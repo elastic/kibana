@@ -17,7 +17,6 @@ import { preConfiguredJobRedirect } from 'plugins/ml/jobs/new_job/wizard/preconf
 import { checkCreateJobsPrivilege, checkFindFileStructurePrivilege } from 'plugins/ml/privilege/check_privilege';
 import { loadIndexPatterns, getIndexPatterns } from 'plugins/ml/util/index_utils';
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
-import { initPromise } from 'plugins/ml/util/promise';
 import template from './index_or_search.html';
 import { timefilter } from 'ui/timefilter';
 
@@ -35,7 +34,6 @@ uiRoutes
       indexPatterns: loadIndexPatterns,
       preConfiguredJobRedirect,
       checkMlNodesAvailable,
-      initPromise: initPromise(true),
       nextStepPath: () => '#/jobs/new_job/step/job_type',
     }
   });
@@ -47,7 +45,6 @@ uiRoutes
       CheckLicense: checkBasicLicense,
       privileges: checkFindFileStructurePrivilege,
       indexPatterns: loadIndexPatterns,
-      initPromise: initPromise(true),
       nextStepPath: () => '#jobs/new_job/datavisualizer',
     }
   });

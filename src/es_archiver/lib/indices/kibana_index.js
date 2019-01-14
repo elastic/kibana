@@ -151,3 +151,36 @@ export async function createDefaultSpace({ index, client }) {
     }
   });
 }
+
+export async function cleanKibanaIndices({ client, stats, log, kibanaUrl }) {
+  if (!await isSpacesEnabled({ kibanaUrl })) {
+    return await deleteKibanaIndices({
+      client,
+      stats,
+      log,
+    });
+  }
+
+  await client.deleteByQuery({
+    index: `.kibana`,
+    body: {
+      query: {
+        bool: {
+          must_not: {
+            ids: {
+              type: 'doc',
+              values: ['space:default']
+            }
+          }
+        }
+      }
+    }
+  });
+
+  log.warning(
+    `since spaces are enabled, all objects other than the default space were deleted from ` +
+    `.kibana rather than deleting the whole index`
+  );
+
+  stats.deletedIndex('.kibana');
+}

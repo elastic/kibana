@@ -39,7 +39,6 @@ import { preLoadJob } from 'plugins/ml/jobs/new_job/simple/components/utils/prep
 import { MultiMetricJobServiceProvider } from './create_job_service';
 import { FullTimeRangeSelectorServiceProvider } from 'plugins/ml/components/full_time_range_selector/full_time_range_selector_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
-import { initPromise } from 'plugins/ml/util/promise';
 import { ml } from 'plugins/ml/services/ml_api_service';
 import template from './create_job.html';
 import { timefilter } from 'ui/timefilter';
@@ -54,7 +53,6 @@ uiRoutes
       savedSearch: loadCurrentSavedSearch,
       checkMlNodesAvailable,
       loadNewJobDefaults,
-      initPromise: initPromise(true)
     }
   });
 
@@ -312,13 +310,13 @@ module
 
       mlMultiMetricJobService.clearChartData();
 
-      // $scope.chartStates.eventRate = CHART_STATE.LOADING;
       setFieldsChartStates(CHART_STATE.LOADING);
 
       if (Object.keys($scope.formConfig.fields).length) {
         $scope.ui.showFieldCharts = true;
         mlMultiMetricJobService.getLineChartResults($scope.formConfig, thisLoadTimestamp)
           .then((resp) => {
+            $scope.$applyAsync();
             loadDocCountData(resp.detectors);
           })
           .catch((resp) => {
@@ -326,6 +324,7 @@ module
             _.each($scope.formConfig.fields, (field, id) => {
               $scope.chartStates.fields[id] = CHART_STATE.NO_RESULTS;
             });
+            $scope.$applyAsync();
           });
       } else {
         $scope.ui.showFieldCharts = false;
@@ -343,13 +342,16 @@ module
 
               $scope.chartData.lastLoadTimestamp = null;
               chartDataUtils.updateChartMargin($scope.chartData);
-              $scope.$broadcast('render');
               $scope.chartStates.eventRate = (resp.totalResults) ? CHART_STATE.LOADED : CHART_STATE.NO_RESULTS;
+              $scope.$broadcast('render');
             }
           })
           .catch((resp) => {
             $scope.chartStates.eventRate = CHART_STATE.NO_RESULTS;
             msgs.error(resp.message);
+          })
+          .then(() => {
+            $scope.$applyAsync();
           });
       }
     };
@@ -358,6 +360,7 @@ module
       _.each($scope.chartStates.fields, (chart, key) => {
         $scope.chartStates.fields[key] = state;
       });
+      $scope.$applyAsync();
     }
 
     function showSparseDataCheckbox() {
@@ -460,11 +463,11 @@ module
                 // as it may have failed because we've hit the limit of open jobs
                 saveNewDatafeed(job, false);
               });
-
           })
           .catch((resp) => {
             // save failed
             msgs.error('Save failed: ', resp.resp);
+            $scope.$applyAsync();
           });
       } else {
         // show the advanced section as the model memory limit is invalid
@@ -479,7 +482,6 @@ module
       function saveNewDatafeed(job, startDatafeedAfterSave) {
         mlJobService.saveNewDatafeed(job.datafeed_config, job.job_id)
           .then(() => {
-
             if (startDatafeedAfterSave) {
               mlMultiMetricJobService.startDatafeed($scope.formConfig)
                 .then(() => {
@@ -508,11 +510,17 @@ module
                 .catch((resp) => {
                   // datafeed failed
                   msgs.error('Could not start datafeed: ', resp);
+                })
+                .then(() => {
+                  $scope.$applyAsync();
                 });
+            } else {
+              $scope.$applyAsync();
             }
           })
           .catch((resp) => {
             msgs.error('Save datafeed failed: ', resp);
+            $scope.$applyAsync();
           });
       }
     };
@@ -533,6 +541,7 @@ module
           .then((state) => {
             if (state === 'stopped') {
               console.log('Stopping poll because datafeed state is: ' + state);
+              $scope.$applyAsync();
               $scope.$broadcast('render-results');
               forceStop = true;
             }
@@ -579,6 +588,7 @@ module
       // fade the bar chart once we have results
         toggleSwimlaneVisibility();
       }
+      $scope.$applyAsync();
       $scope.$broadcast('render-results');
     }
 
@@ -630,7 +640,11 @@ module
     $scope.stopJob = function () {
     // setting the status to STOPPING disables the stop button
       $scope.jobState = JOB_STATE.STOPPING;
-      mlMultiMetricJobService.stopDatafeed($scope.formConfig);
+      mlMultiMetricJobService.stopDatafeed($scope.formConfig)
+        .catch()
+        .then(() => {
+          $scope.$applyAsync();
+        });
     };
 
     $scope.moveToAdvancedJobCreation = function () {
@@ -638,6 +652,7 @@ module
       moveToAdvancedJobCreation(job);
     };
 
+    let lastEstimatedModelMemoryLimit = null;
     $scope.setModelMemoryLimit = function () {
       const formConfig = $scope.formConfig;
       ml.calculateModelMemoryLimit({
@@ -651,10 +666,32 @@ module
         latestMs: formConfig.end
       })
         .then((resp) => {
-          formConfig.modelMemoryLimit = resp.modelMemoryLimit;
+          // To avoid overwriting a possible custom set model memory limit,
+          // it only gets set to the estimation if the current limit is either
+          // the default value or the value of the previous estimation.
+          // That's our best guess if the value hasn't been customized.
+          // It doesn't get it if the user intentionally for whatever reason (re)set
+          // the value to either the default or pervious estimate.
+          // Because the string based limit could contain e.g. MB/Mb/mb
+          // all strings get lower cased for comparison.
+          const currentModelMemoryLimit = formConfig.modelMemoryLimit.toLowerCase();
+          const defaultModelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT.toLowerCase();
+          if (
+            currentModelMemoryLimit === defaultModelMemoryLimit ||
+            currentModelMemoryLimit === lastEstimatedModelMemoryLimit
+          ) {
+            formConfig.modelMemoryLimit = resp.modelMemoryLimit;
+          }
+          lastEstimatedModelMemoryLimit = resp.modelMemoryLimit.toLowerCase();
         })
         .catch(() => {
-          formConfig.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
+          // To avoid overwriting a possible custom set model memory limit,
+          // the limit is reset to the default only if the current limit matches
+          // the previous estimated limit.
+          const currentModelMemoryLimit = formConfig.modelMemoryLimit.toLowerCase();
+          if (currentModelMemoryLimit === lastEstimatedModelMemoryLimit) {
+            formConfig.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
+          }
         });
     };
 

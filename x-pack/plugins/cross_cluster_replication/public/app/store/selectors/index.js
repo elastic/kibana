@@ -18,6 +18,10 @@ export const isApiAuthorized = (scope) => createSelector(getApiError(scope), (er
   return error.status !== 403;
 });
 
+// Stats
+export const getStatsState = (state) => state.stats;
+export const getAutoFollowStats = createSelector(getStatsState, (statsState) => statsState.autoFollow);
+
 // Auto-follow pattern
 export const getAutoFollowPatternState = (state) => state.autoFollowPattern;
 export const getAutoFollowPatterns = createSelector(getAutoFollowPatternState, (autoFollowPatternsState) => autoFollowPatternsState.byId);
@@ -32,10 +36,15 @@ export const getSelectedAutoFollowPattern = createSelector(getAutoFollowPatternS
 export const isAutoFollowPatternDetailPanelOpen = createSelector(getAutoFollowPatternState, (autoFollowPatternsState) => {
   return !!autoFollowPatternsState.detailPanelId;
 });
-export const getDetailPanelAutoFollowPattern = createSelector(getAutoFollowPatternState, (autoFollowPatternsState) => {
-  if(!autoFollowPatternsState.detailPanelId) {
-    return null;
-  }
-  return autoFollowPatternsState.byId[autoFollowPatternsState.detailPanelId];
-});
+export const getDetailPanelAutoFollowPattern = createSelector(
+  getAutoFollowPatternState, getAutoFollowStats, (autoFollowPatternsState, autoFollowStatsState) => {
+    if(!autoFollowPatternsState.detailPanelId) {
+      return null;
+    }
+    const { detailPanelId } = autoFollowPatternsState;
+    const autoFollowPattern = autoFollowPatternsState.byId[detailPanelId];
+    const errors = autoFollowStatsState && autoFollowStatsState.recentAutoFollowErrors[detailPanelId] || [];
+    return autoFollowPattern ? { ...autoFollowPattern, errors } : null;
+  });
 export const getListAutoFollowPatterns = createSelector(getAutoFollowPatterns, (autoFollowPatterns) =>  objectToArray(autoFollowPatterns));
+

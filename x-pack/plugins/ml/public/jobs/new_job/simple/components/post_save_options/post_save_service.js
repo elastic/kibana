@@ -37,7 +37,8 @@ class PostSaveService {
       const datafeedId = mlJobService.getDatafeedId(jobId);
 
       mlJobService.openJob(jobId)
-        .finally(() => {
+        .catch()
+        .then(() => {
           mlJobService.startDatafeed(datafeedId, jobId, 0, undefined)
             .then(() => {
               this.status.realtimeJob = this.STATUS.SAVED;
@@ -53,14 +54,24 @@ class PostSaveService {
   }
 
   apply(jobId, runInRealtime, createWatch) {
-    if (runInRealtime) {
-      this.startRealtimeJob(jobId)
-        .then(() => {
-          if (createWatch) {
-            mlCreateWatchService.createNewWatch(jobId);
-          }
-        });
-    }
+    return new Promise((resolve) => {
+      if (runInRealtime) {
+        this.startRealtimeJob(jobId)
+          .then(() => {
+            if (createWatch) {
+              mlCreateWatchService.createNewWatch(jobId)
+                .catch()
+                .then(() => {
+                  resolve();
+                });
+            } else {
+              resolve();
+            }
+          });
+      } else {
+        resolve();
+      }
+    });
   }
 }
 
