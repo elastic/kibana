@@ -24,6 +24,7 @@ export class AttributionControl  extends React.Component {
 
   componentDidMount() {
     this._isMounted = true;
+    this._syncMbMapWithAttribution();
   }
 
   componentWillUnmount() {
@@ -76,11 +77,10 @@ export class AttributionControl  extends React.Component {
     if (this.state.uniqueAttributions.length === 0) {
       return null;
     }
-    const attributions = this._renderAttributions();
     return (
       <EuiPanel className="gisWidgetControl gisAttributionControl" paddingSize="none" grow={false}>
         <EuiText color="subdued" size="xs">
-          <small>{attributions}</small>
+          <small>{this._renderAttributions()}</small>
         </EuiText>
       </EuiPanel>
     );
