@@ -46,7 +46,7 @@ export class DllCompiler {
       dllExt: '.bundle.dll.js',
       manifestExt: '.manifest.dll.json',
       styleExt: '.style.dll.css',
-      outputPath: fromRoot('./dlls'),
+      outputPath: fromRoot('built_assets/dlls'),
       publicPath: PUBLIC_PATH_PLACEHOLDER
     };
   }

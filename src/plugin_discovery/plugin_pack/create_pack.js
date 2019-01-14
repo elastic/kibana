@@ -22,7 +22,7 @@ import { map, catchError } from 'rxjs/operators';
 import { createInvalidPackError } from '../errors';
 
 function createPack(packageJson) {
-  let provider = require(packageJson.directoryPath);
+  let provider = require(packageJson.directoryPath); // eslint-disable-line import/no-dynamic-require
   if (provider.__esModule) {
     provider = provider.default;
   }

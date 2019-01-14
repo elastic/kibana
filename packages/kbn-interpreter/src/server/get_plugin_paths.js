@@ -31,9 +31,15 @@ const canvasPluginDirectoryName = 'canvas_plugin';
 const isDirectory = path =>
   lstat(path)
     .then(stat => stat.isDirectory())
-    .catch(() => false);
+    .catch(() => false); // if lstat fails, it doesn't exist and is not a directory
 
 const isDirname = (p, name) => path.basename(p) === name;
+
+const filterDirectories = (paths, { exclude = false } = {}) => {
+  return Promise.all(paths.map(p => isDirectory(p))).then(directories => {
+    return paths.filter((p, i) => (exclude ? !directories[i] : directories[i]));
+  });
+};
 
 const getPackagePluginPath = () => {
   let basePluginPath = path.resolve(__dirname, '..');
@@ -90,19 +96,15 @@ export const getPluginPaths = type => {
         return list.concat(dir);
       }, [])
     )
-    .then(possibleCanvasPlugins => {
-      // Check how many are directories. If lstat fails it doesn't exist anyway.
-      return Promise.all(
-        // An array
-        possibleCanvasPlugins.map(pluginPath => isDirectory(pluginPath))
-      ).then(isDirectory => possibleCanvasPlugins.filter((pluginPath, i) => isDirectory[i]));
-    })
+    .then(possibleCanvasPlugins => filterDirectories(possibleCanvasPlugins, { exclude: false }))
     .then(canvasPluginDirectories => {
       return Promise.all(
         canvasPluginDirectories.map(dir =>
           // Get the full path of all files in the directory
           readdir(dir).then(files => files.map(file => path.resolve(dir, file)))
         )
-      ).then(flatten);
+      )
+        .then(flatten)
+        .then(files => filterDirectories(files, { exclude: true }));
     });
 };

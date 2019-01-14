@@ -29,7 +29,7 @@ export default async (kbnServer, server, config) => {
   // bundles in a "middleware" style.
   //
   // the server listening on 5601 may be restarted a number of times, depending
-  // on the watch setup managed by the cli. It proxies all bundles/* and dlls/*
+  // on the watch setup managed by the cli. It proxies all bundles/* and built_assets/dlls/*
   // requests to the other server. The server on 5602 is long running, in order
   // to prevent complete rebuilds of the optimize content.
   const watch = config.get('optimize.watch');

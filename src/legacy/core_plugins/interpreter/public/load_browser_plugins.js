@@ -22,7 +22,6 @@ import { populateBrowserRegistries } from '@kbn/interpreter/public';
 import { typesRegistry, functionsRegistry } from '@kbn/interpreter/common';
 
 const types = {
-  commonFunctions: functionsRegistry,
   browserFunctions: functionsRegistry,
   types: typesRegistry
 };

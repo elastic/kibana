@@ -27,7 +27,8 @@ jest.mock('../metadata', () => ({
   },
 }));
 
-import fetchMock from 'fetch-mock';
+// @ts-ignore
+import fetchMock from 'fetch-mock/es5/client';
 import {
   addInterceptor,
   Interceptor,
@@ -46,13 +47,13 @@ describe('kfetch', () => {
   it('should use supplied request method', async () => {
     fetchMock.post('*', {});
     await kfetch({ pathname: 'my/path', method: 'POST' });
-    expect(fetchMock.lastOptions('*').method).toBe('POST');
+    expect(fetchMock.lastOptions()!.method).toBe('POST');
   });
 
   it('should use supplied Content-Type', async () => {
     fetchMock.get('*', {});
     await kfetch({ pathname: 'my/path', headers: { 'Content-Type': 'CustomContentType' } });
-    expect(fetchMock.lastOptions('*').headers).toMatchObject({
+    expect(fetchMock.lastOptions()!.headers).toMatchObject({
       'Content-Type': 'CustomContentType',
     });
   });
@@ -60,7 +61,7 @@ describe('kfetch', () => {
   it('should use supplied pathname and querystring', async () => {
     fetchMock.get('*', {});
     await kfetch({ pathname: 'my/path', query: { a: 'b' } });
-    expect(fetchMock.lastUrl('*')).toBe('http://localhost.com/myBase/my/path?a=b');
+    expect(fetchMock.lastUrl()).toBe('http://localhost.com/myBase/my/path?a=b');
   });
 
   it('should use supplied headers', async () => {
@@ -70,7 +71,7 @@ describe('kfetch', () => {
       headers: { myHeader: 'foo' },
     });
 
-    expect(fetchMock.lastOptions('*').headers).toEqual({
+    expect(fetchMock.lastOptions()!.headers).toEqual({
       'Content-Type': 'application/json',
       'kbn-version': 'my-version',
       myHeader: 'foo',
@@ -79,28 +80,27 @@ describe('kfetch', () => {
 
   it('should return response', async () => {
     fetchMock.get('*', { foo: 'bar' });
-    expect(await kfetch({ pathname: 'my/path' })).toEqual({
-      foo: 'bar',
-    });
+    const res = await kfetch({ pathname: 'my/path' });
+    expect(res).toEqual({ foo: 'bar' });
   });
 
   it('should prepend url with basepath by default', async () => {
     fetchMock.get('*', {});
     await kfetch({ pathname: 'my/path' });
-    expect(fetchMock.lastUrl('*')).toBe('http://localhost.com/myBase/my/path');
+    expect(fetchMock.lastUrl()).toBe('http://localhost.com/myBase/my/path');
   });
 
   it('should not prepend url with basepath when disabled', async () => {
     fetchMock.get('*', {});
     await kfetch({ pathname: 'my/path' }, { prependBasePath: false });
-    expect(fetchMock.lastUrl('*')).toBe('my/path');
+    expect(fetchMock.lastUrl()).toBe('/my/path');
   });
 
   it('should make request with defaults', async () => {
     fetchMock.get('*', {});
     await kfetch({ pathname: 'my/path' });
 
-    expect(fetchMock.lastOptions('*')).toEqual({
+    expect(fetchMock.lastOptions()!).toEqual({
       method: 'GET',
       credentials: 'same-origin',
       headers: {
@@ -169,7 +169,7 @@ describe('kfetch', () => {
     });
 
     it('should make request', () => {
-      expect(fetchMock.called('*')).toBe(true);
+      expect(fetchMock.called()).toBe(true);
     });
 
     it('should return response', () => {
@@ -205,7 +205,7 @@ describe('kfetch', () => {
     });
 
     it('should make request', () => {
-      expect(fetchMock.called('*')).toBe(true);
+      expect(fetchMock.called()).toBe(true);
     });
 
     it('should return response', () => {
@@ -245,7 +245,7 @@ describe('kfetch', () => {
     });
 
     it('should not make request', () => {
-      expect(fetchMock.called('*')).toBe(false);
+      expect(fetchMock.called()).toBe(false);
     });
 
     it('should throw error', () => {
@@ -285,7 +285,7 @@ describe('kfetch', () => {
     });
 
     it('should make request', () => {
-      expect(fetchMock.called('*')).toBe(true);
+      expect(fetchMock.called()).toBe(true);
     });
 
     it('should throw error', () => {
@@ -328,7 +328,7 @@ describe('kfetch', () => {
     });
 
     it('should not make request', () => {
-      expect(fetchMock.called('*')).toBe(false);
+      expect(fetchMock.called()).toBe(false);
     });
 
     it('should resolve', () => {
@@ -355,7 +355,7 @@ describe('kfetch', () => {
     });
 
     it('should modify request', () => {
-      expect(fetchMock.lastOptions('*')).toMatchObject({
+      expect(fetchMock.lastOptions()!).toMatchObject({
         addedByRequestInterceptor: true,
         method: 'GET',
       });
@@ -390,7 +390,7 @@ describe('kfetch', () => {
     });
 
     it('should modify request', () => {
-      expect(fetchMock.lastOptions('*')).toMatchObject({
+      expect(fetchMock.lastOptions()!).toMatchObject({
         addedByRequestInterceptor: true,
         method: 'GET',
       });
