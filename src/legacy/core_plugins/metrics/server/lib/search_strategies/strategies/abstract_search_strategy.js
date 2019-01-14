@@ -16,25 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import buildRequestBody from './build_request_body';
+export default class AbstractSearchStrategy {
+  constructor(server, callWithRequestFactory, SearchRequest) {
+    this.getSearchRequest = (req) => {
+      const callWithRequest = callWithRequestFactory(server, req);
 
-export default (req, panel, series, isBatchRequest = true) => {
-  const bodies = [];
-  const indexPatternObject = await getIndexPatternObject(req, indexPatternString);
-
-  if (isBatchRequest) {
-    const indexPatternString = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
-  
-    bodies.push({
-      index: indexPatternString,
-      ignoreUnavailable: true,
-    });
+      return new SearchRequest(req, callWithRequest);
+    };
   }
-
-  bodies.push({
-    ...buildRequestBody(req, panel, series, esQueryConfig, indexPatternObject)
-    timeout: '90s'
-  });
-
-  return bodies;
-};
+}

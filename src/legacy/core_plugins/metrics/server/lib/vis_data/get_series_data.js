@@ -16,50 +16,50 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import getRequestParams from './series/get_request_params';
 import handleResponseBody from './series/handle_response_body';
 import handleErrorResponse from './handle_error_response';
 import getAnnotations from './get_annotations';
+import SearchStrategiesRegister from '../search_strategies/search_strategies_register';
 import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
 
+
 export async function getSeriesData(req, panel) {
-  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
-  const includeFrozen = await req.getUiSettingsService().get('search:includeFrozen');
+  const indexPattern = panel.index_pattern;
+  const searchStrategy = SearchStrategiesRegister.getStrategyForIndex(indexPattern);
+  const searchRequest = searchStrategy.getSearchRequest(req);
   const esQueryConfig = await getEsQueryConfig(req);
 
-  try {
-    const bodiesPromises = panel.series.map(series => getRequestParams(req, panel, series, esQueryConfig));
-    const bodies = await Promise.all(bodiesPromises);
-    const params = {
-      rest_total_hits_as_int: true,
-      ignore_throttled: !includeFrozen,
-      body: bodies.reduce((acc, items) => acc.concat(items), [])
-    };
-    return callWithRequest(req, 'msearch', params)
-      .then(resp => {
-        const series = resp.responses.map(handleResponseBody(panel));
-        return {
-          [panel.id]: {
-            id: panel.id,
-            series: series.reduce((acc, series) => acc.concat(series), [])
-          }
-        };
-      })
-      .then(resp => {
-        if (!panel.annotations || panel.annotations.length === 0) return resp;
-        return getAnnotations(req, panel, esQueryConfig).then(annotations => {
-          resp[panel.id].annotations = annotations;
-          return resp;
-        });
-      })
-      .then(resp => {
-        resp.type = panel.type;
+  const body = panel.series
+    .map(series => getRequestParams(req, panel, series, searchStrategy.batchRequestsSupport))
+    .reduce((acc, items) => acc.concat(items), []);
+  
+  // todo: 
+  // try { 
+  return searchRequest.search({ body }, indexPattern)
+    .then(data => {
+      const series = data.map(handleResponseBody(panel, esQueryConfig));
+      return {
+        [panel.id]: {
+          id: panel.id,
+          series: series.reduce((acc, series) => acc.concat(series), []),
+        },
+      };
+    })
+    .then(resp => {
+      // TODO: don't forget to remove
+      // Should be refactored
+      return resp;
+      if (!panel.annotations || panel.annotations.length === 0) return resp;
+      return getAnnotations(req, panel, esQueryConfig).then(annotations => {
+        resp[panel.id].annotations = annotations;
         return resp;
-      })
-      .catch(handleErrorResponse(panel));
-  } catch(e) {
-    return handleErrorResponse(e);
-  }
+      });
+    })
+    .then(resp => {
+      resp.type = panel.type;
+      return resp;
+    })
+    .catch(handleErrorResponse(panel));
 }
 

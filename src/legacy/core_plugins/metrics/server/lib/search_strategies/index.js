@@ -16,25 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import buildRequestBody from './build_request_body';
+import AbstractSearchStrategy from './strategies/abstract_search_strategy';
+import AbstractSearchRequest from './searh_requests/abstract_request';
+import SearchStrategiesRegister from './search_strategies_register';
 
-export default (req, panel, series, isBatchRequest = true) => {
-  const bodies = [];
-  const indexPatternObject = await getIndexPatternObject(req, indexPatternString);
-
-  if (isBatchRequest) {
-    const indexPatternString = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
-  
-    bodies.push({
-      index: indexPatternString,
-      ignoreUnavailable: true,
-    });
-  }
-
-  bodies.push({
-    ...buildRequestBody(req, panel, series, esQueryConfig, indexPatternObject)
-    timeout: '90s'
-  });
-
-  return bodies;
-};
+export { AbstractSearchRequest, AbstractSearchStrategy };
+export default SearchStrategiesRegister;

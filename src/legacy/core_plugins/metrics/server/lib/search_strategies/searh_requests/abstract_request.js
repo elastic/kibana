@@ -16,25 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import buildRequestBody from './build_request_body';
-
-export default (req, panel, series, isBatchRequest = true) => {
-  const bodies = [];
-  const indexPatternObject = await getIndexPatternObject(req, indexPatternString);
-
-  if (isBatchRequest) {
-    const indexPatternString = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
-  
-    bodies.push({
-      index: indexPatternString,
-      ignoreUnavailable: true,
-    });
+export default class AbstractSearchRequest {
+  constructor(req, callWithRequest) {
+    this.req = req;
+    this.callWithRequest = callWithRequest;
   }
 
-  bodies.push({
-    ...buildRequestBody(req, panel, series, esQueryConfig, indexPatternObject)
-    timeout: '90s'
-  });
-
-  return bodies;
-};
+  search() {
+    throw new Error('AbstractSearchRequest: search method should be defined');
+  }
+}

@@ -75,6 +75,11 @@ export const IndexPattern = props => {
             />
           </EuiFormRow>
         </EuiFlexItem>
+
+        {/* Question: I thinks it's better to return from the server the list
+        of available Search Strategies in accordance of current licence. In case
+        of 2 or more values user can select which strategy we should use.
+       */}
         <EuiFlexItem grow={false}>
           <EuiFormLabel>
             <FormattedMessage

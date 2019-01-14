@@ -16,25 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import buildRequestBody from './build_request_body';
+import AbstractSearchStrategy from './abstract_search_strategy';
+import MultiSearchRequest from '../searh_requests/multi_search_request';
+import { i18n } from '@kbn/i18n';
 
-export default (req, panel, series, isBatchRequest = true) => {
-  const bodies = [];
-  const indexPatternObject = await getIndexPatternObject(req, indexPatternString);
+const callWithRequestFactory = (server, request) => {
+  const { callWithRequest } = request.server.plugins.elasticsearch.getCluster('data');
 
-  if (isBatchRequest) {
-    const indexPatternString = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
-  
-    bodies.push({
-      index: indexPatternString,
-      ignoreUnavailable: true,
-    });
-  }
+  return callWithRequest;
+};
 
-  bodies.push({
-    ...buildRequestBody(req, panel, series, esQueryConfig, indexPatternObject)
-    timeout: '90s'
+export default class DefaultSearchStrategy extends AbstractSearchStrategy {
+  name = 'default';
+  batchRequestsSupport = true;
+
+  label = i18n.translate('tsvb.searchStrategies.default.label', {
+    defaultMessage: 'Default',
   });
 
-  return bodies;
-};
+  constructor(server) {
+    super(server, callWithRequestFactory, MultiSearchRequest);
+  }
+
+  isViable(indexPattern) {
+    return Boolean(indexPattern);
+  }
+}

@@ -8,6 +8,7 @@ import { resolve } from 'path';
 import { PLUGIN } from './common';
 import { registerLicenseChecker } from './server/lib/register_license_checker';
 import { rollupDataEnricher } from './rollup_data_enricher';
+import registerRollupSearchStrategy from './server/lib/search_strategies';
 import {
   registerIndicesRoute,
   registerFieldsForWildcardRoute,
@@ -20,7 +21,14 @@ export function rollup(kibana) {
   return new kibana.Plugin({
     id: PLUGIN.ID,
     publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
+
+    // !!!!!!!
+    // Question: not sure that it's a good idea to have a reference to 'metrics' from here
+    // but if we don't add this one we cannot guarantee that 'metrics' plugin was initialized
+    //
+    // Maybe we should move 'search strategies' from the 'metrics' folder.
+    // !!!!!!!
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'metrics'],
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       managementSections: [
@@ -60,6 +68,7 @@ export function rollup(kibana) {
       ) {
         server.plugins.index_management.addIndexManagementDataEnricher(rollupDataEnricher);
       }
+      registerRollupSearchStrategy(server);
     }
   });
 }
