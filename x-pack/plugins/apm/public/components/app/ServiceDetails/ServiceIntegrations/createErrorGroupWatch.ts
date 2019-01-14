@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import chrome from 'ui/chrome';
 import url from 'url';
@@ -64,20 +65,64 @@ export async function createErrorGroupWatch({
   const apmIndexPatternTitle = chrome.getInjected('apmIndexPatternTitle');
 
   const slackUrlPath = getSlackPathUrl(slackUrl);
-  const emailTemplate = `Your service "{{ctx.metadata.serviceName}}" has error groups which exceeds {{ctx.metadata.threshold}} occurrences within "{{ctx.metadata.timeRangeValue}}{{ctx.metadata.timeRangeUnit}}"
+  const emailTemplate = i18n.translate(
+    'xpack.apm.serviceDetails.enableErrorReportsPanel.emailTemplateText',
+    {
+      defaultMessage:
+        'Your service {serviceName} has error groups which exceeds {threshold} occurrences within {timeRange}{br}' +
+        '{br}' +
+        '{errorGroupsBuckets}{br}' +
+        '{errorLogMessage}{br}' +
+        '{errorCulprit}N/A{slashErrorCulprit}{br}' +
+        '{docCountParam} occurrences{br}' +
+        '{slashErrorGroupsBucket}',
+      values: {
+        serviceName: '"{{ctx.metadata.serviceName}}"',
+        threshold: '{{ctx.metadata.threshold}}',
+        timeRange:
+          '"{{ctx.metadata.timeRangeValue}}{{ctx.metadata.timeRangeUnit}}"',
+        errorGroupsBuckets:
+          '{{#ctx.payload.aggregations.error_groups.buckets}}',
+        errorLogMessage:
+          '<strong>{{sample.hits.hits.0._source.error.log.message}}{{^sample.hits.hits.0._source.error.log.message}}{{sample.hits.hits.0._source.error.exception.message}}{{/sample.hits.hits.0._source.error.log.message}}</strong>',
+        errorCulprit:
+          '{{sample.hits.hits.0._source.error.culprit}}{{^sample.hits.hits.0._source.error.culprit}}',
+        slashErrorCulprit: '{{/sample.hits.hits.0._source.error.culprit}}',
+        docCountParam: '{{doc_count}}',
+        slashErrorGroupsBucket:
+          '{{/ctx.payload.aggregations.error_groups.buckets}}',
+        br: '<br/>'
+      }
+    }
+  );
 
-{{#ctx.payload.aggregations.error_groups.buckets}}
-<strong>{{sample.hits.hits.0._source.error.log.message}}{{^sample.hits.hits.0._source.error.log.message}}{{sample.hits.hits.0._source.error.exception.message}}{{/sample.hits.hits.0._source.error.log.message}}</strong>
-{{sample.hits.hits.0._source.error.culprit}}{{^sample.hits.hits.0._source.error.culprit}}N/A{{/sample.hits.hits.0._source.error.culprit}}
-{{doc_count}} occurrences
-{{/ctx.payload.aggregations.error_groups.buckets}}`.replace(/\n/g, '<br/>');
-
-  const slackTemplate = `Your service "{{ctx.metadata.serviceName}}" has error groups which exceeds {{ctx.metadata.threshold}} occurrences within "{{ctx.metadata.timeRangeValue}}{{ctx.metadata.timeRangeUnit}}"
-{{#ctx.payload.aggregations.error_groups.buckets}}
->*{{sample.hits.hits.0._source.error.log.message}}{{^sample.hits.hits.0._source.error.log.message}}{{sample.hits.hits.0._source.error.exception.message}}{{/sample.hits.hits.0._source.error.log.message}}*
->{{#sample.hits.hits.0._source.error.culprit}}\`{{sample.hits.hits.0._source.error.culprit}}\`{{/sample.hits.hits.0._source.error.culprit}}{{^sample.hits.hits.0._source.error.culprit}}N/A{{/sample.hits.hits.0._source.error.culprit}}
->{{doc_count}} occurrences
-{{/ctx.payload.aggregations.error_groups.buckets}}`;
+  const slackTemplate = i18n.translate(
+    'xpack.apm.serviceDetails.enableErrorReportsPanel.slackTemplateText',
+    {
+      defaultMessage: `Your service {serviceName} has error groups which exceeds {threshold} occurrences within {timeRange}
+{errorGroupsBuckets}
+{errorLogMessage}
+{errorCulprit}N/A{slashErrorCulprit}
+{docCountParam} occurrences
+{slashErrorGroupsBucket}`,
+      values: {
+        serviceName: '"{{ctx.metadata.serviceName}}"',
+        threshold: '{{ctx.metadata.threshold}}',
+        timeRange:
+          '"{{ctx.metadata.timeRangeValue}}{{ctx.metadata.timeRangeUnit}}"',
+        errorGroupsBuckets:
+          '{{#ctx.payload.aggregations.error_groups.buckets}}',
+        errorLogMessage:
+          '>*{{sample.hits.hits.0._source.error.log.message}}{{^sample.hits.hits.0._source.error.log.message}}{{sample.hits.hits.0._source.error.exception.message}}{{/sample.hits.hits.0._source.error.log.message}}*',
+        errorCulprit:
+          '>{{#sample.hits.hits.0._source.error.culprit}}`{{sample.hits.hits.0._source.error.culprit}}`{{/sample.hits.hits.0._source.error.culprit}}{{^sample.hits.hits.0._source.error.culprit}}',
+        slashErrorCulprit: '{{/sample.hits.hits.0._source.error.culprit}}',
+        docCountParam: '>{{doc_count}}',
+        slashErrorGroupsBucket:
+          '{{/ctx.payload.aggregations.error_groups.buckets}}'
+      }
+    }
+  );
 
   const actions: Actions = {
     log_error: { logging: { text: emailTemplate } }
@@ -86,7 +131,12 @@ export async function createErrorGroupWatch({
   const body = {
     metadata: {
       emails,
-      trigger: 'This value must be changed in trigger section',
+      trigger: i18n.translate(
+        'xpack.apm.serviceDetails.enableErrorReportsPanel.triggerText',
+        {
+          defaultMessage: 'This value must be changed in trigger section'
+        }
+      ),
       serviceName,
       threshold,
       timeRangeValue: timeRange.value,
@@ -185,7 +235,14 @@ export async function createErrorGroupWatch({
     body.actions.email = {
       email: {
         to: '{{#join}}ctx.metadata.emails{{/join}}',
-        subject: `"{{ctx.metadata.serviceName}}" has error groups which exceeds the threshold`,
+        subject: i18n.translate(
+          'xpack.apm.serviceDetails.enableErrorReportsPanel.emailSubjectText',
+          {
+            defaultMessage:
+              '{serviceName} has error groups which exceeds the threshold',
+            values: { serviceName: '"{{ctx.metadata.serviceName}}"' }
+          }
+        ),
         body: {
           html: emailTemplate
         }
