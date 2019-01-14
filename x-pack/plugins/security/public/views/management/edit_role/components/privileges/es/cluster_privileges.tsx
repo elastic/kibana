@@ -28,7 +28,6 @@ export class ClusterPrivileges extends Component<Props, {}> {
 
     const options = items.map(i => ({
       label: i,
-      isGroupLabelOption: false,
     }));
 
     const selectedOptions = (role.elasticsearch.cluster || []).map(k => ({ label: k }));

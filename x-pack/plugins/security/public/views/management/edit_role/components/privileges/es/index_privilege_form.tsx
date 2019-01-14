@@ -23,7 +23,7 @@ import { getIndexPrivileges } from '../../../../../../services/role_privileges';
 import { RoleValidator } from '../../../lib/validate_role';
 
 const fromOption = (option: any) => option.label;
-const toOption = (value: string) => ({ label: value, isGroupLabelOption: false });
+const toOption = (value: string) => ({ label: value });
 
 interface Props {
   formIndex: number;
