@@ -23,6 +23,8 @@ const clusterPrivileges = [
   'read_ilm',
   'monitor_rollup',
   'manage_rollup',
+  'manage_token',
+  'manage_saml',
 ];
 const indexPrivileges = [
   'all',

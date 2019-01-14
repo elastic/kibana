@@ -27,6 +27,8 @@ module.constant('shieldPrivileges', {
     'read_ilm',
     'monitor_rollup',
     'manage_rollup',
+    'manage_token',
+    'manage_saml',
   ],
   indices: [
     'all',
