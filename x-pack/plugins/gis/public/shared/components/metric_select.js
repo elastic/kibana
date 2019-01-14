@@ -30,7 +30,7 @@ export function MetricSelect({ value, onChange, metricsFilter }) {
     onChange(aggType);
   }
 
-  const options = AGG_OPTIONS.filter(metricsFilter ? metricsFilter : () => true);
+  const options = metricsFilter ? AGG_OPTIONS.filter(metricsFilter) : AGG_OPTIONS;
 
   return (
     <EuiComboBox

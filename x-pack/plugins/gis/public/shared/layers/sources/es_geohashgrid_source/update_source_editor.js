@@ -51,10 +51,10 @@ export class UpdateSourceEditor extends Component {
 
   _renderMetricsEditor() {
 
-    const metricsFilter = (this.props.renderAs === RENDER_AS.HEATMAP) ?  ((m) => {
+    const metricsFilter = (this.props.renderAs === RENDER_AS.HEATMAP) ?  ((metric) => {
       //these are countable metrics, where blending heatmap color blobs make sense
-      return m.value === 'count' || m.value === 'sum';
-    }) : (() => true);
+      return ['count', 'sum'].includes(metric.value);
+    }) : null;
     const allowMultipleMetrics = (this.props.renderAs === RENDER_AS.HEATMAP) ? false : true;
 
     return (
