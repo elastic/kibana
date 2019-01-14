@@ -61,6 +61,6 @@
   display: inline-block;
 
   &:hover {
-    background-color: darken($euiColorPrimary, 2%);
+    background-color: darken($kbnChromeGlobalNavBackground, 4%);
   }
 }
