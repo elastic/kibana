@@ -413,7 +413,11 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
             onClick={[Function]}
             type="button"
           >
-            Create space privilege
+            <FormattedMessage
+              defaultMessage="Update space privilege"
+              id="xpack.security.management.editRolespacePrivilegeForm.updatePrivilegeButton"
+              values={Object {}}
+            />
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

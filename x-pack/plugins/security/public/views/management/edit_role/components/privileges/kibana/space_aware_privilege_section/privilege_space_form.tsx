@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// @ts-ignore
 import {
+  ButtonColor,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -24,7 +24,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
 import { PrivilegeDefinition, Role } from '../../../../../../../../common/model';
@@ -51,6 +51,7 @@ interface State {
   selectedSpaceIds: string[];
   selectedBasePrivilege: string[];
   role: Role;
+  mode: 'create' | 'update';
 }
 
 export class PrivilegeSpaceForm extends Component<Props, State> {
@@ -79,6 +80,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
       editingIndex,
       selectedSpaceIds: [...role.kibana[editingIndex].spaces],
       selectedBasePrivilege: [...(role.kibana[editingIndex].base || [])],
+      mode: props.editingIndex < 0 ? 'create' : 'update',
     };
   }
 
@@ -109,16 +111,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
                   Cancel
                 </EuiButtonEmpty>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  onClick={this.onSaveClick}
-                  fill
-                  disabled={!this.canSave()}
-                  data-test-subj={'createSpacePrivilegeButton'}
-                >
-                  Create space privilege
-                </EuiButton>
-              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{this.getSaveButton()}</EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlyoutFooter>
         </EuiFlyout>
@@ -273,7 +266,84 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           spacesIndex={this.state.editingIndex}
           disabled={this.state.selectedBasePrivilege.length > 0}
         />
+
+        {this.requiresGlobalPrivilegeWarning() && (
+          <Fragment>
+            <EuiSpacer size="l" />
+            <EuiCallOut
+              color="warning"
+              iconType="alert"
+              title={
+                <FormattedMessage
+                  id="xpack.security.management.editRole.spacePrivilegeForm.globalPrivilegeWarning"
+                  defaultMessage="Creating a global privilege may impact your other space privileges."
+                />
+              }
+            />
+          </Fragment>
+        )}
       </EuiForm>
+    );
+  };
+
+  private getSaveButton = () => {
+    const { mode } = this.state;
+    const isGlobal = this.isDefiningGlobalPrivilege();
+    let buttonText;
+    switch (mode) {
+      case 'create':
+        if (isGlobal) {
+          buttonText = (
+            <FormattedMessage
+              id="xpack.security.management.editRolespacePrivilegeForm.createGlobalPrivilegeButton"
+              defaultMessage="Create global privilege"
+            />
+          );
+        } else {
+          buttonText = (
+            <FormattedMessage
+              id="xpack.security.management.editRolespacePrivilegeForm.createPrivilegeButton"
+              defaultMessage="Create space privilege"
+            />
+          );
+        }
+        break;
+      case 'update':
+        if (isGlobal) {
+          buttonText = (
+            <FormattedMessage
+              id="xpack.security.management.editRolespacePrivilegeForm.updateGlobalPrivilegeButton"
+              defaultMessage="Update global privilege"
+            />
+          );
+        } else {
+          buttonText = (
+            <FormattedMessage
+              id="xpack.security.management.editRolespacePrivilegeForm.updatePrivilegeButton"
+              defaultMessage="Update space privilege"
+            />
+          );
+        }
+        break;
+      default:
+        throw new Error(`Unsupported mode: ${mode}`);
+    }
+
+    let buttonColor: ButtonColor = 'primary';
+    if (this.requiresGlobalPrivilegeWarning()) {
+      buttonColor = 'warning';
+    }
+
+    return (
+      <EuiButton
+        onClick={this.onSaveClick}
+        fill
+        disabled={!this.canSave()}
+        color={buttonColor}
+        data-test-subj={'createSpacePrivilegeButton'}
+      >
+        {buttonText}
+      </EuiButton>
     );
   };
 
@@ -444,4 +514,13 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
   };
 
   private isDefiningGlobalPrivilege = () => this.state.selectedSpaceIds.includes('*');
+
+  private requiresGlobalPrivilegeWarning = () => {
+    const hasOtherSpacePrivilegesDefined = this.props.role.kibana.length > 0;
+    return (
+      this.state.mode === 'create' &&
+      this.isDefiningGlobalPrivilege() &&
+      hasOtherSpacePrivilegesDefined
+    );
+  };
 }
