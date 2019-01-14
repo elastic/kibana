@@ -25,6 +25,10 @@ module.constant('shieldPrivileges', {
     'manage_ccr',
     'manage_ilm',
     'read_ilm',
+    'monitor_rollup',
+    'manage_rollup',
+    'manage_token',
+    'manage_saml',
   ],
   indices: [
     'all',
