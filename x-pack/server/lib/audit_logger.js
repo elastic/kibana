@@ -11,8 +11,8 @@ export class AuditLogger {
   }
 
   log(eventType, message, data = {}) {
-    this._server.log(['info', 'audit', this._pluginId, eventType], {
-      tmpl: message,
+    this._server.logStructured(['info', 'audit', this._pluginId, eventType], {
+      message,
       eventType,
       ...data
     });

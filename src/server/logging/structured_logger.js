@@ -16,19 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { isPlainObject } from 'lodash';
+const symbol = Symbol('Structured Log Event');
 
-import good from '@elastic/good';
-import loggingConfiguration from './configuration';
-import { structuredLogger } from './structured_logger';
+export const structuredLogger = {
+  isLogEvent(eventData) {
+    return Boolean(isPlainObject(eventData) && eventData[symbol]);
+  },
 
-export async function setupLogging(server, config) {
-  return await server.register({
-    plugin: good,
-    options: loggingConfiguration(config)
-  });
-}
+  getLogEventData(eventData) {
+    return eventData[symbol];
+  },
 
-export async function loggingMixin(kbnServer, server, config) {
-  structuredLogger.decorateServer(server);
-  return await setupLogging(server, config);
-}
+  decorateServer(server) {
+    server.decorate('server', 'logStructured', (tags, data) => {
+      server.log(tags, { [symbol]: data });
+    });
+  }
+};
