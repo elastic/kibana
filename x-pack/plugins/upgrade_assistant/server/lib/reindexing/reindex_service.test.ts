@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment = require('moment');
+import moment from 'moment';
 import { SavedObjectsClient } from 'src/server/saved_objects';
 import {
   REINDEX_OP_TYPE,
@@ -238,7 +238,7 @@ describe('reindexService', () => {
       } as ReindexSavedObject;
 
       it('blocks writes and updates lastCompletedStep', async () => {
-        callCluster.mockResolvedValue({ acknowledged: true });
+        callCluster.mockResolvedValueOnce({ acknowledged: true });
         const updatedOp = await service.processNextStep(reindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.readonly);
         expect(callCluster).toHaveBeenCalledWith('indices.putSettings', {
@@ -248,7 +248,7 @@ describe('reindexService', () => {
       });
 
       it('fails if setting updates are not acknowledged', async () => {
-        callCluster.mockResolvedValue({ acknowledged: false });
+        callCluster.mockResolvedValueOnce({ acknowledged: false });
         const updatedOp = await service.processNextStep(reindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.created);
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
@@ -256,7 +256,7 @@ describe('reindexService', () => {
       });
 
       it('fails if setting updates fail', async () => {
-        callCluster.mockRejectedValue(new Error('blah!'));
+        callCluster.mockRejectedValueOnce(new Error('blah!'));
         const updatedOp = await service.processNextStep(reindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.created);
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
@@ -301,11 +301,18 @@ describe('reindexService', () => {
       it('fails if create index fails', async () => {
         callCluster
           .mockResolvedValueOnce({ myIndex: settingsMappings })
-          .mockRejectedValueOnce(new Error(`blah!`));
+          .mockRejectedValueOnce(new Error(`blah!`))
+          .mockResolvedValueOnce({ acknowledged: true });
         const updatedOp = await service.processNextStep(reindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.readonly);
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
         expect(updatedOp.attributes.errorMessage).not.toBeNull();
+
+        // Original index should have been set back to allow reads.
+        expect(callCluster).toHaveBeenCalledWith('indices.putSettings', {
+          index: 'myIndex',
+          body: { 'index.blocks.write': false },
+        });
       });
     });
 
@@ -337,7 +344,7 @@ describe('reindexService', () => {
       });
 
       it('fails if starting reindex fails', async () => {
-        callCluster.mockRejectedValue(new Error('blah!'));
+        callCluster.mockRejectedValueOnce(new Error('blah!'));
         const updatedOp = await service.processNextStep(reindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.newIndexCreated);
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
@@ -357,7 +364,7 @@ describe('reindexService', () => {
 
       describe('reindex task is not complete', () => {
         it('updates reindexTaskPercComplete', async () => {
-          callCluster.mockResolvedValue({
+          callCluster.mockResolvedValueOnce({
             completed: false,
             task: { status: { created: 10, total: 100 } },
           });
@@ -406,7 +413,7 @@ describe('reindexService', () => {
       } as ReindexSavedObject;
 
       it('switches aliases, sets as complete, and updates lastCompletedStep', async () => {
-        callCluster.mockResolvedValue({ acknowledged: true });
+        callCluster.mockResolvedValueOnce({ acknowledged: true });
         const updatedOp = await service.processNextStep(reindexOp);
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.completed);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.aliasCreated);
@@ -421,7 +428,7 @@ describe('reindexService', () => {
       });
 
       it('fails if switching aliases is not acknowledged', async () => {
-        callCluster.mockResolvedValue({ acknowledged: false });
+        callCluster.mockResolvedValueOnce({ acknowledged: false });
         const updatedOp = await service.processNextStep(reindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexCompleted);
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
@@ -429,7 +436,7 @@ describe('reindexService', () => {
       });
 
       it('fails if switching aliases fails', async () => {
-        callCluster.mockRejectedValue(new Error('blah!'));
+        callCluster.mockRejectedValueOnce(new Error('blah!'));
         const updatedOp = await service.processNextStep(reindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexCompleted);
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);

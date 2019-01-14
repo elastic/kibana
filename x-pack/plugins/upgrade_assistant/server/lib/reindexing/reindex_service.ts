@@ -125,9 +125,8 @@ export const reindexServiceFactory = (
    * @param indexName
    */
   const getFlatSettings = async (indexName: string) => {
-    // TODO: set `include_type_name` to false in
     const flatSettings = (await callCluster('transport.request', {
-      // &include_type_name=true
+      // TODO: set `&include_type_name=true` to false in 7.0
       path: `/${encodeURIComponent(indexName)}?flat_settings=true`,
     })) as { [indexName: string]: FlatSettings };
 
@@ -154,6 +153,17 @@ export const reindexServiceFactory = (
     throw new Error(
       `Could not generate an indexName that does not already exist after ${attempts} attempts.`
     );
+  };
+
+  /**
+   * Tries to undo any changes that were made in the event of a failure.
+   * @param indexName
+   */
+  const cleanupChanges = async (indexName: string) => {
+    await callCluster('indices.putSettings', {
+      index: indexName,
+      body: { 'index.blocks.write': false },
+    });
   };
 
   // ------ Functions used to process the state machine
@@ -365,8 +375,7 @@ export const reindexServiceFactory = (
       if (existingReindexOps.total !== 0) {
         const existingOp = existingReindexOps.saved_objects[0];
         if (existingOp.attributes.status === ReindexStatus.failed) {
-          // delete the existing one if it failed to give a chance to retry.
-          // TODO: add log
+          // Delete the existing one if it failed to give a chance to retry.
           await client.delete(REINDEX_OP_TYPE, existingOp.id);
         } else {
           throw Boom.badImplementation(`A reindex operation already in-progress for ${indexName}`);
@@ -436,6 +445,8 @@ export const reindexServiceFactory = (
           status: ReindexStatus.failed,
           errorMessage: e instanceof Error ? e.stack : e.toString(),
         });
+
+        await cleanupChanges(reindexOp.attributes.indexName);
       } finally {
         // Always make sure we return the most recent version of the saved object.
         reindexOp = await releaseLock(reindexOp);
