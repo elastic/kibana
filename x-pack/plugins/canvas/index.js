@@ -24,7 +24,7 @@ export function canvas(kibana) {
         euiIconType: 'canvasApp',
         main: 'plugins/canvas/app',
       },
-      styleSheetPaths: `${__dirname}/public/style/index.scss`,
+      styleSheetPaths: resolve(__dirname, 'public/style/index.scss'),
       hacks: [
         // window.onerror override
         'plugins/canvas/lib/window_error_handler.js',

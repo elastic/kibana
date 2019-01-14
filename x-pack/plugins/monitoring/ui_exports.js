@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { resolve } from 'path';
 
 /**
  * Configuration of dependency objects for the UI, which are needed for the
@@ -32,5 +33,5 @@ export const getUiExports = () => ({
   },
   hacks: [ 'plugins/monitoring/hacks/toggle_app_link_in_nav' ],
   home: [ 'plugins/monitoring/register_feature' ],
-  styleSheetPaths: `${__dirname}/public/index.scss`,
+  styleSheetPaths: resolve(__dirname, 'public/index.scss'),
 });
