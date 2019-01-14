@@ -16,7 +16,7 @@ export const EmptyStatusBar = ({ message, monitorId }: Props) => (
   <EuiPanel>
     <EuiFlexGroup gutterSize="l">
       <EuiFlexItem grow={false}>
-        {message === undefined ? `No data found for monitor id ${monitorId}` : message}
+        {!message ? `No data found for monitor id ${monitorId}` : message}
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPanel>
