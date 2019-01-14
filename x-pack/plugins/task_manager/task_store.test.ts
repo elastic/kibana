@@ -73,7 +73,7 @@ describe('TaskStore', () => {
       expect(loggingCall.args[0]).toBe(
         `This Kibana instance defines an older template version (${TEMPLATE_VERSION}) than is currently in Elasticsearch (Infinity). ` +
           `Because of the potential for non-backwards compatible changes, this Kibana instance will only be able to claim scheduled tasks with ` +
-          `"kibana.apiVersion": ${API_VERSION} in the task metadata.`
+          `"kibana.apiVersion" <= ${API_VERSION} in the task metadata.`
       );
       expect(logger.warning.calledOnce).toBe(true);
     });

@@ -9,7 +9,10 @@
  */
 
 import { get } from 'lodash';
-import { TASK_MANAGER_API_VERSION, TASK_MANAGER_TEMPLATE_VERSION } from './constants';
+import {
+  TASK_MANAGER_API_VERSION as API_VERSION,
+  TASK_MANAGER_TEMPLATE_VERSION as TEMPLATE_VERSION,
+} from './constants';
 import { Logger } from './lib/logger';
 import { ConcreteTaskInstance, ElasticJs, TaskInstance, TaskStatus } from './task';
 
@@ -136,20 +139,18 @@ export class TaskStore {
       }
     }
 
-    if (existingVersion > TASK_MANAGER_TEMPLATE_VERSION) {
+    if (existingVersion > TEMPLATE_VERSION) {
       // Do not trample a newer version template
       this.logger.warning(
-        `This Kibana instance defines an older template version (${TASK_MANAGER_TEMPLATE_VERSION}) than is currently in Elasticsearch (${existingVersion}). ` +
+        `This Kibana instance defines an older template version (${TEMPLATE_VERSION}) than is currently in Elasticsearch (${existingVersion}). ` +
           `Because of the potential for non-backwards compatible changes, this Kibana instance will only be able to claim scheduled tasks with ` +
-          `"kibana.apiVersion": ${TASK_MANAGER_API_VERSION} in the task metadata.`
+          `"kibana.apiVersion" <= ${API_VERSION} in the task metadata.`
       );
       return;
-    } else if (existingVersion === TASK_MANAGER_TEMPLATE_VERSION) {
+    } else if (existingVersion === TEMPLATE_VERSION) {
       // The latest template is already saved, so just log a debug line.
       this.logger.debug(
-        `Not installing ${
-          this.index
-        } index template: version ${TASK_MANAGER_TEMPLATE_VERSION} already exists.`
+        `Not installing ${this.index} index template: version ${TEMPLATE_VERSION} already exists.`
       );
       return;
     }
@@ -159,12 +160,10 @@ export class TaskStore {
       this.logger.info(
         `Upgrading ${
           this.index
-        } index template. Old version: ${existingVersion}, New version: ${TASK_MANAGER_TEMPLATE_VERSION}.`
+        } index template. Old version: ${existingVersion}, New version: ${TEMPLATE_VERSION}.`
       );
     } else {
-      this.logger.info(
-        `Installing ${this.index} index template version: ${TASK_MANAGER_TEMPLATE_VERSION}.`
-      );
+      this.logger.info(`Installing ${this.index} index template version: ${TEMPLATE_VERSION}.`);
     }
 
     const templateResult = await this.callCluster('indices.putTemplate', {
@@ -188,7 +187,9 @@ export class TaskStore {
                   user: { type: 'keyword' },
                   scope: { type: 'keyword' },
                 },
-                kibana: {
+              },
+              kibana: {
+                properties: {
                   apiVersion: { type: 'integer' }, // 1, 2, 3, etc
                   uuid: { type: 'keyword' }, //
                   version: { type: 'integer' }, // 7000099, etc
@@ -201,7 +202,7 @@ export class TaskStore {
           number_of_shards: 1,
           auto_expand_replicas: '0-1',
         },
-        version: TASK_MANAGER_TEMPLATE_VERSION,
+        version: TEMPLATE_VERSION,
       },
     });
 
@@ -209,7 +210,7 @@ export class TaskStore {
     this.logger.info(
       `Installed ${
         this.index
-      } index template: version ${TASK_MANAGER_TEMPLATE_VERSION} / API version ${TASK_MANAGER_API_VERSION}`
+      } index template: version ${TEMPLATE_VERSION} (API version ${API_VERSION})`
     );
 
     return templateResult;
@@ -284,7 +285,6 @@ export class TaskStore {
    * @returns {Promise<ConcreteTaskInstance[]>}
    */
   public async fetchAvailableTasks(): Promise<ConcreteTaskInstance[]> {
-    // TODO: use apiVersion as a filter
     const { docs } = await this.search({
       query: {
         bool: {
@@ -292,6 +292,7 @@ export class TaskStore {
             { terms: { 'task.taskType': this.supportedTypes } },
             { range: { 'task.attempts': { lte: this.maxAttempts } } },
             { range: { 'task.runAt': { lte: 'now' } } },
+            { range: { 'kibana.apiVersion': { lte: API_VERSION } } },
           ],
         },
       },
@@ -417,8 +418,8 @@ function rawSource(doc: TaskInstance, store: TaskStore) {
     task: source,
     kibana: {
       uuid: store.getKibanaUuid(), // needs to be pulled live
-      version: TASK_MANAGER_TEMPLATE_VERSION,
-      apiVersion: TASK_MANAGER_API_VERSION,
+      version: TEMPLATE_VERSION,
+      apiVersion: API_VERSION,
     },
   };
 }
