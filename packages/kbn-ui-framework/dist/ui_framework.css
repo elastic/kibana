@@ -718,7 +718,7 @@ main {
   color: #2D2D2D;
   background-color: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 0;
+  border-radius: 4px;
   -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   min-height: 32px;
@@ -765,7 +765,7 @@ main {
   color: #2D2D2D;
   background-color: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 0;
+  border-radius: 4px;
   -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   min-height: 32px;
@@ -850,7 +850,7 @@ main {
   color: #2D2D2D;
   background-color: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 0;
+  border-radius: 4px;
   -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   min-height: 32px;
@@ -901,7 +901,7 @@ main {
   color: #2D2D2D;
   background-color: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 0;
+  border-radius: 4px;
   -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   min-height: 32px;
@@ -1610,6 +1610,11 @@ main {
           align-items: flex-start;
   /* 1 */ }
 
+.kuiLocalNav__popover {
+  height: 100%; }
+  .kuiLocalNav__popover .kuiLocalNav__popoverAnchor {
+    height: 100%; }
+
 .kuiLocalSearch {
   display: -webkit-box;
   display: -webkit-flex;
@@ -1630,7 +1635,7 @@ main {
   color: #2D2D2D;
   background-color: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 0;
+  border-radius: 4px;
   -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   min-height: 32px;
@@ -1665,7 +1670,7 @@ main {
     border-color: #e74C3c; }
 
 .kuiLocalSearchInput--secondary {
-  height: 30px;
+  height: 32px;
   -webkit-box-flex: 0;
   -webkit-flex: 0 0 auto;
       -ms-flex: 0 0 auto;
@@ -1687,6 +1692,16 @@ main {
       -ms-flex: 1 1 100%;
           flex: 1 1 100%;
   position: relative; }
+
+/**
+ * 1. em used for right padding so documentation link and query string
+ *    won't overlap if the user increases their default browser font size
+ *    This is sized for the 'Options' link
+ */
+.kuiLocalSearchInput,
+.kuiLocalSearchAssistedInput__input {
+  padding-right: 6em;
+  /* 1 */ }
 
 /**
    * 1. Vertically center the assistance, regardless of its height.
@@ -1713,7 +1728,7 @@ main {
   color: #2D2D2D;
   background-color: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 0;
+  border-radius: 4px;
   -webkit-transition: border-color 0.1s linear;
   transition: border-color 0.1s linear;
   min-height: 32px;
@@ -1756,7 +1771,7 @@ main {
  */
 .kuiLocalSearchButton {
   width: 43px;
-  height: 30px;
+  height: 32px;
   font-size: 14px;
   line-height: 0;
   /* 1 */
