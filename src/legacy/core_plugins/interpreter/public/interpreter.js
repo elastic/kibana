@@ -37,39 +37,31 @@ function addFunction(fnDef) {
 
 functions.forEach(addFunction);
 
-
-let _interpreter;
-let _socket;
-
+let _resolve;
+let _interpreterPromise;
 
 const initialize = async () => {
   await loadBrowserRegistries(types, basePath);
-  _socket = await createSocket(basePath, functionsRegistry);
-  return initializeInterpreter(_socket, typesRegistry, functionsRegistry);
+  const socket = await createSocket(basePath, functionsRegistry);
+  initializeInterpreter(socket, typesRegistry, functionsRegistry).then(interpreter => {
+    _resolve({ interpreter, socket });
+  });
 };
 
-const getInterpreter = async () => {
-  if (!_interpreter) {
-    _interpreter = initialize();
+export const getInterpreter = async () => {
+  if (!_interpreterPromise) {
+    _interpreterPromise = new Promise(resolve => _resolve = resolve);
+    initialize();
   }
-  return await _interpreter;
+  return await _interpreterPromise;
 };
 
+export const interpretAst = async (...params) => {
+  const { interpreter } = await getInterpreter();
+  return await interpreter.interpretAst(...params);
+};
 
 export const updateInterpreterFunctions = async () => {
-  await getInterpreter();
-  _socket.emit('updateFunctionList');
+  const { socket } =  await getInterpreter();
+  socket.emit('updateFunctionList');
 };
-
-export const getInitializedFunctions = async () => {
-  const interpreter = await getInterpreter();
-  const result = await interpreter.getInitializedFunctions();
-  return result;
-};
-
-export const interpretAst = async (ast, context, handlers) => {
-  const interpreter = await getInterpreter();
-  const result = await interpreter.interpretAst(ast, context, handlers);
-  return result;
-};
-
