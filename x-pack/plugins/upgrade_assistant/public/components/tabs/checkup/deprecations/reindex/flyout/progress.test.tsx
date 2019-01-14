@@ -7,7 +7,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { ReindexStatus, ReindexStep } from '../../../../../../common/types';
+import { ReindexStatus, ReindexStep } from '../../../../../../../common/types';
 import { ReindexProgress } from './progress';
 
 describe('ReindexProgress', () => {

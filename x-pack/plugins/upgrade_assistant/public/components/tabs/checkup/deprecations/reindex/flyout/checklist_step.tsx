@@ -12,18 +12,14 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiPortal,
   EuiSpacer,
 } from '@elastic/eui';
-import { ReindexStatus } from '../../../../../../common/types';
-import { LoadingState } from '../../../../types';
-import { ReindexState } from './polling_service';
+import { ReindexStatus } from '../../../../../../../common/types';
+import { LoadingState } from '../../../../../types';
+import { ReindexState } from '../polling_service';
 import { ReindexProgress } from './progress';
-import { WarningsConfirmationFlyout } from './warnings_confirmation';
 
 const buttonLabel = (status?: ReindexStatus) => {
   switch (status) {
@@ -41,7 +37,7 @@ const buttonLabel = (status?: ReindexStatus) => {
 /**
  * Displays a flyout that shows the current reindexing status for a given index.
  */
-export const ChecklistFlyout: React.StatelessComponent<{
+export const ChecklistFlyoutStep: React.StatelessComponent<{
   closeFlyout: () => void;
   reindexState: ReindexState;
   startReindex: () => void;
@@ -94,80 +90,3 @@ export const ChecklistFlyout: React.StatelessComponent<{
     </Fragment>
   );
 };
-
-enum ReindexFlyoutStep {
-  destructiveConfirmation,
-  checklist,
-}
-
-interface ReindexFlyoutProps {
-  indexName: string;
-  closeFlyout: () => void;
-  reindexState: ReindexState;
-  startReindex: () => void;
-}
-
-interface ReindexFlyoutState {
-  currentFlyoutStep: ReindexFlyoutStep;
-}
-
-/**
- * Wrapper for the contents of the flyout that manages which step of the flyout to show.
- */
-export class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFlyoutState> {
-  constructor(props: ReindexFlyoutProps) {
-    super(props);
-    const { reindexWarnings } = props.reindexState;
-
-    this.state = {
-      currentFlyoutStep:
-        reindexWarnings && reindexWarnings.length > 0
-          ? ReindexFlyoutStep.destructiveConfirmation
-          : ReindexFlyoutStep.checklist,
-    };
-  }
-
-  public render() {
-    const { closeFlyout, indexName, reindexState, startReindex } = this.props;
-    const { currentFlyoutStep } = this.state;
-
-    let flyoutContents: React.ReactNode;
-    switch (currentFlyoutStep) {
-      case ReindexFlyoutStep.destructiveConfirmation:
-        flyoutContents = (
-          <WarningsConfirmationFlyout
-            closeFlyout={closeFlyout}
-            warnings={reindexState.reindexWarnings!}
-            advanceNextStep={this.advanceNextStep}
-          />
-        );
-        break;
-      case ReindexFlyoutStep.checklist:
-        flyoutContents = (
-          <ChecklistFlyout
-            closeFlyout={closeFlyout}
-            reindexState={reindexState}
-            startReindex={startReindex}
-          />
-        );
-        break;
-      default:
-        throw new Error(`Invalid flyout step: ${currentFlyoutStep}`);
-    }
-
-    return (
-      <EuiPortal>
-        <EuiFlyout onClose={closeFlyout} aria-labelledby="Reindex" ownFocus size="m">
-          <EuiFlyoutHeader hasBorder>
-            <h2>Reindex {indexName}</h2>
-          </EuiFlyoutHeader>
-          {flyoutContents}
-        </EuiFlyout>
-      </EuiPortal>
-    );
-  }
-
-  public advanceNextStep = () => {
-    this.setState({ currentFlyoutStep: ReindexFlyoutStep.checklist });
-  };
-}

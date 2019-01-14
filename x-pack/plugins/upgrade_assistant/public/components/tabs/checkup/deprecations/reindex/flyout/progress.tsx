@@ -7,7 +7,7 @@
 import React from 'react';
 
 import { EuiCallOut, EuiContainedStepProps, EuiProgress, EuiSteps, EuiText } from '@elastic/eui';
-import { ReindexStatus, ReindexStep } from '../../../../../../common/types';
+import { ReindexStatus, ReindexStep } from '../../../../../../../common/types';
 
 const ErrorCallout: React.StatelessComponent<{ errorMessage: string | null }> = ({
   errorMessage,

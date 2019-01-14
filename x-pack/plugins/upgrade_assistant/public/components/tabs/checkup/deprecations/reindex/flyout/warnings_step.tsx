@@ -19,7 +19,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { ReindexWarning } from '../../../../../../common/types';
+import { ReindexWarning } from '../../../../../../../common/types';
 
 export const idForWarning = (warning: ReindexWarning) => `reindexWarning-${warning}`;
 
@@ -33,7 +33,7 @@ interface WarningsConfirmationFlyoutState {
   checkedIds: { [id: string]: boolean };
 }
 
-export class WarningsConfirmationFlyout extends React.Component<
+export class WarningsFlyoutStep extends React.Component<
   WarningsConfirmationFlyoutProps,
   WarningsConfirmationFlyoutState
 > {

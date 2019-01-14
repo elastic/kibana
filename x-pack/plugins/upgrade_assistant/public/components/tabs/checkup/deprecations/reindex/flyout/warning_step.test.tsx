@@ -7,10 +7,10 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
-import { ReindexWarning } from 'x-pack/plugins/upgrade_assistant/common/types';
-import { idForWarning, WarningsConfirmationFlyout } from './warnings_confirmation';
+import { ReindexWarning } from '../../../../../../../common/types';
+import { idForWarning, WarningsFlyoutStep } from './warnings_step';
 
-describe('WarningsConfirmationFlyout', () => {
+describe('WarningsFlyoutStep', () => {
   const defaultProps = {
     advanceNextStep: jest.fn(),
     warnings: [ReindexWarning.allField, ReindexWarning.booleanFields],
@@ -18,11 +18,11 @@ describe('WarningsConfirmationFlyout', () => {
   };
 
   it('renders', () => {
-    expect(shallow(<WarningsConfirmationFlyout {...defaultProps} />)).toMatchSnapshot();
+    expect(shallow(<WarningsFlyoutStep {...defaultProps} />)).toMatchSnapshot();
   });
 
   it('does not allow proceeding until all are checked', () => {
-    const wrapper = mount(<WarningsConfirmationFlyout {...defaultProps} />);
+    const wrapper = mount(<WarningsFlyoutStep {...defaultProps} />);
     const button = wrapper.find('EuiButton');
 
     button.simulate('click');

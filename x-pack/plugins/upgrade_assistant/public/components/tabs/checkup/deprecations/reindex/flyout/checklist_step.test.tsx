@@ -7,9 +7,9 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { ReindexStatus, ReindexStep, ReindexWarning } from '../../../../../../common/types';
-import { LoadingState } from '../../../../types';
-import { ChecklistFlyout } from './flyout';
+import { ReindexStatus, ReindexStep, ReindexWarning } from '../../../../../../../common/types';
+import { LoadingState } from '../../../../../types';
+import { ChecklistFlyoutStep } from './checklist_step';
 
 describe('ChecklistFlyout', () => {
   const defaultProps = {
@@ -29,11 +29,11 @@ describe('ChecklistFlyout', () => {
   };
 
   it('renders', () => {
-    expect(shallow(<ChecklistFlyout {...defaultProps} />)).toMatchSnapshot();
+    expect(shallow(<ChecklistFlyoutStep {...defaultProps} />)).toMatchSnapshot();
   });
 
   it('disables button while reindexing', () => {
-    const wrapper = shallow(<ChecklistFlyout {...defaultProps} />);
+    const wrapper = shallow(<ChecklistFlyoutStep {...defaultProps} />);
     expect(wrapper.find('EuiButton').props().disabled).toBe(true);
   });
 
@@ -46,7 +46,7 @@ describe('ChecklistFlyout', () => {
         status: undefined,
       },
     };
-    const wrapper = shallow(<ChecklistFlyout {...props} />);
+    const wrapper = shallow(<ChecklistFlyoutStep {...props} />);
 
     wrapper.find('EuiButton').simulate('click');
     expect(props.startReindex).toHaveBeenCalled();
