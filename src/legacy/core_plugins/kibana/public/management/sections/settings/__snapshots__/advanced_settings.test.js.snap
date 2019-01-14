@@ -78,7 +78,7 @@ exports[`AdvancedSettings should render normally 1`] = `
         Object {
           "elasticsearch": Array [
             Object {
-              "ariaName": "test array setting",
+              "ariaName": "Test array setting",
               "category": Array [
                 "elasticsearch",
               ],
@@ -96,7 +96,7 @@ exports[`AdvancedSettings should render normally 1`] = `
               "value": undefined,
             },
             Object {
-              "ariaName": "test boolean setting",
+              "ariaName": "Test boolean setting",
               "category": Array [
                 "elasticsearch",
               ],
@@ -114,7 +114,7 @@ exports[`AdvancedSettings should render normally 1`] = `
           ],
           "general": Array [
             Object {
-              "ariaName": "test customstring setting",
+              "ariaName": "Test custom string setting",
               "category": Array [
                 "general",
               ],
@@ -130,7 +130,7 @@ exports[`AdvancedSettings should render normally 1`] = `
               "value": undefined,
             },
             Object {
-              "ariaName": "test image setting",
+              "ariaName": "Test image setting",
               "category": Array [
                 "general",
               ],
@@ -146,7 +146,7 @@ exports[`AdvancedSettings should render normally 1`] = `
               "value": undefined,
             },
             Object {
-              "ariaName": "test is overridden json",
+              "ariaName": "An overridden json",
               "category": Array [
                 "general",
               ],
@@ -164,7 +164,7 @@ exports[`AdvancedSettings should render normally 1`] = `
               "value": undefined,
             },
             Object {
-              "ariaName": "test is overridden number",
+              "ariaName": "An overridden number",
               "category": Array [
                 "general",
               ],
@@ -180,7 +180,7 @@ exports[`AdvancedSettings should render normally 1`] = `
               "value": undefined,
             },
             Object {
-              "ariaName": "test is overridden select",
+              "ariaName": "Test overridden select setting",
               "category": Array [
                 "general",
               ],
@@ -200,7 +200,7 @@ exports[`AdvancedSettings should render normally 1`] = `
               "value": undefined,
             },
             Object {
-              "ariaName": "test is overridden string",
+              "ariaName": "An overridden string",
               "category": Array [
                 "general",
               ],
@@ -216,7 +216,7 @@ exports[`AdvancedSettings should render normally 1`] = `
               "value": undefined,
             },
             Object {
-              "ariaName": "test json setting",
+              "ariaName": "Test json setting",
               "category": Array [
                 "general",
               ],
@@ -232,7 +232,7 @@ exports[`AdvancedSettings should render normally 1`] = `
               "value": undefined,
             },
             Object {
-              "ariaName": "test markdown setting",
+              "ariaName": "Test markdown setting",
               "category": Array [
                 "general",
               ],
@@ -248,7 +248,7 @@ exports[`AdvancedSettings should render normally 1`] = `
               "value": undefined,
             },
             Object {
-              "ariaName": "test number setting",
+              "ariaName": "Test number setting",
               "category": Array [
                 "general",
               ],
@@ -264,7 +264,7 @@ exports[`AdvancedSettings should render normally 1`] = `
               "value": undefined,
             },
             Object {
-              "ariaName": "test select setting",
+              "ariaName": "Test select setting",
               "category": Array [
                 "general",
               ],
@@ -284,7 +284,7 @@ exports[`AdvancedSettings should render normally 1`] = `
               "value": undefined,
             },
             Object {
-              "ariaName": "test string setting",
+              "ariaName": "Test string setting",
               "category": Array [
                 "general",
               ],
@@ -424,7 +424,7 @@ exports[`AdvancedSettings should render specific setting if given setting key 1`
         Object {
           "general": Array [
             Object {
-              "ariaName": "test string setting",
+              "ariaName": "Test string setting",
               "category": Array [
                 "general",
               ],
