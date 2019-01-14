@@ -17,5 +17,5 @@ export const enrichResponse = async (response, callWithRequest) => {
       // silently swallow enricher response errors
     }
   }
-  return response;
+  return enrichedResponse;
 };
