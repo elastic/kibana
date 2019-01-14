@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import _ from 'lodash';
+import { FeaturePrivilegeSet } from '../../../common/model/privileges/feature_privileges';
 import { PrivilegeDefinition } from '../../../common/model/privileges/privilege_definition';
 import { Role } from '../../../common/model/role';
 import { copyRole } from '../../views/management/edit_role/lib/copy_role';
@@ -12,9 +13,7 @@ import { compareActions } from './effective_privileges_utils';
 
 export class EffectivePrivilegesFactory {
   /** All feature privileges, sorted from most permissive => least permissive. */
-  public readonly rankedFeaturePrivileges: {
-    [featureId: string]: string[];
-  };
+  public readonly rankedFeaturePrivileges: FeaturePrivilegeSet;
 
   constructor(private readonly privilegeDefinition: PrivilegeDefinition) {
     this.rankedFeaturePrivileges = {};

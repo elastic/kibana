@@ -16,6 +16,7 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { getSpaceColor } from '../../../../../../../../../spaces/common';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
+import { FeaturePrivilegeSet } from '../../../../../../../../common/model/privileges/feature_privileges';
 import { Role } from '../../../../../../../../common/model/role';
 import { EffectivePrivilegesFactory } from '../../../../../../../lib/effective_privileges';
 import { copyRole } from '../../../../lib/copy_role';
@@ -48,9 +49,7 @@ interface TableRow {
   isGlobal: boolean;
   privileges: {
     base: string[];
-    feature: {
-      [featureId: string]: string[];
-    };
+    feature: FeaturePrivilegeSet;
   };
 }
 

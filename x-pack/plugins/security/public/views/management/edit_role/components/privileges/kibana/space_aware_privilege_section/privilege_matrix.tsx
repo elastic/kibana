@@ -26,6 +26,7 @@ import React, { Component, Fragment } from 'react';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
 import { SpaceAvatar } from '../../../../../../../../../spaces/public/components';
+import { FeaturePrivilegeSet } from '../../../../../../../../common/model/privileges/feature_privileges';
 import { Role } from '../../../../../../../../common/model/role';
 import { EffectivePrivileges } from '../../../../../../../lib/effective_privileges';
 import { SpacesPopoverList } from '../../../spaces_popover_list';
@@ -57,9 +58,7 @@ interface SpacesColumn {
   spaces: Space[];
   privileges: {
     base: string[];
-    feature: {
-      [featureId: string]: string[];
-    };
+    feature: FeaturePrivilegeSet;
   };
 }
 

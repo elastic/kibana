@@ -5,6 +5,7 @@
  */
 
 import { IndexPrivilege } from './index_privilege';
+import { FeaturePrivilegeSet } from './privileges/feature_privileges';
 
 export interface Role {
   name: string;
@@ -16,7 +17,7 @@ export interface Role {
   kibana: Array<{
     spaces: string[];
     base: string[];
-    feature: { [featureId: string]: string[] };
+    feature: FeaturePrivilegeSet;
   }>;
   metadata?: {
     [anyKey: string]: any;
