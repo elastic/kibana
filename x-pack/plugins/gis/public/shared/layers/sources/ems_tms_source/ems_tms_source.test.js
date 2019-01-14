@@ -23,7 +23,7 @@ describe('EMSTMSSource', () => {
           attributionMarkdown: '[foobar](http://foobar.org)  | [foobaz](http://foobaz.org)'
         }, {
           id: 'satellite',
-          attributionMarkdown: '[foobar](foobaz)'
+          attributionMarkdown: '[satellite](http://satellite.org)'
         }
       ]
     });
