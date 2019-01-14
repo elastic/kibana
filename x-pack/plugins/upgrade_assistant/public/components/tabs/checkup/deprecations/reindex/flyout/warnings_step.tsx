@@ -11,6 +11,7 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiCheckbox,
+  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -83,56 +84,62 @@ export class WarningsFlyoutStep extends React.Component<
           <EuiSpacer />
 
           {warnings.includes(ReindexWarning.allField) && (
-            <EuiCheckbox
-              id={idForWarning(ReindexWarning.allField)}
-              label={
-                <EuiText>
-                  <h4>_all field will be removed</h4>
-                  <p>
-                    The <code>_all</code> meta field is no longer supported in 7.0 and reindexing
-                    will remove this field in the new index. Ensure that you have no application
-                    code or scripts relying on this field to exist before reindexing.
-                  </p>
-                  <EuiLink
-                    href="https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_the_literal__all_literal_meta_field_is_now_disabled_by_default"
-                    target="_blank"
-                  >
-                    Documentation
-                  </EuiLink>
-                </EuiText>
-              }
-              checked={checkedIds[idForWarning(ReindexWarning.allField)]}
-              onChange={this.onChange}
-            />
+            <EuiText>
+              <EuiCheckbox
+                id={idForWarning(ReindexWarning.allField)}
+                label={
+                  <strong>
+                    <EuiCode>_all</EuiCode> field will be removed
+                  </strong>
+                }
+                checked={checkedIds[idForWarning(ReindexWarning.allField)]}
+                onChange={this.onChange}
+              />
+              <p className="upgWarningsStep__warningDescription">
+                The <EuiCode>_all</EuiCode> meta field is no longer supported in 7.0 and reindexing
+                will remove this field in the new index. Ensure that you have no application code or
+                scripts relying on this field to exist before reindexing.
+                <br />
+                <EuiLink
+                  href="https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_the_literal__all_literal_meta_field_is_now_disabled_by_default"
+                  target="_blank"
+                >
+                  Documentation
+                </EuiLink>
+              </p>
+            </EuiText>
           )}
 
           <EuiSpacer />
 
           {warnings.includes(ReindexWarning.booleanFields) && (
-            <EuiCheckbox
-              id={idForWarning(ReindexWarning.booleanFields)}
-              label={
-                <EuiText>
-                  <h4>Boolean data in _source may change</h4>
-                  <p>
-                    If any documents contain any boolean fields that are not <code>true</code> or{' '}
-                    <code>false</code> (eg. <code>"yes"</code>, <code>"on"</code>, <code>1</code>),
-                    reindexing will convert these fields in the <em>source document</em> to be{' '}
-                    <code>true</code> or <code>false</code>. Ensure that you have no application
-                    code or scripts relying on boolean fields in the deprecated format before
-                    reindexing.
-                  </p>
-                  <EuiLink
-                    href="https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_coercion_of_boolean_fields"
-                    target="_blank"
-                  >
-                    Documentation
-                  </EuiLink>
-                </EuiText>
-              }
-              checked={checkedIds[idForWarning(ReindexWarning.booleanFields)]}
-              onChange={this.onChange}
-            />
+            <EuiText>
+              <EuiCheckbox
+                id={idForWarning(ReindexWarning.booleanFields)}
+                label={
+                  <strong>
+                    Boolean data in <EuiCode>_source</EuiCode> may change
+                  </strong>
+                }
+                checked={checkedIds[idForWarning(ReindexWarning.booleanFields)]}
+                onChange={this.onChange}
+              />
+              <p className="upgWarningsStep__warningDescription">
+                If any documents contain any boolean fields that are not <EuiCode>true</EuiCode> or{' '}
+                <EuiCode>false</EuiCode> (eg. <EuiCode>"yes"</EuiCode>, <EuiCode>"on"</EuiCode>,{' '}
+                <EuiCode>1</EuiCode>), reindexing will convert these fields in the{' '}
+                <strong>source document</strong> to be <EuiCode>true</EuiCode> or{' '}
+                <EuiCode>false</EuiCode>. Ensure that you have no application code or scripts
+                relying on boolean fields in the deprecated format before reindexing.
+                <br />
+                <EuiLink
+                  href="https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_coercion_of_boolean_fields"
+                  target="_blank"
+                >
+                  Documentation
+                </EuiLink>
+              </p>
+            </EuiText>
           )}
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
@@ -144,7 +151,7 @@ export class WarningsFlyoutStep extends React.Component<
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton fill color="danger" onClick={advanceNextStep} disabled={blockAdvance}>
-                Continue reindex
+                Continue with reindex
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

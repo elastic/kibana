@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { EuiFlyout, EuiFlyoutHeader, EuiPortal } from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutHeader, EuiPortal, EuiTitle } from '@elastic/eui';
 
 import { ReindexState } from '../polling_service';
 import { ChecklistFlyoutStep } from './checklist_step';
@@ -75,9 +75,11 @@ export class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFl
 
     return (
       <EuiPortal>
-        <EuiFlyout onClose={closeFlyout} aria-labelledby="Reindex" ownFocus size="m">
+        <EuiFlyout onClose={closeFlyout} aria-labelledby="Reindex" ownFocus size="m" maxWidth>
           <EuiFlyoutHeader hasBorder>
-            <h2>Reindex {indexName}</h2>
+            <EuiTitle size="s">
+              <h2>Reindex {indexName}</h2>
+            </EuiTitle>
           </EuiFlyoutHeader>
           {flyoutContents}
         </EuiFlyout>

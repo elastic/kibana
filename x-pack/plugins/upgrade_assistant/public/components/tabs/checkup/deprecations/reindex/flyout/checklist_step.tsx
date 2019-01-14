@@ -15,6 +15,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { ReindexStatus } from '../../../../../../../common/types';
 import { LoadingState } from '../../../../../types';
@@ -30,7 +31,7 @@ const buttonLabel = (status?: ReindexStatus) => {
     case ReindexStatus.completed:
       return 'Done!';
     default:
-      return 'Start reindex';
+      return 'Run reindex';
   }
 };
 
@@ -60,6 +61,9 @@ export const ChecklistFlyoutStep: React.StatelessComponent<{
           problems and you may need to use a different strategy to reindex this index.
         </EuiCallOut>
         <EuiSpacer />
+        <EuiTitle size="xs">
+          <h3>Steps to be performed during the reindex</h3>
+        </EuiTitle>
         <ReindexProgress
           lastCompletedStep={lastCompletedStep}
           reindexStatus={status}
@@ -71,7 +75,7 @@ export const ChecklistFlyoutStep: React.StatelessComponent<{
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
-              Cancel
+              Close
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

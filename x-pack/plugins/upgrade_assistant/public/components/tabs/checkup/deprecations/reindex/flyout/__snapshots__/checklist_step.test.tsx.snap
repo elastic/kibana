@@ -14,6 +14,14 @@ exports[`ChecklistFlyout renders 1`] = `
     <EuiSpacer
       size="l"
     />
+    <EuiTitle
+      size="xs"
+      textTransform="none"
+    >
+      <h3>
+        Steps to be performed during the reindex
+      </h3>
+    </EuiTitle>
     <Component
       errorMessage={null}
       reindexStatus={0}
@@ -42,7 +50,7 @@ exports[`ChecklistFlyout renders 1`] = `
           onClick={[MockFunction]}
           type="button"
         >
-          Cancel
+          Close
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem

@@ -63,12 +63,10 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
 
     switch (reindexState.status) {
       case ReindexStatus.inProgress:
-        // Small hack to get a loading state button that is not disabled.
         buttonContent = (
-          <div className="euiButton__content" style={{ padding: 0 }}>
-            <EuiLoadingSpinner className="euiButton__spinner" size="m" />
-            <span className="euiButton__text">Reindexing…</span>
-          </div>
+          <span>
+            <EuiLoadingSpinner className="upgReindexButton__spinner" size="m" /> Reindexing…
+          </span>
         );
         break;
       case ReindexStatus.completed:

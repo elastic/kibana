@@ -13,18 +13,18 @@ type STATUS = 'incomplete' | 'inProgress' | 'complete' | 'failed';
 
 const StepStatus: React.StatelessComponent<{ status: STATUS; idx: number }> = ({ status, idx }) => {
   if (status === 'incomplete') {
-    return <span className="stepProgress__status">{idx + 1}.</span>;
+    return <span className="upgStepProgress__status">{idx + 1}.</span>;
   } else if (status === 'inProgress') {
-    return <EuiLoadingSpinner size="m" className="stepProgress__status" />;
+    return <EuiLoadingSpinner size="m" className="upgStepProgress__status" />;
   } else if (status === 'complete') {
     return (
-      <span className="stepProgress__status stepStatus__circle stepStatus__circle--complete">
+      <span className="upgStepProgress__status upgStepProgress__status--circle upgStepProgress__status--circle-complete">
         <EuiIcon type="check" size="s" />
       </span>
     );
   } else if (status === 'failed') {
     return (
-      <span className="stepProgress__status stepStatus__circle stepStatus__circle--failed">
+      <span className="upgStepProgress__status upgStepProgress__status--circle upgStepProgress__status--circle-failed">
         <EuiIcon type="cross" size="s" />
       </span>
     );
@@ -39,17 +39,17 @@ const Step: React.StatelessComponent<StepProgressStep & { idx: number }> = ({
   children,
   idx,
 }) => {
-  const titleClassName = classNames('stepProgress__title', {
-    'stepProgress__title--inProgress': status === 'inProgress',
+  const titleClassName = classNames('upgStepProgress__title', {
+    'upgStepProgress__title--inProgress': status === 'inProgress',
   });
 
   return (
     <Fragment>
-      <div className="stepProgress__step">
+      <div className="upgStepProgress__step">
         <StepStatus status={status} idx={idx} />
         <p className={titleClassName}>{title}</p>
       </div>
-      <div className="stepProgress__content">{children}</div>
+      {children && <div className="upgStepProgress__content">{children}</div>}
     </Fragment>
   );
 };
@@ -67,7 +67,7 @@ export const StepProgress: React.StatelessComponent<{
   steps: StepProgressStep[];
 }> = ({ steps }) => {
   return (
-    <div className="stepProgress__container">
+    <div className="upgStepProgress__container">
       {steps.map((step, idx) => (
         <Step key={step.title} {...step} idx={idx} />
       ))}

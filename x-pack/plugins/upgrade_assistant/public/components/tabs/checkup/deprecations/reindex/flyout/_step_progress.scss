@@ -1,50 +1,44 @@
-.stepProgress__step {
+@import '@elastic/eui/src/components/call_out/variables';
+@import '@elastic/eui/src/components/call_out/mixins';
+
+.upgStepProgress__step {
   display: flex;
   align-items: center;
-  padding: 10px 0;
+  margin-top: $euiSize;
+  margin-bottom: $euiSizeS;
+  line-height: $euiSize;
 }
 
-.stepProgress__status {
-  margin-right: 12px;
-  width: 18px;
-  height: 18px;
-  text-align: center;
-  line-height: 15px;
+.upgStepProgress__status {
+  @include size($euiSize);
+  margin-right: $euiSizeM;
 }
 
-$stepStatusColorsToFade: (
-  failed: $euiColorDanger,
-  complete: $euiColorSecondary,
+$stepStatusToCallOutColor: (
+  failed: 'danger',
+  complete: 'success',
 );
 
-.stepStatus__circle {
-  border-radius: 12px;
+.upgStepProgress__status--circle {
+  text-align: center;
+  border-radius: $euiSizeM;
+  line-height: $euiSize - 2px;
 
-  @each $name, $color in $stepStatusColorsToFade {
-    &--#{$name} {
-      $backgroundColor: $color;
-      @if (saturation($color) > 0%) {
-        $backgroundColor: tintOrShade($color, 90%, 70%);
-      }
-
-      $textColor: makeHighContrastColor($color, $backgroundColor);
-
-      color: $textColor;
-      background-color: $backgroundColor;
+  @each $status, $callOutColor in $stepStatusToCallOutColor {
+    &-#{$status} {
+      color: euiCallOutColor($callOutColor, 'foreground');
+      background-color: euiCallOutColor($callOutColor, 'background');
     }
   }
 }
 
-.stepProgress__title {
-  font-size: 1.1rem;
-  line-height: 2rem;
-
+.upgStepProgress__title {
   &--inProgress {
-    font-weight: 600;
+    font-weight: $euiFontWeightBold;
   }
 }
 
-.stepProgress__content {
+.upgStepProgress__content {
   display: block;
-  margin-left: 30px;
+  margin-left: $euiSize + $euiSizeM;
 }
