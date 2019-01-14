@@ -108,7 +108,10 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
                   flush="left"
                   data-test-subj={'cancelSpacePrivilegeButton'}
                 >
-                  Cancel
+                  <FormattedMessage
+                    id="xpack.security.management.editRolespacePrivilegeForm.cancelButton"
+                    defaultMessage="Cancel"
+                  />
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>{this.getSaveButton()}</EuiFlexItem>

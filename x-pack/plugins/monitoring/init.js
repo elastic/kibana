@@ -57,7 +57,9 @@ export const init = (monitoringPlugin, server) => {
 
   xpackMainPlugin.registerFeature({
     id: 'monitoring',
-    name: 'Monitoring',
+    name: i18n.translate('xpack.monitoring.featureRegistry.monitoringFeatureName', {
+      defaultMessage: 'Stack Monitoring',
+    }),
     icon: 'monitoringApp',
     navLinkId: 'monitoring',
     privileges: {

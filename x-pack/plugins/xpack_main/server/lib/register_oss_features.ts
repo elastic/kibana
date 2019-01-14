@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { Feature, registerFeature } from './feature_registry';
 
 const kibanaFeatures: Feature[] = [
   {
     id: 'discover',
-    name: 'Discover',
+    name: i18n.translate('xpack.xpack_main.featureRegistry.discoverFeatureName', {
+      defaultMessage: 'Discover',
+    }),
     icon: 'discoverApp',
     navLinkId: 'kibana:discover',
     privileges: {
@@ -35,7 +38,9 @@ const kibanaFeatures: Feature[] = [
   },
   {
     id: 'visualize',
-    name: 'Visualize',
+    name: i18n.translate('xpack.xpack_main.featureRegistry.visualizeFeatureName', {
+      defaultMessage: 'Visualize',
+    }),
     icon: 'visualizeApp',
     navLinkId: 'kibana:visualize',
     privileges: {
@@ -61,7 +66,9 @@ const kibanaFeatures: Feature[] = [
   },
   {
     id: 'dashboard',
-    name: 'Dashboard',
+    name: i18n.translate('xpack.xpack_main.featureRegistry.dashboardFeatureName', {
+      defaultMessage: 'Dashboard',
+    }),
     icon: 'dashboardApp',
     navLinkId: 'kibana:dashboard',
     privileges: {
@@ -102,7 +109,9 @@ const kibanaFeatures: Feature[] = [
   },
   {
     id: 'dev_tools',
-    name: 'Dev Tools',
+    name: i18n.translate('xpack.xpack_main.featureRegistry.devToolsFeatureName', {
+      defaultMessage: 'Dev Tools',
+    }),
     icon: 'devToolsApp',
     navLinkId: 'kibana:dev_tools',
     privileges: {
@@ -120,7 +129,9 @@ const kibanaFeatures: Feature[] = [
   },
   {
     id: 'advancedSettings',
-    name: 'Advanced Settings',
+    name: i18n.translate('xpack.xpack_main.featureRegistry.advancedSettingsFeatureName', {
+      defaultMessage: 'Advanced Settings',
+    }),
     icon: 'advancedSettingsApp',
     privileges: {
       all: {
@@ -139,7 +150,9 @@ const kibanaFeatures: Feature[] = [
   },
   {
     id: 'indexPatterns',
-    name: 'Index Pattern Management',
+    name: i18n.translate('xpack.xpack_main.featureRegistry.indexPatternFeatureName', {
+      defaultMessage: 'Index Pattern Management',
+    }),
     icon: 'indexPatternApp',
     privileges: {
       all: {
@@ -161,7 +174,9 @@ const kibanaFeatures: Feature[] = [
 const timelionFeatures: Feature[] = [
   {
     id: 'timelion',
-    name: 'Timelion',
+    name: i18n.translate('xpack.xpack_main.featureRegistry.timelionFeatureName', {
+      defaultMessage: 'Timelion',
+    }),
     icon: 'timelionApp',
     navLinkId: 'timelion',
     privileges: {

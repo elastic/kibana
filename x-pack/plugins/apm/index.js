@@ -71,7 +71,9 @@ export function apm(kibana) {
     init(server) {
       server.plugins.xpack_main.registerFeature({
         id: 'apm',
-        name: 'APM',
+        name: i18n.translate('xpack.apm.featureRegistry.apmFeatureName', {
+          defaultMessage: 'APM'
+        }),
         icon: 'apmApp',
         navLinkId: 'apm',
         privileges: {

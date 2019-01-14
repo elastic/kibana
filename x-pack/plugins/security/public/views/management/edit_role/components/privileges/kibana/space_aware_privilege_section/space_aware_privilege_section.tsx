@@ -47,7 +47,10 @@ interface State {
 class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
   private globalSpaceEntry: Space = {
     id: '*',
-    name: '* Global (all spaces)',
+    name: this.props.intl.formatMessage({
+      id: 'xpack.security.management.editRole.spaceAwarePrivilegeForm.globalSpacesName',
+      defaultMessage: '* Global (all spaces)',
+    }),
     color: '#D3DAE6',
     initials: '*',
     disabledFeatures: [],
@@ -214,7 +217,10 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
         data-test-subj={'addSpacePrivilegeButton'}
         isDisabled={!hasAvailableSpaces || !this.props.editable}
       >
-        Add space privilege
+        <FormattedMessage
+          id="xpack.security.management.editRole.spacePrivilegeSection.addSpacePrivilegeButton"
+          defaultMessage="Add space privilege"
+        />
       </EuiButton>
     );
 

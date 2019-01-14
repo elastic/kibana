@@ -6,6 +6,7 @@
 
 import { functionsRegistry } from '@kbn/interpreter/common';
 import { populateServerRegistries } from '@kbn/interpreter/server';
+import { i18n } from '@kbn/i18n';
 import { routes } from './server/routes';
 import { commonFunctions } from './common/functions';
 import { registerCanvasUsageCollector } from './server/usage';
@@ -37,7 +38,9 @@ export default async function(server /*options*/) {
 
   server.plugins.xpack_main.registerFeature({
     id: 'canvas',
-    name: 'Canvas',
+    name: i18n.translate('xpack.canvas.featureRegistry.canvasFeatureName', {
+      defaultMessage: 'Canvas',
+    }),
     icon: 'canvasApp',
     navLinkId: 'canvas',
     privileges: {

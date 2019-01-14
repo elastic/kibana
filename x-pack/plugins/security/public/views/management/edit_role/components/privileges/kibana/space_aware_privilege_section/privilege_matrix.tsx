@@ -195,7 +195,11 @@ export class PrivilegeMatrix extends Component<Props, State> {
                   <SpaceAvatar size="s" space={space} />{' '}
                   {item.isGlobal && (
                     <span>
-                      Global <br />
+                      <FormattedMessage
+                        id="xpack.security.management.editRole.spacePrivilegeMatrix.globalSpaceName"
+                        defaultMessage="Global"
+                      />
+                      <br />
                       <SpacesPopoverList
                         spaces={this.props.spaces.filter(s => s.id !== '*')}
                         intl={this.props.intl}

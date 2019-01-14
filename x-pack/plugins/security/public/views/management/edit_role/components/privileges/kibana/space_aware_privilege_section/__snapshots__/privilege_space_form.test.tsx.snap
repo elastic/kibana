@@ -397,7 +397,11 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
             onClick={[Function]}
             type="button"
           >
-            Cancel
+            <FormattedMessage
+              defaultMessage="Cancel"
+              id="xpack.security.management.editRolespacePrivilegeForm.cancelButton"
+              values={Object {}}
+            />
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem
