@@ -21,7 +21,7 @@ export default function ({ getService }) {
 
     it('should get all pings stored in index', async () => {
       const { body: apiResponse } = await supertest
-        .get(`/api/uptime/pings?dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`)
+        .get(`/api/uptime/pings?sort=desc&dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`)
         .expect(200);
 
       expect(apiResponse.total).to.be(2);
@@ -45,7 +45,7 @@ export default function ({ getService }) {
     it('should return results of n length', async () => {
       const { body: apiResponse } = await supertest
         .get(
-          `/api/uptime/pings?size=1&dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`
+          `/api/uptime/pings?sort=desc&size=1&dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`
         )
         .expect(200);
 

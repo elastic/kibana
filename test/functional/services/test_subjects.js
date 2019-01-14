@@ -24,15 +24,15 @@ import {
   map as mapAsync,
 } from 'bluebird';
 
-import { WAIT_FOR_EXISTS_TIME } from './find';
-
 export function TestSubjectsProvider({ getService }) {
   const log = getService('log');
   const retry = getService('retry');
   const browser = getService('browser');
   const find = getService('find');
   const config = getService('config');
-  const defaultFindTimeout = config.get('timeouts.find');
+
+  const FIND_TIME = config.get('timeouts.find');
+  const WAIT_FOR_EXISTS_TIME = config.get('timeouts.waitForExists');
 
   class TestSubjects {
     async exists(selector, timeout = WAIT_FOR_EXISTS_TIME) {
@@ -65,17 +65,17 @@ export function TestSubjectsProvider({ getService }) {
       });
     }
 
-    async clickWhenNotDisabled(selector, { timeout } = { timeout: defaultFindTimeout }) {
+    async clickWhenNotDisabled(selector, { timeout = FIND_TIME } = {}) {
       log.debug(`TestSubjects.click(${selector})`);
       await find.clickByCssSelectorWhenNotDisabled(testSubjSelector(selector), { timeout });
     }
 
-    async click(selector, timeout = defaultFindTimeout) {
+    async click(selector, timeout = FIND_TIME) {
       log.debug(`TestSubjects.click(${selector})`);
       await find.clickByCssSelector(testSubjSelector(selector), timeout);
     }
 
-    async doubleClick(selector, timeout = defaultFindTimeout) {
+    async doubleClick(selector, timeout = FIND_TIME) {
       log.debug(`TestSubjects.doubleClick(${selector})`);
       return await retry.try(async () => {
         const element = await this.find(selector, timeout);
