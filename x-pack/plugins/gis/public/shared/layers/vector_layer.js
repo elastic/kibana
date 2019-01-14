@@ -224,7 +224,7 @@ export class VectorLayer extends ALayer {
       updateDueToPrecisionChange = !_.isEqual(meta.geohashPrecision, searchFilters.geohashPrecision);
     }
 
-    const updateDueToExtentChange = !this.updateDueToExtent(source, meta, searchFilters);
+    const updateDueToExtentChange = this.updateDueToExtent(source, meta, searchFilters);
     return !updateDueToTime
       && !updateDueToRefreshTimer
       && !updateDueToExtentChange
