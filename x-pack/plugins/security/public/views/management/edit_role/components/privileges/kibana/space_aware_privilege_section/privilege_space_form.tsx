@@ -137,6 +137,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
             selectedSpaceIds={this.state.selectedSpaceIds}
             onChange={this.onSelectedSpacesChange}
             spaces={spaces}
+            intl={this.props.intl}
           />
         </EuiFormRow>
 

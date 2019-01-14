@@ -11,6 +11,7 @@ import {
   // @ts-ignore
   EuiHighlight,
 } from '@elastic/eui';
+import { InjectedIntl } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
 import { getSpaceColor } from '../../../../../../../../../spaces/common/space_attributes';
@@ -38,6 +39,7 @@ interface Props {
   selectedSpaceIds: string[];
   onChange: (spaceIds: string[]) => void;
   disabled?: boolean;
+  intl: InjectedIntl;
 }
 
 export class SpaceSelector extends Component<Props, {}> {
@@ -56,6 +58,10 @@ export class SpaceSelector extends Component<Props, {}> {
     return (
       <EuiComboBox
         data-test-subj={'spaceSelectorComboBox'}
+        aria-label={this.props.intl.formatMessage({
+          id: 'xpack.security.management.editRole.spaceSelectorLabel',
+          defaultMessage: 'Spaces',
+        })}
         fullWidth
         options={this.getOptions()}
         renderOption={renderOption}
