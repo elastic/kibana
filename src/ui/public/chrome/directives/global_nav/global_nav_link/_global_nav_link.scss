@@ -1,6 +1,12 @@
 .kbnGlobalNavLink {
-  &:hover,
-  &.active,
+  &:hover {
+    background-color: darken($kbnChromeGlobalNavBackground, 4%);
+  }
+
+  &.active {
+    background-color: lighten($kbnChromeGlobalNavBackground, 10%);
+  }
+
   &:focus {
     box-shadow: none !important;
     background-color: darken($euiColorPrimary, 2%);
