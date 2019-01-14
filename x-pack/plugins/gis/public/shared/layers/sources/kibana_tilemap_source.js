@@ -16,7 +16,7 @@ import {
 export class KibanaTilemapSource extends  TMSSource {
 
   static type = 'KIBANA_TILEMAP';
-  static typeDisplayName = 'TMS from kibana.yml';
+  static typeDisplayName = 'Custom Tile Map Service';
 
   static createDescriptor(url) {
     return {
@@ -41,7 +41,9 @@ export class KibanaTilemapSource extends  TMSSource {
         <strong>{KibanaTilemapSource.typeDisplayName}</strong>
         <EuiSpacer size="xs" />
         <EuiText size="s" color="subdued">
-          <p className="euiTextColor--subdued">TMS service configured in kibana.yml</p>
+          <p className="euiTextColor--subdued">
+            Map tiles configured in kibana.yml
+          </p>
         </EuiText>
       </Fragment>
     );

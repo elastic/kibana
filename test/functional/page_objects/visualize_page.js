@@ -20,7 +20,6 @@
 import { VisualizeConstants } from '../../../src/legacy/core_plugins/kibana/public/visualize/visualize_constants';
 import Bluebird from 'bluebird';
 import expect from 'expect.js';
-import Keys from 'leadfoot/keys';
 
 export function VisualizePageProvider({ getService, getPageObjects }) {
   const browser = getService('browser');
@@ -399,7 +398,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         await find.clickByCssSelector(selector);
         const input = await find.byCssSelector(`${selector} input.ui-select-search`);
         await input.type(myString);
-        await browser.pressKeys(Keys.RETURN);
+        await input.pressKeys(browser.keys.RETURN);
       });
       await PageObjects.common.sleep(500);
     }
@@ -508,7 +507,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       `;
       await find.clickByCssSelector(selector);
       await find.setValue(`${selector} input.ui-select-search`, fieldValue);
-      await browser.pressKeys(Keys.RETURN);
+      const input = await find.byCssSelector(`${selector} input.ui-select-search`);
+      await input.pressKeys(browser.keys.RETURN);
     }
 
     async selectFieldById(fieldValue, id) {
@@ -546,7 +546,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // was a long enough gap from the typing above to the space click.  Hence the
       // need for the sleep.
       await PageObjects.common.sleep(500);
-      await browser.pressKeys(Keys.SPACE);
+      await input.pressKeys(browser.keys.SPACE);
     }
 
     async setCustomInterval(newValue) {
@@ -612,7 +612,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async sizeUpEditor() {
       await testSubjects.click('visualizeEditorResizer');
-      await browser.pressKeys(Keys.ARROW_RIGHT);
+      await browser.pressKeys(browser.keys.ARROW_RIGHT);
     }
 
     async clickOptions() {

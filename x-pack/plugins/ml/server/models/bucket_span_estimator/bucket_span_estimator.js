@@ -116,8 +116,8 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
     run() {
       return new Promise((resolve, reject) => {
         if (this.checkers.length === 0) {
-          console.log('BucketSpanEstimator: run has stopped because no checks where created');
-          reject('BucketSpanEstimator: run has stopped because no checks where created');
+          console.log('BucketSpanEstimator: run has stopped because no checks were created');
+          reject('BucketSpanEstimator: run has stopped because no checks were created');
         }
 
         this.polledDataChecker.run()
