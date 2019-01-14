@@ -20,6 +20,7 @@ import {
   EuiFlexItem,
   EuiOverlayMask,
   EuiConfirmModal,
+  EuiIcon,
 
 } from '@elastic/eui';
 
@@ -60,7 +61,16 @@ export const FollowerIndexEdit = injectI18n(
 
     componentDidMount() {
       const { match: { params: { id } }, selectFollowerIndex } = this.props;
-      const decodedId = decodeURIComponent(id);
+      let decodedId;
+      try {
+        // When we navigate through the router (history.push) we need to decode both the uri and the id
+        decodedId = decodeURI(id);
+        decodedId = decodeURIComponent(decodedId);
+      } catch (e) {
+        // This is a page load. I guess that AngularJS router does already a decodeURI so it is not
+        // necessary in this case.
+        decodedId = decodeURIComponent(id);
+      }
 
       selectFollowerIndex(decodedId);
 
@@ -132,7 +142,7 @@ export const FollowerIndexEdit = injectI18n(
       const { followerIndexId, intl } = this.props;
       const title = intl.formatMessage({
         id: 'xpack.crossClusterReplication.followerIndexEditForm.confirmModal.title',
-        defaultMessage: 'Confirm update follower index \'{id}\'',
+        defaultMessage: 'Update follower index \'{id}\'',
       }, { id: followerIndexId });
 
       const { name, followerIndex } = this.inflightPayload;
@@ -158,6 +168,7 @@ export const FollowerIndexEdit = injectI18n(
             }
           >
             <p>
+              <EuiIcon type="alert" color="danger" />{' '}
               <FormattedMessage
                 id="xpack.crossClusterReplication.followerIndexEditForm.confirmModal.description"
                 defaultMessage="To update the follower index, it will first be paused and then resumed."

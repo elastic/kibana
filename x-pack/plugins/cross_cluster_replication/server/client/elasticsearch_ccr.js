@@ -126,6 +126,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         }
       }
     ],
+    needBody: true,
     method: 'POST'
   });
 

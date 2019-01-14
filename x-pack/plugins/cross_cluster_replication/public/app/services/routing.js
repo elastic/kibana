@@ -84,8 +84,10 @@ class Routing {
     return encodeURI(`#${BASE_PATH}/auto_follow_patterns${section}/${encodeURIComponent(name)}`);
   };
 
-  getFollowerIndexPath = (name, section = '/edit') => {
-    return encodeURI(`#${BASE_PATH}/follower_indices${section}/${encodeURIComponent(name)}`);
+  getFollowerIndexPath = (name, section = '/edit', withBase = true) => {
+    return withBase
+      ? encodeURI(`#${BASE_PATH}/follower_indices${section}/${encodeURIComponent(name)}`)
+      : encodeURI(`/follower_indices${section}/${encodeURIComponent(name)}`);
   };
 
   get reactRouter() {

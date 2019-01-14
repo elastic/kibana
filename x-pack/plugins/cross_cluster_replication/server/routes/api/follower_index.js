@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
@@ -11,7 +12,7 @@ import {
   deserializeFollowerIndex,
   deserializeListFollowerIndices,
   serializeFollowerIndex,
-  // serializeAdvancedSettings,
+  serializeAdvancedSettings,
 } from '../../lib/follower_index_serialization';
 import { licensePreRoutingFactory } from'../../lib/license_pre_routing_factory';
 import { API_BASE_PATH } from '../../../common/constants';
@@ -65,6 +66,11 @@ export const registerFollowerIndexRoutes = (server) => {
         const response = await callWithRequest('ccr.followerIndexStats', { id });
         const followerIndex = response.indices[0];
 
+        if (!followerIndex) {
+          const error = Boom.notFound(`The follower index "${id}" does not exist.`);
+          throw(error);
+        }
+
         return deserializeFollowerIndex(followerIndex);
       } catch(err) {
         if (isEsError(err)) {
@@ -110,17 +116,20 @@ export const registerFollowerIndexRoutes = (server) => {
     config: {
       pre: [ licensePreRouting ]
     },
-    handler: async (/*request*/) => {
-      // const callWithRequest = callWithRequestFactory(server, request);
-      // const { id: name } = request.params;
-      // const body = removeEmptyFields(serializeAdvancedSettings(request.payload));
+    handler: async (request) => {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { id: _id } = request.params;
+      const body = removeEmptyFields(serializeAdvancedSettings(request.payload));
 
       try {
         /**
          * We need to first pause the follower and then resume it passing the advanced settings
          */
-        // TODO: Add this when pause/resume PR will be merged
-        return 'NOT_IMPLEMENTED';
+        // Pause follower
+        await callWithRequest('ccr.pauseFollowerIndex', { id: _id });
+
+        // Resume follower
+        return await callWithRequest('ccr.resumeFollowerIndex', { id: _id, body });
       } catch(err) {
         if (isEsError(err)) {
           throw wrapEsError(err);

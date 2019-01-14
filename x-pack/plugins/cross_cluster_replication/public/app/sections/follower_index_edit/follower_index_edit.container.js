@@ -40,7 +40,10 @@ const mapDispatchToProps = dispatch => ({
   getFollowerIndex: (id) => dispatch(getFollowerIndex(id)),
   selectFollowerIndex: (id) => dispatch(selectEditFollowerIndex(id)),
   saveFollowerIndex: (id, followerIndex) => dispatch(saveFollowerIndex(id, followerIndex, true)),
-  clearApiError: () => dispatch(clearApiError(scope)),
+  clearApiError: () => {
+    dispatch(clearApiError(`${scope}-get`));
+    dispatch(clearApiError(`${scope}-save`));
+  },
 });
 
 export const FollowerIndexEdit = connect(

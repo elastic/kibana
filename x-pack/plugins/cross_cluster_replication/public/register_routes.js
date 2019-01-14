@@ -20,7 +20,7 @@ if (chrome.getInjected('ccrUiEnabled')) {
 
   const unmountReactApp = () => elem && unmountComponentAtNode(elem);
 
-  routes.when(`${BASE_PATH}/:section?/:view?/:id?`, {
+  routes.when(`${BASE_PATH}/:section?/:subsection?/:view?/:id?`, {
     template: template,
     controllerAs: 'ccr',
     controller: class CrossClusterReplicationController {
