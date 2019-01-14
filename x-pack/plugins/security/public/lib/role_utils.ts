@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { cloneDeep, get } from 'lodash';
 import { Role } from '../../common/model';
 
 /**
@@ -33,4 +33,13 @@ export function isReservedRole(role: Partial<Role>) {
  */
 export function isReadOnlyRole(role: Partial<Role>): boolean {
   return isReservedRole(role) || !!(role._transform_error && role._transform_error.length > 0);
+}
+
+/**
+ * Returns a deep copy of the role.
+ *
+ * @param role the Role to copy.
+ */
+export function copyRole(role: Role) {
+  return cloneDeep(role);
 }

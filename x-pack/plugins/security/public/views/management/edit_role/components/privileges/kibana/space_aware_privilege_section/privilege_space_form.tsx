@@ -29,8 +29,8 @@ import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
 import { PrivilegeDefinition, Role } from '../../../../../../../../common/model';
 import { EffectivePrivilegesFactory } from '../../../../../../../lib/effective_privileges';
+import { copyRole } from '../../../../../../../lib/role_utils';
 import { NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
-import { copyRole } from '../../../../lib/copy_role';
 import { FeatureTable } from '../feature_table';
 import { SpaceSelector } from './space_selector';
 

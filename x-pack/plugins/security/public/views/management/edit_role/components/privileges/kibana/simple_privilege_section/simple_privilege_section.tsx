@@ -17,8 +17,8 @@ import React, { Component, Fragment } from 'react';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { PrivilegeDefinition, Role } from '../../../../../../../../common/model';
 import { EffectivePrivileges } from '../../../../../../../lib/effective_privileges';
+import { copyRole } from '../../../../../../../lib/role_utils';
 import { NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
-import { copyRole } from '../../../../lib/copy_role';
 import { FeatureTable } from '../feature_table';
 
 interface Props {

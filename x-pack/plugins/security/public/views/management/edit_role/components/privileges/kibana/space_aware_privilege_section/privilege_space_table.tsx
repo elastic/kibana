@@ -18,7 +18,7 @@ import { getSpaceColor } from '../../../../../../../../../spaces/common';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
 import { FeaturePrivilegeSet, Role } from '../../../../../../../../common/model';
 import { EffectivePrivilegesFactory } from '../../../../../../../lib/effective_privileges';
-import { copyRole } from '../../../../lib/copy_role';
+import { copyRole } from '../../../../../../../lib/role_utils';
 import { PrivilegeDisplay } from './privilege_display';
 
 const SPACES_DISPLAY_COUNT = 4;

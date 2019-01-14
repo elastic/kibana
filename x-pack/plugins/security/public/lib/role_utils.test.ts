@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isReadOnlyRole, isReservedRole, isRoleEnabled } from './role_utils';
+import { Role } from '../../common/model';
+import { copyRole, isReadOnlyRole, isReservedRole, isRoleEnabled } from './role_utils';
 
 describe('role', () => {
   describe('isRoleEnabled', () => {
@@ -77,6 +78,43 @@ describe('role', () => {
     test('returns false for all other roles', () => {
       const testRole = {};
       expect(isReadOnlyRole(testRole)).toBe(false);
+    });
+  });
+
+  describe('copyRole', () => {
+    it('should perform a deep copy', () => {
+      const role: Role = {
+        name: '',
+        elasticsearch: {
+          cluster: ['all'],
+          indices: [{ names: ['index*'], privileges: ['all'] }],
+          run_as: ['user'],
+        },
+        kibana: [
+          {
+            spaces: ['*'],
+            base: ['all'],
+            feature: {},
+          },
+          {
+            spaces: ['default'],
+            base: ['foo'],
+            feature: {},
+          },
+          {
+            spaces: ['marketing'],
+            base: ['read'],
+            feature: {},
+          },
+        ],
+      };
+
+      const result = copyRole(role);
+      expect(result).toEqual(role);
+
+      role.elasticsearch.indices[0].names = ['something else'];
+
+      expect(result).not.toEqual(role);
     });
   });
 });

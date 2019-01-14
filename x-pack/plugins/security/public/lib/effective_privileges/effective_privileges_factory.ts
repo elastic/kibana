@@ -5,7 +5,7 @@
  */
 import _ from 'lodash';
 import { FeaturePrivilegeSet, PrivilegeDefinition, Role } from '../../../common/model';
-import { copyRole } from '../../views/management/edit_role/lib/copy_role';
+import { copyRole } from '../../lib/role_utils';
 import { EffectivePrivileges } from './effective_privileges';
 import { compareActions } from './effective_privileges_utils';
 
