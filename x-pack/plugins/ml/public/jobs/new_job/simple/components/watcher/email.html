@@ -1,29 +1,29 @@
 <html>
   <body>
     <strong>
-      {{i18n 'xpack.ml.newJob.simple.email.elasticStackMachineLearningAlertLabel' '{"defaultMessage": "Elastic Stack Machine Learning Alert"'}}
+      <%= elasticStackMachineLearningAlertLabel %>
     </strong>
     <br />
     <br />
 
     <strong>
-      {{i18n 'xpack.ml.newJob.simple.email.jobLabel' '{"defaultMessage": "Job"'}}
+      <%= jobLabel %>
     </strong>: {{ctx.payload.aggregations.bucket_results.top_bucket_hits.hits.hits.0._source.job_id}}
     <br />
 
     <strong>
-      {{i18n 'xpack.ml.newJob.simple.email.timeLabel' '{"defaultMessage": "Time"'}}
+      <%= timeLabel %>
     </strong>: {{ctx.payload.aggregations.bucket_results.top_bucket_hits.hits.hits.0.fields.timestamp_iso8601.0}}
     <br />
 
     <strong>
-      {{i18n 'xpack.ml.newJob.simple.email.anomalyScoreLabel' '{"defaultMessage": "Anomaly score"'}}
+      <%= anomalyScoreLabel %>
     </strong>: {{ctx.payload.aggregations.bucket_results.top_bucket_hits.hits.hits.0.fields.score.0}}
     <br />
     <br />
 
     <a href="<%= serverAddress %>#/explorer/?_g=(ml:(jobIds:!('{{ctx.payload.aggregations.bucket_results.top_bucket_hits.hits.hits.0._source.job_id}}')),refreshInterval:(display:Off,pause:!f,value:0),time:(from:'{{ctx.payload.aggregations.bucket_results.top_bucket_hits.hits.hits.0.fields.start.0}}',mode:absolute,to:'{{ctx.payload.aggregations.bucket_results.top_bucket_hits.hits.hits.0.fields.end.0}}'))&_a=(filters:!(),mlAnomaliesTable:(intervalValue:auto,thresholdValue:0),mlExplorerSwimlane:(selectedLane:Overall,selectedTime:{{ctx.payload.aggregations.bucket_results.top_bucket_hits.hits.hits.0.fields.timestamp_epoch.0}},selectedType:overall),query:(query_string:(analyze_wildcard:!t,query:'*')))">
-      {{i18n 'xpack.ml.newJob.simple.email.openInAnomalyExplorerLinkText' '{"defaultMessage": "Click here to open in Anomaly Explorer."'}}
+      <%= openInAnomalyExplorerLinkText %>
     </a>
     <br />
     <br />
@@ -31,7 +31,7 @@
     <%= influencersSection %>
 
     <strong>
-        {{i18n 'xpack.ml.newJob.simple.email.topRecordsLabel' '{"defaultMessage": "Top records:"'}}
+      <%= topRecordsLabel %>
     </strong>
     <br />
     {{#ctx.payload.aggregations.record_results.top_record_hits.hits.hits}}
