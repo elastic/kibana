@@ -10,7 +10,6 @@ import moment from 'moment';
 
 import { InfraNode, InfraNodeMetric } from '../../../../graphql/types';
 import { InfraBucket, InfraNodeRequestOptions } from '../adapter_types';
-import { NAME_FIELDS } from '../constants';
 import { getBucketSizeInSeconds } from './get_bucket_size_in_seconds';
 
 // TODO: Break these function into seperate files and expand beyond just documnet count

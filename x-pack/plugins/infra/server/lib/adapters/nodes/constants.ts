@@ -9,7 +9,7 @@ import { InfraNodeType } from '../../../graphql/types';
 export const NODE_REQUEST_PARTITION_SIZE = 75;
 export const NODE_REQUEST_PARTITION_FACTOR = 1.2;
 export const NAME_FIELDS = {
-  [InfraNodeType.host]: 'host.hostname',
+  [InfraNodeType.host]: 'host.name',
   [InfraNodeType.pod]: 'kubernetes.pod.name',
   [InfraNodeType.container]: 'container.name',
 };
