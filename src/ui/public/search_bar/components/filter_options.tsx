@@ -18,6 +18,7 @@
  */
 
 import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Component } from 'react';
 import React from 'react';
 
@@ -29,13 +30,14 @@ interface Props {
   onToggleAllNegated: () => void;
   onToggleAllDisabled: () => void;
   onRemoveAll: () => void;
+  intl: InjectedIntl;
 }
 
 interface State {
   isPopoverOpen: boolean;
 }
 
-export class FilterOptions extends Component<Props, State> {
+class FilterOptionsUI extends Component<Props, State> {
   public state: State = {
     isPopoverOpen: false,
   };
@@ -55,7 +57,10 @@ export class FilterOptions extends Component<Props, State> {
       id: 0,
       items: [
         {
-          name: 'Enable all',
+          name: this.props.intl.formatMessage({
+            id: 'common.ui.searchBar.enableAllFiltersButtonLabel',
+            defaultMessage: 'Enable all',
+          }),
           icon: 'eye',
           onClick: () => {
             this.closePopover();
@@ -63,7 +68,10 @@ export class FilterOptions extends Component<Props, State> {
           },
         },
         {
-          name: 'Disable all',
+          name: this.props.intl.formatMessage({
+            id: 'common.ui.searchBar.disableAllFiltersButtonLabel',
+            defaultMessage: 'Disable all',
+          }),
           icon: 'eyeClosed',
           onClick: () => {
             this.closePopover();
@@ -71,7 +79,10 @@ export class FilterOptions extends Component<Props, State> {
           },
         },
         {
-          name: 'Pin all',
+          name: this.props.intl.formatMessage({
+            id: 'common.ui.searchBar.pinAllFiltersButtonLabel',
+            defaultMessage: 'Pin all',
+          }),
           icon: 'pin',
           onClick: () => {
             this.closePopover();
@@ -79,7 +90,10 @@ export class FilterOptions extends Component<Props, State> {
           },
         },
         {
-          name: 'Unpin all',
+          name: this.props.intl.formatMessage({
+            id: 'common.ui.searchBar.unpinAllFiltersButtonLabel',
+            defaultMessage: 'Unpin all',
+          }),
           icon: 'pin',
           onClick: () => {
             this.closePopover();
@@ -87,7 +101,10 @@ export class FilterOptions extends Component<Props, State> {
           },
         },
         {
-          name: 'Invert inclusion',
+          name: this.props.intl.formatMessage({
+            id: 'common.ui.searchBar.invertNegatedFiltersButtonLabel',
+            defaultMessage: 'Invert inclusion',
+          }),
           icon: 'invert',
           onClick: () => {
             this.closePopover();
@@ -95,7 +112,10 @@ export class FilterOptions extends Component<Props, State> {
           },
         },
         {
-          name: 'Invert enabled/disabled',
+          name: this.props.intl.formatMessage({
+            id: 'common.ui.searchBar.invertDisabledFiltersButtonLabel',
+            defaultMessage: 'Invert enabled/disabled',
+          }),
           icon: 'eye',
           onClick: () => {
             this.closePopover();
@@ -103,7 +123,10 @@ export class FilterOptions extends Component<Props, State> {
           },
         },
         {
-          name: 'Remove all',
+          name: this.props.intl.formatMessage({
+            id: 'common.ui.searchBar.deleteAllFiltersButtonLabel',
+            defaultMessage: 'Remove all',
+          }),
           icon: 'trash',
           onClick: () => {
             this.closePopover();
@@ -123,17 +146,30 @@ export class FilterOptions extends Component<Props, State> {
             onClick={this.togglePopover}
             color="text"
             iconType="gear"
-            aria-label="Change all filters"
-            title="Change all filters"
+            aria-label={this.props.intl.formatMessage({
+              id: 'common.ui.searchBar.changeAllFiltersButtonLabel',
+              defaultMessage: 'Change all filters',
+            })}
+            title={this.props.intl.formatMessage({
+              id: 'common.ui.searchBar.changeAllFiltersButtonLabel',
+              defaultMessage: 'Change all filters',
+            })}
           />
         }
         anchorPosition="downCenter"
         panelPaddingSize="none"
         withTitle
       >
-        <EuiPopoverTitle>Change all filters</EuiPopoverTitle>
+        <EuiPopoverTitle>
+          <FormattedMessage
+            id="common.ui.searchBar.changeAllFiltersTitle"
+            defaultMessage="Change all filters"
+          />
+        </EuiPopoverTitle>
         <EuiContextMenu initialPanelId={0} panels={[panelTree]} />
       </EuiPopover>
     );
   }
 }
+
+export const FilterOptions = injectI18n(FilterOptionsUI);

@@ -18,6 +18,7 @@
  */
 
 import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { IndexPatternField } from 'ui/index_patterns';
 
@@ -25,16 +26,20 @@ interface Props {
   value?: IndexPatternField;
   options: IndexPatternField[];
   onChange: (value?: IndexPatternField) => void;
+  intl: InjectedIntl;
 }
 
-export class FieldInput extends Component<Props> {
+class FieldInputUI extends Component<Props> {
   public render() {
     const options = this.getOptions();
     const selectedOptions = this.getSelectedOptions(options);
     return (
       <EuiFormRow label="Field">
         <EuiComboBox
-          placeholder="Select a field"
+          placeholder={this.props.intl.formatMessage({
+            id: 'common.ui.filterEditor.fieldSelectPlaceholder',
+            defaultMessage: 'Select a field',
+          })}
           options={options}
           selectedOptions={selectedOptions}
           onChange={this.onChange}
@@ -64,3 +69,5 @@ export class FieldInput extends Component<Props> {
     this.props.onChange(field);
   };
 }
+
+export const FieldInput = injectI18n(FieldInputUI);

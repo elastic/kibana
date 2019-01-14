@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { CustomFilter } from '../custom_filter';
-import { FilterViews } from './index';
+import React from 'react';
+import { CustomFilter } from '../../filters';
 
-export function getCustomFilterViews(filter: CustomFilter): FilterViews {
-  return {
-    getDisplayText() {
-      return JSON.stringify(filter.query);
-    },
-  };
+interface Props {
+  filter: CustomFilter;
+}
+
+export function CustomFilterView({ filter }: Props) {
+  return <span>{JSON.stringify(filter.query)}</span>;
 }

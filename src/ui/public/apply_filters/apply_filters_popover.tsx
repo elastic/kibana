@@ -30,9 +30,10 @@ import {
   EuiOverlayMask,
   EuiSwitch,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { MetaFilter } from '../filter_bar/filters';
-import { getFilterDisplayText } from '../filter_bar/filters/filter_views';
+import { FilterView } from '../filter_bar/react/filter_view';
 
 interface Props {
   filters: MetaFilter[];
@@ -66,7 +67,7 @@ export class ApplyFiltersPopover extends Component<Props, State> {
         {this.props.filters.map((filter, i) => (
           <EuiFormRow key={i}>
             <EuiSwitch
-              label={getFilterDisplayText(filter)}
+              label={<FilterView filter={filter} />}
               checked={this.isFilterSelected(i)}
               onChange={() => this.toggleFilterSelected(i)}
             />
@@ -79,15 +80,28 @@ export class ApplyFiltersPopover extends Component<Props, State> {
       <EuiOverlayMask>
         <EuiModal onClose={this.props.onCancel}>
           <EuiModalHeader>
-            <EuiModalHeaderTitle>Select filters to apply</EuiModalHeaderTitle>
+            <EuiModalHeaderTitle>
+              <FormattedMessage
+                id="common.ui.applyFilters.popupHeader"
+                defaultMessage="Select filters to apply"
+              />
+            </EuiModalHeaderTitle>
           </EuiModalHeader>
 
           <EuiModalBody>{form}</EuiModalBody>
 
           <EuiModalFooter>
-            <EuiButtonEmpty onClick={this.props.onCancel}>Cancel</EuiButtonEmpty>
+            <EuiButtonEmpty onClick={this.props.onCancel}>
+              <FormattedMessage
+                id="common.ui.applyFiltersPopup.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
             <EuiButton onClick={this.onSubmit} fill>
-              Save
+              <FormattedMessage
+                id="common.ui.applyFiltersPopup.saveButtonLabel"
+                defaultMessage="Save"
+              />
             </EuiButton>
           </EuiModalFooter>
         </EuiModal>

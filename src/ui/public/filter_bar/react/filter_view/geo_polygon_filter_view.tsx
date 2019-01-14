@@ -17,16 +17,17 @@
  * under the License.
  */
 
-import 'ngreact';
-import { uiModules } from '../../modules';
-import { FilterBar } from './filter_bar';
+import React from 'react';
+import { GeoPolygonFilter } from '../../filters';
 
-const app = uiModules.get('app/kibana', ['react']);
+interface Props {
+  filter: GeoPolygonFilter;
+}
 
-app.directive('reactFilterBar', (reactDirective) => {
-  return reactDirective(
-    FilterBar,
-    undefined,
-    {},
+export function GeoPolygonFilterView({ filter }: Props) {
+  return (
+    <span>
+      {filter.meta.key}: {filter.meta.value}
+    </span>
   );
-});
+}

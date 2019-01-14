@@ -17,13 +17,17 @@
  * under the License.
  */
 
-import { GeoPolygonFilter } from '../geo_polygon_filter';
-import { FilterViews } from './index';
+import React from 'react';
+import { RangeFilter } from '../../filters';
 
-export function getGeoPolygonFilterViews(filter: GeoPolygonFilter): FilterViews {
-  return {
-    getDisplayText() {
-      return `${filter.meta.key}: ${filter.meta.value}`;
-    },
-  };
+interface Props {
+  filter: RangeFilter;
+}
+
+export function RangeFilterView({ filter }: Props) {
+  return (
+    <span>
+      {filter.meta.key}: {filter.meta.value}
+    </span>
+  );
 }

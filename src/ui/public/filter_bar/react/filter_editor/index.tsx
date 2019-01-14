@@ -37,6 +37,7 @@ import {
   buildQueryFilter,
   buildRangeFilter,
 } from '@kbn/es-query';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import React, { Component } from 'react';
 import { IndexPatternInput } from 'ui/filter_bar/react/filter_editor/index_pattern_input';
@@ -62,6 +63,7 @@ interface Props {
   indexPatterns: IndexPattern[];
   onSubmit: (filter: MetaFilter) => void;
   onCancel: () => void;
+  intl: InjectedIntl;
 }
 
 interface State {
@@ -76,7 +78,7 @@ interface State {
   isInvalid: boolean;
 }
 
-export class FilterEditor extends Component<Props, State> {
+class FilterEditorUI extends Component<Props, State> {
   public constructor(props: Props) {
     super(props);
     this.state = {
@@ -97,10 +99,18 @@ export class FilterEditor extends Component<Props, State> {
       <div>
         <EuiPopoverTitle>
           <EuiFlexGroup alignItems="baseline">
-            <EuiFlexItem>Edit filter</EuiFlexItem>
+            <EuiFlexItem>
+              <FormattedMessage
+                id="common.ui.filterEditor.editFilterPopupTitle"
+                defaultMessage="Edit filter"
+              />
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty size="xs" onClick={this.toggleCustomEditor}>
-                Edit as Query DSL
+                <FormattedMessage
+                  id="common.ui.filterEditor.editQueryDslButtonLabel"
+                  defaultMessage="Edit as Query DSL"
+                />
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -113,7 +123,10 @@ export class FilterEditor extends Component<Props, State> {
         <EuiSpacer size="m" />
 
         <EuiSwitch
-          label="Create custom label?"
+          label={this.props.intl.formatMessage({
+            id: 'common.ui.filterEditor.createCustomLabelSwitchLabel',
+            defaultMessage: 'Create custom label?',
+          })}
           checked={this.state.useCustomLabel}
           onChange={this.onCustomLabelSwitchChange}
         />
@@ -121,7 +134,12 @@ export class FilterEditor extends Component<Props, State> {
         {this.state.useCustomLabel && (
           <div>
             <EuiSpacer size="m" />
-            <EuiFormRow label="Custom label">
+            <EuiFormRow
+              label={this.props.intl.formatMessage({
+                id: 'common.ui.filterEditor.createCustomLabelInputLabel',
+                defaultMessage: 'Custom label',
+              })}
+            >
               <EuiFieldText
                 value={`${this.state.customLabel}`}
                 onChange={this.onCustomLabelChange}
@@ -135,12 +153,15 @@ export class FilterEditor extends Component<Props, State> {
         <EuiFlexGroup direction="rowReverse" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiButton fill onClick={this.onSubmit} isDisabled={this.state.isInvalid}>
-              Save
+              <FormattedMessage id="common.ui.filterEditor.saveButtonLabel" defaultMessage="Save" />
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty flush="right" onClick={this.props.onCancel}>
-              Cancel
+              <FormattedMessage
+                id="common.ui.filterEditor.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem />
@@ -360,3 +381,5 @@ export class FilterEditor extends Component<Props, State> {
     return { ...customFilter, meta: { negate, index: newIndex } };
   }
 }
+
+export const FilterEditor = injectI18n(FilterEditorUI);

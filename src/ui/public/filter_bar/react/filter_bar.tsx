@@ -18,6 +18,7 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import chrome from 'ui/chrome';
@@ -43,13 +44,14 @@ interface Props {
   onFiltersUpdated: (filters: MetaFilter[]) => void;
   className: string;
   indexPatterns: IndexPattern[];
+  intl: InjectedIntl;
 }
 
 interface State {
   isAddFilterPopoverOpen: boolean;
 }
 
-export class FilterBar extends Component<Props, State> {
+class FilterBarUI extends Component<Props, State> {
   public state = {
     isAddFilterPopoverOpen: false,
   };
@@ -97,6 +99,7 @@ export class FilterBar extends Component<Props, State> {
     return this.props.filters.map((filter, i) => (
       <EuiFlexItem key={i} grow={false}>
         <FilterItem
+          id={`${i}`}
           filter={filter}
           onUpdate={newFilter => this.onUpdate(i, newFilter)}
           onRemove={() => this.onRemove(i)}
@@ -114,7 +117,11 @@ export class FilterBar extends Component<Props, State> {
 
     const button = (
       <EuiButtonEmpty size="xs" onClick={this.onOpenAddFilterPopover}>
-        + Add filter
+        +
+        <FormattedMessage
+          id="common.ui.filterBar.addFilterButtonLabel"
+          defaultMessage="Add filter"
+        />
       </EuiButtonEmpty>
     );
 
@@ -205,3 +212,5 @@ export class FilterBar extends Component<Props, State> {
     });
   };
 }
+
+export const FilterBar = injectI18n(FilterBarUI);

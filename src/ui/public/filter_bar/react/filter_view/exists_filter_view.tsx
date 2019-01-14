@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { GeoBoundingBoxFilter } from '../geo_bounding_box_filter';
-import { FilterViews } from './index';
+import React from 'react';
+import { ExistsFilter } from '../../filters';
 
-export function getGeoBoundingBoxFilterViews(filter: GeoBoundingBoxFilter): FilterViews {
-  return {
-    getDisplayText() {
-      return `${filter.meta.key}: ${filter.meta.value}`;
-    },
-  };
+interface Props {
+  filter: ExistsFilter;
+}
+
+export function ExistsFilterView({ filter }: Props) {
+  return <span>{filter.meta.key} exists</span>;
 }

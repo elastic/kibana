@@ -17,13 +17,26 @@
  * under the License.
  */
 
-import { PhraseFilter } from '../phrase_filter';
-import { FilterViews } from './index';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
+import { PhrasesFilter } from '../../filters';
+import { FILTER_OPERATORS } from '../filter_editor/lib/filter_operators';
 
-export function getPhraseFilterViews(filter: PhraseFilter): FilterViews {
-  return {
-    getDisplayText() {
-      return `${filter.meta.key}: ${filter.meta.value}`;
-    },
-  };
+interface Props {
+  filter: PhrasesFilter;
+}
+
+export function PhrasesFilterView({ filter }: Props) {
+  const operator = FILTER_OPERATORS.find(({ type }) => type === filter.meta.type);
+  const { id = '', defaultMessage = '' } = operator || {};
+  return (
+    <span>
+      {filter.meta.key}
+      <FormattedMessage
+        id={`common.ui.filterEditor.${id}OptionLabel`}
+        defaultMessage={defaultMessage}
+      />
+      {filter.meta.value}
+    </span>
+  );
 }

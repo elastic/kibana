@@ -18,6 +18,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get, isEmpty } from 'lodash';
 import { Component } from 'react';
 import React from 'react';
@@ -36,6 +37,7 @@ interface Props {
   field?: IndexPatternField;
   value?: RangeParams;
   onChange: (params: RangeParamsPartial, isInvalid: boolean) => void;
+  intl: InjectedIntl;
 }
 
 interface State {
@@ -43,7 +45,7 @@ interface State {
   toIsInvalid: boolean;
 }
 
-export class RangeValueInput extends Component<Props, State> {
+class RangeValueInputUI extends Component<Props, State> {
   public constructor(props: Props) {
     super(props);
     this.state = {
@@ -62,22 +64,38 @@ export class RangeValueInput extends Component<Props, State> {
     return (
       <EuiFlexGroup style={{ maxWidth: 600 }}>
         <EuiFlexItem>
-          <EuiFormRow label="From">
+          <EuiFormRow
+            label={this.props.intl.formatMessage({
+              id: 'common.ui.filterEditor.rangeStartInputLabel',
+              defaultMessage: 'From',
+            })}
+          >
             <ValueInputType
               type={type}
               value={this.props.value ? this.props.value.from : undefined}
               onChange={this.onFromChange}
-              placeholder={'Start of the range'}
+              placeholder={this.props.intl.formatMessage({
+                id: 'common.ui.filterEditor.rangeStartInputPlaceholder',
+                defaultMessage: 'Start of the range',
+              })}
             />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow label="To">
+          <EuiFormRow
+            label={this.props.intl.formatMessage({
+              id: 'common.ui.filterEditor.rangeEndInputLabel',
+              defaultMessage: 'To',
+            })}
+          >
             <ValueInputType
               type={type}
               value={this.props.value ? this.props.value.to : undefined}
               onChange={this.onToChange}
-              placeholder={'End of the range'}
+              placeholder={this.props.intl.formatMessage({
+                id: 'common.ui.filterEditor.rangeEndInputPlaceholder',
+                defaultMessage: 'End of the range',
+              })}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -109,3 +127,5 @@ export class RangeValueInput extends Component<Props, State> {
     );
   };
 }
+
+export const RangeValueInput = injectI18n(RangeValueInputUI);

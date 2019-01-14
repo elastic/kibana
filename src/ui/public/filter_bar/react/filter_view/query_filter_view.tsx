@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { QueryFilter } from '../query_filter';
-import { FilterViews } from './index';
+import React from 'react';
+import { QueryFilter } from '../../filters';
 
-export function getQueryFilterViews(filter: QueryFilter): FilterViews {
-  return {
-    getDisplayText() {
-      return filter.meta.value;
-    },
-  };
+interface Props {
+  filter: QueryFilter;
+}
+
+export function QueryFilterView({ filter }: Props) {
+  return <span>{filter.meta.value}</span>;
 }

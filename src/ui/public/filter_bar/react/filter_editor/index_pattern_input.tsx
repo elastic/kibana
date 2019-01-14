@@ -18,6 +18,7 @@
  */
 
 import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { IndexPattern } from 'ui/index_patterns';
 
@@ -25,16 +26,25 @@ interface Props {
   value?: IndexPattern;
   options: IndexPattern[];
   onChange: (value?: IndexPattern) => void;
+  intl: InjectedIntl;
 }
 
-export class IndexPatternInput extends Component<Props> {
+class IndexPatternInputUI extends Component<Props> {
   public render() {
     const options = this.getOptions();
     const selectedOptions = this.getSelectedOptions(options);
     return (
-      <EuiFormRow label="Index Pattern">
+      <EuiFormRow
+        label={this.props.intl.formatMessage({
+          id: 'common.ui.filterEditor.indexPatternSelectLabel',
+          defaultMessage: 'Index Pattern',
+        })}
+      >
         <EuiComboBox
-          placeholder="Select an index pattern"
+          placeholder={this.props.intl.formatMessage({
+            id: 'common.ui.filterBar.indexPatternSelectPlaceholder',
+            defaultMessage: 'Select an index pattern',
+          })}
           options={options}
           selectedOptions={selectedOptions}
           onChange={this.onChange}
@@ -64,3 +74,5 @@ export class IndexPatternInput extends Component<Props> {
     this.props.onChange(indexPattern);
   };
 }
+
+export const IndexPatternInput = injectI18n(IndexPatternInputUI);

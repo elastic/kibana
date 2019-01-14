@@ -18,6 +18,7 @@
  */
 
 import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { uniq } from 'lodash';
 import React from 'react';
 import { ValueInputType } from 'ui/filter_bar/react/filter_editor/value_input_type';
@@ -26,17 +27,26 @@ import { PhraseSuggestor, PhraseSuggestorProps } from './phrase_suggestor';
 interface Props extends PhraseSuggestorProps {
   value?: string;
   onChange: (value: string | number | boolean, isInvalid: boolean) => void;
+  intl: InjectedIntl;
 }
 
-export class PhraseValueInput extends PhraseSuggestor<Props> {
+class PhraseValueInputUI extends PhraseSuggestor<Props> {
   public render() {
     return (
-      <EuiFormRow label="Value">
+      <EuiFormRow
+        label={this.props.intl.formatMessage({
+          id: 'common.ui.filterEditor.valueInputLabel',
+          defaultMessage: 'Value',
+        })}
+      >
         {this.isSuggestingValues() ? (
           this.renderWithSuggestions()
         ) : (
           <ValueInputType
-            placeholder="The value to match against the selected field"
+            placeholder={this.props.intl.formatMessage({
+              id: 'common.ui.filterEditor.valueInputPlaceholder',
+              defaultMessage: 'Enter a value',
+            })}
             value={this.props.value}
             onChange={this.props.onChange}
             type={this.props.field ? this.props.field.type : 'string'}
@@ -51,7 +61,10 @@ export class PhraseValueInput extends PhraseSuggestor<Props> {
     const selectedOptions = this.getSelectedOptions(options);
     return (
       <EuiComboBox
-        placeholder="Select a field"
+        placeholder={this.props.intl.formatMessage({
+          id: 'common.ui.filterEditor.valueSelectPlaceholder',
+          defaultMessage: 'Select a value',
+        })}
         options={options}
         selectedOptions={selectedOptions}
         onChange={this.onComboBoxChange}
@@ -85,3 +98,5 @@ export class PhraseValueInput extends PhraseSuggestor<Props> {
     });
   }
 }
+
+export const PhraseValueInput = injectI18n(PhraseValueInputUI);

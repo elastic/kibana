@@ -18,7 +18,8 @@
  */
 
 export interface Operator {
-  label: string;
+  id: string;
+  defaultMessage: string;
   type: string;
   negate: boolean;
   fieldTypes?: string[];
@@ -26,46 +27,54 @@ export interface Operator {
 
 export const FILTER_OPERATORS: Operator[] = [
   {
-    label: 'is',
+    id: 'isOperator',
+    defaultMessage: 'is',
     type: 'phrase',
     negate: false,
   },
   {
-    label: 'is not',
+    id: 'isNotOperator',
+    defaultMessage: 'is not',
     type: 'phrase',
     negate: true,
   },
   {
-    label: 'is one of',
+    id: 'isOneOfOperator',
+    defaultMessage: 'is one of',
     type: 'phrases',
     negate: false,
     fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape'],
   },
   {
-    label: 'is not one of',
+    id: 'isNotOneOfOperator',
+    defaultMessage: 'is not one of',
     type: 'phrases',
     negate: true,
     fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape'],
   },
   {
-    label: 'is between',
+    id: 'isBetweenOperator',
+    defaultMessage: 'is between',
     type: 'range',
     negate: false,
     fieldTypes: ['number', 'date', 'ip'],
   },
   {
-    label: 'is not between',
+    id: 'isNotBetweenOperator',
+    defaultMessage: 'is not between',
     type: 'range',
     negate: true,
     fieldTypes: ['number', 'date', 'ip'],
   },
   {
-    label: 'exists',
+    id: 'existsOperator',
+    defaultMessage: 'exists',
     type: 'exists',
     negate: false,
   },
   {
-    label: 'does not exist',
+    id: 'doesNotExistOperator',
+    defaultMessage: 'does not exist',
     type: 'exists',
     negate: true,
   },

@@ -18,6 +18,7 @@
  */
 
 import { EuiBadge, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import { IndexPattern } from 'ui/index_patterns';
@@ -28,28 +29,30 @@ import {
   toggleFilterNegated,
   toggleFilterPinned,
 } from '../filters';
-import { getFilterDisplayText } from '../filters/filter_views';
 import { FilterEditor } from './filter_editor';
+import { FilterView } from './filter_view';
 
 interface Props {
+  id: string;
   filter: MetaFilter;
   indexPatterns: IndexPattern[];
   className?: string;
   onUpdate: (filter: MetaFilter) => void;
   onRemove: () => void;
+  intl: InjectedIntl;
 }
 
 interface State {
   isPopoverOpen: boolean;
 }
 
-export class FilterItem extends Component<Props, State> {
+class FilterItemUI extends Component<Props, State> {
   public state = {
     isPopoverOpen: false,
   };
 
   public render() {
-    const { filter } = this.props;
+    const { filter, id } = this.props;
     const { negate, disabled } = filter.meta;
 
     const classes = classNames(
@@ -64,23 +67,27 @@ export class FilterItem extends Component<Props, State> {
 
     const badge = (
       <EuiBadge
-        id={'foo'}
         className={classes}
-        title={'foo'}
         iconOnClick={() => this.props.onRemove()}
-        iconOnClickAriaLabel={`Delete filter`}
+        iconOnClickAriaLabel={this.props.intl.formatMessage({
+          id: 'common.ui.filterBar.filterItemBadgeIconAriaLabel',
+          defaultMessage: 'Delete',
+        })}
         iconType="cross"
         // @ts-ignore
         iconSide="right"
         onClick={this.togglePopover}
-        onClickAriaLabel="Filter actions"
+        onClickAriaLabel={this.props.intl.formatMessage({
+          id: 'common.ui.filterBar.filterItemBadgeAriaLabel',
+          defaultMessage: 'Filter actions',
+        })}
         closeButtonProps={{
           // Removing tab focus on close button because the same option can be optained through the context menu
           // Also, we may want to add a `DEL` keyboard press functionality
           tabIndex: '-1',
         }}
       >
-        <span>{getFilterDisplayText(filter)}</span>
+        <FilterView filter={filter} />
       </EuiBadge>
     );
 
@@ -89,7 +96,15 @@ export class FilterItem extends Component<Props, State> {
         id: 0,
         items: [
           {
-            name: `${isFilterPinned(filter) ? 'Unpin' : 'Pin across all apps'}`,
+            name: isFilterPinned(filter)
+              ? this.props.intl.formatMessage({
+                  id: 'common.ui.filterBar.unpinFilterButtonLabel',
+                  defaultMessage: 'Unpin',
+                })
+              : this.props.intl.formatMessage({
+                  id: 'common.ui.filterBar.pinFilterButtonLabel',
+                  defaultMessage: 'Pin across all apps',
+                }),
             icon: 'pin',
             onClick: () => {
               this.closePopover();
@@ -97,20 +112,39 @@ export class FilterItem extends Component<Props, State> {
             },
           },
           {
-            name: 'Edit filter',
+            name: this.props.intl.formatMessage({
+              id: 'common.ui.filterBar.editFilterButtonLabel',
+              defaultMessage: 'Edit filter',
+            }),
             icon: 'pencil',
             panel: 1,
           },
           {
-            name: `${negate ? 'Include results' : 'Exclude results'}`,
-            icon: `${negate ? 'plusInCircle' : 'minusInCircle'}`,
+            name: negate
+              ? this.props.intl.formatMessage({
+                  id: 'common.ui.filterBar.includeFilterButtonLabel',
+                  defaultMessage: 'Include results',
+                })
+              : this.props.intl.formatMessage({
+                  id: 'common.ui.filterBar.excludeFilterButtonLabel',
+                  defaultMessage: 'Exclude results',
+                }),
+            icon: negate ? 'plusInCircle' : 'minusInCircle',
             onClick: () => {
               this.closePopover();
               this.onToggleNegated();
             },
           },
           {
-            name: `${disabled ? 'Re-enable' : 'Temporarily disable'}`,
+            name: disabled
+              ? this.props.intl.formatMessage({
+                  id: 'common.ui.filterBar.enableFilterButtonLabel',
+                  defaultMessage: 'Re-enable',
+                })
+              : this.props.intl.formatMessage({
+                  id: 'common.ui.filterBar.disableFilterButtonLabel',
+                  defaultMessage: 'Temporarily disable',
+                }),
             icon: `${disabled ? 'eye' : 'eyeClosed'}`,
             onClick: () => {
               this.closePopover();
@@ -118,7 +152,10 @@ export class FilterItem extends Component<Props, State> {
             },
           },
           {
-            name: 'Delete',
+            name: this.props.intl.formatMessage({
+              id: 'common.ui.filterBar.deleteFilterButtonLabel',
+              defaultMessage: 'Delete',
+            }),
             icon: 'trash',
             onClick: () => {
               this.closePopover();
@@ -145,7 +182,7 @@ export class FilterItem extends Component<Props, State> {
 
     return (
       <EuiPopover
-        id={`popoverFor_${getFilterDisplayText(filter)}`}
+        id={`popoverFor_filter${id}`}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
         button={badge}
@@ -189,3 +226,5 @@ export class FilterItem extends Component<Props, State> {
     this.props.onUpdate(filter);
   };
 }
+
+export const FilterItem = injectI18n(FilterItemUI);

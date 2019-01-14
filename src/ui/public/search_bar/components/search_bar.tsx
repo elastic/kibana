@@ -19,6 +19,7 @@
 
 // @ts-ignore
 import { EuiFilterButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
@@ -42,13 +43,14 @@ interface Props {
   onFiltersUpdated: (filters: MetaFilter[]) => void;
   showQueryBar: boolean;
   showFilterBar: boolean;
+  intl: InjectedIntl;
 }
 
 interface State {
   isFiltersVisible: boolean;
 }
 
-export class SearchBar extends Component<Props, State> {
+class SearchBarUI extends Component<Props, State> {
   public static defaultProps = {
     showQueryBar: true,
     showFilterBar: true,
@@ -97,9 +99,19 @@ export class SearchBar extends Component<Props, State> {
   }
 
   public render() {
-    const filterButtonTitle = `${this.props.filters.length} filters applied. Select to ${
-      this.state.isFiltersVisible ? 'hide' : 'show'
-    }.`;
+    const filtersAppliedText = this.props.intl.formatMessage({
+      id: 'common.ui.searchBar.filtersButtonFiltersAppliedTitle',
+      defaultMessage: 'filters applied.',
+    });
+    const clickToShowOrHideText = this.state.isFiltersVisible
+      ? this.props.intl.formatMessage({
+          id: 'common.ui.searchBar.filtersButtonClickToShowTitle',
+          defaultMessage: 'Select to hide',
+        })
+      : this.props.intl.formatMessage({
+          id: 'common.ui.searchBar.filtersButtonClickToHideTitle',
+          defaultMessage: 'Select to show',
+        });
 
     const filterTriggerButton = (
       <EuiFilterButton
@@ -109,7 +121,7 @@ export class SearchBar extends Component<Props, State> {
         numFilters={this.props.filters.length > 0 ? this.props.filters.length : null}
         aria-controls="GlobalFilterGroup"
         aria-expanded={!!this.state.isFiltersVisible}
-        title={filterButtonTitle}
+        title={`${this.props.filters.length} ${filtersAppliedText} ${clickToShowOrHideText}`}
       >
         Filters
       </EuiFilterButton>
@@ -162,3 +174,5 @@ export class SearchBar extends Component<Props, State> {
     );
   }
 }
+
+export const SearchBar = injectI18n(SearchBarUI);

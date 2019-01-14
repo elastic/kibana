@@ -18,6 +18,7 @@
  */
 
 import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { IndexPatternField } from 'ui/index_patterns';
 import { getOperatorOptions } from './lib/filter_editor_utils';
@@ -27,16 +28,25 @@ interface Props {
   field?: IndexPatternField;
   value?: Operator;
   onChange: (value?: Operator) => void;
+  intl: InjectedIntl;
 }
 
-export class OperatorInput extends Component<Props> {
+class OperatorInputUI extends Component<Props> {
   public render() {
     const options = this.getOptions();
     const selectedOptions = this.getSelectedOptions(options);
     return (
-      <EuiFormRow label="Operator">
+      <EuiFormRow
+        label={this.props.intl.formatMessage({
+          id: 'common.ui.filterEditor.operatorSelectLabel',
+          defaultMessage: 'Operator',
+        })}
+      >
         <EuiComboBox
-          placeholder={this.props.field ? 'Select a field first' : 'Select an operator'}
+          placeholder={this.props.intl.formatMessage({
+            id: 'common.ui.filterEditor.operatorSelectPlaceholder',
+            defaultMessage: 'Select an operator',
+          })}
           isDisabled={!this.props.field}
           options={options}
           selectedOptions={selectedOptions}
@@ -53,12 +63,18 @@ export class OperatorInput extends Component<Props> {
       return [];
     }
     const options = getOperatorOptions(this.props.field);
-    return options.map(({ label }) => ({ label }));
+    return options.map(({ id, defaultMessage }) => ({
+      id,
+      label: this.props.intl.formatMessage({
+        defaultMessage,
+        id: `common.ui.filterEditor.${id}OptionLabel`,
+      }),
+    }));
   }
 
   private getSelectedOptions(options: EuiComboBoxOptionProps[]): EuiComboBoxOptionProps[] {
     return options.filter(option => {
-      return typeof this.props.value !== 'undefined' && option.label === this.props.value.label;
+      return typeof this.props.value !== 'undefined' && option.id === this.props.value.id;
     });
   }
 
@@ -67,7 +83,9 @@ export class OperatorInput extends Component<Props> {
       return this.props.onChange(undefined);
     }
     const [selectedOption] = selectedOptions;
-    const operator = FILTER_OPERATORS.find(({ label }) => label === selectedOption.label);
+    const operator = FILTER_OPERATORS.find(({ id }) => id === selectedOption.id);
     this.props.onChange(operator);
   };
 }
+
+export const OperatorInput = injectI18n(OperatorInputUI);

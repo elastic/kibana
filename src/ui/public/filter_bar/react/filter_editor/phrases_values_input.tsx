@@ -18,6 +18,7 @@
  */
 
 import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { uniq } from 'lodash';
 import React from 'react';
 import { PhraseSuggestor, PhraseSuggestorProps } from './phrase_suggestor';
@@ -25,16 +26,25 @@ import { PhraseSuggestor, PhraseSuggestorProps } from './phrase_suggestor';
 interface Props extends PhraseSuggestorProps {
   values?: string[];
   onChange: (values: string[], isInvalid: boolean) => void;
+  intl: InjectedIntl;
 }
 
-export class PhrasesValuesInput extends PhraseSuggestor<Props> {
+class PhrasesValuesInputUI extends PhraseSuggestor<Props> {
   public render() {
     const options = this.getOptions();
     const selectedOptions = this.getSelectedOptions(options);
     return (
-      <EuiFormRow label="Values">
+      <EuiFormRow
+        label={this.props.intl.formatMessage({
+          id: 'common.ui.filterEditor.valuesSelectLabel',
+          defaultMessage: 'Values',
+        })}
+      >
         <EuiComboBox
-          placeholder="Select a field"
+          placeholder={this.props.intl.formatMessage({
+            id: 'common.ui.filterEditor.valuesSelectPlaceholder',
+            defaultMessage: 'Select values',
+          })}
           options={options}
           selectedOptions={selectedOptions}
           onCreateOption={this.onAdd}
@@ -65,3 +75,5 @@ export class PhrasesValuesInput extends PhraseSuggestor<Props> {
     this.props.onChange(selectedOptions.map(option => option.label), selectedOptions.length === 0);
   };
 }
+
+export const PhrasesValuesInput = injectI18n(PhrasesValuesInputUI);

@@ -18,6 +18,7 @@
  */
 
 import { EuiFieldNumber, EuiFieldText, EuiSelect } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
 import { validateParams } from 'ui/filter_bar/react/filter_editor/lib/filter_editor_utils';
@@ -27,9 +28,10 @@ interface Props {
   type: string;
   onChange: (value: string | number | boolean, isInvalid: boolean) => void;
   placeholder: string;
+  intl: InjectedIntl;
 }
 
-export class ValueInputType extends Component<Props> {
+class ValueInputTypeUI extends Component<Props> {
   public render() {
     const value = this.props.value;
     let inputElement: React.ReactNode;
@@ -76,9 +78,21 @@ export class ValueInputType extends Component<Props> {
         inputElement = (
           <EuiSelect
             options={[
-              { value: undefined, text: 'Pick a value' },
-              { value: 'true', text: 'true' },
-              { value: 'false', text: 'false' },
+              { value: undefined, text: this.props.placeholder },
+              {
+                value: 'true',
+                text: this.props.intl.formatMessage({
+                  id: 'common.ui.filterEditor.trueOptionLabel',
+                  defaultMessage: 'true',
+                }),
+              },
+              {
+                value: 'false',
+                text: this.props.intl.formatMessage({
+                  id: 'common.ui.filterEditor.falseOptionLabel',
+                  defaultMessage: 'false',
+                }),
+              },
             ]}
             value={value}
             onChange={this.onBoolChange}
@@ -94,7 +108,7 @@ export class ValueInputType extends Component<Props> {
 
   private onBoolChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const boolValue = event.target.value === 'true';
-    this.props.onChange(boolValue, true);
+    this.props.onChange(boolValue, false);
   };
 
   private onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,3 +116,5 @@ export class ValueInputType extends Component<Props> {
     this.props.onChange(params, !validateParams(params, this.props.type));
   };
 }
+
+export const ValueInputType = injectI18n(ValueInputTypeUI);

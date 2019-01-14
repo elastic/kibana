@@ -17,13 +17,17 @@
  * under the License.
  */
 
-import { PhrasesFilter } from '../phrases_filter';
-import { FilterViews } from './index';
+import React from 'react';
+import { PhraseFilter } from '../../filters';
 
-export function getPhrasesFilterViews(filter: PhrasesFilter): FilterViews {
-  return {
-    getDisplayText() {
-      return `${filter.meta.key} is one of ${filter.meta.value}`;
-    },
-  };
+interface Props {
+  filter: PhraseFilter;
+}
+
+export function PhraseFilterView({ filter }: Props) {
+  return (
+    <span>
+      {filter.meta.key}: {filter.meta.value}
+    </span>
+  );
 }
