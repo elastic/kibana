@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { first } from 'lodash';
 import React from 'react';
 import {
@@ -20,7 +21,12 @@ function getSpanLabel(type: string) {
     case 'db':
       return 'DB';
     case 'hard-navigation':
-      return 'Navigation timing';
+      return i18n.translate(
+        'xpack.apm.transactionDetails.spanFlyout.spanType.navigationTimingLabel',
+        {
+          defaultMessage: 'Navigation timing'
+        }
+      );
     default:
       return type;
   }
@@ -45,27 +51,54 @@ export function StickySpanProperties({ span, totalDuration }: Props) {
   const spanTypeLabel = getSpanLabel(getPrimaryType(span.span.type));
   const stickyProperties = [
     {
-      label: 'Name',
+      label: i18n.translate(
+        'xpack.apm.transactionDetails.spanFlyout.nameLabel',
+        {
+          defaultMessage: 'Name'
+        }
+      ),
       fieldName: SPAN_NAME,
-      val: spanName || 'N/A',
+      val:
+        spanName ||
+        i18n.translate(
+          'xpack.apm.transactionDetails.spanFlyout.notAvailableLabel',
+          {
+            defaultMessage: 'N/A'
+          }
+        ),
       truncated: true,
       width: '50%'
     },
     {
       fieldName: SPAN_TYPE,
-      label: 'Type',
+      label: i18n.translate(
+        'xpack.apm.transactionDetails.spanFlyout.typeLabel',
+        {
+          defaultMessage: 'Type'
+        }
+      ),
       val: spanTypeLabel,
       truncated: true,
       widht: '50%'
     },
     {
       fieldName: SPAN_DURATION,
-      label: 'Duration',
+      label: i18n.translate(
+        'xpack.apm.transactionDetails.spanFlyout.durationLabel',
+        {
+          defaultMessage: 'Duration'
+        }
+      ),
       val: asMillis(spanDuration),
       width: '50%'
     },
     {
-      label: '% of transaction',
+      label: i18n.translate(
+        'xpack.apm.transactionDetails.spanFlyout.percOfTransactionLabel',
+        {
+          defaultMessage: '% of transaction'
+        }
+      ),
       val: asPercent(spanDuration, totalDuration),
       width: '50%'
     }

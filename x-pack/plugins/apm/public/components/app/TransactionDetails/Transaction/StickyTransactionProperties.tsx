@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import React from 'react';
 import {
@@ -29,11 +30,19 @@ export function StickyTransactionProperties({
   totalDuration
 }: Props) {
   const timestamp = transaction['@timestamp'];
-  const url = get(transaction, REQUEST_URL_FULL, 'N/A');
+  const notAvailableLabel = i18n.translate(
+    'xpack.apm.transactionDetails.notAvailableLabel',
+    {
+      defaultMessage: 'N/A'
+    }
+  );
+  const url = get(transaction, REQUEST_URL_FULL, notAvailableLabel);
   const duration = transaction.transaction.duration.us;
   const stickyProperties: IStickyProperty[] = [
     {
-      label: 'Timestamp',
+      label: i18n.translate('xpack.apm.transactionDetails.timestampLabel', {
+        defaultMessage: 'Timestamp'
+      }),
       fieldName: '@timestamp',
       val: timestamp,
       truncated: true,
@@ -47,26 +56,34 @@ export function StickyTransactionProperties({
       width: '50%'
     },
     {
-      label: 'Duration',
+      label: i18n.translate('xpack.apm.transactionDetails.durationLabel', {
+        defaultMessage: 'Duration'
+      }),
       fieldName: TRANSACTION_DURATION,
       val: asTime(duration),
       width: '25%'
     },
     {
-      label: '% of trace',
-      val: asPercent(duration, totalDuration, 'N/A'),
+      label: i18n.translate('xpack.apm.transactionDetails.percOfTraceLabel', {
+        defaultMessage: '% of trace'
+      }),
+      val: asPercent(duration, totalDuration, notAvailableLabel),
       width: '25%'
     },
     {
-      label: 'Result',
+      label: i18n.translate('xpack.apm.transactionDetails.resultLabel', {
+        defaultMessage: 'Result'
+      }),
       fieldName: TRANSACTION_RESULT,
-      val: get(transaction, TRANSACTION_RESULT, 'N/A'),
+      val: get(transaction, TRANSACTION_RESULT, notAvailableLabel),
       width: '25%'
     },
     {
-      label: 'User ID',
+      label: i18n.translate('xpack.apm.transactionDetails.userIdLabel', {
+        defaultMessage: 'User ID'
+      }),
       fieldName: USER_ID,
-      val: get(transaction, USER_ID, 'N/A'),
+      val: get(transaction, USER_ID, notAvailableLabel),
       truncated: true,
       width: '25%'
     }

@@ -17,6 +17,7 @@ import {
   EuiTabbedContent,
   EuiTitle
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { get, keys } from 'lodash';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
@@ -75,14 +76,26 @@ export function SpanFlyout({
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiTitle>
-                <h2>Span details</h2>
+                <h2>
+                  {i18n.translate(
+                    'xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle',
+                    {
+                      defaultMessage: 'Span details'
+                    }
+                  )}
+                </h2>
               </EuiTitle>
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
               <DiscoverSpanButton span={span}>
                 <EuiButtonEmpty iconType="discoverApp">
-                  {`View span in Discover`}
+                  {i18n.translate(
+                    'xpack.apm.transactionDetails.spanFlyout.viewSpanInDiscoverButtonLabel',
+                    {
+                      defaultMessage: 'View span in Discover'
+                    }
+                  )}
                 </EuiButtonEmpty>
               </DiscoverSpanButton>
             </EuiFlexItem>
@@ -97,7 +110,12 @@ export function SpanFlyout({
             tabs={[
               {
                 id: 'stack-trace',
-                name: 'Stack Trace',
+                name: i18n.translate(
+                  'xpack.apm.transactionDetails.spanFlyout.stackTraceTabLabel',
+                  {
+                    defaultMessage: 'Stack Trace'
+                  }
+                ),
                 content: (
                   <Fragment>
                     <HttpContext httpContext={httpContext} />
@@ -113,7 +131,12 @@ export function SpanFlyout({
               },
               {
                 id: 'tags',
-                name: 'Tags',
+                name: i18n.translate(
+                  'xpack.apm.transactionDetails.spanFlyout.tagsTabLabel',
+                  {
+                    defaultMessage: 'Tags'
+                  }
+                ),
                 content: (
                   <Fragment>
                     <EuiBasicTable
