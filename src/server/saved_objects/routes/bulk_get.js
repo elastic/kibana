@@ -19,14 +19,14 @@
 
 import Joi from 'joi';
 
-export const createBulkGetRoute = (prereqs) => ({
+export const createBulkGetRoute = (prereqs, schema) => ({
   path: '/api/saved_objects/_bulk_get',
   method: 'POST',
   config: {
     pre: [prereqs.getSavedObjectsClient],
     validate: {
       payload: Joi.array().items(Joi.object({
-        type: Joi.string().required(),
+        type: Joi.string().valid(schema.getAvailableTypes()).required(),
         id: Joi.string().required(),
       }).required())
     },

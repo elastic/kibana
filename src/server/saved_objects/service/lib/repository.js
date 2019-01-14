@@ -36,6 +36,7 @@ export class SavedObjectsRepository {
       schema,
       serializer,
       migrator,
+      includeHiddenTypes,
       onBeforeWrite = () => { },
     } = options;
 
@@ -50,6 +51,7 @@ export class SavedObjectsRepository {
     this._index = index;
     this._mappings = mappings;
     this._schema = schema;
+    this._includeHiddenTypes = includeHiddenTypes;
     this._type = getRootType(this._mappings);
     this._onBeforeWrite = onBeforeWrite;
     this._unwrappedCallCluster = async (...args) => {
@@ -79,6 +81,8 @@ export class SavedObjectsRepository {
       overwrite = false,
       namespace,
     } = options;
+
+    this.assertAllowedType(type);
 
     const method = id && !overwrite ? 'create' : 'index';
     const time = this._getCurrentTime();
@@ -216,6 +220,8 @@ export class SavedObjectsRepository {
    * @returns {promise}
    */
   async delete(type, id, options = {}) {
+    this.assertAllowedType(type);
+
     const {
       namespace
     } = options;
@@ -303,6 +309,7 @@ export class SavedObjectsRepository {
       fields,
       namespace,
     } = options;
+    this.assertAllowedType(type);
 
     if (!type) {
       throw new TypeError(`options.type must be a string or an array of strings`);
@@ -383,7 +390,7 @@ export class SavedObjectsRepository {
     const response = await this._callCluster('mget', {
       index: this._index,
       body: {
-        docs: objects.map(object => ({
+        docs: objects.filter(object => !this._schema.isHiddenType(object.type)).map(object => ({
           _id: this._serializer.generateRawId(namespace, object.type, object.id),
           _type: this._type,
         }))
@@ -605,5 +612,11 @@ export class SavedObjectsRepository {
   _rawToSavedObject(raw) {
     const savedObject = this._serializer.rawToSavedObject(raw);
     return omit(savedObject, 'namespace');
+  }
+
+  assertAllowedType(type) {
+    if(this._schema.isHiddenType(type) && !this._includeHiddenTypes.includes(type)) {
+      throw Error();
+    }
   }
 }

@@ -28,6 +28,10 @@ describe('POST /api/saved_objects/_bulk_get', () => {
   beforeEach(() => {
     server = new MockServer();
 
+    const schema = {
+      getAvailableTypes: () => ['index-pattern'],
+    };
+
     const prereqs = {
       getSavedObjectsClient: {
         assign: 'savedObjectsClient',
@@ -37,7 +41,7 @@ describe('POST /api/saved_objects/_bulk_get', () => {
       },
     };
 
-    server.route(createBulkGetRoute(prereqs));
+    server.route(createBulkGetRoute(prereqs, schema));
   });
 
   afterEach(() => {

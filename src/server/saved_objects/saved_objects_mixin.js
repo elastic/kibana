@@ -52,20 +52,21 @@ export function savedObjectsMixin(kbnServer, server) {
     getSavedObjectsClient: {
       assign: 'savedObjectsClient',
       method(req) {
-        return req.getSavedObjectsClient();
+        return req.getSavedObjectsClient({ includeHiddenTypes: ['secretType'] });
       },
     },
   };
 
-  server.route(createBulkCreateRoute(prereqs));
-  server.route(createBulkGetRoute(prereqs));
-  server.route(createCreateRoute(prereqs));
-  server.route(createDeleteRoute(prereqs));
-  server.route(createFindRoute(prereqs));
-  server.route(createGetRoute(prereqs));
-  server.route(createUpdateRoute(prereqs));
-
   const schema = new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas);
+
+  server.route(createBulkCreateRoute(prereqs, schema));
+  server.route(createBulkGetRoute(prereqs, schema));
+  server.route(createCreateRoute(prereqs, schema));
+  server.route(createDeleteRoute(prereqs, schema));
+  server.route(createFindRoute(prereqs, schema));
+  server.route(createGetRoute(prereqs, schema));
+  server.route(createUpdateRoute(prereqs, schema));
+
   const serializer = new SavedObjectsSerializer(schema);
   server.decorate('server', 'savedObjects', createSavedObjectsService(server, schema, serializer, migrator));
 

@@ -19,14 +19,14 @@
 
 import Joi from 'joi';
 
-export const createDeleteRoute = (prereqs) => ({
+export const createDeleteRoute = (prereqs, schema) => ({
   path: '/api/saved_objects/{type}/{id}',
   method: 'DELETE',
   config: {
     pre: [prereqs.getSavedObjectsClient],
     validate: {
       params: Joi.object().keys({
-        type: Joi.string().required(),
+        type: Joi.string().valid(schema.getAvailableTypes()).required(),
         id: Joi.string().required(),
       }).required()
     },

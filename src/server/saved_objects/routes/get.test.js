@@ -28,6 +28,10 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
   beforeEach(() => {
     server = new MockServer();
 
+    const schema = {
+      getAvailableTypes: () => ['index-pattern'],
+    };
+
     const prereqs = {
       getSavedObjectsClient: {
         assign: 'savedObjectsClient',
@@ -37,7 +41,7 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
       },
     };
 
-    server.route(createGetRoute(prereqs));
+    server.route(createGetRoute(prereqs, schema));
   });
 
   afterEach(() => {
