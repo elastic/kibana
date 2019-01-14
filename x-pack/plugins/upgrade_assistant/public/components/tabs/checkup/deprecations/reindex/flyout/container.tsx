@@ -34,12 +34,12 @@ interface ReindexFlyoutState {
 export class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFlyoutState> {
   constructor(props: ReindexFlyoutProps) {
     super(props);
-    const { reindexWarnings } = props.reindexState;
+    const { status, reindexWarnings } = props.reindexState;
 
     this.state = {
-      // If there are any warnings, show the warnings step first.
+      // If there are any warnings and we haven't started reindexing, show the warnings step first.
       currentFlyoutStep:
-        reindexWarnings && reindexWarnings.length > 0
+        reindexWarnings && reindexWarnings.length > 0 && status === undefined
           ? ReindexFlyoutStep.reindexWarnings
           : ReindexFlyoutStep.checklist,
     };
