@@ -27,9 +27,10 @@ export function FindProvider({ getService }) {
 
   const WAIT_FOR_EXISTS_TIME = config.get('timeouts.waitForExists');
   const defaultFindTimeout = config.get('timeouts.find');
+  const fixedHeaderHeight = config.get('layout.fixedHeaderHeight');
 
   const wrap = leadfootElement => (
-    new LeadfootElementWrapper(leadfootElement, leadfoot)
+    new LeadfootElementWrapper(leadfootElement, leadfoot, fixedHeaderHeight)
   );
 
   const wrapAll = leadfootElements => (
