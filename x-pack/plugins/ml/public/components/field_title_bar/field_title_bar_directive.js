@@ -10,6 +10,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { FieldTitleBar } from './field_title_bar';
+import { I18nProvider } from '@kbn/i18n/react';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
@@ -32,7 +33,9 @@ module.directive('mlFieldTitleBar', function () {
         };
 
         ReactDOM.render(
-          React.createElement(FieldTitleBar, props),
+          <I18nProvider>
+            {React.createElement(FieldTitleBar, props)}
+          </I18nProvider>,
           element[0]
         );
       }

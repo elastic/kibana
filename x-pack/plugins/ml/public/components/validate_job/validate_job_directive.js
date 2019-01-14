@@ -14,10 +14,11 @@ const module = uiModules.get('apps/ml', ['react']);
 
 import { ValidateJob } from './validate_job_view';
 import { mlJobService } from 'plugins/ml/services/job_service';
+import { injectI18nProvider } from '@kbn/i18n/react';
 
 module.directive('mlValidateJob', function (reactDirective) {
   return reactDirective(
-    ValidateJob,
+    injectI18nProvider(ValidateJob),
     undefined,
     { restrict: 'E' },
     { mlJobService }
