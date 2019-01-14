@@ -29,17 +29,19 @@ import { getSeverity } from 'plugins/ml/../common/util/anomaly_utils';
 function getTooltipContent(maxScoreLabel, totalScoreLabel) {
   return (
     <React.Fragment>
-      <p><FormattedMessage
-        id="xpack.ml.influencersList.tooltip.maxAnomalyScore"
-        defaultMessage="Maximum anomaly score: {maxScoreLabel}"
-        values={{ maxScoreLabel }}
-      />
+      <p>
+        <FormattedMessage
+          id="xpack.ml.influencersList.maxAnomalyScoreTooltipDescription"
+          defaultMessage="Maximum anomaly score: {maxScoreLabel}"
+          values={{ maxScoreLabel }}
+        />
       </p>
-      <p><FormattedMessage
-        id="xpack.ml.influencersList.tooltip.totalAnomalyScore"
-        defaultMessage="Total anomaly score: {totalScoreLabel}"
-        values={{ totalScoreLabel }}
-      />
+      <p>
+        <FormattedMessage
+          id="xpack.ml.influencersList.totalAnomalyScoreTooltipDescription"
+          defaultMessage="Total anomaly score: {totalScoreLabel}"
+          values={{ totalScoreLabel }}
+        />
       </p>
     </React.Fragment>
   );
@@ -137,7 +139,7 @@ export function InfluencersList({ influencers }) {
           <EuiText>
             <h4>
               <FormattedMessage
-                id="xpack.ml.influencersList.noInfluencersTitle"
+                id="xpack.ml.influencersList.noInfluencersFoundTitle"
                 defaultMessage="No influencers found"
               />
             </h4>

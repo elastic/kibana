@@ -6,7 +6,7 @@
       ng-click="ok()"
       ng-disabled="(saveLock === true)"
       class="kuiButton kuiButton--primary"
-      aria-label="{{okAriaLabel}}">
+      aria-label="{{ ::'xpack.ml.confirmModal.okButtonAriaLabel' | i18n: {defaultMessage: 'Ok'} }}">
       {{okLabel}}
     </button>
     <button
@@ -14,7 +14,7 @@
       ng-click="cancel()"
       ng-disabled="(saveLock === true)"
       class="kuiButton kuiButton--primary"
-      aria-label="{{cancelAriaLabel}}">
+      aria-label="{{ ::'xpack.ml.confirmModal.cancelButtonAriaLabel' | i18n: {defaultMessage: 'Cancel'} }}">
       {{cancelLabel}}
     </button>
   </div>

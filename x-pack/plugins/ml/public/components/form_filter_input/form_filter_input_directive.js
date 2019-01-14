@@ -25,11 +25,15 @@ module.directive('mlFormFilterInput', function (i18n) {
     replace: false,
     template,
     link(scope) {
-      const placeholderText = i18n('xpack.ml.formFilterInputPlaceholder', {
-        defaultMessage: 'Filter',
-      });
+      const placeholderIsDefined = angular.isDefined(scope.placeholder);
 
-      scope.placeholder = angular.isDefined(scope.placeholder) ? scope.placeholder : placeholderText;
+      scope.placeholder = placeholderIsDefined
+        ? scope.placeholder
+        : i18n('xpack.ml.formFilterInput.filterPlaceholder', { defaultMessage: 'Filter' });
+
+      scope.ariaLabel = placeholderIsDefined
+        ? scope.placeholder
+        : i18n('xpack.ml.formFilterInput.filterAriaLabel', { defaultMessage: 'Filter' });
     }
   };
 });

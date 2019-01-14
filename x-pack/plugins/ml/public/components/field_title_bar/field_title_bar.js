@@ -27,7 +27,7 @@ export function FieldTitleBar({ card }) {
     classNames.push(card.type);
   }
 
-  const fieldName = card.fieldName || i18n.translate('xpack.ml.FieldTitleBar.fieldName', {
+  const fieldName = card.fieldName || i18n.translate('xpack.ml.fieldTitleBar.documentCountLabel', {
     defaultMessage: 'document count'
   });
 

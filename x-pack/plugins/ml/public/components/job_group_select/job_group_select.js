@@ -13,6 +13,7 @@ import template from './job_group_select.html';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { mlCalendarService } from 'plugins/ml/services/calendar_service';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
+import { i18n } from '@kbn/i18n';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
@@ -28,6 +29,9 @@ module.directive('mlJobGroupSelect', function () {
     controllerAs: 'mlGroupSelect',
     bindToController: true,
     controller: class MlGroupSelectController extends InitAfterBindingsWorkaround {
+      constructor() {
+        this.newGroupLabel = i18n.translate('xpack.ml.jobGroupSelect.newGroupLabel', { defaultMessage: '(new group)' });
+      }
 
       initAfterBindings($scope) {
         this.$scope = $scope;
@@ -108,7 +112,7 @@ module.directive('mlJobGroupSelect', function () {
 
       groupTypes(group) {
         if(group.isTag === false) {
-          return 'Existing groups';
+          return i18n.translate('xpack.ml.jobGroupSelect.existingGroupsLabel', { defaultMessage: 'Existing groups' });
         }
       }
     }

@@ -84,7 +84,14 @@ const statusToEuiIconType = (status) => {
   }
 };
 
-const Link = ({ url }) => (<EuiLink href={url} target="_BLANK">Learn more</EuiLink>);
+const Link = ({ url }) => (
+  <EuiLink href={url} target="_BLANK">
+    <FormattedMessage
+      id="xpack.ml.validateJob.learnMoreLinkText"
+      defaultMessage="Learn more"
+    />
+  </EuiLink>
+);
 Link.propTypes = {
   url: PropTypes.string.isRequired
 };
@@ -145,7 +152,10 @@ const Modal = ({ close, title, children }) => (
           size="s"
           fill
         >
-          Close
+          <FormattedMessage
+            id="xpack.ml.validateJob.modal.closeButtonLabel"
+            defaultMessage="Close"
+          />
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
@@ -234,7 +244,7 @@ class ValidateJob extends Component {
           isLoading={this.state.ui.isLoading}
         >
           <FormattedMessage
-            id="xpack.ml.validateJobButtonLabel"
+            id="xpack.ml.validateJob.validateJobButtonLabel"
             defaultMessage="Validate Job"
           />
         </EuiButton>
@@ -243,11 +253,9 @@ class ValidateJob extends Component {
           <Modal
             close={this.closeModal}
             title={<FormattedMessage
-              id="xpack.ml.validateJob.Modal.title"
+              id="xpack.ml.validateJob.modal.validateJobTitle"
               defaultMessage="Validate Job {title}"
-              values={{
-                title: this.state.title
-              }}
+              values={{ title: this.state.title }}
             />}
           >
             {this.state.data.messages.map(
@@ -255,20 +263,20 @@ class ValidateJob extends Component {
             )}
             <EuiText>
               <FormattedMessage
-                id="xpack.ml.validateJob.Modal.details"
+                id="xpack.ml.validateJob.modal.jobValidationDescriptionText"
                 defaultMessage="Job validation performs certain checks against job configurations and underlying source data
                   and provides specific advice on how to adjust settings that are more likely to produce insightful results."
               />
             </EuiText>
             <EuiText>
               <FormattedMessage
-                id="xpack.ml.validateJob.Modal.jobTips"
-                defaultMessage="For more information, see {urlLink}."
+                id="xpack.ml.validateJob.modal.linkToJobTipsText"
+                defaultMessage="For more information, see {mlJobTipsLink}."
                 values={{
-                  urlLink: (
+                  mlJobTipsLink: (
                     <EuiLink href={jobTipsUrl} target="_blank">
                       <FormattedMessage
-                        id="xpack.ml.validateJob.Modal.jobTipsLinkText"
+                        id="xpack.ml.validateJob.modal.linkToJobTipsText.mlJobTipsLinkText"
                         defaultMessage="Machine Learning Job Tips"
                       />
                     </EuiLink>

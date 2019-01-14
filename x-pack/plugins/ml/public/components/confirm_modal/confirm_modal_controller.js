@@ -17,19 +17,11 @@ module.controller('MlConfirmModal', function ($scope, $modalInstance, params, i1
   $scope.message = params.message || '';
   $scope.title = params.title || '';
 
-  $scope.okAriaLabel = i18n('xpack.ml.confirmModal.okAriaLabel', {
+  $scope.okLabel = params.okLabel || i18n('xpack.ml.confirmModal.okButtonLabel', {
     defaultMessage: 'OK',
   });
 
-  $scope.okLabel = params.okLabel || i18n('xpack.ml.confirmModal.okLabel', {
-    defaultMessage: 'OK',
-  });
-
-  $scope.cancelLabel = params.cancelLabel || i18n('xpack.ml.confirmModal.cancelLabel', {
-    defaultMessage: 'Cancel',
-  });
-
-  $scope.cancelAriaLabel = i18n('xpack.ml.confirmModal.cancelAriaLabel', {
+  $scope.cancelLabel = params.cancelLabel || i18n('xpack.ml.confirmModal.cancelButtonLabel', {
     defaultMessage: 'Cancel',
   });
 

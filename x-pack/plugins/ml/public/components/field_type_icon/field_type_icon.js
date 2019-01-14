@@ -8,62 +8,70 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import { EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 // don't use something like plugins/ml/../common
 // because it won't work with the jest tests
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export function FieldTypeIcon({ tooltipEnabled = false, type }) {
+export const FieldTypeIcon = injectI18n(function FieldTypeIcon({ tooltipEnabled = false, type, intl }) {
   let ariaLabel = '';
   let iconClass = '';
   let iconChar = '';
 
   switch (type) {
     case ML_JOB_FIELD_TYPES.BOOLEAN:
-      ariaLabel = i18n.translate('xpack.ml.FieldTypeIcon.booleanTypeAriaLabel', {
+      ariaLabel = intl.formatMessage({
+        id: 'xpack.ml.fieldTypeIcon.booleanTypeAriaLabel',
         defaultMessage: 'boolean type'
       });
       iconClass = 'fa-adjust';
       break;
     case ML_JOB_FIELD_TYPES.DATE:
-      ariaLabel = i18n.translate('xpack.ml.FieldTypeIcon.dateTypeAriaLabel', {
+      ariaLabel = intl.formatMessage({
+        id: 'xpack.ml.fieldTypeIcon.dateTypeAriaLabel',
         defaultMessage: 'date type'
       });
       iconClass = 'fa-clock-o';
       break;
     case ML_JOB_FIELD_TYPES.NUMBER:
-      ariaLabel = i18n.translate('xpack.ml.FieldTypeIcon.numberTypeAriaLabel', {
+      ariaLabel = intl.formatMessage({
+        id: 'xpack.ml.fieldTypeIcon.numberTypeAriaLabel',
         defaultMessage: 'number type'
       });
       iconChar = '#';
       break;
     case ML_JOB_FIELD_TYPES.GEO_POINT:
-      ariaLabel = i18n.translate('xpack.ml.FieldTypeIcon.geo_pointTypeAriaLabel', {
-        defaultMessage: 'geo_point type'
-      });
+      ariaLabel = intl.formatMessage({
+        id: 'xpack.ml.fieldTypeIcon.geoPointTypeAriaLabel',
+        defaultMessage: '{geoPointParam} type'
+      }, { geoPointParam: 'geo_point' });
       iconClass = 'fa-globe';
       break;
     case ML_JOB_FIELD_TYPES.KEYWORD:
-      ariaLabel = i18n.translate('xpack.ml.FieldTypeIcon.keywordTypeAriaLabel', {
+      ariaLabel = intl.formatMessage({
+        id: 'xpack.ml.fieldTypeIcon.keywordTypeAriaLabel',
         defaultMessage: 'keyword type'
       });
       iconChar = 't';
       break;
     case ML_JOB_FIELD_TYPES.TEXT:
-      ariaLabel = i18n.translate('xpack.ml.FieldTypeIcon.textTypeAriaLabel', {
+      ariaLabel = intl.formatMessage({
+        id: 'xpack.ml.fieldTypeIcon.textTypeAriaLabel',
         defaultMessage: 'text type'
       });
       iconClass = 'fa-file-text-o';
       break;
     case ML_JOB_FIELD_TYPES.IP:
-      ariaLabel = i18n.translate('xpack.ml.FieldTypeIcon.IPTypeAriaLabel', {
+      ariaLabel = intl.formatMessage({
+        id: 'xpack.ml.fieldTypeIcon.ipTypeAriaLabel',
         defaultMessage: 'IP type'
       });
       iconClass = 'fa-laptop';
       break;
     case ML_JOB_FIELD_TYPES.UNKNOWN:
-      ariaLabel = i18n.translate('xpack.ml.FieldTypeIcon.UnknownTypeAriaLabel', {
+      ariaLabel = intl.formatMessage({
+        id: 'xpack.ml.fieldTypeIcon.unknownTypeAriaLabel',
         defaultMessage: 'Unknown type'
       });
       iconChar = '?';
@@ -90,15 +98,22 @@ export function FieldTypeIcon({ tooltipEnabled = false, type }) {
     // to support having another component directly inside the tooltip anchor
     // see https://github.com/elastic/eui/issues/839
     return (
-      <EuiToolTip position="left" content={`${type} type`}>
+      <EuiToolTip
+        position="left"
+        content={<FormattedMessage
+          id="xpack.ml.fieldTypeIcon.fieldTypeTooltip"
+          defaultMessage="{type} type"
+          values={{ type }}
+        />}
+      >
         <FieldTypeIconContainer {...containerProps} />
       </EuiToolTip>
     );
   }
 
   return <FieldTypeIconContainer {...containerProps} />;
-}
-FieldTypeIcon.propTypes = {
+});
+FieldTypeIcon.WrappedComponent.propTypes = {
   tooltipEnabled: PropTypes.bool,
   type: PropTypes.string
 };
