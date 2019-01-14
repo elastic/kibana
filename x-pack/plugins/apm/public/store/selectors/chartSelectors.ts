@@ -21,7 +21,6 @@ import {
 import { colors } from '../../style/variables';
 import {
   asDecimal,
-  asGB,
   asMillis,
   asPercent,
   tpmUnit

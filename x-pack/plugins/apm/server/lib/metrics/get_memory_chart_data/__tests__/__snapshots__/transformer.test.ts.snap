@@ -3,13 +3,11 @@
 exports[`memory chart data transformer should transform ES data 1`] = `
 Object {
   "overallValues": Object {
-    "freeMemory": 300,
-    "processMemoryRss": 100,
-    "processMemorySize": 200,
-    "totalMemory": 400,
+    "averagePercentMemoryUsed": 300,
+    "maximumPercentMemoryUsed": 400,
   },
   "series": Object {
-    "freeMemory": Array [
+    "averagePercentMemoryUsed": Array [
       Object {
         "x": 0,
         "y": 0,
@@ -51,91 +49,7 @@ Object {
         "y": 270,
       },
     ],
-    "processMemoryRss": Array [
-      Object {
-        "x": 0,
-        "y": 0,
-      },
-      Object {
-        "x": 1,
-        "y": 10,
-      },
-      Object {
-        "x": 2,
-        "y": 20,
-      },
-      Object {
-        "x": 3,
-        "y": 30,
-      },
-      Object {
-        "x": 4,
-        "y": 40,
-      },
-      Object {
-        "x": 5,
-        "y": 50,
-      },
-      Object {
-        "x": 6,
-        "y": 60,
-      },
-      Object {
-        "x": 7,
-        "y": 70,
-      },
-      Object {
-        "x": 8,
-        "y": 80,
-      },
-      Object {
-        "x": 9,
-        "y": 90,
-      },
-    ],
-    "processMemorySize": Array [
-      Object {
-        "x": 0,
-        "y": 0,
-      },
-      Object {
-        "x": 1,
-        "y": 20,
-      },
-      Object {
-        "x": 2,
-        "y": 40,
-      },
-      Object {
-        "x": 3,
-        "y": 60,
-      },
-      Object {
-        "x": 4,
-        "y": 80,
-      },
-      Object {
-        "x": 5,
-        "y": 100,
-      },
-      Object {
-        "x": 6,
-        "y": 120,
-      },
-      Object {
-        "x": 7,
-        "y": 140,
-      },
-      Object {
-        "x": 8,
-        "y": 160,
-      },
-      Object {
-        "x": 9,
-        "y": 180,
-      },
-    ],
-    "totalMemory": Array [
+    "maximumPercentMemoryUsed": Array [
       Object {
         "x": 0,
         "y": 0,
