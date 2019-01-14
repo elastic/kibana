@@ -150,11 +150,17 @@ export class TaskStore {
     }
 
     // Activate template creation / update
-    this.logger.info(
-      `Upgrading ${
-        this.index
-      } index template. Old version: ${existingVersion}, New version: ${TASK_MANAGER_TEMPLATE_VERSION}.`
-    );
+    if (existingVersion > 0) {
+      this.logger.info(
+        `Upgrading ${
+          this.index
+        } index template. Old version: ${existingVersion}, New version: ${TASK_MANAGER_TEMPLATE_VERSION}.`
+      );
+    } else {
+      this.logger.info(
+        `Installing ${this.index} index template version: ${TASK_MANAGER_TEMPLATE_VERSION}.`
+      );
+    }
 
     const templateResult = await this.callCluster('indices.putTemplate', {
       name: templateName,
