@@ -20,6 +20,7 @@ import { FeaturePrivilegeSet, Role } from '../../../../../../../../common/model'
 import { EffectivePrivilegesFactory } from '../../../../../../../lib/effective_privileges';
 import { isGlobalPrivilegeDefinition } from '../../../../../../../lib/privilege_utils';
 import { copyRole } from '../../../../../../../lib/role_utils';
+import { SpacesPopoverList } from '../../../spaces_popover_list';
 import { PrivilegeDisplay } from './privilege_display';
 
 const SPACES_DISPLAY_COUNT = 4;
@@ -110,7 +111,18 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
           const displayedSpaces = isExpanded ? spaces : spaces.slice(0, SPACES_DISPLAY_COUNT);
 
           let button = null;
-          if (spaces.length > displayedSpaces.length) {
+          if (record.isGlobal) {
+            button = (
+              <SpacesPopoverList
+                spaces={this.props.displaySpaces}
+                intl={this.props.intl}
+                buttonText={this.props.intl.formatMessage({
+                  id: 'xpack.security.management.editRole.spacePrivilegeTable.showAllSpacesLink',
+                  defaultMessage: 'show spaces',
+                })}
+              />
+            );
+          } else if (spaces.length > displayedSpaces.length) {
             button = (
               <EuiButtonEmpty
                 size="xs"

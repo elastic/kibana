@@ -17,8 +17,6 @@ import {
   EuiModalHeaderTitle,
   EuiOverlayMask,
   // @ts-ignore
-  EuiSuperSelect,
-  // @ts-ignore
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
@@ -191,33 +189,44 @@ export class PrivilegeMatrix extends Component<Props, State> {
         return {
           field: 'feature',
           name: (
-            <Fragment>
+            <div>
               {item.spaces.slice(0, SPACES_DISPLAY_COUNT).map((space: Space) => (
                 <span key={space.id}>
                   <SpaceAvatar size="s" space={space} />{' '}
                   {item.isGlobal && (
                     <span>
                       Global <br />
-                      (all spaces)
+                      <SpacesPopoverList
+                        spaces={this.props.spaces.filter(s => s.id !== '*')}
+                        intl={this.props.intl}
+                        buttonText={this.props.intl.formatMessage({
+                          id:
+                            'xpack.security.management.editRole.spacePrivilegeMatrix.showAllSpacesLink',
+                          defaultMessage: '(all spaces)',
+                        })}
+                      />
                     </span>
                   )}
                 </span>
               ))}
               {item.spaces.length > SPACES_DISPLAY_COUNT && (
-                <SpacesPopoverList
-                  spaces={item.spaces}
-                  intl={this.props.intl}
-                  buttonText={this.props.intl.formatMessage(
-                    {
-                      id:
-                        'xpack.security.management.editRole.spacePrivilegeMatrix.showNMoreSpacesLink',
-                      defaultMessage: '+{count} more',
-                    },
-                    { count: item.spaces.length - SPACES_DISPLAY_COUNT }
-                  )}
-                />
+                <Fragment>
+                  <br />
+                  <SpacesPopoverList
+                    spaces={item.spaces}
+                    intl={this.props.intl}
+                    buttonText={this.props.intl.formatMessage(
+                      {
+                        id:
+                          'xpack.security.management.editRole.spacePrivilegeMatrix.showNMoreSpacesLink',
+                        defaultMessage: '+{count} more',
+                      },
+                      { count: item.spaces.length - SPACES_DISPLAY_COUNT }
+                    )}
+                  />
+                </Fragment>
               )}
-            </Fragment>
+            </div>
           ),
           render: (feature: Feature & { isBase: boolean }, record: TableRow) => {
             return this.renderPrivilegeDisplay(item, record, globalPrivilege.base);
