@@ -284,6 +284,7 @@ export class TaskStore {
    * @returns {Promise<ConcreteTaskInstance[]>}
    */
   public async fetchAvailableTasks(): Promise<ConcreteTaskInstance[]> {
+    // TODO: use apiVersion as a filter
     const { docs } = await this.search({
       query: {
         bool: {
