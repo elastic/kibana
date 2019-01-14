@@ -11,7 +11,7 @@ import {
 
 describe('EMSTMSSource', () => {
 
-  it('should run', async () => {
+  it('should get attribution from markdown (tiles v2 legacy format)', async () => {
 
     const emsTmsSource = new EMSTMSSource({
       id: 'road_map'
