@@ -5,7 +5,7 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import { noop } from 'lodash/fp';
+import { defaultTo, getOr, noop } from 'lodash/fp';
 import moment from 'moment';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -116,7 +116,7 @@ const getUncommonColumns = (startDate: number) => [
     truncateText: false,
     hideForMobile: false,
     render: ({ uncommonProcess }: { uncommonProcess: UncommonProcessItem }) => {
-      const processName = defaultToEmpty(uncommonProcess.name);
+      const processName = defaultTo('--', uncommonProcess.process.name);
       return (
         <>
           <DraggableWrapper
@@ -148,11 +148,19 @@ const getUncommonColumns = (startDate: number) => [
     },
   },
   {
+    name: 'User',
+    truncateText: false,
+    hideForMobile: false,
+    render: ({ uncommonProcess }: { uncommonProcess: UncommonProcessItem }) => (
+      <>{getOr('--', 'user.name', uncommonProcess)}</>
+    ),
+  },
+  {
     name: 'Command Line',
     truncateText: false,
     hideForMobile: false,
     render: ({ uncommonProcess }: { uncommonProcess: UncommonProcessItem }) => (
-      <>{defaultToEmpty(uncommonProcess.title)}</>
+      <>{defaultTo('--', uncommonProcess.process.title)}</>
     ),
   },
   {

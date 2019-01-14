@@ -10,8 +10,10 @@ import { FilterQuery } from '../types';
 import { UncommonProcessesRequestOptions } from './types';
 
 export const processFieldsMap: Readonly<Record<string, string>> = {
-  name: 'process.name',
-  title: 'process.title',
+  'process.name': 'process.name',
+  'process.title': 'process.title',
+  'user.id': 'user.id',
+  'user.name': 'user.name',
 };
 
 export const hostFieldsMap: Readonly<Record<string, string>> = {

@@ -9,10 +9,10 @@ import gql from 'graphql-tag';
 export const uncommonProcessesSchema = gql`
   type UncommonProcessItem {
     _id: String!
-    name: String!
-    title: String
     instances: Int!
+    process: ProcessEcsFields!
     hosts: [HostEcsFields!]!
+    user: UserEcsFields
   }
 
   type UncommonProcessesEdges {

@@ -20,9 +20,15 @@ export const uncommonProcessesQuery = gql`
         edges {
           uncommonProcess {
             _id
-            name
-            title
             instances
+            process {
+              title
+              name
+            }
+            user {
+              id
+              name
+            }
             hosts {
               id
               name

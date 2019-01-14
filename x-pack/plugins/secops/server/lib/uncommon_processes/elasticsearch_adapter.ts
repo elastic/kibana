@@ -30,7 +30,6 @@ export class ElasticsearchUncommonProcessesAdapter implements UncommonProcessesA
       'search',
       buildQuery(options)
     );
-
     const { limit } = options.pagination;
     const totalCount = getOr(0, 'aggregations.process_count.value', response);
     const buckets = getOr([], 'aggregations.group_by_process.buckets', response);
@@ -76,28 +75,26 @@ export const formatUncommonProcessesData = (
   fields: ReadonlyArray<string>,
   hit: UncommonProcessHit,
   fieldMap: Readonly<Record<string, string>>
-): UncommonProcessesEdges =>
-  fields.reduce(
-    (flattenedFields, fieldName) => {
-      flattenedFields.uncommonProcess._id = hit._id;
-      flattenedFields.uncommonProcess.instances = getOr(0, 'total.value', hit);
-      flattenedFields.uncommonProcess.hosts = hit.hosts;
-      if (hit.cursor) {
-        flattenedFields.cursor.value = hit.cursor;
-      }
-      return mergeFieldsWithHit(
-        fieldName,
-        'uncommonProcess',
-        flattenedFields,
-        fieldMap,
-        hit
-      ) as UncommonProcessesEdges;
+): UncommonProcessesEdges => {
+  const initialValue: UncommonProcessesEdges = {
+    uncommonProcess: {
+      _id: '',
+      instances: 0,
+      process: {},
+      hosts: [],
     },
-    {
-      uncommonProcess: {},
-      cursor: {
-        value: '',
-        tiebreaker: null,
-      },
-    } as UncommonProcessesEdges
-  );
+    cursor: {
+      value: '',
+      tiebreaker: null,
+    },
+  };
+  return fields.reduce((flattenedFields, fieldName) => {
+    flattenedFields.uncommonProcess._id = hit._id;
+    flattenedFields.uncommonProcess.instances = getOr(0, 'total.value', hit);
+    flattenedFields.uncommonProcess.hosts = hit.hosts;
+    if (hit.cursor) {
+      flattenedFields.cursor.value = hit.cursor;
+    }
+    return mergeFieldsWithHit(fieldName, 'uncommonProcess', flattenedFields, fieldMap, hit);
+  }, initialValue);
+};

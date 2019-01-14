@@ -31,6 +31,22 @@ export const eventsSchema = gql`
     name: String
   }
 
+  type Thread {
+    id: Int
+    start: String
+  }
+
+  type ProcessEcsFields {
+    pid: Int
+    name: String
+    ppid: Int
+    args: [String]
+    exectuable: String
+    title: String
+    thread: Thread
+    working_directory: String
+  }
+
   type SourceEcsFields {
     ip: String
     port: Float
@@ -57,8 +73,12 @@ export const eventsSchema = gql`
   }
 
   type UserEcsFields {
-    id: Float
+    id: Int
     name: String
+    full_name: String
+    email: String
+    hash: String
+    group: String
   }
 
   type ECS {

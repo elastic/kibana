@@ -245,6 +245,14 @@ export interface UserEcsFields {
   id?: number | null;
 
   name?: string | null;
+
+  full_name?: string | null;
+
+  email?: string | null;
+
+  hash?: string | null;
+
+  group?: string | null;
 }
 
 export interface HostsData {
@@ -292,13 +300,37 @@ export interface UncommonProcessesEdges {
 export interface UncommonProcessItem {
   _id: string;
 
-  name: string;
+  instances: number;
+
+  process: ProcessEcsFields;
+
+  hosts: HostEcsFields[];
+
+  user?: UserEcsFields | null;
+}
+
+export interface ProcessEcsFields {
+  pid?: number | null;
+
+  name?: string | null;
+
+  ppid?: number | null;
+
+  args?: (string | null)[] | null;
+
+  exectuable?: string | null;
 
   title?: string | null;
 
-  instances: number;
+  thread?: Thread | null;
 
-  hosts: HostEcsFields[];
+  working_directory?: string | null;
+}
+
+export interface Thread {
+  id?: number | null;
+
+  start?: string | null;
 }
 
 export interface SayMyName {
@@ -1001,13 +1033,29 @@ export namespace GetUncommonProcessesQuery {
 
     _id: string;
 
-    name: string;
+    instances: number;
+
+    process: Process;
+
+    user?: User | null;
+
+    hosts: Hosts[];
+  };
+
+  export type Process = {
+    __typename?: 'ProcessEcsFields';
 
     title?: string | null;
 
-    instances: number;
+    name?: string | null;
+  };
 
-    hosts: Hosts[];
+  export type User = {
+    __typename?: 'UserEcsFields';
+
+    id?: number | null;
+
+    name?: string | null;
   };
 
   export type Hosts = {

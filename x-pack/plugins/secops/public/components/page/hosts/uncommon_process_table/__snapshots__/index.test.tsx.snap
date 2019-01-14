@@ -17,8 +17,14 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
             },
           ],
           "instances": 93,
-          "name": "elrond.elstc.co",
-          "title": "Hello World",
+          "process": Object {
+            "name": "elrond.elstc.co",
+            "title": "Hello World",
+          },
+          "user": Object {
+            "id": 0,
+            "name": "root",
+          },
         },
       },
       Object {
@@ -38,8 +44,14 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
             },
           ],
           "instances": 97,
-          "name": "siem-kibana",
-          "title": "Hello World",
+          "process": Object {
+            "name": "siem-kibana",
+            "title": "Hello World",
+          },
+          "user": Object {
+            "id": 1,
+            "name": "Evan",
+          },
         },
       },
     ]
