@@ -2,7 +2,7 @@
 [[logs-ui]]
 == Using the Logs UI
 
-Customize the Infrastructure UI to focus on the data you want to see and control how you see it.
+Customize the Logs UI to focus on the data you want to see and control how you see it.
 
 [role="screenshot"]
 image::logs/images/logs-console.png[Log Console in Kibana]

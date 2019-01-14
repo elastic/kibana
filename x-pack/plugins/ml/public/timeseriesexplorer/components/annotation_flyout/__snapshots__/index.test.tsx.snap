@@ -20,13 +20,16 @@ exports[`AnnotationFlyout Initialization. 1`] = `
       <h2
         id="mlAnnotationFlyoutTitle"
       >
-        Edit
-         annotation
+        <FormattedMessage
+          defaultMessage="Edit annotation"
+          id="xpack.ml.timeSeriesExplorer.annotationFlyout.editAnnotationTitle"
+          values={Object {}}
+        />
       </h2>
     </EuiTitle>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <Component
+    <InjectIntl(Component)
       annotation={
         Object {
           "_id": "KCCkDWgB_ZdQ1MFDSYPi",
@@ -49,7 +52,13 @@ exports[`AnnotationFlyout Initialization. 1`] = `
       describedByIds={Array []}
       fullWidth={true}
       hasEmptyLabelSpace={false}
-      label="Annotation text"
+      label={
+        <FormattedMessage
+          defaultMessage="Annotation text"
+          id="xpack.ml.timeSeriesExplorer.annotationFlyout.annotationTextLabel"
+          values={Object {}}
+        />
+      }
     >
       <EuiTextArea
         fullWidth={true}
@@ -83,7 +92,11 @@ exports[`AnnotationFlyout Initialization. 1`] = `
           onClick={[MockFunction]}
           type="button"
         >
-          Cancel
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="xpack.ml.timeSeriesExplorer.annotationFlyout.cancelButtonLabel"
+            values={Object {}}
+          />
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
@@ -96,7 +109,11 @@ exports[`AnnotationFlyout Initialization. 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Delete
+          <FormattedMessage
+            defaultMessage="Delete"
+            id="xpack.ml.timeSeriesExplorer.annotationFlyout.deleteButtonLabel"
+            values={Object {}}
+          />
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
@@ -111,7 +128,11 @@ exports[`AnnotationFlyout Initialization. 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Update
+          <FormattedMessage
+            defaultMessage="Update"
+            id="xpack.ml.timeSeriesExplorer.annotationFlyout.updateButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>

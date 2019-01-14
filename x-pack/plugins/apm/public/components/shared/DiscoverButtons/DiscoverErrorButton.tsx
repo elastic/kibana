@@ -17,7 +17,7 @@ function getDiscoverQuery(error: APMError, kuery?: string) {
   const groupId = error.error.grouping_key;
   let query = `${SERVICE_NAME}:"${serviceName}" AND ${ERROR_GROUP_ID}:"${groupId}"`;
   if (kuery) {
-    query = ` AND ${kuery}`;
+    query += ` AND ${kuery}`;
   }
 
   return {

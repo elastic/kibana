@@ -2,11 +2,12 @@
 [[xpack-security]]
 == Security
 
-{xpack} security enables you to easily secure a cluster. With security, you can
+The {stack} {security-features} enable you to easily secure a cluster. With
+security, you can
 password-protect your data as well as implement more advanced security measures
 such as encrypting communications, role-based access control, IP filtering, and
 auditing. For more information, see
-{xpack-ref}/elasticsearch-security.html[Securing {es} and {kib}] and
+{stack-ov}/elasticsearch-security.html[Securing {es} and {kib}] and
 <<using-kibana-with-security,Configuring Security in {kib}>>.
 
 [float]
@@ -15,7 +16,7 @@ auditing. For more information, see
 You can create and manage users on the *Management* / *Security* / *Users* page.
 You can also change their passwords and roles. For more information about
 authentication and built-in users, see
-{xpack-ref}/setting-up-authentication.html[Setting Up User Authentication].
+{stack-ov}/setting-up-authentication.html[Setting up user authentication].
 
 [float]
 === Roles
@@ -25,7 +26,7 @@ You can manage roles on the *Management* / *Security* / *Roles* page, or use
 {kib} see <<xpack-security-authorization, {kib} Authorization>>.
 
 For a more holistic overview of configuring roles for the entire stack,
-see {xpack-ref}/authorization.html[Configuring Role-based Access Control].
+see {stack-ov}/authorization.html[Configuring role-based access control].
 
 [NOTE]
 ============================================================================
