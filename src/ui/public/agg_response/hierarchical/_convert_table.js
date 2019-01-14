@@ -46,6 +46,7 @@ export function convertTableProvider(tooltipFormatter) {
           const bucketFormatter = getFormat(bucket.format);
           const name = bucketFormatter.convert(row[bucketColumn.id]);
           const size = row[bucketValueColumn.id];
+          names[name] = name;
 
           let slice  = dataLevel.find(slice => slice.name === name);
           if (!slice) {
