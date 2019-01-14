@@ -94,6 +94,7 @@ export function initRoutes(server, licenseUid) {
         id: fileLayer.getId(),
         created_at: fileLayer.getCreatedAt(),
         attribution: fileLayer.getHTMLAttribution(),
+        attributions: fileLayer.getAttributions(),
         fields: fileLayer.getFieldsInLanguage(),
         url: fileLayer.getDefaultFormatUrl(),
         format: format, //legacy: format and meta are split up
@@ -108,6 +109,7 @@ export function initRoutes(server, licenseUid) {
         minZoom: tmsService.getMinZoom(),
         maxZoom: tmsService.getMaxZoom(),
         attribution: tmsService.getHTMLAttribution(),
+        attributionMarkdown: tmsService.getMarkdownAttribution(),
         url: tmsService.getUrlTemplate()
       };
     });
