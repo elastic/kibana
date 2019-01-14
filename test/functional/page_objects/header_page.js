@@ -254,8 +254,10 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     }
 
     async awaitGlobalLoadingIndicatorHidden() {
-      log.debug('awaitGlobalLoadingIndicatorHidden');
-      await testSubjects.find('globalLoadingIndicator-hidden', defaultFindTimeout * 10);
+      await testSubjects.existOrFail('globalLoadingIndicator-hidden', {
+        allowHidden: true,
+        timeout: defaultFindTimeout * 10
+      });
     }
 
     async awaitKibanaChrome() {
