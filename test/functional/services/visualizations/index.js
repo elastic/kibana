@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { InspectorProvider } from './inspector';
 export { PieChartProvider } from './pie_chart';
