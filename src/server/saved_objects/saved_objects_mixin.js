@@ -67,8 +67,10 @@ export function savedObjectsMixin(kbnServer, server) {
   server.route(createGetRoute(prereqs, schema));
   server.route(createUpdateRoute(prereqs, schema));
 
+  const includeHiddenTypes = [];
+
   const serializer = new SavedObjectsSerializer(schema);
-  server.decorate('server', 'savedObjects', createSavedObjectsService(server, schema, serializer, migrator));
+  server.decorate('server', 'savedObjects', createSavedObjectsService(server, schema, serializer, migrator, includeHiddenTypes));
 
   const savedObjectsClientCache = new WeakMap();
   server.decorate('request', 'getSavedObjectsClient', function () {
