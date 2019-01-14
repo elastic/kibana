@@ -170,29 +170,16 @@ export function geoShapeToGeometry(value) {
   return [geoJson];
 }
 
+const POLYGON_COORDINATES_EXTERIOR_INDEX = 0;
+
 export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
-  // TODO this is not a complete implemenation. Need to handle other cases:
-  // 1) bounds are all east of 180
-  // 2) bounds are all west of -180
-  const noWrapMapExtent = {
-    minLon: mapExtent.minLon < -180 ? -180 : mapExtent.minLon,
-    minLat: mapExtent.minLat < -90 ? -90 : mapExtent.minLat,
-    maxLon: mapExtent.maxLon > 180 ? 180 : mapExtent.maxLon,
-    maxLat: mapExtent.maxLat > 90 ? 90 : mapExtent.maxLat,
-  };
+  const safePolygon = convertMapExtentToPolygon(mapExtent);
 
   if (geoFieldType === 'geo_point') {
     return {
-      geo_bounding_box: {
+      geo_polygon: {
         [geoFieldName]: {
-          top_left: {
-            lat: noWrapMapExtent.maxLat,
-            lon: noWrapMapExtent.minLon
-          },
-          bottom_right: {
-            lat: noWrapMapExtent.minLat,
-            lon: noWrapMapExtent.maxLon
-          }
+          points: safePolygon.coordinates[POLYGON_COORDINATES_EXTERIOR_INDEX]
         }
       }
     };
@@ -200,13 +187,7 @@ export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
     return {
       geo_shape: {
         [geoFieldName]: {
-          shape: {
-            type: 'envelope',
-            coordinates: [
-              [noWrapMapExtent.minLon, noWrapMapExtent.maxLat],
-              [noWrapMapExtent.maxLon, noWrapMapExtent.minLat]
-            ]
-          },
+          shape: safePolygon,
           relation: 'INTERSECTS'
         }
       }
@@ -217,12 +198,11 @@ export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
 }
 
 /*
- * Convert map bounds to envelope
- * Bounds that cross the dateline are split into 2 envelopes
+ * Convert map bounds to polygon
  */
-export function convertMapExtentToEnvelope({ maxLat, maxLon, minLat, minLon }) {
+export function convertMapExtentToPolygon({ maxLat, maxLon, minLat, minLon }) {
   if (maxLon > 180 && minLon < -180) {
-    return convertMapExtentToEnvelope({
+    return convertMapExtentToPolygon({
       maxLat,
       maxLon: 180,
       minLat,
@@ -231,47 +211,41 @@ export function convertMapExtentToEnvelope({ maxLat, maxLon, minLat, minLon }) {
   }
 
   if (maxLon > 180) {
-    // bounds cross datleine east to west, slit into 2 shapes
+    // bounds cross dateline east to west
     const overlapWestOfDateLine = maxLon - 180;
-    return [
-      convertMapExtentToEnvelope({
-        maxLat,
-        maxLon: 180,
-        minLat,
-        minLon,
-      }),
-      convertMapExtentToEnvelope({
-        maxLat,
-        maxLon: -180 + overlapWestOfDateLine,
-        minLat,
-        minLon: -180,
-      }),
-    ];
+    return convertMapExtentToPolygon({
+      maxLat,
+      maxLon: -180 + overlapWestOfDateLine,
+      minLat,
+      minLon,
+    });
   }
 
   if (minLon < -180) {
-    // bounds cross datleine west to east, slit into 2 shapes
+    // bounds cross dateline west to east, slit into 2 shapes
     const overlapEastOfDateLine = Math.abs(minLon) - 180;
-    return [
-      convertMapExtentToEnvelope({
-        maxLat,
-        maxLon: 180,
-        minLat,
-        minLon: 180 - overlapEastOfDateLine,
-      }),
-      convertMapExtentToEnvelope({
-        maxLat,
-        maxLon: maxLon,
-        minLat,
-        minLon: -180,
-      }),
-    ];
+    return convertMapExtentToPolygon({
+      maxLat,
+      maxLon,
+      minLat,
+      minLon: 180 - overlapEastOfDateLine,
+    });
   }
 
+  // GeoJSON mandates that the outer polygon must be counterclockwise to avoid ambiguous polygons
+  // when the shape crosses the dateline
+  const left = minLon;
+  const right = maxLon;
+  const top = maxLat;
+  const bottom = minLat;
+  const topLeft = [left, top];
+  const bottomLeft = [left, bottom];
+  const bottomRight = [right, bottom];
+  const topRight = [right, top];
   return {
-    "type": "envelope",
+    "type": "polygon",
     "coordinates": [
-      [minLon, maxLat], [maxLon, minLat]
+      [ topLeft, bottomLeft, bottomRight, topRight, topLeft ]
     ]
   };
 }

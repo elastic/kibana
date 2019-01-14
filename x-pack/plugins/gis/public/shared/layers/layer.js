@@ -145,8 +145,12 @@ export class ALayer {
   }
 
   getDataLoadError() {
-    const loadErrors =  this._dataRequests.filter(dataRequest => dataRequest.hasLoadError());
-    return loadErrors.join(',');//todo
+    const loadErrors =  this._dataRequests
+      .filter(dataRequest => dataRequest.hasLoadError())
+      .map(dataRequest => {
+        return dataRequest._descriptor.dataLoadError;
+      });
+    return loadErrors.join(',');
   }
 
   toLayerDescriptor() {

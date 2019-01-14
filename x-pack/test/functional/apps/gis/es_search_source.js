@@ -23,6 +23,14 @@ export default function ({ getPageObjects, getService }) {
       return requestTimestamp;
     }
 
+    async function getHits() {
+      await PageObjects.gis.openInspectorRequestsView();
+      const requestStats = await PageObjects.gis.getInspectorTableData();
+      const hits = PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits');
+      await PageObjects.gis.closeInspector();
+      return hits;
+    }
+
     it('should re-fetch geohashgrid aggregation with refresh timer', async () => {
       const beforeRefreshTimerTimestamp = await getRequestTimestamp();
       expect(beforeRefreshTimerTimestamp.length).to.be(24);
@@ -60,10 +68,19 @@ export default function ({ getPageObjects, getService }) {
 
     describe('inspector', () => {
       it('should register elasticsearch request in inspector', async () => {
-        await PageObjects.gis.openInspectorRequestsView();
-        const requestStats = await PageObjects.gis.getInspectorTableData();
-        const hits = PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits');
+        const hits = await getHits();
         expect(hits).to.equal('6');
+      });
+    });
+
+    describe('filter by extent', () => {
+      before(async () => {
+        await PageObjects.gis.loadSavedMap('antimeridian example');
+      });
+
+      it('should handle extents that cross antimeridian', async () => {
+        const hits = await getHits();
+        expect(hits).to.equal('2');
       });
     });
   });

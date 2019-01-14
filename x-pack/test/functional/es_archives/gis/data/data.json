@@ -136,3 +136,48 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "index": "antimeridian",
+    "type": "doc",
+    "id": "1",
+    "source": {
+      "location": {
+        "lat": 0.0,
+        "lon": 179.5
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "antimeridian",
+    "type": "doc",
+    "id": "2",
+    "source": {
+      "location": {
+        "lat": 0.0,
+        "lon": -179.5
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "antimeridian",
+    "type": "doc",
+    "id": "3",
+    "source": {
+      "location": {
+        "lat": 0.0,
+        "lon": 0.0
+      }
+    }
+  }
+}

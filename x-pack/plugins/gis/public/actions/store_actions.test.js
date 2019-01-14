@@ -7,7 +7,10 @@
 jest.mock('../selectors/map_selectors', () => ({}));
 jest.mock('../kibana_services', () => ({}));
 
-import { mapExtentChanged } from './store_actions';
+import {
+  mapExtentChanged,
+  setMouseCoordinates
+} from './store_actions';
 
 const getStoreMock = jest.fn();
 const dispatchMock = jest.fn();
@@ -190,5 +193,46 @@ describe('store_actions', () => {
 
     });
 
+  });
+
+  describe('setMouseCoordinates', () => {
+    it('should create SET_MOUSE_COORDINATES action', () => {
+      const action = setMouseCoordinates({
+        lat: 10,
+        lon: 100,
+      });
+
+      expect(action).toEqual({
+        type: 'SET_MOUSE_COORDINATES',
+        lat: 10,
+        lon: 100,
+      });
+    });
+
+    it('should handle longitudes that wrap east to west', () => {
+      const action = setMouseCoordinates({
+        lat: 10,
+        lon: 190,
+      });
+
+      expect(action).toEqual({
+        type: 'SET_MOUSE_COORDINATES',
+        lat: 10,
+        lon: -170,
+      });
+    });
+
+    it('should handle longitudes that wrap west to east', () => {
+      const action = setMouseCoordinates({
+        lat: 10,
+        lon: -190,
+      });
+
+      expect(action).toEqual({
+        type: 'SET_MOUSE_COORDINATES',
+        lat: 10,
+        lon: 170,
+      });
+    });
   });
 });
