@@ -6,6 +6,7 @@
 
 import { EventEmitter } from 'events';
 import fs from 'fs';
+import { Server } from 'hapi';
 import mkdirp from 'mkdirp';
 import fetch from 'node-fetch';
 import path from 'path';
@@ -23,7 +24,7 @@ export class InstallManager {
   private readonly basePath: string;
   private installing: Set<LanguageServerDefinition> = new Set();
 
-  constructor(readonly serverOptions: ServerOptions) {
+  constructor(readonly server: Server, readonly serverOptions: ServerOptions) {
     this.basePath = serverOptions.langServerPath;
   }
 
@@ -31,11 +32,22 @@ export class InstallManager {
     if (def.installationType === InstallationType.Embed) {
       return LanguageServerStatus.READY;
     }
+    if (def.installationType === InstallationType.Plugin) {
+      // @ts-ignore
+      const plugin = this.server.plugins[def.installationPluginName!];
+      if (plugin) {
+        const pluginPath = plugin.install.path;
+        if (fs.existsSync(pluginPath)) {
+          return LanguageServerStatus.READY;
+        }
+      }
+      return LanguageServerStatus.NOT_INSTALLED;
+    }
     if (this.installing.has(def)) {
       return LanguageServerStatus.INSTALLING;
     }
     const installationPath = this.installationPath(def);
-    return fs.existsSync(installationPath)
+    return fs.existsSync(installationPath!)
       ? LanguageServerStatus.READY
       : LanguageServerStatus.NOT_INSTALLED;
   }
@@ -45,25 +57,31 @@ export class InstallManager {
   }
 
   public async install(def: LanguageServerDefinition) {
-    try {
-      this.installing.add(def);
-      const packageFile = await this.downloadFile(def);
-      await this.unPack(packageFile, def);
-      this.sendEvent({
-        langServerName: def.name,
-        eventType: InstallEventType.DONE,
-        progress: 1,
-        message: `install ${def.name} done.`,
-      });
-    } catch (e) {
-      this.sendEvent({
-        langServerName: def.name,
-        eventType: InstallEventType.FAIL,
-        message: `install ${def.name} failed. error: ${e.message}`,
-      });
-      throw e;
-    } finally {
-      this.installing.delete(def);
+    if (def.installationType === InstallationType.Download) {
+      if (!this.installing.has(def)) {
+        try {
+          this.installing.add(def);
+          const packageFile = await this.downloadFile(def);
+          await this.unPack(packageFile, def);
+          this.sendEvent({
+            langServerName: def.name,
+            eventType: InstallEventType.DONE,
+            progress: 1,
+            message: `install ${def.name} done.`,
+          });
+        } catch (e) {
+          this.sendEvent({
+            langServerName: def.name,
+            eventType: InstallEventType.FAIL,
+            message: `install ${def.name} failed. error: ${e.message}`,
+          });
+          throw e;
+        } finally {
+          this.installing.delete(def);
+        }
+      }
+    } else {
+      throw new Error("can't install this language server by downloading");
     }
   }
 
@@ -75,7 +93,7 @@ export class InstallManager {
       throw new Error(`Unable to download language server ${def.name} from url ${url}`);
     }
 
-    const installationPath = this.installationPath(def);
+    const installationPath = this.installationPath(def)!;
     let filename: string;
     const header = res.headers.get('Content-Disposition');
     const FILE_NAME_HEAD_PREFIX = 'filename=';
@@ -121,9 +139,16 @@ export class InstallManager {
     });
   }
 
-  public installationPath(def: LanguageServerDefinition): string {
+  public installationPath(def: LanguageServerDefinition): string | undefined {
     if (def.installationType === InstallationType.Embed) {
       return def.embedPath!;
+    } else if (def.installationType === InstallationType.Plugin) {
+      // @ts-ignore
+      const plugin: any = this.server.plugins[def.installationPluginName];
+      if (plugin) {
+        return plugin.install.path;
+      }
+      return undefined;
     } else {
       let version = def.version!;
       if (def.build) {
@@ -134,7 +159,7 @@ export class InstallManager {
   }
 
   private async unPack(packageFile: string, def: LanguageServerDefinition) {
-    const dest = this.installationPath(def);
+    const dest = this.installationPath(def)!;
     this.sendEvent({
       langServerName: def.name,
       eventType: InstallEventType.UNPACKING,

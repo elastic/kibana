@@ -15,12 +15,12 @@ import mkdirp from 'mkdirp';
 import { LspService } from "../lsp/lsp_service";
 import { ServerOptions } from "../server_options";
 import { ConsoleLoggerFactory } from "../utils/console_logger_factory";
-import { RepositoryGitStatusReservedField, RepositoryTypeName } from '../indexer/schema';
+import { RepositoryGitStatusReservedField, RepositoryTypeName, RepositoryConfigReservedField } from '../indexer/schema';
 import { InstallManager } from "../lsp/install_manager";
 import * as os from "os";
 import assert from 'assert';
 import { RepositoryConfigController } from '../repository_config_controller';
-
+import { Server } from 'hapi';
 
 
 
@@ -66,7 +66,7 @@ describe('lsp_service tests', () => {
   };
 
   const serverOptions = new ServerOptions(options, config);
-  const installManager = new InstallManager(serverOptions);
+  const installManager = new InstallManager(new Server(), serverOptions);
 
   function mockEsClient(): any {
     const api = {
@@ -79,6 +79,9 @@ describe('lsp_service tests', () => {
                 cloneProgress: {
                   isCloned: true
                 }
+              } ,
+              [RepositoryConfigReservedField]: {
+                disableTypescript: false
               }
             }
           }
