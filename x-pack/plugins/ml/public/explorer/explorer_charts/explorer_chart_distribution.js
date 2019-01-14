@@ -378,7 +378,7 @@ export const ExplorerChartDistribution = injectI18n(class ExplorerChartDistribut
           let markerClass = 'metric-value';
           if (_.has(d, 'anomalyScore') && Number(d.anomalyScore) >= threshold.val) {
             markerClass += ' anomaly-marker ';
-            markerClass += getSeverityWithLow(d.anomalyScore);
+            markerClass += getSeverityWithLow(d.anomalyScore).id;
           }
           return markerClass;
         });

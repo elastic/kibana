@@ -291,7 +291,7 @@ export const ExplorerChartSingleMetric = injectI18n(class ExplorerChartSingleMet
         .attr('class', (d) => {
           let markerClass = 'metric-value';
           if (_.has(d, 'anomalyScore') && Number(d.anomalyScore) >= threshold.val) {
-            markerClass += ` anomaly-marker ${getSeverityWithLow(d.anomalyScore)}`;
+            markerClass += ` anomaly-marker ${getSeverityWithLow(d.anomalyScore).id}`;
           }
           return markerClass;
         });
@@ -307,7 +307,7 @@ export const ExplorerChartSingleMetric = injectI18n(class ExplorerChartSingleMet
       multiBucketMarkers.enter().append('path')
         .attr('d', d3.svg.symbol().size(MULTI_BUCKET_SYMBOL_SIZE).type('cross'))
         .attr('transform', d => `translate(${lineChartXScale(d.date)}, ${lineChartYScale(d.value)})`)
-        .attr('class', d => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore)}`)
+        .attr('class', d => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore).id}`)
         // Don't use an arrow function since we need access to `this`.
         .on('mouseover', function (d) {
           showLineChartTooltip(d, this);

@@ -12,6 +12,7 @@
 */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { CONDITIONS_NOT_SUPPORTED_FUNCTIONS } from '../constants/detector_rule';
 import { MULTI_BUCKET_IMPACT } from '../constants/multi_bucket_impact';
 
@@ -27,15 +28,25 @@ const DISPLAY_TYPICAL_FUNCTIONS = ['count', 'distinct_count', 'lat_long', 'mean'
 // for the supplied normalized anomaly score (a value between 0 and 100).
 export function getSeverity(normalizedScore) {
   if (normalizedScore >= 75) {
-    return 'critical';
+    return { id: 'critical', label: i18n.translate('xpack.ml.anomaliesTable.severity.criticalLabel', {
+      defaultMessage: 'critical',
+    }) };
   } else if (normalizedScore >= 50) {
-    return 'major';
+    return { id: 'major', label: i18n.translate('xpack.ml.anomaliesTable.severity.majorLabel', {
+      defaultMessage: 'major',
+    }) };
   } else if (normalizedScore >= 25) {
-    return 'minor';
+    return { id: 'minor', label: i18n.translate('xpack.ml.anomaliesTable.severity.minorLabel', {
+      defaultMessage: 'minor',
+    }) };
   } else if (normalizedScore >= 0) {
-    return 'warning';
+    return { id: 'warning', label: i18n.translate('xpack.ml.anomaliesTable.severity.warningLabel', {
+      defaultMessage: 'warning',
+    }) };
   } else {
-    return 'unknown';
+    return { id: 'unknown', label: i18n.translate('xpack.ml.anomaliesTable.severity.unknownLabel', {
+      defaultMessage: 'unknown',
+    }) };
   }
 }
 
@@ -44,17 +55,29 @@ export function getSeverity(normalizedScore) {
 // less than 3 are assigned a severity of 'low'.
 export function getSeverityWithLow(normalizedScore) {
   if (normalizedScore >= 75) {
-    return 'critical';
+    return { id: 'critical', label: i18n.translate('xpack.ml.anomaliesTable.severityWithLow.criticalLabel', {
+      defaultMessage: 'critical',
+    }) };
   } else if (normalizedScore >= 50) {
-    return 'major';
+    return { id: 'major', label: i18n.translate('xpack.ml.anomaliesTable.severityWithLow.majorLabel', {
+      defaultMessage: 'major',
+    }) };
   } else if (normalizedScore >= 25) {
-    return 'minor';
+    return { id: 'minor', label: i18n.translate('xpack.ml.anomaliesTable.severityWithLow.minorLabel', {
+      defaultMessage: 'minor',
+    }) };
   } else if (normalizedScore >= 3) {
-    return 'warning';
+    return { id: 'warning', label: i18n.translate('xpack.ml.anomaliesTable.severityWithLow.warningLabel', {
+      defaultMessage: 'warning',
+    }) };
   } else if (normalizedScore >= 0) {
-    return 'low';
+    return { id: 'low', label: i18n.translate('xpack.ml.anomaliesTable.severityWithLow.lowLabel', {
+      defaultMessage: 'low',
+    }) };
   } else {
-    return 'unknown';
+    return { id: 'unknown', label: i18n.translate('xpack.ml.anomaliesTable.severityWithLow.unknownLabel', {
+      defaultMessage: 'unknown',
+    }) };
   }
 }
 
@@ -81,13 +104,21 @@ export function getSeverityColor(normalizedScore) {
 // which ranges from -5 to +5.
 export function getMultiBucketImpactLabel(multiBucketImpact) {
   if (multiBucketImpact >= MULTI_BUCKET_IMPACT.HIGH) {
-    return 'high';
+    return i18n.translate('xpack.ml.anomaliesTable.multiBucketImpact.highLabel', {
+      defaultMessage: 'high',
+    });
   } else if (multiBucketImpact >= MULTI_BUCKET_IMPACT.MEDIUM) {
-    return 'medium';
+    return i18n.translate('xpack.ml.anomaliesTable.multiBucketImpact.mediumLabel', {
+      defaultMessage: 'medium',
+    });
   } else if (multiBucketImpact >= MULTI_BUCKET_IMPACT.LOW) {
-    return 'low';
+    return i18n.translate('xpack.ml.anomaliesTable.multiBucketImpact.lowLabel', {
+      defaultMessage: 'low',
+    });
   } else {
-    return 'none';
+    return i18n.translate('xpack.ml.anomaliesTable.multiBucketImpact.noneLabel', {
+      defaultMessage: 'none',
+    });
   }
 }
 

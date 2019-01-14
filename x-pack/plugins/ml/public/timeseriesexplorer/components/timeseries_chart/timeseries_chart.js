@@ -778,7 +778,7 @@ export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Co
       .attr('class', (d) => {
         let markerClass = 'metric-value';
         if (_.has(d, 'anomalyScore')) {
-          markerClass += ` anomaly-marker ${getSeverityWithLow(d.anomalyScore)}`;
+          markerClass += ` anomaly-marker ${getSeverityWithLow(d.anomalyScore).id}`;
         }
         return markerClass;
       });
@@ -801,7 +801,7 @@ export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Co
 
     // Update all markers to new positions.
     multiBucketMarkers.attr('transform', d => `translate(${this.focusXScale(d.date)}, ${this.focusYScale(d.value)})`)
-      .attr('class', d => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore)}`);
+      .attr('class', d => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore).id}`);
 
 
     // Add rectangular markers for any scheduled events.
@@ -1522,13 +1522,13 @@ export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Co
         selectedMarker.enter().append('path')
           .attr('d', d3.svg.symbol().size(MULTI_BUCKET_SYMBOL_SIZE).type('cross'))
           .attr('transform', d => `translate(${focusXScale(d.date)}, ${focusYScale(d.value)})`)
-          .attr('class', d => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore)} highlighted`);
+          .attr('class', d => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore).id} highlighted`);
       } else {
         selectedMarker.enter().append('circle')
           .attr('r', LINE_CHART_ANOMALY_RADIUS)
           .attr('cx', d => focusXScale(d.date))
           .attr('cy', d => focusYScale(d.value))
-          .attr('class', d => `anomaly-marker metric-value ${getSeverityWithLow(d.anomalyScore)} highlighted`);
+          .attr('class', d => `anomaly-marker metric-value ${getSeverityWithLow(d.anomalyScore).id} highlighted`);
       }
 
       // Display the chart tooltip for this marker.
