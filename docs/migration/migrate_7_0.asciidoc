@@ -103,3 +103,16 @@ The port is now protocol dependent: https ports will use 443, and http ports wil
 `server.ssl.supportedProtocols`
 
 *Impact:* Users relying upon TLSv1 will be unable to use Kibana unless `server.ssl.supportedProtocols` is explicitly set.
+
+[float]
+=== kibana.yml setting `server.ssl.cert` is no longer valid
+*Details:* This deprecated setting has been removed and `server.ssl.certificate` should be used instead.
+
+*Impact:* Users with `server.ssl.cert` set should use `server.ssl.certificate` instead
+
+[float]
+=== kibana.yml `server.ssl.enabled` must be set to `true` to enable SSL
+*Details:* Previously, if `server.ssl.certificate` and `server.ssl.key` were set, SSL would automatically be enabled. 
+It's now required that the user sets `server.ssl.enabled` to true for this to occur.
+
+*Impact:* Users with both `server.ssl.certificate` and `server.ssl.key` set must now also set `server.ssl.enabled` to enable SSL.
