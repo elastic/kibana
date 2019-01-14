@@ -129,6 +129,13 @@ describe('RegionMapsVisualizationTests', function () {
         type: 'region_map'
       });
 
+      vis.params.bucket = {
+        accessor: 0,
+      };
+      vis.params.metric = {
+        accessor: 1,
+      };
+
       vis.params.selectedJoinField = { 'name': 'iso2', 'description': 'Two letter abbreviation' };
       vis.params.selectedLayer = {
         'attribution': '<p><a href="http://www.naturalearthdata.com/about/terms-of-use">Made with NaturalEarth</a> | <a href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a></p>&#10;',
