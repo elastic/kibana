@@ -7,9 +7,11 @@
 import { EuiInMemoryTable } from '@elastic/eui';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { FeaturePrivilegeSet } from '../../../../../../../../common/model/privileges/feature_privileges';
-import { PrivilegeDefinition } from '../../../../../../../../common/model/privileges/privilege_definition';
-import { Role } from '../../../../../../../../common/model/role';
+import {
+  FeaturePrivilegeSet,
+  PrivilegeDefinition,
+  Role,
+} from '../../../../../../../../common/model';
 import { EffectivePrivilegesFactory } from '../../../../../../../lib/effective_privileges';
 import { FeatureTable } from './feature_table';
 

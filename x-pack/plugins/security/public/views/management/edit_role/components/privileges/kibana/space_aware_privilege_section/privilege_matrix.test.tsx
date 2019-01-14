@@ -9,8 +9,7 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
 import { Feature } from '../../../../../../../../../xpack_main/types';
-import { PrivilegeDefinition } from '../../../../../../../../common/model/privileges/privilege_definition';
-import { Role } from '../../../../../../../../common/model/role';
+import { PrivilegeDefinition, Role } from '../../../../../../../../common/model';
 import { EffectivePrivilegesFactory } from '../../../../../../../lib/effective_privileges';
 import { PrivilegeMatrix } from './privilege_matrix';
 

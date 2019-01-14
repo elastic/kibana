@@ -15,8 +15,7 @@ import {
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
-import { PrivilegeDefinition } from '../../../../../../../../common/model/privileges/privilege_definition';
-import { Role } from '../../../../../../../../common/model/role';
+import { PrivilegeDefinition, Role } from '../../../../../../../../common/model';
 import { EffectivePrivileges } from '../../../../../../../lib/effective_privileges';
 import { NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
 import { copyRole } from '../../../../lib/copy_role';

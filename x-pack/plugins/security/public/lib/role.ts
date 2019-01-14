@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { Role } from '../../common/model/role';
+import { Role } from '../../common/model';
 
 /**
  * Returns whether given role is enabled or not

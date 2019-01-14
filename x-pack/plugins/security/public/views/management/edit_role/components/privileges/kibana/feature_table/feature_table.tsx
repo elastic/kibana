@@ -17,8 +17,7 @@ import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
-import { PrivilegeDefinition } from '../../../../../../../../common/model/privileges/privilege_definition';
-import { Role } from '../../../../../../../../common/model/role';
+import { PrivilegeDefinition, Role } from '../../../../../../../../common/model';
 import {
   EffectivePrivileges,
   ExplanationResult,

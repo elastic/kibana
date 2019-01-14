@@ -5,7 +5,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { Role } from '../../../../../common/model/role';
+import { Role } from '../../../../../common/model';
 
 export function copyRole(role: Role) {
   return cloneDeep(role);

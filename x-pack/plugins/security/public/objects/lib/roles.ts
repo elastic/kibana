@@ -5,7 +5,7 @@
  */
 import { omit } from 'lodash';
 import chrome from 'ui/chrome';
-import { Role } from '../../../common/model/role';
+import { Role } from '../../../common/model';
 
 const apiBase = chrome.addBasePath(`/api/security/role`);
 

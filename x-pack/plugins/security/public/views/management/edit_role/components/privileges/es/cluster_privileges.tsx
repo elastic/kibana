@@ -6,7 +6,7 @@
 
 import { EuiComboBox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { Component } from 'react';
-import { Role } from '../../../../../../../common/model/role';
+import { Role } from '../../../../../../../common/model';
 import { isReadOnlyRole } from '../../../../../../lib/role';
 // @ts-ignore
 import { getClusterPrivileges } from '../../../../../../services/role_privileges';

@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, I18nProvider, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
-import { Role } from '../../../../../../../common/model/role';
+import { Role } from '../../../../../../../common/model';
 // @ts-ignore
 import { documentationLinks } from '../../../../../../documentation_links';
 import { RoleValidator } from '../../../lib/validate_role';

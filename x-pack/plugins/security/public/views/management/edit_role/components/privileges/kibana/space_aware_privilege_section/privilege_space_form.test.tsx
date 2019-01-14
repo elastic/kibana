@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { PrivilegeDefinition } from '../../../../../../../../common/model/privileges/privilege_definition';
+import { PrivilegeDefinition } from '../../../../../../../../common/model';
 import { EffectivePrivilegesFactory } from '../../../../../../../lib/effective_privileges';
 import { RoleValidator } from '../../../../lib/validate_role';
 import { PrivilegeSpaceForm } from './privilege_space_form';

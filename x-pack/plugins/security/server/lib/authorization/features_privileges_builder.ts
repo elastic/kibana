@@ -5,7 +5,7 @@
  */
 
 import { Dictionary, flatten, mapValues } from 'lodash';
-import { FeaturesPrivileges } from 'x-pack/plugins/security/common/model/kibana_privilege';
+import { FeaturesPrivileges } from 'x-pack/plugins/security/common/model';
 import { FeaturePrivilegeDefinition } from 'x-pack/plugins/xpack_main/server/lib/feature_registry/feature_registry';
 import { Feature } from '../../../../xpack_main/types';
 import { Actions } from './actions';

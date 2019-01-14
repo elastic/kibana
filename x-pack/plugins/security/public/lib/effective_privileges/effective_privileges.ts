@@ -5,9 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import { FeaturePrivilegeSet } from '../../../common/model/privileges/feature_privileges';
-import { PrivilegeDefinition } from '../../../common/model/privileges/privilege_definition';
-import { Role } from '../../../common/model/role';
+import { FeaturePrivilegeSet, PrivilegeDefinition, Role } from '../../../common/model';
 import { NO_PRIVILEGE_VALUE } from '../../views/management/edit_role/lib/constants';
 import { ActionSet, areActionsFullyCovered } from './effective_privileges_utils';
 

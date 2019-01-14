@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PrivilegeMap } from 'x-pack/plugins/security/common/model/kibana_privilege';
+import { PrivilegeMap } from 'x-pack/plugins/security/common/model';
 import { Feature } from '../../../../xpack_main/types';
 import { IGNORED_TYPES } from '../../../common/constants';
 import { Actions } from './actions';

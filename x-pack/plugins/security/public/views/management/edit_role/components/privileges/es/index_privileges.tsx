@@ -5,8 +5,7 @@
  */
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { IndexPrivilege } from '../../../../../../../common/model/index_privilege';
-import { Role } from '../../../../../../../common/model/role';
+import { IndexPrivilege, Role } from '../../../../../../../common/model';
 import { isReadOnlyRole, isReservedRole, isRoleEnabled } from '../../../../../../lib/role';
 import { getFields } from '../../../../../../objects';
 import { RoleValidator } from '../../../lib/validate_role';

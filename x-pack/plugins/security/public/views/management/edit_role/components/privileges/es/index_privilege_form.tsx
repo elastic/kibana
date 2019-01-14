@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, Fragment } from 'react';
-import { IndexPrivilege } from '../../../../../../../common/model/index_privilege';
+import { IndexPrivilege } from '../../../../../../../common/model';
 // @ts-ignore
 import { getIndexPrivileges } from '../../../../../../services/role_privileges';
 import { RoleValidator } from '../../../lib/validate_role';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PrivilegeDefinition } from '../../../common/model/privileges/privilege_definition';
+import { PrivilegeDefinition } from '../../../common/model';
 import { EffectivePrivileges } from './effective_privileges';
 import { EffectivePrivilegesFactory } from './effective_privileges_factory';
 

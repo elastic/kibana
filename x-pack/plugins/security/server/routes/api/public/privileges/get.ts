@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PrivilegeMap } from 'x-pack/plugins/security/common/model/kibana_privilege';
+import { PrivilegeMap } from 'x-pack/plugins/security/common/model';
 
 export function initGetPrivilegesApi(
   server: Record<string, any>,

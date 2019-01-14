@@ -4,21 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/*
- * Copyright Elasticsearch B.V. ../../../../../common/model/index_privileger one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-
 import { i18n } from '@kbn/i18n';
-import { IndexPrivilege } from '../../../../../common/model/index_privilege';
-import { Role } from '../../../../../common/model/role';
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
+import { IndexPrivilege, Role } from '../../../../../common/model';
 
 interface RoleValidatorOptions {
   shouldValidate?: boolean;

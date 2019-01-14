@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FeaturePrivilegeSet } from '../../../common/model/privileges/feature_privileges';
-import { PrivilegeDefinition } from '../../../common/model/privileges/privilege_definition';
-import { Role } from '../../../common/model/role';
+import { FeaturePrivilegeSet, PrivilegeDefinition, Role } from '../../../common/model';
 import { NO_PRIVILEGE_VALUE } from '../../views/management/edit_role/lib/constants';
 import { PRIVILEGE_SOURCE } from './effective_privileges';
 import { EffectivePrivilegesFactory } from './effective_privileges_factory';

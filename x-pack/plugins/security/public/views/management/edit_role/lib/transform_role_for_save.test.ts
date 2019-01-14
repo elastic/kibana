@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Role } from '../../../../../common/model/role';
+import { Role } from '../../../../../common/model';
 import { transformRoleForSave } from './transform_role_for_save';
 
 describe('transformRoleForSave', () => {
