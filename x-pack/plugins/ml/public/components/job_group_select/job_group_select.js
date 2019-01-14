@@ -29,14 +29,12 @@ module.directive('mlJobGroupSelect', function () {
     controllerAs: 'mlGroupSelect',
     bindToController: true,
     controller: class MlGroupSelectController extends InitAfterBindingsWorkaround {
-      constructor() {
-        this.newGroupLabel = i18n.translate('xpack.ml.jobGroupSelect.newGroupLabel', { defaultMessage: '(new group)' });
-      }
 
       initAfterBindings($scope) {
         this.$scope = $scope;
         this.selectedGroups = [];
         this.groups = [];
+        this.$scope.newGroupLabel = i18n.translate('xpack.ml.jobGroupSelect.newGroupLabel', { defaultMessage: '(new group)' });
 
         // load the jobs, in case they've not been loaded before
         // in order to get the job groups
