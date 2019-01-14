@@ -236,8 +236,8 @@ export function convertMapExtentToPolygon({ maxLat, maxLon, minLat, minLon }) {
   // when the shape crosses the dateline
   const left = minLon;
   const right = maxLon;
-  const top = maxLat;
-  const bottom = minLat;
+  const top = maxLat > 90 ? 90 : maxLat;
+  const bottom = minLat < -90 ? -90 : minLat;
   const topLeft = [left, top];
   const bottomLeft = [left, bottom];
   const bottomRight = [right, bottom];
