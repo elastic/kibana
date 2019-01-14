@@ -171,8 +171,9 @@ export class RoleValidator {
 
     const privileges = role.kibana || [];
 
-    // TODO: update validation
-    const arePrivilegesValid = privileges.every(assignedPrivilege => !!assignedPrivilege);
+    const arePrivilegesValid = privileges.every(assignedPrivilege => {
+      return assignedPrivilege.base.length > 0 || Object.keys(assignedPrivilege.feature).length > 0;
+    });
 
     if (arePrivilegesValid) {
       return valid();

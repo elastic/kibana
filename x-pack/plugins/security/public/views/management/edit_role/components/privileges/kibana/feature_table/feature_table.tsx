@@ -74,7 +74,7 @@ export class FeatureTable extends Component<Props, {}> {
     }));
 
     const { rankedFeaturePrivileges } = effectivePrivileges;
-    // TODO: This siimply grabs the available privileges from the first feature we encounter.
+    // TODO: This simply grabs the available privileges from the first feature we encounter.
     // As of now, features can have 'all' and 'read' as available privileges. Once that assumption breaks,
     // this will need updating. This is a simplifying measure to enable the new UI.
     const availablePrivileges = Object.values(rankedFeaturePrivileges)[0];
@@ -174,7 +174,6 @@ export class FeatureTable extends Component<Props, {}> {
           .getPrivileges(featureId);
 
         if (!featurePrivileges) {
-          // TODO
           return null;
         }
 
@@ -224,7 +223,6 @@ export class FeatureTable extends Component<Props, {}> {
             options={options}
             idSelected={`${featureId}_${actualPrivilegeValue || NO_PRIVILEGE_VALUE}`}
             onChange={this.onChange(featureId)}
-            color={'primary'}
           />
         );
       },

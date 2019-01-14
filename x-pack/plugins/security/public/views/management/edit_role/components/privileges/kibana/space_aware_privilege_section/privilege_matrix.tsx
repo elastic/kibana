@@ -187,7 +187,9 @@ export class PrivilegeMatrix extends Component<Props, State> {
       },
       ...spacesColumns.map(item => {
         return {
-          field: 'feature',
+          // TODO: this is a hacky way to determine if we are looking at the global feature
+          // used for cellProps below...
+          field: item.isGlobal ? 'global' : 'feature',
           name: (
             <div>
               {item.spaces.slice(0, SPACES_DISPLAY_COUNT).map((space: Space) => (
@@ -248,10 +250,10 @@ export class PrivilegeMatrix extends Component<Props, State> {
             className: item.feature.isBase ? 'secPrivilegeMatrix__row--isBasePrivilege' : '',
           };
         }}
-        cellProps={(item: any) => {
-          // TODO: FIX THIS TO ACTUALLY WORK
+        cellProps={(item: TableRow, column: Record<string, any>) => {
           return {
-            className: item.isGlobal ? 'secPrivilegeMatrix__cell--isGlobalPrivilege' : '',
+            className:
+              column.field === 'global' ? 'secPrivilegeMatrix__cell--isGlobalPrivilege' : '',
           };
         }}
       />

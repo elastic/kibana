@@ -49,6 +49,7 @@ interface TableRow {
   spacesIndex: number;
   isGlobal: boolean;
   privileges: {
+    spaces: string[];
     base: string[];
     feature: FeaturePrivilegeSet;
   };
@@ -86,6 +87,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
         spacesIndex,
         isGlobal: isGlobalPrivilegeDefinition(spacePrivs),
         privileges: {
+          spaces: spacePrivs.spaces,
           base: spacePrivs.base || [],
           feature: spacePrivs.feature || {},
         },
@@ -242,9 +244,10 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
         items={rows}
         hasActions
         rowProps={(item: TableRow) => {
-          // TODO: Find the global space the right way
           return {
-            className: item.spaces[0].id === '*' ? 'secPrivilegeTable__row--isGlobalSpace' : '',
+            className: isGlobalPrivilegeDefinition(item.privileges)
+              ? 'secPrivilegeTable__row--isGlobalSpace'
+              : '',
           };
         }}
       />
