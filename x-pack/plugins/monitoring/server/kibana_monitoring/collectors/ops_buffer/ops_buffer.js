@@ -7,7 +7,6 @@
 import { LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG } from '../../../../common/constants';
 import { EventRoller } from './event_roller';
 import { CloudDetector } from '../../../cloud';
-import { getOSInfo } from './get_os_info';
 
 /**
  * Manage the buffer of Kibana Ops events
@@ -41,7 +40,7 @@ export function opsBuffer(server) {
       if (eventRollup && eventRollup.os) {
         eventRollup.os = {
           ...eventRollup.os,
-          ...(await getOSInfo())
+          ...(await server.getOSInfo())
         };
       }
 
