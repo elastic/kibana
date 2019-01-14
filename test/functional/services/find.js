@@ -183,7 +183,7 @@ export async function FindProvider({ getService }) {
       log.debug(`Find.displayedByLinkText('${linkText}') with timeout=${timeout}`);
       const element = await this.byLinkText(linkText, timeout);
       log.debug(`Wait for element become visible: ${linkText} with timeout=${timeout}`);
-      await driver.wait(until.elementIsVisible(element), timeout);
+      await driver.wait(until.elementIsVisible(element._webElement), timeout);
       return wrap(element);
     }
 
@@ -191,7 +191,7 @@ export async function FindProvider({ getService }) {
       log.debug(`Find.displayedByCssSelector(${selector})`);
       const element = await this.byCssSelector(selector, timeout);
       log.debug(`Wait for element become visible: ${selector} with timeout=${timeout}`);
-      await driver.wait(until.elementIsVisible(element), timeout);
+      await driver.wait(until.elementIsVisible(element._webElement), timeout);
       return wrap(element);
     }
 
