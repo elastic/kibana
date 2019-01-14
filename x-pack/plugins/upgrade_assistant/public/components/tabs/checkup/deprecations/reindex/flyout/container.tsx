@@ -13,7 +13,7 @@ import { ChecklistFlyoutStep } from './checklist_step';
 import { WarningsFlyoutStep } from './warnings_step';
 
 enum ReindexFlyoutStep {
-  destructiveConfirmation,
+  reindexWarnings,
   checklist,
 }
 
@@ -37,9 +37,10 @@ export class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFl
     const { reindexWarnings } = props.reindexState;
 
     this.state = {
+      // If there are any warnings, show the warnings step first.
       currentFlyoutStep:
         reindexWarnings && reindexWarnings.length > 0
-          ? ReindexFlyoutStep.destructiveConfirmation
+          ? ReindexFlyoutStep.reindexWarnings
           : ReindexFlyoutStep.checklist,
     };
   }
@@ -50,7 +51,7 @@ export class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFl
 
     let flyoutContents: React.ReactNode;
     switch (currentFlyoutStep) {
-      case ReindexFlyoutStep.destructiveConfirmation:
+      case ReindexFlyoutStep.reindexWarnings:
         flyoutContents = (
           <WarningsFlyoutStep
             closeFlyout={closeFlyout}

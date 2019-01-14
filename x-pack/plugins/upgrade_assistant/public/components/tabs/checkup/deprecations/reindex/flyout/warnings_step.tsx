@@ -33,6 +33,10 @@ interface WarningsConfirmationFlyoutState {
   checkedIds: { [id: string]: boolean };
 }
 
+/**
+ * Displays warning text about destructive changes required to reindex this index. The user
+ * must acknowledge each change before being allowed to proceed.
+ */
 export class WarningsFlyoutStep extends React.Component<
   WarningsConfirmationFlyoutProps,
   WarningsConfirmationFlyoutState

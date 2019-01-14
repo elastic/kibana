@@ -9,14 +9,11 @@ import { Server } from 'hapi';
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { SavedObjectsClient } from 'src/server/saved_objects';
-import { ReindexSavedObject, ReindexStatus, ReindexWarning } from '../../common/types';
+import { ReindexStatus } from '../../common/types';
 import { reindexServiceFactory, ReindexWorker } from '../lib/reindexing';
 
-export function registerReindexIndicesRoutes(server: Server) {
-  const BASE_PATH = '/api/upgrade_assistant/reindex';
-  const { callWithRequest, callWithInternalUser } = server.plugins.elasticsearch.getCluster(
-    'admin'
-  );
+export function registerReindexWorker(server: Server) {
+  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const savedObjectsRepository = server.savedObjects.getSavedObjectsRepository(
     callWithInternalUser
   );
@@ -36,6 +33,13 @@ export function registerReindexIndicesRoutes(server: Server) {
 
   worker.start();
   server.events.on('stop', () => worker.stop());
+
+  return worker;
+}
+
+export function registerReindexIndicesRoutes(server: Server, worker: ReindexWorker) {
+  const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
+  const BASE_PATH = '/api/upgrade_assistant/reindex';
 
   // Start reindex for an index
   server.route({
@@ -73,38 +77,21 @@ export function registerReindexIndicesRoutes(server: Server) {
       const callCluster = callWithRequest.bind(null, request) as CallCluster;
       const reindexService = reindexServiceFactory(client, callCluster);
 
-      let reindexOp: ReindexSavedObject | null = null;
-      let reindexWarnings: ReindexWarning[] = [];
-
       try {
-        reindexOp = await reindexService.findReindexOperation(indexName);
+        const reindexOp = await reindexService.findReindexOperation(indexName);
+        const reindexWarnings = await reindexService.detectReindexWarnings(indexName);
 
-        // If the reindexOp is in progress but our worker hasn't picked it up, force it to refresh.
-        if (
-          reindexOp.attributes.status === ReindexStatus.inProgress &&
-          !worker.includes(reindexOp)
-        ) {
-          server.log(['debug', 'upgrade_assistant'], 'Manually refreshing worker.');
-          worker.forceRefresh();
-        }
+        return {
+          warnings: reindexWarnings,
+          reindexOp: reindexOp ? reindexOp.attributes : null,
+        };
       } catch (e) {
-        if (not404(e)) {
-          throw e;
+        if (!e.isBoom) {
+          return Boom.boomify(e, { statusCode: 500 });
         }
-      }
 
-      try {
-        reindexWarnings = await reindexService.detectReindexWarnings(indexName);
-      } catch (e) {
-        if (not404(e)) {
-          throw e;
-        }
+        return e;
       }
-
-      return {
-        warnings: reindexWarnings,
-        reindexOp: reindexOp ? reindexOp.attributes : null,
-      };
     },
   });
 
@@ -117,7 +104,3 @@ export function registerReindexIndicesRoutes(server: Server) {
     },
   });
 }
-
-const not404 = (e: any) => {
-  return !e.output || e.output.statusCode !== 404;
-};

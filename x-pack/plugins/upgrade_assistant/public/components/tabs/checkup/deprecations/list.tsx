@@ -86,8 +86,8 @@ export const DeprecationList: StatelessComponent<{
   // If we're grouping by message and the first deprecation has an index field, show an index
   // group deprecation. Otherwise, show each message.
   if (currentGroupBy === GroupByOption.message && deprecations[0].index !== undefined) {
-    // If we're grouping by index we assume that every deprecation message is the same
-    // issue and that each deprecation will have an index associated with it.
+    // We assume that every deprecation message is the same issue (since they have the same
+    // message) and that each deprecation will have an index associated with it.
     const indices = deprecations.map(dep => ({
       index: dep.index!,
       details: dep.details,

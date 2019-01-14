@@ -93,7 +93,7 @@ export class ReindexPollingService {
       );
       this.updateWithResponse(data);
 
-      // Keep polling if it has completed or failed.
+      // Only keep polling if it exists and is in progress.
       if (data.reindexOp && data.reindexOp.status === ReindexStatus.inProgress) {
         this.pollTimeout = setTimeout(this.updateStatus, POLL_INTERVAL);
       }
@@ -106,8 +106,11 @@ export class ReindexPollingService {
   };
 
   private updateWithResponse = ({ reindexOp, warnings }: StatusResponse) => {
+    // Next value should always include the entire state, not just what changes.
+    // We make a shallow copy as a starting new state.
     const nextValue = {
       ...this.status$.value,
+      // If we're getting any updates, set to success.
       loadingState: LoadingState.Success,
     };
 

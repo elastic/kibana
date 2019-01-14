@@ -46,6 +46,8 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
   }
 
   public async componentWillUnmount() {
+    this.service.stopPolling();
+
     if (this.subscription) {
       this.subscription.unsubscribe();
       delete this.subscription;

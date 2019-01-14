@@ -28,10 +28,10 @@ import { FlatSettings } from './types';
 export const LOCK_WINDOW = moment.duration(90, 'seconds');
 
 export interface ReindexService {
-  detectReindexWarnings(indexName: string): Promise<ReindexWarning[]>;
+  detectReindexWarnings(indexName: string): Promise<ReindexWarning[] | null>;
   createReindexOperation(indexName: string): Promise<ReindexSavedObject>;
   findAllInProgressOperations(): Promise<FindResponse<ReindexOperation>>;
-  findReindexOperation(indexName: string): Promise<ReindexSavedObject>;
+  findReindexOperation(indexName: string): Promise<ReindexSavedObject | null>;
   processNextStep(reindexOp: ReindexSavedObject): Promise<ReindexSavedObject>;
 }
 
@@ -131,7 +131,7 @@ export const reindexServiceFactory = (
     })) as { [indexName: string]: FlatSettings };
 
     if (!flatSettings[indexName]) {
-      throw Boom.notFound(`Index ${indexName} does not exist.`);
+      return null;
     }
 
     return flatSettings[indexName];
@@ -193,9 +193,13 @@ export const reindexServiceFactory = (
    */
   const createNewIndex = async (reindexOp: ReindexSavedObject) => {
     const { indexName, newIndexName } = reindexOp.attributes;
-    const flatSettings = await getFlatSettings(indexName);
-    const { settings, mappings } = transformFlatSettings(flatSettings);
 
+    const flatSettings = await getFlatSettings(indexName);
+    if (!flatSettings) {
+      throw Boom.notFound(`Index ${indexName} does not exist.`);
+    }
+
+    const { settings, mappings } = transformFlatSettings(flatSettings);
     const createIndex = await callCluster('indices.create', {
       index: newIndexName,
       body: {
@@ -362,7 +366,11 @@ export const reindexServiceFactory = (
   return {
     async detectReindexWarnings(indexName: string) {
       const flatSettings = await getFlatSettings(indexName);
-      return getReindexWarnings(flatSettings);
+      if (!flatSettings) {
+        return null;
+      } else {
+        return getReindexWarnings(flatSettings);
+      }
     },
 
     async createReindexOperation(indexName: string) {
@@ -399,9 +407,9 @@ export const reindexServiceFactory = (
 
       // Bail early if it does not exist or there is more than one.
       if (findResponse.total === 0) {
-        throw Boom.notFound(`No reindex operations in-progress for ${indexName}.`);
+        return null;
       } else if (findResponse.total > 1) {
-        throw Boom.badImplementation(`More than on reindex operation in-progress for ${indexName}`);
+        throw Boom.badImplementation(`More than one reindex operation found for ${indexName}`);
       }
 
       return findResponse.saved_objects[0];

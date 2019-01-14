@@ -57,6 +57,12 @@ describe('reindexService', () => {
         path: `/myIndex?flat_settings=true`,
       });
     });
+
+    it('returns null if index does not exist', async () => {
+      callCluster.mockResolvedValueOnce({});
+      const reindexWarnings = await service.detectReindexWarnings('myIndex');
+      expect(reindexWarnings).toBeNull();
+    });
   });
 
   describe('createReindexOperation', () => {
@@ -80,7 +86,7 @@ describe('reindexService', () => {
 
     it('fails if index does not exist', async () => {
       callCluster.mockResolvedValueOnce(false);
-      expect(service.createReindexOperation('myIndex')).rejects.toThrow();
+      await expect(service.createReindexOperation('myIndex')).rejects.toThrow();
       expect(savedObjectClient.create).not.toHaveBeenCalled();
     });
 
@@ -102,7 +108,7 @@ describe('reindexService', () => {
         total: 1,
       });
 
-      expect(service.createReindexOperation('myIndex')).rejects.toThrow();
+      await expect(service.createReindexOperation('myIndex')).rejects.toThrow();
       expect(savedObjectClient.delete).not.toHaveBeenCalled();
     });
 
@@ -125,7 +131,7 @@ describe('reindexService', () => {
       });
     });
 
-    it('fails if it cannot find a newIndexName that does not already exist', () => {
+    it('fails if it cannot find a newIndexName that does not already exist', async () => {
       callCluster.mockResolvedValueOnce(true);
       savedObjectClient.find.mockResolvedValueOnce({
         saved_objects: [{ id: 1, attributes: { status: ReindexStatus.inProgress } }],
@@ -133,15 +139,15 @@ describe('reindexService', () => {
       });
       callCluster.mockResolvedValue(true); // always return true
 
-      expect(service.createReindexOperation('myIndex')).rejects.toThrow();
+      await expect(service.createReindexOperation('myIndex')).rejects.toThrow();
       expect(savedObjectClient.create).not.toHaveBeenCalled();
     });
   });
 
   describe('findReindexOperation', () => {
-    it('returns the only result', () => {
+    it('returns the only result', async () => {
       savedObjectClient.find.mockResolvedValue({ total: 1, saved_objects: ['fake object'] });
-      expect(service.findReindexOperation('myIndex')).resolves.toEqual('fake object');
+      await expect(service.findReindexOperation('myIndex')).resolves.toEqual('fake object');
       expect(savedObjectClient.find).toHaveBeenCalledWith({
         type: REINDEX_OP_TYPE,
         search: `"myIndex"`,
@@ -149,21 +155,21 @@ describe('reindexService', () => {
       });
     });
 
-    it('fails if there are no results', () => {
+    it('returns null if there are no results', async () => {
       savedObjectClient.find.mockResolvedValue({ total: 0 });
-      expect(service.findReindexOperation('myIndex')).rejects.toThrow();
+      await expect(service.findReindexOperation('myIndex')).resolves.toBeNull();
     });
 
-    it('fails if there is more than 1 result', () => {
+    it('fails if there is more than 1 result', async () => {
       savedObjectClient.find.mockResolvedValue({ total: 2 });
-      expect(service.findReindexOperation('myIndex')).rejects.toThrow();
+      await expect(service.findReindexOperation('myIndex')).rejects.toThrow();
     });
   });
 
   describe('findAllInProgressOperations', () => {
-    it('returns raw results', () => {
+    it('returns raw results', async () => {
       savedObjectClient.find.mockResolvedValue('results!');
-      expect(service.findAllInProgressOperations()).resolves.toEqual('results!');
+      await expect(service.findAllInProgressOperations()).resolves.toEqual('results!');
       expect(savedObjectClient.find).toHaveBeenCalledWith({
         type: REINDEX_OP_TYPE,
         search: '0',
@@ -210,12 +216,12 @@ describe('reindexService', () => {
         expect(secondUpdateAttributes.locked).toBeNull();
       });
 
-      it('throws if object is locked', () => {
+      it('throws if object is locked', async () => {
         const reindexOp = {
           id: '1',
           attributes: { locked: moment().format() },
         } as ReindexSavedObject;
-        expect(service.processNextStep(reindexOp)).rejects.toThrow();
+        await expect(service.processNextStep(reindexOp)).rejects.toThrow();
         expect(savedObjectClient.update).not.toHaveBeenCalled();
       });
     });

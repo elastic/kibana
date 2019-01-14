@@ -21,6 +21,10 @@ const ErrorCallout: React.StatelessComponent<{ errorMessage: string | null }> = 
   </EuiCallOut>
 );
 
+/**
+ * Displays a list of steps in the reindex operation, the current status, a progress bar,
+ * and any error messages that are encountered.
+ */
 export const ReindexProgress: React.StatelessComponent<{
   lastCompletedStep?: ReindexStep;
   reindexStatus?: ReindexStatus;

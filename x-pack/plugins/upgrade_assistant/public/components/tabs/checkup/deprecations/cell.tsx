@@ -7,7 +7,6 @@
 import React, { ReactNode, StatelessComponent } from 'react';
 
 import {
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,

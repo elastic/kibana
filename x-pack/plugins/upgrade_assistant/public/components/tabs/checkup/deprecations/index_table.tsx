@@ -7,7 +7,7 @@
 import { sortBy } from 'lodash';
 import React from 'react';
 
-import { EuiBasicTable, EuiButton } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 import { ReindexButton } from './reindex';
 

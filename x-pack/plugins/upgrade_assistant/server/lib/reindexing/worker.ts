@@ -83,6 +83,9 @@ export class ReindexWorker {
     return this.inProgressOps.map(o => o.id).includes(reindexOp.id);
   };
 
+  /**
+   * Runs an async loop until all inProgress jobs are complete or failed.
+   */
   private startUpdateOperationLoop = async () => {
     this.updateOperationLoopRunning = true;
 
@@ -118,6 +121,10 @@ export class ReindexWorker {
   };
 }
 
+/**
+ * Swallows any exceptions that may occur during the reindex process. This prevents any errors from
+ * stopping the worker from continuing to process more jobs.
+ */
 const swallowExceptions = (
   func: (reindexOp: ReindexSavedObject) => Promise<ReindexSavedObject>,
   log: Server['log']

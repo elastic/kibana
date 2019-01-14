@@ -7,10 +7,13 @@
 import { Legacy } from 'kibana';
 import { registerClusterCheckupRoutes } from './routes/cluster_checkup';
 import { registerDeprecationLoggingRoutes } from './routes/deprecation_logging';
-import { registerReindexIndicesRoutes } from './routes/reindex_indices';
+import { registerReindexIndicesRoutes, registerReindexWorker } from './routes/reindex_indices';
 
 export function initServer(server: Legacy.Server) {
   registerClusterCheckupRoutes(server);
   registerDeprecationLoggingRoutes(server);
-  registerReindexIndicesRoutes(server);
+
+  // Reindexing
+  const worker = registerReindexWorker(server);
+  registerReindexIndicesRoutes(server, worker);
 }

@@ -17,7 +17,7 @@ MigrationApis.getUpgradeAssistantStatus = jest.fn();
  * to ensure they're wired up to the lib functions correctly. Business logic is tested
  * more thoroughly in the es_migration_apis test.
  */
-describe('reindex template API', () => {
+describe('cluster checkup API', () => {
   const server = new Server();
   server.plugins = {
     elasticsearch: {
@@ -29,7 +29,7 @@ describe('reindex template API', () => {
   registerClusterCheckupRoutes(server);
 
   describe('GET /api/upgrade_assistant/reindex/{indexName}.json', () => {
-    it('returns a template', async () => {
+    it('returns state', async () => {
       MigrationApis.getUpgradeAssistantStatus.mockResolvedValue({
         cluster: [],
         indices: [],
