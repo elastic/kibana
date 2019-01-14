@@ -104,28 +104,48 @@ export function getMemorySeries(
       ? getEmptySerie(start, end)
       : [
           {
-            title: 'System total mem.',
+            title: i18n.translate(
+              'xpack.apm.chart.memorySeries.systemTotalMemLabel',
+              {
+                defaultMessage: 'System total mem.'
+              }
+            ),
             data: series.totalMemory,
             type: 'area',
             color: colors.apmPink,
             legendValue: asGB(overallValues.totalMemory)
           },
           {
-            title: 'System avail. mem.',
+            title: i18n.translate(
+              'xpack.apm.chart.memorySeries.systemAvailMemLabel',
+              {
+                defaultMessage: 'System avail. mem.'
+              }
+            ),
             data: series.freeMemory,
             type: 'area',
             color: colors.apmPurple,
             legendValue: asGB(overallValues.freeMemory)
           },
           {
-            title: 'Process RSS',
+            title: i18n.translate(
+              'xpack.apm.chart.memorySeries.processRSSLabel',
+              {
+                defaultMessage: 'Process RSS'
+              }
+            ),
             data: series.processMemoryRss,
             type: 'area',
             color: colors.apmGreen,
             legendValue: asGB(overallValues.processMemoryRss)
           },
           {
-            title: 'Process mem. size',
+            title: i18n.translate(
+              'xpack.apm.chart.memorySeries.pocessMemSizeLabel',
+              {
+                defaultMessage: 'Process mem. size'
+              }
+            ),
             data: series.processMemorySize,
             type: 'area',
             color: colors.apmBlue,
@@ -148,28 +168,36 @@ export function getCPUSeries(CPUChartResponse: MetricsChartAPIResponse['cpu']) {
 
   const seriesList: TimeSerie[] = [
     {
-      title: 'Process average',
+      title: i18n.translate('xpack.apm.chart.cpuSeries.processAverageLabel', {
+        defaultMessage: 'Process average'
+      }),
       data: series.processCPUAverage,
       type: 'linemark',
       color: colors.apmPink,
       legendValue: asPercent(overallValues.processCPUAverage || 0)
     },
     {
-      title: 'Process max',
+      title: i18n.translate('xpack.apm.chart.cpuSeries.processMaxLabel', {
+        defaultMessage: 'Process max'
+      }),
       data: series.processCPUMax,
       type: 'linemark',
       color: colors.apmPurple,
       legendValue: asPercent(overallValues.processCPUMax || 0)
     },
     {
-      title: 'System average',
+      title: i18n.translate('xpack.apm.chart.cpuSeries.systemAverageLabel', {
+        defaultMessage: 'System average'
+      }),
       data: series.systemCPUAverage,
       type: 'linemark',
       color: colors.apmGreen,
       legendValue: asPercent(overallValues.systemCPUAverage || 0)
     },
     {
-      title: 'System max',
+      title: i18n.translate('xpack.apm.chart.cpuSeries.systemMaxLabel', {
+        defaultMessage: 'System max'
+      }),
       data: series.systemCPUMax,
       type: 'linemark',
       color: colors.apmBlue,

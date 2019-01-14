@@ -6,6 +6,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
 import styled from 'styled-components';
@@ -59,11 +60,17 @@ const PropertyValueTruncated = styled.span`
 `;
 
 function TimestampValue({ timestamp }: { timestamp: Date }) {
+  const notAvailableLabel = i18n.translate(
+    'xpack.apm.timestampValue.notAvailableLabel',
+    {
+      defaultMessage: 'N/A'
+    }
+  );
   const time = moment(timestamp);
-  const timeAgo = timestamp ? time.fromNow() : 'N/A';
+  const timeAgo = timestamp ? time.fromNow() : notAvailableLabel;
   const timestampFull = timestamp
     ? time.format('MMMM Do YYYY, HH:mm:ss.SSS')
-    : 'N/A';
+    : notAvailableLabel;
 
   return (
     <PropertyValue>
