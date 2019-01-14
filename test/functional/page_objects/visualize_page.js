@@ -400,7 +400,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         await find.clickByCssSelector(selector);
         const input = await find.byCssSelector(`${selector} input.ui-select-search`);
         await input.type(myString);
-        await browser.pressKeys(browser.getKeys().RETURN);
+        await input.pressKeys(browser.keys.RETURN);
       });
       await PageObjects.common.sleep(500);
     }
@@ -509,7 +509,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       `;
       await find.clickByCssSelector(selector);
       await find.setValue(`${selector} input.ui-select-search`, fieldValue);
-      await browser.pressKeys(browser.getKeys().RETURN);
+      const input = await find.byCssSelector(`${selector} input.ui-select-search`);
+      await input.pressKeys(browser.keys.RETURN);
     }
 
     async selectFieldById(fieldValue, id) {
@@ -545,7 +546,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // was a long enough gap from the typing above to the space click.  Hence the
       // need for the sleep.
       await PageObjects.common.sleep(500);
-      await browser.pressKeys(browser.getKeys().SPACE);
+      await input.pressKeys(browser.keys.SPACE);
     }
 
     async setCustomInterval(newValue) {
@@ -635,7 +636,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async sizeUpEditor() {
       await testSubjects.click('visualizeEditorResizer');
-      await browser.pressKeys(browser.getKeys().ARROW_RIGHT);
+      await browser.pressKeys(browser.keys.ARROW_RIGHT);
     }
 
     async clickOptions() {

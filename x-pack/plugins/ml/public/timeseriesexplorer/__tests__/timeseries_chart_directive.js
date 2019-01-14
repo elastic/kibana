@@ -36,7 +36,7 @@ describe('ML - <ml-timeseries-chart>', () => {
     document.getElementsByTagName('body')[0].append(mockClassedElement);
 
     // spy the TimeseriesChart component's unmount method to be able to test if it was called
-    const componentWillUnmountSpy = sinon.spy(TimeseriesChart.prototype, 'componentWillUnmount');
+    const componentWillUnmountSpy = sinon.spy(TimeseriesChart.WrappedComponent.prototype, 'componentWillUnmount');
 
     $element = $compile('<ml-timeseries-chart show-forecast="true" />')($scope);
     const scope = $element.isolateScope();

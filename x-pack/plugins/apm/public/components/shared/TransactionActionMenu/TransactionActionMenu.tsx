@@ -14,6 +14,7 @@ import {
   EuiLink,
   EuiPopover
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import idx from 'idx';
 import React from 'react';
 import { getKibanaHref } from 'x-pack/plugins/apm/public/utils/url';
@@ -40,7 +41,9 @@ function getInfraMetricsQuery(transaction: Transaction) {
 function ActionMenuButton({ onClick }: { onClick: () => void }) {
   return (
     <EuiButtonEmpty iconType="arrowDown" iconSide="right" onClick={onClick}>
-      Actions
+      {i18n.translate('xpack.apm.transactionActionMenu.actionsButtonLabel', {
+        defaultMessage: 'Actions'
+      })}
     </EuiButtonEmpty>
   );
 }
@@ -81,7 +84,10 @@ export class TransactionActionMenu extends React.Component<Props, State> {
     return [
       {
         icon: 'loggingApp',
-        label: 'Show pod logs',
+        label: i18n.translate(
+          'xpack.apm.transactionActionMenu.showPodLogsLinkLabel',
+          { defaultMessage: 'Show pod logs' }
+        ),
         target: podId,
         hash: `/link-to/pod-logs/${podId}`,
         query: { time }
@@ -89,7 +95,10 @@ export class TransactionActionMenu extends React.Component<Props, State> {
 
       {
         icon: 'loggingApp',
-        label: 'Show container logs',
+        label: i18n.translate(
+          'xpack.apm.transactionActionMenu.showContainerLogsLinkLabel',
+          { defaultMessage: 'Show container logs' }
+        ),
         target: containerId,
         hash: `/link-to/container-logs/${containerId}`,
         query: { time }
@@ -97,7 +106,10 @@ export class TransactionActionMenu extends React.Component<Props, State> {
 
       {
         icon: 'loggingApp',
-        label: 'Show host logs',
+        label: i18n.translate(
+          'xpack.apm.transactionActionMenu.showHostLogsLinkLabel',
+          { defaultMessage: 'Show host logs' }
+        ),
         target: hostName,
         hash: `/link-to/host-logs/${hostName}`,
         query: { time }
@@ -105,7 +117,10 @@ export class TransactionActionMenu extends React.Component<Props, State> {
 
       {
         icon: 'infraApp',
-        label: 'Show pod metrics',
+        label: i18n.translate(
+          'xpack.apm.transactionActionMenu.showPodMetricsLinkLabel',
+          { defaultMessage: 'Show pod metrics' }
+        ),
         target: podId,
         hash: `/link-to/pod-detail/${podId}`,
         query: infraMetricsQuery
@@ -113,7 +128,10 @@ export class TransactionActionMenu extends React.Component<Props, State> {
 
       {
         icon: 'infraApp',
-        label: 'Show container metrics',
+        label: i18n.translate(
+          'xpack.apm.transactionActionMenu.showContainerMetricsLinkLabel',
+          { defaultMessage: 'Show container metrics' }
+        ),
         target: containerId,
         hash: `/link-to/container-detail/${containerId}`,
         query: infraMetricsQuery
@@ -121,7 +139,10 @@ export class TransactionActionMenu extends React.Component<Props, State> {
 
       {
         icon: 'infraApp',
-        label: 'Show host metrics',
+        label: i18n.translate(
+          'xpack.apm.transactionActionMenu.showHostMetricsLinkLabel',
+          { defaultMessage: 'Show host metrics' }
+        ),
         target: hostName,
         hash: `/link-to/host-detail/${hostName}`,
         query: infraMetricsQuery
@@ -172,7 +193,14 @@ export class TransactionActionMenu extends React.Component<Props, State> {
             >
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem>
-                  <EuiLink>View sample document</EuiLink>
+                  <EuiLink>
+                    {i18n.translate(
+                      'xpack.apm.transactionActionMenu.viewSampleDocumentLinkLabel',
+                      {
+                        defaultMessage: 'View sample document'
+                      }
+                    )}
+                  </EuiLink>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiIcon type="popout" />
@@ -190,7 +218,13 @@ export class TransactionActionMenu extends React.Component<Props, State> {
               anchorPosition="downRight"
               panelPaddingSize="none"
             >
-              <EuiContextMenuPanel items={items} title="Actions" />
+              <EuiContextMenuPanel
+                items={items}
+                title={i18n.translate(
+                  'xpack.apm.transactionActionMenu.actionsLabel',
+                  { defaultMessage: 'Actions' }
+                )}
+              />
             </EuiPopover>
           );
         }}

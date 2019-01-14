@@ -90,7 +90,7 @@ export function FilterBarProvider({ getService, getPageObjects }) {
         }
         for (let j = 0; j < fieldValues.length; j++) {
           await paramFields[i].type(fieldValues[j]);
-          await paramFields[i].pressKeys(browser.getKeys().RETURN);
+          await paramFields[i].pressKeys(browser.keys.RETURN);
         }
       }
       await testSubjects.click('saveFilter');

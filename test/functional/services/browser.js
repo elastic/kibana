@@ -23,10 +23,12 @@ import { WebElementWrapper } from './lib/web_element_wrapper';
 export async function BrowserProvider({ getService }) {
   const { driver, Key, LegacyActionSequence } = await getService('__webdriver__').init();
 
-  return new class BrowserService {
-    getKeys() {
-      return Key;
-    }
+  class BrowserService {
+
+    /**
+     * Keyboard events
+     */
+    keys = Key;
 
     /**
      * Retrieves the a rect describing the current top-level window's size and position.
@@ -37,7 +39,6 @@ export async function BrowserProvider({ getService }) {
     async getWindowSize() {
       return await driver.manage().window().getRect();
     }
-
 
     /**
      * Sets the dimensions of a window.
@@ -180,7 +181,7 @@ export async function BrowserProvider({ getService }) {
      */
     async pressKeys(...args) {
       const actions = driver.actions({ bridge: true });
-      const chord = this.getKeys().chord(...args);
+      const chord = this.keys.chord(...args);
       await actions.sendKeys(chord).perform();
     }
 
@@ -298,5 +299,7 @@ export async function BrowserProvider({ getService }) {
     async execute(...args) {
       return await driver.executeScript(...args);
     }
-  };
+  }
+
+  return  new BrowserService();
 }
