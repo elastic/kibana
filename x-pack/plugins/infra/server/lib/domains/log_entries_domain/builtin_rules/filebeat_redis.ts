@@ -11,10 +11,16 @@ export const filebeatRedisRules = [
     },
     format: [
       {
-        constant: 'redis',
+        constant: '[Redis]',
       },
       {
-        constant: ' ',
+        constant: '[',
+      },
+      {
+        field: 'redis.log.level',
+      },
+      {
+        constant: '] ',
       },
       {
         field: 'redis.log.message',
