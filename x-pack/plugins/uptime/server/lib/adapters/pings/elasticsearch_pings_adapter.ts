@@ -5,6 +5,7 @@
  */
 
 import { get } from 'lodash';
+import moment from 'moment';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { UMGqlRange, UMPingSortDirectionArg } from '../../../../common/domain_types';
 import { DocCount, HistogramSeries, Ping, PingResults } from '../../../../common/graphql/types';
@@ -142,10 +143,16 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     } = await this.database.search(request, params);
 
     // @ts-ignore TODO fix destructuring implicit any
-    return buckets.map(({ latest: { hits: { hits } } }) => ({
-      ...hits[0]._source,
-      timestamp: hits[0]._source[`@timestamp`],
-    }));
+    return buckets.map(({ latest: { hits: { hits } } }) => {
+      const timestamp = hits[0]._source[`@timestamp`];
+      const momentTs = moment(timestamp);
+      const millisFromNow = moment().diff(momentTs);
+      return {
+        ...hits[0]._source,
+        timestamp,
+        millisFromNow,
+      };
+    });
   }
 
   public async getPingHistogram(

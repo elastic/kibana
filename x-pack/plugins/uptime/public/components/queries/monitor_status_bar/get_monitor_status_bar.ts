@@ -18,6 +18,7 @@ export const createGetMonitorStatusBarQuery = gql`
       monitorId: $monitorId
     ) {
       timestamp
+      millisFromNow
       monitor {
         status
         host

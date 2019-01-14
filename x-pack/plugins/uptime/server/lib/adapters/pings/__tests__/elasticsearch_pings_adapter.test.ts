@@ -162,6 +162,9 @@ describe('ElasticsearchPingsAdapter class', () => {
                 latest: {
                   top_hits: {
                     size: 1,
+                    sort: {
+                      '@timestamp': { order: 'desc' },
+                    },
                   },
                 },
               },

@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { Query } from 'react-apollo';
-import { SnapshotHistogram } from '../../functional/snapshot_histogram';
+import { SnapshotHistogram } from '../../functional';
 import { getSnapshotQuery } from './get_snapshot';
 
 interface SnapshotProps {
