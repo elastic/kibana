@@ -54,9 +54,6 @@ describe('buildHierarchicalData convertTable', () => {
       dimensions = {
         metric: {
           accessor: 0,
-          format: { id: 'agg_1', params: {} },
-          params: { field: 'bytes' },
-          aggType: 'avg',
         },
       };
 
@@ -78,50 +75,6 @@ describe('buildHierarchicalData convertTable', () => {
       expect(results.slices.children[0]).toHaveProperty('name', checkLabel);
       expect(results.slices.children[0]).toHaveProperty('size', 412032);
     });
-  });
-
-  describe('rows and columns', () => {
-    let dimensions;
-    let table;
-
-    beforeEach(async () => {
-      const tabifyResponse = {
-        columns: [
-          { 'id': 'col-0-agg_2', 'name': 'extension: Descending' },
-          { 'id': 'col-1-1', 'name': 'Count' },
-          { 'id': 'col-2-agg_3', 'name': 'geo.src: Descending' },
-          { 'id': 'col-3-1', 'name': 'Count' }
-        ],
-        rows: [
-          { 'col-0-agg_2': 'png', 'col-2-agg_3': 'IT', 'col-1-1': 50, 'col-3-1': 10 },
-          { 'col-0-agg_2': 'png', 'col-2-agg_3': 'US', 'col-1-1': 50, 'col-3-1': 20 },
-          { 'col-0-agg_2': 'css', 'col-2-agg_3': 'MX', 'col-1-1': 20, 'col-3-1': 7 },
-          { 'col-0-agg_2': 'css', 'col-2-agg_3': 'US', 'col-1-1': 20, 'col-3-1': 13 },
-          { 'col-0-agg_2': 'html', 'col-2-agg_3': 'CN', 'col-1-1': 90, 'col-3-1': 85 },
-          { 'col-0-agg_2': 'html', 'col-2-agg_3': 'FR', 'col-1-1': 90, 'col-3-1': 15 }
-        ]
-      };
-      dimensions = {
-        metric: { accessor: 1, format: { id: '1' }, aggType: 'count' },
-        buckets: [
-          { accessor: 0, format: { id: 'agg_2' }, params: { field: 'extension' }, aggType: 'terms' },
-          { accessor: 2, format: { id: 'agg_3' }, params: { field: 'geo.src' }, aggType: 'terms' },
-        ]
-      };
-      const tableGroup = await responseHandler(tabifyResponse, dimensions);
-      table = tableGroup.tables[0];
-    });
-
-    it('should set the rows', () => {
-      const results = convertTable(table, dimensions);
-      expect(results).toHaveProperty('rows');
-    });
-
-    it('should set the columns', () => {
-      const results = convertTable(table, dimensions);
-      expect(results).toHaveProperty('columns');
-    });
-
   });
 
   describe('threeTermBuckets', () => {
@@ -156,11 +109,11 @@ describe('buildHierarchicalData convertTable', () => {
         ]
       };
       dimensions = {
-        metric: { accessor: 1, format: { id: 'agg_1' }, params: { field: 'bytes' }, aggType: 'avg' },
+        rowSplit: { accessor: 0 },
+        metric: { accessor: 5 },
         buckets: [
-          { accessor: 0, format: { id: 'agg_2' }, params: { field: 'extension' }, aggType: 'terms' },
-          { accessor: 2, format: { id: 'agg_3' }, params: { field: 'geo.src' }, aggType: 'terms' },
-          { accessor: 4, format: { id: 'agg_4' }, params: { field: 'machine.os' }, aggType: 'terms' },
+          { accessor: 2 },
+          { accessor: 4 },
         ]
       };
       const tableGroup = await responseHandler(tabifyResponse, dimensions);
@@ -169,23 +122,18 @@ describe('buildHierarchicalData convertTable', () => {
 
     it('should set the hits attribute for the results', () => {
       const results = convertTable(table, dimensions);
-      expect(results).toHaveProperty('rows');
-      results.rows.forEach(item => {
-        expect(item).toHaveProperty('names');
-        expect(item).toHaveProperty('slices');
-        expect(item.slices).toHaveProperty('children');
-      });
+      expect(results).toHaveProperty('names');
+      expect(results).toHaveProperty('slices');
+      expect(results.slices).toHaveProperty('children');
     });
 
     it('should set the parent of the first item in the split', () => {
       const results = convertTable(table, dimensions);
-      expect(results).toHaveProperty('rows');
-      expect(results.rows).toHaveLength(3);
-      expect(results.rows[0]).toHaveProperty('slices');
-      expect(results.rows[0].slices).toHaveProperty('children');
-      expect(results.rows[0].slices.children).toHaveLength(2);
-      expect(results.rows[0].slices.children[0]).toHaveProperty('aggConfigResult');
-      expect(results.rows[0].slices.children[0].aggConfigResult.$parent.$parent).toHaveProperty('key', 'png');
+      expect(results).toHaveProperty('slices');
+      expect(results.slices).toHaveProperty('children');
+      expect(results.slices.children).toHaveLength(2);
+      expect(results.slices.children[0]).toHaveProperty('aggConfigResult');
+      expect(results.slices.children[0].aggConfigResult.$parent.$parent).toHaveProperty('key', 'png');
     });
 
   });
@@ -210,9 +158,9 @@ describe('buildHierarchicalData convertTable', () => {
         ]
       };
       dimensions = {
-        metric: { accessor: 1, format: { id: '1' }, params: {}, aggType: 'count' },
+        metric: { accessor: 1 },
         buckets: [
-          { accessor: 0, format: { id: 'agg_2' }, params: { field: 'bytes', interval: 8192 }, aggType: 'histogram' },
+          { accessor: 0, params: { field: 'bytes', interval: 8192 } },
         ]
       };
       const tableGroup = await responseHandler(tabifyResponse, dimensions);
@@ -245,9 +193,9 @@ describe('buildHierarchicalData convertTable', () => {
         ]
       };
       dimensions = {
-        metric: { accessor: 1, format: { id: '1' }, params: {}, aggType: 'count' },
+        metric: { accessor: 1 },
         buckets: [
-          { accessor: 0, format: { id: 'agg_2' }, params: { field: 'bytes' }, aggType: 'range' },
+          { accessor: 0, format: { id: 'range' }, },
         ]
       };
       const tableGroup = await responseHandler(tabifyResponse, dimensions);
@@ -280,24 +228,9 @@ describe('buildHierarchicalData convertTable', () => {
         ]
       };
       dimensions = {
-        metric: { accessor: 1, format: { id: '1' }, params: {}, aggType: 'count' },
+        metric: { accessor: 1 },
         buckets: [{
           accessor: 0,
-          format: { id: 'agg_2' },
-          params: {
-            field: 'geo.src',
-            filters: [
-              {
-                label: 'type:apache',
-                input: { query: 'type:apache' },
-              },
-              {
-                label: 'type:nginx',
-                input: { query: 'type:nginx' },
-              },
-            ],
-          },
-          aggType: 'filters'
         }],
       };
       const tableGroup = await responseHandler(tabifyResponse, dimensions);
