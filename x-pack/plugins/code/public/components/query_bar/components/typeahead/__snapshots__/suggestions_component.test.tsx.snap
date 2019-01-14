@@ -140,11 +140,11 @@ exports[`render full suggestions component 1`] = `
             >
               <styled.div>
                 <div
-                  className="sc-bZQynM gNhebF"
+                  className="sc-htoDjs chDvrV"
                 >
                   <styled.div>
                     <div
-                      className="sc-gzVnrw tDqEr"
+                      className="sc-dnqmqq iFsitv"
                     >
                       <EuiToken
                         displayOptions={Object {}}
@@ -186,7 +186,7 @@ exports[`render full suggestions component 1`] = `
                       </EuiToken>
                       <styled.span>
                         <span
-                          className="sc-htoDjs kTogwW"
+                          className="sc-iwsKbI eRUloI"
                         >
                           Symbols
                         </span>
@@ -195,7 +195,7 @@ exports[`render full suggestions component 1`] = `
                   </styled.div>
                   <styled.div>
                     <div
-                      className="sc-dnqmqq cXfCkY"
+                      className="sc-gZMcBi doiTLD"
                     >
                       1
                        Result
@@ -232,7 +232,7 @@ exports[`render full suggestions component 1`] = `
                 >
                   <div
                     aria-selected={true}
-                    className="sc-bdVaJa jHURZo"
+                    className="sc-htpNat bUGPvU"
                     id="suggestion-0-0"
                     onClick={[Function]}
                     onMouseEnter={[Function]}
@@ -240,14 +240,14 @@ exports[`render full suggestions component 1`] = `
                   >
                     <styled.div>
                       <div
-                        className="sc-bwzfXH dIdIHh"
+                        className="sc-bxivhb jzTuee"
                       >
                         <Styled(styled.div)>
                           <styled.div
-                            className="sc-bxivhb goHlpn"
+                            className="sc-EHOje iMawIB"
                           >
                             <div
-                              className="sc-bxivhb goHlpn sc-htpNat bUoeMH"
+                              className="sc-EHOje iMawIB sc-ifAKCX bMxzXt"
                             >
                               <EuiToken
                                 displayOptions={Object {}}
@@ -294,10 +294,10 @@ exports[`render full suggestions component 1`] = `
                         <div>
                           <Styled(styled.div)>
                             <styled.div
-                              className="sc-ifAKCX gWOzPQ"
+                              className="sc-bZQynM fCofhq"
                             >
                               <div
-                                className="sc-ifAKCX gWOzPQ sc-htpNat bUoeMH"
+                                className="sc-bZQynM fCofhq sc-ifAKCX bMxzXt"
                               >
                                 <span>
                                   java.lang.
@@ -310,10 +310,10 @@ exports[`render full suggestions component 1`] = `
                           </Styled(styled.div)>
                           <Styled(styled.div)>
                             <styled.div
-                              className="sc-EHOje iasAWb"
+                              className="sc-gzVnrw kzVDXi"
                             >
                               <div
-                                className="sc-EHOje iasAWb sc-htpNat bUoeMH"
+                                className="sc-gzVnrw kzVDXi sc-ifAKCX bMxzXt"
                               >
                                 elastic/elasticsearch &gt; src/foo/bar.java
                               </div>
@@ -335,11 +335,11 @@ exports[`render full suggestions component 1`] = `
             >
               <styled.div>
                 <div
-                  className="sc-bZQynM gNhebF"
+                  className="sc-htoDjs chDvrV"
                 >
                   <styled.div>
                     <div
-                      className="sc-gzVnrw tDqEr"
+                      className="sc-dnqmqq iFsitv"
                     >
                       <EuiToken
                         displayOptions={Object {}}
@@ -381,7 +381,7 @@ exports[`render full suggestions component 1`] = `
                       </EuiToken>
                       <styled.span>
                         <span
-                          className="sc-htoDjs kTogwW"
+                          className="sc-iwsKbI eRUloI"
                         >
                           Files
                         </span>
@@ -390,7 +390,7 @@ exports[`render full suggestions component 1`] = `
                   </styled.div>
                   <styled.div>
                     <div
-                      className="sc-dnqmqq cXfCkY"
+                      className="sc-gZMcBi doiTLD"
                     >
                       1
                        Result
@@ -427,7 +427,7 @@ exports[`render full suggestions component 1`] = `
                 >
                   <div
                     aria-selected={false}
-                    className="sc-bdVaJa kFePkC"
+                    className="sc-htpNat eUnATS"
                     id="suggestion-1-0"
                     onClick={[Function]}
                     onMouseEnter={[Function]}
@@ -435,15 +435,15 @@ exports[`render full suggestions component 1`] = `
                   >
                     <styled.div>
                       <div
-                        className="sc-bwzfXH dIdIHh"
+                        className="sc-bxivhb jzTuee"
                       >
                         <div>
                           <Styled(styled.div)>
                             <styled.div
-                              className="sc-ifAKCX gWOzPQ"
+                              className="sc-bZQynM fCofhq"
                             >
                               <div
-                                className="sc-ifAKCX gWOzPQ sc-htpNat bUoeMH"
+                                className="sc-bZQynM fCofhq sc-ifAKCX bMxzXt"
                               >
                                 src/foo/bar.java
                               </div>
@@ -451,10 +451,10 @@ exports[`render full suggestions component 1`] = `
                           </Styled(styled.div)>
                           <Styled(styled.div)>
                             <styled.div
-                              className="sc-EHOje iasAWb"
+                              className="sc-gzVnrw kzVDXi"
                             >
                               <div
-                                className="sc-EHOje iasAWb sc-htpNat bUoeMH"
+                                className="sc-gzVnrw kzVDXi sc-ifAKCX bMxzXt"
                               >
                                 This is a file
                               </div>
@@ -476,11 +476,11 @@ exports[`render full suggestions component 1`] = `
             >
               <styled.div>
                 <div
-                  className="sc-bZQynM gNhebF"
+                  className="sc-htoDjs chDvrV"
                 >
                   <styled.div>
                     <div
-                      className="sc-gzVnrw tDqEr"
+                      className="sc-dnqmqq iFsitv"
                     >
                       <EuiToken
                         displayOptions={Object {}}
@@ -523,7 +523,7 @@ exports[`render full suggestions component 1`] = `
                       </EuiToken>
                       <styled.span>
                         <span
-                          className="sc-htoDjs kTogwW"
+                          className="sc-iwsKbI eRUloI"
                         >
                           Repos
                         </span>
@@ -532,7 +532,7 @@ exports[`render full suggestions component 1`] = `
                   </styled.div>
                   <styled.div>
                     <div
-                      className="sc-dnqmqq cXfCkY"
+                      className="sc-gZMcBi doiTLD"
                     >
                       2
                        Result
@@ -570,7 +570,7 @@ exports[`render full suggestions component 1`] = `
                 >
                   <div
                     aria-selected={false}
-                    className="sc-bdVaJa kFePkC"
+                    className="sc-htpNat eUnATS"
                     id="suggestion-2-0"
                     onClick={[Function]}
                     onMouseEnter={[Function]}
@@ -578,15 +578,15 @@ exports[`render full suggestions component 1`] = `
                   >
                     <styled.div>
                       <div
-                        className="sc-bwzfXH dIdIHh"
+                        className="sc-bxivhb jzTuee"
                       >
                         <div>
                           <Styled(styled.div)>
                             <styled.div
-                              className="sc-ifAKCX gWOzPQ"
+                              className="sc-bZQynM fCofhq"
                             >
                               <div
-                                className="sc-ifAKCX gWOzPQ sc-htpNat bUoeMH"
+                                className="sc-bZQynM fCofhq sc-ifAKCX bMxzXt"
                               >
                                 elastic/kibana
                               </div>
@@ -594,10 +594,10 @@ exports[`render full suggestions component 1`] = `
                           </Styled(styled.div)>
                           <Styled(styled.div)>
                             <styled.div
-                              className="sc-EHOje iasAWb"
+                              className="sc-gzVnrw kzVDXi"
                             >
                               <div
-                                className="sc-EHOje iasAWb sc-htpNat bUoeMH"
+                                className="sc-gzVnrw kzVDXi sc-ifAKCX bMxzXt"
                               />
                             </styled.div>
                           </Styled(styled.div)>
@@ -636,7 +636,7 @@ exports[`render full suggestions component 1`] = `
                 >
                   <div
                     aria-selected={false}
-                    className="sc-bdVaJa kFePkC"
+                    className="sc-htpNat eUnATS"
                     id="suggestion-2-1"
                     onClick={[Function]}
                     onMouseEnter={[Function]}
@@ -644,15 +644,15 @@ exports[`render full suggestions component 1`] = `
                   >
                     <styled.div>
                       <div
-                        className="sc-bwzfXH dIdIHh"
+                        className="sc-bxivhb jzTuee"
                       >
                         <div>
                           <Styled(styled.div)>
                             <styled.div
-                              className="sc-ifAKCX gWOzPQ"
+                              className="sc-bZQynM fCofhq"
                             >
                               <div
-                                className="sc-ifAKCX gWOzPQ sc-htpNat bUoeMH"
+                                className="sc-bZQynM fCofhq sc-ifAKCX bMxzXt"
                               >
                                 elastic/elasticsearch
                               </div>
@@ -660,10 +660,10 @@ exports[`render full suggestions component 1`] = `
                           </Styled(styled.div)>
                           <Styled(styled.div)>
                             <styled.div
-                              className="sc-EHOje iasAWb"
+                              className="sc-gzVnrw kzVDXi"
                             >
                               <div
-                                className="sc-EHOje iasAWb sc-htpNat bUoeMH"
+                                className="sc-gzVnrw kzVDXi sc-ifAKCX bMxzXt"
                               />
                             </styled.div>
                           </Styled(styled.div)>
@@ -675,7 +675,7 @@ exports[`render full suggestions component 1`] = `
               </Component>
               <styled.div>
                 <div
-                  className="sc-iwsKbI dFhxhD"
+                  className="sc-gqjmRU bqMCCt"
                 >
                   <Link
                     replace={false}
@@ -693,11 +693,11 @@ exports[`render full suggestions component 1`] = `
             </div>
             <styled.div>
               <div
-                className="sc-gZMcBi hJzXXZ"
+                className="sc-VigVT hKgARx"
               >
                 <styled.div>
                   <div
-                    className="sc-gqjmRU gFkTN"
+                    className="sc-jTzLTM eaoLEj"
                   >
                     Press ⮐ Return for Full Text Search
                   </div>
