@@ -51,7 +51,7 @@ export class SavedObjectsRepository {
     this._index = index;
     this._mappings = mappings;
     this._schema = schema;
-    this._includeHiddenTypes = includeHiddenTypes;
+    this._includeHiddenTypes = includeHiddenTypes || [];
     this._type = getRootType(this._mappings);
     this._onBeforeWrite = onBeforeWrite;
     this._unwrappedCallCluster = async (...args) => {
@@ -616,7 +616,7 @@ export class SavedObjectsRepository {
 
   assertAllowedType(type) {
     if(this._schema.isHiddenType(type) && !this._includeHiddenTypes.includes(type)) {
-      throw Error();
+      throw Error('Hidden types not allowed!');
     }
   }
 }

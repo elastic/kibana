@@ -30,6 +30,7 @@ export class SavedObjectsRepositoryProvider {
     migrator,
     schema,
     serializer,
+    includeHiddenTypes,
     onBeforeWrite
   }) {
     this._index = index;
@@ -38,9 +39,11 @@ export class SavedObjectsRepositoryProvider {
     this._schema = schema;
     this._serializer = serializer;
     this._onBeforeWrite = onBeforeWrite;
+    this._includeHiddenTypes = includeHiddenTypes || [];
   }
 
-  getRepository(callCluster) {
+  getRepository(callCluster, includeHiddenTypes) {
+    const hiddenTypes = includeHiddenTypes || [];
 
     if (typeof callCluster !== 'function') {
       throw new TypeError('Repository requires a "callCluster" function to be provided.');
@@ -53,6 +56,7 @@ export class SavedObjectsRepositoryProvider {
       schema: this._schema,
       serializer: this._serializer,
       onBeforeWrite: this._onBeforeWrite,
+      includeHiddenTypes: this._includeHiddenTypes.concat(hiddenTypes),
       callCluster,
     });
   }
