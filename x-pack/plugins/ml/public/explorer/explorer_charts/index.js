@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-import './explorer_charts_container_directive.js';
 import 'plugins/ml/components/chart_tooltip';

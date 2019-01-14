@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import { createLegacyClass } from 'ui/utils/legacy_class';
 import { SavedObjectProvider } from 'ui/courier';
@@ -14,6 +15,7 @@ import {
   getLayerListRaw,
   getMapExtent,
   getRefreshConfig,
+  getQuery,
 } from '../../selectors/map_selectors';
 import { getIsDarkTheme } from '../../store/ui';
 import { TileStyle } from '../../shared/layers/styles/tile_style';
@@ -97,6 +99,7 @@ module.factory('SavedGisMap', function (Private) {
       center: getMapCenter(state),
       timeFilters: getTimeFilters(state),
       refreshConfig: getRefreshConfig(state),
+      query: _.omit(getQuery(state), 'queryLastTriggeredAt'),
     });
 
     this.uiStateJSON = JSON.stringify({

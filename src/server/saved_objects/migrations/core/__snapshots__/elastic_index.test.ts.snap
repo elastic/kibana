@@ -1,23 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ElasticIndex fetchInfo handles v7 indices 1`] = `
-Object {
-  "aliases": Object {
-    "foo": ".baz",
-  },
-  "exists": true,
-  "indexName": ".baz",
-  "mappings": Object {
-    "doc": Object {
-      "dynamic": "strict",
-      "properties": Object {
-        "a": "b",
-      },
-    },
-  },
-}
-`;
-
 exports[`ElasticIndex write writes documents in bulk to the index 1`] = `
 Array [
   "bulk",
