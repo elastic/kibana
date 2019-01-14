@@ -23,6 +23,7 @@ import {
   ExplanationResult,
   PRIVILEGE_SOURCE,
 } from '../../../../../../../lib/effective_privileges';
+import { isGlobalPrivilegeDefinition } from '../../../../../../../lib/privilege_utils';
 import { NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
 import { PrivilegeDisplay } from '../space_aware_privilege_section/privilege_display';
 import { ChangeAllPrivilegesControl } from './change_all_privileges';
@@ -273,5 +274,5 @@ export class FeatureTable extends Component<Props, {}> {
   };
 
   private isConfiguringGlobalPrivileges = () =>
-    this.props.role.kibana[this.props.spacesIndex].spaces.includes('*');
+    isGlobalPrivilegeDefinition(this.props.role.kibana[this.props.spacesIndex]);
 }

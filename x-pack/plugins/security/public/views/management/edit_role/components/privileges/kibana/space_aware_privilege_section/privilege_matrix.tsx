@@ -28,6 +28,7 @@ import { Space } from '../../../../../../../../../spaces/common/model/space';
 import { SpaceAvatar } from '../../../../../../../../../spaces/public/components';
 import { FeaturePrivilegeSet, Role } from '../../../../../../../../common/model';
 import { EffectivePrivileges } from '../../../../../../../lib/effective_privileges';
+import { isGlobalPrivilegeDefinition } from '../../../../../../../lib/privilege_utils';
 import { SpacesPopoverList } from '../../../spaces_popover_list';
 import { PrivilegeDisplay } from './privilege_display';
 
@@ -117,7 +118,7 @@ export class PrivilegeMatrix extends Component<Props, State> {
 
     spacePrivileges.forEach((spacePrivs, spacesIndex) => {
       spacesColumns.push({
-        isGlobal: spacePrivs.spaces.includes('*'),
+        isGlobal: isGlobalPrivilegeDefinition(spacePrivs),
         spacesIndex,
         spaces: spacePrivs.spaces
           .map(spaceId => this.props.spaces.find(space => space.id === spaceId))
@@ -295,7 +296,7 @@ export class PrivilegeMatrix extends Component<Props, State> {
 
   private locateGlobalPrivilege = () => {
     return (
-      this.props.role.kibana.find(spacePriv => spacePriv.spaces.includes('*')) || {
+      this.props.role.kibana.find(spacePriv => isGlobalPrivilegeDefinition(spacePriv)) || {
         spaces: ['*'],
         base: [],
         feature: [],

@@ -7,6 +7,7 @@ import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { FeaturePrivilegeSet, PrivilegeDefinition, Role } from '../../../common/model';
 import { NO_PRIVILEGE_VALUE } from '../../views/management/edit_role/lib/constants';
+import { isGlobalPrivilegeDefinition } from '../privilege_utils';
 import { ActionSet, areActionsFullyCovered } from './effective_privileges_utils';
 
 interface PrivilegeValidationResponse {
@@ -137,7 +138,7 @@ export class EffectivePrivileges {
       ? feature[featureId][0] || NO_PRIVILEGE_VALUE
       : NO_PRIVILEGE_VALUE;
 
-    const { base = [], spaces = [] } = this.role.kibana[spacesIndex] || {};
+    const privilegeSpec = this.role.kibana[spacesIndex] || {};
     const globalFeaturePrivileges = this.globalPrivilege.feature[featureId] || [];
 
     const scenarios: PrivilegeScenario[] = [];
@@ -166,7 +167,7 @@ export class EffectivePrivileges {
           { defaultMessage: 'space base privilege' }
         ),
         source: PRIVILEGE_SOURCE.EFFECTIVE_SPACE_BASE,
-        actions: this.privilegeDefinition.getSpacesPrivileges().getActions(base[0]),
+        actions: this.privilegeDefinition.getSpacesPrivileges().getActions(privilegeSpec.base[0]),
       },
       {
         name: i18n.translate('xpack.security.management.editRole.globalBasePrivilegeScenario', {
@@ -177,7 +178,7 @@ export class EffectivePrivileges {
       }
     );
 
-    if (globalFeaturePrivileges.length > 0 && !spaces.includes('*')) {
+    if (globalFeaturePrivileges.length > 0 && !isGlobalPrivilegeDefinition(privilegeSpec)) {
       scenarios.push({
         name: i18n.translate(
           'xpack.security.management.editRole.effectivePrivileges.globalFeaturePrivilegeScenario',
@@ -336,16 +337,15 @@ export class EffectivePrivileges {
       .getFeaturePrivileges()
       .getActions(featureId, privilege);
 
-    const { base = [], spaces = [] } = this.role.kibana[spacesIndex] || {};
+    const privilegeSpec = this.role.kibana[spacesIndex] || {};
     const globalFeaturePrivileges = this.globalPrivilege.feature[featureId] || [];
 
     const baseActions = [
       ...this.assignedGlobalBaseActions,
-      ...this.privilegeDefinition.getSpacesPrivileges().getActions(base[0]),
+      ...this.privilegeDefinition.getSpacesPrivileges().getActions(privilegeSpec.base[0]),
     ];
 
-    // TODO: temp hack-in
-    if (globalFeaturePrivileges.length > 0 && !spaces.includes('*')) {
+    if (globalFeaturePrivileges.length > 0 && !isGlobalPrivilegeDefinition(privilegeSpec)) {
       baseActions.push(
         ...this.privilegeDefinition
           .getFeaturePrivileges()
@@ -442,7 +442,7 @@ export class EffectivePrivileges {
   private locateGlobalPrivilege(role: Role) {
     const spacePrivileges = role.kibana;
     return (
-      spacePrivileges.find(privileges => privileges.spaces.includes('*')) || {
+      spacePrivileges.find(privileges => isGlobalPrivilegeDefinition(privileges)) || {
         spaces: [] as string[],
         base: [] as string[],
         feature: {},

@@ -17,6 +17,7 @@ import React, { Component, Fragment } from 'react';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { PrivilegeDefinition, Role } from '../../../../../../../../common/model';
 import { EffectivePrivileges } from '../../../../../../../lib/effective_privileges';
+import { isGlobalPrivilegeDefinition } from '../../../../../../../lib/privilege_utils';
 import { copyRole } from '../../../../../../../lib/role_utils';
 import { NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
 import { FeatureTable } from '../feature_table';
@@ -172,7 +173,7 @@ export class SimplePrivilegeSection extends Component<Props, {}> {
 
   private locateGlobalPrivilege = (role: Role, createIfMissing = false) => {
     const spacePrivileges = role.kibana;
-    const existing = spacePrivileges.find(privileges => privileges.spaces.includes('*'));
+    const existing = spacePrivileges.find(privileges => isGlobalPrivilegeDefinition(privileges));
     if (existing) {
       return existing;
     }

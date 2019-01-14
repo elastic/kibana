@@ -18,6 +18,7 @@ import { getSpaceColor } from '../../../../../../../../../spaces/common';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
 import { FeaturePrivilegeSet, Role } from '../../../../../../../../common/model';
 import { EffectivePrivilegesFactory } from '../../../../../../../lib/effective_privileges';
+import { isGlobalPrivilegeDefinition } from '../../../../../../../lib/privilege_utils';
 import { copyRole } from '../../../../../../../lib/role_utils';
 import { PrivilegeDisplay } from './privilege_display';
 
@@ -82,7 +83,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
       return {
         spaces,
         spacesIndex,
-        isGlobal: spacePrivs.spaces.includes('*'),
+        isGlobal: isGlobalPrivilegeDefinition(spacePrivs),
         privileges: {
           base: spacePrivs.base || [],
           feature: spacePrivs.feature || {},
@@ -241,7 +242,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
   private getSortedPrivileges = () => {
     const spacePrivileges = this.props.role.kibana;
     return spacePrivileges.sort((priv1, priv2) => {
-      return priv1.spaces.includes('*') ? -1 : priv1.spaces.includes('*') ? 1 : 0;
+      return isGlobalPrivilegeDefinition(priv1) ? -1 : isGlobalPrivilegeDefinition(priv2) ? 1 : 0;
     });
   };
 

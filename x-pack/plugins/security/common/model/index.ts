@@ -5,7 +5,7 @@
  */
 
 export { Role } from './role';
-export { FeaturesPrivileges, PrivilegeMap } from './kibana_privilege';
+export { FeaturesPrivileges, PrivilegeMap, KibanaPrivilegeSpec } from './kibana_privilege';
 export { IndexPrivilege } from './index_privilege';
 export { PrivilegeDefinition } from './privileges/privilege_definition';
 export { GlobalPrivileges } from './privileges/global_privileges';
