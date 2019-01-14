@@ -30,7 +30,7 @@ export function convertTableProvider(tooltipFormatter) {
     if (!buckets.length) {
       slices = [{
         name: metricColumn.name,
-        size: table.rows[0][metricColumn.id].value,
+        size: table.rows[0][metricColumn.id],
         aggConfig: metricColumn.aggConfig
       }];
       names[metricColumn.name] = metricColumn.name;
