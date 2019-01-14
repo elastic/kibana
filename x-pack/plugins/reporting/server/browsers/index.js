@@ -6,6 +6,5 @@
 
 export { ensureAllBrowsersDownloaded } from './download';
 export { createBrowserDriverFactory } from './create_browser_driver_factory';
-export { getDefaultBrowser } from './default_browser';
 export { getDefaultChromiumSandboxDisabled } from './default_chromium_sandbox_disabled';
-export { PHANTOM, CHROMIUM } from './browser_types';
+export { CHROMIUM } from './browser_types';
