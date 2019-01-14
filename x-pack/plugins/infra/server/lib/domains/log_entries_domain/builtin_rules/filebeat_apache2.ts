@@ -11,10 +11,7 @@ export const filebeatApache2Rules = [
     },
     format: [
       {
-        constant: 'apache2',
-      },
-      {
-        constant: ' ',
+        constant: '[Apache][access] ',
       },
       {
         field: 'apache2.access.remote_ip',
@@ -54,6 +51,25 @@ export const filebeatApache2Rules = [
       },
       {
         field: 'apache2.access.body_sent.bytes',
+      },
+    ],
+  },
+  {
+    when: {
+      exists: ['apache2.error.message'],
+    },
+    format: [
+      {
+        constant: '[Apache][',
+      },
+      {
+        field: 'apache2.error.level',
+      },
+      {
+        constant: '] ',
+      },
+      {
+        field: 'apache2.error.message',
       },
     ],
   },

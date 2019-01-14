@@ -87,6 +87,13 @@ export class EMSFileSource extends VectorSource {
     const fileSource = this._emsFiles.find((source => source.id === this._descriptor.id));
     return fileSource.name;
   }
+
+  async getAttributions() {
+    const fileSource = this._emsFiles.find((source => source.id === this._descriptor.id));
+    return fileSource.attributions;
+  }
+
+
   async getStringFields() {
     //todo: use map/service-settings instead.
     const fileSource = this._emsFiles.find((source => source.id === this._descriptor.id));

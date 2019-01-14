@@ -23,6 +23,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import { getColumns } from './anomalies_table_columns';
 
 import { AnomalyDetails } from './anomaly_details';
@@ -158,7 +160,12 @@ class AnomaliesTable extends Component {
         <EuiFlexGroup justifyContent="spaceAround">
           <EuiFlexItem grow={false}>
             <EuiText>
-              <h4>No matching anomalies found</h4>
+              <h4>
+                <FormattedMessage
+                  id="xpack.ml.anomaliesTable.noMatchingAnomaliesFoundTitle"
+                  defaultMessage="No matching anomalies found"
+                />
+              </h4>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
