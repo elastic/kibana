@@ -12,6 +12,8 @@ import { EuiTab, EuiTabs } from '@elastic/eui';
 
 import styled from 'styled-components';
 
+import { parse as parseQuery } from 'querystring';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { Repository } from '../../../model';
 import { RootState } from '../../reducers';
 import { EmptyProject } from './empty_project';
@@ -33,10 +35,10 @@ const Root = styled.div`
 enum AdminTabs {
   projects = 'Projects',
   roles = 'Roles',
-  languageServers = 'Language Servers',
+  languageServers = 'LanguageServers',
 }
 
-interface Props {
+interface Props extends RouteComponentProps {
   repositories: Repository[];
   repositoryLoading: boolean;
   isAdmin: boolean;
@@ -47,10 +49,6 @@ interface State {
 }
 
 class AdminPage extends React.PureComponent<Props, State> {
-  public state = {
-    tab: AdminTabs.projects,
-  };
-
   public tabs = [
     {
       id: AdminTabs.projects,
@@ -64,13 +62,28 @@ class AdminPage extends React.PureComponent<Props, State> {
     },
     {
       id: AdminTabs.languageServers,
-      name: AdminTabs.languageServers,
+      name: 'Language Servers',
       disabled: false,
     },
   ];
+  constructor(props: Props) {
+    super(props);
+    const getTab = () => {
+      const { search } = props.location;
+      let qs = search;
+      if (search.charAt(0) === '?') {
+        qs = search.substr(1);
+      }
+      return parseQuery(qs).tab || AdminTabs.projects;
+    };
+    this.state = {
+      tab: getTab() as AdminTabs,
+    };
+  }
 
   public getAdminTabClickHandler = (tab: AdminTabs) => () => {
     this.setState({ tab });
+    this.props.history.push(`/admin?tab=${tab}`);
   };
 
   public renderTabs() {
@@ -126,4 +139,4 @@ const mapStateToProps = (state: RootState) => ({
   isAdmin: state.userConfig.isAdmin,
 });
 
-export const Admin = connect(mapStateToProps)(AdminPage);
+export const Admin = withRouter(connect(mapStateToProps)(AdminPage));

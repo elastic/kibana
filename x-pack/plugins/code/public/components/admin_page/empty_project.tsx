@@ -6,6 +6,7 @@
 
 import { EuiButton, EuiFlexGroup, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { ImportProject } from './import_project';
 
 export const EmptyProject = () => (
@@ -22,7 +23,9 @@ export const EmptyProject = () => (
     <ImportProject />
     <EuiSpacer />
     <EuiFlexGroup justifyContent="center">
-      <EuiButton>View the Setup Guide</EuiButton>
+      <EuiButton>
+        <Link to="/setup-guide">View the Setup Guide</Link>
+      </EuiButton>
     </EuiFlexGroup>
   </div>
 );
