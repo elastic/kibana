@@ -5,9 +5,12 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiPanel } from '@elastic/eui';
+import { ApolloError } from 'apollo-client';
+import { get } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import { Query } from 'react-apollo';
+import { Ping } from 'x-pack/plugins/uptime/common/graphql/types';
 import { createGetMonitorStatusBarQuery } from './get_monitor_status_bar';
 
 interface MonitorStatusBarProps {
@@ -16,6 +19,12 @@ interface MonitorStatusBarProps {
   monitorId: string;
   autorefreshInterval: number;
   autorefreshEnabled: boolean;
+}
+
+interface MonitorStatusBarQueryParams {
+  loading: boolean;
+  error?: ApolloError | any;
+  data?: { monitorStatus: Ping[] };
 }
 
 export const MonitorStatusBar = ({
@@ -30,18 +39,24 @@ export const MonitorStatusBar = ({
     query={createGetMonitorStatusBarQuery}
     variables={{ dateRangeStart, dateRangeEnd, monitorId }}
   >
-    {({ loading, error, data }) => {
+    {({ loading, error, data }: MonitorStatusBarQueryParams) => {
       if (loading) {
         return 'Loading...';
       }
       if (error) {
         return `Error ${error.message}`;
       }
-      const { monitorStatus } = data;
-      if (!monitorStatus.length) {
+
+      const monitorStatus: Ping[] = get(data, 'monitorStatus');
+      if (!monitorStatus || !monitorStatus.length) {
         return `No data found for monitor id ${monitorId}`;
       }
-      const { monitor, tcp } = monitorStatus[0];
+      const { monitor, tcp, timestamp } = monitorStatus[0];
+      const status = get(monitor, 'status');
+      const host = get(monitor, 'host');
+      const port = get(tcp, 'port');
+      const duration = parseInt(get(monitor, 'duration.us'), 10);
+      const scheme = get(monitor, 'scheme');
 
       return (
         <EuiPanel>
@@ -51,24 +66,22 @@ export const MonitorStatusBar = ({
                 <EuiFlexItem>Status&#58;</EuiFlexItem>
                 <EuiFlexItem>
                   <EuiHealth
-                    color={monitor.status === 'up' ? 'success' : 'danger'}
+                    color={status === 'up' ? 'success' : 'danger'}
                     style={{ lineHeight: 'inherit' }}
                   >
-                    {monitor.status === 'up' ? 'Up' : 'Down'}
+                    {status === 'up' ? 'Up' : 'Down'}
                   </EuiHealth>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
+            <EuiFlexItem grow={false}>Last update: {moment(timestamp).fromNow()}</EuiFlexItem>
+            <EuiFlexItem grow={false}>Host: {host}</EuiFlexItem>
+            <EuiFlexItem grow={false}>Port: {port}</EuiFlexItem>
             <EuiFlexItem grow={false}>
-              Last update: {moment(monitor.timestamp).fromNow()}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>Host: {monitor.host}</EuiFlexItem>
-            <EuiFlexItem grow={false}>Port: {tcp.port}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              Duration: {monitor.duration.us / 1000}
+              Duration: {isNaN(duration) ? 'N/A' : duration / 1000}
               ms
             </EuiFlexItem>
-            <EuiFlexItem>Scheme: {monitor.scheme}</EuiFlexItem>
+            <EuiFlexItem>Scheme: {scheme}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
       );
