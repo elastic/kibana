@@ -17,7 +17,6 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
 
   const {
     deleteTest,
-    createExpectLegacyForbidden,
     expectRbacForbidden,
     expectEmptyResult,
     expectNotFound,
@@ -35,7 +34,6 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           allAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
         },
@@ -49,7 +47,6 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           allAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
         },
@@ -61,15 +58,15 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
         tests: {
           exists: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.users.noAccess.username, 'read/get'),
+            response: expectRbacForbidden,
           },
           reservedSpace: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.users.noAccess.username, 'read/get'),
+            response: expectRbacForbidden,
           },
           doesntExist: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.users.noAccess.username, 'read/get'),
+            response: expectRbacForbidden,
           },
         },
       });
@@ -136,16 +133,16 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
         user: scenario.users.legacyAll,
         tests: {
           exists: {
-            statusCode: 204,
-            response: expectEmptyResult,
+            statusCode: 403,
+            response: expectRbacForbidden,
           },
           reservedSpace: {
-            statusCode: 400,
-            response: expectReservedSpaceResult,
+            statusCode: 403,
+            response: expectRbacForbidden,
           },
           doesntExist: {
-            statusCode: 404,
-            response: expectNotFound,
+            statusCode: 403,
+            response: expectRbacForbidden,
           },
         },
       });
@@ -184,28 +181,6 @@ export default function deleteSpaceTestSuite({ getService }: TestInvoker) {
           doesntExist: {
             statusCode: 403,
             response: expectRbacForbidden,
-          },
-        },
-      });
-
-      deleteTest(`legacy readonly user from the ${scenario.spaceId} space`, {
-        spaceId: scenario.spaceId,
-        user: scenario.users.legacyRead,
-        tests: {
-          exists: {
-            statusCode: 403,
-            response: createExpectLegacyForbidden(
-              scenario.users.legacyRead.username,
-              'write/delete'
-            ),
-          },
-          reservedSpace: {
-            statusCode: 400,
-            response: expectReservedSpaceResult,
-          },
-          doesntExist: {
-            statusCode: 404,
-            response: expectNotFound,
           },
         },
       });

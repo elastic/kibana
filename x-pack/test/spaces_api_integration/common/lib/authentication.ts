@@ -17,10 +17,6 @@ export const AUTHENTICATION = {
     username: 'a_kibana_legacy_user',
     password: 'password',
   },
-  KIBANA_LEGACY_DASHBOARD_ONLY_USER: {
-    username: 'a_kibana_legacy_dashboard_only_user',
-    password: 'password',
-  },
   KIBANA_DUAL_PRIVILEGES_USER: {
     username: 'a_kibana_dual_privileges_user',
     password: 'password',
