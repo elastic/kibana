@@ -6,7 +6,7 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { PrivilegeDefinition, Role } from 'x-pack/plugins/security/common/model';
+import { PrivilegeDefinition, Role } from '../../../../../../../common/model';
 import { RoleValidator } from '../../../lib/validate_role';
 import { KibanaPrivileges } from './kibana_privileges';
 import { SimplePrivilegeSection } from './simple_privilege_section';
