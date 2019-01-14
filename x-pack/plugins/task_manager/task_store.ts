@@ -16,6 +16,7 @@ const DOC_TYPE = '_doc';
 
 export interface StoreOpts {
   callCluster: ElasticJs;
+  getKibanaUuid: () => string;
   index: string;
   maxAttempts: number;
   supportedTypes: string[];
@@ -49,6 +50,7 @@ export interface RawTaskDoc {
   _source: {
     type: string;
     kibana: {
+      uuid: string;
       version: number;
       apiVersion: number;
     };
@@ -72,8 +74,9 @@ export interface RawTaskDoc {
  */
 export class TaskStore {
   public readonly maxAttempts: number;
+  public getKibanaUuid: () => string;
+  public readonly index: string;
   private callCluster: ElasticJs;
-  private index: string;
   private supportedTypes: string[];
   private _isInitialized = false; // tslint:disable-line:variable-name
   private logger: Logger;
@@ -93,6 +96,7 @@ export class TaskStore {
     this.maxAttempts = opts.maxAttempts;
     this.supportedTypes = opts.supportedTypes;
     this.logger = opts.logger;
+    this.getKibanaUuid = opts.getKibanaUuid;
 
     this.fetchAvailableTasks = this.fetchAvailableTasks.bind(this);
   }
@@ -183,6 +187,11 @@ export class TaskStore {
                   user: { type: 'keyword' },
                   scope: { type: 'keyword' },
                 },
+                kibana: {
+                  apiVersion: { type: 'integer' }, // 1, 2, 3, etc
+                  uuid: { type: 'keyword' }, //
+                  version: { type: 'integer' }, // 7000099, etc
+                },
               },
             },
           },
@@ -227,7 +236,7 @@ export class TaskStore {
       );
     }
 
-    const { id, ...body } = rawSource(taskInstance);
+    const { id, ...body } = rawSource(taskInstance, this);
     const result = await this.callCluster('index', {
       id,
       body,
@@ -300,7 +309,7 @@ export class TaskStore {
    * @returns {Promise<TaskDoc>}
    */
   public async update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance> {
-    const rawDoc = taskDocToRaw(doc, this.index);
+    const rawDoc = taskDocToRaw(doc, this);
 
     const { _version } = await this.callCluster('update', {
       body: {
@@ -385,7 +394,7 @@ function paginatableSort(sort: any[] = []) {
   return [...sort, sortById];
 }
 
-function rawSource(doc: TaskInstance) {
+function rawSource(doc: TaskInstance, store: TaskStore) {
   const { id, ...taskFields } = doc;
   const source = {
     ...taskFields,
@@ -405,18 +414,19 @@ function rawSource(doc: TaskInstance) {
     type: 'task',
     task: source,
     kibana: {
+      uuid: store.getKibanaUuid(), // needs to be pulled live
       version: TASK_MANAGER_TEMPLATE_VERSION,
       apiVersion: TASK_MANAGER_API_VERSION,
     },
   };
 }
 
-function taskDocToRaw(doc: ConcreteTaskInstance, index: string): RawTaskDoc {
-  const { type, task, kibana } = rawSource(doc);
+function taskDocToRaw(doc: ConcreteTaskInstance, store: TaskStore): RawTaskDoc {
+  const { type, task, kibana } = rawSource(doc, store);
 
   return {
     _id: doc.id,
-    _index: index,
+    _index: store.index,
     _source: { type, task, kibana },
     _type: DOC_TYPE,
     _version: doc.version,

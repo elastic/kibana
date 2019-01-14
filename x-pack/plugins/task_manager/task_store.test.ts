@@ -12,6 +12,8 @@ import { TaskInstance, TaskStatus } from './task';
 import { FetchOpts, TaskStore } from './task_store';
 import { mockLogger } from './test_utils';
 
+const getKibanaUuid = sinon.stub().returns('kibana-uuid-123-test');
+
 describe('TaskStore', () => {
   describe('init', () => {
     test('creates the task manager index', async () => {
@@ -19,6 +21,7 @@ describe('TaskStore', () => {
       callCluster.withArgs('indices.getTemplate').returns(Promise.resolve({ tasky: {} }));
       const store = new TaskStore({
         callCluster,
+        getKibanaUuid,
         logger: mockLogger(),
         index: 'tasky',
         maxAttempts: 2,
@@ -48,6 +51,7 @@ describe('TaskStore', () => {
         .returns(Promise.resolve({ tasky: { version: Infinity } }));
       const store = new TaskStore({
         callCluster,
+        getKibanaUuid,
         logger: mockLogger(),
         index: 'tasky',
         maxAttempts: 2,
@@ -74,6 +78,7 @@ describe('TaskStore', () => {
       callCluster.withArgs('indices.getTemplate').returns(Promise.resolve({ tasky: {} }));
       const store = new TaskStore({
         callCluster,
+        getKibanaUuid,
         logger: mockLogger(),
         index: 'tasky',
         maxAttempts: 2,
@@ -148,6 +153,7 @@ describe('TaskStore', () => {
       const callCluster = sinon.spy(async () => ({ hits: { hits } }));
       const store = new TaskStore({
         callCluster,
+        getKibanaUuid,
         logger: mockLogger(),
         index: 'tasky',
         maxAttempts: 2,
@@ -335,6 +341,7 @@ describe('TaskStore', () => {
       const callCluster = sinon.spy(async () => ({ hits: { hits: [] } }));
       const store = new TaskStore({
         callCluster,
+        getKibanaUuid,
         logger: mockLogger(),
         supportedTypes: ['a', 'b', 'c'],
         index: 'tasky',
@@ -476,6 +483,7 @@ describe('TaskStore', () => {
       const callCluster = sinon.spy(async () => ({ _version: task.version + 1 }));
       const store = new TaskStore({
         callCluster,
+        getKibanaUuid,
         logger: mockLogger(),
         index: 'tasky',
         maxAttempts: 2,
@@ -521,6 +529,7 @@ describe('TaskStore', () => {
       );
       const store = new TaskStore({
         callCluster,
+        getKibanaUuid,
         logger: mockLogger(),
         index: 'myindex',
         maxAttempts: 2,

@@ -16,8 +16,10 @@ describe('TaskPoller', () => {
   beforeEach(() => {
     const callCluster = sinon.stub();
     callCluster.withArgs('indices.getTemplate').returns(Promise.resolve({ tasky: {} }));
+    const getKibanaUuid = sinon.stub().returns('kibana-123-uuid-test');
     store = new TaskStore({
       callCluster,
+      getKibanaUuid,
       logger: mockLogger(),
       index: 'tasky',
       maxAttempts: 2,
