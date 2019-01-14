@@ -33,7 +33,7 @@ export function ServiceLegends({ serviceColors }: Props) {
     <Legends>
       <EuiTitle size="xxxs">
         <span>
-          {i18n.translate('xpack.apm.transactionDetails.servicesLabel', {
+          {i18n.translate('xpack.apm.transactionDetails.servicesTitle', {
             defaultMessage: 'Services'
           })}
         </span>

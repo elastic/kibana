@@ -64,9 +64,12 @@ export function StickyTransactionProperties({
       width: '25%'
     },
     {
-      label: i18n.translate('xpack.apm.transactionDetails.percOfTraceLabel', {
-        defaultMessage: '% of trace'
-      }),
+      label: i18n.translate(
+        'xpack.apm.transactionDetails.percentOfTraceLabel',
+        {
+          defaultMessage: '% of trace'
+        }
+      ),
       val: asPercent(duration, totalDuration, notAvailableLabel),
       width: '25%'
     },

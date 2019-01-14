@@ -94,7 +94,7 @@ export function StickySpanProperties({ span, totalDuration }: Props) {
     },
     {
       label: i18n.translate(
-        'xpack.apm.transactionDetails.spanFlyout.percOfTransactionLabel',
+        'xpack.apm.transactionDetails.spanFlyout.percentOfTransactionLabel',
         {
           defaultMessage: '% of transaction'
         }
