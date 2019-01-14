@@ -149,6 +149,7 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
       cnt++;
       return;
     }
+    let skipMetrics = false;
     let schemaName = agg.schema ? agg.schema.name || agg.schema : null;
     if (typeof schemaName === 'object') {
       schemaName = null;
@@ -163,6 +164,7 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
     }
     if (schemaName === 'split') {
       schemaName = `split_${agg.params.row ? 'row' : 'column'}`;
+      skipMetrics = true;
     }
     if (!schemas[schemaName]) {
       schemas[schemaName] = [];
@@ -170,7 +172,11 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
     if (!isHierarchical || agg.type.type !== 'metrics') {
       schemas[schemaName]!.push(createSchemaConfig(cnt++, agg));
     }
-    if (isHierarchical && (agg.type.type !== 'metrics' || metrics.length === responseAggs.length)) {
+    if (
+      !skipMetrics &&
+      isHierarchical &&
+      (agg.type.type !== 'metrics' || metrics.length === responseAggs.length)
+    ) {
       metrics.forEach((metric: any) => {
         schemas.metric.push(createSchemaConfig(cnt++, metric));
       });
