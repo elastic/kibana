@@ -219,14 +219,16 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
     executeOnFilters(pin);
   };
 
-  queryFilter.setFilters = async filters => {
-    const mappedFilters = await mapAndFlattenFilters(filters);
-    const appState = getAppState();
-    const [globalFilters, appFilters] = _.partition(mappedFilters, filter => {
-      return filter.$state.store === 'globalState';
-    });
-    globalState.filters = globalFilters;
-    if (appState) appState.filters = appFilters;
+  queryFilter.setFilters = filters => {
+    return mapAndFlattenFilters(filters)
+      .then(mappedFilters => {
+        const appState = getAppState();
+        const [globalFilters, appFilters] = _.partition(mappedFilters, filter => {
+          return filter.$state.store === 'globalState';
+        });
+        globalState.filters = globalFilters;
+        if (appState) appState.filters = appFilters;
+      });
   };
 
   queryFilter.addFiltersAndChangeTimeFilter = async filters => {
