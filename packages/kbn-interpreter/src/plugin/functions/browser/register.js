@@ -17,4 +17,7 @@
  * under the License.
  */
 
-import '../common/register';
+import { browserFunctions } from './index';
+
+// eslint-disable-next-line no-undef
+browserFunctions.forEach(canvas.register);
