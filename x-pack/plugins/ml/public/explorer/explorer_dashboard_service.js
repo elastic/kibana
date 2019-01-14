@@ -20,11 +20,13 @@ function mlExplorerDashboardServiceFactory() {
 
   const listenerFactory = listenerFactoryProvider();
   const dragSelect = service.dragSelect = listenerFactory();
+  const explorer = service.explorer = listenerFactory();
   const swimlaneRenderDone = service.swimlaneRenderDone = listenerFactory();
 
   service.init = function () {
     // Clear out any old listeners.
     dragSelect.unwatchAll();
+    explorer.unwatchAll();
     swimlaneRenderDone.unwatchAll();
   };
 

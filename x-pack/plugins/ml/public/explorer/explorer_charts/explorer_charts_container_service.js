@@ -25,7 +25,7 @@ import {
   mlSelectSeverityService,
   SEVERITY_OPTIONS,
 } from '../../components/controls/select_severity/select_severity';
-import { getChartContainerWidth } from './legacy_utils';
+import { getChartContainerWidth } from '../legacy_utils';
 
 import { CHART_TYPE } from '../explorer_constants';
 

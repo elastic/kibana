@@ -85,14 +85,14 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
     const { swimlaneType } = this.props;
 
     if (action === DRAG_SELECT_ACTION.NEW_SELECTION && elements.length > 0) {
-      const firstCellData = d3.select(elements[0]).node().__clickData__;
+      const firstSelectedCell = d3.select(elements[0]).node().__clickData__;
 
-      if (typeof firstCellData !== 'undefined' && swimlaneType === firstCellData.swimlaneType) {
+      if (typeof firstSelectedCell !== 'undefined' && swimlaneType === firstSelectedCell.swimlaneType) {
         const selectedData = elements.reduce((d, e) => {
-          const cellData = d3.select(e).node().__clickData__;
-          d.bucketScore = Math.max(d.bucketScore, cellData.bucketScore);
-          d.laneLabels.push(cellData.laneLabel);
-          d.times.push(cellData.time);
+          const cell = d3.select(e).node().__clickData__;
+          d.bucketScore = Math.max(d.bucketScore, cell.bucketScore);
+          d.laneLabels.push(cell.laneLabel);
+          d.times.push(cell.time);
           return d;
         }, {
           bucketScore: 0,
@@ -162,13 +162,13 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       return;
     }
 
-    const cellData = {
+    const selectedCells = {
       fieldName: swimlaneData.fieldName,
       lanes: laneLabels,
       times: d3.extent(times),
       type: swimlaneType
     };
-    swimlaneCellClick(cellData);
+    swimlaneCellClick(selectedCells);
   }
 
   highlightSelection(cellsToSelect, laneLabels, times) {

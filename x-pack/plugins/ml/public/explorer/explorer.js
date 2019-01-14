@@ -61,21 +61,12 @@ export const Explorer = injectI18n(
       noInfluencersConfigured: PropTypes.bool,
       setSwimlaneSelectActive: PropTypes.func,
       setSwimlaneViewBy: PropTypes.func,
-      showViewBySwimlane: PropTypes.bool,
       swimlaneOverall: PropTypes.object,
       swimlaneViewByFieldName: PropTypes.string,
       tableData: PropTypes.object,
       viewByLoadedForTimeFormatted: PropTypes.any,
       viewBySwimlaneOptions: PropTypes.array,
     };
-
-    constructor(props) {
-      super(props);
-
-      this.state = {
-        annotationsData: []
-      };
-    }
 
     viewByChangeHandler = e => this.props.setSwimlaneViewBy(e.target.value);
 
@@ -93,12 +84,12 @@ export const Explorer = injectI18n(
         jobs,
         loading,
         noInfluencersConfigured,
-        showViewBySwimlane,
         swimlaneOverall,
         swimlaneViewBy,
         swimlaneViewByFieldName,
         tableData,
         viewByLoadedForTimeFormatted,
+        viewBySwimlaneData,
         viewBySwimlaneDataLoading,
         viewBySwimlaneOptions,
       } = this.props;
@@ -124,6 +115,12 @@ export const Explorer = injectI18n(
 
       const mainColumnWidthClassName = noInfluencersConfigured === true ? 'col-xs-12' : 'col-xs-10';
       const mainColumnClasses = `column ${mainColumnWidthClassName}`;
+
+      const showViewBySwimlane = (
+        viewBySwimlaneData !== null &&
+        viewBySwimlaneData.laneLabels &&
+        viewBySwimlaneData.laneLabels.length > 0
+      );
 
       return (
         <div className="results-container">

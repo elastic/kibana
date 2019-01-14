@@ -8,6 +8,8 @@
  * Contains values for ML anomaly explorer.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const DRAG_SELECT_ACTION = {
   NEW_SELECTION: 'newSelection',
   ELEMENT_SELECT: 'elementSelect',
@@ -26,3 +28,8 @@ export const CHART_TYPE = {
   POPULATION_DISTRIBUTION: 'population_distribution',
   SINGLE_METRIC: 'single_metric',
 };
+
+export const MAX_CATEGORY_EXAMPLES = 10;
+export const MAX_INFLUENCER_FIELD_VALUES = 10;
+
+export const VIEW_BY_JOB_LABEL = i18n.translate('xpack.ml.explorer.jobIdLabel', { defaultMessage: 'job ID' });
