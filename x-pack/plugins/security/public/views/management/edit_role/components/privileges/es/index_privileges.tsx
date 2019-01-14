@@ -6,7 +6,7 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { IndexPrivilege, Role } from '../../../../../../../common/model';
-import { isReadOnlyRole, isReservedRole, isRoleEnabled } from '../../../../../../lib/role';
+import { isReadOnlyRole, isReservedRole, isRoleEnabled } from '../../../../../../lib/role_utils';
 import { getFields } from '../../../../../../objects';
 import { RoleValidator } from '../../../lib/validate_role';
 import { IndexPrivilegeForm } from './index_privilege_form';

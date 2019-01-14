@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isReadOnlyRole, isReservedRole, isRoleEnabled } from './role';
+import { isReadOnlyRole, isReservedRole, isRoleEnabled } from './role_utils';
 
 describe('role', () => {
   describe('isRoleEnabled', () => {

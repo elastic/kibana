@@ -26,7 +26,7 @@ import { toastNotifications } from 'ui/notify';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../spaces/common/model/space';
 import { PrivilegeDefinition, PrivilegeMap, Role } from '../../../../../common/model';
-import { isReadOnlyRole, isReservedRole } from '../../../../lib/role';
+import { isReadOnlyRole, isReservedRole } from '../../../../lib/role_utils';
 import { deleteRole, saveRole } from '../../../../objects';
 import { ROLES_PATH } from '../../management_urls';
 import { copyRole } from '../lib/copy_role';
