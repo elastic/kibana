@@ -8,6 +8,7 @@ import crypto from 'crypto';
 import { join, resolve } from 'path';
 import { Keystore } from '../../../src/server/keystore';
 import { getData } from '../../../src/server/path';
+import mappings from './mappings.json';
 import { SecretStore } from './server';
 
 const path = join(getData(), 'kibana.keystore');
@@ -19,6 +20,7 @@ export const secretstore = (kibana: any) => {
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
+      mappings,
       savedObjectSchemas: {
         secretType: {
           hidden: true,
@@ -30,10 +32,9 @@ export const secretstore = (kibana: any) => {
       const warn = (message: string | any) => server.log(['secretstore', 'warning'], message);
 
       if (!keystore.exists()) {
-        warn('Keystore not found!');
         keystore.reset();
         keystore.save();
-        warn(`New keystore created ${keystore.path}`);
+        warn(`Keystore missing, new keystore created ${keystore.path}`);
       }
 
       if (!keystore.has('xpack.secretstore.secret')) {
@@ -43,7 +44,11 @@ export const secretstore = (kibana: any) => {
 
       server.expose(
         'secretstore',
-        new SecretStore(server.savedObjects, 'secretType', keystore.get('xpack.secretstore.secret'))
+        new SecretStore(
+          server.savedObjects.getScopedSavedObjectsClient(),
+          'secretType',
+          keystore.get('xpack.secretstore.secret')
+        )
       );
     },
   });
