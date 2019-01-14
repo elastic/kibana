@@ -12,6 +12,7 @@ import {
   EuiText,
   EuiTitle
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import { ITransactionChartData } from 'x-pack/plugins/apm/public/store/selectors/chartSelectors';
@@ -44,13 +45,22 @@ const ShiftedEuiText = styled(EuiText)`
   top: 5px;
 `;
 
+const msTimeUnitLabel = i18n.translate(
+  'xpack.apm.metrics.transactionChart.msTimeUnitLabel',
+  {
+    defaultMessage: 'ms'
+  }
+);
+
 export class TransactionChartsView extends Component<TransactionChartProps> {
   public getResponseTimeTickFormatter = (t: number) => {
-    return this.props.charts.noHits ? '- ms' : asMillis(t);
+    return this.props.charts.noHits ? `- ${msTimeUnitLabel}` : asMillis(t);
   };
 
   public getResponseTimeTooltipFormatter = (p: Coordinate) => {
-    return this.props.charts.noHits || !p ? '- ms' : asMillis(p.y);
+    return this.props.charts.noHits || !p
+      ? `- ${msTimeUnitLabel}`
+      : asMillis(p.y);
   };
 
   public getTPMFormatter = (t: number | null) => {
@@ -80,9 +90,24 @@ export class TransactionChartsView extends Component<TransactionChartProps> {
       <EuiFlexItem grow={false}>
         <ShiftedEuiText size="xs">
           <ShiftedIconWrapper>
-            <EuiIconTip content="The stream around the average duration shows the expected bounds. An annotation is shown for anomaly scores &gt;= 75." />
+            <EuiIconTip
+              content={i18n.translate(
+                'xpack.apm.metrics.transactionChart.machineLearningTooltip',
+                {
+                  defaultMessage:
+                    'The stream around the average duration shows the expected bounds. An annotation is shown for anomaly scores >= 75.'
+                }
+              )}
+            />
           </ShiftedIconWrapper>
-          <span>Machine learning: </span>
+          <span>
+            {i18n.translate(
+              'xpack.apm.metrics.transactionChart.machineLearningLabel',
+              {
+                defaultMessage: 'Machine learning:'
+              }
+            )}{' '}
+          </span>
           <ViewMLJob
             serviceName={serviceName}
             transactionType={transactionType}
@@ -149,16 +174,43 @@ export class TransactionChartsView extends Component<TransactionChartProps> {
 }
 
 function tpmLabel(type?: string) {
-  return type === 'request' ? 'Requests per minute' : 'Transactions per minute';
+  return type === 'request'
+    ? i18n.translate(
+        'xpack.apm.metrics.transactionChart.requestsPerMinuteLabel',
+        {
+          defaultMessage: 'Requests per minute'
+        }
+      )
+    : i18n.translate(
+        'xpack.apm.metrics.transactionChart.transactionsPerMinuteLabel',
+        {
+          defaultMessage: 'Transactions per minute'
+        }
+      );
 }
 
 function responseTimeLabel(type?: string) {
   switch (type) {
     case 'page-load':
-      return 'Page load times';
+      return i18n.translate(
+        'xpack.apm.metrics.transactionChart.pageLoadTimesLabel',
+        {
+          defaultMessage: 'Page load times'
+        }
+      );
     case 'route-change':
-      return 'Route change times';
+      return i18n.translate(
+        'xpack.apm.metrics.transactionChart.routeChangeTimesLabel',
+        {
+          defaultMessage: 'Route change times'
+        }
+      );
     default:
-      return 'Transaction duration';
+      return i18n.translate(
+        'xpack.apm.metrics.transactionChart.transactionDurationLabel',
+        {
+          defaultMessage: 'Transaction duration'
+        }
+      );
   }
 }
