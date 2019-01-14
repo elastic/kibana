@@ -17,18 +17,23 @@
  * under the License.
  */
 
-const createdInstanceProxies = new WeakSet();
 const INITIALIZING = Symbol('async instance initializing');
+const asyncInitFns = new WeakSet();
 
-export const isAsyncInstance = val =>(
-  createdInstanceProxies.has(val)
+export const isAsyncInstance = val => (
+  val && asyncInitFns.has(val.init)
 );
 
 export const createAsyncInstance = (type, name, promiseForValue) => {
   let instance = INITIALIZING;
 
   const initPromise = promiseForValue.then(v => instance = v);
-  const initFn = () => initPromise;
+  const loadingTarget = {
+    init() {
+      return initPromise;
+    }
+  };
+  asyncInitFns.add(loadingTarget.init);
 
   const assertReady = desc => {
     if (instance === INITIALIZING) {
@@ -46,7 +51,7 @@ export const createAsyncInstance = (type, name, promiseForValue) => {
     }
   };
 
-  const proxy = new Proxy({}, {
+  return new Proxy(loadingTarget, {
     apply(target, context, args) {
       assertReady(`${name}()`);
       return Reflect.apply(instance, context, args);
@@ -68,13 +73,19 @@ export const createAsyncInstance = (type, name, promiseForValue) => {
     },
 
     get(target, prop, receiver) {
-      if (prop === 'init') return initFn;
+      if (loadingTarget.hasOwnProperty(prop)) {
+        return Reflect.get(loadingTarget, prop, receiver);
+      }
 
       assertReady(`${name}.${prop}`);
       return Reflect.get(instance, prop, receiver);
     },
 
     getOwnPropertyDescriptor(target, prop) {
+      if (loadingTarget.hasOwnProperty(prop)) {
+        return Reflect.getOwnPropertyDescriptor(loadingTarget, prop);
+      }
+
       assertReady(`${name}.${prop}`);
       return Reflect.getOwnPropertyDescriptor(instance, prop);
     },
@@ -85,7 +96,9 @@ export const createAsyncInstance = (type, name, promiseForValue) => {
     },
 
     has(target, prop) {
-      if (prop === 'init') return true;
+      if (!loadingTarget.hasOwnProperty(prop)) {
+        return Reflect.has(loadingTarget, prop);
+      }
 
       assertReady(`${name}.${prop}`);
       return Reflect.has(instance, prop);
@@ -116,10 +129,4 @@ export const createAsyncInstance = (type, name, promiseForValue) => {
       return Reflect.setPrototypeOf(instance, prototype);
     }
   });
-
-  // add the created provider to the WeakMap so we can
-  // check for it later in `isAsyncProvider()`
-  createdInstanceProxies.add(proxy);
-
-  return proxy;
 };
