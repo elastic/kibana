@@ -40,7 +40,7 @@ async function startApp(libs: FrontendLibs) {
         </HashRouter>
       </I18nProvider>
     </ThemeProvider>,
-    libs.framework.getUISetting('k7design') ? 'management' : 'self'
+    'management'
   );
 
   await libs.framework.waitUntilFrameworkReady();
@@ -55,7 +55,7 @@ async function startApp(libs: FrontendLibs) {
     });
 
     libs.framework.registerManagementUI({
-      sectionId: 'beats',
+      id: 'beats',
       name: i18n.translate('xpack.beatsManagement.centralManagementLinkLabel', {
         defaultMessage: 'Central Management (Beta)',
       }),

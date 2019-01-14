@@ -7,10 +7,10 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
+import uuidv4 from 'uuid/v4';
 import { BeatTag, ConfigurationBlock } from '../../../../common/domain_types';
 import { TagEdit } from '../../../components/tag/tag_edit';
 import { AppPageProps } from '../../../frontend_types';
-
 interface PageState {
   tag: BeatTag;
   configuration_blocks: ConfigurationBlock[];
@@ -21,7 +21,7 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
     super(props);
     this.state = {
       tag: {
-        id: props.urlState.createdTag ? props.urlState.createdTag : '',
+        id: props.urlState.createdTag ? props.urlState.createdTag : uuidv4(),
         name: '',
         color: '#DD0A73',
         hasConfigurationBlocksTypes: [],
@@ -45,16 +45,18 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
               tag: { ...oldState.tag, [field]: value },
             }))
           }
+          onConfigAddOrEdit={(block: ConfigurationBlock) => {
+            alert('need to add config block');
+          }}
+          onConfigRemoved={(id: string) => {
+            alert('need to remove config block');
+          }}
         />
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              disabled={
-                this.state.tag.id.search(/^[a-zA-Z0-9-]+$/) === -1 ||
-                this.state.tag.id === '' ||
-                this.state.configuration_blocks.length === 0
-              }
+              disabled={this.state.configuration_blocks.length === 0}
               onClick={this.saveTag}
             >
               <FormattedMessage

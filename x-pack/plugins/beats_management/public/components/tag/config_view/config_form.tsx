@@ -5,8 +5,7 @@
  */
 // @ts-ignore
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import Formsy, { addValidationRule, FieldValue, FormData } from 'formsy-react';
-import yaml from 'js-yaml';
+import Formsy from 'formsy-react';
 import { get } from 'lodash';
 import React from 'react';
 import { BeatConfigSchema, ConfigurationBlock } from '../../../../common/domain_types';
@@ -17,42 +16,6 @@ import {
   FormsyEuiPasswordText,
   FormsyEuiSelect,
 } from '../../inputs';
-
-addValidationRule('isHosts', (form: FormData, values: FieldValue | string[]) => {
-  // TODO add more validation
-  return true;
-});
-
-addValidationRule('isString', (values: FormData, value: FieldValue) => {
-  return true;
-});
-
-addValidationRule('isPeriod', (values: FormData, value: FieldValue) => {
-  // TODO add more validation
-  return true;
-});
-
-addValidationRule('isPath', (values: FormData, value: FieldValue) => {
-  // TODO add more validation
-  return value && value.length > 0;
-});
-
-addValidationRule('isPaths', (values: FormData, value: FieldValue) => {
-  // TODO add more validation
-  return true;
-});
-
-addValidationRule('isYaml', (values: FormData, value: FieldValue) => {
-  try {
-    const stuff = yaml.safeLoad(value || '');
-    if (typeof stuff === 'string') {
-      return false;
-    }
-    return true;
-  } catch (e) {
-    return false;
-  }
-});
 
 interface ComponentProps {
   intl: InjectedIntl;

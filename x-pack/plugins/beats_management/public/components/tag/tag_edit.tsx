@@ -35,6 +35,8 @@ interface TagEditProps {
   configuration_blocks: ConfigurationBlock[];
   onDetachBeat?: (beatIds: string[]) => void;
   onTagChange: (field: keyof BeatTag, value: string) => any;
+  onConfigAddOrEdit: (block: ConfigurationBlock) => any;
+  onConfigRemoved: (id: string) => any;
   attachedBeats?: CMBeat[];
 }
 
@@ -77,7 +79,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
               </p>
             </EuiText>
             <div>
-              <TagBadge tag={{ color: tag.color || '#FF0', id: tag.id }} />
+              <TagBadge tag={{ color: tag.color || '#FF0', id: tag.name }} />
             </div>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -89,15 +91,15 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
                     defaultMessage="Tag Name"
                   />
                 }
-                isInvalid={!!this.getNameError(tag.id)}
-                error={this.getNameError(tag.id) || undefined}
+                isInvalid={!!this.getNameError(tag.name)}
+                error={this.getNameError(tag.name) || undefined}
               >
                 <EuiFieldText
                   name="name"
-                  isInvalid={!!this.getNameError(tag.id)}
-                  onChange={this.updateTag('id')}
+                  isInvalid={!!this.getNameError(tag.name)}
+                  onChange={this.updateTag('name')}
                   disabled={!!this.props.onDetachBeat}
-                  value={tag.id}
+                  value={tag.name}
                   placeholder={i18n.translate('xpack.beatsManagement.tag.tagNamePlaceholder', {
                     defaultMessage: 'Tag name (required)',
                   })}
@@ -140,19 +142,15 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
           </EuiFlexItem>
           <EuiFlexItem>
             <div>
-              {'config list onConfigClick not updated in tag_edit.tsx'}
               <ConfigList
                 configs={configuration_blocks}
-                onConfigClick={(action: string, config: ConfigurationBlock) => {
+                onConfigClick={(action: string, block: ConfigurationBlock) => {
                   if (action === 'delete') {
-                    alert('not re-implamented yet');
-                    // const configs = [...tag.configuration_blocks];
-                    // configs.splice(selectedIndex, 1);
-                    // this.updateTag('configuration_blocks', configs);
+                    this.props.onConfigRemoved(block.id);
                   } else {
                     this.setState({
                       showFlyout: true,
-                      // selectedConfigIndex: selectedIndex,
+                      selectedConfigId: block.id,
                     });
                   }
                 }}
@@ -200,18 +198,9 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
               block => block.id !== undefined && block.id === this.state.selectedConfigId
             )}
             onClose={() => this.setState({ showFlyout: false, selectedConfigId: undefined })}
-            onSave={(config: any) => {
+            onSave={(config: ConfigurationBlock) => {
               this.setState({ showFlyout: false, selectedConfigId: undefined });
-              // if (this.state.selectedConfigIndex !== undefined) {
-              //   const configs = [...tag.configuration_blocks];
-              //   configs[this.state.selectedConfigIndex] = config;
-              //   this.updateTag('configuration_blocks', configs);
-              // } else {
-              //   this.updateTag('configuration_blocks', [
-              //     ...(tag.configuration_blocks || []),
-              //     config,
-              //   ]);
-              // }
+              this.props.onConfigAddOrEdit(config);
             }}
           />
         )}
