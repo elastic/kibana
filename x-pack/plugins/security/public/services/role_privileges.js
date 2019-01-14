@@ -21,6 +21,8 @@ const clusterPrivileges = [
   'manage_ccr',
   'manage_ilm',
   'read_ilm',
+  'monitor_rollup',
+  'manage_rollup',
 ];
 const indexPrivileges = [
   'all',
