@@ -11,7 +11,7 @@ import Boom from 'boom';
 
 import { fieldsServiceProvider } from '../fields_service';
 import { renderTemplate } from '../../../common/util/string_utils';
-import messages from './messages.json';
+import { getMessages } from './messages';
 import { VALIDATION_STATUS } from '../../../common/constants/validation';
 
 import { basicJobValidation, uniqWithIsEqual } from '../../../common/util/job_utils';
@@ -22,6 +22,8 @@ import { validateModelMemoryLimit } from './validate_model_memory_limit';
 import { validateTimeRange, isValidTimeField } from './validate_time_range';
 
 export async function validateJob(callWithRequest, payload, kbnVersion = 'current', server) {
+  const messages = getMessages();
+
   try {
     if (typeof payload !== 'object' || payload === null) {
       throw new Error(i18n.translate('xpack.ml.models.jobValidation.payloadIsNotObjectErrorMessage', {
