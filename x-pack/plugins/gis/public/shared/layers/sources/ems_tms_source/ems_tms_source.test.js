@@ -16,7 +16,6 @@ describe('EMSTMSSource', () => {
     const emsTmsSource = new EMSTMSSource({
       id: 'road_map'
     }, {
-      id: 'road_map',
       emsTmsServices: [
         {
           id: 'road_map',
