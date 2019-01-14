@@ -181,12 +181,18 @@ export class VectorLayer extends ALayer {
     const isQueryAware = source.isQueryAware();
     const isGeohashPrecisionAware = source.isGeohashPrecisionAware();
 
-    if (!timeAware && !refreshTimerAware && !extentAware && !isFieldAware && !isQueryAware) {
+    if (
+      !timeAware &&
+      !refreshTimerAware &&
+      !extentAware &&
+      !isFieldAware &&
+      !isQueryAware &&
+      !isGeohashPrecisionAware
+    ) {
       const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
       if (sourceDataRequest && sourceDataRequest.hasDataOrRequestInProgress()) {
         return true;
       }
-
       return false;
     }
 
