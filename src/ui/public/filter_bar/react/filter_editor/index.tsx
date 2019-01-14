@@ -46,7 +46,6 @@ import { FieldFilter, MetaFilter } from '../../filters';
 import { FieldInput } from './field_input';
 import {
   getFieldFromFilter,
-  getFilterableFields,
   getFilterParams,
   getIndexPatternFromFilter,
   getOperatorFromFilter,
@@ -195,7 +194,7 @@ class FilterEditorUI extends Component<Props, State> {
         <EuiFlexGroup>
           <EuiFlexItem style={{ maxWidth: '188px' }}>
             <FieldInput
-              options={this.getFieldOptions()}
+              indexPattern={this.state.selectedIndexPattern}
               value={this.state.selectedField}
               onChange={this.onFieldChange}
               refCallback={this.setFieldInputRef}
@@ -297,11 +296,6 @@ class FilterEditorUI extends Component<Props, State> {
   private isUnknownFilterType() {
     const { type } = this.props.filter.meta;
     return !!type && !['phrase', 'phrases', 'range', 'exists'].includes(type);
-  }
-
-  private getFieldOptions() {
-    const indexPattern = this.state.selectedIndexPattern || this.props.indexPatterns[0];
-    return getFilterableFields([indexPattern]);
   }
 
   private getIndexPatternFromFilter() {

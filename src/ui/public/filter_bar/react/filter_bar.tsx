@@ -22,8 +22,6 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import chrome from 'ui/chrome';
-import { buildEmptyFilter } from 'ui/filter_bar/filters/meta_filter';
-import { FilterEditor } from 'ui/filter_bar/react/filter_editor';
 import { IndexPattern } from 'ui/index_patterns';
 import { FilterOptions } from 'ui/search_bar/components/filter_options';
 import {
@@ -35,6 +33,8 @@ import {
   toggleFilterNegated,
   unpinFilter,
 } from '../filters';
+import { buildEmptyFilter } from '../filters/meta_filter';
+import { FilterEditor } from './filter_editor';
 import { FilterItem } from './filter_item';
 
 const config = chrome.getUiSettingsClient();

@@ -20,11 +20,12 @@
 import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component } from 'react';
-import { IndexPatternField } from 'ui/index_patterns';
+import { IndexPattern, IndexPatternField } from 'ui/index_patterns';
+import { getFilterableFields } from './lib/filter_editor_utils';
 
 interface Props {
+  indexPattern?: IndexPattern;
   value?: IndexPatternField;
-  options: IndexPatternField[];
   onChange: (value?: IndexPatternField) => void;
   intl: InjectedIntl;
   refCallback: (element: HTMLElement) => void;
@@ -37,6 +38,7 @@ class FieldInputUI extends Component<Props> {
     return (
       <EuiFormRow label="Field">
         <EuiComboBox
+          isDisabled={!this.props.indexPattern}
           placeholder={this.props.intl.formatMessage({
             id: 'common.ui.filterEditor.fieldSelectPlaceholder',
             defaultMessage: 'Select a field',
@@ -52,8 +54,15 @@ class FieldInputUI extends Component<Props> {
     );
   }
 
+  private getFilterableFields(): IndexPatternField[] {
+    const { indexPattern } = this.props;
+    return indexPattern ? getFilterableFields([indexPattern]) : [];
+  }
+
   private getOptions(): EuiComboBoxOptionProps[] {
-    return this.props.options.map(field => ({ label: field.name }));
+    const { indexPattern } = this.props;
+    const filterableFields = indexPattern ? getFilterableFields([indexPattern]) : [];
+    return filterableFields.map(field => ({ label: field.name }));
   }
 
   private getSelectedOptions(options: EuiComboBoxOptionProps[]): EuiComboBoxOptionProps[] {
@@ -67,7 +76,8 @@ class FieldInputUI extends Component<Props> {
       return this.props.onChange(undefined);
     }
     const [selectedOption] = selectedOptions;
-    const field = this.props.options.find(option => option.name === selectedOption.label);
+    const fields = this.getFilterableFields();
+    const field = fields.find(option => option.name === selectedOption.label);
     this.props.onChange(field);
   };
 }
