@@ -111,7 +111,7 @@ The port is now protocol dependent: https ports will use 443, and http ports wil
 *Impact:* Users with `server.ssl.cert` set should use `server.ssl.certificate` instead
 
 [float]
-=== kibana.yml setting `server.ssl.enabled` must be set to `true` to enable SSL
+=== kibana.yml `server.ssl.enabled` must be set to `true` to enable SSL
 *Details:* Previously, if `server.ssl.certificate` and `server.ssl.key` were set, SSL would automatically be enabled. 
 It's now required that the user sets `server.ssl.enabled` to true for this to occur.
 
