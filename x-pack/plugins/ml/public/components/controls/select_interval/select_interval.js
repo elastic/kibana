@@ -34,7 +34,7 @@ const OPTIONS = [
   },
   {
     value: 'second',
-    text: i18n.translate('xpack.ml.controls.selectInterval.autoLabel', { defaultMessage: 'Show all' })
+    text: i18n.translate('xpack.ml.controls.selectInterval.showAllLabel', { defaultMessage: 'Show all' })
   }
 ];
 
