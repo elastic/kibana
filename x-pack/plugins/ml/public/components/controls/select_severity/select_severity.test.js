@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { SelectSeverity } from './select_severity';
 
 
@@ -22,7 +22,7 @@ const severityService = {
 describe('SelectSeverity', () => {
 
   test('creates correct severity options and initial selected value', () => {
-    const wrapper = shallow(<SelectSeverity mlSelectSeverityService={severityService}/>);
+    const wrapper = shallowWithIntl(<SelectSeverity mlSelectSeverityService={severityService}/>);
     const options = wrapper.props().options;
     const defaultSelectedValue = wrapper.props().valueOfSelected;
 
@@ -64,7 +64,7 @@ describe('SelectSeverity', () => {
   });
 
   test('state for currently selected value is updated correctly on click', () => {
-    const wrapper = shallow(<SelectSeverity mlSelectSeverityService={severityService} />);
+    const wrapper = shallowWithIntl(<SelectSeverity mlSelectSeverityService={severityService} />);
 
     const defaultSelectedValue = wrapper.props().valueOfSelected;
     expect(defaultSelectedValue).toBe('warning');

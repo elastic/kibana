@@ -12,6 +12,8 @@
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import React, { Component, Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiHealth,
@@ -31,10 +33,26 @@ const optionsMap = {
 };
 
 export const SEVERITY_OPTIONS = [
-  { val: 0, display: 'warning', color: getSeverityColor(0) },
-  { val: 25, display: 'minor', color: getSeverityColor(25) },
-  { val: 50, display: 'major', color: getSeverityColor(50) },
-  { val: 75, display: 'critical', color: getSeverityColor(75) },
+  {
+    val: 0,
+    display: i18n.translate('xpack.ml.controls.selectSeverity.warningLabel', { defaultMessage: 'warning' }),
+    color: getSeverityColor(0)
+  },
+  {
+    val: 25,
+    display: i18n.translate('xpack.ml.controls.selectSeverity.minorLabel', { defaultMessage: 'minor' }),
+    color: getSeverityColor(25)
+  },
+  {
+    val: 50,
+    display: i18n.translate('xpack.ml.controls.selectSeverity.majorLabel', { defaultMessage: 'major' }),
+    color: getSeverityColor(50)
+  },
+  {
+    val: 75,
+    display: i18n.translate('xpack.ml.controls.selectSeverity.criticalLabel', { defaultMessage: 'critical' }),
+    color: getSeverityColor(75)
+  },
 ];
 
 function optionValueToThreshold(value) {
@@ -112,7 +130,13 @@ class SelectSeverity extends Component {
           </EuiHealth>
           <EuiSpacer size="xs" />
           <EuiText size="xs" color="subdued">
-            <p className="euiTextColor--subdued">{`score ${val} and above`}</p>
+            <p className="euiTextColor--subdued">
+              <FormattedMessage
+                id="xpack.ml.controls.selectSeverity.scoreDetailsDescription"
+                defaultMessage="score {value} and above"
+                values={{ value: val }}
+              />
+            </p>
           </EuiText>
         </Fragment>
       ),
