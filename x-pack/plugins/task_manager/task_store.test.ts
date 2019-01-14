@@ -391,6 +391,7 @@ describe('TaskStore', () => {
                       { terms: { 'task.taskType': ['foo', 'bar'] } },
                       { range: { 'task.attempts': { lte: maxAttempts } } },
                       { range: { 'task.runAt': { lte: 'now' } } },
+                      { range: { 'kibana.apiVersion': { lte: 1 } } },
                     ],
                   },
                 },
@@ -484,6 +485,7 @@ describe('TaskStore', () => {
       const runAt = new Date();
       const task = {
         runAt,
+        scheduledAt: runAt,
         id: 'task:324242',
         params: { hello: 'world' },
         state: { foo: 'bar' },
