@@ -18,6 +18,7 @@ export const secretstore = (kibana: any) => {
   return new kibana.Plugin({
     id: 'secretstore',
     require: ['kibana', 'elasticsearch', 'xpack_main'],
+    configPrefix: 'xpack.secretstore',
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       mappings,
@@ -31,6 +32,7 @@ export const secretstore = (kibana: any) => {
     config(Joi: any) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
+        secret: Joi.string().default(undefined),
       }).default();
     },
 
@@ -47,7 +49,7 @@ export const secretstore = (kibana: any) => {
       if (!keystore.has('xpack.secretstore.secret')) {
         keystore.add('xpack.secretstore.secret', crypto.randomBytes(128).toString('hex'));
         warn('Missing key - one has been auto-generated for use.');
-        // keystore.save();
+        keystore.save();
       }
 
       const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
