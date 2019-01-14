@@ -46,6 +46,16 @@ The *Anomaly Explorer* and *Single Metric Viewer* display the results of your
 [role="screenshot"]
 image::ml/images/ml-single-metric-viewer.jpg[Single Metric Viewer]
 
+You can optionally add annotations by drag-selecting a period of time in
+the *Single Metric Viewer* and adding a description. For example, you can add an
+explanation for anomalies in that time period or provide notes about what is
+occurring in your operational environment at that time:
+
+[role="screenshot"]
+image::ml/images/ml-annotations-list.jpg[Single Metric Viewer with annotations]
+
+The *Job Management* pane shows the full list of annotations for each job.
+
 NOTE: The {kib} {ml-features} use pop-ups. You must configure your
 web browser so that it does not block pop-up windows or create an exception for
 your {kib} URL.
