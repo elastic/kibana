@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiButtonEmpty,
+  EuiButton,
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
@@ -26,15 +26,17 @@ export function ViewControl({ isSetViewOpen, closeSetView, openSetView, mouseCoo
   };
   const setView = (
     <EuiPopover
+      anchorPosition="upRight"
       button={(
-        <EuiButtonEmpty
-          flush="right"
-          size="xs"
+        <EuiButton
+          className="gisViewControl__gotoButton"
+          fill
+          size="s"
           onClick={toggleSetViewVisibility}
           data-test-subj="toggleSetViewVisibilityButton"
         >
           Goto
-        </EuiButtonEmpty>)}
+        </EuiButton>)}
       isOpen={isSetViewOpen}
       closePopover={closeSetView}
     >
@@ -44,39 +46,30 @@ export function ViewControl({ isSetViewOpen, closeSetView, openSetView, mouseCoo
 
   function renderMouseCoordinates() {
     return (
-      <Fragment>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs">
-            <p>
-              <strong>lat:</strong> {mouseCoordinates && mouseCoordinates.lat}
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs">
-            <p>
-              <strong>long:</strong> {mouseCoordinates && mouseCoordinates.lon}
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-      </Fragment>
+      <EuiPanel className="gisWidgetControl gisViewControl__coordinates" paddingSize="none">
+        <EuiText size="xs">
+          <p>
+            <strong>lat:</strong> {mouseCoordinates && mouseCoordinates.lat},{' '}
+            <strong>lon:</strong> {mouseCoordinates && mouseCoordinates.lon}
+          </p>
+        </EuiText>
+      </EuiPanel>
     );
   }
 
   return (
-    <EuiPanel className="gisWidgetControl" hasShadow paddingSize="s">
-      <EuiFlexGroup
-        justifyContent="spaceBetween"
-        alignItems="center"
-        gutterSize="s"
-      >
+    <EuiFlexGroup
+      justifyContent="spaceBetween"
+      gutterSize="s"
+      responsive={false}
+    >
+      <EuiFlexItem>
+        {mouseCoordinates && renderMouseCoordinates()}
+      </EuiFlexItem>
 
-        {renderMouseCoordinates()}
-
-        <EuiFlexItem grow={false}>
-          {setView}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+      <EuiFlexItem grow={false}>
+        {setView}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

@@ -64,6 +64,10 @@ export class ALayer {
     return (await this._source.getDisplayName()) || `Layer ${this._descriptor.id}`;
   }
 
+  async getAttributions() {
+    return await this._source.getAttributions();
+  }
+
   getLabel() {
     return this._descriptor.label ? this._descriptor.label : '';
   }
