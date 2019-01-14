@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-import './item_select';
+export { KibanaRegionmapSource } from './kibana_regionmap_source';
