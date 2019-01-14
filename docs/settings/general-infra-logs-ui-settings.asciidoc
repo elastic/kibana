@@ -1,0 +1,17 @@
+`xpack.infra.enabled`:: Set to `false` to disable the Logs and Infrastructure UI plugin {kib}. Defaults to `true`.
+
+`xpack.infra.sources.default.logAlias`:: Index pattern for matching indices that contain log data. Defaults to `filebeat-*`.
+
+`xpack.infra.sources.default.metricAlias`:: Index pattern for matching indices that contain Metricbeat data. Defaults to `metricbeat-*`.
+
+`xpack.infra.sources.default.fields.timestamp`:: Timestamp used to sort log entries. Defaults to `@timestamp`.
+
+`xpack.infra.sources.default.fields.message`:: Fields used to display messages in the Logs UI. Defaults to `['message', '@message']`.
+
+`xpack.infra.sources.default.fields.tiebreaker`:: Field used to break ties between two entries with the same timestamp. Defaults to `_doc`.
+
+`xpack.infra.sources.default.fields.host`:: Field used to identify hosts. Defaults to `beat.hostname`.
+
+`xpack.infra.sources.default.fields.container`:: Field used to identify Docker containers. Defaults to `docker.container.name`.
+
+`xpack.infra.sources.default.fields.pod`:: Field used to identify Kubernetes pods. Defaults to `kubernetes.pod.name`.

@@ -7,8 +7,10 @@
 import { combineReducers } from 'redux';
 import { reducer as api } from './api';
 import { reducer as autoFollowPattern } from './auto_follow_pattern';
+import { reducer as stats } from './stats';
 
 export const ccr = combineReducers({
   autoFollowPattern,
   api,
+  stats,
 });

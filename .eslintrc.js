@@ -298,6 +298,16 @@ module.exports = {
     },
 
     /**
+     * GIS overrides
+     */
+    {
+      files: ['x-pack/plugins/gis/**/*'],
+      rules: {
+        'react/prefer-stateless-function': [0, { ignorePureComponents: false }],
+      },
+    },
+
+    /**
      * Graph overrides
      */
     {

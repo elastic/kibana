@@ -20,8 +20,8 @@
 import { uiModules } from '../../modules';
 import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
-import { ORIGIN } from '../../../../core_plugins/ems_util/common/origin';
-import { EMSClientV66 } from '../../../../core_plugins/ems_util/common/ems_client';
+import { ORIGIN } from '../../../../legacy/core_plugins/tile_map/common/origin';
+import { EMSClientV66 } from '../../../../legacy/core_plugins/tile_map/common/ems_client';
 
 const markdownIt = new MarkdownIt({
   html: false,
@@ -41,6 +41,7 @@ uiModules.get('kibana')
       constructor() {
 
         this._showZoomMessage = true;
+
         this._emsClient = new EMSClientV66({
           kbnVersion: kbnVersion,
           manifestServiceUrl: mapConfig.manifestServiceUrl,

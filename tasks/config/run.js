@@ -77,6 +77,13 @@ module.exports = function (grunt) {
       ]
     },
 
+    sasslint: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/sasslint')
+      ]
+    },
+
     // used by the test tasks
     //    runs the check_file_casing script to ensure filenames use correct casing
     checkFileCasing: {

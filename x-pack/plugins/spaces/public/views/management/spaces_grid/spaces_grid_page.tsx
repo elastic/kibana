@@ -8,6 +8,7 @@ import React, { Component, Fragment } from 'react';
 
 import {
   EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   // @ts-ignore
@@ -306,33 +307,45 @@ class SpacesGridPageUI extends Component<Props, State> {
         }),
         actions: [
           {
-            name: intl.formatMessage({
-              id: 'xpack.spaces.management.spacesGridPage.editSpaceActionName',
-              defaultMessage: 'Edit',
-            }),
-            description: intl.formatMessage({
-              id: 'xpack.spaces.management.spacesGridPage.editSpaceActionDescription',
-              defaultMessage: 'Edit this space.',
-            }),
-            onClick: this.onEditSpaceClick,
-            type: 'icon',
-            icon: 'pencil',
-            color: 'primary',
+            render: (record: Space) => {
+              return (
+                <EuiButtonIcon
+                  aria-label={intl.formatMessage(
+                    {
+                      id: 'xpack.spaces.management.spacesGridPage.editSpaceActionName',
+                      defaultMessage: `Edit {spaceName}.`,
+                    },
+                    {
+                      spaceName: record.name,
+                    }
+                  )}
+                  color={'primary'}
+                  iconType={'pencil'}
+                  onClick={() => this.onEditSpaceClick(record)}
+                />
+              );
+            },
           },
           {
             available: (record: Space) => !isReservedSpace(record),
-            name: intl.formatMessage({
-              id: 'xpack.spaces.management.spacesGridPage.deleteActionName',
-              defaultMessage: 'Delete',
-            }),
-            description: intl.formatMessage({
-              id: 'xpack.spaces.management.spacesGridPage.deleteThisSpaceActionDescription',
-              defaultMessage: 'Delete this space.',
-            }),
-            onClick: this.onDeleteSpaceClick,
-            type: 'icon',
-            icon: 'trash',
-            color: 'danger',
+            render: (record: Space) => {
+              return (
+                <EuiButtonIcon
+                  aria-label={intl.formatMessage(
+                    {
+                      id: 'xpack.spaces.management.spacesGridPage.deleteActionName',
+                      defaultMessage: `Delete {spaceName}.`,
+                    },
+                    {
+                      spaceName: record.name,
+                    }
+                  )}
+                  color={'danger'}
+                  iconType={'trash'}
+                  onClick={() => this.onDeleteSpaceClick(record)}
+                />
+              );
+            },
           },
         ],
       },

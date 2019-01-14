@@ -7,7 +7,7 @@
 //import mockOverallSwimlaneData from './__mocks__/mock_overall_swimlane.json';
 
 import moment from 'moment-timezone';
-import { mount } from 'enzyme';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { TimeseriesChart } from './timeseries_chart';
@@ -62,7 +62,7 @@ describe('TimeseriesChart', () => {
   test('Minimal initialization', () => {
     const props = getTimeseriesChartPropsMock();
 
-    const wrapper = mount(<TimeseriesChart {...props}/>);
+    const wrapper = mountWithIntl(<TimeseriesChart.WrappedComponent {...props}/>);
 
     expect(wrapper.html()).toBe(
       `<div class="ml-timeseries-chart-react"></div>`
