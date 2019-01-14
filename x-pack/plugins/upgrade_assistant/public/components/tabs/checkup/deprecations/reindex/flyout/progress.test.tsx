@@ -22,28 +22,22 @@ describe('ReindexProgress', () => {
     );
 
     expect(wrapper).toMatchInlineSnapshot(`
-<EuiSteps
-  firstStepNumber={1}
-  headingElement="p"
+<Component
   steps={
     Array [
       Object {
-        "children": <span />,
-        "status": "incomplete",
+        "status": "inProgress",
         "title": "Setting old index to read-only",
       },
       Object {
-        "children": <span />,
         "status": "incomplete",
         "title": "Creating new index",
       },
       Object {
-        "children": <span />,
         "status": "incomplete",
         "title": "Reindexing documents",
       },
       Object {
-        "children": <span />,
         "status": "incomplete",
         "title": "Creating alias",
       },

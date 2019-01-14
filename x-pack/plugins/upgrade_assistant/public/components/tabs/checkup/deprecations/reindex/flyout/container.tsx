@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 
 import { EuiFlyout, EuiFlyoutHeader, EuiPortal } from '@elastic/eui';
+
 import { ReindexState } from '../polling_service';
 import { ChecklistFlyoutStep } from './checklist_step';
 import { WarningsFlyoutStep } from './warnings_step';

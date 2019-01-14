@@ -1,0 +1,50 @@
+.stepProgress__step {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.stepProgress__status {
+  margin-right: 12px;
+  width: 18px;
+  height: 18px;
+  text-align: center;
+  line-height: 15px;
+}
+
+$stepStatusColorsToFade: (
+  failed: $euiColorDanger,
+  complete: $euiColorSecondary,
+);
+
+.stepStatus__circle {
+  border-radius: 12px;
+
+  @each $name, $color in $stepStatusColorsToFade {
+    &--#{$name} {
+      $backgroundColor: $color;
+      @if (saturation($color) > 0%) {
+        $backgroundColor: tintOrShade($color, 90%, 70%);
+      }
+
+      $textColor: makeHighContrastColor($color, $backgroundColor);
+
+      color: $textColor;
+      background-color: $backgroundColor;
+    }
+  }
+}
+
+.stepProgress__title {
+  font-size: 1.1rem;
+  line-height: 2rem;
+
+  &--inProgress {
+    font-weight: 600;
+  }
+}
+
+.stepProgress__content {
+  display: block;
+  margin-left: 30px;
+}
