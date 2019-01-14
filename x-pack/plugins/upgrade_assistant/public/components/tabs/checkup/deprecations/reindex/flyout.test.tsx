@@ -9,9 +9,9 @@ import React from 'react';
 
 import { ReindexStatus, ReindexStep, ReindexWarning } from '../../../../../../common/types';
 import { LoadingState } from '../../../../types';
-import { ReindexFlyoutUI } from './flyout';
+import { ChecklistFlyout } from './flyout';
 
-describe('ReindexFlyout', () => {
+describe('ChecklistFlyout', () => {
   const defaultProps = {
     indexName: 'myIndex',
     closeFlyout: jest.fn(),
@@ -29,11 +29,11 @@ describe('ReindexFlyout', () => {
   };
 
   it('renders', () => {
-    expect(shallow(<ReindexFlyoutUI {...defaultProps} />)).toMatchSnapshot();
+    expect(shallow(<ChecklistFlyout {...defaultProps} />)).toMatchSnapshot();
   });
 
   it('disables button while reindexing', () => {
-    const wrapper = shallow(<ReindexFlyoutUI {...defaultProps} />);
+    const wrapper = shallow(<ChecklistFlyout {...defaultProps} />);
     expect(wrapper.find('EuiButton').props().disabled).toBe(true);
   });
 
@@ -46,7 +46,7 @@ describe('ReindexFlyout', () => {
         status: undefined,
       },
     };
-    const wrapper = shallow(<ReindexFlyoutUI {...props} />);
+    const wrapper = shallow(<ChecklistFlyout {...props} />);
 
     wrapper.find('EuiButton').simulate('click');
     expect(props.startReindex).toHaveBeenCalled();

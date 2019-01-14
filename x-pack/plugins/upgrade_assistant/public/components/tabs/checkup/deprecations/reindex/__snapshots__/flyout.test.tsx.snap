@@ -1,121 +1,67 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ReindexFlyout renders 1`] = `
-<EuiPortal>
-  <EuiFlyout
-    aria-labelledby="Reindex"
-    closeButtonAriaLabel="Closes this dialog"
-    hideCloseButton={false}
-    maxWidth={false}
-    onClose={[MockFunction]}
-    ownFocus={true}
-    size="m"
-  >
-    <EuiFlyoutHeader
-      hasBorder={true}
+exports[`ChecklistFlyout renders 1`] = `
+<React.Fragment>
+  <EuiFlyoutBody>
+    <EuiCallOut
+      color="warning"
+      iconType="help"
+      size="m"
+      title="Be careful"
     >
-      <h2>
-        Reindex 
-        myIndex
-      </h2>
-    </EuiFlyoutHeader>
-    <EuiFlyoutBody
-      style={
-        Object {
-          "display": "flex",
-        }
-      }
+      While reindexing, the index will not be able to ingest new documents, update documents, or delete documents. Depending on how this index is being used in your system, this may cause problems and you may need to use a different strategy to reindex this index.
+    </EuiCallOut>
+    <EuiSpacer
+      size="l"
+    />
+    <Component
+      errorMessage={null}
+      reindexStatus={0}
+      reindexTaskPercComplete={null}
+    />
+  </EuiFlyoutBody>
+  <EuiFlyoutFooter>
+    <EuiFlexGroup
+      alignItems="stretch"
+      component="div"
+      direction="row"
+      gutterSize="l"
+      justifyContent="spaceBetween"
+      responsive={true}
+      wrap={false}
     >
-      <EuiFlexGroup
-        alignItems="stretch"
+      <EuiFlexItem
         component="div"
-        direction="column"
-        gutterSize="l"
-        justifyContent="spaceBetween"
-        responsive={true}
-        style={
-          Object {
-            "flexGrow": 1,
-          }
-        }
-        wrap={false}
+        grow={false}
       >
-        <EuiFlexItem
-          component="div"
-          grow={false}
+        <EuiButtonEmpty
+          color="primary"
+          flush="left"
+          iconSide="left"
+          iconType="cross"
+          onClick={[MockFunction]}
+          type="button"
         >
-          <EuiCallOut
-            color="warning"
-            iconType="help"
-            size="m"
-            title="Be careful"
-          >
-            While reindexing, the index will not be able to ingest new documents, update documents, or delete documents. Depending on how this index is being used in your system, this may cause problems and you may need to use a different strategy to reindex this index.
-          </EuiCallOut>
-          <EuiSpacer
-            size="l"
-          />
-          <Component
-            warnings={
-              Array [
-                0,
-              ]
-            }
-          />
-          <EuiSpacer
-            size="l"
-          />
-          <Component
-            errorMessage={null}
-            reindexStatus={0}
-            reindexTaskPercComplete={null}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlyoutBody>
-    <EuiFlyoutFooter>
-      <EuiFlexGroup
-        alignItems="stretch"
+          Cancel
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
         component="div"
-        direction="row"
-        gutterSize="l"
-        justifyContent="spaceBetween"
-        responsive={true}
-        wrap={false}
+        grow={false}
       >
-        <EuiFlexItem
-          component="div"
-          grow={false}
+        <EuiButton
+          color="primary"
+          disabled={true}
+          fill={true}
+          iconSide="left"
+          isLoading={true}
+          onClick={[MockFunction]}
+          type="button"
         >
-          <EuiButtonEmpty
-            color="primary"
-            flush="left"
-            iconSide="left"
-            iconType="cross"
-            onClick={[MockFunction]}
-            type="button"
-          >
-            Cancel
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem
-          component="div"
-          grow={false}
-        >
-          <EuiButton
-            color="warning"
-            disabled={true}
-            fill={true}
-            iconSide="left"
-            isLoading={true}
-            onClick={[MockFunction]}
-            type="button"
-          >
-            Reindexing…
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlyoutFooter>
-  </EuiFlyout>
-</EuiPortal>
+          Reindexing…
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutFooter>
+</React.Fragment>
 `;

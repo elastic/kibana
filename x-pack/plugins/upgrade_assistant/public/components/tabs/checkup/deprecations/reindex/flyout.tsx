@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, HTMLAttributes } from 'react';
+import React, { Fragment } from 'react';
 
 import {
-  CommonProps,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -20,17 +18,12 @@ import {
   EuiFlyoutHeader,
   EuiPortal,
   EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
 import { ReindexStatus } from '../../../../../../common/types';
 import { LoadingState } from '../../../../types';
 import { ReindexState } from './polling_service';
 import { ReindexProgress } from './progress';
-import { ReindexWarningSummary } from './warnings';
-
-export const EuiFlyoutBodyTyped: React.SFC<
-  CommonProps & HTMLAttributes<HTMLDivElement>
-> = EuiFlyoutBody;
+import { WarningsConfirmationFlyout } from './warnings_confirmation';
 
 const buttonLabel = (status?: ReindexStatus) => {
   switch (status) {
@@ -41,110 +34,71 @@ const buttonLabel = (status?: ReindexStatus) => {
     case ReindexStatus.completed:
       return 'Done!';
     default:
-      return 'Start reindexing';
+      return 'Start reindex';
   }
 };
 
 /**
  * Displays a flyout that shows the current reindexing status for a given index.
  */
-export const ReindexFlyoutUI: React.StatelessComponent<{
-  indexName: string;
+export const ChecklistFlyout: React.StatelessComponent<{
   closeFlyout: () => void;
-  confirmInputValue: string;
-  onConfirmInputChange: (e: any) => void;
   reindexState: ReindexState;
   startReindex: () => void;
-}> = ({
-  indexName,
-  closeFlyout,
-  confirmInputValue,
-  onConfirmInputChange,
-  reindexState,
-  startReindex,
-}) => {
+}> = ({ closeFlyout, reindexState, startReindex }) => {
   const {
     loadingState,
     status,
     reindexTaskPercComplete,
     lastCompletedStep,
     errorMessage,
-    reindexWarnings,
   } = reindexState;
   const loading = loadingState === LoadingState.Loading || status === ReindexStatus.inProgress;
-  const hasWarnings = Boolean(reindexWarnings && reindexWarnings.length);
-  const confirmFilled = confirmInputValue === 'CONFIRM';
 
   return (
-    <EuiPortal>
-      <EuiFlyout onClose={closeFlyout} aria-labelledby="Reindex" ownFocus size="m">
-        <EuiFlyoutHeader hasBorder>
-          <h2>Reindex {indexName}</h2>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBodyTyped style={{ display: 'flex' }}>
-          <EuiFlexGroup direction="column" justifyContent="spaceBetween" style={{ flexGrow: 1 }}>
-            <EuiFlexItem grow={false}>
-              <EuiCallOut title="Be careful" color="warning" iconType="help">
-                While reindexing, the index will not be able to ingest new documents, update
-                documents, or delete documents. Depending on how this index is being used in your
-                system, this may cause problems and you may need to use a different strategy to
-                reindex this index.
-              </EuiCallOut>
-              <EuiSpacer />
-              <ReindexWarningSummary warnings={reindexWarnings} />
-              <EuiSpacer />
-              {status !== undefined && (
-                <ReindexProgress
-                  lastCompletedStep={lastCompletedStep}
-                  reindexStatus={status}
-                  reindexTaskPercComplete={reindexTaskPercComplete}
-                  errorMessage={errorMessage}
-                />
-              )}
-            </EuiFlexItem>
-            {hasWarnings && status === undefined && (
-              <EuiFlexItem grow={false}>
-                <EuiText>
-                  <strong>Type "CONFIRM" below if you accept these changes</strong>
-                </EuiText>
-                <EuiSpacer size="m" />
-                <EuiFieldText
-                  placeholder="CONFIRM"
-                  fullWidth
-                  value={confirmInputValue}
-                  onChange={onConfirmInputChange}
-                  aria-label="Reindex confirmation"
-                />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiFlyoutBodyTyped>
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
-                Cancel
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                color="warning"
-                onClick={startReindex}
-                isLoading={loading}
-                disabled={
-                  loading || status === ReindexStatus.completed || (hasWarnings && !confirmFilled)
-                }
-              >
-                {buttonLabel(status)}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      </EuiFlyout>
-    </EuiPortal>
+    <Fragment>
+      <EuiFlyoutBody>
+        <EuiCallOut title="Be careful" color="warning" iconType="help">
+          While reindexing, the index will not be able to ingest new documents, update documents, or
+          delete documents. Depending on how this index is being used in your system, this may cause
+          problems and you may need to use a different strategy to reindex this index.
+        </EuiCallOut>
+        <EuiSpacer />
+        <ReindexProgress
+          lastCompletedStep={lastCompletedStep}
+          reindexStatus={status}
+          reindexTaskPercComplete={reindexTaskPercComplete}
+          errorMessage={errorMessage}
+        />
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+              Cancel
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              color="primary"
+              onClick={startReindex}
+              isLoading={loading}
+              disabled={loading || status === ReindexStatus.completed}
+            >
+              {buttonLabel(status)}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </Fragment>
   );
 };
+
+enum ReindexFlyoutStep {
+  destructiveConfirmation,
+  checklist,
+}
 
 interface ReindexFlyoutProps {
   indexName: string;
@@ -154,39 +108,66 @@ interface ReindexFlyoutProps {
 }
 
 interface ReindexFlyoutState {
-  confirmInputValue: string;
+  currentFlyoutStep: ReindexFlyoutStep;
 }
 
 /**
- * Wrapper for the UI that manages setting up the polling service and subscribing to its state.
+ * Wrapper for the contents of the flyout that manages which step of the flyout to show.
  */
 export class ReindexFlyout extends React.Component<ReindexFlyoutProps, ReindexFlyoutState> {
   constructor(props: ReindexFlyoutProps) {
     super(props);
+    const { reindexWarnings } = props.reindexState;
+
     this.state = {
-      confirmInputValue: '',
+      currentFlyoutStep:
+        reindexWarnings && reindexWarnings.length > 0
+          ? ReindexFlyoutStep.destructiveConfirmation
+          : ReindexFlyoutStep.checklist,
     };
   }
 
   public render() {
     const { closeFlyout, indexName, reindexState, startReindex } = this.props;
-    const { confirmInputValue } = this.state;
+    const { currentFlyoutStep } = this.state;
+
+    let flyoutContents: React.ReactNode;
+    switch (currentFlyoutStep) {
+      case ReindexFlyoutStep.destructiveConfirmation:
+        flyoutContents = (
+          <WarningsConfirmationFlyout
+            closeFlyout={closeFlyout}
+            warnings={reindexState.reindexWarnings!}
+            advanceNextStep={this.advanceNextStep}
+          />
+        );
+        break;
+      case ReindexFlyoutStep.checklist:
+        flyoutContents = (
+          <ChecklistFlyout
+            closeFlyout={closeFlyout}
+            reindexState={reindexState}
+            startReindex={startReindex}
+          />
+        );
+        break;
+      default:
+        throw new Error(`Invalid flyout step: ${currentFlyoutStep}`);
+    }
 
     return (
-      <Fragment>
-        <ReindexFlyoutUI
-          closeFlyout={closeFlyout}
-          indexName={indexName}
-          confirmInputValue={confirmInputValue}
-          onConfirmInputChange={this.onConfirmInputChange}
-          reindexState={reindexState}
-          startReindex={startReindex}
-        />
-      </Fragment>
+      <EuiPortal>
+        <EuiFlyout onClose={closeFlyout} aria-labelledby="Reindex" ownFocus size="m">
+          <EuiFlyoutHeader hasBorder>
+            <h2>Reindex {indexName}</h2>
+          </EuiFlyoutHeader>
+          {flyoutContents}
+        </EuiFlyout>
+      </EuiPortal>
     );
   }
 
-  private onConfirmInputChange = (e: any) => {
-    this.setState({ confirmInputValue: e.target.value });
+  public advanceNextStep = () => {
+    this.setState({ currentFlyoutStep: ReindexFlyoutStep.checklist });
   };
 }
