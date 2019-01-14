@@ -6,8 +6,10 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import xPackage from '../../package.json';
-import { getTemplateVersion } from './lib/get_template_version';
+import {
+  TASK_MANAGER_API_VERSION as API_VERSION,
+  TASK_MANAGER_TEMPLATE_VERSION as TEMPLATE_VERSION,
+} from './constants';
 import { TaskInstance, TaskStatus } from './task';
 import { FetchOpts, TaskStore } from './task_store';
 import { mockLogger } from './test_utils';
@@ -44,25 +46,36 @@ describe('TaskStore', () => {
       });
     });
 
-    test('throws error if newer index template exists', async () => {
+    test('logs a warning if newer index template exists', async () => {
       const callCluster = sinon.stub();
       callCluster
         .withArgs('indices.getTemplate')
         .returns(Promise.resolve({ tasky: { version: Infinity } }));
+
+      const logger = {
+        info: sinon.spy(),
+        debug: sinon.spy(),
+        warning: sinon.spy(),
+        error: sinon.spy(),
+      };
+
       const store = new TaskStore({
         callCluster,
         getKibanaUuid,
-        logger: mockLogger(),
+        logger,
         index: 'tasky',
         maxAttempts: 2,
         supportedTypes: ['a', 'b', 'c'],
       });
 
-      await expect(store.init()).rejects.toMatchObject({
-        message: `Template version ${getTemplateVersion(
-          xPackage.version
-        )} could not be saved: existing template version Infinity is newer!`,
-      });
+      await store.init();
+      const loggingCall = logger.warning.getCall(0);
+      expect(loggingCall.args[0]).toBe(
+        `This Kibana instance defines an older template version (${TEMPLATE_VERSION}) than is currently in Elasticsearch (Infinity). ` +
+          `Because of the potential for non-backwards compatible changes, this Kibana instance will only be able to claim scheduled tasks with ` +
+          `"kibana.apiVersion": ${API_VERSION} in the task metadata.`
+      );
+      expect(logger.warning.calledOnce).toBe(true);
     });
   });
 

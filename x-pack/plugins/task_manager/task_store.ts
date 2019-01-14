@@ -8,6 +8,7 @@
  * This module contains helpers for managing the task manager storage layer.
  */
 
+import { get } from 'lodash';
 import { TASK_MANAGER_API_VERSION, TASK_MANAGER_TEMPLATE_VERSION } from './constants';
 import { Logger } from './lib/logger';
 import { ConcreteTaskInstance, ElasticJs, TaskInstance, TaskStatus } from './task';
@@ -128,7 +129,7 @@ export class TaskStore {
         filter_path: '*.version',
       });
       // extract the existing version
-      existingVersion = templateCheck[templateName] ? templateCheck[templateName].version : null;
+      existingVersion = get(templateCheck[templateName], 'version') || 0;
     } catch (err) {
       if (err.statusCode !== 404) {
         throw err; // ignore not found
