@@ -88,7 +88,7 @@ export function getColumns(
     {
       field: 'time',
       name: i18n.translate('xpack.ml.anomaliesTable.timeColumnName', {
-        defaultMessage: 'Show details',
+        defaultMessage: 'time',
       }),
       dataType: 'date',
       render: (date) => renderTime(date, interval),
