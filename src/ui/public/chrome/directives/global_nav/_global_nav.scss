@@ -5,7 +5,7 @@
   top: 0;
   bottom: 0;
   z-index: 0;
-  background-color: $euiColorPrimary;
+  background-color: $kbnChromeGlobalNavBackground;
   overflow: hidden;
 
   &.kbnGlobalNav-isOpen {
@@ -61,10 +61,6 @@
   display: inline-block;
 
   &:hover {
-    background-color: darken($euiColorPrimary, 15%);
-  }
-
-  &.active {
-    background-color: $euiColorPrimary;
+    background-color: darken($kbnChromeGlobalNavBackground, 4%);
   }
 }
