@@ -135,8 +135,6 @@ export function initPutRolesApi(
           existingRoleResponse[name] ? existingRoleResponse[name].applications : []
         );
 
-        console.log(body);
-
         await callWithRequest(request, 'shield.putRole', { name, body });
         return h.response().code(204);
       } catch (err) {
