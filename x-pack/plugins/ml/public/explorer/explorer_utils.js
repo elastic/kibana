@@ -8,15 +8,13 @@
  * utils for Anomaly Explorer.
  */
 
-import { each, get, has, indexOf, uniq } from 'lodash';
+import { each, get, has, uniq } from 'lodash';
 import { timefilter } from 'ui/timefilter';
 import { parseInterval } from 'ui/utils/parse_interval';
 import { TimeBuckets } from 'ui/time_buckets';
 
-import { getIndexPatterns } from 'plugins/ml/util/index_utils';
 import { isTimeSeriesViewDetector } from '../../common/util/job_utils';
 import { ml } from '../services/ml_api_service';
-import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { mlJobService } from '../services/job_service';
 import { mlResultsService } from 'plugins/ml/services/results_service';
 import { mlSelectIntervalService } from '../components/controls/select_interval/select_interval';
@@ -58,7 +56,7 @@ export function mapScopeToProps(scope, appState) {
   return {
     appState,
     dateFormatTz: scope.dateFormatTz,
-    jobs: scope.jobs,
+    noJobsFound: scope.jobs.length === 0,
     loading: scope.loading,
     mlJobSelectService: scope.mlJobSelectService,
   };
@@ -119,11 +117,6 @@ export async function getFilteredTopInfluencers(jobIds, earliestMs, latestMs, re
   return await loadTopInfluencers(jobIds, earliestMs, latestMs, filterInfluencers, noInfluencersConfigured);
 }
 
-export function getSelectedJobIds(jobs) {
-  const selectedJobs = jobs.filter(job => job.selected);
-  return selectedJobs.map(job => job.id);
-}
-
 export function selectedJobsHaveInfluencers(selectedJobs = []) {
   let hasInfluencers = false;
   selectedJobs.forEach((selectedJob) => {
@@ -135,45 +128,6 @@ export function selectedJobsHaveInfluencers(selectedJobs = []) {
     hasInfluencers = hasInfluencers || influencers.length > 0;
   });
   return hasInfluencers;
-}
-
-export function getSelectedJobs(previousSelectedJobs, jobs, selectedIds, appState) {
-  let previousSelectedCount = 0;
-  if (previousSelectedJobs !== null) {
-    previousSelectedCount = previousSelectedJobs.length;
-  }
-
-  // update the jobs' selected flag
-  const selectedJobs = [];
-  jobs.forEach((job) => {
-    job.selected = (indexOf(selectedIds, job.id) !== -1);
-    if (job.selected) {
-      selectedJobs.push(job);
-    }
-  });
-
-  // Clear viewBy from the state if we are moving from single
-  // to multi selection, or vice-versa.
-  appState.fetch();
-  if (
-    (previousSelectedCount <= 1 && selectedJobs.length > 1) ||
-    (selectedJobs.length === 1 && previousSelectedCount > 1)
-  ) {
-    delete appState.mlExplorerSwimlane.viewBy;
-  }
-  appState.save();
-
-  return new Promise((resolve) => {
-    // Populate the map of jobs / detectors / field formatters for the selected IDs.
-    mlFieldFormatService.populateFormats(selectedIds, getIndexPatterns())
-      .catch((err) => {
-        console.log('Error populating field formats:', err);
-        resolve(selectedJobs);
-      })
-      .then(() => {
-        resolve(selectedJobs);
-      });
-  });
 }
 
 export function getSelectionTimeRange(selectedCells, interval) {
@@ -213,7 +167,7 @@ export function getSelectionInfluencers(selectedCells, fieldName) {
   return influencers;
 }
 
-export function getSwimlaneBucketInterval(jobs, swimlaneWidth) {
+export function getSwimlaneBucketInterval(selectedJobs, swimlaneWidth) {
   // Bucketing interval should be the maximum of the chart related interval (i.e. time range related)
   // and the max bucket span for the jobs shown in the chart.
   const bounds = timefilter.getActiveBounds();
@@ -235,7 +189,6 @@ export function getSwimlaneBucketInterval(jobs, swimlaneWidth) {
     buckets.setInterval((intervalSeconds * 2) + 's');
   }
 
-  const selectedJobs = jobs.filter(job => job.selected);
   const maxBucketSpanSeconds = selectedJobs.reduce((memo, job) => Math.max(memo, job.bucketSpanSeconds), 0);
   if (maxBucketSpanSeconds > intervalSeconds) {
     buckets.setInterval(maxBucketSpanSeconds + 's');
@@ -245,12 +198,12 @@ export function getSwimlaneBucketInterval(jobs, swimlaneWidth) {
   return buckets.getInterval();
 }
 
-export function processOverallResults(scoresByTime, searchBounds, jobs, swimlaneWidth) {
+export function processOverallResults(scoresByTime, searchBounds, selectedJobs, swimlaneWidth) {
   const overallLabel = i18n.translate('xpack.ml.explorer.overallLabel', { defaultMessage: 'Overall' });
   const dataset = {
     laneLabels: [overallLabel],
     points: [],
-    interval: getSwimlaneBucketInterval(jobs, swimlaneWidth).asSeconds(),
+    interval: getSwimlaneBucketInterval(selectedJobs, swimlaneWidth).asSeconds(),
     earliest: searchBounds.min.valueOf() / 1000,
     latest: searchBounds.max.valueOf() / 1000
   };
@@ -277,7 +230,7 @@ export function processOverallResults(scoresByTime, searchBounds, jobs, swimlane
 export function processViewByResults(
   scoresByInfluencerAndTime,
   sortedLaneValues,
-  jobs,
+  selectedJobs,
   overallSwimlaneData,
   swimlaneViewByFieldName,
   swimlaneWidth,
@@ -289,7 +242,7 @@ export function processViewByResults(
   const dataset = {
     fieldName: swimlaneViewByFieldName,
     points: [],
-    interval: getSwimlaneBucketInterval(jobs, swimlaneWidth).asSeconds()
+    interval: getSwimlaneBucketInterval(selectedJobs, swimlaneWidth).asSeconds()
   };
 
   // Set the earliest and latest to be the same as the overall swimlane.
@@ -341,9 +294,9 @@ export function processViewByResults(
   return dataset;
 }
 
-export async function loadAnnotationsTableData(selectedCells, jobs, interval) {
+export async function loadAnnotationsTableData(selectedCells, selectedJobs, interval) {
   const jobIds = (selectedCells !== null && selectedCells.fieldName === VIEW_BY_JOB_LABEL) ?
-    selectedCells.lanes : getSelectedJobIds(jobs);
+    selectedCells.lanes : selectedJobs.map(d => d.id);
   const timeRange = getSelectionTimeRange(selectedCells, interval);
 
   if (mlAnnotationsEnabled === false) {
@@ -377,9 +330,9 @@ export async function loadAnnotationsTableData(selectedCells, jobs, interval) {
   );
 }
 
-export async function loadAnomaliesTableData(selectedCells, jobs, dateFormatTz, interval, fieldName) {
+export async function loadAnomaliesTableData(selectedCells, selectedJobs, dateFormatTz, interval, fieldName) {
   const jobIds = (selectedCells !== null && selectedCells.fieldName === VIEW_BY_JOB_LABEL) ?
-    selectedCells.lanes : getSelectedJobIds(jobs);
+    selectedCells.lanes : selectedJobs.map(d => d.id);
   const influencers = getSelectionInfluencers(selectedCells, fieldName);
   const timeRange = getSelectionTimeRange(selectedCells, interval);
 

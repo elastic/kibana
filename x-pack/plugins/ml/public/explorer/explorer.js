@@ -47,8 +47,6 @@ import {
   getFilteredTopInfluencers,
   getSelectionInfluencers,
   getSelectionTimeRange,
-  getSelectedJobs,
-  getSelectedJobIds,
   getSwimlaneBucketInterval,
   getDefaultViewBySwimlaneData,
   loadAnnotationsTableData,
@@ -114,11 +112,14 @@ function mapSwimlaneOptionsToEuiOptions(options) {
 export const Explorer = injectI18n(
   class Explorer extends React.Component {
     static propTypes = {
-      jobs: PropTypes.array,
+      noJobsFound: PropTypes.bool,
       loading: PropTypes.bool,
     };
 
     state = getExplorerDefaultState();
+
+    // helper to avoid calling `setState()` in the listener for chart updates.
+    _isMounted = false;
 
     // make sure dragSelect is only available if the mouse pointer is actually over a swimlane
     disableDragSelectOnMouseLeave = true;
@@ -126,15 +127,17 @@ export const Explorer = injectI18n(
     skipCellClicks = true;
 
     updateCharts = explorerChartsContainerServiceFactory((data) => {
-      this.setState({
-        chartsData: {
-          ...getDefaultChartsData(),
-          chartsPerRow: data.chartsPerRow,
-          seriesToPlot: data.seriesToPlot,
-          // convert truthy/falsy value to Boolean
-          tooManyBuckets: !!data.tooManyBuckets,
-        }
-      });
+      if (this._isMounted) {
+        this.setState({
+          chartsData: {
+            ...getDefaultChartsData(),
+            chartsPerRow: data.chartsPerRow,
+            seriesToPlot: data.seriesToPlot,
+            // convert truthy/falsy value to Boolean
+            tooManyBuckets: !!data.tooManyBuckets,
+          }
+        });
+      }
     });
 
     ALLOW_CELL_RANGE_SELECTION = mlExplorerDashboardService.allowCellRangeSelection;
@@ -177,13 +180,9 @@ export const Explorer = injectI18n(
       if (action === EXPLORER_ACTION.INITIALIZE) {
         const {
           appState,
-          jobs,
-          mlJobSelectService
         } = this.props;
-        // Select any jobs set in the global state (i.e. passed in the URL).
-        const selectedJobIds = mlJobSelectService.getSelectedJobIds(true);
+        const { selectedJobs } = payload;
 
-        const selectedJobs = await getSelectedJobs(this.state.selectedJobs, jobs, selectedJobIds, appState);
         this.setState(
           {
             noInfluencersConfigured: !selectedJobsHaveInfluencers(selectedJobs),
@@ -228,14 +227,12 @@ export const Explorer = injectI18n(
 
       // Listen for changes to job selection.
       if (action === EXPLORER_ACTION.JOB_SELECTION_CHANGE) {
-        const { jobs, selections } = payload;
-        const { selectedJobs } = this.state;
+        const { selectedJobs } = payload;
         this.clearSwimlaneSelectionFromAppState();
-        const updatedSelectedJobs = await getSelectedJobs(selectedJobs, jobs, selections, this.props.appState);
         this.setState(
           {
-            noInfluencersConfigured: !selectedJobsHaveInfluencers(updatedSelectedJobs),
-            selectedJobs: updatedSelectedJobs,
+            noInfluencersConfigured: !selectedJobsHaveInfluencers(selectedJobs),
+            selectedJobs,
           },
           async () => {
             // Load the data - if the FieldFormats failed to populate
@@ -259,9 +256,10 @@ export const Explorer = injectI18n(
           this.state.anomalyChartRecords.length > 0
         ) {
           const swimlaneWidth = getSwimlaneContainerWidth(this.state.noInfluencersConfigured);
+          const { selectedJobs } = this.state;
           const timerange = getSelectionTimeRange(
             this.state.selectedCells,
-            getSwimlaneBucketInterval(this.props.jobs, swimlaneWidth).asSeconds()
+            getSwimlaneBucketInterval(selectedJobs, swimlaneWidth).asSeconds()
           );
           this.updateCharts(this.state.anomalyChartRecords, timerange.earliestMs, timerange.latestMs);
         }
@@ -270,13 +268,12 @@ export const Explorer = injectI18n(
 
     checkboxShowChartsListener = () => {
       const showCharts = mlCheckboxShowChartsService.state.get('showCharts');
-      const { jobs } = this.props;
-      const { noInfluencersConfigured, selectedCells } = this.state;
+      const { noInfluencersConfigured, selectedCells, selectedJobs } = this.state;
       if (showCharts && selectedCells !== null) {
         this.updateExplorer();
       } else {
         const swimlaneWidth = getSwimlaneContainerWidth(noInfluencersConfigured);
-        const timerange = getSelectionTimeRange(selectedCells, getSwimlaneBucketInterval(jobs, swimlaneWidth).asSeconds());
+        const timerange = getSelectionTimeRange(selectedCells, getSwimlaneBucketInterval(selectedJobs, swimlaneWidth).asSeconds());
         this.updateCharts(
           [], timerange.earliestMs, timerange.latestMs
         );
@@ -285,11 +282,10 @@ export const Explorer = injectI18n(
 
     anomalyChartsSeverityListener = () => {
       const showCharts = mlCheckboxShowChartsService.state.get('showCharts');
-      const { jobs } = this.props;
-      const { anomalyChartRecords, noInfluencersConfigured, selectedCells } = this.state;
+      const { anomalyChartRecords, noInfluencersConfigured, selectedCells, selectedJobs } = this.state;
       if (showCharts && selectedCells !== null) {
         const swimlaneWidth = getSwimlaneContainerWidth(noInfluencersConfigured);
-        const timerange = getSelectionTimeRange(selectedCells, getSwimlaneBucketInterval(jobs, swimlaneWidth).asSeconds());
+        const timerange = getSelectionTimeRange(selectedCells, getSwimlaneBucketInterval(selectedJobs, swimlaneWidth).asSeconds());
         this.updateCharts(
           anomalyChartRecords, timerange.earliestMs, timerange.latestMs
         );
@@ -297,15 +293,15 @@ export const Explorer = injectI18n(
     };
 
     tableControlsListener = async () => {
-      const { dateFormatTz, jobs } = this.props;
-      const { noInfluencersConfigured, selectedCells, swimlaneViewByFieldName } = this.state;
+      const { dateFormatTz } = this.props;
+      const { noInfluencersConfigured, selectedCells, swimlaneViewByFieldName, selectedJobs } = this.state;
       const swimlaneWidth = getSwimlaneContainerWidth(noInfluencersConfigured);
       this.setState({
         tableData: await loadAnomaliesTableData(
           selectedCells,
-          jobs,
+          selectedJobs,
           dateFormatTz,
-          getSwimlaneBucketInterval(jobs, swimlaneWidth).asSeconds(),
+          getSwimlaneBucketInterval(selectedJobs, swimlaneWidth).asSeconds(),
           swimlaneViewByFieldName
         )
       });
@@ -323,6 +319,7 @@ export const Explorer = injectI18n(
     };
 
     componentDidMount() {
+      this._isMounted = true;
       mlExplorerDashboardService.explorer.watch(this.dashboardListener);
       mlCheckboxShowChartsService.state.watch(this.checkboxShowChartsListener);
       mlSelectSeverityService.state.watch(this.anomalyChartsSeverityListener);
@@ -332,6 +329,7 @@ export const Explorer = injectI18n(
     }
 
     componentWillUnmount() {
+      this._isMounted = false;
       mlExplorerDashboardService.explorer.unwatch(this.dashboardListener);
       mlCheckboxShowChartsService.state.unwatch(this.checkboxShowChartsListener);
       mlSelectSeverityService.state.unwatch(this.anomalyChartsSeverityListener);
@@ -342,8 +340,9 @@ export const Explorer = injectI18n(
 
     async loadOverallData() {
       return new Promise((resolve) => {
+        const { selectedJobs } = this.state;
         // Loads the overall data components i.e. the overall swimlane and influencers list.
-        if (this.state.selectedJobs === null) {
+        if (selectedJobs === null) {
           resolve();
         }
 
@@ -360,10 +359,10 @@ export const Explorer = injectI18n(
             const bounds = timefilter.getActiveBounds();
             const searchBounds = getBoundsRoundedToInterval(
               bounds,
-              getSwimlaneBucketInterval(this.props.jobs, swimlaneWidth),
+              getSwimlaneBucketInterval(selectedJobs, swimlaneWidth),
               false
             );
-            const selectedJobIds = getSelectedJobIds(this.props.jobs);
+            const selectedJobIds = selectedJobs.map(d => d.id);
 
             // Load the overall bucket scores by time.
             // Pass the interval in seconds as the swimlane relies on a fixed number of seconds between buckets
@@ -372,7 +371,7 @@ export const Explorer = injectI18n(
             // to ensure the search is inclusive of end time.
             const overallBucketsBounds = getBoundsRoundedToInterval(
               bounds,
-              getSwimlaneBucketInterval(this.props.jobs, swimlaneWidth),
+              getSwimlaneBucketInterval(selectedJobs, swimlaneWidth),
               true
             );
             mlResultsService.getOverallBucketScores(
@@ -383,13 +382,13 @@ export const Explorer = injectI18n(
               1,
               overallBucketsBounds.min.valueOf(),
               overallBucketsBounds.max.valueOf(),
-              getSwimlaneBucketInterval(this.props.jobs, swimlaneWidth).asSeconds() + 's'
+              getSwimlaneBucketInterval(selectedJobs, swimlaneWidth).asSeconds() + 's'
             ).then((resp) => {
               this.skipCellClicks = false;
               const overallSwimlaneData = processOverallResults(
                 resp.results,
                 searchBounds,
-                this.props.jobs,
+                selectedJobs,
                 swimlaneWidth
               );
 
@@ -425,7 +424,8 @@ export const Explorer = injectI18n(
           // Unique influencers for the selected job(s).
           let viewByOptions = [];
 
-          const selectedJobIds = getSelectedJobIds(this.props.jobs);
+          const selectedJobIds = this.state.selectedJobs.map(d => d.id);
+
           const fieldsByJob = { '*': [] };
           _.each(mlJobService.jobs, (job) => {
             // Add the list of distinct by, over, partition and influencer fields for each job.
@@ -536,8 +536,6 @@ export const Explorer = injectI18n(
     }
 
     loadViewBySwimlane(fieldValues) {
-      const { jobs } = this.props;
-
       const {
         noInfluencersConfigured,
         overallSwimlaneData,
@@ -581,7 +579,7 @@ export const Explorer = injectI18n(
                   viewBySwimlaneData: processViewByResults(
                     resp.results,
                     fieldValues,
-                    jobs,
+                    selectedJobs,
                     overallSwimlaneData,
                     swimlaneViewByFieldName,
                     swimlaneWidth
@@ -621,15 +619,16 @@ export const Explorer = injectI18n(
             // Ensure the search bounds align to the bucketing interval used in the swimlane so
             // that the first and last buckets are complete.
             const bounds = timefilter.getActiveBounds();
-            const searchBounds = getBoundsRoundedToInterval(bounds, getSwimlaneBucketInterval(jobs, swimlaneWidth), false);
-            const selectedJobIds = getSelectedJobIds(jobs);
+            const searchBounds = getBoundsRoundedToInterval(bounds, getSwimlaneBucketInterval(selectedJobs, swimlaneWidth), false);
+            const selectedJobIds = selectedJobs.map(d => d.id);
+
             const limit = mlSelectLimitService.state.get('limit');
             const swimlaneLimit = (limit === undefined) ? SWIMLANE_DEFAULT_LIMIT : limit.val;
 
             // load scores by influencer/jobId value and time.
             // Pass the interval in seconds as the swimlane relies on a fixed number of seconds between buckets
             // which wouldn't be the case if e.g. '1M' was used.
-            const interval = getSwimlaneBucketInterval(jobs, swimlaneWidth).asSeconds() + 's';
+            const interval = getSwimlaneBucketInterval(selectedJobs, swimlaneWidth).asSeconds() + 's';
             if (swimlaneViewByFieldName !== VIEW_BY_JOB_LABEL) {
               mlResultsService.getInfluencerValueMaxScoreByTime(
                 selectedJobIds,
@@ -656,10 +655,9 @@ export const Explorer = injectI18n(
     }
 
     loadViewBySwimlaneForSelectedTime(earliestMs, latestMs) {
-      const { jobs } = this.props;
-      const { noInfluencersConfigured, swimlaneViewByFieldName } = this.state;
+      const { noInfluencersConfigured, swimlaneViewByFieldName, selectedJobs } = this.state;
 
-      const selectedJobIds = getSelectedJobIds(jobs);
+      const selectedJobIds = selectedJobs.map(d => d.id);
       const limit = mlSelectLimitService.state.get('limit');
       const swimlaneLimit = (limit === undefined) ? SWIMLANE_DEFAULT_LIMIT : limit.val;
 
@@ -687,7 +685,7 @@ export const Explorer = injectI18n(
           selectedJobIds,
           earliestMs,
           latestMs,
-          getSwimlaneBucketInterval(jobs, swimlaneWidth).asSeconds() + 's',
+          getSwimlaneBucketInterval(selectedJobs, swimlaneWidth).asSeconds() + 's',
           swimlaneLimit
         ).then((resp) => {
           this.loadViewBySwimlane(_.keys(resp.results));
@@ -700,27 +698,27 @@ export const Explorer = injectI18n(
         anomalyChartRecords,
         noInfluencersConfigured,
         selectedCells,
+        selectedJobs,
         swimlaneViewByFieldName,
       } = this.state;
 
       const {
         dateFormatTz,
-        jobs
       } = this.props;
 
       const swimlaneWidth = getSwimlaneContainerWidth(noInfluencersConfigured);
 
       const jobIds = (selectedCells !== null && selectedCells.fieldName === VIEW_BY_JOB_LABEL)
         ? selectedCells.lanes
-        : getSelectedJobIds(jobs);
+        : selectedJobs.map(d => d.id);
 
-      const timerange = getSelectionTimeRange(selectedCells, getSwimlaneBucketInterval(jobs, swimlaneWidth).asSeconds());
+      const timerange = getSelectionTimeRange(selectedCells, getSwimlaneBucketInterval(selectedJobs, swimlaneWidth).asSeconds());
       const selectionInfluencers = getSelectionInfluencers(selectedCells, swimlaneViewByFieldName);
 
       this.setState(
         {
           annotationsData: await loadAnnotationsTableData(
-            selectedCells, jobs, getSwimlaneBucketInterval(jobs, swimlaneWidth).asSeconds()
+            selectedCells, selectedJobs, getSwimlaneBucketInterval(selectedJobs, swimlaneWidth).asSeconds()
           )
         },
         async () => {
@@ -770,9 +768,9 @@ export const Explorer = injectI18n(
             influencers,
             tableData: await loadAnomaliesTableData(
               selectedCells,
-              jobs,
+              selectedJobs,
               dateFormatTz,
-              getSwimlaneBucketInterval(jobs, swimlaneWidth).asSeconds(),
+              getSwimlaneBucketInterval(selectedJobs, swimlaneWidth).asSeconds(),
               swimlaneViewByFieldName
             )
           });
@@ -868,7 +866,7 @@ export const Explorer = injectI18n(
       const {
         appState,
         intl,
-        jobs,
+        noJobsFound,
       } = this.props;
 
       const {
@@ -902,11 +900,11 @@ export const Explorer = injectI18n(
         );
       }
 
-      if (jobs.length === 0) {
+      if (noJobsFound) {
         return <ExplorerNoJobsFound />;
       }
 
-      if (jobs.length > 0 && hasResults === false) {
+      if (noJobsFound && hasResults === false) {
         return <ExplorerNoResultsFound />;
       }
 

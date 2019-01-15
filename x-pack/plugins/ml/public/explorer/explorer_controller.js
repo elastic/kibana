@@ -15,10 +15,10 @@
 import $ from 'jquery';
 import moment from 'moment-timezone';
 
-import 'plugins/ml/components/annotations_table';
-import 'plugins/ml/components/anomalies_table';
-import 'plugins/ml/components/controls';
-import 'plugins/ml/components/job_select_list';
+import '../components/annotations_table';
+import '../components/anomalies_table';
+import '../components/controls';
+import '../components/job_select_list';
 
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import template from './explorer.html';
@@ -29,13 +29,14 @@ import {
   mapScopeToProps,
 } from './explorer_utils';
 import { getAnomalyExplorerBreadcrumbs } from './breadcrumbs';
-import { checkFullLicense } from 'plugins/ml/license/check_license';
-import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
-import { loadIndexPatterns } from 'plugins/ml/util/index_utils';
-import { refreshIntervalWatcher } from 'plugins/ml/util/refresh_interval_watcher';
+import { checkFullLicense } from '../license/check_license';
+import { checkGetJobsPrivilege } from '../privilege/check_privilege';
+import { getIndexPatterns, loadIndexPatterns } from '../util/index_utils';
+import { refreshIntervalWatcher } from '../util/refresh_interval_watcher';
 import { mlExplorerDashboardService } from './explorer_dashboard_service';
-import { mlJobService } from 'plugins/ml/services/job_service';
-import { JobSelectServiceProvider } from 'plugins/ml/components/job_select_list/job_select_service';
+import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
+import { mlJobService } from '../services/job_service';
+import { JobSelectServiceProvider } from '../components/job_select_list/job_select_service';
 import { timefilter } from 'ui/timefilter';
 
 import { EXPLORER_ACTION } from './explorer_constants';
@@ -55,20 +56,21 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module.controller('MlExplorerController', function (
+  $injector,
   $scope,
   $timeout,
   AppState,
   Private,
   config,
-
+) {
   // Even if they are not used directly anymore in this controller but via imports
   // in React components, because of the use of AppState and its dependency on angularjs
   // these services still need to be required here to properly initialize.
-  mlCheckboxShowChartsService, // eslint-disable-line no-unused-vars
-  mlSelectIntervalService,     // eslint-disable-line no-unused-vars
-  mlSelectLimitService,        // eslint-disable-line no-unused-vars
-  mlSelectSeverityService      // eslint-disable-line no-unused-vars
-) {
+  $injector.get('mlCheckboxShowChartsService');
+  $injector.get('mlSelectIntervalService');
+  $injector.get('mlSelectLimitService');
+  $injector.get('mlSelectSeverityService');
+
   // Initialize the AppState in which to store filters and swimlane settings.
   // AppState is used to store state in the URL.
   const appState = new AppState({
@@ -95,23 +97,67 @@ module.controller('MlExplorerController', function (
 
   mlExplorerDashboardService.init();
 
-  // Load the job info needed by the dashboard, then do the first load.
-  // Calling loadJobs() ensures the full datafeed config is available for building the charts.
-  mlJobService.loadJobs().then(async (resp) => {
-    if (resp.jobs.length > 0) {
-      $scope.jobs = createJobs(resp.jobs);
-
-      // Select any jobs set in the global state (i.e. passed in the URL).
-      $scope.mlJobSelectService.getSelectedJobIds(true);
-      $scope.jobs = createJobs(mlJobService.jobs);
+  function jobSelectionUpdate(fullJobs, selectedJobIds, action) {
+    console.warn('jobSelectionUpdate');
+    let previousSelectedJobsCount = 0;
+    if ($scope.jobs !== null) {
+      previousSelectedJobsCount = $scope.jobs.filter(d => d.selected).length;
     }
 
-    $scope.loading = false;
-    $scope.$applyAsync();
-    mlExplorerDashboardService.explorer.changed(EXPLORER_ACTION.RENDER, mapScopeToProps($scope, appState));
-    mlExplorerDashboardService.explorer.changed(EXPLORER_ACTION.INITIALIZE);
-  }).catch((resp) => {
-    console.log('Explorer - error getting job info from elasticsearch:', resp);
+    const jobs = createJobs(fullJobs).map((job) => {
+      job.selected = selectedJobIds.some((id) => job.id === id);
+      return job;
+    });
+
+    const selectedJobs = jobs.filter(job => job.selected);
+
+    // Clear viewBy from the state if we are moving from single
+    // to multi selection, or vice-versa.
+    appState.fetch();
+    if ((previousSelectedJobsCount <= 1 && selectedJobs.length > 1) ||
+      (selectedJobs.length === 1 && previousSelectedJobsCount > 1)) {
+      delete appState.mlExplorerSwimlane.viewBy;
+    }
+    appState.save();
+
+    function fieldFormatServiceCallback() {
+      $scope.jobs = jobs;
+      $scope.$applyAsync();
+
+      mlExplorerDashboardService.explorer.changed(EXPLORER_ACTION.RENDER, mapScopeToProps($scope, appState));
+      mlExplorerDashboardService.explorer.changed(action, { selectedJobs });
+    }
+
+    // Populate the map of jobs / detectors / field formatters for the selected IDs.
+    mlFieldFormatService.populateFormats(selectedJobIds, getIndexPatterns())
+      .catch((err) => {
+        console.log('Error populating field formats:', err);
+      })
+      .then(() => {
+        fieldFormatServiceCallback();
+      });
+  }
+
+  // Load the job info needed by the dashboard, then do the first load.
+  // Calling loadJobs() ensures the full datafeed config is available for building the charts.
+  mlJobService.loadJobs()
+    .then((resp) => {
+      $scope.loading = false;
+      $scope.$applyAsync();
+
+      if (resp.jobs.length > 0) {
+        // Select any jobs set in the global state (i.e. passed in the URL).
+        const selectedJobIds = $scope.mlJobSelectService.getSelectedJobIds(true);
+        jobSelectionUpdate(resp.jobs, selectedJobIds, EXPLORER_ACTION.INITIALIZE);
+      }
+    })
+    .catch((resp) => {
+      console.log('Explorer - error getting job info from elasticsearch:', resp);
+    });
+
+  // Listen for changes to job selection.
+  $scope.mlJobSelectService.listenJobSelectionChange($scope, (event, selectedJobIds) => {
+    jobSelectionUpdate(mlJobService.jobs, selectedJobIds, EXPLORER_ACTION.JOB_SELECTION_CHANGE);
   });
 
   function overallRefresh() {
@@ -127,16 +173,6 @@ module.controller('MlExplorerController', function (
   const refreshWatcher = Private(refreshIntervalWatcher);
   refreshWatcher.init(async () => {
     overallRefresh();
-  });
-
-  // Listen for changes to job selection.
-  $scope.mlJobSelectService.listenJobSelectionChange($scope, async (event, selections) => {
-    $scope.jobs = createJobs(mlJobService.jobs);
-    mlExplorerDashboardService.explorer.changed(EXPLORER_ACTION.RENDER, mapScopeToProps($scope, appState));
-    mlExplorerDashboardService.explorer.changed(EXPLORER_ACTION.JOB_SELECTION_CHANGE, {
-      jobs: $scope.jobs,
-      selections,
-    });
   });
 
   // Redraw the swimlane when the window resizes or the global nav is toggled.
