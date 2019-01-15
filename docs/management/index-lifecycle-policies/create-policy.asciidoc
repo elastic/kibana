@@ -34,13 +34,13 @@ index is created, added to the index alias, and designated as the new “hot”
 index. You can still query the previous indices, but you only ever write to 
 the “hot” index. See {ref}/indices-rollover-index.html[Rollover index] for more information.
 
-* *Warm.* The index is still being queried, but is typically 
-read-only. The index is still open for late-arriving data, for example, from a Beat 
-that had a network problem that's now been fixed. Generally, 
-you’ll move your indices onto less performant nodes in this phase. You can 
-change the number of replicas and move the shards to a different set of nodes. 
-For faster searches, you can reduce the number of of primary shards and force 
-merge the index into a smaller number of {ref}/indices-segments.html[segments].
+* *Warm.* The index is typically searched at a lower rate than when the data is 
+hot. The index is not open for new data, but might occasionally add 
+late-arriving data, for example from a Beat that had a network problem that's now fixed.  
+You can optionally shrink the number replicas and move the shards to a 
+different set of nodes with smaller or less performant hardware. You can also 
+reduce the number of primary shards and force merge the index into 
+smaller {ref}/indices-segments.html[segments].
  
 * *Cold.* The index is no longer being updated and is seldom queried, but is 
 still searchable. If you have a big deployment, you can move it to even 
