@@ -14,6 +14,8 @@ import {
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 export function DeleteAnnotationModal({
   cancelAction,
   deleteAction,
@@ -24,11 +26,20 @@ export function DeleteAnnotationModal({
       {isVisible === true &&
         <EuiOverlayMask>
           <EuiConfirmModal
-            title="Delete this annotation?"
+            title={<FormattedMessage
+              id="xpack.ml.timeSeriesExplorer.deleteAnnotationModal.deleteAnnotationTitle"
+              defaultMessage="Delete this annotation?"
+            />}
             onCancel={cancelAction}
             onConfirm={deleteAction}
-            cancelButtonText="Cancel"
-            confirmButtonText="Delete"
+            cancelButtonText={<FormattedMessage
+              id="xpack.ml.timeSeriesExplorer.deleteAnnotationModal.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />}
+            confirmButtonText={<FormattedMessage
+              id="xpack.ml.timeSeriesExplorer.deleteAnnotationModal.deleteButtonLabel"
+              defaultMessage="Delete"
+            />}
             buttonColor="danger"
             defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
             className="eui-textBreakWord"

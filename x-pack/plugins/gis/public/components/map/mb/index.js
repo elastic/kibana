@@ -6,14 +6,21 @@
 
 import { connect } from 'react-redux';
 import { MBMapContainer } from './view';
-import { mapExtentChanged, mapReady, mapDestroyed } from '../../../actions/store_actions';
-import { getLayerList, getMapState, getMapReady } from "../../../selectors/map_selectors";
+import {
+  mapExtentChanged,
+  mapReady,
+  mapDestroyed,
+  setMouseCoordinates,
+  clearMouseCoordinates,
+  clearGoto
+} from '../../../actions/store_actions';
+import { getLayerList, getMapReady, getGoto } from "../../../selectors/map_selectors";
 
 function mapStateToProps(state = {}) {
   return {
     isMapReady: getMapReady(state),
-    mapState: getMapState(state),
     layerList: getLayerList(state),
+    goto: getGoto(state)
   };
 }
 
@@ -23,11 +30,21 @@ function mapDispatchToProps(dispatch) {
       dispatch(mapExtentChanged(e));
     },
     onMapReady: (e) => {
+      dispatch(clearGoto());
       dispatch(mapExtentChanged(e));
       dispatch(mapReady());
     },
     onMapDestroyed: () => {
       dispatch(mapDestroyed());
+    },
+    setMouseCoordinates: ({ lat, lon }) => {
+      dispatch(setMouseCoordinates({ lat, lon }));
+    },
+    clearMouseCoordinates: () => {
+      dispatch(clearMouseCoordinates());
+    },
+    clearGoto: () => {
+      dispatch(clearGoto());
     }
   };
 }

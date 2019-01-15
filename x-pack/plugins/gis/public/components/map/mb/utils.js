@@ -7,9 +7,10 @@
 import _ from 'lodash';
 import mapboxgl from 'mapbox-gl';
 
-export async function createMbMapInstance(node, initialZoom, initialCenter) {
+export async function createMbMapInstance(node, initialView) {
   return new Promise((resolve) => {
     const options = {
+      attributionControl: false,
       container: node,
       style: {
         version: 8,
@@ -17,13 +18,11 @@ export async function createMbMapInstance(node, initialZoom, initialCenter) {
         layers: [],
       },
     };
-    if (initialZoom) {
-      options.zoom = initialZoom;
-    }
-    if (initialCenter) {
+    if (initialView) {
+      options.zoom = initialView.zoom;
       options.center = {
-        lng: initialCenter.lon,
-        lat: initialCenter.lat
+        lng: initialView.lon,
+        lat: initialView.lat
       };
     }
     const mbMap = new mapboxgl.Map(options);

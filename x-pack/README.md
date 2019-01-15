@@ -100,6 +100,16 @@ We also have SAML API integration tests which set up Elasticsearch and Kibana wi
 node scripts/functional_tests --config test/saml_api_integration/config
 ```
 
+#### Running and building Jest integration tests
+
+Jest integration tests can be used to test behavior with Elasticsearch and the Kibana server.
+
+```sh
+node scripts/jest_integration
+```
+
+An example test exists at [test_utils/jest/integration_tests/example_integration.test.ts](test_utils/jest/integration_tests/example_integration.test.ts)
+
 #### Running Reporting functional tests
 
 See [here](test/reporting/README.md) for more information on running reporting tests.
@@ -127,18 +137,3 @@ For both of the above commands, it's crucial that you pass in `--config` to spec
 Read more about how the scripts work [here](scripts/README.md).
 
 For a deeper dive, read more about the way functional tests and servers work [here](packages/kbn-test/README.md).
-
-### Issues starting dev more of creating builds
-
-You may see an error like this when you are getting started:
-
-```
-[14:08:15] Error: Linux x86 checksum failed
-    at download_phantom.js:42:15
-    at process._tickDomainCallback (node.js:407:9)
-```
-
-That's thanks to the binary Phantom downloads that have to happen, and Bitbucket being annoying with throttling and redirecting or... something. The real issue eludes me, but you have 2 options to resolve it.
-
-1. Just keep re-running the command until it passes. Eventually the downloads will work, and since they are cached, it won't ever be an issue again.
-1. Download them by hand [from Bitbucket](https://bitbucket.org/ariya/phantomjs/downloads) and copy them into the `.phantom` path. We're currently using 1.9.8, and you'll need the Window, Mac, and Linux builds.

@@ -41,15 +41,17 @@ import { LoadingIndicator } from '../../components/loading_indicator/loading_ind
 import { mlEscape } from '../../util/string_utils';
 import { mlFieldFormatService } from '../../services/field_format_service';
 import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
+import { mlSelectSeverityService, SEVERITY_OPTIONS } from '../../components/controls/select_severity/select_severity';
+
+import { injectI18n } from '@kbn/i18n/react';
 
 const CONTENT_WRAPPER_HEIGHT = 215;
 const CONTENT_WRAPPER_CLASS = 'ml-explorer-chart-content-wrapper';
 
-export class ExplorerChartSingleMetric extends React.Component {
+export const ExplorerChartSingleMetric = injectI18n(class ExplorerChartSingleMetric extends React.Component {
   static propTypes = {
     tooManyBuckets: PropTypes.bool,
     seriesConfig: PropTypes.object,
-    mlSelectSeverityService: PropTypes.object.isRequired
   }
 
   componentDidMount() {
@@ -63,7 +65,7 @@ export class ExplorerChartSingleMetric extends React.Component {
   renderChart() {
     const {
       tooManyBuckets,
-      mlSelectSeverityService
+      intl,
     } = this.props;
 
     const element = this.rootNode;
@@ -283,7 +285,7 @@ export class ExplorerChartSingleMetric extends React.Component {
         .on('mouseout', () => mlChartTooltipService.hide());
 
       // Update all dots to new positions.
-      const threshold = mlSelectSeverityService.state.get('threshold');
+      const threshold = (mlSelectSeverityService.initiliazed) ? mlSelectSeverityService.state.get('threshold') : SEVERITY_OPTIONS[0];
       dots.attr('cx', d => lineChartXScale(d.date))
         .attr('cy', d => lineChartYScale(d.value))
         .attr('class', (d) => {
@@ -341,10 +343,19 @@ export class ExplorerChartSingleMetric extends React.Component {
       if (_.has(marker, 'anomalyScore')) {
         const score = parseInt(marker.anomalyScore);
         const displayScore = (score > 0 ? score : '< 1');
-        contents += ('anomaly score: ' + displayScore);
+        contents += intl.formatMessage({
+          id: 'xpack.ml.explorer.singleMetricChart.anomalyScoreLabel',
+          defaultMessage: 'anomaly score: {displayScore}'
+        }, { displayScore });
 
         if (showMultiBucketAnomalyTooltip(marker) === true) {
-          contents += `<br/>multi-bucket impact: ${getMultiBucketImpactLabel(marker.multiBucketImpact)}`;
+          contents += intl.formatMessage({
+            id: 'xpack.ml.explorer.singleMetricChart.multiBucketImpactLabel',
+            defaultMessage: '{br}multi-bucket impact: {multiBucketImpactLabel}'
+          }, {
+            br: '<br />',
+            multiBucketImpactLabel: getMultiBucketImpactLabel(marker.multiBucketImpact)
+          });
         }
 
         // Show actual/typical when available except for rare detectors.
@@ -353,29 +364,61 @@ export class ExplorerChartSingleMetric extends React.Component {
         if (_.has(marker, 'actual') && config.functionDescription !== 'rare') {
           // Display the record actual in preference to the chart value, which may be
           // different depending on the aggregation interval of the chart.
-          contents += (`<br/>actual: ${formatValue(marker.actual, config.functionDescription, fieldFormat)}`);
-          contents += (`<br/>typical: ${formatValue(marker.typical, config.functionDescription, fieldFormat)}`);
+          contents += intl.formatMessage({
+            id: 'xpack.ml.explorer.singleMetricChart.actualLabel',
+            defaultMessage: '{br}actual: {actualValue}'
+          }, {
+            br: '<br />',
+            actualValue: formatValue(marker.actual, config.functionDescription, fieldFormat)
+          });
+          contents += intl.formatMessage({
+            id: 'xpack.ml.explorer.singleMetricChart.typicalLabel',
+            defaultMessage: '{br}typical: {typicalValue}'
+          }, {
+            br: '<br />',
+            typicalValue: formatValue(marker.typical, config.functionDescription, fieldFormat)
+          });
         } else {
-          contents += (`<br/>value: ${formatValue(marker.value, config.functionDescription, fieldFormat)}`);
+          contents += intl.formatMessage({
+            id: 'xpack.ml.explorer.singleMetricChart.valueLabel',
+            defaultMessage: '{br}value: {value}'
+          }, {
+            br: '<br />',
+            value: formatValue(marker.value, config.functionDescription, fieldFormat)
+          });
           if (_.has(marker, 'byFieldName') && _.has(marker, 'numberOfCauses')) {
             const numberOfCauses = marker.numberOfCauses;
             const byFieldName = mlEscape(marker.byFieldName);
-            if (numberOfCauses === 1) {
-              contents += `<br/> 1 unusual ${byFieldName} value`;
-            } else if (numberOfCauses < 10) {
-              contents += `<br/> ${numberOfCauses} unusual ${byFieldName} values`;
-            } else {
+            intl.formatMessage({
+              id: 'xpack.ml.explorer.singleMetricChart.unusualByFieldValuesLabel',
+              defaultMessage:
+                '{br} { numberOfCauses, plural, one {# unusual {byFieldName} value} other {#{plusSign} unusual {byFieldName} values}}'
+            }, {
+              br: '<br />',
+              numberOfCauses,
+              byFieldName,
               // Maximum of 10 causes are stored in the record, so '10' may mean more than 10.
-              contents += `<br/> ${numberOfCauses}+ unusual ${byFieldName} values`;
-            }
+              plusSign: numberOfCauses < 10 ? '' : '+',
+            });
           }
         }
       } else {
-        contents += `value: ${formatValue(marker.value, config.functionDescription, fieldFormat)}`;
+        contents += intl.formatMessage({
+          id: 'xpack.ml.explorer.singleMetricChart.valueWithoutAnomalyScoreLabel',
+          defaultMessage: 'value: {value}'
+        }, {
+          value: formatValue(marker.value, config.functionDescription, fieldFormat)
+        });
       }
 
       if (_.has(marker, 'scheduledEvents')) {
-        contents += `<br/><hr/>Scheduled events:<br/>${marker.scheduledEvents.map(mlEscape).join('<br/>')}`;
+        contents += '<br/><hr/>' + intl.formatMessage({
+          id: 'xpack.ml.explorer.singleMetricChart.scheduledEventsLabel',
+          defaultMessage: 'Scheduled events:{br}{scheduledEventsValue}'
+        }, {
+          br: '<br />',
+          scheduledEventsValue: marker.scheduledEvents.map(mlEscape).join('<br/>')
+        });
       }
 
       mlChartTooltipService.show(contents, circle, {
@@ -418,4 +461,4 @@ export class ExplorerChartSingleMetric extends React.Component {
       </div>
     );
   }
-}
+});

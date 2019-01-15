@@ -17,9 +17,15 @@ module.directive('mlGeneralJobDetails', function () {
     restrict: 'E',
     replace: true,
     template,
-    controller: function ($scope) {
+    controller: function ($scope, i18n) {
       // force job ids to be lowercase
       $scope.changeJobIDCase = changeJobIDCase;
+      $scope.hideAdvancedButtonAriaLabel = i18n('xpack.ml.newJob.simple.generalJobDetails.hideAdvancedButtonAriaLabel', {
+        defaultMessage: 'Hide Advanced'
+      });
+      $scope.showAdvancedButtonAriaLabel = i18n('xpack.ml.newJob.simple.generalJobDetails.showAdvancedButtonAriaLabel', {
+        defaultMessage: 'Show Advanced'
+      });
     }
   };
 });

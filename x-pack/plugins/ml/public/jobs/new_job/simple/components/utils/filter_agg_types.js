@@ -8,6 +8,7 @@
 
 import _ from 'lodash';
 import angular from 'angular';
+import { i18n } from '@kbn/i18n';
 
 export function filterAggTypes(aggTypes) {
   const filteredAggTypes = [];
@@ -30,12 +31,16 @@ export function filterAggTypes(aggTypes) {
       filteredAggTypes.push(type);
 
       typeCopy = angular.copy(type);
-      typeCopy.title   = 'High count';
+      typeCopy.title = i18n.translate('xpack.ml.newJob.simple.filterAggTypes.highCountLabel', {
+        defaultMessage: 'High count'
+      });
       typeCopy.mlName = 'high_count';
       filteredAggTypes.push(typeCopy);
 
       typeCopy = angular.copy(type);
-      typeCopy.title   = 'Low count';
+      typeCopy.title = i18n.translate('xpack.ml.newJob.simple.filterAggTypes.lowCountLabel', {
+        defaultMessage: 'Low count'
+      });
       typeCopy.mlName = 'low_count';
       filteredAggTypes.push(typeCopy);
 
@@ -43,27 +48,37 @@ export function filterAggTypes(aggTypes) {
       filteredAggTypes.push(type);
 
       typeCopy = angular.copy(type);
-      typeCopy.title   = 'High sum';
+      typeCopy.title = i18n.translate('xpack.ml.newJob.simple.filterAggTypes.highSumLabel', {
+        defaultMessage: 'High sum'
+      });
       typeCopy.mlName = 'high_sum';
       filteredAggTypes.push(typeCopy);
 
       typeCopy = angular.copy(type);
-      typeCopy.title   = 'Low sum';
+      typeCopy.title = i18n.translate('xpack.ml.newJob.simple.filterAggTypes.lowSumLabel', {
+        defaultMessage: 'Low sum'
+      });
       typeCopy.mlName = 'low_sum';
       filteredAggTypes.push(typeCopy);
 
     } else if (type.name === 'avg') {
-      type.title   = 'Mean';
+      type.title = i18n.translate('xpack.ml.newJob.simple.filterAggTypes.meanLabel', {
+        defaultMessage: 'Mean'
+      });
       type.mlName = 'mean';
       filteredAggTypes.push(type);
 
       typeCopy = angular.copy(type);
-      typeCopy.title   = 'High mean';
+      typeCopy.title = i18n.translate('xpack.ml.newJob.simple.filterAggTypes.highMeanLabel', {
+        defaultMessage: 'High mean'
+      });
       typeCopy.mlName = 'high_mean';
       filteredAggTypes.push(typeCopy);
 
       typeCopy = angular.copy(type);
-      typeCopy.title   = 'Low mean';
+      typeCopy.title = i18n.translate('xpack.ml.newJob.simple.filterAggTypes.lowMeanLabel', {
+        defaultMessage: 'Low mean'
+      });
       typeCopy.mlName = 'low_mean';
       filteredAggTypes.push(typeCopy);
 
@@ -72,12 +87,16 @@ export function filterAggTypes(aggTypes) {
       filteredAggTypes.push(type);
 
       typeCopy = angular.copy(type);
-      typeCopy.title   = 'High median';
+      typeCopy.title = i18n.translate('xpack.ml.newJob.simple.filterAggTypes.highMedianLabel', {
+        defaultMessage: 'High median'
+      });
       typeCopy.mlName = 'high_median';
       filteredAggTypes.push(typeCopy);
 
       typeCopy = angular.copy(type);
-      typeCopy.title   = 'Low median';
+      typeCopy.title = i18n.translate('xpack.ml.newJob.simple.filterAggTypes.lowMedianLabel', {
+        defaultMessage: 'Low median'
+      });
       typeCopy.mlName = 'low_median';
       filteredAggTypes.push(typeCopy);
 
@@ -87,7 +106,9 @@ export function filterAggTypes(aggTypes) {
     } else if (type.name === 'max') {
       filteredAggTypes.push(type);
     } else if (type.name === 'cardinality') {
-      type.title = 'Distinct count';
+      type.title = i18n.translate('xpack.ml.newJob.simple.filterAggTypes.distinctCountLabel', {
+        defaultMessage: 'Distinct count'
+      });
       type.mlName = 'distinct_count';
       type.mlModelPlotAgg = { max: 'max', min: 'min' };
       type.isAggregatableStringType = true;

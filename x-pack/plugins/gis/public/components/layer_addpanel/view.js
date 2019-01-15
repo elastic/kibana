@@ -4,16 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
-import { XYZTMSSource } from '../../shared/layers/sources/xyz_tms_source';
-import { WMSSource } from '../../shared/layers/sources/wms_source';
-import { EMSFileSource } from '../../shared/layers/sources/ems_file_source';
-import { ESGeohashGridSource } from '../../shared/layers/sources/es_geohashgrid_source';
-import { ESSearchSource } from '../../shared/layers/sources/es_search_source';
-import { KibanaRegionmapSource } from '../../shared/layers/sources/kibana_regionmap_source';
-
+import React, { Component, Fragment } from 'react';
+import { ALL_SOURCES } from '../../shared/layers/sources/all_sources';
 import {
-  EuiText,
   EuiSpacer,
   EuiButton,
   EuiHorizontalRule,
@@ -21,62 +14,48 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
-  EuiForm,
-  EuiFormRow,
-  EuiSuperSelect,
   EuiPanel,
+  EuiCard,
+  EuiIcon,
 } from '@elastic/eui';
-export class AddLayerPanel extends React.Component {
+
+export class AddLayerPanel extends Component {
 
   constructor() {
     super();
 
     this.state = {
-      label: '',
-      sourceType: '',
-      minZoom: 0,
-      maxZoom: 24,
-      alphaValue: 1
+      sourceType: null,
     };
-  }
-
-  componentDidUpdate() {
-    if (this.layer && this.state.alphaValue === null) {
-      const defaultAlphaValue = this.layer._descriptor.type === 'TILE' ? 1 : 1;
-      if (this.state.alphaValue !== defaultAlphaValue) {
-        this.setState({
-          alphaValue: defaultAlphaValue
-        });
-      }
-    }
   }
 
   _previewLayer = (source) => {
     this.layer = source.createDefaultLayer({
       temporary: true,
-      label: this.state.label,
-      minZoom: this.state.minZoom,
-      maxZoom: this.state.maxZoom,
     });
     this.props.previewLayer(this.layer);
   };
 
-  _onSourceTypeChange = (sourceType) => {
-    this.setState({
-      sourceType,
-    });
+  _clearSource = () => {
+    this.setState({ sourceType: null });
 
     if (this.layer) {
       this.props.removeLayer(this.layer.getId());
     }
   }
 
+  _onSourceTypeChange = (sourceType) => {
+    this.setState({ sourceType });
+  }
+
   _renderNextBtn() {
+    if (!this.state.sourceType) {
+      return null;
+    }
+
     const { layerLoading, temporaryLayers, nextAction } = this.props;
-    const addToMapBtnText = 'Next';
     return (
       <EuiButton
-        style={{ width: '9rem' }}
         disabled={!temporaryLayers || layerLoading}
         isLoading={layerLoading}
         iconSide="right"
@@ -88,149 +67,75 @@ export class AddLayerPanel extends React.Component {
         }}
         fill
       >
-        {addToMapBtnText}
+        Create layer
       </EuiButton>
     );
   }
 
-  _renderSourceSelect() {
-    const sourceOptions = [
-      {
-        value: ESSearchSource.type,
-        inputDisplay: ESSearchSource.typeDisplayName,
-        dropdownDisplay: (
-          <Fragment>
-            <strong>{ESSearchSource.typeDisplayName}</strong>
-            <EuiSpacer size="xs" />
-            <EuiText size="s" color="subdued">
-              <p className="euiTextColor--subdued">
-                Display documents from an elasticsearch index.
-              </p>
-            </EuiText>
-          </Fragment>
-        ),
-      },
-      {
-        value: ESGeohashGridSource.type,
-        inputDisplay: ESGeohashGridSource.typeDisplayName,
-        dropdownDisplay: (
-          <Fragment>
-            <strong>{ESGeohashGridSource.typeDisplayName}</strong>
-            <EuiSpacer size="xs" />
-            <EuiText size="s" color="subdued">
-              <p className="euiTextColor--subdued">
-                Group documents into grid cells and display metrics for each cell.
-                Great for displaying large datasets.
-              </p>
-            </EuiText>
-          </Fragment>
-        ),
-      },
-      {
-        value: EMSFileSource.type,
-        inputDisplay: EMSFileSource.typeDisplayName,
-        dropdownDisplay: (
-          <Fragment>
-            <strong>{EMSFileSource.typeDisplayName}</strong>
-            <EuiSpacer size="xs" />
-            <EuiText size="s" color="subdued">
-              <p className="euiTextColor--subdued">Political boundry vectors hosted by EMS.</p>
-            </EuiText>
-          </Fragment>
-        ),
-      },
-      {
-        value: KibanaRegionmapSource.type,
-        inputDisplay: KibanaRegionmapSource.typeDisplayName,
-        dropdownDisplay: (
-          <Fragment>
-            <strong>{KibanaRegionmapSource.typeDisplayName}</strong>
-            <EuiSpacer size="xs" />
-            <EuiText size="s" color="subdued">
-              <p className="euiTextColor--subdued">
-                Region map boundary layers configured in your config/kibana.yml file.
-              </p>
-            </EuiText>
-          </Fragment>
-        ),
-      },
-      {
-        value: XYZTMSSource.type,
-        inputDisplay: XYZTMSSource.typeDisplayName,
-        dropdownDisplay: (
-          <Fragment>
-            <strong>{XYZTMSSource.typeDisplayName}</strong>
-            <EuiSpacer size="xs" />
-            <EuiText size="s" color="subdued">
-              <p className="euiTextColor--subdued">Tile Map Service with XYZ url.</p>
-            </EuiText>
-          </Fragment>
-        ),
-      },
-      {
-        value: WMSSource.type,
-        inputDisplay: WMSSource.typeDisplayName,
-        dropdownDisplay: (
-          <Fragment>
-            <strong>{WMSSource.typeDisplayName}</strong>
-            <EuiSpacer size="xs" />
-            <EuiText size="s" color="subdued">
-              <p className="euiTextColor--subdued">Web Map Service (WMS)</p>
-            </EuiText>
-          </Fragment>
-        ),
-      },
-    ];
-
-    return (
-      <EuiFormRow label="Data source">
-        <EuiSuperSelect
-          itemClassName="sourceSelectItem"
-          options={sourceOptions}
-          valueOfSelected={this.state.sourceType}
-          onChange={this._onSourceTypeChange}
-          itemLayoutAlign="top"
-          hasDividers
+  _renderSourceCards() {
+    return ALL_SOURCES.map(Source => {
+      const icon = Source.icon
+        ? <EuiIcon type={Source.icon} size="xl" />
+        : null;
+      return (
+        <EuiCard
+          key={Source.type}
+          title={Source.title}
+          icon={icon}
+          onClick={() => this._onSourceTypeChange(Source.type)}
+          description={Source.description}
+          layout="horizontal"
         />
-      </EuiFormRow>
+      );
+    });
+  }
+
+  _renderSourceSelect() {
+    return (
+      <Fragment>
+        <EuiTitle size="xs">
+          <h2>Choose data source</h2>
+        </EuiTitle>
+        {this._renderSourceCards()}
+      </Fragment>
     );
   }
 
   _renderSourceEditor() {
-    if (!this.state.sourceType) {
-      return;
-    }
-
     const editorProperties = {
       onPreviewSource: this._previewLayer,
       dataSourcesMeta: this.props.dataSourcesMeta
     };
 
-    switch(this.state.sourceType) {
-      case EMSFileSource.type:
-        return EMSFileSource.renderEditor(editorProperties);
-      case XYZTMSSource.type:
-        return XYZTMSSource.renderEditor(editorProperties);
-      case ESGeohashGridSource.type:
-        return ESGeohashGridSource.renderEditor(editorProperties);
-      case ESSearchSource.type:
-        return ESSearchSource.renderEditor(editorProperties);
-      case KibanaRegionmapSource.type:
-        return KibanaRegionmapSource.renderEditor(editorProperties);
-      case WMSSource.type:
-        return WMSSource.renderEditor(editorProperties);
-      default:
-        throw new Error(`Unexepected source type: ${this.state.sourceType}`);
+    const Source = ALL_SOURCES.find((Source) => {
+      return Source.type === this.state.sourceType;
+    });
+    if (!Source) {
+      throw new Error(`Unexepected source type: ${this.state.sourceType}`);
     }
+
+    return (
+      <Fragment>
+        <EuiButtonEmpty
+          contentProps={{ style: { justifyContent: 'left' } }}
+          onClick={this._clearSource}
+          iconType="arrowLeft"
+        >
+          Change data source
+        </EuiButtonEmpty>
+        <EuiPanel>
+          {Source.renderEditor(editorProperties)}
+        </EuiPanel>
+      </Fragment>
+    );
   }
 
   _renderAddLayerForm() {
-    return (
-      <EuiForm>
-        {this._renderSourceSelect()}
-        {this._renderSourceEditor()}
-      </EuiForm>
-    );
+    if (!this.state.sourceType) {
+      return this._renderSourceSelect();
+    }
+
+    return this._renderSourceEditor();
   }
 
   _renderFlyout() {
@@ -248,9 +153,7 @@ export class AddLayerPanel extends React.Component {
         </EuiFlexItem>
 
         <EuiFlexItem className="gisViewPanel__body">
-          <EuiPanel>
-            {this._renderAddLayerForm()}
-          </EuiPanel>
+          {this._renderAddLayerForm()}
         </EuiFlexItem>
 
         <EuiFlexItem grow={false} className="gisViewPanel__footer">

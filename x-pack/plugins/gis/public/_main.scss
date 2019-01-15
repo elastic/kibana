@@ -34,27 +34,68 @@ map-listing, .gisListingPage {
   flex-grow: 1;
 }
 
-.LayerControl {
+/**
+ * 1. The overlay captures mouse events even if it's empty space. To counter-act this,
+ *    we remove all pointer events from the overlay then add them back on the
+ *    individual widgets.
+ */
+
+.gisWidgetOverlay {
   position: absolute;
-  z-index: 100;
-  min-width: 17rem;
+  z-index: $euiZLevel1;
   top: $euiSizeM;
   right: $euiSizeM;
+  bottom: $euiSizeM;
+  // left: $euiSizeM;
+  pointer-events: none; /* 1 */
+}
+
+.gisWidgetOverlay__rightSide {
+  min-width: 17rem;
   max-width: 24rem;
-  padding-bottom: 8px;
-  border-color: transparent;
+}
+
+.gisWidgetControl {
+  max-height: 100%;
+  overflow: hidden;
+  padding-bottom: $euiSizeS; // ensures the scrollbar doesn't appear unnecessarily because of flex group negative margins
+  border-color: transparent !important;
+  flex-direction: column;
+  display: flex;
+  pointer-events: all; /* 1 */
 
   &.euiPanel--shadow {
     @include euiBottomShadowLarge;
   }
 
-  .LayerControl--header {
-    padding: 16px 16px 8px;
+  .gisWidgetControl__header {
+    padding: $euiSizeS $euiSize;
+    flex-shrink: 0;
   }
 }
 
+.gisAttributionControl {
+  padding: 0 $euiSizeXS;
+}
+
+.gisViewControl__coordinates {
+  padding: $euiSizeXS $euiSizeS;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.gisViewControl__gotoButton {
+  min-width: 0;
+  pointer-events: all; /* 1 */
+}
+
+.gisWidgetControl__tocHolder {
+  @include euiScrollBar;
+  overflow-y: auto;
+}
+
 .layerEntry {
-  padding: 8px 16px;
+  padding: $euiSizeS $euiSize;
   position: relative;
 }
 
@@ -151,9 +192,12 @@ map-listing, .gisListingPage {
   overflow-y: auto;
   @include euiScrollBar;
 
+  > * {
+    flex: 0 0 auto;
+  }
+
   > *:not(:last-child) {
     margin-bottom: $euiSize;
-    flex: 0 0 auto;
   }
 }
 

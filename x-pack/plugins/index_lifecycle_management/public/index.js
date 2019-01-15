@@ -6,4 +6,11 @@
 
 import './register_management_section';
 import './register_routes';
-import './extend_index_management';
+
+import chrome from 'ui/chrome';
+import { addAllExtensions } from './extend_index_management';
+
+// Only add extensions if ILM UI is enabled
+if (chrome.getInjected('ilmUiEnabled')) {
+  addAllExtensions();
+}
