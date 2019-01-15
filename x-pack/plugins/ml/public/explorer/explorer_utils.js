@@ -14,8 +14,6 @@ import { parseInterval } from 'ui/utils/parse_interval';
 import { TimeBuckets } from 'ui/time_buckets';
 
 import { getIndexPatterns } from 'plugins/ml/util/index_utils';
-import { getDefaultChartsData } from './explorer_charts/explorer_charts_container_service';
-import { getSwimlaneContainerWidth } from './legacy_utils';
 import { isTimeSeriesViewDetector } from '../../common/util/job_utils';
 import { ml } from '../services/ml_api_service';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
@@ -28,7 +26,6 @@ import {
   MAX_CATEGORY_EXAMPLES,
   MAX_INFLUENCER_FIELD_VALUES,
   VIEW_BY_JOB_LABEL,
-  SWIMLANE_TYPE,
 } from './explorer_constants';
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
@@ -57,27 +54,13 @@ export function getDefaultViewBySwimlaneData() {
   };
 }
 
-export function getExplorerDefaultProps() {
+export function mapScopeToProps(scope, appState) {
   return {
-    annotationsData: [],
-    anomalyChartRecords: [],
-    chartsData: getDefaultChartsData(),
-    hasResults: false,
-    influencers: {},
-    loading: true,
-    noInfluencersConfigured: true,
-    overallSwimlaneData: [],
-    selectedJobs: null,
-    setSwimlaneSelectActive() {},
-    setSwimlaneViewBy() {},
-    swimlaneCellClick() {},
-    swimlaneViewByFieldName: null,
-    swimlaneWidth: getSwimlaneContainerWidth(),
-    tableData: {},
-    viewByLoadedForTimeFormatted: null,
-    viewBySwimlaneData: getDefaultViewBySwimlaneData(),
-    viewBySwimlaneDataLoading: false,
-    viewBySwimlaneOptions: [],
+    appState,
+    dateFormatTz: scope.dateFormatTz,
+    jobs: scope.jobs,
+    loading: scope.loading,
+    mlJobSelectService: scope.mlJobSelectService,
   };
 }
 
@@ -200,7 +183,7 @@ export function getSelectionTimeRange(selectedCells, interval) {
   let earliestMs = bounds.min.valueOf();
   let latestMs = bounds.max.valueOf();
 
-  if (selectedCells !== undefined && selectedCells.times !== undefined) {
+  if (selectedCells !== null && selectedCells.times !== undefined) {
     // time property of the cell data is an array, with the elements being
     // the start times of the first and last cell selected.
     earliestMs = (selectedCells.times[0] !== undefined) ? selectedCells.times[0] * 1000 : bounds.min.valueOf();
@@ -218,7 +201,7 @@ export function getSelectionInfluencers(selectedCells, fieldName) {
   const influencers = [];
 
   if (
-    selectedCells !== undefined &&
+    selectedCells !== null &&
     selectedCells.fieldName !== undefined &&
     selectedCells.fieldName !== VIEW_BY_JOB_LABEL
   ) {
@@ -359,7 +342,7 @@ export function processViewByResults(
 }
 
 export async function loadAnnotationsTableData(selectedCells, jobs, interval) {
-  const jobIds = (selectedCells !== undefined && selectedCells.fieldName === VIEW_BY_JOB_LABEL) ?
+  const jobIds = (selectedCells !== null && selectedCells.fieldName === VIEW_BY_JOB_LABEL) ?
     selectedCells.lanes : getSelectedJobIds(jobs);
   const timeRange = getSelectionTimeRange(selectedCells, interval);
 
@@ -395,7 +378,7 @@ export async function loadAnnotationsTableData(selectedCells, jobs, interval) {
 }
 
 export async function loadAnomaliesTableData(selectedCells, jobs, dateFormatTz, interval, fieldName) {
-  const jobIds = (selectedCells !== undefined && selectedCells.fieldName === VIEW_BY_JOB_LABEL) ?
+  const jobIds = (selectedCells !== null && selectedCells.fieldName === VIEW_BY_JOB_LABEL) ?
     selectedCells.lanes : getSelectedJobIds(jobs);
   const influencers = getSelectionInfluencers(selectedCells, fieldName);
   const timeRange = getSelectionTimeRange(selectedCells, interval);
@@ -476,7 +459,7 @@ export async function loadDataForCharts(jobIds, earliestMs, latestMs, influencer
           resolve(undefined);
         }
 
-        if (selectedCells !== undefined && Object.keys(selectedCells).length > 0) {
+        if (selectedCells !== null && Object.keys(selectedCells).length > 0) {
           console.log('Explorer anomaly charts data set:', resp.records);
           resolve(resp.records);
         }
@@ -504,36 +487,4 @@ export async function loadTopInfluencers(selectedJobIds, earliestMs, latestMs, i
       resolve({});
     }
   });
-}
-
-function getSwimlaneData(props, swimlaneType) {
-  switch (swimlaneType) {
-    case SWIMLANE_TYPE.OVERALL:
-      return props.overallSwimlaneData;
-    case SWIMLANE_TYPE.VIEW_BY:
-      return props.viewBySwimlaneData;
-  }
-}
-
-function mapScopeToSwimlaneProps(props, appState, swimlaneType) {
-  return {
-    chartWidth: props.swimlaneWidth,
-    MlTimeBuckets: TimeBuckets,
-    swimlaneCellClick: props.swimlaneCellClick,
-    swimlaneData: getSwimlaneData(props, swimlaneType),
-    swimlaneType,
-    selection: appState.mlExplorerSwimlane,
-  };
-}
-
-export function mapScopeToProps(explorerProps, scope, appState) {
-  const props = {
-    ...explorerProps,
-    jobs: scope.jobs
-  };
-
-  props.swimlaneOverall = mapScopeToSwimlaneProps(props, appState, SWIMLANE_TYPE.OVERALL);
-  props.swimlaneViewBy = mapScopeToSwimlaneProps(props, appState, SWIMLANE_TYPE.VIEW_BY);
-
-  return props;
 }

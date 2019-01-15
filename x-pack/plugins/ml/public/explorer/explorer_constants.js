@@ -16,6 +16,14 @@ export const DRAG_SELECT_ACTION = {
   DRAG_START: 'dragStart'
 };
 
+export const EXPLORER_ACTION = {
+  INITIALIZE: 'initialize',
+  JOB_SELECTION_CHANGE: 'jobSelectionChange',
+  REDRAW: 'redraw',
+  REFRESH: 'refresh',
+  RENDER: 'render',
+};
+
 export const SWIMLANE_DEFAULT_LIMIT = 10;
 
 export const SWIMLANE_TYPE = {

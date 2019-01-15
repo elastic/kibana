@@ -21,11 +21,13 @@ import { I18nProvider } from '@kbn/i18n/react';
 
 module.directive('mlExplorerReactWrapper', function () {
   function link(scope, element) {
-    function render(props) {
-      ReactDOM.render(
-        <I18nProvider>{React.createElement(Explorer, props)}</I18nProvider>,
-        element[0]
-      );
+    function render(action, props) {
+      if (action === 'render') {
+        ReactDOM.render(
+          <I18nProvider>{React.createElement(Explorer, props)}</I18nProvider>,
+          element[0]
+        );
+      }
     }
 
     mlExplorerDashboardService.explorer.watch(render);
