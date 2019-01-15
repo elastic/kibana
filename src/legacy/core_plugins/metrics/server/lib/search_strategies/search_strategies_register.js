@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { findLast } from 'lodash';
 import AbstractSearchStrategy from './strategies/abstract_search_strategy';
 import DefaultSearchStrategy from './strategies/default_search_strategy';
 
@@ -38,7 +39,7 @@ export default class SearchStrategiesRegister {
   }
 
   static getStrategyForIndex(indexPattern) {
-    return strategies.find(searchStrategy => {
+    return findLast(strategies, searchStrategy => {
       return searchStrategy.isViable(indexPattern);
     });
   }
