@@ -13,11 +13,25 @@ exports[`ValidateJob renders button and modal with a message 1`] = `
     size="s"
     type="button"
   >
-    Validate Job
+    <FormattedMessage
+      defaultMessage="Validate Job"
+      id="xpack.ml.validateJob.validateJobButtonLabel"
+      values={Object {}}
+    />
   </EuiButton>
   <Modal
     close={[Function]}
-    title="Validate job test-id"
+    title={
+      <FormattedMessage
+        defaultMessage="Validate job {title}"
+        id="xpack.ml.validateJob.modal.validateJobTitle"
+        values={
+          Object {
+            "title": "test-id",
+          }
+        }
+      />
+    }
   >
     <Callout
       key="over_field_low_cardinality_0"
@@ -35,22 +49,36 @@ exports[`ValidateJob renders button and modal with a message 1`] = `
       grow={true}
       size="m"
     >
-      Job validation performs certain checks against job configurations and underlying source data and provides specific advice on how to adjust settings that are more likely to produce insightful results.
+      <FormattedMessage
+        defaultMessage="Job validation performs certain checks against job configurations and underlying source data and provides specific advice on how to adjust settings that are more likely to produce insightful results."
+        id="xpack.ml.validateJob.modal.jobValidationDescriptionText"
+        values={Object {}}
+      />
     </EuiText>
     <EuiText
       grow={true}
       size="m"
     >
-      For more information, see 
-      <EuiLink
-        color="primary"
-        href="https://www.elastic.co/guide/en/kibana/my-metadata-branch/job-tips.html"
-        target="_blank"
-        type="button"
-      >
-        Machine Learning Job Tips
-      </EuiLink>
-      .
+      <FormattedMessage
+        defaultMessage="For more information, see {mlJobTipsLink}."
+        id="xpack.ml.validateJob.modal.linkToJobTipsText"
+        values={
+          Object {
+            "mlJobTipsLink": <EuiLink
+              color="primary"
+              href="https://www.elastic.co/guide/en/kibana/my-metadata-branch/job-tips.html"
+              target="_blank"
+              type="button"
+            >
+              <FormattedMessage
+                defaultMessage="Machine Learning Job Tips"
+                id="xpack.ml.validateJob.modal.linkToJobTipsText.mlJobTipsLinkText"
+                values={Object {}}
+              />
+            </EuiLink>,
+          }
+        }
+      />
     </EuiText>
   </Modal>
 </div>
@@ -69,7 +97,11 @@ exports[`ValidateJob renders the button 1`] = `
     size="s"
     type="button"
   >
-    Validate Job
+    <FormattedMessage
+      defaultMessage="Validate Job"
+      id="xpack.ml.validateJob.validateJobButtonLabel"
+      values={Object {}}
+    />
   </EuiButton>
 </div>
 `;
@@ -87,32 +119,60 @@ exports[`ValidateJob renders the button and modal with a success message 1`] = `
     size="s"
     type="button"
   >
-    Validate Job
+    <FormattedMessage
+      defaultMessage="Validate Job"
+      id="xpack.ml.validateJob.validateJobButtonLabel"
+      values={Object {}}
+    />
   </EuiButton>
   <Modal
     close={[Function]}
-    title="Validate job test-id"
+    title={
+      <FormattedMessage
+        defaultMessage="Validate job {title}"
+        id="xpack.ml.validateJob.modal.validateJobTitle"
+        values={
+          Object {
+            "title": "test-id",
+          }
+        }
+      />
+    }
   >
     <EuiText
       grow={true}
       size="m"
     >
-      Job validation performs certain checks against job configurations and underlying source data and provides specific advice on how to adjust settings that are more likely to produce insightful results.
+      <FormattedMessage
+        defaultMessage="Job validation performs certain checks against job configurations and underlying source data and provides specific advice on how to adjust settings that are more likely to produce insightful results."
+        id="xpack.ml.validateJob.modal.jobValidationDescriptionText"
+        values={Object {}}
+      />
     </EuiText>
     <EuiText
       grow={true}
       size="m"
     >
-      For more information, see 
-      <EuiLink
-        color="primary"
-        href="https://www.elastic.co/guide/en/kibana/my-metadata-branch/job-tips.html"
-        target="_blank"
-        type="button"
-      >
-        Machine Learning Job Tips
-      </EuiLink>
-      .
+      <FormattedMessage
+        defaultMessage="For more information, see {mlJobTipsLink}."
+        id="xpack.ml.validateJob.modal.linkToJobTipsText"
+        values={
+          Object {
+            "mlJobTipsLink": <EuiLink
+              color="primary"
+              href="https://www.elastic.co/guide/en/kibana/my-metadata-branch/job-tips.html"
+              target="_blank"
+              type="button"
+            >
+              <FormattedMessage
+                defaultMessage="Machine Learning Job Tips"
+                id="xpack.ml.validateJob.modal.linkToJobTipsText.mlJobTipsLinkText"
+                values={Object {}}
+              />
+            </EuiLink>,
+          }
+        }
+      />
     </EuiText>
   </Modal>
 </div>
