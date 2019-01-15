@@ -30,21 +30,16 @@ import {
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
-import {
-  buildExistsFilter,
-  buildPhraseFilter,
-  buildPhrasesFilter,
-  buildQueryFilter,
-  buildRangeFilter,
-} from '@kbn/es-query';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import React, { Component } from 'react';
-import { IndexPatternInput } from 'ui/filter_bar/react/filter_editor/index_pattern_input';
 import { IndexPattern, IndexPatternField } from 'ui/index_patterns';
 import { FieldFilter, MetaFilter } from '../../filters';
 import { FieldInput } from './field_input';
+import { IndexPatternInput } from './index_pattern_input';
 import {
+  buildCustomFilter,
+  buildFilter,
   getFieldFromFilter,
   getFilterParams,
   getIndexPatternFromFilter,
@@ -62,6 +57,7 @@ interface Props {
   indexPatterns: IndexPattern[];
   onSubmit: (filter: MetaFilter) => void;
   onCancel: () => void;
+  showIndexPatternInput: boolean;
   intl: InjectedIntl;
 }
 
@@ -174,6 +170,9 @@ class FilterEditorUI extends Component<Props, State> {
   }
 
   private renderIndexPatternInput() {
+    if (this.props.indexPatterns.length <= 1) {
+      return '';
+    }
     return (
       <EuiFlexGroup>
         <EuiFlexItem>
@@ -365,53 +364,31 @@ class FilterEditorUI extends Component<Props, State> {
   };
 
   private onSubmit = () => {
-    const filter: MetaFilter | null = this.state.isCustomEditorOpen
-      ? this.buildCustomFilter()
-      : this.buildFilter();
+    const {
+      selectedIndexPattern: indexPattern,
+      selectedField: field,
+      selectedOperator: operator,
+      params,
+      useCustomLabel,
+      customLabel,
+      isCustomEditorOpen,
+      queryDsl,
+    } = this.state;
 
-    if (filter === null) {
-      throw new Error('Cannot call onSubmit with empty filter');
+    const { store } = this.props.filter.$state;
+    const alias = useCustomLabel ? customLabel : null;
+
+    if (isCustomEditorOpen) {
+      const { index, disabled, negate } = this.props.filter.meta;
+      const newIndex = index || this.props.indexPatterns[0].id;
+      const body = JSON.parse(queryDsl);
+      const filter = buildCustomFilter(newIndex, body, disabled, negate, alias, store);
+      this.props.onSubmit(filter);
+    } else if (indexPattern && field && operator) {
+      const filter = buildFilter(indexPattern, field, operator, params, alias, store);
+      this.props.onSubmit(filter);
     }
-
-    if (!this.state.isCustomEditorOpen) {
-      filter.meta.negate = get(this.state.selectedOperator, 'negate') || false;
-    }
-
-    filter.meta.alias = this.state.useCustomLabel ? this.state.customLabel : null;
-    filter.$state = {
-      store: this.props.filter.$state.store,
-    };
-    this.props.onSubmit(filter);
   };
-
-  private buildFilter(): MetaFilter | null {
-    const { selectedIndexPattern, selectedField, selectedOperator, params } = this.state;
-    if (!selectedField || !selectedOperator || !selectedIndexPattern) {
-      return null;
-    }
-    switch (selectedOperator.type) {
-      case 'phrase':
-        return buildPhraseFilter(selectedField, params, selectedIndexPattern);
-      case 'phrases':
-        return buildPhrasesFilter(selectedField, params, selectedIndexPattern);
-      case 'range':
-        const newParams = { gte: params.from, lt: params.to };
-        return buildRangeFilter(selectedField, newParams, selectedIndexPattern);
-      case 'exists':
-        return buildExistsFilter(selectedField, selectedIndexPattern);
-      case 'query':
-        return buildQueryFilter(params.query, selectedIndexPattern.id);
-      default:
-        throw new Error(`Unknown operator type: ${selectedOperator.type}`);
-    }
-  }
-
-  private buildCustomFilter(): MetaFilter {
-    const { negate, index } = this.props.filter.meta;
-    const newIndex = index || this.props.indexPatterns[0].id;
-    const customFilter = JSON.parse(this.state.queryDsl);
-    return { ...customFilter, meta: { negate, index: newIndex } };
-  }
 }
 
 export const FilterEditor = injectI18n(FilterEditorUI);

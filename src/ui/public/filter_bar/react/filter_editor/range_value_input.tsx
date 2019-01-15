@@ -22,9 +22,9 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get, isEmpty } from 'lodash';
 import { Component } from 'react';
 import React from 'react';
-import { validateParams } from 'ui/filter_bar/react/filter_editor/lib/filter_editor_utils';
-import { ValueInputType } from 'ui/filter_bar/react/filter_editor/value_input_type';
 import { IndexPatternField } from 'ui/index_patterns';
+import { validateParams } from './lib/filter_editor_utils';
+import { ValueInputType } from './value_input_type';
 
 interface RangeParams {
   from: number | string;

@@ -18,6 +18,13 @@
  */
 
 import dateMath from '@elastic/datemath';
+import {
+  buildExistsFilter,
+  buildPhraseFilter,
+  buildPhrasesFilter,
+  buildQueryFilter,
+  buildRangeFilter,
+} from '@kbn/es-query';
 import { omit } from 'lodash';
 import { IndexPattern, IndexPatternField } from 'ui/index_patterns';
 import Ipv4Address from 'ui/utils/ipv4_address';
@@ -28,7 +35,8 @@ import {
   PhrasesFilter,
   RangeFilter,
 } from '../../../filters';
-import { FILTER_OPERATORS } from './filter_operators';
+import { FilterMeta, FilterStateStore } from '../../../filters/meta_filter';
+import { FILTER_OPERATORS, Operator } from './filter_operators';
 
 export function getIndexPatternFromFilter(
   filter: MetaFilter,
@@ -94,4 +102,56 @@ export function validateParams(params: any, type: string) {
     default:
       return true;
   }
+}
+
+export function buildFilter(
+  indexPattern: IndexPattern,
+  field: IndexPatternField,
+  operator: Operator,
+  params: any,
+  alias: string | null,
+  store: FilterStateStore
+): MetaFilter {
+  const filter = buildBaseFilter(indexPattern, field, operator, params);
+  filter.meta.alias = alias;
+  filter.meta.negate = operator.negate;
+  filter.$state = { store };
+  return filter;
+}
+
+function buildBaseFilter(
+  indexPattern: IndexPattern,
+  field: IndexPatternField,
+  operator: Operator,
+  params: any
+): MetaFilter {
+  switch (operator.type) {
+    case 'phrase':
+      return buildPhraseFilter(field, params, indexPattern);
+    case 'phrases':
+      return buildPhrasesFilter(field, params, indexPattern);
+    case 'range':
+      const newParams = { gte: params.from, lt: params.to };
+      return buildRangeFilter(field, newParams, indexPattern);
+    case 'exists':
+      return buildExistsFilter(field, indexPattern);
+    case 'query':
+      return buildQueryFilter(params.query, indexPattern.id);
+    default:
+      throw new Error(`Unknown operator type: ${operator.type}`);
+  }
+}
+
+export function buildCustomFilter(
+  index: string,
+  queryDsl: any,
+  disabled: boolean,
+  negate: boolean,
+  alias: string | null,
+  store: FilterStateStore
+): MetaFilter {
+  const meta: FilterMeta = { index, type: 'custom', disabled, negate, alias };
+  const filter: MetaFilter = { ...queryDsl, meta };
+  filter.$state = { store };
+  return filter;
 }

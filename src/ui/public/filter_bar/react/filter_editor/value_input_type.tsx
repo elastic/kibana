@@ -21,7 +21,7 @@ import { EuiFieldNumber, EuiFieldText, EuiSelect } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
-import { validateParams } from 'ui/filter_bar/react/filter_editor/lib/filter_editor_utils';
+import { validateParams } from './lib/filter_editor_utils';
 
 interface Props {
   value?: string | number;
