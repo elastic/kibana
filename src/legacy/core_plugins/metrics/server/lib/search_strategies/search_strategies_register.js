@@ -17,6 +17,7 @@
  * under the License.
  */
 import AbstractSearchStrategy from './strategies/abstract_search_strategy';
+import AbstractSearchRequest from './searh_requests/abstract_request';
 import DefaultSearchStrategy from './strategies/default_search_strategy';
 
 const strategies = [];
@@ -32,9 +33,14 @@ export default class SearchStrategiesRegister {
   static init(server) {
     const searchStrategiesRegister = new SearchStrategiesRegister();
 
-    server.expose('addSearchStrategy', (searchStrategy) => searchStrategiesRegister.add(searchStrategy));
+    searchStrategiesRegister.add(new DefaultSearchStrategy(server));
+    this.exposeServer(server, searchStrategiesRegister);
+  }
 
-    return searchStrategiesRegister.add(new DefaultSearchStrategy(server));
+  static exposeServer(server, searchStrategiesRegister) {
+    server.expose('addSearchStrategy', (searchStrategy) => searchStrategiesRegister.add(searchStrategy));
+    server.expose('AbstractSearchStrategy', AbstractSearchStrategy);
+    server.expose('AbstractSearchRequest', AbstractSearchRequest);
   }
 
   static async getViableStrategy(req, indexPattern) {
