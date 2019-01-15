@@ -119,7 +119,7 @@ export const ConditionExpression = injectI18n(class ConditionExpression extends 
       <div style={POPOVER_STYLE}>
         <EuiPopoverTitle>
           <FormattedMessage
-            id="xpack.ml.ruleEditor.conditionExpression.whenTitle"
+            id="xpack.ml.ruleEditor.conditionExpression.appliesToPopoverTitle"
             defaultMessage="When"
           />
         </EuiPopoverTitle>
@@ -143,7 +143,7 @@ export const ConditionExpression = injectI18n(class ConditionExpression extends 
       <div style={POPOVER_STYLE}>
         <EuiPopoverTitle>
           <FormattedMessage
-            id="xpack.ml.ruleEditor.conditionExpression.isTitle"
+            id="xpack.ml.ruleEditor.conditionExpression.operatorValuePopoverTitle"
             defaultMessage="Is"
           />
         </EuiPopoverTitle>
@@ -191,7 +191,7 @@ export const ConditionExpression = injectI18n(class ConditionExpression extends 
             button={(
               <EuiExpression
                 description={(<FormattedMessage
-                  id="xpack.ml.ruleEditor.conditionExpression.whenButtonLabel"
+                  id="xpack.ml.ruleEditor.conditionExpression.appliesToButtonLabel"
                   defaultMessage="when"
                 />)}
                 value={appliesToText(appliesTo)}
@@ -216,7 +216,7 @@ export const ConditionExpression = injectI18n(class ConditionExpression extends 
             button={(
               <EuiExpression
                 description={(<FormattedMessage
-                  id="xpack.ml.ruleEditor.conditionExpression.isButtonLabel"
+                  id="xpack.ml.ruleEditor.conditionExpression.operatorValueButtonLabel"
                   defaultMessage="is {operator}"
                   values={{ operator: operatorToText(operator) }}
                 />)}
@@ -242,8 +242,8 @@ export const ConditionExpression = injectI18n(class ConditionExpression extends 
             onClick={() => deleteCondition(index)}
             iconType="trash"
             aria-label={this.props.intl.formatMessage({
-              id: 'xpack.ml.ruleEditor.conditionExpression.nextAriaLabel',
-              defaultMessage: 'Next'
+              id: 'xpack.ml.ruleEditor.conditionExpression.deleteConditionButtonAriaLabel',
+              defaultMessage: 'Delete condition'
             })}
           />
         </EuiFlexItem>

@@ -97,7 +97,7 @@ export class ScopeExpression extends Component {
       <div style={POPOVER_STYLE}>
         <EuiPopoverTitle>
           <FormattedMessage
-            id="xpack.ml.ruleEditor.scopeExpression.isTitle"
+            id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypePopoverTitle"
             defaultMessage="Is"
           />
         </EuiPopoverTitle>
@@ -149,7 +149,7 @@ export class ScopeExpression extends Component {
           <EuiExpression
             className="scope-field-button"
             description={<FormattedMessage
-              id="xpack.ml.ruleEditor.scopeExpression.whenButtonLabel"
+              id="xpack.ml.ruleEditor.scopeExpression.scopeFieldWhenLabel"
               defaultMessage="when"
             />}
             value={fieldName}
@@ -165,7 +165,7 @@ export class ScopeExpression extends Component {
               button={(
                 <EuiExpression
                   description={<FormattedMessage
-                    id="xpack.ml.ruleEditor.scopeExpression.isButtonLabel"
+                    id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypeButtonLabel"
                     defaultMessage="is {filterType}"
                     values={{ filterType: filterTypeToText(filterType) }}
                   />}

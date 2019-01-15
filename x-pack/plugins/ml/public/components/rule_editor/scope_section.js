@@ -37,14 +37,14 @@ function NoFilterListsCallOut() {
     >
       <p>
         <FormattedMessage
-          id="xpack.ml.ruleEditor.scopeSection.howToConfigureScopeDescription"
+          id="xpack.ml.ruleEditor.scopeSection.createFilterListsDescription"
           defaultMessage="To configure scope, you must first use the&nbsp;{filterListsLink} settings page
             to create the list of values you want to include or exclude in the rule."
           values={{
             filterListsLink: (
               <EuiLink href="#/settings/filter_lists">
                 <FormattedMessage
-                  id="xpack.ml.ruleEditor.scopeSection.howToConfigureScopeDescription.filterListsLinkText"
+                  id="xpack.ml.ruleEditor.scopeSection.createFilterListsDescription.filterListsLinkText"
                   defaultMessage="Filter Lists"
                 />
               </EuiLink>
