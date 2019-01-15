@@ -35,8 +35,8 @@ index. You can still query the previous indices, but you only ever write to
 the “hot” index. See {ref}/indices-rollover-index.html[Rollover index] for more information.
 
 * *Warm.* The index is typically searched at a lower rate than when the data is 
-hot. The index is not open for new data, but might occasionally add 
-late-arriving data, for example from a Beat that had a network problem that's now fixed.  
+hot. The index is not used for storing for new data, but might occasionally add 
+late-arriving data, for example, from a Beat that had a network problem that's now fixed.  
 You can optionally shrink the number replicas and move the shards to a 
 different set of nodes with smaller or less performant hardware. You can also 
 reduce the number of primary shards and force merge the index into 
