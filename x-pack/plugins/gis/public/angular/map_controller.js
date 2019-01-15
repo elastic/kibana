@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import chrome from 'ui/chrome';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -30,8 +29,7 @@ import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_s
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { showOptionsPopover } from '../components/top_nav/show_options_popover';
 import { toastNotifications } from 'ui/notify';
-import { KibanaTilemapSource } from '../shared/layers/sources/kibana_tilemap_source';
-import { EMSTMSSource } from '../shared/layers/sources/ems_tms_source';
+import { getInitialLayers } from './get_initial_layers';
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-gis-root';
 const DEFAULT_QUERY_LANGUAGE = 'kuery';
@@ -97,32 +95,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       }
     }
 
-    // init layers
-    let layerList;
-    const dataSources = getDataSources(store.getState());
-    const kibanaTilemapUrl = _.get(dataSources, 'kibana.tilemap.url');
-    const emsTmsServices = _.get(dataSources, 'ems.tms');
-    if (savedMap.layerListJSON) {
-      layerList = JSON.parse(savedMap.layerListJSON);
-    } else if (kibanaTilemapUrl) {
-      const sourceDescriptor = KibanaTilemapSource.createDescriptor(kibanaTilemapUrl);
-      const source = new KibanaTilemapSource(sourceDescriptor);
-      const layer = source.createDefaultLayer();
-      layerList = [
-        layer.toLayerDescriptor()
-      ];
-    } else if (emsTmsServices) {
-      const sourceDescriptor = EMSTMSSource.createDescriptor(emsTmsServices[0].id);
-      const source = new EMSTMSSource(sourceDescriptor, { emsTmsServices });
-      const layer = source.createDefaultLayer();
-      layerList = [
-        layer.toLayerDescriptor()
-      ];
-    } else {
-      // TODO display warning that no tile layers are available and map.tilemap needs to be configured
-      // because EMS is unreachable or has been turned off on purpose.
-      layerList = [];
-    }
+    const layerList = getInitialLayers(savedMap.layerListJSON, getDataSources(store.getState()));
     store.dispatch(replaceLayerList(layerList));
 
     // Initialize query, syncing appState and store
