@@ -803,10 +803,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@6.3.0":
-  version "6.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-6.3.0.tgz#68e3551eba97a7236f32939b6f22778692a7063a"
-  integrity sha512-t+Y48kVsoL86D3XC93mBXDz5RmZO14kBB2b6XtwMWBVK9mrsbOEr5CMv7zhK6cfT2h50seReI6iX5tHAby/cZQ==
+"@elastic/eui@6.3.1":
+  version "6.3.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-6.3.1.tgz#5808086484b8e2178a6cf57ef0a3c1b60090b79b"
+  integrity sha512-6t5is08ERJTTmVlm6B6xy7GsY8l0NMTVvbw5FJOD/CY2zlMzFXBlrm+0zWfm2rMo4GJxus0AQVqdL+1sDDv7+Q==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
@@ -1664,11 +1664,6 @@
   resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.5.3.tgz#bef071852dca2a2dbb65fecdb7bfb30cedae2de2"
   integrity sha512-sfjHrNF4zWRv3fJUGyZW46wVxhYJ/GeWIPdKxbnLIhY3bWR0Ncl2kIhZI7rpjY9KtUQAkDP8jWEmaGQGFFvruA==
 
-"@types/prop-types@^15.5.5":
-  version "15.5.8"
-  resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.5.8.tgz#8ae4e0ea205fe95c3901a5a1df7f66495e3a56ce"
-  integrity sha512-3AQoUxQcQtLHsK25wtTWIoIpgYjH3vSDroZOUr7PpCHw/jLY1RB9z9E8dBT/OSmwStVgkRNvdh+ZHNiomRieaw==
-
 "@types/puppeteer-core@^1.9.0":
   version "1.9.0"
   resolved "https://registry.yarnpkg.com/@types/puppeteer-core/-/puppeteer-core-1.9.0.tgz#5ceb397e3ff769081fb07d71289b5009392d24d3"
@@ -1738,7 +1733,7 @@
     "@types/prop-types" "*"
     "@types/react" "*"
 
-"@types/react@*", "@types/react@16.3.14", "@types/react@16.7.12":
+"@types/react@*", "@types/react@16.3.14":
   version "16.3.14"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-16.3.14.tgz#f90ac6834de172e13ecca430dcb6814744225d36"
   integrity sha512-wNUGm49fPl7eE2fnYdF0v5vSOrUMdKMQD/4NwtQRnb6mnPwtkhabmuFz37eq90+hhyfz0pWd38jkZHOcaZ6LGw==
