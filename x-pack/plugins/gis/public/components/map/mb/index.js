@@ -12,7 +12,7 @@ import {
   mapDestroyed,
   setMouseCoordinates,
   clearMouseCoordinates,
-  clearGoto,
+  clearGoto
 } from '../../../actions/store_actions';
 import { getLayerList, getMapReady, getGoto } from "../../../selectors/map_selectors";
 
@@ -20,7 +20,7 @@ function mapStateToProps(state = {}) {
   return {
     isMapReady: getMapReady(state),
     layerList: getLayerList(state),
-    goto: getGoto(state),
+    goto: getGoto(state)
   };
 }
 
