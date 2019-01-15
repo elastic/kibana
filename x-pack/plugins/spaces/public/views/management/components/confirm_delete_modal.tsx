@@ -5,6 +5,7 @@
  */
 
 import {
+  CommonProps,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -75,8 +76,7 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
     // This is largely the same as the built-in EuiConfirmModal component, but we needed the ability
     // to disable the buttons since this could be a long-running operation
 
-    // TODO: awaiting https://github.com/elastic/eui/pull/1410 to land in next version of EUI for types
-    const modalProps: any = {
+    const modalProps: EuiModalProps & CommonProps = {
       onClose: onCancel,
       className: 'spcConfirmDeleteModal',
       initialFocus: 'input[name="confirmDeleteSpaceInput"]',
@@ -84,7 +84,7 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
 
     return (
       <EuiOverlayMask>
-        <EuiModal {...modalProps as EuiModalProps}>
+        <EuiModal {...modalProps}>
           <EuiModalHeader>
             <EuiModalHeaderTitle data-test-subj="confirmModalTitleText">
               <FormattedMessage
