@@ -107,9 +107,7 @@ export default function ({ getService, getPageObjects }) {
       ];
 
       await inspector.open();
-      const data = await inspector.getTableData();
-      log.debug(data);
-      expect(data).to.eql(expectedChartData);
+      await inspector.expectTableData(expectedChartData);
     });
 
     describe.skip('switch between Y axis scale types', () => {

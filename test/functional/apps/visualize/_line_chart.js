@@ -108,9 +108,7 @@ export default function ({ getService, getPageObjects }) {
       const expectedChartData = [['png', '1,373'], ['php', '445'], ['jpg', '9,109'], ['gif', '918'], ['css', '2,159']];
 
       await inspector.open();
-      const data = await inspector.getTableData();
-      log.debug(data);
-      expect(data).to.eql(expectedChartData);
+      await inspector.expectTableData(expectedChartData);
     });
 
     it('should be able to save and load', async function () {

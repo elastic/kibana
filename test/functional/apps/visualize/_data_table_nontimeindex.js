@@ -92,10 +92,8 @@ export default function ({ getService, getPageObjects }) {
 
       return retry.try(async function () {
         await inspector.open();
-        const data = await inspector.getTableData();
+        await inspector.expectTableData(expectedChartData);
         await inspector.close();
-        log.debug(data);
-        expect(data).to.eql(expectedChartData);
       });
     });
 

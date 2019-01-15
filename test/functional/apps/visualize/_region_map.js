@@ -58,8 +58,7 @@ export default function ({ getService, getPageObjects }) {
       it('should show results after clicking play (join on states)', async function () {
         const expectedData = [['CN', '2,592'], ['IN', '2,373'], ['US', '1,194'], ['ID', '489'], ['BR', '415']];
         await inspector.open();
-        const data = await inspector.getTableData();
-        expect(data).to.eql(expectedData);
+        await inspector.expectTableData(expectedData);
       });
 
       it('should change results after changing layer to world', async function () {
