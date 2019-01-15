@@ -25,7 +25,7 @@ You can define up to four phases in the index lifecycle. For each phase, you
 can enable actions to optimize performance for that phase. Transitioning 
 between phases is based on the age of the index.
 
-The four phases in the index lifecycle are:
+The four phases of an index lifecycle policy are:
 
 * *Hot.* The index is actively being queried and written to. You can optionally 
 roll over to a new index when the 
