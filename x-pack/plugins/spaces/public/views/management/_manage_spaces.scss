@@ -10,5 +10,5 @@
   flex-grow: 0;
 }
 .spcGridPage {
-  max-width: 1200px;
+  max-width: map-get($euiBreakpoints, 'xl');
 }
