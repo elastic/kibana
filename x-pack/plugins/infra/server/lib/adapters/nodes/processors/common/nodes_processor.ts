@@ -26,7 +26,6 @@ const nodeTypeToField = (options: InfraProcesorRequestOptions): string => {
 };
 
 export const nodesProcessor = (options: InfraProcesorRequestOptions) => {
-  const { fields } = options.nodeOptions.sourceConfiguration;
   return (doc: InfraESSearchBody) => {
     const result = cloneDeep(doc);
     const field = nodeTypeToField(options);
