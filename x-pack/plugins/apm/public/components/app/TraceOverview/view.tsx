@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { RRRRenderResponse } from 'react-redux-request';
 import { TraceListAPIResponse } from 'x-pack/plugins/apm/server/lib/traces/get_top_traces';
@@ -27,7 +28,11 @@ export function TraceOverview(props: Props) {
           items={data}
           isLoading={status === 'LOADING'}
           noItemsMessage={
-            <EmptyMessage heading="No traces found for this query" />
+            <EmptyMessage
+              heading={i18n.translate('xpack.apm.tracesTable.notFoundLabel', {
+                defaultMessage: 'No traces found for this query'
+              })}
+            />
           }
         />
       )}

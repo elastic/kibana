@@ -174,7 +174,7 @@ export class MBMapContainer extends React.Component {
       lng: goto.lon,
       lat: goto.lat
     });
-  }
+  };
 
   _syncMbMapWithLayerList = () => {
     const {
@@ -190,7 +190,7 @@ export class MBMapContainer extends React.Component {
       layer.syncLayerWithMB(this._mbMap);
     });
     syncLayerOrder(this._mbMap, layerList);
-  }
+  };
 
   _syncMbMapWithInspector = () => {
     if (!this.props.isMapReady) {
@@ -206,7 +206,7 @@ export class MBMapContainer extends React.Component {
       stats,
       style: this._mbMap.getStyle(),
     });
-  }
+  };
 
   render() {
     // do not debounce syncing zoom and center

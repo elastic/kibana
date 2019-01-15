@@ -20,8 +20,20 @@ export const containerDiskIOOps: InfraMetricModelCreator = (timeField, indexPatt
       metrics: [
         {
           field: 'docker.diskio.read.ops',
-          id: 'avg-diskio-ops',
-          type: InfraMetricModelMetricType.avg,
+          id: 'max-diskio-read-ops',
+          type: InfraMetricModelMetricType.max,
+        },
+        {
+          field: 'max-diskio-read-ops',
+          id: 'deriv-max-diskio-read-ops',
+          type: InfraMetricModelMetricType.derivative,
+          unit: '1s',
+        },
+        {
+          id: 'posonly-deriv-max-diskio-read-ops',
+          type: InfraMetricModelMetricType.calculation,
+          variables: [{ id: 'var-rate', name: 'rate', field: 'deriv-max-diskio-read-ops' }],
+          script: 'params.rate > 0.0 ? params.rate : 0.0',
         },
       ],
     },
@@ -31,8 +43,32 @@ export const containerDiskIOOps: InfraMetricModelCreator = (timeField, indexPatt
       metrics: [
         {
           field: 'docker.diskio.write.ops',
-          id: 'avg-diskio-ops',
-          type: InfraMetricModelMetricType.avg,
+          id: 'max-diskio-write-ops',
+          type: InfraMetricModelMetricType.max,
+        },
+        {
+          field: 'max-diskio-write-ops',
+          id: 'deriv-max-diskio-write-ops',
+          type: InfraMetricModelMetricType.derivative,
+          unit: '1s',
+        },
+        {
+          id: 'posonly-deriv-max-diskio-write-ops',
+          type: InfraMetricModelMetricType.calculation,
+          variables: [{ id: 'var-rate', name: 'rate', field: 'deriv-max-diskio-write-ops' }],
+          script: 'params.rate > 0.0 ? params.rate : 0.0',
+        },
+        {
+          id: 'calc-invert-rate',
+          script: 'params.rate * -1',
+          type: InfraMetricModelMetricType.calculation,
+          variables: [
+            {
+              field: 'posonly-deriv-max-diskio-write-ops',
+              id: 'var-rate',
+              name: 'rate',
+            },
+          ],
         },
       ],
     },

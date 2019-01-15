@@ -20,7 +20,7 @@ import {
 } from './metric_select';
 import { SingleFieldSelect } from './single_field_select';
 
-export function MetricsEditor({ fields, metrics, onChange }) {
+export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics, metricsFilter }) {
 
   function onMetricChange(metric, index) {
     onChange([
@@ -91,6 +91,7 @@ export function MetricsEditor({ fields, metrics, onChange }) {
             <MetricSelect
               onChange={onAggChange}
               value={metric.type}
+              metricsFilter={metricsFilter}
             />
           </EuiFlexItem>
 
@@ -110,6 +111,21 @@ export function MetricsEditor({ fields, metrics, onChange }) {
     ]);
   }
 
+  function renderAddMetricButton() {
+
+    if (!allowMultipleMetrics) {
+      return null;
+    }
+
+    return (<EuiButtonIcon
+      iconType="plusInCircle"
+      onClick={addMetric}
+      aria-label="Add metric"
+      title="Add metric"
+    />);
+  }
+
+
   return (
     <Fragment>
       <EuiFlexGroup alignItems="center">
@@ -119,12 +135,7 @@ export function MetricsEditor({ fields, metrics, onChange }) {
           </EuiFormLabel>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="plusInCircle"
-            onClick={addMetric}
-            aria-label="Add metric"
-            title="Add metric"
-          />
+          {renderAddMetricButton()}
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -140,6 +151,8 @@ MetricsEditor.propTypes = {
   })),
   fields: PropTypes.object,  // indexPattern.fields IndexedArray object
   onChange: PropTypes.func.isRequired,
+  allowMultipleMetrics: PropTypes.bool,
+  metricsFilter: PropTypes.func,
 };
 
 MetricsEditor.defaultProps = {

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 /*
  * Service for the container for the anomaly charts in the
  * Machine Learning Explorer dashboard.
@@ -23,47 +21,52 @@ import {
 import { isTimeSeriesViewDetector } from '../../../common/util/job_utils';
 import { mlResultsService } from '../../services/results_service';
 import { mlJobService } from '../../services/job_service';
+import {
+  mlSelectSeverityService,
+  SEVERITY_OPTIONS,
+} from '../../components/controls/select_severity/select_severity';
+import { getChartContainerWidth } from './legacy_utils';
 
 import { CHART_TYPE } from '../explorer_constants';
 
-export function explorerChartsContainerServiceFactory(
-  mlSelectSeverityService,
-  callback,
-  $chartContainer
-) {
+export function getDefaultChartsData() {
+  return {
+    chartsPerRow: 1,
+    seriesToPlot: [],
+    // default values, will update on every re-render
+    tooManyBuckets: false,
+    timeFieldName: 'timestamp'
+  };
+}
+
+export function explorerChartsContainerServiceFactory(callback) {
   const FUNCTION_DESCRIPTIONS_TO_PLOT = ['mean', 'min', 'max', 'sum', 'count', 'distinct_count', 'median', 'rare'];
   const CHART_MAX_POINTS = 500;
   const ANOMALIES_MAX_RESULTS = 500;
-  const MAX_SCHEDULED_EVENTS = 10;          // Max number of scheduled events displayed per bucket.
+  const MAX_SCHEDULED_EVENTS = 10; // Max number of scheduled events displayed per bucket.
   const ML_TIME_FIELD_NAME = 'timestamp';
   const USE_OVERALL_CHART_LIMITS = false;
   const MAX_CHARTS_PER_ROW = 4;
 
-  function getDefaultData() {
-    return {
-      seriesToPlot: [],
-      // default values, will update on every re-render
-      tooManyBuckets: false,
-      timeFieldName: 'timestamp'
-    };
-  }
-
-  callback(getDefaultData());
+  callback(getDefaultChartsData());
 
   let requestCount = 0;
-  const anomalyDataChangeListener = function (anomalyRecords, earliestMs, latestMs) {
+  const anomalyDataChange = function (anomalyRecords, earliestMs, latestMs) {
     const newRequestCount = ++requestCount;
     requestCount = newRequestCount;
 
-    const data = getDefaultData();
+    const data = getDefaultChartsData();
 
-    const threshold = mlSelectSeverityService.state.get('threshold');
+    const threshold = (mlSelectSeverityService.initalized)
+      ? mlSelectSeverityService.state.get('threshold')
+      : SEVERITY_OPTIONS[0];
+
     const filteredRecords = anomalyRecords.filter((record) => {
       return Number(record.record_score) >= threshold.val;
     });
     const allSeriesRecords = processRecordsForDisplay(filteredRecords);
     // Calculate the number of charts per row, depending on the width available, to a max of 4.
-    const chartsContainerWidth = Math.floor($chartContainer.width());
+    const chartsContainerWidth = getChartContainerWidth();
     let chartsPerRow = Math.min(Math.max(Math.floor(chartsContainerWidth / 550), 1), MAX_CHARTS_PER_ROW);
     if (allSeriesRecords.length === 1) {
       chartsPerRow = 1;
@@ -573,6 +576,6 @@ export function explorerChartsContainerServiceFactory(
     };
   }
 
-  return anomalyDataChangeListener;
+  return anomalyDataChange;
 
 }
