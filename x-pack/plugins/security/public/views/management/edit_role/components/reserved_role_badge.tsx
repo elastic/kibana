@@ -21,6 +21,7 @@ export const ReservedRoleBadge = (props: Props) => {
   if (isReservedRole(role)) {
     return (
       <EuiToolTip
+        data-test-subj="reservedRoleBadgeTooltip"
         content={
           <FormattedMessage
             id="xpack.security.management.editRole.reversedRoleBadget.reversedRolesCanNotBeRemovedTooltip"

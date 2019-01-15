@@ -83,6 +83,7 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
           }
           iconType="alert"
           color="danger"
+          data-test-subj="userCannotManageSpacesCallout"
         >
           <p>
             <FormattedMessage
