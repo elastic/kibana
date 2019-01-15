@@ -462,7 +462,10 @@ class IndexActionsContextMenuUi extends Component {
       <EuiButton
         data-test-subj="indexActionsContextMenuButton"
         iconSide={iconSide}
-        aria-label={`${entity} options`}
+        aria-label={intl.formatMessage({
+          id: 'xpack.idxMgmt.indexActionsMenu.manageButtonAriaLabel',
+          defaultMessage: '{entity} options',
+        }, { entity })}
         onClick={this.onButtonClick}
         iconType={iconType}
         fill
