@@ -17,54 +17,10 @@
  * under the License.
  */
 
-import { toArray } from 'lodash';
 import { HierarchicalTooltipFormatterProvider } from './_hierarchical_tooltip_formatter';
+import { convertTableProvider } from './_convert_table';
 
 export function BuildHierarchicalDataProvider(Private) {
   const tooltipFormatter = Private(HierarchicalTooltipFormatterProvider);
-
-  return function (table) {
-    let slices;
-    const names = {};
-    if (table.columns.length === 1) {
-      slices = [{ name: table.columns[0].title, size: table.rows[0][0].value }];
-      names[table.columns[0].title] = table.columns[0].title;
-    } else {
-      let parent;
-      slices = [];
-      table.rows.forEach(row => {
-        let dataLevel = slices;
-        // we always have one bucket column and one metric column (for every level)
-        for (let columnIndex = 0; columnIndex < table.columns.length; columnIndex += 2) {
-          const { aggConfig } = table.columns[columnIndex];
-          const fieldFormatter = aggConfig.fieldFormatter('text');
-          const bucketColumn = row[columnIndex];
-          const metricColumn = row[columnIndex + 1];
-          const name = fieldFormatter(bucketColumn.value);
-          const size = metricColumn.value;
-          names[name] = name;
-
-          let slice  = dataLevel.find(slice => slice.name === name);
-          if (!slice) {
-            slice = { name, size, parent, aggConfig, aggConfigResult: metricColumn, children: [] };
-            dataLevel.push(slice);
-          }
-          parent = slice;
-          dataLevel = slice.children;
-        }
-      });
-    }
-
-    return {
-      hits: table.rows.length,
-      raw: table,
-      names: toArray(names),
-      tooltipFormatter: tooltipFormatter(table.columns),
-      slices: {
-        children: [
-          ...slices
-        ]
-      }
-    };
-  };
+  return convertTableProvider(tooltipFormatter);
 }
