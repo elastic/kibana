@@ -106,9 +106,6 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expect(resp.body).to.eql({
       id: resp.body.id,
       type: 'visualization',
-      migrationVersion: {
-        visualization: '7.0.0',
-      },
       updated_at: resp.body.updated_at,
       version: 2,
       attributes: {
