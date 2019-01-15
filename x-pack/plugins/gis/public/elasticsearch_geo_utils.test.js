@@ -218,16 +218,10 @@ describe('createExtentFilter', () => {
   it('should return elasticsearch geo_bounding_box filter for geo_point field', () => {
     const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_point');
     expect(filter).toEqual({
-      geo_bounding_box: {
-        [geoFieldName]: {
-          top_left: {
-            lat: mapExtent.maxLat,
-            lon: mapExtent.minLon
-          },
-          bottom_right: {
-            lat: mapExtent.minLat,
-            lon: mapExtent.maxLon
-          }
+      "geo_bounding_box": {
+        "location": {
+          "bottom_right": [-83, 35],
+          "top_left": [-89, 39]
         }
       }
     });
@@ -236,16 +230,15 @@ describe('createExtentFilter', () => {
   it('should return elasticsearch geo_shape filter for geo_shape field', () => {
     const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_shape');
     expect(filter).toEqual({
-      geo_shape: {
-        [geoFieldName]: {
-          shape: {
-            type: 'envelope',
-            coordinates: [
-              [mapExtent.minLon, mapExtent.maxLat],
-              [mapExtent.maxLon, mapExtent.minLat]
-            ]
-          },
-          relation: 'INTERSECTS'
+      "geo_shape": {
+        "location": {
+          "relation": "INTERSECTS",
+          "shape": {
+            "coordinates": [
+              [[-89, 39], [-89, 35], [-83, 35], [-83, 39], [-89, 39]]
+            ],
+            "type": "polygon"
+          }
         }
       }
     });
@@ -260,16 +253,15 @@ describe('createExtentFilter', () => {
     };
     const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_shape');
     expect(filter).toEqual({
-      geo_shape: {
-        [geoFieldName]: {
-          shape: {
-            type: 'envelope',
-            coordinates: [
-              [-180, mapExtent.maxLat],
-              [180, mapExtent.minLat]
-            ]
-          },
-          relation: 'INTERSECTS'
+      "geo_shape": {
+        "location": {
+          "relation": "INTERSECTS",
+          "shape": {
+            "coordinates": [
+              [[-180, 39], [-180, 35], [180, 35], [180, 39], [-180, 39]]
+            ],
+            "type": "polygon"
+          }
         }
       }
     });

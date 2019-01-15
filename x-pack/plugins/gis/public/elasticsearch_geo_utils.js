@@ -171,15 +171,19 @@ export function geoShapeToGeometry(value) {
 }
 
 const POLYGON_COORDINATES_EXTERIOR_INDEX = 0;
+const TOP_LEFT_INDEX = 0;
+const BOTTOM_RIGHT_INDEX = 2;
 
 export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
   const safePolygon = convertMapExtentToPolygon(mapExtent);
 
   if (geoFieldType === 'geo_point') {
+    const verticies = safePolygon.coordinates[POLYGON_COORDINATES_EXTERIOR_INDEX];
     return {
-      geo_polygon: {
+      geo_bounding_box: {
         [geoFieldName]: {
-          points: safePolygon.coordinates[POLYGON_COORDINATES_EXTERIOR_INDEX]
+          top_left: verticies[TOP_LEFT_INDEX],
+          bottom_right: verticies[BOTTOM_RIGHT_INDEX]
         }
       }
     };
