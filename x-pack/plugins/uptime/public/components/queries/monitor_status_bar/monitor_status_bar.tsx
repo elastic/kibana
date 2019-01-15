@@ -67,7 +67,12 @@ export const MonitorStatusBar = ({
           <EuiFlexGroup gutterSize="l">
             <EuiFlexItem grow={false}>
               <EuiFlexGroup>
-                <EuiFlexItem>Status&#58;</EuiFlexItem>
+                <EuiFlexItem>
+                  <FormattedMessage
+                    id="xpack.uptime.monitorStatusBar.statusLabel"
+                    defaultMessage="Status:"
+                  />
+                </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiHealth
                     color={status === 'up' ? 'success' : 'danger'}

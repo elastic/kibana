@@ -52,10 +52,15 @@ export const Snapshot = ({
   >
     {({ loading, error, data }) => {
       if (loading) {
-        return 'Loading…';
+        return i18n.translate('xpack.uptime.snapshot.loadingMessage', {
+          defaultMessage: 'Loading…',
+        });
       }
       if (error) {
-        return `Error ${error.message}`;
+        return i18n.translate('xpack.uptime.snapshot.errorMessage', {
+          values: { message: error.message },
+          defaultMessage: 'Error {message}',
+        });
       }
       const {
         snapshot: { up, down, total, histogram },
