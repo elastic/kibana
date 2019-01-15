@@ -21,6 +21,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
+  const inspector = getService('inspector');
   const retry = getService('retry');
   const filterBar = getService('filterBar');
   const renderable = getService('renderable');
@@ -72,8 +73,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should have inspector enabled', async function () {
-      const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-      expect(spyToggleExists).to.be(true);
+      await inspector.expectIsEnabled();
     });
 
     it('should show correct data', function () {
@@ -91,11 +91,9 @@ export default function ({ getService, getPageObjects }) {
       ];
 
       return retry.try(async function () {
-        await PageObjects.visualize.openInspector();
-        const data = await PageObjects.visualize.getInspectorTableData();
-        await PageObjects.visualize.closeInspector();
-        log.debug(data);
-        expect(data).to.eql(expectedChartData);
+        await inspector.open();
+        await inspector.expectTableData(expectedChartData);
+        await inspector.close();
       });
     });
 
