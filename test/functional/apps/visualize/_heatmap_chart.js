@@ -21,6 +21,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
+  const inspector = getService('inspector');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
   describe('heatmap chart', function indexPatternCreation() {
@@ -69,8 +70,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should have inspector enabled', async function () {
-      const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-      expect(spyToggleExists).to.be(true);
+      await inspector.expectIsEnabled();
     });
 
     it('should show correct data', async function () {
@@ -99,11 +99,9 @@ export default function ({ getService, getPageObjects }) {
       ];
 
 
-      await PageObjects.visualize.openInspector();
-      const data = await PageObjects.visualize.getInspectorTableData();
-      log.debug(data);
-      expect(data).to.eql(expectedChartData);
-      await PageObjects.visualize.closeInspector();
+      await inspector.open();
+      await inspector.expectTableData(expectedChartData);
+      await inspector.close();
     });
 
     it('should show 4 color ranges as default colorNumbers param', async function () {

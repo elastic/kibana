@@ -32,5 +32,7 @@ export { ComboBoxProvider } from './combo_box';
 export { RenderableProvider } from './renderable';
 export { TableProvider } from './table';
 export { BrowserProvider } from './browser';
+export { InspectorProvider } from './inspector';
 
+export * from './visualizations';
 export * from './dashboard';
