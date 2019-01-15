@@ -29,6 +29,9 @@ interface Context {
   service: ContextService;
   system?: ContextSystem;
   request?: ContextRequest;
+  page?: {
+    url: string;
+  };
   [key: string]: unknown;
 }
 

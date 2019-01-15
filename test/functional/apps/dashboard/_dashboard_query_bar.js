@@ -21,7 +21,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
-  const dashboardExpect = getService('dashboardExpect');
+  const pieChart = getService('pieChart');
   const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['dashboard', 'discover']);
 
@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }) {
       const headers = await PageObjects.discover.getColumnHeaders();
       expect(headers.length).to.be(0);
 
-      await dashboardExpect.pieSliceCount(0);
+      await pieChart.expectPieSliceCount(0);
     });
   });
 }

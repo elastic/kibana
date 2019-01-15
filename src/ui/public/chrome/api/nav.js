@@ -17,13 +17,31 @@
  * under the License.
  */
 
+import * as Rx from 'rxjs';
+import { mapTo } from 'rxjs/operators';
 import { remove } from 'lodash';
 import { relativeToAbsolute } from '../../url/relative_to_absolute';
 import { absoluteToParsedUrl } from '../../url/absolute_to_parsed_url';
 
 export function initChromeNavApi(chrome, internals) {
+  const navUpdate$ = new Rx.BehaviorSubject(undefined);
+
   chrome.getNavLinks = function () {
     return internals.nav;
+  };
+
+  chrome.getNavLinks$ = function () {
+    return navUpdate$.pipe(mapTo(internals.nav));
+  };
+
+  // track navLinks with $rootScope.$watch like the old nav used to, necessary
+  // as long as random parts of the app are directly mutating the navLinks
+  internals.$initNavLinksDeepWatch = function ($rootScope) {
+    $rootScope.$watch(
+      () => internals.nav,
+      () => navUpdate$.next(),
+      true
+    );
   };
 
   chrome.navLinkExists = (id) => {

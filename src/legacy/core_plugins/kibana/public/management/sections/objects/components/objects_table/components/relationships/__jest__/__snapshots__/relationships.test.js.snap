@@ -95,6 +95,7 @@ exports[`Relationships should render dashboards normally 1`] = `
               },
             ]
           }
+          executeQueryOptions={Object {}}
           items={
             Array [
               Object {
@@ -302,6 +303,7 @@ exports[`Relationships should render searches normally 1`] = `
               },
             ]
           }
+          executeQueryOptions={Object {}}
           items={
             Array [
               Object {
@@ -369,6 +371,7 @@ exports[`Relationships should render searches normally 1`] = `
               },
             ]
           }
+          executeQueryOptions={Object {}}
           items={
             Array [
               Object {
@@ -481,6 +484,7 @@ exports[`Relationships should render visualizations normally 1`] = `
               },
             ]
           }
+          executeQueryOptions={Object {}}
           items={
             Array [
               Object {

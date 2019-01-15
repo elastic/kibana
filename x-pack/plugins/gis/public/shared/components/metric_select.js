@@ -19,7 +19,7 @@ const AGG_OPTIONS = [
 
 export const METRIC_AGGREGATION_VALUES = AGG_OPTIONS.map(({ value }) => { return value; });
 
-export function MetricSelect({ value, onChange }) {
+export function MetricSelect({ value, onChange, metricsFilter }) {
 
   function onAggChange(selectedOptions) {
     if (selectedOptions.length === 0) {
@@ -30,12 +30,14 @@ export function MetricSelect({ value, onChange }) {
     onChange(aggType);
   }
 
+  const options = metricsFilter ? AGG_OPTIONS.filter(metricsFilter) : AGG_OPTIONS;
+
   return (
     <EuiComboBox
       placeholder="Select aggregation"
       singleSelection={true}
       isClearable={false}
-      options={AGG_OPTIONS}
+      options={options}
       selectedOptions={AGG_OPTIONS.filter(option => {
         return value === option.value;
       })}
@@ -45,6 +47,7 @@ export function MetricSelect({ value, onChange }) {
 }
 
 MetricSelect.propTypes = {
+  metricsFilter: PropTypes.func,
   value: PropTypes.oneOf(METRIC_AGGREGATION_VALUES),
   onChange: PropTypes.func.isRequired,
 };

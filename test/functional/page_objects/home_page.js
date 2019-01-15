@@ -90,7 +90,9 @@ export function HomePageProvider({ getService }) {
     async loadSavedObjects() {
       await retry.try(async () => {
         await testSubjects.click('loadSavedObjects');
-        const successMsgExists = await testSubjects.exists('loadSavedObjects_success', 5000);
+        const successMsgExists = await testSubjects.exists('loadSavedObjects_success', {
+          timeout: 5000
+        });
         if (!successMsgExists) {
           throw new Error('Failed to load saved objects');
         }

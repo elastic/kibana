@@ -29,6 +29,8 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const queryBar = getService('queryBar');
+  const pieChart = getService('pieChart');
+  const inspector = getService('inspector');
   const retry = getService('retry');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -140,8 +142,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.saveDashboard('No local edits');
 
       await dashboardPanelActions.openInspector();
-      const tileMapData = await PageObjects.visualize.getInspectorTableData();
-      await PageObjects.visualize.closeInspector();
+      const tileMapData = await inspector.getTableData();
+      await inspector.close();
 
       await PageObjects.dashboard.switchToEditMode();
       await dashboardPanelActions.openContextMenu();
@@ -157,8 +159,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.clickDashboard();
 
       await dashboardPanelActions.openInspector();
-      const changedTileMapData = await PageObjects.visualize.getInspectorTableData();
-      await PageObjects.visualize.closeInspector();
+      const changedTileMapData = await inspector.getTableData();
+      await inspector.close();
       expect(changedTileMapData.length).to.not.equal(tileMapData.length);
     });
 
@@ -228,7 +230,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.header.waitUntilLoadingHasFinished();
 
           await retry.try(async () => {
-            const allPieSlicesColor = await PageObjects.visualize.getAllPieSliceStyles('80,000');
+            const allPieSlicesColor = await pieChart.getAllPieSliceStyles('80,000');
             let whitePieSliceCounts = 0;
             allPieSlicesColor.forEach(style => {
               if (style.indexOf('rgb(255, 255, 255)') > 0) {
@@ -255,7 +257,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.header.waitUntilLoadingHasFinished();
 
           await retry.try(async () => {
-            const pieSliceStyle = await PageObjects.visualize.getPieSliceStyle('80,000');
+            const pieSliceStyle = await pieChart.getPieSliceStyle('80,000');
             // The default green color that was stored with the visualization before any dashboard overrides.
             expect(pieSliceStyle.indexOf('rgb(87, 193, 123)')).to.be.greaterThan(0);
           });

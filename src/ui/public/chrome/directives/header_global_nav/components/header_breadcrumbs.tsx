@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import classNames from 'classnames';
 import React, { Component } from 'react';
 import * as Rx from 'rxjs';
 
@@ -63,13 +64,9 @@ export class HeaderBreadcrumbs extends Component<Props, State> {
   }
 
   public render() {
-    let breadcrumbs = this.state.breadcrumbs;
-
-    if (breadcrumbs.length === 0 && this.props.appTitle) {
-      breadcrumbs = [{ text: this.props.appTitle }];
-    }
-
-    return <EuiHeaderBreadcrumbs breadcrumbs={breadcrumbs} />;
+    return (
+      <EuiHeaderBreadcrumbs breadcrumbs={this.getBreadcrumbs()} data-test-subj="breadcrumbs" />
+    );
   }
 
   private subscribe() {
@@ -85,5 +82,23 @@ export class HeaderBreadcrumbs extends Component<Props, State> {
       this.subscription.unsubscribe();
       delete this.subscription;
     }
+  }
+
+  private getBreadcrumbs() {
+    let breadcrumbs = this.state.breadcrumbs;
+
+    if (breadcrumbs.length === 0 && this.props.appTitle) {
+      breadcrumbs = [{ text: this.props.appTitle }];
+    }
+
+    return breadcrumbs.map((breadcrumb, i) => ({
+      ...breadcrumb,
+      'data-test-subj': classNames(
+        'breadcrumb',
+        breadcrumb['data-test-subj'],
+        i === 0 && 'first',
+        i === breadcrumbs.length - 1 && 'last'
+      ),
+    }));
   }
 }
