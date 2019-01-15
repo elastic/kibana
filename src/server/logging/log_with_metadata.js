@@ -17,20 +17,29 @@
  * under the License.
  */
 import { isPlainObject } from 'lodash';
-const symbol = Symbol('Structured Log Event');
+const symbol = Symbol('log message with metadata');
 
-export const structuredLogger = {
+export const logWithMetadata = {
   isLogEvent(eventData) {
     return Boolean(isPlainObject(eventData) && eventData[symbol]);
   },
 
   getLogEventData(eventData) {
-    return eventData[symbol];
+    const { message, metadata } = eventData[symbol];
+    return {
+      ...metadata,
+      message
+    };
   },
 
   decorateServer(server) {
-    server.decorate('server', 'logStructured', (tags, data) => {
-      server.log(tags, { [symbol]: data });
+    server.decorate('server', 'logWithMetadata', (tags, message, metadata = {}) => {
+      server.log(tags, {
+        [symbol]: {
+          message,
+          metadata,
+        },
+      });
     });
-  }
+  },
 };

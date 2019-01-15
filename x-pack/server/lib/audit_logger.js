@@ -11,10 +11,9 @@ export class AuditLogger {
   }
 
   log(eventType, message, data = {}) {
-    this._server.logStructured(['info', 'audit', this._pluginId, eventType], {
-      message,
+    this._server.logWithMetadata(['info', 'audit', this._pluginId, eventType], message, {
+      ...data,
       eventType,
-      ...data
     });
   }
 }
