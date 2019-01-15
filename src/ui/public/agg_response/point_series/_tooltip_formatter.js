@@ -26,36 +26,38 @@ export function PointSeriesTooltipFormatter($compile, $rootScope) {
   $compile($tooltip)($tooltipScope);
 
   return function tooltipFormatter(event) {
+    const data = event.data;
     const datum = event.datum;
-    if (!datum || !datum.aggConfigResult) return '';
+    if (!datum) return '';
 
     const details = $tooltipScope.details = [];
-    let result = { $parent: datum.aggConfigResult };
 
-    function addDetail(result) {
-      const agg = result.aggConfig;
-      const value = result.value;
-
-      const detail = {
-        value: agg.fieldFormatter()(value),
-        label: agg.makeLabel()
-      };
-
-      if (agg === datum.aggConfigResult.aggConfig) {
-        detail.percent = event.percent;
-        if (datum.yScale != null) {
-          detail.value = agg.fieldFormatter()(value * datum.yScale);
-        }
-      }
-
+    function addDetail(label, value) {
+      const detail = { label, value };
       details.push(detail);
     }
 
-    datum.extraMetrics.forEach(addDetail);
-    while ((result = result.$parent) && result.aggConfig) {
-      addDetail(result);
-    }
+    datum.extraMetrics.forEach(metric => {
+      addDetail(metric.label, metric.value);
+    });
 
+    if (datum.x) {
+      addDetail(data.xAxisLabel, data.xAxisFormatter(datum.x));
+    }
+    if (datum.y) {
+      const value = datum.yScale ? datum.yScale * datum.y : datum.y;
+      addDetail(data.yAxisLabel, data.yAxisFormatter(value));
+    }
+    if (datum.z) {
+      addDetail(data.zAxisLabel, data.zAxisFormatter(datum.z));
+    }
+    if (datum.series) {
+      const dimension = datum.parent;
+      addDetail(dimension.title, dimension.fieldFormatter(datum.series));
+    }
+    if (datum.tableRaw) {
+      addDetail(datum.tableRaw.title, datum.tableRaw.value);
+    }
 
     $tooltipScope.$apply();
     return $tooltip[0].outerHTML;

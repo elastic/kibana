@@ -44,6 +44,7 @@ const LegacyResponseHandlerProvider = function () {
               const tableGroup = {
                 $parent: converted,
                 title: `${splitValue}: ${splitColumn.name}`,
+                name: splitColumn.name,
                 key: splitValue,
                 column: splitColumnIndex,
                 row: rowIndex,
