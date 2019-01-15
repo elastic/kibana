@@ -13,7 +13,8 @@ describe('ElasticsearchPingsAdapter class', () => {
   let adapter: ElasticsearchPingsAdapter;
   let serverRequest: any;
   let mockHits: any[];
-  let mockEsResult: any;
+  let mockEsSearchResult: any;
+  let mockEsCountResult: any;
 
   beforeEach(() => {
     mockHits = [
@@ -33,7 +34,7 @@ describe('ElasticsearchPingsAdapter class', () => {
         },
       },
     ];
-    mockEsResult = {
+    mockEsSearchResult = {
       hits: {
         total: {
           value: mockHits.length,
@@ -41,8 +42,12 @@ describe('ElasticsearchPingsAdapter class', () => {
         hits: mockHits,
       },
     };
+    mockEsCountResult = {
+      count: mockHits.length,
+    };
     database = {
-      search: async (request: any, params: any) => mockEsResult,
+      search: async (request: any, params: any) => mockEsSearchResult,
+      count: async (request: any, params: any) => mockEsCountResult,
     };
     adapter = new ElasticsearchPingsAdapter(database);
     serverRequest = {
@@ -50,11 +55,18 @@ describe('ElasticsearchPingsAdapter class', () => {
     };
   });
 
+  describe('getDocCount', () => {
+    it('returns data in appropriate shape', async () => {
+      const { count } = await adapter.getDocCount(serverRequest);
+      expect(count).toEqual(3);
+    });
+  });
+
   describe('getAll', () => {
     let getAllSearchMock: (request: any, params: any) => Promise<any>;
     let expectedGetAllParams: any;
     beforeEach(() => {
-      getAllSearchMock = jest.fn(async (request: any, params: any) => mockEsResult);
+      getAllSearchMock = jest.fn(async (request: any, params: any) => mockEsSearchResult);
       expectedGetAllParams = {
         index: 'heartbeat*',
         body: {
@@ -130,7 +142,7 @@ describe('ElasticsearchPingsAdapter class', () => {
     let getLatestSearchMock: (request: any, params: any) => Promise<any>;
     let expectedGetLatestSearchParams: any;
     beforeEach(() => {
-      getLatestSearchMock = jest.fn(async (request: any, params: any) => mockEsResult);
+      getLatestSearchMock = jest.fn(async (request: any, params: any) => mockEsSearchResult);
       expectedGetLatestSearchParams = {
         index: 'heartbeat*',
         body: {
@@ -169,7 +181,7 @@ describe('ElasticsearchPingsAdapter class', () => {
           },
         },
       };
-      mockEsResult = {
+      mockEsSearchResult = {
         aggregations: {
           by_id: {
             buckets: [
