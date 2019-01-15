@@ -13,9 +13,9 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
   let version: string;
 
   describe('Privileges', () => {
-    before(() => {
-      version = getService('kibanaServer').version;
-      throw new Error(`version:${version}`);
+    before(async () => {
+      const versionService = getService('kibanaServer').version;
+      version = await versionService.get();
     });
     describe('GET /api/security/privileges', () => {
       it('should return a privilege map with all known privileges', async () => {
