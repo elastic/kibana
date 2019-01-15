@@ -30,6 +30,8 @@ const IsClusterSupported = ({ isSupported, children }) => {
   return isSupported ? children : '-';
 };
 
+const UNLINKED_DEPLOYMENT_STORAGE_KEY = 'viewedUnlinkedDeployments';
+
 /*
   * This checks if alerts feature is supported via monitoring cluster
   * license. If the alerts feature is not supported because the prod cluster
@@ -354,8 +356,6 @@ const handleClickInvalidLicense = (scope, clusterName) => {
   });
 };
 
-const UNLINKED_DEPLOYMENT_STORAGE_KEY = 'viewedUnlinkedDeployments';
-
 export class Listing extends Component {
   constructor(props) {
     super(props);
@@ -373,7 +373,9 @@ export class Listing extends Component {
       <div>
         <EuiCallOut
           color="warning"
-          title="It looks like you have instances that aren't connected to an Elasticsearch cluster."
+          title={i18n.translate('xpack.monitoring.cluster.listing.unlinkedDeploymentCallOutTitle', {
+            defaultMessage: 'It looks like you have instances that aren\'t connected to an Elasticsearch cluster.'
+          })}
           iconType="link"
         >
           <p>
@@ -381,10 +383,16 @@ export class Listing extends Component {
               onClick={() => changeCluster(UNLINKED_DEPLOYMENT_CLUSTER_UUID)}
               data-test-subj="unlinkedDeploymentLink"
             >
-              View these instances.
+              <FormattedMessage
+                id="xpack.monitoring.cluster.listing.unlinkedDeploymentCallOutLink"
+                defaultMessage="View these instances."
+              />
             </EuiLink>
             &nbsp;
-            Or, click Unlinked Cluster in the table below
+            <FormattedMessage
+              id="xpack.monitoring.cluster.listing.unlinkedDeploymentCallOutText"
+              defaultMessage="Or, click Unlinked Cluster in the table below"
+            />
           </p>
           <p>
             <EuiLink onClick={() => {
@@ -393,7 +401,11 @@ export class Listing extends Component {
             }}
             >
               <EuiIcon type="cross"/>
-              &nbsp;Dismiss
+              &nbsp;
+              <FormattedMessage
+                id="xpack.monitoring.cluster.listing.unlinkedDeploymentCallOutDismiss"
+                defaultMessage="Dismiss"
+              />
             </EuiLink>
           </p>
         </EuiCallOut>
