@@ -15,7 +15,6 @@ const module = uiModules.get('apps/ml', ['react']);
 import { checkFullLicense } from '../../../license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check_privilege';
 import { checkMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
-import { initPromise } from 'plugins/ml/util/promise';
 import { getCreateCalendarBreadcrumbs, getEditCalendarBreadcrumbs } from '../../breadcrumbs';
 
 import uiRoutes from 'ui/routes';
@@ -37,7 +36,6 @@ uiRoutes
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       checkMlNodesAvailable,
-      initPromise: initPromise(false)
     }
   })
   .when('/settings/calendars_list/edit_calendar/:calendarId', {
@@ -47,7 +45,6 @@ uiRoutes
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       checkMlNodesAvailable,
-      initPromise: initPromise(false)
     }
   });
 

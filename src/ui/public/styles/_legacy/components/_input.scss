@@ -1,0 +1,21 @@
+i.input-error {
+  position: absolute;
+  margin-left: -$euiSizeL;
+  color: $euiColorDanger;
+  margin-top: $euiSizeS;
+  z-index: 5;
+}
+
+select {
+  color: $euiTextColor;
+  background-color: $euiColorEmptyShade;
+}
+
+.theme-dark {
+  @import '@elastic/eui/src/themes/k6/k6_colors_dark';
+
+  select {
+    color: $euiTextColor;
+    background-color: $euiColorEmptyShade;
+  }
+}

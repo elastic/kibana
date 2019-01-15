@@ -10,13 +10,14 @@ import {
   EuiFieldText,
   EuiButton,
   EuiText,
-  EuiSpacer
 } from '@elastic/eui';
 
 export class KibanaTilemapSource extends  TMSSource {
 
   static type = 'KIBANA_TILEMAP';
-  static typeDisplayName = 'TMS from kibana.yml';
+  static title = 'Custom Tile Map Service';
+  static description = 'Map tiles configured in kibana.yml';
+  static icon = 'logoKibana';
 
   static createDescriptor(url) {
     return {
@@ -34,18 +35,6 @@ export class KibanaTilemapSource extends  TMSSource {
     };
     return (<KibanaTilemapEditor previewTilemap={previewTilemap} url={url} />);
   };
-
-  static renderDropdownDisplayOption() {
-    return (
-      <Fragment>
-        <strong>{KibanaTilemapSource.typeDisplayName}</strong>
-        <EuiSpacer size="xs" />
-        <EuiText size="s" color="subdued">
-          <p className="euiTextColor--subdued">TMS service configured in kibana.yml</p>
-        </EuiText>
-      </Fragment>
-    );
-  }
 
   renderDetails() {
     return (

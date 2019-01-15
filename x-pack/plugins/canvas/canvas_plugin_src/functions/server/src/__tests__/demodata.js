@@ -36,7 +36,7 @@ describe('demodata', () => {
     expect(fn)
       .withArgs(null, { type: 'foo' })
       .to.throwException(e => {
-        expect(e.message).to.be("Invalid data set: foo, use 'ci' or 'shirts'.");
+        expect(e.message).to.be("Invalid data set: 'foo', use 'ci' or 'shirts'.");
       });
   });
 });
