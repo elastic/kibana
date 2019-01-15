@@ -23,12 +23,11 @@ const SEARCH_METHOD = 'search';
 export default class MultiSearchRequest extends AbstractSearchRequest {
   async search(options) {
     const includeFrozen = await this.req.getUiSettingsService().get('search:includeFrozen');
-    const { responses } = await this.callWithRequest(this.req, SEARCH_METHOD, {
+
+    return await this.callWithRequest(this.req, SEARCH_METHOD, {
       ...options,
       index: this.indexPattern,
       ignore_throttled: !includeFrozen,
     });
-
-    return responses;
   }
 }
