@@ -14,6 +14,7 @@ import { Log } from '../log';
 import { LspService } from '../lsp/lsp_service';
 import { RepositoryServiceFactory } from '../repository_service_factory';
 import { RepositoryObjectClient } from '../search';
+import { ServerOptions } from '../server_options';
 import { SocketService } from '../socket_service';
 import { AbstractWorker } from './abstract_worker';
 import { CancellationSerivce } from './cancellation_service';
@@ -27,6 +28,7 @@ export class DeleteWorker extends AbstractWorker {
     protected readonly queue: Esqueue,
     protected readonly log: Log,
     protected readonly client: EsClient,
+    protected readonly serverOptions: ServerOptions,
     private readonly cancellationService: CancellationSerivce,
     private readonly lspService: LspService,
     private readonly repoServiceFactory: RepositoryServiceFactory,
@@ -37,7 +39,7 @@ export class DeleteWorker extends AbstractWorker {
   }
 
   public async executeJob(job: Job) {
-    const { uri, dataPath } = job.payload;
+    const { uri } = job.payload;
 
     // 1. Notify repo delete start through websocket.
     this.socketService.broadcastDeleteProgress(uri, WorkerReservedProgress.INIT);
@@ -47,7 +49,7 @@ export class DeleteWorker extends AbstractWorker {
     this.cancellationService.cancelIndexJob(uri);
 
     // 3. Delete repository on local fs.
-    const repoService = this.repoServiceFactory.newInstance(dataPath, this.log);
+    const repoService = this.repoServiceFactory.newInstance(this.serverOptions.repoPath, this.log);
     const deleteRepoPromise = this.deletePromiseWrapper(repoService.remove(uri), 'git data', uri);
 
     // 4. Delete ES indices and aliases

@@ -74,7 +74,6 @@ test('Execute index job.', async () => {
   await indexWorker.executeJob({
     payload: {
       uri: 'github.com/elastic/kibana',
-      dataPath: 'mockpath',
     },
     options: {},
     cancellationToken: cToken,
@@ -138,7 +137,6 @@ test('Execute index job and then cancel.', async () => {
   await indexWorker.executeJob({
     payload: {
       uri: 'github.com/elastic/kibana',
-      dataPath: 'mockpath',
     },
     options: {},
     cancellationToken: cToken,
@@ -179,7 +177,6 @@ test('On index job enqueued.', async () => {
   await indexWorker.onJobEnqueued({
     payload: {
       uri: 'github.com/elastic/kibana',
-      dataPath: 'mockpath',
     },
     options: {},
   });
@@ -208,7 +205,6 @@ test('On index job completed.', async () => {
     {
       payload: {
         uri: 'github.com/elastic/kibana',
-        dataPath: 'mockpath',
       },
       options: {},
     },

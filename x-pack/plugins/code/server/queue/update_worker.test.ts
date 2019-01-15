@@ -8,6 +8,7 @@ import sinon from 'sinon';
 import { AnyObject, EsClient, Esqueue } from '../lib/esqueue';
 import { Log } from '../log';
 import { RepositoryServiceFactory } from '../repository_service_factory';
+import { ServerOptions } from '../server_options';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 import { UpdateWorker } from './update_worker';
 
@@ -43,13 +44,13 @@ test('Execute update job', async () => {
     esQueue as Esqueue,
     log,
     esClient as EsClient,
+    {} as ServerOptions,
     (repoServiceFactory as any) as RepositoryServiceFactory
   );
 
   await updateWorker.executeJob({
     payload: {
       uri: 'mockrepo',
-      dataPath: 'mockpath',
     },
     options: {},
   });

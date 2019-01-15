@@ -56,7 +56,6 @@ export class UpdateScheduler extends AbstractScheduler {
       ) {
         const payload = {
           uri: repo.uri,
-          dataPath: this.serverOptions.repoPath,
         };
 
         // Update the next repo update timestamp.

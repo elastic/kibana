@@ -69,7 +69,6 @@ export class IndexScheduler extends AbstractScheduler {
         const payload = {
           uri: repo.uri,
           revision: repo.revision,
-          dataPath: this.serverOptions.repoPath,
         };
 
         // Update the next repo index timestamp.
