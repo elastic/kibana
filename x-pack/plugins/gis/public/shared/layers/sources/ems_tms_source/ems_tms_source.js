@@ -3,14 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment } from 'react';
+import React from 'react';
 import { TMSSource } from '../tms_source';
 import { TileLayer } from '../../tile_layer';
 import {
   EuiText,
   EuiSelect,
   EuiFormRow,
-  EuiSpacer
 } from '@elastic/eui';
 import _ from 'lodash';
 
@@ -18,7 +17,9 @@ import _ from 'lodash';
 export class EMSTMSSource extends TMSSource {
 
   static type = 'EMS_TMS';
-  static typeDisplayName = 'Elastic Maps Service tiles';
+  static title = 'Elastic Maps Service tiles';
+  static description = 'Map tiles from Elastic Maps Service';
+  static icon = 'emsApp';
 
   static createDescriptor(serviceId) {
     return {
@@ -49,20 +50,6 @@ export class EMSTMSSource extends TMSSource {
           onChange={onChange}
         />
       </EuiFormRow>
-    );
-  }
-
-  static renderDropdownDisplayOption() {
-    return  (
-      <Fragment>
-        <strong>{EMSTMSSource.typeDisplayName}</strong>
-        <EuiSpacer size="xs" />
-        <EuiText size="s" color="subdued">
-          <p className="euiTextColor--subdued">
-            Map tiles from Elastic Maps Service
-          </p>
-        </EuiText>
-      </Fragment>
     );
   }
 

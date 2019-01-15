@@ -8,7 +8,6 @@ import {
   EuiBadge,
   EuiComboBox,
   EuiComboBoxOptionProps,
-  EuiEmptyPrompt,
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,7 +15,6 @@ import {
   EuiHealth,
   // @ts-ignore
   EuiInMemoryTable,
-  EuiLoadingChart,
   EuiPanel,
   EuiTitle,
   EuiToolTip,
@@ -106,41 +104,14 @@ export class Pings extends React.Component<PingListProps, PingListState> {
         query={getPingsQuery}
       >
         {({ loading, error, data }) => {
-          if (loading) {
-            return (
-              <EuiEmptyPrompt
-                iconType="heartbeatApp"
-                title={
-                  <h2>
-                    <FormattedMessage
-                      id="xpack.uptime.pingList.loadingTitle"
-                      defaultMessage="Loading Ping History"
-                    />
-                  </h2>
-                }
-                body={
-                  <Fragment>
-                    <p>
-                      <FormattedMessage
-                        id="xpack.uptime.pingList.loadingDescription"
-                        defaultMessage="Fetching the latest list of checks"
-                      />
-                    </p>
-                    <EuiLoadingChart size="xl" />
-                  </Fragment>
-                }
-              />
-            );
-          }
           if (error) {
             return i18n.translate('xpack.uptime.pingList.errorMessage', {
               values: { message: error.message },
               defaultMessage: 'Error {message}',
             });
           }
-          const {
-            allPings: { total, pings },
-          } = data;
+          const total = get(data, 'allPings.total');
+          const pings = get(data, 'allPings.pings', []);
           const columns = [
             {
               field: 'monitor.status',
@@ -295,6 +266,7 @@ export class Pings extends React.Component<PingListProps, PingListState> {
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiInMemoryTable
+                  loading={loading}
                   columns={columns}
                   items={pings}
                   pagination={{ initialPageSize: 10, pageSizeOptions: [5, 10, 20, 100] }}

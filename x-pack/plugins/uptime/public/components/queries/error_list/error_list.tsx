@@ -23,11 +23,6 @@ interface ErrorListProps {
 export const ErrorList = ({ dateRangeStart, dateRangeEnd, filters }: ErrorListProps) => (
   <Query query={getErrorListQuery} variables={{ dateRangeStart, dateRangeEnd, filters }}>
     {({ loading, error, data }) => {
-      if (loading) {
-        return i18n.translate('xpack.uptime.errorList.loadingMessage', {
-          defaultMessage: 'Loading…',
-        });
-      }
       if (error) {
         return i18n.translate('xpack.uptime.errorList.errorMessage', {
           values: { message: error.message },
@@ -44,6 +39,7 @@ export const ErrorList = ({ dateRangeStart, dateRangeEnd, filters }: ErrorListPr
           </EuiTitle>
           <EuiPanel>
             <EuiInMemoryTable
+              loading={loading}
               items={errorList}
               columns={[
                 {
