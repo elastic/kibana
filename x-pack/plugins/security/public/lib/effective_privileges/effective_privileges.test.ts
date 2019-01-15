@@ -508,6 +508,83 @@ describe('EffectivePrivileges', () => {
     });
   });
 
+  describe('#canAssignSpaceBasePrivilege', () => {
+    it('returns true when no privileges are assigned', () => {
+      const role = buildRole({
+        spacesPrivileges: [
+          {
+            spaces: ['marketing'],
+            base: [],
+            feature: {},
+          },
+        ],
+      });
+
+      const effectivePrivileges = buildEffectivePrivileges(role);
+      expect(effectivePrivileges.canAssignSpaceBasePrivilege('all')).toEqual(true);
+    });
+
+    it(`returns false when global base of 'all' supercedes 'read'`, () => {
+      const role = buildRole({
+        spacesPrivileges: [
+          {
+            spaces: ['*'],
+            base: ['all'],
+            feature: {},
+          },
+          {
+            spaces: ['marketing'],
+            base: [],
+            feature: {},
+          },
+        ],
+      });
+
+      const effectivePrivileges = buildEffectivePrivileges(role);
+      expect(effectivePrivileges.canAssignSpaceBasePrivilege('read')).toEqual(false);
+    });
+
+    it(`returns true when base privileges match`, () => {
+      const role = buildRole({
+        spacesPrivileges: [
+          {
+            spaces: ['*'],
+            base: ['read'],
+            feature: {},
+          },
+          {
+            spaces: ['marketing'],
+            base: [],
+            feature: {},
+          },
+        ],
+      });
+
+      const effectivePrivileges = buildEffectivePrivileges(role);
+      expect(effectivePrivileges.canAssignSpaceBasePrivilege('read')).toEqual(true);
+    });
+
+    it(`doesn't care if an invalid privilege is already assigned`, () => {
+      const role = buildRole({
+        spacesPrivileges: [
+          {
+            spaces: ['*'],
+            base: ['read'],
+            feature: {},
+          },
+          {
+            spaces: ['marketing'],
+            base: ['foo'],
+            feature: {},
+          },
+        ],
+      });
+
+      const effectivePrivileges = buildEffectivePrivileges(role);
+      expect(effectivePrivileges.canAssignSpaceBasePrivilege('read')).toEqual(true);
+    });
+  });
+
   describe('#canAssignSpaceFeaturePrivilege', () => {
     it('returns true when no privileges are assigned', () => {
       const role = buildRole({

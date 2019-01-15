@@ -28,7 +28,11 @@ import React, { Component, Fragment } from 'react';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
 import { PrivilegeDefinition, Role } from '../../../../../../../../common/model';
-import { EffectivePrivilegesFactory } from '../../../../../../../lib/effective_privileges';
+import {
+  EffectivePrivileges,
+  EffectivePrivilegesFactory,
+  ExplanationResult,
+} from '../../../../../../../lib/effective_privileges';
 import { copyRole } from '../../../../../../../lib/role_utils';
 import { NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
 import { FeatureTable } from '../feature_table';
@@ -124,6 +128,9 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
   private getForm = () => {
     const { intl, spaces } = this.props;
+
+    const effectivePrivileges = this.props.effectivePrivilegesFactory.getInstance(this.state.role);
+
     return (
       <EuiForm>
         <EuiFormRow
@@ -185,7 +192,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
               },
               {
                 value: 'basePrivilege_read',
-                disabled: false,
+                disabled: !effectivePrivileges.canAssignSpaceBasePrivilege('read'),
                 inputDisplay: (
                   <EuiText>
                     <FormattedMessage
@@ -213,7 +220,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
               },
               {
                 value: 'basePrivilege_all',
-                disabled: false,
+                disabled: !effectivePrivileges.canAssignSpaceBasePrivilege('all'),
                 inputDisplay: (
                   <EuiText>
                     <FormattedMessage
@@ -241,7 +248,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
               },
             ]}
             hasDividers
-            valueOfSelected={`basePrivilege_${this.getDisplayedBasePrivilege()}`}
+            valueOfSelected={`basePrivilege_${this.getDisplayedBasePrivilege(effectivePrivileges)}`}
           />
         </EuiFormRow>
 
@@ -452,14 +459,15 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     });
   };
 
-  private getDisplayedBasePrivilege = () => {
-    const effectivePrivileges = this.props.effectivePrivilegesFactory.getInstance(this.state.role);
-    const base = effectivePrivileges.getAssignedBasePrivilege(this.state.editingIndex);
+  private getDisplayedBasePrivilege = (effectivePrivileges: EffectivePrivileges) => {
+    const explanation = effectivePrivileges.explainActualSpaceBasePrivilege(
+      this.state.editingIndex
+    );
 
-    if (base === NO_PRIVILEGE_VALUE) {
+    if (explanation.privilege === NO_PRIVILEGE_VALUE) {
       return 'custom';
     }
-    return base;
+    return explanation.privilege;
   };
 
   private onFeaturePrivilegesChange = (featureId: string, privileges: string[]) => {

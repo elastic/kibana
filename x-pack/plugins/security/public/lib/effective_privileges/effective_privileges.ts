@@ -302,6 +302,14 @@ export class EffectivePrivileges {
   }
 
   /**
+   * Determines if the specified base privilege can be assigned, based on the current global base privilege.
+   * @param privilege
+   */
+  public canAssignSpaceBasePrivilege(privilege: string): boolean {
+    return this.validateSpaceBasePrivilege(privilege).allowed;
+  }
+
+  /**
    * Determines if the specified feature privilege can be assigned, based on the other privileges that may be in play:
    * - Global base privilege
    * - Global feature privilege
