@@ -36,8 +36,9 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
 
   public async componentWillMount() {
     if (!this.props.urlState.createdTag) {
-      return await this.props.libs.tags.upsertTag(this.state.tag);
+      await this.props.libs.tags.upsertTag(this.state.tag);
     }
+    this.loadConfigBlocks();
   }
 
   public render() {
@@ -52,16 +53,26 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
             }))
           }
           onConfigAddOrEdit={(block: ConfigurationBlock) => {
-            this.props.libs.configBlocks.upsert({ ...block, tag: this.state.tag.id }).catch(e => {
-              // tslint:disable-next-line
-              console.error('Error upseting config block', e);
-            });
+            this.props.libs.configBlocks
+              .upsert({ ...block, tag: this.state.tag.id })
+              .catch(e => {
+                // tslint:disable-next-line
+                console.error('Error upseting config block', e);
+              })
+              .then(() => {
+                this.loadConfigBlocks();
+              });
           }}
           onConfigRemoved={(id: string) => {
-            this.props.libs.configBlocks.delete(id).catch(e => {
-              // tslint:disable-next-line
-              console.error(`Error removing block ${id}`, e);
-            });
+            this.props.libs.configBlocks
+              .delete(id)
+              .catch(e => {
+                // tslint:disable-next-line
+                console.error(`Error removing block ${id}`, e);
+              })
+              .then(() => {
+                this.loadConfigBlocks();
+              });
           }}
         />
         <EuiFlexGroup>
@@ -81,6 +92,15 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
       </React.Fragment>
     );
   }
+
+  private loadConfigBlocks = async () => {
+    const blocksResponse = await this.props.libs.configBlocks.getForTags([this.state.tag.id], -1);
+    if (blocksResponse.blocks.length > 0) {
+      this.setState({
+        configuration_blocks: blocksResponse.blocks,
+      });
+    }
+  };
 
   private loadTag = async () => {
     const tags = await this.props.libs.tags.getTagsWithIds([this.state.tag.id]);
