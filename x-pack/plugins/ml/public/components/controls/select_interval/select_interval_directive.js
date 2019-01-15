@@ -13,13 +13,12 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
 import { SelectInterval, mlSelectIntervalService } from './select_interval';
-import { i18n } from '@kbn/i18n';
 
-module.service('mlSelectIntervalService', function (Private) {
+module.service('mlSelectIntervalService', function (Private, i18n) {
   const stateFactory = Private(stateFactoryProvider);
   this.state = mlSelectIntervalService.state = stateFactory('mlSelectInterval', {
     interval: {
-      display: i18n.translate('xpack.ml.controls.selectInterval.autoInitLabel', { defaultMessage: 'Auto' }),
+      display: i18n('xpack.ml.controls.selectInterval.autoInitLabel', { defaultMessage: 'Auto' }),
       val: 'auto'
     }
   });

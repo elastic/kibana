@@ -13,14 +13,13 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
 import { SelectSeverity, mlSelectSeverityService } from './select_severity';
-import { i18n } from '@kbn/i18n';
 import { injectI18nProvider } from '@kbn/i18n/react';
 
-module.service('mlSelectSeverityService', function (Private) {
+module.service('mlSelectSeverityService', function (Private, i18n) {
   const stateFactory = Private(stateFactoryProvider);
   this.state = mlSelectSeverityService.state = stateFactory('mlSelectSeverity', {
     threshold: {
-      display: i18n.translate('xpack.ml.controls.selectSeverity.threshold.warningLabel', { defaultMessage: 'warning' }),
+      display: i18n('xpack.ml.controls.selectSeverity.threshold.warningLabel', { defaultMessage: 'warning' }),
       val: 0
     }
   });
