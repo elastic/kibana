@@ -155,7 +155,7 @@ export const AutoFollowPatternEdit = injectI18n(
     }
 
     render() {
-      const { saveAutoFollowPattern, apiStatus, apiError, autoFollowPattern, intl } = this.props;
+      const { saveAutoFollowPattern, apiStatus, apiError, autoFollowPattern, intl, match: { url: currentUrl }  } = this.props;
 
       return (
         <EuiPage>
@@ -199,16 +199,11 @@ export const AutoFollowPatternEdit = injectI18n(
                       return <SectionError title={title} error={error} />;
                     }
 
-                    const autoFollowPatternCluster = remoteClusters.find(cluster => cluster.name === autoFollowPattern.remoteCluster);
-
-                    if (!autoFollowPatternCluster || !autoFollowPatternCluster.isConnected) {
-                      return this.renderMissingCluster(autoFollowPattern);
-                    }
-
                     return (
                       <AutoFollowPatternForm
                         apiStatus={apiStatus}
                         apiError={apiError}
+                        currentUrl={currentUrl}
                         remoteClusters={remoteClusters}
                         autoFollowPattern={autoFollowPattern}
                         saveAutoFollowPattern={saveAutoFollowPattern}

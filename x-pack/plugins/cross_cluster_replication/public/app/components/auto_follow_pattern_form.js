@@ -26,15 +26,17 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiSuperSelect,
 } from '@elastic/eui';
 
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns';
 import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
 
 import routing from '../services/routing';
+import { extractQueryParams } from '../services/query_params';
 import { API_STATUS } from '../constants';
-import { SectionError, AutoFollowPatternIndicesPreview } from './';
+import { SectionError } from './section_error';
+import { AutoFollowPatternIndicesPreview } from './auto_follow_pattern_indices_preview';
+import { RemoteClustersFormField } from './remote_clusters_form_field';
 import { validateAutoFollowPattern, validateLeaderIndexPattern } from '../services/auto_follow_pattern_validators';
 
 const indexPatternIllegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
@@ -46,12 +48,22 @@ const getFirstConnectedCluster = (clusters) => {
       return clusters[i];
     }
   }
-  return {};
+
+  /**
+   * No cluster connected, we return the first one in the list
+   */
+  return clusters.length ? clusters[0] : {};
 };
 
-const getEmptyAutoFollowPattern = (remoteClusters) => ({
+const getRemoteClusterName = (remoteClusters, selected) => {
+  return selected && remoteClusters.some(c => c.name === selected)
+    ? selected
+    : getFirstConnectedCluster(remoteClusters).name;
+};
+
+const getEmptyAutoFollowPattern = (remoteClusters, remoteClusterSelected) => ({
   name: '',
-  remoteCluster: getFirstConnectedCluster(remoteClusters).name,
+  remoteCluster: getRemoteClusterName(remoteClusters, remoteClusterSelected),
   leaderIndexPatterns: [],
   followIndexPatternPrefix: '',
   followIndexPatternSuffix: '',
@@ -70,16 +82,18 @@ export class AutoFollowPatternFormUI extends PureComponent {
     autoFollowPattern: PropTypes.object,
     apiError: PropTypes.object,
     apiStatus: PropTypes.string.isRequired,
-    remoteClusters: PropTypes.array.isRequired,
+    currentUrl: PropTypes.string.isRequired,
+    remoteClusters: PropTypes.array,
   }
 
   constructor(props) {
     super(props);
 
     const isNew = this.props.autoFollowPattern === undefined;
-
+    const { route: { location: { search } } } = routing.reactRouter;
+    const queryParams = extractQueryParams(search);
     const autoFollowPattern = isNew
-      ? getEmptyAutoFollowPattern(this.props.remoteClusters)
+      ? getEmptyAutoFollowPattern(this.props.remoteClusters, queryParams.cluster)
       : {
         ...this.props.autoFollowPattern,
       };
@@ -101,8 +115,10 @@ export class AutoFollowPatternFormUI extends PureComponent {
     }));
 
     const errors = validateAutoFollowPattern(fields);
-    this.setState(({ fieldsErrors }) => updateFormErrors(errors, fieldsErrors));
+    this.onFieldsErrorChange(errors);
   };
+
+  onFieldsErrorChange = (errors) => this.setState(({ fieldsErrors }) => updateFormErrors(errors, fieldsErrors));
 
   onClusterChange = (remoteCluster) => {
     this.onFieldsChange({ remoteCluster });
@@ -169,8 +185,8 @@ export class AutoFollowPatternFormUI extends PureComponent {
 
       this.setState(({ fieldsErrors }) => updateFormErrors(errors, fieldsErrors));
     } else {
-      this.setState(({ fieldsErrors, autoFollowPattern }) => {
-        const errors = validateAutoFollowPattern(autoFollowPattern);
+      this.setState(({ fieldsErrors, autoFollowPattern: { leaderIndexPatterns } }) => {
+        const errors = validateAutoFollowPattern({ leaderIndexPatterns });
         return updateFormErrors(errors, fieldsErrors);
       });
     }
@@ -293,12 +309,26 @@ export class AutoFollowPatternFormUI extends PureComponent {
      * Remote Cluster
      */
     const renderRemoteClusterField = () => {
-      const remoteClustersOptions = this.props.remoteClusters.map(({ name, isConnected }) => ({
-        value: name,
-        inputDisplay: isConnected ? name : `${name} (not connected)`,
-        disabled: !isConnected,
-        'data-test-subj': `option-${name}`
-      }));
+      const { remoteClusters, currentUrl } = this.props;
+
+      const errorMessages = {
+        noClusterFound: () => (<FormattedMessage
+          id="xpack.crossClusterReplication.autoFollowPatternForm.emptyRemoteClustersCallOutDescription"
+          defaultMessage="Auto-follow patterns capture indices on remote clusters. You must add a remote cluster."
+        />),
+        remoteClusterNotConnectedNotEditable: (name) => (<FormattedMessage
+          id="xpack.crossClusterReplication.autoFollowPatternForm.currentRemoteClusterNotConnectedCallOutDescription"
+          defaultMessage="The remote cluster '{name}' is not connected.
+          You need to connect it before editing the auto-follow pattern."
+          values={{ name }}
+        />),
+        remoteClusterDoesNotExist: (name) => (<FormattedMessage
+          id="xpack.crossClusterReplication.autoFollowPatternForm.currentRemoteClusterNotFoundCallOutDescription"
+          defaultMessage="The remote cluster '{name}' was not found. It might have been removed.
+          In order to edit the auto-follow pattern, you need to add a remote cluster with the same name."
+          values={{ name }}
+        />)
+      };
 
       return (
         <EuiDescribedFormGroup
@@ -320,32 +350,16 @@ export class AutoFollowPatternFormUI extends PureComponent {
           )}
           fullWidth
         >
-          <EuiFormRow
-            label={(
-              <FormattedMessage
-                id="xpack.crossClusterReplication.autoFollowPatternForm.remoteCluster.fieldClusterLabel"
-                defaultMessage="Remote cluster"
-              />
-            )}
-            fullWidth
-          >
-            <Fragment>
-              { isNew && (
-                <EuiSuperSelect
-                  options={remoteClustersOptions}
-                  valueOfSelected={remoteCluster}
-                  onChange={this.onClusterChange}
-                />
-              )}
-              { !isNew && (
-                <EuiFieldText
-                  value={remoteCluster}
-                  fullWidth
-                  disabled={true}
-                />
-              )}
-            </Fragment>
-          </EuiFormRow>
+          <RemoteClustersFormField
+            selected={remoteCluster ? remoteCluster : null}
+            remoteClusters={remoteClusters}
+            currentUrl={currentUrl}
+            isEditable={isNew}
+            areErrorsVisible={areErrorsVisible}
+            onChange={this.onClusterChange}
+            onError={(error) => this.onFieldsErrorChange({ remoteCluster: error })}
+            errorMessages={errorMessages}
+          />
         </EuiDescribedFormGroup>
       );
     };

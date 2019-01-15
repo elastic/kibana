@@ -31,6 +31,7 @@ import {
   FollowerIndexPageTitle,
   SectionLoading,
   SectionError,
+  RemoteClustersProvider,
 } from '../../components';
 import { API_STATUS } from '../../constants';
 
@@ -94,6 +95,12 @@ export const FollowerIndexEdit = injectI18n(
       this.showConfirmModal();
     }
 
+    confirmSaveFollowerIhdex = () => {
+      const { name, followerIndex } = this.inflightPayload;
+      this.props.saveFollowerIndex(name, followerIndex);
+      this.closeConfirmModal();
+    }
+
     showConfirmModal = () => this.setState({ showConfirmModal: true });
 
     closeConfirmModal = () => this.setState({ showConfirmModal: false });
@@ -145,14 +152,12 @@ export const FollowerIndexEdit = injectI18n(
         defaultMessage: 'Update follower index \'{id}\'',
       }, { id: followerIndexId });
 
-      const { name, followerIndex } = this.inflightPayload;
-
       return (
         <EuiOverlayMask>
           <EuiConfirmModal
             title={title}
             onCancel={this.closeConfirmModal}
-            onConfirm={() => this.props.saveFollowerIndex(name, followerIndex)}
+            onConfirm={this.confirmSaveFollowerIhdex}
             cancelButtonText={
               intl.formatMessage({
                 id: 'xpack.crossClusterReplication.followerIndexEditForm.confirmModal.cancelButtonText',
@@ -211,15 +216,36 @@ export const FollowerIndexEdit = injectI18n(
               {apiStatus.get === API_STATUS.LOADING && this.renderLoadingFollowerIndex()}
 
               {apiError.get && this.renderGetFollowerIndexError(apiError.get)}
-
               { followerIndex && (
-                <FollowerIndexForm
-                  followerIndex={rest}
-                  apiStatus={apiStatus.save}
-                  apiError={apiError.save}
-                  saveFollowerIndex={this.saveFollowerIndex}
-                  clearApiError={clearApiError}
-                />
+                <RemoteClustersProvider>
+                  {({ isLoading, error, remoteClusters }) => {
+                    if (isLoading) {
+                      return (
+                        <SectionLoading>
+                          <FormattedMessage
+                            id="xpack.crossClusterReplication.followerIndexCreateForm.loadingRemoteClusters"
+                            defaultMessage="Loading remote clusters..."
+                          />
+                        </SectionLoading>
+                      );
+                    }
+
+                    if (error) {
+                      remoteClusters = [];
+                    }
+
+                    return (
+                      <FollowerIndexForm
+                        followerIndex={rest}
+                        apiStatus={apiStatus.save}
+                        apiError={apiError.save}
+                        remoteClusters={remoteClusters}
+                        saveFollowerIndex={this.saveFollowerIndex}
+                        clearApiError={clearApiError}
+                      />
+                    );
+                  }}
+                </RemoteClustersProvider>
               ) }
 
               { showConfirmModal && this.renderConfirmModal() }

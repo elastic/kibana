@@ -14,25 +14,24 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiDescribedFormGroup,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiFormRow,
   EuiLoadingKibana,
   EuiLoadingSpinner,
   EuiOverlayMask,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiSuperSelect,
 } from '@elastic/eui';
 
 import routing from '../services/routing';
+import { extractQueryParams } from '../services/query_params';
 import { API_STATUS, followerIndexFormSchema } from '../constants';
 import { SectionError } from './section_error';
 import { loadIndices } from '../services/api';
 import { FormEntryRow } from './form_entry_row';
+import { RemoteClustersFormField } from './remote_clusters_form_field';
 
 const getFirstConnectedCluster = (clusters) => {
   for (let i = 0; i < clusters.length; i++) {
@@ -40,12 +39,22 @@ const getFirstConnectedCluster = (clusters) => {
       return clusters[i];
     }
   }
-  return {};
+
+  /**
+   * No cluster connected, we return the first one in the list
+   */
+  return clusters.length ? clusters[0] : {};
 };
 
-const getEmptyFollowerIndex = (remoteClusters) => ({
+const getRemoteClusterName = (remoteClusters, selected) => {
+  return selected && remoteClusters.some(c => c.name === selected)
+    ? selected
+    : getFirstConnectedCluster(remoteClusters).name;
+};
+
+const getEmptyFollowerIndex = (remoteClusters = [], remoteClusterSelected) => ({
   name: '',
-  remoteCluster: remoteClusters ? getFirstConnectedCluster(remoteClusters).name : '',
+  remoteCluster: getRemoteClusterName(remoteClusters, remoteClusterSelected),
   leaderIndex: '',
   ...Object.keys(followerIndexFormSchema.advanced).reduce((acc, field) => ({ ...acc, [field]: '' }), {})
 });
@@ -85,9 +94,10 @@ export const FollowerIndexForm = injectI18n(
       super(props);
 
       const isNew = this.props.followerIndex === undefined;
-
+      const { route: { location: { search } } } = routing.reactRouter;
+      const queryParams = extractQueryParams(search);
       const followerIndex = isNew
-        ? getEmptyFollowerIndex(this.props.remoteClusters)
+        ? getEmptyFollowerIndex(this.props.remoteClusters, queryParams.cluster)
         : {
           ...getEmptyFollowerIndex(),
           ...this.props.followerIndex,
@@ -217,12 +227,12 @@ export const FollowerIndexForm = injectI18n(
       const toggleAdvancedSettingButtonLabel = areAdvancedSettingsVisible
         ? (
           <FormattedMessage
-            id="xpack.crossClusterReplication.followerIndex.advancedSettingsForm.hideButtonLabel"
+            id="xpack.crossClusterReplication.followerIndexForm.hideAdvancedSettingsButtonLabel"
             defaultMessage="Hide advanced settings"
           />
         ) : (
           <FormattedMessage
-            id="xpack.crossClusterReplication.followerIndex.advancedSettingsForm.showButtonLabel"
+            id="xpack.crossClusterReplication.followerIndexForm.showAdvancedSettingsButtonLabel"
             defaultMessage="Show advanced settings"
           />
         );
@@ -247,14 +257,26 @@ export const FollowerIndexForm = injectI18n(
        * Remote Cluster
        */
       const renderRemoteClusterField = () => {
-        const remoteClustersOptions = this.props.remoteClusters
-          ? this.props.remoteClusters.map(({ name, isConnected }) => ({
-            value: name,
-            inputDisplay: isConnected ? name : `${name} (not connected)`,
-            disabled: !isConnected,
-            'data-test-subj': `option-${name}`
-          }))
-          : {};
+        const { remoteClusters, currentUrl } = this.props;
+
+        const errorMessages = {
+          noClusterFound: () => (<FormattedMessage
+            id="xpack.crossClusterReplication.followerIndexForm.emptyRemoteClustersCallOutDescription"
+            defaultMessage="Follower indices replicate indices on remote clusters. You must add a remote cluster."
+          />),
+          remoteClusterNotConnectedNotEditable: (name) => (<FormattedMessage
+            id="xpack.crossClusterReplication.followerIndexForm.currentRemoteClusterNotConnectedCallOutDescription"
+            defaultMessage="The remote cluster '{name}' is not connected.
+            You need to connect it before editing the follower index."
+            values={{ name }}
+          />),
+          remoteClusterDoesNotExist: (name) => (<FormattedMessage
+            id="xpack.crossClusterReplication.followerIndexForm.currentRemoteClusterNotFoundCallOutDescription"
+            defaultMessage="The remote cluster '{name}' was not found. It might have been removed.
+            In order to edit the follower index, you need to add a remote cluster with the same name."
+            values={{ name }}
+          />)
+        };
 
         return (
           <EuiDescribedFormGroup
@@ -276,32 +298,16 @@ export const FollowerIndexForm = injectI18n(
             )}
             fullWidth
           >
-            <EuiFormRow
-              label={(
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.followerIndexForm.remoteCluster.fieldClusterLabel"
-                  defaultMessage="Remote cluster"
-                />
-              )}
-              fullWidth
-            >
-              <Fragment>
-                { isNew && (
-                  <EuiSuperSelect
-                    options={remoteClustersOptions}
-                    valueOfSelected={followerIndex.remoteCluster}
-                    onChange={this.onClusterChange}
-                  />
-                )}
-                { !isNew && (
-                  <EuiFieldText
-                    value={followerIndex.remoteCluster}
-                    fullWidth
-                    disabled={true}
-                  />
-                )}
-              </Fragment>
-            </EuiFormRow>
+            <RemoteClustersFormField
+              selected={followerIndex.remoteCluster ? followerIndex.remoteCluster : null}
+              remoteClusters={remoteClusters || []}
+              currentUrl={currentUrl}
+              isEditable={isNew}
+              areErrorsVisible={areErrorsVisible}
+              onChange={this.onClusterChange}
+              onError={(error) => this.onFieldsErrorChange({ remoteCluster: error })}
+              errorMessages={errorMessages}
+            />
           </EuiDescribedFormGroup>
         );
       };

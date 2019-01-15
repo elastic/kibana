@@ -94,7 +94,7 @@ export const addCluster = (cluster) => async (dispatch) => {
     }));
 
     const decodedRedirect = decodeURIComponent(redirectUrl);
-    redirect(decodedRedirect);
+    redirect(`${decodedRedirect}?cluster=${cluster.name}`);
   } else {
     // This will open the new job in the detail panel. Note that we're *not* showing a success toast
     // here, because it would partially obscure the detail panel.
