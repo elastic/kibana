@@ -74,11 +74,11 @@
 
             var ticks = [],
               end = ceilAsLog10(axis.max),
-              start = floorAsLog10(axis.datamin),
+              start = floorAsLog10(axis.min),
               tick = Number.NaN,
               i = 0;
 
-            if (axis.datamin === null || axis.datamin <= 0) {
+            if (axis.min === null || axis.min <= 0) {
               // Bad minimum, make ticks from 1 (10**0) to max
               start = 0;
               axis.min = 0.6;
