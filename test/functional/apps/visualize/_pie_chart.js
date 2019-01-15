@@ -114,7 +114,8 @@ export default function ({ getService, getPageObjects }) {
         expect(pieData).to.eql(expectedTableData);
       });
 
-      it('should apply correct filter on other bucket', async () => {
+      // Flaky Test: https://github.com/elastic/kibana/issues/25955
+      it.skip('should apply correct filter on other bucket', async () => {
         const expectedTableData = [ 'Missing', 'osx' ];
 
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -126,7 +127,8 @@ export default function ({ getService, getPageObjects }) {
         await filterBar.removeFilter('machine.os.raw');
       });
 
-      it('should apply correct filter on other bucket by clicking on a legend', async () => {
+      // Flaky Test: https://github.com/elastic/kibana/issues/26323
+      it.skip('should apply correct filter on other bucket by clicking on a legend', async () => {
         const expectedTableData = [ 'Missing', 'osx' ];
 
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -138,7 +140,8 @@ export default function ({ getService, getPageObjects }) {
         await filterBar.removeFilter('machine.os.raw');
       });
 
-      it('should show two levels of other buckets', async () => {
+      // Flaky Test: https://github.com/elastic/kibana/issues/25956
+      it.skip('should show two levels of other buckets', async () => {
         const expectedTableData = [ 'win 8', 'CN', 'IN', 'US', 'ID', 'BR', 'Other', 'win xp',
           'CN', 'IN', 'US', 'ID', 'BR', 'Other', 'win 7', 'CN', 'IN', 'US', 'ID', 'BR', 'Other',
           'ios', 'IN', 'CN', 'US', 'ID', 'BR', 'Other', 'Missing', 'CN', 'IN', 'US', 'BR', 'PK',
