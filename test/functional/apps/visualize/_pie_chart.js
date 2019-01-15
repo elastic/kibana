@@ -124,6 +124,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug(`pieData.length = ${pieData.length}`);
         expect(pieData).to.eql(expectedTableData);
         await filterBar.removeFilter('machine.os.raw');
+        await PageObjects.visualize.waitForVisualization();
       });
 
       // FLAKY: https://github.com/elastic/kibana/issues/26323
@@ -137,6 +138,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug(`pieData.length = ${pieData.length}`);
         expect(pieData).to.eql(expectedTableData);
         await filterBar.removeFilter('machine.os.raw');
+        await PageObjects.visualize.waitForVisualization();
       });
 
       it('should show two levels of other buckets', async () => {
