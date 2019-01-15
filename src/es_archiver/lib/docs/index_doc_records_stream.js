@@ -30,7 +30,6 @@ export function createIndexDocRecordsStream(client, stats) {
         {
           index: {
             _index: doc.index,
-            _type: doc.type,
             _id: doc.id,
           }
         },

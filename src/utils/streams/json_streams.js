@@ -40,6 +40,13 @@ export function createJsonParseStream() {
 
       try {
         parsed = JSON.parse(json);
+        // if (parsed.value && parsed.value.type) {
+        //   delete parsed.value.type;
+        // }
+        // if (parsed.value && parsed.value.mappings) {
+        //   const shiftedMappings = parsed.value.mappings[Object.keys(parsed.value.mappings)[0]];
+        //   parsed.value.mappings = shiftedMappings;
+        // }
       } catch (_error) {
         error = _error;
       }

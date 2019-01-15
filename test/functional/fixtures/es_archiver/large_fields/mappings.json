@@ -14,11 +14,9 @@
       }
     },
     "mappings": {
-      "test": {
-        "properties": {
-          "date": {
-            "type": "date"
-          }
+      "properties": {
+        "date": {
+          "type": "date"
         }
       }
     }

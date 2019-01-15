@@ -9,15 +9,13 @@
       }
     },
     "mappings": {
-      "doc": {
-        "properties": {
-          "message": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
+      "properties": {
+        "message": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
             }
           }
         }
@@ -37,11 +35,9 @@
       }
     },
     "mappings": {
-      "doc": {
-        "properties": {
-          "date": {
-            "type": "date"
-          }
+      "properties": {
+        "date": {
+          "type": "date"
         }
       }
     }
@@ -59,15 +55,13 @@
       }
     },
     "mappings": {
-      "doc": {
-        "properties": {
-          "message": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
+      "properties": {
+        "message": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
             }
           }
         }
@@ -87,15 +81,13 @@
       }
     },
     "mappings": {
-      "doc": {
-        "properties": {
-          "message": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
+      "properties": {
+        "message": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
             }
           }
         }
@@ -115,11 +107,9 @@
       }
     },
     "mappings": {
-      "doc": {
-        "properties": {
-          "date": {
-            "type": "date"
-          }
+      "properties": {
+        "date": {
+          "type": "date"
         }
       }
     }
@@ -137,11 +127,9 @@
       }
     },
     "mappings": {
-      "doc": {
-        "properties": {
-          "date": {
-            "type": "date"
-          }
+      "properties": {
+        "date": {
+          "type": "date"
         }
       }
     }
@@ -159,11 +147,9 @@
       }
     },
     "mappings": {
-      "doc": {
-        "properties": {
-          "date": {
-            "type": "date"
-          }
+      "properties": {
+        "date": {
+          "type": "date"
         }
       }
     }
@@ -181,11 +167,9 @@
       }
     },
     "mappings": {
-      "doc": {
-        "properties": {
-          "date": {
-            "type": "date"
-          }
+      "properties": {
+        "date": {
+          "type": "date"
         }
       }
     }
@@ -203,15 +187,13 @@
       }
     },
     "mappings": {
-      "doc": {
-        "properties": {
-          "message": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
+      "properties": {
+        "message": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
             }
           }
         }

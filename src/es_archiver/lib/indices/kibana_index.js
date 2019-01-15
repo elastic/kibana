@@ -137,7 +137,6 @@ async function getKibanaStatuses({ kibanaUrl }) {
 export async function createDefaultSpace({ index, client }) {
   await client.index({
     index,
-    type: 'doc',
     id: 'space:default',
     body: {
       type: 'space',
@@ -181,7 +180,6 @@ export async function cleanKibanaIndices({ client, stats, log, kibanaUrl }) {
         bool: {
           must_not: {
             ids: {
-              type: 'doc',
               values: ['space:default']
             }
           }

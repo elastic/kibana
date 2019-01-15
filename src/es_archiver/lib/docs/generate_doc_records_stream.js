@@ -55,7 +55,6 @@ export function createGenerateDocRecordsStream(client, stats) {
               type: 'doc',
               value: {
                 index: hit._index,
-                type: hit._type,
                 id: hit._id,
                 source: hit._source,
               }
