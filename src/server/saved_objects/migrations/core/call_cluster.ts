@@ -67,6 +67,7 @@ export interface PutMappingOpts {
   body: DocMapping;
   index: string;
   type: string;
+  include_type_name?: boolean;
 }
 
 export interface PutTemplateOpts {
@@ -87,6 +88,7 @@ export interface IndexOpts {
 
 export interface IndexCreationOpts {
   index: string;
+  include_type_name?: boolean;
   body?: {
     mappings?: IndexMapping;
     settings?: {
