@@ -54,6 +54,30 @@ describe('brushEvent', () => {
   const baseEvent = {
     data: {
       fieldFormatter: _.constant({}),
+      series: [
+        {
+          values: [
+            {
+              xRaw: {
+                column: 0,
+                table: {
+                  columns: [
+                    {
+                      id: '1',
+                      aggConfig: {
+                        params: {},
+                        getIndexPattern: () => ({
+                          timeFieldName: 'time',
+                        })
+                      }
+                    },
+                  ]
+                }
+              }
+            },
+          ]
+        },
+      ]
     },
   };
 
@@ -86,7 +110,8 @@ describe('brushEvent', () => {
 
       beforeEach(() => {
         dateEvent = _.cloneDeep(baseEvent);
-        dateEvent.data.xAxisField = dateField;
+        dateEvent.data.series[0].values[0].xRaw.table.columns[0].aggConfig.params.field = dateField;
+        dateEvent.data.ordered = { date: true };
       });
 
       test('by ignoring the event when range spans zero time', () => {
@@ -119,7 +144,8 @@ describe('brushEvent', () => {
 
       beforeEach(() => {
         dateEvent = _.cloneDeep(baseEvent);
-        dateEvent.data.xAxisField = dateField;
+        dateEvent.data.series[0].values[0].xRaw.table.columns[0].aggConfig.params.field = dateField;
+        dateEvent.data.ordered = { date: true };
       });
 
       test('creates a new range filter', () => {
@@ -174,7 +200,8 @@ describe('brushEvent', () => {
 
     beforeEach(() => {
       numberEvent = _.cloneDeep(baseEvent);
-      numberEvent.data.xAxisField = numberField;
+      numberEvent.data.series[0].values[0].xRaw.table.columns[0].aggConfig.params.field = numberField;
+      numberEvent.data.ordered = { date: false };
     });
 
     test('by ignoring the event when range does not span at least 2 values', () => {
