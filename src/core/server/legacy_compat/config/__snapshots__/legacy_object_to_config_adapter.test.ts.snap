@@ -17,40 +17,6 @@ Object {
 }
 `;
 
-exports[`#get correctly handles server config.: deprecated missing ssl.enabled 1`] = `
-Object {
-  "autoListen": true,
-  "basePath": "/abc",
-  "cors": false,
-  "host": "host",
-  "maxPayload": 1000,
-  "port": 1234,
-  "rewriteBasePath": false,
-  "ssl": Object {
-    "certificate": "cert",
-    "enabled": true,
-    "key": "key",
-  },
-}
-`;
-
-exports[`#get correctly handles server config.: deprecated ssl.cert 1`] = `
-Object {
-  "autoListen": true,
-  "basePath": "/abc",
-  "cors": false,
-  "host": "host",
-  "maxPayload": 1000,
-  "port": 1234,
-  "rewriteBasePath": false,
-  "ssl": Object {
-    "certificate": "deprecated-cert",
-    "enabled": true,
-    "key": "key",
-  },
-}
-`;
-
 exports[`#get correctly handles server config.: disabled ssl 1`] = `
 Object {
   "autoListen": true,

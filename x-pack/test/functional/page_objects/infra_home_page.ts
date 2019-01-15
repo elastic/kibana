@@ -5,7 +5,6 @@
  */
 
 import testSubjSelector from '@kbn/test-subj-selector';
-import Keys from 'leadfoot/keys';
 import moment from 'moment';
 
 import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
@@ -13,6 +12,7 @@ import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
 export function InfraHomePageProvider({ getService }: KibanaFunctionalTestDefaultProviders) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const browser = getService('browser');
 
   return {
     async goToTime(time: number) {
@@ -20,8 +20,8 @@ export function InfraHomePageProvider({ getService }: KibanaFunctionalTestDefaul
         `${testSubjSelector('waffleDatePicker')} .euiDatePicker.euiFieldText`
       );
 
-      await datePickerInput.type(Array(30).fill(Keys.BACKSPACE));
-      await datePickerInput.type([moment(time).format('L LTS'), Keys.RETURN]);
+      await datePickerInput.type(Array(30).fill(browser.keys.BACKSPACE));
+      await datePickerInput.type([moment(time).format('L LTS'), browser.keys.RETURN]);
     },
 
     async getWaffleMap() {

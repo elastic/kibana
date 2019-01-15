@@ -16,6 +16,10 @@ export class ASource {
     throw new Error('Must implement Source.createDescriptor');
   }
 
+  static renderDropdownDisplayOption() {
+    throw new Error('Must implement Source.renderDropdownDisplayOption');
+  }
+
   constructor(descriptor) {
     this._descriptor = descriptor;
   }
@@ -39,11 +43,24 @@ export class ASource {
     return '';
   }
 
+  /**
+   * return attribution for this layer as array of objects with url and label property.
+   * e.g. [{ url: 'example.com', label: 'foobar' }]
+   * @return {Promise<null>}
+   */
+  async getAttributions() {
+    return [];
+  }
+
   isFieldAware() {
     return false;
   }
 
   isRefreshTimerAware() {
+    return false;
+  }
+
+  isQueryAware() {
     return false;
   }
 
@@ -57,6 +74,10 @@ export class ASource {
 
   renderSourceSettingsEditor() {
     return null;
+  }
+
+  getIndexPatternIds() {
+    return  [];
   }
 }
 

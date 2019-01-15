@@ -33,6 +33,7 @@ import { PROGRESS_STATES } from './progress_states';
 import { ml } from 'plugins/ml/services/ml_api_service';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { mlForecastService } from 'plugins/ml/services/forecast_service';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 const FORECAST_JOB_MIN_VERSION = '6.1.0'; // Forecasting only allowed for jobs created >= 6.1.0.
 const FORECASTS_VIEW_MAX = 5;       // Display links to a maximum of 5 forecasts.
@@ -58,7 +59,16 @@ function getDefaultState() {
 }
 
 
-class ForecastingModal extends Component {
+export const ForecastingModal = injectI18n(class ForecastingModal extends Component {
+  static propTypes = {
+    isDisabled: PropTypes.bool,
+    job: PropTypes.object,
+    detectorIndex: PropTypes.number,
+    entities: PropTypes.array,
+    loadForForecastId: PropTypes.func,
+    timefilter: PropTypes.object,
+  };
+
   constructor(props) {
     super(props);
     this.state = getDefaultState();
@@ -81,18 +91,34 @@ class ForecastingModal extends Component {
   };
 
   onNewForecastDurationChange = (event) => {
+    const { intl } = this.props;
     const newForecastDurationErrors = [];
     let isNewForecastDurationValid = true;
     const duration = parseInterval(event.target.value);
     if(duration === null) {
       isNewForecastDurationValid = false;
-      newForecastDurationErrors.push('Invalid duration format');
+      newForecastDurationErrors.push(
+        intl.formatMessage({
+          id: 'xpack.ml.timeSeriesExplorer.forecastingModal.invalidDurationFormatErrorMessage',
+          defaultMessage: 'Invalid duration format',
+        })
+      );
     } else if (duration.asMilliseconds() > FORECAST_DURATION_MAX_MS) {
       isNewForecastDurationValid = false;
-      newForecastDurationErrors.push('Forecast duration must not be greater than 8 weeks');
+      newForecastDurationErrors.push(
+        intl.formatMessage({
+          id: 'xpack.ml.timeSeriesExplorer.forecastingModal.forecastDurationMustNotBeGreaterThanMaximumErrorMessage',
+          defaultMessage: 'Forecast duration must not be greater than {maximumForecastDurationValue} weeks',
+        }, { maximumForecastDurationValue: 8 })
+      );
     } else if (duration.asMilliseconds() === 0) {
       isNewForecastDurationValid = false;
-      newForecastDurationErrors.push('Forecast duration must not be zero');
+      newForecastDurationErrors.push(
+        intl.formatMessage({
+          id: 'xpack.ml.timeSeriesExplorer.forecastingModal.forecastDurationMustNotBeZeroErrorMessage',
+          defaultMessage: 'Forecast duration must not be zero',
+        })
+      );
     }
 
     this.setState({
@@ -133,7 +159,13 @@ class ForecastingModal extends Component {
       })
       .catch((resp) => {
         console.log('Time series forecast modal - could not open job:', resp);
-        this.addMessage('Error opening job before running forecast', MESSAGE_LEVEL.ERROR);
+        this.addMessage(
+          this.props.intl.formatMessage({
+            id: 'xpack.ml.timeSeriesExplorer.forecastingModal.errorWithOpeningJobBeforeRunningForecastErrorMessage',
+            defaultMessage: 'Error opening job before running forecast',
+          }),
+          MESSAGE_LEVEL.ERROR
+        );
         this.setState({
           jobOpeningState: PROGRESS_STATES.ERROR
         });
@@ -146,7 +178,11 @@ class ForecastingModal extends Component {
     if (resp && resp.message) {
       this.addMessage(resp.message, MESSAGE_LEVEL.ERROR, true);
     } else {
-      this.addMessage('Unexpected response from running forecast. The request may have failed.',
+      this.addMessage(
+        this.props.intl.formatMessage({
+          id: 'xpack.ml.timeSeriesExplorer.forecastingModal.unexpectedResponseFromRunningForecastErrorMessage',
+          defaultMessage: 'Unexpected response from running forecast. The request may have failed.',
+        }),
         MESSAGE_LEVEL.ERROR, true);
     }
   };
@@ -177,6 +213,7 @@ class ForecastingModal extends Component {
     // Obtain the stats for the forecast request and check forecast is progressing.
     // When the stats show the forecast is finished, load the
     // forecast results into the view.
+    const { intl } = this.props;
     let previousProgress = 0;
     let noProgressMs = 0;
     this.forecastChecker = setInterval(() => {
@@ -210,7 +247,13 @@ class ForecastingModal extends Component {
                   // Load the forecast data in the main page,
                   // but leave this dialog open so the error can be viewed.
                   console.log('Time series forecast modal - could not close job:', response);
-                  this.addMessage('Error closing job after running forecast', MESSAGE_LEVEL.ERROR);
+                  this.addMessage(
+                    intl.formatMessage({
+                      id: 'xpack.ml.timeSeriesExplorer.forecastingModal.errorWithClosingJobAfterRunningForecastErrorMessage',
+                      defaultMessage: 'Error closing job after running forecast',
+                    }),
+                    MESSAGE_LEVEL.ERROR
+                  );
                   this.setState({
                     jobClosingState: PROGRESS_STATES.ERROR
                   });
@@ -227,8 +270,14 @@ class ForecastingModal extends Component {
               noProgressMs += FORECAST_STATS_POLL_FREQUENCY;
               if (noProgressMs > WARN_NO_PROGRESS_MS) {
                 console.log(`Forecast request has not progressed for ${WARN_NO_PROGRESS_MS}ms. Cancelling check.`);
-                this.addMessage(`No progress reported for the new forecast for ${WARN_NO_PROGRESS_MS}ms. ` +
-                  'An error may have occurred whilst running the forecast.', MESSAGE_LEVEL.ERROR);
+                this.addMessage(
+                  intl.formatMessage({
+                    id: 'xpack.ml.timeSeriesExplorer.forecastingModal.noProgressReportedForNewForecastErrorMessage',
+                    defaultMessage: 'No progress reported for the new forecast for {WarnNoProgressMs}ms.' +
+                    'An error may have occurred whilst running the forecast.'
+                  }, { WarnNoProgressMs: WARN_NO_PROGRESS_MS }),
+                  MESSAGE_LEVEL.ERROR
+                );
 
                 // Try and load any results which may have been created.
                 this.props.loadForForecastId(forecastId);
@@ -243,7 +292,13 @@ class ForecastingModal extends Component {
 
         }).catch((resp) => {
           console.log('Time series forecast modal - error loading stats of forecast from elasticsearch:', resp);
-          this.addMessage('Error loading stats of running forecast.', MESSAGE_LEVEL.ERROR);
+          this.addMessage(
+            intl.formatMessage({
+              id: 'xpack.ml.timeSeriesExplorer.forecastingModal.errorWithLoadingStatsOfRunningForecastErrorMessage',
+              defaultMessage: 'Error loading stats of running forecast.',
+            }),
+            MESSAGE_LEVEL.ERROR
+          );
           this.setState({
             forecastProgress: PROGRESS_STATES.ERROR
           });
@@ -253,6 +308,7 @@ class ForecastingModal extends Component {
   };
 
   openModal = () => {
+    const { intl } = this.props;
     const job = this.props.job;
 
     if (typeof job === 'object') {
@@ -275,7 +331,13 @@ class ForecastingModal extends Component {
         })
         .catch((resp) => {
           console.log('Time series forecast modal - error obtaining forecasts summary:', resp);
-          this.addMessage('Error obtaining list of previous forecasts', MESSAGE_LEVEL.ERROR);
+          this.addMessage(
+            intl.formatMessage({
+              id: 'xpack.ml.timeSeriesExplorer.forecastingModal.errorWithObtainingListOfPreviousForecastsErrorMessage',
+              defaultMessage: 'Error obtaining list of previous forecasts',
+            }),
+            MESSAGE_LEVEL.ERROR
+          );
         });
 
       // Display a warning about running a forecast if there is high number
@@ -297,9 +359,13 @@ class ForecastingModal extends Component {
             });
             if (numPartitions > WARN_NUM_PARTITIONS) {
               this.addMessage(
-                `Note that this data contains more than ${WARN_NUM_PARTITIONS} ` +
-                  `partitions so running a forecast may take a long time and consume a high amount of resource`,
-                MESSAGE_LEVEL.WARNING);
+                intl.formatMessage({
+                  id: 'xpack.ml.timeSeriesExplorer.forecastingModal.dataContainsMorePartitionsMessage',
+                  defaultMessage: 'Note that this data contains more than {warnNumPartitions} ' +
+                  'partitions so running a forecast may take a long time and consume a high amount of resource',
+                }, { warnNumPartitions: WARN_NUM_PARTITIONS }),
+                MESSAGE_LEVEL.WARNING
+              );
             }
           })
           .catch((resp) => {
@@ -335,17 +401,22 @@ class ForecastingModal extends Component {
     // Forecasting disabled if detector has an over field or job created < 6.1.0.
     let isForecastingDisabled = false;
     let forecastingDisabledMessage = null;
-    const job = this.props.job;
+    const { intl, job } = this.props;
     if (job !== undefined) {
       const detector = job.analysis_config.detectors[this.props.detectorIndex];
       const overFieldName = detector.over_field_name;
       if (overFieldName !== undefined) {
         isForecastingDisabled = true;
-        forecastingDisabledMessage = 'Forecasting is not available for population detectors with an over field';
+        forecastingDisabledMessage = intl.formatMessage({
+          id: 'xpack.ml.timeSeriesExplorer.forecastingModal.forecastingNotAvailableForPopulationDetectorsMessage',
+          defaultMessage: 'Forecasting is not available for population detectors with an over field',
+        });
       } else if (isJobVersionGte(job, FORECAST_JOB_MIN_VERSION) === false) {
         isForecastingDisabled = true;
-        forecastingDisabledMessage = `Forecasting is only available for jobs created in version ` +
-          `${FORECAST_JOB_MIN_VERSION} or later`;
+        forecastingDisabledMessage = intl.formatMessage({
+          id: 'xpack.ml.timeSeriesExplorer.forecastingModal.forecastingOnlyAvailableForJobsCreatedInSpecifiedVersionMessage',
+          defaultMessage: 'Forecasting is only available for jobs created in version {minVersion} or later',
+        }, { minVersion: FORECAST_JOB_MIN_VERSION });
       }
     }
 
@@ -356,7 +427,10 @@ class ForecastingModal extends Component {
         isDisabled={isForecastingDisabled}
         fill
       >
-        Forecast
+        <FormattedMessage
+          id="xpack.ml.timeSeriesExplorer.forecastingModal.forecastButtonLabel"
+          defaultMessage="Forecast"
+        />
       </EuiButton>
     );
 
@@ -392,14 +466,4 @@ class ForecastingModal extends Component {
       </div>
     );
   }
-}
-ForecastingModal.propTypes = {
-  isDisabled: PropTypes.bool,
-  job: PropTypes.object,
-  detectorIndex: PropTypes.number,
-  entities: PropTypes.array,
-  loadForForecastId: PropTypes.func,
-  timefilter: PropTypes.object,
-};
-
-export { ForecastingModal };
+});

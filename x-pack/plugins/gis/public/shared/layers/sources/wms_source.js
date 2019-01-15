@@ -18,8 +18,8 @@ import { TileLayer } from '../tile_layer';
 export class WMSSource extends TMSSource {
 
   static type = 'WMS';
-
-  static typeDisplayName = 'WMS';
+  static title = 'Web Map Service';
+  static description = 'Maps from OGC Standard WMS';
 
   static createDescriptor({ serviceUrl, layers, styles }) {
     return {

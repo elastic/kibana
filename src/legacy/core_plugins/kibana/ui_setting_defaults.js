@@ -269,6 +269,16 @@ export function getUiSettingDefaults() {
       }),
       category: ['discover'],
     },
+    'doc_table:hideTimeColumn': {
+      name: i18n.translate('kbn.advancedSettings.docTableHideTimeColumnTitle', {
+        defaultMessage: 'Hide \'Time\' column',
+      }),
+      value: false,
+      description: i18n.translate('kbn.advancedSettings.docTableHideTimeColumnText', {
+        defaultMessage: 'Hide the \'Time\' column in Discover and in all Saved Searches on Dashboards.',
+      }),
+      category: ['discover'],
+    },
     'courier:maxSegmentCount': {
       name: i18n.translate('kbn.advancedSettings.courier.maxSegmentCountTitle', {
         defaultMessage: 'Maximum segment count',

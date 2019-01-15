@@ -6,7 +6,7 @@
 
 import React, { Component } from 'react';
 import { MBMapContainer } from '../map/mb';
-import { LayerControl } from '../layer_control/index';
+import { WidgetOverlay } from '../widget_overlay/index';
 import { LayerPanel } from '../layer_panel/index';
 import { AddLayerPanel } from '../layer_addpanel/index';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -78,7 +78,7 @@ export class GisMap extends Component {
       <EuiFlexGroup gutterSize="none" responsive={false}>
         <EuiFlexItem className="gisMapWrapper">
           <MBMapContainer/>
-          <LayerControl/>
+          <WidgetOverlay/>
         </EuiFlexItem>
 
         <EuiFlexItem className={`gisLayerPanel ${currentPanelClassName}`} grow={false}>

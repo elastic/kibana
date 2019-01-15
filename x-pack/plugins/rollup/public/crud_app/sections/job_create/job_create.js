@@ -18,8 +18,6 @@ import {
   EuiCallOut,
   EuiLoadingKibana,
   EuiOverlayMask,
-  EuiPage,
-  EuiPageBody,
   EuiPageContent,
   EuiPageContentHeader,
   EuiSpacer,
@@ -453,7 +451,7 @@ export class JobCreateUi extends Component {
     if (isSaving) {
       savingFeedback = (
         <EuiOverlayMask>
-          <EuiLoadingKibana size="xl"/>
+          <EuiLoadingKibana size="xl" />
         </EuiOverlayMask>
       );
     }
@@ -496,38 +494,33 @@ export class JobCreateUi extends Component {
 
     return (
       <Fragment>
-        <EuiPage>
-          <EuiPageBody>
-            <EuiPageContent
-              horizontalPosition="center"
-              className="rollupJobWizardPage"
-            >
-              <EuiPageContentHeader>
-                <EuiTitle size="l">
-                  <h1>
-                    <FormattedMessage
-                      id="xpack.rollupJobs.createTitle"
-                      defaultMessage="Create rollup job"
-                    />
-                  </h1>
-                </EuiTitle>
-              </EuiPageContentHeader>
+        <EuiPageContent
+          horizontalPosition="center"
+        >
+          <EuiPageContentHeader>
+            <EuiTitle size="m">
+              <h1>
+                <FormattedMessage
+                  id="xpack.rollupJobs.createTitle"
+                  defaultMessage="Create rollup job"
+                />
+              </h1>
+            </EuiTitle>
+          </EuiPageContentHeader>
 
-              {saveErrorFeedback}
+          {saveErrorFeedback}
 
-              <EuiStepsHorizontal steps={this.getSteps()} />
+          <EuiStepsHorizontal steps={this.getSteps()} />
 
-              <EuiSpacer />
+          <EuiSpacer />
 
-              {this.renderCurrentStep()}
+          {this.renderCurrentStep()}
 
-              <EuiSpacer size="l" />
+          <EuiSpacer size="l" />
 
-              {this.renderNavigation()}
-            </EuiPageContent>
-          </EuiPageBody>
-        </EuiPage>
+          {this.renderNavigation()}
 
+        </EuiPageContent>
         {savingFeedback}
       </Fragment>
     );

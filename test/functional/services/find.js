@@ -19,27 +19,13 @@
 
 import { LeadfootElementWrapper } from './lib/leadfoot_element_wrapper';
 
-// Many of our tests use the `exists` functions to determine where the user is. For
-// example, you'll see a lot of code like:
-// if (!testSubjects.exists('someElementOnPageA')) {
-//   navigateToPageA();
-// }
-// If the element doesn't exist, selenium would wait up to defaultFindTimeout for it to
-// appear. Because there are many times when we expect it to not be there, we don't want
-// to wait the full amount of time, or it would greatly slow our tests down. We used to have
-// this value at 1 second, but this caused flakiness because sometimes the element was deemed missing
-// only because the page hadn't finished loading.
-// The best path forward it to prefer functions like `testSubjects.existOrFail` or
-// `testSubjects.missingOrFail` instead of just the `exists` checks, and be deterministic about
-// where your user is and what they should click next.
-export const WAIT_FOR_EXISTS_TIME = 2500;
-
 export function FindProvider({ getService }) {
   const log = getService('log');
   const config = getService('config');
   const leadfoot = getService('__leadfoot__');
   const retry = getService('retry');
 
+  const WAIT_FOR_EXISTS_TIME = config.get('timeouts.waitForExists');
   const defaultFindTimeout = config.get('timeouts.find');
 
   const wrap = leadfootElement => (
@@ -64,7 +50,7 @@ export function FindProvider({ getService }) {
       return await retry.try(async () => {
         const element = await getElementFunction();
         // Calling any method forces a staleness check
-        element.isEnabled();
+        await element.isEnabled();
         return element;
       });
     }
@@ -75,7 +61,7 @@ export function FindProvider({ getService }) {
         return await retry.try(async () => {
           const element = await getElementFunction(leadfootWithTimeout);
           // Calling any method forces a staleness check
-          element.isEnabled();
+          await element.isEnabled();
           return element;
         });
       } finally {
