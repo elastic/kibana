@@ -10,13 +10,27 @@
 
   <div class="no-results-container" ng-if="jobs.length === 0 && loading === false">
     <div class="no-results">
-      <div><i class="fa fa-exclamation-triangle"></i>No single metric jobs found</div>
-      <div><a href="ml#/jobs">Create new single metric job</a></div>
+      <div
+        i18n-id="xpack.ml.timeSeriesExplorer.noSingleMetricJobsFoundLabel"
+        i18n-default-message="{icon} No single metric jobs found"
+        i18n-values="{ html_icon: '<i class=\'fa fa-exclamation-triangle\'></i>' }">
+      </div>
+      <div>
+        <a
+          href="ml#/jobs"
+          i18n-id="xpack.ml.timeSeriesExplorer.createNewSingleMetricJobLinkText"
+          i18n-default-message="Create new single metric job"
+        ></a></div>
     </div>
   </div>
 
   <div class="series-controls" ng-show="jobs.length > 0">
-    <label for="selectDetector" class="kuiLabel">Detector:</label>
+    <label
+      for="selectDetector"
+      class="kuiLabel"
+      i18n-id="xpack.ml.timeSeriesExplorer.detectorLabel"
+      i18n-default-message="Detector:"
+    ></label>
     <select id="selectDetector" class="kuiSelect kuiSelect--large" ng-model="detectorId" ng-change="detectorIndexChanged()">
       <option ng-repeat="detector in detectors track by detector.index" value="{{detector.index}}">{{detector.detector_description}}</option>
     </select>
@@ -29,11 +43,16 @@
       <label for="select{{entity.fieldName}}" class="kuiLabel">{{entity.fieldName}}:</label>
       <input id="select{{entity.fieldName}}" class="kuiTextInput entity-input"
         ng-class="{ 'entity-input-blank': entity.fieldValue.length === 0 }"
-        ng-model="entity.fieldValue" ng-model-options="{ updateOn: 'blur' }" placeholder="Enter value"
+        ng-model="entity.fieldValue" ng-model-options="{ updateOn: 'blur' }"
+        placeholder="{{ ::'xpack.ml.timeSeriesExplorer.enterValuePlaceholder' | i18n: {defaultMessage: 'Enter value'} }}"
         list='{{entity.fieldName}}_datalist' />
     </div>
 
-    <button class="kuiButton kuiButton--primary" ng-click="saveSeriesPropertiesAndRefresh()" aria-label="refresh">
+    <button
+      class="kuiButton kuiButton--primary"
+      ng-click="saveSeriesPropertiesAndRefresh()"
+      aria-label="{{ ::'xpack.ml.timeSeriesExplorer.refreshButtonAriLabel' | i18n: {defaultMessage: 'refresh'} }}"
+    >
       <i class="fa fa-play" ></i>
     </button>
 
@@ -54,25 +73,44 @@
 
   <div class="no-results-container" ng-show="jobs.length > 0 && loading === false && hasResults === false">
     <div class="no-results">
-      <div><i class="fa fa-info-circle" ></i>No results found</div>
-      <div>Try widening the time selection or moving further back in time</div>
+      <div
+        i18n-id="xpack.ml.timeSeriesExplorer.noResultsFoundLabel"
+        i18n-default-message="{icon} No results found"
+        i18n-values="{ html_icon: '<i class=\'fa fa-info-circle\'></i>' }"
+      ></div>
+      <div
+        i18n-id="xpack.ml.timeSeriesExplorer.tryWideningTheTimeSelectionDescription"
+        i18n-default-message="Try widening the time selection or moving further back in time"
+      ></div>
     </div>
   </div>
 
   <div ng-show="jobs.length > 0 && loading === false && hasResults === true">
     <div class="results-container">
 
-      <span class="panel-title euiText">
-        Single time series analysis of {{chartDetails.functionLabel}}
-      </span>
+      <span
+        class="panel-title euiText"
+        i18n-id="xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle"
+        i18n-default-message="Single time series analysis of {functionLabel}"
+        i18n-values="{ functionLabel: chartDetails.functionLabel }"
+      ></span>
       <span ng-if="chartDetails.entityData.count === 1" class="entity-count-text">
         <span ng-repeat="entity in chartDetails.entityData.entities">
           {{$first ? '(' : ''}}{{entity.fieldName}}: {{entity.fieldValue}}{{$last ? ')' : ', '}}
         </span>
       </span>
       <span ng-if="chartDetails.entityData.count !== 1" class="entity-count-text">
-        <span ng-repeat="countData in chartDetails.entityData.entities">
-          {{$first ? '(' : ''}}{{countData.cardinality}} distinct {{countData.fieldName}}{{countData.cardinality > 1 ? ' values' : ''}}{{$last ? ')' : ', '}}
+        <span
+          ng-repeat="countData in chartDetails.entityData.entities"
+          i18n-id="xpack.ml.timeSeriesExplorer.countDataInChartDetailsDescription"
+          i18n-default-message="{openBrace}{cardinality} distinct {fieldName} {cardinality, plural, one {} other { values}}{closeBrace}"
+          i18n-values="{
+            openBrace: $first ? '(' : '',
+            closeBrace: $last ? ')' : ', ',
+            cardinality: countData.cardinality,
+            fieldName: countData.fieldName
+          }"
+        >
         </span>
       </span>
 
@@ -83,7 +121,12 @@
             class="kuiCheckBox"
             ng-click="toggleShowModelBounds()"
             ng-checked="showModelBounds === true">
-          <label for="toggleShowModelBoundsCheckbox" class="kuiCheckBoxLabel">show model bounds</label>
+          <label
+            for="toggleShowModelBoundsCheckbox"
+            class="kuiCheckBoxLabel"
+            i18n-id="xpack.ml.timeSeriesExplorer.showModelBoundsLabel"
+            i18n-default-message="show model bounds"
+          ></label>
         </div>
 
         <div ng-show="showAnnotationsCheckbox === true">
@@ -92,7 +135,12 @@
             class="kuiCheckBox"
             ng-click="toggleShowAnnotations()"
             ng-checked="showAnnotations === true">
-          <label for="toggleAnnotationsCheckbox" class="kuiCheckBoxLabel">annotations</label>
+          <label
+            for="toggleAnnotationsCheckbox"
+            class="kuiCheckBoxLabel"
+            i18n-id="xpack.ml.timeSeriesExplorer.annotationsLabel"
+            i18n-default-message="annotations"
+          ></label>
         </div>
 
         <div ng-show="showForecastCheckbox === true">
@@ -101,7 +149,12 @@
             class="kuiCheckBox"
             ng-click="toggleShowForecast()"
             ng-checked="showForecast === true">
-          <label for="toggleShowForecastCheckbox" class="kuiCheckBoxLabel">show forecast</label>
+          <label
+            for="toggleShowForecastCheckbox"
+            class="kuiCheckBoxLabel"
+            i18n-id="xpack.ml.timeSeriesExplorer.showForecastLabel"
+            i18n-default-message="show forecast"
+          ></label>
         </div>
       </div>
 
@@ -131,9 +184,11 @@
       </div>
 
       <div ng-show="showAnnotations && focusAnnotationData.length > 0">
-        <span class="panel-title euiText">
-          Annotations
-        </span>
+        <span
+          class="panel-title euiText"
+          i18n-id="xpack.ml.timeSeriesExplorer.annotationsTitle"
+          i18n-default-message="Annotations"
+        ></span>
   
         <ml-annotation-table
           annotations="focusAnnotationData"
@@ -144,14 +199,21 @@
         <br /><br />
       </div>
 
-      <span class="panel-title euiText">
-        Anomalies
-      </span>
+      <span
+        class="panel-title euiText"
+        i18n-id="xpack.ml.timeSeriesExplorer.anomaliesTitle"
+        i18n-default-message="Anomalies"
+      ></span>
 
       <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive ml-anomalies-controls">
         <div class="euiFlexItem euiFlexItem--flexGrowZero" style="width:170px">
           <div class="euiFormRow" id="select_severity_control">
-            <label class="euiFormLabel" for="select_severity">Severity threshold</label>
+            <label
+              class="euiFormLabel"
+              for="select_severity"
+              i18n-id="xpack.ml.timeSeriesExplorer.severityThresholdLabel"
+              i18n-default-message="Severity threshold"
+            ></label>
             <div class="euiFormControlLayout">
               <ml-select-severity id="select_severity" />
             </div>
@@ -159,7 +221,12 @@
         </div>
         <div class="euiFlexItem euiFlexItem--flexGrowZero" style="width:170px">
           <div class="euiFormRow" id="select_interval_control">
-            <label class="euiFormLabel" for="select_interval">Interval</label>
+            <label
+              class="euiFormLabel"
+              for="select_interval"
+              i18n-id="xpack.ml.timeSeriesExplorer.intervalLabel"
+              i18n-default-message="Interval"
+            ></label>
             <div class="euiFormControlLayout">
               <ml-select-interval id="select_interval" />
             </div>

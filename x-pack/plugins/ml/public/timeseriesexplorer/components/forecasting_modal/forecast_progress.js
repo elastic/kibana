@@ -25,6 +25,7 @@ import {
 
 import { ProgressIcon } from './progress_icon';
 import { PROGRESS_STATES } from './progress_states';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 
 export function ForecastProgress({
@@ -38,7 +39,12 @@ export function ForecastProgress({
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiText size="xs">
-                <h3>Opening job...</h3>
+                <h3>
+                  <FormattedMessage
+                    id="xpack.ml.timeSeriesExplorer.forecastingModal.openingJobTitle"
+                    defaultMessage="Opening job…"
+                  />
+                </h3>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -53,7 +59,12 @@ export function ForecastProgress({
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiText size="xs">
-                <h3>Running forecast...</h3>
+                <h3>
+                  <FormattedMessage
+                    id="xpack.ml.timeSeriesExplorer.forecastingModal.runningForecastTitle"
+                    defaultMessage="Running forecast…"
+                  />
+                </h3>
               </EuiText>
             </EuiFlexItem>
             {forecastProgress >= 0 &&
@@ -80,7 +91,12 @@ export function ForecastProgress({
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiText size="xs">
-                <h3>Closing job...</h3>
+                <h3>
+                  <FormattedMessage
+                    id="xpack.ml.timeSeriesExplorer.forecastingModal.closingJobTitle"
+                    defaultMessage="Closing job…"
+                  />
+                </h3>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

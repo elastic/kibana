@@ -222,7 +222,12 @@ export async function migrationsUpToDate(
  * @param {IndexMapping} mappings
  */
 export function putMappings(callCluster: CallCluster, index: string, mappings: IndexMapping) {
-  return callCluster('indices.putMapping', { body: mappings.doc, index, type: ROOT_TYPE });
+  return callCluster('indices.putMapping', {
+    body: mappings.doc,
+    index,
+    type: ROOT_TYPE,
+    include_type_name: true,
+  });
 }
 
 export async function createIndex(
@@ -230,7 +235,11 @@ export async function createIndex(
   index: string,
   mappings?: IndexMapping
 ) {
-  await callCluster('indices.create', { body: { mappings, settings }, index });
+  await callCluster('indices.create', {
+    body: { mappings, settings },
+    index,
+    include_type_name: true,
+  });
 }
 
 export async function deleteIndex(callCluster: CallCluster, index: string) {

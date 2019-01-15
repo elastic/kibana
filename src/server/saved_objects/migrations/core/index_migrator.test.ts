@@ -53,6 +53,7 @@ describe('IndexMigrator', () => {
         },
       },
       index: '.kibana_1',
+      include_type_name: true,
       type: ROOT_TYPE,
     });
   });
@@ -89,6 +90,7 @@ describe('IndexMigrator', () => {
         settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
       },
       index: '.kibana_1',
+      include_type_name: true,
     });
   });
 
@@ -175,6 +177,7 @@ describe('IndexMigrator', () => {
           },
         },
       },
+      include_type_name: true,
     });
 
     await new IndexMigrator(opts).migrate();
@@ -201,6 +204,7 @@ describe('IndexMigrator', () => {
         settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
       },
       index: '.kibana_2',
+      include_type_name: true,
     });
   });
 

@@ -43,12 +43,16 @@ map-listing, .gisListingPage {
 .gisWidgetOverlay {
   position: absolute;
   z-index: $euiZLevel1;
-  min-width: 17rem;
-  max-width: 24rem;
   top: $euiSizeM;
   right: $euiSizeM;
   bottom: $euiSizeM;
+  // left: $euiSizeM;
   pointer-events: none; /* 1 */
+}
+
+.gisWidgetOverlay__rightSide {
+  min-width: 17rem;
+  max-width: 24rem;
 }
 
 .gisWidgetControl {
@@ -68,6 +72,21 @@ map-listing, .gisListingPage {
     padding: $euiSizeS $euiSize;
     flex-shrink: 0;
   }
+}
+
+.gisAttributionControl {
+  padding: 0 $euiSizeXS;
+}
+
+.gisViewControl__coordinates {
+  padding: $euiSizeXS $euiSizeS;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.gisViewControl__gotoButton {
+  min-width: 0;
+  pointer-events: all; /* 1 */
 }
 
 .gisWidgetControl__tocHolder {
@@ -173,9 +192,12 @@ map-listing, .gisListingPage {
   overflow-y: auto;
   @include euiScrollBar;
 
+  > * {
+    flex: 0 0 auto;
+  }
+
   > *:not(:last-child) {
     margin-bottom: $euiSize;
-    flex: 0 0 auto;
   }
 }
 

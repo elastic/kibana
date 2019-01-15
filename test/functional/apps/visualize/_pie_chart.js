@@ -112,6 +112,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await pieChart.expectPieChartLabels(expectedTableData);
         await filterBar.removeFilter('machine.os.raw');
+        await PageObjects.visualize.waitForVisualization();
       });
 
       it('should apply correct filter on other bucket by clicking on a legend', async () => {
@@ -122,6 +123,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await pieChart.expectPieChartLabels(expectedTableData);
         await filterBar.removeFilter('machine.os.raw');
+        await PageObjects.visualize.waitForVisualization();
       });
 
       it('should show two levels of other buckets', async () => {
