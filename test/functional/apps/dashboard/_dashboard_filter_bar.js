@@ -24,6 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
+  const pieChart = getService('pieChart');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize']);
 
   describe('dashboard filter bar', async () => {
@@ -92,11 +93,11 @@ export default function ({ getService, getPageObjects }) {
       it('are added when a pie chart slice is clicked', async function () {
         await dashboardAddPanel.addVisualization('Rendering Test: pie');
         await PageObjects.dashboard.waitForRenderComplete();
-        await PageObjects.dashboard.filterOnPieSlice('4,886');
+        await pieChart.filterOnPieSlice('4,886');
         const filters = await PageObjects.dashboard.getFilters();
         expect(filters.length).to.equal(1);
 
-        await dashboardExpect.pieSliceCount(1);
+        await pieChart.expectPieSliceCount(1);
       });
 
       it('are preserved after saving a dashboard', async () => {
@@ -106,7 +107,7 @@ export default function ({ getService, getPageObjects }) {
         const filters = await PageObjects.dashboard.getFilters();
         expect(filters.length).to.equal(1);
 
-        await dashboardExpect.pieSliceCount(1);
+        await pieChart.expectPieSliceCount(1);
       });
 
       it('are preserved after opening a dashboard saved with filters', async () => {
@@ -117,7 +118,7 @@ export default function ({ getService, getPageObjects }) {
         const filters = await PageObjects.dashboard.getFilters();
         expect(filters.length).to.equal(1);
 
-        await dashboardExpect.pieSliceCount(1);
+        await pieChart.expectPieSliceCount(1);
       });
     });
   });

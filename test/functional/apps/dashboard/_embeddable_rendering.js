@@ -30,12 +30,13 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const find = getService('find');
   const browser = getService('browser');
+  const pieChart = getService('pieChart');
   const dashboardExpect = getService('dashboardExpect');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'discover']);
 
   const expectAllDataRenders = async () => {
-    await dashboardExpect.pieSliceCount(16);
+    await pieChart.expectPieSliceCount(16);
     await dashboardExpect.metricValuesExist(['7,544']);
     await dashboardExpect.seriesElementCount(19);
     const tsvbGuageExists = await find.existsByCssSelector('.tvbVisHalfGauge');
@@ -66,7 +67,7 @@ export default function ({ getService, getPageObjects }) {
   };
 
   const expectNoDataRenders = async () => {
-    await dashboardExpect.pieSliceCount(0);
+    await pieChart.expectPieSliceCount(0);
     await dashboardExpect.seriesElementCount(0);
     await dashboardExpect.dataTableRowCount(0);
     await dashboardExpect.savedSearchRowCount(0);

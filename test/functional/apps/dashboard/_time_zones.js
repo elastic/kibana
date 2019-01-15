@@ -21,7 +21,7 @@ import path from 'path';
 import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
-  const dashboardExpect = getService('dashboardExpect');
+  const pieChart = getService('pieChart');
   const PageObjects = getPageObjects(['dashboard', 'header', 'settings', 'common']);
 
   describe('dashboard time zones', () => {
@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }) {
     it('Exported dashboard adjusts EST time to UTC', async () => {
       const timeRange = await PageObjects.header.getPrettyDuration();
       expect(timeRange).to.be('April 10th 2018, 03:00:00.000 to April 10th 2018, 04:00:00.000');
-      await dashboardExpect.pieSliceCount(4);
+      await pieChart.expectPieSliceCount(4);
     });
 
     it('Changing timezone changes dashboard timestamp and shows the same data', async () => {
@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.loadSavedDashboard('time zone test');
       const timeRange = await PageObjects.header.getPrettyDuration();
       expect(timeRange).to.be('April 9th 2018, 22:00:00.000 to April 9th 2018, 23:00:00.000');
-      await dashboardExpect.pieSliceCount(4);
+      await pieChart.expectPieSliceCount(4);
     });
   });
 }
