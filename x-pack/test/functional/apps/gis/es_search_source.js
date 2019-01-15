@@ -78,7 +78,14 @@ export default function ({ getPageObjects, getService }) {
         await PageObjects.gis.loadSavedMap('antimeridian example');
       });
 
-      it('should handle extents that cross antimeridian', async () => {
+      it('should handle geo_point filtering with extents that cross antimeridian', async () => {
+        await PageObjects.gis.loadSavedMap('antimeridian points example');
+        const hits = await getHits();
+        expect(hits).to.equal('2');
+      });
+
+      it('should handle geo_shape filtering with extents that cross antimeridian', async () => {
+        await PageObjects.gis.loadSavedMap('antimeridian shapes example');
         const hits = await getHits();
         expect(hits).to.equal('2');
       });
