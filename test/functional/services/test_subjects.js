@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import expect from 'expect.js';
 import testSubjSelector from '@kbn/test-subj-selector';
 import {
   filter as filterAsync,
@@ -32,28 +31,34 @@ export function TestSubjectsProvider({ getService }) {
   const config = getService('config');
 
   const FIND_TIME = config.get('timeouts.find');
+  const TRY_TIME = config.get('timeouts.try');
   const WAIT_FOR_EXISTS_TIME = config.get('timeouts.waitForExists');
 
   class TestSubjects {
-    async exists(selector, timeout = WAIT_FOR_EXISTS_TIME) {
+    async exists(selector, options = {}) {
+      const {
+        timeout = WAIT_FOR_EXISTS_TIME,
+        allowHidden = false,
+      } = options;
+
       log.debug(`TestSubjects.exists(${selector})`);
-      return await find.existsByDisplayedByCssSelector(testSubjSelector(selector), timeout);
+      return await (
+        allowHidden
+          ? find.existsByCssSelector(testSubjSelector(selector), timeout)
+          : find.existsByDisplayedByCssSelector(testSubjSelector(selector), timeout)
+      );
     }
 
-    async existOrFail(selector, timeout = WAIT_FOR_EXISTS_TIME) {
-      await retry.try(async () => {
-        log.debug(`TestSubjects.existOrFail(${selector})`);
-        const doesExist = await this.exists(selector, timeout);
-        // Verify element exists, or else fail the test consuming this.
-        expect(doesExist).to.be(true);
-      });
+    async existOrFail(selector, existsOptions) {
+      if (!await this.exists(selector, { timeout: TRY_TIME, ...existsOptions })) {
+        throw new Error(`expected testSubject(${selector}) to exist`);
+      }
     }
 
-    async missingOrFail(selector, timeout = WAIT_FOR_EXISTS_TIME) {
-      log.debug(`TestSubjects.missingOrFail(${selector})`);
-      const doesExist = await this.exists(selector, timeout);
-      // Verify element is missing, or else fail the test consuming this.
-      expect(doesExist).to.be(false);
+    async missingOrFail(selector, existsOptions) {
+      if (await this.exists(selector, existsOptions)) {
+        throw new Error(`expected testSubject(${selector}) to not exist`);
+      }
     }
 
 
