@@ -214,17 +214,6 @@ export const TagsTableType: TableType = {
     },
     {
       align: 'right',
-      field: 'configuration_blocks',
-      name: i18n.translate('xpack.beatsManagement.tagsTable.configurationsTitle', {
-        defaultMessage: 'Configurations',
-      }),
-      render: (configurationBlocks: ConfigurationBlock[]) => (
-        <div>{configurationBlocks.length}</div>
-      ),
-      sortable: false,
-    },
-    {
-      align: 'right',
       field: 'last_updated',
       name: i18n.translate('xpack.beatsManagement.tagsTable.lastUpdateTitle', {
         defaultMessage: 'Last update',

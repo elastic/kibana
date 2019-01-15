@@ -129,7 +129,7 @@ class BeatDetailsPageComponent extends React.PureComponent<PageProps, PageState>
       <PrimaryLayout
         title={title}
         actionSection={this.renderActionSection(beat)}
-        hideBreadcrumbs={this.props.libs.framework.info.k7Design}
+        hideBreadcrumbs={this.props.libs.framework.versionGreaterThen('6.7.0')}
       >
         <React.Fragment>
           <Breadcrumb title={`Enrolled Beats`} path={`/overview/enrolled_beats`} />

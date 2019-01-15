@@ -45,7 +45,8 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     private readonly getBasePath: () => string,
     private readonly onKibanaReady: () => Promise<IInjector>,
     private readonly XPackInfoProvider: unknown,
-    private readonly uiSettings: any
+    private readonly uiSettings: any,
+    public readonly version: string
   ) {
     this.adapterService = new KibanaAdapterServiceProvider();
 

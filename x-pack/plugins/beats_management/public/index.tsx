@@ -40,7 +40,7 @@ async function startApp(libs: FrontendLibs) {
         </HashRouter>
       </I18nProvider>
     </ThemeProvider>,
-    'management'
+    libs.framework.versionGreaterThen('6.7.0') ? 'management' : 'self'
   );
 
   await libs.framework.waitUntilFrameworkReady();

@@ -9,6 +9,7 @@ import { LICENSES } from './../../../../common/constants/security';
 export interface FrameworkAdapter {
   // Instance vars
   info: FrameworkInfo;
+  version: string;
   currentUser: FrameworkUser;
   // Methods
   waitUntilFrameworkReady(): Promise<void>;
