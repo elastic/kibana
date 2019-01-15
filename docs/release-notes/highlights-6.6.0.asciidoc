@@ -12,4 +12,14 @@ how the user experience improved.
 Refer to the <<release-notes-6.6.0, {kib} 6.6.0 Release Notes>> for a list of
 bug fixes and other changes.
 
-coming[6.6]
+coming[6.6.0]
+
+[float]
+=== Annotate your {ml} results
+
+You can now add annotations by drag-selecting in the *Single Metric Viewer*
+charts. For example, you can annotate a time period to describe what is
+occurring in your operational environment or to explain why anomalies were
+detected. After you add annotations, they are also listed in the
+*Anomaly Explorer* and the *Job Management* page. See <<xpack-ml>>.
+
