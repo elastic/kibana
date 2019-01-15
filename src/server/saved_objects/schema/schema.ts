@@ -42,7 +42,7 @@ export class SavedObjectsSchema {
 
   public getAvailableTypes() {
     if (this.definition) {
-      return Object.entries(this.definition).filter((type, definition) => !definition.hidden);
+      return Object.entries(this.definition).filter(entry => !entry[1].hidden);
     }
 
     return [];
