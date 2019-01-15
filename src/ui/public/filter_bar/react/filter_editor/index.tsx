@@ -57,7 +57,6 @@ interface Props {
   indexPatterns: IndexPattern[];
   onSubmit: (filter: MetaFilter) => void;
   onCancel: () => void;
-  showIndexPatternInput: boolean;
   intl: InjectedIntl;
 }
 

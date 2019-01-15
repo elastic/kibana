@@ -117,7 +117,7 @@ class FilterBarUI extends Component<Props, State> {
 
     const button = (
       <EuiButtonEmpty size="xs" onClick={this.onOpenAddFilterPopover}>
-        +
+        <span>+ </span>
         <FormattedMessage
           id="common.ui.filterBar.addFilterButtonLabel"
           defaultMessage="Add filter"

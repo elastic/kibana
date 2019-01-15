@@ -17,4 +17,6 @@
  * under the License.
  */
 
+import './directive';
+
 export { FilterBar } from './filter_bar';

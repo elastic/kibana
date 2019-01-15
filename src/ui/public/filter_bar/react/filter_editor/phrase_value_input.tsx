@@ -21,8 +21,8 @@ import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { uniq } from 'lodash';
 import React from 'react';
-import { ValueInputType } from 'ui/filter_bar/react/filter_editor/value_input_type';
 import { PhraseSuggestor, PhraseSuggestorProps } from './phrase_suggestor';
+import { ValueInputType } from './value_input_type';
 
 interface Props extends PhraseSuggestorProps {
   value?: string;
