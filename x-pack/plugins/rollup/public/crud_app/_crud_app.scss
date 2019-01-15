@@ -4,10 +4,3 @@
 .rollupJobWizardStepActions {
   align-items: flex-end;
 }
-
-// Needed because this sits in between some EuiPage elements that require it
-// sass-lint:disable no-ids
-#rollupJobsReactRoot {
-  display: flex;
-  flex-grow: 1;
-}

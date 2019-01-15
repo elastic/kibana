@@ -40,6 +40,6 @@ export default function pluginsTasks(gulp, { log, colors }) {
   });
 
   gulp.task('canvas:plugins:build-prod', function(done) {
-    del(buildDir).then(() => webpack(getWebpackConfig(), onComplete(done)));
+    del(buildDir).then(() => webpack(getWebpackConfig({ production: true }), onComplete(done)));
   });
 }

@@ -21,9 +21,6 @@ interface ErrorListProps {
 export const ErrorList = ({ dateRangeStart, dateRangeEnd, filters }: ErrorListProps) => (
   <Query query={getErrorListQuery} variables={{ dateRangeStart, dateRangeEnd, filters }}>
     {({ loading, error, data }) => {
-      if (loading) {
-        return 'Loading...';
-      }
       if (error) {
         return `Error ${error.message}`;
       }
@@ -35,6 +32,7 @@ export const ErrorList = ({ dateRangeStart, dateRangeEnd, filters }: ErrorListPr
           </EuiTitle>
           <EuiPanel>
             <EuiInMemoryTable
+              loading={loading}
               items={errorList}
               columns={[
                 { field: 'type', name: 'Error Type', sortable: true },
