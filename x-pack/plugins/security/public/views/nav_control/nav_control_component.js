@@ -45,7 +45,7 @@ export class SecurityNavControl extends Component {
   };
 
   render() {
-    const { user, route } = this.props;
+    const { user, editProfileUrl, logoutUrl } = this.props;
     const name = user.full_name || user.username || '';
     const button = (
       <EuiHeaderSectionItemButton
@@ -92,7 +92,7 @@ export class SecurityNavControl extends Component {
                 <EuiFlexItem>
                   <EuiFlexGroup justifyContent="spaceBetween">
                     <EuiFlexItem grow={false}>
-                      <EuiLink href={route}>
+                      <EuiLink href={editProfileUrl}>
                         <FormattedMessage
                           id="xpack.security.navControlComponent.editProfileLinkText"
                           defaultMessage="Edit profile"
@@ -101,7 +101,7 @@ export class SecurityNavControl extends Component {
                     </EuiFlexItem>
 
                     <EuiFlexItem grow={false}>
-                      <EuiLink href="/logout">
+                      <EuiLink href={logoutUrl}>
                         <FormattedMessage
                           id="xpack.security.navControlComponent.logoutLinkText"
                           defaultMessage="Log out"
