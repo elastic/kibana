@@ -15,13 +15,13 @@ export function upgradeAssistant(kibana: any) {
     require: ['elasticsearch'],
     uiExports: {
       managementSections: ['plugins/upgrade_assistant'],
-      mappings,
       savedObjectSchemas: {
-        'upgrade-assistant-telemetry': {
+        'upgrade-assistant': {
           isNamespaceAgnostic: true,
         },
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      mappings,
     },
     publicDir: resolve(__dirname, 'public'),
 

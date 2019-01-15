@@ -4,44 +4,45 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Legacy } from 'kibana';
+import {
+  UIOpen,
+  UIOpenOption,
+  UPGRADE_ASSISTANT_DOC_ID,
+  UPGRADE_ASSISTANT_TYPE,
+  UpgradeAssistantTelemetryServer,
+} from '../../../common/types';
 
-interface UIOpenOption {
-  overview: boolean;
-  cluster: boolean;
-  indices: boolean;
-}
-
-export async function upsertUIOpenOption(
-  server: Legacy.Server,
-  req: Legacy.Request
-): Promise<UIOpenOption> {
+async function incrementUIOpenOptionCounter(
+  server: UpgradeAssistantTelemetryServer,
+  uiOpenOptionCounter: UIOpenOption
+) {
   const { getSavedObjectsRepository } = server.savedObjects;
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const internalRepository = getSavedObjectsRepository(callWithInternalUser);
-  const { overview, cluster, indices } = req.payload as UIOpenOption;
+
+  await internalRepository.incrementCounter(
+    UPGRADE_ASSISTANT_TYPE,
+    UPGRADE_ASSISTANT_DOC_ID,
+    `telemetry.ui_open.${uiOpenOptionCounter}`
+  );
+}
+
+export async function upsertUIOpenOption(
+  server: UpgradeAssistantTelemetryServer,
+  req: Legacy.Request
+): Promise<UIOpen> {
+  const { overview, cluster, indices } = req.payload as UIOpen;
 
   if (overview) {
-    await internalRepository.incrementCounter(
-      'upgrade-assistant',
-      'upgrade-assistant',
-      'telemetry.ui_open.overview'
-    );
+    await incrementUIOpenOptionCounter(server, 'overview');
   }
 
   if (cluster) {
-    await internalRepository.incrementCounter(
-      'upgrade-assistant',
-      'upgrade-assistant',
-      'telemetry.ui_open.cluster'
-    );
+    await incrementUIOpenOptionCounter(server, 'cluster');
   }
 
   if (indices) {
-    await internalRepository.incrementCounter(
-      'upgrade-assistant',
-      'upgrade-assistant',
-      'telemetry.ui_open.indices'
-    );
+    await incrementUIOpenOptionCounter(server, 'indices');
   }
 
   return {

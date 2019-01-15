@@ -4,70 +4,87 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
-import { set } from 'lodash';
+import { merge, set } from 'lodash';
+import { SavedObjectsClient } from '../../../../../../src/server/saved_objects/service';
+import {
+  UPGRADE_ASSISTANT_DOC_ID,
+  UPGRADE_ASSISTANT_TYPE,
+  UpgradeAssistantTelemetry,
+  UpgradeAssistantTelemetrySavedObject,
+  UpgradeAssistantTelemetrySavedObjectAttributes,
+  UpgradeAssistantTelemetryServer,
+} from '../../../common/types';
 import { isDeprecationLoggingEnabled } from '../es_deprecation_logging_apis';
 
-interface KibanaLegacyServer extends Legacy.Server {
-  usage: {
-    collectorSet: {
-      makeUsageCollector: any;
-      register: any;
-    };
-  };
+async function getSavedObjectAttributesFromRepo(
+  savedObjectsRepository: SavedObjectsClient,
+  docType: string,
+  docID: string
+) {
+  try {
+    return (await savedObjectsRepository.get(docType, docID)).attributes;
+  } catch (e) {
+    return null;
+  }
 }
 
-interface UpgradeAssistantSavedObjectAttributes {
-  telemetry: {
-    ui_open: {
-      overview: number;
-      cluster: number;
-      indices: number;
-    };
-  };
-}
-
-export async function fetchUpgradeAssistantMetrics(callCluster: any, server: Legacy.Server) {
+export async function fetchUpgradeAssistantMetrics(
+  callCluster: any,
+  server: UpgradeAssistantTelemetryServer
+): Promise<UpgradeAssistantTelemetry> {
   const { getSavedObjectsRepository } = server.savedObjects;
   const savedObjectsRepository = getSavedObjectsRepository(callCluster);
-  const upgradeAssistant = await savedObjectsRepository.get(
-    'upgrade-assistant',
-    'upgrade-assistant'
+  const upgradeAssistantSOAttributes = await getSavedObjectAttributesFromRepo(
+    savedObjectsRepository,
+    UPGRADE_ASSISTANT_TYPE,
+    UPGRADE_ASSISTANT_DOC_ID
   );
   const loggerDeprecationCallResult = await callCluster('cluster.getSettings', { ignore: [404] });
 
-  const getUIOpen = (upgradeAssistantAttrs: any): UpgradeAssistantSavedObjectAttributes => {
-    const upgradeAssistantAttrsKeys = Object.keys(upgradeAssistantAttrs);
-    const uiOpenObj = {};
+  const getTelemetrySavedObject = (
+    upgradeAssistantTelemetrySavedObjectAttrs: UpgradeAssistantTelemetrySavedObjectAttributes | null
+  ): UpgradeAssistantTelemetrySavedObject => {
+    const defaultTelemetrySavedObject = {
+      telemetry: {
+        ui_open: {
+          overview: 0,
+          cluster: 0,
+          indices: 0,
+        },
+      },
+    };
 
-    upgradeAssistantAttrsKeys.forEach(key => {
-      set(uiOpenObj, key, upgradeAssistantAttrs[key]);
+    if (!upgradeAssistantTelemetrySavedObjectAttrs) {
+      return defaultTelemetrySavedObject;
+    }
+
+    const upgradeAssistantTelemetrySOAttrsKeys = Object.keys(
+      upgradeAssistantTelemetrySavedObjectAttrs
+    );
+    const telemetryObj = defaultTelemetrySavedObject;
+
+    upgradeAssistantTelemetrySOAttrsKeys.forEach((key: string) => {
+      set(telemetryObj, key, upgradeAssistantTelemetrySavedObjectAttrs[key]);
     });
 
-    return uiOpenObj as UpgradeAssistantSavedObjectAttributes;
+    return telemetryObj as UpgradeAssistantTelemetrySavedObject;
   };
 
-  return {
+  return merge(getTelemetrySavedObject(upgradeAssistantSOAttributes), {
     telemetry: {
-      ui_open: {
-        overview: 0,
-        cluster: 0,
-        indices: 0,
-        ...getUIOpen(upgradeAssistant.attributes).telemetry.ui_open,
+      features: {
+        deprecation_logging: {
+          enabled: isDeprecationLoggingEnabled(loggerDeprecationCallResult),
+        },
       },
     },
-    features: {
-      deprecation_logging: {
-        enabled: isDeprecationLoggingEnabled(loggerDeprecationCallResult),
-      },
-    },
-  };
+  });
 }
 
-export function makeUpgradeAssistantUsageCollector(server: Legacy.Server) {
-  const kbnServer = server as KibanaLegacyServer;
+export function makeUpgradeAssistantUsageCollector(server: UpgradeAssistantTelemetryServer) {
+  const kbnServer = server as UpgradeAssistantTelemetryServer;
   const upgradeAssistantUsageCollector = kbnServer.usage.collectorSet.makeUsageCollector({
-    type: 'upgrade_assistant',
+    type: UPGRADE_ASSISTANT_TYPE,
     fetch: async (callCluster: any) => fetchUpgradeAssistantMetrics(callCluster, server),
   });
 
