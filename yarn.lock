@@ -842,15 +842,15 @@
     oppsy "2.x.x"
     pumpify "1.3.x"
 
-"@elastic/javascript-typescript-langserver@^0.1.8":
-  version "0.1.8"
-  resolved "https://registry.yarnpkg.com/@elastic/javascript-typescript-langserver/-/javascript-typescript-langserver-0.1.8.tgz#45f4eb6b97820bc51722501e67dffc0c8754bc19"
-  integrity sha512-qRqN+Ch92OZSep43NI5mZ8nik2fxW78ukyf1ppcgA/9/ftoieYeK5uoTstm+LWQSzQ0bU1M3V9PhKQdjHKjEpg==
+"@elastic/javascript-typescript-langserver@^0.1.9":
+  version "0.1.9"
+  resolved "https://registry.yarnpkg.com/@elastic/javascript-typescript-langserver/-/javascript-typescript-langserver-0.1.9.tgz#67188fd7e336feb9f2bd8673da0f585eb4143116"
+  integrity sha512-vCeu4jgZYT/I35VZzIGSN8HlhHCVsj5DoPI0XGkxVVjbogJXOEnX2jf/OzKFJCfqq6IGsGe5V/hb2vyOlhg2kg==
   dependencies:
     "@elastic/lsp-extension" "^0.1.1"
-    javascript-typescript-langserver "^2.11.1"
+    javascript-typescript-langserver "^2.11.2"
     rxjs "^5.5.0"
-    typescript "^3.2.2"
+    typescript "~3.1.1"
 
 "@elastic/lsp-extension@^0.1.1":
   version "0.1.1"
@@ -12611,7 +12611,7 @@ jaeger-client@^3.5.3:
     uuid "^3.2.1"
     xorshift "^0.2.0"
 
-javascript-typescript-langserver@^2.11.1:
+javascript-typescript-langserver@^2.11.2:
   version "2.11.2"
   resolved "https://registry.yarnpkg.com/javascript-typescript-langserver/-/javascript-typescript-langserver-2.11.2.tgz#fb6539382943873963d03bd11361c754e16e5c82"
   integrity sha512-ntxgW8oAKKGU+Gk21u7HK+/LG8+D4jekxPxOrJYov82CJRb/k/9MKX+gdk7Eh1VSaujwDKJIWzCOWpna4Vtw3A==
@@ -12631,7 +12631,7 @@ javascript-typescript-langserver@^2.11.1:
     rxjs "^5.5.0"
     semaphore-async-await "^1.5.1"
     string-similarity "^2.0.0"
-    typescript "~3.0.3"
+    typescript "~3.1.1"
     vscode-jsonrpc "^4.0.0"
     vscode-languageserver "^5.0.0"
     vscode-languageserver-types "^3.0.3"
@@ -22300,15 +22300,15 @@ typescript-fsa@^2.0.0, typescript-fsa@^2.5.0:
   resolved "https://registry.yarnpkg.com/typescript-fsa/-/typescript-fsa-2.5.0.tgz#1baec01b5e8f5f34c322679d1327016e9e294faf"
   integrity sha1-G67AG16PXzTDImedEycBbp4pT68=
 
-typescript@^3.0.3, typescript@~3.0.3:
+typescript@^3.0.3:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.0.3.tgz#4853b3e275ecdaa27f78fda46dc273a7eb7fc1c8"
   integrity sha512-kk80vLW9iGtjMnIv11qyxLqZm20UklzuR2tL0QAnDIygIUIemcZMxlMWudl9OOt76H3ntVzcTiddQ1/pAAJMYg==
 
-typescript@^3.2.2:
-  version "3.2.2"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.2.2.tgz#fe8101c46aa123f8353523ebdcf5730c2ae493e5"
-  integrity sha512-VCj5UiSyHBjwfYacmDuc/NOk4QQixbE+Wn7MFJuS0nRuPQbof132Pw4u53dm264O8LPc2MVsc7RJNml5szurkg==
+typescript@~3.1.1:
+  version "3.1.6"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.1.6.tgz#b6543a83cfc8c2befb3f4c8fba6896f5b0c9be68"
+  integrity sha512-tDMYfVtvpb96msS1lDX9MEdHrW4yOuZ4Kdc4Him9oU796XldPYF/t2+uKoX0BBa0hXXwDlqYQbXY5Rzjzc5hBA==
 
 ua-parser-js@^0.7.18, ua-parser-js@^0.7.9:
   version "0.7.18"
