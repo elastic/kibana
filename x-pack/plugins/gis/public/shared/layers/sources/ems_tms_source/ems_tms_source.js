@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { TMSSource } from './tms_source';
-import { TileLayer } from '../tile_layer';
+import { TMSSource } from '../tms_source';
+import { TileLayer } from '../../tile_layer';
 import {
   EuiText,
   EuiSelect,
@@ -105,6 +105,22 @@ export class EMSTMSSource extends TMSSource {
 
   async getDisplayName() {
     return this._descriptor.id;
+  }
+
+  async getAttributions() {
+    const service = this._getTMSOptions();
+    const attributions = service.attributionMarkdown.split('|');
+
+    return attributions.map((attribution) => {
+      attribution = attribution.trim();
+      //this assumes attribution is plain markdown link
+      const extractLink = /\[(.*)\]\((.*)\)/;
+      const result = extractLink.exec(attribution);
+      return {
+        label: result ? result[1] : null,
+        url: result ? result[2] : null
+      };
+    });
   }
 
   getUrlTemplate() {

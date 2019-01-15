@@ -7,7 +7,7 @@
         <h1>{{indexPattern.title}}</h1>
       </div>
       <div class="euiFlexItem euiFlexItem--flexGrowZero">
-          <ml-full-time-range-selector index-pattern='indexPattern' query='searchQuery' />
+          <ml-full-time-range-selector ng-if="showSidebar" index-pattern='indexPattern' query='searchQuery' />
       </div>
     </div>
 
@@ -86,7 +86,7 @@
 
       </div>
 
-      <div class="kuiPanel kuiVerticalRhythm datavisualizer-panel card-panel">
+      <div ng-if="metricCards.length > 0" class="kuiPanel kuiVerticalRhythm datavisualizer-panel card-panel">
       	<div class="euiText">
           <h2
             class="kuiSubTitle kuiVerticalRhythm"

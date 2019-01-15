@@ -34,6 +34,10 @@ export class TMSService {
     return this._emsClient.sanitizeMarkdown(this._config.attribution);
   }
 
+  getMarkdownAttribution() {
+    return this._config.attribution;
+  }
+
   getMinZoom() {
     return this._config.minZoom;
   }
