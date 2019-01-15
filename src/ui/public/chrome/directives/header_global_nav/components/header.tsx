@@ -46,7 +46,7 @@ interface Props {
   breadcrumbs$: Rx.Observable<Breadcrumb[]>;
   homeHref: string;
   isVisible: boolean;
-  navLinks: NavLink[];
+  navLinks$: Rx.Observable<NavLink[]>;
   navControls: ChromeHeaderNavControlsRegistry;
   intl: InjectedIntl;
 }
@@ -67,7 +67,7 @@ class HeaderUI extends Component<Props> {
   }
 
   public render() {
-    const { appTitle, breadcrumbs$, isVisible, navControls, navLinks } = this.props;
+    const { appTitle, breadcrumbs$, isVisible, navControls, navLinks$ } = this.props;
 
     if (!isVisible) {
       return null;
@@ -90,7 +90,7 @@ class HeaderUI extends Component<Props> {
           <HeaderNavControls navControls={rightNavControls} />
 
           <EuiHeaderSectionItem>
-            <HeaderAppMenu navLinks={navLinks} />
+            <HeaderAppMenu navLinks$={navLinks$} />
           </EuiHeaderSectionItem>
         </EuiHeaderSection>
       </EuiHeader>
