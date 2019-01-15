@@ -31,6 +31,6 @@ export default (AbstractSearchStrategy, RollupSearchRequest) =>
     }
 
     async isViable(req, indexPattern) {
-      return await await this.isRollupJobExists(req, indexPattern);
+      return await this.isRollupJobExists(req, indexPattern);
     }
   });
