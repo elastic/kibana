@@ -13,7 +13,7 @@ import {
 
 const NO_REGIONMAP_LAYERS_MSG =
   'No vector layers are available.' +
-  ' Contact your system administrator to enable vector layers by setting "map.regionmap" in kibana.yml.';
+  ' Ask your system administrator to set "map.regionmap" in kibana.yml.';
 
 export function CreateSourceEditor({ onSelect, regionmapLayers }) {
 
