@@ -29,7 +29,7 @@ fi
 export KIBANA_DIR="$dir"
 export XPACK_DIR="$KIBANA_DIR/x-pack"
 export PARENT_DIR="$(cd "$KIBANA_DIR/.."; pwd)"
-export TEST_ES_SNAPSHOT_VERSION="7.0.0-fbd1a09d"
+
 echo "-> KIBANA_DIR $KIBANA_DIR"
 echo "-> XPACK_DIR $XPACK_DIR"
 echo "-> PARENT_DIR $PARENT_DIR"
