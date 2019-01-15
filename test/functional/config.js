@@ -32,7 +32,8 @@ import {
   PointSeriesPageProvider,
   VisualBuilderPageProvider,
   TimelionPageProvider,
-  SharePageProvider
+  SharePageProvider,
+  WelcomePageProvider
 } from './page_objects';
 
 import {
@@ -92,6 +93,7 @@ export default async function ({ readConfigFile }) {
       visualBuilder: VisualBuilderPageProvider,
       timelion: TimelionPageProvider,
       share: SharePageProvider,
+      welcome: WelcomePageProvider,
     },
     services: {
       es: commonConfig.get('services.es'),

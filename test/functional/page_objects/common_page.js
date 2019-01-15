@@ -30,7 +30,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['shield']);
+  const PageObjects = getPageObjects(['shield', 'welcome']);
 
   const defaultTryTimeout = config.get('timeouts.try');
   const defaultFindTimeout = config.get('timeouts.find');
@@ -124,6 +124,9 @@ export function CommonPageProvider({ getService, getPageObjects }) {
             .then(function () {
               log.debug('returned from get, calling refresh');
               return browser.refresh();
+            })
+            .then(async function () {
+              await PageObjects.welcome.skip();
             })
             .then(async function () {
               const currentUrl = await self.loginIfPrompted(appUrl);

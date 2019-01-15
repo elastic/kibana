@@ -30,7 +30,6 @@ export function SpaceSelectorPageProvider({ getService, getPageObjects }) {
     async expectHomePage(spaceId) {
       return await retry.try(async () => {
         log.debug(`expectHomePage(${spaceId})`);
-        await this.dismissWelcomeScreen();
         await find.byCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide) ', 20000);
         const url = await browser.getCurrentUrl();
         if (spaceId === 'default') {
@@ -39,12 +38,6 @@ export function SpaceSelectorPageProvider({ getService, getPageObjects }) {
           expect(url).to.contain(`/s/${spaceId}/app/kibana#/home`);
         }
       });
-    }
-
-    async dismissWelcomeScreen() {
-      if (await PageObjects.home.isWelcomeShowing()) {
-        await PageObjects.home.hideWelcomeScreen();
-      }
     }
 
     async openSpacesNav() {
