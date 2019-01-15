@@ -19,6 +19,16 @@ include::management/rollups/create_and_manage_rollups.asciidoc[]
 
 include::management/rollups/visualize_rollup_data.asciidoc[]
 
+include::management/index-lifecycle-policies/intro-to-lifecycle-policies.asciidoc[]
+
+include::management/index-lifecycle-policies/create-policy.asciidoc[]
+
+include::management/index-lifecycle-policies/manage-policy.asciidoc[]
+
+include::management/index-lifecycle-policies/add-policy-to-index.asciidoc[]
+
+include::management/index-lifecycle-policies/example-index-lifecycle-policy.asciidoc[]
+
 include::management/managing-fields.asciidoc[]
 
 include::management/managing-indices.asciidoc[]

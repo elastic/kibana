@@ -1,0 +1,29 @@
+[[index-lifecycle-policies]]
+== Index lifecycle policies
+
+If you're working with time series data, you don't want to continually dump 
+everything into a single index. Instead, you might periodically roll over the 
+data to a new index to keep it from growing so big it's slow and expensive. 
+As the index ages and you query it less frequently, you’ll likely move it to 
+less expensive hardware and reduce the number of shards and replicas.
+
+To automatically move an index through its lifecycle, you can create a policy 
+to define actions to perform on the index as it ages. Index lifecycle policies 
+are especially useful when working with {beats-ref}/beats-reference.html[Beats] 
+data shippers, which continually 
+send operational data, such as metrics and logs, to Elasticsearch. You can 
+automate a rollover to a new index when the existing index reaches a specified 
+size or age.  This ensures that all indices have a similar size instead of having 
+daily indices where size can vary based on the number of Beats and the number 
+of events sent.
+
+{kib}’s *Index Lifecycle Policies* walks you through the process for creating 
+and configuring a policy. Before using this feature, you should be familiar 
+with index lifecycle management:
+
+* For an introduction, see 
+{ref}/getting-started-index-lifecycle-management.html[Getting started with index 
+lifecycle management].  
+* To dig into the concepts and technical details, see 
+{ref}/index-lifecycle-management.html[Managing the index lifecycle].
+* To check out the APIs, see {ref}/index-lifecycle-management-api.html[Index lifecycle management API].
