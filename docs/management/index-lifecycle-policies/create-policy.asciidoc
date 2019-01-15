@@ -25,16 +25,18 @@ You can define up to four phases in the index lifecycle. For each phase, you
 can enable actions to optimize performance for that phase. Transitioning 
 between phases is based on the age of the index.
 
-The four phases of an index lifecycle are:
+The four phases in the index lifecycle are:
 
-* *Hot.* The index is actively being queried and written to. To optimize for 
-write throughput, you can periodically roll over to a new index when the 
+* *Hot.* The index is actively being queried and written to. You can optionally 
+roll over to a new index when the 
 original index reaches a specified size or age.  When a rollover occurs, a new 
 index is created, added to the index alias, and designated as the new “hot” 
 index. You can still query the previous indices, but you only ever write to 
 the “hot” index. See {ref}/indices-rollover-index.html[Rollover index] for more information.
 
-* *Warm.* The index is still being queried, but is read-only. Generally, 
+* *Warm.* The index is still being queried, but is typically 
+read-only. The index is still open for late-arriving data, for example, from a Beat 
+that had a network problem that's now been fixed. Generally, 
 you’ll move your indices onto less performant nodes in this phase. You can 
 change the number of replicas and move the shards to a different set of nodes. 
 For faster searches, you can reduce the number of of primary shards and force 

@@ -7,7 +7,7 @@ such as metrics and log data, to {es}.  When you create the Beats packages, an
 index template is installed.  The template includes a default policy to apply 
 when new indices are created.  
 
-You can edit the policy in {kib}'s Index Lifecycle Policies.  For example, you might:
+You can edit the policy in {kib}'s *Index Lifecycle Policies*.  For example, you might:
 
 * Rollover the index when it reaches 50 GB in size or is 30 days old.  These 
 settings are the default for the Beats lifecycle policy. This avoids 

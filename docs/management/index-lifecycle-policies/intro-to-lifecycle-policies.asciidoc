@@ -2,7 +2,7 @@
 == Index lifecycle policies
 
 If you're working with time series data, you don't want to continually dump 
-everything into a single index. Instead, you’ll periodically roll over the 
+everything into a single index. Instead, you might periodically roll over the 
 data to a new index to keep it from growing so big it's slow and expensive. 
 As the index ages and you query it less frequently, you’ll likely move it to 
 less expensive hardware and reduce the number of shards and replicas.
@@ -17,7 +17,7 @@ size or age.  This ensures that all indices have a similar size instead of havin
 daily indices where size can vary based on the number of Beats and the number 
 of events sent.
 
-{kib}’s *Index lifecycle policies* UI walks you through the process for creating 
+{kib}’s *Index Lifecycle Policies* walks you through the process for creating 
 and configuring a policy. Before using this feature, you should be familiar 
 with index lifecycle management:
 
