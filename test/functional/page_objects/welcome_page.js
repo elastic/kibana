@@ -17,17 +17,21 @@
  * under the License.
  */
 
-export function WelcomePageProvider({ getService }) {
-  const testSubjects = getService('testSubjects');
+export async function WelcomePageProvider({ getService, getPageObjects }) {
   const browser = getService('browser');
+  const lifecycle = getService('lifecycle');
+  const PageObjects = getPageObjects(['common']);
 
-  return new class WelcomePage {
-    async skip() {
-      if (await testSubjects.exists('skipWelcomeScreen')) {
-        await testSubjects.click('skipWelcomeScreen');
-      } else {
-        await browser.setLocalStorageItem('home:welcome:show', 'false');
-      }
+  const welcomePage = new class WelcomePage {
+    async disable() {
+      await browser.setLocalStorageItem('home:welcome:show', 'false');
     }
   };
+
+  lifecycle.on('beforeTests', async () => {
+    await PageObjects.common.navigateToApp('home');
+    await welcomePage.disable();
+  });
+
+  return welcomePage;
 }
