@@ -18,7 +18,6 @@ import { getFilterListsBreadcrumbs } from '../../breadcrumbs';
 import { checkFullLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from 'plugins/ml/privilege/check_privilege';
 import { getMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
-import { initPromise } from 'plugins/ml/util/promise';
 import { FilterLists } from './filter_lists';
 
 import uiRoutes from 'ui/routes';
@@ -38,7 +37,6 @@ uiRoutes
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       mlNodeCount: getMlNodeCount,
-      initPromise: initPromise(false)
     }
   });
 

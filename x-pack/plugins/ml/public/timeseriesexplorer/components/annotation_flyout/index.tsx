@@ -25,6 +25,8 @@ import { AnnotationDescriptionList } from '../annotation_description_list';
 
 import { Annotation } from '../../../../common/types/annotations';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 interface Props {
   annotation: Annotation;
   cancelAction: () => {};
@@ -43,19 +45,37 @@ export const AnnotationFlyout: React.SFC<Props> = ({
   const saveActionWrapper = () => saveAction(annotation);
   const deleteActionWrapper = () => deleteAction(annotation);
   const isExistingAnnotation = typeof annotation._id !== 'undefined';
-  const titlePrefix = isExistingAnnotation ? 'Edit' : 'Add';
-
   return (
     <EuiFlyout onClose={cancelAction} size="s" aria-labelledby="Add annotation">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <h2 id="mlAnnotationFlyoutTitle">{titlePrefix} annotation</h2>
+          <h2 id="mlAnnotationFlyoutTitle">
+            {isExistingAnnotation ? (
+              <FormattedMessage
+                id="xpack.ml.timeSeriesExplorer.annotationFlyout.editAnnotationTitle"
+                defaultMessage="Edit annotation"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.ml.timeSeriesExplorer.annotationFlyout.addAnnotationTitle"
+                defaultMessage="Add annotation"
+              />
+            )}
+          </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <AnnotationDescriptionList annotation={annotation} />
         <EuiSpacer size="m" />
-        <EuiFormRow label="Annotation text" fullWidth>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.ml.timeSeriesExplorer.annotationFlyout.annotationTextLabel"
+              defaultMessage="Annotation text"
+            />
+          }
+          fullWidth
+        >
           <EuiTextArea
             fullWidth
             isInvalid={annotation.annotation === ''}
@@ -69,19 +89,35 @@ export const AnnotationFlyout: React.SFC<Props> = ({
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="cross" onClick={cancelAction} flush="left">
-              Cancel
+              <FormattedMessage
+                id="xpack.ml.timeSeriesExplorer.annotationFlyout.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {isExistingAnnotation && (
               <EuiButtonEmpty color="danger" onClick={deleteActionWrapper}>
-                Delete
+                <FormattedMessage
+                  id="xpack.ml.timeSeriesExplorer.annotationFlyout.deleteButtonLabel"
+                  defaultMessage="Delete"
+                />
               </EuiButtonEmpty>
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton fill isDisabled={annotation.annotation === ''} onClick={saveActionWrapper}>
-              {isExistingAnnotation ? 'Update' : 'Create'}
+              {isExistingAnnotation ? (
+                <FormattedMessage
+                  id="xpack.ml.timeSeriesExplorer.annotationFlyout.updateButtonLabel"
+                  defaultMessage="Update"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.ml.timeSeriesExplorer.annotationFlyout.createButtonLabel"
+                  defaultMessage="Create"
+                />
+              )}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

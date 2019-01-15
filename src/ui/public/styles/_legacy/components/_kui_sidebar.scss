@@ -1,0 +1,133 @@
+.kuiSideBarInput,
+.kuiSideBarSelect {
+  height: $euiSizeL;
+  width: 100%;
+  font-size: $euiFontSizeXS;
+  padding: 0 $euiSize;
+}
+
+.kuiSideBarInput {
+  display: block;
+  color: $euiTextColor;
+  border: $euiBorderThin;
+  border-radius: $euiBorderRadius;
+  padding-left: $euiSizeXS;
+  padding-right: $euiSizeXS;
+}
+
+.kuiSideBarSection {
+  margin-bottom: $euiSizeS;
+  background-color: $euiColorEmptyShade;
+  padding: $euiSizeS;
+  border-radius: $euiBorderRadius;
+
+  label {
+    font-weight: $euiFontWeightBold;
+    display: block;
+  }
+
+  .vis-option-item label {
+    font-weight: $euiFontWeightRegular !important;
+  }
+}
+
+.kuiSideBarSection .kuiSideBarSection .kuiSideBarSection {
+  border-radius: 0;
+  border-left: solid 1px tint($euiColorPrimary, 20%);
+  margin-left: 3px; // Align to caret open
+}
+
+.kuiSideBarSectionTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $euiSizeS;
+}
+
+.kuiSideBarSectionTitle__text {
+  font-size: $euiFontSizeL;
+  color: $euiColorDarkestShade;
+}
+
+
+.kuiSideBarSectionTitle__action {
+  background-color: transparent; // Override Bootstrap button styles.
+  padding: 0; // 1
+  cursor: pointer;
+  color: $euiColorPrimary;
+  border: none;
+
+  &:hover {
+    color: darken($euiColorPrimary, 10%);
+  }
+}
+
+.kuiSideBarCollapsibleTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: $euiSizeS;
+}
+
+.kuiSideBarCollapsibleTitle__label {
+  display: flex;
+  align-items: center;
+}
+
+.kuiSideBarCollapsibleTitle__caret {
+  @include size($euiSizeM + ($euiSizeXS / 2));
+  font-size: $euiFontSizeS !important; // Override FontAwesome .fa styles.
+  color: $euiColorPrimary;
+}
+
+.kuiSideBarCollapsibleTitle__text {
+  font-size: $euiFontSizeS;
+  color: $euiColorPrimary;
+}
+
+/**
+ * 1. Override Bootstrap button styles.
+ */
+.kuiSideBarCollapsibleTitle__action {
+  background-color: transparent; // 1
+  padding: 0; // 1
+  cursor: pointer;
+  color: $euiColorPrimary;
+  border: none;
+
+  &:hover {
+    color: darken($euiColorPrimary, 10%);
+  }
+}
+
+
+/**
+ * 1. Override Bootstrap h1 styles.
+ */
+.kuiSideBarFormSectionTitle {
+  font-size: 12px;
+  color: $euiColorDarkShade;
+  margin: 10px 0 !important; // 1
+  padding-bottom: 2px;
+}
+
+.kuiSideBarFormRow {
+  display: flex;
+  align-items: center;
+  min-height: $euiSizeM;
+  margin-bottom: $euiSizeS;
+}
+
+.kuiSideBarFormRow__label {
+  display: flex;
+  align-items: center;
+  flex: 1 1 40% !important; // Override .vis-editor-sidebar styles
+  font-weight: $euiFontWeightBold;
+}
+
+.kuiSideBarFormRow__control {
+  display: flex;
+  align-items: center;
+  flex: 1 1 60%;
+}

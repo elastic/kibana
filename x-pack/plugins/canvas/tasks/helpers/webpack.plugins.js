@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+const { writeFileSync } = require('fs');
 const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const {
@@ -13,12 +14,11 @@ const {
 const sourceDir = path.resolve(__dirname, '../../canvas_plugin_src');
 const buildDir = path.resolve(__dirname, '../../canvas_plugin');
 
-export function getWebpackConfig({ devtool, watch } = {}) {
+export function getWebpackConfig({ devtool, watch, production } = {}) {
   return {
     watch,
     devtool,
-
-    mode: 'none',
+    mode: production ? 'production' : 'none',
     entry: {
       'elements/all': path.join(sourceDir, 'elements/register.js'),
       'renderers/all': path.join(sourceDir, 'renderers/register.js'),
@@ -94,6 +94,16 @@ export function getWebpackConfig({ devtool, watch } = {}) {
           ignore: '**/__tests__/**',
         },
       ]),
+      function canvasStatsGenerator() {
+        if (!process.env.CANVAS_GENERATE_STATS) {
+          return;
+        }
+
+        this.hooks.done.tap('canvas_stats', stats => {
+          const content = JSON.stringify(stats.toJson());
+          writeFileSync(path.resolve(__dirname, '../../webpack_stats.json'), content);
+        });
+      },
     ],
 
     module: {

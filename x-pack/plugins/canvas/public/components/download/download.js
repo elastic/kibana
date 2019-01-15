@@ -28,7 +28,7 @@ export class Download extends React.PureComponent {
 
   render() {
     return (
-      <div className="canvas_download" onClick={this.onClick}>
+      <div className="canvasDownload" onClick={this.onClick}>
         {this.props.children}
       </div>
     );

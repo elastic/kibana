@@ -122,7 +122,10 @@ export class DataVisualizer {
     _.each(fields, (field) => {
       if (field.fieldName === undefined) {
         // undefined fieldName is used for a document count request.
-        batches.push([field]);
+        // getDocumentCountStats requires timeField - don't add to batched requests if not defined
+        if (timeFieldName !== undefined) {
+          batches.push([field]);
+        }
       } else {
         const fieldType = field.type;
         if (batchedFields[fieldType] === undefined) {

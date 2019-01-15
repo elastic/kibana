@@ -121,7 +121,8 @@ describe('telemetry class', () => {
       expect(telemetry._checkReportStatus()).toBe(false);
     });
 
-    test('returns false if last report is too recent', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/27922
+    test.skip('returns false if last report is too recent', () => {
       const injector = {
         localStorage: {
           // we expect '>', not '>='

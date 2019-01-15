@@ -50,7 +50,6 @@ import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { JobSelectServiceProvider } from 'plugins/ml/components/job_select_list/job_select_service';
 import { mlForecastService } from 'plugins/ml/services/forecast_service';
 import { mlTimeSeriesSearchService } from 'plugins/ml/timeseriesexplorer/timeseries_search_service';
-import { initPromise } from 'plugins/ml/util/promise';
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
@@ -69,7 +68,6 @@ uiRoutes
       privileges: checkGetJobsPrivilege,
       indexPatterns: loadIndexPatterns,
       mlNodeCount: getMlNodeCount,
-      initPromise: initPromise(true)
     }
   });
 
@@ -83,7 +81,8 @@ module.controller('MlTimeSeriesExplorerController', function (
   AppState,
   config,
   mlSelectIntervalService,
-  mlSelectSeverityService) {
+  mlSelectSeverityService,
+  i18n) {
 
   $scope.timeFieldName = 'timestamp';
   timefilter.enableTimeRangeSelector();
@@ -145,10 +144,17 @@ module.controller('MlTimeSeriesExplorerController', function (
           const invalidIds = _.difference(selectedJobIds, timeSeriesJobIds);
           selectedJobIds = _.without(selectedJobIds, ...invalidIds);
           if (invalidIds.length > 0) {
-            const s = invalidIds.length === 1 ? '' : 's';
-            let warningText = `You can't view requested job${s} ${invalidIds} in this dashboard`;
+            let warningText = i18n('xpack.ml.timeSeriesExplorer.canNotViewRequestedJobsWarningMessage', {
+              defaultMessage: `You can't view requested {invalidIdsCount, plural, one {job} other {jobs}} {invalidIds} in this dashboard`,
+              values: {
+                invalidIdsCount: invalidIds.length,
+                invalidIds
+              }
+            });
             if (selectedJobIds.length === 0 && timeSeriesJobIds.length > 0) {
-              warningText += ', auto selecting first job';
+              warningText += i18n('xpack.ml.timeSeriesExplorer.autoSelectingFirstJobText', {
+                defaultMessage: ', auto selecting first job'
+              });
             }
             toastNotifications.addWarning(warningText);
           }
@@ -157,13 +163,21 @@ module.controller('MlTimeSeriesExplorerController', function (
           // if more than one job or a group has been loaded from the URL
             if (selectedJobIds.length > 1) {
             // if more than one job, select the first job from the selection.
-              toastNotifications.addWarning('You can only view one job at a time in this dashboard');
+              toastNotifications.addWarning(
+                i18n('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
+                  defaultMessage: 'You can only view one job at a time in this dashboard'
+                })
+              );
               mlJobSelectService.setJobIds([selectedJobIds[0]]);
             } else {
             // if a group has been loaded
               if (selectedJobIds.length > 0) {
               // if the group contains valid jobs, select the first
-                toastNotifications.addWarning('You can only view one job at a time in this dashboard');
+                toastNotifications.addWarning(
+                  i18n('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
+                    defaultMessage: 'You can only view one job at a time in this dashboard'
+                  })
+                );
                 mlJobSelectService.setJobIds([selectedJobIds[0]]);
               } else if ($scope.jobs.length > 0) {
               // if there are no valid jobs in the group but there are valid jobs
@@ -195,6 +209,7 @@ module.controller('MlTimeSeriesExplorerController', function (
           $scope.loading = false;
         }
 
+        $scope.$applyAsync();
       }).catch((resp) => {
         console.log('Time series explorer - error getting job info from elasticsearch:', resp);
       });
@@ -247,6 +262,10 @@ module.controller('MlTimeSeriesExplorerController', function (
           $timeout(() => {
             $scope.$broadcast('render');
           }, 0);
+        } else {
+          // Call $applyAsync() if for any reason the upper condition doesn't trigger the $timeout.
+          // We still want to trigger a scope update about the changes above the condition.
+          $scope.$applyAsync();
         }
 
       }
@@ -711,7 +730,13 @@ module.controller('MlTimeSeriesExplorerController', function (
     const appStateDtrIdx = $scope.appState.mlTimeSeriesExplorer.detectorIndex;
     let detectorIndex = appStateDtrIdx !== undefined ? appStateDtrIdx : +(viewableDetectors[0].index);
     if (_.find(viewableDetectors, { 'index': '' + detectorIndex }) === undefined) {
-      const warningText = `Requested detector index ${detectorIndex} is not valid for job ${$scope.selectedJob.job_id}`;
+      const warningText = i18n('xpack.ml.timeSeriesExplorer.requestedDetectorIndexNotValidWarningMessage', {
+        defaultMessage: 'Requested detector index {detectorIndex} is not valid for job {jobId}',
+        values: {
+          detectorIndex,
+          jobId: $scope.selectedJob.job_id
+        }
+      });
       toastNotifications.addWarning(warningText);
       detectorIndex = +(viewableDetectors[0].index);
       $scope.appState.mlTimeSeriesExplorer.detectorIndex = detectorIndex;
@@ -845,6 +870,7 @@ module.controller('MlTimeSeriesExplorerController', function (
               entity.fieldValues = _.chain(resp.records).pluck('by_field_value').uniq().value();
             }
           });
+          $scope.$applyAsync();
         }
 
       });

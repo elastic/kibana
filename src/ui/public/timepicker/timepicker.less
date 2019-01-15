@@ -1,4 +1,4 @@
-@import (reference) '../styles/variables.less';
+@import (reference) '../styles/bootstrap/_custom_variables.less';
 
 .kbn-timepicker {
   display: flex;
@@ -83,4 +83,18 @@
   .nav:last-child {
     margin-right: 24px;
   }
+
+  .refresh-interval {
+    padding: 0.2em 0.4em;
+    border-radius: @border-radius-small;
+  }
+
+  .refresh-interval-active {
+    background-color: @brand-info;
+    color: @white;
+  }
+}
+
+.navbar-timepicker-time-desc > .fa-clock-o {
+  padding-right: 5px;
 }
