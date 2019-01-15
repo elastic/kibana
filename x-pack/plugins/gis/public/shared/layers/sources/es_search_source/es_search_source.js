@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import React, { Fragment } from 'react';
+import React from 'react';
 import uuid from 'uuid/v4';
 
 import { VectorSource } from '../vector_source';
@@ -20,17 +20,15 @@ import { timefilter } from 'ui/timefilter/timefilter';
 import { ESSourceDetails } from '../../../components/es_source_details';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
-import {
-  EuiText,
-  EuiSpacer
-} from '@elastic/eui';
 
 const DEFAULT_LIMIT = 2048;
 
 export class ESSearchSource extends VectorSource {
 
   static type = 'ES_SEARCH';
-  static typeDisplayName = 'Elasticsearch documents';
+  static title = 'Elasticsearch documents';
+  static description = 'Geospatial data from an Elasticsearch index';
+  static icon = 'logoElasticsearch';
 
   static renderEditor({ onPreviewSource }) {
     const onSelect = (layerConfig) => {
@@ -41,19 +39,6 @@ export class ESSearchSource extends VectorSource {
       onPreviewSource(layerSource);
     };
     return (<CreateSourceEditor onSelect={onSelect}/>);
-  }
-
-  static renderDropdownDisplayOption() {
-    return (
-      <Fragment>
-        <strong>{ESSearchSource.typeDisplayName}</strong>
-        <EuiSpacer size="xs" />
-        <EuiText size="s" color="subdued">
-          <p className="euiTextColor--subdued">
-            Geospatial data from an Elasticsearch index
-          </p>
-        </EuiText>
-      </Fragment>);
   }
 
   constructor(descriptor) {

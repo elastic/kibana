@@ -31,6 +31,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
           },
         ]
       }
+      executeQueryOptions={Object {}}
       isSelectable={true}
       itemId="filter_id"
       items={
@@ -139,6 +140,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
           },
         ]
       }
+      executeQueryOptions={Object {}}
       isSelectable={true}
       itemId="filter_id"
       items={

@@ -50,6 +50,7 @@ exports[`Ccr that it renders normally 1`] = `
               },
             ]
           }
+          executeQueryOptions={Object {}}
           itemId="id"
           itemIdToExpandedRowMap={Object {}}
           items={

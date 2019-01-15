@@ -93,6 +93,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
           },
         ]
       }
+      executeQueryOptions={Object {}}
       items={
         Array [
           Object {
