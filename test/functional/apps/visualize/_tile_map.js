@@ -276,7 +276,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.common.sleep(1000);
           await PageObjects.visualize.clickMapZoomIn(waitForLoading);
 
-          testSubjects.missingOrFail('maxZoomWarning');
+          await testSubjects.missingOrFail('maxZoomWarning');
         });
     });
   });
