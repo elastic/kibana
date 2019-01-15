@@ -34,7 +34,7 @@ exports[`ScopeExpression renders when empty list of filter IDs is supplied 1`] =
       description={
         <FormattedMessage
           defaultMessage="when"
-          id="xpack.ml.ruleEditor.scopeExpression.whenButtonLabel"
+          id="xpack.ml.ruleEditor.scopeExpression.scopeFieldWhenLabel"
           values={Object {}}
         />
       }
@@ -81,7 +81,7 @@ exports[`ScopeExpression renders when enabled set to false 1`] = `
       description={
         <FormattedMessage
           defaultMessage="when"
-          id="xpack.ml.ruleEditor.scopeExpression.whenButtonLabel"
+          id="xpack.ml.ruleEditor.scopeExpression.scopeFieldWhenLabel"
           values={Object {}}
         />
       }
@@ -103,7 +103,7 @@ exports[`ScopeExpression renders when enabled set to false 1`] = `
           description={
             <FormattedMessage
               defaultMessage="is {filterType}"
-              id="xpack.ml.ruleEditor.scopeExpression.isButtonLabel"
+              id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypeButtonLabel"
               values={
                 Object {
                   "filterType": "in",
@@ -135,7 +135,7 @@ exports[`ScopeExpression renders when enabled set to false 1`] = `
         <EuiPopoverTitle>
           <FormattedMessage
             defaultMessage="Is"
-            id="xpack.ml.ruleEditor.scopeExpression.isTitle"
+            id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypePopoverTitle"
             values={Object {}}
           />
         </EuiPopoverTitle>
@@ -262,7 +262,7 @@ exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
       description={
         <FormattedMessage
           defaultMessage="when"
-          id="xpack.ml.ruleEditor.scopeExpression.whenButtonLabel"
+          id="xpack.ml.ruleEditor.scopeExpression.scopeFieldWhenLabel"
           values={Object {}}
         />
       }
@@ -284,7 +284,7 @@ exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
           description={
             <FormattedMessage
               defaultMessage="is {filterType}"
-              id="xpack.ml.ruleEditor.scopeExpression.isButtonLabel"
+              id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypeButtonLabel"
               values={
                 Object {
                   "filterType": "in",
@@ -316,7 +316,7 @@ exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
         <EuiPopoverTitle>
           <FormattedMessage
             defaultMessage="Is"
-            id="xpack.ml.ruleEditor.scopeExpression.isTitle"
+            id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypePopoverTitle"
             values={Object {}}
           />
         </EuiPopoverTitle>
@@ -443,7 +443,7 @@ exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
       description={
         <FormattedMessage
           defaultMessage="when"
-          id="xpack.ml.ruleEditor.scopeExpression.whenButtonLabel"
+          id="xpack.ml.ruleEditor.scopeExpression.scopeFieldWhenLabel"
           values={Object {}}
         />
       }
@@ -465,7 +465,7 @@ exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
           description={
             <FormattedMessage
               defaultMessage="is {filterType}"
-              id="xpack.ml.ruleEditor.scopeExpression.isButtonLabel"
+              id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypeButtonLabel"
               values={
                 Object {
                   "filterType": "",
@@ -497,7 +497,7 @@ exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
         <EuiPopoverTitle>
           <FormattedMessage
             defaultMessage="Is"
-            id="xpack.ml.ruleEditor.scopeExpression.isTitle"
+            id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypePopoverTitle"
             values={Object {}}
           />
         </EuiPopoverTitle>
