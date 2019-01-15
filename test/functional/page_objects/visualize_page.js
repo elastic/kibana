@@ -20,7 +20,6 @@
 import { VisualizeConstants } from '../../../src/legacy/core_plugins/kibana/public/visualize/visualize_constants';
 import Bluebird from 'bluebird';
 import expect from 'expect.js';
-import Keys from 'leadfoot/keys';
 
 export function VisualizePageProvider({ getService, getPageObjects }) {
   const browser = getService('browser');
@@ -399,7 +398,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         await find.clickByCssSelector(selector);
         const input = await find.byCssSelector(`${selector} input.ui-select-search`);
         await input.type(myString);
-        await browser.pressKeys(Keys.RETURN);
+        await input.pressKeys(browser.keys.RETURN);
       });
       await PageObjects.common.sleep(500);
     }
@@ -508,7 +507,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       `;
       await find.clickByCssSelector(selector);
       await find.setValue(`${selector} input.ui-select-search`, fieldValue);
-      await browser.pressKeys(Keys.RETURN);
+      const input = await find.byCssSelector(`${selector} input.ui-select-search`);
+      await input.pressKeys(browser.keys.RETURN);
     }
 
     async selectFieldById(fieldValue, id) {
@@ -531,10 +531,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getInterval() {
-      const select = await find.byCssSelector('select[ng-model="agg.params.interval"]');
-      const selectedIndex = await select.getProperty('selectedIndex');
       const intervalElement = await find.byCssSelector(
-        `select[ng-model="agg.params.interval"] option:nth-child(${(selectedIndex + 1)})`);
+        `select[ng-model="agg.params.interval"] option[selected]`);
       return await intervalElement.getProperty('label');
     }
 
@@ -546,7 +544,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // was a long enough gap from the typing above to the space click.  Hence the
       // need for the sleep.
       await PageObjects.common.sleep(500);
-      await browser.pressKeys(Keys.SPACE);
+      await input.pressKeys(browser.keys.SPACE);
     }
 
     async setCustomInterval(newValue) {
@@ -612,7 +610,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async sizeUpEditor() {
       await testSubjects.click('visualizeEditorResizer');
-      await browser.pressKeys(Keys.ARROW_RIGHT);
+      await browser.pressKeys(browser.keys.ARROW_RIGHT);
     }
 
     async clickOptions() {
@@ -650,11 +648,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const table = await testSubjects.find('heatmapCustomRangesTable');
       const lastRow = await table.findByCssSelector('tr:last-child');
       const fromCell = await lastRow.findByCssSelector('td:first-child input');
-      fromCell.clearValue();
-      fromCell.type(`${from}`);
+      await fromCell.clearValue();
+      await fromCell.type(`${from}`);
       const toCell = await lastRow.findByCssSelector('td:nth-child(2) input');
-      toCell.clearValue();
-      toCell.type(`${to}`);
+      await toCell.clearValue();
+      await toCell.type(`${to}`);
     }
 
     async clickYAxisOptions(axisId) {
@@ -719,13 +717,18 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async saveVisualizationExpectSuccess(vizName, { saveAsNew = false } = {}) {
       await this.saveVisualization(vizName, { saveAsNew });
-      const successToast = await testSubjects.exists('saveVisualizationSuccess', defaultFindTimeout);
+      const successToast = await testSubjects.exists('saveVisualizationSuccess', {
+        timeout: defaultFindTimeout
+      });
       expect(successToast).to.be(true);
     }
 
-    async expectNoSaveOption() {
-      const saveButtonExists = await testSubjects.exists('visualizeSaveButton');
-      expect(saveButtonExists).to.be(false);
+    async saveVisualizationExpectFail(vizName, { saveAsNew = false } = {}) {
+      await this.saveVisualization(vizName, { saveAsNew });
+      const errorToast = await testSubjects.exists('saveVisualizationError', {
+        timeout: defaultFindTimeout
+      });
+      expect(errorToast).to.be(true);
     }
 
     async clickLoadSavedVisButton() {
@@ -1189,9 +1192,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async filterPieSlice(name) {
       const slice = await this.getPieSlice(name);
-      // Since slice is an SVG element we can't simply use .click() for it
-      await browser.moveMouseTo(slice);
-      await browser.clickMouseButton();
+      await slice.click();
     }
 
     async getPieSlice(name) {
