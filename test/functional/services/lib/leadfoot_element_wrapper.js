@@ -313,4 +313,15 @@ export class LeadfootElementWrapper {
   async findByXpath(xpath) {
     return this._wrap(await this._leadfootElement.findByXpath(xpath));
   }
+
+  /**
+   * Sends key event into element.
+   * https://theintern.io/leadfoot/module-leadfoot_Session.html#pressKeys
+   *
+   * @param  {string|string[]} keys
+   * @return {Promise<void>}
+   */
+  async pressKeys(...args) {
+    await this._leadfoot.pressKeys(...args);
+  }
 }

@@ -22,6 +22,10 @@ export class EuiMonitoringTable extends React.PureComponent {
       search.box['data-test-subj'] = 'monitoringTableToolBar';
     }
 
+    if (search.box && !search.box.schema) {
+      search.box.schema = true;
+    }
+
     const columns = _columns.map(column => {
       if (!column['data-test-subj']) {
         column['data-test-subj'] = 'monitoringTableHasData';

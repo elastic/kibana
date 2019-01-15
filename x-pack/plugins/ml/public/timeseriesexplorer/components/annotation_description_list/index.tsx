@@ -13,47 +13,70 @@ import React from 'react';
 
 import { EuiDescriptionList } from '@elastic/eui';
 
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Annotation } from '../../../../common/types/annotations';
 import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
 
 interface Props {
   annotation: Annotation;
+  intl: InjectedIntl;
 }
 
-export const AnnotationDescriptionList: React.SFC<Props> = ({ annotation }) => {
+export const AnnotationDescriptionList = injectI18n(({ annotation, intl }: Props) => {
   const listItems = [
     {
-      title: 'Job ID',
+      title: intl.formatMessage({
+        id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.jobIdTitle',
+        defaultMessage: 'Job ID',
+      }),
       description: annotation.job_id,
     },
     {
-      title: 'Start',
+      title: intl.formatMessage({
+        id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.startTitle',
+        defaultMessage: 'Start',
+      }),
       description: formatHumanReadableDateTimeSeconds(annotation.timestamp),
     },
   ];
 
   if (annotation.end_timestamp !== undefined) {
     listItems.push({
-      title: 'End',
+      title: intl.formatMessage({
+        id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.endTitle',
+        defaultMessage: 'End',
+      }),
       description: formatHumanReadableDateTimeSeconds(annotation.end_timestamp),
     });
   }
 
   if (annotation.create_time !== undefined && annotation.modified_time !== undefined) {
     listItems.push({
-      title: 'Created',
+      title: intl.formatMessage({
+        id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.createdTitle',
+        defaultMessage: 'Created',
+      }),
       description: formatHumanReadableDateTimeSeconds(annotation.create_time),
     });
     listItems.push({
-      title: 'Created by',
+      title: intl.formatMessage({
+        id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.createdByTitle',
+        defaultMessage: 'Created by',
+      }),
       description: annotation.create_username,
     });
     listItems.push({
-      title: 'Last modified',
+      title: intl.formatMessage({
+        id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.lastModifiedTitle',
+        defaultMessage: 'Last modified',
+      }),
       description: formatHumanReadableDateTimeSeconds(annotation.modified_time),
     });
     listItems.push({
-      title: 'Modified by',
+      title: intl.formatMessage({
+        id: 'xpack.ml.timeSeriesExplorer.annotationDescriptionList.modifiedByTitle',
+        defaultMessage: 'Modified by',
+      }),
       description: annotation.modified_username,
     });
   }
@@ -65,4 +88,4 @@ export const AnnotationDescriptionList: React.SFC<Props> = ({ annotation }) => {
       listItems={listItems}
     />
   );
-};
+});

@@ -17,14 +17,11 @@
  * under the License.
  */
 
-import expect from 'expect.js';
 import testSubjSelector from '@kbn/test-subj-selector';
 import {
   filter as filterAsync,
   map as mapAsync,
 } from 'bluebird';
-
-import { WAIT_FOR_EXISTS_TIME } from './find';
 
 export function TestSubjectsProvider({ getService }) {
   const log = getService('log');
@@ -32,28 +29,36 @@ export function TestSubjectsProvider({ getService }) {
   const browser = getService('browser');
   const find = getService('find');
   const config = getService('config');
-  const defaultFindTimeout = config.get('timeouts.find');
+
+  const FIND_TIME = config.get('timeouts.find');
+  const TRY_TIME = config.get('timeouts.try');
+  const WAIT_FOR_EXISTS_TIME = config.get('timeouts.waitForExists');
 
   class TestSubjects {
-    async exists(selector, timeout = WAIT_FOR_EXISTS_TIME) {
+    async exists(selector, options = {}) {
+      const {
+        timeout = WAIT_FOR_EXISTS_TIME,
+        allowHidden = false,
+      } = options;
+
       log.debug(`TestSubjects.exists(${selector})`);
-      return await find.existsByDisplayedByCssSelector(testSubjSelector(selector), timeout);
+      return await (
+        allowHidden
+          ? find.existsByCssSelector(testSubjSelector(selector), timeout)
+          : find.existsByDisplayedByCssSelector(testSubjSelector(selector), timeout)
+      );
     }
 
-    async existOrFail(selector, timeout = WAIT_FOR_EXISTS_TIME) {
-      await retry.try(async () => {
-        log.debug(`TestSubjects.existOrFail(${selector})`);
-        const doesExist = await this.exists(selector, timeout);
-        // Verify element exists, or else fail the test consuming this.
-        expect(doesExist).to.be(true);
-      });
+    async existOrFail(selector, existsOptions) {
+      if (!await this.exists(selector, { timeout: TRY_TIME, ...existsOptions })) {
+        throw new Error(`expected testSubject(${selector}) to exist`);
+      }
     }
 
-    async missingOrFail(selector, timeout = WAIT_FOR_EXISTS_TIME) {
-      log.debug(`TestSubjects.missingOrFail(${selector})`);
-      const doesExist = await this.exists(selector, timeout);
-      // Verify element is missing, or else fail the test consuming this.
-      expect(doesExist).to.be(false);
+    async missingOrFail(selector, existsOptions) {
+      if (await this.exists(selector, existsOptions)) {
+        throw new Error(`expected testSubject(${selector}) to not exist`);
+      }
     }
 
 
@@ -65,17 +70,17 @@ export function TestSubjectsProvider({ getService }) {
       });
     }
 
-    async clickWhenNotDisabled(selector, { timeout } = { timeout: defaultFindTimeout }) {
+    async clickWhenNotDisabled(selector, { timeout = FIND_TIME } = {}) {
       log.debug(`TestSubjects.click(${selector})`);
       await find.clickByCssSelectorWhenNotDisabled(testSubjSelector(selector), { timeout });
     }
 
-    async click(selector, timeout = defaultFindTimeout) {
+    async click(selector, timeout = FIND_TIME) {
       log.debug(`TestSubjects.click(${selector})`);
       await find.clickByCssSelector(testSubjSelector(selector), timeout);
     }
 
-    async doubleClick(selector, timeout = defaultFindTimeout) {
+    async doubleClick(selector, timeout = FIND_TIME) {
       log.debug(`TestSubjects.doubleClick(${selector})`);
       return await retry.try(async () => {
         const element = await this.find(selector, timeout);

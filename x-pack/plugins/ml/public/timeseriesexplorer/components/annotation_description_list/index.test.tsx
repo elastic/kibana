@@ -6,9 +6,9 @@
 
 import mockAnnotations from '../../../components/annotations_table/__mocks__/mock_annotations.json';
 
-import { shallow } from 'enzyme';
 import moment from 'moment-timezone';
 import React from 'react';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { AnnotationDescriptionList } from './index';
 
@@ -21,7 +21,12 @@ describe('AnnotationDescriptionList', () => {
   });
 
   test('Initialization with annotation.', () => {
-    const wrapper = shallow(<AnnotationDescriptionList annotation={mockAnnotations[0]} />);
+    const wrapper = shallowWithIntl(
+      <AnnotationDescriptionList.WrappedComponent
+        annotation={mockAnnotations[0]}
+        intl={null as any}
+      />
+    );
     expect(wrapper).toMatchSnapshot();
   });
 });

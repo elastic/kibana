@@ -61,7 +61,7 @@ export function updateLandingPage(version) {
   }
 
   render(
-    <EuiPageContent verticalPosition="center"  horizontalPosition="center">
+    <EuiPageContent horizontalPosition="center">
       <I18nProvider>
         <div>
           <div className="eui-textCenter">

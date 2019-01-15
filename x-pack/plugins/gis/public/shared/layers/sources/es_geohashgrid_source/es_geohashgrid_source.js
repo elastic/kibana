@@ -91,8 +91,7 @@ export class ESGeohashGridSource extends VectorSource {
         <EuiSpacer size="xs" />
         <EuiText size="s" color="subdued">
           <p className="euiTextColor--subdued">
-            Group documents into grid cells and display metrics for each cell.
-            Great for displaying large datasets.
+            Group geospatial data in grids with metrics for each gridded cell
           </p>
         </EuiText>
       </Fragment>
@@ -128,11 +127,12 @@ export class ESGeohashGridSource extends VectorSource {
   async getGeoJsonWithMeta({ layerName }, searchFilters) {
     let targetPrecision = ZOOM_TO_PRECISION[Math.round(searchFilters.zoom)];
     targetPrecision += 0;//should have refinement param, similar to heatmap style
-    const featureCollection = await this.getGeoJsonPointsWithTotalCount({
+    const featureCollection = await this.getGeoJsonPoints({
       precision: targetPrecision,
       extent: searchFilters.buffer,
       timeFilters: searchFilters.timeFilters,
       layerName,
+      query: searchFilters.query,
     });
 
     if (this._descriptor.requestType === RENDER_AS.GRID) {
@@ -158,10 +158,18 @@ export class ESGeohashGridSource extends VectorSource {
     return true;
   }
 
+  isQueryAware() {
+    return true;
+  }
+
   getFieldNames() {
     return this.getMetricFields().map(({ propertyKey }) => {
       return propertyKey;
     });
+  }
+
+  getIndexPatternIds() {
+    return  [this._descriptor.indexPatternId];
   }
 
   async getNumberFields() {
@@ -170,7 +178,7 @@ export class ESGeohashGridSource extends VectorSource {
     });
   }
 
-  async getGeoJsonPointsWithTotalCount({ precision, extent, timeFilters, layerName }) {
+  async getGeoJsonPoints({ precision, extent, timeFilters, layerName, query }) {
 
     let indexPattern;
     try {
@@ -198,6 +206,7 @@ export class ESGeohashGridSource extends VectorSource {
         filters.push(timeService.createFilter(indexPattern, timeFilters));
         return filters;
       });
+      searchSource.setField('query', query);
 
       resp = await fetchSearchSourceAndRecordWithInspector({
         searchSource,

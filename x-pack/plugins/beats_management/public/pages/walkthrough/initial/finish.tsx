@@ -46,7 +46,7 @@ class FinishWalkthrough extends React.Component<
     const { goTo } = this.props;
 
     return (
-      <EuiFlexGroup justifyContent="spaceAround" style={{ marginTop: 50 }}>
+      <EuiFlexGroup justifyContent="spaceAround">
         <EuiFlexItem grow={false}>
           <EuiPageContent>
             <EuiEmptyPrompt

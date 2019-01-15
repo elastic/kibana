@@ -113,7 +113,8 @@ export default function ({ getService, getPageObjects }) {
         expect(pieData).to.eql(expectedTableData);
       });
 
-      it('should apply correct filter on other bucket', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/25955
+      it.skip('should apply correct filter on other bucket', async () => {
         const expectedTableData = [ 'Missing', 'osx' ];
 
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -125,7 +126,8 @@ export default function ({ getService, getPageObjects }) {
         await filterBar.removeFilter('machine.os.raw');
       });
 
-      it('should apply correct filter on other bucket by clicking on a legend', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/26323
+      it.skip('should apply correct filter on other bucket by clicking on a legend', async () => {
         const expectedTableData = [ 'Missing', 'osx' ];
 
         await PageObjects.header.waitUntilLoadingHasFinished();
