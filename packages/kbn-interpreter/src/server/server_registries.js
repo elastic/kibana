@@ -42,8 +42,12 @@ export const populateServerRegistries = registries => {
         delete global.canvas;
 
         populatedTypes[type] = registries[type];
-        if (remainingTypes.length) loadType();
-        else resolve(populatedTypes);
+        if (remainingTypes.length) {
+          loadType();
+        }
+        else {
+          resolve(populatedTypes);
+        }
       });
     };
 

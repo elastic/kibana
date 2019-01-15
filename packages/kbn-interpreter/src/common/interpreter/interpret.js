@@ -102,7 +102,7 @@ export function interpretProvider(config) {
     }
 
     // Validate the function output against the type definition's validate function
-    const type = config.types[fnDef.type];
+    const type = handlers.types[fnDef.type];
     if (type && type.validate) {
       try {
         type.validate(fnOutput);
