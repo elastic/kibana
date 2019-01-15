@@ -12,12 +12,12 @@ describe('Filebeat Rules', () => {
   test('Apache2 Access', () => {
     const event = {
       'apache2.access': true,
-      'apache2.access.remote_ip': '192.168.1.42',
-      'apache2.access.user_name': 'admin',
-      'apache2.access.method': 'GET',
-      'apache2.access.url': '/faqs',
-      'apache2.access.http_version': '1.1',
-      'apache2.access.response_code': '200',
+      'source.ip': '192.168.1.42',
+      'user.name': 'admin',
+      'http.request.method': 'GET',
+      'url.original': '/faqs',
+      'http.version': '1.1',
+      'http.response.status_code': '200',
       'apache2.access.body_sent.bytes': 1024,
     };
     const message = format(event);
@@ -26,7 +26,7 @@ describe('Filebeat Rules', () => {
         constant: '[Apache][access] ',
       },
       {
-        field: 'apache2.access.remote_ip',
+        field: 'source.ip',
         highlights: [],
         value: '192.168.1.42',
       },
@@ -34,7 +34,7 @@ describe('Filebeat Rules', () => {
         constant: ' ',
       },
       {
-        field: 'apache2.access.user_name',
+        field: 'user.name',
         highlights: [],
         value: 'admin',
       },
@@ -42,7 +42,7 @@ describe('Filebeat Rules', () => {
         constant: ' "',
       },
       {
-        field: 'apache2.access.method',
+        field: 'http.request.method',
         highlights: [],
         value: 'GET',
       },
@@ -50,7 +50,7 @@ describe('Filebeat Rules', () => {
         constant: ' ',
       },
       {
-        field: 'apache2.access.url',
+        field: 'url.original',
         highlights: [],
         value: '/faqs',
       },
@@ -58,7 +58,7 @@ describe('Filebeat Rules', () => {
         constant: ' HTTP/',
       },
       {
-        field: 'apache2.access.http_version',
+        field: 'http.version',
         highlights: [],
         value: '1.1',
       },
@@ -66,7 +66,7 @@ describe('Filebeat Rules', () => {
         constant: '" ',
       },
       {
-        field: 'apache2.access.response_code',
+        field: 'http.response.status_code',
         highlights: [],
         value: '200',
       },

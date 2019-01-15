@@ -12,13 +12,13 @@ describe('Filebeat Rules', () => {
   test('Nginx Access Rule', () => {
     const event = {
       'nginx.access': true,
-      'nginx.access.remote_ip': '192.168.1.42',
-      'nginx.access.user_name': 'admin',
-      'nginx.access.method': 'GET',
-      'nginx.access.url': '/faq',
-      'nginx.access.http_version': '1.1',
+      'source.ip': '192.168.1.42',
+      'user.name': 'admin',
+      'http.request.method': 'GET',
+      'url.original': '/faq',
+      'http.version': '1.1',
       'nginx.access.body_sent.bytes': 1024,
-      'nginx.access.response_code': 200,
+      'http.response.status_code': 200,
     };
     const message = format(event);
     expect(message).toEqual([
@@ -26,7 +26,7 @@ describe('Filebeat Rules', () => {
         constant: '[Nginx][access] ',
       },
       {
-        field: 'nginx.access.remote_ip',
+        field: 'source.ip',
         highlights: [],
         value: '192.168.1.42',
       },
@@ -34,7 +34,7 @@ describe('Filebeat Rules', () => {
         constant: ' ',
       },
       {
-        field: 'nginx.access.user_name',
+        field: 'user.name',
         highlights: [],
         value: 'admin',
       },
@@ -42,7 +42,7 @@ describe('Filebeat Rules', () => {
         constant: ' "',
       },
       {
-        field: 'nginx.access.method',
+        field: 'http.request.method',
         highlights: [],
         value: 'GET',
       },
@@ -50,7 +50,7 @@ describe('Filebeat Rules', () => {
         constant: ' ',
       },
       {
-        field: 'nginx.access.url',
+        field: 'url.original',
         highlights: [],
         value: '/faq',
       },
@@ -58,7 +58,7 @@ describe('Filebeat Rules', () => {
         constant: ' HTTP/',
       },
       {
-        field: 'nginx.access.http_version',
+        field: 'http.version',
         highlights: [],
         value: '1.1',
       },
@@ -66,7 +66,7 @@ describe('Filebeat Rules', () => {
         constant: '" ',
       },
       {
-        field: 'nginx.access.response_code',
+        field: 'http.response.status_code',
         highlights: [],
         value: '200',
       },
