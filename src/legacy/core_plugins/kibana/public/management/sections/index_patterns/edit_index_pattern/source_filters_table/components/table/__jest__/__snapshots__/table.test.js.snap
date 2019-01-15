@@ -86,6 +86,7 @@ exports[`Table should render normally 1`] = `
       },
     ]
   }
+  executeQueryOptions={Object {}}
   items={
     Array [
       Object {
