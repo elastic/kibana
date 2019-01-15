@@ -5,6 +5,7 @@
  */
 
 import { EuiBetaBadge, EuiHeaderSection } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -13,19 +14,46 @@ interface BetaBadgeHeaderSectionProps {
 }
 
 export const BetaBadgeHeaderSection: React.SFC<BetaBadgeHeaderSectionProps> = ({
-  tooltipContent = 'Please help us improve by reporting issues or bugs in the Kibana repo.',
+  tooltipContent = (
+    <FormattedMessage
+      id="xpack.infra.logs.betaBadgeHeaderSection.betaBadgeHeaderSectionDefaultTooltip"
+      defaultMessage="Please help us improve by reporting issues or bugs in the Kibana repo."
+    />
+  ),
 }) => (
   <VerticallyCenteredHeaderSection side="right">
-    <EuiBetaBadge label="Beta" tooltipContent={tooltipContent} />
+    <EuiBetaBadge
+      label={
+        <FormattedMessage
+          id="xpack.infra.logs.betaBadgeHeaderSection.betaLabel"
+          defaultMessage="Beta"
+        />
+      }
+      tooltipContent={tooltipContent}
+    />
   </VerticallyCenteredHeaderSection>
 );
 
 export const InfrastructureBetaBadgeHeaderSection = () => (
-  <BetaBadgeHeaderSection tooltipContent="The Infrastructure UI is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo." />
+  <BetaBadgeHeaderSection
+    tooltipContent={
+      <FormattedMessage
+        id="xpack.infra.logs.betaBadgeHeaderSection.infrastructureUiIsStillInBetaTooltip"
+        defaultMessage="The Infrastructure UI is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo."
+      />
+    }
+  />
 );
 
 export const LogsBetaBadgeHeaderSection = () => (
-  <BetaBadgeHeaderSection tooltipContent="The Logs UI is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo." />
+  <BetaBadgeHeaderSection
+    tooltipContent={
+      <FormattedMessage
+        id="xpack.infra.logs.betaBadgeHeaderSection.logsUiIsStillInBetaTooltip"
+        defaultMessage="The Logs UI is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo."
+      />
+    }
+  />
 );
 
 const VerticallyCenteredHeaderSection = styled(EuiHeaderSection)`
