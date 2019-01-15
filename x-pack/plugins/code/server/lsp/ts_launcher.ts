@@ -6,6 +6,7 @@
 
 import { spawn } from 'child_process';
 import getPort from 'get-port';
+import { resolve } from 'path';
 import { ServerOptions } from '../server_options';
 import { LoggerFactory } from '../utils/log_factory';
 import { promiseTimeout } from '../utils/timeout';
@@ -55,6 +56,7 @@ export class TypescriptServerLauncher implements ILanguageServerLauncher {
           {
             detached: false,
             stdio: 'inherit',
+            cwd: resolve(installationPath, '../..'),
           }
         );
         this.isRunning = true;
