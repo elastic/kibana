@@ -16,3 +16,12 @@ export function isGlobalPrivilegeDefinition(privilegeSpec: KibanaPrivilegeSpec):
   }
   return privilegeSpec.spaces.includes('*');
 }
+
+/**
+ * Determines if the passed privilege spec defines feature privileges.
+ * @param privilegeSpec
+ */
+export function hasAssignedFeaturePrivileges(privilegeSpec: KibanaPrivilegeSpec): boolean {
+  const featureKeys = Object.keys(privilegeSpec.feature);
+  return featureKeys.length > 0 && featureKeys.some(key => privilegeSpec.feature[key].length > 0);
+}

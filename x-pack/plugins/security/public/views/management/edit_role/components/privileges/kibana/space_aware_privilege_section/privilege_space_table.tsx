@@ -16,9 +16,16 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { getSpaceColor } from '../../../../../../../../../spaces/common';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
-import { FeaturePrivilegeSet, Role } from '../../../../../../../../common/model';
+import {
+  FeaturePrivilegeSet,
+  KibanaPrivilegeSpec,
+  Role,
+} from '../../../../../../../../common/model';
 import { EffectivePrivilegesFactory } from '../../../../../../../lib/effective_privileges';
-import { isGlobalPrivilegeDefinition } from '../../../../../../../lib/privilege_utils';
+import {
+  hasAssignedFeaturePrivileges,
+  isGlobalPrivilegeDefinition,
+} from '../../../../../../../lib/privilege_utils';
 import { copyRole } from '../../../../../../../lib/role_utils';
 import { SpacesPopoverList } from '../../../spaces_popover_list';
 import { PrivilegeDisplay } from './privilege_display';
@@ -170,20 +177,33 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
       {
         field: 'privileges',
         name: 'Privileges',
-        render: (privileges: any, record: TableRow) => {
-          const actualPrivilege = effectivePrivileges.explainActualSpaceBasePrivilege(
+        render: (privileges: KibanaPrivilegeSpec, record: TableRow) => {
+          const hasCustomizations = hasAssignedFeaturePrivileges(privileges);
+          const assignedPrivilege = effectivePrivileges.getAssignedBasePrivilege(
             record.spacesIndex
           );
 
-          const hasCustomizations = Object.keys(privileges.feature).length > 0;
+          if (record.isGlobal) {
+            return (
+              <PrivilegeDisplay
+                scope={'global'}
+                privilege={hasCustomizations ? 'Custom' : assignedPrivilege}
+              />
+            );
+          } else {
+            const explanation = effectivePrivileges.explainActualSpaceBasePrivilege(
+              record.spacesIndex
+            );
+            const canDisplayCustomize = hasCustomizations && explanation.privilege !== 'all';
 
-          return (
-            <PrivilegeDisplay
-              scope={record.isGlobal ? 'global' : 'space'}
-              explanation={hasCustomizations ? undefined : actualPrivilege}
-              privilege={hasCustomizations ? 'Custom' : actualPrivilege.privilege}
-            />
-          );
+            return (
+              <PrivilegeDisplay
+                scope={'space'}
+                explanation={canDisplayCustomize ? undefined : explanation}
+                privilege={canDisplayCustomize ? 'Custom' : explanation.privilege}
+              />
+            );
+          }
         },
       },
     ];

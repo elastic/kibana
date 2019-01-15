@@ -124,14 +124,16 @@ export class EffectivePrivileges {
    * - Global base privilege
    * - Global feature privilege
    * - Space base privilege
-   * - Space feature privilege
+   * - Space feature privilege (optional, defaults to true)
    *
    * @param featureId
    * @param spacesIndex
+   * @param ignoreAssignedPrivilege
    */
   public explainActualSpaceFeaturePrivilege(
     featureId: string,
-    spacesIndex: number
+    spacesIndex: number,
+    ignoreAssignedPrivilege: boolean = false
   ): ExplanationResult {
     const { feature = {} as FeaturePrivilegeSet } = this.role.kibana[spacesIndex] || {};
     const assignedFeaturePrivilege = feature[featureId]
@@ -143,7 +145,8 @@ export class EffectivePrivileges {
 
     const scenarios: PrivilegeScenario[] = [];
 
-    const hasAssignedFeaturePrivilege = assignedFeaturePrivilege !== NO_PRIVILEGE_VALUE;
+    const hasAssignedFeaturePrivilege =
+      !ignoreAssignedPrivilege && assignedFeaturePrivilege !== NO_PRIVILEGE_VALUE;
     let spaceFeaturePrivilegeScenario: PrivilegeScenario | null = null;
 
     if (hasAssignedFeaturePrivilege) {
@@ -251,12 +254,18 @@ export class EffectivePrivileges {
    *
    * Returns the privilege (or NO_PRIVILEGE_VALUE) that is the most permissive of the following:
    * - Global base privilege
-   * - Space base privilege
+   * - Space base privilege (optional, defaults to true)
    *
    * @param spacesIndex
+   * @param ignoreAssignedPrivilege
    */
-  public explainActualSpaceBasePrivilege(spacesIndex: number): ExplanationResult {
-    const { base = [] as string[] } = this.role.kibana[spacesIndex] || {};
+  public explainActualSpaceBasePrivilege(
+    spacesIndex: number,
+    ignoreAssignedPrivilege: boolean = false
+  ): ExplanationResult {
+    const { base = [] as string[] } =
+      (!ignoreAssignedPrivilege && this.role.kibana[spacesIndex]) || {};
+
     const globalBasePrivilege = this.globalPrivilege.base;
 
     if (base.length === 0) {
@@ -324,7 +333,11 @@ export class EffectivePrivileges {
     privilege: string,
     spacesIndex: number
   ): boolean {
-    const actualPrivilegeDetails = this.explainActualSpaceFeaturePrivilege(featureId, spacesIndex);
+    const actualPrivilegeDetails = this.explainActualSpaceFeaturePrivilege(
+      featureId,
+      spacesIndex,
+      true // ignoreAssignedPrivilege
+    );
 
     // Are we currently unassigned or self-assigned?
     if (
