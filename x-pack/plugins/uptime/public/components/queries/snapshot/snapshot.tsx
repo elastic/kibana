@@ -132,7 +132,7 @@ export const Snapshot = ({
                     <EuiTitle>
                       <h5>
                         <FormattedMessage
-                          id="xpack.uptime.snapshot.emptyPrompt.title"
+                          id="xpack.uptime.snapshot.noDataTitle"
                           defaultMessage="No histogram data available"
                         />
                       </h5>
