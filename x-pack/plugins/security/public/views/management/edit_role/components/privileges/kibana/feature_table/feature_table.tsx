@@ -160,10 +160,12 @@ export class FeatureTable extends Component<Props, {}> {
             id="xpack.security.management.editRole.featureTable.enabledRoleFeaturesEnabledColumnTitle"
             defaultMessage="Privilege"
           />
-          <ChangeAllPrivilegesControl
-            privileges={[...availablePrivileges, NO_PRIVILEGE_VALUE]}
-            onChange={this.onChangeAllFeaturePrivileges}
-          />
+          {!this.props.disabled && (
+            <ChangeAllPrivilegesControl
+              privileges={[...availablePrivileges, NO_PRIVILEGE_VALUE]}
+              onChange={this.onChangeAllFeaturePrivileges}
+            />
+          )}
         </span>
       ),
       render: (roleEntry: Role, record: TableRow) => {
@@ -258,8 +260,16 @@ export class FeatureTable extends Component<Props, {}> {
   };
 
   private allowsNoneForPrivilegeAssignment = (featureId: string): boolean => {
-    return [PRIVILEGE_SOURCE.NONE, PRIVILEGE_SOURCE.ASSIGNED_DIRECTLY].includes(
-      this.getPrivilegeExplanation(featureId).source
+    if (this.isConfiguringGlobalPrivileges()) {
+      return [PRIVILEGE_SOURCE.NONE, PRIVILEGE_SOURCE.ASSIGNED_DIRECTLY].includes(
+        this.getPrivilegeExplanation(featureId).source
+      );
+    }
+
+    return this.props.effectivePrivileges.canAssignSpaceFeaturePrivilege(
+      featureId,
+      NO_PRIVILEGE_VALUE,
+      this.props.spacesIndex
     );
   };
 
