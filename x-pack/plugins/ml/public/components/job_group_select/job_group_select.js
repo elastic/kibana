@@ -13,11 +13,10 @@ import template from './job_group_select.html';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { mlCalendarService } from 'plugins/ml/services/calendar_service';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
-import { i18n } from '@kbn/i18n';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlJobGroupSelect', function () {
+module.directive('mlJobGroupSelect', function (i18n) {
   return {
     restrict: 'E',
     template,
@@ -34,7 +33,7 @@ module.directive('mlJobGroupSelect', function () {
         this.$scope = $scope;
         this.selectedGroups = [];
         this.groups = [];
-        this.$scope.newGroupLabel = i18n.translate('xpack.ml.jobGroupSelect.newGroupLabel', { defaultMessage: '(new group)' });
+        this.$scope.newGroupLabel = i18n('xpack.ml.jobGroupSelect.newGroupLabel', { defaultMessage: '(new group)' });
 
         // load the jobs, in case they've not been loaded before
         // in order to get the job groups
@@ -113,7 +112,7 @@ module.directive('mlJobGroupSelect', function () {
 
       groupTypes(group) {
         if(group.isTag === false) {
-          return i18n.translate('xpack.ml.jobGroupSelect.existingGroupsLabel', { defaultMessage: 'Existing groups' });
+          return i18n('xpack.ml.jobGroupSelect.existingGroupsLabel', { defaultMessage: 'Existing groups' });
         }
       }
     }

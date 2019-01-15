@@ -46,7 +46,7 @@ module.directive('mlNavMenu', function (config, i18n) {
 
         const crumbNames = {
           jobs: {
-            label: i18n('xpack.ml.navMenu.breadcrumbs.jobsManagementLabel', { defaultMessage: 'Job Management' }),
+            label: i18n('xpack.ml.navMenu.breadcrumbs.jobManagementLabel', { defaultMessage: 'Job Management' }),
             url: '#/jobs'
           },
           new_job: {
