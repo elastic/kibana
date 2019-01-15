@@ -141,7 +141,7 @@ export const Snapshot = ({
                   body={
                     <p>
                       <FormattedMessage
-                        id="xpack.uptime.snapshot.emptyPrompt.body.text"
+                        id="xpack.uptime.snapshot.noDataDescription"
                         defaultMessage="Sorry, there is no data available for the histogram"
                       />
                     </p>
