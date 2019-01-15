@@ -7,6 +7,9 @@ import RollupSearchRequest from './rollup_search_request';
 import { callWithRequestFactory } from '../call_with_request_factory';
 import { AbstractSearchStrategy } from '../../../../../../src/legacy/core_plugins/metrics/server/lib/search_strategies';
 
+const ROLLUP_INDEX_CAPABILITIES_METHOD = 'rollup.rollupIndexCapabilities';
+const INDEX_PATTERN_SEPARATOR = ',';
+
 export default class RollupSearchStrategy extends AbstractSearchStrategy {
   name = 'rollup';
   batchRequestsSupport = false;
@@ -15,10 +18,19 @@ export default class RollupSearchStrategy extends AbstractSearchStrategy {
     super(server, callWithRequestFactory, RollupSearchRequest);
   }
 
-  isViable(req, indexPattern) {
-    const MULTI_INDEX_SEPARATOR = ',';
-    const splittedIndex = (indexPattern || '').split(MULTI_INDEX_SEPARATOR);
+  async isRollupJobExists(req, indexPattern) {
+    const callWithRequest = this.getCallWithRequestInstance(req);
+    const requests = (indexPattern || '').split(INDEX_PATTERN_SEPARATOR)
+      .map(index => callWithRequest(ROLLUP_INDEX_CAPABILITIES_METHOD, {
+        indexPattern: index,
+      }));
 
-    return Boolean(splittedIndex);
+    return Promise.all(requests)
+      .then((responses) => responses.some(response => Object.keys(response).length))
+      .catch(() => Promise.resolve(false));
+  }
+
+  async isViable(req, indexPattern) {
+    return await this.isRollupJobExists(req, indexPattern);
   }
 }
