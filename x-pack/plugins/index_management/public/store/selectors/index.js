@@ -44,6 +44,9 @@ const filterByToggles = (indices, toggleNameToVisibleMap) => {
 
   // An index is visible if ANY applicable toggle is visible.
   return indices.filter((index) => {
+    if (!toggleNames.length) {
+      return true;
+    }
     return toggleNames.some(toggleName => {
       if (!togglesByName[toggleName].matchIndex(index)) {
         return true;
