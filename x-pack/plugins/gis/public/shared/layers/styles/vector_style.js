@@ -71,7 +71,7 @@ export class VectorStyle {
           <EuiFlexItem>
             <VectorStyleColorEditor
               styleProperty={'lineColor'}
-              stylePropertyName={"Line color"}
+              stylePropertyName={"Border color"}
               handlePropertyChange={handlePropertyChange}
               styleDescriptor={properties.lineColor}
               layer={layer}
@@ -80,7 +80,7 @@ export class VectorStyle {
           <EuiFlexItem>
             <VectorStyleSizeEditor
               styleProperty={'lineWidth'}
-              stylePropertyName={"Line width"}
+              stylePropertyName={"Border width"}
               handlePropertyChange={handlePropertyChange}
               styleDescriptor={properties.lineWidth}
               layer={layer}
@@ -89,7 +89,7 @@ export class VectorStyle {
           <EuiFlexItem>
             <VectorStyleSizeEditor
               styleProperty={'iconSize'}
-              stylePropertyName={"Icon size"}
+              stylePropertyName={"Symbol size"}
               handlePropertyChange={handlePropertyChange}
               styleDescriptor={properties.iconSize}
               layer={layer}
