@@ -20,17 +20,18 @@ export default class RollupSearchStrategy extends AbstractSearchStrategy {
 
   async isRollupJobExists(req, indexPattern) {
     const callWithRequest = this.getCallWithRequestInstance(req);
-    const requests = (indexPattern || '').split(INDEX_PATTERN_SEPARATOR)
-      .map(index => callWithRequest(ROLLUP_INDEX_CAPABILITIES_METHOD, {
-        indexPattern: index,
-      }));
+    const indices = (indexPattern || '').split(INDEX_PATTERN_SEPARATOR);
+
+    const requests = indices.map(index => callWithRequest(ROLLUP_INDEX_CAPABILITIES_METHOD, {
+      indexPattern: index,
+    }));
 
     return Promise.all(requests)
-      .then((responses) => responses.some(response => Object.keys(response).length))
+      .then((responses) => responses.some((response, index) => Boolean(response[indices[index]])))
       .catch(() => Promise.resolve(false));
   }
 
   async isViable(req, indexPattern) {
-    return await this.isRollupJobExists(req, indexPattern);
+    return await await this.isRollupJobExists(req, indexPattern);
   }
 }

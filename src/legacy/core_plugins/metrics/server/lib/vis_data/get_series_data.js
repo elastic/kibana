@@ -24,7 +24,7 @@ import SearchStrategiesRegister from '../search_strategies/search_strategies_reg
 
 export async function getSeriesData(req, panel) {
   const indexPattern = panel.index_pattern;
-  const searchStrategy = SearchStrategiesRegister.getViableStrategy(req, indexPattern);
+  const searchStrategy = await SearchStrategiesRegister.getViableStrategy(req, indexPattern);
   const searchRequest = searchStrategy.getSearchRequest(req, indexPattern);
   const esQueryConfig = await getEsQueryConfig(req);
 

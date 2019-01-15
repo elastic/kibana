@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { findLast } from 'lodash';
 import AbstractSearchStrategy from './strategies/abstract_search_strategy';
 import DefaultSearchStrategy from './strategies/default_search_strategy';
 
@@ -25,7 +24,7 @@ const strategies = [];
 export default class SearchStrategiesRegister {
   add(searchStrategy) {
     if (searchStrategy instanceof AbstractSearchStrategy) {
-      strategies.push(searchStrategy);
+      strategies.unshift(searchStrategy);
     }
     return this;
   }
@@ -38,7 +37,13 @@ export default class SearchStrategiesRegister {
     return searchStrategiesRegister.add(new DefaultSearchStrategy(server));
   }
 
-  static getViableStrategy(req, indexPattern) {
-    return findLast(strategies, searchStrategy => searchStrategy.isViable(req, indexPattern));
+  static async getViableStrategy(req, indexPattern) {
+    for (const searchStrategy of strategies) {
+      const isViable = await searchStrategy.isViable(req, indexPattern);
+
+      if (isViable) {
+        return searchStrategy;
+      }
+    }
   }
 }
