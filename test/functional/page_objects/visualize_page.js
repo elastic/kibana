@@ -29,7 +29,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const find = getService('find');
   const log = getService('log');
-  const flyout = getService('flyout');
+  const inspector = getService('inspector');
   const renderable = getService('renderable');
   const table = getService('table');
   const PageObjects = getPageObjects(['common', 'header']);
@@ -290,39 +290,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await options[optionIndex].click();
     }
 
-    async isInspectorButtonEnabled() {
-      const button = await testSubjects.find('openInspectorButton');
-      const ariaDisabled = await button.getAttribute('aria-disabled');
-      return ariaDisabled !== 'true';
-    }
-
     async getSideEditorExists() {
       return await find.existsByCssSelector('.collapsible-sidebar');
-    }
-
-    async openInspector() {
-      log.debug('Open Inspector');
-      const isOpen = await testSubjects.exists('inspectorPanel');
-      if (!isOpen) {
-        await retry.try(async () => {
-          await testSubjects.click('openInspectorButton');
-          await testSubjects.find('inspectorPanel');
-        });
-      }
-    }
-
-    async closeInspector() {
-      log.debug('Close Inspector');
-      let isOpen = await testSubjects.exists('inspectorPanel');
-      if (isOpen) {
-        await retry.try(async () => {
-          await flyout.close('inspectorPanel');
-          isOpen = await testSubjects.exists('inspectorPanel');
-          if (isOpen) {
-            throw new Error('Failed to close inspector');
-          }
-        });
-      }
     }
 
     async setInspectorTablePageSize(size) {
@@ -900,25 +869,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await Promise.all(getChartTypesPromises);
     }
 
-    async getPieChartData() {
-      const chartTypes = await find.allByCssSelector('path.slice', defaultFindTimeout * 2);
-
-      const getChartTypesPromises = chartTypes.map(async chart => await chart.getAttribute('d'));
-      return await Promise.all(getChartTypesPromises);
-    }
-
-    async getPieChartLabels() {
-      // Outer retry is because because of stale element references getting thrown on grabbing the data-label.
-      // I suspect it's due to a rendering bug with pie charts not emitting the render-complete flag
-      // when actually done rendering.
-      return await retry.try(async () => {
-        const chartTypes = await find.allByCssSelector('path.slice', defaultFindTimeout * 2);
-
-        const getChartTypesPromises = chartTypes.map(async chart => await chart.getAttribute('data-label'));
-        return await Promise.all(getChartTypesPromises);
-      });
-    }
-    async expectPieChartError() {
+    async expectError() {
       return await testSubjects.existOrFail('visLibVisualizeError');
     }
 
@@ -972,32 +923,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async getInspectorTableData() {
-      // TODO: we should use datat-test-subj=inspectorTable as soon as EUI supports it
-      const inspectorPanel = await testSubjects.find('inspectorPanel');
-      const tableBody = await retry.try(async () => inspectorPanel.findByTagName('tbody'));
-      // Convert the data into a nested array format:
-      // [ [cell1_in_row1, cell2_in_row1], [cell1_in_row2, cell2_in_row2] ]
-      const rows = await tableBody.findAllByTagName('tr');
-      return await Promise.all(rows.map(async row => {
-        const cells = await row.findAllByTagName('td');
-        return await Promise.all(cells.map(async cell => cell.getVisibleText()));
-      }));
-    }
-
-    async getInspectorTableHeaders() {
-      // TODO: we should use datat-test-subj=inspectorTable as soon as EUI supports it
-      const dataTableHeader = await retry.try(async () => {
-        const inspectorPanel = await testSubjects.find('inspectorPanel');
-        return await inspectorPanel.findByTagName('thead');
-      });
-      const cells = await dataTableHeader.findAllByTagName('th');
-      return await Promise.all(cells.map(async (cell) => {
-        const untrimmed = await cell.getVisibleText();
-        return untrimmed.trim();
-      }));
-    }
-
     async toggleIsFilteredByCollarCheckbox() {
       await testSubjects.click('isFilteredByCollarCheckbox');
     }
@@ -1035,7 +960,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async getVisualizationRequest() {
       log.debug('getVisualizationRequest');
-      await this.openInspector();
+      await inspector.open();
       await testSubjects.click('inspectorViewChooser');
       await testSubjects.click('inspectorViewChooserRequests');
       await testSubjects.click('inspectorRequestDetailRequest');
@@ -1044,7 +969,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async getVisualizationResponse() {
       log.debug('getVisualizationResponse');
-      await this.openInspector();
+      await inspector.open();
       await testSubjects.click('inspectorViewChooser');
       await testSubjects.click('inspectorViewChooserRequests');
       await testSubjects.click('inspectorRequestDetailResponse');
@@ -1150,28 +1075,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async filterForInspectorTableCell(column, row) {
-      await retry.try(async () => {
-        const table = await testSubjects.find('inspectorTable');
-        const cell = await table.findByCssSelector(`tbody tr:nth-child(${row}) td:nth-child(${column})`);
-        await browser.moveMouseTo(cell);
-        const filterBtn = await testSubjects.findDescendant('filterForInspectorCellValue', cell);
-        await filterBtn.click();
-      });
-      await renderable.waitForRender();
-    }
-
-    async filterOutInspectorTableCell(column, row) {
-      await retry.try(async () => {
-        const table = await testSubjects.find('inspectorTable');
-        const cell = await table.findByCssSelector(`tbody tr:nth-child(${row}) td:nth-child(${column})`);
-        await browser.moveMouseTo(cell);
-        const filterBtn = await testSubjects.findDescendant('filterOutInspectorCellValue', cell);
-        await filterBtn.click();
-      });
-      await renderable.waitForRender();
-    }
-
     async toggleLegend(show = true) {
       await retry.try(async () => {
         const isVisible = find.byCssSelector('vislib-legend');
@@ -1207,33 +1110,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async selectBucketType(type) {
       const bucketType = await find.byCssSelector(`[data-test-subj="${type}"]`);
       return await bucketType.click();
-    }
-
-    async filterPieSlice(name) {
-      const slice = await this.getPieSlice(name);
-      // Since slice is an SVG element we can't simply use .click() for it
-      await browser.moveMouseTo(slice);
-      await browser.clickMouseButton();
-    }
-
-    async getPieSlice(name) {
-      return await testSubjects.find(`pieSlice-${name.split(' ').join('-')}`);
-    }
-
-    async getAllPieSlices(name) {
-      return await testSubjects.findAll(`pieSlice-${name.split(' ').join('-')}`);
-    }
-
-    async getPieSliceStyle(name) {
-      log.debug(`VisualizePage.getPieSliceStyle(${name})`);
-      const pieSlice = await this.getPieSlice(name);
-      return await pieSlice.getAttribute('style');
-    }
-
-    async getAllPieSliceStyles(name) {
-      log.debug(`VisualizePage.getAllPieSliceStyles(${name})`);
-      const pieSlices = await this.getAllPieSlices(name);
-      return await Promise.all(pieSlices.map(async pieSlice => await pieSlice.getAttribute('style')));
     }
 
     async getBucketErrorMessage() {

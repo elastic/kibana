@@ -28,13 +28,6 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'visualize']);
 
   return new class DashboardExpect {
-    async pieSliceCount(expectedCount) {
-      log.debug(`DashboardExpect.expectPieSliceCount(${expectedCount})`);
-      await retry.try(async () => {
-        const slicesCount = await PageObjects.dashboard.getPieSliceCount();
-        expect(slicesCount).to.be(expectedCount);
-      });
-    }
 
     async panelCount(expectedCount) {
       log.debug(`DashboardExpect.panelCount(${expectedCount})`);
