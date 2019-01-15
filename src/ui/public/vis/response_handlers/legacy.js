@@ -30,6 +30,7 @@ const LegacyResponseHandlerProvider = function () {
         const split = (dimensions.splitColumn || dimensions.splitRow);
 
         if (split) {
+          converted.direction = dimensions.splitRow ? 'row' : 'column';
           const splitColumnIndex = split[0].accessor;
           const splitColumn = table.columns[splitColumnIndex];
           const splitMap = {};

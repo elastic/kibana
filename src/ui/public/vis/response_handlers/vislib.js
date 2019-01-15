@@ -45,7 +45,7 @@ function convertTableGroup(tableGroup, convertTable) {
 
   tables.forEach(function (table) {
     if (!outList) {
-      const direction = table.row ? 'rows' : 'columns';
+      const direction = tableGroup.direction === 'row' ? 'rows' : 'columns';
       outList = out[direction] = [];
     }
 

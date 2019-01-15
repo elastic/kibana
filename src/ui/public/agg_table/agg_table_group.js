@@ -50,8 +50,7 @@ uiModules
 
               if (!group || !group.tables.length) return;
 
-              const firstTable = group.tables[0];
-              const childLayout = (firstTable.params && !firstTable.params.row) ? 'columns' : 'rows';
+              const childLayout = (group.direction === 'row') ? 'rows' : 'columns';
 
               $scope[childLayout] = group.tables;
             });
