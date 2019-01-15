@@ -13,6 +13,7 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { mockGlobalState } from '../../../../mock';
 import { createStore, State } from '../../../../store';
+import { getEmptyValue } from '../../../empty_value';
 import { EventsTable, formatSafely } from './index';
 import { mockData } from './mock';
 
@@ -60,8 +61,8 @@ describe('Load More Events Table Component', () => {
       const sourceIp = formatSafely('.ip', mockData.Events.edges[0].event);
       const hostName = formatSafely('.name', mockData.Events.edges[0].event);
 
-      expect(sourceIp).toBe('--');
-      expect(hostName).toBe('--');
+      expect(sourceIp).toBe(getEmptyValue());
+      expect(hostName).toBe(getEmptyValue());
     });
   });
 });

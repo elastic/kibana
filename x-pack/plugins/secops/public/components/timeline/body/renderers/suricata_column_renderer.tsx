@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, getOr } from 'lodash/fp';
+import { get } from 'lodash/fp';
 import React from 'react';
 
-import { ColumnRenderer, EMPTY_VALUE, getSuricataCVEFromSignature } from '.';
+import { ColumnRenderer, getSuricataCVEFromSignature } from '.';
 import { Ecs } from '../../../../graphql/types';
+import { getEmptyValue, getOrEmpty } from '../../../empty_value';
 
 const suricataColumnsOverridden = ['event.id'];
 
@@ -34,11 +35,11 @@ export const suricataColumnRenderer: ColumnRenderer = {
         if (cve != null) {
           return <>{cve}</>;
         } else {
-          return <>{getOr(EMPTY_VALUE, 'event.id', data)}</>;
+          return <>{getOrEmpty('event.id', data)}</>;
         }
       default:
         // unknown column name
-        return <>{EMPTY_VALUE}</>;
+        return <>{getEmptyValue()}</>;
     }
   },
 };

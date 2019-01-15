@@ -5,7 +5,7 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import { defaultTo, noop } from 'lodash/fp';
+import { noop } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
@@ -15,6 +15,7 @@ import { AuthorizationItem, AuthorizationsEdges } from '../../../../graphql/type
 import { escapeQueryValue } from '../../../../lib/keury';
 import { authorizationsSelector, hostsActions, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
+import { defaultToEmpty, getEmptyValue } from '../../../empty_value';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
 
@@ -105,7 +106,7 @@ const getAuthorizationColumns = (startDate: number) => [
     truncateText: false,
     hideForMobile: false,
     render: ({ authorization }: { authorization: AuthorizationItem }) => {
-      const user = defaultTo('--', authorization.user);
+      const user = defaultToEmpty(authorization.user);
       return (
         <>
           <DraggableWrapper
@@ -141,7 +142,7 @@ const getAuthorizationColumns = (startDate: number) => [
     truncateText: false,
     hideForMobile: false,
     render: ({ authorization }: { authorization: AuthorizationItem }) => (
-      <>{defaultTo('--', authorization.failures)}</>
+      <>{defaultToEmpty(authorization.failures)}</>
     ),
   },
   {
@@ -149,7 +150,7 @@ const getAuthorizationColumns = (startDate: number) => [
     truncateText: false,
     hideForMobile: false,
     render: ({ authorization }: { authorization: AuthorizationItem }) => (
-      <>{defaultTo('--', authorization.successes)}</>
+      <>{defaultToEmpty(authorization.successes)}</>
     ),
   },
   {
@@ -157,7 +158,7 @@ const getAuthorizationColumns = (startDate: number) => [
     truncateText: false,
     hideForMobile: false,
     render: ({ authorization }: { authorization: AuthorizationItem }) => (
-      <>{defaultTo('--', authorization.from)}</>
+      <>{defaultToEmpty(authorization.from)}</>
     ),
   },
   {
@@ -165,7 +166,7 @@ const getAuthorizationColumns = (startDate: number) => [
     truncateText: false,
     hideForMobile: false,
     render: ({ authorization }: { authorization: AuthorizationItem }) => (
-      <>{defaultTo('--', authorization.to.name)}</>
+      <>{defaultToEmpty(authorization.to.name)}</>
     ),
   },
   {
@@ -173,7 +174,7 @@ const getAuthorizationColumns = (startDate: number) => [
     truncateText: false,
     hideForMobile: false,
     render: ({ authorization }: { authorization: AuthorizationItem }) => (
-      <>{defaultTo('--', moment(authorization.latest).fromNow())}</>
+      <>{authorization.latest ? moment(authorization.latest).fromNow() : getEmptyValue()}</>
     ),
   },
 ];

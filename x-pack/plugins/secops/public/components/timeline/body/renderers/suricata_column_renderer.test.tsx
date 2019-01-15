@@ -8,9 +8,10 @@ import { mount } from 'enzyme';
 import { cloneDeep, omit, set } from 'lodash/fp';
 import React from 'react';
 
-import { EMPTY_VALUE, suricataColumnRenderer } from '.';
+import { suricataColumnRenderer } from '.';
 import { Ecs } from '../../../../graphql/types';
 import { mockEcsData } from '../../../../mock';
+import { getEmptyValue } from '../../../empty_value';
 
 describe('suricata_column_renderer', () => {
   let mockDatum: Ecs;
@@ -64,12 +65,12 @@ describe('suricata_column_renderer', () => {
     const missingEventIdAndSignature = omit('event.id', missingSignature);
     const column = suricataColumnRenderer.renderColumn('event.id', missingEventIdAndSignature);
     const wrapper = mount(<span>{column}</span>);
-    expect(wrapper.text()).toEqual(EMPTY_VALUE);
+    expect(wrapper.text()).toEqual(getEmptyValue());
   });
 
   test('should return a value if an unknown column name is sent in', () => {
     const column = suricataColumnRenderer.renderColumn('made up column name', mockDatum);
     const wrapper = mount(<span>{column}</span>);
-    expect(wrapper.text()).toEqual(EMPTY_VALUE);
+    expect(wrapper.text()).toEqual(getEmptyValue());
   });
 });

@@ -51,5 +51,3 @@ export const createLinkWithSignature = (signature: string): string => {
     return `https://www.google.com/search?q=${encodeURIComponent(signature)}`;
   }
 };
-
-export const EMPTY_VALUE = '--';

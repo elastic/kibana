@@ -5,7 +5,7 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import { getOr, has, noop } from 'lodash/fp';
+import { has, noop } from 'lodash/fp';
 import moment from 'moment';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -15,6 +15,7 @@ import { Ecs } from '../../../../graphql/types';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { eventsSelector, hostsActions, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
+import { getEmptyValue, getOrEmpty } from '../../../empty_value';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
 
@@ -108,7 +109,7 @@ const getEventsColumns = (startDate: number) => [
     truncateText: false,
     hideForMobile: false,
     render: ({ event }: { event: Ecs }) => {
-      const hostName = getOr('--', 'host.name', event);
+      const hostName = getOrEmpty('host.name', event);
       return (
         <>
           <DraggableWrapper
@@ -144,14 +145,14 @@ const getEventsColumns = (startDate: number) => [
     sortable: true,
     truncateText: true,
     hideForMobile: true,
-    render: ({ event }: { event: Ecs }) => <>{getOr('--', 'event.type', event)}</>,
+    render: ({ event }: { event: Ecs }) => <>{getOrEmpty('event.type', event)}</>,
   },
   {
     name: 'Source',
     truncateText: true,
     render: ({ event }: { event: Ecs }) => (
       <>
-        {formatSafely('source.ip', event)} : {getOr('--', 'source.port', event)}
+        {formatSafely('source.ip', event)} : {getOrEmpty('source.port', event)}
       </>
     ),
   },
@@ -161,7 +162,7 @@ const getEventsColumns = (startDate: number) => [
     truncateText: true,
     render: ({ event }: { event: Ecs }) => (
       <>
-        {formatSafely('destination.ip', event)} : {getOr('--', 'destination.port', event)}
+        {formatSafely('destination.ip', event)} : {getOrEmpty('destination.port', event)}
       </>
     ),
   },
@@ -171,7 +172,7 @@ const getEventsColumns = (startDate: number) => [
     truncateText: true,
     render: ({ event }: { event: Ecs }) => (
       <>
-        {getOr('--', 'geo.region_name', event)} : {getOr('--', 'geo.country_iso_code', event)}
+        {getOrEmpty('geo.region_name', event)} : {getOrEmpty('geo.country_iso_code', event)}
       </>
     ),
   },
@@ -179,8 +180,8 @@ const getEventsColumns = (startDate: number) => [
 
 export const formatSafely = (path: string, data: Ecs) => {
   if (has(path, data)) {
-    const txt = getOr('--', path, data);
+    const txt = getOrEmpty(path, data);
     return txt && txt.slice ? txt.slice(0, 12) : txt;
   }
-  return '--';
+  return getEmptyValue();
 };

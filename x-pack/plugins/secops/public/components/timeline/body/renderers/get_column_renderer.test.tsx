@@ -8,10 +8,10 @@ import { mount } from 'enzyme';
 import { cloneDeep, omit } from 'lodash/fp';
 import React from 'react';
 
-import { EMPTY_VALUE } from '.';
 import { columnRenderers } from '.';
 import { Ecs } from '../../../../graphql/types';
 import { mockEcsData } from '../../../../mock';
+import { getEmptyValue } from '../../../empty_value';
 import { getColumnRenderer } from './get_column_renderer';
 
 describe('get_column_renderer', () => {
@@ -45,7 +45,7 @@ describe('get_column_renderer', () => {
     const columnRenderer = getColumnRenderer(columnName, columnRenderers, omitUser);
     const column = columnRenderer.renderColumn(columnName, omitUser);
     const wrapper = mount(<span>{column}</span>);
-    expect(wrapper.text()).toEqual(EMPTY_VALUE);
+    expect(wrapper.text()).toEqual(getEmptyValue());
   });
 
   test('should render empty value when dealing with an unknown column name', () => {
@@ -53,6 +53,6 @@ describe('get_column_renderer', () => {
     const columnRenderer = getColumnRenderer(columnName, columnRenderers, nonSuricata);
     const column = columnRenderer.renderColumn(columnName, nonSuricata);
     const wrapper = mount(<span>{column}</span>);
-    expect(wrapper.text()).toEqual(EMPTY_VALUE);
+    expect(wrapper.text()).toEqual(getEmptyValue());
   });
 });

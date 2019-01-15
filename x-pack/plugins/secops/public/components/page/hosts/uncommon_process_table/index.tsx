@@ -5,7 +5,7 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import { defaultTo, noop } from 'lodash/fp';
+import { noop } from 'lodash/fp';
 import moment from 'moment';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -19,6 +19,7 @@ import {
 import { escapeQueryValue } from '../../../../lib/keury';
 import { hostsActions, State, uncommonProcessesSelector } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
+import { defaultToEmpty, getEmptyValue } from '../../../empty_value';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
 
@@ -115,7 +116,7 @@ const getUncommonColumns = (startDate: number) => [
     truncateText: false,
     hideForMobile: false,
     render: ({ uncommonProcess }: { uncommonProcess: UncommonProcessItem }) => {
-      const processName = defaultTo('--', uncommonProcess.name);
+      const processName = defaultToEmpty(uncommonProcess.name);
       return (
         <>
           <DraggableWrapper
@@ -151,7 +152,7 @@ const getUncommonColumns = (startDate: number) => [
     truncateText: false,
     hideForMobile: false,
     render: ({ uncommonProcess }: { uncommonProcess: UncommonProcessItem }) => (
-      <>{defaultTo('--', uncommonProcess.title)}</>
+      <>{defaultToEmpty(uncommonProcess.title)}</>
     ),
   },
   {
@@ -159,7 +160,7 @@ const getUncommonColumns = (startDate: number) => [
     truncateText: false,
     hideForMobile: false,
     render: ({ uncommonProcess }: { uncommonProcess: UncommonProcessItem }) => (
-      <>{defaultTo('--', uncommonProcess.instances)}</>
+      <>{defaultToEmpty(uncommonProcess.instances)}</>
     ),
   },
   {
@@ -167,7 +168,7 @@ const getUncommonColumns = (startDate: number) => [
     truncateText: false,
     hideForMobile: false,
     render: ({ uncommonProcess }: { uncommonProcess: UncommonProcessItem }) => (
-      <>{uncommonProcess.hosts != null ? uncommonProcess.hosts.length : '--'}</>
+      <>{uncommonProcess.hosts != null ? uncommonProcess.hosts.length : getEmptyValue()}</>
     ),
   },
   {
@@ -175,7 +176,9 @@ const getUncommonColumns = (startDate: number) => [
     truncateText: false,
     hideForMobile: false,
     render: ({ uncommonProcess }: { uncommonProcess: UncommonProcessItem }) => (
-      <>{uncommonProcess.hosts != null ? extractHostNames(uncommonProcess.hosts) : '--'}</>
+      <>
+        {uncommonProcess.hosts != null ? extractHostNames(uncommonProcess.hosts) : getEmptyValue()}
+      </>
     ),
   },
 ];

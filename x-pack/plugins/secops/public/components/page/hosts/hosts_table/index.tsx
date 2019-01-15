@@ -5,7 +5,7 @@
  */
 
 import { EuiBadge, EuiLink } from '@elastic/eui';
-import { defaultTo, isNil, noop } from 'lodash/fp';
+import { isNil, noop } from 'lodash/fp';
 import moment from 'moment';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -15,6 +15,7 @@ import { HostItem, HostsEdges } from '../../../../graphql/types';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { hostsActions, hostsSelector, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
+import { defaultToEmpty } from '../../../empty_value';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
 
@@ -107,7 +108,7 @@ const getHostsColumns = () => [
     truncateText: false,
     hideForMobile: false,
     render: ({ host }: { host: HostItem }) => {
-      const hostName = defaultTo('--', host.name);
+      const hostName = defaultToEmpty(host.name);
       return (
         <>
           <DraggableWrapper
@@ -115,7 +116,7 @@ const getHostsColumns = () => [
               and: [],
               enabled: true,
               id: host._id!,
-              name: hostName,
+              name: hostName!,
               negated: false,
               queryMatch: `host.id: "${escapeQueryValue(host.hostId!)}"`,
               queryDate: `@timestamp >= ${moment(
@@ -148,18 +149,18 @@ const getHostsColumns = () => [
     name: 'First seen',
     truncateText: false,
     hideForMobile: false,
-    render: ({ host }: { host: HostItem }) => <>{defaultTo('--', host.firstSeen)}</>,
+    render: ({ host }: { host: HostItem }) => <>{defaultToEmpty(host.firstSeen)}</>,
   },
   {
     name: 'OS',
     truncateText: false,
     hideForMobile: false,
-    render: ({ host }: { host: HostItem }) => <>{defaultTo('--', host.os)}</>,
+    render: ({ host }: { host: HostItem }) => <>{defaultToEmpty(host.os)}</>,
   },
   {
     name: 'Version',
     truncateText: false,
     hideForMobile: false,
-    render: ({ host }: { host: HostItem }) => <>{defaultTo('--', host.version)}</>,
+    render: ({ host }: { host: HostItem }) => <>{defaultToEmpty(host.version)}</>,
   },
 ];

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr } from 'lodash/fp';
 import React from 'react';
 import { HostItem } from '../../graphql/types';
+import { getOrEmpty } from '../empty_value';
 import { ItemsPerRow } from './index';
 
 export const mockData = {
@@ -52,25 +52,25 @@ export const getHostsColumns = () => [
     name: 'Host',
     truncateText: false,
     hideForMobile: false,
-    render: (item: HostItem) => <>{getOr('--', 'host.name', item)}</>,
+    render: (item: HostItem) => <>{getOrEmpty('host.name', item)}</>,
   },
   {
     name: 'First seen',
     truncateText: false,
     hideForMobile: false,
-    render: (item: HostItem) => <>{getOr('--', 'host.firstSeen', item)}</>,
+    render: (item: HostItem) => <>{getOrEmpty('host.firstSeen', item)}</>,
   },
   {
     name: 'OS',
     truncateText: false,
     hideForMobile: false,
-    render: (item: HostItem) => <>{getOr('--', 'host.os', item)}</>,
+    render: (item: HostItem) => <>{getOrEmpty('host.os', item)}</>,
   },
   {
     name: 'Version',
     truncateText: false,
     hideForMobile: false,
-    render: (item: HostItem) => <>{getOr('--', 'host.version', item)}</>,
+    render: (item: HostItem) => <>{getOrEmpty('host.version', item)}</>,
   },
 ];
 

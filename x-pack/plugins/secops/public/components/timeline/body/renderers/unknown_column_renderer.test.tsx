@@ -8,9 +8,9 @@ import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 
-import { EMPTY_VALUE } from '.';
 import { Ecs } from '../../../../graphql/types';
 import { mockEcsData } from '../../../../mock';
+import { getEmptyValue } from '../../../empty_value';
 import { unknownColumnRenderer } from './unknown_column_renderer';
 
 describe('unknown_column_renderer', () => {
@@ -26,12 +26,12 @@ describe('unknown_column_renderer', () => {
   test('should return an empty value with a made up column name that does not have a valid data value', () => {
     const emptyColumn = unknownColumnRenderer.renderColumn('a made up column name', mockDatum);
     const wrapper = mount(<span>{emptyColumn}</span>);
-    expect(wrapper.text()).toEqual(EMPTY_VALUE);
+    expect(wrapper.text()).toEqual(getEmptyValue());
   });
 
   test('should return an empty value with a column name that has valid id value', () => {
     const emptyColumn = unknownColumnRenderer.renderColumn('_id', mockDatum);
     const wrapper = mount(<span>{emptyColumn}</span>);
-    expect(wrapper.text()).toEqual(EMPTY_VALUE);
+    expect(wrapper.text()).toEqual(getEmptyValue());
   });
 });
