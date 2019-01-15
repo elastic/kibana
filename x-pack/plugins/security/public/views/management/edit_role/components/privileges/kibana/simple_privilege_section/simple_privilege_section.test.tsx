@@ -11,6 +11,7 @@ import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { PrivilegeDefinition, Role } from '../../../../../../../../common/model';
 import { EffectivePrivilegesFactory } from '../../../../../../../lib/effective_privileges';
 import { SimplePrivilegeSection } from './simple_privilege_section';
+import { UnsupportedSpacePrivilegesWarning } from './unsupported_space_privileges_warning';
 
 const buildProps = (customProps: any = {}) => {
   const privilegeDefinition = new PrivilegeDefinition({
@@ -81,6 +82,7 @@ describe('<SimplePrivilegeForm>', () => {
     expect(selector.props()).toMatchObject({
       valueOfSelected: 'none',
     });
+    expect(wrapper.find(UnsupportedSpacePrivilegesWarning)).toHaveLength(0);
   });
 
   it('displays "custom" when feature privileges are customized', () => {
@@ -103,6 +105,7 @@ describe('<SimplePrivilegeForm>', () => {
     expect(selector.props()).toMatchObject({
       valueOfSelected: 'custom',
     });
+    expect(wrapper.find(UnsupportedSpacePrivilegesWarning)).toHaveLength(0);
   });
 
   it('displays the selected privilege', () => {
@@ -123,6 +126,7 @@ describe('<SimplePrivilegeForm>', () => {
     expect(selector.props()).toMatchObject({
       valueOfSelected: 'read',
     });
+    expect(wrapper.find(UnsupportedSpacePrivilegesWarning)).toHaveLength(0);
   });
 
   it('fires its onChange callback when the privilege changes', () => {
@@ -140,6 +144,7 @@ describe('<SimplePrivilegeForm>', () => {
       },
       kibana: [{ feature: {}, base: ['all'], spaces: ['*'] }],
     });
+    expect(wrapper.find(UnsupportedSpacePrivilegesWarning)).toHaveLength(0);
   });
 
   it('allows feature privileges to be customized', () => {
@@ -184,5 +189,29 @@ describe('<SimplePrivilegeForm>', () => {
       ],
       name: '',
     });
+
+    expect(wrapper.find(UnsupportedSpacePrivilegesWarning)).toHaveLength(0);
+  });
+
+  it('renders a warning when space privileges are found', () => {
+    const props = buildProps({
+      role: {
+        elasticsearch: {},
+        kibana: [
+          {
+            spaces: ['*'],
+            base: ['read'],
+            feature: {},
+          },
+          {
+            spaces: ['marketing'],
+            base: ['read'],
+            feature: {},
+          },
+        ],
+      },
+    });
+    const wrapper = mountWithIntl(<SimplePrivilegeSection {...props} />);
+    expect(wrapper.find(UnsupportedSpacePrivilegesWarning)).toHaveLength(1);
   });
 });

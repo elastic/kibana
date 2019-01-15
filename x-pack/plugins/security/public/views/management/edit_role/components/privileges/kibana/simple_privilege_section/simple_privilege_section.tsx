@@ -21,6 +21,7 @@ import { isGlobalPrivilegeDefinition } from '../../../../../../../lib/privilege_
 import { copyRole } from '../../../../../../../lib/role_utils';
 import { NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
 import { FeatureTable } from '../feature_table';
+import { UnsupportedSpacePrivilegesWarning } from './unsupported_space_privileges_warning';
 
 interface Props {
   role: Role;
@@ -203,6 +204,7 @@ export class SimplePrivilegeSection extends Component<Props, State> {
               />
             </EuiFormRow>
           )}
+          {this.maybeRenderSpacePrivilegeWarning()}
         </EuiDescribedFormGroup>
       </Fragment>
     );
@@ -265,6 +267,22 @@ export class SimplePrivilegeSection extends Component<Props, State> {
       form.feature = {};
     }
     this.props.onChange(role);
+  };
+
+  private maybeRenderSpacePrivilegeWarning = () => {
+    const kibanaPrivileges = this.props.role.kibana;
+    const hasSpacePrivileges = kibanaPrivileges.some(
+      privilege => !isGlobalPrivilegeDefinition(privilege)
+    );
+
+    if (hasSpacePrivileges) {
+      return (
+        <EuiFormRow fullWidth>
+          <UnsupportedSpacePrivilegesWarning />
+        </EuiFormRow>
+      );
+    }
+    return null;
   };
 
   private locateGlobalPrivilege = (role: Role, createIfMissing = false) => {

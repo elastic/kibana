@@ -331,7 +331,7 @@ class EditRolePageUI extends Component<Props, State> {
 
       const role = copyRole(this.state.role);
 
-      transformRoleForSave(role);
+      transformRoleForSave(role, this.props.spacesEnabled);
 
       saveRole(httpClient, role)
         .then(() => {

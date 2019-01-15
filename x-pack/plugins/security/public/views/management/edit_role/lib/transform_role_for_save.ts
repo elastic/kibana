@@ -5,8 +5,9 @@
  */
 
 import { IndexPrivilege, Role } from '../../../../../common/model';
+import { isGlobalPrivilegeDefinition } from '../../../../lib/privilege_utils';
 
-export function transformRoleForSave(role: Role) {
+export function transformRoleForSave(role: Role, spacesEnabled: boolean) {
   // Remove any placeholder index privileges
   role.elasticsearch.indices = role.elasticsearch.indices.filter(
     indexPrivilege => !isPlaceholderPrivilege(indexPrivilege)
@@ -14,6 +15,11 @@ export function transformRoleForSave(role: Role) {
 
   // Remove any placeholder query entries
   role.elasticsearch.indices.forEach(index => index.query || delete index.query);
+
+  // If spaces are disabled, then do not persist any space privileges
+  if (!spacesEnabled) {
+    role.kibana = role.kibana.filter(isGlobalPrivilegeDefinition);
+  }
 
   role.kibana.forEach(kibanaPrivilege => {
     // If a base privilege is defined, then do not persist feature privileges
