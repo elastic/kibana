@@ -68,8 +68,7 @@ export default function MetricsVisProvider(Private, i18n) {
         axis_formatter: 'number',
         axis_scale: 'normal',
         show_legend: 1,
-        show_grid: 1,
-        rollup_search: 0
+        show_grid: 1
       },
       component: require('../components/vis_editor')
     },
