@@ -13,7 +13,12 @@ import { TagEdit } from '../../../components/tag/tag_edit';
 import { AppPageProps } from '../../../frontend_types';
 interface PageState {
   tag: BeatTag;
-  configuration_blocks: ConfigurationBlock[];
+  configuration_blocks: {
+    error?: string | undefined;
+    blocks: ConfigurationBlock[];
+    page: number;
+    total: number;
+  };
 }
 
 export class InitialTagPage extends Component<AppPageProps, PageState> {
@@ -26,7 +31,7 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
         color: '#DD0A73',
         hasConfigurationBlocksTypes: [],
       },
-      configuration_blocks: [],
+      configuration_blocks: { blocks: [], page: 0, total: 0 },
     };
 
     if (props.urlState.createdTag) {
@@ -47,6 +52,9 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
         <TagEdit
           tag={this.state.tag}
           configuration_blocks={this.state.configuration_blocks}
+          onConfigListChange={(index: number, size: number) => {
+            this.loadConfigBlocks(index);
+          }}
           onTagChange={(field: string, value: string | number) =>
             this.setState(oldState => ({
               tag: { ...oldState.tag, [field]: value },
@@ -60,7 +68,7 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
                 console.error('Error upseting config block', e);
               })
               .then(() => {
-                this.loadConfigBlocks();
+                this.loadConfigBlocks(this.state.configuration_blocks.page);
               });
           }}
           onConfigRemoved={(id: string) => {
@@ -71,7 +79,7 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
                 console.error(`Error removing block ${id}`, e);
               })
               .then(() => {
-                this.loadConfigBlocks();
+                this.loadConfigBlocks(this.state.configuration_blocks.page);
               });
           }}
         />
@@ -79,7 +87,7 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              disabled={this.state.configuration_blocks.length === 0}
+              disabled={this.state.configuration_blocks.blocks.length === 0}
               onClick={this.saveTag}
             >
               <FormattedMessage
@@ -93,11 +101,12 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
     );
   }
 
-  private loadConfigBlocks = async () => {
-    const blocksResponse = await this.props.libs.configBlocks.getForTags([this.state.tag.id], -1);
+  private loadConfigBlocks = async (page: number = -1) => {
+    const blocksResponse = await this.props.libs.configBlocks.getForTags([this.state.tag.id], page);
+
     if (blocksResponse.blocks.length > 0) {
       this.setState({
-        configuration_blocks: blocksResponse.blocks,
+        configuration_blocks: blocksResponse,
       });
     }
   };

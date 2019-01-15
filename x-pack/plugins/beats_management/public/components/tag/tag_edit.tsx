@@ -32,7 +32,13 @@ import { TagBadge } from './tag_badge';
 
 interface TagEditProps {
   tag: BeatTag;
-  configuration_blocks: ConfigurationBlock[];
+  configuration_blocks: {
+    error?: string | undefined;
+    blocks: ConfigurationBlock[];
+    page: number;
+    total: number;
+  };
+  onConfigListChange: (index: number, size: number) => void;
   onDetachBeat?: (beatIds: string[]) => void;
   onTagChange: (field: keyof BeatTag, value: string) => any;
   onConfigAddOrEdit: (block: ConfigurationBlock) => any;
@@ -143,6 +149,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
           <EuiFlexItem>
             <div>
               <ConfigList
+                onTableChange={this.props.onConfigListChange}
                 configs={configuration_blocks}
                 onConfigClick={(action: string, block: ConfigurationBlock) => {
                   if (action === 'delete') {
@@ -194,7 +201,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
 
         {this.state.showFlyout && (
           <ConfigView
-            configBlock={configuration_blocks.find(
+            configBlock={configuration_blocks.blocks.find(
               block => block.id !== undefined && block.id === this.state.selectedConfigId
             )}
             onClose={() => this.setState({ showFlyout: false, selectedConfigId: undefined })}

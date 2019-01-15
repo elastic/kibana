@@ -23,8 +23,8 @@ export const createGetConfigurationBlocksRoute = (libs: CMServerLibs): Framework
       tags = await libs.configurationBlocks.getForTags(
         request.user,
         tagIds,
-        request.params.page,
-        25
+        parseInt(request.params.page, 10),
+        5
       );
     } catch (err) {
       return wrapEsError(err);

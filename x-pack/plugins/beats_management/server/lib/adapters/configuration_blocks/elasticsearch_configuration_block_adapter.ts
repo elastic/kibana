@@ -5,6 +5,7 @@
  */
 
 import { flatten, get } from 'lodash';
+import uuidv4 from 'uuid/v4';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { ConfigurationBlock } from '../../../../common/domain_types';
 import { DatabaseAdapter } from '../database/adapter_types';
@@ -56,11 +57,10 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
 
     const params = {
       ignore: [404],
-      size: 10000,
       index: INDEX_NAMES.BEATS,
       type: '_doc',
       body: {
-        from: page === -1 ? undefined : page,
+        from: page === -1 ? undefined : page * size,
         size,
         query: {
           terms: { 'configuration_block.tag': tagIds },
@@ -80,8 +80,8 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
         ...block._source.configuration_block,
         config: JSON.parse(block._source.configuration_block.config || '{}'),
       })),
-      page: 0,
-      total: 0,
+      page,
+      total: (response.hits.total as any).value,
     };
   }
 
@@ -96,13 +96,16 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
 
   public async create(user: FrameworkUser, configs: ConfigurationBlock[]): Promise<string[]> {
     const body = flatten(
-      configs.map(config => [
-        { index: {} },
-        {
-          type: 'configuration_block',
-          configuration_block: { ...config, config: JSON.stringify(config.config) },
-        },
-      ])
+      configs.map(config => {
+        const id = uuidv4();
+        return [
+          { index: { _id: id } },
+          {
+            type: 'configuration_block',
+            configuration_block: { id, ...config, config: JSON.stringify(config.config) },
+          },
+        ];
+      })
     );
 
     const result = await this.database.bulk(user, {
@@ -113,7 +116,10 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
     });
 
     if (result.errors) {
-      throw new Error(result.items[0].result);
+      if (result.items[0].result) {
+        throw new Error(result.items[0].result);
+      }
+      throw new Error((result.items[0] as any).index.error.reason);
     }
 
     return result.items.map((item: any) => item.index._id);

@@ -17,6 +17,9 @@
         },
         "configuration_block": {
           "properties": {
+            "id": {
+              "type": "keyword"
+            },
             "type": {
               "type": "keyword"
             },

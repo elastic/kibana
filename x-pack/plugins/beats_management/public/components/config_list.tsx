@@ -10,27 +10,38 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { configBlockSchemas } from '../../common/config_schemas';
 import { translateConfigSchema } from '../../common/config_schemas_translations_map';
-import { TABLE_CONFIG } from '../../common/constants/table';
 import { ConfigurationBlock } from '../../common/domain_types';
 
 interface ComponentProps {
-  configs: ConfigurationBlock[];
+  configs: {
+    error?: string | undefined;
+    blocks: ConfigurationBlock[];
+    page: number;
+    total: number;
+  };
   onConfigClick: (action: 'edit' | 'delete', config: ConfigurationBlock) => any;
   onTableChange: (index: number, size: number) => void;
   intl: InjectedIntl;
 }
 const pagination = {
-  initialPageSize: TABLE_CONFIG.INITIAL_ROW_SIZE,
-  pageSizeOptions: TABLE_CONFIG.PAGE_SIZE_OPTIONS,
+  pageSize: 5,
+  hidePerPageOptions: true,
 };
 
 const ConfigListUi: React.SFC<ComponentProps> = props => (
   <EuiBasicTable
-    items={props.configs || []}
-    pagination={{ ...pagination, totalItemCount: 10000 }}
-    onChange={(page: { index: number; size: number } = { index: 0, size: 50 }) => {
+    items={props.configs.blocks || []}
+    itemId="id"
+    pagination={{
+      ...pagination,
+      totalItemCount: props.configs.total,
+      pageIndex: props.configs.page,
+    }}
+    onChange={(
+      table: { page: { index: number; size: number } } = { page: { index: 0, size: 5 } }
+    ) => {
       if (props.onTableChange) {
-        props.onTableChange(page.index, page.size);
+        props.onTableChange(table.page.index, table.page.size);
       }
     }}
     columns={[

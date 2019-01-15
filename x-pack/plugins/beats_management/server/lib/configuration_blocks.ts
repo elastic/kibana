@@ -19,7 +19,7 @@ export class ConfigurationBlocksLib {
     user: FrameworkUser,
     tagIds: string[],
     page: number = 0,
-    size: number = 100
+    size: number = 10
   ) {
     if ((page + 1) * size > 10000) {
       throw new Error('System error, too many results. To get all results, request page: -1');
