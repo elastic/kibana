@@ -178,27 +178,25 @@ describe('SavedObjectsRepository', () => {
   };
 
   const mappings = {
-    doc: {
-      properties: {
-        'index-pattern': {
-          properties: {
-            someField: {
-              type: 'keyword'
-            }
+    properties: {
+      'index-pattern': {
+        properties: {
+          someField: {
+            type: 'keyword'
           }
-        },
-        'dashboard': {
-          properties: {
-            otherField: {
-              type: 'keyword'
-            }
+        }
+      },
+      'dashboard': {
+        properties: {
+          otherField: {
+            type: 'keyword'
           }
-        },
-        'globaltype': {
-          properties: {
-            yetAnotherField: {
-              type: 'keyword'
-            }
+        }
+      },
+      'globaltype': {
+        properties: {
+          yetAnotherField: {
+            type: 'keyword'
           }
         }
       }

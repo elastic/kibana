@@ -26,11 +26,6 @@ import uuid from 'uuid';
 import { SavedObjectsSchema } from '../schema';
 
 /**
- * The root document type. In 7.0, this needs to change to '_doc'.
- */
-export const ROOT_TYPE = 'doc';
-
-/**
  * A raw document as represented directly in the saved object index.
  */
 export interface RawDoc {
@@ -130,7 +125,6 @@ export class SavedObjectsSerializer {
     return {
       _id: this.generateRawId(namespace, type, id),
       _source: source,
-      _type: ROOT_TYPE,
       ...(version != null && { _version: version }),
     };
   }

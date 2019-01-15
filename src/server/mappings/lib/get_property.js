@@ -19,8 +19,6 @@
 
 import toPath from 'lodash/internal/toPath';
 
-import { getRootType } from './get_root_type';
-
 /**
  *  Recursively read properties from the mapping object of type "object"
  *  until the `path` is resolved.
@@ -53,7 +51,7 @@ function getPropertyMappingFromObjectMapping(mapping, path) {
  */
 export function getProperty(mappings, path) {
   return getPropertyMappingFromObjectMapping(
-    mappings[getRootType(mappings)],
+    mappings,
     toPath(path)
   );
 }

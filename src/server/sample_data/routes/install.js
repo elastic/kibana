@@ -113,9 +113,7 @@ export const createInstallRoute = () => ({
                 }
               },
               mappings: {
-                _doc: {
-                  properties: dataIndexConfig.fields
-                }
+                properties: dataIndexConfig.fields
               }
             }
           };
