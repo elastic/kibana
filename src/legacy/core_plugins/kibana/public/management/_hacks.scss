@@ -44,7 +44,7 @@ kbn-management-objects-view {
   cursor: -webkit-grabbing;
 }
 
-// Hack ecause the management wrapper is flat HTML and needs a class
+// Hack because the management wrapper is flat HTML and needs a class
 .mgtPage__body {
   max-width: map-get($euiBreakpoints, 'xl');
 }
