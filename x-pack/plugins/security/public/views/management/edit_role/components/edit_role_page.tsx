@@ -40,7 +40,6 @@ interface Props {
   runAsUsers: string[];
   indexPatterns: string[];
   httpClient: any;
-  rbacEnabled: boolean;
   allowDocumentLevelSecurity: boolean;
   allowFieldLevelSecurity: boolean;
   privileges: PrivilegeMap;

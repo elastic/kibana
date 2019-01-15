@@ -5,6 +5,7 @@ exports[`<SpaceAwarePrivilegeSection> hides the space table if there are no exis
 exports[`<SpaceAwarePrivilegeSection> with user profile disabling "manageSpaces" renders a warning message instead of the privilege form 1`] = `
 <EuiCallOut
   color="danger"
+  data-test-subj="userCannotManageSpacesCallout"
   iconType="alert"
   size="m"
   title={

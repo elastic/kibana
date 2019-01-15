@@ -145,7 +145,6 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
             role={role}
             kibanaAppPrivileges={KibanaAppPrivileges}
             indexPatterns={indexPatterns}
-            rbacEnabled={true}
             rbacApplication={rbacApplication}
             httpClient={$http}
             allowDocumentLevelSecurity={allowDocumentLevelSecurity}
