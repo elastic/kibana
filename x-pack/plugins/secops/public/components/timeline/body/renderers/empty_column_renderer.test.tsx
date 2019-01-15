@@ -8,9 +8,10 @@ import { mount } from 'enzyme';
 import { cloneDeep, omit } from 'lodash/fp';
 import React from 'react';
 
-import { EMPTY_VALUE, emptyColumnRenderer } from '.';
+import { emptyColumnRenderer } from '.';
 import { Ecs } from '../../../../graphql/types';
 import { mockEcsData } from '../../../../mock';
+import { getEmptyValue } from '../../../empty_value';
 
 describe('empty_column_renderer', () => {
   let mockDatum: Ecs;
@@ -44,6 +45,6 @@ describe('empty_column_renderer', () => {
     const missingSource = omit('source', mockDatum);
     const emptyColumn = emptyColumnRenderer.renderColumn('source', missingSource);
     const wrapper = mount(<span>{emptyColumn}</span>);
-    expect(wrapper.text()).toEqual(EMPTY_VALUE);
+    expect(wrapper.text()).toEqual(getEmptyValue());
   });
 });

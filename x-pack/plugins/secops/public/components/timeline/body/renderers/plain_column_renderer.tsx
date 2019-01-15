@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr, has } from 'lodash/fp';
+import { has } from 'lodash/fp';
 import moment from 'moment';
 import React from 'react';
 
-import { ColumnRenderer, EMPTY_VALUE } from '.';
+import { ColumnRenderer } from '.';
 import { Ecs } from '../../../../graphql/types';
+import { getOrEmpty } from '../../../empty_value';
 
 export const dataExistsAtColumn = (columnName: string, data: Ecs): boolean => has(columnName, data);
 
@@ -18,7 +19,7 @@ export const plainColumnRenderer: ColumnRenderer = {
 
   renderColumn: (columnName: string, data: Ecs) => {
     return columnName !== 'timestamp' ? (
-      <>{getOr(EMPTY_VALUE, columnName, data)}</>
+      <>{getOrEmpty(columnName, data)}</>
     ) : (
       <>{moment(data!.timestamp!).format()}</>
     );

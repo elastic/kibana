@@ -9,9 +9,10 @@ import { cloneDeep, omit } from 'lodash/fp';
 import React from 'react';
 
 import moment = require('moment');
-import { EMPTY_VALUE, plainColumnRenderer } from '.';
+import { plainColumnRenderer } from '.';
 import { Ecs } from '../../../../graphql/types';
 import { mockEcsData } from '../../../../mock';
+import { getEmptyValue } from '../../../empty_value';
 
 describe('plain_column_renderer', () => {
   let mockDatum: Ecs;
@@ -90,55 +91,55 @@ describe('plain_column_renderer', () => {
     const missingCategory = omit('event.category', mockDatum);
     const emptyColumn = plainColumnRenderer.renderColumn('event.category', missingCategory);
     const wrapper = mount(<span>{emptyColumn}</span>);
-    expect(wrapper.text()).toEqual(EMPTY_VALUE);
+    expect(wrapper.text()).toEqual(getEmptyValue());
   });
 
   test('should return an empty value if destination is empty', () => {
     const missingDestination = omit('destination', mockDatum);
     const emptyColumn = plainColumnRenderer.renderColumn('destination', missingDestination);
     const wrapper = mount(<span>{emptyColumn}</span>);
-    expect(wrapper.text()).toEqual(EMPTY_VALUE);
+    expect(wrapper.text()).toEqual(getEmptyValue());
   });
 
   test('should return an empty value if destination ip is empty', () => {
     const missingDestination = omit('destination.ip', mockDatum);
     const emptyColumn = plainColumnRenderer.renderColumn('destination.ip', missingDestination);
     const wrapper = mount(<span>{emptyColumn}</span>);
-    expect(wrapper.text()).toEqual(EMPTY_VALUE);
+    expect(wrapper.text()).toEqual(getEmptyValue());
   });
 
   test('should return an empty value if event severity is empty', () => {
     const missingSeverity = omit('event.severity', mockDatum);
     const emptyColumn = plainColumnRenderer.renderColumn('event.severity', missingSeverity);
     const wrapper = mount(<span>{emptyColumn}</span>);
-    expect(wrapper.text()).toEqual(EMPTY_VALUE);
+    expect(wrapper.text()).toEqual(getEmptyValue());
   });
 
   test('should return an empty value if source is empty', () => {
     const missingSource = omit('source', mockDatum);
     const emptyColumn = plainColumnRenderer.renderColumn('source', missingSource);
     const wrapper = mount(<span>{emptyColumn}</span>);
-    expect(wrapper.text()).toEqual(EMPTY_VALUE);
+    expect(wrapper.text()).toEqual(getEmptyValue());
   });
 
   test('should return an empty value if source.ip is empty', () => {
     const missingSource = omit('source.ip', mockDatum);
     const emptyColumn = plainColumnRenderer.renderColumn('source.ip', missingSource);
     const wrapper = mount(<span>{emptyColumn}</span>);
-    expect(wrapper.text()).toEqual(EMPTY_VALUE);
+    expect(wrapper.text()).toEqual(getEmptyValue());
   });
 
   test('should return an empty value if event.type is empty', () => {
     const missingType = omit('event.type', mockDatum);
     const emptyColumn = plainColumnRenderer.renderColumn('event.type', missingType);
     const wrapper = mount(<span>{emptyColumn}</span>);
-    expect(wrapper.text()).toEqual(EMPTY_VALUE);
+    expect(wrapper.text()).toEqual(getEmptyValue());
   });
 
   test('should return an empty value if user.name is empty', () => {
     const missingUser = omit('user.name', mockDatum);
     const emptyColumn = plainColumnRenderer.renderColumn('user.name', missingUser);
     const wrapper = mount(<span>{emptyColumn}</span>);
-    expect(wrapper.text()).toEqual(EMPTY_VALUE);
+    expect(wrapper.text()).toEqual(getEmptyValue());
   });
 });
