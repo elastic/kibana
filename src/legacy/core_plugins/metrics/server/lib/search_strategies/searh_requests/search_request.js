@@ -16,14 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export default class AbstractSearchRequest {
-  constructor(req, callWithRequest, indexPattern) {
-    this.req = req;
-    this.callWithRequest = callWithRequest;
-    this.indexPattern = indexPattern;
+import AbstractSearchRequest from './abstract_request';
+
+import MultiSearchRequest from './multi_search_request';
+import SingleSearchRequest from './single_search_request';
+
+export default class SearchRequest extends AbstractSearchRequest {
+  getSearchRequestType(options) {
+    const isMultiSearch = Array.isArray(options.body);
+    const SearchRequest = isMultiSearch ? MultiSearchRequest : SingleSearchRequest;
+
+    return new SearchRequest(this.req, this.callWithRequest, this.indexPattern);
   }
 
-  search() {
-    throw new Error('AbstractSearchRequest: search method should be defined');
+  async search(options) {
+    const concreteSearchRequest = this.getSearchRequestType(options);
+
+    return concreteSearchRequest.search(options);
   }
 }

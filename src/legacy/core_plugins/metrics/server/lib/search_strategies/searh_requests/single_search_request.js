@@ -16,14 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export default class AbstractSearchRequest {
-  constructor(req, callWithRequest, indexPattern) {
-    this.req = req;
-    this.callWithRequest = callWithRequest;
-    this.indexPattern = indexPattern;
-  }
+import AbstractSearchRequest from './abstract_request';
 
-  search() {
-    throw new Error('AbstractSearchRequest: search method should be defined');
+const SEARCH_METHOD = 'search';
+
+export default class MultiSearchRequest extends AbstractSearchRequest {
+  async search(options) {
+    const includeFrozen = await this.req.getUiSettingsService().get('search:includeFrozen');
+    const { responses } = await this.callWithRequest(this.req, SEARCH_METHOD, {
+      ...options,
+      index: this.indexPattern,
+      ignore_throttled: !includeFrozen,
+    });
+
+    return responses;
   }
 }

@@ -38,9 +38,7 @@ export default class SearchStrategiesRegister {
     return searchStrategiesRegister.add(new DefaultSearchStrategy(server));
   }
 
-  static getStrategyForIndex(indexPattern) {
-    return findLast(strategies, searchStrategy => {
-      return searchStrategy.isViable(indexPattern);
-    });
+  static getViableStrategy(req, indexPattern) {
+    return findLast(strategies, searchStrategy => searchStrategy.isViable(req, indexPattern));
   }
 }

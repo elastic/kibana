@@ -12,12 +12,12 @@ import { AbstractSearchRequest } from '../../../../../../src/legacy/core_plugins
 const SEARCH_METHOD = 'rollup.search';
 
 export default class RollupSearchRequest extends AbstractSearchRequest {
-  async search(options, index) {
+  async search(options) {
     const bodies = Array.isArray(options.body) ? options.body : [options.body];
     const requests = bodies
       .map(body => this.callWithRequest(SEARCH_METHOD, {
         body,
-        index,
+        index: this.indexPattern,
         rest_total_hits_as_int: true,
       }));
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 import AbstractSearchStrategy from './abstract_search_strategy';
-import MultiSearchRequest from '../searh_requests/multi_search_request';
+import SearchRequest from '../searh_requests/search_request';
 
 const callWithRequestFactory = (server, request) => {
   const { callWithRequest } = request.server.plugins.elasticsearch.getCluster('data');
@@ -30,10 +30,10 @@ export default class DefaultSearchStrategy extends AbstractSearchStrategy {
   batchRequestsSupport = true;
 
   constructor(server) {
-    super(server, callWithRequestFactory, MultiSearchRequest);
+    super(server, callWithRequestFactory, SearchRequest);
   }
 
-  isViable(indexPattern) {
+  isViable(req, indexPattern) {
     return Boolean(indexPattern);
   }
 }

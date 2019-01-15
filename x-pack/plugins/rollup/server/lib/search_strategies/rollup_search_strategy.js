@@ -15,7 +15,10 @@ export default class RollupSearchStrategy extends AbstractSearchStrategy {
     super(server, callWithRequestFactory, RollupSearchRequest);
   }
 
-  isViable(indexPattern) {
-    return Boolean(indexPattern);
+  isViable(req, indexPattern) {
+    const MULTI_INDEX_SEPARATOR = ',';
+    const splittedIndex = (indexPattern || '').split(MULTI_INDEX_SEPARATOR);
+
+    return Boolean(splittedIndex);
   }
 }
