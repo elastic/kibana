@@ -43,7 +43,7 @@ function getInterval(agg) {
   return interval;
 }
 
-function setBounds(agg, force) {
+export function setBounds(agg, force) {
   if (agg.buckets._alreadySet && !force) return;
   agg.buckets._alreadySet = true;
   const bounds = agg.params.timeRange ? timefilter.calculateBounds(agg.params.timeRange) : null;

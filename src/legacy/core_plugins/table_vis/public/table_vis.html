@@ -9,6 +9,8 @@
 
   <div ng-if="tableGroups" class="table-vis-container" data-test-subj="tableVis">
     <kbn-agg-table-group
+      filter="vis.API.events.filter"
+      dimensions="dimensions"
       group="tableGroups"
       export-title="visState.title"
       per-page="visState.params.perPage"

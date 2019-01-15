@@ -18,7 +18,6 @@
  */
 
 import './_table_vis_controller';
-import './_legacy_response_handler';
 
 describe('Table Vis', function () {
 });

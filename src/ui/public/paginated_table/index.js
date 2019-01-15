@@ -17,4 +17,5 @@
  * under the License.
  */
 
+import './rows';
 import './paginated_table';
