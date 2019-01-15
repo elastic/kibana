@@ -91,6 +91,9 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     },
     privileges() {
       return  kfetch({ method: 'get', pathname: '/api/security/privileges' });
+    },
+    features() {
+      return kfetch({ method: 'get', pathname: '/api/features/v1' });
     }
   },
   controllerAs: 'editRole',
@@ -129,14 +132,11 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       indexPatterns,
       spaces,
       privileges,
+      features,
     } = $route.current.locals;
-
-    console.log({ privileges });
 
     $scope.$$postDigest(async () => {
       const domNode = document.getElementById('editRoleReactRoot');
-
-      const features = await kfetch({ method: 'get', pathname: '/api/features/v1' });
 
       render(
         <I18nProvider>

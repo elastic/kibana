@@ -162,8 +162,8 @@ export class SimplePrivilegeSection extends Component<Props, State> {
                   inputDisplay: (
                     <EuiText>
                       <FormattedMessage
-                        id="xpack.security.management.editRole.simplePrivilegeForm.readPrivilegeInput"
-                        defaultMessage="Read"
+                        id="xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeInput"
+                        defaultMessage="All"
                       />
                     </EuiText>
                   ),

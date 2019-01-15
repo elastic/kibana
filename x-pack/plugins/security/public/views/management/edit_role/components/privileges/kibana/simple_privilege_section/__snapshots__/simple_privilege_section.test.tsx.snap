@@ -159,8 +159,8 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                 size="m"
               >
                 <FormattedMessage
-                  defaultMessage="Read"
-                  id="xpack.security.management.editRole.simplePrivilegeForm.readPrivilegeInput"
+                  defaultMessage="All"
+                  id="xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeInput"
                   values={Object {}}
                 />
               </EuiText>,
