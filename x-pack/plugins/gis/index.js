@@ -6,6 +6,8 @@
 
 import { resolve } from 'path';
 import { initRoutes } from './server/routes';
+import ecommerceSavedObjects from './server/sample_data/ecommerce_saved_objects.json';
+import fligthsSavedObjects from './server/sample_data/flights_saved_objects.json';
 import webLogsSavedObjects from './server/sample_data/web_logs_saved_objects.json';
 import mappings from './mappings.json';
 import { checkLicense } from './check_license';
@@ -60,6 +62,8 @@ export function gis(kibana) {
           .feature(thisPlugin.id)
           .registerLicenseCheckResultsGenerator(checkLicense);
 
+        server.addSavedObjectsToSampleDataset('ecommerce', ecommerceSavedObjects);
+        server.addSavedObjectsToSampleDataset('flights', fligthsSavedObjects);
         server.addSavedObjectsToSampleDataset('logs', webLogsSavedObjects);
         server.injectUiAppVars('gis', async () => {
           return await server.getInjectedUiAppVars('kibana');
