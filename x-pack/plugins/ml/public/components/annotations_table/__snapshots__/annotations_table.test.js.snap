@@ -57,6 +57,7 @@ exports[`AnnotationsTable Initialization with annotations prop. 1`] = `
     ]
   }
   compressed={true}
+  executeQueryOptions={Object {}}
   items={
     Array [
       Object {

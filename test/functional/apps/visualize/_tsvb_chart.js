@@ -22,6 +22,7 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
+  const inspector = getService('inspector');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings', 'visualBuilder']);
 
@@ -70,8 +71,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should not have inspector enabled', async function () {
-        const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-        expect(spyToggleExists).to.be(false);
+        await inspector.expectIsNotEnabled();
       });
 
       it('should show correct data', async function () {
@@ -91,8 +91,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should not have inspector enabled', async function () {
-        const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-        expect(spyToggleExists).to.be(false);
+        await inspector.expectIsNotEnabled();
       });
 
       it('should show correct data', async function () {
