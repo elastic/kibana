@@ -7,8 +7,6 @@
 import React from 'react';
 
 import {
-  EuiPage,
-  EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
   // @ts-ignore
@@ -35,26 +33,22 @@ export const WalkthroughLayout: React.SFC<LayoutProps> = ({
 }) => {
   const indexOfCurrent = walkthroughSteps.findIndex(step => activePath === step.id);
   return (
-    <EuiPage>
-      <EuiPageBody>
-        <EuiPageContent>
-          <EuiTitle>
-            <h1 style={{ textAlign: 'center' }}>{title}</h1>
-          </EuiTitle>
-          <br />
-          <br />
-          <EuiStepsHorizontal
-            steps={walkthroughSteps.map((step, i) => ({
-              title: step.name,
-              isComplete: i <= indexOfCurrent,
-              onClick: () => goTo(step.id),
-            }))}
-          />
-          <br />
-          <br />
-          <EuiPageContentBody>{children}</EuiPageContentBody>
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+    <EuiPageContent>
+      <EuiTitle>
+        <h1 style={{ textAlign: 'center' }}>{title}</h1>
+      </EuiTitle>
+      <br />
+      <br />
+      <EuiStepsHorizontal
+        steps={walkthroughSteps.map((step, i) => ({
+          title: step.name,
+          isComplete: i <= indexOfCurrent,
+          onClick: () => goTo(step.id),
+        }))}
+      />
+      <br />
+      <br />
+      <EuiPageContentBody>{children}</EuiPageContentBody>
+    </EuiPageContent>
   );
 };
