@@ -256,7 +256,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                   <EuiHeaderSection>
                     <EuiHeaderLinks>
                       <EuiHeaderLink
-                        aria-label={i18n.translate('xpack.uptime.header.helpLink.ariaLabel', {
+                        aria-label={i18n.translate('xpack.uptime.header.helpLinkAriaLabel', {
                           defaultMessage: 'Go to our discuss page',
                         })}
                         iconType="help"
