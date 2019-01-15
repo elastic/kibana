@@ -10,7 +10,13 @@ import { KibanaFunctionalTestDefaultProviders } from 'x-pack/test/types/provider
 export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
   const supertest = getService('supertest');
 
+  let version: string;
+
   describe('Privileges', () => {
+    before(() => {
+      version = getService('kibanaServer').version;
+      throw new Error(`version:${version}`);
+    });
     describe('GET /api/security/privileges', () => {
       it('should return a privilege map with all known privileges', async () => {
         await supertest
@@ -22,7 +28,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
               discover: {
                 all: [
                   'login:',
-                  'version:7.0.0',
+                  `version:${version}`,
                   'app:kibana',
                   'saved_object:search/bulk_get',
                   'saved_object:search/get',
@@ -44,7 +50,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 ],
                 read: [
                   'login:',
-                  'version:7.0.0',
+                  `version:${version}`,
                   'app:kibana',
                   'saved_object:config/bulk_get',
                   'saved_object:config/get',
@@ -63,7 +69,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
               visualize: {
                 all: [
                   'login:',
-                  'version:7.0.0',
+                  `version:${version}`,
                   'app:kibana',
                   'saved_object:visualization/bulk_get',
                   'saved_object:visualization/get',
@@ -86,7 +92,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 ],
                 read: [
                   'login:',
-                  'version:7.0.0',
+                  `version:${version}`,
                   'app:kibana',
                   'saved_object:config/bulk_get',
                   'saved_object:config/get',
@@ -107,7 +113,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
               dashboard: {
                 all: [
                   'login:',
-                  'version:7.0.0',
+                  `version:${version}`,
                   'app:kibana',
                   'saved_object:dashboard/bulk_get',
                   'saved_object:dashboard/get',
@@ -139,7 +145,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 ],
                 read: [
                   'login:',
-                  'version:7.0.0',
+                  `version:${version}`,
                   'app:kibana',
                   'saved_object:config/bulk_get',
                   'saved_object:config/get',
@@ -169,7 +175,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
               dev_tools: {
                 all: [
                   'login:',
-                  'version:7.0.0',
+                  `version:${version}`,
                   'api:console/execute',
                   'app:kibana',
                   'saved_object:config/bulk_get',
@@ -184,7 +190,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
               advancedSettings: {
                 all: [
                   'login:',
-                  'version:7.0.0',
+                  `version:${version}`,
                   'app:kibana',
                   'saved_object:config/bulk_get',
                   'saved_object:config/get',
@@ -200,7 +206,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
               indexPatterns: {
                 all: [
                   'login:',
-                  'version:7.0.0',
+                  `version:${version}`,
                   'app:kibana',
                   'saved_object:index-pattern/bulk_get',
                   'saved_object:index-pattern/get',
@@ -219,7 +225,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
               timelion: {
                 all: [
                   'login:',
-                  'version:7.0.0',
+                  `version:${version}`,
                   'app:timelion',
                   'app:kibana',
                   'saved_object:timelion-sheet/bulk_get',
@@ -240,7 +246,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 ],
                 read: [
                   'login:',
-                  'version:7.0.0',
+                  `version:${version}`,
                   'app:timelion',
                   'app:kibana',
                   'saved_object:config/bulk_get',
@@ -259,7 +265,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
               graph: {
                 all: [
                   'login:',
-                  'version:7.0.0',
+                  `version:${version}`,
                   'app:graph',
                   'app:kibana',
                   'saved_object:graph-workspace/bulk_get',
@@ -280,7 +286,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 ],
                 read: [
                   'login:',
-                  'version:7.0.0',
+                  `version:${version}`,
                   'app:graph',
                   'app:kibana',
                   'saved_object:config/bulk_get',
@@ -299,7 +305,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
               monitoring: {
                 all: [
                   'login:',
-                  'version:7.0.0',
+                  `version:${version}`,
                   'app:monitoring',
                   'app:kibana',
                   'saved_object:config/bulk_get',
@@ -312,7 +318,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
               ml: {
                 all: [
                   'login:',
-                  'version:7.0.0',
+                  `version:${version}`,
                   'app:ml',
                   'app:kibana',
                   'saved_object:config/bulk_get',
@@ -325,7 +331,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
               apm: {
                 all: [
                   'login:',
-                  'version:7.0.0',
+                  `version:${version}`,
                   'app:apm',
                   'app:kibana',
                   'saved_object:config/bulk_get',
@@ -338,7 +344,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
               gis: {
                 all: [
                   'login:',
-                  'version:7.0.0',
+                  `version:${version}`,
                   'app:gis',
                   'app:kibana',
                   'saved_object:gis-map/bulk_get',
@@ -355,7 +361,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 ],
                 read: [
                   'login:',
-                  'version:7.0.0',
+                  `version:${version}`,
                   'app:gis',
                   'app:kibana',
                   'saved_object:gis-map/bulk_get',
@@ -370,7 +376,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
               canvas: {
                 all: [
                   'login:',
-                  'version:7.0.0',
+                  `version:${version}`,
                   'app:canvas',
                   'app:kibana',
                   'saved_object:canvas-workpad/bulk_get',
@@ -391,7 +397,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 ],
                 read: [
                   'login:',
-                  'version:7.0.0',
+                  `version:${version}`,
                   'app:canvas',
                   'app:kibana',
                   'saved_object:config/bulk_get',
@@ -410,7 +416,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
               infrastructure: {
                 all: [
                   'login:',
-                  'version:7.0.0',
+                  `version:${version}`,
                   'app:infra',
                   'app:kibana',
                   'saved_object:config/bulk_get',
@@ -423,7 +429,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
               logs: {
                 all: [
                   'login:',
-                  'version:7.0.0',
+                  `version:${version}`,
                   'app:infra',
                   'app:kibana',
                   'saved_object:config/bulk_get',
@@ -436,7 +442,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
               uptime: {
                 all: [
                   'login:',
-                  'version:7.0.0',
+                  `version:${version}`,
                   'app:uptime',
                   'app:kibana',
                   'saved_object:config/bulk_get',
@@ -449,7 +455,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
             global: {
               all: [
                 'login:',
-                'version:7.0.0',
+                `version:${version}`,
                 'api:*',
                 'app:*',
                 'saved_object:*',
@@ -458,7 +464,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
               ],
               read: [
                 'login:',
-                'version:7.0.0',
+                `version:${version}`,
                 'app:*',
                 'saved_object:config/bulk_get',
                 'saved_object:config/get',
@@ -518,7 +524,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
             space: {
               all: [
                 'login:',
-                'version:7.0.0',
+                `version:${version}`,
                 'api:*',
                 'app:*',
                 'saved_object:config/bulk_get',
@@ -630,7 +636,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
               ],
               read: [
                 'login:',
-                'version:7.0.0',
+                `version:${version}`,
                 'app:*',
                 'saved_object:config/bulk_get',
                 'saved_object:config/get',
