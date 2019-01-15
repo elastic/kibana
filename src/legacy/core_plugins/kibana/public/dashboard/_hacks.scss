@@ -205,24 +205,4 @@ dashboard-listing {
       }
     }
   }
-
-  // SASSTODO: Wait for EUI conversion to remove
-  // react-input-range
-  // Updated to match EUI dark theme
-  .input-range__track {
-    background-color: $euiColorDarkShade;
-  }
-
-  .input-range__slider {
-    background: $euiColorLightestShade;
-    border-color: $euiColorDarkShade;
-  }
-
-  .input-range__track--active {
-    background: $euiColorPrimary;
-  }
-
-  .input-range__label {
-    color: $euiTextColor;
-  }
 }

@@ -106,8 +106,10 @@
         "uid": "pod123456abcdef"
       }
     },
-    "container": {
-      "id": "container123456abcdef"
+    "docker": {
+      "container": {
+        "id": "container123456abcdef"
+      }
     },
     "timestamp": {
       "us": 1545092070952472

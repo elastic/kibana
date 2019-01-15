@@ -6,10 +6,14 @@ $securityFormWidth: 460px;
 
 // Management styles
 .mgtForm__panel {
+  border: $euiBorderThin;
+  padding: $euiSizeM;
   max-width: $securityFormWidth;
 
   .mgtForm__subLabel {
     margin-bottom: $euiSizeS;
+    display: block;
+    font-weight: $euiFontWeightRegular;
   }
 }
 

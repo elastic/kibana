@@ -6,8 +6,9 @@
 
 import expect from 'expect.js';
 
-export default function ({ getPageObjects }) {
+export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['gis']);
+  const queryBar = getService('queryBar');
   const DOC_COUNT_PROP_NAME = 'doc_count';
 
   describe('layer geohashgrid aggregation source', () => {
@@ -23,10 +24,6 @@ export default function ({ getPageObjects }) {
     describe('heatmap', () => {
       before(async () => {
         await PageObjects.gis.loadSavedMap('geohashgrid heatmap example');
-      });
-
-      after(async () => {
-        await PageObjects.gis.closeInspector();
       });
 
       const LAYER_ID = '3xlvm';
@@ -48,6 +45,26 @@ export default function ({ getPageObjects }) {
         mapboxStyle.sources[LAYER_ID].data.features.forEach(({ properties }) => {
           expect(properties.hasOwnProperty(HEATMAP_PROP_NAME)).to.be(true);
           expect(properties.hasOwnProperty(DOC_COUNT_PROP_NAME)).to.be(true);
+        });
+      });
+
+      describe('query bar', () => {
+        before(async () => {
+          await queryBar.setQuery('machine.os.raw : "win 8"');
+          await queryBar.submitQuery();
+        });
+
+        after(async () => {
+          await queryBar.setQuery('');
+          await queryBar.submitQuery();
+        });
+
+        it('should apply query to geohashgrid aggregation request', async () => {
+          await PageObjects.gis.openInspectorRequestsView();
+          const requestStats = await PageObjects.gis.getInspectorTableData();
+          const hits = PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits (total)');
+          await PageObjects.gis.closeInspector();
+          expect(hits).to.equal('1');
         });
       });
 
@@ -80,10 +97,6 @@ export default function ({ getPageObjects }) {
         await PageObjects.gis.loadSavedMap('geohashgrid vector grid example');
       });
 
-      after(async () => {
-        await PageObjects.gis.closeInspector();
-      });
-
       const LAYER_ID = 'g1xkv';
       const EXPECTED_NUMBER_FEATURES = 6;
       const MAX_OF_BYTES_PROP_NAME = 'max_of_bytes';
@@ -103,6 +116,26 @@ export default function ({ getPageObjects }) {
         mapboxStyle.sources[LAYER_ID].data.features.forEach(({ properties }) => {
           expect(properties.hasOwnProperty(MAX_OF_BYTES_PROP_NAME)).to.be(true);
           expect(properties.hasOwnProperty(DOC_COUNT_PROP_NAME)).to.be(true);
+        });
+      });
+
+      describe('query bar', () => {
+        before(async () => {
+          await queryBar.setQuery('machine.os.raw : "win 8"');
+          await queryBar.submitQuery();
+        });
+
+        after(async () => {
+          await queryBar.setQuery('');
+          await queryBar.submitQuery();
+        });
+
+        it('should apply query to geohashgrid aggregation request', async () => {
+          await PageObjects.gis.openInspectorRequestsView();
+          const requestStats = await PageObjects.gis.getInspectorTableData();
+          const hits = PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits (total)');
+          await PageObjects.gis.closeInspector();
+          expect(hits).to.equal('1');
         });
       });
 

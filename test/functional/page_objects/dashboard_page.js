@@ -125,7 +125,9 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
      */
     async onDashboardLandingPage() {
       log.debug(`onDashboardLandingPage`);
-      return await testSubjects.exists('dashboardLandingPage', 5000);
+      return await testSubjects.exists('dashboardLandingPage', {
+        timeout: 5000
+      });
     }
 
     async expectExistsDashboardLandingPage() {

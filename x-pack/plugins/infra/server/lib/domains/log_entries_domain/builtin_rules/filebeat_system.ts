@@ -11,6 +11,15 @@ export const filebeatSystemRules = [
     },
     format: [
       {
+        constant: '[System][syslog] ',
+      },
+      {
+        field: 'system.syslog.program',
+      },
+      {
+        constant: ' - ',
+      },
+      {
         field: 'system.syslog.message',
       },
     ],
@@ -20,6 +29,15 @@ export const filebeatSystemRules = [
       exists: ['system.auth.message'],
     },
     format: [
+      {
+        constant: '[System][auth] ',
+      },
+      {
+        field: 'system.syslog.program',
+      },
+      {
+        constant: ' - ',
+      },
       {
         field: 'system.auth.message',
       },
@@ -31,7 +49,7 @@ export const filebeatSystemRules = [
     },
     format: [
       {
-        constant: 'ssh',
+        constant: '[System][auth][ssh]',
       },
       {
         constant: ' ',
@@ -59,7 +77,7 @@ export const filebeatSystemRules = [
     },
     format: [
       {
-        constant: 'ssh',
+        constant: '[System][auth][ssh]',
       },
       {
         constant: ' Dropped connection from ',
