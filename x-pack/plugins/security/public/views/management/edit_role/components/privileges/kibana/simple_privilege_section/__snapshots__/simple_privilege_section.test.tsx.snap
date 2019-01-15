@@ -44,17 +44,29 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                 size="m"
               >
                 <strong>
-                  None
+                  <FormattedMessage
+                    defaultMessage="None"
+                    id="xpack.security.management.editRole.simplePrivilegeForm.noPrivilegeDropdown"
+                    values={Object {}}
+                  />
                 </strong>
                 <p>
-                  No access to Kibana
+                  <FormattedMessage
+                    defaultMessage="No access to Kibana"
+                    id="xpack.security.management.editRole.simplePrivilegeForm.noPrivilegeDropdownDescription"
+                    values={Object {}}
+                  />
                 </p>
               </EuiText>,
               "inputDisplay": <EuiText
                 grow={true}
                 size="m"
               >
-                None
+                <FormattedMessage
+                  defaultMessage="None"
+                  id="xpack.security.management.editRole.simplePrivilegeForm.noPrivilegeInput"
+                  values={Object {}}
+                />
               </EuiText>,
               "value": "none",
             },
@@ -64,17 +76,29 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                 size="m"
               >
                 <strong>
-                  Custom
+                  <FormattedMessage
+                    defaultMessage="Custom"
+                    id="xpack.security.management.editRole.simplePrivilegeForm.customPrivilegeDropdown"
+                    values={Object {}}
+                  />
                 </strong>
                 <p>
-                  Customize access to Kibana
+                  <FormattedMessage
+                    defaultMessage="Customize access to Kibana"
+                    id="xpack.security.management.editRole.simplePrivilegeForm.customPrivilegeDropdownDescription"
+                    values={Object {}}
+                  />
                 </p>
               </EuiText>,
               "inputDisplay": <EuiText
                 grow={true}
                 size="m"
               >
-                Custom
+                <FormattedMessage
+                  defaultMessage="Custom"
+                  id="xpack.security.management.editRole.simplePrivilegeForm.customPrivilegeInput"
+                  values={Object {}}
+                />
               </EuiText>,
               "value": "custom",
             },
@@ -84,17 +108,29 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                 size="m"
               >
                 <strong>
-                  Read
+                  <FormattedMessage
+                    defaultMessage="Read"
+                    id="xpack.security.management.editRole.simplePrivilegeForm.readPrivilegeDropdown"
+                    values={Object {}}
+                  />
                 </strong>
                 <p>
-                  Grants read-only access to all of Kibana
+                  <FormattedMessage
+                    defaultMessage="Grants read-only access to all of Kibana"
+                    id="xpack.security.management.editRole.simplePrivilegeForm.readPrivilegeDropdownDescription"
+                    values={Object {}}
+                  />
                 </p>
               </EuiText>,
               "inputDisplay": <EuiText
                 grow={true}
                 size="m"
               >
-                Read
+                <FormattedMessage
+                  defaultMessage="Read"
+                  id="xpack.security.management.editRole.simplePrivilegeForm.readPrivilegeInput"
+                  values={Object {}}
+                />
               </EuiText>,
               "value": "read",
             },
@@ -104,17 +140,29 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
                 size="m"
               >
                 <strong>
-                  All
+                  <FormattedMessage
+                    defaultMessage="All"
+                    id="xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeDropdown"
+                    values={Object {}}
+                  />
                 </strong>
                 <p>
-                  Grants full access to Kibana
+                  <FormattedMessage
+                    defaultMessage="Grants full access to all of Kibana"
+                    id="xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeDropdownDescription"
+                    values={Object {}}
+                  />
                 </p>
               </EuiText>,
               "inputDisplay": <EuiText
                 grow={true}
                 size="m"
               >
-                All
+                <FormattedMessage
+                  defaultMessage="Read"
+                  id="xpack.security.management.editRole.simplePrivilegeForm.readPrivilegeInput"
+                  values={Object {}}
+                />
               </EuiText>,
               "value": "all",
             },

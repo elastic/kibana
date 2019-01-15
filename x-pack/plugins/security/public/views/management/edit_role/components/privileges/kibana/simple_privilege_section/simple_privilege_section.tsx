@@ -78,41 +78,109 @@ export class SimplePrivilegeSection extends Component<Props, State> {
               options={[
                 {
                   value: NO_PRIVILEGE_VALUE,
-                  inputDisplay: <EuiText>None</EuiText>,
+                  inputDisplay: (
+                    <EuiText>
+                      <FormattedMessage
+                        id="xpack.security.management.editRole.simplePrivilegeForm.noPrivilegeInput"
+                        defaultMessage="None"
+                      />
+                    </EuiText>
+                  ),
                   dropdownDisplay: (
                     <EuiText>
-                      <strong>None</strong>
-                      <p>No access to Kibana</p>
+                      <strong>
+                        <FormattedMessage
+                          id="xpack.security.management.editRole.simplePrivilegeForm.noPrivilegeDropdown"
+                          defaultMessage="None"
+                        />
+                      </strong>
+                      <p>
+                        <FormattedMessage
+                          id="xpack.security.management.editRole.simplePrivilegeForm.noPrivilegeDropdownDescription"
+                          defaultMessage="No access to Kibana"
+                        />
+                      </p>
                     </EuiText>
                   ),
                 },
                 {
                   value: 'custom',
-                  inputDisplay: <EuiText>Custom</EuiText>,
+                  inputDisplay: (
+                    <EuiText>
+                      <FormattedMessage
+                        id="xpack.security.management.editRole.simplePrivilegeForm.customPrivilegeInput"
+                        defaultMessage="Custom"
+                      />
+                    </EuiText>
+                  ),
                   dropdownDisplay: (
                     <EuiText>
-                      <strong>Custom</strong>
-                      <p>Customize access to Kibana</p>
+                      <strong>
+                        <FormattedMessage
+                          id="xpack.security.management.editRole.simplePrivilegeForm.customPrivilegeDropdown"
+                          defaultMessage="Custom"
+                        />
+                      </strong>
+                      <p>
+                        <FormattedMessage
+                          id="xpack.security.management.editRole.simplePrivilegeForm.customPrivilegeDropdownDescription"
+                          defaultMessage="Customize access to Kibana"
+                        />
+                      </p>
                     </EuiText>
                   ),
                 },
                 {
                   value: 'read',
-                  inputDisplay: <EuiText>Read</EuiText>,
+                  inputDisplay: (
+                    <EuiText>
+                      <FormattedMessage
+                        id="xpack.security.management.editRole.simplePrivilegeForm.readPrivilegeInput"
+                        defaultMessage="Read"
+                      />
+                    </EuiText>
+                  ),
                   dropdownDisplay: (
                     <EuiText>
-                      <strong>Read</strong>
-                      <p>Grants read-only access to all of Kibana</p>
+                      <strong>
+                        <FormattedMessage
+                          id="xpack.security.management.editRole.simplePrivilegeForm.readPrivilegeDropdown"
+                          defaultMessage="Read"
+                        />
+                      </strong>
+                      <p>
+                        <FormattedMessage
+                          id="xpack.security.management.editRole.simplePrivilegeForm.readPrivilegeDropdownDescription"
+                          defaultMessage="Grants read-only access to all of Kibana"
+                        />
+                      </p>
                     </EuiText>
                   ),
                 },
                 {
                   value: 'all',
-                  inputDisplay: <EuiText>All</EuiText>,
+                  inputDisplay: (
+                    <EuiText>
+                      <FormattedMessage
+                        id="xpack.security.management.editRole.simplePrivilegeForm.readPrivilegeInput"
+                        defaultMessage="Read"
+                      />
+                    </EuiText>
+                  ),
                   dropdownDisplay: (
                     <EuiText>
-                      <strong>All</strong>
-                      <p>Grants full access to Kibana</p>
+                      <strong>
+                        <FormattedMessage
+                          id="xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeDropdown"
+                          defaultMessage="All"
+                        />
+                      </strong>
+                      <p>
+                        <FormattedMessage
+                          id="xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeDropdownDescription"
+                          defaultMessage="Grants full access to all of Kibana"
+                        />
+                      </p>
                     </EuiText>
                   ),
                 },
