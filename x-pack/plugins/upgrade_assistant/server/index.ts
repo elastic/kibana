@@ -5,10 +5,14 @@
  */
 
 import { Legacy } from 'kibana';
+import { makeUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { registerClusterCheckupRoutes } from './routes/cluster_checkup';
 import { registerDeprecationLoggingRoutes } from './routes/deprecation_logging';
+import { registerTelemetryRoutes } from './routes/telemetry';
 
 export function initServer(server: Legacy.Server) {
   registerClusterCheckupRoutes(server);
   registerDeprecationLoggingRoutes(server);
+  registerTelemetryRoutes(server);
+  makeUpgradeAssistantUsageCollector(server);
 }

@@ -1,0 +1,38 @@
+{
+  "upgrade-assistant": {
+    "properties": {
+      "telemetry": {
+        "properties": {
+          "ui_open": {
+            "properties": {
+              "overview": {
+                "type": "long",
+                "null_value": 0
+              },
+              "cluster": {
+                "type": "long",
+                "null_value": 0
+              },
+              "indices": {
+                "type": "long",
+                "null_value": 0
+              }
+            }
+          },
+          "features": {
+            "properties": {
+              "deprecation_logging": {
+                "properties": {
+                  "enabled": {
+                    "type": "boolean",
+                    "null_value": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -5,13 +5,14 @@
  */
 
 import axios from 'axios';
-import { findIndex } from 'lodash';
+import { findIndex, set } from 'lodash';
 import React from 'react';
 
 import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 
 import chrome from 'ui/chrome';
+import { kfetch } from 'ui/kfetch';
 
 import { UpgradeAssistantStatus } from '../../server/lib/es_migration_apis';
 import { LatestMinorBanner } from './latest_minor_banner';
@@ -39,6 +40,9 @@ export class UpgradeAssistantTabsUI extends React.Component<
   }
 
   public componentDidMount() {
+    // Send telemetry info about the default selected tab
+    this.sendTelemetryInfo(this.tabs[this.state.selectedTabIndex].id);
+
     this.loadData();
   }
 
@@ -60,6 +64,9 @@ export class UpgradeAssistantTabsUI extends React.Component<
     if (selectedTabIndex === -1) {
       throw new Error(`Clicked tab did not exist in tabs array`);
     }
+
+    // Send telemetry info about the current selected tab
+    this.sendTelemetryInfo(selectedTab.id);
 
     this.setSelectedTabIndex(selectedTabIndex);
   };
@@ -139,6 +146,14 @@ export class UpgradeAssistantTabsUI extends React.Component<
         ),
       },
     ];
+  }
+
+  private sendTelemetryInfo(tabName: string) {
+    kfetch({
+      pathname: '/api/upgrade_assistant/telemetry/ui_open',
+      method: 'PUT',
+      body: JSON.stringify(set({}, tabName, true)),
+    });
   }
 }
 
