@@ -72,19 +72,15 @@ exports[`it renders without crashing 1`] = `
             "label": "read_ilm",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "monitor_rollup",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "manage_rollup",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "manage_token",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "manage_saml",
           },
         ]

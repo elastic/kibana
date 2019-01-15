@@ -3,6 +3,7 @@
 exports[`EnabledFeatures renders as expected 1`] = `
 <SectionPanel
   collapsible={true}
+  data-test-subj="enabled-features-panel"
   description="Customize visible features"
   initiallyCollapsed={true}
   intl={
