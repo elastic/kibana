@@ -41,7 +41,7 @@ const metadataTests: KbnTestProvider = ({ getService }) => {
       });
     });
 
-    describe.only('6.6.0', () => {
+    describe('6.6.0', () => {
       before(() => esArchiver.load('infra/6.6.0/docker'));
       after(() => esArchiver.unload('infra/6.6.0/docker'));
 
