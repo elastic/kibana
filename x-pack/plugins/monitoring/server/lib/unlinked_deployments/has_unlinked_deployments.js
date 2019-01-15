@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import moment from 'moment';
+import { get } from 'lodash';
 import { unlinkedDeploymentFilter } from './';
 
 export async function hasUnlinkedDeployments(req, indexPatterns) {
@@ -51,7 +52,7 @@ export async function hasUnlinkedDeployments(req, indexPatterns) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response = await callWithRequest(req, 'search', params);
   if (response && response.hits) {
-    return response.hits.total > 0;
+    return get(response, 'hits.total.value', 0) > 0;
   }
   return false;
 }
