@@ -12,13 +12,13 @@ import {
 const propertyPath = 'isRollupIndex';
 export const rollupToggleExtension = {
   propertyPath,
-  label: i18n.translate('xpack.rollup.indexMgmtToggle.toggleLabel', {
+  label: i18n.translate('xpack.rollupJobs.indexMgmtToggle.toggleLabel', {
     defaultMessage: 'Include rollup indices',
   }),
 };
 export const rollupBadgeExtension = {
   propertyPath,
-  label: i18n.translate('xpack.rollup.indexMgmtBadge.rollupLabel', {
+  label: i18n.translate('xpack.rollupJobs.indexMgmtBadge.rollupLabel', {
     defaultMessage: 'Rollup',
   }),
 };
