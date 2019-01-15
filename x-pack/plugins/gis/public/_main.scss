@@ -192,9 +192,12 @@ map-listing, .gisListingPage {
   overflow-y: auto;
   @include euiScrollBar;
 
+  > * {
+    flex: 0 0 auto;
+  }
+
   > *:not(:last-child) {
     margin-bottom: $euiSize;
-    flex: 0 0 auto;
   }
 }
 

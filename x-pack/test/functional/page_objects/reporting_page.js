@@ -152,7 +152,9 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
 
     async checkForReportingToasts() {
       log.debug('Reporting:checkForReportingToasts');
-      const isToastPresent = await testSubjects.exists('completeReportSuccess', 60000);
+      const isToastPresent = await testSubjects.exists('completeReportSuccess', {
+        timeout: 60000
+      });
       // Close toast so it doesn't obscure the UI.
       await testSubjects.click('completeReportSuccess toastCloseButton');
       return isToastPresent;
