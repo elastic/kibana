@@ -17,10 +17,12 @@ import {
   EuiSeriesChartUtils,
   EuiTitle,
 } from '@elastic/eui';
+import { get } from 'lodash';
 import moment from 'moment';
 import React, { Fragment } from 'react';
 import { Query } from 'react-apollo';
 import { Link } from 'react-router-dom';
+import { LatestMonitorsResult } from 'x-pack/plugins/uptime/common/graphql/types';
 import { getMonitorListQuery } from './get_monitor_list';
 
 interface MonitorListProps {
@@ -117,15 +119,11 @@ export const MonitorList = ({
     variables={{ dateRangeStart, dateRangeEnd, filters }}
   >
     {({ loading, error, data }) => {
-      if (loading) {
-        return 'Loading...';
-      }
       if (error) {
         return `Error ${error.message}`;
       }
-      const {
-        monitorStatus: { monitors },
-      } = data;
+      const monitors: LatestMonitorsResult | undefined = get(data, 'monitorStatus.monitors');
+      // TODO: add a better loading message than "no items found", which it displays today
       return (
         <Fragment>
           <EuiTitle size="xs">
@@ -134,6 +132,7 @@ export const MonitorList = ({
           <EuiPanel paddingSize="l">
             <EuiInMemoryTable
               columns={monitorListColumns}
+              loading={loading}
               items={monitors}
               pagination={monitorListPagination}
               sorting={true}

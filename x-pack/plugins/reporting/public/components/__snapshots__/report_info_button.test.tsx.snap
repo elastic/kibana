@@ -57,7 +57,7 @@ Array [
     size="s"
   >
     <span>
-      <WindowEvent
+      <EuiWindowEvent
         event="keydown"
         handler={[Function]}
       />
@@ -281,7 +281,7 @@ Array [
     size="s"
   >
     <span>
-      <WindowEvent
+      <EuiWindowEvent
         event="keydown"
         handler={[Function]}
       />
