@@ -124,7 +124,7 @@ class HeaderAppMenuUI extends Component<Props, State> {
   private renderNavLink = (navLink: NavLink) => (
     <EuiKeyPadMenuItem
       label={navLink.title}
-      href={navLink.active || !navLink.lastSubUrl ? navLink.url : navLink.url}
+      href={navLink.active || !navLink.lastSubUrl ? navLink.url : navLink.lastSubUrl}
       key={navLink.id}
       onClick={this.closeMenu}
     >
