@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiTitle,
   EuiPanel,
+  EuiSpacer,
   EuiCard,
   EuiIcon,
   EuiFlyoutHeader,
@@ -79,14 +80,17 @@ export class AddLayerPanel extends Component {
         ? <EuiIcon type={Source.icon} size="xl" />
         : null;
       return (
-        <EuiCard
-          key={Source.type}
-          title={Source.title}
-          icon={icon}
-          onClick={() => this._onSourceTypeChange(Source.type)}
-          description={Source.description}
-          layout="horizontal"
-        />
+        <Fragment>
+          <EuiSpacer size="s" />
+          <EuiCard
+            key={Source.type}
+            title={Source.title}
+            icon={icon}
+            onClick={() => this._onSourceTypeChange(Source.type)}
+            description={Source.description}
+            layout="horizontal"
+          />
+        </Fragment>
       );
     });
   }
@@ -118,12 +122,14 @@ export class AddLayerPanel extends Component {
     return (
       <Fragment>
         <EuiButtonEmpty
-          contentProps={{ style: { justifyContent: 'left' } }}
+          size="xs"
+          flush="left"
           onClick={this._clearSource}
           iconType="arrowLeft"
         >
           Change data source
         </EuiButtonEmpty>
+        <EuiSpacer size="s" />
         <EuiPanel>
           {Source.renderEditor(editorProperties)}
         </EuiPanel>
@@ -145,13 +151,13 @@ export class AddLayerPanel extends Component {
         direction="column"
         gutterSize="none"
       >
-        <EuiFlyoutHeader hasBorder className="gisLayerPanel__footer">
+        <EuiFlyoutHeader hasBorder className="gisLayerPanel__header">
           <EuiTitle size="s">
             <h2>Add layer</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
 
-        <EuiFlyoutBody className="gisViewPanel__body">
+        <EuiFlyoutBody className="gisLayerPanel__body">
           {this._renderAddLayerForm()}
         </EuiFlyoutBody>
 

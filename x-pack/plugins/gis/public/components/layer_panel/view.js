@@ -63,7 +63,7 @@ export class LayerPanel  extends React.Component {
         direction="column"
         gutterSize="none"
       >
-        <EuiFlyoutHeader hasBorder className="gisLayerPanel__footer">
+        <EuiFlyoutHeader hasBorder className="gisLayerPanel__header">
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
               {selectedLayer.getIcon()}
