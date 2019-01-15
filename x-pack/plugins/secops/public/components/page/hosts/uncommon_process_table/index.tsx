@@ -19,7 +19,7 @@ import {
 import { escapeQueryValue } from '../../../../lib/keury';
 import { hostsActions, State, uncommonProcessesSelector } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
-import { defaultToEmpty, getEmptyValue } from '../../../empty_value';
+import { defaultToEmpty, getEmptyValue, getOrEmpty } from '../../../empty_value';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
 
@@ -116,7 +116,7 @@ const getUncommonColumns = (startDate: number) => [
     truncateText: false,
     hideForMobile: false,
     render: ({ uncommonProcess }: { uncommonProcess: UncommonProcessItem }) => {
-      const processName = defaultTo('--', uncommonProcess.process.name);
+      const processName = defaultToEmpty(uncommonProcess.process.name);
       return (
         <>
           <DraggableWrapper
@@ -124,9 +124,9 @@ const getUncommonColumns = (startDate: number) => [
               and: [],
               enabled: true,
               id: uncommonProcess._id,
-              name: processName,
+              name: processName!,
               negated: false,
-              queryMatch: `process.name: "${escapeQueryValue(processName)}"`,
+              queryMatch: `process.name: "${escapeQueryValue(processName!)}"`,
               queryDate: `@timestamp >= ${startDate} and @timestamp <= ${moment().valueOf()}`,
             }}
             render={(dataProvider, _, snapshot) =>
@@ -152,7 +152,7 @@ const getUncommonColumns = (startDate: number) => [
     truncateText: false,
     hideForMobile: false,
     render: ({ uncommonProcess }: { uncommonProcess: UncommonProcessItem }) => (
-      <>{getOr('--', 'user.name', uncommonProcess)}</>
+      <>{getOrEmpty('user.name', uncommonProcess)}</>
     ),
   },
   {
@@ -160,7 +160,7 @@ const getUncommonColumns = (startDate: number) => [
     truncateText: false,
     hideForMobile: false,
     render: ({ uncommonProcess }: { uncommonProcess: UncommonProcessItem }) => (
-      <>{defaultTo('--', uncommonProcess.process.title)}</>
+      <>{defaultToEmpty(uncommonProcess.process.title)}</>
     ),
   },
   {
