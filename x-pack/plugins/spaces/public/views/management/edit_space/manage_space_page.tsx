@@ -16,6 +16,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import _ from 'lodash';
 import { SpacesNavState } from 'plugins/spaces/views/nav_control';
 import React, { Component, Fragment } from 'react';
 import { uiCapabilities } from 'ui/capabilities';
@@ -30,6 +31,7 @@ import { SecureSpaceMessage } from '../components/secure_space_message';
 import { UnauthorizedPrompt } from '../components/unauthorized_prompt';
 import { getEditBreadcrumbs, toSpaceIdentifier } from '../lib';
 import { SpaceValidator } from '../lib/validate_space';
+import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
 import { CustomizeSpace } from './customize_space';
 import { DeleteSpacesButton } from './delete_spaces_button';
 import { EnabledFeatures } from './enabled_features';
@@ -46,6 +48,8 @@ interface Props {
 
 interface State {
   space: Partial<Space>;
+  originalSpace?: Partial<Space>;
+  showAlteringActiveSpaceDialog: boolean;
   isLoading: boolean;
   formError?: {
     isInvalid: boolean;
@@ -61,6 +65,7 @@ class ManageSpacePageUI extends Component<Props, State> {
     this.validator = new SpaceValidator({ shouldValidate: false, features: props.features });
     this.state = {
       isLoading: true,
+      showAlteringActiveSpaceDialog: false,
       space: {},
     };
   }
@@ -79,6 +84,7 @@ class ManageSpacePageUI extends Component<Props, State> {
 
             this.setState({
               space: result.data,
+              originalSpace: result.data,
               isLoading: false,
             });
           }
@@ -133,6 +139,8 @@ class ManageSpacePageUI extends Component<Props, State> {
       return <UnauthorizedPrompt />;
     }
 
+    const { showAlteringActiveSpaceDialog } = this.state;
+
     return (
       <Fragment>
         {this.getFormHeading()}
@@ -168,6 +176,15 @@ class ManageSpacePageUI extends Component<Props, State> {
         <EuiSpacer />
 
         {this.getFormButtons()}
+
+        {showAlteringActiveSpaceDialog && (
+          <ConfirmAlterActiveSpaceModal
+            onConfirm={() => this.performSave(true)}
+            onCancel={() => {
+              this.setState({ showAlteringActiveSpaceDialog: false });
+            }}
+          />
+        )}
       </Fragment>
     );
   };
@@ -272,10 +289,31 @@ class ManageSpacePageUI extends Component<Props, State> {
       return;
     }
 
+    if (this.editingExistingSpace()) {
+      const { spacesNavState } = this.props;
+
+      const originalSpace: Space = this.state.originalSpace as Space;
+      const space: Space = this.state.space as Space;
+
+      const editingActiveSpace = spacesNavState.getActiveSpace().id === originalSpace.id;
+
+      const haveDisabledFeaturesChanged =
+        space.disabledFeatures.length !== originalSpace.disabledFeatures.length ||
+        _.difference(space.disabledFeatures, originalSpace.disabledFeatures).length > 0;
+
+      if (editingActiveSpace && haveDisabledFeaturesChanged) {
+        this.setState({
+          showAlteringActiveSpaceDialog: true,
+        });
+
+        return;
+      }
+    }
+
     this.performSave();
   };
 
-  private performSave = () => {
+  private performSave = (requireRefresh = false) => {
     const { intl } = this.props;
     if (!this.state.space) {
       return;
@@ -322,6 +360,11 @@ class ManageSpacePageUI extends Component<Props, State> {
           )
         );
         window.location.hash = `#/management/spaces/list`;
+        if (requireRefresh) {
+          setTimeout(() => {
+            window.location.reload();
+          });
+        }
       })
       .catch(error => {
         const { message = '' } = error.data || {};

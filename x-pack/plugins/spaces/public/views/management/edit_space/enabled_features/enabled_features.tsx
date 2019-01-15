@@ -34,6 +34,7 @@ export class EnabledFeatures extends Component<Props, {}> {
         title={this.getPanelTitle()}
         description={description}
         intl={this.props.intl}
+        data-test-subj="enabled-features-panel"
       >
         <EuiFlexGroup>
           <EuiFlexItem>
