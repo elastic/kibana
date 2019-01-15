@@ -11,13 +11,16 @@ import { waffleNodesQuery } from '../../../../plugins/infra/public/containers/wa
 import { WaffleNodesQuery } from '../../../../plugins/infra/public/graphql/types';
 import { KbnTestProvider } from './types';
 
+import { DATES } from './constants';
+const { min, max } = DATES['7.0.0'].hosts;
+
 const waffleTests: KbnTestProvider = ({ getService }) => {
   const esArchiver = getService('esArchiver');
   const client = getService('infraOpsGraphQLClient');
 
   describe('waffle nodes', () => {
-    before(() => esArchiver.load('infra'));
-    after(() => esArchiver.unload('infra'));
+    before(() => esArchiver.load('infra/7.0.0/hosts'));
+    after(() => esArchiver.unload('infra/7.0.0/hosts'));
 
     it('should basically work', () => {
       return client
@@ -26,8 +29,8 @@ const waffleTests: KbnTestProvider = ({ getService }) => {
           variables: {
             sourceId: 'default',
             timerange: {
-              to: 1539806283952,
-              from: 1539805341208,
+              to: max,
+              from: min,
               interval: '1m',
             },
             metric: { type: 'cpu' },
@@ -39,15 +42,15 @@ const waffleTests: KbnTestProvider = ({ getService }) => {
           expect(map).to.have.property('nodes');
           if (map) {
             const { nodes } = map;
-            expect(nodes.length).to.equal(6);
+            expect(nodes.length).to.equal(1);
             const firstNode = first(nodes);
             expect(firstNode).to.have.property('path');
             expect(firstNode.path.length).to.equal(1);
-            expect(first(firstNode.path)).to.have.property('value', 'demo-stack-apache-01');
+            expect(first(firstNode.path)).to.have.property('value', 'demo-stack-mysql-01');
             expect(firstNode).to.have.property('metric');
             expect(firstNode.metric).to.eql({
               name: 'cpu',
-              value: 0.011,
+              value: 0.0035,
               __typename: 'InfraNodeMetric',
             });
           }
@@ -61,8 +64,8 @@ const waffleTests: KbnTestProvider = ({ getService }) => {
           variables: {
             sourceId: 'default',
             timerange: {
-              to: 1539806283952,
-              from: 1539805341208,
+              to: max,
+              from: min,
               interval: '1m',
             },
             metric: { type: 'cpu' },
@@ -74,15 +77,12 @@ const waffleTests: KbnTestProvider = ({ getService }) => {
           expect(map).to.have.property('nodes');
           if (map) {
             const { nodes } = map;
-            expect(nodes.length).to.equal(6);
+            expect(nodes.length).to.equal(1);
             const firstNode = first(nodes);
             expect(firstNode).to.have.property('path');
             expect(firstNode.path.length).to.equal(2);
-            expect(first(firstNode.path)).to.have.property(
-              'value',
-              'projects/189716325846/zones/us-central1-f'
-            );
-            expect(last(firstNode.path)).to.have.property('value', 'demo-stack-apache-01');
+            expect(first(firstNode.path)).to.have.property('value', 'virtualbox');
+            expect(last(firstNode.path)).to.have.property('value', 'demo-stack-mysql-01');
           }
         });
     });
@@ -94,8 +94,8 @@ const waffleTests: KbnTestProvider = ({ getService }) => {
           variables: {
             sourceId: 'default',
             timerange: {
-              to: 1539806283952,
-              from: 1539805341208,
+              to: max,
+              from: min,
               interval: '1m',
             },
             metric: { type: 'cpu' },
@@ -111,12 +111,13 @@ const waffleTests: KbnTestProvider = ({ getService }) => {
           expect(map).to.have.property('nodes');
           if (map) {
             const { nodes } = map;
-            expect(nodes.length).to.equal(6);
+            expect(nodes.length).to.equal(1);
             const firstNode = first(nodes);
             expect(firstNode).to.have.property('path');
             expect(firstNode.path.length).to.equal(3);
-            expect(first(firstNode.path)).to.have.property('value', 'gce');
-            expect(last(firstNode.path)).to.have.property('value', 'demo-stack-apache-01');
+            expect(first(firstNode.path)).to.have.property('value', 'vagrant');
+            expect(firstNode.path[1]).to.have.property('value', 'virtualbox');
+            expect(last(firstNode.path)).to.have.property('value', 'demo-stack-mysql-01');
           }
         });
     });

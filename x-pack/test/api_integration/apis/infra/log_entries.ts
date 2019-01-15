@@ -115,8 +115,8 @@ const logEntriesTests: KbnTestProvider = ({ getService }) => {
   const client = getService('infraOpsGraphQLClient');
 
   describe('log entry apis', () => {
-    before(() => esArchiver.load('infra'));
-    after(() => esArchiver.unload('infra'));
+    before(() => esArchiver.load('infra/legacy'));
+    after(() => esArchiver.unload('infra/legacy'));
 
     describe('logEntriesAround', () => {
       it('should return newer and older log entries when present', async () => {

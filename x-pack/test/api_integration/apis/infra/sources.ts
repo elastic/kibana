@@ -15,8 +15,8 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
   const client = getService('infraOpsGraphQLClient');
 
   describe('sources', () => {
-    before(() => esArchiver.load('infra'));
-    after(() => esArchiver.unload('infra'));
+    before(() => esArchiver.load('infra/legacy'));
+    after(() => esArchiver.unload('infra/legacy'));
 
     it('supports the redux store query', () => {
       return client
