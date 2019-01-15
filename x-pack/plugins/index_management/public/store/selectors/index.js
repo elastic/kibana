@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Pager, EuiSearchBar } from '@elastic/eui';
-import { every, get } from 'lodash';
 
 import { createSelector } from 'reselect';
 import { indexStatusLabels } from '../../lib/index_status_labels';
 import { sortTable } from '../../services';
+import { getToggleExtensions } from '../../index_management_extensions';
 
 export const getDetailPanelData = (state) => state.detailPanel.data;
 export const getDetailPanelError = (state) => state.detailPanel.error;
@@ -26,7 +26,7 @@ export const getIndexByIndexName = (state, name) => getIndices(state)[name];
 export const getFilteredIds = (state) => state.indices.filteredIds;
 export const getRowStatuses = (state) => state.rowStatus;
 export const getTableState = (state) => state.tableState;
-
+export const getAllIds = (state) => state.indices.allIds;
 export const getIndexStatusByIndexName = (state, indexName) => {
   const indices = getIndices(state);
   const { status } = indices[indexName] || {};
@@ -34,23 +34,34 @@ export const getIndexStatusByIndexName = (state, indexName) => {
 };
 const defaultFilterFields = ['name', 'uuid'];
 
-const filterByToggles = (indices, toggles) => {
-  const togglesOff = Object.keys(toggles).filter((key) => {
-    return !get(toggles, key);
-  });
+const filterByToggles = (indices, toggleNameToVisibleMap) => {
+  const togglesByName = getToggleExtensions().reduce((byName, toggle) => ({
+    ...byName,
+    [toggle.name]: toggle,
+  }), {});
+
+  const toggleNames = Object.keys(togglesByName);
+
+  // An index is visible if ANY applicable toggle is visible.
   return indices.filter((index) => {
-    return every(togglesOff, (toggleOff) => {
-      return !index[toggleOff];
+    return toggleNames.some(toggleName => {
+      if (!togglesByName[toggleName].matchIndex(index)) {
+        return true;
+      }
+
+      const isVisible = toggleNameToVisibleMap[toggleName] === true;
+
+      return isVisible;
     });
   });
 };
 const getFilteredIndices = createSelector(
   getIndices,
-  getRowStatuses,
+  getAllIds,
   getTableState,
-  (indices, rowStatuses, tableState) => {
-    let indexArray = Object.keys(indices).map(indexName => indices[indexName]);
-    indexArray = filterByToggles(indexArray, tableState.toggles);
+  (indices, allIds, tableState) => {
+    let indexArray = allIds.map(indexName => indices[indexName]);
+    indexArray = filterByToggles(indexArray, tableState.toggleNameToVisibleMap);
     const systemFilteredIndexes = tableState.showSystemIndices
       ? indexArray
       : indexArray.filter(index => !(index.name + '').startsWith('.'));

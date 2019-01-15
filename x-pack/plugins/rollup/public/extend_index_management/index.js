@@ -8,16 +8,22 @@ import {
   addToggleExtension,
   addBadgeExtension
 } from '../../../index_management/public/index_management_extensions';
+import { get } from 'lodash';
 
 const propertyPath = 'isRollupIndex';
 export const rollupToggleExtension = {
-  propertyPath,
+  matchIndex: (index) => {
+    return get(index, propertyPath);
+  },
   label: i18n.translate('xpack.rollupJobs.indexMgmtToggle.toggleLabel', {
     defaultMessage: 'Include rollup indices',
   }),
+  name: 'rollupToggle'
 };
 export const rollupBadgeExtension = {
-  propertyPath,
+  matchIndex: (index) => {
+    return get(index, propertyPath);
+  },
   label: i18n.translate('xpack.rollupJobs.indexMgmtBadge.rollupLabel', {
     defaultMessage: 'Rollup',
   }),

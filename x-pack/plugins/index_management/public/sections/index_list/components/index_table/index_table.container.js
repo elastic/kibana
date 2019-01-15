@@ -45,7 +45,7 @@ const mapStateToProps = (state) => {
     sortField: getSortField(state),
     isSortAscending: isSortAscending(state),
     indicesLoading: indicesLoading(state),
-    toggles: getTableState(state).toggles
+    toggleNameToVisibleMap: getTableState(state).toggleNameToVisibleMap
   };
 };
 

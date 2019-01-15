@@ -38,15 +38,16 @@ export const tableState = handleActions({
     return {
       ...state,
       showSystemIndices,
+      toggleNameToVisibleMap: {}
     };
   },
   [toggleChanged](state, action) {
     const { toggleName, toggleValue } = action.payload;
-    const toggles = { ...state.toggles };
-    toggles[toggleName] = toggleValue;
+    const toggleNameToVisibleMap = { ...state.toggleNameToVisibleMap };
+    toggleNameToVisibleMap[toggleName] = toggleValue;
     return {
       ...state,
-      toggles
+      toggleNameToVisibleMap
     };
   },
   [sortChanged](state, action) {

@@ -12,11 +12,11 @@ import { defaultTableState } from './reducers/table_state';
 import { indexManagement } from './reducers/';
 
 export const indexManagementStore = () => {
-  const toggles = {};
+  const toggleNameToVisibleMap = {};
   getToggleExtensions().forEach((toggleExtension) => {
-    toggles[toggleExtension.propertyPath] = false;
+    toggleNameToVisibleMap[toggleExtension.name] = false;
   });
-  const initialState = { tableState: { ...defaultTableState, toggles: toggles } };
+  const initialState = { tableState: { ...defaultTableState, toggleNameToVisibleMap } };
   const enhancers = [ applyMiddleware(thunk) ];
 
   window.__REDUX_DEVTOOLS_EXTENSION__ && enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());

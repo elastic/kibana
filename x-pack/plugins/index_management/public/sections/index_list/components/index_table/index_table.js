@@ -12,7 +12,7 @@ import { NoMatch } from '../../../no_match';
 import { healthToColor } from '../../../../services';
 import '../../../../styles/table.less';
 import { REFRESH_RATE_INDEX_LIST } from '../../../../constants';
-import { get } from 'lodash';
+
 import {
   EuiBadge,
   EuiButton,
@@ -216,8 +216,8 @@ export class IndexTableUi extends Component {
 
   renderBadges(index) {
     const badgeLabels = [];
-    getBadgeExtensions().forEach(({ propertyPath, label }) => {
-      if (get(index, propertyPath)) {
+    getBadgeExtensions().forEach(({ matchIndex, label }) => {
+      if (matchIndex(index)) {
         badgeLabels.push(label);
       }
     });
@@ -225,8 +225,8 @@ export class IndexTableUi extends Component {
       <Fragment>
         {badgeLabels.map((badgeLabel) => {
           return (
-            <Fragment>
-              <EuiBadge color="primary" key={badgeLabel}>{badgeLabel}</EuiBadge>{' '}
+            <Fragment key={badgeLabel}>
+              {' '}<EuiBadge color="primary">{badgeLabel}</EuiBadge>
             </Fragment>
           );
         })}
@@ -246,7 +246,7 @@ export class IndexTableUi extends Component {
             openDetailPanel(value);
           }}
         >
-          {this.renderBadges(index)}{value}
+          {value}{this.renderBadges(index)}
         </EuiLink>
       );
     }
@@ -336,20 +336,14 @@ export class IndexTableUi extends Component {
   onItemSelectionChanged = selectedIndices => {
     this.setState({ selectedIndices });
   };
-  renderToggleControl(propertyPath, label) {
-    const { allIndices, toggles, toggleChanged } = this.props;
-    const hasProperty = !!allIndices.find((index) => {
-      return get(index, propertyPath);
-    });
-    if (!hasProperty) {
-      return null;
-    }
+  renderToggleControl({ name, label }) {
+    const { toggleNameToVisibleMap, toggleChanged } = this.props;
     return (
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem key={name} grow={false}>
         <EuiSwitch
-          id={`checkboxToggles{propertyPath}`}
-          checked={toggles[propertyPath]}
-          onChange={event => toggleChanged(propertyPath, event.target.checked)}
+          id={`checkboxToggles-{name}`}
+          checked={toggleNameToVisibleMap[name]}
+          onChange={event => toggleChanged(name, event.target.checked)}
           label={label}
         />
       </EuiFlexItem>
@@ -402,8 +396,8 @@ export class IndexTableUi extends Component {
           <EuiFlexItem grow={false}>
             {indicesLoading && allIndices.length === 0 ? null : (
               <EuiFlexGroup>
-                {getToggleExtensions().map(({ propertyPath, label }) => {
-                  return this.renderToggleControl(propertyPath, label);
+                {getToggleExtensions().map((toggle) => {
+                  return this.renderToggleControl(toggle);
                 })}
                 <EuiFlexItem grow={false}>
                   <EuiSwitch
