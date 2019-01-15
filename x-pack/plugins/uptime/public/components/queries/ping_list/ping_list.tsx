@@ -8,7 +8,6 @@ import {
   EuiBadge,
   EuiComboBox,
   EuiComboBoxOptionProps,
-  EuiEmptyPrompt,
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,7 +15,6 @@ import {
   EuiHealth,
   // @ts-ignore
   EuiInMemoryTable,
-  EuiLoadingChart,
   EuiPanel,
   EuiTitle,
   EuiToolTip,
@@ -88,20 +86,6 @@ export class Pings extends React.Component<PingListProps, PingListState> {
         query={getPingsQuery}
       >
         {({ loading, error, data }) => {
-          if (loading) {
-            return (
-              <EuiEmptyPrompt
-                iconType="heartbeatApp"
-                title={<h2>Loading Ping History</h2>}
-                body={
-                  <Fragment>
-                    <p>Fetching the latest list of checks</p>
-                    <EuiLoadingChart size="xl" />
-                  </Fragment>
-                }
-              />
-            );
-          }
           if (error) {
             return `Error ${error.message}`;
           }
@@ -210,6 +194,7 @@ export class Pings extends React.Component<PingListProps, PingListState> {
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiInMemoryTable
+                  loading={loading}
                   columns={columns}
                   items={allPings}
                   pagination={{ initialPageSize: 10, pageSizeOptions: [5, 10, 20, 100] }}
