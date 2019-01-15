@@ -10,6 +10,7 @@ import { ResizeChecker } from 'ui/resize_checker';
 import { syncLayerOrder, removeOrphanedSourcesAndLayers, createMbMapInstance } from './utils';
 import { inspectorAdapters } from '../../../kibana_services';
 import { DECIMAL_DEGREES_PRECISION, ZOOM_PRECISION } from '../../../../common/constants';
+import mapboxgl from 'mapbox-gl';
 
 export class MBMapContainer extends React.Component {
 
@@ -169,11 +170,22 @@ export class MBMapContainer extends React.Component {
     }
 
     clearGoto();
-    this._mbMap.setZoom(goto.zoom);
-    this._mbMap.setCenter({
-      lng: goto.lon,
-      lat: goto.lat
-    });
+
+    if (goto.bounds) {//prioritize zooming to bounds after clicking
+      const lnLatBounds = new mapboxgl.LngLatBounds(
+        new mapboxgl.LngLat(goto.bounds.min_lon, goto.bounds.min_lat),
+        new mapboxgl.LngLat(goto.bounds.max_lon, goto.bounds.max_lat)
+      );
+      this._mbMap.fitBounds(lnLatBounds);
+    } else {
+      this._mbMap.setZoom(goto.zoom);
+      this._mbMap.setCenter({
+        lng: goto.lon,
+        lat: goto.lat
+      });
+    }
+
+
   };
 
   _syncMbMapWithLayerList = () => {

@@ -119,12 +119,15 @@ export function map(state = INITIAL_STATE, action) {
         }
       };
     case SET_GOTO:
+      const currentGoto = state.goto ? state.goto : {};
       return {
         ...state,
         goto: {
+          ...currentGoto,
           lat: action.lat,
           lon: action.lon,
           zoom: action.zoom,
+          bounds: action.bounds
         }
       };
     case CLEAR_GOTO:

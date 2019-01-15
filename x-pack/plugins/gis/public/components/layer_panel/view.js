@@ -70,7 +70,7 @@ export class LayerPanel  extends React.Component {
         <EuiFlyoutHeader hasBorder className="gisLayerPanel__header">
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              {selectedLayer.getIcon()}
+              {this.props.selectedLayer.renderFitToBoundsButton({ onFitToData: this.props.fitToBounds })}
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTitle size="s">

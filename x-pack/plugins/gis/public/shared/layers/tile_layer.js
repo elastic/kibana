@@ -60,10 +60,14 @@ export class TileLayer extends ALayer {
     this._style && this._style.setMBPaintProperties(mbMap, layerId);
   }
 
+  getLayerTypeIconName() {
+    return 'grid';
+  }
+
   getIcon() {
     return (
       <EuiIcon
-        type={'grid'}
+        type={this.getLayerTypeIconName()}
       />
     );
   }

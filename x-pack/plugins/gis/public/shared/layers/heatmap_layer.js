@@ -157,10 +157,14 @@ export class HeatmapLayer extends ALayer {
     }
   }
 
+  getLayerTypeIconName() {
+    return 'heatmap';
+  }
+
   getIcon() {
     return (
       <EuiIcon
-        type={'heatmap'}
+        type={this.getLayerTypeIconName()}
       />
     );
   }

@@ -120,6 +120,10 @@ export class VectorLayer extends ALayer {
     return this._style.getIcon(isPointsOnly);
   }
 
+  getLayerTypeIconName() {
+    return 'vector';
+  }
+
   getColorRamp() {
     // TODO: Determine if can be data-driven first
     return this._style.getColorRamp();

@@ -252,12 +252,13 @@ export function clearMouseCoordinates() {
   return { type: CLEAR_MOUSE_COORDINATES };
 }
 
-export function setGoto({ lat, lon, zoom }) {
+export function setGoto({ lat, lon, zoom, bounds }) {
   return {
     type: SET_GOTO,
     lat,
     lon,
     zoom,
+    bounds
   };
 }
 

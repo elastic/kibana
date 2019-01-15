@@ -7,6 +7,9 @@ import _ from 'lodash';
 import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
 import { DataRequest } from './util/data_request';
+import React from 'react';
+
+import { EuiButtonIcon } from '@elastic/eui';
 
 const SOURCE_UPDATE_REQUIRED = true;
 const NO_SOURCE_UPDATE_REQUIRED = false;
@@ -194,6 +197,39 @@ export class ALayer {
     return doesPreviousBufferContainNewBuffer && !_.get(meta, 'areResultsTrimmed', false)
       ? NO_SOURCE_UPDATE_REQUIRED
       : SOURCE_UPDATE_REQUIRED;
+  }
+
+  renderFitToBoundsButton({ onFitToData }) {
+    // return (<EuiButtonIcon></EuiButtonIcon>);
+
+
+    const onClick = async () => {
+      const bounds = await this.getBounds();
+      onFitToData(bounds);
+    };
+
+    const iconName = this.getLayerTypeIconName();
+    return (
+      <EuiButtonIcon iconType={iconName} iconSide="right" onClick={onClick}>
+      Fit
+      </EuiButtonIcon>
+    );
+
+
+  }
+
+  getLayerTypeIconName() {
+    throw new Error('should implement Layer#getLayerTypeIconName');
+  }
+
+
+  async getBounds() {
+    return {
+      min_lon: -180,
+      max_lon: 180,
+      min_lat: -89,
+      max_lat: 89
+    };
   }
 
   renderStyleEditor(style, options) {
