@@ -24,6 +24,30 @@ Kibana 7.0 will only use the Node.js distribution included in the package.
 *Impact:* There is no expected impact unless Kibana is installed in a non-standard way.
 
 [float]
+=== Removed support for using PhantomJS browser for screenshots in Reporting
+*Details:* Since the first release of Kibana Reporting, PhantomJS was used as
+the headless browser to capture screenshots of Kibana dashboards and
+visualizations. In that short time, Chromium has started offering a new
+headless browser library and the PhantomJS maintainers abandoned their project.
+We started planning for a transition in 6.5.0, when we made Chromium the
+default option, but allowed users to continue using Phantom with the
+`xpack.reporting.capture.browser.type: phantom` setting. In 7.0, that setting
+will still exist for compatibility, but the only valid option will be
+`chromium`.
+
+*Impact:* Before upgrading to 7.0, if you have `xpack.reporting.capture.browser.type`
+set in kibana.yml, make sure it is set to `chromium`.
+
+[NOTE]
+============
+Reporting 7.0 uses a version of the Chromium headless browser that RHEL 6,
+CentOS 6.x, and other old versions of Linux derived from RHEL 6. This change
+effectively removes RHEL 6 OS server support from Kibana Reporting. Users with
+RHEL 6 must upgrade to RHEL 7 to use Kibana Reporting starting with version
+7.0.0 of the Elastic stack.
+============
+
+[float]
 === Advanced setting query:queryString:options no longer applies to filters
 *Details:* In previous versions of Kibana the Advanced Setting `query:queryString:options` was applied to both queries
 and custom filters using the `query_string` query. This could cause errors if a custom filter used options that
@@ -79,3 +103,16 @@ The port is now protocol dependent: https ports will use 443, and http ports wil
 `server.ssl.supportedProtocols`
 
 *Impact:* Users relying upon TLSv1 will be unable to use Kibana unless `server.ssl.supportedProtocols` is explicitly set.
+
+[float]
+=== kibana.yml setting `server.ssl.cert` is no longer valid
+*Details:* This deprecated setting has been removed and `server.ssl.certificate` should be used instead.
+
+*Impact:* Users with `server.ssl.cert` set should use `server.ssl.certificate` instead
+
+[float]
+=== kibana.yml `server.ssl.enabled` must be set to `true` to enable SSL
+*Details:* Previously, if `server.ssl.certificate` and `server.ssl.key` were set, SSL would automatically be enabled. 
+It's now required that the user sets `server.ssl.enabled` to true for this to occur.
+
+*Impact:* Users with both `server.ssl.certificate` and `server.ssl.key` set must now also set `server.ssl.enabled` to enable SSL.

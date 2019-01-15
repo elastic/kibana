@@ -10,7 +10,7 @@ import {
   EuiLink,
   EuiText,
   EuiSelect,
-  EuiFormRow
+  EuiFormRow,
 } from '@elastic/eui';
 
 import { GIS_API_PATH } from '../../../../common/constants';
@@ -19,7 +19,9 @@ import { emsServiceSettings } from '../../../kibana_services';
 export class EMSFileSource extends VectorSource {
 
   static type = 'EMS_FILE';
-  static typeDisplayName = 'Elastic Maps Service region boundaries';
+  static title = 'Elastic Maps Service vector shapes';
+  static description = 'Vector shapes of administrative boundaries from Elastic Maps Service';
+  static icon = 'emsApp';
 
   static createDescriptor(id) {
     return {
@@ -53,9 +55,9 @@ export class EMSFileSource extends VectorSource {
     );
   }
 
-  constructor(descriptor, emsFiles) {
+  constructor(descriptor, { emsFileLayers }) {
     super(descriptor);
-    this._emsFiles = emsFiles;
+    this._emsFiles = emsFileLayers;
   }
 
   async getGeoJsonWithMeta() {
@@ -85,6 +87,13 @@ export class EMSFileSource extends VectorSource {
     const fileSource = this._emsFiles.find((source => source.id === this._descriptor.id));
     return fileSource.name;
   }
+
+  async getAttributions() {
+    const fileSource = this._emsFiles.find((source => source.id === this._descriptor.id));
+    return fileSource.attributions;
+  }
+
+
   async getStringFields() {
     //todo: use map/service-settings instead.
     const fileSource = this._emsFiles.find((source => source.id === this._descriptor.id));
@@ -93,10 +102,6 @@ export class EMSFileSource extends VectorSource {
       return { name: f.name, label: f.description };
     });
 
-  }
-
-  async isTimeAware() {
-    return false;
   }
 
   canFormatFeatureProperties() {

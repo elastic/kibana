@@ -9,6 +9,7 @@ import {
   YAxis,
   HorizontalGridLines,
   LineSeries,
+  LineMarkSeries,
   AreaSeries,
   VerticalRectSeries
 } from 'react-vis';
@@ -19,6 +20,7 @@ import { rgba } from 'polished';
 
 import StatusText from './StatusText';
 import { SharedPlot } from './plotUtils';
+import { i18n } from '@kbn/i18n';
 
 const X_TICK_TOTAL = 7;
 class StaticPlot extends PureComponent {
@@ -76,7 +78,18 @@ class StaticPlot extends PureComponent {
             fill={serie.areaColor}
           />
         );
-
+      case 'linemark':
+        return (
+          <LineMarkSeries
+            getNull={d => d.y !== null}
+            key={serie.title}
+            xType="time"
+            curve={'curveMonotoneX'}
+            data={serie.data}
+            color={serie.color}
+            size={0.5}
+          />
+        );
       default:
         throw new Error(`Unknown type ${serie.type}`);
     }
@@ -100,7 +113,12 @@ class StaticPlot extends PureComponent {
         />
 
         {noHits ? (
-          <StatusText marginLeft={30} text="No data within this time range." />
+          <StatusText
+            marginLeft={30}
+            text={i18n.translate('xpack.apm.metrics.plot.noDataLabel', {
+              defaultMessage: 'No data within this time range.'
+            })}
+          />
         ) : (
           this.getVisSeries(series, plotValues)
         )}

@@ -35,6 +35,7 @@ export const LAYER_DATA_LOAD_ENDED = 'LAYER_DATA_LOAD_ENDED';
 export const LAYER_DATA_LOAD_ERROR = 'LAYER_DATA_LOAD_ERROR';
 export const SET_JOINS = 'SET_JOINS';
 export const SET_TIME_FILTERS = 'SET_TIME_FILTERS';
+export const SET_QUERY = 'SET_QUERY';
 export const TRIGGER_REFRESH_TIMER = 'TRIGGER_REFRESH_TIMER';
 export const UPDATE_LAYER_PROP = 'UPDATE_LAYER_PROP';
 export const UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER = 'UPDATE_LAYER_STYLE';
@@ -44,6 +45,10 @@ export const TOUCH_LAYER = 'TOUCH_LAYER';
 export const UPDATE_LAYER_ALPHA_VALUE = 'UPDATE_LAYER_ALPHA_VALUE';
 export const UPDATE_SOURCE_PROP = 'UPDATE_SOURCE_PROP';
 export const SET_REFRESH_CONFIG = 'SET_REFRESH_CONFIG';
+export const SET_MOUSE_COORDINATES = 'SET_MOUSE_COORDINATES';
+export const CLEAR_MOUSE_COORDINATES = 'CLEAR_MOUSE_COORDINATES';
+export const SET_GOTO = 'SET_GOTO';
+export const CLEAR_GOTO = 'CLEAR_GOTO';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
@@ -226,6 +231,31 @@ export function mapExtentChanged(newMapConstants) {
   };
 }
 
+export function setMouseCoordinates({ lat, lon }) {
+  return {
+    type: SET_MOUSE_COORDINATES,
+    lat,
+    lon,
+  };
+}
+
+export function clearMouseCoordinates() {
+  return { type: CLEAR_MOUSE_COORDINATES };
+}
+
+export function setGoto({ lat, lon, zoom }) {
+  return {
+    type: SET_GOTO,
+    lat,
+    lon,
+    zoom,
+  };
+}
+
+export function clearGoto() {
+  return { type: CLEAR_GOTO };
+}
+
 export function startDataLoad(layerId, dataId, requestToken, meta = {}) {
   return ({
     meta,
@@ -266,20 +296,22 @@ export function updateSourceProp(layerId, propName, value) {
       propName,
       value,
     });
-
     dispatch(syncDataForLayer(layerId));
   };
 }
 
 export function syncDataForLayer(layerId) {
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
     const targetLayer = getLayerList(getState()).find(layer => {
       return layer.getId() === layerId;
     });
     if (targetLayer) {
       const dataFilters = getDataFilters(getState());
       const loadingFunctions = getLayerLoadingCallbacks(dispatch, layerId);
-      targetLayer.syncData({ ...loadingFunctions, dataFilters });
+      await targetLayer.syncData({
+        ...loadingFunctions,
+        dataFilters
+      });
     }
   };
 }
@@ -371,6 +403,22 @@ export function setTimeFilters({ from, to }) {
     if ((to && to !== kbnTime.to) || (from && from !== kbnTime.from)) {
       timeService.setTime({ from, to });
     }
+
+    const dataFilters = getDataFilters(getState());
+    await syncDataForAllLayers(getState, dispatch, dataFilters);
+  };
+}
+
+export function setQuery({ query }) {
+  return async (dispatch, getState) => {
+    dispatch({
+      type: SET_QUERY,
+      query: {
+        ...query,
+        // ensure query changes to trigger re-fetch even when query is the same because "Refresh" clicked
+        queryLastTriggeredAt: (new Date()).toISOString(),
+      },
+    });
 
     const dataFilters = getDataFilters(getState());
     await syncDataForAllLayers(getState, dispatch, dataFilters);

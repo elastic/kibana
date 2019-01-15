@@ -9,12 +9,15 @@ import { TileLayer } from '../tile_layer';
 import {
   EuiFieldText,
   EuiButton,
-  EuiText
+  EuiText,
 } from '@elastic/eui';
 
 export class KibanaTilemapSource extends  TMSSource {
 
   static type = 'KIBANA_TILEMAP';
+  static title = 'Custom Tile Map Service';
+  static description = 'Map tiles configured in kibana.yml';
+  static icon = 'logoKibana';
 
   static createDescriptor(url) {
     return {

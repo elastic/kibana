@@ -18,6 +18,7 @@
  */
 
 import React, { Component } from 'react';
+import * as Rx from 'rxjs';
 
 import {
   // TODO: add type annotations
@@ -36,25 +37,45 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { NavLink } from '../';
 
 interface Props {
-  navLinks: NavLink[];
+  navLinks$: Rx.Observable<NavLink[]>;
   intl: InjectedIntl;
 }
 
 interface State {
   isOpen: boolean;
+  navLinks: NavLink[];
 }
 
 class HeaderAppMenuUI extends Component<Props, State> {
+  private subscription?: Rx.Subscription;
+
   constructor(props: Props) {
     super(props);
 
     this.state = {
       isOpen: false,
+      navLinks: [],
     };
   }
 
+  public componentDidMount() {
+    this.subscription = this.props.navLinks$.subscribe({
+      next: navLinks => {
+        this.setState({ navLinks });
+      },
+    });
+  }
+
+  public componentWillUnmount() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+      this.subscription = undefined;
+    }
+  }
+
   public render() {
-    const { navLinks = [], intl } = this.props;
+    const { intl } = this.props;
+    const { navLinks } = this.state;
 
     const button = (
       <EuiHeaderSectionItemButton
@@ -103,7 +124,7 @@ class HeaderAppMenuUI extends Component<Props, State> {
   private renderNavLink = (navLink: NavLink) => (
     <EuiKeyPadMenuItem
       label={navLink.title}
-      href={navLink.url}
+      href={navLink.active || !navLink.lastSubUrl ? navLink.url : navLink.lastSubUrl}
       key={navLink.id}
       onClick={this.closeMenu}
     >

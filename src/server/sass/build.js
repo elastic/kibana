@@ -21,32 +21,25 @@ import path from 'path';
 import { promisify } from 'util';
 import fs from 'fs';
 import sass from 'node-sass';
-import sassLint from 'sass-lint';
 import autoprefixer from 'autoprefixer';
 import postcss from 'postcss';
+import mkdirp from 'mkdirp';
 
 const renderSass = promisify(sass.render);
 const writeFile = promisify(fs.writeFile);
+const mkdirpAsync = promisify(mkdirp);
 
 export class Build {
-  constructor(source, log) {
+  constructor(source, log, targetPath) {
     this.source = source;
     this.log = log;
+    this.targetPath = targetPath;
     this.includedFiles = [source];
-  }
-
-  outputPath() {
-    const fileName = path.basename(this.source, path.extname(this.source)) + '.css';
-    return path.join(path.dirname(this.source), fileName);
   }
 
   /**
    * Glob based on source path
    */
-
-  getGlob() {
-    return path.join(path.dirname(this.source), '**', '*.s{a,c}ss');
-  }
 
   async buildIfIncluded(path) {
     if (this.includedFiles && this.includedFiles.includes(path)) {
@@ -62,20 +55,9 @@ export class Build {
    */
 
   async build() {
-    const outFile = this.outputPath();
-
-    const lintResults = sassLint.lintFiles(this.getGlob(), {}, path.resolve(__dirname, '..', '..', '..', '.sass-lint.yml'));
-
-    lintResults.forEach(result => {
-      if (result.messages.length > 0) {
-        this.log.info(`lint errors in ${result.filePath}`);
-        this.log.info(JSON.stringify(result.messages, null, 2));
-      }
-    });
-
     const rendered = await renderSass({
       file: this.source,
-      outFile,
+      outFile: this.targetPath,
       sourceMap: true,
       sourceMapEmbed: true,
       includePaths: [
@@ -88,7 +70,8 @@ export class Build {
 
     this.includedFiles = rendered.stats.includedFiles;
 
-    await writeFile(outFile, prefixed.css);
+    await mkdirpAsync(path.dirname(this.targetPath));
+    await writeFile(this.targetPath, prefixed.css);
 
     return this;
   }

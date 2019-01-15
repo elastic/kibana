@@ -61,10 +61,7 @@ export class MBMapContainer extends React.Component {
   }
 
   async _initializeMap() {
-    const initialZoom = this.props.mapState.zoom;
-    const initialCenter = this.props.mapState.center;
-    this._mbMap = await createMbMapInstance(this.refs.mapContainer, initialZoom, initialCenter);
-    window._mbMap = this._mbMap;
+    this._mbMap = await createMbMapInstance(this.refs.mapContainer, this.props.goto);
 
     // Override mapboxgl.Map "on" and "removeLayer" methods so we can track layer listeners
     // Tracked layer listerners are used to clean up event handlers
@@ -90,9 +87,27 @@ export class MBMapContainer extends React.Component {
     };
 
     this.assignSizeWatch();
-    this._mbMap.on('moveend', () => {
+
+    // moveend callback is debounced to avoid updating map extent state while map extent is still changing
+    // moveend is fired while the map extent is still changing in the following scenarios
+    // 1) During opening/closing of layer details panel, the EUI animation results in 8 moveend events
+    // 2) Setting map zoom and center from goto is done in 2 API calls, resulting in 2 moveend events
+    this._mbMap.on('moveend', _.debounce(() => {
       this.props.extentChanged(this._getMapState());
+    }, 100));
+
+    const throttledSetMouseCoordinates = _.throttle(e => {
+      this.props.setMouseCoordinates({
+        lat: _.round(e.lngLat.lat, DECIMAL_DEGREES_PRECISION),
+        lon: _.round(e.lngLat.lng, DECIMAL_DEGREES_PRECISION)
+      });
+    }, 100);
+    this._mbMap.on('mousemove', throttledSetMouseCoordinates);
+    this._mbMap.on('mouseout', () => {
+      throttledSetMouseCoordinates.cancel(); // cancel any delayed setMouseCoordinates invocations
+      this.props.clearMouseCoordinates();
     });
+
     this.props.onMapReady(this._getMapState());
   }
 
@@ -145,28 +160,21 @@ export class MBMapContainer extends React.Component {
   _syncMbMapWithMapState = () => {
     const {
       isMapReady,
-      mapState,
+      goto,
+      clearGoto,
     } = this.props;
 
-    if (!isMapReady) {
+    if (!isMapReady || !goto) {
       return;
     }
 
-    const zoom = _.round(this._mbMap.getZoom(), ZOOM_PRECISION);
-    if (typeof mapState.zoom === 'number' && mapState.zoom !== zoom) {
-      this._mbMap.setZoom(mapState.zoom);
-    }
-
-    const center = this._mbMap.getCenter();
-    if (mapState.center &&
-      (mapState.center.lat !== _.round(center.lat, DECIMAL_DEGREES_PRECISION)
-      || mapState.center.lon !== _.round(center.lng, DECIMAL_DEGREES_PRECISION))) {
-      this._mbMap.setCenter({
-        lng: mapState.center.lon,
-        lat: mapState.center.lat
-      });
-    }
-  }
+    clearGoto();
+    this._mbMap.setZoom(goto.zoom);
+    this._mbMap.setCenter({
+      lng: goto.lon,
+      lat: goto.lat
+    });
+  };
 
   _syncMbMapWithLayerList = () => {
     const {
@@ -182,7 +190,7 @@ export class MBMapContainer extends React.Component {
       layer.syncLayerWithMB(this._mbMap);
     });
     syncLayerOrder(this._mbMap, layerList);
-  }
+  };
 
   _syncMbMapWithInspector = () => {
     if (!this.props.isMapReady) {
@@ -198,7 +206,7 @@ export class MBMapContainer extends React.Component {
       stats,
       style: this._mbMap.getStyle(),
     });
-  }
+  };
 
   render() {
     // do not debounce syncing zoom and center

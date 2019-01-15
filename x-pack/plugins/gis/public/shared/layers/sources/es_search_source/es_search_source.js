@@ -26,7 +26,9 @@ const DEFAULT_LIMIT = 2048;
 export class ESSearchSource extends VectorSource {
 
   static type = 'ES_SEARCH';
-  static typeDisplayName = 'Elasticsearch documents';
+  static title = 'Elasticsearch documents';
+  static description = 'Geospatial data from an Elasticsearch index';
+  static icon = 'logoElasticsearch';
 
   static renderEditor({ onPreviewSource }) {
     const onSelect = (layerConfig) => {
@@ -81,11 +83,19 @@ export class ESSearchSource extends VectorSource {
     return true;
   }
 
+  isQueryAware() {
+    return true;
+  }
+
   getFieldNames() {
     return [
       this._descriptor.geoField,
       ...this._descriptor.tooltipProperties
     ];
+  }
+
+  getIndexPatternIds() {
+    return  [this._descriptor.indexPatternId];
   }
 
   renderDetails() {
@@ -142,6 +152,7 @@ export class ESSearchSource extends VectorSource {
         }
         return filters;
       });
+      searchSource.setField('query', searchFilters.query);
 
       resp = await fetchSearchSourceAndRecordWithInspector({
         searchSource,

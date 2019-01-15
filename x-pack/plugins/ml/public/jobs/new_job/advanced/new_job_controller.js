@@ -38,7 +38,6 @@ import {
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
-import { initPromise } from 'plugins/ml/util/promise';
 
 uiRoutes
   .when('/jobs/new_job/advanced', {
@@ -52,7 +51,6 @@ uiRoutes
       savedSearch: loadCurrentSavedSearch,
       checkMlNodesAvailable,
       loadNewJobDefaults,
-      initPromise: initPromise(true)
     }
   })
   .when('/jobs/new_job/advanced/:jobId', {
@@ -66,7 +64,6 @@ uiRoutes
       savedSearch: loadCurrentSavedSearch,
       checkMlNodesAvailable,
       loadNewJobDefaults,
-      initPromise: initPromise(true)
     }
   });
 
@@ -389,6 +386,9 @@ module.controller('MlNewJob',
       loadFields()
         .catch(() => {
           // No need to do anything here as loadFields handles the displaying of any errors.
+        })
+        .then(() => {
+          $scope.$applyAsync();
         });
     };
 
@@ -826,6 +826,9 @@ module.controller('MlNewJob',
             }
           );
           $scope.ui.cardinalityValidator.status = STATUS.FAILED;
+        })
+        .then(() => {
+          $scope.$applyAsync();
         });
     }
 
@@ -1122,6 +1125,9 @@ module.controller('MlNewJob',
       getCustomUrlSelection();
       getCategorizationFilterSelection();
       $scope.ui.jsonText = angular.toJson($scope.job, true);
+      setTimeout(() => {
+        $scope.$applyAsync();
+      }, 0);
     }
 
     // add new custom URL
@@ -1389,11 +1395,15 @@ module.controller('MlNewJob',
           })
           .catch(function (resp) {
             $scope.ui.dataPreview = angular.toJson(resp, true);
+          })
+          .then(() => {
+            $scope.$applyAsync();
           });
       } else {
         $scope.ui.dataPreview = i18n('xpack.ml.newJob.advanced.dataPreview.datafeedDoesNotExistLabel', {
           defaultMessage: 'Datafeed does not exist'
         });
+        $scope.$applyAsync();
       }
     }
 
