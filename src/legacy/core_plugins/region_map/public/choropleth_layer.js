@@ -269,7 +269,7 @@ CORS configuration of the server permits requests from the Kibana application on
     clonedLayer.setLineWeight(this._lineWeight);
     clonedLayer.setTooltipFormatter(this._tooltipFormatter);
     if (this._metrics) {
-      clonedLayer.setMetrics(this._metrics, this._valueFormatter);
+      clonedLayer.setMetrics(this._metrics, this._valueFormatter, this._metricTitle);
     }
     return clonedLayer;
   }
@@ -289,9 +289,10 @@ CORS configuration of the server permits requests from the Kibana application on
     return this._whenDataLoaded;
   }
 
-  setMetrics(metrics, fieldFormatter) {
+  setMetrics(metrics, fieldFormatter, metricTitle) {
     this._metrics = metrics.slice();
     this._valueFormatter = fieldFormatter;
+    this._metricTitle = metricTitle;
 
     this._metrics.sort((a, b) => compareLexicographically(a.term, b.term));
     this._invalidateJoin();
@@ -348,7 +349,7 @@ CORS configuration of the server permits requests from the Kibana application on
       return;
     }
 
-    const titleText = this._metricsAgg.makeLabel();
+    const titleText = this._metricTitle;
     const $title = $('<div>').addClass('visMapLegend__title').text(titleText);
     jqueryDiv.append($title);
 
@@ -356,7 +357,9 @@ CORS configuration of the server permits requests from the Kibana application on
 
       const labelText = this._legendQuantizer
         .invertExtent(color)
-        .map(this._valueFormatter)
+        .map(val => {
+          return this._valueFormatter.convert(val);
+        })
         .join(' – ');
 
       const label = $('<div>');
