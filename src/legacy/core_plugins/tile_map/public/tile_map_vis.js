@@ -26,7 +26,6 @@ import { CoordinateMapsVisualizationProvider } from './coordinate_maps_visualiza
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { Status } from 'ui/vis/update_status';
-import { makeGeoJsonResponseHandler } from './coordinatemap_response_handler';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 
 VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, courier, config) {
@@ -58,7 +57,6 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
       }
     },
     requiresUpdateStatus: [Status.AGGS, Status.PARAMS, Status.RESIZE, Status.UI_STATE],
-    responseHandler: makeGeoJsonResponseHandler(),
     requiresPartialRows: true,
     visualization: CoordinateMapsVisualization,
     editorConfig: {
