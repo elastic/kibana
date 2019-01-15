@@ -63,7 +63,11 @@ export const fetchDirectoryFailed = createAction<Error>('FETCH REPO DIR FAILED')
 export const setNotFound = createAction<boolean>('SET NOT FOUND');
 
 export const fetchTreeCommits = createAction<FetchFilePayload>('FETCH TREE COMMITS');
-export const fetchTreeCommitsSuccess = createAction<{ path: string; commits: CommitInfo[] }>(
-  'FETCH TREE COMMITS SUCCESS'
-);
+export const fetchTreeCommitsSuccess = createAction<{
+  path: string;
+  commits: CommitInfo[];
+  append?: boolean;
+}>('FETCH TREE COMMITS SUCCESS');
 export const fetchTreeCommitsFailed = createAction<Error>('FETCH TREE COMMITS FAILED');
+
+export const fetchMoreCommits = createAction<string>('FETCH MORE COMMITS');

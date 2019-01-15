@@ -22,6 +22,8 @@ import {
   fetchRepoTree,
   fetchRepoTreeFailed,
   fetchRepoTreeSuccess,
+  fetchTreeCommits,
+  fetchTreeCommitsFailed,
   fetchTreeCommitsSuccess,
   openTreePath,
   RepoTreePayload,
@@ -43,6 +45,8 @@ export interface FileState {
   treeCommits: { [path: string]: CommitInfo[] };
   currentPath: string;
   requestedPaths: string[];
+  loadingCommits: boolean;
+  commitsFullyLoaded: { [path: string]: boolean };
 }
 
 const initialState: FileState = {
@@ -61,6 +65,8 @@ const initialState: FileState = {
   isNotFound: false,
   currentPath: '',
   requestedPaths: [],
+  loadingCommits: false,
+  commitsFullyLoaded: {},
 };
 
 function mergeTree(draft: FileState, tree: FileTree, path: string) {
@@ -127,6 +133,7 @@ export const file = handleActions(
     [String(fetchRepoCommitsSuccess)]: (state: FileState, action: any) =>
       produce<FileState>(state, draft => {
         draft.commits = action.payload;
+        draft.loadingCommits = false;
       }),
     [String(fetchRepoBranchesSuccess)]: (state: FileState, action: any) =>
       produce<FileState>(state, (draft: FileState) => {
@@ -163,10 +170,35 @@ export const file = handleActions(
       produce<FileState>(state, draft => {
         draft.isNotFound = false;
       }),
+    [String(fetchTreeCommits)]: (state: FileState) =>
+      produce<FileState>(state, draft => {
+        draft.loadingCommits = true;
+      }),
+    [String(fetchTreeCommitsFailed)]: (state: FileState) =>
+      produce<FileState>(state, draft => {
+        draft.loadingCommits = false;
+      }),
     [String(fetchTreeCommitsSuccess)]: (state: FileState, action: any) =>
       produce<FileState>(state, draft => {
-        const { path, commits } = action.payload;
-        draft.treeCommits[path] = commits;
+        const { path, commits, append } = action.payload;
+        if (path === '' || path === '/') {
+          if (commits.length === 0) {
+            draft.commitsFullyLoaded[''] = true;
+          } else if (append) {
+            draft.commits = draft.commits.concat(commits);
+          } else {
+            draft.commits = commits;
+          }
+        } else {
+          if (commits.length === 0) {
+            draft.commitsFullyLoaded[path] = true;
+          } else if (append) {
+            draft.treeCommits[path] = draft.treeCommits[path].concat(commits);
+          } else {
+            draft.treeCommits[path] = commits;
+          }
+        }
+        draft.loadingCommits = false;
       }),
   },
   initialState

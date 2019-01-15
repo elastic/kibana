@@ -128,7 +128,7 @@ export const CommitHistory = (props: {
     );
   }
   const commits = _.groupBy(props.commits, commit => moment(commit.updated).format('YYYYMMDD'));
-  const commitDates = Object.keys(commits).sort();
+  const commitDates = Object.keys(commits).sort((a, b) => b.localeCompare(a)); // sort desc
   const commitList = commitDates.map(cd => (
     <CommitGroup commits={commits[cd]} date={moment(cd).format('MMMM Do, YYYY')} key={cd} />
   ));

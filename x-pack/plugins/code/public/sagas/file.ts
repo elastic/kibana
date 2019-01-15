@@ -18,6 +18,7 @@ import {
   FetchFilePayload,
   FetchFileResponse,
   fetchFileSuccess,
+  fetchMoreCommits,
   fetchRepoBranches,
   fetchRepoBranchesFailed,
   fetchRepoBranchesSuccess,
@@ -38,7 +39,8 @@ import {
   openTreePath,
   setNotFound,
 } from '../actions';
-import { requestedPathsSelector } from '../selectors';
+import { RootState } from '../reducers';
+import { requestedPathsSelector, treeCommitsSelector } from '../selectors';
 import { repoRoutePattern } from './patterns';
 
 function* handleFetchRepoTree(action: Action<FetchRepoTreePayload>) {
@@ -132,6 +134,20 @@ function* handleFetchCommits(action: Action<FetchRepoPayloadWithRevision>) {
   }
 }
 
+function* handleFetchMoreCommits(action: Action<string>) {
+  try {
+    const path = yield select((state: RootState) => state.file.currentPath);
+    const commits = yield select(treeCommitsSelector);
+    const revision = commits.length > 0 ? commits[commits.length - 1].id : 'head';
+    const uri = action.payload;
+    // @ts-ignore
+    const newCommits = yield call(requestCommits, { uri, revision }, path, true);
+    yield put(fetchTreeCommitsSuccess({ path, commits: newCommits, append: true }));
+  } catch (err) {
+    yield put(fetchTreeCommitsFailed(err));
+  }
+}
+
 function* handleFetchTreeCommits(action: Action<FetchFilePayload>) {
   try {
     const path = action.payload!.path;
@@ -142,11 +158,19 @@ function* handleFetchTreeCommits(action: Action<FetchFilePayload>) {
   }
 }
 
-function requestCommits({ uri, revision }: FetchRepoPayloadWithRevision, path?: string) {
+function requestCommits(
+  { uri, revision }: FetchRepoPayloadWithRevision,
+  path?: string,
+  loadMore?: boolean
+) {
   const pathStr = path ? `/${path}` : '';
-  return kfetch({
+  const options: any = {
     pathname: `../api/code/repo/${uri}/history/${revision}${pathStr}`,
-  });
+  };
+  if (loadMore) {
+    options.query = { after: 1 };
+  }
+  return kfetch(options);
 }
 
 export async function requestFile(
@@ -215,6 +239,7 @@ export function* watchFetchBranchesAndCommits() {
   yield takeLatest(String(fetchFile), handleFetchFile);
   yield takeEvery(String(fetchDirectory), handleFetchDirs);
   yield takeLatest(String(fetchTreeCommits), handleFetchTreeCommits);
+  yield takeLatest(String(fetchMoreCommits), handleFetchMoreCommits);
 }
 
 function* handleRepoRouteChange(action: Action<Match>) {

@@ -142,6 +142,7 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
     const { uri, ref, path } = req.params;
     const queries = req.query as RequestQuery;
     const count = queries.count ? parseInt(queries.count as string, 10) : 10;
+    const after = queries.after !== undefined;
     try {
       const repository = await gitOperations.openRepo(uri);
       const commit = await gitOperations.getCommit(repository, ref);
@@ -151,11 +152,16 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
       let commits: Commit[];
       if (path) {
         // magic number 1000: how many commits at the most to iterate in order to find the commits contains the path
-        const results = await walk.fileHistoryWalk(path, 1000);
+        const results = await walk.fileHistoryWalk(path, 10000);
         commits = results.slice(0, count).map(result => result.commit);
       } else {
         walk.push(commit.id());
         commits = await walk.getCommits(count);
+      }
+      if (after && commits.length > 0) {
+        if (commits[0].id().equal(commit.id())) {
+          commits = commits.slice(1);
+        }
       }
       return commits.map(commitInfo);
     } catch (e) {

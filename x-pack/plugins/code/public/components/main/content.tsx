@@ -7,6 +7,7 @@
 // @ts-ignore
 import { EuiButton, EuiButtonGroup } from '@elastic/eui';
 import React from 'react';
+import InfiniteScroll from 'react-infinite-scroller';
 import Markdown from 'react-markdown';
 import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
@@ -15,10 +16,10 @@ import styled from 'styled-components';
 import { GitBlame } from '../../../common/git_blame';
 import { FileTree } from '../../../model';
 import { CommitInfo } from '../../../model/commit';
-import { FetchFileResponse } from '../../actions';
+import { FetchFileResponse, fetchMoreCommits } from '../../actions';
 import { MainRouteParams, PathTypes } from '../../common/types';
 import { RootState } from '../../reducers';
-import { treeCommitsSelector } from '../../selectors';
+import { hasMoreCommitsSelector, treeCommitsSelector } from '../../selectors';
 import { Editor } from '../editor/editor';
 import { Blame } from './blame';
 import { CommitHistory } from './commit_history';
@@ -61,6 +62,9 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   file: FetchFileResponse | undefined;
   commits: CommitInfo[];
   blames: GitBlame[];
+  hasMoreCommits: boolean;
+  loadingCommits: boolean;
+  fetchMoreCommits(repoUri: string): void;
 }
 
 interface State {
@@ -169,7 +173,7 @@ class CodeContent extends React.PureComponent<Props, State> {
   };
 
   public render() {
-    const { file, blames, commits, match, tree } = this.props;
+    const { file, blames, commits, match, tree, hasMoreCommits, loadingCommits } = this.props;
     const { path, pathType, resource, org, repo } = match.params;
     const repoUri = `${resource}/${org}/${repo}`;
     if (pathType === PathTypes.tree) {
@@ -177,16 +181,29 @@ class CodeContent extends React.PureComponent<Props, State> {
       return (
         <DirectoryViewContainer>
           <Directory node={node} />
-          <CommitHistory
-            commits={commits}
-            repoUri={repoUri}
-            header={
-              <React.Fragment>
-                <Title>Recent Commits</Title>
-                <EuiButton>View All</EuiButton>
-              </React.Fragment>
+          <InfiniteScroll
+            pageStart={0}
+            initialLoad={false}
+            loadMore={() => !loadingCommits && this.props.fetchMoreCommits(repoUri)}
+            hasMore={hasMoreCommits}
+            useWindow={false}
+            loader={
+              <div className="loader" key={0}>
+                Loading ...
+              </div>
             }
-          />
+          >
+            <CommitHistory
+              commits={commits}
+              repoUri={repoUri}
+              header={
+                <React.Fragment>
+                  <Title>Recent Commits</Title>
+                  <EuiButton>View All</EuiButton>
+                </React.Fragment>
+              }
+            />
+          </InfiniteScroll>
         </DirectoryViewContainer>
       );
     } else if (pathType === PathTypes.blob) {
@@ -194,11 +211,24 @@ class CodeContent extends React.PureComponent<Props, State> {
         return (
           <React.Fragment>
             {this.renderButtons()}
-            <CommitHistory
-              commits={commits}
-              repoUri={repoUri}
-              header={<Title>Commit History</Title>}
-            />
+            <InfiniteScroll
+              pageStart={0}
+              initialLoad={true}
+              loadMore={() => !loadingCommits && this.props.fetchMoreCommits(repoUri)}
+              hasMore={hasMoreCommits}
+              useWindow={true}
+              loader={
+                <div className="loader" key={0}>
+                  Loading ...
+                </div>
+              }
+            >
+              <CommitHistory
+                commits={commits}
+                repoUri={repoUri}
+                header={<Title>Commit History</Title>}
+              />
+            </InfiniteScroll>
           </React.Fragment>
         );
       }
@@ -247,6 +277,17 @@ const mapStateToProps = (state: RootState) => ({
   tree: state.file.tree,
   commits: treeCommitsSelector(state),
   blames: state.blame.blames,
+  hasMoreCommits: hasMoreCommitsSelector(state),
+  loadingCommits: state.file.loadingCommits,
 });
 
-export const Content = withRouter(connect(mapStateToProps)(CodeContent));
+const mapDispatchToProps = {
+  fetchMoreCommits,
+};
+
+export const Content = withRouter(
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  )(CodeContent)
+);
