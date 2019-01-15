@@ -18,7 +18,6 @@
  */
 import AbstractSearchStrategy from './abstract_search_strategy';
 import MultiSearchRequest from '../searh_requests/multi_search_request';
-import { i18n } from '@kbn/i18n';
 
 const callWithRequestFactory = (server, request) => {
   const { callWithRequest } = request.server.plugins.elasticsearch.getCluster('data');
@@ -29,10 +28,6 @@ const callWithRequestFactory = (server, request) => {
 export default class DefaultSearchStrategy extends AbstractSearchStrategy {
   name = 'default';
   batchRequestsSupport = true;
-
-  label = i18n.translate('tsvb.searchStrategies.default.label', {
-    defaultMessage: 'Default',
-  });
 
   constructor(server) {
     super(server, callWithRequestFactory, MultiSearchRequest);
