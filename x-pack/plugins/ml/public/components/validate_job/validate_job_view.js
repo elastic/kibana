@@ -254,7 +254,7 @@ class ValidateJob extends Component {
             close={this.closeModal}
             title={<FormattedMessage
               id="xpack.ml.validateJob.modal.validateJobTitle"
-              defaultMessage="Validate Job {title}"
+              defaultMessage="Validate job {title}"
               values={{ title: this.state.title }}
             />}
           >
