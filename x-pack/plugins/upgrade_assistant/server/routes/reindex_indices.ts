@@ -9,7 +9,6 @@ import { Server } from 'hapi';
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { SavedObjectsClient } from 'src/server/saved_objects';
-import { ReindexStatus } from '../../common/types';
 import { reindexServiceFactory, ReindexWorker } from '../lib/reindexing';
 
 export function registerReindexWorker(server: Server) {
