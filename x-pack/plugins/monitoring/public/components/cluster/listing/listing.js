@@ -22,7 +22,6 @@ import { toastNotifications } from 'ui/notify';
 import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
 import { Tooltip } from 'plugins/monitoring/components/tooltip';
 import { AlertsIndicator } from 'plugins/monitoring/components/cluster/listing/alerts_indicator';
-import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { UNLINKED_DEPLOYMENT_CLUSTER_UUID } from '../../../../common/constants';
 
@@ -272,36 +271,32 @@ const licenseWarning = (scope, { title, text }) => {
 
 const handleClickIncompatibleLicense = (scope, clusterName) => {
   licenseWarning(scope, {
-    title: (
-      <FormattedMessage
-        id="xpack.monitoring.cluster.listing.incompatibleLicense.warningMessageTitle"
-        defaultMessage="You can't view the {clusterName} cluster"
-        values={{ clusterName: '"' + clusterName + '"' }}
-      />
-    ),
+    title: i18n.translate('xpack.monitoring.cluster.listing.incompatibleLicense.warningMessageTitle', {
+      defaultMessage: 'You can\'t view the {clusterName} cluster'
+    }, {
+      values: { clusterName: '"' + clusterName + '"' }
+    }),
     text: (
       <Fragment>
         <p>
-          <FormattedMessage
-            id="xpack.monitoring.cluster.listing.incompatibleLicense.noMultiClusterSupportMessage"
-            defaultMessage="The Basic license does not support multi-cluster monitoring."
-          />
+          {i18n.translate('xpack.monitoring.cluster.listing.incompatibleLicense.noMultiClusterSupportMessage', {
+            defaultMessage: 'The Basic license does not support multi-cluster monitoring.'
+          })}
         </p>
         <p>
-          <FormattedMessage
-            id="xpack.monitoring.cluster.listing.incompatibleLicense.infoMessage"
-            defaultMessage="Need to monitor multiple clusters? {getLicenseInfoLink} to enjoy multi-cluster monitoring."
-            values={{
+          {i18n.translate('xpack.monitoring.cluster.listing.incompatibleLicense.infoMessage', {
+            defaultMessage: 'Need to monitor multiple clusters? {getLicenseInfoLink} to enjoy multi-cluster monitoring.'
+          }, {
+            values: {
               getLicenseInfoLink: (
                 <a href="https://www.elastic.co/subscriptions/xpack" target="_blank">
-                  <FormattedMessage
-                    id="xpack.monitoring.cluster.listing.incompatibleLicense.getLicenseLinkLabel"
-                    defaultMessage="Get a license with full functionality"
-                  />
+                  {i18n.translate('xpack.monitoring.cluster.listing.incompatibleLicense.getLicenseLinkLabel', {
+                    defaultMessage: 'Get a license with full functionality'
+                  })}
                 </a>
               )
-            }}
-          />
+            }
+          })}
         </p>
       </Fragment>
     ),
@@ -312,44 +307,41 @@ const handleClickInvalidLicense = (scope, clusterName) => {
   const licensingPath = `${chrome.getBasePath()}/app/kibana#/management/elasticsearch/license_management/home`;
 
   licenseWarning(scope, {
-    title: (
-      <FormattedMessage
-        id="xpack.monitoring.cluster.listing.invalidLicense.warningMessageTitle"
-        defaultMessage="You can't view the {clusterName} cluster"
-        values={{ clusterName: '"' + clusterName + '"' }}
-      />
-    ),
+    title: i18n.translate('xpack.monitoring.cluster.listing.invalidLicense.warningMessageTitle', {
+      defaultMessage: 'You can\'t view the {clusterName} cluster'
+    }, {
+      values: {
+        clusterName: '"' + clusterName + '"'
+      }
+    }),
     text: (
       <Fragment>
         <p>
-          <FormattedMessage
-            id="xpack.monitoring.cluster.listing.invalidLicense.invalidInfoMessage"
-            defaultMessage="The license information is invalid."
-          />
+          {i18n.translate('xpack.monitoring.cluster.listing.invalidLicense.invalidInfoMessage', {
+            defaultMessage: 'The license information is invalid.'
+          })}
         </p>
         <p>
-          <FormattedMessage
-            id="xpack.monitoring.cluster.listing.invalidLicense.infoMessage"
-            defaultMessage="Need a license? {getBasicLicenseLink} or {getLicenseInfoLink} to enjoy multi-cluster monitoring."
-            values={{
+          {i18n.translate('xpack.monitoring.cluster.listing.invalidLicense.infoMessage', {
+            defaultMessage: 'Need a license? {getBasicLicenseLink} or {getLicenseInfoLink} to enjoy multi-cluster monitoring.'
+          }, {
+            values: {
               getBasicLicenseLink: (
                 <a href={licensingPath}>
-                  <FormattedMessage
-                    id="xpack.monitoring.cluster.listing.invalidLicense.getBasicLicenseLinkLabel"
-                    defaultMessage="Get a free Basic license"
-                  />
+                  {i18n.translate('xpack.monitoring.cluster.listing.invalidLicense.getBasicLicenseLinkLabel', {
+                    defaultMessage: 'Get a free Basic license'
+                  })}
                 </a>
               ),
               getLicenseInfoLink: (
                 <a href="https://www.elastic.co/subscriptions/xpack" target="_blank">
-                  <FormattedMessage
-                    id="xpack.monitoring.cluster.listing.invalidLicense.getLicenseLinkLabel"
-                    defaultMessage="get a license with full functionality"
-                  />
+                  {i18n.translate('xpack.monitoring.cluster.listing.invalidLicense.getLicenseLinkLabel', {
+                    defaultMessage: 'get a license with full functionality'
+                  })}
                 </a>
               )
-            }}
-          />
+            }
+          })}
         </p>
       </Fragment>
     ),
@@ -383,16 +375,14 @@ export class Listing extends Component {
               onClick={() => changeCluster(UNLINKED_DEPLOYMENT_CLUSTER_UUID)}
               data-test-subj="unlinkedDeploymentLink"
             >
-              <FormattedMessage
-                id="xpack.monitoring.cluster.listing.unlinkedDeploymentCallOutLink"
-                defaultMessage="View these instances."
-              />
+              {i18n.translate('xpack.monitoring.cluster.listing.unlinkedDeploymentCallOutLink', {
+                defaultMessage: 'View these instances.'
+              })}
             </EuiLink>
             &nbsp;
-            <FormattedMessage
-              id="xpack.monitoring.cluster.listing.unlinkedDeploymentCallOutText"
-              defaultMessage="Or, click Unlinked Cluster in the table below"
-            />
+            {i18n.translate('xpack.monitoring.cluster.listing.unlinkedDeploymentCallOutText', {
+              defaultMessage: 'Or, click Unlinked Cluster in the table below'
+            })}
           </p>
           <p>
             <EuiLink onClick={() => {
@@ -402,10 +392,9 @@ export class Listing extends Component {
             >
               <EuiIcon type="cross"/>
               &nbsp;
-              <FormattedMessage
-                id="xpack.monitoring.cluster.listing.unlinkedDeploymentCallOutDismiss"
-                defaultMessage="Dismiss"
-              />
+              {i18n.translate('xpack.monitoring.cluster.listing.unlinkedDeploymentCallOutDismiss', {
+                defaultMessage: 'Dismiss'
+              })}
             </EuiLink>
           </p>
         </EuiCallOut>
@@ -423,45 +412,43 @@ export class Listing extends Component {
     const hasUnlinkedDeployment = !!clusters.find(cluster => cluster.cluster_uuid === UNLINKED_DEPLOYMENT_CLUSTER_UUID);
 
     return (
-      <I18nProvider>
-        <EuiPage>
-          <EuiPageBody>
-            <EuiPageContent>
-              {hasUnlinkedDeployment ? this.renderUnlinkedDeployment(_changeCluster, angular.storage) : null}
-              <EuiMonitoringTable
-                className="clusterTable"
-                rows={clusters}
-                columns={getColumns(
-                  angular.showLicenseExpiration,
-                  _changeCluster,
-                  _handleClickIncompatibleLicense,
-                  _handleClickInvalidLicense
-                )}
-                rowProps={item => {
-                  return {
-                    'data-test-subj': `clusterRow_${item.cluster_uuid}`
-                  };
-                }}
-                sorting={{
-                  ...sorting,
-                  sort: {
-                    ...sorting.sort,
-                    field: 'cluster_name'
-                  }
-                }}
-                pagination={pagination}
-                search={{
-                  box: {
-                    incremental: true,
-                    placeholder: angular.scope.filterText
-                  },
-                }}
-                onTableChange={onTableChange}
-              />
-            </EuiPageContent>
-          </EuiPageBody>
-        </EuiPage>
-      </I18nProvider>
+      <EuiPage>
+        <EuiPageBody>
+          <EuiPageContent>
+            {hasUnlinkedDeployment ? this.renderUnlinkedDeployment(_changeCluster, angular.storage) : null}
+            <EuiMonitoringTable
+              className="clusterTable"
+              rows={clusters}
+              columns={getColumns(
+                angular.showLicenseExpiration,
+                _changeCluster,
+                _handleClickIncompatibleLicense,
+                _handleClickInvalidLicense
+              )}
+              rowProps={item => {
+                return {
+                  'data-test-subj': `clusterRow_${item.cluster_uuid}`
+                };
+              }}
+              sorting={{
+                ...sorting,
+                sort: {
+                  ...sorting.sort,
+                  field: 'cluster_name'
+                }
+              }}
+              pagination={pagination}
+              search={{
+                box: {
+                  incremental: true,
+                  placeholder: angular.scope.filterText
+                },
+              }}
+              onTableChange={onTableChange}
+            />
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
     );
   }
 }
