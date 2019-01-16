@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import { ViewMLJob } from 'x-pack/plugins/apm/public/components/shared/Links/ViewMLJob';
+import { MLJobLink } from 'x-pack/plugins/apm/public/components/shared/Links/MLJobLink';
 import { ITransactionChartData } from 'x-pack/plugins/apm/public/store/selectors/chartSelectors';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { Coordinate } from 'x-pack/plugins/apm/typings/timeseries';
@@ -109,13 +109,13 @@ export class TransactionChartsView extends Component<TransactionChartProps> {
               }
             )}{' '}
           </span>
-          <ViewMLJob
+          <MLJobLink
             serviceName={serviceName}
             transactionType={transactionType}
             location={this.props.location}
           >
             View Job
-          </ViewMLJob>
+          </MLJobLink>
         </ShiftedEuiText>
       </EuiFlexItem>
     );

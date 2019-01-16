@@ -24,7 +24,7 @@ import { Location } from 'history';
 import React, { Component } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
-import { ViewMLJob } from 'x-pack/plugins/apm/public/components/shared/Links/ViewMLJob';
+import { MLJobLink } from 'x-pack/plugins/apm/public/components/shared/Links/MLJobLink';
 import {
   getMlPrefix,
   startMLJob
@@ -146,7 +146,7 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
               }
             }
           )}{' '}
-          <ViewMLJob
+          <MLJobLink
             serviceName={serviceName}
             transactionType={transactionType}
             location={location}
@@ -157,7 +157,7 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
                 defaultMessage: 'View job'
               }
             )}
-          </ViewMLJob>
+          </MLJobLink>
         </p>
       )
     });
@@ -228,7 +228,7 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
                             }
                           }
                         )}{' '}
-                        <ViewMLJob
+                        <MLJobLink
                           serviceName={serviceName}
                           transactionType={transactionType}
                           location={location}
@@ -239,7 +239,7 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
                               defaultMessage: 'View existing job'
                             }
                           )}
-                        </ViewMLJob>
+                        </MLJobLink>
                       </p>
                     </EuiCallOut>
                     <EuiSpacer size="m" />

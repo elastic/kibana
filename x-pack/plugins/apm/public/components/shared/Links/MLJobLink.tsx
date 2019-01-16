@@ -15,7 +15,7 @@ interface Props {
   location: Location;
 }
 
-export const ViewMLJob: React.SFC<Props> = ({
+export const MLJobLink: React.SFC<Props> = ({
   serviceName,
   transactionType,
   location,

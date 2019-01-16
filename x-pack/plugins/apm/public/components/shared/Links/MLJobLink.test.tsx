@@ -7,13 +7,13 @@
 import { shallow } from 'enzyme';
 import { Location } from 'history';
 import React from 'react';
-import { ViewMLJob } from './ViewMLJob';
+import { MLJobLink } from './MLJobLink';
 
-describe('ViewMLJob', () => {
+describe('MLJobLink', () => {
   it('should render component', () => {
     const location = { search: '' } as Location;
     const wrapper = shallow(
-      <ViewMLJob
+      <MLJobLink
         serviceName="myServiceName"
         transactionType="myTransactionType"
         location={location}
@@ -26,7 +26,7 @@ describe('ViewMLJob', () => {
   it('should have correct path props', () => {
     const location = { search: '' } as Location;
     const wrapper = shallow(
-      <ViewMLJob
+      <MLJobLink
         serviceName="myServiceName"
         transactionType="myTransactionType"
         location={location}
