@@ -30,14 +30,8 @@ export class UMMonitorsDomain {
     return this.adapter.getLatestMonitors(request, dateRangeStart, dateRangeEnd, filters);
   }
 
-  public async getSnapshotCount(
-    request: any,
-    range: UMGqlRange,
-    downCount: number,
-    windowSize: number,
-    filters?: string
-  ): Promise<any> {
-    return this.adapter.getSnapshotCount(request, range, downCount, windowSize, filters);
+  public async getSnapshotCount(request: any, range: UMGqlRange, filters?: string): Promise<any> {
+    return this.adapter.getSnapshotCount(request, range, filters);
   }
 
   public async getFilterBar(

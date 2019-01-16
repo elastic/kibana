@@ -58,6 +58,9 @@ export const EmptyState = ({
               }
               body={
                 <Fragment>
+                  <p data-test-subj="xpack.uptime.noDataAvailable">
+                    There is no uptime data available.
+                  </p>
                   <p>
                     <FormattedMessage
                       id="xpack.uptime.emptyState.noDataDescription"

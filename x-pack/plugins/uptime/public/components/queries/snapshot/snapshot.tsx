@@ -47,8 +47,7 @@ export const Snapshot = ({
   <Query
     pollInterval={autorefreshEnabled ? autorefreshInterval : undefined}
     query={getSnapshotQuery}
-    // TODO downCount and windowSize aren't needed for MVP
-    variables={{ dateRangeStart, dateRangeEnd, downCount: 1, windowSize: 1, filters }}
+    variables={{ dateRangeStart, dateRangeEnd, filters }}
   >
     {({ loading, error, data }) => {
       if (loading) {

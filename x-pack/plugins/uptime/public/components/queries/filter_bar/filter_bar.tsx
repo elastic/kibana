@@ -14,6 +14,8 @@ import { getFilterBarQuery } from './get_filter_bar';
 import { filterBarSearchSchema } from './search_schema';
 
 interface FilterBarProps {
+  autorefreshInterval: number;
+  autorefreshEnabled: boolean;
   dateRangeStart: number;
   dateRangeEnd: number;
   updateQuery: (query: object | undefined) => void;
@@ -22,8 +24,18 @@ interface FilterBarProps {
 const MAX_SELECTION_LENGTH = 20;
 const SEARCH_THRESHOLD = 2;
 
-export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: FilterBarProps) => (
-  <Query query={getFilterBarQuery} variables={{ dateRangeStart, dateRangeEnd }}>
+export const FilterBar = ({
+  autorefreshInterval,
+  autorefreshEnabled,
+  dateRangeEnd,
+  dateRangeStart,
+  updateQuery,
+}: FilterBarProps) => (
+  <Query
+    pollInterval={autorefreshEnabled ? autorefreshInterval : undefined}
+    query={getFilterBarQuery}
+    variables={{ dateRangeStart, dateRangeEnd }}
+  >
     {({ loading, error, data }) => {
       if (loading) {
         return i18n.translate('xpack.uptime.filterBar.loadingMessage', {
@@ -56,10 +68,10 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: FilterB
               }),
             },
             {
-              value: i18n.translate('xpack.uptime.filterBar.filterDownLabel', {
+              value: 'down',
+              name: i18n.translate('xpack.uptime.filterBar.filterDownLabel', {
                 defaultMessage: 'Down',
               }),
-              name: 'Down',
             },
           ],
         },
@@ -106,6 +118,7 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: FilterB
         <EuiFlexGroup>
           <EuiFlexItem grow>
             <EuiSearchBar
+              data-test-subj="xpack.uptime.filterBar"
               // TODO: update typing
               onChange={({ query }: { query?: { text: string } }) => {
                 try {

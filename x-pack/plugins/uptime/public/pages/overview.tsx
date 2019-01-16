@@ -47,6 +47,8 @@ export class OverviewPage extends React.Component<OverviewPageProps, OverviewPag
           autorefreshInterval={autorefreshInterval}
         >
           <FilterBar
+            autorefreshEnabled={autorefreshEnabled}
+            autorefreshInterval={autorefreshInterval}
             dateRangeStart={dateRangeStart}
             dateRangeEnd={dateRangeEnd}
             updateQuery={(query: object | undefined) => {
@@ -70,6 +72,8 @@ export class OverviewPage extends React.Component<OverviewPageProps, OverviewPag
           />
           <EuiSpacer />
           <ErrorList
+            autorefreshEnabled={autorefreshEnabled}
+            autorefreshInterval={autorefreshInterval}
             dateRangeStart={dateRangeStart}
             dateRangeEnd={dateRangeEnd}
             filters={this.state.currentFilterQuery}

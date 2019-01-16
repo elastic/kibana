@@ -48,8 +48,6 @@ export type UMLatestMonitorsResolver = UMResolver<
 interface GetSnapshotArgs {
   dateRangeStart: number;
   dateRangeEnd: number;
-  downCount: number;
-  windowSize: number;
   filters?: string;
 }
 
@@ -111,25 +109,17 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
         monitors: result,
       };
     },
-    async getSnapshot(
-      resolver,
-      { dateRangeStart, dateRangeEnd, downCount, windowSize, filters },
-      { req }
-    ): Promise<any> {
-      const { up, down, trouble } = await libs.monitors.getSnapshotCount(
+    async getSnapshot(resolver, { dateRangeStart, dateRangeEnd, filters }, { req }): Promise<any> {
+      const { up, down, total } = await libs.monitors.getSnapshotCount(
         req,
         { dateRangeStart, dateRangeEnd },
-        downCount,
-        windowSize,
         filters
       );
 
       return {
         up,
         down,
-        // @ts-ignore TODO update typings and remove this comment
-        trouble,
-        total: up + down + trouble,
+        total,
         histogram: await libs.pings.getHist(req, { dateRangeStart, dateRangeEnd }, filters),
       };
     },

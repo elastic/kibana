@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import React from 'react';
 import { Query } from 'react-apollo';
-import { createGetMonitorStatusBarQuery } from './get_monitor_status_bar';
+import { getMonitorStatusBarQuery } from './get_monitor_status_bar';
 
 interface MonitorStatusBarProps {
   dateRangeStart: number;
@@ -29,7 +29,7 @@ export const MonitorStatusBar = ({
 }: MonitorStatusBarProps) => (
   <Query
     pollInterval={autorefreshEnabled ? autorefreshInterval : undefined}
-    query={createGetMonitorStatusBarQuery}
+    query={getMonitorStatusBarQuery}
     variables={{ dateRangeStart, dateRangeEnd, monitorId }}
   >
     {({ loading, error, data }) => {

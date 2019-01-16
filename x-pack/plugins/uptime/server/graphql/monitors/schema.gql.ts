@@ -30,7 +30,6 @@ export const monitorsSchema = gql`
   type Snapshot {
     up: Int
     down: Int
-    trouble: Int
     total: Int
     histogram: [HistogramSeries]
   }
@@ -100,8 +99,6 @@ export const monitorsSchema = gql`
     getSnapshot(
       dateRangeStart: UnsignedInteger
       dateRangeEnd: UnsignedInteger
-      downCount: Int
-      windowSize: Int
       filters: String
     ): Snapshot
 

@@ -21,6 +21,7 @@ import {
   GisPageProvider,
   StatusPagePageProvider,
   UpgradeAssistantProvider,
+  UptimePageProvider,
 } from './page_objects';
 
 import {
@@ -50,6 +51,7 @@ import {
   RandomProvider,
   AceEditorProvider,
   GrokDebuggerProvider,
+  UptimeProvider,
 } from './services';
 
 // the default export of config files must be a config provider
@@ -81,6 +83,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/gis'),
       resolve(__dirname, './apps/status_page'),
       resolve(__dirname, './apps/upgrade_assistant'),
+      resolve(__dirname, './apps/uptime')
     ],
 
     // define the name and providers for services that should be
@@ -115,6 +118,7 @@ export default async function ({ readConfigFile }) {
       random: RandomProvider,
       aceEditor: AceEditorProvider,
       grokDebugger: GrokDebuggerProvider,
+      uptime: UptimeProvider,
     },
 
     // just like services, PageObjects are defined as a map of
@@ -133,6 +137,7 @@ export default async function ({ readConfigFile }) {
       gis: GisPageProvider,
       statusPage: StatusPagePageProvider,
       upgradeAssistant: UpgradeAssistantProvider,
+      uptime: UptimePageProvider,
     },
 
     servers: kibanaFunctionalConfig.get('servers'),
@@ -194,6 +199,9 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/canvas',
         hash: '/',
       },
+      uptime: {
+        pathname: '/app/uptime',
+      }
     },
 
     // choose where esArchiver should load archives from

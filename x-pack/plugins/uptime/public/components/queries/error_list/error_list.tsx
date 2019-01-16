@@ -15,13 +15,25 @@ import { Link } from 'react-router-dom';
 import { getErrorListQuery } from './get_error_list';
 
 interface ErrorListProps {
+  autorefreshInterval: number;
+  autorefreshEnabled: boolean;
   dateRangeStart: number;
   dateRangeEnd: number;
   filters?: string;
 }
 
-export const ErrorList = ({ dateRangeStart, dateRangeEnd, filters }: ErrorListProps) => (
-  <Query query={getErrorListQuery} variables={{ dateRangeStart, dateRangeEnd, filters }}>
+export const ErrorList = ({
+  autorefreshInterval,
+  autorefreshEnabled,
+  dateRangeStart,
+  dateRangeEnd,
+  filters,
+}: ErrorListProps) => (
+  <Query
+    pollInterval={autorefreshEnabled ? autorefreshInterval : undefined}
+    query={getErrorListQuery}
+    variables={{ dateRangeStart, dateRangeEnd, filters }}
+  >
     {({ loading, error, data }) => {
       if (error) {
         return i18n.translate('xpack.uptime.errorList.errorMessage', {

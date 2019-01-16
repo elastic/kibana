@@ -1,0 +1,15 @@
+{
+  "monitorStatus": [
+    {
+      "timestamp": "2019-01-18T22:03:08.383Z",
+      "monitor": {
+        "status": "up",
+        "host": "www.google.com",
+        "ip": "172.217.11.36",
+        "duration": { "us": 94613 },
+        "scheme": "http"
+      },
+      "tcp": { "port": 80 }
+    }
+  ]
+}

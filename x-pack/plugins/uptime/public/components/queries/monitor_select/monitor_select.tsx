@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { Monitor } from '../../../../common/graphql/types';
-import { createGetLatestMonitorsQuery } from './get_latest_monitors';
+import { getLatestMonitorsQuery } from './get_latest_monitors';
 
 interface MonitorSelectProps {
   dateRangeStart: number;
@@ -31,7 +31,7 @@ export const MonitorSelect = ({
 }: MonitorSelectProps) => (
   <Query
     pollInterval={autorefreshEnabled ? autorefreshInterval : undefined}
-    query={createGetLatestMonitorsQuery}
+    query={getLatestMonitorsQuery}
     variables={{ dateRangeStart, dateRangeEnd }}
   >
     {({ loading, error, data }) => {

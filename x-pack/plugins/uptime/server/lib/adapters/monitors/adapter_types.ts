@@ -19,13 +19,7 @@ export interface UMMonitorsAdapter {
     dateRangeEnd: number,
     filters: string
   ): Promise<any>;
-  getSnapshotCount(
-    request: any,
-    range: UMGqlRange,
-    downCount: number,
-    windowSize: number,
-    filters?: string
-  ): Promise<any>;
+  getSnapshotCount(request: any, range: UMGqlRange, filters?: string): Promise<any>;
   getFilterBar(request: any, dateRangeStart: number, dateRangeEnd: number): Promise<any>;
   getErrorsList(
     request: any,

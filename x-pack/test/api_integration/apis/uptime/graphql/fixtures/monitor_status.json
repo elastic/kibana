@@ -1,0 +1,103 @@
+{
+  "monitorStatus": [
+    {
+      "timestamp": "2019-01-18T22:03:05.384Z",
+      "monitor": {
+        "status": "up",
+        "host": "localhost",
+        "ip": "127.0.0.1",
+        "duration": { "us": 1022 },
+        "scheme": "tcp"
+      },
+      "tcp": { "port": 9200 }
+    },
+    {
+      "timestamp": "2019-01-18T22:03:04.383Z",
+      "monitor": {
+        "status": "up",
+        "host": "www.elastic.co",
+        "ip": "151.101.210.217",
+        "duration": { "us": 567900 },
+        "scheme": "https"
+      },
+      "tcp": { "port": 443 }
+    },
+    {
+      "timestamp": "2019-01-18T22:03:08.383Z",
+      "monitor": {
+        "status": "up",
+        "host": "localhost",
+        "ip": "127.0.0.1",
+        "duration": { "us": 3590 },
+        "scheme": "http"
+      },
+      "tcp": { "port": 12349 }
+    },
+    {
+      "timestamp": "2019-01-18T22:03:08.383Z",
+      "monitor": {
+        "status": "up",
+        "host": "www.google.com",
+        "ip": "172.217.11.36",
+        "duration": { "us": 94613 },
+        "scheme": "http"
+      },
+      "tcp": { "port": 80 }
+    },
+    {
+      "timestamp": "2019-01-18T22:03:08.383Z",
+      "monitor": {
+        "status": "up",
+        "host": "www.google.com",
+        "ip": "172.217.11.36",
+        "duration": { "us": 120698 },
+        "scheme": "https"
+      },
+      "tcp": { "port": 443 }
+    },
+    {
+      "timestamp": "2019-01-18T22:03:08.383Z",
+      "monitor": {
+        "status": "up",
+        "host": "www.github.com",
+        "ip": "192.30.253.112",
+        "duration": { "us": 218065 },
+        "scheme": "https"
+      },
+      "tcp": { "port": 443 }
+    },
+    {
+      "timestamp": "2019-01-18T22:03:03.383Z",
+      "monitor": {
+        "status": "down",
+        "host": "www.example.com",
+        "ip": "198.71.248.67",
+        "duration": { "us": 1350724 },
+        "scheme": "http"
+      },
+      "tcp": { "port": 80 }
+    },
+    {
+      "timestamp": "2019-01-18T22:04:28.383Z",
+      "monitor": {
+        "status": "up",
+        "host": "news.google.com",
+        "ip": "172.217.9.238",
+        "duration": { "us": 1063909 },
+        "scheme": "https"
+      },
+      "tcp": { "port": 443 }
+    },
+    {
+      "timestamp": "2019-01-18T22:04:28.383Z",
+      "monitor": {
+        "status": "up",
+        "host": "www.wikipedia.org",
+        "ip": "208.80.154.224",
+        "duration": { "us": 282347 },
+        "scheme": "https"
+      },
+      "tcp": { "port": 443 }
+    }
+  ]
+}

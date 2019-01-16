@@ -36,12 +36,7 @@ export class UMMemoryMonitorsAdapter implements UMMonitorsAdapter {
     throw new Error('Method not implemented.');
   }
 
-  public async getSnapshotCount(
-    request: any,
-    range: UMGqlRange,
-    downCount: number,
-    windowSize: number
-  ): Promise<any> {
+  public async getSnapshotCount(request: any, range: UMGqlRange): Promise<any> {
     throw new Error('Method not implemented.');
   }
   public async getFilterBar(request: any): Promise<any> {
