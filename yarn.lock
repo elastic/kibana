@@ -803,30 +803,6 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@6.0.1":
-  version "6.0.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-6.0.1.tgz#6dd60ee534f5a5d99e28913b9d7dd6df96af0596"
-  integrity sha512-l/3s5ea13Um2A4aa4KXRbA8nAXyC0nz5S/w8Sr96ok8qtM1PT+SuBPq9CTEdZ89MHfC9EIwezBFX1pU8sX194A==
-  dependencies:
-    "@types/numeral" "^0.0.25"
-    classnames "^2.2.5"
-    core-js "^2.5.1"
-    focus-trap-react "^3.0.4"
-    highlight.js "^9.12.0"
-    html "^1.0.0"
-    keymirror "^0.1.1"
-    lodash "npm:@elastic/lodash@3.10.1-kibana1"
-    numeral "^2.0.6"
-    prop-types "^15.6.0"
-    react-ace "^5.5.0"
-    react-color "^2.13.8"
-    react-input-autosize "^2.2.1"
-    react-virtualized "^9.18.5"
-    react-vis "1.10.2"
-    resize-observer-polyfill "^1.5.0"
-    tabbable "^1.1.0"
-    uuid "^3.1.0"
-
 "@elastic/eui@6.3.1":
   version "6.3.1"
   resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-6.3.1.tgz#5808086484b8e2178a6cf57ef0a3c1b60090b79b"
