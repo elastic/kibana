@@ -11,7 +11,6 @@ import uuid from 'uuid/v4';
 import { AbstractESSource } from '../es_source';
 import {
   fetchSearchSourceAndRecordWithInspector,
-  inspectorAdapters,
   indexPatternService,
   SearchSource,
 } from '../../../../kibana_services';
@@ -28,7 +27,6 @@ export class ESSearchSource extends AbstractESSource {
   static type = 'ES_SEARCH';
   static title = 'Elasticsearch documents';
   static description = 'Geospatial data from an Elasticsearch index';
-  static icon = 'logoElasticsearch';
 
   static renderEditor({ onPreviewSource }) {
     const onSelect = (layerConfig) => {
@@ -53,10 +51,6 @@ export class ESSearchSource extends AbstractESSource {
     });
   }
 
-  destroy() {
-    inspectorAdapters.requests.resetRequest(this._descriptor.id);
-  }
-
   renderSourceSettingsEditor({ onChange }) {
     return (
       <UpdateSourceEditor
@@ -75,18 +69,6 @@ export class ESSearchSource extends AbstractESSource {
     });
   }
 
-  isFieldAware() {
-    return true;
-  }
-
-  isRefreshTimerAware() {
-    return true;
-  }
-
-  isQueryAware() {
-    return true;
-  }
-
   getFieldNames() {
     return [
       this._descriptor.geoField,
@@ -94,9 +76,6 @@ export class ESSearchSource extends AbstractESSource {
     ];
   }
 
-  getIndexPatternIds() {
-    return  [this._descriptor.indexPatternId];
-  }
 
   renderDetails() {
     return (
@@ -107,16 +86,6 @@ export class ESSearchSource extends AbstractESSource {
         sourceType={ESSearchSource.typeDisplayName}
       />
     );
-  }
-
-  async _getIndexPattern() {
-    let indexPattern;
-    try {
-      indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
-    } catch (error) {
-      throw new Error(`Unable to find Index pattern ${this._descriptor.indexPatternId}`);
-    }
-    return indexPattern;
   }
 
   async getGeoJsonWithMeta({ layerName }, searchFilters) {
@@ -221,10 +190,6 @@ export class ESSearchSource extends AbstractESSource {
     return _.get(this._descriptor, 'filterByMapBounds', false);
   }
 
-  async getDisplayName() {
-    const indexPattern = await this._getIndexPattern();
-    return indexPattern.title;
-  }
 
   async getStringFields() {
     const indexPattern = await this._getIndexPattern();
@@ -234,12 +199,6 @@ export class ESSearchSource extends AbstractESSource {
     return stringFields.map(stringField => {
       return { name: stringField.name, label: stringField.name };
     });
-  }
-
-  async isTimeAware() {
-    const indexPattern = await this._getIndexPattern();
-    const timeField = indexPattern.timeFieldName;
-    return !!timeField;
   }
 
 }

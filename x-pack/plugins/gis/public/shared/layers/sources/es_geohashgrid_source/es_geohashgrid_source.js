@@ -15,7 +15,6 @@ import { Schemas } from 'ui/vis/editors/default/schemas';
 import {
   indexPatternService,
   fetchSearchSourceAndRecordWithInspector,
-  inspectorAdapters,
   SearchSource,
   timeService,
 } from '../../../../kibana_services';
@@ -60,7 +59,6 @@ export class ESGeohashGridSource extends AbstractESSource {
   static type = 'ES_GEOHASH_GRID';
   static title = 'Elasticsearch geohash aggregation';
   static description = 'Group geospatial data in grids with metrics for each gridded cell';
-  static icon = 'logoElasticsearch';
 
   static createDescriptor({ indexPatternId, geoField, requestType }) {
     return {
@@ -104,10 +102,6 @@ export class ESGeohashGridSource extends AbstractESSource {
     );
   }
 
-  destroy() {
-    inspectorAdapters.requests.resetRequest(this._descriptor.id);
-  }
-
   async getGeoJsonWithMeta({ layerName }, searchFilters) {
     let targetPrecision = ZOOM_TO_PRECISION[Math.round(searchFilters.zoom)];
     targetPrecision += 0;//should have refinement param, similar to heatmap style
@@ -134,27 +128,13 @@ export class ESGeohashGridSource extends AbstractESSource {
     };
   }
 
-  isFieldAware() {
-    return true;
-  }
-
-  isRefreshTimerAware() {
-    return true;
-  }
-
-  isQueryAware() {
-    return true;
-  }
-
   getFieldNames() {
     return this.getMetricFields().map(({ propertyKey }) => {
       return propertyKey;
     });
   }
 
-  getIndexPatternIds() {
-    return  [this._descriptor.indexPatternId];
-  }
+
 
   async getNumberFields() {
     return this.getMetricFields().map(({ propertyKey: name, propertyLabel: label }) => {
@@ -219,25 +199,10 @@ export class ESGeohashGridSource extends AbstractESSource {
     return featureCollection;
   }
 
-  async isTimeAware() {
-    const indexPattern = await this._getIndexPattern();
-    const timeField = indexPattern.timeFieldName;
-    return !!timeField;
-  }
-
   isFilterByMapBounds() {
     return true;
   }
 
-  async _getIndexPattern() {
-    let indexPattern;
-    try {
-      indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
-    } catch (error) {
-      throw new Error(`Unable to find Index pattern ${this._descriptor.indexPatternId}`);
-    }
-    return indexPattern;
-  }
 
   _getValidMetrics() {
     const metrics = _.get(this._descriptor, 'metrics', []).filter(({ type, field }) => {
@@ -371,11 +336,6 @@ export class ESGeohashGridSource extends AbstractESSource {
       source: this,
       style: style
     });
-  }
-
-  async getDisplayName() {
-    const indexPattern = await this._getIndexPattern();
-    return indexPattern.title;
   }
 
   canFormatFeatureProperties() {
