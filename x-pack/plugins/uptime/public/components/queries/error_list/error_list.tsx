@@ -21,8 +21,18 @@ interface ErrorListProps {
 
 type Props = ErrorListProps & UptimeCommonProps;
 
-export const ErrorList = ({ dateRangeStart, dateRangeEnd, filters }: Props) => (
-  <Query query={getErrorListQuery} variables={{ dateRangeStart, dateRangeEnd, filters }}>
+export const ErrorList = ({
+  dateRangeStart,
+  dateRangeEnd,
+  filters,
+  autorefreshInterval,
+  autorefreshIsPaused,
+}: Props) => (
+  <Query
+    query={getErrorListQuery}
+    variables={{ dateRangeStart, dateRangeEnd, filters }}
+    pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
+  >
     {({ loading, error, data }) => {
       if (error) {
         return i18n.translate('xpack.uptime.errorList.errorMessage', {
