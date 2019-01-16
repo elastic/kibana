@@ -1,0 +1,15 @@
+[[release-highlights-6.6.0]]
+== 6.6.0 release highlights
+++++
+<titleabbrev>6.6.0</titleabbrev>
+++++
+
+
+Each release of {kib} brings new features and product improvements. 
+Here are the highlights of the features that were added in 6.6.0 and 
+how the user experience improved.
+
+Refer to the <<release-notes-6.6.0, {kib} 6.6.0 Release Notes>> for a list of
+bug fixes and other changes.
+
+coming[6.6]
