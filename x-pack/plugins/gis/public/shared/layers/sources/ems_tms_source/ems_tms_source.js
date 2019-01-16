@@ -71,9 +71,18 @@ export class EMSTMSSource extends TMSSource {
   }
 
   _getTMSOptions() {
-    return this._emsTileServices.find(service => {
+    if(!this._emsTileServices || !this._emsTileServices.length) {
+      return;
+    }
+
+    const emsTmsService = this._emsTileServices.find(service => {
       return service.id === this._descriptor.id;
     });
+    if (!emsTmsService) {
+      console.error(`EMS TMS Service: ${this._descriptor.id} currently unavailable`);
+      return;
+    }
+    return emsTmsService;
   }
 
   _createDefaultLayerDescriptor(options) {
@@ -95,25 +104,33 @@ export class EMSTMSSource extends TMSSource {
   }
 
   async getAttributions() {
-    const service = this._getTMSOptions();
-    const attributions = service.attributionMarkdown.split('|');
-
-    return attributions.map((attribution) => {
-      attribution = attribution.trim();
-      //this assumes attribution is plain markdown link
-      const extractLink = /\[(.*)\]\((.*)\)/;
-      const result = extractLink.exec(attribution);
-      return {
-        label: result ? result[1] : null,
-        url: result ? result[2] : null
-      };
-    });
+    let service;
+    let attributions;
+    try {
+      service = this._getTMSOptions();
+      attributions = service.attributionMarkdown.split('|');
+    } catch (e) {
+      console.warn(`Error obtaining attributions: ${e}`);
+    }
+    return attributions
+      ? attributions.map((attribution) => {
+        attribution = attribution.trim();
+        //this assumes attribution is plain markdown link
+        const extractLink = /\[(.*)\]\((.*)\)/;
+        const result = extractLink.exec(attribution);
+        return {
+          label: result ? result[1] : null,
+          url: result ? result[2] : null
+        };
+      })
+      : '';
   }
 
   getUrlTemplate() {
     const service = this._getTMSOptions();
+    if (!service || !service.url) {
+      throw new Error('Can not generate EMS TMS url template');
+    }
     return service.url;
   }
-
-
 }
