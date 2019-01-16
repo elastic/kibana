@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
   const testSubjects = getService('testSubjects');
+  const inspector = getService('inspector');
   const find = getService('find');
   const comboBox = getService('comboBox');
 
@@ -44,8 +45,7 @@ export default function ({ getService, getPageObjects }) {
 
 
     it('should not have inspector enabled', async function () {
-      const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-      expect(spyToggleExists).to.be(false);
+      await inspector.expectIsNotEnabled();
     });
 
     describe('updateFiltersOnChange is false', () => {
