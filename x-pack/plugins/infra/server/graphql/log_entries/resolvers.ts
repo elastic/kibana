@@ -31,6 +31,11 @@ export type InfraSourceLogSummaryBetweenResolver = ChildResolverOf<
   QuerySourceResolver
 >;
 
+export type InfraSourceLogItem = ChildResolverOf<
+  InfraResolverOf<InfraSourceResolvers.LogItemResolver>,
+  QuerySourceResolver
+>;
+
 export const createLogEntriesResolvers = (libs: {
   logEntries: InfraLogEntriesDomain;
 }): {
@@ -38,6 +43,7 @@ export const createLogEntriesResolvers = (libs: {
     logEntriesAround: InfraSourceLogEntriesAroundResolver;
     logEntriesBetween: InfraSourceLogEntriesBetweenResolver;
     logSummaryBetween: InfraSourceLogSummaryBetweenResolver;
+    logItem: InfraSourceLogItem;
   };
   InfraLogMessageSegment: {
     __resolveType(
@@ -114,6 +120,12 @@ export const createLogEntriesResolvers = (libs: {
         end: buckets.length > 0 ? buckets[buckets.length - 1].end : null,
         buckets,
       };
+    },
+    async logItem(source, args, { req }) {
+      if (!args.id) {
+        throw new Error('id is a required field');
+      }
+      return await libs.logEntries.getLogItem(req, args.id, source.configuration);
     },
   },
   InfraLogMessageSegment: {

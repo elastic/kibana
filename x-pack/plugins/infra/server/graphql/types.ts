@@ -58,6 +58,8 @@ export interface InfraSource {
   logEntriesBetween: InfraLogEntryInterval;
   /** A consecutive span of summary buckets within an interval */
   logSummaryBetween: InfraLogSummaryInterval;
+
+  logItem?: InfraLogItem | null;
   /** A hierarchy of hosts, pods, containers, services or arbitrary groups */
   map?: InfraResponse | null;
 
@@ -199,6 +201,22 @@ export interface InfraLogSummaryBucket {
   entriesCount: number;
 }
 
+export interface InfraLogItem {
+  /** The ID of the document */
+  id: string;
+  /** The index where the document was found */
+  index: string;
+  /** An array of flattened fields and values */
+  fields: InfraLogItemField[];
+}
+
+export interface InfraLogItemField {
+  /** The flattened field name */
+  field: string;
+  /** The value for the Field as a string */
+  value: string;
+}
+
 export interface InfraResponse {
   nodes: InfraNode[];
 }
@@ -212,7 +230,7 @@ export interface InfraNode {
 export interface InfraNodePath {
   value: string;
 
-  label: string;
+  label?: string | null;
 }
 
 export interface InfraNodeMetric {
@@ -325,6 +343,9 @@ export interface LogSummaryBetweenInfraSourceArgs {
   bucketSize: number;
   /** The query to filter the log entries by */
   filterQuery?: string | null;
+}
+export interface LogItemInfraSourceArgs {
+  id?: string | null;
 }
 export interface MapInfraSourceArgs {
   timerange: InfraTimerangeInput;
@@ -478,6 +499,8 @@ export namespace InfraSourceResolvers {
     logEntriesBetween?: LogEntriesBetweenResolver<InfraLogEntryInterval, TypeParent, Context>;
     /** A consecutive span of summary buckets within an interval */
     logSummaryBetween?: LogSummaryBetweenResolver<InfraLogSummaryInterval, TypeParent, Context>;
+
+    logItem?: LogItemResolver<InfraLogItem | null, TypeParent, Context>;
     /** A hierarchy of hosts, pods, containers, services or arbitrary groups */
     map?: MapResolver<InfraResponse | null, TypeParent, Context>;
 
@@ -558,6 +581,15 @@ export namespace InfraSourceResolvers {
     bucketSize: number;
     /** The query to filter the log entries by */
     filterQuery?: string | null;
+  }
+
+  export type LogItemResolver<
+    R = InfraLogItem | null,
+    Parent = InfraSource,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context, LogItemArgs>;
+  export interface LogItemArgs {
+    id?: string | null;
   }
 
   export type MapResolver<
@@ -1009,6 +1041,53 @@ export namespace InfraLogSummaryBucketResolvers {
   > = Resolver<R, Parent, Context>;
 }
 
+export namespace InfraLogItemResolvers {
+  export interface Resolvers<Context = InfraContext, TypeParent = InfraLogItem> {
+    /** The ID of the document */
+    id?: IdResolver<string, TypeParent, Context>;
+    /** The index where the document was found */
+    index?: IndexResolver<string, TypeParent, Context>;
+    /** An array of flattened fields and values */
+    fields?: FieldsResolver<InfraLogItemField[], TypeParent, Context>;
+  }
+
+  export type IdResolver<R = string, Parent = InfraLogItem, Context = InfraContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type IndexResolver<R = string, Parent = InfraLogItem, Context = InfraContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type FieldsResolver<
+    R = InfraLogItemField[],
+    Parent = InfraLogItem,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace InfraLogItemFieldResolvers {
+  export interface Resolvers<Context = InfraContext, TypeParent = InfraLogItemField> {
+    /** The flattened field name */
+    field?: FieldResolver<string, TypeParent, Context>;
+    /** The value for the Field as a string */
+    value?: ValueResolver<string, TypeParent, Context>;
+  }
+
+  export type FieldResolver<
+    R = string,
+    Parent = InfraLogItemField,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+  export type ValueResolver<
+    R = string,
+    Parent = InfraLogItemField,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+}
+
 export namespace InfraResponseResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = InfraResponse> {
     nodes?: NodesResolver<InfraNode[], TypeParent, Context>;
@@ -1049,7 +1128,7 @@ export namespace InfraNodePathResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = InfraNodePath> {
     value?: ValueResolver<string, TypeParent, Context>;
 
-    label?: DisplayNameResolver<string, TypeParent, Context>;
+    label?: LabelResolver<string | null, TypeParent, Context>;
   }
 
   export type ValueResolver<R = string, Parent = InfraNodePath, Context = InfraContext> = Resolver<
@@ -1057,8 +1136,8 @@ export namespace InfraNodePathResolvers {
     Parent,
     Context
   >;
-  export type DisplayNameResolver<
-    R = string,
+  export type LabelResolver<
+    R = string | null,
     Parent = InfraNodePath,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;

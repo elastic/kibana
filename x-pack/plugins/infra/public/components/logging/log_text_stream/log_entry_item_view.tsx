@@ -20,6 +20,7 @@ interface LogTextStreamLogEntryItemViewProps {
   searchResult?: SearchResult;
   scale: TextScale;
   wrap: boolean;
+  openFlyoutWithItem: (id: string) => void;
 }
 
 interface LogTextStreamLogEntryItemViewState {
@@ -46,6 +47,10 @@ export class LogTextStreamLogEntryItemView extends React.PureComponent<
     });
   };
 
+  public handleClick: React.MouseEventHandler<HTMLDivElement> = () => {
+    this.props.openFlyoutWithItem(this.props.logEntry.gid);
+  };
+
   public render() {
     const { boundingBoxRef, logEntry, scale, searchResult, wrap } = this.props;
     const { isHovered } = this.state;
@@ -58,6 +63,7 @@ export class LogTextStreamLogEntryItemView extends React.PureComponent<
         }
         onMouseEnter={this.handleMouseEnter}
         onMouseLeave={this.handleMouseLeave}
+        onClick={this.handleClick}
       >
         <LogTextStreamItemDateField
           hasHighlights={!!searchResult}
