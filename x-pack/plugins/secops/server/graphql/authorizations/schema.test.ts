@@ -24,7 +24,7 @@ const testCaseSource = {
         Authorizations(timerange: $timerange, pagination: $pagination) {
           totalCount
           edges {
-            authorization {
+            node {
               _id
               failures
               successes

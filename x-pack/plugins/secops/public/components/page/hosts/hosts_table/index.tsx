@@ -11,7 +11,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
-import { HostItem, HostsEdges } from '../../../../graphql/types';
+import { HostsEdges } from '../../../../graphql/types';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { hostsActions, hostsSelector, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
@@ -107,20 +107,20 @@ const getHostsColumns = () => [
     name: 'Name',
     truncateText: false,
     hideForMobile: false,
-    render: ({ host }: { host: HostItem }) => {
-      const hostName = getOrEmpty('host.name', host);
+    render: ({ node }: HostsEdges) => {
+      const hostName = getOrEmpty('host.name', node);
       return (
         <>
           <DraggableWrapper
             dataProvider={{
               and: [],
               enabled: true,
-              id: host._id!,
+              id: node._id!,
               name: hostName,
               negated: false,
-              queryMatch: `host.id: "${escapeQueryValue(host.host!.id!)}"`,
+              queryMatch: `host.id: "${escapeQueryValue(node.host!.id!)}"`,
               queryDate: `@timestamp >= ${moment(
-                host.firstSeen!
+                node.firstSeen!
               ).valueOf()} and @timestamp <= ${moment().valueOf()}`,
             }}
             render={(dataProvider, _, snapshot) =>
@@ -132,10 +132,10 @@ const getHostsColumns = () => [
                     onToggleDataProviderEnabled={noop}
                   />
                 </DragEffects>
-              ) : isNil(get('host.id', host)) ? (
+              ) : isNil(get('host.id', node)) ? (
                 <>{hostName}</>
               ) : (
-                <EuiLink href={`#/link-to/hosts/${encodeURIComponent(host.host!.id!)}`}>
+                <EuiLink href={`#/link-to/hosts/${encodeURIComponent(node.host!.id!)}`}>
                   {hostName}
                 </EuiLink>
               )
@@ -149,18 +149,18 @@ const getHostsColumns = () => [
     name: 'First seen',
     truncateText: false,
     hideForMobile: false,
-    render: ({ host }: { host: HostItem }) => <>{defaultToEmpty(host.firstSeen)}</>,
+    render: ({ node }: HostsEdges) => <>{defaultToEmpty(node.firstSeen)}</>,
   },
   {
     name: 'OS',
     truncateText: false,
     hideForMobile: false,
-    render: ({ host }: { host: HostItem }) => <>{getOrEmpty('host.os.name', host)}</>,
+    render: ({ node }: HostsEdges) => <>{getOrEmpty('host.os.name', node)}</>,
   },
   {
     name: 'Version',
     truncateText: false,
     hideForMobile: false,
-    render: ({ host }: { host: HostItem }) => <>{getOrEmpty('host.os.version', host)}</>,
+    render: ({ node }: HostsEdges) => <>{getOrEmpty('host.os.version', node)}</>,
   },
 ];

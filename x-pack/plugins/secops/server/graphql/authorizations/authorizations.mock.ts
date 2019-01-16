@@ -14,7 +14,7 @@ export const mockAuthorizationsData: { Authorizations: AuthorizationsData } = {
     totalCount: 4,
     edges: [
       {
-        authorization: {
+        node: {
           _id: 'cPsuhGcB0WOhS6qyTKC0',
           failures: 10,
           successes: 0,
@@ -32,7 +32,7 @@ export const mockAuthorizationsData: { Authorizations: AuthorizationsData } = {
         },
       },
       {
-        authorization: {
+        node: {
           _id: 'KwQDiWcB0WOhS6qyXmrW',
           failures: 10,
           successes: 0,

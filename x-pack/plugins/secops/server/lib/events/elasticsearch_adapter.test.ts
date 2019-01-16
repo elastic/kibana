@@ -62,7 +62,7 @@ describe('events elasticsearch_adapter', () => {
           tiebreaker: '1234',
           value: '123567890',
         },
-        event: {
+        node: {
           _id: 'id-123',
           _index: 'index-123',
           host: {
@@ -81,7 +81,7 @@ describe('events elasticsearch_adapter', () => {
           tiebreaker: '1234',
           value: '123567890',
         },
-        event: {
+        node: {
           _id: 'id-123',
           _index: 'index-123',
           host: {
@@ -100,7 +100,7 @@ describe('events elasticsearch_adapter', () => {
           tiebreaker: '1234',
           value: '123567890',
         },
-        event: {
+        node: {
           _id: 'id-123',
           _index: 'index-123',
           event: {
@@ -120,7 +120,7 @@ describe('events elasticsearch_adapter', () => {
           tiebreaker: '1234',
           value: '123567890',
         },
-        event: {
+        node: {
           _id: 'id-123',
           _index: 'index-123',
           event: {
@@ -139,7 +139,7 @@ describe('events elasticsearch_adapter', () => {
           tiebreaker: '1234',
           value: '123567890',
         },
-        event: {
+        node: {
           _id: 'id-123',
           _index: 'index-123',
           event: {
@@ -158,7 +158,7 @@ describe('events elasticsearch_adapter', () => {
           tiebreaker: '1234',
           value: '123567890',
         },
-        event: {
+        node: {
           _id: 'id-123',
           _index: 'index-123',
           event: {
@@ -178,7 +178,7 @@ describe('events elasticsearch_adapter', () => {
           tiebreaker: '1234',
           value: '123567890',
         },
-        event: {
+        node: {
           _id: 'id-123',
           _index: 'index-123',
           event: {
@@ -198,7 +198,7 @@ describe('events elasticsearch_adapter', () => {
           tiebreaker: '1234',
           value: '123567890',
         },
-        event: {
+        node: {
           _id: 'id-123',
           _index: 'index-123',
           suricata: {
@@ -220,7 +220,7 @@ describe('events elasticsearch_adapter', () => {
           tiebreaker: '1234',
           value: '123567890',
         },
-        event: {
+        node: {
           _id: 'id-123',
           _index: 'index-123',
           suricata: {
@@ -242,7 +242,7 @@ describe('events elasticsearch_adapter', () => {
           tiebreaker: '1234',
           value: '123567890',
         },
-        event: {
+        node: {
           _id: 'id-123',
           _index: 'index-123',
           suricata: {
@@ -266,7 +266,7 @@ describe('events elasticsearch_adapter', () => {
           tiebreaker: '1234',
           value: '123567890',
         },
-        event: {
+        node: {
           _id: 'id-123',
           _index: 'index-123',
           suricata: {
@@ -290,7 +290,7 @@ describe('events elasticsearch_adapter', () => {
           tiebreaker: '1234',
           value: '123567890',
         },
-        event: {
+        node: {
           _id: 'id-123',
           _index: 'index-123',
           source: {
@@ -310,7 +310,7 @@ describe('events elasticsearch_adapter', () => {
           tiebreaker: '1234',
           value: '123567890',
         },
-        event: {
+        node: {
           _id: 'id-123',
           _index: 'index-123',
           source: {
@@ -330,7 +330,7 @@ describe('events elasticsearch_adapter', () => {
           tiebreaker: '1234',
           value: '123567890',
         },
-        event: {
+        node: {
           _id: 'id-123',
           _index: 'index-123',
           destination: {
@@ -350,7 +350,7 @@ describe('events elasticsearch_adapter', () => {
           tiebreaker: '1234',
           value: '123567890',
         },
-        event: {
+        node: {
           _id: 'id-123',
           _index: 'index-123',
           destination: {
@@ -370,7 +370,7 @@ describe('events elasticsearch_adapter', () => {
           tiebreaker: '1234',
           value: '123567890',
         },
-        event: {
+        node: {
           _id: 'id-123',
           _index: 'index-123',
           geo: {
@@ -390,7 +390,7 @@ describe('events elasticsearch_adapter', () => {
           tiebreaker: '1234',
           value: '123567890',
         },
-        event: {
+        node: {
           _id: 'id-123',
           _index: 'index-123',
           geo: {
@@ -416,7 +416,7 @@ describe('events elasticsearch_adapter', () => {
           tiebreaker: '1234',
           value: '123567890',
         },
-        event: {
+        node: {
           _id: 'id-123',
           _index: 'index-123',
           host: {
@@ -443,7 +443,7 @@ describe('events elasticsearch_adapter', () => {
     test('it formats a event data if fields are empty', () => {
       const fields: ReadonlyArray<string> = [];
       const data = formatEventsData(fields, hit, eventFieldsMap);
-      const expected: EcsEdges = { cursor: { tiebreaker: null, value: '' }, event: {} };
+      const expected: EcsEdges = { cursor: { tiebreaker: null, value: '' }, node: {} };
 
       expect(data).toEqual(expected);
     });

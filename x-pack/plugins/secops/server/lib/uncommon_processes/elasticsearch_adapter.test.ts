@@ -157,7 +157,7 @@ describe('elasticsearch_adapter', () => {
       const data = formatUncommonProcessesData(fields, hit, processFieldsMap);
       const expected: UncommonProcessesEdges = {
         cursor: { tiebreaker: null, value: 'cursor-1' },
-        uncommonProcess: {
+        node: {
           _id: 'id-123',
           host: [
             { id: 'host-id-1', name: 'host-name-1' },
@@ -177,7 +177,7 @@ describe('elasticsearch_adapter', () => {
       const data = formatUncommonProcessesData(fields, hit, processFieldsMap);
       const expected: UncommonProcessesEdges = {
         cursor: { tiebreaker: null, value: 'cursor-1' },
-        uncommonProcess: {
+        node: {
           _id: 'id-123',
           host: [
             { id: 'host-id-1', name: 'host-name-1' },
@@ -201,7 +201,7 @@ describe('elasticsearch_adapter', () => {
           tiebreaker: null,
           value: '',
         },
-        uncommonProcess: {
+        node: {
           _id: '',
           host: [],
           instances: 0,

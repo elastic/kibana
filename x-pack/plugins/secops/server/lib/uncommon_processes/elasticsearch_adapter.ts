@@ -78,7 +78,7 @@ export const formatUncommonProcessesData = (
   fieldMap: Readonly<Record<string, string>>
 ): UncommonProcessesEdges => {
   const initialValue: UncommonProcessesEdges = {
-    uncommonProcess: {
+    node: {
       _id: '',
       instances: 0,
       process: {},
@@ -90,12 +90,12 @@ export const formatUncommonProcessesData = (
     },
   };
   return fields.reduce((flattenedFields, fieldName) => {
-    flattenedFields.uncommonProcess._id = hit._id;
-    flattenedFields.uncommonProcess.instances = getOr(0, 'total.value', hit);
-    flattenedFields.uncommonProcess.host = hit.host;
+    flattenedFields.node._id = hit._id;
+    flattenedFields.node.instances = getOr(0, 'total.value', hit);
+    flattenedFields.node.host = hit.host;
     if (hit.cursor) {
       flattenedFields.cursor.value = hit.cursor;
     }
-    return mergeFieldsWithHit(fieldName, 'uncommonProcess', flattenedFields, fieldMap, hit);
+    return mergeFieldsWithHit(fieldName, 'node', flattenedFields, fieldMap, hit);
   }, initialValue);
 };

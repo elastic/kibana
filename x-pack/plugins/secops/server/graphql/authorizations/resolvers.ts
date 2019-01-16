@@ -38,7 +38,7 @@ export const createAuthorizationsResolvers = (
         timerange: args.timerange,
         pagination: args.pagination,
         filterQuery: parseFilterQuery(args.filterQuery || ''),
-        fields: fields.map(field => field.replace('edges.authorization.', '')),
+        fields: fields.map(field => field.replace('edges.node.', '')),
       };
       return libs.authorizations.getAuthorizations(req, options);
     },

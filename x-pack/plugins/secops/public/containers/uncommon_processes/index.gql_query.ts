@@ -18,7 +18,7 @@ export const uncommonProcessesQuery = gql`
       UncommonProcesses(timerange: $timerange, pagination: $pagination, filterQuery: $filterQuery) {
         totalCount
         edges {
-          uncommonProcess {
+          node {
             _id
             instances
             process {

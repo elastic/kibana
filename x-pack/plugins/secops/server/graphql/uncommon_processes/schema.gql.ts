@@ -16,7 +16,7 @@ export const uncommonProcessesSchema = gql`
   }
 
   type UncommonProcessesEdges {
-    uncommonProcess: UncommonProcessItem!
+    node: UncommonProcessItem!
     cursor: CursorType!
   }
 

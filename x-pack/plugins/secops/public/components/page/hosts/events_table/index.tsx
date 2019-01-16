@@ -11,7 +11,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
-import { Ecs } from '../../../../graphql/types';
+import { Ecs, EcsEdges } from '../../../../graphql/types';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { eventsSelector, hostsActions, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
@@ -108,18 +108,18 @@ const getEventsColumns = (startDate: number) => [
     sortable: true,
     truncateText: false,
     hideForMobile: false,
-    render: ({ event }: { event: Ecs }) => {
-      const hostName = getOrEmpty('host.name', event);
+    render: ({ node }: EcsEdges) => {
+      const hostName = getOrEmpty('host.name', node);
       return (
         <>
           <DraggableWrapper
             dataProvider={{
               and: [],
               enabled: true,
-              id: event._id!,
+              id: node._id!,
               name: hostName,
               negated: false,
-              queryMatch: `host.id: "${escapeQueryValue(event.host!.id!)}"`,
+              queryMatch: `host.id: "${escapeQueryValue(node.host!.id!)}"`,
               queryDate: `@timestamp >= ${startDate} and @timestamp <= ${moment().valueOf()}`,
             }}
             render={(dataProvider, _, snapshot) =>
@@ -145,14 +145,14 @@ const getEventsColumns = (startDate: number) => [
     sortable: true,
     truncateText: true,
     hideForMobile: true,
-    render: ({ event }: { event: Ecs }) => <>{getOrEmpty('event.type', event)}</>,
+    render: ({ node }: EcsEdges) => <>{getOrEmpty('event.type', node)}</>,
   },
   {
     name: 'Source',
     truncateText: true,
-    render: ({ event }: { event: Ecs }) => (
+    render: ({ node }: EcsEdges) => (
       <>
-        {formatSafely('source.ip', event)} : {getOrEmpty('source.port', event)}
+        {formatSafely('source.ip', node)} : {getOrEmpty('source.port', node)}
       </>
     ),
   },
@@ -160,9 +160,9 @@ const getEventsColumns = (startDate: number) => [
     name: 'Destination',
     sortable: true,
     truncateText: true,
-    render: ({ event }: { event: Ecs }) => (
+    render: ({ node }: EcsEdges) => (
       <>
-        {formatSafely('destination.ip', event)} : {getOrEmpty('destination.port', event)}
+        {formatSafely('destination.ip', node)} : {getOrEmpty('destination.port', node)}
       </>
     ),
   },
@@ -170,9 +170,9 @@ const getEventsColumns = (startDate: number) => [
     name: 'Location',
     sortable: true,
     truncateText: true,
-    render: ({ event }: { event: Ecs }) => (
+    render: ({ node }: EcsEdges) => (
       <>
-        {getOrEmpty('geo.region_name', event)} : {getOrEmpty('geo.country_iso_code', event)}
+        {getOrEmpty('geo.region_name', node)} : {getOrEmpty('geo.country_iso_code', node)}
       </>
     ),
   },

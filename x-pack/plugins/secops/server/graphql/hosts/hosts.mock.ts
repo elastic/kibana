@@ -14,7 +14,7 @@ export const mockHostsData: { Hosts: HostsData } = {
     totalCount: 4,
     edges: [
       {
-        host: {
+        node: {
           _id: '3PsyhGcB0WOhS6qy2LAB',
           host: {
             name: 'galadriel.elstc.co',
@@ -30,7 +30,7 @@ export const mockHostsData: { Hosts: HostsData } = {
         },
       },
       {
-        host: {
+        node: {
           _id: 'cPsuhGcB0WOhS6qyTKC0',
           host: {
             name: 'elrond.elstc.co',

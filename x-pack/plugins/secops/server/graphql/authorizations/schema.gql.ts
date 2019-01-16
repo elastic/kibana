@@ -18,7 +18,7 @@ export const authorizationsSchema = gql`
   }
 
   type AuthorizationsEdges {
-    authorization: AuthorizationItem!
+    node: AuthorizationItem!
     cursor: CursorType!
   }
 

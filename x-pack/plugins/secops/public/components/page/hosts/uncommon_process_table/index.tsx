@@ -11,11 +11,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
-import {
-  HostEcsFields,
-  UncommonProcessesEdges,
-  UncommonProcessItem,
-} from '../../../../graphql/types';
+import { HostEcsFields, UncommonProcessesEdges } from '../../../../graphql/types';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { hostsActions, State, uncommonProcessesSelector } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
@@ -115,15 +111,15 @@ const getUncommonColumns = (startDate: number) => [
     name: 'Name',
     truncateText: false,
     hideForMobile: false,
-    render: ({ uncommonProcess }: { uncommonProcess: UncommonProcessItem }) => {
-      const processName = defaultToEmpty(uncommonProcess.process.name);
+    render: ({ node }: UncommonProcessesEdges) => {
+      const processName = defaultToEmpty(node.process.name);
       return (
         <>
           <DraggableWrapper
             dataProvider={{
               and: [],
               enabled: true,
-              id: uncommonProcess._id,
+              id: node._id,
               name: processName!,
               negated: false,
               queryMatch: `process.name: "${escapeQueryValue(processName!)}"`,
@@ -151,40 +147,34 @@ const getUncommonColumns = (startDate: number) => [
     name: 'User',
     truncateText: false,
     hideForMobile: false,
-    render: ({ uncommonProcess }: { uncommonProcess: UncommonProcessItem }) => (
-      <>{getOrEmpty('user.name', uncommonProcess)}</>
-    ),
+    render: ({ node }: UncommonProcessesEdges) => <>{getOrEmpty('user.name', node)}</>,
   },
   {
     name: 'Command Line',
     truncateText: false,
     hideForMobile: false,
-    render: ({ uncommonProcess }: { uncommonProcess: UncommonProcessItem }) => (
-      <>{defaultToEmpty(uncommonProcess.process.title)}</>
-    ),
+    render: ({ node }: UncommonProcessesEdges) => <>{defaultToEmpty(node.process.title)}</>,
   },
   {
     name: 'Number of Instances',
     truncateText: false,
     hideForMobile: false,
-    render: ({ uncommonProcess }: { uncommonProcess: UncommonProcessItem }) => (
-      <>{defaultToEmpty(uncommonProcess.instances)}</>
-    ),
+    render: ({ node }: UncommonProcessesEdges) => <>{defaultToEmpty(node.instances)}</>,
   },
   {
     name: 'Number of Hosts',
     truncateText: false,
     hideForMobile: false,
-    render: ({ uncommonProcess }: { uncommonProcess: UncommonProcessItem }) => (
-      <>{uncommonProcess.host != null ? uncommonProcess.host.length : getEmptyValue()}</>
+    render: ({ node }: UncommonProcessesEdges) => (
+      <>{node.host != null ? node.host.length : getEmptyValue()}</>
     ),
   },
   {
     name: 'Hosts',
     truncateText: false,
     hideForMobile: false,
-    render: ({ uncommonProcess }: { uncommonProcess: UncommonProcessItem }) => (
-      <>{uncommonProcess.host != null ? extractHostNames(uncommonProcess.host) : getEmptyValue()}</>
+    render: ({ node }: UncommonProcessesEdges) => (
+      <>{node.host != null ? extractHostNames(node.host) : getEmptyValue()}</>
     ),
   },
 ];

@@ -11,7 +11,7 @@ export const mockData: { UncommonProcess: UncommonProcessesData } = {
     totalCount: 4,
     edges: [
       {
-        uncommonProcess: {
+        node: {
           _id: 'cPsuhGcB0WOhS6qyTKC0',
           process: {
             title: 'Hello World',
@@ -29,7 +29,7 @@ export const mockData: { UncommonProcess: UncommonProcessesData } = {
         },
       },
       {
-        uncommonProcess: {
+        node: {
           _id: 'KwQDiWcB0WOhS6qyXmrW',
           process: {
             title: 'Hello World',

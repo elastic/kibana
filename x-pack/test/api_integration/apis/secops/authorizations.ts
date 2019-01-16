@@ -65,7 +65,7 @@ const authorizationsTests: KbnTestProvider = ({ getService }) => {
 
           expect(authorizations.edges.length).to.be(1);
           expect(authorizations.totalCount).to.be(2);
-          expect(authorizations.edges[0]!.authorization.host.name).to.be('siem-kibana');
+          expect(authorizations.edges[0]!.node.host.name).to.be('siem-kibana');
         });
     });
   });

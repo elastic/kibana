@@ -31,7 +31,7 @@ export const eventsQuery = gql`
           hasNextPage
         }
         edges {
-          event {
+          node {
             _id
             _index
             timestamp

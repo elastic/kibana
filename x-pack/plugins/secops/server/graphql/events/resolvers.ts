@@ -38,7 +38,7 @@ export const createEventsResolvers = (
         pagination: args.pagination,
         sortField: args.sortField,
         filterQuery: parseFilterQuery(args.filterQuery || ''),
-        fields: fields.map(f => f.replace('edges.event.', '')),
+        fields: fields.map(f => f.replace('edges.node.', '')),
       };
       return libs.events.getEvents(req, options);
     },

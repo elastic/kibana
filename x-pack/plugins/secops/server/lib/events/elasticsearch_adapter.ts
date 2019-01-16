@@ -5,6 +5,7 @@
  */
 
 import { get, getOr, last } from 'lodash/fp';
+
 import { EcsEdges, EventsData, KpiItem } from '../../graphql/types';
 import { mergeFieldsWithHit } from '../../utils/build_query';
 import { eventFieldsMap } from '../ecs_fields';
@@ -61,16 +62,16 @@ export const formatEventsData = (
 ) =>
   fields.reduce(
     (flattenedFields, fieldName) => {
-      flattenedFields.event._id = hit._id;
-      flattenedFields.event._index = hit._index;
+      flattenedFields.node._id = hit._id;
+      flattenedFields.node._index = hit._index;
       if (hit.sort && hit.sort.length > 1) {
         flattenedFields.cursor.value = hit.sort[0];
         flattenedFields.cursor.tiebreaker = hit.sort[1];
       }
-      return mergeFieldsWithHit(fieldName, 'event', flattenedFields, fieldMap, hit) as EcsEdges;
+      return mergeFieldsWithHit(fieldName, 'node', flattenedFields, fieldMap, hit) as EcsEdges;
     },
     {
-      event: {},
+      node: {},
       cursor: {
         value: '',
         tiebreaker: null,

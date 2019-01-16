@@ -11,7 +11,7 @@ import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
 import moment from 'moment';
-import { AuthorizationItem, AuthorizationsEdges } from '../../../../graphql/types';
+import { AuthorizationsEdges } from '../../../../graphql/types';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { authorizationsSelector, hostsActions, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
@@ -105,15 +105,15 @@ const getAuthorizationColumns = (startDate: number) => [
     name: 'User',
     truncateText: false,
     hideForMobile: false,
-    render: ({ authorization }: { authorization: AuthorizationItem }) => {
-      const userName = defaultToEmpty(authorization.user.name);
+    render: ({ node }: AuthorizationsEdges) => {
+      const userName = defaultToEmpty(node.user.name);
       return (
         <>
           <DraggableWrapper
             dataProvider={{
               and: [],
               enabled: true,
-              id: authorization._id,
+              id: node._id,
               name: userName!,
               negated: false,
               queryMatch: `auditd.data.acct: "${escapeQueryValue(userName!)}"`,
@@ -141,40 +141,32 @@ const getAuthorizationColumns = (startDate: number) => [
     name: 'Failures',
     truncateText: false,
     hideForMobile: false,
-    render: ({ authorization }: { authorization: AuthorizationItem }) => (
-      <>{defaultToEmpty(authorization.failures)}</>
-    ),
+    render: ({ node }: AuthorizationsEdges) => <>{defaultToEmpty(node.failures)}</>,
   },
   {
     name: 'Successes',
     truncateText: false,
     hideForMobile: false,
-    render: ({ authorization }: { authorization: AuthorizationItem }) => (
-      <>{defaultToEmpty(authorization.successes)}</>
-    ),
+    render: ({ node }: AuthorizationsEdges) => <>{defaultToEmpty(node.successes)}</>,
   },
   {
     name: 'From',
     truncateText: false,
     hideForMobile: false,
-    render: ({ authorization }: { authorization: AuthorizationItem }) => (
-      <>{defaultToEmpty(authorization.source.ip)}</>
-    ),
+    render: ({ node }: AuthorizationsEdges) => <>{defaultToEmpty(node.source.ip)}</>,
   },
   {
     name: 'To',
     truncateText: false,
     hideForMobile: false,
-    render: ({ authorization }: { authorization: AuthorizationItem }) => (
-      <>{defaultToEmpty(authorization.host.name)}</>
-    ),
+    render: ({ node }: AuthorizationsEdges) => <>{defaultToEmpty(node.host.name)}</>,
   },
   {
     name: 'Latest',
     truncateText: false,
     hideForMobile: false,
-    render: ({ authorization }: { authorization: AuthorizationItem }) => (
-      <>{authorization.latest ? moment(authorization.latest).fromNow() : getEmptyValue()}</>
+    render: ({ node }: AuthorizationsEdges) => (
+      <>{node.latest ? moment(node.latest).fromNow() : getEmptyValue()}</>
     ),
   },
 ];

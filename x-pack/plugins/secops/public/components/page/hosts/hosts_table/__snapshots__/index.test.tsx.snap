@@ -8,7 +8,7 @@ exports[`Load More Table Component rendering it renders the default Hosts table 
         "cursor": Object {
           "value": "98966fa2013c396155c460d35c0902be",
         },
-        "host": Object {
+        "node": Object {
           "_id": "cPsuhGcB0WOhS6qyTKC0",
           "firstSeen": "2018-12-06T15:40:53.319Z",
           "host": Object {
@@ -24,7 +24,7 @@ exports[`Load More Table Component rendering it renders the default Hosts table 
         "cursor": Object {
           "value": "aa7ca589f1b8220002f2fc61c64cfbf1",
         },
-        "host": Object {
+        "node": Object {
           "_id": "KwQDiWcB0WOhS6qyXmrW",
           "firstSeen": "2018-12-07T14:12:38.560Z",
           "host": Object {

@@ -137,7 +137,7 @@ export interface AuthorizationsData {
 }
 
 export interface AuthorizationsEdges {
-  authorization: AuthorizationItem;
+  node: AuthorizationItem;
 
   cursor: CursorType;
 }
@@ -231,7 +231,7 @@ export interface KpiItem {
 }
 
 export interface EcsEdges {
-  event: Ecs;
+  node: Ecs;
 
   cursor: CursorType;
 }
@@ -309,7 +309,7 @@ export interface HostsData {
 }
 
 export interface HostsEdges {
-  host: HostItem;
+  node: HostItem;
 
   cursor: CursorType;
 }
@@ -331,7 +331,7 @@ export interface UncommonProcessesData {
 }
 
 export interface UncommonProcessesEdges {
-  uncommonProcess: UncommonProcessItem;
+  node: UncommonProcessItem;
 
   cursor: CursorType;
 }
@@ -817,12 +817,12 @@ export namespace AuthorizationsDataResolvers {
 
 export namespace AuthorizationsEdgesResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = AuthorizationsEdges> {
-    authorization?: AuthorizationResolver<AuthorizationItem, TypeParent, Context>;
+    node?: NodeResolver<AuthorizationItem, TypeParent, Context>;
 
     cursor?: CursorResolver<CursorType, TypeParent, Context>;
   }
 
-  export type AuthorizationResolver<
+  export type NodeResolver<
     R = AuthorizationItem,
     Parent = AuthorizationsEdges,
     Context = SecOpsContext
@@ -1126,12 +1126,12 @@ export namespace KpiItemResolvers {
 
 export namespace EcsEdgesResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = EcsEdges> {
-    event?: EventResolver<Ecs, TypeParent, Context>;
+    node?: NodeResolver<Ecs, TypeParent, Context>;
 
     cursor?: CursorResolver<CursorType, TypeParent, Context>;
   }
 
-  export type EventResolver<R = Ecs, Parent = EcsEdges, Context = SecOpsContext> = Resolver<
+  export type NodeResolver<R = Ecs, Parent = EcsEdges, Context = SecOpsContext> = Resolver<
     R,
     Parent,
     Context
@@ -1381,12 +1381,12 @@ export namespace HostsDataResolvers {
 
 export namespace HostsEdgesResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = HostsEdges> {
-    host?: HostResolver<HostItem, TypeParent, Context>;
+    node?: NodeResolver<HostItem, TypeParent, Context>;
 
     cursor?: CursorResolver<CursorType, TypeParent, Context>;
   }
 
-  export type HostResolver<R = HostItem, Parent = HostsEdges, Context = SecOpsContext> = Resolver<
+  export type NodeResolver<R = HostItem, Parent = HostsEdges, Context = SecOpsContext> = Resolver<
     R,
     Parent,
     Context
@@ -1452,12 +1452,12 @@ export namespace UncommonProcessesDataResolvers {
 
 export namespace UncommonProcessesEdgesResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = UncommonProcessesEdges> {
-    uncommonProcess?: UncommonProcessResolver<UncommonProcessItem, TypeParent, Context>;
+    node?: NodeResolver<UncommonProcessItem, TypeParent, Context>;
 
     cursor?: CursorResolver<CursorType, TypeParent, Context>;
   }
 
-  export type UncommonProcessResolver<
+  export type NodeResolver<
     R = UncommonProcessItem,
     Parent = UncommonProcessesEdges,
     Context = SecOpsContext

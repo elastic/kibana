@@ -61,7 +61,7 @@ export const TimelineQuery = pure<OwnProps>(
           loading,
           totalCount: getOr(0, 'source.Events.totalCount', data),
           pageInfo: getOr({}, 'source.Events.pageInfo', data),
-          events: events.map((i: EcsEdges) => i.event),
+          events: events.map((i: EcsEdges) => i.node),
           loadMore: (newCursor: string, tiebreaker: string) =>
             fetchMore({
               variables: {

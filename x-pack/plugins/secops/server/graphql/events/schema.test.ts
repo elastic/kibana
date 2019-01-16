@@ -44,7 +44,7 @@ const testCaseSource = {
               value
               tiebreaker
             }
-            event {
+            node {
               _id
               _index
               timestamp

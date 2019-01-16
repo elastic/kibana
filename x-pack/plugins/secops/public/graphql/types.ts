@@ -108,7 +108,7 @@ export interface AuthorizationsData {
 }
 
 export interface AuthorizationsEdges {
-  authorization: AuthorizationItem;
+  node: AuthorizationItem;
 
   cursor: CursorType;
 }
@@ -202,7 +202,7 @@ export interface KpiItem {
 }
 
 export interface EcsEdges {
-  event: Ecs;
+  node: Ecs;
 
   cursor: CursorType;
 }
@@ -280,7 +280,7 @@ export interface HostsData {
 }
 
 export interface HostsEdges {
-  host: HostItem;
+  node: HostItem;
 
   cursor: CursorType;
 }
@@ -302,7 +302,7 @@ export interface UncommonProcessesData {
 }
 
 export interface UncommonProcessesEdges {
-  uncommonProcess: UncommonProcessItem;
+  node: UncommonProcessItem;
 
   cursor: CursorType;
 }
@@ -476,12 +476,12 @@ export namespace GetAuthorizationsQuery {
   export type Edges = {
     __typename?: 'AuthorizationsEdges';
 
-    authorization: Authorization;
+    node: Node;
 
     cursor: Cursor;
   };
 
-  export type Authorization = {
+  export type Node = {
     __typename?: 'AuthorizationItem';
 
     _id: string;
@@ -592,10 +592,10 @@ export namespace GetEventsQuery {
   export type Edges = {
     __typename?: 'EcsEdges';
 
-    event: Event;
+    node: Node;
   };
 
-  export type Event = {
+  export type Node = {
     __typename?: 'ECS';
 
     _id?: string | null;
@@ -604,7 +604,7 @@ export namespace GetEventsQuery {
 
     timestamp?: string | null;
 
-    event?: _Event | null;
+    event?: Event | null;
 
     host?: Host | null;
 
@@ -617,7 +617,7 @@ export namespace GetEventsQuery {
     suricata?: Suricata | null;
   };
 
-  export type _Event = {
+  export type Event = {
     __typename?: 'EventEcsFields';
 
     type?: string | null;
@@ -725,22 +725,22 @@ export namespace GetHostsQuery {
   export type Edges = {
     __typename?: 'HostsEdges';
 
-    host: Host;
+    node: Node;
 
     cursor: Cursor;
   };
 
-  export type Host = {
+  export type Node = {
     __typename?: 'HostItem';
 
     _id?: string | null;
 
     firstSeen?: string | null;
 
-    host?: _Host | null;
+    host?: Host | null;
   };
 
-  export type _Host = {
+  export type Host = {
     __typename?: 'HostEcsFields';
 
     id?: string | null;
@@ -924,10 +924,10 @@ export namespace GetTimelineQuery {
   export type Edges = {
     __typename?: 'EcsEdges';
 
-    event: Event;
+    node: Node;
   };
 
-  export type Event = {
+  export type Node = {
     __typename?: 'ECS';
 
     _id?: string | null;
@@ -936,7 +936,7 @@ export namespace GetTimelineQuery {
 
     timestamp?: string | null;
 
-    event?: _Event | null;
+    event?: Event | null;
 
     host?: Host | null;
 
@@ -949,7 +949,7 @@ export namespace GetTimelineQuery {
     suricata?: Suricata | null;
   };
 
-  export type _Event = {
+  export type Event = {
     __typename?: 'EventEcsFields';
 
     type?: string | null;
@@ -1057,12 +1057,12 @@ export namespace GetUncommonProcessesQuery {
   export type Edges = {
     __typename?: 'UncommonProcessesEdges';
 
-    uncommonProcess: UncommonProcess;
+    node: Node;
 
     cursor: Cursor;
   };
 
-  export type UncommonProcess = {
+  export type Node = {
     __typename?: 'UncommonProcessItem';
 
     _id: string;

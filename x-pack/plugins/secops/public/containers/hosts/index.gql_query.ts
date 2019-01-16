@@ -18,7 +18,7 @@ export const hostsQuery = gql`
       Hosts(timerange: $timerange, pagination: $pagination, filterQuery: $filterQuery) {
         totalCount
         edges {
-          host {
+          node {
             _id
             firstSeen
             host {

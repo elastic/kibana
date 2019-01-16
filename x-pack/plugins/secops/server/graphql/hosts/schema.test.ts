@@ -24,7 +24,7 @@ const testCaseSource = {
         Hosts(timerange: $timerange, pagination: $pagination) {
           totalCount
           edges {
-            host {
+            node {
               _id
               firstSeen
               host {

@@ -18,7 +18,7 @@ export const authorizationsQuery = gql`
       Authorizations(timerange: $timerange, pagination: $pagination, filterQuery: $filterQuery) {
         totalCount
         edges {
-          authorization {
+          node {
             _id
             failures
             successes

@@ -25,7 +25,7 @@ export const timelineQuery = gql`
           hasNextPage
         }
         edges {
-          event {
+          node {
             _id
             _index
             timestamp

@@ -14,7 +14,7 @@ export const hostsSchema = gql`
   }
 
   type HostsEdges {
-    host: HostItem!
+    node: HostItem!
     cursor: CursorType!
   }
 

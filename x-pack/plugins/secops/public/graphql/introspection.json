@@ -858,7 +858,7 @@
         "description": "",
         "fields": [
           {
-            "name": "authorization",
+            "name": "node",
             "description": "",
             "args": [],
             "type": {
@@ -1386,7 +1386,7 @@
         "description": "",
         "fields": [
           {
-            "name": "event",
+            "name": "node",
             "description": "",
             "args": [],
             "type": {
@@ -1753,7 +1753,7 @@
         "description": "",
         "fields": [
           {
-            "name": "host",
+            "name": "node",
             "description": "",
             "args": [],
             "type": {
@@ -1878,7 +1878,7 @@
         "description": "",
         "fields": [
           {
-            "name": "uncommonProcess",
+            "name": "node",
             "description": "",
             "args": [],
             "type": {

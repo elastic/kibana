@@ -51,14 +51,14 @@ export const formatHostsData = (
 ): HostsEdges =>
   fields.reduce(
     (flattenedFields, fieldName) => {
-      flattenedFields.host._id = hit._id;
+      flattenedFields.node._id = hit._id;
       if (hit.cursor) {
         flattenedFields.cursor.value = hit.cursor;
       }
-      return mergeFieldsWithHit(fieldName, 'host', flattenedFields, fieldMap, hit) as HostsEdges;
+      return mergeFieldsWithHit(fieldName, 'node', flattenedFields, fieldMap, hit) as HostsEdges;
     },
     {
-      host: {},
+      node: {},
       cursor: {
         value: '',
         tiebreaker: null,

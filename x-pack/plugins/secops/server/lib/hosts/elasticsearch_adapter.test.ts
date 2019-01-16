@@ -37,7 +37,7 @@ describe('hosts elasticsearch_adapter', () => {
           tiebreaker: null,
           value: 'cursor-1',
         },
-        host: {
+        node: {
           firstSeen: 'time-1',
           _id: 'id-123',
         },
@@ -54,7 +54,7 @@ describe('hosts elasticsearch_adapter', () => {
           tiebreaker: null,
           value: 'cursor-1',
         },
-        host: {
+        node: {
           host: {
             name: 'host-name-1',
           },
@@ -73,7 +73,7 @@ describe('hosts elasticsearch_adapter', () => {
           tiebreaker: null,
           value: 'cursor-1',
         },
-        host: {
+        node: {
           host: {
             os: {
               name: 'os-name-1',
@@ -94,7 +94,7 @@ describe('hosts elasticsearch_adapter', () => {
           tiebreaker: null,
           value: 'cursor-1',
         },
-        host: {
+        node: {
           host: {
             os: {
               version: 'version-1',
@@ -115,7 +115,7 @@ describe('hosts elasticsearch_adapter', () => {
           tiebreaker: null,
           value: 'cursor-1',
         },
-        host: {
+        node: {
           _id: 'id-123',
           host: {
             name: 'host-name-1',
@@ -140,7 +140,7 @@ describe('hosts elasticsearch_adapter', () => {
           tiebreaker: null,
           value: 'cursor-1',
         },
-        host: {
+        node: {
           _id: 'id-123',
           host: {
             name: 'host-name-1',
@@ -164,7 +164,7 @@ describe('hosts elasticsearch_adapter', () => {
           tiebreaker: null,
           value: '',
         },
-        host: {},
+        node: {},
       };
 
       expect(data).toEqual(expected);

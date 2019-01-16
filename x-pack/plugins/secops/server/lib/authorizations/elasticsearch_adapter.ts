@@ -68,7 +68,7 @@ export const formatAuthorizationData = (
   fieldMap: Readonly<Record<string, string>>
 ): AuthorizationsEdges => {
   const init: AuthorizationsEdges = {
-    authorization: {
+    node: {
       failures: 0,
       successes: 0,
       _id: '',
@@ -91,8 +91,8 @@ export const formatAuthorizationData = (
     if (hit.cursor) {
       flattenedFields.cursor.value = hit.cursor;
     }
-    flattenedFields.authorization = {
-      ...flattenedFields.authorization,
+    flattenedFields.node = {
+      ...flattenedFields.node,
       ...{
         _id: hit._id,
         user: { name: hit.user },
@@ -100,6 +100,6 @@ export const formatAuthorizationData = (
         successes: hit.successes,
       },
     };
-    return mergeFieldsWithHit(fieldName, 'authorization', flattenedFields, fieldMap, hit);
+    return mergeFieldsWithHit(fieldName, 'node', flattenedFields, fieldMap, hit);
   }, init);
 };

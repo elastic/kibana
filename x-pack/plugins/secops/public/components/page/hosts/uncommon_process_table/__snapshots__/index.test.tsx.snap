@@ -8,7 +8,7 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
         "cursor": Object {
           "value": "98966fa2013c396155c460d35c0902be",
         },
-        "uncommonProcess": Object {
+        "node": Object {
           "_id": "cPsuhGcB0WOhS6qyTKC0",
           "host": Array [
             Object {
@@ -31,7 +31,7 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
         "cursor": Object {
           "value": "aa7ca589f1b8220002f2fc61c64cfbf1",
         },
-        "uncommonProcess": Object {
+        "node": Object {
           "_id": "KwQDiWcB0WOhS6qyXmrW",
           "host": Array [
             Object {

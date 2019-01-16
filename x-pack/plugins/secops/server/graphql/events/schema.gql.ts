@@ -105,7 +105,7 @@ export const eventsSchema = gql`
   }
 
   type EcsEdges {
-    event: ECS!
+    node: ECS!
     cursor: CursorType!
   }
 

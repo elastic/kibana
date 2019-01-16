@@ -103,7 +103,7 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
           },
         },
       });
-      expect(UncommonProcesses.edges[0].uncommonProcess).to.eql({
+      expect(UncommonProcesses.edges[0].node).to.eql({
         _id: 'QD1yEWgBiyhPd5Zoyisj',
         instances: 2,
         hosts: [

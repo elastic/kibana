@@ -37,7 +37,7 @@ export const createUncommonProcessesResolvers = (
         timerange: args.timerange,
         pagination: args.pagination,
         filterQuery: parseFilterQuery(args.filterQuery || ''),
-        fields: fields.map(field => field.replace('edges.uncommonProcess.', '')),
+        fields: fields.map(field => field.replace('edges.node.', '')),
       };
       return libs.uncommonProcesses.getUncommonProcesses(req, options);
     },

@@ -5,7 +5,10 @@ exports[`Authorization Table Component rendering it renders the default Authoriz
   data={
     Array [
       Object {
-        "authorization": Object {
+        "cursor": Object {
+          "value": "98966fa2013c396155c460d35c0902be",
+        },
+        "node": Object {
           "_id": "cPsuhGcB0WOhS6qyTKC0",
           "failures": 10,
           "host": Object {
@@ -22,12 +25,12 @@ exports[`Authorization Table Component rendering it renders the default Authoriz
             "name": "Evan Hassanabad",
           },
         },
-        "cursor": Object {
-          "value": "98966fa2013c396155c460d35c0902be",
-        },
       },
       Object {
-        "authorization": Object {
+        "cursor": Object {
+          "value": "aa7ca589f1b8220002f2fc61c64cfbf1",
+        },
+        "node": Object {
           "_id": "KwQDiWcB0WOhS6qyXmrW",
           "failures": 10,
           "host": Object {
@@ -43,9 +46,6 @@ exports[`Authorization Table Component rendering it renders the default Authoriz
           "user": Object {
             "name": "Braden Hassanabad",
           },
-        },
-        "cursor": Object {
-          "value": "aa7ca589f1b8220002f2fc61c64cfbf1",
         },
       },
     ]

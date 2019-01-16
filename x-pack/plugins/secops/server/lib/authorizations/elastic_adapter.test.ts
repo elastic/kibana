@@ -41,7 +41,7 @@ describe('authorizations elasticsearch_adapter', () => {
           tiebreaker: null,
           value: 'cursor-1',
         },
-        authorization: {
+        node: {
           _id: 'id-123',
           failures: 10,
           successes: 20,
@@ -70,7 +70,7 @@ describe('authorizations elasticsearch_adapter', () => {
           tiebreaker: null,
           value: 'cursor-1',
         },
-        authorization: {
+        node: {
           _id: 'id-123',
           failures: 10,
           successes: 20,
@@ -99,7 +99,7 @@ describe('authorizations elasticsearch_adapter', () => {
           tiebreaker: null,
           value: 'cursor-1',
         },
-        authorization: {
+        node: {
           _id: 'id-123',
           failures: 10,
           successes: 20,
@@ -128,7 +128,7 @@ describe('authorizations elasticsearch_adapter', () => {
           tiebreaker: null,
           value: 'cursor-1',
         },
-        authorization: {
+        node: {
           _id: 'id-123',
           failures: 10,
           successes: 20,
@@ -157,7 +157,7 @@ describe('authorizations elasticsearch_adapter', () => {
           tiebreaker: null,
           value: 'cursor-1',
         },
-        authorization: {
+        node: {
           _id: 'id-123',
           failures: 10,
           successes: 20,
