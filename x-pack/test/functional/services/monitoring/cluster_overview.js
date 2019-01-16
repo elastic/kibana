@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import expect from 'expect.js';
+
 export function MonitoringClusterOverviewProvider({ getService }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
