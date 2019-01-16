@@ -62,6 +62,7 @@ describe('ExplorerSwimlane', () => {
 
   test('Minimal initialization', () => {
     const mocks = getExplorerSwimlaneMocks();
+    const swimlaneRenderDoneListener = jest.fn();
 
     const wrapper = mountWithIntl(<ExplorerSwimlane.WrappedComponent
       chartWidth={mockChartWidth}
@@ -69,6 +70,7 @@ describe('ExplorerSwimlane', () => {
       swimlaneCellClick={jest.fn()}
       swimlaneData={mocks.swimlaneData}
       swimlaneType="overall"
+      swimlaneRenderDoneListener={swimlaneRenderDoneListener}
     />);
 
     expect(wrapper.html()).toBe(
@@ -81,10 +83,12 @@ describe('ExplorerSwimlane', () => {
     expect(mlExplorerDashboardService.dragSelect.unwatch.mock.calls).toHaveLength(0);
     expect(mocks.MlTimeBuckets.mockMethods.setInterval.mock.calls.length).toBeGreaterThanOrEqual(1);
     expect(mocks.MlTimeBuckets.mockMethods.getScaledDateFormat.mock.calls.length).toBeGreaterThanOrEqual(1);
+    expect(swimlaneRenderDoneListener.mock.calls.length).toBeGreaterThanOrEqual(1);
   });
 
   test('Overall swimlane', () => {
     const mocks = getExplorerSwimlaneMocks();
+    const swimlaneRenderDoneListener = jest.fn();
 
     const wrapper = mountWithIntl(<ExplorerSwimlane.WrappedComponent
       chartWidth={mockChartWidth}
@@ -92,6 +96,7 @@ describe('ExplorerSwimlane', () => {
       swimlaneCellClick={jest.fn()}
       swimlaneData={mockOverallSwimlaneData}
       swimlaneType="overall"
+      swimlaneRenderDoneListener={swimlaneRenderDoneListener}
     />);
 
     expect(wrapper.html()).toMatchSnapshot();
@@ -101,5 +106,6 @@ describe('ExplorerSwimlane', () => {
     expect(mlExplorerDashboardService.dragSelect.unwatch.mock.calls).toHaveLength(0);
     expect(mocks.MlTimeBuckets.mockMethods.setInterval.mock.calls.length).toBeGreaterThanOrEqual(1);
     expect(mocks.MlTimeBuckets.mockMethods.getScaledDateFormat.mock.calls.length).toBeGreaterThanOrEqual(1);
+    expect(swimlaneRenderDoneListener.mock.calls.length).toBeGreaterThanOrEqual(1);
   });
 });

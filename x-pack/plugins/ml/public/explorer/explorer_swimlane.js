@@ -37,7 +37,8 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       laneLabels: PropTypes.array.isRequired
     }).isRequired,
     swimlaneType: PropTypes.string.isRequired,
-    selection: PropTypes.object
+    selection: PropTypes.object,
+    swimlaneRenderDoneListener: PropTypes.func.isRequired,
   }
 
   // Since this component is mostly rendered using d3 and cellMouseoverActive is only
