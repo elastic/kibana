@@ -5,6 +5,7 @@
  */
 
 import { get } from 'lodash';
+import chrome from 'ui/chrome';
 import { uiModules } from 'ui/modules';
 import template from './index.html';
 import { shortenPipelineHash } from '../../../common/formatting';
@@ -57,6 +58,8 @@ export class MonitoringMainController {
         return this._kbnUrlService.changePath(`/logstash/pipelines/${this.pipelineId}/${this.pipelineHash}`);
       };
     }
+
+    this.isCcrEnabled = chrome.getInjected('monitoringCcrUiEnabled');
   }
 
   // check whether to "highlight" a tab

@@ -28,6 +28,9 @@ export const config = (Joi) => {
         logstash: Joi.object({
           enabled: Joi.boolean().default(false)
         }).default()
+      }).default(),
+      ccr: Joi.object({
+        enabled: Joi.boolean().default(true)
       }).default()
     }).default(),
     index_pattern: Joi.string().default('.monitoring-*-6-*'),
