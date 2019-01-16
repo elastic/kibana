@@ -42,6 +42,10 @@ const parseError = (err) => {
 
 export class FormEntryRow extends PureComponent {
   static propTypes = {
+    label: PropTypes.node,
+    description: PropTypes.node,
+    helpText: PropTypes.node,
+    validator: PropTypes.object,
     onValueUpdate: PropTypes.func.isRequired,
     onErrorUpdate: PropTypes.func.isRequired,
     field: PropTypes.string.isRequired,
@@ -50,7 +54,6 @@ export class FormEntryRow extends PureComponent {
       PropTypes.number
     ]).isRequired,
     error: PropTypes.object,
-    schema: PropTypes.object.isRequired,
     disabled: PropTypes.bool,
     areErrorsVisible: PropTypes.bool.isRequired,
   };
@@ -61,7 +64,7 @@ export class FormEntryRow extends PureComponent {
   }
 
   onFieldChange = (value) => {
-    const { field, onValueUpdate, schema: { validator } } = this.props;
+    const { field, onValueUpdate, validator } = this.props;
     const isNumber = validator._type === 'number';
     onValueUpdate({ [field]: isNumber ? parseInt(value, 10) : value });
 
@@ -69,7 +72,7 @@ export class FormEntryRow extends PureComponent {
   }
 
   validateField = (value) => {
-    const { field, schema: { validator, label }, onErrorUpdate } = this.props;
+    const { field, validator, label, onErrorUpdate } = this.props;
     const result = validator.label(label).validate(value);
     const error = parseError(result.error);
 
@@ -77,7 +80,7 @@ export class FormEntryRow extends PureComponent {
   }
 
   renderField = (isInvalid) => {
-    const { value, schema: { validator }, disabled } = this.props;
+    const { value, validator, disabled } = this.props;
     switch (validator._type) {
       case "number":
         return (
@@ -103,7 +106,14 @@ export class FormEntryRow extends PureComponent {
   }
 
   render() {
-    const { field, error, schema, areErrorsVisible } = this.props;
+    const {
+      field,
+      error,
+      label,
+      description,
+      helpText,
+      areErrorsVisible,
+    } = this.props;
 
     const hasError = !!error;
     const isInvalid = hasError && (error.alwaysVisible || areErrorsVisible);
@@ -112,16 +122,16 @@ export class FormEntryRow extends PureComponent {
       <EuiDescribedFormGroup
         title={(
           <EuiTitle size="s">
-            <h4>{schema.label}</h4>
+            <h4>{label}</h4>
           </EuiTitle>
         )}
-        description={schema.description}
+        description={description}
         fullWidth
         key={field}
       >
         <EuiFormRow
-          label={schema.label}
-          helpText={schema.helpText}
+          label={label}
+          helpText={helpText}
           error={error && error.message}
           isInvalid={isInvalid}
           fullWidth

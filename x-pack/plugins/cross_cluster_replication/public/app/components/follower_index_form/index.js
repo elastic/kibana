@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { API_STATUS } from './api';
-export { SECTIONS } from './sections';
+export { FollowerIndexForm } from './follower_index_form';

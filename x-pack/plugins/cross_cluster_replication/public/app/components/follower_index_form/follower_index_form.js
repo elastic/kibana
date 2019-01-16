@@ -6,8 +6,10 @@
 
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { debounce } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
 
 import {
   EuiButton,
@@ -28,11 +30,15 @@ import {
   EuiSuperSelect,
 } from '@elastic/eui';
 
-import routing from '../services/routing';
-import { API_STATUS, followerIndexFormSchema } from '../constants';
-import { SectionError } from './section_error';
-import { loadIndices } from '../services/api';
-import { FormEntryRow } from './form_entry_row';
+import { indexNameValidator } from '../../services/input_validation';
+import routing from '../../services/routing';
+import { loadIndices } from '../../services/api';
+import { API_STATUS } from '../../constants';
+import { SectionError } from '../section_error';
+import { FormEntryRow } from '../form_entry_row';
+import { advancedSettingsFields } from './advanced_settings_fields';
+
+const indexNameIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
 const getFirstConnectedCluster = (clusters) => {
   for (let i = 0; i < clusters.length; i++) {
@@ -47,7 +53,7 @@ const getEmptyFollowerIndex = (remoteClusters) => ({
   name: '',
   remoteCluster: remoteClusters ? getFirstConnectedCluster(remoteClusters).name : '',
   leaderIndex: '',
-  ...Object.keys(followerIndexFormSchema.advanced).reduce((acc, field) => ({ ...acc, [field]: '' }), {})
+  ...advancedSettingsFields.reduce((acc, advancedSetting) => ({ ...acc, [advancedSetting.field]: '' }), {})
 });
 
 /**
@@ -235,7 +241,20 @@ export const FollowerIndexForm = injectI18n(
           field="name"
           value={followerIndex.name}
           error={fieldsErrors.name}
-          schema={followerIndexFormSchema.name}
+          label={i18n.translate('xpack.crossClusterReplication.followerIndexForm.sectionFollowerIndexNameTitle', {
+            defaultMessage: 'Name'
+          })}
+          description={i18n.translate('xpack.crossClusterReplication.followerIndexForm.sectionFollowerIndexNameDescription', {
+            defaultMessage: 'A name for the follower index.'
+          })}
+          helpText={(
+            <FormattedMessage
+              id="xpack.crossClusterReplication.followerIndexForm.indexNameHelpLabel"
+              defaultMessage="Spaces and the characters {characterList} are not allowed."
+              values={{ characterList: <strong>{indexNameIllegalCharacters}</strong> }}
+            />
+          )}
+          validator={indexNameValidator}
           disabled={!isNew}
           areErrorsVisible={areErrorsVisible}
           onValueUpdate={this.onIndexNameChange}
@@ -312,7 +331,20 @@ export const FollowerIndexForm = injectI18n(
           field="leaderIndex"
           value={followerIndex.leaderIndex}
           error={fieldsErrors.leaderIndex}
-          schema={followerIndexFormSchema.leaderIndex}
+          label={i18n.translate('xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexTitle', {
+            defaultMessage: 'Leader index'
+          })}
+          description={i18n.translate('xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexDescription', {
+            defaultMessage: 'The leader index you want to replicate from the remote cluster.'
+          })}
+          helpText={(
+            <FormattedMessage
+              id="xpack.crossClusterReplication.followerIndexForm.indexNameHelpLabel"
+              defaultMessage="Spaces and the characters {characterList} are not allowed."
+              values={{ characterList: <strong>{indexNameIllegalCharacters}</strong> }}
+            />
+          )}
+          validator={indexNameValidator}
           disabled={!isNew}
           areErrorsVisible={areErrorsVisible}
           onValueUpdate={this.onFieldsChange}
@@ -334,18 +366,24 @@ export const FollowerIndexForm = injectI18n(
           </EuiButtonEmpty>
           <EuiSpacer size="s" />
           {areAdvancedSettingsVisible && (
-            Object.entries(followerIndexFormSchema.advanced).map(([field, schema]) => (
-              <FormEntryRow
-                key={field}
-                field={field}
-                value={followerIndex[field]}
-                error={fieldsErrors[field]}
-                schema={schema}
-                areErrorsVisible={areErrorsVisible}
-                onValueUpdate={this.onFieldsChange}
-                onErrorUpdate={this.onFieldsErrorChange}
-              />
-            ))
+            advancedSettingsFields.map((advancedSetting) => {
+              const { field, label, description, helpText, validator } = advancedSetting;
+              return (
+                <FormEntryRow
+                  key={field}
+                  field={field}
+                  value={followerIndex[field]}
+                  error={fieldsErrors[field]}
+                  label={label}
+                  description={description}
+                  helpText={helpText}
+                  validator={validator}
+                  areErrorsVisible={areErrorsVisible}
+                  onValueUpdate={this.onFieldsChange}
+                  onErrorUpdate={this.onFieldsErrorChange}
+                />
+              );
+            })
           )}
         </Fragment>
       );
