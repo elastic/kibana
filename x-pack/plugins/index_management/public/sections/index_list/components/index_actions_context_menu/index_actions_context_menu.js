@@ -57,11 +57,14 @@ class IndexActionsContextMenuUi extends Component {
       performExtensionAction,
       indices,
       intl,
-      reloadIndices
+      reloadIndices,
+      unfreezeIndices,
     } = this.props;
     const allOpen = all(indexNames, indexName => {
       return indexStatusByName[indexName] === INDEX_OPEN;
     });
+    const allFrozen = all(indices, (index) => index.isFrozen);
+    const allUnfrozen = all(indices, (index) => !index.isFrozen);
     const oneIndexSelected = this.oneIndexSelected();
     const entity = this.getEntity(oneIndexSelected);
     const entityUpper = `${entity[0].toUpperCase()}${entity.slice(1)}`;
@@ -162,6 +165,30 @@ class IndexActionsContextMenuUi extends Component {
           this.closePopoverAndExecute(flushIndices);
         }
       });
+      if (allFrozen) {
+        items.push({
+          name: intl.formatMessage({
+            id: 'xpack.idxMgmt.indexActionsMenu.unfreezeEntityLabel',
+            defaultMessage: 'Unfreeze {entity}',
+          }, { entity }),
+          icon: <EuiIcon type="unfreeze" />,
+          onClick: () => {
+            this.closePopoverAndExecute(unfreezeIndices);
+          }
+        });
+      } else if (allUnfrozen) {
+        items.push({
+          name: intl.formatMessage({
+            id: 'xpack.idxMgmt.indexActionsMenu.freezeEntityLabel',
+            defaultMessage: 'Freeze {entity}',
+          }, { entity }),
+          icon: <EuiIcon type="freeze" />,
+          onClick: () => {
+            this.closePopover();
+            this.setState({ renderConfirmModal: this.renderConfirmFreezeModal });
+          }
+        });
+      }
     } else {
       items.push({
         name: intl.formatMessage({
@@ -417,6 +444,74 @@ class IndexActionsContextMenuUi extends Component {
                   defaultMessage="
                     This operation cannot be undone. Make sure you have appropriate
                     backups.
+                  "
+                />
+              </p>
+            </EuiCallOut>
+          </div>
+        </EuiConfirmModal>
+      </EuiOverlayMask>
+    );
+  };
+  renderConfirmFreezeModal = () => {
+    const oneIndexSelected = this.oneIndexSelected();
+    const entity = this.getEntity(oneIndexSelected);
+    const { freezeIndices, indexNames, intl } = this.props;
+    return (
+      <EuiOverlayMask>
+        <EuiConfirmModal
+          title={
+            intl.formatMessage({
+              id: 'xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.modalTitle',
+              defaultMessage: 'Confirm Freeze {entity}',
+            }, { entity })
+          }
+          onCancel={this.closeConfirmModal}
+          onConfirm={() => this.closePopoverAndExecute(freezeIndices)}
+          cancelButtonText={
+            intl.formatMessage({
+              id: 'xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.cancelButtonText',
+              defaultMessage: 'Cancel',
+            })
+          }
+          confirmButtonText={
+            intl.formatMessage({
+              id: 'xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.confirmButtonText',
+              defaultMessage: 'Confirm',
+            })
+          }
+        >
+          <div>
+            <p>
+              <FormattedMessage
+                id="xpack.idxMgmt.indexActionsMenu.freezeEntity.freezeDescription"
+                defaultMessage="You are about to freeze  {oneIndexSelected, plural, one {this} other {these}}"
+                values={{ oneIndexSelected: oneIndexSelected ? 1 : 0 }}
+              />
+              {' '}
+              {entity}:
+            </p>
+            <ul>
+              {indexNames.map(indexName => (
+                <li key={indexName}>{indexName}</li>
+              ))}
+            </ul>
+            <EuiCallOut
+              title={
+                intl.formatMessage({
+                  id: 'xpack.idxMgmt.indexActionsMenu.deleteEntity.proceedWithCautionCallOutTitle',
+                  defaultMessage: 'Proceed with caution!',
+                })
+              }
+              color="warning"
+              iconType="help"
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.idxMgmt.indexActionsMenu.deleteEntity.deleteEntityWarningDescription"
+                  defaultMessage="
+                    A frozen index has little overhead on the cluster and is blocked for write operations.
+                    You can search a frozen index, but expect queries to be slower.
                   "
                 />
               </p>
