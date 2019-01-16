@@ -7,10 +7,10 @@
 import { Indexer, IndexerFactory, RepositoryIndexInitializer } from '.';
 import { RepositoryUri } from '../../model';
 import { EsClient } from '../lib/esqueue';
-import { Log } from '../log';
+import { Logger } from '../log';
 
 export class RepositoryIndexInitializerFactory implements IndexerFactory {
-  constructor(protected readonly client: EsClient, protected readonly log: Log) {}
+  constructor(protected readonly client: EsClient, protected readonly log: Logger) {}
 
   public create(repoUri: RepositoryUri, revision: string): Indexer {
     return new RepositoryIndexInitializer(repoUri, revision, this.client, this.log);

@@ -26,7 +26,7 @@ import {
 import { createConnection, IConnection } from 'vscode-languageserver/lib/main';
 
 import { LspRequest } from '../../model';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { HttpMessageReader } from './http_message_reader';
 import { HttpMessageWriter } from './http_message_writer';
 import { HttpRequestEmitter } from './http_request_emitter';
@@ -54,12 +54,12 @@ export class LanguageServerProxy implements ILanguageServerHandler {
   private replies = createRepliesMap();
   private readonly targetHost: string;
   private readonly targetPort: number;
-  private readonly logger?: Log;
+  private readonly logger?: Logger;
   private eventEmitter = new EventEmitter();
 
   private connectingPromise?: Promise<MessageConnection>;
 
-  constructor(targetPort: number, targetHost: string, logger?: Log) {
+  constructor(targetPort: number, targetHost: string, logger?: Logger) {
     this.targetHost = targetHost;
     this.targetPort = targetPort;
     this.logger = logger;
@@ -107,7 +107,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
     };
     return await clientConn.sendRequest('initialize', params).then(r => {
       if (this.logger) {
-        this.logger.log(`initialized at ${rootUri}`);
+        this.logger.info(`initialized at ${rootUri}`);
       }
 
       // @ts-ignore
@@ -137,7 +137,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
   public async shutdown() {
     const clientConn = await this.connect();
     if (this.logger) {
-      this.logger.log(`sending shutdown request`);
+      this.logger.info(`sending shutdown request`);
     }
     return await clientConn.sendRequest('shutdown');
   }
@@ -269,7 +269,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
       if (this.logger) {
         switch (notification.type) {
           case MessageType.Log:
-            this.logger.log(notification.message);
+            this.logger.info(notification.message);
             break;
           case MessageType.Info:
             this.logger.info(notification.message);

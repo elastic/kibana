@@ -6,9 +6,9 @@
 
 import Hapi from 'hapi';
 import { inspect } from 'util';
-import { Logger } from 'vscode-jsonrpc';
+import { Logger as VsLogger } from 'vscode-jsonrpc';
 
-export class Log implements Logger {
+export class Logger implements VsLogger {
   constructor(private server: Hapi.Server, private baseTags: string[] = ['code']) {}
 
   public info(msg: string | any) {
@@ -61,5 +61,27 @@ export class Log implements Logger {
     }
 
     this.server.log([...this.baseTags, 'warning'], msg);
+  }
+
+  // Log subprocess stdout
+  public stdout(msg: string | any) {
+    if (typeof msg !== 'string') {
+      msg = inspect(msg, {
+        colors: process.stdout.isTTY,
+      });
+    }
+
+    this.server.log([...this.baseTags, 'info', 'stdout'], msg);
+  }
+
+  // Log subprocess stderr
+  public stderr(msg: string | any) {
+    if (typeof msg !== 'string') {
+      msg = inspect(msg, {
+        colors: process.stdout.isTTY,
+      });
+    }
+
+    this.server.log([...this.baseTags, 'error', 'stderr'], msg);
   }
 }

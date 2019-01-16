@@ -10,14 +10,14 @@ import path from 'path';
 import LockFile from 'proper-lockfile';
 import stream from 'stream';
 import { RepoCmd, RepoConfig } from '../../model/workspace';
-import { Log } from '../log';
+import { Logger } from '../log';
 
 export class WorkspaceCommand {
   constructor(
     readonly repoConfig: RepoConfig,
     readonly workspaceDir: string,
     readonly revision: string,
-    readonly log: Log
+    readonly log: Logger
   ) {}
 
   public async runInit(force: boolean) {

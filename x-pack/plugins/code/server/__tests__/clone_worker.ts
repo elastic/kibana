@@ -13,7 +13,7 @@ import sinon from 'sinon';
 
 import { Repository, WorkerReservedProgress } from '../../model';
 import { AnyObject, EsClient, Esqueue } from '../lib/esqueue';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { CloneWorker } from '../queue';
 import { IndexWorker } from '../queue';
 import { RepositoryServiceFactory } from '../repository_service_factory';
@@ -21,7 +21,7 @@ import { ServerOptions } from '../server_options';
 import { SocketService } from '../socket_service';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 
-const log: Log = (new ConsoleLoggerFactory().getLogger(['test']) as any) as Log;
+const log: Logger = new ConsoleLoggerFactory().getLogger(['test']);
 
 const emptyAsyncFunc = async (_: AnyObject): Promise<any> => {
   Promise.resolve({});

@@ -9,11 +9,15 @@ import SocketIO, { Socket } from 'socket.io';
 import ClientIO from 'socket.io-client';
 
 import { SocketKind } from '../../model';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { ServerOptions } from '../server_options';
 import { BASE_PLACEHOLDER, mainNodeBaseUrl } from './redirect';
 
-export async function redirectSocketRoute(server: Server, serverOptions: ServerOptions, log: Log) {
+export async function redirectSocketRoute(
+  server: Server,
+  serverOptions: ServerOptions,
+  log: Logger
+) {
   const socketIO = SocketIO(server.listener, { path: '/ws' });
   let redirectUrl = serverOptions.redirectToNode;
   const hasBaseUrl = redirectUrl.includes(BASE_PLACEHOLDER);

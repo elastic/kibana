@@ -7,7 +7,7 @@
 import { RepositoryUtils } from '../../common/repository_utils';
 import { Repository, WorkerReservedProgress } from '../../model';
 import { EsClient } from '../lib/esqueue';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { IndexWorker } from '../queue';
 import { RepositoryObjectClient } from '../search';
 import { ServerOptions } from '../server_options';
@@ -20,7 +20,7 @@ export class IndexScheduler extends AbstractScheduler {
     private readonly indexWorker: IndexWorker,
     private readonly serverOptions: ServerOptions,
     protected readonly client: EsClient,
-    protected readonly log: Log,
+    protected readonly log: Logger,
     protected readonly onScheduleFinished?: () => void
   ) {
     super(client, serverOptions.indexFrequencyMs, onScheduleFinished);

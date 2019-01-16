@@ -14,7 +14,7 @@ import {
   tryMigrateIndices,
 } from './server/indexer';
 import { EsClient, Esqueue } from './server/lib/esqueue';
-import { Log } from './server/log';
+import { Logger } from './server/log';
 import { InstallManager } from './server/lsp/install_manager';
 import { LspService } from './server/lsp/lsp_service';
 import {
@@ -92,7 +92,7 @@ export const code = (kibana: any) =>
       const queueIndex: string = server.config().get('xpack.code.queueIndex');
       const queueTimeout: number = server.config().get('xpack.code.queueTimeout');
       const adminCluster = server.plugins.elasticsearch.getCluster('admin');
-      const log = new Log(server);
+      const log = new Logger(server);
       const serverOptions = new ServerOptions(options, server.config());
 
       if (serverOptions.redirectToNode) {

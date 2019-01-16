@@ -13,7 +13,7 @@ import { toCanonicalUrl } from '../../common/uri_util';
 import { Document, IndexStats, IndexStatsKey, LspIndexRequest, RepositoryUri } from '../../model';
 import { GitOperations } from '../git_operations';
 import { EsClient } from '../lib/esqueue';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { LspService } from '../lsp/lsp_service';
 import { ServerOptions } from '../server_options';
 import { detectLanguage, detectLanguageByFilename } from '../utils/detect_language';
@@ -47,7 +47,7 @@ export class LspIndexer extends AbstractIndexer {
     protected readonly lspService: LspService,
     protected readonly options: ServerOptions,
     protected readonly client: EsClient,
-    protected readonly log: Log
+    protected readonly log: Logger
   ) {
     super(repoUri, revision, client, log);
 

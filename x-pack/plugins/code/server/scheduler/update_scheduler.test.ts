@@ -15,7 +15,7 @@ import {
 } from '../../model';
 import { RepositoryGitStatusReservedField, RepositoryReservedField } from '../indexer/schema';
 import { AnyObject, EsClient } from '../lib/esqueue';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { UpdateWorker } from '../queue/update_worker';
 import { ServerOptions } from '../server_options';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
@@ -27,7 +27,7 @@ const serverOpts = {
   updateFrequencyMs: UPDATE_FREQUENCY_MS,
   updateRepoFrequencyMs: UPDATE_REPO_FREQUENCY_MS,
 };
-const log: Log = (new ConsoleLoggerFactory().getLogger(['test']) as any) as Log;
+const log: Logger = new ConsoleLoggerFactory().getLogger(['test']);
 
 const emptyAsyncFunc = async (_: AnyObject): Promise<any> => {
   Promise.resolve({});
@@ -124,7 +124,7 @@ test('Next job should not execute when scheduled update time is not current.', d
     (updateWorker as any) as UpdateWorker,
     serverOpts as ServerOptions,
     esClient as EsClient,
-    log as Log,
+    log,
     onScheduleFinished
   );
   updateScheduler.start();
@@ -170,7 +170,7 @@ test('Next job should not execute when repo is still in clone.', done => {
     (updateWorker as any) as UpdateWorker,
     serverOpts as ServerOptions,
     esClient as EsClient,
-    log as Log,
+    log,
     onScheduleFinished
   );
   updateScheduler.start();
@@ -217,7 +217,7 @@ test('Next job should execute.', done => {
     (updateWorker as any) as UpdateWorker,
     serverOpts as ServerOptions,
     esClient as EsClient,
-    log as Log,
+    log,
     onScheduleFinished
   );
   updateScheduler.start();

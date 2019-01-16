@@ -7,11 +7,11 @@
 import { Repository, RepositorySearchRequest, RepositorySearchResult } from '../../model';
 import { RepositoryIndexNamePrefix, RepositoryReservedField } from '../indexer/schema';
 import { EsClient } from '../lib/esqueue';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { AbstractSearchClient } from './abstract_search_client';
 
 export class RepositorySearchClient extends AbstractSearchClient {
-  constructor(protected readonly client: EsClient, protected readonly log: Log) {
+  constructor(protected readonly client: EsClient, protected readonly log: Logger) {
     super(client, log);
   }
 

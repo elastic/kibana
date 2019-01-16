@@ -11,7 +11,7 @@ import {
   RepositoryTypeName,
 } from '../indexer/schema';
 import { EsClient } from '../lib/esqueue';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { UpdateWorker } from '../queue';
 import { RepositoryObjectClient } from '../search';
 import { ServerOptions } from '../server_options';
@@ -24,7 +24,7 @@ export class UpdateScheduler extends AbstractScheduler {
     private readonly updateWorker: UpdateWorker,
     private readonly serverOptions: ServerOptions,
     protected readonly client: EsClient,
-    protected readonly log: Log,
+    protected readonly log: Logger,
     protected readonly onScheduleFinished?: () => void
   ) {
     super(client, serverOptions.updateFrequencyMs, onScheduleFinished);

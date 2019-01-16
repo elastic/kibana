@@ -13,14 +13,14 @@ import {
 } from '.';
 import { Repository } from '../../model';
 import { EsClient } from '../lib/esqueue';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { RepositoryObjectClient } from '../search';
 import pkg from './schema/version.json';
 
 export class IndexMigrator {
   private version: number;
 
-  constructor(private readonly client: EsClient, private readonly log: Log) {
+  constructor(private readonly client: EsClient, private readonly log: Logger) {
     this.version = Number(pkg.codeIndexVersion);
   }
 
@@ -125,7 +125,7 @@ export class IndexMigrator {
   }
 }
 
-export const tryMigrateIndices = async (client: EsClient, log: Log) => {
+export const tryMigrateIndices = async (client: EsClient, log: Logger) => {
   log.info('Check the versions of Code indices...');
   const repoObjectClient = new RepositoryObjectClient(client);
   const repos: Repository[] = await repoObjectClient.getAllRepositories();

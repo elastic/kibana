@@ -8,11 +8,11 @@ import Boom from 'boom';
 
 import hapi from 'hapi';
 import { DocumentSearchRequest, RepositorySearchRequest, SymbolSearchRequest } from '../../model';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { DocumentSearchClient, RepositorySearchClient, SymbolSearchClient } from '../search';
 import { EsClientWithRequest } from '../utils/esclient_with_request';
 
-export function repositorySearchRoute(server: hapi.Server, log: Log) {
+export function repositorySearchRoute(server: hapi.Server, log: Logger) {
   server.route({
     path: '/api/code/search/repo',
     method: 'GET',
@@ -60,7 +60,7 @@ export function repositorySearchRoute(server: hapi.Server, log: Log) {
   });
 }
 
-export function documentSearchRoute(server: hapi.Server, log: Log) {
+export function documentSearchRoute(server: hapi.Server, log: Logger) {
   server.route({
     path: '/api/code/search/doc',
     method: 'GET',
@@ -110,7 +110,7 @@ export function documentSearchRoute(server: hapi.Server, log: Log) {
   });
 }
 
-export function symbolSearchRoute(server: hapi.Server, log: Log) {
+export function symbolSearchRoute(server: hapi.Server, log: Logger) {
   const symbolSearchHandler = async (req: hapi.Request) => {
     let page = 1;
     const { p, q } = req.query as hapi.RequestQuery;

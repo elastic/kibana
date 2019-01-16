@@ -11,7 +11,7 @@ import { isValidGitUrl } from '../../common/git_url_utils';
 import { RepositoryUtils } from '../../common/repository_utils';
 import { RepositoryConfig } from '../../model';
 import { RepositoryIndexInitializer, RepositoryIndexInitializerFactory } from '../indexer';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { CloneWorker, DeleteWorker, IndexWorker } from '../queue';
 import { RepositoryConfigController } from '../repository_config_controller';
 import { RepositoryObjectClient } from '../search';
@@ -32,7 +32,7 @@ export function repositoryRoute(
     method: 'POST',
     async handler(req, h) {
       const repoUrl: string = (req.payload as any).url;
-      const log = new Log(req.server);
+      const log = new Logger(req.server);
 
       // Reject the request if the url is an invalid git url.
       if (!isValidGitUrl(repoUrl)) {
@@ -83,7 +83,7 @@ export function repositoryRoute(
     method: 'DELETE',
     async handler(req, h) {
       const repoUri: string = req.params.uri as string;
-      const log = new Log(req.server);
+      const log = new Logger(req.server);
       const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
       try {
         // Check if the repository already exists. If not, an error will be thrown.
@@ -121,7 +121,7 @@ export function repositoryRoute(
     method: 'GET',
     async handler(req) {
       const repoUri = req.params.uri as string;
-      const log = new Log(req.server);
+      const log = new Logger(req.server);
       try {
         const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
         return await repoObjectClient.getRepository(repoUri);
@@ -138,7 +138,7 @@ export function repositoryRoute(
     method: 'GET',
     async handler(req) {
       const repoUri = req.params.uri as string;
-      const log = new Log(req.server);
+      const log = new Logger(req.server);
       try {
         const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
         return await repoObjectClient.getRepositoryGitStatus(repoUri);
@@ -155,7 +155,7 @@ export function repositoryRoute(
     path: '/api/code/repos',
     method: 'GET',
     async handler(req) {
-      const log = new Log(req.server);
+      const log = new Logger(req.server);
       try {
         const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
         return await repoObjectClient.getAllRepositories();
@@ -175,7 +175,7 @@ export function repositoryRoute(
     method: 'POST',
     async handler(req) {
       const repoUri = req.params.uri as string;
-      const log = new Log(req.server);
+      const log = new Logger(req.server);
       try {
         const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
         const cloneStatus = await repoObjectClient.getRepositoryGitStatus(repoUri);
@@ -202,7 +202,7 @@ export function repositoryRoute(
       const config: RepositoryConfig = req.payload as RepositoryConfig;
       const repoUrl: string = config.uri;
 
-      const log = new Log(req.server);
+      const log = new Logger(req.server);
 
       // Reject the request if the url is an invalid git url.
       if (!isValidGitUrl(repoUrl)) {

@@ -8,14 +8,14 @@ import _ from 'lodash';
 
 import { IndexMigrator } from '.';
 import { EsClient } from '../lib/esqueue';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { IndexCreationRequest } from './index_creation_request';
 import pkg from './schema/version.json';
 
 export class IndexVersionController {
   private version: number;
 
-  constructor(protected readonly client: EsClient, private readonly log: Log) {
+  constructor(protected readonly client: EsClient, private readonly log: Logger) {
     this.version = Number(pkg.codeIndexVersion);
   }
 

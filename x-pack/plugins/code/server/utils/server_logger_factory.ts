@@ -5,13 +5,13 @@
  */
 
 import * as Hapi from 'hapi';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { LoggerFactory } from './log_factory';
 
 export class ServerLoggerFactory implements LoggerFactory {
   constructor(private readonly server: Hapi.Server) {}
 
-  public getLogger(tags: string[]): Log {
-    return new Log(this.server, tags);
+  public getLogger(tags: string[]): Logger {
+    return new Logger(this.server, tags);
   }
 }

@@ -7,7 +7,7 @@
 import sinon from 'sinon';
 
 import { AnyObject, EsClient } from '../lib/esqueue';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { DocumentSearchClient } from './document_search_client';
 
 let docSearchClient: DocumentSearchClient;
@@ -15,7 +15,7 @@ let esClient;
 
 // Setup the entire RepositorySearchClient.
 function initSearchClient() {
-  const log: Log = (sinon.stub() as any) as Log;
+  const log: Logger = (sinon.stub() as any) as Logger;
   esClient = initEsClient();
 
   docSearchClient = new DocumentSearchClient(esClient, log);

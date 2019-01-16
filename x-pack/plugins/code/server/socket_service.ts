@@ -9,11 +9,11 @@ import SocketIO from 'socket.io';
 
 import { InstallEvent } from '../common/installation';
 import { CloneProgress, RepositoryUri, SocketKind } from '../model';
-import { Log } from './log';
+import { Logger } from './log';
 
 export class SocketService {
   public readonly io: SocketIO.Server;
-  constructor(server: Server, private readonly log: Log) {
+  constructor(server: Server, private readonly log: Logger) {
     this.io = SocketIO(server.listener, { path: '/ws' });
   }
 

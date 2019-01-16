@@ -6,15 +6,15 @@
 
 import { Message, ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { AbstractMessageWriter, MessageWriter } from 'vscode-jsonrpc/lib/messageWriter';
-import { Log } from '../log';
+import { Logger } from '../log';
 
 import { RepliesMap } from './replies_map';
 
 export class HttpMessageWriter extends AbstractMessageWriter implements MessageWriter {
   private replies: RepliesMap;
-  private logger: Log | undefined;
+  private logger: Logger | undefined;
 
-  constructor(replies: RepliesMap, logger: Log | undefined) {
+  constructor(replies: RepliesMap, logger: Logger | undefined) {
     super();
     this.replies = replies;
     this.logger = logger;
@@ -41,7 +41,7 @@ export class HttpMessageWriter extends AbstractMessageWriter implements MessageW
       }
     } else {
       if (this.logger) {
-        this.logger.log(`ignored message ${JSON.stringify(msg)} because of no id`);
+        this.logger.info(`ignored message ${JSON.stringify(msg)} because of no id`);
       }
     }
   }

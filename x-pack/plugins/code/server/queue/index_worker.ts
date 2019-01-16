@@ -15,7 +15,7 @@ import {
 } from '../../model';
 import { IndexerFactory, IndexProgress } from '../indexer';
 import { EsClient, Esqueue } from '../lib/esqueue';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { RepositoryObjectClient } from '../search';
 import { SocketService } from '../socket_service';
 import { aggregateIndexStats } from '../utils/index_stats_aggregator';
@@ -29,7 +29,7 @@ export class IndexWorker extends AbstractWorker {
 
   constructor(
     protected readonly queue: Esqueue,
-    protected readonly log: Log,
+    protected readonly log: Logger,
     protected readonly client: EsClient,
     protected readonly indexerFactories: IndexerFactory[],
     private readonly cancellationService: CancellationSerivce,

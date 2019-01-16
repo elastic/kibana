@@ -17,13 +17,13 @@ import {
   Repository,
   UpdateWorkerResult,
 } from '../model';
-import { Log } from './log';
+import { Logger } from './log';
 
 export type CloneProgressHandler = (progress: number, cloneProgress?: CloneProgress) => void;
 
 // This is the service for any kind of repository handling, e.g. clone, update, delete, etc.
 export class RepositoryService {
-  constructor(private readonly repoVolPath: string, private log: Log) {}
+  constructor(private readonly repoVolPath: string, private log: Logger) {}
 
   public async clone(repo: Repository, handler?: CloneProgressHandler): Promise<CloneWorkerResult> {
     if (!repo) {
