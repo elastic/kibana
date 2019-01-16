@@ -557,7 +557,7 @@ export const Explorer = injectI18n(
             // load scores by influencer/jobId value and time.
             // Pass the interval in seconds as the swimlane relies on a fixed number of seconds between buckets
             // which wouldn't be the case if e.g. '1M' was used.
-            const interval = getSwimlaneBucketInterval(selectedJobs, swimlaneWidth).asSeconds() + 's';
+            const interval = `${getSwimlaneBucketInterval(selectedJobs, swimlaneWidth).asSeconds()}s`;
             if (swimlaneViewByFieldName !== VIEW_BY_JOB_LABEL) {
               mlResultsService.getInfluencerValueMaxScoreByTime(
                 selectedJobIds,
