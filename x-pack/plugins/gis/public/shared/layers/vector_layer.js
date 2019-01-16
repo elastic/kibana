@@ -5,6 +5,7 @@
  */
 
 import mapboxgl from 'mapbox-gl';
+import turf from 'turf';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
@@ -133,8 +134,27 @@ export class VectorLayer extends AbstractLayer {
     return this._style.getTOCDetails();
   }
 
+  _getBoundsBasedOnData() {
+    const featureCollection = this._getSourceFeatureCollection();
+    if (!featureCollection) {
+      return null;
+    }
+    const bbox =  turf.bbox(featureCollection);
+    return {
+      min_lon: bbox[0],
+      min_lat: bbox[1],
+      max_lon: bbox[2],
+      max_lat: bbox[3]
+    };
+  }
+
   async getBounds(filters) {
-    return await this._source.getBoundsForFilters(filters);
+
+    if (this._source.isBoundsAware()) {
+      return await this._source.getBoundsForFilters(filters);
+    }
+
+    return this._getBoundsBasedOnData();
   }
 
   async getStringFields() {

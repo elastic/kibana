@@ -173,8 +173,8 @@ export class MBMapContainer extends React.Component {
 
     if (goto.bounds) {//prioritize zooming to bounds after clicking
       const lnLatBounds = new mapboxgl.LngLatBounds(
-        new mapboxgl.LngLat(goto.bounds.min_lon, goto.bounds.min_lat),
-        new mapboxgl.LngLat(goto.bounds.max_lon, goto.bounds.max_lat)
+        new mapboxgl.LngLat(clamp(goto.bounds.min_lon, -180, 180), clamp(goto.bounds.min_lat, -89, 89)),
+        new mapboxgl.LngLat(clamp(goto.bounds.max_lon, -180, 180), clamp(goto.bounds.max_lat, -89, 89)),
       );
       this._mbMap.fitBounds(lnLatBounds);
     } else if (goto.center) {
@@ -228,4 +228,11 @@ export class MBMapContainer extends React.Component {
       <div id={'mapContainer'} className="mapContainer" ref="mapContainer"/>
     );
   }
+}
+
+
+function clamp(val, min, max) {
+  if (val > max) val = max;
+  else if (val < min) val = min;
+  return val;
 }

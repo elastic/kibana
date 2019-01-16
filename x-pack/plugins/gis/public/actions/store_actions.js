@@ -258,12 +258,12 @@ export function fitToLayerExtent(layerId) {
     const targetLayer = getLayerList(getState()).find(layer => {
       return layer.getId() === layerId;
     });
-    //todo - must include filters (same as syncData, but not the current-view extent)
 
     const dataFilters = getDataFilters(getState());
     const bounds = await targetLayer.getBounds(dataFilters);
-
-    await dispatch(setGotoWithBounds(bounds));
+    if (bounds) {
+      await dispatch(setGotoWithBounds(bounds));
+    }
   };
 }
 

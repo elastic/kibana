@@ -160,4 +160,8 @@ export class AbstractESSource extends AbstractVectorSource {
     return indexPattern.title;
   }
 
+  isBoundsAware() {
+    return true;
+  }
+
 }
