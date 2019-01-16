@@ -9,12 +9,7 @@ import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import { AbstractIndexer } from './abstract_indexer';
 import { IndexCreationRequest } from './index_creation_request';
-import {
-  RepositoryAnalysisSettings,
-  RepositoryIndexName,
-  RepositorySchema,
-  RepositoryTypeName,
-} from './schema';
+import { RepositoryAnalysisSettings, RepositoryIndexName, RepositorySchema } from './schema';
 
 // Inherit AbstractIndexer's index creation logics. This is not an actual indexer.
 export class RepositoryIndexInitializer extends AbstractIndexer {
@@ -32,7 +27,6 @@ export class RepositoryIndexInitializer extends AbstractIndexer {
   public async prepareIndexCreationRequests() {
     const creationReq: IndexCreationRequest = {
       index: RepositoryIndexName(this.repoUri),
-      type: RepositoryTypeName,
       settings: {
         ...RepositoryAnalysisSettings,
         number_of_shards: 1,

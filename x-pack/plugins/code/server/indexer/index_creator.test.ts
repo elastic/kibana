@@ -38,7 +38,6 @@ test('Create Alias and Index', async () => {
   const indexCreator = new IndexCreator((esClient as any) as EsClient);
   const req: IndexCreationRequest = {
     index: 'mockindex',
-    type: 'mocktype',
     settings: {},
     schema: {},
   };
@@ -63,7 +62,6 @@ test('Skip alias and index creation', async () => {
   const indexCreator = new IndexCreator((esClient as any) as EsClient);
   const req: IndexCreationRequest = {
     index: 'mockindex',
-    type: 'mocktype',
     settings: {},
     schema: {},
   };

@@ -15,7 +15,6 @@ import { AnyObject, EsClient, LogFn } from './misc';
 export interface JobOptions {
   client?: EsClient;
   indexSettings?: string;
-  doctype?: string;
   created_by?: string;
   timeout?: number;
   max_attempts?: number;
@@ -39,7 +38,6 @@ export class Job<P> extends EventEmitter {
   public timeout: number;
   public maxAttempts: number;
   public priority: number;
-  public doctype: string;
   public indexSettings: AnyObject;
   public ready: Promise<void>;
 

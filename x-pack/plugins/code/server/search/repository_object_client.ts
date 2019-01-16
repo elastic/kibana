@@ -19,7 +19,6 @@ import {
   RepositoryIndexNamePrefix,
   RepositoryLspIndexStatusReservedField,
   RepositoryReservedField,
-  RepositoryTypeName,
 } from '../indexer/schema';
 import { EsClient } from '../lib/esqueue';
 
@@ -53,7 +52,6 @@ export class RepositoryObjectClient {
   public async getAllRepositories(): Promise<Repository[]> {
     const res = await this.esClient.search({
       index: `${RepositoryIndexNamePrefix}*`,
-      type: RepositoryTypeName,
       body: {
         query: {
           exists: {
@@ -122,7 +120,6 @@ export class RepositoryObjectClient {
   ): Promise<any> {
     const res = await this.esClient.get({
       index: RepositoryIndexName(repoUri),
-      type: RepositoryTypeName,
       id: this.getRepositoryObjectId(reservedFieldName),
     });
     return res._source[reservedFieldName];
@@ -131,7 +128,6 @@ export class RepositoryObjectClient {
   private async setRepositoryObject(repoUri: RepositoryUri, reservedFieldName: string, obj: any) {
     return await this.esClient.index({
       index: RepositoryIndexName(repoUri),
-      type: RepositoryTypeName,
       id: this.getRepositoryObjectId(reservedFieldName),
       body: JSON.stringify({
         [reservedFieldName]: obj,
@@ -146,7 +142,6 @@ export class RepositoryObjectClient {
   ) {
     return await this.esClient.update({
       index: RepositoryIndexName(repoUri),
-      type: RepositoryTypeName,
       id: this.getRepositoryObjectId(reservedFieldName),
       body: JSON.stringify({
         doc: {

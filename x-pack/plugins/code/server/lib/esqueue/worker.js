@@ -42,7 +42,6 @@ export class Worker extends events.EventEmitter {
     this.checkSize = opts.size || 10;
     this.capacity = opts.capacity || 2;
     this.processingJobCount = 0;
-    this.doctype = opts.doctype || constants.DEFAULT_SETTING_DOCTYPE;
 
     this.debug = (msg, err) => {
       const logger = opts.logger || function () {};
@@ -85,7 +84,6 @@ export class Worker extends events.EventEmitter {
       id: this.id,
       index: this.queue.index,
       jobType: this.jobType,
-      doctype: this.doctype,
     };
   }
 
@@ -412,7 +410,6 @@ export class Worker extends events.EventEmitter {
 
     return this.client.search({
       index: `${this.queue.index}-*`,
-      type: this.doctype,
       version: true,
       body: query
     })

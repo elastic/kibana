@@ -5,11 +5,7 @@
  */
 
 import { Repository, WorkerReservedProgress } from '../../model';
-import {
-  RepositoryIndexName,
-  RepositoryReservedField,
-  RepositoryTypeName,
-} from '../indexer/schema';
+import { RepositoryIndexName, RepositoryReservedField } from '../indexer/schema';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import { UpdateWorker } from '../queue';
@@ -62,7 +58,6 @@ export class UpdateScheduler extends AbstractScheduler {
         const nextRepoUpdateTimestamp = this.repoNextSchedulingTime();
         this.client.update({
           index: RepositoryIndexName(repo.uri),
-          type: RepositoryTypeName,
           id: repo.uri,
           body: JSON.stringify({
             doc: {

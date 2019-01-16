@@ -9,12 +9,10 @@ import {
   DocumentIndexName,
   DocumentIndexNamePrefix,
   DocumentSchema,
-  DocumentTypeName,
 } from './document';
 
 export const RepositorySchema = DocumentSchema;
 export const RepositoryAnalysisSettings = DocumentAnalysisSettings;
-export const RepositoryTypeName = DocumentTypeName;
 export const RepositoryIndexNamePrefix = DocumentIndexNamePrefix;
 export const RepositoryIndexName = DocumentIndexName;
 

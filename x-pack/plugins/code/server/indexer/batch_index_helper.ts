@@ -24,7 +24,7 @@ export class BatchIndexHelper {
     this.batch = [];
   }
 
-  public async index(index: string, type: string, body: any) {
+  public async index(index: string, body: any) {
     if (this.isCancelled()) {
       this.log.debug(`Batch index helper is cancelled. Skip.`);
       return;
@@ -32,7 +32,6 @@ export class BatchIndexHelper {
     this.batch.push({
       index: {
         _index: index,
-        _type: type,
       },
     });
     this.batch.push(body);

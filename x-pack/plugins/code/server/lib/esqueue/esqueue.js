@@ -30,7 +30,6 @@ export class Esqueue extends EventEmitter {
     this.settings = {
       interval: constants.DEFAULT_SETTING_INTERVAL,
       timeout: constants.DEFAULT_SETTING_TIMEOUT,
-      doctype: constants.DEFAULT_SETTING_DOCTYPE,
       dateSeparator: constants.DEFAULT_SETTING_DATE_SEPARATOR,
       ...omit(options, ['client'])
     };
@@ -59,7 +58,6 @@ export class Esqueue extends EventEmitter {
     };
 
     const options = Object.assign(defaults, opts, {
-      doctype: this.settings.doctype,
       indexSettings: this.settings.indexSettings,
       logger: this._logger
     });

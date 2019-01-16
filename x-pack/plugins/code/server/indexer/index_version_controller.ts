@@ -20,18 +20,18 @@ export class IndexVersionController {
   }
 
   public async tryUpgrade(request: IndexCreationRequest) {
-    this.log.info(`Try upgrade index mapping/settings for index ${request.index}.`);
-    const esIndexVersion = await this.getIndexVersionFromES(request.index, request.type);
+    this.log.debug(`Try upgrade index mapping/settings for index ${request.index}.`);
+    const esIndexVersion = await this.getIndexVersionFromES(request.index);
     const needUpgrade = this.needUpgrade(esIndexVersion);
     if (needUpgrade) {
       const migrator = new IndexMigrator(this.client, this.log);
       const oldIndexName = `${request.index}-${esIndexVersion}`;
-      this.log.info(
+      this.log.warn(
         `Migrate index mapping/settings from version ${esIndexVersion} for ${request.index}`
       );
       return migrator.migrateIndex(oldIndexName, request);
     } else {
-      this.log.info(`Index version is update-to-date for ${request.index}`);
+      this.log.debug(`Index version is update-to-date for ${request.index}`);
     }
   }
 
@@ -43,13 +43,17 @@ export class IndexVersionController {
     return oldIndexVersion < this.version;
   }
 
-  private async getIndexVersionFromES(indexName: string, typeName: string): Promise<number> {
+  private async getIndexVersionFromES(indexName: string): Promise<number> {
     try {
       const res = await this.client.indices.getMapping({
         index: indexName,
       });
       const esIndexName = Object.keys(res)[0];
-      return _.get(res, [esIndexName, 'mappings', typeName, '_meta', 'version'], 0);
+      const version = _.get(res, [esIndexName, 'mappings', '_meta', 'version'], 0);
+      if (version === 0) {
+        this.log.error(`Can't find index version for ${indexName}.`);
+      }
+      return version;
     } catch (error) {
       this.log.error(`Get index version error for ${indexName}.`);
       this.log.error(error);

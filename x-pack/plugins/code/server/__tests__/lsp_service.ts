@@ -15,7 +15,7 @@ import mkdirp from 'mkdirp';
 import { LspService } from "../lsp/lsp_service";
 import { ServerOptions } from "../server_options";
 import { ConsoleLoggerFactory } from "../utils/console_logger_factory";
-import { RepositoryGitStatusReservedField, RepositoryTypeName, RepositoryConfigReservedField } from '../indexer/schema';
+import { RepositoryGitStatusReservedField, RepositoryConfigReservedField } from '../indexer/schema';
 import { InstallManager } from "../lsp/install_manager";
 import * as os from "os";
 import assert from 'assert';
@@ -71,18 +71,15 @@ describe('lsp_service tests', () => {
   function mockEsClient(): any {
     const api = {
       get: function (params: any) {
-        const {type} = params;
-        if (type === RepositoryTypeName) {
-          return {
-            _source: {
-              [RepositoryGitStatusReservedField]: {
-                cloneProgress: {
-                  isCloned: true
-                }
-              } ,
-              [RepositoryConfigReservedField]: {
-                disableTypescript: false
+        return {
+          _source: {
+            [RepositoryGitStatusReservedField]: {
+              cloneProgress: {
+                isCloned: true
               }
+            } ,
+            [RepositoryConfigReservedField]: {
+              disableTypescript: false
             }
           }
         }

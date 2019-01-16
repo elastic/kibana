@@ -26,15 +26,12 @@ import {
 } from './index_creation_request';
 import {
   DocumentIndexName,
-  DocumentTypeName,
   ReferenceIndexName,
-  ReferenceTypeName,
   RepositoryDeleteStatusReservedField,
   RepositoryGitStatusReservedField,
   RepositoryLspIndexStatusReservedField,
   RepositoryReservedField,
   SymbolIndexName,
-  SymbolTypeName,
 } from './schema';
 
 export class LspIndexer extends AbstractIndexer {
@@ -209,13 +206,13 @@ export class LspIndexer extends AbstractIndexer {
       if (response && response.result.length > 0) {
         const { symbols, references } = response.result[0];
         for (const symbol of symbols) {
-          await this.batchIndexHelper.index(SymbolIndexName(repoUri), SymbolTypeName, symbol);
+          await this.batchIndexHelper.index(SymbolIndexName(repoUri), symbol);
           symbolNames.add(symbol.symbolInformation.name);
         }
         stats.set(IndexStatsKey.Symbol, symbols.length);
 
         for (const ref of references) {
-          await this.batchIndexHelper.index(ReferenceIndexName(repoUri), ReferenceTypeName, ref);
+          await this.batchIndexHelper.index(ReferenceIndexName(repoUri), ref);
         }
         stats.set(IndexStatsKey.Reference, references.length);
       } else {
@@ -244,7 +241,7 @@ export class LspIndexer extends AbstractIndexer {
       language,
       qnames: Array.from(symbolNames),
     };
-    await this.batchIndexHelper.index(DocumentIndexName(repoUri), DocumentTypeName, body);
+    await this.batchIndexHelper.index(DocumentIndexName(repoUri), body);
     stats.set(IndexStatsKey.File, 1);
     return stats;
   }
