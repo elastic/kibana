@@ -44,7 +44,7 @@ const badgeExtensions = [
     matchIndex: (index) => {
       return index.isFrozen;
     },
-    label: i18n.translate('xpack.indexMgmt.frozenBadgeLabel', {
+    label: i18n.translate('xpack.idxMgmt.frozenBadgeLabel', {
       defaultMessage: 'Frozen',
     }),
   }
