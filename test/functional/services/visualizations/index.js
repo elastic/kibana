@@ -17,8 +17,4 @@
  * under the License.
  */
 
-import { clog } from './clog';
-
-export const commonFunctions = [
-  clog,
-];
+export { PieChartProvider } from './pie_chart';
