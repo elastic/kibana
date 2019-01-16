@@ -32,7 +32,9 @@
         ></button>
 
         <!-- Time-picker "menu item" -->
-        <kbn-global-timepicker></kbn-global-timepicker>
+        <span ng-if="showTimepickerInTopNav">
+          <kbn-global-timepicker></kbn-global-timepicker>
+        </span>
       </div>
     </div>
   </div>

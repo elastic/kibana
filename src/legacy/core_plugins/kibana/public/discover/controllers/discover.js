@@ -202,6 +202,7 @@ function discoverController(
     dirty: !savedSearch.id
   };
 
+  $scope.showTimepickerInTopNav = false;
   $scope.topNavMenu = [{
     key: 'new',
     label: i18n('kbn.discover.localMenu.localMenu.newSearchTitle', {

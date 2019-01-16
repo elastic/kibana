@@ -42,6 +42,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiOutsideClickDetector,
+  EuiSuperDatePicker,
 } from '@elastic/eui';
 
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
@@ -74,6 +75,10 @@ interface Props {
   indexPatterns: IndexPattern[];
   store: Storage;
   intl: InjectedIntl;
+  start: string;
+  end: string;
+  isPaused: boolean;
+  refreshInterval: number;
 }
 
 interface State {
@@ -84,6 +89,10 @@ interface State {
   suggestions: AutocompleteSuggestion[];
   suggestionLimit: number;
   currentProps?: Props;
+  start: string;
+  end: string;
+  isPaused: boolean;
+  refreshInterval: number;
 }
 
 export class QueryBarUI extends Component<Props, State> {
@@ -531,6 +540,17 @@ export class QueryBarUI extends Component<Props, State> {
               />
             </div>
           </EuiOutsideClickDetector>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiSuperDatePicker
+            start={this.state.start}
+            end={this.state.end}
+            isPaused={this.state.isPaused}
+            refreshInterval={this.state.refreshInterval}
+            onTimeChange={this.onTimeChange}
+            onRefreshChange={this.onRefreshChange}
+            showUpdateButton={false}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
