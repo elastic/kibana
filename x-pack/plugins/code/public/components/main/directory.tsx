@@ -50,7 +50,7 @@ const Container = styled.div`
 `;
 
 const DirectoryNode = styled.div`
-  width: 20%;
+  width: 200px;
   margin: 0 8px 10px;
   :hover {
     background-color: ${euiColorHighlight};

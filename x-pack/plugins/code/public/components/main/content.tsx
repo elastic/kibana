@@ -55,6 +55,7 @@ const BlameContainer = styled.div`
 
 const DirectoryViewContainer = styled.div`
   overflow: auto;
+  flex-grow: 1;
 `;
 
 interface Props extends RouteComponentProps<MainRouteParams> {
