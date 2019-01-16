@@ -17,15 +17,11 @@
  * under the License.
  */
 
-import {
-  ExistsFilter,
-  PhraseFilter,
-  PhrasesFilter,
-  QueryFilter,
-  RangeFilter,
-} from 'ui/filter_bar/filters';
-import { RangeFilterParams } from 'ui/filter_bar/filters/range_filter';
 import { IndexPattern, IndexPatternField } from 'ui/index_patterns';
+import { ExistsFilter, PhraseFilter, PhrasesFilter, QueryFilter, RangeFilter } from './lib';
+import { RangeFilterParams } from './lib/range_filter';
+
+export * from './lib';
 
 export function buildExistsFilter(
   field: IndexPatternField,

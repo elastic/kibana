@@ -17,9 +17,26 @@
  * under the License.
  */
 
-export * from './exists';
-export * from './phrase';
-export * from './phrases';
-export * from './query';
-export * from './range';
-export * from './lib';
+import { PhrasesFilter } from '@kbn/es-query';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
+import { FILTER_OPERATORS } from '../filter_editor/lib/filter_operators';
+
+interface Props {
+  filter: PhrasesFilter;
+}
+
+export function PhrasesFilterView({ filter }: Props) {
+  const operator = FILTER_OPERATORS.find(({ type }) => type === filter.meta.type);
+  const { id = '', defaultMessage = '' } = operator || {};
+  return (
+    <span>
+      <span> {filter.meta.key}</span>
+      <FormattedMessage
+        id={`common.ui.filterEditor.${id}OptionLabel`}
+        defaultMessage={defaultMessage}
+      />
+      <span> {filter.meta.value}</span>
+    </span>
+  );
+}

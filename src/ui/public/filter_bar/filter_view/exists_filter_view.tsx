@@ -17,9 +17,13 @@
  * under the License.
  */
 
-export * from './exists';
-export * from './phrase';
-export * from './phrases';
-export * from './query';
-export * from './range';
-export * from './lib';
+import { ExistsFilter } from '@kbn/es-query';
+import React from 'react';
+
+interface Props {
+  filter: ExistsFilter;
+}
+
+export function ExistsFilterView({ filter }: Props) {
+  return <span>{filter.meta.key} exists</span>;
+}

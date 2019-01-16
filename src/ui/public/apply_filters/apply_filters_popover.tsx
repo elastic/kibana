@@ -30,10 +30,10 @@ import {
   EuiOverlayMask,
   EuiSwitch,
 } from '@elastic/eui';
+import { MetaFilter } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
-import { MetaFilter } from '../filter_bar/filters';
-import { FilterView } from '../filter_bar/react/filter_view';
+import { FilterView } from '../filter_bar/filter_view';
 
 interface Props {
   filters: MetaFilter[];

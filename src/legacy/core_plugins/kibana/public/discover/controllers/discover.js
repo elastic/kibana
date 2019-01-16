@@ -34,7 +34,6 @@ import 'ui/index_patterns';
 import 'ui/state_management/app_state';
 import { timefilter } from 'ui/timefilter';
 import 'ui/search_bar';
-import 'ui/apply_filters';
 import { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
 import { toastNotifications } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
@@ -358,18 +357,14 @@ function discoverController(
     queryFilter.setFilters(filters);
   };
 
-  $scope.onCancelApplyFilters = () => {
-    $scope.state.$newFilters = [];
-  };
-
-  $scope.onApplyFilters = filters => {
+  $scope.applyFilters = filters => {
     queryFilter.addFiltersAndChangeTimeFilter(filters);
     $scope.state.$newFilters = [];
   };
 
   $scope.$watch('state.$newFilters', (filters = []) => {
     if (filters.length === 1) {
-      $scope.onApplyFilters(filters);
+      $scope.applyFilters(filters);
     }
   });
 

@@ -26,6 +26,7 @@ import { applyTheme } from 'ui/theme';
 import { toastNotifications } from 'ui/notify';
 
 import 'ui/search_bar';
+import 'ui/apply_filters';
 
 import { panelActionsStore } from './store/panel_actions_store';
 

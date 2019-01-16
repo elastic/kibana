@@ -19,12 +19,12 @@
 
 // @ts-ignore
 import { EuiFilterButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { MetaFilter } from '@kbn/es-query';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
-import { MetaFilter } from 'ui/filter_bar/filters/meta_filter';
-import { FilterBar } from 'ui/filter_bar/react';
+import { FilterBar } from 'ui/filter_bar';
 import { IndexPattern } from 'ui/index_patterns';
 import { QueryBar } from 'ui/query_bar';
 import { Storage } from 'ui/storage';

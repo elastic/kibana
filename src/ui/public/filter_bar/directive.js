@@ -17,9 +17,13 @@
  * under the License.
  */
 
-export * from './exists';
-export * from './phrase';
-export * from './phrases';
-export * from './query';
-export * from './range';
-export * from './lib';
+import 'ngreact';
+import { uiModules } from '../modules';
+import { FilterBar } from './filter_bar';
+import { injectI18nProvider } from '@kbn/i18n/react';
+
+const app = uiModules.get('app/kibana', ['react']);
+
+app.directive('filterBar', reactDirective => {
+  return reactDirective(injectI18nProvider(FilterBar));
+});

@@ -17,9 +17,13 @@
  * under the License.
  */
 
-export * from './exists';
-export * from './phrase';
-export * from './phrases';
-export * from './query';
-export * from './range';
-export * from './lib';
+import { QueryFilter } from '@kbn/es-query';
+import React from 'react';
+
+interface Props {
+  filter: QueryFilter;
+}
+
+export function QueryFilterView({ filter }: Props) {
+  return <span>{filter.meta.value}</span>;
+}
