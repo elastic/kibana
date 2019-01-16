@@ -58,7 +58,10 @@ export class ALayer {
   }
 
   async getAttributions() {
-    return await this._source.getAttributions();
+    if (!this.dataHasLoadError()) {
+      return await this._source.getAttributions();
+    }
+    return '';
   }
 
   getLabel() {
