@@ -55,7 +55,7 @@ export const formatHostsData = (
       if (hit.cursor) {
         flattenedFields.cursor.value = hit.cursor;
       }
-      return mergeFieldsWithHit(fieldName, 'node', flattenedFields, fieldMap, hit) as HostsEdges;
+      return mergeFieldsWithHit(fieldName, flattenedFields, fieldMap, hit);
     },
     {
       node: {},

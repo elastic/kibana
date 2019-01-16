@@ -96,6 +96,6 @@ export const formatUncommonProcessesData = (
     if (hit.cursor) {
       flattenedFields.cursor.value = hit.cursor;
     }
-    return mergeFieldsWithHit(fieldName, 'node', flattenedFields, fieldMap, hit);
+    return mergeFieldsWithHit(fieldName, flattenedFields, fieldMap, hit);
   }, initialValue);
 };

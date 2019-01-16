@@ -100,6 +100,6 @@ export const formatAuthorizationData = (
         successes: hit.successes,
       },
     };
-    return mergeFieldsWithHit(fieldName, 'node', flattenedFields, fieldMap, hit);
+    return mergeFieldsWithHit(fieldName, flattenedFields, fieldMap, hit);
   }, init);
 };

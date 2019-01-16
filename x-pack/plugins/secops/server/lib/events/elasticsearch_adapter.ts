@@ -68,7 +68,7 @@ export const formatEventsData = (
         flattenedFields.cursor.value = hit.sort[0];
         flattenedFields.cursor.tiebreaker = hit.sort[1];
       }
-      return mergeFieldsWithHit(fieldName, 'node', flattenedFields, fieldMap, hit) as EcsEdges;
+      return mergeFieldsWithHit(fieldName, flattenedFields, fieldMap, hit);
     },
     {
       node: {},

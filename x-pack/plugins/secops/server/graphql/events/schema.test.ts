@@ -12,7 +12,7 @@ import { sharedSchema } from '../../../common/graphql/shared';
 import { Logger } from '../../utils/logger';
 import { sourceStatusSchema } from '../source_status/schema.gql';
 import { sourcesSchema } from '../sources/schema.gql';
-import { getEventsQueryMock, mockEventsData } from './mock';
+import { getEventsQueryMock, mockEventsData } from './events.mock';
 import { eventsSchema } from './schema.gql';
 
 const testCaseSource = {
