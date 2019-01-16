@@ -12,7 +12,7 @@ import {
   updateLayerMaxZoom,
   updateLayerMinZoom,
   updateLayerAlphaValue,
-  setGotoWithBounds
+  fitToLayerExtent
 } from '../../actions/store_actions';
 
 function mapStateToProps(state = {}) {
@@ -27,8 +27,8 @@ function mapDispatchToProps(dispatch) {
     updateMinZoom: (id, minZoom) => dispatch(updateLayerMinZoom(id, minZoom)),
     updateMaxZoom: (id, maxZoom) => dispatch(updateLayerMaxZoom(id, maxZoom)),
     updateAlphaValue: (id, alphaValue) => dispatch(updateLayerAlphaValue(id, alphaValue)),
-    fitToBounds: (bounds) => {
-      dispatch(setGotoWithBounds(bounds));
+    fitToBounds: (layerId) => {
+      dispatch(fitToLayerExtent(layerId));
     }
   };
 }

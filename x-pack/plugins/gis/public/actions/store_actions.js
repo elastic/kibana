@@ -253,6 +253,17 @@ export function clearMouseCoordinates() {
 }
 
 
+export function fitToLayerExtent(layerId) {
+  return async function (dispatch, getState) {
+    const targetLayer = getLayerList(getState()).find(layer => {
+      return layer.getId() === layerId;
+    });
+    //todo - must include filters (same as syncData, but not the current-view extent)
+    const bounds = await targetLayer.getBounds();
+    await dispatch(setGotoWithBounds(bounds));
+  };
+}
+
 export function setGotoWithBounds(bounds) {
   return {
     type: SET_GOTO,

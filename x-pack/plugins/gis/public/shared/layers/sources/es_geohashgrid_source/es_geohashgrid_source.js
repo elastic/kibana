@@ -162,6 +162,16 @@ export class ESGeohashGridSource extends VectorSource {
     });
   }
 
+  static _getSearchSource({ indexPattern, filter, query, aggConfigs }) {
+    const searchSource = new SearchSource();
+    searchSource.setField('index', indexPattern);
+    searchSource.setField('size', 0);
+    searchSource.setField('aggs', aggConfigs.toDsl());
+    searchSource.setField('filter', filter);
+    searchSource.setField('query', query);
+    return searchSource;
+  }
+
   async getGeoJsonPoints({ precision, extent, timeFilters, layerName, query }) {
 
     let indexPattern;
@@ -180,17 +190,18 @@ export class ESGeohashGridSource extends VectorSource {
 
     let resp;
     try {
-      const searchSource = new SearchSource();
-      searchSource.setField('index', indexPattern);
-      searchSource.setField('size', 0);
-      searchSource.setField('aggs', aggConfigs.toDsl());
-      searchSource.setField('filter', () => {
-        const filters = [];
-        filters.push(createExtentFilter(extent, geoField.name, geoField.type));
-        filters.push(timeService.createFilter(indexPattern, timeFilters));
-        return filters;
+
+      const searchSource = ESGeohashGridSource._getSearchSource({
+        indexPattern: indexPattern,
+        filter: () => {
+          const filters = [];
+          filters.push(createExtentFilter(extent, geoField.name, geoField.type));
+          filters.push(timeService.createFilter(indexPattern, timeFilters));
+          return filters;
+        },
+        aggConfigs: aggConfigs,
+        query: query
       });
-      searchSource.setField('query', query);
 
       resp = await fetchSearchSourceAndRecordWithInspector({
         searchSource,

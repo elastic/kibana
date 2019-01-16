@@ -200,22 +200,15 @@ export class ALayer {
   }
 
   renderFitToBoundsButton({ onFitToData }) {
-    // return (<EuiButtonIcon></EuiButtonIcon>);
-
-
     const onClick = async () => {
-      const bounds = await this.getBounds();
-      onFitToData(bounds);
+      onFitToData(this.getId());
     };
-
     const iconName = this.getLayerTypeIconName();
     return (
       <EuiButtonIcon iconType={iconName} iconSide="right" onClick={onClick}>
       Fit
       </EuiButtonIcon>
     );
-
-
   }
 
   getLayerTypeIconName() {

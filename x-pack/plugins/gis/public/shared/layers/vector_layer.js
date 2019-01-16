@@ -133,6 +133,10 @@ export class VectorLayer extends ALayer {
     return this._style.getTOCDetails();
   }
 
+  async getBounds() {
+    return await this._source.getBounds();
+  }
+
   async getStringFields() {
     return await this._source.getStringFields();
   }
@@ -271,7 +275,6 @@ export class VectorLayer extends ALayer {
     });
     return await Promise.all(joinSyncs);
   }
-
 
   async _syncSource({ startLoading, stopLoading, onLoadError, dataFilters }) {
     const sourceDataId = 'source';
