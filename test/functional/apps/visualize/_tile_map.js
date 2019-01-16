@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }) {
     describe('incomplete config', function describeIndexTests() {
 
       before(async function () {
-        browser.setWindowSize(1280, 1000);
+        await browser.setWindowSize(1280, 1000);
 
         const fromTime = '2015-09-19 06:31:44.000';
         const toTime = '2015-09-23 18:31:44.000';
@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('complete config', function describeIndexTests() {
       before(async function () {
-        browser.setWindowSize(1280, 1000);
+        await browser.setWindowSize(1280, 1000);
 
         const fromTime = '2015-09-19 06:31:44.000';
         const toTime = '2015-09-23 18:31:44.000';
@@ -224,7 +224,7 @@ export default function ({ getService, getPageObjects }) {
       const toastDefaultLife = 6000;
 
       before(async function () {
-        browser.setWindowSize(1280, 1000);
+        await browser.setWindowSize(1280, 1000);
 
         log.debug('navigateToApp visualize');
         await PageObjects.visualize.navigateToNewVisualization();
@@ -256,12 +256,12 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show warning at zoom 10',
         async () => {
-          testSubjects.existOrFail('maxZoomWarning');
+          await testSubjects.existOrFail('maxZoomWarning');
         });
 
       it('should continue providing zoom warning if left alone',
         async () => {
-          testSubjects.existOrFail('maxZoomWarning');
+          await testSubjects.existOrFail('maxZoomWarning');
         });
 
       it('should suppress zoom warning if suppress warnings button clicked',
