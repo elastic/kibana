@@ -12,13 +12,7 @@ import { AbstractESSource } from '../es_source';
 import { HeatmapLayer } from '../../heatmap_layer';
 import { VectorLayer } from '../../vector_layer';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import {
-  indexPatternService,
-  fetchSearchSourceAndRecordWithInspector,
-  SearchSource,
-  timeService,
-} from '../../../../kibana_services';
-import { createExtentFilter, makeGeohashGridPolygon } from '../../../../elasticsearch_geo_utils';
+import { makeGeohashGridPolygon } from '../../../../elasticsearch_geo_utils';
 import { AggConfigs } from 'ui/vis/agg_configs';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { convertToGeoJson } from './convert_to_geojson';
@@ -105,11 +99,10 @@ export class ESGeohashGridSource extends AbstractESSource {
   async getGeoJsonWithMeta({ layerName }, searchFilters) {
     let targetPrecision = ZOOM_TO_PRECISION[Math.round(searchFilters.zoom)];
     targetPrecision += 0;//should have refinement param, similar to heatmap style
-    const featureCollection = await this.getGeoJsonPoints({
+    const featureCollection = await this.getGeoJsonPoints({ layerName }, {
       precision: targetPrecision,
-      extent: searchFilters.buffer,
+      buffer: searchFilters.buffer,
       timeFilters: searchFilters.timeFilters,
-      layerName,
       query: searchFilters.query,
     });
 
@@ -142,56 +135,14 @@ export class ESGeohashGridSource extends AbstractESSource {
     });
   }
 
-  static _getSearchSource({ indexPattern, filter, query, aggConfigs }) {
-    const searchSource = new SearchSource();
-    searchSource.setField('index', indexPattern);
-    searchSource.setField('size', 0);
-    searchSource.setField('aggs', aggConfigs.toDsl());
-    searchSource.setField('filter', filter);
-    searchSource.setField('query', query);
-    return searchSource;
-  }
 
-  async getGeoJsonPoints({ precision, extent, timeFilters, layerName, query }) {
+  async getGeoJsonPoints({ layerName }, { precision, buffer, timeFilters, query }) {
 
-    let indexPattern;
-    try {
-      indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
-    } catch (error) {
-      throw new Error(`Unable to find Index pattern ${this._descriptor.indexPatternId}`);
-    }
-
-    const geoField = indexPattern.fields.byName[this._descriptor.geoField];
-    if (!geoField) {
-      throw new Error(`Index pattern ${indexPattern.title} no longer contains the geo field ${this._descriptor.geoField}`);
-    }
-
+    const indexPattern = await this._getIndexPattern();
+    const searchSource  = this._makeSearchSource({ buffer, timeFilters, query }, 0);
     const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(precision), aggSchemas.all);
-
-    let resp;
-    try {
-
-      const searchSource = ESGeohashGridSource._getSearchSource({
-        indexPattern: indexPattern,
-        filter: () => {
-          const filters = [];
-          filters.push(createExtentFilter(extent, geoField.name, geoField.type));
-          filters.push(timeService.createFilter(indexPattern, timeFilters));
-          return filters;
-        },
-        aggConfigs: aggConfigs,
-        query: query
-      });
-
-      resp = await fetchSearchSourceAndRecordWithInspector({
-        searchSource,
-        requestName: layerName,
-        requestId: this._descriptor.id,
-        requestDesc: 'Elasticsearch geohash_grid aggregation request'
-      });
-    } catch(error) {
-      throw new Error(`Elasticsearch search request failed, error: ${error.message}`);
-    }
+    searchSource.setField('aggs', aggConfigs.toDsl());
+    const resp = await this._runEsQuery(layerName, searchSource, 'Elasticsearch geohash_grid aggregation request');
 
     const tabifiedResp = tabifyAggResponse(aggConfigs, resp);
     const { featureCollection } = convertToGeoJson(tabifiedResp);

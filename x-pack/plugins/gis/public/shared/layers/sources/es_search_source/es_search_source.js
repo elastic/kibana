@@ -10,12 +10,9 @@ import uuid from 'uuid/v4';
 
 import { AbstractESSource } from '../es_source';
 import {
-  fetchSearchSourceAndRecordWithInspector,
   indexPatternService,
-  SearchSource,
 } from '../../../../kibana_services';
-import { hitsToGeoJson, createExtentFilter } from '../../../../elasticsearch_geo_utils';
-import { timefilter } from 'ui/timefilter/timefilter';
+import { hitsToGeoJson } from '../../../../elasticsearch_geo_utils';
 import { ESSourceDetails } from '../../../components/es_source_details';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -89,51 +86,18 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   async getGeoJsonWithMeta({ layerName }, searchFilters) {
-    const indexPattern = await this._getIndexPattern();
 
-    const geoField = indexPattern.fields.byName[this._descriptor.geoField];
-    if (!geoField) {
-      throw new Error(`Index pattern ${indexPattern.title} no longer contains the geo field ${this._descriptor.geoField}`);
-    }
 
-    let resp;
-    try {
-      const searchSource = new SearchSource();
-      searchSource.setField('index', indexPattern);
-      searchSource.setField('size', this._descriptor.limit);
-      // Setting "fields" instead of "source: { includes: []}"
-      // because SearchSource automatically adds the following by default
-      // 1) all scripted fields
-      // 2) docvalue_fields value is added for each date field in an index - see getComputedFields
-      // By setting "fields", SearchSource removes all of defaults
-      searchSource.setField('fields', searchFilters.fieldNames);
-      const isTimeAware = await this.isTimeAware();
-      searchSource.setField('filter', () => {
-        const filters = [];
-        //todo: this seems somewhat redundant. Have this be passed in as arguments in the getGeoJson.
-        //no need to submit time and extent filters in the method if they are not supposed to be applied anyway
-        if (this.isFilterByMapBounds()) {
-          filters.push(createExtentFilter(searchFilters.buffer, geoField.name, geoField.type));
-        }
-
-        if (isTimeAware) {
-          filters.push(timefilter.createFilter(indexPattern, searchFilters.timeFilters));
-        }
-        return filters;
-      });
-      searchSource.setField('query', searchFilters.query);
-
-      resp = await fetchSearchSourceAndRecordWithInspector({
-        searchSource,
-        requestName: layerName,
-        requestId: this._descriptor.id,
-        requestDesc: 'Elasticsearch document request'
-      });
-    } catch(error) {
-      throw new Error(`Elasticsearch search request failed, error: ${error.message}`);
-    }
+    const searchSource = await this._makeSearchSource(searchFilters, this._descriptor.limit);
+    // Setting "fields" instead of "source: { includes: []}"
+    // because SearchSource automatically adds the following by default
+    // 1) all scripted fields
+    // 2) docvalue_fields value is added for each date field in an index - see getComputedFields
+    // By setting "fields", SearchSource removes all of defaults
+    searchSource.setField('fields', searchFilters.fieldNames);
 
     let featureCollection;
+    const indexPattern = await this._getIndexPattern();
     const flattenHit = hit => {
       const properties = indexPattern.flattenHit(hit);
       // remove metaFields
@@ -142,7 +106,11 @@ export class ESSearchSource extends AbstractESSource {
       });
       return properties;
     };
+
+
+    const resp = await this._runEsQuery(layerName, searchSource, 'Elasticsearch document request');
     try {
+      const geoField = await this._getGeoField();
       featureCollection = hitsToGeoJson(resp.hits.hits, flattenHit, geoField.name, geoField.type);
     } catch(error) {
       throw new Error(`Unable to convert search response to geoJson feature collection, error: ${error.message}`);

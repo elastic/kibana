@@ -144,11 +144,10 @@ export class HeatmapLayer extends AbstractLayer {
     startLoading('source', requestToken, dataMeta);
     try {
       const layerName = await this.getDisplayName();
-      const data = await this._source.getGeoJsonPoints({
+      const data = await this._source.getGeoJsonPoints({ layerName }, {
         precision,
         extent: buffer,
         timeFilters,
-        layerName,
         query,
       });
       stopLoading('source', requestToken, data);
