@@ -66,7 +66,6 @@ class RequestDetailsStats extends Component {
     // TODO: Replace by property once available
     return (
       <EuiTable
-        style={{ tableLayout: 'auto' }}
         responsive={false}
       >
         <EuiTableBody>
