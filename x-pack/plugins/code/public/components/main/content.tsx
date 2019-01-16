@@ -6,6 +6,7 @@
 
 // @ts-ignore
 import { EuiButton, EuiButtonGroup } from '@elastic/eui';
+import 'github-markdown-css/github-markdown.css';
 import React from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
 import Markdown from 'react-markdown';
