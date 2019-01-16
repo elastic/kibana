@@ -229,18 +229,7 @@ export const Explorer = injectI18n(
       }
 
       if (action === EXPLORER_ACTION.REDRAW) {
-        if (
-          mlCheckboxShowChartsService.state.get('showCharts') &&
-          this.state.anomalyChartRecords.length > 0
-        ) {
-          const swimlaneWidth = getSwimlaneContainerWidth(this.state.noInfluencersConfigured);
-          const { selectedJobs } = this.state;
-          const timerange = getSelectionTimeRange(
-            this.state.selectedCells,
-            getSwimlaneBucketInterval(selectedJobs, swimlaneWidth).asSeconds()
-          );
-          this.updateCharts(this.state.anomalyChartRecords, timerange.earliestMs, timerange.latestMs);
-        }
+        this.updateExplorer();
       }
     });
 
