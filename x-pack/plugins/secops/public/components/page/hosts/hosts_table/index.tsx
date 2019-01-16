@@ -5,7 +5,7 @@
  */
 
 import { EuiBadge, EuiLink } from '@elastic/eui';
-import { isNil, noop } from 'lodash/fp';
+import { get, isNil, noop } from 'lodash/fp';
 import moment from 'moment';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -132,7 +132,7 @@ const getHostsColumns = () => [
                     onToggleDataProviderEnabled={noop}
                   />
                 </DragEffects>
-              ) : isNil(host.host!.id!) ? (
+              ) : isNil(get('host.id', host)) ? (
                 <>{hostName}</>
               ) : (
                 <EuiLink href={`#/link-to/hosts/${encodeURIComponent(host.host!.id!)}`}>

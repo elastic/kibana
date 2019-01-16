@@ -22,6 +22,7 @@ export const hostsQuery = gql`
             _id
             firstSeen
             host {
+              id
               name
               os {
                 name
