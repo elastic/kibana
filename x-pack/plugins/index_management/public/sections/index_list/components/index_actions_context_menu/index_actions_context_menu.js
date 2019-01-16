@@ -508,7 +508,7 @@ class IndexActionsContextMenuUi extends Component {
             >
               <p>
                 <FormattedMessage
-                  id="xpack.idxMgmt.indexActionsMenu.deleteEntity.deleteEntityWarningDescription"
+                  id="xpack.idxMgmt.indexActionsMenu.freezeEntity.freezeEntityWarningDescription"
                   defaultMessage="
                     A frozen index has little overhead on the cluster and is blocked for write operations.
                     You can search a frozen index, but expect queries to be slower.
