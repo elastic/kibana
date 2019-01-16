@@ -31,6 +31,7 @@ const FileTreeContainer = styled.div`
   flex-shrink: 1;
   overflow: auto;
   padding: 20px 16px;
+  background-color: #f5f7fa;
 `;
 
 class CodeSideTabs extends React.PureComponent<RouteComponentProps<MainRouteParams>> {

@@ -126,7 +126,7 @@ const elasticLight = {
   tag: '#DD0A73',
   symbol: '#A30000',
   foreground: '#3F3F3F',
-  editorBackground: '#F5F5F5',
+  editorBackground: '#FFFFFF',
   lineNumbers: '#D9D9D9',
 };
 
