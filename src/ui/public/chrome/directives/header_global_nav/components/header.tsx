@@ -56,6 +56,8 @@ import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderNavControls } from './header_nav_controls';
 
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
+import { RecentlyAccessedHistoryItem } from 'ui/persisted_log';
 import { ChromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
 import { NavControlSide, NavLink } from '../';
 import { Breadcrumb } from '../../../../../../core/public/chrome';
@@ -66,6 +68,7 @@ interface Props {
   homeHref: string;
   isVisible: boolean;
   navLinks$: Rx.Observable<NavLink[]>;
+  recentlyAccessed$: Rx.Observable<RecentlyAccessedHistoryItem[]>;
   navControls: ChromeHeaderNavControlsRegistry;
   intl: InjectedIntl;
   links: string;
@@ -83,9 +86,13 @@ interface State {
   showScrollbar: boolean;
   outsideClickDisabled: boolean;
   isManagingFocus: boolean;
+  navLinks: NavLink[];
+  recentlyAccessed: RecentlyAccessedHistoryItem[];
 }
 
 class HeaderUI extends Component<Props, State> {
+  private subscription?: Rx.Subscription;
+
   constructor(props: Props) {
     super(props);
 
@@ -99,7 +106,26 @@ class HeaderUI extends Component<Props, State> {
       showScrollbar: false,
       outsideClickDisabled: true,
       isManagingFocus: false,
+      navLinks: [],
+      recentlyAccessed: [],
     };
+  }
+
+  public componentDidMount() {
+    this.subscription = Rx.combineLatest(
+      this.props.navLinks$,
+      this.props.recentlyAccessed$
+    ).subscribe({
+      next: ([navLinks, recentlyAccessed]) => {
+        this.setState({ navLinks, recentlyAccessed });
+      },
+    });
+  }
+
+  public componentWillUnmount() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   public renderLogo() {
@@ -120,170 +146,18 @@ class HeaderUI extends Component<Props, State> {
   public renderMenuTrigger() {
     return (
       <EuiHeaderSectionItemButton aria-label="Toggle side navigation" onClick={this.toggleOpen}>
-        <EuiIcon type="apps" href="#" size="m" />
+        <EuiIcon type="apps" size="m" />
       </EuiHeaderSectionItemButton>
     );
   }
 
   public render() {
-    const { appTitle, breadcrumbs$, isVisible, navControls, navLinks$ } = this.props;
+    const { appTitle, breadcrumbs$, isVisible, navControls } = this.props;
+    const { navLinks, recentlyAccessed } = this.state;
 
     if (!isVisible) {
       return null;
     }
-
-    const topLinks = [
-      {
-        label: 'Recently viewed',
-        iconType: 'clock',
-        size: 's',
-        style: { color: 'inherit' },
-        'aria-label': 'Recently viewed items',
-        onClick: () => this.expandFlyout(recentLinks, 'Recent items'), // TODO replace recentLinks with recentlyAccessed links
-        extraAction: {
-          color: 'subdued',
-          iconType: 'arrowRight',
-          iconSize: 's',
-          'aria-label': 'Expand to view recent apps and objects',
-          onClick: () => this.expandFlyout(recentLinks, 'Recent items'), // TODO replace recentLinks with recentlyAccessed links
-          alwaysShow: true,
-        },
-      },
-    ];
-
-    const exploreLinks = [
-      {
-        label: 'Canvas',
-        href: '/#/layout/nav-drawer',
-        iconType: 'canvasApp',
-        size: 's',
-        style: { color: 'inherit' },
-        'aria-label': 'Canvas',
-        isActive: true,
-        extraAction: {
-          color: 'subdued',
-          iconType: 'pinFilled',
-          iconSize: 's',
-          'aria-label': 'Pin to top',
-          alwaysShow: true,
-        },
-      },
-      {
-        label: 'Discover',
-        href: '/#/layout/nav-drawer',
-        iconType: 'discoverApp',
-        size: 's',
-        style: { color: 'inherit' },
-        'aria-label': 'Discover',
-        extraAction: {
-          color: 'subdued',
-          iconType: 'pin',
-          iconSize: 's',
-          'aria-label': 'Pin to top',
-        },
-      },
-      {
-        label: 'Visualize',
-        href: '/#/layout/nav-drawer',
-        iconType: 'visualizeApp',
-        size: 's',
-        style: { color: 'inherit' },
-        'aria-label': 'Visualize',
-        extraAction: {
-          color: 'subdued',
-          iconType: 'pin',
-          iconSize: 's',
-          'aria-label': 'Pin to top',
-        },
-      },
-      {
-        label: 'Dashboard',
-        href: '/#/layout/nav-drawer',
-        iconType: 'dashboardApp',
-        size: 's',
-        style: { color: 'inherit' },
-        'aria-label': 'Dashboard',
-        extraAction: {
-          color: 'subdued',
-          iconType: 'pin',
-          iconSize: 's',
-          'aria-label': 'Pin to top',
-        },
-      },
-      {
-        label: 'Machine learning',
-        href: '/#/layout/nav-drawer',
-        iconType: 'machineLearningApp',
-        size: 's',
-        style: { color: 'inherit' },
-        'aria-label': 'Machine learning',
-        extraAction: {
-          color: 'subdued',
-          iconType: 'pin',
-          iconSize: 's',
-          'aria-label': 'Pin to top',
-        },
-      },
-      {
-        label: 'Graph',
-        href: '/#/layout/nav-drawer',
-        iconType: 'graphApp',
-        size: 's',
-        style: { color: 'inherit' },
-        'aria-label': 'Graph',
-        extraAction: {
-          color: 'subdued',
-          iconType: 'pin',
-          iconSize: 's',
-          'aria-label': 'Pin to top',
-        },
-      },
-    ];
-
-    const recentLinks = [
-      {
-        label: 'My dashboard',
-        href: '/#/layout/nav-drawer',
-        iconType: 'dashboardApp',
-        size: 's',
-        style: { color: 'inherit' },
-        'aria-label': 'My dashboard',
-        extraAction: {
-          color: 'subdued',
-          iconType: 'starEmpty',
-          iconSize: 's',
-          'aria-label': 'Add to favorites',
-        },
-      },
-      {
-        label: 'My workpad',
-        href: '/#/layout/nav-drawer',
-        iconType: 'canvasApp',
-        size: 's',
-        style: { color: 'inherit' },
-        'aria-label': 'My workpad',
-        extraAction: {
-          color: 'subdued',
-          iconType: 'starEmpty',
-          iconSize: 's',
-          'aria-label': 'Add to favorites',
-        },
-      },
-      {
-        label: 'My logs',
-        href: '/#/layout/nav-drawer',
-        iconType: 'loggingApp',
-        size: 's',
-        style: { color: 'inherit' },
-        'aria-label': 'My logs',
-        extraAction: {
-          color: 'subdued',
-          iconType: 'starEmpty',
-          iconSize: 's',
-          'aria-label': 'Add to favorites',
-        },
-      },
-    ];
 
     const leftNavControls = navControls.bySide[NavControlSide.Left];
     const rightNavControls = navControls.bySide[NavControlSide.Right];
@@ -300,7 +174,7 @@ class HeaderUI extends Component<Props, State> {
 
             <HeaderNavControls navControls={leftNavControls} />
           </EuiHeaderSection>
-          
+
           <HeaderBreadcrumbs appTitle={appTitle} breadcrumbs$={breadcrumbs$} />
 
           <EuiHeaderSection side="right">
@@ -323,10 +197,29 @@ class HeaderUI extends Component<Props, State> {
             showScrollbar={this.state.showScrollbar}
           >
             <EuiNavDrawerMenu id="navDrawerMenu">
-              <EuiListGroup listItems={topLinks} />
+              <EuiListGroup
+                listItems={recentlyAccessed.map(item => ({
+                  label: item.label,
+                  href: chrome.addBasePath(item.link),
+                  iconType: undefined,
+                  size: 's',
+                  style: { color: 'inherit' },
+                  'aria-label': item.label,
+                }))}
+              />
               <EuiHorizontalRule margin="none" />
               {/* TODO replace exploreLinks with navLinks */}
-              <EuiListGroup listItems={exploreLinks} />
+              <EuiListGroup
+                listItems={navLinks.map(navLink => ({
+                  label: navLink.title,
+                  href: navLink.lastSubUrl && !navLink.active ? navLink.lastSubUrl : navLink.url,
+                  iconType: navLink.euiIconType,
+                  size: 's',
+                  style: { color: 'inherit' },
+                  'aria-label': navLink.title,
+                  isActive: navLink.active,
+                }))}
+              />
             </EuiNavDrawerMenu>
             <EuiNavDrawerFlyout
               id="navDrawerFlyout"
