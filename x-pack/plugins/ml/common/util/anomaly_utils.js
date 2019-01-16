@@ -24,29 +24,50 @@ const DISPLAY_ACTUAL_FUNCTIONS = ['count', 'distinct_count', 'lat_long', 'mean',
 const DISPLAY_TYPICAL_FUNCTIONS = ['count', 'distinct_count', 'lat_long', 'mean', 'max', 'min', 'sum',
   'median', 'varp', 'info_content', 'time'];
 
+let severityTypes;
+
+function getSeverityTypes() {
+  if (severityTypes) {
+    return severityTypes;
+  }
+
+  return severityTypes = {
+    critical: { id: 'critical', label: i18n.translate('xpack.ml.anomalyUtils.severity.criticalLabel', {
+      defaultMessage: 'critical',
+    }) },
+    major: { id: 'major', label: i18n.translate('xpack.ml.anomalyUtils.severity.majorLabel', {
+      defaultMessage: 'major',
+    }) },
+    minor: { id: 'minor', label: i18n.translate('xpack.ml.anomalyUtils.severity.minorLabel', {
+      defaultMessage: 'minor',
+    }) },
+    warning: { id: 'warning', label: i18n.translate('xpack.ml.anomalyUtils.severity.warningLabel', {
+      defaultMessage: 'warning',
+    }) },
+    unknown: { id: 'unknown', label: i18n.translate('xpack.ml.anomalyUtils.severity.unknownLabel', {
+      defaultMessage: 'unknown',
+    }) },
+    low: { id: 'low', label: i18n.translate('xpack.ml.anomalyUtils.severityWithLow.lowLabel', {
+      defaultMessage: 'low',
+    }) },
+  };
+}
+
 // Returns a severity label (one of critical, major, minor, warning or unknown)
 // for the supplied normalized anomaly score (a value between 0 and 100).
 export function getSeverity(normalizedScore) {
+  const severityTypesList = getSeverityTypes();
+
   if (normalizedScore >= 75) {
-    return { id: 'critical', label: i18n.translate('xpack.ml.anomaliesTable.severity.criticalLabel', {
-      defaultMessage: 'critical',
-    }) };
+    return severityTypesList.critical;
   } else if (normalizedScore >= 50) {
-    return { id: 'major', label: i18n.translate('xpack.ml.anomaliesTable.severity.majorLabel', {
-      defaultMessage: 'major',
-    }) };
+    return severityTypesList.major;
   } else if (normalizedScore >= 25) {
-    return { id: 'minor', label: i18n.translate('xpack.ml.anomaliesTable.severity.minorLabel', {
-      defaultMessage: 'minor',
-    }) };
+    return severityTypesList.minor;
   } else if (normalizedScore >= 0) {
-    return { id: 'warning', label: i18n.translate('xpack.ml.anomaliesTable.severity.warningLabel', {
-      defaultMessage: 'warning',
-    }) };
+    return severityTypesList.warning;
   } else {
-    return { id: 'unknown', label: i18n.translate('xpack.ml.anomaliesTable.severity.unknownLabel', {
-      defaultMessage: 'unknown',
-    }) };
+    return severityTypesList.unknown;
   }
 }
 
@@ -54,30 +75,20 @@ export function getSeverity(normalizedScore) {
 // for the supplied normalized anomaly score (a value between 0 and 100), where scores
 // less than 3 are assigned a severity of 'low'.
 export function getSeverityWithLow(normalizedScore) {
+  const severityTypesList = getSeverityTypes();
+
   if (normalizedScore >= 75) {
-    return { id: 'critical', label: i18n.translate('xpack.ml.anomaliesTable.severityWithLow.criticalLabel', {
-      defaultMessage: 'critical',
-    }) };
+    return severityTypesList.critical;
   } else if (normalizedScore >= 50) {
-    return { id: 'major', label: i18n.translate('xpack.ml.anomaliesTable.severityWithLow.majorLabel', {
-      defaultMessage: 'major',
-    }) };
+    return severityTypesList.major;
   } else if (normalizedScore >= 25) {
-    return { id: 'minor', label: i18n.translate('xpack.ml.anomaliesTable.severityWithLow.minorLabel', {
-      defaultMessage: 'minor',
-    }) };
+    return severityTypesList.minor;
   } else if (normalizedScore >= 3) {
-    return { id: 'warning', label: i18n.translate('xpack.ml.anomaliesTable.severityWithLow.warningLabel', {
-      defaultMessage: 'warning',
-    }) };
+    return severityTypesList.warning;
   } else if (normalizedScore >= 0) {
-    return { id: 'low', label: i18n.translate('xpack.ml.anomaliesTable.severityWithLow.lowLabel', {
-      defaultMessage: 'low',
-    }) };
+    return severityTypesList.low;
   } else {
-    return { id: 'unknown', label: i18n.translate('xpack.ml.anomaliesTable.severityWithLow.unknownLabel', {
-      defaultMessage: 'unknown',
-    }) };
+    return severityTypesList.unknown;
   }
 }
 
@@ -104,19 +115,19 @@ export function getSeverityColor(normalizedScore) {
 // which ranges from -5 to +5.
 export function getMultiBucketImpactLabel(multiBucketImpact) {
   if (multiBucketImpact >= MULTI_BUCKET_IMPACT.HIGH) {
-    return i18n.translate('xpack.ml.anomaliesTable.multiBucketImpact.highLabel', {
+    return i18n.translate('xpack.ml.anomalyUtils.multiBucketImpact.highLabel', {
       defaultMessage: 'high',
     });
   } else if (multiBucketImpact >= MULTI_BUCKET_IMPACT.MEDIUM) {
-    return i18n.translate('xpack.ml.anomaliesTable.multiBucketImpact.mediumLabel', {
+    return i18n.translate('xpack.ml.anomalyUtils.multiBucketImpact.mediumLabel', {
       defaultMessage: 'medium',
     });
   } else if (multiBucketImpact >= MULTI_BUCKET_IMPACT.LOW) {
-    return i18n.translate('xpack.ml.anomaliesTable.multiBucketImpact.lowLabel', {
+    return i18n.translate('xpack.ml.anomalyUtils.multiBucketImpact.lowLabel', {
       defaultMessage: 'low',
     });
   } else {
-    return i18n.translate('xpack.ml.anomaliesTable.multiBucketImpact.noneLabel', {
+    return i18n.translate('xpack.ml.anomalyUtils.multiBucketImpact.noneLabel', {
       defaultMessage: 'none',
     });
   }
