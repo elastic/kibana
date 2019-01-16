@@ -37,6 +37,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const browser = getService('browser');
   const retry = getService('retry');
+  const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize', 'discover']);
 
@@ -130,13 +131,9 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedExpressionFieldName);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
-        await PageObjects.visualize.openInspector();
-        await PageObjects.visualize.setInspectorTablePageSize(50);
-        const data = await PageObjects.visualize.getInspectorTableData();
-        await log.debug('getDataTableData = ' + data);
-        await log.debug('data=' + data);
-        await log.debug('data.length=' + data.length);
-        expect(data).to.eql(expectedChartValues);
+        await inspector.open();
+        await inspector.setTablePageSize(50);
+        await inspector.expectTableData(expectedChartValues);
       });
     });
 
@@ -200,13 +197,9 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
-        await PageObjects.visualize.openInspector();
-        await PageObjects.visualize.setInspectorTablePageSize(50);
-        const data = await PageObjects.visualize.getInspectorTableData();
-        await log.debug('getDataTableData = ' + data);
-        await log.debug('data=' + data);
-        await log.debug('data.length=' + data.length);
-        expect(data).to.eql(expectedChartValues);
+        await inspector.open();
+        await inspector.setTablePageSize(50);
+        await inspector.expectTableData(expectedChartValues);
       });
     });
 
@@ -264,12 +257,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
-        await PageObjects.visualize.openInspector();
-        const data = await PageObjects.visualize.getInspectorTableData();
-        await log.debug('getDataTableData = ' + data);
-        await log.debug('data=' + data);
-        await log.debug('data.length=' + data.length);
-        expect(data).to.eql([
+        await inspector.open();
+        await inspector.expectTableData([
           ['good', '359'],
           ['bad', '27']
         ]);
@@ -330,12 +319,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
-        await PageObjects.visualize.openInspector();
-        const data = await PageObjects.visualize.getInspectorTableData();
-        await log.debug('getDataTableData = ' + data);
-        await log.debug('data=' + data);
-        await log.debug('data.length=' + data.length);
-        expect(data).to.eql([
+        await inspector.open();
+        await inspector.expectTableData([
           ['true', '359'],
           ['false', '27']
         ]);
@@ -396,13 +381,9 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
-        await PageObjects.visualize.openInspector();
-        await PageObjects.visualize.setInspectorTablePageSize(50);
-        const data = await PageObjects.visualize.getInspectorTableData();
-        await log.debug('getDataTableData = ' + data);
-        await log.debug('data=' + data);
-        await log.debug('data.length=' + data.length);
-        expect(data).to.eql([
+        await inspector.open();
+        await inspector.setTablePageSize(50);
+        await inspector.expectTableData([
           ['2015-09-17 20:00', '1'],
           ['2015-09-17 21:00', '1'],
           ['2015-09-17 23:00', '1'],
