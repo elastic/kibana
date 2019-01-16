@@ -272,7 +272,8 @@ const licenseWarning = (scope, { title, text }) => {
 const handleClickIncompatibleLicense = (scope, clusterName) => {
   licenseWarning(scope, {
     title: i18n.translate('xpack.monitoring.cluster.listing.incompatibleLicense.warningMessageTitle', {
-      defaultMessage: 'You can\'t view the {clusterName} cluster',
+      defaultMessage: 'You can\'t view the {clusterName} cluster'
+    }, {
       values: { clusterName: '"' + clusterName + '"' }
     }),
     text: (
@@ -284,7 +285,8 @@ const handleClickIncompatibleLicense = (scope, clusterName) => {
         </p>
         <p>
           {i18n.translate('xpack.monitoring.cluster.listing.incompatibleLicense.infoMessage', {
-            defaultMessage: 'Need to monitor multiple clusters? {getLicenseInfoLink} to enjoy multi-cluster monitoring.',
+            defaultMessage: 'Need to monitor multiple clusters? {getLicenseInfoLink} to enjoy multi-cluster monitoring.'
+          }, {
             values: {
               getLicenseInfoLink: (
                 <a href="https://www.elastic.co/subscriptions/xpack" target="_blank">
@@ -306,7 +308,8 @@ const handleClickInvalidLicense = (scope, clusterName) => {
 
   licenseWarning(scope, {
     title: i18n.translate('xpack.monitoring.cluster.listing.invalidLicense.warningMessageTitle', {
-      defaultMessage: 'You can\'t view the {clusterName} cluster',
+      defaultMessage: 'You can\'t view the {clusterName} cluster'
+    }, {
       values: {
         clusterName: '"' + clusterName + '"'
       }
@@ -320,7 +323,8 @@ const handleClickInvalidLicense = (scope, clusterName) => {
         </p>
         <p>
           {i18n.translate('xpack.monitoring.cluster.listing.invalidLicense.infoMessage', {
-            defaultMessage: 'Need a license? {getBasicLicenseLink} or {getLicenseInfoLink} to enjoy multi-cluster monitoring.',
+            defaultMessage: 'Need a license? {getBasicLicenseLink} or {getLicenseInfoLink} to enjoy multi-cluster monitoring.'
+          }, {
             values: {
               getBasicLicenseLink: (
                 <a href={licensingPath}>
