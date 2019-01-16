@@ -18,7 +18,6 @@ kbn-management-objects, kbn-management-app, .tab-management {
 
 #management-landing {
   display: flex;
-  flex-grow: 1;
 }
 
 .kbn-management-tab:first-letter {
@@ -43,4 +42,9 @@ kbn-management-objects-view {
   cursor: grabbing;
   cursor: -moz-grabbing;
   cursor: -webkit-grabbing;
+}
+
+// Hack because the management wrapper is flat HTML and needs a class
+.mgtPage__body {
+  max-width: map-get($euiBreakpoints, 'xl');
 }

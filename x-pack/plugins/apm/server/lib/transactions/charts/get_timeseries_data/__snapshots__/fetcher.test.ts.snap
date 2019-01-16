@@ -64,6 +64,11 @@ Array [
             "filter": Array [
               Object {
                 "term": Object {
+                  "processor.event": "transaction",
+                },
+              },
+              Object {
+                "term": Object {
                   "context.service.name": "myServiceName",
                 },
               },
