@@ -33,11 +33,11 @@ export class TypescriptServerLauncher implements ILanguageServerLauncher {
     if (!this.detach) {
       port = await getPort();
     }
-    const log = this.loggerFactory.getLogger(['LSP', `ts@${this.targetHost}:${port}`]);
+    const log = this.loggerFactory.getLogger(['code', `ts@${this.targetHost}:${port}`]);
     const proxy = new LanguageServerProxy(port, this.targetHost, log);
 
     if (this.detach) {
-      log.info('Detach mode, expected LSP launch externally');
+      log.info('Detach mode, expected langserver launch externally');
       proxy.onConnected(() => {
         this.isRunning = true;
       });

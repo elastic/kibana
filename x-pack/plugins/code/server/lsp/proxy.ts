@@ -7,7 +7,6 @@ import EventEmitter from 'events';
 import * as net from 'net';
 import {
   createMessageConnection,
-  Logger,
   MessageConnection,
   SocketMessageReader,
   SocketMessageWriter,
@@ -27,6 +26,7 @@ import {
 import { createConnection, IConnection } from 'vscode-languageserver/lib/main';
 
 import { LspRequest } from '../../model';
+import { Log } from '../log';
 import { HttpMessageReader } from './http_message_reader';
 import { HttpMessageWriter } from './http_message_writer';
 import { HttpRequestEmitter } from './http_request_emitter';
@@ -54,12 +54,12 @@ export class LanguageServerProxy implements ILanguageServerHandler {
   private replies = createRepliesMap();
   private readonly targetHost: string;
   private readonly targetPort: number;
-  private readonly logger?: Logger;
+  private readonly logger?: Log;
   private eventEmitter = new EventEmitter();
 
   private connectingPromise?: Promise<MessageConnection>;
 
-  constructor(targetPort: number, targetHost: string, logger?: Logger) {
+  constructor(targetPort: number, targetHost: string, logger?: Log) {
     this.targetHost = targetHost;
     this.targetPort = targetPort;
     this.logger = logger;
@@ -81,7 +81,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
     };
     return new Promise<ResponseMessage>((resolve, reject) => {
       if (this.logger) {
-        this.logger.log(`emit message ${JSON.stringify(message)}`);
+        this.logger.debug(`emit message ${JSON.stringify(message)}`);
       }
       if (isNotification) {
         // for language server as jdt, notification won't have a response message.
@@ -121,11 +121,11 @@ export class LanguageServerProxy implements ILanguageServerHandler {
   public listen() {
     this.conn.onRequest((method: string, ...params) => {
       if (this.logger) {
-        this.logger.log('received request method: ' + method);
+        this.logger.debug('received request method: ' + method);
       }
       return this.connect().then(clientConn => {
         if (this.logger) {
-          this.logger.log(`proxy method:${method} to Language Server `);
+          this.logger.debug(`proxy method:${method} to Language Server `);
         }
 
         return clientConn.sendRequest(method, ...params);
@@ -173,7 +173,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
         socket.on('close', () => this.onSocketClosed());
 
         if (this.logger) {
-          this.logger.info('JDT LS connection established on port ' + this.targetPort);
+          this.logger.info('Java langserver connection established on port ' + this.targetPort);
         }
 
         const reader = new SocketMessageReader(socket);
@@ -187,7 +187,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
       server.listen(this.targetPort, () => {
         server.removeListener('error', rej);
         if (this.logger) {
-          this.logger.info('Awaiting JDT LS connection on port ' + this.targetPort);
+          this.logger.info('Wait Java langserver connection on port ' + this.targetPort);
         }
       });
     });

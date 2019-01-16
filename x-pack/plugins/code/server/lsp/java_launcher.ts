@@ -9,7 +9,7 @@ import getPort from 'get-port';
 import * as glob from 'glob';
 import { platform as getOsPlatform } from 'os';
 import path from 'path';
-import { Logger } from '../log';
+import { Log } from '../log';
 import { ServerOptions } from '../server_options';
 import { LoggerFactory } from '../utils/log_factory';
 import { ILanguageServerLauncher } from './language_server_launcher';
@@ -34,7 +34,7 @@ export class JavaLauncher implements ILanguageServerLauncher {
     if (!this.detach) {
       port = await getPort();
     }
-    const log = this.loggerFactory.getLogger(['LSP', `java@${this.targetHost}:${port}`]);
+    const log = this.loggerFactory.getLogger(['code', `java@${this.targetHost}:${port}`]);
     const proxy = new LanguageServerProxy(port, this.targetHost, log);
     proxy.awaitServerConnection();
     if (this.detach) {
@@ -74,7 +74,7 @@ export class JavaLauncher implements ILanguageServerLauncher {
     });
   }
 
-  private spawnJava(installationPath: string, port: number, log: Logger) {
+  private spawnJava(installationPath: string, port: number, log: Log) {
     const launchersFound = glob.sync('**/plugins/org.eclipse.equinox.launcher_*.jar', {
       cwd: installationPath,
     });

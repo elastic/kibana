@@ -216,9 +216,7 @@ export function repositoryRoute(
         // Check if the repository exists
         await repoObjectClient.getRepository(repo.uri);
       } catch (error) {
-        const msg = `Repository not existed for ${repoUrl}`;
-        log.error(msg);
-        return Boom.badRequest(msg);
+        return Boom.badRequest(`Repository not existed for ${repoUrl}`);
       }
 
       try {
@@ -240,14 +238,11 @@ export function repositoryRoute(
     method: 'GET',
     async handler(req) {
       const repoUri = req.params.uri as string;
-      const log = new Log(req.server);
       try {
         const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
         return await repoObjectClient.getRepositoryConfig(repoUri);
       } catch (error) {
-        const msg = `Get repository config ${repoUri} error: ${error}`;
-        log.error(msg);
-        return Boom.notFound(msg);
+        return Boom.notFound(`Repository config ${repoUri} not exist`);
       }
     },
   });

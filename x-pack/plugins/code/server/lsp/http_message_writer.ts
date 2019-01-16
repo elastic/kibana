@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger } from 'vscode-jsonrpc';
 import { Message, ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { AbstractMessageWriter, MessageWriter } from 'vscode-jsonrpc/lib/messageWriter';
+import { Log } from '../log';
 
 import { RepliesMap } from './replies_map';
 
 export class HttpMessageWriter extends AbstractMessageWriter implements MessageWriter {
   private replies: RepliesMap;
-  private logger: Logger | undefined;
+  private logger: Log | undefined;
 
-  constructor(replies: RepliesMap, logger: Logger | undefined) {
+  constructor(replies: RepliesMap, logger: Log | undefined) {
     super();
     this.replies = replies;
     this.logger = logger;
