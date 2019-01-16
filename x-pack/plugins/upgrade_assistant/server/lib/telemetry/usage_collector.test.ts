@@ -1,0 +1,87 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import * as usageCollector from './usage_collector';
+
+/**
+ * Since these route callbacks are so thin, these serve simply as integration tests
+ * to ensure they're wired up to the lib functions correctly. Business logic is tested
+ * more thoroughly in the lib/telemetry tests.
+ */
+describe('Upgrade Assistant Usage Collector', () => {
+  let makeUsageCollectorStub: any;
+  let registerStub: any;
+  let server: any;
+  let callClusterStub: any;
+
+  beforeEach(() => {
+    makeUsageCollectorStub = jest.fn();
+    registerStub = jest.fn();
+    server = jest.fn().mockReturnValue({
+      usage: {
+        collectorSet: { makeUsageCollector: makeUsageCollectorStub, register: registerStub },
+        register: {},
+      },
+      savedObjects: {
+        getSavedObjectsRepository: jest.fn().mockImplementation(() => {
+          return {
+            get: () => {
+              return {
+                attributes: {
+                  'telemetry.ui_open.overview': 10,
+                  'telemetry.ui_open.cluster': 20,
+                  'telemetry.ui_open.indices': 30,
+                },
+              };
+            },
+          };
+        }),
+      },
+    });
+    callClusterStub = jest.fn().mockResolvedValue({
+      persistent: {},
+      transient: {
+        logger: {
+          deprecation: 'WARN',
+        },
+      },
+    });
+  });
+
+  describe('makeUpgradeAssistantUsageCollector', () => {
+    it('should call collectorSet.register', () => {
+      usageCollector.makeUpgradeAssistantUsageCollector(server());
+      expect(registerStub).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call makeUsageCollector with type = upgrade-assistant', () => {
+      usageCollector.makeUpgradeAssistantUsageCollector(server());
+      expect(makeUsageCollectorStub).toHaveBeenCalledTimes(1);
+      expect(makeUsageCollectorStub.mock.calls[0][0].type).toBe('upgrade-assistant');
+    });
+
+    it('fetchUpgradeAssistantMetrics should return correct info', async () => {
+      usageCollector.makeUpgradeAssistantUsageCollector(server());
+      const upgradeAssistantStats = await makeUsageCollectorStub.mock.calls[0][0].fetch(
+        callClusterStub
+      );
+      expect(upgradeAssistantStats).toEqual({
+        telemetry: {
+          ui_open: {
+            overview: 10,
+            cluster: 20,
+            indices: 30,
+          },
+          features: {
+            deprecation_logging: {
+              enabled: true,
+            },
+          },
+        },
+      });
+    });
+  });
+});
