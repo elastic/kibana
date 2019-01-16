@@ -53,6 +53,7 @@ export enum FileTreeItemType {
   File,
   Directory,
   Submodule,
+  Link,
 }
 
 export interface WorkerResult {

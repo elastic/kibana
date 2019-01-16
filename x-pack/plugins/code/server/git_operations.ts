@@ -41,15 +41,30 @@ async function checkExists<R>(func: () => Promise<R>, message: string): Promise<
 }
 
 function entry2Tree(entry: TreeEntry): FileTree {
+  let type: FileTreeItemType;
+  switch (entry.filemode()) {
+    case TreeEntry.FILEMODE.LINK:
+      type = FileTreeItemType.Link;
+      break;
+    case TreeEntry.FILEMODE.COMMIT:
+      type = FileTreeItemType.Submodule;
+      break;
+    case TreeEntry.FILEMODE.TREE:
+      type = FileTreeItemType.Directory;
+      break;
+    case TreeEntry.FILEMODE.BLOB:
+    case TreeEntry.FILEMODE.EXECUTABLE:
+      type = FileTreeItemType.File;
+      break;
+    default:
+      // @ts-ignore
+      throw new Error('unreadable file');
+  }
   return {
     name: entry.name(),
     path: entry.path(),
     sha1: entry.sha(),
-    type: entry.isDirectory()
-      ? FileTreeItemType.Directory
-      : entry.isSubmodule()
-      ? FileTreeItemType.Submodule
-      : FileTreeItemType.File,
+    type,
   };
 }
 
@@ -74,7 +89,7 @@ export class GitOperations {
       () => commit.getEntry(path),
       `file ${uri}/${path} not found `
     );
-    if (entry.isFile()) {
+    if (entry.isFile() || entry.filemode() === TreeEntry.FILEMODE.LINK) {
       return await entry.getBlob();
     } else {
       throw Boom.unsupportedMediaType(`${uri}/${path} is not a file.`);
