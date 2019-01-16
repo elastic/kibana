@@ -24,9 +24,11 @@ import { RootState } from '../../reducers';
 import { hasMoreCommitsSelector, treeCommitsSelector } from '../../selectors';
 import { history } from '../../utils/url';
 import { Editor } from '../editor/editor';
+import { UnsupportedFileIcon } from '../shared/icons';
 import { Blame } from './blame';
 import { CommitHistory } from './commit_history';
 import { Directory } from './directory';
+import { UnsupportedFile } from './unsupported_file';
 
 const LARGE_Z_INDEX_NUMBER = 99;
 
@@ -236,7 +238,16 @@ class CodeContent extends React.PureComponent<Props> {
         if (!file) {
           return null;
         }
-        const { lang: fileLanguage, content: fileContent, url } = file;
+        const { lang: fileLanguage, content: fileContent, url, isUnsupported } = file;
+        if (isUnsupported) {
+          return (
+            <UnsupportedFile
+              icon={<UnsupportedFileIcon />}
+              title={<h2>Unsupported File</h2>}
+              content="Unfortunately that’s an unsupported file type and we’re unable to render it here."
+            />
+          );
+        }
         if (fileLanguage === 'markdown') {
           return (
             <div className="markdown-body markdownContainer">
