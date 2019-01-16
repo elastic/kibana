@@ -36,7 +36,7 @@ import { loadIndices } from '../../services/api';
 import { API_STATUS } from '../../constants';
 import { SectionError } from '../section_error';
 import { FormEntryRow } from '../form_entry_row';
-import { advancedSettingsFields } from './advanced_settings_fields';
+import { advancedSettingsFields, emptyAdvancedSettings } from './advanced_settings_fields';
 
 const indexNameIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
@@ -53,7 +53,7 @@ const getEmptyFollowerIndex = (remoteClusters) => ({
   name: '',
   remoteCluster: remoteClusters ? getFirstConnectedCluster(remoteClusters).name : '',
   leaderIndex: '',
-  ...advancedSettingsFields.reduce((acc, advancedSetting) => ({ ...acc, [advancedSetting.field]: '' }), {})
+  ...emptyAdvancedSettings,
 });
 
 /**

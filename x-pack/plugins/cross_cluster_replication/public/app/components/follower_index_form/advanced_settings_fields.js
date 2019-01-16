@@ -144,3 +144,7 @@ export const advancedSettingsFields = [
     validator: Joi.string().empty(''),
   },
 ];
+
+export const emptyAdvancedSettings = advancedSettingsFields.reduce((obj, advancedSetting) => {
+  return { ...obj, [advancedSetting.field]: '' };
+}, {});
