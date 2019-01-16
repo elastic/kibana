@@ -9,6 +9,7 @@ import {
   CloneProgress,
   CloneWorkerProgress,
   CloneWorkerResult,
+  RepositoryUri,
   WorkerReservedProgress,
 } from '../../model';
 import { getDefaultBranch, getHeadRevision } from '../git_operations';
@@ -63,7 +64,7 @@ export abstract class AbstractGitWorker extends AbstractWorker {
     return await super.onJobCompleted(job, res);
   }
 
-  public async updateProgress(uri: string, progress: number, cloneProgress?: CloneProgress) {
+  public async updateProgress(uri: RepositoryUri, progress: number, cloneProgress?: CloneProgress) {
     const p: CloneWorkerProgress = {
       uri,
       progress,
@@ -71,7 +72,7 @@ export abstract class AbstractGitWorker extends AbstractWorker {
       cloneProgress,
     };
     try {
-      return await this.objectClient.updateRepositoryGitStatus(p.uri, p);
+      return await this.objectClient.updateRepositoryGitStatus(uri, p);
     } catch (error) {
       this.log.error(`Update git clone progress error.`);
       this.log.error(error);

@@ -9,12 +9,7 @@ import io from 'socket.io-client';
 import chrome from 'ui/chrome';
 
 import { SocketKind } from '../model';
-import {
-  loadStatusSuccess,
-  updateCloneProgress,
-  updateDeleteProgress,
-  updateIndexProgress,
-} from './actions';
+import { updateCloneProgress, updateDeleteProgress, updateIndexProgress } from './actions';
 import { installLanguageServerSuccess } from './actions/language_server';
 
 export function bindSocket(store: Store) {
@@ -23,26 +18,13 @@ export function bindSocket(store: Store) {
 
   socket.on(SocketKind.CLONE_PROGRESS, (data: any) => {
     const { repoUri, progress, cloneProgress } = data;
-    if (progress === 100) {
-      store.dispatch(
-        loadStatusSuccess({
-          repoUri,
-          status: {
-            uri: repoUri,
-            progress,
-            cloneProgress,
-          },
-        })
-      );
-    } else {
-      store.dispatch(
-        updateCloneProgress({
-          repoUri,
-          progress,
-          cloneProgress,
-        })
-      );
-    }
+    store.dispatch(
+      updateCloneProgress({
+        repoUri,
+        progress,
+        cloneProgress,
+      })
+    );
   });
 
   socket.on(SocketKind.INDEX_PROGRESS, (data: any) => {

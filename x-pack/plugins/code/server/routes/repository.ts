@@ -134,16 +134,40 @@ export function repositoryRoute(
   });
 
   server.route({
-    path: '/api/code/repoCloneStatus/{uri*3}',
+    path: '/api/code/repo/status/{uri*3}',
     method: 'GET',
     async handler(req) {
       const repoUri = req.params.uri as string;
       const log = new Log(req.server);
       try {
         const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
-        return await repoObjectClient.getRepositoryGitStatus(repoUri);
+        let gitStatus = null;
+        try {
+          gitStatus = await repoObjectClient.getRepositoryGitStatus(repoUri);
+        } catch (error) {
+          log.error(`Get repository git status ${repoUri} error: ${error}`);
+        }
+
+        let indexStatus = null;
+        try {
+          indexStatus = await repoObjectClient.getRepositoryLspIndexStatus(repoUri);
+        } catch (error) {
+          log.error(`Get repository index status ${repoUri} error: ${error}`);
+        }
+
+        let deleteStatus = null;
+        try {
+          deleteStatus = await repoObjectClient.getRepositoryDeleteStatus(repoUri);
+        } catch (error) {
+          log.error(`Get repository delete status ${repoUri} error: ${error}`);
+        }
+        return {
+          gitStatus,
+          indexStatus,
+          deleteStatus,
+        };
       } catch (error) {
-        const msg = `Get repository clone status ${repoUri} error: ${error}`;
+        const msg = `Get repository status ${repoUri} error: ${error}`;
         log.error(msg);
         return Boom.notFound(msg);
       }
