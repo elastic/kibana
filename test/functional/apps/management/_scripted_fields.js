@@ -131,13 +131,9 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedExpressionFieldName);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
-        await PageObjects.visualize.openInspector();
-        await PageObjects.visualize.setInspectorTablePageSize(50);
-        const data = await PageObjects.visualize.getInspectorTableData();
-        await log.debug('getDataTableData = ' + data);
-        await log.debug('data=' + data);
-        await log.debug('data.length=' + data.length);
-        expect(data).to.eql(expectedChartValues);
+        await inspector.open();
+        await inspector.setTablePageSize(50);
+        await inspector.expectTableData(expectedChartValues);
       });
     });
 
