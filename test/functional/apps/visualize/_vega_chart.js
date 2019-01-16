@@ -21,6 +21,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
+  const inspector = getService('inspector');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
   describe('visualize app', () => {
@@ -33,8 +34,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('vega chart', () => {
       it('should not have inspector enabled', async function () {
-        const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-        expect(spyToggleExists).to.be(false);
+        await inspector.expectIsNotEnabled();
       });
 
       it.skip('should have some initial vega spec text', async function () {

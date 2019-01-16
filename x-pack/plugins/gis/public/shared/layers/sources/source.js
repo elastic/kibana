@@ -43,6 +43,15 @@ export class ASource {
     return '';
   }
 
+  /**
+   * return attribution for this layer as array of objects with url and label property.
+   * e.g. [{ url: 'example.com', label: 'foobar' }]
+   * @return {Promise<null>}
+   */
+  async getAttributions() {
+    return [];
+  }
+
   isFieldAware() {
     return false;
   }
