@@ -11,6 +11,7 @@ import ReactDOM from 'react-dom';
 import { ALayer } from './layer';
 import { VectorStyle } from './styles/vector_style';
 import { LeftInnerJoin } from './joins/left_inner_join';
+import { DataRequest } from './util/data_request';
 
 import { FeatureTooltip } from 'plugins/gis/components/map/feature_tooltip';
 import { store } from '../../store/store';
@@ -46,6 +47,7 @@ export class VectorLayer extends ALayer {
     ];
     const layerDescriptor = super.createDescriptor(options);
     layerDescriptor.type = VectorLayer.type;
+    layerDescriptor.dataRequests = [];
     if (!options.style) {
       layerDescriptor.style = VectorStyle.createDescriptor({
         fillColor: {
@@ -85,6 +87,11 @@ export class VectorLayer extends ALayer {
       options.layerDescriptor.joins.forEach((joinDescriptor) => {
         this._joins.push(new LeftInnerJoin(joinDescriptor));
       });
+    }
+    if (this._descriptor.dataRequests) {
+      this._dataRequests = this._descriptor.dataRequests.map(dataRequest => new DataRequest(dataRequest));
+    } else {
+      this._dataRequests = [];
     }
   }
 
@@ -170,6 +177,23 @@ export class VectorLayer extends ALayer {
 
   _findDataRequestForSource(sourceDataId) {
     return this._dataRequests.find(dataRequest => dataRequest.getDataId() === sourceDataId);
+  }
+
+  getSourceDataRequest() {
+    return this._dataRequests.find(dataRequest => dataRequest.getDataId() === 'source');
+  }
+
+  isLayerLoading() {
+    return this._dataRequests.some(dataRequest => dataRequest.isLoading());
+  }
+
+  dataHasLoadError() {
+    return this._dataRequests.some(dataRequest => dataRequest.hasLoadError());
+  }
+
+  getDataLoadError() {
+    const loadErrors =  this._dataRequests.filter(dataRequest => dataRequest.hasLoadError());
+    return loadErrors.join(',');//todo
   }
 
   async _canSkipSourceUpdate(source, sourceDataId, filters) {

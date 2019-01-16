@@ -6,7 +6,6 @@
 import _ from 'lodash';
 import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
-import { DataRequest } from './util/data_request';
 
 const SOURCE_UPDATE_REQUIRED = true;
 const NO_SOURCE_UPDATE_REQUIRED = false;
@@ -17,12 +16,6 @@ export class ALayer {
     this._descriptor = layerDescriptor;
     this._source = source;
     this._style = style;
-
-    if (this._descriptor.dataRequests) {
-      this._dataRequests = this._descriptor.dataRequests.map(dataRequest => new DataRequest(dataRequest));
-    } else {
-      this._dataRequests = [];
-    }
   }
 
   static getBoundDataForSource(mbMap, sourceId) {
@@ -33,7 +26,7 @@ export class ALayer {
   static createDescriptor(options) {
     const layerDescriptor = {};
 
-    layerDescriptor.dataRequests = [];
+    layerDescriptor.type = undefined;
     layerDescriptor.id = Math.random().toString(36).substr(2, 5);
     layerDescriptor.label = options.label && options.label.length > 0 ? options.label : null;
     layerDescriptor.minZoom = _.get(options, 'minZoom', 0);
@@ -137,16 +130,16 @@ export class ALayer {
   }
 
   isLayerLoading() {
-    return this._dataRequests.some(dataRequest => dataRequest.isLoading());
+    console.warn(`Layer load status not implemented for ${this._descriptor.type}`);
   }
 
   dataHasLoadError() {
-    return this._dataRequests.some(dataRequest => dataRequest.hasLoadError());
+    console.warn(`Load error status not implemented for ${this._descriptor.type}`);
+    return false;
   }
 
   getDataLoadError() {
-    const loadErrors =  this._dataRequests.filter(dataRequest => dataRequest.hasLoadError());
-    return loadErrors.join(',');//todo
+    console.warn(`Load error not implemented for ${this._descriptor.type}`);
   }
 
   toLayerDescriptor() {
@@ -194,10 +187,6 @@ export class ALayer {
 
   renderStyleEditor(style, options) {
     return style.renderEditor(options);
-  }
-
-  getSourceDataRequest() {
-    return this._dataRequests.find(dataRequest => dataRequest.getDataId() === 'source');
   }
 
   getIndexPatternIds() {

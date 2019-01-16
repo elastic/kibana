@@ -107,5 +107,16 @@ export class TileLayer extends ALayer {
       />
     );
   }
+  isLayerLoading() {
+    return false;
+  }
+
+  dataHasLoadError() {
+    return this._descriptor.errorState;
+  }
+
+  getDataLoadError() {
+    return this.dataHasLoadError() ? this._descriptor.errorMessage : '';
+  }
 
 }
