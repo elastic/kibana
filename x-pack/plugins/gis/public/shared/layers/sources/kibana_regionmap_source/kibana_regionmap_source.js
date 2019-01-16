@@ -4,70 +4,49 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { VectorSource } from './vector_source';
-import React, { Fragment } from 'react';
+import _ from 'lodash';
+import { VectorSource } from '../vector_source';
+import React from 'react';
 import {
   EuiText,
-  EuiSelect,
-  EuiFormRow,
-  EuiSpacer
 } from '@elastic/eui';
+import { CreateSourceEditor } from './create_source_editor';
 
 export class KibanaRegionmapSource extends VectorSource {
 
   static type = 'REGIONMAP_FILE';
-  static typeDisplayName = 'Custom vector shapes';
+  static title = 'Custom vector shapes';
+  static description = 'Vector shapes from static files configured in kibana.yml';
+  static icon = 'logoKibana';
 
   constructor(descriptor, { ymlFileLayers }) {
     super(descriptor);
     this._regionList = ymlFileLayers;
   }
 
-  static createDescriptor(name) {
+  static createDescriptor(options) {
     return {
       type: KibanaRegionmapSource.type,
-      name: name
+      name: options.name
     };
   }
 
   static renderEditor = ({ dataSourcesMeta, onPreviewSource }) => {
-    const regionmapOptionsRaw = (dataSourcesMeta) ? dataSourcesMeta.kibana.regionmap : [];
-    const regionmapOptions = regionmapOptionsRaw ? regionmapOptionsRaw.map((file) => ({
-      value: file.url,
-      text: file.name
-    })) : [];
+    const regionmapLayers = _.get(dataSourcesMeta, 'kibana.regionmap', []);
 
-    const onChange = ({ target }) => {
-      const selectedName = target.options[target.selectedIndex].text;
-      const kibanaRegionmapSourceDescriptor = KibanaRegionmapSource.createDescriptor(selectedName);
-      const kibanaRegionmapSource = new KibanaRegionmapSource(kibanaRegionmapSourceDescriptor, regionmapOptionsRaw);
-      onPreviewSource(kibanaRegionmapSource);
+    const onSelect = (layerConfig) => {
+      const sourceDescriptor = KibanaRegionmapSource.createDescriptor(layerConfig);
+      const source = new KibanaRegionmapSource(sourceDescriptor, { ymlFileLayers: regionmapLayers });
+      onPreviewSource(source);
     };
 
     return (
-      <EuiFormRow label="File">
-        <EuiSelect
-          hasNoInitialSelection
-          options={regionmapOptions}
-          onChange={onChange}
-        />
-      </EuiFormRow>
+      <CreateSourceEditor
+        onSelect={onSelect}
+        regionmapLayers={regionmapLayers}
+      />
     );
   };
-
-  static renderDropdownDisplayOption() {
-    return (
-      <Fragment>
-        <strong>{KibanaRegionmapSource.typeDisplayName}</strong>
-        <EuiSpacer size="xs" />
-        <EuiText size="s" color="subdued">
-          <p className="euiTextColor--subdued">
-            Vector shapes from static files configured in kibana.yml.
-          </p>
-        </EuiText>
-      </Fragment>
-    );
-  }
 
   renderDetails() {
     return (
@@ -104,5 +83,9 @@ export class KibanaRegionmapSource extends VectorSource {
 
   async isTimeAware() {
     return false;
+  }
+
+  canFormatFeatureProperties() {
+    return true;
   }
 }
