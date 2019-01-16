@@ -92,7 +92,7 @@ function getExplorerDefaultState() {
     overallSwimlaneData: [],
     selectedCells: null,
     selectedJobs: null,
-    swimlaneViewByFieldName: null,
+    swimlaneViewByFieldName: undefined,
     swimlaneWidth: getSwimlaneContainerWidth(),
     tableData: {},
     viewByLoadedForTimeFormatted: null,
@@ -437,7 +437,7 @@ export const Explorer = injectI18n(
       viewByOptions.push(VIEW_BY_JOB_LABEL);
       const viewBySwimlaneOptions = viewByOptions;
 
-      let swimlaneViewByFieldName = null;
+      let swimlaneViewByFieldName = undefined;
 
       if (this.state.viewBySwimlaneOptions.indexOf(this.state.swimlaneViewByFieldName) !== -1) {
         // Set the swimlane viewBy to that stored in the state (URL) if set.
@@ -483,12 +483,14 @@ export const Explorer = injectI18n(
             }
           });
 
-          if (this.state.swimlaneViewByFieldName === null) {
+          if (this.state.swimlaneViewByFieldName === undefined) {
             if (firstJobInfluencers.length > 0) {
               swimlaneViewByFieldName = firstJobInfluencers[0];
             } else {
               // No influencers for first selected job - set to first available option.
-              swimlaneViewByFieldName = this.state.viewBySwimlaneOptions.length > 0 ? this.state.viewBySwimlaneOptions[0] : null;
+              swimlaneViewByFieldName = this.state.viewBySwimlaneOptions.length > 0
+                ? this.state.viewBySwimlaneOptions[0]
+                : undefined;
             }
           }
         }
@@ -580,8 +582,7 @@ export const Explorer = injectI18n(
 
           if (
             selectedJobs === undefined ||
-            swimlaneViewByFieldName === undefined  ||
-            swimlaneViewByFieldName === null
+            swimlaneViewByFieldName === undefined
           ) {
             finish();
             return;
