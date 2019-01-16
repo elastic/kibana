@@ -2,7 +2,7 @@
 <input
   class="form-control ml-filter-input-left-icon"
   type="text"
-  aria-label="{{placeholder}}"
+  aria-label="{{ariaLabel}}"
   placeholder="{{placeholder}}"
   ng-model="filter"
   ng-change="filterChanged()" />
@@ -11,7 +11,10 @@
     <i class='fa fa-spinner fa-spin'></i>
   </div>
   <div ng-show="filterIcon===0">
-    <a aria-label="Clear filter" ng-click="clearFilter()">
+    <a
+      aria-label="{{ ::'xpack.ml.formFilterInput.clearFilterAriaLabel' | i18n: {defaultMessage: 'Clear filter'} }}"
+      ng-click="clearFilter()"
+    >
       <i class="fa fa-times-circle"></i>
     </a>
   </div>
