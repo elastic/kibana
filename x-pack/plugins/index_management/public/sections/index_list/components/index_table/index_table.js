@@ -14,7 +14,6 @@ import '../../../../styles/table.less';
 import { REFRESH_RATE_INDEX_LIST } from '../../../../constants';
 
 import {
-  EuiBadge,
   EuiButton,
   EuiCallOut,
   EuiHealth,
@@ -45,8 +44,8 @@ import {
   getBannerExtensions,
   getFilterExtensions,
   getToggleExtensions,
-  getBadgeExtensions,
 } from '../../../../index_management_extensions';
+import { renderBadges } from '../../../../lib/render_badges';
 
 const HEADERS = {
   name: i18n.translate('xpack.idxMgmt.indexTable.headers.nameHeader', {
@@ -214,25 +213,6 @@ export class IndexTableUi extends Component {
     });
   }
 
-  renderBadges(index) {
-    const badgeLabels = [];
-    getBadgeExtensions().forEach(({ matchIndex, label }) => {
-      if (matchIndex(index)) {
-        badgeLabels.push(label);
-      }
-    });
-    return (
-      <Fragment>
-        {badgeLabels.map((badgeLabel) => {
-          return (
-            <Fragment key={badgeLabel}>
-              {' '}<EuiBadge color="primary">{badgeLabel}</EuiBadge>
-            </Fragment>
-          );
-        })}
-      </Fragment>
-    );
-  }
   buildRowCell(fieldName, value, index) {
     const { openDetailPanel } = this.props;
     if (fieldName === 'health') {
@@ -246,7 +226,7 @@ export class IndexTableUi extends Component {
             openDetailPanel(value);
           }}
         >
-          {value}{this.renderBadges(index)}
+          {value}{renderBadges(index)}
         </EuiLink>
       );
     }
