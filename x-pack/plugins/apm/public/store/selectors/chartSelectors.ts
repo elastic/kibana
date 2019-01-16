@@ -21,7 +21,6 @@ import {
 import { colors } from '../../style/variables';
 import {
   asDecimal,
-  asGB,
   asMillis,
   asPercent,
   tpmUnit
@@ -104,32 +103,18 @@ export function getMemorySeries(
       ? getEmptySerie(start, end)
       : [
           {
-            title: 'System total mem.',
-            data: series.totalMemory,
-            type: 'area',
-            color: colors.apmPink,
-            legendValue: asGB(overallValues.totalMemory)
-          },
-          {
-            title: 'System avail. mem.',
-            data: series.freeMemory,
-            type: 'area',
-            color: colors.apmPurple,
-            legendValue: asGB(overallValues.freeMemory)
-          },
-          {
-            title: 'Process RSS',
-            data: series.processMemoryRss,
-            type: 'area',
-            color: colors.apmGreen,
-            legendValue: asGB(overallValues.processMemoryRss)
-          },
-          {
-            title: 'Process mem. size',
-            data: series.processMemorySize,
-            type: 'area',
+            title: 'System max',
+            data: series.maximumPercentMemoryUsed,
+            type: 'linemark',
             color: colors.apmBlue,
-            legendValue: asGB(overallValues.freeMemory)
+            legendValue: asPercent(overallValues.maximumPercentMemoryUsed || 0)
+          },
+          {
+            title: 'System average',
+            data: series.averagePercentMemoryUsed,
+            type: 'linemark',
+            color: colors.apmGreen,
+            legendValue: asPercent(overallValues.averagePercentMemoryUsed || 0)
           }
         ];
 
@@ -148,18 +133,11 @@ export function getCPUSeries(CPUChartResponse: MetricsChartAPIResponse['cpu']) {
 
   const seriesList: TimeSerie[] = [
     {
-      title: 'Process average',
-      data: series.processCPUAverage,
-      type: 'line',
-      color: colors.apmPink,
-      legendValue: asPercent(overallValues.processCPUAverage || 0)
-    },
-    {
-      title: 'Process max',
-      data: series.processCPUMax,
-      type: 'line',
-      color: colors.apmPurple,
-      legendValue: asPercent(overallValues.processCPUMax || 0)
+      title: 'System max',
+      data: series.systemCPUMax,
+      type: 'linemark',
+      color: colors.apmBlue,
+      legendValue: asPercent(overallValues.systemCPUMax || 0)
     },
     {
       title: 'System average',
@@ -169,11 +147,18 @@ export function getCPUSeries(CPUChartResponse: MetricsChartAPIResponse['cpu']) {
       legendValue: asPercent(overallValues.systemCPUAverage || 0)
     },
     {
-      title: 'System max',
-      data: series.systemCPUMax,
-      type: 'line',
-      color: colors.apmBlue,
-      legendValue: asPercent(overallValues.systemCPUMax || 0)
+      title: 'Process max',
+      data: series.processCPUMax,
+      type: 'linemark',
+      color: colors.apmOrange,
+      legendValue: asPercent(overallValues.processCPUMax || 0)
+    },
+    {
+      title: 'Process average',
+      data: series.processCPUAverage,
+      type: 'linemark',
+      color: colors.apmYellow,
+      legendValue: asPercent(overallValues.processCPUAverage || 0)
     }
   ];
 
