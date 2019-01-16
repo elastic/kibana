@@ -16,7 +16,6 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPage,
   EuiPageBody,
   EuiPageContent,
   EuiSpacer,
@@ -182,44 +181,42 @@ export const CrossClusterReplicationHome = injectI18n(
 
     render() {
       return (
-        <EuiPage>
-          <EuiPageBody>
-            <EuiPageContent>
-              <EuiTitle size="l">
-                <h1>
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPatternList.crossClusterReplicationTitle"
-                    defaultMessage="Cross Cluster Replication"
-                  />
-                </h1>
-              </EuiTitle>
+        <EuiPageBody>
+          <EuiPageContent>
+            <EuiTitle size="l">
+              <h1>
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.autoFollowPatternList.crossClusterReplicationTitle"
+                  defaultMessage="Cross Cluster Replication"
+                />
+              </h1>
+            </EuiTitle>
 
-              <EuiSpacer size="s" />
+            <EuiSpacer size="s" />
 
-              <EuiTabs>
-                {this.tabs.map(tab => (
-                  <EuiTab
-                    onClick={() => this.onSectionChange(tab.id)}
-                    isSelected={tab.id === this.state.activeSection}
-                    key={tab.id}
-                  >
-                    {tab.name}
-                  </EuiTab>
-                ))}
-              </EuiTabs>
+            <EuiTabs>
+              {this.tabs.map(tab => (
+                <EuiTab
+                  onClick={() => this.onSectionChange(tab.id)}
+                  isSelected={tab.id === this.state.activeSection}
+                  key={tab.id}
+                >
+                  {tab.name}
+                </EuiTab>
+              ))}
+            </EuiTabs>
 
-              <EuiSpacer size="m" />
+            <EuiSpacer size="m" />
 
-              {this.getHeaderSection()}
-              {this.getUnauthorizedSection()}
+            {this.getHeaderSection()}
+            {this.getUnauthorizedSection()}
 
-              <Switch>
-                <Route exact path={`${BASE_PATH}/follower_indices`} component={FollowerIndicesList} />
-                <Route exact path={`${BASE_PATH}/auto_follow_patterns`} component={AutoFollowPatternList} />
-              </Switch>
-            </EuiPageContent>
-          </EuiPageBody>
-        </EuiPage>
+            <Switch>
+              <Route exact path={`${BASE_PATH}/follower_indices`} component={FollowerIndicesList} />
+              <Route exact path={`${BASE_PATH}/auto_follow_patterns`} component={AutoFollowPatternList} />
+            </Switch>
+          </EuiPageContent>
+        </EuiPageBody>
       );
     }
   }

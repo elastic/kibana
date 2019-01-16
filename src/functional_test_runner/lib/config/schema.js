@@ -84,6 +84,21 @@ export const schema = Joi.object().keys({
     esRequestTimeout: Joi.number().default(30000),
     kibanaStabilize: Joi.number().default(15000),
     navigateStatusPageCheck: Joi.number().default(250),
+
+    // Many of our tests use the `exists` functions to determine where the user is. For
+    // example, you'll see a lot of code like:
+    // if (!testSubjects.exists('someElementOnPageA')) {
+    //   navigateToPageA();
+    // }
+    // If the element doesn't exist, selenium would wait up to defaultFindTimeout for it to
+    // appear. Because there are many times when we expect it to not be there, we don't want
+    // to wait the full amount of time, or it would greatly slow our tests down. We used to have
+    // this value at 1 second, but this caused flakiness because sometimes the element was deemed missing
+    // only because the page hadn't finished loading.
+    // The best path forward it to prefer functions like `testSubjects.existOrFail` or
+    // `testSubjects.missingOrFail` instead of just the `exists` checks, and be deterministic about
+    // where your user is and what they should click next.
+    waitForExists: Joi.number().default(2500),
   }).default(),
 
   mochaOpts: Joi.object().keys({
@@ -165,5 +180,10 @@ export const schema = Joi.object().keys({
   // settings for the failureDebugging module
   failureDebugging: Joi.object().keys({
     htmlDirectory: Joi.string().default(defaultRelativeToConfigPath('failure_debug/html'))
+  }).default(),
+
+  // settings for the find service
+  layout: Joi.object().keys({
+    fixedHeaderHeight: Joi.number().default(0),
   }).default(),
 }).default();
