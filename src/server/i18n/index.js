@@ -22,11 +22,13 @@ import globby from 'globby';
 import { i18n, i18nLoader } from '@kbn/i18n';
 
 import { fromRoot } from '../../utils';
+import { getIntegrityHashes } from './integrity';
 
 export async function i18nMixin(kbnServer, server, config) {
   const locale = config.get('i18n.locale');
 
   const translationsDirs = [fromRoot('src/ui/translations'), fromRoot('src/server/translations')];
+
 
   const groupedEntries = await Promise.all([
     ...config.get('plugins.scanDirs').map(async path => {
@@ -57,7 +59,7 @@ export async function i18nMixin(kbnServer, server, config) {
   const translationPaths = [].concat(...groupedEntries);
 
   i18nLoader.registerTranslationFiles(translationPaths);
-
+  const translationsIntegrities = await getIntegrityHashes(translationPaths);
   const pureTranslations = await i18nLoader.getTranslationsByLocale(locale);
   const translations = Object.freeze({
     locale,
@@ -67,4 +69,5 @@ export async function i18nMixin(kbnServer, server, config) {
   i18n.init(translations);
 
   server.decorate('server', 'getUiTranslations', () => translations);
+  server.decorate('server', 'getTranslationsIntegrities', () => translationsIntegrities);
 }
