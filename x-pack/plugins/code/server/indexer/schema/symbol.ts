@@ -54,8 +54,8 @@ export const SymbolAnalysisSettings = {
   },
 };
 
-export const SymbolTypeName = 'symbol';
-export const SymbolIndexNamePrefix = `.code-${SymbolTypeName}`;
+export const SymbolTypeName = '_doc';
+export const SymbolIndexNamePrefix = `.code-symbol`;
 export const SymbolIndexName = (repoUri: RepositoryUri) => {
   return `${SymbolIndexNamePrefix}-${RepositoryUtils.normalizeRepoUriToIndexName(repoUri)}`;
 };

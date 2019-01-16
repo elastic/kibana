@@ -136,7 +136,6 @@ export const code = (kibana: any) =>
       const queue = new Esqueue(queueIndex, {
         client: esClient,
         timeout: queueTimeout,
-        doctype: 'esqueue',
       });
       const indexWorker = new IndexWorker(
         queue,
