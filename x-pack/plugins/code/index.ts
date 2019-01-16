@@ -136,7 +136,6 @@ export const code = (kibana: any) =>
       const queue = new Esqueue(queueIndex, {
         client: esClient,
         timeout: queueTimeout,
-        doctype: 'esqueue',
       });
       const indexWorker = new IndexWorker(
         queue,
@@ -153,6 +152,7 @@ export const code = (kibana: any) =>
         queue,
         log,
         esClient,
+        serverOptions,
         indexWorker,
         repoServiceFactory,
         socketService
@@ -161,12 +161,19 @@ export const code = (kibana: any) =>
         queue,
         log,
         esClient,
+        serverOptions,
         cancellationService,
         lspService,
         repoServiceFactory,
         socketService
       ).bind();
-      const updateWorker = new UpdateWorker(queue, log, esClient, repoServiceFactory).bind();
+      const updateWorker = new UpdateWorker(
+        queue,
+        log,
+        esClient,
+        serverOptions,
+        repoServiceFactory
+      ).bind();
 
       // Initialize schedulers.
       const updateScheduler = new UpdateScheduler(updateWorker, serverOptions, esClient, log);
@@ -179,7 +186,6 @@ export const code = (kibana: any) =>
       // Add server routes and initialize the plugin here
       repositoryRoute(
         server,
-        serverOptions,
         cloneWorker,
         deleteWorker,
         indexWorker,

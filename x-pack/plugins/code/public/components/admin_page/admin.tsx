@@ -19,7 +19,6 @@ import { RootState } from '../../reducers';
 import { EmptyProject } from './empty_project';
 import { LanguageSeverTab } from './language_server_tab';
 import { ProjectTab } from './project_tab';
-import { SideBar } from './side_bar';
 
 const Container = styled.div`
   margin: 0 32px;
@@ -53,11 +52,6 @@ class AdminPage extends React.PureComponent<Props, State> {
     {
       id: AdminTabs.projects,
       name: AdminTabs.projects,
-      disabled: false,
-    },
-    {
-      id: AdminTabs.roles,
-      name: AdminTabs.roles,
       disabled: false,
     },
     {
@@ -106,7 +100,11 @@ class AdminPage extends React.PureComponent<Props, State> {
 
   public renderTabContent = () => {
     switch (this.state.tab) {
-      case AdminTabs.projects: {
+      case AdminTabs.languageServers: {
+        return <LanguageSeverTab />;
+      }
+      case AdminTabs.projects:
+      default: {
         const repositoriesCount = this.props.repositories.length;
         const showEmpty = repositoriesCount === 0 && !this.props.repositoryLoading;
         if (showEmpty) {
@@ -114,16 +112,12 @@ class AdminPage extends React.PureComponent<Props, State> {
         }
         return <ProjectTab />;
       }
-      case AdminTabs.languageServers: {
-        return <LanguageSeverTab />;
-      }
     }
   };
 
   public render() {
     return (
       <Root>
-        <SideBar />
         <Container>
           {this.renderTabs()}
           {this.renderTabContent()}

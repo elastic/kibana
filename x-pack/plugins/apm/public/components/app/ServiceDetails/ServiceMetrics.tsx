@@ -11,6 +11,7 @@ import {
   EuiSpacer,
   EuiTitle
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 // @ts-ignore
 import Distribution from 'x-pack/plugins/apm/public/components/app/ErrorGroupDetails/Distribution';
@@ -54,7 +55,14 @@ export const ServiceMetrics: React.SFC<ServiceMetricsProps> = ({
                 distribution={data}
                 title={
                   <EuiTitle size="s">
-                    <span>Error occurrences</span>
+                    <span>
+                      {i18n.translate(
+                        'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
+                        {
+                          defaultMessage: 'Error occurrences'
+                        }
+                      )}
+                    </span>
                   </EuiTitle>
                 }
               />

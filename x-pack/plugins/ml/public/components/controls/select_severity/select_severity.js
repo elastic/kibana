@@ -10,7 +10,7 @@
  * React component for rendering a select element with threshold levels.
  */
 import PropTypes from 'prop-types';
-import _ from 'lodash';
+import { get } from 'lodash';
 import React, { Component, Fragment } from 'react';
 
 import {
@@ -30,7 +30,7 @@ const optionsMap = {
   'critical': 75,
 };
 
-const SEVERITY_OPTIONS = [
+export const SEVERITY_OPTIONS = [
   { val: 0, display: 'warning', color: getSeverityColor(0) },
   { val: 25, display: 'minor', color: getSeverityColor(25) },
   { val: 50, display: 'major', color: getSeverityColor(50) },
@@ -49,13 +49,19 @@ function optionValueToThreshold(value) {
   return threshold;
 }
 
+// This service will be populated by the corresponding angularjs based one.
+export const mlSelectSeverityService = {
+  intialized: false,
+  state: null
+};
+
 class SelectSeverity extends Component {
   constructor(props) {
     super(props);
 
     // Restore the threshold from the state, or default to warning.
-    if (this.props.mlSelectSeverityService) {
-      this.mlSelectSeverityService = this.props.mlSelectSeverityService;
+    if (mlSelectSeverityService.intialized) {
+      this.mlSelectSeverityService = mlSelectSeverityService;
     }
 
     this.state = {
@@ -67,7 +73,7 @@ class SelectSeverity extends Component {
     // set initial state from service if available
     if (this.mlSelectSeverityService !== undefined) {
       const thresholdState = this.mlSelectSeverityService.state.get('threshold');
-      const thresholdValue = _.get(thresholdState, 'val', 0);
+      const thresholdValue = get(thresholdState, 'val', 0);
       const threshold = optionValueToThreshold(thresholdValue);
       // set initial selected option equal to threshold value
       const selectedOption = SEVERITY_OPTIONS.find(opt => (opt.val === threshold.val));

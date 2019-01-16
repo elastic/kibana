@@ -14,6 +14,7 @@ import {
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Log } from '../log';
 import { RepositoryServiceFactory } from '../repository_service_factory';
+import { ServerOptions } from '../server_options';
 import { SocketService } from '../socket_service';
 import { AbstractGitWorker } from './abstract_git_worker';
 import { IndexWorker } from './index_worker';
@@ -26,17 +27,18 @@ export class CloneWorker extends AbstractGitWorker {
     protected readonly queue: Esqueue,
     protected readonly log: Log,
     protected readonly client: EsClient,
+    protected readonly serverOptions: ServerOptions,
     private readonly indexWorker: IndexWorker,
     private readonly repoServiceFactory: RepositoryServiceFactory,
     private readonly socketService?: SocketService
   ) {
-    super(queue, log, client);
+    super(queue, log, client, serverOptions);
   }
 
   public async executeJob(job: Job) {
-    const { url, dataPath } = job.payload;
+    const { url } = job.payload;
     this.log.info(`Execute clone job for ${url}`);
-    const repoService = this.repoServiceFactory.newInstance(dataPath, this.log);
+    const repoService = this.repoServiceFactory.newInstance(this.serverOptions.repoPath, this.log);
     const repo = RepositoryUtils.buildRepository(url);
     return await repoService.clone(repo, (progress: number, cloneProgress?: CloneProgress) => {
       this.updateProgress(repo.uri, progress, cloneProgress);
@@ -58,11 +60,9 @@ export class CloneWorker extends AbstractGitWorker {
     }
 
     // Throw out a repository index request.
-    const { dataPath } = job.payload;
     const payload = {
       uri: res.repo.uri,
       revision: res.repo.revision,
-      dataPath,
     };
     await this.indexWorker.enqueueJob(payload, {});
 

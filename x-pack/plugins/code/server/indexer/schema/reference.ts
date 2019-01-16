@@ -37,8 +37,8 @@ export const ReferenceSchema = {
   },
 };
 
-export const ReferenceTypeName = 'reference';
-export const ReferenceIndexNamePrefix = `.code-${ReferenceTypeName}`;
+export const ReferenceTypeName = '_doc';
+export const ReferenceIndexNamePrefix = `.code-reference`;
 export const ReferenceIndexName = (repoUri: RepositoryUri) => {
   return `${ReferenceIndexNamePrefix}-${RepositoryUtils.normalizeRepoUriToIndexName(repoUri)}`;
 };

@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import Keys from 'leadfoot/keys';
-
 export function FilterBarProvider({ getService, getPageObjects }) {
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
@@ -92,7 +90,7 @@ export function FilterBarProvider({ getService, getPageObjects }) {
         }
         for (let j = 0; j < fieldValues.length; j++) {
           await paramFields[i].type(fieldValues[j]);
-          await browser.pressKeys(Keys.RETURN);
+          await paramFields[i].pressKeys(browser.keys.RETURN);
         }
       }
       await testSubjects.click('saveFilter');

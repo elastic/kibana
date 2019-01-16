@@ -15,12 +15,10 @@ import { Log } from '../log';
 import { CloneWorker, DeleteWorker, IndexWorker } from '../queue';
 import { RepositoryConfigController } from '../repository_config_controller';
 import { RepositoryObjectClient } from '../search';
-import { ServerOptions } from '../server_options';
 import { EsClientWithRequest } from '../utils/esclient_with_request';
 
 export function repositoryRoute(
   server: Server,
-  options: ServerOptions,
   cloneWorker: CloneWorker,
   deleteWorker: DeleteWorker,
   indexWorker: IndexWorker,
@@ -28,7 +26,6 @@ export function repositoryRoute(
   repoConfigController: RepositoryConfigController
 ) {
   // Clone a git repository
-
   server.securedRoute({
     path: '/api/code/repo',
     requireAdmin: true,
@@ -67,7 +64,6 @@ export function repositoryRoute(
           // Kick off clone job
           const payload = {
             url: repoUrl,
-            dataPath: options.repoPath,
           };
           await cloneWorker.enqueueJob(payload, {});
           return repo;
@@ -107,7 +103,6 @@ export function repositoryRoute(
 
         const payload = {
           uri: repoUri,
-          dataPath: options.repoPath,
         };
         await deleteWorker.enqueueJob(payload, {});
 
@@ -188,7 +183,6 @@ export function repositoryRoute(
         const payload = {
           uri: repoUri,
           revision: cloneStatus.revision,
-          dataPath: options.repoPath,
         };
         await indexWorker.enqueueJob(payload, {});
         return {};

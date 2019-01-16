@@ -212,8 +212,8 @@ export const DocumentAnalysisSettings = {
   },
 };
 
-export const DocumentTypeName = 'document';
-export const DocumentIndexNamePrefix = `.code-${DocumentTypeName}`;
+export const DocumentTypeName = '_doc';
+export const DocumentIndexNamePrefix = `.code-document`;
 export const DocumentIndexName = (repoUri: RepositoryUri) => {
   return `${DocumentIndexNamePrefix}-${RepositoryUtils.normalizeRepoUriToIndexName(repoUri)}`;
 };

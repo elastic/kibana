@@ -60,4 +60,9 @@ export const treeCommitsSelector = (state: RootState) => {
   }
 };
 
+export const hasMoreCommitsSelector = (state: RootState) => {
+  const path = state.file.currentPath;
+  return !state.file.commitsFullyLoaded[path];
+};
+
 export const requestedPathsSelector = (state: RootState) => state.file.requestedPaths;

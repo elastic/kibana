@@ -115,6 +115,7 @@ describe('clone_worker_tests', () => {
       esQueue as Esqueue,
       log,
       {} as EsClient,
+      serverOptions,
       {} as IndexWorker,
       (repoServiceFactory as any) as RepositoryServiceFactory,
       {} as SocketService
@@ -123,7 +124,6 @@ describe('clone_worker_tests', () => {
     await cloneWorker.executeJob({
       payload: {
         url: 'https://github.com/Microsoft/TypeScript-Node-Starter.git',
-        dataPath: serverOptions.repoPath,
       },
       options: {},
     });
@@ -158,6 +158,7 @@ describe('clone_worker_tests', () => {
       esQueue as Esqueue,
       log,
       esClient as EsClient,
+      serverOptions,
       (indexWorker as any) as IndexWorker,
       {} as RepositoryServiceFactory,
       (socketService as any) as SocketService
@@ -167,7 +168,6 @@ describe('clone_worker_tests', () => {
       {
         payload: {
           url: 'https://github.com/Microsoft/TypeScript-Node-Starter.git',
-          dataPath: serverOptions.repoPath,
         },
         options: {},
       },
@@ -202,6 +202,7 @@ describe('clone_worker_tests', () => {
       esQueue as Esqueue,
       log,
       (esClient as any) as EsClient,
+      serverOptions,
       {} as IndexWorker,
       {} as RepositoryServiceFactory,
       {} as SocketService
@@ -210,7 +211,6 @@ describe('clone_worker_tests', () => {
     await cloneWorker.onJobEnqueued({
       payload: {
         url: 'https://github.com/Microsoft/TypeScript-Node-Starter.git',
-        dataPath: serverOptions.repoPath,
       },
       options: {},
     });

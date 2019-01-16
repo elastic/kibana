@@ -59,9 +59,6 @@ class CodeProjectItem extends React.PureComponent<{
       <EuiPanel style={{ position: 'relative', marginBottom: '8px' }}>
         {this.renderProgress()}
         <EuiFlexGroup alignItems="center" justifyContent="flexStart">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="starEmpty" color="subdued" />
-          </EuiFlexItem>
           <EuiFlexItem grow={3}>
             <Link to={`/${uri}`}>
               <EuiText data-test-subj="codeRepositoryItem">

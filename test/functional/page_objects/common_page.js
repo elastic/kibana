@@ -249,7 +249,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     }
 
     async pressEnterKey() {
-      await browser.pressKeys('\uE007');
+      await browser.pressKeys(browser.keys.ENTER);
     }
 
     // pass in true if your test will show multiple modals
