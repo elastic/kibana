@@ -117,7 +117,7 @@
   },
   "dependencies": {
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "5.8.1",
+    "@elastic/eui": "5.8.2",
     "@elastic/node-crypto": "0.1.2",
     "@elastic/node-phantom-simple": "2.2.4",
     "@elastic/numeral": "2.3.2",
