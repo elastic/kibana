@@ -8,7 +8,7 @@
  * utils for Anomaly Explorer.
  */
 
-import { each, get, uniq } from 'lodash';
+import { each, get, union, uniq } from 'lodash';
 import { timefilter } from 'ui/timefilter';
 import { parseInterval } from 'ui/utils/parse_interval';
 import { TimeBuckets } from 'ui/time_buckets';
@@ -128,6 +128,39 @@ export function selectedJobsHaveInfluencers(selectedJobs = []) {
     hasInfluencers = hasInfluencers || influencers.length > 0;
   });
   return hasInfluencers;
+}
+
+export function getFieldsByJob(selectedJobIds, viewByOptions) {
+  return mlJobService.jobs.reduce((reducedFieldsByJob, job) => {
+    // Add the list of distinct by, over, partition and influencer fields for each job.
+    const analysisConfig = job.analysis_config;
+    const influencers = analysisConfig.influencers || [];
+    const fieldsForJob = (analysisConfig.detectors || [])
+      .reduce((reducedfieldsForJob, detector) => {
+        if (detector.partition_field_name !== undefined) {
+          reducedfieldsForJob.push(detector.partition_field_name);
+        }
+        if (detector.over_field_name !== undefined) {
+          reducedfieldsForJob.push(detector.over_field_name);
+        }
+        // For jobs with by and over fields, don't add the 'by' field as this
+        // field will only be added to the top-level fields for record type results
+        // if it also an influencer over the bucket.
+        if (detector.by_field_name !== undefined && detector.over_field_name === undefined) {
+          reducedfieldsForJob.push(detector.by_field_name);
+        }
+        return reducedfieldsForJob;
+      }, [])
+      .concat(influencers);
+
+    if (selectedJobIds.indexOf(job.job_id) !== -1) {
+      viewByOptions = viewByOptions.concat(influencers);
+    }
+
+    reducedFieldsByJob[job.job_id] = uniq(fieldsForJob);
+    reducedFieldsByJob['*'] = union(reducedFieldsByJob['*'], reducedFieldsByJob[job.job_id]);
+    return reducedFieldsByJob;
+  }, { '*': [] });
 }
 
 export function getSelectionTimeRange(selectedCells, interval) {

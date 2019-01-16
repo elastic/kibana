@@ -388,40 +388,6 @@ export const Explorer = injectI18n(
 
       const selectedJobIds = this.state.selectedJobs.map(d => d.id);
 
-      const fieldsByJob = { '*': [] };
-      _.each(mlJobService.jobs, (job) => {
-        // Add the list of distinct by, over, partition and influencer fields for each job.
-        let fieldsForJob = [];
-
-        const analysisConfig = job.analysis_config;
-        const detectors = analysisConfig.detectors || [];
-        _.each(detectors, (detector) => {
-          if (_.has(detector, 'partition_field_name')) {
-            fieldsForJob.push(detector.partition_field_name);
-          }
-          if (_.has(detector, 'over_field_name')) {
-            fieldsForJob.push(detector.over_field_name);
-          }
-          // For jobs with by and over fields, don't add the 'by' field as this
-          // field will only be added to the top-level fields for record type results
-          // if it also an influencer over the bucket.
-          if (_.has(detector, 'by_field_name') && !(_.has(detector, 'over_field_name'))) {
-            fieldsForJob.push(detector.by_field_name);
-          }
-        });
-
-        const influencers = analysisConfig.influencers || [];
-        fieldsForJob = fieldsForJob.concat(influencers);
-        if (selectedJobIds.indexOf(job.job_id) !== -1) {
-          viewByOptions = viewByOptions.concat(influencers);
-        }
-
-        fieldsByJob[job.job_id] = _.uniq(fieldsForJob);
-        fieldsByJob['*'] = _.union(fieldsByJob['*'], fieldsByJob[job.job_id]);
-      });
-
-      // Currently unused but may be used if add in view by detector.
-      // $scope.fieldsByJob = fieldsByJob;
       viewByOptions = _.chain(viewByOptions).uniq().sortBy(fieldName => fieldName.toLowerCase()).value();
       viewByOptions.push(VIEW_BY_JOB_LABEL);
       const viewBySwimlaneOptions = viewByOptions;
@@ -440,14 +406,14 @@ export const Explorer = injectI18n(
         } else {
           // For a single job, default to the first partition, over,
           // by or influencer field of the first selected job.
-          const firstSelectedJob = _.find(mlJobService.jobs, (job) => {
+          const firstSelectedJob = mlJobService.jobs.find((job) => {
             return job.job_id === selectedJobIds[0];
           });
 
           const firstJobInfluencers = firstSelectedJob.analysis_config.influencers || [];
-          _.each(firstSelectedJob.analysis_config.detectors, (detector) => {
+          firstSelectedJob.analysis_config.detectors.forEach((detector) => {
             if (
-              _.has(detector, 'partition_field_name') &&
+              detector.partition_field_name !== undefined &&
               firstJobInfluencers.indexOf(detector.partition_field_name) !== -1
             ) {
               swimlaneViewByFieldName = detector.partition_field_name;
@@ -455,7 +421,7 @@ export const Explorer = injectI18n(
             }
 
             if (
-              _.has(detector, 'over_field_name') &&
+              detector.over_field_name !== undefined &&
               firstJobInfluencers.indexOf(detector.over_field_name) !== -1
             ) {
               swimlaneViewByFieldName = detector.over_field_name;
@@ -465,8 +431,11 @@ export const Explorer = injectI18n(
             // For jobs with by and over fields, don't add the 'by' field as this
             // field will only be added to the top-level fields for record type results
             // if it also an influencer over the bucket.
-            if (_.has(detector, 'by_field_name') && !(_.has(detector, 'over_field_name')) &&
-                firstJobInfluencers.indexOf(detector.by_field_name) !== -1) {
+            if (
+              detector.by_field_name !== undefined &&
+              detector.over_field_name === undefined &&
+              firstJobInfluencers.indexOf(detector.by_field_name) !== -1
+            ) {
               swimlaneViewByFieldName = detector.by_field_name;
               return false;
             }
@@ -632,7 +601,7 @@ export const Explorer = injectI18n(
         ).then((resp) => {
           const topFieldValues = [];
           const topInfluencers = resp.influencers[swimlaneViewByFieldName];
-          _.each(topInfluencers, (influencerData) => {
+          topInfluencers.forEach((influencerData) => {
             if (influencerData.maxAnomalyScore > 0) {
               topFieldValues.push(influencerData.influencerFieldValue);
             }
@@ -648,7 +617,7 @@ export const Explorer = injectI18n(
           getSwimlaneBucketInterval(selectedJobs, swimlaneWidth).asSeconds() + 's',
           swimlaneLimit
         ).then((resp) => {
-          this.loadViewBySwimlane(_.keys(resp.results));
+          this.loadViewBySwimlane(Object.keys(resp.results));
         });
       }
     }
@@ -788,7 +757,7 @@ export const Explorer = injectI18n(
 
       // If selectedCells is an empty object we clear any existing selection,
       // otherwise we save the new selection in AppState and update the Explorer.
-      if (_.keys(swimlaneSelectedCells).length === 0) {
+      if (Object.keys(swimlaneSelectedCells).length === 0) {
         if (this.state.viewByLoadedForTimeFormatted) {
           // Reload 'view by' swimlane over full time range.
           this.loadViewBySwimlane([]);
