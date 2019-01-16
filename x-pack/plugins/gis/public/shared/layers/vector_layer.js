@@ -149,11 +149,9 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async getBounds(filters) {
-
     if (this._source.isBoundsAware()) {
       return await this._source.getBoundsForFilters(filters);
     }
-
     return this._getBoundsBasedOnData();
   }
 

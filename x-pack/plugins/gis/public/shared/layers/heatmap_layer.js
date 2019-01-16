@@ -92,6 +92,9 @@ export class HeatmapLayer extends AbstractLayer {
     mbMap.setLayerZoomRange(heatmapLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
   }
 
+  async getBounds(filters) {
+    return await this._source.getBoundsForFilters(filters);
+  }
 
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
     if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
