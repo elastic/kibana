@@ -31,6 +31,7 @@ export async function WelcomeProvider({ getService, getPageObjects }) {
   lifecycle.on('beforeTests', async () => {
     await PageObjects.common.navigateToApp('home');
     await welcome.disable();
+    await PageObjects.common.navigateToApp('home');
   });
 
   return welcome;
