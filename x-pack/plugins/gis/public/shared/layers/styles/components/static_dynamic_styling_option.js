@@ -21,18 +21,13 @@ export class StaticDynamicStyleSelector extends React.Component {
 
   constructor() {
     super();
-    this._isMounted = false;
     this.state = {
-      ordinalFields: null,
       isDynamic: false,
-      styleDescriptor: VectorStyle.STYLE_TYPE.STATIC
     };
   }
 
   _canBeDynamic() {
-    // TODO FIX: This isn't quite right because it doesn't equate to true after creating a join
-    // It also doesn't update to the correct state when switching layers without closing the panel first
-    return this.state.ordinalFields && !!this.state.ordinalFields.length;
+    return this.props.ordinalFields.length > 0;
   }
 
   _isDynamic() {
@@ -42,13 +37,7 @@ export class StaticDynamicStyleSelector extends React.Component {
     return this.props.styleDescriptor.type === VectorStyle.STYLE_TYPE.DYNAMIC;
   }
 
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
-
   componentDidMount() {
-    this._isMounted = true;
-    this._loadOrdinalFields();
     this.setState({
       isDynamic: this._isDynamic()
     });
@@ -59,23 +48,6 @@ export class StaticDynamicStyleSelector extends React.Component {
     if (this.state.isDynamic !== isDynamic) {
       this.setState({
         isDynamic
-      });
-    }
-    if (isDynamic) {
-      this._loadOrdinalFields();
-    }
-  }
-
-  async _loadOrdinalFields() {
-    if (!this._isMounted) {
-      return;
-    }
-    //check if fields are the same..
-    const ordinalFields = await this.props.layer.getOrdinalFields();
-    const eqls = _.isEqual(ordinalFields, this.state.ordinalFields);
-    if (!eqls) {
-      this.setState({
-        ordinalFields
       });
     }
   }
@@ -113,11 +85,11 @@ export class StaticDynamicStyleSelector extends React.Component {
   _renderStyleSelector(currentOptions) {
     let styleSelector;
     if (this.state.isDynamic) {
-      if (this.state.ordinalFields && this.state.ordinalFields.length) {
+      if (this._canBeDynamic()) {
         const DynamicSelector = this.props.DynamicSelector;
         styleSelector = (
           <DynamicSelector
-            fields={this.state.ordinalFields}
+            fields={this.props.ordinalFields}
             onChange={this._getStyleUpdateFunction(VectorStyle.STYLE_TYPE.DYNAMIC)}
             selectedOptions={currentOptions}
           />
@@ -137,7 +109,7 @@ export class StaticDynamicStyleSelector extends React.Component {
     return styleSelector;
   }
 
-  _renderStaticAndDynamicStyles = () => {
+  render() {
     const currentOptions = _.get(this.props, 'styleDescriptor.options');
     const dynamicTooltipContent =
       this.state.isDynamic ? "Disable dynamic styling." : "Enable dynamic styling.";
@@ -170,9 +142,5 @@ export class StaticDynamicStyleSelector extends React.Component {
         }
       </EuiFlexGroup>
     );
-  };
-
-  render() {
-    return this._renderStaticAndDynamicStyles();
   }
 }
