@@ -17,7 +17,7 @@ export default (AbstractSearchStrategy, RollupSearchRequest) =>
       super(server, callWithRequestFactory, RollupSearchRequest);
     }
 
-    async isRollupJobExists(req, indexPattern) {
+    async numberOfRollupJobs(req, indexPattern) {
       const callWithRequest = this.getCallWithRequestInstance(req);
       const indices = (indexPattern || '').split(INDEX_PATTERN_SEPARATOR);
 
@@ -26,11 +26,22 @@ export default (AbstractSearchStrategy, RollupSearchRequest) =>
       }));
 
       return Promise.all(requests)
-        .then((responses) => responses.some((response, index) => Boolean(response[indices[index]])))
-        .catch(() => Promise.resolve(false));
+        .then((responses) => responses
+          .reduce((numberOfRollupJobs, response, index) => {
+            if (response[indices[index]]) {
+              numberOfRollupJobs += 1;
+            }
+
+            return numberOfRollupJobs;
+          }, 0))
+        .catch(() => Promise.resolve(0));
+    }
+
+    async hasOneRollupJob(req, indexPattern) {
+      return await this.numberOfRollupJobs(req, indexPattern) === 1;
     }
 
     async isViable(req, indexPattern) {
-      return await this.isRollupJobExists(req, indexPattern);
+      return await this.hasOneRollupJob(req, indexPattern);
     }
   });
