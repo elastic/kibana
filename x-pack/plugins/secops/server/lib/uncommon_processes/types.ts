@@ -31,7 +31,7 @@ export interface UncommonProcessesRequestOptions {
 type StringOrNumber = string | number;
 export interface UncommonProcessHit extends Hit {
   total: TotalHit;
-  hosts: Array<{ id: string; name: string }>;
+  host: Array<{ id: string; name: string }>;
   _source: {
     '@timestamp': string;
     process: {

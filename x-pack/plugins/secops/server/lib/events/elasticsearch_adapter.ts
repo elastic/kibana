@@ -7,9 +7,10 @@
 import { get, getOr, last } from 'lodash/fp';
 import { EcsEdges, EventsData, KpiItem } from '../../graphql/types';
 import { mergeFieldsWithHit } from '../../utils/build_query';
+import { eventFieldsMap } from '../ecs_fields';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
-import { buildQuery, eventFieldsMap } from './query.dsl';
+import { buildQuery } from './query.dsl';
 import { EventHit, EventsAdapter, EventsRequestOptions } from './types';
 
 export class ElasticsearchEventsAdapter implements EventsAdapter {

@@ -11,10 +11,10 @@ export const authorizationsSchema = gql`
     _id: String!
     failures: Int!
     successes: Int!
-    user: String!
-    from: String!
     latest: String!
-    to: HostEcsFields!
+    source: SourceEcsFields!
+    host: HostEcsFields!
+    user: UserEcsFields!
   }
 
   type AuthorizationsEdges {

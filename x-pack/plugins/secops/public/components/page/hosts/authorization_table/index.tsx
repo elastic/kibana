@@ -106,7 +106,7 @@ const getAuthorizationColumns = (startDate: number) => [
     truncateText: false,
     hideForMobile: false,
     render: ({ authorization }: { authorization: AuthorizationItem }) => {
-      const user = defaultToEmpty(authorization.user);
+      const userName = defaultToEmpty(authorization.user.name);
       return (
         <>
           <DraggableWrapper
@@ -114,9 +114,9 @@ const getAuthorizationColumns = (startDate: number) => [
               and: [],
               enabled: true,
               id: authorization._id,
-              name: user,
+              name: userName!,
               negated: false,
-              queryMatch: `auditd.data.acct: "${escapeQueryValue(authorization.user)}"`,
+              queryMatch: `auditd.data.acct: "${escapeQueryValue(userName!)}"`,
               queryDate: `@timestamp >= ${startDate} and @timestamp <= ${moment().valueOf()}`,
             }}
             render={(dataProvider, _, snapshot) =>
@@ -129,7 +129,7 @@ const getAuthorizationColumns = (startDate: number) => [
                   />
                 </DragEffects>
               ) : (
-                user
+                userName
               )
             }
           />
@@ -158,7 +158,7 @@ const getAuthorizationColumns = (startDate: number) => [
     truncateText: false,
     hideForMobile: false,
     render: ({ authorization }: { authorization: AuthorizationItem }) => (
-      <>{defaultToEmpty(authorization.from)}</>
+      <>{defaultToEmpty(authorization.source.ip)}</>
     ),
   },
   {
@@ -166,7 +166,7 @@ const getAuthorizationColumns = (startDate: number) => [
     truncateText: false,
     hideForMobile: false,
     render: ({ authorization }: { authorization: AuthorizationItem }) => (
-      <>{defaultToEmpty(authorization.to.name)}</>
+      <>{defaultToEmpty(authorization.host.name)}</>
     ),
   },
   {

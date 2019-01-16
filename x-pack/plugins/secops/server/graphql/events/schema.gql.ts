@@ -25,10 +25,20 @@ export const eventsSchema = gql`
     region_name: String
   }
 
+  type OsEcsFields {
+    platform: String
+    name: String
+    full: String
+    family: String
+    version: String
+    kernel: String
+  }
+
   type HostEcsFields {
     id: String
     ip: String
     name: String
+    os: OsEcsFields
   }
 
   type Thread {
@@ -41,7 +51,7 @@ export const eventsSchema = gql`
     name: String
     ppid: Int
     args: [String]
-    exectuable: String
+    executable: String
     title: String
     thread: Thread
     working_directory: String

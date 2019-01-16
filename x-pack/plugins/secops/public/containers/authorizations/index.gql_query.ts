@@ -22,9 +22,13 @@ export const authorizationsQuery = gql`
             _id
             failures
             successes
-            user
-            from
-            to {
+            user {
+              name
+            }
+            source {
+              ip
+            }
+            host {
               id
               name
             }

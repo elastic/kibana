@@ -10,7 +10,7 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
         },
         "uncommonProcess": Object {
           "_id": "cPsuhGcB0WOhS6qyTKC0",
-          "hosts": Array [
+          "host": Array [
             Object {
               "id": "host-id-1",
               "name": "hello-world",
@@ -33,7 +33,7 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
         },
         "uncommonProcess": Object {
           "_id": "KwQDiWcB0WOhS6qyXmrW",
-          "hosts": Array [
+          "host": Array [
             Object {
               "id": "host-id-1",
               "name": "hello-world",

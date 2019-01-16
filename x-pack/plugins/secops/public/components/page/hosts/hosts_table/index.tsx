@@ -15,7 +15,7 @@ import { HostItem, HostsEdges } from '../../../../graphql/types';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { hostsActions, hostsSelector, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
-import { defaultToEmpty } from '../../../empty_value';
+import { defaultToEmpty, getOrEmpty } from '../../../empty_value';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
 
@@ -108,7 +108,7 @@ const getHostsColumns = () => [
     truncateText: false,
     hideForMobile: false,
     render: ({ host }: { host: HostItem }) => {
-      const hostName = defaultToEmpty(host.name);
+      const hostName = getOrEmpty('host.name', host);
       return (
         <>
           <DraggableWrapper
@@ -116,9 +116,9 @@ const getHostsColumns = () => [
               and: [],
               enabled: true,
               id: host._id!,
-              name: hostName!,
+              name: hostName,
               negated: false,
-              queryMatch: `host.id: "${escapeQueryValue(host.hostId!)}"`,
+              queryMatch: `host.id: "${escapeQueryValue(host.host!.id!)}"`,
               queryDate: `@timestamp >= ${moment(
                 host.firstSeen!
               ).valueOf()} and @timestamp <= ${moment().valueOf()}`,
@@ -132,10 +132,10 @@ const getHostsColumns = () => [
                     onToggleDataProviderEnabled={noop}
                   />
                 </DragEffects>
-              ) : isNil(host.hostId) ? (
-                { hostName }
+              ) : isNil(host.host!.id!) ? (
+                <>{hostName}</>
               ) : (
-                <EuiLink href={`#/link-to/hosts/${encodeURIComponent(host.hostId)}`}>
+                <EuiLink href={`#/link-to/hosts/${encodeURIComponent(host.host!.id!)}`}>
                   {hostName}
                 </EuiLink>
               )
@@ -155,12 +155,12 @@ const getHostsColumns = () => [
     name: 'OS',
     truncateText: false,
     hideForMobile: false,
-    render: ({ host }: { host: HostItem }) => <>{defaultToEmpty(host.os)}</>,
+    render: ({ host }: { host: HostItem }) => <>{getOrEmpty('host.os.name', host)}</>,
   },
   {
     name: 'Version',
     truncateText: false,
     hideForMobile: false,
-    render: ({ host }: { host: HostItem }) => <>{defaultToEmpty(host.version)}</>,
+    render: ({ host }: { host: HostItem }) => <>{getOrEmpty('host.os.version', host)}</>,
   },
 ];

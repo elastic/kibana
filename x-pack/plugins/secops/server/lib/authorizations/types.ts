@@ -35,6 +35,11 @@ export interface AuthorizationHit extends Hit {
     source: {
       ip: string;
     };
+    host: {
+      id: string;
+      ip: string;
+      name: string;
+    };
   };
   user: string;
   failures: number;

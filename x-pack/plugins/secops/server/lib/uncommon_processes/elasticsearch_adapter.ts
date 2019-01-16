@@ -7,9 +7,10 @@
 import { getOr } from 'lodash/fp';
 import { UncommonProcessesData, UncommonProcessesEdges } from '../../graphql/types';
 import { mergeFieldsWithHit } from '../../utils/build_query';
+import { processFieldsMap } from '../ecs_fields';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 import { HostHits, TermAggregation } from '../types';
-import { buildQuery, processFieldsMap } from './query.dsl';
+import { buildQuery } from './query.dsl';
 import {
   UncommonProcessBucket,
   UncommonProcessData,
@@ -62,7 +63,7 @@ export const getHits = (
     sort: bucket.process.hits.hits[0].sort,
     cursor: bucket.process.hits.hits[0].cursor,
     total: bucket.process.hits.total,
-    hosts: getHosts(bucket.hosts.buckets),
+    host: getHosts(bucket.hosts.buckets),
   }));
 
 export const getHosts = (buckets: ReadonlyArray<{ key: string; host: HostHits }>) =>
@@ -81,7 +82,7 @@ export const formatUncommonProcessesData = (
       _id: '',
       instances: 0,
       process: {},
-      hosts: [],
+      host: [],
     },
     cursor: {
       value: '',
@@ -91,7 +92,7 @@ export const formatUncommonProcessesData = (
   return fields.reduce((flattenedFields, fieldName) => {
     flattenedFields.uncommonProcess._id = hit._id;
     flattenedFields.uncommonProcess.instances = getOr(0, 'total.value', hit);
-    flattenedFields.uncommonProcess.hosts = hit.hosts;
+    flattenedFields.uncommonProcess.host = hit.host;
     if (hit.cursor) {
       flattenedFields.cursor.value = hit.cursor;
     }

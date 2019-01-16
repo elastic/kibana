@@ -29,7 +29,7 @@ export const uncommonProcessesQuery = gql`
               id
               name
             }
-            hosts {
+            host {
               id
               name
             }

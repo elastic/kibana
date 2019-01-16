@@ -20,11 +20,14 @@ export const hostsQuery = gql`
         edges {
           host {
             _id
-            name
-            os
-            version
             firstSeen
-            hostId
+            host {
+              name
+              os {
+                name
+                version
+              }
+            }
           }
           cursor {
             value

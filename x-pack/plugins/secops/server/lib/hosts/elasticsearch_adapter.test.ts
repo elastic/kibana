@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { HostsEdges } from '../../graphql/types';
 import { formatHostsData } from './elasticsearch_adapter';
 import { hostsFieldsMap } from './query.dsl';
 import { HostHit } from './types';
@@ -31,7 +32,7 @@ describe('hosts elasticsearch_adapter', () => {
     test('it formats a host with a source of firstSeen correctly', () => {
       const fields: ReadonlyArray<string> = ['firstSeen'];
       const data = formatHostsData(fields, hit, hostsFieldsMap);
-      expect(data).toEqual({
+      const expected: HostsEdges = {
         cursor: {
           tiebreaker: null,
           value: 'cursor-1',
@@ -40,98 +41,133 @@ describe('hosts elasticsearch_adapter', () => {
           firstSeen: 'time-1',
           _id: 'id-123',
         },
-      });
+      };
+
+      expect(data).toEqual(expected);
     });
 
     test('it formats a host with a source of name correctly', () => {
-      const fields: ReadonlyArray<string> = ['name'];
+      const fields: ReadonlyArray<string> = ['host.name'];
       const data = formatHostsData(fields, hit, hostsFieldsMap);
-      expect(data).toEqual({
+      const expected: HostsEdges = {
         cursor: {
           tiebreaker: null,
           value: 'cursor-1',
         },
         host: {
-          name: 'host-name-1',
+          host: {
+            name: 'host-name-1',
+          },
           _id: 'id-123',
         },
-      });
+      };
+
+      expect(data).toEqual(expected);
     });
 
     test('it formats a host with a source of os correctly', () => {
-      const fields: ReadonlyArray<string> = ['os'];
+      const fields: ReadonlyArray<string> = ['host.os.name'];
       const data = formatHostsData(fields, hit, hostsFieldsMap);
-      expect(data).toEqual({
+      const expected: HostsEdges = {
         cursor: {
           tiebreaker: null,
           value: 'cursor-1',
         },
         host: {
-          os: 'os-name-1',
+          host: {
+            os: {
+              name: 'os-name-1',
+            },
+          },
           _id: 'id-123',
         },
-      });
+      };
+
+      expect(data).toEqual(expected);
     });
 
     test('it formats a host with a source of version correctly', () => {
-      const fields: ReadonlyArray<string> = ['version'];
+      const fields: ReadonlyArray<string> = ['host.os.version'];
       const data = formatHostsData(fields, hit, hostsFieldsMap);
-      expect(data).toEqual({
+      const expected: HostsEdges = {
         cursor: {
           tiebreaker: null,
           value: 'cursor-1',
         },
         host: {
-          version: 'version-1',
+          host: {
+            os: {
+              version: 'version-1',
+            },
+          },
           _id: 'id-123',
         },
-      });
+      };
+
+      expect(data).toEqual(expected);
     });
 
     test('it formats a host with a source of name and firstSeen correctly', () => {
-      const fields: ReadonlyArray<string> = ['name', 'firstSeen'];
+      const fields: ReadonlyArray<string> = ['host.name', 'firstSeen'];
       const data = formatHostsData(fields, hit, hostsFieldsMap);
-      expect(data).toEqual({
+      const expected: HostsEdges = {
         cursor: {
           tiebreaker: null,
           value: 'cursor-1',
         },
         host: {
           _id: 'id-123',
-          name: 'host-name-1',
+          host: {
+            name: 'host-name-1',
+          },
           firstSeen: 'time-1',
         },
-      });
+      };
+
+      expect(data).toEqual(expected);
     });
 
     test('it formats a host with a source of name, firstSeen, os, and version correctly', () => {
-      const fields: ReadonlyArray<string> = ['name', 'firstSeen', 'os', 'version'];
+      const fields: ReadonlyArray<string> = [
+        'firstSeen',
+        'host.name',
+        'host.os.name',
+        'host.os.version',
+      ];
       const data = formatHostsData(fields, hit, hostsFieldsMap);
-      expect(data).toEqual({
+      const expected: HostsEdges = {
         cursor: {
           tiebreaker: null,
           value: 'cursor-1',
         },
         host: {
           _id: 'id-123',
-          name: 'host-name-1',
+          host: {
+            name: 'host-name-1',
+            os: {
+              name: 'os-name-1',
+              version: 'version-1',
+            },
+          },
           firstSeen: 'time-1',
-          os: 'os-name-1',
-          version: 'version-1',
         },
-      });
+      };
+
+      expect(data).toEqual(expected);
     });
 
     test('it formats a host without any data if fields are empty', () => {
       const fields: ReadonlyArray<string> = [];
       const data = formatHostsData(fields, hit, hostsFieldsMap);
-      expect(data).toEqual({
+      const expected: HostsEdges = {
         cursor: {
           tiebreaker: null,
           value: '',
         },
         host: {},
-      });
+      };
+
+      expect(data).toEqual(expected);
     });
   });
 });

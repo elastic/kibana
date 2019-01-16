@@ -176,7 +176,7 @@ const getUncommonColumns = (startDate: number) => [
     truncateText: false,
     hideForMobile: false,
     render: ({ uncommonProcess }: { uncommonProcess: UncommonProcessItem }) => (
-      <>{uncommonProcess.hosts != null ? uncommonProcess.hosts.length : getEmptyValue()}</>
+      <>{uncommonProcess.host != null ? uncommonProcess.host.length : getEmptyValue()}</>
     ),
   },
   {
@@ -184,9 +184,7 @@ const getUncommonColumns = (startDate: number) => [
     truncateText: false,
     hideForMobile: false,
     render: ({ uncommonProcess }: { uncommonProcess: UncommonProcessItem }) => (
-      <>
-        {uncommonProcess.hosts != null ? extractHostNames(uncommonProcess.hosts) : getEmptyValue()}
-      </>
+      <>{uncommonProcess.host != null ? extractHostNames(uncommonProcess.host) : getEmptyValue()}</>
     ),
   },
 ];

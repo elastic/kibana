@@ -12,10 +12,10 @@ import { HostsRequestOptions } from './types';
 
 export const hostsFieldsMap: Readonly<Record<string, string>> = {
   firstSeen: '@timestamp',
-  name: 'host.name',
-  os: 'host.os.name',
-  hostId: 'host.id',
-  version: 'host.os.version',
+  'host.id': 'host.id',
+  'host.name': 'host.name',
+  'host.os.name': 'host.os.name',
+  'host.os.version': 'host.os.version',
 };
 
 export const buildQuery = (options: HostsRequestOptions) => {

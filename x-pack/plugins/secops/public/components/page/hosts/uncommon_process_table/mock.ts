@@ -17,7 +17,7 @@ export const mockData: { UncommonProcess: UncommonProcessesData } = {
             title: 'Hello World',
             name: 'elrond.elstc.co',
           },
-          hosts: [{ id: 'host-id-1', name: 'hello-world' }],
+          host: [{ id: 'host-id-1', name: 'hello-world' }],
           instances: 93,
           user: {
             id: 0,
@@ -35,7 +35,7 @@ export const mockData: { UncommonProcess: UncommonProcessesData } = {
             title: 'Hello World',
             name: 'siem-kibana',
           },
-          hosts: [
+          host: [
             { id: 'host-id-1', name: 'hello-world' },
             { id: 'host-id-2', name: 'hello-world-2' },
           ],

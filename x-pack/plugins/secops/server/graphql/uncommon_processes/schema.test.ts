@@ -38,7 +38,7 @@ const testCaseSource = {
                 id
                 name
               }
-              hosts {
+              host {
                 id
                 name
               }

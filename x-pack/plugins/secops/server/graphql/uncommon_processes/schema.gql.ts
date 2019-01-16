@@ -11,7 +11,7 @@ export const uncommonProcessesSchema = gql`
     _id: String!
     instances: Int!
     process: ProcessEcsFields!
-    hosts: [HostEcsFields!]!
+    host: [HostEcsFields!]!
     user: UserEcsFields
   }
 

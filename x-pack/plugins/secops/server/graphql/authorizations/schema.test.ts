@@ -28,9 +28,13 @@ const testCaseSource = {
               _id
               failures
               successes
-              user
-              from
-              to {
+              user {
+                name
+              }
+              source {
+                ip
+              }
+              host {
                 id
                 ip
                 name

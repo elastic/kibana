@@ -9,11 +9,8 @@ import gql from 'graphql-tag';
 export const hostsSchema = gql`
   type HostItem {
     _id: String
-    name: String
     firstSeen: String
-    version: String
-    os: String
-    hostId: String
+    host: HostEcsFields
   }
 
   type HostsEdges {

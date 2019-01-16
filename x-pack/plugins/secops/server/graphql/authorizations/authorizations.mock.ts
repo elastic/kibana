@@ -18,10 +18,10 @@ export const mockAuthorizationsData: { Authorizations: AuthorizationsData } = {
           _id: 'cPsuhGcB0WOhS6qyTKC0',
           failures: 10,
           successes: 0,
-          user: 'Evan Hassanabad',
-          from: '127.0.0.1',
+          user: { name: 'Evan Hassanabad' },
+          source: { ip: '127.0.0.1' },
           latest: '2019-01-11T06:18:30.745Z',
-          to: {
+          host: {
             id: '123',
             name: 'host-computer-1',
             ip: '192.168.0.1',
@@ -36,10 +36,10 @@ export const mockAuthorizationsData: { Authorizations: AuthorizationsData } = {
           _id: 'KwQDiWcB0WOhS6qyXmrW',
           failures: 10,
           successes: 0,
-          user: 'Braden Hassanabad',
-          from: '127.0.0.1',
+          user: { name: 'Braden Hassanabad' },
+          source: { ip: '127.0.0.1' },
           latest: '2019-01-11T06:18:30.745Z',
-          to: {
+          host: {
             id: '234',
             name: 'host-computer-2',
             ip: '192.168.0.1',

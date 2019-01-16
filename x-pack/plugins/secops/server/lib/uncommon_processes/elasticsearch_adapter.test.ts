@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { UncommonProcessesEdges } from '../../graphql/types';
+import { processFieldsMap } from '../ecs_fields';
 import { formatUncommonProcessesData, getHosts } from './elasticsearch_adapter';
-import { processFieldsMap } from './query.dsl';
 import { UncommonProcessBucket, UncommonProcessHit } from './types';
 
 describe('elasticsearch_adapter', () => {
@@ -140,7 +140,7 @@ describe('elasticsearch_adapter', () => {
         value: 100,
         relation: 'eq',
       },
-      hosts: [{ id: 'host-id-1', name: 'host-name-1' }, { id: 'host-id-1', name: 'host-name-1' }],
+      host: [{ id: 'host-id-1', name: 'host-name-1' }, { id: 'host-id-1', name: 'host-name-1' }],
       _source: {
         '@timestamp': 'time',
         process: {
@@ -159,7 +159,7 @@ describe('elasticsearch_adapter', () => {
         cursor: { tiebreaker: null, value: 'cursor-1' },
         uncommonProcess: {
           _id: 'id-123',
-          hosts: [
+          host: [
             { id: 'host-id-1', name: 'host-name-1' },
             { id: 'host-id-1', name: 'host-name-1' },
           ],
@@ -179,7 +179,7 @@ describe('elasticsearch_adapter', () => {
         cursor: { tiebreaker: null, value: 'cursor-1' },
         uncommonProcess: {
           _id: 'id-123',
-          hosts: [
+          host: [
             { id: 'host-id-1', name: 'host-name-1' },
             { id: 'host-id-1', name: 'host-name-1' },
           ],
@@ -203,7 +203,7 @@ describe('elasticsearch_adapter', () => {
         },
         uncommonProcess: {
           _id: '',
-          hosts: [],
+          host: [],
           instances: 0,
           process: {},
         },

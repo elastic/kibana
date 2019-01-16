@@ -10,7 +10,7 @@ import { AuthorizationsData, AuthorizationsEdges } from '../../graphql/types';
 import { mergeFieldsWithHit } from '../../utils/build_query';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
-import { auditdMap, buildQuery } from './query.dsl';
+import { auditdFieldsMap, buildQuery } from './query.dsl';
 import {
   AuthorizationBucket,
   AuthorizationData,
@@ -45,7 +45,7 @@ export class ElasticsearchAuthorizationAdapter implements AuthorizationsAdapter 
     );
 
     const authorizationEdges: AuthorizationsEdges[] = hits.map(hit =>
-      formatAuthorizationData(options.fields, hit, auditdMap)
+      formatAuthorizationData(options.fields, hit, auditdFieldsMap)
     );
 
     const hasNextPage = authorizationEdges.length === limit + 1;
@@ -72,10 +72,12 @@ export const formatAuthorizationData = (
       failures: 0,
       successes: 0,
       _id: '',
-      user: '',
-      from: '',
+      user: {
+        name: '',
+      },
+      source: { ip: '' },
       latest: '',
-      to: {
+      host: {
         id: '',
         name: '',
       },
@@ -91,7 +93,12 @@ export const formatAuthorizationData = (
     }
     flattenedFields.authorization = {
       ...flattenedFields.authorization,
-      ...{ _id: hit._id, user: hit.user, failures: hit.failures, successes: hit.successes },
+      ...{
+        _id: hit._id,
+        user: { name: hit.user },
+        failures: hit.failures,
+        successes: hit.successes,
+      },
     };
     return mergeFieldsWithHit(fieldName, 'authorization', flattenedFields, fieldMap, hit);
   }, init);

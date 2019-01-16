@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { EcsEdges } from '../../graphql/types';
+import { eventFieldsMap } from '../ecs_fields';
 import { formatEventsData } from './elasticsearch_adapter';
-import { eventFieldsMap } from './query.dsl';
 import { EventHit } from './types';
 
 describe('events elasticsearch_adapter', () => {
@@ -26,10 +27,10 @@ describe('events elasticsearch_adapter', () => {
             alert: {
               category: 'suricata-category-1',
               signature: 'suricata-signature-1',
-              signature_id: 'suricata-signature-id-1',
-              severity: 'suricata-severity-1',
+              signature_id: 5000,
+              severity: 1,
             },
-            flow_id: 'suricata-flow-id-1',
+            flow_id: 100,
             proto: 'suricata-proto-1',
           },
         },
@@ -56,7 +57,7 @@ describe('events elasticsearch_adapter', () => {
     test('it formats an event with a source of hostname correctly', () => {
       const fields: ReadonlyArray<string> = ['host.name'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
-      expect(data).toEqual({
+      const expected: EcsEdges = {
         cursor: {
           tiebreaker: '1234',
           value: '123567890',
@@ -68,13 +69,14 @@ describe('events elasticsearch_adapter', () => {
             name: 'hostname-1',
           },
         },
-      });
+      };
+      expect(data).toEqual(expected);
     });
 
     test('it formats an event with a source of host ip correctly', () => {
       const fields: ReadonlyArray<string> = ['host.ip'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
-      expect(data).toEqual({
+      const expected: EcsEdges = {
         cursor: {
           tiebreaker: '1234',
           value: '123567890',
@@ -86,13 +88,14 @@ describe('events elasticsearch_adapter', () => {
             ip: 'hostip-1',
           },
         },
-      });
+      };
+      expect(data).toEqual(expected);
     });
 
     test('it formats an event with a event category correctly', () => {
       const fields: ReadonlyArray<string> = ['event.category'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
-      expect(data).toEqual({
+      const expected: EcsEdges = {
         cursor: {
           tiebreaker: '1234',
           value: '123567890',
@@ -104,13 +107,15 @@ describe('events elasticsearch_adapter', () => {
             category: 'suricata-category-1',
           },
         },
-      });
+      };
+
+      expect(data).toEqual(expected);
     });
 
     test('it formats an event with a event id correctly', () => {
       const fields: ReadonlyArray<string> = ['event.id'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
-      expect(data).toEqual({
+      const expected: EcsEdges = {
         cursor: {
           tiebreaker: '1234',
           value: '123567890',
@@ -119,16 +124,17 @@ describe('events elasticsearch_adapter', () => {
           _id: 'id-123',
           _index: 'index-123',
           event: {
-            id: 'suricata-flow-id-1',
+            id: 100,
           },
         },
-      });
+      };
+      expect(data).toEqual(expected);
     });
 
     test('it formats an event with a event module correctly', () => {
       const fields: ReadonlyArray<string> = ['event.module'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
-      expect(data).toEqual({
+      const expected: EcsEdges = {
         cursor: {
           tiebreaker: '1234',
           value: '123567890',
@@ -140,13 +146,14 @@ describe('events elasticsearch_adapter', () => {
             module: 'event-module-1',
           },
         },
-      });
+      };
+      expect(data).toEqual(expected);
     });
 
     test('it formats an event with a event type correctly', () => {
       const fields: ReadonlyArray<string> = ['event.type'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
-      expect(data).toEqual({
+      const expected: EcsEdges = {
         cursor: {
           tiebreaker: '1234',
           value: '123567890',
@@ -158,13 +165,15 @@ describe('events elasticsearch_adapter', () => {
             type: 'event-type-1',
           },
         },
-      });
+      };
+
+      expect(data).toEqual(expected);
     });
 
     test('it formats an event with a event severity correctly', () => {
       const fields: ReadonlyArray<string> = ['event.severity'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
-      expect(data).toEqual({
+      const expected: EcsEdges = {
         cursor: {
           tiebreaker: '1234',
           value: '123567890',
@@ -173,16 +182,18 @@ describe('events elasticsearch_adapter', () => {
           _id: 'id-123',
           _index: 'index-123',
           event: {
-            severity: 'suricata-severity-1',
+            severity: 1,
           },
         },
-      });
+      };
+
+      expect(data).toEqual(expected);
     });
 
     test('it formats an event with a suricata eve flow id correctly', () => {
       const fields: ReadonlyArray<string> = ['suricata.eve.flow_id'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
-      expect(data).toEqual({
+      const expected: EcsEdges = {
         cursor: {
           tiebreaker: '1234',
           value: '123567890',
@@ -192,17 +203,19 @@ describe('events elasticsearch_adapter', () => {
           _index: 'index-123',
           suricata: {
             eve: {
-              flow_id: 'suricata-flow-id-1',
+              flow_id: 100,
             },
           },
         },
-      });
+      };
+
+      expect(data).toEqual(expected);
     });
 
     test('it formats an event with a suricata eve proto correctly', () => {
       const fields: ReadonlyArray<string> = ['suricata.eve.proto'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
-      expect(data).toEqual({
+      const expected: EcsEdges = {
         cursor: {
           tiebreaker: '1234',
           value: '123567890',
@@ -216,13 +229,15 @@ describe('events elasticsearch_adapter', () => {
             },
           },
         },
-      });
+      };
+
+      expect(data).toEqual(expected);
     });
 
     test('it formats an event with a suricata eve alert signature correctly', () => {
       const fields: ReadonlyArray<string> = ['suricata.eve.alert.signature'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
-      expect(data).toEqual({
+      const expected: EcsEdges = {
         cursor: {
           tiebreaker: '1234',
           value: '123567890',
@@ -238,13 +253,15 @@ describe('events elasticsearch_adapter', () => {
             },
           },
         },
-      });
+      };
+
+      expect(data).toEqual(expected);
     });
 
     test('it formats an event with a suricata eve alert signature id correctly', () => {
       const fields: ReadonlyArray<string> = ['suricata.eve.alert.signature_id'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
-      expect(data).toEqual({
+      const expected: EcsEdges = {
         cursor: {
           tiebreaker: '1234',
           value: '123567890',
@@ -255,18 +272,20 @@ describe('events elasticsearch_adapter', () => {
           suricata: {
             eve: {
               alert: {
-                signature_id: 'suricata-signature-id-1',
+                signature_id: 5000,
               },
             },
           },
         },
-      });
+      };
+
+      expect(data).toEqual(expected);
     });
 
     test('it formats an event with a source ip correctly', () => {
       const fields: ReadonlyArray<string> = ['source.ip'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
-      expect(data).toEqual({
+      const expected: EcsEdges = {
         cursor: {
           tiebreaker: '1234',
           value: '123567890',
@@ -278,13 +297,15 @@ describe('events elasticsearch_adapter', () => {
             ip: 'source-ip-1',
           },
         },
-      });
+      };
+
+      expect(data).toEqual(expected);
     });
 
     test('it formats an event with a source port correctly', () => {
       const fields: ReadonlyArray<string> = ['source.port'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
-      expect(data).toEqual({
+      const expected: EcsEdges = {
         cursor: {
           tiebreaker: '1234',
           value: '123567890',
@@ -296,13 +317,15 @@ describe('events elasticsearch_adapter', () => {
             port: 100,
           },
         },
-      });
+      };
+
+      expect(data).toEqual(expected);
     });
 
     test('it formats an event with a destination ip correctly', () => {
       const fields: ReadonlyArray<string> = ['destination.ip'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
-      expect(data).toEqual({
+      const expected: EcsEdges = {
         cursor: {
           tiebreaker: '1234',
           value: '123567890',
@@ -314,13 +337,15 @@ describe('events elasticsearch_adapter', () => {
             ip: 'destination-ip-1',
           },
         },
-      });
+      };
+
+      expect(data).toEqual(expected);
     });
 
     test('it formats an event with a destination port correctly', () => {
       const fields: ReadonlyArray<string> = ['destination.port'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
-      expect(data).toEqual({
+      const expected: EcsEdges = {
         cursor: {
           tiebreaker: '1234',
           value: '123567890',
@@ -332,13 +357,15 @@ describe('events elasticsearch_adapter', () => {
             port: 200,
           },
         },
-      });
+      };
+
+      expect(data).toEqual(expected);
     });
 
     test('it formats an event with a geo region name correctly', () => {
       const fields: ReadonlyArray<string> = ['geo.region_name'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
-      expect(data).toEqual({
+      const expected: EcsEdges = {
         cursor: {
           tiebreaker: '1234',
           value: '123567890',
@@ -350,13 +377,15 @@ describe('events elasticsearch_adapter', () => {
             region_name: 'geo-region-1',
           },
         },
-      });
+      };
+
+      expect(data).toEqual(expected);
     });
 
     test('it formats an event with a geo country iso code correctly', () => {
       const fields: ReadonlyArray<string> = ['geo.country_iso_code'];
       const data = formatEventsData(fields, hit, eventFieldsMap);
-      expect(data).toEqual({
+      const expected: EcsEdges = {
         cursor: {
           tiebreaker: '1234',
           value: '123567890',
@@ -368,7 +397,9 @@ describe('events elasticsearch_adapter', () => {
             country_iso_code: 'geo-iso-code-1',
           },
         },
-      });
+      };
+
+      expect(data).toEqual(expected);
     });
 
     test('it formats an event with a lot of fields correctly', () => {
@@ -380,7 +411,7 @@ describe('events elasticsearch_adapter', () => {
         'geo.region_name',
       ];
       const data = formatEventsData(fields, hit, eventFieldsMap);
-      expect(data).toEqual({
+      const expected: EcsEdges = {
         cursor: {
           tiebreaker: '1234',
           value: '123567890',
@@ -399,18 +430,22 @@ describe('events elasticsearch_adapter', () => {
             eve: {
               proto: 'suricata-proto-1',
               alert: {
-                signature_id: 'suricata-signature-id-1',
+                signature_id: 5000,
               },
             },
           },
         },
-      });
+      };
+
+      expect(data).toEqual(expected);
     });
 
     test('it formats a event data if fields are empty', () => {
       const fields: ReadonlyArray<string> = [];
       const data = formatEventsData(fields, hit, eventFieldsMap);
-      expect(data).toEqual({ cursor: { tiebreaker: null, value: '' }, event: {} });
+      const expected: EcsEdges = { cursor: { tiebreaker: null, value: '' }, event: {} };
+
+      expect(data).toEqual(expected);
     });
   });
 });

@@ -7,21 +7,21 @@
 import { merge } from 'lodash/fp';
 import { createQueryFilterClauses } from '../../utils/build_query';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
+import { hostFieldsMap, sourceFieldsMap } from '../ecs_fields';
 import { FilterQuery } from '../types';
 import { AuthorizationsRequestOptions } from './types';
 
-export const auditdMap: Readonly<Record<string, string>> = {
+export const auditdFieldsMap: Readonly<Record<string, string>> = {
   latest: '@timestamp',
-  from: 'source.ip',
-  'to.id': 'host.id',
-  'to.name': 'host.name',
+  ...{ ...sourceFieldsMap },
+  ...{ ...hostFieldsMap },
 };
 
 export const buildQuery = (options: AuthorizationsRequestOptions) => {
   const { to, from } = options.timerange;
   const { limit, cursor } = options.pagination;
   const { fields, filterQuery } = options;
-  const esFields = reduceFields(fields, auditdMap);
+  const esFields = reduceFields(fields, auditdFieldsMap);
 
   const filter = [
     ...createQueryFilterClauses(filterQuery as FilterQuery),
