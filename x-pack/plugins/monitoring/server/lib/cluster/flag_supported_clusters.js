@@ -7,7 +7,7 @@
 import { get, set, find } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { createTypeFilter } from '../create_query';
-import { LOGGING_TAG } from '../../../common/constants';
+import { LOGGING_TAG, UNLINKED_DEPLOYMENT_CLUSTER_UUID } from '../../../common/constants';
 
 async function findSupportedBasicLicenseCluster(req, clusters, kbnIndexPattern, kibanaUuid, serverLog) {
   checkParam(kbnIndexPattern, 'kbnIndexPattern in cluster/findSupportedBasicLicenseCluster');
@@ -78,7 +78,7 @@ export function flagSupportedClusters(req, kbnIndexPattern) {
     // if multi cluster
     if (clusters.length > 1) {
       const basicLicenseCount = clusters.reduce((accumCount, cluster) => {
-        if (cluster.license && cluster.license.type === 'basic') {
+        if (cluster.cluster_uuid === UNLINKED_DEPLOYMENT_CLUSTER_UUID && (cluster.license && cluster.license.type === 'basic')) {
           accumCount++;
         }
         return accumCount;
