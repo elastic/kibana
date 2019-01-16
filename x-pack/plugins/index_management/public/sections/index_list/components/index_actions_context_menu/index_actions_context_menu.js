@@ -499,7 +499,7 @@ class IndexActionsContextMenuUi extends Component {
             <EuiCallOut
               title={
                 intl.formatMessage({
-                  id: 'xpack.idxMgmt.indexActionsMenu.deleteEntity.proceedWithCautionCallOutTitle',
+                  id: 'xpack.idxMgmt.indexActionsMenu.freezeEntity.proceedWithCautionCallOutTitle',
                   defaultMessage: 'Proceed with caution',
                 })
               }
