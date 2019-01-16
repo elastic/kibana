@@ -419,7 +419,9 @@ describe('reindexService', () => {
       } as ReindexSavedObject;
 
       it('switches aliases, sets as complete, and updates lastCompletedStep', async () => {
-        callCluster.mockResolvedValueOnce({ acknowledged: true });
+        callCluster
+          .mockResolvedValueOnce({ myIndex: { aliases: {} } })
+          .mockResolvedValueOnce({ acknowledged: true });
         const updatedOp = await service.processNextStep(reindexOp);
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.completed);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.aliasCreated);
@@ -428,6 +430,38 @@ describe('reindexService', () => {
             actions: [
               { add: { index: 'myIndex-reindex-0', alias: 'myIndex' } },
               { remove_index: { index: 'myIndex' } },
+            ],
+          },
+        });
+      });
+
+      it('moves existing aliases over to new index', async () => {
+        callCluster
+          .mockResolvedValueOnce({
+            myIndex: {
+              aliases: {
+                myAlias: {},
+                myFilteredAlias: { filter: { term: { https: true } } },
+              },
+            },
+          })
+          .mockResolvedValueOnce({ acknowledged: true });
+        const updatedOp = await service.processNextStep(reindexOp);
+        expect(updatedOp.attributes.status).toEqual(ReindexStatus.completed);
+        expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.aliasCreated);
+        expect(callCluster).toHaveBeenCalledWith('indices.updateAliases', {
+          body: {
+            actions: [
+              { add: { index: 'myIndex-reindex-0', alias: 'myIndex' } },
+              { remove_index: { index: 'myIndex' } },
+              { add: { index: 'myIndex-reindex-0', alias: 'myAlias' } },
+              {
+                add: {
+                  index: 'myIndex-reindex-0',
+                  alias: 'myFilteredAlias',
+                  filter: { term: { https: true } },
+                },
+              },
             ],
           },
         });

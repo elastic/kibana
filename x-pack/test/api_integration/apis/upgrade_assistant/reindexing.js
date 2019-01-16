@@ -80,6 +80,49 @@ export default function ({ getService }) {
       });
     });
 
+    it('should update any aliases', async () => {
+      await esArchiver.load('upgrade_assistant/reindex');
+
+      // Add aliases and ensure each returns the right number of docs
+      await es.indices.updateAliases({
+        body: {
+          actions: [
+            { add: { index: 'dummydata', alias: 'myAlias' } },
+            { add: { index: 'dummy*', alias: 'wildcardAlias' } },
+            { add: { index: 'dummydata', alias: 'myHttpsAlias', filter: { term: { https: true } } } }
+          ]
+        }
+      });
+      expect(
+        (await es.count({ index: 'myAlias' })).count
+      ).to.be(3);
+      expect(
+        (await es.count({ index: 'wildcardAlias' })).count
+      ).to.be(3);
+      expect(
+        (await es.count({ index: 'myHttpsAlias' })).count
+      ).to.be(2);
+
+      // Reindex
+      await supertest
+        .post(`/api/upgrade_assistant/reindex/dummydata`)
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+      await waitForReindexToComplete('dummydata');
+
+      // The regular aliases should still return 3 docs
+      expect(
+        (await es.count({ index: 'myAlias' })).count
+      ).to.be(3);
+      expect(
+        (await es.count({ index: 'wildcardAlias' })).count
+      ).to.be(3);
+      // The filtered alias should still return 2 docs
+      expect(
+        (await es.count({ index: 'myHttpsAlias' })).count
+      ).to.be(2);
+    });
+
     it('shows warnings for boolean fields', async () => {
       const resp = await supertest.get(`/api/upgrade_assistant/reindex/boolean-test`);
       expect(resp.body.warnings.includes(ReindexWarning.booleanFields)).to.be(true);
