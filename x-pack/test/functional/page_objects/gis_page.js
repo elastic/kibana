@@ -10,7 +10,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const flyout = getService('flyout');
+  const inspector = getService('inspector');
   const find = getService('find');
 
   class GisPage {
@@ -143,37 +143,8 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.click(`mapRemoveLayerButton`);
     }
 
-
-    /*
-     * Inspector utility functions
-     */
-    async openInspector() {
-      log.debug('Open Inspector');
-      const isOpen = await testSubjects.exists('inspectorPanel');
-      if (!isOpen) {
-        await retry.try(async () => {
-          await testSubjects.click('openInspectorButton');
-          await testSubjects.find('inspectorPanel');
-        });
-      }
-    }
-
-    async closeInspector() {
-      log.debug('Close Inspector');
-      let isOpen = await testSubjects.exists('inspectorPanel');
-      if (isOpen) {
-        await retry.try(async () => {
-          await flyout.close('inspectorPanel');
-          isOpen = await testSubjects.exists('inspectorPanel');
-          if (isOpen) {
-            throw new Error('Failed to close inspector');
-          }
-        });
-      }
-    }
-
     async openInspectorView(viewId) {
-      await this.openInspector();
+      await inspector.open();
       log.debug(`Open Inspector view ${viewId}`);
       await testSubjects.click('inspectorViewChooser');
       await testSubjects.click(viewId);
@@ -207,7 +178,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('mapboxStyleTab');
       const mapboxStyleContainer = await testSubjects.find('mapboxStyleContainer');
       const mapboxStyleJson = await mapboxStyleContainer.getVisibleText();
-      await this.closeInspector();
+      await inspector.close();
       let mapboxStyle;
       try {
         mapboxStyle = JSON.parse(mapboxStyleJson);
@@ -215,18 +186,6 @@ export function GisPageProvider({ getService, getPageObjects }) {
         throw new Error(`Unable to parse mapbox style, error: ${err.message}`);
       }
       return mapboxStyle;
-    }
-
-    async getInspectorTableData() {
-      const inspectorPanel = await testSubjects.find('inspectorPanel');
-      const tableBody = await retry.try(async () => inspectorPanel.findByTagName('tbody'));
-      // Convert the data into a nested array format:
-      // [ [cell1_in_row1, cell2_in_row1], [cell1_in_row2, cell2_in_row2] ]
-      const rows = await tableBody.findAllByTagName('tr');
-      return await Promise.all(rows.map(async row => {
-        const cells = await row.findAllByTagName('td');
-        return await Promise.all(cells.map(async cell => cell.getVisibleText()));
-      }));
     }
 
     getInspectorStatRowHit(stats, rowName) {
