@@ -139,11 +139,10 @@ export function asPercent(
   denominator?: number,
   fallbackResult = ''
 ) {
-  if (denominator === 0) {
+  if (!denominator) {
     return fallbackResult;
   }
 
-  const decimal = denominator ? numerator / denominator : numerator;
-
+  const decimal = numerator / denominator;
   return numeral(decimal).format('0.00%');
 }
