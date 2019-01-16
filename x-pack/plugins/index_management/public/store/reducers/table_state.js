@@ -11,9 +11,10 @@ import {
   pageSizeChanged,
   sortChanged,
   showSystemIndicesChanged,
+  toggleChanged,
 } from '../actions';
 
-const defaultState = {
+export const defaultTableState = {
   filter: '',
   pageSize: 10,
   currentPage: 0,
@@ -37,6 +38,16 @@ export const tableState = handleActions({
     return {
       ...state,
       showSystemIndices,
+      toggleNameToVisibleMap: {}
+    };
+  },
+  [toggleChanged](state, action) {
+    const { toggleName, toggleValue } = action.payload;
+    const toggleNameToVisibleMap = { ...state.toggleNameToVisibleMap };
+    toggleNameToVisibleMap[toggleName] = toggleValue;
+    return {
+      ...state,
+      toggleNameToVisibleMap
     };
   },
   [sortChanged](state, action) {
@@ -62,4 +73,4 @@ export const tableState = handleActions({
       pageSize
     };
   }
-}, defaultState);
+}, defaultTableState);
