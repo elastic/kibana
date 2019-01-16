@@ -35,7 +35,8 @@ import {
   PHASE_ATTRIBUTES_THAT_ARE_NUMBERS,
   MAX_SIZE_TYPE_DOCUMENT,
   WARM_PHASE_ON_ROLLOVER,
-  PHASE_SHRINK_ENABLED
+  PHASE_SHRINK_ENABLED,
+  PHASE_FREEZE_ENABLED
 } from '../constants';
 import { filterItems, sortTable } from '../../services';
 
@@ -194,6 +195,9 @@ export const phaseFromES = (phase, phaseName, defaultPolicy) => {
     if (actions.shrink) {
       policy[PHASE_PRIMARY_SHARD_COUNT] = actions.shrink.number_of_shards;
     }
+    if (actions.freeze) {
+      policy[PHASE_FREEZE_ENABLED] = true;
+    }
   }
   return policy;
 };
@@ -275,6 +279,12 @@ export const phaseToES = (phase, originalEsPhase) => {
     };
   } else {
     delete esPhase.actions.shrink;
+  }
+
+  if (phase[PHASE_FREEZE_ENABLED]) {
+    esPhase.actions.freeze = {};
+  } else {
+    delete esPhase.actions.freeze;
   }
   return esPhase;
 };

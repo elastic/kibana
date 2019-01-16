@@ -47,7 +47,3 @@ ColorRampSelector.propTypes = {
   color: PropTypes.string,
   onChange: PropTypes.func.isRequired,
 };
-
-ColorRampSelector.defaultProps = {
-  color: '',
-};

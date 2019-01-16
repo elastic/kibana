@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 
@@ -56,7 +57,9 @@ export const routes = [
     exact: true,
     path: '/:serviceName/errors',
     component: ServiceDetails,
-    breadcrumb: 'Errors'
+    breadcrumb: i18n.translate('xpack.apm.breadcrumb.errorsTitle', {
+      defaultMessage: 'Errors'
+    })
   },
   {
     switch: true,
@@ -64,16 +67,33 @@ export const routes = [
       {
         exact: true,
         path: '/invalid-license',
-        breadcrumb: 'Invalid License',
-        render: () => <div>Invalid license</div>
+        breadcrumb: i18n.translate('xpack.apm.breadcrumb.invalidLicenseTitle', {
+          defaultMessage: 'Invalid License'
+        }),
+        render: () => (
+          <div>
+            {i18n.translate('xpack.apm.invalidLicenseLabel', {
+              defaultMessage: 'Invalid license'
+            })}
+          </div>
+        )
       },
       {
         exact: true,
         path: '/services',
         component: Home,
-        breadcrumb: 'Services'
+        breadcrumb: i18n.translate('xpack.apm.breadcrumb.servicesTitle', {
+          defaultMessage: 'Services'
+        })
       },
-      { exact: true, path: '/traces', component: Home, breadcrumb: 'Traces' },
+      {
+        exact: true,
+        path: '/traces',
+        component: Home,
+        breadcrumb: i18n.translate('xpack.apm.breadcrumb.tracesTitle', {
+          defaultMessage: 'Traces'
+        })
+      },
       {
         exact: true,
         path: '/:serviceName',
@@ -89,7 +109,9 @@ export const routes = [
     exact: true,
     path: '/:serviceName/transactions',
     component: ServiceDetails,
-    breadcrumb: 'Transactions'
+    breadcrumb: i18n.translate('xpack.apm.breadcrumb.transactionsTitle', {
+      defaultMessage: 'Transactions'
+    })
   },
   // Have to split this out as its own route to prevent duplicate breadcrumbs from both matching
   // if we use :transactionType? as a single route here
@@ -103,7 +125,9 @@ export const routes = [
     exact: true,
     path: '/:serviceName/metrics',
     component: ServiceDetails,
-    breadcrumb: 'Metrics'
+    breadcrumb: i18n.translate('xpack.apm.breadcrumb.metricsTitle', {
+      defaultMessage: 'Metrics'
+    })
   },
   {
     exact: true,

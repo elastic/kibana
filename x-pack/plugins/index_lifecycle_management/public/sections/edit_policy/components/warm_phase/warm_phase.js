@@ -102,8 +102,8 @@ class WarmPhaseUi extends PureComponent {
               <p>
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseDescriptionMessage"
-                  defaultMessage="You are still querying your index, but it is read-only, and you are no longer
-                    updating it.  You can allocate shards to less performant hardware.
+                  defaultMessage="You are still querying your index, but it is read-only.
+                    You can allocate shards to less performant hardware.
                     For faster searches, you can reduce the number of shards and force merge segments."
                 />
               </p>

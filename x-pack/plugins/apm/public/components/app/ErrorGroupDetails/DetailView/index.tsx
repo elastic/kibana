@@ -12,6 +12,7 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import idx from 'idx';
 import { first, get } from 'lodash';
 import React from 'react';
 import { RRRRenderResponse } from 'react-redux-request';
@@ -104,42 +105,64 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
   }
 
   const transactionLink = getTransactionLink(error, transaction);
+  const notAvailableLabel = i18n.translate(
+    'xpack.apm.errorGroupDetails.notAvailableLabel',
+    {
+      defaultMessage: 'N/A'
+    }
+  );
   const stickyProperties = [
     {
       fieldName: '@timestamp',
-      label: 'Timestamp',
+      label: i18n.translate('xpack.apm.errorGroupDetails.timestampLabel', {
+        defaultMessage: 'Timestamp'
+      }),
       val: error['@timestamp'],
       width: '50%'
     },
     {
       fieldName: REQUEST_URL_FULL,
       label: 'URL',
-      val: get(error, REQUEST_URL_FULL, 'N/A'),
+      val:
+        idx(error, _ => _.context.page.url) ||
+        idx(transaction, _ => _.context.request.url.full) ||
+        notAvailableLabel,
       truncated: true,
       width: '50%'
     },
     {
       fieldName: REQUEST_METHOD,
-      label: 'Request method',
-      val: get(error, REQUEST_METHOD, 'N/A'),
+      label: i18n.translate('xpack.apm.errorGroupDetails.requestMethodLabel', {
+        defaultMessage: 'Request method'
+      }),
+      val: get(error, REQUEST_METHOD, notAvailableLabel),
       width: '25%'
     },
     {
       fieldName: ERROR_EXC_HANDLED,
-      label: 'Handled',
-      val: String(get(error, ERROR_EXC_HANDLED, 'N/A')),
+      label: i18n.translate('xpack.apm.errorGroupDetails.handledLabel', {
+        defaultMessage: 'Handled'
+      }),
+      val: String(get(error, ERROR_EXC_HANDLED, notAvailableLabel)),
       width: '25%'
     },
     {
       fieldName: TRANSACTION_ID,
-      label: 'Transaction sample ID',
-      val: transactionLink || 'N/A',
+      label: i18n.translate(
+        'xpack.apm.errorGroupDetails.transactionSampleIdLabel',
+        {
+          defaultMessage: 'Transaction sample ID'
+        }
+      ),
+      val: transactionLink || notAvailableLabel,
       width: '25%'
     },
     {
       fieldName: USER_ID,
-      label: 'User ID',
-      val: get(error, USER_ID, 'N/A'),
+      label: i18n.translate('xpack.apm.errorGroupDetails.userIdLabel', {
+        defaultMessage: 'User ID'
+      }),
+      val: get(error, USER_ID, notAvailableLabel),
       width: '25%'
     }
   ];
@@ -151,11 +174,25 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
     <Container>
       <HeaderContainer>
         <EuiTitle size="s">
-          <h3>Error occurrence</h3>
+          <h3>
+            {i18n.translate(
+              'xpack.apm.errorGroupDetails.errorOccurrenceTitle',
+              {
+                defaultMessage: 'Error occurrence'
+              }
+            )}
+          </h3>
         </EuiTitle>
         <DiscoverErrorButton error={error} kuery={urlParams.kuery}>
           <EuiButtonEmpty iconType="discoverApp">
-            {`View ${occurrencesCount} occurrences in Discover`}
+            {i18n.translate(
+              'xpack.apm.errorGroupDetails.viewOccurrencesInDiscoverButtonLabel',
+              {
+                defaultMessage:
+                  'View {occurrencesCount} occurrences in Discover',
+                values: { occurrencesCount }
+              }
+            )}
           </EuiButtonEmpty>
         </DiscoverErrorButton>
       </HeaderContainer>
@@ -212,7 +249,7 @@ function getTransactionLink(error: APMError, transaction?: Transaction) {
       hash={path}
       query={{
         transactionId: transaction.transaction.id,
-        traceid: get(transaction, TRACE_ID)
+        traceId: get(transaction, TRACE_ID)
       }}
     >
       {transaction.transaction.id}

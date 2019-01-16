@@ -7,6 +7,7 @@
   z-index: 0;
   background-color: $euiColorPrimary;
   overflow: hidden;
+  z-index: 5;
 
   &.kbnGlobalNav-isOpen {
     width: $kbnGlobalNavOpenWidth;
@@ -60,11 +61,8 @@
 .kbnGlobalNav__logoLink {
   display: inline-block;
 
-  &:hover {
-    background-color: darken($euiColorPrimary, 15%);
-  }
-
+  &:hover,
   &.active {
-    background-color: $euiColorPrimary;
+    background-color: darken($euiColorPrimary, 2%);
   }
 }

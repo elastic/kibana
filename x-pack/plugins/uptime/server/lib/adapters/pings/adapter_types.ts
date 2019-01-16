@@ -5,7 +5,7 @@
  */
 
 import { UMGqlRange, UMPingSortDirectionArg } from '../../../../common/domain_types';
-import { DocCount, HistogramSeries, Ping } from '../../../../common/graphql/types';
+import { DocCount, HistogramSeries, Ping, PingResults } from '../../../../common/graphql/types';
 
 export interface UMPingsAdapter {
   getAll(
@@ -16,7 +16,7 @@ export interface UMPingsAdapter {
     status?: string,
     sort?: UMPingSortDirectionArg,
     size?: number
-  ): Promise<Ping[]>;
+  ): Promise<PingResults>;
 
   getLatestMonitorDocs(
     request: any,

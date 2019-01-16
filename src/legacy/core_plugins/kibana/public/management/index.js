@@ -61,7 +61,7 @@ export function updateLandingPage(version) {
   }
 
   render(
-    <EuiPageContent verticalPosition="center"  horizontalPosition="center">
+    <EuiPageContent horizontalPosition="center">
       <I18nProvider>
         <div>
           <div className="eui-textCenter">
@@ -114,7 +114,7 @@ export function updateSidebar(
       <SidebarNav
         sections={items}
         selectedId={id}
-        style={{ width: 192 }}
+        className="mgtSideNav"
       />
     </I18nProvider>,
     node,
