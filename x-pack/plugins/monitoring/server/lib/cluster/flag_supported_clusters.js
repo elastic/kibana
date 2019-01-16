@@ -78,7 +78,7 @@ export function flagSupportedClusters(req, kbnIndexPattern) {
     // if multi cluster
     if (clusters.length > 1) {
       const basicLicenseCount = clusters.reduce((accumCount, cluster) => {
-        if (cluster.cluster_uuid === UNLINKED_DEPLOYMENT_CLUSTER_UUID && (cluster.license && cluster.license.type === 'basic')) {
+        if (cluster.cluster_uuid === UNLINKED_DEPLOYMENT_CLUSTER_UUID || (cluster.license && cluster.license.type === 'basic')) {
           accumCount++;
         }
         return accumCount;
