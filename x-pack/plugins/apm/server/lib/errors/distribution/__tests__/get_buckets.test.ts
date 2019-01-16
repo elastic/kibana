@@ -5,18 +5,26 @@
  */
 
 import { PROCESSOR_EVENT } from 'x-pack/plugins/apm/common/constants';
-import { ESResponse, timeseriesFetcher } from './fetcher';
+import { getBuckets } from '../get_buckets';
 
 describe('timeseriesFetcher', () => {
-  let res: ESResponse;
   let clientSpy: jest.Mock;
-  beforeEach(async () => {
-    clientSpy = jest.fn().mockResolvedValueOnce('ES response');
 
-    res = await timeseriesFetcher({
+  beforeEach(async () => {
+    clientSpy = jest.fn().mockResolvedValueOnce({
+      hits: {
+        total: 100
+      },
+      aggregations: {
+        distribution: {
+          buckets: []
+        }
+      }
+    });
+
+    await getBuckets({
       serviceName: 'myServiceName',
-      transactionType: 'myTransactionType',
-      transactionName: undefined,
+      bucketSize: 10,
       setup: {
         start: 1528113600000,
         end: 1528977600000,
@@ -28,24 +36,20 @@ describe('timeseriesFetcher', () => {
     });
   });
 
-  it('should call client with correct query', () => {
+  it('should make the correct query', () => {
     expect(clientSpy.mock.calls).toMatchSnapshot();
   });
 
-  it('should restrict results to only transaction documents', () => {
+  it('should limit query results to error documents', () => {
     const query = clientSpy.mock.calls[0][1];
     expect(query.body.query.bool.filter).toEqual(
       expect.arrayContaining([
         {
           term: {
-            [PROCESSOR_EVENT]: 'transaction'
+            [PROCESSOR_EVENT]: 'error'
           }
         } as any
       ])
     );
-  });
-
-  it('should return correct response', () => {
-    expect(res).toBe('ES response');
   });
 });
