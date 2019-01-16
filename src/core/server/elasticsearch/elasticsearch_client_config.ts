@@ -44,6 +44,7 @@ export type ElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' 
     requestTimeout?: ElasticsearchConfig['requestTimeout'] | ConfigOptions['requestTimeout'];
     sniffInterval?: ElasticsearchConfig['sniffInterval'] | ConfigOptions['sniffInterval'];
     ssl?: Partial<ElasticsearchConfig['ssl']>;
+    loggerContext?: string;
   };
 
 export interface ElasticsearchClientConfigOverrides {
@@ -71,7 +72,14 @@ export function parseElasticsearchClientConfig(
 ) {
   const esClientConfig: ExtendedConfigOptions = {
     keepAlive: true,
-    ...pick(config, ['apiVersion', 'sniffOnStart', 'sniffOnConnectionFault', 'keepAlive', 'log']),
+    ...pick(config, [
+      'apiVersion',
+      'sniffOnStart',
+      'sniffOnConnectionFault',
+      'keepAlive',
+      'log',
+      'plugins',
+    ]),
   };
 
   if (esClientConfig.log == null) {

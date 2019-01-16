@@ -18,7 +18,7 @@
  */
 
 import { ConnectableObservable, Observable, Subscription } from 'rxjs';
-import { filter, first, map, publishReplay, switchMap } from 'rxjs/operators';
+import { filter, first, publishReplay, switchMap } from 'rxjs/operators';
 import { CoreContext, CoreService } from '../../types';
 import { Logger } from '../logging';
 import { ClusterClient } from './cluster_client';
@@ -36,16 +36,18 @@ export interface ElasticsearchServiceStartContract {
   // Required for the BWC only.
   readonly bwc: {
     readonly config: ElasticsearchConfig;
-    readonly adminClient: ClusterClient;
-    readonly dataClient: ClusterClient;
   };
+
+  readonly apiVersion: ElasticsearchConfig['apiVersion'];
+  readonly requestTimeout: ElasticsearchConfig['requestTimeout'];
+  readonly shardTimeout: ElasticsearchConfig['shardTimeout'];
 
   readonly createClient: (
     type: string,
     config?: Partial<ElasticsearchClientConfig>
   ) => ClusterClient;
-  readonly adminClient$: Observable<ClusterClient>;
-  readonly dataClient$: Observable<ClusterClient>;
+  readonly adminClient: ClusterClient;
+  readonly dataClient: ClusterClient;
 }
 
 /** @internal */
@@ -97,16 +99,26 @@ export class ElasticsearchService implements CoreService<ElasticsearchServiceSta
 
     this.subscription = clients$.connect();
 
-    const bwc = await clients$.pipe(first()).toPromise();
+    const { config: defaultConfig, adminClient, dataClient } = await clients$
+      .pipe(first())
+      .toPromise();
 
     return {
-      bwc,
-      createClient: (type: string, config: Partial<ElasticsearchClientConfig> = {}) => {
-        const defaultConfig: ElasticsearchClientConfig = bwc.config;
-        return this.createClusterClient(type, { ...defaultConfig, ...config });
+      bwc: { config: defaultConfig },
+
+      apiVersion: defaultConfig.apiVersion,
+      requestTimeout: defaultConfig.requestTimeout,
+      shardTimeout: defaultConfig.shardTimeout,
+
+      adminClient,
+      dataClient,
+
+      createClient: (type: string, clientConfig: Partial<ElasticsearchClientConfig> = {}) => {
+        return this.createClusterClient(type, {
+          ...(defaultConfig as ElasticsearchClientConfig),
+          ...clientConfig,
+        });
       },
-      adminClient$: clients$.pipe(map(clients => clients.adminClient)),
-      dataClient$: clients$.pipe(map(clients => clients.dataClient)),
     };
   }
 
@@ -120,6 +132,9 @@ export class ElasticsearchService implements CoreService<ElasticsearchServiceSta
   }
 
   private createClusterClient(type: string, config: ElasticsearchClientConfig) {
-    return new ClusterClient(config, this.coreContext.logger.get('elasticsearch', type));
+    return new ClusterClient(
+      config,
+      this.coreContext.logger.get('elasticsearch', config.loggerContext || type)
+    );
   }
 }

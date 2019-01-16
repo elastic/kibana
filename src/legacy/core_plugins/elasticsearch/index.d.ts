@@ -383,9 +383,7 @@ export type CallClusterWithInternalUser = <T = any>(
 ) => Promise<T>;
 
 export interface ElasticsearchPlugin {
-  ElasticsearchClientLogging: ElasticsearchClientLogging;
   getCluster(name: string): Cluster;
   createCluster(name: string, config: ClusterConfig): Cluster;
-  filterHeaders(originalHeaders: RequestHeaders, headersToKeep: string[]): void;
   waitUntilReady(): Promise<void>;
 }

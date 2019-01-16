@@ -78,7 +78,7 @@ export default function buildRequest(config, tlConfig, scriptedFields) {
     }
   };
 
-  const timeout = tlConfig.server.config().get('elasticsearch.shardTimeout');
+  const timeout = tlConfig.server.core.es.shardTimeout.asMilliseconds();
   if (timeout) {
     request.timeout = `${timeout}ms`;
   }

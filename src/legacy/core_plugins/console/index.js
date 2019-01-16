@@ -20,17 +20,45 @@
 import Boom from 'boom';
 import { resolve, join, sep } from 'path';
 import url from 'url';
-import { has, isEmpty, head } from 'lodash';
+import { has, isEmpty, head, pick, isPlainObject } from 'lodash';
 
 import { resolveApi } from './api_server/server';
 import { addExtensionSpecFilePath } from './api_server/spec';
-import setHeaders from '../elasticsearch/lib/set_headers';
 
 import {
   ProxyConfigCollection,
   getElasticsearchProxyConfig,
   createProxyRoute
 } from './server';
+
+function filterHeaders(originalHeaders, headersToKeep) {
+  const normalizeHeader = function (header) {
+    if (!header) {
+      return '';
+    }
+    header = header.toString();
+    return header.trim().toLowerCase();
+  };
+
+  // Normalize list of headers we want to allow in upstream request
+  const headersToKeepNormalized = headersToKeep.map(normalizeHeader);
+
+  return pick(originalHeaders, headersToKeepNormalized);
+}
+
+function setHeaders(originalHeaders, newHeaders) {
+  if (!isPlainObject(originalHeaders)) {
+    throw new Error(`Expected originalHeaders to be an object, but ${typeof originalHeaders} given`);
+  }
+  if (!isPlainObject(newHeaders)) {
+    throw new Error(`Expected newHeaders to be an object, but ${typeof newHeaders} given`);
+  }
+
+  return {
+    ...originalHeaders,
+    ...newHeaders
+  };
+}
 
 export default function (kibana) {
   const modules = resolve(__dirname, 'public/webpackShims/');
@@ -86,7 +114,6 @@ export default function (kibana) {
       }
 
       const config = server.config();
-      const { filterHeaders } = server.plugins.elasticsearch;
       const proxyConfigCollection = new ProxyConfigCollection(options.proxyConfig);
       const proxyPathFilters = options.proxyFilter.map(str => new RegExp(str));
 
@@ -94,9 +121,11 @@ export default function (kibana) {
         baseUrl: head(server.core.es.bwc.config.hosts),
         pathFilters: proxyPathFilters,
         getConfigForReq(req, uri) {
-          const whitelist = config.get('elasticsearch.requestHeadersWhitelist');
-          const filteredHeaders = filterHeaders(req.headers, whitelist);
-          const headers = setHeaders(filteredHeaders, config.get('elasticsearch.customHeaders'));
+          const filteredHeaders = filterHeaders(
+            req.headers,
+            server.core.es.bwc.config.requestHeadersWhitelist
+          );
+          const headers = setHeaders(filteredHeaders, server.core.es.bwc.config.customHeaders);
 
           if (!isEmpty(config.get('console.proxyConfig'))) {
             return {

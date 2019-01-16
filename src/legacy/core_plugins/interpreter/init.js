@@ -39,8 +39,8 @@ export default async function (server /*options*/) {
 
     return {
       kbnIndex: config.get('kibana.index'),
-      esShardTimeout: config.get('elasticsearch.shardTimeout'),
-      esApiVersion: config.get('elasticsearch.apiVersion'),
+      esShardTimeout: server.core.es.shardTimeout.asMilliseconds(),
+      esApiVersion: server.core.es.apiVersion,
       serverFunctions: registries.serverFunctions.toArray(),
       basePath,
       reportingBrowserType,

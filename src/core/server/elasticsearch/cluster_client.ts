@@ -18,7 +18,7 @@
  */
 
 import Boom from 'boom';
-import { Client } from 'elasticsearch';
+import { Client, errors } from 'elasticsearch';
 import { get } from 'lodash';
 import { filterHeaders } from '../http/router/headers';
 import { Logger } from '../logging';
@@ -30,6 +30,22 @@ import {
 /* @internal */
 interface CallAPIOptions {
   wrap401Errors: boolean;
+}
+
+export interface ElasticsearchClusterClient {
+  callWithInternalUser: (
+    endpoint: string,
+    clientParams?: Record<string, unknown>,
+    options?: CallAPIOptions
+  ) => Promise<unknown>;
+
+  callWithRequest: (
+    endpoint: string,
+    clientParams?: Record<string, unknown>,
+    options?: CallAPIOptions
+  ) => Promise<unknown>;
+
+  close: () => void;
 }
 
 export class ClusterClient {
@@ -62,6 +78,8 @@ export class ClusterClient {
     }
   }
 
+  public readonly errors = errors;
+
   private readonly client: Client;
   private readonly noAuthClient: Client;
 
@@ -79,7 +97,7 @@ export class ClusterClient {
   public callWithInternalUser = (
     endpoint: string,
     clientParams: Record<string, unknown> = {},
-    options: CallAPIOptions
+    options?: CallAPIOptions
   ) => {
     return ClusterClient.callAPI(this.client, endpoint, clientParams, options);
   };

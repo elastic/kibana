@@ -26,15 +26,13 @@ import url from 'url';
 const readFile = (file) => readFileSync(file, 'utf8');
 
 const createAgent = (server) => {
-  const config = server.config();
-  const target = url.parse(
-    _.head(server.core.es.bwc.config.hosts)
-  );
+  const bwcConfig = server.core.es.bwc.config;
+  const target = url.parse(_.head(bwcConfig.hosts));
   if (!/^https/.test(target.protocol)) return new http.Agent();
 
   const agentOptions = {};
 
-  const verificationMode = config.get('elasticsearch.ssl.verificationMode');
+  const verificationMode = bwcConfig.ssl && bwcConfig.ssl.verificationMode;
   switch (verificationMode) {
     case 'none':
       agentOptions.rejectUnauthorized = false;
@@ -52,18 +50,19 @@ const createAgent = (server) => {
       throw new Error(`Unknown ssl verificationMode: ${verificationMode}`);
   }
 
-  if (_.size(config.get('elasticsearch.ssl.certificateAuthorities'))) {
-    agentOptions.ca = config.get('elasticsearch.ssl.certificateAuthorities').map(readFile);
+  if (bwcConfig.ssl && bwcConfig.ssl.certificateAuthorities.length > 0) {
+    agentOptions.ca = bwcConfig.ssl.certificateAuthorities.map(readFile);
   }
 
   if (
-    config.get('elasticsearch.ssl.alwaysPresentCertificate') &&
-    config.get('elasticsearch.ssl.certificate') &&
-    config.get('elasticsearch.ssl.key')
+    bwcConfig.ssl &&
+    bwcConfig.ssl.alwaysPresentCertificate &&
+    bwcConfig.ssl.certificate &&
+    bwcConfig.ssl.key
   ) {
-    agentOptions.cert = readFile(config.get('elasticsearch.ssl.certificate'));
-    agentOptions.key = readFile(config.get('elasticsearch.ssl.key'));
-    agentOptions.passphrase = config.get('elasticsearch.ssl.keyPassphrase');
+    agentOptions.cert = readFile(bwcConfig.ssl.certificate);
+    agentOptions.key = readFile(bwcConfig.ssl.key);
+    agentOptions.passphrase = bwcConfig.ssl.keyPassphrase;
   }
 
   return new https.Agent(agentOptions);
@@ -71,7 +70,7 @@ const createAgent = (server) => {
 
 export const getElasticsearchProxyConfig = (server) => {
   return {
-    timeout: server.config().get('elasticsearch.requestTimeout'),
+    timeout: server.core.es.requestTimeout.asMilliseconds(),
     agent: createAgent(server)
   };
 };

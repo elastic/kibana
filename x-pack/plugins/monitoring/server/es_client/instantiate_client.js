@@ -15,33 +15,25 @@ import { LOGGING_TAG } from '../../common/constants';
  */
 
 export function exposeClient(server) {
-  const Logger = server.plugins.elasticsearch.ElasticsearchClientLogging;
-  const logQueries = Boolean(server.config().get('xpack.monitoring.elasticsearch.logQueries'));
+  const monitoringEsConfig = server.config().get('xpack.monitoring.elasticsearch');
 
-  class MonitoringClientLogging extends Logger {
-    constructor() {
-      super();
-
-      this.tags = [LOGGING_TAG];
-      this.logQueries = logQueries;
-    }
-  }
-
-  let config = {
-    ...server.config().get('xpack.monitoring.elasticsearch')
-  };
-  let configSource = 'monitoring';
-
-  if (!Boolean(config.hosts && config.hosts.length)) {
-    config = server.config().get('elasticsearch');
+  let config;
+  let configSource;
+  if (!Boolean(monitoringEsConfig.hosts && monitoringEsConfig.hosts.length)) {
+    config = {};
     configSource = 'production';
+  } else {
+    config = { ...monitoringEsConfig };
+    configSource = 'monitoring';
   }
 
-  config.log = MonitoringClientLogging;
-  config.plugins = [monitoringBulk];
+  const cluster = server.plugins.elasticsearch.createCluster('monitoring', {
+    ...config,
+    plugins: [monitoringBulk],
+    logQueries: Boolean(monitoringEsConfig.logQueries),
+    loggerContext: LOGGING_TAG,
+  });
 
-  const esPlugin = server.plugins.elasticsearch;
-  const cluster = esPlugin.createCluster('monitoring', config);
   server.events.on('stop', bindKey(cluster, 'close'));
 
   server.log([LOGGING_TAG, 'es-client'], `config sourced from: ${configSource} cluster`);

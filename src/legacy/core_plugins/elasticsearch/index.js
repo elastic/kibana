@@ -18,10 +18,7 @@
  */
 
 import healthCheck from './lib/health_check';
-import { clientLogger } from './lib/client_logger';
-import { createClusters } from './lib/create_clusters';
 import { createProxy } from './lib/create_proxy';
-import filterHeaders from './lib/filter_headers';
 
 export default function (kibana) {
   return new kibana.Plugin({
@@ -29,23 +26,45 @@ export default function (kibana) {
 
     uiExports: {
       injectDefaultVars(server) {
-        const bwcConfig = server.core.es.bwc.config;
         return {
-          esRequestTimeout: bwcConfig.requestTimeout.asMilliseconds(),
-          esShardTimeout: bwcConfig.shardTimeout.asMilliseconds(),
-          esApiVersion: bwcConfig.apiVersion,
+          esRequestTimeout: server.core.es.requestTimeout.asMilliseconds(),
+          esShardTimeout: server.core.es.shardTimeout.asMilliseconds(),
+          esApiVersion: server.core.es.apiVersion,
         };
       }
     },
 
     init(server) {
-      const clusters = createClusters(server);
+      const clusters = new Map();
+      server.expose('getCluster', (name) => {
+        if (name === 'admin') {
+          return server.core.es.adminClient;
+        }
 
-      server.expose('getCluster', clusters.get);
-      server.expose('createCluster', clusters.create);
+        if (name === 'data') {
+          return server.core.es.dataClient;
+        }
 
-      server.expose('filterHeaders', filterHeaders);
-      server.expose('ElasticsearchClientLogging', clientLogger(server));
+        return clusters.get(name);
+      });
+
+      server.expose('createCluster', (name, config) => {
+        if (clusters.has(name)) {
+          throw new Error(`cluster '${name}' already exists`);
+        }
+
+        const cluster = server.core.es.createClient(name, config);
+        clusters.set(name, cluster);
+
+        return cluster;
+      });
+
+      server.events.on('stop', () => {
+        for (const [name, cluster] of clusters) {
+          cluster.close();
+          clusters.delete(name);
+        }
+      });
 
       createProxy(server);
 
