@@ -58,10 +58,10 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
 
     this.server.register<HapiGraphiQLPluginOptions>({
       options: {
-        graphiqlOptions: {
-          endpointURL: routePath,
+        graphiqlOptions: request => ({
+          endpointURL: request ? `${request.getBasePath()}${routePath}` : routePath,
           passHeader: `'kbn-version': '${this.version}'`,
-        },
+        }),
         path: `${routePath}/graphiql`,
       },
       plugin: graphiqlHapi,
