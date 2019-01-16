@@ -118,10 +118,10 @@ function getIconTip(iconType?: IconType, tooltipContent?: ReactNode) {
 
   return (
     <EuiIconTip
-      // TODO: Waiting on update from EUI
-      // iconProps={{
-      //   className: 'eui-alignTop',
-      // }}
+      iconProps={{
+        className: 'eui-alignTop',
+      }}
+      color="subdued"
       type={iconType}
       content={tooltipContent}
       size={'s'}

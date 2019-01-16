@@ -133,10 +133,9 @@ export class FeatureTable extends Component<Props, {}> {
           );
           tooltipElement = (
             <EuiIconTip
-              // TODO: Waiting on update from EUI
-              // iconProps={{
-              //   className: 'eui-alignTop',
-              // }}
+              iconProps={{
+                className: 'eui-alignTop',
+              }}
               type={'iInCircle'}
               color={'subdued'}
               content={tooltipContent}
@@ -207,7 +206,6 @@ export class FeatureTable extends Component<Props, {}> {
           return {
             id: `${featureId}_${priv}`,
             label: _.capitalize(priv),
-            // TODO: Waiting on update from EUI
             isDisabled: !enabledFeaturePrivileges.includes(priv),
           };
         });
@@ -215,7 +213,6 @@ export class FeatureTable extends Component<Props, {}> {
         options.push({
           id: `${featureId}_${NO_PRIVILEGE_VALUE}`,
           label: 'None',
-          // TODO: Waiting on update from EUI
           isDisabled: !allowsNone,
         });
 

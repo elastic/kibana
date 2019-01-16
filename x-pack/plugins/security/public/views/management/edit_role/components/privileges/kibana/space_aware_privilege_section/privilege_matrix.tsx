@@ -69,7 +69,7 @@ export class PrivilegeMatrix extends Component<Props, State> {
     if (this.state.showModal) {
       modal = (
         <EuiOverlayMask>
-          <EuiModal onClose={this.hideModal}>
+          <EuiModal className="secPrivilegeMatrix__modal" onClose={this.hideModal}>
             <EuiModalHeader>
               <EuiModalHeaderTitle>
                 <FormattedMessage
@@ -157,15 +157,15 @@ export class PrivilegeMatrix extends Component<Props, State> {
           id: 'xpack.security.management.editRole.spacePrivilegeMatrix.featureColumnTitle',
           defaultMessage: 'Feature',
         }),
+        width: '230px',
         render: (feature: Feature & { isBase: boolean }) => {
           return feature.isBase ? (
             <Fragment>
               <strong>{feature.name}</strong>
               <EuiIconTip
-                // TODO: Waiting on update from EUI
-                // iconProps={{
-                //   className: 'eui-alignTop',
-                // }}
+                iconProps={{
+                  className: 'eui-alignTop',
+                }}
                 type="questionInCircle"
                 content={intl.formatMessage({
                   id:
@@ -186,10 +186,20 @@ export class PrivilegeMatrix extends Component<Props, State> {
         },
       },
       ...spacesColumns.map(item => {
+        let columnWidth;
+        if (item.isGlobal) {
+          columnWidth = '100px';
+        } else if (item.spaces.length - SPACES_DISPLAY_COUNT) {
+          columnWidth = '90px';
+        } else {
+          columnWidth = '80px';
+        }
+
         return {
           // TODO: this is a hacky way to determine if we are looking at the global feature
           // used for cellProps below...
           field: item.isGlobal ? 'global' : 'feature',
+          width: columnWidth,
           name: (
             <div>
               {item.spaces.slice(0, SPACES_DISPLAY_COUNT).map((space: Space) => (
