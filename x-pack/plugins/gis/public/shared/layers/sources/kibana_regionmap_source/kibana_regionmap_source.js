@@ -6,17 +6,18 @@
 
 import _ from 'lodash';
 import { VectorSource } from '../vector_source';
-import React, { Fragment } from 'react';
+import React from 'react';
 import {
   EuiText,
-  EuiSpacer
 } from '@elastic/eui';
 import { CreateSourceEditor } from './create_source_editor';
 
 export class KibanaRegionmapSource extends VectorSource {
 
   static type = 'REGIONMAP_FILE';
-  static typeDisplayName = 'Custom vector shapes';
+  static title = 'Custom vector shapes';
+  static description = 'Vector shapes from static files configured in kibana.yml';
+  static icon = 'logoKibana';
 
   constructor(descriptor, { ymlFileLayers }) {
     super(descriptor);
@@ -46,20 +47,6 @@ export class KibanaRegionmapSource extends VectorSource {
       />
     );
   };
-
-  static renderDropdownDisplayOption() {
-    return (
-      <Fragment>
-        <strong>{KibanaRegionmapSource.typeDisplayName}</strong>
-        <EuiSpacer size="xs" />
-        <EuiText size="s" color="subdued">
-          <p className="euiTextColor--subdued">
-            Vector shapes from static files configured in kibana.yml.
-          </p>
-        </EuiText>
-      </Fragment>
-    );
-  }
 
   renderDetails() {
     return (
