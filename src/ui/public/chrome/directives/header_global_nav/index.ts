@@ -37,4 +37,6 @@ export interface NavLink {
   url: string;
   id: string;
   euiIconType: IconType;
+  lastSubUrl?: string;
+  active: boolean;
 }
