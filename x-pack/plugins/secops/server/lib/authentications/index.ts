@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FrameworkRequest } from '../framework';
+import { FrameworkRequest, RequestOptions } from '../framework';
 export * from './elasticsearch_adapter';
 import { AuthenticationsData } from '../../graphql/types';
-import { AuthenticationsAdapter, AuthenticationsRequestOptions } from './types';
+import { AuthenticationsAdapter } from './types';
 
 export class Authentications {
   constructor(private readonly adapter: AuthenticationsAdapter) {}
 
   public async getAuthentications(
     req: FrameworkRequest,
-    options: AuthenticationsRequestOptions
+    options: RequestOptions
   ): Promise<AuthenticationsData> {
     return await this.adapter.getAuthentications(req, options);
   }

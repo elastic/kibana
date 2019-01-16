@@ -4,28 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  AuthenticationsData,
-  PaginationInput,
-  SourceConfiguration,
-  TimerangeInput,
-} from '../../graphql/types';
-import { FrameworkRequest } from '../framework';
-import { ESQuery, Hit, SearchHit, TotalHit } from '../types';
+import { AuthenticationsData } from '../../graphql/types';
+import { FrameworkRequest, RequestOptions } from '../framework';
+import { Hit, SearchHit, TotalHit } from '../types';
 
 export interface AuthenticationsAdapter {
-  getAuthentications(
-    req: FrameworkRequest,
-    options: AuthenticationsRequestOptions
-  ): Promise<AuthenticationsData>;
-}
-
-export interface AuthenticationsRequestOptions {
-  sourceConfiguration: SourceConfiguration;
-  pagination: PaginationInput;
-  timerange: TimerangeInput;
-  filterQuery: ESQuery | undefined;
-  fields: string[];
+  getAuthentications(req: FrameworkRequest, options: RequestOptions): Promise<AuthenticationsData>;
 }
 
 type StringOrNumber = string | number;

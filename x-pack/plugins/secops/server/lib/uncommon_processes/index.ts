@@ -5,16 +5,16 @@
  */
 
 import { UncommonProcessesData } from '../../graphql/types';
-import { FrameworkRequest } from '../framework';
+import { FrameworkRequest, RequestOptions } from '../framework';
 export * from './elasticsearch_adapter';
-import { UncommonProcessesAdapter, UncommonProcessesRequestOptions } from './types';
+import { UncommonProcessesAdapter } from './types';
 
 export class UncommonProcesses {
   constructor(private readonly adapter: UncommonProcessesAdapter) {}
 
   public async getUncommonProcesses(
     req: FrameworkRequest,
-    options: UncommonProcessesRequestOptions
+    options: RequestOptions
   ): Promise<UncommonProcessesData> {
     return await this.adapter.getUncommonProcesses(req, options);
   }

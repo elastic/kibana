@@ -9,8 +9,8 @@ import gql from 'graphql-tag';
 export const authenticationsSchema = gql`
   type AuthenticationItem {
     _id: String!
-    failures: Int!
-    successes: Int!
+    failures: Float!
+    successes: Float!
     latest: String!
     source: SourceEcsFields!
     host: HostEcsFields!
@@ -24,7 +24,7 @@ export const authenticationsSchema = gql`
 
   type AuthenticationsData {
     edges: [AuthenticationsEdges!]!
-    totalCount: Int!
+    totalCount: Float!
     pageInfo: PageInfo!
   }
 

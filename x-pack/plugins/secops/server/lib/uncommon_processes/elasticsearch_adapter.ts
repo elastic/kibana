@@ -8,14 +8,13 @@ import { getOr } from 'lodash/fp';
 import { UncommonProcessesData, UncommonProcessesEdges } from '../../graphql/types';
 import { mergeFieldsWithHit } from '../../utils/build_query';
 import { processFieldsMap } from '../ecs_fields';
-import { FrameworkAdapter, FrameworkRequest } from '../framework';
+import { FrameworkAdapter, FrameworkRequest, RequestOptions } from '../framework';
 import { HostHits, TermAggregation } from '../types';
 import { buildQuery } from './query.dsl';
 import {
   UncommonProcessBucket,
   UncommonProcessData,
   UncommonProcessesAdapter,
-  UncommonProcessesRequestOptions,
   UncommonProcessHit,
 } from './types';
 
@@ -24,7 +23,7 @@ export class ElasticsearchUncommonProcessesAdapter implements UncommonProcessesA
 
   public async getUncommonProcesses(
     request: FrameworkRequest,
-    options: UncommonProcessesRequestOptions
+    options: RequestOptions
   ): Promise<UncommonProcessesData> {
     const response = await this.framework.callWithRequest<UncommonProcessData, TermAggregation>(
       request,
@@ -77,7 +76,7 @@ export const formatUncommonProcessesData = (
   hit: UncommonProcessHit,
   fieldMap: Readonly<Record<string, string>>
 ): UncommonProcessesEdges => {
-  const initialValue: UncommonProcessesEdges = {
+  const init: UncommonProcessesEdges = {
     node: {
       _id: '',
       instances: 0,
@@ -97,5 +96,5 @@ export const formatUncommonProcessesData = (
       flattenedFields.cursor.value = hit.cursor;
     }
     return mergeFieldsWithHit(fieldName, flattenedFields, fieldMap, hit);
-  }, initialValue);
+  }, init);
 };

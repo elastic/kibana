@@ -7,10 +7,10 @@
 import { createQueryFilterClauses } from '../../utils/build_query';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { hostFieldsMap, processFieldsMap, userFieldsMap } from '../ecs_fields';
+import { RequestOptions } from '../framework';
 import { FilterQuery } from '../types';
-import { UncommonProcessesRequestOptions } from './types';
 
-export const buildQuery = (options: UncommonProcessesRequestOptions) => {
+export const buildQuery = (options: RequestOptions) => {
   const { to, from } = options.timerange;
   const { limit } = options.pagination;
   const { fields, filterQuery } = options;

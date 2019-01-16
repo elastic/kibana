@@ -8,10 +8,11 @@ import { SortField, TimerangeInput } from '../../graphql/types';
 import { createQueryFilterClauses } from '../../utils/build_query';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { eventFieldsMap } from '../ecs_fields';
+import { RequestOptions } from '../framework';
 import { FilterQuery, SortRequest, SortRequestDirection } from '../types';
-import { EventsRequestOptions, TimerangeFilter } from './types';
+import { TimerangeFilter } from './types';
 
-export const buildQuery = (options: EventsRequestOptions) => {
+export const buildQuery = (options: RequestOptions) => {
   const { limit, cursor, tiebreaker } = options.pagination;
   const { fields, filterQuery } = options;
   const esFields = [...reduceFields(fields, eventFieldsMap)];
@@ -65,7 +66,7 @@ export const buildQuery = (options: EventsRequestOptions) => {
     return [];
   };
 
-  const sort: SortRequest = getSortField(options.sortField);
+  const sort: SortRequest = getSortField(options.sortField!);
 
   const queryDsl = {
     allowNoIndices: true,

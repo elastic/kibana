@@ -9,7 +9,7 @@ import gql from 'graphql-tag';
 export const uncommonProcessesSchema = gql`
   type UncommonProcessItem {
     _id: String!
-    instances: Int!
+    instances: Float!
     process: ProcessEcsFields!
     host: [HostEcsFields!]!
     user: UserEcsFields
@@ -22,7 +22,7 @@ export const uncommonProcessesSchema = gql`
 
   type UncommonProcessesData {
     edges: [UncommonProcessesEdges!]!
-    totalCount: Int!
+    totalCount: Float!
     pageInfo: PageInfo!
   }
 

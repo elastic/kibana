@@ -20,7 +20,7 @@ export const hostsSchema = gql`
 
   type HostsData {
     edges: [HostsEdges!]!
-    totalCount: Int!
+    totalCount: Float!
     pageInfo: PageInfo!
   }
 

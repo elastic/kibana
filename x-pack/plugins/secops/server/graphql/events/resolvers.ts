@@ -4,13 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr } from 'lodash/fp';
 import { SourceResolvers } from '../../graphql/types';
 import { Events } from '../../lib/events';
-import { EventsRequestOptions } from '../../lib/events/types';
 import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
-import { getFields } from '../../utils/build_query/fields';
-import { parseFilterQuery } from '../../utils/serialized_query';
+import { createOptions } from '../../utils/build_query/create_options';
 import { QuerySourceResolver } from '../sources/resolvers';
 
 type QueryEventsResolver = ChildResolverOf<
@@ -31,15 +28,7 @@ export const createEventsResolvers = (
 } => ({
   Source: {
     async Events(source, args, { req }, info) {
-      const fields = getFields(getOr([], 'fieldNodes[0]', info));
-      const options: EventsRequestOptions = {
-        sourceConfiguration: source.configuration,
-        timerange: args.timerange!,
-        pagination: args.pagination,
-        sortField: args.sortField,
-        filterQuery: parseFilterQuery(args.filterQuery || ''),
-        fields: fields.map(f => f.replace('edges.node.', '')),
-      };
+      const options = createOptions(source, args, info);
       return libs.events.getEvents(req, options);
     },
   },

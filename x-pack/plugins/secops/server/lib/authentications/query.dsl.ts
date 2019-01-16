@@ -8,8 +8,8 @@ import { merge } from 'lodash/fp';
 import { createQueryFilterClauses } from '../../utils/build_query';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { hostFieldsMap, sourceFieldsMap } from '../ecs_fields';
+import { RequestOptions } from '../framework';
 import { FilterQuery } from '../types';
-import { AuthenticationsRequestOptions } from './types';
 
 export const auditdFieldsMap: Readonly<Record<string, string>> = {
   latest: '@timestamp',
@@ -17,7 +17,7 @@ export const auditdFieldsMap: Readonly<Record<string, string>> = {
   ...{ ...hostFieldsMap },
 };
 
-export const buildQuery = (options: AuthenticationsRequestOptions) => {
+export const buildQuery = (options: RequestOptions) => {
   const { to, from } = options.timerange;
   const { limit, cursor } = options.pagination;
   const { fields, filterQuery } = options;

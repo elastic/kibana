@@ -9,14 +9,14 @@ import gql from 'graphql-tag';
 export const eventsSchema = gql`
   type KpiItem {
     value: String!
-    count: Int!
+    count: Float!
   }
 
   type EventEcsFields {
     category: String
-    id: Int
+    id: Float
     module: String
-    severity: Int
+    severity: Float
     type: String
   }
 
@@ -42,14 +42,14 @@ export const eventsSchema = gql`
   }
 
   type Thread {
-    id: Int
+    id: Float
     start: String
   }
 
   type ProcessEcsFields {
-    pid: Int
+    pid: Float
     name: String
-    ppid: Int
+    ppid: Float
     args: [String]
     executable: String
     title: String
@@ -59,22 +59,22 @@ export const eventsSchema = gql`
 
   type SourceEcsFields {
     ip: String
-    port: Int
+    port: Float
   }
 
   type DestinationEcsFields {
     ip: String
-    port: Int
+    port: Float
   }
 
   type SuricataAlertData {
     signature: String
-    signature_id: Int
+    signature_id: Float
   }
 
   type SuricataEveData {
     alert: SuricataAlertData
-    flow_id: Int
+    flow_id: Float
     proto: String
   }
 
@@ -83,7 +83,7 @@ export const eventsSchema = gql`
   }
 
   type UserEcsFields {
-    id: Int
+    id: Float
     name: String
     full_name: String
     email: String
@@ -112,7 +112,7 @@ export const eventsSchema = gql`
   type EventsData {
     kpiEventType: [KpiItem!]
     edges: [EcsEdges!]!
-    totalCount: Int!
+    totalCount: Float!
     pageInfo: PageInfo!
   }
 

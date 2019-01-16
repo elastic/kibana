@@ -4,28 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  PaginationInput,
-  SourceConfiguration,
-  TimerangeInput,
-  UncommonProcessesData,
-} from '../../graphql/types';
-import { FrameworkRequest } from '../framework';
-import { ESQuery, Hit, Hits, HostHits, SearchHit, TotalHit } from '../types';
+import { UncommonProcessesData } from '../../graphql/types';
+import { FrameworkRequest, RequestOptions } from '../framework';
+import { Hit, Hits, HostHits, SearchHit, TotalHit } from '../types';
 
 export interface UncommonProcessesAdapter {
   getUncommonProcesses(
     req: FrameworkRequest,
-    options: UncommonProcessesRequestOptions
+    options: RequestOptions
   ): Promise<UncommonProcessesData>;
-}
-
-export interface UncommonProcessesRequestOptions {
-  sourceConfiguration: SourceConfiguration;
-  pagination: PaginationInput;
-  timerange: TimerangeInput;
-  filterQuery: ESQuery | undefined;
-  fields: string[];
 }
 
 type StringOrNumber = string | number;

@@ -8,15 +8,15 @@ import { merge } from 'lodash/fp';
 import { createQueryFilterClauses } from '../../utils/build_query';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { hostFieldsMap } from '../ecs_fields';
+import { RequestOptions } from '../framework';
 import { FilterQuery } from '../types';
-import { HostsRequestOptions } from './types';
 
 export const hostsFieldsMap: Readonly<Record<string, string>> = {
   firstSeen: '@timestamp',
   ...{ ...hostFieldsMap },
 };
 
-export const buildQuery = (options: HostsRequestOptions) => {
+export const buildQuery = (options: RequestOptions) => {
   const { to, from } = options.timerange;
   const { limit, cursor } = options.pagination;
   const { fields, filterQuery } = options;

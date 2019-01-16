@@ -8,7 +8,7 @@ import { get, getOr, head, last } from 'lodash/fp';
 
 import { AuthenticationsData, AuthenticationsEdges } from '../../graphql/types';
 import { mergeFieldsWithHit } from '../../utils/build_query';
-import { FrameworkAdapter, FrameworkRequest } from '../framework';
+import { FrameworkAdapter, FrameworkRequest, RequestOptions } from '../framework';
 import { TermAggregation } from '../types';
 import { auditdFieldsMap, buildQuery } from './query.dsl';
 import {
@@ -16,7 +16,6 @@ import {
   AuthenticationData,
   AuthenticationHit,
   AuthenticationsAdapter,
-  AuthenticationsRequestOptions,
 } from './types';
 
 export class ElasticsearchAuthenticationAdapter implements AuthenticationsAdapter {
@@ -24,7 +23,7 @@ export class ElasticsearchAuthenticationAdapter implements AuthenticationsAdapte
 
   public async getAuthentications(
     request: FrameworkRequest,
-    options: AuthenticationsRequestOptions
+    options: RequestOptions
   ): Promise<AuthenticationsData> {
     const response = await this.framework.callWithRequest<AuthenticationData, TermAggregation>(
       request,

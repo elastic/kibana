@@ -23,7 +23,7 @@ export const sharedSchema = gql`
 
   input PaginationInput {
     "The limit parameter allows you to configure the maximum amount of items to be returned"
-    limit: Int!
+    limit: Float!
     "The cursor parameter defines the next result you want to fetch"
     cursor: String
     "The tiebreaker parameter allow to be more precise to fetch the next item"

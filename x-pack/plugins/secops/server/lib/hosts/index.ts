@@ -5,8 +5,8 @@
  */
 
 import { HostsData } from '../../graphql/types';
-import { FrameworkRequest } from '../framework';
-import { HostsAdapter, HostsRequestOptions } from './types';
+import { FrameworkRequest, RequestOptions } from '../framework';
+import { HostsAdapter } from './types';
 
 export * from './elasticsearch_adapter';
 export * from './types';
@@ -14,7 +14,7 @@ export * from './types';
 export class Hosts {
   constructor(private readonly adapter: HostsAdapter) {}
 
-  public async getHosts(req: FrameworkRequest, options: HostsRequestOptions): Promise<HostsData> {
+  public async getHosts(req: FrameworkRequest, options: RequestOptions): Promise<HostsData> {
     return await this.adapter.getHosts(req, options);
   }
 }
