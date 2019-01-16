@@ -12,6 +12,7 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import idx from 'idx';
 import { first, get } from 'lodash';
 import React from 'react';
 import { RRRRenderResponse } from 'react-redux-request';
@@ -122,7 +123,10 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
     {
       fieldName: REQUEST_URL_FULL,
       label: 'URL',
-      val: get(error, REQUEST_URL_FULL, notAvailableLabel),
+      val:
+        idx(error, _ => _.context.page.url) ||
+        idx(transaction, _ => _.context.request.url.full) ||
+        notAvailableLabel,
       truncated: true,
       width: '50%'
     },

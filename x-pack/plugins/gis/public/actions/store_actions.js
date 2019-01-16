@@ -296,20 +296,22 @@ export function updateSourceProp(layerId, propName, value) {
       propName,
       value,
     });
-
     dispatch(syncDataForLayer(layerId));
   };
 }
 
 export function syncDataForLayer(layerId) {
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
     const targetLayer = getLayerList(getState()).find(layer => {
       return layer.getId() === layerId;
     });
     if (targetLayer) {
       const dataFilters = getDataFilters(getState());
       const loadingFunctions = getLayerLoadingCallbacks(dispatch, layerId);
-      targetLayer.syncData({ ...loadingFunctions, dataFilters });
+      await targetLayer.syncData({
+        ...loadingFunctions,
+        dataFilters
+      });
     }
   };
 }
