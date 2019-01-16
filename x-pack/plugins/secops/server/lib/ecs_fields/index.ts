@@ -8,15 +8,20 @@ export const hostFieldsMap: Readonly<Record<string, string>> = {
   'host.id': 'host.id',
   'host.ip': 'host.ip',
   'host.name': 'host.name',
+  'host.os.platform': 'host.os.platform',
   'host.os.name': 'host.os.name',
+  'host.os.full': 'host.os.full',
+  'host.os.family': 'host.os.family',
   'host.os.version': 'host.os.version',
+  'host.os.kernel': 'host.os.kernel',
 };
 
 export const processFieldsMap: Readonly<Record<string, string>> = {
   'process.pid': 'process.pid',
   'process.name': 'process.name',
+  'process.ppid': 'process.ppid',
   'process.args': 'process.args',
-  // NOTE: This mapping will change soon within auditbeats and then we can remove this
+  // NOTE: This mapping will change soon within auditbeats and then we can change this to be process.executable
   'process.executable': 'process.exe',
   'process.title': 'process.title',
   'process.thread': 'process.thread',
@@ -61,7 +66,6 @@ export const geoFieldsMap: Readonly<Record<string, string>> = {
 export const eventBaseFieldsMap: Readonly<Record<string, string>> = {
   'event.category': 'suricata.eve.alert.category',
   // NOTE: This is only for the index filebeat. If you're using auditbeat, then this needs to be changed out for 'event.id': 'event.id'
-  // Once filebeat is updated to have event.id, then this will be 'event.id': 'event.id'
   'event.id': 'suricata.eve.flow_id',
   'event.module': 'event.module',
   'event.type': 'event.type',

@@ -7,15 +7,13 @@
 import { merge } from 'lodash/fp';
 import { createQueryFilterClauses } from '../../utils/build_query';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
+import { hostFieldsMap } from '../ecs_fields';
 import { FilterQuery } from '../types';
 import { HostsRequestOptions } from './types';
 
 export const hostsFieldsMap: Readonly<Record<string, string>> = {
   firstSeen: '@timestamp',
-  'host.id': 'host.id',
-  'host.name': 'host.name',
-  'host.os.name': 'host.os.name',
-  'host.os.version': 'host.os.version',
+  ...{ ...hostFieldsMap },
 };
 
 export const buildQuery = (options: HostsRequestOptions) => {

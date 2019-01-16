@@ -743,6 +743,8 @@ export namespace GetHostsQuery {
   export type _Host = {
     __typename?: 'HostEcsFields';
 
+    id?: string | null;
+
     name?: string | null;
 
     os?: Os | null;
