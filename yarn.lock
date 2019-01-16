@@ -1784,6 +1784,13 @@
     "@types/node" "*"
     "@types/react" "*"
 
+"@types/react-infinite-scroller@^1.2.0":
+  version "1.2.0"
+  resolved "http://registry.npm.taobao.org/@types/react-infinite-scroller/download/@types/react-infinite-scroller-1.2.0.tgz#895d2822bb6e32f024ea258f60e4f75c3fbf37dc"
+  integrity sha1-iV0oIrtuMvAk6iWPYOT3XD+/N9w=
+  dependencies:
+    "@types/react" "*"
+
 "@types/react-intl@^2.3.11":
   version "2.3.11"
   resolved "https://registry.yarnpkg.com/@types/react-intl/-/react-intl-2.3.11.tgz#8d9e8a5931c665ce9086cbcda5b7467d668dfa33"
@@ -18030,6 +18037,13 @@ react-grid-layout@^0.16.2:
     prop-types "15.x"
     react-draggable "3.x"
     react-resizable "1.x"
+
+react-infinite-scroller@^1.2.4:
+  version "1.2.4"
+  resolved "http://registry.npm.taobao.org/react-infinite-scroller/download/react-infinite-scroller-1.2.4.tgz#f67eaec4940a4ce6417bebdd6e3433bfc38826e9"
+  integrity sha1-9n6uxJQKTOZBe+vdbjQzv8OIJuk=
+  dependencies:
+    prop-types "^15.5.8"
 
 react-input-autosize@^2.1.2, react-input-autosize@^2.2.1:
   version "2.2.1"
