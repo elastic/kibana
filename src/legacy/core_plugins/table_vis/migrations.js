@@ -49,8 +49,7 @@ export const migrations = {
         const newDoc = cloneDeep(doc);
         newDoc.attributes.visState = JSON.stringify(visState);
         return newDoc;
-      }
-      catch (e) {
+      } catch (e) {
         // if anything goes wrong, do nothing and move on
         return doc;
       }
