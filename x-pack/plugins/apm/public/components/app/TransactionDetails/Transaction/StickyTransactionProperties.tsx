@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import idx from 'idx';
 import { get } from 'lodash';
 import React from 'react';
 import {
@@ -36,7 +37,10 @@ export function StickyTransactionProperties({
       defaultMessage: 'N/A'
     }
   );
-  const url = get(transaction, REQUEST_URL_FULL, notAvailableLabel);
+  const url =
+    idx(transaction, _ => _.context.page.url) ||
+    idx(transaction, _ => _.context.request.url) ||
+    notAvailableLabel;
   const duration = transaction.transaction.duration.us;
   const stickyProperties: IStickyProperty[] = [
     {
