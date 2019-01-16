@@ -22,32 +22,42 @@ import {
 } from '@elastic/eui';
 
 import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 function getColumns(viewForecast) {
   return [
     {
       field: 'forecast_create_timestamp',
-      name: 'Created',
+      name: i18n.translate('xpack.ml.timeSeriesExplorer.forecastsList.createdColumnName', {
+        defaultMessage: 'Created'
+      }),
       dataType: 'date',
       render: (date) => formatHumanReadableDateTimeSeconds(date),
       sortable: true
     },
     {
       field: 'forecast_start_timestamp',
-      name: 'From',
+      name: i18n.translate('xpack.ml.timeSeriesExplorer.forecastsList.fromColumnName', {
+        defaultMessage: 'From'
+      }),
       dataType: 'date',
       render: (date) => formatHumanReadableDateTimeSeconds(date),
       sortable: true
     },
     {
       field: 'forecast_end_timestamp',
-      name: 'To',
+      name: i18n.translate('xpack.ml.timeSeriesExplorer.forecastsList.toColumnName', {
+        defaultMessage: 'To'
+      }),
       dataType: 'date',
       render: (date) => formatHumanReadableDateTimeSeconds(date),
       sortable: true
     },
     {
-      name: 'View',
+      name: i18n.translate('xpack.ml.timeSeriesExplorer.forecastsList.viewColumnName', {
+        defaultMessage: 'View'
+      }),
       render: (forecast) => (
         <EuiButton
           className="view-forecast-btn"
@@ -69,11 +79,17 @@ export function ForecastsList({ forecasts, viewForecast }) {
         aria-describedby="ml_aria_description_forecasting_modal_view_list"
         style={{ display: 'inline', paddingRight: '5px' }}
       >
-        Previous forecasts
+        <FormattedMessage
+          id="xpack.ml.timeSeriesExplorer.forecastsList.previousForecastsTitle"
+          defaultMessage="Previous forecasts"
+        />
       </h3>
       <EuiToolTip
         position="right"
-        content="Lists a maximum of five of the most recently run forecasts."
+        content={<FormattedMessage
+          id="xpack.ml.timeSeriesExplorer.forecastsList.listsOfFiveRecentlyRunForecastsTooltip"
+          defaultMessage="Lists a maximum of five of the most recently run forecasts."
+        />}
       >
         <EuiIcon
           type="questionInCircle"
