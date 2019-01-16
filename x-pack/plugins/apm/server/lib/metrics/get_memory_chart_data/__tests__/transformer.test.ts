@@ -16,43 +16,30 @@ describe('memory chart data transformer', () => {
             .fill(1)
             .map((_, i) => ({
               key: i,
-              totalMemory: { value: i * 40 },
-              freeMemory: { value: i * 30 },
-              processMemorySize: { value: i * 20 },
-              processMemoryRss: { value: i * 10 }
+              maximumPercentMemoryUsed: { value: i * 40 },
+              averagePercentMemoryUsed: { value: i * 30 }
             }))
         },
-        totalMemory: {
-          value: 400
-        },
-        freeMemory: {
-          value: 300
-        },
-        processMemorySize: {
-          value: 200
-        },
-        processMemoryRss: {
-          value: 100
-        }
+        maximumPercentMemoryUsed: { value: 400 },
+        averagePercentMemoryUsed: { value: 300 }
       },
-      hits: {
-        total: 199
-      }
+      hits: { total: 199 }
     } as ESResponse;
 
     const result = transform(response);
     expect(result).toMatchSnapshot();
 
-    expect(result.series.totalMemory).toHaveLength(10);
-    expect(result.series.freeMemory).toHaveLength(10);
-    expect(result.series.processMemorySize).toHaveLength(10);
-    expect(result.series.processMemoryRss).toHaveLength(10);
+    expect(result.series.maximumPercentMemoryUsed).toHaveLength(10);
+    expect(result.series.averagePercentMemoryUsed).toHaveLength(10);
 
-    expect(Object.keys(result.overallValues)).toEqual([
-      'totalMemory',
-      'freeMemory',
-      'processMemorySize',
-      'processMemoryRss'
-    ]);
+    const overall = Object.keys(result.overallValues);
+
+    expect(overall).toHaveLength(2);
+    expect(overall).toEqual(
+      expect.arrayContaining([
+        'maximumPercentMemoryUsed',
+        'averagePercentMemoryUsed'
+      ])
+    );
   });
 });
