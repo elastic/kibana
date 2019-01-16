@@ -128,7 +128,7 @@ export const FollowerIndexForm = injectI18n(
     }
 
     validateIndexName = async (name) => {
-      if (!name || !name.trim) {
+      if (!name || !name.trim()) {
         return;
       }
 
