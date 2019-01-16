@@ -25,7 +25,6 @@ import { functions } from './functions';
 const basePath = chrome.getBasePath();
 
 const types = {
-  commonFunctions: functionsRegistry,
   browserFunctions: functionsRegistry,
   types: typesRegistry
 };

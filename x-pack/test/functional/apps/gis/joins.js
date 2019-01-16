@@ -13,8 +13,9 @@ const EXPECTED_JOIN_VALUES = {
   charlie: 12,
 };
 
-export default function ({ getPageObjects }) {
+export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['gis']);
+  const inspector = getService('inspector');
 
   describe('layer with joins', () => {
     before(async () => {
@@ -22,7 +23,23 @@ export default function ({ getPageObjects }) {
     });
 
     after(async () => {
-      await PageObjects.gis.closeInspector();
+      await inspector.close();
+    });
+
+    it('should re-fetch join with refresh timer', async () => {
+      async function getRequestTimestamp() {
+        await PageObjects.gis.openInspectorRequest('meta_for_geo_shapes*.shape_name');
+        const requestStats = await inspector.getTableData();
+        const requestTimestamp =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Request timestamp');
+        await inspector.close();
+        return requestTimestamp;
+      }
+
+      const beforeRefreshTimerTimestamp = await getRequestTimestamp();
+      expect(beforeRefreshTimerTimestamp.length).to.be(24);
+      await PageObjects.gis.triggerSingleRefresh(1000);
+      const afterRefreshTimerTimestamp = await getRequestTimestamp();
+      expect(beforeRefreshTimerTimestamp).not.to.equal(afterRefreshTimerTimestamp);
     });
 
     it('should decorate feature properties with join property', async () => {
@@ -37,12 +54,12 @@ export default function ({ getPageObjects }) {
 
     describe('inspector', () => {
       afterEach(async () => {
-        await PageObjects.gis.closeInspector();
+        await inspector.close();
       });
 
       it('should contain terms aggregation elasticsearch request', async () => {
         await PageObjects.gis.openInspectorRequest('meta_for_geo_shapes*.shape_name');
-        const requestStats = await PageObjects.gis.getInspectorTableData();
+        const requestStats = await inspector.getTableData();
         const totalHits =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits (total)');
         expect(totalHits).to.equal('6');
         const hits =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits');

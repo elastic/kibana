@@ -64,6 +64,10 @@ export class ALayer {
     return (await this._source.getDisplayName()) || `Layer ${this._descriptor.id}`;
   }
 
+  async getAttributions() {
+    return await this._source.getAttributions();
+  }
+
   getLabel() {
     return this._descriptor.label ? this._descriptor.label : '';
   }
@@ -171,16 +175,16 @@ export class ALayer {
     }
 
     const previousBufferGeometry = turf.bboxPolygon([
-      previousBuffer.min_lon,
-      previousBuffer.min_lat,
-      previousBuffer.max_lon,
-      previousBuffer.max_lat
+      previousBuffer.minLon,
+      previousBuffer.minLat,
+      previousBuffer.maxLon,
+      previousBuffer.maxLat
     ]);
     const newBufferGeometry = turf.bboxPolygon([
-      newBuffer.min_lon,
-      newBuffer.min_lat,
-      newBuffer.max_lon,
-      newBuffer.max_lat
+      newBuffer.minLon,
+      newBuffer.minLat,
+      newBuffer.maxLon,
+      newBuffer.maxLat
     ]);
     const doesPreviousBufferContainNewBuffer = turfBooleanContains(previousBufferGeometry, newBufferGeometry);
     return doesPreviousBufferContainNewBuffer && !_.get(meta, 'areResultsTrimmed', false)
@@ -194,6 +198,10 @@ export class ALayer {
 
   getSourceDataRequest() {
     return this._dataRequests.find(dataRequest => dataRequest.getDataId() === 'source');
+  }
+
+  getIndexPatternIds() {
+    return  [];
   }
 
 }

@@ -12,5 +12,5 @@
 
 .timExpressionInput {
   cursor: text !important;
-  min-height: $euiSizeXL * 2;
+  min-height: 70px; // Matches buttons on the right with new vertical rhythm sizing
 }

@@ -322,6 +322,7 @@ export class MapListing extends React.Component {
           <EuiButton
             href={`#/map`}
             data-test-subj="newMapLink"
+            fill
           >
             Create new map
           </EuiButton>
@@ -372,8 +373,8 @@ export class MapListing extends React.Component {
 
   render() {
     return (
-      <EuiPage data-test-subj="gisListingPage" restrictWidth>
-        <EuiPageBody>
+      <EuiPage data-test-subj="gisListingPage" className="gisListingPage">
+        <EuiPageBody restrictWidth>
           {this.renderPageContent()}
         </EuiPageBody>
       </EuiPage>

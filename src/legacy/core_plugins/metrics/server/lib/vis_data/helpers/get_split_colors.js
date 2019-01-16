@@ -29,13 +29,13 @@ export default function getSplitColors(inputColor, size = 10, style = 'gradient'
       '#194D33', '#0062B1', '#808900', '#0C797D', '#9F0500', '#C45100', '#FB9E00', '#653294', '#AB149E', '#0F1419', '#666666'
     ];
   } else {
-    colors.push(color.hex());
+    colors.push(color.string());
     const rotateBy = (color.luminosity() / (size - 1));
     for(let i = 0; i < (size - 1); i++) {
       const hsl = workingColor.hsl().object();
       hsl.l -= (rotateBy * 100);
       workingColor = Color.hsl(hsl);
-      colors.push(workingColor.hex());
+      colors.push(workingColor.rgb().toString());
     }
   }
 

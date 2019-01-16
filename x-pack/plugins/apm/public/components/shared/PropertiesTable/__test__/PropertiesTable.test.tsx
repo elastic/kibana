@@ -90,10 +90,17 @@ describe('PropertiesTable', () => {
 
   describe('getPropertyTabNames', () => {
     it('should return selected and required keys only', () => {
-      expect(getPropertyTabNames(['testProperty'])).toEqual([
-        'testProperty',
-        'requiredProperty'
-      ]);
+      const expectedTabsConfig = [
+        {
+          key: 'testProperty',
+          label: 'testPropertyLabel'
+        },
+        {
+          key: 'requiredProperty',
+          label: 'requiredPropertyLabel'
+        }
+      ];
+      expect(getPropertyTabNames(['testProperty'])).toEqual(expectedTabsConfig);
     });
   });
 
@@ -142,15 +149,18 @@ function mockPropertyConfig() {
   propertyConfig.PROPERTY_CONFIG = [
     {
       key: 'testProperty',
+      label: 'testPropertyLabel',
       required: false,
       presortedKeys: ['name', 'age']
     },
     {
       key: 'optionalProperty',
+      label: 'optionalPropertyLabel',
       required: false
     },
     {
       key: 'requiredProperty',
+      label: 'requiredPropertyLabel',
       required: true
     }
   ];

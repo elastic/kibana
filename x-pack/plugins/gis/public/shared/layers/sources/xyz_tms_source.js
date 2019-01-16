@@ -18,8 +18,8 @@ import { TileLayer } from '../tile_layer';
 export class XYZTMSSource extends TMSSource {
 
   static type = 'EMS_XYZ';
-
-  static typeDisplayName = 'TMS XYZ';
+  static title = 'Tile Map Service from URL';
+  static description = 'Map tiles from a URL that includes the XYZ coordinates';
 
   static createDescriptor(urlTemplate) {
     return {

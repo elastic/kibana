@@ -6,6 +6,7 @@
 
 import { resolve } from 'path';
 import init from './init';
+import './server/build_fix';
 import { mappings } from './server/mappings';
 import { CANVAS_APP } from './common/lib';
 

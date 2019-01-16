@@ -25,6 +25,8 @@ import {
 import styled from 'styled-components';
 
 import { getBoolFilter } from './get_bool_filter';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 const Container = styled.div`
   margin-bottom: 10px;
@@ -112,16 +114,24 @@ class KueryBarView extends Component {
             style={{ display: 'inline-block', marginTop: '10px' }}
             title={
               <div>
-                There&#39;s no APM index pattern with the title &#34;
-                {apmIndexPatternTitle}
-                &#34; available. To use the Query bar, please choose to import
-                the APM index pattern via the{' '}
-                <KibanaLink
-                  pathname={'/app/kibana'}
-                  hash={`/home/tutorial/apm`}
-                >
-                  Setup Instructions.
-                </KibanaLink>
+                <FormattedMessage
+                  id="xpack.apm.kueryBar.indexPatternMissingWarningMessage"
+                  defaultMessage="There's no APM index pattern with the title {apmIndexPatternTitle} available. To use the Query bar, please choose to import the APM index pattern via the {setupInstructionsLink}."
+                  values={{
+                    apmIndexPatternTitle: `"${apmIndexPatternTitle}"`,
+                    setupInstructionsLink: (
+                      <KibanaLink
+                        pathname={'/app/kibana'}
+                        hash={`/home/tutorial/apm`}
+                      >
+                        {i18n.translate(
+                          'xpack.apm.kueryBar.setupInstructionsLinkLabel',
+                          { defaultMessage: 'Setup Instructions' }
+                        )}
+                      </KibanaLink>
+                    )
+                  }}
+                />
               </div>
             }
             color="warning"

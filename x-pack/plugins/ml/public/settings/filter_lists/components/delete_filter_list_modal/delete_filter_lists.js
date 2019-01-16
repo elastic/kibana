@@ -5,6 +5,7 @@
  */
 
 import { toastNotifications } from 'ui/notify';
+import { i18n } from '@kbn/i18n';
 import { ml } from '../../../../services/ml_api_service';
 
 
@@ -15,9 +16,13 @@ export async function deleteFilterLists(filterListsToDelete) {
 
   // Delete each of the specified filter lists in turn, waiting for each response
   // before deleting the next to minimize load on the cluster.
-  const messageId = `${(filterListsToDelete.length > 1) ?
-    `${filterListsToDelete.length} filter lists` : filterListsToDelete[0].filter_id}`;
-  toastNotifications.add(`Deleting ${messageId}`);
+  toastNotifications.add(i18n.translate('xpack.ml.settings.filterLists.deleteFilterLists.deletingNotificationMessage', {
+    defaultMessage: 'Deleting {filterListsToDeleteLength, plural, one {{filterListToDeleteId}} other {# filter lists}}',
+    values: {
+      filterListsToDeleteLength: filterListsToDelete.length,
+      filterListToDeleteId: !!filterListsToDelete.length && filterListsToDelete[0].filter_id,
+    }
+  }));
 
   for(const filterList of filterListsToDelete) {
     const filterId = filterList.filter_id;
@@ -25,13 +30,22 @@ export async function deleteFilterLists(filterListsToDelete) {
       await ml.filters.deleteFilter(filterId);
     } catch (resp) {
       console.log('Error deleting filter list:', resp);
-      let errorMessage = `An error occurred deleting filter list ${filterList.filter_id}`;
-      if (resp.message) {
-        errorMessage += ` : ${resp.message}`;
-      }
-      toastNotifications.addDanger(errorMessage);
+      toastNotifications.addDanger(i18n.translate('xpack.ml.settings.filterLists.deleteFilterLists.deletingErrorMessage', {
+        defaultMessage: 'An error occurred deleting filter list {filterListId}{respMessage}',
+        values: {
+          filterListId: filterList.filter_id,
+          respMessage: resp.message ? ` : ${resp.message}` : '',
+        }
+      }));
     }
   }
 
-  toastNotifications.addSuccess(`${messageId} deleted`);
+  toastNotifications.addSuccess(
+    i18n.translate('xpack.ml.settings.filterLists.deleteFilterLists.filtersSuccessfullyDeletedNotificationMessage', {
+      defaultMessage: '{filterListsToDeleteLength, plural, one {{filterListToDeleteId}} other {# filter lists}} deleted',
+      values: {
+        filterListsToDeleteLength: filterListsToDelete.length,
+        filterListToDeleteId: !!filterListsToDelete.length && filterListsToDelete[0].filter_id,
+      }
+    }));
 }

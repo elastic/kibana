@@ -14,7 +14,6 @@ import {
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiPortal,
-  // @ts-ignore otherwise TS complains "Module ''@elastic/eui'' has no exported member 'EuiTabbedContent'"
   EuiTabbedContent,
   EuiTitle
 } from '@elastic/eui';

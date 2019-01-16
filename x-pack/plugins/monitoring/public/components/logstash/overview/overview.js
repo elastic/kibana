@@ -11,7 +11,7 @@ import { MonitoringTimeseriesContainer } from '../../chart';
 
 export class Overview extends PureComponent {
   render() {
-    const { stats, metrics } = this.props;
+    const { stats, metrics, ...props } = this.props;
     const metricsToShow = [
       metrics.logstash_cluster_events_input_rate,
       metrics.logstash_cluster_events_output_rate,
@@ -29,6 +29,7 @@ export class Overview extends PureComponent {
                 <EuiFlexItem key={index} style={{ width: '50%' }}>
                   <MonitoringTimeseriesContainer
                     series={metric}
+                    {...props}
                   />
                   <EuiSpacer size="m"/>
                 </EuiFlexItem>

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { union } from 'lodash';
 import { Voronoi } from 'react-vis';
 import PropTypes from 'prop-types';
 import React, { PureComponent } from 'react';
@@ -12,7 +12,7 @@ import React, { PureComponent } from 'react';
 import { SharedPlot } from './plotUtils';
 
 function getXValuesCombined(series) {
-  return _.union(...series.map(serie => serie.data.map(p => p.x))).map(x => ({
+  return union(...series.map(serie => serie.data.map(p => p.x))).map(x => ({
     x
   }));
 }

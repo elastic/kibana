@@ -17,8 +17,7 @@
  * under the License.
  */
 
-const filename = require('path').basename(__filename);
-const fn = require(`../${filename}`);
+const fn = require(`../movingstd`);
 
 import moment from 'moment';
 const expect = require('chai').expect;
@@ -26,7 +25,7 @@ import invoke from './helpers/invoke_series_fn.js';
 import getSeries from './helpers/get_series';
 import getSeriesList from './helpers/get_series_list';
 
-describe(filename, () => {
+describe('movingstd.js', () => {
 
   it('computes the moving standard deviation of a list', async () => {
     const points = [

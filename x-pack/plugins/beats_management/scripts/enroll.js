@@ -8,12 +8,17 @@ const Chance = require('chance'); // eslint-disable-line
 const args = process.argv.slice(2);
 const chance = new Chance();
 
-const enroll = async token => {
+const enroll = async (kibanaURL, token) => {
   const beatId = chance.word();
+
+  if (!token) {
+    token = kibanaURL;
+    kibanaURL = 'http://localhost:5601';
+  }
 
   await request(
     {
-      url: `http://localhost:5601/api/beats/agent/${beatId}`,
+      url: `${kibanaURL}/api/beats/agent/${beatId}`,
       method: 'POST',
       headers: {
         'kbn-xsrf': 'xxx',
@@ -32,4 +37,4 @@ const enroll = async token => {
   );
 };
 
-enroll(args[0]);
+enroll(...args);

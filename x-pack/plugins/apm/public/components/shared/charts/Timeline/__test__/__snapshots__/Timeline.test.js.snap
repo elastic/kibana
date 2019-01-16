@@ -18,7 +18,6 @@ exports[`Timeline should render with data 1`] = `
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  padding-bottom: 15px;
 }
 
 .c1 {

@@ -40,13 +40,11 @@ export class App extends Component {
 
   render() {
     return (
-      <div>
-        <Switch>
-          <Redirect exact from={`${CRUD_APP_BASE_PATH}`} to={`${CRUD_APP_BASE_PATH}/job_list`} />
-          <Route exact path={`${CRUD_APP_BASE_PATH}/job_list`} component={JobList} />
-          <Route exact path={`${CRUD_APP_BASE_PATH}/create`} component={JobCreate} />
-        </Switch>
-      </div>
+      <Switch>
+        <Redirect exact from={`${CRUD_APP_BASE_PATH}`} to={`${CRUD_APP_BASE_PATH}/job_list`} />
+        <Route exact path={`${CRUD_APP_BASE_PATH}/job_list`} component={JobList} />
+        <Route exact path={`${CRUD_APP_BASE_PATH}/create`} component={JobCreate} />
+      </Switch>
     );
   }
 }

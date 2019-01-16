@@ -13,31 +13,61 @@ import { timefilter } from 'ui/timefilter';
 import { Provider } from 'react-redux';
 import { getStore } from '../store/store';
 import { GisMap } from '../components/gis_map';
-import { setSelectedLayer, setTimeFilters, mapExtentChanged, replaceLayerList } from '../actions/store_actions';
+import {
+  setSelectedLayer,
+  setTimeFilters,
+  setRefreshConfig,
+  setGoto,
+  replaceLayerList,
+  setQuery,
+} from '../actions/store_actions';
 import { getIsDarkTheme, updateFlyout, FLYOUT_STATE } from '../store/ui';
+import { getUniqueIndexPatternIds } from '../selectors/map_selectors';
 import { Inspector } from 'ui/inspector';
-import { inspectorAdapters } from '../kibana_services';
+import { inspectorAdapters, indexPatternService } from '../kibana_services';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { showOptionsPopover } from '../components/top_nav/show_options_popover';
 import { toastNotifications } from 'ui/notify';
-import { getMapReady, getTimeFilters } from "../selectors/map_selectors";
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-gis-root';
+const DEFAULT_QUERY_LANGUAGE = 'kuery';
 
 const app = uiModules.get('app/gis', []);
 
-app.controller('GisMapController', ($scope, $route, config, kbnUrl) => {
+app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage, AppState) => {
 
-  let isLayersListInitializedFromSavedObject = false;
   const savedMap = $scope.map = $route.current.locals.map;
   let isDarkTheme;
   let unsubscribe;
 
   inspectorAdapters.requests.reset();
 
-  getStore().then(store => {
+  const $state = new AppState();
+  $scope.$listen($state, 'fetch_with_changes', function (diff) {
+    if (diff.includes('query')) {
+      $scope.updateQueryAndDispatch($state.query);
+    }
+  });
+  $scope.query = {};
+  $scope.indexPatterns = [];
+  $scope.updateQueryAndDispatch = function (newQuery) {
+    $scope.query = newQuery;
+    getStore().then(store => {
+      // ignore outdated query
+      if ($scope.query !== newQuery) {
+        return;
+      }
 
+      store.dispatch(setQuery({ query: $scope.query }));
+
+      // update appState
+      $state.query = $scope.query;
+      $state.save();
+    });
+  };
+
+  getStore().then(store => {
     // clear old UI state
     store.dispatch(setSelectedLayer(null));
     store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
@@ -48,15 +78,34 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl) => {
     });
 
     // sync store with savedMap mapState
-    // layerList is synced after map has initialized and extent is known.
+    let queryFromSavedObject;
     if (savedMap.mapStateJSON) {
       const mapState = JSON.parse(savedMap.mapStateJSON);
+      queryFromSavedObject = mapState.query;
       const timeFilters = mapState.timeFilters ? mapState.timeFilters : timefilter.getTime();
       store.dispatch(setTimeFilters(timeFilters));
-      store.dispatch(mapExtentChanged({
+      store.dispatch(setGoto({
+        lat: mapState.center.lat,
+        lon: mapState.center.lon,
         zoom: mapState.zoom,
-        center: mapState.center,
       }));
+      if (mapState.refreshConfig) {
+        store.dispatch(setRefreshConfig(mapState.refreshConfig));
+      }
+    }
+    const layerList = savedMap.layerListJSON ? JSON.parse(savedMap.layerListJSON) : [];
+    store.dispatch(replaceLayerList(layerList));
+
+    // Initialize query, syncing appState and store
+    if ($state.query) {
+      $scope.updateQueryAndDispatch($state.query);
+    } else if (queryFromSavedObject) {
+      $scope.updateQueryAndDispatch(queryFromSavedObject);
+    } else {
+      $scope.updateQueryAndDispatch({
+        query: '',
+        language: localStorage.get('kibana.userQueryLanguage') || DEFAULT_QUERY_LANGUAGE
+      });
     }
 
     const root = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
@@ -67,34 +116,46 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl) => {
       root);
   });
 
+  let prevIndexPatternIds;
+  async function updateIndexPatterns(nextIndexPatternIds) {
+    const indexPatterns = [];
+    const getIndexPatternPromises = nextIndexPatternIds.map(async (indexPatternId) => {
+      try {
+        const indexPattern = await indexPatternService.get(indexPatternId);
+        indexPatterns.push(indexPattern);
+      } catch(err) {
+        // unable to fetch index pattern
+      }
+    });
+
+    await Promise.all(getIndexPatternPromises);
+    // ignore outdated results
+    if (prevIndexPatternIds !== nextIndexPatternIds) {
+      return;
+    }
+    $scope.indexPatterns = indexPatterns;
+  }
+
   function handleStoreChanges(store) {
-    if (isDarkTheme !== getIsDarkTheme(store.getState())) {
-      isDarkTheme = getIsDarkTheme(store.getState());
+    const state = store.getState();
+
+    // theme changes must triggered in digest cycle because top nav is still angular
+    if (isDarkTheme !== getIsDarkTheme(state)) {
+      isDarkTheme = getIsDarkTheme(state);
       updateTheme();
     }
 
-    const storeTime = getTimeFilters(store.getState());
-    const kbnTime = timefilter.getTime();
-    if (storeTime && (storeTime.to !== kbnTime.to || storeTime.from !== kbnTime.from)) {
-      timefilter.setTime(storeTime);
-    }
-
-    // Part of initial syncing of store from saved object
-    // Delayed until after map is ready so map extent is known
-    if (!isLayersListInitializedFromSavedObject && getMapReady(store.getState())) {
-      isLayersListInitializedFromSavedObject = true;
-      const layerList = savedMap.layerListJSON ? JSON.parse(savedMap.layerListJSON) : [];
-      store.dispatch(replaceLayerList(layerList));
+    const nextIndexPatternIds = getUniqueIndexPatternIds(state);
+    if (nextIndexPatternIds !== prevIndexPatternIds) {
+      prevIndexPatternIds = nextIndexPatternIds;
+      updateIndexPatterns(nextIndexPatternIds);
     }
   }
-
-  timefilter.on('timeUpdate', dispatchTimeUpdate);
 
   $scope.$on('$destroy', () => {
     if (unsubscribe) {
       unsubscribe();
     }
-    timefilter.off('timeUpdate', dispatchTimeUpdate);
     const node = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
     if (node) {
       unmountComponentAtNode(node);
@@ -135,7 +196,9 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl) => {
       });
 
       if (savedMap.id !== $route.current.params.id) {
-        kbnUrl.change(`map/{{id}}`, { id: savedMap.id });
+        $scope.$evalAsync(() => {
+          kbnUrl.change(`map/{{id}}`, { id: savedMap.id });
+        });
       }
     }
     return { id };
@@ -191,12 +254,6 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl) => {
   }];
   timefilter.enableTimeRangeSelector();
   timefilter.enableAutoRefreshSelector();
-
-  async function dispatchTimeUpdate() {
-    const timeFilters = timefilter.getTime();
-    const store = await getStore();
-    store.dispatch(setTimeFilters(timeFilters));
-  }
 
   function updateTheme() {
     $scope.$evalAsync(() => {

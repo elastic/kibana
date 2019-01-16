@@ -7,3 +7,4 @@
 export * from './auto_follow_pattern';
 
 export * from './api';
+export * from './ccr';

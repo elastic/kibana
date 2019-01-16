@@ -32,7 +32,8 @@ function startApp() {
   });
 
   routes.when(`${BASE_PATH}/:view?`, {
-    template: '<upgrade-assistant />',
+    template:
+      '<kbn-management-app section="elasticsearch/upgrade_assistant"><upgrade-assistant /></kbn-management-app>',
   });
 }
 

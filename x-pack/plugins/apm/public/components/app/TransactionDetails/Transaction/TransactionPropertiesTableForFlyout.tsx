@@ -5,19 +5,21 @@
  */
 
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
-import { capitalize, first, get } from 'lodash';
+import { first, get } from 'lodash';
 import React from 'react';
 import { Transaction } from '../../../../../typings/es_schemas/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
 import { fromQuery, history, toQuery } from '../../../../utils/url';
 import {
   getPropertyTabNames,
-  PropertiesTable
+  PropertiesTable,
+  Tab
 } from '../../../shared/PropertiesTable';
 
 // Ensure the selected tab exists or use the first
-function getCurrentTab(tabs: string[] = [], selectedTab?: string) {
-  return selectedTab && tabs.includes(selectedTab) ? selectedTab : first(tabs);
+function getCurrentTab(tabs: Tab[] = [], selectedTabKey?: string) {
+  const selectedTab = tabs.find(({ key }) => key === selectedTabKey);
+  return selectedTab ? selectedTab : first(tabs) || {};
 }
 
 function getTabs(transactionData: Transaction) {
@@ -43,7 +45,7 @@ export const TransactionPropertiesTableForFlyout: React.SFC<Props> = ({
   return (
     <div>
       <EuiTabs>
-        {tabs.map(key => {
+        {tabs.map(({ key, label }) => {
           return (
             <EuiTab
               onClick={() => {
@@ -55,18 +57,18 @@ export const TransactionPropertiesTableForFlyout: React.SFC<Props> = ({
                   })
                 });
               }}
-              isSelected={currentTab === key}
+              isSelected={currentTab.key === key}
               key={key}
             >
-              {capitalize(key)}
+              {label}
             </EuiTab>
           );
         })}
       </EuiTabs>
       <EuiSpacer />
       <PropertiesTable
-        propData={get(transaction.context, currentTab)}
-        propKey={currentTab}
+        propData={get(transaction.context, currentTab.key)}
+        propKey={currentTab.key}
         agentName={agentName}
       />
     </div>

@@ -24,16 +24,16 @@ describe('layer', () => {
         isFilterByMapBounds: () => { return true; }
       };
       const oldBuffer = {
-        max_lat: 12.5,
-        max_lon: 102.5,
-        min_lat: 2.5,
-        min_lon: 92.5,
+        maxLat: 12.5,
+        maxLon: 102.5,
+        minLat: 2.5,
+        minLon: 92.5,
       };
       const newBuffer = {
-        max_lat: 12.5,
-        max_lon: 102.5,
-        min_lat: 2.5,
-        min_lon: 92.5,
+        maxLat: 12.5,
+        maxLon: 102.5,
+        minLat: 2.5,
+        minLon: 92.5,
       };
       const updateDueToExtent = layer.updateDueToExtent(sourceMock, { buffer: oldBuffer }, { buffer: newBuffer });
       expect(updateDueToExtent).toBe(false);
@@ -44,16 +44,16 @@ describe('layer', () => {
         isFilterByMapBounds: () => { return true; }
       };
       const oldBuffer = {
-        max_lat: 12.5,
-        max_lon: 102.5,
-        min_lat: 2.5,
-        min_lon: 92.5,
+        maxLat: 12.5,
+        maxLon: 102.5,
+        minLat: 2.5,
+        minLon: 92.5,
       };
       const newBuffer = {
-        max_lat: 10,
-        max_lon: 100,
-        min_lat: 5,
-        min_lon: 95,
+        maxLat: 10,
+        maxLon: 100,
+        minLat: 5,
+        minLon: 95,
       };
       const updateDueToExtent = layer.updateDueToExtent(sourceMock, { buffer: oldBuffer }, { buffer: newBuffer });
       expect(updateDueToExtent).toBe(false);
@@ -64,16 +64,16 @@ describe('layer', () => {
         isFilterByMapBounds: () => { return true; }
       };
       const oldBuffer = {
-        max_lat: 12.5,
-        max_lon: 102.5,
-        min_lat: 2.5,
-        min_lon: 92.5,
+        maxLat: 12.5,
+        maxLon: 102.5,
+        minLat: 2.5,
+        minLon: 92.5,
       };
       const newBuffer = {
-        max_lat: 10,
-        max_lon: 100,
-        min_lat: 5,
-        min_lon: 95,
+        maxLat: 10,
+        maxLon: 100,
+        minLat: 5,
+        minLon: 95,
       };
       const updateDueToExtent = layer.updateDueToExtent(
         sourceMock,
@@ -95,16 +95,16 @@ describe('layer', () => {
         isFilterByMapBounds: () => { return true; }
       };
       const oldBuffer = {
-        max_lat: 12.5,
-        max_lon: 102.5,
-        min_lat: 2.5,
-        min_lon: 92.5,
+        maxLat: 12.5,
+        maxLon: 102.5,
+        minLat: 2.5,
+        minLon: 92.5,
       };
       const newBuffer = {
-        max_lat: 7.5,
-        max_lon: 92.5,
-        min_lat: -2.5,
-        min_lon: 82.5,
+        maxLat: 7.5,
+        maxLon: 92.5,
+        minLat: -2.5,
+        minLon: 82.5,
       };
       const updateDueToExtent = layer.updateDueToExtent(sourceMock, { buffer: oldBuffer }, { buffer: newBuffer });
       expect(updateDueToExtent).toBe(true);

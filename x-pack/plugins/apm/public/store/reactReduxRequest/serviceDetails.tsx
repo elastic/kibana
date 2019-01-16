@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { first, get } from 'lodash';
 import React from 'react';
 import { Request, RRRRender } from 'react-redux-request';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
@@ -22,8 +22,8 @@ export function getServiceDetails(state: IReduxState) {
 }
 
 export function getDefaultTransactionType(state: IReduxState) {
-  const types: string[] = _.get(state.reactReduxRequest[ID], 'data.types');
-  return _.first(types);
+  const types: string[] = get(state.reactReduxRequest[ID], 'data.types');
+  return first(types);
 }
 
 export function ServiceDetailsRequest({

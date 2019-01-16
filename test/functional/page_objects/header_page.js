@@ -194,6 +194,12 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       return testSubjects.getAttribute('globalTimepickerAutoRefreshButton', 'data-test-subj-state');
     }
 
+    async getRefreshConfig() {
+      const refreshState = await testSubjects.getAttribute('globalTimepickerAutoRefreshButton', 'data-test-subj-state');
+      const refreshConfig = await testSubjects.getVisibleText('globalRefreshButton');
+      return `${refreshState} ${refreshConfig}`;
+    }
+
     // check if the auto refresh state is active and to pause it
     async pauseAutoRefresh() {
       let result = false;
@@ -248,8 +254,10 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     }
 
     async awaitGlobalLoadingIndicatorHidden() {
-      log.debug('awaitGlobalLoadingIndicatorHidden');
-      await testSubjects.find('globalLoadingIndicator-hidden', defaultFindTimeout * 10);
+      await testSubjects.existOrFail('globalLoadingIndicator-hidden', {
+        allowHidden: true,
+        timeout: defaultFindTimeout * 10
+      });
     }
 
     async awaitKibanaChrome() {

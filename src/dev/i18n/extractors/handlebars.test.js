@@ -19,7 +19,13 @@
 
 import { extractHandlebarsMessages } from './handlebars';
 
+const report = jest.fn();
+
 describe('dev/i18n/extractors/handlebars', () => {
+  beforeEach(() => {
+    report.mockClear();
+  });
+
   test('extracts handlebars default messages', () => {
     const source = Buffer.from(`\
 window.onload = function () {
@@ -49,7 +55,8 @@ window.onload = function () {
 };
 `);
 
-    expect(() => extractHandlebarsMessages(source).next()).toThrowErrorMatchingSnapshot();
+    expect(() => extractHandlebarsMessages(source, { report }).next()).not.toThrow();
+    expect(report.mock.calls).toMatchSnapshot();
   });
 
   test('throws on wrong properties argument type', () => {
@@ -59,7 +66,8 @@ window.onload = function () {
 };
 `);
 
-    expect(() => extractHandlebarsMessages(source).next()).toThrowErrorMatchingSnapshot();
+    expect(() => extractHandlebarsMessages(source, { report }).next()).not.toThrow();
+    expect(report.mock.calls).toMatchSnapshot();
   });
 
   test('throws on empty id', () => {
@@ -69,7 +77,8 @@ window.onload = function () {
 };
 `);
 
-    expect(() => extractHandlebarsMessages(source).next()).toThrowErrorMatchingSnapshot();
+    expect(() => extractHandlebarsMessages(source, { report }).next()).not.toThrow();
+    expect(report.mock.calls).toMatchSnapshot();
   });
 
   test('throws on missing defaultMessage property', () => {
@@ -79,6 +88,7 @@ window.onload = function () {
 };
 `);
 
-    expect(() => extractHandlebarsMessages(source).next()).toThrowErrorMatchingSnapshot();
+    expect(() => extractHandlebarsMessages(source, { report }).next()).not.toThrow();
+    expect(report.mock.calls).toMatchSnapshot();
   });
 });

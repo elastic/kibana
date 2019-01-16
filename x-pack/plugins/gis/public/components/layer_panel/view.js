@@ -49,7 +49,7 @@ export class LayerPanel  extends React.Component {
 
     return (
       <EuiPanel>
-        <JoinEditor layer={this.props.selectedLayer}/>
+        <JoinEditor/>
       </EuiPanel>
     );
   }

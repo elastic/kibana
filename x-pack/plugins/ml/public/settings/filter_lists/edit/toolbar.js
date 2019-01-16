@@ -13,6 +13,8 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import {
   EuiButton,
   EuiFlexGroup,
@@ -47,7 +49,10 @@ export function EditFilterListToolbar({
             disabled={(selectedItemCount === 0 || canDeleteFilter === false)}
             onClick={deleteSelectedItems}
           >
-            Delete item
+            <FormattedMessage
+              id="xpack.ml.settings.filterLists.toolbar.deleteItemButtonLabel"
+              defaultMessage="Delete item"
+            />
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem>

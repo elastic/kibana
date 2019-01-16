@@ -273,7 +273,8 @@ export class VectorStyle {
       return [
         'interpolate',
         ['linear'],
-        ['get', targetName],
+        ['coalesce', ['get', targetName], -1],
+        -1, 'rgba(0,0,0,0)',
         ...colorRange
       ];
     } else {
@@ -307,14 +308,15 @@ export class VectorStyle {
 
   _getMBColor(property) {
     let color;
-    if (
-      this._descriptor.properties[property].type === VectorStyle.STYLE_TYPE.STATIC
-    ) {
+
+    const hasFields = _.get(this._descriptor.properties[property].options, 'field', false)
+      && _.get(this._descriptor.properties[property].options, 'color', false);
+    const isStatic = this._descriptor.properties[property].type === VectorStyle.STYLE_TYPE.STATIC;
+
+    if (isStatic || !hasFields) {
       color = this.getHexColor(property);
-    } else if (this._descriptor.properties[property].type === VectorStyle.STYLE_TYPE.DYNAMIC) {
-      color = this._getMBDataDrivenColor(property);
     } else {
-      throw new Error(`Style type not recognized: ${this._descriptor.properties[property].type}`);
+      color = this._getMBDataDrivenColor(property);
     }
     return color;
   }
@@ -335,6 +337,7 @@ export class VectorStyle {
 
   setMBPaintProperties(mbMap, sourceId, fillLayerId, lineLayerId) {
     const opacity = this._getMBOpacity();
+
     if (this._descriptor.properties.fillColor) {
       const color = this._getMBColor('fillColor');
       mbMap.setPaintProperty(fillLayerId, 'fill-color', color);

@@ -20,12 +20,10 @@ import moment from 'moment-timezone';
 import 'plugins/ml/components/annotations_table';
 import 'plugins/ml/components/anomalies_table';
 import 'plugins/ml/components/controls';
-import 'plugins/ml/components/influencers_list';
 import 'plugins/ml/components/job_select_list';
 
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { parseInterval } from 'ui/utils/parse_interval';
-import { initPromise } from 'plugins/ml/util/promise';
 import template from './explorer.html';
 
 import uiRoutes from 'ui/routes';
@@ -44,6 +42,7 @@ import { JobSelectServiceProvider } from 'plugins/ml/components/job_select_list/
 import { isTimeSeriesViewDetector } from 'plugins/ml/../common/util/job_utils';
 import { timefilter } from 'ui/timefilter';
 import { formatHumanReadableDateTime } from '../util/date_utils';
+import { explorerChartsContainerServiceFactory, getDefaultChartsData } from './explorer_charts/explorer_charts_container_service';
 import {
   DRAG_SELECT_ACTION,
   SWIMLANE_DEFAULT_LIMIT,
@@ -54,7 +53,6 @@ import {
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
 } from '../../common/constants/search';
 
-// TODO Fully support Annotations in Anomaly Explorer
 import chrome from 'ui/chrome';
 const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
@@ -66,7 +64,6 @@ uiRoutes
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       indexPatterns: loadIndexPatterns,
-      initPromise: initPromise(true)
     }
   });
 
@@ -82,7 +79,6 @@ function getDefaultViewBySwimlaneData() {
   };
 }
 
-
 module.controller('MlExplorerController', function (
   $scope,
   $timeout,
@@ -92,10 +88,12 @@ module.controller('MlExplorerController', function (
   mlCheckboxShowChartsService,
   mlSelectLimitService,
   mlSelectIntervalService,
-  mlSelectSeverityService) {
+  mlSelectSeverityService,
+  i18n) {
 
   $scope.annotationsData = [];
   $scope.anomalyChartRecords = [];
+  $scope.chartsData = getDefaultChartsData();
   $scope.timeFieldName = 'timestamp';
   $scope.loading = true;
   timefilter.enableTimeRangeSelector();
@@ -114,7 +112,7 @@ module.controller('MlExplorerController', function (
   const $mlExplorer = $('.ml-explorer');
   const MAX_INFLUENCER_FIELD_VALUES = 10;
   const MAX_CATEGORY_EXAMPLES = 10;
-  const VIEW_BY_JOB_LABEL = 'job ID';
+  const VIEW_BY_JOB_LABEL = i18n('xpack.ml.explorer.jobIdLabel', { defaultMessage: 'job ID' });
 
   const ALLOW_CELL_RANGE_SELECTION = mlExplorerDashboardService.allowCellRangeSelection;
   // make sure dragSelect is only available if the mouse pointer is actually over a swimlane
@@ -122,6 +120,17 @@ module.controller('MlExplorerController', function (
   // skip listening to clicks on swimlanes while they are loading to avoid race conditions
   let skipCellClicks = true;
   $scope.queryFilters = [];
+
+  const anomalyDataChange = explorerChartsContainerServiceFactory((data) => {
+    $scope.chartsData = {
+      ...getDefaultChartsData(),
+      chartsPerRow: data.chartsPerRow,
+      seriesToPlot: data.seriesToPlot,
+      // convert truthy/falsy value to Boolean
+      tooManyBuckets: !!data.tooManyBuckets,
+    };
+    $scope.$applyAsync();
+  });
 
   const dragSelect = new DragSelect({
     selectables: document.getElementsByClassName('sl-cell'),
@@ -165,16 +174,7 @@ module.controller('MlExplorerController', function (
 
   $scope.viewBySwimlaneOptions = [];
   $scope.viewBySwimlaneData = getDefaultViewBySwimlaneData();
-
-
-  let isChartsContainerInitialized = false;
-  let chartsCallback = () => {};
-  function initializeAfterChartsContainerDone() {
-    if (isChartsContainerInitialized === false) {
-      chartsCallback();
-    }
-    isChartsContainerInitialized = true;
-  }
+  $scope.viewBySwimlaneDataLoading = false;
 
   $scope.initializeVis = function () {
     // Initialize the AppState in which to store filters.
@@ -198,12 +198,12 @@ module.controller('MlExplorerController', function (
         $scope.loading = false;
       }
 
+      $scope.$applyAsync();
     }).catch((resp) => {
       console.log('Explorer - error getting job info from elasticsearch:', resp);
     });
 
     mlExplorerDashboardService.init();
-    mlExplorerDashboardService.chartsInitDone.watch(initializeAfterChartsContainerDone);
   };
 
   // create new job objects based on standard job config objects
@@ -293,6 +293,7 @@ module.controller('MlExplorerController', function (
           restoreCellDataFromAppState();
           updateExplorer();
         }
+        $scope.$applyAsync();
       });
   };
 
@@ -365,38 +366,16 @@ module.controller('MlExplorerController', function (
     $scope.appState.save();
   }
 
-  function getSwimlaneData(swimlaneType) {
-    switch (swimlaneType) {
-      case SWIMLANE_TYPE.OVERALL:
-        return $scope.overallSwimlaneData;
-      case SWIMLANE_TYPE.VIEW_BY:
-        return $scope.viewBySwimlaneData;
-    }
-  }
-
-  function mapScopeToSwimlaneProps(swimlaneType) {
-    return {
-      chartWidth: $scope.swimlaneWidth,
-      MlTimeBuckets: TimeBuckets,
-      swimlaneData: getSwimlaneData(swimlaneType),
-      swimlaneType,
-      selection: $scope.appState.mlExplorerSwimlane
-    };
-  }
-
   function redrawOnResize() {
     $scope.swimlaneWidth = getSwimlaneContainerWidth();
     $scope.$apply();
-
-    mlExplorerDashboardService.swimlaneDataChange.changed(mapScopeToSwimlaneProps(SWIMLANE_TYPE.OVERALL));
-    mlExplorerDashboardService.swimlaneDataChange.changed(mapScopeToSwimlaneProps(SWIMLANE_TYPE.VIEW_BY));
 
     if (
       mlCheckboxShowChartsService.state.get('showCharts') &&
       $scope.anomalyChartRecords.length > 0
     ) {
       const timerange = getSelectionTimeRange($scope.cellData);
-      mlExplorerDashboardService.anomalyDataChange.changed(
+      anomalyDataChange(
         $scope.anomalyChartRecords, timerange.earliestMs, timerange.latestMs
       );
     }
@@ -417,6 +396,7 @@ module.controller('MlExplorerController', function (
       $scope.viewBySwimlaneData.laneLabels &&
       $scope.viewBySwimlaneData.laneLabels.length > 0
     );
+    $scope.$applyAsync();
   }
 
   function getSelectionTimeRange(cellData) {
@@ -464,12 +444,12 @@ module.controller('MlExplorerController', function (
   // an update of the viewby swimlanes. If we'd just ignored click events
   // during the loading, we could miss programmatically triggered events like
   // those coming via AppState when a selection is part of the URL.
-  const swimlaneCellClickListenerQueue = [];
+  const swimlaneCellClickQueue = [];
 
   // Listener for click events in the swimlane to load corresponding anomaly data.
-  const swimlaneCellClickListener = function (cellData) {
+  $scope.swimlaneCellClick = function (cellData) {
     if (skipCellClicks === true) {
-      swimlaneCellClickListenerQueue.push(cellData);
+      swimlaneCellClickQueue.push(cellData);
       return;
     }
 
@@ -491,7 +471,6 @@ module.controller('MlExplorerController', function (
       updateExplorer();
     }
   };
-  mlExplorerDashboardService.swimlaneCellClick.watch(swimlaneCellClickListener);
 
   const checkboxShowChartsListener = function () {
     const showCharts = mlCheckboxShowChartsService.state.get('showCharts');
@@ -499,7 +478,7 @@ module.controller('MlExplorerController', function (
       updateExplorer();
     } else {
       const timerange = getSelectionTimeRange($scope.cellData);
-      mlExplorerDashboardService.anomalyDataChange.changed(
+      anomalyDataChange(
         [], timerange.earliestMs, timerange.latestMs
       );
     }
@@ -510,7 +489,7 @@ module.controller('MlExplorerController', function (
     const showCharts = mlCheckboxShowChartsService.state.get('showCharts');
     if (showCharts && $scope.cellData !== undefined) {
       const timerange = getSelectionTimeRange($scope.cellData);
-      mlExplorerDashboardService.anomalyDataChange.changed(
+      anomalyDataChange(
         $scope.anomalyChartRecords, timerange.earliestMs, timerange.latestMs
       );
     }
@@ -539,13 +518,11 @@ module.controller('MlExplorerController', function (
   $scope.$on('$destroy', () => {
     dragSelect.stop();
     mlCheckboxShowChartsService.state.unwatch(checkboxShowChartsListener);
-    mlExplorerDashboardService.swimlaneCellClick.unwatch(swimlaneCellClickListener);
     mlExplorerDashboardService.swimlaneRenderDone.unwatch(swimlaneRenderDoneListener);
     mlSelectSeverityService.state.unwatch(anomalyChartsSeverityListener);
     mlSelectIntervalService.state.unwatch(tableControlsListener);
     mlSelectSeverityService.state.unwatch(tableControlsListener);
     mlSelectLimitService.state.unwatch(swimlaneLimitListener);
-    mlExplorerDashboardService.chartsInitDone.unwatch(initializeAfterChartsContainerDone);
     delete $scope.cellData;
     refreshWatcher.cancel();
     $(window).off('resize', jqueryRedrawOnResize);
@@ -581,7 +558,7 @@ module.controller('MlExplorerController', function (
           console.log('Explorer anomaly charts data set:', $scope.anomalyChartRecords);
 
           if (mlCheckboxShowChartsService.state.get('showCharts')) {
-            mlExplorerDashboardService.anomalyDataChange.changed(
+            anomalyDataChange(
               $scope.anomalyChartRecords, earliestMs, latestMs
             );
           }
@@ -649,6 +626,7 @@ module.controller('MlExplorerController', function (
 
           loadTopInfluencers(jobIds, earliestMs, latestMs, filterInfluencers);
         }
+        $scope.$applyAsync();
       });
   }
 
@@ -805,7 +783,6 @@ module.controller('MlExplorerController', function (
       // Tell the result components directives to render.
       // Need to use $timeout to ensure the broadcast happens after the child scope is updated with the new data.
       $timeout(() => {
-        mlExplorerDashboardService.swimlaneDataChange.changed(mapScopeToSwimlaneProps(SWIMLANE_TYPE.OVERALL));
         loadViewBySwimlane([]);
       }, 0);
     });
@@ -823,16 +800,19 @@ module.controller('MlExplorerController', function (
       ).then((resp) => {
         // TODO - sort the influencers keys so that the partition field(s) are first.
         $scope.influencers = resp.influencers;
+        $scope.$applyAsync();
         console.log('Explorer top influencers data set:', $scope.influencers);
       });
     } else {
       $scope.influencers = {};
+      $scope.$applyAsync();
     }
   }
 
   function loadViewBySwimlane(fieldValues) {
     // reset the swimlane data to avoid flickering where the old dataset would briefly show up.
     $scope.viewBySwimlaneData = getDefaultViewBySwimlaneData();
+    $scope.viewBySwimlaneDataLoading = true;
 
     skipCellClicks = true;
     // finish() function, called after each data set has been loaded and processed.
@@ -856,20 +836,18 @@ module.controller('MlExplorerController', function (
         }
       }
 
+      $scope.viewBySwimlaneDataLoading = false;
+
       skipCellClicks = false;
       console.log('Explorer view by swimlane data set:', $scope.viewBySwimlaneData);
-      if (swimlaneCellClickListenerQueue.length > 0) {
-        const cellData = swimlaneCellClickListenerQueue.pop();
-        swimlaneCellClickListenerQueue.length = 0;
-        swimlaneCellClickListener(cellData);
+      if (swimlaneCellClickQueue.length > 0) {
+        const cellData = swimlaneCellClickQueue.pop();
+        swimlaneCellClickQueue.length = 0;
+        $scope.swimlaneCellClick(cellData);
         return;
       }
-      // Fire event to indicate swimlane data has changed.
-      // Need to use $timeout to ensure this happens after the child scope is updated with the new data.
+
       setShowViewBySwimlane();
-      $timeout(() => {
-        mlExplorerDashboardService.swimlaneDataChange.changed(mapScopeToSwimlaneProps(SWIMLANE_TYPE.VIEW_BY));
-      }, 0);
     }
 
     if (
@@ -1038,7 +1016,8 @@ module.controller('MlExplorerController', function (
           anomalies,
           interval: resp.interval,
           examplesByJobId: resp.examplesByJobId,
-          showViewSeriesLink: true
+          showViewSeriesLink: true,
+          jobIds
         };
       });
 
@@ -1063,13 +1042,7 @@ module.controller('MlExplorerController', function (
       await loadAnnotationsTableData();
 
       $timeout(() => {
-        if ($scope.overallSwimlaneData !== undefined) {
-          mlExplorerDashboardService.swimlaneDataChange.changed(mapScopeToSwimlaneProps(SWIMLANE_TYPE.OVERALL));
-        }
-        if ($scope.viewBySwimlaneData !== undefined) {
-          mlExplorerDashboardService.swimlaneDataChange.changed(mapScopeToSwimlaneProps(SWIMLANE_TYPE.VIEW_BY));
-        }
-        mlExplorerDashboardService.anomalyDataChange.changed($scope.anomalyChartRecords || [], timerange.earliestMs, timerange.latestMs);
+        anomalyDataChange($scope.anomalyChartRecords || [], timerange.earliestMs, timerange.latestMs);
 
         if (cellData !== undefined && cellData.fieldName === undefined) {
           // Click is in one of the cells in the Overall swimlane - reload the 'view by' swimlane
@@ -1088,11 +1061,7 @@ module.controller('MlExplorerController', function (
       }, 0);
     }
 
-    if (isChartsContainerInitialized) {
-      finish();
-    } else {
-      chartsCallback = finish;
-    }
+    finish();
   }
 
   function clearSelectedAnomalies() {
@@ -1150,8 +1119,9 @@ module.controller('MlExplorerController', function (
   }
 
   function processOverallResults(scoresByTime, searchBounds) {
+    const overallLabel = i18n('xpack.ml.explorer.overallLabel', { defaultMessage: 'Overall' });
     const dataset = {
-      laneLabels: ['Overall'],
+      laneLabels: [overallLabel],
       points: [],
       interval: $scope.swimlaneBucketInterval.asSeconds(),
       earliest: searchBounds.min.valueOf() / 1000,
@@ -1164,7 +1134,7 @@ module.controller('MlExplorerController', function (
       _.each(scoresByTime, (score, timeMs) => {
         const time = timeMs / 1000;
         dataset.points.push({
-          laneLabel: 'Overall',
+          laneLabel: overallLabel,
           time,
           value: score
         });

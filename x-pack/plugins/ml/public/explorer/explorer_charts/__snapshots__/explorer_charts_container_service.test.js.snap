@@ -2,6 +2,7 @@
 
 exports[`explorerChartsContainerService call anomalyChangeListener with actual series config 1`] = `
 Object {
+  "chartsPerRow": 1,
   "seriesToPlot": Array [],
   "timeFieldName": "timestamp",
   "tooManyBuckets": false,
@@ -32,7 +33,6 @@ Object {
         "query_delay": "86658ms",
         "scroll_size": 1000,
         "state": "stopped",
-        "types": Array [],
       },
       "detectorIndex": 0,
       "detectorLabel": "mean(responsetime)",
@@ -575,7 +575,6 @@ Object {
         "query_delay": "86658ms",
         "scroll_size": 1000,
         "state": "stopped",
-        "types": Array [],
       },
       "detectorIndex": 0,
       "detectorLabel": "mean(responsetime)",

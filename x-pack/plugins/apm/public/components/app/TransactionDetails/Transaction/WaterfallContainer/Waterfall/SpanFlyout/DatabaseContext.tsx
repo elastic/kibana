@@ -4,8 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiTitle } from '@elastic/eui';
 import React, { Fragment } from 'react';
+// @ts-ignore
+import sql from 'react-syntax-highlighter/dist/languages/sql';
+import SyntaxHighlighter, {
+  registerLanguage
+  // @ts-ignore
+} from 'react-syntax-highlighter/dist/light';
+// @ts-ignore
+import { xcode } from 'react-syntax-highlighter/dist/styles';
 import styled from 'styled-components';
+import { DbContext } from '../../../../../../../../typings/es_schemas/Span';
 import {
   borderRadius,
   colors,
@@ -14,20 +24,6 @@ import {
   unit,
   units
 } from '../../../../../../../style/variables';
-
-import SyntaxHighlighter, {
-  registerLanguage
-  // @ts-ignore
-} from 'react-syntax-highlighter/dist/light';
-
-// @ts-ignore
-import { xcode } from 'react-syntax-highlighter/dist/styles';
-
-// @ts-ignore
-import sql from 'react-syntax-highlighter/dist/languages/sql';
-
-import { EuiTitle } from '@elastic/eui';
-import { DbContext } from '../../../../../../../../typings/es_schemas/Span';
 
 registerLanguage('sql', sql);
 

@@ -18,6 +18,8 @@ import {
   EuiText,
   EuiTitle
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { toastNotifications } from 'ui/notify';
 import {
@@ -90,26 +92,29 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
   };
 
   public addErrorToast = () => {
-    const { location, urlParams } = this.props;
-    const { serviceName = 'unknown', transactionType } = urlParams;
+    const { urlParams } = this.props;
+    const { serviceName = 'unknown' } = urlParams;
 
     if (!serviceName) {
       return;
     }
 
     toastNotifications.addWarning({
-      title: 'Job already exists',
+      title: i18n.translate(
+        'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreationFailedNotificationTitle',
+        {
+          defaultMessage: 'Job creation failed'
+        }
+      ),
       text: (
         <p>
-          There&apos;s already a job running for anomaly detection on{' '}
-          {serviceName} ({transactionType}).{' '}
-          <ViewMLJob
-            serviceName={serviceName}
-            transactionType={transactionType}
-            location={location}
-          >
-            View existing job
-          </ViewMLJob>
+          {i18n.translate(
+            'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreationFailedNotificationText',
+            {
+              defaultMessage:
+                'Your current license may not allow for creating machine learning jobs, or this job may already exist.'
+            }
+          )}
         </p>
       )
     });
@@ -120,18 +125,36 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
     const { serviceName = 'unknown', transactionType } = urlParams;
 
     toastNotifications.addSuccess({
-      title: 'Job successfully created',
+      title: i18n.translate(
+        'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreatedNotificationTitle',
+        {
+          defaultMessage: 'Job successfully created'
+        }
+      ),
       text: (
         <p>
-          The analysis is now running for {serviceName} ({transactionType}
-          ). It might take a while before results are added to the response
-          times graph.{' '}
+          {i18n.translate(
+            'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreatedNotificationText',
+            {
+              defaultMessage:
+                'The analysis is now running for {serviceName} ({transactionType}). It might take a while before results are added to the response times graph.',
+              values: {
+                serviceName,
+                transactionType: transactionType as string
+              }
+            }
+          )}{' '}
           <ViewMLJob
             serviceName={serviceName}
             transactionType={transactionType}
             location={location}
           >
-            View job
+            {i18n.translate(
+              'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreatedNotificationText.viewJobLinkText',
+              {
+                defaultMessage: 'View job'
+              }
+            )}
           </ViewMLJob>
         </p>
       )
@@ -167,7 +190,14 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
             <EuiFlyout onClose={onClose} size="s">
               <EuiFlyoutHeader>
                 <EuiTitle>
-                  <h2>Enable anomaly detection</h2>
+                  <h2>
+                    {i18n.translate(
+                      'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.enableAnomalyDetectionTitle',
+                      {
+                        defaultMessage: 'Enable anomaly detection'
+                      }
+                    )}
+                  </h2>
                 </EuiTitle>
                 <EuiSpacer size="s" />
               </EuiFlyoutHeader>
@@ -175,20 +205,38 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
                 {hasMLJob && (
                   <div>
                     <EuiCallOut
-                      title="Job already exists"
+                      title={i18n.translate(
+                        'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.jobExistsTitle',
+                        {
+                          defaultMessage: 'Job already exists'
+                        }
+                      )}
                       color="success"
                       iconType="check"
                     >
                       <p>
-                        There is currently a job running for {serviceName} (
-                        {transactionType}
-                        ).{' '}
+                        {i18n.translate(
+                          'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.jobExistsDescription',
+                          {
+                            defaultMessage:
+                              'There is currently a job running for {serviceName} ({transactionType}).',
+                            values: {
+                              serviceName,
+                              transactionType: transactionType as string
+                            }
+                          }
+                        )}{' '}
                         <ViewMLJob
                           serviceName={serviceName}
                           transactionType={transactionType}
                           location={location}
                         >
-                          View existing job
+                          {i18n.translate(
+                            'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.jobExistsDescription.viewJobLinkText',
+                            {
+                              defaultMessage: 'View existing job'
+                            }
+                          )}
                         </ViewMLJob>
                       </p>
                     </EuiCallOut>
@@ -201,14 +249,25 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
                     <EuiCallOut
                       title={
                         <span>
-                          No APM index pattern available. To create a job,
-                          please import the APM index pattern via the{' '}
-                          <KibanaLink
-                            pathname={'/app/kibana'}
-                            hash={`/home/tutorial/apm`}
-                          >
-                            Setup Instructions
-                          </KibanaLink>
+                          <FormattedMessage
+                            id="xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.noPatternTitle"
+                            defaultMessage="No APM index pattern available. To create a job, please import the APM index pattern via the {setupInstructionLink}"
+                            values={{
+                              setupInstructionLink: (
+                                <KibanaLink
+                                  pathname={'/app/kibana'}
+                                  hash={`/home/tutorial/apm`}
+                                >
+                                  {i18n.translate(
+                                    'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.noPatternTitle.setupInstructionLinkText',
+                                    {
+                                      defaultMessage: 'Setup Instructions'
+                                    }
+                                  )}
+                                </KibanaLink>
+                              )
+                            }}
+                          />
                         </span>
                       }
                       color="warning"
@@ -220,24 +279,53 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
 
                 <EuiText>
                   <p>
-                    Here you can create a machine learning job to calculate
-                    anomaly scores on durations for APM transactions within the{' '}
-                    {serviceName} service. Once enabled,{' '}
-                    <b>the transaction duration graph</b> will show the expected
-                    bounds and annotate the graph once the anomaly score is
-                    &gt;=75.
+                    <FormattedMessage
+                      id="xpack.apm.serviceDetails.enableAnomalyDetectionPanel.createMLJobDescription"
+                      defaultMessage="Here you can create a machine learning job to calculate anomaly scores on durations for APM transactions
+                        within the {serviceName} service. Once enabled, {transactionDurationGraphText} will show the expected bounds and annotate
+                        the graph once the anomaly score is &gt;=75."
+                      values={{
+                        serviceName,
+                        transactionDurationGraphText: (
+                          <b>
+                            {i18n.translate(
+                              'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.createMLJobDescription.transactionDurationGraphText',
+                              {
+                                defaultMessage: 'the transaction duration graph'
+                              }
+                            )}
+                          </b>
+                        )
+                      }}
+                    />
                   </p>
                   <p>
-                    Jobs can be created for each service + transaction type
-                    combination. Once a job is created, you can manage it and
-                    see more details in the{' '}
-                    <KibanaLink pathname={'/app/ml'}>
-                      Machine Learning jobs management page
-                    </KibanaLink>
-                    .{' '}
+                    <FormattedMessage
+                      id="xpack.apm.serviceDetails.enableAnomalyDetectionPanel.manageMLJobDescription"
+                      defaultMessage="Jobs can be created for each service + transaction type combination.
+                        Once a job is created, you can manage it and see more details in the {mlJobsPageLink}."
+                      values={{
+                        mlJobsPageLink: (
+                          <KibanaLink pathname={'/app/ml'}>
+                            {i18n.translate(
+                              'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.manageMLJobDescription.mlJobsPageLinkText',
+                              {
+                                defaultMessage:
+                                  'Machine Learning jobs management page'
+                              }
+                            )}
+                          </KibanaLink>
+                        )
+                      }}
+                    />{' '}
                     <em>
-                      Note: It might take a few minutes for the job to begin
-                      calculating results.
+                      {i18n.translate(
+                        'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.manageMLJobDescription.noteText',
+                        {
+                          defaultMessage:
+                            'Note: It might take a few minutes for the job to begin calculating results.'
+                        }
+                      )}
                     </em>
                   </p>
                 </EuiText>
@@ -270,7 +358,12 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
                         fill
                         disabled={isLoading || hasMLJob || !hasIndexPattern}
                       >
-                        Create new job
+                        {i18n.translate(
+                          'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.createNewJobButtonLabel',
+                          {
+                            defaultMessage: 'Create new job'
+                          }
+                        )}
                       </EuiButton>
                     </EuiFormRow>
                   </EuiFlexItem>

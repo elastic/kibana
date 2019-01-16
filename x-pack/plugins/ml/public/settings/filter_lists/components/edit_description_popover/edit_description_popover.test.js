@@ -5,7 +5,7 @@
  */
 
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { EditDescriptionPopover } from './edit_description_popover';
@@ -18,8 +18,8 @@ function prepareTest(updateDescriptionFn) {
     canCreateFilter: true
   };
 
-  const wrapper = shallow(
-    <EditDescriptionPopover {...props} />
+  const wrapper = shallowWithIntl(
+    <EditDescriptionPopover.WrappedComponent {...props} />
   );
 
   return wrapper;
@@ -35,8 +35,8 @@ describe('FilterListUsagePopover', () => {
       canCreateFilter: true
     };
 
-    const component = shallow(
-      <EditDescriptionPopover {...props} />
+    const component = shallowWithIntl(
+      <EditDescriptionPopover.WrappedComponent {...props} />
     );
 
     expect(component).toMatchSnapshot();

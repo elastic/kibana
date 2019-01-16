@@ -16,8 +16,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiPage,
-  EuiPageBody,
   EuiPageContent,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
@@ -270,13 +268,12 @@ export class JobListUi extends Component {
     }
 
     return (
-      <EuiPage>
-        <EuiPageBody>
-          <EuiPageContent>
-            {content}
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
+      <EuiPageContent
+        horizontalPosition="center"
+        verticalPosition="center"
+      >
+        {content}
+      </EuiPageContent>
     );
   }
 }

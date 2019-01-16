@@ -10,7 +10,8 @@ export function GisPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const flyout = getService('flyout');
+  const inspector = getService('inspector');
+  const find = getService('find');
 
   class GisPage {
 
@@ -29,6 +30,28 @@ export function GisPageProvider({ getService, getPageObjects }) {
           throw new Error(`Failed to open map ${name}`);
         }
       });
+    }
+
+    async deleteSavedMaps(search) {
+      await this.searchForMapWithName(search);
+      await testSubjects.click('checkboxSelectAll');
+      await testSubjects.click('deleteSelectedItems');
+      await PageObjects.common.clickConfirmOnModal();
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async openNewMap() {
+      log.debug(`Open new Map`);
+
+      await this.gotoMapListingPage();
+      await testSubjects.click('newMapLink');
+    }
+
+    async saveMap(name) {
+      await testSubjects.click('mapSaveButton');
+      await testSubjects.setValue('savedObjectTitle', name);
+      await testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
     }
 
     async onMapListingPage() {
@@ -69,10 +92,38 @@ export function GisPageProvider({ getService, getPageObjects }) {
       }
     }
 
+    async getMapCountWithName(name) {
+      await this.gotoMapListingPage();
+
+      log.debug(`getMapCountWithName: ${name}`);
+      await this.searchForMapWithName(name);
+      const links = await find.allByLinkText(name);
+      return links.length;
+    }
 
     /*
      * Layer TOC (table to contents) utility functions
      */
+    async setView(lat, lon, zoom) {
+      log.debug(`Set view lat: ${lat}, lon: ${lon}, zoom: ${zoom}`);
+      await testSubjects.click('toggleSetViewVisibilityButton');
+      await testSubjects.setValue('latitudeInput', lat);
+      await testSubjects.setValue('longitudeInput', lon);
+      await testSubjects.setValue('zoomInput', zoom);
+      await testSubjects.click('submitViewButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async getView() {
+      log.debug('Get view');
+      await testSubjects.click('toggleSetViewVisibilityButton');
+      const lat = await testSubjects.getAttribute('latitudeInput', 'value');
+      const lon = await testSubjects.getAttribute('longitudeInput', 'value');
+      const zoom = await testSubjects.getAttribute('zoomInput', 'value');
+      await testSubjects.click('toggleSetViewVisibilityButton');
+      return { lat, lon, zoom };
+    }
+
     async openLayerPanel(layerName) {
       log.debug(`Open layer panel, layer: ${layerName}`);
       await testSubjects.click(`mapOpenLayerButton${layerName}`);
@@ -92,37 +143,8 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.click(`mapRemoveLayerButton`);
     }
 
-
-    /*
-     * Inspector utility functions
-     */
-    async openInspector() {
-      log.debug('Open Inspector');
-      const isOpen = await testSubjects.exists('inspectorPanel');
-      if (!isOpen) {
-        await retry.try(async () => {
-          await testSubjects.click('openInspectorButton');
-          await testSubjects.find('inspectorPanel');
-        });
-      }
-    }
-
-    async closeInspector() {
-      log.debug('Close Inspector');
-      let isOpen = await testSubjects.exists('inspectorPanel');
-      if (isOpen) {
-        await retry.try(async () => {
-          await flyout.close('inspectorPanel');
-          isOpen = await testSubjects.exists('inspectorPanel');
-          if (isOpen) {
-            throw new Error('Failed to close inspector');
-          }
-        });
-      }
-    }
-
     async openInspectorView(viewId) {
-      await this.openInspector();
+      await inspector.open();
       log.debug(`Open Inspector view ${viewId}`);
       await testSubjects.click('inspectorViewChooser');
       await testSubjects.click(viewId);
@@ -156,6 +178,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('mapboxStyleTab');
       const mapboxStyleContainer = await testSubjects.find('mapboxStyleContainer');
       const mapboxStyleJson = await mapboxStyleContainer.getVisibleText();
+      await inspector.close();
       let mapboxStyle;
       try {
         mapboxStyle = JSON.parse(mapboxStyleJson);
@@ -163,18 +186,6 @@ export function GisPageProvider({ getService, getPageObjects }) {
         throw new Error(`Unable to parse mapbox style, error: ${err.message}`);
       }
       return mapboxStyle;
-    }
-
-    async getInspectorTableData() {
-      const inspectorPanel = await testSubjects.find('inspectorPanel');
-      const tableBody = await retry.try(async () => inspectorPanel.findByTagName('tbody'));
-      // Convert the data into a nested array format:
-      // [ [cell1_in_row1, cell2_in_row1], [cell1_in_row2, cell2_in_row2] ]
-      const rows = await tableBody.findAllByTagName('tr');
-      return await Promise.all(rows.map(async row => {
-        const cells = await row.findAllByTagName('td');
-        return await Promise.all(cells.map(async cell => cell.getVisibleText()));
-      }));
     }
 
     getInspectorStatRowHit(stats, rowName) {
@@ -191,6 +202,14 @@ export function GisPageProvider({ getService, getPageObjects }) {
       return statsRow[STATS_ROW_VALUE_INDEX];
     }
 
+    async triggerSingleRefresh(refreshInterval) {
+      log.debug(`triggerSingleRefresh, refreshInterval: ${refreshInterval}`);
+      await PageObjects.header.resumeAutoRefresh();
+      log.debug('waiting to give time for refresh timer to fire');
+      await PageObjects.common.sleep(refreshInterval + (refreshInterval / 2));
+      await PageObjects.header.pauseAutoRefresh();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
   }
   return new GisPage();
 }

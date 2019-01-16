@@ -6,24 +6,38 @@
 
 import expect from 'expect.js';
 
-export default function ({ getPageObjects }) {
+export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['gis']);
+  const queryBar = getService('queryBar');
+  const inspector = getService('inspector');
   const DOC_COUNT_PROP_NAME = 'doc_count';
 
   describe('layer geohashgrid aggregation source', () => {
+
+    async function getRequestTimestamp() {
+      await PageObjects.gis.openInspectorRequestsView();
+      const requestStats = await inspector.getTableData();
+      const requestTimestamp =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Request timestamp');
+      await inspector.close();
+      return requestTimestamp;
+    }
 
     describe('heatmap', () => {
       before(async () => {
         await PageObjects.gis.loadSavedMap('geohashgrid heatmap example');
       });
 
-      after(async () => {
-        await PageObjects.gis.closeInspector();
-      });
-
       const LAYER_ID = '3xlvm';
       const EXPECTED_NUMBER_FEATURES = 6;
       const HEATMAP_PROP_NAME = '__kbn_heatmap_weight__';
+
+      it('should re-fetch geohashgrid aggregation with refresh timer', async () => {
+        const beforeRefreshTimerTimestamp = await getRequestTimestamp();
+        expect(beforeRefreshTimerTimestamp.length).to.be(24);
+        await PageObjects.gis.triggerSingleRefresh(1000);
+        const afterRefreshTimerTimestamp = await getRequestTimestamp();
+        expect(beforeRefreshTimerTimestamp).not.to.equal(afterRefreshTimerTimestamp);
+      });
 
       it('should decorate feature properties with scaled doc_count property', async () => {
         const mapboxStyle = await PageObjects.gis.getMapboxStyle();
@@ -35,14 +49,34 @@ export default function ({ getPageObjects }) {
         });
       });
 
+      describe('query bar', () => {
+        before(async () => {
+          await queryBar.setQuery('machine.os.raw : "win 8"');
+          await queryBar.submitQuery();
+        });
+
+        after(async () => {
+          await queryBar.setQuery('');
+          await queryBar.submitQuery();
+        });
+
+        it('should apply query to geohashgrid aggregation request', async () => {
+          await PageObjects.gis.openInspectorRequestsView();
+          const requestStats = await inspector.getTableData();
+          const hits = PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits (total)');
+          await inspector.close();
+          expect(hits).to.equal('1');
+        });
+      });
+
       describe('inspector', () => {
         afterEach(async () => {
-          await PageObjects.gis.closeInspector();
+          await inspector.close();
         });
 
         it('should contain geohashgrid aggregation elasticsearch request', async () => {
           await PageObjects.gis.openInspectorRequestsView();
-          const requestStats = await PageObjects.gis.getInspectorTableData();
+          const requestStats = await inspector.getTableData();
           const totalHits =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits (total)');
           expect(totalHits).to.equal('6');
           const hits =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits');
@@ -64,13 +98,17 @@ export default function ({ getPageObjects }) {
         await PageObjects.gis.loadSavedMap('geohashgrid vector grid example');
       });
 
-      after(async () => {
-        await PageObjects.gis.closeInspector();
-      });
-
       const LAYER_ID = 'g1xkv';
       const EXPECTED_NUMBER_FEATURES = 6;
       const MAX_OF_BYTES_PROP_NAME = 'max_of_bytes';
+
+      it('should re-fetch geohashgrid aggregation with refresh timer', async () => {
+        const beforeRefreshTimerTimestamp = await getRequestTimestamp();
+        expect(beforeRefreshTimerTimestamp.length).to.be(24);
+        await PageObjects.gis.triggerSingleRefresh(1000);
+        const afterRefreshTimerTimestamp = await getRequestTimestamp();
+        expect(beforeRefreshTimerTimestamp).not.to.equal(afterRefreshTimerTimestamp);
+      });
 
       it('should decorate feature properties with metrics properterties', async () => {
         const mapboxStyle = await PageObjects.gis.getMapboxStyle();
@@ -82,14 +120,34 @@ export default function ({ getPageObjects }) {
         });
       });
 
+      describe('query bar', () => {
+        before(async () => {
+          await queryBar.setQuery('machine.os.raw : "win 8"');
+          await queryBar.submitQuery();
+        });
+
+        after(async () => {
+          await queryBar.setQuery('');
+          await queryBar.submitQuery();
+        });
+
+        it('should apply query to geohashgrid aggregation request', async () => {
+          await PageObjects.gis.openInspectorRequestsView();
+          const requestStats = await inspector.getTableData();
+          const hits = PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits (total)');
+          await inspector.close();
+          expect(hits).to.equal('1');
+        });
+      });
+
       describe('inspector', () => {
         afterEach(async () => {
-          await PageObjects.gis.closeInspector();
+          await inspector.close();
         });
 
         it('should contain geohashgrid aggregation elasticsearch request', async () => {
           await PageObjects.gis.openInspectorRequestsView();
-          const requestStats = await PageObjects.gis.getInspectorTableData();
+          const requestStats = await inspector.getTableData();
           const totalHits =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits (total)');
           expect(totalHits).to.equal('6');
           const hits =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits');

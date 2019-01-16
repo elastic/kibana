@@ -160,16 +160,26 @@ export class VectorLayer extends ALayer {
     return [...numberFieldOptions, ...joinFields];
   }
 
+  getIndexPatternIds() {
+    const indexPatternIds = this._source.getIndexPatternIds();
+    this.getValidJoins().forEach(join => {
+      indexPatternIds.push(...join.getIndexPatternIds());
+    });
+    return indexPatternIds;
+  }
+
   _findDataRequestForSource(sourceDataId) {
     return this._dataRequests.find(dataRequest => dataRequest.getDataId() === sourceDataId);
   }
 
   async _canSkipSourceUpdate(source, sourceDataId, filters) {
     const timeAware = await source.isTimeAware();
+    const refreshTimerAware = await source.isRefreshTimerAware();
     const extentAware = source.isFilterByMapBounds();
     const isFieldAware = source.isFieldAware();
+    const isQueryAware = source.isQueryAware();
 
-    if (!timeAware && !extentAware && !isFieldAware) {
+    if (!timeAware && !refreshTimerAware && !extentAware && !isFieldAware && !isQueryAware) {
       const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
       if (sourceDataRequest && sourceDataRequest.hasDataOrRequestInProgress()) {
         return true;
@@ -192,13 +202,26 @@ export class VectorLayer extends ALayer {
       updateDueToTime = !_.isEqual(meta.timeFilters, filters.timeFilters);
     }
 
+    let updateDueToRefreshTimer = false;
+    if (refreshTimerAware && filters.refreshTimerLastTriggeredAt) {
+      updateDueToRefreshTimer = !_.isEqual(meta.refreshTimerLastTriggeredAt, filters.refreshTimerLastTriggeredAt);
+    }
+
     let updateDueToFields = false;
     if (isFieldAware) {
       updateDueToFields = !_.isEqual(meta.fieldNames, filters.fieldNames);
     }
 
-    return !updateDueToTime && !this.updateDueToExtent(source, meta, filters) && !updateDueToFields;
+    let updateDueToQuery = false;
+    if (isQueryAware) {
+      updateDueToQuery = !_.isEqual(meta.query, filters.query);
+    }
 
+    return !updateDueToTime
+      && !updateDueToRefreshTimer
+      && !this.updateDueToExtent(source, meta, filters)
+      && !updateDueToFields
+      && !updateDueToQuery;
   }
 
   async _syncJoin(join, { startLoading, stopLoading, onLoadError, dataFilters }) {
@@ -215,7 +238,7 @@ export class VectorLayer extends ALayer {
           join: join
         };
       }
-      startLoading(sourceDataId, requestToken, { timeFilters: dataFilters.timeFilters });
+      startLoading(sourceDataId, requestToken, dataFilters);
       const leftSourceName = await this.getSourceName();
       const {
         rawData,

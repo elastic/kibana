@@ -109,19 +109,24 @@ export function initTransactionGroupsApi(server: Server) {
     options: {
       validate: {
         query: withDefaultValidators({
-          transactionId: Joi.string().default('')
+          transactionId: Joi.string().default(''),
+          traceId: Joi.string().default('')
         })
       }
     },
     handler: req => {
       const setup = setupRequest(req);
       const { serviceName, transactionType, transactionName } = req.params;
-      const { transactionId } = req.query as { transactionId: string };
+      const { transactionId, traceId } = req.query as {
+        transactionId: string;
+        traceId: string;
+      };
       return getDistribution(
         serviceName,
         transactionName,
         transactionType,
         transactionId,
+        traceId,
         setup
       ).catch(defaultErrorHandler);
     }

@@ -11,14 +11,16 @@ import {
   LAYER_DATA_LOAD_ENDED,
   LAYER_DATA_LOAD_ERROR,
   ADD_LAYER,
+  ADD_WAITING_FOR_MAP_READY_LAYER,
+  CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
   REMOVE_LAYER,
   PROMOTE_TEMPORARY_LAYERS,
   TOGGLE_LAYER_VISIBLE,
   MAP_EXTENT_CHANGED,
   MAP_READY,
   MAP_DESTROYED,
-  REPLACE_LAYERLIST,
   SET_TIME_FILTERS,
+  SET_QUERY,
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
   PROMOTE_TEMPORARY_STYLES,
@@ -26,7 +28,13 @@ import {
   SET_JOINS,
   TOUCH_LAYER,
   UPDATE_LAYER_ALPHA_VALUE,
-  UPDATE_SOURCE_PROP
+  UPDATE_SOURCE_PROP,
+  SET_REFRESH_CONFIG,
+  TRIGGER_REFRESH_TIMER,
+  SET_MOUSE_COORDINATES,
+  CLEAR_MOUSE_COORDINATES,
+  SET_GOTO,
+  CLEAR_GOTO,
 } from "../actions/store_actions";
 
 const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
@@ -68,6 +76,7 @@ const updateLayerSourceDescriptorProp = (state, layerId, propName, value) => {
 
 const INITIAL_STATE = {
   ready: false,
+  goto: null,
   mapState: {
     zoom: 4,
     center: {
@@ -75,18 +84,54 @@ const INITIAL_STATE = {
       lat: 32.82
     },
     extent: null,
+    mouseCoordinates: null,
     timeFilters: null,
+    query: null,
+    refreshConfig: null,
+    refreshTimerLastTriggeredAt: null,
   },
   selectedLayerId: null,
-  layerList: []
+  layerList: [],
+  waitingForMapReadyLayerList: [],
 };
 
 export function map(state = INITIAL_STATE, action) {
   window._state = state;
   //todo throw actions with actual objects so this doesn't get so cluttered
   switch (action.type) {
-    case REPLACE_LAYERLIST:
-      return { ...state, layerList: [ ...action.layerList] };
+    case SET_MOUSE_COORDINATES:
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          mouseCoordinates: {
+            lat: action.lat,
+            lon: action.lon
+          }
+        }
+      };
+    case CLEAR_MOUSE_COORDINATES:
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          mouseCoordinates: null
+        }
+      };
+    case SET_GOTO:
+      return {
+        ...state,
+        goto: {
+          lat: action.lat,
+          lon: action.lon,
+          zoom: action.zoom,
+        }
+      };
+    case CLEAR_GOTO:
+      return {
+        ...state,
+        goto: null,
+      };
     case LAYER_DATA_LOAD_STARTED:
       return updateWithDataRequest(state, action);
     case LAYER_DATA_LOAD_ERROR:
@@ -119,6 +164,29 @@ export function map(state = INITIAL_STATE, action) {
     case SET_TIME_FILTERS:
       const { from, to } = action;
       return { ...state, mapState: { ...state.mapState, timeFilters: { from, to } } };
+    case SET_QUERY:
+      const { query } = action;
+      return { ...state, mapState: { ...state.mapState, query } };
+    case SET_REFRESH_CONFIG:
+      const { isPaused, interval } = action;
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          refreshConfig: {
+            isPaused,
+            interval,
+          }
+        }
+      };
+    case TRIGGER_REFRESH_TIMER:
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          refreshTimerLastTriggeredAt: (new Date()).toISOString(),
+        }
+      };
     case SET_SELECTED_LAYER:
       const match = state.layerList.find(layer => layer.id === action.selectedLayerId);
       return { ...state, selectedLayerId: match ? action.selectedLayerId : null };
@@ -158,6 +226,19 @@ export function map(state = INITIAL_STATE, action) {
       return {
         ...state, layerList: [...state.layerList.filter(
           ({ id }) => id !== action.id)]
+      };
+    case ADD_WAITING_FOR_MAP_READY_LAYER:
+      return {
+        ...state,
+        waitingForMapReadyLayerList: [
+          ...state.waitingForMapReadyLayerList,
+          action.layer
+        ]
+      };
+    case CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST:
+      return {
+        ...state,
+        waitingForMapReadyLayerList: []
       };
     //TODO: Handle more than one
     case PROMOTE_TEMPORARY_LAYERS:

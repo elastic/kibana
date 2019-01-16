@@ -5,6 +5,7 @@
  */
 
 import { EuiLink } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
 import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/Stackframe';
@@ -62,7 +63,13 @@ export class LibraryStackFrames extends React.Component<Props, State> {
               horizontal={isVisible}
               style={{ marginRight: units.half }}
             />{' '}
-            {stackframes.length} library frames
+            {i18n.translate(
+              'xpack.apm.stacktraceTab.libraryFramesToogleButtonLabel',
+              {
+                defaultMessage: '{stackframesLength} library frames',
+                values: { stackframesLength: stackframes.length }
+              }
+            )}
           </EuiLink>
         </LibraryFrameToggle>
 
