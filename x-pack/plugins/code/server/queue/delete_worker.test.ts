@@ -11,6 +11,7 @@ import { WorkerReservedProgress } from '../../model';
 import { Log } from '../log';
 import { LspService } from '../lsp/lsp_service';
 import { RepositoryServiceFactory } from '../repository_service_factory';
+import { ServerOptions } from '../server_options';
 import { SocketService } from '../socket_service';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 import { CancellationSerivce } from './cancellation_service';
@@ -77,6 +78,7 @@ test('Execute delete job.', async () => {
     esQueue as Esqueue,
     log,
     esClient as EsClient,
+    {} as ServerOptions,
     (cancellationService as any) as CancellationSerivce,
     (lspService as any) as LspService,
     (repoServiceFactory as any) as RepositoryServiceFactory,
@@ -86,7 +88,6 @@ test('Execute delete job.', async () => {
   await deleteWorker.executeJob({
     payload: {
       uri: 'github.com/elastic/kibana',
-      dataPath: 'mockpath',
     },
     options: {},
   });
@@ -117,6 +118,7 @@ test('On delete job enqueued.', async () => {
     esQueue as Esqueue,
     log,
     esClient as EsClient,
+    {} as ServerOptions,
     {} as CancellationSerivce,
     {} as LspService,
     {} as RepositoryServiceFactory,
@@ -126,7 +128,6 @@ test('On delete job enqueued.', async () => {
   await deleteWorker.onJobEnqueued({
     payload: {
       uri: 'github.com/elastic/kibana',
-      dataPath: 'mockpath',
     },
     options: {},
   });
@@ -146,6 +147,7 @@ test('On delete job completed.', async () => {
     esQueue as Esqueue,
     log,
     esClient as EsClient,
+    {} as ServerOptions,
     {} as CancellationSerivce,
     {} as LspService,
     {} as RepositoryServiceFactory,
@@ -156,7 +158,6 @@ test('On delete job completed.', async () => {
     {
       payload: {
         uri: 'github.com/elastic/kibana',
-        dataPath: 'mockpath',
       },
       options: {},
     },
