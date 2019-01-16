@@ -75,6 +75,7 @@ async function patchNodeGit(config, log, build, platform) {
     destination: destination,
     time: new Date(),
   });
+  await deleteAll([extractDir, downloadPath], log);
 }
 
 
