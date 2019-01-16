@@ -81,7 +81,7 @@ export class MetricsExpression extends Component {
         button={
           <EuiExpression
             onClick={this._togglePopover}
-            description="for metrics"
+            description="and use metrics"
             uppercase={false}
             value={metricExpressions.length > 0 ? metricExpressions.join(', ') : 'count'}
           />
