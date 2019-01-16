@@ -11,7 +11,6 @@ import { commit, CommitState } from './commit';
 import { editor, EditorState } from './editor';
 import { file, FileState } from './file';
 import { languageServer, LanguageServerState } from './language_server';
-import { recentProjects, RecentProjectsState } from './recent_projects';
 import { repository, RepositoryState } from './repository';
 import { route, RouteState } from './route';
 import { search, SearchState } from './search';
@@ -30,7 +29,6 @@ export interface RootState {
   commit: CommitState;
   blame: BlameState;
   languageServer: LanguageServerState;
-  recentProjects: RecentProjectsState;
 }
 
 const reducers = {
@@ -45,7 +43,6 @@ const reducers = {
   commit,
   blame,
   languageServer,
-  recentProjects,
 };
 
 // @ts-ignore
