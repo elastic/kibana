@@ -132,11 +132,13 @@ export async function FindProvider({ getService }) {
         await this.byCssSelector(selector, timeout);
         log.debug('Getting all elements by css selector: ' + selector);
         const elements = await driver.findElements(By.css(selector));
+        log.debug(`Found ${elements.length} elements, wrapping`);
         return wrapAll(elements);
       } catch (error) {
         if (error.name === 'TimeoutError') {
           return [];
         } else {
+          log.debug(`Smth went wrong, throwing error`);
           throw error;
         }
       }
