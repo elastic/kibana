@@ -17,27 +17,4 @@
  * under the License.
  */
 
-import expect from 'expect.js';
-
-export default function ({ getService, getPageObjects }) {
-  const esArchiver = getService('esArchiver');
-  const pieChart = getService('pieChart');
-  const queryBar = getService('queryBar');
-  const PageObjects = getPageObjects(['dashboard', 'discover']);
-
-  describe('dashboard query bar', async () => {
-    before(async () => {
-      await PageObjects.dashboard.loadSavedDashboard('dashboard with filter');
-    });
-
-    it('causes panels to reload when refresh is clicked', async () => {
-      await esArchiver.unload('dashboard/current/data');
-
-      await queryBar.clickQuerySubmitButton();
-      const headers = await PageObjects.discover.getColumnHeaders();
-      expect(headers.length).to.be(0);
-
-      await pieChart.expectPieSliceCount(0);
-    });
-  });
-}
+export { PieChartProvider } from './pie_chart';
