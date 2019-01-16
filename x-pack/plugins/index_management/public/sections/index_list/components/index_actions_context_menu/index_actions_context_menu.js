@@ -500,7 +500,7 @@ class IndexActionsContextMenuUi extends Component {
               title={
                 intl.formatMessage({
                   id: 'xpack.idxMgmt.indexActionsMenu.deleteEntity.proceedWithCautionCallOutTitle',
-                  defaultMessage: 'Proceed with caution!',
+                  defaultMessage: 'Proceed with caution',
                 })
               }
               color="warning"
