@@ -35,17 +35,15 @@ export interface UpgradeAssistantTelemetrySavedObject {
   };
 }
 
-export interface UpgradeAssistantTelemetry extends UpgradeAssistantTelemetrySavedObject {
-  telemetry: {
-    ui_open: {
-      overview: number;
-      cluster: number;
-      indices: number;
-    };
-    features: {
-      deprecation_logging: {
-        enabled: boolean;
-      };
+export interface UpgradeAssistantTelemetry {
+  ui_open: {
+    overview: number;
+    cluster: number;
+    indices: number;
+  };
+  features: {
+    deprecation_logging: {
+      enabled: boolean;
     };
   };
 }

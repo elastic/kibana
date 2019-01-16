@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { merge, set } from 'lodash';
+import { set } from 'lodash';
 import { SavedObjectsClient } from '../../../../../../src/server/saved_objects/service';
 import {
   UPGRADE_ASSISTANT_DOC_ID,
@@ -70,15 +70,14 @@ export async function fetchUpgradeAssistantMetrics(
     return telemetryObj as UpgradeAssistantTelemetrySavedObject;
   };
 
-  return merge(getTelemetrySavedObject(upgradeAssistantSOAttributes), {
-    telemetry: {
-      features: {
-        deprecation_logging: {
-          enabled: isDeprecationLoggingEnabled(loggerDeprecationCallResult),
-        },
+  return {
+    ...getTelemetrySavedObject(upgradeAssistantSOAttributes).telemetry,
+    features: {
+      deprecation_logging: {
+        enabled: isDeprecationLoggingEnabled(loggerDeprecationCallResult),
       },
     },
-  });
+  };
 }
 
 export function makeUpgradeAssistantUsageCollector(server: UpgradeAssistantTelemetryServer) {

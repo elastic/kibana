@@ -69,16 +69,14 @@ describe('Upgrade Assistant Usage Collector', () => {
         callClusterStub
       );
       expect(upgradeAssistantStats).toEqual({
-        telemetry: {
-          ui_open: {
-            overview: 10,
-            cluster: 20,
-            indices: 30,
-          },
-          features: {
-            deprecation_logging: {
-              enabled: true,
-            },
+        ui_open: {
+          overview: 10,
+          cluster: 20,
+          indices: 30,
+        },
+        features: {
+          deprecation_logging: {
+            enabled: true,
           },
         },
       });
