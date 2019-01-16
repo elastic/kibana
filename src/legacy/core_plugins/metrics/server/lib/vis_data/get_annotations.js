@@ -31,7 +31,7 @@ function validAnnotation(annotation) {
 
 export default async (req, panel), esQueryConfig => {
   const indexPattern = panel.index_pattern;
-  const searchStrategy = SearchStrategiesRegister.getViableStrategy(req, indexPattern);
+  const searchStrategy = await SearchStrategiesRegister.getViableStrategy(req, indexPattern);
   const searchRequest = searchStrategy.getSearchRequest(req, indexPattern);
   const bodies = panel.annotations
     .filter(validAnnotation)
@@ -56,14 +56,15 @@ export default async (req, panel), esQueryConfig => {
   const body = bodies.reduce((acc, item) => acc.concat(item), []);
 
   try {
-    const resp = await searchRequest.search({ body });
+    const responses = await searchRequest.search({ body });
     const results = {};
     panel.annotations
       .filter(validAnnotation)
       .forEach((annotation, index) => {
-        const data = resp.responses[index];
+        const data = responses[index];
         results[annotation.id] = handleAnnotationResponse(data, annotation);
       });
+
     return results;
   } catch (error) {
     if (error.message === 'missing-indices') return { responses: [] };

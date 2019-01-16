@@ -43,9 +43,6 @@ export async function getSeriesData(req, panel) {
       };
     })
     .then(resp => {
-      // TODO: don't forget to remove
-      // Should be refactored
-      return resp;
       if (!panel.annotations || panel.annotations.length === 0) return resp;
       return getAnnotations(req, panel, esQueryConfig).then(annotations => {
         resp[panel.id].annotations = annotations;
