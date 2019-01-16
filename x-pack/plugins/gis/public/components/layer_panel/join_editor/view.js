@@ -37,10 +37,9 @@ export function JoinEditor({ joins, layer, onChange }) {
       };
 
       return (
-        <Fragment>
-          <EuiSpacer size="m"  />
+        <Fragment key={index}>
+          <EuiSpacer size="m" />
           <Join
-            key={index}
             join={joinDescriptor}
             layer={layer}
             onChange={handleOnChange}

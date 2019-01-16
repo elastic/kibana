@@ -85,13 +85,11 @@ export function DynamicOrdinalStyleOption({ fields, selectedOptions, onChange, t
         );
       case styleTypes.SIZE_RANGE:
         return (
-          <Fragment>
-            <SizeRangeSelector
-              onChange={onAdditionalOptionsChange}
-              minSize={_.get(selectedOptions, 'minSize')}
-              maxSize={_.get(selectedOptions, 'maxSize')}
-            />
-          </Fragment>
+          <SizeRangeSelector
+            onChange={onAdditionalOptionsChange}
+            minSize={_.get(selectedOptions, 'minSize')}
+            maxSize={_.get(selectedOptions, 'maxSize')}
+          />
         );
       default:
         throw new Error(`Unhandled type ${type}`);

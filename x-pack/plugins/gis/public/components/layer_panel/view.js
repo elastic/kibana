@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 
 import { StyleTabs } from './style_tabs';
 import { JoinEditor } from './join_editor';
@@ -19,6 +19,7 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiFlyoutFooter,
+  EuiSpacer,
 } from '@elastic/eui';
 
 export class LayerPanel  extends React.Component {
@@ -49,9 +50,12 @@ export class LayerPanel  extends React.Component {
     }
 
     return (
-      <EuiPanel>
-        <JoinEditor/>
-      </EuiPanel>
+      <Fragment>
+        <EuiPanel>
+          <JoinEditor/>
+        </EuiPanel>
+        <EuiSpacer size="s" />
+      </Fragment>
     );
   }
 
@@ -78,6 +82,7 @@ export class LayerPanel  extends React.Component {
 
         <EuiFlyoutBody className="gisLayerPanel__body">
           <SettingsPanel/>
+          <EuiSpacer size="s" />
           {this._renderJoinSection()}
           <StyleTabs layer={selectedLayer}/>
         </EuiFlyoutBody>

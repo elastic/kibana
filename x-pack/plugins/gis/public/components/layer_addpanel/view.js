@@ -69,7 +69,7 @@ export class AddLayerPanel extends Component {
         }}
         fill
       >
-        Create layer
+        Add layer
       </EuiButton>
     );
   }
@@ -77,13 +77,13 @@ export class AddLayerPanel extends Component {
   _renderSourceCards() {
     return ALL_SOURCES.map(Source => {
       const icon = Source.icon
-        ? <EuiIcon type={Source.icon} size="xl" />
+        ? <EuiIcon type={Source.icon} size="l" />
         : null;
       return (
-        <Fragment>
+        <Fragment key={Source.type}>
           <EuiSpacer size="s" />
           <EuiCard
-            key={Source.type}
+            className="gisLayerAddpanel__card"
             title={Source.title}
             icon={icon}
             onClick={() => this._onSourceTypeChange(Source.type)}
