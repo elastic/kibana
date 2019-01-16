@@ -127,8 +127,6 @@ export class ESGeohashGridSource extends AbstractESSource {
     });
   }
 
-
-
   async getNumberFields() {
     return this.getMetricFields().map(({ propertyKey: name, propertyLabel: label }) => {
       return { label, name };
@@ -139,12 +137,12 @@ export class ESGeohashGridSource extends AbstractESSource {
   async getGeoJsonPoints({ layerName }, { precision, buffer, timeFilters, query }) {
 
     const indexPattern = await this._getIndexPattern();
-    const searchSource  = this._makeSearchSource({ buffer, timeFilters, query }, 0);
+    const searchSource  = await this._makeSearchSource({ buffer, timeFilters, query }, 0);
     const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(precision), aggSchemas.all);
     searchSource.setField('aggs', aggConfigs.toDsl());
-    const resp = await this._runEsQuery(layerName, searchSource, 'Elasticsearch geohash_grid aggregation request');
+    const esResponse = await this._runEsQuery(layerName, searchSource, 'Elasticsearch geohash_grid aggregation request');
 
-    const tabifiedResp = tabifyAggResponse(aggConfigs, resp);
+    const tabifiedResp = tabifyAggResponse(aggConfigs, esResponse);
     const { featureCollection } = convertToGeoJson(tabifiedResp);
 
     return featureCollection;

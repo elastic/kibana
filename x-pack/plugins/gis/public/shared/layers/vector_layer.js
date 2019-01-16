@@ -133,8 +133,8 @@ export class VectorLayer extends AbstractLayer {
     return this._style.getTOCDetails();
   }
 
-  async getBounds() {
-    return await this._source.getBounds();
+  async getBounds(filters) {
+    return await this._source.getBoundsForFilters(filters);
   }
 
   async getStringFields() {

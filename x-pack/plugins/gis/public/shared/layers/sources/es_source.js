@@ -12,6 +12,32 @@ import {
 } from '../../../kibana_services';
 import { createExtentFilter } from '../../../elasticsearch_geo_utils';
 import { timefilter } from 'ui/timefilter/timefilter';
+import _ from 'lodash';
+import { AggConfigs } from 'ui/vis/agg_configs';
+
+import { Schemas } from 'ui/vis/editors/default/schemas';
+
+const aggSchemas = new Schemas([
+  {
+    group: 'metrics',
+    name: 'metric',
+    title: 'Value',
+    min: 1,
+    max: Infinity,
+    aggFilter: ['avg', 'count', 'max', 'min', 'sum'],
+    defaults: [
+      { schema: 'metric', type: 'count' }
+    ]
+  },
+  {
+    group: 'buckets',
+    name: 'segment',
+    title: 'Geo Coordinates',
+    aggFilter: 'geohash_grid',
+    min: 1,
+    max: 1
+  }
+]);
 
 export class AbstractESSource extends AbstractVectorSource {
 
@@ -63,7 +89,7 @@ export class AbstractESSource extends AbstractVectorSource {
     searchSource.setField('size', limit);
     searchSource.setField('filter', () => {
       const filters = [];
-      if (this.isFilterByMapBounds()) {
+      if (this.isFilterByMapBounds() && buffer) {//buffer can be empty
         filters.push(createExtentFilter(buffer, geoField.name, geoField.type));
       }
       if (isTimeAware) {
@@ -73,6 +99,34 @@ export class AbstractESSource extends AbstractVectorSource {
     });
     searchSource.setField('query', query);
     return searchSource;
+  }
+
+  async getBoundsForFilters({ query, timeFilters }, layerName) {
+
+    const searchSource = await this._makeSearchSource({ query, timeFilters }, 0);
+    const geoField = await this._getGeoField();
+    const indexPattern = await this._getIndexPattern();
+
+    const geoBoundsAgg = [{
+      type: 'geo_bounds',
+      enabled: true,
+      params: {
+        field: geoField
+      },
+      schema: 'metric'
+    }];
+
+    const aggConfigs = new AggConfigs(indexPattern, geoBoundsAgg, aggSchemas.all);
+    searchSource.setField('aggs', aggConfigs.toDsl());
+
+    const esResp = await this._runEsQuery(layerName, searchSource, 'bounds request');
+    const esBounds = _.get(esResp, 'aggregations.1.bounds');
+    return {
+      min_lon: esBounds.top_left.lon,
+      max_lon: esBounds.bottom_right.lon,
+      min_lat: esBounds.bottom_right.lat,
+      max_lat: esBounds.top_left.lat
+    };
   }
 
   async isTimeAware() {

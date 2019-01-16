@@ -60,6 +60,11 @@ export class AbstractVectorSource extends AbstractSource {
     return false;
   }
 
+  async getBoundsForFilters() {
+    console.warn('Should implement AbstractVectorSource#getBoundsForFilters');
+    return null;
+  }
+
   async getNumberFields() {
     return [];
   }

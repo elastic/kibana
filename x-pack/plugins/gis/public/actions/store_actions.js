@@ -259,7 +259,10 @@ export function fitToLayerExtent(layerId) {
       return layer.getId() === layerId;
     });
     //todo - must include filters (same as syncData, but not the current-view extent)
-    const bounds = await targetLayer.getBounds();
+
+    const dataFilters = getDataFilters(getState());
+    const bounds = await targetLayer.getBounds(dataFilters);
+
     await dispatch(setGotoWithBounds(bounds));
   };
 }
