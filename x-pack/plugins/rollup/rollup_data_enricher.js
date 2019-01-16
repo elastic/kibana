@@ -12,12 +12,18 @@ export const rollupDataEnricher = async (indicesList, callWithRequest) => {
     path: '/_all/_rollup/data',
     method: 'GET',
   };
-  const rollupJobData = await callWithRequest('transport.request', params);
-  return indicesList.map(index => {
-    const isRollupIndex = !!rollupJobData[index.name];
-    return {
-      ...index,
-      isRollupIndex
-    };
-  });
+  try {
+    const rollupJobData = await callWithRequest('transport.request', params);
+    return indicesList.map(index => {
+      const isRollupIndex = !!rollupJobData[index.name];
+      return {
+        ...index,
+        isRollupIndex
+      };
+    });
+  } catch (e) {
+    //swallow exceptions and return original list
+    return indicesList;
+  }
+
 };
