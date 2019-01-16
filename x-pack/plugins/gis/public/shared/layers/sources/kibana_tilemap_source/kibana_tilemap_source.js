@@ -3,14 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment } from 'react';
-import { TMSSource } from './tms_source';
-import { TileLayer } from '../tile_layer';
-import {
-  EuiFieldText,
-  EuiButton,
-  EuiText,
-} from '@elastic/eui';
+import React from 'react';
+import { TMSSource } from '../tms_source';
+import { TileLayer } from '../../tile_layer';
+import { CreateSourceEditor } from './create_source_editor';
+import { EuiText } from '@elastic/eui';
 
 export class KibanaTilemapSource extends  TMSSource {
 
@@ -33,7 +30,7 @@ export class KibanaTilemapSource extends  TMSSource {
       const source = new KibanaTilemapSource(sourceDescriptor);
       onPreviewSource(source);
     };
-    return (<KibanaTilemapEditor previewTilemap={previewTilemap} url={url} />);
+    return (<CreateSourceEditor previewTilemap={previewTilemap} url={url} />);
   };
 
   renderDetails() {
@@ -69,33 +66,5 @@ export class KibanaTilemapSource extends  TMSSource {
 
   async getDisplayName() {
     return this.getUrlTemplate();
-  }
-}
-
-class KibanaTilemapEditor extends React.Component {
-
-  constructor() {
-    super();
-    this.state = {
-      tilemapCanPreview: false
-    };
-  }
-
-  render() {
-    return (
-      <Fragment>
-        <EuiFieldText
-          readOnly
-          placeholder={this.props.url}
-          aria-label="Use aria labels when no actual label is in use"
-        />
-        <EuiButton
-          size="s"
-          onClick={() => this.props.previewTilemap(this.props.url)}
-        >
-          {'Preview tilemap'}
-        </EuiButton>
-      </Fragment>
-    );
   }
 }
