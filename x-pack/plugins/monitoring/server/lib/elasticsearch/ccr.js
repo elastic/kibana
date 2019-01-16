@@ -7,7 +7,8 @@
 import { get } from 'lodash';
 
 export function handleResponse(response) {
-  return get(response.defaults, 'xpack.ccr.enabled') === 'true';
+  const result = get(response.defaults, 'xpack.ccr.enabled');
+  return result === true || result === 'true';
 }
 
 export async function checkCcrEnabled(req) {
