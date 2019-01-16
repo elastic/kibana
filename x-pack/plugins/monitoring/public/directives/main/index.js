@@ -5,7 +5,6 @@
  */
 
 import { get } from 'lodash';
-import chrome from 'ui/chrome';
 import { uiModules } from 'ui/modules';
 import template from './index.html';
 import { shortenPipelineHash } from '../../../common/formatting';
@@ -58,8 +57,6 @@ export class MonitoringMainController {
         return this._kbnUrlService.changePath(`/logstash/pipelines/${this.pipelineId}/${this.pipelineHash}`);
       };
     }
-
-    this.isCcrEnabled = chrome.getInjected('monitoringCcrUiEnabled');
   }
 
   // check whether to "highlight" a tab
@@ -86,6 +83,7 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, config) => {
       config.watch('k7design', (val) => scope.showPluginBreadcrumbs = !val);
 
       function getSetupObj() {
+        console.log('getSetupObj()', attributes);
         return {
           licenseService: license,
           breadcrumbsService: breadcrumbs,
@@ -100,7 +98,8 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, config) => {
             tabIconLabel: attributes.tabIconLabel,
             pipelineId: attributes.pipelineId,
             pipelineHash: attributes.pipelineHash,
-            pipelineVersions: get(scope, 'pageData.versions')
+            pipelineVersions: get(scope, 'pageData.versions'),
+            isCcrEnabled: attributes.isCcrEnabled
           },
           clusterName: get(scope, 'cluster.cluster_name')
         };

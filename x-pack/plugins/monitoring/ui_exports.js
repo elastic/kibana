@@ -29,7 +29,6 @@ export const getUiExports = () => ({
     const config = server.config();
     return {
       monitoringUiEnabled: config.get('xpack.monitoring.ui.enabled'),
-      monitoringCcrUiEnabled: config.get('xpack.monitoring.ui.ccr.enabled'),
     };
   },
   hacks: [ 'plugins/monitoring/hacks/toggle_app_link_in_nav' ],

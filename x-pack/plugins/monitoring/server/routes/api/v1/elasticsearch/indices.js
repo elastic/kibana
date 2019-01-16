@@ -11,6 +11,7 @@ import { getIndices } from '../../../../lib/elasticsearch/indices';
 import { getShardStats } from '../../../../lib/elasticsearch/shards';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
+import { checkCcrEnabled } from '../../../../lib/elasticsearch/ccr';
 
 export function esIndicesRoute(server) {
   server.route({
@@ -44,10 +45,12 @@ export function esIndicesRoute(server) {
         const clusterStats = await getClusterStats(req, esIndexPattern, clusterUuid);
         const shardStats = await getShardStats(req, esIndexPattern, clusterStats, { includeIndices: true });
         const indices = await getIndices(req, esIndexPattern, showSystemIndices, shardStats);
+        const isCcrEnabled = await checkCcrEnabled(req);
 
         return {
           clusterStatus: getClusterStatus(clusterStats, shardStats),
-          indices
+          indices,
+          isCcrEnabled
         };
       } catch(err) {
         throw handleError(err, req);
