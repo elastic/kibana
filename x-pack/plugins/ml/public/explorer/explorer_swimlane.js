@@ -142,9 +142,9 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
     // since it also includes the "viewBy" attribute which might differ depending
     // on whether the overall or viewby swimlane was selected.
     const oldSelection = {
-      selectedType: selection.selectedType,
-      selectedLanes: selection.selectedLanes,
-      selectedTimes: selection.selectedTimes
+      selectedType: selection && selection.type,
+      selectedLanes: selection && selection.lanes,
+      selectedTimes: selection && selection.times
     };
 
     const newSelection = {
@@ -309,7 +309,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       .style('width', `${laneLabelWidth}px`)
       .html(label => mlEscape(label))
       .on('click', () => {
-        if (typeof selection.selectedLanes !== 'undefined') {
+        if (typeof selection.lanes !== 'undefined') {
           swimlaneCellClick({});
         }
       })
@@ -424,13 +424,11 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       }
     });
 
-    mlExplorerDashboardService.swimlaneRenderDone.changed();
-
     // Check for selection and reselect the corresponding swimlane cell
     // if the time range and lane label are still in view.
     const selectionState = selection;
-    const selectedType = _.get(selectionState, 'selectedType', undefined);
-    const viewBy = _.get(selectionState, 'viewBy', '');
+    const selectedType = _.get(selectionState, 'type', undefined);
+    const selectionFieldName = _.get(selectionState, 'fieldName', '');
 
     // If a selection was done in the other swimlane, add the "masked" classes
     // to de-emphasize the swimlane cells.
@@ -439,15 +437,19 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       element.selectAll('.sl-cell-inner').classed('sl-cell-inner-masked', true);
     }
 
-    if ((swimlaneType !== selectedType) ||
-      (swimlaneData.fieldName !== undefined && swimlaneData.fieldName !== viewBy)) {
+    this.props.swimlaneRenderDoneListener();
+
+    if (
+      (swimlaneType !== selectedType) ||
+      (swimlaneData.fieldName !== undefined && swimlaneData.fieldName !== selectionFieldName)
+    ) {
       // Not this swimlane which was selected.
       return;
     }
 
     const cellsToSelect = [];
-    const selectedLanes = _.get(selectionState, 'selectedLanes', []);
-    const selectedTimes = _.get(selectionState, 'selectedTimes', []);
+    const selectedLanes = _.get(selectionState, 'lanes', []);
+    const selectedTimes = _.get(selectionState, 'times', []);
     const selectedTimeExtent = d3.extent(selectedTimes);
 
     selectedLanes.forEach((selectedLane) => {

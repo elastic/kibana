@@ -26,9 +26,6 @@ jest.mock('./explorer_dashboard_service', () => ({
     dragSelect: {
       watch: jest.fn(),
       unwatch: jest.fn()
-    },
-    swimlaneRenderDone: {
-      changed: jest.fn()
     }
   }
 }));
@@ -80,7 +77,6 @@ describe('ExplorerSwimlane', () => {
     );
 
     // test calls to mock functions
-    expect(mlExplorerDashboardService.swimlaneRenderDone.changed.mock.calls.length).toBeGreaterThanOrEqual(1);
     expect(mlExplorerDashboardService.dragSelect.watch.mock.calls.length).toBeGreaterThanOrEqual(1);
     expect(mlExplorerDashboardService.dragSelect.unwatch.mock.calls).toHaveLength(0);
     expect(mocks.MlTimeBuckets.mockMethods.setInterval.mock.calls.length).toBeGreaterThanOrEqual(1);
@@ -101,7 +97,6 @@ describe('ExplorerSwimlane', () => {
     expect(wrapper.html()).toMatchSnapshot();
 
     // test calls to mock functions
-    expect(mlExplorerDashboardService.swimlaneRenderDone.changed.mock.calls.length).toBeGreaterThanOrEqual(1);
     expect(mlExplorerDashboardService.dragSelect.watch.mock.calls.length).toBeGreaterThanOrEqual(1);
     expect(mlExplorerDashboardService.dragSelect.unwatch.mock.calls).toHaveLength(0);
     expect(mocks.MlTimeBuckets.mockMethods.setInterval.mock.calls.length).toBeGreaterThanOrEqual(1);

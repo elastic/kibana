@@ -52,13 +52,13 @@ export function getDefaultViewBySwimlaneData() {
   };
 }
 
-export function mapScopeToProps(scope, appState) {
+export function mapScopeToProps(scope) {
   return {
-    appState,
     dateFormatTz: scope.dateFormatTz,
-    noJobsFound: scope.jobs.length === 0,
     loading: scope.loading,
     mlJobSelectService: scope.mlJobSelectService,
+    noJobsFound: scope.jobs.length === 0,
+    appStateHandler: scope.appStateHandler,
   };
 }
 
@@ -395,7 +395,7 @@ export async function loadDataForCharts(jobIds, earliestMs, latestMs, influencer
   return new Promise((resolve) => {
     // Just skip doing the request when this function
     // is called without the minimum required data.
-    if (selectedCells === undefined && influencers.length === 0) {
+    if (selectedCells === null && influencers.length === 0) {
       resolve([]);
     }
 

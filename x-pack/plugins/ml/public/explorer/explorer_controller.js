@@ -39,7 +39,7 @@ import { mlJobService } from '../services/job_service';
 import { JobSelectServiceProvider } from '../components/job_select_list/job_select_service';
 import { timefilter } from 'ui/timefilter';
 
-import { EXPLORER_ACTION } from './explorer_constants';
+import { EXPLORER_ACTION, SWIMLANE_TYPE } from './explorer_constants';
 
 uiRoutes
   .when('/explorer/?', {
@@ -71,13 +71,6 @@ module.controller('MlExplorerController', function (
   $injector.get('mlSelectLimitService');
   $injector.get('mlSelectSeverityService');
 
-  // Initialize the AppState in which to store filters and swimlane settings.
-  // AppState is used to store state in the URL.
-  const appState = new AppState({
-    filters: [],
-    mlExplorerSwimlane: {},
-  });
-
   // $scope should only contain what's actually still necessary for the angular part.
   // For the moment that's the job selector and the (hidden) filter bar.
   $scope.loading = true;
@@ -97,8 +90,7 @@ module.controller('MlExplorerController', function (
 
   mlExplorerDashboardService.init();
 
-  function jobSelectionUpdate(fullJobs, selectedJobIds, action) {
-    console.warn('jobSelectionUpdate');
+  function jobSelectionUpdate(action, { fullJobs, selectedCells, selectedJobIds }) {
     let previousSelectedJobsCount = 0;
     if ($scope.jobs !== null) {
       previousSelectedJobsCount = $scope.jobs.filter(d => d.selected).length;
@@ -113,19 +105,21 @@ module.controller('MlExplorerController', function (
 
     // Clear viewBy from the state if we are moving from single
     // to multi selection, or vice-versa.
-    appState.fetch();
-    if ((previousSelectedJobsCount <= 1 && selectedJobs.length > 1) ||
-      (selectedJobs.length === 1 && previousSelectedJobsCount > 1)) {
-      delete appState.mlExplorerSwimlane.viewBy;
+    if (
+      (previousSelectedJobsCount <= 1 && selectedJobs.length > 1) ||
+      (selectedJobs.length === 1 && previousSelectedJobsCount > 1)
+    ) {
+      $scope.appState.fetch();
+      delete $scope.appState.mlExplorerSwimlane.viewBy;
+      $scope.appState.save();
     }
-    appState.save();
 
     function fieldFormatServiceCallback() {
       $scope.jobs = jobs;
       $scope.$applyAsync();
 
-      mlExplorerDashboardService.explorer.changed(EXPLORER_ACTION.RENDER, mapScopeToProps($scope, appState));
-      mlExplorerDashboardService.explorer.changed(action, { selectedJobs });
+      mlExplorerDashboardService.explorer.changed(EXPLORER_ACTION.RENDER, mapScopeToProps($scope));
+      mlExplorerDashboardService.explorer.changed(action, { selectedCells, selectedJobs });
     }
 
     // Populate the map of jobs / detectors / field formatters for the selected IDs.
@@ -142,13 +136,39 @@ module.controller('MlExplorerController', function (
   // Calling loadJobs() ensures the full datafeed config is available for building the charts.
   mlJobService.loadJobs()
     .then((resp) => {
+      // Initialize the AppState in which to store filters and swimlane settings.
+      // AppState is used to store state in the URL.
+      $scope.appState = new AppState({
+        filters: [],
+        mlExplorerSwimlane: {},
+      });
+
       $scope.loading = false;
       $scope.$applyAsync();
 
       if (resp.jobs.length > 0) {
         // Select any jobs set in the global state (i.e. passed in the URL).
         const selectedJobIds = $scope.mlJobSelectService.getSelectedJobIds(true);
-        jobSelectionUpdate(resp.jobs, selectedJobIds, EXPLORER_ACTION.INITIALIZE);
+        let selectedCells;
+
+        // keep swimlane selection, restore selectedCells from AppState
+        if ($scope.appState.mlExplorerSwimlane.selectedType !== undefined) {
+          selectedCells = {
+            type: $scope.appState.mlExplorerSwimlane.selectedType,
+            lanes: $scope.appState.mlExplorerSwimlane.selectedLanes,
+            times: $scope.appState.mlExplorerSwimlane.selectedTimes
+          };
+          if (selectedCells.type === SWIMLANE_TYPE.VIEW_BY) {
+            selectedCells.fieldName = $scope.appState.mlExplorerSwimlane.viewBy;
+          }
+        }
+
+        jobSelectionUpdate(EXPLORER_ACTION.INITIALIZE, {
+          fullJobs: resp.jobs,
+          selectedCells,
+          selectedJobIds,
+          swimlaneViewByFieldName: $scope.appState.mlExplorerSwimlane.viewBy
+        });
       }
     })
     .catch((resp) => {
@@ -157,7 +177,7 @@ module.controller('MlExplorerController', function (
 
   // Listen for changes to job selection.
   $scope.mlJobSelectService.listenJobSelectionChange($scope, (event, selectedJobIds) => {
-    jobSelectionUpdate(mlJobService.jobs, selectedJobIds, EXPLORER_ACTION.JOB_SELECTION_CHANGE);
+    jobSelectionUpdate(EXPLORER_ACTION.JOB_SELECTION_CHANGE, { fullJobs: mlJobService.jobs, selectedJobIds });
   });
 
   function overallRefresh() {
@@ -195,6 +215,30 @@ module.controller('MlExplorerController', function (
   function redrawOnResize() {
     mlExplorerDashboardService.explorer.changed(EXPLORER_ACTION.REDRAW);
   }
+
+  $scope.appStateHandler = ((action, payload) => {
+    $scope.appState.fetch();
+
+    if (action === 'clearSelection') {
+      delete $scope.appState.mlExplorerSwimlane.selectedType;
+      delete $scope.appState.mlExplorerSwimlane.selectedLanes;
+      delete $scope.appState.mlExplorerSwimlane.selectedTimes;
+    }
+
+    if (action === 'saveSelecton') {
+      const swimlaneSelectedCells = payload.swimlaneSelectedCells;
+      $scope.appState.mlExplorerSwimlane.selectedType = swimlaneSelectedCells.type;
+      $scope.appState.mlExplorerSwimlane.selectedLanes = swimlaneSelectedCells.lanes;
+      $scope.appState.mlExplorerSwimlane.selectedTimes = swimlaneSelectedCells.times;
+    }
+
+    if (action === 'saveSwimlaneViewByFieldName') {
+      $scope.appState.mlExplorerSwimlane.viewBy = payload.swimlaneViewByFieldName;
+    }
+
+    $scope.appState.save();
+    $scope.$applyAsync();
+  });
 
   // Refresh the data when the dashboard filters are updated.
   $scope.$listen(queryFilter, 'update', () => {

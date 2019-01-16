@@ -178,49 +178,27 @@ export const Explorer = injectI18n(
     dashboardListener = (async (action, payload) => {
       // Listen to the initial loading of jobs
       if (action === EXPLORER_ACTION.INITIALIZE) {
-        const {
-          appState,
-        } = this.props;
-        const { selectedJobs } = payload;
+        const { selectedCells, selectedJobs, swimlaneViewByFieldName } = payload;
+        let currentSelectedCells = this.state.selectedCells;
+        let currentSwimlaneViewByFieldName = this.state.swimlaneViewByFieldName;
 
+        if (selectedCells !== undefined && currentSelectedCells === null) {
+          currentSelectedCells = selectedCells;
+          currentSwimlaneViewByFieldName = swimlaneViewByFieldName;
+        }
         this.setState(
           {
             noInfluencersConfigured: !selectedJobsHaveInfluencers(selectedJobs),
-            selectedJobs
+            selectedCells: currentSelectedCells,
+            selectedJobs,
+            swimlaneViewByFieldName: currentSwimlaneViewByFieldName
           },
           async () => {
             // Load the data - if the FieldFormats failed to populate
             // the default formatting will be used for metric values.
             await this.loadOverallData();
             this.loadViewBySwimlane([]);
-
-            let selectedCells = this.state.selectedCells;
-
-            // keep swimlane selection, restore selectedCells from AppState
-            if (
-              selectedCells === undefined &&
-              appState.mlExplorerSwimlane.selectedType !== undefined
-            ) {
-              selectedCells = {
-                type: appState.mlExplorerSwimlane.selectedType,
-                lanes: appState.mlExplorerSwimlane.selectedLanes,
-                times: appState.mlExplorerSwimlane.selectedTimes
-              };
-              if (selectedCells.type === SWIMLANE_TYPE.VIEW_BY) {
-                selectedCells.fieldName = appState.mlExplorerSwimlane.viewBy;
-              }
-              this.setState(
-                {
-                  selectedCells,
-                  swimlaneViewByFieldName: appState.mlExplorerSwimlane.viewBy,
-                },
-                () => {
-                  this.updateExplorer();
-                }
-              );
-            } else {
-              this.updateExplorer();
-            }
+            this.updateExplorer();
           }
         );
       }
@@ -228,7 +206,7 @@ export const Explorer = injectI18n(
       // Listen for changes to job selection.
       if (action === EXPLORER_ACTION.JOB_SELECTION_CHANGE) {
         const { selectedJobs } = payload;
-        this.clearSwimlaneSelectionFromAppState();
+        this.props.appStateHandler('clearSelection');
         this.setState(
           {
             noInfluencersConfigured: !selectedJobsHaveInfluencers(selectedJobs),
@@ -325,7 +303,6 @@ export const Explorer = injectI18n(
       mlSelectSeverityService.state.watch(this.anomalyChartsSeverityListener);
       mlSelectIntervalService.state.watch(this.tableControlsListener);
       mlSelectSeverityService.state.watch(this.tableControlsListener);
-      mlExplorerDashboardService.swimlaneRenderDone.watch(this.swimlaneRenderDoneListener);
     }
 
     componentWillUnmount() {
@@ -335,7 +312,6 @@ export const Explorer = injectI18n(
       mlSelectSeverityService.state.unwatch(this.anomalyChartsSeverityListener);
       mlSelectIntervalService.state.unwatch(this.tableControlsListener);
       mlSelectSeverityService.state.unwatch(this.tableControlsListener);
-      mlExplorerDashboardService.swimlaneRenderDone.unwatch(this.swimlaneRenderDoneListener);
     }
 
     async loadOverallData() {
@@ -416,122 +392,116 @@ export const Explorer = injectI18n(
       });
     }
 
+    // Obtain the list of 'View by' fields per job.
     setViewBySwimlaneOptions(resolve) {
-      // Obtain the list of 'View by' fields per job.
-      this.setState(
-        { swimlaneViewByFieldName: '' },
-        () => {
-          // Unique influencers for the selected job(s).
-          let viewByOptions = [];
+      // Unique influencers for the selected job(s).
+      let viewByOptions = [];
 
-          const selectedJobIds = this.state.selectedJobs.map(d => d.id);
+      const selectedJobIds = this.state.selectedJobs.map(d => d.id);
 
-          const fieldsByJob = { '*': [] };
-          _.each(mlJobService.jobs, (job) => {
-            // Add the list of distinct by, over, partition and influencer fields for each job.
-            let fieldsForJob = [];
+      const fieldsByJob = { '*': [] };
+      _.each(mlJobService.jobs, (job) => {
+        // Add the list of distinct by, over, partition and influencer fields for each job.
+        let fieldsForJob = [];
 
-            const analysisConfig = job.analysis_config;
-            const detectors = analysisConfig.detectors || [];
-            _.each(detectors, (detector) => {
-              if (_.has(detector, 'partition_field_name')) {
-                fieldsForJob.push(detector.partition_field_name);
-              }
-              if (_.has(detector, 'over_field_name')) {
-                fieldsForJob.push(detector.over_field_name);
-              }
-              // For jobs with by and over fields, don't add the 'by' field as this
-              // field will only be added to the top-level fields for record type results
-              // if it also an influencer over the bucket.
-              if (_.has(detector, 'by_field_name') && !(_.has(detector, 'over_field_name'))) {
-                fieldsForJob.push(detector.by_field_name);
-              }
-            });
+        const analysisConfig = job.analysis_config;
+        const detectors = analysisConfig.detectors || [];
+        _.each(detectors, (detector) => {
+          if (_.has(detector, 'partition_field_name')) {
+            fieldsForJob.push(detector.partition_field_name);
+          }
+          if (_.has(detector, 'over_field_name')) {
+            fieldsForJob.push(detector.over_field_name);
+          }
+          // For jobs with by and over fields, don't add the 'by' field as this
+          // field will only be added to the top-level fields for record type results
+          // if it also an influencer over the bucket.
+          if (_.has(detector, 'by_field_name') && !(_.has(detector, 'over_field_name'))) {
+            fieldsForJob.push(detector.by_field_name);
+          }
+        });
 
-            const influencers = analysisConfig.influencers || [];
-            fieldsForJob = fieldsForJob.concat(influencers);
-            if (selectedJobIds.indexOf(job.job_id) !== -1) {
-              viewByOptions = viewByOptions.concat(influencers);
-            }
+        const influencers = analysisConfig.influencers || [];
+        fieldsForJob = fieldsForJob.concat(influencers);
+        if (selectedJobIds.indexOf(job.job_id) !== -1) {
+          viewByOptions = viewByOptions.concat(influencers);
+        }
 
-            fieldsByJob[job.job_id] = _.uniq(fieldsForJob);
-            fieldsByJob['*'] = _.union(fieldsByJob['*'], fieldsByJob[job.job_id]);
+        fieldsByJob[job.job_id] = _.uniq(fieldsForJob);
+        fieldsByJob['*'] = _.union(fieldsByJob['*'], fieldsByJob[job.job_id]);
+      });
+
+      // Currently unused but may be used if add in view by detector.
+      // $scope.fieldsByJob = fieldsByJob;
+      viewByOptions = _.chain(viewByOptions).uniq().sortBy(fieldName => fieldName.toLowerCase()).value();
+      viewByOptions.push(VIEW_BY_JOB_LABEL);
+      const viewBySwimlaneOptions = viewByOptions;
+
+      let swimlaneViewByFieldName = null;
+
+      if (this.state.viewBySwimlaneOptions.indexOf(this.state.swimlaneViewByFieldName) !== -1) {
+        // Set the swimlane viewBy to that stored in the state (URL) if set.
+        // This means we reset it to the current state because it was set by the listener
+        // on initializationn.
+        swimlaneViewByFieldName = this.state.swimlaneViewByFieldName;
+      } else {
+        if (selectedJobIds.length > 1) {
+          // If more than one job selected, default to job ID.
+          swimlaneViewByFieldName = VIEW_BY_JOB_LABEL;
+        } else {
+          // For a single job, default to the first partition, over,
+          // by or influencer field of the first selected job.
+          const firstSelectedJob = _.find(mlJobService.jobs, (job) => {
+            return job.job_id === selectedJobIds[0];
           });
 
-          // Currently unused but may be used if add in view by detector.
-          // $scope.fieldsByJob = fieldsByJob;
-          viewByOptions = _.chain(viewByOptions).uniq().sortBy(fieldName => fieldName.toLowerCase()).value();
-          viewByOptions.push(VIEW_BY_JOB_LABEL);
-          const viewBySwimlaneOptions = viewByOptions;
-
-          let swimlaneViewByFieldName = null;
-
-          if (this.props.appState.mlExplorerSwimlane.viewBy !== undefined &&
-            this.state.viewBySwimlaneOptions.indexOf(this.props.appState.mlExplorerSwimlane.viewBy) !== -1) {
-            // Set the swimlane viewBy to that stored in the state (URL) if set.
-            swimlaneViewByFieldName = this.props.appState.mlExplorerSwimlane.viewBy;
-          } else {
-            if (selectedJobIds.length > 1) {
-              // If more than one job selected, default to job ID.
-              swimlaneViewByFieldName = VIEW_BY_JOB_LABEL;
-            } else {
-              // For a single job, default to the first partition, over,
-              // by or influencer field of the first selected job.
-              const firstSelectedJob = _.find(mlJobService.jobs, (job) => {
-                return job.job_id === selectedJobIds[0];
-              });
-
-              const firstJobInfluencers = firstSelectedJob.analysis_config.influencers || [];
-              _.each(firstSelectedJob.analysis_config.detectors, (detector) => {
-                if (
-                  _.has(detector, 'partition_field_name') &&
-                  firstJobInfluencers.indexOf(detector.partition_field_name) !== -1
-                ) {
-                  swimlaneViewByFieldName = detector.partition_field_name;
-                  return false;
-                }
-
-                if (
-                  _.has(detector, 'over_field_name') &&
-                  firstJobInfluencers.indexOf(detector.over_field_name) !== -1
-                ) {
-                  swimlaneViewByFieldName = detector.over_field_name;
-                  return false;
-                }
-
-                // For jobs with by and over fields, don't add the 'by' field as this
-                // field will only be added to the top-level fields for record type results
-                // if it also an influencer over the bucket.
-                if (_.has(detector, 'by_field_name') && !(_.has(detector, 'over_field_name')) &&
-                    firstJobInfluencers.indexOf(detector.by_field_name) !== -1) {
-                  swimlaneViewByFieldName = detector.by_field_name;
-                  return false;
-                }
-              });
-
-              if (this.state.swimlaneViewByFieldName === null) {
-                if (firstJobInfluencers.length > 0) {
-                  swimlaneViewByFieldName = firstJobInfluencers[0];
-                } else {
-                  // No influencers for first selected job - set to first available option.
-                  swimlaneViewByFieldName = this.state.viewBySwimlaneOptions.length > 0 ? this.state.viewBySwimlaneOptions[0] : null;
-                }
-              }
+          const firstJobInfluencers = firstSelectedJob.analysis_config.influencers || [];
+          _.each(firstSelectedJob.analysis_config.detectors, (detector) => {
+            if (
+              _.has(detector, 'partition_field_name') &&
+              firstJobInfluencers.indexOf(detector.partition_field_name) !== -1
+            ) {
+              swimlaneViewByFieldName = detector.partition_field_name;
+              return false;
             }
 
-            this.props.appState.fetch();
-            this.props.appState.mlExplorerSwimlane.viewBy = swimlaneViewByFieldName;
-            this.props.appState.save();
-          }
+            if (
+              _.has(detector, 'over_field_name') &&
+              firstJobInfluencers.indexOf(detector.over_field_name) !== -1
+            ) {
+              swimlaneViewByFieldName = detector.over_field_name;
+              return false;
+            }
 
-          this.setState(
-            {
-              swimlaneViewByFieldName,
-              viewBySwimlaneOptions,
-            },
-            () => resolve()
-          );
+            // For jobs with by and over fields, don't add the 'by' field as this
+            // field will only be added to the top-level fields for record type results
+            // if it also an influencer over the bucket.
+            if (_.has(detector, 'by_field_name') && !(_.has(detector, 'over_field_name')) &&
+                firstJobInfluencers.indexOf(detector.by_field_name) !== -1) {
+              swimlaneViewByFieldName = detector.by_field_name;
+              return false;
+            }
+          });
+
+          if (this.state.swimlaneViewByFieldName === null) {
+            if (firstJobInfluencers.length > 0) {
+              swimlaneViewByFieldName = firstJobInfluencers[0];
+            } else {
+              // No influencers for first selected job - set to first available option.
+              swimlaneViewByFieldName = this.state.viewBySwimlaneOptions.length > 0 ? this.state.viewBySwimlaneOptions[0] : null;
+            }
+          }
         }
+
+        this.props.appStateHandler('saveSwimlaneViewByFieldName', { swimlaneViewByFieldName });
+      }
+
+      this.setState(
+        {
+          swimlaneViewByFieldName,
+          viewBySwimlaneOptions,
+        },
+        () => resolve()
       );
     }
 
@@ -561,7 +531,7 @@ export const Explorer = injectI18n(
               { viewBySwimlaneDataLoading: false },
               () => {
                 this.skipCellClicks = false;
-                console.log('Explorer view by swimlane data set:', viewBySwimlaneData);
+                console.log('Explorer view by swimlane data set:', this.state.viewBySwimlaneData);
                 if (this.swimlaneCellClickQueue.length > 0) {
                   const latestSelectedCells = this.swimlaneCellClickQueue.pop();
                   this.swimlaneCellClickQueue.length = 0;
@@ -702,9 +672,7 @@ export const Explorer = injectI18n(
         swimlaneViewByFieldName,
       } = this.state;
 
-      const {
-        dateFormatTz,
-      } = this.props;
+      const { dateFormatTz } = this.props;
 
       const swimlaneWidth = getSwimlaneContainerWidth(noInfluencersConfigured);
 
@@ -779,22 +747,13 @@ export const Explorer = injectI18n(
 
     }
 
-    clearSwimlaneSelectionFromAppState() {
-      const { appState } = this.props;
-      appState.fetch();
-      delete appState.mlExplorerSwimlane.selectedType;
-      delete appState.mlExplorerSwimlane.selectedLanes;
-      delete appState.mlExplorerSwimlane.selectedTimes;
-      appState.save();
-    }
-
     clearSelectedAnomalies() {
       this.setState({
         anomalyChartRecords: [],
         selectedCells: null,
         viewByLoadedForTimeFormatted: null,
       });
-      this.clearSwimlaneSelectionFromAppState();
+      this.props.appStateHandler('clearSelection');
       this.updateExplorer();
     }
 
@@ -803,11 +762,7 @@ export const Explorer = injectI18n(
       this.setState(
         { swimlaneViewByFieldName },
         () => {
-          // Save the 'view by' field name to the AppState so that it can restored from the URL.
-          this.props.appState.fetch();
-          this.props.appState.mlExplorerSwimlane.viewBy = swimlaneViewByFieldName;
-          this.props.appState.save();
-
+          this.props.appStateHandler('saveSwimlaneViewByFieldName', { swimlaneViewByFieldName });
           this.loadViewBySwimlane([]);
           this.clearSelectedAnomalies();
         }
@@ -850,21 +805,18 @@ export const Explorer = injectI18n(
         }
         this.clearSelectedAnomalies();
       } else {
-        this.props.appState.fetch();
-        this.props.appState.mlExplorerSwimlane.selectedType = swimlaneSelectedCells.type;
-        this.props.appState.mlExplorerSwimlane.selectedLanes = swimlaneSelectedCells.lanes;
-        this.props.appState.mlExplorerSwimlane.selectedTimes = swimlaneSelectedCells.times;
-        this.props.appState.save();
-        this.setState({
-          selectedCells: swimlaneSelectedCells
-        });
-        this.updateExplorer();
+        this.setState(
+          { selectedCells: swimlaneSelectedCells },
+          () => {
+            this.props.appStateHandler('saveSelection', { swimlaneSelectedCells });
+            this.updateExplorer();
+          }
+        );
       }
     }
 
     render() {
       const {
-        appState,
         intl,
         noJobsFound,
       } = this.props;
@@ -877,6 +829,7 @@ export const Explorer = injectI18n(
         hasResults,
         noInfluencersConfigured,
         overallSwimlaneData,
+        selectedCells,
         swimlaneViewByFieldName,
         tableData,
         viewByLoadedForTimeFormatted,
@@ -964,7 +917,8 @@ export const Explorer = injectI18n(
                 swimlaneCellClick={this.swimlaneCellClick}
                 swimlaneData={overallSwimlaneData}
                 swimlaneType={SWIMLANE_TYPE.OVERALL}
-                selection={appState.mlExplorerSwimlane}
+                selection={selectedCells}
+                swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
               />
             </div>
 
@@ -1029,7 +983,8 @@ export const Explorer = injectI18n(
                       swimlaneCellClick={this.swimlaneCellClick}
                       swimlaneData={viewBySwimlaneData}
                       swimlaneType={SWIMLANE_TYPE.VIEW_BY}
-                      selection={appState.mlExplorerSwimlane}
+                      selection={selectedCells}
+                      swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
                     />
                   </div>
                 )}
