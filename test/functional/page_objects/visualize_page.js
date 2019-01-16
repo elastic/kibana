@@ -715,7 +715,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         timeout: defaultFindTimeout
       });
       expect(successToast).to.be(true);
-      await this.waitForVisualizationRenderingCompleted();
+      await this.waitForVisualization();
     }
 
     async saveVisualizationExpectFail(vizName, { saveAsNew = false } = {}) {
@@ -944,7 +944,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async waitForVisualization() {
-      await testSubjects.waitForAttributeToChange('visualizationLoader', 'data-render-complete', 'true');
+      //await testSubjects.waitForAttributeToChange('visualizationLoader', 'data-render-complete', 'true');
+      await this.waitForVisualizationRenderingCompleted();
       return await find.byCssSelector('.visualization');
     }
 

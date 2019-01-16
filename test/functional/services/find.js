@@ -314,14 +314,13 @@ export async function FindProvider({ getService }) {
         }
       });
     }
-    async waitForDeletedByCssSelector(selector) {
-      log.debug(`Find.waitForDeletedByCssSelector('${selector}')`);
-      await driver.wait(() => {
-        return driver.findElements(By.css(selector)).then((elements) => {
-          return elements.length <= 0;
-        });
+    async waitForDeletedByCssSelector(selector, timeout = defaultFindTimeout) {
+      log.debug(`Find.waitForDeletedByCssSelector('${selector}') with timeout=${timeout}`);
+      await driver.wait(async () => {
+        const found  =  await driver.findElements(By.css(selector));
+        return found.length === 0;
       },
-      defaultFindTimeout,
+      timeout,
       `The element ${selector} was still present when it should have disappeared.`);
     }
 

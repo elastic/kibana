@@ -243,7 +243,6 @@ export default function ({ getService, getPageObjects }) {
       });
 
       beforeEach(async function () {
-        await PageObjects.common.sleep(2000);
         await PageObjects.visualize.clickMapZoomIn(waitForLoading);
       });
 
@@ -267,11 +266,10 @@ export default function ({ getService, getPageObjects }) {
       it('should suppress zoom warning if suppress warnings button clicked',
         async () => {
           last = true;
+          await PageObjects.visualize.waitForVisualization();
           await find.clickByCssSelector('[data-test-subj="suppressZoomWarnings"]');
-
-          await PageObjects.common.sleep(toastDefaultLife + 2000);
           await PageObjects.visualize.clickMapZoomOut(waitForLoading);
-          await PageObjects.common.sleep(1000);
+          await testSubjects.waitForDeleted('suppressZoomWarnings');
           await PageObjects.visualize.clickMapZoomIn(waitForLoading);
 
           await testSubjects.missingOrFail('maxZoomWarning');
