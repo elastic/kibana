@@ -477,8 +477,8 @@ class IndexActionsContextMenuUi extends Component {
           confirmButtonText={
             intl.formatMessage({
               id: 'xpack.idxMgmt.indexActionsMenu.freezeEntity.confirmModal.confirmButtonText',
-              defaultMessage: 'Confirm',
-            })
+              defaultMessage: 'Freeze {entity}',
+            }, { entity })
           }
         >
           <div>
