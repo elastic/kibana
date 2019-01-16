@@ -7,7 +7,7 @@
 import { pick, omit, get } from 'lodash';
 import { calculateOverallStatus } from '../calculate_overall_status';
 
-export function getClustersSummary(clusters, kibanaUuid) {
+export function getClustersSummary(clusters, kibanaUuid, isCcrEnabled) {
   return clusters.map(cluster => {
     const {
       isSupported,
@@ -77,7 +77,8 @@ export function getClustersSummary(clusters, kibanaUuid) {
       status: calculateOverallStatus([
         status,
         kibana && kibana.status || null
-      ])
+      ]),
+      isCcrEnabled
     };
   });
 }

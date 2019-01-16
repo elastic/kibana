@@ -44,6 +44,8 @@ uiRoutes.when('/elasticsearch/nodes', {
         $injector
       });
 
+      this.isCcrEnabled = $scope.cluster.isCcrEnabled;
+
       $scope.$watch(() => this.data, data => {
         this.renderReact(data);
       });

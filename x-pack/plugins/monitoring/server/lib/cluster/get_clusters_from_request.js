@@ -20,6 +20,7 @@ import { getClustersSummary } from './get_clusters_summary';
 import { CLUSTER_ALERTS_SEARCH_SIZE } from '../../../common/constants';
 import { getApmsForClusters } from '../apm/get_apms_for_clusters';
 import { i18n } from '@kbn/i18n';
+import { checkCcrEnabled } from '../elasticsearch/ccr';
 
 /**
  * Get all clusters or the cluster associated with {@code clusterUuid} when it is defined.
@@ -127,7 +128,10 @@ export async function getClustersFromRequest(req, indexPatterns, { clusterUuid, 
     set(clusters[clusterIndex], 'apm', apm.stats);
   });
 
+  // check ccr configuration
+  const isCcrEnabled = await checkCcrEnabled(req);
+
   const config = req.server.config();
   const kibanaUuid = config.get('server.uuid');
-  return getClustersSummary(clusters, kibanaUuid);
+  return getClustersSummary(clusters, kibanaUuid, isCcrEnabled);
 }

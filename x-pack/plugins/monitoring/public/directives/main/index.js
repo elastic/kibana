@@ -83,6 +83,7 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, config) => {
       config.watch('k7design', (val) => scope.showPluginBreadcrumbs = !val);
 
       function getSetupObj() {
+        console.log(attributes);
         return {
           licenseService: license,
           breadcrumbsService: breadcrumbs,

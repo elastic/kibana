@@ -11,7 +11,6 @@ import { getNodes } from '../../../../lib/elasticsearch/nodes';
 import { getShardStats } from '../../../../lib/elasticsearch/shards';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
-import { checkCcrEnabled } from '../../../../lib/elasticsearch/ccr';
 
 export function esNodesRoute(server) {
   server.route({
@@ -42,9 +41,8 @@ export function esNodesRoute(server) {
         const shardStats = await getShardStats(req, esIndexPattern, clusterStats, { includeNodes: true });
         const clusterStatus = getClusterStatus(clusterStats, shardStats);
         const nodes = await getNodes(req, esIndexPattern, clusterStats, shardStats);
-        const isCcrEnabled = await checkCcrEnabled(req);
 
-        return { clusterStatus, nodes, isCcrEnabled };
+        return { clusterStatus, nodes };
       } catch(err) {
         throw handleError(err, req);
       }

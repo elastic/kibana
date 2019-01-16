@@ -13,7 +13,6 @@ import { getShardStats } from '../../../../lib/elasticsearch/shards';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { metricSet } from './metric_set_overview';
-import { checkCcrEnabled } from '../../../../lib/elasticsearch/ccr';
 
 export function esOverviewRoute(server) {
   server.route({
@@ -40,11 +39,10 @@ export function esOverviewRoute(server) {
       const esIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.elasticsearch.index_pattern', ccs);
 
       try {
-        const [ clusterStats, metrics, shardActivity, isCcrEnabled ] = await Promise.all([
+        const [ clusterStats, metrics, shardActivity ] = await Promise.all([
           getClusterStats(req, esIndexPattern, clusterUuid),
           getMetrics(req, esIndexPattern, metricSet),
           getLastRecovery(req, esIndexPattern),
-          checkCcrEnabled(req),
         ]);
         const shardStats = await getShardStats(req, esIndexPattern, clusterStats);
 
@@ -52,7 +50,6 @@ export function esOverviewRoute(server) {
           clusterStatus: getClusterStatus(clusterStats, shardStats),
           metrics,
           shardActivity,
-          isCcrEnabled
         };
       } catch (err) {
         throw handleError(err, req);
