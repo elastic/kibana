@@ -170,6 +170,7 @@ export const fieldMappings = {
   geoip: {
     properties: {
       country_iso_code: { type: 'keyword' },
+      region_iso_code: { type: 'keyword' },
       location: { type: 'geo_point' },
       region_name: { type: 'keyword' },
       continent_name: { type: 'keyword' },
