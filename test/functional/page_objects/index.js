@@ -32,4 +32,3 @@ export { PointSeriesPageProvider } from './point_series_page';
 export { VisualBuilderPageProvider } from './visual_builder_page';
 export { TimelionPageProvider } from './timelion_page';
 export { SharePageProvider } from './share_page';
-export { WelcomePageProvider } from './welcome_page';

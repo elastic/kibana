@@ -17,12 +17,12 @@
  * under the License.
  */
 
-export async function WelcomePageProvider({ getService, getPageObjects }) {
+export async function WelcomeProvider({ getService, getPageObjects }) {
   const browser = getService('browser');
   const lifecycle = getService('lifecycle');
   const PageObjects = getPageObjects(['common']);
 
-  const welcomePage = new class WelcomePage {
+  const welcome = new class Welcome {
     async disable() {
       await browser.setLocalStorageItem('home:welcome:show', 'false');
     }
@@ -30,8 +30,8 @@ export async function WelcomePageProvider({ getService, getPageObjects }) {
 
   lifecycle.on('beforeTests', async () => {
     await PageObjects.common.navigateToApp('home');
-    await welcomePage.disable();
+    await welcome.disable();
   });
 
-  return welcomePage;
+  return welcome;
 }
