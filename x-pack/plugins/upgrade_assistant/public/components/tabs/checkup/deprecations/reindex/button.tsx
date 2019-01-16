@@ -9,6 +9,7 @@ import { Subscription } from 'rxjs';
 
 import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 import { ReindexStatus } from '../../../../../../common/types';
+import { LoadingState } from '../../../../types';
 import { ReindexFlyout } from './flyout';
 import { ReindexPollingService, ReindexState } from './polling_service';
 
@@ -32,7 +33,7 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
   constructor(props: ReindexButtonProps) {
     super(props);
 
-    this.service = new ReindexPollingService(this.props.indexName);
+    this.service = this.newService();
     this.state = {
       flyoutVisible: false,
       reindexState: this.service.status$.value,
@@ -40,17 +41,18 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
   }
 
   public async componentDidMount() {
-    this.subscription = this.service.status$.subscribe(reindexState =>
-      this.setState({ reindexState })
-    );
+    this.subscribeToUpdates();
   }
 
   public async componentWillUnmount() {
-    this.service.stopPolling();
+    this.unsubscribeToUpdates();
+  }
 
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-      delete this.subscription;
+  public componentDidUpdate(prevProps: ReindexButtonProps) {
+    if (prevProps.indexName !== this.props.indexName) {
+      this.unsubscribeToUpdates();
+      this.service = this.newService();
+      this.subscribeToUpdates();
     }
   }
 
@@ -61,26 +63,31 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
     const buttonProps: any = { size: 's', onClick: this.showFlyout };
     let buttonContent: ReactNode = 'Reindex';
 
-    switch (reindexState.status) {
-      case ReindexStatus.inProgress:
-        buttonContent = (
-          <span>
-            <EuiLoadingSpinner className="upgReindexButton__spinner" size="m" /> Reindexing…
-          </span>
-        );
-        break;
-      case ReindexStatus.completed:
-        buttonProps.color = 'secondary';
-        buttonProps.iconSide = 'left';
-        buttonProps.iconType = 'check';
-        buttonContent = 'Done';
-        break;
-      case ReindexStatus.failed:
-        buttonProps.color = 'danger';
-        buttonProps.iconSide = 'left';
-        buttonProps.iconType = 'cross';
-        buttonContent = 'Failed';
-        break;
+    if (reindexState.loadingState === LoadingState.Loading) {
+      buttonProps.disabled = true;
+      buttonContent = 'Loading…';
+    } else {
+      switch (reindexState.status) {
+        case ReindexStatus.inProgress:
+          buttonContent = (
+            <span>
+              <EuiLoadingSpinner className="upgReindexButton__spinner" size="m" /> Reindexing…
+            </span>
+          );
+          break;
+        case ReindexStatus.completed:
+          buttonProps.color = 'secondary';
+          buttonProps.iconSide = 'left';
+          buttonProps.iconType = 'check';
+          buttonContent = 'Done';
+          break;
+        case ReindexStatus.failed:
+          buttonProps.color = 'danger';
+          buttonProps.iconSide = 'left';
+          buttonProps.iconType = 'cross';
+          buttonContent = 'Failed';
+          break;
+      }
     }
 
     return (
@@ -97,6 +104,28 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
         )}
       </Fragment>
     );
+  }
+
+  private newService() {
+    return new ReindexPollingService(this.props.indexName);
+  }
+
+  private subscribeToUpdates() {
+    this.service.updateStatus();
+    this.subscription = this.service!.status$.subscribe(reindexState =>
+      this.setState({ reindexState })
+    );
+  }
+
+  private unsubscribeToUpdates() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+      delete this.subscription;
+    }
+
+    if (this.service) {
+      this.service.stopPolling();
+    }
   }
 
   private showFlyout = () => {

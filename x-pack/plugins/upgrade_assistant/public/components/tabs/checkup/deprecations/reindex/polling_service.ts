@@ -56,8 +56,35 @@ export class ReindexPollingService {
       errorMessage: null,
       reindexTaskPercComplete: null,
     });
-    this.updateStatus();
   }
+
+  public updateStatus = async () => {
+    // Prevent two loops from being started.
+    this.stopPolling();
+
+    try {
+      const { data } = await APIClient.get<StatusResponse>(
+        chrome.addBasePath(`/api/upgrade_assistant/reindex/${this.indexName}`)
+      );
+      this.updateWithResponse(data);
+
+      // Only keep polling if it exists and is in progress.
+      if (data.reindexOp && data.reindexOp.status === ReindexStatus.inProgress) {
+        this.pollTimeout = setTimeout(this.updateStatus, POLL_INTERVAL);
+      }
+    } catch (e) {
+      this.status$.next({
+        ...this.status$.value,
+        status: ReindexStatus.failed,
+      });
+    }
+  };
+
+  public stopPolling = () => {
+    if (this.pollTimeout) {
+      clearTimeout(this.pollTimeout);
+    }
+  };
 
   public startReindex = async () => {
     try {
@@ -77,31 +104,6 @@ export class ReindexPollingService {
       this.updateStatus();
     } catch (e) {
       this.status$.next({ ...this.status$.value, status: ReindexStatus.failed });
-    }
-  };
-
-  public stopPolling = () => {
-    if (this.pollTimeout) {
-      clearTimeout(this.pollTimeout);
-    }
-  };
-
-  private updateStatus = async () => {
-    try {
-      const { data } = await APIClient.get<StatusResponse>(
-        chrome.addBasePath(`/api/upgrade_assistant/reindex/${this.indexName}`)
-      );
-      this.updateWithResponse(data);
-
-      // Only keep polling if it exists and is in progress.
-      if (data.reindexOp && data.reindexOp.status === ReindexStatus.inProgress) {
-        this.pollTimeout = setTimeout(this.updateStatus, POLL_INTERVAL);
-      }
-    } catch (e) {
-      this.status$.next({
-        ...this.status$.value,
-        status: ReindexStatus.failed,
-      });
     }
   };
 
