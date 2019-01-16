@@ -177,11 +177,11 @@ export class MBMapContainer extends React.Component {
         new mapboxgl.LngLat(goto.bounds.max_lon, goto.bounds.max_lat)
       );
       this._mbMap.fitBounds(lnLatBounds);
-    } else {
-      this._mbMap.setZoom(goto.zoom);
+    } else if (goto.center) {
+      this._mbMap.setZoom(goto.center.zoom);
       this._mbMap.setCenter({
-        lng: goto.lon,
-        lat: goto.lat
+        lng: goto.center.lon,
+        lat: goto.center.lat
       });
     }
 
