@@ -7,40 +7,40 @@
 import { getOr } from 'lodash/fp';
 
 import { SourceResolvers } from '../../graphql/types';
-import { Authorizations } from '../../lib/authorizations';
-import { AuthorizationsRequestOptions } from '../../lib/authorizations/types';
+import { Authentications } from '../../lib/authentications';
+import { AuthenticationsRequestOptions } from '../../lib/authentications/types';
 import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { getFields } from '../../utils/build_query/fields';
 import { parseFilterQuery } from '../../utils/serialized_query';
 import { QuerySourceResolver } from '../sources/resolvers';
 
-type QueryAuthorizationsResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.AuthorizationsResolver>,
+type QueryAuthenticationsResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.AuthenticationsResolver>,
   QuerySourceResolver
 >;
 
-export interface AuthorizationsResolversDeps {
-  authorizations: Authorizations;
+export interface AuthenticationsResolversDeps {
+  authentications: Authentications;
 }
 
-export const createAuthorizationsResolvers = (
-  libs: AuthorizationsResolversDeps
+export const createAuthenticationsResolvers = (
+  libs: AuthenticationsResolversDeps
 ): {
   Source: {
-    Authorizations: QueryAuthorizationsResolver;
+    Authentications: QueryAuthenticationsResolver;
   };
 } => ({
   Source: {
-    async Authorizations(source, args, { req }, info) {
+    async Authentications(source, args, { req }, info) {
       const fields = getFields(getOr([], 'fieldNodes[0]', info));
-      const options: AuthorizationsRequestOptions = {
+      const options: AuthenticationsRequestOptions = {
         sourceConfiguration: source.configuration,
         timerange: args.timerange,
         pagination: args.pagination,
         filterQuery: parseFilterQuery(args.filterQuery || ''),
         fields: fields.map(field => field.replace('edges.node.', '')),
       };
-      return libs.authorizations.getAuthorizations(req, options);
+      return libs.authentications.getAuthentications(req, options);
     },
   },
 });

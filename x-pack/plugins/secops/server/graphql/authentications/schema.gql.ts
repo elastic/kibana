@@ -6,8 +6,8 @@
 
 import gql from 'graphql-tag';
 
-export const authorizationsSchema = gql`
-  type AuthorizationItem {
+export const authenticationsSchema = gql`
+  type AuthenticationItem {
     _id: String!
     failures: Int!
     successes: Int!
@@ -17,23 +17,23 @@ export const authorizationsSchema = gql`
     user: UserEcsFields!
   }
 
-  type AuthorizationsEdges {
-    node: AuthorizationItem!
+  type AuthenticationsEdges {
+    node: AuthenticationItem!
     cursor: CursorType!
   }
 
-  type AuthorizationsData {
-    edges: [AuthorizationsEdges!]!
+  type AuthenticationsData {
+    edges: [AuthenticationsEdges!]!
     totalCount: Int!
     pageInfo: PageInfo!
   }
 
   extend type Source {
-    "Gets Authorization success and failures based on a timerange"
-    Authorizations(
+    "Gets Authentication success and failures based on a timerange"
+    Authentications(
       timerange: TimerangeInput!
       pagination: PaginationInput!
       filterQuery: String
-    ): AuthorizationsData!
+    ): AuthenticationsData!
   }
 `;

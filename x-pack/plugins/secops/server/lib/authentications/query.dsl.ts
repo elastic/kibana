@@ -9,7 +9,7 @@ import { createQueryFilterClauses } from '../../utils/build_query';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { hostFieldsMap, sourceFieldsMap } from '../ecs_fields';
 import { FilterQuery } from '../types';
-import { AuthorizationsRequestOptions } from './types';
+import { AuthenticationsRequestOptions } from './types';
 
 export const auditdFieldsMap: Readonly<Record<string, string>> = {
   latest: '@timestamp',
@@ -17,7 +17,7 @@ export const auditdFieldsMap: Readonly<Record<string, string>> = {
   ...{ ...hostFieldsMap },
 };
 
-export const buildQuery = (options: AuthorizationsRequestOptions) => {
+export const buildQuery = (options: AuthenticationsRequestOptions) => {
   const { to, from } = options.timerange;
   const { limit, cursor } = options.pagination;
   const { fields, filterQuery } = options;
@@ -73,7 +73,7 @@ export const buildQuery = (options: AuthorizationsRequestOptions) => {
                 },
               },
             },
-            authorization: {
+            authentication: {
               top_hits: {
                 size: 1,
                 _source: esFields,

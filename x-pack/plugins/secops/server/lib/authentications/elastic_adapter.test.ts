@@ -3,14 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { AuthorizationsEdges } from '../../graphql/types';
-import { formatAuthorizationData } from './elasticsearch_adapter';
+import { AuthenticationsEdges } from '../../graphql/types';
+import { formatAuthenticationData } from './elasticsearch_adapter';
 import { auditdFieldsMap } from './query.dsl';
-import { AuthorizationHit } from './types';
+import { AuthenticationHit } from './types';
 
-describe('authorizations elasticsearch_adapter', () => {
-  describe('#formatAuthorizationsData', () => {
-    const hit: AuthorizationHit = {
+describe('authentications elasticsearch_adapter', () => {
+  describe('#formatAuthenticationsData', () => {
+    const hit: AuthenticationHit = {
       _index: 'index-123',
       _type: 'type-123',
       _id: 'id-123',
@@ -33,10 +33,10 @@ describe('authorizations elasticsearch_adapter', () => {
       successes: 20,
     };
 
-    test('it formats a authorizations with an empty set', () => {
+    test('it formats a authentication with an empty set', () => {
       const fields: ReadonlyArray<string> = [''];
-      const data = formatAuthorizationData(fields, hit, auditdFieldsMap);
-      const expected: AuthorizationsEdges = {
+      const data = formatAuthenticationData(fields, hit, auditdFieldsMap);
+      const expected: AuthenticationsEdges = {
         cursor: {
           tiebreaker: null,
           value: 'cursor-1',
@@ -62,10 +62,10 @@ describe('authorizations elasticsearch_adapter', () => {
       expect(data).toEqual(expected);
     });
 
-    test('it formats a authorizations with a source ip correctly', () => {
+    test('it formats a authentications with a source ip correctly', () => {
       const fields: ReadonlyArray<string> = ['source.ip'];
-      const data = formatAuthorizationData(fields, hit, auditdFieldsMap);
-      const expected: AuthorizationsEdges = {
+      const data = formatAuthenticationData(fields, hit, auditdFieldsMap);
+      const expected: AuthenticationsEdges = {
         cursor: {
           tiebreaker: null,
           value: 'cursor-1',
@@ -91,10 +91,10 @@ describe('authorizations elasticsearch_adapter', () => {
       expect(data).toEqual(expected);
     });
 
-    test('it formats a authorizations with a host name only', () => {
+    test('it formats a authentications with a host name only', () => {
       const fields: ReadonlyArray<string> = ['host.name'];
-      const data = formatAuthorizationData(fields, hit, auditdFieldsMap);
-      const expected: AuthorizationsEdges = {
+      const data = formatAuthenticationData(fields, hit, auditdFieldsMap);
+      const expected: AuthenticationsEdges = {
         cursor: {
           tiebreaker: null,
           value: 'cursor-1',
@@ -120,10 +120,10 @@ describe('authorizations elasticsearch_adapter', () => {
       expect(data).toEqual(expected);
     });
 
-    test('it formats a authorizations with a host id only', () => {
+    test('it formats a authentications with a host id only', () => {
       const fields: ReadonlyArray<string> = ['host.id'];
-      const data = formatAuthorizationData(fields, hit, auditdFieldsMap);
-      const expected: AuthorizationsEdges = {
+      const data = formatAuthenticationData(fields, hit, auditdFieldsMap);
+      const expected: AuthenticationsEdges = {
         cursor: {
           tiebreaker: null,
           value: 'cursor-1',
@@ -149,10 +149,10 @@ describe('authorizations elasticsearch_adapter', () => {
       expect(data).toEqual(expected);
     });
 
-    test('it formats a authorizations with a host name and id correctly', () => {
+    test('it formats a authentications with a host name and id correctly', () => {
       const fields: ReadonlyArray<string> = ['host.name', 'host.id'];
-      const data = formatAuthorizationData(fields, hit, auditdFieldsMap);
-      const expected: AuthorizationsEdges = {
+      const data = formatAuthenticationData(fields, hit, auditdFieldsMap);
+      const expected: AuthenticationsEdges = {
         cursor: {
           tiebreaker: null,
           value: 'cursor-1',

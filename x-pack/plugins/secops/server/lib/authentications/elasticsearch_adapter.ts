@@ -6,27 +6,27 @@
 
 import { get, getOr, head, last } from 'lodash/fp';
 
-import { AuthorizationsData, AuthorizationsEdges } from '../../graphql/types';
+import { AuthenticationsData, AuthenticationsEdges } from '../../graphql/types';
 import { mergeFieldsWithHit } from '../../utils/build_query';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
 import { auditdFieldsMap, buildQuery } from './query.dsl';
 import {
-  AuthorizationBucket,
-  AuthorizationData,
-  AuthorizationHit,
-  AuthorizationsAdapter,
-  AuthorizationsRequestOptions,
+  AuthenticationBucket,
+  AuthenticationData,
+  AuthenticationHit,
+  AuthenticationsAdapter,
+  AuthenticationsRequestOptions,
 } from './types';
 
-export class ElasticsearchAuthorizationAdapter implements AuthorizationsAdapter {
+export class ElasticsearchAuthenticationAdapter implements AuthenticationsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
 
-  public async getAuthorizations(
+  public async getAuthentications(
     request: FrameworkRequest,
-    options: AuthorizationsRequestOptions
-  ): Promise<AuthorizationsData> {
-    const response = await this.framework.callWithRequest<AuthorizationData, TermAggregation>(
+    options: AuthenticationsRequestOptions
+  ): Promise<AuthenticationsData> {
+    const response = await this.framework.callWithRequest<AuthenticationData, TermAggregation>(
       request,
       'search',
       buildQuery(options)
@@ -34,22 +34,24 @@ export class ElasticsearchAuthorizationAdapter implements AuthorizationsAdapter 
     const { limit } = options.pagination;
     const totalCount = getOr(0, 'aggregations.user_count.value', response);
 
-    const hits: AuthorizationHit[] = getOr([], 'aggregations.group_by_users.buckets', response).map(
-      (bucket: AuthorizationBucket) => ({
-        ...head(bucket.authorization.hits.hits),
-        user: bucket.key.user_uid,
-        cursor: bucket.key.user_uid,
-        failures: bucket.failures.doc_count,
-        successes: bucket.successes.doc_count,
-      })
+    const hits: AuthenticationHit[] = getOr(
+      [],
+      'aggregations.group_by_users.buckets',
+      response
+    ).map((bucket: AuthenticationBucket) => ({
+      ...head(bucket.authentication.hits.hits),
+      user: bucket.key.user_uid,
+      cursor: bucket.key.user_uid,
+      failures: bucket.failures.doc_count,
+      successes: bucket.successes.doc_count,
+    }));
+
+    const authenticationEdges: AuthenticationsEdges[] = hits.map(hit =>
+      formatAuthenticationData(options.fields, hit, auditdFieldsMap)
     );
 
-    const authorizationEdges: AuthorizationsEdges[] = hits.map(hit =>
-      formatAuthorizationData(options.fields, hit, auditdFieldsMap)
-    );
-
-    const hasNextPage = authorizationEdges.length === limit + 1;
-    const edges = hasNextPage ? authorizationEdges.splice(0, limit) : authorizationEdges;
+    const hasNextPage = authenticationEdges.length === limit + 1;
+    const edges = hasNextPage ? authenticationEdges.splice(0, limit) : authenticationEdges;
     const lastCursor = get('cursor', last(edges));
     return {
       edges,
@@ -62,12 +64,12 @@ export class ElasticsearchAuthorizationAdapter implements AuthorizationsAdapter 
   }
 }
 
-export const formatAuthorizationData = (
+export const formatAuthenticationData = (
   fields: ReadonlyArray<string>,
-  hit: AuthorizationHit,
+  hit: AuthenticationHit,
   fieldMap: Readonly<Record<string, string>>
-): AuthorizationsEdges => {
-  const init: AuthorizationsEdges = {
+): AuthenticationsEdges => {
+  const init: AuthenticationsEdges = {
     node: {
       failures: 0,
       successes: 0,

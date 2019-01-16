@@ -11,9 +11,9 @@ import { HostsModel } from './model';
 
 const hostsQuery = (state: State): HostsModel => state.local.hosts;
 
-export const authorizationsSelector = createSelector(
+export const authenticationsSelector = createSelector(
   hostsQuery,
-  hosts => hosts.query.authorizations
+  hosts => hosts.query.authentications
 );
 
 export const hostsSelector = createSelector(

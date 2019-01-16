@@ -18,9 +18,9 @@ import {
 } from '../../components/page/hosts';
 import { KpiItem } from '../../graphql/types';
 
-import { AuthorizationTable } from '../../components/page/hosts/authorization_table';
+import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
 import { manageQuery } from '../../components/page/manage_query';
-import { AuthorizationsQuery } from '../../containers/authorizations';
+import { AuthenticationsQuery } from '../../containers/authentications';
 import { EventsQuery } from '../../containers/events';
 import { GlobalTime } from '../../containers/global_time';
 import { HostsQuery } from '../../containers/hosts';
@@ -30,7 +30,7 @@ import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
 
 const basePath = chrome.getBasePath();
 
-const AuthorizationTableManage = manageQuery(AuthorizationTable);
+const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const HostsTableManage = manageQuery(HostsTable);
 const EventsTableManage = manageQuery(EventsTable);
 const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
@@ -94,22 +94,22 @@ export const Hosts = pure(() => (
                   />
                 )}
               </UncommonProcessesQuery>
-              <AuthorizationsQuery sourceId="default" startDate={from} endDate={to} poll={poll}>
-                {({ authorizations, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
-                  <AuthorizationTableManage
+              <AuthenticationsQuery sourceId="default" startDate={from} endDate={to} poll={poll}>
+                {({ authentications, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
+                  <AuthenticationTableManage
                     id={id}
                     refetch={refetch}
                     setQuery={setQuery}
                     loading={loading}
                     startDate={from}
-                    data={authorizations}
+                    data={authentications}
                     totalCount={totalCount}
                     nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
                     hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                     loadMore={loadMore}
                   />
                 )}
-              </AuthorizationsQuery>
+              </AuthenticationsQuery>
               <EventsQuery sourceId="default" startDate={from} endDate={to} poll={poll}>
                 {({ events, loading, id, refetch, totalCount, pageInfo, loadMore }) => (
                   <EventsTableManage

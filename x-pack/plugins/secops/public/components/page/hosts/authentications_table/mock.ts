@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AuthorizationsData } from '../../../../graphql/types';
+import { AuthenticationsData } from '../../../../graphql/types';
 
-export const mockData: { Authorizations: AuthorizationsData } = {
-  Authorizations: {
+export const mockData: { Authentications: AuthenticationsData } = {
+  Authentications: {
     totalCount: 4,
     edges: [
       {

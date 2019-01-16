@@ -27,8 +27,8 @@ export interface Source {
   configuration: SourceConfiguration;
   /** The status of the source */
   status: SourceStatus;
-  /** Gets Authorization success and failures based on a timerange */
-  Authorizations: AuthorizationsData;
+  /** Gets Authentication success and failures based on a timerange */
+  Authentications: AuthenticationsData;
   /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Events: EventsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
@@ -99,21 +99,21 @@ export interface IndexField {
   aggregatable: boolean;
 }
 
-export interface AuthorizationsData {
-  edges: AuthorizationsEdges[];
+export interface AuthenticationsData {
+  edges: AuthenticationsEdges[];
 
   totalCount: number;
 
   pageInfo: PageInfo;
 }
 
-export interface AuthorizationsEdges {
-  node: AuthorizationItem;
+export interface AuthenticationsEdges {
+  node: AuthenticationItem;
 
   cursor: CursorType;
 }
 
-export interface AuthorizationItem {
+export interface AuthenticationItem {
   _id: string;
 
   failures: number;
@@ -384,7 +384,7 @@ export interface SourceQueryArgs {
   /** The id of the source */
   id: string;
 }
-export interface AuthorizationsSourceArgs {
+export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
 
   pagination: PaginationInput;
@@ -441,7 +441,7 @@ export enum Direction {
 // Documents
 // ====================================================
 
-export namespace GetAuthorizationsQuery {
+export namespace GetAuthenticationsQuery {
   export type Variables = {
     sourceId: string;
     timerange: TimerangeInput;
@@ -460,11 +460,11 @@ export namespace GetAuthorizationsQuery {
 
     id: string;
 
-    Authorizations: Authorizations;
+    Authentications: Authentications;
   };
 
-  export type Authorizations = {
-    __typename?: 'AuthorizationsData';
+  export type Authentications = {
+    __typename?: 'AuthenticationsData';
 
     totalCount: number;
 
@@ -474,7 +474,7 @@ export namespace GetAuthorizationsQuery {
   };
 
   export type Edges = {
-    __typename?: 'AuthorizationsEdges';
+    __typename?: 'AuthenticationsEdges';
 
     node: Node;
 
@@ -482,7 +482,7 @@ export namespace GetAuthorizationsQuery {
   };
 
   export type Node = {
-    __typename?: 'AuthorizationItem';
+    __typename?: 'AuthenticationItem';
 
     _id: string;
 

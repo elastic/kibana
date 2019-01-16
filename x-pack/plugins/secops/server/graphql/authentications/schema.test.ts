@@ -13,15 +13,15 @@ import { Logger } from '../../utils/logger';
 import { eventsSchema } from '../events';
 import { sourceStatusSchema } from '../source_status/schema.gql';
 import { sourcesSchema } from '../sources/schema.gql';
-import { getAuthorizationsQueryMock, mockAuthorizationsData } from './authorizations.mock';
-import { authorizationsSchema } from './schema.gql';
+import { getAuthenticationsQueryMock, mockAuthenticationsData } from './authentications.mock';
+import { authenticationsSchema } from './schema.gql';
 
 const testCaseSource = {
-  id: 'Test case to query Authorizations',
+  id: 'Test case to query Authentications',
   query: `
-    query AuthorizationsQuery ($timerange: TimerangeInput!, $pagination: PaginationInput!) {
+    query AuthenticationsQuery ($timerange: TimerangeInput!, $pagination: PaginationInput!) {
       source(id: "default") {
-        Authorizations(timerange: $timerange, pagination: $pagination) {
+        Authentications(timerange: $timerange, pagination: $pagination) {
           totalCount
           edges {
             node {
@@ -76,7 +76,7 @@ const testCaseSource = {
   expected: {
     data: {
       source: {
-        ...mockAuthorizationsData,
+        ...mockAuthenticationsData,
       },
     },
   },
@@ -91,7 +91,7 @@ describe('Test Source Schema', () => {
     sourcesSchema,
     sourceStatusSchema,
     eventsSchema,
-    authorizationsSchema,
+    authenticationsSchema,
   ];
   const mockSchema = makeExecutableSchema({ typeDefs });
 
@@ -104,7 +104,7 @@ describe('Test Source Schema', () => {
   };
   const mocks = {
     Query: () => ({
-      ...getAuthorizationsQueryMock(logger),
+      ...getAuthenticationsQueryMock(logger),
     }),
   };
 

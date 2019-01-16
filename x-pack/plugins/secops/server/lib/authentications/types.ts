@@ -5,7 +5,7 @@
  */
 
 import {
-  AuthorizationsData,
+  AuthenticationsData,
   PaginationInput,
   SourceConfiguration,
   TimerangeInput,
@@ -13,14 +13,14 @@ import {
 import { FrameworkRequest } from '../framework';
 import { ESQuery, Hit, SearchHit, TotalHit } from '../types';
 
-export interface AuthorizationsAdapter {
-  getAuthorizations(
+export interface AuthenticationsAdapter {
+  getAuthentications(
     req: FrameworkRequest,
-    options: AuthorizationsRequestOptions
-  ): Promise<AuthorizationsData>;
+    options: AuthenticationsRequestOptions
+  ): Promise<AuthenticationsData>;
 }
 
-export interface AuthorizationsRequestOptions {
+export interface AuthenticationsRequestOptions {
   sourceConfiguration: SourceConfiguration;
   pagination: PaginationInput;
   timerange: TimerangeInput;
@@ -29,7 +29,7 @@ export interface AuthorizationsRequestOptions {
 }
 
 type StringOrNumber = string | number;
-export interface AuthorizationHit extends Hit {
+export interface AuthenticationHit extends Hit {
   _source: {
     '@timestamp': string;
     source: {
@@ -48,7 +48,7 @@ export interface AuthorizationHit extends Hit {
   sort: StringOrNumber[];
 }
 
-export interface AuthorizationBucket {
+export interface AuthenticationBucket {
   key: {
     user_uid: string;
   };
@@ -59,15 +59,15 @@ export interface AuthorizationBucket {
   successes: {
     doc_count: number;
   };
-  authorization: {
+  authentication: {
     hits: {
       total: TotalHit;
-      hits: ArrayLike<AuthorizationHit>;
+      hits: ArrayLike<AuthenticationHit>;
     };
   };
 }
 
-export interface AuthorizationData extends SearchHit {
+export interface AuthenticationData extends SearchHit {
   sort: string[];
   aggregations: {
     process_count: {
@@ -75,7 +75,7 @@ export interface AuthorizationData extends SearchHit {
     };
     group_by_process: {
       after_key: string;
-      buckets: AuthorizationBucket[];
+      buckets: AuthenticationBucket[];
     };
   };
 }

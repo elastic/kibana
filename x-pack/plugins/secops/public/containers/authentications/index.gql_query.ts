@@ -6,8 +6,8 @@
 
 import gql from 'graphql-tag';
 
-export const authorizationsQuery = gql`
-  query GetAuthorizationsQuery(
+export const authenticationsQuery = gql`
+  query GetAuthenticationsQuery(
     $sourceId: ID!
     $timerange: TimerangeInput!
     $pagination: PaginationInput!
@@ -15,7 +15,7 @@ export const authorizationsQuery = gql`
   ) {
     source(id: $sourceId) {
       id
-      Authorizations(timerange: $timerange, pagination: $pagination, filterQuery: $filterQuery) {
+      Authentications(timerange: $timerange, pagination: $pagination, filterQuery: $filterQuery) {
         totalCount
         edges {
           node {

@@ -6,7 +6,7 @@
 
 import { Server } from 'hapi';
 
-import { Authorizations, ElasticsearchAuthorizationAdapter } from '../authorizations';
+import { Authentications, ElasticsearchAuthenticationAdapter } from '../authentications';
 import { KibanaConfigurationAdapter } from '../configuration/kibana_configuration_adapter';
 import { ElasticsearchEventsAdapter, Events } from '../events';
 import { KibanaBackendFrameworkAdapter } from '../framework/kibana_framework_adapter';
@@ -28,7 +28,7 @@ export function compose(server: Server): AppBackendLibs {
     fields: new IndexFields(new ElasticsearchIndexFieldAdapter(framework), sources),
     hosts: new Hosts(new ElasticsearchHostsAdapter(framework)),
     uncommonProcesses: new UncommonProcesses(new ElasticsearchUncommonProcessesAdapter(framework)),
-    authorizations: new Authorizations(new ElasticsearchAuthorizationAdapter(framework)),
+    authentications: new Authentications(new ElasticsearchAuthenticationAdapter(framework)),
   };
 
   const libs: AppBackendLibs = {

@@ -7,7 +7,7 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
-  updateAuthorizationsLimit,
+  updateAuthenticationsLimit,
   updateEventsLimit,
   updateHostsLimit,
   updateUncommonProcessesLimit,
@@ -21,7 +21,7 @@ export const DEFAULT_LIMIT = 10;
 
 export const initialHostsState: HostsState = {
   query: {
-    authorizations: {
+    authentications: {
       limit: DEFAULT_LIMIT,
     },
     hosts: {
@@ -38,11 +38,11 @@ export const initialHostsState: HostsState = {
 };
 
 export const hostsReducer = reducerWithInitialState(initialHostsState)
-  .case(updateAuthorizationsLimit, (state, { limit }) => ({
+  .case(updateAuthenticationsLimit, (state, { limit }) => ({
     ...state,
     query: {
       ...state.query,
-      authorizations: {
+      authentications: {
         limit,
       },
     },

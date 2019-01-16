@@ -11,16 +11,16 @@ import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
 import moment from 'moment';
-import { AuthorizationsEdges } from '../../../../graphql/types';
+import { AuthenticationsEdges } from '../../../../graphql/types';
 import { escapeQueryValue } from '../../../../lib/keury';
-import { authorizationsSelector, hostsActions, State } from '../../../../store';
+import { authenticationsSelector, hostsActions, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { defaultToEmpty, getEmptyValue } from '../../../empty_value';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
 
 interface OwnProps {
-  data: AuthorizationsEdges[];
+  data: AuthenticationsEdges[];
   loading: boolean;
   hasNextPage: boolean;
   nextCursor: string;
@@ -29,17 +29,17 @@ interface OwnProps {
   startDate: number;
 }
 
-interface AuthorizationTableReduxProps {
+interface AuthenticationTableReduxProps {
   limit: number;
 }
 
-interface AuthorizationTableDispatchProps {
+interface AuthenticationTableDispatchProps {
   updateLimitPagination: (param: { limit: number }) => void;
 }
 
-type AuthorizationTableProps = OwnProps &
-  AuthorizationTableReduxProps &
-  AuthorizationTableDispatchProps;
+type AuthenticationTableProps = OwnProps &
+  AuthenticationTableReduxProps &
+  AuthenticationTableDispatchProps;
 
 const rowItems: ItemsPerRow[] = [
   {
@@ -60,7 +60,7 @@ const rowItems: ItemsPerRow[] = [
   },
 ];
 
-const AuthorizationTableComponent = pure<AuthorizationTableProps>(
+const AuthenticationTableComponent = pure<AuthenticationTableProps>(
   ({
     data,
     hasNextPage,
@@ -73,7 +73,7 @@ const AuthorizationTableComponent = pure<AuthorizationTableProps>(
     startDate,
   }) => (
     <LoadMoreTable
-      columns={getAuthorizationColumns(startDate)}
+      columns={getAuthenticationColumns(startDate)}
       loadingTitle="Authentication Failures"
       loading={loading}
       pageOfItems={data}
@@ -91,21 +91,21 @@ const AuthorizationTableComponent = pure<AuthorizationTableProps>(
   )
 );
 
-const mapStateToProps = (state: State) => authorizationsSelector(state);
+const mapStateToProps = (state: State) => authenticationsSelector(state);
 
-export const AuthorizationTable = connect(
+export const AuthenticationTable = connect(
   mapStateToProps,
   {
-    updateLimitPagination: hostsActions.updateAuthorizationsLimit,
+    updateLimitPagination: hostsActions.updateAuthenticationsLimit,
   }
-)(AuthorizationTableComponent);
+)(AuthenticationTableComponent);
 
-const getAuthorizationColumns = (startDate: number) => [
+const getAuthenticationColumns = (startDate: number) => [
   {
     name: 'User',
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }: AuthorizationsEdges) => {
+    render: ({ node }: AuthenticationsEdges) => {
       const userName = defaultToEmpty(node.user.name);
       return (
         <>
@@ -141,31 +141,31 @@ const getAuthorizationColumns = (startDate: number) => [
     name: 'Failures',
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }: AuthorizationsEdges) => <>{defaultToEmpty(node.failures)}</>,
+    render: ({ node }: AuthenticationsEdges) => <>{defaultToEmpty(node.failures)}</>,
   },
   {
     name: 'Successes',
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }: AuthorizationsEdges) => <>{defaultToEmpty(node.successes)}</>,
+    render: ({ node }: AuthenticationsEdges) => <>{defaultToEmpty(node.successes)}</>,
   },
   {
     name: 'From',
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }: AuthorizationsEdges) => <>{defaultToEmpty(node.source.ip)}</>,
+    render: ({ node }: AuthenticationsEdges) => <>{defaultToEmpty(node.source.ip)}</>,
   },
   {
     name: 'To',
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }: AuthorizationsEdges) => <>{defaultToEmpty(node.host.name)}</>,
+    render: ({ node }: AuthenticationsEdges) => <>{defaultToEmpty(node.host.name)}</>,
   },
   {
     name: 'Latest',
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }: AuthorizationsEdges) => (
+    render: ({ node }: AuthenticationsEdges) => (
       <>{node.latest ? moment(node.latest).fromNow() : getEmptyValue()}</>
     ),
   },

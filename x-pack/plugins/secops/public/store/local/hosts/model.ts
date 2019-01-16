@@ -13,7 +13,7 @@ export interface InMemoryPaginationQuery extends BasicQuery {
 
 export interface HostsModel {
   query: {
-    authorizations: BasicQuery;
+    authentications: BasicQuery;
     hosts: BasicQuery;
     events: BasicQuery;
     uncommonProcesses: InMemoryPaginationQuery;

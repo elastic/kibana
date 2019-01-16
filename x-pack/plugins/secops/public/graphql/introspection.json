@@ -110,8 +110,8 @@
             "deprecationReason": null
           },
           {
-            "name": "Authorizations",
-            "description": "Gets Authorization success and failures based on a timerange",
+            "name": "Authentications",
+            "description": "Gets Authentication success and failures based on a timerange",
             "args": [
               {
                 "name": "timerange",
@@ -143,7 +143,7 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "AuthorizationsData", "ofType": null }
+              "ofType": { "kind": "OBJECT", "name": "AuthenticationsData", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -799,7 +799,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "AuthorizationsData",
+        "name": "AuthenticationsData",
         "description": "",
         "fields": [
           {
@@ -815,7 +815,7 @@
                 "ofType": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "OBJECT", "name": "AuthorizationsEdges", "ofType": null }
+                  "ofType": { "kind": "OBJECT", "name": "AuthenticationsEdges", "ofType": null }
                 }
               }
             },
@@ -854,7 +854,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "AuthorizationsEdges",
+        "name": "AuthenticationsEdges",
         "description": "",
         "fields": [
           {
@@ -864,7 +864,7 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "AuthorizationItem", "ofType": null }
+              "ofType": { "kind": "OBJECT", "name": "AuthenticationItem", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -889,7 +889,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "AuthorizationItem",
+        "name": "AuthenticationItem",
         "description": "",
         "fields": [
           {

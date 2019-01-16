@@ -7,10 +7,10 @@
 import { FieldNode } from 'graphql';
 import { Logger } from '../../utils/logger';
 import { SecOpsContext } from '../index';
-import { AuthorizationsData } from '../types';
+import { AuthenticationsData } from '../types';
 
-export const mockAuthorizationsData: { Authorizations: AuthorizationsData } = {
-  Authorizations: {
+export const mockAuthenticationsData: { Authentications: AuthenticationsData } = {
+  Authentications: {
     totalCount: 4,
     edges: [
       {
@@ -59,14 +59,14 @@ export const mockAuthorizationsData: { Authorizations: AuthorizationsData } = {
   },
 };
 
-export const getAuthorizationsQueryMock = (logger: Logger) => ({
+export const getAuthenticationsQueryMock = (logger: Logger) => ({
   source: (root: unknown, args: unknown, context: SecOpsContext) => {
     logger.info('Mock source');
     const operationName = context.req.payload.operationName.toLowerCase();
     switch (operationName) {
       case 'test': {
-        logger.info(`Using mock for test ${mockAuthorizationsData}`);
-        return mockAuthorizationsData;
+        logger.info(`Using mock for test ${mockAuthenticationsData}`);
+        return mockAuthenticationsData;
       }
       default: {
         return {};
@@ -75,11 +75,11 @@ export const getAuthorizationsQueryMock = (logger: Logger) => ({
   },
 });
 
-export const mockAuthorizationsFields: FieldNode = {
+export const mockAuthenticationsFields: FieldNode = {
   kind: 'Field',
   name: {
     kind: 'Name',
-    value: 'Authorizations',
+    value: 'Authentications',
   },
   selectionSet: {
     kind: 'SelectionSet',
@@ -108,7 +108,7 @@ export const mockAuthorizationsFields: FieldNode = {
               kind: 'Field',
               name: {
                 kind: 'Name',
-                value: 'authorization',
+                value: 'authentication',
               },
               arguments: [],
               directives: [],

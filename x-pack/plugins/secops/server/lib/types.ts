@@ -5,7 +5,7 @@
  */
 
 import { JsonObject } from '../../common/typed_json';
-import { Authorizations } from './authorizations';
+import { Authentications } from './authentications';
 import { ConfigurationAdapter } from './configuration';
 import { Events } from './events';
 import { FrameworkAdapter, FrameworkRequest } from './framework';
@@ -22,7 +22,7 @@ export interface AppDomainLibs {
   fields: IndexFields;
   hosts: Hosts;
   uncommonProcesses: UncommonProcesses;
-  authorizations: Authorizations;
+  authentications: Authentications;
 }
 
 export interface AppBackendLibs extends AppDomainLibs {

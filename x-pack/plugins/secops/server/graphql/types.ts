@@ -56,8 +56,8 @@ export interface Source {
   configuration: SourceConfiguration;
   /** The status of the source */
   status: SourceStatus;
-  /** Gets Authorization success and failures based on a timerange */
-  Authorizations: AuthorizationsData;
+  /** Gets Authentication success and failures based on a timerange */
+  Authentications: AuthenticationsData;
   /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Events: EventsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
@@ -128,21 +128,21 @@ export interface IndexField {
   aggregatable: boolean;
 }
 
-export interface AuthorizationsData {
-  edges: AuthorizationsEdges[];
+export interface AuthenticationsData {
+  edges: AuthenticationsEdges[];
 
   totalCount: number;
 
   pageInfo: PageInfo;
 }
 
-export interface AuthorizationsEdges {
-  node: AuthorizationItem;
+export interface AuthenticationsEdges {
+  node: AuthenticationItem;
 
   cursor: CursorType;
 }
 
-export interface AuthorizationItem {
+export interface AuthenticationItem {
   _id: string;
 
   failures: number;
@@ -413,7 +413,7 @@ export interface SourceQueryArgs {
   /** The id of the source */
   id: string;
 }
-export interface AuthorizationsSourceArgs {
+export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
 
   pagination: PaginationInput;
@@ -504,8 +504,8 @@ export namespace SourceResolvers {
     configuration?: ConfigurationResolver<SourceConfiguration, TypeParent, Context>;
     /** The status of the source */
     status?: StatusResolver<SourceStatus, TypeParent, Context>;
-    /** Gets Authorization success and failures based on a timerange */
-    Authorizations?: AuthorizationsResolver<AuthorizationsData, TypeParent, Context>;
+    /** Gets Authentication success and failures based on a timerange */
+    Authentications?: AuthenticationsResolver<AuthenticationsData, TypeParent, Context>;
     /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     Events?: EventsResolver<EventsData, TypeParent, Context>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
@@ -531,12 +531,12 @@ export namespace SourceResolvers {
     Parent,
     Context
   >;
-  export type AuthorizationsResolver<
-    R = AuthorizationsData,
+  export type AuthenticationsResolver<
+    R = AuthenticationsData,
     Parent = Source,
     Context = SecOpsContext
-  > = Resolver<R, Parent, Context, AuthorizationsArgs>;
-  export interface AuthorizationsArgs {
+  > = Resolver<R, Parent, Context, AuthenticationsArgs>;
+  export interface AuthenticationsArgs {
     timerange: TimerangeInput;
 
     pagination: PaginationInput;
@@ -789,9 +789,9 @@ export namespace IndexFieldResolvers {
   > = Resolver<R, Parent, Context>;
 }
 
-export namespace AuthorizationsDataResolvers {
-  export interface Resolvers<Context = SecOpsContext, TypeParent = AuthorizationsData> {
-    edges?: EdgesResolver<AuthorizationsEdges[], TypeParent, Context>;
+export namespace AuthenticationsDataResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = AuthenticationsData> {
+    edges?: EdgesResolver<AuthenticationsEdges[], TypeParent, Context>;
 
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
@@ -799,43 +799,43 @@ export namespace AuthorizationsDataResolvers {
   }
 
   export type EdgesResolver<
-    R = AuthorizationsEdges[],
-    Parent = AuthorizationsData,
+    R = AuthenticationsEdges[],
+    Parent = AuthenticationsData,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
   export type TotalCountResolver<
     R = number,
-    Parent = AuthorizationsData,
+    Parent = AuthenticationsData,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
   export type PageInfoResolver<
     R = PageInfo,
-    Parent = AuthorizationsData,
+    Parent = AuthenticationsData,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
 }
 
-export namespace AuthorizationsEdgesResolvers {
-  export interface Resolvers<Context = SecOpsContext, TypeParent = AuthorizationsEdges> {
-    node?: NodeResolver<AuthorizationItem, TypeParent, Context>;
+export namespace AuthenticationsEdgesResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = AuthenticationsEdges> {
+    node?: NodeResolver<AuthenticationItem, TypeParent, Context>;
 
     cursor?: CursorResolver<CursorType, TypeParent, Context>;
   }
 
   export type NodeResolver<
-    R = AuthorizationItem,
-    Parent = AuthorizationsEdges,
+    R = AuthenticationItem,
+    Parent = AuthenticationsEdges,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
   export type CursorResolver<
     R = CursorType,
-    Parent = AuthorizationsEdges,
+    Parent = AuthenticationsEdges,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
 }
 
-export namespace AuthorizationItemResolvers {
-  export interface Resolvers<Context = SecOpsContext, TypeParent = AuthorizationItem> {
+export namespace AuthenticationItemResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = AuthenticationItem> {
     _id?: IdResolver<string, TypeParent, Context>;
 
     failures?: FailuresResolver<number, TypeParent, Context>;
@@ -853,37 +853,37 @@ export namespace AuthorizationItemResolvers {
 
   export type IdResolver<
     R = string,
-    Parent = AuthorizationItem,
+    Parent = AuthenticationItem,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
   export type FailuresResolver<
     R = number,
-    Parent = AuthorizationItem,
+    Parent = AuthenticationItem,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
   export type SuccessesResolver<
     R = number,
-    Parent = AuthorizationItem,
+    Parent = AuthenticationItem,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
   export type LatestResolver<
     R = string,
-    Parent = AuthorizationItem,
+    Parent = AuthenticationItem,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
   export type SourceResolver<
     R = SourceEcsFields,
-    Parent = AuthorizationItem,
+    Parent = AuthenticationItem,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
   export type HostResolver<
     R = HostEcsFields,
-    Parent = AuthorizationItem,
+    Parent = AuthenticationItem,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
   export type UserResolver<
     R = UserEcsFields,
-    Parent = AuthorizationItem,
+    Parent = AuthenticationItem,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
 }
