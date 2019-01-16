@@ -30,15 +30,17 @@ export const migrations = {
 
         let splitCount = 0;
         visState.aggs = visState.aggs.map(agg => {
-          if (agg.schema === 'split') {
-            splitCount++;
-            if (splitCount === 1) {
-              return agg; // leave the first split agg unchanged
-            }
-            agg.schema = 'bucket';
-            // the `row` param is exclusively used by split aggs, so we remove it
-            agg.params = omit(agg.params, ['row']);
+          if (agg.schema !== 'split') {
+            return agg;
           }
+
+          splitCount++;
+          if (splitCount === 1) {
+            return agg; // leave the first split agg unchanged
+          }
+          agg.schema = 'bucket';
+          // the `row` param is exclusively used by split aggs, so we remove it
+          agg.params = omit(agg.params, ['row']);
           return agg;
         });
 
