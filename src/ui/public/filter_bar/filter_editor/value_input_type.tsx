@@ -26,7 +26,7 @@ import { validateParams } from './lib/filter_editor_utils';
 interface Props {
   value?: string | number;
   type: string;
-  onChange: (value: string | number | boolean, isInvalid: boolean) => void;
+  onChange: (value: string | number | boolean) => void;
   placeholder: string;
   intl: InjectedIntl;
   refCallback: (element: HTMLElement) => void;
@@ -114,12 +114,12 @@ class ValueInputTypeUI extends Component<Props> {
 
   private onBoolChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const boolValue = event.target.value === 'true';
-    this.props.onChange(boolValue, false);
+    this.props.onChange(boolValue);
   };
 
   private onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const params = event.target.value;
-    this.props.onChange(params, !validateParams(params, this.props.type));
+    this.props.onChange(params);
   };
 }
 

@@ -89,17 +89,44 @@ export function validateParams(params: any, type: string) {
   switch (type) {
     case 'date':
       const moment = typeof params === 'string' ? dateMath.parse(params) : null;
-      return typeof params === 'string' && moment && moment.isValid();
+      return Boolean(typeof params === 'string' && moment && moment.isValid());
     case 'ip':
       try {
-        // @ts-ignore
-        const ipOjbect = new Ipv4Address(params);
-        return true;
+        return Boolean(new Ipv4Address(params));
       } catch (e) {
         return false;
       }
     default:
       return true;
+  }
+}
+
+export function isFilterValid(
+  indexPattern?: IndexPattern,
+  field?: IndexPatternField,
+  operator?: Operator,
+  params?: any
+) {
+  if (!indexPattern || !field || !operator) {
+    return false;
+  }
+  switch (operator.type) {
+    case 'phrase':
+      return validateParams(params, field.type);
+    case 'phrases':
+      if (!Array.isArray(params) || !params.length) {
+        return false;
+      }
+      return params.every(phrase => validateParams(phrase, field.type));
+    case 'range':
+      if (typeof params !== 'object') {
+        return false;
+      }
+      return validateParams(params.from, field.type) && validateParams(params.to, field.type);
+    case 'exists':
+      return true;
+    default:
+      throw new Error(`Unknown operator type: ${operator.type}`);
   }
 }
 
@@ -134,8 +161,6 @@ function buildBaseFilter(
       return buildRangeFilter(field, newParams, indexPattern);
     case 'exists':
       return buildExistsFilter(field, indexPattern);
-    case 'query':
-      return buildQueryFilter(params.query, indexPattern.id);
     default:
       throw new Error(`Unknown operator type: ${operator.type}`);
   }

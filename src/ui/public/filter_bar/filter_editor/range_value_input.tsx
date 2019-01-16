@@ -36,27 +36,14 @@ type RangeParamsPartial = Partial<RangeParams>;
 interface Props {
   field?: IndexPatternField;
   value?: RangeParams;
-  onChange: (params: RangeParamsPartial, isInvalid: boolean) => void;
+  onChange: (params: RangeParamsPartial) => void;
   intl: InjectedIntl;
   refCallback: (element: HTMLElement) => void;
 }
 
-interface State {
-  fromIsInvalid: boolean;
-  toIsInvalid: boolean;
-}
-
-class RangeValueInputUI extends Component<Props, State> {
+class RangeValueInputUI extends Component<Props> {
   public constructor(props: Props) {
     super(props);
-    this.state = {
-      fromIsInvalid:
-        isEmpty(props.value) ||
-        !validateParams(get(props, 'value.from'), get(props, 'field.type', 'string')),
-      toIsInvalid:
-        isEmpty(props.value) ||
-        !validateParams(get(props, 'value.to'), get(props, 'field.type', 'string')),
-    };
   }
 
   public render() {
@@ -105,28 +92,18 @@ class RangeValueInputUI extends Component<Props, State> {
     );
   }
 
-  private onFromChange = (value: string | number | boolean, isInvalid: boolean) => {
+  private onFromChange = (value: string | number | boolean) => {
     if (typeof value !== 'string' && typeof value !== 'number') {
       throw new Error('Range params must be a string or number');
     }
-
-    this.setState({ fromIsInvalid: isInvalid });
-    return this.props.onChange(
-      { from: value, to: get(this, 'props.value.to') },
-      this.state.toIsInvalid || isInvalid
-    );
+    this.props.onChange({ from: value, to: get(this, 'props.value.to') });
   };
 
-  private onToChange = (value: string | number | boolean, isInvalid: boolean) => {
+  private onToChange = (value: string | number | boolean) => {
     if (typeof value !== 'string' && typeof value !== 'number') {
       throw new Error('Range params must be a string or number');
     }
-
-    this.setState({ toIsInvalid: isInvalid });
-    return this.props.onChange(
-      { from: get(this, 'props.value.from'), to: value },
-      this.state.fromIsInvalid || isInvalid
-    );
+    this.props.onChange({ from: get(this, 'props.value.from'), to: value });
   };
 }
 

@@ -26,7 +26,7 @@ import { ValueInputType } from './value_input_type';
 
 interface Props extends PhraseSuggestorProps {
   value?: string;
-  onChange: (value: string | number | boolean, isInvalid: boolean) => void;
+  onChange: (value: string | number | boolean) => void;
   refCallback: (element: HTMLElement) => void;
   intl: InjectedIntl;
 }
@@ -81,10 +81,10 @@ class PhraseValueInputUI extends PhraseSuggestor<Props> {
 
   private onComboBoxChange = (selectedOptions: EuiComboBoxOptionProps[]): void => {
     if (selectedOptions.length === 0) {
-      return this.props.onChange('', true);
+      return this.props.onChange('');
     }
     const [selectedOption] = selectedOptions;
-    this.props.onChange(selectedOption.label, false);
+    this.props.onChange(selectedOption.label);
   };
 
   private getOptions() {

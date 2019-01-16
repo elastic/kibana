@@ -45,6 +45,7 @@ import {
   getIndexPatternFromFilter,
   getOperatorFromFilter,
   getQueryDslFromFilter,
+  isFilterValid,
 } from './lib/filter_editor_utils';
 import { Operator } from './lib/filter_operators';
 import { OperatorInput } from './operator_input';
@@ -69,7 +70,6 @@ interface State {
   customLabel: string | null;
   queryDsl: string;
   isCustomEditorOpen: boolean;
-  isInvalid: boolean;
 }
 
 class FilterEditorUI extends Component<Props, State> {
@@ -88,7 +88,6 @@ class FilterEditorUI extends Component<Props, State> {
       customLabel: props.filter.meta.alias,
       queryDsl: JSON.stringify(getQueryDslFromFilter(props.filter), null, 2),
       isCustomEditorOpen: this.isUnknownFilterType(),
-      isInvalid: true,
     };
   }
 
@@ -105,10 +104,17 @@ class FilterEditorUI extends Component<Props, State> {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty size="xs" onClick={this.toggleCustomEditor}>
-                <FormattedMessage
-                  id="common.ui.filterEditor.editQueryDslButtonLabel"
-                  defaultMessage="Edit as Query DSL"
-                />
+                {this.state.isCustomEditorOpen ? (
+                  <FormattedMessage
+                    id="common.ui.filterEditor.editFilterValuesButtonLabel"
+                    defaultMessage="Edit filter values"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="common.ui.filterEditor.editQueryDslButtonLabel"
+                    defaultMessage="Edit as Query DSL"
+                  />
+                )}
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -150,7 +156,7 @@ class FilterEditorUI extends Component<Props, State> {
 
         <EuiFlexGroup direction="rowReverse" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={this.onSubmit} isDisabled={this.state.isInvalid}>
+            <EuiButton fill onClick={this.onSubmit} isDisabled={!this.isFilterValid()}>
               <FormattedMessage id="common.ui.filterEditor.saveButtonLabel" defaultMessage="Save" />
             </EuiButton>
           </EuiFlexItem>
@@ -309,6 +315,27 @@ class FilterEditorUI extends Component<Props, State> {
     return getOperatorFromFilter(this.props.filter);
   }
 
+  private isFilterValid() {
+    const {
+      isCustomEditorOpen,
+      queryDsl,
+      selectedIndexPattern: indexPattern,
+      selectedField: field,
+      selectedOperator: operator,
+      params,
+    } = this.state;
+
+    if (isCustomEditorOpen) {
+      try {
+        return Boolean(JSON.parse(queryDsl));
+      } catch (e) {
+        return false;
+      }
+    }
+
+    return isFilterValid(indexPattern, field, operator, params);
+  }
+
   private onIndexPatternChange = (selectedIndexPattern?: IndexPattern) => {
     const selectedField = undefined;
     const selectedOperator = undefined;
@@ -354,8 +381,8 @@ class FilterEditorUI extends Component<Props, State> {
     this.setState({ customLabel });
   };
 
-  private onParamsChange = (params: any, isInvalid: boolean) => {
-    this.setState({ params, isInvalid });
+  private onParamsChange = (params: any) => {
+    this.setState({ params });
   };
 
   private onQueryDslChange = (queryDsl: string) => {

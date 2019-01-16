@@ -45,7 +45,7 @@ interface Props {
 
 export function FilterView({ filter }: Props) {
   if (filter.meta.alias !== null) {
-    return <span>filter.meta.alias</span>;
+    return <span>{filter.meta.alias}</span>;
   }
   return (
     <span>
