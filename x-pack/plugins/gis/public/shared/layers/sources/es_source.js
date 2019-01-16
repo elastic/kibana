@@ -98,12 +98,13 @@ export class AbstractESSource extends AbstractVectorSource {
 
     const esResp = await this._runEsQuery(layerName, searchSource, 'bounds request');
     const esBounds = _.get(esResp, 'aggregations.1.bounds');
-    return {
-      min_lon: esBounds.top_left.lon,
-      max_lon: esBounds.bottom_right.lon,
-      min_lat: esBounds.bottom_right.lat,
-      max_lat: esBounds.top_left.lat
-    };
+    return (esBounds) ?
+      {
+        min_lon: esBounds.top_left.lon,
+        max_lon: esBounds.bottom_right.lon,
+        min_lat: esBounds.bottom_right.lat,
+        max_lat: esBounds.top_left.lat
+      }  : null;
   }
 
   async isTimeAware() {
