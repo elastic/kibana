@@ -8,7 +8,7 @@
  * utils for Anomaly Explorer.
  */
 
-import { each, get, has, uniq } from 'lodash';
+import { each, get, uniq } from 'lodash';
 import { timefilter } from 'ui/timefilter';
 import { parseInterval } from 'ui/utils/parse_interval';
 import { TimeBuckets } from 'ui/time_buckets';
@@ -152,19 +152,15 @@ export function getSelectionTimeRange(selectedCells, interval) {
 }
 
 export function getSelectionInfluencers(selectedCells, fieldName) {
-  const influencers = [];
-
   if (
     selectedCells !== null &&
     selectedCells.fieldName !== undefined &&
     selectedCells.fieldName !== VIEW_BY_JOB_LABEL
   ) {
-    selectedCells.lanes.forEach((laneLabel) =>{
-      influencers.push({ fieldName, fieldValue: laneLabel });
-    });
+    return selectedCells.lanes.map(laneLabel => ({ fieldName, fieldValue: laneLabel }));
   }
 
-  return influencers;
+  return [];
 }
 
 export function getSwimlaneBucketInterval(selectedJobs, swimlaneWidth) {
@@ -369,7 +365,7 @@ export async function loadAnomaliesTableData(selectedCells, selectedJobs, dateFo
         // Add properties used for building the links menu.
         // TODO - when job_service is moved server_side, move this to server endpoint.
         anomaly.isTimeSeriesViewDetector = isTimeSeriesViewDetector(mlJobService.getJob(jobId), anomaly.detectorIndex);
-        if (has(mlJobService.customUrlsByJob, jobId)) {
+        if (mlJobService.customUrlsByJob[jobId] !== undefined) {
           anomaly.customUrls = mlJobService.customUrlsByJob[jobId];
         }
       });
