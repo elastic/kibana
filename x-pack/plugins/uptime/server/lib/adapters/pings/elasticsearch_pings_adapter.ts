@@ -233,10 +233,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
   }
 
   public async getDocCount(request: any): Promise<DocCount> {
-    const { count } = await this.database.count(request, {
-      index: INDEX_NAMES.HEARTBEAT,
-      body: {},
-    });
+    const { count } = await this.database.count(request, { index: INDEX_NAMES.HEARTBEAT });
 
     return { count };
   }
