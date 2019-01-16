@@ -7,7 +7,7 @@
 
 import expect from 'expect.js';
 
-import { ReindexStatus, REINDEX_OP_TYPE, ReindexWarning } from '../../../../plugins/upgrade_assistant/common/types';
+import { ReindexStatus, REINDEX_OP_TYPE, ReindexWarning } from '../../../plugins/upgrade_assistant/common/types';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -32,7 +32,7 @@ export default function ({ getService }) {
   };
 
   describe('reindexing', () => {
-    after(() => {
+    afterEach(() => {
       // Cleanup saved objects
       return es.deleteByQuery({
         index: '.kibana',
@@ -108,7 +108,7 @@ export default function ({ getService }) {
         .post(`/api/upgrade_assistant/reindex/dummydata`)
         .set('kbn-xsrf', 'xxx')
         .expect(200);
-      await waitForReindexToComplete('dummydata');
+      const lastState = await waitForReindexToComplete('dummydata');
 
       // The regular aliases should still return 3 docs
       expect(
@@ -121,6 +121,11 @@ export default function ({ getService }) {
       expect(
         (await es.count({ index: 'myHttpsAlias' })).count
       ).to.be(2);
+
+      // Cleanup newly created index
+      await es.indices.delete({
+        index: lastState.newIndexName
+      });
     });
 
     it('shows warnings for boolean fields', async () => {

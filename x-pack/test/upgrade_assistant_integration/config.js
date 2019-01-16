@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import path from 'path';
 import {
   EsProvider,
-  EsSupertestWithoutAuthProvider,
-  SupertestWithoutAuthProvider,
-  UsageAPIProvider,
-  InfraOpsGraphQLProvider
 } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -20,23 +17,16 @@ export default async function ({ readConfigFile }) {
   const kibanaCommonConfig = await readConfigFile(require.resolve('../../../test/common/config.js'));
 
   return {
-    testFiles: [require.resolve('./apis')],
+    testFiles: [require.resolve('./upgrade_assistant')],
     servers: xPackFunctionalTestsConfig.get('servers'),
     services: {
       supertest: kibanaAPITestsConfig.get('services.supertest'),
-      esSupertest: kibanaAPITestsConfig.get('services.esSupertest'),
-      supertestWithoutAuth: SupertestWithoutAuthProvider,
-      esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
-      infraOpsGraphQLClient: InfraOpsGraphQLProvider,
       es: EsProvider,
       esArchiver: kibanaCommonConfig.get('services.esArchiver'),
-      usageAPI: UsageAPIProvider,
-      kibanaServer: kibanaCommonConfig.get('services.kibanaServer'),
-      chance: kibanaAPITestsConfig.get('services.chance'),
     },
     esArchiver: xPackFunctionalTestsConfig.get('esArchiver'),
     junit: {
-      reportName: 'X-Pack API Integration Tests',
+      reportName: 'X-Pack Upgrade Assistant Integration Tests',
     },
     kbnTestServer: {
       ...xPackFunctionalTestsConfig.get('kbnTestServer'),
@@ -45,6 +35,9 @@ export default async function ({ readConfigFile }) {
         '--optimize.enabled=false',
       ],
     },
-    esTestCluster: xPackFunctionalTestsConfig.get('esTestCluster'),
+    esTestCluster: {
+      ...xPackFunctionalTestsConfig.get('esTestCluster'),
+      dataArchive: path.resolve(__dirname, './fixtures/data_archives/upgrade_assistant.zip'),
+    }
   };
 }
