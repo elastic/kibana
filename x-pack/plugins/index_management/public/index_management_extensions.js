@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { i18n } from '@kbn/i18n';
 const summaryExtensions = [];
 export const addSummaryExtension = (summaryExtension)=> {
   summaryExtensions.push(summaryExtension);
@@ -39,7 +39,16 @@ export const addToggleExtension = (toggleExtension)=> {
 export const getToggleExtensions = () => {
   return toggleExtensions;
 };
-const badgeExtensions = [];
+const badgeExtensions = [
+  {
+    matchIndex: (index) => {
+      return index.isFrozen;
+    },
+    label: i18n.translate('xpack.indexMgmt.frozenBadgeLabel', {
+      defaultMessage: 'Frozen',
+    }),
+  }
+];
 export const addBadgeExtension = (badgeExtension)=> {
   badgeExtensions.push(badgeExtension);
 };
