@@ -209,6 +209,7 @@ module.exports = function (grunt) {
         '--esFrom', esFrom,
         '--bail',
         '--debug',
+        '--kibana-install-dir', KIBANA_INSTALL_DIR,
         '--',
         '--server.maxPayloadBytes=1648576',
       ],
