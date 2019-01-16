@@ -24,33 +24,37 @@ import {
 
 import { getSeverityColor } from '../../../../common/util/anomaly_utils';
 
+const warningLabel = i18n.translate('xpack.ml.controls.selectSeverity.warningLabel', { defaultMessage: 'warning' });
+const minorLabel = i18n.translate('xpack.ml.controls.selectSeverity.minorLabel', { defaultMessage: 'minor' });
+const majorLabel = i18n.translate('xpack.ml.controls.selectSeverity.majorLabel', { defaultMessage: 'major' });
+const criticalLabel = i18n.translate('xpack.ml.controls.selectSeverity.criticalLabel', { defaultMessage: 'critical' });
 
 const optionsMap = {
-  'warning': 0,
-  'minor': 25,
-  'major': 50,
-  'critical': 75,
+  [warningLabel]: 0,
+  [minorLabel]: 25,
+  [majorLabel]: 50,
+  [criticalLabel]: 75,
 };
 
 export const SEVERITY_OPTIONS = [
   {
     val: 0,
-    display: i18n.translate('xpack.ml.controls.selectSeverity.warningLabel', { defaultMessage: 'warning' }),
+    display: warningLabel,
     color: getSeverityColor(0)
   },
   {
     val: 25,
-    display: i18n.translate('xpack.ml.controls.selectSeverity.minorLabel', { defaultMessage: 'minor' }),
+    display: minorLabel,
     color: getSeverityColor(25)
   },
   {
     val: 50,
-    display: i18n.translate('xpack.ml.controls.selectSeverity.majorLabel', { defaultMessage: 'major' }),
+    display: majorLabel,
     color: getSeverityColor(50)
   },
   {
     val: 75,
-    display: i18n.translate('xpack.ml.controls.selectSeverity.criticalLabel', { defaultMessage: 'critical' }),
+    display: criticalLabel,
     color: getSeverityColor(75)
   },
 ];
