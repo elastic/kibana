@@ -13,7 +13,6 @@ import { i18n } from '@kbn/i18n';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  EuiBreadcrumbs,
   EuiCallOut,
   EuiLoadingKibana,
   EuiOverlayMask,
@@ -443,23 +442,6 @@ export class JobCreateUi extends Component {
   render() {
     const { isSaving, saveError } = this.props;
 
-    const breadcrumbs = [{
-      text: (
-        <FormattedMessage
-          id="xpack.rollupJobs.create.breadcrumbs.jobsText"
-          defaultMessage="Rollup jobs"
-        />
-      ),
-      ...getRouterLinkProps(CRUD_APP_BASE_PATH),
-    }, {
-      text: (
-        <FormattedMessage
-          id="xpack.rollupJobs.create.breadcrumbs.createText"
-          defaultMessage="Create"
-        />
-      ),
-    }];
-
     let savingFeedback;
 
     if (isSaving) {
@@ -508,11 +490,7 @@ export class JobCreateUi extends Component {
 
     return (
       <Fragment>
-        <EuiPageContent
-          horizontalPosition="center"
-        >
-          <EuiBreadcrumbs breadcrumbs={breadcrumbs} responsive={false} />
-          <EuiSpacer size="xs" />
+        <EuiPageContent>
           <EuiPageContentHeader>
             <EuiTitle size="m">
               <h1>

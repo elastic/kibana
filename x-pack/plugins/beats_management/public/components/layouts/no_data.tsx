@@ -7,14 +7,7 @@
 import React from 'react';
 import { withRouter } from 'react-router-dom';
 
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPageContent } from '@elastic/eui';
 
 interface LayoutProps {
   title: string;
@@ -25,22 +18,18 @@ interface LayoutProps {
 export const NoDataLayout: React.SFC<LayoutProps> = withRouter<any>(
   ({ actionSection, title, modalClosePath, children, history }) => {
     return (
-      <EuiPage>
-        <EuiPageBody>
-          <EuiFlexGroup justifyContent="spaceAround" style={{ marginTop: 50 }}>
-            <EuiFlexItem grow={false}>
-              <EuiPageContent>
-                <EuiEmptyPrompt
-                  iconType="logoBeats"
-                  title={<h2>{title}</h2>}
-                  body={children}
-                  actions={actionSection}
-                />
-              </EuiPageContent>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPageBody>
-      </EuiPage>
+      <EuiFlexGroup justifyContent="spaceAround">
+        <EuiFlexItem grow={false}>
+          <EuiPageContent>
+            <EuiEmptyPrompt
+              iconType="logoBeats"
+              title={<h2>{title}</h2>}
+              body={children}
+              actions={actionSection}
+            />
+          </EuiPageContent>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 ) as any;
