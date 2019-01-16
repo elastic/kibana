@@ -46,8 +46,8 @@ const logSummaryTests: KbnTestProvider = ({ getService }) => {
   const client = getService('infraOpsGraphQLClient');
 
   describe('logSummaryBetween', () => {
-    before(() => esArchiver.load('infra/legacy'));
-    after(() => esArchiver.unload('infra/legacy'));
+    before(() => esArchiver.load('infra/metrics_and_logs'));
+    after(() => esArchiver.unload('infra/metrics_and_logs'));
 
     it('should return empty and non-empty consecutive buckets', async () => {
       const start = EARLIEST_TIME_WITH_DATA;
