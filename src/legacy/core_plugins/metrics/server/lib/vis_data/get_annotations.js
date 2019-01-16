@@ -19,6 +19,7 @@
 
 import buildAnnotationRequest from './build_annotation_request';
 import handleAnnotationResponse from './handle_annotation_response';
+import getEsShardTimeout from './helpers/get_es_shard_timeout';
 
 function validAnnotation(annotation) {
   return annotation.index_pattern &&
@@ -30,21 +31,22 @@ function validAnnotation(annotation) {
 
 export default async (req, panel) => {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
+  const timeout = getEsShardTimeout(req);
   const bodies = panel.annotations
     .filter(validAnnotation)
     .map(annotation => {
-
       const indexPattern = annotation.index_pattern;
       const bodies = [];
+      const body = {
+        ...buildAnnotationRequest(req, panel, annotation),
+        timeout
+      };
 
       bodies.push({
         index: indexPattern,
         ignoreUnavailable: true,
-      });
+      }, body);
 
-      const body = buildAnnotationRequest(req, panel, annotation);
-      body.timeout = '90s';
-      bodies.push(body);
       return bodies;
     });
 

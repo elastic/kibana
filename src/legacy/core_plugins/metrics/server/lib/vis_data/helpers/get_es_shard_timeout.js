@@ -17,22 +17,6 @@
  * under the License.
  */
 
-import buildRequestBody from './build_request_body';
-import getEsShardTimeout from '../helpers/get_es_shard_timeout';
-
-export default (req, panel, series) => {
-  const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
-  const timeout = getEsShardTimeout(req);
-  const bodies = [];
-  const body = {
-    ...buildRequestBody(req, panel, series),
-    timeout
-  };
-
-  bodies.push({
-    index: indexPattern,
-    ignoreUnavailable: true,
-  }, body);
-
-  return bodies;
-};
+export default function getEsShardTimeout(req) {
+  return `${req.server.config().get('elasticsearch.shardTimeout')}ms`;
+}
