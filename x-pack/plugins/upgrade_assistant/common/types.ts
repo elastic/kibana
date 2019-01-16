@@ -8,14 +8,13 @@ import { Legacy } from 'kibana';
 
 export const UPGRADE_ASSISTANT_TYPE = 'upgrade-assistant';
 export const UPGRADE_ASSISTANT_DOC_ID = 'upgrade-assistant';
+export type UIOpenOption = 'overview' | 'cluster' | 'indices';
 
 export interface UIOpen {
   overview: boolean;
   cluster: boolean;
   indices: boolean;
 }
-
-export type UIOpenOption = 'overview' | 'cluster' | 'indices';
 
 export interface UpgradeAssistantTelemetryServer extends Legacy.Server {
   usage: {

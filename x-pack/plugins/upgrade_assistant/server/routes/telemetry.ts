@@ -7,7 +7,6 @@
 import Boom from 'boom';
 import Joi from 'joi';
 import { UpgradeAssistantTelemetryServer } from '../../common/types';
-
 import { upsertUIOpenOption } from '../lib/telemetry/es_ui_open_apis';
 
 export function registerTelemetryRoutes(server: UpgradeAssistantTelemetryServer) {
