@@ -8,7 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import uuid from 'uuid/v4';
 
-import { VectorSource } from '../vector_source';
+import { AbstractESSource } from '../es_source';
 import {
   fetchSearchSourceAndRecordWithInspector,
   inspectorAdapters,
@@ -23,7 +23,7 @@ import { UpdateSourceEditor } from './update_source_editor';
 
 const DEFAULT_LIMIT = 2048;
 
-export class ESSearchSource extends VectorSource {
+export class ESSearchSource extends AbstractESSource {
 
   static type = 'ES_SEARCH';
   static title = 'Elasticsearch documents';

@@ -6,14 +6,14 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { ALayer } from './layer';
+import { AbstractLayer } from './layer';
 import { EuiIcon } from '@elastic/eui';
 import { HeatmapStyle } from './styles/heatmap_style';
 import { ZOOM_TO_PRECISION } from '../utils/zoom_to_precision';
 
 const SCALED_PROPERTY_NAME = '__kbn_heatmap_weight__';//unique name to store scaled value for weighting
 
-export class HeatmapLayer extends ALayer {
+export class HeatmapLayer extends AbstractLayer {
 
   static type = "HEATMAP";
 
@@ -75,7 +75,7 @@ export class HeatmapLayer extends ALayer {
     }
 
     const propertyKey = this._getPropKeyOfSelectedMetric();
-    const dataBoundToMap = ALayer.getBoundDataForSource(mbMap, this.getId());
+    const dataBoundToMap = AbstractLayer.getBoundDataForSource(mbMap, this.getId());
     if (featureCollection !== dataBoundToMap) {
       let max = 0;
       for (let i = 0; i < featureCollection.features.length; i++) {

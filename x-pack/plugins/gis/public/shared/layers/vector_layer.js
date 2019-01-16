@@ -8,7 +8,7 @@ import mapboxgl from 'mapbox-gl';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { ALayer } from './layer';
+import { AbstractLayer } from './layer';
 import { VectorStyle } from './styles/vector_style';
 import { LeftInnerJoin } from './joins/left_inner_join';
 
@@ -24,7 +24,7 @@ const EMPTY_FEATURE_COLLECTION = {
   features: []
 };
 
-export class VectorLayer extends ALayer {
+export class VectorLayer extends AbstractLayer {
 
   static type = 'VECTOR';
 
@@ -384,7 +384,7 @@ export class VectorLayer extends ALayer {
       return;
     }
 
-    const dataBoundToMap = ALayer.getBoundDataForSource(mbMap, this.getId());
+    const dataBoundToMap = AbstractLayer.getBoundDataForSource(mbMap, this.getId());
     if (featureCollection !== dataBoundToMap) {
       mbGeoJSONSource.setData(featureCollection);
     }

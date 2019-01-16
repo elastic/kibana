@@ -7,11 +7,11 @@
 
 import { VectorLayer } from '../vector_layer';
 import { VectorStyle } from '../styles/vector_style';
-import { ASource } from './source';
+import { AbstractSource } from './source';
 import * as topojson from 'topojson-client';
 import _ from 'lodash';
 
-export class VectorSource extends ASource {
+export class AbstractVectorSource extends AbstractSource {
 
   static async getGeoJson({ format, meta }, fetchUrl) {
     let jsonFeatures;

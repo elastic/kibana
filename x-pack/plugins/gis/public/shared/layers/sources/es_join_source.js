@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import React, { Fragment } from 'react';
 
-import { ASource } from './source';
+import { AbstractSource } from './source';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import {
   fetchSearchSourceAndRecordWithInspector,
@@ -59,7 +59,7 @@ export function extractPropertiesMap(resp, propertyNames, countPropertyName) {
   return propertiesMap;
 }
 
-export class ESJoinSource extends ASource {
+export class ESJoinSource extends AbstractSource {
 
   static type = 'ES_JOIN_SOURCE';
 

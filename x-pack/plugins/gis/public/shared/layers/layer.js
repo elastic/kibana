@@ -14,7 +14,7 @@ import { EuiButtonIcon } from '@elastic/eui';
 const SOURCE_UPDATE_REQUIRED = true;
 const NO_SOURCE_UPDATE_REQUIRED = false;
 
-export class ALayer {
+export class AbstractLayer {
 
   constructor({ layerDescriptor, source, style }) {
     this._descriptor = layerDescriptor;

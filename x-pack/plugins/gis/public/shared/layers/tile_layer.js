@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ALayer } from './layer';
+import { AbstractLayer } from './layer';
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { TileStyle } from '../layers/styles/tile_style';
 import _ from 'lodash';
 
-export class TileLayer extends ALayer {
+export class TileLayer extends AbstractLayer {
 
   static type = "TILE";
 

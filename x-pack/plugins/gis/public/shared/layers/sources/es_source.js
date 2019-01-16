@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AbstractVectorSource } from './vector_source';
 
-import { AbstractSource } from './source';
+export class AbstractESSource extends AbstractVectorSource {
 
-export class AbstractTMSSource extends AbstractSource {
-  getUrlTemplate() {
-    throw new Error('Should implement TMSSource#getUrlTemplate');
+  constructor(descriptor) {
+    super(descriptor);
   }
+
 }
