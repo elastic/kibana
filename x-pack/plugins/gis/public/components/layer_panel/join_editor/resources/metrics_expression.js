@@ -78,10 +78,11 @@ export class MetricsExpression extends Component {
         ownFocus
         initialFocus="body" /* avoid initialFocus on Combobox */
         withTitle
+        anchorPosition="leftCenter"
         button={
           <EuiExpression
             onClick={this._togglePopover}
-            description="and use metrics"
+            description={metricExpressions.length > 1 ? 'and use metrics' : 'and use metric'}
             uppercase={false}
             value={metricExpressions.length > 0 ? metricExpressions.join(', ') : 'count'}
           />

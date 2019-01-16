@@ -153,6 +153,7 @@ export class JoinExpression extends Component {
         ownFocus
         initialFocus="body" /* avoid initialFocus on Combobox */
         withTitle
+        anchorPosition="leftCenter"
         button={
           <EuiExpression
             onClick={this._togglePopover}
