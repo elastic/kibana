@@ -15,29 +15,6 @@ import { timefilter } from 'ui/timefilter/timefilter';
 import _ from 'lodash';
 import { AggConfigs } from 'ui/vis/agg_configs';
 
-import { Schemas } from 'ui/vis/editors/default/schemas';
-
-const aggSchemas = new Schemas([
-  {
-    group: 'metrics',
-    name: 'metric',
-    title: 'Value',
-    min: 1,
-    max: Infinity,
-    aggFilter: ['avg', 'count', 'max', 'min', 'sum'],
-    defaults: [
-      { schema: 'metric', type: 'count' }
-    ]
-  },
-  {
-    group: 'buckets',
-    name: 'segment',
-    title: 'Geo Coordinates',
-    aggFilter: 'geohash_grid',
-    min: 1,
-    max: 1
-  }
-]);
 
 export class AbstractESSource extends AbstractVectorSource {
 
@@ -116,7 +93,7 @@ export class AbstractESSource extends AbstractVectorSource {
       schema: 'metric'
     }];
 
-    const aggConfigs = new AggConfigs(indexPattern, geoBoundsAgg, aggSchemas.all);
+    const aggConfigs = new AggConfigs(indexPattern, geoBoundsAgg);
     searchSource.setField('aggs', aggConfigs.toDsl());
 
     const esResp = await this._runEsQuery(layerName, searchSource, 'bounds request');
