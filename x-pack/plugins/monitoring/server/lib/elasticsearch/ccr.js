@@ -7,16 +7,7 @@
 import { get } from 'lodash';
 
 export function handleResponse(response) {
-  let enabled = true;
-  const sources = ['persistent', 'transient', 'defaults'];
-  for (const source of sources) {
-    const ccrEnabled = get(response[source], 'xpack.monitoring.ccr.enabled');
-    if (ccrEnabled === false) {
-      enabled = false;
-    }
-  }
-
-  return enabled;
+  return get(response.defaults, 'xpack.ccr.enabled', true);
 }
 
 export async function checkCcrEnabled(req) {
@@ -26,8 +17,6 @@ export async function checkCcrEnabled(req) {
     path: '/_cluster/settings?include_defaults',
     filter_path: [
       'defaults.xpack.ccr.enabled',
-      'persistent.xpack.ccr.enabled',
-      'transient.xpack.ccr.enabled'
     ]
   });
 
