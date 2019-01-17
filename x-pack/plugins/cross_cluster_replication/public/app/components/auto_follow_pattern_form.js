@@ -33,6 +33,7 @@ import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
 
 import routing from '../services/routing';
 import { extractQueryParams } from '../services/query_params';
+import { getRemoteClusterName } from '../services/get_remote_cluster_name';
 import { API_STATUS } from '../constants';
 import { SectionError } from './section_error';
 import { AutoFollowPatternIndicesPreview } from './auto_follow_pattern_indices_preview';
@@ -42,28 +43,9 @@ import { validateAutoFollowPattern, validateLeaderIndexPattern } from '../servic
 const indexPatternIllegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 const indexNameIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
-const getFirstConnectedCluster = (clusters) => {
-  for (let i = 0; i < clusters.length; i++) {
-    if (clusters[i].isConnected) {
-      return clusters[i];
-    }
-  }
-
-  /**
-   * No cluster connected, we return the first one in the list
-   */
-  return clusters.length ? clusters[0] : {};
-};
-
-const getRemoteClusterName = (remoteClusters, selected) => {
-  return selected && remoteClusters.some(c => c.name === selected)
-    ? selected
-    : getFirstConnectedCluster(remoteClusters).name;
-};
-
-const getEmptyAutoFollowPattern = (remoteClusters, remoteClusterSelected) => ({
+const getEmptyAutoFollowPattern = (remoteClusterName = '') => ({
   name: '',
-  remoteCluster: getRemoteClusterName(remoteClusters, remoteClusterSelected),
+  remoteCluster: remoteClusterName,
   leaderIndexPatterns: [],
   followIndexPatternPrefix: '',
   followIndexPatternSuffix: '',
@@ -92,8 +74,9 @@ export class AutoFollowPatternFormUI extends PureComponent {
     const isNew = this.props.autoFollowPattern === undefined;
     const { route: { location: { search } } } = routing.reactRouter;
     const queryParams = extractQueryParams(search);
+    const remoteClusterName = getRemoteClusterName(this.props.remoteClusters, queryParams.cluster);
     const autoFollowPattern = isNew
-      ? getEmptyAutoFollowPattern(this.props.remoteClusters, queryParams.cluster)
+      ? getEmptyAutoFollowPattern(remoteClusterName)
       : {
         ...this.props.autoFollowPattern,
       };
@@ -316,17 +299,15 @@ export class AutoFollowPatternFormUI extends PureComponent {
           id="xpack.crossClusterReplication.autoFollowPatternForm.emptyRemoteClustersCallOutDescription"
           defaultMessage="Auto-follow patterns capture indices on remote clusters. You must add a remote cluster."
         />),
-        remoteClusterNotConnectedNotEditable: (name) => (<FormattedMessage
+        remoteClusterNotConnectedNotEditable: () => (<FormattedMessage
           id="xpack.crossClusterReplication.autoFollowPatternForm.currentRemoteClusterNotConnectedCallOutDescription"
-          defaultMessage="The remote cluster '{name}' is not connected.
-          You need to connect it before editing the auto-follow pattern."
-          values={{ name }}
+          defaultMessage="You need to connect it before editing this auto-follow pattern. Edit the remote cluster to
+            fix the problem."
         />),
-        remoteClusterDoesNotExist: (name) => (<FormattedMessage
+        remoteClusterDoesNotExist: () => (<FormattedMessage
           id="xpack.crossClusterReplication.autoFollowPatternForm.currentRemoteClusterNotFoundCallOutDescription"
-          defaultMessage="The remote cluster '{name}' was not found. It might have been removed.
-          In order to edit the auto-follow pattern, you need to add a remote cluster with the same name."
-          values={{ name }}
+          defaultMessage="It might have been removed. In order to edit this auto-follow pattern,
+            you need to add a remote cluster with the same name."
         />)
       };
 
@@ -449,9 +430,9 @@ export class AutoFollowPatternFormUI extends PureComponent {
     };
 
     /**
-     * Auto-follow pattern
+     * Auto-follow pattern prefix/suffix
      */
-    const renderAutoFollowPattern = () => {
+    const renderAutoFollowPatternPrefixSuffix = () => {
       const isPrefixInvalid = areErrorsVisible && !!fieldsErrors.followIndexPatternPrefix;
       const isSuffixInvalid = areErrorsVisible && !!fieldsErrors.followIndexPatternSuffix;
 
@@ -639,7 +620,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
           {renderAutoFollowPatternName()}
           {renderRemoteClusterField()}
           {renderLeaderIndexPatterns()}
-          {renderAutoFollowPattern()}
+          {renderAutoFollowPatternPrefixSuffix()}
         </EuiForm>
         {renderFormErrorWarning()}
         <EuiSpacer size="l" />

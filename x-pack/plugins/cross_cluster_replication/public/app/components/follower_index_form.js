@@ -27,34 +27,16 @@ import {
 
 import routing from '../services/routing';
 import { extractQueryParams } from '../services/query_params';
+import { getRemoteClusterName } from '../services/get_remote_cluster_name';
 import { API_STATUS, followerIndexFormSchema } from '../constants';
 import { SectionError } from './section_error';
 import { loadIndices } from '../services/api';
 import { FormEntryRow } from './form_entry_row';
 import { RemoteClustersFormField } from './remote_clusters_form_field';
 
-const getFirstConnectedCluster = (clusters) => {
-  for (let i = 0; i < clusters.length; i++) {
-    if (clusters[i].isConnected) {
-      return clusters[i];
-    }
-  }
-
-  /**
-   * No cluster connected, we return the first one in the list
-   */
-  return clusters.length ? clusters[0] : {};
-};
-
-const getRemoteClusterName = (remoteClusters, selected) => {
-  return selected && remoteClusters.some(c => c.name === selected)
-    ? selected
-    : getFirstConnectedCluster(remoteClusters).name;
-};
-
-const getEmptyFollowerIndex = (remoteClusters = [], remoteClusterSelected) => ({
+const getEmptyFollowerIndex = (remoteClusterName = '') => ({
   name: '',
-  remoteCluster: getRemoteClusterName(remoteClusters, remoteClusterSelected),
+  remoteCluster: remoteClusterName,
   leaderIndex: '',
   ...Object.keys(followerIndexFormSchema.advanced).reduce((acc, field) => ({ ...acc, [field]: '' }), {})
 });
@@ -96,8 +78,9 @@ export const FollowerIndexForm = injectI18n(
       const isNew = this.props.followerIndex === undefined;
       const { route: { location: { search } } } = routing.reactRouter;
       const queryParams = extractQueryParams(search);
+      const remoteClusterName = getRemoteClusterName(this.props.remoteClusters, queryParams.cluster);
       const followerIndex = isNew
-        ? getEmptyFollowerIndex(this.props.remoteClusters, queryParams.cluster)
+        ? getEmptyFollowerIndex(remoteClusterName)
         : {
           ...getEmptyFollowerIndex(),
           ...this.props.followerIndex,
@@ -264,17 +247,15 @@ export const FollowerIndexForm = injectI18n(
             id="xpack.crossClusterReplication.followerIndexForm.emptyRemoteClustersCallOutDescription"
             defaultMessage="Follower indices replicate indices on remote clusters. You must add a remote cluster."
           />),
-          remoteClusterNotConnectedNotEditable: (name) => (<FormattedMessage
+          remoteClusterNotConnectedNotEditable: () => (<FormattedMessage
             id="xpack.crossClusterReplication.followerIndexForm.currentRemoteClusterNotConnectedCallOutDescription"
-            defaultMessage="The remote cluster '{name}' is not connected.
-            You need to connect it before editing the follower index."
-            values={{ name }}
+            defaultMessage="You need to connect it before editing this follower index. Edit the remote cluster to
+              fix the problem."
           />),
-          remoteClusterDoesNotExist: (name) => (<FormattedMessage
+          remoteClusterDoesNotExist: () => (<FormattedMessage
             id="xpack.crossClusterReplication.followerIndexForm.currentRemoteClusterNotFoundCallOutDescription"
-            defaultMessage="The remote cluster '{name}' was not found. It might have been removed.
-            In order to edit the follower index, you need to add a remote cluster with the same name."
-            values={{ name }}
+            defaultMessage="It might have been removed. In order to edit this follower index,
+              you need to add a remote cluster with the same name."
           />)
         };
 

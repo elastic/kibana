@@ -11,8 +11,6 @@ import chrome from 'ui/chrome';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import {
-  EuiPage,
-  EuiPageBody,
   EuiPageContent,
 } from '@elastic/eui';
 
@@ -46,57 +44,53 @@ export const FollowerIndexAdd = injectI18n(
       const { saveFollowerIndex, clearApiError, apiStatus, apiError, intl, match: { url: currentUrl }  } = this.props;
 
       return (
-        <EuiPage>
-          <EuiPageBody>
-            <EuiPageContent
-              horizontalPosition="center"
-              className="ccrPageContent"
-            >
-              <FollowerIndexPageTitle
-                title={(
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.followerIndex.addTitle"
-                    defaultMessage="Add follower index"
-                  />
-                )}
+        <EuiPageContent
+          horizontalPosition="center"
+          className="ccrPageContent"
+        >
+          <FollowerIndexPageTitle
+            title={(
+              <FormattedMessage
+                id="xpack.crossClusterReplication.followerIndex.addTitle"
+                defaultMessage="Add follower index"
               />
+            )}
+          />
 
-              <RemoteClustersProvider>
-                {({ isLoading, error, remoteClusters }) => {
-                  if (isLoading) {
-                    return (
-                      <SectionLoading>
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexCreateForm.loadingRemoteClusters"
-                          defaultMessage="Loading remote clusters..."
-                        />
-                      </SectionLoading>
-                    );
-                  }
-
-                  if (error) {
-                    const title = intl.formatMessage({
-                      id: 'xpack.crossClusterReplication.followerIndexCreateForm.loadingRemoteClustersErrorTitle',
-                      defaultMessage: 'Error loading remote clusters',
-                    });
-                    return <SectionError title={title} error={error} />;
-                  }
-
-                  return (
-                    <FollowerIndexForm
-                      apiStatus={apiStatus}
-                      apiError={apiError}
-                      currentUrl={currentUrl}
-                      remoteClusters={remoteClusters}
-                      saveFollowerIndex={saveFollowerIndex}
-                      clearApiError={clearApiError}
+          <RemoteClustersProvider>
+            {({ isLoading, error, remoteClusters }) => {
+              if (isLoading) {
+                return (
+                  <SectionLoading>
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.followerIndexCreateForm.loadingRemoteClusters"
+                      defaultMessage="Loading remote clusters..."
                     />
-                  );
-                }}
-              </RemoteClustersProvider>
-            </EuiPageContent>
-          </EuiPageBody>
-        </EuiPage>
+                  </SectionLoading>
+                );
+              }
+
+              if (error) {
+                const title = intl.formatMessage({
+                  id: 'xpack.crossClusterReplication.followerIndexCreateForm.loadingRemoteClustersErrorTitle',
+                  defaultMessage: 'Error loading remote clusters',
+                });
+                return <SectionError title={title} error={error} />;
+              }
+
+              return (
+                <FollowerIndexForm
+                  apiStatus={apiStatus}
+                  apiError={apiError}
+                  currentUrl={currentUrl}
+                  remoteClusters={remoteClusters}
+                  saveFollowerIndex={saveFollowerIndex}
+                  clearApiError={clearApiError}
+                />
+              );
+            }}
+          </RemoteClustersProvider>
+        </EuiPageContent>
       );
     }
   }

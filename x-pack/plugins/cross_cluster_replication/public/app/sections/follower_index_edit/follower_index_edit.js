@@ -11,8 +11,6 @@ import chrome from 'ui/chrome';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import {
-  EuiPage,
-  EuiPageBody,
   EuiPageContent,
   EuiButton,
   EuiSpacer,
@@ -190,6 +188,7 @@ export const FollowerIndexEdit = injectI18n(
         apiStatus,
         apiError,
         followerIndex,
+        match: { url: currentUrl }
       } = this.props;
 
       const { showConfirmModal } = this.state;
@@ -198,60 +197,57 @@ export const FollowerIndexEdit = injectI18n(
       const { shards, ...rest } = followerIndex || {}; // eslint-disable-line no-unused-vars
 
       return (
-        <EuiPage>
-          <EuiPageBody>
-            <EuiPageContent
-              horizontalPosition="center"
-              className="ccrPageContent"
-            >
-              <FollowerIndexPageTitle
-                title={(
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.followerIndex.editTitle"
-                    defaultMessage="Edit follower index"
-                  />
-                )}
+        <EuiPageContent
+          horizontalPosition="center"
+          className="ccrPageContent"
+        >
+          <FollowerIndexPageTitle
+            title={(
+              <FormattedMessage
+                id="xpack.crossClusterReplication.followerIndex.editTitle"
+                defaultMessage="Edit follower index"
               />
+            )}
+          />
 
-              {apiStatus.get === API_STATUS.LOADING && this.renderLoadingFollowerIndex()}
+          {apiStatus.get === API_STATUS.LOADING && this.renderLoadingFollowerIndex()}
 
-              {apiError.get && this.renderGetFollowerIndexError(apiError.get)}
-              { followerIndex && (
-                <RemoteClustersProvider>
-                  {({ isLoading, error, remoteClusters }) => {
-                    if (isLoading) {
-                      return (
-                        <SectionLoading>
-                          <FormattedMessage
-                            id="xpack.crossClusterReplication.followerIndexCreateForm.loadingRemoteClusters"
-                            defaultMessage="Loading remote clusters..."
-                          />
-                        </SectionLoading>
-                      );
-                    }
-
-                    if (error) {
-                      remoteClusters = [];
-                    }
-
-                    return (
-                      <FollowerIndexForm
-                        followerIndex={rest}
-                        apiStatus={apiStatus.save}
-                        apiError={apiError.save}
-                        remoteClusters={remoteClusters}
-                        saveFollowerIndex={this.saveFollowerIndex}
-                        clearApiError={clearApiError}
+          {apiError.get && this.renderGetFollowerIndexError(apiError.get)}
+          { followerIndex && (
+            <RemoteClustersProvider>
+              {({ isLoading, error, remoteClusters }) => {
+                if (isLoading) {
+                  return (
+                    <SectionLoading>
+                      <FormattedMessage
+                        id="xpack.crossClusterReplication.followerIndexCreateForm.loadingRemoteClusters"
+                        defaultMessage="Loading remote clusters..."
                       />
-                    );
-                  }}
-                </RemoteClustersProvider>
-              ) }
+                    </SectionLoading>
+                  );
+                }
 
-              { showConfirmModal && this.renderConfirmModal() }
-            </EuiPageContent>
-          </EuiPageBody>
-        </EuiPage>
+                if (error) {
+                  remoteClusters = [];
+                }
+
+                return (
+                  <FollowerIndexForm
+                    followerIndex={rest}
+                    apiStatus={apiStatus.save}
+                    apiError={apiError.save}
+                    currentUrl={currentUrl}
+                    remoteClusters={remoteClusters}
+                    saveFollowerIndex={this.saveFollowerIndex}
+                    clearApiError={clearApiError}
+                  />
+                );
+              }}
+            </RemoteClustersProvider>
+          ) }
+
+          { showConfirmModal && this.renderConfirmModal() }
+        </EuiPageContent>
       );
     }
   }

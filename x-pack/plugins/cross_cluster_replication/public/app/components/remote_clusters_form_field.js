@@ -27,7 +27,7 @@ const errorMessages = {
   />),
   remoteClusterNotConnectedEditable: (name) => (<FormattedMessage
     id="xpack.crossClusterReplication.forms.currentRemoteClusterNotConnectedCallOutDescription"
-    defaultMessage="The remote cluster '{name}' is not connected. Select another remote cluster or add a new one."
+    defaultMessage="Edit the remote cluster to fix the problem or select a different one."
     values={{ name }}
   />),
 };
@@ -52,7 +52,12 @@ export const RemoteClustersFormField = injectI18n(
 
       return remoteCluster && remoteCluster.isConnected
         ? { error: null }
-        : { error: { message: 'Invalid remote cluster' } };
+        : { error: { message: (
+          <FormattedMessage
+            id="xpack.crossClusterReplication.forms.invalidRemoteClusterError"
+            defaultMessage="Invalid remote cluster"
+          />
+        ) } };
     }
 
     onRemoteClusterChange = (cluster) => {
@@ -74,27 +79,36 @@ export const RemoteClustersFormField = injectI18n(
       const { remoteClusters, selected, currentUrl } = this.props;
       const remoteClustersOptions = remoteClusters.map(({ name, isConnected }) => ({
         value: name,
-        inputDisplay: isConnected ? name : `${name} (not connected)`,
-        disabled: !isConnected,
+        inputDisplay: isConnected ? name : (
+          <FormattedMessage
+            id="xpack.crossClusterReplication.forms.remoteClusterDropdownNotConnected"
+            defaultMessage="{name} (not connected)"
+            values={{ name }}
+          />
+        ),
         'data-test-subj': `option-${name}`
       }));
 
       return (
         <Fragment>
           <EuiSuperSelect
+            fullWidth
             options={remoteClustersOptions}
             valueOfSelected={selected}
             onChange={this.onRemoteClusterChange}
           />
+          { this.renderErrorMessage() }
           <EuiSpacer size="s" />
           <div>
             <EuiButtonEmpty
               {...routing.getRouterLinkProps('/add', BASE_PATH_REMOTE_CLUSTERS, { redirect: currentUrl })}
               size="s"
+              iconType="plusInCircle"
+              flush="left"
             >
               <FormattedMessage
                 id="xpack.crossClusterReplication.forms.addRemoteClusterButtonLabel"
-                defaultMessage="Add remote cluster"
+                defaultMessage="Add new remote cluster"
               />
             </EuiButtonEmpty>
           </div>
@@ -127,7 +141,7 @@ export const RemoteClustersFormField = injectI18n(
             >
               <FormattedMessage
                 id="xpack.crossClusterReplication.forms.addRemoteClusterButtonLabel"
-                defaultMessage="Add remote cluster"
+                defaultMessage="Add new remote cluster"
               />
             </EuiButton>
           </EuiCallOut>
@@ -136,11 +150,11 @@ export const RemoteClustersFormField = injectI18n(
     };
 
     renderCurrentRemoteClusterNotConnected = (name) => {
-      const { intl, isEditable } = this.props;
+      const { intl, isEditable, currentUrl } = this.props;
       const title = intl.formatMessage({
         id: 'xpack.crossClusterReplication.forms.remoteClusterConnectionErrorTitle',
-        defaultMessage: 'Remote cluster connection error'
-      });
+        defaultMessage: `The remote cluster '{name}' is not connected`
+      }, { name });
 
       return (
         <EuiCallOut
@@ -153,12 +167,13 @@ export const RemoteClustersFormField = injectI18n(
             { !isEditable && this.errorMessages.remoteClusterNotConnectedNotEditable(name)}
           </p>
           <EuiButton
-            {...routing.getRouterLinkProps('/', BASE_PATH_REMOTE_CLUSTERS)}
+            {...routing.getRouterLinkProps(`/edit/${name}`, BASE_PATH_REMOTE_CLUSTERS, { redirect: currentUrl })}
             color="warning"
           >
             <FormattedMessage
               id="xpack.crossClusterReplication.forms.viewRemoteClusterButtonLabel"
-              defaultMessage="View remote clusters"
+              defaultMessage="Edit remote cluster '{name}'"
+              values={{ name }}
             />
           </EuiButton>
         </EuiCallOut>
@@ -166,11 +181,11 @@ export const RemoteClustersFormField = injectI18n(
     };
 
     renderRemoteClusterDoesNotExist = (name) => {
-      const { intl } = this.props;
+      const { intl, currentUrl } = this.props;
       const title = intl.formatMessage({
-        id: 'xpack.crossClusterReplication.forms.remoteClusterErrorTitle',
-        defaultMessage: 'Remote cluster error'
-      });
+        id: 'xpack.crossClusterReplication.forms.remoteClusterNotFoundTitle',
+        defaultMessage: `The remote cluster '{name}' was not found`,
+      }, { name });
 
       return (
         <EuiCallOut
@@ -179,15 +194,16 @@ export const RemoteClustersFormField = injectI18n(
           iconType="cross"
         >
           <p>
-            { this.errorMessages.remoteClusterDoesNotExist(name) }
+            { this.errorMessages.remoteClusterDoesNotExist() }
           </p>
           <EuiButton
-            {...routing.getRouterLinkProps('/', BASE_PATH_REMOTE_CLUSTERS)}
+            {...routing.getRouterLinkProps('/add', BASE_PATH_REMOTE_CLUSTERS, { redirect: currentUrl })}
+            iconType="plusInCircle"
             color="warning"
           >
             <FormattedMessage
-              id="xpack.crossClusterReplication.forms.viewRemoteClusterButtonLabel"
-              defaultMessage="View remote clusters"
+              id="xpack.crossClusterReplication.forms.addRemoteClusterButtonLabel"
+              defaultMessage="Add new remote cluster"
             />
           </EuiButton>
         </EuiCallOut>
@@ -197,27 +213,33 @@ export const RemoteClustersFormField = injectI18n(
     renderErrorMessage = () => {
       const { selected, remoteClusters, isEditable } = this.props;
       const remoteCluster = remoteClusters.find(c => c.name === selected);
-      const hasClusters = Boolean(remoteClusters.length);
       const isSelectedRemoteClusterConnected = remoteCluster && remoteCluster.isConnected;
+      let error;
 
       if (isEditable) {
         /* Create */
+        const hasClusters = Boolean(remoteClusters.length);
         if (hasClusters && !isSelectedRemoteClusterConnected) {
-          return this.renderCurrentRemoteClusterNotConnected(selected);
+          error = this.renderCurrentRemoteClusterNotConnected(selected);
         } else if (!hasClusters) {
-          return this.renderNoClusterFound();
+          error = this.renderNoClusterFound();
         }
       } else {
         /* Edit */
         const doesExists = !!remoteCluster;
         if (!doesExists) {
-          return this.renderRemoteClusterDoesNotExist(selected);
+          error = this.renderRemoteClusterDoesNotExist(selected);
         } else if (!isSelectedRemoteClusterConnected) {
-          return this.renderCurrentRemoteClusterNotConnected(selected);
+          error = this.renderCurrentRemoteClusterNotConnected(selected);
         }
       }
 
-      return null;
+      return error ? (
+        <Fragment>
+          <EuiSpacer size="s" />
+          {error}
+        </Fragment>
+      ) : null;
     }
 
     render() {
@@ -226,6 +248,30 @@ export const RemoteClustersFormField = injectI18n(
       const hasClusters = Boolean(remoteClusters.length);
       const isSelectedRemoteClusterConnected = remoteCluster && remoteCluster.isConnected;
       const isInvalid = areErrorsVisible && (!hasClusters || !isSelectedRemoteClusterConnected);
+      let field;
+
+      if(!isEditable) {
+        field = (
+          <Fragment>
+            { this.renderNotEditable() }
+            { this.renderErrorMessage() }
+          </Fragment>
+        );
+      } else {
+        if(hasClusters) {
+          field = (
+            <Fragment>
+              { this.renderDropdown() }
+            </Fragment>
+          );
+        } else {
+          field = (
+            <Fragment>
+              { this.renderErrorMessage() }
+            </Fragment>
+          );
+        }
+      }
 
       return (
         <EuiFormRow
@@ -238,12 +284,7 @@ export const RemoteClustersFormField = injectI18n(
           isInvalid={isInvalid}
           fullWidth
         >
-          <Fragment>
-            { !isEditable && this.renderNotEditable() }
-            { isEditable && hasClusters && this.renderDropdown() }
-            <EuiSpacer size="s" />
-            { this.renderErrorMessage() }
-          </Fragment>
+          {field}
         </EuiFormRow>
       );
     }

@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../constants';
-import { buildListBreadcrumb, editBreadcrumb } from '../../services';
+import { buildListBreadcrumb, editBreadcrumb, extractQueryParams, getRouter, redirect } from '../../services';
 import { RemoteClusterPageTitle, RemoteClusterForm, ConfiguredByNodeWarning } from '../components';
 
 const disabledFields = {
@@ -85,10 +85,18 @@ export const RemoteClusterEdit = injectI18n(
     };
 
     cancel = () => {
-      const { history, openDetailPanel } = this.props;
+      const { openDetailPanel } = this.props;
       const { clusterName } = this.state;
-      history.push(CRUD_APP_BASE_PATH);
-      openDetailPanel(clusterName);
+      const { history, route: { location: { search } } } = getRouter();
+      const { redirect: redirectUrl } = extractQueryParams(search);
+
+      if (redirectUrl) {
+        const decodedRedirect = decodeURIComponent(redirectUrl);
+        redirect(decodedRedirect);
+      } else {
+        history.push(CRUD_APP_BASE_PATH);
+        openDetailPanel(clusterName);
+      }
     };
 
     renderContent() {
