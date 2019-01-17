@@ -69,17 +69,17 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
   const createFormat = (agg: AggConfig): SchemaFormat => {
     const format: SchemaFormat = agg.params.field ? agg.params.field.format.toJSON() : {};
     const formats: any = {
-      date_range: { id: 'string' },
-      percentile_ranks: { id: 'percent' },
-      count: { id: 'number' },
-      cardinality: { id: 'number' },
-      date_histogram: {
+      date_range: () => ({ id: 'string' }),
+      percentile_ranks: () => ({ id: 'percent' }),
+      count: () => ({ id: 'number' }),
+      cardinality: () => ({ id: 'number' }),
+      date_histogram: () => ({
         id: 'date',
         params: {
           pattern: agg.buckets.getScaledDateFormat(),
         },
-      },
-      terms: {
+      }),
+      terms: () => ({
         id: 'terms',
         params: {
           id: format.id,
@@ -87,14 +87,14 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
           missingBucketLabel: agg.params.missingBucketLabel,
           ...format.params,
         },
-      },
-      range: {
+      }),
+      range: () => ({
         id: 'range',
         params: { id: format.id, ...format.params },
-      },
+      }),
     };
 
-    return formats[agg.type.name] || format;
+    return formats[agg.type.name] ? formats[agg.type.name]() : format;
   };
 
   const createSchemaConfig = (accessor: number, agg: AggConfig): SchemaConfig => {
