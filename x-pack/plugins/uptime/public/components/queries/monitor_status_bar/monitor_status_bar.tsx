@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiLink, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
@@ -59,7 +59,6 @@ export const MonitorStatusBar = ({
           duration: { us },
         },
         url: { full },
-        tcp: { port },
       } = monitorStatus[0];
 
       return (
@@ -98,15 +97,12 @@ export const MonitorStatusBar = ({
                 defaultMessage="Last update: {timeFromNow}"
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>URL: {full}</EuiFlexItem>
-            <EuiFlexItem grow={false}>IP: {ip}</EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <FormattedMessage
-                id="xpack.uptime.monitorStatusBar.healthStatus.portMessage"
-                values={{ port }}
-                defaultMessage="Port: {port}"
-              />
+              <EuiLink href={full} target="_blank">
+                {full}
+              </EuiLink>
             </EuiFlexItem>
+            <EuiFlexItem grow={false}>IP: {ip}</EuiFlexItem>
             <EuiFlexItem grow={false}>
               <FormattedMessage
                 id="xpack.uptime.monitorStatusBar.healthStatus.durationInMillisecondsMessage"

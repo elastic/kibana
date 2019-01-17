@@ -66,11 +66,22 @@ const monitorListColumns = [
     sortable: true,
   },
   {
-    field: 'ping.url.full',
-    name: i18n.translate('xpack.uptime.monitorList.hostColumnLabel', {
-      defaultMessage: 'Host',
+    field: 'ping.monitor.id',
+    name: i18n.translate('xpack.uptime.monitorList.idColumnLabel', {
+      defaultMessage: 'URL',
     }),
-    render: (host: string, monitor: any) => <Link to={`/monitor/${monitor.key.id}`}>{host}</Link>,
+    render: (id: string, monitor: any) => <Link to={`/monitor/${monitor.key.id}`}>{id}</Link>,
+  },
+  {
+    field: 'ping.url.full',
+    name: i18n.translate('xpack.uptime.monitorList.urlColumnLabel', {
+      defaultMessage: 'URL',
+    }),
+    render: (url: string, monitor: any) => (
+      <EuiLink href={url} target="_blank">
+        {url}
+      </EuiLink>
+    ),
   },
   {
     field: 'ping.monitor.ip',
