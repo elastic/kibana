@@ -2,7 +2,7 @@
 
 exports[`SpacesGridPage renders as expected 1`] = `
 <div
-  className="spcGridPage euiPage--restrictWidth-default"
+  className="spcGridPage"
 >
   <EuiPageContent
     horizontalPosition="center"
@@ -106,6 +106,7 @@ exports[`SpacesGridPage renders as expected 1`] = `
             },
           ]
         }
+        executeQueryOptions={Object {}}
         hasActions={true}
         itemId="id"
         items={Array []}
