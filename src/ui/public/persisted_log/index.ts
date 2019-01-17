@@ -17,25 +17,8 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-import { populateBrowserRegistries, createSocket, initializeInterpreter } from '@kbn/interpreter/public';
-import { typesRegistry, functionsRegistry } from '@kbn/interpreter/common';
-import { functions } from './functions';
+// @ts-ignore
+import './directive';
 
-const basePath = chrome.getBasePath();
-
-const types = {
-  browserFunctions: functionsRegistry,
-  types: typesRegistry
-};
-
-function addFunction(fnDef) {
-  functionsRegistry.register(fnDef);
-}
-
-functions.forEach(addFunction);
-
-createSocket(basePath).then(async () => {
-  await populateBrowserRegistries(types, basePath);
-  await initializeInterpreter();
-});
+export { PersistedLog } from './persisted_log';
+export { recentlyAccessed, RecentlyAccessedHistoryItem } from './recently_accessed';

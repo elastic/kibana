@@ -55,10 +55,10 @@ export const MonitorStatusBar = ({
         monitor: {
           status,
           timestamp,
-          host,
+          ip,
           duration: { us },
-          scheme,
         },
+        url: { full },
         tcp: { port },
       } = monitorStatus[0];
 
@@ -98,13 +98,8 @@ export const MonitorStatusBar = ({
                 defaultMessage="Last update: {timeFromNow}"
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <FormattedMessage
-                id="xpack.uptime.monitorStatusBar.healthStatus.hostMessage"
-                values={{ host }}
-                defaultMessage="Host: {host}"
-              />
-            </EuiFlexItem>
+            <EuiFlexItem grow={false}>URL: {full}</EuiFlexItem>
+            <EuiFlexItem grow={false}>IP: {ip}</EuiFlexItem>
             <EuiFlexItem grow={false}>
               <FormattedMessage
                 id="xpack.uptime.monitorStatusBar.healthStatus.portMessage"
@@ -118,13 +113,6 @@ export const MonitorStatusBar = ({
                 // TODO: this should not be computed inline
                 values={{ duration: us / 1000 }}
                 defaultMessage="Duration: {duration} ms"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <FormattedMessage
-                id="xpack.uptime.monitorStatusBar.healthStatus.schemeMessage"
-                values={{ scheme }}
-                defaultMessage="Scheme: {scheme}"
               />
             </EuiFlexItem>
           </EuiFlexGroup>

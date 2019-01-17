@@ -10,6 +10,7 @@ import {
   EuiInMemoryTable,
   // @ts-ignore missing type definition
   EuiLineSeries,
+  EuiLink,
   EuiPanel,
   // @ts-ignore missing type definition
   EuiSeriesChart,
@@ -65,25 +66,11 @@ const monitorListColumns = [
     sortable: true,
   },
   {
-    field: 'ping.monitor.host',
+    field: 'ping.url.full',
     name: i18n.translate('xpack.uptime.monitorList.hostColumnLabel', {
       defaultMessage: 'Host',
     }),
     render: (host: string, monitor: any) => <Link to={`/monitor/${monitor.key.id}`}>{host}</Link>,
-  },
-  {
-    field: 'key.port',
-    name: i18n.translate('xpack.uptime.monitorList.portColumnLabel', {
-      defaultMessage: 'Port',
-    }),
-    sortable: true,
-  },
-  {
-    field: 'ping.monitor.type',
-    name: i18n.translate('xpack.uptime.monitorList.typeColumnLabel', {
-      defaultMessage: 'Type',
-    }),
-    sortable: true,
   },
   {
     field: 'ping.monitor.ip',

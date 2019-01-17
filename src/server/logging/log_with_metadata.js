@@ -16,5 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { isPlainObject } from 'lodash';
+const symbol = Symbol('log message with metadata');
 
-export { PersistedLog } from './persisted_log';
+export const logWithMetadata = {
+  isLogEvent(eventData) {
+    return Boolean(isPlainObject(eventData) && eventData[symbol]);
+  },
+
+  getLogEventData(eventData) {
+    const { message, metadata } = eventData[symbol];
+    return {
+      ...metadata,
+      message
+    };
+  },
+
+  decorateServer(server) {
+    server.decorate('server', 'logWithMetadata', (tags, message, metadata = {}) => {
+      server.log(tags, {
+        [symbol]: {
+          message,
+          metadata,
+        },
+      });
+    });
+  },
+};

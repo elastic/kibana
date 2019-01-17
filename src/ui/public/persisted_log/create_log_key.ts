@@ -19,7 +19,7 @@
 
 import { Sha256 } from '../crypto';
 
-export function createLogKey(type, optionalIdentifier) {
+export function createLogKey(type: string, optionalIdentifier: string) {
   const baseKey = `kibana.history.${type}`;
 
   if (!optionalIdentifier) {
