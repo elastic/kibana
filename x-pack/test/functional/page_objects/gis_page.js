@@ -134,7 +134,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async toggleLayerVisibility(layerName) {
       log.debug(`Toggle layer visibility, layer: ${layerName}`);
-      await testSubjects.click(`mapLayerVisibilityToggleButton${layerName}`);
+      await testSubjects.click(`mapLayerVisibilityToggleButton${layerName.split(' ').join('')}`);
     }
 
     async openLayerPanel(layerName) {

@@ -33,11 +33,6 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.addSampleDataSet('ecommerce');
         await PageObjects.gis.loadSavedMap('[eCommerce] Orders by Country');
-        await PageObjects.gis.toggleLayerVisibility('road_map');
-        await setTimerangeToCoverAllSampleData();
-        await PageObjects.gis.waitForLayersToLoad();
-        // hack just to see if this will run on CI and if its a timing issue
-        await PageObjects.common.sleep(15000);
       });
 
       after(async () => {
@@ -46,7 +41,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         await PageObjects.home.removeSampleDataSet('ecommerce');
       });
 
-      it('should load saved object and display layers', async () => {
+      it('should load layers', async () => {
         const percentDifference = await screenshot.compareAgainstBaseline('ecommerce_map', updateBaselines);
         expect(percentDifference).to.be.lessThan(0.05);
       });
@@ -61,8 +56,6 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         await PageObjects.gis.toggleLayerVisibility('road_map');
         await setTimerangeToCoverAllSampleData();
         await PageObjects.gis.waitForLayersToLoad();
-        // hack just to see if this will run on CI and if its a timing issue
-        await PageObjects.common.sleep(15000);
       });
 
       after(async () => {
@@ -78,13 +71,15 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
     });
 
 
-    /*describe('web logs', () => {
+    describe('web logs', () => {
       before(async () => {
         await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.addSampleDataSet('logs');
         await PageObjects.gis.loadSavedMap('[Logs] Total Requests and Bytes');
         await PageObjects.gis.toggleLayerVisibility('road_map');
+        // EMS vector layers are do not work on CI so hide
+        await PageObjects.gis.toggleLayerVisibility('Total Requests by Country');
         await setTimerangeToCoverAllSampleData();
         await PageObjects.gis.waitForLayersToLoad();
       });
@@ -99,7 +94,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         const percentDifference = await screenshot.compareAgainstBaseline('web_logs_map', updateBaselines);
         expect(percentDifference).to.be.lessThan(0.05);
       });
-    });*/
+    });
 
   });
 }

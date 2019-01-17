@@ -35,7 +35,7 @@ export const VisibilityToggle = ({
         checked={checked}
         disabled={disabled}
         onChange={onChange}
-        data-test-subj={`mapLayerVisibilityToggleButton${layerName}`}
+        data-test-subj={layerName ? `mapLayerVisibilityToggleButton${layerName.split(' ').join('')}` : null}
       />
 
       <span className="visibilityToggle__body">
@@ -65,4 +65,5 @@ VisibilityToggle.propTypes = {
   onChange: PropTypes.func,
   disabled: PropTypes.bool,
   children: PropTypes.element.isRequired,
+  layerName: PropTypes.string,
 };
