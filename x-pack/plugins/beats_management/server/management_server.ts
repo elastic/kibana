@@ -18,7 +18,7 @@ import { createListTagsRoute } from './rest_api/tags/list';
 import { createSetTagRoute } from './rest_api/tags/set';
 import { createTokensRoute } from './rest_api/tokens/create';
 
-export const initManagementServer = async (libs: CMServerLibs) => {
+export const initManagementServer = (libs: CMServerLibs) => {
   libs.framework.registerRoute(createGetBeatRoute(libs));
   libs.framework.registerRoute(createGetTagsWithIdsRoute(libs));
   libs.framework.registerRoute(createListTagsRoute(libs));
