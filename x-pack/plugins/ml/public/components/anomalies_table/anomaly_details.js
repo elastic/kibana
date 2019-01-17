@@ -333,7 +333,7 @@ export class AnomalyDetails extends Component {
     let anomalyDescription = i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.anomalyInLabel', {
       defaultMessage: '{anomalySeverity} anomaly in {anomalyDetector}',
       values: {
-        anomalySeverity: getSeverity(anomaly.severity),
+        anomalySeverity: getSeverity(anomaly.severity).label,
         anomalyDetector: anomaly.detector,
       }
     });
