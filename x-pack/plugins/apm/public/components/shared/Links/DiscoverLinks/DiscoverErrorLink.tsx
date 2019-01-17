@@ -10,7 +10,7 @@ import {
   SERVICE_NAME
 } from 'x-pack/plugins/apm/common/constants';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
-import { DiscoverButton } from './DiscoverButton';
+import { DiscoverLink } from './DiscoverLink';
 
 function getDiscoverQuery(error: APMError, kuery?: string) {
   const serviceName = error.context.service.name;
@@ -32,16 +32,13 @@ function getDiscoverQuery(error: APMError, kuery?: string) {
   };
 }
 
-const DiscoverErrorButton: React.SFC<{
+const DiscoverErrorLink: React.SFC<{
   readonly error: APMError;
   readonly kuery?: string;
 }> = ({ error, kuery, children }) => {
   return (
-    <DiscoverButton
-      query={getDiscoverQuery(error, kuery)}
-      children={children}
-    />
+    <DiscoverLink query={getDiscoverQuery(error, kuery)} children={children} />
   );
 };
 
-export { DiscoverErrorButton };
+export { DiscoverErrorLink };

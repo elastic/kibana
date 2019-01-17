@@ -5,6 +5,7 @@
  */
 
 import { shallow } from 'enzyme';
+import { Location } from 'history';
 import React from 'react';
 import { RRRRenderResponse } from 'react-redux-request';
 import { ErrorGroupAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_error_group';
@@ -25,7 +26,7 @@ describe('DetailView', () => {
       <DetailView
         errorGroup={{} as any}
         urlParams={{}}
-        location={{ state: '' }}
+        location={{} as Location}
       />
     );
     expect(wrapper.isEmptyRender()).toBe(true);
@@ -53,9 +54,9 @@ describe('DetailView', () => {
       <DetailView
         errorGroup={errorGroup}
         urlParams={{}}
-        location={{ state: '' }}
+        location={{} as Location}
       />
-    ).find('DiscoverErrorButton');
+    ).find('DiscoverErrorLink');
 
     expect(wrapper.exists()).toBe(true);
     expect(wrapper).toMatchSnapshot();
@@ -96,7 +97,7 @@ describe('DetailView', () => {
       <DetailView
         errorGroup={errorGroup}
         urlParams={{}}
-        location={{ state: '' }}
+        location={{} as Location}
       />
     ).find('StickyProperties');
 
@@ -120,7 +121,7 @@ describe('DetailView', () => {
       <DetailView
         errorGroup={errorGroup}
         urlParams={{}}
-        location={{ state: '' }}
+        location={{} as Location}
       />
     ).find('EuiTabs');
 
@@ -144,7 +145,7 @@ describe('DetailView', () => {
       <DetailView
         errorGroup={errorGroup}
         urlParams={{}}
-        location={{ state: '' }}
+        location={{} as Location}
       />
     ).find('TabContent');
 
