@@ -21,7 +21,6 @@ import {
 import { colors } from '../../style/variables';
 import {
   asDecimal,
-  asGB,
   asMillis,
   asPercent,
   tpmUnit
@@ -105,51 +104,27 @@ export function getMemorySeries(
       : [
           {
             title: i18n.translate(
-              'xpack.apm.chart.memorySeries.systemTotalMemLabel',
+              'xpack.apm.chart.memorySeries.systemMaxLabel',
               {
-                defaultMessage: 'System total mem.'
+                defaultMessage: 'System max'
               }
             ),
-            data: series.totalMemory,
-            type: 'area',
-            color: colors.apmPink,
-            legendValue: asGB(overallValues.totalMemory)
-          },
-          {
-            title: i18n.translate(
-              'xpack.apm.chart.memorySeries.systemAvailMemLabel',
-              {
-                defaultMessage: 'System avail. mem.'
-              }
-            ),
-            data: series.freeMemory,
-            type: 'area',
-            color: colors.apmPurple,
-            legendValue: asGB(overallValues.freeMemory)
-          },
-          {
-            title: i18n.translate(
-              'xpack.apm.chart.memorySeries.processRSSLabel',
-              {
-                defaultMessage: 'Process RSS'
-              }
-            ),
-            data: series.processMemoryRss,
-            type: 'area',
-            color: colors.apmGreen,
-            legendValue: asGB(overallValues.processMemoryRss)
-          },
-          {
-            title: i18n.translate(
-              'xpack.apm.chart.memorySeries.pocessMemSizeLabel',
-              {
-                defaultMessage: 'Process mem. size'
-              }
-            ),
-            data: series.processMemorySize,
-            type: 'area',
+            data: series.maximumPercentMemoryUsed,
+            type: 'linemark',
             color: colors.apmBlue,
-            legendValue: asGB(overallValues.freeMemory)
+            legendValue: asPercent(overallValues.maximumPercentMemoryUsed || 0)
+          },
+          {
+            title: i18n.translate(
+              'xpack.apm.chart.memorySeries.systemAverageLabel',
+              {
+                defaultMessage: 'System average'
+              }
+            ),
+            data: series.averagePercentMemoryUsed,
+            type: 'linemark',
+            color: colors.apmGreen,
+            legendValue: asPercent(overallValues.averagePercentMemoryUsed || 0)
           }
         ];
 
@@ -168,22 +143,13 @@ export function getCPUSeries(CPUChartResponse: MetricsChartAPIResponse['cpu']) {
 
   const seriesList: TimeSerie[] = [
     {
-      title: i18n.translate('xpack.apm.chart.cpuSeries.processAverageLabel', {
-        defaultMessage: 'Process average'
+      title: i18n.translate('xpack.apm.chart.cpuSeries.systemMaxLabel', {
+        defaultMessage: 'System max'
       }),
-      data: series.processCPUAverage,
+      data: series.systemCPUMax,
       type: 'linemark',
-      color: colors.apmPink,
-      legendValue: asPercent(overallValues.processCPUAverage || 0)
-    },
-    {
-      title: i18n.translate('xpack.apm.chart.cpuSeries.processMaxLabel', {
-        defaultMessage: 'Process max'
-      }),
-      data: series.processCPUMax,
-      type: 'linemark',
-      color: colors.apmPurple,
-      legendValue: asPercent(overallValues.processCPUMax || 0)
+      color: colors.apmBlue,
+      legendValue: asPercent(overallValues.systemCPUMax || 0, 1)
     },
     {
       title: i18n.translate('xpack.apm.chart.cpuSeries.systemAverageLabel', {
@@ -192,16 +158,25 @@ export function getCPUSeries(CPUChartResponse: MetricsChartAPIResponse['cpu']) {
       data: series.systemCPUAverage,
       type: 'linemark',
       color: colors.apmGreen,
-      legendValue: asPercent(overallValues.systemCPUAverage || 0)
+      legendValue: asPercent(overallValues.systemCPUAverage || 0, 1)
     },
     {
-      title: i18n.translate('xpack.apm.chart.cpuSeries.systemMaxLabel', {
-        defaultMessage: 'System max'
+      title: i18n.translate('xpack.apm.chart.cpuSeries.processMaxLabel', {
+        defaultMessage: 'Process max'
       }),
-      data: series.systemCPUMax,
+      data: series.processCPUMax,
       type: 'linemark',
-      color: colors.apmBlue,
-      legendValue: asPercent(overallValues.systemCPUMax || 0)
+      color: colors.apmOrange,
+      legendValue: asPercent(overallValues.processCPUMax || 0, 1)
+    },
+    {
+      title: i18n.translate('xpack.apm.chart.cpuSeries.processAverageLabel', {
+        defaultMessage: 'Process average'
+      }),
+      data: series.processCPUAverage,
+      type: 'linemark',
+      color: colors.apmYellow,
+      legendValue: asPercent(overallValues.processCPUAverage || 0, 1)
     }
   ];
 
