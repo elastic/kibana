@@ -43,6 +43,7 @@ export function getShardStats(req, esIndexPattern, cluster, { includeNodes = fal
     index: esIndexPattern,
     size: 0,
     ignoreUnavailable: true,
+    rest_total_hits_as_int: true,
     body: {
       sort: { timestamp: { order: 'desc' } },
       query: createQuery({

@@ -55,6 +55,7 @@ export async function getNodes(req, esIndexPattern, clusterStats, shardStats) {
     index: esIndexPattern,
     size: config.get('xpack.monitoring.max_bucket_size'),
     ignoreUnavailable: true,
+    rest_total_hits_as_int: true,
     body: {
       query: createQuery({
         type: 'node_stats',

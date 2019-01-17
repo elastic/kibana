@@ -56,6 +56,7 @@ export function getLastRecovery(req, esIndexPattern) {
   const params = {
     index: esIndexPattern,
     size: 1,
+    rest_total_hits_as_int: true,
     ignoreUnavailable: true,
     body: {
       _source: [ 'index_recovery.shards' ],
