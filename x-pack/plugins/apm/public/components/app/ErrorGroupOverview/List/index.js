@@ -24,6 +24,7 @@ import {
   fontSizes,
   truncate
 } from '../../../../style/variables';
+import { i18n } from '@kbn/i18n';
 
 function paginateItems({ items, pageIndex, pageSize }) {
   return items.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
@@ -46,6 +47,13 @@ const MessageLink = styled(RelativeLink)`
 const Culprit = styled.div`
   font-family: ${fontFamilyCode};
 `;
+
+const notAvailableLabel = i18n.translate(
+  'xpack.apm.errorsTable.notAvailableLabel',
+  {
+    defaultMessage: 'N/A'
+  }
+);
 
 class List extends Component {
   state = {
@@ -82,33 +90,40 @@ class List extends Component {
 
     const columns = [
       {
-        name: 'Group ID',
+        name: i18n.translate('xpack.apm.errorsTable.groupIdColumnLabel', {
+          defaultMessage: 'Group ID'
+        }),
         field: 'groupId',
         sortable: false,
         width: px(unit * 6),
         render: groupId => {
           return (
             <GroupIdLink path={`/${serviceName}/errors/${groupId}`}>
-              {groupId.slice(0, 5) || 'N/A'}
+              {groupId.slice(0, 5) || notAvailableLabel}
             </GroupIdLink>
           );
         }
       },
       {
-        name: 'Error message and culprit',
+        name: i18n.translate(
+          'xpack.apm.errorsTable.errorMessageAndCulpritColumnLabel',
+          {
+            defaultMessage: 'Error message and culprit'
+          }
+        ),
         field: 'message',
         sortable: false,
         width: '50%',
         render: (message, item) => {
           return (
             <MessageAndCulpritCell>
-              <TooltipOverlay content={message || 'N/A'}>
+              <TooltipOverlay content={message || notAvailableLabel}>
                 <MessageLink path={`/${serviceName}/errors/${item.groupId}`}>
-                  {message || 'N/A'}
+                  {message || notAvailableLabel}
                 </MessageLink>
               </TooltipOverlay>
-              <TooltipOverlay content={item.culprit || 'N/A'}>
-                <Culprit>{item.culprit || 'N/A'}</Culprit>
+              <TooltipOverlay content={item.culprit || notAvailableLabel}>
+                <Culprit>{item.culprit || notAvailableLabel}</Culprit>
               </TooltipOverlay>
             </MessageAndCulpritCell>
           );
@@ -121,28 +136,42 @@ class List extends Component {
         align: 'right',
         render: isUnhandled =>
           isUnhandled === false && (
-            <EuiBadge color="warning">Unhandled</EuiBadge>
+            <EuiBadge color="warning">
+              {i18n.translate('xpack.apm.errorsTable.unhandledLabel', {
+                defaultMessage: 'Unhandled'
+              })}
+            </EuiBadge>
           )
       },
       {
-        name: 'Occurrences',
+        name: i18n.translate('xpack.apm.errorsTable.occurrencesColumnLabel', {
+          defaultMessage: 'Occurrences'
+        }),
         field: 'occurrenceCount',
         sortable: true,
         dataType: 'number',
-        render: value => (value ? numeral(value).format('0.[0]a') : 'N/A')
+        render: value =>
+          value ? numeral(value).format('0.[0]a') : notAvailableLabel
       },
       {
         field: 'latestOccurrenceAt',
         sortable: true,
-        name: 'Latest occurrence',
+        name: i18n.translate(
+          'xpack.apm.errorsTable.latestOccurrenceColumnLabel',
+          {
+            defaultMessage: 'Latest occurrence'
+          }
+        ),
         align: 'right',
-        render: value => (value ? moment(value).fromNow() : 'N/A')
+        render: value => (value ? moment(value).fromNow() : notAvailableLabel)
       }
     ];
 
     return (
       <EuiBasicTable
-        noItemsMessage="No errors were found"
+        noItemsMessage={i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
+          defaultMessage: 'No errors were found'
+        })}
         items={paginatedItems}
         columns={columns}
         pagination={{

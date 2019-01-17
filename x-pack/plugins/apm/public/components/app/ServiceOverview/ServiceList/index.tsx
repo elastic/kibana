@@ -5,6 +5,7 @@
  */
 
 import { EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
 import { IServiceListItem } from 'x-pack/plugins/apm/server/lib/services/get_services';
@@ -29,7 +30,12 @@ function formatNumber(value: number) {
 }
 
 function formatString(value?: string | null) {
-  return value || 'N/A';
+  return (
+    value ||
+    i18n.translate('xpack.apm.servicesTable.notAvailableLabel', {
+      defaultMessage: 'N/A'
+    })
+  );
 }
 
 const AppLink = styled(RelativeLink)`
@@ -40,7 +46,9 @@ const AppLink = styled(RelativeLink)`
 export const SERVICE_COLUMNS = [
   {
     field: 'serviceName',
-    name: 'Name',
+    name: i18n.translate('xpack.apm.servicesTable.nameColumnLabel', {
+      defaultMessage: 'Name'
+    }),
     width: '50%',
     sortable: true,
     render: (serviceName: string) => (
@@ -53,30 +61,53 @@ export const SERVICE_COLUMNS = [
   },
   {
     field: 'agentName',
-    name: 'Agent',
+    name: i18n.translate('xpack.apm.servicesTable.agentColumnLabel', {
+      defaultMessage: 'Agent'
+    }),
     sortable: true,
     render: (agentName: string) => formatString(agentName)
   },
   {
     field: 'avgResponseTime',
-    name: 'Avg. response time',
+    name: i18n.translate('xpack.apm.servicesTable.avgResponseTimeColumnLabel', {
+      defaultMessage: 'Avg. response time'
+    }),
     sortable: true,
     dataType: 'number',
     render: (value: number) => asMillis(value)
   },
   {
     field: 'transactionsPerMinute',
-    name: 'Trans. per minute',
+    name: i18n.translate(
+      'xpack.apm.servicesTable.transactionsPerMinuteColumnLabel',
+      {
+        defaultMessage: 'Trans. per minute'
+      }
+    ),
     sortable: true,
     dataType: 'number',
-    render: (value: number) => `${formatNumber(value)} tpm`
+    render: (value: number) =>
+      `${formatNumber(value)} ${i18n.translate(
+        'xpack.apm.servicesTable.transactionsPerMinuteUnitLabel',
+        {
+          defaultMessage: 'tpm'
+        }
+      )}`
   },
   {
     field: 'errorsPerMinute',
-    name: 'Errors per minute',
+    name: i18n.translate('xpack.apm.servicesTable.errorsPerMinuteColumnLabel', {
+      defaultMessage: 'Errors per minute'
+    }),
     sortable: true,
     dataType: 'number',
-    render: (value: number) => `${formatNumber(value)} err.`
+    render: (value: number) =>
+      `${formatNumber(value)} ${i18n.translate(
+        'xpack.apm.servicesTable.errorsPerMinuteUnitLabel',
+        {
+          defaultMessage: 'err.'
+        }
+      )}`
   }
 ];
 

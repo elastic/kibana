@@ -42,7 +42,7 @@ VisTypesRegistryProvider.register((Private) => {
   return VisFactory.createBaseVisualization({
     name: 'vega',
     title: 'Vega',
-    description: i18n.translate('vega.type.vegaВescription', {
+    description: i18n.translate('vega.type.vegaDescription', {
       defaultMessage: 'Create custom visualizations using Vega and Vega-Lite',
       description: 'Vega and Vega-Lite are product names and should not be translated',
     }),

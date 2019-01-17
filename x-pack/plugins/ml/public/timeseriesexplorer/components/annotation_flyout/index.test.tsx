@@ -6,8 +6,8 @@
 
 import mockAnnotations from '../../../components/annotations_table/__mocks__/mock_annotations.json';
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { AnnotationFlyout } from './index';
 
@@ -21,7 +21,7 @@ describe('AnnotationFlyout', () => {
       saveAction: jest.fn(),
     };
 
-    const wrapper = shallow(<AnnotationFlyout {...props} />);
+    const wrapper = shallowWithIntl(<AnnotationFlyout {...props} />);
     expect(wrapper).toMatchSnapshot();
   });
 });

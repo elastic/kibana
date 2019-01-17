@@ -119,7 +119,7 @@ export class EMSClientV66 {
     if (!i18nObject) {
       return '';
     }
-    return i18nObject[this._language] ? i18nObject[this._language] : i18nObject[DEFAULT_LANGUAGE];
+    return i18nObject[this._language] ? i18nObject[this._language]  : i18nObject[DEFAULT_LANGUAGE];
   }
 
   /**
@@ -139,9 +139,7 @@ export class EMSClientV66 {
       }
       throw new Error(`Unable to retrieve manifest from ${manifestUrl}: ${e.message}`);
     } finally {
-      return result
-        ? await result.json()
-        : null;
+      return result ? await result.json() : null;
     }
   }
 
@@ -154,9 +152,15 @@ export class EMSClientV66 {
         );
         fetch(url)
           .then(
-            response => resolve(response),
-            err => reject(err)
-          ).finally(() => clearTimeout(timer));
+            response => {
+              clearTimeout(timer);
+              resolve(response);
+            },
+            err => {
+              clearTimeout(timer);
+              reject(err);
+            }
+          );
       });
   }
 
