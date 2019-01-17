@@ -20,11 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { FunctionRegistration } from '@kbn/interpreter/types';
 
-export const inputControlVis: FunctionRegistration<
-  any,
-  any,
-  { visConfig: string; test: string[] }
-> = () => ({
+export const inputControlVis: FunctionRegistration<any, any, { visConfig: string }> = () => ({
   name: 'input_control_vis',
   type: 'render',
   context: {
@@ -37,10 +33,6 @@ export const inputControlVis: FunctionRegistration<
     visConfig: {
       types: ['string'],
       default: '"{}"',
-    },
-    test: {
-      types: ['string'],
-      default: '',
     },
   },
   fn(context, args) {
