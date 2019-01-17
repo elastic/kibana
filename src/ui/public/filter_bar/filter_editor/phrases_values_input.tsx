@@ -17,65 +17,50 @@
  * under the License.
  */
 
-import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { uniq } from 'lodash';
 import React from 'react';
+import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import { PhraseSuggestor, PhraseSuggestorProps } from './phrase_suggestor';
 
 interface Props extends PhraseSuggestorProps {
   values?: string[];
   onChange: (values: string[]) => void;
   intl: InjectedIntl;
-  refCallback: (element: HTMLElement) => void;
 }
 
 class PhrasesValuesInputUI extends PhraseSuggestor<Props> {
   public render() {
-    const options = this.getOptions();
-    const selectedOptions = this.getSelectedOptions(options);
+    const { suggestions } = this.state;
+    const { values, intl, onChange } = this.props;
+    const options = values ? uniq([...values, ...suggestions]) : suggestions;
     return (
       <EuiFormRow
-        label={this.props.intl.formatMessage({
+        label={intl.formatMessage({
           id: 'common.ui.filterEditor.valuesSelectLabel',
           defaultMessage: 'Values',
         })}
       >
-        <EuiComboBox
-          placeholder={this.props.intl.formatMessage({
+        <StringComboBox
+          placeholder={intl.formatMessage({
             id: 'common.ui.filterEditor.valuesSelectPlaceholder',
             defaultMessage: 'Select values',
           })}
           options={options}
-          selectedOptions={selectedOptions}
-          onCreateOption={this.onAdd}
-          onChange={this.onChange}
+          getLabel={option => option}
+          selectedOptions={values || []}
+          onCreateOption={(option: string) => onChange([...(values || []), option])}
+          onChange={onChange}
           isClearable={false}
-          inputRef={this.props.refCallback}
         />
       </EuiFormRow>
     );
   }
+}
 
-  private getOptions(): EuiComboBoxOptionProps[] {
-    const options = [...(this.props.values || []), ...this.state.suggestions];
-    return uniq(options).map(label => ({ label }));
-  }
-
-  private getSelectedOptions(options: EuiComboBoxOptionProps[]): EuiComboBoxOptionProps[] {
-    return options.filter(option => {
-      return (this.props.values || []).includes(option.label);
-    });
-  }
-
-  private onAdd = (value: string) => {
-    const values = this.props.values || [];
-    this.props.onChange([...values, value]);
-  };
-
-  private onChange = (selectedOptions: EuiComboBoxOptionProps[]) => {
-    this.props.onChange(selectedOptions.map(option => option.label));
-  };
+function StringComboBox(props: GenericComboBoxProps<string>) {
+  return GenericComboBox(props);
 }
 
 export const PhrasesValuesInput = injectI18n(PhrasesValuesInputUI);

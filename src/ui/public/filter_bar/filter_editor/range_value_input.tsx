@@ -19,11 +19,10 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { get, isEmpty } from 'lodash';
+import { get } from 'lodash';
 import { Component } from 'react';
 import React from 'react';
 import { IndexPatternField } from 'ui/index_patterns';
-import { validateParams } from './lib/filter_editor_utils';
 import { ValueInputType } from './value_input_type';
 
 interface RangeParams {
@@ -38,7 +37,6 @@ interface Props {
   value?: RangeParams;
   onChange: (params: RangeParamsPartial) => void;
   intl: InjectedIntl;
-  refCallback: (element: HTMLElement) => void;
 }
 
 class RangeValueInputUI extends Component<Props> {
@@ -66,7 +64,6 @@ class RangeValueInputUI extends Component<Props> {
                 id: 'common.ui.filterEditor.rangeStartInputPlaceholder',
                 defaultMessage: 'Start of the range',
               })}
-              refCallback={this.props.refCallback}
             />
           </EuiFormRow>
         </EuiFlexItem>

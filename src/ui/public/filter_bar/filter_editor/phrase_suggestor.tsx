@@ -33,6 +33,11 @@ export interface PhraseSuggestorState {
   isLoading: boolean;
 }
 
+/**
+ * Since both "phrase" and "phrases" filter inputs suggest values (if enabled and the field is
+ * aggregatable), we pull out the common logic for requesting suggestions into this component
+ * which both of them extend.
+ */
 export class PhraseSuggestor<T extends PhraseSuggestorProps> extends Component<
   T,
   PhraseSuggestorState
