@@ -16,35 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import chrome from 'ui/chrome';
-import { PersistedLog } from './';
-import { createLogKey } from './create_log_key';
 
-class RecentlyAccessed {
-  constructor() {
-    const historyOptions = {
-      maxLength: 20,
-      filterDuplicates: true,
-      isDuplicate: (oldItem, newItem) => {
-        return oldItem.id === newItem.id;
-      }
-    };
-    const logKey = createLogKey('recentlyAccessed', chrome.getBasePath());
-    this.history = new PersistedLog(logKey, historyOptions);
-  }
+// @ts-ignore
+import './directive';
 
-  add(link, label, id) {
-    const historyItem = {
-      link: link,
-      label: label,
-      id: id
-    };
-    this.history.add(historyItem);
-  }
-
-  get() {
-    return this.history.get();
-  }
-}
-
-export const recentlyAccessed = new RecentlyAccessed();
+export { PersistedLog } from './persisted_log';
+export { recentlyAccessed, RecentlyAccessedHistoryItem } from './recently_accessed';

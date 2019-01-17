@@ -15,6 +15,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
+  const welcome = getService('welcome');
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'home']);
 
   class LoginPage {
@@ -87,23 +88,10 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     async logout() {
       log.debug('SecurityPage.logout');
 
-      const [isWelcomeShowing, logoutLinkExists] = await Promise.all([
-        PageObjects.home.isWelcomeShowing(),
-        find.existsByLinkText('Logout'),
-      ]);
-
+      const logoutLinkExists = await find.existsByLinkText('Logout');
       if (!logoutLinkExists) {
         log.debug('Logout not found');
         return;
-      }
-
-      // This sometimes happens when hitting the home screen on a brand new / empty
-      // Kibana instance. It may not *always* happen, depending on how
-      // long it takes the home screen to query Elastic to see if it's a
-      // new Kibana instance.
-      if (isWelcomeShowing) {
-        log.debug('welcome screen showing when attempting logout');
-        await PageObjects.home.hideWelcomeScreen();
       }
 
       await find.clickByLinkText('Logout');
@@ -120,6 +108,8 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
           throw new Error('Logout is not completed yet');
         }
       });
+
+      await welcome.disable();
     }
 
     async clickRolesSection() {

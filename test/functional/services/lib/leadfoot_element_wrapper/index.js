@@ -17,25 +17,4 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-import { populateBrowserRegistries, createSocket, initializeInterpreter } from '@kbn/interpreter/public';
-import { typesRegistry, functionsRegistry } from '@kbn/interpreter/common';
-import { functions } from './functions';
-
-const basePath = chrome.getBasePath();
-
-const types = {
-  browserFunctions: functionsRegistry,
-  types: typesRegistry
-};
-
-function addFunction(fnDef) {
-  functionsRegistry.register(fnDef);
-}
-
-functions.forEach(addFunction);
-
-createSocket(basePath).then(async () => {
-  await populateBrowserRegistries(types, basePath);
-  await initializeInterpreter();
-});
+export { LeadfootElementWrapper } from './leadfoot_element_wrapper';
