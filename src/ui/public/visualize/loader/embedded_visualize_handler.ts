@@ -29,7 +29,6 @@ import { RenderCompleteHelper } from '../../render_complete';
 import { AppState } from '../../state_management/app_state';
 import { timefilter } from '../../timefilter';
 import { RequestHandlerParams, Vis } from '../../vis';
-// import { VisualizeDataLoader } from './visualize_data_loader';
 import { PipelineDataLoader } from './pipeline_data_loader';
 import { visualizationLoader } from './visualization_loader';
 
@@ -150,6 +149,7 @@ export class EmbeddedVisualizeHandler {
     this.events$ = this.vis.eventsSubject.asObservable().pipe(share());
     this.events$.subscribe(event => {
       if (this.actions[event.name]) {
+        event.data.aggConfigs = this.vis.aggs.getResponseAggs();
         this.actions[event.name](event.data);
       }
     });

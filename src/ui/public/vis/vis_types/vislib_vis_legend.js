@@ -102,11 +102,11 @@ uiModules.get('kibana')
         };
 
         $scope.filter = function (legendData, negate) {
-          $scope.vis.API.events.filter({ data: legendData.values, negate: negate });
+          $scope.vis.API.events.filter({ aggConfigs: $scope.vis.aggs.getResponseAggs(), data: legendData.values, negate: negate });
         };
 
         $scope.canFilter = function (legendData) {
-          const filters = visFilters.filter({ data: legendData.values }, { simulate: true });
+          const filters = visFilters.filter({ aggConfigs: $scope.vis.aggs.getResponseAggs(), data: legendData.values }, { simulate: true });
           return filters.length;
         };
 
