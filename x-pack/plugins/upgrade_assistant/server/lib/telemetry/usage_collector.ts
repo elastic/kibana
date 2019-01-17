@@ -5,7 +5,7 @@
  */
 
 import { set } from 'lodash';
-import { SavedObjectsClient } from '../../../../../../src/server/saved_objects';
+import { SavedObjectsClient } from 'src/server/saved_objects/service/saved_objects_client';
 import {
   UPGRADE_ASSISTANT_DOC_ID,
   UPGRADE_ASSISTANT_TYPE,
