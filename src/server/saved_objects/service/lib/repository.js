@@ -432,6 +432,7 @@ export class SavedObjectsRepository {
    * @returns {promise} - { id, type, version, attributes }
    */
   async get(type, id, options = {}) {
+    this.assertAllowedType(type);
     const {
       namespace
     } = options;
