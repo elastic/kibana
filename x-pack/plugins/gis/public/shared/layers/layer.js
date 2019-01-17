@@ -152,7 +152,7 @@ export class ALayer {
   }
 
   dataHasLoadError() {
-    return this._descriptor.errorState;
+    return this._descriptor && this._descriptor.errorState || false;
   }
 
   getDataLoadError() {

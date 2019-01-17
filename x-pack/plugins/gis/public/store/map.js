@@ -138,8 +138,8 @@ export function map(state = INITIAL_STATE, action) {
     case SET_TMS_ERROR_STATUS:
       return setErrorStatus(state, action);
     case LAYER_DATA_LOAD_ERROR:
-      return resetDataRequest(
-        setErrorStatus(state, action), action);
+      const errorRequestResetState = resetDataRequest(state, action);
+      return setErrorStatus(errorRequestResetState, action);
     case LAYER_DATA_LOAD_ENDED:
       return updateWithDataResponse(state, action);
     case TOUCH_LAYER:
@@ -305,7 +305,9 @@ function updateWithDataRequest(state, action) {
     dataRequest = {
       dataId: action.dataId
     };
-    layerRequestingData.dataRequests.push(dataRequest);
+    layerRequestingData.dataRequests = [
+      ...(layerRequestingData.dataRequests
+        ? layerRequestingData.dataRequests : []), dataRequest ];
   }
   dataRequest.dataMetaAtStart = action.meta;
   dataRequest.dataRequestToken = action.requestToken;
