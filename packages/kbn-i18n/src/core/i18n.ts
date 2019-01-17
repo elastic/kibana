@@ -165,7 +165,7 @@ export function getRegisteredLocales() {
 }
 
 interface TranslateArguments {
-  values?: { [key: string]: string | number | Date };
+  values?: Record<string, string | number | boolean | Date | null | undefined>;
   defaultMessage?: string;
   description?: string;
 }
