@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
 import { IServiceListItem } from 'x-pack/plugins/apm/server/lib/services/get_services';
+import { NOT_AVAILABLE_LABEL } from '../../../../constants';
 import { fontSizes, truncate } from '../../../../style/variables';
 import { asDecimal, asMillis } from '../../../../utils/formatters';
 import { RelativeLink } from '../../../../utils/url';
@@ -30,12 +31,7 @@ function formatNumber(value: number) {
 }
 
 function formatString(value?: string | null) {
-  return (
-    value ||
-    i18n.translate('xpack.apm.servicesTable.notAvailableLabel', {
-      defaultMessage: 'N/A'
-    })
-  );
+  return value || NOT_AVAILABLE_LABEL;
 }
 
 const AppLink = styled(RelativeLink)`

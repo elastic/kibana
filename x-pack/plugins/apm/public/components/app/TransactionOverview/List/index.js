@@ -13,6 +13,7 @@ import { asMillis, asDecimal } from '../../../../utils/formatters';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { fontFamilyCode, truncate } from '../../../../style/variables';
 import { ManagedTable } from '../../../shared/ManagedTable';
+import { NOT_AVAILABLE_LABEL } from '../../../../constants';
 
 const TransactionNameLink = styled(RelativeLink)`
   ${truncate('100%')};
@@ -20,12 +21,6 @@ const TransactionNameLink = styled(RelativeLink)`
 `;
 
 export default function TransactionList({ items, serviceName, ...rest }) {
-  const notAvailableLabel = i18n.translate(
-    'xpack.apm.transactionsTable.notAvailableLabel',
-    {
-      defaultMessage: 'N/A'
-    }
-  );
   const columns = [
     {
       field: 'name',
@@ -42,9 +37,9 @@ export default function TransactionList({ items, serviceName, ...rest }) {
         const transactionPath = `/${serviceName}/transactions/${encodedType}/${encodedName}`;
 
         return (
-          <TooltipOverlay content={transactionName || notAvailableLabel}>
+          <TooltipOverlay content={transactionName || NOT_AVAILABLE_LABEL}>
             <TransactionNameLink path={transactionPath}>
-              {transactionName || notAvailableLabel}
+              {transactionName || NOT_AVAILABLE_LABEL}
             </TransactionNameLink>
           </TooltipOverlay>
         );

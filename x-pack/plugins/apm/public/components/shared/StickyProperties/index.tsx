@@ -6,10 +6,10 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
 import styled from 'styled-components';
+import { NOT_AVAILABLE_LABEL } from '../../../constants';
 import {
   colors,
   fontFamilyCode,
@@ -60,17 +60,11 @@ const PropertyValueTruncated = styled.span`
 `;
 
 function TimestampValue({ timestamp }: { timestamp: Date }) {
-  const notAvailableLabel = i18n.translate(
-    'xpack.apm.timestampValue.notAvailableLabel',
-    {
-      defaultMessage: 'N/A'
-    }
-  );
   const time = moment(timestamp);
-  const timeAgo = timestamp ? time.fromNow() : notAvailableLabel;
+  const timeAgo = timestamp ? time.fromNow() : NOT_AVAILABLE_LABEL;
   const timestampFull = timestamp
     ? time.format('MMMM Do YYYY, HH:mm:ss.SSS')
-    : notAvailableLabel;
+    : NOT_AVAILABLE_LABEL;
 
   return (
     <PropertyValue>
