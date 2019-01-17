@@ -15,6 +15,7 @@ import {
   USER_ID
 } from '../../../../../common/constants';
 import { Transaction } from '../../../../../typings/es_schemas/Transaction';
+import { NOT_AVAILABLE_LABEL } from '../../../../constants';
 import { asPercent, asTime } from '../../../../utils/formatters';
 import {
   IStickyProperty,
@@ -31,16 +32,10 @@ export function StickyTransactionProperties({
   totalDuration
 }: Props) {
   const timestamp = transaction['@timestamp'];
-  const notAvailableLabel = i18n.translate(
-    'xpack.apm.transactionDetails.notAvailableLabel',
-    {
-      defaultMessage: 'N/A'
-    }
-  );
   const url =
     idx(transaction, _ => _.context.page.url) ||
     idx(transaction, _ => _.context.request.url) ||
-    notAvailableLabel;
+    NOT_AVAILABLE_LABEL;
   const duration = transaction.transaction.duration.us;
   const stickyProperties: IStickyProperty[] = [
     {
@@ -74,7 +69,7 @@ export function StickyTransactionProperties({
           defaultMessage: '% of trace'
         }
       ),
-      val: asPercent(duration, totalDuration, notAvailableLabel),
+      val: asPercent(duration, totalDuration, NOT_AVAILABLE_LABEL),
       width: '25%'
     },
     {
@@ -82,7 +77,7 @@ export function StickyTransactionProperties({
         defaultMessage: 'Result'
       }),
       fieldName: TRANSACTION_RESULT,
-      val: get(transaction, TRANSACTION_RESULT, notAvailableLabel),
+      val: get(transaction, TRANSACTION_RESULT, NOT_AVAILABLE_LABEL),
       width: '25%'
     },
     {
@@ -90,7 +85,7 @@ export function StickyTransactionProperties({
         defaultMessage: 'User ID'
       }),
       fieldName: USER_ID,
-      val: get(transaction, USER_ID, notAvailableLabel),
+      val: get(transaction, USER_ID, NOT_AVAILABLE_LABEL),
       truncated: true,
       width: '25%'
     }

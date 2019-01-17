@@ -13,6 +13,7 @@ import {
   SPAN_TYPE
 } from 'x-pack/plugins/apm/common/constants';
 import { Span } from '../../../../../../../../typings/es_schemas/Span';
+import { NOT_AVAILABLE_LABEL } from '../../../../../../../constants';
 import { asMillis, asPercent } from '../../../../../../../utils/formatters';
 import { StickyProperties } from '../../../../../../shared/StickyProperties';
 
@@ -58,14 +59,7 @@ export function StickySpanProperties({ span, totalDuration }: Props) {
         }
       ),
       fieldName: SPAN_NAME,
-      val:
-        spanName ||
-        i18n.translate(
-          'xpack.apm.transactionDetails.spanFlyout.notAvailableLabel',
-          {
-            defaultMessage: 'N/A'
-          }
-        ),
+      val: spanName || NOT_AVAILABLE_LABEL,
       truncated: true,
       width: '50%'
     },
