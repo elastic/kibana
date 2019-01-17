@@ -16,14 +16,13 @@ import {
   EuiButtonToggle
 } from '@elastic/eui';
 
-
 export class StaticDynamicStyleSelector extends React.Component {
 
-  constructor() {
-    super();
-    this.state = {
-      isDynamic: false,
-    };
+  // Store previous options locally so when type is toggled,
+  // previous style options can be used.
+  prevOptions = {
+    // TODO: Move default to central location with other defaults
+    color: '#e6194b'
   }
 
   _canBeDynamic() {
@@ -37,88 +36,69 @@ export class StaticDynamicStyleSelector extends React.Component {
     return this.props.styleDescriptor.type === VectorStyle.STYLE_TYPE.DYNAMIC;
   }
 
-  componentDidMount() {
-    this.setState({
-      isDynamic: this._isDynamic()
-    });
+  _getStyleOptions() {
+    return _.get(this.props, 'styleDescriptor.options');
   }
 
-  componentDidUpdate() {
-    const isDynamic = this._isDynamic();
-    if (this.state.isDynamic !== isDynamic) {
-      this.setState({
-        isDynamic
-      });
-    }
+  _onStaticStyleChange = options => {
+    const styleDescriptor = {
+      type: VectorStyle.STYLE_TYPE.STATIC,
+      options
+    };
+    this.props.handlePropertyChange(this.props.property, styleDescriptor);
   }
 
-  _getStyleUpdateFunction = type => {
-    const { property } = this.props;
-    return options => {
-      const styleDescriptor = {
-        type,
-        options
-      };
-      this.props.handlePropertyChange(property, styleDescriptor);
+  _onDynamicStyleChange = options => {
+    const styleDescriptor = {
+      type: VectorStyle.STYLE_TYPE.DYNAMIC,
+      options
     };
-  };
+    this.props.handlePropertyChange(this.props.property, styleDescriptor);
+  }
 
-  _onTypeToggle = (() => {
-    let lastOptions = {
-      // TODO: Move default to central location with other defaults
-      color: 'rgba(0,0,0,0.4)'
-    };
-    const { DYNAMIC, STATIC } = VectorStyle.STYLE_TYPE;
-    return ({ target }, currentOptions) => {
-      const selectedStyleType = target.checked ? DYNAMIC : STATIC;
-      this.setState({
-        isDynamic: target.checked
-      }, () => {
-        if (!_.isEqual(lastOptions, currentOptions)) {
-          lastOptions && this._getStyleUpdateFunction(selectedStyleType)(lastOptions);
-          lastOptions = currentOptions;
-        }
-      });
-    };
-  })();
-
-  _renderStyleSelector(currentOptions) {
-    let styleSelector;
-    if (this.state.isDynamic) {
-      if (this._canBeDynamic()) {
-        const DynamicSelector = this.props.DynamicSelector;
-        styleSelector = (
-          <DynamicSelector
-            fields={this.props.ordinalFields}
-            onChange={this._getStyleUpdateFunction(VectorStyle.STYLE_TYPE.DYNAMIC)}
-            selectedOptions={currentOptions}
-          />
-        );
-      } else {
-        styleSelector = null;
-      }
+  _onTypeToggle = () => {
+    if (this._isDynamic()) {
+      // toggle to static style
+      this._onStaticStyleChange(this.prevOptions);
     } else {
-      const StaticSelector = this.props.StaticSelector;
-      styleSelector = (
-        <StaticSelector
-          changeOptions={this._getStyleUpdateFunction(VectorStyle.STYLE_TYPE.STATIC)}
-          selectedOptions={currentOptions}
+      // toggle to dynamic style
+      this._onDynamicStyleChange(this.prevOptions);
+    }
+
+    this.prevOptions = this._getStyleOptions();
+  }
+
+  _renderStyleSelector() {
+    if (this._isDynamic()) {
+      const DynamicSelector = this.props.DynamicSelector;
+      return (
+        <DynamicSelector
+          fields={this.props.ordinalFields}
+          onChange={this._onDynamicStyleChange}
+          selectedOptions={this._getStyleOptions()}
         />
       );
     }
-    return styleSelector;
+
+    const StaticSelector = this.props.StaticSelector;
+    return (
+      <StaticSelector
+        changeOptions={this._onStaticStyleChange}
+        selectedOptions={this._getStyleOptions()}
+      />
+    );
   }
 
   render() {
-    const currentOptions = _.get(this.props, 'styleDescriptor.options');
+    const isDynamic = this._isDynamic();
     const dynamicTooltipContent =
-      this.state.isDynamic ? "Disable dynamic styling." : "Enable dynamic styling.";
+      isDynamic ? "Disable dynamic styling." : "Enable dynamic styling.";
 
     return (
       <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem className={this.state.isDynamic ? 'gisStaticDynamicSylingOption__dynamicSizeHack' : undefined}>
+        <EuiFlexItem className={isDynamic ? 'gisStaticDynamicSylingOption__dynamicSizeHack' : undefined}>
           <EuiFormRow label={this.props.name && this.props.name}>
-            {this._renderStyleSelector(currentOptions)}
+            {this._renderStyleSelector()}
           </EuiFormRow>
         </EuiFlexItem>
         {this._canBeDynamic() &&
@@ -131,9 +111,9 @@ export class StaticDynamicStyleSelector extends React.Component {
                 <EuiButtonToggle
                   label={dynamicTooltipContent}
                   iconType="link"
-                  onChange={e => this._onTypeToggle(e, currentOptions)}
-                  isEmpty={!this.state.isDynamic}
-                  fill={this.state.isDynamic}
+                  onChange={this._onTypeToggle}
+                  isEmpty={!isDynamic}
+                  fill={isDynamic}
                   isIconOnly
                 />
               </EuiToolTip>
