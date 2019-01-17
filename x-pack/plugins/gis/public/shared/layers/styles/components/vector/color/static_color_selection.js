@@ -4,29 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import React from 'react';
 import {
   EuiColorPicker,
   EuiFormControlLayout
 } from '@elastic/eui';
 
-export class StaticColorSelection extends React.Component {
-  render() {
+export function StaticColorSelection({ onChange, styleOptions }) {
+  const onColorChange = color => {
+    onChange({ color });
+  };
 
-    const onOptionChange = color => {
-      this.props.changeOptions({
-        color
-      });
-    };
-
-    return (
-      <EuiFormControlLayout>
-        <EuiColorPicker
-          onChange={onOptionChange}
-          color={this.props.selectedOptions ? this.props.selectedOptions.color : null}
-          className="gisColorPicker euiFieldText"
-        />
-      </EuiFormControlLayout>
-    );
-  }
+  return (
+    <EuiFormControlLayout>
+      <EuiColorPicker
+        onChange={onColorChange}
+        color={_.get(styleOptions, 'color')}
+        className="gisColorPicker euiFieldText"
+      />
+    </EuiFormControlLayout>
+  );
 }

@@ -13,7 +13,7 @@ import {
   EuiSpacer
 } from '@elastic/eui';
 
-import { ColorRampSelector } from './vector/color/color_ramp_selector';
+import { ColorRampSelect } from './vector/color/color_ramp_select';
 import { SizeRangeSelector } from './vector/size/size_range_selector';
 
 export const styleTypes = {
@@ -76,7 +76,7 @@ export function DynamicOrdinalStyleOption({ fields, selectedOptions, onChange, t
       case styleTypes.COLOR_RAMP:
         return (
           <Fragment>
-            <ColorRampSelector
+            <ColorRampSelect
               onChange={onAdditionalOptionsChange}
               color={_.get(selectedOptions, 'color')}
             />

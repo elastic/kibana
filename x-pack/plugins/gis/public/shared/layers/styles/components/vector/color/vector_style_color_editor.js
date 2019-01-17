@@ -7,8 +7,9 @@
 import React from 'react';
 
 import { StaticDynamicStyleRow } from '../../static_dynamic_style_row';
-import  { DynamicColorSelection } from './dynamic_color_selection';
-import  { StaticColorSelection } from './static_color_selection';
+import { DynamicColorSelection } from './dynamic_color_selection';
+import { StaticColorSelection } from './static_color_selection';
+import { COLOR_GRADIENTS } from './color_ramp_select';
 
 export function VectorStyleColorEditor(props) {
   return (
@@ -20,6 +21,8 @@ export function VectorStyleColorEditor(props) {
       handlePropertyChange={props.handlePropertyChange}
       DynamicSelector={DynamicColorSelection}
       StaticSelector={StaticColorSelection}
+      defaultDynamicStyleOptions={{ color: COLOR_GRADIENTS[0].value }}
+      defaultStaticStyleOptions={{ color: '#e6194b' }}
     />
   );
 }

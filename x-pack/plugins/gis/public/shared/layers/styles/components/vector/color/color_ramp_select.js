@@ -7,9 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import {
-  EuiSuperSelect
-} from '@elastic/eui';
+import { EuiSuperSelect } from '@elastic/eui';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 import { ColorGradient } from '../../../../../icons/color_gradient';
 
@@ -19,31 +17,23 @@ export const COLOR_GRADIENTS = Object.keys(vislibColorMaps).map(colorKey => ({
   inputDisplay: <ColorGradient color={colorKey}/>
 }));
 
-const onColorRampChange = onChange =>
-  selectedColorRampString => {
+export function ColorRampSelect({ color, onChange }) {
+  const onColorRampChange = (selectedColorRampString) => {
     onChange({
       color: selectedColorRampString
     });
   };
-
-export function ColorRampSelector({ color, onChange }) {
-  if (color) {
-    return (
-      <EuiSuperSelect
-        options={COLOR_GRADIENTS}
-        onChange={onColorRampChange(onChange)}
-        valueOfSelected={color}
-        hasDividers={true}
-      />
-    );
-  } else {
-    // Default to first color gradient
-    onColorRampChange(onChange)(COLOR_GRADIENTS[0].value);
-    return null;
-  }
+  return (
+    <EuiSuperSelect
+      options={COLOR_GRADIENTS}
+      onChange={onColorRampChange}
+      valueOfSelected={color}
+      hasDividers={true}
+    />
+  );
 }
 
-ColorRampSelector.propTypes = {
-  color: PropTypes.string,
+ColorRampSelect.propTypes = {
+  color: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
 };

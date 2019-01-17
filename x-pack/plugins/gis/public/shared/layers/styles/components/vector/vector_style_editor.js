@@ -52,35 +52,7 @@ export class VectorStyleEditor extends Component {
           ordinalFields={this.state.ordinalFields}
         />
 
-        <EuiSpacer size="m" />
 
-        <VectorStyleColorEditor
-          styleProperty="lineColor"
-          stylePropertyName="Border color"
-          handlePropertyChange={this.props.handlePropertyChange}
-          styleDescriptor={this.props.styleProperties.lineColor}
-          ordinalFields={this.state.ordinalFields}
-        />
-
-        <EuiSpacer size="m" />
-
-        <VectorStyleSizeEditor
-          styleProperty="lineWidth"
-          stylePropertyName="Border width"
-          handlePropertyChange={this.props.handlePropertyChange}
-          styleDescriptor={this.props.styleProperties.lineWidth}
-          ordinalFields={this.state.ordinalFields}
-        />
-
-        <EuiSpacer size="m" />
-
-        <VectorStyleSizeEditor
-          styleProperty="iconSize"
-          stylePropertyName="Symbol size"
-          handlePropertyChange={this.props.handlePropertyChange}
-          styleDescriptor={this.props.styleProperties.iconSize}
-          ordinalFields={this.state.ordinalFields}
-        />
 
       </Fragment>
     );

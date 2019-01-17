@@ -4,20 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { DynamicOrdinalStyleOption, styleTypes } from '../../dynamic_ordinal_styling_option';
+import _ from 'lodash';
+import React, { Fragment } from 'react';
+import { FieldSelect } from '../field_select';
+import { ColorRampSelect } from './color_ramp_select';
+import { EuiSpacer } from '@elastic/eui';
 
-export class DynamicColorSelection extends React.Component {
+export function DynamicColorSelection({ ordinalFields, onChange, styleOptions }) {
+  const onFieldChange = ({ field }) => {
+    onChange({ ...styleOptions, field });
+  };
 
-  render() {
-    return (
-      <DynamicOrdinalStyleOption
-        fields={this.props.fields}
-        selectedOptions={this.props.selectedOptions}
-        type={styleTypes.COLOR_RAMP}
-        onChange={this.props.onChange}
+  const onColorChange = ({ color }) => {
+    onChange({ ...styleOptions, color });
+  };
+
+  return (
+    <Fragment>
+      <ColorRampSelect
+        onChange={onColorChange}
+        color={_.get(styleOptions, 'color')}
       />
-    );
-  }
-
+      <EuiSpacer size="s" />
+      <FieldSelect
+        fields={ordinalFields}
+        selectedField={_.get(styleOptions, 'field')}
+        onChange={onFieldChange}
+      />
+    </Fragment>
+  );
 }
