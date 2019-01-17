@@ -29,6 +29,12 @@ export class SizeRangeSelector extends React.Component {
     return typeof this.props.minSize === 'number' && typeof this.props.maxSize === 'number';
   }
 
+  componentDidMount() {
+    if (!this._areSizesValid()) {
+      this._onSizeChange(DEFAULT_MIN_SIZE, DEFAULT_MAX_SIZE);
+    }
+  }
+
   componentDidUpdate() {
     if (!this._areSizesValid()) {
       this._onSizeChange(DEFAULT_MIN_SIZE, DEFAULT_MAX_SIZE);
