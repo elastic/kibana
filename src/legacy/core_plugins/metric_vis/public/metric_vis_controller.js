@@ -120,9 +120,10 @@ export class MetricVisComponent extends Component {
         if (isPercentageMode) {
           const percentage = Math.round(100 * (value - min) / (max - min));
           value = `${percentage}%`;
+        } else {
+          value = this._getFormattedValue(formatter, value, 'html');
         }
 
-        if (!isPercentageMode) value = this._getFormattedValue(formatter, value, 'html');
         if (bucketColumnId) {
           const bucketValue = this._getFormattedValue(bucketFormatter, row[bucketColumnId]);
           title = `${bucketValue} - ${title}`;
