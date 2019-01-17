@@ -41,7 +41,8 @@ export function extractGroupPaths(
         );
       }
       const nodeItem = createNodeItem(options, node, bucket);
-      const path = [{ value: key, label: key }].concat(nodeItem.path);
+      const currentPath: InfraNodePath[] = [{ value: key, label: key }];
+      const path = currentPath.concat(nodeItem.path);
       return acc.concat({
         ...nodeItem,
         path,
