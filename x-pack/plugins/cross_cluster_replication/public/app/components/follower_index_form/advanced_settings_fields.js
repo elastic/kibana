@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
 import { i18n } from '@kbn/i18n';
 
 export const advancedSettingsFields = [
@@ -20,7 +19,7 @@ export const advancedSettingsFields = [
         defaultMessage: 'The maximum number of operations to pull per read from the remote cluster.'
       }
     ),
-    validator: Joi.number().empty(''),
+    type: 'number',
   }, {
     field: 'maxOutstandingReadRequests',
     label: i18n.translate(
@@ -31,7 +30,7 @@ export const advancedSettingsFields = [
     description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingReadRequestsDescription', {
       defaultMessage: 'The maximum number of outstanding read requests from the remote cluster.'
     }),
-    validator: Joi.number().empty(''),
+    type: 'number',
   }, {
     field: 'maxReadRequestSize',
     label: i18n.translate(
@@ -42,7 +41,6 @@ export const advancedSettingsFields = [
     description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestSizeDescription', {
       defaultMessage: 'The maximum size in bytes of per read of a batch of operations pulled from the remote cluster.'
     }),
-    validator: Joi.string().empty(''),
   }, {
     field: 'maxWriteRequestOperationCount',
     label: i18n.translate(
@@ -55,7 +53,7 @@ export const advancedSettingsFields = [
         defaultMessage: 'The maximum number of operations per bulk write request executed on the follower.'
       }
     ),
-    validator: Joi.number().empty(''),
+    type: 'number',
   }, {
     field: 'maxWriteRequestSize',
     label: i18n.translate(
@@ -68,7 +66,6 @@ export const advancedSettingsFields = [
         defaultMessage: 'The maximum total bytes of operations per bulk write request executed on the follower.'
       }
     ),
-    validator: Joi.string().empty(''),
   }, {
     field: 'maxOutstandingWriteRequests',
     label: i18n.translate(
@@ -81,7 +78,7 @@ export const advancedSettingsFields = [
         defaultMessage: 'The maximum number of outstanding write requests on the follower.'
       }
     ),
-    validator: Joi.number().empty(''),
+    type: 'number',
   }, {
     field: 'maxWriteBufferCount',
     label: i18n.translate(
@@ -96,7 +93,7 @@ export const advancedSettingsFields = [
           operations goes below the limit.`
       }
     ),
-    validator: Joi.number().empty(''),
+    type: 'number',
   }, {
     field: 'maxWriteBufferSize',
     label: i18n.translate(
@@ -111,7 +108,6 @@ export const advancedSettingsFields = [
           of queued operations goes below the limit.`
       }
     ),
-    validator: Joi.string().empty(''),
   }, {
     field: 'maxRetryDelay',
     label: i18n.translate(
@@ -125,7 +121,6 @@ export const advancedSettingsFields = [
         an exponential backoff strategy is employed when retrying.`
       }
     ),
-    validator: Joi.string().empty(''),
   }, {
     field: 'readPollTimeout',
     label: i18n.translate(
@@ -141,7 +136,6 @@ export const advancedSettingsFields = [
           then the follower will immediately attempt to read from the leader again.`
       }
     ),
-    validator: Joi.string().empty(''),
   },
 ];
 

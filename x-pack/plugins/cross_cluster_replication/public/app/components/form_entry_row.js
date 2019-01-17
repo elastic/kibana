@@ -30,7 +30,7 @@ export class FormEntryRow extends PureComponent {
     label: PropTypes.node,
     description: PropTypes.node,
     helpText: PropTypes.node,
-    validator: PropTypes.object,
+    type: PropTypes.string,
     onValueUpdate: PropTypes.func.isRequired,
     field: PropTypes.string.isRequired,
     value: PropTypes.oneOfType([
@@ -44,15 +44,15 @@ export class FormEntryRow extends PureComponent {
   };
 
   onFieldChange = (value) => {
-    const { field, onValueUpdate, validator } = this.props;
-    const isNumber = validator._type === 'number';
+    const { field, onValueUpdate, type } = this.props;
+    const isNumber = type === 'number';
     onValueUpdate({ [field]: isNumber ? parseInt(value, 10) : value });
   }
 
   renderField = (isInvalid) => {
-    const { value, validator, disabled, isLoading } = this.props;
-    switch (validator._type) {
-      case "number":
+    const { value, type, disabled, isLoading } = this.props;
+    switch (type) {
+      case 'number':
         return (
           <EuiFieldNumber
             isInvalid={isInvalid}
@@ -101,7 +101,7 @@ export class FormEntryRow extends PureComponent {
         <EuiFormRow
           label={label}
           helpText={helpText}
-          error={error && error.message}
+          error={error}
           isInvalid={isInvalid}
           fullWidth
         >

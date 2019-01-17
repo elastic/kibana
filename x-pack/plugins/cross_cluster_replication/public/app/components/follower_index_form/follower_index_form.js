@@ -32,7 +32,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { indexNameValidator, i18nValidationErrorMessages } from '../../services/input_validation';
+import { indexNameValidator, leaderIndexValidator } from '../../services/input_validation';
 import routing from '../../services/routing';
 import { loadIndices } from '../../services/api';
 import { API_STATUS } from '../../constants';
@@ -41,6 +41,15 @@ import { FormEntryRow } from '../form_entry_row';
 import { advancedSettingsFields, emptyAdvancedSettings } from './advanced_settings_fields';
 
 const indexNameIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
+
+const fieldToValidatorMap = advancedSettingsFields.reduce((map, advancedSetting) => {
+  const { field, validator } = advancedSetting;
+  map[field] = validator;
+  return map;
+}, {
+  'name': indexNameValidator,
+  'leaderIndex': leaderIndexValidator,
+});
 
 const getFirstConnectedCluster = (clusters) => {
   for (let i = 0; i < clusters.length; i++) {
@@ -78,17 +87,6 @@ export const updateFormErrors = (errors) => ({ fieldsErrors }) => ({
   }
 });
 
-const parseError = (err) => {
-  if (!err) {
-    return null;
-  }
-
-  const error = err.details[0];
-  const { type, context } = error;
-  const message = i18nValidationErrorMessages[type](context);
-  return { message };
-};
-
 export const FollowerIndexForm = injectI18n(
   class extends PureComponent {
     static propTypes = {
@@ -112,10 +110,12 @@ export const FollowerIndexForm = injectI18n(
           ...this.props.followerIndex,
         };
 
+      const fieldsErrors = this.getFieldsErrors(followerIndex);
+
       this.state = {
         isNew,
         followerIndex,
-        fieldsErrors: {},
+        fieldsErrors,
         areErrorsVisible: false,
         areAdvancedSettingsVisible: false,
         isValidatingIndexName: false,
@@ -126,25 +126,29 @@ export const FollowerIndexForm = injectI18n(
 
     onFieldsChange = (fields) => {
       this.setState(updateFields(fields));
-      this.setState(updateFormErrors(this.getFieldsErrors(fields)));
+
+      const newFields = {
+        ...this.state.fields,
+        ...fields,
+      };
+
+      this.setState(updateFormErrors(this.getFieldsErrors(newFields)));
 
       if (this.props.apiError) {
         this.props.clearApiError();
       }
     };
 
-    getFieldsErrors = (changedFields) => {
-      const newFields = {
-        ...this.state.fields,
-        ...changedFields,
-      };
-
-      return advancedSettingsFields.reduce((errors, advancedSetting) => {
-        const { field, validator, label } = advancedSetting;
+    getFieldsErrors = (newFields) => {
+      return Object.keys(newFields).reduce((errors, field) => {
+        const validator = fieldToValidatorMap[field];
         const value = newFields[field];
-        const result = validator.label(label).validate(value);
-        const error = parseError(result.error);
-        errors[field] = error;
+
+        if (validator) {
+          const error = validator(value);
+          errors[field] = error;
+        }
+
         return errors;
       }, {});
     };
@@ -242,7 +246,7 @@ export const FollowerIndexForm = injectI18n(
     }
 
     isFormValid() {
-      return Object.values(this.state.fieldsErrors).every(error => error === null);
+      return Object.values(this.state.fieldsErrors).every(error => error === undefined);
     }
 
     sendForm = () => {
@@ -311,7 +315,7 @@ export const FollowerIndexForm = injectI18n(
             <p>
               <FormattedMessage
                 id="xpack.crossClusterReplication.followerIndexForm.indexNameValidatingLabel"
-                defaultMessage="Validating index name..."
+                defaultMessage="Checking availability..."
               />
             </p>
           )}
@@ -346,7 +350,6 @@ export const FollowerIndexForm = injectI18n(
             defaultMessage: 'A name for the follower index.'
           })}
           helpText={indexNameHelpText}
-          validator={indexNameValidator}
           isLoading={isValidatingIndexName}
           disabled={!isNew}
           areErrorsVisible={areErrorsVisible}
@@ -447,7 +450,6 @@ export const FollowerIndexForm = injectI18n(
               values={{ characterList: <strong>{indexNameIllegalCharacters}</strong> }}
             />
           )}
-          validator={indexNameValidator}
           disabled={!isNew}
           areErrorsVisible={areErrorsVisible}
           onValueUpdate={this.onFieldsChange}
@@ -511,7 +513,7 @@ export const FollowerIndexForm = injectI18n(
               <EuiSpacer size="s" />
 
               {advancedSettingsFields.map((advancedSetting) => {
-                const { field, label, description, helpText, validator } = advancedSetting;
+                const { field, label, description, helpText } = advancedSetting;
                 return (
                   <FormEntryRow
                     key={field}
@@ -526,7 +528,6 @@ export const FollowerIndexForm = injectI18n(
                     label={label}
                     description={description}
                     helpText={helpText}
-                    validator={validator}
                     areErrorsVisible={areErrorsVisible}
                     onValueUpdate={this.onFieldsChange}
                   />
