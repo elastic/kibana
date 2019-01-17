@@ -15,9 +15,11 @@ function getModelArgs(expressionType) {
   if (!expressionType) {
     return NO_NEXT_EXP;
   }
+
   if (!expressionType.modelArgs) {
     return MISSING_MODEL_ARGS;
   }
+
   return expressionType.modelArgs.length > 0 ? expressionType.modelArgs : MISSING_MODEL_ARGS;
 }
 
@@ -42,7 +44,7 @@ export class Model extends FunctionForm {
     // if modelArgs are missing, something went wrong here
     if (modelArgs === MISSING_MODEL_ARGS) {
       // if there is a next expression, it is lacking modelArgs, so we throw
-      throw new Error(`${nextExpressionType.displayName} modelArgs Error:
+      throw new Error(`"${nextExpressionType.displayName}" modelArgs Error:
         The modelArgs value is empty. Either it should contain an arg,
         or a model should not be used in the expression.
       `);
