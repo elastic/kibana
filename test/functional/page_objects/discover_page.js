@@ -27,6 +27,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
   const flyout = getService('flyout');
   const PageObjects = getPageObjects(['header', 'common']);
   const browser = getService('browser');
+  const globalNav = getService('globalNav');
 
   class DiscoverPage {
     async getQueryField() {
@@ -130,7 +131,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async getCurrentQueryName() {
-      return await testSubjects.getVisibleText('discoverCurrentQuery');
+      return await globalNav.getLastBreadcrumb();
     }
 
     async getBarChartXTicks() {

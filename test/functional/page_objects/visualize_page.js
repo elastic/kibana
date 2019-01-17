@@ -31,6 +31,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
   const inspector = getService('inspector');
   const renderable = getService('renderable');
   const table = getService('table');
+  const globalNav = getService('globalNav');
   const PageObjects = getPageObjects(['common', 'header']);
   const defaultFindTimeout = config.get('timeouts.find');
 
@@ -692,11 +693,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       expect(successToast).to.be(true);
     }
 
-    async saveVisualizationExpectSuccessAndBreadcrumb(vizName, options) {
-      await this.saveVisualizationExpectSuccess(vizName, options);
-      const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
-      log.debug(`Save viz page title is ${pageTitle}`);
-      expect(pageTitle).to.contain(vizName);
+    async saveVisualizationExpectSuccessAndBreadcrumb(vizName, { saveAsNew = false } = {}) {
+      await this.saveVisualizationExpectSuccess(vizName, { saveAsNew });
+      await retry.waitFor('last breadcrumb to have new vis name', async () => (
+        await globalNav.getLastBreadcrumb() === vizName
+      ));
     }
 
     async saveVisualizationExpectFail(vizName, { saveAsNew = false } = {}) {
