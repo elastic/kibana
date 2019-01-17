@@ -200,12 +200,22 @@ describe('SavedObjectsRepository', () => {
               type: 'keyword'
             }
           }
+        },
+        'hiddenType': {
+          properties: {
+            someField: {
+              type: 'keyword'
+            }
+          }
         }
       }
     }
   };
 
-  const schema = new SavedObjectsSchema({ globaltype: { isNamespaceAgnostic: true } });
+  const schema = new SavedObjectsSchema({
+    globaltype: { isNamespaceAgnostic: true },
+    hiddenType: { isNamespaceAgnostic: true, hidden: true },
+  });
 
   beforeEach(() => {
     callAdminCluster = sandbox.stub();
@@ -1500,6 +1510,40 @@ describe('SavedObjectsRepository', () => {
         expect(error).toBe(es401);
         expect(errors.isNotAuthorizedError(error)).toBe(true);
       }
+    });
+  });
+
+  describe('hidden types', () => {
+    it('should error when attempting to \'get\' hidden types', async () => {
+      await expect(savedObjectsRepository.get('hiddenType')).rejects.toEqual(new Error('Hidden types not allowed!'));
+    });
+
+    it('should error when attempting to \'bulkGet\' hidden types', async () => {
+      callAdminCluster.returns({ docs: [] });
+      await savedObjectsRepository.bulkGet([
+        { id: 'one', type: 'config' },
+        { id: 'two', type: 'index-pattern' },
+        { id: 'three', type: 'globaltype' },
+        { id: 'four', type: 'hiddenType' },
+      ]);
+      sinon.assert.calledWithExactly(callAdminCluster, 'mget', {
+        body: {
+          docs: [
+            { _id: 'config:one', _type: 'doc' },
+            { _id: 'index-pattern:two', _type: 'doc' },
+            { _id: 'globaltype:three', _type: 'doc' },
+          ]
+        },
+        index: '.kibana-test',
+      });
+    });
+
+    it('should error when attempting to \'find\' hidden types', async () => {
+      await expect(savedObjectsRepository.find({ type: 'hiddenType' })).rejects.toEqual(new Error('Hidden types not allowed!'));
+    });
+
+    it('should error when attempting to \'delete\' hidden types', async () => {
+      await expect(savedObjectsRepository.delete('hiddenType')).rejects.toEqual(new Error('Hidden types not allowed!'));
     });
   });
 });
