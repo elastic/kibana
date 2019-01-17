@@ -82,5 +82,4 @@ export class PersistedLog<T = any> {
   public get() {
     return _.cloneDeep(this.items);
   }
-
 }
