@@ -34,7 +34,7 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
     this.uriPath = `${chrome.getBasePath()}/api/uptime/graphql`;
     this.defaultDateRangeStart = dateRangeStart || 'now-15m';
     this.defaultDateRangeEnd = dateRangeEnd || 'now';
-    this.defaultAutorefreshInterval = autorefreshInterval || 5000;
+    this.defaultAutorefreshInterval = autorefreshInterval || 60 * 1000;
     this.defaultAutorefreshIsPaused = autorefreshIsPaused || true;
   }
 
