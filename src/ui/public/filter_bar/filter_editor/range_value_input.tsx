@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIcon, EuiLink } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import { Component } from 'react';
 import React from 'react';
+import { getDocLink } from 'ui/documentation_links';
 import { IndexPatternField } from 'ui/index_patterns';
 import { ValueInputType } from './value_input_type';
 
@@ -48,44 +49,57 @@ class RangeValueInputUI extends Component<Props> {
     const type = this.props.field ? this.props.field.type : 'string';
 
     return (
-      <EuiFlexGroup style={{ maxWidth: 600 }}>
-        <EuiFlexItem>
-          <EuiFormRow
-            label={this.props.intl.formatMessage({
-              id: 'common.ui.filterEditor.rangeStartInputLabel',
-              defaultMessage: 'From',
-            })}
-          >
-            <ValueInputType
-              type={type}
-              value={this.props.value ? this.props.value.from : undefined}
-              onChange={this.onFromChange}
-              placeholder={this.props.intl.formatMessage({
-                id: 'common.ui.filterEditor.rangeStartInputPlaceholder',
-                defaultMessage: 'Start of the range',
+      <div>
+        <EuiFlexGroup style={{ maxWidth: 600 }}>
+          <EuiFlexItem>
+            <EuiFormRow
+              label={this.props.intl.formatMessage({
+                id: 'common.ui.filterEditor.rangeStartInputLabel',
+                defaultMessage: 'From',
               })}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow
-            label={this.props.intl.formatMessage({
-              id: 'common.ui.filterEditor.rangeEndInputLabel',
-              defaultMessage: 'To',
-            })}
-          >
-            <ValueInputType
-              type={type}
-              value={this.props.value ? this.props.value.to : undefined}
-              onChange={this.onToChange}
-              placeholder={this.props.intl.formatMessage({
-                id: 'common.ui.filterEditor.rangeEndInputPlaceholder',
-                defaultMessage: 'End of the range',
+            >
+              <ValueInputType
+                type={type}
+                value={this.props.value ? this.props.value.from : undefined}
+                onChange={this.onFromChange}
+                placeholder={this.props.intl.formatMessage({
+                  id: 'common.ui.filterEditor.rangeStartInputPlaceholder',
+                  defaultMessage: 'Start of the range',
+                })}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow
+              label={this.props.intl.formatMessage({
+                id: 'common.ui.filterEditor.rangeEndInputLabel',
+                defaultMessage: 'To',
               })}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            >
+              <ValueInputType
+                type={type}
+                value={this.props.value ? this.props.value.to : undefined}
+                onChange={this.onToChange}
+                placeholder={this.props.intl.formatMessage({
+                  id: 'common.ui.filterEditor.rangeEndInputPlaceholder',
+                  defaultMessage: 'End of the range',
+                })}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {type === 'date' ? (
+          <EuiLink target="_window" href={getDocLink('date.dateMath')}>
+            <FormattedMessage
+              id="common.ui.filterEditor.dateFormatHelpLinkLabel"
+              defaultMessage="Accepted date formats"
+            />{' '}
+            <EuiIcon type="link" />
+          </EuiLink>
+        ) : (
+          ''
+        )}
+      </div>
     );
   }
 

@@ -217,7 +217,7 @@ class FilterEditorUI extends Component<Props, State> {
 
   private renderFieldInput() {
     const { selectedIndexPattern, selectedField } = this.state;
-    const fields = selectedIndexPattern ? getFilterableFields([selectedIndexPattern]) : [];
+    const fields = selectedIndexPattern ? getFilterableFields(selectedIndexPattern) : [];
     return (
       <EuiFormRow
         label={this.props.intl.formatMessage({

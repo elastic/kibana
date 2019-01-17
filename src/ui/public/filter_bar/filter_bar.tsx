@@ -166,32 +166,32 @@ class FilterBarUI extends Component<Props, State> {
   };
 
   private onEnableAll = () => {
-    const filters = this.props.filters.map(filter => enableFilter(filter));
+    const filters = this.props.filters.map(enableFilter);
     this.props.onFiltersUpdated(filters);
   };
 
   private onDisableAll = () => {
-    const filters = this.props.filters.map(filter => disableFilter(filter));
+    const filters = this.props.filters.map(disableFilter);
     this.props.onFiltersUpdated(filters);
   };
 
   private onPinAll = () => {
-    const filters = this.props.filters.map(filter => pinFilter(filter));
+    const filters = this.props.filters.map(pinFilter);
     this.props.onFiltersUpdated(filters);
   };
 
   private onUnpinAll = () => {
-    const filters = this.props.filters.map(filter => unpinFilter(filter));
+    const filters = this.props.filters.map(unpinFilter);
     this.props.onFiltersUpdated(filters);
   };
 
   private onToggleAllNegated = () => {
-    const filters = this.props.filters.map(filter => toggleFilterNegated(filter));
+    const filters = this.props.filters.map(toggleFilterNegated);
     this.props.onFiltersUpdated(filters);
   };
 
   private onToggleAllDisabled = () => {
-    const filters = this.props.filters.map(filter => toggleFilterDisabled(filter));
+    const filters = this.props.filters.map(toggleFilterDisabled);
     this.props.onFiltersUpdated(filters);
   };
 

@@ -33,8 +33,6 @@ export interface GenericComboBoxProps<T> {
  * any type of object. It also accepts a `getLabel` function that each object will be sent through
  * to get the label to be passed to the combo box. The `onChange` will trigger with the actual
  * selected objects, rather than an option object.
- * @param props
- * @constructor
  */
 export function GenericComboBox<T>(props: GenericComboBoxProps<T>) {
   const { options, selectedOptions, getLabel, onChange, ...otherProps } = props;

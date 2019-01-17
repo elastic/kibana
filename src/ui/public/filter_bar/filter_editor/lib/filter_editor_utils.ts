@@ -22,7 +22,6 @@ import {
   buildExistsFilter,
   buildPhraseFilter,
   buildPhrasesFilter,
-  buildQueryFilter,
   buildRangeFilter,
   FieldFilter,
   FilterMeta,
@@ -45,7 +44,7 @@ export function getIndexPatternFromFilter(
 }
 
 export function getFieldFromFilter(filter: FieldFilter, indexPattern: IndexPattern) {
-  return indexPattern.fields.find((field: any) => field.name === filter.meta.key);
+  return indexPattern.fields.find(field => field.name === filter.meta.key);
 }
 
 export function getOperatorFromFilter(filter: MetaFilter) {
@@ -58,11 +57,8 @@ export function getQueryDslFromFilter(filter: MetaFilter) {
   return omit(filter, ['$state', 'meta']);
 }
 
-export function getFilterableFields(indexPatterns: IndexPattern[]) {
-  return indexPatterns.reduce((fields: IndexPatternField[], indexPattern) => {
-    const filterableFields = indexPattern.fields.filter(field => field.filterable);
-    return [...fields, ...filterableFields];
-  }, []);
+export function getFilterableFields(indexPattern: IndexPattern) {
+  return indexPattern.fields.filter(field => field.filterable);
 }
 
 export function getOperatorOptions(field: IndexPatternField) {
@@ -71,7 +67,7 @@ export function getOperatorOptions(field: IndexPatternField) {
   });
 }
 
-export function getFilterParams(filter: MetaFilter): any {
+export function getFilterParams(filter: MetaFilter) {
   switch (filter.meta.type) {
     case 'phrase':
       return (filter as PhraseFilter).meta.params.query;
