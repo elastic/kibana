@@ -41,23 +41,20 @@ export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
       {groups.map((group, i) => {
         // library frame
         if (group.isLibraryFrame) {
-          const initialVisiblity = groups.length === 1; // if there is only a single group it should be visible initially
+          const hasMultipleStackframes = group.stackframes.length > 1;
+          const hasLeadingSpacer = hasMultipleStackframes && i !== 0;
+          const hasTrailingSpacer =
+            hasMultipleStackframes && i !== groups.length - 1;
           return (
             <Fragment>
-              {group.stackframes.length > 1 && i !== 0 && (
-                <EuiSpacer size="m" />
-              ) // render a leading spacer if LibraryStackFrames is collapsible and it's not the first item
-              }
+              {hasLeadingSpacer && <EuiSpacer size="m" />}
               <LibraryStackFrames
                 key={i}
-                initialVisiblity={initialVisiblity}
+                initialVisiblity={!hasMultipleStackframes}
                 stackframes={group.stackframes}
                 codeLanguage={codeLanguage}
               />
-              {group.stackframes.length > 1 && i !== groups.length - 1 && (
-                <EuiSpacer size="m" />
-              ) // render a trailing spacer if LibraryStackFrames is collapsible and it's not the last item
-              }
+              {hasTrailingSpacer && <EuiSpacer size="m" />}
             </Fragment>
           );
         }
