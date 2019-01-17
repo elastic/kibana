@@ -110,8 +110,8 @@
             "deprecationReason": null
           },
           {
-            "name": "Authorizations",
-            "description": "Gets Authorization success and failures based on a timerange",
+            "name": "Authentications",
+            "description": "Gets Authentication success and failures based on a timerange",
             "args": [
               {
                 "name": "timerange",
@@ -143,7 +143,7 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "AuthorizationsData", "ofType": null }
+              "ofType": { "kind": "OBJECT", "name": "AuthenticationsData", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -766,7 +766,7 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Int", "ofType": null }
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
             },
             "defaultValue": null
           },
@@ -788,18 +788,8 @@
         "possibleTypes": null
       },
       {
-        "kind": "SCALAR",
-        "name": "Int",
-        "description": "The `Int` scalar type represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1. ",
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
         "kind": "OBJECT",
-        "name": "AuthorizationsData",
+        "name": "AuthenticationsData",
         "description": "",
         "fields": [
           {
@@ -815,7 +805,7 @@
                 "ofType": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "OBJECT", "name": "AuthorizationsEdges", "ofType": null }
+                  "ofType": { "kind": "OBJECT", "name": "AuthenticationsEdges", "ofType": null }
                 }
               }
             },
@@ -829,7 +819,7 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Int", "ofType": null }
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -854,17 +844,17 @@
       },
       {
         "kind": "OBJECT",
-        "name": "AuthorizationsEdges",
+        "name": "AuthenticationsEdges",
         "description": "",
         "fields": [
           {
-            "name": "authorization",
+            "name": "node",
             "description": "",
             "args": [],
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "AuthorizationItem", "ofType": null }
+              "ofType": { "kind": "OBJECT", "name": "AuthenticationItem", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -889,7 +879,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "AuthorizationItem",
+        "name": "AuthenticationItem",
         "description": "",
         "fields": [
           {
@@ -911,7 +901,7 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Int", "ofType": null }
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -923,31 +913,7 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Int", "ofType": null }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "user",
-            "description": "",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "from",
-            "description": "",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -965,7 +931,19 @@
             "deprecationReason": null
           },
           {
-            "name": "to",
+            "name": "source",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "SourceEcsFields", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "host",
             "description": "",
             "args": [],
             "type": {
@@ -973,6 +951,45 @@
               "name": null,
               "ofType": { "kind": "OBJECT", "name": "HostEcsFields", "ofType": null }
             },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "user",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "UserEcsFields", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "SourceEcsFields",
+        "description": "",
+        "fields": [
+          {
+            "name": "ip",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "port",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -1005,6 +1022,132 @@
           },
           {
             "name": "name",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "os",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "OsEcsFields", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "OsEcsFields",
+        "description": "",
+        "fields": [
+          {
+            "name": "platform",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "full",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "family",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "version",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "kernel",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "UserEcsFields",
+        "description": "",
+        "fields": [
+          {
+            "name": "id",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "full_name",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "email",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "hash",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "group",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
@@ -1169,7 +1312,7 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Int", "ofType": null }
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -1233,7 +1376,7 @@
         "description": "",
         "fields": [
           {
-            "name": "event",
+            "name": "node",
             "description": "",
             "args": [],
             "type": {
@@ -1460,33 +1603,6 @@
       },
       {
         "kind": "OBJECT",
-        "name": "SourceEcsFields",
-        "description": "",
-        "fields": [
-          {
-            "name": "ip",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "port",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
         "name": "SuricataEcsFields",
         "description": "",
         "fields": [
@@ -1568,33 +1684,6 @@
       },
       {
         "kind": "OBJECT",
-        "name": "UserEcsFields",
-        "description": "",
-        "fields": [
-          {
-            "name": "id",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "name",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "OBJECT",
         "name": "HostsData",
         "description": "",
         "fields": [
@@ -1625,7 +1714,7 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Int", "ofType": null }
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -1654,7 +1743,7 @@
         "description": "",
         "fields": [
           {
-            "name": "host",
+            "name": "node",
             "description": "",
             "args": [],
             "type": {
@@ -1697,14 +1786,6 @@
             "deprecationReason": null
           },
           {
-            "name": "name",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "firstSeen",
             "description": "",
             "args": [],
@@ -1713,26 +1794,10 @@
             "deprecationReason": null
           },
           {
-            "name": "version",
+            "name": "host",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "os",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "hostId",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": { "kind": "OBJECT", "name": "HostEcsFields", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -1774,7 +1839,7 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Int", "ofType": null }
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -1803,7 +1868,7 @@
         "description": "",
         "fields": [
           {
-            "name": "uncommonProcess",
+            "name": "node",
             "description": "",
             "args": [],
             "type": {
@@ -1850,39 +1915,31 @@
             "deprecationReason": null
           },
           {
-            "name": "name",
-            "description": "",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "title",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "instances",
             "description": "",
             "args": [],
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Int", "ofType": null }
+              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "hosts",
+            "name": "process",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "ProcessEcsFields", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "host",
             "description": "",
             "args": [],
             "type": {
@@ -1898,6 +1955,120 @@
                 }
               }
             },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "user",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "UserEcsFields", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "ProcessEcsFields",
+        "description": "",
+        "fields": [
+          {
+            "name": "pid",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "ppid",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "args",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "executable",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "title",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "thread",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "Thread", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "working_directory",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "Thread",
+        "description": "",
+        "fields": [
+          {
+            "name": "id",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "start",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }

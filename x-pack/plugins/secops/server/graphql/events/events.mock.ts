@@ -7,9 +7,9 @@
 import { FieldNode } from 'graphql';
 import { Logger } from '../../utils/logger';
 import { SecOpsContext } from '../index';
+import { EventsData } from '../types';
 
-/* tslint:disable */
-export const mockEventsData = {
+export const mockEventsData: { Events: EventsData } = {
   Events: {
     totalCount: 15546,
     pageInfo: {
@@ -19,79 +19,75 @@ export const mockEventsData = {
         tiebreaker: '10624',
       },
     },
-    kpiEventType: [
-      { count: 28, value: 'Young' },
-      { count: 82, value: 'Old'},
-    ],
+    kpiEventType: [{ count: 28, value: 'Young' }, { count: 82, value: 'Old' }],
     edges: [
       {
         cursor: {
           value: '1546878704036',
-          tiebreaker: '10656'
+          tiebreaker: '10656',
         },
-        event: {
+        node: {
           _id: 'Fo8nKWgBiyhPd5Zo3cib',
           timestamp: '2019-01-07T16:31:44.036Z',
           _index: 'auditbeat-7.0.0-2019.01.07',
           destination: {
             ip: '24.168.54.169',
-            port: 62123
+            port: 62123,
           },
           event: {
             category: null,
             id: null,
             module: 'system',
             severity: null,
-            type: null
+            type: null,
           },
           geo: null,
           host: {
             name: 'siem-general',
-            ip: null
+            ip: null,
           },
           source: {
             ip: '10.142.0.6',
-            port: 9200
+            port: 9200,
           },
-          suricata: null
-        }
+          suricata: null,
+        },
       },
       {
         cursor: {
           value: '1546878704036',
-          tiebreaker: '10624'
+          tiebreaker: '10624',
         },
-        event: {
+        node: {
           _id: 'F48nKWgBiyhPd5Zo3cib',
           timestamp: '2019-01-07T16:31:44.036Z',
           _index: 'auditbeat-7.0.0-2019.01.07',
           destination: {
             ip: '24.168.54.169',
-            port: 62145
+            port: 62145,
           },
           event: {
             category: null,
             id: null,
             module: 'system',
             severity: null,
-            type: null
+            type: null,
           },
           geo: null,
           host: {
             name: 'siem-general',
-            ip: null
+            ip: null,
           },
           source: {
             ip: '10.142.0.6',
-            port: 9200
+            port: 9200,
           },
-          suricata: null
-        }
-      }
-    ]
-  }
+          suricata: null,
+        },
+      },
+    ],
+  },
 };
-/* tslint:enable */
 
 export const getEventsQueryMock = (logger: Logger) => ({
   source: (root: unknown, args: unknown, context: SecOpsContext) => {

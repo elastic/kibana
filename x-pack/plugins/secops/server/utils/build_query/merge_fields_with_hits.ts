@@ -8,7 +8,6 @@ import { get, has, merge } from 'lodash/fp';
 
 export const mergeFieldsWithHit = <T>(
   fieldName: string,
-  propertyName: string,
   flattenedFields: T,
   fieldMap: Readonly<Record<string, string>>,
   hit: { _source: {} }
@@ -17,8 +16,8 @@ export const mergeFieldsWithHit = <T>(
     const esField = fieldMap[fieldName];
     if (has(esField, hit._source)) {
       const objectWithProperty = {
-        [propertyName]: {
-          ...get(propertyName, flattenedFields),
+        node: {
+          ...get('node', flattenedFields),
           ...fieldName
             .split('.')
             .reduceRight((obj, next) => ({ [next]: obj }), get(esField, hit._source)),

@@ -7,21 +7,21 @@
 import { FieldNode } from 'graphql';
 import { Logger } from '../../utils/logger';
 import { SecOpsContext } from '../index';
-import { AuthorizationsData } from '../types';
+import { AuthenticationsData } from '../types';
 
-export const mockAuthorizationsData: { Authorizations: AuthorizationsData } = {
-  Authorizations: {
+export const mockAuthenticationsData: { Authentications: AuthenticationsData } = {
+  Authentications: {
     totalCount: 4,
     edges: [
       {
-        authorization: {
+        node: {
           _id: 'cPsuhGcB0WOhS6qyTKC0',
           failures: 10,
           successes: 0,
-          user: 'Evan Hassanabad',
-          from: '127.0.0.1',
+          user: { name: 'Evan Hassanabad' },
+          source: { ip: '127.0.0.1' },
           latest: '2019-01-11T06:18:30.745Z',
-          to: {
+          host: {
             id: '123',
             name: 'host-computer-1',
             ip: '192.168.0.1',
@@ -32,14 +32,14 @@ export const mockAuthorizationsData: { Authorizations: AuthorizationsData } = {
         },
       },
       {
-        authorization: {
+        node: {
           _id: 'KwQDiWcB0WOhS6qyXmrW',
           failures: 10,
           successes: 0,
-          user: 'Braden Hassanabad',
-          from: '127.0.0.1',
+          user: { name: 'Braden Hassanabad' },
+          source: { ip: '127.0.0.1' },
           latest: '2019-01-11T06:18:30.745Z',
-          to: {
+          host: {
             id: '234',
             name: 'host-computer-2',
             ip: '192.168.0.1',
@@ -59,14 +59,14 @@ export const mockAuthorizationsData: { Authorizations: AuthorizationsData } = {
   },
 };
 
-export const getAuthorizationsQueryMock = (logger: Logger) => ({
+export const getAuthenticationsQueryMock = (logger: Logger) => ({
   source: (root: unknown, args: unknown, context: SecOpsContext) => {
     logger.info('Mock source');
     const operationName = context.req.payload.operationName.toLowerCase();
     switch (operationName) {
       case 'test': {
-        logger.info(`Using mock for test ${mockAuthorizationsData}`);
-        return mockAuthorizationsData;
+        logger.info(`Using mock for test ${mockAuthenticationsData}`);
+        return mockAuthenticationsData;
       }
       default: {
         return {};
@@ -75,11 +75,11 @@ export const getAuthorizationsQueryMock = (logger: Logger) => ({
   },
 });
 
-export const mockAuthorizationsFields: FieldNode = {
+export const mockAuthenticationsFields: FieldNode = {
   kind: 'Field',
   name: {
     kind: 'Name',
-    value: 'Authorizations',
+    value: 'Authentications',
   },
   selectionSet: {
     kind: 'SelectionSet',
@@ -108,7 +108,7 @@ export const mockAuthorizationsFields: FieldNode = {
               kind: 'Field',
               name: {
                 kind: 'Name',
-                value: 'authorization',
+                value: 'authentication',
               },
               arguments: [],
               directives: [],

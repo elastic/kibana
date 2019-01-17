@@ -5,31 +5,31 @@
  */
 
 import { SourceResolvers } from '../../graphql/types';
-import { Events } from '../../lib/events';
+import { Authentications } from '../../lib/authentications';
 import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { createOptions } from '../../utils/build_query/create_options';
 import { QuerySourceResolver } from '../sources/resolvers';
 
-type QueryEventsResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.EventsResolver>,
+type QueryAuthenticationsResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.AuthenticationsResolver>,
   QuerySourceResolver
 >;
 
-export interface EventsResolversDeps {
-  events: Events;
+export interface AuthenticationsResolversDeps {
+  authentications: Authentications;
 }
 
-export const createEventsResolvers = (
-  libs: EventsResolversDeps
+export const createAuthenticationsResolvers = (
+  libs: AuthenticationsResolversDeps
 ): {
   Source: {
-    Events: QueryEventsResolver;
+    Authentications: QueryAuthenticationsResolver;
   };
 } => ({
   Source: {
-    async Events(source, args, { req }, info) {
+    async Authentications(source, args, { req }, info) {
       const options = createOptions(source, args, info);
-      return libs.events.getEvents(req, options);
+      return libs.authentications.getAuthentications(req, options);
     },
   },
 });

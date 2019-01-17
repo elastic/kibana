@@ -1,0 +1,60 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Authentication Table Component rendering it renders the default Authentication table 1`] = `
+<Connect(pure(Component))
+  data={
+    Array [
+      Object {
+        "cursor": Object {
+          "value": "98966fa2013c396155c460d35c0902be",
+        },
+        "node": Object {
+          "_id": "cPsuhGcB0WOhS6qyTKC0",
+          "failures": 10,
+          "host": Object {
+            "id": "123",
+            "ip": "192.168.0.1",
+            "name": "host-computer-1",
+          },
+          "latest": "2019-01-11T06:18:30.745Z",
+          "source": Object {
+            "ip": "127.0.0.1",
+          },
+          "successes": 0,
+          "user": Object {
+            "name": "Evan Hassanabad",
+          },
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "aa7ca589f1b8220002f2fc61c64cfbf1",
+        },
+        "node": Object {
+          "_id": "KwQDiWcB0WOhS6qyXmrW",
+          "failures": 10,
+          "host": Object {
+            "id": "234",
+            "ip": "192.168.0.1",
+            "name": "host-computer-2",
+          },
+          "latest": "2019-01-11T06:18:30.745Z",
+          "source": Object {
+            "ip": "127.0.0.1",
+          },
+          "successes": 0,
+          "user": Object {
+            "name": "Braden Hassanabad",
+          },
+        },
+      },
+    ]
+  }
+  hasNextPage={true}
+  loadMore={[MockFunction]}
+  loading={false}
+  nextCursor="aa7ca589f1b8220002f2fc61c64cfbf1"
+  startDate={1546965070707}
+  totalCount={4}
+/>
+`;

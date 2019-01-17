@@ -6,34 +6,34 @@
 
 import gql from 'graphql-tag';
 
-export const authorizationsSchema = gql`
-  type AuthorizationItem {
+export const authenticationsSchema = gql`
+  type AuthenticationItem {
     _id: String!
-    failures: Int!
-    successes: Int!
-    user: String!
-    from: String!
+    failures: Float!
+    successes: Float!
     latest: String!
-    to: HostEcsFields!
+    source: SourceEcsFields!
+    host: HostEcsFields!
+    user: UserEcsFields!
   }
 
-  type AuthorizationsEdges {
-    authorization: AuthorizationItem!
+  type AuthenticationsEdges {
+    node: AuthenticationItem!
     cursor: CursorType!
   }
 
-  type AuthorizationsData {
-    edges: [AuthorizationsEdges!]!
-    totalCount: Int!
+  type AuthenticationsData {
+    edges: [AuthenticationsEdges!]!
+    totalCount: Float!
     pageInfo: PageInfo!
   }
 
   extend type Source {
-    "Gets Authorization success and failures based on a timerange"
-    Authorizations(
+    "Gets Authentication success and failures based on a timerange"
+    Authentications(
       timerange: TimerangeInput!
       pagination: PaginationInput!
       filterQuery: String
-    ): AuthorizationsData!
+    ): AuthenticationsData!
   }
 `;

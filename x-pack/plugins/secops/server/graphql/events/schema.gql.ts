@@ -25,10 +25,36 @@ export const eventsSchema = gql`
     region_name: String
   }
 
+  type OsEcsFields {
+    platform: String
+    name: String
+    full: String
+    family: String
+    version: String
+    kernel: String
+  }
+
   type HostEcsFields {
     id: String
     ip: String
     name: String
+    os: OsEcsFields
+  }
+
+  type Thread {
+    id: Float
+    start: String
+  }
+
+  type ProcessEcsFields {
+    pid: Float
+    name: String
+    ppid: Float
+    args: [String]
+    executable: String
+    title: String
+    thread: Thread
+    working_directory: String
   }
 
   type SourceEcsFields {
@@ -59,6 +85,10 @@ export const eventsSchema = gql`
   type UserEcsFields {
     id: Float
     name: String
+    full_name: String
+    email: String
+    hash: String
+    group: String
   }
 
   type ECS {
@@ -75,14 +105,14 @@ export const eventsSchema = gql`
   }
 
   type EcsEdges {
-    event: ECS!
+    node: ECS!
     cursor: CursorType!
   }
 
   type EventsData {
     kpiEventType: [KpiItem!]
     edges: [EcsEdges!]!
-    totalCount: Int!
+    totalCount: Float!
     pageInfo: PageInfo!
   }
 

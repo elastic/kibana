@@ -11,27 +11,39 @@ export const mockData: { UncommonProcess: UncommonProcessesData } = {
     totalCount: 4,
     edges: [
       {
-        uncommonProcess: {
+        node: {
           _id: 'cPsuhGcB0WOhS6qyTKC0',
-          name: 'elrond.elstc.co',
-          hosts: [{ id: 'host-id-1', name: 'hello-world' }],
+          process: {
+            title: 'Hello World',
+            name: 'elrond.elstc.co',
+          },
+          host: [{ id: 'host-id-1', name: 'hello-world' }],
           instances: 93,
-          title: 'Hello World',
+          user: {
+            id: 0,
+            name: 'root',
+          },
         },
         cursor: {
           value: '98966fa2013c396155c460d35c0902be',
         },
       },
       {
-        uncommonProcess: {
+        node: {
           _id: 'KwQDiWcB0WOhS6qyXmrW',
-          name: 'siem-kibana',
-          hosts: [
+          process: {
+            title: 'Hello World',
+            name: 'siem-kibana',
+          },
+          host: [
             { id: 'host-id-1', name: 'hello-world' },
             { id: 'host-id-2', name: 'hello-world-2' },
           ],
           instances: 97,
-          title: 'Hello World',
+          user: {
+            id: 1,
+            name: 'Evan',
+          },
         },
         cursor: {
           value: 'aa7ca589f1b8220002f2fc61c64cfbf1',

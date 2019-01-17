@@ -18,13 +18,17 @@ export const hostsQuery = gql`
       Hosts(timerange: $timerange, pagination: $pagination, filterQuery: $filterQuery) {
         totalCount
         edges {
-          host {
+          node {
             _id
-            name
-            os
-            version
             firstSeen
-            hostId
+            host {
+              id
+              name
+              os {
+                name
+                version
+              }
+            }
           }
           cursor {
             value

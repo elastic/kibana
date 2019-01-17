@@ -4,27 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EventsData,
-  PaginationInput,
-  SortField,
-  SourceConfiguration,
-  TimerangeInput,
-} from '../../graphql/types';
-import { FrameworkRequest } from '../framework';
-import { ESQuery, SearchHit } from '../types';
+import { EventsData } from '../../graphql/types';
+import { FrameworkRequest, RequestOptions } from '../framework';
+import { SearchHit } from '../types';
 
 export interface EventsAdapter {
-  getEvents(req: FrameworkRequest, options: EventsRequestOptions): Promise<EventsData>;
-}
-
-export interface EventsRequestOptions {
-  sourceConfiguration: SourceConfiguration;
-  pagination: PaginationInput;
-  sortField: SortField;
-  timerange?: TimerangeInput;
-  filterQuery?: ESQuery;
-  fields: string[];
+  getEvents(req: FrameworkRequest, options: RequestOptions): Promise<EventsData>;
 }
 
 export interface EventHit extends SearchHit {

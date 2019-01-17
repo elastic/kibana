@@ -1,0 +1,84 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+export const hostFieldsMap: Readonly<Record<string, string>> = {
+  'host.id': 'host.id',
+  'host.ip': 'host.ip',
+  'host.name': 'host.name',
+  'host.os.platform': 'host.os.platform',
+  'host.os.name': 'host.os.name',
+  'host.os.full': 'host.os.full',
+  'host.os.family': 'host.os.family',
+  'host.os.version': 'host.os.version',
+  'host.os.kernel': 'host.os.kernel',
+};
+
+export const processFieldsMap: Readonly<Record<string, string>> = {
+  'process.pid': 'process.pid',
+  'process.name': 'process.name',
+  'process.ppid': 'process.ppid',
+  'process.args': 'process.args',
+  // NOTE: This mapping will change soon within auditbeats and then we can change this to be process.executable
+  'process.executable': 'process.exe',
+  'process.title': 'process.title',
+  'process.thread': 'process.thread',
+  'process.working_directory': 'process.working_directory',
+};
+
+export const userFieldsMap: Readonly<Record<string, string>> = {
+  'user.id': 'user.id',
+  'user.name': 'user.name',
+  // NOTE: This field is not tested and available from ECS. Please remove this tag once it is
+  'user.full_name': 'user.full_name',
+  // NOTE: This field is not tested and available from ECS. Please remove this tag once it is
+  'user.email': 'user.email',
+  // NOTE: This field is not tested and available from ECS. Please remove this tag once it is
+  'user.hash': 'user.hash',
+  // NOTE: This field is not tested and available from ECS. Please remove this tag once it is
+  'user.group': 'user.group',
+};
+
+export const suricataFieldsMap: Readonly<Record<string, string>> = {
+  'suricata.eve.flow_id': 'suricata.eve.flow_id',
+  'suricata.eve.proto': 'suricata.eve.proto',
+  'suricata.eve.alert.signature': 'suricata.eve.alert.signature',
+  'suricata.eve.alert.signature_id': 'suricata.eve.alert.signature_id',
+};
+
+export const sourceFieldsMap: Readonly<Record<string, string>> = {
+  'source.ip': 'source.ip',
+  'source.port': 'source.port',
+};
+
+export const destinationFieldsMap: Readonly<Record<string, string>> = {
+  'destination.ip': 'destination.ip',
+  'destination.port': 'destination.port',
+};
+
+export const geoFieldsMap: Readonly<Record<string, string>> = {
+  'geo.region_name': 'destination.geo.region_name',
+  'geo.country_iso_code': 'destination.geo.country_iso_code',
+};
+
+export const eventBaseFieldsMap: Readonly<Record<string, string>> = {
+  'event.category': 'suricata.eve.alert.category',
+  // NOTE: This is only for the index filebeat. If you're using auditbeat, then this needs to be changed out for 'event.id': 'event.id'
+  'event.id': 'suricata.eve.flow_id',
+  'event.module': 'event.module',
+  'event.type': 'event.type',
+  // NOTE: This is only for the index filebeat. If you're using auditbeat, this doesn't matter as auditbeat does not have severities yet.
+  'event.severity': 'suricata.eve.alert.severity',
+};
+
+export const eventFieldsMap: Readonly<Record<string, string>> = {
+  timestamp: '@timestamp',
+  ...{ ...hostFieldsMap },
+  ...{ ...eventBaseFieldsMap },
+  ...{ ...suricataFieldsMap },
+  ...{ ...sourceFieldsMap },
+  ...{ ...destinationFieldsMap },
+  ...{ ...geoFieldsMap },
+};

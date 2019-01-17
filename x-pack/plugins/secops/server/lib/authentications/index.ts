@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UncommonProcessesData } from '../../graphql/types';
 import { FrameworkRequest, RequestOptions } from '../framework';
 export * from './elasticsearch_adapter';
-import { UncommonProcessesAdapter } from './types';
+import { AuthenticationsData } from '../../graphql/types';
+import { AuthenticationsAdapter } from './types';
 
-export class UncommonProcesses {
-  constructor(private readonly adapter: UncommonProcessesAdapter) {}
+export class Authentications {
+  constructor(private readonly adapter: AuthenticationsAdapter) {}
 
-  public async getUncommonProcesses(
+  public async getAuthentications(
     req: FrameworkRequest,
     options: RequestOptions
-  ): Promise<UncommonProcessesData> {
-    return await this.adapter.getUncommonProcesses(req, options);
+  ): Promise<AuthenticationsData> {
+    return await this.adapter.getAuthentications(req, options);
   }
 }

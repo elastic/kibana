@@ -49,18 +49,18 @@ describe('events elasticsearch_adapter', () => {
   };
 
   test('it should merge two fields correctly', () => {
-    const existing = { host: {} };
-    const merge1 = mergeFieldsWithHit('os', 'host', existing, mockFieldMap, mockHits);
-    const merge2 = mergeFieldsWithHit('version', 'host', merge1, mockFieldMap, mockHits);
-    expect(merge2).toEqual({ host: { os: 'os-1', version: 'version-1' } });
+    const existing = { node: {} };
+    const merge1 = mergeFieldsWithHit('os', existing, mockFieldMap, mockHits);
+    const merge2 = mergeFieldsWithHit('version', merge1, mockFieldMap, mockHits);
+    expect(merge2).toEqual({ node: { os: 'os-1', version: 'version-1' } });
   });
 
   test('it should merge two fields correctly', () => {
-    const existing = { host: {} };
-    const merge1 = mergeFieldsWithHit('level1.value1', 'host', existing, mockFieldMap, mockHits);
-    const merge2 = mergeFieldsWithHit('level1.value2', 'host', merge1, mockFieldMap, mockHits);
+    const existing = { node: {} };
+    const merge1 = mergeFieldsWithHit('level1.value1', existing, mockFieldMap, mockHits);
+    const merge2 = mergeFieldsWithHit('level1.value2', merge1, mockFieldMap, mockHits);
     expect(merge2).toEqual({
-      host: {
+      node: {
         level1: {
           value1: 'level-2-value-1',
           value2: 'level-2-value-2',
@@ -70,13 +70,13 @@ describe('events elasticsearch_adapter', () => {
   });
 
   test('it should merge two fields correctly along side of other fields', () => {
-    const existing = { host: {} };
-    const merge1 = mergeFieldsWithHit('os', 'host', existing, mockFieldMap, mockHits);
-    const merge2 = mergeFieldsWithHit('version', 'host', merge1, mockFieldMap, mockHits);
-    const merge3 = mergeFieldsWithHit('level1.value1', 'host', merge2, mockFieldMap, mockHits);
-    const merge4 = mergeFieldsWithHit('level1.value2', 'host', merge3, mockFieldMap, mockHits);
+    const existing = { node: {} };
+    const merge1 = mergeFieldsWithHit('os', existing, mockFieldMap, mockHits);
+    const merge2 = mergeFieldsWithHit('version', merge1, mockFieldMap, mockHits);
+    const merge3 = mergeFieldsWithHit('level1.value1', merge2, mockFieldMap, mockHits);
+    const merge4 = mergeFieldsWithHit('level1.value2', merge3, mockFieldMap, mockHits);
     expect(merge4).toEqual({
-      host: {
+      node: {
         os: 'os-1',
         version: 'version-1',
         level1: {
@@ -88,18 +88,12 @@ describe('events elasticsearch_adapter', () => {
   });
 
   test('it should merge deep leveled 3 fields with other fields', () => {
-    const existing = { host: {} };
-    const merge1 = mergeFieldsWithHit('os', 'host', existing, mockFieldMap, mockHits);
-    const merge2 = mergeFieldsWithHit('version', 'host', merge1, mockFieldMap, mockHits);
-    const merge3 = mergeFieldsWithHit(
-      'level2.value2.value3',
-      'host',
-      merge2,
-      mockFieldMap,
-      mockHits
-    );
+    const existing = { node: {} };
+    const merge1 = mergeFieldsWithHit('os', existing, mockFieldMap, mockHits);
+    const merge2 = mergeFieldsWithHit('version', merge1, mockFieldMap, mockHits);
+    const merge3 = mergeFieldsWithHit('level2.value2.value3', merge2, mockFieldMap, mockHits);
     expect(merge3).toEqual({
-      host: {
+      node: {
         level2: {
           value2: {
             value3: 'level-3-value-3',
@@ -112,25 +106,13 @@ describe('events elasticsearch_adapter', () => {
   });
 
   test('it should merge deep level 4 leveled fields with other fields', () => {
-    const existing = { host: {} };
-    const merge1 = mergeFieldsWithHit('os', 'host', existing, mockFieldMap, mockHits);
-    const merge2 = mergeFieldsWithHit('version', 'host', merge1, mockFieldMap, mockHits);
-    const merge3 = mergeFieldsWithHit(
-      'level2.value2.value5',
-      'host',
-      merge2,
-      mockFieldMap,
-      mockHits
-    );
-    const merge4 = mergeFieldsWithHit(
-      'level2.value2.value6',
-      'host',
-      merge3,
-      mockFieldMap,
-      mockHits
-    );
+    const existing = { node: {} };
+    const merge1 = mergeFieldsWithHit('os', existing, mockFieldMap, mockHits);
+    const merge2 = mergeFieldsWithHit('version', merge1, mockFieldMap, mockHits);
+    const merge3 = mergeFieldsWithHit('level2.value2.value5', merge2, mockFieldMap, mockHits);
+    const merge4 = mergeFieldsWithHit('level2.value2.value6', merge3, mockFieldMap, mockHits);
     expect(merge4).toEqual({
-      host: {
+      node: {
         level2: {
           value2: {
             value5: 'level-4-value-5',

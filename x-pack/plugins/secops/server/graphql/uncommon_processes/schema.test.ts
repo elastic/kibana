@@ -27,12 +27,18 @@ const testCaseSource = {
         UncommonProcesses(timerange: $timerange, pagination: $pagination) {
           totalCount
           edges {
-            uncommonProcess{
+            node {
               _id
-              name
-              title
               instances
-              hosts {
+              process {
+                title
+                name
+              }
+              user {
+                id
+                name
+              }
+              host {
                 id
                 name
               }

@@ -7,17 +7,22 @@
 import { FieldNode } from 'graphql';
 import { Logger } from '../../utils/logger';
 import { SecOpsContext } from '../index';
+import { HostsData } from '../types';
 
-export const mockHostsData = {
+export const mockHostsData: { Hosts: HostsData } = {
   Hosts: {
     totalCount: 4,
     edges: [
       {
-        host: {
+        node: {
           _id: '3PsyhGcB0WOhS6qy2LAB',
-          name: 'galadriel.elstc.co',
-          os: 'Ubuntu',
-          version: '18.04.1 LTS (Bionic Beaver)',
+          host: {
+            name: 'galadriel.elstc.co',
+            os: {
+              name: 'Ubuntu',
+              version: '18.04.1 LTS (Bionic Beaver)',
+            },
+          },
           firstSeen: '2018-12-06T15:45:52.095Z',
         },
         cursor: {
@@ -25,11 +30,15 @@ export const mockHostsData = {
         },
       },
       {
-        host: {
+        node: {
           _id: 'cPsuhGcB0WOhS6qyTKC0',
-          name: 'elrond.elstc.co',
-          os: 'Ubuntu',
-          version: '18.04.1 LTS (Bionic Beaver)',
+          host: {
+            name: 'elrond.elstc.co',
+            os: {
+              name: 'Ubuntu',
+              version: '18.04.1 LTS (Bionic Beaver)',
+            },
+          },
           firstSeen: '2018-12-06T15:40:53.319Z',
         },
         cursor: {

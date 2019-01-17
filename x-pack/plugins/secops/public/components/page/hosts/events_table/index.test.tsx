@@ -33,7 +33,7 @@ describe('Load More Events Table Component', () => {
         <ReduxStoreProvider store={store}>
           <EventsTable
             loading={false}
-            data={mockData.Events.edges.map(i => i.event)}
+            data={mockData.Events.edges.map(i => i.node)}
             totalCount={mockData.Events.totalCount}
             tiebreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
             hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
@@ -50,16 +50,16 @@ describe('Load More Events Table Component', () => {
 
   describe('formatSafely', () => {
     test('formatSafely happy path', () => {
-      const sourceIp = formatSafely('source.ip', mockData.Events.edges[0].event);
-      const hostName = formatSafely('host.name', mockData.Events.edges[0].event);
+      const sourceIp = formatSafely('source.ip', mockData.Events.edges[0].node);
+      const hostName = formatSafely('host.name', mockData.Events.edges[0].node);
 
       expect(sourceIp).toBe('10.142.0.6');
       expect(hostName).toBe('siem-general');
     });
 
     test('formatSafely unhappy path', () => {
-      const sourceIp = formatSafely('.ip', mockData.Events.edges[0].event);
-      const hostName = formatSafely('.name', mockData.Events.edges[0].event);
+      const sourceIp = formatSafely('.ip', mockData.Events.edges[0].node);
+      const hostName = formatSafely('.name', mockData.Events.edges[0].node);
 
       expect(sourceIp).toBe(getEmptyValue());
       expect(hostName).toBe(getEmptyValue());

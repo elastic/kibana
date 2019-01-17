@@ -10,6 +10,7 @@ import { addMockFunctionsToSchema, makeExecutableSchema } from 'graphql-tools';
 import { rootSchema } from '../../../common/graphql/root/schema.gql';
 import { sharedSchema } from '../../../common/graphql/shared';
 import { Logger } from '../../utils/logger';
+import { eventsSchema } from '../events';
 import { sourceStatusSchema } from '../source_status/schema.gql';
 import { sourcesSchema } from '../sources/schema.gql';
 import { getHostsQueryMock, mockHostsData } from './hosts.mock';
@@ -23,12 +24,16 @@ const testCaseSource = {
         Hosts(timerange: $timerange, pagination: $pagination) {
           totalCount
           edges {
-            host{
+            node {
               _id
-              name
-              os
-              version
               firstSeen
+              host {
+                name
+                os {
+                  name
+                  version
+                }
+              }
             }
             cursor{
               value
@@ -74,7 +79,14 @@ const testCaseSource = {
 describe('Test Source Schema', () => {
   // Array of case types
   const cases = [testCaseSource];
-  const typeDefs = [rootSchema, sharedSchema, sourcesSchema, sourceStatusSchema, hostsSchema];
+  const typeDefs = [
+    rootSchema,
+    sharedSchema,
+    sourcesSchema,
+    sourceStatusSchema,
+    eventsSchema,
+    hostsSchema,
+  ];
   const mockSchema = makeExecutableSchema({ typeDefs });
 
   // Here we specify the return payloads of mocked types

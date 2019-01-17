@@ -9,7 +9,7 @@ import { sharedSchema } from '../../common/graphql/shared';
 import { getSourceQueryMock } from '../graphql/sources/source.mock';
 import { getAllSourcesQueryMock } from '../graphql/sources/sources.mock';
 import { Logger } from '../utils/logger';
-import { authorizationsSchema } from './authorizations/schema.gql';
+import { authenticationsSchema } from './authentications/schema.gql';
 import { eventsSchema } from './events/schema.gql';
 import { hostsSchema } from './hosts/schema.gql';
 import { sourceStatusSchema } from './source_status/schema.gql';
@@ -18,7 +18,7 @@ import { uncommonProcessesSchema } from './uncommon_processes';
 import { whoAmISchema } from './who_am_i/schema.gql';
 
 export const schemas = [
-  authorizationsSchema,
+  authenticationsSchema,
   eventsSchema,
   hostsSchema,
   rootSchema,

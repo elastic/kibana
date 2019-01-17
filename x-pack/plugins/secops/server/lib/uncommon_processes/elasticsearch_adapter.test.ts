@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { UncommonProcessesEdges } from '../../graphql/types';
+import { processFieldsMap } from '../ecs_fields';
 import { formatUncommonProcessesData, getHosts } from './elasticsearch_adapter';
-import { processFieldsMap } from './query.dsl';
 import { UncommonProcessBucket, UncommonProcessHit } from './types';
 
 describe('elasticsearch_adapter', () => {
@@ -139,7 +140,7 @@ describe('elasticsearch_adapter', () => {
         value: 100,
         relation: 'eq',
       },
-      hosts: [{ id: 'host-id-1', name: 'host-name-1' }, { id: 'host-id-1', name: 'host-name-1' }],
+      host: [{ id: 'host-id-1', name: 'host-name-1' }, { id: 'host-id-1', name: 'host-name-1' }],
       _source: {
         '@timestamp': 'time',
         process: {
@@ -152,50 +153,62 @@ describe('elasticsearch_adapter', () => {
     };
 
     test('it formats a uncommon process data with a source of name correctly', () => {
-      const fields: ReadonlyArray<string> = ['name'];
+      const fields: ReadonlyArray<string> = ['process.name'];
       const data = formatUncommonProcessesData(fields, hit, processFieldsMap);
-      expect(data).toEqual({
+      const expected: UncommonProcessesEdges = {
         cursor: { tiebreaker: null, value: 'cursor-1' },
-        uncommonProcess: {
+        node: {
           _id: 'id-123',
-          hosts: [
+          host: [
             { id: 'host-id-1', name: 'host-name-1' },
             { id: 'host-id-1', name: 'host-name-1' },
           ],
+          process: {
+            name: 'process-1',
+          },
           instances: 100,
-          name: 'process-1',
         },
-      });
+      };
+      expect(data).toEqual(expected);
     });
 
     test('it formats a uncommon process data with a source of name and title correctly', () => {
-      const fields: ReadonlyArray<string> = ['name', 'title'];
+      const fields: ReadonlyArray<string> = ['process.name', 'process.title'];
       const data = formatUncommonProcessesData(fields, hit, processFieldsMap);
-      expect(data).toEqual({
+      const expected: UncommonProcessesEdges = {
         cursor: { tiebreaker: null, value: 'cursor-1' },
-        uncommonProcess: {
+        node: {
           _id: 'id-123',
-          hosts: [
+          host: [
             { id: 'host-id-1', name: 'host-name-1' },
             { id: 'host-id-1', name: 'host-name-1' },
           ],
           instances: 100,
-          name: 'process-1',
-          title: 'title-1',
+          process: {
+            name: 'process-1',
+            title: 'title-1',
+          },
         },
-      });
+      };
+      expect(data).toEqual(expected);
     });
 
     test('it formats a uncommon process data without any data if fields is empty', () => {
       const fields: ReadonlyArray<string> = [];
       const data = formatUncommonProcessesData(fields, hit, processFieldsMap);
-      expect(data).toEqual({
+      const expected: UncommonProcessesEdges = {
         cursor: {
           tiebreaker: null,
           value: '',
         },
-        uncommonProcess: {},
-      });
+        node: {
+          _id: '',
+          host: [],
+          instances: 0,
+          process: {},
+        },
+      };
+      expect(data).toEqual(expected);
     });
   });
 });

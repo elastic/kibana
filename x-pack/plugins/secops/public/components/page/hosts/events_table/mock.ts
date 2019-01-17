@@ -22,7 +22,7 @@ export const mockData: { Events: EventsData } = {
           value: '1546878704036',
           tiebreaker: '10656',
         },
-        event: {
+        node: {
           _id: 'Fo8nKWgBiyhPd5Zo3cib',
           timestamp: '2019-01-07T16:31:44.036Z',
           _index: 'auditbeat-7.0.0-2019.01.07',
@@ -54,7 +54,7 @@ export const mockData: { Events: EventsData } = {
           value: '1546878704036',
           tiebreaker: '10624',
         },
-        event: {
+        node: {
           _id: 'F48nKWgBiyhPd5Zo3cib',
           timestamp: '2019-01-07T16:31:44.036Z',
           _index: 'auditbeat-7.0.0-2019.01.07',

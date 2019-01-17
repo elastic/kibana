@@ -4,25 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  HostsData,
-  PaginationInput,
-  SourceConfiguration,
-  TimerangeInput,
-} from '../../graphql/types';
-import { FrameworkRequest } from '../framework';
-import { ESQuery, Hit, Hits, SearchHit } from '../types';
+import { HostsData } from '../../graphql/types';
+import { FrameworkRequest, RequestOptions } from '../framework';
+import { Hit, Hits, SearchHit } from '../types';
 
 export interface HostsAdapter {
-  getHosts(req: FrameworkRequest, options: HostsRequestOptions): Promise<HostsData>;
-}
-
-export interface HostsRequestOptions {
-  sourceConfiguration: SourceConfiguration;
-  pagination: PaginationInput;
-  timerange: TimerangeInput;
-  filterQuery: ESQuery | undefined;
-  fields: string[];
+  getHosts(req: FrameworkRequest, options: RequestOptions): Promise<HostsData>;
 }
 
 type StringOrNumber = string | number;

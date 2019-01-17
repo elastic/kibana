@@ -5,6 +5,13 @@
  */
 
 import { GraphQLSchema } from 'graphql';
+import {
+  PaginationInput,
+  SortField,
+  SourceConfiguration,
+  TimerangeInput,
+} from '../../graphql/types';
+import { ESQuery } from '../types';
 
 export * from '../../utils/typed_resolvers';
 
@@ -98,4 +105,13 @@ export interface DatabaseGetIndicesResponse {
       [aliasName: string]: Alias;
     };
   };
+}
+
+export interface RequestOptions {
+  sourceConfiguration: SourceConfiguration;
+  pagination: PaginationInput;
+  timerange: TimerangeInput;
+  filterQuery: ESQuery | undefined;
+  fields: string[];
+  sortField?: SortField;
 }

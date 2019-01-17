@@ -5,20 +5,19 @@
  */
 
 import { get, getOr, last } from 'lodash/fp';
+
 import { EcsEdges, EventsData, KpiItem } from '../../graphql/types';
 import { mergeFieldsWithHit } from '../../utils/build_query';
-import { FrameworkAdapter, FrameworkRequest } from '../framework';
+import { eventFieldsMap } from '../ecs_fields';
+import { FrameworkAdapter, FrameworkRequest, RequestOptions } from '../framework';
 import { TermAggregation } from '../types';
-import { buildQuery, eventFieldsMap } from './query.dsl';
-import { EventHit, EventsAdapter, EventsRequestOptions } from './types';
+import { buildQuery } from './query.dsl';
+import { EventHit, EventsAdapter } from './types';
 
 export class ElasticsearchEventsAdapter implements EventsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
 
-  public async getEvents(
-    request: FrameworkRequest,
-    options: EventsRequestOptions
-  ): Promise<EventsData> {
+  public async getEvents(request: FrameworkRequest, options: RequestOptions): Promise<EventsData> {
     const response = await this.framework.callWithRequest<EventHit, TermAggregation>(
       request,
       'search',
@@ -57,22 +56,21 @@ export const formatEventsData = (
   fields: ReadonlyArray<string>,
   hit: EventHit,
   fieldMap: Readonly<Record<string, string>>
-) =>
-  fields.reduce(
-    (flattenedFields, fieldName) => {
-      flattenedFields.event._id = hit._id;
-      flattenedFields.event._index = hit._index;
-      if (hit.sort && hit.sort.length > 1) {
-        flattenedFields.cursor.value = hit.sort[0];
-        flattenedFields.cursor.tiebreaker = hit.sort[1];
-      }
-      return mergeFieldsWithHit(fieldName, 'event', flattenedFields, fieldMap, hit) as EcsEdges;
+) => {
+  const init: EcsEdges = {
+    node: {},
+    cursor: {
+      value: '',
+      tiebreaker: null,
     },
-    {
-      event: {},
-      cursor: {
-        value: '',
-        tiebreaker: null,
-      },
-    } as EcsEdges
-  );
+  };
+  return fields.reduce((flattenedFields, fieldName) => {
+    flattenedFields.node._id = hit._id;
+    flattenedFields.node._index = hit._index;
+    if (hit.sort && hit.sort.length > 1) {
+      flattenedFields.cursor.value = hit.sort[0];
+      flattenedFields.cursor.tiebreaker = hit.sort[1];
+    }
+    return mergeFieldsWithHit(fieldName, flattenedFields, fieldMap, hit);
+  }, init);
+};

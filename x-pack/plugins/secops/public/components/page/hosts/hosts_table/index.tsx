@@ -5,17 +5,17 @@
  */
 
 import { EuiBadge, EuiLink } from '@elastic/eui';
-import { isNil, noop } from 'lodash/fp';
+import { get, isNil, noop } from 'lodash/fp';
 import moment from 'moment';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
-import { HostItem, HostsEdges } from '../../../../graphql/types';
+import { HostsEdges } from '../../../../graphql/types';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { hostsActions, hostsSelector, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
-import { defaultToEmpty } from '../../../empty_value';
+import { defaultToEmpty, getOrEmpty } from '../../../empty_value';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
 
@@ -107,20 +107,20 @@ const getHostsColumns = () => [
     name: 'Name',
     truncateText: false,
     hideForMobile: false,
-    render: ({ host }: { host: HostItem }) => {
-      const hostName = defaultToEmpty(host.name);
+    render: ({ node }: HostsEdges) => {
+      const hostName = getOrEmpty('host.name', node);
       return (
         <>
           <DraggableWrapper
             dataProvider={{
               and: [],
               enabled: true,
-              id: host._id!,
-              name: hostName!,
+              id: node._id!,
+              name: hostName,
               negated: false,
-              queryMatch: `host.id: "${escapeQueryValue(host.hostId!)}"`,
+              queryMatch: `host.id: "${escapeQueryValue(node.host!.id!)}"`,
               queryDate: `@timestamp >= ${moment(
-                host.firstSeen!
+                node.firstSeen!
               ).valueOf()} and @timestamp <= ${moment().valueOf()}`,
             }}
             render={(dataProvider, _, snapshot) =>
@@ -132,10 +132,10 @@ const getHostsColumns = () => [
                     onToggleDataProviderEnabled={noop}
                   />
                 </DragEffects>
-              ) : isNil(host.hostId) ? (
-                { hostName }
+              ) : isNil(get('host.id', node)) ? (
+                <>{hostName}</>
               ) : (
-                <EuiLink href={`#/link-to/hosts/${encodeURIComponent(host.hostId)}`}>
+                <EuiLink href={`#/link-to/hosts/${encodeURIComponent(node.host!.id!)}`}>
                   {hostName}
                 </EuiLink>
               )
@@ -149,18 +149,18 @@ const getHostsColumns = () => [
     name: 'First seen',
     truncateText: false,
     hideForMobile: false,
-    render: ({ host }: { host: HostItem }) => <>{defaultToEmpty(host.firstSeen)}</>,
+    render: ({ node }: HostsEdges) => <>{defaultToEmpty(node.firstSeen)}</>,
   },
   {
     name: 'OS',
     truncateText: false,
     hideForMobile: false,
-    render: ({ host }: { host: HostItem }) => <>{defaultToEmpty(host.os)}</>,
+    render: ({ node }: HostsEdges) => <>{getOrEmpty('host.os.name', node)}</>,
   },
   {
     name: 'Version',
     truncateText: false,
     hideForMobile: false,
-    render: ({ host }: { host: HostItem }) => <>{defaultToEmpty(host.version)}</>,
+    render: ({ node }: HostsEdges) => <>{getOrEmpty('host.os.version', node)}</>,
   },
 ];

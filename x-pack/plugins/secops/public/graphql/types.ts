@@ -27,8 +27,8 @@ export interface Source {
   configuration: SourceConfiguration;
   /** The status of the source */
   status: SourceStatus;
-  /** Gets Authorization success and failures based on a timerange */
-  Authorizations: AuthorizationsData;
+  /** Gets Authentication success and failures based on a timerange */
+  Authentications: AuthenticationsData;
   /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Events: EventsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
@@ -99,34 +99,40 @@ export interface IndexField {
   aggregatable: boolean;
 }
 
-export interface AuthorizationsData {
-  edges: AuthorizationsEdges[];
+export interface AuthenticationsData {
+  edges: AuthenticationsEdges[];
 
   totalCount: number;
 
   pageInfo: PageInfo;
 }
 
-export interface AuthorizationsEdges {
-  authorization: AuthorizationItem;
+export interface AuthenticationsEdges {
+  node: AuthenticationItem;
 
   cursor: CursorType;
 }
 
-export interface AuthorizationItem {
+export interface AuthenticationItem {
   _id: string;
 
   failures: number;
 
   successes: number;
 
-  user: string;
-
-  from: string;
-
   latest: string;
 
-  to: HostEcsFields;
+  source: SourceEcsFields;
+
+  host: HostEcsFields;
+
+  user: UserEcsFields;
+}
+
+export interface SourceEcsFields {
+  ip?: string | null;
+
+  port?: number | null;
 }
 
 export interface HostEcsFields {
@@ -135,6 +141,36 @@ export interface HostEcsFields {
   ip?: string | null;
 
   name?: string | null;
+
+  os?: OsEcsFields | null;
+}
+
+export interface OsEcsFields {
+  platform?: string | null;
+
+  name?: string | null;
+
+  full?: string | null;
+
+  family?: string | null;
+
+  version?: string | null;
+
+  kernel?: string | null;
+}
+
+export interface UserEcsFields {
+  id?: number | null;
+
+  name?: string | null;
+
+  full_name?: string | null;
+
+  email?: string | null;
+
+  hash?: string | null;
+
+  group?: string | null;
 }
 
 export interface CursorType {
@@ -166,7 +202,7 @@ export interface KpiItem {
 }
 
 export interface EcsEdges {
-  event: Ecs;
+  node: Ecs;
 
   cursor: CursorType;
 }
@@ -217,12 +253,6 @@ export interface GeoEcsFields {
   region_name?: string | null;
 }
 
-export interface SourceEcsFields {
-  ip?: string | null;
-
-  port?: number | null;
-}
-
 export interface SuricataEcsFields {
   eve?: SuricataEveData | null;
 }
@@ -241,12 +271,6 @@ export interface SuricataAlertData {
   signature_id?: number | null;
 }
 
-export interface UserEcsFields {
-  id?: number | null;
-
-  name?: string | null;
-}
-
 export interface HostsData {
   edges: HostsEdges[];
 
@@ -256,7 +280,7 @@ export interface HostsData {
 }
 
 export interface HostsEdges {
-  host: HostItem;
+  node: HostItem;
 
   cursor: CursorType;
 }
@@ -264,15 +288,9 @@ export interface HostsEdges {
 export interface HostItem {
   _id?: string | null;
 
-  name?: string | null;
-
   firstSeen?: string | null;
 
-  version?: string | null;
-
-  os?: string | null;
-
-  hostId?: string | null;
+  host?: HostEcsFields | null;
 }
 
 export interface UncommonProcessesData {
@@ -284,7 +302,7 @@ export interface UncommonProcessesData {
 }
 
 export interface UncommonProcessesEdges {
-  uncommonProcess: UncommonProcessItem;
+  node: UncommonProcessItem;
 
   cursor: CursorType;
 }
@@ -292,13 +310,37 @@ export interface UncommonProcessesEdges {
 export interface UncommonProcessItem {
   _id: string;
 
-  name: string;
+  instances: number;
+
+  process: ProcessEcsFields;
+
+  host: HostEcsFields[];
+
+  user?: UserEcsFields | null;
+}
+
+export interface ProcessEcsFields {
+  pid?: number | null;
+
+  name?: string | null;
+
+  ppid?: number | null;
+
+  args?: (string | null)[] | null;
+
+  executable?: string | null;
 
   title?: string | null;
 
-  instances: number;
+  thread?: Thread | null;
 
-  hosts: HostEcsFields[];
+  working_directory?: string | null;
+}
+
+export interface Thread {
+  id?: number | null;
+
+  start?: string | null;
 }
 
 export interface SayMyName {
@@ -342,7 +384,7 @@ export interface SourceQueryArgs {
   /** The id of the source */
   id: string;
 }
-export interface AuthorizationsSourceArgs {
+export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
 
   pagination: PaginationInput;
@@ -399,7 +441,7 @@ export enum Direction {
 // Documents
 // ====================================================
 
-export namespace GetAuthorizationsQuery {
+export namespace GetAuthenticationsQuery {
   export type Variables = {
     sourceId: string;
     timerange: TimerangeInput;
@@ -418,11 +460,11 @@ export namespace GetAuthorizationsQuery {
 
     id: string;
 
-    Authorizations: Authorizations;
+    Authentications: Authentications;
   };
 
-  export type Authorizations = {
-    __typename?: 'AuthorizationsData';
+  export type Authentications = {
+    __typename?: 'AuthenticationsData';
 
     totalCount: number;
 
@@ -432,15 +474,15 @@ export namespace GetAuthorizationsQuery {
   };
 
   export type Edges = {
-    __typename?: 'AuthorizationsEdges';
+    __typename?: 'AuthenticationsEdges';
 
-    authorization: Authorization;
+    node: Node;
 
     cursor: Cursor;
   };
 
-  export type Authorization = {
-    __typename?: 'AuthorizationItem';
+  export type Node = {
+    __typename?: 'AuthenticationItem';
 
     _id: string;
 
@@ -448,16 +490,28 @@ export namespace GetAuthorizationsQuery {
 
     successes: number;
 
-    user: string;
+    user: User;
 
-    from: string;
+    source: _Source;
 
-    to: To;
+    host: Host;
 
     latest: string;
   };
 
-  export type To = {
+  export type User = {
+    __typename?: 'UserEcsFields';
+
+    name?: string | null;
+  };
+
+  export type _Source = {
+    __typename?: 'SourceEcsFields';
+
+    ip?: string | null;
+  };
+
+  export type Host = {
     __typename?: 'HostEcsFields';
 
     id?: string | null;
@@ -538,10 +592,10 @@ export namespace GetEventsQuery {
   export type Edges = {
     __typename?: 'EcsEdges';
 
-    event: Event;
+    node: Node;
   };
 
-  export type Event = {
+  export type Node = {
     __typename?: 'ECS';
 
     _id?: string | null;
@@ -550,7 +604,7 @@ export namespace GetEventsQuery {
 
     timestamp?: string | null;
 
-    event?: _Event | null;
+    event?: Event | null;
 
     host?: Host | null;
 
@@ -563,7 +617,7 @@ export namespace GetEventsQuery {
     suricata?: Suricata | null;
   };
 
-  export type _Event = {
+  export type Event = {
     __typename?: 'EventEcsFields';
 
     type?: string | null;
@@ -671,25 +725,37 @@ export namespace GetHostsQuery {
   export type Edges = {
     __typename?: 'HostsEdges';
 
-    host: Host;
+    node: Node;
 
     cursor: Cursor;
   };
 
-  export type Host = {
+  export type Node = {
     __typename?: 'HostItem';
 
     _id?: string | null;
 
-    name?: string | null;
-
-    os?: string | null;
-
-    version?: string | null;
-
     firstSeen?: string | null;
 
-    hostId?: string | null;
+    host?: Host | null;
+  };
+
+  export type Host = {
+    __typename?: 'HostEcsFields';
+
+    id?: string | null;
+
+    name?: string | null;
+
+    os?: Os | null;
+  };
+
+  export type Os = {
+    __typename?: 'OsEcsFields';
+
+    name?: string | null;
+
+    version?: string | null;
   };
 
   export type Cursor = {
@@ -858,10 +924,10 @@ export namespace GetTimelineQuery {
   export type Edges = {
     __typename?: 'EcsEdges';
 
-    event: Event;
+    node: Node;
   };
 
-  export type Event = {
+  export type Node = {
     __typename?: 'ECS';
 
     _id?: string | null;
@@ -870,7 +936,7 @@ export namespace GetTimelineQuery {
 
     timestamp?: string | null;
 
-    event?: _Event | null;
+    event?: Event | null;
 
     host?: Host | null;
 
@@ -883,7 +949,7 @@ export namespace GetTimelineQuery {
     suricata?: Suricata | null;
   };
 
-  export type _Event = {
+  export type Event = {
     __typename?: 'EventEcsFields';
 
     type?: string | null;
@@ -991,26 +1057,42 @@ export namespace GetUncommonProcessesQuery {
   export type Edges = {
     __typename?: 'UncommonProcessesEdges';
 
-    uncommonProcess: UncommonProcess;
+    node: Node;
 
     cursor: Cursor;
   };
 
-  export type UncommonProcess = {
+  export type Node = {
     __typename?: 'UncommonProcessItem';
 
     _id: string;
 
-    name: string;
+    instances: number;
+
+    process: Process;
+
+    user?: User | null;
+
+    host: Host[];
+  };
+
+  export type Process = {
+    __typename?: 'ProcessEcsFields';
 
     title?: string | null;
 
-    instances: number;
-
-    hosts: Hosts[];
+    name?: string | null;
   };
 
-  export type Hosts = {
+  export type User = {
+    __typename?: 'UserEcsFields';
+
+    id?: number | null;
+
+    name?: string | null;
+  };
+
+  export type Host = {
     __typename?: 'HostEcsFields';
 
     id?: string | null;

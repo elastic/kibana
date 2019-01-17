@@ -11,12 +11,12 @@ import { getOr } from 'lodash/fp';
 import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { AuthorizationTable } from '.';
+import { AuthenticationTable } from '.';
 import { mockGlobalState } from '../../../../mock';
 import { createStore, State } from '../../../../store';
 import { mockData } from './mock';
 
-describe('Authorization Table Component', () => {
+describe('Authentication Table Component', () => {
   const loadMore = jest.fn();
   const state: State = mockGlobalState;
 
@@ -27,15 +27,15 @@ describe('Authorization Table Component', () => {
   });
 
   describe('rendering', () => {
-    test('it renders the default Authorization table', () => {
+    test('it renders the default Authentication table', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
-          <AuthorizationTable
+          <AuthenticationTable
             loading={false}
-            data={mockData.Authorizations.edges}
-            totalCount={mockData.Authorizations.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.Authorizations.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.Authorizations.pageInfo)!}
+            data={mockData.Authentications.edges}
+            totalCount={mockData.Authentications.totalCount}
+            hasNextPage={getOr(false, 'hasNextPage', mockData.Authentications.pageInfo)!}
+            nextCursor={getOr(null, 'endCursor.value', mockData.Authentications.pageInfo)!}
             loadMore={loadMore}
             startDate={1546965070707}
           />

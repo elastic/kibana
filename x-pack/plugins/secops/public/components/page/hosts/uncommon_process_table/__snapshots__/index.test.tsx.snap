@@ -8,26 +8,32 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
         "cursor": Object {
           "value": "98966fa2013c396155c460d35c0902be",
         },
-        "uncommonProcess": Object {
+        "node": Object {
           "_id": "cPsuhGcB0WOhS6qyTKC0",
-          "hosts": Array [
+          "host": Array [
             Object {
               "id": "host-id-1",
               "name": "hello-world",
             },
           ],
           "instances": 93,
-          "name": "elrond.elstc.co",
-          "title": "Hello World",
+          "process": Object {
+            "name": "elrond.elstc.co",
+            "title": "Hello World",
+          },
+          "user": Object {
+            "id": 0,
+            "name": "root",
+          },
         },
       },
       Object {
         "cursor": Object {
           "value": "aa7ca589f1b8220002f2fc61c64cfbf1",
         },
-        "uncommonProcess": Object {
+        "node": Object {
           "_id": "KwQDiWcB0WOhS6qyXmrW",
-          "hosts": Array [
+          "host": Array [
             Object {
               "id": "host-id-1",
               "name": "hello-world",
@@ -38,8 +44,14 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
             },
           ],
           "instances": 97,
-          "name": "siem-kibana",
-          "title": "Hello World",
+          "process": Object {
+            "name": "siem-kibana",
+            "title": "Hello World",
+          },
+          "user": Object {
+            "id": 1,
+            "name": "Evan",
+          },
         },
       },
     ]

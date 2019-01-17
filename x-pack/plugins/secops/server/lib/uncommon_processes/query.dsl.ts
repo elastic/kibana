@@ -6,24 +6,15 @@
 
 import { createQueryFilterClauses } from '../../utils/build_query';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
+import { hostFieldsMap, processFieldsMap, userFieldsMap } from '../ecs_fields';
+import { RequestOptions } from '../framework';
 import { FilterQuery } from '../types';
-import { UncommonProcessesRequestOptions } from './types';
 
-export const processFieldsMap: Readonly<Record<string, string>> = {
-  name: 'process.name',
-  title: 'process.title',
-};
-
-export const hostFieldsMap: Readonly<Record<string, string>> = {
-  'hosts.id': 'host.id',
-  'hosts.name': 'host.name',
-};
-
-export const buildQuery = (options: UncommonProcessesRequestOptions) => {
+export const buildQuery = (options: RequestOptions) => {
   const { to, from } = options.timerange;
   const { limit } = options.pagination;
   const { fields, filterQuery } = options;
-  const processFields = reduceFields(fields, processFieldsMap);
+  const processUserFields = reduceFields(fields, { ...processFieldsMap, ...userFieldsMap });
   const hostFields = reduceFields(fields, hostFieldsMap);
   const filter = [
     ...createQueryFilterClauses(filterQuery as FilterQuery),
@@ -72,7 +63,7 @@ export const buildQuery = (options: UncommonProcessesRequestOptions) => {
             process: {
               top_hits: {
                 size: 1,
-                _source: processFields,
+                _source: processUserFields,
               },
             },
             host_count: {

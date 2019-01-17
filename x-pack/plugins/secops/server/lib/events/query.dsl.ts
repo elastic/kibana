@@ -7,32 +7,12 @@
 import { SortField, TimerangeInput } from '../../graphql/types';
 import { createQueryFilterClauses } from '../../utils/build_query';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
+import { eventFieldsMap } from '../ecs_fields';
+import { RequestOptions } from '../framework';
 import { FilterQuery, SortRequest, SortRequestDirection } from '../types';
-import { EventsRequestOptions, TimerangeFilter } from './types';
+import { TimerangeFilter } from './types';
 
-export const eventFieldsMap: Readonly<Record<string, string>> = {
-  timestamp: '@timestamp',
-  'host.name': 'host.name',
-  'host.ip': 'host.ip',
-  'host.id': 'host.id',
-  'event.category': 'suricata.eve.alert.category',
-  'event.id': 'suricata.eve.flow_id',
-  'event.module': 'event.module',
-  'event.type': 'event.type',
-  'event.severity': 'suricata.eve.alert.severity',
-  'suricata.eve.flow_id': 'suricata.eve.flow_id',
-  'suricata.eve.proto': 'suricata.eve.proto',
-  'suricata.eve.alert.signature': 'suricata.eve.alert.signature',
-  'suricata.eve.alert.signature_id': 'suricata.eve.alert.signature_id',
-  'source.ip': 'source.ip',
-  'source.port': 'source.port',
-  'destination.ip': 'destination.ip',
-  'destination.port': 'destination.port',
-  'geo.region_name': 'destination.geo.region_name',
-  'geo.country_iso_code': 'destination.geo.country_iso_code',
-};
-
-export const buildQuery = (options: EventsRequestOptions) => {
+export const buildQuery = (options: RequestOptions) => {
   const { limit, cursor, tiebreaker } = options.pagination;
   const { fields, filterQuery } = options;
   const esFields = [...reduceFields(fields, eventFieldsMap)];
@@ -86,7 +66,7 @@ export const buildQuery = (options: EventsRequestOptions) => {
     return [];
   };
 
-  const sort: SortRequest = getSortField(options.sortField);
+  const sort: SortRequest = getSortField(options.sortField!);
 
   const queryDsl = {
     allowNoIndices: true,

@@ -5,7 +5,7 @@
  */
 
 export {
-  authorizationsSelector,
+  authenticationsSelector,
   dataProvidersSelector,
   hostsSelector,
   eventsSelector,

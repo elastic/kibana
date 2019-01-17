@@ -11,11 +11,15 @@ export const mockData: { Hosts: HostsData } = {
     totalCount: 4,
     edges: [
       {
-        host: {
+        node: {
           _id: 'cPsuhGcB0WOhS6qyTKC0',
-          name: 'elrond.elstc.co',
-          os: 'Ubuntu',
-          version: '18.04.1 LTS (Bionic Beaver)',
+          host: {
+            name: 'elrond.elstc.co',
+            os: {
+              name: 'Ubuntu',
+              version: '18.04.1 LTS (Bionic Beaver)',
+            },
+          },
           firstSeen: '2018-12-06T15:40:53.319Z',
         },
         cursor: {
@@ -23,11 +27,15 @@ export const mockData: { Hosts: HostsData } = {
         },
       },
       {
-        host: {
+        node: {
           _id: 'KwQDiWcB0WOhS6qyXmrW',
-          name: 'siem-kibana',
-          os: 'Debian GNU/Linux',
-          version: '9 (stretch)',
+          host: {
+            name: 'siem-kibana',
+            os: {
+              name: 'Debian GNU/Linux',
+              version: '9 (stretch)',
+            },
+          },
           firstSeen: '2018-12-07T14:12:38.560Z',
         },
         cursor: {

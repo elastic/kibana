@@ -7,30 +7,47 @@
 import { FieldNode } from 'graphql';
 import { Logger } from '../../utils/logger';
 import { SecOpsContext } from '../index';
+import { UncommonProcessesData } from '../types';
 
-export const mockUncommonProcessesData = {
+interface MockData {
+  UncommonProcesses: UncommonProcessesData;
+}
+
+export const mockUncommonProcessesData: MockData = {
   UncommonProcesses: {
     totalCount: 4,
     edges: [
       {
-        uncommonProcess: {
+        node: {
           _id: '3PsyhGcB0WOhS6qy2LAB',
-          hosts: [{ id: 'Hello World', name: 'Hello World' }],
+          host: [{ id: 'Hello World', name: 'Hello World' }],
           instances: 93,
-          name: 'galadriel.elstc.co',
-          title: 'Hello World',
+          process: {
+            name: 'galadriel.elstc.co',
+            title: 'Hello World',
+          },
+          user: {
+            id: 0,
+            name: 'Evan',
+          },
         },
         cursor: {
           value: '6f7be6fb33e6c77f057266415c094408',
         },
       },
       {
-        uncommonProcess: {
+        node: {
           _id: 'cPsuhGcB0WOhS6qyTKC0',
-          hosts: [{ id: 'Hello World', name: 'Hello World' }],
+          host: [{ id: 'Hello World', name: 'Hello World' }],
           instances: 97,
-          name: 'elrond.elstc.co',
-          title: 'Hello World',
+          process: {
+            name: 'elrond.elstc.co',
+            title: 'Hello World',
+          },
+          user: {
+            id: 1,
+            name: 'Braden',
+          },
         },
         cursor: {
           value: '98966fa2013c396155c460d35c0902be',

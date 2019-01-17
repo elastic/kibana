@@ -103,10 +103,8 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
           },
         },
       });
-      expect(UncommonProcesses.edges[0].uncommonProcess).to.eql({
+      expect(UncommonProcesses.edges[0].node).to.eql({
         _id: 'QD1yEWgBiyhPd5Zoyisj',
-        name: 'sshd',
-        title: null,
         instances: 2,
         hosts: [
           {
@@ -116,6 +114,16 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
           },
         ],
         __typename: 'UncommonProcessItem',
+        process: {
+          __typename: 'ProcessEcsFields',
+          name: 'sshd',
+          title: null,
+        },
+        user: {
+          __typename: 'UserEcsFields',
+          id: 0,
+          name: 'root',
+        },
       });
     });
   });

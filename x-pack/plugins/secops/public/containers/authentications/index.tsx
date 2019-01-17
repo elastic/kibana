@@ -9,16 +9,16 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { pure } from 'recompose';
 
-import { AuthorizationsEdges, GetAuthorizationsQuery, PageInfo } from '../../graphql/types';
+import { AuthenticationsEdges, GetAuthenticationsQuery, PageInfo } from '../../graphql/types';
 
 import { connect } from 'react-redux';
 import { inputsModel, State } from '../../store';
-import { authorizationsSelector } from '../../store';
-import { authorizationsQuery } from './index.gql_query';
+import { authenticationsSelector } from '../../store';
+import { authenticationsQuery } from './index.gql_query';
 
-export interface AuthorizationArgs {
+export interface AuthenticationArgs {
   id: string;
-  authorizations: AuthorizationsEdges[];
+  authentications: AuthenticationsEdges[];
   totalCount: number;
   pageInfo: PageInfo;
   loading: boolean;
@@ -28,7 +28,7 @@ export interface AuthorizationArgs {
 
 export interface OwnProps {
   id?: string;
-  children: (args: AuthorizationArgs) => React.ReactNode;
+  children: (args: AuthenticationArgs) => React.ReactNode;
   sourceId: string;
   startDate: number;
   endDate: number;
@@ -36,15 +36,15 @@ export interface OwnProps {
   poll: number;
 }
 
-export interface AuthorizationsComponentReduxProps {
+export interface AuthenticationsComponentReduxProps {
   limit: number;
 }
 
-type AuthorizationsProps = OwnProps & AuthorizationsComponentReduxProps;
+type AuthenticationsProps = OwnProps & AuthenticationsComponentReduxProps;
 
-const AuthorizationsComponentQuery = pure<AuthorizationsProps>(
+const AuthenticationsComponentQuery = pure<AuthenticationsProps>(
   ({
-    id = 'authorizationQuery',
+    id = 'authenticationQuery',
     children,
     filterQuery,
     sourceId,
@@ -53,8 +53,8 @@ const AuthorizationsComponentQuery = pure<AuthorizationsProps>(
     limit,
     poll,
   }) => (
-    <Query<GetAuthorizationsQuery.Query, GetAuthorizationsQuery.Variables>
-      query={authorizationsQuery}
+    <Query<GetAuthenticationsQuery.Query, GetAuthenticationsQuery.Variables>
+      query={authenticationsQuery}
       fetchPolicy="cache-and-network"
       pollInterval={poll}
       notifyOnNetworkStatusChange
@@ -74,14 +74,14 @@ const AuthorizationsComponentQuery = pure<AuthorizationsProps>(
       }}
     >
       {({ data, loading, fetchMore, refetch }) => {
-        const authorizations = getOr([], 'source.Authorizations.edges', data);
+        const authentications = getOr([], 'source.Authentications.edges', data);
         return children({
           id,
           refetch,
           loading,
-          totalCount: getOr(0, 'source.Authorizations.totalCount', data),
-          authorizations,
-          pageInfo: getOr({}, 'source.Authorizations.pageInfo', data),
+          totalCount: getOr(0, 'source.Authentications.totalCount', data),
+          authentications,
+          pageInfo: getOr({}, 'source.Authentications.pageInfo', data),
           loadMore: (newCursor: string) =>
             fetchMore({
               variables: {
@@ -98,11 +98,11 @@ const AuthorizationsComponentQuery = pure<AuthorizationsProps>(
                   ...fetchMoreResult,
                   source: {
                     ...fetchMoreResult.source,
-                    Authorizations: {
-                      ...fetchMoreResult.source.Authorizations,
+                    Authentications: {
+                      ...fetchMoreResult.source.Authentications,
                       edges: [
-                        ...prev.source.Authorizations.edges,
-                        ...fetchMoreResult.source.Authorizations.edges,
+                        ...prev.source.Authentications.edges,
+                        ...fetchMoreResult.source.Authentications.edges,
                       ],
                     },
                   },
@@ -115,6 +115,6 @@ const AuthorizationsComponentQuery = pure<AuthorizationsProps>(
   )
 );
 
-const mapStateToProps = (state: State) => authorizationsSelector(state);
+const mapStateToProps = (state: State) => authenticationsSelector(state);
 
-export const AuthorizationsQuery = connect(mapStateToProps)(AuthorizationsComponentQuery);
+export const AuthenticationsQuery = connect(mapStateToProps)(AuthenticationsComponentQuery);

@@ -75,7 +75,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
 
           expect(events.edges.length).to.be(2);
           expect(events.totalCount).to.be(586);
-          expect(events.edges[0]!.event.host!.name).to.be('siem-kibana');
+          expect(events.edges[0]!.node.host!.name).to.be('siem-kibana');
         });
     });
   });

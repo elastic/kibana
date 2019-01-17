@@ -7,35 +7,35 @@ import { GraphQLResolveInfo } from 'graphql';
 import { omit } from 'lodash/fp';
 
 import { Source } from '../../graphql/types';
-import { Authorizations } from '../../lib/authorizations';
-import { AuthorizationsAdapter } from '../../lib/authorizations/types';
+import { Authentications } from '../../lib/authentications';
+import { AuthenticationsAdapter } from '../../lib/authentications/types';
 import { FrameworkRequest, internalFrameworkRequest } from '../../lib/framework';
 import { SourceStatus } from '../../lib/source_status';
 import { Sources } from '../../lib/sources';
 import { createSourcesResolvers } from '../sources';
 import { SourcesResolversDeps } from '../sources/resolvers';
 import { mockSourcesAdapter, mockSourceStatusAdapter } from '../sources/resolvers.test';
-import { mockAuthorizationsData, mockAuthorizationsFields } from './authorizations.mock';
-import { AuthorizationsResolversDeps, createAuthorizationsResolvers } from './resolvers';
+import { mockAuthenticationsData, mockAuthenticationsFields } from './authentications.mock';
+import { AuthenticationsResolversDeps, createAuthenticationsResolvers } from './resolvers';
 
 const mockGetFields = jest.fn();
-mockGetFields.mockResolvedValue({ fieldNodes: [mockAuthorizationsFields] });
+mockGetFields.mockResolvedValue({ fieldNodes: [mockAuthenticationsFields] });
 jest.mock('../../utils/build_query/fields', () => ({
   getFields: mockGetFields,
 }));
 
-const mockGetAuthorizations = jest.fn();
-mockGetAuthorizations.mockResolvedValue({
-  Authorizations: {
-    ...mockAuthorizationsData.Authorizations,
+const mockGetAuthentications = jest.fn();
+mockGetAuthentications.mockResolvedValue({
+  Authentications: {
+    ...mockAuthenticationsData.Authentications,
   },
 });
-const mockAuthorizationsAdapter: AuthorizationsAdapter = {
-  getAuthorizations: mockGetAuthorizations,
+const mockAuthenticationsAdapter: AuthenticationsAdapter = {
+  getAuthentications: mockGetAuthentications,
 };
 
-const mockAuthorizationsLibs: AuthorizationsResolversDeps = {
-  authorizations: new Authorizations(mockAuthorizationsAdapter),
+const mockAuthenticationsLibs: AuthenticationsResolversDeps = {
+  authentications: new Authentications(mockAuthenticationsAdapter),
 };
 
 const mockSrcLibs: SourcesResolversDeps = {
@@ -61,14 +61,16 @@ const req: FrameworkRequest = {
 const context = { req };
 
 describe('Test Source Resolvers', () => {
-  test('Make sure that getAuthorizations have been called', async () => {
+  test('Make sure that getAuthenticationss have been called', async () => {
     const source = await createSourcesResolvers(mockSrcLibs).Query.source(
       {},
       { id: 'default' },
       context,
       {} as GraphQLResolveInfo
     );
-    const data = await createAuthorizationsResolvers(mockAuthorizationsLibs).Source.Authorizations(
+    const data = await createAuthenticationsResolvers(
+      mockAuthenticationsLibs
+    ).Source.Authentications(
       source as Source,
       {
         timerange: {
@@ -84,7 +86,7 @@ describe('Test Source Resolvers', () => {
       context,
       {} as GraphQLResolveInfo
     );
-    expect(mockAuthorizationsAdapter.getAuthorizations).toHaveBeenCalled();
-    expect(data).toEqual(omit('status', mockAuthorizationsData));
+    expect(mockAuthenticationsAdapter.getAuthentications).toHaveBeenCalled();
+    expect(data).toEqual(omit('status', mockAuthenticationsData));
   });
 });

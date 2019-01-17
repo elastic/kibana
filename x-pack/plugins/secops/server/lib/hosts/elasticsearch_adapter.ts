@@ -7,18 +7,15 @@
 import { get, getOr, head, last } from 'lodash/fp';
 import { HostsData, HostsEdges } from '../../graphql/types';
 import { mergeFieldsWithHit } from '../../utils/build_query';
-import { FrameworkAdapter, FrameworkRequest } from '../framework';
+import { FrameworkAdapter, FrameworkRequest, RequestOptions } from '../framework';
 import { TermAggregation } from '../types';
 import { buildQuery, hostsFieldsMap } from './query.dsl';
-import { HostBucket, HostData, HostHit, HostsAdapter, HostsRequestOptions } from './types';
+import { HostBucket, HostData, HostHit, HostsAdapter } from './types';
 
 export class ElasticsearchHostsAdapter implements HostsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
 
-  public async getHosts(
-    request: FrameworkRequest,
-    options: HostsRequestOptions
-  ): Promise<HostsData> {
+  public async getHosts(request: FrameworkRequest, options: RequestOptions): Promise<HostsData> {
     const response = await this.framework.callWithRequest<HostData, TermAggregation>(
       request,
       'search',
@@ -48,20 +45,19 @@ export const formatHostsData = (
   fields: ReadonlyArray<string>,
   hit: HostHit,
   fieldMap: Readonly<Record<string, string>>
-): HostsEdges =>
-  fields.reduce(
-    (flattenedFields, fieldName) => {
-      flattenedFields.host._id = hit._id;
-      if (hit.cursor) {
-        flattenedFields.cursor.value = hit.cursor;
-      }
-      return mergeFieldsWithHit(fieldName, 'host', flattenedFields, fieldMap, hit) as HostsEdges;
+): HostsEdges => {
+  const init: HostsEdges = {
+    node: {},
+    cursor: {
+      value: '',
+      tiebreaker: null,
     },
-    {
-      host: {},
-      cursor: {
-        value: '',
-        tiebreaker: null,
-      },
-    } as HostsEdges
-  );
+  };
+  return fields.reduce((flattenedFields, fieldName) => {
+    flattenedFields.node._id = hit._id;
+    if (hit.cursor) {
+      flattenedFields.cursor.value = hit.cursor;
+    }
+    return mergeFieldsWithHit(fieldName, flattenedFields, fieldMap, hit);
+  }, init);
+};
