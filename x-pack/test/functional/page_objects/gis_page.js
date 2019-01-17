@@ -15,6 +15,14 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
   class GisPage {
 
+    async waitForLayersToLoad() {
+      log.debug('Wait for layers to load');
+      const tableOfContents = await testSubjects.find('mapLayerTOC');
+      await retry.try(async () => {
+        await tableOfContents.waitForDeletedByClassName('euiLoadingSpinner');
+      });
+    }
+
     // use the search filter box to narrow the results down to a single
     // entry, or at least to a single page of results
     async loadSavedMap(name) {

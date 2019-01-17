@@ -35,6 +35,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         await PageObjects.gis.loadSavedMap('[eCommerce] Orders by Country');
         await PageObjects.gis.toggleLayerVisibility('road_map');
         await setTimerangeToCoverAllSampleData();
+        await PageObjects.gis.waitForLayersToLoad();
       });
 
       after(async () => {
@@ -57,6 +58,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         await PageObjects.gis.loadSavedMap('[Flights] Origin and Destination Flight Time');
         await PageObjects.gis.toggleLayerVisibility('road_map');
         await setTimerangeToCoverAllSampleData();
+        await PageObjects.gis.waitForLayersToLoad();
       });
 
       after(async () => {
@@ -80,6 +82,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         await PageObjects.gis.loadSavedMap('[Logs] Total Requests and Bytes');
         await PageObjects.gis.toggleLayerVisibility('road_map');
         await setTimerangeToCoverAllSampleData();
+        await PageObjects.gis.waitForLayersToLoad();
       });
 
       after(async () => {
