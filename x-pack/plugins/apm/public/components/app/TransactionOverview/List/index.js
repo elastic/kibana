@@ -12,6 +12,7 @@ import { asMillis, asDecimal } from '../../../../utils/formatters';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { fontFamilyCode, truncate } from '../../../../style/variables';
 import { ManagedTable } from '../../../shared/ManagedTable';
+import { NOT_AVAILABLE_LABEL } from '../../../../constants';
 import { legacyEncodeURIComponent } from '../../../shared/Links/url_helpers';
 import { KibanaLink } from '../../../shared/Links/KibanaLink';
 
@@ -21,12 +22,6 @@ const TransactionNameLink = styled(KibanaLink)`
 `;
 
 export default function TransactionList({ items, serviceName, ...rest }) {
-  const notAvailableLabel = i18n.translate(
-    'xpack.apm.transactionsTable.notAvailableLabel',
-    {
-      defaultMessage: 'N/A'
-    }
-  );
   const columns = [
     {
       field: 'name',
@@ -43,9 +38,9 @@ export default function TransactionList({ items, serviceName, ...rest }) {
         const transactionPath = `/${serviceName}/transactions/${encodedType}/${encodedName}`;
 
         return (
-          <TooltipOverlay content={transactionName || notAvailableLabel}>
+          <TooltipOverlay content={transactionName || NOT_AVAILABLE_LABEL}>
             <TransactionNameLink hash={transactionPath}>
-              {transactionName || notAvailableLabel}
+              {transactionName || NOT_AVAILABLE_LABEL}
             </TransactionNameLink>
           </TooltipOverlay>
         );
