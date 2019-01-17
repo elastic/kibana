@@ -9,12 +9,8 @@ import PropTypes from 'prop-types';
 import { EuiBasicTable, EuiBadge } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import moment from 'moment';
-import {
-  toQuery,
-  fromQuery,
-  history,
-  RelativeLink
-} from '../../../../utils/url';
+import { toQuery, fromQuery, history } from '../../../shared/Links/url_helpers';
+import { KibanaLink } from '../../../shared/Links/KibanaLink';
 import TooltipOverlay from '../../../shared/TooltipOverlay';
 import styled from 'styled-components';
 import {
@@ -31,7 +27,7 @@ function paginateItems({ items, pageIndex, pageSize }) {
   return items.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
 }
 
-const GroupIdLink = styled(RelativeLink)`
+const GroupIdLink = styled(KibanaLink)`
   font-family: ${fontFamilyCode};
 `;
 
@@ -39,7 +35,7 @@ const MessageAndCulpritCell = styled.div`
   ${truncate('100%')};
 `;
 
-const MessageLink = styled(RelativeLink)`
+const MessageLink = styled(KibanaLink)`
   font-family: ${fontFamilyCode};
   font-size: ${fontSizes.large};
   ${truncate('100%')};
@@ -92,7 +88,7 @@ class List extends Component {
         width: px(unit * 6),
         render: groupId => {
           return (
-            <GroupIdLink path={`/${serviceName}/errors/${groupId}`}>
+            <GroupIdLink hash={`/${serviceName}/errors/${groupId}`}>
               {groupId.slice(0, 5) || NOT_AVAILABLE_LABEL}
             </GroupIdLink>
           );
@@ -112,7 +108,7 @@ class List extends Component {
           return (
             <MessageAndCulpritCell>
               <TooltipOverlay content={message || NOT_AVAILABLE_LABEL}>
-                <MessageLink path={`/${serviceName}/errors/${item.groupId}`}>
+                <MessageLink hash={`/${serviceName}/errors/${item.groupId}`}>
                   {message || NOT_AVAILABLE_LABEL}
                 </MessageLink>
               </TooltipOverlay>

@@ -112,7 +112,10 @@ export function getMemorySeries(
             data: series.maximumPercentMemoryUsed,
             type: 'linemark',
             color: colors.apmBlue,
-            legendValue: asPercent(overallValues.maximumPercentMemoryUsed || 0)
+            legendValue: asPercent(
+              overallValues.maximumPercentMemoryUsed || 0,
+              1
+            )
           },
           {
             title: i18n.translate(
@@ -124,7 +127,10 @@ export function getMemorySeries(
             data: series.averagePercentMemoryUsed,
             type: 'linemark',
             color: colors.apmGreen,
-            legendValue: asPercent(overallValues.averagePercentMemoryUsed || 0)
+            legendValue: asPercent(
+              overallValues.averagePercentMemoryUsed || 0,
+              1
+            )
           }
         ];
 

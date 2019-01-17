@@ -9,17 +9,17 @@ import 'jest-styled-components';
 import React from 'react';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import {
-  DiscoverTransactionButton,
+  DiscoverTransactionLink,
   getDiscoverQuery
-} from '../DiscoverTransactionButton';
+} from '../DiscoverTransactionLink';
 import mockTransaction from './mockTransaction.json';
 
-describe('DiscoverTransactionButton component', () => {
+describe('DiscoverTransactionLink component', () => {
   it('should render with data', () => {
     const transaction: Transaction = mockTransaction;
 
     expect(
-      shallow(<DiscoverTransactionButton transaction={transaction} />)
+      shallow(<DiscoverTransactionLink transaction={transaction} />)
     ).toMatchSnapshot();
   });
 });

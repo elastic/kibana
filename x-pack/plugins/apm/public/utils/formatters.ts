@@ -131,7 +131,7 @@ export function tpmUnit(type?: string) {
 
 export function asPercent(
   numerator: number,
-  denominator?: number,
+  denominator: number | undefined,
   fallbackResult = ''
 ) {
   if (!denominator) {
@@ -139,5 +139,5 @@ export function asPercent(
   }
 
   const decimal = numerator / denominator;
-  return numeral(decimal).format('0.00%');
+  return numeral(decimal).format('0.0%');
 }
