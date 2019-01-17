@@ -51,7 +51,7 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
   }
 
   public async bulk(user: FrameworkUser, params: DatabaseBulkIndexDocumentsParams): Promise<any> {
-    this.putTemplate();
+    await this.putTemplate();
 
     const result = await this.callWithUser(user, 'bulk', params);
     return result;
@@ -61,12 +61,12 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
     user: FrameworkUser,
     params: DatabaseCreateDocumentParams
   ): Promise<DatabaseCreateDocumentResponse> {
-    this.putTemplate();
+    await this.putTemplate();
     const result = await this.callWithUser(user, 'create', params);
     return result;
   }
   public async index<T>(user: FrameworkUser, params: DatabaseIndexDocumentParams<T>): Promise<any> {
-    this.putTemplate();
+    await this.putTemplate();
     const result = await this.callWithUser(user, 'index', params);
     return result;
   }
