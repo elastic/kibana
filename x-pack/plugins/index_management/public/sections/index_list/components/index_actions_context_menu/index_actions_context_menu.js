@@ -464,8 +464,8 @@ class IndexActionsContextMenuUi extends Component {
         iconSide={iconSide}
         aria-label={intl.formatMessage({
           id: 'xpack.idxMgmt.indexActionsMenu.manageButtonAriaLabel',
-          defaultMessage: '{entity} options',
-        }, { entity })}
+          defaultMessage: '{indexNamesLength, plural, one {index options} other {indices options} }',
+        }, { indexNamesLength })}
         onClick={this.onButtonClick}
         iconType={iconType}
         fill
