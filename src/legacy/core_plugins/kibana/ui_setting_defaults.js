@@ -1025,5 +1025,15 @@ export function getUiSettingDefaults() {
       }),
       category: ['rollups'],
     },
+    'home:welcome:disable': {
+      name: i18n.translate('kbn.advancedSettings.disableWelcomeTitle', {
+        defaultMessage: 'Disable the welcome screen',
+      }),
+      value: false,
+      description: i18n.translate('kbn.advancedSettings.disableWelcomeText', {
+        defaultMessage: 'Set this to prevent the welcome screen from ever showing.'
+      }),
+      category: ['home'],
+    }
   };
 }

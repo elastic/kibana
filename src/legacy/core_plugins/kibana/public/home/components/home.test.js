@@ -28,6 +28,9 @@ jest.mock(
   () => ({
     getBasePath: jest.fn(() => 'path'),
     getInjected: jest.fn(() => ''),
+    getUiSettingsClient: jest.fn(() => ({
+      get: jest.fn()
+    })),
   }),
   { virtual: true }
 );

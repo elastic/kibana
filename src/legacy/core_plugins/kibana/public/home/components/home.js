@@ -23,6 +23,7 @@ import { Synopsis } from './synopsis';
 import { AddData } from './add_data';
 import { RecentlyAccessed, recentlyAccessedShape } from './recently_accessed';
 import { FormattedMessage } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
 
 import {
   EuiButton,
@@ -46,7 +47,8 @@ export class Home extends Component {
   constructor(props) {
     super(props);
 
-    const isWelcomeEnabled = props.localStorage.getItem(KEY_ENABLE_WELCOME) !== 'false';
+    const uiSettings = chrome.getUiSettingsClient();
+    const isWelcomeEnabled = !(uiSettings.get('home:welcome:disable') || props.localStorage.getItem(KEY_ENABLE_WELCOME) === 'false');
 
     this.state = {
       // If welcome is enabled, we wait for loading to complete
