@@ -81,12 +81,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async closeLoadSaveSearchPanel() {
-      const isOpen = await testSubjects.exists('loadSearchForm');
-      if (!isOpen) {
-        return;
-      }
-
-      await flyout.close('loadSearchForm');
+      await flyout.ensureClosed('loadSearchForm');
     }
 
     async hasSavedSearch(searchName) {
