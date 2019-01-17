@@ -17,4 +17,15 @@
  * under the License.
  */
 
-export { PersistedLog } from './persisted_log';
+import { Sha256 } from '../crypto';
+
+export function createLogKey(type: string, optionalIdentifier: string) {
+  const baseKey = `kibana.history.${type}`;
+
+  if (!optionalIdentifier) {
+    return baseKey;
+  }
+
+  const protectedIdentifier = new Sha256().update(optionalIdentifier, 'utf8').digest('base64');
+  return `${baseKey}-${protectedIdentifier}`;
+}
