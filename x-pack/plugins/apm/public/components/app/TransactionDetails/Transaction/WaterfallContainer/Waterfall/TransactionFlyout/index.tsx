@@ -17,6 +17,7 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Location } from 'history';
 import { get } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
@@ -32,7 +33,7 @@ import { IWaterfall } from '../waterfall_helpers/waterfall_helpers';
 interface Props {
   onClose: () => void;
   transaction?: Transaction;
-  location: any; // TODO: import location type from react router or history types?
+  location: Location;
   urlParams: IUrlParams;
   waterfall: IWaterfall;
 }

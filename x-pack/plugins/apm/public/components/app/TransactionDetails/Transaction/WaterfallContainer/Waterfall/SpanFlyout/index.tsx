@@ -29,7 +29,7 @@ import { DatabaseContext } from './DatabaseContext';
 import { HttpContext } from './HttpContext';
 import { StickySpanProperties } from './StickySpanProperties';
 
-import { DiscoverSpanButton } from 'x-pack/plugins/apm/public/components/shared/DiscoverButtons/DiscoverSpanButton';
+import { DiscoverSpanLink } from 'x-pack/plugins/apm/public/components/shared/Links/DiscoverLinks/DiscoverSpanLink';
 import { Stacktrace } from 'x-pack/plugins/apm/public/components/shared/Stacktrace';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { Span } from '../../../../../../../../typings/es_schemas/Span';
@@ -88,7 +88,7 @@ export function SpanFlyout({
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <DiscoverSpanButton span={span}>
+              <DiscoverSpanLink span={span}>
                 <EuiButtonEmpty iconType="discoverApp">
                   {i18n.translate(
                     'xpack.apm.transactionDetails.spanFlyout.viewSpanInDiscoverButtonLabel',
@@ -97,7 +97,7 @@ export function SpanFlyout({
                     }
                   )}
                 </EuiButtonEmpty>
-              </DiscoverSpanButton>
+              </DiscoverSpanLink>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>

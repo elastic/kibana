@@ -14,6 +14,7 @@ import {
   EuiToolTip
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Location } from 'history';
 import React from 'react';
 import { Transaction as ITransaction } from '../../../../../typings/es_schemas/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
@@ -49,7 +50,7 @@ function MaybeViewTraceLink({
             }
           )}
         >
-          <EuiButton iconType="apmApp" disabled={true}>
+          <EuiButton iconType="apmTrace" disabled={true}>
             {viewFullTraceButtonLabel}
           </EuiButton>
         </EuiToolTip>
@@ -72,7 +73,7 @@ function MaybeViewTraceLink({
             }
           )}
         >
-          <EuiButton iconType="apmApp" disabled={true}>
+          <EuiButton iconType="apmTrace" disabled={true}>
             {viewFullTraceButtonLabel}
           </EuiButton>
         </EuiToolTip>
@@ -84,7 +85,7 @@ function MaybeViewTraceLink({
     return (
       <EuiFlexItem grow={false}>
         <TransactionLink transaction={waterfall.traceRoot}>
-          <EuiButton iconType="apmApp">{viewFullTraceButtonLabel}</EuiButton>
+          <EuiButton iconType="apmTrace">{viewFullTraceButtonLabel}</EuiButton>
         </TransactionLink>
       </EuiFlexItem>
     );

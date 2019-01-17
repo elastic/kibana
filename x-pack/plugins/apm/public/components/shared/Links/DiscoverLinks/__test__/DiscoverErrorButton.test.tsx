@@ -8,9 +8,9 @@ import { shallow, ShallowWrapper } from 'enzyme';
 import 'jest-styled-components';
 import React from 'react';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
-import { DiscoverErrorButton } from '../DiscoverErrorButton';
+import { DiscoverErrorLink } from '../DiscoverErrorLink';
 
-describe('DiscoverErrorButton without kuery', () => {
+describe('DiscoverErrorLink without kuery', () => {
   let wrapper: ShallowWrapper;
   beforeEach(() => {
     const error = {
@@ -18,7 +18,7 @@ describe('DiscoverErrorButton without kuery', () => {
       error: { grouping_key: 'myGroupingKey' }
     } as APMError;
 
-    wrapper = shallow(<DiscoverErrorButton error={error} />);
+    wrapper = shallow(<DiscoverErrorLink error={error} />);
   });
 
   it('should have correct query', () => {
@@ -33,7 +33,7 @@ describe('DiscoverErrorButton without kuery', () => {
   });
 });
 
-describe('DiscoverErrorButton with kuery', () => {
+describe('DiscoverErrorLink with kuery', () => {
   let wrapper: ShallowWrapper;
   beforeEach(() => {
     const error = {
@@ -43,7 +43,7 @@ describe('DiscoverErrorButton with kuery', () => {
 
     const kuery = 'transaction.sampled: true';
 
-    wrapper = shallow(<DiscoverErrorButton error={error} kuery={kuery} />);
+    wrapper = shallow(<DiscoverErrorLink error={error} kuery={kuery} />);
   });
 
   it('should have correct query', () => {
