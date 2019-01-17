@@ -47,101 +47,95 @@ Array [
 
 exports[`policy table should show empty state when there are not any policies 1`] = `
 <div
-  class="euiPage"
+  class="euiPageBody"
 >
   <div
-    class="euiPageBody"
+    class="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
   >
-    <div
-      class="euiPanel euiPanel--paddingLarge euiPageContent"
-    >
+    <div>
       <div
-        class="policyTable__horizontalScroll"
+        class="euiSpacer euiSpacer--l"
+      />
+      <div
+        class="euiEmptyPrompt"
       >
+        <svg
+          class="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app"
+          focusable="false"
+          height="32"
+          viewBox="0 0 32 32"
+          width="32"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            class="euiIcon__fillSecondary"
+            d="M16 21a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"
+          />
+          <path
+            d="M20 32h-8v-4.06a1 1 0 0 0-1.61-.67l-2.88 2.87-5.65-5.65 2.87-2.87a.92.92 0 0 0 .2-1 .93.93 0 0 0-.86-.6H0V12h4.06a.92.92 0 0 0 .85-.58.94.94 0 0 0-.19-1L1.86 7.51l5.65-5.65 2.87 2.87A1 1 0 0 0 12 4.06V0h8v4.06a1 1 0 0 0 1.61.67l2.87-2.87 5.66 5.66-2.87 2.87a.92.92 0 0 0-.2 1 .93.93 0 0 0 .86.6H32v8h-4.06a.92.92 0 0 0-.85.58.94.94 0 0 0 .19 1l2.87 2.87-5.66 5.66-2.87-2.87a1 1 0 0 0-1.61.67L20 32zm-6-2h4v-2.06a3 3 0 0 1 5-2.08l1.46 1.46 2.83-2.83L25.86 23a3 3 0 0 1 2.08-5H30v-4h-2.06a3 3 0 0 1-2.08-5l1.46-1.46-2.83-2.85L23 6.14a3 3 0 0 1-5-2.08V2h-4v2.06a3 3 0 0 1-5 2.08L7.51 4.69 4.69 7.51 6.14 9a3 3 0 0 1-2.08 5H2v4h2.06a3 3 0 0 1 2.08 5l-1.45 1.49 2.83 2.83L9 25.86a3 3 0 0 1 5 2.08V30z"
+          />
+        </svg>
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <span
+          class="euiTextColor euiTextColor--subdued"
+        >
+          <h1
+            class="euiTitle euiTitle--medium"
+          >
+            Create your first index lifecycle policy
+          </h1>
+          <div
+            class="euiSpacer euiSpacer--m"
+          />
+          <div
+            class="euiText euiText--medium"
+          >
+            <p>
+               An index lifecycle policy helps you manage your indices as they age.
+            </p>
+          </div>
+        </span>
         <div
           class="euiSpacer euiSpacer--l"
         />
         <div
-          class="euiEmptyPrompt"
-        >
-          <svg
-            class="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app"
-            focusable="false"
-            height="32"
-            viewBox="0 0 32 32"
-            width="32"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              class="euiIcon__fillSecondary"
-              d="M16 21a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"
-            />
-            <path
-              d="M20 32h-8v-4.06a1 1 0 0 0-1.61-.67l-2.88 2.87-5.65-5.65 2.87-2.87a.92.92 0 0 0 .2-1 .93.93 0 0 0-.86-.6H0V12h4.06a.92.92 0 0 0 .85-.58.94.94 0 0 0-.19-1L1.86 7.51l5.65-5.65 2.87 2.87A1 1 0 0 0 12 4.06V0h8v4.06a1 1 0 0 0 1.61.67l2.87-2.87 5.66 5.66-2.87 2.87a.92.92 0 0 0-.2 1 .93.93 0 0 0 .86.6H32v8h-4.06a.92.92 0 0 0-.85.58.94.94 0 0 0 .19 1l2.87 2.87-5.66 5.66-2.87-2.87a1 1 0 0 0-1.61.67L20 32zm-6-2h4v-2.06a3 3 0 0 1 5-2.08l1.46 1.46 2.83-2.83L25.86 23a3 3 0 0 1 2.08-5H30v-4h-2.06a3 3 0 0 1-2.08-5l1.46-1.46-2.83-2.85L23 6.14a3 3 0 0 1-5-2.08V2h-4v2.06a3 3 0 0 1-5 2.08L7.51 4.69 4.69 7.51 6.14 9a3 3 0 0 1-2.08 5H2v4h2.06a3 3 0 0 1 2.08 5l-1.45 1.49 2.83 2.83L9 25.86a3 3 0 0 1 5 2.08V30z"
-            />
-          </svg>
-          <div
-            class="euiSpacer euiSpacer--s"
-          />
-          <span
-            class="euiTextColor euiTextColor--subdued"
-          >
-            <h1
-              class="euiTitle euiTitle--medium"
-            >
-              Create your first index lifecycle policy
-            </h1>
-            <div
-              class="euiSpacer euiSpacer--m"
-            />
-            <div
-              class="euiText euiText--medium"
-            >
-              <p>
-                 An index lifecycle policy helps you manage your indices as they age.
-              </p>
-            </div>
-          </span>
-          <div
-            class="euiSpacer euiSpacer--l"
-          />
-          <div
-            class="euiSpacer euiSpacer--s"
-          />
-          <a
-            class="euiButton euiButton--primary euiButton--fill"
-            data-test-subj="createPolicyButton"
-            href="#/management/elasticsearch/index_lifecycle_management/policies/edit"
-          >
-            <span
-              class="euiButton__content"
-            >
-              <svg
-                aria-hidden="true"
-                class="euiIcon euiIcon--medium euiButton__icon"
-                focusable="false"
-                height="16"
-                viewBox="0 0 16 16"
-                width="16"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M8 7h3.5a.5.5 0 1 1 0 1H8v3.5a.5.5 0 1 1-1 0V8H3.5a.5.5 0 0 1 0-1H7V3.5a.5.5 0 0 1 1 0V7zm-.5-7C11.636 0 15 3.364 15 7.5S11.636 15 7.5 15 0 11.636 0 7.5 3.364 0 7.5 0zm0 .882a6.618 6.618 0 1 0 0 13.236A6.618 6.618 0 0 0 7.5.882z"
-                  fill-rule="evenodd"
-                />
-              </svg>
-              <span
-                class="euiButton__text"
-              >
-                Create policy
-              </span>
-            </span>
-          </a>
-        </div>
-        <div
-          class="euiSpacer euiSpacer--m"
+          class="euiSpacer euiSpacer--s"
         />
+        <a
+          class="euiButton euiButton--primary euiButton--fill"
+          data-test-subj="createPolicyButton"
+          href="#/management/elasticsearch/index_lifecycle_management/policies/edit"
+        >
+          <span
+            class="euiButton__content"
+          >
+            <svg
+              aria-hidden="true"
+              class="euiIcon euiIcon--medium euiButton__icon"
+              focusable="false"
+              height="16"
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M8 7h3.5a.5.5 0 1 1 0 1H8v3.5a.5.5 0 1 1-1 0V8H3.5a.5.5 0 0 1 0-1H7V3.5a.5.5 0 0 1 1 0V7zm-.5-7C11.636 0 15 3.364 15 7.5S11.636 15 7.5 15 0 11.636 0 7.5 3.364 0 7.5 0zm0 .882a6.618 6.618 0 1 0 0 13.236A6.618 6.618 0 0 0 7.5.882z"
+                fill-rule="evenodd"
+              />
+            </svg>
+            <span
+              class="euiButton__text"
+            >
+              Create policy
+            </span>
+          </span>
+        </a>
       </div>
+      <div
+        class="euiSpacer euiSpacer--m"
+      />
     </div>
   </div>
 </div>

@@ -17,15 +17,4 @@
  * under the License.
  */
 
-import { Sha256 } from '../crypto';
-
-export function createLogKey(type, optionalIdentifier) {
-  const baseKey = `kibana.history.${type}`;
-
-  if (!optionalIdentifier) {
-    return baseKey;
-  }
-
-  const protectedIdentifier = new Sha256().update(optionalIdentifier, 'utf8').digest('base64');
-  return `${baseKey}-${protectedIdentifier}`;
-}
+export { LeadfootElementWrapper } from './leadfoot_element_wrapper';
