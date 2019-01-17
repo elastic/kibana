@@ -146,6 +146,7 @@ export default function ({ getPageObjects, getService }) {
 
       describe('query bar', () => {
         before(async () => {
+          await PageObjects.gis.setView(0, 0, 0);
           await queryBar.setQuery('machine.os.raw : "win 8"');
           await queryBar.submitQuery();
         });
