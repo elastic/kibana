@@ -105,6 +105,8 @@ export const MonitorCharts = ({
         }
       );
 
+      // As above, we are building a domain size for the chart to use.
+      // Without this code the chart could render data outside of the field.
       const checksDomain = upSeries.concat(downSeries).map(({ y }) => y);
       const domainLimits = [Math.min(...checksDomain), Math.max(...checksDomain)];
       const durationDomain = avgDurationSeries.concat(areaRttSeries);
