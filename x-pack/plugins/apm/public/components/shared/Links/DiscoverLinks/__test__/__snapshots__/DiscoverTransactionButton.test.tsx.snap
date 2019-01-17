@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`DiscoverTransactionButton component should render with data 1`] = `
-<DiscoverButton
+exports[`DiscoverTransactionLink component should render with data 1`] = `
+<DiscoverLink
   query={
     Object {
       "_a": Object {

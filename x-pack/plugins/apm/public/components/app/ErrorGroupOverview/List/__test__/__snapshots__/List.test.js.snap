@@ -493,8 +493,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             >
               <a
                 className="euiLink euiLink--primary c0"
-                href="#/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee"
-                onClick={[Function]}
+                href="#/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
               >
                 a0ce2
               </a>
@@ -514,8 +513,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 <a
                   aria-describedby="overlay1"
                   className="euiLink euiLink--primary c2"
-                  href="#/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee"
-                  onClick={[Function]}
+                  href="#/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
@@ -574,8 +572,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             >
               <a
                 className="euiLink euiLink--primary c0"
-                href="#/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a"
-                onClick={[Function]}
+                href="#/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
               >
                 f3ac9
               </a>
@@ -595,8 +592,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 <a
                   aria-describedby="overlay3"
                   className="euiLink euiLink--primary c2"
-                  href="#/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a"
-                  onClick={[Function]}
+                  href="#/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
@@ -655,8 +651,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             >
               <a
                 className="euiLink euiLink--primary c0"
-                href="#/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840"
-                onClick={[Function]}
+                href="#/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
               >
                 e9086
               </a>
@@ -676,8 +671,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 <a
                   aria-describedby="overlay5"
                   className="euiLink euiLink--primary c2"
-                  href="#/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840"
-                  onClick={[Function]}
+                  href="#/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
@@ -736,8 +730,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             >
               <a
                 className="euiLink euiLink--primary c0"
-                href="#/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc"
-                onClick={[Function]}
+                href="#/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
               >
                 8673d
               </a>
@@ -757,8 +750,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 <a
                   aria-describedby="overlay7"
                   className="euiLink euiLink--primary c2"
-                  href="#/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc"
-                  onClick={[Function]}
+                  href="#/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >

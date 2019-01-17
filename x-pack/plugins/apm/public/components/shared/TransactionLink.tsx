@@ -6,7 +6,8 @@
 
 import React from 'react';
 import { Transaction } from '../../../typings/es_schemas/Transaction';
-import { KibanaLink, legacyEncodeURIComponent } from '../../utils/url';
+import { KibanaLink } from './Links/KibanaLink';
+import { legacyEncodeURIComponent } from './Links/url_helpers';
 
 interface TransactionLinkProps {
   transaction?: Transaction;
@@ -50,9 +51,5 @@ export const TransactionLink: React.SFC<TransactionLinkProps> = ({
     return <React.Fragment>{children}</React.Fragment>;
   }
 
-  return (
-    <KibanaLink pathname="/app/apm" {...linkProps}>
-      {children}
-    </KibanaLink>
-  );
+  return <KibanaLink {...linkProps}>{children}</KibanaLink>;
 };
