@@ -1542,6 +1542,16 @@ describe('SavedObjectsRepository', () => {
       await expect(savedObjectsRepository.find({ type: 'hiddenType' })).rejects.toEqual(new Error('Hidden types not allowed!'));
     });
 
+    it('should error when attempting to \'find\' more than one hidden types', async () => {
+      const findParams = { type: ['hiddenType', 'hiddenType2'] };
+      await expect(savedObjectsRepository.find(findParams)).rejects.toEqual(new Error('Hidden types not allowed!'));
+    });
+
+    it('should error when attempting to \'find\' an array of hidden types', async () => {
+      const findParams = { type: ['hiddenType'] };
+      await expect(savedObjectsRepository.find(findParams)).rejects.toEqual(new Error('Hidden types not allowed!'));
+    });
+
     it('should error when attempting to \'delete\' hidden types', async () => {
       await expect(savedObjectsRepository.delete('hiddenType')).rejects.toEqual(new Error('Hidden types not allowed!'));
     });

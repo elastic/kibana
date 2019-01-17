@@ -474,6 +474,8 @@ export class SavedObjectsRepository {
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {
+    this.assertAllowedType(type);
+
     const {
       version,
       namespace
@@ -615,9 +617,11 @@ export class SavedObjectsRepository {
     return omit(savedObject, 'namespace');
   }
 
-  assertAllowedType(type) {
-    if(this._schema.isHiddenType(type) && !this._includeHiddenTypes.includes(type)) {
-      throw Error('Hidden types not allowed!');
-    }
+  assertAllowedType(types) {
+    [].concat(types).forEach((type) => {
+      if(this._schema.isHiddenType(type) && !this._includeHiddenTypes.includes(type)) {
+        throw Error('Hidden types not allowed!');
+      }
+    });
   }
 }
