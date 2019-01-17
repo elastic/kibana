@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import './directive';
 
-export { PersistedLog } from './persisted_log';
-export { recentlyAccessed } from './recently_accessed';
+import { TypesRegistry } from '@kbn/interpreter/common';
+
+export const typesRegistry = new TypesRegistry();

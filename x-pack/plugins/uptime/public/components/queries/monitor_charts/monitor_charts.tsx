@@ -21,6 +21,8 @@ import {
   // @ts-ignore missing typings
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import { Query } from 'react-apollo';
 import { createGetMonitorChartsQuery } from './get_monitor_charts';
@@ -47,10 +49,15 @@ export const MonitorCharts = ({
   >
     {({ loading, error, data }) => {
       if (loading) {
-        return 'Loading...';
+        return i18n.translate('xpack.uptime.monitorCharts.loadingMessage', {
+          defaultMessage: 'Loading…',
+        });
       }
       if (error) {
-        return `Error ${error.message}`;
+        return i18n.translate('xpack.uptime.monitorCharts.errorMessage', {
+          values: { message: error.message },
+          defaultMessage: 'Error {message}',
+        });
       }
 
       // TODO: this should not exist in the UI, update the GQL resolver/schema to return
@@ -96,7 +103,13 @@ export const MonitorCharts = ({
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiTitle size="xs">
-                <h4>RTT Breakdown ms</h4>
+                <h4>
+                  <FormattedMessage
+                    id="xpack.uptime.monitorCharts.rttBreakdownTitle"
+                    defaultMessage="RTT Breakdown ms"
+                    description="The 'ms' is an abbreviation for milliseconds."
+                  />
+                </h4>
               </EuiTitle>
               <EuiPanel>
                 <EuiSeriesChart
@@ -107,20 +120,55 @@ export const MonitorCharts = ({
                   height={200}
                 >
                   <EuiAreaSeries
-                    name="Write Request"
+                    name={i18n.translate(
+                      'xpack.uptime.monitorCharts.rtt.series.writeRequestLabel',
+                      {
+                        defaultMessage: 'Write request',
+                      }
+                    )}
                     data={rttWriteRequestSeries}
                     curve="curveBasis"
                   />
-                  <EuiAreaSeries name="Validate" data={rttValidateSeries} curve="curveBasis" />
-                  <EuiAreaSeries name="Content" data={rttContentSeries} curve="curveBasis" />
-                  <EuiAreaSeries name="Response" data={rttResponseSeries} curve="curveBasis" />
-                  <EuiAreaSeries name="Tcp" data={rttTcpSeries} curve="curveBasis" />
+                  <EuiAreaSeries
+                    name={i18n.translate('xpack.uptime.monitorCharts.rtt.series.validateLabel', {
+                      defaultMessage: 'Validate',
+                    })}
+                    data={rttValidateSeries}
+                    curve="curveBasis"
+                  />
+                  <EuiAreaSeries
+                    name={i18n.translate('xpack.uptime.monitorCharts.rtt.series.contentLabel', {
+                      defaultMessage: 'Content',
+                    })}
+                    data={rttContentSeries}
+                    curve="curveBasis"
+                  />
+                  <EuiAreaSeries
+                    name={i18n.translate('xpack.uptime.monitorCharts.rtt.series.responseLabel', {
+                      defaultMessage: 'Response',
+                    })}
+                    data={rttResponseSeries}
+                    curve="curveBasis"
+                  />
+                  <EuiAreaSeries
+                    name={i18n.translate('xpack.uptime.monitorCharts.rtt.series.tcpLabel', {
+                      defaultMessage: 'Tcp',
+                    })}
+                    data={rttTcpSeries}
+                    curve="curveBasis"
+                  />
                 </EuiSeriesChart>
               </EuiPanel>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTitle size="xs">
-                <h4>Monitor Duration ms</h4>
+                <h4>
+                  <FormattedMessage
+                    id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
+                    defaultMessage="Monitor Duration ms"
+                    description="The 'ms' is an abbreviation for milliseconds."
+                  />
+                </h4>
               </EuiTitle>
               <EuiPanel>
                 <EuiSeriesChart
@@ -129,15 +177,37 @@ export const MonitorCharts = ({
                   height={200}
                   xType={EuiSeriesChartUtils.SCALE.TIME}
                 >
-                  <EuiAreaSeries name="Duration Range" data={areaRttSeries} curve="curveBasis" />
-                  <EuiLineSeries name="Mean Duration" data={avgDurationSeries} />
+                  <EuiAreaSeries
+                    name={i18n.translate(
+                      'xpack.uptime.monitorCharts.monitorDuration.series.durationRangeLabel',
+                      {
+                        defaultMessage: 'Duration range',
+                      }
+                    )}
+                    data={areaRttSeries}
+                    curve="curveBasis"
+                  />
+                  <EuiLineSeries
+                    name={i18n.translate(
+                      'xpack.uptime.monitorCharts.monitorDuration.series.meanDurationLabel',
+                      {
+                        defaultMessage: 'Mean duration',
+                      }
+                    )}
+                    data={avgDurationSeries}
+                  />
                 </EuiSeriesChart>
               </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />
           <EuiTitle size="xs">
-            <h4>Check Status</h4>
+            <h4>
+              <FormattedMessage
+                id="xpack.uptime.monitorCharts.checkStatus.title"
+                defaultMessage="Check status"
+              />
+            </h4>
           </EuiTitle>
           <EuiPanel style={{ maxWidth: 520, maxHeight: 220 }}>
             <EuiSeriesChart
@@ -147,8 +217,23 @@ export const MonitorCharts = ({
               xType={EuiSeriesChartUtils.SCALE.TIME}
               stackBy="y"
             >
-              <EuiAreaSeries name="Up Count" data={upSeries} color="green" />
-              <EuiAreaSeries name="Down Count" data={downSeries} color="red" />
+              <EuiAreaSeries
+                name={i18n.translate('xpack.uptime.monitorCharts.checkStatus.series.upCountLabel', {
+                  defaultMessage: 'Up count',
+                })}
+                data={upSeries}
+                color="green"
+              />
+              <EuiAreaSeries
+                name={i18n.translate(
+                  'xpack.uptime.monitorCharts.checkStatus.series.downCountLabel',
+                  {
+                    defaultMessage: 'Down count',
+                  }
+                )}
+                data={downSeries}
+                color="red"
+              />
             </EuiSeriesChart>
           </EuiPanel>
         </Fragment>
