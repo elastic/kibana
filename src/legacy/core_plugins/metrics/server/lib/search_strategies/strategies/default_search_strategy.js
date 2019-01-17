@@ -33,7 +33,10 @@ export default class DefaultSearchStrategy extends AbstractSearchStrategy {
     super(server, callWithRequestFactory, SearchRequest);
   }
 
-  isViable() {
-    return true;
+  checkForViability() {
+    return {
+      isViable: true,
+      restrictions: {},
+    };
   }
 }

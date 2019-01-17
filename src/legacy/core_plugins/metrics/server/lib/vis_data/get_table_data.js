@@ -25,7 +25,7 @@ import SearchStrategiesRegister from '../search_strategies/search_strategies_reg
 
 export async function getTableData(req, panel) {
   const indexPattern = panel.index_pattern;
-  const searchStrategy = await SearchStrategiesRegister.getViableStrategy(req, indexPattern);
+  const { searchStrategy } = await SearchStrategiesRegister.getViableStrategy(req, indexPattern);
   const searchRequest = searchStrategy.getSearchRequest(req, indexPattern);
   const body = buildRequestBody(req, panel);
 

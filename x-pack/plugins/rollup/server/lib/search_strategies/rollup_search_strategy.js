@@ -41,7 +41,12 @@ export default (AbstractSearchStrategy, RollupSearchRequest) =>
       return await this.numberOfRollupJobs(req, indexPattern) === 1;
     }
 
-    async isViable(req, indexPattern) {
-      return await this.hasOneRollupJob(req, indexPattern);
+    async checkForViability(req, indexPattern) {
+      const isViable = await this.hasOneRollupJob(req, indexPattern);
+
+      return {
+        isViable,
+        restrictions: {},
+      };
     }
   });

@@ -45,10 +45,13 @@ export default class SearchStrategiesRegister {
 
   static async getViableStrategy(req, indexPattern) {
     for (const searchStrategy of strategies) {
-      const isViable = await searchStrategy.isViable(req, indexPattern);
+      const { isViable, restrictions } = await searchStrategy.checkForViability(req, indexPattern);
 
       if (isViable) {
-        return searchStrategy;
+        return {
+          searchStrategy,
+          restrictions,
+        };
       }
     }
   }
