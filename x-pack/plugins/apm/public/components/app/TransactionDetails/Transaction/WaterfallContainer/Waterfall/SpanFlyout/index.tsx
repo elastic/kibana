@@ -14,6 +14,7 @@ import {
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiPortal,
+  EuiSpacer,
   EuiTabbedContent,
   EuiTitle
 } from '@elastic/eui';
@@ -22,7 +23,6 @@ import React, { Fragment } from 'react';
 import styled from 'styled-components';
 
 import { SERVICE_LANGUAGE_NAME } from '../../../../../../../../common/constants';
-import { px, unit } from '../../../../../../../style/variables';
 
 import { DatabaseContext } from './DatabaseContext';
 import { HttpContext } from './HttpContext';
@@ -33,10 +33,6 @@ import { Stacktrace } from 'x-pack/plugins/apm/public/components/shared/Stacktra
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { Span } from '../../../../../../../../typings/es_schemas/Span';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
-
-const StackTraceContainer = styled.div`
-  margin-top: ${px(unit)};
-`;
 
 const TagName = styled.div`
   font-weight: bold;
@@ -100,14 +96,13 @@ export function SpanFlyout({
                 name: 'Stack Trace',
                 content: (
                   <Fragment>
+                    <EuiSpacer size="l" />
                     <HttpContext httpContext={httpContext} />
                     <DatabaseContext dbContext={dbContext} />
-                    <StackTraceContainer>
-                      <Stacktrace
-                        stackframes={stackframes}
-                        codeLanguage={codeLanguage}
-                      />
-                    </StackTraceContainer>
+                    <Stacktrace
+                      stackframes={stackframes}
+                      codeLanguage={codeLanguage}
+                    />
                   </Fragment>
                 )
               },
