@@ -16,6 +16,7 @@ kibana_vars=(
     console.proxyConfig
     console.proxyFilter
     elasticsearch.customHeaders
+    elasticsearch.hosts
     elasticsearch.logQueries
     elasticsearch.password
     elasticsearch.pingTimeout
