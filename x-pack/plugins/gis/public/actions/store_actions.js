@@ -110,12 +110,13 @@ export function addLayer(layerDescriptor) {
   };
 }
 
-export function setTmsErrorStatus(layerDescriptor) {
+export function setTmsErrorStatus(id, errorMessage) {
   return dispatch => {
     dispatch(clearTemporaryLayers());
     dispatch({
       type: SET_TMS_ERROR_STATUS,
-      layer: layerDescriptor,
+      layerId: id,
+      errorMessage,
     });
   };
 }

@@ -135,8 +135,11 @@ export function map(state = INITIAL_STATE, action) {
       };
     case LAYER_DATA_LOAD_STARTED:
       return updateWithDataRequest(state, action);
+    case SET_TMS_ERROR_STATUS:
+      return setErrorStatus(state, action);
     case LAYER_DATA_LOAD_ERROR:
-      return updateWithDataLoadError(state, action);
+      return resetDataRequest(
+        setErrorStatus(state, action), action);
     case LAYER_DATA_LOAD_ENDED:
       return updateWithDataResponse(state, action);
     case TOUCH_LAYER:
@@ -215,15 +218,6 @@ export function map(state = INITIAL_STATE, action) {
         return { ...state, layerList: newLayerList };
       }
       return state;
-    case SET_TMS_ERROR_STATUS:
-      const tmsErrorLayer = state.layerList.find(({ id }) => id === action.layer.id);
-      const stateWithTmsError = tmsErrorLayer
-        ? updateLayerInList(
-          updateLayerInList(state, tmsErrorLayer.id, 'errorState',
-            action.layer.errorState), tmsErrorLayer.id, 'errorMessage',
-          action.layer.errorMessage)
-        : state;
-      return stateWithTmsError;
     case ADD_LAYER:
       return {
         ...state,
@@ -282,6 +276,15 @@ export function map(state = INITIAL_STATE, action) {
   }
 }
 
+function setErrorStatus(state, { layerId, errorMessage }) {
+  const tmsErrorLayer = state.layerList.find(({ id }) => id === layerId);
+  return tmsErrorLayer
+    ? updateLayerInList(
+      updateLayerInList(state, tmsErrorLayer.id, 'errorState', true),
+      tmsErrorLayer.id, 'errorMessage', errorMessage)
+    : state;
+}
+
 function findDataRequest(layerDescriptor, dataRequestAction) {
 
   if (!layerDescriptor.dataRequests) {
@@ -295,16 +298,9 @@ function findDataRequest(layerDescriptor, dataRequestAction) {
 
 
 function updateWithDataRequest(state, action) {
+  let dataRequest = getValidDataRequest(state, action, false);
   const layerRequestingData = findLayerById(state, action.layerId);
-  if (!layerRequestingData) {
-    return state;
-  }
 
-  if (!layerRequestingData.dataRequests) {
-    layerRequestingData.dataRequests = [];
-  }
-
-  let dataRequest = findDataRequest(layerRequestingData, action);
   if (!dataRequest) {
     dataRequest = {
       dataId: action.dataId
@@ -320,38 +316,29 @@ function updateWithDataRequest(state, action) {
 }
 
 function updateWithDataResponse(state, action) {
-  const layerReceivingData = findLayerById(state, action.layerId);
-  if (!layerReceivingData) {
-    return state;
-  }
-
-
-  const dataRequest = findDataRequest(layerReceivingData, action);
-  if (!dataRequest) {
-    throw new Error('Data request should be initialized. Cannot call stopLoading before startLoading');
-  }
-
-  if (
-    dataRequest.dataRequestToken &&
-    dataRequest.dataRequestToken !== action.requestToken
-  ) {
-    // ignore responses to outdated requests
-    return { ...state };
-  }
+  const dataRequest = getValidDataRequest(state, action);
+  if (!dataRequest) { return state; }
 
   dataRequest.data = action.data;
   dataRequest.dataMeta = { ...dataRequest.dataMetaAtStart, ...action.meta };
   dataRequest.dataMetaAtStart = null;
+  return resetDataRequest(state, action, dataRequest);
+}
+
+function resetDataRequest(state, action, request) {
+  const dataRequest = request || getValidDataRequest(state, action);
+  if (!dataRequest) { return state; }
+
   dataRequest.dataRequestToken = null;
   dataRequest.dataId = action.dataId;
   const layerList = [...state.layerList];
   return { ...state, layerList };
 }
 
-function updateWithDataLoadError(state, action) {
+function getValidDataRequest(state, action, checkRequestToken = true) {
   const layer = findLayerById(state, action.layerId);
   if (!layer) {
-    return state;
+    return;
   }
 
   const dataRequest = findDataRequest(layer, action);
@@ -360,19 +347,14 @@ function updateWithDataLoadError(state, action) {
   }
 
   if (
+    checkRequestToken &&
     dataRequest.dataRequestToken &&
     dataRequest.dataRequestToken !== action.requestToken
   ) {
     // ignore responses to outdated requests
-    return state;
+    return;
   }
-
-  dataRequest.dataHasLoadError = true;
-  dataRequest.dataLoadError = action.errorMessage;
-  dataRequest.dataRequestToken = null;
-  dataRequest.dataId = action.dataId;
-  const layerList = [...state.layerList];
-  return { ...state, layerList };
+  return dataRequest;
 }
 
 function findLayerById(state, id) {

@@ -47,8 +47,8 @@ function mapDispatchToProps(dispatch) {
     clearGoto: () => {
       dispatch(clearGoto());
     },
-    setTmsErrorStatus: layerDescriptor =>
-      dispatch(setTmsErrorStatus(layerDescriptor))
+    setTmsErrorStatus: (id, msg) =>
+      dispatch(setTmsErrorStatus(id, msg))
   };
 }
 

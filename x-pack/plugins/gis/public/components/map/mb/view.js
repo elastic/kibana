@@ -194,11 +194,7 @@ export class MBMapContainer extends React.Component {
             switch(layer._descriptor.type) {
               case 'TILE':
                 console.warn(`Sync error retrieving tiles from TMS: ${message}`);
-                this.props.setTmsErrorStatus({
-                  id: layer.getId(),
-                  errorState: true,
-                  errorMessage: message,
-                });
+                this.props.setTmsErrorStatus(layer.getId(), message);
                 break;
               default:
                 console.warn(`Layer sync error: ${message}`);
