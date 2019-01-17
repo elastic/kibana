@@ -201,41 +201,7 @@ export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
   }
 }
 
-/*
- * Convert map bounds to polygon
- */
-export function convertMapExtentToPolygon({ maxLat, maxLon, minLat, minLon }) {
-  if (maxLon > 180 && minLon < -180) {
-    return convertMapExtentToPolygon({
-      maxLat,
-      maxLon: 180,
-      minLat,
-      minLon: -180,
-    });
-  }
-
-  if (maxLon > 180) {
-    // bounds cross dateline east to west
-    const overlapWestOfDateLine = maxLon - 180;
-    return convertMapExtentToPolygon({
-      maxLat,
-      maxLon: -180 + overlapWestOfDateLine,
-      minLat,
-      minLon,
-    });
-  }
-
-  if (minLon < -180) {
-    // bounds cross dateline west to east, slit into 2 shapes
-    const overlapEastOfDateLine = Math.abs(minLon) - 180;
-    return convertMapExtentToPolygon({
-      maxLat,
-      maxLon,
-      minLat,
-      minLon: 180 - overlapEastOfDateLine,
-    });
-  }
-
+function formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon }) {
   // GeoJSON mandates that the outer polygon must be counterclockwise to avoid ambiguous polygons
   // when the shape crosses the dateline
   const left = minLon;
@@ -252,4 +218,42 @@ export function convertMapExtentToPolygon({ maxLat, maxLon, minLat, minLon }) {
       [ topLeft, bottomLeft, bottomRight, topRight, topLeft ]
     ]
   };
+}
+
+/*
+ * Convert map bounds to polygon
+ */
+export function convertMapExtentToPolygon({ maxLat, maxLon, minLat, minLon }) {
+  if (maxLon > 180 && minLon < -180) {
+    return formatEnvelopeAsPolygon({
+      maxLat,
+      maxLon: 180,
+      minLat,
+      minLon: -180,
+    });
+  }
+
+  if (maxLon > 180) {
+    // bounds cross dateline east to west
+    const overlapWestOfDateLine = maxLon - 180;
+    return formatEnvelopeAsPolygon({
+      maxLat,
+      maxLon: -180 + overlapWestOfDateLine,
+      minLat,
+      minLon,
+    });
+  }
+
+  if (minLon < -180) {
+    // bounds cross dateline west to east, slit into 2 shapes
+    const overlapEastOfDateLine = Math.abs(minLon) - 180;
+    return formatEnvelopeAsPolygon({
+      maxLat,
+      maxLon,
+      minLat,
+      minLon: 180 - overlapEastOfDateLine,
+    });
+  }
+
+  return formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon });
 }
