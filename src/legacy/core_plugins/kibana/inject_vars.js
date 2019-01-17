@@ -66,6 +66,7 @@ export function injectVars(server) {
 
   return {
     kbnDefaultAppId: serverConfig.get('kibana.defaultAppId'),
+    disableWelcomeScreen: serverConfig.get('kibana.disableWelcomeScreen'),
     regionmapsConfig: regionmap,
     mapConfig: mapConfig,
     tilemapsConfig: {

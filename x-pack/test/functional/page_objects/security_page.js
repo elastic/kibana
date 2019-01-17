@@ -15,7 +15,6 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
-  const welcome = getService('welcome');
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'home']);
 
   class LoginPage {
@@ -108,8 +107,6 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
           throw new Error('Logout is not completed yet');
         }
       });
-
-      await welcome.disable();
     }
 
     async clickRolesSection() {
