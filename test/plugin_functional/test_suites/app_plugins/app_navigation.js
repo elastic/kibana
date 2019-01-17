@@ -21,7 +21,9 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
+  const config = getService('config');
   const PageObjects = getPageObjects(['common', 'header', 'home']);
+  const defaultFindTimeout = config.get('timeouts.find');
 
   describe('app navigation', function describeIndexTests() {
 
@@ -36,7 +38,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should navigate to the app', async () => {
       await PageObjects.header.clickGlobalNavigationLink('Test Plugin App');
-      const pluginContent = await testSubjects.find('pluginContent');
+      const pluginContent = await testSubjects.find('pluginContent', defaultFindTimeout);
       expect(await pluginContent.getVisibleText()).to.be('Super simple app plugin');
     });
   });
