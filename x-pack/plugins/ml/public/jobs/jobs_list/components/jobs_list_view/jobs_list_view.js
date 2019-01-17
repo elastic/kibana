@@ -20,6 +20,7 @@ import { MultiJobActions } from '../multi_job_actions';
 import { NewJobButton } from '../new_job_button';
 import { JobStatsBar } from '../jobs_stats_bar';
 import { NodeAvailableWarning } from '../node_available_warning';
+import { UpgradeWarning } from '../../../../components/upgrade';
 import { RefreshJobsListButton } from '../refresh_jobs_list_button';
 
 import React, {
@@ -356,6 +357,7 @@ export class JobsListView extends Component {
         />
         <div className="job-management">
           <NodeAvailableWarning />
+          <UpgradeWarning />
           <header>
             <div className="job-buttons-container">
               <EuiFlexGroup alignItems="center">

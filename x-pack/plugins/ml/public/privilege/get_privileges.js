@@ -6,6 +6,7 @@
 
 
 import { ml } from 'plugins/ml/services/ml_api_service';
+import { setUpgradeInProgress } from '../components/upgrade';
 
 export function getPrivileges() {
   const privileges = {
@@ -64,20 +65,19 @@ export function getPrivileges() {
 
     ml.checkPrivilege(priv)
       .then((resp) => {
-        // if security has been disabled, securityDisabled is returned from the endpoint
-        // therefore set all privileges to true
-        if (resp.securityDisabled) {
+        setUpgradeInProgress(resp.upgradeInProgress);
+
+        if(resp.upgradeInProgress === true) {
+          // only check for getting endpoints
+          // force all to be true if security is disabled
+          setGetPrivileges(resp.cluster, privileges, !!resp.securityDisabled);
+        }
+        else if (resp.securityDisabled) {
+          // if security has been disabled, securityDisabled is returned from the endpoint
+          // therefore set all privileges to true
           Object.keys(privileges).forEach(k => privileges[k] = true);
         } else {
-          if (resp.cluster['cluster:monitor/xpack/ml/job/get'] &&
-            resp.cluster['cluster:monitor/xpack/ml/job/stats/get']) {
-            privileges.canGetJobs = true;
-          }
-
-          if (resp.cluster['cluster:monitor/xpack/ml/datafeeds/get'] &&
-            resp.cluster['cluster:monitor/xpack/ml/datafeeds/stats/get']) {
-            privileges.canGetDatafeeds = true;
-          }
+          setGetPrivileges(resp.cluster, privileges);
 
           if (resp.cluster['cluster:admin/xpack/ml/job/put'] &&
             resp.cluster['cluster:admin/xpack/ml/job/open'] &&
@@ -120,10 +120,6 @@ export function getPrivileges() {
             privileges.canPreviewDatafeed = true;
           }
 
-          if (resp.cluster['cluster:monitor/xpack/ml/calendars/get']) {
-            privileges.canGetCalendars = true;
-          }
-
           if (resp.cluster['cluster:admin/xpack/ml/calendars/put'] &&
             resp.cluster['cluster:admin/xpack/ml/calendars/jobs/update'] &&
             resp.cluster['cluster:admin/xpack/ml/calendars/events/post']) {
@@ -135,10 +131,6 @@ export function getPrivileges() {
             privileges.canDeleteCalendar = true;
           }
 
-          if (resp.cluster['cluster:admin/xpack/ml/filters/get']) {
-            privileges.canGetFilters = true;
-          }
-
           if (resp.cluster['cluster:admin/xpack/ml/filters/put'] &&
             resp.cluster['cluster:admin/xpack/ml/filters/update']) {
             privileges.canCreateFilter = true;
@@ -147,11 +139,6 @@ export function getPrivileges() {
           if (resp.cluster['cluster:admin/xpack/ml/filters/delete']) {
             privileges.canDeleteFilter = true;
           }
-
-          if (resp.cluster['cluster:monitor/xpack/ml/findfilestructure']) {
-            privileges.canFindFileStructure = true;
-          }
-
         }
 
         resolve(privileges);
@@ -162,3 +149,32 @@ export function getPrivileges() {
   });
 }
 
+function setGetPrivileges(cluster = {}, privileges = {}, forceTrue = false) {
+  if (
+    forceTrue ||
+    (cluster['cluster:monitor/xpack/ml/job/get'] &&
+    cluster['cluster:monitor/xpack/ml/job/stats/get'])
+  ) {
+    privileges.canGetJobs = true;
+  }
+
+  if (
+    forceTrue ||
+    (cluster['cluster:monitor/xpack/ml/datafeeds/get'] &&
+    cluster['cluster:monitor/xpack/ml/datafeeds/stats/get'])
+  ) {
+    privileges.canGetDatafeeds = true;
+  }
+
+  if (forceTrue || cluster['cluster:monitor/xpack/ml/calendars/get']) {
+    privileges.canGetCalendars = true;
+  }
+
+  if (forceTrue || cluster['cluster:admin/xpack/ml/filters/get']) {
+    privileges.canGetFilters = true;
+  }
+
+  if (forceTrue || cluster['cluster:monitor/xpack/ml/findfilestructure']) {
+    privileges.canFindFileStructure = true;
+  }
+}

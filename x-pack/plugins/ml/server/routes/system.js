@@ -40,20 +40,30 @@ export function systemRoutes(server, commonRouteConfig) {
   server.route({
     method: 'POST',
     path: '/api/ml/_has_privileges',
-    handler(request) {
+    async handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
-      // isSecurityDisabled will return true if it is a basic license
-      // this will cause the subsequent ml.privilegeCheck to fail.
-      // therefore, check for a basic license first and report that security
-      // is disabled because its not available on basic
-      if (isBasicLicense(server) || isSecurityDisabled(server)) {
-        // if xpack.security.enabled has been explicitly set to false
-        // return that security is disabled and don't call the privilegeCheck endpoint
-        return { securityDisabled: true };
-      } else {
-        const body = request.payload;
-        return callWithRequest('ml.privilegeCheck', { body })
-          .catch(resp => wrapError(resp));
+      try {
+        const info = await callWithRequest('ml.info');
+        const upgradeInProgress = !!info.upgradeInProgress;
+        // isSecurityDisabled will return true if it is a basic license
+        // this will cause the subsequent ml.privilegeCheck to fail.
+        // therefore, check for a basic license first and report that security
+        // is disabled because its not available on basic
+        if (isBasicLicense(server) || isSecurityDisabled(server)) {
+          // if xpack.security.enabled has been explicitly set to false
+          // return that security is disabled and don't call the privilegeCheck endpoint
+          return {
+            securityDisabled: true,
+            upgradeInProgress
+          };
+        } else {
+          const body = request.payload;
+          const resp = await callWithRequest('ml.privilegeCheck', { body });
+          resp.upgradeInProgress = upgradeInProgress;
+          return resp;
+        }
+      } catch (error) {
+        return wrapError(error);
       }
     },
     config: {
