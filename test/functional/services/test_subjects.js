@@ -19,7 +19,6 @@
 
 import testSubjSelector from '@kbn/test-subj-selector';
 import {
-  filter as filterAsync,
   map as mapAsync,
 } from 'bluebird';
 
@@ -119,7 +118,7 @@ export function TestSubjectsProvider({ getService }) {
       return await retry.try(async () => {
         log.debug(`TestSubjects.findAll(${selector})`);
         const all = await find.allByCssSelector(testSubjSelector(selector), timeout);
-        return await filterAsync(all, async (element) => await element.isDisplayed());
+        return await find.filterElementIsDisplayed(all);
       });
     }
 

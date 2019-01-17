@@ -91,7 +91,7 @@ export async function FindProvider({ getService }) {
       });
     }
 
-    async _filterElementIsDisplayed(elements) {
+    async filterElementIsDisplayed(elements) {
       if (elements.length === 0) {
         return [];
       } else {
@@ -154,7 +154,7 @@ export async function FindProvider({ getService }) {
     async allDescendantDisplayedByCssSelector(selector, parentElement) {
       log.debug(`Find.allDescendantDisplayedByCssSelector('${selector}')`);
       const allElements = await wrapAll(await parentElement._webElement.findElements(By.css(selector)));
-      return await this._filterElementIsDisplayed(allElements);
+      return await this.filterElementIsDisplayed(allElements);
     }
 
     async displayedByLinkText(linkText, timeout = defaultFindTimeout) {
@@ -208,7 +208,7 @@ export async function FindProvider({ getService }) {
       log.debug(`Find.existsByDisplayedByCssSelector('${selector}') with timeout=${timeout}`);
       return await this.exists(async (driver) => {
         const elements = wrapAll(await driver.findElements(By.css(selector)));
-        return await this._filterElementIsDisplayed(elements);
+        return await this.filterElementIsDisplayed(elements);
       }, timeout);
     }
 
