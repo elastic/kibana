@@ -134,7 +134,7 @@ export class ESGeohashGridSource extends VectorSource {
   }
 
   async getGeoJsonWithMeta({ layerName }, searchFilters) {
-    const featureCollection = await this.getGeoJsonPointsWithTotalCount({
+    const featureCollection = await this.getGeoJsonPoints({
       geohashPrecision: searchFilters.geohashPrecision,
       extent: searchFilters.buffer,
       timeFilters: searchFilters.timeFilters,
