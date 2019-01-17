@@ -15,7 +15,6 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
-  const welcome = getService('welcome');
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'home']);
 
   class LoginPage {
@@ -99,8 +98,6 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       await retry.waitForWithTimeout('login form', config.get('timeouts.waitFor') * 5, async () => (
         await find.existsByDisplayedByCssSelector('.login-form')
       ));
-
-      await welcome.disable();
     }
 
     async clickRolesSection() {
