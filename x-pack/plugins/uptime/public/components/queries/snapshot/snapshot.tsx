@@ -22,6 +22,8 @@ import {
   EuiStat,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { SnapshotHistogram } from '../../functional/snapshot_histogram';
@@ -50,10 +52,15 @@ export const Snapshot = ({
   >
     {({ loading, error, data }) => {
       if (loading) {
-        return 'Loading...';
+        return i18n.translate('xpack.uptime.snapshot.loadingMessage', {
+          defaultMessage: 'Loading…',
+        });
       }
       if (error) {
-        return `Error ${error.message}`;
+        return i18n.translate('xpack.uptime.snapshot.errorMessage', {
+          values: { message: error.message },
+          defaultMessage: 'Error {message}',
+        });
       }
       const {
         snapshot: { up, down, total, histogram },
@@ -63,20 +70,34 @@ export const Snapshot = ({
         <EuiFlexGroup alignItems="baseline" gutterSize="xl">
           <EuiFlexItem>
             <EuiTitle size="xs">
-              <h5>Endpoint status</h5>
+              <h5>
+                <FormattedMessage
+                  id="xpack.uptime.snapshot.endpointStatusTitle"
+                  defaultMessage="Endpoint status"
+                />
+              </h5>
             </EuiTitle>
             <EuiPanel>
               <EuiFlexGroup justifyContent="spaceEvenly" gutterSize="xl">
                 <EuiFlexItem>
                   {/* TODO: this is a UI hack that needs to be replaced */}
                   <EuiPanel>
-                    <EuiStat description="Up" textAlign="center" title={up} titleColor="primary" />
+                    <EuiStat
+                      description={i18n.translate('xpack.uptime.snapshot.stats.upDescription', {
+                        defaultMessage: 'Up',
+                      })}
+                      textAlign="center"
+                      title={up}
+                      titleColor="primary"
+                    />
                   </EuiPanel>
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiPanel>
                     <EuiStat
-                      description="Down"
+                      description={i18n.translate('xpack.uptime.snapshot.stats.downDescription', {
+                        defaultMessage: 'Down',
+                      })}
                       textAlign="center"
                       title={down}
                       titleColor="danger"
@@ -86,7 +107,9 @@ export const Snapshot = ({
                 <EuiFlexItem>
                   <EuiPanel>
                     <EuiStat
-                      description="Total"
+                      description={i18n.translate('xpack.uptime.snapshot.stats.totalDescription', {
+                        defaultMessage: 'Total',
+                      })}
                       textAlign="center"
                       title={total}
                       titleColor="subdued"
@@ -98,7 +121,12 @@ export const Snapshot = ({
           </EuiFlexItem>
           <EuiFlexItem style={{ paddingTop: '12px' }}>
             <EuiTitle size="xs">
-              <h5>Status over time</h5>
+              <h5>
+                <FormattedMessage
+                  id="xpack.uptime.snapshot.statusOverTimeTitle"
+                  defaultMessage="Status over time"
+                />
+              </h5>
             </EuiTitle>
             {/* TODO: this is a UI hack that should be replaced */}
             <EuiPanel paddingSize="s">
@@ -107,10 +135,22 @@ export const Snapshot = ({
                 <EuiEmptyPrompt
                   title={
                     <EuiTitle>
-                      <h5>No Histogram Data Available</h5>
+                      <h5>
+                        <FormattedMessage
+                          id="xpack.uptime.snapshot.noDataTitle"
+                          defaultMessage="No histogram data available"
+                        />
+                      </h5>
                     </EuiTitle>
                   }
-                  body={<p>Sorry, there is no data available for the histogram</p>}
+                  body={
+                    <p>
+                      <FormattedMessage
+                        id="xpack.uptime.snapshot.noDataDescription"
+                        defaultMessage="Sorry, there is no data available for the histogram"
+                      />
+                    </p>
+                  }
                 />
               )}
             </EuiPanel>

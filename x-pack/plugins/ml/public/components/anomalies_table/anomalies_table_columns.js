@@ -16,6 +16,8 @@ import {
 import React from 'react';
 import _ from 'lodash';
 
+import { i18n } from '@kbn/i18n';
+
 import {
   formatHumanReadableDate,
   formatHumanReadableDateTime,
@@ -74,14 +76,20 @@ export function getColumns(
         <EuiButtonIcon
           onClick={() => toggleRow(item)}
           iconType={itemIdToExpandedRowMap[item.rowId] ? 'arrowDown' : 'arrowRight'}
-          aria-label={itemIdToExpandedRowMap[item.rowId] ? 'Hide details' : 'Show details'}
+          aria-label={itemIdToExpandedRowMap[item.rowId] ? i18n.translate('xpack.ml.anomaliesTable.hideDetailsAriaLabel', {
+            defaultMessage: 'Hide details',
+          }) : i18n.translate('xpack.ml.anomaliesTable.showDetailsAriaLabel', {
+            defaultMessage: 'Show details',
+          })}
           data-row-id={item.rowId}
         />
       )
     },
     {
       field: 'time',
-      name: 'time',
+      name: i18n.translate('xpack.ml.anomaliesTable.timeColumnName', {
+        defaultMessage: 'time',
+      }),
       dataType: 'date',
       render: (date) => renderTime(date, interval),
       textOnly: true,
@@ -89,7 +97,11 @@ export function getColumns(
     },
     {
       field: 'severity',
-      name: `${(isAggregatedData === true) ? 'max ' : ''}severity`,
+      name: isAggregatedData === true ? i18n.translate('xpack.ml.anomaliesTable.maxSeverityColumnName', {
+        defaultMessage: 'max severity',
+      }) : i18n.translate('xpack.ml.anomaliesTable.severityColumnName', {
+        defaultMessage: 'severity',
+      }),
       render: (score) => (
         <EuiHealth color={getSeverityColor(score)} compressed="true">
           {score >= 1 ? Math.floor(score) : '< 1'}
@@ -99,7 +111,9 @@ export function getColumns(
     },
     {
       field: 'detector',
-      name: 'detector',
+      name: i18n.translate('xpack.ml.anomaliesTable.detectorColumnName', {
+        defaultMessage: 'detector',
+      }),
       render: (detectorDescription, item) => (
         <DetectorCell
           detectorDescription={detectorDescription}
@@ -114,7 +128,9 @@ export function getColumns(
   if (items.some(item => item.entityValue !== undefined)) {
     columns.push({
       field: 'entityValue',
-      name: 'found for',
+      name: i18n.translate('xpack.ml.anomaliesTable.entityValueColumnName', {
+        defaultMessage: 'found for',
+      }),
       render: (entityValue, item) => (
         <EntityCell
           entityName={item.entityName}
@@ -130,7 +146,9 @@ export function getColumns(
   if (items.some(item => item.influencers !== undefined)) {
     columns.push({
       field: 'influencers',
-      name: 'influenced by',
+      name: i18n.translate('xpack.ml.anomaliesTable.influencersColumnName', {
+        defaultMessage: 'influenced by',
+      }),
       render: (influencers) => (
         <InfluencersCell
           limit={INFLUENCERS_LIMIT}
@@ -148,7 +166,9 @@ export function getColumns(
   if (items.some(item => item.actual !== undefined)) {
     columns.push({
       field: 'actualSort',
-      name: 'actual',
+      name: i18n.translate('xpack.ml.anomaliesTable.actualSortColumnName', {
+        defaultMessage: 'actual',
+      }),
       render: (actual, item) => {
         const fieldFormat = mlFieldFormatService.getFieldFormat(item.jobId, item.source.detector_index);
         return formatValue(item.actual, item.source.function, fieldFormat);
@@ -160,7 +180,9 @@ export function getColumns(
   if (items.some(item => item.typical !== undefined)) {
     columns.push({
       field: 'typicalSort',
-      name: 'typical',
+      name: i18n.translate('xpack.ml.anomaliesTable.typicalSortColumnName', {
+        defaultMessage: 'typical',
+      }),
       render: (typical, item) => {
         const fieldFormat = mlFieldFormatService.getFieldFormat(item.jobId, item.source.detector_index);
         return formatValue(item.typical, item.source.function, fieldFormat);
@@ -177,7 +199,9 @@ export function getColumns(
     if (nonTimeOfDayOrWeek === true) {
       columns.push({
         field: 'metricDescriptionSort',
-        name: 'description',
+        name: i18n.translate('xpack.ml.anomaliesTable.metricDescriptionSortColumnName', {
+          defaultMessage: 'description',
+        }),
         render: (metricDescriptionSort, item) => (
           <DescriptionCell
             actual={item.actual}
@@ -193,7 +217,9 @@ export function getColumns(
   if (jobIds && jobIds.length > 1) {
     columns.push({
       field: 'jobId',
-      name: 'job ID',
+      name: i18n.translate('xpack.ml.anomaliesTable.jobIdColumnName', {
+        defaultMessage: 'job ID',
+      }),
       sortable: true
     });
   }
@@ -201,7 +227,9 @@ export function getColumns(
   const showExamples = items.some(item => item.entityName === 'mlcategory');
   if (showExamples === true) {
     columns.push({
-      name: 'category examples',
+      name: i18n.translate('xpack.ml.anomaliesTable.categoryExamplesColumnName', {
+        defaultMessage: 'category examples',
+      }),
       sortable: false,
       truncateText: true,
       render: (item) => {
@@ -227,7 +255,9 @@ export function getColumns(
 
   if (showLinks === true) {
     columns.push({
-      name: 'actions',
+      name: i18n.translate('xpack.ml.anomaliesTable.actionsColumnName', {
+        defaultMessage: 'actions',
+      }),
       render: (item) => {
         if (showLinksMenuForItem(item) === true) {
           return (

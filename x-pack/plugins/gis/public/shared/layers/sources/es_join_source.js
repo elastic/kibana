@@ -84,6 +84,10 @@ export class ESJoinSource extends ASource {
     inspectorAdapters.requests.resetRequest(this._descriptor.id);
   }
 
+  getIndexPatternIds() {
+    return  [this._descriptor.indexPatternId];
+  }
+
   async getPropertiesMap(searchFilters, leftSourceName, leftFieldName) {
 
     if (!this.hasCompleteConfig()) {
@@ -108,6 +112,7 @@ export class ESJoinSource extends ASource {
         }
         return filters;
       });
+      searchSource.setField('query', searchFilters.query);
 
       const dsl = aggConfigs.toDsl();
       searchSource.setField('aggs', dsl);
@@ -162,6 +167,10 @@ export class ESJoinSource extends ASource {
   }
 
   isRefreshTimerAware() {
+    return true;
+  }
+
+  isQueryAware() {
     return true;
   }
 

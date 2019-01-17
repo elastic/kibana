@@ -5,6 +5,7 @@
  */
 
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { Location } from 'history';
 import React from 'react';
 import { TransactionDetailsRequest } from '../../../store/reactReduxRequest/transactionDetails';
 import { TransactionDetailsChartsRequest } from '../../../store/reactReduxRequest/transactionDetailsCharts';
@@ -21,7 +22,7 @@ import { Transaction } from './Transaction';
 interface Props {
   mlAvailable: boolean;
   urlParams: IUrlParams;
-  location: any;
+  location: Location;
 }
 
 export function TransactionDetailsView({ urlParams, location }: Props) {

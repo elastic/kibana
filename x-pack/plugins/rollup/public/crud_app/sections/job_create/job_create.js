@@ -494,9 +494,7 @@ export class JobCreateUi extends Component {
 
     return (
       <Fragment>
-        <EuiPageContent
-          horizontalPosition="center"
-        >
+        <EuiPageContent>
           <EuiPageContentHeader>
             <EuiTitle size="m">
               <h1>
@@ -519,13 +517,7 @@ export class JobCreateUi extends Component {
           <EuiSpacer size="l" />
 
           {this.renderNavigation()}
-          <EuiSpacer />
 
-          {this.renderCurrentStep()}
-
-          <EuiSpacer size="l" />
-
-          {this.renderNavigation()}
         </EuiPageContent>
         {savingFeedback}
       </Fragment>

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Location } from 'history';
 import React from 'react';
-import { Transaction } from '../../../../../../typings/es_schemas/Transaction';
-
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { getAgentMarks } from './get_agent_marks';
 import { ServiceLegends } from './ServiceLegends';
 import { Waterfall } from './Waterfall';
@@ -16,7 +16,7 @@ import { IWaterfall } from './Waterfall/waterfall_helpers/waterfall_helpers';
 interface Props {
   urlParams: IUrlParams;
   transaction: Transaction;
-  location: any;
+  location: Location;
   waterfall: IWaterfall;
 }
 

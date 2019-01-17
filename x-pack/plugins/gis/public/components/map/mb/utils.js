@@ -10,6 +10,7 @@ import mapboxgl from 'mapbox-gl';
 export async function createMbMapInstance(node, initialView) {
   return new Promise((resolve) => {
     const options = {
+      attributionControl: false,
       container: node,
       style: {
         version: 8,

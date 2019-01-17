@@ -41,6 +41,7 @@ import { LoadingIndicator } from '../../components/loading_indicator/loading_ind
 import { mlEscape } from '../../util/string_utils';
 import { mlFieldFormatService } from '../../services/field_format_service';
 import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
+import { mlSelectSeverityService, SEVERITY_OPTIONS } from '../../components/controls/select_severity/select_severity';
 
 import { injectI18n } from '@kbn/i18n/react';
 
@@ -51,7 +52,6 @@ export const ExplorerChartSingleMetric = injectI18n(class ExplorerChartSingleMet
   static propTypes = {
     tooManyBuckets: PropTypes.bool,
     seriesConfig: PropTypes.object,
-    mlSelectSeverityService: PropTypes.object.isRequired
   }
 
   componentDidMount() {
@@ -65,7 +65,6 @@ export const ExplorerChartSingleMetric = injectI18n(class ExplorerChartSingleMet
   renderChart() {
     const {
       tooManyBuckets,
-      mlSelectSeverityService,
       intl,
     } = this.props;
 
@@ -286,13 +285,13 @@ export const ExplorerChartSingleMetric = injectI18n(class ExplorerChartSingleMet
         .on('mouseout', () => mlChartTooltipService.hide());
 
       // Update all dots to new positions.
-      const threshold = mlSelectSeverityService.state.get('threshold');
+      const threshold = (mlSelectSeverityService.initiliazed) ? mlSelectSeverityService.state.get('threshold') : SEVERITY_OPTIONS[0];
       dots.attr('cx', d => lineChartXScale(d.date))
         .attr('cy', d => lineChartYScale(d.value))
         .attr('class', (d) => {
           let markerClass = 'metric-value';
           if (_.has(d, 'anomalyScore') && Number(d.anomalyScore) >= threshold.val) {
-            markerClass += ` anomaly-marker ${getSeverityWithLow(d.anomalyScore)}`;
+            markerClass += ` anomaly-marker ${getSeverityWithLow(d.anomalyScore).id}`;
           }
           return markerClass;
         });
@@ -308,7 +307,7 @@ export const ExplorerChartSingleMetric = injectI18n(class ExplorerChartSingleMet
       multiBucketMarkers.enter().append('path')
         .attr('d', d3.svg.symbol().size(MULTI_BUCKET_SYMBOL_SIZE).type('cross'))
         .attr('transform', d => `translate(${lineChartXScale(d.date)}, ${lineChartYScale(d.value)})`)
-        .attr('class', d => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore)}`)
+        .attr('class', d => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore).id}`)
         // Don't use an arrow function since we need access to `this`.
         .on('mouseover', function (d) {
           showLineChartTooltip(d, this);
