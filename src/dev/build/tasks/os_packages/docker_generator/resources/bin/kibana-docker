@@ -24,6 +24,9 @@ kibana_vars=(
     elasticsearch.requestHeadersWhitelist
     elasticsearch.requestTimeout
     elasticsearch.shardTimeout
+    elasticsearch.sniffInterval
+    elasticsearch.sniffOnConnectionFault
+    elasticsearch.sniffOnStart
     elasticsearch.ssl.ca
     elasticsearch.ssl.cert
     elasticsearch.ssl.certificate
