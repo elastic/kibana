@@ -34,13 +34,32 @@ export class TileLayer extends ALayer {
   }
 
   _tileLoadErrorTracker(map, url) {
-    let tileLoadCount = 0;
-    map.on('tileload', ({ tile }) => tile && tileLoadCount++);
+    let tileLoad;
+    map.on('dataloading', ({ tile }) => {
+      if (tile && tile.request) {
+        // If at least one tile loads, endpoint/resource is valid
+        tile.request.onloadend = ({ loaded }) => loaded && (tileLoad = true);
+      }
+    });
 
     return new Promise((resolve, reject) => {
-      const tileLoadTimer = setTimeout(() => {
-        map.off('sourcedata');
-        if (!tileLoadCount) {
+      let tileLoadTimer = null;
+      let checkInterval = null;
+
+      const clearChecks = () => {
+        clearInterval(checkInterval);
+        clearTimeout(tileLoadTimer);
+        map.off('dataloading');
+      };
+
+      checkInterval = setInterval(() => {
+        if (tileLoad) {
+          resolve();
+          clearChecks();
+        }
+      }, 1000);
+      tileLoadTimer = setTimeout(() => {
+        if (!tileLoad) {
           try {
             throw new Error(`Tiles from "${url}" could not be loaded`);
           } catch (e) {
@@ -49,11 +68,8 @@ export class TileLayer extends ALayer {
         } else {
           resolve();
         }
+        clearChecks();
       }, this.TMS_LOAD_TIMEOUT);
-      if (tileLoadCount) {
-        clearTimeout(tileLoadTimer);
-        resolve();
-      }
     });
   }
 
