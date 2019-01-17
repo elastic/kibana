@@ -20,29 +20,35 @@ import chrome from 'ui/chrome';
 import { PersistedLog } from './';
 import { createLogKey } from './create_log_key';
 
+export interface RecentlyAccessedHistoryItem {
+  link: string;
+  label: string;
+  id: string;
+}
+
 class RecentlyAccessed {
+  public history: PersistedLog<RecentlyAccessedHistoryItem>;
+
   constructor() {
-    const historyOptions = {
+    const logKey = createLogKey('recentlyAccessed', chrome.getBasePath());
+    this.history = new PersistedLog(logKey, {
       maxLength: 20,
       filterDuplicates: true,
       isDuplicate: (oldItem, newItem) => {
         return oldItem.id === newItem.id;
-      }
-    };
-    const logKey = createLogKey('recentlyAccessed', chrome.getBasePath());
-    this.history = new PersistedLog(logKey, historyOptions);
+      },
+    });
   }
 
-  add(link, label, id) {
-    const historyItem = {
-      link: link,
-      label: label,
-      id: id
-    };
-    this.history.add(historyItem);
+  public add(link: string, label: string, id: string) {
+    this.history.add({
+      link,
+      label,
+      id,
+    });
   }
 
-  get() {
+  public get() {
     return this.history.get();
   }
 }
