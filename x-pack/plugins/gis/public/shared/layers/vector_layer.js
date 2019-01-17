@@ -231,6 +231,7 @@ export class VectorLayer extends ALayer {
     }
 
     const updateDueToExtentChange = this.updateDueToExtent(source, meta, searchFilters);
+
     return !updateDueToTime
       && !updateDueToRefreshTimer
       && !updateDueToExtentChange

@@ -152,7 +152,7 @@ export class ESGeohashGridSource extends VectorSource {
     return {
       data: featureCollection,
       meta: {
-        areResultsTrimmed: true
+        areResultsTrimmed: false
       }
     };
   }

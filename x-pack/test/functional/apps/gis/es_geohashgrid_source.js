@@ -120,6 +120,30 @@ export default function ({ getPageObjects, getService }) {
         });
       });
 
+      it('should correctly re-request data', async () => {
+
+        //zoom way outside range
+        await PageObjects.gis.setView(64, 179, 5);
+        let mapboxStyle = await PageObjects.gis.getMapboxStyle();
+        expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(0);
+
+        //zoom back into range
+        await PageObjects.gis.setView(0, 0, 0);
+        mapboxStyle = await PageObjects.gis.getMapboxStyle();
+        expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(EXPECTED_NUMBER_FEATURES);
+
+        //zoom in a little bit (inside buffer)
+        await PageObjects.gis.setView(0, 0, 3);
+        mapboxStyle = await PageObjects.gis.getMapboxStyle();
+        expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(EXPECTED_NUMBER_FEATURES);
+
+        //zoom in a lot
+        await PageObjects.gis.setView(0, 0, 8);
+        mapboxStyle = await PageObjects.gis.getMapboxStyle();
+        expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(0);
+
+      });
+
       describe('query bar', () => {
         before(async () => {
           await queryBar.setQuery('machine.os.raw : "win 8"');

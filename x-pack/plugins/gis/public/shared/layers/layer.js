@@ -191,7 +191,9 @@ export class ALayer {
       newBuffer.maxLat
     ]);
     const doesPreviousBufferContainNewBuffer = turfBooleanContains(previousBufferGeometry, newBufferGeometry);
-    return doesPreviousBufferContainNewBuffer && !_.get(meta, 'areResultsTrimmed', false)
+
+    const isTrimmed = _.get(meta, 'areResultsTrimmed', false);
+    return doesPreviousBufferContainNewBuffer && !isTrimmed
       ? NO_SOURCE_UPDATE_REQUIRED
       : SOURCE_UPDATE_REQUIRED;
   }
