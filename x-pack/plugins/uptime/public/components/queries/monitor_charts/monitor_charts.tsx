@@ -85,10 +85,13 @@ export const MonitorCharts = ({
           minDuration,
           status,
         }: any) => {
+          // We're summing these values because we need to know what the max value of the RTT
+          // fields are in order to provide an accurate domain size for the RTT combination series.
           maxRtt.push({
             x: maxWriteRequest.x,
             y: maxWriteRequest.y + maxValidate.y + maxContent.y + maxResponse.y + maxTcpRtt.y,
           });
+          // TODO: these types of computations should take place on the server and be reflected in the GQL schema
           rttWriteRequestSeries.push(maxWriteRequest);
           rttValidateSeries.push(maxValidate);
           rttContentSeries.push(maxContent);
@@ -107,8 +110,8 @@ export const MonitorCharts = ({
       const durationDomain = avgDurationSeries.concat(areaRttSeries);
       const durationLimits = [0, Math.max(...durationDomain.map(({ y }) => y))];
 
-      const rttDomain = maxRtt.map(({ y }) => y);
-      const rttLimits = [0, Math.max(...rttDomain)];
+      // find the greatest y-value for rtt chart
+      const rttLimits = [0, Math.max(...maxRtt.map(({ y }) => y))];
 
       return (
         <Fragment>
