@@ -26,6 +26,7 @@ import stringify from 'json-stringify-safe';
 import querystring from 'querystring';
 import applyFiltersToKeys from './apply_filters_to_keys';
 import { inspect } from 'util';
+import { logWithMetadata } from './log_with_metadata';
 
 function serializeError(err = {}) {
   return {
@@ -157,6 +158,9 @@ export default class TransformObjStream extends Stream.Transform {
       data.error = serializeError(event.error);
       const message =  get(event, 'error.message');
       data.message = message || 'Unknown error object (no message)';
+    }
+    else if (logWithMetadata.isLogEvent(event.data)) {
+      _.assign(data, logWithMetadata.getLogEventData(event.data));
     }
     else if (_.isPlainObject(event.data) && event.data.tmpl) {
       _.assign(data, event.data);
