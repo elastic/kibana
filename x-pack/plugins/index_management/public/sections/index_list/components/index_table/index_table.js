@@ -204,6 +204,7 @@ export class IndexTableUi extends Component {
           onSort={() => this.onSort(fieldName)}
           isSorted={isSorted}
           isSortAscending={isSortAscending}
+          className={'indTable__header--' + fieldName}
           data-test-subj={`indexTableHeaderCell-${fieldName}`}
         >
           {label}
@@ -260,6 +261,7 @@ export class IndexTableUi extends Component {
           key={`${fieldName}-${name}`}
           truncateText={false}
           data-test-subj={`indexTableCell-${fieldName}`}
+          className={'indTable__cell--' + fieldName}
           header={fieldName}
         >
           {this.buildRowCell(fieldName, value, index)}

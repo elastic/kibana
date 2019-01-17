@@ -2,9 +2,17 @@
   background-color: $euiColorLightestShade;
 }
 
-// The index table is a bespoke table and can't make use of EuiBasicTable's width settings
-.indTable thead th:nth-of-type(2) {
-  width: 25%;
+.indTable {
+
+  // The index table is a bespoke table and can't make use of EuiBasicTable's width settings
+  thead th.indTable__header--name {
+    width: 25%;
+  }
+
+  // The index name can't contain spaces, so this is a rare case of break being OK.
+  .indTable__cell--name {
+    word-break: break-all;
+  }
 }
 
 .indTable__link {
