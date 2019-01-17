@@ -17,4 +17,7 @@
  * under the License.
  */
 
-export { PersistedLog } from './persisted_log';
+
+import { FunctionsRegistry } from '@kbn/interpreter/common';
+
+export const functionsRegistry = new FunctionsRegistry();

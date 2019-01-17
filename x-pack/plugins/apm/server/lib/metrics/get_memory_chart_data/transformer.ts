@@ -8,53 +8,41 @@ import { ESResponse } from './fetcher';
 
 export interface MemoryChartAPIResponse {
   series: {
-    totalMemory: Coordinate[];
-    freeMemory: Coordinate[];
-    processMemorySize: Coordinate[];
-    processMemoryRss: Coordinate[];
+    averagePercentMemoryUsed: Coordinate[];
+    maximumPercentMemoryUsed: Coordinate[];
   };
   // overall totals for the whole time range
   overallValues: {
-    totalMemory: number | null;
-    freeMemory: number | null;
-    processMemorySize: number | null;
-    processMemoryRss: number | null;
+    averagePercentMemoryUsed: number | null;
+    maximumPercentMemoryUsed: number | null;
   };
   totalHits: number;
 }
 
 export type MemoryMetricName =
-  | 'totalMemory'
-  | 'freeMemory'
-  | 'processMemorySize'
-  | 'processMemoryRss';
+  | 'averagePercentMemoryUsed'
+  | 'maximumPercentMemoryUsed';
 
 const MEMORY_METRIC_NAMES: MemoryMetricName[] = [
-  'totalMemory',
-  'freeMemory',
-  'processMemorySize',
-  'processMemoryRss'
+  'averagePercentMemoryUsed',
+  'maximumPercentMemoryUsed'
 ];
 
 export function transform(result: ESResponse): MemoryChartAPIResponse {
   const { aggregations, hits } = result;
   const {
     timeseriesData,
-    totalMemory,
-    freeMemory,
-    processMemorySize,
-    processMemoryRss
+    averagePercentMemoryUsed,
+    maximumPercentMemoryUsed
   } = aggregations;
 
   const series: MemoryChartAPIResponse['series'] = {
-    totalMemory: [],
-    freeMemory: [],
-    processMemorySize: [],
-    processMemoryRss: []
+    averagePercentMemoryUsed: [],
+    maximumPercentMemoryUsed: []
   };
 
   // using forEach here to avoid looping over the entire dataset
-  // 4 times or doing a complicated, memory-heavy map/reduce
+  // multiple times or doing a complicated, memory-heavy map/reduce
   timeseriesData.buckets.forEach(({ key, ...bucket }) => {
     MEMORY_METRIC_NAMES.forEach(name => {
       series[name].push({ x: key, y: bucket[name].value });
@@ -64,10 +52,8 @@ export function transform(result: ESResponse): MemoryChartAPIResponse {
   return {
     series,
     overallValues: {
-      totalMemory: totalMemory.value,
-      freeMemory: freeMemory.value,
-      processMemorySize: processMemorySize.value,
-      processMemoryRss: processMemoryRss.value
+      averagePercentMemoryUsed: averagePercentMemoryUsed.value,
+      maximumPercentMemoryUsed: maximumPercentMemoryUsed.value
     },
     totalHits: hits.total
   };
