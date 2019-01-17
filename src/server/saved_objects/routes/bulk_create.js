@@ -19,7 +19,7 @@
 
 import Joi from 'joi';
 
-export const createBulkCreateRoute = (prereqs, schema) => ({
+export const createBulkCreateRoute = (prereqs) => ({
   path: '/api/saved_objects/_bulk_create',
   method: 'POST',
   config: {
@@ -32,7 +32,7 @@ export const createBulkCreateRoute = (prereqs, schema) => ({
         .default(),
       payload: Joi.array().items(
         Joi.object({
-          type: Joi.string().valid(schema.getAvailableTypes()).required(),
+          type: Joi.string().required(),
           id: Joi.string(),
           attributes: Joi.object().required(),
           version: Joi.number(),

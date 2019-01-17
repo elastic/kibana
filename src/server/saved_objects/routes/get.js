@@ -19,14 +19,14 @@
 
 import Joi from 'joi';
 
-export const createGetRoute = (prereqs, schema) => ({
+export const createGetRoute = (prereqs) => ({
   path: '/api/saved_objects/{type}/{id}',
   method: 'GET',
   config: {
     pre: [prereqs.getSavedObjectsClient],
     validate: {
       params: Joi.object().keys({
-        type: Joi.string().valid(schema.getAvailableTypes()).required(),
+        type: Joi.string().required(),
         id: Joi.string().required(),
       }).required()
     },
