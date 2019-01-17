@@ -19,7 +19,7 @@
 
 import Joi from 'joi';
 
-export const createBulkCreateRoute = (prereqs) => ({
+export const createBulkCreateRoute = prereqs => ({
   path: '/api/saved_objects/_bulk_create',
   method: 'POST',
   config: {
