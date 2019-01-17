@@ -36,7 +36,7 @@ export class SavedObjectsRepository {
       schema,
       serializer,
       migrator,
-      includeHiddenTypes,
+      includeHiddenTypes = [],
       onBeforeWrite = () => { },
     } = options;
 
@@ -51,7 +51,7 @@ export class SavedObjectsRepository {
     this._index = index;
     this._mappings = mappings;
     this._schema = schema;
-    this._includeHiddenTypes = includeHiddenTypes || [];
+    this._includeHiddenTypes = includeHiddenTypes;
     this._type = getRootType(this._mappings);
     this._onBeforeWrite = onBeforeWrite;
     this._unwrappedCallCluster = async (...args) => {
