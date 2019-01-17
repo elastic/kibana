@@ -41,6 +41,7 @@ describe('ReindexPollingService', () => {
     });
 
     const service = new ReindexPollingService('myIndex');
+    service.updateStatus();
     await new Promise(resolve => setTimeout(resolve, 1200)); // wait for poll interval
 
     expect(mockClient.get).toHaveBeenCalledTimes(1);
@@ -61,6 +62,7 @@ describe('ReindexPollingService', () => {
     });
 
     const service = new ReindexPollingService('myIndex');
+    service.updateStatus();
     await new Promise(resolve => setTimeout(resolve, 1200)); // wait for poll interval
 
     expect(mockClient.get).toHaveBeenCalledTimes(1);
@@ -81,6 +83,7 @@ describe('ReindexPollingService', () => {
     });
 
     const service = new ReindexPollingService('myIndex');
+    service.updateStatus();
     await new Promise(resolve => setTimeout(resolve, 1200)); // wait for poll interval
 
     expect(mockClient.get).toHaveBeenCalledTimes(2);
