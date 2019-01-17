@@ -16,7 +16,7 @@ import {
   EuiButtonToggle
 } from '@elastic/eui';
 
-export class StaticDynamicStyleSelector extends React.Component {
+export class StaticDynamicStyleRow extends React.Component {
 
   // Store previous options locally so when type is toggled,
   // previous style options can be used.

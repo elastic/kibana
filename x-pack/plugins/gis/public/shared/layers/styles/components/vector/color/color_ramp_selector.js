@@ -13,7 +13,7 @@ import {
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 import { ColorGradient } from '../../../../../icons/color_gradient';
 
-const COLOR_GRADIENTS = Object.keys(vislibColorMaps).map(colorKey => ({
+export const COLOR_GRADIENTS = Object.keys(vislibColorMaps).map(colorKey => ({
   value: colorKey,
   text: colorKey,
   inputDisplay: <ColorGradient color={colorKey}/>

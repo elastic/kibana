@@ -6,13 +6,13 @@
 
 import React from 'react';
 
-import { StaticDynamicStyleSelector } from '../../static_dynamic_styling_option';
+import { StaticDynamicStyleRow } from '../../static_dynamic_style_row';
 import  { DynamicColorSelection } from './dynamic_color_selection';
 import  { StaticColorSelection } from './static_color_selection';
 
 export function VectorStyleColorEditor(props) {
   return (
-    <StaticDynamicStyleSelector
+    <StaticDynamicStyleRow
       ordinalFields={props.ordinalFields}
       property={props.styleProperty}
       name={props.stylePropertyName}

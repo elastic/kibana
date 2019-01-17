@@ -46,6 +46,7 @@ export class VectorStyle {
 
     const styleProperties = { ...style.getProperties() };
     const handlePropertyChange = (propertyName, settings) => {
+      console.log(settings);
       styleProperties[propertyName] = settings;//override single property, but preserve the rest
       const vectorStyleDescriptor = VectorStyle.createDescriptor(styleProperties);
       handleStyleChange(vectorStyleDescriptor);
