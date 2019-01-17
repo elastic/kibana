@@ -17,15 +17,7 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import init from './init';
 
-export default function (kibana) {
-  return new kibana.Plugin({
-    id: 'interpreter',
-    require: ['kibana', 'elasticsearch'],
-    publicDir: resolve(__dirname, 'public'),
-    init,
-  });
-}
+import { FunctionsRegistry } from '@kbn/interpreter/common';
 
+export const functionsRegistry = new FunctionsRegistry();
