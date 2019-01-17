@@ -7,6 +7,7 @@ import { UNLINKED_DEPLOYMENT_CLUSTER_UUID } from "../../../common/constants";
 
 export const unlinkedDeploymentClusterDefinition = {
   cluster_uuid: UNLINKED_DEPLOYMENT_CLUSTER_UUID,
+  isSupported: true,
   license: {},
   cluster_state: {},
   cluster_stats: {
