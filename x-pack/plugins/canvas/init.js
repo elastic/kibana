@@ -27,8 +27,6 @@ export default async function(server /*options*/) {
     return {
       ...kibanaVars,
       kbnIndex: config.get('kibana.index'),
-      esShardTimeout: server.core.es.shardTimeout.asMilliseconds(),
-      esApiVersion: server.core.es.apiVersion,
       serverFunctions: functionsRegistry.toArray(),
       basePath,
       reportingBrowserType,

@@ -85,8 +85,6 @@ export const init = (monitoringPlugin, server) => {
       maxBucketSize: config.get('xpack.monitoring.max_bucket_size'),
       minIntervalSeconds: config.get('xpack.monitoring.min_interval_seconds'),
       kbnIndex: config.get('kibana.index'),
-      esApiVersion: server.core.es.apiVersion,
-      esShardTimeout: server.core.es.shardTimeout.asMilliseconds(),
       showLicenseExpiration: config.get('xpack.monitoring.show_license_expiration'),
       showCgroupMetricsElasticsearch: config.get('xpack.monitoring.ui.container.elasticsearch.enabled'),
       showCgroupMetricsLogstash: config.get('xpack.monitoring.ui.container.logstash.enabled') // Note, not currently used, but see https://github.com/elastic/x-pack-kibana/issues/1559 part 2

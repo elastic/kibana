@@ -8,6 +8,5 @@ import { once } from 'lodash';
 import esShield from './esjs_shield_plugin';
 
 export const getClient = once((server) => {
-  const config = { plugins: [esShield] };
-  return server.plugins.elasticsearch.createCluster('security', config);
+  return server.plugins.elasticsearch.createCluster('security', { plugins: [esShield] });
 });

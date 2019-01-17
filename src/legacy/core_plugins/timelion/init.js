@@ -56,8 +56,6 @@ export default function (server) {
     const config = server.config();
     return {
       kbnIndex: config.get('kibana.index'),
-      esShardTimeout: server.core.es.shardTimeout.asMilliseconds(),
-      esApiVersion: server.core.es.apiVersion,
     };
   });
 }
