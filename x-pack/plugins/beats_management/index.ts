@@ -35,8 +35,8 @@ export function beats(kibana: any) {
     },
     config: () => config,
     configPrefix: CONFIG_PREFIX,
-    async init(server: KibanaLegacyServer) {
-      await initServerWithKibana(server);
+    init(server: KibanaLegacyServer) {
+      initServerWithKibana(server);
     },
   });
 }
