@@ -77,6 +77,7 @@ app.directive('dashboardApp', function ($injector) {
   const confirmModal = $injector.get('confirmModal');
   const config = $injector.get('config');
   const Private = $injector.get('Private');
+  const indexPatterns = $injector.get('indexPatterns');
 
   return {
     restrict: 'E',
@@ -138,7 +139,18 @@ app.directive('dashboardApp', function ($injector) {
           description: dashboardStateManager.getDescription(),
         };
         $scope.panels = dashboardStateManager.getPanels();
-        $scope.indexPatterns = dashboardStateManager.getPanelIndexPatterns();
+
+        const panelIndexPatterns = dashboardStateManager.getPanelIndexPatterns();
+        if (panelIndexPatterns && panelIndexPatterns.length > 0) {
+          $scope.indexPatterns = panelIndexPatterns;
+        }
+        else {
+          indexPatterns.getDefault().then((defaultIndexPattern) => {
+            $scope.$evalAsync(() => {
+              $scope.indexPatterns = [defaultIndexPattern];
+            });
+          });
+        }
       };
 
       // Part of the exposed plugin API - do not remove without careful consideration.
