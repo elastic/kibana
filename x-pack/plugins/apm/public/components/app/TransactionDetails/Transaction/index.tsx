@@ -35,7 +35,7 @@ function MaybeViewTraceLink({
     return (
       <EuiFlexItem grow={false}>
         <EuiToolTip content="The trace parent cannot be found">
-          <EuiButton iconType="apmApp" disabled={true}>
+          <EuiButton iconType="apmTrace" disabled={true}>
             View full trace
           </EuiButton>
         </EuiToolTip>
@@ -51,7 +51,7 @@ function MaybeViewTraceLink({
     return (
       <EuiFlexItem grow={false}>
         <EuiToolTip content="Currently viewing the full trace">
-          <EuiButton iconType="apmApp" disabled={true}>
+          <EuiButton iconType="apmTrace" disabled={true}>
             View full trace
           </EuiButton>
         </EuiToolTip>
@@ -63,7 +63,7 @@ function MaybeViewTraceLink({
     return (
       <EuiFlexItem grow={false}>
         <TransactionLink transaction={waterfall.traceRoot}>
-          <EuiButton iconType="apmApp">View full trace</EuiButton>
+          <EuiButton iconType="apmTrace">View full trace</EuiButton>
         </TransactionLink>
       </EuiFlexItem>
     );
