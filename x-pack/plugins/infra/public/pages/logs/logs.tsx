@@ -16,7 +16,7 @@ import { LogFlyout } from '../../components/logging/log_flyout';
 import { ColumnarPage } from '../../components/page';
 
 import { LogsBetaBadgeHeaderSection } from '../../components/beta_badge_header_section';
-import { WithLogFilterUrlState } from '../../containers/logs/with_log_filter';
+import { WithLogFilter, WithLogFilterUrlState } from '../../containers/logs/with_log_filter';
 import { WithLogFlyout } from '../../containers/logs/with_log_flyout';
 import { WithFlyoutOptionsUrlState } from '../../containers/logs/with_log_flyout_options';
 import { WithLogMinimapUrlState } from '../../containers/logs/with_log_minimap';
@@ -68,12 +68,23 @@ export const LogsPage = injectI18n(
                   <LogsToolbar />
                   <WithLogFlyout>
                     {({ isFlyoutVisible, flyoutItem, showFlyout, setFlyoutItem }) => (
-                      <React.Fragment>
-                        <LogsPageContent showFlyout={showFlyout} setFlyoutItem={setFlyoutItem} />
-                        {flyoutItem && isFlyoutVisible ? (
-                          <LogFlyout flyoutItem={flyoutItem} showFlyout={showFlyout} />
-                        ) : null}
-                      </React.Fragment>
+                      <WithLogFilter indexPattern={derivedIndexPattern}>
+                        {({ applyFilterQueryFromKueryExpression }) => (
+                          <React.Fragment>
+                            <LogsPageContent
+                              showFlyout={showFlyout}
+                              setFlyoutItem={setFlyoutItem}
+                            />
+                            {flyoutItem && isFlyoutVisible ? (
+                              <LogFlyout
+                                setFilter={applyFilterQueryFromKueryExpression}
+                                flyoutItem={flyoutItem}
+                                showFlyout={showFlyout}
+                              />
+                            ) : null}
+                          </React.Fragment>
+                        )}
+                      </WithLogFilter>
                     )}
                   </WithLogFlyout>
                 </>
