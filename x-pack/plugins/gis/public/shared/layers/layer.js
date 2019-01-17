@@ -6,6 +6,7 @@
 import _ from 'lodash';
 import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
+import { DataRequest } from './util/data_request';
 
 const SOURCE_UPDATE_REQUIRED = true;
 const NO_SOURCE_UPDATE_REQUIRED = false;
@@ -16,6 +17,11 @@ export class ALayer {
     this._descriptor = layerDescriptor;
     this._source = source;
     this._style = style;
+    if (this._descriptor.dataRequests) {
+      this._dataRequests = this._descriptor.dataRequests.map(dataRequest => new DataRequest(dataRequest));
+    } else {
+      this._dataRequests = [];
+    }
   }
 
   static getBoundDataForSource(mbMap, sourceId) {
@@ -33,6 +39,7 @@ export class ALayer {
     layerDescriptor.maxZoom = _.get(options, 'maxZoom', 24);
     layerDescriptor.source = options.source;
     layerDescriptor.sourceDescriptor = options.sourceDescriptor;
+    layerDescriptor.dataRequests = [];
     layerDescriptor.visible = options.visible || true;
     layerDescriptor.temporary = options.temporary || false;
     layerDescriptor.style = options.style || {};
@@ -132,17 +139,24 @@ export class ALayer {
     return this._source.renderSourceSettingsEditor({ onChange });
   }
 
+  _findDataRequestForSource(sourceDataId) {
+    return this._dataRequests.find(dataRequest => dataRequest.getDataId() === sourceDataId);
+  }
+
+  getSourceDataRequest() {
+    return this._dataRequests.find(dataRequest => dataRequest.getDataId() === 'source');
+  }
+
   isLayerLoading() {
-    console.warn(`Layer load status not implemented for ${this._descriptor.type}`);
+    return this._dataRequests.some(dataRequest => dataRequest.isLoading());
   }
 
   dataHasLoadError() {
-    console.warn(`Load error status not implemented for ${this._descriptor.type}`);
-    return false;
+    return this._descriptor.errorState;
   }
 
   getDataLoadError() {
-    console.warn(`Load error not implemented for ${this._descriptor.type}`);
+    return this.dataHasLoadError() ? this._descriptor.errorMessage : '';
   }
 
   toLayerDescriptor() {

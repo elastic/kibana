@@ -111,12 +111,4 @@ export class TileLayer extends ALayer {
     return false;
   }
 
-  dataHasLoadError() {
-    return this._descriptor.errorState;
-  }
-
-  getDataLoadError() {
-    return this.dataHasLoadError() ? this._descriptor.errorMessage : '';
-  }
-
 }
