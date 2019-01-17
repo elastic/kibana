@@ -5,15 +5,12 @@
  */
 
 import _ from 'lodash';
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 
 import { VectorStyleColorEditor } from './color/vector_style_color_editor';
 import { VectorStyleSizeEditor } from './size/vector_style_size_editor';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem
-} from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 
 export class VectorStyleEditor extends Component {
   state = {
@@ -45,44 +42,47 @@ export class VectorStyleEditor extends Component {
 
   render() {
     return (
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          <VectorStyleColorEditor
-            styleProperty="fillColor"
-            stylePropertyName="Fill color"
-            handlePropertyChange={this.props.handlePropertyChange}
-            styleDescriptor={this.props.styleProperties.fillColor}
-            ordinalFields={this.state.ordinalFields}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <VectorStyleColorEditor
-            styleProperty="lineColor"
-            stylePropertyName="Border color"
-            handlePropertyChange={this.props.handlePropertyChange}
-            styleDescriptor={this.props.styleProperties.lineColor}
-            ordinalFields={this.state.ordinalFields}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <VectorStyleSizeEditor
-            styleProperty="lineWidth"
-            stylePropertyName="Border width"
-            handlePropertyChange={this.props.handlePropertyChange}
-            styleDescriptor={this.props.styleProperties.lineWidth}
-            ordinalFields={this.state.ordinalFields}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <VectorStyleSizeEditor
-            styleProperty="iconSize"
-            stylePropertyName="Symbol size"
-            handlePropertyChange={this.props.handlePropertyChange}
-            styleDescriptor={this.props.styleProperties.iconSize}
-            ordinalFields={this.state.ordinalFields}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <Fragment>
+
+        <VectorStyleColorEditor
+          styleProperty="fillColor"
+          stylePropertyName="Fill color"
+          handlePropertyChange={this.props.handlePropertyChange}
+          styleDescriptor={this.props.styleProperties.fillColor}
+          ordinalFields={this.state.ordinalFields}
+        />
+
+        <EuiSpacer size="m" />
+
+        <VectorStyleColorEditor
+          styleProperty="lineColor"
+          stylePropertyName="Border color"
+          handlePropertyChange={this.props.handlePropertyChange}
+          styleDescriptor={this.props.styleProperties.lineColor}
+          ordinalFields={this.state.ordinalFields}
+        />
+
+        <EuiSpacer size="m" />
+
+        <VectorStyleSizeEditor
+          styleProperty="lineWidth"
+          stylePropertyName="Border width"
+          handlePropertyChange={this.props.handlePropertyChange}
+          styleDescriptor={this.props.styleProperties.lineWidth}
+          ordinalFields={this.state.ordinalFields}
+        />
+
+        <EuiSpacer size="m" />
+
+        <VectorStyleSizeEditor
+          styleProperty="iconSize"
+          stylePropertyName="Symbol size"
+          handlePropertyChange={this.props.handlePropertyChange}
+          styleDescriptor={this.props.styleProperties.iconSize}
+          ordinalFields={this.state.ordinalFields}
+        />
+
+      </Fragment>
     );
   }
 }
