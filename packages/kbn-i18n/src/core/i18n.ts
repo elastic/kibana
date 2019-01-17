@@ -55,7 +55,7 @@ function getMessageById(id: string): string | undefined {
  * @param locale
  */
 function normalizeLocale(locale: string) {
-  return locale.toLowerCase().replace('_', LOCALE_DELIMITER);
+  return locale.toLowerCase();
 }
 
 /**
