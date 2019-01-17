@@ -28,10 +28,6 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
   beforeEach(() => {
     server = new MockServer();
 
-    const schema = {
-      getAvailableTypes: () => ['index-pattern'],
-    };
-
     const prereqs = {
       getSavedObjectsClient: {
         assign: 'savedObjectsClient',
@@ -41,7 +37,7 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
       },
     };
 
-    server.route(createDeleteRoute(prereqs, schema));
+    server.route(createDeleteRoute(prereqs));
   });
 
   afterEach(() => {
