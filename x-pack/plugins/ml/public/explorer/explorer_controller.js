@@ -39,7 +39,7 @@ import { mlJobService } from '../services/job_service';
 import { JobSelectServiceProvider } from '../components/job_select_list/job_select_service';
 import { timefilter } from 'ui/timefilter';
 
-import { EXPLORER_ACTION, SWIMLANE_TYPE } from './explorer_constants';
+import { APP_STATE_ACTION, EXPLORER_ACTION, SWIMLANE_TYPE } from './explorer_constants';
 
 uiRoutes
   .when('/explorer/?', {
@@ -109,9 +109,7 @@ module.controller('MlExplorerController', function (
       (previousSelectedJobsCount <= 1 && selectedJobs.length > 1) ||
       (selectedJobs.length === 1 && previousSelectedJobsCount > 1)
     ) {
-      $scope.appState.fetch();
-      delete $scope.appState.mlExplorerSwimlane.viewBy;
-      $scope.appState.save();
+      $scope.appStateHandler(APP_STATE_ACTION.CLEAR_SWIMLANE_VIEW_BY_FIELD_NAME);
     }
 
     function fieldFormatServiceCallback() {
@@ -219,20 +217,24 @@ module.controller('MlExplorerController', function (
   $scope.appStateHandler = ((action, payload) => {
     $scope.appState.fetch();
 
-    if (action === 'clearSelection') {
+    if (action === APP_STATE_ACTION.CLEAR_SELECTION) {
       delete $scope.appState.mlExplorerSwimlane.selectedType;
       delete $scope.appState.mlExplorerSwimlane.selectedLanes;
       delete $scope.appState.mlExplorerSwimlane.selectedTimes;
     }
 
-    if (action === 'saveSelecton') {
+    if (action === APP_STATE_ACTION.SAVE_SELECTION) {
       const swimlaneSelectedCells = payload.swimlaneSelectedCells;
       $scope.appState.mlExplorerSwimlane.selectedType = swimlaneSelectedCells.type;
       $scope.appState.mlExplorerSwimlane.selectedLanes = swimlaneSelectedCells.lanes;
       $scope.appState.mlExplorerSwimlane.selectedTimes = swimlaneSelectedCells.times;
     }
 
-    if (action === 'saveSwimlaneViewByFieldName') {
+    if (action === APP_STATE_ACTION.CLEAR_SWIMLANE_VIEW_BY_FIELD_NAME) {
+      delete $scope.appState.mlExplorerSwimlane.viewBy;
+    }
+
+    if (action === APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME) {
       $scope.appState.mlExplorerSwimlane.viewBy = payload.swimlaneViewByFieldName;
     }
 

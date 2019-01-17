@@ -130,7 +130,7 @@ export function selectedJobsHaveInfluencers(selectedJobs = []) {
   return hasInfluencers;
 }
 
-export function getFieldsByJob(selectedJobIds, viewByOptions) {
+export function getFieldsByJob() {
   return mlJobService.jobs.reduce((reducedFieldsByJob, job) => {
     // Add the list of distinct by, over, partition and influencer fields for each job.
     const analysisConfig = job.analysis_config;
@@ -152,10 +152,6 @@ export function getFieldsByJob(selectedJobIds, viewByOptions) {
         return reducedfieldsForJob;
       }, [])
       .concat(influencers);
-
-    if (selectedJobIds.indexOf(job.job_id) !== -1) {
-      viewByOptions = viewByOptions.concat(influencers);
-    }
 
     reducedFieldsByJob[job.job_id] = uniq(fieldsForJob);
     reducedFieldsByJob['*'] = union(reducedFieldsByJob['*'], reducedFieldsByJob[job.job_id]);

@@ -67,6 +67,7 @@ import {
 
 import {
   DRAG_SELECT_ACTION,
+  APP_STATE_ACTION,
   EXPLORER_ACTION,
   SWIMLANE_DEFAULT_LIMIT,
   SWIMLANE_TYPE,
@@ -206,7 +207,7 @@ export const Explorer = injectI18n(
       // Listen for changes to job selection.
       if (action === EXPLORER_ACTION.JOB_SELECTION_CHANGE) {
         const { selectedJobs } = payload;
-        this.props.appStateHandler('clearSelection');
+        this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
         this.setState(
           {
             noInfluencersConfigured: !selectedJobsHaveInfluencers(selectedJobs),
@@ -383,12 +384,20 @@ export const Explorer = injectI18n(
 
     // Obtain the list of 'View by' fields per job.
     setViewBySwimlaneOptions(resolve) {
-      // Unique influencers for the selected job(s).
-      let viewByOptions = [];
-
       const selectedJobIds = this.state.selectedJobs.map(d => d.id);
 
-      viewByOptions = _.chain(viewByOptions).uniq().sortBy(fieldName => fieldName.toLowerCase()).value();
+      // Unique influencers for the selected job(s).
+      const viewByOptions = _.chain(
+        mlJobService.jobs.reduce((reducedViewByOptions, job) => {
+          if (selectedJobIds.some(jobId => jobId === job.job_id)) {
+            return reducedViewByOptions.concat(job.analysis_config.influencers || []);
+          }
+          return reducedViewByOptions;
+        }, []))
+        .uniq()
+        .sortBy(fieldName => fieldName.toLowerCase())
+        .value();
+
       viewByOptions.push(VIEW_BY_JOB_LABEL);
       const viewBySwimlaneOptions = viewByOptions;
 
@@ -453,7 +462,7 @@ export const Explorer = injectI18n(
           }
         }
 
-        this.props.appStateHandler('saveSwimlaneViewByFieldName', { swimlaneViewByFieldName });
+        this.props.appStateHandler(APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME, { swimlaneViewByFieldName });
       }
 
       this.setState(
@@ -472,7 +481,6 @@ export const Explorer = injectI18n(
         selectedCells,
         selectedJobs,
         swimlaneViewByFieldName,
-        viewBySwimlaneData,
       } = this.state;
 
       const swimlaneWidth = getSwimlaneContainerWidth(noInfluencersConfigured);
@@ -523,7 +531,7 @@ export const Explorer = injectI18n(
                     selectedCells.type === SWIMLANE_TYPE.VIEW_BY
                   ) {
                     const selectionExists = selectedCells.lanes.some((lane) => {
-                      return (viewBySwimlaneData.laneLabels.includes(lane));
+                      return (this.state.viewBySwimlaneData.laneLabels.includes(lane));
                     });
                     if (selectionExists === false) {
                       this.clearSelectedAnomalies();
@@ -639,13 +647,18 @@ export const Explorer = injectI18n(
         ? selectedCells.lanes
         : selectedJobs.map(d => d.id);
 
-      const timerange = getSelectionTimeRange(selectedCells, getSwimlaneBucketInterval(selectedJobs, swimlaneWidth).asSeconds());
+      const timerange = getSelectionTimeRange(
+        selectedCells,
+        getSwimlaneBucketInterval(selectedJobs, swimlaneWidth).asSeconds()
+      );
       const selectionInfluencers = getSelectionInfluencers(selectedCells, swimlaneViewByFieldName);
 
       this.setState(
         {
           annotationsData: await loadAnnotationsTableData(
-            selectedCells, selectedJobs, getSwimlaneBucketInterval(selectedJobs, swimlaneWidth).asSeconds()
+            selectedCells,
+            selectedJobs,
+            getSwimlaneBucketInterval(selectedJobs, swimlaneWidth).asSeconds()
           )
         },
         async () => {
@@ -721,7 +734,7 @@ export const Explorer = injectI18n(
       this.setState(
         { swimlaneViewByFieldName },
         () => {
-          this.props.appStateHandler('saveSwimlaneViewByFieldName', { swimlaneViewByFieldName });
+          this.props.appStateHandler(APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME, { swimlaneViewByFieldName });
           this.loadViewBySwimlane([]);
           this.clearSelectedAnomalies();
         }
@@ -767,7 +780,7 @@ export const Explorer = injectI18n(
         this.setState(
           { selectedCells: swimlaneSelectedCells },
           () => {
-            this.props.appStateHandler('saveSelection', { swimlaneSelectedCells });
+            this.props.appStateHandler(APP_STATE_ACTION.SAVE_SELECTION, { swimlaneSelectedCells });
             this.updateExplorer();
           }
         );
