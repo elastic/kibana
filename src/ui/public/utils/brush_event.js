@@ -26,8 +26,8 @@ export function onBrushEvent(event, $state) {
   const isNumber = event.data.ordered;
   const isDate = isNumber && event.data.ordered.date;
 
-  if (!_.get(event.data, 'series[0].values[0].xRaw')) return;
-  const xRaw = event.data.series[0].values[0].xRaw;
+  const xRaw = _.get(event.data, 'series[0].values[0].xRaw');
+  if (!xRaw) return;
   const column = xRaw.table.columns[xRaw.column];
   if (!column) return;
   const indexPattern = column.aggConfig.getIndexPattern();

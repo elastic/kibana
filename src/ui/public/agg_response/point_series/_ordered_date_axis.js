@@ -21,8 +21,7 @@ import moment from 'moment';
 
 export function orderedDateAxis(chart) {
   const x = chart.aspects.x[0];
-  const format = x.params.format;
-  const bounds = x.params.bounds;
+  const { format, bounds } = x.params;
 
   chart.xAxisFormatter = function (val) {
     return moment(val).format(format);

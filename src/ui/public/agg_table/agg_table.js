@@ -105,7 +105,7 @@ uiModules
           $scope.rows = table.rows;
           $scope.formattedColumns = table.columns.map(function (col, i) {
             const isBucket = $scope.dimensions.buckets.find(bucket => bucket.accessor === i);
-            const dimension = isBucket ? isBucket : $scope.dimensions.metrics.find(metric => metric.accessor === i);
+            const dimension = isBucket || $scope.dimensions.metrics.find(metric => metric.accessor === i);
             if (!dimension) return;
 
             const formatter = getFormat(dimension.format);
@@ -123,8 +123,7 @@ uiModules
               formattedColumn.class = 'visualize-table-right';
             }
 
-            const isNumeric = dimension.params.isNumeric;
-            const isDate = dimension.params.isDate;
+            const { isNumeric, isDate } = dimension.params;
 
             if (isNumeric || isDate || $scope.totalFunc === 'count') {
               const sum = tableRows => {

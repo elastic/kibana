@@ -32,10 +32,7 @@ export function PointSeriesTooltipFormatter($compile, $rootScope) {
 
     const details = $tooltipScope.details = [];
 
-    function addDetail(label, value) {
-      const detail = { label, value };
-      details.push(detail);
-    }
+    const addDetail = (label, value) => details.push({ label, value });
 
     datum.extraMetrics.forEach(metric => {
       addDetail(metric.label, metric.value);

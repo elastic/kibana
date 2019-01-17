@@ -30,7 +30,7 @@ const config = chrome.getUiSettingsClient();
 const defaultFormat = { convert: identity };
 const getConfig = (...args: any[]): any => (config.get as any)(...args);
 
-const getFieldFormat = (id: any, params: any) => {
+const getFieldFormat = (id: string, params: object) => {
   const Format = fieldFormats.byId[id];
   if (Format) {
     return new Format(params, getConfig);

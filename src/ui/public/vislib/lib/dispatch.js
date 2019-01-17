@@ -39,7 +39,8 @@ export function VislibLibDispatchProvider(Private, config) {
       this._listeners = {};
     }
 
-    pieClickResponse(data) {
+
+    _pieClickResponse(data) {
       const points = [];
 
       let dataPointer = data;
@@ -56,7 +57,7 @@ export function VislibLibDispatchProvider(Private, config) {
       return points;
     }
 
-    seriesClickResponse(data) {
+    _seriesClickResponse(data) {
       const points = [];
 
       ['xRaw', 'yRaw', 'zRaw', 'seriesRaw', 'rawData', 'tableRaw'].forEach(val => {
@@ -68,6 +69,12 @@ export function VislibLibDispatchProvider(Private, config) {
       return points;
     }
 
+    /**
+     * Response to click  events
+     *
+     * @param d {Object} Data point
+     * @returns event with list of data points related to the click
+     */
     clickEventResponse(d) {
       const _data = d3.event.target.nearestViewportElement ?
         d3.event.target.nearestViewportElement.__data__ : d3.event.target.__data__;
@@ -77,12 +84,12 @@ export function VislibLibDispatchProvider(Private, config) {
 
       return {
         e: d3.event,
-        data: isSlices ? this.pieClickResponse(data) : this.seriesClickResponse(data),
+        data: isSlices ? this._pieClickResponse(data) : this._seriesClickResponse(data),
       };
     }
 
     /**
-     * Response to click and hover events
+     * Response to hover events
      *
      * @param d {Object} Data point
      * @param i {Number} Index number of data point

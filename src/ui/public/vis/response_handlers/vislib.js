@@ -17,7 +17,6 @@
  * under the License.
  */
 
-// import { LegacyResponseHandlerProvider } from './legacy';
 import { BuildHierarchicalDataProvider } from '../../agg_response/hierarchical/build_hierarchical_data';
 import { AggResponsePointSeriesProvider } from '../../agg_response/point_series/point_series';
 import { VisResponseHandlersRegistryProvider } from '../../registry/vis_response_handlers';

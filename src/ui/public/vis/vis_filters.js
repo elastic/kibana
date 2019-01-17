@@ -103,10 +103,12 @@ const VisFiltersProvider = (Private, getAppState) => {
       const { table, column, row, value } = val;
       const filter = createFilter(table, column, row, value);
       if (filter) {
-        if (event.negate) {
-          filter.forEach(f => f.meta.negate = !f.meta.negate);
-        }
-        filter.forEach(f => filters.push(f));
+        filter.forEach(f => {
+          if (event.negate) {
+            f.meta.negate = !f.meta.negate;
+          }
+          filters.push(f);
+        });
       }
     });
 

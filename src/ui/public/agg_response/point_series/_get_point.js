@@ -60,7 +60,6 @@ export function getPoint(table, x, series, yScale, row, rowIndex, y, z) {
       row: table.$parent.row,
       value: table.$parent.key,
       title: table.$parent.name,
-
     },
     parent: series[0],
   };
@@ -77,7 +76,6 @@ export function getPoint(table, x, series, yScale, row, rowIndex, y, z) {
   } else if (y) {
     // If the data is not split up with a series aspect, then
     // each point's "series" becomes the y-agg that produced it
-    //point.aggConfig = y.aggConfig;
     point.series = y.title;
   }
 

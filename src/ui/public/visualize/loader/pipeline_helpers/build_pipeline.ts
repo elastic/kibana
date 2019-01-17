@@ -67,34 +67,34 @@ const vislibCharts: string[] = [
 
 export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
   const createFormat = (agg: AggConfig): SchemaFormat => {
-    let format: any = agg.params.field ? agg.params.field.format.toJSON() : {};
-    if (agg.type.name === 'date_range') {
-      format = { id: 'string' };
-    } else if (agg.type.name === 'percentile_ranks') {
-      format = { id: 'percent' };
-    } else if (['count', 'cardinality'].includes(agg.type.name)) {
-      format = { id: 'number' };
-    } else if (agg.type.name === 'date_histogram') {
-      format = {
+    const format: SchemaFormat = agg.params.field ? agg.params.field.format.toJSON() : {};
+    const formats: any = {
+      date_range: { id: 'string' },
+      percentile_ranks: { id: 'percent' },
+      count: { id: 'number' },
+      cardinality: { id: 'number' },
+      date_histogram: {
         id: 'date',
         params: {
           pattern: agg.buckets.getScaledDateFormat(),
         },
-      };
-    } else if (agg.type.name === 'terms') {
-      format.params = {
-        id: format.id,
-        otherBucketLabel: agg.params.otherBucketLabel,
-        missingBucketLabel: agg.params.missingBucketLabel,
-        ...format.params,
-      };
-      format.id = 'terms';
-    } else if (agg.type.name === 'range') {
-      format.params = { id: format.id, ...format.params };
-      format.id = 'range';
-    }
+      },
+      terms: {
+        id: 'terms',
+        params: {
+          id: format.id,
+          otherBucketLabel: agg.params.otherBucketLabel,
+          missingBucketLabel: agg.params.missingBucketLabel,
+          ...format.params,
+        },
+      },
+      range: {
+        id: 'range',
+        params: { id: format.id, ...format.params },
+      },
+    };
 
-    return format;
+    return formats[agg.type.name] || format;
   };
 
   const createSchemaConfig = (accessor: number, agg: AggConfig): SchemaConfig => {
@@ -141,7 +141,7 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
   const schemas: Schemas = {
     metric: [],
   };
-  const responseAggs = vis.aggs.getResponseAggs().filter((agg: any) => agg.enabled);
+  const responseAggs = vis.aggs.getResponseAggs().filter((agg: AggConfig) => agg.enabled);
   const isHierarchical = vis.isHierarchical();
   const metrics = responseAggs.filter((agg: AggConfig) => agg.type.type === 'metrics');
   responseAggs.forEach((agg: AggConfig) => {
