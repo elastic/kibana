@@ -494,9 +494,7 @@ export class JobCreateUi extends Component {
 
     return (
       <Fragment>
-        <EuiPageContent
-          horizontalPosition="center"
-        >
+        <EuiPageContent>
           <EuiPageContentHeader>
             <EuiTitle size="m">
               <h1>

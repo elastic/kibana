@@ -21,7 +21,7 @@ export function LayerControl(props) {
     </EuiButtonEmpty>);
 
   return (
-    <EuiPanel className="gisWidgetControl" hasShadow paddingSize="none" grow={false}>
+    <EuiPanel className="gisWidgetControl gisWidgetControl-hasShadow" paddingSize="none" grow={false}>
       <EuiFlexItem className="gisWidgetControl__header" grow={false}>
         <EuiFlexGroup
           justifyContent="spaceBetween"
@@ -30,8 +30,8 @@ export function LayerControl(props) {
           gutterSize="none"
         >
           <EuiFlexItem>
-            <EuiTitle size="s">
-              <h1>Layers</h1>
+            <EuiTitle size="xs">
+              <h2>Layers</h2>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -40,7 +40,7 @@ export function LayerControl(props) {
         </EuiFlexGroup>
       </EuiFlexItem>
 
-      <EuiFlexItem className="gisWidgetControl__tocHolder">
+      <EuiFlexItem className="gisLayerControl">
         <LayerTOC />
       </EuiFlexItem>
     </EuiPanel>
