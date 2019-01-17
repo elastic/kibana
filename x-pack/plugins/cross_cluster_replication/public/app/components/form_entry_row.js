@@ -4,20 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { debounce } from 'lodash';
 
 import {
-  EuiTitle,
   EuiFieldText,
   EuiFieldNumber,
   EuiDescribedFormGroup,
   EuiFormRow,
 } from '@elastic/eui';
-
-import { i18nValidationErrorMessages } from '../services/input_validation';
 
 /**
  * State transitions: fields update
@@ -29,55 +24,29 @@ export const updateFields = (newValues) => ({ fields }) => ({
   },
 });
 
-const parseError = (err) => {
-  if (!err) {
-    return null;
-  }
-
-  const [error] = err.details; // Use the first error in the details array (error.details[0])
-  const { type, context } = error;
-  const message = i18nValidationErrorMessages[type](context);
-  return { message };
-};
-
 export class FormEntryRow extends PureComponent {
   static propTypes = {
+    title: PropTypes.node,
     label: PropTypes.node,
     description: PropTypes.node,
     helpText: PropTypes.node,
     validator: PropTypes.object,
     onValueUpdate: PropTypes.func.isRequired,
-    onErrorUpdate: PropTypes.func.isRequired,
     field: PropTypes.string.isRequired,
     value: PropTypes.oneOfType([
       PropTypes.string,
       PropTypes.number
     ]).isRequired,
     isLoading: PropTypes.bool,
-    error: PropTypes.object,
+    error: PropTypes.node,
     disabled: PropTypes.bool,
     areErrorsVisible: PropTypes.bool.isRequired,
   };
-
-  componentDidMount() {
-    this.validateField(this.props.value);
-    this.validateField = debounce(this.validateField.bind(this), 300);
-  }
 
   onFieldChange = (value) => {
     const { field, onValueUpdate, validator } = this.props;
     const isNumber = validator._type === 'number';
     onValueUpdate({ [field]: isNumber ? parseInt(value, 10) : value });
-
-    this.validateField(value);
-  }
-
-  validateField = (value) => {
-    const { field, validator, label, onErrorUpdate } = this.props;
-    const result = validator.label(label).validate(value);
-    const error = parseError(result.error);
-
-    onErrorUpdate({ [field]: error });
   }
 
   renderField = (isInvalid) => {
@@ -112,6 +81,7 @@ export class FormEntryRow extends PureComponent {
     const {
       field,
       error,
+      title,
       label,
       description,
       helpText,
@@ -123,11 +93,7 @@ export class FormEntryRow extends PureComponent {
 
     return (
       <EuiDescribedFormGroup
-        title={(
-          <EuiTitle size="s">
-            <h4>{label}</h4>
-          </EuiTitle>
-        )}
+        title={title}
         description={description}
         fullWidth
         key={field}

@@ -22,16 +22,17 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiLoadingKibana,
   EuiLoadingSpinner,
   EuiOverlayMask,
   EuiSpacer,
+  EuiSuperSelect,
   EuiText,
   EuiTitle,
-  EuiSuperSelect,
 } from '@elastic/eui';
 
-import { indexNameValidator } from '../../services/input_validation';
+import { indexNameValidator, i18nValidationErrorMessages } from '../../services/input_validation';
 import routing from '../../services/routing';
 import { loadIndices } from '../../services/api';
 import { API_STATUS } from '../../constants';
@@ -77,6 +78,17 @@ export const updateFormErrors = (errors) => ({ fieldsErrors }) => ({
   }
 });
 
+const parseError = (err) => {
+  if (!err) {
+    return null;
+  }
+
+  const error = err.details[0];
+  const { type, context } = error;
+  const message = i18nValidationErrorMessages[type](context);
+  return { message };
+};
+
 export const FollowerIndexForm = injectI18n(
   class extends PureComponent {
     static propTypes = {
@@ -114,14 +126,27 @@ export const FollowerIndexForm = injectI18n(
 
     onFieldsChange = (fields) => {
       this.setState(updateFields(fields));
+      this.setState(updateFormErrors(this.getFieldsErrors(fields)));
 
       if (this.props.apiError) {
         this.props.clearApiError();
       }
     };
 
-    onFieldsErrorChange = (errors) => {
-      this.setState(updateFormErrors(errors));
+    getFieldsErrors = (changedFields) => {
+      const newFields = {
+        ...this.state.fields,
+        ...changedFields,
+      };
+
+      return advancedSettingsFields.reduce((errors, advancedSetting) => {
+        const { field, validator, label } = advancedSetting;
+        const value = newFields[field];
+        const result = validator.label(label).validate(value);
+        const error = parseError(result.error);
+        errors[field] = error;
+        return errors;
+      }, {});
     };
 
     onIndexNameChange = ({ name }) => {
@@ -186,7 +211,34 @@ export const FollowerIndexForm = injectI18n(
     };
 
     toggleAdvancedSettings = () => {
-      this.setState(({ areAdvancedSettingsVisible }) => ({ areAdvancedSettingsVisible: !areAdvancedSettingsVisible }));
+      this.setState(({ areAdvancedSettingsVisible, cachedAdvancedSettings }) => {
+        // Hide settings, clear fields, and create cache.
+        if (areAdvancedSettingsVisible) {
+          const fields = this.getFields();
+
+          const newCachedAdvancedSettings = advancedSettingsFields.reduce((cache, { field }) => {
+            const value = fields[field];
+            if (value !== '') {
+              cache[field] = value;
+            }
+            return cache;
+          }, {});
+
+          this.onFieldsChange(emptyAdvancedSettings);
+
+          return {
+            areAdvancedSettingsVisible: false,
+            cachedAdvancedSettings: newCachedAdvancedSettings,
+          };
+        }
+
+        // Show settings and restore fields from the cache.
+        this.onFieldsChange(cachedAdvancedSettings);
+        return {
+          areAdvancedSettingsVisible: true,
+          cachedAdvancedSettings: {},
+        };
+      });
     }
 
     isFormValid() {
@@ -249,19 +301,6 @@ export const FollowerIndexForm = injectI18n(
         isValidatingIndexName,
       } = this.state;
 
-      const toggleAdvancedSettingButtonLabel = areAdvancedSettingsVisible
-        ? (
-          <FormattedMessage
-            id="xpack.crossClusterReplication.followerIndex.advancedSettingsForm.hideButtonLabel"
-            defaultMessage="Hide advanced settings"
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.crossClusterReplication.followerIndex.advancedSettingsForm.showButtonLabel"
-            defaultMessage="Show advanced settings"
-          />
-        );
-
       /**
        * Follower index name
        */
@@ -286,14 +325,23 @@ export const FollowerIndexForm = injectI18n(
         </Fragment>
       );
 
+      const indexNameLabel = i18n.translate(
+        'xpack.crossClusterReplication.followerIndexForm.sectionFollowerIndexNameTitle', {
+          defaultMessage: 'Name'
+        }
+      );
+
       const renderFollowerIndexName = () => (
         <FormEntryRow
           field="name"
           value={followerIndex.name}
           error={fieldsErrors.name}
-          label={i18n.translate('xpack.crossClusterReplication.followerIndexForm.sectionFollowerIndexNameTitle', {
-            defaultMessage: 'Name'
-          })}
+          title={(
+            <EuiTitle size="s">
+              <h2>{indexNameLabel}</h2>
+            </EuiTitle>
+          )}
+          label={indexNameLabel}
           description={i18n.translate('xpack.crossClusterReplication.followerIndexForm.sectionFollowerIndexNameDescription', {
             defaultMessage: 'A name for the follower index.'
           })}
@@ -303,7 +351,6 @@ export const FollowerIndexForm = injectI18n(
           disabled={!isNew}
           areErrorsVisible={areErrorsVisible}
           onValueUpdate={this.onIndexNameChange}
-          onErrorUpdate={this.onFieldsErrorChange}
         />
       );
 
@@ -322,12 +369,12 @@ export const FollowerIndexForm = injectI18n(
           <EuiDescribedFormGroup
             title={(
               <EuiTitle size="s">
-                <h4>
+                <h2>
                   <FormattedMessage
                     id="xpack.crossClusterReplication.followerIndexForm.sectionRemoteClusterTitle"
                     defaultMessage="Remote cluster"
                   />
-                </h4>
+                </h2>
               </EuiTitle>
             )}
             description={(
@@ -353,6 +400,7 @@ export const FollowerIndexForm = injectI18n(
                     options={remoteClustersOptions}
                     valueOfSelected={followerIndex.remoteCluster}
                     onChange={this.onClusterChange}
+                    fullWidth
                   />
                 )}
                 { !isNew && (
@@ -371,14 +419,24 @@ export const FollowerIndexForm = injectI18n(
       /**
        * Leader index
        */
+
+      const leaderIndexLabel = i18n.translate(
+        'xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexTitle', {
+          defaultMessage: 'Leader index'
+        }
+      );
+
       const renderLeaderIndex = () => (
         <FormEntryRow
           field="leaderIndex"
           value={followerIndex.leaderIndex}
           error={fieldsErrors.leaderIndex}
-          label={i18n.translate('xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexTitle', {
-            defaultMessage: 'Leader index'
-          })}
+          title={(
+            <EuiTitle size="s">
+              <h2>{leaderIndexLabel}</h2>
+            </EuiTitle>
+          )}
+          label={leaderIndexLabel}
           description={i18n.translate('xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexDescription', {
             defaultMessage: 'The leader index you want to replicate from the remote cluster.'
           })}
@@ -393,43 +451,91 @@ export const FollowerIndexForm = injectI18n(
           disabled={!isNew}
           areErrorsVisible={areErrorsVisible}
           onValueUpdate={this.onFieldsChange}
-          onErrorUpdate={this.onFieldsErrorChange}
         />
       );
 
       /**
        * Advanced settings
        */
+
+      const toggleAdvancedSettingButtonLabel = areAdvancedSettingsVisible
+        ? (
+          <FormattedMessage
+            id="xpack.crossClusterReplication.followerIndex.advancedSettingsForm.hideButtonLabel"
+            defaultMessage="Don't use advanced settings"
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.crossClusterReplication.followerIndex.advancedSettingsForm.showButtonLabel"
+            defaultMessage="Use advanced settings"
+          />
+        );
+
       const renderAdvancedSettings = () => (
         <Fragment>
-          <EuiButtonEmpty
-            iconType={areAdvancedSettingsVisible ? "arrowUp" : "arrowDown"}
-            flush="left"
-            onClick={this.toggleAdvancedSettings}
-          >
-            { toggleAdvancedSettingButtonLabel }
-          </EuiButtonEmpty>
-          <EuiSpacer size="s" />
+          <EuiHorizontalRule />
+
+          <EuiDescribedFormGroup
+            title={(
+              <EuiTitle size="s">
+                <h2>
+                  <FormattedMessage
+                    id="xpack.crossClusterReplication.followerIndexForm.advancedSettingsTitle"
+                    defaultMessage="Advanced settings"
+                  />
+                </h2>
+              </EuiTitle>
+            )}
+            description={(
+              <Fragment>
+                <p>
+                  <FormattedMessage
+                    id="xpack.crossClusterReplication.followerIndexForm.advancedSettingsDescription"
+                    defaultMessage="Use advanced settings to control the rate at which data is replicated."
+                  />
+                </p>
+
+                <EuiButton
+                  color="primary"
+                  onClick={this.toggleAdvancedSettings}
+                >
+                  { toggleAdvancedSettingButtonLabel }
+                </EuiButton>
+              </Fragment>
+            )}
+            fullWidth
+          />
+
           {areAdvancedSettingsVisible && (
-            advancedSettingsFields.map((advancedSetting) => {
-              const { field, label, description, helpText, validator } = advancedSetting;
-              return (
-                <FormEntryRow
-                  key={field}
-                  field={field}
-                  value={followerIndex[field]}
-                  error={fieldsErrors[field]}
-                  label={label}
-                  description={description}
-                  helpText={helpText}
-                  validator={validator}
-                  areErrorsVisible={areErrorsVisible}
-                  onValueUpdate={this.onFieldsChange}
-                  onErrorUpdate={this.onFieldsErrorChange}
-                />
-              );
-            })
+            <Fragment>
+              <EuiSpacer size="s" />
+
+              {advancedSettingsFields.map((advancedSetting) => {
+                const { field, label, description, helpText, validator } = advancedSetting;
+                return (
+                  <FormEntryRow
+                    key={field}
+                    field={field}
+                    value={followerIndex[field]}
+                    error={fieldsErrors[field]}
+                    title={(
+                      <EuiTitle size="xs">
+                        <h3>{label}</h3>
+                      </EuiTitle>
+                    )}
+                    label={label}
+                    description={description}
+                    helpText={helpText}
+                    validator={validator}
+                    areErrorsVisible={areErrorsVisible}
+                    onValueUpdate={this.onFieldsChange}
+                  />
+                );
+              })}
+            </Fragment>
           )}
+
+          <EuiHorizontalRule />
         </Fragment>
       );
 
@@ -446,7 +552,6 @@ export const FollowerIndexForm = injectI18n(
 
         return (
           <Fragment>
-            <EuiSpacer size="m" />
             <EuiCallOut
               title={(
                 <FormattedMessage
@@ -457,6 +562,8 @@ export const FollowerIndexForm = injectI18n(
               color="danger"
               iconType="cross"
             />
+
+            <EuiSpacer size="l" />
           </Fragment>
         );
       };
@@ -530,9 +637,8 @@ export const FollowerIndexForm = injectI18n(
             <EuiSpacer size="s" />
             {renderAdvancedSettings()}
           </EuiForm>
-          <EuiSpacer size="l" />
+
           {renderFormErrorWarning()}
-          <EuiSpacer size="l" />
           {renderActions()}
         </Fragment>
       );
