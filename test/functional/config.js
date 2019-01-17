@@ -135,7 +135,6 @@ export default async function ({ readConfigFile }) {
     uiSettings: {
       defaults: {
         'accessibility:disableAnimations': true,
-        'home:welcome:disable': true,
       },
     },
 

@@ -47,8 +47,7 @@ export class Home extends Component {
   constructor(props) {
     super(props);
 
-    const uiSettings = chrome.getUiSettingsClient();
-    const isWelcomeEnabled = !(uiSettings.get('home:welcome:disable') || props.localStorage.getItem(KEY_ENABLE_WELCOME) === 'false');
+    const isWelcomeEnabled = !(chrome.getInjected('disableWelcomeScreen') || props.localStorage.getItem(KEY_ENABLE_WELCOME) === 'false');
 
     this.state = {
       // If welcome is enabled, we wait for loading to complete
