@@ -17,4 +17,8 @@
  * under the License.
  */
 
+// @ts-ignore
+import './directive';
+
 export { PersistedLog } from './persisted_log';
+export { recentlyAccessed, RecentlyAccessedHistoryItem } from './recently_accessed';

@@ -17,7 +17,4 @@
  * under the License.
  */
 
-import './directive';
-
-export { PersistedLog } from './persisted_log';
-export { recentlyAccessed } from './recently_accessed';
+export { PieChartProvider } from './pie_chart';
