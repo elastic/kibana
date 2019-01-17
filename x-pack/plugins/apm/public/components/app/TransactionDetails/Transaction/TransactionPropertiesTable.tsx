@@ -5,16 +5,23 @@
  */
 
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
-import { capitalize, first, get } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { Location } from 'history';
+import { first, get } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
+import {
+  fromQuery,
+  history,
+  toQuery
+} from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import { Transaction } from '../../../../../typings/es_schemas/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
 import { px, units } from '../../../../style/variables';
-import { fromQuery, history, toQuery } from '../../../../utils/url';
 import {
   getPropertyTabNames,
-  PropertiesTable
+  PropertiesTable,
+  Tab
 } from '../../../shared/PropertiesTable';
 import { WaterfallContainer } from './WaterfallContainer';
 import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
@@ -24,19 +31,26 @@ const TableContainer = styled.div`
 `;
 
 // Ensure the selected tab exists or use the first
-function getCurrentTab(tabs: string[] = [], selectedTab?: string) {
-  return selectedTab && tabs.includes(selectedTab) ? selectedTab : first(tabs);
+function getCurrentTab(tabs: Tab[] = [], selectedTabKey?: string) {
+  const selectedTab = tabs.find(({ key }) => key === selectedTabKey);
+
+  return selectedTab ? selectedTab : first(tabs) || {};
 }
 
-const TIMELINE_TAB = 'timeline';
+const timelineTab = {
+  key: 'timeline',
+  label: i18n.translate('xpack.apm.propertiesTable.tabs.timelineLabel', {
+    defaultMessage: 'Timeline'
+  })
+};
 
 function getTabs(transactionData: Transaction) {
   const dynamicProps = Object.keys(transactionData.context || {});
-  return [TIMELINE_TAB, ...getPropertyTabNames(dynamicProps)];
+  return [timelineTab, ...getPropertyTabNames(dynamicProps)];
 }
 
 interface TransactionPropertiesTableProps {
-  location: any;
+  location: Location;
   transaction: Transaction;
   urlParams: IUrlParams;
   waterfall: IWaterfall;
@@ -55,7 +69,7 @@ export function TransactionPropertiesTable({
   return (
     <div>
       <EuiTabs>
-        {tabs.map(key => {
+        {tabs.map(({ key, label }) => {
           return (
             <EuiTab
               onClick={() => {
@@ -67,10 +81,10 @@ export function TransactionPropertiesTable({
                   })
                 });
               }}
-              isSelected={currentTab === key}
+              isSelected={currentTab.key === key}
               key={key}
             >
-              {capitalize(key)}
+              {label}
             </EuiTab>
           );
         })}
@@ -78,7 +92,7 @@ export function TransactionPropertiesTable({
 
       <EuiSpacer />
 
-      {currentTab === TIMELINE_TAB && (
+      {currentTab.key === timelineTab.key && (
         <WaterfallContainer
           transaction={transaction}
           location={location}
@@ -87,11 +101,11 @@ export function TransactionPropertiesTable({
         />
       )}
 
-      {currentTab !== TIMELINE_TAB && (
+      {currentTab.key !== timelineTab.key && (
         <TableContainer>
           <PropertiesTable
-            propData={get(transaction.context, currentTab)}
-            propKey={currentTab}
+            propData={get(transaction.context, currentTab.key)}
+            propKey={currentTab.key}
             agentName={agentName}
           />
         </TableContainer>

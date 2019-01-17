@@ -18,8 +18,10 @@ export const reloadIndices = (indexNames) => async (dispatch, getState) => {
   try {
     indices = await request(indexNames);
   } catch (error) {
-    // an index has been deleted, reload the full list
-    if (error.status === 404) {
+    // an index has been deleted
+    // or the user does not have privileges for one of the indices on the current page,
+    // reload the full list
+    if (error.status === 404 || error.status === 403) {
       return dispatch(loadIndices());
     }
     return toastNotifications.addDanger(error.data.message);

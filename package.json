@@ -27,7 +27,7 @@
       "extraPatterns": [
         "build",
         "optimize",
-        "dlls",
+        "built_assets",
         ".eslintcache"
       ]
     }
@@ -95,7 +95,7 @@
   },
   "dependencies": {
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "6.0.1",
+    "@elastic/eui": "6.3.1",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "2.3.2",
@@ -123,7 +123,7 @@
     "babel-loader": "7.1.5",
     "babel-polyfill": "6.26.0",
     "babel-register": "6.26.0",
-    "bluebird": "2.9.34",
+    "bluebird": "3.5.3",
     "boom": "^7.2.0",
     "brace": "0.11.1",
     "cache-loader": "1.2.2",
@@ -294,7 +294,7 @@
     "@types/opn": "^5.1.0",
     "@types/podium": "^1.0.0",
     "@types/prop-types": "^15.5.3",
-    "@types/puppeteer": "^1.6.2",
+    "@types/puppeteer-core": "^1.9.0",
     "@types/react": "16.3.14",
     "@types/react-dom": "^16.0.5",
     "@types/react-redux": "^6.0.6",
@@ -302,6 +302,7 @@
     "@types/react-virtualized": "^9.18.7",
     "@types/redux": "^3.6.31",
     "@types/redux-actions": "^2.2.1",
+    "@types/rimraf": "^2.0.2",
     "@types/semver": "^5.5.0",
     "@types/sinon": "^5.0.1",
     "@types/strip-ansi": "^3.0.0",
@@ -359,7 +360,7 @@
     "jest-raw-loader": "^1.0.1",
     "jimp": "0.2.28",
     "json5": "^1.0.1",
-    "karma": "1.7.0",
+    "karma": "3.1.4",
     "karma-chrome-launcher": "2.1.1",
     "karma-coverage": "1.1.1",
     "karma-firefox-launcher": "1.0.1",

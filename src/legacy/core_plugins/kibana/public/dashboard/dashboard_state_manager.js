@@ -482,7 +482,7 @@ export class DashboardStateManager {
     // Filter bar comparison is done manually (see cleanFiltersForComparison for the reason) and time picker
     // changes are not tracked by the state monitor.
     const hasTimeFilterChanged = timeFilter ? this.getFiltersChanged(timeFilter) : false;
-    return this.isDirty || hasTimeFilterChanged;
+    return this.getIsEditMode() && (this.isDirty || hasTimeFilterChanged);
   }
 
   getPanels() {

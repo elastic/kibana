@@ -6,12 +6,17 @@
 
 import { EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import d3 from 'd3';
+import { Location } from 'history';
 import React, { Component } from 'react';
+import {
+  fromQuery,
+  history,
+  toQuery
+} from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { ITransactionDistributionAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/distribution';
 import { IBucket } from 'x-pack/plugins/apm/server/lib/transactions/distribution/get_buckets/transform';
 import { getTimeFormatter, timeUnit } from '../../../../utils/formatters';
-import { fromQuery, history, toQuery } from '../../../../utils/url';
 // @ts-ignore
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
@@ -45,7 +50,7 @@ export function getFormattedBuckets(buckets: IBucket[], bucketSize: number) {
 }
 
 interface Props {
-  location: any;
+  location: Location;
   distribution: ITransactionDistributionAPIResponse;
   urlParams: IUrlParams;
 }

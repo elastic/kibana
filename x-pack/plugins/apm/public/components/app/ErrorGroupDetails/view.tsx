@@ -5,6 +5,8 @@
  */
 
 import { EuiBadge, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { Location } from 'history';
 import { get } from 'lodash';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
@@ -57,9 +59,16 @@ const Culprit = styled.div`
   font-family: ${fontFamilyCode};
 `;
 
+const notAvailableLabel = i18n.translate(
+  'xpack.apm.errorGroupDetails.notAvailableLabel',
+  {
+    defaultMessage: 'N/A'
+  }
+);
+
 function getShortGroupId(errorGroupId?: string) {
   if (!errorGroupId) {
-    return 'N/A';
+    return notAvailableLabel;
   }
 
   return errorGroupId.slice(0, 5);
@@ -67,7 +76,7 @@ function getShortGroupId(errorGroupId?: string) {
 
 interface Props {
   urlParams: IUrlParams;
-  location: any;
+  location: Location;
 }
 
 export function ErrorGroupDetails({ urlParams, location }: Props) {
@@ -87,9 +96,21 @@ export function ErrorGroupDetails({ urlParams, location }: Props) {
           <div>
             <EuiTitle>
               <span>
-                Error group {getShortGroupId(urlParams.errorGroupId)}
+                {i18n.translate('xpack.apm.errorGroupDetails.errorGroupTitle', {
+                  defaultMessage: 'Error group {errorGroupId}',
+                  values: {
+                    errorGroupId: getShortGroupId(urlParams.errorGroupId)
+                  }
+                })}
                 {isUnhandled && (
-                  <UnhandledBadge color="warning">Unhandled</UnhandledBadge>
+                  <UnhandledBadge color="warning">
+                    {i18n.translate(
+                      'xpack.apm.errorGroupDetails.unhandledLabel',
+                      {
+                        defaultMessage: 'Unhandled'
+                      }
+                    )}
+                  </UnhandledBadge>
                 )}
               </span>
             </EuiTitle>
@@ -105,14 +126,35 @@ export function ErrorGroupDetails({ urlParams, location }: Props) {
                 <EuiText>
                   {logMessage && (
                     <Fragment>
-                      <Label>Log message</Label>
+                      <Label>
+                        {i18n.translate(
+                          'xpack.apm.errorGroupDetails.logMessageLabel',
+                          {
+                            defaultMessage: 'Log message'
+                          }
+                        )}
+                      </Label>
                       <Message>{logMessage}</Message>
                     </Fragment>
                   )}
-                  <Label>Exception message</Label>
-                  <Message>{excMessage || 'N/A'}</Message>
-                  <Label>Culprit</Label>
-                  <Culprit>{culprit || 'N/A'}</Culprit>
+                  <Label>
+                    {i18n.translate(
+                      'xpack.apm.errorGroupDetails.exceptionMessageLabel',
+                      {
+                        defaultMessage: 'Exception message'
+                      }
+                    )}
+                  </Label>
+                  <Message>{excMessage || notAvailableLabel}</Message>
+                  <Label>
+                    {i18n.translate(
+                      'xpack.apm.errorGroupDetails.culpritLabel',
+                      {
+                        defaultMessage: 'Culprit'
+                      }
+                    )}
+                  </Label>
+                  <Culprit>{culprit || notAvailableLabel}</Culprit>
                 </EuiText>
               </Titles>
             )}

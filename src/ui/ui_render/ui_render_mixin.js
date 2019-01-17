@@ -23,6 +23,7 @@ import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
 import { AppBootstrap } from './bootstrap';
 import { mergeVariables } from './lib';
+import { fromRoot } from '../../utils';
 
 export function uiRenderMixin(kbnServer, server, config) {
   function replaceInjectedVars(request, injectedVars) {
@@ -50,6 +51,9 @@ export function uiRenderMixin(kbnServer, server, config) {
   // render all views from ./views
   server.setupViews(resolve(__dirname, 'views'));
 
+  // expose built css
+  server.exposeStaticDir('/built_assets/css/{path*}', fromRoot('built_assets/css'));
+
   server.route({
     path: '/bundles/app/{id}/bootstrap.js',
     method: 'GET',
@@ -63,12 +67,19 @@ export function uiRenderMixin(kbnServer, server, config) {
 
       const basePath = config.get('server.basePath');
       const regularBundlePath = `${basePath}/bundles`;
-      const dllBundlePath = `${basePath}/dlls`;
+      const dllBundlePath = `${basePath}/built_assets/dlls`;
       const styleSheetPaths = [
         `${dllBundlePath}/vendors.style.dll.css`,
         `${regularBundlePath}/commons.style.css`,
         `${regularBundlePath}/${app.getId()}.style.css`,
-      ].concat(kbnServer.uiExports.styleSheetPaths.map(path => `${basePath}/${path.publicPath}`).reverse());
+        ...kbnServer.uiExports.styleSheetPaths
+          .map(path => (
+            path.localPath.endsWith('.scss')
+              ? `${basePath}/built_assets/css/${path.publicPath}`
+              : `${basePath}/${path.publicPath}`
+          ))
+          .reverse()
+      ];
 
       const bootstrap = new AppBootstrap({
         templateData: {

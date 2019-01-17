@@ -9,6 +9,8 @@ import { initRoutes } from './server/routes';
 import webLogsSavedObjects from './server/sample_data/web_logs_saved_objects.json';
 import mappings from './mappings.json';
 import { checkLicense } from './check_license';
+import { watchStatusAndLicenseToInitialize } from
+  '../../server/lib/watch_status_and_license_to_initialize';
 
 export function gis(kibana) {
 
@@ -44,7 +46,15 @@ export function gis(kibana) {
       if (gisEnabled) {
         const thisPlugin = this;
         const xpackMainPlugin = server.plugins.xpack_main;
-        initRoutes(server);
+        let routesInitialized = false;
+
+        watchStatusAndLicenseToInitialize(xpackMainPlugin, thisPlugin,
+          async license => {
+            if (license && license.gis && !routesInitialized) {
+              routesInitialized = true;
+              initRoutes(server, license.uid);
+            }
+          });
 
         xpackMainPlugin.info
           .feature(thisPlugin.id)

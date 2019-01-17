@@ -10,6 +10,8 @@ import {
   EuiContextMenuPanelItemDescriptor,
   EuiPopover
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { Location } from 'history';
 import { memoize } from 'lodash';
 import React from 'react';
 import chrome from 'ui/chrome';
@@ -19,7 +21,7 @@ import { WatcherFlyout } from './WatcherFlyout';
 
 interface ServiceIntegrationProps {
   mlAvailable: boolean;
-  location: any;
+  location: Location;
   serviceTransactionTypes: string[];
   urlParams: IUrlParams;
 }
@@ -46,16 +48,31 @@ export class ServiceIntegrationsView extends React.Component<
   public getMLPanelItems = () => {
     return [
       {
-        name: 'Enable ML anomaly detection',
+        name: i18n.translate(
+          'xpack.apm.serviceDetails.integrationsMenu.enableMLAnomalyDetectionButtonLabel',
+          {
+            defaultMessage: 'Enable ML anomaly detection'
+          }
+        ),
         icon: 'machineLearningApp',
-        toolTipContent: 'Set up a machine learning job for this service',
+        toolTipContent: i18n.translate(
+          'xpack.apm.serviceDetails.integrationsMenu.enableMLAnomalyDetectionButtonTooltip',
+          {
+            defaultMessage: 'Set up a machine learning job for this service'
+          }
+        ),
         onClick: () => {
           this.closePopover();
           this.openFlyout('ML');
         }
       },
       {
-        name: 'View existing ML jobs',
+        name: i18n.translate(
+          'xpack.apm.serviceDetails.integrationsMenu.viewMLJobsButtonLabel',
+          {
+            defaultMessage: 'View existing ML jobs'
+          }
+        ),
         icon: 'machineLearningApp',
         href: chrome.addBasePath('/app/ml'),
         target: '_blank',
@@ -67,7 +84,12 @@ export class ServiceIntegrationsView extends React.Component<
   public getWatcherPanelItems = () => {
     return [
       {
-        name: 'Enable watcher error reports',
+        name: i18n.translate(
+          'xpack.apm.serviceDetails.integrationsMenu.enableWatcherErrorReportsButtonLabel',
+          {
+            defaultMessage: 'Enable watcher error reports'
+          }
+        ),
         icon: 'watchesApp',
         onClick: () => {
           this.closePopover();
@@ -75,7 +97,12 @@ export class ServiceIntegrationsView extends React.Component<
         }
       },
       {
-        name: 'View existing watches',
+        name: i18n.translate(
+          'xpack.apm.serviceDetails.integrationsMenu.viewWatchesButtonLabel',
+          {
+            defaultMessage: 'View existing watches'
+          }
+        ),
         icon: 'watchesApp',
         href: chrome.addBasePath(
           '/app/kibana#/management/elasticsearch/watcher'
@@ -108,7 +135,12 @@ export class ServiceIntegrationsView extends React.Component<
         iconSide="right"
         onClick={this.openPopover}
       >
-        Integrations
+        {i18n.translate(
+          'xpack.apm.serviceDetails.integrationsMenu.integrationsButtonLabel',
+          {
+            defaultMessage: 'Integrations'
+          }
+        )}
       </EuiButton>
     );
 

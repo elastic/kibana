@@ -133,7 +133,7 @@ const updateGithubIssues = (githubClient, issues) => {
 /**
  * Scans all junit XML files in ./target/junit/ and reports any found test failures to Github Issues.
  */
-export async function reportFailedTests(done) {
+export async function reportFailedTests() {
   const githubClient = getGithubClient();
   const issues = await paginate(githubClient, githubClient.issues.getForRepo({
     owner: GITHUB_OWNER,
@@ -148,5 +148,5 @@ export async function reportFailedTests(done) {
     .pipe(mapXml)
     .pipe(filterFailures)
     .pipe(updateGithubIssues(githubClient, issues))
-    .on('done', done);
+    .on('done', () => console.log(`Finished reporting test failures.`));
 }

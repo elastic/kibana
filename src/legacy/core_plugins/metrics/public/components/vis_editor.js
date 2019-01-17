@@ -48,9 +48,13 @@ class VisEditor extends Component {
     this.onBrush = brushHandler(props.vis.API.timeFilter);
     this.handleUiState = this.handleUiState.bind(this, props.vis);
     this.handleAppStateChange = this.handleAppStateChange.bind(this);
-    this.getConfig = (...args) => props.config.get(...args);
+    this.getConfig = this.getConfig.bind(this);
     this.visDataSubject = new Rx.Subject();
     this.visData$ = this.visDataSubject.asObservable().pipe(share());
+  }
+
+  getConfig(...args) {
+    return this.props.config.get(...args);
   }
 
   handleUiState(vis, ...args) {

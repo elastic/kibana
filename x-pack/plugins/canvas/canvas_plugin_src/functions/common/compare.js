@@ -61,7 +61,7 @@ export const compare = () => ({
         }
         return false;
       default:
-        throw new Error('Invalid compare operator. Use eq, ne, lt, gt, lte, or gte.');
+        throw new Error(`Invalid compare operator: '${op}'. Use eq, ne, lt, gt, lte, or gte.`);
     }
 
     return false;

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Chrome from 'puppeteer';
+import * as Chrome from 'puppeteer-core';
 import { parse as parseUrl } from 'url';
 import {
   ConditionalHeaders,

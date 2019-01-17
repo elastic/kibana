@@ -11,7 +11,10 @@ import {
   EuiTabs,
   EuiTitle
 } from '@elastic/eui';
-import { capitalize, get } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { Location } from 'history';
+import idx from 'idx';
+import { first, get } from 'lodash';
 import React from 'react';
 import { RRRRenderResponse } from 'react-redux-request';
 import styled from 'styled-components';
@@ -19,6 +22,13 @@ import {
   ERROR_EXC_STACKTRACE,
   ERROR_LOG_STACKTRACE
 } from 'x-pack/plugins/apm/common/constants';
+import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
+import {
+  fromQuery,
+  history,
+  toQuery
+} from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
+import { legacyEncodeURIComponent } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { ErrorGroupAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_error_group';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
@@ -40,12 +50,11 @@ import {
   unit,
   units
 } from '../../../../style/variables';
-import { fromQuery, history, toQuery } from '../../../../utils/url';
-import { KibanaLink, legacyEncodeURIComponent } from '../../../../utils/url';
-import { DiscoverErrorButton } from '../../../shared/DiscoverButtons/DiscoverErrorButton';
+import { DiscoverErrorLink } from '../../../shared/Links/DiscoverLinks/DiscoverErrorLink';
 import {
   getPropertyTabNames,
-  PropertiesTable
+  PropertiesTable,
+  Tab
 } from '../../../shared/PropertiesTable';
 import { Stacktrace } from '../../../shared/Stacktrace';
 import { StickyProperties } from '../../../shared/StickyProperties';
@@ -69,13 +78,26 @@ const PaddedContainer = styled.div`
   padding: ${px(units.plus)} ${px(units.plus)} 0;
 `;
 
-const EXC_STACKTRACE_TAB = 'exception_stacktrace';
-const LOG_STACKTRACE_TAB = 'log_stacktrace';
+const logStacktraceTab = {
+  key: 'log_stacktrace',
+  label: i18n.translate('xpack.apm.propertiesTable.tabs.logStacktraceLabel', {
+    defaultMessage: 'Log stacktrace'
+  })
+};
+const exceptionStacktraceTab = {
+  key: 'exception_stacktrace',
+  label: i18n.translate(
+    'xpack.apm.propertiesTable.tabs.exceptionStacktraceLabel',
+    {
+      defaultMessage: 'Exception stacktrace'
+    }
+  )
+};
 
 interface Props {
   errorGroup: RRRRenderResponse<ErrorGroupAPIResponse>;
   urlParams: IUrlParams;
-  location: any;
+  location: Location;
 }
 
 export function DetailView({ errorGroup, urlParams, location }: Props) {
@@ -89,42 +111,64 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
   }
 
   const transactionLink = getTransactionLink(error, transaction);
+  const notAvailableLabel = i18n.translate(
+    'xpack.apm.errorGroupDetails.notAvailableLabel',
+    {
+      defaultMessage: 'N/A'
+    }
+  );
   const stickyProperties = [
     {
       fieldName: '@timestamp',
-      label: 'Timestamp',
+      label: i18n.translate('xpack.apm.errorGroupDetails.timestampLabel', {
+        defaultMessage: 'Timestamp'
+      }),
       val: error['@timestamp'],
       width: '50%'
     },
     {
       fieldName: REQUEST_URL_FULL,
       label: 'URL',
-      val: get(error, REQUEST_URL_FULL, 'N/A'),
+      val:
+        idx(error, _ => _.context.page.url) ||
+        idx(transaction, _ => _.context.request.url.full) ||
+        notAvailableLabel,
       truncated: true,
       width: '50%'
     },
     {
       fieldName: REQUEST_METHOD,
-      label: 'Request method',
-      val: get(error, REQUEST_METHOD, 'N/A'),
+      label: i18n.translate('xpack.apm.errorGroupDetails.requestMethodLabel', {
+        defaultMessage: 'Request method'
+      }),
+      val: get(error, REQUEST_METHOD, notAvailableLabel),
       width: '25%'
     },
     {
       fieldName: ERROR_EXC_HANDLED,
-      label: 'Handled',
-      val: String(get(error, ERROR_EXC_HANDLED, 'N/A')),
+      label: i18n.translate('xpack.apm.errorGroupDetails.handledLabel', {
+        defaultMessage: 'Handled'
+      }),
+      val: String(get(error, ERROR_EXC_HANDLED, notAvailableLabel)),
       width: '25%'
     },
     {
       fieldName: TRANSACTION_ID,
-      label: 'Transaction sample ID',
-      val: transactionLink || 'N/A',
+      label: i18n.translate(
+        'xpack.apm.errorGroupDetails.transactionSampleIdLabel',
+        {
+          defaultMessage: 'Transaction sample ID'
+        }
+      ),
+      val: transactionLink || notAvailableLabel,
       width: '25%'
     },
     {
       fieldName: USER_ID,
-      label: 'User ID',
-      val: get(error, USER_ID, 'N/A'),
+      label: i18n.translate('xpack.apm.errorGroupDetails.userIdLabel', {
+        defaultMessage: 'User ID'
+      }),
+      val: get(error, USER_ID, notAvailableLabel),
       width: '25%'
     }
   ];
@@ -136,13 +180,27 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
     <Container>
       <HeaderContainer>
         <EuiTitle size="s">
-          <h3>Error occurrence</h3>
+          <h3>
+            {i18n.translate(
+              'xpack.apm.errorGroupDetails.errorOccurrenceTitle',
+              {
+                defaultMessage: 'Error occurrence'
+              }
+            )}
+          </h3>
         </EuiTitle>
-        <DiscoverErrorButton error={error} kuery={urlParams.kuery}>
+        <DiscoverErrorLink error={error} kuery={urlParams.kuery}>
           <EuiButtonEmpty iconType="discoverApp">
-            {`View ${occurrencesCount} occurrences in Discover`}
+            {i18n.translate(
+              'xpack.apm.errorGroupDetails.viewOccurrencesInDiscoverButtonLabel',
+              {
+                defaultMessage:
+                  'View {occurrencesCount} occurrences in Discover',
+                values: { occurrencesCount }
+              }
+            )}
           </EuiButtonEmpty>
-        </DiscoverErrorButton>
+        </DiscoverErrorLink>
       </HeaderContainer>
 
       <PaddedContainer>
@@ -152,7 +210,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
       <EuiSpacer />
 
       <EuiTabs>
-        {tabs.map(key => {
+        {tabs.map(({ key, label }) => {
           return (
             <EuiTab
               onClick={() => {
@@ -164,10 +222,10 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
                   })
                 });
               }}
-              isSelected={currentTab === key}
+              isSelected={currentTab.key === key}
               key={key}
             >
-              {capitalize(key.replace('_', ' '))}
+              {label}
             </EuiTab>
           );
         })}
@@ -193,11 +251,10 @@ function getTransactionLink(error: APMError, transaction?: Transaction) {
 
   return (
     <KibanaLink
-      pathname={'/app/apm'}
       hash={path}
       query={{
         transactionId: transaction.transaction.id,
-        traceid: get(transaction, TRACE_ID)
+        traceId: get(transaction, TRACE_ID)
       }}
     >
       {transaction.transaction.id}
@@ -212,29 +269,28 @@ export function TabContent({
   currentTab
 }: {
   error: APMError;
-  currentTab?: string;
+  currentTab: Tab;
 }) {
   const codeLanguage = error.context.service.name;
   const agentName = error.context.service.agent.name;
   const excStackframes: MaybeStackframes = get(error, ERROR_EXC_STACKTRACE);
   const logStackframes: MaybeStackframes = get(error, ERROR_LOG_STACKTRACE);
 
-  switch (currentTab) {
-    case LOG_STACKTRACE_TAB:
-    case undefined:
+  switch (currentTab.key) {
+    case logStacktraceTab.key:
       return (
         <Stacktrace stackframes={logStackframes} codeLanguage={codeLanguage} />
       );
-    case EXC_STACKTRACE_TAB:
+    case exceptionStacktraceTab.key:
       return (
         <Stacktrace stackframes={excStackframes} codeLanguage={codeLanguage} />
       );
     default:
-      const propData = error.context[currentTab] as any;
+      const propData = error.context[currentTab.key] as any;
       return (
         <PropertiesTable
           propData={propData}
-          propKey={currentTab}
+          propKey={currentTab.key}
           agentName={agentName}
         />
       );
@@ -242,16 +298,18 @@ export function TabContent({
 }
 
 // Ensure the selected tab exists or use the first
-export function getCurrentTab(tabs: string[] = [], selectedTab?: string) {
-  return tabs.includes(selectedTab!) ? selectedTab : tabs[0];
+export function getCurrentTab(tabs: Tab[] = [], selectedTabKey?: string) {
+  const selectedTab = tabs.find(({ key }) => key === selectedTabKey);
+  return selectedTab ? selectedTab : first(tabs) || {};
 }
 
 export function getTabs(error: APMError) {
   const hasLogStacktrace = get(error, ERROR_LOG_STACKTRACE, []).length > 0;
   const contextKeys = Object.keys(error.context);
+
   return [
-    ...(hasLogStacktrace ? [LOG_STACKTRACE_TAB] : []),
-    EXC_STACKTRACE_TAB,
+    ...(hasLogStacktrace ? [logStacktraceTab] : []),
+    exceptionStacktraceTab,
     ...getPropertyTabNames(contextKeys)
   ];
 }
