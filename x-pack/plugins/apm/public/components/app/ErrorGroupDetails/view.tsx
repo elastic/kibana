@@ -6,6 +6,7 @@
 
 import { EuiBadge, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Location } from 'history';
 import { get } from 'lodash';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
@@ -75,7 +76,7 @@ function getShortGroupId(errorGroupId?: string) {
 
 interface Props {
   urlParams: IUrlParams;
-  location: any;
+  location: Location;
 }
 
 export function ErrorGroupDetails({ urlParams, location }: Props) {
