@@ -15,6 +15,7 @@ import {
   InfraNodeMetric,
   InfraNodePath,
   InfraPathInput,
+  InfraPathType,
   InfraTimerangeInput,
   SourceQuery,
 } from '../graphql/types';
@@ -202,4 +203,10 @@ export enum InfraWaffleMapDataFormat {
   bitsBinaryIEC = 'bitsBinaryIEC',
   bitsBinaryJEDEC = 'bitsBinaryJEDEC',
   abbreviatedNumber = 'abbreviatedNumber',
+}
+
+export interface InfraGroupByOptions {
+  text: string;
+  type: InfraPathType;
+  field: string;
 }

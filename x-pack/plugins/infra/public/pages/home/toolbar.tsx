@@ -112,7 +112,15 @@ export const HomeToolbar = injectI18n(({ intl }) => (
       <WithSource>
         {({ derivedIndexPattern }) => (
           <WithWaffleOptions>
-            {({ changeMetric, changeGroupBy, groupBy, metric, nodeType }) => (
+            {({
+              changeMetric,
+              changeGroupBy,
+              changeCustomOptions,
+              customOptions,
+              groupBy,
+              metric,
+              nodeType,
+            }) => (
               <React.Fragment>
                 <EuiFlexItem grow={false}>
                   <WaffleMetricControls
@@ -127,6 +135,8 @@ export const HomeToolbar = injectI18n(({ intl }) => (
                     nodeType={nodeType}
                     onChange={changeGroupBy}
                     fields={derivedIndexPattern.fields}
+                    onChangeCustomOptions={changeCustomOptions}
+                    customOptions={customOptions}
                   />
                 </EuiFlexItem>
               </React.Fragment>

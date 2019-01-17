@@ -16,23 +16,20 @@ import {
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { InfraIndexField, InfraNodeType, InfraPathInput, InfraPathType } from '../../graphql/types';
+import { InfraGroupByOptions } from '../../lib/lib';
 import { CustomFieldPanel } from './custom_field_panel';
 
 interface Props {
   nodeType: InfraNodeType;
   groupBy: InfraPathInput[];
   onChange: (groupBy: InfraPathInput[]) => void;
+  onChangeCustomOptions: (options: InfraGroupByOptions[]) => void;
   fields: InfraIndexField[];
   intl: InjectedIntl;
+  customOptions: InfraGroupByOptions[];
 }
 
-interface Options {
-  text: string;
-  type: InfraPathType;
-  field: string;
-}
-
-let OPTIONS: { [P in InfraNodeType]: Options[] };
+let OPTIONS: { [P in InfraNodeType]: InfraGroupByOptions[] };
 const getOptions = (
   nodeType: InfraNodeType,
   intl: InjectedIntl
@@ -141,7 +138,6 @@ const getOptions = (
 
 const initialState = {
   isPopoverOpen: false,
-  customOptions: [] as Options[],
 };
 
 type State = Readonly<typeof initialState>;
@@ -153,7 +149,7 @@ export const WaffleGroupByControls = injectI18n(
 
     public render() {
       const { nodeType, groupBy, intl } = this.props;
-      const options = getOptions(nodeType, intl).concat(this.state.customOptions);
+      const options = getOptions(nodeType, intl).concat(this.props.customOptions);
 
       if (!options.length) {
         throw Error(
@@ -257,11 +253,8 @@ export const WaffleGroupByControls = injectI18n(
     private handleRemove = (field: string) => () => {
       const { groupBy } = this.props;
       this.props.onChange(groupBy.filter(g => g.field !== field));
-      this.setState(state => {
-        return {
-          customOptions: state.customOptions.filter(g => g.field !== field),
-        };
-      });
+      const options = this.props.customOptions.filter(g => g.field !== field);
+      this.props.onChangeCustomOptions(options);
       // We need to close the panel after we rmeove the pill icon otherwise
       // it will remain open because the click is still captured by the EuiFilterButton
       setTimeout(() => this.handleClose());
@@ -276,18 +269,15 @@ export const WaffleGroupByControls = injectI18n(
     };
 
     private handleCustomField = (field: string, label: string) => {
-      this.setState(state => {
-        return {
-          customOptions: [
-            ...state.customOptions,
-            {
-              text: label || field,
-              field,
-              type: InfraPathType.custom,
-            },
-          ],
-        };
-      });
+      const options = [
+        ...this.props.customOptions,
+        {
+          text: label || field,
+          field,
+          type: InfraPathType.custom,
+        },
+      ];
+      this.props.onChangeCustomOptions(options);
       const fn = this.handleClick(field);
       fn();
     };
