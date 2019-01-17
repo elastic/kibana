@@ -54,7 +54,8 @@ export function compose(
       () => '',
       onKibanaReady,
       null,
-      null
+      null,
+      '7.0.0'
     )
   );
   const libs: FrontendLibs = {

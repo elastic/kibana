@@ -63,7 +63,7 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
           onConfigAddOrEdit={(block: ConfigurationBlock) => {
             this.props.libs.configBlocks
               .upsert({ ...block, tag: this.state.tag.id })
-              .catch(e => {
+              .catch((e: any) => {
                 // tslint:disable-next-line
                 console.error('Error upseting config block', e);
               })
@@ -74,7 +74,7 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
           onConfigRemoved={(id: string) => {
             this.props.libs.configBlocks
               .delete(id)
-              .catch(e => {
+              .catch((e: any) => {
                 // tslint:disable-next-line
                 console.error(`Error removing block ${id}`, e);
               })
