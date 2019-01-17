@@ -58,7 +58,7 @@ export const MonitorStatusBar = ({
           ip,
           duration: { us },
         },
-        url: { full },
+        url: { full: fullURL },
       } = monitorStatus[0];
 
       return (
@@ -98,8 +98,8 @@ export const MonitorStatusBar = ({
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiLink href={full} target="_blank">
-                {full}
+              <EuiLink href={fullURL} target="_blank">
+                {fullURL}
               </EuiLink>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>IP: {ip}</EuiFlexItem>
