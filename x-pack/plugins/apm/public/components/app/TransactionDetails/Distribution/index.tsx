@@ -65,7 +65,7 @@ export class Distribution extends Component<Props> {
           '{transCount} {transType, select, request {req.} other {trans.}}',
         values: {
           transCount: t,
-          transType: this.props.urlParams.transactionType as string
+          transType: this.props.urlParams.transactionType
         }
       }
     );
