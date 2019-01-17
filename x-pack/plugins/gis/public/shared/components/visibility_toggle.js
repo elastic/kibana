@@ -20,7 +20,8 @@ export const VisibilityToggle = ({
   disabled,
   onChange,
   children,
-  className
+  className,
+  layerName
 }) => {
   const classes = classNames('visibilityToggle', className);
 
@@ -34,6 +35,7 @@ export const VisibilityToggle = ({
         checked={checked}
         disabled={disabled}
         onChange={onChange}
+        data-test-subj={`mapLayerVisibilityToggleButton${layerName}`}
       />
 
       <span className="visibilityToggle__body">

@@ -40,6 +40,7 @@ export class TOCEntry extends React.Component {
         checked={layer.isVisible()}
         onChange={() => toggleVisible(layer.getId())}
         size={'l'}
+        layerName={this.state.displayName}
       >
         {layer.getIcon()}
       </VisibilityToggle>

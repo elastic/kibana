@@ -124,6 +124,11 @@ export function GisPageProvider({ getService, getPageObjects }) {
       return { lat, lon, zoom };
     }
 
+    async toggleLayerVisibility(layerName) {
+      log.debug(`Toggle layer visibility, layer: ${layerName}`);
+      await testSubjects.click(`mapLayerVisibilityToggleButton${layerName}`);
+    }
+
     async openLayerPanel(layerName) {
       log.debug(`Open layer panel, layer: ${layerName}`);
       await testSubjects.click(`mapOpenLayerButton${layerName}`);

@@ -170,6 +170,17 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       }
     }
 
+    formatDateToAbsoluteTimeString(date) {
+      // toISOString returns dates in format 'YYYY-MM-DDTHH:mm:ss.sssZ'
+      // Need to replace T with space and remove timezone
+      const dateString = date.toISOString().replace('T', ' ');
+      return dateString.substring(0, 22);
+    }
+
+    /**
+     * @param {String} fromTime YYYY-MM-DD HH:mm:ss.SSS
+     * @param {String} fromTime YYYY-MM-DD HH:mm:ss.SSS
+     */
     async setAbsoluteRange(fromTime, toTime) {
       log.debug(`Setting absolute range to ${fromTime} to ${toTime}`);
       await this.ensureTimePickerIsOpen();
