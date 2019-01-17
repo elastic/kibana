@@ -17,34 +17,4 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const inputControlVis = () => ({
-  name: 'input_control_vis',
-  type: 'render',
-  context: {
-    types: [],
-  },
-  help: i18n.translate('common.core_plugins.interpreter.public.functions.input_control.help', {
-    defaultMessage: 'Input control visualization'
-  }),
-  args: {
-    visConfig: {
-      types: ['string'],
-      default: '"{}"',
-    }
-  },
-  fn(context, args) {
-    const params = JSON.parse(args.visConfig);
-    return {
-      type: 'render',
-      as: 'visualization',
-      value: {
-        visConfig: {
-          type: 'input_controls_vis',
-          params: params
-        },
-      }
-    };
-  }
-});
+export { FunctionDefinition, FunctionRegistration } from './functions';

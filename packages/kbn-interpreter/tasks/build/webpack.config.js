@@ -60,12 +60,30 @@ module.exports = function ({ sourceMaps }, { watch }) {
     },
 
     resolve: {
-      extensions: ['.js', '.json'],
+      extensions: ['.ts', '.js', '.json'],
       mainFields: ['browser', 'main'],
     },
 
     module: {
       rules: [
+        {
+          test: /\.ts$/,
+          use: [
+            {
+              loader: 'babel-loader',
+            },
+            {
+              loader: 'ts-loader',
+              options: {
+                compilerOptions: {
+                  // enable esnext modules so webpack can do its thing better
+                  module: 'esnext',
+                },
+              },
+            },
+          ],
+          exclude: /node_modules/,
+        },
         {
           test: /\.js$/,
           include: PLUGIN_SOURCE_DIR,
