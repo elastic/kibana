@@ -5,6 +5,7 @@
  */
 
 import nodemailer from 'nodemailer';
+import { i18n } from '@kbn/i18n';
 
 import { Action, ActionResult } from '../';
 
@@ -36,7 +37,9 @@ export class EmailAction extends Action {
     if (!Boolean(this.defaults.to) && !Boolean(notification.to)) {
       missingFields.push({
         field: 'to',
-        name: 'To',
+        name: i18n.translate('xpack.notifications.email.toLabel', {
+          defaultMessage: 'To'
+        }),
         type: 'email',
       });
     }
@@ -44,7 +47,9 @@ export class EmailAction extends Action {
     if (!Boolean(this.defaults.from) && !Boolean(notification.from)) {
       missingFields.push({
         field: 'from',
-        name: 'From',
+        name: i18n.translate('xpack.notifications.email.fromLabel', {
+          defaultMessage: 'From'
+        }),
         type: 'email',
       });
     }
@@ -52,7 +57,9 @@ export class EmailAction extends Action {
     if (!Boolean(notification.subject)) {
       missingFields.push({
         field: 'subject',
-        name: 'Subject',
+        name: i18n.translate('xpack.notifications.email.subjectLabel', {
+          defaultMessage: 'Subject'
+        }),
         type: 'text',
       });
     }
@@ -60,7 +67,9 @@ export class EmailAction extends Action {
     if (!Boolean(notification.markdown)) {
       missingFields.push({
         field: 'markdown',
-        name: 'Body',
+        name: i18n.translate('xpack.notifications.email.bodyLabel', {
+          defaultMessage: 'Body'
+        }),
         type: 'markdown',
       });
     }
@@ -73,7 +82,9 @@ export class EmailAction extends Action {
     const response = await this.transporter.verify();
 
     return new ActionResult({
-      message: `Email action SMTP configuration has been verified.`,
+      message: i18n.translate('xpack.notifications.email.smtpConfigurationHasBeenVerifiedMessage', {
+        defaultMessage: 'Email action SMTP configuration has been verified.'
+      }),
       response: {
         verified: response
       },
@@ -95,7 +106,10 @@ export class EmailAction extends Action {
     });
 
     return new ActionResult({
-      message: `Sent email for '${notification.subject}'.`,
+      message: i18n.translate('xpack.notifications.email.sentEmailForMessage', {
+        defaultMessage: `Sent email for '{notificationSubject}'.`,
+        values: { notificationSubject: notification.subject },
+      }),
       response,
     });
   }

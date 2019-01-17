@@ -6,6 +6,7 @@
 
 import Joi from 'joi';
 import { boomify } from 'boom';
+import { i18n } from '@kbn/i18n';
 
 /**
  * Check the incoming request parameters to see if the action should be allowed to fire.
@@ -18,7 +19,10 @@ import { boomify } from 'boom';
 export function checkForErrors(action, actionId, data) {
   if (action === null) {
     return {
-      message: `Unrecognized action: '${actionId}'.`,
+      message: i18n.translate('xpack.notifications.notify.unrecognizedActionMessage', {
+        defaultMessage: `Unrecognized action: '{actionId}'.`,
+        values: { actionId },
+      }),
     };
   } else {
     let validLicense = false;
@@ -31,7 +35,10 @@ export function checkForErrors(action, actionId, data) {
 
     if (validLicense === false) {
       return {
-        message: `Unable to perform '${action.name}' action due to the current license.`,
+        message: i18n.translate('xpack.notifications.notify.unableToPerformActiondueToCurrentLicenseMessage', {
+          defaultMessage: `Unable to perform '{actionName}' action due to the current license.`,
+          values: { actionName: action.name },
+        }),
       };
     }
   }
@@ -40,7 +47,10 @@ export function checkForErrors(action, actionId, data) {
 
   if (fields.length !== 0) {
     return {
-      message: `Unable to perform '${action.name}' action due to missing required fields.`,
+      message: i18n.translate('xpack.notifications.notify.unableToPerformActionDueToMissingRequiredFieldsMessage', {
+        defaultMessage: `Unable to perform '{actionName}' action due to missing required fields.`,
+        values: { actionName: action.name },
+      }),
       fields
     };
   }
@@ -72,7 +82,10 @@ export async function sendNotification(server, notificationService, actionId, da
   return {
     status_code: 400,
     ok: false,
-    message: `Error: ${error.message}`,
+    message: i18n.translate('xpack.notifications.notify.errorMessage', {
+      defaultMessage: `Error: {errorMessage}`,
+      values: { errorMessage: error.message },
+    }),
     error,
   };
 }

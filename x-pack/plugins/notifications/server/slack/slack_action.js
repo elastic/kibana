@@ -5,6 +5,7 @@
  */
 
 import { WebClient } from '@slack/client';
+import { i18n } from '@kbn/i18n';
 
 import { Action, ActionResult } from '../';
 
@@ -48,7 +49,9 @@ export class SlackAction extends Action {
     if (!Boolean(this.defaults.channel) && !Boolean(data.channel)) {
       missingFields.push({
         field: 'channel',
-        name: 'Channel',
+        name: i18n.translate('xpack.notifications.slack.channelLabel', {
+          defaultMessage: 'Channel',
+        }),
         type: 'text',
       });
     }
@@ -56,7 +59,9 @@ export class SlackAction extends Action {
     if (!Boolean(data.subject)) {
       missingFields.push({
         field: 'subject',
-        name: 'Message',
+        name: i18n.translate('xpack.notifications.slack.messageLabel', {
+          defaultMessage: 'Message',
+        }),
         type: 'markdown',
       });
     }
@@ -69,13 +74,17 @@ export class SlackAction extends Action {
 
     if (response.ok) {
       return new ActionResult({
-        message: `Slack action configuration has been verified.`,
+        message: i18n.translate('xpack.notifications.slack.slackActionConfigurationHasBeenVerifiedMessage', {
+          defaultMessage: 'Slack action configuration has been verified.',
+        }),
         response,
       });
     }
 
     return new ActionResult({
-      message: `Slack action configuration could not be verified.`,
+      message: i18n.translate('xpack.notifications.slack.slackActionConfigurationCouldNotBeVerifiedMessage', {
+        defaultMessage: 'Slack action configuration could not be verified.',
+      }),
       response,
       error: response.error || { message: 'Unknown Error' },
     });
@@ -107,7 +116,10 @@ export class SlackAction extends Action {
     });
 
     return new ActionResult({
-      message: `Posted Slack message to channel '${slackChannel}'.`,
+      message: i18n.translate('xpack.notifications.slack.postedSlackMessageToChannelMessage', {
+        defaultMessage: `Posted Slack message to channel '{slackChannel}'.`,
+        values: { slackChannel },
+      }),
       response,
       error: response.error,
     });

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { Action, ActionResult } from '../';
 
 export const LOGGER_ACTION_ID = 'xpack-notifications-logger';
@@ -25,7 +26,9 @@ export class LoggerAction extends Action {
 
   async doPerformHealthCheck() {
     return new ActionResult({
-      message: `Logger action is always usable.`,
+      message: i18n.translate('xpack.notifications.logger.loggerActionIsAlwaysUsableMessage', {
+        defaultMessage: 'Logger action is always usable.',
+      }),
       response: { },
     });
   }
@@ -34,7 +37,9 @@ export class LoggerAction extends Action {
     this.server.log([LOGGER_ACTION_ID, 'info'], notification);
 
     return new ActionResult({
-      message: 'Logged data returned as response.',
+      message: i18n.translate('xpack.notifications.logger.loggedDataReturnedAsResponseMessage', {
+        defaultMessage: 'Logged data returned as response.',
+      }),
       response: notification
     });
   }

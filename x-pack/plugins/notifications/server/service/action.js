@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { ActionResult } from './action_result';
 
 /**
@@ -73,7 +74,10 @@ export class Action {
    * @throws {Error} if there is an unexpected failure occurs.
    */
   async doPerformHealthCheck() {
-    throw new Error(`[doPerformHealthCheck] is not implemented for '${this.name}' action.`);
+    throw new Error(i18n.translate('xpack.notifications.service.healthCheckIsNotImplementedForActionErrorMessage', {
+      defaultMessage: `[doPerformHealthCheck] is not implemented for '{name}' action.`,
+      values: { name: this.name },
+    }));
   }
 
   /**
@@ -86,7 +90,10 @@ export class Action {
       return await this.doPerformHealthCheck();
     } catch (error) {
       return new ActionResult({
-        message: `Unable to perform '${this.name}' health check: ${error.message}.`,
+        message: i18n.translate('xpack.notifications.service.unableToPerformHealthCheckMessage', {
+          defaultMessage: `Unable to perform '{name}' health check: {errorMessage}.`,
+          values: { errorMessage: error.message, name: this.name },
+        }),
         error
       });
     }
@@ -102,7 +109,10 @@ export class Action {
    * @throws {Error} if the method is not implemented or an unexpected failure occurs.
    */
   async doPerformAction(notification) {
-    throw new Error(`[doPerformAction] is not implemented for '${this.name}' action: ${JSON.stringify(notification)}`);
+    throw new Error(i18n.translate('xpack.notifications.service.performActionIsNotImplementedForActionErrorMessage', {
+      defaultMessage: `[doPerformAction] is not implemented for '{name}' action: {action}`,
+      values: { action: JSON.stringify(notification), name: this.name },
+    }));
   }
 
   /**
@@ -128,13 +138,19 @@ export class Action {
   async performAction(notification) {
     try {
       if (!this.isLicenseValid()) {
-        throw new Error(`The current license does not allow '${this.name}' action.`);
+        throw new Error(i18n.translate('xpack.notifications.service.currentLicenseDoesNotAllowActionErrorMessage', {
+          defaultMessage: `The current license does not allow '{name}' action.`,
+          values: { name: this.name },
+        }));
       }
 
       return await this.doPerformAction(notification);
     } catch (error) {
       return new ActionResult({
-        message: `Unable to perform '${this.name}' action: ${error.message}.`,
+        message: i18n.translate('xpack.notifications.service.unableToPerformActionErrorMessage', {
+          defaultMessage: `Unable to perform '{name}' action: {errorMessage}.`,
+          values: { name: this.name, errorMessage: error.message },
+        }),
         error
       });
     }

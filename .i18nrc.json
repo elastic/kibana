@@ -27,6 +27,7 @@
     "xpack.ml": "x-pack/plugins/ml",
     "xpack.logstash": "x-pack/plugins/logstash",
     "xpack.monitoring": "x-pack/plugins/monitoring",
+    "xpack.notifications": "x-pack/plugins/notifications",
     "xpack.remoteClusters": "x-pack/plugins/remote_clusters",
     "xpack.reporting": "x-pack/plugins/reporting",
     "xpack.rollupJobs": "x-pack/plugins/rollup",
