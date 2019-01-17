@@ -12,6 +12,7 @@ import { ThemeProvider } from 'styled-components';
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import * as dark from '@elastic/eui/dist/eui_theme_k6_dark.json';
+import { I18nProvider } from '@kbn/i18n/react';
 
 // @ts-ignore
 import { applyTheme } from 'ui/theme';
@@ -27,14 +28,16 @@ export const startApp = async (libs: AppFrontendLibs) => {
   const store = createStore();
 
   libs.framework.render(
-    <EuiErrorBoundary>
-      <ReduxStoreProvider store={store}>
-        <ApolloProvider client={libs.apolloClient}>
-          <ThemeProvider theme={{ eui: dark }}>
-            <PageRouter history={history} />
-          </ThemeProvider>
-        </ApolloProvider>
-      </ReduxStoreProvider>
-    </EuiErrorBoundary>
+    <I18nProvider>
+      <EuiErrorBoundary>
+        <ReduxStoreProvider store={store}>
+          <ApolloProvider client={libs.apolloClient}>
+            <ThemeProvider theme={{ eui: dark }}>
+              <PageRouter history={history} />
+            </ThemeProvider>
+          </ApolloProvider>
+        </ReduxStoreProvider>
+      </EuiErrorBoundary>
+    </I18nProvider>
   );
 };
