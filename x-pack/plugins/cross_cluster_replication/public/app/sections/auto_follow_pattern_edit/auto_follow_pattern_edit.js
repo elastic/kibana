@@ -14,16 +14,13 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent,
-  EuiSpacer,
-  EuiButton,
-  EuiCallOut,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem
 } from '@elastic/eui';
 
 import { listBreadcrumb, editBreadcrumb } from '../../services/breadcrumbs';
 import routing from '../../services/routing';
-import { BASE_PATH_REMOTE_CLUSTERS } from '../../../../common/constants';
 import {
   AutoFollowPatternForm,
   AutoFollowPatternPageTitle,
@@ -86,19 +83,18 @@ export const AutoFollowPatternEdit = injectI18n(
       return (
         <Fragment>
           <SectionError title={title} error={error} />
-          <EuiSpacer />
-          <EuiFlexGroup justifyContent="spaceAround">
+          <EuiFlexGroup>
             <EuiFlexItem grow={false}>
-              <EuiButton
+              <EuiButtonEmpty
                 {...routing.getRouterLinkProps('/auto_follow_patterns')}
-                fill
-                iconType="plusInCircle"
+                iconType="arrowLeft"
+                flush="left"
               >
                 <FormattedMessage
                   id="xpack.crossClusterReplication.autoFollowPatternEditForm.viewAutoFollowPatternsButtonLabel"
                   defaultMessage="View auto-follow patterns"
                 />
-              </EuiButton>
+              </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
         </Fragment>
@@ -113,44 +109,6 @@ export const AutoFollowPatternEdit = injectI18n(
             defaultMessage="Loading auto-follow pattern..."
           />
         </SectionLoading>
-      );
-    }
-
-    renderMissingCluster({ name, remoteCluster }) {
-      const { intl } = this.props;
-
-      const title = intl.formatMessage({
-        id: 'xpack.crossClusterReplication.autoFollowPatternEditForm.emptyRemoteClustersTitle',
-        defaultMessage: 'Remote cluster missing'
-      });
-
-      return (
-        <Fragment>
-          <EuiCallOut
-            title={title}
-            color="warning"
-            iconType="help"
-          >
-            <p>
-
-              <FormattedMessage
-                id="xpack.crossClusterReplication.autoFollowPatternEditForm.emptyRemoteClustersDescription"
-                defaultMessage="The remote cluster '{remoteCluster}' does not exist or is not
-                  connected. Make sure it is connected before editing the '{name}' auto-follow pattern."
-                values={{ remoteCluster, name }}
-              />
-            </p>
-            <EuiButton
-              {...routing.getRouterLinkProps('/list', BASE_PATH_REMOTE_CLUSTERS)}
-              color="warning"
-            >
-              <FormattedMessage
-                id="xpack.crossClusterReplication.autoFollowPatternEditForm.viewRemoteClustersButtonLabel"
-                defaultMessage="View remote clusters"
-              />
-            </EuiButton>
-          </EuiCallOut>
-        </Fragment>
       );
     }
 

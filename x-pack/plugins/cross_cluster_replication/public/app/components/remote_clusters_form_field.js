@@ -99,9 +99,9 @@ export const RemoteClustersFormField = injectI18n(
           />
           { this.renderErrorMessage() }
           <EuiSpacer size="s" />
-          <div>
+          <div> {/* Break out of EuiFormRow's flexbox layout */}
             <EuiButtonEmpty
-              {...routing.getRouterLinkProps('/add', BASE_PATH_REMOTE_CLUSTERS, { redirect: currentUrl })}
+              {...routing.getRouterLinkProps('/add', BASE_PATH_REMOTE_CLUSTERS, { redirect: currentUrl }, true)}
               size="s"
               iconType="plusInCircle"
               flush="left"
@@ -135,7 +135,7 @@ export const RemoteClustersFormField = injectI18n(
             </p>
 
             <EuiButton
-              {...routing.getRouterLinkProps('/add', BASE_PATH_REMOTE_CLUSTERS, { redirect: currentUrl })}
+              {...routing.getRouterLinkProps('/add', BASE_PATH_REMOTE_CLUSTERS, { redirect: currentUrl }, true)}
               iconType="plusInCircle"
               color="warning"
             >
@@ -167,7 +167,7 @@ export const RemoteClustersFormField = injectI18n(
             { !isEditable && this.errorMessages.remoteClusterNotConnectedNotEditable(name)}
           </p>
           <EuiButton
-            {...routing.getRouterLinkProps(`/edit/${name}`, BASE_PATH_REMOTE_CLUSTERS, { redirect: currentUrl })}
+            {...routing.getRouterLinkProps(`/edit/${name}`, BASE_PATH_REMOTE_CLUSTERS, { redirect: currentUrl }, true)}
             color="warning"
           >
             <FormattedMessage
@@ -197,7 +197,7 @@ export const RemoteClustersFormField = injectI18n(
             { this.errorMessages.remoteClusterDoesNotExist() }
           </p>
           <EuiButton
-            {...routing.getRouterLinkProps('/add', BASE_PATH_REMOTE_CLUSTERS, { redirect: currentUrl })}
+            {...routing.getRouterLinkProps('/add', BASE_PATH_REMOTE_CLUSTERS, { redirect: currentUrl }, true)}
             iconType="plusInCircle"
             color="warning"
           >

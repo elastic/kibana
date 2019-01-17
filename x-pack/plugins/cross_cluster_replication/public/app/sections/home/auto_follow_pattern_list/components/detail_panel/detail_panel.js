@@ -335,9 +335,7 @@ export class DetailPanelUi extends Component {
                   <EuiButton
                     fill
                     color="primary"
-                    onClick={() => {
-                      routing.navigate(encodeURI(`/auto_follow_patterns/edit/${encodeURIComponent(autoFollowPattern.name)}`));
-                    }}
+                    href={routing.getAutoFollowPatternPath(autoFollowPattern.name)}
                   >
                     <FormattedMessage
                       id="xpack.crossClusterReplication.autoFollowPatternDetailPanel.editButtonLabel"
