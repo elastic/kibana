@@ -7,7 +7,10 @@
 import { compact, pick } from 'lodash';
 import { AnyAction } from 'redux';
 import { createSelector } from 'reselect';
-import { legacyDecodeURIComponent, toQuery } from '../utils/url';
+import {
+  legacyDecodeURIComponent,
+  toQuery
+} from '../components/shared/Links/url_helpers';
 // @ts-ignore
 import { LOCATION_UPDATE } from './location';
 import { getDefaultTransactionType } from './reactReduxRequest/serviceDetails';

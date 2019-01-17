@@ -12,6 +12,7 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Location } from 'history';
 import idx from 'idx';
 import { first, get } from 'lodash';
 import React from 'react';
@@ -21,6 +22,13 @@ import {
   ERROR_EXC_STACKTRACE,
   ERROR_LOG_STACKTRACE
 } from 'x-pack/plugins/apm/common/constants';
+import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
+import {
+  fromQuery,
+  history,
+  toQuery
+} from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
+import { legacyEncodeURIComponent } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { ErrorGroupAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_error_group';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
@@ -42,9 +50,7 @@ import {
   unit,
   units
 } from '../../../../style/variables';
-import { fromQuery, history, toQuery } from '../../../../utils/url';
-import { KibanaLink, legacyEncodeURIComponent } from '../../../../utils/url';
-import { DiscoverErrorButton } from '../../../shared/DiscoverButtons/DiscoverErrorButton';
+import { DiscoverErrorLink } from '../../../shared/Links/DiscoverLinks/DiscoverErrorLink';
 import {
   getPropertyTabNames,
   PropertiesTable,
@@ -91,7 +97,7 @@ const exceptionStacktraceTab = {
 interface Props {
   errorGroup: RRRRenderResponse<ErrorGroupAPIResponse>;
   urlParams: IUrlParams;
-  location: any;
+  location: Location;
 }
 
 export function DetailView({ errorGroup, urlParams, location }: Props) {
@@ -183,7 +189,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
             )}
           </h3>
         </EuiTitle>
-        <DiscoverErrorButton error={error} kuery={urlParams.kuery}>
+        <DiscoverErrorLink error={error} kuery={urlParams.kuery}>
           <EuiButtonEmpty iconType="discoverApp">
             {i18n.translate(
               'xpack.apm.errorGroupDetails.viewOccurrencesInDiscoverButtonLabel',
@@ -194,7 +200,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
               }
             )}
           </EuiButtonEmpty>
-        </DiscoverErrorButton>
+        </DiscoverErrorLink>
       </HeaderContainer>
 
       <PaddedContainer>
@@ -245,7 +251,6 @@ function getTransactionLink(error: APMError, transaction?: Transaction) {
 
   return (
     <KibanaLink
-      pathname={'/app/apm'}
       hash={path}
       query={{
         transactionId: transaction.transaction.id,

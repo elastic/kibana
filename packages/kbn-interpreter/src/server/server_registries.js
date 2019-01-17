@@ -18,56 +18,39 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { typesRegistry } from '../common/lib/types_registry';
-import { functionsRegistry as serverFunctions } from '../common/lib/functions_registry';
 import { getPluginPaths } from './get_plugin_paths';
 
-const registries = {
-  serverFunctions: serverFunctions,
-  commonFunctions: serverFunctions,
-  types: typesRegistry,
-};
 
-let resolve = null;
-let called = false;
+export const populateServerRegistries = registries => {
+  if (!registries) throw new Error('registries are required');
 
-const populatePromise = new Promise(_resolve => {
-  resolve = _resolve;
-});
+  return new Promise(resolve => {
+    const remainingTypes = Object.keys(registries);
+    const populatedTypes = {};
 
-export const getServerRegistries = () => {
-  return populatePromise;
-};
+    const loadType = () => {
+      const type = remainingTypes.pop();
+      getPluginPaths(type).then(paths => {
+        global.canvas = global.canvas || {};
+        global.canvas.register = d => registries[type].register(d);
+        global.canvas.i18n = i18n;
 
-export const populateServerRegistries = types => {
-  if (called) {
-    return populatePromise;
-  }
-  called = true;
-  if (!types || !types.length) throw new Error('types is required');
+        paths.forEach(path => {
+          require(path); // eslint-disable-line import/no-dynamic-require
+        });
 
-  const remainingTypes = types;
-  const populatedTypes = {};
+        delete global.canvas;
 
-  const loadType = () => {
-    const type = remainingTypes.pop();
-    getPluginPaths(type).then(paths => {
-      global.canvas = global.canvas || {};
-      global.canvas.register = d => registries[type].register(d);
-      global.canvas.i18n = i18n;
-
-      paths.forEach(path => {
-        require(path); // eslint-disable-line import/no-dynamic-require
+        populatedTypes[type] = registries[type];
+        if (remainingTypes.length) {
+          loadType();
+        }
+        else {
+          resolve(populatedTypes);
+        }
       });
+    };
 
-      delete global.canvas;
-
-      populatedTypes[type] = registries[type];
-      if (remainingTypes.length) loadType();
-      else resolve(populatedTypes);
-    });
-  };
-
-  if (remainingTypes.length) loadType();
-  return populatePromise;
+    if (remainingTypes.length) loadType();
+  });
 };
