@@ -232,6 +232,18 @@ export function BrowserProvider({ getService }) {
     }
 
     /**
+     * Sets a value in local storage for the focused window/frame.
+     * https://theintern.io/leadfoot/module-leadfoot_Session.html#setLocalStorageItem
+     *
+     * @param {string} key
+     * @param {string} value
+     * @return {Promise<void>}
+     */
+    async setLocalStorageItem(key, value) {
+      await leadfoot.setLocalStorageItem(key, value);
+    }
+
+    /**
      * Closes the currently focused window. In most environments, after the window has been
      * closed, it is necessary to explicitly switch to whatever window is now focused.
      * https://theintern.io/leadfoot/module-leadfoot_Session.html#closeCurrentWindow
