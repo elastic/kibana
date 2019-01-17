@@ -12,6 +12,7 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const log = getService('log');
   const find = getService('find');
+  const pieChart = getService('pieChart');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
@@ -146,7 +147,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('can filter on a visualization', async () => {
         await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
-        await PageObjects.dashboard.filterOnPieSlice();
+        await pieChart.filterOnPieSlice();
         const filters = await PageObjects.dashboard.getFilters();
         expect(filters.length).to.equal(1);
       });

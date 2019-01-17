@@ -26,6 +26,7 @@ import { InfraBackendFrameworkAdapter } from '../framework';
 
 const DAY_MILLIS = 24 * 60 * 60 * 1000;
 const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000, Infinity].map(days => days * DAY_MILLIS);
+const TIMESTAMP_FORMAT = 'epoch_millis';
 
 export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
   constructor(private readonly framework: InfraBackendFrameworkAdapter) {}
@@ -113,6 +114,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
           count_by_date: {
             date_range: {
               field: sourceConfiguration.fields.timestamp,
+              format: TIMESTAMP_FORMAT,
               ranges: bucketIntervalStarts.map(bucketIntervalStart => ({
                 from: bucketIntervalStart.getTime(),
                 to: bucketIntervalStart.getTime() + bucketSize,
@@ -129,6 +131,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
                   [sourceConfiguration.fields.timestamp]: {
                     gte: start,
                     lte: end,
+                    format: TIMESTAMP_FORMAT,
                   },
                 },
               },
@@ -215,6 +218,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
                   [sourceConfiguration.fields.timestamp]: {
                     ...startRange,
                     ...endRange,
+                    format: TIMESTAMP_FORMAT,
                   },
                 },
               },

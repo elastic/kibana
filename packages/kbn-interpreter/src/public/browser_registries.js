@@ -19,18 +19,7 @@
 
 import $script from 'scriptjs';
 
-let resolvePromise = null;
-let called = false;
-
-let populatePromise = new Promise(_resolve => {
-  resolvePromise = _resolve;
-});
-
-export const getBrowserRegistries = () => {
-  return populatePromise;
-};
-
-const loadBrowserRegistries = (registries, basePath) => {
+export const loadBrowserRegistries = (registries, basePath) => {
   const remainingTypes = Object.keys(registries);
   const populatedTypes = {};
 
@@ -55,28 +44,4 @@ const loadBrowserRegistries = (registries, basePath) => {
 
     loadType();
   });
-};
-
-export const populateBrowserRegistries = (registries, basePath) => {
-  if (called) {
-    const oldPromise = populatePromise;
-    let newResolve;
-    populatePromise = new Promise(_resolve => {
-      newResolve = _resolve;
-    });
-    oldPromise.then(oldTypes => {
-      loadBrowserRegistries(registries, basePath).then(newTypes => {
-        newResolve({
-          ...oldTypes,
-          ...newTypes,
-        });
-      });
-    });
-    return populatePromise;
-  }
-  called = true;
-  loadBrowserRegistries(registries, basePath).then(registries => {
-    resolvePromise(registries);
-  });
-  return populatePromise;
 };

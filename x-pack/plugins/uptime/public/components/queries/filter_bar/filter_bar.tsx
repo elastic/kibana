@@ -6,6 +6,7 @@
 
 // @ts-ignore No typings for EuiSearchBar
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSearchBar, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { take } from 'lodash';
 import React from 'react';
 import { Query } from 'react-apollo';
@@ -25,10 +26,15 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: FilterB
   <Query query={getFilterBarQuery} variables={{ dateRangeStart, dateRangeEnd }}>
     {({ loading, error, data }) => {
       if (loading) {
-        return 'Loading...';
+        return i18n.translate('xpack.uptime.filterBar.loadingMessage', {
+          defaultMessage: 'Loading…',
+        });
       }
       if (error) {
-        return `Error ${error.message}`;
+        return i18n.translate('xpack.uptime.filterBar.errorMessage', {
+          values: { message: error.message },
+          defaultMessage: 'Error {message}',
+        });
       }
       const {
         filterBar: { port, id, scheme },
@@ -45,10 +51,14 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: FilterB
           items: [
             {
               value: 'up',
-              name: 'Up',
+              name: i18n.translate('xpack.uptime.filterBar.filterUpLabel', {
+                defaultMessage: 'Up',
+              }),
             },
             {
-              value: 'down',
+              value: i18n.translate('xpack.uptime.filterBar.filterDownLabel', {
+                defaultMessage: 'Down',
+              }),
               name: 'Down',
             },
           ],
@@ -57,7 +67,9 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: FilterB
         {
           type: 'field_value_selection',
           field: 'monitor.id',
-          name: 'Host',
+          name: i18n.translate('xpack.uptime.filterBar.options.hostLabel', {
+            defaultMessage: 'Host',
+          }),
           multiSelect: false,
           options: take(id, MAX_SELECTION_LENGTH).map((idValue: any) => ({
             value: idValue,
@@ -68,7 +80,9 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: FilterB
         {
           type: 'field_value_selection',
           field: 'tcp.port',
-          name: 'Port',
+          name: i18n.translate('xpack.uptime.filterBar.options.portLabel', {
+            defaultMessage: 'Port',
+          }),
           multiSelect: false,
           options: take(port, MAX_SELECTION_LENGTH).map((portValue: any) => ({
             value: portValue,
@@ -79,7 +93,9 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: FilterB
         {
           type: 'field_value_selection',
           field: 'monitor.scheme',
-          name: 'Type',
+          name: i18n.translate('xpack.uptime.filterBar.options.typeLabel', {
+            defaultMessage: 'Type',
+          }),
           multiSelect: false,
           options: scheme.map((schemeValue: string) => ({ value: schemeValue, view: schemeValue })),
           searchThreshold: SEARCH_THRESHOLD,
@@ -110,8 +126,14 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: FilterB
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 position="left"
-                title="Filter limitations"
-                content={`The top ${MAX_SELECTION_LENGTH} filter options for each field are displayed, but you can modify the filters manually or search for additional values.`}
+                title={i18n.translate('xpack.uptime.filterBar.filterLimitationsTooltipTitle', {
+                  defaultMessage: 'Filter limitations',
+                })}
+                content={i18n.translate('xpack.uptime.filterBar.filterLimitationsTooltipText', {
+                  values: { selectionLength: MAX_SELECTION_LENGTH },
+                  defaultMessage:
+                    'The top {selectionLength} filter options for each field are displayed, but you can modify the filters manually or search for additional values.',
+                })}
               >
                 <EuiIcon type="iInCircle" size="l" />
               </EuiToolTip>
