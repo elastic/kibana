@@ -25,12 +25,10 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const browser = getService('browser');
   const find = getService('find');
-  const config = getService('config');
   const flyout = getService('flyout');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const PageObjects = getPageObjects(['header', 'common']);
-  const defaultFindTimeout = config.get('timeouts.find');
 
   class SettingsPage {
     async clickNavigation() {
@@ -147,7 +145,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async getIndexPageHeading() {
-      return await testSubjects.find('indexPatternTitle', defaultFindTimeout);
+      return await testSubjects.find('indexPatternTitle');
     }
 
     async getConfigureHeader() {
