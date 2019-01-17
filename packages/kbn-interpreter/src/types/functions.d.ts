@@ -17,38 +17,42 @@
  * under the License.
  */
 
-export type FunctionRegistration<Input, Output, Args> = () => FunctionDefinition<
+export type FunctionRegistration<
   Input,
   Output,
-  Args
->;
+  Args extends { [argName: string]: ValidTsArgumentTypes }
+> = () => FunctionDefinition<Input, Output, Args>;
 
 type ArgumentTypes = 'string' | 'number' | 'boolean' | 'null';
-type ValidTsArgumentTypes = string | number | boolean | null;
+type ValidTsArgumentTypes = string[] | string | number[] | number | boolean[] | boolean | null;
 
 interface ArgumentDefinition<T> {
   types: Array<
-    T extends string
+    T extends string | string[]
       ? 'string'
-      : T extends string[]
-      ? 'string'
-      : T extends number
+      : T extends number | number[]
       ? 'number'
-      : 'null'
+      : T extends null
+      ? 'null'
+      : never
   >;
-  default?: T;
-  multi?: boolean;
+  default?: T extends any[] ? T[number] : T;
+  multi?: T extends any[] ? true : (false | undefined);
   aliases?: string[];
   help?: string;
 }
 
-export interface FunctionDefinition<Input, Output, Args> {
+export interface FunctionDefinition<
+  Input,
+  Output,
+  Args extends { [argName: string]: ValidTsArgumentTypes }
+> {
   name: string;
   type: string;
   context: {
     types: string[];
   };
-  help: string;
+  help?: string;
   args: { [argName in keyof Args]: ArgumentDefinition<Args[argName]> };
   fn: (context: Input, args: Args) => Output;
 }
