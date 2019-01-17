@@ -57,6 +57,7 @@ import {
   BrowserProvider,
   InspectorProvider,
   PieChartProvider,
+  AppsMenuProvider,
   GlobalNavProvider,
 } from './services';
 
@@ -120,6 +121,7 @@ export default async function ({ readConfigFile }) {
       browser: BrowserProvider,
       pieChart: PieChartProvider,
       inspector: InspectorProvider,
+      appsMenu: AppsMenuProvider,
       globalNav: GlobalNavProvider,
     },
     servers: commonConfig.get('servers'),
