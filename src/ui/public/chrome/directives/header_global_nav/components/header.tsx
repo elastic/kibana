@@ -41,6 +41,8 @@ import {
   // @ts-ignore
   EuiListGroup,
   // @ts-ignore
+  EuiListGroupItem,
+  // @ts-ignore
   EuiNavDrawer,
   // @ts-ignore
   EuiNavDrawerFlyout,
@@ -71,8 +73,6 @@ interface Props {
   recentlyAccessed$: Rx.Observable<RecentlyAccessedHistoryItem[]>;
   navControls: ChromeHeaderNavControlsRegistry;
   intl: InjectedIntl;
-  links: string;
-  title: string;
   timeoutID: string;
 }
 
@@ -133,7 +133,6 @@ class HeaderUI extends Component<Props, State> {
     return (
       <EuiHeaderLogo
         iconType="logoKibana"
-        data-test-subj="logo"
         href={homeHref}
         aria-label={intl.formatMessage({
           id: 'common.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel',
@@ -197,18 +196,25 @@ class HeaderUI extends Component<Props, State> {
             showScrollbar={this.state.showScrollbar}
           >
             <EuiNavDrawerMenu id="navDrawerMenu">
-              <EuiListGroup
-                listItems={recentlyAccessed.map(item => ({
-                  label: item.label,
-                  href: chrome.addBasePath(item.link),
-                  iconType: undefined,
-                  size: 's',
-                  style: { color: 'inherit' },
-                  'aria-label': item.label,
-                }))}
-              />
+              <EuiListGroup>
+                <EuiListGroupItem
+                  label="Recently viewed"
+                  iconType="clock"
+                  size="s"
+                  style={{ color: 'inherit' }}
+                  aria-label="Recently viewed items"
+                  onClick={() => this.expandFlyout()}
+                  extraAction={{
+                    color: 'subdued',
+                    iconType: 'arrowRight',
+                    iconSize: 's',
+                    'aria-label': 'Expand to view recent apps and objects',
+                    onClick: () => this.expandFlyout(),
+                    alwaysShow: true,
+                  }}
+                />
+              </EuiListGroup>
               <EuiHorizontalRule margin="none" />
-              {/* TODO replace exploreLinks with navLinks */}
               <EuiListGroup
                 listItems={navLinks.map(navLink => ({
                   label: navLink.title,
@@ -223,9 +229,16 @@ class HeaderUI extends Component<Props, State> {
             </EuiNavDrawerMenu>
             <EuiNavDrawerFlyout
               id="navDrawerFlyout"
-              title={this.state.navFlyoutTitle}
+              title="Recent items"
               isCollapsed={this.state.flyoutIsCollapsed}
-              listItems={this.state.navFlyoutContent}
+              listItems={recentlyAccessed.map(item => ({
+                label: item.label,
+                href: chrome.addBasePath(item.link),
+                iconType: undefined,
+                size: 's',
+                style: { color: 'inherit' },
+                'aria-label': item.label,
+              }))}
               onMouseLeave={this.collapseFlyout}
             />
           </EuiNavDrawer>
@@ -243,7 +256,7 @@ class HeaderUI extends Component<Props, State> {
       this.setState({
         outsideClickDisabled: this.state.mobileIsHidden ? true : false,
       });
-    }, 150);
+    }, 350);
   };
 
   private expandDrawer = () => {
@@ -261,7 +274,7 @@ class HeaderUI extends Component<Props, State> {
     // has focus. This is the case since React bubbles up onFocus and onBlur
     // events from the child elements.
 
-    clearTimeout(this.timeoutID); // TODO not sure where to define/initialize timeoutID
+    clearTimeout(this.timeoutID);
 
     if (!this.state.isManagingFocus) {
       this.setState({
@@ -306,18 +319,13 @@ class HeaderUI extends Component<Props, State> {
     }, 0);
   };
 
-  private expandFlyout = (links, title) => {
-    // TODO not sure where to define/initialize links, title
-    const content = links;
-
+  private expandFlyout = () => {
     this.setState(prevState => ({
-      flyoutIsCollapsed: prevState.navFlyoutTitle === title ? !this.state.flyoutIsCollapsed : false,
+      flyoutIsCollapsed: !this.state.flyoutIsCollapsed,
     }));
 
     this.setState({
       flyoutIsAnimating: true,
-      navFlyoutTitle: title,
-      navFlyoutContent: content,
     });
   };
 
@@ -327,8 +335,6 @@ class HeaderUI extends Component<Props, State> {
     setTimeout(() => {
       this.setState({
         flyoutIsCollapsed: true,
-        navFlyoutTitle: null,
-        navFlyoutContent: null,
       });
     }, 250);
   };

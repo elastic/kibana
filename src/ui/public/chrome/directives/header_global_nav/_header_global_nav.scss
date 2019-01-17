@@ -5,9 +5,9 @@
   z-index: 10;
 }
 
-.header-global-wrapper + .app-wrapper:not(.hidden-chrome) {
+.header-global-wrapper + .app-wrapper {
   top: 48px;
-  left: 0;
+  left: 48px;
 
   // HOTFIX: Temporary fix for flyouts not inside portals
   // SASSTODO: Find an actual solution
@@ -17,12 +17,20 @@
 }
 
 // Mobile header is smaller
-@include euiBreakpoint('xs','s') {
+@include euiBreakpoint('xs') {
   .header-global-wrapper + .app-wrapper {
     top: 36px;
+    left: 0;
 
     .euiFlyout {
       top: 36px;
     }
+  }
+}
+
+// Mobile header is smaller
+@include euiBreakpoint('s') {
+  .header-global-wrapper + .app-wrapper {
+    left: 0;
   }
 }
