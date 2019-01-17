@@ -212,7 +212,7 @@ export interface InfraNode {
 export interface InfraNodePath {
   value: string;
 
-  label: string;
+  label?: string | null;
 }
 
 export interface InfraNodeMetric {
@@ -371,6 +371,7 @@ export enum InfraPathType {
   hosts = 'hosts',
   pods = 'pods',
   containers = 'containers',
+  custom = 'custom',
 }
 
 export enum InfraMetricType {
@@ -1049,7 +1050,7 @@ export namespace InfraNodePathResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = InfraNodePath> {
     value?: ValueResolver<string, TypeParent, Context>;
 
-    label?: DisplayNameResolver<string, TypeParent, Context>;
+    label?: LabelResolver<string | null, TypeParent, Context>;
   }
 
   export type ValueResolver<R = string, Parent = InfraNodePath, Context = InfraContext> = Resolver<
@@ -1057,8 +1058,8 @@ export namespace InfraNodePathResolvers {
     Parent,
     Context
   >;
-  export type DisplayNameResolver<
-    R = string,
+  export type LabelResolver<
+    R = string | null,
     Parent = InfraNodePath,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;

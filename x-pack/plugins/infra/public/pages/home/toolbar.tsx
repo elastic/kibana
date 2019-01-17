@@ -109,22 +109,31 @@ export const HomeToolbar = injectI18n(({ intl }) => (
           )}
         </WithSource>
       </EuiFlexItem>
-      <WithWaffleOptions>
-        {({ changeMetric, changeGroupBy, groupBy, metric, nodeType }) => (
-          <React.Fragment>
-            <EuiFlexItem grow={false}>
-              <WaffleMetricControls metric={metric} nodeType={nodeType} onChange={changeMetric} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <WaffleGroupByControls
-                groupBy={groupBy}
-                nodeType={nodeType}
-                onChange={changeGroupBy}
-              />
-            </EuiFlexItem>
-          </React.Fragment>
+      <WithSource>
+        {({ derivedIndexPattern }) => (
+          <WithWaffleOptions>
+            {({ changeMetric, changeGroupBy, groupBy, metric, nodeType }) => (
+              <React.Fragment>
+                <EuiFlexItem grow={false}>
+                  <WaffleMetricControls
+                    metric={metric}
+                    nodeType={nodeType}
+                    onChange={changeMetric}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <WaffleGroupByControls
+                    groupBy={groupBy}
+                    nodeType={nodeType}
+                    onChange={changeGroupBy}
+                    fields={derivedIndexPattern.fields}
+                  />
+                </EuiFlexItem>
+              </React.Fragment>
+            )}
+          </WithWaffleOptions>
         )}
-      </WithWaffleOptions>
+      </WithSource>
       <EuiFlexItem grow={false}>
         <WithWaffleTime resetOnUnmount>
           {({ currentTime, isAutoReloading, jumpToTime, startAutoReload, stopAutoReload }) => (

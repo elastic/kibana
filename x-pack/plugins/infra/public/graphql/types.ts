@@ -184,7 +184,7 @@ export interface InfraNode {
 export interface InfraNodePath {
   value: string;
 
-  label: string;
+  label?: string | null;
 }
 
 export interface InfraNodeMetric {
@@ -343,6 +343,7 @@ export enum InfraPathType {
   hosts = 'hosts',
   pods = 'pods',
   containers = 'containers',
+  custom = 'custom',
 }
 
 export enum InfraMetricType {
@@ -536,7 +537,7 @@ export namespace WaffleNodesQuery {
 
     value: string;
 
-    label: string;
+    label?: string | null;
   };
 
   export type Metric = {
