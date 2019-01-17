@@ -86,7 +86,6 @@ class FilterBarUI extends Component<Props, State> {
             gutterSize="xs"
             alignItems="center"
           >
-            {/* TODO display pinned filters first*/}
             {this.renderItems()}
             {this.renderAddFilter()}
           </EuiFlexGroup>
