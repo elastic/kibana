@@ -53,6 +53,7 @@ export class FormEntryRow extends PureComponent {
       PropTypes.string,
       PropTypes.number
     ]).isRequired,
+    isLoading: PropTypes.bool,
     error: PropTypes.object,
     disabled: PropTypes.bool,
     areErrorsVisible: PropTypes.bool.isRequired,
@@ -80,7 +81,7 @@ export class FormEntryRow extends PureComponent {
   }
 
   renderField = (isInvalid) => {
-    const { value, validator, disabled } = this.props;
+    const { value, validator, disabled, isLoading } = this.props;
     switch (validator._type) {
       case "number":
         return (
@@ -89,6 +90,7 @@ export class FormEntryRow extends PureComponent {
             value={value}
             onChange={e => this.onFieldChange(e.target.value)}
             disabled={disabled === true}
+            isLoading={isLoading}
             fullWidth
           />
         );
@@ -99,6 +101,7 @@ export class FormEntryRow extends PureComponent {
             value={value}
             onChange={e => this.onFieldChange(e.target.value)}
             disabled={disabled === true}
+            isLoading={isLoading}
             fullWidth
           />
         );

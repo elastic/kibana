@@ -10,6 +10,7 @@ import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
+import { fatalError } from 'ui/notify';
 
 import {
   EuiButton,
@@ -105,6 +106,7 @@ export const FollowerIndexForm = injectI18n(
         fieldsErrors: {},
         areErrorsVisible: false,
         areAdvancedSettingsVisible: false,
+        isValidatingIndexName: false,
       };
 
       this.validateIndexName = debounce(this.validateIndexName, 500);
@@ -120,18 +122,27 @@ export const FollowerIndexForm = injectI18n(
 
     onFieldsErrorChange = (errors) => {
       this.setState(updateFormErrors(errors));
-    }
+    };
 
     onIndexNameChange = ({ name }) => {
       this.onFieldsChange({ name });
-      this.validateIndexName(name);
-    }
 
-    validateIndexName = async (name) => {
       if (!name || !name.trim()) {
+        this.setState({
+          isValidatingIndexName: false,
+        });
+
         return;
       }
 
+      this.setState({
+        isValidatingIndexName: true,
+      });
+
+      this.validateIndexName(name);
+    };
+
+    validateIndexName = async (name) => {
       const { intl } = this.props;
 
       try {
@@ -144,10 +155,27 @@ export const FollowerIndexForm = injectI18n(
           });
           this.setState(updateFormErrors({ name: { message, alwaysVisible: true } }));
         }
-      } catch (err) {
-        // Silently fail...
+
+        this.setState({
+          isValidatingIndexName: false,
+        });
+      } catch (error) {
+        // Expect an error in the shape provided by Angular's $http service.
+        if (error && error.data) {
+          // All validation does is check for a name collision, so we can just let the user attempt
+          // to save the follower index and get an error back from the API.
+          this.setState({
+            isValidatingIndexName: false,
+          });
+        }
+
+        // This error isn't an HTTP error, so let the fatal error screen tell the user something
+        // unexpected happened.
+        fatalError(error, i18n.translate('xpack.crossClusterReplication.followerIndexForm.indexNameValidationFatalErrorTitle', {
+          defaultMessage: 'Follower Index Forn index name validation',
+        }));
       }
-    }
+    };
 
     onClusterChange = (remoteCluster) => {
       this.onFieldsChange({ remoteCluster });
@@ -218,6 +246,7 @@ export const FollowerIndexForm = injectI18n(
         areErrorsVisible,
         areAdvancedSettingsVisible,
         fieldsErrors,
+        isValidatingIndexName,
       } = this.state;
 
       const toggleAdvancedSettingButtonLabel = areAdvancedSettingsVisible
@@ -236,6 +265,27 @@ export const FollowerIndexForm = injectI18n(
       /**
        * Follower index name
        */
+
+      const indexNameHelpText = (
+        <Fragment>
+          {isValidatingIndexName && (
+            <p>
+              <FormattedMessage
+                id="xpack.crossClusterReplication.followerIndexForm.indexNameValidatingLabel"
+                defaultMessage="Validating index name..."
+              />
+            </p>
+          )}
+          <p>
+            <FormattedMessage
+              id="xpack.crossClusterReplication.followerIndexForm.indexNameHelpLabel"
+              defaultMessage="Spaces and the characters {characterList} are not allowed."
+              values={{ characterList: <strong>{indexNameIllegalCharacters}</strong> }}
+            />
+          </p>
+        </Fragment>
+      );
+
       const renderFollowerIndexName = () => (
         <FormEntryRow
           field="name"
@@ -247,14 +297,9 @@ export const FollowerIndexForm = injectI18n(
           description={i18n.translate('xpack.crossClusterReplication.followerIndexForm.sectionFollowerIndexNameDescription', {
             defaultMessage: 'A name for the follower index.'
           })}
-          helpText={(
-            <FormattedMessage
-              id="xpack.crossClusterReplication.followerIndexForm.indexNameHelpLabel"
-              defaultMessage="Spaces and the characters {characterList} are not allowed."
-              values={{ characterList: <strong>{indexNameIllegalCharacters}</strong> }}
-            />
-          )}
+          helpText={indexNameHelpText}
           validator={indexNameValidator}
+          isLoading={isValidatingIndexName}
           disabled={!isNew}
           areErrorsVisible={areErrorsVisible}
           onValueUpdate={this.onIndexNameChange}
