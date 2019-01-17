@@ -10,20 +10,18 @@ import { EuiBadge } from '@elastic/eui';
 import { getBadgeExtensions } from '../index_management_extensions';
 export const renderBadges = (index) => {
   const badgeLabels = [];
-  getBadgeExtensions().forEach(({ matchIndex, label }) => {
+  getBadgeExtensions().forEach(({ matchIndex, label, color }) => {
     if (matchIndex(index)) {
-      badgeLabels.push(label);
+      badgeLabels.push(
+        <Fragment key={label}>
+          {' '}<EuiBadge color={color}>{label}</EuiBadge>
+        </Fragment>
+      );
     }
   });
   return (
     <Fragment>
-      {badgeLabels.map((badgeLabel) => {
-        return (
-          <Fragment key={badgeLabel}>
-            {' '}<EuiBadge color="primary">{badgeLabel}</EuiBadge>
-          </Fragment>
-        );
-      })}
+      {badgeLabels}
     </Fragment>
   );
 };
