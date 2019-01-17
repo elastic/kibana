@@ -10,7 +10,6 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { Route } from 'react-router-dom';
 import { NoMatch } from '../../../no_match';
 import { healthToColor } from '../../../../services';
-import '../../../../styles/table.less';
 import { REFRESH_RATE_INDEX_LIST } from '../../../../constants';
 
 import {
@@ -206,7 +205,6 @@ export class IndexTableUi extends Component {
           isSorted={isSorted}
           isSortAscending={isSortAscending}
           data-test-subj={`indexTableHeaderCell-${fieldName}`}
-          className={'indexTable__header--' + fieldName}
         >
           {label}
         </EuiTableHeaderCell>
@@ -301,6 +299,7 @@ export class IndexTableUi extends Component {
       return (
         <EuiTableRow
           isSelected={this.isItemSelected(name) || name === detailPanelIndexName}
+          isSelectable
           key={`${name}-row`}
         >
           <EuiTableRowCellCheckbox key={`checkbox-${name}`}>
@@ -480,7 +479,7 @@ export class IndexTableUi extends Component {
 
         {indices.length > 0 ? (
           <div style={{ maxWidth: '100%', overflow: 'auto' }}>
-            <EuiTable>
+            <EuiTable className="indTable">
               <EuiTableHeader>
                 <EuiTableHeaderCellCheckbox>
                   <EuiCheckbox

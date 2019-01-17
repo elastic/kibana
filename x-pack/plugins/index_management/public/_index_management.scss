@@ -1,7 +1,20 @@
-#indReactRoot {
+#indReactRoot, #indexManagementReactRoot {
   background-color: $euiColorLightestShade;
+}
+
+// The index table is a bespoke table and can't make use of EuiBasicTable's width settings
+.indTable thead th:nth-of-type(2) {
+  width: 25%;
 }
 
 .indTable__link {
   text-align: left;
+}
+
+.indTable__link {
+  text-align: left;
+}
+
+.indDetail__codeBlock {
+  background: transparent;
 }
