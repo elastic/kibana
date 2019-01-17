@@ -44,7 +44,11 @@ export function systemRoutes(server, commonRouteConfig) {
       const callWithRequest = callWithRequestFactory(server, request);
       try {
         const info = await callWithRequest('ml.info');
-        const upgradeInProgress = !!info.upgradeInProgress;
+        // if ml indices are currently being migrated, upgrade_mode will be set to true
+        // pass this back with the privileges to allow for the disabling of UI controls
+        // the setting may be missing, which means false, so force it with !!
+        const upgradeInProgress = (info.upgrade_mode === true);
+
         // isSecurityDisabled will return true if it is a basic license
         // this will cause the subsequent ml.privilegeCheck to fail.
         // therefore, check for a basic license first and report that security
