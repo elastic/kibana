@@ -27,7 +27,8 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
       );
     }
 
-    /*describe('ecommerce', () => {
+    // Skipped because EMS vectors are not accessible in CI
+    describe.skip('ecommerce', () => {
       before(async () => {
         await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -45,7 +46,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         const percentDifference = await screenshot.compareAgainstBaseline('ecommerce_map', updateBaselines);
         expect(percentDifference).to.be.lessThan(0.05);
       });
-    });*/
+    });
 
     describe('flights', () => {
       before(async () => {
@@ -70,16 +71,14 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
       });
     });
 
-
-    describe('web logs', () => {
+    // Skipped because EMS vectors are not accessible in CI
+    describe.skip('web logs', () => {
       before(async () => {
         await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.addSampleDataSet('logs');
         await PageObjects.gis.loadSavedMap('[Logs] Total Requests and Bytes');
         await PageObjects.gis.toggleLayerVisibility('road_map');
-        // EMS vector layers are do not work on CI so hide
-        await PageObjects.gis.toggleLayerVisibility('Total Requests by Country');
         await setTimerangeToCoverAllSampleData();
         await PageObjects.gis.waitForLayersToLoad();
       });
