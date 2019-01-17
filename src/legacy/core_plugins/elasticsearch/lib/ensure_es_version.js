@@ -92,15 +92,14 @@ export function ensureEsVersion(server, kibanaVersion) {
         const warningNodeNames = getHumanizedNodeNames(simplifiedNodes).join(', ');
         if (lastWarnedNodesForServer.get(server) !== warningNodeNames) {
           lastWarnedNodesForServer.set(server, warningNodeNames);
-          server.log(['warning'], {
-            tmpl: (
-              `You're running Kibana ${kibanaVersion} with some different versions of ` +
+          server.logWithMetadata(['warning'],
+            `You're running Kibana ${kibanaVersion} with some different versions of ` +
             'Elasticsearch. Update Kibana or Elasticsearch to the same ' +
-            `version to prevent compatibility issues: ${warningNodeNames}`
-            ),
-            kibanaVersion,
-            nodes: simplifiedNodes,
-          });
+            `version to prevent compatibility issues: ${warningNodeNames}`,
+            {
+              kibanaVersion,
+              nodes: simplifiedNodes,
+            });
         }
       }
 
