@@ -36,6 +36,8 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         await PageObjects.gis.toggleLayerVisibility('road_map');
         await setTimerangeToCoverAllSampleData();
         await PageObjects.gis.waitForLayersToLoad();
+        // hack just to see if this will run on CI and if its a timing issue
+        await PageObjects.common.sleep(15000);
       });
 
       after(async () => {
