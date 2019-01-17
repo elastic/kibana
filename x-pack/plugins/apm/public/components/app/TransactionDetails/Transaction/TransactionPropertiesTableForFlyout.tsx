@@ -5,11 +5,16 @@
  */
 
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import { Location } from 'history';
 import { first, get } from 'lodash';
 import React from 'react';
+import {
+  fromQuery,
+  history,
+  toQuery
+} from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import { Transaction } from '../../../../../typings/es_schemas/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
-import { fromQuery, history, toQuery } from '../../../../utils/url';
 import {
   getPropertyTabNames,
   PropertiesTable,
@@ -28,7 +33,7 @@ function getTabs(transactionData: Transaction) {
 }
 
 interface Props {
-  location: any;
+  location: Location;
   transaction: Transaction;
   urlParams: IUrlParams;
 }
