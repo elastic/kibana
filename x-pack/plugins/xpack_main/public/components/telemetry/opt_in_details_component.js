@@ -114,7 +114,7 @@ export class OptInExampleFlyout extends Component {
               <EuiText>
                 <FormattedMessage
                   id="xpack.main.telemetry.callout.clusterStatisticsDescription"
-                  defaultMessage="This is an example of the basic cluster statistics that we&rsquo;ll collect.
+                  defaultMessage="This is an example of the basic cluster statistics that we'll collect.
                   It includes the number of indices, shards, and nodes.
                   It also includes high-level usage statistics, such as whether monitoring is turned on."
                 />

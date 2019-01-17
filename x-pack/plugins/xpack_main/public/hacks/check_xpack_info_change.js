@@ -48,7 +48,7 @@ module.factory('checkXPackInfoChange', ($q, Private) => {
           >
             <FormattedMessage
               id="xpack.main.welcomeBanner.licenseIsExpiredDescription"
-              defaultMessage="Contact your administrator or {updateYourLicenseLinkText} directly"
+              defaultMessage="Contact your administrator or {updateYourLicenseLinkText} directly."
               values={{
                 updateYourLicenseLinkText: (
                   <a href={uploadLicensePath}>
