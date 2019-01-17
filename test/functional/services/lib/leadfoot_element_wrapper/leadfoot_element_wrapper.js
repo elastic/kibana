@@ -17,18 +17,21 @@
  * under the License.
  */
 
+import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
+
 export class LeadfootElementWrapper {
-  constructor(leadfootElement, leadfoot) {
+  constructor(leadfootElement, leadfoot, fixedHeaderHeight) {
     if (leadfootElement instanceof LeadfootElementWrapper) {
       return leadfootElement;
     }
 
     this._leadfootElement = leadfootElement;
     this._leadfoot = leadfoot;
+    this._fixedHeaderHeight = fixedHeaderHeight;
   }
 
   _wrap(otherLeadfootElement) {
-    return new LeadfootElementWrapper(otherLeadfootElement, this._leadfoot);
+    return new LeadfootElementWrapper(otherLeadfootElement, this._leadfoot, this._fixedHeaderHeight);
   }
 
   _wrapAll(otherLeadfootElements) {
@@ -42,6 +45,7 @@ export class LeadfootElementWrapper {
    * @return {Promise<void>}
    */
   async click() {
+    await this.scrollIntoViewIfNecessary();
     await this._leadfootElement.click();
   }
 
@@ -222,6 +226,7 @@ export class LeadfootElementWrapper {
    * @return {Promise<void>}
    */
   async moveMouseTo(xOffset, yOffset) {
+    await this.scrollIntoViewIfNecessary();
     return await this._leadfoot.moveMouseTo(this._leadfootElement, xOffset, yOffset);
   }
 
@@ -312,5 +317,26 @@ export class LeadfootElementWrapper {
    */
   async findByXpath(xpath) {
     return this._wrap(await this._leadfootElement.findByXpath(xpath));
+  }
+
+  /**
+   * Sends key event into element.
+   * https://theintern.io/leadfoot/module-leadfoot_Session.html#pressKeys
+   *
+   * @param  {string|string[]} keys
+   * @return {Promise<void>}
+   */
+  async pressKeys(...args) {
+    await this._leadfoot.pressKeys(...args);
+  }
+
+  /**
+   * Scroll the element into view, avoiding the fixed header if necessary
+   *
+   * @nonstandard
+   * @return {Promise<void>}
+   */
+  async scrollIntoViewIfNecessary() {
+    await this._leadfoot.execute(scrollIntoViewIfNecessary, [this._leadfootElement, this._fixedHeaderHeight]);
   }
 }

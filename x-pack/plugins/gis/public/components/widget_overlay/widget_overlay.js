@@ -11,19 +11,28 @@ import {
 } from '@elastic/eui';
 import { LayerControl } from './layer_control';
 import { ViewControl } from './view_control';
+import { AttributionControl } from './attribution_control';
 
 export function WidgetOverlay() {
   return (
-    <EuiFlexGroup
-      className="gisWidgetOverlay"
-      direction="column"
-      justifyContent="spaceBetween"
-    >
+    <EuiFlexGroup className="gisWidgetOverlay" responsive={false} direction="column" alignItems="flexEnd" gutterSize="s">
       <EuiFlexItem>
-        <LayerControl/>
+        <EuiFlexGroup
+          className="gisWidgetOverlay__rightSide"
+          direction="column"
+          justifyContent="spaceBetween"
+          responsive={false}
+        >
+          <EuiFlexItem>
+            <LayerControl/>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ViewControl/>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <ViewControl/>
+        <AttributionControl/>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

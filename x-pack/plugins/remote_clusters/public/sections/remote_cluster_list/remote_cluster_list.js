@@ -18,7 +18,6 @@ import {
   EuiLoadingKibana,
   EuiLoadingSpinner,
   EuiOverlayMask,
-  EuiPage,
   EuiPageBody,
   EuiPageContent,
   EuiPageContentHeader,
@@ -284,15 +283,15 @@ export const RemoteClusterList = injectI18n(
       }
 
       return (
-        <EuiPage>
-          <EuiPageBody>
-            <EuiPageContent>
-              {content}
+        <EuiPageBody>
+          <EuiPageContent
+            horizontalPosition="center"
+          >
+            {content}
 
-              {this.renderBlockingAction()}
-            </EuiPageContent>
-          </EuiPageBody>
-        </EuiPage>
+            {this.renderBlockingAction()}
+          </EuiPageContent>
+        </EuiPageBody>
       );
     }
   }
