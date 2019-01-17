@@ -27,7 +27,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
       );
     }
 
-    describe('ecommerce', () => {
+    /*describe('ecommerce', () => {
       before(async () => {
         await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -50,7 +50,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         const percentDifference = await screenshot.compareAgainstBaseline('ecommerce_map', updateBaselines);
         expect(percentDifference).to.be.lessThan(0.05);
       });
-    });
+    });*/
 
     describe('flights', () => {
       before(async () => {
@@ -61,6 +61,8 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         await PageObjects.gis.toggleLayerVisibility('road_map');
         await setTimerangeToCoverAllSampleData();
         await PageObjects.gis.waitForLayersToLoad();
+        // hack just to see if this will run on CI and if its a timing issue
+        await PageObjects.common.sleep(15000);
       });
 
       after(async () => {
@@ -76,7 +78,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
     });
 
 
-    describe('web logs', () => {
+    /*describe('web logs', () => {
       before(async () => {
         await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -97,7 +99,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         const percentDifference = await screenshot.compareAgainstBaseline('web_logs_map', updateBaselines);
         expect(percentDifference).to.be.lessThan(0.05);
       });
-    });
+    });*/
 
   });
 }
