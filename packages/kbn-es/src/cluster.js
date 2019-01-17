@@ -131,7 +131,7 @@ exports.Cluster = class Cluster {
 
     await decompress(archivePath, installPath);
 
-    this._log.indent(4);
+    this._log.indent(-4);
   }
 
   /**
