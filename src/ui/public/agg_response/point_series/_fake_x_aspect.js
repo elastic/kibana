@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 export function makeFakeXAspect() {
@@ -28,6 +27,6 @@ export function makeFakeXAspect() {
       defaultMessage: 'All docs'
     }),
     params: {},
-    fieldFormatter: () => identity,
+    fieldFormatter: () => '',
   };
 }

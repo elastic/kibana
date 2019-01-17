@@ -61,7 +61,7 @@ export function getPoint(table, x, series, yScale, row, rowIndex, y, z) {
       value: table.$parent.key,
       title: table.$parent.name,
     },
-    parent: series[0],
+    parent: series ? series[0] : null,
   };
 
   if (point.y === 'NaN') {

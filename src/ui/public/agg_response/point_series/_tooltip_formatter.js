@@ -48,7 +48,7 @@ export function PointSeriesTooltipFormatter($compile, $rootScope) {
     if (datum.z) {
       addDetail(data.zAxisLabel, data.zAxisFormatter(datum.z));
     }
-    if (datum.series) {
+    if (datum.series && datum.parent) {
       const dimension = datum.parent;
       addDetail(dimension.title, dimension.fieldFormatter(datum.series));
     }
