@@ -33,7 +33,7 @@ import { RequestHandlerParams, Vis } from '../../vis';
 import { PipelineDataLoader } from './pipeline_data_loader';
 import { visualizationLoader } from './visualization_loader';
 
-import { DataAdapter, RequestAdapter } from '../../inspector/adapters';
+import { DataAdapter, ExpressionAdapter, RequestAdapter } from '../../inspector/adapters';
 
 import { VisSavedObject, VisualizeLoaderParams, VisualizeUpdateParams } from './types';
 
@@ -336,6 +336,8 @@ export class EmbeddedVisualizeHandler {
     if ((typeAdapters && typeAdapters.data) || this.vis.type.requestHandler === 'courier') {
       adapters.data = new DataAdapter();
     }
+
+    adapters.expression = new ExpressionAdapter();
 
     // Add all inspectors, that are explicitly registered with this vis type
     if (typeAdapters && typeAdapters.custom) {

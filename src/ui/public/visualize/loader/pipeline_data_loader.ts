@@ -28,6 +28,10 @@ export class PipelineDataLoader {
     this.vis.showRequestError = false;
     this.vis.pipelineExpression = buildPipeline(this.vis, params);
 
+    if (params.inspectorAdapters) {
+      params.inspectorAdapters.expression.setExpression(this.vis.pipelineExpression);
+    }
+
     return await runPipeline(
       this.vis.pipelineExpression,
       {},

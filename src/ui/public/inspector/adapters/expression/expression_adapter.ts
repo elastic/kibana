@@ -17,12 +17,18 @@
  * under the License.
  */
 
-import { DataView } from './data/data_view';
-import { RequestsView } from './requests/requests_view';
-import { ExpressionView } from './expression/expression_view';
+import { EventEmitter } from 'events';
 
-import { viewRegistry } from 'ui/inspector';
+class ExpressionAdapter extends EventEmitter {
+  private expression?: string;
 
-viewRegistry.register(DataView);
-viewRegistry.register(RequestsView);
-viewRegistry.register(ExpressionView);
+  public setExpression(expression: string): void {
+    this.expression = expression;
+  }
+
+  public getExpression(): string | undefined {
+    return this.expression;
+  }
+}
+
+export { ExpressionAdapter };

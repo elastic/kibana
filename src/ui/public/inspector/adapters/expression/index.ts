@@ -17,12 +17,4 @@
  * under the License.
  */
 
-import { DataView } from './data/data_view';
-import { RequestsView } from './requests/requests_view';
-import { ExpressionView } from './expression/expression_view';
-
-import { viewRegistry } from 'ui/inspector';
-
-viewRegistry.register(DataView);
-viewRegistry.register(RequestsView);
-viewRegistry.register(ExpressionView);
+export { ExpressionAdapter } from './expression_adapter';
