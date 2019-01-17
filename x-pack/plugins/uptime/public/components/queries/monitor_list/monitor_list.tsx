@@ -68,7 +68,7 @@ const monitorListColumns = [
   {
     field: 'ping.monitor.id',
     name: i18n.translate('xpack.uptime.monitorList.idColumnLabel', {
-      defaultMessage: 'URL',
+      defaultMessage: 'ID',
     }),
     render: (id: string, monitor: any) => <Link to={`/monitor/${monitor.key.id}`}>{id}</Link>,
   },
