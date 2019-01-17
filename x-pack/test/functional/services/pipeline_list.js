@@ -73,7 +73,7 @@ export function PipelineListProvider({ getService }) {
       const description = await testSubjects.getVisibleTextAll(SUBJ_CELL_DESCRIPTION);
       const lastModified = await testSubjects.getVisibleTextAll(SUBJ_CELL_LAST_MODIFIED);
       const username = await testSubjects.getVisibleTextAll(SUBJ_CELL_USERNAME);
-      const valuesByKey = { selected, ids, description, lastModified, username };
+      const valuesByKey = { selected, id: ids, description, lastModified, username };
 
       // ensure that we got values for every row, otherwise we can't
       // recombine these into a list of rows
