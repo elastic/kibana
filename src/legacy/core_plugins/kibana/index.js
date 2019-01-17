@@ -52,7 +52,7 @@ export default function (kibana) {
         enabled: Joi.boolean().default(true),
         defaultAppId: Joi.string().default('home'),
         index: Joi.string().default('.kibana'),
-        disableWelcomeScreen: Joi.boolean().default(false)
+        disableWelcomeScreen: Joi.boolean().default(false),
       }).default();
     },
 

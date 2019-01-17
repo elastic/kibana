@@ -1024,6 +1024,6 @@ export function getUiSettingDefaults() {
           'visualizations based on rollup data. Refresh the page to apply the changes.',
       }),
       category: ['rollups'],
-    }
+    },
   };
 }
