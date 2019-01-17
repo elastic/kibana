@@ -170,6 +170,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
 
     const params = {
       index: sourceConfiguration.logAlias,
+      terminate_after: 1,
       body: {
         size: 1,
         query: {
