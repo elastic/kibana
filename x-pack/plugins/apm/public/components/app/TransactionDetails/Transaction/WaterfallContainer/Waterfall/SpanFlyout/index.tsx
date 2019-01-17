@@ -14,6 +14,7 @@ import {
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiPortal,
+  EuiSpacer,
   EuiTabbedContent,
   EuiTitle
 } from '@elastic/eui';
@@ -35,7 +36,7 @@ import { Span } from '../../../../../../../../typings/es_schemas/Span';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
 
 const StackTraceContainer = styled.div`
-  margin-top: ${px(unit)};
+  //margin-top: ${px(unit)};
 `;
 
 const TagName = styled.div`
@@ -100,6 +101,7 @@ export function SpanFlyout({
                 name: 'Stack Trace',
                 content: (
                   <Fragment>
+                    <EuiSpacer size="l" />
                     <HttpContext httpContext={httpContext} />
                     <DatabaseContext dbContext={dbContext} />
                     <StackTraceContainer>
