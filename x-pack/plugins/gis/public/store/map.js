@@ -307,8 +307,6 @@ function updateWithDataRequest(state, action) {
     };
     layerRequestingData.dataRequests.push(dataRequest);
   }
-  dataRequest.dataHasLoadError = false;
-  dataRequest.dataLoadError = null;
   dataRequest.dataMetaAtStart = action.meta;
   dataRequest.dataRequestToken = action.requestToken;
   const layerList = [...state.layerList];
@@ -343,7 +341,7 @@ function getValidDataRequest(state, action, checkRequestToken = true) {
 
   const dataRequest = findDataRequest(layer, action);
   if (!dataRequest) {
-    throw new Error('Data request should be initialized. Cannot call loadError before startLoading');
+    return;
   }
 
   if (
