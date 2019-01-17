@@ -115,8 +115,8 @@ class FilterBarUI extends Component<Props, State> {
     const newFilter = buildEmptyFilter(isPinned, index);
 
     const button = (
-      <EuiButtonEmpty size="xs" onClick={this.onOpenAddFilterPopover}>
-        <span>+ </span>
+      <EuiButtonEmpty size="s" onClick={this.onOpenAddFilterPopover}>
+        +{' '}
         <FormattedMessage
           id="common.ui.filterBar.addFilterButtonLabel"
           defaultMessage="Add filter"
@@ -132,6 +132,7 @@ class FilterBarUI extends Component<Props, State> {
         closePopover={this.onCloseAddFilterPopover}
         anchorPosition="downCenter"
         withTitle
+        panelPaddingSize="none"
       >
         <EuiFlexItem grow={false}>
           <div style={{ width: 400 }}>

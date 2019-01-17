@@ -188,6 +188,7 @@ class FilterItemUI extends Component<Props, State> {
         button={badge}
         anchorPosition="downCenter"
         withTitle={true}
+        panelPaddingSize="none"
       >
         <EuiContextMenu initialPanelId={0} panels={panelTree} />
       </EuiPopover>

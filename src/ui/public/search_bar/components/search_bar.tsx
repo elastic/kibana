@@ -66,7 +66,7 @@ class SearchBarUI extends Component<Props, State> {
   public setFilterBarHeight = () => {
     requestAnimationFrame(() => {
       const height =
-        this.filterBarRef && this.state.isFiltersVisible ? this.filterBarRef.clientHeight + 4 : 0;
+        this.filterBarRef && this.state.isFiltersVisible ? this.filterBarRef.clientHeight : 0;
       if (this.filterBarWrapperRef) {
         this.filterBarWrapperRef.setAttribute('style', `height: ${height}px`);
       }
@@ -132,7 +132,7 @@ class SearchBarUI extends Component<Props, State> {
     });
 
     return (
-      <div>
+      <div className="globalQueryBar">
         {this.props.showQueryBar ? (
           <QueryBar
             query={this.props.query}

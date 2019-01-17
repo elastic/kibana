@@ -139,6 +139,7 @@ class FilterOptionsUI extends Component<Props, State> {
     return (
       <EuiPopover
         id="popoverForAllFilters"
+        className="globalFilterGroup__allFiltersPopover"
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
         button={
