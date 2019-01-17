@@ -7,7 +7,7 @@
 // Mock the mlJobService that is imported for saving rules.
 jest.mock('../../services/job_service.js', () => 'mlJobService');
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { ConditionsSection } from './conditions_section';
@@ -38,7 +38,7 @@ describe('ConditionsSectionExpression', () => {
       isEnabled: false,
     };
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <ConditionsSection {...props} />
     );
 
@@ -51,7 +51,7 @@ describe('ConditionsSectionExpression', () => {
       isEnabled: true,
     };
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <ConditionsSection {...props} />
     );
 
@@ -65,7 +65,7 @@ describe('ConditionsSectionExpression', () => {
       conditions: [],
     };
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <ConditionsSection {...props} />
     );
 
@@ -79,7 +79,7 @@ describe('ConditionsSectionExpression', () => {
       conditions: [getNewConditionDefaults()],
     };
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <ConditionsSection {...props} />
     );
 
@@ -93,7 +93,7 @@ describe('ConditionsSectionExpression', () => {
       conditions: [getNewConditionDefaults(), testCondition],
     };
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <ConditionsSection {...props} />
     );
 
@@ -107,7 +107,7 @@ describe('ConditionsSectionExpression', () => {
       conditions: [getNewConditionDefaults(), testCondition],
     };
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <ConditionsSection {...props} />
     );
 
