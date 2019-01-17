@@ -245,7 +245,7 @@ export function convertMapExtentToPolygon({ maxLat, maxLon, minLat, minLon }) {
   }
 
   if (minLon < -180) {
-    // bounds cross dateline west to east, slit into 2 shapes
+    // bounds cross dateline west to east
     const overlapEastOfDateLine = Math.abs(minLon) - 180;
     return formatEnvelopeAsPolygon({
       maxLat,
