@@ -80,7 +80,7 @@ if (flags.help) {
         --all-platforms         {dim Produce archives for all platforms, not just this one}
         --rpm                   {dim Only build the rpm package}
         --deb                   {dim Only build the deb package}
-        --docker                {dim Only build the docker package}
+        --docker                {dim Only build the docker image}
         --release               {dim Produce a release-ready distributable}
         --version-qualifier     {dim Suffix version with a qualifier}
         --skip-node-download    {dim Reuse existing downloads of node.js}
