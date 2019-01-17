@@ -51,7 +51,7 @@ export const CustomFieldPanel = injectI18n(
               />
             </EuiFormRow>
             <EuiFormRow
-              label="Label"
+              label="Label (optional)"
               helpText="This label is used to identify this field"
               compressed
             >
