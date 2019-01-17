@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { PersistedLog } from './persisted_log';
+export { PieChartProvider } from './pie_chart';

@@ -16,14 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { isPlainObject } from 'lodash';
+const symbol = Symbol('log message with metadata');
 
-import chrome from 'ui/chrome';
-import { populateBrowserRegistries } from '@kbn/interpreter/public';
-import { typesRegistry, functionsRegistry } from '@kbn/interpreter/common';
+export const logWithMetadata = {
+  isLogEvent(eventData) {
+    return Boolean(isPlainObject(eventData) && eventData[symbol]);
+  },
 
-const types = {
-  browserFunctions: functionsRegistry,
-  types: typesRegistry
+  getLogEventData(eventData) {
+    const { message, metadata } = eventData[symbol];
+    return {
+      ...metadata,
+      message
+    };
+  },
+
+  decorateServer(server) {
+    server.decorate('server', 'logWithMetadata', (tags, message, metadata = {}) => {
+      server.log(tags, {
+        [symbol]: {
+          message,
+          metadata,
+        },
+      });
+    });
+  },
 };
-
-populateBrowserRegistries(types, chrome.getBasePath());
