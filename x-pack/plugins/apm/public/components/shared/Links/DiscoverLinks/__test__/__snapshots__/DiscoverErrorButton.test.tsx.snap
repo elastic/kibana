@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`DiscoverErrorButton with kuery should match snapshot 1`] = `
-<DiscoverButton
+exports[`DiscoverErrorLink with kuery should match snapshot 1`] = `
+<DiscoverLink
   query={
     Object {
       "_a": Object {
@@ -19,8 +19,8 @@ exports[`DiscoverErrorButton with kuery should match snapshot 1`] = `
 />
 `;
 
-exports[`DiscoverErrorButton without kuery should match snapshot 1`] = `
-<DiscoverButton
+exports[`DiscoverErrorLink without kuery should match snapshot 1`] = `
+<DiscoverLink
   query={
     Object {
       "_a": Object {
