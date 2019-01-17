@@ -5,8 +5,6 @@
  */
 import { AggregationSearchResponse } from 'elasticsearch';
 import {
-  METRIC_PROCESS_MEMORY_RSS,
-  METRIC_PROCESS_MEMORY_SIZE,
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY
 } from 'x-pack/plugins/apm/common/constants';
@@ -14,38 +12,37 @@ import { fetchMetrics } from '../metricsFetcher';
 import { AggValue, MetricsRequestArgs, TimeSeriesBucket } from '../query_types';
 
 interface Bucket extends TimeSeriesBucket {
-  totalMemory: AggValue;
-  freeMemory: AggValue;
-  processMemorySize: AggValue;
-  processMemoryRss: AggValue;
+  averagePercentMemoryUsed: AggValue;
+  maximumPercentMemoryUsed: AggValue;
 }
 
 interface Aggs {
   timeseriesData: {
     buckets: Bucket[];
   };
-  totalMemory: AggValue;
-  freeMemory: AggValue;
-  processMemorySize: AggValue;
-  processMemoryRss: AggValue;
+  averagePercentMemoryUsed: AggValue;
+  maximumPercentMemoryUsed: AggValue;
 }
 
 export type ESResponse = AggregationSearchResponse<void, Aggs>;
+
+const percentSystemMemoryUsedScript = {
+  script: {
+    lang: 'expression',
+    source: `1 - doc['${METRIC_SYSTEM_FREE_MEMORY}'] / doc['${METRIC_SYSTEM_TOTAL_MEMORY}']`
+  }
+};
 
 export async function fetch(args: MetricsRequestArgs) {
   return fetchMetrics<Aggs>({
     ...args,
     timeseriesBucketAggregations: {
-      freeMemory: { avg: { field: METRIC_SYSTEM_FREE_MEMORY } },
-      totalMemory: { avg: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
-      processMemorySize: { avg: { field: METRIC_PROCESS_MEMORY_SIZE } },
-      processMemoryRss: { avg: { field: METRIC_PROCESS_MEMORY_RSS } }
+      averagePercentMemoryUsed: { avg: percentSystemMemoryUsedScript },
+      maximumPercentMemoryUsed: { max: percentSystemMemoryUsedScript }
     },
     totalAggregations: {
-      freeMemory: { avg: { field: METRIC_SYSTEM_FREE_MEMORY } },
-      totalMemory: { avg: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
-      processMemorySize: { avg: { field: METRIC_PROCESS_MEMORY_SIZE } },
-      processMemoryRss: { avg: { field: METRIC_PROCESS_MEMORY_RSS } }
+      averagePercentMemoryUsed: { avg: percentSystemMemoryUsedScript },
+      maximumPercentMemoryUsed: { max: percentSystemMemoryUsedScript }
     }
   });
 }
