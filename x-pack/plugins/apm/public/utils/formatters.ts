@@ -144,5 +144,5 @@ export function asPercent(
   }
 
   const decimal = numerator / denominator;
-  return numeral(decimal).format('0.00%');
+  return numeral(decimal).format('0.0%');
 }
