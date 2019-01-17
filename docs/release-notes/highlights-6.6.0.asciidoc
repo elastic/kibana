@@ -19,9 +19,10 @@ coming[6.6.0]
 {kib} has additional *Management* user interfaces that provide a simple, 
 user-friendly way to use advanced features.  This version introduces 
 *Index Lifecycle Policies*.  If you use time series indices, this feature can 
-help keep your clusters tidy. You can create and manage index lifecycle policies, 
-which perform actions such as rolling over an index, relocating shards to warm 
+help you keep your clusters tidy. You can create and manage index lifecycle policies, 
+which automate actions such as rolling over an index, relocating shards to warm 
 or cold nodes, merging shards, and deleting outdated indices.  
+See {kibana-ref}/index-lifecycle-policies.html[Index lifecycle policies].
 
 [role="screenshot"]
 image::images/highlights-6.6.0-policies.png[Create index lifecycle policies UI]
@@ -29,9 +30,8 @@ image::images/highlights-6.6.0-policies.png[Create index lifecycle policies UI]
 [float]
 === Remote clusters and Auto-follow pattern
 
-{kib} also has two new user interfaces for cross cluster replication, available
-in *Management*. 
-*Remote clusters* helps you manage remote clusters for use with cross cluster 
+{kib} *Management* also has two new user interfaces for cross cluster replication. 
+*Remote clusters* helps you manage your remote clusters for use with cross cluster 
 search and cross cluster replication. You can add and remove remote clusters 
 and check their connectivity. 
 
@@ -66,7 +66,7 @@ If you’re a CSS guru and enjoy styling your elements with custom CSS, you’ll
 be excited to learn that Canvas supports global CSS across your entire workpad. 
 
 Finally, Canvas has two workpad templates to help you get started. You can 
-choose from a light and a dark themed workpad. Look for the *Templates* tab on 
+choose between a light and a dark themed workpad. Look for the *Templates* tab on 
 the Canvas home page. 
 
 [role="screenshot"]
@@ -103,7 +103,7 @@ requests to be distributed over multiple nodes in the cluster.  Simply set
 `elasticsearch.host` in your kibana.yml file to the URLs of the {es} nodes you 
 want to use.  You can also configure {kib} to automatically discover other nodes 
 in the cluster (`elasticsearch.sniffOnStart`) or on an interval (`elasticsearch.sniffInterval`).
-For more information on these settings, see {kibana-ref}/settings.html[Configure Kibana].
+For more information, see {kibana-ref}/settings.html[Kibana configuration settings].
 
 [float]
 === Production version of Time Series Visual Builder
