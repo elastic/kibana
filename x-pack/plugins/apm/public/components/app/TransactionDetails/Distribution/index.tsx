@@ -67,17 +67,27 @@ export class Distribution extends Component<Props> {
   };
 
   public formatYLong = (t: number) => {
-    return i18n.translate(
-      'xpack.apm.transactionDetails.transactionsDurationDistributionChart.unitLongLabel',
-      {
-        defaultMessage:
-          '{transType, select, request {{transCount, plural, =0 {# request} one {# request} other {# requests}}} other {{transCount, plural, =0 {# transaction} one {# transaction} other {# transactions}}}}',
-        values: {
-          transCount: t,
-          transType: this.props.urlParams.transactionType as string
-        }
-      }
-    );
+    return this.props.urlParams.transactionType === 'request'
+      ? i18n.translate(
+          'xpack.apm.transactionDetails.transactionsDurationDistributionChart.requestTypeUnitLongLabel',
+          {
+            defaultMessage:
+              '{transCount, plural, =0 {# request} one {# request} other {# requests}}',
+            values: {
+              transCount: t
+            }
+          }
+        )
+      : i18n.translate(
+          'xpack.apm.transactionDetails.transactionsDurationDistributionChart.transactionTypeUnitLongLabel',
+          {
+            defaultMessage:
+              '{transCount, plural, =0 {# transaction} one {# transaction} other {# transactions}}',
+            values: {
+              transCount: t
+            }
+          }
+        );
   };
 
   public render() {
