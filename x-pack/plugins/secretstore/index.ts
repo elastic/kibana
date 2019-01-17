@@ -8,7 +8,6 @@ import crypto from 'crypto';
 import { join, resolve } from 'path';
 import { Keystore } from '../../../src/server/keystore';
 import { getData } from '../../../src/server/path';
-import mappings from './mappings.json';
 import { SecretStore } from './server';
 
 const path = join(getData(), 'kibana.keystore');
@@ -20,14 +19,6 @@ export const secretstore = (kibana: any) => {
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     configPrefix: 'xpack.secretstore',
     publicDir: resolve(__dirname, 'public'),
-    uiExports: {
-      mappings,
-      savedObjectSchemas: {
-        secretType: {
-          hidden: true,
-        },
-      },
-    },
 
     config(Joi: any) {
       return Joi.object({
@@ -52,15 +43,7 @@ export const secretstore = (kibana: any) => {
         keystore.save();
       }
 
-      const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
-      const so = server.savedObjects.getSavedObjectsRepository(callWithInternalUser, [
-        'secretType',
-      ]);
-
-      server.expose(
-        'secretstore',
-        new SecretStore(so, 'secretType', keystore.get('xpack.secretstore.secret'))
-      );
+      server.expose('secretstore', new SecretStore(keystore.get('xpack.secretstore.secret')));
     },
   });
 };

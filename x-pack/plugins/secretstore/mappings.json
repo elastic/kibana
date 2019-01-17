@@ -1,9 +1,0 @@
-{
-  "secretType": {
-    "properties": {
-      "secret": {
-        "type": "text"
-      }
-    }
-  }
-}
