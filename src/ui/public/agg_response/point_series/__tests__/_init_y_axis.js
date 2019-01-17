@@ -26,8 +26,8 @@ describe('initYAxis', function () {
   const baseChart = {
     aspects: {
       y: [
-        { title: 'y1', fieldFormatter: _.identity },
-        { title: 'y2', fieldFormatter: _.identity },
+        { title: 'y1', fieldFormatter: v => v },
+        { title: 'y2', fieldFormatter: v => v },
       ],
       x: [{
         title: 'x'
