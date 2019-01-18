@@ -140,7 +140,7 @@ class SearchBarUI extends Component<Props, State> {
             appName={this.props.appName}
             indexPatterns={this.props.indexPatterns}
             store={this.props.store}
-            prepend={filterTriggerButton}
+            prepend={this.props.showFilterBar ? filterTriggerButton : ''}
           />
         ) : (
           ''

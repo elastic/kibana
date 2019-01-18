@@ -33,6 +33,7 @@ export interface IndexPatternField {
   type: string;
   aggregatable: boolean;
   filterable: boolean;
+  searchable: boolean;
 }
 
 export interface StaticIndexPatternField {
