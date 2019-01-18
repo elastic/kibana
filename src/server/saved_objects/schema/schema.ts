@@ -40,14 +40,6 @@ export class SavedObjectsSchema {
     return false;
   }
 
-  public getAvailableTypes() {
-    if (this.definition) {
-      return Object.entries(this.definition).filter(entry => !entry[1].hidden);
-    }
-
-    return [];
-  }
-
   public isNamespaceAgnostic(type: string) {
     // if no plugins have registered a uiExports.savedObjectSchemas,
     // this.schema will be undefined, and no types are namespace agnostic

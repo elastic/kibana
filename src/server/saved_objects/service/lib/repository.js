@@ -36,7 +36,7 @@ export class SavedObjectsRepository {
       schema,
       serializer,
       migrator,
-      includeHiddenTypes,
+      includeHiddenTypes = [],
       onBeforeWrite = () => { },
     } = options;
 
@@ -51,7 +51,7 @@ export class SavedObjectsRepository {
     this._index = index;
     this._mappings = mappings;
     this._schema = schema;
-    this._includeHiddenTypes = includeHiddenTypes || [];
+    this._includeHiddenTypes = includeHiddenTypes;
     this._type = getRootType(this._mappings);
     this._onBeforeWrite = onBeforeWrite;
     this._unwrappedCallCluster = async (...args) => {
@@ -82,7 +82,7 @@ export class SavedObjectsRepository {
       namespace,
     } = options;
 
-    this.assertAllowedType(type);
+    this._assertAllowedType(type);
 
     const method = id && !overwrite ? 'create' : 'index';
     const time = this._getCurrentTime();
@@ -162,7 +162,10 @@ export class SavedObjectsRepository {
     const { items } = await this._writeToCluster('bulk', {
       index: this._index,
       refresh: 'wait_for',
-      body: objects.reduce((acc, object) => ([
+      body: objects.filter(object => {
+        this._assertAllowedType(object.type);
+        return object;
+      }).reduce((acc, object) => ([
         ...acc,
         ...objectToBulkRequest(object)
       ]), []),
@@ -220,7 +223,7 @@ export class SavedObjectsRepository {
    * @returns {promise}
    */
   async delete(type, id, options = {}) {
-    this.assertAllowedType(type);
+    this._assertAllowedType(type);
 
     const {
       namespace
@@ -309,7 +312,7 @@ export class SavedObjectsRepository {
       fields,
       namespace,
     } = options;
-    this.assertAllowedType(type);
+    this._assertAllowedType(type);
 
     if (!type) {
       throw new TypeError(`options.type must be a string or an array of strings`);
@@ -432,7 +435,7 @@ export class SavedObjectsRepository {
    * @returns {promise} - { id, type, version, attributes }
    */
   async get(type, id, options = {}) {
-    this.assertAllowedType(type);
+    this._assertAllowedType(type);
     const {
       namespace
     } = options;
@@ -474,6 +477,8 @@ export class SavedObjectsRepository {
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {
+    this._assertAllowedType(type);
+
     const {
       version,
       namespace
@@ -526,6 +531,7 @@ export class SavedObjectsRepository {
     if (typeof counterFieldName !== 'string') {
       throw new Error('"counterFieldName" argument must be a string');
     }
+    this._assertAllowedType(type);
 
     const {
       migrationVersion,
@@ -615,9 +621,11 @@ export class SavedObjectsRepository {
     return omit(savedObject, 'namespace');
   }
 
-  assertAllowedType(type) {
-    if(this._schema.isHiddenType(type) && !this._includeHiddenTypes.includes(type)) {
-      throw Error('Hidden types not allowed!');
-    }
+  _assertAllowedType(types) {
+    [].concat(types).forEach((type) => {
+      if(this._schema.isHiddenType(type) && !this._includeHiddenTypes.includes(type)) {
+        throw Error('Hidden types not allowed!');
+      }
+    });
   }
 }
