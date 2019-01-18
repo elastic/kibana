@@ -157,7 +157,7 @@
   @include formControlBase;
   background-color: #ffffff;
   border: 1px solid $kuiFormControlBorderColor;
-  border-radius: 0;
+  border-radius: $borderRadius;
   transition: border-color $kuiInputTransitionTiming;
   min-height: $kuiFormInputHeight; /* 1 */
 

@@ -5,6 +5,7 @@
  */
 
 import { EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 // @ts-ignore
 import CustomPlot from 'x-pack/plugins/apm/public/components/shared/charts/CustomPlot';
@@ -22,14 +23,21 @@ export function CPUUsageChart({ data, hoverXHandlers }: Props) {
   return (
     <React.Fragment>
       <EuiTitle size="s">
-        <span>CPU usage</span>
+        <span>
+          {i18n.translate(
+            'xpack.apm.serviceDetails.metrics.cpuUsageChartTitle',
+            {
+              defaultMessage: 'CPU usage'
+            }
+          )}
+        </span>
       </EuiTitle>
       <CustomPlot
         {...hoverXHandlers}
         noHits={data.totalHits === 0}
         series={data.series}
         tickFormatY={(y: number | null) => `${(y || 0) * 100}%`}
-        formatTooltipValue={(c: Coordinate) => asPercent(c.y || 0)}
+        formatTooltipValue={(c: Coordinate) => asPercent(c.y || 0, 1)}
         yMax={1}
       />
     </React.Fragment>

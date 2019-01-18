@@ -21,6 +21,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
+  const inspector = getService('inspector');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
@@ -52,7 +53,7 @@ export default function ({ getService, getPageObjects }) {
     before(initLineChart);
 
     afterEach(async () => {
-      await PageObjects.visualize.closeInspector();
+      await inspector.close();
     });
 
     it('should show correct chart', async function () {
@@ -77,8 +78,7 @@ export default function ({ getService, getPageObjects }) {
 
 
     it('should have inspector enabled', async function () {
-      const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-      expect(spyToggleExists).to.be(true);
+      await inspector.expectIsEnabled();
     });
 
     it('should show correct chart order by Term', async function () {
@@ -107,10 +107,8 @@ export default function ({ getService, getPageObjects }) {
 
       const expectedChartData = [['png', '1,373'], ['php', '445'], ['jpg', '9,109'], ['gif', '918'], ['css', '2,159']];
 
-      await PageObjects.visualize.openInspector();
-      const data = await PageObjects.visualize.getInspectorTableData();
-      log.debug(data);
-      expect(data).to.eql(expectedChartData);
+      await inspector.open();
+      await inspector.expectTableData(expectedChartData);
     });
 
     it('should be able to save and load', async function () {

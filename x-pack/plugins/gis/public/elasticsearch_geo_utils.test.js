@@ -9,7 +9,7 @@ import {
   geoPointToGeometry,
   geoShapeToGeometry,
   createExtentFilter,
-  convertMapExtentToEnvelope,
+  convertMapExtentToPolygon,
 } from './elasticsearch_geo_utils';
 
 const geoFieldName = 'location';
@@ -218,16 +218,10 @@ describe('createExtentFilter', () => {
   it('should return elasticsearch geo_bounding_box filter for geo_point field', () => {
     const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_point');
     expect(filter).toEqual({
-      geo_bounding_box: {
-        [geoFieldName]: {
-          top_left: {
-            lat: mapExtent.maxLat,
-            lon: mapExtent.minLon
-          },
-          bottom_right: {
-            lat: mapExtent.minLat,
-            lon: mapExtent.maxLon
-          }
+      "geo_bounding_box": {
+        "location": {
+          "bottom_right": [-83, 35],
+          "top_left": [-89, 39]
         }
       }
     });
@@ -236,16 +230,15 @@ describe('createExtentFilter', () => {
   it('should return elasticsearch geo_shape filter for geo_shape field', () => {
     const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_shape');
     expect(filter).toEqual({
-      geo_shape: {
-        [geoFieldName]: {
-          shape: {
-            type: 'envelope',
-            coordinates: [
-              [mapExtent.minLon, mapExtent.maxLat],
-              [mapExtent.maxLon, mapExtent.minLat]
-            ]
-          },
-          relation: 'INTERSECTS'
+      "geo_shape": {
+        "location": {
+          "relation": "INTERSECTS",
+          "shape": {
+            "coordinates": [
+              [[-89, 39], [-89, 35], [-83, 35], [-83, 39], [-89, 39]]
+            ],
+            "type": "polygon"
+          }
         }
       }
     });
@@ -260,96 +253,79 @@ describe('createExtentFilter', () => {
     };
     const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_shape');
     expect(filter).toEqual({
-      geo_shape: {
-        [geoFieldName]: {
-          shape: {
-            type: 'envelope',
-            coordinates: [
-              [-180, mapExtent.maxLat],
-              [180, mapExtent.minLat]
-            ]
-          },
-          relation: 'INTERSECTS'
+      "geo_shape": {
+        "location": {
+          "relation": "INTERSECTS",
+          "shape": {
+            "coordinates": [
+              [[-180, 39], [-180, 35], [180, 35], [180, 39], [-180, 39]]
+            ],
+            "type": "polygon"
+          }
         }
       }
     });
   });
 });
 
-describe('convertMapExtentToEnvelope', () => {
+describe('convertMapExtentToPolygon', () => {
   it('should convert bounds to envelope', () => {
     const bounds = {
-      maxLat: 65.98468,
-      maxLon: -162.71869,
-      minLat: 60.97598,
-      minLon: -174.59527,
+      maxLat: 10,
+      maxLon: 100,
+      minLat: -10,
+      minLon: 90,
     };
-    expect(convertMapExtentToEnvelope(bounds)).toEqual({
-      "type": "envelope",
+    expect(convertMapExtentToPolygon(bounds)).toEqual({
+      "type": "polygon",
       "coordinates": [
-        [-174.59527, 65.98468], [-162.71869, 60.97598]
+        [[90, 10], [90, -10], [100, -10], [100, 10], [90, 10]]
       ]
     });
   });
 
   it('should clamp longitudes to -180 to 180', () => {
     const bounds = {
-      maxLat: 85.05113,
-      maxLon: 209.55801,
-      minLat: -85.05113,
-      minLon: -454.84711,
+      maxLat: 10,
+      maxLon: 200,
+      minLat: -10,
+      minLon: -400,
     };
-    expect(convertMapExtentToEnvelope(bounds)).toEqual({
-      "type": "envelope",
+    expect(convertMapExtentToPolygon(bounds)).toEqual({
+      "type": "polygon",
       "coordinates": [
-        [-180, 85.05113], [180, -85.05113]
+        [[-180, 10], [-180, -10], [180, -10], [180, 10], [-180, 10]]
       ]
     });
   });
 
-  it('should split bounds that cross dateline(east to west)', () => {
+  it('should handle bounds that cross dateline(east to west)', () => {
     const bounds = {
-      maxLat: 66.01959,
-      maxLon: 190.11434,
-      minLat: 61.0176,
-      minLon: 169.35168,
+      maxLat: 10,
+      maxLon: 190,
+      minLat: -10,
+      minLon: 170,
     };
-    expect(convertMapExtentToEnvelope(bounds)).toEqual([
-      {
-        "type": "envelope",
-        "coordinates": [
-          [169.35168, 66.01959], [180, 61.0176]
-        ]
-      },
-      {
-        "type": "envelope",
-        "coordinates": [
-          [-180, 66.01959], [-169.88566, 61.0176]
-        ]
-      },
-    ]);
+    expect(convertMapExtentToPolygon(bounds)).toEqual({
+      "type": "polygon",
+      "coordinates": [
+        [[170, 10], [170, -10], [-170, -10], [-170, 10], [170, 10]]
+      ]
+    });
   });
 
-  it('should split bounds that cross dateline(west to east)', () => {
+  it('should handle bounds that cross dateline(west to east)', () => {
     const bounds = {
-      maxLat: 14.29261,
-      maxLon: -159.0253,
-      minLat: -18.0925,
-      minLon: -193.69868,
+      maxLat: 10,
+      maxLon: -170,
+      minLat: -10,
+      minLon: -190,
     };
-    expect(convertMapExtentToEnvelope(bounds)).toEqual([
-      {
-        "type": "envelope",
-        "coordinates": [
-          [166.30132, 14.29261], [180, -18.0925]
-        ]
-      },
-      {
-        "type": "envelope",
-        "coordinates": [
-          [-180, 14.29261], [-159.0253, -18.0925]
-        ]
-      },
-    ]);
+    expect(convertMapExtentToPolygon(bounds)).toEqual({
+      "type": "polygon",
+      "coordinates": [
+        [[170, 10], [170, -10], [-170, -10], [-170, 10], [170, 10]]
+      ]
+    });
   });
 });

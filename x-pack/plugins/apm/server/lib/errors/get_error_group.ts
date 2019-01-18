@@ -20,7 +20,7 @@ import { getTransaction } from '../transactions/get_transaction';
 export interface ErrorGroupAPIResponse {
   transaction?: Transaction;
   error?: APMError;
-  occurrencesCount?: number;
+  occurrencesCount: number;
 }
 
 // TODO: rename from "getErrorGroup"  to "getErrorGroupSample" (since a single error is returned, not an errorGroup)
@@ -82,6 +82,6 @@ export async function getErrorGroup({
   return {
     transaction,
     error,
-    occurrencesCount: oc(resp).hits.total()
+    occurrencesCount: resp.hits.total
   };
 }

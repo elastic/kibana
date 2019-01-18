@@ -27,7 +27,7 @@
       "extraPatterns": [
         "build",
         "optimize",
-        "dlls",
+        "built_assets",
         ".eslintcache"
       ]
     }
@@ -95,7 +95,7 @@
   },
   "dependencies": {
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "6.0.1",
+    "@elastic/eui": "6.5.1",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "2.3.2",
@@ -123,7 +123,7 @@
     "babel-loader": "7.1.5",
     "babel-polyfill": "6.26.0",
     "babel-register": "6.26.0",
-    "bluebird": "2.9.34",
+    "bluebird": "3.5.3",
     "boom": "^7.2.0",
     "brace": "0.11.1",
     "cache-loader": "1.2.2",
@@ -360,7 +360,7 @@
     "jest-raw-loader": "^1.0.1",
     "jimp": "0.2.28",
     "json5": "^1.0.1",
-    "karma": "1.7.0",
+    "karma": "3.1.4",
     "karma-chrome-launcher": "2.1.1",
     "karma-coverage": "1.1.1",
     "karma-firefox-launcher": "1.0.1",
