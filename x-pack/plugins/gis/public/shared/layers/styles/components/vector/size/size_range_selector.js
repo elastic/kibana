@@ -29,6 +29,12 @@ export class SizeRangeSelector extends React.Component {
     return typeof this.props.minSize === 'number' && typeof this.props.maxSize === 'number';
   }
 
+  componentDidMount() {
+    if (!this._areSizesValid()) {
+      this._onSizeChange(DEFAULT_MIN_SIZE, DEFAULT_MAX_SIZE);
+    }
+  }
+
   componentDidUpdate() {
     if (!this._areSizesValid()) {
       this._onSizeChange(DEFAULT_MIN_SIZE, DEFAULT_MAX_SIZE);
@@ -52,40 +58,38 @@ export class SizeRangeSelector extends React.Component {
     };
 
     return (
-      <EuiFormRow>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFormRow
-              label="Min size"
-              compressed
-            >
-              <EuiRange
-                min={DEFAULT_MIN_SIZE}
-                max={DEFAULT_MAX_SIZE}
-                value={this.props.minSize.toString()}
-                onChange={onMinSizeChange}
-                showInput
-                showRange
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFormRow
-              label="Max size"
-              compressed
-            >
-              <EuiRange
-                min={DEFAULT_MIN_SIZE}
-                max={DEFAULT_MAX_SIZE}
-                value={this.props.maxSize.toString()}
-                onChange={onMaxSizeChange}
-                showInput
-                showRange
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFormRow>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFormRow
+            label="Min size"
+            compressed
+          >
+            <EuiRange
+              min={DEFAULT_MIN_SIZE}
+              max={DEFAULT_MAX_SIZE}
+              value={this.props.minSize.toString()}
+              onChange={onMinSizeChange}
+              showInput
+              showRange
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            label="Max size"
+            compressed
+          >
+            <EuiRange
+              min={DEFAULT_MIN_SIZE}
+              max={DEFAULT_MAX_SIZE}
+              value={this.props.maxSize.toString()}
+              onChange={onMaxSizeChange}
+              showInput
+              showRange
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 }

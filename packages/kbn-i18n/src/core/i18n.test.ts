@@ -418,16 +418,16 @@ describe('I18n engine', () => {
 
   describe('translate', () => {
     test('should throw error if id is not a non-empty string', () => {
-      expect(() => i18n.translate(undefined as any)).toThrowErrorMatchingSnapshot();
-      expect(() => i18n.translate(null as any)).toThrowErrorMatchingSnapshot();
-      expect(() => i18n.translate(true as any)).toThrowErrorMatchingSnapshot();
-      expect(() => i18n.translate(5 as any)).toThrowErrorMatchingSnapshot();
-      expect(() => i18n.translate({} as any)).toThrowErrorMatchingSnapshot();
-      expect(() => i18n.translate('')).toThrowErrorMatchingSnapshot();
+      expect(() => i18n.translate(undefined as any, {} as any)).toThrowErrorMatchingSnapshot();
+      expect(() => i18n.translate(null as any, {} as any)).toThrowErrorMatchingSnapshot();
+      expect(() => i18n.translate(true as any, {} as any)).toThrowErrorMatchingSnapshot();
+      expect(() => i18n.translate(5 as any, {} as any)).toThrowErrorMatchingSnapshot();
+      expect(() => i18n.translate({} as any, {} as any)).toThrowErrorMatchingSnapshot();
+      expect(() => i18n.translate('', {} as any)).toThrowErrorMatchingSnapshot();
     });
 
     test('should throw error if translation message and defaultMessage are not provided', () => {
-      expect(() => i18n.translate('foo')).toThrowErrorMatchingSnapshot();
+      expect(() => i18n.translate('foo', {} as any)).toThrowErrorMatchingSnapshot();
     });
 
     test('should return message as is if values are not provided', () => {
@@ -438,7 +438,7 @@ describe('I18n engine', () => {
         },
       });
 
-      expect(i18n.translate('a.b.c')).toBe('foo');
+      expect(i18n.translate('a.b.c', {} as any)).toBe('foo');
     });
 
     test('should return default message as is if values are not provided', () => {
@@ -467,10 +467,10 @@ describe('I18n engine', () => {
       expect(
         i18n.translate('a.b.c', {
           values: { a: 1, b: 2, c: 3 },
-        })
+        } as any)
       ).toBe('foo 1, 2, 3 bar');
 
-      expect(i18n.translate('d.e.f', { values: { foo: 'bar' } })).toBe('bar');
+      expect(i18n.translate('d.e.f', { values: { foo: 'bar' } } as any)).toBe('bar');
     });
 
     test('should interpolate variables for default messages', () => {
@@ -494,9 +494,13 @@ describe('I18n engine', () => {
         },
       });
 
-      expect(i18n.translate('a.b.c', { values: { numPhotos: 0 } })).toBe('You have no photos.');
-      expect(i18n.translate('a.b.c', { values: { numPhotos: 1 } })).toBe('You have one photo.');
-      expect(i18n.translate('a.b.c', { values: { numPhotos: 1000 } })).toBe(
+      expect(i18n.translate('a.b.c', { values: { numPhotos: 0 } } as any)).toBe(
+        'You have no photos.'
+      );
+      expect(i18n.translate('a.b.c', { values: { numPhotos: 1 } } as any)).toBe(
+        'You have one photo.'
+      );
+      expect(i18n.translate('a.b.c', { values: { numPhotos: 1000 } } as any)).toBe(
         'You have 1,000 photos.'
       );
     });
@@ -551,7 +555,9 @@ describe('I18n engine', () => {
       });
       i18n.setDefaultLocale('en');
 
-      expect(() => i18n.translate('a.b.c', { values: { foo: 0 } })).toThrowErrorMatchingSnapshot();
+      expect(() =>
+        i18n.translate('a.b.c', { values: { foo: 0 } } as any)
+      ).toThrowErrorMatchingSnapshot();
 
       expect(() =>
         i18n.translate('d.e.f', {
@@ -574,7 +580,7 @@ describe('I18n engine', () => {
       });
       i18n.setDefaultLocale('en');
 
-      expect(i18n.translate('a.b.c', { values: { result: 0.15 } })).toBe('Result: 15%');
+      expect(i18n.translate('a.b.c', { values: { result: 0.15 } } as any)).toBe('Result: 15%');
 
       expect(
         i18n.translate('d.e.f', {
@@ -598,25 +604,25 @@ describe('I18n engine', () => {
       expect(
         i18n.translate('a.short', {
           values: { start: new Date(2018, 5, 20) },
-        })
+        } as any)
       ).toBe('Sale begins 6/20/18');
 
       expect(
         i18n.translate('a.medium', {
           values: { start: new Date(2018, 5, 20) },
-        })
+        } as any)
       ).toBe('Sale begins Jun 20, 2018');
 
       expect(
         i18n.translate('a.long', {
           values: { start: new Date(2018, 5, 20) },
-        })
+        } as any)
       ).toBe('Sale begins June 20, 2018');
 
       expect(
         i18n.translate('a.full', {
           values: { start: new Date(2018, 5, 20) },
-        })
+        } as any)
       ).toBe('Sale begins Wednesday, June 20, 2018');
     });
 
@@ -664,13 +670,13 @@ describe('I18n engine', () => {
       expect(
         i18n.translate('a.short', {
           values: { expires: new Date(2018, 5, 20, 18, 40, 30, 50) },
-        })
+        } as any)
       ).toBe('Coupon expires at 6:40 PM');
 
       expect(
         i18n.translate('a.medium', {
           values: { expires: new Date(2018, 5, 20, 18, 40, 30, 50) },
-        })
+        } as any)
       ).toBe('Coupon expires at 6:40:30 PM');
     });
 
@@ -706,7 +712,9 @@ describe('I18n engine', () => {
         },
       });
 
-      expect(i18n.translate('a.b.c', { values: { total: 1000 } })).toBe('Your total is $1,000.00');
+      expect(i18n.translate('a.b.c', { values: { total: 1000 } } as any)).toBe(
+        'Your total is $1,000.00'
+      );
 
       i18n.setFormats({
         number: {
@@ -714,9 +722,13 @@ describe('I18n engine', () => {
         },
       });
 
-      expect(i18n.translate('a.b.c', { values: { total: 1000 } })).toBe('Your total is $1,000.00');
+      expect(i18n.translate('a.b.c', { values: { total: 1000 } } as any)).toBe(
+        'Your total is $1,000.00'
+      );
 
-      expect(i18n.translate('d.e.f', { values: { total: 1000 } })).toBe('Your total is €1,000.00');
+      expect(i18n.translate('d.e.f', { values: { total: 1000 } } as any)).toBe(
+        'Your total is €1,000.00'
+      );
     });
 
     test('should format default message with a custom format', () => {
@@ -768,7 +780,9 @@ describe('I18n engine', () => {
       });
       i18n.setDefaultLocale('en');
 
-      expect(i18n.translate('a.b.c', { values: { total: 1000 } })).toBe('Your total is 1,000');
+      expect(i18n.translate('a.b.c', { values: { total: 1000 } } as any)).toBe(
+        'Your total is 1,000'
+      );
 
       expect(
         i18n.translate('d.e.f', {
@@ -788,7 +802,7 @@ describe('I18n engine', () => {
       i18n.setDefaultLocale('en');
 
       expect(() =>
-        i18n.translate('a.b.c', { values: { total: 1 } })
+        i18n.translate('a.b.c', { values: { total: 1 } } as any)
       ).toThrowErrorMatchingSnapshot();
 
       expect(() =>

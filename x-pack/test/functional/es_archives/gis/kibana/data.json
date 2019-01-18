@@ -68,6 +68,38 @@
   "value": {
     "index": ".kibana",
     "type": "doc",
+    "id": "index-pattern:1035e930-1811-11e9-b78a-23d706cd2507",
+    "source": {
+      "type" : "index-pattern",
+      "index-pattern" : {
+        "title" : "antimeridian_points",
+        "fields" : "[{\"name\":\"_id\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"location\",\"type\":\"geo_point\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "type": "doc",
+    "id": "index-pattern:502886a0-18f8-11e9-97c8-5da5e037299c",
+    "source": {
+      "type" : "index-pattern",
+      "index-pattern" : {
+        "title" : "antimeridian_shapes",
+        "fields" : "[{\"name\":\"_id\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"location\",\"type\":\"geo_shape\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false}]"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "type": "doc",
     "id": "gis-map:d2e73f40-e14a-11e8-a35a-370a8516603a",
     "source": {
       "type" : "gis-map",
@@ -214,6 +246,98 @@
             [
               -55.49169,
               18.17193
+            ]
+          ]
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "type": "doc",
+    "id": "gis-map:346fbec0-1811-11e9-b78a-23d706cd2507",
+    "source": {
+      "type" : "gis-map",
+      "gis-map" : {
+        "title" : "antimeridian points example",
+        "description" : "",
+        "mapStateJSON" : "{\"zoom\":8.8,\"center\":{\"lon\":-179.98743,\"lat\":-0.09561},\"timeFilters\":{\"from\":\"now-15m\",\"to\":\"now\",\"mode\":\"quick\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":0},\"query\":{\"query\":\"\",\"language\":\"kuery\"}}",
+        "layerListJSON" : "[{\"id\":\"0hmz5\",\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"TILE\",\"properties\":{\"alphaValue\":1}},\"type\":\"TILE\",\"minZoom\":0,\"maxZoom\":24},{\"id\":\"frk92\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"id\":\"7d807c75-088a-44b7-920a-e7e47f4fc038\",\"type\":\"ES_SEARCH\",\"indexPatternId\":\"1035e930-1811-11e9-b78a-23d706cd2507\",\"geoField\":\"location\",\"limit\":2048,\"filterByMapBounds\":true,\"tooltipProperties\":[]},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#e6194b\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}},\"alphaValue\":1},\"previousStyle\":null},\"type\":\"VECTOR\"}]",
+        "uiStateJSON" : "{\"isDarkMode\":false}",
+        "bounds" : {
+          "type" : "polygon",
+          "coordinates" : [
+            [
+              [
+                172.235,
+                6.35533
+              ],
+              [
+                172.235,
+                -6.16462
+              ],
+              [
+                -174.17114,
+                -6.16462
+              ],
+              [
+                -174.17114,
+                6.35533
+              ],
+              [
+                172.235,
+                6.35533
+              ]
+            ]
+          ]
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "type": "doc",
+    "id": "gis-map:6a6ff930-18f8-11e9-97c8-5da5e037299c",
+    "source": {
+      "type" : "gis-map",
+      "gis-map" : {
+        "title" : "antimeridian shapes example",
+        "description" : "",
+        "mapStateJSON" : "{\"zoom\":5.65,\"center\":{\"lon\":179.03193,\"lat\":0.09593},\"timeFilters\":{\"from\":\"now-15m\",\"to\":\"now\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":0},\"query\":{\"language\":\"kuery\",\"query\":\"\"}}",
+        "layerListJSON" : "[{\"id\":\"0hmz5\",\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"TILE\",\"properties\":{\"alphaValue\":1}},\"type\":\"TILE\",\"minZoom\":0,\"maxZoom\":24},{\"id\":\"ad9fj\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"id\":\"4e4b5628-dbdc-40bb-93f0-8a7a48be1141\",\"type\":\"ES_SEARCH\",\"indexPatternId\":\"502886a0-18f8-11e9-97c8-5da5e037299c\",\"geoField\":\"location\",\"limit\":2048,\"filterByMapBounds\":true,\"tooltipProperties\":[]},\"visible\":true,\"temporary\":true,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#e6194b\"}},\"lineColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#FFFFFF\"}},\"lineWidth\":{\"type\":\"STATIC\",\"options\":{\"size\":1}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}},\"alphaValue\":1}},\"type\":\"VECTOR\"}]",
+        "uiStateJSON" : "{\"isDarkMode\":false}",
+        "bounds" : {
+          "type" : "polygon",
+          "coordinates" : [
+            [
+              [
+                172.235,
+                6.35533
+              ],
+              [
+                172.235,
+                -6.16462
+              ],
+              [
+                -174.17114,
+                -6.16462
+              ],
+              [
+                -174.17114,
+                6.35533
+              ],
+              [
+                172.235,
+                6.35533
+              ]
             ]
           ]
         }
