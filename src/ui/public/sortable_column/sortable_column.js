@@ -48,12 +48,12 @@ app.directive('sortableColumn', function (i18n) {
         const isAscending = this.isSortedAscending();
         if(isAscending) {
           return i18n('common.ui.sortableColumn.sortAscendingAriaLabel', {
-            defaultMassage: 'Sort {field} ascending',
+            defaultMessage: 'Sort {field} ascending',
             values: { field: this.field },
           });
         }
         return i18n('common.ui.sortableColumn.sortDescendingAriaLabel', {
-          defaultMassage: 'Sort {field} descending',
+          defaultMessage: 'Sort {field} descending',
           values: { field: this.field },
         });
       }
