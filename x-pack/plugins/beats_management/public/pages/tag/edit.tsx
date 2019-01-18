@@ -87,7 +87,7 @@ class TagEditPageComponent extends React.PureComponent<
             }}
             onConfigAddOrEdit={(block: ConfigurationBlock) => {
               this.props.libs.configBlocks
-                .upsert({ ...block, tag: this.state.tag.id })
+                .upsert([{ ...block, tag: this.state.tag.id }])
                 .catch((e: any) => {
                   // tslint:disable-next-line
                   console.error('Error upseting config block', e);

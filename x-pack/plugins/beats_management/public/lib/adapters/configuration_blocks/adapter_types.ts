@@ -7,8 +7,8 @@ import { ConfigurationBlock } from '../../../../common/domain_types';
 
 export interface FrontendConfigBlocksAdapter {
   upsert(
-    block: ConfigurationBlock
-  ): Promise<{ success?: boolean; blockID?: string; error?: string }>;
+    blocks: ConfigurationBlock[]
+  ): Promise<Array<{ success?: boolean; blockID?: string; error?: string }>>;
   getForTags(
     tagIds: string[],
     page: number

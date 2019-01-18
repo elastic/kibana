@@ -122,6 +122,8 @@ class TagCreatePageComponent extends React.PureComponent<
 
   private saveTag = async () => {
     await this.props.containers.tags.upsertTag(this.state.tag);
+    await this.props.libs.configBlocks.upsert(this.state.configuration_blocks);
+
     this.props.goTo(`/overview/configuration_tags`);
   };
   private getNumExclusiveConfigurationBlocks = () =>

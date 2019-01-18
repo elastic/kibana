@@ -13,12 +13,8 @@ import { TagEdit } from '../../../components/tag/tag_edit';
 import { AppPageProps } from '../../../frontend_types';
 interface PageState {
   tag: BeatTag;
-  configuration_blocks: {
-    error?: string | undefined;
-    blocks: ConfigurationBlock[];
-    page: number;
-    total: number;
-  };
+  configuration_blocks: ConfigurationBlock[];
+  currentConfigPage: number;
 }
 
 export class InitialTagPage extends Component<AppPageProps, PageState> {
@@ -26,12 +22,13 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
     super(props);
     this.state = {
       tag: {
-        id: props.urlState.createdTag ? props.urlState.createdTag : uuidv4(),
+        id: uuidv4(),
         name: '',
         color: '#DD0A73',
         hasConfigurationBlocksTypes: [],
       },
-      configuration_blocks: { blocks: [], page: 0, total: 0 },
+      configuration_blocks: [],
+      currentConfigPage: 0,
     };
 
     if (props.urlState.createdTag) {
@@ -39,55 +36,49 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
     }
   }
 
-  public async componentWillMount() {
-    if (!this.props.urlState.createdTag) {
-      await this.props.libs.tags.upsertTag(this.state.tag);
-    }
-    this.loadConfigBlocks();
-  }
-
   public render() {
+    const blockStartingIndex = this.state.currentConfigPage * 5;
+
     return (
       <React.Fragment>
         <TagEdit
           tag={this.state.tag}
-          configuration_blocks={this.state.configuration_blocks}
-          onConfigListChange={(index: number, size: number) => {
-            this.loadConfigBlocks(index);
+          configuration_blocks={{
+            blocks: this.state.configuration_blocks.slice(
+              blockStartingIndex,
+              5 + blockStartingIndex
+            ),
+            page: this.state.currentConfigPage,
+            total: this.state.configuration_blocks.length,
           }}
           onTagChange={(field: string, value: string | number) =>
             this.setState(oldState => ({
               tag: { ...oldState.tag, [field]: value },
             }))
           }
+          onConfigListChange={(index: number) => {
+            this.setState({
+              currentConfigPage: index,
+            });
+          }}
           onConfigAddOrEdit={(block: ConfigurationBlock) => {
-            this.props.libs.configBlocks
-              .upsert({ ...block, tag: this.state.tag.id })
-              .catch((e: any) => {
-                // tslint:disable-next-line
-                console.error('Error upseting config block', e);
-              })
-              .then(() => {
-                this.loadConfigBlocks(this.state.configuration_blocks.page);
-              });
+            this.setState(previousState => ({
+              configuration_blocks: previousState.configuration_blocks.concat([block]),
+            }));
           }}
           onConfigRemoved={(id: string) => {
-            this.props.libs.configBlocks
-              .delete(id)
-              .catch((e: any) => {
-                // tslint:disable-next-line
-                console.error(`Error removing block ${id}`, e);
-              })
-              .then(() => {
-                this.loadConfigBlocks(this.state.configuration_blocks.page);
-              });
+            this.setState(previousState => ({
+              configuration_blocks: previousState.configuration_blocks.filter(
+                block => block.id !== id
+              ),
+            }));
           }}
         />
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              disabled={this.state.configuration_blocks.blocks.length === 0}
+              disabled={this.state.configuration_blocks.length === 0}
               onClick={this.saveTag}
             >
               <FormattedMessage
@@ -100,16 +91,6 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
       </React.Fragment>
     );
   }
-
-  private loadConfigBlocks = async (page: number = -1) => {
-    const blocksResponse = await this.props.libs.configBlocks.getForTags([this.state.tag.id], page);
-
-    if (blocksResponse.blocks.length > 0) {
-      this.setState({
-        configuration_blocks: blocksResponse,
-      });
-    }
-  };
 
   private loadTag = async () => {
     const tags = await this.props.libs.tags.getTagsWithIds([this.state.tag.id]);
@@ -129,6 +110,8 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
         })
       );
     }
+    this.props.libs.configBlocks.upsert(this.state.configuration_blocks);
+
     this.props.setUrlState({
       createdTag: newTag.id,
     });

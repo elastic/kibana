@@ -11,11 +11,11 @@ import { FrontendConfigBlocksAdapter } from './adapter_types';
 export class RestConfigBlocksAdapter implements FrontendConfigBlocksAdapter {
   constructor(private readonly REST: RestAPIAdapter) {}
 
-  public async upsert(block: ConfigurationBlock) {
+  public async upsert(blocks: ConfigurationBlock[]) {
     const result = await this.REST.put<
       Array<{ success?: boolean; blockID?: string; error?: string }>
-    >(`/api/beats/configurations`, [block]);
-    return result[0];
+    >(`/api/beats/configurations`, blocks);
+    return result;
   }
   public async getForTags(
     tagIds: string[],

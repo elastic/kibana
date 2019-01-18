@@ -10,14 +10,14 @@ import { FrontendConfigBlocksAdapter } from './adapter_types';
 export class MemoryConfigBlocksAdapter implements FrontendConfigBlocksAdapter {
   constructor(private db: ConfigurationBlock[]) {}
 
-  public async upsert(block: ConfigurationBlock) {
-    this.db.push(block);
-    return {
+  public async upsert(blocks: ConfigurationBlock[]) {
+    this.db = this.db.concat(blocks);
+    return blocks.map(() => ({
       success: true,
       blockID: Math.random()
         .toString(36)
         .substring(7),
-    };
+    }));
   }
   public async getForTags(
     tagIds: string[]
