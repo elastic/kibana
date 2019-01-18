@@ -1,10 +1,14 @@
 <div class="app-container kbnError--multi-allow-explicit-index euiText">
-  <h3><icon aria-hidden="true" type="'alert'" color="'danger'"></icon>
-    <span i18n-id="common.ui.errorAllowExplicitIndex.errorTitle"
-    i18n-default-message="Oh no!"></span>
+  <h3>
+    <icon aria-hidden="true" type="'alert'" color="'danger'"></icon>
+    <span
+      i18n-id="common.ui.errorAllowExplicitIndex.errorTitle"
+      i18n-default-message="Oh no!">
+    </span>
   </h3>
 
-  <p i18n-id="common.ui.errorAllowExplicitIndex.errorDescription"
+  <p
+    i18n-id="common.ui.errorAllowExplicitIndex.errorDescription"
     i18n-default-message="It looks like your Elasticsearch cluster has the
     {allowExplicitIndexConfig} setting set to {allowExplicitIndexValue}, which
     prevents Kibana from making search requests. We use this ability to send a single request to
@@ -16,23 +20,28 @@
     }"
   ></p>
 
-  <p i18n-id="common.ui.errorAllowExplicitIndex.errorDisclaimer"
+  <p
+    i18n-id="common.ui.errorAllowExplicitIndex.errorDisclaimer"
     i18n-default-message="Unfortunately, until this issue is fixed you won't be able to use certain apps in Kibana, like
     Discover, Visualize and Dashboard."
   ></p>
 
-  <h3 i18n-id="common.ui.errorAllowExplicitIndex.howToFixErrorTitle"
+  <h3
+    i18n-id="common.ui.errorAllowExplicitIndex.howToFixErrorTitle"
     i18n-default-message="Ok, how do I fix this?"
   ></h3>
   <ol>
-    <li i18n-id="common.ui.errorAllowExplicitIndex.howToFix.removeItemLabel"
+    <li
+      i18n-id="common.ui.errorAllowExplicitIndex.howToFix.removeConfigItemText"
       i18n-default-message="Remove {allowExplicitIndexConfig} from your Elasticsearch config file."
       i18n-values="{ html_allowExplicitIndexConfig: '<code>rest.action.multi.allow_explicit_index: false</code>' }"
     ></li>
-    <li i18n-id="common.ui.errorAllowExplicitIndex.howToFix.restartLabel"
+    <li
+      i18n-id="common.ui.errorAllowExplicitIndex.howToFix.restartText"
       i18n-default-message="Restart Elasticsearch."
     ></li>
-    <li i18n-id="common.ui.errorAllowExplicitIndex.howToFix.goBackLabel"
+    <li
+      i18n-id="common.ui.errorAllowExplicitIndex.howToFix.goBackText"
       i18n-default-message="Use the browser's back button to return to what you were doing."
     ></li>
   </ol>
