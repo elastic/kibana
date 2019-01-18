@@ -34,3 +34,9 @@
     }
   }
 }
+
+.guidePageKillScreen {
+  background-color: tintOrShade($euiColorDanger, 90%, 70%);
+  padding: $euiSizeL;
+  margin-bottom: $euiSizeL;
+}

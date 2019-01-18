@@ -1,4 +1,4 @@
-$tabBackgroundColor: #FFF;
-$tabHoverBackgroundColor: #F2F2F2;
+$tabBackgroundColor: transparent;
+$tabHoverBackgroundColor: $euiColorLightestShade;
 
 @import "tabs";

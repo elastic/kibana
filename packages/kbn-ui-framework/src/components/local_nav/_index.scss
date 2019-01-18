@@ -1,25 +1,25 @@
 // Normal colors
 $localNavTextColor: $kuiTextColor;
-$localNavBackgroundColor: $kuiColorWhite;
+$localNavBackgroundColor: $euiColorEmptyShade;
 $localNavButtonTextColor: $kuiTextColor;
 $localNavButtonTextColor-isHover: $kuiColorLightestGray;
 $localNavButtonBackgroundColor: transparent;
 $localNavButtonBackgroundColor-isHover: $kuiColorBlue;
 $localNavButtonBackgroundColor-isSelected: $kuiColorLightestGray;
-$localNavBreadcrumbDelimiterColor: #5a5a5a;
-$localSearchBackgroundColor: #ffffff;
-$localSearchBorderColor-isInvalid: #e74C3c;
+$localNavBreadcrumbDelimiterColor: $euiBorderColor;
+$localSearchBackgroundColor: $euiColorGhost;
+$localSearchBorderColor-isInvalid: $euiColorDanger;
 $localDropdownBackgroundColor: $localNavButtonBackgroundColor-isSelected;
-$localDropdownFormNoteTextColor: #737373;
+$localDropdownFormNoteTextColor: $euiColorDarkShade;
 $localTabTextColor: $kuiColorDarkestGray;
 $localTabTextColor-isHover: $kuiColorBlue;
 $localTabTextColor-isSelected: $kuiColorBlue;
 $localBreadcrumbLinkColor: $kuiColorBlue;
-$localSearchButtonBackgroundColor: $kuiColorDarkGray;
-$localSearchButtonTextColor: #ffffff;
+$localSearchButtonBackgroundColor: $euiColorPrimary;
+$localSearchButtonTextColor: $euiColorGhost;
 $localDatePickerButtonHoverBackgroundColor: $localNavButtonBackgroundColor-isHover;
-$localDatePickerCellSelectedBackgroundColor: #777777;
-$localDatePickerCellSelectedTextColor: #ffffff;
+$localDatePickerCellSelectedBackgroundColor: $euiColorDarkShade;
+$localDatePickerCellSelectedTextColor: $euiTextColor;
 
 // Spacing
 $localNavSideSpacing: 10px;

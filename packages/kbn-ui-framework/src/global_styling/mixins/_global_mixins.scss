@@ -99,11 +99,6 @@
   @include kuiButtonActive { @content }
 }
 
-/**
- * 1. Make sure outline doesn't get hidden beneath adjacent elements.
- * 2. Override inherited styles (possibly from Bootstrap).
- * 3. Create an offset box-shadow that follows the contours of the element.
- */
 @mixin focus($color: $kuiFocusColor, $backgroundColor: $kuiFocusBackgroundColor) {
   z-index: 1; /* 1 */
   outline: none !important; /* 2 */
@@ -133,8 +128,8 @@
  */
 @mixin formControl($borderRadius: $kuiBorderRadius) {
   @include formControlBase;
-  background-color: #ffffff;
-  border: 1px solid $kuiFormControlBorderColor;
+  background-color: $euiFormBackgroundColor;
+  border: 1px solid $euiFormBorderColor;
   border-radius: $borderRadius;
   transition: border-color $kuiInputTransitionTiming;
   min-height: $kuiFormInputHeight; /* 1 */
@@ -264,7 +259,7 @@
 
 @mixin selectOnStandoutBackground {
   .kuiSelect {
-    border-color: #ffffff;
+    border-color: $euiFormBackgroundColor;
 
     @include kuiButtonFocus {
       @include formControlFocus;

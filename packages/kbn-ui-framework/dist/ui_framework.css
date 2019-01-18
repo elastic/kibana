@@ -25,11 +25,6 @@
  * 1. Links can't have a disabled attribute, so they can't support :enabled.
  */
 /**
- * 1. Make sure outline doesn't get hidden beneath adjacent elements.
- * 2. Override inherited styles (possibly from Bootstrap).
- * 3. Create an offset box-shadow that follows the contours of the element.
- */
-/**
  * Nothing fancy, just the basics so we can use this for both regular and static controls.
  */
 /**
@@ -297,7 +292,6 @@ main {
  */
 .kuiButton--danger {
   color: #BF4D4D;
-  background-color: rgba(255, 255, 255, 0.5);
   border: solid 1px #BF4D4D; }
   .kuiButton--danger:not(a):enabled:focus {
     z-index: 1;
@@ -320,29 +314,29 @@ main {
     color: #BF4D4D; }
   .kuiButton--danger:enabled:hover {
     color: #a03939 !important;
-    background-color: rgba(255, 255, 255, 0.5);
-    border: solid 1px #a03939; }
+    border: solid 1px #a03939;
+    background-color: rgba(191, 77, 77, 0.1); }
   a.kuiButton--danger:not(.kuiButton-isDisabled):hover {
     /* 1 */
     color: #a03939 !important;
-    background-color: rgba(255, 255, 255, 0.5);
-    border: solid 1px #a03939; }
+    border: solid 1px #a03939;
+    background-color: rgba(191, 77, 77, 0.1); }
   .kuiButton--danger:enabled:active {
     color: #a03939 !important;
-    background-color: rgba(255, 255, 255, 0.5);
-    border: solid 1px #a03939; }
+    border: solid 1px #a03939;
+    background-color: rgba(191, 77, 77, 0.1); }
   a.kuiButton--danger:not(.kuiButton-isDisabled):active {
     /* 1 */
     color: #a03939 !important;
-    background-color: rgba(255, 255, 255, 0.5);
-    border: solid 1px #a03939; }
+    border: solid 1px #a03939;
+    background-color: rgba(191, 77, 77, 0.1); }
 
 /**
  * 1. Override Bootstrap.
  */
 .kuiButton--warning {
   color: #FFF;
-  background-color: #f98100; }
+  background-color: #C06C4C; }
   .kuiButton--warning:not(a):enabled:focus {
     z-index: 1;
     /* 1 */
@@ -365,25 +359,25 @@ main {
   .kuiButton--warning:enabled:hover {
     color: #FFF !important;
     /* 1 */
-    background-color: #c66700; }
+    background-color: #a15538; }
   a.kuiButton--warning:not(.kuiButton-isDisabled):hover {
     /* 1 */
     color: #FFF !important;
     /* 1 */
-    background-color: #c66700; }
+    background-color: #a15538; }
   .kuiButton--warning:enabled:active {
     color: #FFF !important;
     /* 1 */
-    background-color: #c66700; }
+    background-color: #a15538; }
   a.kuiButton--warning:not(.kuiButton-isDisabled):active {
     /* 1 */
     color: #FFF !important;
     /* 1 */
-    background-color: #c66700; }
+    background-color: #a15538; }
   .kuiButton--warning:disabled {
-    background-color: #ff9a2d; }
+    background-color: #cd8b72; }
   a.kuiButton--warning.kuiButton-isDisabled {
-    background-color: #ff9a2d; }
+    background-color: #cd8b72; }
 
 /**
  * 1. Override Bootstrap.
@@ -415,30 +409,33 @@ main {
 .kuiButton--secondary {
   color: #4DA1C0 !important;
   /* 2 */
-  border: solid 1px #4DA1C0;
-  background-color: rgba(255, 255, 255, 0.5); }
+  border: solid 1px #4DA1C0; }
   .kuiButton--secondary:enabled:hover {
     color: #3985a1 !important;
     /* 1 */
     border: solid 1px #3985a1;
-    background-color: rgba(255, 255, 255, 0.5); }
+    background-color: rgba(77, 161, 192, 0.1);
+    text-decoration: underline; }
   a.kuiButton--secondary:not(.kuiButton-isDisabled):hover {
     /* 1 */
     color: #3985a1 !important;
     /* 1 */
     border: solid 1px #3985a1;
-    background-color: rgba(255, 255, 255, 0.5); }
+    background-color: rgba(77, 161, 192, 0.1);
+    text-decoration: underline; }
   .kuiButton--secondary:enabled:active {
     color: #3985a1 !important;
     /* 1 */
     border: solid 1px #3985a1;
-    background-color: rgba(255, 255, 255, 0.5); }
+    background-color: rgba(77, 161, 192, 0.1);
+    text-decoration: underline; }
   a.kuiButton--secondary:not(.kuiButton-isDisabled):active {
     /* 1 */
     color: #3985a1 !important;
     /* 1 */
     border: solid 1px #3985a1;
-    background-color: rgba(255, 255, 255, 0.5); }
+    background-color: rgba(77, 161, 192, 0.1);
+    text-decoration: underline; }
 
 .kuiButtonGroup {
   display: -webkit-box;
@@ -556,8 +553,8 @@ main {
 .kuiCheckBox {
   -webkit-appearance: none;
   /* 1 */
-  background-color: #FFF;
-  border: 1px solid #BEBEBE;
+  background-color: #1b1b1b;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   width: 16px;
   height: 16px;
@@ -597,8 +594,8 @@ main {
             box-shadow: 0 0 0 1px #222, 0 0 0 2px #4DA1C0;
     /* 3 */ }
   .kuiCheckBox:disabled {
-    background-color: #D3DAE6 !important;
-    border-color: #D3DAE6 !important;
+    background-color: #1f1f1f !important;
+    border-color: #1f1f1f !important;
     cursor: not-allowed !important; }
 
 .kuiCheckBoxLabel {
@@ -641,7 +638,7 @@ main {
   top: 0.5em;
   left: 0.7em;
   font-size: 1em;
-  color: #ACACAC; }
+  color: #494E51; }
 
 /**
    * 1. Make space for search icon.
@@ -657,7 +654,7 @@ main {
   font-weight: 400;
   line-height: 1.5;
   color: #DDD;
-  background-color: #ffffff;
+  background-color: #1b1b1b;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   -webkit-transition: border-color 0.1s linear;
@@ -696,7 +693,7 @@ main {
   font-weight: 400;
   line-height: 1.5;
   color: #DDD;
-  background-color: #ffffff;
+  background-color: #1b1b1b;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   -webkit-transition: border-color 0.1s linear;
@@ -768,7 +765,7 @@ main {
   font-weight: 400;
   line-height: 1.5;
   color: #DDD;
-  background-color: #ffffff;
+  background-color: #1b1b1b;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   -webkit-transition: border-color 0.1s linear;
@@ -811,7 +808,7 @@ main {
   font-weight: 400;
   line-height: 1.5;
   color: #DDD;
-  background-color: #ffffff;
+  background-color: #1b1b1b;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   -webkit-transition: border-color 0.1s linear;
@@ -902,7 +899,7 @@ main {
   color: #333; }
 
 .kuiIcon--basic {
-  color: #565656; }
+  color: #8A8A8A; }
 
 .kuiInfoPanel {
   padding: 14px 20px 18px;
@@ -1023,7 +1020,7 @@ main {
           -ms-user-select: none;
               user-select: none;
       margin-right: 4px;
-      color: #5a5a5a; }
+      color: #333; }
 
 /**
  * 1. Make it a bit darker to contrast with the gray background.
@@ -1164,8 +1161,8 @@ main {
   .kuiDatePickerRowCellContent.kuiDatePickerRowCellContent-isCurrent {
     color: #4DA1C0; }
   .kuiDatePickerRowCellContent.kuiDatePickerRowCellContent-isSelected {
-    background-color: #777777;
-    color: #ffffff; }
+    background-color: #8A8A8A;
+    color: #DDD; }
   .kuiDatePickerRowCellContent:hover, .kuiDatePickerRowCellContent:active {
     cursor: pointer;
     color: #242424;
@@ -1280,27 +1277,28 @@ main {
   padding: 5px 15px;
   font-size: 14px;
   color: #DDD;
-  background-color: #FFF;
-  border: 1px solid #333;
+  background-color: #1b1b1b;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px; }
   .kuiLocalDropdownInput:focus {
     border-color: #4DA1C0; }
 
 .kuiLocalDropdownFormNote {
   font-size: 14px;
-  color: #737373; }
+  color: #8A8A8A; }
 
 .kuiLocalDropdownWarning {
   margin-bottom: 16px;
   padding: 6px 10px;
   font-size: 14px;
   color: #DDD;
-  background-color: #FFF; }
+  background-color: #222;
+  border-left: solid 2px #BF4D4D; }
 
 .kuiLocalDropdownHelpText {
   margin-bottom: 16px;
   font-size: 14px;
-  color: #2D2D2D; }
+  color: #8A8A8A; }
 
 .kuiLocalMenu {
   display: -webkit-box;
@@ -1373,7 +1371,7 @@ main {
   min-height: 69px;
   /* 1 */
   color: #DDD;
-  background-color: #FFF;
+  background-color: #222;
   line-height: 1.5;
   border-bottom: solid 1px #333; }
 
@@ -1447,7 +1445,7 @@ main {
   font-weight: 400;
   line-height: 1.5;
   color: #DDD;
-  background-color: #ffffff;
+  background-color: #1b1b1b;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   -webkit-transition: border-color 0.1s linear;
@@ -1458,7 +1456,7 @@ main {
   -webkit-flex: 1 1 100%;
       -ms-flex: 1 1 100%;
           flex: 1 1 100%;
-  border-color: #ffffff;
+  border-color: #FFF;
   border-color: #333;
   border-radius: 4px 0 0 4px; }
   .kuiLocalSearchInput:invalid {
@@ -1473,7 +1471,7 @@ main {
     -webkit-box-shadow: none;
             box-shadow: none; }
   .kuiLocalSearchInput.kuiLocalSearchInput-isInvalid {
-    border-color: #e74C3c; }
+    border-color: #BF4D4D; }
 
 .kuiLocalSearchInput--secondary {
   height: 32px;
@@ -1528,7 +1526,7 @@ main {
   font-weight: 400;
   line-height: 1.5;
   color: #DDD;
-  background-color: #ffffff;
+  background-color: #1b1b1b;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   -webkit-transition: border-color 0.1s linear;
@@ -1566,8 +1564,8 @@ main {
   font-size: 14px;
   line-height: 0;
   /* 1 */
-  color: #ffffff;
-  background-color: #8A8A8A;
+  color: #FFF;
+  background-color: #4DA1C0;
   border: 0;
   border-radius: 0 4px 4px 0; }
   .kuiLocalSearchButton:focus {
@@ -1708,51 +1706,55 @@ main {
  * 2. Safari won't respect :enabled:hover/active on links.
  */
 .kuiMenuButton--basic {
-  color: #5a5a5a;
-  background-color: #ffffff; }
+  color: #DDD;
+  background-color: #222; }
   .kuiMenuButton--basic:focus {
-    color: #5a5a5a !important;
+    color: #DDD !important;
     /* 1 */ }
   .kuiMenuButton--basic:hover, .kuiMenuButton--basic:active {
     /* 2 */
-    color: #5a5a5a !important;
+    color: #DDD !important;
     /* 1 */
-    background-color: #F2F2F2; }
+    background-color: #242424; }
   .kuiMenuButton--basic:disabled {
-    color: #9B9B9B; }
+    color: #494E51;
+    cursor: not-allowed; }
 
 /**
  * 1. Override Bootstrap.
  * 2. Safari won't respect :enabled:hover/active on links.
  */
 .kuiMenuButton--primary {
-  color: #ffffff;
+  color: #FFF;
   background-color: #4DA1C0; }
   .kuiMenuButton--primary:focus {
-    color: #ffffff !important;
+    color: #FFF !important;
     /* 1 */ }
   .kuiMenuButton--primary:hover, .kuiMenuButton--primary:active {
     /* 2 */
-    color: #ffffff !important;
+    color: #FFF !important;
     /* 1 */
-    background-color: #006E8A; }
+    background-color: #3985a1; }
   .kuiMenuButton--primary:disabled {
-    background-color: #B6D6E0; }
+    background-color: #494E51;
+    cursor: not-allowed; }
 
 /**
  * 1. Override Bootstrap.
  * 2. Safari won't respect :enabled:hover/active on links.
  */
 .kuiMenuButton--danger {
-  color: #D76051;
-  background-color: #ffffff; }
+  color: #FFF;
+  background-color: #BF4D4D; }
   .kuiMenuButton--danger:hover, .kuiMenuButton--danger:active {
     /* 2 */
-    color: #FFFFFF !important;
+    color: #FFF !important;
     /* 1 */
-    background-color: #D76051; }
+    background-color: #a03939; }
   .kuiMenuButton--danger:disabled {
-    color: #9B9B9B; }
+    color: #FFF;
+    background-color: #494E51;
+    cursor: not-allowed; }
   .kuiMenuButton--danger:focus {
     z-index: 1;
     /* 1 */
@@ -1796,13 +1798,13 @@ main {
       -ms-flex-pack: center;
           justify-content: center;
   padding-bottom: 10vh;
-  background-color: rgba(0, 0, 0, 0.5); }
+  background: rgba(51, 51, 51, 0.8); }
 
 .kuiModal {
   -webkit-box-shadow: 0 12px 24px 0 rgba(0, 0, 0, 0.1), 0 6px 12px 0 rgba(0, 0, 0, 0.1), 0 4px 4px 0 rgba(0, 0, 0, 0.1), 0 2px 2px 0 rgba(0, 0, 0, 0.1);
           box-shadow: 0 12px 24px 0 rgba(0, 0, 0, 0.1), 0 6px 12px 0 rgba(0, 0, 0, 0.1), 0 4px 4px 0 rgba(0, 0, 0, 0.1), 0 2px 2px 0 rgba(0, 0, 0, 0.1);
   line-height: 1.5;
-  background-color: #FFF;
+  background-color: #222;
   border: 1px solid #333;
   border-radius: 4px;
   z-index: 1001;
@@ -1909,7 +1911,7 @@ main {
 .kuiPagerText {
   font-size: 14px;
   line-height: 1.5;
-  color: #5A5A5A;
+  color: #8A8A8A;
   white-space: nowrap;
   /* 1 */ }
 
@@ -2018,7 +2020,7 @@ main {
             box-shadow: 0 0 0 1px #333, 0 0 0 2px #BF4D4D;
     /* 3 */ }
   .kuiPanelHeader .kuiSelect {
-    border-color: #ffffff; }
+    border-color: #1b1b1b; }
     .kuiPanelHeader .kuiSelect:not(a):enabled:focus {
       outline: none;
       border-color: #4DA1C0; }
@@ -2162,7 +2164,7 @@ main {
     width: 0;
     border-left: 16px solid transparent;
     border-right: 16px solid transparent;
-    border-bottom: 16px solid #ffffff; }
+    border-bottom: 16px solid #222; }
 
 .kuiPopover--withTitle .kuiPopover__panel:after {
   border-bottom-color: #242424; }
@@ -2252,7 +2254,7 @@ main {
  * 1. Make seamless transition from Table to ToolBarFooter header.
  */
 .kuiControlledTable {
-  background: #FFF; }
+  background: #222; }
   .kuiControlledTable .kuiTable {
     border-top: none;
     /* 1 */ }
@@ -2274,7 +2276,7 @@ main {
   width: 100%;
   border: 1px solid #333;
   border-collapse: collapse;
-  background-color: #FFF; }
+  background-color: #222; }
 
 /**
  * 1. Allow contents of cells to determine table's width.
@@ -2404,7 +2406,7 @@ main {
  *    that contains its expanded details.
  */
 .kuiTableRowCell--expanded {
-  border-top-color: #f0f0f0;
+  border-top-color: #222;
   /* 1 */ }
 
 .kuiTableRowCell--alignRight {
@@ -2462,7 +2464,7 @@ main {
   padding: 10px 30px;
   font-size: 14px;
   color: #8A8A8A;
-  background-color: #FFF;
+  background-color: transparent;
   /* 1 */
   border: 1px solid #333;
   border-radius: 0;
@@ -2489,12 +2491,12 @@ main {
     border: 1px solid #4DA1C0 !important; }
   .kuiTab:hover:not(.kuiTab-isSelected) {
     color: #3985a1;
-    background-color: #F2F2F2; }
+    background-color: #242424; }
   .kuiTab.kuiTab-isSelected {
     cursor: default;
     color: #DDD;
-    background-color: #FFF;
-    border-bottom-color: #FFF; }
+    background-color: transparent;
+    border-bottom-color: transparent; }
 
 /**
  * 1. Allow container to determine font-size and line-height.
@@ -2601,7 +2603,7 @@ main {
             box-shadow: 0 0 0 1px #333, 0 0 0 2px #BF4D4D;
     /* 3 */ }
   .kuiToolBar .kuiSelect {
-    border-color: #ffffff; }
+    border-color: #1b1b1b; }
     .kuiToolBar .kuiSelect:not(a):enabled:focus {
       outline: none;
       border-color: #4DA1C0; }
@@ -2676,7 +2678,7 @@ main {
   /* 1 */
   padding: 10px;
   height: 40px;
-  background-color: #ffffff; }
+  background-color: #222; }
 
 .kuiToolBarFooterSection {
   display: -webkit-box;
@@ -2776,7 +2778,7 @@ main {
   padding: 4px 12px 5px 28px;
   font-family: "Open Sans", "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   /* 1 */
-  background-color: #FFFFFF;
+  background-color: #222;
   color: #DDD;
   border-radius: 4px;
   font-size: 1em;
@@ -2795,7 +2797,7 @@ main {
 .kuiToolBarText {
   font-size: 14px;
   line-height: 1.5;
-  color: #5A5A5A;
+  color: #8A8A8A;
   white-space: nowrap;
   /* 1 */ }
 
@@ -2807,7 +2809,7 @@ main {
   /* 1 */
   font-weight: 400;
   /* 1 */
-  font-size: 22px; }
+  font-size: 24px; }
 
 /**
  * 1. Override h2, h3, etc.

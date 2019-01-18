@@ -19,8 +19,8 @@ $kuiTextColor: $euiTextColor;
 $kuiLinkColor: $euiColorPrimary;
 $kuiLinkColor-isHover: darken($kuiLinkColor, 10%);
 $kuiInputTextColor: $kuiTextColor;
-$kuiInputBackgroundColor: $kuiColorWhite;
-$kuiInputBorderColor: $euiBorderColor;
+$kuiInputBackgroundColor: $euiFormBackgroundColor;
+$kuiInputBorderColor: $euiFormBorderColor;
 
 // Colors
 

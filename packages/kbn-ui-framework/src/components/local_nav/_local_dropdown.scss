@@ -114,10 +114,11 @@
   font-size: 14px;
   color: $kuiTextColor;
   background-color: $localNavBackgroundColor;
+  border-left: solid 2px $euiColorDanger;
 }
 
 .kuiLocalDropdownHelpText {
   margin-bottom: 16px;
   font-size: 14px;
-  color: #2D2D2D;
+  color: $euiColorDarkShade;
 }
