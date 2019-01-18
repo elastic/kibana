@@ -2,7 +2,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "space:default",
     "source": {
       "type": "space",
@@ -20,7 +19,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "space:space_1",
     "source": {
       "type": "space",
@@ -37,7 +35,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "space:space_2",
     "source": {
       "type": "space",
@@ -54,7 +51,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "index-pattern:91200a00-9efd-11e7-acb3-3dab96693fab",
     "source": {
       "type": "index-pattern",
@@ -72,7 +68,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "config:7.0.0-alpha1",
     "source": {
       "type": "config",
@@ -89,7 +84,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "visualization:dd7caf20-9efd-11e7-acb3-3dab96693fab",
     "source": {
       "type": "visualization",
@@ -112,7 +106,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "dashboard:be3733a0-9efe-11e7-acb3-3dab96693fab",
     "source": {
       "type": "dashboard",
@@ -145,7 +138,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "space_1:index-pattern:space_1-91200a00-9efd-11e7-acb3-3dab96693fab",
     "source": {
       "type": "index-pattern",
@@ -164,7 +156,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "space_1:config:7.0.0-alpha1",
     "source": {
       "type": "config",
@@ -182,7 +173,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "space_1:visualization:space_1-dd7caf20-9efd-11e7-acb3-3dab96693fab",
     "source": {
       "type": "visualization",
@@ -206,7 +196,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "space_1:dashboard:space_1-be3733a0-9efe-11e7-acb3-3dab96693fab",
     "source": {
       "type": "dashboard",
@@ -236,12 +225,10 @@
   }
 }
 
-
 {
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "space_2:index-pattern:space_2-91200a00-9efd-11e7-acb3-3dab96693fab",
     "source": {
       "type": "index-pattern",
@@ -260,7 +247,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "space_2:config:7.0.0-alpha1",
     "source": {
       "type": "config",
@@ -278,7 +264,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "space_2:visualization:space_2-dd7caf20-9efd-11e7-acb3-3dab96693fab",
     "source": {
       "type": "visualization",
@@ -302,7 +287,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "space_2:dashboard:space_2-be3733a0-9efe-11e7-acb3-3dab96693fab",
     "source": {
       "type": "dashboard",
@@ -336,7 +320,6 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "globaltype:8121a00-8efd-21e7-1cb3-34ab966434445",
     "source": {
       "type": "globaltype",
