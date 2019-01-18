@@ -52,7 +52,7 @@ or `i18n.locale: zn` and `.../translations/zn.json` will work as expected.
 
 __Note:__ locale should look like `zh-CN` where `zh` - lowercase two-letter or three-letter ISO-639 code
 and `CN` - uppercase two-letter ISO-3166 code. (optional)
-ISO-639 code and ISO-3166 code should be separated with `-` character.
+[ISO-639](https://www.iso.org/iso-639-language-codes.html) code and [ISO-3166](https://www.iso.org/iso-3166-country-codes.html) code should be separated with `-` character.
 
 ## I18n engine
 
