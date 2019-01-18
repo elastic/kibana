@@ -16,6 +16,7 @@ import {
   EuiPortal,
   EuiTitle
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import { get } from 'lodash';
 import React from 'react';
@@ -75,10 +76,21 @@ function DroppedSpansWarning({
   return (
     <React.Fragment>
       <EuiCallOut size="s">
-        The APM agent that reported this transaction dropped {dropped} spans or
-        more based on its configuration.{' '}
+        {i18n.translate(
+          'xpack.apm.transactionDetails.transFlyout.callout.agentDroppedSpansMessage',
+          {
+            defaultMessage:
+              'The APM agent that reported this transaction dropped {dropped} spans or more based on its configuration.',
+            values: { dropped }
+          }
+        )}{' '}
         <EuiLink href={DROPPED_SPANS_DOCS} target="_blank">
-          Learn more about dropped spans.
+          {i18n.translate(
+            'xpack.apm.transactionDetails.transFlyout.callout.learnMoreAboutDroppedSpansLinkText',
+            {
+              defaultMessage: 'Learn more about dropped spans.'
+            }
+          )}
         </EuiLink>
       </EuiCallOut>
       <EuiHorizontalRule />
@@ -104,7 +116,14 @@ export function TransactionFlyout({
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiTitle>
-                <h4>Transaction details</h4>
+                <h4>
+                  {i18n.translate(
+                    'xpack.apm.transactionDetails.transFlyout.transactionDetailsTitle',
+                    {
+                      defaultMessage: 'Transaction details'
+                    }
+                  )}
+                </h4>
               </EuiTitle>
             </EuiFlexItem>
 

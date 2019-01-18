@@ -95,18 +95,9 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
 
       await find.clickByLinkText('Logout');
 
-      await retry.try(async () => {
-        const loginFormExists = await find.existsByDisplayedByCssSelector('.login-form');
-
-        const logoutLinkExists = await find.existsByLinkText('Logout');
-        if (logoutLinkExists) {
-          await find.clickByLinkText('Logout');
-        }
-
-        if (!loginFormExists) {
-          throw new Error('Logout is not completed yet');
-        }
-      });
+      await retry.waitForWithTimeout('login form', config.get('timeouts.waitFor') * 5, async () => (
+        await find.existsByDisplayedByCssSelector('.login-form')
+      ));
     }
 
     async clickRolesSection() {
