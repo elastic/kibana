@@ -38,7 +38,7 @@ export const ErrorPage: React.SFC<Props> = ({ detailedMessage, retry, shortMessa
             iconType="cross"
             title={
               <FormattedMessage
-                id="xpack.infra.logs.errorPage.errorOccurredTitle"
+                id="xpack.infra.errorPage.errorOccurredTitle"
                 defaultMessage="An error occurred"
               />
             }
@@ -49,7 +49,7 @@ export const ErrorPage: React.SFC<Props> = ({ detailedMessage, retry, shortMessa
                 <EuiFlexItem grow={false}>
                   <EuiButton onClick={retry} iconType="refresh">
                     <FormattedMessage
-                      id="xpack.infra.logs.errorPage.tryAgainButtonLabel"
+                      id="xpack.infra.errorPage.tryAgainButtonLabel"
                       defaultMessage="Try again"
                     />
                   </EuiButton>

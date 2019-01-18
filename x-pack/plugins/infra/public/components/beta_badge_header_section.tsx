@@ -16,7 +16,7 @@ interface BetaBadgeHeaderSectionProps {
 export const BetaBadgeHeaderSection: React.SFC<BetaBadgeHeaderSectionProps> = ({
   tooltipContent = (
     <FormattedMessage
-      id="xpack.infra.logs.betaBadgeHeaderSection.betaBadgeHeaderSectionDefaultTooltip"
+      id="xpack.infra.betaBadgeHeaderSection.betaBadgeHeaderSectionDefaultTooltip"
       defaultMessage="Please help us improve by reporting issues or bugs in the Kibana repo."
     />
   ),
@@ -24,10 +24,7 @@ export const BetaBadgeHeaderSection: React.SFC<BetaBadgeHeaderSectionProps> = ({
   <VerticallyCenteredHeaderSection side="right">
     <EuiBetaBadge
       label={
-        <FormattedMessage
-          id="xpack.infra.logs.betaBadgeHeaderSection.betaLabel"
-          defaultMessage="Beta"
-        />
+        <FormattedMessage id="xpack.infra.betaBadgeHeaderSection.betaLabel" defaultMessage="Beta" />
       }
       tooltipContent={tooltipContent}
     />
@@ -38,7 +35,7 @@ export const InfrastructureBetaBadgeHeaderSection = () => (
   <BetaBadgeHeaderSection
     tooltipContent={
       <FormattedMessage
-        id="xpack.infra.logs.betaBadgeHeaderSection.infrastructureUiIsStillInBetaTooltip"
+        id="xpack.infra.betaBadgeHeaderSection.infrastructureUiIsStillInBetaTooltip"
         defaultMessage="The Infrastructure UI is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo."
       />
     }
@@ -49,7 +46,7 @@ export const LogsBetaBadgeHeaderSection = () => (
   <BetaBadgeHeaderSection
     tooltipContent={
       <FormattedMessage
-        id="xpack.infra.logs.betaBadgeHeaderSection.logsUiIsStillInBetaTooltip"
+        id="xpack.infra.betaBadgeHeaderSection.logsUiIsStillInBetaTooltip"
         defaultMessage="The Logs UI is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo."
       />
     }

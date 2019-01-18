@@ -13,7 +13,7 @@ export const SourceLoadingPage: React.SFC = () => (
   <LoadingPage
     message={
       <FormattedMessage
-        id="xpack.infra.logs.sourceLoadingPage.loadingDataSourcesMessage"
+        id="xpack.infra.sourceLoadingPage.loadingDataSourcesMessage"
         defaultMessage="Loading data sources"
       />
     }
