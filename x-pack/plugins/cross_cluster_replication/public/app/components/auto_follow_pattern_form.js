@@ -186,7 +186,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
   };
 
   isFormValid() {
-    return Object.values(this.state.fieldsErrors).every(error => error === null);
+    return Object.values(this.state.fieldsErrors).every(error => error === undefined || error === null);
   }
 
   sendForm = () => {

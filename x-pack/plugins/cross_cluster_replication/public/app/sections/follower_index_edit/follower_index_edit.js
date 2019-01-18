@@ -75,8 +75,8 @@ export const FollowerIndexEdit = injectI18n(
 
     componentDidUpdate(prevProps, prevState) {
       const { followerIndex, getFollowerIndex } = this.props;
+      // Fetch the follower index on the server if we don't have it (i.e. page reload)
       if (!followerIndex && prevState.lastFollowerIndexId !== this.state.lastFollowerIndexId) {
-        // Fetch the follower index on the server
         getFollowerIndex(this.state.lastFollowerIndexId);
       }
     }

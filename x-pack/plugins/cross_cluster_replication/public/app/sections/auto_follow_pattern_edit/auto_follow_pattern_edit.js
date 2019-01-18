@@ -61,8 +61,8 @@ export const AutoFollowPatternEdit = injectI18n(
 
     componentDidUpdate(prevProps, prevState) {
       const { autoFollowPattern, getAutoFollowPattern } = this.props;
+      // Fetch the auto-follow pattern on the server if we don't have it (i.e. page reload)
       if (!autoFollowPattern && prevState.lastAutoFollowPatternId !== this.state.lastAutoFollowPatternId) {
-        // Fetch the auto-follow pattern on the server
         getAutoFollowPattern(this.state.lastAutoFollowPatternId);
       }
     }
@@ -120,7 +120,6 @@ export const AutoFollowPatternEdit = injectI18n(
 
     render() {
       const { saveAutoFollowPattern, apiStatus, apiError, autoFollowPattern, intl, match: { url: currentUrl }  } = this.props;
-      console.log(apiStatus, apiError);
 
       return (
         <EuiPageContent

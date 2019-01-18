@@ -16,7 +16,6 @@ const getFirstConnectedCluster = (clusters) => {
 };
 
 export const getRemoteClusterName = (remoteClusters, selected) => {
-  console.log(remoteClusters, selected);
   return selected && remoteClusters.some(c => c.name === selected)
     ? selected
     : getFirstConnectedCluster(remoteClusters).name;

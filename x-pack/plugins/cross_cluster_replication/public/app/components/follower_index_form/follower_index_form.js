@@ -102,7 +102,6 @@ export const FollowerIndexForm = injectI18n(
           ...getEmptyFollowerIndex(),
           ...this.props.followerIndex,
         };
-      console.log(isNew, remoteClusterName, followerIndex);
 
       const fieldsErrors = this.getFieldsErrors(followerIndex);
 
@@ -244,7 +243,7 @@ export const FollowerIndexForm = injectI18n(
     }
 
     isFormValid() {
-      return Object.values(this.state.fieldsErrors).every(error => error === undefined);
+      return Object.values(this.state.fieldsErrors).every(error => error === undefined || error === null);
     }
 
     sendForm = () => {
@@ -504,7 +503,9 @@ export const FollowerIndexForm = injectI18n(
                 </Fragment>
               )}
               fullWidth
-            />
+            >
+              <Fragment /> {/* Avoid missing `children` warning */}
+            </EuiDescribedFormGroup>
 
             {areAdvancedSettingsVisible && (
               <Fragment>
