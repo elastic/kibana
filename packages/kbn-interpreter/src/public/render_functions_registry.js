@@ -17,7 +17,13 @@
  * under the License.
  */
 
-export { loadBrowserRegistries } from './browser_registries';
-export { createSocket } from './socket';
-export { initializeInterpreter } from './interpreter';
-export { RenderFunctionsRegistry } from './render_functions_registry';
+import { Registry } from '../common';
+import { RenderFunction } from './render_function';
+
+class RenderFunctionsRegistry extends Registry {
+  wrapper(obj) {
+    return new RenderFunction(obj);
+  }
+}
+
+export { RenderFunctionsRegistry };

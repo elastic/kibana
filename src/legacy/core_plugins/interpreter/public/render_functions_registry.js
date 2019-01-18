@@ -17,7 +17,6 @@
  * under the License.
  */
 
-export { loadBrowserRegistries } from './browser_registries';
-export { createSocket } from './socket';
-export { initializeInterpreter } from './interpreter';
-export { RenderFunctionsRegistry } from './render_functions_registry';
+import { RenderFunctionsRegistry } from '@kbn/interpreter/public';
+
+export const renderFunctionsRegistry = new RenderFunctionsRegistry();
