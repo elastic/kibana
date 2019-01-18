@@ -10,6 +10,8 @@
 
 import { ConcreteTaskInstance, ElasticJs, TaskInstance, TaskStatus } from './task';
 
+const DOC_TYPE = '_doc';
+
 export interface StoreOpts {
   callCluster: ElasticJs;
   index: string;
@@ -123,8 +125,10 @@ export class TaskStore {
         body: {
           index_patterns: [this.index],
           mappings: {
-            dynamic: 'strict',
-            properties,
+            [DOC_TYPE]: {
+              dynamic: 'strict',
+              properties,
+            },
           },
           settings: {
             number_of_shards: 1,
