@@ -38,3 +38,8 @@ include::management/advanced-options.asciidoc[]
 include::management/managing-saved-objects.asciidoc[]
 
 include::management/managing-beats.asciidoc[]
+
+include::management/managing-remote-clusters.asciidoc[]
+
+
+
