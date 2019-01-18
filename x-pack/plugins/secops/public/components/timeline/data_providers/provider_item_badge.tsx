@@ -17,15 +17,14 @@ import { ProviderBadge } from './provider_badge';
 import { ProviderItemActions } from './provider_item_actions';
 
 interface ProviderItemBadgeProps {
-  deleteItemAnd: (providerId: string) => void;
   field: string;
   kqlQuery: string;
   isDisabled: boolean;
   isExcluded: boolean;
-  onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
-  onDataProviderRemoved: OnDataProviderRemoved;
-  onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
-  onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
+  onChangeDataProviderKqlQuery?: OnChangeDataProviderKqlQuery;
+  onDataProviderRemoved?: OnDataProviderRemoved;
+  onToggleDataProviderEnabled?: OnToggleDataProviderEnabled;
+  onToggleDataProviderExcluded?: OnToggleDataProviderExcluded;
   providerId: string;
   queryDate?: QueryDate;
   val: string | number;
@@ -91,8 +90,7 @@ export class ProviderItemBadge extends PureComponent<ProviderItemBadgeProps, Own
     if (event.stopPropagation) {
       event.stopPropagation();
     }
-    const { deleteItemAnd, onDataProviderRemoved } = this.props;
-    onDataProviderRemoved(this.props.providerId);
-    deleteItemAnd(this.props.providerId);
+    const { onDataProviderRemoved } = this.props;
+    onDataProviderRemoved!(this.props.providerId);
   };
 }

@@ -23,7 +23,6 @@ import {
   OnToggleDataProviderExcluded,
 } from '../events';
 import { DataProvider } from './data_provider';
-import { ItemAnd } from './manage_droppale_provider_and';
 import { ProviderBadge } from './provider_badge';
 import { getProviderActions } from './provider_item_actions';
 
@@ -31,14 +30,14 @@ const MyEuiBadge = styled(EuiBadge)`
   margin: 0px 5px;
 `;
 
-const EuiBadgeOrStyled = styled(EuiBadge)`
+const EuiBadgeAndStyled = styled(EuiBadge)`
   position: absolute;
   left: calc(50% - 15px);
-  top: -20px;
+  top: -18px;
   z-index: 1;
-  width: 30px;
-  height: 30px;
-  padding: 10px 6px 0px 6px;
+  width: 27px;
+  height: 27px;
+  padding: 8px 3px 0px 3px;
   border-radius: 100%;
 `;
 
@@ -49,13 +48,23 @@ const AndStyled = styled.div`
   }
 `;
 
+const EuiButtonContent = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
+  .euiBadge {
+    position: inherit;
+  }
+`;
+
 interface ProviderItemAndPopoverProps {
-  itemAnd: ItemAnd;
+  dataProvidersAnd: DataProvider[];
+  id: string;
   onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
   onDataProviderRemoved: OnDataProviderRemoved;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
   onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
-  width: number;
 }
 
 interface ProviderItemAndPopoverState {
@@ -69,18 +78,17 @@ export class ProviderItemAndPopover extends React.PureComponent<
   public readonly state = {
     isPopoverOpen: false,
   };
-
   public render() {
     const {
-      itemAnd,
+      dataProvidersAnd,
+      id,
       // onChangeDataProviderKqlQuery,
       // onDataProviderRemoved,
       // onToggleDataProviderEnabled,
       // onToggleDataProviderExcluded,
-      width,
     } = this.props;
 
-    const hasAndItem = itemAnd.dataProvider.and.length > 0;
+    const hasAndItem = dataProvidersAnd.length > 0;
     const euiButtonProps: EuiButtonEmptyProps = hasAndItem
       ? { iconType: 'arrowDown', iconSide: 'right' }
       : {};
@@ -88,66 +96,64 @@ export class ProviderItemAndPopover extends React.PureComponent<
       <EuiButtonEmpty
         {...euiButtonProps}
         onClick={this.togglePopover}
-        style={
-          hasAndItem
-            ? { width: `${width}px`, padding: '0px' }
-            : { cursor: 'default', width: `${width}px`, padding: '0px' }
-        }
+        style={hasAndItem ? {} : { cursor: 'default' }}
       >
-        {hasAndItem && <MyEuiBadge color="primary">{itemAnd.dataProvider.and.length}</MyEuiBadge>}
-        AND
+        <EuiButtonContent>
+          {hasAndItem && <MyEuiBadge color="primary">{dataProvidersAnd.length}</MyEuiBadge>}
+          <EuiBadgeAndStyled>AND</EuiBadgeAndStyled>
+        </EuiButtonContent>
       </EuiButtonEmpty>
     );
 
     return (
       <EuiPopover
-        id={`${itemAnd.dataProvider.id}-popover`}
+        id={`${id}-popover`}
         ownFocus
         button={button}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
       >
         <div style={{ width: '300px' }}>
-          {itemAnd.dataProvider.and.map((provider: DataProvider, index: number) => {
+          {dataProvidersAnd.map((providerAnd: DataProvider, index: number) => {
             const badge = (
               <ProviderBadge
                 deleteFilter={() => {
-                  this.deleteFilter(itemAnd.dataProvider.id, provider.id);
+                  this.deleteFilter(id, providerAnd.id);
                 }}
-                field={provider.queryMatch.displayField || provider.queryMatch.field}
-                kqlQuery={provider.kqlQuery}
-                isDisabled={!provider.enabled}
-                isExcluded={provider.excluded}
-                providerId={`${itemAnd.dataProvider.id}.${provider.id}`}
-                queryDate={provider.queryDate}
-                val={provider.queryMatch.displayValue || provider.queryMatch.value}
+                field={providerAnd.queryMatch.displayField || providerAnd.queryMatch.field}
+                kqlQuery={providerAnd.kqlQuery}
+                isDisabled={!providerAnd.enabled}
+                isExcluded={providerAnd.excluded}
+                providerId={`${id}.${providerAnd.id}`}
+                queryDate={providerAnd.queryDate}
+                val={providerAnd.queryMatch.displayValue || providerAnd.queryMatch.value}
               />
             );
             const panelTree = getProviderActions(
               () => {
-                this.deleteFilter(itemAnd.dataProvider.id, provider.id);
+                this.deleteFilter(id, providerAnd.id);
               },
-              !provider.enabled,
-              provider.excluded,
+              !providerAnd.enabled,
+              providerAnd.excluded,
               () => {
-                this.deleteFilter(itemAnd.dataProvider.id, provider.id);
+                this.deleteFilter(id, providerAnd.id);
               },
               () => {
-                this.deleteFilter(itemAnd.dataProvider.id, provider.id);
+                this.deleteFilter(id, providerAnd.id);
               }
             );
             return (
-              <div key={`${itemAnd.dataProvider.id}-${provider.id}-accordion`}>
+              <div key={`${id}-${providerAnd.id}-accordion`}>
                 <EuiAccordion
-                  id={`${itemAnd.dataProvider.id}-${provider.id}-accordion`}
+                  id={`${id}-${providerAnd.id}-accordion`}
                   buttonContent={badge}
                   paddingSize="l"
                 >
                   <EuiContextMenu initialPanelId={0} panels={panelTree} />
                 </EuiAccordion>
-                {index < itemAnd.dataProvider.and.length - 1 && (
+                {index < dataProvidersAnd.length - 1 && (
                   <AndStyled>
-                    <EuiBadgeOrStyled color="default">AND</EuiBadgeOrStyled>
+                    <EuiBadgeAndStyled color="default">AND</EuiBadgeAndStyled>
                     <EuiHorizontalRule />
                   </AndStyled>
                 )}
@@ -167,7 +173,7 @@ export class ProviderItemAndPopover extends React.PureComponent<
   };
 
   private togglePopover = () => {
-    if (this.props.itemAnd.dataProvider.and.length > 0) {
+    if (this.props.dataProvidersAnd.length > 0) {
       this.setState({
         ...this.state,
         isPopoverOpen: !this.state.isPopoverOpen,

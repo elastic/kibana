@@ -8,7 +8,7 @@ import { filter, getOr, omit, uniq } from 'lodash/fp';
 import { TimelineById, TimelineState } from '.';
 import { Sort } from '../../../components/timeline/body/sort';
 import { DataProvider } from '../../../components/timeline/data_providers/data_provider';
-import { KqlMode, timelineDefaults } from './model';
+import { KqlMode, timelineDefaults, TimelineModel } from './model';
 
 const EMPTY_TIMELINE_BY_ID: TimelineById = {}; // stable reference
 
@@ -187,20 +187,40 @@ export const applyDeltaToCurrentWidth = ({
   };
 };
 
-interface AddTimelineProviderParams {
-  id: string;
-  provider: DataProvider;
-  timelineById: TimelineById;
-}
+const addAndToProviderInTimeline = (
+  id: string,
+  provider: DataProvider,
+  timeline: TimelineModel,
+  timelineById: TimelineById
+): TimelineById => {
+  const alreadyExistsAtIndex = timeline.dataProviders.findIndex(
+    p => p.id === timeline.highlightedDropAndProviderId
+  );
+  const newProvider = timeline.dataProviders[alreadyExistsAtIndex];
+  newProvider.and = [...newProvider.and, provider];
 
-export const addTimelineProvider = ({
-  id,
-  provider,
-  timelineById,
-}: AddTimelineProviderParams): TimelineById => {
-  const timeline = timelineById[id];
+  const dataProviders = [
+    ...timeline.dataProviders.slice(0, alreadyExistsAtIndex),
+    newProvider,
+    ...timeline.dataProviders.slice(alreadyExistsAtIndex + 1),
+  ];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      dataProviders,
+    },
+  };
+};
+
+const addProviderToTimeline = (
+  id: string,
+  provider: DataProvider,
+  timeline: TimelineModel,
+  timelineById: TimelineById
+): TimelineById => {
   const alreadyExistsAtIndex = timeline.dataProviders.findIndex(p => p.id === provider.id);
-
   const dataProviders =
     alreadyExistsAtIndex > -1
       ? [
@@ -218,39 +238,24 @@ export const addTimelineProvider = ({
     },
   };
 };
-
-interface AddTimelineAndProviderParams {
+interface AddTimelineProviderParams {
   id: string;
   provider: DataProvider;
   timelineById: TimelineById;
 }
 
-export const addTimelineAndProvider = ({
+export const addTimelineProvider = ({
   id,
   provider,
   timelineById,
-}: AddTimelineAndProviderParams): TimelineById => {
+}: AddTimelineProviderParams): TimelineById => {
   const timeline = timelineById[id];
-  const alreadyExistsAtIndex = timeline.dataProviders.findIndex(
-    p => p.id === timeline.highlightedDropAndProviderId
-  );
-  const newProvider = timeline.dataProviders[alreadyExistsAtIndex];
 
-  newProvider.and = [...newProvider.and, provider];
-
-  const dataProviders = [
-    ...timeline.dataProviders.slice(0, alreadyExistsAtIndex),
-    newProvider,
-    ...timeline.dataProviders.slice(alreadyExistsAtIndex + 1),
-  ];
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      dataProviders,
-    },
-  };
+  if (timeline.highlightedDropAndProviderId !== '') {
+    return addAndToProviderInTimeline(id, provider, timeline, timelineById);
+  } else {
+    return addProviderToTimeline(id, provider, timeline, timelineById);
+  }
 };
 
 interface UpdateTimelineKqlModeParams {

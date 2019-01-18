@@ -11,7 +11,6 @@ import styled from 'styled-components';
 import { Theme } from '../../store/local/app/model';
 
 interface Props {
-  children: JSX.Element;
   droppableId: string;
   isDropDisabled?: boolean;
   theme: Theme;
@@ -24,12 +23,33 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; themeName: Them
   ${({ isDraggingOver }) =>
     isDraggingOver
       ? `
-  .euiPanel {
-    background-color:  'rgb(245, 247, 250)' : 'inherit'};
-    div.flyout-overlay + div {
+    .drop-and-provider-timeline {
+      &:hover {
+        background: repeating-linear-gradient(
+          -55deg,
+          rgb(52, 55, 65),
+          rgb(52, 55, 65) 10px,
+          rgb(245, 247, 250) 10px,
+          rgb(245, 247, 250) 20px
+        );
+      }
+    }
+  > div.timeline-drop-area {
+    background-color: rgb(245, 247, 250);
+    .provider-item-filter-container div:first-child{
+      transform: none !important;
+    }
+  }
+  .flyout-overlay {
+    .euiPanel {
+      background-color:  rgb(245, 247, 250);
+    }
+    + div {
       display: none !important;
     }
-  }`
+  }
+  
+  `
       : ''}
   > div.timeline-drop-area {
     & + div {
@@ -48,7 +68,7 @@ export const DroppableWrapper = pure<Props>(
           {...provided.droppableProps}
           isDraggingOver={snapshot.isDraggingOver}
         >
-          {React.cloneElement(children, { isDraggingOver: snapshot.isDraggingOver })}
+          {children}
           {provided.placeholder}
         </ReactDndDropTarget>
       )}

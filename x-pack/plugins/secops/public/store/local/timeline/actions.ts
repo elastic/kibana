@@ -22,11 +22,6 @@ export const addNoteToEvent = actionCreator<{ id: string; noteId: string; eventI
 
 export const addProvider = actionCreator<{ id: string; provider: DataProvider }>('ADD_PROVIDER');
 
-export const addAndProvider = actionCreator<{
-  id: string;
-  provider: DataProvider;
-}>('ADD_AND_PROVIDER');
-
 export const applyDeltaToWidth = actionCreator<{
   id: string;
   delta: number;

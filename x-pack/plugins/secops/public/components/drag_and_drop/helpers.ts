@@ -117,24 +117,6 @@ export const addProviderToTimeline = ({
   }
 };
 
-export const addProviderToAndProvider = ({
-  dataProviders,
-  result,
-  dispatch,
-  addAndProvider = timelineActions.addAndProvider,
-  noProviderFound = dragAndDropActions.noProviderFound,
-}: AddProviderToTimelineParams): void => {
-  const timeline = getTimelineIdFromDestination(result);
-  const providerId = getProviderIdFromDraggable(result);
-  const provider = dataProviders[providerId];
-
-  if (provider) {
-    dispatch(addAndProvider({ id: timeline, provider }));
-  } else {
-    dispatch(noProviderFound({ id: providerId }));
-  }
-};
-
 interface ShowTimelineParams {
   result: DropResult;
   show: boolean;

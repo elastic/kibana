@@ -9,7 +9,6 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { Theme } from '../../../store/local/app/model';
-import { DroppableIsDraggingOver } from '../../drag_and_drop/droppable_is_dragging_over';
 import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';
 import { droppableTimelineProvidersPrefix } from '../../drag_and_drop/helpers';
 import {
@@ -21,8 +20,6 @@ import {
 } from '../events';
 import { DataProvider } from './data_provider';
 import { Empty } from './empty';
-import { ManageDropProviderAnd } from './manage_droppale_provider_and';
-import { ProviderItemAndDragDrop } from './provider_item_and_drag_drop';
 import { Providers } from './providers';
 
 interface Props {
@@ -37,7 +34,7 @@ interface Props {
   theme: Theme;
 }
 
-const DropTargetDataProviders = styled.div<{ isDraggingOver: boolean }>`
+const DropTargetDataProviders = styled.div`
   position: relative;
   border: 0.2rem dashed #999999;
   border-radius: 5px;
@@ -45,9 +42,9 @@ const DropTargetDataProviders = styled.div<{ isDraggingOver: boolean }>`
   flex-direction: column;
   justify-content: center;
   margin: 5px;
+  padding: 0px;
   min-height: 100px;
   overflow-y: auto;
-  background-color: ${({ isDraggingOver }) => (isDraggingOver ? 'rgb(245, 247, 250)' : 'inherit')};
 `;
 
 const getDroppableId = (id: string): string => `${droppableTimelineProvidersPrefix}${id}`;
@@ -80,40 +77,23 @@ export const DataProviders = pure<Props>(
     onToggleDataProviderExcluded,
     show,
     theme,
-  }: Props) => (
-    <ManageDropProviderAnd>
-      {({ deleteItemAnd, isDraggingOver, itemsAnd, setIsDraggingOver, setItemAnd }) => (
-        <DropTargetDataProviders isDraggingOver={isDraggingOver} data-test-subj="dataProviders">
-          <DroppableWrapper isDropDisabled={!show} droppableId={getDroppableId(id)} theme={theme}>
-            <DroppableIsDraggingOver setIsDraggingOver={setIsDraggingOver}>
-              {dataProviders.length ? (
-                <Providers
-                  id={id}
-                  dataProviders={dataProviders}
-                  deleteItemAnd={deleteItemAnd}
-                  onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
-                  onDataProviderRemoved={onDataProviderRemoved}
-                  onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-                  onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-                  setItemAnd={setItemAnd}
-                />
-              ) : (
-                <Empty />
-              )}
-            </DroppableIsDraggingOver>
-          </DroppableWrapper>
-          <ProviderItemAndDragDrop
+  }) => (
+    <DropTargetDataProviders data-test-subj="dataProviders">
+      <DroppableWrapper isDropDisabled={!show} droppableId={getDroppableId(id)} theme={theme}>
+        {dataProviders.length ? (
+          <Providers
             id={id}
-            itemsAnd={itemsAnd}
+            dataProviders={dataProviders}
             onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
             onChangeDroppableAndProvider={onChangeDroppableAndProvider}
             onDataProviderRemoved={onDataProviderRemoved}
             onToggleDataProviderEnabled={onToggleDataProviderEnabled}
             onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-            theme={theme}
           />
-        </DropTargetDataProviders>
-      )}
-    </ManageDropProviderAnd>
+        ) : (
+          <Empty />
+        )}
+      </DroppableWrapper>
+    </DropTargetDataProviders>
   )
 );

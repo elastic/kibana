@@ -7,7 +7,6 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
-  addAndProvider,
   addHistory,
   addNote,
   addNoteToEvent,
@@ -37,7 +36,6 @@ import {
 } from './actions';
 import {
   addNewTimeline,
-  addTimelineAndProvider,
   addTimelineHistory,
   addTimelineNote,
   addTimelineNoteToEvent,
@@ -99,14 +97,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   .case(addNoteToEvent, (state, { id, noteId, eventId }) => ({
     ...state,
     timelineById: addTimelineNoteToEvent({ id, noteId, eventId, timelineById: state.timelineById }),
-  }))
-  .case(addAndProvider, (state, { id, provider }) => ({
-    ...state,
-    timelineById: addTimelineAndProvider({
-      id,
-      provider,
-      timelineById: state.timelineById,
-    }),
   }))
   .case(addProvider, (state, { id, provider }) => ({
     ...state,

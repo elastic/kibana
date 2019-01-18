@@ -40,6 +40,9 @@ const dropInEffect = keyframes`
 export const DragEffects = styled.div`
   animation: ${dropInEffect} 250ms;
   .provider-item-container {
+    .provider-item-and-container {
+      display: none;
+    }
     .provider-item-or-container {
       display: none;
     }
