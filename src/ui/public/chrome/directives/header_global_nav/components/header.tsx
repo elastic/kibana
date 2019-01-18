@@ -57,6 +57,7 @@ class HeaderUI extends Component<Props> {
     return (
       <EuiHeaderLogo
         iconType="logoKibana"
+        data-test-subj="logo"
         href={homeHref}
         aria-label={intl.formatMessage({
           id: 'common.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel',

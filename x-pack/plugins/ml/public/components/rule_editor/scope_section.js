@@ -23,18 +23,34 @@ import {
 import { ScopeExpression } from './scope_expression';
 import { checkPermission } from '../../privilege/check_privilege';
 import { getScopeFieldDefaults } from './utils';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 
 function NoFilterListsCallOut() {
   return (
     <EuiCallOut
-      title="No filter lists configured"
+      title={<FormattedMessage
+        id="xpack.ml.ruleEditor.scopeSection.noFilterListsConfiguredTitle"
+        defaultMessage="No filter lists configured"
+      />}
       iconType="gear"
     >
       <p>
-        To configure scope, you must first use the&nbsp;
-        <EuiLink href="#/settings/filter_lists">Filter Lists</EuiLink> settings page
-        to create the list of values you want to include or exclude in the rule.
+        <FormattedMessage
+          id="xpack.ml.ruleEditor.scopeSection.createFilterListsDescription"
+          defaultMessage="To configure scope, you must first use the&nbsp;{filterListsLink} settings page
+            to create the list of values you want to include or exclude in the rule."
+          values={{
+            filterListsLink: (
+              <EuiLink href="#/settings/filter_lists">
+                <FormattedMessage
+                  id="xpack.ml.ruleEditor.scopeSection.createFilterListsDescription.filterListsLinkText"
+                  defaultMessage="Filter Lists"
+                />
+              </EuiLink>
+            )
+          }}
+        />
       </p>
     </EuiCallOut>
   );
@@ -43,7 +59,10 @@ function NoFilterListsCallOut() {
 function NoPermissionCallOut() {
   return (
     <EuiCallOut
-      title="You do not have permission to view filter lists"
+      title={<FormattedMessage
+        id="xpack.ml.ruleEditor.scopeSection.noPermissionToViewFilterListsTitle"
+        defaultMessage="You do not have permission to view filter lists"
+      />}
       iconType="gear"
     />
   );
@@ -94,12 +113,20 @@ export function ScopeSection({
   return (
     <React.Fragment>
       <EuiTitle>
-        <h2>Scope</h2>
+        <h2>
+          <FormattedMessage
+            id="xpack.ml.ruleEditor.scopeSection.scopeTitle"
+            defaultMessage="Scope"
+          />
+        </h2>
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiCheckbox
         id="enable_scope_checkbox"
-        label="Add a filter list to limit where the rule applies."
+        label={<FormattedMessage
+          id="xpack.ml.ruleEditor.scopeSection.addFilterListLabel"
+          defaultMessage="Add a filter list to limit where the rule applies."
+        />}
         checked={isEnabled}
         onChange={onEnabledChange}
       />
