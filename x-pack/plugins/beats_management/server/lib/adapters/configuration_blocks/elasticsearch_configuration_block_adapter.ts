@@ -139,7 +139,7 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
       },
       aggs: {
         tags: {
-          terms: { field: 'tag' },
+          terms: { field: 'configuration_block.tag' },
         },
       },
     };
