@@ -11,7 +11,7 @@
           input-focus
           disable-input-focus="disableAutoFocus"
           ng-model="query"
-          placeholder="{{ ::'common.ui.paginateSelectableList.searchPlaceholder' | i18n: {defaultMessage: 'Filter...'} }}"
+          placeholder="{{ ::'common.ui.paginateSelectableList.searchPlaceholder' | i18n: {defaultMessage: 'Filter…'} }}"
           class="form-control"
           name="query"
           type="text"
@@ -25,7 +25,7 @@
         {{ (hits | filter: query).length }}
         <span i18n-id="common.ui.paginateSelectableList.ofTotalHitCount"
           i18n-default-message="of {hitCount}"
-          i18n-values="{ hitCount: hitCount }"
+          i18n-values="{ hitCount }"
         ></span>
       </p>
     </div>
@@ -43,11 +43,11 @@
     aria-live="assertive"
   >
     <span class="euiScreenReaderOnly"
-      i18n-id="common.ui.paginateSelectableList.SortByButtonLabelScreenReaderOnly"
+      i18n-id="common.ui.paginateSelectableList.sortByButtonLabelScreenReaderOnly"
       i18n-default-message="Sort by"
     ></span>
     <span class="euiScreenReaderOnly"
-      i18n-id="common.ui.paginateSelectableList.SortByButtonLabel"
+      i18n-id="common.ui.paginateSelectableList.sortByButtonLabel"
       i18n-default-message="Name"
     ></span>
     <span
@@ -56,12 +56,12 @@
     >
       <span class="euiScreenReaderOnly"
         ng-if="isAscending"
-        i18n-id="common.ui.paginateSelectableList.SortByButtonLabeAscendingScreenReaderOnly"
+        i18n-id="common.ui.paginateSelectableList.sortByButtonLabeAscendingScreenReaderOnly"
         i18n-default-message="ascending"
       ></span>
       <span class="euiScreenReaderOnly"
         ng-if="!isAscending"
-        i18n-id="common.ui.paginateSelectableList.SortByButtonLabeDescendingScreenReaderOnly"
+        i18n-id="common.ui.paginateSelectableList.sortByButtonLabeDescendingScreenReaderOnly"
         i18n-default-message="descending"
       ></span>
     </span>

@@ -25,7 +25,7 @@
       <p class="kuiText kuiSubduedText"
         i18n-id="common.ui.savedObjectFinder.pageItemsFromHitCountDescription"
         i18n-default-message="{pageFirstItem}-{pageLastItem} of {hitCount}"
-        i18n-values="{pageFirstItem: pageFirstItem, pageLastItem:pageLastItem, hitCount: finder.hitCount}"
+        i18n-values="{pageFirstItem, pageLastItem, hitCount: finder.hitCount}"
       ></p>
       <div class="kuiButtonGroup">
         <button
@@ -33,7 +33,7 @@
           ng-if="onAddNew"
           ng-click="onAddNew()"
           data-test-subj="addNewSavedObjectLink"
-          i18n-id="common.ui.savedObjectFinder.newNounButtonLabel"
+          i18n-id="common.ui.savedObjectFinder.newItemButtonLabel"
           i18n-default-message="Add new {noun}"
           i18n-values="{noun: finder.properties.noun}"
         ></button>
@@ -42,7 +42,7 @@
           class="kuiButton kuiButton--secondary"
           ng-if="!useLocalManagement"
           ng-click="finder.manageObjects(finder.properties.name)"
-          i18n-id="common.ui.savedObjectFinder.manageNounsButtonLabel"
+          i18n-id="common.ui.savedObjectFinder.manageItemsButtonLabel"
           i18n-default-message="Manage {nouns}"
           i18n-values="{nouns: finder.properties.nouns}"
         ></button>
@@ -62,11 +62,11 @@
     aria-live="assertive"
   >
     <span class="euiScreenReaderOnly"
-      i18n-id="common.ui.savedObjectFinder.SortByButtonLabelScreenReaderOnly"
+      i18n-id="common.ui.savedObjectFinder.sortByButtonLabelScreenReaderOnly"
       i18n-default-message="Sort by"
     ></span>
     <span class="euiScreenReaderOnly"
-      i18n-id="common.ui.savedObjectFinder.SortByButtonLabel"
+      i18n-id="common.ui.savedObjectFinder.sortByButtonLabel"
       i18n-default-message="Name"
     ></span>
     <span
@@ -75,12 +75,12 @@
     >
       <span class="euiScreenReaderOnly"
         ng-if="finder.isAscending"
-        i18n-id="common.ui.savedObjectFinder.SortByButtonLabeAscendingScreenReaderOnly"
+        i18n-id="common.ui.savedObjectFinder.sortByButtonLabeAscendingScreenReaderOnly"
         i18n-default-message="ascending"
       ></span>
       <span class="euiScreenReaderOnly"
         ng-if="!finder.isAscending"
-        i18n-id="common.ui.savedObjectFinder.SortByButtonLabeDescendingScreenReaderOnly"
+        i18n-id="common.ui.savedObjectFinder.sortByButtonLabeDescendingScreenReaderOnly"
         i18n-default-message="descending"
       ></span>
     </span>
@@ -107,8 +107,8 @@
       ng-if="finder.hits.length === 0"
     >
       <p i18n-id="common.ui.savedObjectFinder.noMatchesFoundDescription"
-        i18n-default-message="No matching {nouns} found."
-        i18n-values="{nouns: finder.properties.nouns}"
+        i18n-default-message="No matching {items} found."
+        i18n-values="{items: finder.properties.nouns}"
       ></p>
     </li>
   </ul>
