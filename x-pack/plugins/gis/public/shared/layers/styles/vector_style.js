@@ -11,6 +11,7 @@ import { FillableCircle, FillableVector } from '../../icons/additional_layer_ico
 import { ColorGradient } from '../../icons/color_gradient';
 import { getHexColorRangeStrings } from '../../utils/color_utils';
 import { VectorStyleEditor } from './components/vector/vector_style_editor';
+import { getDefaultStaticProperties } from './vector_style_defaults';
 
 export class VectorStyle {
 
@@ -36,6 +37,10 @@ export class VectorStyle {
     };
   }
 
+  static createDefaultStyleProperties(mapColors) {
+    return getDefaultStaticProperties(mapColors);
+  }
+
   static getDisplayName() {
     return 'Vector style';
   }
@@ -45,6 +50,7 @@ export class VectorStyle {
   static renderEditor({ handleStyleChange, style, layer }) {
 
     const styleProperties = { ...style.getProperties() };
+    console.log(styleProperties);
     const handlePropertyChange = (propertyName, settings) => {
       console.log(settings);
       styleProperties[propertyName] = settings;//override single property, but preserve the rest
@@ -80,15 +86,6 @@ export class VectorStyle {
 
   getProperties() {
     return this._descriptor.properties || {};
-  }
-
-  getHexColor(colorProperty) {
-
-    if (!this._descriptor.properties[colorProperty] || !this._descriptor.properties[colorProperty].options) {
-      return null;
-    }
-
-    return this._descriptor.properties[colorProperty].options.color;
   }
 
   _isPropertyDynamic(property) {
@@ -219,69 +216,48 @@ export class VectorStyle {
     return updateStatuses.some(r => r === true);
   }
 
-  _getMBDataDrivenColor(property) {
-
-    if (!this._descriptor.properties[property] || !this._descriptor.properties[property].options) {
-      return null;
-    }
-    const { field, color } = this._descriptor.properties[property].options;
-    if (field && color) {
-      const colorRange = getHexColorRangeStrings(color, 8)
-        .reduce((accu, curColor, idx, srcArr) => {
-          accu = [ ...accu, idx / srcArr.length, curColor ];
-          return accu;
-        }, []);
-      const originalFieldName = this._descriptor.properties[property].options.field.name;
-      const targetName = VectorStyle.getComputedFieldName(originalFieldName);
-      return [
-        'interpolate',
-        ['linear'],
-        ['coalesce', ['get', targetName], -1],
-        -1, 'rgba(0,0,0,0)',
-        ...colorRange
-      ];
-    } else {
-      return null;
-    }
+  _getMBDataDrivenColor({ fieldName, color }) {
+    const colorRange = getHexColorRangeStrings(color, 8)
+      .reduce((accu, curColor, idx, srcArr) => {
+        accu = [ ...accu, idx / srcArr.length, curColor ];
+        return accu;
+      }, []);
+    const targetName = VectorStyle.getComputedFieldName(fieldName);
+    return [
+      'interpolate',
+      ['linear'],
+      ['coalesce', ['get', targetName], -1],
+      -1, 'rgba(0,0,0,0)',
+      ...colorRange
+    ];
   }
 
-
-  _getMbDataDrivenSize(property) {
-
-    if (!this._descriptor.properties[property] || !this._descriptor.properties[property].options) {
-      return null;
-    }
-
-    const { minSize, maxSize } = this._descriptor.properties[property].options;
-    if (typeof minSize === 'number' && typeof maxSize === 'number') {
-      const originalFieldName = this._descriptor.properties[property].options.field.name;
-      const targetName = VectorStyle.getComputedFieldName(originalFieldName);
-      return   ['interpolate',
-        ['linear'],
-        ['get', targetName],
-        0, minSize,
-        1, maxSize
-      ];
-    } else {
-      return null;
-    }
+  _getMbDataDrivenSize({ fieldName, minSize, maxSize }) {
+    const targetName = VectorStyle.getComputedFieldName(fieldName);
+    return   ['interpolate',
+      ['linear'],
+      ['get', targetName],
+      0, minSize,
+      1, maxSize
+    ];
   }
 
-
-
-  _getMBColor(property) {
-    let color;
-
-    const hasFields = _.get(this._descriptor.properties[property].options, 'field', false)
-      && _.get(this._descriptor.properties[property].options, 'color', false);
-    const isStatic = this._descriptor.properties[property].type === VectorStyle.STYLE_TYPE.STATIC;
-
-    if (isStatic || !hasFields) {
-      color = this.getHexColor(property);
-    } else {
-      color = this._getMBDataDrivenColor(property);
+  _getMBColor(styleDescriptor) {
+    const isStatic = styleDescriptor.type === VectorStyle.STYLE_TYPE.STATIC;
+    if (isStatic) {
+      return _.get(styleDescriptor, 'options.color', null);
     }
-    return color;
+
+    const isDynamicConfigComplete = _.has(styleDescriptor, 'options.field')
+      && _.has(styleDescriptor, 'options.color');
+    if (isDynamicConfigComplete) {
+      return this._getMBDataDrivenColor({
+        fieldName: styleDescriptor.options.field.name,
+        color: styleDescriptor.options.color,
+      });
+    }
+
+    return null;
   }
 
   _getMBOpacity() {
@@ -290,19 +266,30 @@ export class VectorStyle {
     return opacity;
   }
 
-  _getMbSize(property) {
-    if (this._descriptor.properties[property].type === VectorStyle.STYLE_TYPE.STATIC) {
-      return this._descriptor.properties[property].options.size;
-    } else {
-      return this._getMbDataDrivenSize(property);
+  _getMbSize(styleDescriptor) {
+    if (styleDescriptor.type === VectorStyle.STYLE_TYPE.STATIC) {
+      return styleDescriptor.options.size;
     }
+
+    const isDynamicConfigComplete = _.has(styleDescriptor, 'options.field')
+      && _.has(styleDescriptor, 'options.minSize')
+      && _.has(styleDescriptor, 'options.maxSize');
+    if (isDynamicConfigComplete) {
+      return this._getMbDataDrivenSize({
+        fieldName: styleDescriptor.options.field.name,
+        minSize: styleDescriptor.options.minSize,
+        maxSize: styleDescriptor.options.maxSize,
+      });
+    }
+
+    return null;
   }
 
   setMBPaintProperties(mbMap, sourceId, fillLayerId, lineLayerId) {
     const opacity = this._getMBOpacity();
 
     if (this._descriptor.properties.fillColor) {
-      const color = this._getMBColor('fillColor');
+      const color = this._getMBColor(this._descriptor.properties.fillColor);
       mbMap.setPaintProperty(fillLayerId, 'fill-color', color);
       mbMap.setPaintProperty(fillLayerId, 'fill-opacity', opacity);
     } else {
@@ -311,7 +298,7 @@ export class VectorStyle {
     }
 
     if (this._descriptor.properties.lineColor) {
-      const color = this._getMBColor('lineColor');
+      const color = this._getMBColor(this._descriptor.properties.lineColor);
       mbMap.setPaintProperty(lineLayerId, 'line-color', color);
       mbMap.setPaintProperty(lineLayerId, 'line-opacity', opacity);
 
@@ -320,8 +307,8 @@ export class VectorStyle {
       mbMap.setPaintProperty(lineLayerId, 'line-opacity', 0);
     }
 
-    if (this._descriptor.properties.lineWidth && this._descriptor.properties.lineWidth.options) {
-      const lineWidth = this._getMbSize('lineWidth');
+    if (this._descriptor.properties.lineWidth) {
+      const lineWidth = this._getMbSize(this._descriptor.properties.lineWidth);
       mbMap.setPaintProperty(lineLayerId, 'line-width', lineWidth);
     } else {
       mbMap.setPaintProperty(lineLayerId, 'line-width', 0);
@@ -331,7 +318,7 @@ export class VectorStyle {
   setMBPaintPropertiesForPoints(mbMap, sourceId, pointLayerId) {
     const opacity = this._getMBOpacity();
     if (this._descriptor.properties.fillColor) {
-      const color = this._getMBColor('fillColor');
+      const color = this._getMBColor(this._descriptor.properties.fillColor);
       mbMap.setPaintProperty(pointLayerId, 'circle-color', color);
       mbMap.setPaintProperty(pointLayerId, 'circle-opacity', opacity);
     } else {
@@ -339,7 +326,7 @@ export class VectorStyle {
       mbMap.setPaintProperty(pointLayerId, 'circle-opacity', 0);
     }
     if (this._descriptor.properties.lineColor) {
-      const color = this._getMBColor('lineColor');
+      const color = this._getMBColor(this._descriptor.properties.lineColor);
       mbMap.setPaintProperty(pointLayerId, 'circle-stroke-color', color);
       mbMap.setPaintProperty(pointLayerId, 'circle-stroke-opacity', opacity);
 
@@ -347,14 +334,14 @@ export class VectorStyle {
       mbMap.setPaintProperty(pointLayerId, 'circle-stroke-color', null);
       mbMap.setPaintProperty(pointLayerId, 'circle-stroke-opacity', 0);
     }
-    if (this._descriptor.properties.lineWidth && this._descriptor.properties.lineWidth.options) {
-      const lineWidth = this._getMbSize('lineWidth');
+    if (this._descriptor.properties.lineWidth) {
+      const lineWidth = this._getMbSize(this._descriptor.properties.lineWidth);
       mbMap.setPaintProperty(pointLayerId, 'circle-stroke-width', lineWidth);
     } else {
       mbMap.setPaintProperty(pointLayerId, 'circle-stroke-width', 0);
     }
-    if (this._descriptor.properties.iconSize && this._descriptor.properties.iconSize.options) {
-      const iconSize = this._getMbSize('iconSize');
+    if (this._descriptor.properties.iconSize) {
+      const iconSize = this._getMbSize(this._descriptor.properties.iconSize);
       mbMap.setPaintProperty(pointLayerId, 'circle-radius', iconSize);
     } else {
       mbMap.setPaintProperty(pointLayerId, 'circle-radius', 0);

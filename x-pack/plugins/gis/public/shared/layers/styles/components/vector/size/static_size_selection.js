@@ -5,38 +5,32 @@
  */
 
 import React from 'react';
-
+import PropTypes from 'prop-types';
 import {
   EuiRange
 } from '@elastic/eui';
 
-export class StaticSizeSelection extends React.Component {
+export function StaticSizeSelection({ onChange, styleOptions }) {
 
-  constructor() {
-    super();
-    this.state = {};
-  }
+  const onSizeChange = (event) => {
+    const size = parseInt(event.target.value, 10);
+    onChange({ size });
+  };
 
-  render() {
-
-    const onChange = (event) => {
-      const size = parseInt(event.target.value, 10);
-      this.props.changeOptions({
-        size: size
-      });
-    };
-
-    const selectedValue = (
-      this.props.selectedOptions && typeof this.props.selectedOptions.size === 'number'
-    ) ? this.props.selectedOptions.size : 0;
-    return (
-      <EuiRange
-        min={0}
-        max={100}
-        value={selectedValue.toString()}
-        onChange={onChange}
-        showInput
-      />
-    );
-  }
+  return (
+    <EuiRange
+      min={0}
+      max={100}
+      value={styleOptions.size.toString()}
+      onChange={onSizeChange}
+      showInput
+    />
+  );
 }
+
+StaticSizeSelection.propTypes = {
+  styleOptions: PropTypes.shape({
+    size: PropTypes.number.isRequired,
+  }).isRequired,
+  onChange: PropTypes.func.isRequired
+};

@@ -6,7 +6,8 @@
 
 import _ from 'lodash';
 import React, { Fragment } from 'react';
-import { FieldSelect } from '../field_select';
+import PropTypes from 'prop-types';
+import { FieldSelect, fieldShape } from '../field_select';
 import { ColorRampSelect } from './color_ramp_select';
 import { EuiSpacer } from '@elastic/eui';
 
@@ -23,7 +24,7 @@ export function DynamicColorSelection({ ordinalFields, onChange, styleOptions })
     <Fragment>
       <ColorRampSelect
         onChange={onColorChange}
-        color={_.get(styleOptions, 'color')}
+        color={styleOptions.color}
       />
       <EuiSpacer size="s" />
       <FieldSelect
@@ -34,3 +35,12 @@ export function DynamicColorSelection({ ordinalFields, onChange, styleOptions })
     </Fragment>
   );
 }
+
+DynamicColorSelection.propTypes = {
+  ordinalFields: PropTypes.arrayOf(fieldShape).isRequired,
+  styleOptions: PropTypes.shape({
+    color: PropTypes.string.isRequired,
+    field: fieldShape,
+  }).isRequired,
+  onChange: PropTypes.func.isRequired
+};

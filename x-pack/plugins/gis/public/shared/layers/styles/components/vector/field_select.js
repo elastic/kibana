@@ -68,8 +68,14 @@ export function FieldSelect({ fields, selectedField, onChange }) {
   );
 }
 
+export const fieldShape = PropTypes.shape({
+  name: PropTypes.string.isRequired,
+  label: PropTypes.string.isRequired,
+  origin: PropTypes.oneOf(['join', 'source']).isRequired
+});
+
 FieldSelect.propTypes = {
-  selectedField: PropTypes.object,
-  fields: PropTypes.array.isRequired,
+  selectedField: fieldShape,
+  fields: PropTypes.arrayOf(fieldShape).isRequired,
   onChange: PropTypes.func.isRequired,
 };

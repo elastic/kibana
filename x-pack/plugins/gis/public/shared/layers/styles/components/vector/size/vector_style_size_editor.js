@@ -20,6 +20,8 @@ export function VectorStyleSizeEditor(props) {
       handlePropertyChange={props.handlePropertyChange}
       DynamicSelector={DynamicSizeSelection}
       StaticSelector={StaticSizeSelection}
+      defaultDynamicStyleOptions={props.defaultDynamicStyleOptions}
+      defaultStaticStyleOptions={props.defaultStaticStyleOptions}
     />
   );
 }

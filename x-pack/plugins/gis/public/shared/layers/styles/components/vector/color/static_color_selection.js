@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import React from 'react';
+import PropTypes from 'prop-types';
 import {
   EuiColorPicker,
   EuiFormControlLayout
@@ -20,9 +20,16 @@ export function StaticColorSelection({ onChange, styleOptions }) {
     <EuiFormControlLayout>
       <EuiColorPicker
         onChange={onColorChange}
-        color={_.get(styleOptions, 'color')}
+        color={styleOptions.color}
         className="gisColorPicker euiFieldText"
       />
     </EuiFormControlLayout>
   );
 }
+
+StaticColorSelection.propTypes = {
+  styleOptions: PropTypes.shape({
+    color: PropTypes.string.isRequired,
+  }).isRequired,
+  onChange: PropTypes.func.isRequired
+};
