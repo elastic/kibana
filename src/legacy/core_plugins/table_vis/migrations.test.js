@@ -164,7 +164,7 @@ describe('table vis migrations', () => {
       expect(actual.aggs.map(agg => agg.params)).toEqual(expected);
     });
 
-    it('should fail gracefully in the event of an error, returning the original doc unchanged', () => {
+    it('should throw with a reference to the doc name if something goes wrong', () => {
       const doc = {
         attributes: {
           title: 'My Vis',
@@ -177,9 +177,7 @@ describe('table vis migrations', () => {
           }
         }
       };
-      const actual = migrate(doc);
-      expect(actual).toEqual(doc);
-      expect(actual).toBe(doc);
+      expect(() => migrate(doc)).toThrowError(/My Vis/);
     });
   });
 

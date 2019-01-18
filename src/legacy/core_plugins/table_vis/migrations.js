@@ -52,8 +52,7 @@ export const migrations = {
         newDoc.attributes.visState = JSON.stringify(visState);
         return newDoc;
       } catch (e) {
-        // if anything goes wrong, do nothing and move on
-        return doc;
+        throw new Error(`Failure attempting to migrate saved object '${doc.attributes.title}' - ${e}`);
       }
     }
   }
