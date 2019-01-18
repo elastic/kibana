@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import idx from 'idx';
 import { get } from 'lodash';
 import React from 'react';
 import {
@@ -29,7 +30,11 @@ export function StickyTransactionProperties({
   totalDuration
 }: Props) {
   const timestamp = transaction['@timestamp'];
-  const url = get(transaction, REQUEST_URL_FULL, 'N/A');
+
+  const url =
+    idx(transaction, _ => _.context.page.url) ||
+    idx(transaction, _ => _.context.request.url.full) ||
+    'N/A';
   const duration = transaction.transaction.duration.us;
   const stickyProperties: IStickyProperty[] = [
     {

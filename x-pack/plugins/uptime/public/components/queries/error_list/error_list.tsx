@@ -6,6 +6,8 @@
 
 // @ts-ignore missing typings
 import { EuiInMemoryTable, EuiPanel, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import React, { Fragment } from 'react';
 import { Query } from 'react-apollo';
@@ -21,39 +23,71 @@ interface ErrorListProps {
 export const ErrorList = ({ dateRangeStart, dateRangeEnd, filters }: ErrorListProps) => (
   <Query query={getErrorListQuery} variables={{ dateRangeStart, dateRangeEnd, filters }}>
     {({ loading, error, data }) => {
-      if (loading) {
-        return 'Loading...';
-      }
       if (error) {
-        return `Error ${error.message}`;
+        return i18n.translate('xpack.uptime.errorList.errorMessage', {
+          values: { message: error.message },
+          defaultMessage: 'Error {message}',
+        });
       }
       const { errorList } = data;
       return (
         <Fragment>
           <EuiTitle size="xs">
-            <h5>Error list</h5>
+            <h5>
+              <FormattedMessage id="xpack.uptime.errorList.title" defaultMessage="Error list" />
+            </h5>
           </EuiTitle>
           <EuiPanel>
             <EuiInMemoryTable
+              loading={loading}
               items={errorList}
               columns={[
-                { field: 'type', name: 'Error Type', sortable: true },
+                {
+                  field: 'type',
+                  name: i18n.translate('xpack.uptime.errorList.errorTypeColumnLabel', {
+                    defaultMessage: 'Error type',
+                  }),
+                  sortable: true,
+                },
                 {
                   field: 'monitorId',
-                  name: 'Monitor ID',
+                  name: i18n.translate('xpack.uptime.errorList.monitorIdColumnLabel', {
+                    defaultMessage: 'Monitor ID',
+                  }),
                   render: (id: string) => <Link to={`/monitor/${id}`}>{id}</Link>,
                   sortable: true,
                   width: '25%',
                 },
-                { field: 'count', name: 'Count', sortable: true },
+                {
+                  field: 'count',
+                  name: i18n.translate('xpack.uptime.errorList.CountColumnLabel', {
+                    defaultMessage: 'Count',
+                  }),
+                  sortable: true,
+                },
                 {
                   field: 'timestamp',
-                  name: 'Latest error',
+                  name: i18n.translate('xpack.uptime.errorList.latestErrorColumnLabel', {
+                    defaultMessage: 'Latest error',
+                  }),
                   sortable: true,
                   render: (timestamp: string) => moment(timestamp).fromNow(),
                 },
-                { field: 'statusCode', name: 'Response code', sortable: true },
-                { field: 'latestMessage', name: 'Latest message', sortable: true, width: '40%' },
+                {
+                  field: 'statusCode',
+                  name: i18n.translate('xpack.uptime.errorList.statusCodeColumnLabel', {
+                    defaultMessage: 'Status code',
+                  }),
+                  sortable: true,
+                },
+                {
+                  field: 'latestMessage',
+                  name: i18n.translate('xpack.uptime.errorList.latestMessageColumnLabel', {
+                    defaultMessage: 'Latest message',
+                  }),
+                  sortable: true,
+                  width: '40%',
+                },
               ]}
               sorting={true}
               pagination={{ initialPageSize: 10, pageSizeOptions: [5, 10, 20, 50] }}

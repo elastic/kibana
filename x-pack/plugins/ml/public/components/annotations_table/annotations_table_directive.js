@@ -23,6 +23,8 @@ const module = uiModules.get('apps/ml');
 import chrome from 'ui/chrome';
 const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
+import { I18nProvider } from '@kbn/i18n/react';
+
 module.directive('mlAnnotationTable', function () {
 
   function link(scope, element) {
@@ -39,7 +41,9 @@ module.directive('mlAnnotationTable', function () {
       };
 
       ReactDOM.render(
-        React.createElement(AnnotationsTable, props),
+        <I18nProvider>
+          {React.createElement(AnnotationsTable, props)}
+        </I18nProvider>,
         element[0]
       );
     }

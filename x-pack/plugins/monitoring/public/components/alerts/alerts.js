@@ -25,7 +25,7 @@ const linkToCategories = {
 const getColumns = (kbnUrl, scope) => ([
   {
     name: 'Status',
-    field: 'metadata.severity',
+    field: 'status',
     sortable: true,
     render: severity => {
       const severityIcon = mapSeverity(severity);
@@ -82,7 +82,7 @@ const getColumns = (kbnUrl, scope) => ([
   },
   {
     name: 'Category',
-    field: 'metadata.link',
+    field: 'category',
     sortable: true,
     render: link => linkToCategories[link] ? linkToCategories[link] : 'General'
   },
@@ -101,16 +101,22 @@ const getColumns = (kbnUrl, scope) => ([
 ]);
 
 const AlertsUI = ({ alerts, angular, sorting, pagination, onTableChange, intl }) => {
+  const alertsFlattened = alerts.map(alert => ({
+    ...alert,
+    status: alert.metadata.severity,
+    category: alert.metadata.link,
+  }));
+
   return (
     <EuiMonitoringTable
       className="alertsTable"
-      rows={alerts}
+      rows={alertsFlattened}
       columns={getColumns(angular.kbnUrl, angular.scope)}
       sorting={{
         ...sorting,
         sort: {
           ...sorting.sort,
-          field: 'metadata.severity',
+          field: 'status',
           direction: EUI_SORT_DESCENDING,
         }
       }}

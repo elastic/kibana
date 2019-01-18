@@ -40,7 +40,6 @@ import { preLoadJob } from 'plugins/ml/jobs/new_job/simple/components/utils/prep
 import { SingleMetricJobServiceProvider } from './create_job_service';
 import { FullTimeRangeSelectorServiceProvider } from 'plugins/ml/components/full_time_range_selector/full_time_range_selector_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
-import { initPromise } from 'plugins/ml/util/promise';
 
 import template from './create_job.html';
 
@@ -57,7 +56,6 @@ uiRoutes
       savedSearch: loadCurrentSavedSearch,
       checkMlNodesAvailable,
       loadNewJobDefaults,
-      initPromise: initPromise(true)
     }
   });
 
@@ -365,6 +363,7 @@ module
         $scope.ui.dirty = false;
 
         $scope.chartState = CHART_STATE.LOADING;
+        $scope.$applyAsync();
 
         mlSingleMetricJobService.getLineChartResults($scope.formConfig)
           .then((resp) => {
@@ -374,8 +373,9 @@ module
             msgs.error(resp.message);
             $scope.chartState = CHART_STATE.NO_RESULTS;
           })
-          .finally(() => {
+          .then(() => {
             $scope.$broadcast('render');
+            $scope.$applyAsync();
           });
       }
     };
@@ -417,6 +417,7 @@ module
             msgs.error(i18n('xpack.ml.newJob.simple.singleMetric.saveFailedErrorMessage', {
               defaultMessage: 'Save failed: '
             }), resp.resp);
+            $scope.$applyAsync();
           });
       } else {
         // show the advanced section as the model memory limit is invalid
@@ -462,7 +463,12 @@ module
                   msgs.error(i18n('xpack.ml.newJob.simple.singleMetric.datafeedNotStartedErrorMessage', {
                     defaultMessage: 'Could not start datafeed: '
                   }), resp);
+                })
+                .then(() => {
+                  $scope.$applyAsync();
                 });
+            } else {
+              $scope.$applyAsync();
             }
           })
           .catch((resp) => {
@@ -488,6 +494,7 @@ module
               console.log('Stopping poll because datafeed state is: ' + state);
               $scope.$broadcast('render-results');
               forceStop = true;
+              $scope.$applyAsync();
             }
             run();
           });
@@ -537,10 +544,11 @@ module
                     ignoreModel = true;
                   }
                 })
-                .finally(() => {
+                .then(() => {
                   jobCheck();
                 });
             }
+            $scope.$applyAsync();
           });
       }
     }
@@ -560,12 +568,15 @@ module
       // any jitters in the chart caused by previously loading the model mid job.
         $scope.chartData.model = [];
         reloadModelChart()
-          .finally(() => {
+          .catch()
+          .then(() => {
             $scope.chartData.percentComplete = 100;
             $scope.$broadcast('render-results');
+            $scope.$applyAsync();
           });
       } else {
         $scope.$broadcast('render-results');
+        $scope.$applyAsync();
       }
     }
 

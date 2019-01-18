@@ -66,10 +66,10 @@ export class GisMap extends Component {
     if (noFlyoutVisible) {
       currentPanel = null;
     } else if (addLayerVisible) {
-      currentPanelClassName = "gisLayerPanel-isVisible";
+      currentPanelClassName = "gisMapLayerPanel-isVisible";
       currentPanel = <AddLayerPanel/>;
     } else if (layerDetailsVisible) {
-      currentPanelClassName = "gisLayerPanel-isVisible";
+      currentPanelClassName = "gisMapLayerPanel-isVisible";
       currentPanel = (
         <LayerPanel/>
       );
@@ -81,7 +81,7 @@ export class GisMap extends Component {
           <WidgetOverlay/>
         </EuiFlexItem>
 
-        <EuiFlexItem className={`gisLayerPanel ${currentPanelClassName}`} grow={false}>
+        <EuiFlexItem className={`gisMapLayerPanel ${currentPanelClassName}`} grow={false}>
           {currentPanel}
         </EuiFlexItem>
 
