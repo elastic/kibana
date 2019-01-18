@@ -11,7 +11,7 @@ import { FillableCircle, FillableVector } from '../../icons/additional_layer_ico
 import { ColorGradient } from '../../icons/color_gradient';
 import { getHexColorRangeStrings } from '../../utils/color_utils';
 import { VectorStyleEditor } from './components/vector/vector_style_editor';
-import { getDefaultStaticProperties } from './vector_style_defaults';
+import { DEFAULT_ALPHA_VALUE, getDefaultStaticProperties } from './vector_style_defaults';
 
 export class VectorStyle {
 
@@ -261,9 +261,7 @@ export class VectorStyle {
   }
 
   _getMBOpacity() {
-    const DEFAULT_OPACITY = 1;
-    const opacity = typeof this._descriptor.properties.alphaValue === 'number' ? this._descriptor.properties.alphaValue : DEFAULT_OPACITY;
-    return opacity;
+    return _.get(this._descriptor.properties, 'alphaValue', DEFAULT_ALPHA_VALUE);
   }
 
   _getMbSize(styleDescriptor) {
