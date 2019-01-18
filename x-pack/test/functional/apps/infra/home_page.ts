@@ -16,6 +16,7 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
 
   describe('Home page', () => {
     before(async () => {
+      await esArchiver.unload('empty_kibana');
       await esArchiver.load('empty_kibana');
     });
 
