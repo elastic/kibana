@@ -32,7 +32,7 @@ import {
   PointSeriesPageProvider,
   VisualBuilderPageProvider,
   TimelionPageProvider,
-  SharePageProvider
+  SharePageProvider,
 } from './page_objects';
 
 import {
