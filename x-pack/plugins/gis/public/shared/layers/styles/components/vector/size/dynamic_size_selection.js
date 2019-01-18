@@ -4,21 +4,45 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import _ from 'lodash';
+import React, { Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { FieldSelect, fieldShape } from '../field_select';
+import { SizeRangeSelector } from './size_range_selector';
+import { EuiSpacer } from '@elastic/eui';
 
-import { DynamicOrdinalStyleOption, styleTypes } from '../../dynamic_ordinal_styling_option';
+export function DynamicSizeSelection({ ordinalFields, styleOptions, onChange }) {
+  const onFieldChange = ({ field }) => {
+    onChange({ ...styleOptions, field });
+  };
 
+  const onSizeRangeChange = ({ minSize, maxSize }) => {
+    onChange({ ...styleOptions, minSize, maxSize });
+  };
 
-export class DynamicSizeSelection extends React.Component {
-
-  render() {
-    return (
-      <DynamicOrdinalStyleOption
-        fields={this.props.fields}
-        selectedOptions={this.props.selectedOptions}
-        type={styleTypes.SIZE_RANGE}
-        onChange={this.props.onChange}
+  return (
+    <Fragment>
+      <SizeRangeSelector
+        onChange={onSizeRangeChange}
+        minSize={styleOptions.minSize}
+        maxSize={styleOptions.maxSize}
       />
-    );
-  }
+      <EuiSpacer size="s" />
+      <FieldSelect
+        fields={ordinalFields}
+        selectedField={_.get(styleOptions, 'field')}
+        onChange={onFieldChange}
+      />
+    </Fragment>
+  );
 }
+
+DynamicSizeSelection.propTypes = {
+  ordinalFields: PropTypes.arrayOf(fieldShape).isRequired,
+  styleOptions: PropTypes.shape({
+    minSize: PropTypes.number.isRequired,
+    maxSize: PropTypes.number.isRequired,
+    field: fieldShape,
+  }).isRequired,
+  onChange: PropTypes.func.isRequired
+};
