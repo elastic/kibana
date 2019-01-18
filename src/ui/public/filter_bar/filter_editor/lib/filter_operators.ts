@@ -17,9 +17,11 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export interface Operator {
   id: string;
-  defaultMessage: string;
+  message: string;
   type: string;
   negate: boolean;
   fieldTypes?: string[];
@@ -28,53 +30,69 @@ export interface Operator {
 export const FILTER_OPERATORS: Operator[] = [
   {
     id: 'isOperator',
-    defaultMessage: 'is',
+    message: i18n.translate('common.ui.filterEditor.isOperatorOptionLabel', {
+      defaultMessage: 'is',
+    }),
     type: 'phrase',
     negate: false,
   },
   {
     id: 'isNotOperator',
-    defaultMessage: 'is not',
+    message: i18n.translate('common.ui.filterEditor.isNotOperatorOptionLabel', {
+      defaultMessage: 'is not',
+    }),
     type: 'phrase',
     negate: true,
   },
   {
     id: 'isOneOfOperator',
-    defaultMessage: 'is one of',
+    message: i18n.translate('common.ui.filterEditor.isOneOfOperatorOptionLabel', {
+      defaultMessage: 'is one of',
+    }),
     type: 'phrases',
     negate: false,
     fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape'],
   },
   {
     id: 'isNotOneOfOperator',
-    defaultMessage: 'is not one of',
+    message: i18n.translate('common.ui.filterEditor.isNotOneOfOperatorOptionLabel', {
+      defaultMessage: 'is not one of',
+    }),
     type: 'phrases',
     negate: true,
     fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape'],
   },
   {
     id: 'isBetweenOperator',
-    defaultMessage: 'is between',
+    message: i18n.translate('common.ui.filterEditor.isBetweenOperatorOptionLabel', {
+      defaultMessage: 'is between',
+    }),
     type: 'range',
     negate: false,
     fieldTypes: ['number', 'date', 'ip'],
   },
   {
     id: 'isNotBetweenOperator',
-    defaultMessage: 'is not between',
+    message: i18n.translate('common.ui.filterEditor.isNotBetweenOperatorOptionLabel', {
+      defaultMessage: 'is not between',
+    }),
     type: 'range',
     negate: true,
     fieldTypes: ['number', 'date', 'ip'],
   },
   {
     id: 'existsOperator',
-    defaultMessage: 'exists',
+    message: i18n.translate('common.ui.filterEditor.existsOperatorOptionLabel', {
+      defaultMessage: 'exists',
+    }),
     type: 'exists',
     negate: false,
   },
   {
     id: 'doesNotExistOperator',
-    defaultMessage: 'does not exist',
+    message: i18n.translate('common.ui.filterEditor.doesNotExistOperatorOptionLabel', {
+      defaultMessage: 'does not exist',
+    }),
     type: 'exists',
     negate: true,
   },

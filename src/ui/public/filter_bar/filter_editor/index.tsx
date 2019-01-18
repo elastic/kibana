@@ -265,12 +265,7 @@ class FilterEditorUI extends Component<Props, State> {
           })}
           options={operators}
           selectedOptions={selectedOperator ? [selectedOperator] : []}
-          getLabel={({ id, defaultMessage }) =>
-            this.props.intl.formatMessage({
-              defaultMessage,
-              id: `common.ui.filterEditor.${id}OptionLabel`,
-            })
-          }
+          getLabel={({ message }) => message}
           onChange={this.onOperatorChange}
           singleSelection={{ asPlainText: true }}
           isClearable={false}
