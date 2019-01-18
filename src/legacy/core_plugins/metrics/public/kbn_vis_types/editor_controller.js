@@ -20,7 +20,6 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
-import chrome from 'ui/chrome';
 
 function ReactEditorControllerProvider(Private, config) {
   class ReactEditorController {
@@ -32,7 +31,6 @@ function ReactEditorControllerProvider(Private, config) {
 
     async render(params) {
       const Component = this.vis.type.editorConfig.component;
-      await this.setDefaultIndexPattern(params.appState);
       render(
         <I18nProvider>
           <Component
@@ -44,17 +42,8 @@ function ReactEditorControllerProvider(Private, config) {
             isEditorMode={true}
             appState={params.appState}
           />
-        </I18nProvider>, this.el);
-    }
-
-    setDefaultIndexPattern = async (appState) => {
-      if (this.vis.params.index_pattern === '') {
-        // set the default index pattern if none is defined.
-        const savedObjectsClient = chrome.getSavedObjectsClient();
-        const indexPattern = await savedObjectsClient.get('index-pattern', config.get('defaultIndex'));
-        this.vis.params.index_pattern = indexPattern.attributes.title;
-        appState.vis.params.index_pattern = indexPattern.attributes.title;
-      }
+        </I18nProvider>,
+        this.el);
     }
 
     resize() {
