@@ -90,14 +90,19 @@ describe('[CCR] follower index serialization', () => {
       const deserializedFollowerIndex = {
         remoteCluster: 'remote cluster',
         leaderIndex: 'leader index',
+        maxReadRequestOperationCount: 'foo',
+        maxOutstandingReadRequests: 'foo',
+        maxReadRequestSize: 'foo',
+        maxWriteRequestOperationCount: 'foo',
+        maxWriteRequestSize: 'foo',
+        maxOutstandingWriteRequests: 'foo',
+        maxWriteBufferCount: 'foo',
+        maxWriteBufferSize: 'foo',
+        maxRetryDelay: 'foo',
+        readPollTimeout: 'foo',
       };
 
-      const serializedFollowerIndex = {
-        remote_cluster: 'remote cluster',
-        leader_index: 'leader index',
-      };
-
-      expect(serializeFollowerIndex(deserializedFollowerIndex)).toEqual(serializedFollowerIndex);
+      expect(serializeFollowerIndex(deserializedFollowerIndex)).toMatchSnapshot();
     });
   });
 });
