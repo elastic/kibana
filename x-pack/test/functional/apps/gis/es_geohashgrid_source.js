@@ -154,7 +154,7 @@ export default function ({ getPageObjects, getService }) {
 
       });
 
-      describe('geoprecision - requests', async ()=> {
+      describe('geoprecision - requests', async () => {
 
         let beforeTimestamp;
         beforeEach(async () => {
@@ -174,6 +174,50 @@ export default function ({ getPageObjects, getService }) {
           expect(afterTimestamp).not.to.equal(beforeTimestamp);
         });
 
+      });
+
+      describe('query bar', () => {
+        before(async () => {
+          await PageObjects.gis.setView(0, 0, 0);
+          await queryBar.setQuery('machine.os.raw : "win 8"');
+          await queryBar.submitQuery();
+        });
+
+        after(async () => {
+          await queryBar.setQuery('');
+          await queryBar.submitQuery();
+        });
+
+        it('should apply query to geohashgrid aggregation request', async () => {
+          await PageObjects.gis.openInspectorRequestsView();
+          const requestStats = await inspector.getTableData();
+          const hits = PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits (total)');
+          await inspector.close();
+          expect(hits).to.equal('1');
+        });
+      });
+
+      describe('inspector', () => {
+        afterEach(async () => {
+          await inspector.close();
+        });
+
+        it('should contain geohashgrid aggregation elasticsearch request', async () => {
+          await PageObjects.gis.openInspectorRequestsView();
+          const requestStats = await inspector.getTableData();
+          const totalHits =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits (total)');
+          expect(totalHits).to.equal('6');
+          const hits =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits');
+          expect(hits).to.equal('0'); // aggregation requests do not return any documents
+          const indexPatternName =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Index pattern');
+          expect(indexPatternName).to.equal('logstash-*');
+        });
+
+        it('should not contain any elasticsearch request after layer is deleted', async () => {
+          await PageObjects.gis.removeLayer('logstash-*');
+          const noRequests = await PageObjects.gis.doesInspectorHaveRequests();
+          expect(noRequests).to.equal(true);
+        });
       });
 
     });
