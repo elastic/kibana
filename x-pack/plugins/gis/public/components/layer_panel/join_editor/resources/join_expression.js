@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
@@ -53,8 +54,7 @@ export class JoinExpression extends Component {
   }
 
   _onLeftFieldChange = (selectedFields) => {
-    const selectedField = selectedFields.length > 0 ? selectedFields[0].value : null;
-    this.props.onLeftFieldChange(selectedField.name);
+    this.props.onLeftFieldChange(_.get(selectedFields, '[0].value.name', null));
   };
 
   _renderLeftFieldSelect() {
@@ -101,8 +101,27 @@ export class JoinExpression extends Component {
     );
   }
 
+  _renderRightSourceSelect() {
+    if (!this.props.leftValue) {
+      return null;
+    }
+
+    return (
+      <EuiFormRow
+        label="Right source"
+      >
+        <IndexPatternSelect
+          placeholder="Select index pattern"
+          indexPatternId={this.props.rightSourceIndexPatternId}
+          onChange={this._onRightSourceChange}
+          isClearable={false}
+        />
+      </EuiFormRow>
+    );
+  }
+
   _renderRightFieldSelect() {
-    if (!this.props.rightFields) {
+    if (!this.props.rightFields || !this.props.leftValue) {
       return null;
     }
 
@@ -141,10 +160,7 @@ export class JoinExpression extends Component {
   }
 
   render() {
-    const {
-      leftSourceName,
-      rightSourceIndexPatternId,
-    } = this.props;
+    const { leftSourceName } = this.props;
     return (
       <EuiPopover
         id="joinPopover"
@@ -175,16 +191,8 @@ export class JoinExpression extends Component {
           </EuiFormRow>
           {this._renderLeftFieldSelect()}
 
-          <EuiFormRow
-            label="Right source"
-          >
-            <IndexPatternSelect
-              placeholder="Select index pattern"
-              indexPatternId={rightSourceIndexPatternId}
-              onChange={this._onRightSourceChange}
-              isClearable={false}
-            />
-          </EuiFormRow>
+          {this._renderRightSourceSelect()}
+
           {this._renderRightFieldSelect()}
         </div>
       </EuiPopover>
