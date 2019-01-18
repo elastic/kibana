@@ -19,25 +19,21 @@
 
 import $ from 'jquery';
 import _ from 'lodash';
-import AggConfigResult from '../vis/agg_config_result';
 import { uiModules } from '../modules';
-import tableCellFilterHtml from './partials/table_cell_filter.html';
-import { isNumeric } from '../utils/numeric';
-import { VisFiltersProvider } from '../vis/vis_filters';
+import tableCellFilterHtml from '../directives/partials/table_cell_filter.html';
 
 const module = uiModules.get('kibana');
 
-module.directive('kbnRows', function ($compile, Private) {
+module.directive('kbnRows', function ($compile) {
   return {
     restrict: 'A',
     link: function ($scope, $el, attr) {
-      const visFilter = Private(VisFiltersProvider);
-      function addCell($tr, contents) {
+      function addCell($tr, contents, column, row) {
         function createCell() {
           return $(document.createElement('td'));
         }
 
-        function createFilterableCell(aggConfigResult) {
+        function createFilterableCell(value) {
           const $template = $(tableCellFilterHtml);
           $template.addClass('kbnTableCellFilter__hover');
 
@@ -49,7 +45,12 @@ module.directive('kbnRows', function ($compile, Private) {
               return;
             }
 
-            visFilter.filter({ datum: { aggConfigResult: aggConfigResult }, negate });
+            $scope.filter({ data: [{
+              table: $scope.table,
+              row: $scope.rows.findIndex(r => r === row),
+              column: $scope.table.columns.findIndex(c => c.id === column.id),
+              value
+            }], negate });
           };
 
           return $compile($template)(scope);
@@ -58,31 +59,18 @@ module.directive('kbnRows', function ($compile, Private) {
         let $cell;
         let $cellContent;
 
-        if (contents instanceof AggConfigResult) {
-          const field = contents.aggConfig.getField();
-          const isCellContentFilterable =
-            contents.aggConfig.isFilterable()
-            && (!field || field.filterable);
+        const contentsIsDefined = (contents !== null && contents !== undefined);
 
-          if (isCellContentFilterable) {
-            $cell = createFilterableCell(contents);
-            $cellContent = $cell.find('[data-cell-content]');
-          } else {
-            $cell = $cellContent = createCell();
-          }
-
-          // An AggConfigResult can "enrich" cell contents by applying a field formatter,
-          // which we want to do if possible.
-          contents = contents.toString('html');
+        if (column.filterable && contentsIsDefined) {
+          $cell = createFilterableCell(contents);
+          $cellContent = $cell.find('[data-cell-content]');
         } else {
           $cell = $cellContent = createCell();
-
-          // TODO: It would be better to actually check the type of the field, but we don't have
-          // access to it here. This may become a problem with the switch to BigNumber
-          if (isNumeric(contents)) {
-            $cell.addClass('numeric-value');
-          }
         }
+
+        // An AggConfigResult can "enrich" cell contents by applying a field formatter,
+        // which we want to do if possible.
+        contents = contentsIsDefined ? column.formatter.convert(contents, 'html') : '';
 
         if (_.isObject(contents)) {
           if (contents.attr) {
@@ -113,10 +101,6 @@ module.directive('kbnRows', function ($compile, Private) {
         $tr.append($cell);
       }
 
-      function maxRowSize(max, row) {
-        return Math.max(max, row.length);
-      }
-
       $scope.$watchMulti([
         attr.kbnRows,
         attr.kbnRowsMin
@@ -127,23 +111,21 @@ module.directive('kbnRows', function ($compile, Private) {
         $el.empty();
 
         if (!Array.isArray(rows)) rows = [];
-        const width = rows.reduce(maxRowSize, 0);
 
         if (isFinite(min) && rows.length < min) {
           // clone the rows so that we can add elements to it without upsetting the original
           rows = _.clone(rows);
           // crate the empty row which will be pushed into the row list over and over
-          const emptyRow = new Array(width);
-          // fill the empty row with values
-          _.times(width, function (i) { emptyRow[i] = ''; });
+          const emptyRow = {};
           // push as many empty rows into the row array as needed
           _.times(min - rows.length, function () { rows.push(emptyRow); });
         }
 
         rows.forEach(function (row) {
           const $tr = $(document.createElement('tr')).appendTo($el);
-          row.forEach(function (cell) {
-            addCell($tr, cell);
+          $scope.columns.forEach(column => {
+            const value = row[column.id];
+            addCell($tr, value, column, row);
           });
         });
       });

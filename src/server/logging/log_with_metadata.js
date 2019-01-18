@@ -16,23 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { isPlainObject } from 'lodash';
+const symbol = Symbol('log message with metadata');
 
-export async function WelcomeProvider({ getService, getPageObjects }) {
-  const browser = getService('browser');
-  const lifecycle = getService('lifecycle');
-  const PageObjects = getPageObjects(['common']);
+export const logWithMetadata = {
+  isLogEvent(eventData) {
+    return Boolean(isPlainObject(eventData) && eventData[symbol]);
+  },
 
-  const welcome = new class Welcome {
-    async disable() {
-      await browser.setLocalStorageItem('home:welcome:show', 'false');
-    }
-  };
+  getLogEventData(eventData) {
+    const { message, metadata } = eventData[symbol];
+    return {
+      ...metadata,
+      message
+    };
+  },
 
-  lifecycle.on('beforeTests', async () => {
-    await PageObjects.common.navigateToApp('home');
-    await welcome.disable();
-    await PageObjects.common.navigateToApp('home');
-  });
-
-  return welcome;
-}
+  decorateServer(server) {
+    server.decorate('server', 'logWithMetadata', (tags, message, metadata = {}) => {
+      server.log(tags, {
+        [symbol]: {
+          message,
+          metadata,
+        },
+      });
+    });
+  },
+};

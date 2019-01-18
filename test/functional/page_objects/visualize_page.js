@@ -692,6 +692,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       expect(successToast).to.be(true);
     }
 
+    async saveVisualizationExpectSuccessAndBreadcrumb(vizName, options) {
+      await this.saveVisualizationExpectSuccess(vizName, options);
+      const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
+      log.debug(`Save viz page title is ${pageTitle}`);
+      expect(pageTitle).to.contain(vizName);
+    }
+
     async saveVisualizationExpectFail(vizName, { saveAsNew = false } = {}) {
       await this.saveVisualization(vizName, { saveAsNew });
       const errorToast = await testSubjects.exists('saveVisualizationError', {

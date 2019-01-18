@@ -23,12 +23,13 @@ import {
   ERROR_LOG_STACKTRACE
 } from 'x-pack/plugins/apm/common/constants';
 import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
+import { legacyEncodeURIComponent } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import {
   fromQuery,
   history,
   toQuery
 } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
-import { legacyEncodeURIComponent } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
+import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/public/constants';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { ErrorGroupAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_error_group';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
@@ -111,12 +112,6 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
   }
 
   const transactionLink = getTransactionLink(error, transaction);
-  const notAvailableLabel = i18n.translate(
-    'xpack.apm.errorGroupDetails.notAvailableLabel',
-    {
-      defaultMessage: 'N/A'
-    }
-  );
   const stickyProperties = [
     {
       fieldName: '@timestamp',
@@ -132,7 +127,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
       val:
         idx(error, _ => _.context.page.url) ||
         idx(transaction, _ => _.context.request.url.full) ||
-        notAvailableLabel,
+        NOT_AVAILABLE_LABEL,
       truncated: true,
       width: '50%'
     },
@@ -141,7 +136,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
       label: i18n.translate('xpack.apm.errorGroupDetails.requestMethodLabel', {
         defaultMessage: 'Request method'
       }),
-      val: get(error, REQUEST_METHOD, notAvailableLabel),
+      val: get(error, REQUEST_METHOD, NOT_AVAILABLE_LABEL),
       width: '25%'
     },
     {
@@ -149,7 +144,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
       label: i18n.translate('xpack.apm.errorGroupDetails.handledLabel', {
         defaultMessage: 'Handled'
       }),
-      val: String(get(error, ERROR_EXC_HANDLED, notAvailableLabel)),
+      val: String(get(error, ERROR_EXC_HANDLED, NOT_AVAILABLE_LABEL)),
       width: '25%'
     },
     {
@@ -160,7 +155,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
           defaultMessage: 'Transaction sample ID'
         }
       ),
-      val: transactionLink || notAvailableLabel,
+      val: transactionLink || NOT_AVAILABLE_LABEL,
       width: '25%'
     },
     {
@@ -168,7 +163,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
       label: i18n.translate('xpack.apm.errorGroupDetails.userIdLabel', {
         defaultMessage: 'User ID'
       }),
-      val: get(error, USER_ID, notAvailableLabel),
+      val: get(error, USER_ID, NOT_AVAILABLE_LABEL),
       width: '25%'
     }
   ];

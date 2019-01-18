@@ -16,6 +16,7 @@ import {
   ERROR_EXC_MESSAGE,
   ERROR_LOG_MESSAGE
 } from '../../../../common/constants';
+import { NOT_AVAILABLE_LABEL } from '../../../constants';
 import { ErrorDistributionRequest } from '../../../store/reactReduxRequest/errorDistribution';
 import { ErrorGroupDetailsRequest } from '../../../store/reactReduxRequest/errorGroup';
 import { IUrlParams } from '../../../store/urlParams';
@@ -59,16 +60,9 @@ const Culprit = styled.div`
   font-family: ${fontFamilyCode};
 `;
 
-const notAvailableLabel = i18n.translate(
-  'xpack.apm.errorGroupDetails.notAvailableLabel',
-  {
-    defaultMessage: 'N/A'
-  }
-);
-
 function getShortGroupId(errorGroupId?: string) {
   if (!errorGroupId) {
-    return notAvailableLabel;
+    return NOT_AVAILABLE_LABEL;
   }
 
   return errorGroupId.slice(0, 5);
@@ -145,7 +139,7 @@ export function ErrorGroupDetails({ urlParams, location }: Props) {
                       }
                     )}
                   </Label>
-                  <Message>{excMessage || notAvailableLabel}</Message>
+                  <Message>{excMessage || NOT_AVAILABLE_LABEL}</Message>
                   <Label>
                     {i18n.translate(
                       'xpack.apm.errorGroupDetails.culpritLabel',
@@ -154,7 +148,7 @@ export function ErrorGroupDetails({ urlParams, location }: Props) {
                       }
                     )}
                   </Label>
-                  <Culprit>{culprit || notAvailableLabel}</Culprit>
+                  <Culprit>{culprit || NOT_AVAILABLE_LABEL}</Culprit>
                 </EuiText>
               </Titles>
             )}
