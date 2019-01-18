@@ -14,7 +14,7 @@ FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'gis',
     title: 'Maps',
-    description: 'Explore geo-data from Elasticsearch and the Elastic Maps Service',
+    description: 'Explore geospatial data from Elasticsearch and the Elastic Maps Service',
     icon: 'gisApp',
     path: '/app/gis',
     showOnHomePage: true,
