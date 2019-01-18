@@ -10,6 +10,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
 import { IServiceListItem } from 'x-pack/plugins/apm/server/lib/services/get_services';
+import { NOT_AVAILABLE_LABEL } from '../../../../constants';
 import { fontSizes, truncate } from '../../../../style/variables';
 import { asDecimal, asMillis } from '../../../../utils/formatters';
 import { ManagedTable } from '../../../shared/ManagedTable';
@@ -30,12 +31,7 @@ function formatNumber(value: number) {
 }
 
 function formatString(value?: string | null) {
-  return (
-    value ||
-    i18n.translate('xpack.apm.servicesTable.notAvailableLabel', {
-      defaultMessage: 'N/A'
-    })
-  );
+  return value || NOT_AVAILABLE_LABEL;
 }
 
 const AppLink = styled(KibanaLink)`

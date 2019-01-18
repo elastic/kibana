@@ -20,6 +20,7 @@ import {
   fontSizes,
   truncate
 } from '../../../../style/variables';
+import { NOT_AVAILABLE_LABEL } from '../../../../constants';
 import { i18n } from '@kbn/i18n';
 
 function paginateItems({ items, pageIndex, pageSize }) {
@@ -43,13 +44,6 @@ const MessageLink = styled(KibanaLink)`
 const Culprit = styled.div`
   font-family: ${fontFamilyCode};
 `;
-
-const notAvailableLabel = i18n.translate(
-  'xpack.apm.errorsTable.notAvailableLabel',
-  {
-    defaultMessage: 'N/A'
-  }
-);
 
 class List extends Component {
   state = {
@@ -95,7 +89,7 @@ class List extends Component {
         render: groupId => {
           return (
             <GroupIdLink hash={`/${serviceName}/errors/${groupId}`}>
-              {groupId.slice(0, 5) || notAvailableLabel}
+              {groupId.slice(0, 5) || NOT_AVAILABLE_LABEL}
             </GroupIdLink>
           );
         }
@@ -113,13 +107,13 @@ class List extends Component {
         render: (message, item) => {
           return (
             <MessageAndCulpritCell>
-              <TooltipOverlay content={message || notAvailableLabel}>
+              <TooltipOverlay content={message || NOT_AVAILABLE_LABEL}>
                 <MessageLink hash={`/${serviceName}/errors/${item.groupId}`}>
-                  {message || notAvailableLabel}
+                  {message || NOT_AVAILABLE_LABEL}
                 </MessageLink>
               </TooltipOverlay>
-              <TooltipOverlay content={item.culprit || notAvailableLabel}>
-                <Culprit>{item.culprit || notAvailableLabel}</Culprit>
+              <TooltipOverlay content={item.culprit || NOT_AVAILABLE_LABEL}>
+                <Culprit>{item.culprit || NOT_AVAILABLE_LABEL}</Culprit>
               </TooltipOverlay>
             </MessageAndCulpritCell>
           );
@@ -147,7 +141,7 @@ class List extends Component {
         sortable: true,
         dataType: 'number',
         render: value =>
-          value ? numeral(value).format('0.[0]a') : notAvailableLabel
+          value ? numeral(value).format('0.[0]a') : NOT_AVAILABLE_LABEL
       },
       {
         field: 'latestOccurrenceAt',
@@ -159,7 +153,7 @@ class List extends Component {
           }
         ),
         align: 'right',
-        render: value => (value ? moment(value).fromNow() : notAvailableLabel)
+        render: value => (value ? moment(value).fromNow() : NOT_AVAILABLE_LABEL)
       }
     ];
 
