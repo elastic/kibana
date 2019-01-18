@@ -19,18 +19,28 @@
 
 import { socketInterpreterProvider } from '../common/interpreter/socket_interpret';
 import { serializeProvider } from '../common/lib/serialize';
-import { getSocket } from './socket';
-import { typesRegistry } from '../common/lib/types_registry';
 import { createHandlers } from './create_handlers';
-import { functionsRegistry } from '../common/lib/functions_registry';
-import { getBrowserRegistries } from './browser_registries';
 
-let socket;
-let resolve;
-const functionList = new Promise(_resolve => (resolve = _resolve));
+export async function initializeInterpreter(socket, typesRegistry, functionsRegistry) {
+  let resolve;
+  const functionList = new Promise(_resolve => (resolve = _resolve));
 
-export async function initializeInterpreter() {
-  socket = getSocket();
+  const getInitializedFunctions = async () => {
+    return functionList;
+  };
+
+  const interpretAst = async (ast, context, handlers) => {
+    // Load plugins before attempting to get functions, otherwise this gets racey
+    const serverFunctionList = await functionList;
+    const interpretFn = await socketInterpreterProvider({
+      types: typesRegistry.toJS(),
+      handlers: { ...handlers, ...createHandlers(socket) },
+      functions: functionsRegistry.toJS(),
+      referableFunctions: serverFunctionList,
+      socket: socket,
+    });
+    return interpretFn(ast, context);
+  };
 
   // Listen for interpreter runs
   socket.on('run', ({ ast, context, id }) => {
@@ -42,27 +52,20 @@ export async function initializeInterpreter() {
   });
 
   // Create the function list
-  socket.emit('getFunctionList');
-  socket.once('functionList', resolve);
-  return functionList;
+  let gotFunctionList = false;
+  socket.once('functionList', (fl) => {
+    gotFunctionList = true;
+    resolve(fl);
+  });
+
+  const interval = setInterval(() => {
+    if (gotFunctionList) {
+      clearInterval(interval);
+      return;
+    }
+    socket.emit('getFunctionList');
+  }, 1000);
+
+  return { getInitializedFunctions, interpretAst };
 }
 
-export async function getInitializedFunctions() {
-  return functionList;
-}
-
-// Use the above promise to seed the interpreter with the functions it can defer to
-export async function interpretAst(ast, context, handlers) {
-  // Load plugins before attempting to get functions, otherwise this gets racey
-  return Promise.all([functionList, getBrowserRegistries()])
-    .then(([serverFunctionList]) => {
-      return socketInterpreterProvider({
-        types: typesRegistry.toJS(),
-        handlers: { ...handlers, ...createHandlers(socket) },
-        functions: functionsRegistry.toJS(),
-        referableFunctions: serverFunctionList,
-        socket: socket,
-      });
-    })
-    .then(interpretFn => interpretFn(ast, context));
-}

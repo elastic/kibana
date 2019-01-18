@@ -151,7 +151,7 @@ export const WorkpadPage = compose(
           }
         },
         pasteElements: () => {
-          const { selectedElements, rootShapes } = JSON.parse(getClipboardData());
+          const { selectedElements, rootShapes } = JSON.parse(getClipboardData()) || {};
           const clonedElements = selectedElements && cloneSubgraphs(selectedElements);
           if (clonedElements) {
             // first clone and persist the new node(s)

@@ -7,7 +7,7 @@
 import { NormalizedCacheObject } from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
 import React from 'react';
-import { Breadcrumb } from 'ui/chrome';
+import { UMBreadcrumb } from '../breadcrumbs';
 import { UptimePersistedState } from '../uptime_app';
 import { CreateGraphQLClient } from './adapters/framework/framework_adapter_types';
 
@@ -15,12 +15,12 @@ export interface UMFrontendLibs {
   framework: UMFrameworkAdapter;
 }
 
-export type UMUpdateBreadcrumbs = (breadcrumbs: Breadcrumb[]) => void;
+export type UMUpdateBreadcrumbs = (breadcrumbs: UMBreadcrumb[]) => void;
 
 export interface UptimeAppProps {
   isUsingK7Design: boolean;
   updateBreadcrumbs: UMUpdateBreadcrumbs;
-  kibanaBreadcrumbs: Breadcrumb[];
+  kibanaBreadcrumbs: UMBreadcrumb[];
   routerBasename: string;
   graphQLClient: ApolloClient<NormalizedCacheObject>;
   initialDateRangeStart?: number;

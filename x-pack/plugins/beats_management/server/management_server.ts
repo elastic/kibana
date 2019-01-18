@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { INDEX_NAMES } from '../common/constants/index_names';
 import { CMServerLibs } from './lib/types';
 import { createGetBeatConfigurationRoute } from './rest_api/beats/configuration';
 import { createBeatEnrollmentRoute } from './rest_api/beats/enroll';
@@ -18,16 +17,8 @@ import { createGetTagsWithIdsRoute } from './rest_api/tags/get';
 import { createListTagsRoute } from './rest_api/tags/list';
 import { createSetTagRoute } from './rest_api/tags/set';
 import { createTokensRoute } from './rest_api/tokens/create';
-import { beatsIndexTemplate } from './utils/index_templates';
 
-export const initManagementServer = async (libs: CMServerLibs) => {
-  if (libs.database) {
-    await libs.database.putTemplate(libs.framework.internalUser, {
-      name: INDEX_NAMES.BEATS,
-      body: beatsIndexTemplate,
-    });
-  }
-
+export const initManagementServer = (libs: CMServerLibs) => {
   libs.framework.registerRoute(createGetBeatRoute(libs));
   libs.framework.registerRoute(createGetTagsWithIdsRoute(libs));
   libs.framework.registerRoute(createListTagsRoute(libs));

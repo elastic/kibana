@@ -57,6 +57,7 @@ exports[`AnnotationsTable Initialization with annotations prop. 1`] = `
     ]
   }
   compressed={true}
+  executeQueryOptions={Object {}}
   items={
     Array [
       Object {
@@ -121,6 +122,12 @@ exports[`AnnotationsTable Minimal initialization without props. 1`] = `
   color="primary"
   iconType="iInCircle"
   size="m"
-  title="No annotations created for this job"
+  title={
+    <FormattedMessage
+      defaultMessage="No annotations created for this job"
+      id="xpack.ml.annotationsTable.annotationsNotCreatedTitle"
+      values={Object {}}
+    />
+  }
 />
 `;
