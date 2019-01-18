@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UnconnectedKibanaLink should render correct markup 1`] = `
+<EuiLink
+  color="primary"
+  href="/app/kibana#/discover?_a=(interval:auto,query:(language:lucene,query:'context.service.name:\\"myServiceName\\" AND error.grouping_key:\\"myGroupId\\"'),sort:('@timestamp':desc))&_g=(time:(from:now-24h,mode:quick,to:now))"
+  type="button"
+>
+  Go to Discover
+</EuiLink>
+`;
