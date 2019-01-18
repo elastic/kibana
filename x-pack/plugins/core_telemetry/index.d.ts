@@ -16,7 +16,7 @@ export interface ISavedObjectDoc {
   _id: string;
   _source: {
     visualization: IVisualization;
-    type: string;
+    type: 'visualization';
   };
 }
 
