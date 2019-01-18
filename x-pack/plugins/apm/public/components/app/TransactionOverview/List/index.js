@@ -8,24 +8,20 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
 import TooltipOverlay from '../../../shared/TooltipOverlay';
-import { RelativeLink, legacyEncodeURIComponent } from '../../../../utils/url';
 import { asMillis, asDecimal } from '../../../../utils/formatters';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { fontFamilyCode, truncate } from '../../../../style/variables';
 import { ManagedTable } from '../../../shared/ManagedTable';
+import { NOT_AVAILABLE_LABEL } from '../../../../constants';
+import { legacyEncodeURIComponent } from '../../../shared/Links/url_helpers';
+import { KibanaLink } from '../../../shared/Links/KibanaLink';
 
-const TransactionNameLink = styled(RelativeLink)`
+const TransactionNameLink = styled(KibanaLink)`
   ${truncate('100%')};
   font-family: ${fontFamilyCode};
 `;
 
 export default function TransactionList({ items, serviceName, ...rest }) {
-  const notAvailableLabel = i18n.translate(
-    'xpack.apm.transactionsTable.notAvailableLabel',
-    {
-      defaultMessage: 'N/A'
-    }
-  );
   const columns = [
     {
       field: 'name',
@@ -42,9 +38,9 @@ export default function TransactionList({ items, serviceName, ...rest }) {
         const transactionPath = `/${serviceName}/transactions/${encodedType}/${encodedName}`;
 
         return (
-          <TooltipOverlay content={transactionName || notAvailableLabel}>
-            <TransactionNameLink path={transactionPath}>
-              {transactionName || notAvailableLabel}
+          <TooltipOverlay content={transactionName || NOT_AVAILABLE_LABEL}>
+            <TransactionNameLink hash={transactionPath}>
+              {transactionName || NOT_AVAILABLE_LABEL}
             </TransactionNameLink>
           </TooltipOverlay>
         );

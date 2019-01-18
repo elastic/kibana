@@ -9,58 +9,37 @@ import React from 'react';
 import {
   EuiTitle,
   EuiPanel,
-  EuiSpacer
+  EuiSpacer,
+  EuiText
 } from '@elastic/eui';
 
-export class StyleTabs extends React.Component {
-
-  constructor(props) {
-    super();
-    this.state = {
-      currentStyle: props.layer && props.layer.getCurrentStyle()
-    };
-  }
-
-  static getDerivedStateFromProps(nextProps, prevState) {
-    const currentStyle = nextProps.layer.getCurrentStyle();
-    if (currentStyle) {
-      return {
-        ...prevState,
-        currentStyle
-      };
-    } else {
-      return {};
+export function StyleTabs({ layer, reset, updateStyle }) {
+  return layer.getSupportedStyles().map((Style, index) => {
+    let description;
+    if (Style.description) {
+      description = (
+        <EuiText size="s">
+          <p>{Style.description}</p>
+        </EuiText>
+      );
     }
-  }
 
-  render() {
-    const { currentStyle } = this.state;
-    const supportedStyles = this.props.layer.getSupportedStyles();
-
-    const styleEditors = supportedStyles.map((style, index) => {
-      const seedStyle = (style.canEdit(currentStyle)) ? currentStyle : null;
-
-      const editorHeader = (
-        <EuiTitle size="xs"><h5>{style.getDisplayName()}</h5></EuiTitle>
-      );
-
-      const styleEditor = this.props.layer.renderStyleEditor(style, {
-        handleStyleChange: (styleDescriptor) => {
-          this.props.updateStyle(styleDescriptor);
-        },
-        style: seedStyle,
-        resetStyle: () => this.props.reset()
-      });
-
-      return (
-        <EuiPanel key={index}>
-          {editorHeader}
-          <EuiSpacer margin="m"/>
-          {styleEditor}
-        </EuiPanel>
-      );
+    const currentStyle = layer.getCurrentStyle();
+    const styleEditor = layer.renderStyleEditor(Style, {
+      handleStyleChange: (styleDescriptor) => {
+        updateStyle(styleDescriptor);
+      },
+      style: (Style.canEdit(currentStyle)) ? currentStyle : null,
+      resetStyle: () => reset()
     });
 
-    return (styleEditors);
-  }
+    return (
+      <EuiPanel key={index}>
+        <EuiTitle size="xs"><h5>{Style.getDisplayName()}</h5></EuiTitle>
+        {description}
+        <EuiSpacer margin="m"/>
+        {styleEditor}
+      </EuiPanel>
+    );
+  });
 }
