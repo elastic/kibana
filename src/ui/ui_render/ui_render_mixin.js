@@ -57,67 +57,78 @@ export function uiRenderMixin(kbnServer, server, config) {
   server.exposeStaticDir('/node_modules/@elastic/eui/dist/{path*}', fromRoot('node_modules/@elastic/eui/dist'));
   server.exposeStaticDir('/node_modules/@kbn/ui-framework/dist/{path*}', fromRoot('node_modules/@kbn/ui-framework/dist'));
 
-  server.route({
-    path: '/bundles/app/{id}/bootstrap.js',
-    method: 'GET',
-    config: { auth: false },
-    async handler(request, h) {
-      const { id } = request.params;
-      const app = server.getUiAppById(id) || server.getHiddenUiAppById(id);
-      if (!app) {
-        throw Boom.notFound(`Unknown app: ${id}`);
-      }
+  // register the bootstrap.js route after plugins are initialized so that we can
+  // detect if any default auth strategies were registered
+  kbnServer.afterPluginsInit(() => {
+    const authEnabled = !!server.auth.settings.default;
 
-      const uiSettings = request.getUiSettingsService();
-      const darkMode = await uiSettings.get('theme:darkMode');
-
-      const basePath = config.get('server.basePath');
-      const regularBundlePath = `${basePath}/bundles`;
-      const dllBundlePath = `${basePath}/built_assets/dlls`;
-      const styleSheetPaths = [
-        `${dllBundlePath}/vendors.style.dll.css`,
-        ...(
-          darkMode ?
-            [
-              `${basePath}/node_modules/@elastic/eui/dist/eui_theme_k6_dark.css`,
-              `${basePath}/node_modules/@kbn/ui-framework/dist/kui_dark.css`,
-            ] : [
-              `${basePath}/node_modules/@elastic/eui/dist/eui_theme_k6_light.css`,
-              `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
-            ]
-        ),
-        `${regularBundlePath}/${darkMode ? 'dark' : 'light'}_theme.style.css`,
-        `${regularBundlePath}/commons.style.css`,
-        `${regularBundlePath}/${app.getId()}.style.css`,
-        ...kbnServer.uiExports.styleSheetPaths
-          .filter(path => (
-            path.theme === '*' || path.theme === (darkMode ? 'dark' : 'light')
-          ))
-          .map(path => (
-            path.localPath.endsWith('.scss')
-              ? `${basePath}/built_assets/css/${path.publicPath}`
-              : `${basePath}/${path.publicPath}`
-          ))
-          .reverse()
-      ];
-
-      const bootstrap = new AppBootstrap({
-        templateData: {
-          appId: app.getId(),
-          regularBundlePath,
-          dllBundlePath,
-          styleSheetPaths,
+    server.route({
+      path: '/bundles/app/{id}/bootstrap.js',
+      method: 'GET',
+      config: {
+        tags: ['api'],
+        auth: authEnabled ? { mode: 'try' } : false,
+      },
+      async handler(request, h) {
+        const { id } = request.params;
+        const app = server.getUiAppById(id) || server.getHiddenUiAppById(id);
+        if (!app) {
+          throw Boom.notFound(`Unknown app: ${id}`);
         }
-      });
 
-      const body = await bootstrap.getJsFile();
-      const etag = await bootstrap.getJsFileHash();
+        const uiSettings = request.getUiSettingsService();
+        const darkMode = !authEnabled || request.auth.isAuthenticated
+          ? await uiSettings.get('theme:darkMode')
+          : true;
 
-      return h.response(body)
-        .header('cache-control', 'must-revalidate')
-        .header('content-type', 'application/javascript')
-        .etag(etag);
-    }
+        const basePath = config.get('server.basePath');
+        const regularBundlePath = `${basePath}/bundles`;
+        const dllBundlePath = `${basePath}/built_assets/dlls`;
+        const styleSheetPaths = [
+          `${dllBundlePath}/vendors.style.dll.css`,
+          ...(
+            darkMode ?
+              [
+                `${basePath}/node_modules/@elastic/eui/dist/eui_theme_k6_dark.css`,
+                `${basePath}/node_modules/@kbn/ui-framework/dist/kui_dark.css`,
+              ] : [
+                `${basePath}/node_modules/@elastic/eui/dist/eui_theme_k6_light.css`,
+                `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
+              ]
+          ),
+          `${regularBundlePath}/${darkMode ? 'dark' : 'light'}_theme.style.css`,
+          `${regularBundlePath}/commons.style.css`,
+          `${regularBundlePath}/${app.getId()}.style.css`,
+          ...kbnServer.uiExports.styleSheetPaths
+            .filter(path => (
+              path.theme === '*' || path.theme === (darkMode ? 'dark' : 'light')
+            ))
+            .map(path => (
+              path.localPath.endsWith('.scss')
+                ? `${basePath}/built_assets/css/${path.publicPath}`
+                : `${basePath}/${path.publicPath}`
+            ))
+            .reverse()
+        ];
+
+        const bootstrap = new AppBootstrap({
+          templateData: {
+            appId: app.getId(),
+            regularBundlePath,
+            dllBundlePath,
+            styleSheetPaths,
+          }
+        });
+
+        const body = await bootstrap.getJsFile();
+        const etag = await bootstrap.getJsFileHash();
+
+        return h.response(body)
+          .header('cache-control', 'must-revalidate')
+          .header('content-type', 'application/javascript')
+          .etag(etag);
+      }
+    });
   });
 
   server.route({
