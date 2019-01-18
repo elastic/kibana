@@ -34,7 +34,7 @@ export class SavedObjectsSchema {
 
   public isHiddenType(type: string) {
     if (this.definition && this.definition.hasOwnProperty(type)) {
-      return !!this.definition[type].hidden;
+      return Boolean(this.definition[type].hidden);
     }
 
     return false;
