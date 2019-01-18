@@ -9,6 +9,8 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import * as i18n from './translations';
+
 const Text = styled.div`
   color: #999999;
   overflow: hidden;
@@ -53,14 +55,14 @@ const NoWrap = styled.div`
 export const Empty = pure(() => (
   <EmptyContainer data-test-subj="empty">
     <NoWrap>
-      <Text>Drop anything</Text>
-      <BadgeHighlighted color="#d9d9d9">highlighted</BadgeHighlighted>
+      <Text>{i18n.DROP_ANYTHING}</Text>
+      <BadgeHighlighted color="#d9d9d9">{i18n.HIGHLIGHTED}</BadgeHighlighted>
     </NoWrap>
 
     <NoWrap>
-      <Text>here to build an</Text>
-      <BadgeOr color="#d9d9d9">OR</BadgeOr>
-      <Text>query</Text>
+      <Text>{i18n.HERE_TO_BUILD_AN}</Text>
+      <BadgeOr color="#d9d9d9">{i18n.OR.toLocaleUpperCase()}</BadgeOr>
+      <Text>{i18n.QUERY}</Text>
     </NoWrap>
   </EmptyContainer>
 ));

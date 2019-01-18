@@ -20,6 +20,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { LoadingPanel } from '../loading';
+import * as i18n from './translations';
 
 export interface HoryzontalBarChartData {
   x: number;
@@ -168,7 +169,7 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
                       isLoading={loading}
                       onClick={this.loadMore}
                     >
-                      {loading ? 'Loading...' : 'Load More'}
+                      {loading ? `${i18n.LOADING}...` : i18n.LOAD_MORE}
                     </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>

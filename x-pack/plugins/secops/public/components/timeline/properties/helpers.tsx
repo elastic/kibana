@@ -24,12 +24,7 @@ import {
   NotesButtonLabel,
   StarSvg,
 } from './styles';
-
-const descriptionToolTip = 'The story told by the events and notes in this Timeline';
-const notesToolTip = 'Add and review notes about this Timeline. Notes may also be added to events.';
-const historyToolTip = 'The chronological history of actions related to this timeline';
-const streamLiveToolTip = ' Update the Timeline as new data arrives';
-const newTimelineToolTip = 'Create a new timeline';
+import * as i18n from './translations';
 
 type CreateTimeline = ({ id, show }: { id: string; show?: boolean }) => void;
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
@@ -80,12 +75,12 @@ export const Description = pure<{
   timelineId: string;
   updateDescription: UpdateDescription;
 }>(({ description, timelineId, updateDescription }) => (
-  <EuiToolTip data-test-subj="timeline-description-tool-tip" content={descriptionToolTip}>
+  <EuiToolTip data-test-subj="timeline-description-tool-tip" content={i18n.DESCRIPTION_TOOL_TIP}>
     <DescriptionField
-      aria-label="Timeline description"
+      aria-label={i18n.TIMELINE_DESCRIPTION}
       data-test-subj="timeline-description"
       onChange={e => updateDescription({ id: timelineId, description: e.target.value })}
-      placeholder="Description"
+      placeholder={i18n.DESCRIPTION}
       spellCheck={true}
       value={description}
     />
@@ -96,10 +91,10 @@ export const Name = pure<{ timelineId: string; title: string; updateTitle: Updat
   ({ timelineId, title, updateTitle }) => (
     <EuiToolTip data-test-subj="timeline-title-tool-tip" content="Title">
       <NameField
-        aria-label="Timeline title"
+        aria-label={i18n.TIMELINE_TITLE}
         data-test-subj="timeline-title"
         onChange={e => updateTitle({ id: timelineId, title: e.target.value })}
-        placeholder="Untitled Timeline"
+        placeholder={i18n.UNTITLED_TIMELINE}
         spellCheck={true}
         value={title}
       />
@@ -112,7 +107,7 @@ export const NewTimeline = pure<{
   onClosePopover: () => void;
   timelineId: string;
 }>(({ createTimeline, onClosePopover, timelineId }) => (
-  <EuiToolTip data-test-subj="timeline-new-tool-tip" content={newTimelineToolTip}>
+  <EuiToolTip data-test-subj="timeline-new-tool-tip" content={i18n.NEW_TIMELINE_TOOL_TIP}>
     <EuiButton
       data-test-subj="timeline-new"
       fill={true}
@@ -121,7 +116,7 @@ export const NewTimeline = pure<{
         onClosePopover();
       }}
     >
-      New Timeline
+      {i18n.NEW_TIMELINE}
     </EuiButton>
   </EuiToolTip>
 ));
@@ -139,7 +134,7 @@ const getNewNoteId = (): string => uuid.v4();
 export const NotesButton = pure<NotesButtonProps>(
   ({ associateNote, notes, showNotes, toggleShowNotes, updateNote }) => (
     <ButtonContainer>
-      <EuiToolTip data-test-subj="timeline-notes-tool-tip" content={notesToolTip}>
+      <EuiToolTip data-test-subj="timeline-notes-tool-tip" content={i18n.NOTES_TOOL_TIP}>
         <>
           <EuiButton
             data-test-subj="timeline-notes"
@@ -171,7 +166,7 @@ export const NotesButton = pure<NotesButtonProps>(
 );
 
 export const HistoryButton = pure<{ history: History[] }>(({ history }) => (
-  <EuiToolTip data-test-subj="timeline-history-tool-tip" content={historyToolTip}>
+  <EuiToolTip data-test-subj="timeline-history-tool-tip" content={i18n.HISTORY_TOOL_TIP}>
     <EuiButton
       data-test-subj="timeline-history"
       iconType="arrowDown"
@@ -189,7 +184,7 @@ export const HistoryButton = pure<{ history: History[] }>(({ history }) => (
 
 export const StreamLive = pure<{ isLive: boolean; timelineId: string; updateIsLive: UpdateIsLive }>(
   ({ isLive, timelineId, updateIsLive }) => (
-    <EuiToolTip data-test-subj="timeline-stream-tool-tip" content={streamLiveToolTip}>
+    <EuiToolTip data-test-subj="timeline-stream-tool-tip" content={i18n.STREAM_LIVE_TOOL_TIP}>
       <ButtonContainer>
         <EuiButton
           data-test-subj="timeline-stream-live"
@@ -200,7 +195,7 @@ export const StreamLive = pure<{ isLive: boolean; timelineId: string; updateIsLi
           isDisabled={true}
           onClick={() => updateIsLive({ id: timelineId, isLive: !isLive })}
         >
-          Stream Live
+          {i18n.STREAM_LIVE}
         </EuiButton>
       </ButtonContainer>
     </EuiToolTip>

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// TODO: Translate these below
+
 /** Date ranges applicable to the MiniMap */
 export type Range = '1 Day' | '1 Week' | '1 Month' | '1 Year';
 

@@ -24,6 +24,7 @@ import { LoadingPanel } from '../../loading';
 import { DataProvider } from '../data_providers/data_provider';
 import { OnChangeItemsPerPage, OnLoadMore } from '../events';
 import { LastUpdatedAt } from './last_updated';
+import * as i18n from './translations';
 
 interface FooterProps {
   dataProviders: DataProvider[];
@@ -116,7 +117,7 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
         <LoadingPanel
           height="auto"
           width="100%"
-          text="Loading Timeline data..."
+          text={`${i18n.LOADING_TIMELINE_DATA}...`}
           data-test-subj="LoadingPanelTimeline"
         />
       );
@@ -145,7 +146,7 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
             onChangeItemsPerPage(item);
           }}
         >
-          {`${item} rows`}
+          {`${item} ${i18n.ROWS}`}
         </EuiContextMenuItem>
       ));
     return (

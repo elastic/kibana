@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 
 import { KqlMode } from '../../../store/local/timeline/model';
+import * as i18n from './translations';
 
 interface ModeProperties {
   mode: KqlMode;
@@ -26,18 +27,17 @@ interface ModeProperties {
 export const modes: { [key in KqlMode]: ModeProperties } = {
   filter: {
     mode: 'filter',
-    description: 'Events from the data providers above are filtered by the adjacent KQL',
-    kqlBarTooltip: 'Events from the data providers above are filtered by this KQL',
-    placeholder: 'Filter events',
-    selectText: 'Filter',
+    description: i18n.FILTER_DESCRIPTION,
+    kqlBarTooltip: i18n.FILTER_KQL_TOOLTIP,
+    placeholder: i18n.FILTER_KQL_PLACEHOLDER,
+    selectText: i18n.FILTER_KQL_SELECTED_TEXT,
   },
   search: {
     mode: 'search',
-    description:
-      'Events from the data providers above are combined with results from the adjacent KQL',
-    kqlBarTooltip: 'Events from the data providers above are combined with results from this KQL',
-    placeholder: 'Search events',
-    selectText: 'Search',
+    description: i18n.SEARCH_DESCRIPTION,
+    kqlBarTooltip: i18n.SEARCH_KQL_TOOLTIP,
+    placeholder: i18n.SEARCH_KQL_PLACEHOLDER,
+    selectText: i18n.SEARCH_KQL_SELECTED_TEXT,
   },
 };
 

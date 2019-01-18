@@ -5,6 +5,7 @@
  */
 
 import { ColumnHeader } from './column_header';
+import * as i18n from './translations';
 
 /** The default minimum width of a column */
 export const DEFAULT_COLUMN_MIN_WIDTH = 100;
@@ -15,54 +16,54 @@ export const headers: ColumnHeader[] = [
     columnHeaderType: 'not-filtered',
     id: 'timestamp',
     minWidth: DEFAULT_COLUMN_MIN_WIDTH,
-    text: 'Time',
+    text: i18n.TIME,
   },
   {
     columnHeaderType: 'not-filtered',
     id: 'event.severity',
     minWidth: DEFAULT_COLUMN_MIN_WIDTH,
-    text: 'Severity',
+    text: i18n.SEVERITY,
   },
   {
     columnHeaderType: 'not-filtered',
     id: 'event.category',
     minWidth: DEFAULT_COLUMN_MIN_WIDTH,
-    text: 'Category',
+    text: i18n.CATEGORY,
   },
   {
     columnHeaderType: 'not-filtered',
     id: 'event.type',
     minWidth: DEFAULT_COLUMN_MIN_WIDTH,
-    text: 'Type',
+    text: i18n.TYPE,
   },
   {
     columnHeaderType: 'not-filtered',
     id: 'host.name',
     minWidth: DEFAULT_COLUMN_MIN_WIDTH,
-    text: 'Hostname',
+    text: i18n.HOST_NAME,
   },
   {
     columnHeaderType: 'not-filtered',
     id: 'source.ip',
     minWidth: DEFAULT_COLUMN_MIN_WIDTH,
-    text: 'Source IP',
+    text: i18n.SOURCE_IP,
   },
   {
     columnHeaderType: 'not-filtered',
     id: 'destination.ip',
     minWidth: DEFAULT_COLUMN_MIN_WIDTH,
-    text: 'Destination IP',
+    text: i18n.DESTINATION_IP,
   },
   {
     columnHeaderType: 'not-filtered',
     id: 'user.name',
     minWidth: DEFAULT_COLUMN_MIN_WIDTH,
-    text: 'User',
+    text: i18n.USER,
   },
   {
     columnHeaderType: 'not-filtered',
     id: 'event.id',
     minWidth: DEFAULT_COLUMN_MIN_WIDTH,
-    text: 'Event',
+    text: i18n.EVENT,
   },
 ];

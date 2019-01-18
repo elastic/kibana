@@ -5,6 +5,7 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
+import { FormattedRelative } from '@kbn/i18n/react';
 import { noop } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -18,6 +19,7 @@ import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_
 import { defaultToEmpty, getEmptyValue } from '../../../empty_value';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
+import * as i18n from './translations';
 
 interface OwnProps {
   data: AuthenticationsEdges[];
@@ -43,19 +45,19 @@ type AuthenticationTableProps = OwnProps &
 
 const rowItems: ItemsPerRow[] = [
   {
-    text: '5 rows',
+    text: i18n.ROWS_5,
     numberOfRow: 5,
   },
   {
-    text: '10 rows',
+    text: i18n.ROWS_10,
     numberOfRow: 10,
   },
   {
-    text: '20 rows',
+    text: i18n.ROWS_20,
     numberOfRow: 20,
   },
   {
-    text: '50 rows',
+    text: i18n.ROWS_50,
     numberOfRow: 50,
   },
 ];
@@ -74,7 +76,7 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
   }) => (
     <LoadMoreTable
       columns={getAuthenticationColumns(startDate)}
-      loadingTitle="Authentication Failures"
+      loadingTitle={i18n.AUTHENTICATION_FAILURES}
       loading={loading}
       pageOfItems={data}
       loadMore={() => loadMore(nextCursor)}
@@ -84,7 +86,7 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
       updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
       title={
         <h3>
-          Authentication Failures <EuiBadge color="hollow">{totalCount}</EuiBadge>
+          {i18n.AUTHENTICATION_FAILURES} <EuiBadge color="hollow">{totalCount}</EuiBadge>
         </h3>
       }
     />
@@ -102,7 +104,7 @@ export const AuthenticationTable = connect(
 
 const getAuthenticationColumns = (startDate: number) => [
   {
-    name: 'User',
+    name: i18n.USER,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }: AuthenticationsEdges) => {
@@ -138,35 +140,35 @@ const getAuthenticationColumns = (startDate: number) => [
     },
   },
   {
-    name: 'Failures',
+    name: i18n.FAILURES,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }: AuthenticationsEdges) => <>{defaultToEmpty(node.failures)}</>,
   },
   {
-    name: 'Successes',
+    name: i18n.SUCCESSES,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }: AuthenticationsEdges) => <>{defaultToEmpty(node.successes)}</>,
   },
   {
-    name: 'From',
+    name: i18n.FROM,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }: AuthenticationsEdges) => <>{defaultToEmpty(node.source.ip)}</>,
   },
   {
-    name: 'To',
+    name: i18n.TO,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }: AuthenticationsEdges) => <>{defaultToEmpty(node.host.name)}</>,
   },
   {
-    name: 'Latest',
+    name: i18n.LATEST,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }: AuthenticationsEdges) => (
-      <>{node.latest ? moment(node.latest).fromNow() : getEmptyValue()}</>
+      <>{node.latest ? <FormattedRelative value={new Date(node.latest)} /> : getEmptyValue()}</>
     ),
   },
 ];

@@ -11,6 +11,7 @@ import styled, { keyframes } from 'styled-components';
 
 import { createLinkWithSignature, RowRenderer } from '.';
 import { Ecs } from '../../../../graphql/types';
+import * as i18n from './translations';
 
 export const dropInEffect = keyframes`
   0% {
@@ -110,15 +111,15 @@ export const suricataRowRenderer: RowRenderer = {
               {signature}
             </EuiButton>
             <Details>
-              <LabelValuePair label="Protocol" ariaLabel="Protocol" value="TCP" />
+              <LabelValuePair label={i18n.PROTOCOL} ariaLabel={i18n.PROTOCOL} value="TCP" />
               <LabelValuePair
-                label="Source"
-                ariaLabel="Source"
+                label={i18n.SOURCE}
+                ariaLabel={i18n.SOURCE}
                 value={`${data.source!.ip}:${data.source!.port}`}
               />
               <LabelValuePair
-                label="Destination"
-                ariaLabel="Destination"
+                label={i18n.DESTINATION}
+                ariaLabel={i18n.DESTINATION}
                 value={`${data.destination!.ip}:${data.destination!.port}`}
               />
             </Details>

@@ -9,10 +9,12 @@ import { EuiBadge, EuiPanel, EuiText } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
+
 import { Theme } from '../../../store/local/app/model';
 import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';
 import { droppableTimelineFlyoutButtonPrefix } from '../../drag_and_drop/helpers';
 import { DataProvider } from '../../timeline/data_providers/data_provider';
+import * as i18n from './translations';
 
 const Container = styled.div`
   overflow-x: auto;
@@ -83,7 +85,11 @@ export const FlyoutButton = pure(
               </Badge>
             )}
             <Button>
-              <Text data-test-subj="flyoutButton">T I M E L I N E</Text>
+              <Text data-test-subj="flyoutButton">
+                {i18n.TIMELINE.toLocaleUpperCase()
+                  .split('')
+                  .join(' ')}
+              </Text>
             </Button>
           </BadgeButtonContainer>
         </DroppableWrapper>

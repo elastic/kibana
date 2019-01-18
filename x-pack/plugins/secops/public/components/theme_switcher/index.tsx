@@ -5,19 +5,19 @@
  */
 
 import { EuiIcon, EuiSwitch, EuiToolTip } from '@elastic/eui';
-import * as React from 'react';
-import styled from 'styled-components';
-import { ActionCreator } from 'typescript-fsa';
-
 import { defaultTo } from 'lodash/fp';
+import * as React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
+import styled from 'styled-components';
+import { ActionCreator } from 'typescript-fsa';
 
 // @ts-ignore
 import { applyTheme } from 'ui/theme';
 import { State } from '../../store';
 import { appActions, themeSelector } from '../../store/local/app';
 import { Theme } from '../../store/local/app/model';
+import * as i18n from './translations';
 
 const ThemeSwitcherContainer = styled.div`
   align-items: center;
@@ -56,7 +56,7 @@ type Props = StateReduxProps & DispatchProps;
  * the real `EuiAccordion`.
  */
 const ThemeSwitcherComponent = pure<Props>(({ currentTheme, setTheme }) => (
-  <EuiToolTip content={currentTheme === 'dark' ? 'Dark Theme' : 'Light Theme'}>
+  <EuiToolTip content={currentTheme === 'dark' ? i18n.DARK_THEME : i18n.LIGHT_THEME}>
     <ThemeSwitcherContainer data-test-subj="theme-switcher">
       <EuiIcon type="invert" size="m" />
       <EuiSwitch

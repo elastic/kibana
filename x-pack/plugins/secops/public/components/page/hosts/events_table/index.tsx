@@ -18,6 +18,7 @@ import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_
 import { getEmptyValue, getOrEmpty } from '../../../empty_value';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
+import * as i18n from './translations';
 
 interface OwnProps {
   data: Ecs[];
@@ -42,19 +43,19 @@ type EventsTableProps = OwnProps & EventsTableReduxProps & EventsTableDispatchPr
 
 const rowItems: ItemsPerRow[] = [
   {
-    text: '5 rows',
+    text: i18n.ROWS_5,
     numberOfRow: 5,
   },
   {
-    text: '10 rows',
+    text: i18n.ROWS_10,
     numberOfRow: 10,
   },
   {
-    text: '20 rows',
+    text: i18n.ROWS_20,
     numberOfRow: 20,
   },
   {
-    text: '50 rows',
+    text: i18n.ROWS_50,
     numberOfRow: 50,
   },
 ];
@@ -74,7 +75,7 @@ const EventsTableComponent = pure<EventsTableProps>(
   }) => (
     <LoadMoreTable
       columns={getEventsColumns(startDate)}
-      loadingTitle="Events"
+      loadingTitle={i18n.EVENTS}
       loading={loading}
       pageOfItems={data}
       loadMore={() => loadMore(nextCursor, tiebreaker)}
@@ -86,7 +87,7 @@ const EventsTableComponent = pure<EventsTableProps>(
       }}
       title={
         <h3>
-          Events <EuiBadge color="hollow">{totalCount}</EuiBadge>
+          {i18n.EVENTS} <EuiBadge color="hollow">{totalCount}</EuiBadge>
         </h3>
       }
     />
@@ -104,7 +105,7 @@ export const EventsTable = connect(
 
 const getEventsColumns = (startDate: number) => [
   {
-    name: 'Host name',
+    name: i18n.HOST_NAME,
     sortable: true,
     truncateText: false,
     hideForMobile: false,
@@ -141,14 +142,14 @@ const getEventsColumns = (startDate: number) => [
     },
   },
   {
-    name: 'Event type',
+    name: i18n.EVENT_TYPE,
     sortable: true,
     truncateText: true,
     hideForMobile: true,
     render: ({ node }: EcsEdges) => <>{getOrEmpty('event.type', node)}</>,
   },
   {
-    name: 'Source',
+    name: i18n.SOURCE,
     truncateText: true,
     render: ({ node }: EcsEdges) => (
       <>
@@ -157,7 +158,7 @@ const getEventsColumns = (startDate: number) => [
     ),
   },
   {
-    name: 'Destination',
+    name: i18n.DESTINATION,
     sortable: true,
     truncateText: true,
     render: ({ node }: EcsEdges) => (
@@ -167,7 +168,7 @@ const getEventsColumns = (startDate: number) => [
     ),
   },
   {
-    name: 'Location',
+    name: i18n.LOCATION,
     sortable: true,
     truncateText: true,
     render: ({ node }: EcsEdges) => (
