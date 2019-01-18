@@ -57,6 +57,7 @@ class TagEditPageComponent extends React.PureComponent<
   public componentWillMount() {
     this.loadTag();
     this.loadAttachedBeats();
+    this.loadConfigBlocks();
   }
   public render() {
     const { intl } = this.props;
