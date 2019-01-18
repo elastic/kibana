@@ -1555,5 +1555,18 @@ describe('SavedObjectsRepository', () => {
     it('should error when attempting to \'delete\' hidden types', async () => {
       await expect(savedObjectsRepository.delete('hiddenType')).rejects.toEqual(new Error('Hidden types not allowed!'));
     });
+
+    it('should error when attempting to \'bulkCreate\' hidden types', async () => {
+      await expect(savedObjectsRepository.bulkCreate([
+        { type: 'config', id: 'one', attributes: { title: 'Test One' } },
+        { type: 'hiddenType', id: 'two', attributes: { title: 'Test Two' } }
+      ])).rejects.toEqual(new Error('Hidden types not allowed!'));
+    });
+
+    it('should error when attempting to \'incrementCounter\' for a hidden type', async () => {
+      await expect(
+        savedObjectsRepository.incrementCounter('hiddenType', 'doesntmatter', 'fieldArg')
+      ).rejects.toEqual(new Error('Hidden types not allowed!'));
+    });
   });
 });
