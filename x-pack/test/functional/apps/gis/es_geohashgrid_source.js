@@ -100,6 +100,8 @@ export default function ({ getPageObjects, getService }) {
 
       const LAYER_ID = 'g1xkv';
       const EXPECTED_NUMBER_FEATURES = 6;
+      const DATA_CENTER_LON = -98;
+      const DATA_CENTER_LAT = 38;
       const MAX_OF_BYTES_PROP_NAME = 'max_of_bytes';
 
       it('should re-fetch geohashgrid aggregation with refresh timer', async () => {
@@ -120,73 +122,60 @@ export default function ({ getPageObjects, getService }) {
         });
       });
 
-      it('should correctly re-request data', async () => {
 
-        //zoom way outside range
-        await PageObjects.gis.setView(64, 179, 5);
-        let mapboxStyle = await PageObjects.gis.getMapboxStyle();
-        expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(0);
+      describe('geoprecision - data', async ()=> {
 
-        //zoom back into range
-        await PageObjects.gis.setView(0, 0, 0);
-        mapboxStyle = await PageObjects.gis.getMapboxStyle();
-        expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(EXPECTED_NUMBER_FEATURES);
+        beforeEach(async () => {
+          await PageObjects.gis.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1);
+        });
 
-        //zoom in a little bit (inside buffer)
-        await PageObjects.gis.setView(0, 0, 3);
-        mapboxStyle = await PageObjects.gis.getMapboxStyle();
-        expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(EXPECTED_NUMBER_FEATURES);
+        it ('should not return any data when the extent does not cover the data bounds', async () => {
+          await PageObjects.gis.setView(64, 179, 5);
+          const mapboxStyle = await PageObjects.gis.getMapboxStyle();
+          expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(0);
+        });
 
-        //zoom in a lot
-        await PageObjects.gis.setView(0, 0, 8);
-        mapboxStyle = await PageObjects.gis.getMapboxStyle();
-        expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(0);
+        it ('should request the data when the map covers the databounds', async () => {
+          const mapboxStyle = await PageObjects.gis.getMapboxStyle();
+          expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(EXPECTED_NUMBER_FEATURES);
+        });
+
+        it ('should have the same data when a zoom change does not cause a precision change', async () => {
+          await PageObjects.gis.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 2);
+          const mapboxStyle = await PageObjects.gis.getMapboxStyle();
+          expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(EXPECTED_NUMBER_FEATURES);
+        });
+
+        it ('should request only partial data when the map conly overs part of the databounds', async () => {
+          await PageObjects.gis.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 6);
+          const mapboxStyle = await PageObjects.gis.getMapboxStyle();
+          expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(2);
+        });
 
       });
 
-      describe('query bar', () => {
-        before(async () => {
-          await PageObjects.gis.setView(0, 0, 0);
-          await queryBar.setQuery('machine.os.raw : "win 8"');
-          await queryBar.submitQuery();
+      describe('geoprecision - requests', async ()=> {
+
+        let beforeTimestamp;
+        beforeEach(async () => {
+          await PageObjects.gis.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1);
+          beforeTimestamp = await getRequestTimestamp();
         });
 
-        after(async () => {
-          await queryBar.setQuery('');
-          await queryBar.submitQuery();
+        it('should not rerequest when zoom changes does not cause geohash precision to change', async () => {
+          await PageObjects.gis.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 2);
+          const afterTimestamp = await getRequestTimestamp();
+          expect(afterTimestamp).to.equal(beforeTimestamp);
         });
 
-        it('should apply query to geohashgrid aggregation request', async () => {
-          await PageObjects.gis.openInspectorRequestsView();
-          const requestStats = await inspector.getTableData();
-          const hits = PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits (total)');
-          await inspector.close();
-          expect(hits).to.equal('1');
+        it('should rerequest when zoom changes causes the geohash precision to change', async () => {
+          await PageObjects.gis.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 4);
+          const afterTimestamp = await getRequestTimestamp();
+          expect(afterTimestamp).not.to.equal(beforeTimestamp);
         });
+
       });
 
-      describe('inspector', () => {
-        afterEach(async () => {
-          await inspector.close();
-        });
-
-        it('should contain geohashgrid aggregation elasticsearch request', async () => {
-          await PageObjects.gis.openInspectorRequestsView();
-          const requestStats = await inspector.getTableData();
-          const totalHits =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits (total)');
-          expect(totalHits).to.equal('6');
-          const hits =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits');
-          expect(hits).to.equal('0'); // aggregation requests do not return any documents
-          const indexPatternName =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Index pattern');
-          expect(indexPatternName).to.equal('logstash-*');
-        });
-
-        it('should not contain any elasticsearch request after layer is deleted', async () => {
-          await PageObjects.gis.removeLayer('logstash-*');
-          const noRequests = await PageObjects.gis.doesInspectorHaveRequests();
-          expect(noRequests).to.equal(true);
-        });
-      });
     });
 
   });
