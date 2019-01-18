@@ -31,12 +31,12 @@ export function PhrasesFilterView({ filter }: Props) {
   const { id = '', defaultMessage = '' } = operator || {};
   return (
     <span>
-      <span> {filter.meta.key}</span>
+      {filter.meta.key}{' '}
       <FormattedMessage
         id={`common.ui.filterEditor.${id}OptionLabel`}
         defaultMessage={defaultMessage}
-      />
-      <span> {filter.meta.value}</span>
+      />{' '}
+      {filter.meta.value}
     </span>
   );
 }

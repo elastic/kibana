@@ -115,7 +115,7 @@ class FilterBarUI extends Component<Props, State> {
     const newFilter = buildEmptyFilter(isPinned, index);
 
     const button = (
-      <EuiButtonEmpty size="s" onClick={this.onOpenAddFilterPopover}>
+      <EuiButtonEmpty size="s" onClick={this.onOpenAddFilterPopover} data-test-subj="addFilter">
         +{' '}
         <FormattedMessage
           id="common.ui.filterBar.addFilterButtonLabel"
