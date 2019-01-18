@@ -14,7 +14,6 @@ import {
   EuiFieldText,
   EuiForm,
   EuiFormRow,
-  EuiIcon,
   EuiPopover,
   EuiSpacer,
   EuiConfirmModal,
@@ -75,7 +74,6 @@ class IndexActionsContextMenuUi extends Component {
           id: 'xpack.idxMgmt.indexActionsMenu.showEntitySettingsLabel',
           defaultMessage: 'Show {entity} settings',
         }, { entity }),
-        icon: <EuiIcon type="indexSettings" />,
         onClick: () => {
           this.closePopoverAndExecute(showSettings);
         }
@@ -85,7 +83,6 @@ class IndexActionsContextMenuUi extends Component {
           id: 'xpack.idxMgmt.indexActionsMenu.showEntityMappingLabel',
           defaultMessage: 'Show {entity} mapping',
         }, { entity }),
-        icon: <EuiIcon type="indexMapping" />,
         onClick: () => {
           this.closePopoverAndExecute(showMapping);
         }
@@ -96,7 +93,6 @@ class IndexActionsContextMenuUi extends Component {
             id: 'xpack.idxMgmt.indexActionsMenu.showEntityStatsLabel',
             defaultMessage: 'Show {entity} stats',
           }, { entity }),
-          icon: <EuiIcon type="stats" />,
           onClick: () => {
             this.closePopoverAndExecute(showStats);
           }
@@ -107,7 +103,6 @@ class IndexActionsContextMenuUi extends Component {
           id: 'xpack.idxMgmt.indexActionsMenu.editEntitySettingsLabel',
           defaultMessage: 'Edit {entity} settings',
         }, { entity }),
-        icon: <EuiIcon type="indexEdit" />,
         onClick: () => {
           this.closePopoverAndExecute(editIndex);
         }
@@ -119,7 +114,6 @@ class IndexActionsContextMenuUi extends Component {
           id: 'xpack.idxMgmt.indexActionsMenu.closeEntityLabel',
           defaultMessage: 'Close {entity}',
         }, { entity }),
-        icon: <EuiIcon type="indexClose" />,
         onClick: () => {
           this.closePopoverAndExecute(closeIndices);
         }
@@ -129,7 +123,6 @@ class IndexActionsContextMenuUi extends Component {
           id: 'xpack.idxMgmt.indexActionsMenu.forceMergeEntityLabel',
           defaultMessage: 'Force merge {entity}',
         }, { entity }),
-        icon: <EuiIcon type="merge" />,
         onClick: () => {
           this.closePopover();
           this.setState({ renderConfirmModal: this.renderForcemergeSegmentsModal });
@@ -140,7 +133,6 @@ class IndexActionsContextMenuUi extends Component {
           id: 'xpack.idxMgmt.indexActionsMenu.refreshEntityLabel',
           defaultMessage: 'Refresh {entity}',
         }, { entity }),
-        icon: <EuiIcon type="refresh" />,
         onClick: () => {
           this.closePopoverAndExecute(refreshIndices);
         }
@@ -150,7 +142,6 @@ class IndexActionsContextMenuUi extends Component {
           id: 'xpack.idxMgmt.indexActionsMenu.clearEntityCacheLabel',
           defaultMessage: 'Clear {entity} cache',
         }, { entity }),
-        icon: <EuiIcon type="broom" />,
         onClick: () => {
           this.closePopoverAndExecute(clearCacheIndices);
         }
@@ -160,7 +151,6 @@ class IndexActionsContextMenuUi extends Component {
           id: 'xpack.idxMgmt.indexActionsMenu.flushEntityLabel',
           defaultMessage: 'Flush {entity}',
         }, { entity }),
-        icon: <EuiIcon type="indexFlush" />,
         onClick: () => {
           this.closePopoverAndExecute(flushIndices);
         }
@@ -171,7 +161,6 @@ class IndexActionsContextMenuUi extends Component {
             id: 'xpack.idxMgmt.indexActionsMenu.unfreezeEntityLabel',
             defaultMessage: 'Unfreeze {entity}',
           }, { entity }),
-          icon: <EuiIcon type="unfreeze" />,
           onClick: () => {
             this.closePopoverAndExecute(unfreezeIndices);
           }
@@ -182,7 +171,6 @@ class IndexActionsContextMenuUi extends Component {
             id: 'xpack.idxMgmt.indexActionsMenu.freezeEntityLabel',
             defaultMessage: 'Freeze {entity}',
           }, { entity }),
-          icon: <EuiIcon type="freeze" />,
           onClick: () => {
             this.closePopover();
             this.setState({ renderConfirmModal: this.renderConfirmFreezeModal });
@@ -195,7 +183,6 @@ class IndexActionsContextMenuUi extends Component {
           id: 'xpack.idxMgmt.indexActionsMenu.openEntityLabel',
           defaultMessage: 'Open {entity}',
         }, { entity }),
-        icon: <EuiIcon type="indexOpen" />,
         onClick: () => {
           this.closePopoverAndExecute(openIndices);
         }
@@ -206,7 +193,6 @@ class IndexActionsContextMenuUi extends Component {
         id: 'xpack.idxMgmt.indexActionsMenu.deleteEntityLabel',
         defaultMessage: 'Delete {entity}',
       }, { entity }),
-      icon: <EuiIcon type="trash" />,
       onClick: () => {
         this.closePopover();
         this.setState({ renderConfirmModal: this.renderConfirmDeleteModal });
@@ -215,11 +201,10 @@ class IndexActionsContextMenuUi extends Component {
     getActionExtensions().forEach((actionExtension) => {
       const actionExtensionDefinition = actionExtension(indices, reloadIndices);
       if (actionExtensionDefinition) {
-        const { buttonLabel, requestMethod, successMessage, icon, renderConfirmModal } = actionExtensionDefinition;
+        const { buttonLabel, requestMethod, successMessage, renderConfirmModal } = actionExtensionDefinition;
         if (requestMethod) {
           items.push({
             name: buttonLabel,
-            icon: <EuiIcon type={icon} />,
             onClick: () => {
               this.closePopoverAndExecute(async () => {
                 await performExtensionAction(requestMethod, successMessage);
@@ -229,7 +214,6 @@ class IndexActionsContextMenuUi extends Component {
         } else {
           items.push({
             name: buttonLabel,
-            icon: <EuiIcon type={icon} />,
             onClick: () => {
               this.closePopover();
               this.setState({ renderConfirmModal });
