@@ -9,22 +9,19 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import { Query } from 'react-apollo';
+import { UptimeCommonProps } from '../../../uptime_app';
 import { getDocCountQuery } from './get_doc_count';
 
 interface EmptyStateProps {
-  autorefreshInterval: number;
-  autorefreshEnabled: boolean;
   children: JSX.Element[];
 }
 
-export const EmptyState = ({
-  autorefreshInterval,
-  autorefreshEnabled,
-  children,
-}: EmptyStateProps) => (
+type Props = EmptyStateProps & UptimeCommonProps;
+
+export const EmptyState = ({ autorefreshInterval, autorefreshIsPaused, children }: Props) => (
   <Query
     query={getDocCountQuery}
-    pollInterval={autorefreshEnabled ? autorefreshInterval : undefined}
+    pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
   >
     {({ loading, error, data }) => {
       if (loading) {
