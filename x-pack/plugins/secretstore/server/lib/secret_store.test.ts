@@ -3,57 +3,145 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import crypto from 'crypto';
+import * as sinon from 'sinon';
 import { SecretStore } from './secret_store';
 
 describe('The Secret Secret Store', function TestSecretStoreObject() {
-  const subject = new SecretStore(crypto.randomBytes(32));
+  const savedObjectsClient = {
+    create: sinon.stub(),
+    errors: sinon.stub(),
+    bulkCreate: sinon.stub(),
+    bulkGet: sinon.stub(),
+    delete: sinon.stub(),
+    find: sinon.stub(),
+    get: sinon.stub(),
+    update: sinon.stub(),
+  };
 
-  it('should not expose the key field', () => {
-    const field = 'key';
+  const subject = new SecretStore(savedObjectsClient, 'testSecretType');
+
+  it('should not expose the password field', () => {
+    const field = 'password';
     const sameSubject: any = subject;
     expect(sameSubject[field]).toBeUndefined();
   });
 
-  it('should hide values', () => {
+  it('should hide values using the saved object client', async () => {
     const hideMe = { message: 'my secret message', nonSecret: 'this is unhidden' };
-    const hidden = subject.hide(hideMe);
+    let insideJob: any = null;
+    savedObjectsClient.create.callsFake((type: string, attributes: any, options?: any) => {
+      insideJob = {
+        id: 'testId',
+        type: 'testSecretType',
+        attributes,
+      };
+      return insideJob;
+    });
+    savedObjectsClient.update.callsFake(
+      (type: string, id: string, attributes: any, options?: any) => {
+        return {
+          id,
+          type,
+          attributes: {
+            ...attributes,
+            ...insideJob.attributes,
+          },
+        };
+      }
+    );
+    const hidden = await subject.hideAttribute(hideMe, 'message');
+    sinon.assert.calledOnce(savedObjectsClient.create);
+    sinon.assert.calledOnce(savedObjectsClient.update);
     expect(hidden).toBeDefined();
-    expect(hidden).not.toContain('my secret message');
+    expect(hidden.attributes.message).toBeUndefined();
+    expect(hidden.attributes.secret).toBeDefined();
+    expect(hidden.attributes.secret).not.toContain('my secret message');
+    expect(hidden.attributes.nonSecret).toEqual('this is unhidden');
     expect(subject);
   });
 
-  it('should be able to unhide values', () => {
+  it('should be able to unhide values from saved objects', async () => {
+    expect.assertions(5);
     const hideMe = {
       message: 'my secret message',
       nonSecret: 'this is unhidden',
       someOtherProp: 'check me',
     };
-    const hidden = subject.hide(hideMe);
-    const unhidden = subject.unhide(hidden);
-    expect(unhidden).toMatchObject(hideMe);
+    let insideJob: any = null;
+    let internalSavedObject: any = null;
+    savedObjectsClient.create.callsFake((type: string, attributes: any, options?: any) => {
+      insideJob = {
+        id: 'testId',
+        type: 'testSecretType',
+        attributes,
+      };
+      return insideJob;
+    });
+    savedObjectsClient.update.callsFake(
+      (type: string, id: string, attributes: any, options?: any) => {
+        return (internalSavedObject = {
+          id,
+          type,
+          attributes: {
+            ...attributes,
+            ...insideJob.attributes,
+          },
+        });
+      }
+    );
+    expect(savedObjectsClient.update.notCalled).toBeTruthy();
+    savedObjectsClient.get.callsFake((type: string, id: string, options?: any) => {
+      return internalSavedObject;
+    });
+    const hidden = await subject.hideAttribute(hideMe, 'message');
+    const unhidden = await subject.unhideAttribute(hidden.id);
+    expect(unhidden.id).toEqual(hidden.id);
+    expect(unhidden.type).toEqual(hidden.type);
+    expect(unhidden.version).toEqual(hidden.version);
+    expect(unhidden.attributes).toMatchObject(hideMe);
   });
 
-  it('should be different each time encrypted', () => {
+  it('should be unable to unhide values if the saved object was changed in any way', async () => {
+    expect.assertions(1);
     const hideMe = {
-      secretMessage: 'this is my secret message',
+      message: 'my secret message',
+      nonSecret: 'this is unhidden',
+      someOtherProp: 'check me',
     };
-    const hidden = subject.hide(hideMe);
-    const hidden2 = subject.hide(hideMe);
-    expect(hidden).not.toEqual(hidden2);
-  });
+    let insideJob: any = null;
+    let internalSavedObject: any = null;
+    savedObjectsClient.create.callsFake((type: string, attributes: any, options?: any) => {
+      insideJob = {
+        id: 'testId',
+        type: 'testSecretType',
+        attributes,
+      };
+      return insideJob;
+    });
+    savedObjectsClient.update.callsFake(
+      (type: string, id: string, attributes: any, options?: any) => {
+        return (internalSavedObject = {
+          id,
+          type,
+          attributes: {
+            ...attributes,
+            ...insideJob.attributes,
+          },
+        });
+      }
+    );
+    savedObjectsClient.get.callsFake((type: string, id: string, options?: any) => {
+      internalSavedObject.nonSecret = 'I am changing the message';
+      internalSavedObject.addNewField = 'me';
+      return internalSavedObject;
+    });
+    const hidden = await subject.hideAttribute(hideMe, 'message');
 
-  it('should throw an error if there was a problem unhiding', () => {
-    expect(() => {
-      subject.unhide("blahblahI'mnotencrypted");
-    }).toThrowError('SecretStore Decrypt Failed: Invalid IV length');
-  });
-
-  it('should throw an error if there was a problem hiding', () => {
-    expect(() => {
-      const unparsable = { me: {} };
-      unparsable.me = unparsable;
-      subject.hide(unparsable);
-    }).toThrowError();
+    try {
+      await subject.unhideAttribute(hidden.id);
+      fail('The test fails because no exception was thrown');
+    } catch (e) {
+      expect(e).not.toBeNull();
+    }
   });
 });

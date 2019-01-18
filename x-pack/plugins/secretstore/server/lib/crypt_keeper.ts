@@ -20,7 +20,7 @@ export function buildCrypt({ key }: { key: string | Buffer }) {
   } = {};
 
   return {
-    encrypt: (unencrypted: any) => {
+    encrypt: (unencrypted: any, aad: any) => {
       const salt = crypto.randomBytes(SALT_LEN);
       const iv = crypto.randomBytes(IV_LEN);
       const encKey = crypto.pbkdf2Sync(key, salt, CYCLES, KEY_LEN, DIGEST);
@@ -29,12 +29,14 @@ export function buildCrypt({ key }: { key: string | Buffer }) {
         authTagLength: TAG_LEN,
       });
 
+      cipher.setAAD(Buffer.from(hash(aad), 'hex'));
+
       const encrypted = Buffer.concat([cipher.update(JSON.stringify(unencrypted)), cipher.final()]);
       const tag = cipher.getAuthTag();
 
       return Buffer.concat([tag, iv, salt, encrypted]).toString(ENC);
     },
-    decrypt: (encrypted: string) => {
+    decrypt: (encrypted: string, aad: any) => {
       const buffer = Buffer.from(encrypted, ENC);
       const tag = buffer.slice(0, TAG_LEN);
       const iv = buffer.slice(TAG_LEN, TAG_LEN + IV_LEN);
@@ -45,6 +47,7 @@ export function buildCrypt({ key }: { key: string | Buffer }) {
 
       const decipher = crypto.createDecipheriv(ALGO, decryptKey, iv);
       decipher.setAuthTag(tag);
+      decipher.setAAD(Buffer.from(hash(aad), 'hex'));
 
       return JSON.parse(Buffer.concat([decipher.update(data), decipher.final()]).toString('utf8'));
     },
