@@ -6,8 +6,11 @@
 
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { debounce } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
+import { fatalError } from 'ui/notify';
 
 import {
   EuiButton,
@@ -17,6 +20,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
+  EuiHorizontalRule,
   EuiLoadingKibana,
   EuiLoadingSpinner,
   EuiOverlayMask,
@@ -25,20 +29,33 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import routing from '../services/routing';
-import { extractQueryParams } from '../services/query_params';
-import { getRemoteClusterName } from '../services/get_remote_cluster_name';
-import { API_STATUS, followerIndexFormSchema } from '../constants';
-import { SectionError } from './section_error';
-import { loadIndices } from '../services/api';
-import { FormEntryRow } from './form_entry_row';
-import { RemoteClustersFormField } from './remote_clusters_form_field';
+import { indexNameValidator, leaderIndexValidator } from '../../services/input_validation';
+import routing from '../../services/routing';
+import { loadIndices } from '../../services/api';
+import { API_STATUS } from '../../constants';
+import { SectionError } from '../section_error';
+import { FormEntryRow } from '../form_entry_row';
+import { advancedSettingsFields, emptyAdvancedSettings } from './advanced_settings_fields';
+import { extractQueryParams } from '../../services/query_params';
+import { getRemoteClusterName, getFirstConnectedCluster } from '../../services/get_remote_cluster_name';
+import { RemoteClustersFormField } from '../remote_clusters_form_field';
 
-const getEmptyFollowerIndex = (remoteClusterName = '') => ({
+const indexNameIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
+
+const fieldToValidatorMap = advancedSettingsFields.reduce((map, advancedSetting) => {
+  const { field, validator } = advancedSetting;
+  map[field] = validator;
+  return map;
+}, {
+  'name': indexNameValidator,
+  'leaderIndex': leaderIndexValidator,
+});
+
+const getEmptyFollowerIndex = (remoteClusters) => ({
   name: '',
-  remoteCluster: remoteClusterName,
+  remoteCluster: remoteClusters ? getFirstConnectedCluster(remoteClusters).name : '',
   leaderIndex: '',
-  ...Object.keys(followerIndexFormSchema.advanced).reduce((acc, field) => ({ ...acc, [field]: '' }), {})
+  ...emptyAdvancedSettings,
 });
 
 /**
@@ -86,12 +103,15 @@ export const FollowerIndexForm = injectI18n(
           ...this.props.followerIndex,
         };
 
+      const fieldsErrors = this.getFieldsErrors(followerIndex);
+
       this.state = {
         isNew,
         followerIndex,
-        fieldsErrors: {},
+        fieldsErrors,
         areErrorsVisible: false,
         areAdvancedSettingsVisible: isNew ? false : true,
+        isValidatingIndexName: false,
       };
 
       this.validateIndexName = debounce(this.validateIndexName, 500);
@@ -100,41 +120,88 @@ export const FollowerIndexForm = injectI18n(
     onFieldsChange = (fields) => {
       this.setState(updateFields(fields));
 
+      const newFields = {
+        ...this.state.fields,
+        ...fields,
+      };
+
+      this.setState(updateFormErrors(this.getFieldsErrors(newFields)));
+
       if (this.props.apiError) {
         this.props.clearApiError();
       }
     };
 
-    onFieldsErrorChange = (errors) => {
-      this.setState(updateFormErrors(errors));
-    }
+    getFieldsErrors = (newFields) => {
+      return Object.keys(newFields).reduce((errors, field) => {
+        const validator = fieldToValidatorMap[field];
+        const value = newFields[field];
+
+        if (validator) {
+          const error = validator(value);
+          errors[field] = error;
+        }
+
+        return errors;
+      }, {});
+    };
 
     onIndexNameChange = ({ name }) => {
       this.onFieldsChange({ name });
-      this.validateIndexName(name);
-    }
 
-    validateIndexName = async (name) => {
-      if (!name || !name.trim) {
+      if (!name || !name.trim()) {
+        this.setState({
+          isValidatingIndexName: false,
+        });
+
         return;
       }
 
-      const { intl } = this.props;
+      this.setState({
+        isValidatingIndexName: true,
+      });
 
+      this.validateIndexName(name);
+    };
+
+    validateIndexName = async (name) => {
       try {
         const indices = await loadIndices();
         const doesExist = indices.some(index => index.name === name);
         if (doesExist) {
-          const message = intl.formatMessage({
-            id: 'xpack.crossClusterReplication.followerIndexForm.indexAlreadyExistError',
-            defaultMessage: 'An index with the same name already exists.'
-          });
-          this.setState(updateFormErrors({ name: { message, alwaysVisible: true } }));
+          const error = {
+            message: (
+              <FormattedMessage
+                id="xpack.crossClusterReplication.followerIndexForm.indexAlreadyExistError"
+                defaultMessage="An index with the same name already exists."
+              />
+            ),
+            alwaysVisible: true,
+          };
+
+          this.setState(updateFormErrors({ name: error }));
         }
-      } catch (err) {
-        // Silently fail...
+
+        this.setState({
+          isValidatingIndexName: false,
+        });
+      } catch (error) {
+        // Expect an error in the shape provided by Angular's $http service.
+        if (error && error.data) {
+          // All validation does is check for a name collision, so we can just let the user attempt
+          // to save the follower index and get an error back from the API.
+          this.setState({
+            isValidatingIndexName: false,
+          });
+        }
+
+        // This error isn't an HTTP error, so let the fatal error screen tell the user something
+        // unexpected happened.
+        fatalError(error, i18n.translate('xpack.crossClusterReplication.followerIndexForm.indexNameValidationFatalErrorTitle', {
+          defaultMessage: 'Follower Index Forn index name validation',
+        }));
       }
-    }
+    };
 
     onClusterChange = (remoteCluster) => {
       this.onFieldsChange({ remoteCluster });
@@ -145,11 +212,38 @@ export const FollowerIndexForm = injectI18n(
     };
 
     toggleAdvancedSettings = () => {
-      this.setState(({ areAdvancedSettingsVisible }) => ({ areAdvancedSettingsVisible: !areAdvancedSettingsVisible }));
+      this.setState(({ areAdvancedSettingsVisible, cachedAdvancedSettings }) => {
+        // Hide settings, clear fields, and create cache.
+        if (areAdvancedSettingsVisible) {
+          const fields = this.getFields();
+
+          const newCachedAdvancedSettings = advancedSettingsFields.reduce((cache, { field }) => {
+            const value = fields[field];
+            if (value !== '') {
+              cache[field] = value;
+            }
+            return cache;
+          }, {});
+
+          this.onFieldsChange(emptyAdvancedSettings);
+
+          return {
+            areAdvancedSettingsVisible: false,
+            cachedAdvancedSettings: newCachedAdvancedSettings,
+          };
+        }
+
+        // Show settings and restore fields from the cache.
+        this.onFieldsChange(cachedAdvancedSettings);
+        return {
+          areAdvancedSettingsVisible: true,
+          cachedAdvancedSettings: {},
+        };
+      });
     }
 
     isFormValid() {
-      return Object.values(this.state.fieldsErrors).every(error => error === null);
+      return Object.values(this.state.fieldsErrors).every(error => error === undefined);
     }
 
     sendForm = () => {
@@ -171,7 +265,7 @@ export const FollowerIndexForm = injectI18n(
     };
 
     /**
-     * Secctions Renders
+     * Sections Renders
      */
     renderApiErrors() {
       const { apiError, intl } = this.props;
@@ -205,34 +299,58 @@ export const FollowerIndexForm = injectI18n(
         areErrorsVisible,
         areAdvancedSettingsVisible,
         fieldsErrors,
+        isValidatingIndexName,
       } = this.state;
-
-      const toggleAdvancedSettingButtonLabel = areAdvancedSettingsVisible
-        ? (
-          <FormattedMessage
-            id="xpack.crossClusterReplication.followerIndexForm.hideAdvancedSettingsButtonLabel"
-            defaultMessage="Hide advanced settings"
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.crossClusterReplication.followerIndexForm.showAdvancedSettingsButtonLabel"
-            defaultMessage="Show advanced settings"
-          />
-        );
 
       /**
        * Follower index name
        */
+
+      const indexNameHelpText = (
+        <Fragment>
+          {isValidatingIndexName && (
+            <p>
+              <FormattedMessage
+                id="xpack.crossClusterReplication.followerIndexForm.indexNameValidatingLabel"
+                defaultMessage="Checking availability..."
+              />
+            </p>
+          )}
+          <p>
+            <FormattedMessage
+              id="xpack.crossClusterReplication.followerIndexForm.indexNameHelpLabel"
+              defaultMessage="Spaces and the characters {characterList} are not allowed."
+              values={{ characterList: <strong>{indexNameIllegalCharacters}</strong> }}
+            />
+          </p>
+        </Fragment>
+      );
+
+      const indexNameLabel = i18n.translate(
+        'xpack.crossClusterReplication.followerIndexForm.sectionFollowerIndexNameTitle', {
+          defaultMessage: 'Name'
+        }
+      );
+
       const renderFollowerIndexName = () => (
         <FormEntryRow
           field="name"
           value={followerIndex.name}
           error={fieldsErrors.name}
-          schema={followerIndexFormSchema.name}
+          title={(
+            <EuiTitle size="s">
+              <h2>{indexNameLabel}</h2>
+            </EuiTitle>
+          )}
+          label={indexNameLabel}
+          description={i18n.translate('xpack.crossClusterReplication.followerIndexForm.sectionFollowerIndexNameDescription', {
+            defaultMessage: 'A name for the follower index.'
+          })}
+          helpText={indexNameHelpText}
+          isLoading={isValidatingIndexName}
           disabled={!isNew}
           areErrorsVisible={areErrorsVisible}
           onValueUpdate={this.onIndexNameChange}
-          onErrorUpdate={this.onFieldsErrorChange}
         />
       );
 
@@ -263,12 +381,12 @@ export const FollowerIndexForm = injectI18n(
           <EuiDescribedFormGroup
             title={(
               <EuiTitle size="s">
-                <h4>
+                <h2>
                   <FormattedMessage
                     id="xpack.crossClusterReplication.followerIndexForm.sectionRemoteClusterTitle"
                     defaultMessage="Remote cluster"
                   />
-                </h4>
+                </h2>
               </EuiTitle>
             )}
             description={(
@@ -296,50 +414,121 @@ export const FollowerIndexForm = injectI18n(
       /**
        * Leader index
        */
+
+      const leaderIndexLabel = i18n.translate(
+        'xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexTitle', {
+          defaultMessage: 'Leader index'
+        }
+      );
+
       const renderLeaderIndex = () => (
         <FormEntryRow
           field="leaderIndex"
           value={followerIndex.leaderIndex}
           error={fieldsErrors.leaderIndex}
-          schema={followerIndexFormSchema.leaderIndex}
+          title={(
+            <EuiTitle size="s">
+              <h2>{leaderIndexLabel}</h2>
+            </EuiTitle>
+          )}
+          label={leaderIndexLabel}
+          description={i18n.translate('xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexDescription', {
+            defaultMessage: 'The leader index you want to replicate from the remote cluster.'
+          })}
+          helpText={(
+            <FormattedMessage
+              id="xpack.crossClusterReplication.followerIndexForm.indexNameHelpLabel"
+              defaultMessage="Spaces and the characters {characterList} are not allowed."
+              values={{ characterList: <strong>{indexNameIllegalCharacters}</strong> }}
+            />
+          )}
           disabled={!isNew}
           areErrorsVisible={areErrorsVisible}
           onValueUpdate={this.onFieldsChange}
-          onErrorUpdate={this.onFieldsErrorChange}
         />
       );
 
       /**
        * Advanced settings
        */
+
+      const toggleAdvancedSettingButtonLabel = areAdvancedSettingsVisible
+        ? (
+          <FormattedMessage
+            id="xpack.crossClusterReplication.followerIndex.advancedSettingsForm.hideButtonLabel"
+            defaultMessage="Don't use advanced settings"
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.crossClusterReplication.followerIndex.advancedSettingsForm.showButtonLabel"
+            defaultMessage="Use advanced settings"
+          />
+        );
+
       const renderAdvancedSettings = () => (
         <Fragment>
-          { isNew && (
-            <Fragment>
-              <EuiButtonEmpty
-                iconType={areAdvancedSettingsVisible ? "arrowUp" : "arrowDown"}
-                flush="left"
-                onClick={this.toggleAdvancedSettings}
-              >
-                { toggleAdvancedSettingButtonLabel }
-              </EuiButtonEmpty>
-              <EuiSpacer size="s" />
-            </Fragment>
-          ) }
+          <EuiHorizontalRule />
+
+          <EuiDescribedFormGroup
+            title={(
+              <EuiTitle size="s">
+                <h2>
+                  <FormattedMessage
+                    id="xpack.crossClusterReplication.followerIndexForm.advancedSettingsTitle"
+                    defaultMessage="Advanced settings"
+                  />
+                </h2>
+              </EuiTitle>
+            )}
+            description={(
+              <Fragment>
+                <p>
+                  <FormattedMessage
+                    id="xpack.crossClusterReplication.followerIndexForm.advancedSettingsDescription"
+                    defaultMessage="Use advanced settings to control the rate at which data is replicated."
+                  />
+                </p>
+
+                <EuiButton
+                  color="primary"
+                  onClick={this.toggleAdvancedSettings}
+                >
+                  { toggleAdvancedSettingButtonLabel }
+                </EuiButton>
+              </Fragment>
+            )}
+            fullWidth
+          />
+
           {areAdvancedSettingsVisible && (
-            Object.entries(followerIndexFormSchema.advanced).map(([field, schema]) => (
-              <FormEntryRow
-                key={field}
-                field={field}
-                value={followerIndex[field]}
-                error={fieldsErrors[field]}
-                schema={schema}
-                areErrorsVisible={areErrorsVisible}
-                onValueUpdate={this.onFieldsChange}
-                onErrorUpdate={this.onFieldsErrorChange}
-              />
-            ))
+            <Fragment>
+              <EuiSpacer size="s" />
+
+              {advancedSettingsFields.map((advancedSetting) => {
+                const { field, title, description, label, helpText } = advancedSetting;
+                return (
+                  <FormEntryRow
+                    key={field}
+                    field={field}
+                    value={followerIndex[field]}
+                    error={fieldsErrors[field]}
+                    title={(
+                      <EuiTitle size="xs">
+                        <h3>{title}</h3>
+                      </EuiTitle>
+                    )}
+                    description={description}
+                    label={label}
+                    helpText={helpText}
+                    areErrorsVisible={areErrorsVisible}
+                    onValueUpdate={this.onFieldsChange}
+                  />
+                );
+              })}
+            </Fragment>
           )}
+
+          <EuiHorizontalRule />
         </Fragment>
       );
 
@@ -367,6 +556,8 @@ export const FollowerIndexForm = injectI18n(
               color="danger"
               iconType="cross"
             />
+
+            <EuiSpacer size="l" />
           </Fragment>
         );
       };
@@ -440,9 +631,8 @@ export const FollowerIndexForm = injectI18n(
             <EuiSpacer size="s" />
             {renderAdvancedSettings()}
           </EuiForm>
-          <EuiSpacer size="l" />
+
           {renderFormErrorWarning()}
-          <EuiSpacer size="l" />
           {renderActions()}
         </Fragment>
       );
