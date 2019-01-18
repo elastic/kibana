@@ -40,7 +40,7 @@ export function ensureEsVersion(server, kibanaVersion) {
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const isProd = server.config().get('env.prod');
 
-  server.log(['plugin', 'debug'], 'Checking Elasticsearch version');
+  server.logWithMetadata(['plugin', 'debug'], 'Checking Elasticsearch version');
   return callWithInternalUser('nodes.info', {
     filterPath: [
       'nodes.*.version',
