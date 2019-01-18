@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// export the common registry here, so it's available in plugin public code
-export { typesRegistry } from '@kbn/interpreter/common';
+export { KibanaTilemapSource } from './kibana_tilemap_source';
