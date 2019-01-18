@@ -6,7 +6,7 @@
 
 import { EuiButton, EuiComboBox, EuiForm, EuiFormRow } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import React, { SyntheticEvent } from 'react';
+import React from 'react';
 import { InfraIndexField } from 'x-pack/plugins/infra/server/graphql/types';
 interface Props {
   onSubmit: (field: string) => void;
