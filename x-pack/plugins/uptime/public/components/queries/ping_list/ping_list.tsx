@@ -272,7 +272,7 @@ export class Pings extends React.Component<PingListProps, PingListState> {
                 <EuiInMemoryTable
                   loading={loading}
                   columns={columns}
-                  items={typeof allPings !== 'undefined' ? allPings.pings : []}
+                  items={allPings && allPings.pings}
                   pagination={{ initialPageSize: 10, pageSizeOptions: [5, 10, 20, 100] }}
                   sorting={true}
                 />
