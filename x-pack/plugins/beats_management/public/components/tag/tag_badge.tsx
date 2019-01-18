@@ -18,19 +18,15 @@ interface TagBadgeProps {
 }
 
 export const TagBadge = (props: TagBadgeProps) => {
-  const {
-    iconType,
-    onClick,
-    onClickAriaLabel,
-    tag: { color, disabled, id },
-  } = props;
+  const { iconType, onClick, onClickAriaLabel, tag } = props;
   const maxIdRenderSize = props.maxIdRenderSize || TABLE_CONFIG.TRUNCATE_TAG_LENGTH;
-  const idToRender = id.length > maxIdRenderSize ? `${id.substring(0, maxIdRenderSize)}...` : id;
-  return disabled ? (
-    <DisabledTagBadge maxIdRenderSize={props.maxIdRenderSize} id={id} />
+  const idToRender =
+    tag.id.length > maxIdRenderSize ? `${tag.id.substring(0, maxIdRenderSize)}...` : tag.id;
+  return tag.disabled ? (
+    <DisabledTagBadge maxIdRenderSize={props.maxIdRenderSize} id={tag.id} />
   ) : (
     <EuiBadge
-      color={color || 'primary'}
+      color={tag.color || 'primary'}
       iconType={iconType}
       onClick={onClick}
       onClickAriaLabel={onClickAriaLabel}

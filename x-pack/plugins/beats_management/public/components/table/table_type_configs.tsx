@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { sortBy, uniq } from 'lodash';
 import moment from 'moment';
 import React from 'react';
-import { BeatTag, CMBeat, ConfigurationBlock } from '../../../common/domain_types';
+import { BeatTag, CMBeat } from '../../../common/domain_types';
 import { ConnectedLink } from '../navigation/connected_link';
 import { TagBadge } from '../tag';
 
@@ -251,15 +251,6 @@ export const BeatDetailTagsTable: TableType = {
       ),
       sortable: true,
       width: '55%',
-    },
-    {
-      align: 'right',
-      field: 'configuration_blocks',
-      name: i18n.translate('xpack.beatsManagement.beatTagsTable.configurationsTitle', {
-        defaultMessage: 'Configurations',
-      }),
-      render: (configurations: ConfigurationBlock[]) => <span>{configurations.length}</span>,
-      sortable: true,
     },
     {
       align: 'right',

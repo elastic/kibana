@@ -7,7 +7,7 @@
 import { EuiGlobalToastList } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { CMBeat } from '../../../common/domain_types';
+import { BeatTag, CMBeat } from '../../../common/domain_types';
 import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { BeatDetailTagsTable, Table } from '../../components/table';
 import { FrontendLibs } from '../../lib/types';
@@ -20,6 +20,7 @@ interface BeatTagsPageProps {
 
 interface BeatTagsPageState {
   notifications: any[];
+  tags: BeatTag[];
 }
 
 export class BeatTagsPage extends React.PureComponent<BeatTagsPageProps, BeatTagsPageState> {
@@ -29,7 +30,19 @@ export class BeatTagsPage extends React.PureComponent<BeatTagsPageProps, BeatTag
 
     this.state = {
       notifications: [],
+      tags: [],
     };
+  }
+
+  public componentWillMount() {
+    this.updateBeatsData();
+  }
+
+  public async updateBeatsData() {
+    const tags = await this.props.libs.tags.getTagsWithIds(this.props.beat.tags);
+    this.setState({
+      tags,
+    });
   }
 
   public render() {
@@ -44,7 +57,12 @@ export class BeatTagsPage extends React.PureComponent<BeatTagsPageProps, BeatTag
           path={`/beat/${beat.id}/tags`}
         />
 
-        <Table hideTableControls={true} items={[]} ref={this.tableRef} type={BeatDetailTagsTable} />
+        <Table
+          hideTableControls={true}
+          items={this.state.tags}
+          ref={this.tableRef}
+          type={BeatDetailTagsTable}
+        />
 
         <EuiGlobalToastList
           toasts={this.state.notifications}

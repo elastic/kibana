@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { sortBy } from 'lodash';
+import { flatten, sortBy } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import { BeatTag, CMBeat } from '../../../common/domain_types';
@@ -36,6 +36,7 @@ interface PageProps extends AppPageProps {
 interface PageState {
   notifications: any[];
   tags: BeatTag[] | null;
+  beats: CMBeat[];
 }
 
 class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
@@ -46,12 +47,25 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
     this.state = {
       notifications: [],
       tags: null,
+      beats: [],
     };
 
     if (props.urlState.beatsKBar) {
       props.containers.beats.reload(props.urlState.beatsKBar);
     }
     props.renderAction(this.renderActionArea);
+    this.updateBeatsData();
+  }
+
+  public async updateBeatsData() {
+    const beats = (await sortBy(this.props.containers.beats.state.list, 'id')) || [];
+    const tags = await this.props.libs.tags.getTagsWithIds(
+      flatten(this.props.containers.beats.state.list.map(beat => beat.tags))
+    );
+    this.setState({
+      tags,
+      beats,
+    });
   }
 
   public renderActionArea = () => (
@@ -188,7 +202,10 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
                     break;
                 }
               }}
-              items={sortBy(this.props.containers.beats.state.list, 'id') || []}
+              items={this.state.beats.map(beat => ({
+                ...beat,
+                tags: (this.state.tags || []).filter(tag => beat.tags.includes(tag.id)),
+              }))}
               ref={this.tableRef}
               type={BeatsTableType}
             />
@@ -325,28 +342,6 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
     });
     return beats;
   };
-
-  // TODO  the following 3 methods will be re-added in some form in a followup PR due to scope of this aspect of the change
-
-  // private configBlocksRequireUniqueness = (hasConfigurationBlocksTypes: string[]) =>
-  //   intersection(UNIQUENESS_ENFORCING_TYPES, hasConfigurationBlocksTypes).length !== 0;
-
-  // private disableTagForUniquenessEnforcement = (tag: BeatTag) =>
-  //   this.configBlocksRequireUniqueness(tag.hasConfigurationBlocksTypes) &&
-  //   // if > 0 beats are associated with the tag, it will result in disassociation, so do not disable it
-  //   !this.getSelectedBeats().some(beat => beat.tags.some(id => id === tag.id))
-  //     ? { ...tag, disabled: true }
-  //     : tag;
-
-  // private selectedBeatConfigsRequireUniqueness = () =>
-  //   // union beat tags
-  //   flatten(this.getSelectedBeats().map(({ tags }) => tags))
-  //     // map tag list to bool
-  //     .map(tag => {
-  //       return this.configBlocksRequireUniqueness(tag ? tag.configuration_blocks : []);
-  //     })
-  //     // reduce to result
-  //     .reduce((acc, cur) => acc || cur, false);
 }
 
 export const BeatsPage = injectI18n(BeatsPageComponent);

@@ -8,6 +8,7 @@ import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from 
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import 'brace/mode/yaml';
 import 'brace/theme/github';
+import { flatten } from 'lodash';
 import React from 'react';
 import { UNIQUENESS_ENFORCING_TYPES } from 'x-pack/plugins/beats_management/common/constants';
 import { BeatTag, CMBeat, ConfigurationBlock } from '../../../common/domain_types';
@@ -18,6 +19,7 @@ interface TagPageState {
   showFlyout: boolean;
   attachedBeats: CMBeat[] | null;
   tag: BeatTag;
+  beatsTags: BeatTag[];
   configuration_blocks: {
     error?: string | undefined;
     blocks: ConfigurationBlock[];
@@ -37,6 +39,7 @@ class TagEditPageComponent extends React.PureComponent<
     this.state = {
       showFlyout: false,
       attachedBeats: null,
+      beatsTags: [],
       tag: {
         id: props.match.params.tagid,
         name: '',
@@ -49,7 +52,9 @@ class TagEditPageComponent extends React.PureComponent<
         total: 0,
       },
     };
+  }
 
+  public componentWillMount() {
     this.loadTag();
     this.loadAttachedBeats();
   }
@@ -81,7 +86,14 @@ class TagEditPageComponent extends React.PureComponent<
                 tag: { ...oldState.tag, [field]: value },
               }))
             }
-            attachedBeats={this.state.attachedBeats as CMBeat[]}
+            attachedBeats={
+              (this.state.attachedBeats || []).map(beat => ({
+                ...beat,
+                tags: flatten(
+                  beat.tags.map(tagId => this.state.beatsTags.filter(tag => tag.id === tagId))
+                ),
+              })) as any
+            }
             onConfigListChange={(index: number) => {
               this.loadConfigBlocks(index);
             }}
@@ -161,9 +173,12 @@ class TagEditPageComponent extends React.PureComponent<
 
   private loadAttachedBeats = async () => {
     const beats = await this.props.libs.beats.getBeatsWithTag(this.props.match.params.tagid);
-
+    const beatsTags = await this.props.libs.tags.getTagsWithIds(
+      flatten(beats.map(beat => beat.tags))
+    );
     this.setState({
       attachedBeats: beats,
+      beatsTags,
     });
   };
   private saveTag = async () => {

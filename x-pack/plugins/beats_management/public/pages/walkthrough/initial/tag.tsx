@@ -111,14 +111,14 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
       );
     }
     const createBlocksResponse = await this.props.libs.configBlocks.upsert(
-      this.state.configuration_blocks
+      this.state.configuration_blocks.map(block => ({ ...block, tag: this.state.tag.id }))
     );
     const creationError = createBlocksResponse.reduce(
       (err: string, resp: any) => (!err ? (err = resp.error || '') : err),
       ''
     );
     if (creationError) {
-      alert(creationError);
+      return alert(creationError);
     }
     this.props.setUrlState({
       createdTag: newTag.id,
