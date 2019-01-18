@@ -24,7 +24,7 @@ export const ReservedRoleBadge = (props: Props) => {
         data-test-subj="reservedRoleBadgeTooltip"
         content={
           <FormattedMessage
-            id="xpack.security.management.editRole.reversedRoleBadget.reversedRolesCanNotBeRemovedTooltip"
+            id="xpack.security.management.editRole.reversedRoleBadge.reservedRolesCanNotBeModifiedTooltip"
             defaultMessage="Reserved roles are built-in and cannot be removed or modified."
           />
         }

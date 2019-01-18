@@ -63,7 +63,7 @@ const buildProps = (customProps: any = {}) => {
 };
 
 describe('<SpaceAwarePrivilegeSection>', () => {
-  it('shows the space table if exisitng space privileges are declared', () => {
+  it('shows the space table if existing space privileges are declared', () => {
     const props = buildProps({
       role: {
         elasticsearch: {
@@ -91,7 +91,7 @@ describe('<SpaceAwarePrivilegeSection>', () => {
     const wrapper = mountWithIntl(<SpaceAwarePrivilegeSection.WrappedComponent {...props} />);
 
     const table = wrapper.find(PrivilegeSpaceTable);
-    expect(table).toMatchSnapshot();
+    expect(table).toBe(null);
   });
 
   it('Renders flyout after clicking "Add a privilege" button', () => {

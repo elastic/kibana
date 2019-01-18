@@ -152,7 +152,7 @@ export class FeatureTable extends Component<Props, {}> {
       },
     },
     {
-      field: 'role',
+      field: 'privilege',
       name: (
         <span>
           <FormattedMessage
