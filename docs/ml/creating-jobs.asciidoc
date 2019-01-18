@@ -34,8 +34,8 @@ http://nginx.org/[Nginx] and https://httpd.apache.org/[Apache] HTTP servers to
 [role="screenshot"]
 image::ml/images/ml-data-recognizer-filebeat.jpg[A screenshot of the {filebeat} job creation wizards]
 
-Likewise, if you use {auditbeat-ref}/index.html[{auditbeat}] to audit the
-activities of users and processes on your systems, the following wizards appear:
+Likewise, if you use {auditbeat-ref}/index.html[{auditbeat}] to audit process
+activity on your systems, the following wizards appear:
 
 [role="screenshot"]
 image::ml/images/ml-data-recognizer-auditbeat.jpg[A screenshot of the {auditbeat} job creation wizards]
