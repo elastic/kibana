@@ -34,10 +34,9 @@ export function GetEnabledScriptingLanguagesProvider($http) {
     return $http.get(chrome.addBasePath('/api/kibana/scripts/languages'))
       .then((res) => res.data)
       .catch(() => {
-        const toastText = i18n.translate('common.ui.scriptingLanguages.errorFetchingToastDescription', {
+        toastNotifications.addDanger(i18n.translate('common.ui.scriptingLanguages.errorFetchingToastDescription', {
           defaultMessage: 'Error getting available scripting languages from Elasticsearch'
-        });
-        toastNotifications.addDanger(toastText);
+        }));
         return [];
       });
   };
