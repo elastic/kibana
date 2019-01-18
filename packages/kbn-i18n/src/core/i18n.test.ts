@@ -153,8 +153,7 @@ describe('I18n engine', () => {
     });
 
     test('should add messages with normalized passed locale', () => {
-      const locale = 'en-US';
-      i18n.setLocale(locale);
+      i18n.setLocale('en-US');
 
       i18n.addTranslation(
         {
@@ -165,7 +164,7 @@ describe('I18n engine', () => {
         'en-us'
       );
 
-      expect(i18n.getLocale()).toBe(locale);
+      expect(i18n.getLocale()).toBe('en-us');
       expect(i18n.getTranslation()).toEqual({
         messages: {
           ['a.b.c']: 'bar',
