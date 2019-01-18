@@ -246,6 +246,7 @@ class HeaderUI extends Component<Props, State> {
                 'aria-label': item.label,
               }))}
               onMouseLeave={this.collapseFlyout}
+              wrapText={true}
             />
           </EuiNavDrawer>
         </EuiOutsideClickDetector>
