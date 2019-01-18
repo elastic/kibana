@@ -15,11 +15,10 @@ import {
   units
 } from '../../../../../../../style/variables';
 
-import { EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { Span } from 'x-pack/plugins/apm/typings/es_schemas/Span';
 
-const DatabaseStatement = styled.div`
-  margin-top: ${px(unit)};
+const ContextUrl = styled.div`
   padding: ${px(units.half)} ${px(unit)};
   background: ${colors.gray5};
   border-radius: ${borderRadius};
@@ -41,7 +40,9 @@ export function HttpContext({ httpContext }: Props) {
       <EuiTitle size="xs">
         <h3>HTTP URL</h3>
       </EuiTitle>
-      <DatabaseStatement>{httpContext.url}</DatabaseStatement>
+      <EuiSpacer size="m" />
+      <ContextUrl>{httpContext.url}</ContextUrl>
+      <EuiSpacer size="l" />
     </Fragment>
   );
 }

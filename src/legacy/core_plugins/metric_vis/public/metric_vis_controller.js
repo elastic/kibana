@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { getHeatmapColors } from 'ui/vislib/components/color/heatmap_color';
+import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { isColorDark } from '@elastic/eui';
 
 import { MetricVisValue } from './components/metric_vis_value';
@@ -84,10 +85,10 @@ export class MetricVisComponent extends Component {
     return isColorDark(parseInt(color[1]), parseInt(color[2]), parseInt(color[3]));
   }
 
-  _getFormattedValue(fieldFormatter, value) {
+  _getFormattedValue = (fieldFormatter, value, format = 'text') => {
     if (_.isNaN(value)) return '-';
-    return fieldFormatter(value);
-  }
+    return fieldFormatter.convert(value, format);
+  };
 
   _processTableGroups(table) {
     const config = this.props.vis.params.metric;
@@ -98,22 +99,18 @@ export class MetricVisComponent extends Component {
     const labels = this._getLabels();
     const metrics = [];
 
-    let bucketAgg;
     let bucketColumnId;
-    let rowHeaderIndex;
+    let bucketFormatter;
 
-    table.columns.forEach((column, columnIndex) => {
-      const aggConfig = column.aggConfig;
+    if (config.bucket) {
+      bucketColumnId = table.columns[config.bucket.accessor].id;
+      bucketFormatter = getFormat(config.bucket.format);
+    }
 
-      if (aggConfig && aggConfig.type.type === 'buckets') {
-        bucketAgg = aggConfig;
-        // Store the current index, so we later know in which position in the
-        // row array, the bucket agg key will be, so we can create filters on it.
-        rowHeaderIndex = columnIndex;
-        bucketColumnId = column.id;
-        return;
-      }
-
+    config.metrics.forEach(metric => {
+      const columnIndex = metric.accessor;
+      const column = table.columns[columnIndex];
+      const formatter = getFormat(metric.format);
       table.rows.forEach((row, rowIndex) => {
 
         let title = column.name;
@@ -123,16 +120,13 @@ export class MetricVisComponent extends Component {
         if (isPercentageMode) {
           const percentage = Math.round(100 * (value - min) / (max - min));
           value = `${percentage}%`;
+        } else {
+          value = this._getFormattedValue(formatter, value, 'html');
         }
 
-        if (aggConfig) {
-          if (!isPercentageMode) value = this._getFormattedValue(aggConfig.fieldFormatter('html'), value);
-          if (bucketAgg) {
-            const bucketValue = bucketAgg.fieldFormatter('text')(row[bucketColumnId]);
-            title = `${bucketValue} - ${aggConfig.makeLabel()}`;
-          } else {
-            title = aggConfig.makeLabel();
-          }
+        if (bucketColumnId) {
+          const bucketValue = this._getFormattedValue(bucketFormatter, row[bucketColumnId]);
+          title = `${bucketValue} - ${title}`;
         }
 
         const shouldColor = config.colorsRange.length > 1;
@@ -143,10 +137,7 @@ export class MetricVisComponent extends Component {
           color: shouldColor && config.style.labelColor ? color : null,
           bgColor: shouldColor && config.style.bgColor ? color : null,
           lightText: shouldColor && config.style.bgColor && this._needsLightText(color),
-          filterKey: bucketColumnId !== undefined ? row[bucketColumnId] : null,
           rowIndex: rowIndex,
-          columnIndex: rowHeaderIndex,
-          bucketAgg: bucketAgg,
         });
       });
     });
@@ -155,11 +146,12 @@ export class MetricVisComponent extends Component {
   }
 
   _filterBucket = (metric) => {
-    if (!metric.filterKey || !metric.bucketAgg) {
+    const config = this.props.vis.params.metric;
+    if (!config.bucket) {
       return;
     }
     const table = this.props.visData;
-    this.props.vis.API.events.filter({ table, column: metric.columnIndex, row: metric.rowIndex });
+    this.props.vis.API.events.filter({ table, column: config.bucket.accessor, row: metric.rowIndex });
   };
 
   _renderMetric = (metric, index) => {
