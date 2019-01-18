@@ -1,17 +1,28 @@
-#indReactRoot {
+#indReactRoot, #indexManagementReactRoot {
   background-color: $euiColorLightestShade;
+}
+
+.indTable {
+
+  // The index table is a bespoke table and can't make use of EuiBasicTable's width settings
+  thead th.indTable__header--name {
+    width: 25%;
+  }
+
+  // The index name can't contain spaces, so this is a rare case of break being OK.
+  .indTable__cell--name {
+    word-break: break-all;
+  }
 }
 
 .indTable__link {
   text-align: left;
 }
 
-.indTable__horizontalScrollContainer {
-  overflow-x: auto;
-  max-width: 100%;
+.indTable__link {
+  text-align: left;
 }
 
-.indTable__horizontalScroll {
-  min-width: 800px;
-  width: 100%;
+.indDetail__codeBlock {
+  background: transparent;
 }

@@ -1,9 +1,31 @@
 # GitHub CODEOWNERS definition
-# See: https://help.github.com/articles/about-codeowners/
+# Identify which groups will be pinged by changes to different parts of the codebase.
+# For more info, see https://help.github.com/articles/about-codeowners/
 
+# APM
 /x-pack/plugins/apm/  @elastic/apm-ui
+
+# Beats
 /x-pack/plugins/beats_management/  @elastic/beats
+
+# Canvas
 /x-pack/plugins/canvas/  @elastic/kibana-canvas
+
+# Security
 /x-pack/plugins/security/  @elastic/kibana-security
 /x-pack/plugins/spaces/  @elastic/kibana-security
+
+# Design
 **/*.scss  @elastic/kibana-design
+
+# Elasticsearch UI
+/src/legacy/core_plugins/console/  @elastic/es-ui
+/x-pack/plugins/console_extensions/  @elastic/es-ui
+/x-pack/plugins/cross_cluster_replication/  @elastic/es-ui
+/x-pack/plugins/index_lifecycle_management/  @elastic/es-ui
+/x-pack/plugins/index_management/  @elastic/es-ui
+/x-pack/plugins/license_management/  @elastic/es-ui
+/x-pack/plugins/remote_clusters/  @elastic/es-ui
+/x-pack/plugins/rollup/  @elastic/es-ui
+/x-pack/plugins/searchprofiler/  @elastic/es-ui
+/x-pack/plugins/watcher/  @elastic/es-ui

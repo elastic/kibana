@@ -13,6 +13,7 @@ import {
   EuiSuperSelect,
   EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import { getMonitorPageBreadcrumb } from '../breadcrumbs';
 import { MonitorCharts } from '../components/queries/monitor_charts';
@@ -60,7 +61,12 @@ export class MonitorPage extends React.Component<MonitorPageProps> {
         <EuiSpacer size="l" />
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <span>Monitor:</span>
+            <span>
+              <FormattedMessage
+                id="xpack.uptime.monitorPage.header.salutation"
+                defaultMessage="Monitor:"
+              />
+            </span>
           </EuiFlexItem>
           <EuiFlexItem>
             <MonitorSelect

@@ -10,23 +10,16 @@ import { StaticDynamicStyleSelector } from '../../static_dynamic_styling_option'
 import  { DynamicColorSelection } from './dynamic_color_selection';
 import  { StaticColorSelection } from './static_color_selection';
 
-export class VectorStyleColorEditor extends React.Component {
-
-  constructor() {
-    super();
-  }
-
-  render() {
-    return (
-      <StaticDynamicStyleSelector
-        layer={this.props.layer}
-        property={this.props.styleProperty}
-        name={this.props.stylePropertyName}
-        styleDescriptor={this.props.styleDescriptor}
-        handlePropertyChange={this.props.handlePropertyChange}
-        DynamicSelector={DynamicColorSelection}
-        StaticSelector={StaticColorSelection}
-      />
-    );
-  }
+export function VectorStyleColorEditor(props) {
+  return (
+    <StaticDynamicStyleSelector
+      ordinalFields={props.ordinalFields}
+      property={props.styleProperty}
+      name={props.stylePropertyName}
+      styleDescriptor={props.styleDescriptor}
+      handlePropertyChange={props.handlePropertyChange}
+      DynamicSelector={DynamicColorSelection}
+      StaticSelector={StaticColorSelection}
+    />
+  );
 }
