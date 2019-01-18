@@ -29,19 +29,29 @@ export const CustomFieldPanel = injectI18n(
     public static displayName = 'CustomFieldPanel';
     public readonly state: State = initialState;
     public render() {
-      const options = this.props.fields
+      const { fields, intl } = this.props;
+      const options = fields
         .filter(f => f.aggregatable && f.type === 'string')
         .map(f => ({ label: f.name }));
       return (
         <div style={{ padding: 16 }}>
           <EuiForm>
             <EuiFormRow
-              label="Field"
-              helpText="This is the field used for the terms aggregation"
+              label={intl.formatMessage({
+                id: 'xpack.infra.waffle.customGroupByFieldLabel',
+                defaultMessage: 'Field',
+              })}
+              helpText={intl.formatMessage({
+                id: 'xpack.infra.waffle.customGroupByHelpText',
+                defaultMessage: 'This is the field used for the terms aggregation',
+              })}
               compressed
             >
               <EuiComboBox
-                placeholder="Select one field"
+                placeholder={intl.formatMessage({
+                  id: 'xpack.infra.waffle.customGroupByDropdownPlacehoder',
+                  defaultMessage: 'Select one',
+                })}
                 singleSelection={{ asPlainText: true }}
                 selectedOptions={this.state.selectedOptions}
                 options={options}

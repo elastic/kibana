@@ -173,7 +173,10 @@ export const WaffleGroupByControls = injectI18n(
           }),
           items: [
             {
-              name: 'Custom Field',
+              name: intl.formatMessage({
+                id: 'xpack.infra.waffle.customGroupByOptionName',
+                defaultMessage: 'Custom Field',
+              }),
               icon: 'empty',
               panel: 'customPanel',
             },
@@ -190,7 +193,10 @@ export const WaffleGroupByControls = injectI18n(
         },
         {
           id: 'customPanel',
-          title: 'Group By Custom Field',
+          title: intl.formatMessage({
+            id: 'xpack.infra.waffle.customGroupByPanelTitle',
+            defaultMessage: 'Group By Custom Field',
+          }),
           content: (
             <CustomFieldPanel onSubmit={this.handleCustomField} fields={this.props.fields} />
           ),
