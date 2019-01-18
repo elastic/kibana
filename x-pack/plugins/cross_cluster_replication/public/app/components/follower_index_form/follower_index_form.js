@@ -172,17 +172,21 @@ export const FollowerIndexForm = injectI18n(
     };
 
     validateIndexName = async (name) => {
-      const { intl } = this.props;
-
       try {
         const indices = await loadIndices();
         const doesExist = indices.some(index => index.name === name);
         if (doesExist) {
-          const message = intl.formatMessage({
-            id: 'xpack.crossClusterReplication.followerIndexForm.indexAlreadyExistError',
-            defaultMessage: 'An index with the same name already exists.'
-          });
-          this.setState(updateFormErrors({ name: { message, alwaysVisible: true } }));
+          const error = {
+            message: (
+              <FormattedMessage
+                id="xpack.crossClusterReplication.followerIndexForm.indexAlreadyExistError"
+                defaultMessage="An index with the same name already exists."
+              />
+            ),
+            alwaysVisible: true,
+          };
+
+          this.setState(updateFormErrors({ name: error }));
         }
 
         this.setState({

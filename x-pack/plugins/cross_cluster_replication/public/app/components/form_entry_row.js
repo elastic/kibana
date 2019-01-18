@@ -38,7 +38,10 @@ export class FormEntryRow extends PureComponent {
       PropTypes.number
     ]).isRequired,
     isLoading: PropTypes.bool,
-    error: PropTypes.node,
+    error: PropTypes.oneOfType([
+      PropTypes.node,
+      PropTypes.object,
+    ]),
     disabled: PropTypes.bool,
     areErrorsVisible: PropTypes.bool.isRequired,
   };
@@ -101,7 +104,7 @@ export class FormEntryRow extends PureComponent {
         <EuiFormRow
           label={label}
           helpText={helpText}
-          error={error}
+          error={(error && error.message) ? error.message : error}
           isInvalid={isInvalid}
           fullWidth
         >
