@@ -97,31 +97,32 @@ Platform::
 * Upgrades Hapi in legacy platform to v17 {pull}21707[#21707]
 
 [float]
-[[deprecation-6.0.0]]
+[[deprecation-6.6.0]]
 === Deprecations
 Operations::
 * Deprecates tribe settings in 6.x {pull}25548[#25548]
 
 [float]
-[[plugin-6.0.0]]
+[[plugin-6.6.0]]
 === Plugin API Changes 
 See https://www.elastic.co/blog/kibana-plugin-api-changes-in-6-6[Kibana plugin API changes in 6.6].
 
 [float]
-[[highlights-6.0.0]]
+[[highlights-6.6.0]]
 === Highlights
-For an overview of the new features that were added in 6.6.0 and how the user experience 
-improved, see the <<release-highlights-6.6.0, 6.6.0 Release Highlights>>.
+6.6.0 includes the following highlights:
 
 * Index Lifecycle Management
 * Remote Clusters and Cross Cluster Replication 
 * Upgrade Assistant for Elasticsearch 7.0
 
+For more information, see <<release-highlights-6.6.0, 6.6.0 Release Highlights>>.
+
 [float]
-[[enhancement-6.0.0]]
+[[enhancement-6.6.0]]
 === Enhancements
 Canvas::
-*  Implements a clipboard with simple copy/cut/paste for elements only that stores in local storage {pull}25890[#25890]
+* Implements a clipboard with simple copy/cut/paste for elements only that stores in local storage {pull}25890[#25890]
 * Adds the ability to reuse assets without editing an element's expression. {pull}25764[#25764]
 * Adds a template tab to the workpad manager where users can find workpad templates, demos, and tutorials {pull}23966[#23966]
 * Renames cloned templates {pull}28708[#28708]
@@ -147,7 +148,7 @@ Management::
 * Adds timestamp to inspector request stats {pull}25667[#25667]
 * Support date fields in Metrics step for rollup data {pull}26450[#26450]
 * Implements a CRUD UI for index lifecycle management policies {pull}25553[#25553]
-Monitoring::
+Observability::
 * Adds Overview and Monitor pages for Uptime Monitoring {pull}27279[#27279]
 Operations::
 * Adds support for multiple Elasticsearch nodes and sniffing {pull}21928[#21928]
@@ -169,7 +170,7 @@ Visualizations::
 * Adds setting to enable frozen index search {pull}27297[#27297]
 
 [float]
-[[bug-6.0.0]]
+[[bug-6.6.0]]
 === Bug fixes
 APM::
 * Fixes linking between errors and transactions, and link from errors to Discover {pull}28477[#28477]
