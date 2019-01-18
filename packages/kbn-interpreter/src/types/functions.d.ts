@@ -17,11 +17,11 @@
  * under the License.
  */
 
-export type FunctionRegistration<
-  Input,
-  Output,
-  Args extends { [argName: string]: ValidTsArgumentTypes }
-> = () => FunctionDefinition<Input, Output, Args>;
+/**
+ * This file provides typings for function definitions that can be registered
+ * to the interpreter. Check the {@link FunctionDefinition} documentation
+ * for details how to use this.
+ */
 
 type ArgumentTypes = 'string' | 'number' | 'boolean' | 'null';
 type NonMultiArgumentTypes = string | number | boolean | null;
@@ -51,6 +51,39 @@ interface MultiArgumentDefinition<T> extends BaseArgumentDefinition<T> {
   multi: true;
 }
 
+/**
+ * The interface that must be fulfilled by the function definition of an
+ * interpreter function.
+ *
+ * ## Usage
+ * Usually you would use this as the return type for the exported function,
+ * that register with the interpreter:
+ *
+ * ```ts
+ * export const textFunction = (): FunctionDefinition<any, any, any> => ({ ... });
+ * ```
+ *
+ * ## Generic types
+ * The three generic types represent the input, output and the arguments of the function.
+ *
+ * ### Argument type
+ * The third type parameter defined the structure of the arguments accepted by the functions
+ * and must correlate to the definition of the arguments in the `args` key of the registration.
+ *
+ * Due to [limitations in TypeScript](https://github.com/Microsoft/TypeScript/issues/15300),
+ * you must either specify the parameter inline, or define it as a type, but not as an interface.
+ *
+ * ```ts
+ * // Inline and type will work fine
+ * FunctionDefinition<any, any, { name: string }>
+ * // tslint:disable-next-line interface-over-type-literal
+ * type MyArgs = { name: string };
+ * FunctionDefinition<any, any, MyArgs>
+ * // Interface WON'T work!
+ * interface MyArgs { name: string }
+ * FunctionDefinition<any, any, MyArgs>
+ * ```
+ */
 export interface FunctionDefinition<
   Input,
   Output,
