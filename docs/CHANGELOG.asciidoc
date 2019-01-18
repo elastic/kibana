@@ -89,8 +89,6 @@ This section summarizes the changes in each release.
 
 coming[6.6]
 
-See <<breaking-changes, Breaking changes>> for the changes to be aware of 
-when migrating your application from one version of {kib} to another.
 
 [float]
 [[breaking-6.6.0]]
@@ -168,7 +166,7 @@ Security::
 * Makes space selector a button {pull}26889[#26889]
 Visualizations::
 * Removes experimental status flag from Visual Builder {pull}25634[#25634]
-* [Fixes #26244] Add setting to enable frozen index search {pull}27297[#27297]
+* Adds setting to enable frozen index search {pull}27297[#27297]
 
 [float]
 [[bug-6.0.0]]
@@ -226,14 +224,14 @@ Infrastructure::
 * Fails out of auth flow on first provider failure {pull}26648[#26648]
 * Preserves time values when navigating from the waffle map to the logs and details pages {pull}24666[#24666]
 * Removes duplicate text in detail page title {pull}25283[#25283]
-* Moves SavedObjectClient types alongside js source {pull}26448[#26448]
+* Moves `SavedObjectClient` types alongside JavaScript source files {pull}26448[#26448]
 * Passes flag in request to force BWC hit count {pull}26517[#26517]
 * Replaces redux source slice with constate container {pull}26121[#26121]
 * Fixes styling after breaking EUI changes {pull}27021[#27021]
 * Fixes graphql type generation after package upgrades {pull}26991[#26991]
 * Removes usage of ts-optchain in the browser {pull}27148[#27148]
-* Refactors 'capabilites' to 'metadata'. {pull}25580[#25580]
-* Hides sidenav while loading. {pull}27119[#27119]
+* Refactors "capabilites" to "metadata" in GraphQL {pull}25580[#25580]
+* Hides sidenav while loading {pull}27119[#27119]
 Kibana App::
 * Fixes wildcard queries against the default field {pull}24778[#24778]
 * Adds raw data to split column {pull}26321[#26321]
