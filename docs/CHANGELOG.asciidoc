@@ -291,6 +291,7 @@ Management::
 * Adds loading spinner for index management table {pull}27204[#27204]
 * Fixes logic for when license error shows {pull}27326[#27326]
 * Update 'Disenroll' text to be consistent with menu option 'Unenroll' {pull}26816[#26816]
+* Puts template index before any ES write operation to prevent risk of startup errors in Beats Central Management {pull}28955[#28955]
 Monitoring::
 * Renames Monitoring FormattedMessage to FormattedAlert {pull}24197[#24197]
 * Uses the cluster name from metadata if it exists {pull}24495[#24495]
