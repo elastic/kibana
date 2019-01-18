@@ -66,12 +66,6 @@ export default function ({ getPageObjects, getService }) {
           expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(EXPECTED_NUMBER_FEATURES);
         });
 
-        it ('should have the same data when a zoom change does not cause a precision change', async () => {
-          await PageObjects.gis.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 2);
-          const mapboxStyle = await PageObjects.gis.getMapboxStyle();
-          expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(EXPECTED_NUMBER_FEATURES);
-        });
-
         it ('should request only partial data when the map only covers part of the databounds', async () => {
           //todo this verifies the extent-filtering behavior (not really the correct application of geohash-precision), and should ideally be moved to its own section
           await PageObjects.gis.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 6);
