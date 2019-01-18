@@ -22,7 +22,7 @@ import {
   buildEmptyFilter,
   disableFilter,
   enableFilter,
-  MetaFilter,
+  Filter,
   pinFilter,
   toggleFilterDisabled,
   toggleFilterNegated,
@@ -40,8 +40,8 @@ import { FilterItem } from './filter_item';
 const config = chrome.getUiSettingsClient();
 
 interface Props {
-  filters: MetaFilter[];
-  onFiltersUpdated: (filters: MetaFilter[]) => void;
+  filters: Filter[];
+  onFiltersUpdated: (filters: Filter[]) => void;
   className: string;
   indexPatterns: IndexPattern[];
   intl: InjectedIntl;
@@ -149,7 +149,7 @@ class FilterBarUI extends Component<Props, State> {
     );
   }
 
-  private onAdd = (filter: MetaFilter) => {
+  private onAdd = (filter: Filter) => {
     this.onCloseAddFilterPopover();
     const filters = [...this.props.filters, filter];
     this.props.onFiltersUpdated(filters);
@@ -161,7 +161,7 @@ class FilterBarUI extends Component<Props, State> {
     this.props.onFiltersUpdated(filters);
   };
 
-  private onUpdate = (i: number, filter: MetaFilter) => {
+  private onUpdate = (i: number, filter: Filter) => {
     const filters = [...this.props.filters];
     filters[i] = filter;
     this.props.onFiltersUpdated(filters);

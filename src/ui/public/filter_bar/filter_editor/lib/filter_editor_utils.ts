@@ -24,9 +24,9 @@ import {
   buildPhrasesFilter,
   buildRangeFilter,
   FieldFilter,
+  Filter,
   FilterMeta,
   FilterStateStore,
-  MetaFilter,
   PhraseFilter,
   PhrasesFilter,
   RangeFilter,
@@ -37,7 +37,7 @@ import Ipv4Address from 'ui/utils/ipv4_address';
 import { FILTER_OPERATORS, Operator } from './filter_operators';
 
 export function getIndexPatternFromFilter(
-  filter: MetaFilter,
+  filter: Filter,
   indexPatterns: IndexPattern[]
 ): IndexPattern | undefined {
   return indexPatterns.find(indexPattern => indexPattern.id === filter.meta.index);
@@ -47,13 +47,13 @@ export function getFieldFromFilter(filter: FieldFilter, indexPattern: IndexPatte
   return indexPattern.fields.find(field => field.name === filter.meta.key);
 }
 
-export function getOperatorFromFilter(filter: MetaFilter) {
+export function getOperatorFromFilter(filter: Filter) {
   return FILTER_OPERATORS.find(operator => {
     return filter.meta.type === operator.type && filter.meta.negate === operator.negate;
   });
 }
 
-export function getQueryDslFromFilter(filter: MetaFilter) {
+export function getQueryDslFromFilter(filter: Filter) {
   return omit(filter, ['$state', 'meta']);
 }
 
@@ -67,7 +67,7 @@ export function getOperatorOptions(field: IndexPatternField) {
   });
 }
 
-export function getFilterParams(filter: MetaFilter) {
+export function getFilterParams(filter: Filter) {
   switch (filter.meta.type) {
     case 'phrase':
       return (filter as PhraseFilter).meta.params.query;
@@ -133,7 +133,7 @@ export function buildFilter(
   params: any,
   alias: string | null,
   store: FilterStateStore
-): MetaFilter {
+): Filter {
   const filter = buildBaseFilter(indexPattern, field, operator, params);
   filter.meta.alias = alias;
   filter.meta.negate = operator.negate;
@@ -146,7 +146,7 @@ function buildBaseFilter(
   field: IndexPatternField,
   operator: Operator,
   params: any
-): MetaFilter {
+): Filter {
   switch (operator.type) {
     case 'phrase':
       return buildPhraseFilter(field, params, indexPattern);
@@ -169,9 +169,9 @@ export function buildCustomFilter(
   negate: boolean,
   alias: string | null,
   store: FilterStateStore
-): MetaFilter {
+): Filter {
   const meta: FilterMeta = { index, type: 'custom', disabled, negate, alias };
-  const filter: MetaFilter = { ...queryDsl, meta };
+  const filter: Filter = { ...queryDsl, meta };
   filter.$state = { store };
   return filter;
 }

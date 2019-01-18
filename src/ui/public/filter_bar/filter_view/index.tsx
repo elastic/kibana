@@ -20,12 +20,12 @@
 import {
   CustomFilter,
   ExistsFilter,
+  Filter,
   GeoBoundingBoxFilter,
   GeoPolygonFilter,
-  MetaFilter,
   PhraseFilter,
   PhrasesFilter,
-  QueryFilter,
+  QueryStringFilter,
   RangeFilter,
 } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -36,11 +36,11 @@ import { GeoBoundingBoxFilterView } from './geo_bounding_box_filter_view';
 import { GeoPolygonFilterView } from './geo_polygon_filter_view';
 import { PhraseFilterView } from './phrase_filter_view';
 import { PhrasesFilterView } from './phrases_filter_view';
-import { QueryFilterView } from './query_filter_view';
+import { QueryStringFilterView } from './query_string_filter_view';
 import { RangeFilterView } from './range_filter_view';
 
 interface Props {
-  filter: MetaFilter;
+  filter: Filter;
 }
 
 export function FilterView({ filter }: Props) {
@@ -59,7 +59,7 @@ export function FilterView({ filter }: Props) {
   );
 }
 
-function renderViewForType(filter: MetaFilter) {
+function renderViewForType(filter: Filter) {
   switch (filter.meta.type) {
     case 'exists':
       return <ExistsFilterView filter={filter as ExistsFilter} />;
@@ -72,7 +72,7 @@ function renderViewForType(filter: MetaFilter) {
     case 'phrases':
       return <PhrasesFilterView filter={filter as PhrasesFilter} />;
     case 'query_string':
-      return <QueryFilterView filter={filter as QueryFilter} />;
+      return <QueryStringFilterView filter={filter as QueryStringFilter} />;
     case 'range':
       return <RangeFilterView filter={filter as RangeFilter} />;
     default:

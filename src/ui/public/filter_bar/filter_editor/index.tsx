@@ -30,7 +30,7 @@ import {
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
-import { FieldFilter, MetaFilter } from '@kbn/es-query';
+import { FieldFilter, Filter } from '@kbn/es-query';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import React, { Component } from 'react';
@@ -54,9 +54,9 @@ import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
 
 interface Props {
-  filter: MetaFilter;
+  filter: Filter;
   indexPatterns: IndexPattern[];
-  onSubmit: (filter: MetaFilter) => void;
+  onSubmit: (filter: Filter) => void;
   onCancel: () => void;
   intl: InjectedIntl;
 }

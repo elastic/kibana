@@ -55,7 +55,6 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should show Split Gauges', async function () {
-      const expectedTexts = [ 'win 8', 'win xp', 'win 7', 'ios' ];
       await PageObjects.visualize.clickMetricEditor();
       log.debug('Bucket = Split Group');
       await PageObjects.visualize.clickBucket('Split Group');
@@ -66,9 +65,14 @@ export default function ({ getService, getPageObjects }) {
       log.debug('Size = 4');
       await PageObjects.visualize.setSize('4');
       await PageObjects.visualize.clickGo();
-      await retry.try(async function tryingForTime() {
-        const metricValue = await PageObjects.visualize.getGaugeValue();
-        expect(expectedTexts).to.eql(metricValue);
+
+      await retry.try(async () => {
+        expect(await PageObjects.visualize.getGaugeValue()).to.eql([
+          '2,904\nwin 8',
+          '2,858\nwin xp',
+          '2,814\nwin 7',
+          '2,784\nios'
+        ]);
       });
     });
 

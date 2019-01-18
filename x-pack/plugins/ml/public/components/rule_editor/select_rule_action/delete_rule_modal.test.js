@@ -5,7 +5,7 @@
  */
 
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { DeleteRuleModal } from './delete_rule_modal';
@@ -24,7 +24,7 @@ describe('DeleteRuleModal', () => {
       ...requiredProps,
     };
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <DeleteRuleModal {...props} />
     );
 
@@ -37,7 +37,7 @@ describe('DeleteRuleModal', () => {
       ...requiredProps,
     };
 
-    const wrapper = shallow(<DeleteRuleModal {...props} />);
+    const wrapper = shallowWithIntl(<DeleteRuleModal {...props} />);
     wrapper.find('EuiLink').simulate('click');
     wrapper.update();
     expect(wrapper).toMatchSnapshot();
@@ -49,7 +49,7 @@ describe('DeleteRuleModal', () => {
       ...requiredProps,
     };
 
-    const wrapper = shallow(<DeleteRuleModal {...props} />);
+    const wrapper = shallowWithIntl(<DeleteRuleModal {...props} />);
     wrapper.find('EuiLink').simulate('click');
     const instance = wrapper.instance();
     instance.closeModal();

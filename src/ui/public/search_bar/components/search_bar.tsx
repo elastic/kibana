@@ -19,7 +19,7 @@
 
 // @ts-ignore
 import { EuiFilterButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { MetaFilter } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
@@ -39,8 +39,8 @@ interface Props {
   appName: string;
   indexPatterns: IndexPattern[];
   store: Storage;
-  filters: MetaFilter[];
-  onFiltersUpdated: (filters: MetaFilter[]) => void;
+  filters: Filter[];
+  onFiltersUpdated: (filters: Filter[]) => void;
   showQueryBar: boolean;
   showFilterBar: boolean;
   intl: InjectedIntl;

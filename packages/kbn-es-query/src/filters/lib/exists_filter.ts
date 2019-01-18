@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { FilterMeta, MetaFilter } from './meta_filter';
+import { Filter, FilterMeta } from './meta_filter';
 
 export type ExistsFilterMeta = FilterMeta & {
   key: string; // The name of the field
 };
 
-export type ExistsFilter = MetaFilter & {
+export type ExistsFilter = Filter & {
   meta: ExistsFilterMeta;
 };

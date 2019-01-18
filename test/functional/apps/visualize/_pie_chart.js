@@ -53,10 +53,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should save and load', async function () {
-      await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
-      const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
-      log.debug(`Save viz page title is ${pageTitle}`);
-      expect(pageTitle).to.contain(vizName1);
+      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
       await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
@@ -168,10 +165,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should correctly save disabled agg', async () => {
-        await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
-        const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
-        log.debug(`Save viz page title is ${pageTitle}`);
-        expect(pageTitle).to.contain(vizName1);
+        await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
         await PageObjects.visualize.waitForVisualizationSavedToastGone();
         await PageObjects.visualize.loadSavedVisualization(vizName1);
         await PageObjects.visualize.waitForVisualization();
@@ -310,9 +304,14 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it ('correctly applies filter', async () => {
-        const expectedTableData = [[ 'win 8', '560', 'CN', '560' ]];
+        const expectedTableData = [
+          [ 'win 8', '560', 'CN', '560' ],
+          [ 'win 7', '537', 'CN', '537' ],
+          [ 'win xp', '526', 'CN', '526' ],
+          [ 'ios', '478', 'CN', '478' ],
+          [ 'osx', '228', 'CN', '228' ]
+        ];
         await PageObjects.visualize.filterLegend('CN');
-        await PageObjects.visualize.applyFilters();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await inspector.open();
         await inspector.setTablePageSize(50);

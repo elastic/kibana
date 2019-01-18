@@ -35,7 +35,7 @@ export interface FilterMeta {
   alias: string | null;
 }
 
-export interface MetaFilter {
+export interface Filter {
   $state: FilterState;
   meta: FilterMeta;
   query?: any;
@@ -46,7 +46,7 @@ export interface LatLon {
   lon: number;
 }
 
-export function buildEmptyFilter(isPinned: boolean, index?: string): MetaFilter {
+export function buildEmptyFilter(isPinned: boolean, index?: string): Filter {
   const meta: FilterMeta = {
     disabled: false,
     negate: false,
@@ -59,40 +59,40 @@ export function buildEmptyFilter(isPinned: boolean, index?: string): MetaFilter 
   return { meta, $state };
 }
 
-export function isFilterPinned(filter: MetaFilter) {
+export function isFilterPinned(filter: Filter) {
   return filter.$state.store === FilterStateStore.GLOBAL_STATE;
 }
 
-export function toggleFilterDisabled(filter: MetaFilter) {
+export function toggleFilterDisabled(filter: Filter) {
   const disabled = !filter.meta.disabled;
   const meta = { ...filter.meta, disabled };
   return { ...filter, meta };
 }
 
-export function toggleFilterNegated(filter: MetaFilter) {
+export function toggleFilterNegated(filter: Filter) {
   const negate = !filter.meta.negate;
   const meta = { ...filter.meta, negate };
   return { ...filter, meta };
 }
 
-export function toggleFilterPinned(filter: MetaFilter) {
+export function toggleFilterPinned(filter: Filter) {
   const store = isFilterPinned(filter) ? FilterStateStore.APP_STATE : FilterStateStore.GLOBAL_STATE;
   const $state = { ...filter.$state, store };
   return { ...filter, $state };
 }
 
-export function enableFilter(filter: MetaFilter) {
+export function enableFilter(filter: Filter) {
   return !filter.meta.disabled ? filter : toggleFilterDisabled(filter);
 }
 
-export function disableFilter(filter: MetaFilter) {
+export function disableFilter(filter: Filter) {
   return filter.meta.disabled ? filter : toggleFilterDisabled(filter);
 }
 
-export function pinFilter(filter: MetaFilter) {
+export function pinFilter(filter: Filter) {
   return isFilterPinned(filter) ? filter : toggleFilterPinned(filter);
 }
 
-export function unpinFilter(filter: MetaFilter) {
+export function unpinFilter(filter: Filter) {
   return !isFilterPinned(filter) ? filter : toggleFilterPinned(filter);
 }

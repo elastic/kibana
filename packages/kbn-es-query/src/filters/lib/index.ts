@@ -18,11 +18,7 @@
  */
 
 // The interface the other filters extend
-export { MetaFilter } from './meta_filter';
-
-// Helper functions that can be invoked on any filter
 export * from './meta_filter';
-export { disableFilter } from './meta_filter';
 
 // The actual filter types
 import { CustomFilter } from './custom_filter';
@@ -31,7 +27,7 @@ import { GeoBoundingBoxFilter } from './geo_bounding_box_filter';
 import { GeoPolygonFilter } from './geo_polygon_filter';
 import { PhraseFilter } from './phrase_filter';
 import { PhrasesFilter } from './phrases_filter';
-import { QueryFilter } from './query_filter';
+import { QueryStringFilter } from './query_string_filter';
 import { RangeFilter } from './range_filter';
 export {
   CustomFilter,
@@ -40,7 +36,7 @@ export {
   GeoPolygonFilter,
   PhraseFilter,
   PhrasesFilter,
-  QueryFilter,
+  QueryStringFilter,
   RangeFilter,
 };
 

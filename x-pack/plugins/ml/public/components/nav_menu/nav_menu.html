@@ -16,23 +16,38 @@
       <div ng-if="showTabs" class="kuiLocalTabs" role="tablist">
         <a kbn-href="#/jobs" class="kuiLocalTab" role="tab"
         ng-class="{'kuiLocalTab-isSelected': isActiveTab('jobs'), 'disabled-nav-link': disableLinks}">
-         Job Management
+          <span
+            i18n-id="xpack.ml.navMenu.jobManagementTabLinkText"
+            i18n-default-message="Job Management"
+          ></span>
         </a>
         <a kbn-href="#/explorer" class="kuiLocalTab" role="tab"
         ng-class="{'kuiLocalTab-isSelected': isActiveTab('explorer'), 'disabled-nav-link': disableLinks}">
-          Anomaly Explorer
+          <span
+            i18n-id="xpack.ml.navMenu.anomalyExplorerTabLinkText"
+            i18n-default-message="Anomaly Explorer"
+          ></span>
         </a>
         <a kbn-href="#/timeseriesexplorer" class="kuiLocalTab" role="tab"
         ng-class="{'kuiLocalTab-isSelected': isActiveTab('timeseriesexplorer'), 'disabled-nav-link': disableLinks}">
-          Single Metric Viewer
+          <span
+            i18n-id="xpack.ml.navMenu.singleMetricViewerTabLinkText"
+            i18n-default-message="Single Metric Viewer"
+          ></span>
         </a>
         <a kbn-href="#/datavisualizer" class="kuiLocalTab" role="tab"
         ng-class="{'kuiLocalTab-isSelected': isActiveTab('datavisualizer')}">
-          Data Visualizer
+          <span
+            i18n-id="xpack.ml.navMenu.dataVisualizerTabLinkText"
+            i18n-default-message="Data Visualizer"
+          ></span>
         </a>
         <a kbn-href="#/settings" class="kuiLocalTab" role="tab"
         ng-class="{'kuiLocalTab-isSelected': isActiveTab('settings'), 'disabled-nav-link': disableLinks}">
-          Settings
+          <span
+            i18n-id="xpack.ml.navMenu.settingsTabLinkText"
+            i18n-default-message="Settings"
+          ></span>
         </a>
       </div>
     </div>

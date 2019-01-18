@@ -18,7 +18,7 @@
  */
 
 import { IndexPattern, IndexPatternField } from 'ui/index_patterns';
-import { ExistsFilter, PhraseFilter, PhrasesFilter, QueryFilter, RangeFilter } from './lib';
+import { CustomFilter, ExistsFilter, PhraseFilter, PhrasesFilter, RangeFilter } from './lib';
 import { RangeFilterParams } from './lib/range_filter';
 
 export * from './lib';
@@ -40,7 +40,7 @@ export function buildPhrasesFilter(
   indexPattern: IndexPattern
 ): PhrasesFilter;
 
-export function buildQueryFilter(query: string, index: string): QueryFilter;
+export function buildQueryFilter(query: any, index: string): CustomFilter;
 
 export function buildRangeFilter(
   field: IndexPatternField,
