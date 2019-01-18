@@ -17,10 +17,10 @@
  * under the License.
  */
 export default class DefaultSearchCapabilities {
-  constructor(req, batchRequestsSupport, capabilities) {
+  constructor(req, batchRequestsSupport, fieldsCapabilities) {
     this.request = req;
     this.batchRequestsSupport = batchRequestsSupport;
-    this.capabilities = capabilities;
+    this.fieldsCapabilities = fieldsCapabilities;
   }
 
   getTimeZone() {

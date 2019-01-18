@@ -3,13 +3,12 @@
 * or more contributor license agreements. Licensed under the Elastic License;
 * you may not use this file except in compliance with the Elastic License.
 */
-import { isEmpty } from 'lodash';
+import { merge } from 'lodash';
 import { callWithRequestFactory } from '../call_with_request_factory';
 
 const ROLLUP_INDEX_CAPABILITIES_METHOD = 'rollup.rollupIndexCapabilities';
 const INDEX_PATTERN_SEPARATOR = ',';
 const batchRequestsSupport = false;
-
 
 export default (AbstractSearchStrategy, RollupSearchRequest, RollupSearchCapabilities) =>
   (class RollupSearchStrategy extends AbstractSearchStrategy {
@@ -26,18 +25,22 @@ export default (AbstractSearchStrategy, RollupSearchRequest, RollupSearchCapabil
         indexPattern: index,
       }));
 
-      return Promise.all(requests);
+      return Promise.all(requests)
+        .then(data => (data || []).reduce((acc, rollupData) => merge(acc, rollupData), {}));
+    }
+
+    hasOneRollupJob(rollupCapabilities) {
+      return Object.keys(rollupCapabilities).length === 1;
     }
 
     async checkForViability(req, indexPattern) {
-      const rollupCapabilities = await this.getAllRollupCapabilities(req, indexPattern)
-        .then((responses) => responses.filter(response => !isEmpty(response)));
+      const rollupCapabilities = await this.getAllRollupCapabilities(req, indexPattern);
 
-      const isViable = rollupCapabilities.length === 1;
+      const isViable = this.hasOneRollupJob(rollupCapabilities);
 
       return {
         isViable,
-        capabilities: isViable ? new RollupSearchCapabilities(req, batchRequestsSupport, rollupCapabilities) : null
+        capabilities: isViable ? new RollupSearchCapabilities(req, batchRequestsSupport, rollupCapabilities) : null,
       };
     }
   });
