@@ -1,9 +1,3 @@
-@mixin darkTheme {
-  .theme-dark & {
-    @content;
-  }
-}
-
 /**
  * 1. Enforce pointer when there's no href.
  * 2. Allow these styles to be applied to a button element.
@@ -27,14 +21,6 @@
     color: $kuiLinkHoverColor;
     text-decoration: underline;
   }
-
-  @include darkTheme {
-    color: $kuiLinkColor--darkTheme;
-
-    &:hover {
-      color: $kuiLinkColor--darkTheme;
-    }
-  }
 }
 
 /**
@@ -53,10 +39,6 @@
 
   &:hover {
     opacity: 1;
-  }
-
-  @include darkTheme {
-    color: $kuiTextColor--darkTheme !important; /* 1 */
   }
 }
 
@@ -144,10 +126,6 @@
   font-weight: 400;
   line-height: $kuiLineHeight;
   color: $kuiFontColor;
-
-  @include darkTheme {
-    color: $kuiInputTextColor--darkTheme;
-  }
 }
 
 /**
@@ -172,15 +150,6 @@
   &:disabled {
     opacity: 0.4;
     cursor: not-allowed;
-  }
-
-  @include darkTheme {
-    background-color: $kuiInputBackgroundColor--darkTheme;
-    border-color: $kuiInputBorderColor--darkTheme;
-
-    &:focus {
-      @include formControlFocus;
-    }
   }
 }
 
@@ -207,10 +176,6 @@
 
   &:-moz-focusring {
     text-shadow: 0 0 0; /* 3 */
-  }
-
-  @include darkTheme {
-    background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z" fill="#CECECE"/></svg>'); /* 1 */
   }
 }
 

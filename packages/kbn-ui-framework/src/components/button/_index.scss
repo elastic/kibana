@@ -17,9 +17,6 @@ $buttonBasicTextColor: $kuiTextColor;
 $buttonBasicBackgroundColor: $kuiColorLightestGray;
 $buttonBasicHoverBackgroundColor: darken($kuiColorLightestGray, 10%);
 $buttonBasicDisabledTextColor: $kuiTextColor;
-$buttonBasicTextColor--darkTheme: #FFF;
-$buttonBasicBackgroundColor--darkTheme: #9c9c9c;
-$buttonBasicHoverBackgroundColor--darkTheme: darken($buttonBasicBackgroundColor--darkTheme, 20%);
 
 // Primary
 $buttonPrimaryBackgroundColor: $kuiLinkColor;
