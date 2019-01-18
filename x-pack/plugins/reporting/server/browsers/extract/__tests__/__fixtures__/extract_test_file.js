@@ -62,7 +62,7 @@ export const dashboard = {
     panelsJSON: '[{\'id\':\'mock-visualization\',\'type\':\'visualization\',\'panelIndex\':1,\'size_x\':3,\'size_y\':5,'
     + '\'col\':1,\'row\':1},{\'id\':\'mock-search\',\'type\':\'search\',\'panelIndex\':2,\'size_x\':7,\'size_y\':4,\'col\':4,'
     + '\'row\':1,\'columns\':[\'_source\'],\'sort\':[\'@timestamp\',\'desc\']}]',
-    optionsJSON: '{}',
+    optionsJSON: '{\'darkTheme\':false}',
     uiStateJSON: '{}',
     version: 1,
     timeRestore: false,
