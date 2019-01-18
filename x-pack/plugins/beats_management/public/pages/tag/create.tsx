@@ -6,6 +6,7 @@
 
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import 'brace/mode/yaml';
 import 'brace/theme/github';
@@ -121,8 +122,24 @@ class TagCreatePageComponent extends React.PureComponent<
   }
 
   private saveTag = async () => {
-    await this.props.containers.tags.upsertTag(this.state.tag);
-    await this.props.libs.configBlocks.upsert(this.state.configuration_blocks);
+    const newTag = await this.props.containers.tags.upsertTag(this.state.tag);
+    if (!newTag) {
+      return alert(
+        i18n.translate('xpack.beatsManagement.createTag.errorSavingTagTitle', {
+          defaultMessage: 'error saving tag',
+        })
+      );
+    }
+    const createBlocksResponse = await this.props.libs.configBlocks.upsert(
+      this.state.configuration_blocks
+    );
+    const creationError = createBlocksResponse.reduce(
+      (err: string, resp: any) => (!err ? (err = resp.error || '') : err),
+      ''
+    );
+    if (creationError) {
+      alert(creationError);
+    }
 
     this.props.goTo(`/overview/configuration_tags`);
   };
