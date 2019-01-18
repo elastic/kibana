@@ -13,6 +13,7 @@ import {
   EuiTitle,
   EuiToolTip
 } from '@elastic/eui';
+import { Location } from 'history';
 import React from 'react';
 import { Transaction as ITransaction } from '../../../../../typings/es_schemas/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
