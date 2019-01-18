@@ -133,6 +133,7 @@ class FilterBarUI extends Component<Props, State> {
         anchorPosition="downCenter"
         withTitle
         panelPaddingSize="none"
+        ownFocus={true}
       >
         <EuiFlexItem grow={false}>
           <div style={{ width: 400 }}>
