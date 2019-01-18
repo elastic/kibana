@@ -129,6 +129,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getTextTag() {
+      await this.waitForVisualization();
       const elements = await find.allByCssSelector('text');
       return await Promise.all(elements.map(async element => await element.getVisibleText()));
     }
