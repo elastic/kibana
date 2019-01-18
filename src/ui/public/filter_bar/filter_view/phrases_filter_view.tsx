@@ -18,7 +18,6 @@
  */
 
 import { PhrasesFilter } from '@kbn/es-query';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { FILTER_OPERATORS } from '../filter_editor/lib/filter_operators';
 
@@ -28,15 +27,10 @@ interface Props {
 
 export function PhrasesFilterView({ filter }: Props) {
   const operator = FILTER_OPERATORS.find(({ type }) => type === filter.meta.type);
-  const { id = '', defaultMessage = '' } = operator || {};
+  const { message = '' } = operator || {};
   return (
     <span>
-      {filter.meta.key}{' '}
-      <FormattedMessage
-        id={`common.ui.filterEditor.${id}OptionLabel`}
-        defaultMessage={defaultMessage}
-      />{' '}
-      {filter.meta.value}
+      {filter.meta.key} {message} {filter.meta.value}
     </span>
   );
 }
