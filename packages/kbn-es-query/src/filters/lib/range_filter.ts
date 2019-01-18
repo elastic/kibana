@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { FilterMeta, MetaFilter } from './meta_filter';
+import { Filter, FilterMeta } from './meta_filter';
 
 export interface RangeFilterParams {
   gt?: number | string;
@@ -32,6 +32,6 @@ export type RangeFilterMeta = FilterMeta & {
   params: RangeFilterParams;
 };
 
-export type RangeFilter = MetaFilter & {
+export type RangeFilter = Filter & {
   meta: RangeFilterMeta;
 };

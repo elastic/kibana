@@ -19,8 +19,8 @@
 
 import { EuiBadge, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import {
+  Filter,
   isFilterPinned,
-  MetaFilter,
   toggleFilterDisabled,
   toggleFilterNegated,
   toggleFilterPinned,
@@ -34,10 +34,10 @@ import { FilterView } from './filter_view';
 
 interface Props {
   id: string;
-  filter: MetaFilter;
+  filter: Filter;
   indexPatterns: IndexPattern[];
   className?: string;
-  onUpdate: (filter: MetaFilter) => void;
+  onUpdate: (filter: Filter) => void;
   onRemove: () => void;
   intl: InjectedIntl;
 }
@@ -207,7 +207,7 @@ class FilterItemUI extends Component<Props, State> {
     });
   };
 
-  private onSubmit = (filter: MetaFilter) => {
+  private onSubmit = (filter: Filter) => {
     this.closePopover();
     this.props.onUpdate(filter);
   };

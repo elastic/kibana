@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { FilterMeta, MetaFilter } from './meta_filter';
+import { Filter, FilterMeta } from './meta_filter';
 
 export type PhrasesFilterMeta = FilterMeta & {
   key: string; // The name of the field
@@ -25,6 +25,6 @@ export type PhrasesFilterMeta = FilterMeta & {
   value: string; // The formatted values concatenated together
 };
 
-export type PhrasesFilter = MetaFilter & {
+export type PhrasesFilter = Filter & {
   meta: PhrasesFilterMeta;
 };

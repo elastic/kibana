@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { FilterMeta, LatLon, MetaFilter } from './meta_filter';
+import { Filter, FilterMeta, LatLon } from './meta_filter';
 
 export type GeoBoundingBoxFilterMeta = FilterMeta & {
   key: string; // The name of the field
@@ -28,6 +28,6 @@ export type GeoBoundingBoxFilterMeta = FilterMeta & {
   };
 };
 
-export type GeoBoundingBoxFilter = MetaFilter & {
+export type GeoBoundingBoxFilter = Filter & {
   meta: GeoBoundingBoxFilterMeta;
 };

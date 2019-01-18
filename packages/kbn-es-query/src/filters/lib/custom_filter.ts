@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { MetaFilter } from './meta_filter';
+import { Filter } from './meta_filter';
 
-export type CustomFilter = MetaFilter & {
+export type CustomFilter = Filter & {
   query: any;
 };

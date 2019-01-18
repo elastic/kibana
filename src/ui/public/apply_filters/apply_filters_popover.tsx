@@ -30,15 +30,15 @@ import {
   EuiOverlayMask,
   EuiSwitch,
 } from '@elastic/eui';
-import { MetaFilter } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { FilterView } from '../filter_bar/filter_view';
 
 interface Props {
-  filters: MetaFilter[];
+  filters: Filter[];
   onCancel: () => void;
-  onSubmit: (filters: MetaFilter[]) => void;
+  onSubmit: (filters: Filter[]) => void;
 }
 
 interface State {

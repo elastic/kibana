@@ -17,12 +17,13 @@
  * under the License.
  */
 
-import { FilterMeta, MetaFilter } from './meta_filter';
+import { QueryStringFilter } from '@kbn/es-query';
+import React from 'react';
 
-export type QueryFilterMeta = FilterMeta & {
-  value: string; // The query string
-};
+interface Props {
+  filter: QueryStringFilter;
+}
 
-export type QueryFilter = MetaFilter & {
-  meta: QueryFilterMeta;
-};
+export function QueryStringFilterView({ filter }: Props) {
+  return <span>{filter.meta.value}</span>;
+}

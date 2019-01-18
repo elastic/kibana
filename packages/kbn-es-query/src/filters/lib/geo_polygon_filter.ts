@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { FilterMeta, LatLon, MetaFilter } from './meta_filter';
+import { Filter, FilterMeta, LatLon } from './meta_filter';
 
 export type GeoPolygonFilterMeta = FilterMeta & {
   key: string; // The name of the field
@@ -27,6 +27,6 @@ export type GeoPolygonFilterMeta = FilterMeta & {
   };
 };
 
-export type GeoPolygonFilter = MetaFilter & {
+export type GeoPolygonFilter = Filter & {
   meta: GeoPolygonFilterMeta;
 };
