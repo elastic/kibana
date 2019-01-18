@@ -24,9 +24,11 @@ export type FunctionRegistration<
 > = () => FunctionDefinition<Input, Output, Args>;
 
 type ArgumentTypes = 'string' | 'number' | 'boolean' | 'null';
-type ValidTsArgumentTypes = string[] | string | number[] | number | boolean[] | boolean | null;
+type NonMultiArgumentTypes = string | number | boolean | null;
+type MultiArgumentTypes = string[] | number[] | boolean[] | null;
+type ValidTsArgumentTypes = NonMultiArgumentTypes | MultiArgumentTypes;
 
-interface ArgumentDefinition<T> {
+interface BaseArgumentDefinition<T> {
   types: Array<
     T extends string | string[]
       ? 'string'
@@ -37,9 +39,16 @@ interface ArgumentDefinition<T> {
       : never
   >;
   default?: T extends any[] ? T[number] : T;
-  multi?: T extends any[] ? true : (false | undefined);
   aliases?: string[];
   help?: string;
+}
+
+interface ArgumentDefinition<T> extends BaseArgumentDefinition<T> {
+  multi?: false;
+}
+
+interface MultiArgumentDefinition<T> extends BaseArgumentDefinition<T> {
+  multi: true;
 }
 
 export interface FunctionDefinition<
@@ -53,6 +62,10 @@ export interface FunctionDefinition<
     types: string[];
   };
   help?: string;
-  args: { [argName in keyof Args]: ArgumentDefinition<Args[argName]> };
+  args: {
+    [argName in keyof Args]: Args[argName] extends NonMultiArgumentTypes
+      ? ArgumentDefinition<Args[argName]>
+      : MultiArgumentDefinition<Args[argName]>
+  };
   fn: (context: Input, args: Args) => Output;
 }
