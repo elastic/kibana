@@ -171,8 +171,13 @@ export const WaffleGroupByControls = injectI18n(
             id: 'xpack.infra.waffle.selectTwoGroupingsTitle',
             defaultMessage: 'Select up to two groupings',
           }),
-          items: options
-            .map(o => {
+          items: [
+            {
+              name: 'Custom Field',
+              icon: 'empty',
+              panel: 'customPanel',
+            },
+            ...options.map(o => {
               const icon = groupBy.some(g => g.field === o.field) ? 'check' : 'empty';
               const panel = {
                 name: o.text,
@@ -180,14 +185,8 @@ export const WaffleGroupByControls = injectI18n(
                 icon,
               } as EuiContextMenuPanelItemDescriptor;
               return panel;
-            })
-            .concat([
-              {
-                name: 'Custom Field',
-                icon: 'empty',
-                panel: 'customPanel',
-              },
-            ]),
+            }),
+          ],
         },
         {
           id: 'customPanel',
@@ -268,11 +267,11 @@ export const WaffleGroupByControls = injectI18n(
       this.setState(state => ({ isPopoverOpen: !state.isPopoverOpen }));
     };
 
-    private handleCustomField = (field: string, label: string) => {
+    private handleCustomField = (field: string) => {
       const options = [
         ...this.props.customOptions,
         {
-          text: label || field,
+          text: field,
           field,
           type: InfraPathType.custom,
         },

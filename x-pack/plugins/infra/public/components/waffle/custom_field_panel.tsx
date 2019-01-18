@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiComboBox, EuiFieldText, EuiForm, EuiFormRow } from '@elastic/eui';
+import { EuiButton, EuiComboBox, EuiForm, EuiFormRow } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { SyntheticEvent } from 'react';
 import { InfraIndexField } from 'x-pack/plugins/infra/server/graphql/types';
 interface Props {
-  onSubmit: (field: string, label: string) => void;
+  onSubmit: (field: string) => void;
   fields: InfraIndexField[];
   intl: InjectedIntl;
 }
@@ -19,7 +19,6 @@ interface SelectedOption {
 }
 
 const initialState = {
-  label: '',
   selectedOptions: [] as SelectedOption[],
 };
 
@@ -50,17 +49,6 @@ export const CustomFieldPanel = injectI18n(
                 isClearable={false}
               />
             </EuiFormRow>
-            <EuiFormRow
-              label="Label (optional)"
-              helpText="This label is used to identify this field"
-              compressed
-            >
-              <EuiFieldText
-                name="label"
-                value={this.state.label}
-                onChange={this.handleLabelSelection}
-              />
-            </EuiFormRow>
             <EuiButton type="submit" size="s" fill onClick={this.handleSubmit}>
               Add
             </EuiButton>
@@ -70,11 +58,7 @@ export const CustomFieldPanel = injectI18n(
     }
 
     private handleSubmit = () => {
-      this.props.onSubmit(this.state.selectedOptions[0].label, this.state.label);
-    };
-
-    private handleLabelSelection = (e: SyntheticEvent<HTMLInputElement>) => {
-      this.setState({ label: e.currentTarget.value });
+      this.props.onSubmit(this.state.selectedOptions[0].label);
     };
 
     private handleFieldSelection = (selectedOptions: SelectedOption[]) => {
