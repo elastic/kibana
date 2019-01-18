@@ -221,9 +221,9 @@ export class Pings extends React.Component<PingListProps, PingListState> {
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="primary">
-                    {typeof allPings !== 'undefined' ? allPings.total : ''}
-                  </EuiBadge>
+                  {typeof allPings !== 'undefined' && (
+                    <EuiBadge color="primary">{allPings.total}</EuiBadge>
+                  )}
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiPanel paddingSize="l">
