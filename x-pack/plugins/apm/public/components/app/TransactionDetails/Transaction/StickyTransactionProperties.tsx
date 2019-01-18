@@ -34,7 +34,7 @@ export function StickyTransactionProperties({
   const timestamp = transaction['@timestamp'];
   const url =
     idx(transaction, _ => _.context.page.url) ||
-    idx(transaction, _ => _.context.request.url) ||
+    idx(transaction, _ => _.context.request.url.full) ||
     NOT_AVAILABLE_LABEL;
   const duration = transaction.transaction.duration.us;
   const stickyProperties: IStickyProperty[] = [
