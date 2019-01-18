@@ -67,8 +67,8 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: FilterB
         {
           type: 'field_value_selection',
           field: 'monitor.id',
-          name: i18n.translate('xpack.uptime.filterBar.options.hostLabel', {
-            defaultMessage: 'Host',
+          name: i18n.translate('xpack.uptime.filterBar.options.idLabel', {
+            defaultMessage: 'ID',
           }),
           multiSelect: false,
           options: take(id, MAX_SELECTION_LENGTH).map((idValue: any) => ({
