@@ -30,7 +30,6 @@ import { isPseudoLocale, translateUsingPseudoLocale } from './pseudo_locale';
 import './locales.js';
 
 const EN_LOCALE = 'en';
-const LOCALE_DELIMITER = '-';
 const translationsForLocale: Record<string, Translation> = {};
 const getMessageFormat = memoizeIntlConstructor(IntlMessageFormat);
 
