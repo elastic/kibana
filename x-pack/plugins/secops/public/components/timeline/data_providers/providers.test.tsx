@@ -21,8 +21,10 @@ describe('Providers', () => {
             <Providers
               id="foo"
               dataProviders={mockDataProviders}
+              onChangeDataProviderKqlQuery={noop}
               onDataProviderRemoved={noop}
               onToggleDataProviderEnabled={noop}
+              onToggleDataProviderExcluded={noop}
             />
           </DroppableWrapper>
         </DragDropContext>
@@ -42,8 +44,10 @@ describe('Providers', () => {
             <Providers
               id="foo"
               dataProviders={mockDataProviders}
+              onChangeDataProviderKqlQuery={noop}
               onDataProviderRemoved={mockOnDataProviderRemoved}
               onToggleDataProviderEnabled={noop}
+              onToggleDataProviderExcluded={noop}
             />
           </DroppableWrapper>
         </DragDropContext>
@@ -86,8 +90,10 @@ describe('Providers', () => {
             <Providers
               id="foo"
               dataProviders={mockDataProviders}
+              onChangeDataProviderKqlQuery={noop}
               onDataProviderRemoved={noop}
               onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
+              onToggleDataProviderExcluded={noop}
             />
           </DroppableWrapper>
         </DragDropContext>

@@ -7,6 +7,7 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
+  addAndProvider,
   addHistory,
   addNote,
   addNoteToEvent,
@@ -18,7 +19,10 @@ import {
   showTimeline,
   unPinEvent,
   updateDataProviderEnabled,
+  updateDataProviderExcluded,
+  updateDataProviderKqlQuery,
   updateDescription,
+  updateHighlightedDropAndProviderId,
   updateIsFavorite,
   updateIsLive,
   updateItemsPerPage,
@@ -33,6 +37,7 @@ import {
 } from './actions';
 import {
   addNewTimeline,
+  addTimelineAndProvider,
   addTimelineHistory,
   addTimelineNote,
   addTimelineNoteToEvent,
@@ -41,6 +46,7 @@ import {
   pinTimelineEvent,
   removeTimelineProvider,
   unPinTimelineEvent,
+  updateHighlightedDropAndProvider,
   updateTimelineDescription,
   updateTimelineIsFavorite,
   updateTimelineIsLive,
@@ -50,6 +56,8 @@ import {
   updateTimelinePageIndex,
   updateTimelinePerPageOptions,
   updateTimelineProviderEnabled,
+  updateTimelineProviderExcluded,
+  updateTimelineProviderKqlQuery,
   updateTimelineProviders,
   updateTimelineRange,
   updateTimelineShowTimeline,
@@ -91,6 +99,14 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   .case(addNoteToEvent, (state, { id, noteId, eventId }) => ({
     ...state,
     timelineById: addTimelineNoteToEvent({ id, noteId, eventId, timelineById: state.timelineById }),
+  }))
+  .case(addAndProvider, (state, { id, provider }) => ({
+    ...state,
+    timelineById: addTimelineAndProvider({
+      id,
+      provider,
+      timelineById: state.timelineById,
+    }),
   }))
   .case(addProvider, (state, { id, provider }) => ({
     ...state,
@@ -171,6 +187,24 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       timelineById: state.timelineById,
     }),
   }))
+  .case(updateDataProviderExcluded, (state, { id, excluded, providerId }) => ({
+    ...state,
+    timelineById: updateTimelineProviderExcluded({
+      id,
+      excluded,
+      providerId,
+      timelineById: state.timelineById,
+    }),
+  }))
+  .case(updateDataProviderKqlQuery, (state, { id, kqlQuery, providerId }) => ({
+    ...state,
+    timelineById: updateTimelineProviderKqlQuery({
+      id,
+      kqlQuery,
+      providerId,
+      timelineById: state.timelineById,
+    }),
+  }))
   .case(updateItemsPerPage, (state, { id, itemsPerPage }) => ({
     ...state,
     timelineById: updateTimelineItemsPerPage({
@@ -192,6 +226,14 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     timelineById: updateTimelinePerPageOptions({
       id,
       itemsPerPageOptions,
+      timelineById: state.timelineById,
+    }),
+  }))
+  .case(updateHighlightedDropAndProviderId, (state, { id, providerId }) => ({
+    ...state,
+    timelineById: updateHighlightedDropAndProvider({
+      id,
+      providerId,
       timelineById: state.timelineById,
     }),
   }))

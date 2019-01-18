@@ -9,21 +9,33 @@ import { Draggable } from 'react-beautiful-dnd';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { OnDataProviderRemoved, OnToggleDataProviderEnabled } from '../events';
+import {
+  OnChangeDataProviderKqlQuery,
+  OnDataProviderRemoved,
+  OnToggleDataProviderEnabled,
+  OnToggleDataProviderExcluded,
+} from '../events';
 import { DataProvider } from './data_provider';
+import { Empty } from './empty';
 import { Provider } from './provider';
 
 interface Props {
   id: string;
   dataProviders: DataProvider[];
+  deleteItemAnd: (providerId: string) => void;
+  onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
   onDataProviderRemoved: OnDataProviderRemoved;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
+  onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
+  setItemAnd: (dataprovider: DataProvider, width: number) => void;
 }
 
 const PanelProviders = styled.div`
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap;
+  min-height: 100px;
+  padding: 5px 10px;
+  margin-top: -10px;
 `;
 
 interface GetDraggableIdParams {
@@ -42,8 +54,17 @@ export const getDraggableId = ({ id, dataProviderId }: GetDraggableIdParams): st
  * 3) applying boolean negation to the data provider
  */
 export const Providers = pure<Props>(
-  ({ id, dataProviders, onDataProviderRemoved, onToggleDataProviderEnabled }: Props) => (
-    <PanelProviders data-test-subj="providers">
+  ({
+    id,
+    dataProviders,
+    deleteItemAnd,
+    onChangeDataProviderKqlQuery,
+    onDataProviderRemoved,
+    onToggleDataProviderEnabled,
+    onToggleDataProviderExcluded,
+    setItemAnd,
+  }: Props) => (
+    <PanelProviders className="timeline-drop-area" data-test-subj="providers">
       {dataProviders.map((dataProvider, i) => (
         // Providers are a special drop target that can't be drag-and-dropped
         // to another destination, so it doesn't use our DraggableWrapper
@@ -62,13 +83,18 @@ export const Providers = pure<Props>(
               <Provider
                 data-test-subj="provider"
                 dataProvider={dataProvider}
+                deleteItemAnd={deleteItemAnd}
+                onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
                 onDataProviderRemoved={onDataProviderRemoved}
                 onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+                onToggleDataProviderExcluded={onToggleDataProviderExcluded}
+                setItemAnd={setItemAnd}
               />
             </div>
           )}
         </Draggable>
       ))}
+      <Empty shareSpace />
     </PanelProviders>
   )
 );

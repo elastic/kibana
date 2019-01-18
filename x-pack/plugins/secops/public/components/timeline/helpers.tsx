@@ -10,6 +10,7 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 import { convertKueryToElasticSearchQuery } from '../../lib/keury';
 import { DataProvider } from './data_providers/data_provider';
 
+// `@timestamp >= ${startDate} and @timestamp <= ${moment().valueOf()}`
 export const combineQueries = (
   dataProviders: DataProvider[],
   indexPattern: StaticIndexPattern

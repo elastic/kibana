@@ -114,22 +114,33 @@ const getHostsColumns = () => [
           <DraggableWrapper
             dataProvider={{
               and: [],
+              droppableId: '',
               enabled: true,
+              excluded: false,
               id: node._id!,
+              isDefaultState: false,
               name: hostName,
-              negated: false,
-              queryMatch: `host.id: "${escapeQueryValue(node.host!.id!)}"`,
-              queryDate: `@timestamp >= ${moment(
-                node.firstSeen!
-              ).valueOf()} and @timestamp <= ${moment().valueOf()}`,
+              kqlQuery: '',
+              queryMatch: {
+                field: 'host.id',
+                displayField: 'host.name',
+                value: escapeQueryValue(node.host!.id!),
+                displayValue: hostName,
+              },
+              queryDate: {
+                from: moment(node.firstSeen!).valueOf(),
+                to: moment().valueOf(),
+              },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
                 <DragEffects>
                   <Provider
                     dataProvider={dataProvider}
+                    onChangeDataProviderKqlQuery={noop}
                     onDataProviderRemoved={noop}
                     onToggleDataProviderEnabled={noop}
+                    onToggleDataProviderExcluded={noop}
                   />
                 </DragEffects>
               ) : isNil(get('host.id', node)) ? (

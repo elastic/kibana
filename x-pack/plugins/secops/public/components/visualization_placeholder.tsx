@@ -63,8 +63,10 @@ class PlaceholdersComponent extends React.PureComponent<Props> {
                   <DragEffects>
                     <Provider
                       dataProvider={dataProvider}
+                      onChangeDataProviderKqlQuery={noop}
                       onDataProviderRemoved={noop}
                       onToggleDataProviderEnabled={noop}
+                      onToggleDataProviderExcluded={noop}
                     />
                   </DragEffects>
                 ) : (

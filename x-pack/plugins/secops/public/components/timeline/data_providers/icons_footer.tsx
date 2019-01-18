@@ -27,9 +27,8 @@ export const IconsFooter = pure<OwnProps>(({ dataProvider }: OwnProps) => {
   if (!dataProvider.queryDate || isEmpty(dataProvider.queryDate)) {
     return null;
   }
-  const dates = dataProvider.queryDate.trim().match(/\d+/g);
-  const tooltipStr = `${moment(parseInt(dates![0], 10)).format('L LTS')} - ${moment(
-    parseInt(dates![1], 10)
+  const tooltipStr = `${moment(dataProvider.queryDate.from).format('L LTS')} - ${moment(
+    dataProvider.queryDate.to
   ).format('L LTS')}`;
   return (
     <>

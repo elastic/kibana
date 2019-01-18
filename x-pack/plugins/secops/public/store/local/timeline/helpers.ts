@@ -219,6 +219,40 @@ export const addTimelineProvider = ({
   };
 };
 
+interface AddTimelineAndProviderParams {
+  id: string;
+  provider: DataProvider;
+  timelineById: TimelineById;
+}
+
+export const addTimelineAndProvider = ({
+  id,
+  provider,
+  timelineById,
+}: AddTimelineAndProviderParams): TimelineById => {
+  const timeline = timelineById[id];
+  const alreadyExistsAtIndex = timeline.dataProviders.findIndex(
+    p => p.id === timeline.highlightedDropAndProviderId
+  );
+  const newProvider = timeline.dataProviders[alreadyExistsAtIndex];
+
+  newProvider.and = [...newProvider.and, provider];
+
+  const dataProviders = [
+    ...timeline.dataProviders.slice(0, alreadyExistsAtIndex),
+    newProvider,
+    ...timeline.dataProviders.slice(alreadyExistsAtIndex + 1),
+  ];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      dataProviders,
+    },
+  };
+};
+
 interface UpdateTimelineKqlModeParams {
   id: string;
   kqlMode: KqlMode;
@@ -440,6 +474,56 @@ export const updateTimelineProviderEnabled = ({
   };
 };
 
+interface UpdateTimelineProviderExcludedParams {
+  id: string;
+  providerId: string;
+  excluded: boolean;
+  timelineById: TimelineById;
+}
+
+export const updateTimelineProviderExcluded = ({
+  id,
+  providerId,
+  excluded,
+  timelineById,
+}: UpdateTimelineProviderExcludedParams): TimelineById => {
+  const timeline = timelineById[id];
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      dataProviders: timeline.dataProviders.map(provider =>
+        provider.id === providerId ? { ...provider, ...{ excluded } } : provider
+      ),
+    },
+  };
+};
+
+interface UpdateTimelineProviderKqlQueryParams {
+  id: string;
+  providerId: string;
+  kqlQuery: string;
+  timelineById: TimelineById;
+}
+
+export const updateTimelineProviderKqlQuery = ({
+  id,
+  providerId,
+  kqlQuery,
+  timelineById,
+}: UpdateTimelineProviderKqlQueryParams): TimelineById => {
+  const timeline = timelineById[id];
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      dataProviders: timeline.dataProviders.map(provider =>
+        provider.id === providerId ? { ...provider, ...{ kqlQuery } } : provider
+      ),
+    },
+  };
+};
+
 interface UpdateTimelineItemsPerPageParams {
   id: string;
   itemsPerPage: number;
@@ -541,6 +625,28 @@ export const unPinTimelineEvent = ({
     [id]: {
       ...timeline,
       pinnedEventIds: omit(eventId, timeline.pinnedEventIds),
+    },
+  };
+};
+
+interface UpdateHighlightedDropAndProviderIdParams {
+  id: string;
+  providerId: string;
+  timelineById: TimelineById;
+}
+
+export const updateHighlightedDropAndProvider = ({
+  id,
+  providerId,
+  timelineById,
+}: UpdateHighlightedDropAndProviderIdParams): TimelineById => {
+  const timeline = timelineById[id];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      highlightedDropAndProviderId: providerId,
     },
   };
 };

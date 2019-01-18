@@ -4,11 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiText } from '@elastic/eui';
-import * as React from 'react';
-import styled from 'styled-components';
-
-import { EventsQuery } from '../../../../containers/events';
 import { DataProvider } from '../data_provider';
 
 interface NameToEventCount<TValue> {
@@ -39,31 +34,25 @@ export const mockDataProviderNames = (): string[] => Object.keys(mockSourceNameT
 export const getEventCount = (dataProviderName: string): number =>
   mockSourceNameToEventCount[dataProviderName] || 0;
 
-const Text = styled(EuiText)`
-  display: inline;
-  padding-left: 5px;
-`;
-
 /**
  * A collection of mock data providers, that can both be rendered
  * in the browser, and also used as mocks in unit and functional tests.
  */
 export const mockDataProviders: DataProvider[] = Object.keys(mockSourceNameToEventCount).map(
   name => ({
-    enabled: true,
     id: `id-${name}`,
     name,
-    componentResultParam: 'events',
-    componentQuery: EventsQuery,
-    queryMatch: 'host.name: "testHostName"',
-    queryDate: '@timestamp >= 1521830963132 and @timestamp <= 1521862432253',
-    negated: false,
-    render: () => (
-      <div data-test-subj="mockDataProvider">
-        <EuiBadge color="primary">{getEventCount(name)}</EuiBadge>
-        <Text> {name} </Text>
-      </div>
-    ),
+    enabled: true,
+    excluded: false,
+    kqlQuery: '',
+    queryMatch: {
+      field: 'host.name',
+      value: 'testHostName',
+    },
+    queryDate: {
+      from: 1521830963132,
+      to: 1521862432253,
+    },
     and: [],
   })
 );

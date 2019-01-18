@@ -25,6 +25,8 @@ export const droppableTimelineProvidersPrefix = `${droppableIdPrefix}.timelinePr
 
 export const droppableTimelineFlyoutButtonPrefix = `${droppableIdPrefix}.flyoutButton.`;
 
+export const droppableTimelineProvidersAndPrefix = `${droppableIdPrefix}.timelineProvider.and.`;
+
 export const getDraggableId = (dataProviderId: string): string =>
   `${draggableContentPrefix}${dataProviderId}`;
 
@@ -39,6 +41,10 @@ export const draggableIsContent = (result: DropResult): boolean =>
 
 export const reasonIsDrop = (result: DropResult): boolean => result.reason === 'DROP';
 
+export const destinationIsAndProviders = (result: DropResult): boolean =>
+  result.destination != null &&
+  result.destination.droppableId.startsWith(droppableTimelineProvidersAndPrefix);
+
 export const destinationIsTimelineProviders = (result: DropResult): boolean =>
   result.destination != null &&
   result.destination.droppableId.startsWith(droppableTimelineProvidersPrefix);
@@ -49,7 +55,9 @@ export const destinationIsTimelineButton = (result: DropResult): boolean =>
 
 export const getTimelineIdFromDestination = (result: DropResult): string =>
   result.destination != null &&
-  (destinationIsTimelineProviders(result) || destinationIsTimelineButton(result))
+  (destinationIsTimelineProviders(result) ||
+    destinationIsTimelineButton(result) ||
+    destinationIsAndProviders(result))
     ? result.destination.droppableId.substring(result.destination.droppableId.lastIndexOf('.') + 1)
     : '';
 
@@ -62,6 +70,12 @@ export const providerWasDroppedOnTimeline = (result: DropResult): boolean =>
   sourceIsContent(result) &&
   destinationIsTimelineProviders(result);
 
+export const providerWasDroppedOnAndProvider = (result: DropResult): boolean =>
+  reasonIsDrop(result) &&
+  draggableIsContent(result) &&
+  sourceIsContent(result) &&
+  destinationIsAndProviders(result);
+
 export const providerWasDroppedOnTimelineButton = (result: DropResult): boolean =>
   reasonIsDrop(result) &&
   draggableIsContent(result) &&
@@ -73,6 +87,10 @@ interface AddProviderToTimelineParams {
   result: DropResult;
   dispatch: Dispatch;
   addProvider?: ActionCreator<{
+    id: string;
+    provider: DataProvider;
+  }>;
+  addAndProvider?: ActionCreator<{
     id: string;
     provider: DataProvider;
   }>;
@@ -94,6 +112,24 @@ export const addProviderToTimeline = ({
 
   if (provider) {
     dispatch(addProvider({ id: timeline, provider }));
+  } else {
+    dispatch(noProviderFound({ id: providerId }));
+  }
+};
+
+export const addProviderToAndProvider = ({
+  dataProviders,
+  result,
+  dispatch,
+  addAndProvider = timelineActions.addAndProvider,
+  noProviderFound = dragAndDropActions.noProviderFound,
+}: AddProviderToTimelineParams): void => {
+  const timeline = getTimelineIdFromDestination(result);
+  const providerId = getProviderIdFromDraggable(result);
+  const provider = dataProviders[providerId];
+
+  if (provider) {
+    dispatch(addAndProvider({ id: timeline, provider }));
   } else {
     dispatch(noProviderFound({ id: providerId }));
   }

@@ -24,8 +24,10 @@ describe('DataProviders', () => {
           <DataProviders
             id="foo"
             dataProviders={dataProviders}
+            onChangeDataProviderKqlQuery={noop}
             onDataProviderRemoved={noop}
             onToggleDataProviderEnabled={noop}
+            onToggleDataProviderExcluded={noop}
             show={true}
             theme="dark"
           />
@@ -41,8 +43,10 @@ describe('DataProviders', () => {
           <DataProviders
             id="foo"
             dataProviders={mockDataProviders}
+            onChangeDataProviderKqlQuery={noop}
             onDataProviderRemoved={noop}
             onToggleDataProviderEnabled={noop}
+            onToggleDataProviderExcluded={noop}
             show={true}
             theme="dark"
           />
@@ -58,8 +62,10 @@ describe('DataProviders', () => {
           <DataProviders
             id="foo"
             dataProviders={mockDataProviders}
+            onChangeDataProviderKqlQuery={noop}
             onDataProviderRemoved={noop}
             onToggleDataProviderEnabled={noop}
+            onToggleDataProviderExcluded={noop}
             show={true}
             theme="dark"
           />

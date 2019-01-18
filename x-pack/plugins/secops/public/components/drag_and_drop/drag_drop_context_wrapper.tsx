@@ -15,7 +15,9 @@ import { IdToDataProvider } from '../../store/local/drag_and_drop/model';
 import { dataProvidersSelector } from '../../store/local/drag_and_drop/selectors';
 import { State } from '../../store/reducer';
 import {
+  addProviderToAndProvider,
   addProviderToTimeline,
+  providerWasDroppedOnAndProvider,
   providerWasDroppedOnTimeline,
   providerWasDroppedOnTimelineButton,
 } from './helpers';
@@ -34,10 +36,10 @@ interface OnDragEndHandlerParams {
 const onDragEndHandler = ({ result, dataProviders, dispatch }: OnDragEndHandlerParams) => {
   if (providerWasDroppedOnTimeline(result)) {
     addProviderToTimeline({ dataProviders, result, dispatch });
-  }
-
-  if (providerWasDroppedOnTimelineButton(result)) {
+  } else if (providerWasDroppedOnTimelineButton(result)) {
     addProviderToTimeline({ dataProviders, result, dispatch });
+  } else if (providerWasDroppedOnAndProvider(result)) {
+    addProviderToAndProvider({ dataProviders, result, dispatch });
   }
 };
 

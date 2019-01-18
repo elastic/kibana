@@ -22,6 +22,11 @@ export const addNoteToEvent = actionCreator<{ id: string; noteId: string; eventI
 
 export const addProvider = actionCreator<{ id: string; provider: DataProvider }>('ADD_PROVIDER');
 
+export const addAndProvider = actionCreator<{
+  id: string;
+  provider: DataProvider;
+}>('ADD_AND_PROVIDER');
+
 export const applyDeltaToWidth = actionCreator<{
   id: string;
   delta: number;
@@ -45,6 +50,23 @@ export const updateDataProviderEnabled = actionCreator<{
   enabled: boolean;
   providerId: string;
 }>('TOGGLE_PROVIDER_ENABLED');
+
+export const updateDataProviderExcluded = actionCreator<{
+  id: string;
+  excluded: boolean;
+  providerId: string;
+}>('TOGGLE_PROVIDER_EXCLUDED');
+
+export const updateDataProviderKqlQuery = actionCreator<{
+  id: string;
+  kqlQuery: string;
+  providerId: string;
+}>('PROVIDER_EDIT_KQL_QUERY');
+
+export const updateHighlightedDropAndProviderId = actionCreator<{
+  id: string;
+  providerId: string;
+}>('UPDATE_DROP_AND_PROVIDER');
 
 export const updateDescription = actionCreator<{ id: string; description: string }>(
   'UPDATE_DESCRIPTION'

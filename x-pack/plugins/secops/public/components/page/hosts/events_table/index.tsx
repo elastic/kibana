@@ -119,17 +119,26 @@ const getEventsColumns = (startDate: number) => [
               enabled: true,
               id: node._id!,
               name: hostName,
-              negated: false,
-              queryMatch: `host.id: "${escapeQueryValue(node.host!.id!)}"`,
-              queryDate: `@timestamp >= ${startDate} and @timestamp <= ${moment().valueOf()}`,
+              excluded: false,
+              kqlQuery: '',
+              queryMatch: {
+                field: 'host.id',
+                value: escapeQueryValue(node.host!.id!),
+              },
+              queryDate: {
+                from: startDate,
+                to: moment().valueOf(),
+              },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
                 <DragEffects>
                   <Provider
                     dataProvider={dataProvider}
+                    onChangeDataProviderKqlQuery={noop}
                     onDataProviderRemoved={noop}
                     onToggleDataProviderEnabled={noop}
+                    onToggleDataProviderExcluded={noop}
                   />
                 </DragEffects>
               ) : (

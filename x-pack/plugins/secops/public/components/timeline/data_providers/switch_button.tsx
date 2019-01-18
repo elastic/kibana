@@ -20,7 +20,7 @@ interface Props {
 /** An affordance for enabling/disabling a data provider. It invokes `onToggleDataProviderEnabled` when clicked */
 export const SwitchButton = pure<Props>(({ onToggleDataProviderEnabled, dataProvider }) => {
   const onClick = () => {
-    onToggleDataProviderEnabled({ dataProvider, enabled: !dataProvider.enabled });
+    onToggleDataProviderEnabled({ providerId: dataProvider.id, enabled: !dataProvider.enabled });
   };
 
   return (

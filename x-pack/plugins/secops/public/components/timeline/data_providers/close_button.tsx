@@ -20,7 +20,7 @@ interface Props {
 /** An affordance for removing a data provider. It invokes `onDataProviderRemoved` when clicked */
 export const CloseButton = pure<Props>(({ onDataProviderRemoved, dataProvider }) => {
   const onClick = () => {
-    onDataProviderRemoved(dataProvider);
+    onDataProviderRemoved(dataProvider.id);
   };
 
   return (

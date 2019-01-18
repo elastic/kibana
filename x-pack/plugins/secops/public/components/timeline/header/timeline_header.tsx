@@ -16,11 +16,14 @@ import { Sort } from '../body/sort';
 import { DataProviders } from '../data_providers';
 import { DataProvider } from '../data_providers/data_provider';
 import {
+  OnChangeDataProviderKqlQuery,
+  OnChangeDroppableAndProvider,
   OnColumnSorted,
   OnDataProviderRemoved,
   OnFilterChange,
   OnRangeSelected,
   OnToggleDataProviderEnabled,
+  OnToggleDataProviderExcluded,
 } from '../events';
 import { StatefulSearchOrFilter } from '../search_or_filter';
 
@@ -28,11 +31,14 @@ interface Props {
   columnHeaders: ColumnHeader[];
   id: string;
   dataProviders: DataProvider[];
+  onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
+  onChangeDroppableAndProvider: OnChangeDroppableAndProvider;
   onColumnSorted: OnColumnSorted;
   onDataProviderRemoved: OnDataProviderRemoved;
   onFilterChange: OnFilterChange;
   onRangeSelected: OnRangeSelected;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
+  onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
   range: string;
   show: boolean;
   sort: Sort;
@@ -48,11 +54,14 @@ export const TimelineHeader = pure<Props>(
     columnHeaders,
     id,
     dataProviders,
+    onChangeDataProviderKqlQuery,
+    onChangeDroppableAndProvider,
     onColumnSorted,
     onDataProviderRemoved,
     onFilterChange,
     onRangeSelected,
     onToggleDataProviderEnabled,
+    onToggleDataProviderExcluded,
     range,
     show,
     sort,
@@ -62,8 +71,11 @@ export const TimelineHeader = pure<Props>(
       <DataProviders
         id={id}
         dataProviders={dataProviders}
+        onChangeDroppableAndProvider={onChangeDroppableAndProvider}
+        onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
         onDataProviderRemoved={onDataProviderRemoved}
         onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+        onToggleDataProviderExcluded={onToggleDataProviderExcluded}
         show={show}
         theme={theme}
       />

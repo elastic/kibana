@@ -30,9 +30,16 @@ const timelineByIdMock: TimelineById = {
         id: '123',
         name: 'data provider 1',
         enabled: true,
-        queryMatch: '',
-        queryDate: '',
-        negated: false,
+        queryMatch: {
+          field: '',
+          value: '',
+        },
+        queryDate: {
+          from: 0,
+          to: 1,
+        },
+        excluded: false,
+        kqlQuery: '',
       },
     ],
     description: '',
@@ -109,9 +116,16 @@ describe('Timeline', () => {
           id: '567',
           name: 'data provider 2',
           enabled: true,
-          queryMatch: '',
-          queryDate: '',
-          negated: false,
+          queryMatch: {
+            field: '',
+            value: '',
+          },
+          queryDate: {
+            from: 0,
+            to: 1,
+          },
+          excluded: false,
+          kqlQuery: '',
         },
         timelineById: timelineByIdMock,
       });
@@ -124,9 +138,16 @@ describe('Timeline', () => {
         id: '567',
         name: 'data provider 2',
         enabled: true,
-        queryMatch: '',
-        queryDate: '',
-        negated: false,
+        queryMatch: {
+          field: '',
+          value: '',
+        },
+        queryDate: {
+          from: 0,
+          to: 1,
+        },
+        excluded: false,
+        kqlQuery: '',
       };
       const update = addTimelineProvider({
         id: 'foo',
@@ -143,9 +164,16 @@ describe('Timeline', () => {
         id: '123',
         name: 'data provider 1',
         enabled: true,
-        queryMatch: '',
-        queryDate: '',
-        negated: false,
+        queryMatch: {
+          field: '',
+          value: '',
+        },
+        queryDate: {
+          from: 0,
+          to: 1,
+        },
+        excluded: false,
+        kqlQuery: '',
       };
       const update = addTimelineProvider({
         id: 'foo',
@@ -161,9 +189,16 @@ describe('Timeline', () => {
         id: '123',
         name: 'my name changed',
         enabled: true,
-        queryMatch: '',
-        queryDate: '',
-        negated: false,
+        queryMatch: {
+          field: '',
+          value: '',
+        },
+        queryDate: {
+          from: 0,
+          to: 1,
+        },
+        excluded: false,
+        kqlQuery: '',
       };
       const update = addTimelineProvider({
         id: 'foo',
@@ -184,9 +219,16 @@ describe('Timeline', () => {
             id: '567',
             name: 'data provider 2',
             enabled: true,
-            queryMatch: '',
-            queryDate: '',
-            negated: false,
+            queryMatch: {
+              field: '',
+              value: '',
+            },
+            queryDate: {
+              from: 0,
+              to: 1,
+            },
+            excluded: false,
+            kqlQuery: '',
           },
         ],
         timelineById: timelineByIdMock,
@@ -200,9 +242,16 @@ describe('Timeline', () => {
         id: '567',
         name: 'data provider 2',
         enabled: true,
-        queryMatch: '',
-        queryDate: '',
-        negated: false,
+        queryMatch: {
+          field: '',
+          value: '',
+        },
+        queryDate: {
+          from: 0,
+          to: 1,
+        },
+        excluded: false,
+        kqlQuery: '',
       };
       const update = updateTimelineProviders({
         id: 'foo',
@@ -302,9 +351,16 @@ describe('Timeline', () => {
               id: '123',
               name: 'data provider 1',
               enabled: false, // This value changed from true to false
-              queryMatch: '',
-              queryDate: '',
-              negated: false,
+              queryMatch: {
+                field: '',
+                value: '',
+              },
+              queryDate: {
+                from: 0,
+                to: 1,
+              },
+              excluded: false,
+              kqlQuery: '',
             },
           ],
           description: '',
@@ -337,9 +393,16 @@ describe('Timeline', () => {
         id: '456',
         name: 'data provider 1',
         enabled: true,
-        queryMatch: '',
-        queryDate: '',
-        negated: false,
+        queryMatch: {
+          field: '',
+          value: '',
+        },
+        queryDate: {
+          from: 0,
+          to: 1,
+        },
+        excluded: false,
+        kqlQuery: '',
       });
       const multiDataProviderMock = set('foo.dataProviders', multiDataProvider, timelineByIdMock);
       const update = updateTimelineProviderEnabled({
@@ -357,18 +420,32 @@ describe('Timeline', () => {
               id: '123',
               name: 'data provider 1',
               enabled: false, // value we are updating from true to false
-              queryMatch: '',
-              queryDate: '',
-              negated: false,
+              queryMatch: {
+                field: '',
+                value: '',
+              },
+              queryDate: {
+                from: 0,
+                to: 1,
+              },
+              excluded: false,
+              kqlQuery: '',
             },
             {
               and: [],
               id: '456',
               name: 'data provider 1',
               enabled: true,
-              queryMatch: '',
-              queryDate: '',
-              negated: false,
+              queryMatch: {
+                field: '',
+                value: '',
+              },
+              queryDate: {
+                from: 0,
+                to: 1,
+              },
+              excluded: false,
+              kqlQuery: '',
             },
           ],
           description: '',
@@ -421,9 +498,16 @@ describe('Timeline', () => {
               id: '123',
               name: 'data provider 1',
               enabled: true,
-              queryMatch: '',
-              queryDate: '',
-              negated: false,
+              queryMatch: {
+                field: '',
+                value: '',
+              },
+              queryDate: {
+                from: 0,
+                to: 1,
+              },
+              excluded: false,
+              kqlQuery: '',
             },
           ],
           description: '',
@@ -475,9 +559,16 @@ describe('Timeline', () => {
               id: '123',
               name: 'data provider 1',
               enabled: true,
-              queryMatch: '',
-              queryDate: '',
-              negated: false,
+              queryMatch: {
+                field: '',
+                value: '',
+              },
+              queryDate: {
+                from: 0,
+                to: 1,
+              },
+              excluded: false,
+              kqlQuery: '',
             },
           ],
           description: '',
@@ -531,9 +622,16 @@ describe('Timeline', () => {
         id: '456',
         name: 'data provider 2',
         enabled: true,
-        queryMatch: '',
-        queryDate: '',
-        negated: false,
+        queryMatch: {
+          field: '',
+          value: '',
+        },
+        queryDate: {
+          from: 0,
+          to: 1,
+        },
+        excluded: false,
+        kqlQuery: '',
       });
       const multiDataProviderMock = set('foo.dataProviders', multiDataProvider, timelineByIdMock);
       const update = removeTimelineProvider({
@@ -549,9 +647,16 @@ describe('Timeline', () => {
               id: '456',
               name: 'data provider 2',
               enabled: true,
-              queryMatch: '',
-              queryDate: '',
-              negated: false,
+              queryMatch: {
+                field: '',
+                value: '',
+              },
+              queryDate: {
+                from: 0,
+                to: 1,
+              },
+              excluded: false,
+              kqlQuery: '',
             },
           ],
           description: '',

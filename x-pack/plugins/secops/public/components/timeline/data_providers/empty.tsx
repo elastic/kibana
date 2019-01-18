@@ -32,7 +32,7 @@ const BadgeOr = styled(EuiBadge)`
   min-width: 20px;
 `;
 
-const EmptyContainer = styled.div`
+const EmptyContainer = styled.div<{ shareSpace: boolean }>`
   align-items: center;
   display: flex;
   flex-direction: row;
@@ -40,20 +40,28 @@ const EmptyContainer = styled.div`
   justify-content: center;
   min-height: 100px;
   user-select: none;
+  flex: 1;
+  align-content: center;
+  ${({ shareSpace }) => (shareSpace ? `padding-top: 25px` : '')};
 `;
 
 const NoWrap = styled.div`
+  margin: 6px;
   align-items: center;
   display: flex;
   flex-direction: row;
   flex-wrap: no-wrap;
 `;
 
+interface OwnProps {
+  shareSpace?: boolean;
+}
+
 /**
  * Prompts the user to drop anything with a facet count into the data providers section.
  */
-export const Empty = pure(() => (
-  <EmptyContainer data-test-subj="empty">
+export const Empty = pure<OwnProps>(({ shareSpace = false }) => (
+  <EmptyContainer className="timeline-drop-area" shareSpace={shareSpace} data-test-subj="empty">
     <NoWrap>
       <Text>{i18n.DROP_ANYTHING}</Text>
       <BadgeHighlighted color="#d9d9d9">{i18n.HIGHLIGHTED}</BadgeHighlighted>

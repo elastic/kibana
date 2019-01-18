@@ -6,24 +6,31 @@
 
 import { ColumnId } from './body/column_id';
 import { SortDirection } from './body/sort';
-import { DataProvider } from './data_providers/data_provider';
 
 /** Invoked when a user clicks the close button to remove a data provider */
-export type OnDataProviderRemoved = (removed: DataProvider) => void;
+export type OnDataProviderRemoved = (providerId: string) => void;
 
 /** Invoked when a user temporarily disables or re-enables a data provider */
 export type OnToggleDataProviderEnabled = (
   toggled: {
-    dataProvider: DataProvider;
+    providerId: string;
     enabled: boolean;
   }
 ) => void;
 
 /** Invoked when a user toggles negation ("boolean NOT") of a data provider */
-export type OnToggleDataProviderNegated = (
-  negated: {
-    dataProvider: DataProvider;
-    negated: boolean;
+export type OnToggleDataProviderExcluded = (
+  excluded: {
+    providerId: string;
+    excluded: boolean;
+  }
+) => void;
+
+/** Invoked when a user change the kql query of our data provider */
+export type OnChangeDataProviderKqlQuery = (
+  edit: {
+    providerId: string;
+    kqlQuery: string;
   }
 ) => void;
 
@@ -51,3 +58,5 @@ export type OnChangeItemsPerPage = (itemsPerPage: number) => void;
 
 /** Invoked when a user clicks to load more item */
 export type OnLoadMore = (cursor: string, tieBreaker: string) => void;
+
+export type OnChangeDroppableAndProvider = (providerId: string) => void;

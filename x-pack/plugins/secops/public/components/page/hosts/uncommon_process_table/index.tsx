@@ -117,18 +117,27 @@ const getUncommonColumns = (startDate: number) => [
               and: [],
               enabled: true,
               id: node._id,
-              name: processName!,
-              negated: false,
-              queryMatch: `process.name: "${escapeQueryValue(processName!)}"`,
-              queryDate: `@timestamp >= ${startDate} and @timestamp <= ${moment().valueOf()}`,
+              name: processName,
+              excluded: false,
+              kqlQuery: '',
+              queryMatch: {
+                field: 'process.name',
+                value: escapeQueryValue(processName),
+              },
+              queryDate: {
+                from: startDate,
+                to: moment().valueOf(),
+              },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
                 <DragEffects>
                   <Provider
                     dataProvider={dataProvider}
+                    onChangeDataProviderKqlQuery={noop}
                     onDataProviderRemoved={noop}
                     onToggleDataProviderEnabled={noop}
+                    onToggleDataProviderExcluded={noop}
                   />
                 </DragEffects>
               ) : (
