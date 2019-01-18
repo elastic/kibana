@@ -9,3 +9,6 @@
   margin-right: auto;
   flex-grow: 0;
 }
+.spcGridPage {
+  max-width: map-get($euiBreakpoints, 'xl');
+}

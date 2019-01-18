@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+import { Location } from 'history';
 import React from 'react';
 import { HistoryTabs } from 'x-pack/plugins/apm/public/components/shared/HistoryTabs';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
@@ -14,7 +16,7 @@ import { ServiceMetrics } from './ServiceMetrics';
 interface TabsProps {
   transactionTypes: string[];
   urlParams: IUrlParams;
-  location: any;
+  location: Location;
 }
 
 export class ServiceDetailTabs extends React.Component<TabsProps> {
@@ -23,10 +25,12 @@ export class ServiceDetailTabs extends React.Component<TabsProps> {
     const { serviceName } = urlParams;
     const tabs = [
       {
-        name: 'Transactions',
+        name: i18n.translate('xpack.apm.serviceDetails.transactionsTabLabel', {
+          defaultMessage: 'Transactions'
+        }),
         path: `/${serviceName}/transactions/${transactionTypes[0]}`,
         routePath: `/${serviceName}/transactions/:transactionType?`,
-        component: () => (
+        render: () => (
           <TransactionOverview
             urlParams={urlParams}
             serviceTransactionTypes={transactionTypes}
@@ -34,18 +38,24 @@ export class ServiceDetailTabs extends React.Component<TabsProps> {
         )
       },
       {
-        name: 'Errors',
+        name: i18n.translate('xpack.apm.serviceDetails.errorsTabLabel', {
+          defaultMessage: 'Errors'
+        }),
         path: `/${serviceName}/errors`,
-        component: () => {
+        render: () => {
           return (
             <ErrorGroupOverview urlParams={urlParams} location={location} />
           );
         }
       },
       {
-        name: 'Metrics',
+        name: i18n.translate('xpack.apm.serviceDetails.metricsTabLabel', {
+          defaultMessage: 'Metrics'
+        }),
         path: `/${serviceName}/metrics`,
-        component: () => <ServiceMetrics urlParams={urlParams} />
+        render: () => (
+          <ServiceMetrics urlParams={urlParams} location={location} />
+        )
       }
     ];
 

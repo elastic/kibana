@@ -6,7 +6,7 @@
 
 import { take } from 'lodash';
 import { UMPingSortDirectionArg } from '../../../../common/domain_types';
-import { DocCount, HistogramSeries, Ping } from '../../../../common/graphql/types';
+import { DocCount, HistogramSeries, Ping, PingResults } from '../../../../common/graphql/types';
 import { UMPingsAdapter } from './adapter_types';
 
 const sortPings = (sort: UMPingSortDirectionArg) =>
@@ -29,16 +29,17 @@ export class MemoryPingsAdapter implements UMPingsAdapter {
     status?: string,
     sort?: UMPingSortDirectionArg,
     size?: number
-  ): Promise<Ping[]> {
+  ): Promise<PingResults> {
     let pings = this.pingsDB;
     if (monitorId) {
       pings = pings.filter(ping => ping.monitor && ping.monitor.id === monitorId);
     }
-    if (sort) {
-      const sortedPings = pings.sort(sortPings(sort));
-      return take(sortedPings, size ? size : 10);
-    }
-    return take(pings, size ? size : 10);
+
+    size = size ? size : 10;
+    return {
+      total: size,
+      pings: take(sort ? pings.sort(sortPings(sort)) : pings, size),
+    };
   }
 
   // TODO implement

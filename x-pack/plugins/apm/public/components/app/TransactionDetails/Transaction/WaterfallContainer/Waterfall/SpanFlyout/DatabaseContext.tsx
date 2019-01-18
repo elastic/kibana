@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import React, { Fragment } from 'react';
 // @ts-ignore
 import sql from 'react-syntax-highlighter/dist/languages/sql';
@@ -28,7 +28,6 @@ import {
 registerLanguage('sql', sql);
 
 const DatabaseStatement = styled.div`
-  margin-top: ${px(unit)};
   padding: ${px(units.half)} ${px(unit)};
   background: ${colors.yellow};
   border-radius: ${borderRadius};
@@ -54,6 +53,7 @@ export function DatabaseContext({ dbContext }: Props) {
       <EuiTitle size="xs">
         <h3>Database statement</h3>
       </EuiTitle>
+      <EuiSpacer size="m" />
       <DatabaseStatement>
         <SyntaxHighlighter
           language={'sql'}
@@ -70,6 +70,7 @@ export function DatabaseContext({ dbContext }: Props) {
           {dbContext.statement}
         </SyntaxHighlighter>
       </DatabaseStatement>
+      <EuiSpacer size="l" />
     </Fragment>
   );
 }

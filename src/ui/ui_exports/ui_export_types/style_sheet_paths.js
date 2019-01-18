@@ -18,6 +18,7 @@
  */
 
 import path from 'path';
+import { existsSync } from 'fs';
 import { flatConcatAtType } from './reduce';
 import { mapSpec, wrap } from './modify_reduce';
 
@@ -46,15 +47,21 @@ function normalize(localPath, type, pluginSpec) {
     );
   }
 
+  // replace the extension of localPath to be .css
+  // publicPath will always point to the css file
+  const localCssPath = localPath.slice(0, -extname.length) + '.css';
+
+  // update localPath to point to the .css file if it exists and
+  // the .scss path does not, which is the case for built plugins
+  if (extname === '.scss' && !existsSync(localPath) && existsSync(localCssPath)) {
+    localPath = localCssPath;
+  }
+
   // get the path of the stylesheet relative to the public dir for the plugin
-  let relativePath = path.relative(publicDir, localPath);
+  let relativePath = path.relative(publicDir, localCssPath);
 
   // replace back slashes on windows
   relativePath = relativePath.split('\\').join('/');
-
-  // replace the extension of relativePath to be .css
-  // publicPath will always point to the css file
-  relativePath = relativePath.slice(0, -extname.length) + '.css';
 
   const publicPath = `plugins/${pluginSpec.getId()}/${relativePath}`;
 

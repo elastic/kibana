@@ -6,6 +6,7 @@ exports[`TransactionOverviewView should render with type filter controls 1`] = `
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
+    label="Filter by type"
   >
     <EuiSelect
       compressed={false}
@@ -16,11 +17,11 @@ exports[`TransactionOverviewView should render with type filter controls 1`] = `
       options={
         Array [
           Object {
-            "text": "Filter by type: a",
+            "text": "a",
             "value": "a",
           },
           Object {
-            "text": "Filter by type: b",
+            "text": "b",
             "value": "b",
           },
         ]

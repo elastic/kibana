@@ -33,15 +33,16 @@ export class CreateSourceEditor extends Component {
 
     this._requestTypeOptions = [
       {
-        label: 'heatmap',
-        value: RENDER_AS.HEATMAP
-      }, {
         label: 'points',
         value: RENDER_AS.POINT
       },
       {
         label: 'grid rectangles',
         value: RENDER_AS.GRID
+      },
+      {
+        label: 'heatmap',
+        value: RENDER_AS.HEATMAP
       }
     ];
 

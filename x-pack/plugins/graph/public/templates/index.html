@@ -15,7 +15,7 @@
         ></strong>
       </div>
 
-      <div data-transclude-slot="bottomRow" class="flexGroup">
+      <div data-transclude-slot="bottomRow" class="gphGraph__flexGroup">
         <!-- Select index pattern. -->
         <select class="form-control gphIndexSelect" name="mySelect" ng-change="uiSelectIndex()" ng-class="{'gphIndexSelect-unselected':selectedIndex === null}"
           ng-options="option.attributes.title for option in indices" ng-model="grr.proposedIndex">
@@ -62,7 +62,7 @@
         </span>
 
         <!-- Search. -->
-        <form ng-submit="submit()" name="graphBasicSearch" class="flexGroup__filler" style="width: 100%">
+        <form ng-submit="submit()" name="graphBasicSearch" class="gphGraph__flexGroupFiller" style="width: 100%">
           <div class="kuiLocalSearch">
             <input name="searchTerm" type="text" class="kuiLocalSearchInput" ng-model="grr.searchTerm" ng-disabled="liveResponseFields.length === 0"
               ng-focus="kbnTopNav.close()" placeholder="foo AND bar NOT baz" autocomplete="off">
