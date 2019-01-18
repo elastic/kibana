@@ -31,7 +31,7 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
       index: INDEX_NAMES.BEATS,
       type: '_doc',
       body: {
-        ids,
+        ids: ids.map(id => `configuration_block:${id}`),
       },
     };
 
@@ -97,7 +97,7 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
   public async create(user: FrameworkUser, configs: ConfigurationBlock[]): Promise<string[]> {
     const body = flatten(
       configs.map(config => {
-        const id = uuidv4();
+        const id = `configuration_block:${uuidv4()}`;
         return [
           { index: { _id: id } },
           {
@@ -123,5 +123,38 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
     }
 
     return result.items.map((item: any) => item.index._id);
+  }
+
+  public async getTagIdsExcludingTypes(
+    user: FrameworkUser,
+    blockTypes: string[]
+  ): Promise<string[]> {
+    const body = {
+      query: {
+        bool: {
+          must_not: {
+            terms: { type: blockTypes },
+          },
+        },
+      },
+      aggs: {
+        tags: {
+          terms: { field: 'tag' },
+        },
+      },
+    };
+
+    const params = {
+      body,
+      index: INDEX_NAMES.BEATS,
+      ignore: [404],
+      _source: true,
+      size: 10000,
+      type: '_doc',
+    };
+    const response = await this.database.search(user, params);
+
+    // @ts-ignore
+    return get<any>(response, 'aggregations.tags.buckets', []).map(bucket => bucket.key);
   }
 }

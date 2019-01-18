@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BeatTag } from '../../../../common/domain_types';
+import { BeatTag, CMBeat } from '../../../../common/domain_types';
 import { RestAPIAdapter } from '../rest_api/adapter_types';
 import { CMTagsAdapter } from './adapter_types';
 
@@ -40,12 +40,11 @@ export class RestTagsAdapter implements CMTagsAdapter {
     return response.success ? tag : null;
   }
 
-  public async tagsExcept(tags: BeatTag[], ignoredConfigTypes: string[]) {
+  public async getAssignable(beats: CMBeat[]) {
     try {
-      return await this.REST.get<BeatTag[]>(`/api/beats/assignable-tags`, {
-        tags: tags.map(tag => tag.id),
-        ignoredConfigTypes,
-      });
+      return await this.REST.get<BeatTag[]>(
+        `/api/beats/tags/assignable/${beats.map(beat => beat.id).join(',')}`
+      );
     } catch (e) {
       return [];
     }

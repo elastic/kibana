@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { UNIQUENESS_ENFORCING_TYPES } from '../../common/constants/configuration_blocks';
 import { BeatTag, CMBeat } from '../../common/domain_types';
 import { CMTagsAdapter } from './adapters/tags/adapter_types';
 
@@ -27,19 +26,6 @@ export class TagsLib {
   }
 
   public async getassignableTagsForBeats(beats: CMBeat[]): Promise<BeatTag[]> {
-    const existingTags = await this.adapter.getTagsWithIds([
-      ...new Set(beats.reduce((ids: string[], beat) => ids.concat([beat.id]), [])),
-    ]);
-
-    const configTypesToBeIgnored = existingTags.reduce(
-      (uniquenessEnforcingConfigTypes: string[], tag) => {
-        return uniquenessEnforcingConfigTypes.concat(
-          tag.hasConfigurationBlocksTypes!.filter(type => UNIQUENESS_ENFORCING_TYPES.includes(type))
-        );
-      },
-      []
-    );
-
-    return await this.adapter.tagsExcept(existingTags, configTypesToBeIgnored);
+    return await this.adapter.getAssignable(beats);
   }
 }

@@ -15,6 +15,13 @@ export class ConfigurationBlocksLib {
     private readonly tags: CMTagsDomain
   ) {}
 
+  public async getTagIdsExcludingTypes(
+    user: FrameworkUser,
+    blockTypes: string[]
+  ): Promise<string[]> {
+    return await this.adapter.getTagIdsExcludingTypes(user, blockTypes);
+  }
+
   public async getForTags(
     user: FrameworkUser,
     tagIds: string[],

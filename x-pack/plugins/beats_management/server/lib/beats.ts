@@ -41,6 +41,11 @@ export class CMBeatsDomain {
     return beat && beat.active ? beat : null;
   }
 
+  public async getByIds(user: FrameworkUser, beatIds: string[]): Promise<CMBeat[]> {
+    const beats = await this.adapter.getWithIds(user, beatIds);
+    return beats.filter(beat => beat.active);
+  }
+
   public async getAll(user: FrameworkUser, ESQuery?: any) {
     return (await this.adapter.getAll(user, ESQuery)).filter(
       (beat: CMBeat) => beat.active === true

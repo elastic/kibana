@@ -37,6 +37,7 @@ interface PageState {
   notifications: any[];
   tags: BeatTag[] | null;
   beats: CMBeat[];
+  assignmentOptions: BeatTag[] | null;
 }
 
 class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
@@ -48,6 +49,7 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
       notifications: [],
       tags: null,
       beats: [],
+      assignmentOptions: null,
     };
 
     if (props.urlState.beatsKBar) {
@@ -182,7 +184,7 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
               }}
               actions={beatsListActions}
               actionData={{
-                tags: this.props.libs.tags.getassignableTagsForBeats(this.getSelectedBeats()),
+                tags: this.state.assignmentOptions,
               }}
               actionHandler={async (action: AssignmentActionType, payload: any) => {
                 switch (action) {
@@ -198,7 +200,10 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
                     this.notifyBeatDisenrolled(this.getSelectedBeats());
                     break;
                   case AssignmentActionType.Reload:
-                    this.props.containers.tags.reload();
+                    const assignmentOptions = await this.props.libs.tags.getassignableTagsForBeats(
+                      this.getSelectedBeats()
+                    );
+                    this.setState({ assignmentOptions });
                     break;
                 }
               }}

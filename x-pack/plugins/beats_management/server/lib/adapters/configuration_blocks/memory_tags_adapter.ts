@@ -5,6 +5,7 @@
  */
 
 import Chance from 'chance'; // eslint-disable-line
+import { uniq } from 'lodash';
 import { ConfigurationBlock } from '../../../../common/domain_types';
 import { FrameworkUser } from '../framework/adapter_types';
 import { ConfigurationBlockAdapter } from './adapter_types';
@@ -48,6 +49,13 @@ export class MemoryConfigurationBlockAdapter implements ConfigurationBlockAdapte
       }
       return block.id;
     });
+  }
+
+  public async getTagIdsExcludingTypes(
+    user: FrameworkUser,
+    blockTypes: string[]
+  ): Promise<string[]> {
+    return uniq(this.db.map(block => block.tag));
   }
 
   public setDB(db: ConfigurationBlock[]) {

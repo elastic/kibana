@@ -16,4 +16,5 @@ export interface ConfigurationBlockAdapter {
   ): Promise<{ blocks: ConfigurationBlock[]; page: number; total: number }>;
   delete(user: FrameworkUser, blockIds: string[]): Promise<void>;
   create(user: FrameworkUser, configs: ConfigurationBlock[]): Promise<string[]>;
+  getTagIdsExcludingTypes(user: FrameworkUser, blockTypes: string[]): Promise<string[]>;
 }
