@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import buildAnnotationRequest from './build_annotation_request';
 import handleAnnotationResponse from './handle_annotation_response';
+import getRequestParams from './annorations/get_request_params';
+
 import SearchStrategiesRegister from '../search_strategies/search_strategies_register';
 
 function validAnnotation(annotation) {
@@ -29,52 +29,32 @@ function validAnnotation(annotation) {
     annotation.template;
 }
 
-export default async (req, panel), esQueryConfig => {
+export default async (req, panel, esQueryConfig) => {
   const indexPattern = panel.index_pattern;
   const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategy(req, indexPattern);
   const searchRequest = searchStrategy.getSearchRequest(req, indexPattern);
-  const bodies = panel.annotations
-    .filter(validAnnotation)
-    .map(annotation => {
+  const annotations = panel.annotations.filter(validAnnotation);
 
-      const indexPattern = annotation.index_pattern;
-      const bodies = [];
+  const body = annotations
+    .map(annotation => getRequestParams(req, panel, annotation, esQueryConfig, capabilities.batchRequestsSupport))
+    .reduce((acc, item) => acc.concat(item), []);
 
-      if (capabilities.batchRequestsSupport) {
-        bodies.push({
-          index: indexPattern,
-          ignoreUnavailable: true,
-        });
-      }
-
-      const body = buildAnnotationRequest(req, panel, annotation), esQueryConfig;
-      body.timeout = '90s';
-      bodies.push(body);
-      return bodies;
-    });
-
-  if (!bodies.length) return { responses: [] };
-
-  const body = bodies.reduce((acc, item) => acc.concat(item), []);
+  if (!body.length) return { responses: [] };
 
   try {
     const responses = await searchRequest.search({ body });
-    const results = {};
-    panel.annotations
-      .filter(validAnnotation)
-      .forEach((annotation, index) => {
-        const data = responses[index];
-        results[annotation.id] = handleAnnotationResponse(data, annotation);
-      });
 
-    return results;
+    return annotations
+      .reduce((acc, annotation, index) => {
+        acc[annotation.id] = handleAnnotationResponse(responses[index], annotation);
+
+        return acc;
+      }, {});
   } catch (error) {
     if (error.message === 'missing-indices') return { responses: [] };
     throw error;
   }
-
 };
-
 
 //todo: 
 async function getAnnotationBody(req, panel, annotation, esQueryConfig) {

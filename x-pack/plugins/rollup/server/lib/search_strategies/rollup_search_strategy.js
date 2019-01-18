@@ -19,7 +19,7 @@ export default (AbstractSearchStrategy, RollupSearchRequest, RollupSearchCapabil
       super(server, callWithRequestFactory, RollupSearchRequest);
     }
 
-    getAllRollupaCapabilities(req, indexPattern) {
+    getAllRollupCapabilities(req, indexPattern) {
       const callWithRequest = this.getCallWithRequestInstance(req);
       const indices = (indexPattern || '').split(INDEX_PATTERN_SEPARATOR);
       const requests = indices.map(index => callWithRequest(ROLLUP_INDEX_CAPABILITIES_METHOD, {
@@ -29,9 +29,8 @@ export default (AbstractSearchStrategy, RollupSearchRequest, RollupSearchCapabil
       return Promise.all(requests);
     }
 
-
     async checkForViability(req, indexPattern) {
-      const rollupCapabilities = await this.getAllRollupaCapabilities(req, indexPattern)
+      const rollupCapabilities = await this.getAllRollupCapabilities(req, indexPattern)
         .then((responses) => responses.filter(response => !isEmpty(response)));
 
       const isViable = rollupCapabilities.length === 1;
