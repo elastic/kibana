@@ -8,6 +8,7 @@ import { Server } from 'src/server/kbn_server';
 import { SavedObjectsClient } from 'src/server/saved_objects';
 
 import { ReindexSavedObject } from '../../../common/types';
+import { reindexActionsFactory } from './reindex_actions';
 import { ReindexService, reindexServiceFactory } from './reindex_service';
 
 const POLL_INTERVAL = 30000;
@@ -46,7 +47,10 @@ export class ReindexWorker {
       throw new Error(`More than one ReindexWorker cannot be created.`);
     }
 
-    this.reindexService = reindexServiceFactory(client, callWithInternalUser);
+    this.reindexService = reindexServiceFactory(
+      callWithInternalUser,
+      reindexActionsFactory(client, callWithInternalUser)
+    );
     this.processNextStep = swallowExceptions(this.reindexService.processNextStep, this.log);
     ReindexWorker.workerSingleton = this;
   }
@@ -111,8 +115,7 @@ export class ReindexWorker {
   };
 
   private refresh = async () => {
-    const resp = await this.reindexService.findAllInProgressOperations();
-    this.inProgressOps = resp.saved_objects;
+    this.inProgressOps = await this.reindexService.findAllInProgressOperations();
 
     // If there are operations in progress and we're not already updating operations, kick off the update loop
     if (!this.updateOperationLoopRunning) {

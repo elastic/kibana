@@ -4,43 +4,55 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
-import { SavedObjectsClient } from 'src/server/saved_objects';
+import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import {
-  REINDEX_OP_TYPE,
+  ReindexOperation,
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
   ReindexWarning,
 } from '../../../common/types';
-import { LOCK_WINDOW, ReindexService, reindexServiceFactory } from './reindex_service';
+import { ReindexService, reindexServiceFactory } from './reindex_service';
 
 describe('reindexService', () => {
-  let savedObjectClient: jest.Mocked<SavedObjectsClient>;
-  let callCluster: jest.Mock;
+  let actions: jest.Mocked<any>;
+  let callCluster: jest.Mock<CallCluster>;
   let service: ReindexService;
 
+  const updateMockImpl = (reindexOp: ReindexSavedObject, attrs: Partial<ReindexOperation> = {}) =>
+    Promise.resolve({
+      ...reindexOp,
+      attributes: { ...reindexOp.attributes, ...attrs },
+    } as ReindexSavedObject);
+
+  const unimplemented = (name: string) => () =>
+    Promise.reject(`Mock function ${name} was not implemented!`);
+
   beforeEach(() => {
-    savedObjectClient = {
-      errors: null,
-      create: jest.fn(),
-      bulkCreate: jest.fn(),
-      delete: jest.fn(),
-      find: jest.fn(),
-      bulkGet: jest.fn(),
-      get: jest.fn(),
-      // Fake update implementation that simply resolves to whatever the update says.
-      update: jest.fn((type: string, id: string, attributes: object) =>
-        Promise.resolve({ id, attributes } as ReindexSavedObject)
-      ) as any,
+    actions = {
+      createReindexOp: jest.fn(unimplemented('createReindexOp')),
+      deleteReindexOp: jest.fn(unimplemented('deleteReindexOp')),
+      updateReindexOp: jest.fn(updateMockImpl),
+      acquireLock: jest.fn((reindexOp: ReindexSavedObject) => reindexOp),
+      releaseLock: jest.fn((reindexOp: ReindexSavedObject) => reindexOp),
+      releaseLocks: jest.fn(unimplemented('releaseLocks')),
+      findReindexOperations: jest.fn(unimplemented('findReindexOperations')),
+      findAllInProgressOperations: jest.fn(unimplemented('findAllInProgressOperations')),
+      getBooleanFieldPaths: jest.fn(unimplemented('getBooleanFieldPaths')),
+      getFlatSettings: jest.fn(unimplemented('getFlatSettings')),
+      cleanupChanges: jest.fn(),
+      isMlIndex: jest.fn(() => false),
+      incrementMlReindexes: jest.fn(unimplemented('incrementMlReindexes')),
+      decrementMlReindexes: jest.fn(unimplemented('incrementMlReindexes')),
+      runWhileMlLocked: jest.fn(unimplemented('runWhileMlLocked')),
     };
     callCluster = jest.fn();
-    service = reindexServiceFactory(savedObjectClient, callCluster);
+    service = reindexServiceFactory(callCluster, actions);
   });
 
   describe('detectReindexWarnings', () => {
     it('fetches reindex warnings from flat settings', async () => {
-      const mappingsWithWarnings = {
+      actions.getFlatSettings.mockResolvedValueOnce({
         settings: {},
         mappings: {
           _doc: {
@@ -48,18 +60,14 @@ describe('reindexService', () => {
             _all: { enabled: true },
           },
         },
-      };
-      callCluster.mockResolvedValueOnce({ myIndex: mappingsWithWarnings });
+      });
 
       const reindexWarnings = await service.detectReindexWarnings('myIndex');
       expect(reindexWarnings).toEqual([ReindexWarning.allField, ReindexWarning.booleanFields]);
-      expect(callCluster).toHaveBeenCalledWith('transport.request', {
-        path: `/myIndex?flat_settings=true`,
-      });
     });
 
     it('returns null if index does not exist', async () => {
-      callCluster.mockResolvedValueOnce({});
+      actions.getFlatSettings.mockResolvedValueOnce(null);
       const reindexWarnings = await service.detectReindexWarnings('myIndex');
       expect(reindexWarnings).toBeNull();
     });
@@ -67,114 +75,64 @@ describe('reindexService', () => {
 
   describe('createReindexOperation', () => {
     it('creates new reindex operation', async () => {
-      callCluster.mockResolvedValueOnce(true);
-      savedObjectClient.find.mockResolvedValueOnce({ total: 0 });
-      callCluster.mockResolvedValueOnce(false);
+      callCluster.mockResolvedValueOnce(true); // indices.exist
+      actions.findReindexOperations.mockResolvedValueOnce({ total: 0 });
+      actions.createReindexOp.mockResolvedValueOnce();
 
       await service.createReindexOperation('myIndex');
-      expect(savedObjectClient.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
-        indexName: 'myIndex',
-        newIndexName: 'myIndex-reindex-0',
-        status: ReindexStatus.inProgress,
-        lastCompletedStep: ReindexStep.created,
-        locked: null,
-        reindexTaskId: null,
-        reindexTaskPercComplete: null,
-        errorMessage: null,
-      });
+
+      expect(actions.createReindexOp).toHaveBeenCalledWith('myIndex');
     });
 
     it('fails if index does not exist', async () => {
-      callCluster.mockResolvedValueOnce(false);
+      callCluster.mockResolvedValueOnce(false); // indices.exist
       await expect(service.createReindexOperation('myIndex')).rejects.toThrow();
-      expect(savedObjectClient.create).not.toHaveBeenCalled();
+      expect(actions.createReindexOp).not.toHaveBeenCalled();
     });
 
     it('deletes existing operation if it failed', async () => {
-      callCluster.mockResolvedValueOnce(true);
-      savedObjectClient.find.mockResolvedValueOnce({
+      callCluster.mockResolvedValueOnce(true); // indices.exist
+      actions.findReindexOperations.mockResolvedValueOnce({
         saved_objects: [{ id: 1, attributes: { status: ReindexStatus.failed } }],
         total: 1,
       });
+      actions.deleteReindexOp.mockResolvedValueOnce();
+      actions.createReindexOp.mockResolvedValueOnce();
 
       await service.createReindexOperation('myIndex');
-      expect(savedObjectClient.delete).toHaveBeenCalledWith(REINDEX_OP_TYPE, 1);
+      expect(actions.deleteReindexOp).toHaveBeenCalledWith({
+        id: 1,
+        attributes: { status: ReindexStatus.failed },
+      });
     });
 
     it('fails if existing operation did not fail', async () => {
-      callCluster.mockResolvedValueOnce(true);
-      savedObjectClient.find.mockResolvedValueOnce({
+      callCluster.mockResolvedValueOnce(true); // indices.exist
+      actions.findReindexOperations.mockResolvedValueOnce({
         saved_objects: [{ id: 1, attributes: { status: ReindexStatus.inProgress } }],
         total: 1,
       });
 
       await expect(service.createReindexOperation('myIndex')).rejects.toThrow();
-      expect(savedObjectClient.delete).not.toHaveBeenCalled();
-    });
-
-    it('generates fallback newIndexName if already exists', async () => {
-      callCluster.mockResolvedValueOnce(true);
-      savedObjectClient.find.mockResolvedValueOnce({ total: 0 });
-      callCluster.mockResolvedValueOnce(true);
-      callCluster.mockResolvedValueOnce(false);
-
-      await service.createReindexOperation('myIndex');
-      expect(savedObjectClient.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
-        indexName: 'myIndex',
-        newIndexName: 'myIndex-reindex-1',
-        status: ReindexStatus.inProgress,
-        lastCompletedStep: ReindexStep.created,
-        locked: null,
-        reindexTaskId: null,
-        reindexTaskPercComplete: null,
-        errorMessage: null,
-      });
-    });
-
-    it('fails if it cannot find a newIndexName that does not already exist', async () => {
-      callCluster.mockResolvedValueOnce(true);
-      savedObjectClient.find.mockResolvedValueOnce({
-        saved_objects: [{ id: 1, attributes: { status: ReindexStatus.inProgress } }],
-        total: 1,
-      });
-      callCluster.mockResolvedValue(true); // always return true
-
-      await expect(service.createReindexOperation('myIndex')).rejects.toThrow();
-      expect(savedObjectClient.create).not.toHaveBeenCalled();
+      expect(actions.deleteReindexOp).not.toHaveBeenCalled();
+      expect(actions.createReindexOp).not.toHaveBeenCalled();
     });
   });
 
   describe('findReindexOperation', () => {
     it('returns the only result', async () => {
-      savedObjectClient.find.mockResolvedValue({ total: 1, saved_objects: ['fake object'] });
+      actions.findReindexOperations.mockResolvedValue({ total: 1, saved_objects: ['fake object'] });
       await expect(service.findReindexOperation('myIndex')).resolves.toEqual('fake object');
-      expect(savedObjectClient.find).toHaveBeenCalledWith({
-        type: REINDEX_OP_TYPE,
-        search: `"myIndex"`,
-        searchFields: ['indexName'],
-      });
     });
 
     it('returns null if there are no results', async () => {
-      savedObjectClient.find.mockResolvedValue({ total: 0 });
+      actions.findReindexOperations.mockResolvedValue({ total: 0 });
       await expect(service.findReindexOperation('myIndex')).resolves.toBeNull();
     });
 
     it('fails if there is more than 1 result', async () => {
-      savedObjectClient.find.mockResolvedValue({ total: 2 });
+      actions.findReindexOperations.mockResolvedValue({ total: 2 });
       await expect(service.findReindexOperation('myIndex')).rejects.toThrow();
-    });
-  });
-
-  describe('findAllInProgressOperations', () => {
-    it('returns raw results', async () => {
-      savedObjectClient.find.mockResolvedValue('results!');
-      await expect(service.findAllInProgressOperations()).resolves.toEqual('results!');
-      expect(savedObjectClient.find).toHaveBeenCalledWith({
-        type: REINDEX_OP_TYPE,
-        search: '0',
-        searchFields: ['status'],
-      });
     });
   });
 
@@ -187,42 +145,8 @@ describe('reindexService', () => {
         const reindexOp = { id: '1', attributes: { locked: null } } as ReindexSavedObject;
         await service.processNextStep(reindexOp);
 
-        // Locked and then unlocked
-        expect(savedObjectClient.update.mock.calls).toHaveLength(2);
-        const firstUpdateAttributes = savedObjectClient.update.mock.calls[0][2];
-        expect(firstUpdateAttributes.locked).not.toBeNull();
-        const secondUpdateAttributes = savedObjectClient.update.mock.calls[1][2];
-        expect(secondUpdateAttributes.locked).toBeNull();
-      });
-
-      it('locks and unlocks if object lock has expired', async () => {
-        const reindexOp = {
-          id: '1',
-          attributes: {
-            // Set locked timestamp to timeout + 10 seconds ago
-            locked: moment()
-              .subtract(LOCK_WINDOW)
-              .subtract(moment.duration(10, 'seconds'))
-              .format(),
-          },
-        } as ReindexSavedObject;
-        await service.processNextStep(reindexOp);
-
-        // Locked and then unlocked
-        expect(savedObjectClient.update.mock.calls).toHaveLength(2);
-        const firstUpdateAttributes = savedObjectClient.update.mock.calls[0][2];
-        expect(firstUpdateAttributes.locked).not.toBeNull();
-        const secondUpdateAttributes = savedObjectClient.update.mock.calls[1][2];
-        expect(secondUpdateAttributes.locked).toBeNull();
-      });
-
-      it('throws if object is locked', async () => {
-        const reindexOp = {
-          id: '1',
-          attributes: { locked: moment().format() },
-        } as ReindexSavedObject;
-        await expect(service.processNextStep(reindexOp)).rejects.toThrow();
-        expect(savedObjectClient.update).not.toHaveBeenCalled();
+        expect(actions.acquireLock).toHaveBeenCalled();
+        expect(actions.releaseLock).toHaveBeenCalled();
       });
     });
   });
@@ -242,6 +166,89 @@ describe('reindexService', () => {
         id: '1',
         attributes: { ...defaultAttributes, lastCompletedStep: ReindexStep.created },
       } as ReindexSavedObject;
+      const mlReindexOp = {
+        id: '2',
+        attributes: { ...reindexOp.attributes, indexName: '.ml-anomalies' },
+      } as ReindexSavedObject;
+
+      it('does nothing if index is not an ML index', async () => {
+        actions.isMlIndex.mockReturnValueOnce(false);
+        const updatedOp = await service.processNextStep(reindexOp);
+        expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.mlUpgradeModeSet);
+        expect(actions.incrementMlReindexes).not.toHaveBeenCalled();
+        expect(actions.runWhileMlLocked).not.toHaveBeenCalled();
+        expect(callCluster).not.toHaveBeenCalled();
+      });
+
+      it('increments ML reindexes and calls ML stop endpoint', async () => {
+        actions.isMlIndex.mockReturnValueOnce(true);
+        actions.incrementMlReindexes.mockResolvedValueOnce();
+        actions.runWhileMlLocked.mockImplementationOnce(async (f: any) => f());
+        // Mock call to /_ml/set_upgrade_mode?enabled=true
+        callCluster.mockResolvedValueOnce({ acknowledged: true });
+
+        const updatedOp = await service.processNextStep(mlReindexOp);
+        expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.mlUpgradeModeSet);
+        expect(actions.incrementMlReindexes).toHaveBeenCalled();
+        expect(actions.runWhileMlLocked).toHaveBeenCalled();
+        expect(callCluster).toHaveBeenCalledWith('transport.request', {
+          path: '/_ml/set_upgrade_mode?enabled=true',
+          method: 'POST',
+        });
+      });
+
+      it('fails if ML reindexes cannot be incremented', async () => {
+        actions.isMlIndex.mockReturnValueOnce(true);
+        actions.incrementMlReindexes.mockRejectedValueOnce(new Error(`Can't lock!`));
+
+        const updatedOp = await service.processNextStep(mlReindexOp);
+        expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.created);
+        expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
+        expect(updatedOp.attributes.errorMessage!.includes(`Can't lock!`)).toBeTruthy();
+        expect(callCluster).not.toHaveBeenCalledWith('transport.request', {
+          path: '/_ml/set_upgrade_mode?enabled=true',
+          method: 'POST',
+        });
+      });
+
+      it('fails if ML doc cannot be locked', async () => {
+        actions.isMlIndex.mockReturnValueOnce(true);
+        actions.incrementMlReindexes.mockResolvedValueOnce();
+        actions.runWhileMlLocked.mockRejectedValueOnce(new Error(`Can't lock!`));
+
+        const updatedOp = await service.processNextStep(mlReindexOp);
+        expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.created);
+        expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
+        expect(updatedOp.attributes.errorMessage!.includes(`Can't lock!`)).toBeTruthy();
+        expect(callCluster).not.toHaveBeenCalledWith('transport.request', {
+          path: '/_ml/set_upgrade_mode?enabled=true',
+          method: 'POST',
+        });
+      });
+
+      it('fails if ML endpoint fails', async () => {
+        actions.isMlIndex.mockReturnValueOnce(true);
+        actions.incrementMlReindexes.mockResolvedValueOnce();
+        actions.runWhileMlLocked.mockImplementationOnce(async (f: any) => f());
+        // Mock call to /_ml/set_upgrade_mode?enabled=true
+        callCluster.mockResolvedValueOnce({ acknowledged: false });
+
+        const updatedOp = await service.processNextStep(mlReindexOp);
+        expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.created);
+        expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
+        expect(updatedOp.attributes.errorMessage!.includes('Could not stop ML jobs')).toBeTruthy();
+        expect(callCluster).toHaveBeenCalledWith('transport.request', {
+          path: '/_ml/set_upgrade_mode?enabled=true',
+          method: 'POST',
+        });
+      });
+    });
+
+    describe('mlJobsStopped', () => {
+      const reindexOp = {
+        id: '1',
+        attributes: { ...defaultAttributes, lastCompletedStep: ReindexStep.mlUpgradeModeSet },
+      } as ReindexSavedObject;
 
       it('blocks writes and updates lastCompletedStep', async () => {
         callCluster.mockResolvedValueOnce({ acknowledged: true });
@@ -256,7 +263,7 @@ describe('reindexService', () => {
       it('fails if setting updates are not acknowledged', async () => {
         callCluster.mockResolvedValueOnce({ acknowledged: false });
         const updatedOp = await service.processNextStep(reindexOp);
-        expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.created);
+        expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.mlUpgradeModeSet);
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
         expect(updatedOp.attributes.errorMessage).not.toBeNull();
       });
@@ -264,7 +271,7 @@ describe('reindexService', () => {
       it('fails if setting updates fail', async () => {
         callCluster.mockRejectedValueOnce(new Error('blah!'));
         const updatedOp = await service.processNextStep(reindexOp);
-        expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.created);
+        expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.mlUpgradeModeSet);
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
         expect(updatedOp.attributes.errorMessage).not.toBeNull();
       });
@@ -278,9 +285,8 @@ describe('reindexService', () => {
 
       // The more intricate details of how the settings are chosen are test separately.
       it('creates new index with settings and mappings and updates lastCompletedStep', async () => {
-        callCluster
-          .mockResolvedValueOnce({ myIndex: settingsMappings })
-          .mockResolvedValueOnce({ acknowledged: true });
+        actions.getFlatSettings.mockResolvedValueOnce(settingsMappings);
+        callCluster.mockResolvedValueOnce({ acknowledged: true }); // indices.create
 
         const updatedOp = await service.processNextStep(reindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.newIndexCreated);
@@ -315,10 +321,7 @@ describe('reindexService', () => {
         expect(updatedOp.attributes.errorMessage).not.toBeNull();
 
         // Original index should have been set back to allow reads.
-        expect(callCluster).toHaveBeenCalledWith('indices.putSettings', {
-          index: 'myIndex',
-          body: { 'index.blocks.write': false },
-        });
+        expect(actions.cleanupChanges).toHaveBeenCalledWith('myIndex');
       });
     });
 
@@ -329,16 +332,12 @@ describe('reindexService', () => {
       } as ReindexSavedObject;
 
       it('starts reindex, saves taskId, and updates lastCompletedStep', async () => {
-        callCluster
-          .mockResolvedValueOnce({ myIndex: { mappings: settingsMappings.mappings } })
-          .mockResolvedValueOnce({ task: 'xyz' });
+        actions.getBooleanFieldPaths.mockResolvedValue([]);
+        callCluster.mockResolvedValueOnce({ task: 'xyz' }); // reindex
         const updatedOp = await service.processNextStep(reindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexStarted);
         expect(updatedOp.attributes.reindexTaskId).toEqual('xyz');
         expect(updatedOp.attributes.reindexTaskPercComplete).toEqual(0);
-        expect(callCluster).toHaveBeenCalledWith('indices.getMapping', {
-          index: 'myIndex',
-        });
         expect(callCluster).toHaveBeenLastCalledWith('reindex', {
           refresh: true,
           waitForCompletion: false,
@@ -347,6 +346,19 @@ describe('reindexService', () => {
             dest: { index: 'myIndex-reindex-0' },
           },
         });
+      });
+
+      it('adds painless script if there are boolean fields', async () => {
+        actions.getBooleanFieldPaths.mockResolvedValue([['field1'], ['nested', 'field2']]);
+        callCluster.mockResolvedValueOnce({ task: 'xyz' }); // reindex
+        await service.processNextStep(reindexOp);
+        const reindexBody = callCluster.mock.calls[0][1].body;
+        expect(reindexBody.script.lang).toEqual('painless');
+        expect(typeof reindexBody.script.source).toEqual('string');
+        expect(reindexBody.script.params.booleanFieldPaths).toEqual([
+          ['field1'],
+          ['nested', 'field2'],
+        ]);
       });
 
       it('fails if starting reindex fails', async () => {
@@ -481,6 +493,111 @@ describe('reindexService', () => {
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexCompleted);
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
         expect(updatedOp.attributes.errorMessage).not.toBeNull();
+      });
+    });
+
+    describe('aliasCreated', () => {
+      const reindexOp = {
+        id: '1',
+        attributes: { ...defaultAttributes, lastCompletedStep: ReindexStep.aliasCreated },
+      } as ReindexSavedObject;
+      const mlReindexOp = {
+        id: '2',
+        attributes: { ...reindexOp.attributes, indexName: '.ml-anomalies' },
+      } as ReindexSavedObject;
+
+      it('does nothing if index is not an ML index', async () => {
+        actions.isMlIndex.mockReturnValueOnce(false);
+        const updatedOp = await service.processNextStep(reindexOp);
+        expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.mlUpgradeModeUnset);
+        expect(callCluster).not.toHaveBeenCalled();
+      });
+
+      it('decrements ML reindexes and calls ML start endpoint if no remaining ML jobs', async () => {
+        actions.isMlIndex.mockReturnValueOnce(true);
+        actions.decrementMlReindexes.mockResolvedValueOnce();
+        actions.runWhileMlLocked.mockImplementationOnce(async (f: any) =>
+          f({ attributes: { mlReindexCount: 0 } })
+        );
+        // Mock call to /_ml/set_upgrade_mode?enabled=false
+        callCluster.mockResolvedValueOnce({ acknowledged: true });
+
+        const updatedOp = await service.processNextStep(mlReindexOp);
+        expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.mlUpgradeModeUnset);
+        expect(callCluster).toHaveBeenCalledWith('transport.request', {
+          path: '/_ml/set_upgrade_mode?enabled=false',
+          method: 'POST',
+        });
+      });
+
+      it('does not call ML start endpoint if there are remaining ML jobs', async () => {
+        actions.isMlIndex.mockReturnValueOnce(true);
+        actions.decrementMlReindexes.mockResolvedValueOnce();
+        actions.runWhileMlLocked.mockImplementationOnce(async (f: any) =>
+          f({ attributes: { mlReindexCount: 2 } })
+        );
+        // Mock call to /_ml/set_upgrade_mode?enabled=false
+        callCluster.mockResolvedValueOnce({ acknowledged: true });
+        actions.releaseLocks.mockResolvedValueOnce();
+
+        const updatedOp = await service.processNextStep(mlReindexOp);
+        expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.mlUpgradeModeUnset);
+        expect(callCluster).not.toHaveBeenCalledWith('transport.request', {
+          path: '/_ml/set_upgrade_mode?enabled=false',
+          method: 'POST',
+        });
+      });
+
+      it('fails if ML reindexes cannot be decremented', async () => {
+        actions.isMlIndex.mockReturnValueOnce(true);
+        // Mock unable to lock ml doc
+        actions.decrementMlReindexes.mockRejectedValueOnce(new Error(`Can't lock!`));
+
+        const updatedOp = await service.processNextStep(mlReindexOp);
+        expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.aliasCreated);
+        expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
+        expect(updatedOp.attributes.errorMessage!.includes(`Can't lock!`)).toBeTruthy();
+        expect(callCluster).not.toHaveBeenCalledWith('transport.request', {
+          path: '/_ml/set_upgrade_mode?enabled=false',
+          method: 'POST',
+        });
+      });
+
+      it('fails if ML doc cannot be locked', async () => {
+        actions.isMlIndex.mockReturnValueOnce(true);
+        actions.decrementMlReindexes.mockResolvedValueOnce();
+        // Mock unable to lock ml doc
+        actions.runWhileMlLocked.mockRejectedValueOnce(new Error(`Can't lock!`));
+
+        const updatedOp = await service.processNextStep(mlReindexOp);
+        expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.aliasCreated);
+        expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
+        expect(updatedOp.attributes.errorMessage!.includes(`Can't lock!`)).toBeTruthy();
+        expect(callCluster).not.toHaveBeenCalledWith('transport.request', {
+          path: '/_ml/set_upgrade_mode?enabled=false',
+          method: 'POST',
+        });
+      });
+
+      it('fails if ML endpoint fails', async () => {
+        actions.isMlIndex.mockReturnValueOnce(true);
+        actions.decrementMlReindexes.mockResolvedValueOnce();
+        actions.runWhileMlLocked.mockImplementationOnce(async (f: any) =>
+          f({ attributes: { mlReindexCount: 0 } })
+        );
+        // Mock call to /_ml/set_upgrade_mode?enabled=true
+        callCluster.mockResolvedValueOnce({ acknowledged: false });
+
+        const updatedOp = await service.processNextStep(mlReindexOp);
+        expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.aliasCreated);
+        expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
+        expect(
+          updatedOp.attributes.errorMessage!.includes('Could not resume ML jobs')
+        ).toBeTruthy();
+        expect(callCluster).toHaveBeenCalledWith('transport.request', {
+          path: '/_ml/set_upgrade_mode?enabled=false',
+          method: 'POST',
+        });
       });
     });
   });

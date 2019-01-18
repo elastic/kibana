@@ -26,7 +26,7 @@ describe('ReindexProgress', () => {
   steps={
     Array [
       Object {
-        "status": "inProgress",
+        "status": "incomplete",
         "title": "Setting old index to read-only",
       },
       Object {

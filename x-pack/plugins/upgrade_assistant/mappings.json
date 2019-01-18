@@ -24,6 +24,9 @@
       },
       "errorMessage": {
         "type": "text"
+      },
+      "mlReindexCount": {
+        "type": "integer"
       }
     }
   }

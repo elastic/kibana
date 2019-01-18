@@ -10,12 +10,15 @@ import {
 } from 'src/server/saved_objects/service/saved_objects_client';
 
 export enum ReindexStep {
-  created,
-  readonly,
-  newIndexCreated,
-  reindexStarted,
-  reindexCompleted,
-  aliasCreated,
+  // Enum values are spaced out by 10 to give us room to insert steps in between.
+  created = 0,
+  mlUpgradeModeSet = 10,
+  readonly = 20,
+  newIndexCreated = 30,
+  reindexStarted = 40,
+  reindexCompleted = 50,
+  aliasCreated = 60,
+  mlUpgradeModeUnset = 70,
 }
 
 export enum ReindexStatus {
@@ -34,6 +37,7 @@ export interface ReindexOperation extends SavedObjectAttributes {
   reindexTaskId: string | null;
   reindexTaskPercComplete: number | null;
   errorMessage: string | null;
+  mlReindexCount: number | null;
 }
 
 export type ReindexSavedObject = SavedObject<ReindexOperation>;

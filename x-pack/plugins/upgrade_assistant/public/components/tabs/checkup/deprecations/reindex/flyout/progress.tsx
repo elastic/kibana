@@ -21,6 +21,8 @@ const ErrorCallout: React.StatelessComponent<{ errorMessage: string | null }> = 
   </EuiCallOut>
 );
 
+const orderedSteps = Object.values(ReindexStep).sort() as number[];
+
 /**
  * Displays a list of steps in the reindex operation, the current status, a progress bar,
  * and any error messages that are encountered.
@@ -32,16 +34,18 @@ export const ReindexProgress: React.StatelessComponent<{
   errorMessage: string | null;
 }> = ({ lastCompletedStep = -1, reindexStatus, reindexTaskPercComplete, errorMessage }) => {
   const stepDetails = (thisStep: ReindexStep): Pick<StepProgressStep, 'status' | 'children'> => {
-    if (reindexStatus === ReindexStatus.failed && lastCompletedStep + 1 === thisStep) {
+    const previousStep = orderedSteps[orderedSteps.indexOf(thisStep) - 1];
+
+    if (reindexStatus === ReindexStatus.failed && lastCompletedStep === previousStep) {
       return {
         status: 'failed',
         children: <ErrorCallout {...{ errorMessage }} />,
       };
-    } else if (reindexStatus === undefined || lastCompletedStep < thisStep - 1) {
+    } else if (reindexStatus === undefined || lastCompletedStep < previousStep) {
       return {
         status: 'incomplete',
       };
-    } else if (lastCompletedStep === thisStep - 1) {
+    } else if (lastCompletedStep === previousStep) {
       return {
         status: 'inProgress',
       };
@@ -62,11 +66,11 @@ export const ReindexProgress: React.StatelessComponent<{
   ) {
     reindexingDocsStep.status = 'failed';
     reindexingDocsStep.children = <ErrorCallout {...{ errorMessage }} />;
-  } else if (reindexStatus === undefined || lastCompletedStep < ReindexStep.reindexStarted - 1) {
+  } else if (reindexStatus === undefined || lastCompletedStep < ReindexStep.newIndexCreated) {
     reindexingDocsStep.status = 'incomplete';
   } else {
     reindexingDocsStep.status =
-      lastCompletedStep === ReindexStep.reindexStarted - 1 ||
+      lastCompletedStep === ReindexStep.newIndexCreated ||
       lastCompletedStep === ReindexStep.reindexStarted
         ? 'inProgress'
         : 'complete';

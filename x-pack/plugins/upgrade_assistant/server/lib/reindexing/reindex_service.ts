@@ -5,168 +5,61 @@
  */
 
 import Boom from 'boom';
-import { range } from 'lodash';
-import moment from 'moment';
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import {
-  FindResponse,
-  SavedObjectsClient,
-} from 'src/server/saved_objects/service/saved_objects_client';
-import {
-  REINDEX_OP_TYPE,
-  ReindexOperation,
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
   ReindexWarning,
 } from '../../../common/types';
-import { findBooleanFields, getReindexWarnings, transformFlatSettings } from './index_settings';
-import { FlatSettings } from './types';
-
-// TODO: base on elasticsearch.requestTimeout?
-export const LOCK_WINDOW = moment.duration(90, 'seconds');
+import { getReindexWarnings, transformFlatSettings } from './index_settings';
+import { ReindexActions } from './reindex_actions';
 
 export interface ReindexService {
   detectReindexWarnings(indexName: string): Promise<ReindexWarning[] | null>;
   createReindexOperation(indexName: string): Promise<ReindexSavedObject>;
-  findAllInProgressOperations(): Promise<FindResponse<ReindexOperation>>;
+  findAllInProgressOperations(): Promise<ReindexSavedObject[]>;
   findReindexOperation(indexName: string): Promise<ReindexSavedObject | null>;
   processNextStep(reindexOp: ReindexSavedObject): Promise<ReindexSavedObject>;
 }
 
 export const reindexServiceFactory = (
-  client: SavedObjectsClient,
-  callCluster: CallCluster
+  callCluster: CallCluster,
+  actions: ReindexActions
 ): ReindexService => {
-  // ------ Utility functions used internally
-
-  const updateReindexOp = (
-    reindexOp: ReindexSavedObject,
-    attrs: Partial<ReindexOperation> = {}
-  ) => {
-    return client.update<ReindexOperation>(
-      REINDEX_OP_TYPE,
-      reindexOp.id,
-      { ...reindexOp.attributes, locked: moment().format(), ...attrs },
-      { version: reindexOp.version }
-    );
-  };
-
-  /**
-   * Marks the reindex operation as locked by the current kibana process for up to LOCK_WINDOW
-   * @param reindexOp
-   */
-  const acquireLock = async (reindexOp: ReindexSavedObject) => {
-    const now = moment();
-    if (reindexOp.attributes.locked) {
-      const lockedTime = moment(reindexOp.attributes.locked);
-      // If the object has been locked for more than the LOCK_WINDOW, assume the process that locked it died.
-      if (now.subtract(LOCK_WINDOW) < lockedTime) {
-        throw Boom.conflict(
-          `Another Kibana process is currently modifying this reindex operation.`
-        );
-      }
-    }
-
-    return client.update<ReindexOperation>(
-      REINDEX_OP_TYPE,
-      reindexOp.id,
-      { ...reindexOp.attributes, locked: now.format() },
-      { version: reindexOp.version }
-    );
-  };
-
-  /**
-   * Releases the lock on the reindex operation.
-   * @param reindexOp
-   */
-  const releaseLock = (reindexOp: ReindexSavedObject) => {
-    return client.update<ReindexOperation>(
-      REINDEX_OP_TYPE,
-      reindexOp.id,
-      { ...reindexOp.attributes, locked: null },
-      { version: reindexOp.version }
-    );
-  };
-
-  /**
-   * Finds the reindex operation saved object for the given index.
-   * @param indexName
-   */
-  const findReindexOperations = (indexName: string) => {
-    return client.find<ReindexOperation>({
-      type: REINDEX_OP_TYPE,
-      search: `"${indexName}"`,
-      searchFields: ['indexName'],
-    });
-  };
-
-  /**
-   * Returns array of field paths to boolean fields in the index's mapping.
-   * @param indexName
-   */
-  const getBooleanFieldPaths = async (indexName: string) => {
-    const results = await callCluster('indices.getMapping', { index: indexName });
-    const allMappings = results[indexName].mappings;
-    const mappingTypes = Object.keys(allMappings);
-
-    if (mappingTypes.length > 1) {
-      throw new Error(`Cannot reindex indices with more than one mapping type.`);
-    }
-
-    const mapping = allMappings[mappingTypes[0]];
-    // It's possible an index doesn't have a mapping.
-    return mapping ? findBooleanFields(mapping.properties) : [];
-  };
-
-  /**
-   * Retrieve index settings (in flat, dot-notation style) and mappings.
-   * @param indexName
-   */
-  const getFlatSettings = async (indexName: string) => {
-    const flatSettings = (await callCluster('transport.request', {
-      // TODO: set `&include_type_name=true` to false in 7.0
-      path: `/${encodeURIComponent(indexName)}?flat_settings=true`,
-    })) as { [indexName: string]: FlatSettings };
-
-    if (!flatSettings[indexName]) {
-      return null;
-    }
-
-    return flatSettings[indexName];
-  };
-
-  /**
-   * Generates a new index name for the new index. Iterates until it finds an index
-   * that doesn't already exist.
-   * @param indexName
-   */
-  const getNewIndexName = async (indexName: string, attempts = 100) => {
-    for (const i of range(0, attempts)) {
-      const newIndexName = `${indexName}-reindex-${i}`;
-      if (!(await callCluster('indices.exists', { index: newIndexName }))) {
-        return newIndexName;
-      }
-    }
-
-    throw new Error(
-      `Could not generate an indexName that does not already exist after ${attempts} attempts.`
-    );
-  };
-
-  /**
-   * Tries to undo any changes that were made in the event of a failure.
-   * @param indexName
-   */
-  const cleanupChanges = async (indexName: string) => {
-    await callCluster('indices.putSettings', {
-      index: indexName,
-      body: { 'index.blocks.write': false },
-    });
-  };
-
   // ------ Functions used to process the state machine
+
+  /**
+   * If the index is a ML index that will cause jobs to fail when set to readonly,
+   * turn on 'upgrade mode' to pause all ML jobs.
+   * @param reindexOp
+   */
+  const setMlUpgradeMode = async (reindexOp: ReindexSavedObject) => {
+    if (!actions.isMlIndex(reindexOp.attributes.indexName)) {
+      return actions.updateReindexOp(reindexOp, {
+        lastCompletedStep: ReindexStep.mlUpgradeModeSet,
+      });
+    }
+
+    await actions.incrementMlReindexes();
+    await actions.runWhileMlLocked(async mlDoc => {
+      const res = await callCluster('transport.request', {
+        path: '/_ml/set_upgrade_mode?enabled=true',
+        method: 'POST',
+      });
+
+      if (!res.acknowledged) {
+        throw new Error(`Could not stop ML jobs`);
+      }
+
+      return mlDoc;
+    });
+
+    return actions.updateReindexOp(reindexOp, {
+      lastCompletedStep: ReindexStep.mlUpgradeModeSet,
+    });
+  };
 
   /**
    * Sets the original index as readonly so new data can be indexed until the reindex
@@ -184,7 +77,7 @@ export const reindexServiceFactory = (
       throw new Error(`Index could not be set to readonly.`);
     }
 
-    return updateReindexOp(reindexOp, { lastCompletedStep: ReindexStep.readonly });
+    return actions.updateReindexOp(reindexOp, { lastCompletedStep: ReindexStep.readonly });
   };
 
   /**
@@ -194,7 +87,7 @@ export const reindexServiceFactory = (
   const createNewIndex = async (reindexOp: ReindexSavedObject) => {
     const { indexName, newIndexName } = reindexOp.attributes;
 
-    const flatSettings = await getFlatSettings(indexName);
+    const flatSettings = await actions.getFlatSettings(indexName);
     if (!flatSettings) {
       throw Boom.notFound(`Index ${indexName} does not exist.`);
     }
@@ -212,7 +105,9 @@ export const reindexServiceFactory = (
       throw Boom.badImplementation(`Index could not be created: ${newIndexName}`);
     }
 
-    return updateReindexOp(reindexOp, { lastCompletedStep: ReindexStep.newIndexCreated });
+    return actions.updateReindexOp(reindexOp, {
+      lastCompletedStep: ReindexStep.newIndexCreated,
+    });
   };
 
   /**
@@ -226,7 +121,7 @@ export const reindexServiceFactory = (
       dest: { index: reindexOp.attributes.newIndexName },
     } as any;
 
-    const booleanFieldPaths = await getBooleanFieldPaths(indexName);
+    const booleanFieldPaths = await actions.getBooleanFieldPaths(indexName);
     if (booleanFieldPaths.length) {
       reindexBody.script = {
         lang: 'painless',
@@ -285,7 +180,7 @@ export const reindexServiceFactory = (
       body: reindexBody,
     })) as { task: string };
 
-    return updateReindexOp(reindexOp, {
+    return actions.updateReindexOp(reindexOp, {
       lastCompletedStep: ReindexStep.reindexStarted,
       reindexTaskId: startReindex.task,
       reindexTaskPercComplete: 0,
@@ -323,13 +218,13 @@ export const reindexServiceFactory = (
       }
 
       // Update the status
-      return updateReindexOp(reindexOp, {
+      return actions.updateReindexOp(reindexOp, {
         lastCompletedStep: ReindexStep.reindexCompleted,
         reindexTaskPercComplete: 1,
       });
     } else {
       const perc = taskResponse.task.status.created / taskResponse.task.status.total;
-      return updateReindexOp(reindexOp, {
+      return actions.updateReindexOp(reindexOp, {
         reindexTaskPercComplete: perc,
       });
     }
@@ -364,8 +259,45 @@ export const reindexServiceFactory = (
       throw Boom.badImplementation(`Index aliases could not be created.`);
     }
 
-    return updateReindexOp(reindexOp, {
+    return actions.updateReindexOp(reindexOp, {
       lastCompletedStep: ReindexStep.aliasCreated,
+      // Only set to completed if this is not an ML index.
+      status: actions.isMlIndex(indexName) ? ReindexStatus.inProgress : ReindexStatus.completed,
+    });
+  };
+
+  /**
+   * Turn off 'upgrade mode' to resume ML jobs if this reindex is the only running ML ReindexOp.
+   * @param reindexOp
+   */
+  const unsetMlUpgradeMode = async (reindexOp: ReindexSavedObject) => {
+    // In theory the reindexOp should never get passed through this function in this case
+    // because it should already be marked as completed. However, let's be safe.
+    if (!actions.isMlIndex(reindexOp.attributes.indexName)) {
+      return actions.updateReindexOp(reindexOp, {
+        lastCompletedStep: ReindexStep.mlUpgradeModeUnset,
+        status: ReindexStatus.completed,
+      });
+    }
+
+    await actions.decrementMlReindexes();
+    await actions.runWhileMlLocked(async mlDoc => {
+      if (mlDoc.attributes.mlReindexCount === 0) {
+        const res = await callCluster('transport.request', {
+          path: '/_ml/set_upgrade_mode?enabled=false',
+          method: 'POST',
+        });
+
+        if (!res.acknowledged) {
+          throw new Error(`Could not resume ML jobs`);
+        }
+      }
+
+      return mlDoc;
+    });
+
+    return actions.updateReindexOp(reindexOp, {
+      lastCompletedStep: ReindexStep.mlUpgradeModeUnset,
       status: ReindexStatus.completed,
     });
   };
@@ -374,7 +306,7 @@ export const reindexServiceFactory = (
 
   return {
     async detectReindexWarnings(indexName: string) {
-      const flatSettings = await getFlatSettings(indexName);
+      const flatSettings = await actions.getFlatSettings(indexName);
       if (!flatSettings) {
         return null;
       } else {
@@ -383,36 +315,27 @@ export const reindexServiceFactory = (
     },
 
     async createReindexOperation(indexName: string) {
-      const indexExists = callCluster('indices.exists', { index: indexName });
+      const indexExists = await callCluster('indices.exists', { index: indexName });
       if (!indexExists) {
         throw Boom.notFound(`Index ${indexName} does not exist in this cluster.`);
       }
 
-      const existingReindexOps = await findReindexOperations(indexName);
+      const existingReindexOps = await actions.findReindexOperations(indexName);
       if (existingReindexOps.total !== 0) {
         const existingOp = existingReindexOps.saved_objects[0];
         if (existingOp.attributes.status === ReindexStatus.failed) {
           // Delete the existing one if it failed to give a chance to retry.
-          await client.delete(REINDEX_OP_TYPE, existingOp.id);
+          await actions.deleteReindexOp(existingOp);
         } else {
           throw Boom.badImplementation(`A reindex operation already in-progress for ${indexName}`);
         }
       }
 
-      return client.create<ReindexOperation>(REINDEX_OP_TYPE, {
-        indexName,
-        newIndexName: await getNewIndexName(indexName),
-        status: ReindexStatus.inProgress,
-        lastCompletedStep: ReindexStep.created,
-        locked: null,
-        reindexTaskId: null,
-        reindexTaskPercComplete: null,
-        errorMessage: null,
-      });
+      return actions.createReindexOp(indexName);
     },
 
     async findReindexOperation(indexName: string) {
-      const findResponse = await findReindexOperations(indexName);
+      const findResponse = await actions.findReindexOperations(indexName);
 
       // Bail early if it does not exist or there is more than one.
       if (findResponse.total === 0) {
@@ -424,21 +347,18 @@ export const reindexServiceFactory = (
       return findResponse.saved_objects[0];
     },
 
-    findAllInProgressOperations() {
-      return client.find<ReindexOperation>({
-        type: REINDEX_OP_TYPE,
-        search: ReindexStatus.inProgress.toString(),
-        searchFields: ['status'],
-      });
-    },
+    findAllInProgressOperations: actions.findAllInProgressOperations,
 
     async processNextStep(reindexOp: ReindexSavedObject) {
       // If locking the operation fails, we don't want to catch it.
-      reindexOp = await acquireLock(reindexOp);
+      reindexOp = await actions.acquireLock(reindexOp);
 
       try {
         switch (reindexOp.attributes.lastCompletedStep) {
           case ReindexStep.created:
+            reindexOp = await setMlUpgradeMode(reindexOp);
+            break;
+          case ReindexStep.mlUpgradeModeSet:
             reindexOp = await setReadonly(reindexOp);
             break;
           case ReindexStep.readonly:
@@ -453,20 +373,23 @@ export const reindexServiceFactory = (
           case ReindexStep.reindexCompleted:
             reindexOp = await switchAlias(reindexOp);
             break;
+          case ReindexStep.aliasCreated:
+            reindexOp = await unsetMlUpgradeMode(reindexOp);
+            break;
           default:
             break;
         }
       } catch (e) {
         // Trap the exception and add the message to the object so the UI can display it.
-        reindexOp = await updateReindexOp(reindexOp, {
+        reindexOp = await actions.updateReindexOp(reindexOp, {
           status: ReindexStatus.failed,
           errorMessage: e instanceof Error ? e.stack : e.toString(),
         });
 
-        await cleanupChanges(reindexOp.attributes.indexName);
+        await actions.cleanupChanges(reindexOp.attributes.indexName);
       } finally {
         // Always make sure we return the most recent version of the saved object.
-        reindexOp = await releaseLock(reindexOp);
+        reindexOp = await actions.releaseLock(reindexOp);
       }
 
       return reindexOp;

@@ -10,6 +10,7 @@ import { Server } from 'hapi';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { SavedObjectsClient } from 'src/server/saved_objects';
 import { reindexServiceFactory, ReindexWorker } from '../lib/reindexing';
+import { reindexActionsFactory } from '../lib/reindexing/reindex_actions';
 
 export function registerReindexWorker(server: Server) {
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
@@ -30,8 +31,11 @@ export function registerReindexWorker(server: Server) {
 
   const worker = new ReindexWorker(savedObjectsClient, callWithInternalUser, log);
 
-  worker.start();
-  server.events.on('stop', () => worker.stop());
+  // Wait for ES connection before starting the polling loop.
+  server.plugins.elasticsearch.waitUntilReady().then(() => {
+    worker.start();
+    server.events.on('stop', () => worker.stop());
+  });
 
   return worker;
 }
@@ -48,7 +52,8 @@ export function registerReindexIndicesRoutes(server: Server, worker: ReindexWork
       const client = request.getSavedObjectsClient();
       const { indexName } = request.params;
       const callCluster = callWithRequest.bind(null, request) as CallCluster;
-      const reindexService = reindexServiceFactory(client, callCluster);
+      const reindexActions = reindexActionsFactory(client, callCluster);
+      const reindexService = reindexServiceFactory(callCluster, reindexActions);
 
       try {
         // Create the reindex operation
@@ -74,7 +79,8 @@ export function registerReindexIndicesRoutes(server: Server, worker: ReindexWork
       const client = request.getSavedObjectsClient();
       const { indexName } = request.params;
       const callCluster = callWithRequest.bind(null, request) as CallCluster;
-      const reindexService = reindexServiceFactory(client, callCluster);
+      const reindexActions = reindexActionsFactory(client, callCluster);
+      const reindexService = reindexServiceFactory(callCluster, reindexActions);
 
       try {
         const reindexOp = await reindexService.findReindexOperation(indexName);
