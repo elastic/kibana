@@ -37,7 +37,7 @@ import { SectionError } from '../section_error';
 import { FormEntryRow } from '../form_entry_row';
 import { advancedSettingsFields, emptyAdvancedSettings } from './advanced_settings_fields';
 import { extractQueryParams } from '../../services/query_params';
-import { getRemoteClusterName, getFirstConnectedCluster } from '../../services/get_remote_cluster_name';
+import { getRemoteClusterName } from '../../services/get_remote_cluster_name';
 import { RemoteClustersFormField } from '../remote_clusters_form_field';
 
 const indexNameIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
@@ -51,9 +51,9 @@ const fieldToValidatorMap = advancedSettingsFields.reduce((map, advancedSetting)
   'leaderIndex': leaderIndexValidator,
 });
 
-const getEmptyFollowerIndex = (remoteClusters) => ({
+const getEmptyFollowerIndex = (remoteClusterName = '') => ({
   name: '',
-  remoteCluster: remoteClusters ? getFirstConnectedCluster(remoteClusters).name : '',
+  remoteCluster: remoteClusterName,
   leaderIndex: '',
   ...emptyAdvancedSettings,
 });
@@ -102,6 +102,7 @@ export const FollowerIndexForm = injectI18n(
           ...getEmptyFollowerIndex(),
           ...this.props.followerIndex,
         };
+      console.log(isNew, remoteClusterName, followerIndex);
 
       const fieldsErrors = this.getFieldsErrors(followerIndex);
 

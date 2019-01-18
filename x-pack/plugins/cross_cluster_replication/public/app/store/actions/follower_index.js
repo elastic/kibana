@@ -51,7 +51,7 @@ export const getFollowerIndex = (id) =>
     )
   });
 
-export const saveFollowerIndex = (name, followerIndex, isUpdating) => (
+export const saveFollowerIndex = (name, followerIndex, isUpdating = false) => (
   sendApiRequest({
     label: t.FOLLOWER_INDEX_CREATE,
     status: API_STATUS.SAVING,

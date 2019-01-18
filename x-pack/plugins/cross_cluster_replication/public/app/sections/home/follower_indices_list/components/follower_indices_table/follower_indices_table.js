@@ -70,7 +70,7 @@ export const FollowerIndicesTable = injectI18n(
       const { intl, selectFollowerIndex } = this.props;
 
       const actions = [
-        /* Resume follower index */
+        /* Pause or resume follower index */
         {
           render: ({ name, shards }) => {
             const isPaused = !shards || !shards.length;
@@ -115,6 +115,27 @@ export const FollowerIndicesTable = injectI18n(
             );
           },
         },
+        /* Edit follower index */
+        {
+          render: ({ name }) => {
+            const label = intl.formatMessage({
+              id: 'xpack.crossClusterReplication.followerIndexList.table.actionEditDescription',
+              defaultMessage: 'Edit follower index',
+            });
+
+            return (
+              <span onClick={() => this.editFollowerIndex(name)}>
+                <EuiIcon
+                  aria-label={label}
+                  type="pencil"
+                  color="primary"
+                  className="euiContextMenu__icon"
+                />
+                <span>{label}</span>
+              </span>
+            );
+          },
+        },
         /* Unfollow leader index */
         {
           render: ({ name }) => {
@@ -137,27 +158,6 @@ export const FollowerIndicesTable = injectI18n(
                   </span>
                 )}
               </FollowerIndexUnfollowProvider>
-            );
-          },
-        },
-        /* Edit follower index */
-        {
-          render: ({ name }) => {
-            const label = intl.formatMessage({
-              id: 'xpack.crossClusterReplication.followerIndexList.table.actionEditDescription',
-              defaultMessage: 'Edit follower index',
-            });
-
-            return (
-              <span onClick={() => this.editFollowerIndex(name)}>
-                <EuiIcon
-                  aria-label={label}
-                  type="pencil"
-                  color="primary"
-                  className="euiContextMenu__icon"
-                />
-                <span>{label}</span>
-              </span>
             );
           },
         },

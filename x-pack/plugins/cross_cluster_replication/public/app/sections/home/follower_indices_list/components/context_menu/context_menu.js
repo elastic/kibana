@@ -145,6 +145,18 @@ export class ContextMenuUi extends PureComponent {
             ) : null
           }
 
+          { followerIndexNames.length === 1 && (
+            <EuiContextMenuItem
+              icon="pencil"
+              onClick={() => this.editFollowerIndex(followerIndexNames[0])}
+            >
+              <FormattedMessage
+                id="xpack.crossClusterReplication.followerIndex.contextMenu.editLabel"
+                defaultMessage="Edit follower index"
+              />
+            </EuiContextMenuItem>
+          ) }
+
           <FollowerIndexUnfollowProvider>
             {(unfollowLeaderIndex) => (
               <EuiContextMenuItem
@@ -159,18 +171,6 @@ export class ContextMenuUi extends PureComponent {
               </EuiContextMenuItem>
             )}
           </FollowerIndexUnfollowProvider>
-
-          { followerIndexNames.length === 1 && (
-            <EuiContextMenuItem
-              icon="pencil"
-              onClick={() => this.editFollowerIndex(followerIndexNames[0])}
-            >
-              <FormattedMessage
-                id="xpack.crossClusterReplication.followerIndex.contextMenu.editLabel"
-                defaultMessage="Edit follower index"
-              />
-            </EuiContextMenuItem>
-          ) }
         </EuiContextMenuPanel>
       </EuiPopover>
     );

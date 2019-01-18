@@ -17,8 +17,6 @@ import {
   EuiFlexItem,
   EuiOverlayMask,
   EuiConfirmModal,
-  EuiIcon,
-
 } from '@elastic/eui';
 
 import { listBreadcrumb, editBreadcrumb } from '../../services/breadcrumbs';
@@ -78,7 +76,7 @@ export const FollowerIndexEdit = injectI18n(
     componentDidUpdate(prevProps, prevState) {
       const { followerIndex, getFollowerIndex } = this.props;
       if (!followerIndex && prevState.lastFollowerIndexId !== this.state.lastFollowerIndexId) {
-        // Fetch the auto-follow pattern on the server
+        // Fetch the follower index on the server
         getFollowerIndex(this.state.lastFollowerIndexId);
       }
     }
@@ -88,12 +86,12 @@ export const FollowerIndexEdit = injectI18n(
     }
 
     saveFollowerIndex = (name, followerIndex) => {
-      this.inflightPayload = { name, followerIndex };
+      this.editedFollowerIndexPayload = { name, followerIndex };
       this.showConfirmModal();
     }
 
     confirmSaveFollowerIhdex = () => {
-      const { name, followerIndex } = this.inflightPayload;
+      const { name, followerIndex } = this.editedFollowerIndexPayload;
       this.props.saveFollowerIndex(name, followerIndex);
       this.closeConfirmModal();
     }
@@ -153,7 +151,7 @@ export const FollowerIndexEdit = injectI18n(
       const { followerIndexId, intl } = this.props;
       const title = intl.formatMessage({
         id: 'xpack.crossClusterReplication.followerIndexEditForm.confirmModal.title',
-        defaultMessage: 'Update follower index \'{id}\'',
+        defaultMessage: 'Update follower index \'{id}\'?',
       }, { id: followerIndexId });
 
       return (
@@ -168,7 +166,6 @@ export const FollowerIndexEdit = injectI18n(
                 defaultMessage: 'Cancel',
               })
             }
-            buttonColor="danger"
             confirmButtonText={
               intl.formatMessage({
                 id: 'xpack.crossClusterReplication.followerIndexEditForm.confirmModal.confirmButtonText',
@@ -177,10 +174,10 @@ export const FollowerIndexEdit = injectI18n(
             }
           >
             <p>
-              <EuiIcon type="alert" color="danger" />{' '}
               <FormattedMessage
                 id="xpack.crossClusterReplication.followerIndexEditForm.confirmModal.description"
-                defaultMessage="To update the follower index, it will first be paused and then resumed."
+                defaultMessage="To update the follower index, it will first be paused and then resumed.
+                  If the update fails, you may need to manually resume the follower index."
               />
             </p>
           </EuiConfirmModal>

@@ -50,7 +50,7 @@ export const RemoteClustersFormField = injectI18n(
       const remoteCluster = remoteClusters.find(c => c.name === clusterName);
 
       return remoteCluster && remoteCluster.isConnected
-        ? { error: null }
+        ? { error: undefined }
         : { error: { message: (
           <FormattedMessage
             id="xpack.crossClusterReplication.forms.invalidRemoteClusterError"

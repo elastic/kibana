@@ -34,10 +34,10 @@ const registerHandlers = () => {
     0: 'list',
     1: 'get',
     2: 'create',
-    2: 'edit',
-    3: 'pause',
-    4: 'resume',
-    5: 'unfollow',
+    3: 'edit',
+    4: 'pause',
+    5: 'resume',
+    6: 'unfollow',
   };
 
   const server = {

@@ -23,7 +23,7 @@ export const registerFollowerIndexRoutes = (server) => {
   const licensePreRouting = licensePreRoutingFactory(server);
 
   /**
-   * Returns a list of all Follower indices
+   * Returns a list of all follower indices
    */
   server.route({
     path: `${API_BASE_PATH}/follower_indices`,
@@ -47,7 +47,6 @@ export const registerFollowerIndexRoutes = (server) => {
       }
     },
   });
-
 
   /**
    * Returns a single follower index pattern
@@ -80,7 +79,6 @@ export const registerFollowerIndexRoutes = (server) => {
       }
     },
   });
-
 
   /**
    * Create a follower index
@@ -121,10 +119,8 @@ export const registerFollowerIndexRoutes = (server) => {
       const { id: _id } = request.params;
       const body = removeEmptyFields(serializeAdvancedSettings(request.payload));
 
+      // We need to first pause the follower and then resume it passing the advanced settings
       try {
-        /**
-         * We need to first pause the follower and then resume it passing the advanced settings
-         */
         // Pause follower
         await callWithRequest('ccr.pauseFollowerIndex', { id: _id });
 
