@@ -50,9 +50,7 @@ export class VectorStyle {
   static renderEditor({ handleStyleChange, style, layer }) {
 
     const styleProperties = { ...style.getProperties() };
-    console.log(styleProperties);
     const handlePropertyChange = (propertyName, settings) => {
-      console.log(settings);
       styleProperties[propertyName] = settings;//override single property, but preserve the rest
       const vectorStyleDescriptor = VectorStyle.createDescriptor(styleProperties);
       handleStyleChange(vectorStyleDescriptor);
