@@ -11,6 +11,7 @@ import mappings from './mappings.json';
 import { checkLicense } from './check_license';
 import { watchStatusAndLicenseToInitialize } from
   '../../server/lib/watch_status_and_license_to_initialize';
+import { makeMapsUsageCollector } from './server/maps_telemetry';
 
 export function gis(kibana) {
 
@@ -32,6 +33,11 @@ export function gis(kibana) {
       ],
       home: ['plugins/gis/register_feature'],
       styleSheetPaths: `${__dirname}/public/index.scss`,
+      savedObjectSchemas: {
+        'maps-telemetry': {
+          isNamespaceAgnostic: true
+        }
+      },
       mappings
     },
     config(Joi) {
@@ -43,30 +49,32 @@ export function gis(kibana) {
     init(server) {
       const gisEnabled = server.config().get('xpack.gis.enabled');
 
-      if (gisEnabled) {
-        const thisPlugin = this;
-        const xpackMainPlugin = server.plugins.xpack_main;
-        let routesInitialized = false;
-
-        watchStatusAndLicenseToInitialize(xpackMainPlugin, thisPlugin,
-          async license => {
-            if (license && license.gis && !routesInitialized) {
-              routesInitialized = true;
-              initRoutes(server, license.uid);
-            }
-          });
-
-        xpackMainPlugin.info
-          .feature(thisPlugin.id)
-          .registerLicenseCheckResultsGenerator(checkLicense);
-
-        server.addSavedObjectsToSampleDataset('logs', webLogsSavedObjects);
-        server.injectUiAppVars('gis', async () => {
-          return await server.getInjectedUiAppVars('kibana');
-        });
-      } else {
+      if (!gisEnabled) {
         server.log(['info', 'maps'], 'Maps app disabled by configuration');
+        return;
       }
+
+      const thisPlugin = this;
+      const xpackMainPlugin = server.plugins.xpack_main;
+      let routesInitialized = false;
+
+      watchStatusAndLicenseToInitialize(xpackMainPlugin, thisPlugin,
+        async license => {
+          if (license && license.gis && !routesInitialized) {
+            routesInitialized = true;
+            initRoutes(server, license.uid);
+          }
+        });
+
+      xpackMainPlugin.info
+        .feature(thisPlugin.id)
+        .registerLicenseCheckResultsGenerator(checkLicense);
+
+      server.addSavedObjectsToSampleDataset('logs', webLogsSavedObjects);
+      server.injectUiAppVars('gis', async () => {
+        return await server.getInjectedUiAppVars('kibana');
+      });
+      makeMapsUsageCollector(server);
     }
   });
 }
