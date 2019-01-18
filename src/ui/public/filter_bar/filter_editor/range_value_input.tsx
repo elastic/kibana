@@ -23,7 +23,7 @@ import { get } from 'lodash';
 import { Component } from 'react';
 import React from 'react';
 import { getDocLink } from 'ui/documentation_links';
-import { IndexPatternField } from 'ui/index_patterns';
+import { Field } from 'ui/index_patterns';
 import { ValueInputType } from './value_input_type';
 
 interface RangeParams {
@@ -34,7 +34,7 @@ interface RangeParams {
 type RangeParamsPartial = Partial<RangeParams>;
 
 interface Props {
-  field?: IndexPatternField;
+  field?: Field;
   value?: RangeParams;
   onChange: (params: RangeParamsPartial) => void;
   intl: InjectedIntl;

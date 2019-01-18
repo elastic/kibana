@@ -17,25 +17,22 @@
  * under the License.
  */
 
-import { IndexPattern, IndexPatternField } from 'ui/index_patterns';
+import { Field, IndexPattern } from 'ui/index_patterns';
 import { CustomFilter, ExistsFilter, PhraseFilter, PhrasesFilter, RangeFilter } from './lib';
 import { RangeFilterParams } from './lib/range_filter';
 
 export * from './lib';
 
-export function buildExistsFilter(
-  field: IndexPatternField,
-  indexPattern: IndexPattern
-): ExistsFilter;
+export function buildExistsFilter(field: Field, indexPattern: IndexPattern): ExistsFilter;
 
 export function buildPhraseFilter(
-  field: IndexPatternField,
+  field: Field,
   value: string,
   indexPattern: IndexPattern
 ): PhraseFilter;
 
 export function buildPhrasesFilter(
-  field: IndexPatternField,
+  field: Field,
   values: string[],
   indexPattern: IndexPattern
 ): PhrasesFilter;
@@ -43,7 +40,7 @@ export function buildPhrasesFilter(
 export function buildQueryFilter(query: any, index: string): CustomFilter;
 
 export function buildRangeFilter(
-  field: IndexPatternField,
+  field: Field,
   params: RangeFilterParams,
   indexPattern: IndexPattern,
   formattedValue?: string

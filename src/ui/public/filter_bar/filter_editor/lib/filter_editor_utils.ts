@@ -32,7 +32,7 @@ import {
   RangeFilter,
 } from '@kbn/es-query';
 import { omit } from 'lodash';
-import { IndexPattern, IndexPatternField } from 'ui/index_patterns';
+import { Field, IndexPattern } from 'ui/index_patterns';
 import Ipv4Address from 'ui/utils/ipv4_address';
 import { FILTER_OPERATORS, Operator } from './filter_operators';
 
@@ -61,7 +61,7 @@ export function getFilterableFields(indexPattern: IndexPattern) {
   return indexPattern.fields.filter(field => field.filterable);
 }
 
-export function getOperatorOptions(field: IndexPatternField) {
+export function getOperatorOptions(field: Field) {
   return FILTER_OPERATORS.filter(operator => {
     return !operator.fieldTypes || operator.fieldTypes.includes(field.type);
   });
@@ -99,7 +99,7 @@ export function validateParams(params: any, type: string) {
 
 export function isFilterValid(
   indexPattern?: IndexPattern,
-  field?: IndexPatternField,
+  field?: Field,
   operator?: Operator,
   params?: any
 ) {
@@ -128,7 +128,7 @@ export function isFilterValid(
 
 export function buildFilter(
   indexPattern: IndexPattern,
-  field: IndexPatternField,
+  field: Field,
   operator: Operator,
   params: any,
   alias: string | null,
@@ -143,7 +143,7 @@ export function buildFilter(
 
 function buildBaseFilter(
   indexPattern: IndexPattern,
-  field: IndexPatternField,
+  field: Field,
   operator: Operator,
   params: any
 ): Filter {

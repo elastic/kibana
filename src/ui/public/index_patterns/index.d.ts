@@ -19,7 +19,7 @@
 
 export {
   IndexPattern,
-  IndexPatternField,
   StaticIndexPattern,
   StaticIndexPatternField,
 } from 'ui/index_patterns/_index_pattern';
+export { Field } from 'ui/index_patterns/_field';

@@ -34,7 +34,7 @@ import { FieldFilter, Filter } from '@kbn/es-query';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import React, { Component } from 'react';
-import { IndexPattern, IndexPatternField } from 'ui/index_patterns';
+import { Field, IndexPattern } from 'ui/index_patterns';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import {
   buildCustomFilter,
@@ -63,7 +63,7 @@ interface Props {
 
 interface State {
   selectedIndexPattern?: IndexPattern;
-  selectedField?: IndexPatternField;
+  selectedField?: Field;
   selectedOperator?: Operator;
   params: any;
   useCustomLabel: boolean;
@@ -382,7 +382,7 @@ class FilterEditorUI extends Component<Props, State> {
     this.setState({ selectedIndexPattern, selectedField, selectedOperator, params });
   };
 
-  private onFieldChange = ([selectedField]: IndexPatternField[]) => {
+  private onFieldChange = ([selectedField]: Field[]) => {
     const selectedOperator = undefined;
     const params = undefined;
     this.setState({ selectedField, selectedOperator, params });
@@ -448,7 +448,7 @@ function IndexPatternComboBox(props: GenericComboBoxProps<IndexPattern>) {
   return GenericComboBox(props);
 }
 
-function FieldComboBox(props: GenericComboBoxProps<IndexPatternField>) {
+function FieldComboBox(props: GenericComboBoxProps<Field>) {
   return GenericComboBox(props);
 }
 

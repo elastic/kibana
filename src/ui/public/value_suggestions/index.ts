@@ -19,13 +19,13 @@
 
 import { memoize } from 'lodash';
 import chrome from 'ui/chrome';
-import { IndexPatternField } from 'ui/index_patterns';
+import { Field } from 'ui/index_patterns';
 import { kfetch } from 'ui/kfetch';
 
 const config = chrome.getUiSettingsClient();
 
 const requestSuggestions = memoize(
-  (index: string, field: IndexPatternField, query: string, boolFilter: any = []) => {
+  (index: string, field: Field, query: string, boolFilter: any = []) => {
     return kfetch({
       pathname: `/api/kibana/suggestions/values/${index}`,
       method: 'POST',
@@ -35,12 +35,7 @@ const requestSuggestions = memoize(
   resolver
 );
 
-export async function getSuggestions(
-  index: string,
-  field: IndexPatternField,
-  query: string,
-  boolFilter?: any
-) {
+export async function getSuggestions(index: string, field: Field, query: string, boolFilter?: any) {
   const shouldSuggestValues = config.get('filterEditor:suggestValues');
   if (field.type === 'boolean') {
     return [true, false];
@@ -50,7 +45,7 @@ export async function getSuggestions(
   return await requestSuggestions(index, field, query, boolFilter);
 }
 
-function resolver(index: string, field: IndexPatternField, query: string, boolFilter: any) {
+function resolver(index: string, field: Field, query: string, boolFilter: any) {
   // Only cache results for a minute
   const ttl = Math.floor(Date.now() / 1000 / 60);
   return [ttl, query, index, field.name, JSON.stringify(boolFilter)].join('|');

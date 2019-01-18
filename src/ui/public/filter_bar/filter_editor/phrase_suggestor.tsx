@@ -19,13 +19,13 @@
 
 import { Component } from 'react';
 import chrome from 'ui/chrome';
-import { IndexPattern, IndexPatternField } from 'ui/index_patterns';
+import { Field, IndexPattern } from 'ui/index_patterns';
 import { getSuggestions } from 'ui/value_suggestions';
 const config = chrome.getUiSettingsClient();
 
 export interface PhraseSuggestorProps {
   indexPattern: IndexPattern;
-  field?: IndexPatternField;
+  field?: Field;
 }
 
 export interface PhraseSuggestorState {
