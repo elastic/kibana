@@ -102,7 +102,14 @@ export const MonitorStatusBar = ({
                 {fullURL}
               </EuiLink>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>IP: {ip}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <FormattedMessage
+                id="xpack.uptime.monitorStatusBar.healthStatus.ipMessage"
+                // TODO: this should not be computed inline
+                values={{ ip }}
+                defaultMessage="IP: {ip}"
+              />
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <FormattedMessage
                 id="xpack.uptime.monitorStatusBar.healthStatus.durationInMillisecondsMessage"
