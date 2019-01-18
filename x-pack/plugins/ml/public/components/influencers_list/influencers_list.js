@@ -72,7 +72,7 @@ function Influencer({ influencerFieldName, valueData }) {
           <div className="field-value">mlcategory {valueData.influencerFieldValue}</div>
         )}
       </div>
-      <div className={`progress ${severity}`} value="{valueData.maxAnomalyScore}" max="100">
+      <div className={`progress ${severity.id}`} value="{valueData.maxAnomalyScore}" max="100">
         <div className="progress-bar-holder">
           <div className="progress-bar" style={barStyle}/>
         </div>

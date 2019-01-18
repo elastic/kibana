@@ -17,15 +17,22 @@
  * under the License.
  */
 
-import { Sha256 } from '../crypto';
+export async function WelcomeProvider({ getService, getPageObjects }) {
+  const browser = getService('browser');
+  const lifecycle = getService('lifecycle');
+  const PageObjects = getPageObjects(['common']);
 
-export function createLogKey(type, optionalIdentifier) {
-  const baseKey = `kibana.history.${type}`;
+  const welcome = new class Welcome {
+    async disable() {
+      await browser.setLocalStorageItem('home:welcome:show', 'false');
+    }
+  };
 
-  if (!optionalIdentifier) {
-    return baseKey;
-  }
+  lifecycle.on('beforeTests', async () => {
+    await PageObjects.common.navigateToApp('home');
+    await welcome.disable();
+    await PageObjects.common.navigateToApp('home');
+  });
 
-  const protectedIdentifier = new Sha256().update(optionalIdentifier, 'utf8').digest('base64');
-  return `${baseKey}-${protectedIdentifier}`;
+  return welcome;
 }
