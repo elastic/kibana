@@ -142,8 +142,8 @@ module.exports = function (grunt) {
   }
 
   function uiFrameworkCompile() {
-    const src = 'src/index.scss';
-    const dest = 'dist/ui_framework.css';
+    const src = 'src/kui_dark.scss';
+    const dest = 'dist/kui_dark.css';
 
     return new Promise(resolve => {
       sass.render({
