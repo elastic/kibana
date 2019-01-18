@@ -9,12 +9,8 @@ import PropTypes from 'prop-types';
 import { EuiBasicTable, EuiBadge } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import moment from 'moment';
-import {
-  toQuery,
-  fromQuery,
-  history,
-  RelativeLink
-} from '../../../../utils/url';
+import { toQuery, fromQuery, history } from '../../../shared/Links/url_helpers';
+import { KibanaLink } from '../../../shared/Links/KibanaLink';
 import TooltipOverlay from '../../../shared/TooltipOverlay';
 import styled from 'styled-components';
 import {
@@ -24,12 +20,14 @@ import {
   fontSizes,
   truncate
 } from '../../../../style/variables';
+import { NOT_AVAILABLE_LABEL } from '../../../../constants';
+import { i18n } from '@kbn/i18n';
 
 function paginateItems({ items, pageIndex, pageSize }) {
   return items.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
 }
 
-const GroupIdLink = styled(RelativeLink)`
+const GroupIdLink = styled(KibanaLink)`
   font-family: ${fontFamilyCode};
 `;
 
@@ -37,7 +35,7 @@ const MessageAndCulpritCell = styled.div`
   ${truncate('100%')};
 `;
 
-const MessageLink = styled(RelativeLink)`
+const MessageLink = styled(KibanaLink)`
   font-family: ${fontFamilyCode};
   font-size: ${fontSizes.large};
   ${truncate('100%')};
@@ -82,33 +80,40 @@ class List extends Component {
 
     const columns = [
       {
-        name: 'Group ID',
+        name: i18n.translate('xpack.apm.errorsTable.groupIdColumnLabel', {
+          defaultMessage: 'Group ID'
+        }),
         field: 'groupId',
         sortable: false,
         width: px(unit * 6),
         render: groupId => {
           return (
-            <GroupIdLink path={`/${serviceName}/errors/${groupId}`}>
-              {groupId.slice(0, 5) || 'N/A'}
+            <GroupIdLink hash={`/${serviceName}/errors/${groupId}`}>
+              {groupId.slice(0, 5) || NOT_AVAILABLE_LABEL}
             </GroupIdLink>
           );
         }
       },
       {
-        name: 'Error message and culprit',
+        name: i18n.translate(
+          'xpack.apm.errorsTable.errorMessageAndCulpritColumnLabel',
+          {
+            defaultMessage: 'Error message and culprit'
+          }
+        ),
         field: 'message',
         sortable: false,
         width: '50%',
         render: (message, item) => {
           return (
             <MessageAndCulpritCell>
-              <TooltipOverlay content={message || 'N/A'}>
-                <MessageLink path={`/${serviceName}/errors/${item.groupId}`}>
-                  {message || 'N/A'}
+              <TooltipOverlay content={message || NOT_AVAILABLE_LABEL}>
+                <MessageLink hash={`/${serviceName}/errors/${item.groupId}`}>
+                  {message || NOT_AVAILABLE_LABEL}
                 </MessageLink>
               </TooltipOverlay>
-              <TooltipOverlay content={item.culprit || 'N/A'}>
-                <Culprit>{item.culprit || 'N/A'}</Culprit>
+              <TooltipOverlay content={item.culprit || NOT_AVAILABLE_LABEL}>
+                <Culprit>{item.culprit || NOT_AVAILABLE_LABEL}</Culprit>
               </TooltipOverlay>
             </MessageAndCulpritCell>
           );
@@ -121,28 +126,42 @@ class List extends Component {
         align: 'right',
         render: isUnhandled =>
           isUnhandled === false && (
-            <EuiBadge color="warning">Unhandled</EuiBadge>
+            <EuiBadge color="warning">
+              {i18n.translate('xpack.apm.errorsTable.unhandledLabel', {
+                defaultMessage: 'Unhandled'
+              })}
+            </EuiBadge>
           )
       },
       {
-        name: 'Occurrences',
+        name: i18n.translate('xpack.apm.errorsTable.occurrencesColumnLabel', {
+          defaultMessage: 'Occurrences'
+        }),
         field: 'occurrenceCount',
         sortable: true,
         dataType: 'number',
-        render: value => (value ? numeral(value).format('0.[0]a') : 'N/A')
+        render: value =>
+          value ? numeral(value).format('0.[0]a') : NOT_AVAILABLE_LABEL
       },
       {
         field: 'latestOccurrenceAt',
         sortable: true,
-        name: 'Latest occurrence',
+        name: i18n.translate(
+          'xpack.apm.errorsTable.latestOccurrenceColumnLabel',
+          {
+            defaultMessage: 'Latest occurrence'
+          }
+        ),
         align: 'right',
-        render: value => (value ? moment(value).fromNow() : 'N/A')
+        render: value => (value ? moment(value).fromNow() : NOT_AVAILABLE_LABEL)
       }
     ];
 
     return (
       <EuiBasicTable
-        noItemsMessage="No errors were found"
+        noItemsMessage={i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
+          defaultMessage: 'No errors were found'
+        })}
         items={paginatedItems}
         columns={columns}
         pagination={{

@@ -158,11 +158,12 @@ export function onPremInstructions(apmIndexPattern) {
             index: apmIndexPattern,
             query: {
               bool: {
-                filter: {
-                  exists: {
-                    field: 'processor.name',
-                  },
-                },
+                should: [
+                  { term: { 'processor.name': 'error' } },
+                  { term: { 'processor.name': 'transaction' } },
+                  { term: { 'processor.name': 'metric' } },
+                  { term: { 'processor.name': 'sourcemap' } },
+                ],
               },
             },
           },

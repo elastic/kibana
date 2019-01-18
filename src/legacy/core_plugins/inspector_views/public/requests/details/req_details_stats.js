@@ -65,7 +65,9 @@ class RequestDetailsStats extends Component {
     const sortedStats = Object.keys(stats).sort().map(name => ({ name, ...stats[name] }));
     // TODO: Replace by property once available
     return (
-      <EuiTable style={{ tableLayout: 'auto' }}>
+      <EuiTable
+        responsive={false}
+      >
         <EuiTableBody>
           { sortedStats.map(this.renderStatRow) }
         </EuiTableBody>

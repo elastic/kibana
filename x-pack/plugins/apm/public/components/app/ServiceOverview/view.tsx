@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 import { RRRRenderResponse } from 'react-redux-request';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
@@ -43,8 +44,12 @@ export class ServiceOverview extends Component<Props, State> {
       <EmptyMessage
         heading={
           historicalDataFound
-            ? 'No services were found'
-            : "Looks like you don't have any services with APM installed. Let's add some!"
+            ? i18n.translate('xpack.apm.servicesTable.notFoundLabel', {
+                defaultMessage: 'No services were found'
+              })
+            : i18n.translate('xpack.apm.servicesTable.noServicesLabel', {
+                defaultMessage: `Looks like you don't have any services with APM installed. Let's add some!`
+              })
         }
         subheading={
           !historicalDataFound ? <SetupInstructionsLink buttonFill /> : null
