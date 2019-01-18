@@ -12,7 +12,8 @@ export async function fetchMetrics<T = void>({
   serviceName,
   setup,
   timeseriesBucketAggregations = {},
-  totalAggregations = {}
+  totalAggregations = {},
+  bool = {}
 }: MetricsRequestArgs) {
   const { start, end, esFilterQuery, client, config } = setup;
   const { intervalString } = getBucketSize(start, end, 'auto');
@@ -41,6 +42,7 @@ export async function fetchMetrics<T = void>({
       size: 0,
       query: {
         bool: {
+          ...bool,
           filter: filters
         }
       },
