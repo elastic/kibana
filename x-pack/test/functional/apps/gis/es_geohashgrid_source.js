@@ -36,7 +36,7 @@ export default function ({ getPageObjects, getService }) {
           beforeTimestamp = await getRequestTimestamp();
         });
 
-        it('should not rerequest when zoom changes does not cause geohash precision to change', async () => {
+        it('should not rerequest when zoom changes do not cause geohash precision to change', async () => {
           await PageObjects.gis.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 2);
           const afterTimestamp = await getRequestTimestamp();
           expect(afterTimestamp).to.equal(beforeTimestamp);
@@ -72,15 +72,13 @@ export default function ({ getPageObjects, getService }) {
           expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(EXPECTED_NUMBER_FEATURES);
         });
 
-        it ('should request only partial data when the map conly overs part of the databounds', async () => {
+        it ('should request only partial data when the map only covers part of the databounds', async () => {
+          //todo this verifies the extent-filtering behavior (not really the correct application of geohash-precision), and should ideally be moved to its own section
           await PageObjects.gis.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 6);
           const mapboxStyle = await PageObjects.gis.getMapboxStyle();
           expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(2);
         });
-
       });
-
-
     }
 
     describe('heatmap', () => {
