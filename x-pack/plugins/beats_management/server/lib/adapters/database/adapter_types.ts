@@ -6,7 +6,6 @@
 import { FrameworkRequest, FrameworkUser } from '../framework/adapter_types';
 
 export interface DatabaseAdapter {
-  putTemplate(user: FrameworkUser, params: DatabasePutTemplateParams): Promise<any>;
   get<Source>(
     user: FrameworkUser,
     params: DatabaseGetParams
