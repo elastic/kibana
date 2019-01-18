@@ -762,9 +762,9 @@ app.controller('graphuiPlugin', function ($scope, $route, $http, kbnUrl, Private
         <p>
           <FormattedMessage
             id="xpack.graph.noDataSourceNotificationMessageText"
-            defaultMessage="Go to {managementIndexPatternsLinkText} and create an index pattern"
+            defaultMessage="Go to {managementIndexPatternsLink} and create an index pattern"
             values={{
-              managementIndexPatternsLinkText: (
+              managementIndexPatternsLink: (
                 <a href={url}>
                   <FormattedMessage
                     id="xpack.graph.noDataSourceNotificationMessageText.managementIndexPatternLinkText"
