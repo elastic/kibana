@@ -117,7 +117,6 @@ improved, see the <<release-highlights-6.6.0, 6.6.0 Release Highlights>>.
 * Index Lifecycle Management
 * Remote Clusters and Cross Cluster Replication 
 * Upgrade Assistant for Elasticsearch 7.0
-* Uptime Monitoring
 
 [float]
 [[enhancement-6.0.0]]
@@ -149,6 +148,8 @@ Management::
 * Adds timestamp to inspector request stats {pull}25667[#25667]
 * Support date fields in Metrics step for rollup data {pull}26450[#26450]
 * Implements a CRUD UI for index lifecycle management policies {pull}25553[#25553]
+Monitoring::
+* Adds Overview and Monitor pages for Uptime Monitoring {pull}27279[#27279]
 Operations::
 * Adds support for multiple Elasticsearch nodes and sniffing {pull}21928[#21928]
 * Upgrades to NodeJS 10 {pull}25157[#25157]
