@@ -4,18 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
-import { VectorStyleColorEditor } from './components/vector/color/vector_style_color_editor';
-import { VectorStyleSizeEditor } from './components/vector/size/vector_style_size_editor';
+import _ from 'lodash';
+import React from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem
-} from '@elastic/eui';
 import { FillableCircle, FillableVector } from '../../icons/additional_layer_icons';
 import { ColorGradient } from '../../icons/color_gradient';
 import { getHexColorRangeStrings } from '../../utils/color_utils';
-import _ from 'lodash';
+import { VectorStyleEditor } from './components/vector/vector_style_editor';
 
 export class VectorStyle {
 
@@ -45,56 +40,23 @@ export class VectorStyle {
     return 'Vector style';
   }
 
+  static description = 'Link styles to property values for data driven styling.';
+
   static renderEditor({ handleStyleChange, style, layer }) {
 
-    const properties = { ...style.getProperties() };
+    const styleProperties = { ...style.getProperties() };
     const handlePropertyChange = (propertyName, settings) => {
-      properties[propertyName] = settings;//override single property, but preserve the rest
-      const vectorStyleDescriptor = VectorStyle.createDescriptor(properties);
+      styleProperties[propertyName] = settings;//override single property, but preserve the rest
+      const vectorStyleDescriptor = VectorStyle.createDescriptor(styleProperties);
       handleStyleChange(vectorStyleDescriptor);
     };
 
     return (
-      <Fragment>
-        <EuiFlexGroup direction="column">
-          <EuiFlexItem>
-            <VectorStyleColorEditor
-              styleProperty={'fillColor'}
-              stylePropertyName={"Fill color"}
-              handlePropertyChange={handlePropertyChange}
-              styleDescriptor={properties.fillColor}
-              layer={layer}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <VectorStyleColorEditor
-              styleProperty={'lineColor'}
-              stylePropertyName={"Line color"}
-              handlePropertyChange={handlePropertyChange}
-              styleDescriptor={properties.lineColor}
-              layer={layer}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <VectorStyleSizeEditor
-              styleProperty={'lineWidth'}
-              stylePropertyName={"Line width"}
-              handlePropertyChange={handlePropertyChange}
-              styleDescriptor={properties.lineWidth}
-              layer={layer}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <VectorStyleSizeEditor
-              styleProperty={'iconSize'}
-              stylePropertyName={"Icon size"}
-              handlePropertyChange={handlePropertyChange}
-              styleDescriptor={properties.iconSize}
-              layer={layer}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </Fragment>
+      <VectorStyleEditor
+        handlePropertyChange={handlePropertyChange}
+        styleProperties={styleProperties}
+        layer={layer}
+      />
     );
   }
 

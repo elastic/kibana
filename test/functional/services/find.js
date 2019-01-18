@@ -31,10 +31,11 @@ export async function FindProvider({ getService }) {
 
   const WAIT_FOR_EXISTS_TIME = config.get('timeouts.waitForExists');
   const defaultFindTimeout = config.get('timeouts.find');
+  const fixedHeaderHeight = config.get('layout.fixedHeaderHeight');
   const defaultImplicitWait = 0;
 
   const wrap = webElement => (
-    new WebElementWrapper(webElement, webdriver, defaultFindTimeout)
+    new WebElementWrapper(webElement, webdriver, defaultFindTimeout, fixedHeaderHeight)
   );
 
   const wrapAll = webElements => (

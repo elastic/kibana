@@ -54,7 +54,7 @@ export async function BrowserProvider({ getService }) {
 
     /**
      * Gets the URL that is loaded in the focused window/frame.
-     * https://theintern.io/leadfoot/module-leadfoot_Session.html#getCurrentUrl
+     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebDriver.html#getCurrentUrl
      *
      * @return {Promise<string>}
      */
@@ -69,7 +69,7 @@ export async function BrowserProvider({ getService }) {
 
     /**
      * Navigates the focused window/frame to a new URL.
-     * https://theintern.io/leadfoot/module-leadfoot_Session.html#get
+     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/chrome_exports_Driver.html#get
      *
      * @param {string} url
      * @param {boolean} insertTimestamp Optional
@@ -276,6 +276,17 @@ export async function BrowserProvider({ getService }) {
      */
     async getAllWindowHandles() {
       return await driver.getAllWindowHandles();
+    }
+
+    /**
+     * Sets a value in local storage for the focused window/frame.
+     *
+     * @param {string} key
+     * @param {string} value
+     * @return {Promise<void>}
+     */
+    async setLocalStorageItem(key, value) {
+      await driver.executeScript('return window.localStorage.setItem(arguments[0], arguments[1]);', key, value);
     }
 
     /**
