@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const advancedSettingsFields = [
   {
     field: 'maxReadRequestOperationCount',
-    label: i18n.translate(
+    title: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestOperationCountTitle', {
         defaultMessage: 'Max read request operation count'
       }
@@ -19,10 +19,15 @@ export const advancedSettingsFields = [
         defaultMessage: 'The maximum number of operations to pull per read from the remote cluster.'
       }
     ),
+    label: i18n.translate(
+      'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestOperationCountLabel', {
+        defaultMessage: 'Max read request operation count (optional)'
+      }
+    ),
     type: 'number',
   }, {
     field: 'maxOutstandingReadRequests',
-    label: i18n.translate(
+    title: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingReadRequestsTitle', {
         defaultMessage: 'Max outstanding read requests'
       }
@@ -30,10 +35,15 @@ export const advancedSettingsFields = [
     description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingReadRequestsDescription', {
       defaultMessage: 'The maximum number of outstanding read requests from the remote cluster.'
     }),
+    label: i18n.translate(
+      'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingReadRequestsLabel', {
+        defaultMessage: 'Max outstanding read requests (optional)'
+      }
+    ),
     type: 'number',
   }, {
     field: 'maxReadRequestSize',
-    label: i18n.translate(
+    title: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestSizeTitle', {
         defaultMessage: 'Max read request size'
       }
@@ -41,9 +51,14 @@ export const advancedSettingsFields = [
     description: i18n.translate('xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestSizeDescription', {
       defaultMessage: 'The maximum size in bytes of per read of a batch of operations pulled from the remote cluster.'
     }),
+    label: i18n.translate(
+      'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestSizeLabel', {
+        defaultMessage: 'Max read request size (optional)'
+      }
+    ),
   }, {
     field: 'maxWriteRequestOperationCount',
-    label: i18n.translate(
+    title: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestOperationCountTitle', {
         defaultMessage: 'Max write request operation count'
       }
@@ -53,10 +68,15 @@ export const advancedSettingsFields = [
         defaultMessage: 'The maximum number of operations per bulk write request executed on the follower.'
       }
     ),
+    label: i18n.translate(
+      'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestOperationCountLabel', {
+        defaultMessage: 'Max write request operation count (optional)'
+      }
+    ),
     type: 'number',
   }, {
     field: 'maxWriteRequestSize',
-    label: i18n.translate(
+    title: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestSizeTitle', {
         defaultMessage: 'Max write request size'
       }
@@ -66,9 +86,14 @@ export const advancedSettingsFields = [
         defaultMessage: 'The maximum total bytes of operations per bulk write request executed on the follower.'
       }
     ),
+    label: i18n.translate(
+      'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestSizeLabel', {
+        defaultMessage: 'Max write request size (optional)'
+      }
+    ),
   }, {
     field: 'maxOutstandingWriteRequests',
-    label: i18n.translate(
+    title: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingWriteRequestsTitle', {
         defaultMessage: 'Max outstanding write requests'
       }
@@ -78,10 +103,15 @@ export const advancedSettingsFields = [
         defaultMessage: 'The maximum number of outstanding write requests on the follower.'
       }
     ),
+    label: i18n.translate(
+      'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingWriteRequestsLabel', {
+        defaultMessage: 'Max outstanding write requests (optional)'
+      }
+    ),
     type: 'number',
   }, {
     field: 'maxWriteBufferCount',
-    label: i18n.translate(
+    title: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferCountTitle', {
         defaultMessage: 'Max write buffer count'
       }
@@ -93,10 +123,15 @@ export const advancedSettingsFields = [
           operations goes below the limit.`
       }
     ),
+    label: i18n.translate(
+      'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferCountLabel', {
+        defaultMessage: 'Max write buffer count (optional)'
+      }
+    ),
     type: 'number',
   }, {
     field: 'maxWriteBufferSize',
-    label: i18n.translate(
+    title: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferSizeTitle', {
         defaultMessage: 'Max write buffer size'
       }
@@ -108,9 +143,14 @@ export const advancedSettingsFields = [
           of queued operations goes below the limit.`
       }
     ),
+    label: i18n.translate(
+      'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferSizeLabel', {
+        defaultMessage: 'Max write buffer size (optional)'
+      }
+    ),
   }, {
     field: 'maxRetryDelay',
-    label: i18n.translate(
+    title: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxRetryDelayTitle', {
         defaultMessage: 'Max retry delay'
       }
@@ -121,9 +161,14 @@ export const advancedSettingsFields = [
         an exponential backoff strategy is employed when retrying.`
       }
     ),
+    label: i18n.translate(
+      'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxRetryDelayLabel', {
+        defaultMessage: 'Max retry delay (optional)'
+      }
+    ),
   }, {
     field: 'readPollTimeout',
-    label: i18n.translate(
+    title: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.readPollTimeoutTitle', {
         defaultMessage: 'Read poll timeout'
       }
@@ -134,6 +179,11 @@ export const advancedSettingsFields = [
           follower index is synchronized with the leader index; when the timeout has elapsed, the
           poll for operations will return to the follower so that it can update some statistics, and
           then the follower will immediately attempt to read from the leader again.`
+      }
+    ),
+    label: i18n.translate(
+      'xpack.crossClusterReplication.followerIndexForm.advancedSettings.readPollTimeoutLabel', {
+        defaultMessage: 'Read poll timeout (optional)'
       }
     ),
   },

@@ -27,8 +27,8 @@ export const updateFields = (newValues) => ({ fields }) => ({
 export class FormEntryRow extends PureComponent {
   static propTypes = {
     title: PropTypes.node,
-    label: PropTypes.node,
     description: PropTypes.node,
+    label: PropTypes.node,
     helpText: PropTypes.node,
     type: PropTypes.string,
     onValueUpdate: PropTypes.func.isRequired,

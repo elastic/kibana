@@ -517,7 +517,7 @@ export const FollowerIndexForm = injectI18n(
               <EuiSpacer size="s" />
 
               {advancedSettingsFields.map((advancedSetting) => {
-                const { field, label, description, helpText } = advancedSetting;
+                const { field, title, description, label, helpText } = advancedSetting;
                 return (
                   <FormEntryRow
                     key={field}
@@ -526,11 +526,11 @@ export const FollowerIndexForm = injectI18n(
                     error={fieldsErrors[field]}
                     title={(
                       <EuiTitle size="xs">
-                        <h3>{label}</h3>
+                        <h3>{title}</h3>
                       </EuiTitle>
                     )}
-                    label={label}
                     description={description}
+                    label={label}
                     helpText={helpText}
                     areErrorsVisible={areErrorsVisible}
                     onValueUpdate={this.onFieldsChange}
