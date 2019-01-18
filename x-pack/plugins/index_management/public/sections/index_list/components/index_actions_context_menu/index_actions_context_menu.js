@@ -68,7 +68,7 @@ class IndexActionsContextMenuUi extends Component {
       items.push({
         name: intl.formatMessage({
           id: 'xpack.idxMgmt.indexActionsMenu.showIndexSettingsLabel',
-          defaultMessage: '{selectedIndexCount, plural, one {Show index settings} other {Show indices settings} }',
+          defaultMessage: 'Show {selectedIndexCount, plural, one {index} other {indices} } settings',
         }, { selectedIndexCount }),
         icon: <EuiIcon type="indexSettings" />,
         onClick: () => {
@@ -78,7 +78,7 @@ class IndexActionsContextMenuUi extends Component {
       items.push({
         name: intl.formatMessage({
           id: 'xpack.idxMgmt.indexActionsMenu.showIndexMappingLabel',
-          defaultMessage: '{selectedIndexCount, plural, one {Show index mapping} other {Show indices mapping} }',
+          defaultMessage: 'Show {selectedIndexCount, plural, one {index} other {indices} } mapping',
         }, { selectedIndexCount }),
         icon: <EuiIcon type="indexMapping" />,
         onClick: () => {
@@ -89,7 +89,7 @@ class IndexActionsContextMenuUi extends Component {
         items.push({
           name: intl.formatMessage({
             id: 'xpack.idxMgmt.indexActionsMenu.showIndexStatsLabel',
-            defaultMessage: '{selectedIndexCount, plural, one {Show index stats} other {Show indices stats} }',
+            defaultMessage: 'Show {selectedIndexCount, plural, one {index} other {indices} } stats',
           }, { selectedIndexCount }),
           icon: <EuiIcon type="stats" />,
           onClick: () => {
@@ -100,7 +100,7 @@ class IndexActionsContextMenuUi extends Component {
       items.push({
         name: intl.formatMessage({
           id: 'xpack.idxMgmt.indexActionsMenu.editIndexSettingsLabel',
-          defaultMessage: '{selectedIndexCount, plural, one {Edit index settings} other {Edit indices settings} }',
+          defaultMessage: 'Edit {selectedIndexCount, plural, one {index} other {indices} } settings',
         }, { selectedIndexCount }),
         icon: <EuiIcon type="indexEdit" />,
         onClick: () => {
@@ -112,7 +112,7 @@ class IndexActionsContextMenuUi extends Component {
       items.push({
         name: intl.formatMessage({
           id: 'xpack.idxMgmt.indexActionsMenu.closeIndexLabel',
-          defaultMessage: '{selectedIndexCount, plural, one {Close index} other {Close indices} }',
+          defaultMessage: 'Close {selectedIndexCount, plural, one {index} other {indices} }',
         }, { selectedIndexCount }),
         icon: <EuiIcon type="indexClose" />,
         onClick: () => {
@@ -122,7 +122,7 @@ class IndexActionsContextMenuUi extends Component {
       items.push({
         name: intl.formatMessage({
           id: 'xpack.idxMgmt.indexActionsMenu.forceMergeIndexLabel',
-          defaultMessage: '{selectedIndexCount, plural, one {Force merge index} other {Force merge indices} }',
+          defaultMessage: 'Force merge {selectedIndexCount, plural, one {index} other {indices} }',
         }, { selectedIndexCount }),
         icon: <EuiIcon type="merge" />,
         onClick: () => {
@@ -133,7 +133,7 @@ class IndexActionsContextMenuUi extends Component {
       items.push({
         name: intl.formatMessage({
           id: 'xpack.idxMgmt.indexActionsMenu.refreshIndexLabel',
-          defaultMessage: '{selectedIndexCount, plural, one {Refresh index} other {Refresh indices} }',
+          defaultMessage: 'Refresh {selectedIndexCount, plural, one {index} other {indices} }',
         }, { selectedIndexCount }),
         icon: <EuiIcon type="refresh" />,
         onClick: () => {
@@ -143,7 +143,7 @@ class IndexActionsContextMenuUi extends Component {
       items.push({
         name: intl.formatMessage({
           id: 'xpack.idxMgmt.indexActionsMenu.clearIndexCacheLabel',
-          defaultMessage: '{selectedIndexCount, plural, one {Clear index cache} other {Clear indices cache} }',
+          defaultMessage: 'Clear {selectedIndexCount, plural, one {index} other {indices} } cache',
         }, { selectedIndexCount }),
         icon: <EuiIcon type="broom" />,
         onClick: () => {
@@ -153,7 +153,7 @@ class IndexActionsContextMenuUi extends Component {
       items.push({
         name: intl.formatMessage({
           id: 'xpack.idxMgmt.indexActionsMenu.flushIndexLabel',
-          defaultMessage: '{selectedIndexCount, plural, one {Flush index} other {Flush indices} }',
+          defaultMessage: 'Flush {selectedIndexCount, plural, one {index} other {indices} }',
         }, { selectedIndexCount }),
         icon: <EuiIcon type="indexFlush" />,
         onClick: () => {
@@ -164,7 +164,7 @@ class IndexActionsContextMenuUi extends Component {
       items.push({
         name: intl.formatMessage({
           id: 'xpack.idxMgmt.indexActionsMenu.openIndexLabel',
-          defaultMessage: '{selectedIndexCount, plural, one {Open index} other {Open indices} }',
+          defaultMessage: 'Open {selectedIndexCount, plural, one {index} other {indices} }',
         }, { selectedIndexCount }),
         icon: <EuiIcon type="indexOpen" />,
         onClick: () => {
@@ -175,7 +175,7 @@ class IndexActionsContextMenuUi extends Component {
     items.push({
       name: intl.formatMessage({
         id: 'xpack.idxMgmt.indexActionsMenu.deleteIndexLabel',
-        defaultMessage: '{selectedIndexCount, plural, one {Delete index} other {Delete indices} }',
+        defaultMessage: 'Delete {selectedIndexCount, plural, one {index} other {indices} }',
       }, { selectedIndexCount }),
       icon: <EuiIcon type="trash" />,
       onClick: () => {
@@ -216,7 +216,7 @@ class IndexActionsContextMenuUi extends Component {
       id: 0,
       title: intl.formatMessage({
         id: 'xpack.idxMgmt.indexActionsMenu.panelTitle',
-        defaultMessage: '{selectedIndexCount, plural, one {Index options} other {Indices options} }',
+        defaultMessage: '{selectedIndexCount, plural, one {Index} other {Indices} } options',
       }, { selectedIndexCount }),
       items
     };
@@ -300,7 +300,7 @@ class IndexActionsContextMenuUi extends Component {
             <p>
               <FormattedMessage
                 id="xpack.idxMgmt.indexActionsMenu.forceMerge.forceMergeDescription"
-                defaultMessage="You are about to force merge {selectedIndexCount, plural, one {this index:} other {these indices:}}"
+                defaultMessage="You are about to force merge {selectedIndexCount, plural, one {this index} other {these indices} }:"
                 values={{ selectedIndexCount }}
               />
             </p>
@@ -363,7 +363,7 @@ class IndexActionsContextMenuUi extends Component {
           title={
             intl.formatMessage({
               id: 'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.modalTitle',
-              defaultMessage: '{selectedIndexCount, plural, one {Confirm Delete index} other {Confirm Delete indices} }',
+              defaultMessage: 'Confirm delete {selectedIndexCount, plural, one {index} other {indices} }',
             }, { selectedIndexCount })
           }
           onCancel={this.closeConfirmModal}
@@ -385,7 +385,7 @@ class IndexActionsContextMenuUi extends Component {
             <p>
               <FormattedMessage
                 id="xpack.idxMgmt.indexActionsMenu.deleteIndex.deleteDescription"
-                defaultMessage="You are about to delete {selectedIndexCount, plural, one {this index:} other {these indices:}}"
+                defaultMessage="You are about to delete {selectedIndexCount, plural, one {this index} other {these indices} }:"
                 values={{ selectedIndexCount }}
               />
             </p>
@@ -406,7 +406,7 @@ class IndexActionsContextMenuUi extends Component {
             >
               <p>
                 <FormattedMessage
-                  id="xpack.idxMgmt.indexActionsMenu.deleteIndex.deleteEntityWarningDescription"
+                  id="xpack.idxMgmt.indexActionsMenu.deleteIndex.deleteWarningDescription"
                   defaultMessage="This operation cannot be undone. Make sure you have appropriate backups."
                 />
               </p>
@@ -435,7 +435,7 @@ class IndexActionsContextMenuUi extends Component {
         iconSide={iconSide}
         aria-label={intl.formatMessage({
           id: 'xpack.idxMgmt.indexActionsMenu.manageButtonAriaLabel',
-          defaultMessage: '{selectedIndexCount, plural, one {index options} other {indices options} }',
+          defaultMessage: '{selectedIndexCount, plural, one {index} other {indices} } options',
         }, { selectedIndexCount })}
         onClick={this.onButtonClick}
         iconType={iconType}
@@ -449,7 +449,7 @@ class IndexActionsContextMenuUi extends Component {
       <div>
         {this.state.renderConfirmModal ? this.state.renderConfirmModal(this.closeConfirmModal, getHttpClient()) : null}
         <EuiPopover
-          id={`contextMenu${selectedIndexCount === 1 ? 'index' : 'indices'}`}
+          id="contextMenuIndices"
           button={button}
           isOpen={this.state.isPopoverOpen}
           closePopover={this.closePopover}
