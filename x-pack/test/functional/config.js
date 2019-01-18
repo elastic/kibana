@@ -204,7 +204,7 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/canvas',
         hash: '/',
       },
-      rollup_jobs: {
+      rollupjob: {
         pathname: '/app/kibana',
         hash: '/management/elasticsearch/rollup_jobs/',
       }

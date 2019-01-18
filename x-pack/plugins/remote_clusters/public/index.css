@@ -1,0 +1,22 @@
+/**
+ * 1. Override EUI styles.
+ */
+.remoteClusterAddPage {
+  max-width: 1000px !important;
+  /* 1 */
+  width: 100% !important;
+  /* 1 */ }
+
+/**
+ * 1. Override EuiFormRow styles. Otherwise the switch will jump around when toggled on and off,
+ *    as the 'Reset to defaults' link is added to and removed from the DOM.
+ * 2. Fix the positioning.
+ */
+.remoteClusterSkipIfUnavailableSwitch {
+  -webkit-box-pack: start !important;
+  -webkit-justify-content: flex-start !important;
+      -ms-flex-pack: start !important;
+          justify-content: flex-start !important;
+  /* 1 */
+  padding-top: 8px !important; }
+/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImluZGV4LnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBWUE7O0dBRUc7QUFDSDtFQUNFLDZCQUE0QjtFQUFFLE9BQU87RUFDckMsdUJBQXNCO0VBQUUsT0FBTyxFQUNoQzs7QUFFRDs7OztHQUlHO0FBRUg7RUFDRSxtQ0FBc0M7RUFBdEMsK0NBQXNDO01BQXRDLGdDQUFzQztVQUF0Qyx1Q0FBc0M7RUFBRSxPQUFPO0VBQy9DLDRCQUFpQyxFQUNsQyIsImZpbGUiOiJ0by5jc3MifQ== */
