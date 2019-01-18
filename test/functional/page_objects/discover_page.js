@@ -122,24 +122,16 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async clickHistogramBar(i) {
-      return await retry.try(async () => {
-        await this.waitVisualisationLoaded();
-        const bars = await find.allByCssSelector(`.series.histogram rect`);
-        await bars[i].click();
-        await this.waitVisualisationLoaded();
-      });
+      const bars = await find.allByCssSelector(`.series.histogram rect`);
+      await bars[i].click();
     }
 
     async brushHistogram(from, to) {
-      return await retry.try(async () => {
-        await this.waitVisualisationLoaded();
-        const bars = await find.allByCssSelector('.series.histogram rect');
-        await browser.dragAndDrop(
-          { location: bars[from], offset: { x: 0, y: -5 } },
-          { location: bars[to], offset: { x: 0, y: -5 } }
-        );
-        await this.waitVisualisationLoaded();
-      });
+      const bars = await find.allByCssSelector('.series.histogram rect');
+      await browser.dragAndDrop(
+        { location: bars[from], offset: { x: 0, y: -5 } },
+        { location: bars[to], offset: { x: 0, y: -5 } }
+      );
     }
 
     async getCurrentQueryName() {
