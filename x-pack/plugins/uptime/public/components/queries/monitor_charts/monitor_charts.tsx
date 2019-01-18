@@ -25,25 +25,24 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import { Query } from 'react-apollo';
+import { UptimeCommonProps } from '../../../uptime_app';
 import { createGetMonitorChartsQuery } from './get_monitor_charts';
 
 interface MonitorChartsProps {
-  dateRangeStart: number;
-  dateRangeEnd: number;
   monitorId: string;
-  autorefreshInterval: number;
-  autorefreshEnabled: boolean;
 }
+
+type Props = MonitorChartsProps & UptimeCommonProps;
 
 export const MonitorCharts = ({
   dateRangeStart,
   dateRangeEnd,
   monitorId,
-  autorefreshEnabled,
+  autorefreshIsPaused,
   autorefreshInterval,
-}: MonitorChartsProps) => (
+}: Props) => (
   <Query
-    pollInterval={autorefreshEnabled ? autorefreshInterval : undefined}
+    pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
     query={createGetMonitorChartsQuery}
     variables={{ dateRangeStart, dateRangeEnd, monitorId }}
   >
@@ -73,6 +72,7 @@ export const MonitorCharts = ({
       const downSeries: any[] = [];
       const upSeries: any[] = [];
       const checksSeries: any[] = [];
+      const maxRtt: any[] = [];
       monitorChartsData.forEach(
         ({
           maxWriteRequest,
@@ -85,6 +85,13 @@ export const MonitorCharts = ({
           minDuration,
           status,
         }: any) => {
+          // We're summing these values because we need to know what the max value of the RTT
+          // fields are in order to provide an accurate domain size for the RTT combination series.
+          maxRtt.push({
+            x: maxWriteRequest.x,
+            y: maxWriteRequest.y + maxValidate.y + maxContent.y + maxResponse.y + maxTcpRtt.y,
+          });
+          // TODO: these types of computations should take place on the server and be reflected in the GQL schema
           rttWriteRequestSeries.push(maxWriteRequest);
           rttValidateSeries.push(maxValidate);
           rttContentSeries.push(maxContent);
@@ -97,6 +104,16 @@ export const MonitorCharts = ({
           checksSeries.push({ x: status.x, y: status.total });
         }
       );
+
+      // As above, we are building a domain size for the chart to use.
+      // Without this code the chart could render data outside of the field.
+      const checksDomain = upSeries.concat(downSeries).map(({ y }) => y);
+      const domainLimits = [Math.min(...checksDomain), Math.max(...checksDomain)];
+      const durationDomain = avgDurationSeries.concat(areaRttSeries);
+      const durationLimits = [0, Math.max(...durationDomain.map(({ y }) => y))];
+
+      // find the greatest y-value for rtt chart
+      const rttLimits = [0, Math.max(...maxRtt.map(({ y }) => y))];
 
       return (
         <Fragment>
@@ -118,6 +135,7 @@ export const MonitorCharts = ({
                   xType={EuiSeriesChartUtils.SCALE.TIME}
                   width={500}
                   height={200}
+                  yDomain={rttLimits}
                 >
                   <EuiAreaSeries
                     name={i18n.translate(
@@ -176,6 +194,7 @@ export const MonitorCharts = ({
                   width={500}
                   height={200}
                   xType={EuiSeriesChartUtils.SCALE.TIME}
+                  yDomain={durationLimits}
                 >
                   <EuiAreaSeries
                     name={i18n.translate(
@@ -216,6 +235,7 @@ export const MonitorCharts = ({
               height={200}
               xType={EuiSeriesChartUtils.SCALE.TIME}
               stackBy="y"
+              yDomain={domainLimits}
             >
               <EuiAreaSeries
                 name={i18n.translate('xpack.uptime.monitorCharts.checkStatus.series.upCountLabel', {

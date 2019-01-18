@@ -232,10 +232,19 @@ export function mapExtentChanged(newMapConstants) {
 }
 
 export function setMouseCoordinates({ lat, lon }) {
+  let safeLon = lon;
+  if (lon > 180) {
+    const overlapWestOfDateLine = lon - 180;
+    safeLon = -180 + overlapWestOfDateLine;
+  } else if (lon < -180) {
+    const overlapEastOfDateLine = Math.abs(lon) - 180;
+    safeLon = 180 - overlapEastOfDateLine;
+  }
+
   return {
     type: SET_MOUSE_COORDINATES,
     lat,
-    lon,
+    lon: safeLon,
   };
 }
 

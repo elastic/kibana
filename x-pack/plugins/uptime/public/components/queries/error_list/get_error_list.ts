@@ -7,11 +7,7 @@
 import gql from 'graphql-tag';
 
 export const getErrorListQuery = gql`
-  query ErrorList(
-    $dateRangeStart: UnsignedInteger!
-    $dateRangeEnd: UnsignedInteger!
-    $filters: String
-  ) {
+  query ErrorList($dateRangeStart: String!, $dateRangeEnd: String!, $filters: String) {
     errorList: getErrorsList(
       dateRangeStart: $dateRangeStart
       dateRangeEnd: $dateRangeEnd
