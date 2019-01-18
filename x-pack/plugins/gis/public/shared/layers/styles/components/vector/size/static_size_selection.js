@@ -6,24 +6,20 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiRange
-} from '@elastic/eui';
+import { ValidatedRange } from '../../../../../components/validated_range';
 
 export function StaticSizeSelection({ onChange, styleOptions }) {
 
-  const onSizeChange = (event) => {
-    const size = parseInt(event.target.value, 10);
+  const onSizeChange = (size) => {
     onChange({ size });
   };
 
   return (
-    <EuiRange
+    <ValidatedRange
       min={0}
       max={100}
-      value={styleOptions.size.toString()}
+      value={styleOptions.size}
       onChange={onSizeChange}
-      showInput
     />
   );
 }

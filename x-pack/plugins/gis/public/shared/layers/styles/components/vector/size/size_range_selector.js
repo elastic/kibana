@@ -10,8 +10,8 @@ import {
   EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiRange
 } from '@elastic/eui';
+import { ValidatedRange } from '../../../../../components/validated_range';
 import { DEFAULT_MIN_SIZE, DEFAULT_MAX_SIZE } from '../../../vector_style_defaults';
 
 export function SizeRangeSelector({ minSize, maxSize, onChange }) {
@@ -23,13 +23,11 @@ export function SizeRangeSelector({ minSize, maxSize, onChange }) {
     });
   };
 
-  const onMinSizeChange = (e) => {
-    const updatedMinSize = parseInt(e.target.value, 10);
+  const onMinSizeChange = (updatedMinSize) => {
     onSizeChange(updatedMinSize, updatedMinSize > maxSize ? updatedMinSize : maxSize);
   };
 
-  const onMaxSizeChange = (e) => {
-    const updatedMaxSize = parseInt(e.target.value, 10);
+  const onMaxSizeChange = (updatedMaxSize) => {
     onSizeChange(updatedMaxSize < minSize ? updatedMaxSize : minSize, updatedMaxSize);
   };
 
@@ -40,13 +38,11 @@ export function SizeRangeSelector({ minSize, maxSize, onChange }) {
           label="Min size"
           compressed
         >
-          <EuiRange
+          <ValidatedRange
             min={DEFAULT_MIN_SIZE}
             max={DEFAULT_MAX_SIZE}
-            value={minSize.toString()}
+            value={minSize}
             onChange={onMinSizeChange}
-            showInput
-            showRange
           />
         </EuiFormRow>
       </EuiFlexItem>
@@ -55,13 +51,11 @@ export function SizeRangeSelector({ minSize, maxSize, onChange }) {
           label="Max size"
           compressed
         >
-          <EuiRange
+          <ValidatedRange
             min={DEFAULT_MIN_SIZE}
             max={DEFAULT_MAX_SIZE}
-            value={maxSize.toString()}
+            value={maxSize}
             onChange={onMaxSizeChange}
-            showInput
-            showRange
           />
         </EuiFormRow>
       </EuiFlexItem>
