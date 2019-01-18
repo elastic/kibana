@@ -9,96 +9,84 @@ import euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import 'brace/mode/yaml';
 import 'brace/theme/github';
-import { sample } from 'lodash';
 import React from 'react';
 import { UNIQUENESS_ENFORCING_TYPES } from 'x-pack/plugins/beats_management/common/constants';
-import { BeatTag, CMBeat, ConfigurationBlock } from '../../common/domain_types';
-import { PrimaryLayout } from '../components/layouts/primary';
-import { TagEdit } from '../components/tag';
-import { AppPageProps } from '../frontend_types';
+import { BeatTag, ConfigurationBlock } from '../../../common/domain_types';
+import { PrimaryLayout } from '../../components/layouts/primary';
+import { TagEdit } from '../../components/tag';
+import { AppPageProps } from '../../frontend_types';
+import { randomEUIColor } from '../../utils/random_eui_color';
 
 interface TagPageState {
   showFlyout: boolean;
-  attachedBeats: CMBeat[] | null;
   tag: BeatTag;
   configuration_blocks: ConfigurationBlock[];
+  currentConfigPage: number;
 }
-class TagPageComponent extends React.PureComponent<
+class TagCreatePageComponent extends React.PureComponent<
   AppPageProps & {
     intl: InjectedIntl;
   },
   TagPageState
 > {
-  private mode: 'edit' | 'create' = 'create';
   constructor(props: AppPageProps & { intl: InjectedIntl }) {
     super(props);
-    const randomColor = sample(
-      Object.keys(euiVars)
-        .filter(key => key.startsWith('euiColorVis'))
-        .map(key => (euiVars as any)[key])
-    );
 
     this.state = {
       showFlyout: false,
-      attachedBeats: null,
+      currentConfigPage: 0,
       tag: {
-        id: props.match.params.action === 'create' ? '' : props.match.params.tagid,
+        id: '',
         name: '',
-        color: this.rgb2hex(randomColor),
+        color: randomEUIColor(euiVars),
         hasConfigurationBlocksTypes: [],
       },
       configuration_blocks: [],
     };
-
-    if (props.match.params.action !== 'create') {
-      this.mode = 'edit';
-      this.loadTag();
-      this.loadAttachedBeats();
-    }
   }
   public render() {
     const { intl } = this.props;
-
+    const blockStartingIndex = this.state.currentConfigPage * 5;
     return (
       <PrimaryLayout
-        title={
-          this.mode === 'create'
-            ? intl.formatMessage({
-                id: 'xpack.beatsManagement.tag.createTagTitle',
-                defaultMessage: 'Create Tag',
-              })
-            : intl.formatMessage(
-                {
-                  id: 'xpack.beatsManagement.tag.updateTagTitle',
-                  defaultMessage: 'Update Tag: {tagId}',
-                },
-                {
-                  tagId: this.state.tag.id,
-                }
-              )
-        }
+        title={intl.formatMessage({
+          id: 'xpack.beatsManagement.tag.createTagTitle',
+          defaultMessage: 'Create Tag',
+        })}
       >
         <div>
           <TagEdit
             tag={this.state.tag}
-            configuration_blocks={this.state.configuration_blocks}
-            onDetachBeat={
-              this.mode === 'edit'
-                ? async (beatIds: string[]) => {
-                    await this.props.containers.beats.removeTagsFromBeats(
-                      beatIds,
-                      this.state.tag.id
-                    );
-                    await this.loadAttachedBeats();
-                  }
-                : undefined
-            }
+            configuration_blocks={{
+              blocks: this.state.configuration_blocks.slice(
+                blockStartingIndex,
+                5 + blockStartingIndex
+              ),
+              page: this.state.currentConfigPage,
+              total: this.state.configuration_blocks.length,
+            }}
             onTagChange={(field: string, value: string | number) =>
               this.setState(oldState => ({
                 tag: { ...oldState.tag, [field]: value },
               }))
             }
-            attachedBeats={this.state.attachedBeats as CMBeat[]}
+            onConfigListChange={(index: number) => {
+              this.setState({
+                currentConfigPage: index,
+              });
+            }}
+            onConfigAddOrEdit={(block: ConfigurationBlock) => {
+              this.setState(previousState => ({
+                configuration_blocks: previousState.configuration_blocks.concat([block]),
+              }));
+            }}
+            onConfigRemoved={(id: string) => {
+              this.setState(previousState => ({
+                configuration_blocks: previousState.configuration_blocks.filter(
+                  block => block.id !== id
+                ),
+              }));
+            }}
           />
           <EuiSpacer size="m" />
           <EuiFlexGroup>
@@ -131,34 +119,7 @@ class TagPageComponent extends React.PureComponent<
       </PrimaryLayout>
     );
   }
-  private rgb2hex(rgb: string) {
-    const matchedrgb = rgb.match(
-      /^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i
-    );
-    return matchedrgb && matchedrgb.length === 4
-      ? '#' +
-          ('0' + parseInt(matchedrgb[1], 10).toString(16)).slice(-2) +
-          ('0' + parseInt(matchedrgb[2], 10).toString(16)).slice(-2) +
-          ('0' + parseInt(matchedrgb[3], 10).toString(16)).slice(-2)
-      : '';
-  }
-  private loadTag = async () => {
-    const tags = await this.props.libs.tags.getTagsWithIds([this.props.match.params.tagid]);
-    if (tags.length === 0) {
-      // TODO do something to error https://github.com/elastic/kibana/issues/26023
-    }
-    this.setState({
-      tag: tags[0],
-    });
-  };
 
-  private loadAttachedBeats = async () => {
-    const beats = await this.props.libs.beats.getBeatsWithTag(this.props.match.params.tagid);
-
-    this.setState({
-      attachedBeats: beats,
-    });
-  };
   private saveTag = async () => {
     await this.props.containers.tags.upsertTag(this.state.tag);
     this.props.goTo(`/overview/configuration_tags`);
@@ -169,4 +130,4 @@ class TagPageComponent extends React.PureComponent<
       .reduce((acc, cur) => (cur ? acc + 1 : acc), 0);
 }
 
-export const TagPage = injectI18n(TagPageComponent);
+export const TagCreatePage = injectI18n(TagCreatePageComponent);
