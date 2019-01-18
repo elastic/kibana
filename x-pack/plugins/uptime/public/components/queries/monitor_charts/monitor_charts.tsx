@@ -112,72 +112,9 @@ export const MonitorCharts = ({
       const durationDomain = avgDurationSeries.concat(areaRttSeries);
       const durationLimits = [0, Math.max(...durationDomain.map(({ y }) => y))];
 
-      // find the greatest y-value for rtt chart
-      const rttLimits = [0, Math.max(...maxRtt.map(({ y }) => y))];
-
       return (
         <Fragment>
           <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiTitle size="xs">
-                <h4>
-                  <FormattedMessage
-                    id="xpack.uptime.monitorCharts.rttBreakdownTitle"
-                    defaultMessage="RTT Breakdown ms"
-                    description="The 'ms' is an abbreviation for milliseconds."
-                  />
-                </h4>
-              </EuiTitle>
-              <EuiPanel>
-                <EuiSeriesChart
-                  stackBy="y"
-                  margins={{ left: 60, right: 40, top: 10, bottom: 40 }}
-                  xType={EuiSeriesChartUtils.SCALE.TIME}
-                  width={500}
-                  height={200}
-                  yDomain={rttLimits}
-                >
-                  <EuiAreaSeries
-                    name={i18n.translate(
-                      'xpack.uptime.monitorCharts.rtt.series.writeRequestLabel',
-                      {
-                        defaultMessage: 'Write request',
-                      }
-                    )}
-                    data={rttWriteRequestSeries}
-                    curve="curveBasis"
-                  />
-                  <EuiAreaSeries
-                    name={i18n.translate('xpack.uptime.monitorCharts.rtt.series.validateLabel', {
-                      defaultMessage: 'Validate',
-                    })}
-                    data={rttValidateSeries}
-                    curve="curveBasis"
-                  />
-                  <EuiAreaSeries
-                    name={i18n.translate('xpack.uptime.monitorCharts.rtt.series.contentLabel', {
-                      defaultMessage: 'Content',
-                    })}
-                    data={rttContentSeries}
-                    curve="curveBasis"
-                  />
-                  <EuiAreaSeries
-                    name={i18n.translate('xpack.uptime.monitorCharts.rtt.series.responseLabel', {
-                      defaultMessage: 'Response',
-                    })}
-                    data={rttResponseSeries}
-                    curve="curveBasis"
-                  />
-                  <EuiAreaSeries
-                    name={i18n.translate('xpack.uptime.monitorCharts.rtt.series.tcpLabel', {
-                      defaultMessage: 'Tcp',
-                    })}
-                    data={rttTcpSeries}
-                    curve="curveBasis"
-                  />
-                </EuiSeriesChart>
-              </EuiPanel>
-            </EuiFlexItem>
             <EuiFlexItem>
               <EuiTitle size="xs">
                 <h4>
@@ -188,7 +125,7 @@ export const MonitorCharts = ({
                   />
                 </h4>
               </EuiTitle>
-              <EuiPanel>
+              <EuiPanel style={{ maxWidth: 520, maxHeight: 220 }}>
                 <EuiSeriesChart
                   margins={{ left: 60, right: 40, top: 10, bottom: 40 }}
                   width={500}
@@ -218,44 +155,48 @@ export const MonitorCharts = ({
                 </EuiSeriesChart>
               </EuiPanel>
             </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiTitle size="xs">
+                <h4>
+                  <FormattedMessage
+                    id="xpack.uptime.monitorCharts.checkStatus.title"
+                    defaultMessage="Check status"
+                  />
+                </h4>
+              </EuiTitle>
+              <EuiPanel style={{ maxWidth: 520, maxHeight: 220 }}>
+                <EuiSeriesChart
+                  margins={{ left: 60, right: 40, top: 10, bottom: 40 }}
+                  width={500}
+                  height={200}
+                  xType={EuiSeriesChartUtils.SCALE.TIME}
+                  stackBy="y"
+                  yDomain={domainLimits}
+                >
+                  <EuiAreaSeries
+                    name={i18n.translate(
+                      'xpack.uptime.monitorCharts.checkStatus.series.upCountLabel',
+                      {
+                        defaultMessage: 'Up count',
+                      }
+                    )}
+                    data={upSeries}
+                    color="green"
+                  />
+                  <EuiAreaSeries
+                    name={i18n.translate(
+                      'xpack.uptime.monitorCharts.checkStatus.series.downCountLabel',
+                      {
+                        defaultMessage: 'Down count',
+                      }
+                    )}
+                    data={downSeries}
+                    color="red"
+                  />
+                </EuiSeriesChart>
+              </EuiPanel>
+            </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiSpacer />
-          <EuiTitle size="xs">
-            <h4>
-              <FormattedMessage
-                id="xpack.uptime.monitorCharts.checkStatus.title"
-                defaultMessage="Check status"
-              />
-            </h4>
-          </EuiTitle>
-          <EuiPanel style={{ maxWidth: 520, maxHeight: 220 }}>
-            <EuiSeriesChart
-              margins={{ left: 60, right: 40, top: 10, bottom: 40 }}
-              width={500}
-              height={200}
-              xType={EuiSeriesChartUtils.SCALE.TIME}
-              stackBy="y"
-              yDomain={domainLimits}
-            >
-              <EuiAreaSeries
-                name={i18n.translate('xpack.uptime.monitorCharts.checkStatus.series.upCountLabel', {
-                  defaultMessage: 'Up count',
-                })}
-                data={upSeries}
-                color="green"
-              />
-              <EuiAreaSeries
-                name={i18n.translate(
-                  'xpack.uptime.monitorCharts.checkStatus.series.downCountLabel',
-                  {
-                    defaultMessage: 'Down count',
-                  }
-                )}
-                data={downSeries}
-                color="red"
-              />
-            </EuiSeriesChart>
-          </EuiPanel>
         </Fragment>
       );
     }}
