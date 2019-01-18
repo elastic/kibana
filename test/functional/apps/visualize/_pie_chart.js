@@ -22,6 +22,8 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const filterBar = getService('filterBar');
+  const pieChart = getService('pieChart');
+  const inspector = getService('inspector');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
   const fromTime = '2015-09-19 06:31:44.000';
   const toTime = '2015-09-23 18:31:44.000';
@@ -58,22 +60,15 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
-      // sleep a bit before trying to get the pie chart data below
-      await PageObjects.common.sleep(2000);
     });
 
     it('should have inspector enabled', async function () {
-      const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-      expect(spyToggleExists).to.be(true);
+      await inspector.expectIsEnabled();
     });
 
 
     it('should show 10 slices in pie chart', async function () {
-      const expectedPieChartSliceCount = 10;
-
-      const pieData = await PageObjects.visualize.getPieChartData();
-      log.debug('pieData.length = ' + pieData.length);
-      expect(pieData.length).to.be(expectedPieChartSliceCount);
+      pieChart.expectPieSliceCount(10);
     });
 
     it('should show correct data', async function () {
@@ -81,11 +76,9 @@ export default function ({ getService, getPageObjects }) {
         ['160,000', '44'], ['200,000', '40'], ['240,000', '46'], ['280,000', '39'], ['320,000', '40'], ['360,000', '47']
       ];
 
-      await PageObjects.visualize.openInspector();
-      await PageObjects.visualize.setInspectorTablePageSize(50);
-      const data =  await PageObjects.visualize.getInspectorTableData();
-      log.debug(data);
-      expect(data).to.eql(expectedTableData);
+      await inspector.open();
+      await inspector.setTablePageSize(50);
+      await inspector.expectTableData(expectedTableData);
     });
 
     describe('other bucket', () => {
@@ -108,35 +101,29 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.toggleMissingBucket();
         log.debug('clickGo');
         await PageObjects.visualize.clickGo();
-        const pieData = await PageObjects.visualize.getPieChartLabels();
-        log.debug(`pieData.length = ${pieData.length}`);
-        expect(pieData).to.eql(expectedTableData);
+        await pieChart.expectPieChartLabels(expectedTableData);
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/25955
-      it.skip('should apply correct filter on other bucket', async () => {
+      it('should apply correct filter on other bucket', async () => {
         const expectedTableData = [ 'Missing', 'osx' ];
 
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.visualize.filterPieSlice('Other');
+        await pieChart.filterOnPieSlice('Other');
         await PageObjects.visualize.waitForVisualization();
-        const pieData = await PageObjects.visualize.getPieChartLabels();
-        log.debug(`pieData.length = ${pieData.length}`);
-        expect(pieData).to.eql(expectedTableData);
+        await pieChart.expectPieChartLabels(expectedTableData);
         await filterBar.removeFilter('machine.os.raw');
+        await PageObjects.visualize.waitForVisualization();
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/26323
-      it.skip('should apply correct filter on other bucket by clicking on a legend', async () => {
+      it('should apply correct filter on other bucket by clicking on a legend', async () => {
         const expectedTableData = [ 'Missing', 'osx' ];
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.filterLegend('Other');
         await PageObjects.visualize.waitForVisualization();
-        const pieData = await PageObjects.visualize.getPieChartLabels();
-        log.debug(`pieData.length = ${pieData.length}`);
-        expect(pieData).to.eql(expectedTableData);
+        await pieChart.expectPieChartLabels(expectedTableData);
         await filterBar.removeFilter('machine.os.raw');
+        await PageObjects.visualize.waitForVisualization();
       });
 
       it('should show two levels of other buckets', async () => {
@@ -155,9 +142,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.toggleMissingBucket();
         log.debug('clickGo');
         await PageObjects.visualize.clickGo();
-        const pieData = await PageObjects.visualize.getPieChartLabels();
-        log.debug(`pieData.length = ${pieData.length}`);
-        expect(pieData).to.eql(expectedTableData);
+        await pieChart.expectPieChartLabels(expectedTableData);
       });
     });
 
@@ -179,9 +164,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.toggleDisabledAgg(2);
         await PageObjects.visualize.clickGo();
 
-        const pieData = await PageObjects.visualize.getPieChartLabels();
-        log.debug('pieData.length = ' + pieData.length);
-        expect(pieData).to.eql(expectedTableData);
+        await pieChart.expectPieChartLabels(expectedTableData);
       });
 
       it('should correctly save disabled agg', async () => {
@@ -194,9 +177,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
 
         const expectedTableData =  [ 'win 8', 'win xp', 'win 7', 'ios', 'osx'  ];
-        const pieData = await PageObjects.visualize.getPieChartLabels();
-        log.debug('pieData.length = ' + pieData.length);
-        expect(pieData).to.eql(expectedTableData);
+        await pieChart.expectPieChartLabels(expectedTableData);
       });
 
       it('should show correct result when agg is re-enabled', async () => {
@@ -209,9 +190,8 @@ export default function ({ getService, getPageObjects }) {
           'win 8', 'ios', 'win 7', 'win xp', 'osx', '200,000', 'win 8', 'ios', 'win xp', 'win 7', 'osx', '240,000',
           'ios', 'win 7', 'win xp', 'win 8', 'osx', '280,000', 'win xp', 'win 8', 'win 7', 'ios', 'osx', '320,000',
           'win xp', 'win 7', 'ios', 'win 8', 'osx', '360,000', 'win 7', 'win xp', 'ios', 'win 8', 'osx' ];
-        const pieData = await PageObjects.visualize.getPieChartLabels();
-        log.debug('pieData.length = ' + pieData.length);
-        expect(pieData).to.eql(expectedTableData);
+
+        await pieChart.expectPieChartLabels(expectedTableData);
       });
     });
 
@@ -239,7 +219,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug('Switch to a different time range from \"' + emptyFromTime + '\" to \"' + emptyToTime + '\"');
         await PageObjects.header.setAbsoluteRange(emptyFromTime, emptyToTime);
         await PageObjects.visualize.waitForVisualization();
-        await PageObjects.visualize.expectPieChartError();
+        await PageObjects.visualize.expectError();
       });
     });
     describe('multi series slice', () => {
@@ -323,25 +303,26 @@ export default function ({ getService, getPageObjects }) {
           [ 'osx', '1,322', 'ID', '56' ],
           [ 'osx', '1,322', 'BR', '30' ]
         ];
-        await PageObjects.visualize.openInspector();
-        await PageObjects.visualize.setInspectorTablePageSize(50);
-        const data =  await PageObjects.visualize.getInspectorTableData();
-        await PageObjects.visualize.closeInspector();
-        log.debug(data);
-        expect(data).to.eql(expectedTableData);
+        await inspector.open();
+        await inspector.setTablePageSize(50);
+        await inspector.expectTableData(expectedTableData);
+        await inspector.close();
       });
 
       it ('correctly applies filter', async () => {
-        const expectedTableData = [[ 'win 8', '560', 'CN', '560' ]];
+        const expectedTableData = [
+          [ 'win 8', '560', 'CN', '560' ],
+          [ 'win 7', '537', 'CN', '537' ],
+          [ 'win xp', '526', 'CN', '526' ],
+          [ 'ios', '478', 'CN', '478' ],
+          [ 'osx', '228', 'CN', '228' ]
+        ];
         await PageObjects.visualize.filterLegend('CN');
-        await PageObjects.visualize.applyFilters();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.visualize.openInspector();
-        await PageObjects.visualize.setInspectorTablePageSize(50);
-        const data =  await PageObjects.visualize.getInspectorTableData();
-        await PageObjects.visualize.closeInspector();
-        log.debug(data);
-        expect(data).to.eql(expectedTableData);
+        await inspector.open();
+        await inspector.setTablePageSize(50);
+        await inspector.expectTableData(expectedTableData);
+        await inspector.close();
       });
     });
   });

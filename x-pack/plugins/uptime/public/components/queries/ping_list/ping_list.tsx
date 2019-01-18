@@ -8,7 +8,6 @@ import {
   EuiBadge,
   EuiComboBox,
   EuiComboBoxOptionProps,
-  EuiEmptyPrompt,
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,11 +15,12 @@ import {
   EuiHealth,
   // @ts-ignore
   EuiInMemoryTable,
-  EuiLoadingChart,
   EuiPanel,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import moment from 'moment';
 import React, { Fragment } from 'react';
@@ -50,9 +50,24 @@ export class Pings extends React.Component<PingListProps, PingListState> {
     super(props);
 
     const statusOptions = [
-      { label: 'All', value: '' },
-      { label: 'Up', value: 'up' },
-      { label: 'Down', value: 'down' },
+      {
+        label: i18n.translate('xpack.uptime.pingList.statusOptions.allStatusOptionLabel', {
+          defaultMessage: 'All',
+        }),
+        value: '',
+      },
+      {
+        label: i18n.translate('xpack.uptime.pingList.statusOptions.upStatusOptionLabel', {
+          defaultMessage: 'Up',
+        }),
+        value: 'up',
+      },
+      {
+        label: i18n.translate('xpack.uptime.pingList.statusOptions.downStatusOptionLabel', {
+          defaultMessage: 'Down',
+        }),
+        value: 'down',
+      },
     ];
     this.state = {
       statusOptions,
@@ -82,76 +97,95 @@ export class Pings extends React.Component<PingListProps, PingListState> {
             selectedOption.value === 'up' || selectedOption.value === 'down'
               ? selectedOption.value
               : '',
+          // TODO: get rid of the magic number
           size: this.state.maxSearchSize || size || 200,
           sort: sort || 'desc',
         }}
         query={getPingsQuery}
       >
         {({ loading, error, data }) => {
-          if (loading) {
-            return (
-              <EuiEmptyPrompt
-                iconType="heartbeatApp"
-                title={<h2>Loading Ping History</h2>}
-                body={
-                  <Fragment>
-                    <p>Fetching the latest list of checks</p>
-                    <EuiLoadingChart size="xl" />
-                  </Fragment>
-                }
-              />
-            );
-          }
           if (error) {
-            return `Error ${error.message}`;
+            return i18n.translate('xpack.uptime.pingList.errorMessage', {
+              values: { message: error.message },
+              defaultMessage: 'Error {message}',
+            });
           }
-          const {
-            allPings: { total, pings },
-          } = data;
+          const total = get(data, 'allPings.total');
+          const pings = get(data, 'allPings.pings', []);
           const columns = [
             {
               field: 'monitor.status',
-              name: 'Status',
+              name: i18n.translate('xpack.uptime.pingList.statusColumnLabel', {
+                defaultMessage: 'Status',
+              }),
               render: (pingStatus: string) => (
                 <EuiHealth color={pingStatus === 'up' ? 'success' : 'danger'}>
-                  {pingStatus === 'up' ? 'Up' : 'Down'}
+                  {pingStatus === 'up'
+                    ? i18n.translate('xpack.uptime.pingList.statusColumnHealthUpLabel', {
+                        defaultMessage: 'Up',
+                      })
+                    : i18n.translate('xpack.uptime.pingList.statusColumnHealthDownLabel', {
+                        defaultMessage: 'Down',
+                      })}
                 </EuiHealth>
               ),
               sortable: true,
             },
             {
               field: 'timestamp',
-              name: 'Timestamp',
+              name: i18n.translate('xpack.uptime.pingList.timestampColumnLabel', {
+                defaultMessage: 'Timestamp',
+              }),
               sortable: true,
               render: (timestamp: string) => moment(timestamp).fromNow(),
             },
             {
               field: 'monitor.ip',
-              name: 'IP',
+              name: i18n.translate('xpack.uptime.pingList.ipAddressColumnLabel', {
+                defaultMessage: 'IP',
+              }),
             },
             {
               field: 'monitor.id',
-              name: 'Id',
+              name: i18n.translate('xpack.uptime.pingList.idColumnLabel', {
+                defaultMessage: 'Id',
+              }),
               dataType: 'string',
               width: '20%',
             },
             {
               field: 'monitor.duration.us',
-              name: 'Duration ms',
+              name: i18n.translate('xpack.uptime.pingList.durationMsColumnLabel', {
+                defaultMessage: 'Duration ms',
+                description: 'The "ms" in the default message is an abbreviation for milliseconds',
+              }),
               render: (duration: number) => duration / 1000,
               sortable: true,
             },
             {
               field: 'error.type',
-              name: 'Error Type',
+              name: i18n.translate('xpack.uptime.pingList.errorTypeColumnLabel', {
+                defaultMessage: 'Error type',
+              }),
             },
             {
               field: 'error.message',
-              name: 'Error Message',
+              name: i18n.translate('xpack.uptime.pingList.errorMessageColumnLabel', {
+                defaultMessage: 'Error message',
+              }),
               render: (message: string) =>
                 message && message.length > 25 ? (
-                  <EuiToolTip position="top" title="Error Message" content={<p>{message}</p>}>
-                    <div>{message.slice(0, 24)}...</div>
+                  <EuiToolTip
+                    position="top"
+                    title={i18n.translate(
+                      'xpack.uptime.pingList.columns.errorMessageTooltipTitle',
+                      {
+                        defaultMessage: 'Error message',
+                      }
+                    )}
+                    content={<p>{message}</p>}
+                  >
+                    <div>{message.slice(0, 24)}…</div>
                   </EuiToolTip>
                 ) : (
                   message
@@ -164,14 +198,24 @@ export class Pings extends React.Component<PingListProps, PingListState> {
             false
           );
           if (hasStatus) {
-            columns.push({ field: 'http.response.status_code', name: 'Response Code' });
+            columns.push({
+              field: 'http.response.status_code',
+              name: i18n.translate('xpack.uptime.pingList.responseCodeColumnLabel', {
+                defaultMessage: 'Response code',
+              }),
+            });
           }
           return (
             <Fragment>
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="xs">
-                    <h4>Check History</h4>
+                    <h4>
+                      <FormattedMessage
+                        id="xpack.uptime.pingList.checkHistoryTitle"
+                        defaultMessage="Check History"
+                      />
+                    </h4>
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -181,7 +225,11 @@ export class Pings extends React.Component<PingListProps, PingListState> {
               <EuiPanel paddingSize="l">
                 <EuiFlexGroup>
                   <EuiFlexItem>
-                    <EuiFormRow label="Status">
+                    <EuiFormRow
+                      label={i18n.translate('xpack.uptime.pingList.statusLabel', {
+                        defaultMessage: 'Status',
+                      })}
+                    >
                       <EuiComboBox
                         isClearable={false}
                         singleSelection={{ asPlainText: true }}
@@ -196,7 +244,11 @@ export class Pings extends React.Component<PingListProps, PingListState> {
                     </EuiFormRow>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiFormRow label="Max Search Size">
+                    <EuiFormRow
+                      label={i18n.translate('xpack.uptime.pingList.maxSearchSizeLabel', {
+                        defaultMessage: 'Max Search Size',
+                      })}
+                    >
                       <EuiFieldNumber
                         defaultValue={this.state.maxSearchSize.toString()}
                         min={0}
@@ -214,6 +266,7 @@ export class Pings extends React.Component<PingListProps, PingListState> {
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiInMemoryTable
+                  loading={loading}
                   columns={columns}
                   items={pings}
                   pagination={{ initialPageSize: 10, pageSizeOptions: [5, 10, 20, 100] }}

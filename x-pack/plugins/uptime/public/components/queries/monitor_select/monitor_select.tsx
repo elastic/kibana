@@ -6,6 +6,7 @@
 
 // @ts-ignore No typing for EuiSuperSelect
 import { EuiHealth, EuiSuperSelect } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { Monitor } from '../../../../common/graphql/types';
@@ -35,10 +36,15 @@ export const MonitorSelect = ({
   >
     {({ loading, error, data }) => {
       if (loading) {
-        return 'Loading...';
+        return i18n.translate('xpack.uptime.monitorSelect.loadingMessage', {
+          defaultMessage: 'Loading…',
+        });
       }
       if (error) {
-        return `Error ${error.message}`;
+        return i18n.translate('xpack.uptime.monitorSelect.errorMessage', {
+          values: { message: error.message },
+          defaultMessage: 'Error {message}',
+        });
       }
       const { latestMonitors } = data;
       const options = latestMonitors.map(({ monitor }: { monitor: Monitor }) => ({

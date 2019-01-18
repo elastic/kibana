@@ -803,11 +803,12 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@6.0.1":
-  version "6.0.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-6.0.1.tgz#6dd60ee534f5a5d99e28913b9d7dd6df96af0596"
-  integrity sha512-l/3s5ea13Um2A4aa4KXRbA8nAXyC0nz5S/w8Sr96ok8qtM1PT+SuBPq9CTEdZ89MHfC9EIwezBFX1pU8sX194A==
+"@elastic/eui@6.5.1":
+  version "6.5.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-6.5.1.tgz#9a77577d88e74f0871523c8b90373819f36aa0b3"
+  integrity sha512-NirOp2cMESQrhUuD4CHmMgedNMv2x8XHOIqCQl1SGftfUzixlpxEeZRmgjJjegaSMOtPaV6dnqx4YELoZFYlAA==
   dependencies:
+    "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
     classnames "^2.2.5"
     core-js "^2.5.1"
@@ -1519,6 +1520,11 @@
   version "4.14.117"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.117.tgz#695a7f514182771a1e0f4345d189052ee33c8778"
   integrity sha512-xyf2m6tRbz8qQKcxYZa7PA4SllYcay+eh25DN3jmNYY6gSTL7Htc/bttVdkqj2wfJGbeWlQiX8pIyJpKU+tubw==
+
+"@types/lodash@^4.14.116":
+  version "4.14.119"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.119.tgz#be847e5f4bc3e35e46d041c394ead8b603ad8b39"
+  integrity sha512-Z3TNyBL8Vd/M9D9Ms2S3LmFq2sSMzahodD6rCS9V2N44HUMINb75jNkSuwAx7eo2ufqTdfOdtGQpNbieUjPQmw==
 
 "@types/log-symbols@^2.0.0":
   version "2.0.0"

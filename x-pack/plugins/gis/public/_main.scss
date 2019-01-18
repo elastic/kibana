@@ -1,10 +1,3 @@
-// Makes sure the listing page is full height with proper background
-map-listing, .gisListingPage {
-  display: flex;
-  flex-grow: 1;
-}
-
-
 #gis-plugin {
   display: flex;
   flex-direction: column;
@@ -19,262 +12,25 @@ map-listing, .gisListingPage {
   flex-direction: column;
 }
 
-.gisMapWrapper {
-  display: flex;
-  flex-direction: column;
-  position: relative;
-}
 
-.layerToast {
-  margin-top: -150px !important;
-  pointer-events: none;
-}
+// MapBox
 
 .mapContainer {
   flex-grow: 1;
-}
-
-/**
- * 1. The overlay captures mouse events even if it's empty space. To counter-act this,
- *    we remove all pointer events from the overlay then add them back on the
- *    individual widgets.
- */
-
-.gisWidgetOverlay {
-  position: absolute;
-  z-index: $euiZLevel1;
-  min-width: 17rem;
-  max-width: 24rem;
-  top: $euiSizeM;
-  right: $euiSizeM;
-  bottom: $euiSizeM;
-  pointer-events: none; /* 1 */
-}
-
-.gisWidgetControl {
-  max-height: 100%;
-  overflow: hidden;
-  padding-bottom: $euiSizeS; // ensures the scrollbar doesn't appear unnecessarily because of flex group negative margins
-  border-color: transparent !important;
-  flex-direction: column;
-  display: flex;
-  pointer-events: all; /* 1 */
-
-  &.euiPanel--shadow {
-    @include euiBottomShadowLarge;
-  }
-
-  .gisWidgetControl__header {
-    padding: $euiSizeS $euiSize;
-    flex-shrink: 0;
-  }
-}
-
-.gisWidgetControl__tocHolder {
-  @include euiScrollBar;
-  overflow-y: auto;
-}
-
-.layerEntry {
-  padding: $euiSizeS $euiSize;
-  position: relative;
-}
-
-.alphaRange {
-  .euiFieldNumber {
-    max-width: 5.5em !important;
-  }
-}
-
-.colorPicker {
-  .euiColorPickerPopUp {
-    z-index: 3000;
-  }
-}
-
-.colorGradient {
-  width: 100%;
-  height: 20px;
-  position: relative;
-  top: 0px;
-  right: 0px;
-  bottom: 0px;
-  left: 0px;
-}
-
-.layerEntry > .visible {
-  opacity: 1;
-}
-
-.layerEntry > .notvisible { //ugh, already global classname named `invisible`
-    opacity: 0.5;
-}
-
-.layerEntry .grab:hover {
-  cursor: -webkit-grab;
-  cursor: grab;
-}
-
-.layerSettings__type {
-  .euiIcon {
-    margin-top: -2px;
-  }
-}
-
-.hidden {
-  display: none
-}
-
-// HOTFIX coming from EUI
-.sourceSelectItem {
-  width: 374px;
 }
 
 .mapboxgl-popup {
   z-index: 100;
 }
 
-.gisLayerPanel {
-  background-color: $euiColorLightestShade;
-  width: 0;
-  overflow: hidden;
-
-  > * {
-    width: $euiSizeXXL * 11;
-  }
-
-  &-isVisible {
-    width: $euiSizeXXL * 11;
-    transition: width $euiAnimSpeedNormal $euiAnimSlightResistance;
-  }
-}
-
-.gisViewPanel__header,
-.gisViewPanel__body,
-.gisViewPanel__footer {
-  padding: $euiSize;
-}
-
-.gisViewPanel__header {
-  padding-bottom: 0;
-  flex-shrink: 0;
-  z-index: 2;
-  box-shadow: 0 $euiSize $euiSize (-$euiSize / 2) $euiColorLightestShade;
-}
-
-.gisViewPanel__title {
-  svg {
-    margin: -.1em .5em 0 0;
-  }
-}
-
-.gisViewPanel__body {
-  overflow: hidden;
-  overflow-y: auto;
-  @include euiScrollBar;
-
-  > *:not(:last-child) {
-    margin-bottom: $euiSize;
-    flex: 0 0 auto;
-  }
-}
-
-.gisViewPanel__footer {
-  padding-top: 0;
-  flex-shrink: 0;
-  z-index: 2;
-  box-shadow: 0 ($euiSize *-1) $euiSize (-$euiSize / 2) $euiColorLightestShade;
-}
+// This is not good practice to create such a generic class.
+// I can't seem to find it being applied anywhere in GIS
+// .hidden {
+//   display: none
+// }
 
 // EUIFIXTODO:
 
 .euiColorPicker__emptySwatch {
   position: relative;
-}
-
-.visibilityToggle {
-  position: relative;
-  display: inline-block;
-  min-height: 20px;
-  color: $euiColorMediumShade;
-
-  .visibilityToggle__body {
-    line-height: 19px;
-
-    > * {
-      vertical-align: baseline;
-    }
-  }
-
-  .visibilityToggle__content {
-    svg {
-      display: inline-block;
-      vertical-align: middle;
-    }
-
-    .filter {
-      display: none;
-    }
-  }
-
-  .visibilityToggle__eye,
-  .visibilityToggle__eyeClosed,
-  .visibilityToggle__content {
-    transition: opacity .2s ease-in-out;
-  }
-
-  .visibilityToggle__eye,
-  .visibilityToggle__eyeClosed {
-    position: absolute;
-    left: 0;
-    top: 0;
-    opacity: 0;
-    z-index: 1;
-  }
-
-  .euiSwitch__input {
-    z-index: 2;
-    position: absolute;
-    opacity: 0;
-    width: 100%;
-    height: 100%;
-    cursor: pointer;
-  }
-
-  .visibilityToggle__body {
-    display: block;
-    display: block;
-    height: 16px;
-    width: 16px;
-  }
-
-  &:hover,
-  &:focus {
-    cursor: pointer;
-    color: $euiColorPrimary;
-
-    .visibilityToggle__content {
-      opacity: 0;
-    }
-
-    .euiSwitch__input:checked {
-      + .visibilityToggle__body > .visibilityToggle__eye {
-        opacity: 1;
-      }
-    }
-
-    .euiSwitch__input:not(:checked) {
-      + .visibilityToggle__body > .visibilityToggle__content {
-        opacity: 0;
-      }
-      + .visibilityToggle__body > .visibilityToggle__eyeClosed {
-        opacity: 1;
-      }
-    }
-  }
-}
-.euiComboBox {
-  .euiComboBox__inputWrap {
-    display: flex;
-  }
 }
