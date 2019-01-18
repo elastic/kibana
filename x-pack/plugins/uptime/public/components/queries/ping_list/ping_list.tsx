@@ -191,18 +191,21 @@ export class Pings extends React.Component<PingListProps, PingListState> {
                 ),
             },
           ];
-          const hasStatus = allPings.reduce(
-            (hasHttpStatus: boolean, currentPing: Ping) =>
-              hasHttpStatus || get(currentPing, 'http.response.status_code'),
-            false
-          );
-          if (hasStatus) {
-            columns.push({
-              field: 'http.response.status_code',
-              name: i18n.translate('xpack.uptime.pingList.responseCodeColumnLabel', {
-                defaultMessage: 'Response code',
-              }),
-            });
+
+          if (allPings) {
+            const hasStatus = allPings.reduce(
+              (hasHttpStatus: boolean, currentPing: Ping) =>
+                hasHttpStatus || get(currentPing, 'http.response.status_code'),
+              false
+            );
+            if (hasStatus) {
+              columns.push({
+                field: 'http.response.status_code',
+                name: i18n.translate('xpack.uptime.pingList.responseCodeColumnLabel', {
+                  defaultMessage: 'Response code',
+                }),
+              });
+            }
           }
           return (
             <Fragment>
@@ -218,7 +221,13 @@ export class Pings extends React.Component<PingListProps, PingListState> {
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="primary">{allPings.length}</EuiBadge>
+                  <EuiBadge color="primary">
+                    {allPings
+                      ? allPings.length
+                      : i18n.translate('xpack.uptime.pingList.pingCountBadgeDefault', {
+                          defaultMessage: 'N/A',
+                        })}
+                  </EuiBadge>
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiPanel paddingSize="l">
