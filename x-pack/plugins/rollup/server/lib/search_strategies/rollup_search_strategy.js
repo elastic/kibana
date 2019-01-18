@@ -3,50 +3,42 @@
 * or more contributor license agreements. Licensed under the Elastic License;
 * you may not use this file except in compliance with the Elastic License.
 */
+import { isEmpty } from 'lodash';
 import { callWithRequestFactory } from '../call_with_request_factory';
 
 const ROLLUP_INDEX_CAPABILITIES_METHOD = 'rollup.rollupIndexCapabilities';
 const INDEX_PATTERN_SEPARATOR = ',';
+const batchRequestsSupport = false;
 
-export default (AbstractSearchStrategy, RollupSearchRequest) =>
+
+export default (AbstractSearchStrategy, RollupSearchRequest, RollupSearchCapabilities) =>
   (class RollupSearchStrategy extends AbstractSearchStrategy {
     name = 'rollup';
-    batchRequestsSupport = false;
 
     constructor(server) {
       super(server, callWithRequestFactory, RollupSearchRequest);
     }
 
-    async numberOfRollupJobs(req, indexPattern) {
+    getAllRollupaCapabilities(req, indexPattern) {
       const callWithRequest = this.getCallWithRequestInstance(req);
       const indices = (indexPattern || '').split(INDEX_PATTERN_SEPARATOR);
-
       const requests = indices.map(index => callWithRequest(ROLLUP_INDEX_CAPABILITIES_METHOD, {
         indexPattern: index,
       }));
 
-      return Promise.all(requests)
-        .then((responses) => responses
-          .reduce((numberOfRollupJobs, response, index) => {
-            if (response[indices[index]]) {
-              numberOfRollupJobs += 1;
-            }
-
-            return numberOfRollupJobs;
-          }, 0))
-        .catch(() => Promise.resolve(0));
+      return Promise.all(requests);
     }
 
-    async hasOneRollupJob(req, indexPattern) {
-      return await this.numberOfRollupJobs(req, indexPattern) === 1;
-    }
 
     async checkForViability(req, indexPattern) {
-      const isViable = await this.hasOneRollupJob(req, indexPattern);
+      const rollupCapabilities = await this.getAllRollupaCapabilities(req, indexPattern)
+        .then((responses) => responses.filter(response => !isEmpty(response)));
+
+      const isViable = rollupCapabilities.length === 1;
 
       return {
         isViable,
-        restrictions: {},
+        capabilities: isViable ? new RollupSearchCapabilities(req, batchRequestsSupport, rollupCapabilities) : null
       };
     }
   });

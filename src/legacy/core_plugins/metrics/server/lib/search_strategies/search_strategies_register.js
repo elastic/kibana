@@ -19,6 +19,7 @@
 import AbstractSearchStrategy from './strategies/abstract_search_strategy';
 import AbstractSearchRequest from './searh_requests/abstract_request';
 import DefaultSearchStrategy from './strategies/default_search_strategy';
+import DefaultSearchCapabilities from './default_search_capabilities';
 
 const strategies = [];
 
@@ -38,19 +39,20 @@ export default class SearchStrategiesRegister {
   }
 
   static exposeServer(server, searchStrategiesRegister) {
-    server.expose('addSearchStrategy', (searchStrategy) => searchStrategiesRegister.add(searchStrategy));
     server.expose('AbstractSearchStrategy', AbstractSearchStrategy);
     server.expose('AbstractSearchRequest', AbstractSearchRequest);
+    server.expose('DefaultSearchCapabilities', DefaultSearchCapabilities);
+    server.expose('addSearchStrategy', (searchStrategy) => searchStrategiesRegister.add(searchStrategy));
   }
 
   static async getViableStrategy(req, indexPattern) {
     for (const searchStrategy of strategies) {
-      const { isViable, restrictions } = await searchStrategy.checkForViability(req, indexPattern);
+      const { isViable, capabilities } = await searchStrategy.checkForViability(req, indexPattern);
 
       if (isViable) {
         return {
           searchStrategy,
-          restrictions,
+          capabilities,
         };
       }
     }

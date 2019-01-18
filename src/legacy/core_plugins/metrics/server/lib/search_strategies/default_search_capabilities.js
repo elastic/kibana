@@ -16,28 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import AbstractSearchStrategy from './abstract_search_strategy';
-import SearchRequest from '../searh_requests/search_request';
-import DefaultSearchCapabilities from '../default_search_capabilities';
-
-const callWithRequestFactory = (server, request) => {
-  const { callWithRequest } = request.server.plugins.elasticsearch.getCluster('data');
-
-  return callWithRequest;
-};
-const batchRequestsSupport = true;
-
-export default class DefaultSearchStrategy extends AbstractSearchStrategy {
-  name = 'default';
-
-  constructor(server) {
-    super(server, callWithRequestFactory, SearchRequest);
+export default class DefaultSearchCapabilities {
+  constructor(req, batchRequestsSupport, capabilities) {
+    this.request = req;
+    this.batchRequestsSupport = batchRequestsSupport;
+    this.capabilities = capabilities;
   }
 
-  checkForViability(req) {
-    return {
-      isViable: true,
-      capabilities: new DefaultSearchCapabilities(req, batchRequestsSupport)
-    };
+  getTimeZone() {
+    const { timezone } = this.request.payload.timerange;
+
+    return timezone;
   }
 }

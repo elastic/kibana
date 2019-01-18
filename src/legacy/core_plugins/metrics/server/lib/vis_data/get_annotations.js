@@ -31,7 +31,7 @@ function validAnnotation(annotation) {
 
 export default async (req, panel), esQueryConfig => {
   const indexPattern = panel.index_pattern;
-  const { searchStrategy } = await SearchStrategiesRegister.getViableStrategy(req, indexPattern);
+  const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategy(req, indexPattern);
   const searchRequest = searchStrategy.getSearchRequest(req, indexPattern);
   const bodies = panel.annotations
     .filter(validAnnotation)
@@ -40,10 +40,12 @@ export default async (req, panel), esQueryConfig => {
       const indexPattern = annotation.index_pattern;
       const bodies = [];
 
-      bodies.push({
-        index: indexPattern,
-        ignoreUnavailable: true,
-      });
+      if (capabilities.batchRequestsSupport) {
+        bodies.push({
+          index: indexPattern,
+          ignoreUnavailable: true,
+        });
+      }
 
       const body = buildAnnotationRequest(req, panel, annotation), esQueryConfig;
       body.timeout = '90s';

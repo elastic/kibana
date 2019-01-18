@@ -5,13 +5,20 @@
 */
 import getRollupSearchStrategy from './rollup_search_strategy';
 import getRollupSearchRequest from './rollup_search_request';
+import getRollupSearchCapabilities from './rollup_search_capabilities';
 
 export default (server) => {
-  const { addSearchStrategy, AbstractSearchRequest, AbstractSearchStrategy } = server.plugins.metrics;
+  const {
+    addSearchStrategy,
+    AbstractSearchRequest,
+    AbstractSearchStrategy,
+    DefaultSearchCapabilities,
+  } = server.plugins.metrics;
 
   if (addSearchStrategy) {
     const RollupSearchRequest = getRollupSearchRequest(AbstractSearchRequest);
-    const RollupSearchStrategy = getRollupSearchStrategy(AbstractSearchStrategy, RollupSearchRequest);
+    const RollupSearchCapabilities = getRollupSearchCapabilities(DefaultSearchCapabilities);
+    const RollupSearchStrategy = getRollupSearchStrategy(AbstractSearchStrategy, RollupSearchRequest, RollupSearchCapabilities);
 
     addSearchStrategy(new RollupSearchStrategy(server));
   }
