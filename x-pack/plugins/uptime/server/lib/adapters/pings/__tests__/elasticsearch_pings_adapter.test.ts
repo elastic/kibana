@@ -36,9 +36,7 @@ describe('ElasticsearchPingsAdapter class', () => {
     ];
     mockEsSearchResult = {
       hits: {
-        total: {
-          value: mockHits.length,
-        },
+        total: mockHits.length,
         hits: mockHits,
       },
     };
