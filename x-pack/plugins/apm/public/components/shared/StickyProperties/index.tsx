@@ -9,6 +9,7 @@ import { EuiToolTip } from '@elastic/eui';
 import moment from 'moment';
 import React from 'react';
 import styled from 'styled-components';
+import { NOT_AVAILABLE_LABEL } from '../../../constants';
 import {
   colors,
   fontFamilyCode,
@@ -20,7 +21,7 @@ import {
 } from '../../../style/variables';
 
 export interface IStickyProperty {
-  val: React.ReactNode | Date;
+  val: JSX.Element | string | Date;
   label: string;
   fieldName?: string;
   width?: 0 | string;
@@ -60,10 +61,10 @@ const PropertyValueTruncated = styled.span`
 
 function TimestampValue({ timestamp }: { timestamp: Date }) {
   const time = moment(timestamp);
-  const timeAgo = timestamp ? time.fromNow() : 'N/A';
+  const timeAgo = timestamp ? time.fromNow() : NOT_AVAILABLE_LABEL;
   const timestampFull = timestamp
     ? time.format('MMMM Do YYYY, HH:mm:ss.SSS')
-    : 'N/A';
+    : NOT_AVAILABLE_LABEL;
 
   return (
     <PropertyValue>

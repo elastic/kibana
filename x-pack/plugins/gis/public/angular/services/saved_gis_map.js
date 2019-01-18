@@ -18,8 +18,7 @@ import {
   getQuery,
 } from '../../selectors/map_selectors';
 import { getIsDarkTheme } from '../../store/ui';
-import { TileStyle } from '../../shared/layers/styles/tile_style';
-import { convertMapExtentToEnvelope } from '../../elasticsearch_geo_utils';
+import { convertMapExtentToPolygon } from '../../elasticsearch_geo_utils';
 
 const module = uiModules.get('app/gis');
 
@@ -39,23 +38,6 @@ module.factory('SavedGisMap', function (Private) {
       defaults: {
         title: 'New Map',
         description: '',
-        layerListJSON: JSON.stringify([
-          {
-            id: "0hmz5",
-            sourceDescriptor: { "type": "EMS_TMS", "id": "road_map" },
-            visible: true,
-            temporary: false,
-            style: {
-              type: TileStyle.type,
-              properties: {
-                alphaValue: 1
-              }
-            },
-            type: "TILE",
-            minZoom: 0,
-            maxZoom: 24,
-          }
-        ])
       },
     });
 
@@ -106,7 +88,7 @@ module.factory('SavedGisMap', function (Private) {
       isDarkMode: getIsDarkTheme(state),
     });
 
-    this.bounds = convertMapExtentToEnvelope(getMapExtent(state));
+    this.bounds = convertMapExtentToPolygon(getMapExtent(state));
   };
 
   return SavedGisMap;
