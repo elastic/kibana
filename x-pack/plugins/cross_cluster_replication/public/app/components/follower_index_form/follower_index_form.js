@@ -404,7 +404,9 @@ export const FollowerIndexForm = injectI18n(
               isEditable={isNew}
               areErrorsVisible={areErrorsVisible}
               onChange={this.onClusterChange}
-              onError={(error) => this.onFieldsErrorChange({ remoteCluster: error })}
+              onError={(error) => {
+                this.setState(updateFormErrors({ remoteCluster: error }));
+              }}
               errorMessages={errorMessages}
             />
           </EuiDescribedFormGroup>
@@ -465,72 +467,74 @@ export const FollowerIndexForm = injectI18n(
           />
         );
 
-      const renderAdvancedSettings = () => (
-        <Fragment>
-          <EuiHorizontalRule />
+      const renderAdvancedSettings = () => {
+        const { isNew } = this.state;
 
-          <EuiDescribedFormGroup
-            title={(
-              <EuiTitle size="s">
-                <h2>
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.followerIndexForm.advancedSettingsTitle"
-                    defaultMessage="Advanced settings"
-                  />
-                </h2>
-              </EuiTitle>
-            )}
-            description={(
+        return (
+          <Fragment>
+            <EuiHorizontalRule />
+            <EuiDescribedFormGroup
+              title={(
+                <EuiTitle size="s">
+                  <h2>
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.followerIndexForm.advancedSettingsTitle"
+                      defaultMessage="Advanced settings"
+                    />
+                  </h2>
+                </EuiTitle>
+              )}
+              description={(
+                <Fragment>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.followerIndexForm.advancedSettingsDescription"
+                      defaultMessage="Use advanced settings to control the rate at which data is replicated."
+                    />
+                  </p>
+                  {isNew ? (
+                    <EuiButton
+                      color="primary"
+                      onClick={this.toggleAdvancedSettings}
+                    >
+                      {toggleAdvancedSettingButtonLabel}
+                    </EuiButton>
+                  ) : null}
+                </Fragment>
+              )}
+              fullWidth
+            />
+
+            {areAdvancedSettingsVisible && (
               <Fragment>
-                <p>
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.followerIndexForm.advancedSettingsDescription"
-                    defaultMessage="Use advanced settings to control the rate at which data is replicated."
-                  />
-                </p>
-
-                <EuiButton
-                  color="primary"
-                  onClick={this.toggleAdvancedSettings}
-                >
-                  { toggleAdvancedSettingButtonLabel }
-                </EuiButton>
+                <EuiSpacer size="s"/>
+                {advancedSettingsFields.map((advancedSetting) => {
+                  const { field, title, description, label, helpText } = advancedSetting;
+                  return (
+                    <FormEntryRow
+                      key={field}
+                      field={field}
+                      value={followerIndex[field]}
+                      error={fieldsErrors[field]}
+                      title={(
+                        <EuiTitle size="xs">
+                          <h3>{title}</h3>
+                        </EuiTitle>
+                      )}
+                      description={description}
+                      label={label}
+                      helpText={helpText}
+                      areErrorsVisible={areErrorsVisible}
+                      onValueUpdate={this.onFieldsChange}
+                    />
+                  );
+                })}
               </Fragment>
             )}
-            fullWidth
-          />
-
-          {areAdvancedSettingsVisible && (
-            <Fragment>
-              <EuiSpacer size="s" />
-
-              {advancedSettingsFields.map((advancedSetting) => {
-                const { field, title, description, label, helpText } = advancedSetting;
-                return (
-                  <FormEntryRow
-                    key={field}
-                    field={field}
-                    value={followerIndex[field]}
-                    error={fieldsErrors[field]}
-                    title={(
-                      <EuiTitle size="xs">
-                        <h3>{title}</h3>
-                      </EuiTitle>
-                    )}
-                    description={description}
-                    label={label}
-                    helpText={helpText}
-                    areErrorsVisible={areErrorsVisible}
-                    onValueUpdate={this.onFieldsChange}
-                  />
-                );
-              })}
-            </Fragment>
-          )}
-
-          <EuiHorizontalRule />
-        </Fragment>
-      );
+            <EuiHorizontalRule />
+          </Fragment>
+        );
+      };
 
       /**
        * Form Error warning message
