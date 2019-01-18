@@ -23,7 +23,7 @@ export class VectorStyle {
   }
 
   constructor(descriptor) {
-    this._descriptor = descriptor;
+    this._descriptor = VectorStyle.createDescriptor(descriptor.properties);
   }
 
   static canEdit(styleInstance) {
@@ -31,9 +31,10 @@ export class VectorStyle {
   }
 
   static createDescriptor(properties) {
+    const defaultStyleProperties = getDefaultStaticProperties();
     return {
       type: VectorStyle.type,
-      properties: properties
+      properties: { ...defaultStyleProperties, ...properties }
     };
   }
 
