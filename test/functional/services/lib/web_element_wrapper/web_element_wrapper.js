@@ -88,6 +88,7 @@ export class WebElementWrapper {
    * @return {Promise<void>}
    */
   async click() {
+    await this.scrollIntoViewIfNecessary();
     await this._webElement.click();
   }
 
@@ -254,6 +255,7 @@ export class WebElementWrapper {
    * @return {Promise<void>}
    */
   async moveMouseTo() {
+    await this.scrollIntoViewIfNecessary();
     const mouse = this._driver.actions().mouse();
     const actions = this._driver.actions({ bridge: true });
     await actions.pause(mouse).move({ origin: this._webElement }).perform();
