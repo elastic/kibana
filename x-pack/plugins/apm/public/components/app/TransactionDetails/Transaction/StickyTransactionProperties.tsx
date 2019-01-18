@@ -33,7 +33,7 @@ export function StickyTransactionProperties({
 
   const url =
     idx(transaction, _ => _.context.page.url) ||
-    idx(transaction, _ => _.context.request.url) ||
+    idx(transaction, _ => _.context.request.url.full) ||
     'N/A';
   const duration = transaction.transaction.duration.us;
   const stickyProperties: IStickyProperty[] = [

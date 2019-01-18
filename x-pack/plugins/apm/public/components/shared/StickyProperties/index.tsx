@@ -21,7 +21,7 @@ import {
 } from '../../../style/variables';
 
 export interface IStickyProperty {
-  val: React.ReactNode | Date;
+  val: JSX.Element | string | Date;
   label: string;
   fieldName?: string;
   width?: 0 | string;

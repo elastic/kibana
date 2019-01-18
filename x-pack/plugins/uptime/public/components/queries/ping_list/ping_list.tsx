@@ -110,9 +110,7 @@ export class Pings extends React.Component<PingListProps, PingListState> {
               defaultMessage: 'Error {message}',
             });
           }
-          const {
-            allPings: { total, pings },
-          } = data;
+          const { allPings } = data;
           const columns = [
             {
               field: 'monitor.status',
@@ -193,18 +191,21 @@ export class Pings extends React.Component<PingListProps, PingListState> {
                 ),
             },
           ];
-          const hasStatus = pings.reduce(
-            (hasHttpStatus: boolean, currentPing: Ping) =>
-              hasHttpStatus || get(currentPing, 'http.response.status_code'),
-            false
-          );
-          if (hasStatus) {
-            columns.push({
-              field: 'http.response.status_code',
-              name: i18n.translate('xpack.uptime.pingList.responseCodeColumnLabel', {
-                defaultMessage: 'Response code',
-              }),
-            });
+
+          if (allPings) {
+            const hasStatus = allPings.pings.reduce(
+              (hasHttpStatus: boolean, currentPing: Ping) =>
+                hasHttpStatus || get(currentPing, 'http.response.status_code'),
+              false
+            );
+            if (hasStatus) {
+              columns.push({
+                field: 'http.response.status_code',
+                name: i18n.translate('xpack.uptime.pingList.responseCodeColumnLabel', {
+                  defaultMessage: 'Response code',
+                }),
+              });
+            }
           }
           return (
             <Fragment>
@@ -220,7 +221,9 @@ export class Pings extends React.Component<PingListProps, PingListState> {
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="primary">{total}</EuiBadge>
+                  <EuiBadge color="primary">
+                    {typeof allPings !== 'undefined' ? allPings.total : ''}
+                  </EuiBadge>
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiPanel paddingSize="l">
@@ -269,7 +272,7 @@ export class Pings extends React.Component<PingListProps, PingListState> {
                 <EuiInMemoryTable
                   loading={loading}
                   columns={columns}
-                  items={pings}
+                  items={typeof allPings !== 'undefined' ? allPings.pings : []}
                   pagination={{ initialPageSize: 10, pageSizeOptions: [5, 10, 20, 100] }}
                   sorting={true}
                 />

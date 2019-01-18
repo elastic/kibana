@@ -28,7 +28,9 @@ exports[`it renders without crashing 1`] = `
         size="l"
         textTransform="none"
       >
-        <h1>
+        <h1
+          tabIndex={0}
+        >
           <FormattedMessage
             defaultMessage="Select your space"
             id="xpack.spaces.spaceSelector.selectSpacesTitle"
