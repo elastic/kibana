@@ -272,24 +272,24 @@ class EditPolicyUi extends Component {
                 errors={errors[PHASE_HOT]}
                 isShowingErrors={isShowingErrors && !!findFirstError(errors[PHASE_HOT], false)}
               />
-              <EuiHorizontalRule className="ilmHrule" />
+              <EuiHorizontalRule />
               <WarmPhase
                 errors={errors[PHASE_WARM]}
                 showNodeDetailsFlyout={this.showNodeDetailsFlyout}
                 isShowingErrors={isShowingErrors && !!findFirstError(errors[PHASE_WARM], false)}
               />
-              <EuiHorizontalRule className="ilmHrule" />
+              <EuiHorizontalRule />
               <ColdPhase
                 errors={errors[PHASE_COLD]}
                 showNodeDetailsFlyout={this.showNodeDetailsFlyout}
                 isShowingErrors={isShowingErrors && !!findFirstError(errors[PHASE_COLD], false)}
               />
-              <EuiHorizontalRule className="ilmHrule" />
+              <EuiHorizontalRule />
               <DeletePhase
                 errors={errors[PHASE_DELETE]}
                 isShowingErrors={isShowingErrors && !!findFirstError(errors[PHASE_DELETE], false)}
               />
-              <EuiHorizontalRule className="ilmHrule" />
+              <EuiHorizontalRule />
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup>

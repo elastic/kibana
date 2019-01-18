@@ -21,13 +21,15 @@ export const getMonitorListQuery = gql`
         ping {
           timestamp
           monitor {
+            id
             status
-            type
-            host
             ip
             duration {
               us
             }
+          }
+          url {
+            full
           }
         }
         upSeries {

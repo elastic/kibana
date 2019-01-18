@@ -11,6 +11,7 @@ exports[`removes aria-label when instructed not to announce the space name 1`] =
   }
 >
   <EuiAvatar
+    aria-hidden={true}
     aria-label=""
     color="#BFA180"
     data-test-subj="space-avatar-"
@@ -21,6 +22,7 @@ exports[`removes aria-label when instructed not to announce the space name 1`] =
     type="space"
   >
     <div
+      aria-hidden={true}
       aria-label=""
       className="euiAvatar euiAvatar--m euiAvatar--space"
       data-test-subj="space-avatar-"

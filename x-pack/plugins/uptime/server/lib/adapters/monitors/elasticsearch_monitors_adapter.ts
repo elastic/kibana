@@ -155,7 +155,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       body: {
         query: getFilteredQuery(dateRangeStart, dateRangeEnd, filters),
         aggs: {
-          hosts: {
+          urls: {
             composite: {
               sources: [
                 {
@@ -168,7 +168,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
                 {
                   port: {
                     terms: {
-                      field: 'tcp.port',
+                      field: 'url.full',
                     },
                   },
                 },
