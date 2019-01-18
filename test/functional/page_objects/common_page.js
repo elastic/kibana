@@ -28,6 +28,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
   const browser = getService('browser');
   const retry = getService('retry');
   const find = getService('find');
+  const globalNav = getService('globalNav');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['shield']);
@@ -278,16 +279,8 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async getBreadcrumbPageTitle() {
-      return await testSubjects.getVisibleText('breadcrumbPageTitle');
-    }
-
-    async getTopNavText() {
-      return await testSubjects.getVisibleText('top-nav');
-    }
-
     async isChromeVisible() {
-      const globalNavShown = await testSubjects.exists('globalNav');
+      const globalNavShown = await globalNav.exists();
       const topNavShown = await testSubjects.exists('top-nav');
       return globalNavShown && topNavShown;
     }

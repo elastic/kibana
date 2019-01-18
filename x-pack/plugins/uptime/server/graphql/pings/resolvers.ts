@@ -4,26 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UMPingSortDirectionArg } from '../../../common/domain_types';
 import { UMResolver } from '../../../common/graphql/resolver_types';
-import { DocCount, PingResults } from '../../../common/graphql/types';
+import { AllPingsQueryArgs, DocCount, PingResults } from '../../../common/graphql/types';
 import { UMServerLibs } from '../../lib/lib';
 import { UMContext } from '../types';
 import { CreateUMGraphQLResolvers } from '../types';
 
-interface UMAllPingsArgs {
-  sort: UMPingSortDirectionArg;
-  size?: number;
-  monitorId: string;
-  status: string;
-  dateRangeStart: number;
-  dateRangeEnd: number;
-}
-
 export type UMAllPingsResolver = UMResolver<
   PingResults | Promise<PingResults>,
   any,
-  UMAllPingsArgs,
+  AllPingsQueryArgs,
   UMContext
 >;
 

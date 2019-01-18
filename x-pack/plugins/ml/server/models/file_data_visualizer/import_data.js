@@ -81,12 +81,10 @@ export function importDataProvider(callWithRequest) {
     if (await indexExits(index) === false) {
       const body = {
         mappings: {
-          _doc: {
-            _meta: {
-              created_by: INDEX_META_DATA_CREATED_BY
-            },
-            properties: mappings
+          _meta: {
+            created_by: INDEX_META_DATA_CREATED_BY
           },
+          properties: mappings
         }
       };
 
@@ -102,14 +100,13 @@ export function importDataProvider(callWithRequest) {
 
   async function indexData(index, pipelineId, data) {
     try {
-      const type = '_doc';
       const body = [];
       for (let i = 0; i < data.length; i++) {
         body.push({ index: {} });
         body.push(data[i]);
       }
 
-      const settings = { index, type, body };
+      const settings = { index, body };
       if (pipelineId !== undefined) {
         settings.pipeline = pipelineId;
       }

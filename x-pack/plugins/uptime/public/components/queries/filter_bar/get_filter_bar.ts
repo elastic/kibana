@@ -7,7 +7,7 @@
 import gql from 'graphql-tag';
 
 export const getFilterBarQuery = gql`
-  query FilterBar($dateRangeStart: UnsignedInteger!, $dateRangeEnd: UnsignedInteger!) {
+  query FilterBar($dateRangeStart: String!, $dateRangeEnd: String!) {
     filterBar: getFilterBar(dateRangeStart: $dateRangeStart, dateRangeEnd: $dateRangeEnd) {
       status
       port

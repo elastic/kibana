@@ -7,16 +7,11 @@
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
+import { NOT_AVAILABLE_LABEL } from '../constants';
 
 const SECONDS_CUT_OFF = 10 * 1000000; // 10 seconds (in microseconds)
 const MILLISECONDS_CUT_OFF = 10 * 1000; // 10 milliseconds (in microseconds)
 const SPACE = ' ';
-const notAvailableLabel: string = i18n.translate(
-  'xpack.apm.formatters.notAvailableLabel',
-  {
-    defaultMessage: 'N/A'
-  }
-);
 
 /*
  * value: time in microseconds
@@ -31,7 +26,7 @@ interface FormatterOptions {
 
 export function asSeconds(
   value: FormatterValue,
-  { withUnit = true, defaultValue = notAvailableLabel }: FormatterOptions = {}
+  { withUnit = true, defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
 ) {
   if (value == null) {
     return defaultValue;
@@ -47,7 +42,7 @@ export function asSeconds(
 
 export function asMillis(
   value: FormatterValue,
-  { withUnit = true, defaultValue = notAvailableLabel }: FormatterOptions = {}
+  { withUnit = true, defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
 ) {
   if (value == null) {
     return defaultValue;
@@ -64,7 +59,7 @@ export function asMillis(
 
 export function asMicros(
   value: FormatterValue,
-  { withUnit = true, defaultValue = notAvailableLabel }: FormatterOptions = {}
+  { withUnit = true, defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
 ) {
   if (value == null) {
     return defaultValue;
@@ -107,7 +102,7 @@ export function timeUnit(max: number) {
 
 export function asTime(
   value: FormatterValue,
-  { withUnit = true, defaultValue = notAvailableLabel }: FormatterOptions = {}
+  { withUnit = true, defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
 ) {
   if (value == null) {
     return defaultValue;
@@ -136,18 +131,13 @@ export function tpmUnit(type?: string) {
 
 export function asPercent(
   numerator: number,
-  denominator?: number,
+  denominator: number | undefined,
   fallbackResult = ''
 ) {
-  if (denominator === 0) {
+  if (!denominator) {
     return fallbackResult;
   }
 
-  const decimal = denominator ? numerator / denominator : numerator;
-
-  return numeral(decimal).format('0.00%');
-}
-
-export function asGB(bytes: number | null, places = 1) {
-  return ((bytes || 0) / 1e9).toFixed(places) + ' GB';
+  const decimal = numerator / denominator;
+  return numeral(decimal).format('0.0%');
 }

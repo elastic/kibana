@@ -7,41 +7,38 @@ Array [
     Object {
       "body": Object {
         "aggs": Object {
-          "freeMemory": Object {
+          "averagePercentMemoryUsed": Object {
             "avg": Object {
-              "field": "system.memory.actual.free",
+              "script": Object {
+                "lang": "expression",
+                "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+              },
             },
           },
-          "processMemoryRss": Object {
-            "avg": Object {
-              "field": "system.process.memory.rss.bytes",
-            },
-          },
-          "processMemorySize": Object {
-            "avg": Object {
-              "field": "system.process.memory.size",
+          "maximumPercentMemoryUsed": Object {
+            "max": Object {
+              "script": Object {
+                "lang": "expression",
+                "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+              },
             },
           },
           "timeseriesData": Object {
             "aggs": Object {
-              "freeMemory": Object {
+              "averagePercentMemoryUsed": Object {
                 "avg": Object {
-                  "field": "system.memory.actual.free",
+                  "script": Object {
+                    "lang": "expression",
+                    "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+                  },
                 },
               },
-              "processMemoryRss": Object {
-                "avg": Object {
-                  "field": "system.process.memory.rss.bytes",
-                },
-              },
-              "processMemorySize": Object {
-                "avg": Object {
-                  "field": "system.process.memory.size",
-                },
-              },
-              "totalMemory": Object {
-                "avg": Object {
-                  "field": "system.memory.total",
+              "maximumPercentMemoryUsed": Object {
+                "max": Object {
+                  "script": Object {
+                    "lang": "expression",
+                    "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+                  },
                 },
               },
             },
@@ -53,11 +50,6 @@ Array [
               "field": "@timestamp",
               "interval": "1s",
               "min_doc_count": 0,
-            },
-          },
-          "totalMemory": Object {
-            "avg": Object {
-              "field": "system.memory.total",
             },
           },
         },
