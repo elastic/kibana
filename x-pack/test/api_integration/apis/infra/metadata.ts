@@ -15,8 +15,8 @@ const metadataTests: KbnTestProvider = ({ getService }) => {
   const client = getService('infraOpsGraphQLClient');
 
   describe('metadata', () => {
-    before(() => esArchiver.load('infra'));
-    after(() => esArchiver.unload('infra'));
+    before(() => esArchiver.load('infra/metrics_and_logs'));
+    after(() => esArchiver.unload('infra/metrics_and_logs'));
 
     it('supports the metadata container query', () => {
       return client

@@ -22,20 +22,17 @@ export function initYAxis(chart) {
 
   if (Array.isArray(y)) {
     // TODO: vis option should allow choosing this format
-    chart.yAxisFormatter = y[0].aggConfig.fieldFormatter();
-    chart.yAxisLabel = ''; // use the legend
-  } else {
-    chart.yAxisFormatter = y.aggConfig.fieldFormatter();
-    chart.yAxisLabel = y.title;
+    chart.yAxisFormatter = y[0].fieldFormatter;
+    chart.yAxisLabel = y.length > 1 ? '' : y[0].title;
   }
 
   const z = chart.aspects.series;
   if (z) {
     if (Array.isArray(z)) {
-      chart.zAxisFormatter = z[0].aggConfig.fieldFormatter();
-      chart.zAxisLabel = ''; // use the legend
+      chart.zAxisFormatter = z[0].fieldFormatter;
+      chart.zAxisLabel = '';
     } else {
-      chart.zAxisFormatter = z.aggConfig.fieldFormatter();
+      chart.zAxisFormatter = z.fieldFormatter;
       chart.zAxisLabel = z.title;
     }
   }

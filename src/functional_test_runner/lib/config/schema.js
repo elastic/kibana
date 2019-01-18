@@ -181,4 +181,9 @@ export const schema = Joi.object().keys({
   failureDebugging: Joi.object().keys({
     htmlDirectory: Joi.string().default(defaultRelativeToConfigPath('failure_debug/html'))
   }).default(),
+
+  // settings for the find service
+  layout: Joi.object().keys({
+    fixedHeaderHeight: Joi.number().default(50),
+  }).default(),
 }).default();
