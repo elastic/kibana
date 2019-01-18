@@ -217,19 +217,19 @@ class HeaderUI extends Component<Props, State> {
               </EuiListGroup>
               <EuiHorizontalRule margin="none" />
               <EuiListGroup
-                listItems={navLinks.map(navLink => (
-                  (!navLink.hidden ?
-                    {
-                      label: navLink.title,
-                      href: navLink.lastSubUrl && !navLink.active ? navLink.lastSubUrl : navLink.url,
-                      iconType: navLink.euiIconType,
-                      size: 's',
-                      style: { color: 'inherit' },
-                      'aria-label': navLink.title,
-                      isActive: navLink.active,
-                    }
+                listItems={navLinks.map(navLink =>
+                  !navLink.hidden
+                    ? {
+                        label: navLink.title,
+                        href:
+                          navLink.lastSubUrl && !navLink.active ? navLink.lastSubUrl : navLink.url,
+                        iconType: navLink.euiIconType,
+                        size: 's',
+                        style: { color: 'inherit' },
+                        'aria-label': navLink.title,
+                        isActive: navLink.active,
+                      }
                     : false
-                  )
                 )}
               />
             </EuiNavDrawerMenu>
