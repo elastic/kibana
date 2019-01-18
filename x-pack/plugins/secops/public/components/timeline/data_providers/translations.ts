@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const DROP_ANYTHING = i18n.translate('xpack.secops.dataProviders.dropAnything', {
-  defaultMessage: 'Drop Anything',
+  defaultMessage: 'Drop anything',
 });
 
 export const HIGHLIGHTED = i18n.translate('xpack.secops.dataProviders.highlighted', {
