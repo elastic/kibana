@@ -33,7 +33,7 @@ $kuiFocusColor: $euiColorPrimary;
 $kuiFocusAltBackgroundColor: rgba($kuiInfoColor, 0.2);
 $kuiFocusDangerColor: $euiColorDanger;
 $kuiFocusWarningColor: $euiColorWarning;
-$kuiFocusBackgroundColor: #fff;
+$kuiFocusBackgroundColor: $euiColorEmptyShade;
 $kuiFontColor: $euiTextColor;
 $kuiSubduedTextColor: $euiColorDarkShade;
 $kuiLinkHoverColor: darken($euiColorPrimary, 10%);

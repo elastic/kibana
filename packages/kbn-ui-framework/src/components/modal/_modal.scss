@@ -1,11 +1,10 @@
 .kuiModal {
-  @include kuiBottomShadow;
+  @include euiBottomShadow;
 
   line-height: $kuiLineHeight;
   background-color: $modalBackgroundColor;
   border: 1px solid $modalBorderColor;
   border-radius: $kuiBorderRadius;
-  box-shadow: $kuiBoxShadow;
   z-index: $kuiModalDepth + 1;
   animation: kuiModal $kuiAnimSpeedSlow $kuiAnimSlightBounce;
 }

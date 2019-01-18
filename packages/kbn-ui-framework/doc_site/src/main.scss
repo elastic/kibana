@@ -1,3 +1,8 @@
-@import "~@elastic/eui/src/global_styling/index";
+@import '~@elastic/eui/src/themes/k6/k6_globals';
+@import '~@elastic/eui/src/themes/k6/k6_colors_dark';
+@import '~@elastic/eui/src/global_styling/functions/index';
+@import '~@elastic/eui/src/global_styling/variables/index';
+@import '~@elastic/eui/src/global_styling/mixins/index';
+@import '~@elastic/eui/src/global_styling/reset/index';
 @import "../../dist/ui_framework.css";
 @import "./components/guide_components";
