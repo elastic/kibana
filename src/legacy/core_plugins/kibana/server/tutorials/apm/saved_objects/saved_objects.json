@@ -50,7 +50,7 @@
         "kibanaSavedObjectMeta": {
             "searchSourceJSON": "{\"filter\": [], \"highlightAll\": true, \"version\": true, \"query\": {\"language\": \"lucene\", \"query\": \"\"}}"
         },
-        "optionsJSON": "{\"darkTheme\": false}",
+        "optionsJSON": "{}",
         "panelsJSON": "[{\"size_x\": 12, \"size_y\": 5, \"id\": \"1ffc5e20-7827-11e7-8c47-65b845b5cfb3\", \"panelIndex\": 1, \"row\": 4, \"col\": 1, \"type\": \"visualization\"}, {\"size_x\": 6, \"size_y\": 3, \"id\": \"1bdca740-7828-11e7-8c47-65b845b5cfb3\", \"panelIndex\": 2, \"row\": 1, \"col\": 1, \"type\": \"visualization\"}, {\"size_x\": 6, \"size_y\": 3, \"id\": \"804ffc40-7828-11e7-8c47-65b845b5cfb3\", \"panelIndex\": 3, \"row\": 1, \"col\": 7, \"type\": \"visualization\"}]",
         "timeRestore": false,
         "title": "[APM] Services",
@@ -109,7 +109,7 @@
         "kibanaSavedObjectMeta": {
             "searchSourceJSON": "{\"filter\": [], \"highlightAll\": true, \"version\": true, \"query\": {\"language\": \"lucene\", \"query\": \"\"}}"
         },
-        "optionsJSON": "{\"darkTheme\": false}",
+        "optionsJSON": "{}",
         "panelsJSON": "[{\"size_x\": 12, \"size_y\": 3, \"id\": \"c618e4e0-7c69-11e7-aa55-3b0d52c71c60\", \"panelIndex\": 1, \"row\": 1, \"col\": 1, \"type\": \"visualization\"}, {\"size_x\": 12, \"sort\": [\"@timestamp\", \"desc\"], \"size_y\": 21, \"id\": \"ceefd050-7c6a-11e7-aa55-3b0d52c71c60\", \"columns\": [\"error.culprit\", \"error.exception.type\", \"error.exception.message\", \"error.log.message\", \"error.exception.handled\", \"context.service.name\"], \"panelIndex\": 2, \"row\": 4, \"col\": 1, \"type\": \"search\"}]",
         "timeRestore": false,
         "title": "[APM] Error Details",
@@ -142,7 +142,7 @@
         "kibanaSavedObjectMeta": {
             "searchSourceJSON": "{\"filter\": [], \"highlightAll\": true, \"version\": true, \"query\": {\"language\": \"lucene\", \"query\": \"\"}}"
         },
-        "optionsJSON": "{\"darkTheme\": false}",
+        "optionsJSON": "{}",
         "panelsJSON": "[{\"size_x\": 12, \"size_y\": 10, \"id\": \"22518e70-7c69-11e7-aa55-3b0d52c71c60\", \"panelIndex\": 1, \"row\": 4, \"col\": 1, \"type\": \"visualization\"}, {\"size_x\": 12, \"size_y\": 3, \"id\": \"c618e4e0-7c69-11e7-aa55-3b0d52c71c60\", \"panelIndex\": 2, \"row\": 1, \"col\": 1, \"type\": \"visualization\"}]",
         "timeRestore": false,
         "title": "[APM] Errors",
@@ -205,7 +205,7 @@
         "kibanaSavedObjectMeta": {
             "searchSourceJSON": "{\"filter\": [], \"highlightAll\": true, \"version\": true, \"query\": {\"language\": \"lucene\", \"query\": \"\"}}"
         },
-        "optionsJSON": "{\"darkTheme\": false}",
+        "optionsJSON": "{}",
         "panelsJSON": "[{\"size_x\": 12, \"size_y\": 10, \"id\": \"a2e199b0-7820-11e7-8c47-65b845b5cfb3\", \"panelIndex\": 1, \"row\": 4, \"col\": 1, \"type\": \"visualization\"}, {\"size_x\": 6, \"size_y\": 3, \"id\": \"09bcf890-7822-11e7-8c47-65b845b5cfb3\", \"panelIndex\": 2, \"row\": 1, \"col\": 1, \"type\": \"visualization\"}, {\"size_x\": 6, \"size_y\": 3, \"id\": \"55606a60-7823-11e7-8c47-65b845b5cfb3\", \"panelIndex\": 3, \"row\": 1, \"col\": 7, \"type\": \"visualization\"}]",
         "timeRestore": false,
         "title": "[APM] Transactions",
@@ -247,7 +247,7 @@
         "kibanaSavedObjectMeta": {
             "searchSourceJSON": "{\"filter\": [], \"highlightAll\": true, \"version\": true, \"query\": {\"language\": \"lucene\", \"query\": \"\"}}"
         },
-        "optionsJSON": "{\"darkTheme\": false}",
+        "optionsJSON": "{}",
         "panelsJSON": "[{\"size_x\": 12, \"sort\": [\"span.start.us\", \"asc\"], \"size_y\": 23, \"type\": \"search\", \"columns\": [\"span.type\", \"span.name\", \"span.duration.us\", \"span.start.us\"], \"panelIndex\": 1, \"row\": 1, \"col\": 1, \"id\": \"d7735b90-7ddf-11e7-b115-df9c90da2df1\"}]",
         "timeRestore": false,
         "title": "[APM] Span Details",

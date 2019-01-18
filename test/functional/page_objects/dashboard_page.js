@@ -277,22 +277,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await this.gotoDashboardLandingPage();
     }
 
-    async isDarkThemeOn() {
-      log.debug('isDarkThemeOn');
-      await this.openOptions();
-      const darkThemeCheckbox = await testSubjects.find('dashboardDarkThemeCheckbox');
-      return await darkThemeCheckbox.getProperty('checked');
-    }
-
-    async useDarkTheme(on) {
-      log.debug(`useDarkTheme: on ${on}`);
-      await this.openOptions();
-      const isDarkThemeOn = await this.isDarkThemeOn();
-      if (isDarkThemeOn !== on) {
-        return await testSubjects.click('dashboardDarkThemeCheckbox');
-      }
-    }
-
     async isMarginsOn() {
       log.debug('isMarginsOn');
       await this.openOptions();
