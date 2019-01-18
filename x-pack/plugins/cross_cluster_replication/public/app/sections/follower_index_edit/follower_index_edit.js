@@ -12,8 +12,7 @@ import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import {
   EuiPageContent,
-  EuiButton,
-  EuiSpacer,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiOverlayMask,
@@ -115,28 +114,35 @@ export const FollowerIndexEdit = injectI18n(
     }
 
     renderGetFollowerIndexError(error) {
-      const { intl } = this.props;
+      const { intl, match: { params: { id: name } } } = this.props;
       const title = intl.formatMessage({
         id: 'xpack.crossClusterReplication.followerIndexEditForm.loadingErrorTitle',
         defaultMessage: 'Error loading follower index',
       });
+      const errorMessage = error.status === 404 ? {
+        data: {
+          error: intl.formatMessage({
+            id: 'xpack.crossClusterReplication.followerIndexEditForm.loadingErrorMessage',
+            defaultMessage: `The follower index '{name}' does not exist.`,
+          }, { name })
+        }
+      } : error;
 
       return (
         <Fragment>
-          <SectionError title={title} error={error} />
-          <EuiSpacer />
-          <EuiFlexGroup justifyContent="spaceAround">
+          <SectionError title={title} error={errorMessage} />
+          <EuiFlexGroup>
             <EuiFlexItem grow={false}>
-              <EuiButton
+              <EuiButtonEmpty
                 {...routing.getRouterLinkProps('/follower_indices')}
-                fill
-                iconType="plusInCircle"
+                iconType="arrowLeft"
+                flush="left"
               >
                 <FormattedMessage
                   id="xpack.crossClusterReplication.followerIndexEditForm.viewFollowerIndicesButtonLabel"
                   defaultMessage="View follower indices"
                 />
-              </EuiButton>
+              </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
         </Fragment>

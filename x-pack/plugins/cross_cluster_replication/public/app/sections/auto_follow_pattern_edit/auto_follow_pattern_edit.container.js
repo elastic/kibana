@@ -19,8 +19,14 @@ import { AutoFollowPatternEdit as AutoFollowPatternEditView } from './auto_follo
 const scope = SECTIONS.AUTO_FOLLOW_PATTERN;
 
 const mapStateToProps = (state) => ({
-  apiStatus: getApiStatus(scope)(state),
-  apiError: getApiError(scope)(state),
+  apiStatus: {
+    get: getApiStatus(`${scope}-get`)(state),
+    save: getApiStatus(`${scope}-save`)(state),
+  },
+  apiError: {
+    get: getApiError(`${scope}-get`)(state),
+    save: getApiError(`${scope}-save`)(state),
+  },
   autoFollowPatternId: getSelectedAutoFollowPatternId('edit')(state),
   autoFollowPattern: getSelectedAutoFollowPattern('edit')(state),
 });
@@ -29,7 +35,10 @@ const mapDispatchToProps = dispatch => ({
   getAutoFollowPattern: (id) => dispatch(getAutoFollowPattern(id)),
   selectAutoFollowPattern: (id) => dispatch(selectEditAutoFollowPattern(id)),
   saveAutoFollowPattern: (id, autoFollowPattern) => dispatch(saveAutoFollowPattern(id, autoFollowPattern, true)),
-  clearApiError: () => dispatch(clearApiError(scope)),
+  clearApiError: () => {
+    dispatch(clearApiError(`${scope}-get`));
+    dispatch(clearApiError(`${scope}-save`));
+  },
 });
 
 export const AutoFollowPatternEdit = connect(

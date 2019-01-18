@@ -25,10 +25,9 @@ const errorMessages = {
     id="xpack.crossClusterReplication.forms.emptyRemoteClustersCallOutDescription"
     defaultMessage="No cluster found. You must add a remote cluster."
   />),
-  remoteClusterNotConnectedEditable: (name) => (<FormattedMessage
+  remoteClusterNotConnectedEditable: () => (<FormattedMessage
     id="xpack.crossClusterReplication.forms.currentRemoteClusterNotConnectedCallOutDescription"
     defaultMessage="Edit the remote cluster to fix the problem or select a different one."
-    values={{ name }}
   />),
 };
 
@@ -163,8 +162,8 @@ export const RemoteClustersFormField = injectI18n(
           iconType="cross"
         >
           <p>
-            { isEditable && this.errorMessages.remoteClusterNotConnectedEditable(name)}
-            { !isEditable && this.errorMessages.remoteClusterNotConnectedNotEditable(name)}
+            { isEditable && this.errorMessages.remoteClusterNotConnectedEditable()}
+            { !isEditable && this.errorMessages.remoteClusterNotConnectedNotEditable()}
           </p>
           <EuiButton
             {...routing.getRouterLinkProps(`/edit/${name}`, BASE_PATH_REMOTE_CLUSTERS, { redirect: currentUrl }, true)}
