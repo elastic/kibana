@@ -27,6 +27,9 @@ interface Context {
     username?: string;
     email?: string;
   };
+  page?: {
+    url: string;
+  };
   [key: string]: unknown;
 }
 

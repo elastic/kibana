@@ -11,8 +11,6 @@ import chrome from 'ui/chrome';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import {
-  EuiPage,
-  EuiPageBody,
   EuiPageContent,
 } from '@elastic/eui';
 
@@ -46,56 +44,49 @@ export const AutoFollowPatternAdd = injectI18n(
       const { saveAutoFollowPattern, apiStatus, apiError, intl, match: { url: currentUrl } } = this.props;
 
       return (
-        <EuiPage>
-          <EuiPageBody>
-            <EuiPageContent
-              horizontalPosition="center"
-              className="ccrPageContent"
-            >
-              <AutoFollowPatternPageTitle
-                title={(
-                  <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPattern.addTitle"
-                    defaultMessage="Add auto-follow pattern"
-                  />
-                )}
+        <EuiPageContent>
+          <AutoFollowPatternPageTitle
+            title={(
+              <FormattedMessage
+                id="xpack.crossClusterReplication.autoFollowPattern.addTitle"
+                defaultMessage="Add auto-follow pattern"
               />
+            )}
+          />
 
-              <RemoteClustersProvider>
-                {({ isLoading, error, remoteClusters }) => {
-                  if (isLoading) {
-                    return (
-                      <SectionLoading>
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.autoFollowPatternCreateForm.loadingRemoteClusters"
-                          defaultMessage="Loading remote clusters..."
-                        />
-                      </SectionLoading>
-                    );
-                  }
-
-                  if (error) {
-                    const title = intl.formatMessage({
-                      id: 'xpack.crossClusterReplication.autoFollowPatternCreateForm.loadingRemoteClustersErrorTitle',
-                      defaultMessage: 'Error loading remote clusters',
-                    });
-                    return <SectionError title={title} error={error} />;
-                  }
-
-                  return (
-                    <AutoFollowPatternForm
-                      apiStatus={apiStatus}
-                      apiError={apiError}
-                      currentUrl={currentUrl}
-                      remoteClusters={remoteClusters}
-                      saveAutoFollowPattern={saveAutoFollowPattern}
+          <RemoteClustersProvider>
+            {({ isLoading, error, remoteClusters }) => {
+              if (isLoading) {
+                return (
+                  <SectionLoading>
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.autoFollowPatternCreateForm.loadingRemoteClusters"
+                      defaultMessage="Loading remote clusters..."
                     />
-                  );
-                }}
-              </RemoteClustersProvider>
-            </EuiPageContent>
-          </EuiPageBody>
-        </EuiPage>
+                  </SectionLoading>
+                );
+              }
+
+              if (error) {
+                const title = intl.formatMessage({
+                  id: 'xpack.crossClusterReplication.autoFollowPatternCreateForm.loadingRemoteClustersErrorTitle',
+                  defaultMessage: 'Error loading remote clusters',
+                });
+                return <SectionError title={title} error={error} />;
+              }
+
+              return (
+                <AutoFollowPatternForm
+                  apiStatus={apiStatus}
+                  apiError={apiError}
+                  currentUrl={currentUrl}
+                  remoteClusters={remoteClusters}
+                  saveAutoFollowPattern={saveAutoFollowPattern}
+                />
+              );
+            }}
+          </RemoteClustersProvider>
+        </EuiPageContent>
       );
     }
   }
