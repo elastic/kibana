@@ -4,7 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { byteUnitsUrl, timeUnitsUrl } from '../../services/documentation_links';
+
+const byteUnitsHelpText = (
+  <FormattedMessage
+    id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.bytesHelpText"
+    defaultMessage="Example values: 10b, 1024kb, 1mb, 5gb, 2tb, 1pb. {link}"
+    values={{ link: (
+      <a href={byteUnitsUrl} target="_blank">
+        <FormattedMessage
+          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.bytesHelpTextLinkMessage"
+          defaultMessage="Learn more."
+        />
+      </a>
+    ) }}
+  />
+);
+
+const timeUnitsHelpText = (
+  <FormattedMessage
+    id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.bytesHelpText"
+    defaultMessage="Example values: 2d, 24h, 20m, 30s, 500ms, 10000micros, 80000nanos. {link}"
+    values={{ link: (
+      <a href={timeUnitsUrl} target="_blank">
+        <FormattedMessage
+          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.bytesHelpTextLinkMessage"
+          defaultMessage="Learn more."
+        />
+      </a>
+    ) }}
+  />
+);
 
 export const advancedSettingsFields = [
   {
@@ -56,6 +89,7 @@ export const advancedSettingsFields = [
         defaultMessage: 'Max read request size (optional)'
       }
     ),
+    helpText: byteUnitsHelpText,
   }, {
     field: 'maxWriteRequestOperationCount',
     title: i18n.translate(
@@ -91,6 +125,7 @@ export const advancedSettingsFields = [
         defaultMessage: 'Max write request size (optional)'
       }
     ),
+    helpText: byteUnitsHelpText,
   }, {
     field: 'maxOutstandingWriteRequests',
     title: i18n.translate(
@@ -148,6 +183,7 @@ export const advancedSettingsFields = [
         defaultMessage: 'Max write buffer size (optional)'
       }
     ),
+    helpText: byteUnitsHelpText,
   }, {
     field: 'maxRetryDelay',
     title: i18n.translate(
@@ -166,6 +202,7 @@ export const advancedSettingsFields = [
         defaultMessage: 'Max retry delay (optional)'
       }
     ),
+    helpText: timeUnitsHelpText,
   }, {
     field: 'readPollTimeout',
     title: i18n.translate(
@@ -186,6 +223,7 @@ export const advancedSettingsFields = [
         defaultMessage: 'Read poll timeout (optional)'
       }
     ),
+    helpText: timeUnitsHelpText,
   },
 ];
 
