@@ -17,8 +17,9 @@ export function handleResponse(resp, includeNodes, includeIndices, cluster) {
   let indicesTotals;
   let nodes;
 
-  if (resp && resp.hits && resp.hits.total !== 0) {
-    indices = resp.aggregations.indices.buckets.reduce(normalizeIndexShards, {});
+  const buckets = get(resp, 'aggregations.indices.buckets');
+  if (buckets && buckets.length !== 0) {
+    indices = buckets.reduce(normalizeIndexShards, {});
     indicesTotals = calculateIndicesTotals(indices);
 
     if (includeNodes) {
@@ -43,7 +44,6 @@ export function getShardStats(req, esIndexPattern, cluster, { includeNodes = fal
     index: esIndexPattern,
     size: 0,
     ignoreUnavailable: true,
-    rest_total_hits_as_int: true,
     body: {
       sort: { timestamp: { order: 'desc' } },
       query: createQuery({
