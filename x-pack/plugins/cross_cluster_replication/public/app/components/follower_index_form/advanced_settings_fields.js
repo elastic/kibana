@@ -11,12 +11,12 @@ import { byteUnitsUrl, timeUnitsUrl } from '../../services/documentation_links';
 
 const byteUnitsHelpText = (
   <FormattedMessage
-    id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.bytesHelpText"
+    id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.byteUnitsHelpText"
     defaultMessage="Example values: 10b, 1024kb, 1mb, 5gb, 2tb, 1pb. {link}"
     values={{ link: (
       <a href={byteUnitsUrl} target="_blank">
         <FormattedMessage
-          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.bytesHelpTextLinkMessage"
+          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.byteUnitsHelpTextLinkMessage"
           defaultMessage="Learn more."
         />
       </a>
@@ -26,12 +26,12 @@ const byteUnitsHelpText = (
 
 const timeUnitsHelpText = (
   <FormattedMessage
-    id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.bytesHelpText"
+    id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.timeUnitsHelpText"
     defaultMessage="Example values: 2d, 24h, 20m, 30s, 500ms, 10000micros, 80000nanos. {link}"
     values={{ link: (
       <a href={timeUnitsUrl} target="_blank">
         <FormattedMessage
-          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.bytesHelpTextLinkMessage"
+          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.timeUnitsHelpTextLinkMessage"
           defaultMessage="Learn more."
         />
       </a>
