@@ -10,6 +10,8 @@ import {
   EuiSuperSelect,
 } from '@elastic/eui';
 
+import { DEFAULT_ALPHA_VALUE } from './style_defaults';
+
 export class HeatmapStyle {
 
   static type = 'HEATMAP';
@@ -27,7 +29,7 @@ export class HeatmapStyle {
       type: HeatmapStyle.type,
       refinement: refinement || 'coarse',
       properties: {
-        alphaValue: 1
+        alphaValue: DEFAULT_ALPHA_VALUE
       }
     };
   }
