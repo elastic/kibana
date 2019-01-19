@@ -1,0 +1,27 @@
+{
+  "type": "_doc",
+  "value": {
+    "index": "flstest",
+    "type": "_doc",
+    "id": "2",
+    "source": {
+      "customer_name": "ABC Company",
+      "customer_region": "WEST",
+      "customer_ssn": "444.555.6666"
+    }
+  }
+}
+
+{
+  "type": "_doc",
+  "value": {
+    "index": "flstest",
+    "type": "_doc",
+    "id": "1",
+    "source": {
+      "customer_name": "ABC Company",
+      "customer_region": "EAST",
+      "customer_ssn": "111.222.3333"
+    }
+  }
+}
