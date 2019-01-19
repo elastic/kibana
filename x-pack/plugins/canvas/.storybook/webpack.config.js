@@ -5,10 +5,10 @@ module.exports = (baseConfig, env, config) => {
   config.module.rules.push({
     test: /\.less$/,
     use: [
-      {
-        loader: require.resolve('extract-text-webpack-plugin'),
-        options: { omit: 1, remove: true },
-      },
+      // {
+      //   loader: require.resolve('extract-text-webpack-plugin'),
+      //   options: { omit: 1, remove: true },
+      // },
       { loader: 'style-loader' },
       { loader: 'css-loader', options: { importLoaders: 2 } },
       {
@@ -23,7 +23,10 @@ module.exports = (baseConfig, env, config) => {
 
   config.module.rules.push({
     test: /\.(ts|tsx)$/,
-    loader: require.resolve('awesome-typescript-loader'),
+    use: [
+      require.resolve('awesome-typescript-loader'),
+      require.resolve("react-docgen-typescript-loader"),
+    ],
   });
 
   config.plugins.push(new TSDocgenPlugin()); // optional
