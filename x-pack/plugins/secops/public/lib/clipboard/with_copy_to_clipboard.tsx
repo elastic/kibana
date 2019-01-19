@@ -8,7 +8,9 @@ import { EuiButtonIcon } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
+
 import { Clipboard } from './clipboard';
+import * as i18n from './translations';
 
 const WithCopyToClipboardContainer = styled.div`
   align-items: center;
@@ -28,7 +30,7 @@ export const WithCopyToClipboard = pure<{ text: string }>(({ text, children }) =
       <EuiButtonIcon
         color="text"
         iconType="copyClipboard"
-        aria-label={`Copy ${text} to clipboard`}
+        aria-label={`${i18n.COPY} ${text} ${i18n.TO_CLIPBOARD}`}
       />
     </Clipboard>
   </WithCopyToClipboardContainer>

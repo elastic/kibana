@@ -6,6 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const TOGGLE = i18n.translate('xpack.secops.themeSwitcher.toggle', {
+  defaultMessage: 'Toggle',
+});
+
 export const DARK_THEME = i18n.translate('xpack.secops.themeSwitcher.darkTheme', {
   defaultMessage: 'Dark Theme',
 });

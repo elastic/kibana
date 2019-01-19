@@ -16,8 +16,6 @@ import {
   TypesBar,
   UncommonProcessTable,
 } from '../../components/page/hosts';
-import { KpiItem } from '../../graphql/types';
-
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
 import { manageQuery } from '../../components/page/manage_query';
 import { AuthenticationsQuery } from '../../containers/authentications';
@@ -27,6 +25,8 @@ import { HostsQuery } from '../../containers/hosts';
 import { KpiEventsQuery } from '../../containers/kpi_events';
 import { WithSource } from '../../containers/source';
 import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
+import { KpiItem } from '../../graphql/types';
+import * as i18n from './translations';
 
 const basePath = chrome.getBasePath();
 
@@ -132,9 +132,9 @@ export const Hosts = pure(() => (
         </GlobalTime>
       ) : (
         <EmptyPage
-          title="Looks like you don't have any auditbeat indices."
-          message="Let's add some!"
-          actionLabel="Setup Instructions"
+          title={i18n.NO_AUDITBEAT_INDICES}
+          message={i18n.LETS_ADD_SOME}
+          actionLabel={i18n.SETUP_INSTRUCTIONS}
           actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/security`}
         />
       )

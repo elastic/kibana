@@ -10,6 +10,7 @@ import { pure } from 'recompose';
 
 import { OnToggleDataProviderEnabled } from '../events';
 import { DataProvider } from './data_provider';
+import * as i18n from './translations';
 
 interface Props {
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
@@ -24,7 +25,7 @@ export const SwitchButton = pure<Props>(({ onToggleDataProviderEnabled, dataProv
 
   return (
     <EuiSwitch
-      aria-label="Toggle"
+      aria-label={i18n.TOGGLE}
       data-test-subj="switchButton"
       defaultChecked={dataProvider.enabled}
       onClick={onClick}

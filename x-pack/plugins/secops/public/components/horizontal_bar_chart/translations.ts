@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as i18n from './translations';
+import { i18n } from '@kbn/i18n';
 
-/** Enables runtime enumeration of valid `Range`s */
-export const Ranges: string[] = [i18n.ONE_DAY, i18n.ONE_WEEK, i18n.ONE_MONTH, i18n.ONE_YEAR];
+export const LOADING_DATA = i18n.translate('xpack.secops.horizontalBarChart.loadingData', {
+  defaultMessage: 'Loading data',
+});

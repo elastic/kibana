@@ -60,7 +60,7 @@ const ThemeSwitcherComponent = pure<Props>(({ currentTheme, setTheme }) => (
     <ThemeSwitcherContainer data-test-subj="theme-switcher">
       <EuiIcon type="invert" size="m" />
       <EuiSwitch
-        aria-label="Toggle"
+        aria-label={i18n.TOGGLE}
         data-test-subj="switchButton"
         defaultChecked={currentTheme === 'dark' ? true : false}
         onClick={() => {

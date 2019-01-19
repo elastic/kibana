@@ -83,7 +83,7 @@ export const columns = [
       <WithHoverActions
         hoverContent={
           <HoverActionsContainer data-test-subj="hover-actions-container">
-            <EuiToolTip content="Copy to clipboard">
+            <EuiToolTip content={i18n.COPY_TO_CLIPBOARD}>
               <WithCopyToClipboard text={item.valueAsString} />
             </EuiToolTip>
           </HoverActionsContainer>

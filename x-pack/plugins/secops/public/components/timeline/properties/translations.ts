@@ -13,6 +13,18 @@ export const TIMELINE_DESCRIPTION = i18n.translate(
   }
 );
 
+export const TITLE = i18n.translate('xpack.secops.timeline.properties.title', {
+  defaultMessage: 'Title',
+});
+
+export const FAVORITE = i18n.translate('xpack.secops.timeline.properties.favorite', {
+  defaultMessage: 'Favorite',
+});
+
+export const NOT_A_FAVORITE = i18n.translate('xpack.secops.timeline.properties.notAFavorite', {
+  defaultMessage: 'Not a Favorite',
+});
+
 export const TIMELINE_TITLE = i18n.translate('xpack.secops.timeline.properties.timelineTitle', {
   defaultMessage: 'Timeline title',
 });
@@ -34,6 +46,14 @@ export const DESCRIPTION_TOOL_TIP = i18n.translate(
     defaultMessage: 'The story told by the events and notes in this Timeline',
   }
 );
+
+export const HISTORY = i18n.translate('xpack.secops.timeline.properties.history', {
+  defaultMessage: 'History',
+});
+
+export const NOTES = i18n.translate('xpack.secops.timeline.properties.notes', {
+  defaultMessage: 'Notes',
+});
 
 export const NOTES_TOOL_TIP = i18n.translate('xpack.secops.timeline.properties.notesToolTip', {
   defaultMessage: 'Add and review notes about this Timeline. Notes may also be added to events.',

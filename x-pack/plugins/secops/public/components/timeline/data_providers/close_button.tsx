@@ -10,6 +10,7 @@ import { pure } from 'recompose';
 
 import { OnDataProviderRemoved } from '../events';
 import { DataProvider } from './data_provider';
+import * as i18n from './translations';
 
 interface Props {
   onDataProviderRemoved: OnDataProviderRemoved;
@@ -27,7 +28,7 @@ export const CloseButton = pure<Props>(({ onDataProviderRemoved, dataProvider })
       data-test-subj="closeButton"
       onClick={onClick}
       iconType="cross"
-      aria-label="Remove data provider"
+      aria-label={i18n.REMOVE_DATA_PROVIDER}
     />
   );
 });

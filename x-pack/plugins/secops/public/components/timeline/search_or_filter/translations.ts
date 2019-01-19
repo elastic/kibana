@@ -62,3 +62,10 @@ export const SEARCH_KQL_SELECTED_TEXT = i18n.translate(
     defaultMessage: 'Search',
   }
 );
+
+export const FILTER_OR_SEARCH_WITH_KQL = i18n.translate(
+  'xpack.secops.timeline.searchOrFilter.filterOrSearchWithKql',
+  {
+    defaultMessage: 'Filter or Search with KQL',
+  }
+);

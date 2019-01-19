@@ -25,3 +25,14 @@ export const OR = i18n.translate('xpack.secops.dataProviders.or', {
 export const QUERY = i18n.translate('xpack.secops.dataProviders.query', {
   defaultMessage: 'query',
 });
+
+export const TOGGLE = i18n.translate('xpack.secops.dataProviders.toggle', {
+  defaultMessage: 'toggle',
+});
+
+export const REMOVE_DATA_PROVIDER = i18n.translate(
+  'xpack.secops.dataProviders.removeDataProvider',
+  {
+    defaultMessage: 'Remove Data Provider',
+  }
+);

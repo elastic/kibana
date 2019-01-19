@@ -55,7 +55,7 @@ export const StarIcon = pure<{
 }>(({ isFavorite, timelineId: id, updateIsFavorite }) => (
   <div role="button" onClick={() => updateIsFavorite({ id, isFavorite: !isFavorite })}>
     {isFavorite ? (
-      <EuiToolTip data-test-subj="timeline-favorite-filled-star-tool-tip" content="Favorite">
+      <EuiToolTip data-test-subj="timeline-favorite-filled-star-tool-tip" content={i18n.FAVORITE}>
         <FilledStar
           data-test-subj="timeline-favorite-filled-star"
           starStroke="#E6C220"
@@ -63,7 +63,7 @@ export const StarIcon = pure<{
         />
       </EuiToolTip>
     ) : (
-      <EuiToolTip content="Not a favorite">
+      <EuiToolTip content={i18n.NOT_A_FAVORITE}>
         <EmptyStar data-test-subj="timeline-favorite-empty-star" type="starEmpty" size="l" />
       </EuiToolTip>
     )}
@@ -89,7 +89,7 @@ export const Description = pure<{
 
 export const Name = pure<{ timelineId: string; title: string; updateTitle: UpdateTitle }>(
   ({ timelineId, title, updateTitle }) => (
-    <EuiToolTip data-test-subj="timeline-title-tool-tip" content="Title">
+    <EuiToolTip data-test-subj="timeline-title-tool-tip" content={i18n.TITLE}>
       <NameField
         aria-label={i18n.TIMELINE_TITLE}
         data-test-subj="timeline-title"
@@ -144,7 +144,7 @@ export const NotesButton = pure<NotesButtonProps>(
           >
             <NotesButtonLabel>
               <Facet>{notes.length}</Facet>
-              <LabelText>Notes</LabelText>
+              <LabelText>{i18n.NOTES}</LabelText>
             </NotesButtonLabel>
           </EuiButton>
           {showNotes ? (
@@ -176,7 +176,7 @@ export const HistoryButton = pure<{ history: History[] }>(({ history }) => (
     >
       <HistoryButtonLabel>
         <Facet>{history.length}</Facet>
-        <LabelText>History</LabelText>
+        <LabelText>{i18n.HISTORY}</LabelText>
       </HistoryButtonLabel>
     </EuiButton>
   </EuiToolTip>

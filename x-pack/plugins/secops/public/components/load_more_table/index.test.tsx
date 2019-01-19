@@ -7,6 +7,7 @@
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
+
 import { LoadMoreTable } from './index';
 import { getHostsColumns, mockData, rowItems } from './index.mock';
 

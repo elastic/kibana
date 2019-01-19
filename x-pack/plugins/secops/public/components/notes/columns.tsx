@@ -5,7 +5,7 @@
  */
 
 import { EuiPanel, EuiToolTip } from '@elastic/eui';
-import moment from 'moment';
+import { FormattedRelative } from '@kbn/i18n/react';
 import * as React from 'react';
 import styled from 'styled-components';
 
@@ -35,7 +35,11 @@ export const columns = [
     name: i18n.DATE,
     sortable: false,
     truncateText: false,
-    render: (date: string) => <SelectableText>{moment(date).fromNow()}</SelectableText>,
+    render: (date: string) => (
+      <SelectableText>
+        <FormattedRelative value={new Date(date)} />
+      </SelectableText>
+    ),
   },
   {
     field: 'user',

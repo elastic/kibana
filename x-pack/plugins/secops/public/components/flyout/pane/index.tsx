@@ -11,6 +11,7 @@ import styled from 'styled-components';
 
 import { FlyoutHeader } from '../header';
 import { ResizeHandle } from '../resize_handle';
+import * as i18n from './translations';
 
 interface FlyoutPaneProps {
   children: React.ReactNode;
@@ -64,7 +65,7 @@ export const FlyoutPane = pure<FlyoutPaneProps>(
         size="l"
         maxWidth="95%"
         onClose={onClose}
-        aria-label="Timeline Properties"
+        aria-label={i18n.TIMELINE_DESCRIPTION}
         data-test-subj="flyout"
         hideCloseButton={true}
       >
@@ -72,10 +73,10 @@ export const FlyoutPane = pure<FlyoutPaneProps>(
         <EuiFlyoutHeader hasBorder className="timeline-flyout-header">
           <FlyoutHeaderContainer>
             <WrappedCloseButton>
-              <EuiToolTip content="Close">
+              <EuiToolTip content={i18n.CLOSE_TIMELINE}>
                 <EuiButtonIcon
                   iconType="cross"
-                  aria-label="Close timeline"
+                  aria-label={i18n.CLOSE_TIMELINE}
                   onClick={() => onClose()}
                 />
               </EuiToolTip>

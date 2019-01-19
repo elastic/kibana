@@ -97,7 +97,7 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
         <LoadingPanel
           height="auto"
           width="100%"
-          text={`Loading ${loadingTitle ? loadingTitle : title}`}
+          text={`${i18n.LOADING} ${loadingTitle ? loadingTitle : title}`}
           data-test-subj="LoadingPanelLoadMoreTable"
         />
       );

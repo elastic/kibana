@@ -6,6 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const TCP = i18n.translate('xpack.secops.timeline.tcp', {
+  defaultMessage: 'TCP',
+});
+
 export const DESTINATION = i18n.translate('xpack.secops.timeline.destination', {
   defaultMessage: 'Destination',
 });

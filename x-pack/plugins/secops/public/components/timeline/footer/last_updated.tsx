@@ -5,8 +5,9 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import moment from 'moment';
+import { FormattedRelative } from '@kbn/i18n/react';
 import * as React from 'react';
+import * as i18n from './translations';
 
 interface LastUpdatedAtProps {
   updatedAt: number;
@@ -42,7 +43,10 @@ export class LastUpdatedAt extends React.PureComponent<LastUpdatedAtProps, LastU
         <EuiFlexItem grow={false}>
           <EuiIcon type="clock" />
         </EuiFlexItem>
-        <EuiFlexItem> Updated {moment(this.props.updatedAt).fromNow()}</EuiFlexItem>
+        <EuiFlexItem>
+          {' '}
+          {i18n.UPDATED} <FormattedRelative value={new Date(this.props.updatedAt)} />
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
   }

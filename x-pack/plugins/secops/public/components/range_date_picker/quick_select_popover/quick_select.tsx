@@ -117,7 +117,7 @@ export const QuickSelect = pure<Props>(
         <EuiFlexItem>
           <EuiFormRow>
             <EuiFieldNumber
-              aria-label="Count of"
+              aria-label="Count of" // TODO: Translate this if we don't replace this with a new date time picker
               value={quickSelectTime}
               step={0}
               onChange={arg => {

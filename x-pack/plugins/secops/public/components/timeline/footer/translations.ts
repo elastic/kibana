@@ -10,6 +10,22 @@ export const LOADING_TIMELINE_DATA = i18n.translate('xpack.secops.footer.loading
   defaultMessage: 'Loading Timeline data',
 });
 
+export const EVENTS = i18n.translate('xpack.secops.footer.events', {
+  defaultMessage: 'Events',
+});
+
+export const OF = i18n.translate('xpack.secops.footer.of', {
+  defaultMessage: 'of',
+});
+
 export const ROWS = i18n.translate('xpack.secops.footer.rows', {
   defaultMessage: 'rows',
+});
+
+export const TOTAL_COUNT_OF_EVENTS = i18n.translate('xpack.secops.footer.totalCountOfEvents', {
+  defaultMessage: 'The total count of events matching the search criteria',
+});
+
+export const UPDATED = i18n.translate('xpack.secops.footer.updated', {
+  defaultMessage: 'Updated',
 });

@@ -111,7 +111,7 @@ export const suricataRowRenderer: RowRenderer = {
               {signature}
             </EuiButton>
             <Details>
-              <LabelValuePair label={i18n.PROTOCOL} ariaLabel={i18n.PROTOCOL} value="TCP" />
+              <LabelValuePair label={i18n.PROTOCOL} ariaLabel={i18n.PROTOCOL} value={i18n.TCP} />
               <LabelValuePair
                 label={i18n.SOURCE}
                 ariaLabel={i18n.SOURCE}

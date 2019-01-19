@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,10 +13,13 @@ import {
   EuiSuperSelect,
   EuiToolTip,
 } from '@elastic/eui';
+import * as React from 'react';
 import { pure } from 'recompose';
 import styled, { injectGlobal } from 'styled-components';
+
 import { KqlMode } from '../../../store/local/timeline/model';
 import { modes, options } from './helpers';
+import * as i18n from './translations';
 
 const timelineSelectModeItemsClassName = 'timelineSelectModeItemsClassName';
 
@@ -70,7 +71,7 @@ export const SearchOrFilter = pure<Props>(
     <SearchAndFilterContainer>
       <EuiFlexGroup data-test-subj="timeline-search-and-filter-container">
         <ModeFlexItem grow={false}>
-          <EuiToolTip content="Filter or Search with KQL">
+          <EuiToolTip content={i18n.FILTER_OR_SEARCH_WITH_KQL}>
             <SuperSelect
               data-test-subj="timeline-select-search-or-filter"
               hasDividers={true}

@@ -53,10 +53,10 @@ export const footerHeight = 50; // px
 /** Displays the server-side count of events */
 export const EventsCount = pure<{ serverSideEventCount: number; itemsCount: number }>(
   ({ itemsCount, serverSideEventCount }) => (
-    <EuiToolTip content="The total count of events matching the search criteria">
+    <EuiToolTip content={i18n.TOTAL_COUNT_OF_EVENTS}>
       <h5>
-        <EuiBadge color="hollow">{itemsCount}</EuiBadge> of{' '}
-        <EuiBadge color="hollow">{serverSideEventCount}</EuiBadge> Events
+        <EuiBadge color="hollow">{itemsCount}</EuiBadge> {i18n.OF}{' '}
+        <EuiBadge color="hollow">{serverSideEventCount}</EuiBadge> {i18n.EVENTS}
       </h5>
     </EuiToolTip>
   )

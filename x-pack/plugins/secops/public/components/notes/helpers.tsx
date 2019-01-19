@@ -126,7 +126,7 @@ export const AddNote = pure<{
 }>(({ associateNote, getNewNoteId, newNote, updateNewNote, updateNote }) => (
   <AddNotesContainer>
     <NewNote note={newNote} updateNewNote={updateNewNote} />
-    <EuiToolTip data-test-subj="add-tool-tip" content="Add a new note">
+    <EuiToolTip data-test-subj="add-tool-tip" content={i18n.ADD_A_NEW_NOTE}>
       <EuiButton
         data-test-subj="Add Note"
         isDisabled={newNote.trim().length < 1}
@@ -141,7 +141,7 @@ export const AddNote = pure<{
           })
         }
       >
-        Add Note
+        {i18n.ADD_NOTE}
       </EuiButton>
     </EuiToolTip>
   </AddNotesContainer>

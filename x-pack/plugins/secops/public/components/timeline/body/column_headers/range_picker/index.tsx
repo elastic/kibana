@@ -10,10 +10,10 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { OnRangeSelected } from '../../../events';
-import { Range, Ranges } from './ranges';
+import { Ranges } from './ranges';
 
 interface Props {
-  selected: Range;
+  selected: string;
   onRangeSelected: OnRangeSelected;
 }
 
@@ -28,7 +28,7 @@ const SelectContainer = styled.div`
 /** Renders a time range picker for the MiniMap (e.g. 1 Day, 1 Week...) */
 export const RangePicker = pure<Props>(({ selected, onRangeSelected }) => {
   const onChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
-    onRangeSelected(event.target.value as Range);
+    onRangeSelected(event.target.value);
   };
 
   return (

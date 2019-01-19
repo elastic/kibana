@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Range } from './body/column_headers/range_picker/ranges';
 import { ColumnId } from './body/column_id';
 import { SortDirection } from './body/sort';
 import { DataProvider } from './data_providers/data_provider';
@@ -29,7 +28,7 @@ export type OnToggleDataProviderNegated = (
 ) => void;
 
 /** Invoked when a user selects a new minimap time range */
-export type OnRangeSelected = (range: Range) => void;
+export type OnRangeSelected = (range: string) => void;
 
 /** Invoked when a user updates a column's filter */
 export type OnFilterChange = (

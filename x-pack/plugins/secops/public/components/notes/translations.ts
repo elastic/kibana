@@ -14,6 +14,14 @@ export const USER = i18n.translate('xpack.secops.notes.user', {
   defaultMessage: 'User',
 });
 
+export const ADD_NOTE = i18n.translate('xpack.secops.notes.addNote', {
+  defaultMessage: 'Add note',
+});
+
+export const ADD_A_NEW_NOTE = i18n.translate('xpack.secops.notes.addANewNote', {
+  defaultMessage: 'Add a new note',
+});
+
 export const ADD_A_NOTE = i18n.translate('xpack.secops.notes.addANote', {
   defaultMessage: 'Add a Note',
 });

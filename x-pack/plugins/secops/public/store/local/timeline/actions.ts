@@ -6,7 +6,6 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-import { Range } from '../../../components/timeline/body/column_headers/range_picker/ranges';
 import { Sort } from '../../../components/timeline/body/sort';
 import { DataProvider } from '../../../components/timeline/data_providers/data_provider';
 import { KqlMode } from './model';
@@ -80,6 +79,6 @@ export const updateProviders = actionCreator<{ id: string; providers: DataProvid
   'UPDATE_PROVIDERS'
 );
 
-export const updateRange = actionCreator<{ id: string; range: Range }>('UPDATE_RANGE');
+export const updateRange = actionCreator<{ id: string; range: string }>('UPDATE_RANGE');
 
 export const updateSort = actionCreator<{ id: string; sort: Sort }>('UPDATE_SORT');
