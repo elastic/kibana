@@ -6,9 +6,10 @@
 
 import { VectorStyle } from './vector_style';
 import { COLOR_GRADIENTS } from './components/vector/color/color_ramp_select';
+import { DEFAULT_ALPHA_VALUE } from './style_defaults';
 
 const DEFAULT_COLORS = ['#e6194b', '#3cb44b', '#ffe119', '#f58231', '#911eb4'];
-export const DEFAULT_ALPHA_VALUE = 1;
+
 export const DEFAULT_MIN_SIZE = 1;
 export const DEFAULT_MAX_SIZE = 64;
 
