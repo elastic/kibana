@@ -3,11 +3,11 @@
 exports[`memory chart data transformer should transform ES data 1`] = `
 Object {
   "overallValues": Object {
-    "averagePercentMemoryUsed": 300,
-    "maximumPercentMemoryUsed": 400,
+    "memoryUsedAvg": 300,
+    "memoryUsedMax": 400,
   },
   "series": Object {
-    "averagePercentMemoryUsed": Array [
+    "memoryUsedAvg": Array [
       Object {
         "x": 0,
         "y": 0,
@@ -49,7 +49,7 @@ Object {
         "y": 270,
       },
     ],
-    "maximumPercentMemoryUsed": Array [
+    "memoryUsedMax": Array [
       Object {
         "x": 0,
         "y": 0,
