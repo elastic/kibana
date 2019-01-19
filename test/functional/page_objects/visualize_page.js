@@ -931,7 +931,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async waitForVisualizationRenderingCompleted() {
+    async waitForVisualizationRenderingStabilized() {
       //assuming rendering is done when data-rendering-count is constant within 1000 ms
       await retry.try(async () => {
         const previousCount = await this.getVisualizationRenderingCount();
@@ -943,7 +943,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async waitForVisualization() {
-      await this.waitForVisualizationRenderingCompleted();
+      await this.waitForVisualizationRenderingStabilized();
       return await find.byCssSelector('.visualization');
     }
 
@@ -1060,12 +1060,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async openLegendOptionColors(name) {
-      await this.waitForVisualizationRenderingCompleted();
+      await this.waitForVisualizationRenderingStabilized();
       await retry.try(async () => {
         // This click has been flaky in opening the legend, hence the retry.  See
         // https://github.com/elastic/kibana/issues/17468
         await testSubjects.click(`legend-${name}`);
-        await this.waitForVisualizationRenderingCompleted();
+        await this.waitForVisualizationRenderingStabilized();
         // arbitrary color chosen, any available would do
         const isOpen = await this.doesLegendColorChoiceExist('#EF843C');
         if (!isOpen) {
@@ -1097,7 +1097,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await this.toggleLegend();
       await testSubjects.click(`legend-${name}`);
       await testSubjects.click(`legend-${name}-filterIn`);
-      await this.waitForVisualizationRenderingCompleted();
+      await this.waitForVisualizationRenderingStabilized();
     }
 
     async doesLegendColorChoiceExist(color) {
