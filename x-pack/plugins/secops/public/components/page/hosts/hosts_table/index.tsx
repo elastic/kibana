@@ -5,7 +5,7 @@
  */
 
 import { EuiBadge, EuiLink } from '@elastic/eui';
-import { get, isNil, noop } from 'lodash/fp';
+import { get, isNil } from 'lodash/fp';
 import moment from 'moment';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -135,13 +135,7 @@ const getHostsColumns = () => [
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
                 <DragEffects>
-                  <Provider
-                    dataProvider={dataProvider}
-                    onChangeDataProviderKqlQuery={noop}
-                    onDataProviderRemoved={noop}
-                    onToggleDataProviderEnabled={noop}
-                    onToggleDataProviderExcluded={noop}
-                  />
+                  <Provider dataProvider={dataProvider} />
                 </DragEffects>
               ) : isNil(get('host.id', node)) ? (
                 <>{hostName}</>

@@ -6,7 +6,7 @@
 
 import { EuiBadge, EuiIcon, EuiToolTip } from '@elastic/eui';
 import classNames from 'classnames';
-import { isEmpty, values } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import moment from 'moment';
 import React from 'react';
 import styled from 'styled-components';
@@ -17,6 +17,12 @@ import { QueryDate } from './data_provider';
 const EuiBadgeStyled = styled(EuiBadge)`
   line-height: 28px;
   border: none;
+  .euiToolTipAnchor {
+    &::after {
+      content: '|';
+      padding: 0px 3px;
+    }
+  }
 `;
 
 interface ProviderBadgeProps {
@@ -31,13 +37,6 @@ interface ProviderBadgeProps {
   val: string | number;
 }
 
-const isDateObjectEmpty = (date: QueryDate | undefined | null) => {
-  if (isEmpty(date)) {
-    return true;
-  }
-  return !values(date).some(d => !isEmpty(d));
-};
-
 export const ProviderBadge = pure<ProviderBadgeProps>(
   ({ deleteFilter, field, isDisabled, isExcluded, queryDate, providerId, togglePopover, val }) => {
     const classes = classNames('globalFilterItem', {
@@ -48,7 +47,7 @@ export const ProviderBadge = pure<ProviderBadgeProps>(
 
     const title = `${field}: "${val}"`;
 
-    const tooltipStr = isDateObjectEmpty(queryDate!)
+    const tooltipStr = isEmpty(queryDate)
       ? null
       : `${moment(queryDate!.from).format('L LTS')} - ${moment(queryDate!.to).format('L LTS')}`;
 
