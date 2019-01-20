@@ -128,7 +128,6 @@ export function getWebpackConfig({ devtool, watch, production } = {}) {
         },
         {
           test: /\.tsx?$/,
-          include: [path.resolve(__dirname, '../../public'), sourceDir],
           use: [
             {
               loader: 'ts-loader',

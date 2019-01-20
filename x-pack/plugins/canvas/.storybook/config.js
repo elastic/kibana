@@ -2,7 +2,7 @@ import '@elastic/eui/dist/eui_theme_k6_light.css';
 import { configure } from '@storybook/react';
 import { setAddon, addDecorator } from '@storybook/react';
 import JSXAddon from 'storybook-addon-jsx';
-import { withKnobs, select } from '@storybook/addon-knobs/react';
+import { withKnobs } from '@storybook/addon-knobs/react';
 import { withInfo } from '@storybook/addon-info';
 
 addDecorator(withKnobs);

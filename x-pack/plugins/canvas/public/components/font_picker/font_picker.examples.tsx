@@ -7,8 +7,11 @@
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { FileUpload } from './file_upload';
+import { americanTypewriter } from '../../../common/lib/fonts';
+import { FontPicker } from './font_picker';
 
-storiesOf('FileUpload', module).add('default props', () => (
-  <FileUpload onUpload={action('onUpload')} />
-));
+storiesOf('FontPicker', module)
+  .add('default props', () => <FontPicker onSelect={action('onSelect')} />)
+  .add('value defined', () => (
+    <FontPicker onSelect={action('onSelect')} value={americanTypewriter.value} />
+  ));
