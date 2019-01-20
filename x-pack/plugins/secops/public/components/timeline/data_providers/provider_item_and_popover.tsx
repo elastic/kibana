@@ -107,7 +107,7 @@ export class ProviderItemAndPopover extends React.PureComponent<
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
       >
-        <div style={{ width: '300px' }}>
+        <div style={{ width: '200px' }}>
           {dataProvidersAnd.map((providerAnd: DataProvider, index: number) => {
             const badge = (
               <ProviderBadge
@@ -117,7 +117,6 @@ export class ProviderItemAndPopover extends React.PureComponent<
                 isEnabled={providerAnd.enabled}
                 isExcluded={providerAnd.excluded}
                 providerId={`${providerId}.${providerAnd.id}`}
-                queryDate={providerAnd.queryDate}
                 val={providerAnd.queryMatch.displayValue || providerAnd.queryMatch.value}
               />
             );
