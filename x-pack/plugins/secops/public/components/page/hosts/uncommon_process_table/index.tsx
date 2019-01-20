@@ -115,12 +115,12 @@ const getUncommonColumns = (startDate: number) => [
               and: [],
               enabled: true,
               id: node._id,
-              name: processName,
+              name: processName!,
               excluded: false,
               kqlQuery: '',
               queryMatch: {
                 field: 'process.name',
-                value: processName,
+                value: processName!,
               },
               queryDate: {
                 from: startDate,

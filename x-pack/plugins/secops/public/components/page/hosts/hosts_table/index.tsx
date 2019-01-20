@@ -122,7 +122,7 @@ const getHostsColumns = () => [
                 displayField: 'host.name',
                 displayValue: hostName,
                 field: 'host.id',
-                value: node.host.id!,
+                value: node.host!.id!,
               },
               queryDate: {
                 from: moment(node.firstSeen!).valueOf(),
