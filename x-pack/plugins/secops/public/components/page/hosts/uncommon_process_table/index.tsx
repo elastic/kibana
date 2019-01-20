@@ -122,7 +122,7 @@ const getUncommonColumns = (startDate: number) => [
               kqlQuery: '',
               queryMatch: {
                 field: 'process.name',
-                value: escapeQueryValue(processName),
+                value: processName,
               },
               queryDate: {
                 from: startDate,
@@ -132,13 +132,7 @@ const getUncommonColumns = (startDate: number) => [
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
                 <DragEffects>
-                  <Provider
-                    dataProvider={dataProvider}
-                    onChangeDataProviderKqlQuery={noop}
-                    onDataProviderRemoved={noop}
-                    onToggleDataProviderEnabled={noop}
-                    onToggleDataProviderExcluded={noop}
-                  />
+                  <Provider dataProvider={dataProvider} />
                 </DragEffects>
               ) : (
                 processName

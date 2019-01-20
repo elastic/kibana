@@ -5,14 +5,13 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import { has, noop } from 'lodash/fp';
+import { has } from 'lodash/fp';
 import moment from 'moment';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
 import { Ecs, EcsEdges } from '../../../../graphql/types';
-import { escapeQueryValue } from '../../../../lib/keury';
 import { eventsSelector, hostsActions, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { getEmptyValue, getOrEmpty } from '../../../empty_value';
@@ -122,8 +121,10 @@ const getEventsColumns = (startDate: number) => [
               excluded: false,
               kqlQuery: '',
               queryMatch: {
+                displayField: 'host.name',
+                displayValue: hostName,
                 field: 'host.id',
-                value: escapeQueryValue(node.host!.id!),
+                value: node.host!.id!,
               },
               queryDate: {
                 from: startDate,
@@ -133,13 +134,7 @@ const getEventsColumns = (startDate: number) => [
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
                 <DragEffects>
-                  <Provider
-                    dataProvider={dataProvider}
-                    onChangeDataProviderKqlQuery={noop}
-                    onDataProviderRemoved={noop}
-                    onToggleDataProviderEnabled={noop}
-                    onToggleDataProviderExcluded={noop}
-                  />
+                  <Provider dataProvider={dataProvider} />
                 </DragEffects>
               ) : (
                 hostName

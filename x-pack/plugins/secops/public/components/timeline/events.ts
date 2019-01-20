@@ -8,13 +8,14 @@ import { ColumnId } from './body/column_id';
 import { SortDirection } from './body/sort';
 
 /** Invoked when a user clicks the close button to remove a data provider */
-export type OnDataProviderRemoved = (providerId: string) => void;
+export type OnDataProviderRemoved = (providerId: string, andProviderId?: string) => void;
 
 /** Invoked when a user temporarily disables or re-enables a data provider */
 export type OnToggleDataProviderEnabled = (
   toggled: {
     providerId: string;
     enabled: boolean;
+    andProviderId?: string;
   }
 ) => void;
 
@@ -23,6 +24,7 @@ export type OnToggleDataProviderExcluded = (
   excluded: {
     providerId: string;
     excluded: boolean;
+    andProviderId?: string;
   }
 ) => void;
 

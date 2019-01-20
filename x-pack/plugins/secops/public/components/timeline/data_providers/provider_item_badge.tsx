@@ -6,27 +6,20 @@
 
 import React, { PureComponent } from 'react';
 
-import {
-  OnChangeDataProviderKqlQuery,
-  OnDataProviderRemoved,
-  OnToggleDataProviderEnabled,
-  OnToggleDataProviderExcluded,
-} from '../events';
 import { QueryDate } from './data_provider';
 import { ProviderBadge } from './provider_badge';
 import { ProviderItemActions } from './provider_item_actions';
 
 interface ProviderItemBadgeProps {
+  deleteProvider: () => void;
   field: string;
   kqlQuery: string;
-  isDisabled: boolean;
+  isEnabled: boolean;
   isExcluded: boolean;
-  onChangeDataProviderKqlQuery?: OnChangeDataProviderKqlQuery;
-  onDataProviderRemoved?: OnDataProviderRemoved;
-  onToggleDataProviderEnabled?: OnToggleDataProviderEnabled;
-  onToggleDataProviderExcluded?: OnToggleDataProviderExcluded;
   providerId: string;
   queryDate?: QueryDate;
+  toggleEnabledProvider: () => void;
+  toggleExcludedProvider: () => void;
   val: string | number;
 }
 
@@ -40,14 +33,23 @@ export class ProviderItemBadge extends PureComponent<ProviderItemBadgeProps, Own
   };
 
   public render() {
-    const { field, kqlQuery, isDisabled, isExcluded, queryDate, providerId, val } = this.props;
+    const {
+      deleteProvider,
+      field,
+      kqlQuery,
+      isEnabled,
+      isExcluded,
+      queryDate,
+      providerId,
+      val,
+    } = this.props;
 
     const badge = (
       <ProviderBadge
-        deleteFilter={this.deleteFilter}
+        deleteProvider={deleteProvider}
         field={field}
         kqlQuery={kqlQuery}
-        isDisabled={isDisabled}
+        isEnabled={isEnabled}
         isExcluded={isExcluded}
         providerId={providerId}
         queryDate={queryDate}
@@ -60,12 +62,15 @@ export class ProviderItemBadge extends PureComponent<ProviderItemBadgeProps, Own
       <ProviderItemActions
         button={badge}
         closePopover={this.closePopover}
+        deleteProvider={deleteProvider}
         field={field}
         kqlQuery={kqlQuery}
-        isDisabled={isDisabled}
+        isEnabled={isEnabled}
         isExcluded={isExcluded}
         isOpen={this.state.isPopoverOpen}
         providerId={providerId}
+        toggleEnabledProvider={this.toggleEnabledProvider}
+        toggleExcludedProvider={this.toggleExcludedProvider}
         value={val}
       />
     );
@@ -83,14 +88,13 @@ export class ProviderItemBadge extends PureComponent<ProviderItemBadgeProps, Own
     });
   };
 
-  private deleteFilter: React.MouseEventHandler<HTMLButtonElement> = (
-    event: React.MouseEvent<HTMLButtonElement>
-  ) => {
-    // Make sure it doesn't also trigger the onclick for the whole badge
-    if (event.stopPropagation) {
-      event.stopPropagation();
-    }
-    const { onDataProviderRemoved } = this.props;
-    onDataProviderRemoved!(this.props.providerId);
+  private toggleEnabledProvider = () => {
+    this.props.toggleEnabledProvider();
+    this.closePopover();
+  };
+
+  private toggleExcludedProvider = () => {
+    this.props.toggleExcludedProvider();
+    this.closePopover();
   };
 }

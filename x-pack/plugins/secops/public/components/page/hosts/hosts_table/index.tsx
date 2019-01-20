@@ -12,7 +12,6 @@ import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
 import { HostsEdges } from '../../../../graphql/types';
-import { escapeQueryValue } from '../../../../lib/keury';
 import { hostsActions, hostsSelector, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { defaultToEmpty, getOrEmpty } from '../../../empty_value';
@@ -122,10 +121,10 @@ const getHostsColumns = () => [
               name: hostName,
               kqlQuery: '',
               queryMatch: {
-                field: 'host.id',
                 displayField: 'host.name',
-                value: escapeQueryValue(node.host!.id!),
                 displayValue: hostName,
+                field: 'host.id',
+                value: node.host.id!,
               },
               queryDate: {
                 from: moment(node.firstSeen!).valueOf(),

@@ -72,16 +72,19 @@ interface DispatchProps {
   removeProvider?: ActionCreator<{
     id: string;
     providerId: string;
+    andProviderId?: string;
   }>;
   updateDataProviderEnabled?: ActionCreator<{
     id: string;
     providerId: string;
     enabled: boolean;
+    andProviderId?: string;
   }>;
   updateDataProviderExcluded?: ActionCreator<{
     id: string;
     excluded: boolean;
     providerId: string;
+    andProviderId?: string;
   }>;
   updateDataProviderKqlQuery?: ActionCreator<{
     id: string;
@@ -140,17 +143,25 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
 
     const onColumnSorted: OnColumnSorted = sorted => updateSort!({ id, sort: sorted });
 
-    const onDataProviderRemoved: OnDataProviderRemoved = providerId =>
-      removeProvider!({ id, providerId });
+    const onDataProviderRemoved: OnDataProviderRemoved = (
+      providerId: string,
+      andProviderId?: string
+    ) => removeProvider!({ id, providerId, andProviderId });
 
     const onRangeSelected: OnRangeSelected = selectedRange =>
       updateRange!({ id, range: selectedRange });
 
-    const onToggleDataProviderEnabled: OnToggleDataProviderEnabled = ({ providerId, enabled }) =>
-      updateDataProviderEnabled!({ id, enabled, providerId });
+    const onToggleDataProviderEnabled: OnToggleDataProviderEnabled = ({
+      providerId,
+      enabled,
+      andProviderId,
+    }) => updateDataProviderEnabled!({ id, enabled, providerId, andProviderId });
 
-    const onToggleDataProviderExcluded: OnToggleDataProviderExcluded = ({ providerId, excluded }) =>
-      updateDataProviderExcluded!({ id, excluded, providerId });
+    const onToggleDataProviderExcluded: OnToggleDataProviderExcluded = ({
+      providerId,
+      excluded,
+      andProviderId,
+    }) => updateDataProviderExcluded!({ id, excluded, providerId, andProviderId });
 
     const onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery = ({ providerId, kqlQuery }) =>
       updateDataProviderKqlQuery!({ id, kqlQuery, providerId });

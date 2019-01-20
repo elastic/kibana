@@ -193,16 +193,26 @@ const addAndToProviderInTimeline = (
   timeline: TimelineModel,
   timelineById: TimelineById
 ): TimelineById => {
-  const alreadyExistsAtIndex = timeline.dataProviders.findIndex(
+  const alreadyExistsProviderIndex = timeline.dataProviders.findIndex(
     p => p.id === timeline.highlightedDropAndProviderId
   );
-  const newProvider = timeline.dataProviders[alreadyExistsAtIndex];
-  newProvider.and = [...newProvider.and, provider];
+  const newProvider = timeline.dataProviders[alreadyExistsProviderIndex];
+  const alreadyExistsAndProviderIndex = newProvider.and.findIndex(p => p.id === provider.id);
 
   const dataProviders = [
-    ...timeline.dataProviders.slice(0, alreadyExistsAtIndex),
-    newProvider,
-    ...timeline.dataProviders.slice(alreadyExistsAtIndex + 1),
+    ...timeline.dataProviders.slice(0, alreadyExistsProviderIndex),
+    {
+      ...timeline.dataProviders[alreadyExistsProviderIndex],
+      and:
+        alreadyExistsAndProviderIndex > -1
+          ? [
+              ...newProvider.and.slice(0, alreadyExistsAndProviderIndex),
+              provider,
+              ...newProvider.and.slice(alreadyExistsAndProviderIndex + 1),
+            ]
+          : [...newProvider.and, provider],
+    },
+    ...timeline.dataProviders.slice(alreadyExistsProviderIndex + 1),
   ];
 
   return {
@@ -454,11 +464,39 @@ export const updateTimelineSort = ({
   };
 };
 
+const updateEnabledAndProvider = (
+  andProviderId: string,
+  enabled: boolean,
+  providerId: string,
+  timeline: TimelineModel
+) =>
+  timeline.dataProviders.map(provider =>
+    provider.id === providerId
+      ? {
+          ...provider,
+          and: provider.and.map(andProvider =>
+            andProvider.id === andProviderId ? { ...andProvider, enabled } : andProvider
+          ),
+        }
+      : provider
+  );
+
+const updateEnabledProvider = (enabled: boolean, providerId: string, timeline: TimelineModel) =>
+  timeline.dataProviders.map(provider =>
+    provider.id === providerId
+      ? {
+          ...provider,
+          enabled,
+        }
+      : provider
+  );
+
 interface UpdateTimelineProviderEnabledParams {
   id: string;
   providerId: string;
   enabled: boolean;
   timelineById: TimelineById;
+  andProviderId?: string;
 }
 
 export const updateTimelineProviderEnabled = ({
@@ -466,24 +504,53 @@ export const updateTimelineProviderEnabled = ({
   providerId,
   enabled,
   timelineById,
+  andProviderId,
 }: UpdateTimelineProviderEnabledParams): TimelineById => {
   const timeline = timelineById[id];
   return {
     ...timelineById,
     [id]: {
       ...timeline,
-      dataProviders: timeline.dataProviders.map(provider =>
-        provider.id === providerId ? { ...provider, ...{ enabled } } : provider
-      ),
+      dataProviders: andProviderId
+        ? updateEnabledAndProvider(andProviderId, enabled, providerId, timeline)
+        : updateEnabledProvider(enabled, providerId, timeline),
     },
   };
 };
+
+const updateExcludedAndProvider = (
+  andProviderId: string,
+  excluded: boolean,
+  providerId: string,
+  timeline: TimelineModel
+) =>
+  timeline.dataProviders.map(provider =>
+    provider.id === providerId
+      ? {
+          ...provider,
+          and: provider.and.map(andProvider =>
+            andProvider.id === andProviderId ? { ...andProvider, excluded } : andProvider
+          ),
+        }
+      : provider
+  );
+
+const updateExcludedProvider = (excluded: boolean, providerId: string, timeline: TimelineModel) =>
+  timeline.dataProviders.map(provider =>
+    provider.id === providerId
+      ? {
+          ...provider,
+          excluded,
+        }
+      : provider
+  );
 
 interface UpdateTimelineProviderExcludedParams {
   id: string;
   providerId: string;
   excluded: boolean;
   timelineById: TimelineById;
+  andProviderId?: string;
 }
 
 export const updateTimelineProviderExcluded = ({
@@ -491,15 +558,16 @@ export const updateTimelineProviderExcluded = ({
   providerId,
   excluded,
   timelineById,
+  andProviderId,
 }: UpdateTimelineProviderExcludedParams): TimelineById => {
   const timeline = timelineById[id];
   return {
     ...timelineById,
     [id]: {
       ...timeline,
-      dataProviders: timeline.dataProviders.map(provider =>
-        provider.id === providerId ? { ...provider, ...{ excluded } } : provider
-      ),
+      dataProviders: andProviderId
+        ? updateExcludedAndProvider(andProviderId, excluded, providerId, timeline)
+        : updateExcludedProvider(excluded, providerId, timeline),
     },
   };
 };
@@ -592,23 +660,54 @@ export const updateTimelinePerPageOptions = ({
   };
 };
 
+const removeAndProvider = (andProviderId: string, providerId: string, timeline: TimelineModel) => {
+  const providerIndex = timeline.dataProviders.findIndex(p => p.id === providerId);
+  const providerAndIndex = timeline.dataProviders[providerIndex].and.findIndex(
+    p => p.id === andProviderId
+  );
+  return [
+    ...timeline.dataProviders.slice(0, providerIndex),
+    {
+      ...timeline.dataProviders[providerIndex],
+      and: [
+        ...timeline.dataProviders[providerIndex].and.slice(0, providerAndIndex),
+        ...timeline.dataProviders[providerIndex].and.slice(providerAndIndex + 1),
+      ],
+    },
+    ...timeline.dataProviders.slice(providerIndex + 1),
+  ];
+};
+
+const removeProvider = (providerId: string, timeline: TimelineModel) => {
+  const providerIndex = timeline.dataProviders.findIndex(p => p.id === providerId);
+  return [
+    ...timeline.dataProviders.slice(0, providerIndex),
+    ...timeline.dataProviders.slice(providerIndex + 1),
+  ];
+};
+
 interface RemoveTimelineProviderParams {
   id: string;
   providerId: string;
   timelineById: TimelineById;
+  andProviderId?: string;
 }
 
 export const removeTimelineProvider = ({
   id,
   providerId,
   timelineById,
+  andProviderId,
 }: RemoveTimelineProviderParams): TimelineById => {
   const timeline = timelineById[id];
+
   return {
     ...timelineById,
     [id]: {
       ...timeline,
-      dataProviders: filter(p => p.id !== providerId, timeline.dataProviders),
+      dataProviders: andProviderId
+        ? removeAndProvider(andProviderId, providerId, timeline)
+        : removeProvider(providerId, timeline),
     },
   };
 };

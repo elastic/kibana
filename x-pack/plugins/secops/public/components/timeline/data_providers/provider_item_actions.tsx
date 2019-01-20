@@ -15,12 +15,15 @@ import styled from 'styled-components';
 interface OwnProps {
   button: JSX.Element;
   closePopover: () => void;
+  deleteProvider: () => void;
   field: string;
   kqlQuery: string;
-  isDisabled: boolean;
+  isEnabled: boolean;
   isExcluded: boolean;
   isOpen: boolean;
   providerId: string;
+  toggleEnabledProvider: () => void;
+  toggleExcludedProvider: () => void;
   value: string | number;
 }
 
@@ -30,7 +33,7 @@ const MyEuiPopover = styled(EuiPopover)`
 
 export const getProviderActions = (
   deleteItem: () => void,
-  isDisabled: boolean,
+  isEnabled: boolean,
   isExcluded: boolean,
   toggleEnabled: () => void,
   toggleExcluded: () => void
@@ -38,19 +41,19 @@ export const getProviderActions = (
   {
     id: 0,
     items: [
-      {
-        name: 'Edit filter query',
-        icon: 'pencil',
-        panel: 1,
-      },
+      // {
+      //   name: 'Edit filter query',
+      //   icon: 'pencil',
+      //   panel: 1,
+      // },
       {
         name: `${isExcluded ? 'Include results' : 'Exclude results'}`,
         icon: `${isExcluded ? 'plusInCircle' : 'minusInCircle'}`,
         onClick: toggleExcluded,
       },
       {
-        name: `${isDisabled ? 'Re-enable' : 'Temporarily disable'}`,
-        icon: `${isDisabled ? 'eye' : 'eyeClosed'}`,
+        name: `${isEnabled ? 'Temporarily disable' : 'Re-enable'}`,
+        icon: `${isEnabled ? 'eyeClosed' : 'eye'}`,
         onClick: toggleEnabled,
       },
       {
@@ -60,31 +63,34 @@ export const getProviderActions = (
       },
     ],
   },
-  {
-    id: 1,
-    width: 400,
-    content: <div style={{ padding: 16 }}>ADD KQL BAR</div>,
-  },
+  // {
+  //   id: 1,
+  //   width: 400,
+  //   content: <div style={{ padding: 16 }}>ADD KQL BAR</div>,
+  // },
 ];
 
 export const ProviderItemActions = pure<OwnProps>(
   ({
     button,
     closePopover,
+    deleteProvider,
     kqlQuery,
     field,
-    isDisabled,
+    isEnabled,
     isExcluded,
     isOpen,
     providerId,
+    toggleEnabledProvider,
+    toggleExcludedProvider,
     value,
   }) => {
     const panelTree = getProviderActions(
-      closePopover,
-      isDisabled,
+      deleteProvider,
+      isEnabled,
       isExcluded,
-      closePopover,
-      closePopover
+      toggleEnabledProvider,
+      toggleExcludedProvider
     );
     return (
       <MyEuiPopover

@@ -21,15 +21,27 @@ const DropAndTargetDataProviders = styled.div<{ hasAndItem: boolean }>`
   border: 0.1rem dashed #999999;
   border-radius: 5px;
   text-align: center;
-  span.euiButtonEmpty__content {
-    padding: 0px;
-  }
   padding: 2px 3px;
-  &:hover {
+  ${({ hasAndItem }) =>
+    hasAndItem
+      ? `&:hover {
     transition: background-color 0.7s ease;
     background-color: rgb(52, 55, 65);
-  }
+  }`
+      : ''};
   cursor: ${({ hasAndItem }) => (!hasAndItem ? `default` : 'inherit')};
+  .euiPopover {
+    display: inherit;
+    .euiPopover__anchor {
+      display: inherit;
+      .euiButtonEmpty {
+        width: 100%;
+        .euiButtonEmpty__content {
+          padding: 0px;
+        }
+      }
+    }
+  }
 `;
 
 interface ProviderItemDropProps {
@@ -63,7 +75,7 @@ export const ProviderItemAndDragDrop = pure<ProviderItemDropProps>(
       >
         <ProviderItemAndPopover
           dataProvidersAnd={dataProvider.and}
-          id={dataProvider.id}
+          providerId={dataProvider.id}
           onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
           onDataProviderRemoved={onDataProviderRemoved}
           onToggleDataProviderEnabled={onToggleDataProviderEnabled}

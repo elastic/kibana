@@ -60,7 +60,7 @@ const EuiButtonContent = styled.div`
 
 interface ProviderItemAndPopoverProps {
   dataProvidersAnd: DataProvider[];
-  id: string;
+  providerId: string;
   onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
   onDataProviderRemoved: OnDataProviderRemoved;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
@@ -78,15 +78,9 @@ export class ProviderItemAndPopover extends React.PureComponent<
   public readonly state = {
     isPopoverOpen: false,
   };
+
   public render() {
-    const {
-      dataProvidersAnd,
-      id,
-      // onChangeDataProviderKqlQuery,
-      // onDataProviderRemoved,
-      // onToggleDataProviderEnabled,
-      // onToggleDataProviderExcluded,
-    } = this.props;
+    const { dataProvidersAnd, providerId } = this.props;
 
     const hasAndItem = dataProvidersAnd.length > 0;
     const euiButtonProps: EuiButtonEmptyProps = hasAndItem
@@ -107,7 +101,7 @@ export class ProviderItemAndPopover extends React.PureComponent<
 
     return (
       <EuiPopover
-        id={`${id}-popover`}
+        id={`${providerId}-popover`}
         ownFocus
         button={button}
         isOpen={this.state.isPopoverOpen}
@@ -117,35 +111,28 @@ export class ProviderItemAndPopover extends React.PureComponent<
           {dataProvidersAnd.map((providerAnd: DataProvider, index: number) => {
             const badge = (
               <ProviderBadge
-                deleteFilter={() => {
-                  this.deleteFilter(id, providerAnd.id);
-                }}
+                deleteProvider={() => this.deleteAndProvider(providerId, providerAnd.id)}
                 field={providerAnd.queryMatch.displayField || providerAnd.queryMatch.field}
                 kqlQuery={providerAnd.kqlQuery}
-                isDisabled={!providerAnd.enabled}
+                isEnabled={providerAnd.enabled}
                 isExcluded={providerAnd.excluded}
-                providerId={`${id}.${providerAnd.id}`}
+                providerId={`${providerId}.${providerAnd.id}`}
                 queryDate={providerAnd.queryDate}
                 val={providerAnd.queryMatch.displayValue || providerAnd.queryMatch.value}
               />
             );
             const panelTree = getProviderActions(
-              () => {
-                this.deleteFilter(id, providerAnd.id);
-              },
-              !providerAnd.enabled,
+              () => this.deleteAndProvider(providerId, providerAnd.id),
+              providerAnd.enabled,
               providerAnd.excluded,
-              () => {
-                this.deleteFilter(id, providerAnd.id);
-              },
-              () => {
-                this.deleteFilter(id, providerAnd.id);
-              }
+              () => this.toggleEnabledAndProvider(providerId, !providerAnd.enabled, providerAnd.id),
+              () =>
+                this.toggleExcludedAndProvider(providerId, !providerAnd.excluded, providerAnd.id)
             );
             return (
-              <div key={`${id}-${providerAnd.id}-accordion`}>
+              <div key={`${providerId}-${providerAnd.id}-accordion`}>
                 <EuiAccordion
-                  id={`${id}-${providerAnd.id}-accordion`}
+                  id={`${providerId}-${providerAnd.id}-accordion`}
                   buttonContent={badge}
                   paddingSize="l"
                 >
@@ -181,7 +168,26 @@ export class ProviderItemAndPopover extends React.PureComponent<
     }
   };
 
-  private deleteFilter = (parentProviderId: string, childProviderId: string) => {
-    console.log('DELETE', parentProviderId, childProviderId);
+  private deleteAndProvider = (providerId: string, andProviderId: string) => {
+    this.props.onDataProviderRemoved(providerId, andProviderId);
+    this.closePopover();
+  };
+
+  private toggleEnabledAndProvider = (
+    providerId: string,
+    enabled: boolean,
+    andProviderId: string
+  ) => {
+    this.props.onToggleDataProviderEnabled({ providerId, enabled, andProviderId });
+    this.closePopover();
+  };
+
+  private toggleExcludedAndProvider = (
+    providerId: string,
+    excluded: boolean,
+    andProviderId: string
+  ) => {
+    this.props.onToggleDataProviderExcluded({ providerId, excluded, andProviderId });
+    this.closePopover();
   };
 }

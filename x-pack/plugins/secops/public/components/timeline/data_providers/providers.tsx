@@ -100,67 +100,82 @@ export const Providers = pure<Props>(
     onToggleDataProviderExcluded,
   }) => (
     <PanelProviders className="timeline-drop-area" data-test-subj="providers">
-      {dataProviders.map((dataProvider, i) => (
-        // Providers are a special drop target that can't be drag-and-dropped
-        // to another destination, so it doesn't use our DraggableWrapper
-        <EuiFlexGroupContainer
-          key={dataProvider.id}
-          direction="row"
-          className="provider-item-container"
-          alignItems="center"
-          gutterSize="none"
-        >
-          <MyEuiFlexItem grow={false}>
-            <EuiFlexGroup direction="column" gutterSize="none" justifyContent="spaceAround">
-              <EuiFlexItem className="provider-item-filter-container" grow={false}>
-                <Draggable
-                  draggableId={getDraggableId({ id, dataProviderId: dataProvider.id })}
-                  index={i}
-                >
-                  {provided => (
-                    <div
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      ref={provided.innerRef}
-                      data-test-subj="providerContainer"
-                    >
-                      <ProviderItemBadge
-                        field={
-                          dataProvider.queryMatch.displayField || dataProvider.queryMatch.field
-                        }
-                        kqlQuery={dataProvider.kqlQuery}
-                        isDisabled={!dataProvider.enabled}
-                        isExcluded={dataProvider.excluded}
-                        onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
-                        onDataProviderRemoved={onDataProviderRemoved}
-                        onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-                        onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-                        providerId={dataProvider.id}
-                        queryDate={dataProvider.queryDate}
-                        val={dataProvider.queryMatch.displayValue || dataProvider.queryMatch.value}
-                      />
-                    </div>
-                  )}
-                </Draggable>
-              </EuiFlexItem>
-              <EuiFlexItem className="provider-item-and-container" grow={false}>
-                <ProviderItemAndDragDrop
-                  dataProvider={dataProvider}
-                  onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
-                  onChangeDroppableAndProvider={onChangeDroppableAndProvider}
-                  onDataProviderRemoved={onDataProviderRemoved}
-                  onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-                  onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </MyEuiFlexItem>
-          <MyEuiFlexItem className="provider-item-or-container" grow={false}>
-            <EuiBadgeOrStyled color="default">OR</EuiBadgeOrStyled>
-            <EuiHorizontalRule />
-          </MyEuiFlexItem>
-        </EuiFlexGroupContainer>
-      ))}
+      {dataProviders.map((dataProvider, i) => {
+        const deleteProvider = () => onDataProviderRemoved(dataProvider.id);
+        const deleteAndProvider = () => onDataProviderRemoved(dataProvider.id);
+        const toggleEnabledProvider = () =>
+          onToggleDataProviderEnabled({
+            providerId: dataProvider.id,
+            enabled: !dataProvider.enabled,
+          });
+        const toggleExcludedProvider = () =>
+          onToggleDataProviderExcluded({
+            providerId: dataProvider.id,
+            excluded: !dataProvider.excluded,
+          });
+        return (
+          // Providers are a special drop target that can't be drag-and-dropped
+          // to another destination, so it doesn't use our DraggableWrapper
+          <EuiFlexGroupContainer
+            key={dataProvider.id}
+            direction="row"
+            className="provider-item-container"
+            alignItems="center"
+            gutterSize="none"
+          >
+            <MyEuiFlexItem grow={false}>
+              <EuiFlexGroup direction="column" gutterSize="none" justifyContent="spaceAround">
+                <EuiFlexItem className="provider-item-filter-container" grow={false}>
+                  <Draggable
+                    draggableId={getDraggableId({ id, dataProviderId: dataProvider.id })}
+                    index={i}
+                  >
+                    {provided => (
+                      <div
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        ref={provided.innerRef}
+                        data-test-subj="providerContainer"
+                      >
+                        <ProviderItemBadge
+                          field={
+                            dataProvider.queryMatch.displayField || dataProvider.queryMatch.field
+                          }
+                          kqlQuery={dataProvider.kqlQuery}
+                          isEnabled={dataProvider.enabled}
+                          isExcluded={dataProvider.excluded}
+                          deleteProvider={deleteProvider}
+                          toggleEnabledProvider={toggleEnabledProvider}
+                          toggleExcludedProvider={toggleExcludedProvider}
+                          providerId={dataProvider.id}
+                          queryDate={dataProvider.queryDate}
+                          val={
+                            dataProvider.queryMatch.displayValue || dataProvider.queryMatch.value
+                          }
+                        />
+                      </div>
+                    )}
+                  </Draggable>
+                </EuiFlexItem>
+                <EuiFlexItem className="provider-item-and-container" grow={false}>
+                  <ProviderItemAndDragDrop
+                    dataProvider={dataProvider}
+                    onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
+                    onChangeDroppableAndProvider={onChangeDroppableAndProvider}
+                    onDataProviderRemoved={onDataProviderRemoved}
+                    onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+                    onToggleDataProviderExcluded={onToggleDataProviderExcluded}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </MyEuiFlexItem>
+            <MyEuiFlexItem className="provider-item-or-container" grow={false}>
+              <EuiBadgeOrStyled color="default">OR</EuiBadgeOrStyled>
+              <EuiHorizontalRule />
+            </MyEuiFlexItem>
+          </EuiFlexGroupContainer>
+        );
+      })}
       <Empty />
     </PanelProviders>
   )
