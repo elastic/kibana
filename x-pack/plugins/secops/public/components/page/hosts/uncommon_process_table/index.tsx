@@ -5,14 +5,12 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import { noop } from 'lodash/fp';
 import moment from 'moment';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
 import { HostEcsFields, UncommonProcessesEdges } from '../../../../graphql/types';
-import { escapeQueryValue } from '../../../../lib/keury';
 import { hostsActions, State, uncommonProcessesSelector } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { defaultToEmpty, getEmptyValue, getOrEmpty } from '../../../empty_value';

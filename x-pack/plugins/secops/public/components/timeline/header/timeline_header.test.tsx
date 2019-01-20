@@ -35,6 +35,7 @@ describe('Header', () => {
               columnHeaders={[]}
               dataProviders={mockDataProviders}
               onChangeDataProviderKqlQuery={noop}
+              onChangeDroppableAndProvider={noop}
               onColumnSorted={noop}
               onDataProviderRemoved={noop}
               onFilterChange={noop}

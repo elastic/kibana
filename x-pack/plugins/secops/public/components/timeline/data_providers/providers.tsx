@@ -102,7 +102,6 @@ export const Providers = pure<Props>(
     <PanelProviders className="timeline-drop-area" data-test-subj="providers">
       {dataProviders.map((dataProvider, i) => {
         const deleteProvider = () => onDataProviderRemoved(dataProvider.id);
-        const deleteAndProvider = () => onDataProviderRemoved(dataProvider.id);
         const toggleEnabledProvider = () =>
           onToggleDataProviderEnabled({
             providerId: dataProvider.id,

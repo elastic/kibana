@@ -113,11 +113,9 @@ const getHostsColumns = () => [
           <DraggableWrapper
             dataProvider={{
               and: [],
-              droppableId: '',
               enabled: true,
               excluded: false,
               id: node._id!,
-              isDefaultState: false,
               name: hostName,
               kqlQuery: '',
               queryMatch: {

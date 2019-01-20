@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { filter, getOr, omit, uniq } from 'lodash/fp';
+import { getOr, omit, uniq } from 'lodash/fp';
 import { TimelineById, TimelineState } from '.';
 import { Sort } from '../../../components/timeline/body/sort';
 import { DataProvider } from '../../../components/timeline/data_providers/data_provider';

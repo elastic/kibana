@@ -231,6 +231,92 @@ describe('Timeline', () => {
                     itemsPerPageOptions={[5, 10, 20]}
                     onChangeDataProviderKqlQuery={noop}
                     onChangeDroppableAndProvider={noop}
+                    onColumnSorted={mockOnColumnSorted}
+                    onChangeItemsPerPage={noop}
+                    onColumnSorted={noop}
+                    onDataProviderRemoved={noop}
+                    onFilterChange={noop}
+                    onRangeSelected={noop}
+                    onToggleDataProviderEnabled={noop}
+                    onToggleDataProviderExcluded={noop}
+                    range={'1 Day'}
+                    rowRenderers={rowRenderers}
+                    show={true}
+                    sort={sort}
+                    theme="dark"
+                    indexPattern={indexPattern}
+                  />
+                </MockedProvider>
+              </DragDropContext>
+            </ReduxStoreProvider>
+          </I18nProvider>
+        );
+
+        expect(wrapper.find('[data-test-subj="scrollableArea"]').exists()).toEqual(true);
+    });
+
+    test('it does NOT render the paging footer when you do NOT have any data providers', () => {
+      const wrapper = mount(
+        <I18nProvider>
+          <ReduxStoreProvider store={store}>
+            <DragDropContext onDragEnd={noop}>
+              <MockedProvider mocks={mocks}>
+                <Timeline
+                  id="foo"
+                  columnHeaders={headers}
+                  columnRenderers={columnRenderers}
+                  dataProviders={[]}
+                  flyoutHeight={testFlyoutHeight}
+                  flyoutHeaderHeight={flyoutHeaderHeight}
+                  itemsPerPage={5}
+                  itemsPerPageOptions={[5, 10, 20]}
+                  onChangeDataProviderKqlQuery={noop}
+                  onChangeDroppableAndProvider={noop}
+                  onChangeItemsPerPage={noop}
+                  onColumnSorted={noop}
+                  onDataProviderRemoved={noop}
+                  onFilterChange={noop}
+                  onRangeSelected={noop}
+                  onToggleDataProviderEnabled={noop}
+                  onToggleDataProviderExcluded={noop}
+                  range={'1 Day'}
+                  rowRenderers={rowRenderers}
+                  show={true}
+                  sort={sort}
+                  theme="dark"
+                  indexPattern={indexPattern}
+                />
+              </MockedProvider>
+            </DragDropContext>
+          </ReduxStoreProvider>
+        </I18nProvider>
+      );
+
+      expect(wrapper.find('[data-test-subj="table-pagination"]').exists()).toEqual(false);
+    });
+  });
+
+  describe('event wire up', () => {
+    describe('onColumnSorted', () => {
+      test('it invokes the onColumnSorted callback when a header is clicked', () => {
+        const mockOnColumnSorted = jest.fn();
+
+        const wrapper = mount(
+          <I18nProvider>
+            <ReduxStoreProvider store={store}>
+              <DragDropContext onDragEnd={noop}>
+                <MockedProvider mocks={mocks}>
+                  <Timeline
+                    id="foo"
+                    columnHeaders={headers}
+                    columnRenderers={columnRenderers}
+                    dataProviders={mockDataProviders}
+                    flyoutHeight={testFlyoutHeight}
+                    flyoutHeaderHeight={flyoutHeaderHeight}
+                    itemsPerPage={5}
+                    itemsPerPageOptions={[5, 10, 20]}
+                    onChangeDataProviderKqlQuery={noop}
+                    onChangeDroppableAndProvider={noop}
                     onChangeItemsPerPage={noop}
                     onColumnSorted={mockOnColumnSorted}
                     onDataProviderRemoved={noop}

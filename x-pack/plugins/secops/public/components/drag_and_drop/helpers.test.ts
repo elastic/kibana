@@ -52,6 +52,7 @@ describe('helpers', () => {
           reason: 'DROP',
           source: { index: 0, droppableId: getDroppableId('2119990039033485') },
           type: 'DEFAULT',
+          mode: 'FLUID',
         })
       ).toEqual(true);
     });
@@ -64,6 +65,7 @@ describe('helpers', () => {
           reason: 'DROP',
           source: { index: 0, droppableId: `${droppableIdPrefix}.somethingElse.2119990039033485` },
           type: 'DEFAULT',
+          mode: 'FLUID',
         })
       ).toEqual(false);
     });
@@ -84,6 +86,7 @@ describe('helpers', () => {
             index: 0,
           },
           type: 'DEFAULT',
+          mode: 'FLUID',
         })
       ).toEqual(true);
     });
@@ -99,6 +102,7 @@ describe('helpers', () => {
             index: 0,
           },
           type: 'DEFAULT',
+          mode: 'FLUID',
         })
       ).toEqual(false);
     });
@@ -119,6 +123,7 @@ describe('helpers', () => {
             index: 0,
           },
           type: 'DEFAULT',
+          mode: 'FLUID',
         })
       ).toEqual(true);
     });
@@ -137,6 +142,7 @@ describe('helpers', () => {
             index: 0,
           },
           type: 'DEFAULT',
+          mode: 'FLUID',
         })
       ).toEqual(false);
     });
@@ -157,6 +163,7 @@ describe('helpers', () => {
             index: 0,
           },
           type: 'DEFAULT',
+          mode: 'FLUID',
         })
       ).toEqual(true);
     });
@@ -172,6 +179,7 @@ describe('helpers', () => {
             index: 0,
           },
           type: 'DEFAULT',
+          mode: 'FLUID',
         })
       ).toEqual(false);
     });
@@ -190,6 +198,7 @@ describe('helpers', () => {
             index: 0,
           },
           type: 'DEFAULT',
+          mode: 'FLUID',
         })
       ).toEqual(false);
     });
@@ -210,6 +219,7 @@ describe('helpers', () => {
             index: 0,
           },
           type: 'DEFAULT',
+          mode: 'FLUID',
         })
       ).toEqual(true);
     });
@@ -225,6 +235,7 @@ describe('helpers', () => {
             index: 0,
           },
           type: 'DEFAULT',
+          mode: 'FLUID',
         })
       ).toEqual(false);
     });
@@ -243,6 +254,7 @@ describe('helpers', () => {
             index: 0,
           },
           type: 'DEFAULT',
+          mode: 'FLUID',
         })
       ).toEqual(false);
     });
@@ -263,6 +275,7 @@ describe('helpers', () => {
             index: 0,
           },
           type: 'DEFAULT',
+          mode: 'FLUID',
         })
       ).toEqual('timeline');
     });
@@ -281,6 +294,7 @@ describe('helpers', () => {
             index: 0,
           },
           type: 'DEFAULT',
+          mode: 'FLUID',
         })
       ).toEqual('timeline');
     });
@@ -296,6 +310,7 @@ describe('helpers', () => {
             index: 0,
           },
           type: 'DEFAULT',
+          mode: 'FLUID',
         })
       ).toEqual('');
     });
@@ -314,6 +329,7 @@ describe('helpers', () => {
             index: 0,
           },
           type: 'DEFAULT',
+          mode: 'FLUID',
         })
       ).toEqual('');
     });
@@ -333,6 +349,7 @@ describe('helpers', () => {
           index: 0,
         },
         type: 'DEFAULT',
+        mode: 'FLUID',
       });
       const expected = '2119990039033485';
 
@@ -355,6 +372,7 @@ describe('helpers', () => {
             index: 0,
           },
           type: 'DEFAULT',
+          mode: 'FLUID',
         })
       ).toEqual(true);
     });
@@ -373,6 +391,7 @@ describe('helpers', () => {
             index: 0,
           },
           type: 'DEFAULT',
+          mode: 'FLUID',
         })
       ).toEqual(false);
     });
@@ -388,6 +407,7 @@ describe('helpers', () => {
             index: 0,
           },
           type: 'DEFAULT',
+          mode: 'FLUID',
         })
       ).toEqual(false);
     });
@@ -400,6 +420,7 @@ describe('helpers', () => {
           reason: 'DROP',
           source: { index: 0, droppableId: `${droppableIdPrefix}.somethingElse.2119990039033485` },
           type: 'DEFAULT',
+          mode: 'FLUID',
         })
       ).toEqual(false);
     });
@@ -418,6 +439,7 @@ describe('helpers', () => {
             index: 0,
           },
           type: 'DEFAULT',
+          mode: 'FLUID',
         })
       ).toEqual(false);
     });
