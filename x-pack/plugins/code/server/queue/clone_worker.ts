@@ -12,7 +12,7 @@ import {
   WorkerReservedProgress,
 } from '../../model';
 import { EsClient, Esqueue } from '../lib/esqueue';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { RepositoryServiceFactory } from '../repository_service_factory';
 import { ServerOptions } from '../server_options';
 import { SocketService } from '../socket_service';
@@ -25,7 +25,7 @@ export class CloneWorker extends AbstractGitWorker {
 
   constructor(
     protected readonly queue: Esqueue,
-    protected readonly log: Log,
+    protected readonly log: Logger,
     protected readonly client: EsClient,
     protected readonly serverOptions: ServerOptions,
     private readonly indexWorker: IndexWorker,

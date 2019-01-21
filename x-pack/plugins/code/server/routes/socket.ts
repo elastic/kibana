@@ -7,10 +7,10 @@
 import { Server } from 'hapi';
 import { Socket } from 'socket.io';
 
-import { Log } from '../log';
+import { Logger } from '../log';
 import { SocketService } from '../socket_service';
 
-export function socketRoute(server: Server, socketService: SocketService, log: Log) {
+export function socketRoute(server: Server, socketService: SocketService, log: Logger) {
   const socketIO = socketService.io;
 
   socketIO.on('connection', (socket: Socket) => {

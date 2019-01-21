@@ -6,7 +6,7 @@
 
 import { RepositoryUri } from '../../model';
 import { EsClient } from '../lib/esqueue';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { AbstractIndexer } from './abstract_indexer';
 import { IndexCreationRequest } from './index_creation_request';
 import {
@@ -24,7 +24,7 @@ export class RepositoryIndexInitializer extends AbstractIndexer {
     protected readonly repoUri: RepositoryUri,
     protected readonly revision: string,
     protected readonly client: EsClient,
-    protected readonly log: Log
+    protected readonly log: Logger
   ) {
     super(repoUri, revision, client, log);
   }

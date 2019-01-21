@@ -15,14 +15,14 @@ import { WorkerReservedProgress } from '../../model';
 import { LspIndexer } from '../indexer/lsp_indexer';
 import { RepositoryGitStatusReservedField } from '../indexer/schema';
 import { AnyObject, EsClient } from '../lib/esqueue';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { InstallManager } from '../lsp/install_manager';
 import { LspService } from '../lsp/lsp_service';
 import { RepositoryConfigController } from '../repository_config_controller';
 import { ServerOptions } from '../server_options';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 
-const log: Log = (new ConsoleLoggerFactory().getLogger(['test']) as any) as Log;
+const log: Logger = new ConsoleLoggerFactory().getLogger(['test']);
 
 const emptyAsyncFunc = async (_: AnyObject): Promise<any> => {
   Promise.resolve({});
@@ -202,7 +202,7 @@ describe('lsp_indexer', () => {
       lspservice,
       serverOptions,
       esClient as EsClient,
-      log as Log
+      log
     );
     await indexer.start();
 
@@ -254,7 +254,7 @@ describe('lsp_indexer', () => {
       lspservice,
       serverOptions,
       esClient as EsClient,
-      log as Log
+      log
     );
     // Cancel the indexer before start.
     indexer.cancel();

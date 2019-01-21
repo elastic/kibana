@@ -6,7 +6,7 @@
 
 import { CloneWorkerResult } from '../../model';
 import { EsClient, Esqueue } from '../lib/esqueue';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { RepositoryServiceFactory } from '../repository_service_factory';
 import { ServerOptions } from '../server_options';
 import { AbstractGitWorker } from './abstract_git_worker';
@@ -17,7 +17,7 @@ export class UpdateWorker extends AbstractGitWorker {
 
   constructor(
     queue: Esqueue,
-    protected readonly log: Log,
+    protected readonly log: Logger,
     protected readonly client: EsClient,
     protected readonly serverOptions: ServerOptions,
     protected readonly repoServiceFactory: RepositoryServiceFactory

@@ -13,7 +13,7 @@ import {
 } from '../../model';
 import { getDefaultBranch, getHeadRevision } from '../git_operations';
 import { EsClient, Esqueue } from '../lib/esqueue';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { RepositoryObjectClient } from '../search';
 import { ServerOptions } from '../server_options';
 import { AbstractWorker } from './abstract_worker';
@@ -25,7 +25,7 @@ export abstract class AbstractGitWorker extends AbstractWorker {
 
   constructor(
     protected readonly queue: Esqueue,
-    protected readonly log: Log,
+    protected readonly log: Logger,
     protected readonly client: EsClient,
     protected readonly serverOptions: ServerOptions
   ) {

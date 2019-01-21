@@ -7,7 +7,7 @@
 import sinon from 'sinon';
 
 import { AnyObject, EsClient } from '../lib/esqueue';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { SymbolSearchClient } from './symbol_search_client';
 
 let symbolSearchClient: SymbolSearchClient;
@@ -15,7 +15,7 @@ let esClient;
 
 // Setup the entire SymbolSearchClient.
 function initSearchClient() {
-  const log: Log = (sinon.stub() as any) as Log;
+  const log: Logger = (sinon.stub() as any) as Logger;
   esClient = initEsClient();
 
   symbolSearchClient = new SymbolSearchClient(esClient, log);

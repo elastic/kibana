@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Log } from './log';
+import { Logger } from './log';
 import { RepositoryService } from './repository_service';
 
 export class RepositoryServiceFactory {
-  public newInstance(repoPath: string, log: Log): RepositoryService {
+  public newInstance(repoPath: string, log: Logger): RepositoryService {
     return new RepositoryService(repoPath, log);
   }
 }

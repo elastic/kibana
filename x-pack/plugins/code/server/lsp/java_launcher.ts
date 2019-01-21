@@ -34,7 +34,7 @@ export class JavaLauncher implements ILanguageServerLauncher {
     if (!this.detach) {
       port = await getPort();
     }
-    const log = this.loggerFactory.getLogger(['LSP', `java@${this.targetHost}:${port}`]);
+    const log = this.loggerFactory.getLogger(['code', `java@${this.targetHost}:${port}`]);
     const proxy = new LanguageServerProxy(port, this.targetHost, log);
     proxy.awaitServerConnection();
     if (this.detach) {
@@ -116,10 +116,16 @@ export class JavaLauncher implements ILanguageServerLauncher {
       ],
       {
         detached: false,
-        stdio: 'inherit',
+        stdio: 'pipe',
         env: process.env,
       }
     );
+    p.stdout.on('data', data => {
+      log.stdout(data.toString());
+    });
+    p.stderr.on('data', data => {
+      log.stderr(data.toString());
+    });
     this.isRunning = true;
     p.on('exit', () => (this.isRunning = false));
     log.info(

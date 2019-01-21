@@ -20,7 +20,7 @@ import {
   RepositoryReservedField,
 } from '../indexer/schema';
 import { AnyObject, EsClient } from '../lib/esqueue';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { IndexWorker } from '../queue/index_worker';
 import { ServerOptions } from '../server_options';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
@@ -32,7 +32,7 @@ const serverOpts = {
   indexFrequencyMs: INDEX_FREQUENCY_MS,
   indexRepoFrequencyMs: INDEX_REPO_FREQUENCY_MS,
 };
-const log: Log = (new ConsoleLoggerFactory().getLogger(['test']) as any) as Log;
+const log: Logger = new ConsoleLoggerFactory().getLogger(['test']);
 
 const emptyAsyncFunc = async (_: AnyObject): Promise<any> => {
   Promise.resolve({});
@@ -149,7 +149,7 @@ test('Next job should not execute when scheduled index time is not current.', do
     (indexWorker as any) as IndexWorker,
     serverOpts as ServerOptions,
     esClient as EsClient,
-    log as Log,
+    log,
     onScheduleFinished
   );
   indexScheduler.start();
@@ -195,7 +195,7 @@ test('Next job should not execute when repo is still in clone.', done => {
     (indexWorker as any) as IndexWorker,
     serverOpts as ServerOptions,
     esClient as EsClient,
-    log as Log,
+    log,
     onScheduleFinished
   );
   indexScheduler.start();
@@ -242,7 +242,7 @@ test('Next job should not execute when repo is still in the preivous index job.'
     (indexWorker as any) as IndexWorker,
     serverOpts as ServerOptions,
     esClient as EsClient,
-    log as Log,
+    log,
     onScheduleFinished
   );
   indexScheduler.start();
@@ -293,7 +293,7 @@ test('Next job should not execute when repo revision did not change.', done => {
     (indexWorker as any) as IndexWorker,
     serverOpts as ServerOptions,
     esClient as EsClient,
-    log as Log,
+    log,
     onScheduleFinished
   );
   indexScheduler.start();
@@ -345,7 +345,7 @@ test('Next job should execute.', done => {
     (indexWorker as any) as IndexWorker,
     serverOpts as ServerOptions,
     esClient as EsClient,
-    log as Log,
+    log,
     onScheduleFinished
   );
   indexScheduler.start();

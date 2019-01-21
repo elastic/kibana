@@ -7,7 +7,7 @@
 import { Indexer, IndexerFactory, LspIndexer } from '.';
 import { RepositoryUri } from '../../model';
 import { EsClient } from '../lib/esqueue';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { LspService } from '../lsp/lsp_service';
 import { ServerOptions } from '../server_options';
 
@@ -16,7 +16,7 @@ export class LspIndexerFactory implements IndexerFactory {
     protected readonly lspService: LspService,
     protected readonly options: ServerOptions,
     protected readonly client: EsClient,
-    protected readonly log: Log
+    protected readonly log: Logger
   ) {}
 
   public create(repoUri: RepositoryUri, revision: string): Indexer {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger } from 'vscode-jsonrpc';
+import { Logger } from '../log';
 
 export interface LoggerFactory {
   getLogger(tags: string[]): Logger;

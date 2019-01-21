@@ -7,13 +7,13 @@
 import sinon from 'sinon';
 
 import { AnyObject, EsClient } from '../lib/esqueue';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 import { IndexCreationRequest } from './index_creation_request';
 import { IndexVersionController } from './index_version_controller';
 import pkg from './schema/version.json';
 
-const log: Log = (new ConsoleLoggerFactory().getLogger(['test']) as any) as Log;
+const log: Logger = new ConsoleLoggerFactory().getLogger(['test']);
 
 const emptyAsyncFunc = async (_: AnyObject): Promise<any> => {
   Promise.resolve({});

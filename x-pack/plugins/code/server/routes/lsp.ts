@@ -14,7 +14,7 @@ import { Location } from 'vscode-languageserver-types';
 import { UnknownFileLanguage } from '../../common/lsp_error_codes';
 import { parseLspUrl } from '../../common/uri_util';
 import { GitOperations } from '../git_operations';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { LspService } from '../lsp/lsp_service';
 import { SymbolSearchClient } from '../search';
 import { ServerOptions } from '../server_options';
@@ -53,7 +53,7 @@ export function lspRoute(
             if (error instanceof ResponseError) {
               // hide some errors;
               if (error.code !== UnknownFileLanguage) {
-                const log = new Log(server);
+                const log = new Logger(server);
                 log.error(error);
               }
               return h
@@ -152,7 +152,7 @@ export function lspRoute(
         }
         return { title, files: groupBy(files, 'repo'), uri, position };
       } catch (error) {
-        const log = new Log(server);
+        const log = new Logger(server);
         log.error(error);
         if (error instanceof ResponseError) {
           return h
@@ -172,7 +172,7 @@ export function lspRoute(
   });
 }
 
-export function symbolByQnameRoute(server: hapi.Server, log: Log) {
+export function symbolByQnameRoute(server: hapi.Server, log: Logger) {
   server.route({
     path: '/api/lsp/symbol/{qname}',
     method: 'GET',

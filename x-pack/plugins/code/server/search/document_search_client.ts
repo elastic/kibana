@@ -16,7 +16,7 @@ import {
 } from '../../model';
 import { DocumentIndexNamePrefix } from '../indexer/schema';
 import { EsClient } from '../lib/esqueue';
-import { Log } from '../log';
+import { Logger } from '../log';
 import {
   expandRanges,
   extractSourceContent,
@@ -32,7 +32,7 @@ const MAX_HIT_NUMBER = 5;
 export class DocumentSearchClient extends AbstractSearchClient {
   private HIGHLIGHT_TAG = '_@_';
 
-  constructor(protected readonly client: EsClient, protected readonly log: Log) {
+  constructor(protected readonly client: EsClient, protected readonly log: Logger) {
     super(client, log);
   }
 
