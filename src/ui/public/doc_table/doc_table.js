@@ -136,10 +136,13 @@ uiModules.get('kibana')
             let inspectorRequest = undefined;
             if (_.has($scope, 'inspectorAdapters.requests')) {
               $scope.inspectorAdapters.requests.reset();
-              const description = i18n('common.ui.docTable.inspectorRequestDescription', {
-                defaultMessage: 'This request queries Elasticsearch to fetch the data for the search!',
+              const title = i18n('common.ui.docTable.inspectorRequestDataTitle', {
+                defaultMessage: 'Data',
               });
-              inspectorRequest = $scope.inspectorAdapters.requests.start('Data', { description });
+              const description = i18n('common.ui.docTable.inspectorRequestDescription', {
+                defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
+              });
+              inspectorRequest = $scope.inspectorAdapters.requests.start(title, { description });
               inspectorRequest.stats(getRequestInspectorStats($scope.searchSource));
               $scope.searchSource.getSearchRequestBody().then(body => {
                 inspectorRequest.json(body);
