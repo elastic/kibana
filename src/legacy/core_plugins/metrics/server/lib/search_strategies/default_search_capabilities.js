@@ -23,9 +23,11 @@ export default class DefaultSearchCapabilities {
     this.fieldsCapabilities = fieldsCapabilities;
   }
 
-  getTimeZone() {
-    const { timezone } = this.request.payload.timerange;
+  get fixedTimeZone() {
+    return null;
+  }
 
-    return timezone;
+  get minimumTimeInterval() {
+    return null;
   }
 }
