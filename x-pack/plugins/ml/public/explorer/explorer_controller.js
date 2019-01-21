@@ -32,11 +32,12 @@ import { getAnomalyExplorerBreadcrumbs } from './breadcrumbs';
 import { checkFullLicense } from '../license/check_license';
 import { checkGetJobsPrivilege } from '../privilege/check_privilege';
 import { getIndexPatterns, loadIndexPatterns } from '../util/index_utils';
-import { refreshIntervalWatcher } from '../util/refresh_interval_watcher';
+import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
+import { JobSelectServiceProvider } from '../components/job_select_list/job_select_service';
 import { mlExplorerDashboardService } from './explorer_dashboard_service';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { mlJobService } from '../services/job_service';
-import { JobSelectServiceProvider } from '../components/job_select_list/job_select_service';
+import { refreshIntervalWatcher } from '../util/refresh_interval_watcher';
 import { timefilter } from 'ui/timefilter';
 
 import { APP_STATE_ACTION, EXPLORER_ACTION, SWIMLANE_TYPE } from './explorer_constants';
@@ -85,6 +86,7 @@ module.controller('MlExplorerController', function (
 
   const queryFilter = Private(FilterBarQueryFilterProvider);
   $scope.mlJobSelectService = Private(JobSelectServiceProvider);
+  $scope.MlTimeBuckets = Private(IntervalHelperProvider);
 
   let resizeTimeout = null;
 

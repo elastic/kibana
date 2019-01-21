@@ -11,7 +11,6 @@
 import { each, get, union, uniq } from 'lodash';
 import { timefilter } from 'ui/timefilter';
 import { parseInterval } from 'ui/utils/parse_interval';
-import { TimeBuckets } from 'ui/time_buckets';
 
 import { isTimeSeriesViewDetector } from '../../common/util/job_utils';
 import { ml } from '../services/ml_api_service';
@@ -58,6 +57,7 @@ export function mapScopeToProps(scope) {
     dateFormatTz: scope.dateFormatTz,
     loading: scope.loading,
     mlJobSelectService: scope.mlJobSelectService,
+    MlTimeBuckets: scope.MlTimeBuckets,
     noJobsFound: scope.jobs.length === 0,
   };
 }
@@ -192,43 +192,12 @@ export function getSelectionInfluencers(selectedCells, fieldName) {
   return [];
 }
 
-export function getSwimlaneBucketInterval(selectedJobs, swimlaneWidth) {
-  // Bucketing interval should be the maximum of the chart related interval (i.e. time range related)
-  // and the max bucket span for the jobs shown in the chart.
-  const bounds = timefilter.getActiveBounds();
-  const buckets = new TimeBuckets();
-  buckets.setInterval('auto');
-  buckets.setBounds(bounds);
-
-  const intervalSeconds = buckets.getInterval().asSeconds();
-
-  // if the swimlane cell widths are too small they will not be visible
-  // calculate how many buckets will be drawn before the swimlanes are actually rendered
-  // and increase the interval to widen the cells if they're going to be smaller than 8px
-  // this has to be done at this stage so all searches use the same interval
-  const numBuckets = parseInt(((bounds.max.valueOf() - bounds.min.valueOf()) / 1000) / intervalSeconds);
-  const cellWidth = Math.floor(swimlaneWidth / numBuckets);
-
-  // if the cell width is going to be less than 8px, double the interval
-  if (cellWidth < 8) {
-    buckets.setInterval((intervalSeconds * 2) + 's');
-  }
-
-  const maxBucketSpanSeconds = selectedJobs.reduce((memo, job) => Math.max(memo, job.bucketSpanSeconds), 0);
-  if (maxBucketSpanSeconds > intervalSeconds) {
-    buckets.setInterval(maxBucketSpanSeconds + 's');
-    buckets.setBounds(bounds);
-  }
-
-  return buckets.getInterval();
-}
-
-export function processOverallResults(scoresByTime, searchBounds, selectedJobs, swimlaneWidth) {
+export function processOverallResults(scoresByTime, searchBounds, interval) {
   const overallLabel = i18n.translate('xpack.ml.explorer.overallLabel', { defaultMessage: 'Overall' });
   const dataset = {
     laneLabels: [overallLabel],
     points: [],
-    interval: getSwimlaneBucketInterval(selectedJobs, swimlaneWidth).asSeconds(),
+    interval,
     earliest: searchBounds.min.valueOf() / 1000,
     latest: searchBounds.max.valueOf() / 1000
   };
@@ -255,10 +224,9 @@ export function processOverallResults(scoresByTime, searchBounds, selectedJobs, 
 export function processViewByResults(
   scoresByInfluencerAndTime,
   sortedLaneValues,
-  selectedJobs,
   overallSwimlaneData,
   swimlaneViewByFieldName,
-  swimlaneWidth,
+  interval,
 ) {
   // Processes the scores for the 'view by' swimlane.
   // Sorts the lanes according to the supplied array of lane
@@ -267,7 +235,7 @@ export function processViewByResults(
   const dataset = {
     fieldName: swimlaneViewByFieldName,
     points: [],
-    interval: getSwimlaneBucketInterval(selectedJobs, swimlaneWidth).asSeconds()
+    interval
   };
 
   // Set the earliest and latest to be the same as the overall swimlane.
