@@ -36,6 +36,20 @@ const percentSystemMemoryUsedScript = {
 export async function fetch(args: MetricsRequestArgs) {
   return fetchMetrics<Aggs>({
     ...args,
+    bool: {
+      must: [
+        {
+          exists: {
+            field: METRIC_SYSTEM_TOTAL_MEMORY
+          }
+        },
+        {
+          exists: {
+            field: METRIC_SYSTEM_FREE_MEMORY
+          }
+        }
+      ]
+    },
     timeseriesBucketAggregations: {
       averagePercentMemoryUsed: { avg: percentSystemMemoryUsedScript },
       maximumPercentMemoryUsed: { max: percentSystemMemoryUsedScript }
