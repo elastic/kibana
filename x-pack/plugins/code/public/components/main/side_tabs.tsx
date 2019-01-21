@@ -13,6 +13,7 @@ import { QueryString } from 'ui/utils/query_string';
 import { MainRouteParams, PathTypes } from '../../common/types';
 import { colors } from '../../style/variables';
 import { FileTree } from '../file_tree/file_tree';
+import { Shortcut } from '../shortcuts';
 import { SymbolTree } from '../symbol_tree/symbol_tree';
 
 enum Tabs {
@@ -35,15 +36,6 @@ const FileTreeContainer = styled.div`
 `;
 
 class CodeSideTabs extends React.PureComponent<RouteComponentProps<MainRouteParams>> {
-  public tabContentMap = {
-    [Tabs.file]: (
-      <FileTreeContainer>
-        <FileTree />
-      </FileTreeContainer>
-    ),
-    [Tabs.structure]: <SymbolTree />,
-  };
-
   public get sideTab(): Tabs {
     const { search } = this.props.location;
     let qs = search;
@@ -53,6 +45,14 @@ class CodeSideTabs extends React.PureComponent<RouteComponentProps<MainRoutePara
     const tab = parseQuery(qs).tab;
     return tab === Tabs.structure ? Tabs.structure : Tabs.file;
   }
+  public tabContentMap = {
+    [Tabs.file]: (
+      <FileTreeContainer>
+        <FileTree />
+      </FileTreeContainer>
+    ),
+    [Tabs.structure]: <SymbolTree />,
+  };
 
   public switchTab = (tab: Tabs) => {
     const { history } = this.props;
@@ -87,9 +87,22 @@ class CodeSideTabs extends React.PureComponent<RouteComponentProps<MainRoutePara
           <EuiTabs>{this.renderTabs()}</EuiTabs>
         </div>
         {this.tabContentMap[this.sideTab]}
+        <Shortcut
+          keyCode="t"
+          help="Toggle tree and symbol view in sidebar"
+          onPress={this.toggleTab}
+        />
       </Container>
     );
   }
+  private toggleTab = () => {
+    const currentTab = this.sideTab;
+    if (currentTab === Tabs.file) {
+      this.switchTab(Tabs.structure);
+    } else {
+      this.switchTab(Tabs.file);
+    }
+  };
 }
 
 export const SideTabs = withRouter(CodeSideTabs);

@@ -14,6 +14,7 @@ import { CloneProgress, WorkerReservedProgress } from '../../../model';
 import { MainRouteParams } from '../../common/types';
 import { RootState } from '../../reducers';
 import { cloneProgressSelector, progressSelector } from '../../selectors';
+import { ShortcutsProvider } from '../shortcuts';
 import { CloneStatus } from './clone_status';
 import { Content } from './content';
 import { NotFound } from './not_found';
@@ -76,6 +77,7 @@ class CodeMain extends React.Component<Props> {
       <Root>
         <TopBar routeParams={this.props.match.params} />
         <Container>{this.renderContent()}</Container>
+        <ShortcutsProvider />
       </Root>
     );
   }

@@ -16,6 +16,7 @@ import {
   RepositorySuggestionsProvider,
   SymbolSuggestionsProvider,
 } from '../query_bar';
+import { Shortcut } from '../shortcuts';
 
 const SearchBarContainer = styled.div`
   width: ${pxToRem(600)};
@@ -51,11 +52,15 @@ export class CodeSearchBar extends React.Component<RouteComponentProps<MainRoute
   public render() {
     return (
       <SearchBarContainer>
+        <Shortcut keyCode="p" help="Search projects" />
+        <Shortcut keyCode="y" help="Search symbols" />
+        <Shortcut keyCode="s" help="Search everything" />
         <QueryBar
           query=""
           onSubmit={this.onSubmit}
           onSelect={this.onSelect}
           appName="code"
+          disableAutoFocus={true}
           suggestionProviders={this.suggestionProviders}
         />
       </SearchBarContainer>
