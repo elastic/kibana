@@ -29,11 +29,12 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import { DataDownloadOptions } from './download_options';
 
-const DataTableFormat = injectI18n(class DataTableFormat extends Component {
+class DataTableFormat extends Component {
   static propTypes = {
     data: PropTypes.object.isRequired,
     exportTitle: PropTypes.string.isRequired,
@@ -42,7 +43,7 @@ const DataTableFormat = injectI18n(class DataTableFormat extends Component {
 
   state = { };
 
-  static renderCell(col, value, isFormatted, intl) {
+  static renderCell(col, value, isFormatted) {
     return (
       <EuiFlexGroup
         responsive={false}
@@ -69,8 +70,7 @@ const DataTableFormat = injectI18n(class DataTableFormat extends Component {
                 <EuiButtonIcon
                   iconType="plusInCircle"
                   color="text"
-                  aria-label={intl.formatMessage({
-                    id: 'inspectorViews.data.filterForValueButtonAriaLabel',
+                  aria-label={i18n.translate('inspectorViews.data.filterForValueButtonAriaLabel', {
                     defaultMessage: 'Filter for value'
                   })}
                   data-test-subj="filterForInspectorCellValue"
@@ -91,8 +91,7 @@ const DataTableFormat = injectI18n(class DataTableFormat extends Component {
                   <EuiButtonIcon
                     iconType="minusInCircle"
                     color="text"
-                    aria-label={intl.formatMessage({
-                      id: 'inspectorViews.data.filterOutValueButtonAriaLabel',
+                    aria-label={i18n.translate('inspectorViews.data.filterOutValueButtonAriaLabel', {
                       defaultMessage: 'Filter out value'
                     })}
                     data-test-subj="filterOutInspectorCellValue"
@@ -161,6 +160,12 @@ const DataTableFormat = injectI18n(class DataTableFormat extends Component {
       </React.Fragment>
     );
   }
-});
+}
+
+DataTableFormat.propTypes = {
+  data: PropTypes.object.isRequired,
+  exportTitle: PropTypes.string.isRequired,
+  isFormatted: PropTypes.bool,
+};
 
 export { DataTableFormat };
