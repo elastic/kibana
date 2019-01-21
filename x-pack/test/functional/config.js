@@ -52,6 +52,7 @@ import {
   RandomProvider,
   AceEditorProvider,
   GrokDebuggerProvider,
+  UserMenuProvider,
 } from './services';
 
 // the default export of config files must be a config provider
@@ -118,6 +119,7 @@ export default async function ({ readConfigFile }) {
       random: RandomProvider,
       aceEditor: AceEditorProvider,
       grokDebugger: GrokDebuggerProvider,
+      userMenu: UserMenuProvider,
     },
 
     // just like services, PageObjects are defined as a map of

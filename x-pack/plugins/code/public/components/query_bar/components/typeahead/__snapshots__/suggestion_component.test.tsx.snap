@@ -42,10 +42,10 @@ exports[`render file item 1`] = `
           <div>
             <Styled(styled.div)>
               <styled.div
-                className="sc-ifAKCX gWOzPQ"
+                className="sc-ifAKCX joLhfG"
               >
                 <div
-                  className="sc-ifAKCX gWOzPQ sc-htpNat bUoeMH"
+                  className="sc-ifAKCX joLhfG sc-htpNat bUoeMH"
                 >
                   <span>
                     src/foo/
@@ -118,10 +118,10 @@ exports[`render repository item 1`] = `
           <div>
             <Styled(styled.div)>
               <styled.div
-                className="sc-ifAKCX gWOzPQ"
+                className="sc-ifAKCX joLhfG"
               >
                 <div
-                  className="sc-ifAKCX gWOzPQ sc-htpNat bUoeMH"
+                  className="sc-ifAKCX joLhfG sc-htpNat bUoeMH"
                 >
                   <span>
                     elastic/
@@ -240,10 +240,10 @@ exports[`render symbol item 1`] = `
           <div>
             <Styled(styled.div)>
               <styled.div
-                className="sc-ifAKCX gWOzPQ"
+                className="sc-ifAKCX joLhfG"
               >
                 <div
-                  className="sc-ifAKCX gWOzPQ sc-htpNat bUoeMH"
+                  className="sc-ifAKCX joLhfG sc-htpNat bUoeMH"
                 >
                   <span>
                     java.lang.
