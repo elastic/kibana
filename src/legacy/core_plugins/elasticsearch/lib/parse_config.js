@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import url from 'url';
+import { URL } from 'url';
 import { get, noop, size, pick } from 'lodash';
 import { readFileSync } from 'fs';
 
@@ -35,7 +35,7 @@ export function parseConfig(serverConfig = {}, { ignoreCertAndKey = false } = {}
 
 
   const mapNode = url => ({
-    url: new url.URL(url),
+    url: new URL(url),
     headers: serverConfig.customHeaders
   });
 
