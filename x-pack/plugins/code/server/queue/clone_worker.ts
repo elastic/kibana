@@ -79,4 +79,20 @@ export class CloneWorker extends AbstractGitWorker {
     };
     return await this.objectClient.setRepositoryGitStatus(repo.uri, progress);
   }
+
+  public async onJobExecutionError(res: any) {
+    // The payload of clone job won't have the `uri`, but only with `url`.
+    const url = res.job.payload.url;
+    const repo = RepositoryUtils.buildRepository(url);
+    res.job.payload.uri = repo.uri;
+    return await super.onJobExecutionError(res);
+  }
+
+  public async onJobTimeOut(res: any) {
+    // The payload of clone job won't have the `uri`, but only with `url`.
+    const url = res.job.payload.url;
+    const repo = RepositoryUtils.buildRepository(url);
+    res.job.payload.uri = repo.uri;
+    return await super.onJobTimeOut(res);
+  }
 }

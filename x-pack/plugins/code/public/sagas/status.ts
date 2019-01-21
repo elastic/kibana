@@ -7,19 +7,25 @@
 import { Action } from 'redux-actions';
 import { put, select, takeEvery } from 'redux-saga/effects';
 import { WorkerReservedProgress } from '../../model';
-import { deleteRepoFinished, Match, routeChange, updateDeleteProgress } from '../actions';
-import { loadStatusSuccess } from '../actions';
+import {
+  deleteRepoFinished,
+  Match,
+  routeChange,
+  updateCloneProgress,
+  updateDeleteProgress,
+} from '../actions';
 import * as ROUTES from '../components/routes';
 import { RootState } from '../reducers';
 
 const matchSelector = (state: RootState) => state.route.match;
 
 const pattern = (action: Action<any>) =>
-  action.type === String(loadStatusSuccess) &&
-  action.payload!.status.progress === WorkerReservedProgress.COMPLETED;
+  action.type === String(updateCloneProgress) &&
+  action.payload.progress === WorkerReservedProgress.COMPLETED;
 
 const deletePattern = (action: Action<any>) =>
-  action.type === String(updateDeleteProgress) && action.payload.progress === 100;
+  action.type === String(updateDeleteProgress) &&
+  action.payload.progress === WorkerReservedProgress.COMPLETED;
 
 function* handleRepoCloneSuccess() {
   const match: Match = yield select(matchSelector);

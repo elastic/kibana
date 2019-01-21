@@ -18,11 +18,23 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { Repository } from 'x-pack/plugins/code/model';
+import { Repository, WorkerReservedProgress } from 'x-pack/plugins/code/model';
 import { deleteRepo, indexRepo, initRepoCommand } from '../../actions';
 import { RepoState, RepoStatus } from '../../reducers/status';
 
+const errorColor = `#BD271E`;
 const Footer = styled.div``;
+const ErrorFooter = styled(Footer)`
+  color: ${errorColor};
+`;
+
+const ProjectItemPanel = styled(EuiPanel)`
+  position: relative;
+  margin-bottom: 8px;
+`;
+const ErrorProjectItemPanel = styled(ProjectItemPanel)`
+  border: 2px solid ${errorColor};
+`;
 
 const stateColor = {
   [RepoState.CLONING]: 'secondary',
@@ -46,6 +58,8 @@ class CodeProjectItem extends React.PureComponent<{
     const onClickIndex = () => this.props.indexRepo(uri);
     const onClickSettings = () => this.props.openSettings(uri, url);
     let footer = null;
+    let disableRepoLink = false;
+    let hasError = false;
     if (!status || status.state === RepoState.READY) {
       footer = <Footer>LAST UPDATED: {moment(nextUpdateTimestamp).fromNow()}</Footer>;
     } else if (status.state === RepoState.DELETING) {
@@ -54,17 +68,33 @@ class CodeProjectItem extends React.PureComponent<{
       footer = <Footer>INDEXING...</Footer>;
     } else if (status.state === RepoState.CLONING) {
       footer = <Footer>CLONING...</Footer>;
+    } else if (status.state === RepoState.DELETE_ERROR) {
+      footer = <ErrorFooter>ERROR DELETE REPO</ErrorFooter>;
+      hasError = true;
+    } else if (status.state === RepoState.INDEX_ERROR) {
+      footer = <ErrorFooter>ERROR INDEX REPO</ErrorFooter>;
+      hasError = true;
+    } else if (status.state === RepoState.CLONE_ERROR) {
+      footer = <ErrorFooter>ERROR CLONE REPO</ErrorFooter>;
+      // Disable repo link is clone failed.
+      disableRepoLink = true;
+      hasError = true;
     }
+
+    const repoTitle = (
+      <EuiText data-test-subj="codeRepositoryItem">
+        <EuiTextColor color="subdued">{org}</EuiTextColor>/<strong>{name}</strong>
+      </EuiText>
+    );
+
+    const Panel = hasError ? ErrorProjectItemPanel : ProjectItemPanel;
+
     return (
-      <EuiPanel style={{ position: 'relative', marginBottom: '8px' }}>
+      <Panel>
         {this.renderProgress()}
         <EuiFlexGroup alignItems="center" justifyContent="flexStart">
           <EuiFlexItem grow={3}>
-            <Link to={`/${uri}`}>
-              <EuiText data-test-subj="codeRepositoryItem">
-                <EuiTextColor color="subdued">{org}</EuiTextColor>/<strong>{name}</strong>
-              </EuiText>
-            </Link>
+            {disableRepoLink ? repoTitle : <Link to={`/${uri}`}>{repoTitle}</Link>}
             <EuiText>
               <h6>
                 <EuiTextColor color="subdued">{footer}</EuiTextColor>
@@ -107,26 +137,33 @@ class CodeProjectItem extends React.PureComponent<{
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPanel>
+      </Panel>
     );
   }
 
   private renderProgress() {
     const { status } = this.props;
-    if (status && status.state !== RepoState.READY) {
+    if (
+      status &&
+      (status.state === RepoState.CLONING ||
+        status.state === RepoState.DELETING ||
+        status.state === RepoState.INDEXING)
+    ) {
       const color = stateColor[status.state] as 'primary' | 'secondary' | 'accent';
-      if (status.progress! > 0) {
+      if (status.progress! === WorkerReservedProgress.COMPLETED) {
+        return null;
+      } else if (status.progress! > WorkerReservedProgress.INIT) {
         return (
           <EuiProgress
             max={100}
             value={status.progress}
-            size="xs"
+            size="s"
             color={color}
             position="absolute"
           />
         );
       } else {
-        return <EuiProgress size="xs" color={color} position="absolute" />;
+        return <EuiProgress size="s" color={color} position="absolute" />;
       }
     }
   }
