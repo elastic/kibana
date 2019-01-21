@@ -68,3 +68,6 @@ declare module '@elastic/elasticsearch' {
     responses?: Array<SearchResponse<T>>;
   }
 }
+
+// We need this so TypeScript doesn't overwrite the typings from the @elastic/elasticsearch library with this file.
+export {};
