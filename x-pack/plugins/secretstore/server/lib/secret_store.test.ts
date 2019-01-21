@@ -49,9 +49,11 @@ describe('The Secret Secret Store', function TestSecretStoreObject() {
         };
       }
     );
+
     const hidden = await subject.hideAttribute(hideMe, 'message');
     sinon.assert.calledOnce(savedObjectsClient.create);
     sinon.assert.calledOnce(savedObjectsClient.update);
+    expect(savedObjectsClient.update.notCalled).toBeTruthy();
     expect(hidden).toBeDefined();
     expect(hidden.attributes.message).toBeUndefined();
     expect(hidden.attributes.secret).toBeDefined();
@@ -61,7 +63,7 @@ describe('The Secret Secret Store', function TestSecretStoreObject() {
   });
 
   it('should be able to unhide values from saved objects', async () => {
-    expect.assertions(5);
+    expect.assertions(4);
     const hideMe = {
       message: 'my secret message',
       nonSecret: 'this is unhidden',
@@ -89,7 +91,6 @@ describe('The Secret Secret Store', function TestSecretStoreObject() {
         });
       }
     );
-    expect(savedObjectsClient.update.notCalled).toBeTruthy();
     savedObjectsClient.get.callsFake((type: string, id: string, options?: any) => {
       return internalSavedObject;
     });

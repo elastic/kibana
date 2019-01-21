@@ -37,6 +37,14 @@ describe('The SecretStore', function TestSecretStore() {
       log: sinon.spy(),
       savedObjects: {
         addScopedSavedObjectsClientWrapperFactory: sinon.spy(),
+        getSavedObjectsRepository: sinon.spy(),
+      },
+      plugins: {
+        elasticsearch: {
+          getCluster: () => {
+            return { callWithInternalUser: sinon.spy() };
+          },
+        },
       },
     };
     subject.init(core);
