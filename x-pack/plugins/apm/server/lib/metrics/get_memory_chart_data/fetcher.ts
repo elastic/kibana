@@ -40,14 +40,8 @@ export async function fetch({
     {
       range: { '@timestamp': { gte: start, lte: end, format: 'epoch_millis' } }
     },
-    {
-      bool: {
-        must: [
-          { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
-          { exists: { field: METRIC_SYSTEM_FREE_MEMORY } }
-        ]
-      }
-    }
+    { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+    { exists: { field: METRIC_SYSTEM_FREE_MEMORY } }
   ];
 
   if (esFilterQuery) {

@@ -76,29 +76,6 @@ Array [
                 },
               },
               Object {
-                "bool": Object {
-                  "must": Array [
-                    Object {
-                      "exists": Object {
-                        "field": "system.memory.total",
-                      },
-                    },
-                    Object {
-                      "exists": Object {
-                        "field": "system.memory.actual.free",
-                      },
-                    },
-                  ],
-                },
-              },
-              Object {
-                "term": Object {
-                  "field": "test.esfilter.query",
-                },
-              },
-            ],
-            "must": Array [
-              Object {
                 "exists": Object {
                   "field": "system.memory.total",
                 },
@@ -106,6 +83,11 @@ Array [
               Object {
                 "exists": Object {
                   "field": "system.memory.actual.free",
+                },
+              },
+              Object {
+                "term": Object {
+                  "field": "test.esfilter.query",
                 },
               },
             ],
