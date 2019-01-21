@@ -12,7 +12,6 @@ import { ColorGradient } from '../../icons/color_gradient';
 import { getHexColorRangeStrings } from '../../utils/color_utils';
 import { VectorStyleEditor } from './components/vector/vector_style_editor';
 import { getDefaultStaticProperties } from './vector_style_defaults';
-import { DEFAULT_ALPHA_VALUE } from './style_defaults';
 
 export class VectorStyle {
 
@@ -23,7 +22,7 @@ export class VectorStyle {
     return `__kbn__scaled(${fieldName})`;
   }
 
-  constructor(descriptor) {
+  constructor(descriptor = {}) {
     this._descriptor = VectorStyle.createDescriptor(descriptor.properties);
   }
 
@@ -31,11 +30,10 @@ export class VectorStyle {
     return styleInstance.constructor === VectorStyle;
   }
 
-  static createDescriptor(properties) {
-    const defaultStyleProperties = getDefaultStaticProperties();
+  static createDescriptor(properties = {}) {
     return {
       type: VectorStyle.type,
-      properties: { ...defaultStyleProperties, ...properties }
+      properties: { ...getDefaultStaticProperties(), ...properties }
     };
   }
 
@@ -261,7 +259,7 @@ export class VectorStyle {
   }
 
   _getMBOpacity() {
-    return _.get(this._descriptor.properties, 'alphaValue', DEFAULT_ALPHA_VALUE);
+    return this._descriptor.properties.alphaValue;
   }
 
   _getMbSize(styleDescriptor) {

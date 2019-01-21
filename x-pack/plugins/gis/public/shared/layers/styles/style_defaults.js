@@ -4,4 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const DEFAULT_ALPHA_VALUE = 0.75;
+const DEFAULT_ALPHA_VALUE = 0.75;
+const DEFAULT_TILE_ALPHA_VALUE = 1;
+
+export function getDefaultStyleProperties(isTileLayer = false) {
+  return {
+    alphaValue: isTileLayer ? DEFAULT_TILE_ALPHA_VALUE : DEFAULT_ALPHA_VALUE
+  };
+}

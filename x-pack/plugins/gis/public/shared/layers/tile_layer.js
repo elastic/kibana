@@ -8,7 +8,6 @@ import { ALayer } from './layer';
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { TileStyle } from '../layers/styles/tile_style';
-import _ from 'lodash';
 
 export class TileLayer extends ALayer {
 
@@ -16,11 +15,8 @@ export class TileLayer extends ALayer {
 
   constructor({ layerDescriptor, source, style }) {
     super({ layerDescriptor, source, style });
-    if (!style || !_.get(style, '_descriptor.properties.alphaValue')) {
-      const defaultStyle = TileStyle.createDescriptor({
-        alphaValue: 1
-      });
-      this._style = new TileStyle(defaultStyle);
+    if (!style) {
+      this._style = new TileStyle();
     }
   }
 

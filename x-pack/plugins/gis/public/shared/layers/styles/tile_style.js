@@ -4,22 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getDefaultStyleProperties } from './style_defaults';
+
 export class TileStyle {
 
   static type = 'TILE';
 
-  constructor(styleDescriptor) {
-    this._descriptor = styleDescriptor;
+  constructor(styleDescriptor = {}) {
+    this._descriptor = TileStyle.createDescriptor(styleDescriptor.properties);
   }
 
   static canEdit(styleInstance) {
     return styleInstance.constructor === TileStyle;
   }
 
-  static createDescriptor(properties) {
+  static createDescriptor(properties = {}) {
     return {
       type: TileStyle.type,
-      properties
+      properties: {
+        ...getDefaultStyleProperties(true),
+        ...properties,
+      }
     };
   }
 
@@ -28,8 +33,7 @@ export class TileStyle {
   }
 
   _getMBOpacity() {
-    const DEFAULT_OPACITY = 1;
-    return typeof this._descriptor.properties.alphaValue === 'number' ? this._descriptor.properties.alphaValue : DEFAULT_OPACITY;
+    return this._descriptor.properties.alphaValue;
   }
 
   setMBPaintProperties(mbMap, tileLayerID) {

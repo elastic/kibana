@@ -10,26 +10,30 @@ import {
   EuiSuperSelect,
 } from '@elastic/eui';
 
-import { DEFAULT_ALPHA_VALUE } from './style_defaults';
+import { getDefaultStyleProperties } from './style_defaults';
 
 export class HeatmapStyle {
 
   static type = 'HEATMAP';
 
-  constructor(styleDescriptor) {
-    this._descriptor = styleDescriptor;
+  constructor(styleDescriptor = {}) {
+    this._descriptor = HeatmapStyle.createDescriptor(
+      styleDescriptor.refinement,
+      styleDescriptor.properties
+    );
   }
 
   static canEdit(styleInstance) {
     return styleInstance.constructor === HeatmapStyle;
   }
 
-  static createDescriptor(refinement) {
+  static createDescriptor(refinement, properties = {}) {
     return {
       type: HeatmapStyle.type,
       refinement: refinement || 'coarse',
       properties: {
-        alphaValue: DEFAULT_ALPHA_VALUE
+        ...getDefaultStyleProperties(),
+        ...properties
       }
     };
   }
@@ -50,8 +54,7 @@ export class HeatmapStyle {
   }
 
   _getMBOpacity() {
-    const DEFAULT_OPACITY = 1;
-    return typeof this._descriptor.properties.alphaValue === 'number' ?  this._descriptor.properties.alphaValue : DEFAULT_OPACITY;
+    return this._descriptor.properties.alphaValue;
   }
 
   setMBPaintProperties(mbMap, pointLayerID, property) {

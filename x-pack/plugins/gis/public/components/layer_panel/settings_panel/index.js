@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import { connect } from 'react-redux';
 import { SettingsPanel } from './settings_panel';
 import { getSelectedLayer } from '../../../selectors/map_selectors';
@@ -15,12 +14,11 @@ import {
   updateLayerAlphaValue,
   updateSourceProp,
 } from '../../../actions/store_actions';
-import { DEFAULT_ALPHA_VALUE } from '../../../shared/layers/styles/style_defaults';
 
 function mapStateToProps(state = {}) {
   const selectedLayer = getSelectedLayer(state);
   return {
-    alphaValue: _.get(selectedLayer.getCurrentStyle(), '_descriptor.properties.alphaValue', DEFAULT_ALPHA_VALUE),
+    alphaValue: selectedLayer.getCurrentStyle()._descriptor.properties.alphaValue,
     label: selectedLayer.getLabel(),
     layerId: selectedLayer.getId(),
     maxZoom: selectedLayer.getMaxZoom(),
