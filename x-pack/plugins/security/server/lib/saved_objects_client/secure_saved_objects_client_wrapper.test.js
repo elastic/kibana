@@ -1797,10 +1797,7 @@ describe(`spaces enabled`, () => {
       expect(result).toBe(returnValue);
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivileges.globally).toHaveBeenCalledWith([mockActions.getSavedObjectAction(type, 'find_relationships')]);
-      expect(mockBaseClient.findRelationships).toHaveBeenCalledWith(type, id, {
-        ...options,
-        filterTypes: [],
-      });
+      expect(mockBaseClient.findRelationships).toHaveBeenCalledWith(type, id, options);
       expect(mockAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
       expect(mockAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(username, 'find_relationships', [type], {
         type,

@@ -107,17 +107,7 @@ export class SecureSavedObjectsClientWrapper {
       'find_relationships',
       { type, id, options },
     );
-    let { filterTypes } = options;
-    const authorizedTypes = await this._getAuthorizedTypes(this._savedObjectTypes, 'find_relationships');
-    // Go through filterTypes array and ensure each value is in authorizedTypes.
-    // Or else we'll filter on what they're authorized to see.
-    filterTypes = filterTypes
-      ? authorizedTypes.filter(type => filterTypes.includes(type))
-      : authorizedTypes;
-    return await this._baseClient.findRelationships(type, id, {
-      ...options,
-      filterTypes,
-    });
+    return await this._baseClient.findRelationships(type, id, options);
   }
 
   async _checkSavedObjectPrivileges(actions) {

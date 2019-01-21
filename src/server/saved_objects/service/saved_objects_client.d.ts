@@ -92,7 +92,6 @@ export interface SavedObjectReference {
 export interface FindRelationshipsOptions {
   size?: number;
   namespace?: string;
-  filterTypes?: string[];
 }
 
 export interface FindRelationshipResponse {

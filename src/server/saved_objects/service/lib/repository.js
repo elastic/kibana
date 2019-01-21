@@ -602,13 +602,11 @@ export class SavedObjectsRepository {
    * @param {object} [options={}]
    * @property {number} [options.size=10000]
    * @property {string} [options.namespace]
-   * @property {array} [options.filterTypes]
    */
   async findRelationships(type, id, options = {}) {
     const {
       size = 10000,
       namespace,
-      filterTypes = Object.keys(getRootPropertiesObjects(this._mappings)),
     } = options;
 
     if (!id || typeof id !== 'string') {
@@ -620,9 +618,8 @@ export class SavedObjectsRepository {
     }
 
     const { references = [] } = await this.get(type, id, { namespace });
-    const bulkGetOpts = references
-      .filter(ref => filterTypes.includes(ref.type))
-      .map(ref => ({ id: ref.id, type: ref.type }));
+    const bulkGetOpts = references.map(ref => ({ id: ref.id, type: ref.type }));
+    const allTypes = Object.keys(getRootPropertiesObjects(this._mappings));
     const searchOpts = {
       index: this._index,
       size,
@@ -630,13 +627,13 @@ export class SavedObjectsRepository {
       _source: [
         'type',
         'namespace',
-        ...(filterTypes.map(type => `${type}.title`)),
+        ...(allTypes.map(type => `${type}.title`)),
       ],
       ignore: [404],
       rest_total_hits_as_int: true,
       body: {
         version: true,
-        query: getRelationshipsQuery({ type, id, namespace, filterTypes }),
+        query: getRelationshipsQuery({ type, id, namespace }),
       },
     };
 
@@ -653,7 +650,7 @@ export class SavedObjectsRepository {
         type: obj.type,
         ...(obj.attributes.title ? { title: obj.attributes.title } : {})
       })),
-      legacyResponse.filter(obj => filterTypes.includes(obj.type)),
+      legacyResponse,
       referencedResponse.hits.hits
         .map(hit => this._rawToSavedObject(hit))
         .map(obj => ({

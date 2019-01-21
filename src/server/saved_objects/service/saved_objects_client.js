@@ -205,7 +205,6 @@ export class SavedObjectsClient {
    * @param {object} [options={}]
    * @property {number} [options.size]
    * @property {string} [options.namespace]
-   * @property {array} [options.filterTypes]
    * @returns {promise}
    */
   async findRelationships(type, id, options = {}) {

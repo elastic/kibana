@@ -20,7 +20,7 @@
 import { getRelationshipsQuery } from './relationship_query_builder';
 
 test('Filters a targeted type for a source object', () => {
-  const query = getRelationshipsQuery({ type: 'search', id: '123', filterTypes: ['my-type'] });
+  const query = getRelationshipsQuery({ type: 'search', id: '123' });
   expect(query).toMatchInlineSnapshot(`
 Object {
   "bool": Object {
@@ -36,15 +36,6 @@ Object {
               },
             },
           },
-          Array [
-            Object {
-              "terms": Object {
-                "type": Array [
-                  "my-type",
-                ],
-              },
-            },
-          ],
           Object {
             "nested": Object {
               "path": "references",
@@ -79,7 +70,6 @@ test('Filters by namespace', () => {
     type: 'search',
     id: '123',
     namespace: 'my-namespace',
-    filterTypes: ['my-type'],
   });
   expect(query).toMatchInlineSnapshot(`
 Object {
@@ -92,15 +82,6 @@ Object {
               "namespace": "my-namespace",
             },
           },
-          Array [
-            Object {
-              "terms": Object {
-                "type": Array [
-                  "my-type",
-                ],
-              },
-            },
-          ],
           Object {
             "nested": Object {
               "path": "references",
