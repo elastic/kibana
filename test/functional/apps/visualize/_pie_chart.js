@@ -270,7 +270,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('geo.src');
         await PageObjects.visualize.clickGo();
-        await PageObjects.visualize.waitForVisualization();
       });
 
       it ('shows correct split chart', async () => {

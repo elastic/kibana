@@ -43,8 +43,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.selectField('@timestamp');
       await PageObjects.visualize.setCustomInterval('3h');
       await PageObjects.visualize.clickGo();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.visualize.waitForVisualization();
     };
 
 
@@ -57,7 +55,6 @@ export default function ({ getService, getPageObjects }) {
       expect(pageTitle).to.contain(vizName1);
       await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
-      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.visualize.waitForVisualization();
     });
 
