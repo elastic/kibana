@@ -64,6 +64,10 @@ export class ALayer {
     return (await this._source.getDisplayName()) || `Layer ${this._descriptor.id}`;
   }
 
+  async getAttributions() {
+    return await this._source.getAttributions();
+  }
+
   getLabel() {
     return this._descriptor.label ? this._descriptor.label : '';
   }
@@ -141,8 +145,12 @@ export class ALayer {
   }
 
   getDataLoadError() {
-    const loadErrors =  this._dataRequests.filter(dataRequest => dataRequest.hasLoadError());
-    return loadErrors.join(',');//todo
+    const loadErrors =  this._dataRequests
+      .filter(dataRequest => dataRequest.hasLoadError())
+      .map(dataRequest => {
+        return dataRequest._descriptor.dataLoadError;
+      });
+    return loadErrors.join(',');
   }
 
   toLayerDescriptor() {
