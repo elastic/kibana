@@ -649,9 +649,11 @@ export const Explorer = injectI18n(
     // TODO To solve this, refactor the way Anomaly Explorer fetches data and avoid nested
     // state updates and updateExplorer() calls in parallel.
     updateExplorerQueue = 0;
-    updateExplorerPendingUpdate = false;
     async updateExplorer() {
       this.updateExplorerQueue += 1;
+      if (this.updateExplorerQueue > 1) {
+        return;
+      }
 
       const {
         noInfluencersConfigured,
@@ -731,10 +733,6 @@ export const Explorer = injectI18n(
 
             this.updateExplorerQueue -= 1;
             if (this.updateExplorerQueue > 0) {
-              this.updateExplorerPendingUpdate = true;
-            }
-            if (this.updateExplorerQueue === 0 && this.updateExplorerPendingUpdate === true) {
-              this.updateExplorerPendingUpdate = false;
               this.updateExplorer();
             }
           }
