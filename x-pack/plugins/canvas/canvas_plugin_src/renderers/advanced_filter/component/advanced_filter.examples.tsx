@@ -7,11 +7,10 @@
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { americanTypewriter } from '../../../common/lib/fonts';
-import { FontPicker } from './font_picker';
+import { AdvancedFilter } from './advanced_filter';
 
-storiesOf('components/FontPicker', module)
-  .add('default', () => <FontPicker onSelect={action('onSelect')} />)
+storiesOf('renderers/AdvancedFilter', module)
+  .add('default', () => <AdvancedFilter onChange={action('onChange')} commit={action('commit')} />)
   .add('with value', () => (
-    <FontPicker onSelect={action('onSelect')} value={americanTypewriter.value} />
+    <AdvancedFilter onChange={action('onChange')} commit={action('commit')} value="expression" />
   ));

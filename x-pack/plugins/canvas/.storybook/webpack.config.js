@@ -2,6 +2,18 @@ const path = require('path');
 const TSDocgenPlugin = require('react-docgen-typescript-webpack-plugin');
 
 module.exports = (baseConfig, env, config) => {
+
+  config.module.rules.push(
+    {
+      test: /\.js$/,
+      loaders: 'babel-loader',
+      options: {
+        babelrc: false,
+        presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+      },
+    },
+  );
+  
   config.module.rules.push({
     test: /\.less$/,
     use: [
@@ -19,6 +31,12 @@ module.exports = (baseConfig, env, config) => {
       },
       { loader: 'less-loader' },
     ],
+  });
+
+  config.module.rules.push({
+    test: /\.scss$/,
+    loaders: ['style-loader', 'css-loader', 'sass-loader'],
+    exclude: /node_modules/
   });
 
   config.module.rules.push({

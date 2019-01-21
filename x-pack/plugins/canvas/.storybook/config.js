@@ -1,19 +1,59 @@
-import '@elastic/eui/dist/eui_theme_k6_light.css';
-import { configure } from '@storybook/react';
-import { setAddon, addDecorator } from '@storybook/react';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React from 'react';
+import { configure, setAddon, addDecorator } from '@storybook/react';
 import JSXAddon from 'storybook-addon-jsx';
 import { withKnobs } from '@storybook/addon-knobs/react';
 import { withInfo } from '@storybook/addon-info';
+import register from 'babel-plugin-require-context-hook/register';
+import { withOptions } from '@storybook/addon-options';
 
-addDecorator(withKnobs);
-addDecorator(withInfo({ inline: true }));
-setAddon(JSXAddon);
+import '@elastic/eui/dist/eui_theme_k6_light.css';
 
-// automatically import all files ending in *.examples.ts
+// Set up the Storybook environment with custom settings.
+addDecorator(
+  withOptions({
+    goFullScreen: false,
+    name: 'Canvas Storybook',
+    showAddonsPanel: true,
+    url: 'https://www.github.com/'
+  })
+);
+
+// If we're running Storyshots, be sure to register the require context hook.
+// Otherwise, add the other decorators.
+if (process.env.NODE_ENV === 'test') {
+  register();
+} else {
+  // Customize the info for each story.
+  addDecorator(
+    withInfo({ 
+      inline: true,
+    })
+  );
+
+  // Add optional knobs to customize the story.
+  addDecorator(withKnobs);
+
+  // Add JSX output.
+  setAddon(JSXAddon);
+}
+
+// Automatically import all files ending in *.examples.ts
 const req = require.context('./..', true, /.examples.tsx$/);
+
 function loadStories() {
   //require('./welcome');
   req.keys().forEach(filename => req(filename));
 }
+
+const storyWrapper = story => <div style={{ margin: 35 }}>{story()}</div>;
+
+// Wrap each story with a div -- we may make this smarter later.
+addDecorator(storyWrapper);
 
 configure(loadStories, module);

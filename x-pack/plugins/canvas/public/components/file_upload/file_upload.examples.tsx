@@ -9,6 +9,6 @@ import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { FileUpload } from './file_upload';
 
-storiesOf('FileUpload', module).add('default props', () => (
+storiesOf('components/FileUpload', module).add('default', () => (
   <FileUpload onUpload={action('onUpload')} />
 ));
