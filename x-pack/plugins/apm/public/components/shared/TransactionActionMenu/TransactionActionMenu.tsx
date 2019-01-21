@@ -15,15 +15,17 @@ import {
   EuiPopover
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Location } from 'history';
 import idx from 'idx';
 import React from 'react';
-import { getKibanaHref } from 'x-pack/plugins/apm/public/utils/url';
+import { getKibanaHref } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
+import { StringMap } from 'x-pack/plugins/apm/typings/common';
 import {
   Transaction,
   TransactionV2
 } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
-import { getDiscoverQuery } from '../DiscoverButtons/DiscoverTransactionButton';
-import { QueryWithIndexPattern } from '../DiscoverButtons/QueryWithIndexPattern';
+import { getDiscoverQuery } from '../Links/DiscoverLinks/DiscoverTransactionLink';
+import { QueryWithIndexPattern } from '../Links/DiscoverLinks/QueryWithIndexPattern';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const plus5 = new Date(transaction['@timestamp']);
@@ -70,7 +72,8 @@ export class TransactionActionMenu extends React.Component<Props, State> {
     this.setState({ isOpen: false });
   };
 
-  public getInfraActions(transaction: Transaction) {
+  public getInfraActions() {
+    const { transaction, location } = this.props;
     const hostName = idx(transaction, _ => _.context.system.hostname);
     const podId = idx(transaction as TransactionV2, _ => _.kubernetes.pod.uid);
     const containerId = idx(
@@ -154,7 +157,7 @@ export class TransactionActionMenu extends React.Component<Props, State> {
           location,
           pathname,
           hash,
-          query
+          query: query as StringMap // TODO: differentiate between APM ui query args, and external query args
         });
 
         return (
@@ -185,7 +188,7 @@ export class TransactionActionMenu extends React.Component<Props, State> {
           });
 
           const items = [
-            ...this.getInfraActions(transaction),
+            ...this.getInfraActions(),
             <EuiContextMenuItem
               icon="discoverApp"
               href={discoverTransactionHref}

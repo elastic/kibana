@@ -26,15 +26,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Location } from 'history';
 import { memoize, padLeft, range } from 'lodash';
 import moment from 'moment-timezone';
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
+import { UnconnectedKibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { XPACK_DOCS } from '../../../../utils/documentation/xpack';
-import { UnconnectedKibanaLink } from '../../../../utils/url';
 import { createErrorGroupWatch, Schedule } from './createErrorGroupWatch';
 
 type ScheduleKey = keyof Schedule;
@@ -58,7 +59,7 @@ const SmallInput = styled.div`
 interface WatcherFlyoutProps {
   urlParams: IUrlParams;
   onClose: () => void;
-  location: any;
+  location: Location;
   isOpen: boolean;
 }
 
@@ -248,7 +249,7 @@ export class WatcherFlyout extends Component<
               defaultMessage:
                 'The watch is now ready and will send error reports for {serviceName}.',
               values: {
-                serviceName: this.props.urlParams.serviceName as string
+                serviceName: this.props.urlParams.serviceName
               }
             }
           )}{' '}
