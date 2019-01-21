@@ -6,39 +6,44 @@
 
 // @ts-ignore No typing for EuiSuperSelect
 import { EuiHealth, EuiSuperSelect } from '@elastic/eui';
-import React from 'react';
+import { i18n } from '@kbn/i18n';
+import React, { Fragment } from 'react';
 import { Query } from 'react-apollo';
 import { Monitor } from '../../../../common/graphql/types';
+import { UptimeCommonProps } from '../../../uptime_app';
 import { createGetLatestMonitorsQuery } from './get_latest_monitors';
 
 interface MonitorSelectProps {
-  dateRangeStart: number;
-  dateRangeEnd: number;
   valueOfSelectedMonitor?: string;
-  autorefreshInterval: number;
-  autorefreshEnabled: boolean;
   onChange: (path: string, state: object) => void;
 }
+
+type Props = MonitorSelectProps & UptimeCommonProps;
 
 export const MonitorSelect = ({
   dateRangeStart,
   dateRangeEnd,
   valueOfSelectedMonitor,
   autorefreshInterval,
-  autorefreshEnabled,
+  autorefreshIsPaused,
   onChange,
-}: MonitorSelectProps) => (
+}: Props) => (
   <Query
-    pollInterval={autorefreshEnabled ? autorefreshInterval : undefined}
+    pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
     query={createGetLatestMonitorsQuery}
     variables={{ dateRangeStart, dateRangeEnd }}
   >
     {({ loading, error, data }) => {
       if (loading) {
-        return 'Loading...';
+        return i18n.translate('xpack.uptime.monitorSelect.loadingMessage', {
+          defaultMessage: 'Loading…',
+        });
       }
       if (error) {
-        return `Error ${error.message}`;
+        return i18n.translate('xpack.uptime.monitorSelect.errorMessage', {
+          values: { message: error.message },
+          defaultMessage: 'Error {message}',
+        });
       }
       const { latestMonitors } = data;
       const options = latestMonitors.map(({ monitor }: { monitor: Monitor }) => ({
@@ -53,11 +58,18 @@ export const MonitorSelect = ({
         ),
       }));
       return (
-        <EuiSuperSelect
-          options={options}
-          valueOfSelected={valueOfSelectedMonitor}
-          onChange={(e: string) => onChange(`/monitor/${e}`, {})}
-        />
+        <Fragment>
+          {options.length > 0 && (
+            <EuiSuperSelect
+              options={options}
+              valueOfSelected={valueOfSelectedMonitor}
+              onChange={(e: string) => onChange(`/monitor/${e}`, {})}
+            />
+          )}
+          {options.length === 0 && (
+            <h4>There is no monitor data available for the selected time range</h4>
+          )}
+        </Fragment>
       );
     }}
   </Query>

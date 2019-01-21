@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['common', 'discover', 'header']);
+  const PageObjects = getPageObjects(['common', 'discover', 'header', 'visualize']);
   const defaultSettings = {
     'dateFormat:tz': 'UTC',
     defaultIndex: 'logstash-*',
@@ -127,21 +127,34 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show bars in the correct time zone', async function () {
         const ticks = await PageObjects.discover.getBarChartXTicks();
-        expect(ticks).to.eql(['2015-09-20 00:00', '2015-09-21 00:00', '2015-09-22 00:00', '2015-09-23 00:00']);
+        expect(ticks).to.eql([
+          '2015-09-20 00:00',
+          '2015-09-20 12:00',
+          '2015-09-21 00:00',
+          '2015-09-21 12:00',
+          '2015-09-22 00:00',
+          '2015-09-22 12:00',
+          '2015-09-23 00:00',
+          '2015-09-23 12:00'
+        ]);
       });
 
       it('should modify the time range when a bar is clicked', async function () {
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.clickHistogramBar(0);
+        await PageObjects.visualize.waitForVisualization();
         const actualTimeString = await PageObjects.header.getPrettyDuration();
         expect(actualTimeString).to.be('September 20th 2015, 00:00:00.000 to September 20th 2015, 03:00:00.000');
       });
 
       it('should modify the time range when the histogram is brushed', async function () {
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.brushHistogram(0, 1);
+        await PageObjects.visualize.waitForVisualization();
         const actualTimeString = await PageObjects.header.getPrettyDuration();
-        expect(actualTimeString).to.be('September 19th 2015, 23:52:17.080 to September 20th 2015, 02:59:51.112');
+        expect(actualTimeString).to.be('September 19th 2015, 23:59:02.606 to September 20th 2015, 02:56:40.744');
       });
 
       it('should show correct initial chart interval of Auto', async function () {
@@ -431,7 +444,16 @@ export default function ({ getService, getPageObjects }) {
         await browser.refresh();
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);
         const ticks = await PageObjects.discover.getBarChartXTicks();
-        expect(ticks).to.eql(['2015-09-19 17:00', '2015-09-20 17:00', '2015-09-21 17:00', '2015-09-22 17:00']);
+        expect(ticks).to.eql([
+          '2015-09-19 17:00',
+          '2015-09-20 05:00',
+          '2015-09-20 17:00',
+          '2015-09-21 05:00',
+          '2015-09-21 17:00',
+          '2015-09-22 05:00',
+          '2015-09-22 17:00',
+          '2015-09-23 05:00'
+        ]);
       });
     });
   });

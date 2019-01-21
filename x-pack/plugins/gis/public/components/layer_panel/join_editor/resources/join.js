@@ -13,11 +13,8 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 
-import { FromExpression } from './from_expression';
-import { GroupByExpression } from './group_by_expression';
 import { JoinExpression } from './join_expression';
-import { OnExpression } from './on_expression';
-import { SelectExpression } from './select_expression';
+import { MetricsExpression } from './metrics_expression';
 
 import {
   indexPatternService,
@@ -27,13 +24,6 @@ const getIndexPatternId = (props) => {
   return _.get(props, 'join.right.indexPatternId');
 };
 
-/*
- * SELECT <metric_agg>
- * FROM <left_source (can not be changed)>
- * LEFT JOIN <right_source (index-pattern)>
- * ON <left_field>
- * GROUP BY <right_field>
- */
 export class Join extends Component {
 
   state = {
@@ -169,62 +159,40 @@ export class Join extends Component {
     const right = _.get(join, 'right', {});
     const rightSourceName = right.indexPatternTitle ? right.indexPatternTitle : right.indexPatternId;
 
-    let onExpression;
-    if (leftFields && rightFields) {
-      onExpression = (
+    let metricsExpression;
+    if (join.leftField && right.indexPatternId && right.term) {
+      metricsExpression = (
         <EuiFlexItem grow={false}>
-          <OnExpression
-            leftValue={join.leftField}
-            leftFields={leftFields}
-            onLeftChange={this._onLeftFieldChange}
-
-            rightValue={right.term}
-            rightFields={rightFields}
-            onRightChange={this._onRightFieldChange}
-          />
-        </EuiFlexItem>
-      );
-    }
-
-    let groupByExpression;
-    if (right.indexPatternId && right.term) {
-      groupByExpression = (
-        <EuiFlexItem grow={false}>
-          <GroupByExpression
-            rightSourceName={rightSourceName}
-            term={right.term}
-          />
-        </EuiFlexItem>
-      );
-    }
-    return (
-      <EuiFlexGroup className="gisJoinItem" responsive={false} wrap={true} gutterSize="s">
-
-        <EuiFlexItem grow={false}>
-          <SelectExpression
+          <MetricsExpression
             metrics={right.metrics}
             rightFields={rightFields}
             onChange={this._onMetricsChange}
           />
         </EuiFlexItem>
+      );
+    }
 
-        <EuiFlexItem grow={false}>
-          <FromExpression
-            leftSourceName={leftSourceName}
-          />
-        </EuiFlexItem>
+    return (
+      <EuiFlexGroup className="gisJoinItem" responsive={false} wrap={true} gutterSize="s">
 
         <EuiFlexItem grow={false}>
           <JoinExpression
-            indexPatternId={right.indexPatternId}
+            leftSourceName={leftSourceName}
+            leftValue={join.leftField}
+            leftFields={leftFields}
+            onLeftFieldChange={this._onLeftFieldChange}
+
+            rightSourceIndexPatternId={right.indexPatternId}
             rightSourceName={rightSourceName}
-            onChange={this._onRightSourceChange}
+            onRightSourceChange={this._onRightSourceChange}
+
+            rightValue={right.term}
+            rightFields={rightFields}
+            onRightFieldChange={this._onRightFieldChange}
           />
         </EuiFlexItem>
 
-        {onExpression}
-
-        {groupByExpression}
+        {metricsExpression}
 
         <EuiButtonIcon
           className="gisJoinItem__delete"

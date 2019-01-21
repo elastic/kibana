@@ -22,6 +22,7 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const find = getService('find');
+  const pieChart = getService('pieChart');
   const dashboardExpect = getService('dashboardExpect');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard']);
 
@@ -91,7 +92,7 @@ export default function ({ getService, getPageObjects }) {
 
 
       it.skip('pie charts rendered', async () => {
-        await dashboardExpect.pieSliceCount(4);
+        await pieChart.expectPieSliceCount(4);
       });
 
       it.skip('area, bar and heatmap charts rendered', async () => {

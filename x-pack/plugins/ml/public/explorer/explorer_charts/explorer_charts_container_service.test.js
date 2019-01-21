@@ -81,6 +81,10 @@ jest.mock('../../util/string_utils', () => ({
   mlEscape(d) { return d; }
 }));
 
+jest.mock('./legacy_utils', () => ({
+  getChartContainerWidth() { return 1140; }
+}));
+
 jest.mock('ui/chrome', () => ({
   getBasePath: (path) => path,
   getUiSettingsClient: () => ({
@@ -88,35 +92,14 @@ jest.mock('ui/chrome', () => ({
   }),
 }));
 
-const mockMlSelectSeverityService = {
-  state: {
-    get() { return { display: 'warning', val: 0 }; }
-  }
-};
-
-const mockChartContainer = {
-  width() { return 1140; }
-};
-
-function mockGetDefaultData() {
-  return {
-    seriesToPlot: [],
-    tooManyBuckets: false,
-    timeFieldName: 'timestamp'
-  };
-}
-
-import { explorerChartsContainerServiceFactory } from './explorer_charts_container_service';
+import { explorerChartsContainerServiceFactory, getDefaultChartsData } from './explorer_charts_container_service';
 
 describe('explorerChartsContainerService', () => {
   test('Initialize factory', (done) => {
-    explorerChartsContainerServiceFactory(
-      mockMlSelectSeverityService,
-      callback
-    );
+    explorerChartsContainerServiceFactory(callback);
 
     function callback(data) {
-      expect(data).toEqual(mockGetDefaultData());
+      expect(data).toEqual(getDefaultChartsData());
       done();
     }
   });
@@ -125,17 +108,13 @@ describe('explorerChartsContainerService', () => {
     // callback will be called multiple times.
     // the callbackData array contains the expected data values for each consecutive call.
     const callbackData = [];
-    callbackData.push(mockGetDefaultData());
+    callbackData.push(getDefaultChartsData());
     callbackData.push({
-      ...mockGetDefaultData(),
+      ...getDefaultChartsData(),
       chartsPerRow: 2
     });
 
-    const anomalyDataChangeListener = explorerChartsContainerServiceFactory(
-      mockMlSelectSeverityService,
-      callback,
-      mockChartContainer
-    );
+    const anomalyDataChangeListener = explorerChartsContainerServiceFactory(callback);
 
     anomalyDataChangeListener(
       [],
@@ -159,11 +138,7 @@ describe('explorerChartsContainerService', () => {
     let callbackCount = 0;
     const expectedTestCount = 3;
 
-    const anomalyDataChangeListener = explorerChartsContainerServiceFactory(
-      mockMlSelectSeverityService,
-      callback,
-      mockChartContainer
-    );
+    const anomalyDataChangeListener = explorerChartsContainerServiceFactory(callback);
 
     anomalyDataChangeListener(
       mockAnomalyChartRecords,
@@ -184,11 +159,7 @@ describe('explorerChartsContainerService', () => {
     let callbackCount = 0;
     const expectedTestCount = 3;
 
-    const anomalyDataChangeListener = explorerChartsContainerServiceFactory(
-      mockMlSelectSeverityService,
-      callback,
-      mockChartContainer
-    );
+    const anomalyDataChangeListener = explorerChartsContainerServiceFactory(callback);
 
     const mockAnomalyChartRecordsClone = _.cloneDeep(mockAnomalyChartRecords).map((d) => {
       d.job_id = 'mock-job-id-distribution';
@@ -228,11 +199,7 @@ describe('explorerChartsContainerService', () => {
     let callbackCount = 0;
     const expectedTestCount = 3;
 
-    const anomalyDataChangeListener = explorerChartsContainerServiceFactory(
-      mockMlSelectSeverityService,
-      callback,
-      mockChartContainer
-    );
+    const anomalyDataChangeListener = explorerChartsContainerServiceFactory(callback);
 
     const mockAnomalyChartRecordsClone = _.cloneDeep(mockAnomalyChartRecords);
     mockAnomalyChartRecordsClone[1].partition_field_value = 'AAL.';

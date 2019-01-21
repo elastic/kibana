@@ -34,6 +34,7 @@ import {
   getSelectedOriginalPolicyName,
   getPolicies
 } from '.';
+import { getPolicyByName } from './policies';
 export const numberRequiredMessage = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.numberRequiredError', {
   defaultMessage: 'A number is required.'
 });
@@ -204,15 +205,17 @@ export const validateLifecycle = state => {
 };
 
 export const getLifecycle = state => {
+  const policyName = getSelectedPolicyName(state);
   const phases = Object.entries(getPhases(state)).reduce(
     (accum, [phaseName, phase]) => {
       // Hot is ALWAYS enabled
       if (phaseName === PHASE_HOT) {
         phase[PHASE_ENABLED] = true;
       }
-
+      const esPolicy = getPolicyByName(state, policyName).policy || {};
+      const esPhase = esPolicy.phases ? esPolicy.phases[phaseName] : {};
       if (phase[PHASE_ENABLED]) {
-        accum[phaseName] = phaseToES(state, phase);
+        accum[phaseName] = phaseToES(phase, esPhase);
 
         // These seem to be constants
         if (phaseName === PHASE_DELETE) {

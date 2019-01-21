@@ -9,19 +9,33 @@
 /*
  * React component for rendering a select element with various aggregation interval levels.
  */
-import _ from 'lodash';
+import { get } from 'lodash';
 import React, { Component } from 'react';
 
 import {
   EuiSelect
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 
 const OPTIONS = [
-  { value: 'auto', text: 'Auto' },
-  { value: 'hour', text: '1 hour' },
-  { value: 'day', text: '1 day' },
-  { value: 'second', text: 'Show all' }
+  {
+    value: 'auto',
+    text: i18n.translate('xpack.ml.controls.selectInterval.autoLabel', { defaultMessage: 'Auto' })
+  },
+  {
+    value: 'hour',
+    text: i18n.translate('xpack.ml.controls.selectInterval.hourLabel', { defaultMessage: '1 hour' })
+  },
+  {
+    value: 'day',
+    text: i18n.translate('xpack.ml.controls.selectInterval.dayLabel', { defaultMessage: '1 day' })
+  },
+  {
+    value: 'second',
+    text: i18n.translate('xpack.ml.controls.selectInterval.showAllLabel', { defaultMessage: 'Show all' })
+  }
 ];
 
 function optionValueToInterval(value) {
@@ -38,14 +52,20 @@ function optionValueToInterval(value) {
   return interval;
 }
 
+// This service will be populated by the corresponding angularjs based one.
+export const mlSelectIntervalService = {
+  intialized: false,
+  state: null
+};
+
 class SelectInterval extends Component {
   constructor(props) {
     super(props);
 
     // Restore the interval from the state, or default to auto.
-    this.mlSelectIntervalService = this.props.mlSelectIntervalService;
+    this.mlSelectIntervalService = mlSelectIntervalService;
     const intervalState = this.mlSelectIntervalService.state.get('interval');
-    const intervalValue = _.get(intervalState, 'val', 'auto');
+    const intervalValue = get(intervalState, 'val', 'auto');
     const interval = optionValueToInterval(intervalValue);
     this.mlSelectIntervalService.state.set('interval', interval);
 

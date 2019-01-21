@@ -5,7 +5,6 @@
  */
 
 import Joi from 'joi';
-import Promise from 'bluebird';
 import { getClusterStatus } from '../../../../lib/logstash/get_cluster_status';
 import { getNodes } from '../../../../lib/logstash/get_nodes';
 import { handleError } from '../../../../lib/errors';
