@@ -54,11 +54,11 @@ export function getDefaultViewBySwimlaneData() {
 
 export function mapScopeToProps(scope) {
   return {
+    appStateHandler: scope.appStateHandler,
     dateFormatTz: scope.dateFormatTz,
     loading: scope.loading,
     mlJobSelectService: scope.mlJobSelectService,
     noJobsFound: scope.jobs.length === 0,
-    appStateHandler: scope.appStateHandler,
   };
 }
 

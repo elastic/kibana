@@ -94,7 +94,6 @@ function getExplorerDefaultState() {
     selectedCells: null,
     selectedJobs: null,
     swimlaneViewByFieldName: undefined,
-    swimlaneWidth: getSwimlaneContainerWidth(),
     tableData: {},
     viewByLoadedForTimeFormatted: null,
     viewBySwimlaneData: getDefaultViewBySwimlaneData(),
@@ -223,13 +222,17 @@ export const Explorer = injectI18n(
         );
       }
 
+      // REFRESH reloads full Anomaly Explorer and clears the selection.
       if (action === EXPLORER_ACTION.REFRESH) {
         await this.loadOverallData();
         this.loadViewBySwimlane([]);
         this.clearSelectedAnomalies();
       }
 
+      // REDRAW reloads Anomaly Explorer and tries to retain the selection.
       if (action === EXPLORER_ACTION.REDRAW) {
+        await this.loadOverallData();
+        this.loadViewBySwimlane([]);
         this.updateExplorer();
       }
     });
@@ -494,7 +497,7 @@ export const Explorer = injectI18n(
         () => {
           this.skipCellClicks = true;
 
-          const finishCallback = () => {
+          const finishCallback = (clearSelection = false) => {
             this.setState(
               { viewBySwimlaneDataLoading: false },
               () => {
@@ -505,6 +508,10 @@ export const Explorer = injectI18n(
                   this.swimlaneCellClickQueue.length = 0;
                   this.swimlaneCellClick(latestSelectedCells);
                   return;
+                }
+
+                if (clearSelection === true) {
+                  this.clearSelectedAnomalies();
                 }
               }
             );
@@ -526,19 +533,22 @@ export const Explorer = injectI18n(
                 () => {
                   // do a sanity check against selectedCells. It can happen that a previously
                   // selected lane loaded via URL/AppState is not available anymore.
+                  let clearSelection = false;
                   if (
                     selectedCells !== null &&
                     selectedCells.type === SWIMLANE_TYPE.VIEW_BY
                   ) {
-                    const selectionExists = selectedCells.lanes.some((lane) => {
-                      return (this.state.viewBySwimlaneData.laneLabels.includes(lane));
+                    clearSelection = !selectedCells.lanes.some((lane) => {
+                      return this.state.viewBySwimlaneData.points.some((point) => {
+                        return (
+                          point.laneLabel === lane &&
+                          point.time === selectedCells.times[0]
+                        );
+                      });
                     });
-                    if (selectionExists === false) {
-                      this.clearSelectedAnomalies();
-                    }
                   }
 
-                  finishCallback();
+                  finishCallback(clearSelection);
                 }
               );
             } else {
@@ -591,7 +601,7 @@ export const Explorer = injectI18n(
       );
     }
 
-    loadViewBySwimlaneForSelectedTime(earliestMs, latestMs) {
+    loadViewByTopFieldValuesForSelectedTime(earliestMs, latestMs) {
       const { noInfluencersConfigured, swimlaneViewByFieldName, selectedJobs } = this.state;
 
       const selectedJobIds = selectedJobs.map(d => d.id);
@@ -600,39 +610,50 @@ export const Explorer = injectI18n(
 
       // Find the top field values for the selected time, and then load the 'view by'
       // swimlane over the full time range for those specific field values.
-      if (swimlaneViewByFieldName !== VIEW_BY_JOB_LABEL) {
-        mlResultsService.getTopInfluencers(
-          selectedJobIds,
-          earliestMs,
-          latestMs,
-          swimlaneLimit
-        ).then((resp) => {
-          const topFieldValues = [];
-          const topInfluencers = resp.influencers[swimlaneViewByFieldName];
-          topInfluencers.forEach((influencerData) => {
-            if (influencerData.maxAnomalyScore > 0) {
-              topFieldValues.push(influencerData.influencerFieldValue);
-            }
+      return new Promise((resolve) => {
+        if (swimlaneViewByFieldName !== VIEW_BY_JOB_LABEL) {
+          mlResultsService.getTopInfluencers(
+            selectedJobIds,
+            earliestMs,
+            latestMs,
+            swimlaneLimit
+          ).then((resp) => {
+            const topFieldValues = [];
+            const topInfluencers = resp.influencers[swimlaneViewByFieldName];
+            topInfluencers.forEach((influencerData) => {
+              if (influencerData.maxAnomalyScore > 0) {
+                topFieldValues.push(influencerData.influencerFieldValue);
+              }
+            });
+            resolve(topFieldValues);
           });
-          this.loadViewBySwimlane(topFieldValues);
-        });
-      } else {
-        const swimlaneWidth = getSwimlaneContainerWidth(noInfluencersConfigured);
-        mlResultsService.getScoresByBucket(
-          selectedJobIds,
-          earliestMs,
-          latestMs,
-          getSwimlaneBucketInterval(selectedJobs, swimlaneWidth).asSeconds() + 's',
-          swimlaneLimit
-        ).then((resp) => {
-          this.loadViewBySwimlane(Object.keys(resp.results));
-        });
-      }
+        } else {
+          const swimlaneWidth = getSwimlaneContainerWidth(noInfluencersConfigured);
+          mlResultsService.getScoresByBucket(
+            selectedJobIds,
+            earliestMs,
+            latestMs,
+            getSwimlaneBucketInterval(selectedJobs, swimlaneWidth).asSeconds() + 's',
+            swimlaneLimit
+          ).then((resp) => {
+            resolve(Object.keys(resp.results));
+          });
+        }
+      });
     }
 
+    // Because of the nature of the existing code migrated from angularjs,
+    // updateExplorer() could be called multiple times in parallel by nested updates.
+    // To avoid race conditions, we track if it's been called multiple times and if so,
+    // a final call gets scheduled to redraw again with the final state.
+    // TODO To solve this, refactor the way Anomaly Explorer fetches data and avoid nested
+    // state updates and updateExplorer() calls in parallel.
+    updateExplorerQueue = 0;
+    updateExplorerPendingUpdate = false;
     async updateExplorer() {
+      this.updateExplorerQueue += 1;
+
       const {
-        anomalyChartRecords,
         noInfluencersConfigured,
         selectedCells,
         selectedJobs,
@@ -651,60 +672,40 @@ export const Explorer = injectI18n(
         selectedCells,
         getSwimlaneBucketInterval(selectedJobs, swimlaneWidth).asSeconds()
       );
-      const selectionInfluencers = getSelectionInfluencers(selectedCells, swimlaneViewByFieldName);
 
-      this.setState(
-        {
-          annotationsData: await loadAnnotationsTableData(
-            selectedCells,
-            selectedJobs,
-            getSwimlaneBucketInterval(selectedJobs, swimlaneWidth).asSeconds()
-          )
-        },
-        async () => {
-          this.updateCharts(anomalyChartRecords || [], timerange.earliestMs, timerange.latestMs);
+      const annotationsData = await loadAnnotationsTableData(
+        selectedCells,
+        selectedJobs,
+        getSwimlaneBucketInterval(selectedJobs, swimlaneWidth).asSeconds()
+      );
 
-          if (selectedCells !== null && selectedCells.fieldName === undefined) {
-            // Click is in one of the cells in the Overall swimlane - reload the 'view by' swimlane
-            // to show the top 'view by' values for the selected time.
-            this.loadViewBySwimlaneForSelectedTime(timerange.earliestMs, timerange.latestMs);
-            this.setState(
-              { viewByLoadedForTimeFormatted: formatHumanReadableDateTime(timerange.earliestMs) }
-            );
-          }
+      const continueUpdate = async () => {
+        const selectionInfluencers = getSelectionInfluencers(selectedCells, swimlaneViewByFieldName);
 
-          let influencers;
+        let influencers;
 
-          if (selectionInfluencers.length === 0) {
-            influencers = await loadTopInfluencers(jobIds, timerange.earliestMs, timerange.latestMs, noInfluencersConfigured);
-          }
+        if (selectionInfluencers.length === 0) {
+          influencers = await loadTopInfluencers(jobIds, timerange.earliestMs, timerange.latestMs, noInfluencersConfigured);
+        }
 
-          const updatedAnomalyChartRecords = await loadDataForCharts(
-            jobIds, timerange.earliestMs, timerange.latestMs, selectionInfluencers, selectedCells
+        const updatedAnomalyChartRecords = await loadDataForCharts(
+          jobIds, timerange.earliestMs, timerange.latestMs, selectionInfluencers, selectedCells
+        );
+
+        if (selectionInfluencers.length > 0 && updatedAnomalyChartRecords !== undefined) {
+          influencers = await getFilteredTopInfluencers(
+            jobIds,
+            timerange.earliestMs,
+            timerange.latestMs,
+            updatedAnomalyChartRecords,
+            selectionInfluencers,
+            noInfluencersConfigured,
           );
+        }
 
-          if (selectionInfluencers.length > 0 && updatedAnomalyChartRecords !== undefined) {
-            influencers = await getFilteredTopInfluencers(
-              jobIds,
-              timerange.earliestMs,
-              timerange.latestMs,
-              updatedAnomalyChartRecords,
-              selectionInfluencers,
-              noInfluencersConfigured,
-            );
-          }
-
-          if (updatedAnomalyChartRecords !== undefined) {
-            this.setState({ anomalyChartRecords: updatedAnomalyChartRecords });
-
-            if (mlCheckboxShowChartsService.state.get('showCharts')) {
-              this.updateCharts(
-                updatedAnomalyChartRecords, timerange.earliestMs, timerange.latestMs
-              );
-            }
-          }
-
-          this.setState({
+        this.setState(
+          {
+            annotationsData,
             influencers,
             tableData: await loadAnomaliesTableData(
               selectedCells,
@@ -713,20 +714,59 @@ export const Explorer = injectI18n(
               getSwimlaneBucketInterval(selectedJobs, swimlaneWidth).asSeconds(),
               swimlaneViewByFieldName
             )
-          });
-        }
-      );
+          },
+          () => {
+            if (updatedAnomalyChartRecords !== undefined) {
+              this.setState(
+                { anomalyChartRecords: updatedAnomalyChartRecords },
+                () => {
+                  if (mlCheckboxShowChartsService.state.get('showCharts')) {
+                    this.updateCharts(
+                      this.state.anomalyChartRecords, timerange.earliestMs, timerange.latestMs
+                    );
+                  }
+                }
+              );
+            }
 
+            this.updateExplorerQueue -= 1;
+            if (this.updateExplorerQueue > 0) {
+              this.updateExplorerPendingUpdate = true;
+            }
+            if (this.updateExplorerQueue === 0 && this.updateExplorerPendingUpdate === true) {
+              this.updateExplorerPendingUpdate = false;
+              this.updateExplorer();
+            }
+          }
+        );
+      };
+
+      if (selectedCells !== null && selectedCells.fieldName === undefined) {
+        // Click is in one of the cells in the Overall swimlane - reload the 'view by' swimlane
+        // to show the top 'view by' values for the selected time.
+        const topFieldValues = await this.loadViewByTopFieldValuesForSelectedTime(
+          timerange.earliestMs,
+          timerange.latestMs,
+        );
+        this.loadViewBySwimlane(topFieldValues);
+        this.setState({
+          viewByLoadedForTimeFormatted: formatHumanReadableDateTime(timerange.earliestMs),
+        }, continueUpdate);
+      } else {
+        continueUpdate();
+      }
     }
 
     clearSelectedAnomalies() {
-      this.setState({
-        anomalyChartRecords: [],
-        selectedCells: null,
-        viewByLoadedForTimeFormatted: null,
-      });
       this.props.appStateHandler('clearSelection');
-      this.updateExplorer();
+      this.setState(
+        {
+          anomalyChartRecords: [],
+          selectedCells: null,
+          viewByLoadedForTimeFormatted: null,
+        },
+        this.updateExplorer
+      );
     }
 
     viewByChangeHandler = e => this.setSwimlaneViewBy(e.target.value);
@@ -777,12 +817,10 @@ export const Explorer = injectI18n(
         }
         this.clearSelectedAnomalies();
       } else {
+        this.props.appStateHandler(APP_STATE_ACTION.SAVE_SELECTION, { swimlaneSelectedCells });
         this.setState(
           { selectedCells: swimlaneSelectedCells },
-          () => {
-            this.props.appStateHandler(APP_STATE_ACTION.SAVE_SELECTION, { swimlaneSelectedCells });
-            this.updateExplorer();
-          }
+          this.updateExplorer
         );
       }
     }
