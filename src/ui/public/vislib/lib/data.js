@@ -60,17 +60,15 @@ export function VislibLibDataProvider(Private) {
           } else {
             newData[key] = data[key].map(seri => {
               return {
+                id: seri.id,
                 label: seri.label,
-                aggLabel: seri.aggLabel,
-                aggId: seri.aggId,
                 values: seri.values.map(val => {
                   const newVal = _.clone(val);
-                  newVal.aggConfig = val.aggConfig;
-                  newVal.aggConfigResult = val.aggConfigResult;
                   newVal.extraMetrics = val.extraMetrics;
                   newVal.series = val.series || seri.label;
                   return newVal;
-                })
+                }),
+                yAxisFormatter: seri.yAxisFormatter,
               };
             });
           }
@@ -304,7 +302,7 @@ export function VislibLibDataProvider(Private) {
       _.forEach(array, function (obj) {
         names.push({
           label: obj.name,
-          values: obj,
+          values: [obj.rawData],
           index: index
         });
 

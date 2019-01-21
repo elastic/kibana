@@ -4,31 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiLink, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import React from 'react';
 import { Query } from 'react-apollo';
+import { UptimeCommonProps } from '../../../uptime_app';
 import { createGetMonitorStatusBarQuery } from './get_monitor_status_bar';
 
 interface MonitorStatusBarProps {
-  dateRangeStart: number;
-  dateRangeEnd: number;
   monitorId: string;
-  autorefreshInterval: number;
-  autorefreshEnabled: boolean;
 }
+
+type Props = MonitorStatusBarProps & UptimeCommonProps;
 
 export const MonitorStatusBar = ({
   dateRangeStart,
   dateRangeEnd,
   monitorId,
-  autorefreshEnabled,
+  autorefreshIsPaused,
   autorefreshInterval,
-}: MonitorStatusBarProps) => (
+}: Props) => (
   <Query
-    pollInterval={autorefreshEnabled ? autorefreshInterval : undefined}
+    pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
     query={createGetMonitorStatusBarQuery}
     variables={{ dateRangeStart, dateRangeEnd, monitorId }}
   >
@@ -55,11 +54,10 @@ export const MonitorStatusBar = ({
         monitor: {
           status,
           timestamp,
-          host,
+          ip,
           duration: { us },
-          scheme,
         },
-        tcp: { port },
+        url: { full: fullURL },
       } = monitorStatus[0];
 
       return (
@@ -99,17 +97,16 @@ export const MonitorStatusBar = ({
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <FormattedMessage
-                id="xpack.uptime.monitorStatusBar.healthStatus.hostMessage"
-                values={{ host }}
-                defaultMessage="Host: {host}"
-              />
+              <EuiLink href={fullURL} target="_blank">
+                {fullURL}
+              </EuiLink>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <FormattedMessage
-                id="xpack.uptime.monitorStatusBar.healthStatus.portMessage"
-                values={{ port }}
-                defaultMessage="Port: {port}"
+                id="xpack.uptime.monitorStatusBar.healthStatus.ipMessage"
+                // TODO: this should not be computed inline
+                values={{ ip }}
+                defaultMessage="IP: {ip}"
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -118,13 +115,6 @@ export const MonitorStatusBar = ({
                 // TODO: this should not be computed inline
                 values={{ duration: us / 1000 }}
                 defaultMessage="Duration: {duration} ms"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <FormattedMessage
-                id="xpack.uptime.monitorStatusBar.healthStatus.schemeMessage"
-                values={{ scheme }}
-                defaultMessage="Scheme: {scheme}"
               />
             </EuiFlexItem>
           </EuiFlexGroup>

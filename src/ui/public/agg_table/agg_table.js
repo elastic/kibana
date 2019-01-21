@@ -23,24 +23,24 @@ import '../paginated_table';
 import _ from 'lodash';
 import { uiModules } from '../modules';
 import aggTableTemplate from './agg_table.html';
-import { fieldFormats } from '../registry/field_formats';
+import { getFormat } from '../visualize/loader/pipeline_helpers/utilities';
 
 uiModules
   .get('kibana', ['RecursionHelper'])
   .directive('kbnAggTable', function ($filter, config, Private, RecursionHelper) {
-
-    const numberFormatter = fieldFormats.getDefaultInstance('number').getConverterFor('text');
 
     return {
       restrict: 'E',
       template: aggTableTemplate,
       scope: {
         table: '=',
+        dimensions: '=',
         perPage: '=?',
         sort: '=?',
         exportTitle: '=?',
         showTotal: '=',
-        totalFunc: '='
+        totalFunc: '=',
+        filter: '=',
       },
       controllerAs: 'aggTable',
       compile: function ($el) {
@@ -104,75 +104,56 @@ uiModules
           self.csv.filename = ($scope.exportTitle || table.title || 'table') + '.csv';
           $scope.rows = table.rows;
           $scope.formattedColumns = table.columns.map(function (col, i) {
-            const agg = col.aggConfig;
-            const field = agg.getField();
+            const isBucket = $scope.dimensions.buckets.find(bucket => bucket.accessor === i);
+            const dimension = isBucket || $scope.dimensions.metrics.find(metric => metric.accessor === i);
+            if (!dimension) return;
+
+            const formatter = getFormat(dimension.format);
+
             const formattedColumn = {
-              title: col.title,
-              filterable: field && field.filterable && agg.schema.group === 'buckets'
+              id: col.id,
+              title: col.name,
+              formatter: formatter,
+              filterable: !!isBucket
             };
 
             const last = i === (table.columns.length - 1);
 
-            if (last || (agg.schema.group === 'metrics')) {
+            if (last || !isBucket) {
               formattedColumn.class = 'visualize-table-right';
             }
 
-            let isFieldNumeric = false;
-            let isFieldDate = false;
-            const aggType = agg.type;
-            if (aggType && aggType.type === 'metrics') {
-              if (aggType.name === 'top_hits') {
-                if (agg._opts.params.aggregate !== 'concat') {
-                // all other aggregate types for top_hits output numbers
-                // so treat this field as numeric
-                  isFieldNumeric = true;
-                }
-              } else if(aggType.name === 'cardinality') {
-                // Unique count aggregations always produce a numeric value
-                isFieldNumeric = true;
-              } else if (field) {
-              // if the metric has a field, check if it is either number or date
-                isFieldNumeric = field.type === 'number';
-                isFieldDate = field.type === 'date';
-              } else {
-              // if there is no field, then it is count or similar so just say number
-                isFieldNumeric = true;
-              }
-            } else if (field) {
-              isFieldNumeric = field.type === 'number';
-              isFieldDate = field.type === 'date';
-            }
+            const { isNumeric, isDate } = dimension.params;
 
-            if (isFieldNumeric || isFieldDate || $scope.totalFunc === 'count') {
-              function sum(tableRows) {
+            if (isNumeric || isDate || $scope.totalFunc === 'count') {
+              const sum = tableRows => {
                 return _.reduce(tableRows, function (prev, curr) {
                 // some metrics return undefined for some of the values
                 // derivative is an example of this as it returns undefined in the first row
-                  if (curr[i].value === undefined) return prev;
-                  return prev + curr[i].value;
+                  if (curr[col.id] === undefined) return prev;
+                  return prev + curr[col.id];
                 }, 0);
-              }
-              const formatter = agg.fieldFormatter('text');
+              };
 
               switch ($scope.totalFunc) {
                 case 'sum':
-                  if (!isFieldDate) {
-                    formattedColumn.total = formatter(sum(table.rows));
+                  if (!isDate) {
+                    formattedColumn.total = formatter.convert(sum(table.rows));
                   }
                   break;
                 case 'avg':
-                  if (!isFieldDate) {
-                    formattedColumn.total = formatter(sum(table.rows) / table.rows.length);
+                  if (!isDate) {
+                    formattedColumn.total = formatter.convert(sum(table.rows) / table.rows.length);
                   }
                   break;
                 case 'min':
-                  formattedColumn.total = formatter(_.chain(table.rows).map(i).map('value').min().value());
+                  formattedColumn.total = formatter.convert(_.chain(table.rows).map(col.id).min().value());
                   break;
                 case 'max':
-                  formattedColumn.total = formatter(_.chain(table.rows).map(i).map('value').max().value());
+                  formattedColumn.total = formatter.convert(_.chain(table.rows).map(col.id).max().value());
                   break;
                 case 'count':
-                  formattedColumn.total = numberFormatter(table.rows.length);
+                  formattedColumn.total = table.rows.length;
                   break;
                 default:
                   break;
@@ -180,7 +161,7 @@ uiModules
             }
 
             return formattedColumn;
-          });
+          }).filter(column => column);
         });
       }
     };
