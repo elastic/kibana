@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { InspectorPanel } from './inspector_panel';
 
 describe('InspectorPanel', () => {
@@ -59,7 +59,7 @@ describe('InspectorPanel', () => {
   });
 
   it('should render as expected', () => {
-    const component = mount(
+    const component = mountWithIntl(
       <InspectorPanel
         adapters={adapters}
         onClose={() => true}
@@ -70,7 +70,7 @@ describe('InspectorPanel', () => {
   });
 
   it('should not allow updating adapters', () => {
-    const component = mount(
+    const component = mountWithIntl(
       <InspectorPanel
         adapters={adapters}
         onClose={() => true}
