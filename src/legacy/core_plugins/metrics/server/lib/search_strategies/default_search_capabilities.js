@@ -19,14 +19,18 @@
 import { INTERVAL_STRING_RE } from '../../../common/interval_regexp';
 import unitToSeconds from '../vis_data/helpers/unit_to_seconds';
 
-const convertUnitToSeconds = (interval) => {
+const convertUnitToSeconds = interval => {
   const matches = interval && interval.match(INTERVAL_STRING_RE);
 
   return matches ? Number(matches[1]) * unitToSeconds(matches[2]) : 0;
 };
 
+const getTimezoneFromRequest = request => {
+  return request.payload.timerange.timezone;
+};
+
 export default class DefaultSearchCapabilities {
-  constructor(request, batchRequestsSupport, fieldsCapabilities) {
+  constructor(request, batchRequestsSupport, fieldsCapabilities = {}) {
     this.request = request;
     this.batchRequestsSupport = batchRequestsSupport;
     this.fieldsCapabilities = fieldsCapabilities;
@@ -43,7 +47,7 @@ export default class DefaultSearchCapabilities {
   }
 
   getSearchTimezone() {
-    return this.fixedTimeZone || this.request.payload.timerange.timezone;
+    return this.fixedTimeZone || getTimezoneFromRequest(this.request);
   }
 
   isTimeIntervalValid(intervalString) {
@@ -56,5 +60,20 @@ export default class DefaultSearchCapabilities {
 
   getSearchInterval(intervalString) {
     return this.isTimeIntervalValid(intervalString) ? intervalString : this.defaultTimeInterval;
+  }
+
+  getFieldsByAggregationType(aggregationType) {
+    const fields = {};
+
+    Object.keys(this.fieldsCapabilities).forEach(fieldKey => {
+      this.fieldsCapabilities[fieldKey].some(aggregation => {
+        if (aggregation.agg === aggregationType) {
+          fields[fieldKey] = aggregation;
+
+          return true;
+        }
+      });
+    });
+    return fields;
   }
 }
