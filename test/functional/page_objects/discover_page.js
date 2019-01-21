@@ -27,6 +27,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
   const flyout = getService('flyout');
   const PageObjects = getPageObjects(['header', 'common']);
   const browser = getService('browser');
+  const globalNav = getService('globalNav');
 
   class DiscoverPage {
     async getQueryField() {
@@ -85,12 +86,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async closeLoadSaveSearchPanel() {
-      const isOpen = await testSubjects.exists('loadSearchForm');
-      if (!isOpen) {
-        return;
-      }
-
-      await flyout.close('loadSearchForm');
+      await flyout.ensureClosed('loadSearchForm');
     }
 
     async hasSavedSearch(searchName) {
@@ -117,10 +113,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('discoverOpenButton');
     }
 
-    async waitVisualisationLoaded() {
-      await testSubjects.waitForAttributeToChange('visualizationLoader', 'data-render-complete', 'true');
-    }
-
     async clickHistogramBar(i) {
       const bars = await find.allByCssSelector(`.series.histogram rect`);
       await bars[i].click();
@@ -135,7 +127,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async getCurrentQueryName() {
-      return await testSubjects.getVisibleText('discoverCurrentQuery');
+      return await globalNav.getLastBreadcrumb();
     }
 
     async getBarChartXTicks() {

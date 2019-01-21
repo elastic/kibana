@@ -309,15 +309,15 @@ export class EmbeddedVisualizeHandler {
     this.fetchAndRender(true);
   };
 
+  private incrementRenderingCount = () => {
+    const renderingCount = Number(this.element.getAttribute(RENDERING_COUNT_ATTRIBUTE) || 0);
+    this.element.setAttribute(RENDERING_COUNT_ATTRIBUTE, `${renderingCount + 1}`);
+  };
+
   private onRenderCompleteListener = () => {
     this.listeners.emit(RENDER_COMPLETE_EVENT);
     this.element.removeAttribute(LOADING_ATTRIBUTE);
     this.incrementRenderingCount();
-  };
-
-  private incrementRenderingCount = () => {
-    const renderingCount = Number(this.element.getAttribute(RENDERING_COUNT_ATTRIBUTE) || 0);
-    this.element.setAttribute(RENDERING_COUNT_ATTRIBUTE, `${renderingCount + 1}`);
   };
 
   private onUiStateChange = () => {
