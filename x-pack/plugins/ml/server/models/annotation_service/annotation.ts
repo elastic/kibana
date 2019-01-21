@@ -47,7 +47,6 @@ interface GetResponse {
 
 interface IndexParams {
   index: string;
-  type: string;
   body: Annotation;
   refresh?: string;
   id?: string;
@@ -55,7 +54,6 @@ interface IndexParams {
 
 interface DeleteParams {
   index: string;
-  type: string;
   refresh?: string;
   id: string;
 }
@@ -63,22 +61,21 @@ interface DeleteParams {
 export function annotationProvider(
   callWithRequest: (action: string, params: IndexParams | DeleteParams | GetParams) => Promise<any>
 ) {
-  async function indexAnnotation(annotation: Annotation) {
+  async function indexAnnotation(annotation: Annotation, username: string) {
     if (isAnnotation(annotation) === false) {
       return Promise.reject(new Error('invalid annotation format'));
     }
 
     if (annotation.create_time === undefined) {
       annotation.create_time = new Date().getTime();
-      annotation.create_username = '<user unknown>';
+      annotation.create_username = username;
     }
 
     annotation.modified_time = new Date().getTime();
-    annotation.modified_username = '<user unknown>';
+    annotation.modified_username = username;
 
     const params: IndexParams = {
       index: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
-      type: 'annotation',
       body: annotation,
       refresh: 'wait_for',
     };
@@ -232,7 +229,6 @@ export function annotationProvider(
   async function deleteAnnotation(id: string) {
     const param: DeleteParams = {
       index: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
-      type: 'annotation',
       id,
       refresh: 'wait_for',
     };

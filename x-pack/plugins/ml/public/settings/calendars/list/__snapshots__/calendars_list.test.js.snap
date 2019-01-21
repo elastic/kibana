@@ -11,7 +11,7 @@ exports[`CalendarsList Renders calendar list with calendars 1`] = `
     panelPaddingSize="l"
     verticalPosition="center"
   >
-    <CalendarsListTable
+    <InjectIntl(CalendarsListTable)
       calendarsList={
         Array [
           Object {
@@ -26,7 +26,7 @@ exports[`CalendarsList Renders calendar list with calendars 1`] = `
                 "start_time": 1486656600000,
               },
             ],
-            "events_length": "1 event",
+            "events_length": 1,
             "job_ids": Array [
               "farequote",
             ],
@@ -44,7 +44,7 @@ exports[`CalendarsList Renders calendar list with calendars 1`] = `
                 "start_time": 1544076000000,
               },
             ],
-            "events_length": "1 event",
+            "events_length": 1,
             "job_ids": Array [
               "test",
             ],

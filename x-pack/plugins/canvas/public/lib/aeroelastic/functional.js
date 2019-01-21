@@ -87,13 +87,21 @@ const not = fun => (...args) => !fun(...args);
 const removeDuplicates = (idFun, a) =>
   a.filter((d, i) => a.findIndex(s => idFun(s) === idFun(d)) === i);
 
-const epsilon = 1 / 1000;
-const applyTolerance = d => Math.round(d / epsilon) * epsilon;
+const arrayToMap = a => Object.assign({}, ...a.map(d => ({ [d]: true })));
+
+const subMultitree = (pk, fk, elements, roots) => {
+  const getSubgraphs = roots => {
+    const children = flatten(roots.map(r => elements.filter(e => fk(e) === pk(r))));
+    return [...roots, ...(children.length && getSubgraphs(children, elements))];
+  };
+  return getSubgraphs(roots);
+};
 
 module.exports = {
-  applyTolerance,
+  arrayToMap,
   disjunctiveUnion,
   flatten,
+  subMultitree,
   identity,
   log,
   map,

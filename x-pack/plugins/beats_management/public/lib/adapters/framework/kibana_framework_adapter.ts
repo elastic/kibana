@@ -144,6 +144,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
           toController === 'self'
             ? `<${DOM_ELEMENT_NAME}><div id="${DOM_ELEMENT_NAME}ReactRoot"></div></${DOM_ELEMENT_NAME}>`
             : `<kbn-management-app section="${this.PLUGIN_ID.replace('_', '-')}">
+                <div id="management-sidenav" class="euiPageSideBar" style="position: static;"></div>
                 <div id="${DOM_ELEMENT_NAME}ReactRoot" />
                </kbn-management-app>`,
         // tslint:disable-next-line: max-classes-per-file

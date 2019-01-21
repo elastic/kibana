@@ -1,0 +1,305 @@
+.actionTypeChoice {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
+
+.actionTypeChoice--disabled {
+  opacity: 0.5;
+  cursor: default; }
+
+.actionTypeIcon {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 0 auto;
+      -ms-flex: 1 0 auto;
+          flex: 1 0 auto;
+  margin-right: 12px;
+  font-size: 18.0px; }
+
+.actionTypeDescription {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  width: 100%; }
+
+.watchActionsActionType {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  width: 450px; }
+  .watchActionsActionType .ui-select-bootstrap > .ui-select-choices {
+    min-width: 350px; }
+  .watchActionsActionType .ui-select-bootstrap .ui-select-choices-row > span {
+    padding: 12px 24px; }
+  .watchActionsActionType .ui-select-match .btn {
+    border-color: #0079A5;
+    color: #0079A5; }
+  .watchActionsActionType .ui-select-placeholder {
+    color: #0079A5 !important;
+    padding-right: 12px; }
+
+.chartTooltip {
+  line-height: 1.1;
+  font-size: 14px;
+  font-weight: normal;
+  background-color: #3F3F3F;
+  color: #FFF;
+  border-radius: 4px;
+  position: fixed;
+  z-index: 120;
+  word-wrap: break-word;
+  max-width: 40%;
+  overflow: hidden;
+  pointer-events: none;
+  margin: 8px;
+  padding: 4px; }
+
+.chartTooltip__label {
+  font-weight: bold; }
+
+.durationSelect {
+  white-space: nowrap; }
+
+.durationSelectSize {
+  display: inline-block; }
+
+.durationSelectUnit {
+  display: inline-block; }
+
+.watcherExpressionPopover {
+  z-index: 1; }
+
+.flotChart {
+  height: 100%; }
+
+.indexSelectNoChoice {
+  color: #666;
+  font-size: 12.0px;
+  padding: 4px 24px;
+  line-height: 1.5; }
+
+/**
+ * 1. To ensure a smooth UX, prevent the dropdown from hiding while we async search for more results
+ * 2. ui-select likes to clear the result set out of the UI when you enter
+ *    a new search query which can cause a jarring UX. This helps mitigate
+ *    that by at least providing something in the box so it's not empty
+ */
+.indexSelect--activeSearch .ui-select-dropdown.ng-hide {
+  display: block !important;
+  /* 1 */ }
+  .indexSelect--activeSearch .ui-select-dropdown.ng-hide:after {
+    content: 'Choose...';
+    /* 2 */
+    color: #666;
+    font-size: 12.0px;
+    padding: 4px 24px;
+    line-height: 1.5;
+    /* 2 */ }
+
+/**
+ * 1. By default, hide this until the user searches or there are results
+ */
+.indexSelect--noSearch .ui-select-no-choice {
+  display: none !important;
+  /* 1 */ }
+
+/**
+ * 1. Provide a loading indicator to the user
+ */
+.indexSelect--fetchingWithNoIndices .ui-select-choices:before {
+  content: 'Loading...';
+  /* 1 */
+  margin-left: 16px;
+  /* 1 */
+  font-style: italic;
+  /* 1 */
+  color: #666;
+  /* 1 */ }
+
+/**
+ * 1. Ensure that an invalid ui-select shows a red border
+ */
+.ui-select-multiple.ui-select-bootstrap.ng-invalid {
+  border-color: #A30000 !important;
+  /* 1 */ }
+
+.json-editor {
+  border: 1px solid #D9D9D9; }
+
+.kuiPanelPager {
+  height: 0px; }
+
+.panelPagerPrevious,
+.panelPagerNext {
+  position: relative;
+  top: -155px;
+  border-radius: 20px;
+  border: 1px solid #D9D9D9;
+  background-color: #FFF;
+  height: 40px;
+  width: 40px; }
+
+.panelPagerPrevious {
+  left: -20px; }
+
+.panelPagerPrevious__icon {
+  margin-left: 2px; }
+
+.panelPagerNext {
+  float: right;
+  right: -20px; }
+
+.panelPagerNext__icon {
+  margin-left: 4px; }
+
+.thresholdPreviewChart {
+  height: 100%;
+  position: relative; }
+  .thresholdPreviewChart .flot-tick-label {
+    color: #666; }
+
+.thresholdPreviewChartNoData {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%); }
+
+.watcherNumberInput {
+  width: 85px; }
+
+.thresholdWatchExpression .kuiExpressionButton {
+  margin-right: 12px; }
+
+.thresholdWatchExpression .kuiExpressionButton-isError {
+  border-color: #A30000; }
+
+.thresholdWatchExpression .kuiInputNote {
+  margin-top: -8px; }
+
+.watchActionsHeader {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
+  .watchActionsHeader .watchActionsHeaderTitle {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1 1 auto;
+        -ms-flex: 1 1 auto;
+            flex: 1 1 auto;
+    font-size: 18px;
+    width: 100%;
+    line-height: 32px; }
+
+.watchAction {
+  margin-top: 16px; }
+
+.watchAction {
+  border-top: 1px dashed #999; }
+
+.watchAction__error {
+  background-color: #F5F5F5; }
+
+.watchActionErrorMessage {
+  color: #A30000; }
+
+.watchActionSummaryButton {
+  padding: 16px;
+  width: 100%;
+  background: transparent;
+  border: transparent;
+  text-align: left; }
+  .watchActionSummaryButton:hover {
+    background: #f2f8fb; }
+
+.watchActionSummaryToggleIcon {
+  margin-right: 8px;
+  width: 12px; }
+
+.watchActionSummaryTypeIcon {
+  margin-right: 4px; }
+
+.watchActionSummaryType {
+  font-size: 12.0px; }
+
+.watchActionHeader {
+  display: block; }
+
+.watchActionDescription {
+  display: block;
+  color: #666;
+  margin-left: 24px;
+  margin-top: 8px; }
+
+.watchActionDetails {
+  background-color: inherit;
+  padding: 0 12px 12px 40px; }
+
+.watchActionSimulateButton {
+  float: right; }
+
+watch-history-item-detail .json-editor {
+  height: 400px;
+  border: 1px solid #D9D9D9; }
+
+threshold-watch-edit {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 0 auto;
+      -ms-flex: 1 0 auto;
+          flex: 1 0 auto;
+  background-color: #F5F5F5; }
+  threshold-watch-edit .thresholdWatchEditContent {
+    padding: 24px; }
+  threshold-watch-edit .thresholdWatchEditButtons {
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: reverse;
+    -webkit-flex-direction: row-reverse;
+        -ms-flex-direction: row-reverse;
+            flex-direction: row-reverse; }
+  threshold-watch-edit .thresholdWatchEditSectionPanel {
+    background-color: #FFF;
+    padding: 24px; }
+  threshold-watch-edit .kuiVerticalRhythm + .kuiVerticalRhythm {
+    margin-top: 24px; }
+  threshold-watch-edit .kuiWatchVisualization {
+    width: 800px;
+    height: 250px;
+    border: 1px solid #D9D9D9;
+    padding: 12px;
+    border-radius: 4px;
+    background-color: #F5F5F5; }
+  threshold-watch-edit .kuiWatchVisualizationMulti {
+    margin: 24px; }
+  threshold-watch-edit .kuiSubText {
+    margin-top: 8px; }
+
+watch-edit-detail .json-editor {
+  height: 400px; }
+
+watch-edit-execute-detail .json-editor {
+  height: 300px; }
+
+watch-edit-execute-detail .copyFromPrevious {
+  float: right;
+  font-weight: normal; }
+
+watch-edit-execute-detail .kuiFormSection {
+  padding-left: 16px; }
+
+watch-edit-execute-detail label.collapserLabel {
+  font-weight: normal;
+  color: #666; }
+
+.watchEditTitlePanelContent {
+  border-top: 1px solid #D9D9D9;
+  padding-top: 16px;
+  margin-top: 16px; }
+
+.watchEditTitleIndexSelectContainer.ng-invalid .ui-select-container {
+  border-color: #A30000; }
+
+.watchEditTitlePanelIntervalValidation {
+  width: 185px; }
+/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImNvbXBvbmVudHMvYWN0aW9uX3R5cGVfc2VsZWN0L19hY3Rpb25fdHlwZV9zZWxlY3Quc2NzcyIsIi4uLy4uLy4uLy4uL25vZGVfbW9kdWxlcy9AZWxhc3RpYy9ldWkvc3JjL2dsb2JhbF9zdHlsaW5nL3ZhcmlhYmxlcy9fc2l6ZS5zY3NzIiwiLi4vLi4vLi4vLi4vbm9kZV9tb2R1bGVzL0BlbGFzdGljL2V1aS9zcmMvdGhlbWVzL2s2L2s2X2dsb2JhbHMuc2NzcyIsIi4uLy4uLy4uLy4uL25vZGVfbW9kdWxlcy9AZWxhc3RpYy9ldWkvc3JjL2dsb2JhbF9zdHlsaW5nL3ZhcmlhYmxlcy9fY29sb3JzLnNjc3MiLCJjb21wb25lbnRzL2NoYXJ0X3Rvb2x0aXAvX2NoYXJ0X3Rvb2x0aXAuc2NzcyIsIi4uLy4uLy4uLy4uL25vZGVfbW9kdWxlcy9AZWxhc3RpYy9ldWkvc3JjL2dsb2JhbF9zdHlsaW5nL3ZhcmlhYmxlcy9fYm9yZGVycy5zY3NzIiwiY29tcG9uZW50cy9kdXJhdGlvbl9zZWxlY3QvX2R1cmF0aW9uX3NlbGVjdC5zY3NzIiwiY29tcG9uZW50cy9leHByZXNzaW9uX2J1aWxkZXIvY29tcG9uZW50cy9leHByZXNzaW9uX3BvcG92ZXIvX2V4cHJlc3Npb25fcG9wb3Zlci5zY3NzIiwiY29tcG9uZW50cy9mbG90X2NoYXJ0L19mbG90X2NoYXJ0LnNjc3MiLCJjb21wb25lbnRzL2luZGV4X3NlbGVjdC9faW5kZXhfc2VsZWN0LnNjc3MiLCIuLi8uLi8uLi8uLi9ub2RlX21vZHVsZXMvQGVsYXN0aWMvZXVpL3NyYy9nbG9iYWxfc3R5bGluZy92YXJpYWJsZXMvX3R5cG9ncmFwaHkuc2NzcyIsImNvbXBvbmVudHMvanNvbl9lZGl0b3IvX2pzb25fZWRpdG9yLnNjc3MiLCJjb21wb25lbnRzL3BhbmVsX3BhZ2VyL19wYW5lbF9wYWdlci5zY3NzIiwiY29tcG9uZW50cy90aHJlc2hvbGRfcHJldmlld19jaGFydC9fdGhyZXNob2xkX3ByZXZpZXdfY2hhcnQuc2NzcyIsImNvbXBvbmVudHMvdGhyZXNob2xkX3dhdGNoX2V4cHJlc3Npb24vX3RocmVzaG9sZF93YXRjaF9leHByZXNzaW9uLnNjc3MiLCJjb21wb25lbnRzL3dhdGNoX2FjdGlvbnMvX3dhdGNoX2FjdGlvbnMuc2NzcyIsImNvbXBvbmVudHMvd2F0Y2hfYWN0aW9ucy9jb21wb25lbnRzL3dhdGNoX2FjdGlvbi9fd2F0Y2hfYWN0aW9uLnNjc3MiLCIuLi8uLi8uLi8uLi9ub2RlX21vZHVsZXMvQGVsYXN0aWMvZXVpL3NyYy9nbG9iYWxfc3R5bGluZy9mdW5jdGlvbnMvX2NvbG9ycy5zY3NzIiwiY29tcG9uZW50cy93YXRjaF9oaXN0b3J5X2l0ZW1fZGV0YWlsL193YXRjaF9oaXN0b3J5X2l0ZW1fZGV0YWlsLnNjc3MiLCJzZWN0aW9ucy93YXRjaF9lZGl0L2NvbXBvbmVudHMvdGhyZXNob2xkX3dhdGNoX2VkaXQvX3RocmVzaG9sZF93YXRjaF9lZGl0LnNjc3MiLCJzZWN0aW9ucy93YXRjaF9lZGl0L2NvbXBvbmVudHMvd2F0Y2hfZWRpdF9kZXRhaWwvX3dhdGNoX2VkaXRfZGV0YWlsLnNjc3MiLCJzZWN0aW9ucy93YXRjaF9lZGl0L2NvbXBvbmVudHMvd2F0Y2hfZWRpdF9leGVjdXRlX2RldGFpbC9fd2F0Y2hfZWRpdF9leGVjdXRlX2RldGFpbC5zY3NzIiwic2VjdGlvbnMvd2F0Y2hfZWRpdC9jb21wb25lbnRzL3dhdGNoX2VkaXRfdGl0bGVfcGFuZWwvX3dhdGNoX2VkaXRfdGl0bGVfcGFuZWwuc2NzcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQTtFQUNFLHFCQUFhO0VBQWIsc0JBQWE7RUFBYixxQkFBYTtFQUFiLGNBQWEsRUFDZDs7QUFFRDtFQUNFLGFBQVk7RUFDWixnQkFBZSxFQUNoQjs7QUFFRDtFQUNFLG9CQUFjO0VBQWQsdUJBQWM7TUFBZCxtQkFBYztVQUFkLGVBQWM7RUFDZCxtQkNQMEI7RURRMUIsa0JFRnNELEVGR3ZEOztBQUVEO0VBQ0Usb0JBQWM7RUFBZCx1QkFBYztN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 */

@@ -6,7 +6,7 @@
 
 
 
-import { shallow, mount } from 'enzyme';
+import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { ImportModal } from './import_modal';
 
@@ -34,16 +34,16 @@ const events = [{
 describe('ImportModal', () => {
 
   test('Renders import modal', () => {
-    const wrapper = shallow(
-      <ImportModal {...testProps}/>
+    const wrapper = shallowWithIntl(
+      <ImportModal.WrappedComponent {...testProps}/>
     );
 
     expect(wrapper).toMatchSnapshot();
   });
 
   test('Deletes selected event from event table', () => {
-    const wrapper = mount(
-      <ImportModal {...testProps} />
+    const wrapper = mountWithIntl(
+      <ImportModal.WrappedComponent {...testProps} />
     );
 
     const testState = {

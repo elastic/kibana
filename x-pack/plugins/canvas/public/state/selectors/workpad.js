@@ -102,7 +102,42 @@ export function getElements(state, pageId, withAst = true) {
     return [];
   }
 
-  // explicitely strip the ast, basically a fix for corrupted workpads
+  // explicitly strip the ast, basically a fix for corrupted workpads
+  // due to https://github.com/elastic/kibana-canvas/issues/260
+  // TODO: remove this once it's been in the wild a bit
+  if (!withAst) {
+    return elements.map(el => omit(el, ['ast']));
+  }
+
+  return elements.map(appendAst);
+}
+
+const augment = type => n => ({
+  ...n,
+  position: { ...n.position, type },
+  ...(type === 'group' && { expression: 'shape fill="rgba(255,255,255,0)" | render' }), // fixme unify with mw/aeroelastic
+});
+
+const getNodesOfPage = page =>
+  get(page, 'elements')
+    .map(augment('element'))
+    .concat((get(page, 'groups') || []).map(augment('group')));
+
+// todo unify or DRY up with `getElements`
+export function getNodes(state, pageId, withAst = true) {
+  const id = pageId || getSelectedPage(state);
+  if (!id) {
+    return [];
+  }
+
+  const page = getPageById(state, id);
+  const elements = getNodesOfPage(page);
+
+  if (!elements) {
+    return [];
+  }
+
+  // explicitly strip the ast, basically a fix for corrupted workpads
   // due to https://github.com/elastic/kibana-canvas/issues/260
   // TODO: remove this once it's been in the wild a bit
   if (!withAst) {
@@ -113,9 +148,18 @@ export function getElements(state, pageId, withAst = true) {
 }
 
 export function getElementById(state, id, pageId) {
+  // do we need to pass a truthy empty array instead of `true`?
   const element = getElements(state, pageId, []).find(el => el.id === id);
   if (element) {
     return appendAst(element);
+  }
+}
+
+export function getNodeById(state, id, pageId) {
+  // do we need to pass a truthy empty array instead of `true`?
+  const group = getNodes(state, pageId, []).find(el => el.id === id);
+  if (group) {
+    return appendAst(group);
   }
 }
 

@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AggregationSearchResponse } from '@elastic/elasticsearch';
+import { AggregationSearchResponse, ESFilter } from '@elastic/elasticsearch';
 import {
+  PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_DURATION,
   TRANSACTION_NAME,
@@ -71,12 +72,34 @@ export function timeseriesFetcher({
   setup
 }: {
   serviceName: string;
-  transactionType: string;
+  transactionType?: string;
   transactionName?: string;
   setup: Setup;
 }): Promise<ESResponse> {
   const { start, end, esFilterQuery, client, config } = setup;
   const { intervalString } = getBucketSize(start, end, 'auto');
+
+  const filter: ESFilter[] = [
+    { term: { [PROCESSOR_EVENT]: 'transaction' } },
+    { term: { [SERVICE_NAME]: serviceName } },
+    {
+      range: {
+        '@timestamp': {
+          gte: start,
+          lte: end,
+          format: 'epoch_millis'
+        }
+      }
+    }
+  ];
+
+  if (transactionType) {
+    filter.push({ term: { [TRANSACTION_TYPE]: transactionType } });
+  }
+
+  if (esFilterQuery) {
+    filter.push(esFilterQuery);
+  }
 
   const params: any = {
     index: config.get('apm_oss.transactionIndices'),
@@ -84,19 +107,7 @@ export function timeseriesFetcher({
       size: 0,
       query: {
         bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [TRANSACTION_TYPE]: transactionType } },
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                  format: 'epoch_millis'
-                }
-              }
-            }
-          ]
+          filter
         }
       },
       aggs: {
@@ -147,10 +158,6 @@ export function timeseriesFetcher({
       }
     }
   };
-
-  if (esFilterQuery) {
-    params.body.query.bool.filter.push(esFilterQuery);
-  }
 
   if (transactionName) {
     params.body.query.bool.must = [

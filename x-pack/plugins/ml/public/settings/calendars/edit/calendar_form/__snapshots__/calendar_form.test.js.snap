@@ -1,5 +1,28 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`CalendarForm CalendarId shown as title when editing 1`] = `
+<EuiTitle
+  size="m"
+  textTransform="none"
+>
+  <h1
+    className="euiTitle euiTitle--medium"
+  >
+    <FormattedMessage
+      defaultMessage="Calendar {calendarId}"
+      id="xpack.ml.calendarsEdit.calendarForm.calendarTitle"
+      values={
+        Object {
+          "calendarId": "test-calendar",
+        }
+      }
+    >
+      Calendar test-calendar
+    </FormattedMessage>
+  </h1>
+</EuiTitle>
+`;
+
 exports[`CalendarForm Renders calendar form 1`] = `
 <EuiForm>
   <React.Fragment>
@@ -7,14 +30,19 @@ exports[`CalendarForm Renders calendar form 1`] = `
       describedByIds={Array []}
       error={
         Array [
-          "Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores;
-    must start and end with an alphanumeric character",
+          "Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores; must start and end with an alphanumeric character",
         ]
       }
       fullWidth={false}
       hasEmptyLabelSpace={false}
       isInvalid={true}
-      label="Calendar ID"
+      label={
+        <FormattedMessage
+          defaultMessage="Calendar ID"
+          id="xpack.ml.calendarsEdit.calendarForm.calendarIdLabel"
+          values={Object {}}
+        />
+      }
     >
       <EuiFieldText
         compressed={false}
@@ -30,7 +58,13 @@ exports[`CalendarForm Renders calendar form 1`] = `
       describedByIds={Array []}
       fullWidth={false}
       hasEmptyLabelSpace={false}
-      label="Description"
+      label={
+        <FormattedMessage
+          defaultMessage="Description"
+          id="xpack.ml.calendarsEdit.calendarForm.descriptionLabel"
+          values={Object {}}
+        />
+      }
     >
       <EuiFieldText
         compressed={false}
@@ -47,7 +81,13 @@ exports[`CalendarForm Renders calendar form 1`] = `
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
-    label="Jobs"
+    label={
+      <FormattedMessage
+        defaultMessage="Jobs"
+        id="xpack.ml.calendarsEdit.calendarForm.jobsLabel"
+        values={Object {}}
+      />
+    }
   >
     <EuiComboBox
       compressed={false}
@@ -64,7 +104,13 @@ exports[`CalendarForm Renders calendar form 1`] = `
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
-    label="Groups"
+    label={
+      <FormattedMessage
+        defaultMessage="Groups"
+        id="xpack.ml.calendarsEdit.calendarForm.groupsLabel"
+        values={Object {}}
+      />
+    }
   >
     <EuiComboBox
       compressed={false}
@@ -85,9 +131,15 @@ exports[`CalendarForm Renders calendar form 1`] = `
     describedByIds={Array []}
     fullWidth={true}
     hasEmptyLabelSpace={false}
-    label="Events"
+    label={
+      <FormattedMessage
+        defaultMessage="Events"
+        id="xpack.ml.calendarsEdit.calendarForm.eventsLabel"
+        values={Object {}}
+      />
+    }
   >
-    <EventsTable
+    <InjectIntl(EventsTable)
       canCreateCalendar={true}
       canDeleteCalendar={true}
       eventsList={Array []}
@@ -122,7 +174,11 @@ exports[`CalendarForm Renders calendar form 1`] = `
         onClick={[MockFunction]}
         type="button"
       >
-        Save
+        <FormattedMessage
+          defaultMessage="Save"
+          id="xpack.ml.calendarsEdit.calendarForm.saveButtonLabel"
+          values={Object {}}
+        />
       </EuiButton>
     </EuiFlexItem>
     <EuiFlexItem
@@ -137,7 +193,11 @@ exports[`CalendarForm Renders calendar form 1`] = `
         isDisabled={false}
         type="button"
       >
-        Cancel
+        <FormattedMessage
+          defaultMessage="Cancel"
+          id="xpack.ml.calendarsEdit.calendarForm.cancelButtonLabel"
+          values={Object {}}
+        />
       </EuiButton>
     </EuiFlexItem>
   </EuiFlexGroup>

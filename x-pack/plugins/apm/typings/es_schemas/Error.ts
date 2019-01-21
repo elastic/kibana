@@ -29,6 +29,9 @@ interface Context {
   service: ContextService;
   system?: ContextSystem;
   request?: ContextRequest;
+  page?: {
+    url: string;
+  };
   [key: string]: unknown;
 }
 
@@ -76,6 +79,7 @@ interface ErrorV2 extends APMDocV2 {
   context: Context;
   transaction: {
     id: string; // transaction ID is required in v2
+    sampled?: boolean;
   };
   error: {
     id: string; // ID is required in v2

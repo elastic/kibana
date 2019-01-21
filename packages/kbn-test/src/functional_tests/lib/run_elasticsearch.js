@@ -44,7 +44,10 @@ export async function runElasticsearch({ config, options }) {
   await cluster.start(esArgs);
 
   if (isTrialLicense) {
-    await setupUsers(log, config);
+    await setupUsers(log, config.get('servers.elasticsearch.port'), [
+      config.get('servers.elasticsearch'),
+      config.get('servers.kibana'),
+    ]);
   }
 
   return cluster;

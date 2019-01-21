@@ -8,3 +8,5 @@ export enum ANNOTATION_TYPE {
   ANNOTATION = 'annotation',
   COMMENT = 'comment',
 }
+
+export const ANNOTATION_USER_UNKNOWN = '<user unknown>';

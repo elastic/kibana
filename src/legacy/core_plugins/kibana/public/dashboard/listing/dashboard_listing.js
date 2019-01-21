@@ -257,10 +257,7 @@ class DashboardListingUi extends React.Component {
                   listingLimitValue: this.props.listingLimit,
                   listingLimitText: (
                     <strong>
-                      <FormattedMessage
-                        id="kbn.dashboard.listing.listingLimitExceededListingLimitTitle"
-                        defaultMessage="listingLimit"
-                      />
+                      listingLimit
                     </strong>
                   ),
                   advancedSettingsLink: (
@@ -522,6 +519,7 @@ class DashboardListingUi extends React.Component {
           <EuiButton
             href={`#${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`}
             data-test-subj="newDashboardLink"
+            fill
           >
             <FormattedMessage
               id="kbn.dashboard.listing.createNewDashboardButtonLabel"

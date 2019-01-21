@@ -28,20 +28,27 @@ export function parseConfig(serverConfig = {}, { ignoreCertAndKey = false } = {}
     keepAlive: true,
     ...pick(serverConfig, [
       'plugins', 'apiVersion', 'keepAlive', 'pingTimeout',
-      'requestTimeout', 'log', 'logQueries'
+      'requestTimeout', 'log', 'logQueries', 'sniffOnStart',
+      'sniffInterval', 'sniffOnConnectionFault', 'hosts'
     ])
   };
 
-  config.node = {
-    url: new url.URL(serverConfig.url),
-    id: serverConfig.id || null,
+
+  const mapNode = url => ({
+    url: new url.URL(url),
     headers: serverConfig.customHeaders
-  };
+  });
+
+  if (serverConfig.hosts) {
+    config.nodes = serverConfig.hosts.map(mapNode);
+  }
 
   // Auth
   if (serverConfig.auth !== false && serverConfig.username && serverConfig.password) {
-    config.node.url.username = serverConfig.username;
-    config.node.url.password = serverConfig.password;
+    config.nodes.forEach(node => {
+      node.url.username = serverConfig.username;
+      node.url.password = serverConfig.password;
+    });
   }
 
   // SSL

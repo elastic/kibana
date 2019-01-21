@@ -4,18 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+const { writeFileSync } = require('fs');
 const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const {
+  createServerCodeTransformer,
+} = require('@kbn/interpreter/tasks/build/server_code_transformer');
 
 const sourceDir = path.resolve(__dirname, '../../canvas_plugin_src');
 const buildDir = path.resolve(__dirname, '../../canvas_plugin');
 
-export function getWebpackConfig({ devtool, watch } = {}) {
+export function getWebpackConfig({ devtool, watch, production } = {}) {
   return {
     watch,
     devtool,
-
-    mode: 'none',
+    mode: production ? 'production' : 'none',
     entry: {
       'elements/all': path.join(sourceDir, 'elements/register.js'),
       'renderers/all': path.join(sourceDir, 'renderers/register.js'),
@@ -25,9 +28,9 @@ export function getWebpackConfig({ devtool, watch } = {}) {
       'uis/datasources/all': path.join(sourceDir, 'uis/datasources/register.js'),
       'uis/arguments/all': path.join(sourceDir, 'uis/arguments/register.js'),
       'functions/browser/all': path.join(sourceDir, 'functions/browser/register.js'),
-      'functions/common/all': path.join(sourceDir, 'functions/common/register.js'),
+      'functions/browser/common': path.join(sourceDir, 'functions/common/register.js'),
       'templates/all': path.join(sourceDir, 'templates/register.js'),
-      'tags/all': path.join(sourceDir, 'uis/tags/register.js'),
+      'uis/tags/all': path.join(sourceDir, 'uis/tags/register.js'),
     },
 
     // there were problems with the node and web targets since this code is actually
@@ -74,11 +77,34 @@ export function getWebpackConfig({ devtool, watch } = {}) {
       },
       new CopyWebpackPlugin([
         {
-          from: `${sourceDir}/functions/server/`,
-          to: `${buildDir}/functions/server/`,
+          from: path.resolve(sourceDir, 'functions/server'),
+          to: path.resolve(buildDir, 'functions/server'),
+          transform: createServerCodeTransformer(!!devtool),
+          ignore: '**/__tests__/**',
+        },
+        {
+          from: path.resolve(sourceDir, 'functions/common'),
+          to: path.resolve(buildDir, 'functions/common'),
+          transform: createServerCodeTransformer(!!devtool),
+          ignore: '**/__tests__/**',
+        },
+        {
+          from: path.resolve(sourceDir, 'lib'),
+          to: path.resolve(buildDir, 'lib'),
+          transform: createServerCodeTransformer(!!devtool),
           ignore: '**/__tests__/**',
         },
       ]),
+      function canvasStatsGenerator() {
+        if (!process.env.CANVAS_GENERATE_STATS) {
+          return;
+        }
+
+        this.hooks.done.tap('canvas_stats', stats => {
+          const content = JSON.stringify(stats.toJson());
+          writeFileSync(path.resolve(__dirname, '../../webpack_stats.json'), content);
+        });
+      },
     ],
 
     module: {

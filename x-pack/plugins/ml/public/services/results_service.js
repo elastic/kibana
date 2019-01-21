@@ -610,7 +610,13 @@ function getInfluencerValueMaxScoreByTime(
         if (i > 0) {
           influencerFilterStr += ' OR ';
         }
-        influencerFilterStr += `influencer_field_value:${escapeForElasticsearchQuery(value)}`;
+        if (value.trim().length > 0) {
+          influencerFilterStr += `influencer_field_value:${escapeForElasticsearchQuery(value)}`;
+        } else {
+          // Wrap whitespace influencer field values in quotes for the query_string query.
+          influencerFilterStr += `influencer_field_value:"${value}"`;
+        }
+
       });
       boolCriteria.push({
         query_string: {
@@ -1160,7 +1166,6 @@ function getRecordsForCriteria(jobIds, criteriaFields, threshold, earliestMs, la
 
 // Queries Elasticsearch to obtain metric aggregation results.
 // index can be a String, or String[], of index names to search.
-// types must be a String[] of types to search.
 // entityFields parameter must be an array, with each object in the array having 'fieldName'
 //  and 'fieldValue' properties.
 // Extra query object can be supplied, or pass null if no additional query
@@ -1168,7 +1173,6 @@ function getRecordsForCriteria(jobIds, criteriaFields, threshold, earliestMs, la
 // Returned response contains a results property containing the requested aggregation.
 function getMetricData(
   index,
-  types,
   entityFields,
   query,
   metricFunction,
@@ -1181,14 +1185,10 @@ function getMetricData(
     const obj = { success: true, results: {} };
 
     // Build the criteria to use in the bool filter part of the request.
-    // Add criteria for the types, time range, entity fields,
+    // Add criteria for the time range, entity fields,
     // plus any additional supplied query.
     const mustCriteria = [];
     const shouldCriteria = [];
-
-    if (types && types.length) {
-      mustCriteria.push({ terms: { _type: types } });
-    }
 
     mustCriteria.push({
       range: {
@@ -1336,7 +1336,7 @@ function getEventRateData(
     const obj = { success: true, results: {} };
 
     // Build the criteria to use in the bool filter part of the request.
-    // Add criteria for the types, time range, entity fields,
+    // Add criteria for the time range, entity fields,
     // plus any additional supplied query.
     const mustCriteria = [{
       range: {
@@ -1407,7 +1407,6 @@ const ENTITY_AGGREGATION_SIZE = 10;
 const AGGREGATION_MIN_DOC_COUNT = 1;
 function getEventDistributionData(
   index,
-  types,
   splitField,
   filterField = null,
   query,
@@ -1423,13 +1422,9 @@ function getEventDistributionData(
     }
 
     // Build the criteria to use in the bool filter part of the request.
-    // Add criteria for the types, time range, entity fields,
+    // Add criteria for the time range, entity fields,
     // plus any additional supplied query.
     const mustCriteria = [];
-
-    if (types && types.length) {
-      mustCriteria.push({ terms: { _type: types } });
-    }
 
     mustCriteria.push({
       range: {

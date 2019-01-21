@@ -14,8 +14,15 @@ exports[`ImportedEvents Renders imported events 1`] = `
       size="m"
     >
       <h4>
-        Events to import: 
-        1
+        <FormattedMessage
+          defaultMessage="Events to import: {eventsCount}"
+          id="xpack.ml.calendarsEdit.importedEvents.eventsToImportTitle"
+          values={
+            Object {
+              "eventsCount": 1,
+            }
+          }
+        />
       </h4>
     </EuiText>
   </EuiFlexItem>
@@ -23,9 +30,7 @@ exports[`ImportedEvents Renders imported events 1`] = `
     component="div"
     grow={false}
   >
-    <EventsTable
-      canCreateCalendar={true}
-      canDeleteCalendar={true}
+    <InjectIntl(EventsTable)
       eventsList={
         Array [
           Object {
@@ -38,7 +43,6 @@ exports[`ImportedEvents Renders imported events 1`] = `
         ]
       }
       onDeleteClick={[MockFunction]}
-      showSearchBar={false}
     />
   </EuiFlexItem>
   <EuiSpacer
@@ -54,7 +58,13 @@ exports[`ImportedEvents Renders imported events 1`] = `
       disabled={false}
       id="ml-include-past-events"
       indeterminate={false}
-      label="Include past events"
+      label={
+        <FormattedMessage
+          defaultMessage="Include past events"
+          id="xpack.ml.calendarsEdit.importedEvents.includePastEventsLabel"
+          values={Object {}}
+        />
+      }
       onChange={[MockFunction]}
     />
   </EuiFlexItem>

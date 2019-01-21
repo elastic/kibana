@@ -4,18 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Location } from 'history';
 import React from 'react';
-// @ts-ignore
-import {
-  SERVICE_NAME,
-  TRACE_ID,
-  TRANSACTION_ID
-} from '../../../../../../common/constants';
-import { Transaction } from '../../../../../../typings/es_schemas/Transaction';
-
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { getAgentMarks } from './get_agent_marks';
 import { ServiceLegends } from './ServiceLegends';
 import { Waterfall } from './Waterfall';
@@ -24,7 +16,7 @@ import { IWaterfall } from './Waterfall/waterfall_helpers/waterfall_helpers';
 interface Props {
   urlParams: IUrlParams;
   transaction: Transaction;
-  location: any;
+  location: Location;
   waterfall: IWaterfall;
 }
 
@@ -41,19 +33,7 @@ export function WaterfallContainer({
 
   return (
     <div>
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem>
-          <ServiceLegends serviceColors={waterfall.serviceColors} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content="Distributed tracing is now supported as a beta feature of the APM UI timeline visualisation."
-            position="left"
-          >
-            <EuiBadge color="hollow">Beta</EuiBadge>
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <ServiceLegends serviceColors={waterfall.serviceColors} />
       <Waterfall
         agentMarks={agentMarks}
         location={location}

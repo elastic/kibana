@@ -40,9 +40,9 @@ function inPluginNodeModules(checkPath) {
 }
 
 export class DynamicDllPlugin {
-  constructor({ uiBundles, log, maxCompilations = 1 }) {
+  constructor({ uiBundles, threadLoaderPoolConfig, log, maxCompilations = 1 }) {
     this.log = log || (() => null);
-    this.dllCompiler = new DllCompiler(uiBundles, log);
+    this.dllCompiler = new DllCompiler(uiBundles, threadLoaderPoolConfig, log);
     this.entryPaths = '';
     this.afterCompilationEntryPaths = '';
     this.maxCompilations = maxCompilations;

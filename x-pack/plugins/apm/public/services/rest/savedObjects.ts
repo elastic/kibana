@@ -17,7 +17,7 @@ export interface ISavedObject {
 }
 
 interface ISavedObjectAPIResponse {
-  savedObjects: ISavedObject[];
+  saved_objects: ISavedObject[];
 }
 
 export const getAPMIndexPattern = memoize(async () => {
@@ -34,12 +34,12 @@ export const getAPMIndexPattern = memoize(async () => {
     }
   });
 
-  if (isEmpty(res.savedObjects)) {
+  if (isEmpty(res.saved_objects)) {
     return;
   }
 
   const apmSavedObject = first(
-    res.savedObjects.filter(
+    res.saved_objects.filter(
       savedObject => savedObject.attributes.title === apmIndexPatternTitle
     )
   );

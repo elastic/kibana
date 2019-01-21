@@ -17,20 +17,10 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import $script from 'scriptjs';
 
-let resolvePromise = null;
-let called = false;
-
-let populatePromise = new Promise(_resolve => {
-  resolvePromise = _resolve;
-});
-
-export const getBrowserRegistries = () => {
-  return populatePromise;
-};
-
-const loadBrowserRegistries = (registries, basePath) => {
+export const loadBrowserRegistries = (registries, basePath) => {
   const remainingTypes = Object.keys(registries);
   const populatedTypes = {};
 
@@ -43,6 +33,7 @@ const loadBrowserRegistries = (registries, basePath) => {
       const type = remainingTypes.pop();
       window.canvas = window.canvas || {};
       window.canvas.register = d => registries[type].register(d);
+      window.canvas.i18n = i18n;
 
       // Load plugins one at a time because each needs a different loader function
       // $script will only load each of these once, we so can call this as many times as we need?
@@ -55,28 +46,4 @@ const loadBrowserRegistries = (registries, basePath) => {
 
     loadType();
   });
-};
-
-export const populateBrowserRegistries = (registries, basePath) => {
-  if (called) {
-    const oldPromise = populatePromise;
-    let newResolve;
-    populatePromise = new Promise(_resolve => {
-      newResolve = _resolve;
-    });
-    oldPromise.then(oldTypes => {
-      loadBrowserRegistries(registries, basePath).then(newTypes => {
-        newResolve({
-          ...oldTypes,
-          ...newTypes,
-        });
-      });
-    });
-    return populatePromise;
-  }
-  called = true;
-  loadBrowserRegistries(registries, basePath).then(registries => {
-    resolvePromise(registries);
-  });
-  return populatePromise;
 };

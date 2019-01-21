@@ -37,9 +37,9 @@ Set to `true` (default) to enable {monitoring} in {kib}. Unlike the
 monitoring back-end does not run and {kib} stats are not sent to the monitoring
 cluster.
 
-`xpack.monitoring.elasticsearch.url`::
+`xpack.monitoring.elasticsearch.hosts`::
 Specifies the location of the {es} cluster where your monitoring data is stored.
-By default, this is the same as the `elasticsearch.url`. This setting enables
+By default, this is the same as `elasticsearch.hosts`. This setting enables
 you to use a single {kib} instance to search and visualize data in your
 production cluster as well as monitor data sent to a dedicated monitoring
 cluster.

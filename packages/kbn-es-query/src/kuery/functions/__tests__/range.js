@@ -86,6 +86,28 @@ describe('kuery functions', function () {
         expect(result).to.eql(expected);
       });
 
+      it('should return an ES range query without an index pattern', function () {
+        const expected = {
+          bool: {
+            should: [
+              {
+                range: {
+                  bytes: {
+                    gt: 1000,
+                    lt: 8000
+                  }
+                }
+              }
+            ],
+            minimum_should_match: 1
+          }
+        };
+
+        const node = nodeTypes.function.buildNode('range', 'bytes', { gt: 1000, lt: 8000 });
+        const result = range.toElasticsearchQuery(node);
+        expect(result).to.eql(expected);
+      });
+
       it('should support wildcard field names', function () {
         const expected = {
           bool: {

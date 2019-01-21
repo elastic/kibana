@@ -105,7 +105,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
     }
   }
 
-  if (opts.elasticsearch) set('elasticsearch.url', opts.elasticsearch);
+  if (opts.elasticsearch) set('elasticsearch.hosts', opts.elasticsearch.split(','));
   if (opts.port) set('server.port', opts.port);
   if (opts.host) set('server.host', opts.host);
   if (opts.quiet) set('logging.quiet', true);
@@ -144,7 +144,7 @@ export default function (program) {
   command
     .description('Run the kibana server')
     .collectUnknownOptions()
-    .option('-e, --elasticsearch <uri>', 'Elasticsearch instance')
+    .option('-e, --elasticsearch <uri1,uri2>', 'Elasticsearch instances')
     .option(
       '-c, --config <path>',
       'Path to the config file, can be changed with the CONFIG_PATH environment variable as well. ' +

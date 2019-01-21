@@ -1,0 +1,10 @@
+// Needs to remain a LESS file to point to the correct path for the fonts themeselves
+@import "~font-awesome/less/font-awesome";
+
+// new file icon
+.@{fa-css-prefix}-file-new-o:before { content: @fa-var-file-o; }
+.@{fa-css-prefix}-file-new-o:after { content: @fa-var-plus; position: relative; margin-left: -1.0em; font-size: 0.5em; }
+
+// alias for alert types - allows class="fa fa-{{alertType}}"
+.fa-success:before { content: @fa-var-check; }
+.fa-danger:before { content: @fa-var-exclamation-circle; }

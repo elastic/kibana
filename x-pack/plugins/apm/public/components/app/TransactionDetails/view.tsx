@@ -4,32 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { Location } from 'history';
 import React from 'react';
 import { TransactionDetailsRequest } from '../../../store/reactReduxRequest/transactionDetails';
 import { TransactionDetailsChartsRequest } from '../../../store/reactReduxRequest/transactionDetailsCharts';
 import { TransactionDistributionRequest } from '../../../store/reactReduxRequest/transactionDistribution';
 import { WaterfallRequest } from '../../../store/reactReduxRequest/waterfall';
 import { IUrlParams } from '../../../store/urlParams';
-// @ts-ignore
-import TransactionCharts from '../../shared/charts/TransactionCharts';
+import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 // @ts-ignore
 import { KueryBar } from '../../shared/KueryBar';
-// @ts-ignore
-import { HeaderLarge } from '../../shared/UIComponents';
 import { Distribution } from './Distribution';
 import { Transaction } from './Transaction';
 
 interface Props {
+  mlAvailable: boolean;
   urlParams: IUrlParams;
-  location: any;
+  location: Location;
 }
 
 export function TransactionDetailsView({ urlParams, location }: Props) {
   return (
     <div>
-      <HeaderLarge>{urlParams.transactionName}</HeaderLarge>
+      <EuiTitle size="l">
+        <h1>{urlParams.transactionName}</h1>
+      </EuiTitle>
+
+      <EuiSpacer />
 
       <KueryBar />
 
@@ -45,6 +49,8 @@ export function TransactionDetailsView({ urlParams, location }: Props) {
           />
         )}
       />
+
+      <EuiSpacer />
 
       <TransactionDistributionRequest
         urlParams={urlParams}
@@ -65,8 +71,19 @@ export function TransactionDetailsView({ urlParams, location }: Props) {
           if (!transaction) {
             return (
               <EmptyMessage
-                heading="No transaction sample available."
-                subheading="Try another time range, reset the search filter or select another bucket from the distribution histogram."
+                heading={i18n.translate(
+                  'xpack.apm.transactionDetails.noTransactionTitle',
+                  {
+                    defaultMessage: 'No transaction sample available.'
+                  }
+                )}
+                subheading={i18n.translate(
+                  'xpack.apm.transactionDetails.noTransactionDescription',
+                  {
+                    defaultMessage:
+                      'Try another time range, reset the search filter or select another bucket from the distribution histogram.'
+                  }
+                )}
               />
             );
           }

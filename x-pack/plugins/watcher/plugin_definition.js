@@ -28,7 +28,7 @@ export const pluginDefinition = {
       'plugins/watcher/sections/watch_list',
       'plugins/watcher/sections/watch_history_item',
     ],
-    styleSheetPaths: `${__dirname}/public/index.scss`,
+    styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     home: ['plugins/watcher/register_feature']
   },
   init: function (server) {

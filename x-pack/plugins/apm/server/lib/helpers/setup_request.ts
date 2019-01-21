@@ -5,11 +5,15 @@
  */
 
 /* tslint:disable no-console */
-import { AggregationSearchResponse, RequestParams } from '@elastic/elasticsearch';
+import {
+  AggregationSearchResponse,
+  ESFilter,
+  RequestParams
+} from '@elastic/elasticsearch';
 import { Legacy } from 'kibana';
 import moment from 'moment';
 
-function decodeEsQuery(esQuery?: string): object {
+function decodeEsQuery(esQuery?: string) {
   return esQuery ? JSON.parse(decodeURIComponent(esQuery)) : null;
 }
 
@@ -21,7 +25,7 @@ export type ESClient = <T = void, U = void>(
 export interface Setup {
   start: number;
   end: number;
-  esFilterQuery?: any;
+  esFilterQuery?: ESFilter;
   client: ESClient;
   config: Legacy.KibanaConfig;
 }

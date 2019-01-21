@@ -11,7 +11,7 @@ jest.mock('ui/chrome', () => ({
 }));
 
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { ImportedEvents } from './imported_events';
 
@@ -33,7 +33,7 @@ const testProps = {
 describe('ImportedEvents', () => {
 
   test('Renders imported events', () => {
-    const wrapper = shallow(
+    const wrapper = shallowWithIntl(
       <ImportedEvents {...testProps} />
     );
 

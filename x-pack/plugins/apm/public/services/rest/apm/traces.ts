@@ -11,18 +11,13 @@ import { callApi } from '../callApi';
 import { addVersion, getEncodedEsQuery } from './apm';
 
 export async function loadTrace({ traceId, start, end }: IUrlParams) {
-  const hits = await callApi<TraceAPIResponse>(
-    {
-      pathname: `/api/apm/traces/${traceId}`,
-      query: {
-        start,
-        end
-      }
-    },
-    {
-      camelcase: false
+  const hits = await callApi<TraceAPIResponse>({
+    pathname: `/api/apm/traces/${traceId}`,
+    query: {
+      start,
+      end
     }
-  );
+  });
 
   return hits.map(addVersion);
 }

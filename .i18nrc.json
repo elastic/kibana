@@ -18,6 +18,7 @@
     "tsvb": "src/legacy/core_plugins/metrics",
     "xpack.apm": "x-pack/plugins/apm",
     "xpack.beatsManagement": "x-pack/plugins/beats_management",
+    "xpack.crossClusterReplication": "x-pack/plugins/cross_cluster_replication",
     "xpack.graph": "x-pack/plugins/graph",
     "xpack.grokDebugger": "x-pack/plugins/grokdebugger",
     "xpack.idxMgmt": "x-pack/plugins/index_management",
@@ -26,11 +27,14 @@
     "xpack.ml": "x-pack/plugins/ml",
     "xpack.logstash": "x-pack/plugins/logstash",
     "xpack.monitoring": "x-pack/plugins/monitoring",
+    "xpack.remoteClusters": "x-pack/plugins/remote_clusters",
     "xpack.reporting": "x-pack/plugins/reporting",
     "xpack.rollupJobs": "x-pack/plugins/rollup",
     "xpack.searchProfiler": "x-pack/plugins/searchprofiler",
     "xpack.security": "x-pack/plugins/security",
     "xpack.spaces": "x-pack/plugins/spaces",
+    "xpack.upgradeAssistant": "x-pack/plugins/upgrade_assistant",
+    "xpack.uptime": "x-pack/plugins/uptime",
     "xpack.watcher": "x-pack/plugins/watcher"
   },
   "exclude": [

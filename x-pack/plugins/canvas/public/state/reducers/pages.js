@@ -6,6 +6,7 @@
 
 import { handleActions } from 'redux-actions';
 import { set, del, insert } from 'object-path-immutable';
+import { cloneSubgraphs } from '../../lib/clone_subgraphs';
 import { getId } from '../../lib/get_id';
 import { routerProvider } from '../../lib/router_provider';
 import { getDefaultPage } from '../defaults';
@@ -29,10 +30,15 @@ function addPage(workpadState, payload, srcIndex = workpadState.pages.length - 1
 function clonePage(page) {
   // TODO: would be nice if we could more reliably know which parameters need to get a unique id
   // this makes a pretty big assumption about the shape of the page object
+  const elements = page.elements;
+  const groups = page.groups || [];
+  const nodes = elements.concat(groups);
+  const newNodes = cloneSubgraphs(nodes);
   return {
     ...page,
     id: getId('page'),
-    elements: page.elements.map(element => ({ ...element, id: getId('element') })),
+    groups: newNodes.filter(n => n.position.type === 'group'),
+    elements: newNodes.filter(n => n.position.type !== 'group'),
   };
 }
 

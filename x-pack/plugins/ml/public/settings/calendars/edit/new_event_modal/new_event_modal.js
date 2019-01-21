@@ -31,9 +31,16 @@ import moment from 'moment';
 import { TIME_FORMAT } from '../events_table/';
 import { generateTempId } from '../utils';
 
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+
 const VALID_DATE_STRING_LENGTH = 19;
 
-export class NewEventModal extends Component {
+export const NewEventModal = injectI18n(class NewEventModal extends Component {
+  static propTypes = {
+    closeModal: PropTypes.func.isRequired,
+    addEvent: PropTypes.func.isRequired,
+  };
+
   constructor(props) {
     super(props);
 
@@ -158,11 +165,19 @@ export class NewEventModal extends Component {
       endDateString,
     } = this.state;
 
+    const { intl } = this.props;
+
     const timeInputs = (
       <Fragment>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiFormRow label="From:" helpText={TIME_FORMAT}>
+            <EuiFormRow
+              label={<FormattedMessage
+                id="xpack.ml.calendarsEdit.newEventModal.fromLabel"
+                defaultMessage="From:"
+              />}
+              helpText={TIME_FORMAT}
+            >
               <EuiFieldText
                 name="startTime"
                 onChange={this.handleTimeStartChange}
@@ -172,7 +187,13 @@ export class NewEventModal extends Component {
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormRow label="To:" helpText={TIME_FORMAT}>
+            <EuiFormRow
+              label={<FormattedMessage
+                id="xpack.ml.calendarsEdit.newEventModal.toLabel"
+                defaultMessage="To:"
+              />}
+              helpText={TIME_FORMAT}
+            >
               <EuiFieldText
                 name="endTime"
                 onChange={this.handleTimeEndChange}
@@ -203,7 +224,10 @@ export class NewEventModal extends Component {
                 startDate={startDate}
                 endDate={endDate}
                 isInvalid={startDate > endDate}
-                aria-label="Start date"
+                aria-label={intl.formatMessage({
+                  id: 'xpack.ml.calendarsEdit.newEventModal.startDateAriaLabel',
+                  defaultMessage: 'Start date'
+                })}
                 timeFormat={TIME_FORMAT}
                 dateFormat={TIME_FORMAT}
               />
@@ -217,7 +241,10 @@ export class NewEventModal extends Component {
                 startDate={startDate}
                 endDate={endDate}
                 isInvalid={startDate > endDate}
-                aria-label="End date"
+                aria-label={intl.formatMessage({
+                  id: 'xpack.ml.calendarsEdit.newEventModal.endDateAriaLabel',
+                  defaultMessage: 'End date'
+                })}
                 timeFormat={TIME_FORMAT}
                 dateFormat={TIME_FORMAT}
               />
@@ -241,14 +268,20 @@ export class NewEventModal extends Component {
         >
           <EuiModalHeader>
             <EuiModalHeaderTitle >
-              Create new event
+              <FormattedMessage
+                id="xpack.ml.calendarsEdit.newEventModal.createNewEventTitle"
+                defaultMessage="Create new event"
+              />
             </EuiModalHeaderTitle>
           </EuiModalHeader>
 
           <EuiModalBody>
             <EuiForm>
               <EuiFormRow
-                label="Description"
+                label={<FormattedMessage
+                  id="xpack.ml.calendarsEdit.newEventModal.descriptionLabel"
+                  defaultMessage="Description"
+                />}
                 fullWidth
               >
                 <EuiFieldText
@@ -269,21 +302,22 @@ export class NewEventModal extends Component {
               fill
               disabled={!description}
             >
-              Add
+              <FormattedMessage
+                id="xpack.ml.calendarsEdit.newEventModal.addButtonLabel"
+                defaultMessage="Add"
+              />
             </EuiButton>
             <EuiButtonEmpty
               onClick={closeModal}
             >
-              Cancel
+              <FormattedMessage
+                id="xpack.ml.calendarsEdit.newEventModal.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
             </EuiButtonEmpty>
           </EuiModalFooter>
         </EuiModal>
       </Fragment>
     );
   }
-}
-
-NewEventModal.propTypes = {
-  closeModal: PropTypes.func.isRequired,
-  addEvent: PropTypes.func.isRequired,
-};
+});

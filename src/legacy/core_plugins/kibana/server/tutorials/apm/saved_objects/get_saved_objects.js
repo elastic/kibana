@@ -20,11 +20,11 @@
 import indexPattern from './index_pattern.json';
 import staticSavedObjects from './saved_objects.json';
 
-function getIndexPattern(apmIndexPattern) {
-  indexPattern.attributes.title = apmIndexPattern;
+function getIndexPatternWithTitle(indexPatternTitle) {
+  indexPattern.attributes.title = indexPatternTitle;
   return indexPattern;
 }
 
-export function getSavedObjects(server) {
-  return [getIndexPattern(server), ...staticSavedObjects];
+export function getSavedObjects(indexPatternTitle) {
+  return [getIndexPatternWithTitle(indexPatternTitle), ...staticSavedObjects];
 }

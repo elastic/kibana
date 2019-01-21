@@ -1,10 +1,9 @@
 .kbnGlobalNavLink {
-  &:hover {
-    background-color: shade($euiColorPrimary, 15%);
-  }
-
-  &.active {
-    background-color: $euiColorPrimary;
+  &:hover,
+  &.active,
+  &:focus {
+    box-shadow: none !important;
+    background-color: darken($euiColorPrimary, 2%);
   }
 }
 
@@ -48,9 +47,8 @@
   display: inline-block;
   width: $kbnGlobalNavClosedWidth;
   height: $kbnGlobalNavAppIconHeight;
-  float: left;
+  line-height: $kbnGlobalNavAppIconHeight - 2px;
   text-align: center;
-  font-size: 1.7em;
 }
 
 /**
@@ -59,6 +57,16 @@
 .kbnGlobalNavLink__iconImage {
   height: 18px;
   margin-top: $euiSizeS;
+}
+
+.kbnGlobalNavLink__euiIcon {
+  svg {
+    @include size($euiSize + $euiSizeXS);
+  }
+
+  .euiIcon--app .euiIcon__fillSecondary {
+    fill: $euiColorGhost;
+  }
 }
 
 /**

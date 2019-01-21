@@ -18,6 +18,10 @@
  */
 
 const { resolve } = require('path');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+
+const { createServerCodeTransformer } = require('./server_code_transformer');
+
 const {
   PLUGIN_SOURCE_DIR,
   PLUGIN_BUILD_DIR,
@@ -31,7 +35,8 @@ module.exports = function ({ sourceMaps }, { watch }) {
     mode: 'none',
     entry: {
       'types/all': resolve(PLUGIN_SOURCE_DIR, 'types/register.js'),
-      'functions/common/all': resolve(PLUGIN_SOURCE_DIR, 'functions/common/register.js'),
+      'functions/browser/all': resolve(PLUGIN_SOURCE_DIR, 'functions/browser/register.js'),
+      'functions/browser/common': resolve(PLUGIN_SOURCE_DIR, 'functions/common/register.js'),
     },
 
     // there were problems with the node and web targets since this code is actually
@@ -95,6 +100,15 @@ module.exports = function ({ sourceMaps }, { watch }) {
     stats: 'errors-only',
 
     plugins: [
+      new CopyWebpackPlugin([
+        {
+          from: resolve(PLUGIN_SOURCE_DIR, 'functions/common'),
+          to: resolve(PLUGIN_BUILD_DIR, 'functions/common'),
+          ignore: '**/__tests__/**',
+          transform: createServerCodeTransformer(sourceMaps)
+        },
+      ]),
+
       function LoaderFailHandlerPlugin() {
         if (!watch) {
           return;

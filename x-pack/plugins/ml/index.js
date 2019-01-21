@@ -9,7 +9,8 @@
 import { resolve } from 'path';
 import Boom from 'boom';
 import { checkLicense } from './server/lib/check_license';
-import { isAnnotationsFeatureAvailable } from './server/lib/check_annotations';
+import { FEATURE_ANNOTATIONS_ENABLED } from './common/constants/feature_flags';
+
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { annotationRoutes } from './server/routes/annotations';
 import { jobRoutes } from './server/routes/anomaly_detectors';
@@ -27,6 +28,7 @@ import { resultsServiceRoutes } from './server/routes/results_service';
 import { jobServiceRoutes } from './server/routes/job_service';
 import { jobAuditMessagesRoutes } from './server/routes/job_audit_messages';
 import { fileDataVisualizerRoutes } from './server/routes/file_data_visualizer';
+import { i18n } from '@kbn/i18n';
 
 export const ml = (kibana) => {
   return new kibana.Plugin({
@@ -37,13 +39,17 @@ export const ml = (kibana) => {
 
     uiExports: {
       app: {
-        title: 'Machine Learning',
-        description: 'Machine Learning for the Elastic Stack',
+        title: i18n.translate('xpack.ml.mlNavTitle', {
+          defaultMessage: 'Machine Learning'
+        }),
+        description: i18n.translate('xpack.ml.mlNavDescription', {
+          defaultMessage: 'Machine Learning for the Elastic Stack'
+        }),
         icon: 'plugins/ml/ml.svg',
         euiIconType: 'machineLearningApp',
         main: 'plugins/ml/app',
       },
-      styleSheetPaths: `${__dirname}/public/index.scss`,
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: ['plugins/ml/hacks/toggle_app_link_in_nav'],
       home: ['plugins/ml/register_feature'],
       injectDefaultVars(server) {
@@ -78,14 +84,11 @@ export const ml = (kibana) => {
         ]
       };
 
-      const mlAnnotationsEnabled = await isAnnotationsFeatureAvailable(server);
-
       server.injectUiAppVars('ml', () => {
         const config = server.config();
         return {
           kbnIndex: config.get('kibana.index'),
-          esServerUrl: config.get('elasticsearch.url'),
-          mlAnnotationsEnabled,
+          mlAnnotationsEnabled: FEATURE_ANNOTATIONS_ENABLED,
         };
       });
 
