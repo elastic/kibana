@@ -10,12 +10,12 @@ export function Toasts({ layerLoadToast, clearLayerLoadToast }) {
   if (layerLoadToast === 'success') {
     toastNotifications.add({
       title: 'Layer added',
-      className: 'layerToast'
+      className: 'gisLayerToast'
     }) && clearLayerLoadToast();
   } else if (layerLoadToast === 'error') {
     toastNotifications.addDanger({
       title: 'Error adding layer',
-      className: 'layerToast'
+      className: 'gisLayerToast'
     }) && clearLayerLoadToast();
   } else {
     // Do nothing
