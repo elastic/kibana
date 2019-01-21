@@ -184,6 +184,6 @@ export const schema = Joi.object().keys({
 
   // settings for the find service
   layout: Joi.object().keys({
-    fixedHeaderHeight: Joi.number().default(0),
+    fixedHeaderHeight: Joi.number().default(50),
   }).default(),
 }).default();

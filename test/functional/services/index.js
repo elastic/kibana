@@ -33,6 +33,8 @@ export { RenderableProvider } from './renderable';
 export { TableProvider } from './table';
 export { BrowserProvider } from './browser';
 export { InspectorProvider } from './inspector';
+export { AppsMenuProvider } from './apps_menu';
+export { GlobalNavProvider } from './global_nav';
 
 export * from './visualizations';
 export * from './dashboard';
