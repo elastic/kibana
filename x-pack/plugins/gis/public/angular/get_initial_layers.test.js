@@ -56,7 +56,9 @@ describe('Saved object does not have layer list', () => {
         url: 'myTileUrl',
       },
       style: {
-        properties: undefined,
+        properties: {
+          alphaValue: 1
+        },
         type: 'TILE',
       },
       temporary: false,
@@ -83,7 +85,9 @@ describe('Saved object does not have layer list', () => {
         type: 'EMS_TMS'
       },
       style: {
-        properties: undefined,
+        properties: {
+          alphaValue: 1
+        },
         type: 'TILE',
       },
       temporary: false,
