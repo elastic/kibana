@@ -6,6 +6,7 @@
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -18,6 +19,7 @@ import {
 } from '@elastic/eui';
 import React, { ChangeEvent } from 'react';
 import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { RepositoryUtils } from 'x-pack/plugins/code/common/repository_utils';
 import { LanguageServer } from '../../../common/language_server';
@@ -127,7 +129,9 @@ class ProjectSettingsModal extends React.PureComponent<
             {languageServerSwitches}
           </EuiModalBody>
           <EuiModalFooter>
-            <EuiButton>Manage Language Servers</EuiButton>
+            <EuiButtonEmpty>
+              <Link to="/admin?tab=LanguageServers">Manage Language Servers</Link>
+            </EuiButtonEmpty>
             <EuiButton onClick={this.saveChanges}>Save Changes</EuiButton>
           </EuiModalFooter>
         </EuiModal>

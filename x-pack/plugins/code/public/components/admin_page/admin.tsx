@@ -48,6 +48,19 @@ interface State {
 }
 
 class AdminPage extends React.PureComponent<Props, State> {
+  public static getDerivedStateFromProps(props: Props) {
+    const getTab = () => {
+      const { search } = props.location;
+      let qs = search;
+      if (search.charAt(0) === '?') {
+        qs = search.substr(1);
+      }
+      return parseQuery(qs).tab || AdminTabs.projects;
+    };
+    return {
+      tab: getTab() as AdminTabs,
+    };
+  }
   public tabs = [
     {
       id: AdminTabs.projects,
