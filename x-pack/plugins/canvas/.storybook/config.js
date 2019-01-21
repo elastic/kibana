@@ -9,9 +9,10 @@ import { configure, setAddon, addDecorator } from '@storybook/react';
 import JSXAddon from 'storybook-addon-jsx';
 import { withKnobs } from '@storybook/addon-knobs/react';
 import { withInfo } from '@storybook/addon-info';
-import register from 'babel-plugin-require-context-hook/register';
+
 import { withOptions } from '@storybook/addon-options';
 
+// Import the default EUI theme
 import '@elastic/eui/dist/eui_theme_k6_light.css';
 
 // Set up the Storybook environment with custom settings.
@@ -20,14 +21,14 @@ addDecorator(
     goFullScreen: false,
     name: 'Canvas Storybook',
     showAddonsPanel: true,
-    url: 'https://www.github.com/'
+    url: 'https://github.com/elastic/kibana/tree/master/x-pack/plugins/canvas'
   })
 );
 
 // If we're running Storyshots, be sure to register the require context hook.
 // Otherwise, add the other decorators.
 if (process.env.NODE_ENV === 'test') {
-  register();
+  require('babel-plugin-require-context-hook/register')();
 } else {
   // Customize the info for each story.
   addDecorator(
@@ -46,14 +47,14 @@ if (process.env.NODE_ENV === 'test') {
 // Automatically import all files ending in *.examples.ts
 const req = require.context('./..', true, /.examples.tsx$/);
 
-function loadStories() {
-  //require('./welcome');
-  req.keys().forEach(filename => req(filename));
-}
-
 const storyWrapper = story => <div style={{ margin: 35 }}>{story()}</div>;
 
 // Wrap each story with a div -- we may make this smarter later.
 addDecorator(storyWrapper);
+
+function loadStories() {
+  //require('./welcome');
+  req.keys().forEach(filename => req(filename));
+}
 
 configure(loadStories, module);

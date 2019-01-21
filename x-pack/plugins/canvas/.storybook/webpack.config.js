@@ -6,10 +6,10 @@ module.exports = (baseConfig, env, config) => {
   config.module.rules.push(
     {
       test: /\.js$/,
+      include: /\.storybook/,
       loaders: 'babel-loader',
       options: {
-        babelrc: false,
-        presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+        presets: [require.resolve('babel-preset-react')],
       },
     },
   );
@@ -17,10 +17,6 @@ module.exports = (baseConfig, env, config) => {
   config.module.rules.push({
     test: /\.less$/,
     use: [
-      // {
-      //   loader: require.resolve('extract-text-webpack-plugin'),
-      //   options: { omit: 1, remove: true },
-      // },
       { loader: 'style-loader' },
       { loader: 'css-loader', options: { importLoaders: 2 } },
       {
