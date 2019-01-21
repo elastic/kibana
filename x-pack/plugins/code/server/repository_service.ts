@@ -31,7 +31,7 @@ export class RepositoryService {
     } else {
       const localPath = RepositoryUtils.repositoryLocalPath(this.repoVolPath, repo.uri);
       if (fs.existsSync(localPath)) {
-        this.log.info(`Repository exist in local path: ${localPath}. Do update instead of clone.`);
+        this.log.info(`Repository exist in local path. Do update instead of clone.`);
         try {
           // Do update instead of clone if the local repo exists.
           const updateRes = await this.update(repo.uri);
@@ -98,7 +98,7 @@ export class RepositoryService {
         this.log.info(
           `Clone repository from ${
             repo.url
-          } to ${localPath} done with head revision ${headRevision} and default branch ${currentBranchName}`
+          } done with head revision ${headRevision} and default branch ${currentBranchName}`
         );
         return {
           uri: repo.uri,
@@ -109,7 +109,7 @@ export class RepositoryService {
           },
         };
       } catch (error) {
-        const msg = `Clone repository from ${repo.url} to ${localPath} error.`;
+        const msg = `Clone repository from ${repo.url} error.`;
         this.log.error(msg);
         this.log.error(error);
         throw new Error(msg);
@@ -122,13 +122,13 @@ export class RepositoryService {
     try {
       // For now, just `rm -rf`
       await del([localPath]);
-      this.log.info(`Remove ${localPath} done.`);
+      this.log.info(`Remove local repository ${uri} done.`);
       return {
         uri,
         res: true,
       };
     } catch (error) {
-      this.log.error(`Remove ${localPath} error: ${error}.`);
+      this.log.error(`Remove local repository ${uri} error: ${error}.`);
       throw error;
     }
   }
