@@ -375,7 +375,6 @@ export const ml = {
   getCardinalityOfFields(obj) {
     const data = pick(obj, [
       'index',
-      'types',
       'fieldNames',
       'query',
       'timeFieldName',

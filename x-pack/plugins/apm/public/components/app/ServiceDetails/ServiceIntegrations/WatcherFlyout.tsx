@@ -249,7 +249,7 @@ export class WatcherFlyout extends Component<
               defaultMessage:
                 'The watch is now ready and will send error reports for {serviceName}.',
               values: {
-                serviceName: this.props.urlParams.serviceName as string
+                serviceName: this.props.urlParams.serviceName
               }
             }
           )}{' '}

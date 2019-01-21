@@ -16,7 +16,7 @@ import {
 
 import { MetricsEditor } from '../../../../shared/components/metrics_editor';
 
-export class SelectExpression extends Component {
+export class MetricsExpression extends Component {
 
   state = {
     isPopoverOpen: false,
@@ -64,30 +64,32 @@ export class SelectExpression extends Component {
       })
       .map(({ type, field }) => {
         if (type === 'count') {
-          return 'count(*)';
+          return 'count';
         }
 
-        return `${type}(right.${field})`;
+        return `${type} ${field}`;
       });
 
     return (
       <EuiPopover
-        id="selectPopover"
+        id="metricsPopover"
         isOpen={this.state.isPopoverOpen}
         closePopover={this._closePopover}
         ownFocus
         initialFocus="body" /* avoid initialFocus on Combobox */
         withTitle
+        anchorPosition="leftCenter"
         button={
           <EuiExpression
             onClick={this._togglePopover}
-            description="SELECT"
-            value={metricExpressions.length > 0 ? metricExpressions.join(', ') : 'count(*)'}
+            description={metricExpressions.length > 1 ? 'and use metrics' : 'and use metric'}
+            uppercase={false}
+            value={metricExpressions.length > 0 ? metricExpressions.join(', ') : 'count'}
           />
         }
       >
         <div style={{ width: 400 }}>
-          <EuiPopoverTitle>SELECT</EuiPopoverTitle>
+          <EuiPopoverTitle>Metrics</EuiPopoverTitle>
           {this._renderMetricsEditor()}
         </div>
       </EuiPopover>
@@ -95,13 +97,13 @@ export class SelectExpression extends Component {
   }
 }
 
-SelectExpression.propTypes = {
+MetricsExpression.propTypes = {
   metrics: PropTypes.array,
   rightFields: PropTypes.object,  // indexPattern.fields IndexedArray object
   onChange: PropTypes.func.isRequired,
 };
 
-SelectExpression.defaultProps = {
+MetricsExpression.defaultProps = {
   metrics: [
     { type: 'count' }
   ]
