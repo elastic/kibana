@@ -43,7 +43,7 @@ export default class DefaultSearchCapabilities {
   }
 
   getSearchTimezone() {
-    return this.fixedTimeZone || this.request.payload.timerange;
+    return this.fixedTimeZone || this.request.payload.timerange.timezone;
   }
 
   isTimeIntervalValid(intervalString) {
