@@ -76,7 +76,7 @@ function open(adapters: Adapters, options: InspectorOptions = {}): InspectorSess
     {
       'data-test-subj': 'inspectorPanel',
       closeButtonAriaLabel: i18n.translate('common.ui.inspector.closeButtonAriaLabel', {
-        defaultMessage: 'Close Inspector'
+        defaultMessage: 'Close Inspector',
       }),
     }
   );
