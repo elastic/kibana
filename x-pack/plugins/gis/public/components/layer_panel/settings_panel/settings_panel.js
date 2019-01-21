@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiLink,
 } from '@elastic/eui';
+import { ValidatedRange } from '../../../shared/components/validated_range';
 
 export class SettingsPanel extends Component {
 
@@ -45,9 +46,7 @@ export class SettingsPanel extends Component {
     this.props.updateMaxZoom(this.props.layerId, zoom);
   }
 
-  onAlphaValueChange = (event) => {
-    const sanitizedValue = parseFloat(event.target.value);
-    const alphaValue = isNaN(sanitizedValue) ? '' : sanitizedValue;
+  onAlphaValueChange = (alphaValue) => {
     this.props.updateAlphaValue(this.props.layerId, alphaValue);
   }
 
@@ -113,11 +112,11 @@ export class SettingsPanel extends Component {
         label="Layer transparency"
       >
         <div className="gisAlphaRange">
-          <EuiRange
+          <ValidatedRange
             min={.00}
             max={1.00}
             step={.05}
-            value={this.props.alphaValue.toString()} // EuiRange value must be string
+            value={this.props.alphaValue}
             onChange={this.onAlphaValueChange}
             showLabels
             showInput
