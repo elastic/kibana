@@ -24,7 +24,7 @@ import {
   INTERVAL_STRING_RE,
   GTE_INTERVAL_RE
 } from '../../../../common/interval_regexp';
-export default (req, interval) => {
+export default (req, interval, capabilities) => {
   const from = moment.utc(req.payload.timerange.min);
   const to = moment.utc(req.payload.timerange.max);
   const duration = moment.duration(to.valueOf() - from.valueOf(), 'ms');
@@ -42,6 +42,11 @@ export default (req, interval) => {
         intervalString: gteAutoMatch[1]
       };
     }
+  }
+
+  // Todo: 'auto' interval is not working!
+  if (capabilities) {
+    interval = capabilities.getSearchInterval(interval);
   }
 
   const matches = interval && interval.match(INTERVAL_STRING_RE);

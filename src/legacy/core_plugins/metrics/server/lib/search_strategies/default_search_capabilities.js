@@ -16,18 +16,45 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { INTERVAL_STRING_RE } from '../../../common/interval_regexp';
+import unitToSeconds from '../vis_data/helpers/unit_to_seconds';
+
+const convertUnitToSeconds = (interval) => {
+  const matches = interval && interval.match(INTERVAL_STRING_RE);
+
+  return matches ? Number(matches[1]) * unitToSeconds(matches[2]) : 0;
+};
+
 export default class DefaultSearchCapabilities {
-  constructor(req, batchRequestsSupport, fieldsCapabilities) {
-    this.request = req;
+  constructor(request, batchRequestsSupport, fieldsCapabilities) {
+    this.request = request;
     this.batchRequestsSupport = batchRequestsSupport;
     this.fieldsCapabilities = fieldsCapabilities;
+
+    this.validateTimeIntervalRules = [];
   }
 
   get fixedTimeZone() {
     return null;
   }
 
-  get minimumTimeInterval() {
+  get defaultTimeInterval() {
     return null;
+  }
+
+  getSearchTimezone() {
+    return this.fixedTimeZone || this.request.payload.timerange;
+  }
+
+  isTimeIntervalValid(intervalString) {
+    const userInterval = convertUnitToSeconds(intervalString);
+    const defaultInterval = convertUnitToSeconds(this.defaultTimeInterval);
+
+    return this.validateTimeIntervalRules
+      .every(validationRule => validationRule(userInterval, defaultInterval));
+  }
+
+  getSearchInterval(intervalString) {
+    return this.isTimeIntervalValid(intervalString) ? intervalString : this.defaultTimeInterval;
   }
 }

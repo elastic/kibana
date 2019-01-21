@@ -1,4 +1,4 @@
-*
+/*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
  * this work for additional information regarding copyright
@@ -36,7 +36,7 @@ export default async (req, panel, esQueryConfig) => {
   const annotations = panel.annotations.filter(validAnnotation);
 
   const body = annotations
-    .map(annotation => getRequestParams(req, panel, annotation, esQueryConfig, capabilities.batchRequestsSupport))
+    .map(annotation => getRequestParams(req, panel, annotation, esQueryConfig, capabilities))
     .reduce((acc, item) => acc.concat(item), []);
 
   if (!body.length) return { responses: [] };
@@ -55,18 +55,3 @@ export default async (req, panel, esQueryConfig) => {
     throw error;
   }
 };
-
-//todo: 
-async function getAnnotationBody(req, panel, annotation, esQueryConfig) {
-  const indexPatternString = annotation.index_pattern;
-  const indexPatternObject = await getIndexPatternObject(req, indexPatternString);
-  const request = buildAnnotationRequest(req, panel, annotation, esQueryConfig, indexPatternObject);
-  request.timeout = '90s';
-  return [
-    {
-      index: indexPatternString,
-      ignoreUnavailable: true,
-    },
-    request,
-  ];
-}

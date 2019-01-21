@@ -19,8 +19,9 @@
 import buildProcessorFunction from '../build_processor_function';
 import processors from '../request_processors/annotations';
 
-export default function buildAnnotationRequest(req, panel, annotation,  esQueryConfig, indexPattern) {
-  const processor = buildProcessorFunction(processors, req, panel, annotation,  esQueryConfig, indexPattern);
+//todo: (req, panel, annotation,  esQueryConfig, indexPattern, capabilities
+export default function buildAnnotationRequest(...args) {
+  const processor = buildProcessorFunction(processors, ...args);
   const doc = processor({});
   return doc;
 }

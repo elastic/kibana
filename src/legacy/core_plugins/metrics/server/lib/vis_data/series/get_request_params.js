@@ -18,13 +18,12 @@
  */
 import buildRequestBody from './build_request_body';
 
-export default (req, panel, series, isBatchRequest = true) => {
+export default (req, panel, series, esQueryConfig, capabilities) => {
   const bodies = [];
+  const indexPatternString = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;  
   const indexPatternObject = await getIndexPatternObject(req, indexPatternString);
 
-  if (isBatchRequest) {
-    const indexPatternString = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
-  
+  if (capabilities.batchRequestsSupport) {
     bodies.push({
       index: indexPatternString,
       ignoreUnavailable: true,
@@ -32,7 +31,7 @@ export default (req, panel, series, isBatchRequest = true) => {
   }
 
   bodies.push({
-    ...buildRequestBody(req, panel, series, esQueryConfig, indexPatternObject)
+    ...buildRequestBody(req, panel, series, esQueryConfig, indexPatternObject, capabilities)
     timeout: '90s'
   });
 

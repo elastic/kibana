@@ -18,10 +18,10 @@
  */
 import buildRequestBody from './build_request_body';
 
-export default (req, panel, annotation, isBatchRequest = true) => {
+export default (req, panel, annotation, capabilities) => {
   const bodies = [];
 
-  if (isBatchRequest) {
+  if (capabilities.batchRequestsSupport) {
     const indexPattern = annotation.index_pattern;
 
     bodies.push({
@@ -31,7 +31,7 @@ export default (req, panel, annotation, isBatchRequest = true) => {
   }
 
   bodies.push({
-    ...buildRequestBody(req, panel, annotation),
+    ...buildRequestBody(req, panel, annotation, capabilities),
     timeout: '90s'
   });
 

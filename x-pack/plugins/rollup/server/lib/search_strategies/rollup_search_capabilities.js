@@ -27,21 +27,32 @@ const getDateHistogramField = (fieldsCapabilities) => {
   return histogramAggregation;
 };
 
+const intervalLessThanMinimum = (userTimeInterval, defaultTimeInterval) => userTimeInterval >= defaultTimeInterval;
+const intervalMultiple = (userTimeInterval, defaultTimeInterval) => !Boolean(userTimeInterval % defaultTimeInterval);
+
 export default (DefaultSearchCapabilities) =>
   (class RollupSearchCapabilities extends DefaultSearchCapabilities {
     constructor(req, batchRequestsSupport, rollupCapabilities) {
       const fieldsCapabilities = toFieldsCapabilities(rollupCapabilities);
 
       super(req, batchRequestsSupport, fieldsCapabilities);
-
-      this.dateHistogram = getDateHistogramField(fieldsCapabilities);
+      this.init();
     }
 
     get fixedTimeZone() {
       return get(this.dateHistogram, 'time_zone', null);
     }
 
-    get minimumTimeInterval() {
+    get defaultTimeInterval() {
       return get(this.dateHistogram, 'interval', null);
+    }
+
+    init() {
+      this.dateHistogram = getDateHistogramField(this.fieldsCapabilities);
+
+      this.validateTimeIntervalRules = [
+        intervalLessThanMinimum,
+        intervalMultiple,
+      ];
     }
   });
