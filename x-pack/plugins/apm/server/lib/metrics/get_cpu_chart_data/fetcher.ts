@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { AggregationSearchResponse } from 'elasticsearch';
+import { AggregationSearchResponse } from '@elastic/elasticsearch';
 import {
   METRIC_PROCESS_CPU_PERCENT,
   METRIC_SYSTEM_CPU_PERCENT

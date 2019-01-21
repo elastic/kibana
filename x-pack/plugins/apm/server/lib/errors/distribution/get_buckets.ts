@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BucketAgg, ESFilter } from 'elasticsearch';
+import { BucketAgg, ESFilter } from '@elastic/elasticsearch';
 import {
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,

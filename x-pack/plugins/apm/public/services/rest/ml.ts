@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter } from 'elasticsearch';
+import { ESFilter } from '@elastic/elasticsearch';
 import chrome from 'ui/chrome';
 import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../common/constants';
 import { callApi } from './callApi';

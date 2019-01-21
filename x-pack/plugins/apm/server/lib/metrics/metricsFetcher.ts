@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ESFilter } from 'elasticsearch';
+import { ESFilter } from '@elastic/elasticsearch';
 import { PROCESSOR_NAME, SERVICE_NAME } from '../../../common/constants';
 import { getBucketSize } from '../helpers/get_bucket_size';
 import { MetricsRequestArgs } from './query_types';

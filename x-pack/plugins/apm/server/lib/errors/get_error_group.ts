@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter } from 'elasticsearch';
+import { ESFilter } from '@elastic/elasticsearch';
 import { get } from 'lodash';
 import { oc } from 'ts-optchain';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';

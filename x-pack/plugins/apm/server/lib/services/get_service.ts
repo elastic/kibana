@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BucketAgg } from 'elasticsearch';
-import { ESFilter } from 'elasticsearch';
+import { BucketAgg } from '@elastic/elasticsearch';
+import { ESFilter } from '@elastic/elasticsearch';
 import { oc } from 'ts-optchain';
 import {
   SERVICE_AGENT_NAME,
