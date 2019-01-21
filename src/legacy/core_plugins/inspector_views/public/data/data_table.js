@@ -107,7 +107,7 @@ class DataTableFormat extends Component {
     );
   }
 
-  static getDerivedStateFromProps({ data, isFormatted, intl }) {
+  static getDerivedStateFromProps({ data, isFormatted }) {
     if (!data) {
       return {
         columns: null,
@@ -119,7 +119,7 @@ class DataTableFormat extends Component {
       name: col.name,
       field: col.field,
       sortable: isFormatted ? row => row[col.field].raw : true,
-      render: (value) => DataTableFormat.renderCell(col, value, isFormatted, intl),
+      render: (value) => DataTableFormat.renderCell(col, value, isFormatted),
     }));
 
     return { columns, rows: data.rows };

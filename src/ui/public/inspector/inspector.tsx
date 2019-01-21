@@ -18,7 +18,6 @@
  */
 import React from 'react';
 
-import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import { FlyoutSession, openFlyout } from 'ui/flyout';
 import { Adapters } from './types';
