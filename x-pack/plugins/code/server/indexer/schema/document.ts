@@ -71,6 +71,9 @@ export const DocumentSchema = {
       disableJava: {
         type: 'boolean',
       },
+      disableGo: {
+        type: 'boolean',
+      },
       disableTypescript: {
         type: 'boolean',
       },

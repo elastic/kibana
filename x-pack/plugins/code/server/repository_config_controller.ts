@@ -21,6 +21,11 @@ export class RepositoryConfigController {
     const { repoUri } = parseLspUrl(uri)!;
     let repoConfig = this.repositoryConfigCache[repoUri];
 
+    // TODO Once we finished the go language server, we should make it visible.
+    if (lang === 'go') {
+      return true;
+    }
+
     if (!repoConfig) {
       try {
         repoConfig = await this.repoObjectClient.getRepositoryConfig(repoUri);
