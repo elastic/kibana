@@ -2944,8 +2944,7 @@ main {
   /* 1 */
   padding: 10px;
   height: 40px;
-  background-color: #ffffff;
-  border: 1px solid #D3DAE6; }
+  background-color: #ffffff; }
 
 .kuiToolBarFooterSection {
   display: -webkit-box;

@@ -22,13 +22,14 @@ import {
   setQuery,
 } from '../actions/store_actions';
 import { getIsDarkTheme, updateFlyout, FLYOUT_STATE } from '../store/ui';
-import { getUniqueIndexPatternIds } from '../selectors/map_selectors';
+import { getDataSources, getUniqueIndexPatternIds } from '../selectors/map_selectors';
 import { Inspector } from 'ui/inspector';
 import { inspectorAdapters, indexPatternService } from '../kibana_services';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { showOptionsPopover } from '../components/top_nav/show_options_popover';
 import { toastNotifications } from 'ui/notify';
+import { getInitialLayers } from './get_initial_layers';
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-gis-root';
 const DEFAULT_QUERY_LANGUAGE = 'kuery';
@@ -93,7 +94,8 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
         store.dispatch(setRefreshConfig(mapState.refreshConfig));
       }
     }
-    const layerList = savedMap.layerListJSON ? JSON.parse(savedMap.layerListJSON) : [];
+
+    const layerList = getInitialLayers(savedMap.layerListJSON, getDataSources(store.getState()));
     store.dispatch(replaceLayerList(layerList));
 
     // Initialize query, syncing appState and store
