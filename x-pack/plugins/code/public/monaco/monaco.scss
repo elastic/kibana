@@ -1,16 +1,16 @@
-.highlightLine {
-  background: lightblue;
+.code-monaco-highlight-line {
+  background: $euiCodeBlockBuiltInColor;
 
 }
 
-.markLineNumber {
-  background: lightblue;
-	width: 5px;
+.code-mark-line-number {
+  background: $euiCodeBlockBuiltInColor;
+	width: $euiSizeXS;
 }
 
 .monaco-editor .margin-view-overlays .line-numbers {
   text-align: center;
-  border-right: solid 1px rgba(188, 188, 188, 1);
+  border-right: $euiBorderThin;
 }
 
 

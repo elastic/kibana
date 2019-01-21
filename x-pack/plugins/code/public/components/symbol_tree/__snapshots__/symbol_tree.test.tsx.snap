@@ -2,7 +2,7 @@
 
 exports[`render symbol tree correctly 1`] = `
 <nav
-  className="euiSideNav sc-htpNat hHmRsM"
+  className="euiSideNav sc-htpNat bVMkMp"
 >
   <button
     className="euiSideNav__mobileToggle euiLink"
@@ -82,7 +82,7 @@ exports[`render symbol tree correctly 1`] = `
               onClick={[Function]}
             />
             <div
-              className="euiToken euiToken--tokenTint12 euiToken--rectangle euiToken--small euiToken--fill sc-ifAKCX giCWZe"
+              className="euiToken euiToken--tokenTint12 euiToken--rectangle euiToken--small euiToken--fill sc-ifAKCX dBLqTo"
             >
               <svg
                 className="euiIcon euiIcon--medium"
@@ -117,7 +117,7 @@ exports[`render symbol tree correctly 1`] = `
                 className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive sc-bxivhb hbpUhB"
               >
                 <div
-                  className="euiToken euiToken--tokenTint04 euiToken--circle euiToken--small sc-ifAKCX giCWZe"
+                  className="euiToken euiToken--tokenTint04 euiToken--circle euiToken--small sc-ifAKCX dBLqTo"
                 >
                   <svg
                     className="euiIcon euiIcon--medium"
@@ -151,7 +151,7 @@ exports[`render symbol tree correctly 1`] = `
                 className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive sc-bxivhb hbpUhB"
               >
                 <div
-                  className="euiToken euiToken--tokenTint04 euiToken--circle euiToken--small sc-ifAKCX giCWZe"
+                  className="euiToken euiToken--tokenTint04 euiToken--circle euiToken--small sc-ifAKCX dBLqTo"
                 >
                   <svg
                     className="euiIcon euiIcon--medium"
@@ -185,7 +185,7 @@ exports[`render symbol tree correctly 1`] = `
                 className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive sc-bxivhb hbpUhB"
               >
                 <div
-                  className="euiToken euiToken--tokenTint04 euiToken--circle euiToken--small sc-ifAKCX giCWZe"
+                  className="euiToken euiToken--tokenTint04 euiToken--circle euiToken--small sc-ifAKCX dBLqTo"
                 >
                   <svg
                     className="euiIcon euiIcon--medium"
@@ -219,7 +219,7 @@ exports[`render symbol tree correctly 1`] = `
                 className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive sc-bxivhb hbpUhB"
               >
                 <div
-                  className="euiToken euiToken--tokenTint04 euiToken--circle euiToken--small sc-ifAKCX giCWZe"
+                  className="euiToken euiToken--tokenTint04 euiToken--circle euiToken--small sc-ifAKCX dBLqTo"
                 >
                   <svg
                     className="euiIcon euiIcon--medium"
@@ -253,7 +253,7 @@ exports[`render symbol tree correctly 1`] = `
                 className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive sc-bxivhb hbpUhB"
               >
                 <div
-                  className="euiToken euiToken--tokenTint04 euiToken--circle euiToken--small sc-ifAKCX giCWZe"
+                  className="euiToken euiToken--tokenTint04 euiToken--circle euiToken--small sc-ifAKCX dBLqTo"
                 >
                   <svg
                     className="euiIcon euiIcon--medium"
@@ -287,7 +287,7 @@ exports[`render symbol tree correctly 1`] = `
                 className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive sc-bxivhb hbpUhB"
               >
                 <div
-                  className="euiToken euiToken--tokenTint04 euiToken--circle euiToken--small sc-ifAKCX giCWZe"
+                  className="euiToken euiToken--tokenTint04 euiToken--circle euiToken--small sc-ifAKCX dBLqTo"
                 >
                   <svg
                     className="euiIcon euiIcon--medium"
@@ -321,7 +321,7 @@ exports[`render symbol tree correctly 1`] = `
                 className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive sc-bxivhb hbpUhB"
               >
                 <div
-                  className="euiToken euiToken--tokenTint07 euiToken--circle euiToken--small sc-ifAKCX giCWZe"
+                  className="euiToken euiToken--tokenTint07 euiToken--circle euiToken--small sc-ifAKCX dBLqTo"
                 >
                   <svg
                     className="euiIcon euiIcon--medium"
@@ -355,7 +355,7 @@ exports[`render symbol tree correctly 1`] = `
                 className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive sc-bxivhb hbpUhB"
               >
                 <div
-                  className="euiToken euiToken--tokenTint02 euiToken--circle euiToken--small sc-ifAKCX giCWZe"
+                  className="euiToken euiToken--tokenTint02 euiToken--circle euiToken--small sc-ifAKCX dBLqTo"
                 >
                   <svg
                     className="euiIcon euiIcon--medium"
@@ -389,7 +389,7 @@ exports[`render symbol tree correctly 1`] = `
                 className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive sc-bxivhb hbpUhB"
               >
                 <div
-                  className="euiToken euiToken--tokenTint07 euiToken--circle euiToken--small sc-ifAKCX giCWZe"
+                  className="euiToken euiToken--tokenTint07 euiToken--circle euiToken--small sc-ifAKCX dBLqTo"
                 >
                   <svg
                     className="euiIcon euiIcon--medium"
@@ -423,7 +423,7 @@ exports[`render symbol tree correctly 1`] = `
                 className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive sc-bxivhb hbpUhB"
               >
                 <div
-                  className="euiToken euiToken--tokenTint02 euiToken--circle euiToken--small sc-ifAKCX giCWZe"
+                  className="euiToken euiToken--tokenTint02 euiToken--circle euiToken--small sc-ifAKCX dBLqTo"
                 >
                   <svg
                     className="euiIcon euiIcon--medium"
@@ -457,7 +457,7 @@ exports[`render symbol tree correctly 1`] = `
                 className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive sc-bxivhb hbpUhB"
               >
                 <div
-                  className="euiToken euiToken--tokenTint07 euiToken--circle euiToken--small sc-ifAKCX giCWZe"
+                  className="euiToken euiToken--tokenTint07 euiToken--circle euiToken--small sc-ifAKCX dBLqTo"
                 >
                   <svg
                     className="euiIcon euiIcon--medium"

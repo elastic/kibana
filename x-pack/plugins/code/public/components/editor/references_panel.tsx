@@ -29,7 +29,7 @@ export class ReferencesPanel extends React.Component<Props> {
   public render() {
     const body = this.props.isLoading ? <EuiLoadingKibana size="xl" /> : this.renderGroupByRepo();
     return (
-      <EuiPanel grow={false} className="referencesPanel">
+      <EuiPanel grow={false} className="code-editor-references-panel">
         <EuiButtonIcon
           className="euiFlyout__closeButton"
           size="s"
@@ -41,7 +41,7 @@ export class ReferencesPanel extends React.Component<Props> {
           <h3>{this.props.title}</h3>
         </EuiTitle>
 
-        <div className="autoOverflow">{body}</div>
+        <div className="code-auto-overflow">{body}</div>
       </EuiPanel>
     );
   }
@@ -57,7 +57,7 @@ export class ReferencesPanel extends React.Component<Props> {
       <EuiAccordion
         id={repo}
         key={repo}
-        buttonContentClassName="referenceAccordionButton"
+        buttonContentClassName="code-editor-reference-accordion-button"
         buttonContent={repo}
         paddingSize="s"
         initialIsOpen={true}

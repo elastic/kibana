@@ -1266,7 +1266,7 @@ exports[`render correctly with input query string changed 1`] = `
                           role="textbox"
                           spellCheck={false}
                           type="text"
-                          value="mockquery"
+                          value=""
                         >
                           <EuiFormControlLayout
                             compressed={false}
@@ -1297,7 +1297,7 @@ exports[`render correctly with input query string changed 1`] = `
                                     role="textbox"
                                     spellCheck={false}
                                     type="text"
-                                    value="mockquery"
+                                    value=""
                                   />
                                 </EuiValidatableControl>
                                 <EuiFormControlLayoutIcons
@@ -1357,7 +1357,7 @@ exports[`render correctly with input query string changed 1`] = `
                     loadMore={[Function]}
                     onClick={[Function]}
                     onMouseEnter={[Function]}
-                    query="mockquery"
+                    query=""
                     show={true}
                     suggestionGroups={Array []}
                   />

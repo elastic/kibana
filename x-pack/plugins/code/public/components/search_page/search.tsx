@@ -37,7 +37,7 @@ const MainContentContainer = styled.div`
 `;
 
 const CodeResultContainer = styled.div`
-  margin-top: 16px;
+  margin-top: calc(16 / 14rem);
 `;
 
 const RepositoryResultContainer = CodeResultContainer;

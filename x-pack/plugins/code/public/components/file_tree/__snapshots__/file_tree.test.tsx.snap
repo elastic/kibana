@@ -75,7 +75,7 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode"
+            className="code-file-node"
           >
             <span
               className="sc-bdVaJa fsxEnI"
@@ -107,7 +107,7 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode"
+            className="code-file-node"
           >
             <span
               className="sc-bdVaJa fsxEnI"
@@ -139,7 +139,7 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk euiSideNavItem--hasChildItems"
         >
           <div
-            className="fileNode"
+            className="code-file-node"
           >
             <span
               className="sc-bwzfXH kVxRUe sc-bdVaJa fsxEnI"
@@ -173,7 +173,7 @@ exports[`render correctly 1`] = `
               className="euiSideNavItem euiSideNavItem--branch"
             >
               <div
-                className="fileNode"
+                className="code-file-node"
               >
                 <span
                   className="sc-bdVaJa fsxEnI"
@@ -205,7 +205,7 @@ exports[`render correctly 1`] = `
               className="euiSideNavItem euiSideNavItem--branch"
             >
               <div
-                className="fileNode fileTreeFile"
+                className="code-file-node code-file-tree-file"
                 onClick={[Function]}
                 role="button"
               >
@@ -240,7 +240,7 @@ exports[`render correctly 1`] = `
               className="euiSideNavItem euiSideNavItem--branch euiSideNavItem--hasChildItems"
             >
               <div
-                className="activeFileNode"
+                className="code-active-file-node"
               >
                 <span
                   className="sc-bwzfXH kVxRUe sc-bdVaJa fsxEnI"
@@ -274,7 +274,7 @@ exports[`render correctly 1`] = `
                   className="euiSideNavItem euiSideNavItem--branch"
                 >
                   <div
-                    className="fileNode"
+                    className="code-file-node"
                   >
                     <span
                       className="sc-bdVaJa fsxEnI"
@@ -306,7 +306,7 @@ exports[`render correctly 1`] = `
                   className="euiSideNavItem euiSideNavItem--branch"
                 >
                   <div
-                    className="fileNode"
+                    className="code-file-node"
                   >
                     <span
                       className="sc-bdVaJa fsxEnI"
@@ -342,7 +342,7 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode"
+            className="code-file-node"
           >
             <span
               className="sc-bdVaJa fsxEnI"
@@ -374,7 +374,7 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode"
+            className="code-file-node"
           >
             <span
               className="sc-bdVaJa fsxEnI"
@@ -406,7 +406,7 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode"
+            className="code-file-node"
           >
             <span
               className="sc-bdVaJa fsxEnI"
@@ -438,7 +438,7 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode"
+            className="code-file-node"
           >
             <span
               className="sc-bdVaJa fsxEnI"
@@ -470,7 +470,7 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode"
+            className="code-file-node"
           >
             <span
               className="sc-bdVaJa fsxEnI"
@@ -502,7 +502,7 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode"
+            className="code-file-node"
           >
             <span
               className="sc-bdVaJa fsxEnI"
@@ -534,7 +534,7 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode fileTreeFile"
+            className="code-file-node code-file-tree-file"
             onClick={[Function]}
             role="button"
           >
@@ -569,7 +569,7 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode fileTreeFile"
+            className="code-file-node code-file-tree-file"
             onClick={[Function]}
             role="button"
           >
@@ -604,7 +604,7 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode fileTreeFile"
+            className="code-file-node code-file-tree-file"
             onClick={[Function]}
             role="button"
           >
@@ -639,7 +639,7 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode fileTreeFile"
+            className="code-file-node code-file-tree-file"
             onClick={[Function]}
             role="button"
           >
@@ -674,7 +674,7 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode fileTreeFile"
+            className="code-file-node code-file-tree-file"
             onClick={[Function]}
             role="button"
           >
@@ -709,7 +709,7 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode fileTreeFile"
+            className="code-file-node code-file-tree-file"
             onClick={[Function]}
             role="button"
           >
@@ -744,7 +744,7 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode fileTreeFile"
+            className="code-file-node code-file-tree-file"
             onClick={[Function]}
             role="button"
           >
@@ -779,7 +779,7 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode fileTreeFile"
+            className="code-file-node code-file-tree-file"
             onClick={[Function]}
             role="button"
           >
@@ -814,7 +814,7 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode fileTreeFile"
+            className="code-file-node code-file-tree-file"
             onClick={[Function]}
             role="button"
           >
@@ -849,7 +849,7 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="fileNode fileTreeFile"
+            className="code-file-node code-file-tree-file"
             onClick={[Function]}
             role="button"
           >

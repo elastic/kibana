@@ -5,6 +5,15 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiTextColor } from '@elastic/eui';
+import {
+  euiBorderColor,
+  euiBorderThick,
+  euiBorderThin,
+  euiSizeM,
+  euiSizeS,
+  euiSizeXs,
+  paddingSizes,
+} from '@elastic/eui/dist/eui_theme_light.json';
 import _ from 'lodash';
 import moment from 'moment';
 import React from 'react';
@@ -14,18 +23,18 @@ import { CommitInfo } from '../../../model/commit';
 const COMMIT_ID_LENGTH = 8;
 
 const Dot = styled.div`
-  --dotRadius: 10px;
+  --dotRadius: ${euiSizeS};
   width: var(--dotRadius);
   height: var(--dotRadius);
   border-radius: calc(var(--dotRadius) / 2);
-  background-color: #d8d8d8;
+  background-color: ${euiBorderColor};
   margin: auto;
 `;
 
 const CommitMessages = styled.div`
   overflow: auto;
   flex: 1;
-  padding: 1rem;
+  padding: ${paddingSizes.m};
 `;
 
 const Header = styled.div`
@@ -35,9 +44,9 @@ const Header = styled.div`
 `;
 
 const TimeLine = styled.div`
-  border-left: 2px solid #d9d9d9;
-  margin-left: 4px;
-  padding: 0.5rem 0 0.5rem 1rem;
+  border-left: ${euiBorderThick};
+  margin-left: ${euiSizeXs};
+  padding: ${paddingSizes.s} 0 ${paddingSizes.s} ${paddingSizes.m};
 `;
 
 const CommitRoot = styled(EuiPanel)`
@@ -50,16 +59,17 @@ const CommitRoot = styled(EuiPanel)`
 `;
 
 const CommitGroupContainer = styled.div`
-  margin: 0 0 4px 10px;
+  margin: 0 0 ${euiSizeXs} ${euiSizeM};
 `;
 
 const CommitId = styled.div`
+  --height: calc(20 / 14rem);
+  width: var(--dotRadius);
+  height: var(--height);
   margin: auto 0;
-  height: 20px;
-  width: 100px;
-  line-height: 20px;
+  line-height: var(--height);
   color: black;
-  border: 1px solid #d9d9d9;
+  border: ${euiBorderThin};
   text-align: center;
   flex-shrink: 0;
 `;
@@ -122,7 +132,7 @@ export const CommitHistory = (props: {
   if (!props.commits) {
     return (
       <CommitMessages>
-        <h1 className="commitsHeader">Commits</h1>
+        <h1>Commits</h1>
         <h3>loading</h3>
       </CommitMessages>
     );

@@ -5,16 +5,17 @@
  */
 
 import { EuiButton, EuiPanel, EuiSpacer, EuiSteps, EuiText, EuiTitle } from '@elastic/eui';
+import { euiSizeL, euiSizeXxl } from '@elastic/eui/dist/eui_theme_light.json'
 import React from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 const Root = styled.div`
-  padding: 40px 0;
+  padding: ${euiSizeXxl} 0;
   margin: 0 auto;
   &>div {
-    margin-top: 24px;
-    width: 784px;
+    margin-top: ${euiSizeL};
+    width: 56rem;
   }
 `
 

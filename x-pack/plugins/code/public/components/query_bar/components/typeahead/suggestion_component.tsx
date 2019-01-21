@@ -34,7 +34,7 @@ interface Props {
 
 const SuggestionItem = styled.div`
   background: ${(props: any) => (props.active ? euiColorHighlight : 'white')};
-  height: 48px;
+  height: calc(48 / 14rem);
   margin: 0 ${euiSize};
   border-radius: ${euiSizeXs} ${euiSizeXs} ${euiSizeXs} ${euiSizeXs};
   cursor: pointer;
