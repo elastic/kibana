@@ -5,11 +5,11 @@
  */
 
 import { mount } from 'enzyme';
-import { noop, pick } from 'lodash/fp';
+import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';
-import { mockDataProviderNames, mockDataProviders } from './mock/mock_data_providers';
+import { mockDataProviders } from './mock/mock_data_providers';
 import { getDraggableId, Providers } from './providers';
 
 describe('Providers', () => {
@@ -31,7 +31,11 @@ describe('Providers', () => {
         </DragDropContext>
       );
 
-      mockDataProviderNames().forEach(name => expect(wrapper.text()).toContain(name));
+      mockDataProviders.forEach(dataProvider =>
+        expect(wrapper.text()).toContain(
+          dataProvider.queryMatch.displayValue || dataProvider.queryMatch.value
+        )
+      );
     });
   });
 
@@ -54,23 +58,12 @@ describe('Providers', () => {
           </DroppableWrapper>
         </DragDropContext>
       );
-
       wrapper
-        .find('[data-test-subj="closeButton"]')
+        .find('[data-test-subj="providerBadge"] svg')
         .first()
         .simulate('click');
 
-      const callbackParams = pick(
-        ['enabled', 'id', 'name', 'negated'],
-        mockOnDataProviderRemoved.mock.calls[0][0]
-      );
-
-      expect(callbackParams).toEqual({
-        enabled: true,
-        id: 'id-Provider 1',
-        name: 'Provider 1',
-        negated: false,
-      });
+      expect(mockOnDataProviderRemoved.mock.calls[0][0]).toEqual('id-Provider 1');
     });
   });
 
@@ -103,22 +96,20 @@ describe('Providers', () => {
       );
 
       wrapper
-        .find('[data-test-subj="switchButton"]')
+        .find('[data-test-subj="providerBadge"]')
+        .first()
+        .simulate('click');
+
+      wrapper.update();
+
+      wrapper
+        .find('[data-test-subj="providerActions"] button.euiContextMenuItem')
         .at(1)
         .simulate('click');
 
-      const callbackParams = pick(
-        ['enabled', 'dataProvider.id', 'dataProvider.name', 'dataProvider.negated'],
-        mockOnToggleDataProviderEnabled.mock.calls[0][0]
-      );
-
-      expect(callbackParams).toEqual({
-        dataProvider: {
-          name: 'Provider 1',
-          negated: false,
-          id: 'id-Provider 1',
-        },
+      expect(mockOnToggleDataProviderEnabled.mock.calls[0][0]).toEqual({
         enabled: false,
+        providerId: 'id-Provider 1',
       });
     });
   });

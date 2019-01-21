@@ -101,7 +101,7 @@ export const ProviderItemActions = pure<OwnProps>(
         anchorPosition="downCenter"
         panelPaddingSize="none"
       >
-        <EuiContextMenu initialPanelId={0} panels={panelTree} />
+        <EuiContextMenu initialPanelId={0} panels={panelTree} data-test-subj="providerActions" />
       </MyEuiPopover>
     );
   }

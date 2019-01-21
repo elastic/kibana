@@ -350,7 +350,7 @@ describe('Timeline', () => {
     });
 
     describe('onDataProviderRemoved', () => {
-      test('it invokes the onDataProviderRemoved callback when the close button on a provider is clicked', () => {
+      test('it invokes the onDataProviderRemoved callback when the delete button on a provider is clicked', () => {
         const mockOnDataProviderRemoved = jest.fn();
 
         const wrapper = mount(
@@ -390,21 +390,11 @@ describe('Timeline', () => {
         );
 
         wrapper
-          .find('[data-test-subj="closeButton"]')
+          .find('[data-test-subj="providerBadge"] svg')
           .first()
           .simulate('click');
 
-        const callbackParams = pick(
-          ['enabled', 'id', 'name', 'negated'],
-          mockOnDataProviderRemoved.mock.calls[0][0]
-        );
-
-        expect(callbackParams).toEqual({
-          enabled: true,
-          id: 'id-Provider 1',
-          name: 'Provider 1',
-          negated: false,
-        });
+        expect(mockOnDataProviderRemoved.mock.calls[0][0]).toEqual('id-Provider 1');
       });
     });
 
@@ -514,21 +504,19 @@ describe('Timeline', () => {
         );
 
         wrapper
-          .find('[data-test-subj="switchButton"]')
+          .find('[data-test-subj="providerBadge"]')
+          .first()
+          .simulate('click');
+
+        wrapper.update();
+
+        wrapper
+          .find('[data-test-subj="providerActions"] button.euiContextMenuItem')
           .at(1)
           .simulate('click');
 
-        const callbackParams = pick(
-          ['enabled', 'dataProvider.id', 'dataProvider.name', 'dataProvider.negated'],
-          mockOnToggleDataProviderEnabled.mock.calls[0][0]
-        );
-
-        expect(callbackParams).toEqual({
-          dataProvider: {
-            name: 'Provider 1',
-            negated: false,
-            id: 'id-Provider 1',
-          },
+        expect(mockOnToggleDataProviderEnabled.mock.calls[0][0]).toEqual({
+          providerId: 'id-Provider 1',
           enabled: false,
         });
       });

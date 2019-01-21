@@ -88,6 +88,7 @@ export const ProviderBadge = pure<ProviderBadgeProps>(
           // Also, we may want to add a `DEL` keyboard press functionality
           tabIndex: '-1',
         }}
+        data-test-subj="providerBadge"
       >
         {tooltipStr !== null && (
           <EuiToolTip data-test-subj="add-tool-tip" content={tooltipStr} position="bottom">

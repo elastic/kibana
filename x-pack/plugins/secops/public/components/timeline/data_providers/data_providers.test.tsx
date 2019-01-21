@@ -10,7 +10,7 @@ import * as React from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { DataProviders } from '.';
 import { DataProvider } from './data_provider';
-import { mockDataProviderNames, mockDataProviders } from './mock/mock_data_providers';
+import { mockDataProviders } from './mock/mock_data_providers';
 
 describe('DataProviders', () => {
   describe('rendering', () => {
@@ -38,7 +38,7 @@ describe('DataProviders', () => {
       dropMessage.forEach(word => expect(wrapper.text()).toContain(word));
     });
 
-    test('it should NOT render a placeholder given a non-empty collection of data providers', () => {
+    test('it should STILL render a placeholder given a non-empty collection of data providers', () => {
       const wrapper = mount(
         <DragDropContext onDragEnd={noop}>
           <DataProviders
@@ -55,7 +55,7 @@ describe('DataProviders', () => {
         </DragDropContext>
       );
 
-      dropMessage.forEach(word => expect(wrapper.text()).not.toContain(word));
+      dropMessage.forEach(word => expect(wrapper.text()).toContain(word));
     });
 
     test('it renders the data providers', () => {
@@ -75,7 +75,11 @@ describe('DataProviders', () => {
         </DragDropContext>
       );
 
-      mockDataProviderNames().forEach(name => expect(wrapper.text()).toContain(name));
+      mockDataProviders.forEach(dataProvider =>
+        expect(wrapper.text()).toContain(
+          dataProvider.queryMatch.displayValue || dataProvider.queryMatch.value
+        )
+      );
     });
   });
 });
