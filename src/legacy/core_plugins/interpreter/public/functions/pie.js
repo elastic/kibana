@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { VislibSlicesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
@@ -34,10 +33,6 @@ export const kibanaPie = () => ({
     defaultMessage: 'Pie visualization'
   }),
   args: {
-    schemas: {
-      types: ['string'],
-      default: '"{}"',
-    },
     visConfig: {
       types: ['string', 'null'],
       default: '"{}"',
@@ -47,24 +42,9 @@ export const kibanaPie = () => ({
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const Private = $injector.get('Private');
     const responseHandler = Private(VislibSlicesResponseHandlerProvider).handler;
-    const visTypes = Private(VisTypesRegistryProvider);
     const visConfigParams = JSON.parse(args.visConfig);
-    const visType = visTypes.byName.pie;
-    const schemas = JSON.parse(args.schemas);
 
-    if (context.columns) {
-      context.columns.forEach(column => {
-        column.aggConfig.aggConfigs.schemas = visType.schemas.all;
-      });
-
-      Object.keys(schemas).forEach(key => {
-        schemas[key].forEach(i => {
-          context.columns[i].aggConfig.schema = key;
-        });
-      });
-    }
-
-    const convertedData = await responseHandler(context);
+    const convertedData = await responseHandler(context, visConfigParams.dimensions);
 
     return {
       type: 'render',
