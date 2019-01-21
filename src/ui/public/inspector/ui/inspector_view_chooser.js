@@ -28,6 +28,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 class InspectorViewChooser extends Component {
 
   state = {
@@ -72,7 +74,11 @@ class InspectorViewChooser extends Component {
         onClick={this.toggleSelector}
         data-test-subj="inspectorViewChooser"
       >
-        View: { this.props.selectedView.title }
+        <FormattedMessage
+          id="common.ui.inspector.viewSelectedViewButtonLabel"
+          defaultMessage="View: {selectedViewTitle}"
+          values={{ selectedViewTitle: this.props.selectedView.title }}
+        />
       </EuiButtonEmpty>
     );
   }
@@ -83,7 +89,13 @@ class InspectorViewChooser extends Component {
         position="bottom"
         content={this.props.selectedView.help}
       >
-        <span>View: { this.props.selectedView.title }</span>
+        <span>
+          <FormattedMessage
+            id="common.ui.inspector.viewSelectedViewLabel"
+            defaultMessage="View: {selectedViewTitle}"
+            values={{ selectedViewTitle: this.props.selectedView.title }}
+          />
+        </span>
       </EuiToolTip>
     );
   }

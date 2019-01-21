@@ -25,6 +25,7 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { InspectorViewChooser } from './inspector_view_chooser';
 
@@ -106,7 +107,9 @@ class InspectorPanel extends Component {
 }
 
 InspectorPanel.defaultProps = {
-  title: 'Inspector',
+  title: i18n.translate('common.ui.inspector.inspectorTitle', {
+    defaultMessage: 'Inspector'
+  })
 };
 
 InspectorPanel.propTypes = {

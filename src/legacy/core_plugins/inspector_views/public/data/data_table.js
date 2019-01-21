@@ -35,12 +35,6 @@ import { i18n } from '@kbn/i18n';
 import { DataDownloadOptions } from './download_options';
 
 class DataTableFormat extends Component {
-  static propTypes = {
-    data: PropTypes.object.isRequired,
-    exportTitle: PropTypes.string.isRequired,
-    isFormatted: PropTypes.bool,
-  };
-
   state = { };
 
   static renderCell(col, value, isFormatted) {

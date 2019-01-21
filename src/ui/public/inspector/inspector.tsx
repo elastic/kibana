@@ -18,6 +18,7 @@
  */
 import React from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import { FlyoutSession, openFlyout } from 'ui/flyout';
 import { Adapters } from './types';
@@ -74,7 +75,9 @@ function open(adapters: Adapters, options: InspectorOptions = {}): InspectorSess
     </I18nProvider>,
     {
       'data-test-subj': 'inspectorPanel',
-      closeButtonAriaLabel: 'Close Inspector',
+      closeButtonAriaLabel: i18n.translate('common.ui.inspector.closeButtonAriaLabel', {
+        defaultMessage: 'Close Inspector'
+      }),
     }
   );
 }

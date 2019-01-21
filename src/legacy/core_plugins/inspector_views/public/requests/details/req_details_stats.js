@@ -46,7 +46,7 @@ const RequestDetailsStats = injectI18n(class RequestDetailsStats extends Compone
             { stat.description &&
               <EuiIconTip
                 aria-label={this.props.intl.formatMessage({
-                  id: 'inspectorViews.requests.descriptionAriaLabel',
+                  id: 'inspectorViews.requests.descriptionRowIconAriaLabel',
                   defaultMessage: 'Description'
                 })}
                 type="questionInCircle"

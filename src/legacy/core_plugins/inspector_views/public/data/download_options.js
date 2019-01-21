@@ -82,7 +82,7 @@ class DataDownloadOptions extends Component {
         onClick={this.onTogglePopover}
       >
         <FormattedMessage
-          id="inspectorViews.data.downloadCSVButtonLabel"
+          id="inspectorViews.data.downloadCSVToggleButtonLabel"
           defaultMessage="Download CSV"
         />
       </EuiButton>
