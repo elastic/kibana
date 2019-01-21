@@ -27,8 +27,12 @@ import {
   EuiTableRow,
   EuiTableRowCell,
 } from '@elastic/eui';
+import { injectI18n } from '@kbn/i18n/react';
 
-class RequestDetailsStats extends Component {
+const RequestDetailsStats = injectI18n(class RequestDetailsStats extends Component {
+  static propTypes = {
+    request: PropTypes.object.isRequired,
+  };
 
   static shouldShow = (request) => !!request.stats && Object.keys(request.stats).length;
 
@@ -41,7 +45,10 @@ class RequestDetailsStats extends Component {
           <span className="insRequestDetailsStats__icon">
             { stat.description &&
               <EuiIconTip
-                aria-label="Description"
+                aria-label={this.props.intl.formatMessage({
+                  id: 'inspectorViews.requests.descriptionAriaLabel',
+                  defaultMessage: 'Description'
+                })}
                 type="questionInCircle"
                 color="subdued"
                 content={stat.description}
@@ -74,10 +81,6 @@ class RequestDetailsStats extends Component {
       </EuiTable>
     );
   }
-}
-
-RequestDetailsStats.propTypes = {
-  request: PropTypes.object.isRequired,
-};
+});
 
 export { RequestDetailsStats };

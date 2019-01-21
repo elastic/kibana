@@ -29,13 +29,20 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+
 import { DataDownloadOptions } from './download_options';
 
-class DataTableFormat extends Component {
+const DataTableFormat = injectI18n(class DataTableFormat extends Component {
+  static propTypes = {
+    data: PropTypes.object.isRequired,
+    exportTitle: PropTypes.string.isRequired,
+    isFormatted: PropTypes.bool,
+  };
 
   state = { };
 
-  static renderCell(col, value, isFormatted) {
+  static renderCell(col, value, isFormatted, intl) {
     return (
       <EuiFlexGroup
         responsive={false}
@@ -54,12 +61,18 @@ class DataTableFormat extends Component {
             { col.filter &&
               <EuiToolTip
                 position="bottom"
-                content="Filter for value"
+                content={<FormattedMessage
+                  id="inspectorViews.data.filterForValueButtonTooltip"
+                  defaultMessage="Filter for value"
+                />}
               >
                 <EuiButtonIcon
                   iconType="plusInCircle"
                   color="text"
-                  aria-label="Filter for value"
+                  aria-label={intl.formatMessage({
+                    id: 'inspectorViews.data.filterForValueButtonAriaLabel',
+                    defaultMessage: 'Filter for value'
+                  })}
                   data-test-subj="filterForInspectorCellValue"
                   className="insDataTableFormat__filter"
                   onClick={() => col.filter(value)}
@@ -70,12 +83,18 @@ class DataTableFormat extends Component {
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   position="bottom"
-                  content="Filter out value"
+                  content={<FormattedMessage
+                    id="inspectorViews.data.filterOutValueButtonTooltip"
+                    defaultMessage="Filter out value"
+                  />}
                 >
                   <EuiButtonIcon
                     iconType="minusInCircle"
                     color="text"
-                    aria-label="Filter out value"
+                    aria-label={intl.formatMessage({
+                      id: 'inspectorViews.data.filterOutValueButtonAriaLabel',
+                      defaultMessage: 'Filter out value'
+                    })}
                     data-test-subj="filterOutInspectorCellValue"
                     className="insDataTableFormat__filter"
                     onClick={() => col.filterOut(value)}
@@ -89,7 +108,7 @@ class DataTableFormat extends Component {
     );
   }
 
-  static getDerivedStateFromProps({ data, isFormatted }) {
+  static getDerivedStateFromProps({ data, isFormatted, intl }) {
     if (!data) {
       return {
         columns: null,
@@ -101,7 +120,7 @@ class DataTableFormat extends Component {
       name: col.name,
       field: col.field,
       sortable: isFormatted ? row => row[col.field].raw : true,
-      render: (value) => DataTableFormat.renderCell(col, value, isFormatted),
+      render: (value) => DataTableFormat.renderCell(col, value, isFormatted, intl),
     }));
 
     return { columns, rows: data.rows };
@@ -142,12 +161,6 @@ class DataTableFormat extends Component {
       </React.Fragment>
     );
   }
-}
-
-DataTableFormat.propTypes = {
-  data: PropTypes.object.isRequired,
-  exportTitle: PropTypes.string.isRequired,
-  isFormatted: PropTypes.bool,
-};
+});
 
 export { DataTableFormat };
