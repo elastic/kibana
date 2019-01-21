@@ -17,8 +17,24 @@
  * under the License.
  */
 
-import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
+export function GlobalNavProvider({ getService }) {
+  const testSubjects = getService('testSubjects');
 
-export function makeGeoJsonResponseHandler() {
-  return convertToGeoJson;
+  return new class GlobalNav {
+    async clickLogo() {
+      return await testSubjects.click('headerGlobalNav logo');
+    }
+
+    async exists() {
+      return await testSubjects.exists('headerGlobalNav');
+    }
+
+    async getFirstBreadcrumb() {
+      return await testSubjects.getVisibleText('headerGlobalNav breadcrumbs first&breadcrumb');
+    }
+
+    async getLastBreadcrumb() {
+      return await testSubjects.getVisibleText('headerGlobalNav breadcrumbs last&breadcrumb');
+    }
+  };
 }
