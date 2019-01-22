@@ -18,6 +18,7 @@ import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_
 import { defaultToEmpty, getEmptyValue, getOrEmpty } from '../../../empty_value';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
+import * as i18n from './translations';
 
 interface OwnProps {
   data: UncommonProcessesEdges[];
@@ -43,23 +44,19 @@ type UncommonProcessTableProps = OwnProps &
 
 const rowItems: ItemsPerRow[] = [
   {
-    text: '2 rows',
-    numberOfRow: 2,
-  },
-  {
-    text: '5 rows',
+    text: i18n.ROWS_5,
     numberOfRow: 5,
   },
   {
-    text: '10 rows',
+    text: i18n.ROWS_10,
     numberOfRow: 10,
   },
   {
-    text: '20 rows',
+    text: i18n.ROWS_20,
     numberOfRow: 20,
   },
   {
-    text: '50 rows',
+    text: i18n.ROWS_50,
     numberOfRow: 50,
   },
 ];
@@ -78,7 +75,7 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
   }) => (
     <LoadMoreTable
       columns={getUncommonColumns(startDate)}
-      loadingTitle="Uncommon Processes"
+      loadingTitle={i18n.UNCOMMON_PROCESSES}
       loading={loading}
       pageOfItems={data}
       loadMore={() => loadMore(nextCursor)}
@@ -88,7 +85,7 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
       updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
       title={
         <h3>
-          Uncommon Processes <EuiBadge color="hollow">{totalCount}</EuiBadge>
+          {i18n.UNCOMMON_PROCESSES} <EuiBadge color="hollow">{totalCount}</EuiBadge>
         </h3>
       }
     />
@@ -108,7 +105,7 @@ const extractHostNames = (hosts: HostEcsFields[]) => hosts.map(host => host.name
 
 const getUncommonColumns = (startDate: number) => [
   {
-    name: 'Name',
+    name: i18n.NAME,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }: UncommonProcessesEdges) => {
@@ -144,25 +141,25 @@ const getUncommonColumns = (startDate: number) => [
     },
   },
   {
-    name: 'User',
+    name: i18n.USER,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }: UncommonProcessesEdges) => <>{getOrEmpty('user.name', node)}</>,
   },
   {
-    name: 'Command Line',
+    name: i18n.COMMAND_LINE,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }: UncommonProcessesEdges) => <>{defaultToEmpty(node.process.title)}</>,
   },
   {
-    name: 'Number of Instances',
+    name: i18n.NUMBER_OF_INSTANCES,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }: UncommonProcessesEdges) => <>{defaultToEmpty(node.instances)}</>,
   },
   {
-    name: 'Number of Hosts',
+    name: i18n.NUMBER_OF_HOSTS,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }: UncommonProcessesEdges) => (
@@ -170,7 +167,7 @@ const getUncommonColumns = (startDate: number) => [
     ),
   },
   {
-    name: 'Hosts',
+    name: i18n.HOSTS,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }: UncommonProcessesEdges) => (

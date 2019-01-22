@@ -1,0 +1,19 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { i18n } from '@kbn/i18n';
+
+export const NO_AUDITBEAT_INDICES = i18n.translate('xpack.secops.hosts.noAuditBeatIndicies', {
+  defaultMessage: "Looks like you don't have any auditbeat indices.",
+});
+
+export const LETS_ADD_SOME = i18n.translate('xpack.secops.hosts.letsAddSome', {
+  defaultMessage: "Let's add some!",
+});
+
+export const SETUP_INSTRUCTIONS = i18n.translate('xpack.secops.hosts.setupInstructions', {
+  defaultMessage: 'Setup Instructions',
+});

@@ -13,6 +13,7 @@ import {
 import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
+import * as i18n from './translations';
 
 interface HeaderBreadcrumbsProps {
   breadcrumbs?: EuiBreadcrumbDefinition[];
@@ -21,7 +22,7 @@ interface HeaderBreadcrumbsProps {
 const staticBreadcrumbs = [
   {
     href: '#/',
-    text: 'secops',
+    text: i18n.SECOPS,
   },
 ];
 

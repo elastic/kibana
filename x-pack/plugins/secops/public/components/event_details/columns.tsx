@@ -17,6 +17,7 @@ import styled from 'styled-components';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { WithHoverActions } from '../with_hover_actions';
 import { getIconFromType } from './helpers';
+import * as i18n from './translations';
 
 /**
  * An item rendered in the table
@@ -56,14 +57,14 @@ export const columns = [
   },
   {
     field: 'field',
-    name: 'Field',
+    name: i18n.FIELD,
     sortable: true,
     truncateText: false,
     render: (field: string) => (
       <WithHoverActions
         hoverContent={
           <HoverActionsContainer data-test-subj="hover-actions-container">
-            <EuiToolTip content="Copy to clipboard">
+            <EuiToolTip content={i18n.COPY_TO_CLIPBOARD}>
               <WithCopyToClipboard text={field} />
             </EuiToolTip>
           </HoverActionsContainer>
@@ -75,14 +76,14 @@ export const columns = [
   },
   {
     field: 'value',
-    name: 'Value',
+    name: i18n.VALUE,
     sortable: true,
     truncateText: false,
     render: (value: JSX.Element, item: Item) => (
       <WithHoverActions
         hoverContent={
           <HoverActionsContainer data-test-subj="hover-actions-container">
-            <EuiToolTip content="Copy to clipboard">
+            <EuiToolTip content={i18n.COPY_TO_CLIPBOARD}>
               <WithCopyToClipboard text={item.valueAsString} />
             </EuiToolTip>
           </HoverActionsContainer>
@@ -94,7 +95,7 @@ export const columns = [
   },
   {
     field: 'description',
-    name: 'Description',
+    name: i18n.DESCRIPTION,
     render: (description: string) => <SelectableText>{description}</SelectableText>,
     sortable: true,
     truncateText: true,

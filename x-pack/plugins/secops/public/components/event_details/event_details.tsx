@@ -12,6 +12,7 @@ import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { Ecs } from '../../graphql/types';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
+import * as i18n from './translations';
 
 export type View = 'table-view' | 'json-view';
 
@@ -30,12 +31,12 @@ export const EventDetails = pure<Props>(({ data, view, onViewSelected }) => {
   const tabs: EuiTabbedContentTab[] = [
     {
       id: 'table-view',
-      name: 'Table',
+      name: i18n.TABLE,
       content: <EventFieldsBrowser data={data} />,
     },
     {
       id: 'json-view',
-      name: 'JSON View',
+      name: i18n.JSON_VIEW,
       content: <JsonView data={data} />,
     },
   ];

@@ -15,7 +15,6 @@ import { Theme } from '../../store/local/app/model';
 import { AutoSizer } from '../auto_sizer';
 import { Body } from './body';
 import { ColumnHeader } from './body/column_headers/column_header';
-import { Range } from './body/column_headers/range_picker/ranges';
 import { RowRenderer } from './body/renderers';
 import { ColumnRenderer } from './body/renderers';
 import { Sort } from './body/sort';
@@ -48,7 +47,7 @@ interface Props {
   onFilterChange: OnFilterChange;
   onRangeSelected: OnRangeSelected;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
-  range: Range;
+  range: string;
   rowRenderers: RowRenderer[];
   show: boolean;
   sort: Sort;

@@ -65,7 +65,7 @@ export const Timer = pure<Props>(({ onChange, timerIsOn, duration, durationKind,
       <EuiFlexItem>
         <EuiFormRow>
           <EuiFieldNumber
-            aria-label="Count of"
+            aria-label="Count of" // TODO: Translate this if we don't replace this with a new date time picker
             value={duration}
             step={0}
             onChange={arg => {
@@ -77,7 +77,7 @@ export const Timer = pure<Props>(({ onChange, timerIsOn, duration, durationKind,
       <EuiFlexItem>
         <EuiFormRow>
           <EuiSelect
-            aria-label="Count Type"
+            aria-label="Count Type" // TODO: Translate this if we don't replace this with a new date time picker
             value={durationKind}
             options={duration === 1 ? singleLastOptions : pluralLastOptions}
             onChange={arg => {

@@ -11,6 +11,7 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { Note } from '../../lib/note';
+import * as i18n from './translations';
 
 /** Performs IO to update (or add a new) note */
 export type UpdateNote = (note: Note) => void;
@@ -69,11 +70,11 @@ export const NewNote = pure<{
 }>(({ note, updateNewNote }) => (
   <TextArea
     autoFocus
-    aria-label="Add a note"
+    aria-label={i18n.ADD_A_NOTE}
     data-test-subj="add-a-note"
     fullWidth={true}
     onChange={e => updateNewNote(e.target.value)}
-    placeholder="Add a note"
+    placeholder={i18n.ADD_A_NOTE}
     spellCheck={true}
     value={note}
   />
@@ -125,7 +126,7 @@ export const AddNote = pure<{
 }>(({ associateNote, getNewNoteId, newNote, updateNewNote, updateNote }) => (
   <AddNotesContainer>
     <NewNote note={newNote} updateNewNote={updateNewNote} />
-    <EuiToolTip data-test-subj="add-tool-tip" content="Add a new note">
+    <EuiToolTip data-test-subj="add-tool-tip" content={i18n.ADD_A_NEW_NOTE}>
       <EuiButton
         data-test-subj="Add Note"
         isDisabled={newNote.trim().length < 1}
@@ -140,7 +141,7 @@ export const AddNote = pure<{
           })
         }
       >
-        Add Note
+        {i18n.ADD_NOTE}
       </EuiButton>
     </EuiToolTip>
   </AddNotesContainer>

@@ -17,7 +17,6 @@ import { timelineDefaults } from '../../store/local/timeline/model';
 import { State } from '../../store/reducer';
 import { timelineByIdSelector } from '../../store/selectors';
 import { ColumnHeader } from './body/column_headers/column_header';
-import { Range } from './body/column_headers/range_picker/ranges';
 import { columnRenderers, rowRenderers } from './body/renderers';
 import { Sort } from './body/sort';
 import { DataProvider } from './data_providers/data_provider';
@@ -43,7 +42,7 @@ interface StateReduxProps {
   itemsPerPage?: number;
   itemsPerPageOptions?: number[];
   pageCount?: number;
-  range?: Range;
+  range?: string;
   sort?: Sort;
   show?: boolean;
   theme?: Theme;
@@ -61,7 +60,7 @@ interface DispatchProps {
   }>;
   updateRange?: ActionCreator<{
     id: string;
-    range: Range;
+    range: string;
   }>;
   updateSort?: ActionCreator<{
     id: string;

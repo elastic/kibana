@@ -21,6 +21,7 @@ import {
   StreamLive,
 } from './helpers';
 import { NotesHistoryActions, TimelineProperties } from './styles';
+import * as i18n from './translations';
 
 type CreateTimeline = ({ id, show }: { id: string; show?: boolean }) => void;
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
@@ -175,7 +176,7 @@ export class Properties extends React.PureComponent<Props, State> {
                 </EuiFormRow>
 
                 {width < showDescriptionThreshold ? (
-                  <EuiFormRow label="Description">
+                  <EuiFormRow label={i18n.DESCRIPTION}>
                     <Description
                       description={description}
                       timelineId={timelineId}

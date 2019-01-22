@@ -10,6 +10,7 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { ThemeSwitcher } from '../theme_switcher';
+import * as i18n from './translations';
 
 interface Props {
   showPopover: boolean;
@@ -45,12 +46,12 @@ export const AppSettingsPopover = pure<Props>(({ showPopover, onClick, onClose }
           href="kibana#home/tutorial_directory/security"
           target="_blank"
         >
-          Add data
+          {i18n.ADD_DATA}
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem>
         <Title size="xs">
-          <TitleText>Theme</TitleText>
+          <TitleText>{i18n.THEME}</TitleText>
         </Title>
         <ThemeSwitcher />
       </EuiFlexItem>

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { I18nProvider } from '@kbn/i18n/react';
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { getOr } from 'lodash/fp';
@@ -86,21 +87,23 @@ describe('Footer Timeline Component', () => {
 
     test('it renders the loadMore button if need to fetch more', () => {
       const wrapper = mount(
-        <Footer
-          dataProviders={mockDataProviders}
-          serverSideEventCount={mockData.Events.totalCount}
-          hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
-          height={100}
-          isLoading={false}
-          itemsCount={mockData.Events.edges.length}
-          itemsPerPage={2}
-          itemsPerPageOptions={[1, 5, 10, 20]}
-          onChangeItemsPerPage={onChangeItemsPerPage}
-          onLoadMore={loadMore}
-          nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
-          tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
-          updatedAt={1546878704036}
-        />
+        <I18nProvider>
+          <Footer
+            dataProviders={mockDataProviders}
+            serverSideEventCount={mockData.Events.totalCount}
+            hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
+            height={100}
+            isLoading={false}
+            itemsCount={mockData.Events.edges.length}
+            itemsPerPage={2}
+            itemsPerPageOptions={[1, 5, 10, 20]}
+            onChangeItemsPerPage={onChangeItemsPerPage}
+            onLoadMore={loadMore}
+            nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
+            tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
+            updatedAt={1546878704036}
+          />
+        </I18nProvider>
       );
 
       expect(wrapper.find('[data-test-subj="TimelineMoreButton"]').exists()).toBeTruthy();
@@ -108,23 +111,29 @@ describe('Footer Timeline Component', () => {
 
     test('it renders the Loading... in the more load button when fetching new data', () => {
       const wrapper = mount(
-        <Footer
-          dataProviders={mockDataProviders}
-          serverSideEventCount={mockData.Events.totalCount}
-          hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
-          height={100}
-          isLoading={true}
-          itemsCount={mockData.Events.edges.length}
-          itemsPerPage={2}
-          itemsPerPageOptions={[1, 5, 10, 20]}
-          onChangeItemsPerPage={onChangeItemsPerPage}
-          onLoadMore={loadMore}
-          nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
-          tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
-          updatedAt={1546878704036}
-        />
+        <I18nProvider>
+          <Footer
+            dataProviders={mockDataProviders}
+            serverSideEventCount={mockData.Events.totalCount}
+            hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
+            height={100}
+            isLoading={true}
+            itemsCount={mockData.Events.edges.length}
+            itemsPerPage={2}
+            itemsPerPageOptions={[1, 5, 10, 20]}
+            onChangeItemsPerPage={onChangeItemsPerPage}
+            onLoadMore={loadMore}
+            nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
+            tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
+            updatedAt={1546878704036}
+          />
+        </I18nProvider>
       );
-      wrapper.setState({ paginationLoading: true });
+      wrapper
+        .find(Footer)
+        .instance()
+        .setState({ paginationLoading: true });
+      wrapper.update();
       expect(wrapper.find('[data-test-subj="LoadingPanelTimeline"]').exists()).toBeFalsy();
       expect(
         wrapper
@@ -158,21 +167,23 @@ describe('Footer Timeline Component', () => {
 
     test('it render popover to select new itemsPerPage in timeline', () => {
       const wrapper = mount(
-        <Footer
-          dataProviders={mockDataProviders}
-          serverSideEventCount={mockData.Events.totalCount}
-          hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
-          height={100}
-          isLoading={false}
-          itemsCount={mockData.Events.edges.length}
-          itemsPerPage={1}
-          itemsPerPageOptions={[1, 5, 10, 20]}
-          onChangeItemsPerPage={onChangeItemsPerPage}
-          onLoadMore={loadMore}
-          nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
-          tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
-          updatedAt={1546878704036}
-        />
+        <I18nProvider>
+          <Footer
+            dataProviders={mockDataProviders}
+            serverSideEventCount={mockData.Events.totalCount}
+            hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
+            height={100}
+            isLoading={false}
+            itemsCount={mockData.Events.edges.length}
+            itemsPerPage={1}
+            itemsPerPageOptions={[1, 5, 10, 20]}
+            onChangeItemsPerPage={onChangeItemsPerPage}
+            onLoadMore={loadMore}
+            nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
+            tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
+            updatedAt={1546878704036}
+          />
+        </I18nProvider>
       );
 
       wrapper
@@ -184,21 +195,23 @@ describe('Footer Timeline Component', () => {
 
     test('it does NOT render popover to select new itemsPerPage in timeline if there is not enough data for it ', () => {
       const wrapper = mount(
-        <Footer
-          dataProviders={mockDataProviders}
-          serverSideEventCount={2}
-          hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
-          height={100}
-          isLoading={false}
-          itemsCount={mockData.Events.edges.length}
-          itemsPerPage={2}
-          itemsPerPageOptions={[1, 5, 10, 20]}
-          onChangeItemsPerPage={onChangeItemsPerPage}
-          onLoadMore={loadMore}
-          nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
-          tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
-          updatedAt={1546878704036}
-        />
+        <I18nProvider>
+          <Footer
+            dataProviders={mockDataProviders}
+            serverSideEventCount={2}
+            hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
+            height={100}
+            isLoading={false}
+            itemsCount={mockData.Events.edges.length}
+            itemsPerPage={2}
+            itemsPerPageOptions={[1, 5, 10, 20]}
+            onChangeItemsPerPage={onChangeItemsPerPage}
+            onLoadMore={loadMore}
+            nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
+            tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
+            updatedAt={1546878704036}
+          />
+        </I18nProvider>
       );
 
       expect(wrapper.find('[data-test-subj="timelineSizeRowPopover"]').exists()).toBeFalsy();
@@ -206,21 +219,23 @@ describe('Footer Timeline Component', () => {
 
     test('it will NOT render popover to select new itemsPerPage in timeline if props itemsPerPageOptions is empty', () => {
       const wrapper = mount(
-        <Footer
-          dataProviders={mockDataProviders}
-          serverSideEventCount={mockData.Events.totalCount}
-          hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
-          height={100}
-          isLoading={false}
-          itemsCount={mockData.Events.edges.length}
-          itemsPerPage={2}
-          itemsPerPageOptions={[]}
-          onChangeItemsPerPage={onChangeItemsPerPage}
-          onLoadMore={loadMore}
-          nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
-          tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
-          updatedAt={1546878704036}
-        />
+        <I18nProvider>
+          <Footer
+            dataProviders={mockDataProviders}
+            serverSideEventCount={mockData.Events.totalCount}
+            hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
+            height={100}
+            isLoading={false}
+            itemsCount={mockData.Events.edges.length}
+            itemsPerPage={2}
+            itemsPerPageOptions={[]}
+            onChangeItemsPerPage={onChangeItemsPerPage}
+            onLoadMore={loadMore}
+            nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
+            tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
+            updatedAt={1546878704036}
+          />
+        </I18nProvider>
       );
 
       expect(wrapper.find('[data-test-subj="timelineSizeRowPopover"]').exists()).toBeFalsy();
@@ -230,21 +245,23 @@ describe('Footer Timeline Component', () => {
   describe('Events', () => {
     test('should call loadmore when clicking on the button load more', () => {
       const wrapper = mount(
-        <Footer
-          dataProviders={mockDataProviders}
-          serverSideEventCount={mockData.Events.totalCount}
-          hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
-          height={100}
-          isLoading={false}
-          itemsCount={mockData.Events.edges.length}
-          itemsPerPage={2}
-          itemsPerPageOptions={[1, 5, 10, 20]}
-          onChangeItemsPerPage={onChangeItemsPerPage}
-          onLoadMore={loadMore}
-          nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
-          tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
-          updatedAt={1546878704036}
-        />
+        <I18nProvider>
+          <Footer
+            dataProviders={mockDataProviders}
+            serverSideEventCount={mockData.Events.totalCount}
+            hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
+            height={100}
+            isLoading={false}
+            itemsCount={mockData.Events.edges.length}
+            itemsPerPage={2}
+            itemsPerPageOptions={[1, 5, 10, 20]}
+            onChangeItemsPerPage={onChangeItemsPerPage}
+            onLoadMore={loadMore}
+            nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
+            tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
+            updatedAt={1546878704036}
+          />
+        </I18nProvider>
       );
 
       wrapper
@@ -257,21 +274,23 @@ describe('Footer Timeline Component', () => {
 
     test('Should call onChangeItemsPerPage when you pick a new limit', () => {
       const wrapper = mount(
-        <Footer
-          dataProviders={mockDataProviders}
-          serverSideEventCount={mockData.Events.totalCount}
-          hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
-          height={100}
-          isLoading={false}
-          itemsCount={mockData.Events.edges.length}
-          itemsPerPage={1}
-          itemsPerPageOptions={[1, 5, 10, 20]}
-          onChangeItemsPerPage={onChangeItemsPerPage}
-          onLoadMore={loadMore}
-          nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
-          tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
-          updatedAt={1546878704036}
-        />
+        <I18nProvider>
+          <Footer
+            dataProviders={mockDataProviders}
+            serverSideEventCount={mockData.Events.totalCount}
+            hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
+            height={100}
+            isLoading={false}
+            itemsCount={mockData.Events.edges.length}
+            itemsPerPage={1}
+            itemsPerPageOptions={[1, 5, 10, 20]}
+            onChangeItemsPerPage={onChangeItemsPerPage}
+            onLoadMore={loadMore}
+            nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
+            tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
+            updatedAt={1546878704036}
+          />
+        </I18nProvider>
       );
 
       wrapper

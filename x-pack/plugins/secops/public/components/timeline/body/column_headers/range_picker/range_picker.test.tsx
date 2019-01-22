@@ -8,7 +8,7 @@ import { mount } from 'enzyme';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { RangePicker } from '.';
-import { Range, Ranges } from './ranges';
+import { Ranges } from './ranges';
 
 describe('RangePicker', () => {
   describe('rendering', () => {
@@ -21,7 +21,7 @@ describe('RangePicker', () => {
     });
 
     test('it selects the option specified by the "selected" prop', () => {
-      const selected: Range = '1 Month';
+      const selected = '1 Month';
       const wrapper = mount(<RangePicker selected={selected} onRangeSelected={noop} />);
 
       expect(wrapper.find('select').props().value).toBe(selected);
@@ -30,8 +30,8 @@ describe('RangePicker', () => {
 
   describe('#onRangeSelected', () => {
     test('it invokes the onRangeSelected callback when a new range is selected', () => {
-      const oldSelection: Range = '1 Week';
-      const newSelection: Range = '1 Day';
+      const oldSelection = '1 Week';
+      const newSelection = '1 Day';
       const mockOnRangeSelected = jest.fn();
 
       const wrapper = mount(

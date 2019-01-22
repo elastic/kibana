@@ -10,7 +10,6 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { OnColumnSorted, OnFilterChange, OnRangeSelected } from '../../events';
-import { Range } from '../column_headers/range_picker/ranges';
 import { Sort } from '../sort';
 import { ColumnHeader } from './column_header';
 import { Header } from './header';
@@ -21,7 +20,7 @@ interface Props {
   onColumnSorted?: OnColumnSorted;
   onFilterChange?: OnFilterChange;
   onRangeSelected: OnRangeSelected;
-  range: Range;
+  range: string;
   sort: Sort;
 }
 

@@ -5,12 +5,13 @@
  */
 
 import { EuiPanel, EuiToolTip } from '@elastic/eui';
-import moment from 'moment';
+import { FormattedRelative } from '@kbn/i18n/react';
 import * as React from 'react';
 import styled from 'styled-components';
 
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { WithHoverActions } from '../with_hover_actions';
+import * as i18n from './translations';
 
 const HoverActionsContainer = styled(EuiPanel)`
   align-items: center;
@@ -31,21 +32,25 @@ const SelectableText = styled.span`
 export const columns = [
   {
     field: 'created',
-    name: 'Date',
+    name: i18n.DATE,
     sortable: false,
     truncateText: false,
-    render: (date: string) => <SelectableText>{moment(date).fromNow()}</SelectableText>,
+    render: (date: string) => (
+      <SelectableText>
+        <FormattedRelative value={new Date(date)} />
+      </SelectableText>
+    ),
   },
   {
     field: 'user',
-    name: 'User',
+    name: i18n.USER,
     sortable: true,
     truncateText: false,
     render: (field: string) => (
       <WithHoverActions
         hoverContent={
           <HoverActionsContainer data-test-subj="hover-actions-container">
-            <EuiToolTip content="Copy to clipboard">
+            <EuiToolTip content={i18n.COPY_TO_CLIPBOARD}>
               <WithCopyToClipboard text={field} />
             </EuiToolTip>
           </HoverActionsContainer>
@@ -57,14 +62,14 @@ export const columns = [
   },
   {
     field: 'note',
-    name: 'Note',
+    name: i18n.NOTE,
     sortable: true,
     truncateText: false,
     render: (note: string) => (
       <WithHoverActions
         hoverContent={
           <HoverActionsContainer data-test-subj="hover-actions-container">
-            <EuiToolTip content="Copy to clipboard">
+            <EuiToolTip content={i18n.COPY_TO_CLIPBOARD}>
               <WithCopyToClipboard text={note} />
             </EuiToolTip>
           </HoverActionsContainer>

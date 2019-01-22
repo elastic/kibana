@@ -3,14 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import {
-  // @ts-ignore
-  EuiTab,
-  // @ts-ignore
-  EuiTabs,
-} from '@elastic/eui';
+import { EuiTab, EuiTabs } from '@elastic/eui';
 import * as React from 'react';
 import styled from 'styled-components';
+import * as i18n from './translations';
 
 import { getHostsUrl, getNetworkUrl, getOverviewUrl } from '../../link_to';
 
@@ -24,19 +20,19 @@ interface NavTab {
 const navTabs: NavTab[] = [
   {
     id: 'overview',
-    name: 'Overview',
+    name: i18n.OVERVIEW,
     href: getOverviewUrl(),
     disabled: false,
   },
   {
     id: 'hosts',
-    name: 'Hosts',
+    name: i18n.HOSTS,
     href: getHostsUrl(),
     disabled: false,
   },
   {
     id: 'network',
-    name: 'Network',
+    name: i18n.NETWORK,
     href: getNetworkUrl(),
     disabled: false,
   },

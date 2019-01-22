@@ -6,7 +6,6 @@
 
 import { filter, getOr, omit, uniq } from 'lodash/fp';
 import { TimelineById, TimelineState } from '.';
-import { Range } from '../../../components/timeline/body/column_headers/range_picker/ranges';
 import { Sort } from '../../../components/timeline/body/sort';
 import { DataProvider } from '../../../components/timeline/data_providers/data_provider';
 import { KqlMode, timelineDefaults } from './model';
@@ -376,7 +375,7 @@ export const updateTimelineProviders = ({
 
 interface UpdateTimelineRangeParams {
   id: string;
-  range: Range;
+  range: string;
   timelineById: TimelineById;
 }
 

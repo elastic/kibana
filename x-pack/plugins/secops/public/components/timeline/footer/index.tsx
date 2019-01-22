@@ -24,6 +24,7 @@ import { LoadingPanel } from '../../loading';
 import { DataProvider } from '../data_providers/data_provider';
 import { OnChangeItemsPerPage, OnLoadMore } from '../events';
 import { LastUpdatedAt } from './last_updated';
+import * as i18n from './translations';
 
 interface FooterProps {
   dataProviders: DataProvider[];
@@ -52,10 +53,10 @@ export const footerHeight = 50; // px
 /** Displays the server-side count of events */
 export const EventsCount = pure<{ serverSideEventCount: number; itemsCount: number }>(
   ({ itemsCount, serverSideEventCount }) => (
-    <EuiToolTip content="The total count of events matching the search criteria">
+    <EuiToolTip content={i18n.TOTAL_COUNT_OF_EVENTS}>
       <h5>
-        <EuiBadge color="hollow">{itemsCount}</EuiBadge> of{' '}
-        <EuiBadge color="hollow">{serverSideEventCount}</EuiBadge> Events
+        <EuiBadge color="hollow">{itemsCount}</EuiBadge> {i18n.OF}{' '}
+        <EuiBadge color="hollow">{serverSideEventCount}</EuiBadge> {i18n.EVENTS}
       </h5>
     </EuiToolTip>
   )
@@ -116,7 +117,7 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
         <LoadingPanel
           height="auto"
           width="100%"
-          text="Loading Timeline data..."
+          text={`${i18n.LOADING_TIMELINE_DATA}...`}
           data-test-subj="LoadingPanelTimeline"
         />
       );
@@ -145,7 +146,7 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
             onChangeItemsPerPage(item);
           }}
         >
-          {`${item} rows`}
+          {`${item} ${i18n.ROWS}`}
         </EuiContextMenuItem>
       ));
     return (

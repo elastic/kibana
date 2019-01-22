@@ -16,13 +16,18 @@ import { pure } from 'recompose';
 
 import { FooterContainer } from '.';
 import { WhoAmI } from '../../containers/who_am_i';
+import * as i18n from './translations';
 
 export const Footer = pure(() => (
   <FooterContainer data-test-subj="footer">
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
       <EuiFlexItem grow={false}>
         <WhoAmI sourceId="default">
-          {({ appName }) => <EuiHealth color="success">Live {appName} data</EuiHealth>}
+          {({ appName }) => (
+            <EuiHealth color="success">
+              {i18n.LIVE} {appName} {i18n.DATA}
+            </EuiHealth>
+          )}
         </WhoAmI>
       </EuiFlexItem>
     </EuiFlexGroup>

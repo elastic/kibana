@@ -5,7 +5,6 @@
  */
 
 import { defaultWidth } from '../../../components/timeline/body';
-import { Range } from '../../../components/timeline/body/column_headers/range_picker/ranges';
 import { Sort } from '../../../components/timeline/body/sort';
 import { DataProvider } from '../../../components/timeline/data_providers/data_provider';
 import { Direction } from '../../../graphql/types';
@@ -43,7 +42,7 @@ export interface TimelineModel {
   /** Events pinned to this timeline */
   pinnedEventIds: { [eventId: string]: boolean };
   /** Specifies the granularity of the date range (e.g. 1 Day / Week / Month) applicable to the mini-map */
-  range: Range;
+  range: string;
   /** When true, show the timeline flyover */
   show: boolean;
   /**  Specifies which column the timeline is sorted on, and the direction (ascending / descending) */

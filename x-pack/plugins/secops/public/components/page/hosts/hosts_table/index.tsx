@@ -18,7 +18,7 @@ import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_
 import { defaultToEmpty, getOrEmpty } from '../../../empty_value';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
-
+import * as i18n from './translations';
 interface OwnProps {
   data: HostsEdges[];
   loading: boolean;
@@ -40,23 +40,23 @@ type HostsTableProps = OwnProps & HostsTableReduxProps & HostsTableDispatchProps
 
 const rowItems: ItemsPerRow[] = [
   {
-    text: '2 rows',
+    text: i18n.ROWS_2,
     numberOfRow: 2,
   },
   {
-    text: '5 rows',
+    text: i18n.ROWS_5,
     numberOfRow: 5,
   },
   {
-    text: '10 rows',
+    text: i18n.ROWS_10,
     numberOfRow: 10,
   },
   {
-    text: '20 rows',
+    text: i18n.ROWS_20,
     numberOfRow: 20,
   },
   {
-    text: '50 rows',
+    text: i18n.ROWS_50,
     numberOfRow: 50,
   },
 ];
@@ -74,7 +74,7 @@ const HostsTableComponent = pure<HostsTableProps>(
   }) => (
     <LoadMoreTable
       columns={getHostsColumns()}
-      loadingTitle="Hosts"
+      loadingTitle={i18n.HOSTS}
       loading={loading}
       pageOfItems={data}
       loadMore={() => loadMore(nextCursor)}
@@ -86,7 +86,7 @@ const HostsTableComponent = pure<HostsTableProps>(
       }}
       title={
         <h3>
-          Hosts <EuiBadge color="hollow">{totalCount}</EuiBadge>
+          {i18n.HOSTS} <EuiBadge color="hollow">{totalCount}</EuiBadge>
         </h3>
       }
     />
@@ -104,7 +104,7 @@ export const HostsTable = connect(
 
 const getHostsColumns = () => [
   {
-    name: 'Name',
+    name: i18n.NAME,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }: HostsEdges) => {
@@ -146,19 +146,19 @@ const getHostsColumns = () => [
     },
   },
   {
-    name: 'First seen',
+    name: i18n.FIRST_SEEN,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }: HostsEdges) => <>{defaultToEmpty(node.firstSeen)}</>,
   },
   {
-    name: 'OS',
+    name: i18n.OS,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }: HostsEdges) => <>{getOrEmpty('host.os.name', node)}</>,
   },
   {
-    name: 'Version',
+    name: i18n.VERSION,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }: HostsEdges) => <>{getOrEmpty('host.os.version', node)}</>,

@@ -5,17 +5,13 @@
  */
 
 import { EuiTitle } from '@elastic/eui';
-import {
-  // @ts-ignore
-  EuiBarSeries,
-  // @ts-ignore
-  EuiSeriesChart,
-} from '@elastic/eui/lib/experimental';
+import { EuiBarSeries, EuiSeriesChart } from '@elastic/eui/lib/experimental';
 import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { LoadingPanel } from '../loading';
+import * as i18n from './translations';
 
 export interface HorizontalBarChartData {
   x: number;
@@ -33,7 +29,7 @@ interface HorizontalBarChartProps {
 export const HorizontalBarChart = pure<HorizontalBarChartProps>(
   ({ barChartdata, width, height, title, loading }) => {
     return loading ? (
-      <LoadingPanel height="auto" width="100%" text="Loading data" />
+      <LoadingPanel height="auto" width="100%" text={i18n.LOADING_DATA} />
     ) : (
       <Container height={height}>
         <EuiTitle size="s">

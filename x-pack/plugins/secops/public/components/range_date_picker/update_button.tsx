@@ -8,7 +8,7 @@ import { EuiButton } from '@elastic/eui';
 import React from 'react';
 import { pure } from 'recompose';
 import { inputsModel } from '../../store';
-
+import * as i18n from './translations';
 interface Props {
   loading: boolean;
   refetch: inputsModel.Refetch[];
@@ -17,10 +17,10 @@ interface Props {
 export const UpdateButton = pure<Props>(({ loading, refetch }) => {
   const color = loading ? 'secondary' : 'primary';
   const icon = 'refresh';
-  let text = 'Refresh';
+  let text = i18n.REFRESH;
 
   if (loading) {
-    text = 'Updating';
+    text = i18n.UPDATING;
   }
 
   return (

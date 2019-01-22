@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/** Date ranges applicable to the MiniMap */
-export type Range = '1 Day' | '1 Week' | '1 Month' | '1 Year';
+import * as i18n from './translations';
 
 /** Enables runtime enumeration of valid `Range`s */
-export const Ranges: Range[] = ['1 Day', '1 Week', '1 Month', '1 Year'];
+export const Ranges: string[] = [i18n.ONE_DAY, i18n.ONE_WEEK, i18n.ONE_MONTH, i18n.ONE_YEAR];

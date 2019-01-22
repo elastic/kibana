@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { I18nProvider } from '@kbn/i18n/react';
 import { mount } from 'enzyme';
 import { noop, pick } from 'lodash/fp';
 import * as React from 'react';
@@ -90,116 +91,7 @@ describe('Timeline', () => {
   describe('rendering', () => {
     test('it renders the timeline header', () => {
       const wrapper = mount(
-        <ReduxStoreProvider store={store}>
-          <DragDropContext onDragEnd={noop}>
-            <MockedProvider mocks={mocks}>
-              <Timeline
-                id="foo"
-                columnHeaders={headers}
-                columnRenderers={columnRenderers}
-                dataProviders={mockDataProviders}
-                flyoutHeight={testFlyoutHeight}
-                flyoutHeaderHeight={flyoutHeaderHeight}
-                itemsPerPage={5}
-                itemsPerPageOptions={[5, 10, 20]}
-                onChangeItemsPerPage={noop}
-                onColumnSorted={noop}
-                onDataProviderRemoved={noop}
-                onFilterChange={noop}
-                onRangeSelected={noop}
-                onToggleDataProviderEnabled={noop}
-                range={'1 Day'}
-                rowRenderers={rowRenderers}
-                show={true}
-                sort={sort}
-                theme="dark"
-                indexPattern={indexPattern}
-              />
-            </MockedProvider>
-          </DragDropContext>
-        </ReduxStoreProvider>
-      );
-
-      expect(wrapper.find('[data-test-subj="timelineHeader"]').exists()).toEqual(true);
-    });
-
-    test('it renders the timeline body', () => {
-      const wrapper = mount(
-        <ReduxStoreProvider store={store}>
-          <DragDropContext onDragEnd={noop}>
-            <MockedProvider mocks={mocks}>
-              <Timeline
-                id="foo"
-                columnHeaders={headers}
-                columnRenderers={columnRenderers}
-                dataProviders={mockDataProviders}
-                flyoutHeight={testFlyoutHeight}
-                flyoutHeaderHeight={flyoutHeaderHeight}
-                itemsPerPage={5}
-                itemsPerPageOptions={[5, 10, 20]}
-                onChangeItemsPerPage={noop}
-                onColumnSorted={noop}
-                onDataProviderRemoved={noop}
-                onFilterChange={noop}
-                onRangeSelected={noop}
-                onToggleDataProviderEnabled={noop}
-                range={'1 Day'}
-                rowRenderers={rowRenderers}
-                show={true}
-                sort={sort}
-                theme="dark"
-                indexPattern={indexPattern}
-              />
-            </MockedProvider>
-          </DragDropContext>
-        </ReduxStoreProvider>
-      );
-
-      expect(wrapper.find('[data-test-subj="scrollableArea"]').exists()).toEqual(true);
-    });
-
-    test('it does NOT render the paging footer when you do NOT have any data providers', () => {
-      const wrapper = mount(
-        <ReduxStoreProvider store={store}>
-          <DragDropContext onDragEnd={noop}>
-            <MockedProvider mocks={mocks}>
-              <Timeline
-                id="foo"
-                columnHeaders={headers}
-                columnRenderers={columnRenderers}
-                dataProviders={[]}
-                flyoutHeight={testFlyoutHeight}
-                flyoutHeaderHeight={flyoutHeaderHeight}
-                itemsPerPage={5}
-                itemsPerPageOptions={[5, 10, 20]}
-                onChangeItemsPerPage={noop}
-                onColumnSorted={noop}
-                onDataProviderRemoved={noop}
-                onFilterChange={noop}
-                onRangeSelected={noop}
-                onToggleDataProviderEnabled={noop}
-                range={'1 Day'}
-                rowRenderers={rowRenderers}
-                show={true}
-                sort={sort}
-                theme="dark"
-                indexPattern={indexPattern}
-              />
-            </MockedProvider>
-          </DragDropContext>
-        </ReduxStoreProvider>
-      );
-
-      expect(wrapper.find('[data-test-subj="table-pagination"]').exists()).toEqual(false);
-    });
-  });
-
-  describe('event wire up', () => {
-    describe('onColumnSorted', () => {
-      test('it invokes the onColumnSorted callback when a header is clicked', () => {
-        const mockOnColumnSorted = jest.fn();
-
-        const wrapper = mount(
+        <I18nProvider>
           <ReduxStoreProvider store={store}>
             <DragDropContext onDragEnd={noop}>
               <MockedProvider mocks={mocks}>
@@ -212,8 +104,8 @@ describe('Timeline', () => {
                   flyoutHeaderHeight={flyoutHeaderHeight}
                   itemsPerPage={5}
                   itemsPerPageOptions={[5, 10, 20]}
-                  onColumnSorted={mockOnColumnSorted}
                   onChangeItemsPerPage={noop}
+                  onColumnSorted={noop}
                   onDataProviderRemoved={noop}
                   onFilterChange={noop}
                   onRangeSelected={noop}
@@ -228,6 +120,123 @@ describe('Timeline', () => {
               </MockedProvider>
             </DragDropContext>
           </ReduxStoreProvider>
+        </I18nProvider>
+      );
+
+      expect(wrapper.find('[data-test-subj="timelineHeader"]').exists()).toEqual(true);
+    });
+
+    test('it renders the timeline body', () => {
+      const wrapper = mount(
+        <I18nProvider>
+          <ReduxStoreProvider store={store}>
+            <DragDropContext onDragEnd={noop}>
+              <MockedProvider mocks={mocks}>
+                <Timeline
+                  id="foo"
+                  columnHeaders={headers}
+                  columnRenderers={columnRenderers}
+                  dataProviders={mockDataProviders}
+                  flyoutHeight={testFlyoutHeight}
+                  flyoutHeaderHeight={flyoutHeaderHeight}
+                  itemsPerPage={5}
+                  itemsPerPageOptions={[5, 10, 20]}
+                  onChangeItemsPerPage={noop}
+                  onColumnSorted={noop}
+                  onDataProviderRemoved={noop}
+                  onFilterChange={noop}
+                  onRangeSelected={noop}
+                  onToggleDataProviderEnabled={noop}
+                  range={'1 Day'}
+                  rowRenderers={rowRenderers}
+                  show={true}
+                  sort={sort}
+                  theme="dark"
+                  indexPattern={indexPattern}
+                />
+              </MockedProvider>
+            </DragDropContext>
+          </ReduxStoreProvider>
+        </I18nProvider>
+      );
+
+      expect(wrapper.find('[data-test-subj="scrollableArea"]').exists()).toEqual(true);
+    });
+
+    test('it does NOT render the paging footer when you do NOT have any data providers', () => {
+      const wrapper = mount(
+        <I18nProvider>
+          <ReduxStoreProvider store={store}>
+            <DragDropContext onDragEnd={noop}>
+              <MockedProvider mocks={mocks}>
+                <Timeline
+                  id="foo"
+                  columnHeaders={headers}
+                  columnRenderers={columnRenderers}
+                  dataProviders={[]}
+                  flyoutHeight={testFlyoutHeight}
+                  flyoutHeaderHeight={flyoutHeaderHeight}
+                  itemsPerPage={5}
+                  itemsPerPageOptions={[5, 10, 20]}
+                  onChangeItemsPerPage={noop}
+                  onColumnSorted={noop}
+                  onDataProviderRemoved={noop}
+                  onFilterChange={noop}
+                  onRangeSelected={noop}
+                  onToggleDataProviderEnabled={noop}
+                  range={'1 Day'}
+                  rowRenderers={rowRenderers}
+                  show={true}
+                  sort={sort}
+                  theme="dark"
+                  indexPattern={indexPattern}
+                />
+              </MockedProvider>
+            </DragDropContext>
+          </ReduxStoreProvider>
+        </I18nProvider>
+      );
+
+      expect(wrapper.find('[data-test-subj="table-pagination"]').exists()).toEqual(false);
+    });
+  });
+
+  describe('event wire up', () => {
+    describe('onColumnSorted', () => {
+      test('it invokes the onColumnSorted callback when a header is clicked', () => {
+        const mockOnColumnSorted = jest.fn();
+
+        const wrapper = mount(
+          <I18nProvider>
+            <ReduxStoreProvider store={store}>
+              <DragDropContext onDragEnd={noop}>
+                <MockedProvider mocks={mocks}>
+                  <Timeline
+                    id="foo"
+                    columnHeaders={headers}
+                    columnRenderers={columnRenderers}
+                    dataProviders={mockDataProviders}
+                    flyoutHeight={testFlyoutHeight}
+                    flyoutHeaderHeight={flyoutHeaderHeight}
+                    itemsPerPage={5}
+                    itemsPerPageOptions={[5, 10, 20]}
+                    onColumnSorted={mockOnColumnSorted}
+                    onChangeItemsPerPage={noop}
+                    onDataProviderRemoved={noop}
+                    onFilterChange={noop}
+                    onRangeSelected={noop}
+                    onToggleDataProviderEnabled={noop}
+                    range={'1 Day'}
+                    rowRenderers={rowRenderers}
+                    show={true}
+                    sort={sort}
+                    theme="dark"
+                    indexPattern={indexPattern}
+                  />
+                </MockedProvider>
+              </DragDropContext>
+            </ReduxStoreProvider>
+          </I18nProvider>
         );
 
         wrapper
@@ -247,34 +256,36 @@ describe('Timeline', () => {
         const mockOnDataProviderRemoved = jest.fn();
 
         const wrapper = mount(
-          <ReduxStoreProvider store={store}>
-            <DragDropContext onDragEnd={noop}>
-              <MockedProvider mocks={mocks}>
-                <Timeline
-                  id="foo"
-                  columnHeaders={headers}
-                  columnRenderers={columnRenderers}
-                  dataProviders={mockDataProviders}
-                  flyoutHeight={testFlyoutHeight}
-                  flyoutHeaderHeight={flyoutHeaderHeight}
-                  itemsPerPage={5}
-                  itemsPerPageOptions={[5, 10, 20]}
-                  onChangeItemsPerPage={noop}
-                  onColumnSorted={noop}
-                  onDataProviderRemoved={mockOnDataProviderRemoved}
-                  onFilterChange={noop}
-                  onRangeSelected={noop}
-                  onToggleDataProviderEnabled={noop}
-                  range={'1 Day'}
-                  rowRenderers={rowRenderers}
-                  show={true}
-                  sort={sort}
-                  theme="dark"
-                  indexPattern={indexPattern}
-                />
-              </MockedProvider>
-            </DragDropContext>
-          </ReduxStoreProvider>
+          <I18nProvider>
+            <ReduxStoreProvider store={store}>
+              <DragDropContext onDragEnd={noop}>
+                <MockedProvider mocks={mocks}>
+                  <Timeline
+                    id="foo"
+                    columnHeaders={headers}
+                    columnRenderers={columnRenderers}
+                    dataProviders={mockDataProviders}
+                    flyoutHeight={testFlyoutHeight}
+                    flyoutHeaderHeight={flyoutHeaderHeight}
+                    itemsPerPage={5}
+                    itemsPerPageOptions={[5, 10, 20]}
+                    onChangeItemsPerPage={noop}
+                    onColumnSorted={noop}
+                    onDataProviderRemoved={mockOnDataProviderRemoved}
+                    onFilterChange={noop}
+                    onRangeSelected={noop}
+                    onToggleDataProviderEnabled={noop}
+                    range={'1 Day'}
+                    rowRenderers={rowRenderers}
+                    show={true}
+                    sort={sort}
+                    theme="dark"
+                    indexPattern={indexPattern}
+                  />
+                </MockedProvider>
+              </DragDropContext>
+            </ReduxStoreProvider>
+          </I18nProvider>
         );
 
         wrapper
@@ -308,34 +319,36 @@ describe('Timeline', () => {
         }));
 
         const wrapper = mount(
-          <ReduxStoreProvider store={store}>
-            <DragDropContext onDragEnd={noop}>
-              <MockedProvider mocks={mocks}>
-                <Timeline
-                  id="foo"
-                  columnHeaders={allColumnsHaveTextFilters}
-                  columnRenderers={columnRenderers}
-                  dataProviders={mockDataProviders}
-                  flyoutHeight={testFlyoutHeight}
-                  flyoutHeaderHeight={flyoutHeaderHeight}
-                  itemsPerPage={5}
-                  itemsPerPageOptions={[5, 10, 20]}
-                  onChangeItemsPerPage={noop}
-                  onColumnSorted={noop}
-                  onDataProviderRemoved={noop}
-                  onFilterChange={mockOnFilterChange}
-                  onRangeSelected={noop}
-                  onToggleDataProviderEnabled={noop}
-                  range={'1 Day'}
-                  rowRenderers={rowRenderers}
-                  show={true}
-                  sort={sort}
-                  theme="dark"
-                  indexPattern={indexPattern}
-                />
-              </MockedProvider>
-            </DragDropContext>
-          </ReduxStoreProvider>
+          <I18nProvider>
+            <ReduxStoreProvider store={store}>
+              <DragDropContext onDragEnd={noop}>
+                <MockedProvider mocks={mocks}>
+                  <Timeline
+                    id="foo"
+                    columnHeaders={allColumnsHaveTextFilters}
+                    columnRenderers={columnRenderers}
+                    dataProviders={mockDataProviders}
+                    flyoutHeight={testFlyoutHeight}
+                    flyoutHeaderHeight={flyoutHeaderHeight}
+                    itemsPerPage={5}
+                    itemsPerPageOptions={[5, 10, 20]}
+                    onChangeItemsPerPage={noop}
+                    onColumnSorted={noop}
+                    onDataProviderRemoved={noop}
+                    onFilterChange={mockOnFilterChange}
+                    onRangeSelected={noop}
+                    onToggleDataProviderEnabled={noop}
+                    range={'1 Day'}
+                    rowRenderers={rowRenderers}
+                    show={true}
+                    sort={sort}
+                    theme="dark"
+                    indexPattern={indexPattern}
+                  />
+                </MockedProvider>
+              </DragDropContext>
+            </ReduxStoreProvider>
+          </I18nProvider>
         );
 
         wrapper
@@ -361,34 +374,36 @@ describe('Timeline', () => {
         }));
 
         const wrapper = mount(
-          <ReduxStoreProvider store={store}>
-            <DragDropContext onDragEnd={noop}>
-              <MockedProvider mocks={mocks}>
-                <Timeline
-                  id="foo"
-                  columnHeaders={allColumnsHaveTextFilters}
-                  columnRenderers={columnRenderers}
-                  dataProviders={mockDataProviders}
-                  flyoutHeight={testFlyoutHeight}
-                  flyoutHeaderHeight={flyoutHeaderHeight}
-                  itemsPerPage={5}
-                  itemsPerPageOptions={[5, 10, 20]}
-                  onChangeItemsPerPage={noop}
-                  onColumnSorted={noop}
-                  onDataProviderRemoved={noop}
-                  onFilterChange={noop}
-                  onRangeSelected={noop}
-                  onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
-                  range={'1 Day'}
-                  rowRenderers={rowRenderers}
-                  show={true}
-                  sort={sort}
-                  theme="dark"
-                  indexPattern={indexPattern}
-                />
-              </MockedProvider>
-            </DragDropContext>
-          </ReduxStoreProvider>
+          <I18nProvider>
+            <ReduxStoreProvider store={store}>
+              <DragDropContext onDragEnd={noop}>
+                <MockedProvider mocks={mocks}>
+                  <Timeline
+                    id="foo"
+                    columnHeaders={allColumnsHaveTextFilters}
+                    columnRenderers={columnRenderers}
+                    dataProviders={mockDataProviders}
+                    flyoutHeight={testFlyoutHeight}
+                    flyoutHeaderHeight={flyoutHeaderHeight}
+                    itemsPerPage={5}
+                    itemsPerPageOptions={[5, 10, 20]}
+                    onChangeItemsPerPage={noop}
+                    onColumnSorted={noop}
+                    onDataProviderRemoved={noop}
+                    onFilterChange={noop}
+                    onRangeSelected={noop}
+                    onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
+                    range={'1 Day'}
+                    rowRenderers={rowRenderers}
+                    show={true}
+                    sort={sort}
+                    theme="dark"
+                    indexPattern={indexPattern}
+                  />
+                </MockedProvider>
+              </DragDropContext>
+            </ReduxStoreProvider>
+          </I18nProvider>
         );
 
         wrapper

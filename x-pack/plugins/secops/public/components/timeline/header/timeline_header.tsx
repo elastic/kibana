@@ -12,7 +12,6 @@ import styled from 'styled-components';
 import { Theme } from '../../../store/local/app/model';
 import { ColumnHeaders } from '../body/column_headers';
 import { ColumnHeader } from '../body/column_headers/column_header';
-import { Range } from '../body/column_headers/range_picker/ranges';
 import { Sort } from '../body/sort';
 import { DataProviders } from '../data_providers';
 import { DataProvider } from '../data_providers/data_provider';
@@ -34,7 +33,7 @@ interface Props {
   onFilterChange: OnFilterChange;
   onRangeSelected: OnRangeSelected;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
-  range: Range;
+  range: string;
   show: boolean;
   sort: Sort;
   theme: Theme;

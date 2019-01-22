@@ -7,6 +7,7 @@
 import React from 'react';
 import { pure } from 'recompose';
 import { HorizontalBarChart, HorizontalBarChartData } from '../../../horizontal_bar_chart';
+import * as i18n from './translations';
 
 interface TypesBarProps {
   data: HorizontalBarChartData[];
@@ -16,7 +17,7 @@ interface TypesBarProps {
 export const TypesBar = pure<TypesBarProps>(({ data, loading }) => (
   <HorizontalBarChart
     loading={loading}
-    title="KPI event types"
+    title={i18n.KPI_EVENT_TYPES}
     width={490}
     height={279}
     barChartdata={data}
