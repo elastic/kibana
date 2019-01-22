@@ -55,4 +55,14 @@ export default (AbstractSearchStrategy, RollupSearchRequest, RollupSearchCapabil
         capabilities
       };
     }
+
+    async getFieldsForWildcard(req, indexPattern/*, capabilities*/) {
+      const fields  = await super.getFieldsForWildcard(req, indexPattern);
+
+      // TODO: write your logic here
+      // try to reuse x-pack\plugins\rollup\server\routes\api\index_patterns.js
+      // probably it make sense to move logic related to merging rollup field to separate file
+
+      return fields;
+    }
   });

@@ -26,4 +26,12 @@ export default class AbstractSearchStrategy {
       return new SearchRequest(req, callWithRequest, indexPattern);
     };
   }
+
+  async getFieldsForWildcard(req, indexPattern) {
+    const { indexPatternsService } = req.pre;
+
+    return await indexPatternsService.getFieldsForWildcard({
+      pattern: indexPattern,
+    });
+  }
 }

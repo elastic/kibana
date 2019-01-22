@@ -16,44 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { uniq, forEach } from 'lodash';
 import SearchStrategiesRegister from './search_strategies/search_strategies_register';
-
-const FIELD_TYPES = {
-  STRING: 'string',
-  DATE: 'date',
-  NUMBER: 'number'
-};
-
-const createField = (name, type) => ({
-  name,
-  type,
-  aggregatable: true,
-  searchable: true
-});
+import { uniq } from 'lodash';
 
 export async function getFields(req) {
-  const index = req.query.index || '*';
-  const { capabilities } = await SearchStrategiesRegister.getViableStrategy(req, index);
+  const indexPattern = req.query.index || '*';
+  const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategy(req, indexPattern);
 
-  if (capabilities.fieldsCapabilities) {
-    const fields = [];
-    forEach(capabilities.fieldsCapabilities, (aggs, field) => {
-      if (aggs[0].agg === 'terms') {
-        fields.push(createField(field, FIELD_TYPES.STRING));
-      } else if (aggs[0].agg === 'date_histogram') {
-        fields.push(createField(field, FIELD_TYPES.DATE));
-      } else {
-        fields.push(createField(field, FIELD_TYPES.NUMBER));
-      }
-    });
+  const fields = (await searchStrategy
+    .getFieldsForWildcard(req, indexPattern, capabilities))
+    .filter(field => field.aggregatable);
 
-    return fields;
-  }
-
-  const { indexPatternsService } = req.pre;
-  const resp = await indexPatternsService.getFieldsForWildcard({ pattern: index });
-  const fields = resp.filter(field => field.aggregatable);
   return uniq(fields, field => field.name);
 }

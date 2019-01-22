@@ -16,9 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import AbstractSearchStrategy from './strategies/abstract_search_strategy';
-import AbstractSearchRequest from './searh_requests/abstract_request';
 import SearchStrategiesRegister from './search_strategies_register';
 
-export { AbstractSearchRequest, AbstractSearchStrategy };
 export default SearchStrategiesRegister;
