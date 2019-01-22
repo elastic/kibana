@@ -32,6 +32,7 @@ export const filtersBucketAgg = new BucketAggType({
   name: 'filters',
   title: i18n.translate('common.ui.aggTypes.buckets.filtersTitle', {
     defaultMessage: 'Filters',
+    description: 'The name of an aggregation, that allows to specify multiple individual filters to group data by.'
   }),
   createFilter: createFilterFilters,
   customLabels: false,
