@@ -298,6 +298,44 @@ describe('AllowedPrivileges', () => {
     ]);
   });
 
+  it(`allows space base privilege to be set to "all" or "read" when space base is already "all"`, () => {
+    const role = buildRole({
+      spacesPrivileges: [
+        {
+          spaces: ['foo'],
+          base: ['all'],
+          feature: {},
+        },
+      ],
+    });
+    const effectivePrivileges = buildEffectivePrivilegesCalculator(role);
+    const allowedPrivilegesCalculator = buildAllowedPrivilegesCalculator(role);
+
+    const result = allowedPrivilegesCalculator.calculateAllowedPrivileges(
+      effectivePrivileges.calculateEffectivePrivileges(true)
+    );
+
+    expect(result).toEqual([
+      {
+        ...unrestrictedBasePrivileges,
+        feature: {
+          feature1: {
+            privileges: ['all'],
+            canUnassign: false,
+          },
+          feature2: {
+            privileges: ['all'],
+            canUnassign: false,
+          },
+          feature3: {
+            privileges: ['all'],
+            canUnassign: false,
+          },
+        },
+      },
+    ]);
+  });
+
   it(`restricts space feature privileges when global feature privileges are set`, () => {
     const role = buildRole({
       spacesPrivileges: [

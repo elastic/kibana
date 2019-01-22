@@ -174,7 +174,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
             options={[
               {
                 value: 'basePrivilege_custom',
-                disabled: !this.canCustomizeFeaturePrivileges(allowedPrivileges),
+                disabled: !this.canCustomizeFeaturePrivileges(baseExplanation, allowedPrivileges),
                 inputDisplay: (
                   <EuiText>
                     <FormattedMessage
@@ -478,7 +478,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     allowedPrivileges: AllowedPrivilege,
     explanation: PrivilegeExplanation
   ) => {
-    if (this.canCustomizeFeaturePrivileges(allowedPrivileges)) {
+    if (this.canCustomizeFeaturePrivileges(explanation, allowedPrivileges)) {
       const form = this.state.role.kibana[this.state.editingIndex];
 
       if (
@@ -492,14 +492,17 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     return explanation.actualPrivilege;
   };
 
-  private canCustomizeFeaturePrivileges = (allowedPrivileges: AllowedPrivilege) => {
-    if (this.isDefiningGlobalPrivilege()) {
+  private canCustomizeFeaturePrivileges = (
+    basePrivilegeExplanation: PrivilegeExplanation,
+    allowedPrivileges: AllowedPrivilege
+  ) => {
+    if (basePrivilegeExplanation.isDirectlyAssigned) {
       return true;
     }
 
     const featureEntries = Object.values(allowedPrivileges.feature);
     return featureEntries.some(entry => {
-      return entry.canUnassign;
+      return entry.canUnassign || entry.privileges.length > 1;
     });
   };
 

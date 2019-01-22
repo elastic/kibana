@@ -59,8 +59,11 @@ export const SupercededPrivilegeDisplay: SFC<Props> = (props: Props) => {
       tooltipContent={
         <FormattedMessage
           id="xpack.security.management.editRole.spaceAwarePrivilegeDisplay.privilegeSupercededMessage"
-          defaultMessage="Original privilege of {supercededPrivilege} has been overriden by {overrideSource}"
-          values={{ supercededPrivilege: `'${supercededPrivilege}'`, actualPrivilegeSource }}
+          defaultMessage="Original privilege of {supercededPrivilege} has been overriden by {actualPrivilegeSource}"
+          values={{
+            supercededPrivilege: `'${supercededPrivilege}'`,
+            actualPrivilegeSource: getReadablePrivilegeSource(actualPrivilegeSource),
+          }}
         />
       }
     />

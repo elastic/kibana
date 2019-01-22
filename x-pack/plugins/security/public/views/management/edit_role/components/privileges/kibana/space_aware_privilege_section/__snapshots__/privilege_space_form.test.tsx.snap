@@ -173,7 +173,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
             options={
               Array [
                 Object {
-                  "disabled": true,
+                  "disabled": false,
                   "dropdownDisplay": <EuiText
                     grow={true}
                     size="m"
@@ -273,7 +273,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                 },
               ]
             }
-            valueOfSelected="basePrivilege_none"
+            valueOfSelected="basePrivilege_custom"
           />
         </EuiFormRow>
         <EuiSpacer

@@ -77,9 +77,11 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
 
     const spacePrivileges = this.getSortedPrivileges();
 
-    const effectivePrivileges = privilegeCalculatorFactory
-      .getInstance(this.props.role)
-      .calculateEffectivePrivileges(false);
+    const privilegeCalculator = privilegeCalculatorFactory.getInstance(this.props.role);
+
+    const effectivePrivileges = privilegeCalculator.calculateEffectivePrivileges(false);
+
+    const allowedPrivileges = privilegeCalculator.calculateAllowedPrivileges();
 
     const rows: TableRow[] = spacePrivileges.map((spacePrivs, spacesIndex) => {
       const spaces = spacePrivs.spaces.map(
@@ -184,21 +186,22 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
           const hasCustomizations = hasAssignedFeaturePrivileges(privileges);
           const basePrivilege = effectivePrivileges[record.spacesIndex].base;
 
+          const isAllowedCustomizations =
+            allowedPrivileges[record.spacesIndex].base.privileges.length > 1;
+
+          const showCustomize = hasCustomizations && isAllowedCustomizations;
+
           if (record.isGlobal) {
             return (
               <PrivilegeDisplay
-                privilege={
-                  hasCustomizations ? CUSTOM_PRIVILEGE_VALUE : basePrivilege.actualPrivilege
-                }
+                privilege={showCustomize ? CUSTOM_PRIVILEGE_VALUE : basePrivilege.actualPrivilege}
               />
             );
           } else {
             return (
               <PrivilegeDisplay
                 explanation={basePrivilege}
-                privilege={
-                  hasCustomizations ? CUSTOM_PRIVILEGE_VALUE : basePrivilege.actualPrivilege
-                }
+                privilege={showCustomize ? CUSTOM_PRIVILEGE_VALUE : basePrivilege.actualPrivilege}
               />
             );
           }
