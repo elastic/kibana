@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
@@ -27,8 +28,6 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-
-import { FormattedMessage } from '@kbn/i18n/react';
 
 class InspectorViewChooser extends Component {
 
@@ -75,9 +74,9 @@ class InspectorViewChooser extends Component {
         data-test-subj="inspectorViewChooser"
       >
         <FormattedMessage
-          id="common.ui.inspector.viewSelectedViewButtonLabel"
-          defaultMessage="View: {selectedViewTitle}"
-          values={{ selectedViewTitle: this.props.selectedView.title }}
+          id="common.ui.inspector.view"
+          defaultMessage="View: {viewName}"
+          values={{ viewName: this.props.selectedView.title }}
         />
       </EuiButtonEmpty>
     );
@@ -89,13 +88,11 @@ class InspectorViewChooser extends Component {
         position="bottom"
         content={this.props.selectedView.help}
       >
-        <span>
-          <FormattedMessage
-            id="common.ui.inspector.viewSelectedViewLabel"
-            defaultMessage="View: {selectedViewTitle}"
-            values={{ selectedViewTitle: this.props.selectedView.title }}
-          />
-        </span>
+        <FormattedMessage
+          id="common.ui.inspector.view"
+          defaultMessage="View: {viewName}"
+          values={{ viewName: this.props.selectedView.title }}
+        />
       </EuiToolTip>
     );
   }

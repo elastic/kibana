@@ -224,11 +224,11 @@ exports[`InspectorPanel should render as expected 1`] = `
                       type="button"
                     >
                       <FormattedMessage
-                        defaultMessage="View: {selectedViewTitle}"
-                        id="common.ui.inspector.viewSelectedViewButtonLabel"
+                        defaultMessage="View: {viewName}"
+                        id="common.ui.inspector.view"
                         values={
                           Object {
-                            "selectedViewTitle": "View 1",
+                            "viewName": "View 1",
                           }
                         }
                       />
@@ -317,11 +317,11 @@ exports[`InspectorPanel should render as expected 1`] = `
                                 className="euiButtonEmpty__text"
                               >
                                 <FormattedMessage
-                                  defaultMessage="View: {selectedViewTitle}"
-                                  id="common.ui.inspector.viewSelectedViewButtonLabel"
+                                  defaultMessage="View: {viewName}"
+                                  id="common.ui.inspector.view"
                                   values={
                                     Object {
-                                      "selectedViewTitle": "View 1",
+                                      "viewName": "View 1",
                                     }
                                   }
                                 >

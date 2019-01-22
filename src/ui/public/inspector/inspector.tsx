@@ -25,6 +25,10 @@ import { Adapters } from './types';
 import { InspectorPanel } from './ui/inspector_panel';
 import { viewRegistry } from './view_registry';
 
+const closeButtonLabel = i18n.translate('common.ui.inspector.closeButton', {
+  defaultMessage: 'Close Inspector',
+});
+
 /**
  * Checks if a inspector panel could be shown based on the passed adapters.
  *
@@ -75,9 +79,7 @@ function open(adapters: Adapters, options: InspectorOptions = {}): InspectorSess
     </I18nProvider>,
     {
       'data-test-subj': 'inspectorPanel',
-      closeButtonAriaLabel: i18n.translate('common.ui.inspector.closeButtonAriaLabel', {
-        defaultMessage: 'Close Inspector',
-      }),
+      closeButtonAriaLabel: closeButtonLabel,
     }
   );
 }
