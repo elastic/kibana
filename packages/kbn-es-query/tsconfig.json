@@ -1,9 +1,8 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.browser.json",
   "compilerOptions": {
     "rootDir": "./src",
-    "outDir": "./target",
-    "target": "ES3"
+    "outDir": "./target"
   },
   "include": [
     "index.d.ts",
