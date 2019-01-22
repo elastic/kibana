@@ -41,7 +41,6 @@ export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) =>
     })
     .expect(204);
 
-<<<<<<< HEAD
   await supertest
     .put('/api/security/role/kibana_dual_privileges_dashboard_only_user')
     .send({
@@ -66,11 +65,6 @@ export const createUsersAndRoles = async (es: any, supertest: SuperTest<any>) =>
     .put('/api/security/role/kibana_rbac_user')
     .send({
       kibana: [
-=======
-  await supertest.put('/api/security/role/kibana_dual_privileges_user').send({
-    elasticsearch: {
-      indices: [
->>>>>>> upstream/master
         {
           base: ['all'],
           spaces: ['*'],
