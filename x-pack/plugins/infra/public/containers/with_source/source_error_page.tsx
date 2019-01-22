@@ -18,7 +18,7 @@ export const SourceErrorPage: React.SFC<SourceErrorPageProps> = ({ errorMessage,
   <ErrorPage
     shortMessage={
       <FormattedMessage
-        id="xpack.infra.logs.sourceErrorPage.failedToLoadDataSourcesMessage"
+        id="xpack.infra.sourceErrorPage.failedToLoadDataSourcesMessage"
         defaultMessage="Failed to load data sources."
       />
     }
