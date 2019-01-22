@@ -137,9 +137,7 @@ function getReadablePrivilegeSource(privilegeSource: PRIVILEGE_SOURCE) {
     case PRIVILEGE_SOURCE.GLOBAL_BASE:
       return (
         <FormattedMessage
-          id={
-            'xpack.security.management.editRole.spaceAwarePrivilegeDisplay.globalBasePrivilegeSource'
-          }
+          id="xpack.security.management.editRole.spaceAwarePrivilegeDisplay.globalBasePrivilegeSource"
           defaultMessage="global base privilege"
         />
       );
