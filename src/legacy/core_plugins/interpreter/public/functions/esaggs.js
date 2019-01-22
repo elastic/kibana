@@ -41,7 +41,7 @@ export const esaggs = () => ({
       'null',
     ],
   },
-  help: i18n.translate('common.core_plugins.interpreter.public.functions.esaggs.help', { defaultMessage: 'Run AggConfig aggregation' }),
+  help: i18n.translate('interpreter.functions.esaggs.help', { defaultMessage: 'Run AggConfig aggregation' }),
   args: {
     index: {
       types: ['string', 'null'],

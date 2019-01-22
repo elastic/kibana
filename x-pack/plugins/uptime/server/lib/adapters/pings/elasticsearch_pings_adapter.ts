@@ -6,12 +6,15 @@
 
 import { get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
-import { UMGqlRange, UMPingSortDirectionArg } from '../../../../common/domain_types';
 import { DocCount, HistogramSeries, Ping, PingResults } from '../../../../common/graphql/types';
 import { DatabaseAdapter } from '../database';
 import { UMPingsAdapter } from './adapter_types';
 
-const getFilteredQuery = (dateRangeStart: number, dateRangeEnd: number, filters?: string) => {
+const getFilteredQuery = (
+  dateRangeStart: string,
+  dateRangeEnd: string,
+  filters?: string | null
+) => {
   let filtersObj;
   // TODO: handle bad JSON gracefully
   filtersObj = filters ? JSON.parse(filters) : undefined;
@@ -43,12 +46,12 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
 
   public async getAll(
     request: any,
-    dateRangeStart: number,
-    dateRangeEnd: number,
-    monitorId?: string,
-    status?: string,
-    sort?: UMPingSortDirectionArg,
-    size?: number
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    monitorId?: string | null,
+    status?: string | null,
+    sort?: string | null,
+    size?: number | null
   ): Promise<PingResults> {
     const sortParam = sort ? { sort: [{ '@timestamp': { order: sort } }] } : undefined;
     const sizeParam = size ? { size } : undefined;
@@ -90,9 +93,9 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
 
   public async getLatestMonitorDocs(
     request: any,
-    dateRangeStart: number,
-    dateRangeEnd: number,
-    monitorId?: string
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    monitorId?: string | null
   ): Promise<Ping[]> {
     const must: any[] = [];
     if (monitorId) {
@@ -147,10 +150,10 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
 
   public async getPingHistogram(
     request: any,
-    range: UMGqlRange,
-    filters?: string
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string | null
   ): Promise<HistogramSeries[] | null> {
-    const { dateRangeStart, dateRangeEnd } = range;
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
@@ -233,18 +236,8 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
   }
 
   public async getDocCount(request: any): Promise<DocCount> {
-    const params = {
-      index: INDEX_NAMES.HEARTBEAT,
-      body: {
-        query: {
-          match_all: {},
-        },
-        size: 1,
-      },
-    };
-    const result = await this.database.search(request, params);
-    return {
-      count: get(result, 'hits.total.value', 0),
-    };
+    const { count } = await this.database.count(request, { index: INDEX_NAMES.HEARTBEAT });
+
+    return { count };
   }
 }

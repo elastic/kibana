@@ -9,12 +9,8 @@ import PropTypes from 'prop-types';
 import { EuiBasicTable, EuiBadge } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import moment from 'moment';
-import {
-  toQuery,
-  fromQuery,
-  history,
-  RelativeLink
-} from '../../../../utils/url';
+import { toQuery, fromQuery, history } from '../../../shared/Links/url_helpers';
+import { KibanaLink } from '../../../shared/Links/KibanaLink';
 import TooltipOverlay from '../../../shared/TooltipOverlay';
 import styled from 'styled-components';
 import {
@@ -24,13 +20,14 @@ import {
   fontSizes,
   truncate
 } from '../../../../style/variables';
+import { NOT_AVAILABLE_LABEL } from '../../../../constants';
 import { i18n } from '@kbn/i18n';
 
 function paginateItems({ items, pageIndex, pageSize }) {
   return items.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
 }
 
-const GroupIdLink = styled(RelativeLink)`
+const GroupIdLink = styled(KibanaLink)`
   font-family: ${fontFamilyCode};
 `;
 
@@ -38,7 +35,7 @@ const MessageAndCulpritCell = styled.div`
   ${truncate('100%')};
 `;
 
-const MessageLink = styled(RelativeLink)`
+const MessageLink = styled(KibanaLink)`
   font-family: ${fontFamilyCode};
   font-size: ${fontSizes.large};
   ${truncate('100%')};
@@ -47,13 +44,6 @@ const MessageLink = styled(RelativeLink)`
 const Culprit = styled.div`
   font-family: ${fontFamilyCode};
 `;
-
-const notAvailableLabel = i18n.translate(
-  'xpack.apm.errorsTable.notAvailableLabel',
-  {
-    defaultMessage: 'N/A'
-  }
-);
 
 class List extends Component {
   state = {
@@ -98,8 +88,8 @@ class List extends Component {
         width: px(unit * 6),
         render: groupId => {
           return (
-            <GroupIdLink path={`/${serviceName}/errors/${groupId}`}>
-              {groupId.slice(0, 5) || notAvailableLabel}
+            <GroupIdLink hash={`/${serviceName}/errors/${groupId}`}>
+              {groupId.slice(0, 5) || NOT_AVAILABLE_LABEL}
             </GroupIdLink>
           );
         }
@@ -117,13 +107,13 @@ class List extends Component {
         render: (message, item) => {
           return (
             <MessageAndCulpritCell>
-              <TooltipOverlay content={message || notAvailableLabel}>
-                <MessageLink path={`/${serviceName}/errors/${item.groupId}`}>
-                  {message || notAvailableLabel}
+              <TooltipOverlay content={message || NOT_AVAILABLE_LABEL}>
+                <MessageLink hash={`/${serviceName}/errors/${item.groupId}`}>
+                  {message || NOT_AVAILABLE_LABEL}
                 </MessageLink>
               </TooltipOverlay>
-              <TooltipOverlay content={item.culprit || notAvailableLabel}>
-                <Culprit>{item.culprit || notAvailableLabel}</Culprit>
+              <TooltipOverlay content={item.culprit || NOT_AVAILABLE_LABEL}>
+                <Culprit>{item.culprit || NOT_AVAILABLE_LABEL}</Culprit>
               </TooltipOverlay>
             </MessageAndCulpritCell>
           );
@@ -151,7 +141,7 @@ class List extends Component {
         sortable: true,
         dataType: 'number',
         render: value =>
-          value ? numeral(value).format('0.[0]a') : notAvailableLabel
+          value ? numeral(value).format('0.[0]a') : NOT_AVAILABLE_LABEL
       },
       {
         field: 'latestOccurrenceAt',
@@ -163,7 +153,7 @@ class List extends Component {
           }
         ),
         align: 'right',
-        render: value => (value ? moment(value).fromNow() : notAvailableLabel)
+        render: value => (value ? moment(value).fromNow() : NOT_AVAILABLE_LABEL)
       }
     ];
 

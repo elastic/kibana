@@ -70,6 +70,8 @@ export interface Ping {
   tcp?: Tcp | null;
 
   tls?: Tls | null;
+
+  url?: Url | null;
 }
 /** An agent for recording a beat */
 export interface Beat {
@@ -258,6 +260,10 @@ export interface Tls {
   rtt?: Rtt | null;
 }
 
+export interface Url {
+  full?: string | null;
+}
+
 export interface DocCount {
   count: UnsignedInteger;
 }
@@ -393,51 +399,51 @@ export interface AllPingsQueryArgs {
 
   status?: string | null;
 
-  dateRangeStart: UnsignedInteger;
+  dateRangeStart: string;
 
-  dateRangeEnd: UnsignedInteger;
+  dateRangeEnd: string;
 }
 export interface GetMonitorsQueryArgs {
-  dateRangeStart: UnsignedInteger;
+  dateRangeStart: string;
 
-  dateRangeEnd: UnsignedInteger;
+  dateRangeEnd: string;
 
   filters?: string | null;
 }
 export interface GetSnapshotQueryArgs {
-  dateRangeStart?: UnsignedInteger | null;
+  dateRangeStart: string;
 
-  dateRangeEnd?: UnsignedInteger | null;
+  dateRangeEnd: string;
 
-  downCount?: number | null;
+  downCount: number;
 
-  windowSize?: number | null;
+  windowSize: number;
 
   filters?: string | null;
 }
 export interface GetMonitorChartsDataQueryArgs {
-  monitorId?: string | null;
+  monitorId: string;
 
-  dateRangeStart?: UnsignedInteger | null;
+  dateRangeStart: string;
 
-  dateRangeEnd?: UnsignedInteger | null;
+  dateRangeEnd: string;
 }
 export interface GetLatestMonitorsQueryArgs {
-  dateRangeStart: UnsignedInteger;
+  dateRangeStart: string;
 
-  dateRangeEnd: UnsignedInteger;
+  dateRangeEnd: string;
 
   monitorId?: string | null;
 }
 export interface GetFilterBarQueryArgs {
-  dateRangeStart: UnsignedInteger;
+  dateRangeStart: string;
 
-  dateRangeEnd: UnsignedInteger;
+  dateRangeEnd: string;
 }
 export interface GetErrorsListQueryArgs {
-  dateRangeStart: UnsignedInteger;
+  dateRangeStart: string;
 
-  dateRangeEnd: UnsignedInteger;
+  dateRangeEnd: string;
 
   filters?: string | null;
 }

@@ -29,8 +29,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const log = getService('log');
   const inspector = getService('inspector');
-  const renderable = getService('renderable');
   const table = getService('table');
+  const globalNav = getService('globalNav');
   const PageObjects = getPageObjects(['common', 'header']);
   const defaultFindTimeout = config.get('timeouts.find');
 
@@ -130,6 +130,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getTextTag() {
+      await this.waitForVisualization();
       const elements = await find.allByCssSelector('text');
       return await Promise.all(elements.map(async element => await element.getVisibleText()));
     }
@@ -562,15 +563,15 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickGo() {
+      const prevRenderingCount = await this.getVisualizationRenderingCount();
+      log.debug(`Before Rendering count ${prevRenderingCount}`);
       await testSubjects.clickWhenNotDisabled('visualizeEditorRenderButton');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      // For some reason there are two `data-render-complete` tags on each visualization in the visualize page.
-      const countOfDataCompleteFlags = 2;
-      await renderable.waitForRender(countOfDataCompleteFlags);
+      await this.waitForRenderingCount(prevRenderingCount);
     }
 
     async clickReset() {
       await testSubjects.click('visualizeEditorResetButton');
+      await this.waitForVisualization();
     }
 
     async toggleAutoMode() {
@@ -690,6 +691,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         timeout: defaultFindTimeout
       });
       expect(successToast).to.be(true);
+    }
+
+    async saveVisualizationExpectSuccessAndBreadcrumb(vizName, { saveAsNew = false } = {}) {
+      await this.saveVisualizationExpectSuccess(vizName, { saveAsNew });
+      await retry.waitFor('last breadcrumb to have new vis name', async () => (
+        await globalNav.getLastBreadcrumb() === vizName
+      ));
     }
 
     async saveVisualizationExpectFail(vizName, { saveAsNew = false } = {}) {
@@ -917,7 +925,33 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await find.clickByCssSelector('div.schemaEditors > div > div > button:nth-child(2)');
     }
 
+    async getVisualizationRenderingCount() {
+      const visualizationLoader = await testSubjects.find('visualizationLoader');
+      const renderingCount = await visualizationLoader.getAttribute('data-rendering-count');
+      return Number(renderingCount);
+    }
+
+    async waitForRenderingCount(previousCount = 0, increment = 1) {
+      await retry.try(async () => {
+        const currentRenderingCount = await this.getVisualizationRenderingCount();
+        log.debug(`Readed rendering count ${previousCount} ${currentRenderingCount}`);
+        expect(currentRenderingCount).to.be(previousCount + increment);
+      });
+    }
+
+    async waitForVisualizationRenderingStabilized() {
+      //assuming rendering is done when data-rendering-count is constant within 1000 ms
+      await retry.try(async () => {
+        const previousCount = await this.getVisualizationRenderingCount();
+        await PageObjects.common.sleep(1000);
+        const currentCount = await this.getVisualizationRenderingCount();
+        log.debug(`Readed rendering count ${previousCount} ${currentCount}`);
+        expect(currentCount).to.be(previousCount);
+      });
+    }
+
     async waitForVisualization() {
+      await this.waitForVisualizationRenderingStabilized();
       return await find.byCssSelector('.visualization');
     }
 
@@ -1034,10 +1068,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async openLegendOptionColors(name) {
+      await this.waitForVisualizationRenderingStabilized();
       await retry.try(async () => {
         // This click has been flaky in opening the legend, hence the retry.  See
         // https://github.com/elastic/kibana/issues/17468
         await testSubjects.click(`legend-${name}`);
+        await this.waitForVisualizationRenderingStabilized();
         // arbitrary color chosen, any available would do
         const isOpen = await this.doesLegendColorChoiceExist('#EF843C');
         if (!isOpen) {
@@ -1069,6 +1105,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await this.toggleLegend();
       await testSubjects.click(`legend-${name}`);
       await testSubjects.click(`legend-${name}-filterIn`);
+      await this.waitForVisualizationRenderingStabilized();
     }
 
     async doesLegendColorChoiceExist(color) {

@@ -39,8 +39,57 @@ export function VislibLibDispatchProvider(Private, config) {
       this._listeners = {};
     }
 
+
+    _pieClickResponse(data) {
+      const points = [];
+
+      let dataPointer = data;
+      while (dataPointer && dataPointer.rawData) {
+        points.push(dataPointer.rawData);
+        dataPointer = dataPointer.parent;
+      }
+
+      if (data.rawData.table.$parent) {
+        const { table, column, row, key } = data.rawData.table.$parent;
+        points.push({ table, column, row, value: key });
+      }
+
+      return points;
+    }
+
+    _seriesClickResponse(data) {
+      const points = [];
+
+      ['xRaw', 'yRaw', 'zRaw', 'seriesRaw', 'rawData', 'tableRaw'].forEach(val => {
+        if (data[val]) {
+          points.push(data[val]);
+        }
+      });
+
+      return points;
+    }
+
     /**
-     * Response to click and hover events
+     * Response to click  events
+     *
+     * @param d {Object} Data point
+     * @returns event with list of data points related to the click
+     */
+    clickEventResponse(d) {
+      const _data = d3.event.target.nearestViewportElement ?
+        d3.event.target.nearestViewportElement.__data__ : d3.event.target.__data__;
+      const isSlices = !!(_data && _data.slices);
+
+      const data = d.input || d;
+
+      return {
+        e: d3.event,
+        data: isSlices ? this._pieClickResponse(data) : this._seriesClickResponse(data),
+      };
+    }
+
+    /**
+     * Response to hover events
      *
      * @param d {Object} Data point
      * @param i {Number} Index number of data point
@@ -74,31 +123,6 @@ export function VislibLibDispatchProvider(Private, config) {
         e: d3.event,
         handler: handler
       };
-
-      if (isSeries) {
-        let percentageMode = false;
-        //only series charts work in percentage mode.
-        const isSeriesChart = handler.charts && handler.charts[0] && handler.charts[0].getSeries;
-        const parentNode = d3.event.target.parentNode;
-        const parentData = parentNode ? parentNode.__data__ : null;
-        if (isSeriesChart && parentData) {
-          const aggId = parentData.aggId;
-          const seriesFromAggId = handler.charts[0].getSeries(aggId);
-          if (seriesFromAggId && seriesFromAggId.getValueAxis) {
-            percentageMode = seriesFromAggId.getValueAxis().axisConfig.isPercentage();
-          }
-        }
-
-        const object = _.find(series, { 'label': label });
-        if (object) {
-          eventData.value = +object.values[i].y;
-
-          if (percentageMode) {
-            // Add the formatted percentage to the point object
-            eventData.percent = (100 * d.y).toFixed(1) + '%';
-          }
-        }
-      }
 
       return eventData;
     }
@@ -179,8 +203,8 @@ export function VislibLibDispatchProvider(Private, config) {
       const self = this;
       const addEvent = this.addEvent;
 
-      function click(d, i) {
-        self.emit('click', self.eventResponse(d, i));
+      function click(d) {
+        self.emit('click', self.clickEventResponse(d));
       }
 
       return addEvent('click', click);

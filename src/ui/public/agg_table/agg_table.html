@@ -1,10 +1,12 @@
 <paginated-table
   ng-if="rows.length"
+  table="table"
   rows="rows"
   columns="formattedColumns"
   per-page="perPage"
   sort="sort"
   show-total="showTotal"
+  filter="filter"
   totalFunc="totalFunc">
 
   <div class="kbnAggTable__controls">
