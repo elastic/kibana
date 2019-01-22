@@ -37,12 +37,14 @@ export function getWorker() {
     if (type === 'run') {
       const { threadId } = msg;
       const { ast, context } = value;
-      heap[threadId]
-        .onFunctionNotFound(ast, context)
-        .then(value => {
-          worker.send({ type: 'msgSuccess', id, value: value });
-        })
-        .catch(e => heap[threadId].reject(e));
+      if (heap[threadId]) {
+        heap[threadId]
+          .onFunctionNotFound(ast, context)
+          .then(value => {
+            worker.send({ type: 'msgSuccess', id, value: value });
+          })
+          .catch(e => heap[threadId].reject(e));
+      }
     }
 
     if (type === 'msgSuccess' && heap[id]) heap[id].resolve(value);

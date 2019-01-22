@@ -31,7 +31,7 @@ export const kibanaTable = () => ({
       'kibana_table'
     ],
   },
-  help: i18n.translate('common.core_plugins.interpreter.public.functions.table.help', {
+  help: i18n.translate('interpreter.functions.table.help', {
     defaultMessage: 'Table visualization'
   }),
   args: {

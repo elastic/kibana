@@ -81,6 +81,18 @@ Array [
                 },
               },
             ],
+            "must": Array [
+              Object {
+                "exists": Object {
+                  "field": "system.memory.total",
+                },
+              },
+              Object {
+                "exists": Object {
+                  "field": "system.memory.actual.free",
+                },
+              },
+            ],
           },
         },
         "size": 0,
