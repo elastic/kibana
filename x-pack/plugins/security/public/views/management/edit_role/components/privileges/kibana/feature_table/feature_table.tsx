@@ -46,11 +46,6 @@ interface Props {
   disabled?: boolean;
 }
 
-interface ToolTipDefinition {
-  privilegeId: string;
-  tooltip: string;
-}
-
 interface TableFeature extends Feature {
   hasAnyPrivilegeAssigned: boolean;
 }
@@ -109,30 +104,11 @@ export class FeatureTable extends Component<Props, {}> {
         defaultMessage: 'Feature',
       }),
       render: (feature: TableFeature) => {
-        const tooltips = Object.entries(feature.privileges).reduce(
-          (acc: ToolTipDefinition[], [privilegeId, privilege]) => {
-            if (!privilege.metadata || !privilege.metadata.tooltip) {
-              return acc;
-            }
-
-            return [
-              ...acc,
-              {
-                privilegeId,
-                tooltip: privilege.metadata.tooltip,
-              },
-            ];
-          },
-          [] as ToolTipDefinition[]
-        );
-
         let tooltipElement = null;
-        if (tooltips.length > 0) {
+        if (feature.privilegesTooltip) {
           const tooltipContent = (
             <EuiText>
-              {tooltips.map(tip => (
-                <p key={tip.privilegeId}>{tip.tooltip}</p>
-              ))}
+              <p>{feature.privilegesTooltip}</p>
             </EuiText>
           );
           tooltipElement = (

@@ -39,9 +39,6 @@ describe('registerFeature', () => {
       validLicenses: ['standard', 'basic', 'gold', 'platinum'],
       privileges: {
         all: {
-          metadata: {
-            tooltip: 'some fancy tooltip',
-          },
           app: ['app1', 'app2'],
           savedObject: {
             all: ['config', 'space', 'etc'],
@@ -51,6 +48,7 @@ describe('registerFeature', () => {
           ui: ['allowsFoo', 'showBar', 'showBaz'],
         },
       },
+      privilegesTooltip: 'some fancy tooltip',
     };
 
     registerFeature(feature);
@@ -100,9 +98,6 @@ describe('registerFeature', () => {
       name: 'Test Feature',
       privileges: {
         ['some invalid key']: {
-          metadata: {
-            tooltip: 'some fancy tooltip',
-          },
           app: ['app1', 'app2'],
           savedObject: {
             all: ['config', 'space', 'etc'],

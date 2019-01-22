@@ -10,9 +10,6 @@ import _ from 'lodash';
 import { UICapabilities } from 'ui/capabilities';
 
 export interface FeaturePrivilegeDefinition {
-  metadata?: {
-    tooltip?: string;
-  };
   management?: {
     [sectionId: string]: string[];
   };
@@ -36,6 +33,7 @@ export interface Feature {
   privileges: {
     [key: string]: FeaturePrivilegeDefinition;
   };
+  privilegesTooltip?: string;
 }
 
 // Each feature gets its own property on the UICapabilities object,
@@ -60,9 +58,6 @@ const schema = Joi.object({
     .pattern(
       featurePrivilegePartRegex,
       Joi.object({
-        metadata: Joi.object({
-          tooltip: Joi.string(),
-        }),
         management: Joi.object().pattern(managementSectionIdRegex, Joi.array().items(Joi.string())),
         catalogue: Joi.array().items(Joi.string()),
         api: Joi.array().items(Joi.string()),
@@ -83,6 +78,7 @@ const schema = Joi.object({
       })
     )
     .required(),
+  privilegesTooltip: Joi.string(),
 });
 
 const features: Record<string, Feature> = {};
