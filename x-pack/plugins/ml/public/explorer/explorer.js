@@ -209,6 +209,11 @@ export const Explorer = injectI18n(
 
         if (selectedJobs.length > 1) {
           stateUpdate.swimlaneViewByFieldName = VIEW_BY_JOB_LABEL;
+          // enforce a state update for swimlaneViewByFieldName
+          this.setState({ swimlaneViewByFieldName: VIEW_BY_JOB_LABEL }, () => {
+            this.updateExplorer(stateUpdate, true);
+          });
+          return;
         }
 
         this.updateExplorer(stateUpdate, true);
@@ -217,8 +222,7 @@ export const Explorer = injectI18n(
       // REFRESH reloads full Anomaly Explorer and clears the selection.
       if (action === EXPLORER_ACTION.REFRESH) {
         this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
-        const stateUpdate = this.getclearedSelectedAnomaliesState();
-        this.updateExplorer(stateUpdate, true);
+        this.updateExplorer(this.getclearedSelectedAnomaliesState(), true);
       }
 
       // REDRAW reloads Anomaly Explorer and tries to retain the selection.
@@ -277,9 +281,7 @@ export const Explorer = injectI18n(
 
     swimlaneLimitListener = () => {
       this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
-      this.updateExplorer({
-        ...this.getclearedSelectedAnomaliesState(),
-      }, false);
+      this.updateExplorer(this.getclearedSelectedAnomaliesState(), false);
     };
 
     // Listens to render updates of the swimlanes to update dragSelect
