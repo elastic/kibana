@@ -71,6 +71,36 @@ export default {
     '7.0.0': (doc) => {
       // Set new "references" attribute
       doc.references = doc.references || [];
+      // Migrate index pattern
+      const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
+      if (
+        typeof searchSourceJSON !== 'string' &&
+        searchSourceJSON !== undefined &&
+        searchSourceJSON !== null
+      ) {
+        throw new Error(`searchSourceJSON is not a string on dashboard "${doc.id}"`);
+      }
+      if (searchSourceJSON) {
+        let searchSource;
+        try {
+          searchSource = JSON.parse(searchSourceJSON);
+        } catch (e) {
+          throw new Error(
+            `Failed to parse searchSourceJSON: "${searchSourceJSON}" because "${
+              e.message
+            }" on dashboard "${doc.id}"`
+          );
+        }
+        if (searchSource.index) {
+          doc.references.push({
+            name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+            type: 'index-pattern',
+            id: searchSource.index,
+          });
+          searchSource.index = 'kibanaSavedObjectMeta.searchSourceJSON.index';
+          set(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON', JSON.stringify(searchSource));
+        }
+      }
       // Migrate panels
       const panelsJSON = get(doc, 'attributes.panelsJSON');
       if (typeof panelsJSON !== 'string') {

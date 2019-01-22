@@ -228,6 +228,184 @@ describe('dashboard', () => {
       );
     });
 
+    test('skips errors when searchSourceJSON is null', () => {
+      const doc = {
+        id: '1',
+        type: 'dashboard',
+        attributes: {
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: null,
+          },
+          panelsJSON:
+            '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
+        },
+      };
+      const migratedDoc = migration(doc);
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": null,
+    },
+    "panelsJSON": "[{\\"foo\\":true,\\"panelRef\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRef\\":\\"panel_1\\"}]",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "1",
+      "name": "panel_0",
+      "type": "visualization",
+    },
+    Object {
+      "id": "2",
+      "name": "panel_1",
+      "type": "visualization",
+    },
+  ],
+  "type": "dashboard",
+}
+`);
+    });
+
+    test('skips errors when searchSourceJSON is undefined', () => {
+      const doc = {
+        id: '1',
+        type: 'dashboard',
+        attributes: {
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: undefined,
+          },
+          panelsJSON:
+            '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
+        },
+      };
+      const migratedDoc = migration(doc);
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": undefined,
+    },
+    "panelsJSON": "[{\\"foo\\":true,\\"panelRef\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRef\\":\\"panel_1\\"}]",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "1",
+      "name": "panel_0",
+      "type": "visualization",
+    },
+    Object {
+      "id": "2",
+      "name": "panel_1",
+      "type": "visualization",
+    },
+  ],
+  "type": "dashboard",
+}
+`);
+    });
+
+    test('throw error when searchSourceJSON is not a string', () => {
+      const doc = {
+        id: '1',
+        type: 'dashboard',
+        attributes: {
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: 123,
+          },
+          panelsJSON:
+            '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
+        },
+      };
+      expect(() => migration(doc)).toThrowErrorMatchingInlineSnapshot(
+        `"searchSourceJSON is not a string on dashboard \\"1\\""`
+      );
+    });
+
+    test('skips error when "index" is missing from searchSourceJSON', () => {
+      const doc = {
+        id: '1',
+        type: 'dashboard',
+        attributes: {
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({ bar: true }),
+          },
+          panelsJSON:
+            '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
+        },
+      };
+      const migratedDoc = migration(doc);
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": "{\\"bar\\":true}",
+    },
+    "panelsJSON": "[{\\"foo\\":true,\\"panelRef\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRef\\":\\"panel_1\\"}]",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "1",
+      "name": "panel_0",
+      "type": "visualization",
+    },
+    Object {
+      "id": "2",
+      "name": "panel_1",
+      "type": "visualization",
+    },
+  ],
+  "type": "dashboard",
+}
+`);
+    });
+
+    test('extracts "index" attribute from doc', () => {
+      const doc = {
+        id: '1',
+        type: 'dashboard',
+        attributes: {
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({ bar: true, index: 'pattern*' }),
+          },
+          panelsJSON:
+            '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
+        },
+      };
+      const migratedDoc = migration(doc);
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": "{\\"bar\\":true,\\"index\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
+    },
+    "panelsJSON": "[{\\"foo\\":true,\\"panelRef\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRef\\":\\"panel_1\\"}]",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "pattern*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "1",
+      "name": "panel_0",
+      "type": "visualization",
+    },
+    Object {
+      "id": "2",
+      "name": "panel_1",
+      "type": "visualization",
+    },
+  ],
+  "type": "dashboard",
+}
+`);
+    });
+
     test('throw error when panelsJSON is not a string', () => {
       const doc = {
         id: '1',
