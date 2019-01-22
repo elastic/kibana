@@ -10,6 +10,8 @@ export const REQUEST_URL_FULL = 'url.full';
 export const REQUEST_METHOD = 'http.request.method';
 export const USER_ID = 'user.id';
 
+export const OBSERVER_LISTENING = 'observer.listening';
+
 export const PROCESSOR_NAME = 'processor.name';
 export const PROCESSOR_EVENT = 'processor.event';
 
