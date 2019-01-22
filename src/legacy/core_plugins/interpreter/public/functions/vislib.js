@@ -29,7 +29,7 @@ export const vislib = () => ({
       'kibana_table', 'null'
     ],
   },
-  help: i18n.translate('common.core_plugins.interpreter.public.functions.vislib.help', {
+  help: i18n.translate('interpreter.functions.vislib.help', {
     defaultMessage: 'Vislib visualization'
   }),
   args: {

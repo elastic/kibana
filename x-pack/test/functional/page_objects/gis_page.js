@@ -105,11 +105,11 @@ export function GisPageProvider({ getService, getPageObjects }) {
      * Layer TOC (table to contents) utility functions
      */
     async setView(lat, lon, zoom) {
-      log.debug(`Set view lat: ${lat}, lon: ${lon}, zoom: ${zoom}`);
+      log.debug(`Set view lat: ${lat.toString()}, lon: ${lon.toString()}, zoom: ${zoom.toString()}`);
       await testSubjects.click('toggleSetViewVisibilityButton');
-      await testSubjects.setValue('latitudeInput', lat);
-      await testSubjects.setValue('longitudeInput', lon);
-      await testSubjects.setValue('zoomInput', zoom);
+      await testSubjects.setValue('latitudeInput', lat.toString());
+      await testSubjects.setValue('longitudeInput', lon.toString());
+      await testSubjects.setValue('zoomInput', zoom.toString());
       await testSubjects.click('submitViewButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
     }

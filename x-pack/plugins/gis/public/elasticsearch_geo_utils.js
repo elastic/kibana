@@ -224,7 +224,8 @@ function formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon }) {
  * Convert map bounds to polygon
  */
 export function convertMapExtentToPolygon({ maxLat, maxLon, minLat, minLon }) {
-  if (maxLon > 180 && minLon < -180) {
+  const lonDelta = maxLon - minLon;
+  if (lonDelta >= 360) {
     return formatEnvelopeAsPolygon({
       maxLat,
       maxLon: 180,
