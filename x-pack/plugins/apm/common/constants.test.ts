@@ -17,7 +17,10 @@ describe('Transaction', () => {
       name: 'agent name',
       version: 'agent version'
     },
-    http: { request: { method: 'GET' } },
+    http: {
+      request: { method: 'GET' },
+      response: { status_code: 200 }
+    },
     url: { full: 'http://www.elastic.co' },
     service: {
       name: 'service name',
@@ -93,12 +96,13 @@ describe('Span', () => {
       id: 'parentId'
     },
     span: {
-      duration: {
-        us: 1337
-      },
+      action: 'my action',
+      duration: { us: 1337 },
+      id: 'span id',
       name: 'span name',
-      type: 'span type',
-      id: 'span id'
+      subtype: 'my subtype',
+      sync: false,
+      type: 'span type'
     },
     transaction: {
       id: 'transaction id'

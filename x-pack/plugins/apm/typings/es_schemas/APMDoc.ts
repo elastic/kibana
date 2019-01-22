@@ -11,15 +11,14 @@ export interface Context {
   [key: string]: unknown;
 }
 
+// TODO: APMDoc should perhaps only be the base for errors and transactions. Not spans
 export interface APMDoc {
   '@timestamp': string;
   host?: {
     architecture?: string;
     hostname?: string;
     ip?: string;
-    os?: {
-      platform?: string;
-    };
+    os?: { platform?: string };
   };
   agent: {
     name: string;
@@ -29,9 +28,8 @@ export interface APMDoc {
     full: string;
   };
   http?: {
-    request: {
-      method: string;
-    };
+    request: { method: string };
+    response: { status_code: number };
   };
   service: {
     name: string;
@@ -52,7 +50,7 @@ export interface APMDoc {
   process?: {
     pid: number;
     title: string;
-    argv: string[];
+    args: string[];
     [key: string]: unknown;
   };
   timestamp: {
@@ -68,6 +66,9 @@ export interface APMDoc {
     id: string;
     username?: string;
     email?: string;
+  };
+  labels?: {
+    [key: string]: unknown;
   };
   context?: Context;
 }

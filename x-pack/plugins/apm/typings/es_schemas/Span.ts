@@ -12,6 +12,7 @@ interface Processor {
   event: 'span';
 }
 
+// TODO: should spanContext extend shared context?
 interface SpanContext extends Context {
   db?: {
     instance?: string;
@@ -20,10 +21,12 @@ interface SpanContext extends Context {
     user?: string;
   };
   http?: {
+    method?: string;
+    status_code?: number;
     url?: string;
   };
   tags?: {
-    [key: string]: string;
+    [key: string]: string; // is this always a string?
   };
 }
 
@@ -31,13 +34,14 @@ export interface Span extends APMDoc {
   processor: Processor;
   context?: SpanContext;
   span: {
-    duration: {
-      us: number;
-    };
-    name: string;
-    type: string;
+    action: string;
+    duration: { us: number };
     id: string;
+    name: string;
     stacktrace?: IStackframe[];
+    subtype: string;
+    sync: boolean;
+    type: string;
   };
   transaction: {
     id: string;

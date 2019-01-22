@@ -26,6 +26,8 @@ exports[`Error METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 
 exports[`Error METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
+exports[`Error OBSERVER_LISTENING 1`] = `undefined`;
+
 exports[`Error PARENT_ID 1`] = `"parentId"`;
 
 exports[`Error PROCESSOR_EVENT 1`] = `"error"`;
@@ -96,6 +98,8 @@ exports[`Span METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 
 exports[`Span METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
+exports[`Span OBSERVER_LISTENING 1`] = `undefined`;
+
 exports[`Span PARENT_ID 1`] = `"parentId"`;
 
 exports[`Span PROCESSOR_EVENT 1`] = `"span"`;
@@ -165,6 +169,8 @@ exports[`Transaction METRIC_SYSTEM_CPU_PERCENT 1`] = `undefined`;
 exports[`Transaction METRIC_SYSTEM_FREE_MEMORY 1`] = `undefined`;
 
 exports[`Transaction METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
+
+exports[`Transaction OBSERVER_LISTENING 1`] = `undefined`;
 
 exports[`Transaction PARENT_ID 1`] = `"parentId"`;
 

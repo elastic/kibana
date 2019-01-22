@@ -147,18 +147,10 @@ exports[`DetailView should render tabs 1`] = `
   <EuiTab
     disabled={false}
     isSelected={false}
-    key="tags"
+    key="labels"
     onClick={[Function]}
   >
-    Tags
-  </EuiTab>
-  <EuiTab
-    disabled={false}
-    isSelected={false}
-    key="custom"
-    onClick={[Function]}
-  >
-    Custom
+    Labels
   </EuiTab>
 </EuiTabs>
 `;
