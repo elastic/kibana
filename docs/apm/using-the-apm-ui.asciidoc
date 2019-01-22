@@ -7,6 +7,7 @@ but you might come across certain terms or concepts that don’t feel native to 
 Not to worry, we've created this guide to help you get the most out of Elastic APM.
 
 * <<services>>
+* <<traces>>
 * <<transactions>>
 ** <<transaction-details>>
 ** <<spans>>
@@ -27,6 +28,43 @@ You can add services by setting the `service.name` configuration in each of the 
 [role="screenshot"]
 image::apm/images/apm-services-overview.png[Example view of services table the APM UI in Kibana]
 
+[[traces]]
+=== Traces
+
+The Traces overview page displays every *transaction* occurring in your application,
+regardless of the service it originated from.
+Transactions with the same name are grouped together and only shown once in this table.
+
+By default, transactions are sorted by _Impact_.
+Impact helps show the most used and slowest endpoints in your service - in other words,
+it's the collective amount of pain a specific endpoint is causing your users.
+If there's a particular endpoint you're worried about, you can click on it to view the <<transaction-details, transaction details>>.
+
+[role="screenshot"]
+image::apm/images/apm-traces.png[Example view of the Traces overview in APM UI in Kibana]
+
+[float]
+[[distributed-tracing]]
+==== Distributed Tracing
+
+Elastic APM supports distributed tracing.
+Distributed tracing is a key feature of modern application performance monitoring as application architectures are shifting from monolithic to more distributed,
+service-based architectures.
+
+Distributed tracing allows APM users to automatically trace requests all the way through the service architecture,
+and visualize those traces in one single view in the APM UI.
+This is accomplished by tracing all of the requests, from the initial web request to your front-end service,
+to queries made to your back-end services.
+This makes finding possible bottlenecks throughout your application much easier and faster.
+
+By definition, a distributed trace includes more than one transaction.
+You can use the <<spans,span timeline visualization>> to view a waterfall display of all of the transactions from individual services that are connected in a trace.
+
+[role="screenshot"]
+image::apm/images/apm-distributed-tracing.png[Example view of the distributed tracing in APM UI in Kibana]
+
+TIP: Distributed tracing is supported by all APM agents and there’s no additional configuration needed.
+
 [[transactions]]
 === Transactions
 
@@ -34,7 +72,10 @@ TIP: A {apm-overview-ref-v}/transactions.html[transaction] describes an event ca
 The APM agents automatically collect performance metrics on HTTP requests, database queries, and much more.
 
 Selecting a service on the <<services,Services overview page>> will bring you to the Transaction overview page.
-The dashboards on this page display the transaction duration, requests per minute, and transaction names for the selected service. 
+The charts and table on this dashboard display the transaction duration, requests per minute, and a list of transactions for the selected service.
+
+[role="screenshot"]
+image::apm/images/apm-transactions-overview.png[Example view of transactions table in the APM UI in Kibana]
 
 *Transaction duration* shows the response times for this service and is broken down into average, 95th, and 99th percentile.
 If there's a weird spike that you'd like to investigate,
@@ -45,15 +86,12 @@ and all of the data on the page will update accordingly.
 and is useful for determining if you're serving more of one code than you typically do.
 Like in the Transaction duration graph, you can zoom in on anomalies to further investigate them.
 
-The table at the bottom shows the name of each *transaction* occurring in your service.
+The table at the bottom is similar to the <<traces,Traces overview>> and shows the name of each transaction occurring in the selected service.
 Transactions with the same name are grouped together and only shown once in this table.
 By default, transactions are sorted by _Impact_.
 Impact helps show the most used and slowest endpoints in your service - in other words,
 it's the collective amount of pain a specific endpoint is causing your users.
 If there's a particular endpoint you're worried about, you can click on it to view the <<transaction-details, transaction details>>.
-
-[role="screenshot"]
-image::apm/images/apm-transactions-overview.png[Example view of transactions table in the APM UI in Kibana]
 
 [IMPORTANT]
 ====
@@ -82,8 +120,8 @@ This page also displays a single sampled transaction, which is based on your sel
 You can update the sampled transaction by selecting a new _bucket_ in the transactions duration distribution graph.
 The number of requests per bucket is displayed when hovering over the graph, and the selected bucket is highlighted to stand out.
 
-//[role="screenshot"]
-//image::apm/images/apm-transaction-duration-dist.png[Example view of transactions duration distribution graph]
+[role="screenshot"]
+image::apm/images/apm-transaction-duration-dist.png[Example view of transactions duration distribution graph]
 
 Let's look at an example.
 In the screenshot below,
@@ -93,7 +131,7 @@ This is a typical distribution, and indicates most of our requests were served q
 It's the requests on the right, the ones taking longer than average, that we probably want to focus on.
 By clicking on these buckets,
 we're presented with a span timeline waterfall showing what a typical request in that bucket was doing.
-By investigating this timeline waterfall, we can hopefully see why it was slow and implement a fix.
+By investigating this timeline waterfall, we can hopefully see why it was slow and then implement a fix.
 
 [role="screenshot"]
 image::apm/images/apm-transaction-sample.png[Example view of transactions sample]
@@ -113,44 +151,43 @@ This can be extremely useful if it's determined that specific users are getting 
 * *Tags* - Useful if you want to start correlating transactions with log files or metrics from Metricbeat.
 * *Custom* - You can configure your agent to add custom contextual information on transactions.
 
-TIP: All of this data is just documents in Elasticsearch.
-This means we can click "Actions - View sample document" to see the actual Elasticsearch document under the discover tab.
+TIP: All of this data is stored in documents in Elasticsearch.
+This means you can select "Actions - View sample document" to see the actual Elasticsearch document under the discover tab.
 
 [[spans]]
-==== Spans
+=== Spans
 
 TIP: A {apm-overview-ref-v}/transaction-spans.html[span] is defined as the duration of a single event.
 Spans are automatically captured by APM agents, and you can also define custom spans.
 Each span has a type and is defined by a different color in the timeline/waterfall visualization.
 
-The span timeline is essentially a timeline of what the application was doing while it was trying to respond to the request that came in.
+The span timeline visualization is a bird's-eye view of what your application was doing while it was trying to respond to the request that came in.
 This makes it useful for visualizing where the selected transaction spent most of its time.
+
+[role="screenshot"]
+image::apm/images/apm-distributed-tracing.png[Example view of the distributed tracing in APM UI in Kibana]
 
 You can view a span in detail by clicking on it in the timeline waterfall.
 For example, in the below screenshot we've clicked on an SQL Select database query.
 The information displayed includes the actual SQL that was executed, how long it took,
 and the percentage of the trace's total time.
-You also get a stack trace, which shows where in your code you do the SQL query.
+You also get a stack trace, which shows the SQL query in your code.
 Finally, APM knows which files are your code and which are just modules or libraries that you've installed.
 These library frames will be minimized by default in order to show you the most relevant stack trace. 
 
 [role="screenshot"]
 image::apm/images/apm-span-detail.png[Example view of a span detail in the APM UI in Kibana]
 
-If your span timeline is colorful, it's indicative of a distributed trace.
+If your span timeline is colorful, it's indicative of a <<distributed-tracing,distributed trace>>.
 Services in a distributed trace are separated by color and listed in the order they occur.
 
 [role="screenshot"]
 image::apm/images/apm-services-trace.png[Example of distributed trace colors in the APM UI in Kibana]
 
-A distributed trace includes more than one transaction.
-APM can show you the waterfall all the way through these transactions.
-This can be extremely useful for seeing how services are interacting with each other.
-
 If you select one of these sub-traces, the transaction link will be clickable.
 If you click on the transaction name, you will open a similar view,
 but just for the sub-trace you've selected.
-To return to the full trace, simply click "View full trace".
+To return to the full trace, simply click the "View full trace" button in the upper right hand corner of the page.
 
 [role="screenshot"]
 image::apm/images/apm-view-full-trace.png[Example of distributed trace colors in the APM UI in Kibana]
@@ -160,16 +197,20 @@ image::apm/images/apm-view-full-trace.png[Example of distributed trace colors in
 
 TIP: {apm-overview-ref-v}/errors.html[Errors] are defined as groups of exceptions with matching exception or log messages.
 
-The Errors overview page provides a high-level view of the error message and culprit,
+The _Errors overview_ page provides a high-level view of the error message and culprit,
 the number of occurrences, and the most recent occurrence.
-Just like on the Transaction overview page, you'll notice we group together like errors.
+Just like on the _Transaction overview_ page, you'll notice we group together like errors.
 This makes it very easy to quickly see which errors are affecting your services,
 and to take actions to rectify them.
 
 [role="screenshot"]
 image::apm/images/apm-errors-overview.png[Example view of the errors overview in the APM UI in Kibana]
 
-Selecting an error group ID or error message brings you to the error group page.
+Selecting an _error group ID_ or _error message_ brings you to the _Error group_ page.
+
+[role="screenshot"]
+image::apm/images/apm-error-group.png[Example view of the error group page in the APM UI in Kibana]
+
 At the top of this page, you'll see the error message, culprit, and the number of occurrences over time.
 
 At the bottom of the page, you'll see the Error occurrence table.
@@ -183,18 +224,15 @@ This feature allows you to make a connection between the errors and transactions
 by linking you to the specific transaction where the error occurred.
 This allows you to see the whole trace, including which services the request went through. 
 
-[role="screenshot"]
-image::apm/images/apm-error-group.png[Example view of the error group page in the APM UI in Kibana]
-
 [float]
 [[errors-alerts-with-watcher]]
-==== Errors alerts with Watcher
+==== Error reports with Watcher
 
-You can use the power of the alerting features with Watcher to get alerts on error occurrences.
+You can use the power of the alerting features with Watcher to get reports on error occurrences.
 The Watcher assistant, which is available on the Errors overview page, can help you set up a watch per service.
 
 Configure the watch with an occurrences threshold, time interval, and the desired actions, such as email or Slack notifications.
-With Watcher, your team can set up alerts within minutes.
+With Watcher, your team can set up reports within minutes.
 
 Watches are managed separately in the dedicated Watcher UI available in Advanced Settings.
 
@@ -237,7 +275,8 @@ You can select the query bar and hit the down arrow on your keyboard to begin se
 When querying, you're simply searching and selecting data from fields in Elasticsearch documents.
 It may be helpful to view some of your documents in {kibana-ref}/discover.html[Discover] to better understand how APM data is stored in Elasticsearch. 
 
-The query bar is available on Services, Transactions, and Errors views, and any input will persist as you move between pages.
+The query bar is available in the Services, Transactions, Errors, Metrics, and Traces views,
+and any input will persist as you move between pages.
 
 TIP: Interactions with the query bar change the URL of the page you're on.
 This means you can simply copy and paste the URL of your page to share a specific query or view with others.
