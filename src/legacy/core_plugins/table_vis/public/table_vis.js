@@ -26,6 +26,7 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import tableVisTemplate from './table_vis.html';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { VisFiltersProvider } from 'ui/vis/vis_filters';
 
 // we need to load the css ourselves
 
@@ -41,6 +42,7 @@ VisTypesRegistryProvider.register(TableVisTypeProvider);
 // define the TableVisType
 function TableVisTypeProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);
+  const visFilters = Private(VisFiltersProvider);
 
   // define the TableVisController which is used in the template
   // by angular's ng-controller directive
@@ -106,8 +108,10 @@ function TableVisTypeProvider(Private) {
         }
       ])
     },
-    responseHandlerConfig: {
-      asAggConfigResults: true
+    events: {
+      filterBucket: {
+        defaultAction: visFilters.filter,
+      },
     },
     hierarchicalData: function (vis) {
       return Boolean(vis.params.showPartialRows || vis.params.showMetricsAtAllLevels);
