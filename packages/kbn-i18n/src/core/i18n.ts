@@ -30,7 +30,6 @@ import { isPseudoLocale, translateUsingPseudoLocale } from './pseudo_locale';
 import './locales.js';
 
 const EN_LOCALE = 'en';
-const LOCALE_DELIMITER = '-';
 const translationsForLocale: Record<string, Translation> = {};
 const getMessageFormat = memoizeIntlConstructor(IntlMessageFormat);
 
@@ -55,7 +54,7 @@ function getMessageById(id: string): string | undefined {
  * @param locale
  */
 function normalizeLocale(locale: string) {
-  return locale.toLowerCase().replace('_', LOCALE_DELIMITER);
+  return locale.toLowerCase();
 }
 
 /**
