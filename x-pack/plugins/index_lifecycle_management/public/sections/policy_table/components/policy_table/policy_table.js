@@ -411,7 +411,7 @@ export class PolicyTableUi extends Component {
                 >
                   <FormattedMessage
                     id="xpack.indexLifecycleMgmt.policyTable.sectionHeading"
-                    defaultMessage="Deleted {numSelected} {selectedIndexCount, plural, one {policy} other {policies}}"
+                    defaultMessage="Deleted {numSelected} {numSelected, plural, one {policy} other {policies}}"
                     values={{ numSelected }}
                   />
                 </EuiButton>
