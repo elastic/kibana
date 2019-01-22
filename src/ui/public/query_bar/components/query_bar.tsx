@@ -639,6 +639,16 @@ export class QueryBarUI extends Component<Props, State> {
         };
       });
 
+    const commonlyUsedRanges = config
+      .get('timepicker:quickRanges')
+      .map(({ from, to, display }: { from: string; to: string; display: string }) => {
+        return {
+          start: from,
+          end: to,
+          label: display,
+        };
+      });
+
     return (
       <EuiFlexItem grow={false}>
         <EuiSuperDatePicker
@@ -650,6 +660,8 @@ export class QueryBarUI extends Component<Props, State> {
           onRefreshChange={this.props.onRefreshChange}
           showUpdateButton={false}
           recentlyUsedRanges={recentlyUsedRanges}
+          commonlyUsedRanges={commonlyUsedRanges}
+          dateFormat={config.get('dateFormat')}
         />
       </EuiFlexItem>
     );
