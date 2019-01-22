@@ -184,67 +184,134 @@ export const Explorer = injectI18n(
           currentSelectedCells = selectedCells;
           currentSwimlaneViewByFieldName = swimlaneViewByFieldName;
         }
-        this.setState(
-          {
-            noInfluencersConfigured: !selectedJobsHaveInfluencers(selectedJobs),
-            selectedCells: currentSelectedCells,
-            selectedJobs,
-            swimlaneViewByFieldName: currentSwimlaneViewByFieldName
-          },
-          async () => {
-            // Load the data - if the FieldFormats failed to populate
-            // the default formatting will be used for metric values.
-            await this.loadOverallData();
-            this.loadViewBySwimlane([]);
-            this.updateExplorer();
-          }
-        );
+
+        const stateUpdate = {
+          noInfluencersConfigured: !selectedJobsHaveInfluencers(selectedJobs),
+          selectedCells: currentSelectedCells,
+          selectedJobs,
+          swimlaneViewByFieldName: currentSwimlaneViewByFieldName
+        };
+
+        // Load the data - if the FieldFormats failed to populate
+        // the default formatting will be used for metric values.
+        this.setState({ hasResults: false, loading: true });
+        Object.assign(stateUpdate, await this.loadOverallData(selectedJobs));
+
+        if (stateUpdate.hasResults) {
+          // Trigger loading of the 'view by' swimlane -
+          // only load once the overall swimlane so that we can match the time span.
+          this.setState({ viewBySwimlaneData: getDefaultViewBySwimlaneData(), viewBySwimlaneDataLoading: true });
+          const viewBySwimlaneOptions = this.getViewBySwimlaneOptions(selectedJobs);
+          Object.assign(
+            stateUpdate,
+            viewBySwimlaneOptions,
+            await this.loadViewBySwimlane([], stateUpdate.overallSwimlaneData, selectedJobs, viewBySwimlaneOptions.swimlaneViewByFieldName),
+          );
+        }
+
+        this.updateExplorer(stateUpdate);
       }
 
       // Listen for changes to job selection.
       if (action === EXPLORER_ACTION.JOB_SELECTION_CHANGE) {
         const { selectedJobs } = payload;
         this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
-        this.setState(
-          {
-            noInfluencersConfigured: !selectedJobsHaveInfluencers(selectedJobs),
-            selectedJobs,
-          },
-          async () => {
-            // Load the data - if the FieldFormats failed to populate
-            // the default formatting will be used for metric values.
-            await this.loadOverallData();
-            this.loadViewBySwimlane([]);
-            this.clearSelectedAnomalies();
-          }
-        );
+
+        const stateUpdate = {
+          noInfluencersConfigured: !selectedJobsHaveInfluencers(selectedJobs),
+          selectedJobs,
+        };
+        Object.assign(stateUpdate, this.getclearedSelectedAnomaliesState());
+
+        // Load the data - if the FieldFormats failed to populate
+        // the default formatting will be used for metric values.
+        this.setState({ hasResults: false, loading: true });
+        Object.assign(stateUpdate, await this.loadOverallData(selectedJobs));
+
+        if (stateUpdate.hasResults) {
+          // Trigger loading of the 'view by' swimlane -
+          // only load once the overall swimlane so that we can match the time span.
+          this.setState({ viewBySwimlaneData: getDefaultViewBySwimlaneData(), viewBySwimlaneDataLoading: true });
+          const viewBySwimlaneOptions = this.getViewBySwimlaneOptions(selectedJobs);
+          Object.assign(
+            stateUpdate,
+            viewBySwimlaneOptions,
+            await this.loadViewBySwimlane([], stateUpdate.overallSwimlaneData, selectedJobs, viewBySwimlaneOptions.swimlaneViewByFieldName),
+          );
+        }
+
+        this.updateExplorer(stateUpdate);
       }
 
       // REFRESH reloads full Anomaly Explorer and clears the selection.
       if (action === EXPLORER_ACTION.REFRESH) {
-        await this.loadOverallData();
-        this.loadViewBySwimlane([]);
-        this.clearSelectedAnomalies();
+        this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
+        const stateUpdate = this.getclearedSelectedAnomaliesState();
+
+        // Load the data - if the FieldFormats failed to populate
+        // the default formatting will be used for metric values.
+        this.setState({ hasResults: false, loading: true });
+        Object.assign(stateUpdate, await this.loadOverallData(this.state.selectedJobs));
+        if (stateUpdate.hasResults) {
+          // Trigger loading of the 'view by' swimlane -
+          // only load once the overall swimlane so that we can match the time span.
+          this.setState({ viewBySwimlaneData: getDefaultViewBySwimlaneData(), viewBySwimlaneDataLoading: true });
+          const viewBySwimlaneOptions = this.getViewBySwimlaneOptions(this.state.selectedJobs);
+          Object.assign(
+            stateUpdate,
+            viewBySwimlaneOptions,
+            await this.loadViewBySwimlane(
+              [],
+              stateUpdate.overallSwimlaneData,
+              this.state.selectedJobs,
+              viewBySwimlaneOptions.swimlaneViewByFieldName
+            ),
+          );
+        }
+
+        this.updateExplorer(stateUpdate);
       }
 
       // REDRAW reloads Anomaly Explorer and tries to retain the selection.
       if (action === EXPLORER_ACTION.REDRAW) {
-        await this.loadOverallData();
-        this.loadViewBySwimlane([]);
-        this.updateExplorer();
+        // Load the data - if the FieldFormats failed to populate
+        // the default formatting will be used for metric values.
+        const stateUpdate = await this.loadOverallData(this.state.selectedJobs);
+        if (stateUpdate.hasResults) {
+          // Trigger loading of the 'view by' swimlane -
+          // only load once the overall swimlane so that we can match the time span.
+          Object.assign(stateUpdate, this.getViewBySwimlaneOptions(this.state.selectedJobs));
+          this.props.appStateHandler(
+            APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
+            { swimlaneViewByFieldName: stateUpdate.swimlaneViewByFieldName }
+          );
+
+          Object.assign(stateUpdate, await this.loadViewBySwimlane(
+            [],
+            stateUpdate.overallSwimlaneData,
+            this.state.selectedJobs,
+            this.state.swimlaneViewByFieldName
+          ));
+
+          this.updateExplorer(stateUpdate);
+        }
       }
     });
 
     checkboxShowChartsListener = () => {
       const showCharts = mlCheckboxShowChartsService.state.get('showCharts');
-      const { selectedCells } = this.state;
+      const { selectedCells, selectedJobs } = this.state;
+
+      const timerange = getSelectionTimeRange(
+        selectedCells,
+        this.getSwimlaneBucketInterval(selectedJobs).asSeconds()
+      );
+
       if (showCharts && selectedCells !== null) {
-        this.updateExplorer();
-      } else {
-        const timerange = getSelectionTimeRange(
-          selectedCells,
-          this.getSwimlaneBucketInterval().asSeconds()
+        this.updateCharts(
+          this.state.anomalyChartRecords, timerange.earliestMs, timerange.latestMs
         );
+      } else {
         this.updateCharts(
           [], timerange.earliestMs, timerange.latestMs
         );
@@ -253,11 +320,11 @@ export const Explorer = injectI18n(
 
     anomalyChartsSeverityListener = () => {
       const showCharts = mlCheckboxShowChartsService.state.get('showCharts');
-      const { anomalyChartRecords, selectedCells } = this.state;
+      const { anomalyChartRecords, selectedCells, selectedJobs } = this.state;
       if (showCharts && selectedCells !== null) {
         const timerange = getSelectionTimeRange(
           selectedCells,
-          this.getSwimlaneBucketInterval().asSeconds()
+          this.getSwimlaneBucketInterval(selectedJobs).asSeconds()
         );
         this.updateCharts(
           anomalyChartRecords, timerange.earliestMs, timerange.latestMs
@@ -273,15 +340,19 @@ export const Explorer = injectI18n(
           selectedCells,
           selectedJobs,
           dateFormatTz,
-          this.getSwimlaneBucketInterval().asSeconds(),
+          this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
           swimlaneViewByFieldName
         )
       });
     };
 
-    swimlaneLimitListener = () => {
-      this.loadViewBySwimlane([]);
-      this.clearSelectedAnomalies();
+    swimlaneLimitListener = async () => {
+      this.setState({ viewBySwimlaneData: getDefaultViewBySwimlaneData(), viewBySwimlaneDataLoading: true });
+      this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
+      this.updateExplorer({
+        ...await this.loadViewBySwimlane([], this.state.overallSwimlaneData, this.state.selectedJobs, this.state.swimlaneViewByFieldName),
+        ...this.getclearedSelectedAnomaliesState(),
+      });
     };
 
     // Listens to render updates of the swimlanes to update dragSelect
@@ -294,6 +365,7 @@ export const Explorer = injectI18n(
       this._isMounted = true;
       mlExplorerDashboardService.explorer.watch(this.dashboardListener);
       mlCheckboxShowChartsService.state.watch(this.checkboxShowChartsListener);
+      mlSelectLimitService.state.watch(this.swimlaneLimitListener);
       mlSelectSeverityService.state.watch(this.anomalyChartsSeverityListener);
       mlSelectIntervalService.state.watch(this.tableControlsListener);
       mlSelectSeverityService.state.watch(this.tableControlsListener);
@@ -303,14 +375,14 @@ export const Explorer = injectI18n(
       this._isMounted = false;
       mlExplorerDashboardService.explorer.unwatch(this.dashboardListener);
       mlCheckboxShowChartsService.state.unwatch(this.checkboxShowChartsListener);
+      mlSelectLimitService.state.unwatch(this.swimlaneLimitListener);
       mlSelectSeverityService.state.unwatch(this.anomalyChartsSeverityListener);
       mlSelectIntervalService.state.unwatch(this.tableControlsListener);
       mlSelectSeverityService.state.unwatch(this.tableControlsListener);
     }
 
-    getSwimlaneBucketInterval() {
+    getSwimlaneBucketInterval(selectedJobs) {
       const { MlTimeBuckets } = this.props;
-      const { selectedJobs } = this.state;
 
       const swimlaneWidth = getSwimlaneContainerWidth(this.state.noInfluencersConfigured);
       // Bucketing interval should be the maximum of the chart related interval (i.e. time range related)
@@ -344,84 +416,68 @@ export const Explorer = injectI18n(
       return buckets.getInterval();
     }
 
-    async loadOverallData() {
+    async loadOverallData(selectedJobs) {
       return new Promise((resolve) => {
-        const { selectedJobs } = this.state;
         // Loads the overall data components i.e. the overall swimlane and influencers list.
         if (selectedJobs === null) {
-          resolve();
+          resolve({
+            loading: false,
+            hasResuts: false
+          });
+          return;
         }
 
-        this.setState(
-          {
-            hasResults: false,
-            loading: true,
-          },
-          () => {
-            // Ensure the search bounds align to the bucketing interval used in the swimlane so
-            // that the first and last buckets are complete.
-            const bounds = timefilter.getActiveBounds();
-            const searchBounds = getBoundsRoundedToInterval(
-              bounds,
-              this.getSwimlaneBucketInterval(),
-              false
-            );
-            const selectedJobIds = selectedJobs.map(d => d.id);
-
-            // Load the overall bucket scores by time.
-            // Pass the interval in seconds as the swimlane relies on a fixed number of seconds between buckets
-            // which wouldn't be the case if e.g. '1M' was used.
-            // Pass 'true' when obtaining bucket bounds due to the way the overall_buckets endpoint works
-            // to ensure the search is inclusive of end time.
-            const overallBucketsBounds = getBoundsRoundedToInterval(
-              bounds,
-              this.getSwimlaneBucketInterval(),
-              true
-            );
-            mlResultsService.getOverallBucketScores(
-              selectedJobIds,
-              // Note there is an optimization for when top_n == 1.
-              // If top_n > 1, we should test what happens when the request takes long
-              // and refactor the loading calls, if necessary, to avoid delays in loading other components.
-              1,
-              overallBucketsBounds.min.valueOf(),
-              overallBucketsBounds.max.valueOf(),
-              this.getSwimlaneBucketInterval().asSeconds() + 's'
-            ).then((resp) => {
-              this.skipCellClicks = false;
-              const overallSwimlaneData = processOverallResults(
-                resp.results,
-                searchBounds,
-                this.getSwimlaneBucketInterval().asSeconds(),
-              );
-
-              console.log('Explorer overall swimlane data set:', overallSwimlaneData);
-              const hasResults = (overallSwimlaneData.points && overallSwimlaneData.points.length > 0);
-              this.setState(
-                {
-                  hasResults,
-                  loading: false,
-                  overallSwimlaneData,
-                },
-                () => {
-                  if (this.state.hasResults) {
-                    // Trigger loading of the 'view by' swimlane -
-                    // only load once the overall swimlane so that we can match the time span.
-                    this.setViewBySwimlaneOptions(resolve);
-                  } else {
-                    resolve();
-                  }
-                }
-              );
-            });
-          }
+        // Ensure the search bounds align to the bucketing interval used in the swimlane so
+        // that the first and last buckets are complete.
+        const bounds = timefilter.getActiveBounds();
+        const searchBounds = getBoundsRoundedToInterval(
+          bounds,
+          this.getSwimlaneBucketInterval(selectedJobs),
+          false
         );
+        const selectedJobIds = selectedJobs.map(d => d.id);
+
+        // Load the overall bucket scores by time.
+        // Pass the interval in seconds as the swimlane relies on a fixed number of seconds between buckets
+        // which wouldn't be the case if e.g. '1M' was used.
+        // Pass 'true' when obtaining bucket bounds due to the way the overall_buckets endpoint works
+        // to ensure the search is inclusive of end time.
+        const overallBucketsBounds = getBoundsRoundedToInterval(
+          bounds,
+          this.getSwimlaneBucketInterval(selectedJobs),
+          true
+        );
+        mlResultsService.getOverallBucketScores(
+          selectedJobIds,
+          // Note there is an optimization for when top_n == 1.
+          // If top_n > 1, we should test what happens when the request takes long
+          // and refactor the loading calls, if necessary, to avoid delays in loading other components.
+          1,
+          overallBucketsBounds.min.valueOf(),
+          overallBucketsBounds.max.valueOf(),
+          this.getSwimlaneBucketInterval(selectedJobs).asSeconds() + 's'
+        ).then((resp) => {
+          this.skipCellClicks = false;
+          const overallSwimlaneData = processOverallResults(
+            resp.results,
+            searchBounds,
+            this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
+          );
+
+          console.log('Explorer overall swimlane data set:', overallSwimlaneData);
+          const hasResults = (overallSwimlaneData.points && overallSwimlaneData.points.length > 0);
+          resolve({
+            hasResults,
+            loading: false,
+            overallSwimlaneData,
+          });
+        });
       });
     }
 
     // Obtain the list of 'View by' fields per job.
-    setViewBySwimlaneOptions(resolve) {
-      const selectedJobIds = this.state.selectedJobs.map(d => d.id);
+    getViewBySwimlaneOptions(selectedJobs) {
+      const selectedJobIds = selectedJobs.map(d => d.id);
 
       // Unique influencers for the selected job(s).
       const viewByOptions = _.chain(
@@ -499,145 +555,88 @@ export const Explorer = injectI18n(
           }
         }
 
-        this.props.appStateHandler(APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME, { swimlaneViewByFieldName });
       }
 
-      this.setState(
-        {
-          swimlaneViewByFieldName,
-          viewBySwimlaneOptions,
-        },
-        () => resolve()
-      );
+      return {
+        swimlaneViewByFieldName,
+        viewBySwimlaneOptions,
+      };
     }
 
-    loadViewBySwimlane(fieldValues) {
-      const {
-        overallSwimlaneData,
-        selectedCells,
-        selectedJobs,
-        swimlaneViewByFieldName,
-      } = this.state;
+    loadViewBySwimlane(fieldValues, overallSwimlaneData, selectedJobs, swimlaneViewByFieldName) {
+      return new Promise((resolve) => {
+        this.skipCellClicks = true;
 
-      // reset the swimlane data to avoid flickering where the old dataset would briefly show up.
-      this.setState(
-        {
-          viewBySwimlaneData: getDefaultViewBySwimlaneData(),
-          viewBySwimlaneDataLoading: true,
-        },
-        () => {
-          this.skipCellClicks = true;
-
-          const finishCallback = (clearSelection = false) => {
-            this.setState(
-              { viewBySwimlaneDataLoading: false },
-              () => {
-                this.skipCellClicks = false;
-                console.log('Explorer view by swimlane data set:', this.state.viewBySwimlaneData);
-                if (this.swimlaneCellClickQueue.length > 0) {
-                  const latestSelectedCells = this.swimlaneCellClickQueue.pop();
-                  this.swimlaneCellClickQueue.length = 0;
-                  this.swimlaneCellClick(latestSelectedCells);
-                  return;
-                }
-
-                if (clearSelection === true) {
-                  this.clearSelectedAnomalies();
-                }
-              }
+        const finish = (resp) => {
+          this.skipCellClicks = false;
+          if (resp !== undefined) {
+            const viewBySwimlaneData = processViewByResults(
+              resp.results,
+              fieldValues,
+              overallSwimlaneData,
+              swimlaneViewByFieldName,
+              this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
             );
-          };
+            console.log('Explorer view by swimlane data set:', viewBySwimlaneData);
 
-          const finish = (resp) => {
-            if (resp !== undefined) {
-              this.setState(
-                {
-                  viewBySwimlaneData: processViewByResults(
-                    resp.results,
-                    fieldValues,
-                    overallSwimlaneData,
-                    swimlaneViewByFieldName,
-                    this.getSwimlaneBucketInterval().asSeconds(),
-                  )
-                },
-                () => {
-                  // do a sanity check against selectedCells. It can happen that a previously
-                  // selected lane loaded via URL/AppState is not available anymore.
-                  let clearSelection = false;
-                  if (
-                    selectedCells !== null &&
-                    selectedCells.type === SWIMLANE_TYPE.VIEW_BY
-                  ) {
-                    clearSelection = !selectedCells.lanes.some((lane) => {
-                      return this.state.viewBySwimlaneData.points.some((point) => {
-                        return (
-                          point.laneLabel === lane &&
-                          point.time === selectedCells.times[0]
-                        );
-                      });
-                    });
-                  }
-
-                  finishCallback(clearSelection);
-                }
-              );
-            } else {
-              finishCallback();
-            }
-          };
-
-          if (
-            selectedJobs === undefined ||
-            swimlaneViewByFieldName === undefined
-          ) {
-            finish();
-            return;
+            resolve({
+              viewBySwimlaneData,
+              viewBySwimlaneDataLoading: false
+            });
           } else {
-            // Ensure the search bounds align to the bucketing interval used in the swimlane so
-            // that the first and last buckets are complete.
-            const bounds = timefilter.getActiveBounds();
-            const searchBounds = getBoundsRoundedToInterval(
-              bounds,
-              this.getSwimlaneBucketInterval(),
-              false,
-            );
-            const selectedJobIds = selectedJobs.map(d => d.id);
+            resolve({ viewBySwimlaneDataLoading: false });
+          }
+        };
 
-            const limit = mlSelectLimitService.state.get('limit');
-            const swimlaneLimit = (limit === undefined) ? SWIMLANE_DEFAULT_LIMIT : limit.val;
+        if (
+          selectedJobs === undefined ||
+          swimlaneViewByFieldName === undefined
+        ) {
+          finish();
+          return;
+        } else {
+          // Ensure the search bounds align to the bucketing interval used in the swimlane so
+          // that the first and last buckets are complete.
+          const bounds = timefilter.getActiveBounds();
+          const searchBounds = getBoundsRoundedToInterval(
+            bounds,
+            this.getSwimlaneBucketInterval(selectedJobs),
+            false,
+          );
+          const selectedJobIds = selectedJobs.map(d => d.id);
 
-            // load scores by influencer/jobId value and time.
-            // Pass the interval in seconds as the swimlane relies on a fixed number of seconds between buckets
-            // which wouldn't be the case if e.g. '1M' was used.
-            const interval = `${this.getSwimlaneBucketInterval().asSeconds()}s`;
-            if (swimlaneViewByFieldName !== VIEW_BY_JOB_LABEL) {
-              mlResultsService.getInfluencerValueMaxScoreByTime(
-                selectedJobIds,
-                swimlaneViewByFieldName,
-                fieldValues,
-                searchBounds.min.valueOf(),
-                searchBounds.max.valueOf(),
-                interval,
-                swimlaneLimit
-              ).then(finish);
-            } else {
-              const jobIds = (fieldValues !== undefined && fieldValues.length > 0) ? fieldValues : selectedJobIds;
-              mlResultsService.getScoresByBucket(
-                jobIds,
-                searchBounds.min.valueOf(),
-                searchBounds.max.valueOf(),
-                interval,
-                swimlaneLimit
-              ).then(finish);
-            }
+          const limit = mlSelectLimitService.state.get('limit');
+          const swimlaneLimit = (limit === undefined) ? SWIMLANE_DEFAULT_LIMIT : limit.val;
+
+          // load scores by influencer/jobId value and time.
+          // Pass the interval in seconds as the swimlane relies on a fixed number of seconds between buckets
+          // which wouldn't be the case if e.g. '1M' was used.
+          const interval = `${this.getSwimlaneBucketInterval(selectedJobs).asSeconds()}s`;
+          if (swimlaneViewByFieldName !== VIEW_BY_JOB_LABEL) {
+            mlResultsService.getInfluencerValueMaxScoreByTime(
+              selectedJobIds,
+              swimlaneViewByFieldName,
+              fieldValues,
+              searchBounds.min.valueOf(),
+              searchBounds.max.valueOf(),
+              interval,
+              swimlaneLimit
+            ).then(finish);
+          } else {
+            const jobIds = (fieldValues !== undefined && fieldValues.length > 0) ? fieldValues : selectedJobIds;
+            mlResultsService.getScoresByBucket(
+              jobIds,
+              searchBounds.min.valueOf(),
+              searchBounds.max.valueOf(),
+              interval,
+              swimlaneLimit
+            ).then(finish);
           }
         }
-      );
+      });
     }
 
-    loadViewByTopFieldValuesForSelectedTime(earliestMs, latestMs) {
-      const { swimlaneViewByFieldName, selectedJobs } = this.state;
-
+    loadViewByTopFieldValuesForSelectedTime(earliestMs, latestMs, selectedJobs, swimlaneViewByFieldName) {
       const selectedJobIds = selectedJobs.map(d => d.id);
       const limit = mlSelectLimitService.state.get('limit');
       const swimlaneLimit = (limit === undefined) ? SWIMLANE_DEFAULT_LIMIT : limit.val;
@@ -670,7 +669,7 @@ export const Explorer = injectI18n(
             selectedJobIds,
             earliestMs,
             latestMs,
-            this.getSwimlaneBucketInterval().asSeconds() + 's',
+            this.getSwimlaneBucketInterval(selectedJobs).asSeconds() + 's',
             swimlaneLimit
           ).then((resp) => {
             resolve(Object.keys(resp.results));
@@ -679,25 +678,51 @@ export const Explorer = injectI18n(
       });
     }
 
-    // Because of the nature of the existing code migrated from angularjs,
-    // updateExplorer() could be called multiple times in parallel by nested updates.
-    // To avoid race conditions, we track if it's been called multiple times and if so,
-    // a final call gets scheduled to redraw again with the final state.
-    // TODO To solve this, refactor the way Anomaly Explorer fetches data and avoid nested
-    // state updates and updateExplorer() calls in parallel.
-    updateExplorerQueue = 0;
-    async updateExplorer() {
-      this.updateExplorerQueue += 1;
-      if (this.updateExplorerQueue > 1) {
+    async updateExplorer(stateUpdate) {
+      const {
+        noInfluencersConfigured,
+        overallSwimlaneData,
+        selectedCells,
+        selectedJobs,
+        viewBySwimlaneData,
+        swimlaneViewByFieldName
+      } = {
+        ...this.state,
+        ...stateUpdate
+      };
+
+      this.skipCellClicks = false;
+
+      if (this.swimlaneCellClickQueue.length > 0) {
+        this.setState(stateUpdate);
+
+        const latestSelectedCells = this.swimlaneCellClickQueue.pop();
+        this.swimlaneCellClickQueue.length = 0;
+        this.swimlaneCellClick(latestSelectedCells);
         return;
       }
 
-      const {
-        noInfluencersConfigured,
-        selectedCells,
-        selectedJobs,
-        swimlaneViewByFieldName,
-      } = this.state;
+      // do a sanity check against selectedCells. It can happen that a previously
+      // selected lane loaded via URL/AppState is not available anymore.
+      let clearSelection = false;
+      if (
+        selectedCells !== null &&
+        selectedCells.type === SWIMLANE_TYPE.VIEW_BY
+      ) {
+        clearSelection = !selectedCells.lanes.some((lane) => {
+          return viewBySwimlaneData.points.some((point) => {
+            return (
+              point.laneLabel === lane &&
+              point.time === selectedCells.times[0]
+            );
+          });
+        });
+      }
+
+      if (clearSelection === true) {
+        this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
+        Object.assign(stateUpdate, this.getclearedSelectedAnomaliesState());
+      }
 
       const { dateFormatTz } = this.props;
 
@@ -707,111 +732,95 @@ export const Explorer = injectI18n(
 
       const timerange = getSelectionTimeRange(
         selectedCells,
-        this.getSwimlaneBucketInterval().asSeconds()
+        this.getSwimlaneBucketInterval(selectedJobs).asSeconds()
       );
 
-      const annotationsData = await loadAnnotationsTableData(
+      stateUpdate.annotationsData = await loadAnnotationsTableData(
         selectedCells,
         selectedJobs,
-        this.getSwimlaneBucketInterval().asSeconds()
+        this.getSwimlaneBucketInterval(selectedJobs).asSeconds()
       );
 
-      const continueUpdate = async () => {
-        const selectionInfluencers = getSelectionInfluencers(selectedCells, swimlaneViewByFieldName);
-
-        let influencers;
-
-        if (selectionInfluencers.length === 0) {
-          influencers = await loadTopInfluencers(jobIds, timerange.earliestMs, timerange.latestMs, noInfluencersConfigured);
-        }
-
-        const updatedAnomalyChartRecords = await loadDataForCharts(
-          jobIds, timerange.earliestMs, timerange.latestMs, selectionInfluencers, selectedCells
-        );
-
-        if (selectionInfluencers.length > 0 && updatedAnomalyChartRecords !== undefined) {
-          influencers = await getFilteredTopInfluencers(
-            jobIds,
-            timerange.earliestMs,
-            timerange.latestMs,
-            updatedAnomalyChartRecords,
-            selectionInfluencers,
-            noInfluencersConfigured,
-          );
-        }
-
-        this.setState(
-          {
-            annotationsData,
-            influencers,
-            tableData: await loadAnomaliesTableData(
-              selectedCells,
-              selectedJobs,
-              dateFormatTz,
-              this.getSwimlaneBucketInterval().asSeconds(),
-              swimlaneViewByFieldName
-            )
-          },
-          () => {
-            if (updatedAnomalyChartRecords !== undefined) {
-              this.setState(
-                { anomalyChartRecords: updatedAnomalyChartRecords },
-                () => {
-                  if (mlCheckboxShowChartsService.state.get('showCharts')) {
-                    this.updateCharts(
-                      this.state.anomalyChartRecords, timerange.earliestMs, timerange.latestMs
-                    );
-                  }
-                }
-              );
-            }
-
-            this.updateExplorerQueue -= 1;
-            if (this.updateExplorerQueue > 0) {
-              this.updateExplorer();
-            }
-          }
-        );
-      };
-
       if (selectedCells !== null && selectedCells.fieldName === undefined) {
+        this.setState({ viewBySwimlaneData: getDefaultViewBySwimlaneData(), viewBySwimlaneDataLoading: true });
         // Click is in one of the cells in the Overall swimlane - reload the 'view by' swimlane
         // to show the top 'view by' values for the selected time.
         const topFieldValues = await this.loadViewByTopFieldValuesForSelectedTime(
           timerange.earliestMs,
           timerange.latestMs,
+          selectedJobs,
+          swimlaneViewByFieldName
         );
-        this.loadViewBySwimlane(topFieldValues);
-        this.setState({
-          viewByLoadedForTimeFormatted: formatHumanReadableDateTime(timerange.earliestMs),
-        }, continueUpdate);
+        Object.assign(
+          stateUpdate,
+          await this.loadViewBySwimlane(topFieldValues, overallSwimlaneData, selectedJobs, swimlaneViewByFieldName),
+          { viewByLoadedForTimeFormatted: formatHumanReadableDateTime(timerange.earliestMs) }
+        );
+      }
+
+      const selectionInfluencers = getSelectionInfluencers(selectedCells, swimlaneViewByFieldName);
+
+      if (selectionInfluencers.length === 0) {
+        stateUpdate.influencers = await loadTopInfluencers(jobIds, timerange.earliestMs, timerange.latestMs, noInfluencersConfigured);
+      }
+
+      const updatedAnomalyChartRecords = await loadDataForCharts(
+        jobIds, timerange.earliestMs, timerange.latestMs, selectionInfluencers, selectedCells
+      );
+
+      if (selectionInfluencers.length > 0 && updatedAnomalyChartRecords !== undefined) {
+        stateUpdate.influencers = await getFilteredTopInfluencers(
+          jobIds,
+          timerange.earliestMs,
+          timerange.latestMs,
+          updatedAnomalyChartRecords,
+          selectionInfluencers,
+          noInfluencersConfigured,
+        );
+      }
+
+      stateUpdate.tableData = await loadAnomaliesTableData(
+        selectedCells,
+        selectedJobs,
+        dateFormatTz,
+        this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
+        swimlaneViewByFieldName
+      );
+
+      stateUpdate.anomalyChartRecords = updatedAnomalyChartRecords || [];
+
+      this.setState(stateUpdate);
+
+      if (mlCheckboxShowChartsService.state.get('showCharts') && selectedCells !== null) {
+        this.updateCharts(
+          stateUpdate.anomalyChartRecords, timerange.earliestMs, timerange.latestMs
+        );
       } else {
-        continueUpdate();
+        this.updateCharts(
+          [], timerange.earliestMs, timerange.latestMs
+        );
       }
     }
 
-    clearSelectedAnomalies() {
-      this.props.appStateHandler('clearSelection');
-      this.setState(
-        {
-          anomalyChartRecords: [],
-          selectedCells: null,
-          viewByLoadedForTimeFormatted: null,
-        },
-        this.updateExplorer
-      );
+    getclearedSelectedAnomaliesState() {
+      return {
+        anomalyChartRecords: [],
+        selectedCells: null,
+        viewByLoadedForTimeFormatted: null,
+      };
     }
 
     viewByChangeHandler = e => this.setSwimlaneViewBy(e.target.value);
-    setSwimlaneViewBy = (swimlaneViewByFieldName) => {
-      this.setState(
-        { swimlaneViewByFieldName },
-        () => {
-          this.props.appStateHandler(APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME, { swimlaneViewByFieldName });
-          this.loadViewBySwimlane([]);
-          this.clearSelectedAnomalies();
-        }
-      );
+    setSwimlaneViewBy = async (swimlaneViewByFieldName) => {
+      this.setState({ viewBySwimlaneData: getDefaultViewBySwimlaneData(), viewBySwimlaneDataLoading: true });
+      this.props.appStateHandler(APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME, { swimlaneViewByFieldName });
+      this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
+
+      this.updateExplorer({
+        swimlaneViewByFieldName,
+        ...await this.loadViewBySwimlane([], this.state.overallSwimlaneData, this.state.selectedJobs, swimlaneViewByFieldName),
+        ...this.getclearedSelectedAnomaliesState(),
+      });
     };
 
     onSwimlaneEnterHandler = () => this.setSwimlaneSelectActive(true);
@@ -835,7 +844,7 @@ export const Explorer = injectI18n(
     swimlaneCellClickQueue = [];
 
     // Listener for click events in the swimlane to load corresponding anomaly data.
-    swimlaneCellClick = (swimlaneSelectedCells) => {
+    swimlaneCellClick = async (swimlaneSelectedCells) => {
       if (this.skipCellClicks === true) {
         this.swimlaneCellClickQueue.push(swimlaneSelectedCells);
         return;
@@ -844,17 +853,28 @@ export const Explorer = injectI18n(
       // If selectedCells is an empty object we clear any existing selection,
       // otherwise we save the new selection in AppState and update the Explorer.
       if (Object.keys(swimlaneSelectedCells).length === 0) {
+        this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
+
+        const stateUpdate = this.getclearedSelectedAnomaliesState();
+
         if (this.state.viewByLoadedForTimeFormatted) {
           // Reload 'view by' swimlane over full time range.
-          this.loadViewBySwimlane([]);
+          this.setState({ viewBySwimlaneData: getDefaultViewBySwimlaneData(), viewBySwimlaneDataLoading: true });
+          Object.assign(
+            stateUpdate,
+            await this.loadViewBySwimlane(
+              [],
+              this.state.overallSwimlaneData,
+              this.state.selectedJobs,
+              this.state.swimlaneViewByFieldName
+            )
+          );
         }
-        this.clearSelectedAnomalies();
+
+        this.updateExplorer(stateUpdate);
       } else {
         this.props.appStateHandler(APP_STATE_ACTION.SAVE_SELECTION, { swimlaneSelectedCells });
-        this.setState(
-          { selectedCells: swimlaneSelectedCells },
-          this.updateExplorer
-        );
+        this.updateExplorer({ selectedCells: swimlaneSelectedCells });
       }
     }
 
