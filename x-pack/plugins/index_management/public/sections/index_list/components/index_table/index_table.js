@@ -10,7 +10,6 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { Route } from 'react-router-dom';
 import { NoMatch } from '../../../no_match';
 import { healthToColor } from '../../../../services';
-import '../../../../styles/table.less';
 import { REFRESH_RATE_INDEX_LIST } from '../../../../constants';
 
 import {
@@ -204,8 +203,8 @@ export class IndexTableUi extends Component {
           onSort={() => this.onSort(fieldName)}
           isSorted={isSorted}
           isSortAscending={isSortAscending}
+          className={'indTable__header--' + fieldName}
           data-test-subj={`indexTableHeaderCell-${fieldName}`}
-          className={'indexTable__header--' + fieldName}
         >
           {label}
         </EuiTableHeaderCell>
@@ -242,6 +241,8 @@ export class IndexTableUi extends Component {
           key={`${fieldName}-${name}`}
           truncateText={false}
           data-test-subj={`indexTableCell-${fieldName}`}
+          className={'indTable__cell--' + fieldName}
+          header={fieldName}
         >
           {this.buildRowCell(fieldName, value, index)}
         </EuiTableRowCell>
@@ -280,6 +281,7 @@ export class IndexTableUi extends Component {
       return (
         <EuiTableRow
           isSelected={this.isItemSelected(name) || name === detailPanelIndexName}
+          isSelectable
           key={`${name}-row`}
         >
           <EuiTableRowCellCheckbox key={`checkbox-${name}`}>
@@ -418,7 +420,7 @@ export class IndexTableUi extends Component {
             <Fragment>
               <EuiFlexItem>
                 <EuiSearchBar
-                  filters={this.getFilters()}
+                  filters={(this.getFilters().length > 0) ? this.getFilters() : null}
                   defaultQuery={filter}
                   query={filter}
                   box={{
@@ -458,20 +460,22 @@ export class IndexTableUi extends Component {
         <EuiSpacer size="m" />
 
         {indices.length > 0 ? (
-          <EuiTable>
-            <EuiTableHeader>
-              <EuiTableHeaderCellCheckbox>
-                <EuiCheckbox
-                  id="selectAllIndexes"
-                  checked={this.areAllItemsSelected()}
-                  onChange={this.toggleAll}
-                  type="inList"
-                />
-              </EuiTableHeaderCellCheckbox>
-              {this.buildHeader()}
-            </EuiTableHeader>
-            <EuiTableBody>{this.buildRows()}</EuiTableBody>
-          </EuiTable>
+          <div style={{ maxWidth: '100%', overflow: 'auto' }}>
+            <EuiTable className="indTable">
+              <EuiTableHeader>
+                <EuiTableHeaderCellCheckbox>
+                  <EuiCheckbox
+                    id="selectAllIndexes"
+                    checked={this.areAllItemsSelected()}
+                    onChange={this.toggleAll}
+                    type="inList"
+                  />
+                </EuiTableHeaderCellCheckbox>
+                {this.buildHeader()}
+              </EuiTableHeader>
+              <EuiTableBody>{this.buildRows()}</EuiTableBody>
+            </EuiTable>
+          </div>
         ) : (
           emptyState
         )}

@@ -14,7 +14,7 @@ export function canvas(kibana) {
   return new kibana.Plugin({
     id: CANVAS_APP,
     configPrefix: 'xpack.canvas',
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'interpreter'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       app: {

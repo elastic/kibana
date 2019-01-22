@@ -45,6 +45,7 @@ interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
 
 const RENDER_COMPLETE_EVENT = 'render_complete';
 const LOADING_ATTRIBUTE = 'data-loading';
+const RENDERING_COUNT_ATTRIBUTE = 'data-rendering-count';
 
 /**
  * A handler to the embedded visualization. It offers several methods to interact
@@ -115,6 +116,7 @@ export class EmbeddedVisualizeHandler {
     });
 
     element.setAttribute(LOADING_ATTRIBUTE, '');
+    element.setAttribute(RENDERING_COUNT_ATTRIBUTE, '0');
     element.addEventListener('renderComplete', this.onRenderCompleteListener);
 
     this.appState = appState;
@@ -234,6 +236,9 @@ export class EmbeddedVisualizeHandler {
         throw new Error(pipelineResponse.error);
       }
       visData = pipelineResponse.value.visData || pipelineResponse.value;
+      if (pipelineResponse.value.visConfig) {
+        this.vis.params = pipelineResponse.value.visConfig.params;
+      }
     }
     return visualizationLoader
       .render(this.element, this.vis, visData, this.uiState, {
@@ -304,9 +309,15 @@ export class EmbeddedVisualizeHandler {
     this.fetchAndRender(true);
   };
 
+  private incrementRenderingCount = () => {
+    const renderingCount = Number(this.element.getAttribute(RENDERING_COUNT_ATTRIBUTE) || 0);
+    this.element.setAttribute(RENDERING_COUNT_ATTRIBUTE, `${renderingCount + 1}`);
+  };
+
   private onRenderCompleteListener = () => {
     this.listeners.emit(RENDER_COMPLETE_EVENT);
     this.element.removeAttribute(LOADING_ATTRIBUTE);
+    this.incrementRenderingCount();
   };
 
   private onUiStateChange = () => {
