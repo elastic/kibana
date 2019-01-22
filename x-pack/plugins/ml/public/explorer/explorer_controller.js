@@ -40,7 +40,7 @@ import { mlJobService } from '../services/job_service';
 import { refreshIntervalWatcher } from '../util/refresh_interval_watcher';
 import { timefilter } from 'ui/timefilter';
 
-import { APP_STATE_ACTION, EXPLORER_ACTION, SWIMLANE_TYPE } from './explorer_constants';
+import { APP_STATE_ACTION, EXPLORER_ACTION } from './explorer_constants';
 
 uiRoutes
   .when('/explorer/?', {
@@ -93,26 +93,12 @@ module.controller('MlExplorerController', function (
   mlExplorerDashboardService.init();
 
   function jobSelectionUpdate(action, { fullJobs, selectedCells, selectedJobIds }) {
-    let previousSelectedJobsCount = 0;
-    if ($scope.jobs !== null) {
-      previousSelectedJobsCount = $scope.jobs.filter(d => d.selected).length;
-    }
-
     const jobs = createJobs(fullJobs).map((job) => {
       job.selected = selectedJobIds.some((id) => job.id === id);
       return job;
     });
 
     const selectedJobs = jobs.filter(job => job.selected);
-
-    // Clear viewBy from the state if we are moving from single
-    // to multi selection, or vice-versa.
-    if (
-      (previousSelectedJobsCount <= 1 && selectedJobs.length > 1) ||
-      (selectedJobs.length === 1 && previousSelectedJobsCount > 1)
-    ) {
-      $scope.appStateHandler(APP_STATE_ACTION.CLEAR_SWIMLANE_VIEW_BY_FIELD_NAME);
-    }
 
     function fieldFormatServiceCallback() {
       $scope.jobs = jobs;
@@ -156,18 +142,17 @@ module.controller('MlExplorerController', function (
           selectedCells = {
             type: $scope.appState.mlExplorerSwimlane.selectedType,
             lanes: $scope.appState.mlExplorerSwimlane.selectedLanes,
-            times: $scope.appState.mlExplorerSwimlane.selectedTimes
+            times: $scope.appState.mlExplorerSwimlane.selectedTimes,
+            showTopFieldValues: $scope.appState.mlExplorerSwimlane.showTopFieldValues,
+            viewByFieldName: $scope.appState.mlExplorerSwimlane.viewByFieldName,
           };
-          if (selectedCells.type === SWIMLANE_TYPE.VIEW_BY) {
-            selectedCells.fieldName = $scope.appState.mlExplorerSwimlane.viewBy;
-          }
         }
 
         jobSelectionUpdate(EXPLORER_ACTION.INITIALIZE, {
           fullJobs: resp.jobs,
           selectedCells,
           selectedJobIds,
-          swimlaneViewByFieldName: $scope.appState.mlExplorerSwimlane.viewBy
+          swimlaneViewByFieldName: $scope.appState.mlExplorerSwimlane.viewByFieldName
         });
       }
     })
@@ -223,6 +208,7 @@ module.controller('MlExplorerController', function (
       delete $scope.appState.mlExplorerSwimlane.selectedType;
       delete $scope.appState.mlExplorerSwimlane.selectedLanes;
       delete $scope.appState.mlExplorerSwimlane.selectedTimes;
+      delete $scope.appState.mlExplorerSwimlane.showTopFieldValues;
     }
 
     if (action === APP_STATE_ACTION.SAVE_SELECTION) {
@@ -230,14 +216,13 @@ module.controller('MlExplorerController', function (
       $scope.appState.mlExplorerSwimlane.selectedType = swimlaneSelectedCells.type;
       $scope.appState.mlExplorerSwimlane.selectedLanes = swimlaneSelectedCells.lanes;
       $scope.appState.mlExplorerSwimlane.selectedTimes = swimlaneSelectedCells.times;
-    }
+      $scope.appState.mlExplorerSwimlane.showTopFieldValues = swimlaneSelectedCells.showTopFieldValues;
+      $scope.appState.mlExplorerSwimlane.viewByFieldName = swimlaneSelectedCells.viewByFieldName;
 
-    if (action === APP_STATE_ACTION.CLEAR_SWIMLANE_VIEW_BY_FIELD_NAME) {
-      delete $scope.appState.mlExplorerSwimlane.viewBy;
     }
 
     if (action === APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME) {
-      $scope.appState.mlExplorerSwimlane.viewBy = payload.swimlaneViewByFieldName;
+      $scope.appState.mlExplorerSwimlane.viewByFieldName = payload.swimlaneViewByFieldName;
     }
 
     $scope.appState.save();

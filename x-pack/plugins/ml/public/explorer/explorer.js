@@ -205,9 +205,14 @@ export const Explorer = injectI18n(
           selectedJobs,
         };
 
+        this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
         Object.assign(stateUpdate, this.getclearedSelectedAnomaliesState());
 
         if (selectedJobs.length > 1) {
+          this.props.appStateHandler(
+            APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
+            { swimlaneViewByFieldName: VIEW_BY_JOB_LABEL },
+          );
           stateUpdate.swimlaneViewByFieldName = VIEW_BY_JOB_LABEL;
           // enforce a state update for swimlaneViewByFieldName
           this.setState({ swimlaneViewByFieldName: VIEW_BY_JOB_LABEL }, () => {
@@ -690,7 +695,6 @@ export const Explorer = injectI18n(
         noInfluencersConfigured,
         selectedCells,
         selectedJobs,
-        swimlaneViewByFieldName
       } = {
         ...this.state,
         ...stateUpdate
@@ -709,7 +713,7 @@ export const Explorer = injectI18n(
 
       const { dateFormatTz } = this.props;
 
-      const jobIds = (selectedCells !== null && selectedCells.fieldName === VIEW_BY_JOB_LABEL)
+      const jobIds = (selectedCells !== null && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL)
         ? selectedCells.lanes
         : selectedJobs.map(d => d.id);
 
@@ -729,16 +733,48 @@ export const Explorer = injectI18n(
         )
       );
 
-      const {
-        hasResults,
-        overallSwimlaneData
-      } = stateUpdate;
+      const { overallSwimlaneData } = stateUpdate;
 
+      const annotationsTableCompareArgs = {
+        selectedCells,
+        selectedJobs,
+        interval: this.getSwimlaneBucketInterval(selectedJobs).asSeconds()
+      };
 
-      // Trigger loading of the 'view by' swimlane -
-      // only load if the overall swimlane returned `hasResults: true`.
-      if (hasResults) {
-        const viewBySwimlaneOptions = this.getViewBySwimlaneOptions(selectedJobs);
+      if (_.isEqual(annotationsTableCompareArgs, this.annotationsTablePreviousArgs)) {
+        stateUpdate.annotationsData = this.annotationsTablePreviousData;
+      } else {
+        this.annotationsTablePreviousArgs = annotationsTableCompareArgs;
+        stateUpdate.annotationsData = this.annotationsTablePreviousData = await loadAnnotationsTableData(
+          selectedCells,
+          selectedJobs,
+          this.getSwimlaneBucketInterval(selectedJobs).asSeconds()
+        );
+      }
+
+      const viewBySwimlaneOptions = this.getViewBySwimlaneOptions(selectedJobs);
+      Object.assign(stateUpdate, viewBySwimlaneOptions);
+      if (selectedCells !== null && selectedCells.showTopFieldValues === true) {
+        // this.setState({ viewBySwimlaneData: getDefaultViewBySwimlaneData(), viewBySwimlaneDataLoading: true });
+        // Click is in one of the cells in the Overall swimlane - reload the 'view by' swimlane
+        // to show the top 'view by' values for the selected time.
+        const topFieldValues = await this.loadViewByTopFieldValuesForSelectedTime(
+          timerange.earliestMs,
+          timerange.latestMs,
+          selectedJobs,
+          viewBySwimlaneOptions.swimlaneViewByFieldName
+        );
+        Object.assign(
+          stateUpdate,
+          await this.loadViewBySwimlane(
+            topFieldValues,
+            overallSwimlaneData,
+            selectedJobs,
+            viewBySwimlaneOptions.swimlaneViewByFieldName
+          ),
+          { viewByLoadedForTimeFormatted: formatHumanReadableDateTime(timerange.earliestMs) }
+        );
+      } else {
         Object.assign(
           stateUpdate,
           viewBySwimlaneOptions,
@@ -775,47 +811,7 @@ export const Explorer = injectI18n(
         Object.assign(stateUpdate, this.getclearedSelectedAnomaliesState());
       }
 
-
-      const annotationsTableCompareArgs = {
-        selectedCells,
-        selectedJobs,
-        interval: this.getSwimlaneBucketInterval(selectedJobs).asSeconds()
-      };
-
-      if (_.isEqual(annotationsTableCompareArgs, this.annotationsTablePreviousArgs)) {
-        stateUpdate.annotationsData = this.annotationsTablePreviousData;
-      } else {
-        this.annotationsTablePreviousArgs = annotationsTableCompareArgs;
-        stateUpdate.annotationsData = this.annotationsTablePreviousData = await loadAnnotationsTableData(
-          selectedCells,
-          selectedJobs,
-          this.getSwimlaneBucketInterval(selectedJobs).asSeconds()
-        );
-      }
-
-      if (selectedCells !== null && selectedCells.fieldName === undefined) {
-        this.setState({ viewBySwimlaneData: getDefaultViewBySwimlaneData(), viewBySwimlaneDataLoading: true });
-        // Click is in one of the cells in the Overall swimlane - reload the 'view by' swimlane
-        // to show the top 'view by' values for the selected time.
-        const topFieldValues = await this.loadViewByTopFieldValuesForSelectedTime(
-          timerange.earliestMs,
-          timerange.latestMs,
-          selectedJobs,
-          swimlaneViewByFieldName
-        );
-        Object.assign(
-          stateUpdate,
-          await this.loadViewBySwimlane(
-            topFieldValues,
-            overallSwimlaneData,
-            selectedJobs,
-            swimlaneViewByFieldName
-          ),
-          { viewByLoadedForTimeFormatted: formatHumanReadableDateTime(timerange.earliestMs) }
-        );
-      }
-
-      const selectionInfluencers = getSelectionInfluencers(selectedCells, swimlaneViewByFieldName);
+      const selectionInfluencers = getSelectionInfluencers(selectedCells, viewBySwimlaneOptions.swimlaneViewByFieldName);
 
       if (selectionInfluencers.length === 0) {
         stateUpdate.influencers = await loadTopInfluencers(jobIds, timerange.earliestMs, timerange.latestMs, noInfluencersConfigured);
@@ -855,7 +851,7 @@ export const Explorer = injectI18n(
         selectedJobs,
         dateFormatTz,
         interval: this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
-        swimlaneViewByFieldName
+        swimlaneViewByFieldName: viewBySwimlaneOptions.swimlaneViewByFieldName,
       };
 
       if (_.isEqual(anomaliesTableCompareArgs, this.anomaliesTablePreviousArgs)) {
@@ -867,7 +863,7 @@ export const Explorer = injectI18n(
           selectedJobs,
           dateFormatTz,
           this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
-          swimlaneViewByFieldName
+          viewBySwimlaneOptions.swimlaneViewByFieldName
         );
         this.setState({ tableData });
       }
@@ -883,8 +879,8 @@ export const Explorer = injectI18n(
 
     viewByChangeHandler = e => this.setSwimlaneViewBy(e.target.value);
     setSwimlaneViewBy = (swimlaneViewByFieldName) => {
-      this.props.appStateHandler(APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME, { swimlaneViewByFieldName });
       this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
+      this.props.appStateHandler(APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME, { swimlaneViewByFieldName });
       this.setState({ swimlaneViewByFieldName }, () => {
         this.updateExplorer({
           swimlaneViewByFieldName,
@@ -928,6 +924,20 @@ export const Explorer = injectI18n(
         const stateUpdate = this.getclearedSelectedAnomaliesState();
         this.updateExplorer(stateUpdate, false);
       } else {
+        swimlaneSelectedCells.showTopFieldValues = false;
+
+        const currentSwimlaneType = _.get(this.state, 'selectedCells.type');
+        const currentShowTopFieldValues = _.get(this.state, 'selectedCells.showTopFieldValues', false);
+        const newSwimlaneType = _.get(swimlaneSelectedCells, 'type');
+
+        if (
+          (currentSwimlaneType === SWIMLANE_TYPE.OVERALL && newSwimlaneType === SWIMLANE_TYPE.VIEW_BY) ||
+          newSwimlaneType === SWIMLANE_TYPE.OVERALL ||
+          currentShowTopFieldValues === true
+        ) {
+          swimlaneSelectedCells.showTopFieldValues = true;
+        }
+
         this.props.appStateHandler(APP_STATE_ACTION.SAVE_SELECTION, { swimlaneSelectedCells });
         this.updateExplorer({ selectedCells: swimlaneSelectedCells }, false);
       }

@@ -164,7 +164,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
     }
 
     const selectedCells = {
-      fieldName: swimlaneData.fieldName,
+      viewByFieldName: swimlaneData.fieldName,
       lanes: laneLabels,
       times: d3.extent(times),
       type: swimlaneType
@@ -429,7 +429,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
     // if the time range and lane label are still in view.
     const selectionState = selection;
     const selectedType = _.get(selectionState, 'type', undefined);
-    const selectionFieldName = _.get(selectionState, 'fieldName', '');
+    const selectionViewByFieldName = _.get(selectionState, 'viewByFieldName', '');
 
     // If a selection was done in the other swimlane, add the "masked" classes
     // to de-emphasize the swimlane cells.
@@ -442,7 +442,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
 
     if (
       (swimlaneType !== selectedType) ||
-      (swimlaneData.fieldName !== undefined && swimlaneData.fieldName !== selectionFieldName)
+      (swimlaneData.fieldName !== undefined && swimlaneData.fieldName !== selectionViewByFieldName)
     ) {
       // Not this swimlane which was selected.
       return;

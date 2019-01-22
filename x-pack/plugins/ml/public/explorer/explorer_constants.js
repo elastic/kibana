@@ -27,7 +27,6 @@ export const EXPLORER_ACTION = {
 export const APP_STATE_ACTION = {
   CLEAR_SELECTION: 'clearSelection',
   SAVE_SELECTION: 'saveSelection',
-  CLEAR_SWIMLANE_VIEW_BY_FIELD_NAME: 'clearSwimlaneViewByFieldName',
   SAVE_SWIMLANE_VIEW_BY_FIELD_NAME: 'saveSwimlaneViewByFieldName',
 };
 

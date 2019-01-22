@@ -183,8 +183,8 @@ export function getSelectionTimeRange(selectedCells, interval) {
 export function getSelectionInfluencers(selectedCells, fieldName) {
   if (
     selectedCells !== null &&
-    selectedCells.fieldName !== undefined &&
-    selectedCells.fieldName !== VIEW_BY_JOB_LABEL
+    selectedCells.viewByFieldName !== undefined &&
+    selectedCells.viewByFieldName !== VIEW_BY_JOB_LABEL
   ) {
     return selectedCells.lanes.map(laneLabel => ({ fieldName, fieldValue: laneLabel }));
   }
@@ -288,7 +288,7 @@ export function processViewByResults(
 }
 
 export async function loadAnnotationsTableData(selectedCells, selectedJobs, interval) {
-  const jobIds = (selectedCells !== null && selectedCells.fieldName === VIEW_BY_JOB_LABEL) ?
+  const jobIds = (selectedCells !== null && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL) ?
     selectedCells.lanes : selectedJobs.map(d => d.id);
   const timeRange = getSelectionTimeRange(selectedCells, interval);
 
@@ -324,7 +324,7 @@ export async function loadAnnotationsTableData(selectedCells, selectedJobs, inte
 }
 
 export async function loadAnomaliesTableData(selectedCells, selectedJobs, dateFormatTz, interval, fieldName) {
-  const jobIds = (selectedCells !== null && selectedCells.fieldName === VIEW_BY_JOB_LABEL) ?
+  const jobIds = (selectedCells !== null && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL) ?
     selectedCells.lanes : selectedJobs.map(d => d.id);
   const influencers = getSelectionInfluencers(selectedCells, fieldName);
   const timeRange = getSelectionTimeRange(selectedCells, interval);
