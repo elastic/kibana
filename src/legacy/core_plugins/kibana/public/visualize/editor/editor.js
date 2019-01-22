@@ -304,7 +304,9 @@ function VisEditor(
       $appStatus.dirty = status.dirty || !savedVis.id;
     });
 
-    $scope.$watch('state.query', $scope.updateQueryAndFetch);
+    $scope.$watch('state.query', (query) => {
+      $scope.updateQueryAndFetch({ query });
+    });
 
     $state.replace();
 
