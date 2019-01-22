@@ -349,10 +349,6 @@ export const Explorer = injectI18n(
     loadOverallDataPreviousInterval = null;
     loadOverallDataPreviousData = null;
     loadOverallData(selectedJobs, interval, showLoadingIndicator = true) {
-      if (showLoadingIndicator) {
-        this.setState({ hasResults: false, loading: true });
-      }
-
       return new Promise((resolve) => {
         // Loads the overall data components i.e. the overall swimlane and influencers list.
         if (selectedJobs === null) {
@@ -381,6 +377,10 @@ export const Explorer = injectI18n(
         }
 
         this.loadOverallDataPreviousArgs = compareArgs;
+
+        if (showLoadingIndicator) {
+          this.setState({ hasResults: false, loading: true });
+        }
 
         // Ensure the search bounds align to the bucketing interval used in the swimlane so
         // that the first and last buckets are complete.
