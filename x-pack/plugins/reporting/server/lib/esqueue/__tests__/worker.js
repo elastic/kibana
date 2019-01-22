@@ -867,7 +867,7 @@ describe('Worker class', function () {
       return sinon.stub(workerWithFailure, '_failJob').returns(Promise.resolve());
     }
 
-    describe('saving output failure', () => {
+    describe.skip('saving output failure', () => {
       it('should mark the job as failed if saving to ES fails', async () => {
         const job = {
           _id: 'shouldSucced',
