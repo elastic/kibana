@@ -9,6 +9,7 @@ import { TestInvoker } from './lib/types';
 export default function codeApp({ loadTestFile }: TestInvoker) {
   describe('Code app', function codeAppTestSuite() {
     this.tags('ciGroup2');
-    loadTestFile(require.resolve('./import_repository'));
+    // Temporarily disable functional test for code.
+    // loadTestFile(require.resolve('./import_repository'));
   });
 }
