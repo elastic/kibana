@@ -16,10 +16,18 @@ interface Props {
   theme: Theme;
 }
 
+const getBackgroundColor = (theme: Theme): string =>
+  theme === 'dark' ? 'rgb(63,63,63)' : '#F5F7FA';
+
 const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; themeName: Theme }>`
   transition: background-color 0.7s ease;
   width: 100%;
   height: 100%;
+  .flyout-overlay {
+    .euiPanel {
+      background-color: ${({ themeName }) => getBackgroundColor(themeName)};
+    }
+  }
   ${({ isDraggingOver }) =>
     isDraggingOver
       ? `
