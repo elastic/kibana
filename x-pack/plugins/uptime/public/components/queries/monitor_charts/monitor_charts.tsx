@@ -49,12 +49,12 @@ export class MonitorCharts extends React.Component<Props, MonitorChartsState> {
       dateRangeStart,
       dateRangeEnd,
       monitorId,
-      autorefreshEnabled,
+      autorefreshIsPaused,
       autorefreshInterval,
     } = this.props;
     return (
       <Query
-        pollInterval={autorefreshEnabled ? autorefreshInterval : undefined}
+        pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
         query={createGetMonitorChartsQuery}
         variables={{ dateRangeStart, dateRangeEnd, monitorId }}
       >
