@@ -144,7 +144,6 @@ export function uiRenderMixin(kbnServer, server, config) {
 
   async function renderApp({ app, h, includeUserProvidedConfig = true, injectedVarsOverrides = {} }) {
     const request = h.request;
-    const translations = await server.getUiTranslations();
     const basePath = request.getBasePath();
 
     return h.view('ui_app', {
@@ -168,7 +167,6 @@ export function uiRenderMixin(kbnServer, server, config) {
 
         legacyMetadata: await getLegacyKibanaPayload({
           app,
-          translations,
           request,
           includeUserProvidedConfig,
           injectedVarsOverrides
