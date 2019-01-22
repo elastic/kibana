@@ -8,12 +8,18 @@ import expect from 'expect.js';
 export default function ({ getPageObjects, getService }) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
 
   describe('dashboard', () => {
     before(async () => {
       await esArchiver.load('security/feature_privileges');
+      await kibanaServer.uiSettings.replace({
+        "accessibility:disableAnimations": true,
+        "telemetry:optIn": false,
+        "defaultIndex": "logstash-*",
+      });
       await esArchiver.loadIfNeeded('logstash_functional');
     });
 
@@ -29,13 +35,14 @@ export default function ({ getPageObjects, getService }) {
               { names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }
             ],
           },
-          kibana: {
-            global: {
+          kibana: [
+            {
               feature: {
                 dashboard: ['all']
               },
+              spaces: ['*']
             }
-          }
+          ]
         });
 
         await security.user.create('global_dashboard_all_user', {
@@ -62,9 +69,10 @@ export default function ({ getPageObjects, getService }) {
         ]);
       });
 
-      it('shows save button', async () => {
+      it('shows create "Create new dashboard" button', async () => {
         await PageObjects.common.navigateToApp('dashboard');
-        await testSubjects.existOrFail('dashboardSaveButton', 20000);
+        await testSubjects.existOrFail('dashboardLandingPage', 10000);
+        await testSubjects.existOrFail('createDashboardPromptButton');
       });
     });
 
@@ -76,13 +84,14 @@ export default function ({ getPageObjects, getService }) {
               { names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }
             ],
           },
-          kibana: {
-            global: {
+          kibana: [
+            {
               feature: {
                 dashboard: ['read']
               },
+              spaces: ['*']
             }
-          }
+          ]
         });
 
         await security.user.create('global_dashboard_read_user', {
@@ -109,10 +118,10 @@ export default function ({ getPageObjects, getService }) {
         ]);
       });
 
-      it(`doesn't show save button`, async () => {
+      it(`doesn't show "Create new Dashboard" button`, async () => {
         await PageObjects.common.navigateToApp('dashboard');
-        await testSubjects.existOrFail('dashboardNewButton', 10000);
-        await testSubjects.missingOrFail('dashboardSaveButton');
+        await testSubjects.existOrFail('dashboardLandingPage', 10000);
+        await testSubjects.missingOrFail('createDashboardPromptButton');
       });
     });
 
@@ -124,13 +133,14 @@ export default function ({ getPageObjects, getService }) {
               { names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }
             ],
           },
-          kibana: {
-            global: {
+          kibana: [
+            {
               feature: {
                 discover: ['all']
-              }
+              },
+              spaces: ['*']
             }
-          }
+          ]
         });
 
         await security.user.create('no_dashboard_privileges_user', {
