@@ -7,18 +7,22 @@ import chrome from 'ui/chrome';
 
 const uiSettings = chrome.getUiSettingsClient();
 
-export function getInitialTimeFilters({
+export function getInitialRefreshConfig({
   mapStateJSON,
   globalState = {},
 }) {
 
   if (mapStateJSON) {
     const mapState = JSON.parse(mapStateJSON);
-    if (mapState.timeFilters) {
-      return mapState.timeFilters;
+    if (mapState.refreshConfig) {
+      return mapState.refreshConfig;
     }
   }
 
-  const defaultTime = uiSettings.get('timepicker:timeDefaults');
-  return { ...defaultTime, ...globalState.time };
+  const defaultRefreshConfig = uiSettings.get('timepicker:refreshIntervalDefaults');
+  const refreshInterval = { ...defaultRefreshConfig, ...globalState.refreshInterval };
+  return {
+    isPaused: refreshInterval.pause,
+    interval: refreshInterval.value,
+  };
 }

@@ -30,6 +30,7 @@ import { toastNotifications } from 'ui/notify';
 import { getInitialLayers } from './get_initial_layers';
 import { getInitialQuery } from './get_initial_query';
 import { getInitialTimeFilters } from './get_initial_time_filters';
+import { getInitialRefreshConfig } from './get_initial_refresh_config';
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-gis-root';
 
@@ -48,6 +49,9 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     if (diff.includes('time')) {
       $scope.updateQueryAndDispatch({ query: $scope.query, dateRange: globalState.time });
     }
+    if (diff.includes('refreshInterval')) {
+      $scope.onRefreshChange({ isPaused: globalState.pause, refreshInterval: globalState.value });
+    }
   });
 
   const $state = new AppState();
@@ -58,10 +62,16 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   });
 
   function syncAppAndGlobalState() {
-    $state.query = $scope.query;
-    $state.save();
-    globalState.time = $scope.time;
-    globalState.save();
+    $scope.$evalAsync(() => {
+      $state.query = $scope.query;
+      $state.save();
+      globalState.time = $scope.time;
+      globalState.refreshInterval = {
+        pause: $scope.refreshConfig.isPaused,
+        value: $scope.refreshConfig.interval,
+      };
+      globalState.save();
+    });
   }
 
   $scope.query = getInitialQuery({
@@ -72,7 +82,10 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   $scope.time = getInitialTimeFilters({
     mapStateJSON: savedMap.mapStateJSON,
     globalState: globalState,
-    timeDefaults: config.get('timepicker:timeDefaults')
+  });
+  $scope.refreshConfig = getInitialRefreshConfig({
+    mapStateJSON: savedMap.mapStateJSON,
+    globalState: globalState,
   });
   syncAppAndGlobalState();
 
@@ -87,6 +100,22 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       }
 
       store.dispatch(setQuery({ query: $scope.query, timeFilters: $scope.time }));
+
+      syncAppAndGlobalState();
+    });
+  };
+  $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
+    $scope.refreshConfig = {
+      isPaused,
+      interval: refreshInterval ? refreshInterval : $scope.refreshConfig.interval
+    };
+    getStore().then(store => {
+      // ignore outdated
+      if ($scope.refreshConfig.isPaused !== isPaused && $scope.refreshConfig.interval !== refreshInterval) {
+        return;
+      }
+
+      store.dispatch(setRefreshConfig($scope.refreshConfig));
 
       syncAppAndGlobalState();
     });
@@ -110,14 +139,12 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
         lon: mapState.center.lon,
         zoom: mapState.zoom,
       }));
-      if (mapState.refreshConfig) {
-        store.dispatch(setRefreshConfig(mapState.refreshConfig));
-      }
     }
 
     const layerList = getInitialLayers(savedMap.layerListJSON, getDataSources(store.getState()));
     store.dispatch(replaceLayerList(layerList));
 
+    store.dispatch(setRefreshConfig($scope.refreshConfig));
     store.dispatch(setQuery({ query: $scope.query, timeFilters: $scope.time }));
 
     const root = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);

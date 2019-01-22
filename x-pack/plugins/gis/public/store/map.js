@@ -19,7 +19,6 @@ import {
   MAP_EXTENT_CHANGED,
   MAP_READY,
   MAP_DESTROYED,
-  SET_TIME_FILTERS,
   SET_QUERY,
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
@@ -161,9 +160,6 @@ export function map(state = INITIAL_STATE, action) {
         buffer: action.mapState.buffer,
       };
       return { ...state, mapState: { ...state.mapState, ...newMapState } };
-    case SET_TIME_FILTERS:
-      const { from, to } = action;
-      return { ...state, mapState: { ...state.mapState, timeFilters: { from, to } } };
     case SET_QUERY:
       const { query, timeFilters } = action;
       return {
