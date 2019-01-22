@@ -81,7 +81,7 @@ export const ml = (kibana) => {
           all: {
             metadata: {
               tooltip: i18n.translate('xpack.ml.privileges.tooltip', {
-                defaultMessage: 'The machine_learning_user or machine_learning_admin role should also be assigned to users grant access'
+                defaultMessage: 'The machine_learning_user or machine_learning_admin role should also be assigned to users to grant access'
               })
             },
             catalogue: ['ml'],
