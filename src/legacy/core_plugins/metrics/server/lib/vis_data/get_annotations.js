@@ -36,18 +36,16 @@ export default async (req, panel) => {
     .filter(validAnnotation)
     .map(annotation => {
       const indexPattern = annotation.index_pattern;
-      const bodies = [];
+      const header = {
+        index: indexPattern,
+        ignoreUnavailable: true,
+      };
       const body = {
         ...buildAnnotationRequest(req, panel, annotation),
         timeout
       };
 
-      bodies.push({
-        index: indexPattern,
-        ignoreUnavailable: true,
-      }, body);
-
-      return bodies;
+      return [header, body];
     });
 
   if (!bodies.length) return { responses: [] };
