@@ -46,9 +46,9 @@ import { DashboardConstants, createDashboardEditUrl } from '../dashboard_constan
 export const EMPTY_FILTER = '';
 
 // The table supports three sort states:
-// field | asc, field | desc, default.
+// field-asc, field-desc, and default.
 //
-// If you click non-default sort header three times,
+// If you click a non-default sort header three times,
 // the sort returns to the default sort, described here.
 const defaultSort = {
   field: 'title',
