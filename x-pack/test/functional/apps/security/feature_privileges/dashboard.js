@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from 'expect.js';
+import { DashboardConstants } from '../../../../../../src/legacy/core_plugins/kibana/public/dashboard/dashboard_constants';
 
 export default function ({ getPageObjects, getService }) {
   const esArchiver = getService('esArchiver');
@@ -159,9 +160,18 @@ export default function ({ getPageObjects, getService }) {
         await security.user.delete('no_dashboard_privileges_user');
       });
 
-      it(`redirects to the home page`, async () => {
-        await PageObjects.common.navigateToUrl('dashboard', '', {
+      it(`landing page redirects to the home page`, async () => {
+        await PageObjects.common.navigateToActualUrl('kibana', DashboardConstants.LANDING_PAGE_PATH, {
           ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+        await testSubjects.existOrFail('homeApp', 10000);
+      });
+
+      it(`create new dashboard redirects to the home page`, async () => {
+        await PageObjects.common.navigateToActualUrl('kibana', DashboardConstants.CREATE_NEW_DASHBOARD_URL, {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
         });
         await testSubjects.existOrFail('homeApp', 10000);
       });
