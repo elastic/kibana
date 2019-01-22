@@ -112,21 +112,6 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
       );
     }
 
-    let availableSpaces: Space[] = [];
-    if (this.state.showSpacePrivilegeEditor) {
-      availableSpaces = [...this.getAvailableSpaces()];
-      if (this.state.editingIndex >= 0) {
-        const form = this.props.role.kibana[this.state.editingIndex];
-
-        const displaySpaces = this.getDisplaySpaces();
-        const selectedSpaces = form.spaces
-          .map(spaceId => displaySpaces.find(s => s.id === spaceId))
-          .filter(Boolean) as Space[];
-
-        availableSpaces.push(...selectedSpaces);
-      }
-    }
-
     return (
       <Fragment>
         {this.renderKibanaPrivileges()}
@@ -139,7 +124,7 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
             intl={this.props.intl}
             onChange={this.onSpacesPrivilegeChange}
             onCancel={this.onCancelEditPrivileges}
-            spaces={availableSpaces}
+            spaces={this.getAvailableSpaces(this.state.editingIndex)}
             editingIndex={this.state.editingIndex}
           />
         )}
@@ -253,16 +238,21 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
     return [this.globalSpaceEntry, ...this.props.spaces];
   };
 
-  private getAvailableSpaces = () => {
-    const spacePrivileges = this.props.role.kibana;
+  private getAvailableSpaces = (includeSpacesFromPrivilegeIndex: number = -1) => {
+    const spacesToExclude = _.uniq(
+      _.flatten(
+        this.props.role.kibana.map((entry, index) => {
+          if (includeSpacesFromPrivilegeIndex === index) {
+            return [];
+          }
+          return entry.spaces;
+        })
+      )
+    );
 
-    const displaySpaces = this.getDisplaySpaces();
-
-    const assignedSpaces: Space[] = _.uniq(_.flatten(spacePrivileges.map(entry => entry.spaces)))
-      .map(spaceId => displaySpaces.find(s => s.id === spaceId))
-      .filter(Boolean) as Space[];
-
-    return _.difference([this.globalSpaceEntry, ...this.props.spaces], assignedSpaces) as Space[];
+    return this.getDisplaySpaces().filter(
+      displaySpace => !spacesToExclude.includes(displaySpace.id)
+    );
   };
 
   private addSpacePrivilege = () => {
