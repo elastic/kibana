@@ -54,7 +54,6 @@ const buildProps = (customProps = {}) => {
       },
     },
     editable: true,
-    kibanaAppPrivileges: ['all'],
     onChange: jest.fn(),
     validator: new RoleValidator(),
     ...customProps,

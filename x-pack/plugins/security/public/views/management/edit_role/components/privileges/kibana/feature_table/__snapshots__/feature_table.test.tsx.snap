@@ -10,7 +10,7 @@ exports[`FeatureTable can render without spaces 1`] = `
         "render": [Function],
       },
       Object {
-        "field": "role",
+        "field": "privilege",
         "name": <span>
           <FormattedMessage
             defaultMessage="Privilege"

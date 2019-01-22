@@ -5,7 +5,6 @@
  */
 
 import _ from 'lodash';
-import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import { uiCapabilities } from 'ui/capabilities';
 import { kfetch } from 'ui/kfetch';
@@ -29,7 +28,6 @@ import { EditRolePage } from './components';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { KibanaAppPrivileges } from '../../../../common/model';
 import { I18nProvider } from '@kbn/i18n/react';
 
 routes.when(`${EDIT_ROLES_PATH}/:name?`, {
@@ -106,7 +104,6 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     const xpackInfo = Private(XPackInfoProvider);
     const allowDocumentLevelSecurity = xpackInfo.get('features.security.allowRoleDocumentLevelSecurity');
     const allowFieldLevelSecurity = xpackInfo.get('features.security.allowRoleFieldLevelSecurity');
-    const rbacApplication = chrome.getInjected('rbacApplication');
 
     if (role.elasticsearch.indices.length === 0) {
       const emptyOption = {
@@ -143,9 +140,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
           <EditRolePage
             runAsUsers={users}
             role={role}
-            kibanaAppPrivileges={KibanaAppPrivileges}
             indexPatterns={indexPatterns}
-            rbacApplication={rbacApplication}
             httpClient={$http}
             allowDocumentLevelSecurity={allowDocumentLevelSecurity}
             allowFieldLevelSecurity={allowFieldLevelSecurity}

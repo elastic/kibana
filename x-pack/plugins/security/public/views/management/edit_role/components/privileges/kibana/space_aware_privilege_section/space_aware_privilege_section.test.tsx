@@ -43,7 +43,6 @@ const buildProps = (customProps: any = {}) => {
     },
     features: [],
     editable: true,
-    kibanaAppPrivileges: ['all', 'read'],
     onChange: jest.fn(),
     validator: new RoleValidator(),
     privilegeCalculatorFactory: new KibanaPrivilegeCalculatorFactory(
@@ -91,7 +90,7 @@ describe('<SpaceAwarePrivilegeSection>', () => {
     const wrapper = mountWithIntl(<SpaceAwarePrivilegeSection.WrappedComponent {...props} />);
 
     const table = wrapper.find(PrivilegeSpaceTable);
-    expect(table).toBe(null);
+    expect(table).toHaveLength(0);
   });
 
   it('Renders flyout after clicking "Add a privilege" button', () => {

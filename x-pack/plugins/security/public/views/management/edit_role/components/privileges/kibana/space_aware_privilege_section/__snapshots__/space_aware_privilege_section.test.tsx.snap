@@ -1,7 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<SpaceAwarePrivilegeSection> hides the space table if there are no existing space privileges 1`] = `null`;
-
 exports[`<SpaceAwarePrivilegeSection> with user profile disabling "manageSpaces" renders a warning message instead of the privilege form 1`] = `
 <EuiCallOut
   color="danger"
