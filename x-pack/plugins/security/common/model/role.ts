@@ -22,4 +22,5 @@ export interface Role {
     [anyKey: string]: any;
   };
   _transform_error?: string[];
+  _unrecognized_applications?: string[];
 }

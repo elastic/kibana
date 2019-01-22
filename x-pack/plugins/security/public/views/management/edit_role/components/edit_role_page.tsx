@@ -29,7 +29,6 @@ import { PrivilegeDefinition, PrivilegeMap, Role } from '../../../../../common/m
 import { copyRole, isReadOnlyRole, isReservedRole } from '../../../../lib/role_utils';
 import { deleteRole, saveRole } from '../../../../objects';
 import { ROLES_PATH } from '../../management_urls';
-import { transformRoleForSave } from '../lib/transform_role_for_save';
 import { RoleValidationResult, RoleValidator } from '../lib/validate_role';
 import { DeleteRoleButton } from './delete_role_button';
 import { ElasticsearchPrivileges, KibanaPrivileges } from './privileges';
@@ -327,13 +326,9 @@ class EditRolePageUI extends Component<Props, State> {
         formError: null,
       });
 
-      const { httpClient, intl } = this.props;
+      const { httpClient, intl, spacesEnabled } = this.props;
 
-      const role = copyRole(this.state.role);
-
-      transformRoleForSave(role, this.props.spacesEnabled);
-
-      saveRole(httpClient, role)
+      saveRole(httpClient, this.state.role, spacesEnabled)
         .then(() => {
           toastNotifications.addSuccess(
             intl.formatMessage({

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Role } from '../../../../../common/model';
+import { Role } from '../../common/model';
 import { transformRoleForSave } from './transform_role_for_save';
 
 describe('transformRoleForSave', () => {
@@ -20,10 +20,9 @@ describe('transformRoleForSave', () => {
         kibana: [],
       };
 
-      transformRoleForSave(role, false);
+      const result = transformRoleForSave(role, false);
 
-      expect(role).toEqual({
-        name: 'my role',
+      expect(result).toEqual({
         elasticsearch: {
           cluster: [],
           indices: [],
@@ -44,13 +43,46 @@ describe('transformRoleForSave', () => {
         kibana: [],
       };
 
-      transformRoleForSave(role, false);
+      const result = transformRoleForSave(role, false);
 
-      expect(role).toEqual({
-        name: 'my role',
+      expect(result).toEqual({
         elasticsearch: {
           cluster: [],
           indices: [{ names: ['.kibana*'], privileges: ['all'] }],
+          run_as: [],
+        },
+        kibana: [],
+      });
+    });
+
+    it('removes transient fields not required for save', () => {
+      const role: Role = {
+        name: 'my role',
+        transient_metadata: {
+          foo: 'bar',
+        },
+        _transform_error: ['kibana'],
+        metadata: {
+          someOtherMetadata: true,
+        },
+        _unrecognized_applications: ['foo'],
+        elasticsearch: {
+          cluster: [],
+          indices: [],
+          run_as: [],
+        },
+        kibana: [],
+      };
+
+      const result = transformRoleForSave(role, false);
+
+      expect(result).toEqual({
+        metadata: {
+          someOtherMetadata: true,
+        },
+        elasticsearch: {
+          cluster: [],
+          indices: [],
           run_as: [],
         },
         kibana: [],
@@ -68,10 +100,9 @@ describe('transformRoleForSave', () => {
         kibana: [],
       };
 
-      transformRoleForSave(role, false);
+      const result = transformRoleForSave(role, false);
 
-      expect(role).toEqual({
-        name: 'my role',
+      expect(result).toEqual({
         elasticsearch: {
           cluster: [],
           indices: [{ names: ['.kibana*'], privileges: ['all'], query: 'something' }],
@@ -101,10 +132,9 @@ describe('transformRoleForSave', () => {
         ],
       };
 
-      transformRoleForSave(role, false);
+      const result = transformRoleForSave(role, false);
 
-      expect(role).toEqual({
-        name: 'my role',
+      expect(result).toEqual({
         elasticsearch: {
           cluster: [],
           indices: [],
@@ -140,10 +170,9 @@ describe('transformRoleForSave', () => {
         ],
       };
 
-      transformRoleForSave(role, false);
+      const result = transformRoleForSave(role, false);
 
-      expect(role).toEqual({
-        name: 'my role',
+      expect(result).toEqual({
         elasticsearch: {
           cluster: [],
           indices: [],
@@ -190,10 +219,9 @@ describe('transformRoleForSave', () => {
         ],
       };
 
-      transformRoleForSave(role, false);
+      const result = transformRoleForSave(role, false);
 
-      expect(role).toEqual({
-        name: 'my role',
+      expect(result).toEqual({
         elasticsearch: {
           cluster: [],
           indices: [],
@@ -225,10 +253,9 @@ describe('transformRoleForSave', () => {
         kibana: [],
       };
 
-      transformRoleForSave(role, true);
+      const result = transformRoleForSave(role, true);
 
-      expect(role).toEqual({
-        name: 'my role',
+      expect(result).toEqual({
         elasticsearch: {
           cluster: [],
           indices: [],
@@ -249,13 +276,46 @@ describe('transformRoleForSave', () => {
         kibana: [],
       };
 
-      transformRoleForSave(role, true);
+      const result = transformRoleForSave(role, true);
 
-      expect(role).toEqual({
-        name: 'my role',
+      expect(result).toEqual({
         elasticsearch: {
           cluster: [],
           indices: [{ names: ['.kibana*'], privileges: ['all'] }],
+          run_as: [],
+        },
+        kibana: [],
+      });
+    });
+
+    it('removes transient fields not required for save', () => {
+      const role: Role = {
+        name: 'my role',
+        transient_metadata: {
+          foo: 'bar',
+        },
+        _transform_error: ['kibana'],
+        metadata: {
+          someOtherMetadata: true,
+        },
+        _unrecognized_applications: ['foo'],
+        elasticsearch: {
+          cluster: [],
+          indices: [],
+          run_as: [],
+        },
+        kibana: [],
+      };
+
+      const result = transformRoleForSave(role, true);
+
+      expect(result).toEqual({
+        metadata: {
+          someOtherMetadata: true,
+        },
+        elasticsearch: {
+          cluster: [],
+          indices: [],
           run_as: [],
         },
         kibana: [],
@@ -273,10 +333,9 @@ describe('transformRoleForSave', () => {
         kibana: [],
       };
 
-      transformRoleForSave(role, true);
+      const result = transformRoleForSave(role, true);
 
-      expect(role).toEqual({
-        name: 'my role',
+      expect(result).toEqual({
         elasticsearch: {
           cluster: [],
           indices: [{ names: ['.kibana*'], privileges: ['all'], query: 'something' }],
@@ -306,10 +365,9 @@ describe('transformRoleForSave', () => {
         ],
       };
 
-      transformRoleForSave(role, true);
+      const result = transformRoleForSave(role, true);
 
-      expect(role).toEqual({
-        name: 'my role',
+      expect(result).toEqual({
         elasticsearch: {
           cluster: [],
           indices: [],
@@ -345,10 +403,9 @@ describe('transformRoleForSave', () => {
         ],
       };
 
-      transformRoleForSave(role, true);
+      const result = transformRoleForSave(role, true);
 
-      expect(role).toEqual({
-        name: 'my role',
+      expect(result).toEqual({
         elasticsearch: {
           cluster: [],
           indices: [],
@@ -395,10 +452,9 @@ describe('transformRoleForSave', () => {
         ],
       };
 
-      transformRoleForSave(role, true);
+      const result = transformRoleForSave(role, true);
 
-      expect(role).toEqual({
-        name: 'my role',
+      expect(result).toEqual({
         elasticsearch: {
           cluster: [],
           indices: [],

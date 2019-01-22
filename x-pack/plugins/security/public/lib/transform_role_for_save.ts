@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPrivilege, Role } from '../../../../../common/model';
-import { isGlobalPrivilegeDefinition } from '../../../../lib/privilege_utils';
+import { IndexPrivilege, Role } from '../../common/model';
+import { isGlobalPrivilegeDefinition } from './privilege_utils';
 
 export function transformRoleForSave(role: Role, spacesEnabled: boolean) {
   // Remove any placeholder index privileges
@@ -27,6 +27,13 @@ export function transformRoleForSave(role: Role, spacesEnabled: boolean) {
       kibanaPrivilege.feature = {};
     }
   });
+
+  delete role.name;
+  delete role.transient_metadata;
+  delete role._unrecognized_applications;
+  delete role._transform_error;
+
+  return role;
 }
 
 function isPlaceholderPrivilege(indexPrivilege: IndexPrivilege) {
