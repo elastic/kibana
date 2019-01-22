@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { functionsRegistry } from '@kbn/interpreter/common';
-import { populateServerRegistries } from '@kbn/interpreter/server';
-import { i18n } from '@kbn/i18n';
 import { routes } from './server/routes';
 import { commonFunctions } from './common/functions';
 import { registerCanvasUsageCollector } from './server/usage';
 import { loadSampleData } from './server/sample_data';
 
 export default async function(server /*options*/) {
+  const functionsRegistry = server.plugins.interpreter.serverFunctions;
+
   server.injectUiAppVars('canvas', async () => {
     const config = server.config();
     const basePath = config.get('server.basePath');
@@ -38,9 +37,7 @@ export default async function(server /*options*/) {
 
   server.plugins.xpack_main.registerFeature({
     id: 'canvas',
-    name: i18n.translate('xpack.canvas.featureRegistry.canvasFeatureName', {
-      defaultMessage: 'Canvas',
-    }),
+    name: 'Canvas',
     icon: 'canvasApp',
     navLinkId: 'canvas',
     privileges: {
@@ -70,8 +67,5 @@ export default async function(server /*options*/) {
 
   registerCanvasUsageCollector(server);
   loadSampleData(server);
-
-  // Do not initialize the app until the registries are populated
-  await populateServerRegistries(['serverFunctions', 'types']);
   routes(server);
 }

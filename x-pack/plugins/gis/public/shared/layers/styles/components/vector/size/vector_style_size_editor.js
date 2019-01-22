@@ -13,23 +13,16 @@ import { StaticDynamicStyleSelector } from '../../static_dynamic_styling_option'
 import  { DynamicSizeSelection } from './dynamic_size_selection';
 import  { StaticSizeSelection } from './static_size_selection';
 
-export class VectorStyleSizeEditor extends React.Component {
-
-
-  constructor() {
-    super();
-    this.state = {};
-  }
-
-  render() {
-    return (<StaticDynamicStyleSelector
-      layer={this.props.layer}
-      property={this.props.styleProperty}
-      name={this.props.stylePropertyName}
-      styleDescriptor={this.props.styleDescriptor}
-      handlePropertyChange={this.props.handlePropertyChange}
+export function VectorStyleSizeEditor(props) {
+  return (
+    <StaticDynamicStyleSelector
+      ordinalFields={props.ordinalFields}
+      property={props.styleProperty}
+      name={props.stylePropertyName}
+      styleDescriptor={props.styleDescriptor}
+      handlePropertyChange={props.handlePropertyChange}
       DynamicSelector={DynamicSizeSelection}
       StaticSelector={StaticSizeSelection}
-    />);
-  }
+    />
+  );
 }

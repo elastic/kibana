@@ -5,10 +5,7 @@
  */
 
 import { Server } from 'hapi';
-import {
-  getFeatures,
-  registerFeature,
-} from 'x-pack/plugins/xpack_main/server/lib/feature_registry';
+import { FeatureRegistry } from 'x-pack/plugins/xpack_main/server/lib/feature_registry';
 // @ts-ignore
 import { setupXPackMain } from '../../../../lib/setup_xpack_main';
 import { featuresRoute } from './features';
@@ -28,9 +25,10 @@ describe('GET /api/features/v1', () => {
         },
       };
     };
+    const featureRegistry = new FeatureRegistry();
     // @ts-ignore
     server.plugins.xpack_main = {
-      getFeatures,
+      getFeatures: () => featureRegistry.getAll(),
       info: {
         license: {
           isOneOf: (candidateLicenses: string[]) => {
@@ -42,13 +40,13 @@ describe('GET /api/features/v1', () => {
 
     featuresRoute(server);
 
-    registerFeature({
+    featureRegistry.register({
       id: 'feature_1',
       name: 'Feature 1',
       privileges: {},
     });
 
-    registerFeature({
+    featureRegistry.register({
       id: 'licensed_feature',
       name: 'Licensed Feature',
       validLicenses: ['gold'],

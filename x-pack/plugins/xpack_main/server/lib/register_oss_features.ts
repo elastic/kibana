@@ -3,9 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { i18n } from '@kbn/i18n';
-import { Feature, registerFeature } from './feature_registry';
+import { Feature } from './feature_registry';
 
 const kibanaFeatures: Feature[] = [
   {
@@ -174,9 +173,7 @@ const kibanaFeatures: Feature[] = [
 const timelionFeatures: Feature[] = [
   {
     id: 'timelion',
-    name: i18n.translate('xpack.xpack_main.featureRegistry.timelionFeatureName', {
-      defaultMessage: 'Timelion',
-    }),
+    name: 'Timelion',
     icon: 'timelionApp',
     navLinkId: 'timelion',
     privileges: {
@@ -202,7 +199,8 @@ const timelionFeatures: Feature[] = [
   },
 ];
 
-export function registerOssFeatures() {
-  kibanaFeatures.forEach(registerFeature);
-  timelionFeatures.forEach(registerFeature);
+export function registerOssFeatures(registerFeature: (feature: Feature) => void) {
+  for (const feature of [...kibanaFeatures, ...timelionFeatures]) {
+    registerFeature(feature);
+  }
 }

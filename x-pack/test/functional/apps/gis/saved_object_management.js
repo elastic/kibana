@@ -11,6 +11,7 @@ export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['gis', 'header']);
   const queryBar = getService('queryBar');
   const browser = getService('browser');
+  const inspector = getService('inspector');
 
   describe('gis-map saved object management', () => {
 
@@ -63,9 +64,9 @@ export default function ({ getPageObjects, getService }) {
 
         it('should apply query stored with map', async () => {
           await PageObjects.gis.openInspectorRequestsView();
-          const requestStats = await PageObjects.gis.getInspectorTableData();
+          const requestStats = await inspector.getTableData();
           const hits = PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits');
-          await PageObjects.gis.closeInspector();
+          await inspector.close();
           expect(hits).to.equal('2');
         });
 
@@ -81,8 +82,8 @@ export default function ({ getPageObjects, getService }) {
           expect(query).to.equal('machine.os.raw : "win 8"');
 
           await PageObjects.gis.openInspectorRequestsView();
-          const requestStats = await PageObjects.gis.getInspectorTableData();
-          await PageObjects.gis.closeInspector();
+          const requestStats = await inspector.getTableData();
+          await inspector.close();
           const hits = PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits');
           expect(hits).to.equal('1');
         });
