@@ -28,8 +28,8 @@ export const startApp = async (libs: AppFrontendLibs) => {
   const store = createStore();
 
   libs.framework.render(
-    <I18nProvider>
-      <EuiErrorBoundary>
+    <EuiErrorBoundary>
+      <I18nProvider>
         <ReduxStoreProvider store={store}>
           <ApolloProvider client={libs.apolloClient}>
             <ThemeProvider theme={{ eui: dark }}>
@@ -37,7 +37,7 @@ export const startApp = async (libs: AppFrontendLibs) => {
             </ThemeProvider>
           </ApolloProvider>
         </ReduxStoreProvider>
-      </EuiErrorBoundary>
-    </I18nProvider>
+      </I18nProvider>
+    </EuiErrorBoundary>
   );
 };
