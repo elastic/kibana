@@ -106,6 +106,7 @@ export class ProviderItemAndPopover extends React.PureComponent<
         button={button}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
+        data-test-subj="andProviderButton"
       >
         <div style={{ width: '200px' }}>
           {dataProvidersAnd.map((providerAnd: DataProvider, index: number) => {
@@ -134,6 +135,7 @@ export class ProviderItemAndPopover extends React.PureComponent<
                   id={`${providerId}-${providerAnd.id}-accordion`}
                   buttonContent={badge}
                   paddingSize="l"
+                  data-test-subj="andProviderAccordion"
                 >
                   <EuiContextMenu initialPanelId={0} panels={panelTree} />
                 </EuiAccordion>

@@ -15,6 +15,7 @@ import {
   updateTimelineItemsPerPage,
   updateTimelinePerPageOptions,
   updateTimelineProviderEnabled,
+  updateTimelineProviderExcluded,
   updateTimelineProviders,
   updateTimelineRange,
   updateTimelineShowTimeline,
@@ -210,6 +211,132 @@ describe('Timeline', () => {
     });
   });
 
+  describe('#addAndProviderToTimelineProvider', () => {
+    test('should add a new and provider to an existing timeline provider', () => {
+      const providerToAdd = {
+        and: [],
+        id: '567',
+        name: 'data provider 2',
+        enabled: true,
+        queryMatch: {
+          field: '',
+          value: '',
+        },
+        queryDate: {
+          from: 0,
+          to: 1,
+        },
+        excluded: false,
+        kqlQuery: '',
+      };
+
+      const newTimeline = addTimelineProvider({
+        id: 'foo',
+        provider: providerToAdd,
+        timelineById: timelineByIdMock,
+      });
+
+      newTimeline.foo.highlightedDropAndProviderId = '567';
+
+      const andProviderToAdd = {
+        and: [],
+        id: '568',
+        name: 'And Data Provider',
+        enabled: true,
+        queryMatch: {
+          field: '',
+          value: '',
+        },
+        queryDate: {
+          from: 0,
+          to: 1,
+        },
+        excluded: false,
+        kqlQuery: '',
+      };
+
+      const update = addTimelineProvider({
+        id: 'foo',
+        provider: andProviderToAdd,
+        timelineById: newTimeline,
+      });
+      const indexProvider = update.foo.dataProviders.findIndex(i => i.id === '567');
+      const addedAndDataProvider = update.foo.dataProviders[indexProvider].and[0];
+      expect(addedAndDataProvider).toEqual(andProviderToAdd);
+      newTimeline.foo.highlightedDropAndProviderId = '';
+    });
+
+    test('should NOT add a new timeline and provider if it already exists', () => {
+      const providerToAdd = {
+        and: [
+          {
+            and: [],
+            id: '568',
+            name: 'And Data Provider',
+            enabled: true,
+            queryMatch: {
+              field: '',
+              value: '',
+            },
+            queryDate: {
+              from: 0,
+              to: 1,
+            },
+            excluded: false,
+            kqlQuery: '',
+          },
+        ],
+        id: '567',
+        name: 'data provider 1',
+        enabled: true,
+        queryMatch: {
+          field: '',
+          value: '',
+        },
+        queryDate: {
+          from: 0,
+          to: 1,
+        },
+        excluded: false,
+        kqlQuery: '',
+      };
+
+      const newTimeline = addTimelineProvider({
+        id: 'foo',
+        provider: providerToAdd,
+        timelineById: timelineByIdMock,
+      });
+
+      newTimeline.foo.highlightedDropAndProviderId = '567';
+
+      const andProviderToAdd = {
+        and: [],
+        id: '568',
+        name: 'And Data Provider',
+        enabled: true,
+        queryMatch: {
+          field: '',
+          value: '',
+        },
+        queryDate: {
+          from: 0,
+          to: 1,
+        },
+        excluded: false,
+        kqlQuery: '',
+      };
+
+      const update = addTimelineProvider({
+        id: 'foo',
+        provider: andProviderToAdd,
+        timelineById: newTimeline,
+      });
+      const indexProvider = update.foo.dataProviders.findIndex(i => i.id === '567');
+      expect(update.foo.dataProviders[indexProvider].and.length).toEqual(1);
+      newTimeline.foo.highlightedDropAndProviderId = '';
+    });
+  });
+
   describe('#updateTimelineProviders', () => {
     test('should return a new reference and not the same reference', () => {
       const update = updateTimelineProviders({
@@ -352,6 +479,8 @@ describe('Timeline', () => {
               id: '123',
               name: 'data provider 1',
               enabled: false, // This value changed from true to false
+              excluded: false,
+              kqlQuery: '',
               queryMatch: {
                 field: '',
                 value: '',
@@ -360,14 +489,12 @@ describe('Timeline', () => {
                 from: 0,
                 to: 1,
               },
-              excluded: false,
-              kqlQuery: '',
             },
           ],
           description: '',
           eventIdToNoteIds: {},
-          historyIds: [],
           highlightedDropAndProviderId: '',
+          historyIds: [],
           isFavorite: false,
           isLive: false,
           kqlMode: 'filter',
@@ -395,6 +522,8 @@ describe('Timeline', () => {
         id: '456',
         name: 'data provider 1',
         enabled: true,
+        excluded: false,
+        kqlQuery: '',
         queryMatch: {
           field: '',
           value: '',
@@ -403,8 +532,6 @@ describe('Timeline', () => {
           from: 0,
           to: 1,
         },
-        excluded: false,
-        kqlQuery: '',
       });
       const multiDataProviderMock = set('foo.dataProviders', multiDataProvider, timelineByIdMock);
       const update = updateTimelineProviderEnabled({
@@ -422,6 +549,8 @@ describe('Timeline', () => {
               id: '123',
               name: 'data provider 1',
               enabled: false, // value we are updating from true to false
+              excluded: false,
+              kqlQuery: '',
               queryMatch: {
                 field: '',
                 value: '',
@@ -430,14 +559,14 @@ describe('Timeline', () => {
                 from: 0,
                 to: 1,
               },
-              excluded: false,
-              kqlQuery: '',
             },
             {
               and: [],
               id: '456',
               name: 'data provider 1',
               enabled: true,
+              excluded: false,
+              kqlQuery: '',
               queryMatch: {
                 field: '',
                 value: '',
@@ -446,8 +575,6 @@ describe('Timeline', () => {
                 from: 0,
                 to: 1,
               },
-              excluded: false,
-              kqlQuery: '',
             },
           ],
           description: '',
@@ -473,6 +600,405 @@ describe('Timeline', () => {
         },
       };
       expect(update).toEqual(expected);
+    });
+  });
+
+  describe('#updateTimelineAndProviderEnabled', () => {
+    let timelineByIdwithAndMock: TimelineById = timelineByIdMock;
+    beforeEach(() => {
+      const providerToAdd = {
+        and: [
+          {
+            and: [],
+            id: '568',
+            name: 'And Data Provider',
+            enabled: true,
+            queryMatch: {
+              field: '',
+              value: '',
+            },
+            queryDate: {
+              from: 0,
+              to: 1,
+            },
+            excluded: false,
+            kqlQuery: '',
+          },
+        ],
+        id: '567',
+        name: 'data provider 1',
+        enabled: true,
+        queryMatch: {
+          field: '',
+          value: '',
+        },
+        queryDate: {
+          from: 0,
+          to: 1,
+        },
+        excluded: false,
+        kqlQuery: '',
+      };
+
+      timelineByIdwithAndMock = addTimelineProvider({
+        id: 'foo',
+        provider: providerToAdd,
+        timelineById: timelineByIdMock,
+      });
+    });
+
+    test('should return a new reference and not the same reference', () => {
+      const update = updateTimelineProviderEnabled({
+        id: 'foo',
+        providerId: '567',
+        enabled: false, // value we are updating from true to false
+        timelineById: timelineByIdwithAndMock,
+        andProviderId: '568',
+      });
+      expect(update).not.toBe(timelineByIdwithAndMock);
+    });
+
+    test('should return a new reference for and data provider and not the same reference of data and provider', () => {
+      const update = updateTimelineProviderEnabled({
+        id: 'foo',
+        providerId: '567',
+        enabled: false, // value we are updating from true to false
+        timelineById: timelineByIdwithAndMock,
+        andProviderId: '568',
+      });
+      expect(update.foo.dataProviders).not.toBe(timelineByIdMock.foo.dataProviders);
+    });
+
+    test('should update the timeline and provider enabled from true to false', () => {
+      const update = updateTimelineProviderEnabled({
+        id: 'foo',
+        providerId: '567',
+        enabled: false, // value we are updating from true to false
+        timelineById: timelineByIdwithAndMock,
+        andProviderId: '568',
+      });
+      const indexProvider = update.foo.dataProviders.findIndex(i => i.id === '567');
+      expect(update.foo.dataProviders[indexProvider].and[0].enabled).toEqual(false);
+    });
+
+    test('should update only one and data provider and not two and data providers', () => {
+      const indexProvider = timelineByIdwithAndMock.foo.dataProviders.findIndex(
+        i => i.id === '567'
+      );
+      const multiAndDataProvider = timelineByIdwithAndMock.foo.dataProviders[
+        indexProvider
+      ].and.concat({
+        and: [],
+        id: '456',
+        name: 'new and data provider',
+        enabled: true,
+        queryMatch: {
+          field: '',
+          value: '',
+        },
+        queryDate: {
+          from: 0,
+          to: 1,
+        },
+        excluded: false,
+        kqlQuery: '',
+      });
+      const multiAndDataProviderMock = set(
+        `foo.dataProviders[${indexProvider}].and`,
+        multiAndDataProvider,
+        timelineByIdwithAndMock
+      );
+      const update = updateTimelineProviderEnabled({
+        id: 'foo',
+        providerId: '567',
+        enabled: false, // value we are updating from true to false
+        timelineById: multiAndDataProviderMock,
+        andProviderId: '568',
+      });
+      const oldAndProvider = update.foo.dataProviders[indexProvider].and.find(i => i.id === '568');
+      const newAndProvider = update.foo.dataProviders[indexProvider].and.find(i => i.id === '456');
+      expect(oldAndProvider!.enabled).toEqual(false);
+      expect(newAndProvider!.enabled).toEqual(true);
+    });
+  });
+
+  describe('#updateTimelineProviderExcluded', () => {
+    test('should return a new reference and not the same reference', () => {
+      const update = updateTimelineProviderExcluded({
+        id: 'foo',
+        providerId: '123',
+        excluded: true, // value we are updating from false to true
+        timelineById: timelineByIdMock,
+      });
+      expect(update).not.toBe(timelineByIdMock);
+    });
+
+    test('should return a new reference for data provider and not the same reference of data provider', () => {
+      const update = updateTimelineProviderExcluded({
+        id: 'foo',
+        providerId: '123',
+        excluded: true, // value we are updating from false to true
+        timelineById: timelineByIdMock,
+      });
+      expect(update.foo.dataProviders).not.toBe(timelineByIdMock.foo.dataProviders);
+    });
+
+    test('should update the timeline provider excluded from true to false', () => {
+      const update = updateTimelineProviderExcluded({
+        id: 'foo',
+        providerId: '123',
+        excluded: true, // value we are updating from false to true
+        timelineById: timelineByIdMock,
+      });
+      const expected: TimelineById = {
+        foo: {
+          id: 'foo',
+          dataProviders: [
+            {
+              and: [],
+              id: '123',
+              name: 'data provider 1',
+              enabled: true,
+              excluded: true, // This value changed from true to false
+              kqlQuery: '',
+              queryMatch: {
+                field: '',
+                value: '',
+              },
+              queryDate: {
+                from: 0,
+                to: 1,
+              },
+            },
+          ],
+          description: '',
+          eventIdToNoteIds: {},
+          highlightedDropAndProviderId: '',
+          historyIds: [],
+          isFavorite: false,
+          isLive: false,
+          kqlMode: 'filter',
+          kqlQuery: '',
+          title: '',
+          noteIds: [],
+          range: '1 Day',
+          show: true,
+          sort: {
+            columnId: 'timestamp',
+            sortDirection: Direction.descending,
+          },
+          pinnedEventIds: {},
+          itemsPerPage: 25,
+          itemsPerPageOptions: [10, 25, 50],
+          width: defaultWidth,
+        },
+      };
+      expect(update).toEqual(expected);
+    });
+
+    test('should update only one data provider and not two data providers', () => {
+      const multiDataProvider = timelineByIdMock.foo.dataProviders.concat({
+        and: [],
+        id: '456',
+        name: 'data provider 1',
+        enabled: true,
+        excluded: false,
+        kqlQuery: '',
+        queryMatch: {
+          field: '',
+          value: '',
+        },
+        queryDate: {
+          from: 0,
+          to: 1,
+        },
+      });
+      const multiDataProviderMock = set('foo.dataProviders', multiDataProvider, timelineByIdMock);
+      const update = updateTimelineProviderExcluded({
+        id: 'foo',
+        providerId: '123',
+        excluded: true, // value we are updating from false to true
+        timelineById: multiDataProviderMock,
+      });
+      const expected: TimelineById = {
+        foo: {
+          id: 'foo',
+          dataProviders: [
+            {
+              and: [],
+              id: '123',
+              name: 'data provider 1',
+              enabled: true,
+              excluded: true, // value we are updating from false to true
+              kqlQuery: '',
+              queryMatch: {
+                field: '',
+                value: '',
+              },
+              queryDate: {
+                from: 0,
+                to: 1,
+              },
+            },
+            {
+              and: [],
+              id: '456',
+              name: 'data provider 1',
+              enabled: true,
+              excluded: false,
+              kqlQuery: '',
+              queryMatch: {
+                field: '',
+                value: '',
+              },
+              queryDate: {
+                from: 0,
+                to: 1,
+              },
+            },
+          ],
+          description: '',
+          eventIdToNoteIds: {},
+          highlightedDropAndProviderId: '',
+          historyIds: [],
+          isFavorite: false,
+          isLive: false,
+          kqlMode: 'filter',
+          kqlQuery: '',
+          title: '',
+          noteIds: [],
+          range: '1 Day',
+          show: true,
+          sort: {
+            columnId: 'timestamp',
+            sortDirection: Direction.descending,
+          },
+          pinnedEventIds: {},
+          itemsPerPage: 25,
+          itemsPerPageOptions: [10, 25, 50],
+          width: defaultWidth,
+        },
+      };
+      expect(update).toEqual(expected);
+    });
+  });
+
+  describe('#updateTimelineAndProviderExcluded', () => {
+    let timelineByIdwithAndMock: TimelineById = timelineByIdMock;
+    beforeEach(() => {
+      const providerToAdd = {
+        and: [
+          {
+            and: [],
+            id: '568',
+            name: 'And Data Provider',
+            enabled: true,
+            queryMatch: {
+              field: '',
+              value: '',
+            },
+            queryDate: {
+              from: 0,
+              to: 1,
+            },
+            excluded: false,
+            kqlQuery: '',
+          },
+        ],
+        id: '567',
+        name: 'data provider 1',
+        enabled: true,
+        queryMatch: {
+          field: '',
+          value: '',
+        },
+        queryDate: {
+          from: 0,
+          to: 1,
+        },
+        excluded: false,
+        kqlQuery: '',
+      };
+
+      timelineByIdwithAndMock = addTimelineProvider({
+        id: 'foo',
+        provider: providerToAdd,
+        timelineById: timelineByIdMock,
+      });
+    });
+
+    test('should return a new reference and not the same reference', () => {
+      const update = updateTimelineProviderExcluded({
+        id: 'foo',
+        providerId: '567',
+        excluded: true, // value we are updating from true to false
+        timelineById: timelineByIdwithAndMock,
+        andProviderId: '568',
+      });
+      expect(update).not.toBe(timelineByIdwithAndMock);
+    });
+
+    test('should return a new reference for and data provider and not the same reference of data and provider', () => {
+      const update = updateTimelineProviderExcluded({
+        id: 'foo',
+        providerId: '567',
+        excluded: true, // value we are updating from false to true
+        timelineById: timelineByIdwithAndMock,
+        andProviderId: '568',
+      });
+      expect(update.foo.dataProviders).not.toBe(timelineByIdMock.foo.dataProviders);
+    });
+
+    test('should update the timeline and provider excluded from true to false', () => {
+      const update = updateTimelineProviderExcluded({
+        id: 'foo',
+        providerId: '567',
+        excluded: true, // value we are updating from true to false
+        timelineById: timelineByIdwithAndMock,
+        andProviderId: '568',
+      });
+      const indexProvider = update.foo.dataProviders.findIndex(i => i.id === '567');
+      expect(update.foo.dataProviders[indexProvider].and[0].enabled).toEqual(true);
+    });
+
+    test('should update only one and data provider and not two and data providers', () => {
+      const indexProvider = timelineByIdwithAndMock.foo.dataProviders.findIndex(
+        i => i.id === '567'
+      );
+      const multiAndDataProvider = timelineByIdwithAndMock.foo.dataProviders[
+        indexProvider
+      ].and.concat({
+        and: [],
+        id: '456',
+        name: 'new and data provider',
+        enabled: true,
+        queryMatch: {
+          field: '',
+          value: '',
+        },
+        queryDate: {
+          from: 0,
+          to: 1,
+        },
+        excluded: false,
+        kqlQuery: '',
+      });
+      const multiAndDataProviderMock = set(
+        `foo.dataProviders[${indexProvider}].and`,
+        multiAndDataProvider,
+        timelineByIdwithAndMock
+      );
+      const update = updateTimelineProviderExcluded({
+        id: 'foo',
+        providerId: '567',
+        excluded: true, // value we are updating from true to false
+        timelineById: multiAndDataProviderMock,
+        andProviderId: '568',
+      });
+      const oldAndProvider = update.foo.dataProviders[indexProvider].and.find(i => i.id === '568');
+      const newAndProvider = update.foo.dataProviders[indexProvider].and.find(i => i.id === '456');
+      expect(oldAndProvider!.excluded).toEqual(true);
+      expect(newAndProvider!.excluded).toEqual(false);
     });
   });
 

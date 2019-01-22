@@ -19,7 +19,7 @@ const buildQueryMatch = (dataProvider: DataProvider) =>
             : escapeQueryValue(dataProvider.queryMatch.value)
         }`
       : ''
-  }`;
+  }`.trim();
 
 const buildQueryDate = (dataProvider: DataProvider) =>
   dataProvider.queryDate
@@ -27,12 +27,29 @@ const buildQueryDate = (dataProvider: DataProvider) =>
     : '';
 
 const buildQueryForAndProvider = (dataAndProviders: DataProvider[]) =>
-  dataAndProviders.reduce((andQuery, andDataProvider) => {
-    const prepend = (q: string) => `${q !== '' ? `${q} and ` : ''}`;
-    return andDataProvider.enabled
-      ? `${prepend(andQuery)} ${buildQueryMatch(andDataProvider)}`
-      : andQuery;
-  }, '');
+  dataAndProviders
+    .reduce((andQuery, andDataProvider) => {
+      const prepend = (q: string) => `${q !== '' ? `${q} and ` : ''}`;
+      return andDataProvider.enabled
+        ? `${prepend(andQuery)} ${buildQueryMatch(andDataProvider)}`
+        : andQuery;
+    }, '')
+    .trim();
+
+export const buildGlobalQuery = (dataProviders: DataProvider[]) =>
+  dataProviders
+    .reduce((query, dataProvider) => {
+      const prepend = (q: string) => `${q !== '' ? `${q} or ` : ''}`;
+      return dataProvider.enabled
+        ? `${prepend(query)}(
+        ${buildQueryMatch(dataProvider)}
+        ${dataProvider.queryDate ? ` and ${buildQueryDate(dataProvider)}` : ''}
+        ${
+          dataProvider.and.length > 0 ? ` and ${buildQueryForAndProvider(dataProvider.and)}` : ''
+        })`.trim()
+        : query;
+    }, '')
+    .trim();
 
 export const combineQueries = (
   dataProviders: DataProvider[],
@@ -42,19 +59,11 @@ export const combineQueries = (
     return null;
   }
 
-  const globalQuery = dataProviders.reduce((query, dataProvider) => {
-    const prepend = (q: string) => `${q !== '' ? `${q} or ` : ''}`;
-    return dataProvider.enabled
-      ? `${prepend(query)} (
-        ${buildQueryMatch(dataProvider)}
-        ${dataProvider.queryDate ? ` and ${buildQueryDate(dataProvider)}` : ''}
-        ${dataProvider.and.length > 0 ? ` and ${buildQueryForAndProvider(dataProvider.and)}` : ''})`
-      : query;
-  }, '');
-
+  const globalQuery = buildGlobalQuery(dataProviders);
   if (isEmpty(globalQuery)) {
     return null;
   }
+
   return {
     filterQuery: convertKueryToElasticSearchQuery(globalQuery, indexPattern),
   };

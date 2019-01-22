@@ -23,7 +23,7 @@ describe('Provider', () => {
         </DragDropContext>
       );
 
-      expect(wrapper.text()).toContain('host.name: "testHostName"');
+      expect(wrapper.text()).toContain('name: "Provider 1"');
     });
   });
 });

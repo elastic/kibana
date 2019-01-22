@@ -46,8 +46,8 @@ export const mockDataProviders: DataProvider[] = Object.keys(mockSourceNameToEve
     excluded: false,
     kqlQuery: '',
     queryMatch: {
-      field: 'host.name',
-      value: 'testHostName',
+      field: 'name',
+      value: name,
     },
     queryDate: {
       from: 1521830963132,
