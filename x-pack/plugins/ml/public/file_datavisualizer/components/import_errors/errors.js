@@ -69,6 +69,13 @@ function title(statuses) {
           defaultMessage="Error creating index pattern"
         />
       );
+    case statuses.permissionCheckStatus:
+      return (
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.importErrors.checkingPermissionErrorMessage"
+          defaultMessage="Import permissions error"
+        />
+      );
     default:
       return (
         <FormattedMessage

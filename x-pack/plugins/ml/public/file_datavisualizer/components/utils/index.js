@@ -4,15 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 
-import { EuiExpression } from '@elastic/eui';
-
-export function FromExpression({ leftSourceName }) {
-  return (
-    <EuiExpression
-      description="FROM"
-      value={`${leftSourceName} left`}
-    />
-  );
-}
+export * from './utils';
