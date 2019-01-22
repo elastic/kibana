@@ -224,7 +224,7 @@ export const security = (kibana) => new kibana.Plugin({
       const { actions, checkPrivilegesDynamicallyWithRequest, mode } = server.plugins.security.authorization;
 
       // if we don't have a license enabling security, or we're a legacy user, don't validate this request
-      if (!mode.useRbacForRequest(req)) {
+      if (!mode.useRbac()) {
         return h.continue;
       }
 
