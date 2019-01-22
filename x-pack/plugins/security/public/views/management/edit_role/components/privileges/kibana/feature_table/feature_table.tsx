@@ -199,11 +199,7 @@ export class FeatureTable extends Component<Props, {}> {
 
         if (!canChangePrivilege) {
           return (
-            <PrivilegeDisplay
-              scope={this.isConfiguringGlobalPrivileges() ? 'global' : 'space'}
-              privilege={actualPrivilegeValue}
-              explanation={privilegeExplanation}
-            />
+            <PrivilegeDisplay privilege={actualPrivilegeValue} explanation={privilegeExplanation} />
           );
         }
 

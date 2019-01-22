@@ -7,7 +7,6 @@ exports[`PrivilegeDisplay renders a superceded privilege 1`] = `
       "actualPrivilege": "all",
       "actualPrivilegeSource": 40,
       "isDirectlyAssigned": false,
-      "isUnassignable": false,
       "supercededPrivilege": "read",
       "supercededPrivilegeSource": 20,
     }
@@ -115,7 +114,5 @@ exports[`PrivilegeDisplay renders a superceded privilege 1`] = `
     }
   }
   privilege="all"
-  scope="space"
-  styleMissingPrivilege={true}
 />
 `;

@@ -267,14 +267,14 @@ export class PrivilegeMatrix extends Component<Props, State> {
   ) => {
     if (column.isGlobal) {
       if (feature.isBase) {
-        return <PrivilegeDisplay scope={'global'} privilege={globalBasePrivilege} />;
+        return <PrivilegeDisplay privilege={globalBasePrivilege} />;
       }
 
       const actualPrivileges = this.props.calculatedPrivileges[column.spacesIndex].feature[
         feature.id
       ].actualPrivilege;
 
-      return <PrivilegeDisplay scope={'global'} privilege={actualPrivileges} />;
+      return <PrivilegeDisplay privilege={actualPrivileges} />;
     } else {
       // not global
 
@@ -286,7 +286,6 @@ export class PrivilegeMatrix extends Component<Props, State> {
 
         return (
           <PrivilegeDisplay
-            scope={'space'}
             explanation={calculatedPrivilege.base}
             privilege={actualBasePrivileges}
           />
@@ -297,7 +296,6 @@ export class PrivilegeMatrix extends Component<Props, State> {
 
       return (
         <PrivilegeDisplay
-          scope={'space'}
           explanation={featurePrivilegeExplanation}
           privilege={featurePrivilegeExplanation.actualPrivilege}
         />

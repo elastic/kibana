@@ -187,7 +187,6 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
           if (record.isGlobal) {
             return (
               <PrivilegeDisplay
-                scope={'global'}
                 privilege={
                   hasCustomizations ? CUSTOM_PRIVILEGE_VALUE : basePrivilege.actualPrivilege
                 }
@@ -196,7 +195,6 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
           } else {
             return (
               <PrivilegeDisplay
-                scope={'space'}
                 explanation={basePrivilege}
                 privilege={
                   hasCustomizations ? CUSTOM_PRIVILEGE_VALUE : basePrivilege.actualPrivilege

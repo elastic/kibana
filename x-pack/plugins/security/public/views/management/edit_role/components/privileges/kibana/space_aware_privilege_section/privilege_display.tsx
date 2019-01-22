@@ -15,15 +15,13 @@ import { NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
 
 interface Props extends EuiTextProps {
   privilege: string | string[];
-  scope: 'global' | 'space';
   explanation?: PrivilegeExplanation;
-  styleMissingPrivilege?: boolean;
   iconType?: IconType;
   tooltipContent?: ReactNode;
 }
 
 export const PrivilegeDisplay: SFC<Props> = (props: Props) => {
-  const { scope, explanation } = props;
+  const { explanation } = props;
 
   if (!explanation) {
     return <SimplePrivilegeDisplay {...props} />;
@@ -33,12 +31,7 @@ export const PrivilegeDisplay: SFC<Props> = (props: Props) => {
     return <SupercededPrivilegeDisplay {...props} />;
   }
 
-  if (
-    scope === 'space' &&
-    [PRIVILEGE_SOURCE.GLOBAL_BASE, PRIVILEGE_SOURCE.GLOBAL_FEATURE].includes(
-      explanation.actualPrivilegeSource
-    )
-  ) {
+  if (!explanation.isDirectlyAssigned) {
     return <EffectivePrivilegeDisplay {...props} />;
   }
 
@@ -46,19 +39,11 @@ export const PrivilegeDisplay: SFC<Props> = (props: Props) => {
 };
 
 const SimplePrivilegeDisplay: SFC<Props> = (props: Props) => {
-  const {
-    privilege,
-    styleMissingPrivilege,
-    iconType,
-    tooltipContent,
-    scope,
-    explanation,
-    ...rest
-  } = props;
+  const { privilege, iconType, tooltipContent, explanation, ...rest } = props;
 
   return (
     <EuiText {...rest}>
-      {getDisplayValue(privilege, styleMissingPrivilege)} {getIconTip(iconType, tooltipContent)}
+      {getDisplayValue(privilege)} {getIconTip(iconType, tooltipContent)}
     </EuiText>
   );
 };
@@ -84,17 +69,25 @@ export const SupercededPrivilegeDisplay: SFC<Props> = (props: Props) => {
 
 export const EffectivePrivilegeDisplay: SFC<Props> = (props: Props) => {
   const { explanation, ...rest } = props;
-  return (
-    <SimplePrivilegeDisplay {...rest} iconType={'lock'} tooltipContent={'NEED DETAILS HERE'} />
+
+  const source = getReadablePrivilegeSource(explanation!.actualPrivilegeSource);
+
+  const tooltipContent = (
+    <FormattedMessage
+      id="xpack.security.management.editRole.spaceAwarePrivilegeDisplay.effectivePrivilegeMessage"
+      defaultMessage="Granted via {source}"
+      values={{ source }}
+    />
   );
+
+  return <SimplePrivilegeDisplay {...rest} iconType={'lock'} tooltipContent={tooltipContent} />;
 };
 
 PrivilegeDisplay.defaultProps = {
   privilege: [],
-  styleMissingPrivilege: true,
 };
 
-function getDisplayValue(privilege: string | string[], styleMissingPrivilege?: boolean) {
+function getDisplayValue(privilege: string | string[]) {
   const privileges = coerceToArray(privilege);
 
   let displayValue: string | ReactNode;
@@ -102,7 +95,7 @@ function getDisplayValue(privilege: string | string[], styleMissingPrivilege?: b
   const isPrivilegeMissing =
     privileges.length === 0 || (privileges.length === 1 && privileges.includes(NO_PRIVILEGE_VALUE));
 
-  if (isPrivilegeMissing && styleMissingPrivilege) {
+  if (isPrivilegeMissing) {
     displayValue = <EuiIcon color="subdued" type={'minusInCircle'} />;
   } else {
     displayValue = privileges.map(p => _.capitalize(p)).join(', ');
@@ -134,4 +127,54 @@ function coerceToArray(privilege: string | string[]): string[] {
     return privilege;
   }
   return [privilege];
+}
+
+function getReadablePrivilegeSource(privilegeSource: PRIVILEGE_SOURCE) {
+  switch (privilegeSource) {
+    case PRIVILEGE_SOURCE.GLOBAL_BASE:
+      return (
+        <FormattedMessage
+          id={
+            'xpack.security.management.editRole.spaceAwarePrivilegeDisplay.globalBasePrivilegeSource'
+          }
+          defaultMessage={'global base privilege'}
+        />
+      );
+    case PRIVILEGE_SOURCE.GLOBAL_FEATURE:
+      return (
+        <FormattedMessage
+          id={
+            'xpack.security.management.editRole.spaceAwarePrivilegeDisplay.globalFeaturePrivilegeSource'
+          }
+          defaultMessage={'global feature privilege'}
+        />
+      );
+    case PRIVILEGE_SOURCE.SPACE_BASE:
+      return (
+        <FormattedMessage
+          id={
+            'xpack.security.management.editRole.spaceAwarePrivilegeDisplay.spaceBasePrivilegeSource'
+          }
+          defaultMessage={'space base privilege'}
+        />
+      );
+    case PRIVILEGE_SOURCE.SPACE_FEATURE:
+      return (
+        <FormattedMessage
+          id={
+            'xpack.security.management.editRole.spaceAwarePrivilegeDisplay.spaceFeaturePrivilegeSource'
+          }
+          defaultMessage={'space feature privilege'}
+        />
+      );
+    default:
+      return (
+        <FormattedMessage
+          id={
+            'xpack.security.management.editRole.spaceAwarePrivilegeDisplay.unknownPrivilegeSource'
+          }
+          defaultMessage={'**UNKNOWN**'}
+        />
+      );
+  }
 }

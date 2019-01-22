@@ -12,14 +12,12 @@ import { PrivilegeDisplay } from './privilege_display';
 
 describe('PrivilegeDisplay', () => {
   it('renders a simple privilege', () => {
-    const wrapper = mountWithIntl(<PrivilegeDisplay privilege={'all'} scope={'space'} />);
+    const wrapper = mountWithIntl(<PrivilegeDisplay privilege={'all'} />);
     expect(wrapper.text().trim()).toEqual('All');
   });
 
   it('renders a privilege with custom styling', () => {
-    const wrapper = mountWithIntl(
-      <PrivilegeDisplay privilege={'all'} color={'danger'} scope={'space'} />
-    );
+    const wrapper = mountWithIntl(<PrivilegeDisplay privilege={'all'} color={'danger'} />);
     expect(wrapper.text().trim()).toEqual('All');
     expect(wrapper.find(EuiText).props()).toMatchObject({
       color: 'danger',
@@ -28,12 +26,7 @@ describe('PrivilegeDisplay', () => {
 
   it('renders a privilege with tooltip, if provided', () => {
     const wrapper = mountWithIntl(
-      <PrivilegeDisplay
-        privilege={'all'}
-        tooltipContent={<b>ahh</b>}
-        iconType={'asterisk'}
-        scope={'space'}
-      />
+      <PrivilegeDisplay privilege={'all'} tooltipContent={<b>ahh</b>} iconType={'asterisk'} />
     );
     expect(wrapper.text().trim()).toEqual('All');
     expect(wrapper.find(EuiIconTip).props()).toMatchObject({
@@ -46,14 +39,12 @@ describe('PrivilegeDisplay', () => {
     const wrapper = shallowWithIntl(
       <PrivilegeDisplay
         privilege={'all'}
-        scope={'space'}
         explanation={{
           supercededPrivilege: 'read',
           supercededPrivilegeSource: PRIVILEGE_SOURCE.SPACE_BASE,
           actualPrivilege: 'all',
           actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
           isDirectlyAssigned: false,
-          isUnassignable: false,
         }}
       />
     );
