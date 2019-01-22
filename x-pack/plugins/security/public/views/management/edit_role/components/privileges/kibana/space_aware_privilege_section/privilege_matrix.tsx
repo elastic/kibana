@@ -25,7 +25,7 @@ import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
 import { SpaceAvatar } from '../../../../../../../../../spaces/public/components';
 import { FeaturePrivilegeSet, Role } from '../../../../../../../../common/model';
-import { EffectivePrivileges } from '../../../../../../../lib/effective_privileges';
+import { CalculatedPrivilege } from '../../../../../../../lib/kibana_privilege_calculator';
 import { isGlobalPrivilegeDefinition } from '../../../../../../../lib/privilege_utils';
 import { SpacesPopoverList } from '../../../spaces_popover_list';
 import { PrivilegeDisplay } from './privilege_display';
@@ -36,7 +36,7 @@ interface Props {
   role: Role;
   spaces: Space[];
   features: Feature[];
-  effectivePrivileges: EffectivePrivileges;
+  calculatedPrivileges: CalculatedPrivilege[];
   intl: InjectedIntl;
 }
 
@@ -270,40 +270,36 @@ export class PrivilegeMatrix extends Component<Props, State> {
         return <PrivilegeDisplay scope={'global'} privilege={globalBasePrivilege} />;
       }
 
-      const actualPrivileges = this.props.effectivePrivileges.getActualGlobalFeaturePrivilege(
+      const actualPrivileges = this.props.calculatedPrivileges[column.spacesIndex].feature[
         feature.id
-      );
+      ].actualPrivilege;
 
       return <PrivilegeDisplay scope={'global'} privilege={actualPrivileges} />;
     } else {
       // not global
 
+      const calculatedPrivilege = this.props.calculatedPrivileges[column.spacesIndex];
+
       if (feature.isBase) {
         // Space base privilege
-        const actualBasePrivileges = this.props.effectivePrivileges.explainActualSpaceBasePrivilege(
-          column.spacesIndex
-        );
+        const actualBasePrivileges = calculatedPrivilege.base.actualPrivilege;
 
         return (
           <PrivilegeDisplay
             scope={'space'}
-            explanation={actualBasePrivileges}
-            privilege={actualBasePrivileges.privilege}
+            explanation={calculatedPrivilege.base}
+            privilege={actualBasePrivileges}
           />
         );
       }
 
-      // Space feature privilege
-      const actualPrivileges = this.props.effectivePrivileges.explainActualSpaceFeaturePrivilege(
-        feature.id,
-        column.spacesIndex
-      );
+      const featurePrivilegeExplanation = calculatedPrivilege.feature[feature.id];
 
       return (
         <PrivilegeDisplay
           scope={'space'}
-          explanation={actualPrivileges}
-          privilege={actualPrivileges.privilege}
+          explanation={featurePrivilegeExplanation}
+          privilege={featurePrivilegeExplanation.actualPrivilege}
         />
       );
     }

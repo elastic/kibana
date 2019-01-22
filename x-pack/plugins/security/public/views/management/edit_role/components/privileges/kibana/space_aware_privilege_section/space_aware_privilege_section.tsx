@@ -18,7 +18,7 @@ import { UICapabilities } from 'ui/capabilities';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
 import { PrivilegeDefinition, Role } from '../../../../../../../../common/model';
-import { EffectivePrivilegesFactory } from '../../../../../../../lib/effective_privileges';
+import { KibanaPrivilegeCalculatorFactory } from '../../../../../../../lib/kibana_privilege_calculator';
 import { RoleValidator } from '../../../../lib/validate_role';
 import { PrivilegeMatrix } from './privilege_matrix';
 import { PrivilegeSpaceForm } from './privilege_space_form';
@@ -27,7 +27,7 @@ import { PrivilegeSpaceTable } from './privilege_space_table';
 interface Props {
   privilegeDefinition: PrivilegeDefinition;
   role: Role;
-  effectivePrivilegesFactory: EffectivePrivilegesFactory;
+  privilegeCalculatorFactory: KibanaPrivilegeCalculatorFactory;
   spaces: Space[];
   onChange: (role: Role) => void;
   editable: boolean;
@@ -68,7 +68,7 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
   }
 
   public render() {
-    const { uiCapabilities, effectivePrivilegesFactory } = this.props;
+    const { uiCapabilities, privilegeCalculatorFactory } = this.props;
 
     if (!uiCapabilities.spaces.manage) {
       return (
@@ -133,7 +133,7 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
         {this.state.showSpacePrivilegeEditor && (
           <PrivilegeSpaceForm
             role={this.props.role}
-            effectivePrivilegesFactory={effectivePrivilegesFactory}
+            privilegeCalculatorFactory={privilegeCalculatorFactory}
             privilegeDefinition={this.props.privilegeDefinition}
             features={this.props.features}
             intl={this.props.intl}
@@ -158,7 +158,7 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
         <PrivilegeSpaceTable
           role={this.props.role}
           displaySpaces={this.getDisplaySpaces()}
-          effectivePrivilegesFactory={this.props.effectivePrivilegesFactory}
+          privilegeCalculatorFactory={this.props.privilegeCalculatorFactory}
           onChange={this.props.onChange}
           onEdit={this.onEditSpacesPrivileges}
           intl={this.props.intl}
@@ -232,7 +232,9 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
     const viewMatrixButton = (
       <PrivilegeMatrix
         role={this.props.role}
-        effectivePrivileges={this.props.effectivePrivilegesFactory.getInstance(this.props.role)}
+        calculatedPrivileges={this.props.privilegeCalculatorFactory
+          .getInstance(this.props.role)
+          .calculateEffectivePrivileges()}
         features={this.props.features}
         spaces={this.getDisplaySpaces()}
         intl={this.props.intl}

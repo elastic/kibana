@@ -7,8 +7,10 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
 >
   <InjectIntl(SpaceAwarePrivilegeSectionUI)
     editable={true}
-    effectivePrivilegesFactory={
-      EffectivePrivilegesFactory {
+    features={Array []}
+    onChange={[MockFunction]}
+    privilegeCalculatorFactory={
+      KibanaPrivilegeCalculatorFactory {
         "privilegeDefinition": PrivilegeDefinition {
           "privilegeActionMap": Object {
             "features": Object {},
@@ -19,8 +21,6 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
         "rankedFeaturePrivileges": Object {},
       }
     }
-    features={Array []}
-    onChange={[MockFunction]}
     privilegeDefinition={
       PrivilegeDefinition {
         "privilegeActionMap": Object {

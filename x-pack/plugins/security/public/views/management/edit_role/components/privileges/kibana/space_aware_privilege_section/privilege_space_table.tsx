@@ -21,7 +21,7 @@ import {
   KibanaPrivilegeSpec,
   Role,
 } from '../../../../../../../../common/model';
-import { EffectivePrivilegesFactory } from '../../../../../../../lib/effective_privileges';
+import { KibanaPrivilegeCalculatorFactory } from '../../../../../../../lib/kibana_privilege_calculator';
 import {
   hasAssignedFeaturePrivileges,
   isGlobalPrivilegeDefinition,
@@ -34,7 +34,7 @@ const SPACES_DISPLAY_COUNT = 4;
 
 interface Props {
   role: Role;
-  effectivePrivilegesFactory: EffectivePrivilegesFactory;
+  privilegeCalculatorFactory: KibanaPrivilegeCalculatorFactory;
   onChange: (role: Role) => void;
   onEdit: (spacesIndex: number) => void;
   displaySpaces: Space[];
@@ -72,11 +72,13 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
   }
 
   private renderKibanaPrivileges = () => {
-    const { effectivePrivilegesFactory, displaySpaces, intl } = this.props;
+    const { privilegeCalculatorFactory, displaySpaces, intl } = this.props;
 
     const spacePrivileges = this.getSortedPrivileges();
 
-    const effectivePrivileges = effectivePrivilegesFactory.getInstance(this.props.role);
+    const effectivePrivileges = privilegeCalculatorFactory
+      .getInstance(this.props.role)
+      .calculateEffectivePrivileges(false);
 
     const rows: TableRow[] = spacePrivileges.map((spacePrivs, spacesIndex) => {
       const spaces = spacePrivs.spaces.map(
@@ -179,28 +181,21 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
         name: 'Privileges',
         render: (privileges: KibanaPrivilegeSpec, record: TableRow) => {
           const hasCustomizations = hasAssignedFeaturePrivileges(privileges);
-          const assignedPrivilege = effectivePrivileges.getAssignedBasePrivilege(
-            record.spacesIndex
-          );
+          const basePrivilege = effectivePrivileges[record.spacesIndex].base;
 
           if (record.isGlobal) {
             return (
               <PrivilegeDisplay
                 scope={'global'}
-                privilege={hasCustomizations ? 'Custom' : assignedPrivilege}
+                privilege={hasCustomizations ? 'Custom' : basePrivilege.actualPrivilege}
               />
             );
           } else {
-            const explanation = effectivePrivileges.explainActualSpaceBasePrivilege(
-              record.spacesIndex
-            );
-            const canDisplayCustomize = hasCustomizations && explanation.privilege !== 'all';
-
             return (
               <PrivilegeDisplay
                 scope={'space'}
-                explanation={canDisplayCustomize ? undefined : explanation}
-                privilege={canDisplayCustomize ? 'Custom' : explanation.privilege}
+                explanation={basePrivilege}
+                privilege={hasCustomizations ? 'Custom' : basePrivilege.actualPrivilege}
               />
             );
           }

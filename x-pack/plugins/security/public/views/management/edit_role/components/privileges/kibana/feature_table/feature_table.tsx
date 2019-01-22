@@ -17,12 +17,16 @@ import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
-import { PrivilegeDefinition, Role } from '../../../../../../../../common/model';
 import {
-  EffectivePrivileges,
-  ExplanationResult,
-  PRIVILEGE_SOURCE,
-} from '../../../../../../../lib/effective_privileges';
+  FeaturePrivilegeSet,
+  PrivilegeDefinition,
+  Role,
+} from '../../../../../../../../common/model';
+import {
+  AllowedPrivilege,
+  CalculatedPrivilege,
+  PrivilegeExplanation,
+} from '../../../../../../../lib/kibana_privilege_calculator';
 import { isGlobalPrivilegeDefinition } from '../../../../../../../lib/privilege_utils';
 import { NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
 import { PrivilegeDisplay } from '../space_aware_privilege_section/privilege_display';
@@ -31,7 +35,9 @@ import { ChangeAllPrivilegesControl } from './change_all_privileges';
 interface Props {
   role: Role;
   features: Feature[];
-  effectivePrivileges: EffectivePrivileges;
+  calculatedPrivileges: CalculatedPrivilege;
+  allowedPrivileges: AllowedPrivilege;
+  rankedFeaturePrivileges: FeaturePrivilegeSet;
   privilegeDefinition: PrivilegeDefinition;
   intl: InjectedIntl;
   spacesIndex: number;
@@ -61,19 +67,17 @@ export class FeatureTable extends Component<Props, {}> {
   };
 
   public render() {
-    const { role, features, effectivePrivileges, spacesIndex } = this.props;
+    const { role, features, calculatedPrivileges, rankedFeaturePrivileges } = this.props;
 
     const items: TableRow[] = features.map(feature => ({
       feature: {
         ...feature,
         hasAnyPrivilegeAssigned:
-          effectivePrivileges.getActualSpaceFeaturePrivilege(feature.id, spacesIndex) !==
-          NO_PRIVILEGE_VALUE,
+          calculatedPrivileges.feature[feature.id].actualPrivilege !== NO_PRIVILEGE_VALUE,
       },
       role,
     }));
 
-    const { rankedFeaturePrivileges } = effectivePrivileges;
     // TODO: This simply grabs the available privileges from the first feature we encounter.
     // As of now, features can have 'all' and 'read' as available privileges. Once that assumption breaks,
     // this will need updating. This is a simplifying measure to enable the new UI.
@@ -188,7 +192,7 @@ export class FeatureTable extends Component<Props, {}> {
 
         const allowsNone = this.allowsNoneForPrivilegeAssignment(featureId);
 
-        const actualPrivilegeValue = privilegeExplanation.privilege;
+        const actualPrivilegeValue = privilegeExplanation.actualPrivilege;
 
         const canChangePrivilege =
           !this.props.disabled && (allowsNone || enabledFeaturePrivileges.length > 1);
@@ -232,45 +236,25 @@ export class FeatureTable extends Component<Props, {}> {
   ];
 
   private getEnabledFeaturePrivileges = (featurePrivileges: string[], featureId: string) => {
-    const { effectivePrivileges } = this.props;
+    const { allowedPrivileges } = this.props;
 
     if (this.isConfiguringGlobalPrivileges()) {
       // Global feature privileges are not limited by effective privileges.
       return featurePrivileges;
     }
 
-    return featurePrivileges.filter(p =>
-      effectivePrivileges.canAssignSpaceFeaturePrivilege(featureId, p, this.props.spacesIndex)
-    );
+    return allowedPrivileges.feature[featureId].privileges;
   };
 
-  private getPrivilegeExplanation = (featureId: string): ExplanationResult => {
-    const { effectivePrivileges, spacesIndex } = this.props;
+  private getPrivilegeExplanation = (featureId: string): PrivilegeExplanation => {
+    const { calculatedPrivileges } = this.props;
 
-    if (this.isConfiguringGlobalPrivileges()) {
-      // Global feature privileges are not limited by effective privileges.
-      return {
-        privilege: effectivePrivileges.getActualGlobalFeaturePrivilege(featureId),
-        source: PRIVILEGE_SOURCE.ASSIGNED_DIRECTLY,
-        details: '',
-      };
-    }
-
-    return effectivePrivileges.explainActualSpaceFeaturePrivilege(featureId, spacesIndex);
+    return calculatedPrivileges.feature[featureId];
   };
 
   private allowsNoneForPrivilegeAssignment = (featureId: string): boolean => {
-    if (this.isConfiguringGlobalPrivileges()) {
-      return [PRIVILEGE_SOURCE.NONE, PRIVILEGE_SOURCE.ASSIGNED_DIRECTLY].includes(
-        this.getPrivilegeExplanation(featureId).source
-      );
-    }
-
-    return this.props.effectivePrivileges.canAssignSpaceFeaturePrivilege(
-      featureId,
-      NO_PRIVILEGE_VALUE,
-      this.props.spacesIndex
-    );
+    const { allowedPrivileges } = this.props;
+    return allowedPrivileges.feature[featureId].canUnassign;
   };
 
   private onChangeAllFeaturePrivileges = (privilege: string) => {

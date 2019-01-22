@@ -173,7 +173,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
             options={
               Array [
                 Object {
-                  "disabled": false,
+                  "disabled": true,
                   "dropdownDisplay": <EuiText
                     grow={true}
                     size="m"
@@ -207,7 +207,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                   "value": "basePrivilege_custom",
                 },
                 Object {
-                  "disabled": false,
+                  "disabled": true,
                   "dropdownDisplay": <EuiText
                     grow={true}
                     size="m"
@@ -273,7 +273,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                 },
               ]
             }
-            valueOfSelected="basePrivilege_custom"
+            valueOfSelected="basePrivilege_none"
           />
         </EuiFormRow>
         <EuiSpacer
@@ -302,42 +302,26 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
           size="l"
         />
         <FeatureTable
-          disabled={false}
-          effectivePrivileges={
-            EffectivePrivileges {
-              "assignedGlobalBaseActions": Array [],
-              "globalPrivilege": Object {
-                "base": Array [],
-                "feature": Object {},
-                "spaces": Array [],
+          allowedPrivileges={
+            Object {
+              "base": Object {
+                "canUnassign": true,
+                "privileges": Array [],
               },
-              "privilegeDefinition": PrivilegeDefinition {
-                "privilegeActionMap": Object {
-                  "features": Object {},
-                  "global": Object {},
-                  "space": Object {},
-                },
-              },
-              "rankedFeaturePrivileges": Object {},
-              "role": Object {
-                "elasticsearch": Object {
-                  "cluster": Array [
-                    "all",
-                  ],
-                  "indices": Array [],
-                  "run_as": Array [],
-                },
-                "kibana": Array [
-                  Object {
-                    "base": Array [],
-                    "feature": Object {},
-                    "spaces": Array [],
-                  },
-                ],
-                "name": "test role",
-              },
+              "feature": Object {},
             }
           }
+          calculatedPrivileges={
+            Object {
+              "base": Object {
+                "actualPrivilege": "none",
+                "actualPrivilegeSource": 40,
+                "isDirectlyAssigned": true,
+              },
+              "feature": Object {},
+            }
+          }
+          disabled={false}
           features={Array []}
           intl={
             Object {
@@ -452,6 +436,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
               },
             }
           }
+          rankedFeaturePrivileges={Object {}}
           role={
             Object {
               "elasticsearch": Object {

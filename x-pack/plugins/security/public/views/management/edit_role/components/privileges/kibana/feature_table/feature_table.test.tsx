@@ -12,7 +12,7 @@ import {
   PrivilegeDefinition,
   Role,
 } from '../../../../../../../../common/model';
-import { EffectivePrivilegesFactory } from '../../../../../../../lib/effective_privileges';
+import { KibanaPrivilegeCalculatorFactory } from '../../../../../../../lib/kibana_privilege_calculator';
 import { FeatureTable } from './feature_table';
 
 const defaultPrivilegeDefinition = new PrivilegeDefinition({
@@ -95,13 +95,23 @@ describe('FeatureTable', () => {
         },
       ],
     });
+
+    const calculator = new KibanaPrivilegeCalculatorFactory(defaultPrivilegeDefinition).getInstance(
+      role
+    );
+
     const wrapper = shallowWithIntl(
       <FeatureTable
         role={role}
         privilegeDefinition={defaultPrivilegeDefinition}
-        effectivePrivileges={new EffectivePrivilegesFactory(defaultPrivilegeDefinition).getInstance(
-          role
-        )}
+        calculatedPrivileges={calculator.calculateEffectivePrivileges()[0]}
+        allowedPrivileges={calculator.calculateAllowedPrivileges()[0]}
+        rankedFeaturePrivileges={{
+          feature1: ['all', 'read'],
+          feature2: ['all', 'read'],
+          feature3: ['all'],
+          feature4: ['all'],
+        }}
         features={buildFeatures()}
         onChange={jest.fn()}
         onChangeAll={jest.fn()}
@@ -115,13 +125,21 @@ describe('FeatureTable', () => {
 
   it('can render for a specific spaces entry', () => {
     const role = buildRole();
+    const calculator = new KibanaPrivilegeCalculatorFactory(defaultPrivilegeDefinition).getInstance(
+      role
+    );
     const wrapper = mountWithIntl(
       <FeatureTable
         role={role}
         privilegeDefinition={defaultPrivilegeDefinition}
-        effectivePrivileges={new EffectivePrivilegesFactory(defaultPrivilegeDefinition).getInstance(
-          role
-        )}
+        calculatedPrivileges={calculator.calculateEffectivePrivileges()[0]}
+        allowedPrivileges={calculator.calculateAllowedPrivileges()[0]}
+        rankedFeaturePrivileges={{
+          feature1: ['all', 'read'],
+          feature2: ['all', 'read'],
+          feature3: ['all'],
+          feature4: ['all'],
+        }}
         features={buildFeatures()}
         onChange={jest.fn()}
         onChangeAll={jest.fn()}

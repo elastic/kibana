@@ -7,7 +7,7 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { PrivilegeDefinition } from '../../../../../../../../common/model';
-import { EffectivePrivilegesFactory } from '../../../../../../../lib/effective_privileges';
+import { KibanaPrivilegeCalculatorFactory } from '../../../../../../../lib/kibana_privilege_calculator';
 import { RoleValidator } from '../../../../lib/validate_role';
 import { PrivilegeSpaceForm } from './privilege_space_form';
 
@@ -34,7 +34,7 @@ const buildProps = (customProps = {}) => {
       global: {},
       space: {},
     }),
-    effectivePrivilegesFactory: new EffectivePrivilegesFactory(
+    privilegeCalculatorFactory: new KibanaPrivilegeCalculatorFactory(
       new PrivilegeDefinition({
         global: {},
         features: {},

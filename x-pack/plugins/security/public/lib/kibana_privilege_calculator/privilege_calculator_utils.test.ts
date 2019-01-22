@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { areActionsFullyCovered, compareActions } from './effective_privileges_utils';
+import { areActionsFullyCovered, compareActions } from './privilege_calculator_utils';
 
 describe('#compareActions', () => {
   it(`returns -1 when the first action set is more permissive than the second action set`, () => {

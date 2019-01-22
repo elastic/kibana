@@ -9,7 +9,7 @@ import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { PrivilegeDefinition, Role } from '../../../../../../../../common/model';
-import { EffectivePrivilegesFactory } from '../../../../../../../lib/effective_privileges';
+import { KibanaPrivilegeCalculatorFactory } from '../../../../../../../lib/kibana_privilege_calculator';
 import { SimplePrivilegeSection } from './simple_privilege_section';
 import { UnsupportedSpacePrivilegesWarning } from './unsupported_space_privileges_warning';
 
@@ -39,7 +39,7 @@ const buildProps = (customProps: any = {}) => {
   return {
     editable: true,
     privilegeDefinition,
-    effectivePrivileges: new EffectivePrivilegesFactory(privilegeDefinition).getInstance(role),
+    privilegeCalculatorFactory: new KibanaPrivilegeCalculatorFactory(privilegeDefinition),
     features: [
       {
         id: 'feature1',
@@ -152,9 +152,6 @@ describe('<SimplePrivilegeForm>', () => {
       onChange: (role: Role) => {
         wrapper.setProps({
           role,
-          effectivePrivileges: new EffectivePrivilegesFactory(
-            props.privilegeDefinition
-          ).getInstance(role),
         });
       },
     });

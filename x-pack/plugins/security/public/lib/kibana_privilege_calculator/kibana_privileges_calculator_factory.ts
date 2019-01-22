@@ -6,10 +6,10 @@
 import _ from 'lodash';
 import { FeaturePrivilegeSet, PrivilegeDefinition, Role } from '../../../common/model';
 import { copyRole } from '../../lib/role_utils';
-import { EffectivePrivileges } from './effective_privileges';
-import { compareActions } from './effective_privileges_utils';
+import { KibanaPrivilegeCalculator } from './kibana_privilege_calculator';
+import { compareActions } from './privilege_calculator_utils';
 
-export class EffectivePrivilegesFactory {
+export class KibanaPrivilegeCalculatorFactory {
   /** All feature privileges, sorted from most permissive => least permissive. */
   public readonly rankedFeaturePrivileges: FeaturePrivilegeSet;
 
@@ -31,14 +31,14 @@ export class EffectivePrivilegesFactory {
   }
 
   /**
-   * Creates an EffectivePrivileges instance for the specified role.
+   * Creates an KibanaPrivilegeCalculator instance for the specified role.
    * @param role
    */
   public getInstance(role: Role) {
     const roleCopy = copyRole(role);
 
     this.sortPrivileges(roleCopy);
-    return new EffectivePrivileges(
+    return new KibanaPrivilegeCalculator(
       this.privilegeDefinition,
       roleCopy,
       this.rankedFeaturePrivileges

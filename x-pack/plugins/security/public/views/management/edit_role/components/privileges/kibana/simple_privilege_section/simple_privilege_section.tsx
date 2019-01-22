@@ -13,10 +13,14 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
+import { create } from 'domain';
 import React, { Component, Fragment } from 'react';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { PrivilegeDefinition, Role } from '../../../../../../../../common/model';
-import { EffectivePrivileges } from '../../../../../../../lib/effective_privileges';
+import {
+  CalculatedPrivilege,
+  KibanaPrivilegeCalculatorFactory,
+} from '../../../../../../../lib/kibana_privilege_calculator';
 import { isGlobalPrivilegeDefinition } from '../../../../../../../lib/privilege_utils';
 import { copyRole } from '../../../../../../../lib/role_utils';
 import { NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
@@ -26,7 +30,7 @@ import { UnsupportedSpacePrivilegesWarning } from './unsupported_space_privilege
 interface Props {
   role: Role;
   privilegeDefinition: PrivilegeDefinition;
-  effectivePrivileges: EffectivePrivileges;
+  privilegeCalculatorFactory: KibanaPrivilegeCalculatorFactory;
   features: Feature[];
   onChange: (role: Role) => void;
   editable: boolean;
@@ -35,6 +39,7 @@ interface Props {
 
 interface State {
   isCustomizingGlobalPrivilege: boolean;
+  globalPrivsIndex: number;
 }
 
 export class SimplePrivilegeSection extends Component<Props, State> {
@@ -42,13 +47,25 @@ export class SimplePrivilegeSection extends Component<Props, State> {
     super(props);
 
     const globalPrivs = this.locateGlobalPrivilege(props.role, true);
+    const globalPrivsIndex = this.locateGlobalPrivilegeIndex(props.role);
 
     this.state = {
       isCustomizingGlobalPrivilege: Object.keys(globalPrivs.feature).length > 0,
+      globalPrivsIndex,
     };
   }
   public render() {
     const kibanaPrivilege = this.getDisplayedBasePrivilege();
+
+    const privilegeCalculator = this.props.privilegeCalculatorFactory.getInstance(this.props.role);
+
+    const calculatedPrivileges = privilegeCalculator.calculateEffectivePrivileges()[
+      this.state.globalPrivsIndex
+    ];
+
+    const allowedPrivileges = privilegeCalculator.calculateAllowedPrivileges()[
+      this.state.globalPrivsIndex
+    ];
 
     const description = (
       <p>
@@ -195,7 +212,9 @@ export class SimplePrivilegeSection extends Component<Props, State> {
               <FeatureTable
                 role={this.props.role}
                 privilegeDefinition={this.props.privilegeDefinition}
-                effectivePrivileges={this.props.effectivePrivileges}
+                calculatedPrivileges={calculatedPrivileges}
+                allowedPrivileges={allowedPrivileges}
+                rankedFeaturePrivileges={privilegeCalculator.rankedFeaturePrivileges}
                 features={this.props.features}
                 intl={this.props.intl}
                 onChange={this.onFeaturePrivilegeChange}
@@ -285,6 +304,17 @@ export class SimplePrivilegeSection extends Component<Props, State> {
     return null;
   };
 
+  private locateGlobalPrivilegeIndex = (role: Role, createIfMissing = false) => {
+    const index = role.kibana.findIndex(privileges => isGlobalPrivilegeDefinition(privileges));
+
+    if (index < 0 && createIfMissing) {
+      const entry = this.createGlobalPrivilegeEntry(role);
+      return role.kibana.indexOf(entry);
+    }
+
+    return index;
+  };
+
   private locateGlobalPrivilege = (role: Role, createIfMissing = false) => {
     const spacePrivileges = role.kibana;
     const existing = spacePrivileges.find(privileges => isGlobalPrivilegeDefinition(privileges));
@@ -292,16 +322,26 @@ export class SimplePrivilegeSection extends Component<Props, State> {
       return existing;
     }
 
+    if (createIfMissing) {
+      return this.createGlobalPrivilegeEntry(role);
+    }
+
+    return {
+      spaces: ['*'],
+      base: [],
+      feature: {},
+    };
+  };
+
+  private createGlobalPrivilegeEntry(role: Role) {
     const newEntry = {
       spaces: ['*'],
       base: [],
       feature: {},
     };
 
-    if (createIfMissing) {
-      spacePrivileges.push(newEntry);
-    }
+    role.kibana.push(newEntry);
 
     return newEntry;
-  };
+  }
 }

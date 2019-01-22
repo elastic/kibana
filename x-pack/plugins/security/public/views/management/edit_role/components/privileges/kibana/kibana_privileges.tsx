@@ -10,7 +10,7 @@ import { UICapabilities } from 'ui/capabilities';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { PrivilegeDefinition, Role } from '../../../../../../../common/model';
-import { EffectivePrivilegesFactory } from '../../../../../../lib/effective_privileges';
+import { KibanaPrivilegeCalculatorFactory } from '../../../../../../lib/kibana_privilege_calculator';
 import { RoleValidator } from '../../../lib/validate_role';
 import { CollapsiblePanel } from '../../collapsible_panel';
 import { SimplePrivilegeSection } from './simple_privilege_section';
@@ -56,14 +56,14 @@ export class KibanaPrivileges extends Component<Props, {}> {
       return <TransformErrorSection />;
     }
 
-    const effectivePrivilegesFactory = new EffectivePrivilegesFactory(privilegeDefinition);
+    const privilegeCalculatorFactory = new KibanaPrivilegeCalculatorFactory(privilegeDefinition);
 
     if (spacesEnabled) {
       return (
         <SpaceAwarePrivilegeSection
           privilegeDefinition={privilegeDefinition}
           role={role}
-          effectivePrivilegesFactory={effectivePrivilegesFactory}
+          privilegeCalculatorFactory={privilegeCalculatorFactory}
           spaces={spaces}
           uiCapabilities={uiCapabilities}
           features={features}
@@ -78,7 +78,7 @@ export class KibanaPrivileges extends Component<Props, {}> {
           privilegeDefinition={privilegeDefinition}
           features={features}
           role={role}
-          effectivePrivileges={effectivePrivilegesFactory.getInstance(role)}
+          privilegeCalculatorFactory={privilegeCalculatorFactory}
           onChange={onChange}
           editable={editable}
           intl={this.props.intl}

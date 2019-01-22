@@ -4,11 +4,12 @@ exports[`PrivilegeDisplay renders a superceded privilege 1`] = `
 <Component
   explanation={
     Object {
-      "details": "details",
-      "overrideSource": "my override source",
-      "privilege": "all",
-      "source": 3,
+      "actualPrivilege": "all",
+      "actualPrivilegeSource": 40,
+      "isDirectlyAssigned": false,
+      "isUnassignable": false,
       "supercededPrivilege": "read",
+      "supercededPrivilegeSource": 20,
     }
   }
   intl={

@@ -7,7 +7,7 @@
 import { EuiIconTip, EuiText } from '@elastic/eui';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { PRIVILEGE_SOURCE } from '../../../../../../../lib/effective_privileges';
+import { PRIVILEGE_SOURCE } from '../../../../../../../lib/kibana_privilege_calculator';
 import { PrivilegeDisplay } from './privilege_display';
 
 describe('PrivilegeDisplay', () => {
@@ -49,10 +49,11 @@ describe('PrivilegeDisplay', () => {
         scope={'space'}
         explanation={{
           supercededPrivilege: 'read',
-          overrideSource: 'my override source',
-          privilege: 'all',
-          source: PRIVILEGE_SOURCE.EFFECTIVE_GLOBAL_BASE,
-          details: 'details',
+          supercededPrivilegeSource: PRIVILEGE_SOURCE.SPACE_BASE,
+          actualPrivilege: 'all',
+          actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
+          isDirectlyAssigned: false,
+          isUnassignable: false,
         }}
       />
     );

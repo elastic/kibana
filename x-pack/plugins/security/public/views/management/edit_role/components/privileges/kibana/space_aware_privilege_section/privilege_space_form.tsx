@@ -29,10 +29,10 @@ import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
 import { PrivilegeDefinition, Role } from '../../../../../../../../common/model';
 import {
-  EffectivePrivileges,
-  EffectivePrivilegesFactory,
-  ExplanationResult,
-} from '../../../../../../../lib/effective_privileges';
+  AllowedPrivilege,
+  KibanaPrivilegeCalculatorFactory,
+  PrivilegeExplanation,
+} from '../../../../../../../lib/kibana_privilege_calculator';
 import { hasAssignedFeaturePrivileges } from '../../../../../../../lib/privilege_utils';
 import { copyRole } from '../../../../../../../lib/role_utils';
 import { NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
@@ -41,7 +41,7 @@ import { SpaceSelector } from './space_selector';
 
 interface Props {
   role: Role;
-  effectivePrivilegesFactory: EffectivePrivilegesFactory;
+  privilegeCalculatorFactory: KibanaPrivilegeCalculatorFactory;
   privilegeDefinition: PrivilegeDefinition;
   features: Feature[];
   spaces: Space[];
@@ -128,12 +128,18 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
   }
 
   private getForm = () => {
-    const { intl, spaces } = this.props;
+    const { intl, spaces, privilegeCalculatorFactory } = this.props;
 
-    const effectivePrivileges = this.props.effectivePrivilegesFactory.getInstance(this.state.role);
-    const baseExplanation = effectivePrivileges.explainActualSpaceBasePrivilege(
+    const privilegeCalculator = privilegeCalculatorFactory.getInstance(this.state.role);
+
+    const calculatedPrivileges = privilegeCalculator.calculateEffectivePrivileges()[
       this.state.editingIndex
-    );
+    ];
+    const allowedPrivileges = privilegeCalculator.calculateAllowedPrivileges()[
+      this.state.editingIndex
+    ];
+
+    const baseExplanation = calculatedPrivileges.base;
 
     return (
       <EuiForm>
@@ -168,7 +174,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
             options={[
               {
                 value: 'basePrivilege_custom',
-                disabled: !this.canCustomizeFeaturePrivileges(effectivePrivileges),
+                disabled: !this.canCustomizeFeaturePrivileges(allowedPrivileges),
                 inputDisplay: (
                   <EuiText>
                     <FormattedMessage
@@ -197,9 +203,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
               },
               {
                 value: 'basePrivilege_read',
-                disabled:
-                  !this.isDefiningGlobalPrivilege() &&
-                  !effectivePrivileges.canAssignSpaceBasePrivilege('read'),
+                disabled: !allowedPrivileges.base.privileges.includes('read'),
                 inputDisplay: (
                   <EuiText>
                     <FormattedMessage
@@ -255,7 +259,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
             ]}
             hasDividers
             valueOfSelected={`basePrivilege_${this.getDisplayedBasePrivilege(
-              effectivePrivileges,
+              allowedPrivileges,
               baseExplanation
             )}`}
           />
@@ -278,7 +282,9 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
         <FeatureTable
           role={this.state.role}
           features={this.props.features}
-          effectivePrivileges={this.props.effectivePrivilegesFactory.getInstance(this.state.role)}
+          calculatedPrivileges={calculatedPrivileges}
+          allowedPrivileges={allowedPrivileges}
+          rankedFeaturePrivileges={privilegeCalculator.rankedFeaturePrivileges}
           intl={this.props.intl}
           onChange={this.onFeaturePrivilegesChange}
           onChangeAll={this.onChangeAllFeaturePrivileges}
@@ -469,31 +475,32 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
   };
 
   private getDisplayedBasePrivilege = (
-    effectivePrivileges: EffectivePrivileges,
-    explanation: ExplanationResult
+    allowedPrivileges: AllowedPrivilege,
+    explanation: PrivilegeExplanation
   ) => {
-    if (this.canCustomizeFeaturePrivileges(effectivePrivileges)) {
+    if (this.canCustomizeFeaturePrivileges(allowedPrivileges)) {
       const form = this.state.role.kibana[this.state.editingIndex];
 
-      if (hasAssignedFeaturePrivileges(form) || explanation.privilege === NO_PRIVILEGE_VALUE) {
+      if (
+        hasAssignedFeaturePrivileges(form) ||
+        explanation.actualPrivilege === NO_PRIVILEGE_VALUE
+      ) {
         return 'custom';
       }
     }
 
-    return explanation.privilege;
+    return explanation.actualPrivilege;
   };
 
-  private canCustomizeFeaturePrivileges = (effectivePrivileges: EffectivePrivileges) => {
+  private canCustomizeFeaturePrivileges = (allowedPrivileges: AllowedPrivilege) => {
     if (this.isDefiningGlobalPrivilege()) {
       return true;
     }
 
-    const baseExplanation = effectivePrivileges.explainActualSpaceBasePrivilege(
-      this.state.editingIndex,
-      true // ignoreAssignedPrivilege
-    );
-
-    return baseExplanation.privilege !== 'all';
+    const featureEntries = Object.values(allowedPrivileges.feature);
+    return featureEntries.some(entry => {
+      return entry.canUnassign;
+    });
   };
 
   private onFeaturePrivilegesChange = (featureId: string, privileges: string[]) => {
@@ -515,17 +522,16 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     const role = copyRole(this.state.role);
     const form = role.kibana[this.state.editingIndex];
 
-    const effectivePrivileges = this.props.effectivePrivilegesFactory.getInstance(role);
+    const calculator = this.props.privilegeCalculatorFactory.getInstance(role);
+    const allowedPrivs = calculator.calculateAllowedPrivileges();
 
     if (privileges.length === 0) {
       form.feature = {};
     } else {
       this.props.features.forEach(feature => {
-        const canAssign = effectivePrivileges.canAssignSpaceFeaturePrivilege(
-          feature.id,
-          privileges[0],
-          this.state.editingIndex
-        );
+        const canAssign = allowedPrivs[this.state.editingIndex].feature[
+          feature.id
+        ].privileges.includes(privileges[0]);
 
         if (canAssign) {
           form.feature[feature.id] = [...privileges];

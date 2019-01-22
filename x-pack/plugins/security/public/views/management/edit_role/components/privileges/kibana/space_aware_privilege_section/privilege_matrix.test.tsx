@@ -10,7 +10,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
 import { Feature } from '../../../../../../../../../xpack_main/types';
 import { PrivilegeDefinition, Role } from '../../../../../../../../common/model';
-import { EffectivePrivilegesFactory } from '../../../../../../../lib/effective_privileges';
+import { KibanaPrivilegeCalculatorFactory } from '../../../../../../..//lib/kibana_privilege_calculator';
 import { PrivilegeMatrix } from './privilege_matrix';
 
 describe('PrivilegeMatrix', () => {
@@ -76,7 +76,7 @@ describe('PrivilegeMatrix', () => {
       ],
     };
 
-    const effectivePrivileges = new EffectivePrivilegesFactory(
+    const calculator = new KibanaPrivilegeCalculatorFactory(
       new PrivilegeDefinition({
         global: {
           all: [],
@@ -84,6 +84,14 @@ describe('PrivilegeMatrix', () => {
         },
         features: {
           feature1: {
+            all: [],
+            read: [],
+          },
+          feature2: {
+            all: [],
+            read: [],
+          },
+          feature3: {
             all: [],
             read: [],
           },
@@ -100,7 +108,7 @@ describe('PrivilegeMatrix', () => {
         role={role}
         spaces={spaces}
         features={features}
-        effectivePrivileges={effectivePrivileges}
+        calculatedPrivileges={calculator.calculateEffectivePrivileges()}
         intl={null as any}
       />
     );
