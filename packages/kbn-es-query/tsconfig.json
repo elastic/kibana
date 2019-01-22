@@ -3,7 +3,7 @@
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./target",
-    "target": "esnext"
+    "target": "ES3"
   },
   "include": [
     "index.d.ts",
