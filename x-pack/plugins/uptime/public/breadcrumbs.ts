@@ -4,17 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Breadcrumb } from 'ui/chrome';
+import { i18n } from '@kbn/i18n';
 
-export const monitorBreadcrumb: Breadcrumb = {
-  text: 'Monitor',
+export interface UMBreadcrumb {
+  text: string;
+  href?: string;
+}
+
+export const monitorBreadcrumb: UMBreadcrumb = {
+  text: i18n.translate('xpack.uptime.breadcrumbs.monitorBreadcrumbText', {
+    defaultMessage: 'Monitor',
+  }),
 };
 
-export const overviewBreadcrumb: Breadcrumb = {
-  text: 'Overview',
+export const overviewBreadcrumb: UMBreadcrumb = {
+  text: i18n.translate('xpack.uptime.breadcrumbs.overviewBreadcrumbText', {
+    defaultMessage: 'Overview',
+  }),
   href: '#/',
 };
 
-export const getOverviewPageBreadcrumbs = (): Breadcrumb[] => [overviewBreadcrumb];
+export const getOverviewPageBreadcrumbs = (): UMBreadcrumb[] => [overviewBreadcrumb];
 
-export const getMonitorPageBreadcrumb = (): Breadcrumb[] => [overviewBreadcrumb, monitorBreadcrumb];
+export const getMonitorPageBreadcrumb = (): UMBreadcrumb[] => [
+  overviewBreadcrumb,
+  monitorBreadcrumb,
+];

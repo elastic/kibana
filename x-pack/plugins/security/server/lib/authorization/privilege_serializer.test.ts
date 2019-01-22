@@ -6,68 +6,68 @@
 
 import { PrivilegeSerializer } from './privilege_serializer';
 
-describe(`#isGlobalMinimumPrivilege`, () => {
+describe(`#isSerializedGlobalBasePrivilege`, () => {
   ['all', 'read'].forEach(validValue => {
     test(`returns true for '${validValue}'`, () => {
-      expect(PrivilegeSerializer.isSerializedGlobalMinimumPrivilege(validValue)).toBe(true);
+      expect(PrivilegeSerializer.isSerializedGlobalBasePrivilege(validValue)).toBe(true);
     });
   });
 
   ['space_all', 'space_read', 'foo', 'bar', 'feature_foo', 'feature_foo.privilege1'].forEach(
     invalidValue => {
       test(`returns false for '${invalidValue}'`, () => {
-        expect(PrivilegeSerializer.isSerializedGlobalMinimumPrivilege(invalidValue)).toBe(false);
+        expect(PrivilegeSerializer.isSerializedGlobalBasePrivilege(invalidValue)).toBe(false);
       });
     }
   );
 });
 
-describe(`#isSpaceMinimumPrivilege`, () => {
+describe(`#isSerializedSpaceBasePrivilege`, () => {
   ['space_all', 'space_read'].forEach(validValue => {
     test(`returns true for '${validValue}'`, () => {
-      expect(PrivilegeSerializer.isSerializedSpaceMinimumPrivilege(validValue)).toBe(true);
+      expect(PrivilegeSerializer.isSerializedSpaceBasePrivilege(validValue)).toBe(true);
     });
   });
 
   ['all', 'read', 'foo', 'bar', 'feature_foo', 'feature_foo.privilege1'].forEach(validValue => {
     test(`returns true for '${validValue}'`, () => {
-      expect(PrivilegeSerializer.isSerializedSpaceMinimumPrivilege(validValue)).toBe(false);
+      expect(PrivilegeSerializer.isSerializedSpaceBasePrivilege(validValue)).toBe(false);
     });
   });
 });
 
-describe('#serializeGlobalMinimumPrivilege', () => {
+describe('#serializeGlobalBasePrivilege', () => {
   test('throws Error if unrecognized privilege used', () => {
     expect(() =>
-      PrivilegeSerializer.serializeGlobalMinimumPrivilege('foo')
+      PrivilegeSerializer.serializeGlobalBasePrivilege('foo')
     ).toThrowErrorMatchingSnapshot();
   });
 
   test('returns all unmodified', () => {
-    const allResult = PrivilegeSerializer.serializeGlobalMinimumPrivilege('all');
+    const allResult = PrivilegeSerializer.serializeGlobalBasePrivilege('all');
     expect(allResult).toBe('all');
   });
 
   test('returns read unmodified', () => {
-    const readResult = PrivilegeSerializer.serializeGlobalMinimumPrivilege('read');
+    const readResult = PrivilegeSerializer.serializeGlobalBasePrivilege('read');
     expect(readResult).toBe('read');
   });
 });
 
-describe('#serializeSpaceMinimumPrivilege', () => {
+describe('#serializeSpaceBasePrivilege', () => {
   test('throws Error if unrecognized privilege used', () => {
     expect(() =>
-      PrivilegeSerializer.serializeSpaceMinimumPrivilege('foo')
+      PrivilegeSerializer.serializeSpaceBasePrivilege('foo')
     ).toThrowErrorMatchingSnapshot();
   });
 
   test('returns all prefixed with space_', () => {
-    const allResult = PrivilegeSerializer.serializeSpaceMinimumPrivilege('all');
+    const allResult = PrivilegeSerializer.serializeSpaceBasePrivilege('all');
     expect(allResult).toBe('space_all');
   });
 
   test('returns read prefixed with space_', () => {
-    const readResult = PrivilegeSerializer.serializeSpaceMinimumPrivilege('read');
+    const readResult = PrivilegeSerializer.serializeSpaceBasePrivilege('read');
     expect(readResult).toBe('space_read');
   });
 });
@@ -117,44 +117,44 @@ describe('#deserializeFeaturePrivilege', () => {
   });
 });
 
-describe('#deserializeGlobalMinimumPrivilege', () => {
-  test(`throws Error if isn't a minimum privilege`, () => {
+describe('#deserializeGlobalBasePrivilege', () => {
+  test(`throws Error if isn't a base privilege`, () => {
     expect(() =>
-      PrivilegeSerializer.deserializeGlobalMinimumPrivilege('foo')
+      PrivilegeSerializer.deserializeGlobalBasePrivilege('foo')
     ).toThrowErrorMatchingSnapshot();
   });
 
   test(`returns 'all' unprefixed if provided 'all'`, () => {
-    const result = PrivilegeSerializer.deserializeGlobalMinimumPrivilege('all');
+    const result = PrivilegeSerializer.deserializeGlobalBasePrivilege('all');
     expect(result).toBe('all');
   });
 
   test(`returns 'read' unprefixed if provided 'read'`, () => {
-    const result = PrivilegeSerializer.deserializeGlobalMinimumPrivilege('read');
+    const result = PrivilegeSerializer.deserializeGlobalBasePrivilege('read');
     expect(result).toBe('read');
   });
 });
 
-describe('#deserializeSpaceMinimumPrivilege', () => {
+describe('#deserializeSpaceBasePrivilege', () => {
   test(`throws Error if provided 'all'`, () => {
     expect(() =>
-      PrivilegeSerializer.deserializeSpaceMinimumPrivilege('all')
+      PrivilegeSerializer.deserializeSpaceBasePrivilege('all')
     ).toThrowErrorMatchingSnapshot();
   });
 
   test(`throws Error if prefixed with space_ but not a reserved privilege`, () => {
     expect(() =>
-      PrivilegeSerializer.deserializeSpaceMinimumPrivilege('space_foo')
+      PrivilegeSerializer.deserializeSpaceBasePrivilege('space_foo')
     ).toThrowErrorMatchingSnapshot();
   });
 
   test(`returns 'all' unprefixed if provided 'space_all'`, () => {
-    const result = PrivilegeSerializer.deserializeSpaceMinimumPrivilege('space_all');
+    const result = PrivilegeSerializer.deserializeSpaceBasePrivilege('space_all');
     expect(result).toBe('all');
   });
 
   test(`returns 'read' unprefixed if provided 'space_read'`, () => {
-    const result = PrivilegeSerializer.deserializeSpaceMinimumPrivilege('space_read');
+    const result = PrivilegeSerializer.deserializeSpaceBasePrivilege('space_read');
     expect(result).toBe('read');
   });
 });

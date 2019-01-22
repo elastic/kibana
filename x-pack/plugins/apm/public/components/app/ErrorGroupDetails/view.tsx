@@ -5,6 +5,8 @@
  */
 
 import { EuiBadge, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { Location } from 'history';
 import { get } from 'lodash';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
@@ -14,6 +16,7 @@ import {
   ERROR_EXC_MESSAGE,
   ERROR_LOG_MESSAGE
 } from '../../../../common/constants';
+import { NOT_AVAILABLE_LABEL } from '../../../constants';
 import { ErrorDistributionRequest } from '../../../store/reactReduxRequest/errorDistribution';
 import { ErrorGroupDetailsRequest } from '../../../store/reactReduxRequest/errorGroup';
 import { IUrlParams } from '../../../store/urlParams';
@@ -59,7 +62,7 @@ const Culprit = styled.div`
 
 function getShortGroupId(errorGroupId?: string) {
   if (!errorGroupId) {
-    return 'N/A';
+    return NOT_AVAILABLE_LABEL;
   }
 
   return errorGroupId.slice(0, 5);
@@ -67,7 +70,7 @@ function getShortGroupId(errorGroupId?: string) {
 
 interface Props {
   urlParams: IUrlParams;
-  location: any;
+  location: Location;
 }
 
 export function ErrorGroupDetails({ urlParams, location }: Props) {
@@ -87,9 +90,21 @@ export function ErrorGroupDetails({ urlParams, location }: Props) {
           <div>
             <EuiTitle>
               <span>
-                Error group {getShortGroupId(urlParams.errorGroupId)}
+                {i18n.translate('xpack.apm.errorGroupDetails.errorGroupTitle', {
+                  defaultMessage: 'Error group {errorGroupId}',
+                  values: {
+                    errorGroupId: getShortGroupId(urlParams.errorGroupId)
+                  }
+                })}
                 {isUnhandled && (
-                  <UnhandledBadge color="warning">Unhandled</UnhandledBadge>
+                  <UnhandledBadge color="warning">
+                    {i18n.translate(
+                      'xpack.apm.errorGroupDetails.unhandledLabel',
+                      {
+                        defaultMessage: 'Unhandled'
+                      }
+                    )}
+                  </UnhandledBadge>
                 )}
               </span>
             </EuiTitle>
@@ -105,14 +120,35 @@ export function ErrorGroupDetails({ urlParams, location }: Props) {
                 <EuiText>
                   {logMessage && (
                     <Fragment>
-                      <Label>Log message</Label>
+                      <Label>
+                        {i18n.translate(
+                          'xpack.apm.errorGroupDetails.logMessageLabel',
+                          {
+                            defaultMessage: 'Log message'
+                          }
+                        )}
+                      </Label>
                       <Message>{logMessage}</Message>
                     </Fragment>
                   )}
-                  <Label>Exception message</Label>
-                  <Message>{excMessage || 'N/A'}</Message>
-                  <Label>Culprit</Label>
-                  <Culprit>{culprit || 'N/A'}</Culprit>
+                  <Label>
+                    {i18n.translate(
+                      'xpack.apm.errorGroupDetails.exceptionMessageLabel',
+                      {
+                        defaultMessage: 'Exception message'
+                      }
+                    )}
+                  </Label>
+                  <Message>{excMessage || NOT_AVAILABLE_LABEL}</Message>
+                  <Label>
+                    {i18n.translate(
+                      'xpack.apm.errorGroupDetails.culpritLabel',
+                      {
+                        defaultMessage: 'Culprit'
+                      }
+                    )}
+                  </Label>
+                  <Culprit>{culprit || NOT_AVAILABLE_LABEL}</Culprit>
                 </EuiText>
               </Titles>
             )}

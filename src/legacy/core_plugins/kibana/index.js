@@ -51,7 +51,8 @@ export default function (kibana) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         defaultAppId: Joi.string().default('home'),
-        index: Joi.string().default('.kibana')
+        index: Joi.string().default('.kibana'),
+        disableWelcomeScreen: Joi.boolean().default(false),
       }).default();
     },
 
@@ -157,7 +158,7 @@ export default function (kibana) {
           uiCapabilities: {
             discover: {
               show: true,
-              showWriteControls: true
+              save: true
             },
             visualize: {
               showWriteControls: true

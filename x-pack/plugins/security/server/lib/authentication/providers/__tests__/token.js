@@ -424,7 +424,7 @@ describe('TokenAuthenticationProvider', () => {
 
         callWithInternalUser
           .withArgs('shield.deleteAccessToken', { body: { token: accessToken } })
-          .returns({ created: true });
+          .returns({ invalidated_tokens: 1 });
 
         const failureReason = new Error('failed to delete token');
         callWithInternalUser
@@ -451,11 +451,11 @@ describe('TokenAuthenticationProvider', () => {
 
         callWithInternalUser
           .withArgs('shield.deleteAccessToken', { body: { token: accessToken } })
-          .returns({ created: true });
+          .returns({ invalidated_tokens: 1 });
 
         callWithInternalUser
           .withArgs('shield.deleteAccessToken', { body: { refresh_token: refreshToken } })
-          .returns({ created: true });
+          .returns({ invalidated_tokens: 1 });
 
         const authenticationResult = await provider.deauthenticate(request, { accessToken, refreshToken });
 

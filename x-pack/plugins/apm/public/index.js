@@ -25,7 +25,9 @@ import configureStore from './store/config/configureStore';
 import GlobalProgress from './components/app/Main/GlobalProgress';
 import LicenseChecker from './components/app/Main/LicenseChecker';
 
-import { history } from './utils/url';
+import { history } from './components/shared/Links/url_helpers';
+
+import { I18nProvider } from '@kbn/i18n/react';
 
 chrome.setRootTemplate(template);
 const store = configureStore();
@@ -43,15 +45,17 @@ initTimepicker(history, store.dispatch).then(() => {
   );
 
   ReactDOM.render(
-    <Provider store={store}>
-      <Fragment>
-        <GlobalProgress />
-        <LicenseChecker />
-        <Router history={history}>
-          <Main />
-        </Router>
-      </Fragment>
-    </Provider>,
+    <I18nProvider>
+      <Provider store={store}>
+        <Fragment>
+          <GlobalProgress />
+          <LicenseChecker />
+          <Router history={history}>
+            <Main />
+          </Router>
+        </Fragment>
+      </Provider>
+    </I18nProvider>,
     document.getElementById('react-apm-root')
   );
 });

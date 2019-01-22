@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`DetailView should render Discover button 1`] = `
-<DiscoverErrorButton
+<DiscoverErrorLink
   error={
     Object {
       "@timestamp": "myTimestamp",
@@ -39,7 +39,7 @@ exports[`DetailView should render Discover button 1`] = `
   >
     View 10 occurrences in Discover
   </EuiButtonEmpty>
-</DiscoverErrorButton>
+</DiscoverErrorLink>
 `;
 
 exports[`DetailView should render StickyProperties 1`] = `
@@ -74,18 +74,17 @@ exports[`DetailView should render StickyProperties 1`] = `
       Object {
         "fieldName": "transaction.id",
         "label": "Transaction sample ID",
-        "val": <Connect(Component)
+        "val": <Connect(UnconnectedKibanaLink)
           hash="/myService/transactions/myTransactionType/myTransactionName"
-          pathname="/app/apm"
           query={
             Object {
-              "traceid": "traceId",
+              "traceId": "traceId",
               "transactionId": "myTransactionName",
             }
           }
         >
           myTransactionName
-        </Connect(Component)>,
+        </Connect(UnconnectedKibanaLink)>,
         "width": "25%",
       },
       Object {

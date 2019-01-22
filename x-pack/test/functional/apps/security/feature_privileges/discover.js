@@ -8,12 +8,18 @@ import expect from 'expect.js';
 export default function ({ getPageObjects, getService }) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'discover', 'security', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
 
   describe('discover', () => {
     before(async () => {
       await esArchiver.load('security/feature_privileges');
+      await kibanaServer.uiSettings.replace({
+        "accessibility:disableAnimations": true,
+        "telemetry:optIn": false,
+        "defaultIndex": "logstash-*",
+      });
       await esArchiver.loadIfNeeded('logstash_functional');
     });
 
@@ -29,13 +35,14 @@ export default function ({ getPageObjects, getService }) {
               { names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }
             ],
           },
-          kibana: {
-            global: {
+          kibana: [
+            {
               feature: {
                 discover: ['all']
               },
+              spaces: ['*']
             }
-          }
+          ]
         });
 
         await security.user.create('global_discover_all_user', {
@@ -76,13 +83,14 @@ export default function ({ getPageObjects, getService }) {
               { names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }
             ],
           },
-          kibana: {
-            global: {
+          kibana: [
+            {
               feature: {
                 discover: ['read']
               },
+              spaces: ['*']
             }
-          }
+          ]
         });
 
         await security.user.create('global_discover_read_user', {
@@ -124,13 +132,14 @@ export default function ({ getPageObjects, getService }) {
               { names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }
             ],
           },
-          kibana: {
-            global: {
+          kibana: [
+            {
               feature: {
                 dashboard: ['all']
-              }
+              },
+              spaces: ['*']
             }
-          }
+          ],
         });
 
         await security.user.create('no_discover_privileges_user', {

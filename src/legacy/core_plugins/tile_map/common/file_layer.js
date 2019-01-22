@@ -27,6 +27,17 @@ export class FileLayer {
     this._emsClient = emsClient;
   }
 
+  getAttributions() {
+    const attributions = this._config.attribution.map(attribution => {
+      const url = this._emsClient.getValueInLanguage(attribution.url);
+      const label = this._emsClient.getValueInLanguage(attribution.label);
+      return {
+        url: url,
+        label: label
+      };
+    });
+    return attributions;
+  }
 
   getHTMLAttribution() {
     const attributions = this._config.attribution.map(attribution => {

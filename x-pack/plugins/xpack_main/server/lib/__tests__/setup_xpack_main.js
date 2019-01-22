@@ -8,7 +8,6 @@ import sinon from 'sinon';
 import { XPackInfo } from '../xpack_info';
 import { setupXPackMain } from '../setup_xpack_main';
 import * as InjectXPackInfoSignatureNS from '../inject_xpack_info_signature';
-import { getFeatures, unregisterFeature } from '../feature_registry';
 
 describe('setupXPackMain()', () => {
   const sandbox = sinon.createSandbox();
@@ -50,9 +49,6 @@ describe('setupXPackMain()', () => {
     const configGetStub = sinon.stub().throws(new Error('`config.get` is called with unexpected key.'));
     configGetStub.withArgs('xpack.xpack_main.xpack_api_polling_frequency_millis').returns(1234);
     mockServer.config.returns({ get: configGetStub });
-
-    const features = getFeatures();
-    features.forEach(unregisterFeature);
   });
 
   afterEach(() => sandbox.restore());

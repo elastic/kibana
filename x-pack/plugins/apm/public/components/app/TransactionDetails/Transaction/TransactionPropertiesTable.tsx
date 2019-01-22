@@ -6,13 +6,18 @@
 
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Location } from 'history';
 import { first, get } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
+import {
+  fromQuery,
+  history,
+  toQuery
+} from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import { Transaction } from '../../../../../typings/es_schemas/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
 import { px, units } from '../../../../style/variables';
-import { fromQuery, history, toQuery } from '../../../../utils/url';
 import {
   getPropertyTabNames,
   PropertiesTable,
@@ -45,7 +50,7 @@ function getTabs(transactionData: Transaction) {
 }
 
 interface TransactionPropertiesTableProps {
-  location: any;
+  location: Location;
   transaction: Transaction;
   urlParams: IUrlParams;
   waterfall: IWaterfall;
