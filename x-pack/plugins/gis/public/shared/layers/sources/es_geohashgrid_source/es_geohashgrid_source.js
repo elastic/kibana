@@ -17,7 +17,6 @@ import { AggConfigs } from 'ui/vis/agg_configs';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { convertToGeoJson } from './convert_to_geojson';
 import { ESSourceDetails } from '../../../components/es_source_details';
-import { ZOOM_TO_PRECISION } from '../../../utils/zoom_to_precision';
 import { VectorStyle } from '../../styles/vector_style';
 import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
@@ -96,13 +95,22 @@ export class ESGeohashGridSource extends AbstractESSource {
     );
   }
 
+  getFieldNames() {
+    return this.getMetricFields().map(({ propertyKey }) => {
+      return propertyKey;
+    });
+  }
+
+  isGeohashPrecisionAware() {
+    return true;
+  }
+
   async getGeoJsonWithMeta({ layerName }, searchFilters) {
-    let targetPrecision = ZOOM_TO_PRECISION[Math.round(searchFilters.zoom)];
-    targetPrecision += 0;//should have refinement param, similar to heatmap style
-    const featureCollection = await this.getGeoJsonPoints({ layerName }, {
-      precision: targetPrecision,
-      buffer: searchFilters.buffer,
+    const featureCollection = await this.getGeoJsonPoints({
+      geohashPrecision: searchFilters.geohashPrecision,
+      extent: searchFilters.buffer,
       timeFilters: searchFilters.timeFilters,
+      layerName,
       query: searchFilters.query,
     });
 
@@ -116,15 +124,9 @@ export class ESGeohashGridSource extends AbstractESSource {
     return {
       data: featureCollection,
       meta: {
-        areResultsTrimmed: true
+        areResultsTrimmed: false
       }
     };
-  }
-
-  getFieldNames() {
-    return this.getMetricFields().map(({ propertyKey }) => {
-      return propertyKey;
-    });
   }
 
   async getNumberFields() {
@@ -134,11 +136,11 @@ export class ESGeohashGridSource extends AbstractESSource {
   }
 
 
-  async getGeoJsonPoints({ layerName }, { precision, buffer, timeFilters, query }) {
+  async getGeoJsonPoints({ layerName }, { geohashPrecision, buffer, timeFilters, query }) {
 
     const indexPattern = await this._getIndexPattern();
     const searchSource  = await this._makeSearchSource({ buffer, timeFilters, query }, 0);
-    const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(precision), aggSchemas.all);
+    const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(geohashPrecision), aggSchemas.all);
     searchSource.setField('aggs', aggConfigs.toDsl());
     const esResponse = await this._runEsQuery(layerName, searchSource, 'Elasticsearch geohash_grid aggregation request');
 
@@ -151,7 +153,6 @@ export class ESGeohashGridSource extends AbstractESSource {
   isFilterByMapBounds() {
     return true;
   }
-
 
   _getValidMetrics() {
     const metrics = _.get(this._descriptor, 'metrics', []).filter(({ type, field }) => {

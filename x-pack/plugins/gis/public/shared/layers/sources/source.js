@@ -60,6 +60,10 @@ export class AbstractSource {
     return false;
   }
 
+  isGeohashPrecisionAware() {
+    return false;
+  }
+
   isQueryAware() {
     return false;
   }

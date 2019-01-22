@@ -15,6 +15,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
+  const userMenu = getService('userMenu');
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'home']);
 
   class LoginPage {
@@ -76,24 +77,20 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
         return;
       }
 
-      await retry.try(async () => {
-        const logoutLinkExists = await find.existsByLinkText('Logout');
-        if (!logoutLinkExists) {
-          throw new Error('Login is not completed yet');
-        }
-      });
+      await retry.waitFor('logout button visible', async () => (
+        await userMenu.logoutLinkExists()
+      ));
     }
 
     async logout() {
       log.debug('SecurityPage.logout');
 
-      const logoutLinkExists = await find.existsByLinkText('Logout');
-      if (!logoutLinkExists) {
+      if (!await userMenu.logoutLinkExists()) {
         log.debug('Logout not found');
         return;
       }
 
-      await find.clickByLinkText('Logout');
+      await userMenu.clickLogoutButton();
 
       await retry.waitForWithTimeout('login form', config.get('timeouts.waitFor') * 5, async () => (
         await find.existsByDisplayedByCssSelector('.login-form')

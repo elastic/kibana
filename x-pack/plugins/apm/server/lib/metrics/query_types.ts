@@ -11,6 +11,7 @@ export interface MetricsRequestArgs {
   setup: Setup;
   timeseriesBucketAggregations?: StringMap<any>;
   totalAggregations?: StringMap<any>;
+  bool?: StringMap<any>;
 }
 
 export interface AggValue {

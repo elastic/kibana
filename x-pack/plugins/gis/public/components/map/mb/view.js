@@ -62,7 +62,12 @@ export class MBMapContainer extends React.Component {
   }
 
   async _initializeMap() {
-    this._mbMap = await createMbMapInstance(this.refs.mapContainer, this.props.goto);
+
+    try {
+      this._mbMap = await createMbMapInstance(this.refs.mapContainer, this.props.goto.center);
+    } catch(e) {
+      throw e;
+    }
 
     // Override mapboxgl.Map "on" and "removeLayer" methods so we can track layer listeners
     // Tracked layer listerners are used to clean up event handlers
@@ -88,6 +93,7 @@ export class MBMapContainer extends React.Component {
     };
 
     this.assignSizeWatch();
+
 
     // moveend callback is debounced to avoid updating map extent state while map extent is still changing
     // moveend is fired while the map extent is still changing in the following scenarios

@@ -16,14 +16,12 @@ import {
   EuiButtonToggle
 } from '@elastic/eui';
 
-export class StaticDynamicStyleSelector extends React.Component {
+export class StaticDynamicStyleRow extends React.Component {
 
   // Store previous options locally so when type is toggled,
   // previous style options can be used.
-  prevOptions = {
-    // TODO: Move default to central location with other defaults
-    color: '#e6194b'
-  }
+  prevStaticStyleOptions = this.props.defaultStaticStyleOptions;
+  prevDynamicStyleOptions = this.props.defaultDynamicStyleOptions;
 
   _canBeDynamic() {
     return this.props.ordinalFields.length > 0;
@@ -58,14 +56,17 @@ export class StaticDynamicStyleSelector extends React.Component {
 
   _onTypeToggle = () => {
     if (this._isDynamic()) {
+      // preserve current dynmaic style
+      this.prevDynamicStyleOptions = this._getStyleOptions();
       // toggle to static style
-      this._onStaticStyleChange(this.prevOptions);
-    } else {
-      // toggle to dynamic style
-      this._onDynamicStyleChange(this.prevOptions);
+      this._onStaticStyleChange(this.prevStaticStyleOptions);
+      return;
     }
 
-    this.prevOptions = this._getStyleOptions();
+    // preserve current static style
+    this.prevStaticStyleOptions = this._getStyleOptions();
+    // toggle to dynamic style
+    this._onDynamicStyleChange(this.prevDynamicStyleOptions);
   }
 
   _renderStyleSelector() {
@@ -73,9 +74,9 @@ export class StaticDynamicStyleSelector extends React.Component {
       const DynamicSelector = this.props.DynamicSelector;
       return (
         <DynamicSelector
-          fields={this.props.ordinalFields}
+          ordinalFields={this.props.ordinalFields}
           onChange={this._onDynamicStyleChange}
-          selectedOptions={this._getStyleOptions()}
+          styleOptions={this._getStyleOptions()}
         />
       );
     }
@@ -83,8 +84,8 @@ export class StaticDynamicStyleSelector extends React.Component {
     const StaticSelector = this.props.StaticSelector;
     return (
       <StaticSelector
-        changeOptions={this._onStaticStyleChange}
-        selectedOptions={this._getStyleOptions()}
+        onChange={this._onStaticStyleChange}
+        styleOptions={this._getStyleOptions()}
       />
     );
   }

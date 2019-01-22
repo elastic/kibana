@@ -133,11 +133,11 @@ export class AbstractLayer {
 
   renderSourceDetails = () => {
     return this._source.renderDetails();
-  }
+  };
 
   renderSourceSettingsEditor = ({ onChange }) => {
     return this._source.renderSourceSettingsEditor({ onChange });
-  }
+  };
 
   isLayerLoading() {
     return this._dataRequests.some(dataRequest => dataRequest.isLoading());
@@ -194,7 +194,9 @@ export class AbstractLayer {
       newBuffer.maxLat
     ]);
     const doesPreviousBufferContainNewBuffer = turfBooleanContains(previousBufferGeometry, newBufferGeometry);
-    return doesPreviousBufferContainNewBuffer && !_.get(meta, 'areResultsTrimmed', false)
+
+    const isTrimmed = _.get(meta, 'areResultsTrimmed', false);
+    return doesPreviousBufferContainNewBuffer && !isTrimmed
       ? NO_SOURCE_UPDATE_REQUIRED
       : SOURCE_UPDATE_REQUIRED;
   }
