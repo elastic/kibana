@@ -22,10 +22,11 @@ import kibanaVersion from './kibana_version';
 import { ensureEsVersion } from './ensure_es_version';
 
 export default function (plugin, server) {
-  const esContract = server.core.es;
-  const NoConnections = esContract.adminClient.errors.NoConnections;
-  const callAdminAsKibanaUser = esContract.adminClient.callWithInternalUser;
-  const REQUEST_DELAY = esContract.bwc.config.healthCheckDelay.asMilliseconds();
+  const adminCluster = server.plugins.elasticsearch.getCluster('admin');
+  const NoConnections = adminCluster.errors.NoConnections;
+  const callAdminAsKibanaUser = adminCluster.callWithInternalUser;
+
+  const REQUEST_DELAY = server.core.es.bwc.config.healthCheckDelay.asMilliseconds();
 
   plugin.status.yellow('Waiting for Elasticsearch');
   function waitForPong(callWithInternalUser) {

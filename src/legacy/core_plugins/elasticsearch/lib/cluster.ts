@@ -17,17 +17,32 @@
  * under the License.
  */
 
-export { ElasticsearchServiceStartContract } from './elasticsearch_service';
-export { CallAPIOptions, ClusterClient } from './cluster_client';
+import { errors } from 'elasticsearch';
+import { CallAPIOptions, ClusterClient } from 'kibana';
 
-import { CoreContext } from '../../types';
-import { ElasticsearchService } from './elasticsearch_service';
+export class Cluster {
+  public readonly errors = errors;
 
-/** @internal */
-export class ElasticsearchModule {
-  public readonly service: ElasticsearchService;
+  constructor(private readonly clusterClient: ClusterClient) {}
 
-  constructor(coreContext: CoreContext) {
-    this.service = new ElasticsearchService(coreContext);
+  public callWithRequest = async (
+    req: { headers?: Record<string, string> } = {},
+    endpoint: string,
+    clientParams?: Record<string, unknown>,
+    options?: CallAPIOptions
+  ) => {
+    return await this.clusterClient.asScoped(req).callWithRequest(endpoint, clientParams, options);
+  };
+
+  public callWithInternalUser = async (
+    endpoint: string,
+    clientParams?: Record<string, unknown>,
+    options?: CallAPIOptions
+  ) => {
+    return await this.clusterClient.callAsInternalUser(endpoint, clientParams, options);
+  };
+
+  public close() {
+    this.clusterClient.close();
   }
 }

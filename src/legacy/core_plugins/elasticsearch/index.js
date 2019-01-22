@@ -18,6 +18,7 @@
  */
 
 import healthCheck from './lib/health_check';
+import { Cluster } from './lib/cluster';
 import { createProxy } from './lib/create_proxy';
 
 export default function (kibana) {
@@ -36,13 +37,16 @@ export default function (kibana) {
 
     init(server) {
       const clusters = new Map();
+
+      const adminCluster = new Cluster(server.core.es.adminClient);
+      const dataCluster = new Cluster(server.core.es.dataClient);
       server.expose('getCluster', (name) => {
         if (name === 'admin') {
-          return server.core.es.adminClient;
+          return adminCluster;
         }
 
         if (name === 'data') {
-          return server.core.es.dataClient;
+          return dataCluster;
         }
 
         return clusters.get(name);
@@ -53,7 +57,7 @@ export default function (kibana) {
           throw new Error(`cluster '${name}' already exists`);
         }
 
-        const cluster = server.core.es.createClient(name, config);
+        const cluster = new Cluster(server.core.es.createClient(name, config));
         clusters.set(name, cluster);
 
         return cluster;

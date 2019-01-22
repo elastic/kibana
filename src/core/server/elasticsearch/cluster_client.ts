@@ -18,105 +18,105 @@
  */
 
 import Boom from 'boom';
-import { Client, errors } from 'elasticsearch';
+import { Client } from 'elasticsearch';
 import { get } from 'lodash';
-import { filterHeaders } from '../http/router/headers';
+import { filterHeaders, Headers } from '../http/router';
 import { Logger } from '../logging';
 import {
   ElasticsearchClientConfig,
   parseElasticsearchClientConfig,
 } from './elasticsearch_client_config';
+import { ScopedClusterClient } from './scoped_cluster_client';
 
-/* @internal */
-interface CallAPIOptions {
+export interface CallAPIOptions {
   wrap401Errors: boolean;
 }
 
-export interface ElasticsearchClusterClient {
-  callWithInternalUser: (
-    endpoint: string,
-    clientParams?: Record<string, unknown>,
-    options?: CallAPIOptions
-  ) => Promise<unknown>;
+async function callAPI(
+  client: Client,
+  endpoint: string,
+  clientParams: Record<string, unknown> = {},
+  options: CallAPIOptions = { wrap401Errors: true }
+) {
+  const clientPath = endpoint.split('.');
+  const api: any = get(client, clientPath);
+  if (!api) {
+    throw new Error(`called with an invalid endpoint: ${endpoint}`);
+  }
 
-  callWithRequest: (
-    endpoint: string,
-    clientParams?: Record<string, unknown>,
-    options?: CallAPIOptions
-  ) => Promise<unknown>;
+  const apiContext = clientPath.length === 1 ? client : get(client, clientPath.slice(0, -1));
+  try {
+    return await api.call(apiContext, clientParams);
+  } catch (err) {
+    if (!options.wrap401Errors || err.statusCode !== 401) {
+      throw err;
+    }
 
-  close: () => void;
+    const boomError = Boom.boomify(err, { statusCode: err.statusCode });
+    const wwwAuthHeader: string = get(err, 'body.error.header[WWW-Authenticate]');
+    boomError.output.headers['WWW-Authenticate'] =
+      wwwAuthHeader || 'Basic realm="Authorization Required"';
+
+    throw boomError;
+  }
 }
 
 export class ClusterClient {
-  private static async callAPI(
-    client: Client,
-    endpoint: string,
-    clientParams: Record<string, unknown> = {},
-    options: CallAPIOptions = { wrap401Errors: true }
-  ) {
-    const clientPath = endpoint.split('.');
-    const api: any = get(client, clientPath);
-    if (!api) {
-      throw new Error(`called with an invalid endpoint: ${endpoint}`);
-    }
+  private readonly client: Client;
+  private scopedClient?: Client;
+  private isClosed = false;
 
-    const apiContext = clientPath.length === 1 ? client : get(client, clientPath.slice(0, -1));
-    try {
-      return await api.call(apiContext, clientParams);
-    } catch (err) {
-      if (!options.wrap401Errors || err.statusCode !== 401) {
-        throw err;
-      }
-
-      const boomError = Boom.boomify(err, { statusCode: err.statusCode });
-      const wwwAuthHeader: string = get(err, 'body.error.header[WWW-Authenticate]');
-      boomError.output.headers['WWW-Authenticate'] =
-        wwwAuthHeader || 'Basic realm="Authorization Required"';
-
-      throw boomError;
-    }
+  constructor(private readonly config: ElasticsearchClientConfig, private readonly log: Logger) {
+    this.client = new Client(parseElasticsearchClientConfig(config, log));
   }
 
-  public readonly errors = errors;
+  public async callAsInternalUser(
+    endpoint: string,
+    clientParams: Record<string, unknown> = {},
+    options?: CallAPIOptions
+  ) {
+    this.assertIsClosed();
 
-  private readonly client: Client;
-  private readonly noAuthClient: Client;
+    return await callAPI(this.client, endpoint, clientParams, options);
+  }
 
-  constructor(private readonly config: ElasticsearchClientConfig, log: Logger) {
-    this.client = new Client(parseElasticsearchClientConfig(config, log));
+  public asScoped(req: { headers?: Headers } = {}) {
+    if (this.scopedClient === undefined) {
+      this.scopedClient = new Client(
+        parseElasticsearchClientConfig(this.config, this.log, {
+          auth: false,
+          ignoreCertAndKey: !this.config.ssl || !this.config.ssl.alwaysPresentCertificate,
+        })
+      );
+    }
 
-    this.noAuthClient = new Client(
-      parseElasticsearchClientConfig(config, log, {
-        auth: false,
-        ignoreCertAndKey: !config.ssl || !config.ssl.alwaysPresentCertificate,
-      })
+    const headers = req.headers
+      ? filterHeaders(req.headers, this.config.requestHeadersWhitelist)
+      : req.headers;
+
+    return new ScopedClusterClient(
+      (...args) => this.callAsInternalUser(...args),
+      async (...args) => {
+        this.assertIsClosed();
+        return await callAPI(this.scopedClient!, ...args);
+      },
+      headers
     );
   }
 
-  public callWithInternalUser = (
-    endpoint: string,
-    clientParams: Record<string, unknown> = {},
-    options?: CallAPIOptions
-  ) => {
-    return ClusterClient.callAPI(this.client, endpoint, clientParams, options);
-  };
-
-  public callWithRequest = (
-    req: { headers?: Record<string, string> } = {},
-    endpoint: string,
-    clientParams: Record<string, unknown> = {},
-    options?: CallAPIOptions
-  ) => {
-    if (req.headers) {
-      clientParams.headers = filterHeaders(req.headers, this.config.requestHeadersWhitelist);
-    }
-
-    return ClusterClient.callAPI(this.noAuthClient, endpoint, clientParams, options);
-  };
-
   public close() {
     this.client.close();
-    this.noAuthClient.close();
+
+    if (this.scopedClient !== undefined) {
+      this.scopedClient.close();
+    }
+
+    this.isClosed = true;
+  }
+
+  private assertIsClosed() {
+    if (this.isClosed) {
+      throw new Error('Cluster client cannot be used after it has been closed.');
+    }
   }
 }

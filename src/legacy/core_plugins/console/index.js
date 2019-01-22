@@ -114,18 +114,16 @@ export default function (kibana) {
       }
 
       const config = server.config();
+      const bwcEsConfig = server.core.es.bwc.config;
       const proxyConfigCollection = new ProxyConfigCollection(options.proxyConfig);
       const proxyPathFilters = options.proxyFilter.map(str => new RegExp(str));
 
       server.route(createProxyRoute({
-        baseUrl: head(server.core.es.bwc.config.hosts),
+        baseUrl: head(bwcEsConfig.hosts),
         pathFilters: proxyPathFilters,
         getConfigForReq(req, uri) {
-          const filteredHeaders = filterHeaders(
-            req.headers,
-            server.core.es.bwc.config.requestHeadersWhitelist
-          );
-          const headers = setHeaders(filteredHeaders, server.core.es.bwc.config.customHeaders);
+          const filteredHeaders = filterHeaders(req.headers, bwcEsConfig.requestHeadersWhitelist);
+          const headers = setHeaders(filteredHeaders, bwcEsConfig.customHeaders);
 
           if (!isEmpty(config.get('console.proxyConfig'))) {
             return {
