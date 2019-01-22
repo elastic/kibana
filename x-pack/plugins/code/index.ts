@@ -28,7 +28,7 @@ export const code = (kibana: any) =>
     },
     config(Joi: any) {
       return Joi.object({
-        enabled: Joi.boolean().default(false),
+        enabled: Joi.boolean().default(true),
         queueIndex: Joi.string().default('.code-worker-queue'),
         // 1 hour by default.
         queueTimeout: Joi.number().default(moment.duration(1, 'hour').asMilliseconds()),
@@ -47,6 +47,7 @@ export const code = (kibana: any) =>
         isAdmin: Joi.boolean().default(true), // If we show the admin buttons
         disableScheduler: Joi.boolean().default(true), // Temp option to disable all schedulers.
         enableGlobalReference: Joi.boolean().default(false), // Global reference as optional feature for now
+        codeNode: Joi.boolean().default(false),
       }).default();
     },
     init,

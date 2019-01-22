@@ -40,7 +40,7 @@ async function retryUntilAvailable<T>(
   if (value) {
     return value;
   } else {
-    return new Promise<T>(resolve => {
+    const promise = new Promise<T>(resolve => {
       const retry = () => {
         func().then(v => {
           if (v) {
@@ -57,6 +57,7 @@ async function retryUntilAvailable<T>(
       };
       setTimeout(retry, intervalMs);
     });
+    return await promise;
   }
 }
 
@@ -77,7 +78,7 @@ export function init(server: Server, options: any) {
     enableSecurity(server);
     // enable cluster status routes
     clusterRoute(server, codeNodeClient, log);
-    if (serverOptions.enabled) {
+    if (serverOptions.codeNode) {
       let info = await codeNodeClient.getCodeNodeInfo();
       if (!info) {
         let url: string = server.info.uri;
