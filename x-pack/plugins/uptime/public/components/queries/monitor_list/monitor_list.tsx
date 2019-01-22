@@ -10,6 +10,7 @@ import {
   EuiHistogramSeries,
   // @ts-ignore missing type definition
   EuiInMemoryTable,
+  EuiLink,
   EuiPanel,
   // @ts-ignore missing type definition
   EuiSeriesChart,
@@ -26,15 +27,14 @@ import { Query } from 'react-apollo';
 import { Link } from 'react-router-dom';
 import { LatestMonitorsResult } from 'x-pack/plugins/uptime/common/graphql/types';
 import { formatSparklineCounts } from './format_sparkline_counts';
+import { UptimeCommonProps } from '../../../uptime_app';
 import { getMonitorListQuery } from './get_monitor_list';
 
 interface MonitorListProps {
-  autorefreshInterval: number;
-  autorefreshEnabled: boolean;
-  dateRangeStart: number;
-  dateRangeEnd: number;
   filters?: string;
 }
+
+type Props = MonitorListProps & UptimeCommonProps;
 
 const MONITOR_LIST_DEFAULT_PAGINATION = 10;
 
@@ -66,25 +66,22 @@ const monitorListColumns = [
     sortable: true,
   },
   {
-    field: 'ping.monitor.host',
-    name: i18n.translate('xpack.uptime.monitorList.hostColumnLabel', {
-      defaultMessage: 'Host',
+    field: 'ping.monitor.id',
+    name: i18n.translate('xpack.uptime.monitorList.idColumnLabel', {
+      defaultMessage: 'ID',
     }),
-    render: (host: string, monitor: any) => <Link to={`/monitor/${monitor.key.id}`}>{host}</Link>,
+    render: (id: string, monitor: any) => <Link to={`/monitor/${monitor.key.id}`}>{id}</Link>,
   },
   {
-    field: 'key.port',
-    name: i18n.translate('xpack.uptime.monitorList.portColumnLabel', {
-      defaultMessage: 'Port',
+    field: 'ping.url.full',
+    name: i18n.translate('xpack.uptime.monitorList.urlColumnLabel', {
+      defaultMessage: 'URL',
     }),
-    sortable: true,
-  },
-  {
-    field: 'ping.monitor.type',
-    name: i18n.translate('xpack.uptime.monitorList.typeColumnLabel', {
-      defaultMessage: 'Type',
-    }),
-    sortable: true,
+    render: (url: string, monitor: any) => (
+      <EuiLink href={url} target="_blank">
+        {url}
+      </EuiLink>
+    ),
   },
   {
     field: 'ping.monitor.ip',
@@ -135,13 +132,13 @@ const monitorListPagination = {
 
 export const MonitorList = ({
   autorefreshInterval,
-  autorefreshEnabled,
+  autorefreshIsPaused,
   dateRangeStart,
   dateRangeEnd,
   filters,
-}: MonitorListProps) => (
+}: Props) => (
   <Query
-    pollInterval={autorefreshEnabled ? autorefreshInterval : undefined}
+    pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
     query={getMonitorListQuery}
     variables={{ dateRangeStart, dateRangeEnd, filters }}
   >

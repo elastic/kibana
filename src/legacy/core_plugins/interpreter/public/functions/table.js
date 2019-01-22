@@ -31,23 +31,10 @@ export const kibanaTable = () => ({
       'kibana_table'
     ],
   },
-  help: i18n.translate('common.core_plugins.interpreter.public.functions.table.help', {
+  help: i18n.translate('interpreter.functions.table.help', {
     defaultMessage: 'Table visualization'
   }),
   args: {
-    bucket: {
-      types: ['string'],
-    },
-    splitRow: {
-      types: ['string'],
-    },
-    splitColumn: {
-      types: ['string'],
-    },
-    metric: {
-      types: ['string'],
-      default: '1',
-    },
     visConfig: {
       types: ['string', 'null'],
       default: '"{}"',
@@ -55,35 +42,8 @@ export const kibanaTable = () => ({
   },
   async fn(context, args) {
     const visConfigParams = JSON.parse(args.visConfig);
-    args.metric.split(',').forEach(metric => {
-      const metricColumn = context.columns.find((column, i) =>
-        column.id === metric || column.name === metric || i === parseInt(metric));
-      metricColumn.aggConfig.schema = 'metric';
-    });
-    if (args.bucket) {
-      args.bucket.split(',').forEach(bucket => {
-        const bucketColumn = context.columns.find((column, i) =>
-          column.id === bucket || column.name === bucket || i === parseInt(bucket));
-        bucketColumn.aggConfig.schema = 'bucket';
-      });
-    }
-    if (args.splitColumn) {
-      args.splitColumn.split(',').forEach(split => {
-        const splitColumn = context.columns.find((column, i) =>
-          column.id === split || column.name === split || i === parseInt(split));
-        splitColumn.aggConfig.schema = 'split';
-      });
-    }
-    if (args.splitRow) {
-      args.splitRow.split(',').forEach(split => {
-        const splitColumn = context.columns.find((column, i) =>
-          column.id === split || column.name === split || i === parseInt(split));
-        splitColumn.aggConfig.schema = 'split';
-        splitColumn.aggConfig.params.row = true;
-      });
-    }
 
-    const convertedData = await responseHandler(context);
+    const convertedData = await responseHandler(context, visConfigParams.dimensions);
 
     return {
       type: 'render',

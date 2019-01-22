@@ -7,16 +7,18 @@
 import React, { Component, Fragment } from 'react';
 import { ALL_SOURCES } from '../../shared/layers/sources/all_sources';
 import {
-  EuiSpacer,
   EuiButton,
-  EuiHorizontalRule,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
   EuiPanel,
+  EuiSpacer,
   EuiCard,
   EuiIcon,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
 } from '@elastic/eui';
 
 export class AddLayerPanel extends Component {
@@ -67,7 +69,7 @@ export class AddLayerPanel extends Component {
         }}
         fill
       >
-        Create layer
+        Add layer
       </EuiButton>
     );
   }
@@ -75,17 +77,20 @@ export class AddLayerPanel extends Component {
   _renderSourceCards() {
     return ALL_SOURCES.map(Source => {
       const icon = Source.icon
-        ? <EuiIcon type={Source.icon} size="xl" />
+        ? <EuiIcon type={Source.icon} size="l" />
         : null;
       return (
-        <EuiCard
-          key={Source.type}
-          title={Source.title}
-          icon={icon}
-          onClick={() => this._onSourceTypeChange(Source.type)}
-          description={Source.description}
-          layout="horizontal"
-        />
+        <Fragment key={Source.type}>
+          <EuiSpacer size="s" />
+          <EuiCard
+            className="gisLayerAddpanel__card"
+            title={Source.title}
+            icon={icon}
+            onClick={() => this._onSourceTypeChange(Source.type)}
+            description={Source.description}
+            layout="horizontal"
+          />
+        </Fragment>
       );
     });
   }
@@ -117,12 +122,14 @@ export class AddLayerPanel extends Component {
     return (
       <Fragment>
         <EuiButtonEmpty
-          contentProps={{ style: { justifyContent: 'left' } }}
+          size="xs"
+          flush="left"
           onClick={this._clearSource}
           iconType="arrowLeft"
         >
           Change data source
         </EuiButtonEmpty>
+        <EuiSpacer size="s" />
         <EuiPanel>
           {Source.renderEditor(editorProperties)}
         </EuiPanel>
@@ -144,21 +151,17 @@ export class AddLayerPanel extends Component {
         direction="column"
         gutterSize="none"
       >
-        <EuiFlexItem grow={false} className="gisViewPanel__header">
+        <EuiFlyoutHeader hasBorder className="gisLayerPanel__header">
           <EuiTitle size="s">
-            <h1>Add layer</h1>
+            <h2>Add layer</h2>
           </EuiTitle>
-          <EuiSpacer size="m"/>
-          <EuiHorizontalRule margin="none"/>
-        </EuiFlexItem>
+        </EuiFlyoutHeader>
 
-        <EuiFlexItem className="gisViewPanel__body">
+        <EuiFlyoutBody className="gisLayerPanel__body">
           {this._renderAddLayerForm()}
-        </EuiFlexItem>
+        </EuiFlyoutBody>
 
-        <EuiFlexItem grow={false} className="gisViewPanel__footer">
-          <EuiHorizontalRule margin="none"/>
-          <EuiSpacer size="m"/>
+        <EuiFlyoutFooter className="gisLayerPanel__footer">
           <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
@@ -172,7 +175,7 @@ export class AddLayerPanel extends Component {
               {this._renderNextBtn()}
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiFlexItem>
+        </EuiFlyoutFooter>
       </EuiFlexGroup>
     );
   }
