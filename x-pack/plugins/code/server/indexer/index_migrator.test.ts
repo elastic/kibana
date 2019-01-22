@@ -45,7 +45,6 @@ test('Normal index migration steps.', async () => {
   const migrator = new IndexMigrator(esClient as EsClient, log);
   const req: IndexCreationRequest = {
     index: 'mockindex',
-    type: 'mocktype',
     settings: {},
     schema: {},
   };

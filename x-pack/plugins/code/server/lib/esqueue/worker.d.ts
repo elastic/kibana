@@ -24,7 +24,6 @@ interface WorkerInfo {
   id: string;
   index: string;
   jobType: string;
-  doctype: string;
 }
 
 interface ErrorInfo {
@@ -55,7 +54,6 @@ export interface WorkerOptions {
   intervalErrorMultiplier: number;
   client?: EsClient;
   size?: number;
-  doctype?: string;
   logger?: LogFn;
 }
 
@@ -66,7 +64,6 @@ export class Worker<P, O extends WorkerOutput> extends EventEmitter {
   public jobType: string;
   public workerFn: WorkerFn<P, O>;
   public checkSize: number;
-  public doctype: string;
   constructor(queue: Esqueue, type: string, workerFn: WorkerFn<P, O>, opts: WorkerOptions);
 
   public destroy(): void;
@@ -78,7 +75,6 @@ export class Worker<P, O extends WorkerOutput> extends EventEmitter {
     id: string;
     index: string;
     jobType: string;
-    doctype: string;
   };
 
   public on(

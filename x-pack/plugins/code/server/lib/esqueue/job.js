@@ -30,7 +30,6 @@ export class Job extends events.EventEmitter {
     this.timeout = options.timeout || 10000;
     this.maxAttempts = options.max_attempts || 3;
     this.priority = Math.max(Math.min(options.priority || 10, 20), -20);
-    this.doctype = options.doctype || constants.DEFAULT_SETTING_DOCTYPE;
     this.indexSettings = options.indexSettings || {};
 
     this.debug = (msg, err) => {
@@ -48,7 +47,6 @@ export class Job extends events.EventEmitter {
 
     const indexParams = {
       index: this.index,
-      type: this.doctype,
       id: this.id,
       body: {
         jobtype: this.jobtype,
@@ -74,7 +72,7 @@ export class Job extends events.EventEmitter {
       indexParams.headers = options.headers;
     }
 
-    this.ready = createIndex(this.client, this.index, this.doctype, this.indexSettings)
+    this.ready = createIndex(this.client, this.index, this.indexSettings)
       .then(() => this.client.index(indexParams))
       .then((doc) => {
         this.document = {
@@ -108,7 +106,6 @@ export class Job extends events.EventEmitter {
       .then(() => {
         return this.client.get({
           index: this.index,
-          type: this.doctype,
           id: this.id
         });
       })
@@ -126,7 +123,6 @@ export class Job extends events.EventEmitter {
     return {
       id: this.id,
       index: this.index,
-      type: this.doctype,
       jobtype: this.jobtype,
       created_by: this.created_by,
       payload: this.payload,

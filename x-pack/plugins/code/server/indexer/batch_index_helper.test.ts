@@ -35,7 +35,7 @@ test('Execute bulk index.', async () => {
 
   // Submit index requests as many as 2 batches.
   for (let i = 0; i < BATCH_INDEX_SIZE * 2; i++) {
-    await batchIndexHelper.index('mockindex', 'mocktype', {});
+    await batchIndexHelper.index('mockindex', {});
   }
 
   expect(bulkSpy.calledTwice).toBeTruthy();
@@ -50,7 +50,7 @@ test('Do not execute bulk index without enough requests.', async () => {
 
   // Submit index requests less than one batch.
   for (let i = 0; i < BATCH_INDEX_SIZE - 1; i++) {
-    await batchIndexHelper.index('mockindex', 'mocktype', {});
+    await batchIndexHelper.index('mockindex', {});
   }
 
   expect(bulkSpy.notCalled).toBeTruthy();
@@ -66,7 +66,7 @@ test('Skip bulk index if cancelled.', async () => {
 
   // Submit index requests more than one batch.
   for (let i = 0; i < BATCH_INDEX_SIZE + 1; i++) {
-    await batchIndexHelper.index('mockindex', 'mocktype', {});
+    await batchIndexHelper.index('mockindex', {});
   }
 
   expect(bulkSpy.notCalled).toBeTruthy();

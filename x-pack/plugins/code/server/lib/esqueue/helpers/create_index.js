@@ -63,7 +63,6 @@ const schema = {
 };
 
 export function createIndex(client, indexName,
-  doctype = constants.DEFAULT_SETTING_DOCTYPE,
   indexSettings = { }) {
   const body = {
     settings: {
@@ -71,9 +70,7 @@ export function createIndex(client, indexName,
       ...indexSettings
     },
     mappings: {
-      [doctype]: {
-        properties: schema
-      }
+      properties: schema
     }
   };
 
