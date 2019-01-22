@@ -14,6 +14,7 @@ import { languageServer, LanguageServerState } from './language_server';
 import { repository, RepositoryState } from './repository';
 import { route, RouteState } from './route';
 import { search, SearchState } from './search';
+import { shortcuts, ShortcutsState } from './shortcuts';
 import { status, StatusState } from './status';
 import { symbol, SymbolState } from './symbol';
 import { userConfig, UserConfigState } from './user';
@@ -29,6 +30,7 @@ export interface RootState {
   commit: CommitState;
   blame: BlameState;
   languageServer: LanguageServerState;
+  shortcuts: ShortcutsState;
 }
 
 const reducers = {
@@ -43,6 +45,7 @@ const reducers = {
   commit,
   blame,
   languageServer,
+  shortcuts,
 };
 
 // @ts-ignore

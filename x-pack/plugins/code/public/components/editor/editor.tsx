@@ -13,6 +13,7 @@ import { closeReferences, findReferences, hoverResult } from '../../actions';
 import { MonacoHelper } from '../../monaco/monaco_helper';
 import { RootState } from '../../reducers';
 import { refUrlSelector } from '../../selectors';
+import { Modifier, Shortcut } from '../shortcuts';
 import { ReferencesPanel } from './references_panel';
 
 export interface EditorActions {
@@ -87,6 +88,13 @@ export class EditorComponent extends React.Component<Props> {
   public render() {
     return (
       <EuiFlexItem className="noOverflow" grow={1}>
+        <Shortcut
+          keyCode="f"
+          help="With editor ‘active’ Find in file"
+          linuxModifier={[Modifier.ctrl]}
+          macModifier={[Modifier.meta]}
+          winModifier={[Modifier.ctrl]}
+        />
         <EuiFlexItem tabIndex={0} grow={1} className="editorContainer noOverflow" id="mainEditor" />
         {this.renderReferences()}
       </EuiFlexItem>
