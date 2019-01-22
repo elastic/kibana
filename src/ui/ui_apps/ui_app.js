@@ -40,6 +40,8 @@ export class UiApp {
       throw new Error('Every app must specify an id');
     }
 
+    console.log(euiIconType);
+
     this._id = id;
     this._main = main;
     this._title = title;
