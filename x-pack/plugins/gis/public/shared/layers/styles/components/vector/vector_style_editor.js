@@ -9,12 +9,19 @@ import React, { Component, Fragment } from 'react';
 
 import { VectorStyleColorEditor } from './color/vector_style_color_editor';
 import { VectorStyleSizeEditor } from './size/vector_style_size_editor';
+import { getDefaultDynamicProperties, getDefaultStaticProperties } from '../../vector_style_defaults';
 
 import { EuiSpacer } from '@elastic/eui';
 
 export class VectorStyleEditor extends Component {
-  state = {
-    ordinalFields: []
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      ordinalFields: [],
+      defaultDynamicProperties: getDefaultDynamicProperties(),
+      defaultStaticProperties: getDefaultStaticProperties()
+    };
   }
 
   componentWillUnmount() {
@@ -50,6 +57,8 @@ export class VectorStyleEditor extends Component {
           handlePropertyChange={this.props.handlePropertyChange}
           styleDescriptor={this.props.styleProperties.fillColor}
           ordinalFields={this.state.ordinalFields}
+          defaultStaticStyleOptions={this.state.defaultStaticProperties.fillColor.options}
+          defaultDynamicStyleOptions={this.state.defaultDynamicProperties.fillColor.options}
         />
 
         <EuiSpacer size="m" />
@@ -60,6 +69,8 @@ export class VectorStyleEditor extends Component {
           handlePropertyChange={this.props.handlePropertyChange}
           styleDescriptor={this.props.styleProperties.lineColor}
           ordinalFields={this.state.ordinalFields}
+          defaultStaticStyleOptions={this.state.defaultStaticProperties.lineColor.options}
+          defaultDynamicStyleOptions={this.state.defaultDynamicProperties.lineColor.options}
         />
 
         <EuiSpacer size="m" />
@@ -70,6 +81,8 @@ export class VectorStyleEditor extends Component {
           handlePropertyChange={this.props.handlePropertyChange}
           styleDescriptor={this.props.styleProperties.lineWidth}
           ordinalFields={this.state.ordinalFields}
+          defaultStaticStyleOptions={this.state.defaultStaticProperties.lineWidth.options}
+          defaultDynamicStyleOptions={this.state.defaultDynamicProperties.lineWidth.options}
         />
 
         <EuiSpacer size="m" />
@@ -80,6 +93,8 @@ export class VectorStyleEditor extends Component {
           handlePropertyChange={this.props.handlePropertyChange}
           styleDescriptor={this.props.styleProperties.iconSize}
           ordinalFields={this.state.ordinalFields}
+          defaultStaticStyleOptions={this.state.defaultStaticProperties.iconSize.options}
+          defaultDynamicStyleOptions={this.state.defaultDynamicProperties.iconSize.options}
         />
 
       </Fragment>
