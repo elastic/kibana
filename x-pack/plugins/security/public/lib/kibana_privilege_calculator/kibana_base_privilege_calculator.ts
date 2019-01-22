@@ -12,17 +12,11 @@ import { PRIVILEGE_SOURCE, PrivilegeExplanation } from './kibana_privilege_calcu
 import { compareActions } from './privilege_calculator_utils';
 
 export class KibanaBasePrivilegeCalculator {
-  // list of privilege actions that comprise the global base privilege
-  private assignedGlobalBaseActions: string[];
-
   constructor(
     private readonly privilegeDefinition: PrivilegeDefinition,
-    private readonly globalPrivilege: KibanaPrivilegeSpec
-  ) {
-    this.assignedGlobalBaseActions = this.globalPrivilege.base[0]
-      ? privilegeDefinition.getGlobalPrivileges().getActions(this.globalPrivilege.base[0])
-      : [];
-  }
+    private readonly globalPrivilege: KibanaPrivilegeSpec,
+    private readonly assignedGlobalBaseActions: string[]
+  ) {}
 
   public getMostPermissiveBasePrivilege(
     privilegeSpec: KibanaPrivilegeSpec,
@@ -34,7 +28,7 @@ export class KibanaBasePrivilegeCalculator {
     if (isGlobalPrivilegeDefinition(privilegeSpec)) {
       if (assignedPrivilege === NO_PRIVILEGE_VALUE || ignoreAssigned) {
         return {
-          actualPrivilege: assignedPrivilege,
+          actualPrivilege: NO_PRIVILEGE_VALUE,
           actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
           isDirectlyAssigned: true,
         };
@@ -56,7 +50,7 @@ export class KibanaBasePrivilegeCalculator {
       (compareActions(this.assignedGlobalBaseActions, baseActions) < 0 || ignoreAssigned);
 
     if (globalSupercedes) {
-      const wasDirectlyAssigned = baseActions.length > 0;
+      const wasDirectlyAssigned = !ignoreAssigned && baseActions.length > 0;
 
       return {
         actualPrivilege: this.globalPrivilege.base[0],

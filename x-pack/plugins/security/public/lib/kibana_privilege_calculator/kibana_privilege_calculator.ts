@@ -18,9 +18,6 @@ import { KibanaFeaturePrivilegeCalculator } from './kibana_feature_privilege_cal
 import { AllowedPrivilege, CalculatedPrivilege } from './kibana_privilege_calculator_types';
 
 export class KibanaPrivilegeCalculator {
-  // reference to the global privilege definition
-  private globalPrivilege: KibanaPrivilegeSpec;
-
   private allowedPrivilegesCalculator: KibanaAllowedPrivilegesCalculator;
 
   private effectiveBasePrivilegesCalculator: KibanaBasePrivilegeCalculator;
@@ -32,7 +29,11 @@ export class KibanaPrivilegeCalculator {
     private readonly role: Role,
     public readonly rankedFeaturePrivileges: FeaturePrivilegeSet
   ) {
-    this.globalPrivilege = this.locateGlobalPrivilege(role);
+    const globalPrivilege = this.locateGlobalPrivilege(role);
+
+    const assignedGlobalBaseActions: string[] = globalPrivilege.base[0]
+      ? privilegeDefinition.getGlobalPrivileges().getActions(globalPrivilege.base[0])
+      : [];
 
     this.allowedPrivilegesCalculator = new KibanaAllowedPrivilegesCalculator(
       privilegeDefinition,
@@ -41,12 +42,14 @@ export class KibanaPrivilegeCalculator {
 
     this.effectiveBasePrivilegesCalculator = new KibanaBasePrivilegeCalculator(
       privilegeDefinition,
-      this.globalPrivilege
+      globalPrivilege,
+      assignedGlobalBaseActions
     );
 
     this.effectiveFeaturePrivilegesCalculator = new KibanaFeaturePrivilegeCalculator(
       privilegeDefinition,
-      this.globalPrivilege,
+      globalPrivilege,
+      assignedGlobalBaseActions,
       rankedFeaturePrivileges
     );
   }

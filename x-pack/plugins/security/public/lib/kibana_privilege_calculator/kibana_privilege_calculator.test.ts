@@ -4,66 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FeaturePrivilegeSet, PrivilegeDefinition, Role } from '../../../common/model';
+import { PrivilegeDefinition, Role } from '../../../common/model';
 import { NO_PRIVILEGE_VALUE } from '../../views/management/edit_role/lib/constants';
+import { buildRole, defaultPrivilegeDefinition } from './__fixtures__';
 import { PRIVILEGE_SOURCE, PrivilegeExplanation } from './kibana_privilege_calculator_types';
 import { KibanaPrivilegeCalculatorFactory } from './kibana_privileges_calculator_factory';
-
-const defaultPrivilegeDefinition = new PrivilegeDefinition({
-  global: {
-    all: ['api:/*', 'ui:/*'],
-    read: ['ui:/feature1/foo', 'ui:/feature2/foo', 'ui:/feature3/foo/*'],
-  },
-  space: {
-    all: [
-      'api:/feature1/*',
-      'ui:/feature1/*',
-      'api:/feature2/*',
-      'ui:/feature2/*',
-      'ui:/feature3/foo',
-      'ui:/feature3/foo/*',
-    ],
-    read: ['ui:/feature1/foo', 'ui:/feature2/foo', 'ui:/feature3/foo/bar'],
-  },
-  features: {
-    feature1: {
-      all: ['ui:/feature1/foo', 'ui:/feature1/bar'],
-      read: ['ui:/feature1/foo'],
-    },
-    feature2: {
-      all: ['ui:/feature2/foo', 'api:/feature2/bar'],
-      read: ['ui:/feature2/foo'],
-    },
-    feature3: {
-      all: ['ui:/feature3/foo', 'ui:/feature3/foo/*'],
-    },
-  },
-});
-
-interface BuildRoleOpts {
-  spacesPrivileges?: Array<{
-    spaces: string[];
-    base: string[];
-    feature: FeaturePrivilegeSet;
-  }>;
-}
-const buildRole = (options: BuildRoleOpts = {}) => {
-  const role: Role = {
-    name: 'unit test role',
-    elasticsearch: {
-      indices: [],
-      cluster: [],
-      run_as: [],
-    },
-    kibana: [],
-  };
-
-  if (options.spacesPrivileges) {
-    role.kibana.push(...options.spacesPrivileges);
-  }
-
-  return role;
-};
 
 const buildEffectivePrivileges = (
   role: Role,
@@ -96,6 +41,8 @@ const buildExpectedFeaturePrivileges = (
 describe('calculateEffectivePrivileges', () => {
   it(`returns an empty array for an empty role`, () => {
     const role = buildRole();
+    role.kibana = [];
+
     const effectivePrivileges = buildEffectivePrivileges(role);
     const calculatedPrivileges = effectivePrivileges.calculateEffectivePrivileges();
     expect(calculatedPrivileges).toHaveLength(0);

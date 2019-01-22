@@ -14,11 +14,11 @@ export enum PRIVILEGE_SOURCE {
   /** Privilege is derived from space base privilege */
   SPACE_BASE = 20,
 
-  /** Privilege is derived from global base privilege */
-  GLOBAL_BASE = 40,
-
   /** Privilege is derived from global feature privilege */
   GLOBAL_FEATURE = 30,
+
+  /** Privilege is derived from global base privilege */
+  GLOBAL_BASE = 40,
 }
 
 export interface PrivilegeExplanation {

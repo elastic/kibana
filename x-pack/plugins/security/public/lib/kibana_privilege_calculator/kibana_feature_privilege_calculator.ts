@@ -20,18 +20,12 @@ import {
 import { areActionsFullyCovered } from './privilege_calculator_utils';
 
 export class KibanaFeaturePrivilegeCalculator {
-  // list of privilege actions that comprise the global base privilege
-  private assignedGlobalBaseActions: string[];
-
   constructor(
     private readonly privilegeDefinition: PrivilegeDefinition,
     private readonly globalPrivilege: KibanaPrivilegeSpec,
-    public readonly rankedFeaturePrivileges: FeaturePrivilegeSet
-  ) {
-    this.assignedGlobalBaseActions = this.globalPrivilege.base[0]
-      ? privilegeDefinition.getGlobalPrivileges().getActions(this.globalPrivilege.base[0])
-      : [];
-  }
+    private readonly assignedGlobalBaseActions: string[],
+    private readonly rankedFeaturePrivileges: FeaturePrivilegeSet
+  ) {}
 
   public getMostPermissiveFeaturePrivilege(
     privilegeSpec: KibanaPrivilegeSpec,
@@ -97,7 +91,8 @@ export class KibanaFeaturePrivilegeCalculator {
     );
 
     const assignedFeaturePrivilege = this.getAssignedFeaturePrivilege(privilegeSpec, featureId);
-    const hasAssignedFeaturePrivilege = assignedFeaturePrivilege !== NO_PRIVILEGE_VALUE;
+    const hasAssignedFeaturePrivilege =
+      !ignoreAssigned && assignedFeaturePrivilege !== NO_PRIVILEGE_VALUE;
 
     scenarios.push({
       actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
@@ -129,16 +124,18 @@ export class KibanaFeaturePrivilegeCalculator {
 
     // Otherwise, this is a space feature privilege
 
-    // If the base privilege is directly assigned, then use it.
-    // If it's not directly assigned, then it is already covered by the GLOBAL_BASE scenario above.
-    if (basePrivilegeExplanation.isDirectlyAssigned) {
+    const includeSpaceBaseScenario =
+      basePrivilegeExplanation.actualPrivilegeSource === PRIVILEGE_SOURCE.SPACE_BASE ||
+      basePrivilegeExplanation.supercededPrivilegeSource === PRIVILEGE_SOURCE.SPACE_BASE;
+
+    const spaceBasePrivilege =
+      basePrivilegeExplanation.supercededPrivilege || basePrivilegeExplanation.actualPrivilege;
+
+    if (includeSpaceBaseScenario) {
       scenarios.push({
         actualPrivilegeSource: PRIVILEGE_SOURCE.SPACE_BASE,
         isDirectlyAssigned: false,
-        actions: this.getBaseActions(
-          basePrivilegeExplanation.actualPrivilegeSource,
-          basePrivilegeExplanation.actualPrivilege
-        ),
+        actions: this.getBaseActions(PRIVILEGE_SOURCE.SPACE_BASE, spaceBasePrivilege),
         ...this.buildSupercededFields(
           hasAssignedFeaturePrivilege,
           assignedFeaturePrivilege,

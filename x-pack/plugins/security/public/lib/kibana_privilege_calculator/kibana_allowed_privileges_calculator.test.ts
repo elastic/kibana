@@ -3,65 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FeaturePrivilegeSet, PrivilegeDefinition, Role } from '../../../common/model';
+import { PrivilegeDefinition, Role } from '../../../common/model';
+import { buildRole, defaultPrivilegeDefinition } from './__fixtures__';
 import { KibanaAllowedPrivilegesCalculator } from './kibana_allowed_privileges_calculator';
 import { KibanaPrivilegeCalculatorFactory } from './kibana_privileges_calculator_factory';
-
-const defaultPrivilegeDefinition = new PrivilegeDefinition({
-  global: {
-    all: ['api:/*', 'ui:/*'],
-    read: ['ui:/feature1/foo', 'ui:/feature2/foo', 'ui:/feature3/foo/*'],
-  },
-  space: {
-    all: [
-      'api:/feature1/*',
-      'ui:/feature1/*',
-      'api:/feature2/*',
-      'ui:/feature2/*',
-      'ui:/feature3/foo',
-      'ui:/feature3/foo/*',
-    ],
-    read: ['ui:/feature1/foo', 'ui:/feature2/foo', 'ui:/feature3/foo/bar'],
-  },
-  features: {
-    feature1: {
-      all: ['ui:/feature1/foo', 'ui:/feature1/bar'],
-      read: ['ui:/feature1/foo'],
-    },
-    feature2: {
-      all: ['ui:/feature2/foo', 'api:/feature2/bar'],
-      read: ['ui:/feature2/foo'],
-    },
-    feature3: {
-      all: ['ui:/feature3/foo', 'ui:/feature3/foo/*'],
-    },
-  },
-});
-
-interface BuildRoleOpts {
-  spacesPrivileges?: Array<{
-    spaces: string[];
-    base: string[];
-    feature: FeaturePrivilegeSet;
-  }>;
-}
-const buildRole = (options: BuildRoleOpts = {}) => {
-  const role: Role = {
-    name: 'unit test role',
-    elasticsearch: {
-      indices: [],
-      cluster: [],
-      run_as: [],
-    },
-    kibana: [],
-  };
-
-  if (options.spacesPrivileges) {
-    role.kibana.push(...options.spacesPrivileges);
-  }
-
-  return role;
-};
 
 const buildAllowedPrivilegesCalculator = (
   role: Role,

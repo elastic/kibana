@@ -78,7 +78,6 @@ export class KibanaAllowedPrivilegesCalculator {
         return {
           ...acc,
           [featureId]: this.getAllowedFeaturePrivileges(
-            privilegeSpec,
             effectivePrivileges,
             featureId,
             featurePrivileges
@@ -92,7 +91,6 @@ export class KibanaAllowedPrivilegesCalculator {
   }
 
   private getAllowedFeaturePrivileges(
-    privilegeSpec: KibanaPrivilegeSpec,
     effectivePrivileges: CalculatedPrivilege,
     featureId: string,
     candidateFeaturePrivileges: string[]
