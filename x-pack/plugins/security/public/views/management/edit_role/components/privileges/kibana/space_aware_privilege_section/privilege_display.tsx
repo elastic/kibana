@@ -140,43 +140,35 @@ function getReadablePrivilegeSource(privilegeSource: PRIVILEGE_SOURCE) {
           id={
             'xpack.security.management.editRole.spaceAwarePrivilegeDisplay.globalBasePrivilegeSource'
           }
-          defaultMessage={'global base privilege'}
+          defaultMessage="global base privilege"
         />
       );
     case PRIVILEGE_SOURCE.GLOBAL_FEATURE:
       return (
         <FormattedMessage
-          id={
-            'xpack.security.management.editRole.spaceAwarePrivilegeDisplay.globalFeaturePrivilegeSource'
-          }
-          defaultMessage={'global feature privilege'}
+          id="xpack.security.management.editRole.spaceAwarePrivilegeDisplay.globalFeaturePrivilegeSource"
+          defaultMessage="global feature privilege"
         />
       );
     case PRIVILEGE_SOURCE.SPACE_BASE:
       return (
         <FormattedMessage
-          id={
-            'xpack.security.management.editRole.spaceAwarePrivilegeDisplay.spaceBasePrivilegeSource'
-          }
-          defaultMessage={'space base privilege'}
+          id="xpack.security.management.editRole.spaceAwarePrivilegeDisplay.spaceBasePrivilegeSource"
+          defaultMessage="space base privilege"
         />
       );
     case PRIVILEGE_SOURCE.SPACE_FEATURE:
       return (
         <FormattedMessage
-          id={
-            'xpack.security.management.editRole.spaceAwarePrivilegeDisplay.spaceFeaturePrivilegeSource'
-          }
-          defaultMessage={'space feature privilege'}
+          id="xpack.security.management.editRole.spaceAwarePrivilegeDisplay.spaceFeaturePrivilegeSource"
+          defaultMessage="space feature privilege"
         />
       );
     default:
       return (
         <FormattedMessage
-          id={
-            'xpack.security.management.editRole.spaceAwarePrivilegeDisplay.unknownPrivilegeSource'
-          }
-          defaultMessage={'**UNKNOWN**'}
+          id="xpack.security.management.editRole.spaceAwarePrivilegeDisplay.unknownPrivilegeSource"
+          defaultMessage="**UNKNOWN**"
         />
       );
   }
