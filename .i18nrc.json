@@ -5,6 +5,7 @@
     "console": "src/legacy/core_plugins/console",
     "inputControl": "src/legacy/core_plugins/input_control_vis",
     "inspectorViews": "src/legacy/core_plugins/inspector_views",
+    "interpreter": "src/legacy/core_plugins/interpreter",
     "kbn": "src/legacy/core_plugins/kibana",
     "kbnVislibVisTypes": "src/legacy/core_plugins/kbn_vislib_vis_types",
     "markdownVis": "src/legacy/core_plugins/markdown_vis",
