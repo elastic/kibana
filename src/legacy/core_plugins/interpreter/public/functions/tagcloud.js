@@ -27,7 +27,7 @@ export const tagcloud = () => ({
       'kibana_table'
     ],
   },
-  help: i18n.translate('common.core_plugins.interpreter.public.functions.tagcloud.help', {
+  help: i18n.translate('interpreter.functions.tagcloud.help', {
     defaultMessage: 'Tagcloud visualization'
   }),
   args: {
