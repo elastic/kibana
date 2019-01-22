@@ -45,6 +45,16 @@ import { DashboardConstants, createDashboardEditUrl } from '../dashboard_constan
 
 export const EMPTY_FILTER = '';
 
+// The table supports three sort states:
+// field | asc, field | desc, default.
+//
+// If you click non-default sort header three times,
+// the sort returns to the default sort, described here.
+const defaultSort = {
+  field: 'title',
+  direction: 'asc',
+};
+
 // saved object client does not support sorting by title because title is only mapped as analyzed
 // the legacy implementation got around this by pulling `listingLimit` items and doing client side sorting
 // and not supporting server-side paging.
@@ -65,6 +75,8 @@ class DashboardListingUi extends React.Component {
       selectedIds: [],
       page: 0,
       perPage: 20,
+      sortField: defaultSort.field,
+      sortDirection: defaultSort.direction,
     };
   }
 
@@ -147,13 +159,13 @@ class DashboardListingUi extends React.Component {
       direction: sortDirection,
     } = sort;
 
-    // 3rd sorting state that is not captured by sort - native order (no sort)
-    // when switching from desc to asc for the same field - use native order
+    // 3rd sorting state that is not captured by sort - default order (asc by title)
+    // when switching from desc to asc for the same, non-default field - use default order
     if (this.state.sortField === sortField
       && this.state.sortDirection === 'desc'
       && sortDirection === 'asc') {
-      sortField = null;
-      sortDirection = null;
+      sortField = defaultSort.field;
+      sortDirection = defaultSort.direction;
     }
 
     this.setState({
