@@ -140,7 +140,7 @@
   },
   "dependencies": {
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "6.3.1",
+    "@elastic/eui": "6.5.1",
     "@elastic/javascript-typescript-langserver": "^0.1.9",
     "@elastic/lsp-extension": "^0.1.1",
     "@elastic/node-crypto": "0.1.2",
@@ -236,7 +236,7 @@
     "monaco-editor": "^0.14.3",
     "ngreact": "^0.5.1",
     "node-fetch": "^2.1.2",
-    "nodegit": "git+https://github.com/elastic/nodegit.git#v0.24.0-alpha.6",
+    "nodegit": "git+https://github.com/elastic/nodegit.git",
     "nodemailer": "^4.6.4",
     "object-path-immutable": "^0.5.3",
     "oppsy": "^2.0.0",

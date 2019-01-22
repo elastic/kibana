@@ -5,11 +5,7 @@
  */
 
 import { Repository } from '../../model';
-import {
-  RepositoryIndexNamePrefix,
-  RepositoryReservedField,
-  RepositoryTypeName,
-} from '../indexer/schema';
+import { RepositoryIndexNamePrefix, RepositoryReservedField } from '../indexer/schema';
 import { EsClient } from '../lib/esqueue';
 import { Poller } from '../poller';
 
@@ -43,7 +39,6 @@ export abstract class AbstractScheduler {
   protected async schedule(): Promise<void> {
     const res = await this.client.search({
       index: `${RepositoryIndexNamePrefix}*`,
-      type: RepositoryTypeName,
       body: {
         query: {
           exists: {

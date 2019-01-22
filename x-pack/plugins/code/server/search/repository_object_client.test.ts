@@ -19,7 +19,6 @@ import {
   RepositoryIndexNamePrefix,
   RepositoryLspIndexStatusReservedField,
   RepositoryReservedField,
-  RepositoryTypeName,
 } from '../indexer/schema';
 import { AnyObject, EsClient } from '../lib/esqueue';
 import { RepositoryObjectClient } from './repository_object_client';
@@ -63,7 +62,6 @@ test('CRUD of Repository', async () => {
   expect(indexSpy.getCall(0).args[0]).toEqual(
     expect.objectContaining({
       index: RepositoryIndexName(repoUri),
-      type: RepositoryTypeName,
       id: RepositoryReservedField,
       body: JSON.stringify({
         [RepositoryReservedField]: cObj,
@@ -85,7 +83,6 @@ test('CRUD of Repository', async () => {
   expect(getFake.getCall(0).args[0]).toEqual(
     expect.objectContaining({
       index: RepositoryIndexName(repoUri),
-      type: RepositoryTypeName,
       id: RepositoryReservedField,
     })
   );
@@ -100,7 +97,6 @@ test('CRUD of Repository', async () => {
   expect(updateSpy.getCall(0).args[0]).toEqual(
     expect.objectContaining({
       index: RepositoryIndexName(repoUri),
-      type: RepositoryTypeName,
       id: RepositoryReservedField,
       body: JSON.stringify({
         doc: {
@@ -137,7 +133,6 @@ test('Get All Repositories', async () => {
   expect(searchFake.getCall(0).args[0]).toEqual(
     expect.objectContaining({
       index: `${RepositoryIndexNamePrefix}*`,
-      type: RepositoryTypeName,
     })
   );
 });
@@ -157,7 +152,6 @@ test('CRUD of Repository Git Status', async () => {
   expect(indexSpy.getCall(0).args[0]).toEqual(
     expect.objectContaining({
       index: RepositoryIndexName(repoUri),
-      type: RepositoryTypeName,
       id: RepositoryGitStatusReservedField,
       body: JSON.stringify({
         [RepositoryGitStatusReservedField]: cObj,
@@ -179,7 +173,6 @@ test('CRUD of Repository Git Status', async () => {
   expect(getFake.getCall(0).args[0]).toEqual(
     expect.objectContaining({
       index: RepositoryIndexName(repoUri),
-      type: RepositoryTypeName,
       id: RepositoryGitStatusReservedField,
     })
   );
@@ -194,7 +187,6 @@ test('CRUD of Repository Git Status', async () => {
   expect(updateSpy.getCall(0).args[0]).toEqual(
     expect.objectContaining({
       index: RepositoryIndexName(repoUri),
-      type: RepositoryTypeName,
       id: RepositoryGitStatusReservedField,
       body: JSON.stringify({
         doc: {
@@ -220,7 +212,6 @@ test('CRUD of Repository LSP Index Status', async () => {
   expect(indexSpy.getCall(0).args[0]).toEqual(
     expect.objectContaining({
       index: RepositoryIndexName(repoUri),
-      type: RepositoryTypeName,
       id: RepositoryLspIndexStatusReservedField,
       body: JSON.stringify({
         [RepositoryLspIndexStatusReservedField]: cObj,
@@ -242,7 +233,6 @@ test('CRUD of Repository LSP Index Status', async () => {
   expect(getFake.getCall(0).args[0]).toEqual(
     expect.objectContaining({
       index: RepositoryIndexName(repoUri),
-      type: RepositoryTypeName,
       id: RepositoryLspIndexStatusReservedField,
     })
   );
@@ -257,7 +247,6 @@ test('CRUD of Repository LSP Index Status', async () => {
   expect(updateSpy.getCall(0).args[0]).toEqual(
     expect.objectContaining({
       index: RepositoryIndexName(repoUri),
-      type: RepositoryTypeName,
       id: RepositoryLspIndexStatusReservedField,
       body: JSON.stringify({
         doc: {
@@ -283,7 +272,6 @@ test('CRUD of Repository Delete Status', async () => {
   expect(indexSpy.getCall(0).args[0]).toEqual(
     expect.objectContaining({
       index: RepositoryIndexName(repoUri),
-      type: RepositoryTypeName,
       id: RepositoryDeleteStatusReservedField,
       body: JSON.stringify({
         [RepositoryDeleteStatusReservedField]: cObj,
@@ -305,7 +293,6 @@ test('CRUD of Repository Delete Status', async () => {
   expect(getFake.getCall(0).args[0]).toEqual(
     expect.objectContaining({
       index: RepositoryIndexName(repoUri),
-      type: RepositoryTypeName,
       id: RepositoryDeleteStatusReservedField,
     })
   );
@@ -320,7 +307,6 @@ test('CRUD of Repository Delete Status', async () => {
   expect(updateSpy.getCall(0).args[0]).toEqual(
     expect.objectContaining({
       index: RepositoryIndexName(repoUri),
-      type: RepositoryTypeName,
       id: RepositoryDeleteStatusReservedField,
       body: JSON.stringify({
         doc: {

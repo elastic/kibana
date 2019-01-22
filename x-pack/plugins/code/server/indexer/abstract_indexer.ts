@@ -7,7 +7,7 @@
 import { Indexer, IndexProgress, ProgressReporter } from '.';
 import { IndexRequest, IndexStats, IndexStatsKey, RepositoryUri } from '../../model';
 import { EsClient } from '../lib/esqueue';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { aggregateIndexStats } from '../utils/index_stats_aggregator';
 import { IndexCreationRequest } from './index_creation_request';
 import { IndexCreator } from './index_creator';
@@ -21,7 +21,7 @@ export abstract class AbstractIndexer implements Indexer {
     protected readonly repoUri: RepositoryUri,
     protected readonly revision: string,
     protected readonly client: EsClient,
-    protected readonly log: Log
+    protected readonly log: Logger
   ) {
     this.indexCreator = new IndexCreator(client);
   }

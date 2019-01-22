@@ -7,6 +7,7 @@
 import { spawn } from 'child_process';
 import getPort from 'get-port';
 import { resolve } from 'path';
+import { Logger } from '../log';
 import { ServerOptions } from '../server_options';
 import { LoggerFactory } from '../utils/log_factory';
 import { promiseTimeout } from '../utils/timeout';
@@ -33,11 +34,11 @@ export class TypescriptServerLauncher implements ILanguageServerLauncher {
     if (!this.detach) {
       port = await getPort();
     }
-    const log = this.loggerFactory.getLogger(['LSP', `ts@${this.targetHost}:${port}`]);
+    const log: Logger = this.loggerFactory.getLogger(['code', `ts@${this.targetHost}:${port}`]);
     const proxy = new LanguageServerProxy(port, this.targetHost, log);
 
     if (this.detach) {
-      log.info('Detach mode, expected LSP launch externally');
+      log.info('Detach mode, expected langserver launch externally');
       proxy.onConnected(() => {
         this.isRunning = true;
       });
@@ -55,10 +56,16 @@ export class TypescriptServerLauncher implements ILanguageServerLauncher {
           ['--max_old_space_size=4096', installationPath, '-p', port.toString(), '-c', '1'],
           {
             detached: false,
-            stdio: 'inherit',
+            stdio: 'pipe',
             cwd: resolve(installationPath, '../..'),
           }
         );
+        p.stdout.on('data', data => {
+          log.stdout(data.toString());
+        });
+        p.stderr.on('data', data => {
+          log.stderr(data.toString());
+        });
         this.isRunning = true;
         p.on('exit', () => (this.isRunning = false));
         return p;

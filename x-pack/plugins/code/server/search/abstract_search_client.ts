@@ -6,13 +6,13 @@
 
 import { SearchRequest, SearchResult } from '../../model';
 import { EsClient } from '../lib/esqueue';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { SearchClient } from './search_client';
 
 export abstract class AbstractSearchClient implements SearchClient {
   protected RESULTS_PER_PAGE = 20;
 
-  constructor(protected readonly client: EsClient, protected readonly log: Log) {}
+  constructor(protected readonly client: EsClient, protected readonly log: Logger) {}
 
   // For the full search request.
   public async search(req: SearchRequest): Promise<SearchResult> {

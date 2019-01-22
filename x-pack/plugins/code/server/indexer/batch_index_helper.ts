@@ -5,7 +5,7 @@
  */
 
 import { EsClient } from '../lib/esqueue';
-import { Log } from '../log';
+import { Logger } from '../log';
 
 /*
  * This BatchIndexHelper acts as the index request cache for elasticsearch
@@ -18,13 +18,13 @@ export class BatchIndexHelper {
 
   constructor(
     protected readonly client: EsClient,
-    protected readonly log: Log,
+    protected readonly log: Logger,
     private batchSize: number = BatchIndexHelper.DEFAULT_BATCH_SIZE
   ) {
     this.batch = [];
   }
 
-  public async index(index: string, type: string, body: any) {
+  public async index(index: string, body: any) {
     if (this.isCancelled()) {
       this.log.debug(`Batch index helper is cancelled. Skip.`);
       return;
@@ -32,7 +32,6 @@ export class BatchIndexHelper {
     this.batch.push({
       index: {
         _index: index,
-        _type: type,
       },
     });
     this.batch.push(body);

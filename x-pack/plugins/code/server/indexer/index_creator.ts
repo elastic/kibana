@@ -22,24 +22,22 @@ export class IndexCreator {
     const body = {
       settings: request.settings,
       mappings: {
-        [request.type]: {
-          // Apply the index version in the reserved _meta field of the index.
-          _meta: {
-            version: this.version,
-          },
-          dynamic_templates: [
-            {
-              fieldDefaultNotAnalyzed: {
-                match: '*',
-                mapping: {
-                  index: false,
-                  norms: false,
-                },
+        // Apply the index version in the reserved _meta field of the index.
+        _meta: {
+          version: this.version,
+        },
+        dynamic_templates: [
+          {
+            fieldDefaultNotAnalyzed: {
+              match: '*',
+              mapping: {
+                index: false,
+                norms: false,
               },
             },
-          ],
-          properties: request.schema,
-        },
+          },
+        ],
+        properties: request.schema,
       },
     };
 

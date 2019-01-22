@@ -9,19 +9,15 @@ import {
   DocumentAnalysisSettings,
   DocumentIndexName,
   DocumentSchema,
-  DocumentTypeName,
   ReferenceIndexName,
   ReferenceSchema,
-  ReferenceTypeName,
   SymbolAnalysisSettings,
   SymbolIndexName,
   SymbolSchema,
-  SymbolTypeName,
 } from './schema';
 
 export interface IndexCreationRequest {
   index: string;
-  type: string;
   settings: any;
   schema: any;
 }
@@ -29,7 +25,6 @@ export interface IndexCreationRequest {
 export const getDocumentIndexCreationRequest = (repoUri: RepositoryUri): IndexCreationRequest => {
   return {
     index: DocumentIndexName(repoUri),
-    type: DocumentTypeName,
     settings: {
       ...DocumentAnalysisSettings,
       number_of_shards: 1,
@@ -42,7 +37,6 @@ export const getDocumentIndexCreationRequest = (repoUri: RepositoryUri): IndexCr
 export const getSymbolIndexCreationRequest = (repoUri: RepositoryUri): IndexCreationRequest => {
   return {
     index: SymbolIndexName(repoUri),
-    type: SymbolTypeName,
     settings: {
       ...SymbolAnalysisSettings,
       number_of_shards: 1,
@@ -55,7 +49,6 @@ export const getSymbolIndexCreationRequest = (repoUri: RepositoryUri): IndexCrea
 export const getReferenceIndexCreationRequest = (repoUri: RepositoryUri): IndexCreationRequest => {
   return {
     index: ReferenceIndexName(repoUri),
-    type: ReferenceTypeName,
     settings: {
       number_of_shards: 1,
       auto_expand_replicas: '0-1',

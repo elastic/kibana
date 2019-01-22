@@ -294,10 +294,10 @@ exports[`render full suggestions component 1`] = `
                         <div>
                           <Styled(styled.div)>
                             <styled.div
-                              className="sc-bZQynM fCofhq"
+                              className="sc-bZQynM keiyFT"
                             >
                               <div
-                                className="sc-bZQynM fCofhq sc-ifAKCX bMxzXt"
+                                className="sc-bZQynM keiyFT sc-ifAKCX bMxzXt"
                               >
                                 <span>
                                   java.lang.
@@ -440,10 +440,10 @@ exports[`render full suggestions component 1`] = `
                         <div>
                           <Styled(styled.div)>
                             <styled.div
-                              className="sc-bZQynM fCofhq"
+                              className="sc-bZQynM keiyFT"
                             >
                               <div
-                                className="sc-bZQynM fCofhq sc-ifAKCX bMxzXt"
+                                className="sc-bZQynM keiyFT sc-ifAKCX bMxzXt"
                               >
                                 src/foo/bar.java
                               </div>
@@ -583,10 +583,10 @@ exports[`render full suggestions component 1`] = `
                         <div>
                           <Styled(styled.div)>
                             <styled.div
-                              className="sc-bZQynM fCofhq"
+                              className="sc-bZQynM keiyFT"
                             >
                               <div
-                                className="sc-bZQynM fCofhq sc-ifAKCX bMxzXt"
+                                className="sc-bZQynM keiyFT sc-ifAKCX bMxzXt"
                               >
                                 elastic/kibana
                               </div>
@@ -649,10 +649,10 @@ exports[`render full suggestions component 1`] = `
                         <div>
                           <Styled(styled.div)>
                             <styled.div
-                              className="sc-bZQynM fCofhq"
+                              className="sc-bZQynM keiyFT"
                             >
                               <div
-                                className="sc-bZQynM fCofhq sc-ifAKCX bMxzXt"
+                                className="sc-bZQynM keiyFT sc-ifAKCX bMxzXt"
                               >
                                 elastic/elasticsearch
                               </div>

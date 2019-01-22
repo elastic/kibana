@@ -7,13 +7,13 @@
 import sinon from 'sinon';
 
 import { AnyObject, EsClient } from '../lib/esqueue';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 import { IndexCreationRequest } from './index_creation_request';
 import { IndexVersionController } from './index_version_controller';
 import pkg from './schema/version.json';
 
-const log: Log = (new ConsoleLoggerFactory().getLogger(['test']) as any) as Log;
+const log: Logger = new ConsoleLoggerFactory().getLogger(['test']);
 
 const emptyAsyncFunc = async (_: AnyObject): Promise<any> => {
   Promise.resolve({});
@@ -39,10 +39,8 @@ test('Index upgrade is triggered.', async () => {
     Promise.resolve({
       mockindex: {
         mappings: {
-          mocktype: {
-            _meta: {
-              version: 0,
-            },
+          _meta: {
+            version: 0,
           },
         },
       },
@@ -61,7 +59,6 @@ test('Index upgrade is triggered.', async () => {
   const versionController = new IndexVersionController(esClient as EsClient, log);
   const req: IndexCreationRequest = {
     index: 'mockindex',
-    type: 'mocktype',
     settings: {},
     schema: {},
   };
@@ -84,10 +81,8 @@ test('Index upgrade is skipped.', async () => {
     Promise.resolve({
       mockindex: {
         mappings: {
-          mocktype: {
-            _meta: {
-              version: pkg.codeIndexVersion,
-            },
+          _meta: {
+            version: pkg.codeIndexVersion,
           },
         },
       },
@@ -106,7 +101,6 @@ test('Index upgrade is skipped.', async () => {
   const versionController = new IndexVersionController(esClient as EsClient, log);
   const req: IndexCreationRequest = {
     index: 'mockindex',
-    type: 'mocktype',
     settings: {},
     schema: {},
   };

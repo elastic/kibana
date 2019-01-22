@@ -27,12 +27,31 @@ import {
 
 import { APPLIES_TO, OPERATOR } from '../../../common/constants/detector_rule';
 import { appliesToText, operatorToText } from './utils';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 // Raise the popovers above GuidePageSideNav
 const POPOVER_STYLE = { zIndex: '200' };
 
 
-export class ConditionExpression extends Component {
+export const ConditionExpression = injectI18n(class ConditionExpression extends Component {
+  static propTypes = {
+    index: PropTypes.number.isRequired,
+    appliesTo: PropTypes.oneOf([
+      APPLIES_TO.ACTUAL,
+      APPLIES_TO.TYPICAL,
+      APPLIES_TO.DIFF_FROM_TYPICAL
+    ]),
+    operator: PropTypes.oneOf([
+      OPERATOR.LESS_THAN,
+      OPERATOR.LESS_THAN_OR_EQUAL,
+      OPERATOR.GREATER_THAN,
+      OPERATOR.GREATER_THAN_OR_EQUAL
+    ]),
+    value: PropTypes.number.isRequired,
+    updateCondition: PropTypes.func.isRequired,
+    deleteCondition: PropTypes.func.isRequired
+  };
+
   constructor(props) {
     super(props);
 
@@ -98,7 +117,12 @@ export class ConditionExpression extends Component {
   renderAppliesToPopover() {
     return (
       <div style={POPOVER_STYLE}>
-        <EuiPopoverTitle>When</EuiPopoverTitle>
+        <EuiPopoverTitle>
+          <FormattedMessage
+            id="xpack.ml.ruleEditor.conditionExpression.appliesToPopoverTitle"
+            defaultMessage="When"
+          />
+        </EuiPopoverTitle>
         <div className="euiExpression" style={{ width: 200 }}>
           <EuiSelect
             value={this.props.appliesTo}
@@ -117,7 +141,12 @@ export class ConditionExpression extends Component {
   renderOperatorValuePopover() {
     return (
       <div style={POPOVER_STYLE}>
-        <EuiPopoverTitle>Is</EuiPopoverTitle>
+        <EuiPopoverTitle>
+          <FormattedMessage
+            id="xpack.ml.ruleEditor.conditionExpression.operatorValuePopoverTitle"
+            defaultMessage="Is"
+          />
+        </EuiPopoverTitle>
         <div className="euiExpression">
           <EuiFlexGroup style={{ maxWidth: 450 }}>
             <EuiFlexItem grow={false} style={{ width: 250 }}>
@@ -161,7 +190,10 @@ export class ConditionExpression extends Component {
             id="appliesToPopover"
             button={(
               <EuiExpression
-                description="when"
+                description={(<FormattedMessage
+                  id="xpack.ml.ruleEditor.conditionExpression.appliesToButtonLabel"
+                  defaultMessage="when"
+                />)}
                 value={appliesToText(appliesTo)}
                 isActive={this.state.isAppliesToOpen}
                 onClick={this.openAppliesTo}
@@ -183,7 +215,11 @@ export class ConditionExpression extends Component {
             id="operatorValuePopover"
             button={(
               <EuiExpression
-                description={`is ${operatorToText(operator)}`}
+                description={(<FormattedMessage
+                  id="xpack.ml.ruleEditor.conditionExpression.operatorValueButtonLabel"
+                  defaultMessage="is {operator}"
+                  values={{ operator: operatorToText(operator) }}
+                />)}
                 value={`${value}`}
                 isActive={this.state.isOperatorValueOpen}
                 onClick={this.openOperatorValue}
@@ -205,27 +241,13 @@ export class ConditionExpression extends Component {
             color="danger"
             onClick={() => deleteCondition(index)}
             iconType="trash"
-            aria-label="Next"
+            aria-label={this.props.intl.formatMessage({
+              id: 'xpack.ml.ruleEditor.conditionExpression.deleteConditionButtonAriaLabel',
+              defaultMessage: 'Delete condition'
+            })}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
   }
-}
-ConditionExpression.propTypes = {
-  index: PropTypes.number.isRequired,
-  appliesTo: PropTypes.oneOf([
-    APPLIES_TO.ACTUAL,
-    APPLIES_TO.TYPICAL,
-    APPLIES_TO.DIFF_FROM_TYPICAL
-  ]),
-  operator: PropTypes.oneOf([
-    OPERATOR.LESS_THAN,
-    OPERATOR.LESS_THAN_OR_EQUAL,
-    OPERATOR.GREATER_THAN,
-    OPERATOR.GREATER_THAN_OR_EQUAL
-  ]),
-  value: PropTypes.number.isRequired,
-  updateCondition: PropTypes.func.isRequired,
-  deleteCondition: PropTypes.func.isRequired
-};
+});

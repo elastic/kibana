@@ -15,6 +15,7 @@ export * from './user';
 export * from './commit';
 export * from './status';
 export * from './project_config';
+export * from './shortcuts';
 
 export interface Match {
   isExact?: boolean;

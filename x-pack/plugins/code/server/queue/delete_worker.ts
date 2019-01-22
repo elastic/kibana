@@ -10,7 +10,7 @@ import { RepositoryUri, WorkerReservedProgress } from '../../model';
 import { WorkerProgress, WorkerResult } from '../../model/repository';
 import { DocumentIndexName, ReferenceIndexName, SymbolIndexName } from '../indexer/schema';
 import { EsClient, Esqueue } from '../lib/esqueue';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { LspService } from '../lsp/lsp_service';
 import { RepositoryServiceFactory } from '../repository_service_factory';
 import { RepositoryObjectClient } from '../search';
@@ -26,7 +26,7 @@ export class DeleteWorker extends AbstractWorker {
 
   constructor(
     protected readonly queue: Esqueue,
-    protected readonly log: Log,
+    protected readonly log: Logger,
     protected readonly client: EsClient,
     protected readonly serverOptions: ServerOptions,
     private readonly cancellationService: CancellationSerivce,

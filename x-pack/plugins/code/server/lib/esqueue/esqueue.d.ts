@@ -40,11 +40,6 @@ export class Esqueue extends EventEmitter {
       timeout?: number;
 
       /**
-       * The _type used by Esqueue for documents created in elasticsearch
-       */
-      doctype?: string;
-
-      /**
        * The value used to separate the parts of the date in index names created by Esqueue
        */
       dateSeparator?: string;

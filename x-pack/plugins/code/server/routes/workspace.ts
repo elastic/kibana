@@ -7,7 +7,7 @@
 import Boom from 'boom';
 import hapi, { RequestQuery } from 'hapi';
 
-import { Log } from '../log';
+import { Logger } from '../log';
 import { WorkspaceCommand } from '../lsp/workspace_command';
 import { WorkspaceHandler } from '../lsp/workspace_handler';
 import { ServerOptions } from '../server_options';
@@ -32,7 +32,7 @@ export function workspaceRoute(server: hapi.Server, serverOptions: ServerOptions
       const repoConfig = serverOptions.repoConfigs[repoUri];
       const force = !!(req.query as RequestQuery).force;
       if (repoConfig) {
-        const log = new Log(server, ['workspace', repoUri]);
+        const log = new Logger(server, ['workspace', repoUri]);
         const workspaceHandler = new WorkspaceHandler(
           serverOptions.repoPath,
           serverOptions.workspacePath,

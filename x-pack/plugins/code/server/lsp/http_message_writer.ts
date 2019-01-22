@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger } from 'vscode-jsonrpc';
 import { Message, ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { AbstractMessageWriter, MessageWriter } from 'vscode-jsonrpc/lib/messageWriter';
+import { Logger } from '../log';
 
 import { RepliesMap } from './replies_map';
 
@@ -41,7 +41,7 @@ export class HttpMessageWriter extends AbstractMessageWriter implements MessageW
       }
     } else {
       if (this.logger) {
-        this.logger.log(`ignored message ${JSON.stringify(msg)} because of no id`);
+        this.logger.info(`ignored message ${JSON.stringify(msg)} because of no id`);
       }
     }
   }

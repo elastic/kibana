@@ -13,7 +13,7 @@ import { toCanonicalUrl } from '../../common/uri_util';
 import { Document, IndexStats, IndexStatsKey, LspIndexRequest, RepositoryUri } from '../../model';
 import { GitOperations } from '../git_operations';
 import { EsClient } from '../lib/esqueue';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { LspService } from '../lsp/lsp_service';
 import { ServerOptions } from '../server_options';
 import { detectLanguage, detectLanguageByFilename } from '../utils/detect_language';
@@ -26,15 +26,12 @@ import {
 } from './index_creation_request';
 import {
   DocumentIndexName,
-  DocumentTypeName,
   ReferenceIndexName,
-  ReferenceTypeName,
   RepositoryDeleteStatusReservedField,
   RepositoryGitStatusReservedField,
   RepositoryLspIndexStatusReservedField,
   RepositoryReservedField,
   SymbolIndexName,
-  SymbolTypeName,
 } from './schema';
 
 export class LspIndexer extends AbstractIndexer {
@@ -47,7 +44,7 @@ export class LspIndexer extends AbstractIndexer {
     protected readonly lspService: LspService,
     protected readonly options: ServerOptions,
     protected readonly client: EsClient,
-    protected readonly log: Log
+    protected readonly log: Logger
   ) {
     super(repoUri, revision, client, log);
 
@@ -209,13 +206,13 @@ export class LspIndexer extends AbstractIndexer {
       if (response && response.result.length > 0) {
         const { symbols, references } = response.result[0];
         for (const symbol of symbols) {
-          await this.batchIndexHelper.index(SymbolIndexName(repoUri), SymbolTypeName, symbol);
+          await this.batchIndexHelper.index(SymbolIndexName(repoUri), symbol);
           symbolNames.add(symbol.symbolInformation.name);
         }
         stats.set(IndexStatsKey.Symbol, symbols.length);
 
         for (const ref of references) {
-          await this.batchIndexHelper.index(ReferenceIndexName(repoUri), ReferenceTypeName, ref);
+          await this.batchIndexHelper.index(ReferenceIndexName(repoUri), ref);
         }
         stats.set(IndexStatsKey.Reference, references.length);
       } else {
@@ -244,7 +241,7 @@ export class LspIndexer extends AbstractIndexer {
       language,
       qnames: Array.from(symbolNames),
     };
-    await this.batchIndexHelper.index(DocumentIndexName(repoUri), DocumentTypeName, body);
+    await this.batchIndexHelper.index(DocumentIndexName(repoUri), body);
     stats.set(IndexStatsKey.File, 1);
     return stats;
   }

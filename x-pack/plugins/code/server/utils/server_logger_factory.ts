@@ -5,14 +5,13 @@
  */
 
 import * as Hapi from 'hapi';
-import { Logger } from 'vscode-jsonrpc';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { LoggerFactory } from './log_factory';
 
 export class ServerLoggerFactory implements LoggerFactory {
   constructor(private readonly server: Hapi.Server) {}
 
   public getLogger(tags: string[]): Logger {
-    return new Log(this.server, tags);
+    return new Logger(this.server, tags);
   }
 }

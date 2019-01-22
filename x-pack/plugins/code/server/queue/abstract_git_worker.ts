@@ -9,11 +9,12 @@ import {
   CloneProgress,
   CloneWorkerProgress,
   CloneWorkerResult,
+  RepositoryUri,
   WorkerReservedProgress,
 } from '../../model';
 import { getDefaultBranch, getHeadRevision } from '../git_operations';
 import { EsClient, Esqueue } from '../lib/esqueue';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { RepositoryObjectClient } from '../search';
 import { ServerOptions } from '../server_options';
 import { AbstractWorker } from './abstract_worker';
@@ -25,7 +26,7 @@ export abstract class AbstractGitWorker extends AbstractWorker {
 
   constructor(
     protected readonly queue: Esqueue,
-    protected readonly log: Log,
+    protected readonly log: Logger,
     protected readonly client: EsClient,
     protected readonly serverOptions: ServerOptions
   ) {
@@ -63,7 +64,7 @@ export abstract class AbstractGitWorker extends AbstractWorker {
     return await super.onJobCompleted(job, res);
   }
 
-  public async updateProgress(uri: string, progress: number, cloneProgress?: CloneProgress) {
+  public async updateProgress(uri: RepositoryUri, progress: number, cloneProgress?: CloneProgress) {
     const p: CloneWorkerProgress = {
       uri,
       progress,
@@ -71,7 +72,7 @@ export abstract class AbstractGitWorker extends AbstractWorker {
       cloneProgress,
     };
     try {
-      return await this.objectClient.updateRepositoryGitStatus(p.uri, p);
+      return await this.objectClient.updateRepositoryGitStatus(uri, p);
     } catch (error) {
       this.log.error(`Update git clone progress error.`);
       this.log.error(error);

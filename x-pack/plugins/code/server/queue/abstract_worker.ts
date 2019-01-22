@@ -13,7 +13,7 @@ import {
   events as esqueueEvents,
   Job as JobInternal,
 } from '../lib/esqueue';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { Job } from './job';
 import { Worker } from './worker';
 
@@ -21,7 +21,7 @@ export abstract class AbstractWorker implements Worker {
   // The id of the worker. Also serves as the id of the job this worker consumes.
   protected id = '';
 
-  constructor(protected readonly queue: Esqueue, protected readonly log: Log) {}
+  constructor(protected readonly queue: Esqueue, protected readonly log: Logger) {}
 
   // Assemble jobs, for now most of the job object construction should be the same.
   public createJob(payload: any, options: any): Job {

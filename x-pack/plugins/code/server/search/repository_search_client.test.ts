@@ -8,7 +8,7 @@ import sinon from 'sinon';
 
 import { RepositoryReservedField } from '../indexer/schema';
 import { AnyObject, EsClient } from '../lib/esqueue';
-import { Log } from '../log';
+import { Logger } from '../log';
 import { RepositorySearchClient } from './repository_search_client';
 
 let repoSearchClient: RepositorySearchClient;
@@ -16,7 +16,7 @@ let esClient;
 
 // Setup the entire RepositorySearchClient.
 function initSearchClient() {
-  const log: Log = (sinon.stub() as any) as Log;
+  const log: Logger = (sinon.stub() as any) as Logger;
   esClient = initEsClient();
 
   repoSearchClient = new RepositorySearchClient(esClient, log);
