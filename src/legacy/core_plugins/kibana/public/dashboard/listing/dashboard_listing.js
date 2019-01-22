@@ -257,10 +257,7 @@ class DashboardListingUi extends React.Component {
                   listingLimitValue: this.props.listingLimit,
                   listingLimitText: (
                     <strong>
-                      <FormattedMessage
-                        id="kbn.dashboard.listing.listingLimitExceededListingLimitTitle"
-                        defaultMessage="listingLimit"
-                      />
+                      listingLimit
                     </strong>
                   ),
                   advancedSettingsLink: (
@@ -397,6 +394,7 @@ class DashboardListingUi extends React.Component {
             aria-label={intl.formatMessage({
               id: 'kbn.dashboard.listing.searchBar.searchFieldAriaLabel',
               defaultMessage: 'Filter dashboards',
+              description: '"Filter" is used as a verb here, similar to "search through dashboards".',
             })}
             placeholder={intl.formatMessage({
               id: 'kbn.dashboard.listing.searchBar.searchFieldPlaceholder',

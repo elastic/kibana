@@ -28,8 +28,21 @@ import { formatValue } from '../../../formatters/format_value';
 import {
   getAppliesToValueFromAnomaly,
 } from '../utils';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export class EditConditionLink extends Component {
+export const EditConditionLink = injectI18n(class EditConditionLink extends Component {
+  static propTypes = {
+    conditionIndex: PropTypes.number.isRequired,
+    conditionValue: PropTypes.number.isRequired,
+    appliesTo: PropTypes.oneOf([
+      APPLIES_TO.ACTUAL,
+      APPLIES_TO.TYPICAL,
+      APPLIES_TO.DIFF_FROM_TYPICAL
+    ]),
+    anomaly: PropTypes.object.isRequired,
+    updateConditionValue: PropTypes.func.isRequired,
+  };
+
   constructor(props) {
     super(props);
 
@@ -62,21 +75,32 @@ export class EditConditionLink extends Component {
   }
 
   render() {
+    const { intl } = this.props;
     const value = this.state.value;
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiText>
-            Update rule condition from {this.props.conditionValue} to
+            <FormattedMessage
+              id="xpack.ml.ruleEditor.editConditionLink.updateRuleConditionFromText"
+              defaultMessage="Update rule condition from {conditionValue} to"
+              values={{ conditionValue: this.props.conditionValue }}
+            />
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false} className="condition-edit-value-field">
           <EuiFieldNumber
-            placeholder="Enter value"
+            placeholder={intl.formatMessage({
+              id: 'xpack.ml.ruleEditor.editConditionLink.enterValuePlaceholder',
+              defaultMessage: 'Enter value'
+            })}
             compressed={true}
             value={value}
             onChange={this.onChangeValue}
-            aria-label="Enter numeric value for condition"
+            aria-label={intl.formatMessage({
+              id: 'xpack.ml.ruleEditor.editConditionLink.enterNumericValueForConditionAriaLabel',
+              defaultMessage: 'Enter numeric value for condition'
+            })}
           />
         </EuiFlexItem>
         {value !== '' &&
@@ -85,22 +109,14 @@ export class EditConditionLink extends Component {
               size="s"
               onClick={() => this.onUpdateClick()}
             >
-              Update
+              <FormattedMessage
+                id="xpack.ml.ruleEditor.editConditionLink.updateLinkText"
+                defaultMessage="Update"
+              />
             </EuiLink>
           </EuiFlexItem>
         }
       </EuiFlexGroup>
     );
   }
-}
-EditConditionLink.propTypes = {
-  conditionIndex: PropTypes.number.isRequired,
-  conditionValue: PropTypes.number.isRequired,
-  appliesTo: PropTypes.oneOf([
-    APPLIES_TO.ACTUAL,
-    APPLIES_TO.TYPICAL,
-    APPLIES_TO.DIFF_FROM_TYPICAL
-  ]),
-  anomaly: PropTypes.object.isRequired,
-  updateConditionValue: PropTypes.func.isRequired,
-};
+});
