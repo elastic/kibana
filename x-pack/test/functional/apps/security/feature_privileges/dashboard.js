@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from 'expect.js';
-import { DashboardConstants } from '../../../../../../src/legacy/core_plugins/kibana/public/dashboard/dashboard_constants';
+// eslint-disable-next-line max-len
+import { DashboardConstants, createDashboardEditUrl } from '../../../../../../src/legacy/core_plugins/kibana/public/dashboard/dashboard_constants';
 
 export default function ({ getPageObjects, getService }) {
   const esArchiver = getService('esArchiver');
@@ -70,10 +71,29 @@ export default function ({ getPageObjects, getService }) {
         ]);
       });
 
-      it('shows create "Create new dashboard" button', async () => {
-        await PageObjects.common.navigateToApp('dashboard');
+      it(`landing page shows "Create new Dashboard" button`, async () => {
+        await PageObjects.common.navigateToActualUrl('kibana', DashboardConstants.LANDING_PAGE_PATH, {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
         await testSubjects.existOrFail('dashboardLandingPage', 10000);
-        await testSubjects.existOrFail('createDashboardPromptButton');
+        await testSubjects.existOrFail('newDashboardLink');
+      });
+
+      it(`create new dashboard shows addNew button`, async () => {
+        await PageObjects.common.navigateToActualUrl('kibana', DashboardConstants.CREATE_NEW_DASHBOARD_URL, {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+        await testSubjects.existOrFail('emptyDashboardAddPanelButton', 10000);
+      });
+
+      it(`can view existing Dashboard`, async () => {
+        await PageObjects.common.navigateToActualUrl('kibana', createDashboardEditUrl('i-exist'), {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+        await testSubjects.existOrFail('dashboardPanelHeading-APie', 10000);
       });
     });
 
@@ -119,10 +139,30 @@ export default function ({ getPageObjects, getService }) {
         ]);
       });
 
-      it(`doesn't show "Create new Dashboard" button`, async () => {
-        await PageObjects.common.navigateToApp('dashboard');
+      it(`landing page doesn't show "Create new Dashboard" button`, async () => {
+        await PageObjects.common.navigateToActualUrl('kibana', DashboardConstants.LANDING_PAGE_PATH, {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
         await testSubjects.existOrFail('dashboardLandingPage', 10000);
-        await testSubjects.missingOrFail('createDashboardPromptButton');
+        await testSubjects.missingOrFail('newDashboardLink');
+      });
+
+      it(`create new dashboard redirects to the home page`, async () => {
+        await PageObjects.common.navigateToActualUrl('kibana', DashboardConstants.CREATE_NEW_DASHBOARD_URL, {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+        await testSubjects.existOrFail('homeApp', 10000);
+      });
+
+
+      it(`can view existing Dashboard`, async () => {
+        await PageObjects.common.navigateToActualUrl('kibana', createDashboardEditUrl('i-exist'), {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+        await testSubjects.existOrFail('dashboardPanelHeading-APie', 10000);
       });
     });
 
@@ -170,6 +210,22 @@ export default function ({ getPageObjects, getService }) {
 
       it(`create new dashboard redirects to the home page`, async () => {
         await PageObjects.common.navigateToActualUrl('kibana', DashboardConstants.CREATE_NEW_DASHBOARD_URL, {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+        await testSubjects.existOrFail('homeApp', 10000);
+      });
+
+      it(`edit dashboard for object which doesn't exist redirects to the home page`, async () => {
+        await PageObjects.common.navigateToActualUrl('kibana', createDashboardEditUrl('i-dont-exist'), {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+        await testSubjects.existOrFail('homeApp', 10000);
+      });
+
+      it(`edit dashboard for object which exists redirects to the home page`, async () => {
+        await PageObjects.common.navigateToActualUrl('kibana', createDashboardEditUrl('i-exist'), {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });

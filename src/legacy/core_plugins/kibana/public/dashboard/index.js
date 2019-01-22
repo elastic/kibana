@@ -108,6 +108,7 @@ uiRoutes
   .when(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {
     template: dashboardTemplate,
     controller: createNewDashboardCtrl,
+    requireUICapabilities: 'dashboard.createNew',
     resolve: {
       dash: function (savedDashboards, redirectWhenMissing) {
         return savedDashboards.get()
