@@ -216,7 +216,7 @@ app.directive('dashboardApp', function ($injector) {
             dashboardStateManager.getPanels().find((panel) => panel.panelIndex === panelIndex);
       };
 
-      $scope.updateQueryAndFetch = function (query) {
+      $scope.updateQueryAndFetch = function ({ query }) {
         const oldQuery = $scope.model.query;
         if (_.isEqual(oldQuery, query)) {
           // The user can still request a reload in the query bar, even if the

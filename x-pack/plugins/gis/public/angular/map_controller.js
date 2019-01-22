@@ -9,13 +9,11 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { applyTheme } from 'ui/theme';
-import { timefilter } from 'ui/timefilter';
 import { Provider } from 'react-redux';
 import { getStore } from '../store/store';
 import { GisMap } from '../components/gis_map';
 import {
   setSelectedLayer,
-  setTimeFilters,
   setRefreshConfig,
   setGoto,
   replaceLayerList,
@@ -30,13 +28,16 @@ import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { showOptionsPopover } from '../components/top_nav/show_options_popover';
 import { toastNotifications } from 'ui/notify';
 import { getInitialLayers } from './get_initial_layers';
+import { getInitialQuery } from './get_initial_query';
+import { getInitialTimeFilters } from './get_initial_time_filters';
+import { getInitialRefreshConfig } from './get_initial_refresh_config';
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-gis-root';
-const DEFAULT_QUERY_LANGUAGE = 'kuery';
+
 
 const app = uiModules.get('app/gis', []);
 
-app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage, AppState) => {
+app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage, AppState, globalState) => {
 
   const savedMap = $scope.map = $route.current.locals.map;
   let isDarkTheme;
@@ -44,27 +45,79 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
 
   inspectorAdapters.requests.reset();
 
+  $scope.$listen(globalState, 'fetch_with_changes', (diff) => {
+    if (diff.includes('time')) {
+      $scope.updateQueryAndDispatch({ query: $scope.query, dateRange: globalState.time });
+    }
+    if (diff.includes('refreshInterval')) {
+      $scope.onRefreshChange({ isPaused: globalState.pause, refreshInterval: globalState.value });
+    }
+  });
+
   const $state = new AppState();
   $scope.$listen($state, 'fetch_with_changes', function (diff) {
     if (diff.includes('query')) {
-      $scope.updateQueryAndDispatch($state.query);
+      $scope.updateQueryAndDispatch({ query: $state.query });
     }
   });
-  $scope.query = {};
+
+  function syncAppAndGlobalState() {
+    $scope.$evalAsync(() => {
+      $state.query = $scope.query;
+      $state.save();
+      globalState.time = $scope.time;
+      globalState.refreshInterval = {
+        pause: $scope.refreshConfig.isPaused,
+        value: $scope.refreshConfig.interval,
+      };
+      globalState.save();
+    });
+  }
+
+  $scope.query = getInitialQuery({
+    mapStateJSON: savedMap.mapStateJSON,
+    appState: $state,
+    userQueryLanguage: localStorage.get('kibana.userQueryLanguage')
+  });
+  $scope.time = getInitialTimeFilters({
+    mapStateJSON: savedMap.mapStateJSON,
+    globalState: globalState,
+  });
+  $scope.refreshConfig = getInitialRefreshConfig({
+    mapStateJSON: savedMap.mapStateJSON,
+    globalState: globalState,
+  });
+  syncAppAndGlobalState();
+
   $scope.indexPatterns = [];
-  $scope.updateQueryAndDispatch = function (newQuery) {
-    $scope.query = newQuery;
+  $scope.updateQueryAndDispatch = function ({ dateRange, query }) {
+    $scope.query = query;
+    $scope.time = dateRange;
     getStore().then(store => {
       // ignore outdated query
-      if ($scope.query !== newQuery) {
+      if ($scope.query !== query && $scope.time !== dateRange) {
         return;
       }
 
-      store.dispatch(setQuery({ query: $scope.query }));
+      store.dispatch(setQuery({ query: $scope.query, timeFilters: $scope.time }));
 
-      // update appState
-      $state.query = $scope.query;
-      $state.save();
+      syncAppAndGlobalState();
+    });
+  };
+  $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
+    $scope.refreshConfig = {
+      isPaused,
+      interval: refreshInterval ? refreshInterval : $scope.refreshConfig.interval
+    };
+    getStore().then(store => {
+      // ignore outdated
+      if ($scope.refreshConfig.isPaused !== isPaused && $scope.refreshConfig.interval !== refreshInterval) {
+        return;
+      }
+
+      store.dispatch(setRefreshConfig($scope.refreshConfig));
+
+      syncAppAndGlobalState();
     });
   };
 
@@ -79,36 +132,20 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     });
 
     // sync store with savedMap mapState
-    let queryFromSavedObject;
     if (savedMap.mapStateJSON) {
       const mapState = JSON.parse(savedMap.mapStateJSON);
-      queryFromSavedObject = mapState.query;
-      const timeFilters = mapState.timeFilters ? mapState.timeFilters : timefilter.getTime();
-      store.dispatch(setTimeFilters(timeFilters));
       store.dispatch(setGoto({
         lat: mapState.center.lat,
         lon: mapState.center.lon,
         zoom: mapState.zoom,
       }));
-      if (mapState.refreshConfig) {
-        store.dispatch(setRefreshConfig(mapState.refreshConfig));
-      }
     }
 
     const layerList = getInitialLayers(savedMap.layerListJSON, getDataSources(store.getState()));
     store.dispatch(replaceLayerList(layerList));
 
-    // Initialize query, syncing appState and store
-    if ($state.query) {
-      $scope.updateQueryAndDispatch($state.query);
-    } else if (queryFromSavedObject) {
-      $scope.updateQueryAndDispatch(queryFromSavedObject);
-    } else {
-      $scope.updateQueryAndDispatch({
-        query: '',
-        language: localStorage.get('kibana.userQueryLanguage') || DEFAULT_QUERY_LANGUAGE
-      });
-    }
+    store.dispatch(setRefreshConfig($scope.refreshConfig));
+    store.dispatch(setQuery({ query: $scope.query, timeFilters: $scope.time }));
 
     const root = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
     render(
@@ -206,6 +243,8 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     return { id };
   }
 
+  $scope.showTimepickerInTopNav = false; // used by kbn-top-nav directive to disable timepicker in top nav
+  $scope.showDatePicker = true; // used by query-bar directive to enable timepikcer in query bar
   $scope.topNavMenu = [{
     key: 'inspect',
     description: 'Open Inspector',
@@ -254,8 +293,6 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       showSaveModal(saveModal);
     }
   }];
-  timefilter.enableTimeRangeSelector();
-  timefilter.enableAutoRefreshSelector();
 
   function updateTheme() {
     $scope.$evalAsync(() => {

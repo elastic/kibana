@@ -19,12 +19,14 @@
 
 import { IndexPattern } from 'ui/index_patterns';
 
-import { compact, debounce, isEqual } from 'lodash';
+import { compact, debounce, get, isEqual } from 'lodash';
 import React, { Component } from 'react';
 import { getFromLegacyIndexPattern } from 'ui/index_patterns/static_utils';
 import { kfetch } from 'ui/kfetch';
 import { PersistedLog } from 'ui/persisted_log';
 import { Storage } from 'ui/storage';
+// @ts-ignore
+import { timeHistory } from 'ui/timefilter/time_history';
 import {
   AutocompleteSuggestion,
   AutocompleteSuggestionType,
@@ -42,6 +44,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiOutsideClickDetector,
+  EuiSuperDatePicker,
 } from '@elastic/eui';
 
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
@@ -66,14 +69,25 @@ interface Query {
   language: string;
 }
 
+interface DateRange {
+  from: string;
+  to: string;
+}
+
 interface Props {
   query: Query;
-  onSubmit: (query: { query: string | object; language: string }) => void;
+  onSubmit: ({ dateRange, query }: { dateRange: DateRange; query: Query }) => void;
   disableAutoFocus?: boolean;
   appName: string;
   indexPatterns: IndexPattern[];
   store: Storage;
   intl: InjectedIntl;
+  showDatePicker: boolean;
+  from: string;
+  to: string;
+  isPaused: boolean;
+  refreshInterval: number;
+  onRefreshChange?: (isPaused: boolean, refreshInterval: number) => void;
 }
 
 interface State {
@@ -84,6 +98,8 @@ interface State {
   suggestions: AutocompleteSuggestion[];
   suggestionLimit: number;
   currentProps?: Props;
+  from: string;
+  to: string;
 }
 
 export class QueryBarUI extends Component<Props, State> {
@@ -92,26 +108,47 @@ export class QueryBarUI extends Component<Props, State> {
       return null;
     }
 
+    let nextQuery = null;
     if (nextProps.query.query !== prevState.query.query) {
-      return {
-        query: {
-          query: toUser(nextProps.query.query),
-          language: nextProps.query.language,
-        },
-        currentProps: nextProps,
+      nextQuery = {
+        query: toUser(nextProps.query.query),
+        language: nextProps.query.language,
       };
     } else if (nextProps.query.language !== prevState.query.language) {
-      return {
-        query: {
-          query: '',
-          language: nextProps.query.language,
-        },
-        currentProps: nextProps,
+      nextQuery = {
+        query: '',
+        language: nextProps.query.language,
       };
     }
 
-    return null;
+    let nextDateRange = null;
+    if (
+      nextProps.from !== get(prevState, 'currentProps.from') ||
+      nextProps.to !== get(prevState, 'currentProps.to')
+    ) {
+      nextDateRange = {
+        from: nextProps.from,
+        to: nextProps.to,
+      };
+    }
+
+    const nextState = {
+      currentProps: nextProps,
+    };
+    if (nextQuery) {
+      nextState.query = nextQuery;
+    }
+    if (nextDateRange) {
+      nextState.from = nextDateRange.from;
+      nextState.to = nextDateRange.to;
+    }
+    return nextState;
   }
+  private static defaultProps = {
+    showDatePicker: false,
+    from: 'now-15m',
+    to: 'now',
+  };
 
   /*
    Keep the "draft" value in local state until the user actually submits the query. There are a couple advantages:
@@ -135,6 +172,8 @@ export class QueryBarUI extends Component<Props, State> {
     index: null,
     suggestions: [],
     suggestionLimit: 50,
+    from: this.props.from,
+    to: this.props.to,
   };
 
   public updateSuggestions = debounce(async () => {
@@ -150,7 +189,11 @@ export class QueryBarUI extends Component<Props, State> {
   private persistedLog: PersistedLog | null = null;
 
   public isDirty = () => {
-    return this.state.query.query !== this.props.query.query;
+    return (
+      this.state.query.query !== this.props.query.query ||
+      this.state.from !== this.props.from ||
+      this.state.to !== this.props.to
+    );
   };
 
   public increaseLimit = () => {
@@ -321,6 +364,13 @@ export class QueryBarUI extends Component<Props, State> {
     this.onInputChange(event.target.value);
   };
 
+  public onTimeChange = ({ start, end }: { start: string; end: string }) => {
+    this.setState({
+      from: start,
+      to: end,
+    });
+  };
+
   public onKeyUp = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if ([KEY_CODES.LEFT, KEY_CODES.RIGHT, KEY_CODES.HOME, KEY_CODES.END].includes(event.keyCode)) {
       this.setState({ isSuggestionsVisible: true });
@@ -407,9 +457,20 @@ export class QueryBarUI extends Component<Props, State> {
       this.persistedLog.add(this.state.query.query);
     }
 
+    timeHistory.add({
+      from: this.state.from,
+      to: this.state.to,
+    });
+
     this.props.onSubmit({
-      query: fromUser(this.state.query.query),
-      language: this.state.query.language,
+      query: {
+        query: fromUser(this.state.query.query),
+        language: this.state.query.language,
+      },
+      dateRange: {
+        from: this.state.from,
+        to: this.state.to,
+      },
     });
     this.setState({ isSuggestionsVisible: false });
   };
@@ -426,8 +487,14 @@ export class QueryBarUI extends Component<Props, State> {
 
     this.props.store.set('kibana.userQueryLanguage', language);
     this.props.onSubmit({
-      query: '',
-      language,
+      query: {
+        query: '',
+        language,
+      },
+      dateRange: {
+        from: this.props.from,
+        to: this.props.to,
+      },
     });
   };
 
@@ -532,6 +599,7 @@ export class QueryBarUI extends Component<Props, State> {
             </div>
           </EuiOutsideClickDetector>
         </EuiFlexItem>
+        {this.renderDatePicker()}
         <EuiFlexItem grow={false}>
           <EuiButton
             aria-label={this.props.intl.formatMessage({
@@ -554,6 +622,36 @@ export class QueryBarUI extends Component<Props, State> {
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
+    );
+  }
+
+  private renderDatePicker() {
+    if (!this.props.showDatePicker) {
+      return null;
+    }
+
+    const recentlyUsedRanges = timeHistory
+      .get()
+      .map(({ from, to }: { from: string; to: string }) => {
+        return {
+          start: from,
+          end: to,
+        };
+      });
+
+    return (
+      <EuiFlexItem grow={false}>
+        <EuiSuperDatePicker
+          start={this.state.from}
+          end={this.state.to}
+          isPaused={this.props.isPaused}
+          refreshInterval={this.props.refreshInterval}
+          onTimeChange={this.onTimeChange}
+          onRefreshChange={this.props.onRefreshChange}
+          showUpdateButton={false}
+          recentlyUsedRanges={recentlyUsedRanges}
+        />
+      </EuiFlexItem>
     );
   }
 }

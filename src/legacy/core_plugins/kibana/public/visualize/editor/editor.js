@@ -378,7 +378,7 @@ function VisEditor(
     }
   }
 
-  $scope.updateQueryAndFetch = function (query) {
+  $scope.updateQueryAndFetch = function ({ query }) {
     $state.query = migrateLegacyQuery(query);
     $scope.fetch();
   };
