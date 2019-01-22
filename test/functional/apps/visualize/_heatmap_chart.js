@@ -45,14 +45,12 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.selectField('@timestamp');
       // leaving Interval set to Auto
       await PageObjects.visualize.clickGo();
-      await PageObjects.visualize.waitForVisualization();
     });
 
     it('should save and load', async function () {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
       await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
-      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.visualize.waitForVisualization();
     });
 
