@@ -165,8 +165,15 @@ export function map(state = INITIAL_STATE, action) {
       const { from, to } = action;
       return { ...state, mapState: { ...state.mapState, timeFilters: { from, to } } };
     case SET_QUERY:
-      const { query } = action;
-      return { ...state, mapState: { ...state.mapState, query } };
+      const { query, timeFilters } = action;
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          query,
+          timeFilters,
+        }
+      };
     case SET_REFRESH_CONFIG:
       const { isPaused, interval } = action;
       return {

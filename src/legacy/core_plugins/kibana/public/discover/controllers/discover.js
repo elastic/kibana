@@ -202,7 +202,6 @@ function discoverController(
     dirty: !savedSearch.id
   };
 
-  $scope.showTimepickerInTopNav = false;
   $scope.topNavMenu = [{
     key: 'new',
     label: i18n('kbn.discover.localMenu.localMenu.newSearchTitle', {
@@ -644,7 +643,7 @@ function discoverController(
       .catch(notify.error);
   };
 
-  $scope.updateQueryAndFetch = function (query) {
+  $scope.updateQueryAndFetch = function ({ query }) {
     $state.query = migrateLegacyQuery(query);
     $scope.fetch();
   };

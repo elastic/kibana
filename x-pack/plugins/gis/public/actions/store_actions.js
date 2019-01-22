@@ -418,10 +418,11 @@ export function setTimeFilters({ from, to }) {
   };
 }
 
-export function setQuery({ query }) {
+export function setQuery({ query, timeFilters }) {
   return async (dispatch, getState) => {
     dispatch({
       type: SET_QUERY,
+      timeFilters,
       query: {
         ...query,
         // ensure query changes to trigger re-fetch even when query is the same because "Refresh" clicked
