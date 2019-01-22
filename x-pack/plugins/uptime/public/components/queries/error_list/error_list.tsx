@@ -12,16 +12,27 @@ import moment from 'moment';
 import React, { Fragment } from 'react';
 import { Query } from 'react-apollo';
 import { Link } from 'react-router-dom';
+import { UptimeCommonProps } from '../../../uptime_app';
 import { getErrorListQuery } from './get_error_list';
 
 interface ErrorListProps {
-  dateRangeStart: number;
-  dateRangeEnd: number;
   filters?: string;
 }
 
-export const ErrorList = ({ dateRangeStart, dateRangeEnd, filters }: ErrorListProps) => (
-  <Query query={getErrorListQuery} variables={{ dateRangeStart, dateRangeEnd, filters }}>
+type Props = ErrorListProps & UptimeCommonProps;
+
+export const ErrorList = ({
+  dateRangeStart,
+  dateRangeEnd,
+  filters,
+  autorefreshInterval,
+  autorefreshIsPaused,
+}: Props) => (
+  <Query
+    query={getErrorListQuery}
+    variables={{ dateRangeStart, dateRangeEnd, filters }}
+    pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
+  >
     {({ loading, error, data }) => {
       if (error) {
         return i18n.translate('xpack.uptime.errorList.errorMessage', {

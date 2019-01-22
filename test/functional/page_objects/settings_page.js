@@ -517,17 +517,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async closeScriptedFieldHelp() {
-      log.debug('close Scripted Fields help');
-      let isOpen = await testSubjects.exists('scriptedFieldsHelpFlyout');
-      if (isOpen) {
-        await retry.try(async () => {
-          await flyout.close('scriptedFieldsHelpFlyout');
-          isOpen = await testSubjects.exists('scriptedFieldsHelpFlyout');
-          if (isOpen) {
-            throw new Error('Failed to close scripted fields help');
-          }
-        });
-      }
+      await flyout.ensureClosed('scriptedFieldsHelpFlyout');
     }
 
     async executeScriptedField(script, additionalField) {

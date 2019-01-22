@@ -17,24 +17,24 @@
  * under the License.
  */
 
-import expect from 'expect.js';
-
-export default function ({ getService, getPageObjects }) {
-  const appsMenu = getService('appsMenu');
+export function GlobalNavProvider({ getService }) {
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'header', 'home']);
 
-  describe('app navigation', function describeIndexTests() {
+  return new class GlobalNav {
+    async clickLogo() {
+      return await testSubjects.click('headerGlobalNav logo');
+    }
 
-    before(async () => {
-      await PageObjects.common.navigateToApp('settings');
-    });
+    async exists() {
+      return await testSubjects.exists('headerGlobalNav');
+    }
 
-    it('should should nav link that navigates to the app', async () => {
-      await appsMenu.clickLink('Test Plugin App');
-      const pluginContent = await testSubjects.find('pluginContent');
-      expect(await pluginContent.getVisibleText()).to.be('Super simple app plugin');
-    });
-  });
+    async getFirstBreadcrumb() {
+      return await testSubjects.getVisibleText('headerGlobalNav breadcrumbs first&breadcrumb');
+    }
 
+    async getLastBreadcrumb() {
+      return await testSubjects.getVisibleText('headerGlobalNav breadcrumbs last&breadcrumb');
+    }
+  };
 }
