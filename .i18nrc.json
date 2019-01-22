@@ -4,6 +4,7 @@
     "server": "src/server",
     "console": "src/legacy/core_plugins/console",
     "inputControl": "src/legacy/core_plugins/input_control_vis",
+    "interpreter": "src/legacy/core_plugins/interpreter",
     "kbn": "src/legacy/core_plugins/kibana",
     "kbnVislibVisTypes": "src/legacy/core_plugins/kbn_vislib_vis_types",
     "markdownVis": "src/legacy/core_plugins/markdown_vis",
@@ -26,6 +27,7 @@
     "xpack.licenseMgmt": "x-pack/plugins/license_management",
     "xpack.ml": "x-pack/plugins/ml",
     "xpack.logstash": "x-pack/plugins/logstash",
+    "xpack.main": "x-pack/plugins/xpack_main",
     "xpack.monitoring": "x-pack/plugins/monitoring",
     "xpack.remoteClusters": "x-pack/plugins/remote_clusters",
     "xpack.reporting": "x-pack/plugins/reporting",
@@ -34,6 +36,7 @@
     "xpack.security": "x-pack/plugins/security",
     "xpack.spaces": "x-pack/plugins/spaces",
     "xpack.upgradeAssistant": "x-pack/plugins/upgrade_assistant",
+    "xpack.uptime": "x-pack/plugins/uptime",
     "xpack.watcher": "x-pack/plugins/watcher"
   },
   "exclude": [

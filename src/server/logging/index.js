@@ -19,6 +19,7 @@
 
 import good from '@elastic/good';
 import loggingConfiguration from './configuration';
+import { logWithMetadata } from './log_with_metadata';
 
 export async function setupLogging(server, config) {
   return await server.register({
@@ -28,5 +29,6 @@ export async function setupLogging(server, config) {
 }
 
 export async function loggingMixin(kbnServer, server, config) {
+  logWithMetadata.decorateServer(server);
   return await setupLogging(server, config);
 }

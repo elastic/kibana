@@ -158,5 +158,6 @@ MetricsEditor.propTypes = {
 MetricsEditor.defaultProps = {
   metrics: [
     { type: 'count' }
-  ]
+  ],
+  allowMultipleMetrics: true
 };

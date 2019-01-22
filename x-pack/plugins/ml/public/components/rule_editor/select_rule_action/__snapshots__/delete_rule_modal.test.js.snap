@@ -7,7 +7,11 @@ exports[`DeleteRuleModal renders as delete button after opening and closing moda
     onClick={[Function]}
     type="button"
   >
-    Delete rule
+    <FormattedMessage
+      defaultMessage="Delete rule"
+      id="xpack.ml.ruleEditor.deleteRuleModal.deleteRuleLinkText"
+      values={Object {}}
+    />
   </EuiLink>
 </React.Fragment>
 `;
@@ -19,7 +23,11 @@ exports[`DeleteRuleModal renders as delete button when not visible 1`] = `
     onClick={[Function]}
     type="button"
   >
-    Delete rule
+    <FormattedMessage
+      defaultMessage="Delete rule"
+      id="xpack.ml.ruleEditor.deleteRuleModal.deleteRuleLinkText"
+      values={Object {}}
+    />
   </EuiLink>
 </React.Fragment>
 `;
@@ -31,20 +39,46 @@ exports[`DeleteRuleModal renders modal after clicking delete rule link 1`] = `
     onClick={[Function]}
     type="button"
   >
-    Delete rule
+    <FormattedMessage
+      defaultMessage="Delete rule"
+      id="xpack.ml.ruleEditor.deleteRuleModal.deleteRuleLinkText"
+      values={Object {}}
+    />
   </EuiLink>
   <EuiOverlayMask>
     <EuiConfirmModal
       buttonColor="primary"
-      cancelButtonText="Cancel"
-      confirmButtonText="Delete"
+      cancelButtonText={
+        <FormattedMessage
+          defaultMessage="Cancel"
+          id="xpack.ml.ruleEditor.deleteRuleModal.cancelButtonLabel"
+          values={Object {}}
+        />
+      }
+      confirmButtonText={
+        <FormattedMessage
+          defaultMessage="Delete"
+          id="xpack.ml.ruleEditor.deleteRuleModal.deleteButtonLabel"
+          values={Object {}}
+        />
+      }
       defaultFocusedButton="confirm"
       onCancel={[Function]}
       onConfirm={[Function]}
-      title="Delete rule"
+      title={
+        <FormattedMessage
+          defaultMessage="Delete rule"
+          id="xpack.ml.ruleEditor.deleteRuleModal.deleteRuleTitle"
+          values={Object {}}
+        />
+      }
     >
       <p>
-        Are you sure you want to delete this rule?
+        <FormattedMessage
+          defaultMessage="Are you sure you want to delete this rule?"
+          id="xpack.ml.ruleEditor.deleteRuleModal.deleteRuleDescription"
+          values={Object {}}
+        />
       </p>
     </EuiConfirmModal>
   </EuiOverlayMask>
