@@ -26,8 +26,8 @@ import React, { Fragment } from 'react';
 import { Query } from 'react-apollo';
 import { Link } from 'react-router-dom';
 import { LatestMonitorsResult } from 'x-pack/plugins/uptime/common/graphql/types';
-import { formatSparklineCounts } from './format_sparkline_counts';
 import { UptimeCommonProps } from '../../../uptime_app';
+import { formatSparklineCounts } from './format_sparkline_counts';
 import { getMonitorListQuery } from './get_monitor_list';
 
 interface MonitorListProps {
