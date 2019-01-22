@@ -34,7 +34,6 @@ import { formatHumanReadableDateTime } from '../util/date_utils';
 import { getBoundsRoundedToInterval } from 'plugins/ml/util/ml_time_buckets';
 import { InfluencersList } from '../components/influencers_list';
 import { mlExplorerDashboardService } from './explorer_dashboard_service';
-import { mlJobService } from 'plugins/ml/services/job_service';
 import { mlResultsService } from 'plugins/ml/services/results_service';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
 import { CheckboxShowCharts, mlCheckboxShowChartsService } from '../components/controls/checkbox_showcharts/checkbox_showcharts';
@@ -43,10 +42,12 @@ import { SelectLimit, mlSelectLimitService } from './select_limit/select_limit';
 import { SelectSeverity, mlSelectSeverityService } from '../components/controls/select_severity/select_severity';
 
 import {
+  getClearedSelectedAnomaliesState,
+  getDefaultViewBySwimlaneData,
   getFilteredTopInfluencers,
   getSelectionInfluencers,
   getSelectionTimeRange,
-  getDefaultViewBySwimlaneData,
+  getViewBySwimlaneOptions,
   loadAnnotationsTableData,
   loadAnomaliesTableData,
   loadDataForCharts,
@@ -206,7 +207,7 @@ export const Explorer = injectI18n(
         };
 
         this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
-        Object.assign(stateUpdate, this.getclearedSelectedAnomaliesState());
+        Object.assign(stateUpdate, getClearedSelectedAnomaliesState());
 
         if (selectedJobs.length > 1) {
           this.props.appStateHandler(
@@ -227,7 +228,7 @@ export const Explorer = injectI18n(
       // REFRESH reloads full Anomaly Explorer and clears the selection.
       if (action === EXPLORER_ACTION.REFRESH) {
         this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
-        this.updateExplorer(this.getclearedSelectedAnomaliesState(), true);
+        this.updateExplorer(getClearedSelectedAnomaliesState(), true);
       }
 
       // REDRAW reloads Anomaly Explorer and tries to retain the selection.
@@ -286,7 +287,7 @@ export const Explorer = injectI18n(
 
     swimlaneLimitListener = () => {
       this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
-      this.updateExplorer(this.getclearedSelectedAnomaliesState(), false);
+      this.updateExplorer(getClearedSelectedAnomaliesState(), false);
     };
 
     // Listens to render updates of the swimlanes to update dragSelect
@@ -351,7 +352,6 @@ export const Explorer = injectI18n(
     }
 
     loadOverallDataPreviousArgs = null;
-    loadOverallDataPreviousInterval = null;
     loadOverallDataPreviousData = null;
     loadOverallData(selectedJobs, interval, showLoadingIndicator = true) {
       return new Promise((resolve) => {
@@ -434,95 +434,6 @@ export const Explorer = injectI18n(
           });
         });
       });
-    }
-
-    // Obtain the list of 'View by' fields per job.
-    getViewBySwimlaneOptions(selectedJobs) {
-      const selectedJobIds = selectedJobs.map(d => d.id);
-
-      // Unique influencers for the selected job(s).
-      const viewByOptions = _.chain(
-        mlJobService.jobs.reduce((reducedViewByOptions, job) => {
-          if (selectedJobIds.some(jobId => jobId === job.job_id)) {
-            return reducedViewByOptions.concat(job.analysis_config.influencers || []);
-          }
-          return reducedViewByOptions;
-        }, []))
-        .uniq()
-        .sortBy(fieldName => fieldName.toLowerCase())
-        .value();
-
-      viewByOptions.push(VIEW_BY_JOB_LABEL);
-      const viewBySwimlaneOptions = viewByOptions;
-
-      let swimlaneViewByFieldName = undefined;
-
-      if (
-        viewBySwimlaneOptions.indexOf(this.state.swimlaneViewByFieldName) !== -1
-      ) {
-        // Set the swimlane viewBy to that stored in the state (URL) if set.
-        // This means we reset it to the current state because it was set by the listener
-        // on initialization.
-        swimlaneViewByFieldName = this.state.swimlaneViewByFieldName;
-      } else {
-        if (selectedJobIds.length > 1) {
-          // If more than one job selected, default to job ID.
-          swimlaneViewByFieldName = VIEW_BY_JOB_LABEL;
-        } else {
-          // For a single job, default to the first partition, over,
-          // by or influencer field of the first selected job.
-          const firstSelectedJob = mlJobService.jobs.find((job) => {
-            return job.job_id === selectedJobIds[0];
-          });
-
-          const firstJobInfluencers = firstSelectedJob.analysis_config.influencers || [];
-          firstSelectedJob.analysis_config.detectors.forEach((detector) => {
-            if (
-              detector.partition_field_name !== undefined &&
-              firstJobInfluencers.indexOf(detector.partition_field_name) !== -1
-            ) {
-              swimlaneViewByFieldName = detector.partition_field_name;
-              return false;
-            }
-
-            if (
-              detector.over_field_name !== undefined &&
-              firstJobInfluencers.indexOf(detector.over_field_name) !== -1
-            ) {
-              swimlaneViewByFieldName = detector.over_field_name;
-              return false;
-            }
-
-            // For jobs with by and over fields, don't add the 'by' field as this
-            // field will only be added to the top-level fields for record type results
-            // if it also an influencer over the bucket.
-            if (
-              detector.by_field_name !== undefined &&
-              detector.over_field_name === undefined &&
-              firstJobInfluencers.indexOf(detector.by_field_name) !== -1
-            ) {
-              swimlaneViewByFieldName = detector.by_field_name;
-              return false;
-            }
-          });
-
-          if (swimlaneViewByFieldName === undefined) {
-            if (firstJobInfluencers.length > 0) {
-              swimlaneViewByFieldName = firstJobInfluencers[0];
-            } else {
-              // No influencers for first selected job - set to first available option.
-              swimlaneViewByFieldName = viewBySwimlaneOptions.length > 0
-                ? viewBySwimlaneOptions[0]
-                : undefined;
-            }
-          }
-        }
-      }
-
-      return {
-        swimlaneViewByFieldName,
-        viewBySwimlaneOptions,
-      };
     }
 
     loadViewBySwimlanePreviousArgs = null;
@@ -752,7 +663,7 @@ export const Explorer = injectI18n(
         );
       }
 
-      const viewBySwimlaneOptions = this.getViewBySwimlaneOptions(selectedJobs);
+      const viewBySwimlaneOptions = getViewBySwimlaneOptions(selectedJobs, this.state.swimlaneViewByFieldName);
       Object.assign(stateUpdate, viewBySwimlaneOptions);
       if (selectedCells !== null && selectedCells.showTopFieldValues === true) {
         // this.setState({ viewBySwimlaneData: getDefaultViewBySwimlaneData(), viewBySwimlaneDataLoading: true });
@@ -808,7 +719,7 @@ export const Explorer = injectI18n(
 
       if (clearSelection === true) {
         this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
-        Object.assign(stateUpdate, this.getclearedSelectedAnomaliesState());
+        Object.assign(stateUpdate, getClearedSelectedAnomaliesState());
       }
 
       const selectionInfluencers = getSelectionInfluencers(selectedCells, viewBySwimlaneOptions.swimlaneViewByFieldName);
@@ -869,14 +780,6 @@ export const Explorer = injectI18n(
       }
     }
 
-    getclearedSelectedAnomaliesState() {
-      return {
-        anomalyChartRecords: [],
-        selectedCells: null,
-        viewByLoadedForTimeFormatted: null,
-      };
-    }
-
     viewByChangeHandler = e => this.setSwimlaneViewBy(e.target.value);
     setSwimlaneViewBy = (swimlaneViewByFieldName) => {
       this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
@@ -884,7 +787,7 @@ export const Explorer = injectI18n(
       this.setState({ swimlaneViewByFieldName }, () => {
         this.updateExplorer({
           swimlaneViewByFieldName,
-          ...this.getclearedSelectedAnomaliesState(),
+          ...getClearedSelectedAnomaliesState(),
         }, false);
       });
     };
@@ -921,7 +824,7 @@ export const Explorer = injectI18n(
       if (Object.keys(swimlaneSelectedCells).length === 0) {
         this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
 
-        const stateUpdate = this.getclearedSelectedAnomaliesState();
+        const stateUpdate = getClearedSelectedAnomaliesState();
         this.updateExplorer(stateUpdate, false);
       } else {
         swimlaneSelectedCells.showTopFieldValues = false;

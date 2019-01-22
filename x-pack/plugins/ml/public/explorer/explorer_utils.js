@@ -8,7 +8,7 @@
  * utils for Anomaly Explorer.
  */
 
-import { each, get, union, uniq } from 'lodash';
+import { chain, each, get, union, uniq } from 'lodash';
 import { timefilter } from 'ui/timefilter';
 import { parseInterval } from 'ui/utils/parse_interval';
 
@@ -40,6 +40,14 @@ export function createJobs(jobs) {
     const bucketSpan = parseInterval(job.analysis_config.bucket_span);
     return { id: job.job_id, selected: false, bucketSpanSeconds: bucketSpan.asSeconds() };
   });
+}
+
+export function getClearedSelectedAnomaliesState() {
+  return {
+    anomalyChartRecords: [],
+    selectedCells: null,
+    viewByLoadedForTimeFormatted: null,
+  };
 }
 
 export function getDefaultViewBySwimlaneData() {
@@ -191,6 +199,96 @@ export function getSelectionInfluencers(selectedCells, fieldName) {
 
   return [];
 }
+
+// Obtain the list of 'View by' fields per job and swimlaneViewByFieldName
+export function getViewBySwimlaneOptions(selectedJobs, currentSwimlaneViewByFieldName) {
+  const selectedJobIds = selectedJobs.map(d => d.id);
+
+  // Unique influencers for the selected job(s).
+  const viewByOptions = chain(
+    mlJobService.jobs.reduce((reducedViewByOptions, job) => {
+      if (selectedJobIds.some(jobId => jobId === job.job_id)) {
+        return reducedViewByOptions.concat(job.analysis_config.influencers || []);
+      }
+      return reducedViewByOptions;
+    }, []))
+    .uniq()
+    .sortBy(fieldName => fieldName.toLowerCase())
+    .value();
+
+  viewByOptions.push(VIEW_BY_JOB_LABEL);
+  const viewBySwimlaneOptions = viewByOptions;
+
+  let swimlaneViewByFieldName = undefined;
+
+  if (
+    viewBySwimlaneOptions.indexOf(currentSwimlaneViewByFieldName) !== -1
+  ) {
+    // Set the swimlane viewBy to that stored in the state (URL) if set.
+    // This means we reset it to the current state because it was set by the listener
+    // on initialization.
+    swimlaneViewByFieldName = currentSwimlaneViewByFieldName;
+  } else {
+    if (selectedJobIds.length > 1) {
+      // If more than one job selected, default to job ID.
+      swimlaneViewByFieldName = VIEW_BY_JOB_LABEL;
+    } else {
+      // For a single job, default to the first partition, over,
+      // by or influencer field of the first selected job.
+      const firstSelectedJob = mlJobService.jobs.find((job) => {
+        return job.job_id === selectedJobIds[0];
+      });
+
+      const firstJobInfluencers = firstSelectedJob.analysis_config.influencers || [];
+      firstSelectedJob.analysis_config.detectors.forEach((detector) => {
+        if (
+          detector.partition_field_name !== undefined &&
+          firstJobInfluencers.indexOf(detector.partition_field_name) !== -1
+        ) {
+          swimlaneViewByFieldName = detector.partition_field_name;
+          return false;
+        }
+
+        if (
+          detector.over_field_name !== undefined &&
+          firstJobInfluencers.indexOf(detector.over_field_name) !== -1
+        ) {
+          swimlaneViewByFieldName = detector.over_field_name;
+          return false;
+        }
+
+        // For jobs with by and over fields, don't add the 'by' field as this
+        // field will only be added to the top-level fields for record type results
+        // if it also an influencer over the bucket.
+        if (
+          detector.by_field_name !== undefined &&
+          detector.over_field_name === undefined &&
+          firstJobInfluencers.indexOf(detector.by_field_name) !== -1
+        ) {
+          swimlaneViewByFieldName = detector.by_field_name;
+          return false;
+        }
+      });
+
+      if (swimlaneViewByFieldName === undefined) {
+        if (firstJobInfluencers.length > 0) {
+          swimlaneViewByFieldName = firstJobInfluencers[0];
+        } else {
+          // No influencers for first selected job - set to first available option.
+          swimlaneViewByFieldName = viewBySwimlaneOptions.length > 0
+            ? viewBySwimlaneOptions[0]
+            : undefined;
+        }
+      }
+    }
+  }
+
+  return {
+    swimlaneViewByFieldName,
+    viewBySwimlaneOptions,
+  };
+}
+
 
 export function processOverallResults(scoresByTime, searchBounds, interval) {
   const overallLabel = i18n.translate('xpack.ml.explorer.overallLabel', { defaultMessage: 'Overall' });
