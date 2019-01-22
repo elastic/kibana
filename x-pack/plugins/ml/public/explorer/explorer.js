@@ -549,7 +549,7 @@ export const Explorer = injectI18n(
 
       let swimlaneViewByFieldName = undefined;
 
-      if (this.state.viewBySwimlaneOptions.indexOf(this.state.swimlaneViewByFieldName) !== -1) {
+      if (viewBySwimlaneOptions.indexOf(this.state.swimlaneViewByFieldName) !== -1) {
         // Set the swimlane viewBy to that stored in the state (URL) if set.
         // This means we reset it to the current state because it was set by the listener
         // on initializationn.
@@ -601,13 +601,12 @@ export const Explorer = injectI18n(
               swimlaneViewByFieldName = firstJobInfluencers[0];
             } else {
               // No influencers for first selected job - set to first available option.
-              swimlaneViewByFieldName = this.state.viewBySwimlaneOptions.length > 0
-                ? this.state.viewBySwimlaneOptions[0]
+              swimlaneViewByFieldName = viewBySwimlaneOptions.length > 0
+                ? viewBySwimlaneOptions[0]
                 : undefined;
             }
           }
         }
-
       }
 
       return {
