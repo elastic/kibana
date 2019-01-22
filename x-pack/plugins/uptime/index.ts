@@ -5,7 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Server } from 'hapi';
 import { resolve } from 'path';
 import { PLUGIN } from './common/constants';
 import { initServerWithKibana, KibanaServer } from './server';
