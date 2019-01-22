@@ -10,7 +10,7 @@ const formatLookup = {
 
 export default (format = '0,0.[00]', template) => {
   if (!template) template = '{{value}}';
-  const render = handlebars.compile(template);
+  const render = handlebars.compile(template, { knownHelpersOnly: true });
   return (val) => {
     const formatString = formatLookup[format] || format;
     let value;
