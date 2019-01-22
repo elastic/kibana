@@ -195,14 +195,7 @@ exports[`after fetch initialFilter 1`] = `
               "onSelectionChange": [Function],
             }
           }
-          sorting={
-            Object {
-              "sort": Object {
-                "direction": "asc",
-                "field": "title",
-              },
-            }
-          }
+          sorting={Object {}}
         />
       </div>
     </EuiPageContent>
