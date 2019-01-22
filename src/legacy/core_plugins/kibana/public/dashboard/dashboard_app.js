@@ -239,7 +239,9 @@ app.directive('dashboardApp', function ($injector) {
         $scope.indexPatterns = dashboardStateManager.getPanelIndexPatterns();
       };
 
-      $scope.$watch('model.query', $scope.updateQueryAndFetch);
+      $scope.$watch('model.query', (query) => {
+        $scope.updateQueryAndFetch({ query });
+      });
 
       $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
         dashboardStateManager.handleTimeChange(timefilter.getTime());
