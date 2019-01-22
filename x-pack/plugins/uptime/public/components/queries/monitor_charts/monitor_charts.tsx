@@ -120,7 +120,7 @@ export class MonitorCharts extends React.Component<Props, MonitorChartsState> {
           // As above, we are building a domain size for the chart to use.
           // Without this code the chart could render data outside of the field.
           const checksDomain = upSeries.concat(downSeries).map(({ y }) => y);
-          const domainLimits = [Math.min(...checksDomain), Math.max(...checksDomain)];
+          const domainLimits = [0, Math.max(...checksDomain)];
           const durationDomain = avgDurationSeries.concat(areaRttSeries);
           const durationLimits = [0, Math.max(...durationDomain.map(({ y }) => y))];
 
@@ -215,6 +215,7 @@ export class MonitorCharts extends React.Component<Props, MonitorChartsState> {
                       width={500}
                       height={200}
                       xType={EuiSeriesChartUtils.SCALE.TIME}
+                      yDomain={durationLimits}
                       crosshairValue={this.state.crosshairLocation}
                       onCrosshairUpdate={this.updateCrosshairLocation}
                     >
@@ -260,7 +261,7 @@ export class MonitorCharts extends React.Component<Props, MonitorChartsState> {
                   stackBy="y"
                   crosshairValue={this.state.crosshairLocation}
                   onCrosshairUpdate={this.updateCrosshairLocation}
-                  yDomain={durationLimits}
+                  yDomain={domainLimits}
                 >
                   <EuiAreaSeries
                     name={i18n.translate(
