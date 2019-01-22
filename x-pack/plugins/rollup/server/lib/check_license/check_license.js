@@ -17,7 +17,7 @@ export function checkLicense(xpackLicenseInfo) {
       showLinks: true,
       enableLinks: false,
       message: i18n.translate(
-        'xpack.rollup.checkLicense.errorUnavailableMessage',
+        'xpack.rollupJobs.checkLicense.errorUnavailableMessage',
         {
           defaultMessage: 'You cannot use {pluginName} because license information is not available at this time.',
           values: { pluginName },
@@ -44,7 +44,7 @@ export function checkLicense(xpackLicenseInfo) {
       isAvailable: false,
       showLinks: false,
       message: i18n.translate(
-        'xpack.rollup.checkLicense.errorUnsupportedMessage',
+        'xpack.rollupJobs.checkLicense.errorUnsupportedMessage',
         {
           defaultMessage: 'Your {licenseType} license does not support {pluginName}. Please upgrade your license.',
           values: { licenseType, pluginName },
@@ -60,7 +60,7 @@ export function checkLicense(xpackLicenseInfo) {
       showLinks: true,
       enableLinks: false,
       message: i18n.translate(
-        'xpack.rollup.checkLicense.errorExpiredMessage',
+        'xpack.rollupJobs.checkLicense.errorExpiredMessage',
         {
           defaultMessage: 'You cannot use {pluginName} because your {licenseType} license has expired',
           values: { licenseType, pluginName },
