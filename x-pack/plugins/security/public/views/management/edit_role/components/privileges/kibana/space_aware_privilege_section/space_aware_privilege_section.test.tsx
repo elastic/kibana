@@ -127,7 +127,7 @@ describe('<SpaceAwarePrivilegeSection>', () => {
           kibana: [
             {
               spaces: ['default'],
-              base: ['all'],
+              base: ['read'],
               feature: {},
             },
           ],
@@ -154,7 +154,7 @@ describe('<SpaceAwarePrivilegeSection>', () => {
           kibana: [
             {
               spaces: ['default'],
-              base: ['all'],
+              base: [],
               feature: {},
             },
           ],
