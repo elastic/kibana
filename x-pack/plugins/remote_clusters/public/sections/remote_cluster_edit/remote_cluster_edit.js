@@ -149,7 +149,7 @@ export const RemoteClusterEdit = injectI18n(
             >
               <FormattedMessage
                 id="xpack.remoteClusters.edit.loadingErrorMessage"
-                defaultMessage={`The remote cluster '{name}' does not exist.`}
+                defaultMessage="The remote cluster '{name}' does not exist."
                 values={{ name: clusterName }}
               />
             </EuiCallOut>
