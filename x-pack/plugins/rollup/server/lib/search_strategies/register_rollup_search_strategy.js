@@ -13,7 +13,7 @@ export default (server) => {
     AbstractSearchRequest,
     AbstractSearchStrategy,
     DefaultSearchCapabilities,
-  } = server.plugins.metrics;
+  } = server.plugins.tsvb;
 
   if (addSearchStrategy) {
     const RollupSearchRequest = getRollupSearchRequest(AbstractSearchRequest);

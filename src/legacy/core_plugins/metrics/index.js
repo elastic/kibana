@@ -25,7 +25,7 @@ import SearchStrategiesRegister from './server/lib/search_strategies/search_stra
 
 export default function (kibana) {
   return new kibana.Plugin({
-    id: 'metrics',
+    id: 'tsvb',
     require: ['kibana', 'elasticsearch'],
 
     uiExports: {

@@ -24,25 +24,21 @@ import DefaultSearchCapabilities from './default_search_capabilities';
 const strategies = [];
 
 export default class SearchStrategiesRegister {
-  add(searchStrategy) {
+  static init(server) {
+    SearchStrategiesRegister.add(new DefaultSearchStrategy(server));
+
+    server.expose('AbstractSearchStrategy', AbstractSearchStrategy);
+    server.expose('AbstractSearchRequest', AbstractSearchRequest);
+    server.expose('DefaultSearchCapabilities', DefaultSearchCapabilities);
+
+    server.expose('addSearchStrategy', (searchStrategy) => SearchStrategiesRegister.add(searchStrategy));
+  }
+
+  static add(searchStrategy) {
     if (searchStrategy instanceof AbstractSearchStrategy) {
       strategies.unshift(searchStrategy);
     }
     return this;
-  }
-
-  static init(server) {
-    const searchStrategiesRegister = new SearchStrategiesRegister();
-
-    searchStrategiesRegister.add(new DefaultSearchStrategy(server));
-    this.exposeServer(server, searchStrategiesRegister);
-  }
-
-  static exposeServer(server, searchStrategiesRegister) {
-    server.expose('AbstractSearchStrategy', AbstractSearchStrategy);
-    server.expose('AbstractSearchRequest', AbstractSearchRequest);
-    server.expose('DefaultSearchCapabilities', DefaultSearchCapabilities);
-    server.expose('addSearchStrategy', (searchStrategy) => searchStrategiesRegister.add(searchStrategy));
   }
 
   static async getViableStrategy(req, indexPattern) {

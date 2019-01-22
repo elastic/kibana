@@ -21,7 +21,7 @@ export function rollup(kibana) {
   return new kibana.Plugin({
     id: PLUGIN.ID,
     publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'metrics'],
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'tsvb'],
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       managementSections: [
