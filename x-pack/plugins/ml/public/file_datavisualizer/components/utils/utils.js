@@ -6,6 +6,7 @@
 
 import { overrideDefaults } from './overrides';
 import { isEqual } from 'lodash';
+import { ml } from '../../../services/ml_api_service';
 
 export function readFile(file) {
   return new Promise((resolve, reject) => {
@@ -104,4 +105,31 @@ export function processResults(results) {
     columnNames: results.column_names,
     grokPattern: results.grok_pattern,
   };
+}
+
+// a check for the minimum privileges needed to create and ingest data into an index.
+// if called with not indexName, the check will just look for the minimum cluster privileges.
+export async function hasImportPermission(indexName) {
+  const priv = {
+    cluster: [
+      'cluster:monitor/nodes/info',
+      'cluster:admin/ingest/pipeline/put',
+    ]
+  };
+
+  if (indexName !== undefined) {
+    priv.index = [
+      {
+        names: [indexName],
+        privileges: [
+          'indices:data/write/bulk',
+          'indices:data/write/index',
+          'indices:admin/create',
+        ]
+      }
+    ];
+  }
+
+  const resp = await ml.checkPrivilege(priv);
+  return (resp.securityDisabled === true || resp.has_all_requested === true);
 }
