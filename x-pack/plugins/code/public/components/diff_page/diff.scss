@@ -1,3 +1,4 @@
-.code-diff-layout-button {
-  height: calc(20/14rem);
+button.euiAccordion__button > div:first-child {
+  flex-direction: row-reverse;
+  padding: $euiSize $euiSizeS;
 }

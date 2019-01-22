@@ -22,6 +22,7 @@ export class MonacoDiffEditor {
       const diffEditor = monaco.editor.createDiffEditor(this.container, {
         enableSplitViewResizing: false,
         renderSideBySide: this.renderSideBySide,
+        scrollBeyondLastLine: false,
       });
       diffEditor.setModel({
         original: originalModel,

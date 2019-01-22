@@ -34,6 +34,7 @@ import { watchLoadStructure } from './structure';
 import { watchLoadUserConfig } from './user';
 
 export function* rootSaga() {
+  yield fork(watchLoadCommit);
   yield fork(watchFetchRepos);
   yield fork(watchDeleteRepo);
   yield fork(watchIndexRepo);
@@ -50,7 +51,6 @@ export function* rootSaga() {
   yield fork(watchGotoRepo);
   yield fork(watchLoadRepo);
   yield fork(watchLoadUserConfig);
-  yield fork(watchLoadCommit);
   yield fork(watchSearchRouteChange);
   yield fork(watchAdminRouteChange);
   yield fork(watchMainRouteChange);

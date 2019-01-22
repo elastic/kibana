@@ -23,7 +23,7 @@ export const App = () => {
   return (
     <Router>
       <Switch>
-        <Route path={ROUTES.DIFF} component={Diff} />
+        <Route path={ROUTES.DIFF} exact={true} component={Diff} />
         <Route path={ROUTES.ROOT} exact={true} render={redirectToAdmin} />
         <Route path={ROUTES.MAIN} component={Main} exact={true} />
         <Route path={ROUTES.MAIN_ROOT} component={Main} />
