@@ -6,12 +6,6 @@
 
 import _ from 'lodash';
 
-// This is just a named set of actions.
-export interface ActionSet {
-  name: string;
-  actions: string[];
-}
-
 /**
  * Given two sets of actions, where one set is known to be a subset of the other, this will
  * determine which set of actions is most permissive, using standard sorting return values:
