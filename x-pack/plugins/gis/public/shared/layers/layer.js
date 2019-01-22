@@ -9,7 +9,13 @@ import turfBooleanContains from '@turf/boolean-contains';
 import { DataRequest } from './util/data_request';
 import React from 'react';
 
-import { EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiLoadingSpinner,
+  EuiToolTip,
+  EuiIconTip
+} from '@elastic/eui';
+import { VisibilityToggle } from '../components/visibility_toggle';
 
 const SOURCE_UPDATE_REQUIRED = true;
 const NO_SOURCE_UPDATE_REQUIRED = false;
@@ -138,6 +144,59 @@ export class AbstractLayer {
   renderSourceSettingsEditor = ({ onChange }) => {
     return this._source.renderSourceSettingsEditor({ onChange });
   };
+
+
+  _renderVisibilityToggle({ toggleVisible }) {
+    const layer  = this;
+    return (
+      <VisibilityToggle
+        id={layer.getId()}
+        checked={layer.isVisible()}
+        onChange={() => toggleVisible(layer.getId())}
+        size={'l'}
+      >
+        {layer.getIcon()}
+      </VisibilityToggle>
+    );
+  }
+
+
+  renderSmallIcon({ toggleVisible, zoom }) {
+
+    const layer = this;
+
+    let visibilityIndicator;
+    if (layer.dataHasLoadError()) {
+      visibilityIndicator = (
+        <EuiIconTip
+          aria-label="Load warning"
+          size="m"
+          type="alert"
+          color="warning"
+          content={layer.getDataLoadError()}
+        />
+      );
+    } else if (layer.isLayerLoading()) {
+      visibilityIndicator = <EuiLoadingSpinner size="m"/>;
+    } else if (!layer.showAtZoomLevel(zoom)) {
+      const { minZoom, maxZoom } = layer.getZoomConfig();
+      visibilityIndicator = (
+        <EuiToolTip
+          position="left"
+          content={`Map is at zoom level ${zoom}.
+          This layer is only visible between zoom levels ${minZoom} to ${maxZoom}.`}
+        >
+          {this._renderVisibilityToggle({ toggleVisible })}
+        </EuiToolTip>
+      );
+    } else {
+      visibilityIndicator = this._renderVisibilityToggle({ toggleVisible });
+    }
+    return visibilityIndicator;
+
+
+  }
+
 
   isLayerLoading() {
     return this._dataRequests.some(dataRequest => dataRequest.isLoading());
