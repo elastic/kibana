@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature, registerFeature } from './feature_registry';
+import { Feature } from './feature_registry';
 
 const kibanaFeatures: Feature[] = [
   {
@@ -180,7 +180,8 @@ const timelionFeatures: Feature[] = [
   },
 ];
 
-export function registerOssFeatures() {
-  kibanaFeatures.forEach(registerFeature);
-  timelionFeatures.forEach(registerFeature);
+export function registerOssFeatures(registerFeature: (feature: Feature) => void) {
+  for (const feature of [...kibanaFeatures, ...timelionFeatures]) {
+    registerFeature(feature);
+  }
 }
