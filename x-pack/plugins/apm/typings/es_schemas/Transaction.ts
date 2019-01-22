@@ -27,6 +27,9 @@ interface Context {
     username?: string;
     email?: string;
   };
+  page?: {
+    url: string;
+  };
   [key: string]: unknown;
 }
 
@@ -80,9 +83,14 @@ export interface TransactionV2 extends APMDocV2 {
     };
     type: string;
   };
-  kubernetes: {
+  kubernetes?: {
     pod: {
       uid: string;
+    };
+  };
+  docker?: {
+    container: {
+      id: string;
     };
   };
   container: {

@@ -21,8 +21,6 @@ import moment from 'moment-timezone';
 import numeralLanguages from '@elastic/numeral/languages';
 import { i18n } from '@kbn/i18n';
 
-import { IS_KIBANA_RELEASE } from '../../../utils';
-
 export function getUiSettingDefaults() {
   const weekdays = moment.weekdays().slice();
   const [defaultWeekday] = weekdays;
@@ -77,7 +75,7 @@ export function getUiSettingDefaults() {
       name: i18n.translate('kbn.advancedSettings.k7designTitle', {
         defaultMessage: 'Use the new K7 UI design',
       }),
-      value: IS_KIBANA_RELEASE,
+      value: true,
       description: i18n.translate('kbn.advancedSettings.k7designText', {
         defaultMessage:
           'When set, Kibana will use the new K7 design targeted for release in 7.0. At this time, not all features are implemented.',
@@ -266,6 +264,16 @@ export function getUiSettingDefaults() {
         defaultMessage:
           'Highlight results in Discover and Saved Searches Dashboard. ' +
           'Highlighting makes requests slow when working on big documents.',
+      }),
+      category: ['discover'],
+    },
+    'doc_table:hideTimeColumn': {
+      name: i18n.translate('kbn.advancedSettings.docTableHideTimeColumnTitle', {
+        defaultMessage: 'Hide \'Time\' column',
+      }),
+      value: false,
+      description: i18n.translate('kbn.advancedSettings.docTableHideTimeColumnText', {
+        defaultMessage: 'Hide the \'Time\' column in Discover and in all Saved Searches on Dashboards.',
       }),
       category: ['discover'],
     },

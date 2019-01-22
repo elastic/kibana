@@ -21,7 +21,7 @@ export const ALL_SOURCES = [
   EMSFileSource,
   EMSTMSSource,
   KibanaRegionmapSource,
+  KibanaTilemapSource,
   XYZTMSSource,
   WMSSource,
-  KibanaTilemapSource
 ];

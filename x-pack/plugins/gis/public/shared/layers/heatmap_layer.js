@@ -11,6 +11,8 @@ import { EuiIcon } from '@elastic/eui';
 import { HeatmapStyle } from './styles/heatmap_style';
 import { ZOOM_TO_PRECISION } from '../utils/zoom_to_precision';
 
+const SCALED_PROPERTY_NAME = '__kbn_heatmap_weight__';//unique name to store scaled value for weighting
+
 export class HeatmapLayer extends ALayer {
 
   static type = "HEATMAP";
@@ -33,6 +35,15 @@ export class HeatmapLayer extends ALayer {
 
   getSupportedStyles() {
     return [HeatmapStyle];
+  }
+
+  getIndexPatternIds() {
+    return this._source.getIndexPatternIds();
+  }
+
+  _getPropKeyOfSelectedMetric() {
+    const metricfields = this._source.getMetricFields();
+    return metricfields[0].propertyKey;
   }
 
   syncLayerWithMB(mbMap) {
@@ -63,22 +74,21 @@ export class HeatmapLayer extends ALayer {
       return;
     }
 
-    const scaledPropertyName = '__kbn_heatmap_weight__';
-    const propertyName = 'doc_count';
+    const propertyKey = this._getPropKeyOfSelectedMetric();
     const dataBoundToMap = ALayer.getBoundDataForSource(mbMap, this.getId());
     if (featureCollection !== dataBoundToMap) {
       let max = 0;
       for (let i = 0; i < featureCollection.features.length; i++) {
-        max = Math.max(featureCollection.features[i].properties[propertyName], max);
+        max = Math.max(featureCollection.features[i].properties[propertyKey], max);
       }
       for (let i = 0; i < featureCollection.features.length; i++) {
-        featureCollection.features[i].properties[scaledPropertyName] = featureCollection.features[i].properties[propertyName] / max;
+        featureCollection.features[i].properties[SCALED_PROPERTY_NAME] = featureCollection.features[i].properties[propertyKey] / max;
       }
       mbSourceAfter.setData(featureCollection);
     }
 
     mbMap.setLayoutProperty(heatmapLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
-    this._style.setMBPaintProperties(mbMap, heatmapLayerId, scaledPropertyName);
+    this._style.setMBPaintProperties(mbMap, heatmapLayerId, SCALED_PROPERTY_NAME);
     mbMap.setLayerZoomRange(heatmapLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
   }
 
@@ -105,29 +115,41 @@ export class HeatmapLayer extends ALayer {
 
     const updateDueToExtent = this.updateDueToExtent(this._source, dataMeta, dataFilters);
 
+    const updateDueToQuery = dataFilters.query
+      && !_.isEqual(dataMeta.query, dataFilters.query);
 
-    if (isSamePrecision && isSameTime && !updateDueToExtent && !updateDueToRefreshTimer) {
+    const metricPropertyKey = this._getPropKeyOfSelectedMetric();
+    const updateDueToMetricChange = !_.isEqual(dataMeta.metric, metricPropertyKey);
+
+    if (isSamePrecision
+      && isSameTime
+      && !updateDueToExtent
+      && !updateDueToRefreshTimer
+      && !updateDueToQuery
+      && !updateDueToMetricChange) {
       return;
     }
 
     const newDataMeta = {
       ...dataFilters,
-      precision: targetPrecision
+      precision: targetPrecision,
+      metric: metricPropertyKey
     };
-    return this._fetchNewData({ startLoading, stopLoading, onLoadError, dataMeta: newDataMeta });
+    await this._fetchNewData({ startLoading, stopLoading, onLoadError, dataMeta: newDataMeta });
   }
 
   async _fetchNewData({ startLoading, stopLoading, onLoadError, dataMeta }) {
-    const { precision, timeFilters, buffer } = dataMeta;
+    const { precision, timeFilters, buffer, query } = dataMeta;
     const requestToken = Symbol(`layer-source-refresh: this.getId()`);
     startLoading('source', requestToken, dataMeta);
     try {
       const layerName = await this.getDisplayName();
-      const data = await this._source.getGeoJsonPointsWithTotalCount({
+      const data = await this._source.getGeoJsonPoints({
         precision,
         extent: buffer,
         timeFilters,
         layerName,
+        query,
       });
       stopLoading('source', requestToken, data);
     } catch (error) {

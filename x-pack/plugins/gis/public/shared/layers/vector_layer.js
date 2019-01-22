@@ -17,8 +17,6 @@ import { store } from '../../store/store';
 import { getMapColors } from '../../selectors/map_selectors';
 import _ from 'lodash';
 
-const DEFAULT_COLORS = ['#e6194b', '#3cb44b', '#ffe119', '#f58231', '#911eb4'];
-
 const EMPTY_FEATURE_COLLECTION = {
   type: 'FeatureCollection',
   features: []
@@ -37,44 +35,16 @@ export class VectorLayer extends ALayer {
   static tooltipContainer = document.createElement('div');
 
   static createDescriptor(options) {
-    // Colors must be state-aware to reduce unnecessary incrementation
-    const DEFAULT_ALPHA_VALUE = 1;
-    const mapColors = getMapColors(store.getState());
-    const lastColor = mapColors.pop();
-    const nextColor = DEFAULT_COLORS[
-      (DEFAULT_COLORS.indexOf(lastColor) + 1) % (DEFAULT_COLORS.length - 1)
-    ];
     const layerDescriptor = super.createDescriptor(options);
     layerDescriptor.type = VectorLayer.type;
+
     if (!options.style) {
-      layerDescriptor.style = VectorStyle.createDescriptor({
-        fillColor: {
-          type: VectorStyle.STYLE_TYPE.STATIC,
-          options: {
-            color: nextColor,
-          }
-        },
-        lineColor: {
-          type: VectorStyle.STYLE_TYPE.STATIC,
-          options: {
-            color: '#FFFFFF'
-          }
-        },
-        lineWidth: {
-          type: VectorStyle.STYLE_TYPE.STATIC,
-          options: {
-            size: 1
-          }
-        },
-        iconSize: {
-          type: VectorStyle.STYLE_TYPE.STATIC,
-          options: {
-            size: 10
-          }
-        },
-        alphaValue: DEFAULT_ALPHA_VALUE
-      });
+      // TODO pass store in as argument. Accessing store this way is unsafe
+      const mapColors = getMapColors(store.getState());
+      const styleProperties = VectorStyle.createDefaultStyleProperties(mapColors);
+      layerDescriptor.style = VectorStyle.createDescriptor(styleProperties);
     }
+
     return layerDescriptor;
   }
 
@@ -160,6 +130,14 @@ export class VectorLayer extends ALayer {
     return [...numberFieldOptions, ...joinFields];
   }
 
+  getIndexPatternIds() {
+    const indexPatternIds = this._source.getIndexPatternIds();
+    this.getValidJoins().forEach(join => {
+      indexPatternIds.push(...join.getIndexPatternIds());
+    });
+    return indexPatternIds;
+  }
+
   _findDataRequestForSource(sourceDataId) {
     return this._dataRequests.find(dataRequest => dataRequest.getDataId() === sourceDataId);
   }
@@ -169,8 +147,9 @@ export class VectorLayer extends ALayer {
     const refreshTimerAware = await source.isRefreshTimerAware();
     const extentAware = source.isFilterByMapBounds();
     const isFieldAware = source.isFieldAware();
+    const isQueryAware = source.isQueryAware();
 
-    if (!timeAware && !refreshTimerAware && !extentAware && !isFieldAware) {
+    if (!timeAware && !refreshTimerAware && !extentAware && !isFieldAware && !isQueryAware) {
       const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
       if (sourceDataRequest && sourceDataRequest.hasDataOrRequestInProgress()) {
         return true;
@@ -203,10 +182,16 @@ export class VectorLayer extends ALayer {
       updateDueToFields = !_.isEqual(meta.fieldNames, filters.fieldNames);
     }
 
+    let updateDueToQuery = false;
+    if (isQueryAware) {
+      updateDueToQuery = !_.isEqual(meta.query, filters.query);
+    }
+
     return !updateDueToTime
       && !updateDueToRefreshTimer
       && !this.updateDueToExtent(source, meta, filters)
-      && !updateDueToFields;
+      && !updateDueToFields
+      && !updateDueToQuery;
   }
 
   async _syncJoin(join, { startLoading, stopLoading, onLoadError, dataFilters }) {
@@ -223,7 +208,7 @@ export class VectorLayer extends ALayer {
           join: join
         };
       }
-      startLoading(sourceDataId, requestToken, { timeFilters: dataFilters.timeFilters });
+      startLoading(sourceDataId, requestToken, dataFilters);
       const leftSourceName = await this.getSourceName();
       const {
         rawData,

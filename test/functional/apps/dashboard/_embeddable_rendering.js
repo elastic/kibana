@@ -30,34 +30,44 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const find = getService('find');
   const browser = getService('browser');
+  const pieChart = getService('pieChart');
   const dashboardExpect = getService('dashboardExpect');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'discover']);
 
   const expectAllDataRenders = async () => {
-    await dashboardExpect.pieSliceCount(16);
-    await dashboardExpect.seriesElementCount(19);
-    await dashboardExpect.dataTableRowCount(5);
-    await dashboardExpect.savedSearchRowCount(50);
-    await dashboardExpect.goalAndGuageLabelsExist(['63%', '56%', '11.915 GB']);
-    await dashboardExpect.inputControlItemCount(5);
+    await pieChart.expectPieSliceCount(16);
     await dashboardExpect.metricValuesExist(['7,544']);
-    await dashboardExpect.markdownWithValuesExists(['I\'m a markdown!']);
-    await dashboardExpect.lineChartPointsCount(5);
-    await dashboardExpect.tagCloudWithValuesFound(['CN', 'IN', 'US', 'BR', 'ID']);
-    await dashboardExpect.timelionLegendCount(0);
+    await dashboardExpect.seriesElementCount(19);
     const tsvbGuageExists = await find.existsByCssSelector('.tvbVisHalfGauge');
     expect(tsvbGuageExists).to.be(true);
-    await dashboardExpect.tsvbMetricValuesExist(['210,007,889,606']);
-    await dashboardExpect.tsvbMarkdownWithValuesExists(['Hi Avg last bytes: 6286.674715909091']);
-    await dashboardExpect.tsvbTableCellCount(20);
-    await dashboardExpect.tsvbTimeSeriesLegendCount(1);
-    await dashboardExpect.tsvbTopNValuesExist(['5,734.79', '6,286.675']);
+    await dashboardExpect.timelionLegendCount(0);
+    await dashboardExpect.markdownWithValuesExists(['I\'m a markdown!']);
     await dashboardExpect.vegaTextsExist(['5,000']);
+    await dashboardExpect.goalAndGuageLabelsExist(['63%', '56%', '11.915 GB']);
+    await dashboardExpect.dataTableRowCount(5);
+    await dashboardExpect.tagCloudWithValuesFound(['CN', 'IN', 'US', 'BR', 'ID']);
+    // TODO add test for 'region map viz'
+    // TODO add test for 'tsvb gauge' viz
+    await dashboardExpect.tsvbTimeSeriesLegendCount(1);
+    // TODO add test for 'geo map' viz
+    // This tests the presence of the two input control embeddables
+    await dashboardExpect.inputControlItemCount(5);
+    await dashboardExpect.tsvbTableCellCount(20);
+    await dashboardExpect.tsvbMarkdownWithValuesExists(['Hi Avg last bytes: 6286.674715909091']);
+    await dashboardExpect.tsvbTopNValuesExist(['5,734.79', '6,286.675']);
+    await dashboardExpect.tsvbMetricValuesExist(['210,007,889,606']);
+    // TODO add test for 'animal sound pie' viz
+    // This tests the area chart and non timebased line chart points
+    await dashboardExpect.lineChartPointsCount(5);
+    // TODO add test for 'scripted filter and query' viz
+    // TODO add test for 'animal weight linked to search' viz
+    // TODO add test for the last vega viz
+    await dashboardExpect.savedSearchRowCount(50);
   };
 
   const expectNoDataRenders = async () => {
-    await dashboardExpect.pieSliceCount(0);
+    await pieChart.expectPieSliceCount(0);
     await dashboardExpect.seriesElementCount(0);
     await dashboardExpect.dataTableRowCount(0);
     await dashboardExpect.savedSearchRowCount(0);
@@ -103,6 +113,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardAddPanel.addVisualization('Filter Bytes Test: vega');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.waitForRenderComplete();
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.be(27);
     });
@@ -111,13 +122,16 @@ export default function ({ getService, getPageObjects }) {
       await dashboardAddPanel.addEverySavedSearch('"Rendering Test"');
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.waitForRenderComplete();
       const panelCount = await PageObjects.dashboard.getPanelCount();
       expect(panelCount).to.be(28);
 
       await PageObjects.dashboard.saveDashboard('embeddable rendering test', { storeTimeWithDashboard: true });
     });
 
-    it.skip('initial render test', async () => {
+    it('initial render test', async () => {
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.waitForRenderComplete();
       await expectAllDataRenders();
     });
 
@@ -127,14 +141,15 @@ export default function ({ getService, getPageObjects }) {
       const toTime = '2018-05-11 00:00:00.000';
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
       await PageObjects.dashboard.loadSavedDashboard('embeddable rendering test');
-
+      await PageObjects.dashboard.waitForRenderComplete();
       await expectAllDataRenders();
     });
 
     it('data rendered correctly when dashboard is hard refreshed', async () => {
       const currentUrl = await browser.getCurrentUrl();
       await browser.get(currentUrl, true);
-
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.waitForRenderComplete();
       await expectAllDataRenders();
     });
 
@@ -142,7 +157,8 @@ export default function ({ getService, getPageObjects }) {
       const fromTime = '2018-05-11 00:00:00.000';
       const toTime = '2018-05-12 00:00:00.000';
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.waitForRenderComplete();
       await expectNoDataRenders();
     });
 
@@ -150,7 +166,8 @@ export default function ({ getService, getPageObjects }) {
       const fromTime = '2018-01-01 00:00:00.000';
       const toTime = '2018-04-13 00:00:00.000';
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.waitForRenderComplete();
       await expectAllDataRenders();
     });
   });

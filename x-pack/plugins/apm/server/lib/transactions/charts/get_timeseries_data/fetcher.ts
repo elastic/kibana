@@ -6,6 +6,7 @@
 
 import { AggregationSearchResponse, ESFilter } from 'elasticsearch';
 import {
+  PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_DURATION,
   TRANSACTION_NAME,
@@ -79,6 +80,7 @@ export function timeseriesFetcher({
   const { intervalString } = getBucketSize(start, end, 'auto');
 
   const filter: ESFilter[] = [
+    { term: { [PROCESSOR_EVENT]: 'transaction' } },
     { term: { [SERVICE_NAME]: serviceName } },
     {
       range: {

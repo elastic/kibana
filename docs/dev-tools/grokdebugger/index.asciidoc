@@ -14,8 +14,8 @@ with over 120 reusable grok patterns. See
 https://github.com/elastic/elasticsearch/tree/master/modules/ingest-common/src/main/resources/patterns[Ingest node grok patterns] and https://github.com/logstash-plugins/logstash-patterns-core/tree/master/patterns[Logstash grok patterns]
 for the full list of patterns.
 
-{xpack} includes a Grok Debugger tool that you can use to build and debug
-grok patterns before you use them in your data processing pipelines. Because
+You can build and debug grok patterns in the Grok Debugger tool in {kib}
+before you use them in your data processing pipelines. Because
 ingest node and Logstash share the same grok implementation and pattern
 libraries, any grok pattern that you create in the Grok Debugger will work
 in ingest node and Logstash.

@@ -6,10 +6,16 @@
 
 import { getIndexManagementDataEnrichers } from '../../index_management_data';
 export const enrichResponse = async (response, callWithRequest) => {
+  let enrichedResponse = response;
   const dataEnrichers = getIndexManagementDataEnrichers();
   for (let i = 0; i < dataEnrichers.length; i++) {
     const dataEnricher = dataEnrichers[i];
-    response = await dataEnricher(response, callWithRequest);
+    try {
+      const dataEnricherResponse = await dataEnricher(enrichedResponse, callWithRequest);
+      enrichedResponse = dataEnricherResponse;
+    } catch(e) {
+      // silently swallow enricher response errors
+    }
   }
-  return response;
+  return enrichedResponse;
 };

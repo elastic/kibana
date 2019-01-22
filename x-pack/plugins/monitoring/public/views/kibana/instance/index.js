@@ -81,11 +81,13 @@ uiRoutes.when('/kibana/instances/:uuid', {
                     <EuiFlexItem grow={true}>
                       <MonitoringTimeseriesContainer
                         series={data.metrics.kibana_requests}
+                        onBrush={this.onBrush}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem grow={true}>
                       <MonitoringTimeseriesContainer
                         series={data.metrics.kibana_response_times}
+                        onBrush={this.onBrush}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -93,11 +95,13 @@ uiRoutes.when('/kibana/instances/:uuid', {
                     <EuiFlexItem grow={true}>
                       <MonitoringTimeseriesContainer
                         series={data.metrics.kibana_memory}
+                        onBrush={this.onBrush}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem grow={true}>
                       <MonitoringTimeseriesContainer
                         series={data.metrics.kibana_average_concurrent_connections}
+                        onBrush={this.onBrush}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -105,11 +109,13 @@ uiRoutes.when('/kibana/instances/:uuid', {
                     <EuiFlexItem grow={true}>
                       <MonitoringTimeseriesContainer
                         series={data.metrics.kibana_os_load}
+                        onBrush={this.onBrush}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem grow={true}>
                       <MonitoringTimeseriesContainer
                         series={data.metrics.kibana_process_delay}
+                        onBrush={this.onBrush}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
