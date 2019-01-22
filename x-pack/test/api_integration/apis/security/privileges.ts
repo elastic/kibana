@@ -17,10 +17,10 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
       const versionService = getService('kibanaServer').version;
       version = await versionService.get();
     });
-    describe('GET /api/security/privileges', () => {
-      it('should return a privilege map with all known privileges', async () => {
+    describe('GET /api/security/privileges?includeActions=true', () => {
+      it('should return a privilege map with all known privileges with actions', async () => {
         await supertest
-          .get('/api/security/privileges')
+          .get('/api/security/privileges?includeActions=true')
           .set('kbn-xsrf', 'xxx')
           .send()
           .expect(200, {
@@ -693,6 +693,37 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 'ui:navLinks/*',
               ],
             },
+          });
+      });
+    });
+
+    describe('GET /api/security/privileges', () => {
+      it('should return a privilege map with all known privileges, without actions', async () => {
+        await supertest
+          .get('/api/security/privileges')
+          .set('kbn-xsrf', 'xxx')
+          .send()
+          .expect(200, {
+            features: {
+              discover: ['all', 'read'],
+              visualize: ['all', 'read'],
+              dashboard: ['all', 'read'],
+              dev_tools: ['all'],
+              advancedSettings: ['all'],
+              indexPatterns: ['all'],
+              timelion: ['all', 'read'],
+              graph: ['all', 'read'],
+              monitoring: ['all'],
+              ml: ['all'],
+              apm: ['all'],
+              gis: ['all', 'read'],
+              canvas: ['all', 'read'],
+              infrastructure: ['all'],
+              logs: ['all'],
+              uptime: ['all'],
+            },
+            global: ['all', 'read'],
+            space: ['all', 'read'],
           });
       });
     });

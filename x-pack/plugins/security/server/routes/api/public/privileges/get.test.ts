@@ -60,6 +60,7 @@ const createMockServer = () => {
 
 interface TestOptions {
   preCheckLicenseImpl?: () => void;
+  includeActions?: boolean;
   asserts: {
     statusCode: number;
     result: Record<string, any>;
@@ -69,7 +70,7 @@ interface TestOptions {
 describe('GET privileges', () => {
   const getPrivilegesTest = (
     description: string,
-    { preCheckLicenseImpl = () => null, asserts }: TestOptions
+    { preCheckLicenseImpl = () => null, includeActions, asserts }: TestOptions
   ) => {
     test(description, async () => {
       const mockServer = createMockServer();
@@ -80,9 +81,11 @@ describe('GET privileges', () => {
         authorization: 'foo',
       };
 
+      const url = `/api/security/privileges${includeActions ? '?includeActions=true' : ''}`;
+
       const request = {
         method: 'GET',
-        url: '/api/security/privileges',
+        url,
         headers,
       };
       const { result, statusCode } = await mockServer.inject(request);
@@ -108,10 +111,26 @@ describe('GET privileges', () => {
   });
 
   describe('success', () => {
-    getPrivilegesTest(`returns registered application privileges`, {
+    getPrivilegesTest(`returns registered application privileges with actions when requested`, {
+      includeActions: true,
       asserts: {
         statusCode: 200,
         result: createPrivilegeMap(),
+      },
+    });
+
+    getPrivilegesTest(`returns registered application privileges without actions`, {
+      includeActions: false,
+      asserts: {
+        statusCode: 200,
+        result: {
+          global: ['all', 'read'],
+          space: ['all', 'read'],
+          features: {
+            feature1: ['all'],
+            feature2: ['all'],
+          },
+        },
       },
     });
   });

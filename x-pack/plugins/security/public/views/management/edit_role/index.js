@@ -88,7 +88,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       return [];
     },
     privileges() {
-      return  kfetch({ method: 'get', pathname: '/api/security/privileges' });
+      return  kfetch({ method: 'get', pathname: '/api/security/privileges', query: { includeActions: true } });
     },
     features() {
       return kfetch({ method: 'get', pathname: '/api/features/v1' });
