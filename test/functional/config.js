@@ -32,7 +32,7 @@ import {
   PointSeriesPageProvider,
   VisualBuilderPageProvider,
   TimelionPageProvider,
-  SharePageProvider
+  SharePageProvider,
 } from './page_objects';
 
 import {
@@ -55,6 +55,10 @@ import {
   RenderableProvider,
   TableProvider,
   BrowserProvider,
+  InspectorProvider,
+  PieChartProvider,
+  AppsMenuProvider,
+  GlobalNavProvider,
 } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -115,6 +119,10 @@ export default async function ({ readConfigFile }) {
       renderable: RenderableProvider,
       table: TableProvider,
       browser: BrowserProvider,
+      pieChart: PieChartProvider,
+      inspector: InspectorProvider,
+      appsMenu: AppsMenuProvider,
+      globalNav: GlobalNavProvider,
     },
     servers: commonConfig.get('servers'),
 
