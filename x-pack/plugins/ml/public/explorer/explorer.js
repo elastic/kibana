@@ -195,17 +195,31 @@ export const Explorer = injectI18n(
         // Load the data - if the FieldFormats failed to populate
         // the default formatting will be used for metric values.
         this.setState({ hasResults: false, loading: true });
-        Object.assign(stateUpdate, await this.loadOverallData(selectedJobs));
+        Object.assign(
+          stateUpdate,
+          await this.loadOverallData(
+            selectedJobs,
+            this.getSwimlaneBucketInterval(selectedJobs)
+          )
+        );
 
         if (stateUpdate.hasResults) {
           // Trigger loading of the 'view by' swimlane -
           // only load once the overall swimlane so that we can match the time span.
-          this.setState({ viewBySwimlaneData: getDefaultViewBySwimlaneData(), viewBySwimlaneDataLoading: true });
+          this.setState({
+            viewBySwimlaneData: getDefaultViewBySwimlaneData(),
+            viewBySwimlaneDataLoading: true
+          });
           const viewBySwimlaneOptions = this.getViewBySwimlaneOptions(selectedJobs);
           Object.assign(
             stateUpdate,
             viewBySwimlaneOptions,
-            await this.loadViewBySwimlane([], stateUpdate.overallSwimlaneData, selectedJobs, viewBySwimlaneOptions.swimlaneViewByFieldName),
+            await this.loadViewBySwimlane(
+              [],
+              stateUpdate.overallSwimlaneData,
+              selectedJobs,
+              viewBySwimlaneOptions.swimlaneViewByFieldName
+            ),
           );
         }
 
@@ -226,17 +240,28 @@ export const Explorer = injectI18n(
         // Load the data - if the FieldFormats failed to populate
         // the default formatting will be used for metric values.
         this.setState({ hasResults: false, loading: true });
-        Object.assign(stateUpdate, await this.loadOverallData(selectedJobs));
+        Object.assign(
+          stateUpdate,
+          await this.loadOverallData(selectedJobs, this.getSwimlaneBucketInterval(selectedJobs))
+        );
 
         if (stateUpdate.hasResults) {
           // Trigger loading of the 'view by' swimlane -
           // only load once the overall swimlane so that we can match the time span.
-          this.setState({ viewBySwimlaneData: getDefaultViewBySwimlaneData(), viewBySwimlaneDataLoading: true });
+          this.setState({
+            viewBySwimlaneData: getDefaultViewBySwimlaneData(),
+            viewBySwimlaneDataLoading: true
+          });
           const viewBySwimlaneOptions = this.getViewBySwimlaneOptions(selectedJobs);
           Object.assign(
             stateUpdate,
             viewBySwimlaneOptions,
-            await this.loadViewBySwimlane([], stateUpdate.overallSwimlaneData, selectedJobs, viewBySwimlaneOptions.swimlaneViewByFieldName),
+            await this.loadViewBySwimlane(
+              [],
+              stateUpdate.overallSwimlaneData,
+              selectedJobs,
+              viewBySwimlaneOptions.swimlaneViewByFieldNam
+            ),
           );
         }
 
@@ -255,7 +280,10 @@ export const Explorer = injectI18n(
         if (stateUpdate.hasResults) {
           // Trigger loading of the 'view by' swimlane -
           // only load once the overall swimlane so that we can match the time span.
-          this.setState({ viewBySwimlaneData: getDefaultViewBySwimlaneData(), viewBySwimlaneDataLoading: true });
+          this.setState({
+            viewBySwimlaneData: getDefaultViewBySwimlaneData(),
+            viewBySwimlaneDataLoading: true
+          });
           const viewBySwimlaneOptions = this.getViewBySwimlaneOptions(this.state.selectedJobs);
           Object.assign(
             stateUpdate,
@@ -276,7 +304,10 @@ export const Explorer = injectI18n(
       if (action === EXPLORER_ACTION.REDRAW) {
         // Load the data - if the FieldFormats failed to populate
         // the default formatting will be used for metric values.
-        const stateUpdate = await this.loadOverallData(this.state.selectedJobs);
+        const stateUpdate = await this.loadOverallData(
+          this.state.selectedJobs,
+          this.getSwimlaneBucketInterval(this.state.selectedJobs)
+        );
         if (stateUpdate.hasResults) {
           // Trigger loading of the 'view by' swimlane -
           // only load once the overall swimlane so that we can match the time span.
@@ -400,7 +431,7 @@ export const Explorer = injectI18n(
       // this has to be done at this stage so all searches use the same interval
       const timerangeSeconds = (bounds.max.valueOf() - bounds.min.valueOf()) / 1000;
       const numBuckets = parseInt(timerangeSeconds / intervalSeconds);
-      const cellWidth = Math.floor(swimlaneWidth / numBuckets);
+      const cellWidth = Math.floor(swimlaneWidth / numBuckets * 100) / 100;
 
       // if the cell width is going to be less than 8px, double the interval
       if (cellWidth < 8) {
@@ -416,7 +447,10 @@ export const Explorer = injectI18n(
       return buckets.getInterval();
     }
 
-    async loadOverallData(selectedJobs) {
+    loadOverallDataPreviousSelectedJobs = null;
+    loadOverallDataPreviousInterval = null;
+    loadOverallDataPreviousData = null;
+    async loadOverallData(selectedJobs, interval) {
       return new Promise((resolve) => {
         // Loads the overall data components i.e. the overall swimlane and influencers list.
         if (selectedJobs === null) {
@@ -427,12 +461,30 @@ export const Explorer = injectI18n(
           return;
         }
 
+        // check if we can just return existing cached data
+        if (
+          _.isEqual(selectedJobs, this.loadOverallDataPreviousSelectedJobs) &&
+          interval.asSeconds() === this.loadOverallDataPreviousInterval.asSeconds()
+        ) {
+          const overallSwimlaneData = this.loadOverallDataPreviousData;
+          const hasResults = (overallSwimlaneData.points && overallSwimlaneData.points.length > 0);
+          resolve({
+            hasResults,
+            loading: false,
+            overallSwimlaneData,
+          });
+          return;
+        }
+
+        this.loadOverallDataPreviousSelectedJobs = selectedJobs;
+        this.loadOverallDataPreviousInterval = interval;
+
         // Ensure the search bounds align to the bucketing interval used in the swimlane so
         // that the first and last buckets are complete.
         const bounds = timefilter.getActiveBounds();
         const searchBounds = getBoundsRoundedToInterval(
           bounds,
-          this.getSwimlaneBucketInterval(selectedJobs),
+          interval,
           false
         );
         const selectedJobIds = selectedJobs.map(d => d.id);
@@ -444,7 +496,7 @@ export const Explorer = injectI18n(
         // to ensure the search is inclusive of end time.
         const overallBucketsBounds = getBoundsRoundedToInterval(
           bounds,
-          this.getSwimlaneBucketInterval(selectedJobs),
+          interval,
           true
         );
         mlResultsService.getOverallBucketScores(
@@ -455,14 +507,15 @@ export const Explorer = injectI18n(
           1,
           overallBucketsBounds.min.valueOf(),
           overallBucketsBounds.max.valueOf(),
-          this.getSwimlaneBucketInterval(selectedJobs).asSeconds() + 's'
+          interval.asSeconds() + 's'
         ).then((resp) => {
           this.skipCellClicks = false;
           const overallSwimlaneData = processOverallResults(
             resp.results,
             searchBounds,
-            this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
+            interval.asSeconds(),
           );
+          this.loadOverallDataPreviousData = overallSwimlaneData;
 
           console.log('Explorer overall swimlane data set:', overallSwimlaneData);
           const hasResults = (overallSwimlaneData.points && overallSwimlaneData.points.length > 0);
@@ -563,9 +616,30 @@ export const Explorer = injectI18n(
       };
     }
 
+    loadViewBySwimlanePreviousArgs = null;
+    loadViewBySwimlanePreviousData = null;
     loadViewBySwimlane(fieldValues, overallSwimlaneData, selectedJobs, swimlaneViewByFieldName) {
+      const compareArgs = {
+        fieldValues,
+        overallSwimlaneData,
+        selectedJobs,
+        swimlaneViewByFieldName,
+        interval: this.getSwimlaneBucketInterval(selectedJobs).asSeconds()
+      };
+
       return new Promise((resolve) => {
         this.skipCellClicks = true;
+
+        // check if we can just return existing cached data
+        if (_.isEqual(compareArgs, this.loadViewBySwimlanePreviousArgs)) {
+          this.skipCellClicks = false;
+
+          resolve({
+            viewBySwimlaneData: this.loadViewBySwimlanePreviousData,
+            viewBySwimlaneDataLoading: false
+          });
+          return;
+        }
 
         const finish = (resp) => {
           this.skipCellClicks = false;
@@ -577,6 +651,8 @@ export const Explorer = injectI18n(
               swimlaneViewByFieldName,
               this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
             );
+            this.loadViewBySwimlanePreviousArgs = compareArgs;
+            this.loadViewBySwimlanePreviousData = viewBySwimlaneData;
             console.log('Explorer view by swimlane data set:', viewBySwimlaneData);
 
             resolve({
@@ -636,14 +712,27 @@ export const Explorer = injectI18n(
       });
     }
 
+    topFieldsPreviousArgs = null;
+    topFieldsPreviousData = null;
     loadViewByTopFieldValuesForSelectedTime(earliestMs, latestMs, selectedJobs, swimlaneViewByFieldName) {
       const selectedJobIds = selectedJobs.map(d => d.id);
       const limit = mlSelectLimitService.state.get('limit');
       const swimlaneLimit = (limit === undefined) ? SWIMLANE_DEFAULT_LIMIT : limit.val;
 
+      const compareArgs = {
+        earliestMs, latestMs, selectedJobIds, swimlaneLimit, swimlaneViewByFieldName,
+        interval: this.getSwimlaneBucketInterval(selectedJobs).asSeconds()
+      };
+
       // Find the top field values for the selected time, and then load the 'view by'
       // swimlane over the full time range for those specific field values.
       return new Promise((resolve) => {
+        if (_.isEqual(compareArgs, this.topFieldsPreviousArgs)) {
+          resolve(this.topFieldsPreviousData);
+          return;
+        }
+        this.topFieldsPreviousArgs = compareArgs;
+
         if (swimlaneViewByFieldName !== VIEW_BY_JOB_LABEL) {
           mlResultsService.getTopInfluencers(
             selectedJobIds,
@@ -652,6 +741,7 @@ export const Explorer = injectI18n(
             swimlaneLimit
           ).then((resp) => {
             if (resp.influencers[swimlaneViewByFieldName] === undefined) {
+              this.topFieldsPreviousData = [];
               resolve([]);
             }
 
@@ -662,6 +752,7 @@ export const Explorer = injectI18n(
                 topFieldValues.push(influencerData.influencerFieldValue);
               }
             });
+            this.topFieldsPreviousData = topFieldValues;
             resolve(topFieldValues);
           });
         } else {
@@ -672,12 +763,18 @@ export const Explorer = injectI18n(
             this.getSwimlaneBucketInterval(selectedJobs).asSeconds() + 's',
             swimlaneLimit
           ).then((resp) => {
-            resolve(Object.keys(resp.results));
+            const topFieldValues = Object.keys(resp.results);
+            this.topFieldsPreviousData = topFieldValues;
+            resolve(topFieldValues);
           });
         }
       });
     }
 
+    anomaliesTablePreviousArgs = null;
+    anomaliesTablePreviousData = null;
+    annotationsTablePreviousArgs = null;
+    annotationsTablePreviousData = null;
     async updateExplorer(stateUpdate) {
       const {
         noInfluencersConfigured,
@@ -735,11 +832,22 @@ export const Explorer = injectI18n(
         this.getSwimlaneBucketInterval(selectedJobs).asSeconds()
       );
 
-      stateUpdate.annotationsData = await loadAnnotationsTableData(
+      const annotationsTableCompareArgs = {
         selectedCells,
         selectedJobs,
-        this.getSwimlaneBucketInterval(selectedJobs).asSeconds()
-      );
+        interval: this.getSwimlaneBucketInterval(selectedJobs).asSeconds()
+      };
+
+      if (_.isEqual(annotationsTableCompareArgs, this.annotationsTablePreviousArgs)) {
+        stateUpdate.annotationsData = this.annotationsTablePreviousData;
+      } else {
+        this.annotationsTablePreviousArgs = annotationsTableCompareArgs;
+        stateUpdate.annotationsData = this.annotationsTablePreviousData = await loadAnnotationsTableData(
+          selectedCells,
+          selectedJobs,
+          this.getSwimlaneBucketInterval(selectedJobs).asSeconds()
+        );
+      }
 
       if (selectedCells !== null && selectedCells.fieldName === undefined) {
         this.setState({ viewBySwimlaneData: getDefaultViewBySwimlaneData(), viewBySwimlaneDataLoading: true });
@@ -753,7 +861,12 @@ export const Explorer = injectI18n(
         );
         Object.assign(
           stateUpdate,
-          await this.loadViewBySwimlane(topFieldValues, overallSwimlaneData, selectedJobs, swimlaneViewByFieldName),
+          await this.loadViewBySwimlane(
+            topFieldValues,
+            overallSwimlaneData,
+            selectedJobs,
+            swimlaneViewByFieldName
+          ),
           { viewByLoadedForTimeFormatted: formatHumanReadableDateTime(timerange.earliestMs) }
         );
       }
@@ -779,14 +892,6 @@ export const Explorer = injectI18n(
         );
       }
 
-      stateUpdate.tableData = await loadAnomaliesTableData(
-        selectedCells,
-        selectedJobs,
-        dateFormatTz,
-        this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
-        swimlaneViewByFieldName
-      );
-
       stateUpdate.anomalyChartRecords = updatedAnomalyChartRecords || [];
 
       this.setState(stateUpdate);
@@ -799,6 +904,28 @@ export const Explorer = injectI18n(
         this.updateCharts(
           [], timerange.earliestMs, timerange.latestMs
         );
+      }
+
+      const anomaliesTableCompareArgs = {
+        selectedCells,
+        selectedJobs,
+        dateFormatTz,
+        interval: this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
+        swimlaneViewByFieldName
+      };
+
+      if (_.isEqual(anomaliesTableCompareArgs, this.anomaliesTablePreviousArgs)) {
+        this.setState(this.anomaliesTablePreviousData);
+      } else {
+        this.anomaliesTablePreviousArgs = anomaliesTableCompareArgs;
+        const tableData = this.anomaliesTablePreviousData = await loadAnomaliesTableData(
+          selectedCells,
+          selectedJobs,
+          dateFormatTz,
+          this.getSwimlaneBucketInterval(selectedJobs).asSeconds(),
+          swimlaneViewByFieldName
+        );
+        this.setState({ tableData });
       }
     }
 
@@ -859,7 +986,10 @@ export const Explorer = injectI18n(
 
         if (this.state.viewByLoadedForTimeFormatted) {
           // Reload 'view by' swimlane over full time range.
-          this.setState({ viewBySwimlaneData: getDefaultViewBySwimlaneData(), viewBySwimlaneDataLoading: true });
+          this.setState({
+            viewBySwimlaneData: getDefaultViewBySwimlaneData(),
+            viewBySwimlaneDataLoading: true
+          });
           Object.assign(
             stateUpdate,
             await this.loadViewBySwimlane(

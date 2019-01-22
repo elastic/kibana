@@ -250,7 +250,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
     const swimlanes = element.select('.ml-swimlanes');
     swimlanes.html('');
 
-    const cellWidth = Math.floor(chartWidth / numBuckets);
+    const cellWidth = Math.floor(chartWidth / numBuckets * 100) / 100;
 
     const xAxisWidth = cellWidth * numBuckets;
     const xAxisScale = d3.time.scale()

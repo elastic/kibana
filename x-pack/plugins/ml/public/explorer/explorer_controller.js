@@ -200,8 +200,8 @@ module.controller('MlExplorerController', function (
     if (resizeTimeout !== null) {
       $timeout.cancel(resizeTimeout);
     }
-    // Only redraw 500ms after last resize event.
-    resizeTimeout = $timeout(redrawOnResize, 500);
+    // Only redraw 100ms after last resize event.
+    resizeTimeout = $timeout(redrawOnResize, 100);
   }
   $(window).resize(jqueryRedrawOnResize);
 
