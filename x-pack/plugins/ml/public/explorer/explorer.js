@@ -173,7 +173,7 @@ export const Explorer = injectI18n(
       }
     });
 
-    dashboardListener = (async (action, payload) => {
+    dashboardListener = ((action, payload) => {
       // Listen to the initial loading of jobs
       if (action === EXPLORER_ACTION.INITIALIZE) {
         const { selectedCells, selectedJobs, swimlaneViewByFieldName } = payload;
@@ -348,7 +348,7 @@ export const Explorer = injectI18n(
     loadOverallDataPreviousArgs = null;
     loadOverallDataPreviousInterval = null;
     loadOverallDataPreviousData = null;
-    async loadOverallData(selectedJobs, interval, showLoadingIndicator = true) {
+    loadOverallData(selectedJobs, interval, showLoadingIndicator = true) {
       if (showLoadingIndicator) {
         this.setState({ hasResults: false, loading: true });
       }
@@ -914,7 +914,7 @@ export const Explorer = injectI18n(
     swimlaneCellClickQueue = [];
 
     // Listener for click events in the swimlane to load corresponding anomaly data.
-    swimlaneCellClick = async (swimlaneSelectedCells) => {
+    swimlaneCellClick = (swimlaneSelectedCells) => {
       if (this.skipCellClicks === true) {
         this.swimlaneCellClickQueue.push(swimlaneSelectedCells);
         return;
