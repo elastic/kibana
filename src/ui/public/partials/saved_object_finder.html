@@ -33,9 +33,9 @@
           ng-if="onAddNew"
           ng-click="onAddNew()"
           data-test-subj="addNewSavedObjectLink"
-          i18n-id="common.ui.savedObjectFinder.newItemButtonLabel"
-          i18n-default-message="Add new {noun}"
-          i18n-values="{noun: finder.properties.noun}"
+          i18n-id="common.ui.savedObjectFinder.addNewItemButtonLabel"
+          i18n-default-message="Add new {item}"
+          i18n-values="{item: finder.properties.noun}"
         ></button>
 
         <button
@@ -43,8 +43,8 @@
           ng-if="!useLocalManagement"
           ng-click="finder.manageObjects(finder.properties.name)"
           i18n-id="common.ui.savedObjectFinder.manageItemsButtonLabel"
-          i18n-default-message="Manage {nouns}"
-          i18n-values="{nouns: finder.properties.nouns}"
+          i18n-default-message="Manage {items}"
+          i18n-values="{items: finder.properties.nouns}"
         ></button>
       </div>
     </div>
