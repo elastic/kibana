@@ -242,7 +242,10 @@ export const Explorer = injectI18n(
         this.setState({ hasResults: false, loading: true });
         Object.assign(
           stateUpdate,
-          await this.loadOverallData(selectedJobs, this.getSwimlaneBucketInterval(selectedJobs))
+          await this.loadOverallData(
+            selectedJobs,
+            this.getSwimlaneBucketInterval(selectedJobs)
+          )
         );
 
         if (stateUpdate.hasResults) {
@@ -260,7 +263,7 @@ export const Explorer = injectI18n(
               [],
               stateUpdate.overallSwimlaneData,
               selectedJobs,
-              viewBySwimlaneOptions.swimlaneViewByFieldNam
+              viewBySwimlaneOptions.swimlaneViewByFieldName
             ),
           );
         }
@@ -276,7 +279,10 @@ export const Explorer = injectI18n(
         // Load the data - if the FieldFormats failed to populate
         // the default formatting will be used for metric values.
         this.setState({ hasResults: false, loading: true });
-        Object.assign(stateUpdate, await this.loadOverallData(this.state.selectedJobs));
+        Object.assign(stateUpdate, await this.loadOverallData(
+          this.state.selectedJobs,
+          this.getSwimlaneBucketInterval(this.state.selectedJobs)
+        ));
         if (stateUpdate.hasResults) {
           // Trigger loading of the 'view by' swimlane -
           // only load once the overall swimlane so that we can match the time span.
@@ -447,7 +453,7 @@ export const Explorer = injectI18n(
       return buckets.getInterval();
     }
 
-    loadOverallDataPreviousSelectedJobs = null;
+    loadOverallDataPreviousArgs = null;
     loadOverallDataPreviousInterval = null;
     loadOverallDataPreviousData = null;
     async loadOverallData(selectedJobs, interval) {
@@ -462,10 +468,12 @@ export const Explorer = injectI18n(
         }
 
         // check if we can just return existing cached data
-        if (
-          _.isEqual(selectedJobs, this.loadOverallDataPreviousSelectedJobs) &&
-          interval.asSeconds() === this.loadOverallDataPreviousInterval.asSeconds()
-        ) {
+        const compareArgs = {
+          selectedJobs,
+          intervalAsSeconds: interval.asSeconds()
+        };
+
+        if (_.isEqual(compareArgs, this.loadOverallDataPreviousArgs)) {
           const overallSwimlaneData = this.loadOverallDataPreviousData;
           const hasResults = (overallSwimlaneData.points && overallSwimlaneData.points.length > 0);
           resolve({
@@ -476,8 +484,7 @@ export const Explorer = injectI18n(
           return;
         }
 
-        this.loadOverallDataPreviousSelectedJobs = selectedJobs;
-        this.loadOverallDataPreviousInterval = interval;
+        this.loadOverallDataPreviousArgs = compareArgs;
 
         // Ensure the search bounds align to the bucketing interval used in the swimlane so
         // that the first and last buckets are complete.
@@ -596,7 +603,7 @@ export const Explorer = injectI18n(
             }
           });
 
-          if (this.state.swimlaneViewByFieldName === undefined) {
+          if (swimlaneViewByFieldName === undefined) {
             if (firstJobInfluencers.length > 0) {
               swimlaneViewByFieldName = firstJobInfluencers[0];
             } else {
