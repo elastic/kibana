@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { i18n, FormattedMessage } from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiFlexGroup,
@@ -45,8 +45,8 @@ export function ConnectionStatus({ isConnected }) {
   }
 
   const seedNodeTooltip = i18n.translate('xpack.remoteClusters.connectedStatus.notConnectedToolTip', {
-      defaultMessage: "Ensure the seed nodes are configured with the remote cluster's transport port, not the http port.",
-    });
+    defaultMessage: "Ensure the seed nodes are configured with the remote cluster's transport port, not the http port.",
+  });
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -64,7 +64,7 @@ export function ConnectionStatus({ isConnected }) {
           type="iInCircle"
           color="subdued"
           content={seedNodeTooltip}
-        /> 
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
