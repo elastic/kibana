@@ -6,7 +6,7 @@
 
 import { UMPingSortDirectionArg } from '../../../common/domain_types';
 import { UMResolver } from '../../../common/graphql/resolver_types';
-import { DocCount, Ping } from '../../../common/graphql/types';
+import { DocCount, PingResults } from '../../../common/graphql/types';
 import { UMServerLibs } from '../../lib/lib';
 import { UMContext } from '../types';
 import { CreateUMGraphQLResolvers } from '../types';
@@ -21,7 +21,7 @@ interface UMAllPingsArgs {
 }
 
 export type UMAllPingsResolver = UMResolver<
-  Ping[] | Promise<Ping[]>,
+  PingResults | Promise<PingResults>,
   any,
   UMAllPingsArgs,
   UMContext
@@ -30,7 +30,7 @@ export type UMAllPingsResolver = UMResolver<
 export type UMGetDocCountResolver = UMResolver<DocCount | Promise<DocCount>, any, never, UMContext>;
 
 export interface UMPingResolver {
-  allPings: () => Ping[];
+  allPings: () => PingResults;
   getDocCount: () => number;
 }
 
@@ -47,7 +47,7 @@ export const createPingsResolvers: CreateUMGraphQLResolvers = (
       resolver,
       { monitorId, sort, size, status, dateRangeStart, dateRangeEnd },
       { req }
-    ): Promise<Ping[]> {
+    ): Promise<PingResults> {
       return libs.pings.getAll(req, dateRangeStart, dateRangeEnd, monitorId, status, sort, size);
     },
     async getDocCount(resolver, args, { req }): Promise<DocCount> {

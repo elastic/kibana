@@ -193,7 +193,7 @@ export class Pings extends React.Component<PingListProps, PingListState> {
           ];
 
           if (allPings) {
-            const hasStatus = allPings.reduce(
+            const hasStatus = allPings.pings.reduce(
               (hasHttpStatus: boolean, currentPing: Ping) =>
                 hasHttpStatus || get(currentPing, 'http.response.status_code'),
               false
@@ -221,13 +221,9 @@ export class Pings extends React.Component<PingListProps, PingListState> {
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="primary">
-                    {allPings
-                      ? allPings.length
-                      : i18n.translate('xpack.uptime.pingList.pingCountBadgeDefault', {
-                          defaultMessage: 'N/A',
-                        })}
-                  </EuiBadge>
+                  {typeof allPings !== 'undefined' && (
+                    <EuiBadge color="primary">{allPings.total}</EuiBadge>
+                  )}
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiPanel paddingSize="l">
@@ -276,7 +272,7 @@ export class Pings extends React.Component<PingListProps, PingListState> {
                 <EuiInMemoryTable
                   loading={loading}
                   columns={columns}
-                  items={allPings}
+                  items={allPings && allPings.pings}
                   pagination={{ initialPageSize: 10, pageSizeOptions: [5, 10, 20, 100] }}
                   sorting={true}
                 />
