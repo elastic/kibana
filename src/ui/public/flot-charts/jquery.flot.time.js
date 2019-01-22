@@ -8,6 +8,8 @@ API.txt for details.
 
 */
 
+import { i18n } from '@kbn/i18n';
+
 (function($) {
 
 	var options = {
@@ -46,11 +48,50 @@ API.txt for details.
 		var isAM = hours < 12;
 
 		if (monthNames == null) {
-			monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+			monthNames = [
+        i18n.translate('common.ui.flotCharts.janLabel', {
+					defaultMessage: 'Jan',
+				}), i18n.translate('common.ui.flotCharts.febLabel', {
+					defaultMessage: 'Feb',
+				}), i18n.translate('common.ui.flotCharts.marLabel', {
+					defaultMessage: 'Mar',
+				}), i18n.translate('common.ui.flotCharts.aprLabel', {
+					defaultMessage: 'Apr',
+				}), i18n.translate('common.ui.flotCharts.mayLabel', {
+					defaultMessage: 'May',
+				}), i18n.translate('common.ui.flotCharts.junLabel', {
+					defaultMessage: 'Jun',
+				}), i18n.translate('common.ui.flotCharts.julLabel', {
+					defaultMessage: 'Jul',
+				}), i18n.translate('common.ui.flotCharts.augLabel', {
+					defaultMessage: 'Aug',
+				}), i18n.translate('common.ui.flotCharts.sepLabel', {
+					defaultMessage: 'Sep',
+				}), i18n.translate('common.ui.flotCharts.octLabel', {
+					defaultMessage: 'Oct',
+				}), i18n.translate('common.ui.flotCharts.novLabel', {
+					defaultMessage: 'Nov',
+				}), i18n.translate('common.ui.flotCharts.decLabel', {
+					defaultMessage: 'Dec',
+				})];
 		}
 
 		if (dayNames == null) {
-			dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+			dayNames = [i18n.translate('common.ui.flotCharts.sunLabel', {
+        defaultMessage: 'Sun',
+      }), i18n.translate('common.ui.flotCharts.monLabel', {
+        defaultMessage: 'Mon',
+      }), i18n.translate('common.ui.flotCharts.tueLabel', {
+        defaultMessage: 'Tue',
+      }), i18n.translate('common.ui.flotCharts.wedLabel', {
+        defaultMessage: 'Wed',
+      }), i18n.translate('common.ui.flotCharts.thuLabel', {
+        defaultMessage: 'Thu',
+      }), i18n.translate('common.ui.flotCharts.friLabel', {
+        defaultMessage: 'Fri',
+      }), i18n.translate('common.ui.flotCharts.satLabel', {
+        defaultMessage: 'Sat',
+      })];
 		}
 
 		var hours12;
@@ -158,7 +199,7 @@ API.txt for details.
 			return makeUtcWrapper(new Date(ts));
 		}
 	}
-	
+
 	// map of app. size of time units in milliseconds
 
 	var timeUnitSize = {
@@ -176,9 +217,9 @@ API.txt for details.
 
 	var baseSpec = [
 		[1, "second"], [2, "second"], [5, "second"], [10, "second"],
-		[30, "second"], 
+		[30, "second"],
 		[1, "minute"], [2, "minute"], [5, "minute"], [10, "minute"],
-		[30, "minute"], 
+		[30, "minute"],
 		[1, "hour"], [2, "hour"], [4, "hour"],
 		[8, "hour"], [12, "hour"],
 		[1, "day"], [2, "day"], [3, "day"],
