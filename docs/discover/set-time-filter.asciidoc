@@ -26,6 +26,8 @@ by editing the *To* and *From* fields.
 +
 image::images/time-filter-absolute.jpg[Absolute time filter]
 . To specify recently used Quick, Relative, Absolute, click *Recent* 
++
+image::images/time-filter-recent.jpg[Recent time filter]
 one of the shortcut links.
 
 . Click the caret in the bottom right corner to close the Time Picker.
