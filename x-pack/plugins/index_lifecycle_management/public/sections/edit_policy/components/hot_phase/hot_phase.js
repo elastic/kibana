@@ -83,8 +83,8 @@ class HotPhaseUi extends PureComponent {
             <p>
               <FormattedMessage
                 id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.hotPhaseDescriptionMessage"
-                defaultMessage={`This phase is required. You are actively querying and 
-                writing to your index.  For faster updates, you can roll over the index when it gets too big or too old.`}
+                defaultMessage="This phase is required. You are actively querying and writing to your
+                index. For faster updates, you can roll over the index when it gets too big or too old."
               />
             </p>
           </Fragment>

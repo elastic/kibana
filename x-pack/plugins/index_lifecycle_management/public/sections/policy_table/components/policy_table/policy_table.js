@@ -410,7 +410,7 @@ export class PolicyTableUi extends Component {
                   onClick={() => this.setState({ showDeleteConfirmation: true })}
                 >
                   <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.policyTable.sectionHeading"
+                    id="xpack.indexLifecycleMgmt.policyTable.deletedPoliciesText"
                     defaultMessage="Deleted {numSelected} {numSelected, plural, one {policy} other {policies}}"
                     values={{ numSelected }}
                   />
