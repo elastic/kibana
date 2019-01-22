@@ -25,27 +25,50 @@ const data = [
     id: '1',
     type: 'dashboard',
     attributes: {
-      panelsJSON: JSON.stringify([
-        { type: 'visualization', id: '2' },
-        { type: 'visualization', id: '3' },
-      ]),
+      panelsJSON: JSON.stringify([{ panelRef: 'panel_0' }, { panelRef: 'panel_1' }]),
     },
+    references: [
+      {
+        name: 'panel_0',
+        type: 'visualization',
+        id: '2',
+      },
+      {
+        name: 'panel_1',
+        type: 'visualization',
+        id: '3',
+      },
+    ],
   },
   {
     id: '2',
     type: 'visualization',
     attributes: {
       kibanaSavedObjectMeta: {
-        searchSourceJSON: JSON.stringify({ index: '4' }),
+        searchSourceJSON: JSON.stringify({ index: 'kibanaSavedObjectMeta.searchSourceJSON.index' }),
       },
     },
+    references: [
+      {
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+        id: '4',
+      },
+    ],
   },
   {
     id: '3',
     type: 'visualization',
     attributes: {
-      savedSearchId: '5',
+      savedSearchId: 'search_0',
     },
+    references: [
+      {
+        name: 'search_0',
+        type: 'search',
+        id: '5',
+      },
+    ],
   },
   {
     id: '4',
@@ -59,9 +82,16 @@ const data = [
     type: 'search',
     attributes: {
       kibanaSavedObjectMeta: {
-        searchSourceJSON: JSON.stringify({ index: '4' }),
+        searchSourceJSON: JSON.stringify({ index: 'kibanaSavedObjectMeta.searchSourceJSON.index' }),
       },
     },
+    references: [
+      {
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+        id: '4',
+      },
+    ],
   },
 ];
 
@@ -88,25 +118,51 @@ test('collects dashboard and all dependencies', async () => {
 Array [
   Object {
     "attributes": Object {
-      "panelsJSON": "[{\\"type\\":\\"visualization\\",\\"id\\":\\"2\\"},{\\"type\\":\\"visualization\\",\\"id\\":\\"3\\"}]",
+      "panelsJSON": "[{\\"panelRef\\":\\"panel_0\\"},{\\"panelRef\\":\\"panel_1\\"}]",
     },
     "id": "1",
+    "references": Array [
+      Object {
+        "id": "2",
+        "name": "panel_0",
+        "type": "visualization",
+      },
+      Object {
+        "id": "3",
+        "name": "panel_1",
+        "type": "visualization",
+      },
+    ],
     "type": "dashboard",
   },
   Object {
     "attributes": Object {
       "kibanaSavedObjectMeta": Object {
-        "searchSourceJSON": "{\\"index\\":\\"4\\"}",
+        "searchSourceJSON": "{\\"index\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
       },
     },
     "id": "2",
+    "references": Array [
+      Object {
+        "id": "4",
+        "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+        "type": "index-pattern",
+      },
+    ],
     "type": "visualization",
   },
   Object {
     "attributes": Object {
-      "savedSearchId": "5",
+      "savedSearchId": "search_0",
     },
     "id": "3",
+    "references": Array [
+      Object {
+        "id": "5",
+        "name": "search_0",
+        "type": "search",
+      },
+    ],
     "type": "visualization",
   },
   Object {
@@ -119,10 +175,17 @@ Array [
   Object {
     "attributes": Object {
       "kibanaSavedObjectMeta": Object {
-        "searchSourceJSON": "{\\"index\\":\\"4\\"}",
+        "searchSourceJSON": "{\\"index\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
       },
     },
     "id": "5",
+    "references": Array [
+      Object {
+        "id": "4",
+        "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+        "type": "index-pattern",
+      },
+    ],
     "type": "search",
   },
 ]

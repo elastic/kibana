@@ -17,11 +17,7 @@
  * under the License.
  */
 
-import { get } from 'lodash';
-import {
-  SavedObject,
-  SavedObjectsClient,
-} from '../../../../../../server/saved_objects/service/saved_objects_client';
+import { SavedObjectsClient } from '../../../../../../server/saved_objects/service/saved_objects_client';
 
 interface ObjectsToCollect {
   id: string;
@@ -38,10 +34,9 @@ export async function collectReferencesDeep(
     const itemsToGet = queue.splice(0, queue.length);
     const { saved_objects: savedObjects } = await savedObjectClient.bulkGet(itemsToGet);
     result.push(...savedObjects);
-    const references = Array<ObjectsToCollect>()
-      .concat(...savedObjects.map(obj => obj.references || []))
-      // This line below will be removed once legacy support is removed
-      .concat(...savedObjects.map(obj => extractLegacyReferences(obj)));
+    const references = Array<ObjectsToCollect>().concat(
+      ...savedObjects.map(obj => obj.references || [])
+    );
     for (const reference of references) {
       const isDuplicate = queue
         .concat(result)
@@ -53,58 +48,4 @@ export async function collectReferencesDeep(
     }
   }
   return result;
-}
-
-// Function will be used until each type use "references", each type
-// will be removed once migrated to new structure
-function extractLegacyReferences(savedObject: SavedObject): ObjectsToCollect[] {
-  const legacyReferences = [];
-  switch (savedObject.type) {
-    case 'dashboard':
-      let panels;
-      try {
-        panels = JSON.parse(get(savedObject, 'attributes.panelsJSON'));
-      } catch (e) {
-        panels = [];
-      }
-      for (const panel of panels) {
-        if (panel.type === 'visualization' && panel.id) {
-          legacyReferences.push({ type: panel.type, id: panel.id });
-        }
-      }
-      break;
-    case 'visualization':
-      const { savedSearchId } = savedObject.attributes;
-      const visIndexPattern = extractSearchSourceIndexPattern(savedObject);
-      if (savedSearchId) {
-        legacyReferences.push({ type: 'search', id: savedSearchId });
-      }
-      if (visIndexPattern) {
-        legacyReferences.push(visIndexPattern);
-      }
-      break;
-    case 'search':
-      const searchIndexPattern = extractSearchSourceIndexPattern(savedObject);
-      if (searchIndexPattern) {
-        legacyReferences.push(searchIndexPattern);
-      }
-      break;
-  }
-  return legacyReferences;
-}
-
-function extractSearchSourceIndexPattern(savedObject: SavedObject): ObjectsToCollect | undefined {
-  const searchSourceJSON = get(
-    savedObject,
-    'attributes.kibanaSavedObjectMeta.searchSourceJSON',
-    ''
-  );
-  try {
-    const searchSource = JSON.parse(searchSourceJSON);
-    if (searchSource.index) {
-      return { type: 'index-pattern', id: searchSource.index };
-    }
-  } catch (e) {
-    // Previous behaviour is to ignore error
-  }
 }

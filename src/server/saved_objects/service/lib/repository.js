@@ -24,9 +24,6 @@ import { includedFields } from './included_fields';
 import { decorateEsError } from './decorate_es_error';
 import { getRelationshipsQuery } from './relationship_query_builder';
 import * as errors from './errors';
-import {
-  findRelationships as legacyFindRelationships,
-} from '../../../../legacy/core_plugins/kibana/server/lib/management/saved_objects/relationships';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -637,11 +634,9 @@ export class SavedObjectsRepository {
       },
     };
 
-    const [{ saved_objects: referencedObjects }, referencedResponse, legacyResponse] = await Promise.all([
+    const [{ saved_objects: referencedObjects }, referencedResponse] = await Promise.all([
       this.bulkGet(bulkGetOpts),
       this._callCluster('search', searchOpts),
-      // This code will be removed as these types migrate to use "references"
-      legacyFindRelationships({ type, size, namespace, id, savedObjectsClient: this }),
     ]);
 
     const relationshipObjects = [].concat(
@@ -650,7 +645,6 @@ export class SavedObjectsRepository {
         type: obj.type,
         ...(obj.attributes.title ? { title: obj.attributes.title } : {})
       })),
-      legacyResponse,
       referencedResponse.hits.hits
         .map(hit => this._rawToSavedObject(hit))
         .map(obj => ({
