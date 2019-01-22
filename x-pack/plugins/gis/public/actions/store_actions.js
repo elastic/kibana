@@ -16,7 +16,6 @@ import {
   getMapReady,
   getWaitingForMapReadyLayerListRaw,
 } from '../selectors/map_selectors';
-import { timeService } from '../kibana_services';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
@@ -34,7 +33,6 @@ export const LAYER_DATA_LOAD_STARTED = 'LAYER_DATA_LOAD_STARTED';
 export const LAYER_DATA_LOAD_ENDED = 'LAYER_DATA_LOAD_ENDED';
 export const LAYER_DATA_LOAD_ERROR = 'LAYER_DATA_LOAD_ERROR';
 export const SET_JOINS = 'SET_JOINS';
-export const SET_TIME_FILTERS = 'SET_TIME_FILTERS';
 export const SET_QUERY = 'SET_QUERY';
 export const TRIGGER_REFRESH_TIMER = 'TRIGGER_REFRESH_TIMER';
 export const UPDATE_LAYER_PROP = 'UPDATE_LAYER_PROP';
@@ -385,43 +383,17 @@ export function removeLayer(id) {
 }
 
 export function setMeta(metaJson) {
-  return async dispatch => {
-    dispatch({
-      type: SET_META,
-      meta: metaJson
-    });
+  return {
+    type: SET_META,
+    meta: metaJson
   };
 }
 
-export function setTimeFiltersToKbnGlobalTime() {
-  return (dispatch) => {
-    dispatch(setTimeFilters(timeService.getTime()));
-  };
-}
-
-export function setTimeFilters({ from, to }) {
-  return async (dispatch, getState) => {
-    dispatch({
-      type: SET_TIME_FILTERS,
-      from,
-      to,
-    });
-
-    // Update Kibana global time
-    const kbnTime = timeService.getTime();
-    if ((to && to !== kbnTime.to) || (from && from !== kbnTime.from)) {
-      timeService.setTime({ from, to });
-    }
-
-    const dataFilters = getDataFilters(getState());
-    await syncDataForAllLayers(getState, dispatch, dataFilters);
-  };
-}
-
-export function setQuery({ query }) {
+export function setQuery({ query, timeFilters }) {
   return async (dispatch, getState) => {
     dispatch({
       type: SET_QUERY,
+      timeFilters,
       query: {
         ...query,
         // ensure query changes to trigger re-fetch even when query is the same because "Refresh" clicked
@@ -435,21 +407,10 @@ export function setQuery({ query }) {
 }
 
 export function setRefreshConfig({ isPaused, interval }) {
-  return async (dispatch) => {
-    dispatch({
-      type: SET_REFRESH_CONFIG,
-      isPaused,
-      interval,
-    });
-
-    // Update Kibana global refresh
-    const kbnRefresh = timeService.getRefreshInterval();
-    if (isPaused !== kbnRefresh.pause || interval !== kbnRefresh.value) {
-      timeService.setRefreshInterval({
-        pause: isPaused,
-        value: interval,
-      });
-    }
+  return {
+    type: SET_REFRESH_CONFIG,
+    isPaused,
+    interval,
   };
 }
 
