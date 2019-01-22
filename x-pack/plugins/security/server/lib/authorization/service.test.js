@@ -88,10 +88,6 @@ test(`returns exposed services`, () => {
   expect(checkPrivilegesDynamicallyWithRequestFactory).toHaveBeenCalledWith(mockCheckPrivilegesWithRequest, mockSpaces);
   expect(privilegesFactory).toHaveBeenCalledWith(mockSavedObjectTypes, mockActions, mockXpackMainPlugin);
   expect(authorizationModeFactory).toHaveBeenCalledWith(
-    application,
-    mockConfig,
-    expect.any(Function),
-    mockShieldClient,
     mockXpackInfoFeature,
   );
 

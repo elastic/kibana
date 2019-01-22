@@ -20,10 +20,6 @@ export function createAuthorizationService(server, xpackInfoFeature, savedObject
   const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(actions, application, shieldClient);
   const checkPrivilegesDynamicallyWithRequest = checkPrivilegesDynamicallyWithRequestFactory(checkPrivilegesWithRequest, spaces);
   const mode = authorizationModeFactory(
-    application,
-    config,
-    (...args) => server.log(...args),
-    shieldClient,
     xpackInfoFeature,
   );
   const privileges = privilegesFactory(savedObjectTypes, actions, xpackMainPlugin);
