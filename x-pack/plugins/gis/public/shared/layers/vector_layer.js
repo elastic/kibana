@@ -16,6 +16,7 @@ import { FeatureTooltip } from 'plugins/gis/components/map/feature_tooltip';
 import { store } from '../../store/store';
 import { getMapColors } from '../../selectors/map_selectors';
 import _ from 'lodash';
+import { getGeohashPrecisionForZoom } from '../utils/zoom_to_precision';
 
 const EMPTY_FEATURE_COLLECTION = {
   type: 'FeatureCollection',
@@ -142,19 +143,26 @@ export class VectorLayer extends ALayer {
     return this._dataRequests.find(dataRequest => dataRequest.getDataId() === sourceDataId);
   }
 
-  async _canSkipSourceUpdate(source, sourceDataId, filters) {
+  async _canSkipSourceUpdate(source, sourceDataId, searchFilters) {
     const timeAware = await source.isTimeAware();
     const refreshTimerAware = await source.isRefreshTimerAware();
     const extentAware = source.isFilterByMapBounds();
     const isFieldAware = source.isFieldAware();
     const isQueryAware = source.isQueryAware();
+    const isGeohashPrecisionAware = source.isGeohashPrecisionAware();
 
-    if (!timeAware && !refreshTimerAware && !extentAware && !isFieldAware && !isQueryAware) {
+    if (
+      !timeAware &&
+      !refreshTimerAware &&
+      !extentAware &&
+      !isFieldAware &&
+      !isQueryAware &&
+      !isGeohashPrecisionAware
+    ) {
       const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
       if (sourceDataRequest && sourceDataRequest.hasDataOrRequestInProgress()) {
         return true;
       }
-
       return false;
     }
 
@@ -169,29 +177,37 @@ export class VectorLayer extends ALayer {
 
     let updateDueToTime = false;
     if (timeAware) {
-      updateDueToTime = !_.isEqual(meta.timeFilters, filters.timeFilters);
+      updateDueToTime = !_.isEqual(meta.timeFilters, searchFilters.timeFilters);
     }
 
     let updateDueToRefreshTimer = false;
-    if (refreshTimerAware && filters.refreshTimerLastTriggeredAt) {
-      updateDueToRefreshTimer = !_.isEqual(meta.refreshTimerLastTriggeredAt, filters.refreshTimerLastTriggeredAt);
+    if (refreshTimerAware && searchFilters.refreshTimerLastTriggeredAt) {
+      updateDueToRefreshTimer = !_.isEqual(meta.refreshTimerLastTriggeredAt, searchFilters.refreshTimerLastTriggeredAt);
     }
 
     let updateDueToFields = false;
     if (isFieldAware) {
-      updateDueToFields = !_.isEqual(meta.fieldNames, filters.fieldNames);
+      updateDueToFields = !_.isEqual(meta.fieldNames, searchFilters.fieldNames);
     }
 
     let updateDueToQuery = false;
     if (isQueryAware) {
-      updateDueToQuery = !_.isEqual(meta.query, filters.query);
+      updateDueToQuery = !_.isEqual(meta.query, searchFilters.query);
     }
+
+    let updateDueToPrecisionChange = false;
+    if (isGeohashPrecisionAware) {
+      updateDueToPrecisionChange = !_.isEqual(meta.geohashPrecision, searchFilters.geohashPrecision);
+    }
+
+    const updateDueToExtentChange = this.updateDueToExtent(source, meta, searchFilters);
 
     return !updateDueToTime
       && !updateDueToRefreshTimer
-      && !this.updateDueToExtent(source, meta, filters)
+      && !updateDueToExtentChange
       && !updateDueToFields
-      && !updateDueToQuery;
+      && !updateDueToQuery
+      && !updateDueToPrecisionChange;
   }
 
   async _syncJoin(join, { startLoading, stopLoading, onLoadError, dataFilters }) {
@@ -239,34 +255,44 @@ export class VectorLayer extends ALayer {
   }
 
 
+  _getSearchFilters(dataFilters) {
+    const fieldNames = [
+      ...this._source.getFieldNames(),
+      ...this._style.getSourceFieldNames(),
+      ...this.getValidJoins().map(join => {
+        return join.getLeftFieldName();
+      })
+    ];
+
+    const targetPrecision = getGeohashPrecisionForZoom(dataFilters.zoom);
+    return {
+      ...dataFilters,
+      fieldNames: _.uniq(fieldNames).sort(),
+      geohashPrecision: targetPrecision
+    };
+  }
+
   async _syncSource({ startLoading, stopLoading, onLoadError, dataFilters }) {
+
     const sourceDataId = 'source';
     const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
-    try {
-      const fieldNames = [
-        ...this._source.getFieldNames(),
-        ...this._style.getSourceFieldNames(),
-        ...this.getValidJoins().map(join => {
-          return join.getLeftFieldName();
-        })
-      ];
-      const filters = {
-        ...dataFilters,
-        fieldNames: _.uniq(fieldNames).sort()
+
+    const searchFilters = this._getSearchFilters(dataFilters);
+    const canSkip = await this._canSkipSourceUpdate(this._source, sourceDataId, searchFilters);
+    if (canSkip) {
+      const sourceDataRequest = this.getSourceDataRequest();
+      return {
+        refreshed: false,
+        featureCollection: sourceDataRequest.getData()
       };
-      const canSkip = await this._canSkipSourceUpdate(this._source, sourceDataId, filters);
-      if (canSkip) {
-        const sourceDataRequest = this.getSourceDataRequest();
-        return {
-          refreshed: false,
-          featureCollection: sourceDataRequest.getData()
-        };
-      }
-      startLoading(sourceDataId, requestToken, filters);
+    }
+
+    try {
+      startLoading(sourceDataId, requestToken, searchFilters);
       const layerName = await this.getDisplayName();
       const { data, meta } = await this._source.getGeoJsonWithMeta({
         layerName,
-      }, filters);
+      }, searchFilters);
       stopLoading(sourceDataId, requestToken, data, meta);
       return {
         refreshed: true,
