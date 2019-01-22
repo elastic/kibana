@@ -100,7 +100,7 @@ export const security = (kibana) => new kibana.Plugin({
       // if we have a license which doesn't enable security, or we're a legacy user
       // we shouldn't disable any ui capabilities
       const { authorization } = server.plugins.security;
-      if (!authorization.mode.useRbacForRequest(request)) {
+      if (!authorization.mode.useRbac()) {
         return originalInjectedVars;
       }
 

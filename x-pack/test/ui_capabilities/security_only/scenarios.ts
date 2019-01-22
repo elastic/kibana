@@ -62,26 +62,6 @@ const LegacyAll: LegacyAll = {
   },
 };
 
-interface LegacyRead extends User {
-  username: 'legacy_read';
-}
-const LegacyRead: LegacyRead = {
-  username: 'legacy_read',
-  fullName: 'legacy_read',
-  password: 'legacy_read-password',
-  role: {
-    name: 'legacy_read_role',
-    elasticsearch: {
-      indices: [
-        {
-          names: ['.kibana*'],
-          privileges: ['read'],
-        },
-      ],
-    },
-  },
-};
-
 interface DualPrivilegesAll extends User {
   username: 'dual_privileges_all';
 }
@@ -576,7 +556,6 @@ export type UserScenarios =
   | NoKibanaPrivileges
   | Superuser
   | LegacyAll
-  | LegacyRead
   | DualPrivilegesAll
   | DualPrivilegesRead
   | All
@@ -605,7 +584,6 @@ export const UserScenarios: UserScenarios[] = [
   NoKibanaPrivileges,
   Superuser,
   LegacyAll,
-  LegacyRead,
   DualPrivilegesAll,
   DualPrivilegesRead,
   All,
