@@ -20,7 +20,7 @@ export const registerAutoFollowPatternRoutes = (server) => {
   const licensePreRouting = licensePreRoutingFactory(server);
 
   /**
-   * Returns a list of all Auto follow patterns
+   * Returns a list of all auto-follow patterns
    */
   server.route({
     path: `${API_BASE_PATH}/auto_follow_patterns`,
@@ -114,7 +114,7 @@ export const registerAutoFollowPatternRoutes = (server) => {
   });
 
   /**
-   * Returns a single Auto follow pattern
+   * Returns a single auto-follow pattern
    */
   server.route({
     path: `${API_BASE_PATH}/auto_follow_patterns/{id}`,
@@ -141,7 +141,7 @@ export const registerAutoFollowPatternRoutes = (server) => {
   });
 
   /**
-   * Delete an auto follow pattern
+   * Delete an auto-follow pattern
    */
   server.route({
     path: `${API_BASE_PATH}/auto_follow_patterns/{id}`,

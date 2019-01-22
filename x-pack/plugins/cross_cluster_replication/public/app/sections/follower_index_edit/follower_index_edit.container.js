@@ -10,13 +10,18 @@ import { SECTIONS } from '../../constants';
 import {
   getApiStatus,
   getApiError,
-  getSelectedAutoFollowPatternId,
-  getSelectedAutoFollowPattern,
+  getSelectedFollowerIndexId,
+  getSelectedFollowerIndex,
 } from '../../store/selectors';
-import { getAutoFollowPattern, saveAutoFollowPattern, selectEditAutoFollowPattern, clearApiError } from '../../store/actions';
-import { AutoFollowPatternEdit as AutoFollowPatternEditView } from './auto_follow_pattern_edit';
+import {
+  saveFollowerIndex,
+  clearApiError,
+  getFollowerIndex,
+  selectEditFollowerIndex,
+} from '../../store/actions';
+import { FollowerIndexEdit as FollowerIndexEditView } from './follower_index_edit';
 
-const scope = SECTIONS.AUTO_FOLLOW_PATTERN;
+const scope = SECTIONS.FOLLOWER_INDEX;
 
 const mapStateToProps = (state) => ({
   apiStatus: {
@@ -27,21 +32,21 @@ const mapStateToProps = (state) => ({
     get: getApiError(`${scope}-get`)(state),
     save: getApiError(`${scope}-save`)(state),
   },
-  autoFollowPatternId: getSelectedAutoFollowPatternId('edit')(state),
-  autoFollowPattern: getSelectedAutoFollowPattern('edit')(state),
+  followerIndexId: getSelectedFollowerIndexId('edit')(state),
+  followerIndex: getSelectedFollowerIndex('edit')(state),
 });
 
 const mapDispatchToProps = dispatch => ({
-  getAutoFollowPattern: (id) => dispatch(getAutoFollowPattern(id)),
-  selectAutoFollowPattern: (id) => dispatch(selectEditAutoFollowPattern(id)),
-  saveAutoFollowPattern: (id, autoFollowPattern) => dispatch(saveAutoFollowPattern(id, autoFollowPattern, true)),
+  getFollowerIndex: (id) => dispatch(getFollowerIndex(id)),
+  selectFollowerIndex: (id) => dispatch(selectEditFollowerIndex(id)),
+  saveFollowerIndex: (id, followerIndex) => dispatch(saveFollowerIndex(id, followerIndex, true)),
   clearApiError: () => {
     dispatch(clearApiError(`${scope}-get`));
     dispatch(clearApiError(`${scope}-save`));
   },
 });
 
-export const AutoFollowPatternEdit = connect(
+export const FollowerIndexEdit = connect(
   mapStateToProps,
   mapDispatchToProps
-)(AutoFollowPatternEditView);
+)(FollowerIndexEditView);

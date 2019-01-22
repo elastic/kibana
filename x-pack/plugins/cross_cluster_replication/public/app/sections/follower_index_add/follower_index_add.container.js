@@ -14,13 +14,13 @@ import { FollowerIndexAdd as FollowerIndexAddView } from './follower_index_add';
 const scope = SECTIONS.FOLLOWER_INDEX;
 
 const mapStateToProps = (state) => ({
-  apiStatus: getApiStatus(scope)(state),
-  apiError: getApiError(scope)(state),
+  apiStatus: getApiStatus(`${scope}-save`)(state),
+  apiError: getApiError(`${scope}-save`)(state),
 });
 
 const mapDispatchToProps = dispatch => ({
   saveFollowerIndex: (id, followerIndex) => dispatch(saveFollowerIndex(id, followerIndex)),
-  clearApiError: () => dispatch(clearApiError(scope)),
+  clearApiError: () => dispatch(clearApiError(`${scope}-save`)),
 });
 
 export const FollowerIndexAdd = connect(

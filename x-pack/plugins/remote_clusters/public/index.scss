@@ -11,14 +11,6 @@
 //   remoteClustersChart__legend-isLoading
 
 /**
- * 1. Override EUI styles.
- */
-.remoteClusterAddPage {
-  max-width: 1000px !important; /* 1 */
-  width: 100% !important; /* 1 */
-}
-
-/**
  * 1. Override EuiFormRow styles. Otherwise the switch will jump around when toggled on and off,
  *    as the 'Reset to defaults' link is added to and removed from the DOM.
  * 2. Fix the positioning.

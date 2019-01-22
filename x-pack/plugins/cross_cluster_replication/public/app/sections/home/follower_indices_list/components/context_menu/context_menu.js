@@ -4,16 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import PropTypes from 'prop-types';
-
-import {
-  FollowerIndexPauseProvider,
-  FollowerIndexResumeProvider,
-  FollowerIndexUnfollowProvider
-} from '../../../../../components';
-
 import {
   EuiButton,
   EuiContextMenuPanel,
@@ -22,7 +15,14 @@ import {
   EuiPopoverTitle,
 } from '@elastic/eui';
 
-export class ContextMenuUi extends Component {
+import routing from '../../../../../services/routing';
+import {
+  FollowerIndexPauseProvider,
+  FollowerIndexResumeProvider,
+  FollowerIndexUnfollowProvider
+} from '../../../../../components';
+
+export class ContextMenuUi extends PureComponent {
 
   static propTypes = {
     iconSide: PropTypes.string,
@@ -47,6 +47,11 @@ export class ContextMenuUi extends Component {
       isPopoverOpen: false
     });
   };
+
+  editFollowerIndex = (id) => {
+    const uri = routing.getFollowerIndexPath(id, '/edit', false);
+    routing.navigate(uri);
+  }
 
   render() {
     const { followerIndices } = this.props;
@@ -139,6 +144,18 @@ export class ContextMenuUi extends Component {
               </FollowerIndexResumeProvider>
             ) : null
           }
+
+          { followerIndexNames.length === 1 && (
+            <EuiContextMenuItem
+              icon="pencil"
+              onClick={() => this.editFollowerIndex(followerIndexNames[0])}
+            >
+              <FormattedMessage
+                id="xpack.crossClusterReplication.followerIndex.contextMenu.editLabel"
+                defaultMessage="Edit follower index"
+              />
+            </EuiContextMenuItem>
+          ) }
 
           <FollowerIndexUnfollowProvider>
             {(unfollowLeaderIndex) => (

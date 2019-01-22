@@ -43,7 +43,7 @@ export const loadAutoFollowPatterns = (isUpdating = false) =>
 export const getAutoFollowPattern = (id) =>
   sendApiRequest({
     label: t.AUTO_FOLLOW_PATTERN_GET,
-    scope,
+    scope: `${scope}-get`,
     handler: async () => (
       await getAutoFollowPatternRequest(id)
     )
@@ -53,7 +53,7 @@ export const saveAutoFollowPattern = (id, autoFollowPattern, isUpdating = false)
   sendApiRequest({
     label: isUpdating ? t.AUTO_FOLLOW_PATTERN_UPDATE : t.AUTO_FOLLOW_PATTERN_CREATE,
     status: API_STATUS.SAVING,
-    scope,
+    scope: `${scope}-save`,
     handler: async () => {
       if (isUpdating) {
         return await updateAutoFollowPatternRequest(id, autoFollowPattern);

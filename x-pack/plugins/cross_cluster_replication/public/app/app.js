@@ -16,6 +16,7 @@ import {
   AutoFollowPatternAdd,
   AutoFollowPatternEdit,
   FollowerIndexAdd,
+  FollowerIndexEdit,
 } from './sections';
 
 export class App extends Component {
@@ -54,6 +55,7 @@ export class App extends Component {
           <Route exact path={`${BASE_PATH}/auto_follow_patterns/add`} component={AutoFollowPatternAdd} />
           <Route exact path={`${BASE_PATH}/auto_follow_patterns/edit/:id`} component={AutoFollowPatternEdit} />
           <Route exact path={`${BASE_PATH}/follower_indices/add`} component={FollowerIndexAdd} />
+          <Route exact path={`${BASE_PATH}/follower_indices/edit/:id`} component={FollowerIndexEdit} />
           <Route exact path={`${BASE_PATH}/:section`} component={CrossClusterReplicationHome} />
         </Switch>
       </div>
