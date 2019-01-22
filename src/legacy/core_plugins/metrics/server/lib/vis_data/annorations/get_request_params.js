@@ -17,9 +17,11 @@
  * under the License.
  */
 import buildRequestBody from './build_request_body';
+import getEsShardTimeout from '../helpers/get_es_shard_timeout';
 
 export default (req, panel, annotation, capabilities) => {
   const bodies = [];
+  const timeout = getEsShardTimeout(req);
 
   if (capabilities.batchRequestsSupport) {
     const indexPattern = annotation.index_pattern;
@@ -32,7 +34,7 @@ export default (req, panel, annotation, capabilities) => {
 
   bodies.push({
     ...buildRequestBody(req, panel, annotation, capabilities),
-    timeout: '90s'
+    timeout
   });
 
   return bodies;

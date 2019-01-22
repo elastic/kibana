@@ -17,11 +17,13 @@
  * under the License.
  */
 import buildRequestBody from './build_request_body';
+import getEsShardTimeout from '../helpers/get_es_shard_timeout';
 
 export default (req, panel, series, esQueryConfig, capabilities) => {
   const bodies = [];
   const indexPatternString = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;  
   const indexPatternObject = await getIndexPatternObject(req, indexPatternString);
+  const timeout = getEsShardTimeout(req);
 
   if (capabilities.batchRequestsSupport) {
     bodies.push({
@@ -31,8 +33,8 @@ export default (req, panel, series, esQueryConfig, capabilities) => {
   }
 
   bodies.push({
-    ...buildRequestBody(req, panel, series, esQueryConfig, indexPatternObject, capabilities)
-    timeout: '90s'
+    ...buildRequestBody(req, panel, series, esQueryConfig, indexPatternObject, capabilities),
+    timeout
   });
 
   return bodies;
