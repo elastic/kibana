@@ -38,9 +38,9 @@ export function detectLanguageByFilename(filename: string) {
   return lang && lang.toLowerCase();
 }
 
-export async function detectLanguage(file: string, fileContent?: Buffer | string) {
+export async function detectLanguage(file: string, fileContent?: Buffer | string): Promise<string> {
   const lang = detectByFilename(file);
-  return Promise.resolve(lang.toLowerCase());
+  return await Promise.resolve(lang.toLowerCase());
   // if (!lang) {
   //   let content: string;
   //   if (fileContent) {

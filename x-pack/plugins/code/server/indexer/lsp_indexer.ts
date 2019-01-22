@@ -24,15 +24,7 @@ import {
   getReferenceIndexCreationRequest,
   getSymbolIndexCreationRequest,
 } from './index_creation_request';
-import {
-  DocumentIndexName,
-  ReferenceIndexName,
-  RepositoryDeleteStatusReservedField,
-  RepositoryGitStatusReservedField,
-  RepositoryLspIndexStatusReservedField,
-  RepositoryReservedField,
-  SymbolIndexName,
-} from './schema';
+import { ALL_RESERVED, DocumentIndexName, ReferenceIndexName, SymbolIndexName } from './schema';
 
 export class LspIndexer extends AbstractIndexer {
   protected type: string = 'lsp';
@@ -153,28 +145,11 @@ export class LspIndexer extends AbstractIndexer {
         body: {
           query: {
             bool: {
-              must_not: [
-                {
-                  exists: {
-                    field: RepositoryReservedField,
-                  },
+              must_not: ALL_RESERVED.map((field: string) => ({
+                exists: {
+                  field,
                 },
-                {
-                  exists: {
-                    field: RepositoryGitStatusReservedField,
-                  },
-                },
-                {
-                  exists: {
-                    field: RepositoryLspIndexStatusReservedField,
-                  },
-                },
-                {
-                  exists: {
-                    field: RepositoryDeleteStatusReservedField,
-                  },
-                },
-              ],
+              })),
             },
           },
         },

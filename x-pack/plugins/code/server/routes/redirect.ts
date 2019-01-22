@@ -42,7 +42,7 @@ export function redirectRoute(server: hapi.Server, redirect: string, log: Logger
         if (request.url.search) {
           uri += request.url.search;
         }
-        log.info(`redirect ${request.path}${request.url.search} to ${uri}`);
+        log.info(`redirect ${request.path}${request.url.search || ''} to ${uri}`);
         return {
           uri,
         };
