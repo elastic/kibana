@@ -27,18 +27,10 @@ export const metric = () => ({
       'kibana_table'
     ],
   },
-  help: i18n.translate('common.core_plugins.interpreter.public.functions.metric.help', {
+  help: i18n.translate('interpreter.functions.metric.help', {
     defaultMessage: 'Metric visualization'
   }),
   args: {
-    bucket: {
-      types: ['string', 'null'],
-      default: null,
-    },
-    metric: {
-      types: ['string'],
-      default: '1',
-    },
     visConfig: {
       types: ['string', 'null'],
       default: '"{}"',
@@ -46,17 +38,6 @@ export const metric = () => ({
   },
   fn(context, args) {
     const visConfigParams = JSON.parse(args.visConfig);
-    const metrics = args.metric.split(',');
-    metrics.forEach(metric => {
-      const metricColumn = context.columns.find((column, i) =>
-        column.id === metric || column.name === metric || i === parseInt(metric));
-      metricColumn.aggConfig.schema = 'metric';
-    });
-    if (args.bucket) {
-      const bucketColumn = context.columns.find((column, i) =>
-        column.id === args.bucket || column.name === args.bucket || i === parseInt(args.bucket));
-      bucketColumn.aggConfig.schema = 'segment';
-    }
 
     return {
       type: 'render',
