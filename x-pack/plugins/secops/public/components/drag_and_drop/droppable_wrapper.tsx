@@ -50,9 +50,10 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; themeName: Them
   }
   .flyout-overlay {
     .euiPanel {
-      background-color:  rgb(245, 247, 250);
+      background-color: rgb(245, 247, 250);
     }
     + div {
+      // This is to overwrite dragNdrop beautifull so we do not have our droppable moving around for no good reason
       display: none !important;
     }
   }
@@ -61,6 +62,7 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; themeName: Them
       : ''}
   > div.timeline-drop-area {
     & + div {
+      // This is to overwrite dragNdrop beautifull so we do not have our droppable moving around for no good reason
       display: none !important;
     }
   }

@@ -12,7 +12,7 @@
     "@types/react-beautiful-dnd": "^10.0.1"
   },
   "dependencies": {
-    "react-beautiful-dnd": "^10.0.0",
+    "react-beautiful-dnd": "^10.0.1",
     "lodash": "^4.17.10"
   }
 }

@@ -76,10 +76,6 @@ interface AddProviderToTimelineParams {
     id: string;
     provider: DataProvider;
   }>;
-  addAndProvider?: ActionCreator<{
-    id: string;
-    provider: DataProvider;
-  }>;
   noProviderFound?: ActionCreator<{
     id: string;
   }>;
