@@ -195,7 +195,14 @@ exports[`after fetch initialFilter 1`] = `
               "onSelectionChange": [Function],
             }
           }
-          sorting={Object {}}
+          sorting={
+            Object {
+              "sort": Object {
+                "direction": "asc",
+                "field": "title",
+              },
+            }
+          }
         />
       </div>
     </EuiPageContent>
@@ -445,7 +452,14 @@ exports[`after fetch renders table rows 1`] = `
               "onSelectionChange": [Function],
             }
           }
-          sorting={Object {}}
+          sorting={
+            Object {
+              "sort": Object {
+                "direction": "asc",
+                "field": "title",
+              },
+            }
+          }
         />
       </div>
     </EuiPageContent>
@@ -657,7 +671,14 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
               "onSelectionChange": [Function],
             }
           }
-          sorting={Object {}}
+          sorting={
+            Object {
+              "sort": Object {
+                "direction": "asc",
+                "field": "title",
+              },
+            }
+          }
         />
       </div>
     </EuiPageContent>
