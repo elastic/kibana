@@ -27,6 +27,7 @@ import {
   isGlobalPrivilegeDefinition,
 } from '../../../../../../../lib/privilege_utils';
 import { copyRole } from '../../../../../../../lib/role_utils';
+import { CUSTOM_PRIVILEGE_VALUE } from '../../../../lib/constants';
 import { SpacesPopoverList } from '../../../spaces_popover_list';
 import { PrivilegeDisplay } from './privilege_display';
 
@@ -187,7 +188,9 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
             return (
               <PrivilegeDisplay
                 scope={'global'}
-                privilege={hasCustomizations ? 'Custom' : basePrivilege.actualPrivilege}
+                privilege={
+                  hasCustomizations ? CUSTOM_PRIVILEGE_VALUE : basePrivilege.actualPrivilege
+                }
               />
             );
           } else {
@@ -195,7 +198,9 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
               <PrivilegeDisplay
                 scope={'space'}
                 explanation={basePrivilege}
-                privilege={hasCustomizations ? 'Custom' : basePrivilege.actualPrivilege}
+                privilege={
+                  hasCustomizations ? CUSTOM_PRIVILEGE_VALUE : basePrivilege.actualPrivilege
+                }
               />
             );
           }

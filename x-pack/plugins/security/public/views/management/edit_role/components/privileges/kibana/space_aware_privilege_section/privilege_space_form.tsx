@@ -35,7 +35,7 @@ import {
 } from '../../../../../../../lib/kibana_privilege_calculator';
 import { hasAssignedFeaturePrivileges } from '../../../../../../../lib/privilege_utils';
 import { copyRole } from '../../../../../../../lib/role_utils';
-import { NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
+import { CUSTOM_PRIVILEGE_VALUE, NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
 import { FeatureTable } from '../feature_table';
 import { SpaceSelector } from './space_selector';
 
@@ -461,7 +461,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
     const privilegeName = basePrivilege.split('basePrivilege_')[1];
 
-    if (privilegeName === 'custom') {
+    if (privilegeName === CUSTOM_PRIVILEGE_VALUE) {
       form.base = [];
     } else {
       form.base = [privilegeName];
@@ -469,7 +469,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     }
 
     this.setState({
-      selectedBasePrivilege: privilegeName === 'custom' ? [] : [privilegeName],
+      selectedBasePrivilege: privilegeName === CUSTOM_PRIVILEGE_VALUE ? [] : [privilegeName],
       role,
     });
   };
@@ -485,7 +485,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
         hasAssignedFeaturePrivileges(form) ||
         explanation.actualPrivilege === NO_PRIVILEGE_VALUE
       ) {
-        return 'custom';
+        return CUSTOM_PRIVILEGE_VALUE;
       }
     }
 

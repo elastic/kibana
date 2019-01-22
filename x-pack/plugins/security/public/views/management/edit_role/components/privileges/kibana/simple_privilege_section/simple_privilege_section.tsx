@@ -13,17 +13,13 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
-import { create } from 'domain';
 import React, { Component, Fragment } from 'react';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { PrivilegeDefinition, Role } from '../../../../../../../../common/model';
-import {
-  CalculatedPrivilege,
-  KibanaPrivilegeCalculatorFactory,
-} from '../../../../../../../lib/kibana_privilege_calculator';
+import { KibanaPrivilegeCalculatorFactory } from '../../../../../../../lib/kibana_privilege_calculator';
 import { isGlobalPrivilegeDefinition } from '../../../../../../../lib/privilege_utils';
 import { copyRole } from '../../../../../../../lib/role_utils';
-import { NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
+import { CUSTOM_PRIVILEGE_VALUE, NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
 import { FeatureTable } from '../feature_table';
 import { UnsupportedSpacePrivilegesWarning } from './unsupported_space_privileges_warning';
 
@@ -122,7 +118,7 @@ export class SimplePrivilegeSection extends Component<Props, State> {
                   ),
                 },
                 {
-                  value: 'custom',
+                  value: CUSTOM_PRIVILEGE_VALUE,
                   inputDisplay: (
                     <EuiText>
                       <FormattedMessage
@@ -207,7 +203,7 @@ export class SimplePrivilegeSection extends Component<Props, State> {
               valueOfSelected={kibanaPrivilege}
             />
           </EuiFormRow>
-          {kibanaPrivilege === 'custom' && (
+          {kibanaPrivilege === CUSTOM_PRIVILEGE_VALUE && (
             <EuiFormRow>
               <FeatureTable
                 role={this.props.role}
@@ -231,7 +227,7 @@ export class SimplePrivilegeSection extends Component<Props, State> {
 
   public getDisplayedBasePrivilege = () => {
     if (this.state.isCustomizingGlobalPrivilege) {
-      return 'custom';
+      return CUSTOM_PRIVILEGE_VALUE;
     }
 
     const { role } = this.props;
@@ -249,17 +245,17 @@ export class SimplePrivilegeSection extends Component<Props, State> {
     // Remove base privilege value
     form.base = [];
 
-    if (privilege !== NO_PRIVILEGE_VALUE && privilege !== 'custom') {
+    if (privilege !== NO_PRIVILEGE_VALUE && privilege !== CUSTOM_PRIVILEGE_VALUE) {
       form.base = [privilege];
     }
 
-    if (privilege !== 'custom') {
+    if (privilege !== CUSTOM_PRIVILEGE_VALUE) {
       form.feature = {};
     }
 
     this.props.onChange(role);
     this.setState({
-      isCustomizingGlobalPrivilege: privilege === 'custom',
+      isCustomizingGlobalPrivilege: privilege === CUSTOM_PRIVILEGE_VALUE,
     });
   };
 
