@@ -6,12 +6,13 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { i18n } from '@kbn/i18n';
+import { i18n, FormattedMessage } from '@kbn/i18n';
 
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiText,
 } from '@elastic/eui';
 
@@ -43,6 +44,10 @@ export function ConnectionStatus({ isConnected }) {
     });
   }
 
+  const seedNodeTooltip = i18n.translate('xpack.remoteClusters.connectedStatus.notConnectedToolTip', {
+      defaultMessage: "Ensure the seed nodes are configured with the remote cluster's transport port, not the http port.",
+    });
+
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -53,6 +58,13 @@ export function ConnectionStatus({ isConnected }) {
         <EuiText>
           {message}
         </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiIconTip
+          type="iInCircle"
+          color="subdued"
+          content={seedNodeTooltip}
+        /> 
       </EuiFlexItem>
     </EuiFlexGroup>
   );
