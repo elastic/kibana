@@ -31,7 +31,6 @@
                 "forcemerge": {
                   "max_num_segments": 1
                 },
-                "unfollow": {}
               }  
             },
             "min_age": "1d",
@@ -71,7 +70,6 @@
                   "priority": 0
                 },
                 "freeze": {},
-                "unfollow": {},
                 "allocate": {
                   "number_of_replicas": 1,
                   "include": {
@@ -125,7 +123,6 @@
                   "max_docs": 1000,
                   "max_size": "5gb"
                 },
-                "unfollow": {}
               }  
             },
             "min_age": "1d",
