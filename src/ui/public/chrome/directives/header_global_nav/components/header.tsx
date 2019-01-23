@@ -73,7 +73,6 @@ interface Props {
   recentlyAccessed$: Rx.Observable<RecentlyAccessedHistoryItem[]>;
   navControls: ChromeHeaderNavControlsRegistry;
   intl: InjectedIntl;
-  timeoutID: string;
 }
 
 interface State {
@@ -92,6 +91,7 @@ interface State {
 
 class HeaderUI extends Component<Props, State> {
   private subscription?: Rx.Subscription;
+  private timeoutID?: ReturnType<typeof setTimeout>;
 
   constructor(props: Props) {
     super(props);
@@ -216,22 +216,24 @@ class HeaderUI extends Component<Props, State> {
                 />
               </EuiListGroup>
               <EuiHorizontalRule margin="none" />
-              <EuiListGroup
-                listItems={navLinks.map(navLink =>
-                  !navLink.hidden
-                    ? {
-                        label: navLink.title,
-                        href:
-                          navLink.lastSubUrl && !navLink.active ? navLink.lastSubUrl : navLink.url,
-                        iconType: navLink.euiIconType,
-                        size: 's',
-                        style: { color: 'inherit' },
-                        'aria-label': navLink.title,
-                        isActive: navLink.active,
+              <EuiListGroup>
+                {navLinks.map(navLink =>
+                  navLink.hidden ? null : (
+                    <EuiListGroupItem
+                      key={navLink.id}
+                      label={navLink.title}
+                      href={
+                        navLink.lastSubUrl && !navLink.active ? navLink.lastSubUrl : navLink.url
                       }
-                    : false
+                      iconType={navLink.euiIconType}
+                      size="s"
+                      style={{ color: 'inherit' }}
+                      aria-label={navLink.title}
+                      isActive={navLink.active}
+                    />
+                  )
                 )}
-              />
+              </EuiListGroup>
             </EuiNavDrawerMenu>
             <EuiNavDrawerFlyout
               id="navDrawerFlyout"
@@ -281,7 +283,9 @@ class HeaderUI extends Component<Props, State> {
     // has focus. This is the case since React bubbles up onFocus and onBlur
     // events from the child elements.
 
-    clearTimeout(this.timeoutID);
+    if (this.timeoutID) {
+      clearTimeout(this.timeoutID);
+    }
 
     if (!this.state.isManagingFocus) {
       this.setState({
@@ -307,8 +311,15 @@ class HeaderUI extends Component<Props, State> {
 
     // Scrolls the menu and flyout back to top when the nav drawer collapses
     setTimeout(() => {
-      document.getElementById('navDrawerMenu').scrollTop = 0;
-      document.getElementById('navDrawerFlyout').scrollTop = 0;
+      const menuEl = document.getElementById('navDrawerMenu');
+      if (menuEl) {
+        menuEl.scrollTop = 0;
+      }
+
+      const flyoutEl = document.getElementById('navDrawerFlyout');
+      if (flyoutEl) {
+        flyoutEl.scrollTop = 0;
+      }
     }, 300);
   };
 
@@ -329,7 +340,7 @@ class HeaderUI extends Component<Props, State> {
   };
 
   private expandFlyout = () => {
-    this.setState(prevState => ({
+    this.setState(() => ({
       flyoutIsCollapsed: !this.state.flyoutIsCollapsed,
     }));
 
