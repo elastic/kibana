@@ -4,11 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 const type = 'conjunction';
 
+const bothArgumentsText = i18n.translate('xpack.kueryAutocomplete.andOperatorDescription.bothArgumentsText', {
+  defaultMessage: 'both arguments'
+});
+const oneOrMoreArgumentsText = i18n.translate('xpack.kueryAutocomplete.orOperatorDescription.oneOrMoreArgumentsText', {
+  defaultMessage: 'one or more arguments'
+});
+
 const conjunctions = {
-  and: `<p>Requires <span class="suggestionItem__callout">both arguments</span> to be true</p>`,
-  or: `<p>Requires <span class="suggestionItem__callout">one or more arguments</span> to be true</p>`
+  and: '<p>' +
+    i18n.translate('xpack.kueryAutocomplete.andOperatorDescription', {
+      defaultMessage: 'Requires {bothArguments} to be true',
+      values: { bothArguments: '<span class="suggestionItem__callout">' + bothArgumentsText + '</span>' },
+      description: 'initial version of the string is: "Requires <span class="suggestionItem__callout">both arguments</span> to be true"'
+    }) +
+    '</p>',
+  or: '<p>' +
+    i18n.translate('xpack.kueryAutocomplete.orOperatorDescription', {
+      defaultMessage: 'Requires {oneOrMoreArguments} to be true',
+      values: { oneOrMoreArguments: '<span class="suggestionItem__callout">' + oneOrMoreArgumentsText + '</span>' },
+      description:
+        'initial version of the string is: "Requires <span class="suggestionItem__callout">one or more arguments</span> to be true"'
+    }) +
+    '</p>'
 };
 
 function getDescription(conjunction) {
