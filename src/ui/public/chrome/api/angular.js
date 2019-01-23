@@ -90,21 +90,21 @@ export function initAngularApi(chrome, internals) {
           try {
             if (urlOverflow.check($location.absUrl()) <= URL_LIMIT_WARN_WITHIN) {
               toastNotifications.addWarning({
-                title: i18n.translate('common.ui.chrome.urlIsBigAndKibanaMightStopWorkingNotificationTitle', {
+                title: i18n.translate('common.ui.chrome.bigUrlWarningNotificationTitle', {
                   defaultMessage: 'The URL is big and Kibana might stop working'
                 }),
                 text: (
                   <Fragment>
                     <FormattedMessage
-                      id="common.ui.chrome.urlIsBigAndKibanaMightStopWorkingNotificationMessage"
-                      defaultMessage="Either enable the {storeInSessionStorageParam}
+                      id="common.ui.chrome.bigUrlWarningNotificationMessage"
+                      defaultMessage="Either enable the {storeInSessionStorageParam} option
                         in {advancedSettingsLink} or simplify the onscreen visuals."
                       values={{
                         storeInSessionStorageParam: <code>state:storeInSessionStorage</code>,
                         advancedSettingsLink: (
                           <a href="#/management/kibana/settings">
                             <FormattedMessage
-                              id="common.ui.chrome.urlIsBigAndKibanaMightStopWorkingNotificationMessage.advancedSettingsLinkText"
+                              id="common.ui.chrome.bigUrlWarningNotificationMessage.advancedSettingsLinkText"
                               defaultMessage="advanced settings"
                             />
                           </a>
