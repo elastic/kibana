@@ -23,11 +23,13 @@ import chrome from 'ui/chrome';
 import { functions } from './functions';
 import { functionsRegistry } from './functions_registry';
 import { typesRegistry } from './types_registry';
+import { renderFunctionsRegistry } from './render_functions_registry';
 
 const basePath = chrome.getBasePath();
 
 const types = {
   browserFunctions: functionsRegistry,
+  renderers: renderFunctionsRegistry,
   types: typesRegistry
 };
 

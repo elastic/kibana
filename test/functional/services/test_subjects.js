@@ -101,7 +101,7 @@ export function TestSubjectsProvider({ getService }) {
       return await find.allDescendantDisplayedByCssSelector(testSubjSelector(selector), parentElement);
     }
 
-    async find(selector, timeout = 1000) {
+    async find(selector, timeout = FIND_TIME) {
       log.debug(`TestSubjects.find(${selector})`);
       return await find.byCssSelector(testSubjSelector(selector), timeout);
     }

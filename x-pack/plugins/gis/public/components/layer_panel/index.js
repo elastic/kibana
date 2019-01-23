@@ -7,12 +7,6 @@
 import { connect } from 'react-redux';
 import { LayerPanel } from './view';
 import { getSelectedLayer } from '../../selectors/map_selectors';
-import {
-  updateLayerLabel,
-  updateLayerMaxZoom,
-  updateLayerMinZoom,
-  updateLayerAlphaValue
-} from '../../actions/store_actions';
 
 function mapStateToProps(state = {}) {
   return {
@@ -20,13 +14,8 @@ function mapStateToProps(state = {}) {
   };
 }
 
-function mapDispatchToProps(dispatch) {
-  return {
-    updateLabel: (id, label) => dispatch(updateLayerLabel(id, label)),
-    updateMinZoom: (id, minZoom) => dispatch(updateLayerMinZoom(id, minZoom)),
-    updateMaxZoom: (id, maxZoom) => dispatch(updateLayerMaxZoom(id, maxZoom)),
-    updateAlphaValue: (id, alphaValue) => dispatch(updateLayerAlphaValue(id, alphaValue))
-  };
+function mapDispatchToProps(/* dispatch */) {
+  return {};
 }
 
 const connectedLayerPanel = connect(mapStateToProps, mapDispatchToProps)(LayerPanel);
