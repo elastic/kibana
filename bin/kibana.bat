@@ -22,7 +22,7 @@ If Not Exist "%NODE%" (
 )
 
 TITLE Kibana Server
-"%NODE%" %NODE_OPTIONS% --no-warnings "%DIR%\src\cli" %*
+"%NODE%" --no-warnings --max-http-header-size=65536 %NODE_OPTIONS% "%DIR%\src\cli" %*
 
 :finally
 
