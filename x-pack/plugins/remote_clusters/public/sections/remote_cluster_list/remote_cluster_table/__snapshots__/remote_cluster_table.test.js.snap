@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`RemoteClusterTable renders a row for a default remote cluster 1`] = `
+exports[`RemoteClusterTable renders a row for an API-defined remote cluster 1`] = `
 <tr
   class="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
 >
@@ -102,7 +102,7 @@ exports[`RemoteClusterTable renders a row for a default remote cluster 1`] = `
             class="euiToolTipAnchor"
           >
             <svg
-              aria-describedby="my-id"
+              aria-describedby="fakeId"
               aria-label="Info"
               class="euiIcon euiIcon--medium euiIcon--subdued"
               focusable="true"
@@ -181,7 +181,7 @@ exports[`RemoteClusterTable renders a row for a default remote cluster 1`] = `
           class="euiToolTipAnchor"
         >
           <a
-            aria-describedby="my-id"
+            aria-describedby="fakeId"
             aria-label="Edit remote cluster"
             class="euiButtonIcon euiButtonIcon--primary"
             href="#/management/elasticsearch/remote_clusters/edit/Default remote cluster"
@@ -214,7 +214,7 @@ exports[`RemoteClusterTable renders a row for a default remote cluster 1`] = `
 </tr>
 `;
 
-exports[`RemoteClusterTable renders a row for a remote cluster defined in elasticsearch.yml 1`] = `
+exports[`RemoteClusterTable renders a row with a tooltip for a remote cluster defined in elasticsearch.yml 1`] = `
 <tr
   class="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
 >
@@ -268,7 +268,7 @@ exports[`RemoteClusterTable renders a row for a remote cluster defined in elasti
             class="euiToolTipAnchor"
           >
             <svg
-              aria-describedby="my-id"
+              aria-describedby="fakeId"
               aria-label="Info"
               class="euiIcon euiIcon--medium euiIcon--subdued"
               focusable="true"
@@ -349,7 +349,7 @@ exports[`RemoteClusterTable renders a row for a remote cluster defined in elasti
             class="euiToolTipAnchor"
           >
             <svg
-              aria-describedby="my-id"
+              aria-describedby="fakeId"
               aria-label="Info"
               class="euiIcon euiIcon--medium euiIcon--subdued"
               focusable="true"
@@ -429,7 +429,7 @@ exports[`RemoteClusterTable renders a row for a remote cluster defined in elasti
           class="euiToolTipAnchor"
         >
           <button
-            aria-describedby="my-id"
+            aria-describedby="fakeId"
             aria-label="Remote clusters defined in elasticsearch.yml can't be edited"
             class="euiButtonIcon euiButtonIcon--primary"
             disabled=""
