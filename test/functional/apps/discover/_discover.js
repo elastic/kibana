@@ -150,7 +150,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.brushHistogram(0, 1);
         await PageObjects.visualize.waitForVisualization();
         const time = await PageObjects.timePicker.getTimeConfig();
-        expect(time.start).to.be('Sep 19, 2015 @ 23:55:14.810');
+        expect(time.start).to.be('Sep 19, 2015 @ 23:59:02.606');
         expect(time.end).to.be('Sep 20, 2015 @ 02:56:40.744');
       });
 

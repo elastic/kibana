@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
   const pieChart = getService('pieChart');
   const dashboardVisualizations = getService('dashboardVisualizations');
-  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize']);
+  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'timePicker']);
 
   describe('dashboard time picker', function describeIndexTests() {
     before(async function () {

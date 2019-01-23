@@ -106,7 +106,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
-          expect(rowData).to.be('September 18th 2015, 18:20:57.916\n18');
+          expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\n18');
         });
       });
 
