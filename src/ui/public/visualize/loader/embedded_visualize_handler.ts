@@ -129,7 +129,10 @@ export class EmbeddedVisualizeHandler {
     }
     this.uiState = this.vis.getUiState();
 
-    this.handlers = { uiState: this.uiState, onDestroy: fn => (this.handlers.destroyFn = fn) };
+    this.handlers = {
+      uiState: this.uiState,
+      onDestroy: (fn: () => never) => (this.handlers.destroyFn = fn),
+    };
 
     this.vis.on('update', this.handleVisUpdate);
     this.vis.on('reload', this.reload);
