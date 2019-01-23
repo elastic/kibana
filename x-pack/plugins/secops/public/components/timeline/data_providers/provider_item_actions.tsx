@@ -3,11 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import {
-  // @ts-ignore
-  EuiContextMenu,
-  EuiPopover,
-} from '@elastic/eui';
+import { EuiContextMenu, EuiPopover } from '@elastic/eui';
 import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
