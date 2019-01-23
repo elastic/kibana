@@ -68,7 +68,7 @@ function generator({ artifactsUrlRoot, artifactTarball, versionTag, license  }) 
     org.label-schema.name="kibana" \\
     org.label-schema.version="${ versionTag }" \\
     org.label-schema.url="https://www.elastic.co/products/kibana" \\
-    org.label-schema.vcs-url="https://github.com/elastic/kibana-docker" \\
+    org.label-schema.vcs-url="https://github.com/elastic/kibana" \\
     license="${ license }"
   
   CMD ["/usr/local/bin/kibana-docker"]
