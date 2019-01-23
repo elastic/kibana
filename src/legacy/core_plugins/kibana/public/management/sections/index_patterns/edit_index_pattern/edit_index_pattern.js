@@ -157,27 +157,27 @@ function destroyIndexedFieldsTable() {
 }
 
 uiRoutes
-  .when('/management/kibana/indices/:indexPatternId', {
+  .when('/management/kibana/index_patterns/:indexPatternId', {
     template,
     k7Breadcrumbs: getEditBreadcrumbs,
     resolve: {
       indexPattern: function ($route, redirectWhenMissing, indexPatterns) {
         return indexPatterns
           .get($route.current.params.indexPatternId)
-          .catch(redirectWhenMissing('/management/kibana/index'));
+          .catch(redirectWhenMissing('/management/kibana/index_pattern'));
       }
     },
   });
 
 uiRoutes
-  .when('/management/kibana/indices', {
+  .when('/management/kibana/index_patterns', {
     redirectTo() {
       const defaultIndex = chrome.getUiSettingsClient().get('defaultIndex');
       if (defaultIndex) {
-        return `/management/kibana/indices/${defaultIndex}`;
+        return `/management/kibana/index_patterns/${defaultIndex}`;
       }
 
-      return '/management/kibana/index';
+      return '/management/kibana/index_pattern';
     }
   });
 
