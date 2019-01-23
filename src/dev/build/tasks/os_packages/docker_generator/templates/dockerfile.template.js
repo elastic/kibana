@@ -52,9 +52,6 @@ function generator({ artifactsUrlRoot, artifactTarball, versionTag, license  }) 
   # variables and translate them to Kibana CLI options.
   COPY --chown=1000:0 bin/kibana-docker /usr/local/bin/
   
-  # Add a self-signed SSL certificate for use in examples.
-  COPY --chown=1000:0 ssl/kibana.example.org.* /usr/share/kibana/config/
-  
   # Ensure gid 0 write permissions for Openshift.
   RUN find /usr/share/kibana -gid 0 -and -not -perm /g+w -exec chmod g+w {} \\;
   
