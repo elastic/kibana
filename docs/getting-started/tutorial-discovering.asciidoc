@@ -23,7 +23,7 @@ excess of 47,500. It returns results for account numbers 8, 32, 78, 85, and 97.
 image::images/tutorial-discover-2.png[]
 
 By default, all fields are shown for each matching document. To choose which
-fields to display, hover the pointer over the the list of *Available Fields*
+fields to display, hover the pointer over the list of *Available Fields*
 and then click *add* next to each field you want include as a column in the table.
 
 For example, if you add the `account_number` field, the display changes to a list of five
