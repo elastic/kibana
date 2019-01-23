@@ -153,7 +153,12 @@ class FilterEditorUI extends Component<Props, State> {
 
           <EuiFlexGroup direction="rowReverse" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={this.onSubmit} isDisabled={!this.isFilterValid()}>
+              <EuiButton
+                fill
+                onClick={this.onSubmit}
+                isDisabled={!this.isFilterValid()}
+                data-test-subj="saveFilter"
+              >
                 <FormattedMessage
                   id="common.ui.filterEditor.saveButtonLabel"
                   defaultMessage="Save"
@@ -161,7 +166,11 @@ class FilterEditorUI extends Component<Props, State> {
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty flush="right" onClick={this.props.onCancel}>
+              <EuiButtonEmpty
+                flush="right"
+                onClick={this.props.onCancel}
+                data-test-subj="cancelSaveFilter"
+              >
                 <FormattedMessage
                   id="common.ui.filterEditor.cancelButtonLabel"
                   defaultMessage="Cancel"
@@ -215,7 +224,7 @@ class FilterEditorUI extends Component<Props, State> {
           <EuiFlexItem style={{ maxWidth: '188px' }}>{this.renderOperatorInput()}</EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        <div>{this.renderParamsEditor()}</div>
+        <div data-test-subj="filterParams">{this.renderParamsEditor()}</div>
       </div>
     );
   }
@@ -242,6 +251,7 @@ class FilterEditorUI extends Component<Props, State> {
           onChange={this.onFieldChange}
           singleSelection={{ asPlainText: true }}
           isClearable={false}
+          data-test-subj="filterFieldSuggestionList"
         />
       </EuiFormRow>
     );
@@ -269,6 +279,7 @@ class FilterEditorUI extends Component<Props, State> {
           onChange={this.onOperatorChange}
           singleSelection={{ asPlainText: true }}
           isClearable={false}
+          data-test-subj="filterOperatorList"
         />
       </EuiFormRow>
     );

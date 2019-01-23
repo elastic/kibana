@@ -21,15 +21,8 @@ export function FilterBarProvider({ getService, getPageObjects }) {
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const comboBox = getService('comboBox');
   const PageObjects = getPageObjects(['common', 'header']);
-
-  async function typeIntoReactSelect(testSubj, value) {
-    const select = await testSubjects.find(testSubj);
-    const input = await select.findByClassName('ui-select-search');
-    await input.type(value);
-    const activeSelection = await select.findByClassName('active');
-    await activeSelection.click();
-  }
 
   class FilterBar {
     hasFilter(key, value, enabled = true) {
@@ -77,8 +70,8 @@ export function FilterBarProvider({ getService, getPageObjects }) {
      */
     async addFilter(field, operator, ...values) {
       await testSubjects.click('addFilter');
-      await typeIntoReactSelect('filterfieldSuggestionList', field);
-      await typeIntoReactSelect('filterOperatorList', operator);
+      await comboBox.set('filterFieldSuggestionList', field);
+      await comboBox.set('filterOperatorList', operator);
       const params = await testSubjects.find('filterParams');
       const paramFields = await params.findAllByTagName('input');
       for (let i = 0; i < values.length; i++) {
