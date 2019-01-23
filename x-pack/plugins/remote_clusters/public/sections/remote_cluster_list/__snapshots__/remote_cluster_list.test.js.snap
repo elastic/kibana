@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`RemoteClusterList renders empty state when loading is complete and there are no clusters 1`] = `
+exports[`RemoteClusterList renders empty prompt when loading is complete and there are no clusters 1`] = `
 <div
   class="euiPageBody"
 >

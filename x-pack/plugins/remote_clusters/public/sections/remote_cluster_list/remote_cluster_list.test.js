@@ -18,7 +18,7 @@ jest.mock('../../services', () => {
 });
 
 describe('RemoteClusterList', () => {
-  test(`renders empty state when loading is complete and there are no clusters`, () => {
+  test(`renders empty prompt when loading is complete and there are no clusters`, () => {
     const component = renderWithIntl(
       <RemoteClusterList
         loadClusters={() => {}}
@@ -30,6 +30,7 @@ describe('RemoteClusterList', () => {
         isLoading={false}
         isCopyingCluster={false}
         isRemovingCluster={false}
+        history={{ location: { search: '' } }}
       />
     );
     expect(component).toMatchSnapshot();
