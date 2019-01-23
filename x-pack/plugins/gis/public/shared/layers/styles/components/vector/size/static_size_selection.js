@@ -20,6 +20,8 @@ export function StaticSizeSelection({ onChange, styleOptions }) {
       max={100}
       value={styleOptions.size}
       onChange={onSizeChange}
+      showInput
+      showRange
     />
   );
 }
