@@ -66,6 +66,7 @@ class FilterOptionsUI extends Component<Props, State> {
             this.closePopover();
             this.props.onEnableAll();
           },
+          'data-test-subj': 'enableAllFilters',
         },
         {
           name: this.props.intl.formatMessage({
@@ -77,6 +78,7 @@ class FilterOptionsUI extends Component<Props, State> {
             this.closePopover();
             this.props.onDisableAll();
           },
+          'data-test-subj': 'disableAllFilters',
         },
         {
           name: this.props.intl.formatMessage({
@@ -88,6 +90,7 @@ class FilterOptionsUI extends Component<Props, State> {
             this.closePopover();
             this.props.onPinAll();
           },
+          'data-test-subj': 'pinAllFilters',
         },
         {
           name: this.props.intl.formatMessage({
@@ -99,6 +102,7 @@ class FilterOptionsUI extends Component<Props, State> {
             this.closePopover();
             this.props.onUnpinAll();
           },
+          'data-test-subj': 'unpinAllFilters',
         },
         {
           name: this.props.intl.formatMessage({
@@ -110,6 +114,7 @@ class FilterOptionsUI extends Component<Props, State> {
             this.closePopover();
             this.props.onToggleAllNegated();
           },
+          'data-test-subj': 'invertInclusionAllFilters',
         },
         {
           name: this.props.intl.formatMessage({
@@ -121,6 +126,7 @@ class FilterOptionsUI extends Component<Props, State> {
             this.closePopover();
             this.props.onToggleAllDisabled();
           },
+          'data-test-subj': 'invertEnableDisableAllFilters',
         },
         {
           name: this.props.intl.formatMessage({
@@ -132,6 +138,7 @@ class FilterOptionsUI extends Component<Props, State> {
             this.closePopover();
             this.props.onRemoveAll();
           },
+          'data-test-subj': 'removeAllFilters',
         },
       ],
     };
@@ -155,6 +162,7 @@ class FilterOptionsUI extends Component<Props, State> {
               id: 'common.ui.searchBar.changeAllFiltersButtonLabel',
               defaultMessage: 'Change all filters',
             })}
+            data-test-subj="showFilterActions"
           />
         }
         anchorPosition="downCenter"

@@ -37,6 +37,13 @@ export function FilterBarProvider({ getService, getPageObjects }) {
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
+    async removeAllFilters() {
+      await testSubjects.click('showFilterActions');
+      await testSubjects.click('removeAllFilters');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.common.waitUntilUrlIncludes('filters:!()');
+    }
+
     async toggleFilterEnabled(key) {
       await testSubjects.click(`filter & filter-key-${key}`);
       await testSubjects.click(`disableFilter`);
