@@ -19,7 +19,6 @@
 
 export function FilterBarProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const comboBox = getService('comboBox');
   const PageObjects = getPageObjects(['common', 'header']);
 
@@ -54,6 +53,11 @@ export function FilterBarProvider({ getService, getPageObjects }) {
       await testSubjects.click(`filter & filter-key-${key}`);
       await testSubjects.click(`pinFilter`);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+    }
+
+    async getFilterCount() {
+      const filters = await testSubjects.findAll('filter');
+      return filters.length;
     }
 
     /**
@@ -109,24 +113,20 @@ export function FilterBarProvider({ getService, getPageObjects }) {
     }
 
     async getFilterEditorPhrases() {
-      const spans = await testSubjects.findAll('filterEditorPhrases');
-      return await Promise.all(spans.map(el => el.getVisibleText()));
+      const optionsString = await comboBox.getOptionsList('phraseValueInput');
+      return optionsString.split('\n');
+    }
+
+    async getFilterEditorFields() {
+      const optionsString = await comboBox.getOptionsList('filterFieldSuggestionList');
+      return optionsString.split('\n');
     }
 
     async ensureFieldEditorModalIsClosed() {
-      const closeFilterEditorModalButtonExists = await testSubjects.exists('filterEditorModalCloseButton');
-      if (closeFilterEditorModalButtonExists) {
-        await testSubjects.click('filterEditorModalCloseButton');
+      const cancelSaveFilterModalButtonExists = await testSubjects.exists('cancelSaveFilter');
+      if (cancelSaveFilterModalButtonExists) {
+        await testSubjects.click('cancelSaveFilter');
       }
-    }
-
-    async getFilterFieldIndexPatterns() {
-      const indexPatterns = [];
-      const groups = await find.allByCssSelector('.ui-select-choices-group-label');
-      for (let i = 0; i < groups.length; i++) {
-        indexPatterns.push(await groups[i].getVisibleText());
-      }
-      return indexPatterns;
     }
   }
 

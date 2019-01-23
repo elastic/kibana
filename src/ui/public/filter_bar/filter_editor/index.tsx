@@ -315,6 +315,7 @@ class FilterEditorUI extends Component<Props, State> {
             field={this.state.selectedField}
             value={this.state.params}
             onChange={this.onParamsChange}
+            data-test-subj="phraseValueInput"
           />
         );
       case 'phrases':
