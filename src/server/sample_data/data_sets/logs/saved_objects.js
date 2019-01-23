@@ -28,6 +28,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-08-29T13:22:17.617Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.logsSpec.uniqueVisitorsTitle', {
         defaultMessage: '[Logs] Unique Visitors vs. Average Bytes',
@@ -46,6 +47,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-08-29T13:22:17.617Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.logsSpec.uniqueVisitorsByCountryTitle', {
         defaultMessage: '[Logs] Unique Visitors by Country',
@@ -64,6 +66,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-08-29T13:22:17.617Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.logsSpec.heatmapTitle', {
         defaultMessage: '[Logs] Heatmap',
@@ -82,6 +85,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-08-29T13:23:20.897Z",
     "version": 2,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.logsSpec.hostVisitsBytesTableTitle', {
         defaultMessage: '[Logs] Host, Visits and Bytes Table',
@@ -100,6 +104,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-08-29T13:24:46.136Z",
     "version": 2,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.logsSpec.goalsTitle', {
         defaultMessage: '[Logs] Goals',
@@ -118,6 +123,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-08-29T13:22:17.617Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.logsSpec.fileTypeScatterPlotTitle', {
         defaultMessage: '[Logs] File Type Scatter Plot',
@@ -136,6 +142,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-08-29T13:22:17.617Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.logsSpec.sourceAndDestinationSankeyChartTitle', {
         defaultMessage: '[Logs] Source and Destination Sankey Chart',
@@ -154,6 +161,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-08-29T13:22:17.617Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.logsSpec.responseCodesOverTimeTitle', {
         defaultMessage: '[Logs] Response Codes Over Time + Annotations',
@@ -172,6 +180,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-08-29T13:22:17.617Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.logsSpec.inputControlsTitle', {
         defaultMessage: '[Logs] Input Controls',
@@ -190,6 +199,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-08-29T13:22:17.617Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.logsSpec.articleTagsTitle', {
         defaultMessage: '[Logs] Article Tags',
@@ -208,6 +218,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-08-29T13:22:17.617Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.logsSpec.markdownInstructionsTitle', {
         defaultMessage: '[Logs] Markdown Instructions',
@@ -226,6 +237,7 @@ export const getSavedObjects = () => [
     "type": "index-pattern",
     "updated_at": "2018-08-29T13:22:17.617Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": "kibana_sample_data_logs",
       "timeFieldName": "timestamp",
@@ -238,6 +250,7 @@ export const getSavedObjects = () => [
     "type": "dashboard",
     "updated_at": "2018-08-29T13:26:13.463Z",
     "version": 3,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.logsSpec.webTrafficTitle', {
         defaultMessage: '[Logs] Web Traffic',
