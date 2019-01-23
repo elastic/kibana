@@ -11,7 +11,7 @@
         "fields": [
           {
             "name": "source",
-            "description": "Get an infrastructure data source by id",
+            "description": "Get an infrastructure data source by id.\n\nThe resolution order for the source configuration attributes is as follows\nwith the first defined value winning:\n\n1. The attributes of the saved object with the given 'id'.\n2. The attributes defined in the static Kibana configuration key\n   'xpack.infra.sources.default'.\n3. The hard-coded default values.\n\nAs a consequence, querying a source without a corresponding saved object\ndoesn't error out, but returns the configured or hardcoded defaults.",
             "args": [
               {
                 "name": "id",
@@ -1960,11 +1960,11 @@
         "fields": [
           {
             "name": "createSource",
-            "description": "",
+            "description": "Create a new source of infrastructure data",
             "args": [
               {
                 "name": "id",
-                "description": "",
+                "description": "The id of the source",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -1993,11 +1993,11 @@
           },
           {
             "name": "updateSource",
-            "description": "",
+            "description": "Modify an existing source using the given sequence of update operations",
             "args": [
               {
                 "name": "id",
-                "description": "",
+                "description": "The id of the source",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -2007,7 +2007,7 @@
               },
               {
                 "name": "changes",
-                "description": "",
+                "description": "A sequence of update operations",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -2038,11 +2038,11 @@
           },
           {
             "name": "deleteSource",
-            "description": "",
+            "description": "Delete a source of infrastructure data",
             "args": [
               {
                 "name": "id",
-                "description": "",
+                "description": "The id of the source",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
@@ -2068,7 +2068,7 @@
       {
         "kind": "INPUT_OBJECT",
         "name": "CreateSourceInput",
-        "description": "",
+        "description": "The source to be created",
         "fields": null,
         "inputFields": [
           {
@@ -2113,7 +2113,7 @@
       {
         "kind": "INPUT_OBJECT",
         "name": "CreateSourceFieldsInput",
-        "description": "",
+        "description": "The mapping of semantic fields of the source to be created",
         "fields": null,
         "inputFields": [
           {
@@ -2154,11 +2154,11 @@
       {
         "kind": "OBJECT",
         "name": "CreateSourceResult",
-        "description": "",
+        "description": "The result of a successful source creation",
         "fields": [
           {
             "name": "source",
-            "description": "",
+            "description": "The source that was created",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -2177,18 +2177,18 @@
       {
         "kind": "INPUT_OBJECT",
         "name": "UpdateSourceInput",
-        "description": "",
+        "description": "The update operations to be performed",
         "fields": null,
         "inputFields": [
           {
             "name": "setName",
-            "description": "",
+            "description": "The name update operation to be performed",
             "type": { "kind": "INPUT_OBJECT", "name": "UpdateSourceNameInput", "ofType": null },
             "defaultValue": null
           },
           {
             "name": "setDescription",
-            "description": "",
+            "description": "The description update operation to be performed",
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "UpdateSourceDescriptionInput",
@@ -2198,13 +2198,13 @@
           },
           {
             "name": "setAliases",
-            "description": "",
+            "description": "The alias update operation to be performed",
             "type": { "kind": "INPUT_OBJECT", "name": "UpdateSourceAliasInput", "ofType": null },
             "defaultValue": null
           },
           {
             "name": "setFields",
-            "description": "",
+            "description": "The field update operation to be performed",
             "type": { "kind": "INPUT_OBJECT", "name": "UpdateSourceFieldsInput", "ofType": null },
             "defaultValue": null
           }
@@ -2216,12 +2216,12 @@
       {
         "kind": "INPUT_OBJECT",
         "name": "UpdateSourceNameInput",
-        "description": "",
+        "description": "A name update operation",
         "fields": null,
         "inputFields": [
           {
             "name": "name",
-            "description": "",
+            "description": "The new name to be set",
             "type": {
               "kind": "NON_NULL",
               "name": null,
@@ -2237,12 +2237,12 @@
       {
         "kind": "INPUT_OBJECT",
         "name": "UpdateSourceDescriptionInput",
-        "description": "",
+        "description": "A description update operation",
         "fields": null,
         "inputFields": [
           {
             "name": "description",
-            "description": "",
+            "description": "The new description to be set",
             "type": {
               "kind": "NON_NULL",
               "name": null,
@@ -2258,18 +2258,18 @@
       {
         "kind": "INPUT_OBJECT",
         "name": "UpdateSourceAliasInput",
-        "description": "",
+        "description": "An alias update operation",
         "fields": null,
         "inputFields": [
           {
             "name": "logAlias",
-            "description": "",
+            "description": "The new log index pattern or alias to bet set",
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "defaultValue": null
           },
           {
             "name": "metricAlias",
-            "description": "",
+            "description": "The new metric index pattern or alias to bet set",
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "defaultValue": null
           }
@@ -2281,36 +2281,36 @@
       {
         "kind": "INPUT_OBJECT",
         "name": "UpdateSourceFieldsInput",
-        "description": "",
+        "description": "A field update operations",
         "fields": null,
         "inputFields": [
           {
             "name": "container",
-            "description": "",
+            "description": "The new container field to be set",
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "defaultValue": null
           },
           {
             "name": "host",
-            "description": "",
+            "description": "The new host field to be set",
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "defaultValue": null
           },
           {
             "name": "pod",
-            "description": "",
+            "description": "The new pod field to be set",
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "defaultValue": null
           },
           {
             "name": "tiebreaker",
-            "description": "",
+            "description": "The new tiebreaker field to be set",
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "defaultValue": null
           },
           {
             "name": "timestamp",
-            "description": "",
+            "description": "The new timestamp field to be set",
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "defaultValue": null
           }
@@ -2322,11 +2322,11 @@
       {
         "kind": "OBJECT",
         "name": "UpdateSourceResult",
-        "description": "",
+        "description": "The result of a sequence of source update operations",
         "fields": [
           {
             "name": "source",
-            "description": "",
+            "description": "The source after the operations were performed",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -2345,11 +2345,11 @@
       {
         "kind": "OBJECT",
         "name": "DeleteSourceResult",
-        "description": "",
+        "description": "The result of a source deletion operations",
         "fields": [
           {
             "name": "id",
-            "description": "",
+            "description": "The id of the source that was deleted",
             "args": [],
             "type": {
               "kind": "NON_NULL",

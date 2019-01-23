@@ -53,7 +53,20 @@ export const sourcesSchema = gql`
   }
 
   extend type Query {
-    "Get an infrastructure data source by id"
+    """
+    Get an infrastructure data source by id.
+
+    The resolution order for the source configuration attributes is as follows
+    with the first defined value winning:
+
+    1. The attributes of the saved object with the given 'id'.
+    2. The attributes defined in the static Kibana configuration key
+       'xpack.infra.sources.default'.
+    3. The hard-coded default values.
+
+    As a consequence, querying a source without a corresponding saved object
+    doesn't error out, but returns the configured or hardcoded defaults.
+    """
     source("The id of the source" id: ID!): InfraSource!
     "Get a list of all infrastructure data sources"
     allSources: [InfraSource!]!
@@ -154,7 +167,7 @@ export const sourcesSchema = gql`
   extend type Mutation {
     "Create a new source of infrastructure data"
     createSource("The id of the source" id: ID!, source: CreateSourceInput!): CreateSourceResult!
-    "Modify a source using the given sequence of update operations"
+    "Modify an existing source using the given sequence of update operations"
     updateSource(
       "The id of the source"
       id: ID!

@@ -37,7 +37,7 @@ export type SubscriptionResolver<Result, Parent = any, Context = any, Args = nev
 // ====================================================
 
 export interface Query {
-  /** Get an infrastructure data source by id */
+  /** Get an infrastructure data source by id.The resolution order for the source configuration attributes is as followswith the first defined value winning:1. The attributes of the saved object with the given 'id'.2. The attributes defined in the static Kibana configuration key'xpack.infra.sources.default'.3. The hard-coded default values.As a consequence, querying a source without a corresponding saved objectdoesn't error out, but returns the configured or hardcoded defaults. */
   source: InfraSource;
   /** Get a list of all infrastructure data sources */
   allSources: InfraSource[];
@@ -246,22 +246,26 @@ export interface InfraDataPoint {
 }
 
 export interface Mutation {
+  /** Create a new source of infrastructure data */
   createSource: CreateSourceResult;
-
+  /** Modify an existing source using the given sequence of update operations */
   updateSource: UpdateSourceResult;
-
+  /** Delete a source of infrastructure data */
   deleteSource: DeleteSourceResult;
 }
-
+/** The result of a successful source creation */
 export interface CreateSourceResult {
+  /** The source that was created */
   source: InfraSource;
 }
-
+/** The result of a sequence of source update operations */
 export interface UpdateSourceResult {
+  /** The source after the operations were performed */
   source: InfraSource;
 }
-
+/** The result of a source deletion operations */
 export interface DeleteSourceResult {
+  /** The id of the source that was deleted */
   id: string;
 }
 
@@ -306,7 +310,7 @@ export interface InfraMetricInput {
   /** The type of metric */
   type: InfraMetricType;
 }
-
+/** The source to be created */
 export interface CreateSourceInput {
   /** The name of the data source */
   name: string;
@@ -319,7 +323,7 @@ export interface CreateSourceInput {
   /** The field mapping to use for this source */
   fields?: CreateSourceFieldsInput | null;
 }
-
+/** The mapping of semantic fields of the source to be created */
 export interface CreateSourceFieldsInput {
   /** The field to identify a container by */
   container?: string | null;
@@ -332,40 +336,45 @@ export interface CreateSourceFieldsInput {
   /** The field to use as a timestamp for metrics and logs */
   timestamp?: string | null;
 }
-
+/** The update operations to be performed */
 export interface UpdateSourceInput {
+  /** The name update operation to be performed */
   setName?: UpdateSourceNameInput | null;
-
+  /** The description update operation to be performed */
   setDescription?: UpdateSourceDescriptionInput | null;
-
+  /** The alias update operation to be performed */
   setAliases?: UpdateSourceAliasInput | null;
-
+  /** The field update operation to be performed */
   setFields?: UpdateSourceFieldsInput | null;
 }
-
+/** A name update operation */
 export interface UpdateSourceNameInput {
+  /** The new name to be set */
   name: string;
 }
-
+/** A description update operation */
 export interface UpdateSourceDescriptionInput {
+  /** The new description to be set */
   description: string;
 }
-
+/** An alias update operation */
 export interface UpdateSourceAliasInput {
+  /** The new log index pattern or alias to bet set */
   logAlias?: string | null;
-
+  /** The new metric index pattern or alias to bet set */
   metricAlias?: string | null;
 }
-
+/** A field update operations */
 export interface UpdateSourceFieldsInput {
+  /** The new container field to be set */
   container?: string | null;
-
+  /** The new host field to be set */
   host?: string | null;
-
+  /** The new pod field to be set */
   pod?: string | null;
-
+  /** The new tiebreaker field to be set */
   tiebreaker?: string | null;
-
+  /** The new timestamp field to be set */
   timestamp?: string | null;
 }
 
@@ -437,16 +446,19 @@ export interface NodesInfraResponseArgs {
   metric: InfraMetricInput;
 }
 export interface CreateSourceMutationArgs {
+  /** The id of the source */
   id: string;
 
   source: CreateSourceInput;
 }
 export interface UpdateSourceMutationArgs {
+  /** The id of the source */
   id: string;
-
+  /** A sequence of update operations */
   changes: UpdateSourceInput[];
 }
 export interface DeleteSourceMutationArgs {
+  /** The id of the source */
   id: string;
 }
 
@@ -539,7 +551,7 @@ export type InfraLogMessageSegment = InfraLogMessageFieldSegment | InfraLogMessa
 
 export namespace QueryResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = never> {
-    /** Get an infrastructure data source by id */
+    /** Get an infrastructure data source by id.The resolution order for the source configuration attributes is as followswith the first defined value winning:1. The attributes of the saved object with the given 'id'.2. The attributes defined in the static Kibana configuration key'xpack.infra.sources.default'.3. The hard-coded default values.As a consequence, querying a source without a corresponding saved objectdoesn't error out, but returns the configured or hardcoded defaults. */
     source?: SourceResolver<InfraSource, TypeParent, Context>;
     /** Get a list of all infrastructure data sources */
     allSources?: AllSourcesResolver<InfraSource[], TypeParent, Context>;
@@ -1264,10 +1276,11 @@ export namespace InfraDataPointResolvers {
 
 export namespace MutationResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = never> {
+    /** Create a new source of infrastructure data */
     createSource?: CreateSourceResolver<CreateSourceResult, TypeParent, Context>;
-
+    /** Modify an existing source using the given sequence of update operations */
     updateSource?: UpdateSourceResolver<UpdateSourceResult, TypeParent, Context>;
-
+    /** Delete a source of infrastructure data */
     deleteSource?: DeleteSourceResolver<DeleteSourceResult, TypeParent, Context>;
   }
 
@@ -1277,6 +1290,7 @@ export namespace MutationResolvers {
     Context = InfraContext
   > = Resolver<R, Parent, Context, CreateSourceArgs>;
   export interface CreateSourceArgs {
+    /** The id of the source */
     id: string;
 
     source: CreateSourceInput;
@@ -1288,8 +1302,9 @@ export namespace MutationResolvers {
     Context = InfraContext
   > = Resolver<R, Parent, Context, UpdateSourceArgs>;
   export interface UpdateSourceArgs {
+    /** The id of the source */
     id: string;
-
+    /** A sequence of update operations */
     changes: UpdateSourceInput[];
   }
 
@@ -1299,12 +1314,14 @@ export namespace MutationResolvers {
     Context = InfraContext
   > = Resolver<R, Parent, Context, DeleteSourceArgs>;
   export interface DeleteSourceArgs {
+    /** The id of the source */
     id: string;
   }
 }
-
+/** The result of a successful source creation */
 export namespace CreateSourceResultResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = CreateSourceResult> {
+    /** The source that was created */
     source?: SourceResolver<InfraSource, TypeParent, Context>;
   }
 
@@ -1314,9 +1331,10 @@ export namespace CreateSourceResultResolvers {
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
 }
-
+/** The result of a sequence of source update operations */
 export namespace UpdateSourceResultResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = UpdateSourceResult> {
+    /** The source after the operations were performed */
     source?: SourceResolver<InfraSource, TypeParent, Context>;
   }
 
@@ -1326,9 +1344,10 @@ export namespace UpdateSourceResultResolvers {
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
 }
-
+/** The result of a source deletion operations */
 export namespace DeleteSourceResultResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = DeleteSourceResult> {
+    /** The id of the source that was deleted */
     id?: IdResolver<string, TypeParent, Context>;
   }
 
