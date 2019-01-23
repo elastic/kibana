@@ -17,39 +17,28 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { map } from 'lodash';
 
-export const metric = () => ({
-  name: 'kibana_metric',
-  type: 'render',
-  context: {
-    types: [
-      'kibana_datatable'
-    ],
-  },
-  help: i18n.translate('interpreter.functions.metric.help', {
-    defaultMessage: 'Metric visualization'
-  }),
-  args: {
-    visConfig: {
-      types: ['string', 'null'],
-      default: '"{}"',
+export const kibanaDatatable = () => ({
+  name: 'kibana_datatable',
+  from: {
+    datatable: context => {
+      context.columns.forEach(c => c.id = c.name);
+      return {
+        type: 'kibana_datatable',
+        rows: context.rows,
+        columns: context.columns,
+      };
     },
-  },
-  fn(context, args) {
-    const visConfigParams = JSON.parse(args.visConfig);
-
-    return {
-      type: 'render',
-      as: 'visualization',
-      value: {
-        visData: context,
-        visType: 'metric',
-        visConfig: visConfigParams,
-        params: {
-          listenOnChange: true,
-        }
-      },
-    };
+    pointseries: context => {
+      const columns = map(context.columns, (column, name) => {
+        return { id: name, name, ...column };
+      });
+      return {
+        type: 'kibana_datatable',
+        rows: context.rows,
+        columns: columns,
+      };
+    }
   },
 });

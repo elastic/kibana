@@ -60,6 +60,8 @@ export const timelionVis = () => ({
       visParams: { expression: args.expression, interval: args.interval }
     });
 
+    response.visType = 'timelion';
+
     return {
       type: 'render',
       as: 'visualization',

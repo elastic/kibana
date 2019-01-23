@@ -64,6 +64,8 @@ export const tsvb = () => ({
       uiState: uiState,
     });
 
+    response.visType = 'tsvb';
+
     return {
       type: 'render',
       as: 'visualization',

@@ -26,7 +26,7 @@ export const kibanaPie = () => ({
   type: 'render',
   context: {
     types: [
-      'datatable'
+      'kibana_datatable'
     ],
   },
   help: i18n.translate('interpreter.functions.pie.help', {
@@ -51,10 +51,8 @@ export const kibanaPie = () => ({
       as: 'visualization',
       value: {
         visData: convertedData,
-        visConfig: {
-          type: args.type,
-          params: visConfigParams,
-        },
+        visType: 'pie',
+        visConfig: visConfigParams,
         params: {
           listenOnChange: true,
         }

@@ -111,6 +111,8 @@ export class Visualization extends React.Component<VisualizationProps> {
    * the visualization, since these changes could effect visualization rendering.
    */
   private onUiStateChanged() {
-    this.forceUpdate();
+    if (this.forceUpdate) {
+      this.forceUpdate();
+    }
   }
 }
