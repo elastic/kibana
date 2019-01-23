@@ -127,12 +127,14 @@ exports.Cluster = class Cluster {
   async extractDataDirectory(installPath, archivePath) {
     this._log.info(chalk.bold(`Extracting data directory`));
     this._log.indent(4);
-    this._log.info(`Data archive: ${archivePath}`);
-    this._log.info(`Install path: ${installPath}`);
 
     // decompress excludes the root directory as that is how our archives are
     // structured. This works in our favor as we can explicitly extract into the data dir
-    await decompress(archivePath, path.resolve(installPath, 'data'));
+    const extractPath = path.resolve(installPath, 'data');
+    this._log.info(`Data archive: ${archivePath}`);
+    this._log.info(`Extract path: ${extractPath}`);
+
+    await decompress(archivePath, extractPath);
 
     this._log.indent(-4);
   }
