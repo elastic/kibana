@@ -31,7 +31,7 @@ export async function collectReferencesDeep(
   const result = [];
   const queue = [...objects];
   while (queue.length !== 0) {
-    const itemsToGet = queue.splice(0, queue.length);
+    const itemsToGet = queue.splice(0, 10000);
     const { saved_objects: savedObjects } = await savedObjectClient.bulkGet(itemsToGet);
     result.push(...savedObjects);
     const references = Array<ObjectsToCollect>().concat(

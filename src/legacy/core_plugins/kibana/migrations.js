@@ -19,6 +19,38 @@
 
 import { get, set } from 'lodash';
 
+function migrateIndexPattern(type, doc) {
+  const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
+  if (
+    typeof searchSourceJSON !== 'string' &&
+    searchSourceJSON !== undefined &&
+    searchSourceJSON !== null
+  ) {
+    throw new Error(`searchSourceJSON is not a string on ${type} "${doc.id}"`);
+  }
+  if (searchSourceJSON) {
+    let searchSource;
+    try {
+      searchSource = JSON.parse(searchSourceJSON);
+    } catch (e) {
+      throw new Error(
+        `Failed to parse searchSourceJSON: "${searchSourceJSON}" because "${
+          e.message
+        }" on ${type} "${doc.id}"`
+      );
+    }
+    if (searchSource.index) {
+      doc.references.push({
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+        id: searchSource.index,
+      });
+      searchSource.index = 'kibanaSavedObjectMeta.searchSourceJSON.index';
+      set(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON', JSON.stringify(searchSource));
+    }
+  }
+}
+
 export default {
   visualization: {
     '7.0.0': (doc) => {
@@ -26,35 +58,7 @@ export default {
       // Set new "references" attribute
       doc.references = doc.references || [];
       // Migrate index pattern
-      const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
-      if (
-        typeof searchSourceJSON !== 'string' &&
-        searchSourceJSON !== undefined &&
-        searchSourceJSON !== null
-      ) {
-        throw new Error(`searchSourceJSON is not a string on visualization "${doc.id}"`);
-      }
-      if (searchSourceJSON) {
-        let searchSource;
-        try {
-          searchSource = JSON.parse(searchSourceJSON);
-        } catch (e) {
-          throw new Error(
-            `Failed to parse searchSourceJSON: "${searchSourceJSON}" because "${
-              e.message
-            }" on visualization "${doc.id}"`
-          );
-        }
-        if (searchSource.index) {
-          doc.references.push({
-            name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-            type: 'index-pattern',
-            id: searchSource.index,
-          });
-          searchSource.index = 'kibanaSavedObjectMeta.searchSourceJSON.index';
-          set(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON', JSON.stringify(searchSource));
-        }
-      }
+      migrateIndexPattern('visualization', doc);
       // Migrate saved search
       if (savedSearchId) {
         doc.references.push({
@@ -72,35 +76,7 @@ export default {
       // Set new "references" attribute
       doc.references = doc.references || [];
       // Migrate index pattern
-      const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
-      if (
-        typeof searchSourceJSON !== 'string' &&
-        searchSourceJSON !== undefined &&
-        searchSourceJSON !== null
-      ) {
-        throw new Error(`searchSourceJSON is not a string on dashboard "${doc.id}"`);
-      }
-      if (searchSourceJSON) {
-        let searchSource;
-        try {
-          searchSource = JSON.parse(searchSourceJSON);
-        } catch (e) {
-          throw new Error(
-            `Failed to parse searchSourceJSON: "${searchSourceJSON}" because "${
-              e.message
-            }" on dashboard "${doc.id}"`
-          );
-        }
-        if (searchSource.index) {
-          doc.references.push({
-            name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-            type: 'index-pattern',
-            id: searchSource.index,
-          });
-          searchSource.index = 'kibanaSavedObjectMeta.searchSourceJSON.index';
-          set(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON', JSON.stringify(searchSource));
-        }
-      }
+      migrateIndexPattern('dashboard', doc);
       // Migrate panels
       const panelsJSON = get(doc, 'attributes.panelsJSON');
       if (typeof panelsJSON !== 'string') {
@@ -134,38 +110,8 @@ export default {
   },
   search: {
     '7.0.0': (doc) => {
-      // Set new "references" attribute
       doc.references = doc.references || [];
-      // Migrate index pattern
-      const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
-      if (
-        typeof searchSourceJSON !== 'string' &&
-        searchSourceJSON !== undefined &&
-        searchSourceJSON !== null
-      ) {
-        throw new Error(`searchSourceJSON is not a string on search "${doc.id}"`);
-      }
-      if (searchSourceJSON) {
-        let searchSource;
-        try {
-          searchSource = JSON.parse(searchSourceJSON);
-        } catch (e) {
-          throw new Error(
-            `Failed to parse searchSourceJSON: "${searchSourceJSON}" because "${
-              e.message
-            }" on search "${doc.id}"`
-          );
-        }
-        if (searchSource.index) {
-          doc.references.push({
-            name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-            type: 'index-pattern',
-            id: searchSource.index,
-          });
-          searchSource.index = 'kibanaSavedObjectMeta.searchSourceJSON.index';
-          set(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON', JSON.stringify(searchSource));
-        }
-      }
+      migrateIndexPattern('search', doc);
       return doc;
     },
   },
