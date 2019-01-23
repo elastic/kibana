@@ -84,7 +84,7 @@ uiRoutes
 
 // wrapper directive, which sets some global stuff up like the left nav
 uiModules.get('apps/management')
-  .directive('kbnManagementIndices', function ($route, config, kbnUrl, Private) {
+  .directive('kbnManagementIndexPatterns', function ($route, config, kbnUrl, Private) {
     return {
       restrict: 'E',
       transclude: true,

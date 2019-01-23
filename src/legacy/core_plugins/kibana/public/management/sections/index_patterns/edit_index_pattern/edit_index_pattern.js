@@ -182,7 +182,7 @@ uiRoutes
   });
 
 uiModules.get('apps/management')
-  .controller('managementIndicesEdit', function (
+  .controller('managementIndexPatternsEdit', function (
     $scope, $location, $route, config, indexPatterns, Private, AppState, docTitle, confirmModal) {
     const $state = $scope.state = new AppState();
     const { fieldWildcardMatcher } = Private(FieldWildcardProvider);
