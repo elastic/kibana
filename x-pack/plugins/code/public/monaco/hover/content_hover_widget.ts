@@ -126,7 +126,6 @@ export class ContentHoverWidget extends ContentWidget {
         ...props,
         state: HoverState.READY,
         contents,
-        fontFamily: this.editor.getConfiguration().fontInfo.fontFamily,
       };
       if (result.range) {
         this.lastRange = this.toMonacoRange(result.range);
