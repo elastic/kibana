@@ -23,6 +23,7 @@ import { VislibComponentsZeroInjectionInjectZerosProvider } from '../components/
 import { VislibComponentsZeroInjectionOrderedXKeysProvider } from '../components/zero_injection/ordered_x_keys';
 import { VislibComponentsLabelsLabelsProvider } from '../components/labels/labels';
 import { VislibComponentsColorColorProvider } from '../../vis/components/color/color';
+import { getFormat } from '../../visualize/loader/pipeline_helpers/utilities';
 
 export function VislibLibDataProvider(Private) {
 
@@ -68,11 +69,15 @@ export function VislibLibDataProvider(Private) {
                   newVal.series = val.series || seri.label;
                   return newVal;
                 }),
-                yAxisFormatter: seri.yAxisFormatter,
+                yAxisFormatatter: getFormat(seri.yAxisFormat)
               };
             });
           }
         });
+        newData.xAxisFormatter = getFormat(newData.xAxisFormat).convert;
+        newData.yAxisFormatter = getFormat(newData.yAxisFormat).convert;
+        newData.zAxisFormatter = getFormat(newData.zAxisFormat).convert;
+
         return newData;
       };
 
