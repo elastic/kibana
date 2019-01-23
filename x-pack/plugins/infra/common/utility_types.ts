@@ -37,11 +37,3 @@ export type DeepPartial<T> = T extends any[]
 interface DeepPartialArray<T> extends Array<DeepPartial<T>> {}
 
 type DeepPartialObject<T> = { [P in keyof T]+?: DeepPartial<T[P]> };
-
-export type DeepRequired<T> = NonNullable<
-  T extends any[] ? DeepRequiredArray<T[number]> : T extends object ? DeepRequiredObject<T> : T
->;
-
-interface DeepRequiredArray<T> extends Array<DeepRequired<T>> {}
-
-type DeepRequiredObject<T> = { [P in keyof T]+?: DeepRequired<T[P]> };
