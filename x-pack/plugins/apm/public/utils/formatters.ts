@@ -134,7 +134,7 @@ export function asPercent(
   denominator: number | undefined,
   fallbackResult = ''
 ) {
-  if (!denominator) {
+  if (!denominator || isNaN(numerator)) {
     return fallbackResult;
   }
 

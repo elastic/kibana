@@ -27,7 +27,7 @@ export const regionmap = () => ({
       'kibana_table'
     ],
   },
-  help: i18n.translate('common.core_plugins.interpreter.public.functions.regionmap.help', {
+  help: i18n.translate('interpreter.functions.regionmap.help', {
     defaultMessage: 'Regionmap visualization'
   }),
   args: {

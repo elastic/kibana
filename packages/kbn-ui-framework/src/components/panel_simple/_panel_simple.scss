@@ -24,9 +24,4 @@
   &.kuiPanelSimple--flexGrowZero {
     flex-grow: 0;
   }
-
-  @include darkTheme {
-    background-color: $kuiBackgroundColor--darkTheme;
-    border-color: $kuiInputBorderColor--darkTheme;
-  }
 }

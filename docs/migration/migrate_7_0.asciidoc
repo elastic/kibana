@@ -10,6 +10,13 @@ your application to Kibana 7.0.
 See also <<release-highlights>> and <<release-notes>>.
 
 [float]
+=== Removed support for users relying on direct index privileges to the Kibana index in Elasticsearch
+*Details:* With the introduction of Kibana RBAC in 6.4, users no longer require privileges to the Kibana index in Elasticsearch. Instead, users 
+should be granted <<kibana-privileges>>. Prior to 7.0, when a user that relies upon direct index privileges logs into Kibana, a deprecation warning is logged. If you are using the `kibana_user` or `kibana_dashboard_only_user` role to grant access to Kibana, or a custom role using <<kibana-privileges>>, no changes are required.
+
+*Impact:* You must change any roles which grant access to Kibana using index privileges to instead use <<kibana-privileges>>. Watcher jobs using the Reporting attachment type must be updated as well.
+
+[float]
 === Removed support for tribe nodes
 *Details:* Elasticsearch 7.0 removes the tribe node feature, so Kibana removes it as well.
 
