@@ -6,16 +6,13 @@
 
 import React from 'react';
 
-import {
-} from '@elastic/eui';
-
-import { StaticDynamicStyleSelector } from '../../static_dynamic_styling_option';
+import { StaticDynamicStyleRow } from '../../static_dynamic_style_row';
 import  { DynamicSizeSelection } from './dynamic_size_selection';
 import  { StaticSizeSelection } from './static_size_selection';
 
 export function VectorStyleSizeEditor(props) {
   return (
-    <StaticDynamicStyleSelector
+    <StaticDynamicStyleRow
       ordinalFields={props.ordinalFields}
       property={props.styleProperty}
       name={props.stylePropertyName}
@@ -23,6 +20,8 @@ export function VectorStyleSizeEditor(props) {
       handlePropertyChange={props.handlePropertyChange}
       DynamicSelector={DynamicSizeSelection}
       StaticSelector={StaticSizeSelection}
+      defaultDynamicStyleOptions={props.defaultDynamicStyleOptions}
+      defaultStaticStyleOptions={props.defaultStaticStyleOptions}
     />
   );
 }

@@ -52,9 +52,19 @@ export class SectionPanel extends Component<Props, State> {
   }
 
   public getTitle = () => {
-    const showLinkText = this.props.intl.formatMessage(
+    const showLinkText = this.props.intl.formatMessage({
+      id: 'xpack.spaces.management.collapsiblePanel.showLinkText',
+      defaultMessage: 'show',
+    });
+
+    const hideLinkText = this.props.intl.formatMessage({
+      id: 'xpack.spaces.management.collapsiblePanel.hideLinkText',
+      defaultMessage: 'hide',
+    });
+
+    const showLinkDescription = this.props.intl.formatMessage(
       {
-        id: 'xpack.spaces.management.collapsiblePanel.showLinkText',
+        id: 'xpack.spaces.management.collapsiblePanel.showLinkDescription',
         defaultMessage: 'show {title}',
       },
       {
@@ -62,9 +72,9 @@ export class SectionPanel extends Component<Props, State> {
       }
     );
 
-    const hideLinkText = this.props.intl.formatMessage(
+    const hideLinkDescription = this.props.intl.formatMessage(
       {
-        id: 'xpack.spaces.management.collapsiblePanel.hideLinkText',
+        id: 'xpack.spaces.management.collapsiblePanel.hideLinkDescription',
         defaultMessage: 'hide {title}',
       },
       {
@@ -96,7 +106,7 @@ export class SectionPanel extends Component<Props, State> {
             <EuiLink
               data-test-subj="show-hide-section-link"
               onClick={this.toggleCollapsed}
-              aria-label={this.state.collapsed ? showLinkText : hideLinkText}
+              aria-label={this.state.collapsed ? showLinkDescription : hideLinkDescription}
             >
               {this.state.collapsed ? showLinkText : hideLinkText}
             </EuiLink>
