@@ -248,4 +248,43 @@ describe('getSeries', function () {
     expect(series2[2]).to.have.property('label', '1: 1');
     expect(series2[3]).to.have.property('label', '1: 0');
   });
+
+  it('produces series values with x values in the same order as the provided rows', function () {
+    const rows = [
+      [1, 4],
+      [1, 3],
+      [1, 4],
+      [1, 4],
+      [1, 2],
+      [1, 1],
+      [1, 1],
+      [1, 2],
+      [1, 3],
+    ].map(wrapRows);
+
+    const chart = {
+      aspects: {
+        x: { i: 1 },
+        y: { i: 0, title: 'y', aggConfig: { id: 'id' } },
+      }
+    };
+
+    const series = getSeries(rows, chart);
+
+    expect(series)
+      .to.be.an('array')
+      .and.to.have.length(1);
+
+    const siri = series[0];
+    expect(siri)
+      .to.be.an('object')
+      .and.have.property('label', chart.aspects.y.title)
+      .and.have.property('values');
+
+    expect(siri.values)
+      .to.be.an('array')
+      .and.have.length(9);
+
+    expect(siri.values.map(v => v.x)).to.eql([4, 4, 4, 3, 3, 2, 2, 1, 1]);
+  });
 });

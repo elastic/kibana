@@ -26,11 +26,7 @@ export function getSeries(rows, chart) {
   const multiY = Array.isArray(aspects.y);
   const yScale = chart.yScale;
   const partGetPoint = _.partial(getPoint, aspects.x, aspects.series, yScale);
-  const orderedXKeys = aspects.x.i > -1 ? _.uniq(rows.map(r => r[aspects.x.i].value)) : ['_all'];
-  const orderedXKeysMap = orderedXKeys.reduce((acc, cur, i) => {
-    acc[cur] = i;
-    return acc;
-  }, {}); // maps x key values to their ordered array index, e.g. { foo: 0, bar: 1 }
+  const xKeys = aspects.x.i > -1 ? _.uniq(rows.map(r => r[aspects.x.i].value)) : ['_all'];
 
   let series = _(rows)
     .transform(function (series, row) {
@@ -38,7 +34,7 @@ export function getSeries(rows, chart) {
         const point = partGetPoint(row, aspects.y, aspects.z);
         if (point) {
           addToSiri(
-            { ordered: orderedXKeys, indexMap: orderedXKeysMap },
+            xKeys,
             series,
             point,
             point.series,
@@ -66,7 +62,7 @@ export function getSeries(rows, chart) {
         }
 
         addToSiri(
-          { ordered: orderedXKeys, indexMap: orderedXKeysMap },
+          xKeys,
           series,
           point,
           seriesId,
