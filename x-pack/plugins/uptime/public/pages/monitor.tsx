@@ -17,7 +17,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import { getMonitorPageBreadcrumb } from '../breadcrumbs';
 import { MonitorCharts } from '../components/queries/monitor_charts';
-import { MonitorSelect } from '../components/queries/monitor_select';
 import { MonitorStatusBar } from '../components/queries/monitor_status_bar';
 import { Pings } from '../components/queries/ping_list';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
@@ -51,20 +50,6 @@ export class MonitorPage extends React.Component<Props> {
         <EuiTitle>
           <h2>{id}</h2>
         </EuiTitle>
-        <EuiSpacer size="l" />
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <span>
-              <FormattedMessage
-                id="xpack.uptime.monitorPage.header.salutation"
-                defaultMessage="Monitor:"
-              />
-            </span>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <MonitorSelect valueOfSelectedMonitor={id} onChange={history.push} {...this.props} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
         <EuiSpacer />
         <MonitorStatusBar monitorId={id} {...this.props} />
         <EuiSpacer />
