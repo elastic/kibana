@@ -178,6 +178,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                             this.persistState
                           );
                         }}
+                        showUpdateButton={false}
                       />
                     </div>
                   </EuiHeaderSectionItem>
