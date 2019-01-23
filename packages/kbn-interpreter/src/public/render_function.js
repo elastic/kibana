@@ -17,26 +17,26 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
+export function RenderFunction(config) {
+  // This must match the name of the function that is used to create the `type: render` object
+  this.name = config.name;
 
-import uiRoutes from '../routes';
+  // Use this to set a more friendly name
+  this.displayName = config.displayName || this.name;
 
-import template from './error_auto_create_index.html';
+  // A sentence or few about what this element does
+  this.help = config.help;
 
-uiRoutes
-  .when('/error/action.auto_create_index', {
-    template,
-    k7Breadcrumbs: () => [{ text: i18n.translate('common.ui.errorAutoCreateIndex.breadcrumbs.errorText', { defaultMessage: 'Error' }) }],
-  });
+  // used to validate the data before calling the render function
+  this.validate = config.validate || function validate() {};
 
-export function isAutoCreateIndexError(error) {
-  return (
-    get(error, 'res.status') === 503 &&
-    get(error, 'body.code') === 'ES_AUTO_CREATE_INDEX_ERROR'
-  );
-}
+  // tell the renderer if the dom node should be reused, it's recreated each time by default
+  this.reuseDomNode = Boolean(config.reuseDomNode);
 
-export function showAutoCreateIndexErrorPage() {
-  window.location.hash = '/error/action.auto_create_index';
+  // the function called to render the data
+  this.render =
+    config.render ||
+    function render(domNode, data, done) {
+      done();
+    };
 }

@@ -17,26 +17,13 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
+import { Registry } from '../common';
+import { RenderFunction } from './render_function';
 
-import uiRoutes from '../routes';
-
-import template from './error_auto_create_index.html';
-
-uiRoutes
-  .when('/error/action.auto_create_index', {
-    template,
-    k7Breadcrumbs: () => [{ text: i18n.translate('common.ui.errorAutoCreateIndex.breadcrumbs.errorText', { defaultMessage: 'Error' }) }],
-  });
-
-export function isAutoCreateIndexError(error) {
-  return (
-    get(error, 'res.status') === 503 &&
-    get(error, 'body.code') === 'ES_AUTO_CREATE_INDEX_ERROR'
-  );
+class RenderFunctionsRegistry extends Registry {
+  wrapper(obj) {
+    return new RenderFunction(obj);
+  }
 }
 
-export function showAutoCreateIndexErrorPage() {
-  window.location.hash = '/error/action.auto_create_index';
-}
+export { RenderFunctionsRegistry };
