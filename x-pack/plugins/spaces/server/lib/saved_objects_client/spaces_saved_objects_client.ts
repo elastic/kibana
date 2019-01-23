@@ -10,7 +10,6 @@ import {
   BulkGetObjects,
   CreateOptions,
   FindOptions,
-  FindRelationshipsOptions,
   SavedObjectAttributes,
   SavedObjectsClient,
   UpdateOptions,
@@ -226,23 +225,6 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
     throwErrorIfNamespaceSpecified(options);
 
     return await this.client.update(type, id, attributes, {
-      ...options,
-      namespace: getNamespace(this.spaceId),
-    });
-  }
-
-  /**
-   * Finds other saved objects that have a relationship with a given saved object
-   *
-   * @param {string} type
-   * @param {string} id
-   * @param {object} [options]
-   */
-  public async findRelationships(type: string, id: string, options: FindRelationshipsOptions = {}) {
-    throwErrorIfTypeIsSpace(type);
-    throwErrorIfNamespaceSpecified(options);
-
-    return await this.client.findRelationships(type, id, {
       ...options,
       namespace: getNamespace(this.spaceId),
     });

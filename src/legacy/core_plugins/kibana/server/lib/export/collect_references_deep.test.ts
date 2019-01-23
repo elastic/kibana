@@ -104,7 +104,6 @@ test('collects dashboard and all dependencies', async () => {
     find: jest.fn(),
     get: jest.fn(),
     update: jest.fn(),
-    findRelationships: jest.fn(),
     bulkGet: jest.fn(getObjects => {
       return {
         saved_objects: getObjects.map((obj: SavedObject) =>

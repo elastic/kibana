@@ -3,13 +3,3 @@
 exports[`SavedObjectsRepository #deleteByNamespace requires namespace to be a string 1`] = `"namespace is required, and must be a string"`;
 
 exports[`SavedObjectsRepository #deleteByNamespace requires namespace to be defined 1`] = `"namespace is required, and must be a string"`;
-
-exports[`SavedObjectsRepository #findRelationships should find relationships for a given record 1`] = `
-Object {
-  "index-pattern": Array [
-    Object {
-      "id": "pattern*",
-    },
-  ],
-}
-`;

@@ -716,4 +716,46 @@ describe('searchDsl/queryParams', () => {
         });
     });
   });
+
+  describe('type (plural, namespaced and global), referencedBy', () => {
+    it('supports referencedBy', () => {
+      expect(getQueryParams(MAPPINGS, SCHEMA, 'foo-namespace', ['saved', 'global'], null, null, { type: 'bar', id: '1' }))
+        .toEqual({
+          query: {
+            bool: {
+              filter: [{
+                bool: {
+                  must: [{
+                    nested: {
+                      path: 'references',
+                      query: {
+                        bool: {
+                          must: [
+                            {
+                              term: {
+                                'references.id': '1',
+                              },
+                            },
+                            {
+                              term: {
+                                'references.type': 'bar',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  }],
+                  should: [
+                    createTypeClause('saved', 'foo-namespace'),
+                    createTypeClause('global'),
+                  ],
+                  minimum_should_match: 1,
+                }
+              }]
+            }
+          }
+        });
+    });
+  });
 });

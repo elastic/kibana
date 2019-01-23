@@ -80,22 +80,6 @@ test(`#find`, async () => {
   expect(result).toBe(returnValue);
 });
 
-test('#findRelationships', async () => {
-  const returnValue = Symbol();
-  const mockRepository = {
-    findRelationships: jest.fn().mockReturnValue(Promise.resolve(returnValue)),
-  };
-  const client = new SavedObjectsClient(mockRepository);
-
-  const type = Symbol();
-  const id = Symbol();
-  const options = Symbol();
-  const result = await client.findRelationships(type, id, options);
-
-  expect(mockRepository.findRelationships).toHaveBeenCalledWith(type, id, options);
-  expect(result).toBe(returnValue);
-});
-
 test(`#bulkGet`, async () => {
   const returnValue = Symbol();
   const mockRepository = {

@@ -89,15 +89,6 @@ export interface SavedObjectReference {
   id: string;
 }
 
-export interface FindRelationshipsOptions {
-  size?: number;
-  namespace?: string;
-}
-
-export interface FindRelationshipResponse {
-  [key: string]: SavedObjectAttributes[];
-}
-
 export interface SavedObjectsClient {
   errors: any;
   create: (
@@ -116,9 +107,4 @@ export interface SavedObjectsClient {
     attributes: SavedObjectAttributes,
     options?: UpdateOptions
   ) => Promise<SavedObject>;
-  findRelationships: (
-    type: string,
-    id: string,
-    options: FindRelationshipsOptions,
-  ) => Promise<FindRelationshipResponse>;
 }

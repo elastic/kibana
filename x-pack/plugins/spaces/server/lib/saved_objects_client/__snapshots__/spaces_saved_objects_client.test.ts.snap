@@ -24,10 +24,6 @@ exports[`default space #find throws error if options.type is array containing sp
 
 exports[`default space #find throws error if options.type is space 1`] = `"Spaces can not be accessed using the SavedObjectsClient"`;
 
-exports[`default space #findRelationships throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;
-
-exports[`default space #findRelationships throws error if type is space 1`] = `"Spaces can not be accessed using the SavedObjectsClient"`;
-
 exports[`default space #get throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;
 
 exports[`default space #get throws error if type is space 1`] = `"Spaces can not be accessed using the SavedObjectsClient"`;
@@ -59,10 +55,6 @@ exports[`space_1 space #find throws error if options.namespace is specified 1`] 
 exports[`space_1 space #find throws error if options.type is array containing space 1`] = `"Spaces can not be accessed using the SavedObjectsClient"`;
 
 exports[`space_1 space #find throws error if options.type is space 1`] = `"Spaces can not be accessed using the SavedObjectsClient"`;
-
-exports[`space_1 space #findRelationships throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;
-
-exports[`space_1 space #findRelationships throws error if type is space 1`] = `"Spaces can not be accessed using the SavedObjectsClient"`;
 
 exports[`space_1 space #get throws error if options.namespace is specified 1`] = `"Spaces currently determines the namespaces"`;
 

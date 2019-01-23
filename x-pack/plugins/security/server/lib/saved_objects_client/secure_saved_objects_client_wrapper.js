@@ -101,15 +101,6 @@ export class SecureSavedObjectsClientWrapper {
     return await this._baseClient.update(type, id, attributes, options);
   }
 
-  async findRelationships(type, id, options = {}) {
-    await this._ensureAuthorized(
-      type,
-      'find_relationships',
-      { type, id, options },
-    );
-    return await this._baseClient.findRelationships(type, id, options);
-  }
-
   async _checkSavedObjectPrivileges(actions) {
     try {
       if (this._spaces) {

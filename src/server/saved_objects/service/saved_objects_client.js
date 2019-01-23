@@ -197,17 +197,4 @@ export class SavedObjectsClient {
   async update(type, id, attributes, options = {}) {
     return this._repository.update(type, id, attributes, options);
   }
-
-  /**
-   * Gets relational objects
-   * @param {string} type
-   * @param {string} id
-   * @param {object} [options={}]
-   * @property {number} [options.size]
-   * @property {string} [options.namespace]
-   * @returns {promise}
-   */
-  async findRelationships(type, id, options = {}) {
-    return this._repository.findRelationships(type, id, options);
-  }
 }

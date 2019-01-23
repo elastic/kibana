@@ -18,6 +18,7 @@
  */
 
 import Joi from 'joi';
+import { findRelationships } from '../../../../lib/management/saved_objects/relationships';
 
 export function registerRelationships(server) {
   server.route({
@@ -41,7 +42,7 @@ export function registerRelationships(server) {
       const size = req.query.size || 10000;
       const savedObjectsClient = req.getSavedObjectsClient();
 
-      return await savedObjectsClient.findRelationships(type, id, { size });
+      return await findRelationships(type, id, { size, savedObjectsClient });
     },
   });
 }
