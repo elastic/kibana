@@ -77,7 +77,10 @@
       <td>
         <i ng-if="!mapping[field] && field[0] === '_'"
           tooltip-placement="top"
-          tooltip="{{ ::'kbnDocViews.table.fieldNamesBeginningWithUnderscoreUnsupportedTooltip' | i18n: { defaultMessage: 'Field names beginning with _ are not supported' } }}"
+          tooltip="{{ ::'kbnDocViews.table.fieldNamesBeginningWithUnderscoreUnsupportedTooltip' | i18n: {
+            defaultMessage: 'Field names beginning with {underscoreSign} are not supported',
+            values: { underscoreSign: '_' }
+          } }}"
           class="fa fa-warning text-color-warning kbnDocViewer__underscore"></i>
         <i ng-if="!mapping[field] && field[0] !== '_' && !showArrayInObjectsWarning(doc, field)"
           tooltip-placement="top"
