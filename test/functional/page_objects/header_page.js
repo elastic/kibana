@@ -65,74 +65,8 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 
-    async clickTimepicker() {
-      await testSubjects.click('globalTimepickerButton');
-    }
-
-    async clickQuickButton() {
-      await retry.try(async () => {
-        await testSubjects.click('timepicker-quick-button');
-      });
-    }
-
     async isTimepickerOpen() {
       return await testSubjects.exists('timePicker');
-    }
-
-    async isAbsoluteSectionShowing() {
-      log.debug('isAbsoluteSectionShowing');
-      return await find.existsByCssSelector('input[ng-model=\'absolute.from\']');
-    }
-
-    async showAbsoluteSection() {
-      log.debug('showAbsoluteSection');
-      const isAbsoluteSectionShowing = await this.isAbsoluteSectionShowing();
-      if (!isAbsoluteSectionShowing) {
-        await retry.try(async () => {
-          await testSubjects.click('timepicker-absolute-button');
-          // Check to make sure one of the elements on the absolute section is showing.
-          await this.getFromTime();
-        });
-      }
-    }
-
-    async getFromTime() {
-      log.debug('getFromTime');
-      return await retry.try(async () => {
-        await this.ensureTimePickerIsOpen();
-        await this.showAbsoluteSection();
-        const element = await find.byCssSelector('input[ng-model=\'absolute.from\']');
-        return await element.getProperty('value');
-      });
-    }
-
-    async getToTime() {
-      log.debug('getToTime');
-      return await retry.try(async () => {
-        await this.ensureTimePickerIsOpen();
-        await this.showAbsoluteSection();
-        const element = await find.byCssSelector('input[ng-model=\'absolute.to\']');
-        return await element.getProperty('value');
-      });
-    }
-
-    async ensureTimePickerIsOpen() {
-      log.debug('ensureTimePickerIsOpen');
-      const isOpen = await this.isTimepickerOpen();
-      if (!isOpen) {
-        await retry.try(async () => {
-          await this.clickTimepicker();
-          const isOpen = await this.isTimepickerOpen();
-          if (!isOpen) throw new Error('Time picker still not open, try again.');
-        });
-      }
-    }
-
-    async setQuickTime(quickTime) {
-      await this.ensureTimePickerIsOpen();
-      log.debug('--Clicking Quick button');
-      await this.clickQuickButton();
-      await find.clickByLinkText(quickTime);
     }
 
     async getToastMessage(findTimeout = defaultFindTimeout) {

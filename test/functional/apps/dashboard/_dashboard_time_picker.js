@@ -54,7 +54,8 @@ export default function ({ getService, getPageObjects }) {
       await dashboardVisualizations.createAndAddSavedSearch({ name: 'saved search', fields: ['bytes', 'agent'] });
       await dashboardExpect.docTableFieldCount(150);
 
-      await PageObjects.header.setQuickTime('Today');
+      // Set to time range with no data
+      await PageObjects.timePicker.setAbsoluteRange('2000-01-01 00:00:00.000', '2000-01-01 01:00:00.000');
       await dashboardExpect.docTableFieldCount(0);
     });
   });

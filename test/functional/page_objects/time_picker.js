@@ -29,15 +29,15 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       log.debug(`Setting absolute range to ${fromTime} to ${toTime}`);
       await this.showStartEndTimes();
 
-      // set from time
-      await testSubjects.click('superDatePickerstartDatePopoverButton');
-      await testSubjects.click('superDatePickerAbsoluteTab');
-      await testSubjects.setValue('superDatePickerAbsoluteDateInput', fromTime);
-
       // set to time
       await testSubjects.click('superDatePickerendDatePopoverButton');
       await testSubjects.click('superDatePickerAbsoluteTab');
       await testSubjects.setValue('superDatePickerAbsoluteDateInput', toTime);
+
+      // set from time
+      await testSubjects.click('superDatePickerstartDatePopoverButton');
+      await testSubjects.click('superDatePickerAbsoluteTab');
+      await testSubjects.setValue('superDatePickerAbsoluteDateInput', fromTime);
 
       const superDatePickerApplyButtonExists = await testSubjects.exists('superDatePickerApplyTimeButton');
       if (superDatePickerApplyButtonExists) {
