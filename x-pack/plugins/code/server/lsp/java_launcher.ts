@@ -96,6 +96,7 @@ export class JavaLauncher implements ILanguageServerLauncher {
       default:
         log.error('Unable to find platform for this os');
     }
+    process.env.CLIENT_HOST = '127.0.0.1';
     process.env.CLIENT_PORT = port.toString();
 
     const p = spawn(
