@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiButton } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 import { EnrollBeat } from '../../../components/enroll_beats';
 import { AppPageProps } from '../../../frontend_types';
@@ -53,7 +54,9 @@ export class BeatsInitialEnrollmentPage extends Component<AppPageProps, Componen
                 this.props.goTo('/walkthrough/initial/tag');
               }}
             >
-              Continue
+              {i18n.translate('xpack.beatsManagement.walkthrough.beats.continue', {
+                defaultMessage: 'Continue',
+              })}
             </EuiButton>
           </React.Fragment>
         )}

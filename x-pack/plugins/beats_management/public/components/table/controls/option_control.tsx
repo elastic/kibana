@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ActionComponentType, ControlSchema } from '../action_schema';
 import { AssignmentActionType } from '../table';
@@ -53,5 +54,11 @@ export const OptionControl: React.SFC<ComponentProps> = (props: ComponentProps) 
         />
       );
   }
-  return <div>Invalid config</div>;
+  return (
+    <div>
+      {i18n.translate('xpack.beatsManagement.table.controls.invalidConfig', {
+        defaultMessage: 'Invalid config',
+      })}
+    </div>
+  );
 };

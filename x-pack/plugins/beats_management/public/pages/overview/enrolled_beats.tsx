@@ -146,7 +146,9 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
                       this.props.goTo('/overview/enrolled_beats');
                     }}
                   >
-                    Done
+                    {i18n.translate('xpack.beatsManagement.enrollBeats.doneButton', {
+                      defaultMessage: 'Done',
+                    })}
                   </EuiButton>
                 </React.Fragment>
               )}

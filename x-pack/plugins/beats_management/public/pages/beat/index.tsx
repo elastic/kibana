@@ -13,6 +13,7 @@ import {
   EuiTabs,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import moment from 'moment';
 import React from 'react';
@@ -132,7 +133,12 @@ class BeatDetailsPageComponent extends React.PureComponent<PageProps, PageState>
         hideBreadcrumbs={this.props.libs.framework.versionGreaterThen('6.7.0')}
       >
         <React.Fragment>
-          <Breadcrumb title={`Enrolled Beats`} path={`/overview/enrolled_beats`} />
+          <Breadcrumb
+            title={i18n.translate('xpack.beatsManagement.breadcrumbs.enrolledBeats', {
+              defaultMessage: 'Enrolled Beats',
+            })}
+            path={`/overview/enrolled_beats`}
+          />
           <EuiTabs>
             <EuiTab
               isSelected={`/beat/${id}/details` === this.props.history.location.pathname}
