@@ -20,8 +20,6 @@
 import { Filter, FilterMeta, LatLon } from './meta_filter';
 
 export type GeoBoundingBoxFilterMeta = FilterMeta & {
-  key: string; // The name of the field
-  value: string; // The formatted value
   params: {
     bottom_right: LatLon;
     top_left: LatLon;

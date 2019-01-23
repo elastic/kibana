@@ -20,9 +20,7 @@
 import { Filter, FilterMeta } from './meta_filter';
 
 export type PhrasesFilterMeta = FilterMeta & {
-  key: string; // The name of the field
   params: string[]; // The unformatted values
-  value: string; // The formatted values concatenated together
 };
 
 export type PhrasesFilter = Filter & {

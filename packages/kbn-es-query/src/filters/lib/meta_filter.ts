@@ -33,6 +33,8 @@ export interface FilterMeta {
   disabled: boolean;
   negate: boolean;
   alias: string | null;
+  key?: string;
+  value?: string;
 }
 
 export interface Filter {

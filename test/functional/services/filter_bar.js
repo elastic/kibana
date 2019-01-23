@@ -40,23 +40,21 @@ export function FilterBarProvider({ getService, getPageObjects }) {
     }
 
     async removeFilter(key) {
-      const filterElement = await testSubjects.find(`filter & filter-key-${key}`);
-      await browser.moveMouseTo(filterElement);
-      await testSubjects.click(`filter & filter-key-${key} removeFilter-${key}`);
+      await testSubjects.click(`filter & filter-key-${key}`);
+      await testSubjects.click(`deleteFilter`);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
     async toggleFilterEnabled(key) {
-      const filterElement = await testSubjects.find(`filter & filter-key-${key}`);
-      await browser.moveMouseTo(filterElement);
-      await testSubjects.click(`filter & filter-key-${key} disableFilter-${key}`);
+      await testSubjects.click(`filter & filter-key-${key}`);
+      await testSubjects.click(`disableFilter`);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
     async toggleFilterPinned(key) {
-      const filterElement = await testSubjects.find(`filter & filter-key-${key}`);
-      await browser.moveMouseTo(filterElement);
-      await testSubjects.click(`filter & filter-key-${key} pinFilter-${key}`);
+      await testSubjects.click(`filter & filter-key-${key}`);
+      await testSubjects.click(`pinFilter`);
+      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
     /**
@@ -98,9 +96,9 @@ export function FilterBarProvider({ getService, getPageObjects }) {
     }
 
     async clickEditFilter(key, value) {
-      const pill = await testSubjects.find(`filter & filter-key-${key} & filter-value-${value}`);
-      await browser.moveMouseTo(pill);
-      await testSubjects.click('editFilter');
+      await testSubjects.click(`filter & filter-key-${key} & filter-value-${value}`);
+      await testSubjects.click(`editFilter`);
+      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
     async getFilterEditorPhrases() {

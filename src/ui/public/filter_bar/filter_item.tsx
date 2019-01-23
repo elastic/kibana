@@ -65,6 +65,12 @@ class FilterItemUI extends Component<Props, State> {
       this.props.className
     );
 
+    const dataTestSubjKey = filter.meta.key ? `filter-key-${filter.meta.key}` : '';
+    const dataTestSubjValue = filter.meta.value ? `filter-value-${filter.meta.value}` : '';
+    const dataTestSubjDisabled = `filter-${
+      this.props.filter.meta.disabled ? 'disabled' : 'enabled'
+    }`;
+
     const badge = (
       <EuiBadge
         className={classes}
@@ -86,6 +92,7 @@ class FilterItemUI extends Component<Props, State> {
           // Also, we may want to add a `DEL` keyboard press functionality
           tabIndex: '-1',
         }}
+        data-test-subj={`filter ${dataTestSubjDisabled} ${dataTestSubjKey} ${dataTestSubjValue}`}
       >
         <FilterView filter={filter} />
       </EuiBadge>
@@ -110,6 +117,7 @@ class FilterItemUI extends Component<Props, State> {
               this.closePopover();
               this.onTogglePinned();
             },
+            'data-test-subj': 'pinFilter',
           },
           {
             name: this.props.intl.formatMessage({
@@ -118,6 +126,7 @@ class FilterItemUI extends Component<Props, State> {
             }),
             icon: 'pencil',
             panel: 1,
+            'data-test-subj': 'editFilter',
           },
           {
             name: negate
@@ -134,6 +143,7 @@ class FilterItemUI extends Component<Props, State> {
               this.closePopover();
               this.onToggleNegated();
             },
+            'data-test-subj': 'negateFilter',
           },
           {
             name: disabled
@@ -150,6 +160,7 @@ class FilterItemUI extends Component<Props, State> {
               this.closePopover();
               this.onToggleDisabled();
             },
+            'data-test-subj': 'disableFilter',
           },
           {
             name: this.props.intl.formatMessage({
@@ -161,6 +172,7 @@ class FilterItemUI extends Component<Props, State> {
               this.closePopover();
               this.props.onRemove();
             },
+            'data-test-subj': 'deleteFilter',
           },
         ],
       },

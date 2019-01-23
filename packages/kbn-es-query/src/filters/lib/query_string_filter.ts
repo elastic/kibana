@@ -19,9 +19,7 @@
 
 import { Filter, FilterMeta } from './meta_filter';
 
-export type QueryStringFilterMeta = FilterMeta & {
-  value: string; // The query string
-};
+export type QueryStringFilterMeta = FilterMeta;
 
 export type QueryStringFilter = Filter & {
   meta: QueryStringFilterMeta;

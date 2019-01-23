@@ -20,8 +20,6 @@
 import { Filter, FilterMeta } from './meta_filter';
 
 export type PhraseFilterMeta = FilterMeta & {
-  key: string; // The name of the field
-  value: string; // The formatted value
   params: {
     query: string; // The unformatted value
   };

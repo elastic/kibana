@@ -19,9 +19,7 @@
 
 import { Filter, FilterMeta } from './meta_filter';
 
-export type ExistsFilterMeta = FilterMeta & {
-  key: string; // The name of the field
-};
+export type ExistsFilterMeta = FilterMeta;
 
 export type ExistsFilter = Filter & {
   meta: ExistsFilterMeta;
