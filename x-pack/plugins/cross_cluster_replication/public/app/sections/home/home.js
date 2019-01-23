@@ -10,7 +10,6 @@ import { Route, Switch } from 'react-router-dom';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
-import { BASE_PATH } from '../../../../common/constants';
 
 import {
   EuiButton,
@@ -25,6 +24,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { BASE_PATH } from '../../../../common/constants';
 import { listBreadcrumb } from '../../services/breadcrumbs';
 import routing from '../../services/routing';
 import { AutoFollowPatternList } from './auto_follow_pattern_list';
@@ -34,9 +34,7 @@ import { SectionUnauthorized } from '../../components';
 export const CrossClusterReplicationHome = injectI18n(
   class extends PureComponent {
     static propTypes = {
-      autoFollowPatterns: PropTypes.array,
       isAutoFollowApiAuthorized: PropTypes.bool,
-      followerIndices: PropTypes.array,
       isFollowerIndexApiAuthorized: PropTypes.bool,
     }
 
@@ -77,16 +75,8 @@ export const CrossClusterReplicationHome = injectI18n(
       routing.navigate(`/${section}`);
     }
 
-    getHeaderSection() {
-      if(this.state.activeSection === 'follower_indices') {
-        const { isFollowerIndexApiAuthorized, followerIndices } = this.props;
-
-
-        // We want to show the title when the user isn't authorized.
-        if (isFollowerIndexApiAuthorized && !followerIndices.length) {
-          return null;
-        }
-
+    renderHeaderSection() {
+      if (this.state.activeSection === 'follower_indices') {
         return (
           <Fragment>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
@@ -102,60 +92,16 @@ export const CrossClusterReplicationHome = injectI18n(
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                {isFollowerIndexApiAuthorized && (
-                  <EuiButton
-                    {...routing.getRouterLinkProps('/follower_indices/add')}
-                    fill
-                    iconType="plusInCircle"
-                  >
-                    <FormattedMessage
-                      id="xpack.crossClusterReplication.followerIndexList.addFollowerButtonLabel"
-                      defaultMessage="Create a follower index"
-                    />
-                  </EuiButton>
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-
-            <EuiSpacer />
-          </Fragment>
-        );
-      } else {
-        const { isAutoFollowApiAuthorized, autoFollowPatterns } = this.props;
-
-        // We want to show the title when the user isn't authorized.
-        if (isAutoFollowApiAuthorized && !autoFollowPatterns.length) {
-          return null;
-        }
-
-        return (
-          <Fragment>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
-              <EuiFlexItem grow={false}>
-                <EuiText>
-                  <p>
-                    <FormattedMessage
-                      id="xpack.crossClusterReplication.autoFollowPatternList.autoFollowPatternsDescription"
-                      defaultMessage="Auto-follow patterns replicate leader indices from a remote
-                      cluster to follower indices on the local cluster."
-                    />
-                  </p>
-                </EuiText>
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={false}>
-                {isAutoFollowApiAuthorized && (
-                  <EuiButton
-                    {...routing.getRouterLinkProps('/auto_follow_patterns/add')}
-                    fill
-                    iconType="plusInCircle"
-                  >
-                    <FormattedMessage
-                      id="xpack.crossClusterReplication.autoFollowPatternList.addAutoFollowPatternButtonLabel"
-                      defaultMessage="Create an auto-follow pattern"
-                    />
-                  </EuiButton>
-                )}
+                <EuiButton
+                  {...routing.getRouterLinkProps('/follower_indices/add')}
+                  fill
+                  iconType="plusInCircle"
+                >
+                  <FormattedMessage
+                    id="xpack.crossClusterReplication.followerIndexList.addFollowerButtonLabel"
+                    defaultMessage="Create a follower index"
+                  />
+                </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
 
@@ -163,20 +109,86 @@ export const CrossClusterReplicationHome = injectI18n(
           </Fragment>
         );
       }
+
+      return (
+        <Fragment>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                <p>
+                  <FormattedMessage
+                    id="xpack.crossClusterReplication.autoFollowPatternList.autoFollowPatternsDescription"
+                    defaultMessage="Auto-follow patterns replicate leader indices from a remote
+                    cluster to follower indices on the local cluster."
+                  />
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                {...routing.getRouterLinkProps('/auto_follow_patterns/add')}
+                fill
+                iconType="plusInCircle"
+              >
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.autoFollowPatternList.addAutoFollowPatternButtonLabel"
+                  defaultMessage="Create an auto-follow pattern"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiSpacer />
+        </Fragment>
+      );
     }
 
-    getUnauthorizedSection() {
-      const { isAutoFollowApiAuthorized } = this.props;
-      if (!isAutoFollowApiAuthorized) {
+    renderContent() {
+      const { isAutoFollowApiAuthorized, isFollowerIndexApiAuthorized } = this.props;
+
+      if (!isAutoFollowApiAuthorized || !isFollowerIndexApiAuthorized) {
         return (
-          <SectionUnauthorized>
+          <SectionUnauthorized
+            title={(
+              <FormattedMessage
+                id="xpack.crossClusterReplication.home.permissionErrorTitle"
+                defaultMessage="Permission error"
+              />
+            )}
+          >
             <FormattedMessage
-              id="xpack.crossClusterReplication.autoFollowPatternList.noPermissionText"
-              defaultMessage="You do not have permission to view or add auto-follow patterns."
+              id="xpack.crossClusterReplication.home.permissionErrorText"
+              defaultMessage="You do not have permission to view or add follower indices or auto-follow patterns."
             />
           </SectionUnauthorized>
         );
       }
+
+      return (
+        <Fragment>
+          <EuiTabs>
+            {this.tabs.map(tab => (
+              <EuiTab
+                onClick={() => this.onSectionChange(tab.id)}
+                isSelected={tab.id === this.state.activeSection}
+                key={tab.id}
+              >
+                {tab.name}
+              </EuiTab>
+            ))}
+          </EuiTabs>
+
+          <EuiSpacer size="m" />
+
+          {this.renderHeaderSection()}
+
+          <Switch>
+            <Route exact path={`${BASE_PATH}/follower_indices`} component={FollowerIndicesList} />
+            <Route exact path={`${BASE_PATH}/auto_follow_patterns`} component={AutoFollowPatternList} />
+          </Switch>
+        </Fragment>
+      );
     }
 
     render() {
@@ -194,27 +206,7 @@ export const CrossClusterReplicationHome = injectI18n(
 
             <EuiSpacer size="s" />
 
-            <EuiTabs>
-              {this.tabs.map(tab => (
-                <EuiTab
-                  onClick={() => this.onSectionChange(tab.id)}
-                  isSelected={tab.id === this.state.activeSection}
-                  key={tab.id}
-                >
-                  {tab.name}
-                </EuiTab>
-              ))}
-            </EuiTabs>
-
-            <EuiSpacer size="m" />
-
-            {this.getHeaderSection()}
-            {this.getUnauthorizedSection()}
-
-            <Switch>
-              <Route exact path={`${BASE_PATH}/follower_indices`} component={FollowerIndicesList} />
-              <Route exact path={`${BASE_PATH}/auto_follow_patterns`} component={AutoFollowPatternList} />
-            </Switch>
+            {this.renderContent()}
           </EuiPageContent>
         </EuiPageBody>
       );
