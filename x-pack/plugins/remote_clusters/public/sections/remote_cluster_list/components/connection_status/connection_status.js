@@ -55,18 +55,20 @@ export function ConnectionStatus({ isConnected }) {
           <EuiFlexItem grow={false}>
             {icon}
           </EuiFlexItem>
+
           <EuiFlexItem>
             <EuiText>
               {message}
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiIconTip
-              color="subdued"
-              content={seedNodeTooltip}
-            />
-          </EuiFlexItem>
         </EuiFlexGroup>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiIconTip
+          color="subdued"
+          content={seedNodeTooltip}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
