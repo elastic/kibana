@@ -50,7 +50,7 @@ export class FeaturesPrivilegesBuilder {
     return _.uniq(allApiReadActions);
   }
 
-  public getUIReadActions(features: Feature[]): string[] {
+  public getUIFeaturesReadActions(features: Feature[]): string[] {
     const allUIReadActions = flatten(
       features.map(feature => {
         const { privileges } = feature;
@@ -75,7 +75,7 @@ export class FeaturesPrivilegesBuilder {
     return _.uniq(allUIReadActions);
   }
 
-  public getCatalogueReadActions(features: Feature[]): string[] {
+  public getUICatalogueReadActions(features: Feature[]): string[] {
     const allCatalogueReadActions = flatten(
       features.map(feature => {
         const { privileges } = feature;
@@ -100,7 +100,7 @@ export class FeaturesPrivilegesBuilder {
     return _.uniq(allCatalogueReadActions);
   }
 
-  public getManagementReadActions(features: Feature[]): string[] {
+  public getUIManagementReadActions(features: Feature[]): string[] {
     const allManagementReadActions = flatten(
       features.map(feature => {
         const { privileges } = feature;

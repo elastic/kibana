@@ -383,7 +383,7 @@ describe('#getApiReadActions', () => {
   });
 });
 
-describe('#getUIReadActions', () => {
+describe('#getUIFeaturesReadActions', () => {
   test(`includes ui actions from the read privileges`, () => {
     const actions = new Actions(versionNumber);
     const builder = new FeaturesPrivilegesBuilder(actions);
@@ -428,7 +428,7 @@ describe('#getUIReadActions', () => {
         },
       },
     ];
-    const result = builder.getUIReadActions(features);
+    const result = builder.getUIFeaturesReadActions(features);
     expect(result).toEqual([actions.ui.get('bar', 'bar-ui-capability')]);
   });
 
@@ -477,7 +477,7 @@ describe('#getUIReadActions', () => {
         },
       },
     ];
-    const result = builder.getUIReadActions(features);
+    const result = builder.getUIFeaturesReadActions(features);
     expect(result).toEqual([
       actions.ui.get('foo', 'foo-ui-capability'),
       actions.ui.get('bar', 'bar-ui-capability'),
@@ -485,7 +485,7 @@ describe('#getUIReadActions', () => {
   });
 });
 
-describe('#getManagementReadActions', () => {
+describe('#getUIManagementReadActions', () => {
   test(`includes management actions from the read privileges`, () => {
     const actions = new Actions(versionNumber);
     const builder = new FeaturesPrivilegesBuilder(actions);
@@ -538,7 +538,7 @@ describe('#getManagementReadActions', () => {
         },
       },
     ];
-    const result = builder.getManagementReadActions(features);
+    const result = builder.getUIManagementReadActions(features);
     expect(result).toEqual([
       actions.ui.get('management', 'kibana', 'fooManagementLink'),
       actions.ui.get('management', 'es', 'barManagementLink'),
@@ -605,7 +605,7 @@ describe('#getManagementReadActions', () => {
         },
       },
     ];
-    const result = builder.getManagementReadActions(features);
+    const result = builder.getUIManagementReadActions(features);
     expect(result).toEqual([
       actions.ui.get('management', 'foo', 'bar'),
       actions.ui.get('management', 'kibana', 'fooManagementLink'),
@@ -615,7 +615,7 @@ describe('#getManagementReadActions', () => {
   });
 });
 
-describe('#getCatalogueReadActions', () => {
+describe('#getUICatalogueReadActions', () => {
   test(`includes catalogue actions from the read privileges`, () => {
     const actions = new Actions(versionNumber);
     const builder = new FeaturesPrivilegesBuilder(actions);
@@ -663,7 +663,7 @@ describe('#getCatalogueReadActions', () => {
         },
       },
     ];
-    const result = builder.getCatalogueReadActions(features);
+    const result = builder.getUICatalogueReadActions(features);
     expect(result).toEqual([
       actions.ui.get('catalogue', 'barCatalogueLink'),
       actions.ui.get('catalogue', 'bazCatalogueLink'),
@@ -719,7 +719,7 @@ describe('#getCatalogueReadActions', () => {
         },
       },
     ];
-    const result = builder.getCatalogueReadActions(features);
+    const result = builder.getUICatalogueReadActions(features);
     expect(result).toEqual([
       actions.ui.get('catalogue', 'fooCatalogueLink'),
       actions.ui.get('catalogue', 'barCatalogueLink'),
