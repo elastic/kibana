@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { identity } from 'lodash';
-import { Vis } from 'ui/vis';
+import { AggConfig, Vis } from 'ui/vis';
 // @ts-ignore
 import { FieldFormat } from '../../../../field_formats/field_format';
 // @ts-ignore
@@ -102,7 +102,7 @@ export const getFormat = (mapping: any) => {
   }
 };
 
-export const getTableAggs = (vis: Vis): any[] => {
+export const getTableAggs = (vis: Vis): AggConfig[] => {
   const columns = tabifyGetColumns(vis.aggs.getResponseAggs(), !vis.isHierarchical());
   return columns.map((c: any) => c.aggConfig);
 };
