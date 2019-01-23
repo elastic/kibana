@@ -51,20 +51,22 @@ export function ConnectionStatus({ isConnected }) {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
-        {icon}
-      </EuiFlexItem>
-
-      <EuiFlexItem>
-        <EuiText>
-          {message}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiIconTip
-          type="iInCircle"
-          color="subdued"
-          content={seedNodeTooltip}
-        />
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            {icon}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText>
+              {message}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiIconTip
+              color="subdued"
+              content={seedNodeTooltip}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
