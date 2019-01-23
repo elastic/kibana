@@ -243,7 +243,6 @@ export class MonitorCharts extends React.Component<Props, MonitorChartsState> {
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer />
-
               <EuiTitle size="xs">
                 <h4>
                   <FormattedMessage
