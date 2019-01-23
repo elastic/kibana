@@ -117,7 +117,6 @@ export const FilterBar = ({
         <EuiFlexGroup>
           <EuiFlexItem grow>
             <EuiSearchBar
-              data-test-subj="xpack.uptime.filterBar"
               // TODO: update typing
               onChange={({ query }: { query?: { text: string } }) => {
                 try {

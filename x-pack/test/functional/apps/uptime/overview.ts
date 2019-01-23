@@ -10,13 +10,15 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) => {
   const esArchiver = getService('esArchiver');
   const pageObjects = getPageObjects(['uptime']);
+  const archive = 'uptime/full_heartbeat';
 
   describe('Overview page', () => {
     describe('this is a simple test', () => {
       beforeEach(async () => {
-        await esArchiver.load('uptime/fullexport');
+        await esArchiver.load(archive);
       });
-      afterEach(async () => await esArchiver.unload('uptime/fullexport'));
+      afterEach(async () => await esArchiver.unload(archive));
+
       it('overviewpagefails', async () => {
         await pageObjects.uptime.goToUptimeOverview();
       });
