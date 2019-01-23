@@ -3,17 +3,23 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get, max, min } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
 
+import { nodesToWaffleMap } from '../../containers/waffle/nodes_to_wafflemap';
 import {
   isWaffleMapGroupWithGroups,
   isWaffleMapGroupWithNodes,
 } from '../../containers/waffle/type_guards';
-import { InfraMetricType, InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
+import {
+  InfraMetricType,
+  InfraNode,
+  InfraNodeType,
+  InfraTimerangeInput,
+} from '../../graphql/types';
 import {
   InfraFormatterType,
   InfraWaffleData,
@@ -29,15 +35,18 @@ import { GroupOfGroups } from './group_of_groups';
 import { GroupOfNodes } from './group_of_nodes';
 import { Legend } from './legend';
 import { applyWaffleMapLayout } from './lib/apply_wafflemap_layout';
+import { TableView } from './table';
 
 interface Props {
   options: InfraWaffleMapOptions;
   nodeType: InfraNodeType;
-  map: InfraWaffleData;
+  nodes: InfraNode[];
   loading: boolean;
   reload: () => void;
   onDrilldown: (filter: KueryFilterQuery) => void;
   timeRange: InfraTimerangeInput;
+  onViewChange: (view: string) => void;
+  view: string;
   intl: InjectedIntl;
 }
 
@@ -93,14 +102,14 @@ const calculateBoundsFromMap = (map: InfraWaffleData): InfraWaffleMapBounds => {
   if (values.length === 1) {
     values.unshift(0);
   }
-  return { min: min(values), max: max(values) };
+  return { min: min(values) || 0, max: max(values) || 0 };
 };
 
 export const Waffle = injectI18n(
   class extends React.Component<Props, {}> {
     public static displayName = 'Waffle';
     public render() {
-      const { loading, map, reload, timeRange, intl } = this.props;
+      const { loading, nodes, nodeType, reload, intl, view, options, timeRange } = this.props;
       if (loading) {
         return (
           <InfraLoadingPanel
@@ -112,7 +121,7 @@ export const Waffle = injectI18n(
             })}
           />
         );
-      } else if (!loading && map && map.length === 0) {
+      } else if (!loading && nodes && nodes.length === 0) {
         return (
           <CenteredEmptyPrompt
             title={
@@ -151,12 +160,53 @@ export const Waffle = injectI18n(
           />
         );
       }
+      if (view === 'table') {
+        return (
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem grow={false}>
+              <div>
+                <EuiButtonEmpty size="s" onClick={this.handleViewChange('map')} role="link">
+                  Switch to Map View
+                </EuiButtonEmpty>
+              </div>
+            </EuiFlexItem>
+            <EuiFlexItem style={{ padding: 16 }}>
+              <TableView
+                nodeType={nodeType}
+                nodes={nodes}
+                options={options}
+                formatter={this.formatter}
+                timeRange={timeRange}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      }
+      return (
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem grow={false}>
+            <div>
+              <EuiButtonEmpty size="s" onClick={this.handleViewChange('table')} role="link">
+                Switch to Table View
+              </EuiButtonEmpty>
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem>{this.renderWaffle()}</EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    private handleViewChange = (view: string) => () => this.props.onViewChange(view);
+
+    private renderWaffle = () => {
+      const { nodes, timeRange } = this.props;
       const { metric } = this.props.options;
       const metricFormatter = get(
         METRIC_FORMATTERS,
         metric.type,
         METRIC_FORMATTERS[InfraMetricType.count]
       );
+      const map = nodesToWaffleMap(nodes);
       const bounds = (metricFormatter && metricFormatter.bounds) || calculateBoundsFromMap(map);
       return (
         <AutoSizer content>
@@ -180,7 +230,7 @@ export const Waffle = injectI18n(
           }}
         </AutoSizer>
       );
-    }
+    };
 
     // TODO: Change this to a real implimentation using the tickFormatter from the prototype as an example.
     private formatter = (val: string | number) => {

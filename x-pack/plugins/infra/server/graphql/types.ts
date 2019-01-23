@@ -212,13 +212,17 @@ export interface InfraNode {
 export interface InfraNodePath {
   value: string;
 
-  label: string;
+  label?: string | null;
 }
 
 export interface InfraNodeMetric {
   name: InfraMetricType;
 
   value: number;
+
+  avg: number;
+
+  max: number;
 }
 
 export interface InfraMetricData {
@@ -1049,7 +1053,7 @@ export namespace InfraNodePathResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = InfraNodePath> {
     value?: ValueResolver<string, TypeParent, Context>;
 
-    label?: DisplayNameResolver<string, TypeParent, Context>;
+    label?: LabelResolver<string | null, TypeParent, Context>;
   }
 
   export type ValueResolver<R = string, Parent = InfraNodePath, Context = InfraContext> = Resolver<
@@ -1057,8 +1061,8 @@ export namespace InfraNodePathResolvers {
     Parent,
     Context
   >;
-  export type DisplayNameResolver<
-    R = string,
+  export type LabelResolver<
+    R = string | null,
     Parent = InfraNodePath,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
@@ -1069,6 +1073,10 @@ export namespace InfraNodeMetricResolvers {
     name?: NameResolver<InfraMetricType, TypeParent, Context>;
 
     value?: ValueResolver<number, TypeParent, Context>;
+
+    avg?: AvgResolver<number, TypeParent, Context>;
+
+    max?: MaxResolver<number, TypeParent, Context>;
   }
 
   export type NameResolver<
@@ -1081,6 +1089,16 @@ export namespace InfraNodeMetricResolvers {
     Parent = InfraNodeMetric,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
+  export type AvgResolver<R = number, Parent = InfraNodeMetric, Context = InfraContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type MaxResolver<R = number, Parent = InfraNodeMetric, Context = InfraContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
 }
 
 export namespace InfraMetricDataResolvers {

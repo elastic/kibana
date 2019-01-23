@@ -23,10 +23,12 @@ const selectOptionsUrlState = createSelector(
   waffleOptionsSelectors.selectMetric,
   waffleOptionsSelectors.selectGroupBy,
   waffleOptionsSelectors.selectNodeType,
-  (metric, groupBy, nodeType) => ({
+  waffleOptionsSelectors.selectView,
+  (metric, groupBy, nodeType, view) => ({
     metric,
     groupBy,
     nodeType,
+    view,
   })
 );
 
@@ -35,12 +37,14 @@ export const withWaffleOptions = connect(
     metric: waffleOptionsSelectors.selectMetric(state),
     groupBy: waffleOptionsSelectors.selectGroupBy(state),
     nodeType: waffleOptionsSelectors.selectNodeType(state),
+    view: waffleOptionsSelectors.selectView(state),
     urlState: selectOptionsUrlState(state),
   }),
   bindPlainActionCreators({
     changeMetric: waffleOptionsActions.changeMetric,
     changeGroupBy: waffleOptionsActions.changeGroupBy,
     changeNodeType: waffleOptionsActions.changeNodeType,
+    changeView: waffleOptionsActions.changeView,
   })
 );
 
@@ -54,11 +58,12 @@ interface WaffleOptionsUrlState {
   metric?: ReturnType<typeof waffleOptionsSelectors.selectMetric>;
   groupBy?: ReturnType<typeof waffleOptionsSelectors.selectGroupBy>;
   nodeType?: ReturnType<typeof waffleOptionsSelectors.selectNodeType>;
+  view?: ReturnType<typeof waffleOptionsSelectors.selectView>;
 }
 
 export const WithWaffleOptionsUrlState = () => (
   <WithWaffleOptions>
-    {({ changeMetric, urlState, changeGroupBy, changeNodeType }) => (
+    {({ changeMetric, urlState, changeGroupBy, changeNodeType, changeView }) => (
       <UrlStateContainer
         urlState={urlState}
         urlStateKey="waffleOptions"
@@ -73,6 +78,9 @@ export const WithWaffleOptionsUrlState = () => (
           if (newUrlState && newUrlState.nodeType) {
             changeNodeType(newUrlState.nodeType);
           }
+          if (newUrlState && newUrlState.view) {
+            changeView(newUrlState.view);
+          }
         }}
         onInitialize={initialUrlState => {
           if (initialUrlState && initialUrlState.metric) {
@@ -83,6 +91,9 @@ export const WithWaffleOptionsUrlState = () => (
           }
           if (initialUrlState && initialUrlState.nodeType) {
             changeNodeType(initialUrlState.nodeType);
+          }
+          if (initialUrlState && initialUrlState.view) {
+            changeView(initialUrlState.view);
           }
         }}
       />
@@ -96,6 +107,7 @@ const mapToUrlState = (value: any): WaffleOptionsUrlState | undefined =>
         metric: mapToMetricUrlState(value.metric),
         groupBy: mapToGroupByUrlState(value.groupBy),
         nodeType: mapToNodeTypeUrlState(value.nodeType),
+        view: mapToViewUrlState(value.view),
       }
     : undefined;
 
@@ -117,4 +129,8 @@ const mapToGroupByUrlState = (subject: any) => {
 
 const mapToNodeTypeUrlState = (subject: any) => {
   return subject && InfraNodeType[subject] ? subject : undefined;
+};
+
+const mapToViewUrlState = (subject: any) => {
+  return subject && ['map', 'table'].includes(subject) ? subject : undefined;
 };

@@ -9,3 +9,4 @@ import { WaffleOptionsState } from './reducer';
 export const selectMetric = (state: WaffleOptionsState) => state.metric;
 export const selectGroupBy = (state: WaffleOptionsState) => state.groupBy;
 export const selectNodeType = (state: WaffleOptionsState) => state.nodeType;
+export const selectView = (state: WaffleOptionsState) => state.view;

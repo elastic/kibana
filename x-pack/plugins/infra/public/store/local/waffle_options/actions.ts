@@ -5,7 +5,6 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-
 import { InfraMetricInput, InfraNodeType, InfraPathInput } from '../../../graphql/types';
 
 const actionCreator = actionCreatorFactory('x-pack/infra/local/waffle_options');
@@ -13,3 +12,4 @@ const actionCreator = actionCreatorFactory('x-pack/infra/local/waffle_options');
 export const changeMetric = actionCreator<InfraMetricInput>('CHANGE_METRIC');
 export const changeGroupBy = actionCreator<InfraPathInput[]>('CHANGE_GROUP_BY');
 export const changeNodeType = actionCreator<InfraNodeType>('CHANGE_NODE_TYPE');
+export const changeView = actionCreator<string>('CHANGE_VIEW');
