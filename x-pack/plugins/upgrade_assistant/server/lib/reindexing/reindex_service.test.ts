@@ -285,8 +285,11 @@ describe('reindexService', () => {
         actions.isMlIndex.mockReturnValueOnce(true);
         actions.incrementMlReindexes.mockResolvedValueOnce();
         actions.runWhileMlLocked.mockImplementationOnce(async (f: any) => f());
-        // Mock call to /_ml/set_upgrade_mode?enabled=true
-        callCluster.mockResolvedValueOnce({ acknowledged: true });
+        callCluster
+          // Mock call to /_nodes for version check
+          .mockResolvedValueOnce({ nodes: { nodeX: { version: '6.7.0-alpha' } } })
+          // Mock call to /_ml/set_upgrade_mode?enabled=true
+          .mockResolvedValueOnce({ acknowledged: true });
 
         const updatedOp = await service.processNextStep(mlReindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.mlUpgradeModeSet);
@@ -331,14 +334,38 @@ describe('reindexService', () => {
         actions.isMlIndex.mockReturnValueOnce(true);
         actions.incrementMlReindexes.mockResolvedValueOnce();
         actions.runWhileMlLocked.mockImplementationOnce(async (f: any) => f());
-        // Mock call to /_ml/set_upgrade_mode?enabled=true
-        callCluster.mockResolvedValueOnce({ acknowledged: false });
+        callCluster
+          // Mock call to /_nodes for version check
+          .mockResolvedValueOnce({ nodes: { nodeX: { version: '6.7.0' } } })
+          // Mock call to /_ml/set_upgrade_mode?enabled=true
+          .mockResolvedValueOnce({ acknowledged: false });
 
         const updatedOp = await service.processNextStep(mlReindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.created);
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
         expect(updatedOp.attributes.errorMessage!.includes('Could not stop ML jobs')).toBeTruthy();
         expect(callCluster).toHaveBeenCalledWith('transport.request', {
+          path: '/_ml/set_upgrade_mode?enabled=true',
+          method: 'POST',
+        });
+      });
+
+      it('fails if not all nodes have been upgraded to 6.7.0', async () => {
+        actions.isMlIndex.mockReturnValueOnce(true);
+        actions.incrementMlReindexes.mockResolvedValueOnce();
+        actions.runWhileMlLocked.mockImplementationOnce(async (f: any) => f());
+        callCluster
+          // Mock call to /_nodes for version check
+          .mockResolvedValueOnce({ nodes: { nodeX: { version: '6.6.0' } } });
+
+        const updatedOp = await service.processNextStep(mlReindexOp);
+        expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.created);
+        expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
+        expect(
+          updatedOp.attributes.errorMessage!.includes('Some nodes are not on minimum version')
+        ).toBeTruthy();
+        // Should not have called ML endpoint at all
+        expect(callCluster).not.toHaveBeenCalledWith('transport.request', {
           path: '/_ml/set_upgrade_mode?enabled=true',
           method: 'POST',
         });

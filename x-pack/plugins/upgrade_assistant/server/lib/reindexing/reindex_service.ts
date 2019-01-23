@@ -16,6 +16,8 @@ import {
 import { getReindexWarnings, transformFlatSettings } from './index_settings';
 import { ReindexActions } from './reindex_actions';
 
+const VERSION_REGEX = new RegExp(/^([1-9]+)\.([0-9]+)\.([0-9]+)/);
+
 export interface ReindexService {
   /**
    * Checks an index's settings and mappings to flag potential issues during reindex.
@@ -69,6 +71,29 @@ export const reindexServiceFactory = (
 ): ReindexService => {
   // ------ Functions used to process the state machine
 
+  const validateNodesMinimumVersion = async (minMajor: number, minMinor: number) => {
+    const nodesResponse = await callCluster('transport.request', {
+      path: '/_nodes',
+      method: 'GET',
+    });
+
+    const outDatedNodes = Object.values(nodesResponse.nodes).filter((node: any) => {
+      const matches = node.version.match(VERSION_REGEX);
+      const major = parseInt(matches[1], 10);
+      const minor = parseInt(matches[2], 10);
+
+      // All ES nodes must be >= 6.7.0 to pause ML jobs
+      return !(major > minMajor || (major === minMajor && minor >= minMinor));
+    });
+
+    if (outDatedNodes.length > 0) {
+      const nodeList = JSON.stringify(outDatedNodes.map((n: any) => n.name));
+      throw new Error(
+        `Some nodes are not on minimum version (${minMajor}.${minMinor}.0)  required: ${nodeList}`
+      );
+    }
+  };
+
   /**
    * If the index is a ML index that will cause jobs to fail when set to readonly,
    * turn on 'upgrade mode' to pause all ML jobs.
@@ -83,6 +108,8 @@ export const reindexServiceFactory = (
 
     await actions.incrementMlReindexes();
     await actions.runWhileMlLocked(async mlDoc => {
+      await validateNodesMinimumVersion(6, 7);
+
       const res = await callCluster('transport.request', {
         path: '/_ml/set_upgrade_mode?enabled=true',
         method: 'POST',
