@@ -23,7 +23,7 @@ describe('RemoteClusterForm', () => {
   });
 
   describe('validation', () => {
-    it('renders invalid state and a global form error when the user tries to submit an invalid form', () => {
+    test('renders invalid state and a global form error when the user tries to submit an invalid form', () => {
       const component = mountWithIntl(
         <RemoteClusterForm save={() => {}}/>
       );

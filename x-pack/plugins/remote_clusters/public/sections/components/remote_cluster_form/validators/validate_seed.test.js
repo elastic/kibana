@@ -7,17 +7,17 @@
 import { validateSeed } from './validate_seed';
 
 describe('validateSeeds', () => {
-  it(`rejects invalid seeds and invalid ports`, () => {
+  test(`rejects invalid seeds and invalid ports`, () => {
     const errorsCount = validateSeed('&').length;
     expect(errorsCount).toBe(2);
   });
 
-  it(`accepts no seed`, () => {
+  test(`accepts no seed`, () => {
     const errorsCount = validateSeed('').length;
     expect(errorsCount).toBe(0);
   });
 
-  it(`accepts a valid seed with a valid port`, () => {
+  test(`accepts a valid seed with a valid port`, () => {
     const errorsCount = validateSeed('seed:10').length;
     expect(errorsCount).toBe(0);
   });

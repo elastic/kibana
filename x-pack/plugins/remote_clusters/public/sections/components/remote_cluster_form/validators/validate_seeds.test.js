@@ -7,15 +7,15 @@
 import { validateSeeds } from './validate_seeds';
 
 describe('validateSeeds', () => {
-  it(`rejects empty seeds when there's no input`, () => {
+  test(`rejects empty seeds when there's no input`, () => {
     expect(validateSeeds([], '')).toMatchSnapshot();
   });
 
-  it(`accepts empty seeds when there's input`, () => {
+  test(`accepts empty seeds when there's input`, () => {
     expect(validateSeeds([], 'input')).toBe(undefined);
   });
 
-  it(`accepts existing seeds`, () => {
+  test(`accepts existing seeds`, () => {
     expect(validateSeeds(['seed'])).toBe(undefined);
   });
 });
