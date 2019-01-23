@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// Note: this logic is duplicated in tutorials/apm/envs/on_prem
 export async function getServerStatus({ setup }) {
   const { client, config } = setup;
 

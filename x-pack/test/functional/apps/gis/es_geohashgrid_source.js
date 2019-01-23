@@ -6,18 +6,73 @@
 
 import expect from 'expect.js';
 
-export default function ({ getPageObjects }) {
+export default function ({ getPageObjects, getService }) {
+
   const PageObjects = getPageObjects(['gis']);
+  const queryBar = getService('queryBar');
+  const inspector = getService('inspector');
   const DOC_COUNT_PROP_NAME = 'doc_count';
 
   describe('layer geohashgrid aggregation source', () => {
 
+    const EXPECTED_NUMBER_FEATURES = 6;
+    const DATA_CENTER_LON = -98;
+    const DATA_CENTER_LAT = 38;
+
     async function getRequestTimestamp() {
       await PageObjects.gis.openInspectorRequestsView();
-      const requestStats = await PageObjects.gis.getInspectorTableData();
+      const requestStats = await inspector.getTableData();
       const requestTimestamp =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Request timestamp');
-      await PageObjects.gis.closeInspector();
+      await inspector.close();
       return requestTimestamp;
+    }
+
+    function makeRequestTestsForGeoPrecision(LAYER_ID) {
+
+      describe('geoprecision - requests', async () => {
+        let beforeTimestamp;
+        beforeEach(async () => {
+          await PageObjects.gis.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1);
+          beforeTimestamp = await getRequestTimestamp();
+        });
+
+        it('should not rerequest when zoom changes do not cause geohash precision to change', async () => {
+          await PageObjects.gis.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 2);
+          const afterTimestamp = await getRequestTimestamp();
+          expect(afterTimestamp).to.equal(beforeTimestamp);
+        });
+
+        it('should rerequest when zoom changes causes the geohash precision to change', async () => {
+          await PageObjects.gis.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 4);
+          const afterTimestamp = await getRequestTimestamp();
+          expect(afterTimestamp).not.to.equal(beforeTimestamp);
+        });
+      });
+
+      describe('geoprecision - data', async ()=> {
+
+        beforeEach(async () => {
+          await PageObjects.gis.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1);
+        });
+
+        it ('should not return any data when the extent does not cover the data bounds', async () => {
+          await PageObjects.gis.setView(64, 179, 5);
+          const mapboxStyle = await PageObjects.gis.getMapboxStyle();
+          expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(0);
+        });
+
+        it ('should request the data when the map covers the databounds', async () => {
+          const mapboxStyle = await PageObjects.gis.getMapboxStyle();
+          expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(EXPECTED_NUMBER_FEATURES);
+        });
+
+        it ('should request only partial data when the map only covers part of the databounds', async () => {
+          //todo this verifies the extent-filtering behavior (not really the correct application of geohash-precision), and should ideally be moved to its own section
+          await PageObjects.gis.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 6);
+          const mapboxStyle = await PageObjects.gis.getMapboxStyle();
+          expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(2);
+        });
+      });
     }
 
     describe('heatmap', () => {
@@ -25,12 +80,7 @@ export default function ({ getPageObjects }) {
         await PageObjects.gis.loadSavedMap('geohashgrid heatmap example');
       });
 
-      after(async () => {
-        await PageObjects.gis.closeInspector();
-      });
-
       const LAYER_ID = '3xlvm';
-      const EXPECTED_NUMBER_FEATURES = 6;
       const HEATMAP_PROP_NAME = '__kbn_heatmap_weight__';
 
       it('should re-fetch geohashgrid aggregation with refresh timer', async () => {
@@ -51,14 +101,37 @@ export default function ({ getPageObjects }) {
         });
       });
 
+      makeRequestTestsForGeoPrecision(LAYER_ID);
+
+      describe('query bar', () => {
+        before(async () => {
+          await queryBar.setQuery('machine.os.raw : "win 8"');
+          await queryBar.submitQuery();
+          await PageObjects.gis.setView(0, 0, 0);
+        });
+
+        after(async () => {
+          await queryBar.setQuery('');
+          await queryBar.submitQuery();
+        });
+
+        it('should apply query to geohashgrid aggregation request', async () => {
+          await PageObjects.gis.openInspectorRequestsView();
+          const requestStats = await inspector.getTableData();
+          const hits = PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits (total)');
+          await inspector.close();
+          expect(hits).to.equal('1');
+        });
+      });
+
       describe('inspector', () => {
         afterEach(async () => {
-          await PageObjects.gis.closeInspector();
+          await inspector.close();
         });
 
         it('should contain geohashgrid aggregation elasticsearch request', async () => {
           await PageObjects.gis.openInspectorRequestsView();
-          const requestStats = await PageObjects.gis.getInspectorTableData();
+          const requestStats = await inspector.getTableData();
           const totalHits =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits (total)');
           expect(totalHits).to.equal('6');
           const hits =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits');
@@ -80,12 +153,8 @@ export default function ({ getPageObjects }) {
         await PageObjects.gis.loadSavedMap('geohashgrid vector grid example');
       });
 
-      after(async () => {
-        await PageObjects.gis.closeInspector();
-      });
-
       const LAYER_ID = 'g1xkv';
-      const EXPECTED_NUMBER_FEATURES = 6;
+
       const MAX_OF_BYTES_PROP_NAME = 'max_of_bytes';
 
       it('should re-fetch geohashgrid aggregation with refresh timer', async () => {
@@ -106,14 +175,38 @@ export default function ({ getPageObjects }) {
         });
       });
 
+      makeRequestTestsForGeoPrecision(LAYER_ID);
+
+
+      describe('query bar', () => {
+        before(async () => {
+          await PageObjects.gis.setView(0, 0, 0);
+          await queryBar.setQuery('machine.os.raw : "win 8"');
+          await queryBar.submitQuery();
+        });
+
+        after(async () => {
+          await queryBar.setQuery('');
+          await queryBar.submitQuery();
+        });
+
+        it('should apply query to geohashgrid aggregation request', async () => {
+          await PageObjects.gis.openInspectorRequestsView();
+          const requestStats = await inspector.getTableData();
+          const hits = PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits (total)');
+          await inspector.close();
+          expect(hits).to.equal('1');
+        });
+      });
+
       describe('inspector', () => {
         afterEach(async () => {
-          await PageObjects.gis.closeInspector();
+          await inspector.close();
         });
 
         it('should contain geohashgrid aggregation elasticsearch request', async () => {
           await PageObjects.gis.openInspectorRequestsView();
-          const requestStats = await PageObjects.gis.getInspectorTableData();
+          const requestStats = await inspector.getTableData();
           const totalHits =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits (total)');
           expect(totalHits).to.equal('6');
           const hits =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits');
@@ -128,6 +221,7 @@ export default function ({ getPageObjects }) {
           expect(noRequests).to.equal(true);
         });
       });
+
     });
 
   });

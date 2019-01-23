@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import React, { Fragment } from 'react';
+import React from 'react';
 import uuid from 'uuid/v4';
 
 import { VectorSource } from '../vector_source';
@@ -24,15 +24,10 @@ import { AggConfigs } from 'ui/vis/agg_configs';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { convertToGeoJson } from './convert_to_geojson';
 import { ESSourceDetails } from '../../../components/es_source_details';
-import { ZOOM_TO_PRECISION } from '../../../utils/zoom_to_precision';
 import { VectorStyle } from '../../styles/vector_style';
 import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
-import {
-  EuiText,
-  EuiSpacer
-} from '@elastic/eui';
 
 const COUNT_PROP_LABEL = 'Count';
 const COUNT_PROP_NAME = 'doc_count';
@@ -62,7 +57,9 @@ const aggSchemas = new Schemas([
 export class ESGeohashGridSource extends VectorSource {
 
   static type = 'ES_GEOHASH_GRID';
-  static typeDisplayName = 'Elasticsearch geohash aggregation';
+  static title = 'Elasticsearch geohash aggregation';
+  static description = 'Group geospatial data in grids with metrics for each gridded cell';
+  static icon = 'logoElasticsearch';
 
   static createDescriptor({ indexPatternId, geoField, requestType }) {
     return {
@@ -82,21 +79,6 @@ export class ESGeohashGridSource extends VectorSource {
     };
 
     return (<CreateSourceEditor onSelect={onSelect}/>);
-  }
-
-  static renderDropdownDisplayOption() {
-    return (
-      <Fragment>
-        <strong>{ESGeohashGridSource.typeDisplayName}</strong>
-        <EuiSpacer size="xs" />
-        <EuiText size="s" color="subdued">
-          <p className="euiTextColor--subdued">
-            Group documents into grid cells and display metrics for each cell.
-            Great for displaying large datasets.
-          </p>
-        </EuiText>
-      </Fragment>
-    );
   }
 
   renderSourceSettingsEditor({ onChange }) {
@@ -125,14 +107,39 @@ export class ESGeohashGridSource extends VectorSource {
     inspectorAdapters.requests.resetRequest(this._descriptor.id);
   }
 
+  isFieldAware() {
+    return true;
+  }
+
+  isRefreshTimerAware() {
+    return true;
+  }
+
+  isQueryAware() {
+    return true;
+  }
+
+  getFieldNames() {
+    return this.getMetricFields().map(({ propertyKey }) => {
+      return propertyKey;
+    });
+  }
+
+  getIndexPatternIds() {
+    return  [this._descriptor.indexPatternId];
+  }
+
+  isGeohashPrecisionAware() {
+    return true;
+  }
+
   async getGeoJsonWithMeta({ layerName }, searchFilters) {
-    let targetPrecision = ZOOM_TO_PRECISION[Math.round(searchFilters.zoom)];
-    targetPrecision += 0;//should have refinement param, similar to heatmap style
-    const featureCollection = await this.getGeoJsonPointsWithTotalCount({
-      precision: targetPrecision,
+    const featureCollection = await this.getGeoJsonPoints({
+      geohashPrecision: searchFilters.geohashPrecision,
       extent: searchFilters.buffer,
       timeFilters: searchFilters.timeFilters,
       layerName,
+      query: searchFilters.query,
     });
 
     if (this._descriptor.requestType === RENDER_AS.GRID) {
@@ -145,23 +152,9 @@ export class ESGeohashGridSource extends VectorSource {
     return {
       data: featureCollection,
       meta: {
-        areResultsTrimmed: true
+        areResultsTrimmed: false
       }
     };
-  }
-
-  isFieldAware() {
-    return true;
-  }
-
-  isRefreshTimerAware() {
-    return true;
-  }
-
-  getFieldNames() {
-    return this.getMetricFields().map(({ propertyKey }) => {
-      return propertyKey;
-    });
   }
 
   async getNumberFields() {
@@ -170,7 +163,7 @@ export class ESGeohashGridSource extends VectorSource {
     });
   }
 
-  async getGeoJsonPointsWithTotalCount({ precision, extent, timeFilters, layerName }) {
+  async getGeoJsonPoints({ geohashPrecision, extent, timeFilters, layerName, query }) {
 
     let indexPattern;
     try {
@@ -184,7 +177,7 @@ export class ESGeohashGridSource extends VectorSource {
       throw new Error(`Index pattern ${indexPattern.title} no longer contains the geo field ${this._descriptor.geoField}`);
     }
 
-    const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(precision), aggSchemas.all);
+    const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(geohashPrecision), aggSchemas.all);
 
     let resp;
     try {
@@ -198,6 +191,7 @@ export class ESGeohashGridSource extends VectorSource {
         filters.push(timeService.createFilter(indexPattern, timeFilters));
         return filters;
       });
+      searchSource.setField('query', query);
 
       resp = await fetchSearchSourceAndRecordWithInspector({
         searchSource,

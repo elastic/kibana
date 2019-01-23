@@ -4,73 +4,60 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Component, Fragment } from 'react';
 import { ALL_SOURCES } from '../../shared/layers/sources/all_sources';
 import {
-  EuiSpacer,
   EuiButton,
-  EuiHorizontalRule,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
-  EuiForm,
-  EuiFormRow,
-  EuiSuperSelect,
   EuiPanel,
+  EuiSpacer,
+  EuiCard,
+  EuiIcon,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
 } from '@elastic/eui';
 
-export class AddLayerPanel extends React.Component {
+export class AddLayerPanel extends Component {
 
   constructor() {
     super();
 
     this.state = {
-      label: '',
-      sourceType: '',
-      minZoom: 0,
-      maxZoom: 24,
-      alphaValue: 1
+      sourceType: null,
     };
-  }
-
-  componentDidUpdate() {
-    if (this.layer && this.state.alphaValue === null) {
-      const defaultAlphaValue = this.layer._descriptor.type === 'TILE' ? 1 : 1;
-      if (this.state.alphaValue !== defaultAlphaValue) {
-        this.setState({
-          alphaValue: defaultAlphaValue
-        });
-      }
-    }
   }
 
   _previewLayer = (source) => {
     this.layer = source.createDefaultLayer({
       temporary: true,
-      label: this.state.label,
-      minZoom: this.state.minZoom,
-      maxZoom: this.state.maxZoom,
     });
     this.props.previewLayer(this.layer);
   };
 
-  _onSourceTypeChange = (sourceType) => {
-    this.setState({
-      sourceType,
-    });
+  _clearSource = () => {
+    this.setState({ sourceType: null });
 
     if (this.layer) {
       this.props.removeLayer(this.layer.getId());
     }
   }
 
+  _onSourceTypeChange = (sourceType) => {
+    this.setState({ sourceType });
+  }
+
   _renderNextBtn() {
+    if (!this.state.sourceType) {
+      return null;
+    }
+
     const { layerLoading, temporaryLayers, nextAction } = this.props;
-    const addToMapBtnText = 'Next';
     return (
       <EuiButton
-        style={{ width: '9rem' }}
         disabled={!temporaryLayers || layerLoading}
         isLoading={layerLoading}
         iconSide="right"
@@ -82,42 +69,44 @@ export class AddLayerPanel extends React.Component {
         }}
         fill
       >
-        {addToMapBtnText}
+        Add layer
       </EuiButton>
     );
   }
 
-  _renderSourceSelect() {
-
-
-    const sourceOptions = ALL_SOURCES.map(Source => {
-      return {
-        value: Source.type,
-        inputDisplay: Source.typeDisplayName,
-        dropdownDisplay: Source.renderDropdownDisplayOption()
-      };
+  _renderSourceCards() {
+    return ALL_SOURCES.map(Source => {
+      const icon = Source.icon
+        ? <EuiIcon type={Source.icon} size="l" />
+        : null;
+      return (
+        <Fragment key={Source.type}>
+          <EuiSpacer size="s" />
+          <EuiCard
+            className="gisLayerAddpanel__card"
+            title={Source.title}
+            icon={icon}
+            onClick={() => this._onSourceTypeChange(Source.type)}
+            description={Source.description}
+            layout="horizontal"
+          />
+        </Fragment>
+      );
     });
+  }
 
-
+  _renderSourceSelect() {
     return (
-      <EuiFormRow label="Data source">
-        <EuiSuperSelect
-          itemClassName="sourceSelectItem"
-          options={sourceOptions}
-          valueOfSelected={this.state.sourceType}
-          onChange={this._onSourceTypeChange}
-          itemLayoutAlign="top"
-          hasDividers
-        />
-      </EuiFormRow>
+      <Fragment>
+        <EuiTitle size="xs">
+          <h2>Choose data source</h2>
+        </EuiTitle>
+        {this._renderSourceCards()}
+      </Fragment>
     );
   }
 
   _renderSourceEditor() {
-    if (!this.state.sourceType) {
-      return;
-    }
-
     const editorProperties = {
       onPreviewSource: this._previewLayer,
       dataSourcesMeta: this.props.dataSourcesMeta
@@ -130,16 +119,30 @@ export class AddLayerPanel extends React.Component {
       throw new Error(`Unexepected source type: ${this.state.sourceType}`);
     }
 
-    return Source.renderEditor(editorProperties);
+    return (
+      <Fragment>
+        <EuiButtonEmpty
+          size="xs"
+          flush="left"
+          onClick={this._clearSource}
+          iconType="arrowLeft"
+        >
+          Change data source
+        </EuiButtonEmpty>
+        <EuiSpacer size="s" />
+        <EuiPanel>
+          {Source.renderEditor(editorProperties)}
+        </EuiPanel>
+      </Fragment>
+    );
   }
 
   _renderAddLayerForm() {
-    return (
-      <EuiForm>
-        {this._renderSourceSelect()}
-        {this._renderSourceEditor()}
-      </EuiForm>
-    );
+    if (!this.state.sourceType) {
+      return this._renderSourceSelect();
+    }
+
+    return this._renderSourceEditor();
   }
 
   _renderFlyout() {
@@ -148,23 +151,17 @@ export class AddLayerPanel extends React.Component {
         direction="column"
         gutterSize="none"
       >
-        <EuiFlexItem grow={false} className="gisViewPanel__header">
+        <EuiFlyoutHeader hasBorder className="gisLayerPanel__header">
           <EuiTitle size="s">
-            <h1>Add layer</h1>
+            <h2>Add layer</h2>
           </EuiTitle>
-          <EuiSpacer size="m"/>
-          <EuiHorizontalRule margin="none"/>
-        </EuiFlexItem>
+        </EuiFlyoutHeader>
 
-        <EuiFlexItem className="gisViewPanel__body">
-          <EuiPanel>
-            {this._renderAddLayerForm()}
-          </EuiPanel>
-        </EuiFlexItem>
+        <EuiFlyoutBody className="gisLayerPanel__body">
+          {this._renderAddLayerForm()}
+        </EuiFlyoutBody>
 
-        <EuiFlexItem grow={false} className="gisViewPanel__footer">
-          <EuiHorizontalRule margin="none"/>
-          <EuiSpacer size="m"/>
+        <EuiFlyoutFooter className="gisLayerPanel__footer">
           <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
@@ -178,7 +175,7 @@ export class AddLayerPanel extends React.Component {
               {this._renderNextBtn()}
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiFlexItem>
+        </EuiFlyoutFooter>
       </EuiFlexGroup>
     );
   }

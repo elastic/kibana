@@ -11,6 +11,8 @@ import {
   EuiSpacer,
   EuiTitle
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { Location } from 'history';
 import React from 'react';
 // @ts-ignore
 import Distribution from 'x-pack/plugins/apm/public/components/app/ErrorGroupDetails/Distribution';
@@ -25,11 +27,10 @@ import { MemoryUsageChart } from './MemoryUsageChart';
 
 interface ServiceMetricsProps {
   urlParams: IUrlParams;
+  location: Location;
 }
 
-export const ServiceMetrics: React.SFC<ServiceMetricsProps> = ({
-  urlParams
-}) => {
+export function ServiceMetrics({ urlParams, location }: ServiceMetricsProps) {
   return (
     <React.Fragment>
       <TransactionOverviewChartsRequestForAllTypes
@@ -54,7 +55,14 @@ export const ServiceMetrics: React.SFC<ServiceMetricsProps> = ({
                 distribution={data}
                 title={
                   <EuiTitle size="s">
-                    <span>Error occurrences</span>
+                    <span>
+                      {i18n.translate(
+                        'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
+                        {
+                          defaultMessage: 'Error occurrences'
+                        }
+                      )}
+                    </span>
                   </EuiTitle>
                 }
               />
@@ -90,6 +98,8 @@ export const ServiceMetrics: React.SFC<ServiceMetricsProps> = ({
           );
         }}
       />
+
+      <EuiSpacer size="xxl" />
     </React.Fragment>
   );
-};
+}

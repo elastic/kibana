@@ -6,6 +6,7 @@
 
 import { PROCESSOR_NAME } from '../../../common/constants';
 
+// Note: this logic is duplicated in tutorials/apm/envs/on_prem
 export async function getAgentStatus({ setup }) {
   const { client, config } = setup;
 
@@ -18,11 +19,12 @@ export async function getAgentStatus({ setup }) {
       size: 0,
       query: {
         bool: {
-          filter: {
-            exists: {
-              field: PROCESSOR_NAME
-            }
-          }
+          should: [
+            { term: { [PROCESSOR_NAME]: 'error' } },
+            { term: { [PROCESSOR_NAME]: 'transaction' } },
+            { term: { [PROCESSOR_NAME]: 'metric' } },
+            { term: { [PROCESSOR_NAME]: 'sourcemap' } }
+          ]
         }
       }
     }

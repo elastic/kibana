@@ -2,6 +2,7 @@
 
 exports[`explorerChartsContainerService call anomalyChangeListener with actual series config 1`] = `
 Object {
+  "chartsPerRow": 1,
   "seriesToPlot": Array [],
   "timeFieldName": "timestamp",
   "tooManyBuckets": false,

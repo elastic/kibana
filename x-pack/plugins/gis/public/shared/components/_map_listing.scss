@@ -1,0 +1,5 @@
+// Makes sure the listing page is full height with proper background
+map-listing, {
+  min-height: 100vh;
+  background-color: $euiColorLightestShade;
+}

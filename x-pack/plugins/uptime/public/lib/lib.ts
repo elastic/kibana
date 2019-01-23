@@ -7,28 +7,17 @@
 import { NormalizedCacheObject } from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
 import React from 'react';
-import { Breadcrumb } from 'ui/chrome';
-import { UptimePersistedState } from '../uptime_app';
+import { UMBreadcrumb } from '../breadcrumbs';
+import { UptimeAppProps } from '../uptime_app';
 import { CreateGraphQLClient } from './adapters/framework/framework_adapter_types';
 
 export interface UMFrontendLibs {
   framework: UMFrameworkAdapter;
 }
 
-export type UMUpdateBreadcrumbs = (breadcrumbs: Breadcrumb[]) => void;
+export type UMUpdateBreadcrumbs = (breadcrumbs: UMBreadcrumb[]) => void;
 
-export interface UptimeAppProps {
-  isUsingK7Design: boolean;
-  updateBreadcrumbs: UMUpdateBreadcrumbs;
-  kibanaBreadcrumbs: Breadcrumb[];
-  routerBasename: string;
-  graphQLClient: ApolloClient<NormalizedCacheObject>;
-  initialDateRangeStart?: number;
-  initialDateRangeEnd?: number;
-  initialAutorefreshInterval?: number;
-  initialAutorefreshEnabled?: boolean;
-  persistState(state: UptimePersistedState): void;
-}
+export type UMGraphQLClient = ApolloClient<NormalizedCacheObject>; // | OtherClientType
 
 export type BootstrapUptimeApp = (props: UptimeAppProps) => React.ReactElement<any>;
 
