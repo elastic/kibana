@@ -275,7 +275,7 @@ uiModules.get('apps/management')
 
         indexPatterns.delete($scope.indexPattern)
           .then(function () {
-            $location.url('/management/kibana/index');
+            $location.url('/management/kibana/index_patterns');
           })
           .catch(fatalError);
       }
