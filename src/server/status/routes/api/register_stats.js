@@ -35,7 +35,6 @@ export function registerStatsApi(kbnServer, server, config) {
   const wrapAuth = wrapAuthConfig(config.get('status.allowAnonymous'));
   const { collectorSet } = server.usage;
 
-
   const getClusterUuid = async callCluster => {
     const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid', });
     return uuid;
@@ -132,7 +131,6 @@ export function registerStatsApi(kbnServer, server, config) {
 
         return {
           ...kibanaStats,
-          locale: kibanaStats.kibana.locale,
           ...extended,
         };
       },
