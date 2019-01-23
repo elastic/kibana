@@ -64,6 +64,10 @@ export class ALayer {
     return (await this._source.getDisplayName()) || `Layer ${this._descriptor.id}`;
   }
 
+  async getAttributions() {
+    return await this._source.getAttributions();
+  }
+
   getLabel() {
     return this._descriptor.label ? this._descriptor.label : '';
   }
@@ -126,11 +130,11 @@ export class ALayer {
 
   renderSourceDetails = () => {
     return this._source.renderDetails();
-  }
+  };
 
   renderSourceSettingsEditor = ({ onChange }) => {
     return this._source.renderSourceSettingsEditor({ onChange });
-  }
+  };
 
   isLayerLoading() {
     return this._dataRequests.some(dataRequest => dataRequest.isLoading());
@@ -141,8 +145,12 @@ export class ALayer {
   }
 
   getDataLoadError() {
-    const loadErrors =  this._dataRequests.filter(dataRequest => dataRequest.hasLoadError());
-    return loadErrors.join(',');//todo
+    const loadErrors =  this._dataRequests
+      .filter(dataRequest => dataRequest.hasLoadError())
+      .map(dataRequest => {
+        return dataRequest._descriptor.dataLoadError;
+      });
+    return loadErrors.join(',');
   }
 
   toLayerDescriptor() {
@@ -183,7 +191,9 @@ export class ALayer {
       newBuffer.maxLat
     ]);
     const doesPreviousBufferContainNewBuffer = turfBooleanContains(previousBufferGeometry, newBufferGeometry);
-    return doesPreviousBufferContainNewBuffer && !_.get(meta, 'areResultsTrimmed', false)
+
+    const isTrimmed = _.get(meta, 'areResultsTrimmed', false);
+    return doesPreviousBufferContainNewBuffer && !isTrimmed
       ? NO_SOURCE_UPDATE_REQUIRED
       : SOURCE_UPDATE_REQUIRED;
   }

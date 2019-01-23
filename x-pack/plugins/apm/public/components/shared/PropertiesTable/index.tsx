@@ -5,6 +5,7 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get, indexBy, uniq } from 'lodash';
 import React from 'react';
@@ -19,7 +20,6 @@ import {
   units
 } from '../../../style/variables';
 import { getAgentFeatureDocsUrl } from '../../../utils/documentation/agents';
-import { ExternalLink } from '../../../utils/url';
 import { KeySorter, NestedKeyValueTable } from './NestedKeyValueTable';
 import { PROPERTY_CONFIG } from './propertyConfig';
 
@@ -100,12 +100,12 @@ export function AgentFeatureTipMessage({
     <TableInfo>
       <EuiIconWithSpace type="iInCircle" />
       {getAgentFeatureText(featureName)}{' '}
-      <ExternalLink href={docsUrl}>
+      <EuiLink target="_blank" rel="noopener noreferrer" href={docsUrl}>
         {i18n.translate(
           'xpack.apm.propertiesTable.agentFeature.learnMoreLinkLabel',
           { defaultMessage: 'Learn more in the documentation.' }
         )}
-      </ExternalLink>
+      </EuiLink>
     </TableInfo>
   );
 }

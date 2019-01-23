@@ -136,3 +136,105 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "index": "antimeridian_points",
+    "type": "doc",
+    "id": "1",
+    "source": {
+      "location": {
+        "lat": 0.0,
+        "lon": 179.5
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "antimeridian_points",
+    "type": "doc",
+    "id": "2",
+    "source": {
+      "location": {
+        "lat": 0.0,
+        "lon": -179.5
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "antimeridian_points",
+    "type": "doc",
+    "id": "3",
+    "source": {
+      "location": {
+        "lat": 0.0,
+        "lon": 0.0
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "antimeridian_shapes",
+    "type": "doc",
+    "id": "1",
+    "source": {
+      "location": {
+        "type" : "polygon",
+        "coordinates": [
+          [
+            [179, 5.0], [178.5, -5.0], [179.5, -5.0], [179, 5.0]
+          ]
+        ]
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "antimeridian_shapes",
+    "type": "doc",
+    "id": "2",
+    "source": {
+      "location": {
+        "type" : "polygon",
+        "coordinates": [
+          [
+            [-179, 5.0], [-178.5, -5.0], [-179.5, -5.0], [-179, 5.0]
+          ]
+        ]
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "antimeridian_shapes",
+    "type": "doc",
+    "id": "3",
+    "source": {
+      "location": {
+        "type" : "polygon",
+        "coordinates": [
+          [
+            [0, 5.0], [-0.5, -5.0], [0.5, -5.0], [0, 5.0]
+          ]
+        ]
+      }
+    }
+  }
+}
