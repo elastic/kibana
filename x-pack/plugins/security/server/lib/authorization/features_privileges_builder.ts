@@ -78,13 +78,12 @@ export class FeaturesPrivilegesBuilder {
   public getUICatalogueReadActions(features: Feature[]): string[] {
     const allCatalogueReadActions = flatten(
       features.map(feature => {
-        const { privileges = {}, catalogue: featureCatalogueEntries } = feature;
+        const { privileges = {} } = feature;
 
         const catalogueReadActions = Object.entries(privileges).reduce<string[]>(
           (acc, [privilegeId, privilege]) => {
             if (this.includeInBaseRead(privilegeId, privilege)) {
-              const catalogueEntries = privilege.catalogue || featureCatalogueEntries;
-              return [...acc, ...this.buildCatalogueFeaturePrivileges(catalogueEntries)];
+              return [...acc, ...this.buildCatalogueFeaturePrivileges(privilege, feature)];
             }
             return acc;
           },
@@ -101,13 +100,12 @@ export class FeaturesPrivilegesBuilder {
   public getUIManagementReadActions(features: Feature[]): string[] {
     const allManagementReadActions = flatten(
       features.map(feature => {
-        const { privileges = {}, management: featureManagementSections } = feature;
+        const { privileges = {} } = feature;
 
         const managementReadActions = Object.entries(privileges).reduce<string[]>(
           (acc, [privilegeId, privilege]) => {
             if (this.includeInBaseRead(privilegeId, privilege)) {
-              const managementSections = privilege.management || featureManagementSections;
-              return [...acc, ...this.buildManagementFeaturePrivileges(managementSections)];
+              return [...acc, ...this.buildManagementFeaturePrivileges(privilege, feature)];
             }
             return acc;
           },
@@ -145,12 +143,18 @@ export class FeaturesPrivilegesBuilder {
       ),
       ...privilegeDefinition.ui.map(ui => this.actions.ui.get(feature.id, ui)),
       ...(feature.navLinkId ? [this.actions.ui.get('navLinks', feature.navLinkId)] : []),
-      ...this.buildCatalogueFeaturePrivileges(privilegeDefinition.catalogue),
-      ...this.buildManagementFeaturePrivileges(privilegeDefinition.management),
+      // Entries on the privilege definition take priority over entries on the feature.
+      ...this.buildCatalogueFeaturePrivileges(privilegeDefinition, feature),
+      ...this.buildManagementFeaturePrivileges(privilegeDefinition, feature),
     ]);
   }
 
-  private buildCatalogueFeaturePrivileges(catalogueEntries?: string[]): string[] {
+  private buildCatalogueFeaturePrivileges(
+    privilegeDefinition: FeaturePrivilegeDefinition,
+    feature: Feature
+  ): string[] {
+    const catalogueEntries = privilegeDefinition.catalogue || feature.catalogue;
+
     if (!catalogueEntries) {
       return [];
     }
@@ -160,9 +164,12 @@ export class FeaturesPrivilegesBuilder {
     );
   }
 
-  private buildManagementFeaturePrivileges(managementSections?: {
-    [managementSectionId: string]: string[];
-  }): string[] {
+  private buildManagementFeaturePrivileges(
+    privilegeDefinition: FeaturePrivilegeDefinition,
+    feature: Feature
+  ): string[] {
+    const managementSections = privilegeDefinition.management || feature.management;
+
     if (!managementSections) {
       return [];
     }

@@ -140,6 +140,8 @@ test(`builds privileges correctly`, () => {
           'ui:bar-feature/show',
           'ui:bar-feature/showSaveButton',
           'ui:bar-feature/showCreateButton',
+          'ui:catalogue/barCatalogue',
+          'ui:management/kibana/yeppers',
         ],
         read: [
           'login:',
@@ -153,6 +155,7 @@ test(`builds privileges correctly`, () => {
           'saved_object:bar-saved-object-type/get',
           'saved_object:bar-saved-object-type/find',
           'ui:bar-feature/show',
+          'ui:catalogue/barCatalogue',
           'ui:management/kibana/yeppers',
         ],
       },
