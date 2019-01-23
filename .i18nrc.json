@@ -19,6 +19,7 @@
     "xpack.apm": "x-pack/plugins/apm",
     "xpack.beatsManagement": "x-pack/plugins/beats_management",
     "xpack.crossClusterReplication": "x-pack/plugins/cross_cluster_replication",
+    "xpack.dashboardMode": "x-pack/plugins/dashboard_mode",
     "xpack.graph": "x-pack/plugins/graph",
     "xpack.grokDebugger": "x-pack/plugins/grokdebugger",
     "xpack.idxMgmt": "x-pack/plugins/index_management",
