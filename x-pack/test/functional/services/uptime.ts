@@ -8,7 +8,6 @@ import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
 
 export const UptimeProvider = ({ getService }: KibanaFunctionalTestDefaultProviders) => {
   const testSubjects = getService('testSubjects');
-  const testStuff = 'testStuff';
 
   return {
     async assertExists() {

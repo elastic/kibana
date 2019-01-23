@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 // tslint:disable-next-line:no-default-export
