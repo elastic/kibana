@@ -34,7 +34,7 @@ export function handleKibanaStats(server, response) {
       platformReleases: [{ platformRelease, count: 1 }],
     },
     versions: [{ version, count: 1 }],
-    localization,
+    localizations: [{ localization, count: 1 }],
     plugins,
   };
 }

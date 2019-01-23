@@ -60,11 +60,16 @@ describe('get_local_stats', () => {
       great: 'googlymoogly',
       versions: [{ version: '8675309', count: 1 }]
     },
+    localization: {
+      locale: 'en',
+      labelsCount: 0,
+      integrities: {}
+    },
     kibana_stats: {
       os: {
         platform: 'rocky',
         platformRelease: 'iv',
-      }
+      },
     },
     sun: { chances: 5 },
     clouds: { chances: 95 },
@@ -91,6 +96,14 @@ describe('get_local_stats', () => {
           platformReleases: [{ platformRelease: 'iv', count: 1 }]
         },
         versions: [{ version: '8675309', count: 1 }],
+        localizations: [{
+          localization: {
+            locale: 'en',
+            labelsCount: 0,
+            integrities: {}
+          },
+          count: 1
+        }],
         plugins: {
           sun: { chances: 5 },
           clouds: { chances: 95 },
