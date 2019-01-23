@@ -306,8 +306,10 @@ class HeaderUI extends Component<Props, State> {
     }, 350);
 
     // Scrolls the menu and flyout back to top when the nav drawer collapses
-    document.getElementById('navDrawerMenu').scroll(0, 0);
-    document.getElementById('navDrawerFlyout').scroll(0, 0);
+    setTimeout(() => {
+      document.getElementById('navDrawerMenu').scrollTop = 0;
+      document.getElementById('navDrawerFlyout').scrollTop = 0;
+    }, 300);
   };
 
   private focusOut = () => {
