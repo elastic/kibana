@@ -17,19 +17,22 @@
  * under the License.
  */
 
-export const existsFilter = {
-  'meta': {
-    'index': 'logstash-*',
-    'negate': false,
-    'disabled': false,
-    'type': 'exists',
-    'key': 'machine.os',
-    'value': 'exists'
+import { FilterStateStore, PhraseFilter } from '@kbn/es-query';
+
+export const phraseFilter: PhraseFilter = {
+  meta: {
+    negate: false,
+    index: 'logstash-*',
+    type: 'phrase',
+    key: 'machine.os',
+    value: 'ios',
+    disabled: false,
+    alias: null,
+    params: {
+      query: 'ios',
+    },
   },
-  'exists': {
-    'field': 'machine.os'
+  $state: {
+    store: FilterStateStore.APP_STATE,
   },
-  '$state': {
-    'store': 'appState'
-  }
 };

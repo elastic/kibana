@@ -17,11 +17,12 @@ function getDescription(fieldName) {
 }
 
 export function getSuggestionsProvider({ indexPatterns }) {
-  const allFields = flatten(indexPatterns.map(indexPattern => indexPattern.fields));
+  const allFields = flatten(indexPatterns.map(indexPattern => {
+    return indexPattern.fields.filter(isFilterable);
+  }));
   return function getFieldSuggestions({ start, end, prefix, suffix }) {
     const search = `${prefix}${suffix}`.toLowerCase();
-    const filterableFields = allFields.filter(isFilterable);
-    const fieldNames = filterableFields.map(field => field.name);
+    const fieldNames = allFields.map(field => field.name);
     const matchingFieldNames = fieldNames.filter(name => name.toLowerCase().includes(search));
     const sortedFieldNames = sortPrefixFirst(matchingFieldNames.sort(keywordComparator), search);
     const suggestions = sortedFieldNames.map(fieldName => {

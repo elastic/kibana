@@ -35,10 +35,3 @@ export function getFromSavedObject(savedObject) {
     title: savedObject.attributes.title,
   };
 }
-
-export function getFromLegacyIndexPattern(indexPatterns) {
-  return indexPatterns.map(indexPattern => ({
-    fields: indexPattern.fields.raw,
-    title: indexPattern.title,
-  }));
-}

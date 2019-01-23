@@ -118,7 +118,7 @@ export function isFilterValid(
       if (typeof params !== 'object') {
         return false;
       }
-      return validateParams(params.from, field.type) && validateParams(params.to, field.type);
+      return validateParams(params.from, field.type) || validateParams(params.to, field.type);
     case 'exists':
       return true;
     default:
