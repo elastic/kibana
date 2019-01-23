@@ -148,7 +148,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     dateRangeEnd: string,
     filter?: string | null
   ): Promise<any> {
-    const { statusFilter, query } = this.getFilteredQueryWithoutStatus(
+    const { statusFilter, query } = this.getFilteredQueryAndStatusFilter(
       dateRangeStart,
       dateRangeEnd,
       filter
@@ -232,7 +232,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     dateRangeEnd: string,
     filters?: string | null
   ): Promise<any> {
-    const { statusFilter, query } = this.getFilteredQueryWithoutStatus(
+    const { statusFilter, query } = this.getFilteredQueryAndStatusFilter(
       dateRangeStart,
       dateRangeEnd,
       filters
@@ -476,12 +476,11 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     return errorsList;
   }
 
-  private getMonitorsListFilteredQuery(filters: string): string | undefined {
-    const obj = JSON.parse(filters);
-    const must = get(obj, 'bool.must', []);
+  private getMonitorsListFilteredQuery(filters: any): string | undefined {
+    const must = get(filters, 'bool.must', []);
     if (must && must.length) {
-      const statusFilter = obj.bool.must.filter(
-        (filterObject: any) => filterObject.match['monitor.status']
+      const statusFilter = filters.bool.must.filter(
+        (filter: any) => filter.match['monitor.status']
       );
       if (statusFilter.length) {
         return statusFilter[0].match['monitor.status'].query;
@@ -489,27 +488,28 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     }
   }
 
-  private getFilteredQueryWithoutStatus(
+  private getFilteredQueryAndStatusFilter(
     dateRangeStart: string,
     dateRangeEnd: string,
     filters?: string | null
   ) {
     let statusFilter: string | undefined;
+    let filterObject: any;
     if (filters) {
-      statusFilter = this.getMonitorsListFilteredQuery(filters);
+      filterObject = JSON.parse(filters);
+      statusFilter = this.getMonitorsListFilteredQuery(filterObject);
     }
-    let complicatedFilter;
+    let nonStatusFiters;
     if (statusFilter && filters) {
-      const obj = JSON.parse(filters);
-      complicatedFilter = {
+      nonStatusFiters = {
         bool: {
-          must: obj.bool.must.filter((filterObject: any) => !filterObject.match['monitor.status']),
+          must: filterObject.bool.must.filter((filter: any) => !filter.match['monitor.status']),
         },
       };
     }
     return {
       query: statusFilter
-        ? complicatedFilter
+        ? nonStatusFiters
         : getFilteredQuery(dateRangeStart, dateRangeEnd, filters),
       statusFilter,
     };
