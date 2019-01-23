@@ -318,6 +318,7 @@ export const RemoteClusterForm = injectI18n(
           fullWidth
         >
           <EuiFormRow
+            data-test-subj="remoteClusterFormSeedNodesFormRow"
             label={(
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.fieldSeedsLabel"
@@ -404,6 +405,7 @@ export const RemoteClusterForm = injectI18n(
           fullWidth
         >
           <EuiFormRow
+            data-test-subj="remoteClusterFormSkipUnavailableFormRow"
             className="remoteClusterSkipIfUnavailableSwitch"
             hasEmptyLabelSpace
             fullWidth
@@ -477,6 +479,7 @@ export const RemoteClusterForm = injectI18n(
         <EuiFlexGroup alignItems="center" gutterSize="m">
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="remoteClusterFormSaveButton"
               color="secondary"
               iconType="check"
               onClick={this.save}
@@ -559,6 +562,7 @@ export const RemoteClusterForm = injectI18n(
         <Fragment>
           <EuiSpacer size="m" />
           <EuiCallOut
+            data-test-subj="remoteClusterFormGlobalError"
             title={(
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.errorTitle"
@@ -614,6 +618,7 @@ export const RemoteClusterForm = injectI18n(
               fullWidth
             >
               <EuiFormRow
+                data-test-subj="remoteClusterFormNameFormRow"
                 label={(
                   <FormattedMessage
                     id="xpack.remoteClusters.remoteClusterForm.fieldNameLabel"

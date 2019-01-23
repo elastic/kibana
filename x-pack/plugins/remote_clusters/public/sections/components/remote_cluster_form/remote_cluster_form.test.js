@@ -5,25 +5,42 @@
  */
 
 import React from 'react';
-import { renderWithIntl } from 'test_utils/enzyme_helpers';
-
+import { mountWithIntl, renderWithIntl } from 'test_utils/enzyme_helpers';
+import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
 import { RemoteClusterForm } from './remote_cluster_form';
 
-/**
- * Make sure we have deterministic aria ID
- */
-jest.mock('@elastic/eui/lib/components/form/form_row/make_id', () => () => 'my-id');
+// Make sure we have deterministic aria IDs.
+jest.mock('@elastic/eui/lib/components/form/form_row/make_id', () => () => 'mockId');
 
 describe('RemoteClusterForm', () => {
   test(`renders untouched state`, () => {
     const component = renderWithIntl(
       <RemoteClusterForm
         save={() => {}}
-        cancel={() => {}}
-        isSaving={false}
-        saveError={undefined}
       />
     );
     expect(component).toMatchSnapshot();
+  });
+
+  describe('validation', () => {
+    it('renders invalid state and a global form error when the user tries to submit an invalid form', () => {
+      const component = mountWithIntl(
+        <RemoteClusterForm save={() => {}}/>
+      );
+
+      findTestSubject(component, 'remoteClusterFormSaveButton').simulate('click');
+
+      const fieldsSnapshot = [
+        'remoteClusterFormNameFormRow',
+        'remoteClusterFormSeedNodesFormRow',
+        'remoteClusterFormSkipUnavailableFormRow',
+        'remoteClusterFormGlobalError',
+      ].map(testSubject => {
+        const mountedField = findTestSubject(component, testSubject);
+        return takeMountedSnapshot(mountedField);
+      });
+
+      expect(fieldsSnapshot).toMatchSnapshot();
+    });
   });
 });
