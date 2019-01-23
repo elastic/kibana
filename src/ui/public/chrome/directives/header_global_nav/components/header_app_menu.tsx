@@ -101,8 +101,9 @@ class HeaderAppMenuUI extends Component<Props, State> {
         // @ts-ignore
         repositionOnScroll
         closePopover={this.closeMenu}
+        data-test-subj="appsMenuButton"
       >
-        <EuiKeyPadMenu id="keyPadMenu" style={{ width: 288 }}>
+        <EuiKeyPadMenu id="keyPadMenu" style={{ width: 288 }} data-test-subj="appsMenu">
           {navLinks.map(this.renderNavLink)}
         </EuiKeyPadMenu>
       </EuiPopover>
@@ -127,6 +128,7 @@ class HeaderAppMenuUI extends Component<Props, State> {
       href={navLink.active || !navLink.lastSubUrl ? navLink.url : navLink.lastSubUrl}
       key={navLink.id}
       onClick={this.closeMenu}
+      data-test-subj="appLink"
     >
       <EuiIcon type={navLink.euiIconType} size="l" />
     </EuiKeyPadMenuItem>

@@ -30,11 +30,11 @@ describe('formatters', () => {
 
   describe('asPercent', () => {
     it('should divide and format item as percent', () => {
-      expect(asPercent(3725, 10000, 'n/a')).toEqual('37.25%');
+      expect(asPercent(3725, 10000, 'n/a')).toEqual('37.3%');
     });
 
     it('should format when numerator is 0', () => {
-      expect(asPercent(0, 1, 'n/a')).toEqual('0.00%');
+      expect(asPercent(0, 1, 'n/a')).toEqual('0.0%');
     });
 
     it('should return fallback when denominator is undefined', () => {
@@ -43,7 +43,11 @@ describe('formatters', () => {
 
     it('should return fallback when denominator is 0 ', () => {
       expect(asPercent(3725, 0, 'n/a')).toEqual('n/a');
-      expect(asPercent(3725, 0)).toEqual('');
+    });
+
+    it('should return fallback when numerator or denominator is NaN', () => {
+      expect(asPercent(3725, NaN, 'n/a')).toEqual('n/a');
+      expect(asPercent(NaN, 10000, 'n/a')).toEqual('n/a');
     });
   });
 });

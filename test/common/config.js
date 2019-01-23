@@ -59,6 +59,7 @@ export default function () {
         `--elasticsearch.hosts=${formatUrl(servers.elasticsearch)}`,
         `--elasticsearch.username=${servers.elasticsearch.username}`,
         `--elasticsearch.password=${servers.elasticsearch.password}`,
+        `--kibana.disableWelcomeScreen=true`,
       ],
     },
 

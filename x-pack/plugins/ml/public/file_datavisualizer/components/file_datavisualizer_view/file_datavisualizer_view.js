@@ -29,7 +29,8 @@ import {
   createUrlOverrides,
   processResults,
   reduceData,
-} from './utils';
+  hasImportPermission,
+} from '../utils';
 
 export const MODE = {
   READ: 0,
@@ -55,11 +56,20 @@ export class FileDataVisualizerView extends Component {
       mode: MODE.READ,
       isEditFlyoutVisible: false,
       bottomBarVisible: false,
+      hasPermissionToImport: false,
     };
 
     this.overrides = {};
     this.previousOverrides = {};
     this.originalSettings = {};
+  }
+
+  async componentDidMount() {
+    // check the user has the correct permission to import data.
+    // note, calling hasImportPermission with no arguments just checks the
+    // cluster privileges, the user will still need index privileges to create and ingest
+    const hasPermissionToImport = await hasImportPermission();
+    this.setState({ hasPermissionToImport });
   }
 
   onFilePickerChange = (files) => {
@@ -242,6 +252,7 @@ export class FileDataVisualizerView extends Component {
       mode,
       isEditFlyoutVisible,
       bottomBarVisible,
+      hasPermissionToImport,
     } = this.state;
 
     const fields = (results !== undefined && results.field_stats !== undefined) ? Object.keys(results.field_stats) : [];
@@ -302,6 +313,7 @@ export class FileDataVisualizerView extends Component {
               mode={MODE.READ}
               changeMode={this.changeMode}
               onCancel={this.onCancel}
+              disableImport={(hasPermissionToImport === false)}
             />
 
             <BottomPadding />

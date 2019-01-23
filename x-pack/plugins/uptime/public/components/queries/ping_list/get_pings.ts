@@ -8,8 +8,8 @@ import gql from 'graphql-tag';
 
 export const getPingsQuery = gql`
   query PingList(
-    $dateRangeStart: UnsignedInteger!
-    $dateRangeEnd: UnsignedInteger!
+    $dateRangeStart: String!
+    $dateRangeEnd: String!
     $monitorId: String
     $status: String
     $sort: String
