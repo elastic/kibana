@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { PureComponent } from 'react';
+import React, { PureComponent, Fragment } from 'react';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import PropTypes from 'prop-types';
 import {
@@ -21,6 +21,8 @@ import {
   FollowerIndexResumeProvider,
   FollowerIndexUnfollowProvider
 } from '../../../../../components';
+
+import { getIndexListUri } from '../../../../../../../../index_management/public/services/navigation';
 
 export class ContextMenuUi extends PureComponent {
 
@@ -83,10 +85,8 @@ export class ContextMenuUi extends PureComponent {
       </EuiButton>
     );
 
-    // TODO: Fix with correct logic when paused status info is available from ES, currently all
-    // follower indices are assumed to be active: https://github.com/elastic/elasticsearch/issues/37127
-    const pausedFollowerIndexNames = followerIndices.filter(({ shards }) => !shards || !shards.length).map((index) => index.name);
-    const activeFollowerIndexNames = followerIndices.filter(({ shards }) => shards && shards.length).map((index) => index.name);
+    const pausedFollowerIndexNames = followerIndices.filter(({ isPaused }) => isPaused).map((index) => index.name);
+    const activeFollowerIndexNames = followerIndices.filter(({ isPaused }) => !isPaused).map((index) => index.name);
 
     return (
       <EuiPopover
@@ -109,7 +109,7 @@ export class ContextMenuUi extends PureComponent {
 
           {
             activeFollowerIndexNames.length ? (
-              <FollowerIndexPauseProvider>
+              <FollowerIndexPauseProvider onConfirm={this.closePopover}>
                 {(pauseFollowerIndex) => (
                   <EuiContextMenuItem
                     icon="pause"
@@ -128,7 +128,7 @@ export class ContextMenuUi extends PureComponent {
 
           {
             pausedFollowerIndexNames.length ? (
-              <FollowerIndexResumeProvider>
+              <FollowerIndexResumeProvider onConfirm={this.closePopover}>
                 {(resumeFollowerIndex) => (
                   <EuiContextMenuItem
                     icon="play"
@@ -146,18 +146,30 @@ export class ContextMenuUi extends PureComponent {
           }
 
           { followerIndexNames.length === 1 && (
-            <EuiContextMenuItem
-              icon="pencil"
-              onClick={() => this.editFollowerIndex(followerIndexNames[0])}
-            >
-              <FormattedMessage
-                id="xpack.crossClusterReplication.followerIndex.contextMenu.editLabel"
-                defaultMessage="Edit follower index"
-              />
-            </EuiContextMenuItem>
+            <Fragment>
+              <EuiContextMenuItem
+                icon="pencil"
+                onClick={() => this.editFollowerIndex(followerIndexNames[0])}
+              >
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.followerIndex.contextMenu.editLabel"
+                  defaultMessage="Edit follower index"
+                />
+              </EuiContextMenuItem>
+
+              <EuiContextMenuItem
+                icon="inspect"
+                href={getIndexListUri(`name:${followerIndexNames[0]}`)}
+              >
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.followerIndex.contextMenu.viewIndexManagementLabel"
+                  defaultMessage="View in Index Management"
+                />
+              </EuiContextMenuItem>
+            </Fragment>
           ) }
 
-          <FollowerIndexUnfollowProvider>
+          <FollowerIndexUnfollowProvider onConfirm={this.closePopover}>
             {(unfollowLeaderIndex) => (
               <EuiContextMenuItem
                 icon="indexFlush"

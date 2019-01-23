@@ -63,6 +63,20 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'DELETE'
   });
 
+  ccr.info = ca({
+    urls: [
+      {
+        fmt: '/<%=id%>/_ccr/info',
+        req: {
+          id: {
+            type: 'string'
+          }
+        }
+      }
+    ],
+    method: 'GET'
+  });
+
   ccr.stats = ca({
     urls: [
       {

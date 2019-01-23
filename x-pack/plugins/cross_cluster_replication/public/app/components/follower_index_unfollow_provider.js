@@ -5,6 +5,7 @@
  */
 
 import React, { PureComponent, Fragment } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -16,6 +17,10 @@ import { unfollowLeaderIndex } from '../store/actions';
 import { arrify } from '../../../common/services/utils';
 
 class Provider extends PureComponent {
+  static propTypes = {
+    onConfirm: PropTypes.func,
+  }
+
   state = {
     isModalOpen: false,
     ids: null
@@ -34,6 +39,7 @@ class Provider extends PureComponent {
   onConfirm = () => {
     this.props.unfollowLeaderIndex(this.state.ids);
     this.setState({ isModalOpen: false, ids: null });
+    this.props.onConfirm && this.props.onConfirm();
   }
 
   closeConfirmModal = () => {

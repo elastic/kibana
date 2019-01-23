@@ -16,10 +16,8 @@ const initialState = {
 const success = action => `${action}_SUCCESS`;
 
 const parseFollowerIndex = (followerIndex) => {
-  // Extract remote cluster and leader index from follower index shard information
-  const { remoteCluster, leaderIndex } = followerIndex.shards[0];
-
-  return { ...followerIndex, remoteCluster, leaderIndex };
+  // Extract status into boolean
+  return { ...followerIndex, isPaused: followerIndex.status === 'paused' };
 };
 export const reducer = (state = initialState, action) => {
   switch (action.type) {

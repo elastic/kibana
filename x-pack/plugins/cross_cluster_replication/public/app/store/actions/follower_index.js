@@ -89,7 +89,7 @@ export const pauseFollowerIndex = (id) => (
     handler: async () => (
       pauseFollowerIndexRequest(id)
     ),
-    onSuccess(response, dispatch, getState) {
+    onSuccess(response, dispatch) {
       /**
        * We can have 1 or more follower index pause operation
        * that can fail or succeed. We will show 1 toast notification for each.
@@ -123,14 +123,6 @@ export const pauseFollowerIndex = (id) => (
           });
 
         toastNotifications.addSuccess(successMessage);
-
-        // If we've just paused a follower index we were looking at, we need to close the panel.
-        // TODO: This is temporary because ES currently removes paused followers from the list.
-        // Remove once issue is fixed: https://github.com/elastic/elasticsearch/issues/37127
-        const followerIndexId = getSelectedFollowerIndexId('detail')(getState());
-        if (response.itemsPaused.includes(followerIndexId)) {
-          dispatch(selectDetailFollowerIndex(null));
-        }
 
         // Refresh list
         dispatch(loadFollowerIndices(true));
