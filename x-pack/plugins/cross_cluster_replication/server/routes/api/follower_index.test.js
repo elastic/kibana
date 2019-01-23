@@ -7,14 +7,22 @@
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../lib/is_es_error_factory';
 import { registerFollowerIndexRoutes } from './follower_index';
-import { getFollowerIndexMock, getFollowerIndexListMock } from '../../../fixtures';
+import {
+  getFollowerIndexStatsMock,
+  getFollowerIndexListStatsMock,
+  getFollowerIndexInfoMock,
+  getFollowerIndexListInfoMock,
+} from '../../../fixtures';
 import { deserializeFollowerIndex } from '../../lib/follower_index_serialization';
 
 jest.mock('../../lib/call_with_request_factory');
 jest.mock('../../lib/is_es_error_factory');
 jest.mock('../../lib/license_pre_routing_factory');
 
-const DESERIALIZED_KEYS = Object.keys(deserializeFollowerIndex(getFollowerIndexMock()));
+const DESERIALIZED_KEYS = Object.keys(deserializeFollowerIndex({
+  ...getFollowerIndexInfoMock(),
+  ...getFollowerIndexStatsMock()
+}));
 
 /**
  * Hashtable to save the route handlers
@@ -99,13 +107,16 @@ describe('[CCR API Routes] Follower Index', () => {
 
     it('deserializes the response from Elasticsearch', async () => {
       const totalResult = 2;
-      setHttpRequestResponse(null, getFollowerIndexListMock(totalResult));
+      const infoResult = getFollowerIndexListInfoMock(totalResult);
+      const statsResult = getFollowerIndexListStatsMock(totalResult, infoResult.follower_indices.map(index => index.follower_index));
+      setHttpRequestResponse(null, infoResult);
+      setHttpRequestResponse(null, statsResult);
 
       const response = await routeHandler();
-      const autoFollowPattern = response.indices[0];
+      const followerIndex = response.indices[0];
 
       expect(response.indices.length).toEqual(totalResult);
-      expect(Object.keys(autoFollowPattern)).toEqual(DESERIALIZED_KEYS);
+      expect(Object.keys(followerIndex)).toEqual(DESERIALIZED_KEYS);
     });
   });
 
@@ -115,12 +126,14 @@ describe('[CCR API Routes] Follower Index', () => {
     });
 
     it('should return a single resource even though ES return an array with 1 item', async () => {
-      const followerIndex = getFollowerIndexMock();
-      const esResponse = { indices: [followerIndex] };
+      const mockId = 'test1';
+      const followerIndexInfo = getFollowerIndexInfoMock(mockId);
+      const followerIndexStats = getFollowerIndexStatsMock(mockId);
 
-      setHttpRequestResponse(null, esResponse);
+      setHttpRequestResponse(null, { follower_indices: [followerIndexInfo] });
+      setHttpRequestResponse(null, { indices: [followerIndexStats] });
 
-      const response = await routeHandler({ params: { id: 1 } });
+      const response = await routeHandler({ params: { id: mockId } });
       expect(Object.keys(response)).toEqual(DESERIALIZED_KEYS);
     });
   });

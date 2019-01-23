@@ -2,7 +2,19 @@
 
 exports[`[CCR] follower index serialization deserializeFollowerIndex() deserializes Elasticsearch follower index object 1`] = `
 Object {
-  "name": "follower index name",
+  "leaderIndex": undefined,
+  "maxOutstandingReadRequests": undefined,
+  "maxOutstandingWriteRequests": undefined,
+  "maxReadRequestOperationCount": undefined,
+  "maxReadRequestSize": undefined,
+  "maxRetryDelay": undefined,
+  "maxWriteBufferCount": undefined,
+  "maxWriteBufferSize": undefined,
+  "maxWriteRequestOperationCount": undefined,
+  "maxWriteRequestSize": undefined,
+  "name": undefined,
+  "readPollTimeout": undefined,
+  "remoteCluster": undefined,
   "shards": Array [
     Object {
       "bytesReadCount": undefined,
@@ -61,6 +73,7 @@ Object {
       "writeBufferSizeBytes": undefined,
     },
   ],
+  "status": "paused",
 }
 `;
 
