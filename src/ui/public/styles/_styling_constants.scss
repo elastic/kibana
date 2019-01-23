@@ -1,6 +1,6 @@
 // EUI global scope
-@import '@elastic/eui/src/themes/k6/k6_globals';
-@import '@elastic/eui/src/themes/k6/k6_colors_light';
+// Note that fonts are loaded directly by src/ui/ui_render/views/chrome.pug
+
 @import '@elastic/eui/src/global_styling/functions/index';
 @import '@elastic/eui/src/global_styling/variables/index';
 @import '@elastic/eui/src/global_styling/mixins/index';
