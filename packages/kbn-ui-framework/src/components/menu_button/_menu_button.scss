@@ -63,6 +63,7 @@
 
   &:disabled {
     color: $menuButtonBasicDisabledTextColor;
+    cursor: not-allowed;
   }
 }
 
@@ -87,6 +88,7 @@
 
   &:disabled {
     background-color: $menuButtonPrimaryDisabledBackgroundColor;
+    cursor: not-allowed;
   }
 }
 
@@ -106,6 +108,8 @@
 
   &:disabled {
     color: $menuButtonDangerHoverDisabledTextColor;
+    background-color: $menuButtonDangerDisabledBackgroundColor;
+    cursor: not-allowed;
   }
 
   &:focus {

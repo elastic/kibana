@@ -7,11 +7,7 @@
 import gql from 'graphql-tag';
 
 export const createGetMonitorStatusBarQuery = gql`
-  query MonitorStatus(
-    $dateRangeStart: UnsignedInteger!
-    $dateRangeEnd: UnsignedInteger!
-    $monitorId: String
-  ) {
+  query MonitorStatus($dateRangeStart: String!, $dateRangeEnd: String!, $monitorId: String) {
     monitorStatus: getLatestMonitors(
       dateRangeStart: $dateRangeStart
       dateRangeEnd: $dateRangeEnd
@@ -26,10 +22,9 @@ export const createGetMonitorStatusBarQuery = gql`
         duration {
           us
         }
-        scheme
       }
-      tcp {
-        port
+      url {
+        full
       }
     }
   }

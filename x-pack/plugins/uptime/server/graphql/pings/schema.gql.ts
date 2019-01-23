@@ -23,9 +23,9 @@ export const pingsSchema = gql`
       size: Int
       monitorId: String
       status: String
-      dateRangeStart: UnsignedInteger!
-      dateRangeEnd: UnsignedInteger!
-    ): PingResults!
+      dateRangeStart: String!
+      dateRangeEnd: String!
+    ): [Ping!]!
 
     "Gets the number of documents in the target index"
     getDocCount: DocCount!
@@ -180,6 +180,15 @@ export const pingsSchema = gql`
     rtt: RTT
   }
 
+  type URL {
+    full: String
+    scheme: String
+    domain: String
+    port: Int
+    path: String
+    query: String
+  }
+
   "A request sent from a monitor to a host"
   type Ping {
     "The timestamp of the ping's creation"
@@ -201,5 +210,6 @@ export const pingsSchema = gql`
     tags: String
     tcp: TCP
     tls: TLS
+    url: URL
   }
 `;

@@ -14,18 +14,18 @@ export class UpdateSourceEditor extends Component {
 
   state = {
     fields: null,
-  }
+  };
 
   componentDidMount() {
     this._isMounted = true;
-    this.loadFields();
+    this._loadFields();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
   }
 
-  async loadFields() {
+  async _loadFields() {
     let indexPattern;
     try {
       indexPattern = await indexPatternService.get(this.props.indexPatternId);
@@ -45,20 +45,25 @@ export class UpdateSourceEditor extends Component {
     this.setState({ fields: indexPattern.fields });
   }
 
-  onMetricsChange = (metrics) => {
+  _onMetricsChange = (metrics) => {
     this.props.onChange({ propName: 'metrics', value: metrics });
-  }
+  };
 
-  renderMetricsEditor() {
-    if (this.props.renderAs === RENDER_AS.HEATMAP) {
-      return null;
-    }
+  _renderMetricsEditor() {
+
+    const metricsFilter = (this.props.renderAs === RENDER_AS.HEATMAP) ?  ((metric) => {
+      //these are countable metrics, where blending heatmap color blobs make sense
+      return ['count', 'sum'].includes(metric.value);
+    }) : null;
+    const allowMultipleMetrics = (this.props.renderAs === RENDER_AS.HEATMAP) ? false : true;
 
     return (
       <MetricsEditor
+        allowMultipleMetrics={allowMultipleMetrics}
+        metricsFilter={metricsFilter}
         fields={this.state.fields}
         metrics={this.props.metrics}
-        onChange={this.onMetricsChange}
+        onChange={this._onMetricsChange}
       />
     );
   }
@@ -66,7 +71,7 @@ export class UpdateSourceEditor extends Component {
   render() {
     return (
       <Fragment>
-        {this.renderMetricsEditor()}
+        {this._renderMetricsEditor()}
       </Fragment>
     );
   }

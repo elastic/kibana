@@ -45,7 +45,7 @@ exports.downloadSnapshot = async function installSnapshot({
   log = defaultLog,
 }) {
   const fileName = getFilename(license, version);
-  const url = `https://snapshots.elastic.co/downloads/elasticsearch/${fileName}`;
+  const url = getUrl(fileName);
   const dest = path.resolve(basePath, 'cache', fileName);
 
   log.info('version: %s', chalk.bold(version));
@@ -149,4 +149,14 @@ function getFilename(license, version) {
   const basename = `elasticsearch${license === 'oss' ? '-oss-' : '-'}${version}`;
 
   return `${basename}-SNAPSHOT.${extension}`;
+}
+
+function getUrl(fileName) {
+  if (process.env.TEST_ES_SNAPSHOT_VERSION) {
+    return `https://snapshots.elastic.co/${
+      process.env.TEST_ES_SNAPSHOT_VERSION
+    }/downloads/elasticsearch/${fileName}`;
+  } else {
+    return `https://snapshots.elastic.co/downloads/elasticsearch/${fileName}`;
+  }
 }

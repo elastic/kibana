@@ -4,40 +4,57 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiLink, EuiPanel } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import React from 'react';
 
 interface Props {
   duration?: number;
-  host?: string;
-  port?: string;
-  scheme?: string;
+  url?: string;
   status?: string;
   timestamp?: string;
 }
 
-export const StatusBar = ({ timestamp, host, port, duration, scheme, status }: Props) => (
+export const StatusBar = ({ timestamp, url, duration, status }: Props) => (
   <EuiPanel>
     <EuiFlexGroup gutterSize="l">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup>
-          <EuiFlexItem>Status&#58;</EuiFlexItem>
           <EuiFlexItem>
             <EuiHealth
               color={status === 'up' ? 'success' : 'danger'}
               style={{ lineHeight: 'inherit' }}
             >
-              {status === 'up' ? 'Up' : 'Down'}
+              {status === 'up'
+                ? i18n.translate('xpack.uptime.monitorStatusBar.healthStatusMessage.upLabel', {
+                    defaultMessage: 'Up',
+                  })
+                : i18n.translate('xpack.uptime.monitorStatusBar.healthStatusMessage.downLabel', {
+                    defaultMessage: 'Down',
+                  })}
             </EuiHealth>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>Last update: {moment(timestamp).fromNow()}</EuiFlexItem>
-      <EuiFlexItem grow={false}>Host: {host}</EuiFlexItem>
-      <EuiFlexItem grow={false}>Port: {port}</EuiFlexItem>
-      <EuiFlexItem grow={false}>Duration: {duration === 0 ? 'N/A' : `${duration}ms`}</EuiFlexItem>
-      <EuiFlexItem>Scheme: {scheme}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false}>
+          <EuiLink href={url} target="_blank">
+            {url}
+          </EuiLink>
+        </EuiFlexItem>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <FormattedMessage
+          id="xpack.uptime.monitorStatusBar.healthStatus.durationInMillisecondsMessage"
+          // TODO: this should not be computed inline
+          values={{ duration: duration ? duration / 1000 : 0 }}
+          defaultMessage="{duration}ms"
+          description="The 'ms' is an abbreviation for 'milliseconds'."
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{moment(timestamp).fromNow()}</EuiFlexItem>
     </EuiFlexGroup>
   </EuiPanel>
 );
