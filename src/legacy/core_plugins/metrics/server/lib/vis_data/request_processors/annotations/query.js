@@ -28,17 +28,17 @@ export default function query(req, panel, annotation, esQueryConfig, indexPatter
     const { from, to } = getTimerange(req);
 
     doc.size = 0;
-    const queries = req.payload.query || [];
+    const queries = !annotation.ignore_global_filters ? req.payload.query : [];
     const filters = !annotation.ignore_global_filters ? req.payload.filters : [];
     doc.query = buildEsQuery(indexPattern, queries, filters, esQueryConfig);
     const timerange = {
       range: {
         [timeField]: {
           gte: from.valueOf(),
-          lte: to.valueOf() - (bucketSize * 1000),
+          lte: to.valueOf() - bucketSize * 1000,
           format: 'epoch_millis',
-        }
-      }
+        },
+      },
     };
     doc.query.bool.must.push(timerange);
 
@@ -46,8 +46,8 @@ export default function query(req, panel, annotation, esQueryConfig, indexPatter
       doc.query.bool.must.push({
         query_string: {
           query: annotation.query_string,
-          analyze_wildcard: true
-        }
+          analyze_wildcard: true,
+        },
       });
     }
 
@@ -55,8 +55,8 @@ export default function query(req, panel, annotation, esQueryConfig, indexPatter
       doc.query.bool.must.push({
         query_string: {
           query: panel.filter,
-          analyze_wildcard: true
-        }
+          analyze_wildcard: true,
+        },
       });
     }
 

@@ -27,10 +27,9 @@ export default function query(req, panel, esQueryConfig, indexPattern) {
 
     doc.size = 0;
 
-    const queries = req.payload.query || [];
+    const queries = !panel.ignore_global_filter ? req.payload.query : [];
     const filters = !panel.ignore_global_filter ? req.payload.filters : [];
     doc.query = buildEsQuery(indexPattern, queries, filters, esQueryConfig);
-
 
     const timerange = {
       range: {
@@ -38,8 +37,8 @@ export default function query(req, panel, esQueryConfig, indexPattern) {
           gte: from.valueOf(),
           lte: to.valueOf(),
           format: 'epoch_millis',
-        }
-      }
+        },
+      },
     };
     doc.query.bool.must.push(timerange);
 
@@ -47,12 +46,11 @@ export default function query(req, panel, esQueryConfig, indexPattern) {
       doc.query.bool.must.push({
         query_string: {
           query: panel.filter,
-          analyze_wildcard: true
-        }
+          analyze_wildcard: true,
+        },
       });
     }
 
     return next(doc);
-
   };
 }
