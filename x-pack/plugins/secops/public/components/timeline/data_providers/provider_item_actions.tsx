@@ -8,6 +8,8 @@ import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import * as i18n from './translations';
+
 interface OwnProps {
   button: JSX.Element;
   closePopover: () => void;
@@ -43,12 +45,12 @@ export const getProviderActions = (
       //   panel: 1,
       // },
       {
-        name: `${isExcluded ? 'Include results' : 'Exclude results'}`,
+        name: isExcluded ? i18n.INCLUDE_DATA_PROVIDER : i18n.EXCLUDE_DATA_PROVIDER,
         icon: `${isExcluded ? 'plusInCircle' : 'minusInCircle'}`,
         onClick: toggleExcluded,
       },
       {
-        name: `${isEnabled ? 'Temporarily disable' : 'Re-enable'}`,
+        name: isEnabled ? i18n.TEMPORARILY_DISABLE_DATA_PROVIDER : i18n.RE_ENABLE_DATA_PROVIDER,
         icon: `${isEnabled ? 'eyeClosed' : 'eye'}`,
         onClick: toggleEnabled,
       },

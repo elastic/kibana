@@ -25,6 +25,7 @@ import {
 import { DataProvider } from './data_provider';
 import { ProviderBadge } from './provider_badge';
 import { getProviderActions } from './provider_item_actions';
+import * as i18n from './translations';
 
 const NumberProviderAndBadge = styled(EuiBadge)`
   margin: 0px 5px;
@@ -98,7 +99,7 @@ export class ProviderItemAndPopover extends React.PureComponent<
               {dataProvidersAnd.length}
             </NumberProviderAndBadge>
           )}
-          <EuiBadgeAndStyled>AND</EuiBadgeAndStyled>
+          <EuiBadgeAndStyled>{i18n.AND}</EuiBadgeAndStyled>
         </EuiButtonContent>
       </EuiButtonEmpty>
     );
@@ -145,7 +146,7 @@ export class ProviderItemAndPopover extends React.PureComponent<
                 </EuiAccordion>
                 {index < dataProvidersAnd.length - 1 && (
                   <AndStyled>
-                    <EuiBadgeAndStyled color="default">AND</EuiBadgeAndStyled>
+                    <EuiBadgeAndStyled color="default">{i18n.AND}</EuiBadgeAndStyled>
                     <EuiHorizontalRule />
                   </AndStyled>
                 )}

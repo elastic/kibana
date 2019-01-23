@@ -27,6 +27,7 @@ import { DataProvider } from './data_provider';
 import { Empty } from './empty';
 import { ProviderItemAndDragDrop } from './provider_item_and_drag_drop';
 import { ProviderItemBadge } from './provider_item_badge';
+import * as i18n from './translations';
 
 interface Props {
   id: string;
@@ -169,7 +170,7 @@ export const Providers = pure<Props>(
               </EuiFlexGroup>
             </PanelProviderItemContainer>
             <PanelProviderItemContainer grow={false}>
-              <EuiBadgeOrStyled color="default">OR</EuiBadgeOrStyled>
+              <EuiBadgeOrStyled color="default">{i18n.OR.toLocaleUpperCase()}</EuiBadgeOrStyled>
               <EuiHorizontalRule />
             </PanelProviderItemContainer>
           </PanelProvidersGroupContainer>

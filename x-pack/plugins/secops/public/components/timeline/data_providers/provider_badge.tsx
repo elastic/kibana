@@ -9,10 +9,11 @@ import classNames from 'classnames';
 import { isEmpty } from 'lodash/fp';
 import moment from 'moment';
 import React from 'react';
+import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { pure } from 'recompose';
 import { QueryDate } from './data_provider';
+import * as i18n from './translations';
 
 const ProviderBadgeStyled = styled(EuiBadge)`
   border: none;
@@ -64,7 +65,7 @@ export const ProviderBadge = pure<ProviderBadgeProps>(
       'globalFilterItem-isDisabled': !isEnabled,
       'globalFilterItem-isExcluded': isExcluded,
     });
-    const prefix = isExcluded ? <span>NOT </span> : null;
+    const prefix = isExcluded ? <span>{i18n.NOT} </span> : null;
 
     const title = `${field}: "${val}"`;
 
@@ -78,11 +79,11 @@ export const ProviderBadge = pure<ProviderBadgeProps>(
         className={classes}
         title={title}
         iconOnClick={deleteFilter}
-        iconOnClickAriaLabel="Delete filter"
+        iconOnClickAriaLabel={i18n.REMOVE_DATA_PROVIDER}
         iconType="cross"
         iconSide="right"
         onClick={togglePopover}
-        onClickAriaLabel={`Show Filter ${val} in timeline`}
+        onClickAriaLabel={`${i18n.SHOW_OPTIONS_DATA_PROVIDER} ${val}`}
         closeButtonProps={{
           // Removing tab focus on close button because the same option can be obtained through the context menu
           // TODO: add a `DEL` keyboard press functionality
