@@ -24,7 +24,10 @@ class TimeHistory {
   constructor() {
     const historyOptions = {
       maxLength: 10,
-      filterDuplicates: true
+      filterDuplicates: true,
+      isDuplicate: (oldItem, newItem) => {
+        return oldItem.from === newItem.from && oldItem.to === newItem.to;
+      }
     };
     this.history = new PersistedLog('kibana.timepicker.timeHistory', historyOptions);
   }

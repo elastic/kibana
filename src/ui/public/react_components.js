@@ -57,5 +57,9 @@ app.directive('superDatePicker', reactDirective => reactDirective(EuiSuperDatePi
   'dateFormat',
   'recentlyUsedRanges',
   'onTimeChange',
-  'onRefreshChange'
+  'onRefreshChange',
+  'isAutoRefreshOnly',
+  'commonlyUsedRanges',
+  'dateFormat',
+  'recentlyUsedRanges',
 ]));

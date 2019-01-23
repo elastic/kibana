@@ -21,12 +21,11 @@ import { uiModules } from '../modules';
 
 import toggleHtml from './kbn_global_timepicker.html';
 import { timefilter } from 'ui/timefilter';
+import { timeHistory } from 'ui/timefilter/time_history';
 
 uiModules
   .get('kibana')
   .directive('kbnGlobalTimepicker', (globalState, config) => {
-    const getConfig = (...args) => config.get(...args);
-
     const listenForUpdates = ($scope) => {
       $scope.$listenAndDigestAsync(timefilter, 'refreshIntervalUpdate', () => {
         setTimefilterValues($scope);
@@ -48,16 +47,38 @@ uiModules
         isAutoRefreshSelectorEnabled: timefilter.isAutoRefreshSelectorEnabled,
         isTimeRangeSelectorEnabled: timefilter.isTimeRangeSelectorEnabled,
       };
+      $scope.recentlyUsedRanges = timeHistory.get().map(({ from, to }) => {
+        return {
+          start: from,
+          end: to,
+        };
+      });
     }
 
     return {
       template: toggleHtml,
       replace: true,
-      require: '^kbnTopNav',
-      link: ($scope, element, attributes, kbnTopNav) => {
+      link: ($scope) => {
         listenForUpdates($scope);
 
         setTimefilterValues($scope);
+
+        config.watch('timepicker:quickRanges', (quickRanges) => {
+          // quickRanges is null when timepicker:quickRanges is set to default value
+          const ranges = quickRanges ? quickRanges : config.get('timepicker:quickRanges');
+          $scope.commonlyUsedRanges = ranges.map(({ from, to, display }) => {
+            return {
+              start: from,
+              end: to,
+              label: display,
+            };
+          });
+        });
+
+        config.watch('dateFormat', (dateFormat) => {
+          // dateFormat is null when dateFormat is set to default value
+          $scope.dateFormat = dateFormat ? dateFormat : config.get('dateFormat');
+        });
 
         $scope.toggleRefresh = () => {
           timefilter.toggleRefresh();
@@ -65,12 +86,13 @@ uiModules
 
         $scope.updateFilter = function ({ start, end }) {
           timefilter.setTime({ from: start, to: end });
-          kbnTopNav.close('filter');
         };
 
         $scope.updateInterval = function ({ isPaused, refreshInterval }) {
-          timefilter.setRefreshInterval({ pause: isPaused, value: refreshInterval });
-          kbnTopNav.close('interval');
+          timefilter.setRefreshInterval({
+            pause: isPaused,
+            value: refreshInterval ? refreshInterval : $scope.timefilterValues.refreshInterval.value
+          });
         };
 
         $scope.getSharedTimeFilterFromDate = function () {
