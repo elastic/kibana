@@ -28,10 +28,28 @@ import {
 } from './elasticsearch_client_config';
 import { ScopedClusterClient } from './scoped_cluster_client';
 
+/**
+ * The set of options that defines how API call should be made and result be
+ * processed.
+ */
 export interface CallAPIOptions {
+  /**
+   * Indicates whether `401 Unauthorized` errors returned from the Elasticsearch API
+   * should be wrapped into `Boom` error instances with properly set `WWW-Authenticate`
+   * header that could have been returned by the API itself. If API didn't specify that
+   * then `Basic realm="Authorization Required"` is used as `WWW-Authenticate`.
+   */
   wrap401Errors: boolean;
 }
 
+/**
+ * Calls the Elasticsearch API endpoint with the specified parameters.
+ * @param client Raw Elasticsearch JS client instance to use.
+ * @param endpoint Name of the API endpoint to call.
+ * @param clientParams Parameters that will be directly passed to the
+ * Elasticsearch JS client.
+ * @param options Options that affect the way we call the API and process the result.
+ */
 async function callAPI(
   client: Client,
   endpoint: string,
@@ -61,26 +79,78 @@ async function callAPI(
   }
 }
 
+/**
+ * Represents an Elasticsearch cluster API client and allows to call API on behalf
+ * of the internal Kibana user and the actual user that is derived from the request
+ * headers (via `asScoped(...)`).
+ */
 export class ClusterClient {
+  /**
+   * Raw Elasticsearch JS client that acts on behalf of the Kibana internal user.
+   */
   private readonly client: Client;
+
+  /**
+   * Optional raw Elasticsearch JS client that is shared between all the scoped clients created
+   * from this cluster client. Every API call is attributed by the wh
+   */
   private scopedClient?: Client;
+
+  /**
+   * Indicates whether this cluster client (and all internal raw Elasticsearch JS clients) has been closed.
+   */
   private isClosed = false;
 
   constructor(private readonly config: ElasticsearchClientConfig, private readonly log: Logger) {
     this.client = new Client(parseElasticsearchClientConfig(config, log));
   }
 
+  /**
+   * Calls specified {@param endpoint} with provided {@param clientParams} on behalf of the
+   * Kibana internal user.
+   * @param endpoint String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`.
+   * @param clientParams A dictionary of parameters that will be passed directly to the Elasticsearch JS client.
+   * @param options Options that affect the way we call the API and process the result.
+   */
   public async callAsInternalUser(
     endpoint: string,
     clientParams: Record<string, unknown> = {},
     options?: CallAPIOptions
   ) {
-    this.assertIsClosed();
+    this.assertIsNotClosed();
 
     return await callAPI(this.client, endpoint, clientParams, options);
   }
 
+  /**
+   * Closes the cluster client. After that client cannot be used and one should
+   * create a new client instance to be able to interact with Elasticsearch API.
+   */
+  public close() {
+    this.client.close();
+
+    if (this.scopedClient !== undefined) {
+      this.scopedClient.close();
+    }
+
+    this.isClosed = true;
+  }
+
+  /**
+   * Creates an instance of `ScopedClusterClient` based on the configuration the
+   * current cluster client that exposes additional `callAsCurrentUser` method
+   * scoped to the provided {@param req}. Consumers shouldn't worry about closing
+   * scoped client instances, these will be automatically closed as soon as the
+   * original cluster client isn't needed anymore and closed.
+   * @param req Request the `ScopedClusterClient` instance will be scoped to.
+   */
   public asScoped(req: { headers?: Headers } = {}) {
+    // It'd have been quite expensive to create and configure client for every incoming
+    // request since it involves parsing of the config, reading of the SSL certificate and
+    // key files etc. Moreover scoped client needs two Elasticsearch JS clients at the same
+    // time: one to support `callAsInternalUser` and another one for `callAsCurrentUser`.
+    // To reduce that overhead we create one scoped client per cluster client and share it
+    // between all scoped client instances.
     if (this.scopedClient === undefined) {
       this.scopedClient = new Client(
         parseElasticsearchClientConfig(this.config, this.log, {
@@ -97,24 +167,14 @@ export class ClusterClient {
     return new ScopedClusterClient(
       (...args) => this.callAsInternalUser(...args),
       async (...args) => {
-        this.assertIsClosed();
+        this.assertIsNotClosed();
         return await callAPI(this.scopedClient!, ...args);
       },
       headers
     );
   }
 
-  public close() {
-    this.client.close();
-
-    if (this.scopedClient !== undefined) {
-      this.scopedClient.close();
-    }
-
-    this.isClosed = true;
-  }
-
-  private assertIsClosed() {
+  private assertIsNotClosed() {
     if (this.isClosed) {
       throw new Error('Cluster client cannot be used after it has been closed.');
     }

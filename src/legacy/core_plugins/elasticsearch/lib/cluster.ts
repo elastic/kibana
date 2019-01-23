@@ -31,7 +31,9 @@ export class Cluster {
     clientParams?: Record<string, unknown>,
     options?: CallAPIOptions
   ) => {
-    return await this.clusterClient.asScoped(req).callWithRequest(endpoint, clientParams, options);
+    return await this.clusterClient
+      .asScoped(req)
+      .callAsCurrentUser(endpoint, clientParams, options);
   };
 
   public callWithInternalUser = async (

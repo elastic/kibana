@@ -27,6 +27,11 @@ import { pick } from '../../utils';
 import { Logger } from '../logging';
 import { ElasticsearchConfig } from './elasticsearch_config';
 
+/**
+ * Config that consumers can pass to the Elasticsearch JS client is complex and includes
+ * not only entries from standard `elasticsearch.*` yaml config, but also some Elasticsearch JS
+ * client specific options like `keepAlive` or `plugins` (that eventually will be deprecated).
+ */
 export type ElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' | 'plugins'> &
   Pick<
     ElasticsearchConfig,
@@ -47,12 +52,23 @@ export type ElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' 
     loggerContext?: string;
   };
 
+/** @internal */
 export interface ElasticsearchClientConfigOverrides {
+  /**
+   * If set to `true`, username and password from the config won't be used
+   * to access Elasticsearch API even if these are specified.
+   */
   auth?: boolean;
+
+  /**
+   * If set to `true`, `ssl.key` and `ssl.certificate` provided through config won't
+   * be used to connect to Elasticsearch.
+   */
   ignoreCertAndKey?: boolean;
 }
 
 // Original `ConfigOptions` defines `ssl: object` so we need something more specific.
+/** @internal */
 export type ExtendedConfigOptions = ConfigOptions &
   Partial<{
     ssl: Partial<{
@@ -65,6 +81,7 @@ export type ExtendedConfigOptions = ConfigOptions &
     }>;
   }>;
 
+/** @internal */
 export function parseElasticsearchClientConfig(
   config: ElasticsearchClientConfig,
   log: Logger,
