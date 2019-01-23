@@ -81,7 +81,7 @@ export class BackendFrameworkLib {
       ) {
         return Boom.forbidden(
           `Your ${
-            this.license
+            this.license.type
           } license does not support this API or is expired. Please upgrade your license.`
         );
       }
