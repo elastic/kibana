@@ -61,10 +61,11 @@ const getOtherBucketFilterTerms = (table, columnIndex, rowIndex) => {
  * @param  {string} cellValue - value of the current cell
  * @return {array|string} - filter or list of filters to provide to queryFilter.addFilters()
  */
-const createFilter = (table, columnIndex, rowIndex, cellValue) => {
-  const { aggConfig, id: columnId } = table.columns[columnIndex];
+const createFilter = (aggConfigs, table, columnIndex, rowIndex, cellValue) => {
+  const column = table.columns[columnIndex];
+  const aggConfig = aggConfigs[columnIndex];
   let filter = [];
-  const value = rowIndex > -1 ? table.rows[rowIndex][columnId] : cellValue;
+  const value = rowIndex > -1 ? table.rows[rowIndex][column.id] : cellValue;
   if (value === null || value === undefined || !aggConfig.isFilterable()) {
     return;
   }
@@ -101,7 +102,7 @@ const VisFiltersProvider = (Private, getAppState) => {
 
     dataPoints.forEach(val => {
       const { table, column, row, value } = val;
-      const filter = createFilter(table, column, row, value);
+      const filter = createFilter(event.aggConfigs, table, column, row, value);
       if (filter) {
         filter.forEach(f => {
           if (event.negate) {
@@ -117,7 +118,7 @@ const VisFiltersProvider = (Private, getAppState) => {
   };
 
   const addFilter = (event) => {
-    const filter = createFilter(event.table, event.column, event.row, event.value);
+    const filter = createFilter(event.aggConfigs, event.table, event.column, event.row, event.value);
     queryFilter.addFilters(filter);
   };
 

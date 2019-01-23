@@ -16,8 +16,9 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-import { CONFIG_TELEMETRY_DESC, PRIVACY_STATEMENT_URL } from '../../../common/constants';
+import { getConfigTelemetryDesc, PRIVACY_STATEMENT_URL } from '../../../common/constants';
 import { OptInExampleFlyout } from '../../components';
 
 /**
@@ -48,7 +49,7 @@ export class OptInBanner extends Component {
   }
 
   render() {
-    let title = CONFIG_TELEMETRY_DESC;
+    let title = getConfigTelemetryDesc();
     let details;
     let flyoutDetails;
 
@@ -56,19 +57,30 @@ export class OptInBanner extends Component {
       details = (
         <EuiText>
           <p tabIndex="0">
-            No information about the data you process or store will be sent. This feature
-            will periodically send basic feature usage statistics. See an {(
-              <EuiLink onClick={() => this.setState({ showExample: !this.state.showExample })}>
-                example
-              </EuiLink>
-            )} or read our {(
-              <EuiLink
-                href={PRIVACY_STATEMENT_URL}
-                target="_blank"
-              >
-                telemetry privacy statement
-              </EuiLink>
-            )}. You can disable this feature at any time.
+            <FormattedMessage
+              id="xpack.main.welcomeBanner.telemetryConfigDetailsDescription"
+              defaultMessage="No information about the data you process or store will be sent. This feature
+                will periodically send basic feature usage statistics. See an {exampleLink} or read our {telemetryPrivacyStatementLink}.
+                You can disable this feature at any time."
+              values={{
+                exampleLink: (
+                  <EuiLink onClick={() => this.setState({ showExample: !this.state.showExample })}>
+                    <FormattedMessage
+                      id="xpack.main.welcomeBanner.telemetryConfigDetailsDescription.exampleLinkText"
+                      defaultMessage="example"
+                    />
+                  </EuiLink>
+                ),
+                telemetryPrivacyStatementLink: (
+                  <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank" >
+                    <FormattedMessage
+                      id="xpack.main.welcomeBanner.telemetryConfigDetailsDescription.telemetryPrivacyStatementLinkText"
+                      defaultMessage="telemetry privacy statement"
+                    />
+                  </EuiLink>
+                )
+              }}
+            />
           </p>
         </EuiText>
       );
@@ -84,9 +96,12 @@ export class OptInBanner extends Component {
     } else {
       title = (
         <Fragment>
-          {CONFIG_TELEMETRY_DESC} {(
+          {getConfigTelemetryDesc()} {(
             <EuiLink onClick={() => this.setState({ showDetails: true })}>
-              Read more
+              <FormattedMessage
+                id="xpack.main.welcomeBanner.telemetryConfigDescription.readMoreLinkText"
+                defaultMessage="Read more"
+              />
             </EuiLink>
           )}
         </Fragment>
@@ -108,7 +123,10 @@ export class OptInBanner extends Component {
               size="s"
               onClick={() => this.props.optInClick(true)}
             >
-              Yes
+              <FormattedMessage
+                id="xpack.main.welcomeBanner.yesButtonLabel"
+                defaultMessage="Yes"
+              />
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -116,7 +134,10 @@ export class OptInBanner extends Component {
               size="s"
               onClick={() => this.props.optInClick(false)}
             >
-              No
+              <FormattedMessage
+                id="xpack.main.welcomeBanner.noButtonLabel"
+                defaultMessage="No"
+              />
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -24,7 +24,7 @@ export const tagcloud = () => ({
   type: 'render',
   context: {
     types: [
-      'kibana_table'
+      'datatable'
     ],
   },
   help: i18n.translate('interpreter.functions.tagcloud.help', {
