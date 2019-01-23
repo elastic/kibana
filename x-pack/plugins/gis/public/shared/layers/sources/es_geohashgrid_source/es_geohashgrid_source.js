@@ -106,11 +106,11 @@ export class ESGeohashGridSource extends AbstractESSource {
   }
 
   async getGeoJsonWithMeta({ layerName }, searchFilters) {
-    const featureCollection = await this.getGeoJsonPoints({
+
+    const featureCollection = await this.getGeoJsonPoints({ layerName }, {
       geohashPrecision: searchFilters.geohashPrecision,
       extent: searchFilters.buffer,
       timeFilters: searchFilters.timeFilters,
-      layerName,
       query: searchFilters.query,
     });
 

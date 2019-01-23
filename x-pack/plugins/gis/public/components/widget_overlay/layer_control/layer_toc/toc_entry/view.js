@@ -48,7 +48,7 @@ export class TOCEntry extends React.Component {
 
     const { layer, openLayerPanel, zoom, toggleVisible } = this.props;
 
-    const smallIcon = layer.renderSmallIcon({ toggleVisible, zoom });
+    const smallIcon = layer.renderSmallTocIcon({ toggleVisible, zoom });
     let tocDetails = layer.getTOCDetails();
     if (tocDetails) {
       tocDetails = (

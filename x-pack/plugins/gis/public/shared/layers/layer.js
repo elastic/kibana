@@ -161,25 +161,23 @@ export class AbstractLayer {
   }
 
 
-  renderSmallIcon({ toggleVisible, zoom }) {
-
-    const layer = this;
+  renderSmallTocIcon({ toggleVisible, zoom }) {
 
     let visibilityIndicator;
-    if (layer.dataHasLoadError()) {
+    if (this.dataHasLoadError()) {
       visibilityIndicator = (
         <EuiIconTip
           aria-label="Load warning"
           size="m"
           type="alert"
           color="warning"
-          content={layer.getDataLoadError()}
+          content={this.getDataLoadError()}
         />
       );
-    } else if (layer.isLayerLoading()) {
+    } else if (this.isLayerLoading()) {
       visibilityIndicator = <EuiLoadingSpinner size="m"/>;
-    } else if (!layer.showAtZoomLevel(zoom)) {
-      const { minZoom, maxZoom } = layer.getZoomConfig();
+    } else if (!this.showAtZoomLevel(zoom)) {
+      const { minZoom, maxZoom } = this.getZoomConfig();
       visibilityIndicator = (
         <EuiToolTip
           position="left"
