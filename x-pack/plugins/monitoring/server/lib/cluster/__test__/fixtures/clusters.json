@@ -705,7 +705,6 @@
       "issuer" : "elasticsearch"
     },
     "cluster_stats" : {
-      "status" : "green",
       "timestamp" : 1548265097151,
       "indices" : {
         "count": 6,

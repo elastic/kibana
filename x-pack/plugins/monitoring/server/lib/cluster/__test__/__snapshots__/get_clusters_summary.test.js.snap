@@ -206,6 +206,108 @@ Array [
     "status": "green",
     "version": "7.0.0-alpha1",
   },
+  Object {
+    "alerts": Object {
+      "alertsMeta": Object {
+        "enabled": true,
+      },
+    },
+    "apm": undefined,
+    "beats": Object {
+      "beats": Object {
+        "total": null,
+        "types": Array [],
+      },
+      "bytesSent": null,
+      "totalEvents": null,
+    },
+    "ccs": undefined,
+    "cluster_name": "expired_one",
+    "cluster_uuid": "bbbd5y4oTiOu0dZYeY8ibw",
+    "elasticsearch": Object {
+      "cluster_stats": Object {
+        "indices": Object {
+          "count": 6,
+          "docs": Object {
+            "count": 557,
+            "deleted": 1,
+          },
+          "shards": Object {
+            "index": Object {
+              "primaries": Object {
+                "avg": 1,
+                "max": 1,
+                "min": 1,
+              },
+              "replication": Object {
+                "avg": 0,
+                "max": 0,
+                "min": 0,
+              },
+              "shards": Object {
+                "avg": 1,
+                "max": 1,
+                "min": 1,
+              },
+            },
+            "primaries": 6,
+            "replication": 0,
+            "total": 6,
+          },
+          "store": Object {
+            "size_in_bytes": 651556,
+          },
+        },
+        "nodes": Object {
+          "count": Object {
+            "total": 1,
+          },
+          "fs": Object {
+            "available_in_bytes": 224468783104,
+            "free_in_bytes": 228403920896,
+            "total_in_bytes": 499963170816,
+          },
+          "jvm": Object {
+            "max_uptime_in_millis": 922788,
+            "mem": Object {
+              "heap_max_in_bytes": 731840512,
+              "heap_used_in_bytes": 271001920,
+            },
+          },
+        },
+        "status": "unknown",
+      },
+    },
+    "isPrimary": false,
+    "isSupported": true,
+    "kibana": Object {
+      "concurrent_connections": 0,
+      "count": 0,
+      "memory_limit": 0,
+      "memory_size": 0,
+      "requests_total": 0,
+      "response_time_max": 0,
+      "status": null,
+    },
+    "license": Object {
+      "expiry_date_in_millis": 1546439627460,
+      "status": "expired",
+      "type": "trial",
+    },
+    "logstash": Object {
+      "avg_memory": 0,
+      "avg_memory_used": 0,
+      "events_in_total": 0,
+      "events_out_total": 0,
+      "max_uptime": 0,
+      "node_count": 0,
+      "pipeline_count": 0,
+      "versions": Array [],
+    },
+    "ml": undefined,
+    "status": "unknown",
+    "version": "5.3.0",
+  },
 ]
 `;
 
