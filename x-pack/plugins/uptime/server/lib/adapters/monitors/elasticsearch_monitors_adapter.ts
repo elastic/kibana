@@ -148,25 +148,15 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     dateRangeEnd: string,
     filter?: string | null
   ): Promise<any> {
-    let statusFilter: string | undefined;
-    if (filter) {
-      statusFilter = this.getMonitorsListFilteredQuery(filter);
-    }
-    let complicatedFilter;
-    if (statusFilter && filter) {
-      const obj = JSON.parse(filter);
-      complicatedFilter = {
-        bool: {
-          must: obj.bool.must.filter((filterObject: any) => !filterObject.match['monitor.status']),
-        },
-      };
-    }
+    const { statusFilter, query } = this.getFilteredQueryWithoutStatus(
+      dateRangeStart,
+      dateRangeEnd,
+      filter
+    );
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
-        query: statusFilter
-          ? complicatedFilter
-          : getFilteredQuery(dateRangeStart, dateRangeEnd, filter),
+        query,
         aggs: {
           hosts: {
             composite: {
@@ -242,25 +232,15 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     dateRangeEnd: string,
     filters?: string | null
   ): Promise<any> {
-    let statusFilter: string | undefined;
-    if (filters) {
-      statusFilter = this.getMonitorsListFilteredQuery(filters);
-    }
-    let complicatedFilter;
-    if (statusFilter && filters) {
-      const obj = JSON.parse(filters);
-      complicatedFilter = {
-        bool: {
-          must: obj.bool.must.filter((filterObject: any) => !filterObject.match['monitor.status']),
-        },
-      };
-    }
+    const { statusFilter, query } = this.getFilteredQueryWithoutStatus(
+      dateRangeStart,
+      dateRangeEnd,
+      filters
+    );
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
-        query: statusFilter
-          ? complicatedFilter
-          : getFilteredQuery(dateRangeStart, dateRangeEnd, filters),
+        query,
         aggs: {
           hosts: {
             composite: {
@@ -507,5 +487,31 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
         return statusFilter[0].match['monitor.status'].query;
       }
     }
+  }
+
+  private getFilteredQueryWithoutStatus(
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string | null
+  ) {
+    let statusFilter: string | undefined;
+    if (filters) {
+      statusFilter = this.getMonitorsListFilteredQuery(filters);
+    }
+    let complicatedFilter;
+    if (statusFilter && filters) {
+      const obj = JSON.parse(filters);
+      complicatedFilter = {
+        bool: {
+          must: obj.bool.must.filter((filterObject: any) => !filterObject.match['monitor.status']),
+        },
+      };
+    }
+    return {
+      query: statusFilter
+        ? complicatedFilter
+        : getFilteredQuery(dateRangeStart, dateRangeEnd, filters),
+      statusFilter,
+    };
   }
 }
