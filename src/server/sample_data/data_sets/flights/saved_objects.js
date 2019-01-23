@@ -40,8 +40,7 @@ export const getSavedObjects = () => [
       "kibanaSavedObjectMeta": {
         "searchSourceJSON": "{}"
       }
-    },
-    "references": []
+    }
   },
   {
     "id": "c8fc3d30-4c87-11e8-b3d7-01146121b73d",
@@ -58,16 +57,9 @@ export const getSavedObjects = () => [
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+        "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
       }
-    },
-    "references": [
-      {
-        "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-        "type": "index-pattern",
-        "id": "d3d7af60-4c81-11e8-b3d7-01146121b73d"
-      }
-    ]
+    }
   },
   {
     "id": "571aaf70-4c88-11e8-b3d7-01146121b73d",
@@ -98,16 +90,9 @@ export const getSavedObjects = () => [
       ],
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[]}"
+        "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[]}"
       }
-    },
-    "references": [
-      {
-        "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-        "type": "index-pattern",
-        "id": "d3d7af60-4c81-11e8-b3d7-01146121b73d"
-      }
-    ]
+    }
   },
   {
     "id": "8f4d0c00-4c86-11e8-b3d7-01146121b73d",
@@ -124,16 +109,9 @@ export const getSavedObjects = () => [
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+        "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
       }
-    },
-    "references": [
-      {
-        "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-        "type": "index-pattern",
-        "id": "d3d7af60-4c81-11e8-b3d7-01146121b73d"
-      }
-    ]
+    }
   },
   {
     "id": "f8290060-4c88-11e8-b3d7-01146121b73d",
@@ -150,16 +128,9 @@ export const getSavedObjects = () => [
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+        "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
       }
-    },
-    "references": [
-      {
-        "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-        "type": "index-pattern",
-        "id": "d3d7af60-4c81-11e8-b3d7-01146121b73d"
-      }
-    ]
+    }
   },
   {
     "id": "bcb63b50-4c89-11e8-b3d7-01146121b73d",
@@ -178,8 +149,7 @@ export const getSavedObjects = () => [
       "kibanaSavedObjectMeta": {
         "searchSourceJSON": "{}"
       }
-    },
-    "references": []
+    }
   },
   {
     "id": "9886b410-4c8b-11e8-b3d7-01146121b73d",
@@ -196,16 +166,9 @@ export const getSavedObjects = () => [
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"filter\":[{\"meta\":{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"negate\":true,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"FlightDelayMin\",\"value\":\"0\",\"params\":{\"query\":0,\"type\":\"phrase\"}},\"query\":{\"match\":{\"FlightDelayMin\":{\"query\":0,\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+        "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"filter\":[{\"meta\":{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"negate\":true,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"FlightDelayMin\",\"value\":\"0\",\"params\":{\"query\":0,\"type\":\"phrase\"}},\"query\":{\"match\":{\"FlightDelayMin\":{\"query\":0,\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
       }
-    },
-    "references": [
-      {
-        "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-        "type": "index-pattern",
-        "id": "d3d7af60-4c81-11e8-b3d7-01146121b73d"
-      }
-    ]
+    }
   },
   {
     "id": "76e3c090-4c8c-11e8-b3d7-01146121b73d",
@@ -222,16 +185,9 @@ export const getSavedObjects = () => [
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+        "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
       }
-    },
-    "references": [
-      {
-        "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-        "type": "index-pattern",
-        "id": "d3d7af60-4c81-11e8-b3d7-01146121b73d"
-      }
-    ]
+    }
   },
   {
     "id": "707665a0-4c8c-11e8-b3d7-01146121b73d",
@@ -248,16 +204,9 @@ export const getSavedObjects = () => [
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+        "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
       }
-    },
-    "references": [
-      {
-        "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-        "type": "index-pattern",
-        "id": "d3d7af60-4c81-11e8-b3d7-01146121b73d"
-      }
-    ]
+    }
   },
   {
     "id": "79e8ff60-4c8e-11e8-b3d7-01146121b73d",
@@ -274,16 +223,9 @@ export const getSavedObjects = () => [
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+        "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
       }
-    },
-    "references": [
-      {
-        "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-        "type": "index-pattern",
-        "id": "d3d7af60-4c81-11e8-b3d7-01146121b73d"
-      }
-    ]
+    }
   },
   {
     "id": "293b5a30-4c8f-11e8-b3d7-01146121b73d",
@@ -300,16 +242,9 @@ export const getSavedObjects = () => [
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+        "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
       }
-    },
-    "references": [
-      {
-        "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-        "type": "index-pattern",
-        "id": "d3d7af60-4c81-11e8-b3d7-01146121b73d"
-      }
-    ]
+    }
   },
   {
     "id": "129be430-4c93-11e8-b3d7-01146121b73d",
@@ -328,8 +263,7 @@ export const getSavedObjects = () => [
       "kibanaSavedObjectMeta": {
         "searchSourceJSON": "{}"
       }
-    },
-    "references": []
+    }
   },
   {
     "id": "334084f0-52fd-11e8-a160-89cc2ad9e8e2",
@@ -346,16 +280,9 @@ export const getSavedObjects = () => [
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+        "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
       }
-    },
-    "references": [
-      {
-        "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-        "type": "index-pattern",
-        "id": "d3d7af60-4c81-11e8-b3d7-01146121b73d"
-      }
-    ]
+    }
   },
   {
     "id": "f8283bf0-52fd-11e8-a160-89cc2ad9e8e2",
@@ -372,16 +299,9 @@ export const getSavedObjects = () => [
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"filter\":[{\"meta\":{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"FlightDelay\",\"value\":\"true\",\"params\":{\"query\":true,\"type\":\"phrase\"}},\"query\":{\"match\":{\"FlightDelay\":{\"query\":true,\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+        "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"filter\":[{\"meta\":{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"FlightDelay\",\"value\":\"true\",\"params\":{\"query\":true,\"type\":\"phrase\"}},\"query\":{\"match\":{\"FlightDelay\":{\"query\":true,\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
       }
-    },
-    "references": [
-      {
-        "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-        "type": "index-pattern",
-        "id": "d3d7af60-4c81-11e8-b3d7-01146121b73d"
-      }
-    ]
+    }
   },
   {
     "id": "08884800-52fe-11e8-a160-89cc2ad9e8e2",
@@ -398,16 +318,9 @@ export const getSavedObjects = () => [
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"filter\":[{\"meta\":{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"Cancelled\",\"value\":\"true\",\"params\":{\"query\":true,\"type\":\"phrase\"}},\"query\":{\"match\":{\"Cancelled\":{\"query\":true,\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+        "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"filter\":[{\"meta\":{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"Cancelled\",\"value\":\"true\",\"params\":{\"query\":true,\"type\":\"phrase\"}},\"query\":{\"match\":{\"Cancelled\":{\"query\":true,\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
       }
-    },
-    "references": [
-      {
-        "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-        "type": "index-pattern",
-        "id": "d3d7af60-4c81-11e8-b3d7-01146121b73d"
-      }
-    ]
+    }
   },
   {
     "id": "e6944e50-52fe-11e8-a160-89cc2ad9e8e2",
@@ -424,16 +337,9 @@ export const getSavedObjects = () => [
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+        "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
       }
-    },
-    "references": [
-      {
-        "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-        "type": "index-pattern",
-        "id": "d3d7af60-4c81-11e8-b3d7-01146121b73d"
-      }
-    ]
+    }
   },
   {
     "id": "01c413e0-5395-11e8-99bf-1ba7b1bdaa61",
@@ -450,16 +356,9 @@ export const getSavedObjects = () => [
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
+        "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
       }
-    },
-    "references": [
-      {
-        "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-        "type": "index-pattern",
-        "id": "d3d7af60-4c81-11e8-b3d7-01146121b73d"
-      }
-    ]
+    }
   },
   {
     "id": "2edf78b0-5395-11e8-99bf-1ba7b1bdaa61",
@@ -476,16 +375,9 @@ export const getSavedObjects = () => [
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
+        "searchSourceJSON": "{\"index\":\"d3d7af60-4c81-11e8-b3d7-01146121b73d\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
       }
-    },
-    "references": [
-      {
-        "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-        "type": "index-pattern",
-        "id": "d3d7af60-4c81-11e8-b3d7-01146121b73d"
-      }
-    ]
+    }
   },
   {
     "id": "ed78a660-53a0-11e8-acbd-0be0ad9d822b",
@@ -504,8 +396,7 @@ export const getSavedObjects = () => [
       "kibanaSavedObjectMeta": {
         "searchSourceJSON": "{}"
       }
-    },
-    "references": []
+    }
   },
   {
     "id": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
@@ -534,7 +425,7 @@ export const getSavedObjects = () => [
       "description": i18n.translate('server.sampleData.flightsSpec.globalFlightDashboardDescription', {
         defaultMessage: 'Analyze mock flight data for ES-Air, Logstash Airways, Kibana Airlines and JetBeats',
       }),
-      "panelsJSON": "[{\"panelIndex\":\"1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":32,\"h\":7,\"i\":\"1\"},\"embeddableConfig\":{},\"version\":\"6.3.0\",\"panelRef\":\"panel_0\"},{\"panelIndex\":\"3\",\"gridData\":{\"x\":17,\"y\":7,\"w\":23,\"h\":12,\"i\":\"3\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Average Ticket Price\":\"#0A50A1\",\"Flight Count\":\"#82B5D8\"},\"legendOpen\":false}},\"version\":\"6.3.0\",\"panelRef\":\"panel_1\"},{\"panelIndex\":\"4\",\"gridData\":{\"x\":0,\"y\":85,\"w\":48,\"h\":15,\"i\":\"4\"},\"embeddableConfig\":{},\"version\":\"6.3.0\",\"panelRef\":\"panel_2\"},{\"panelIndex\":\"5\",\"gridData\":{\"x\":0,\"y\":7,\"w\":17,\"h\":12,\"i\":\"5\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"ES-Air\":\"#447EBC\",\"JetBeats\":\"#65C5DB\",\"Kibana Airlines\":\"#BA43A9\",\"Logstash Airways\":\"#E5AC0E\"},\"legendOpen\":false}},\"version\":\"6.3.0\",\"panelRef\":\"panel_3\"},{\"panelIndex\":\"6\",\"gridData\":{\"x\":24,\"y\":33,\"w\":24,\"h\":14,\"i\":\"6\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Carrier Delay\":\"#5195CE\",\"Late Aircraft Delay\":\"#1F78C1\",\"NAS Delay\":\"#70DBED\",\"No Delay\":\"#BADFF4\",\"Security Delay\":\"#052B51\",\"Weather Delay\":\"#6ED0E0\"}}},\"version\":\"6.3.0\",\"panelRef\":\"panel_4\"},{\"panelIndex\":\"7\",\"gridData\":{\"x\":24,\"y\":19,\"w\":24,\"h\":14,\"i\":\"7\"},\"embeddableConfig\":{},\"version\":\"6.3.0\",\"panelRef\":\"panel_5\"},{\"panelIndex\":\"10\",\"gridData\":{\"x\":0,\"y\":35,\"w\":24,\"h\":12,\"i\":\"10\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Count\":\"#1F78C1\"},\"legendOpen\":false}},\"version\":\"6.3.0\",\"panelRef\":\"panel_6\"},{\"panelIndex\":\"13\",\"gridData\":{\"x\":10,\"y\":19,\"w\":14,\"h\":8,\"i\":\"13\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Count\":\"#1F78C1\"},\"legendOpen\":false}},\"version\":\"6.3.0\",\"panelRef\":\"panel_7\"},{\"panelIndex\":\"14\",\"gridData\":{\"x\":10,\"y\":27,\"w\":14,\"h\":8,\"i\":\"14\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Count\":\"#1F78C1\"},\"legendOpen\":false}},\"version\":\"6.3.0\",\"panelRef\":\"panel_8\"},{\"panelIndex\":\"18\",\"gridData\":{\"x\":24,\"y\":70,\"w\":24,\"h\":15,\"i\":\"18\"},\"embeddableConfig\":{\"mapCenter\":[27.421687059550266,15.371002131141724],\"mapZoom\":1},\"version\":\"6.3.0\",\"panelRef\":\"panel_9\"},{\"panelIndex\":\"21\",\"gridData\":{\"x\":0,\"y\":62,\"w\":48,\"h\":8,\"i\":\"21\"},\"embeddableConfig\":{},\"version\":\"6.3.0\",\"panelRef\":\"panel_10\"},{\"panelIndex\":\"22\",\"gridData\":{\"x\":32,\"y\":0,\"w\":16,\"h\":7,\"i\":\"22\"},\"embeddableConfig\":{},\"version\":\"6.3.0\",\"panelRef\":\"panel_11\"},{\"panelIndex\":\"23\",\"gridData\":{\"x\":0,\"y\":70,\"w\":24,\"h\":15,\"i\":\"23\"},\"embeddableConfig\":{\"mapCenter\":[42.19556096274418,9.536742995308601e-7],\"mapZoom\":1},\"version\":\"6.3.0\",\"panelRef\":\"panel_12\"},{\"panelIndex\":\"25\",\"gridData\":{\"x\":0,\"y\":19,\"w\":10,\"h\":8,\"i\":\"25\"},\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 50\":\"rgb(247,251,255)\",\"100 - 150\":\"rgb(107,174,214)\",\"150 - 200\":\"rgb(33,113,181)\",\"200 - 250\":\"rgb(8,48,107)\",\"50 - 100\":\"rgb(198,219,239)\"},\"legendOpen\":false}},\"version\":\"6.3.0\",\"panelRef\":\"panel_13\"},{\"panelIndex\":\"27\",\"gridData\":{\"x\":0,\"y\":27,\"w\":10,\"h\":8,\"i\":\"27\"},\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 50\":\"rgb(247,251,255)\",\"100 - 150\":\"rgb(107,174,214)\",\"150 - 200\":\"rgb(33,113,181)\",\"200 - 250\":\"rgb(8,48,107)\",\"50 - 100\":\"rgb(198,219,239)\"},\"legendOpen\":false}},\"version\":\"6.3.0\",\"panelRef\":\"panel_14\"},{\"panelIndex\":\"28\",\"gridData\":{\"x\":0,\"y\":47,\"w\":24,\"h\":15,\"i\":\"28\"},\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 11\":\"rgb(247,251,255)\",\"11 - 22\":\"rgb(208,225,242)\",\"22 - 33\":\"rgb(148,196,223)\",\"33 - 44\":\"rgb(74,152,201)\",\"44 - 55\":\"rgb(23,100,171)\"},\"legendOpen\":false}},\"version\":\"6.3.0\",\"panelRef\":\"panel_15\"},{\"panelIndex\":\"29\",\"gridData\":{\"x\":40,\"y\":7,\"w\":8,\"h\":6,\"i\":\"29\"},\"embeddableConfig\":{},\"version\":\"6.3.0\",\"panelRef\":\"panel_16\"},{\"panelIndex\":\"30\",\"gridData\":{\"x\":40,\"y\":13,\"w\":8,\"h\":6,\"i\":\"30\"},\"embeddableConfig\":{},\"version\":\"6.3.0\",\"panelRef\":\"panel_17\"},{\"panelIndex\":\"31\",\"gridData\":{\"x\":24,\"y\":47,\"w\":24,\"h\":15,\"i\":\"31\"},\"embeddableConfig\":{},\"version\":\"6.3.0\",\"panelRef\":\"panel_18\"}]",
+      "panelsJSON": "[{\"panelIndex\":\"1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":32,\"h\":7,\"i\":\"1\"},\"embeddableConfig\":{},\"id\":\"aeb212e0-4c84-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"panelIndex\":\"3\",\"gridData\":{\"x\":17,\"y\":7,\"w\":23,\"h\":12,\"i\":\"3\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Average Ticket Price\":\"#0A50A1\",\"Flight Count\":\"#82B5D8\"},\"legendOpen\":false}},\"id\":\"c8fc3d30-4c87-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"panelIndex\":\"4\",\"gridData\":{\"x\":0,\"y\":85,\"w\":48,\"h\":15,\"i\":\"4\"},\"embeddableConfig\":{},\"id\":\"571aaf70-4c88-11e8-b3d7-01146121b73d\",\"type\":\"search\",\"version\":\"6.3.0\"},{\"panelIndex\":\"5\",\"gridData\":{\"x\":0,\"y\":7,\"w\":17,\"h\":12,\"i\":\"5\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"ES-Air\":\"#447EBC\",\"JetBeats\":\"#65C5DB\",\"Kibana Airlines\":\"#BA43A9\",\"Logstash Airways\":\"#E5AC0E\"},\"legendOpen\":false}},\"id\":\"8f4d0c00-4c86-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"panelIndex\":\"6\",\"gridData\":{\"x\":24,\"y\":33,\"w\":24,\"h\":14,\"i\":\"6\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Carrier Delay\":\"#5195CE\",\"Late Aircraft Delay\":\"#1F78C1\",\"NAS Delay\":\"#70DBED\",\"No Delay\":\"#BADFF4\",\"Security Delay\":\"#052B51\",\"Weather Delay\":\"#6ED0E0\"}}},\"id\":\"f8290060-4c88-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"panelIndex\":\"7\",\"gridData\":{\"x\":24,\"y\":19,\"w\":24,\"h\":14,\"i\":\"7\"},\"embeddableConfig\":{},\"id\":\"bcb63b50-4c89-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"panelIndex\":\"10\",\"gridData\":{\"x\":0,\"y\":35,\"w\":24,\"h\":12,\"i\":\"10\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Count\":\"#1F78C1\"},\"legendOpen\":false}},\"id\":\"9886b410-4c8b-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"panelIndex\":\"13\",\"gridData\":{\"x\":10,\"y\":19,\"w\":14,\"h\":8,\"i\":\"13\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Count\":\"#1F78C1\"},\"legendOpen\":false}},\"id\":\"76e3c090-4c8c-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"panelIndex\":\"14\",\"gridData\":{\"x\":10,\"y\":27,\"w\":14,\"h\":8,\"i\":\"14\"},\"embeddableConfig\":{\"vis\":{\"colors\":{\"Count\":\"#1F78C1\"},\"legendOpen\":false}},\"id\":\"707665a0-4c8c-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"panelIndex\":\"18\",\"gridData\":{\"x\":24,\"y\":70,\"w\":24,\"h\":15,\"i\":\"18\"},\"embeddableConfig\":{\"mapCenter\":[27.421687059550266,15.371002131141724],\"mapZoom\":1},\"id\":\"79e8ff60-4c8e-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"panelIndex\":\"21\",\"gridData\":{\"x\":0,\"y\":62,\"w\":48,\"h\":8,\"i\":\"21\"},\"embeddableConfig\":{},\"id\":\"293b5a30-4c8f-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"panelIndex\":\"22\",\"gridData\":{\"x\":32,\"y\":0,\"w\":16,\"h\":7,\"i\":\"22\"},\"embeddableConfig\":{},\"id\":\"129be430-4c93-11e8-b3d7-01146121b73d\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"panelIndex\":\"23\",\"gridData\":{\"x\":0,\"y\":70,\"w\":24,\"h\":15,\"i\":\"23\"},\"embeddableConfig\":{\"mapCenter\":[42.19556096274418,9.536742995308601e-7],\"mapZoom\":1},\"id\":\"334084f0-52fd-11e8-a160-89cc2ad9e8e2\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"panelIndex\":\"25\",\"gridData\":{\"x\":0,\"y\":19,\"w\":10,\"h\":8,\"i\":\"25\"},\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 50\":\"rgb(247,251,255)\",\"100 - 150\":\"rgb(107,174,214)\",\"150 - 200\":\"rgb(33,113,181)\",\"200 - 250\":\"rgb(8,48,107)\",\"50 - 100\":\"rgb(198,219,239)\"},\"legendOpen\":false}},\"id\":\"f8283bf0-52fd-11e8-a160-89cc2ad9e8e2\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"panelIndex\":\"27\",\"gridData\":{\"x\":0,\"y\":27,\"w\":10,\"h\":8,\"i\":\"27\"},\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 50\":\"rgb(247,251,255)\",\"100 - 150\":\"rgb(107,174,214)\",\"150 - 200\":\"rgb(33,113,181)\",\"200 - 250\":\"rgb(8,48,107)\",\"50 - 100\":\"rgb(198,219,239)\"},\"legendOpen\":false}},\"id\":\"08884800-52fe-11e8-a160-89cc2ad9e8e2\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"panelIndex\":\"28\",\"gridData\":{\"x\":0,\"y\":47,\"w\":24,\"h\":15,\"i\":\"28\"},\"embeddableConfig\":{\"vis\":{\"defaultColors\":{\"0 - 11\":\"rgb(247,251,255)\",\"11 - 22\":\"rgb(208,225,242)\",\"22 - 33\":\"rgb(148,196,223)\",\"33 - 44\":\"rgb(74,152,201)\",\"44 - 55\":\"rgb(23,100,171)\"},\"legendOpen\":false}},\"id\":\"e6944e50-52fe-11e8-a160-89cc2ad9e8e2\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"panelIndex\":\"29\",\"gridData\":{\"x\":40,\"y\":7,\"w\":8,\"h\":6,\"i\":\"29\"},\"embeddableConfig\":{},\"id\":\"01c413e0-5395-11e8-99bf-1ba7b1bdaa61\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"panelIndex\":\"30\",\"gridData\":{\"x\":40,\"y\":13,\"w\":8,\"h\":6,\"i\":\"30\"},\"embeddableConfig\":{},\"id\":\"2edf78b0-5395-11e8-99bf-1ba7b1bdaa61\",\"type\":\"visualization\",\"version\":\"6.3.0\"},{\"panelIndex\":\"31\",\"gridData\":{\"x\":24,\"y\":47,\"w\":24,\"h\":15,\"i\":\"31\"},\"embeddableConfig\":{},\"id\":\"ed78a660-53a0-11e8-acbd-0be0ad9d822b\",\"type\":\"visualization\",\"version\":\"6.3.0\"}]",
       "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
       "version": 1,
       "timeRestore": true,
@@ -549,103 +440,6 @@ export const getSavedObjects = () => [
       "kibanaSavedObjectMeta": {
         "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[],\"highlightAll\":true,\"version\":true}"
       }
-    },
-    "references": [
-      {
-        "name": "panel_0",
-        "type": "visualization",
-        "id": "aeb212e0-4c84-11e8-b3d7-01146121b73d"
-      },
-      {
-        "name": "panel_1",
-        "type": "visualization",
-        "id": "c8fc3d30-4c87-11e8-b3d7-01146121b73d"
-      },
-      {
-        "name": "panel_2",
-        "type": "search",
-        "id": "571aaf70-4c88-11e8-b3d7-01146121b73d"
-      },
-      {
-        "name": "panel_3",
-        "type": "visualization",
-        "id": "8f4d0c00-4c86-11e8-b3d7-01146121b73d"
-      },
-      {
-        "name": "panel_4",
-        "type": "visualization",
-        "id": "f8290060-4c88-11e8-b3d7-01146121b73d"
-      },
-      {
-        "name": "panel_5",
-        "type": "visualization",
-        "id": "bcb63b50-4c89-11e8-b3d7-01146121b73d"
-      },
-      {
-        "name": "panel_6",
-        "type": "visualization",
-        "id": "9886b410-4c8b-11e8-b3d7-01146121b73d"
-      },
-      {
-        "name": "panel_7",
-        "type": "visualization",
-        "id": "76e3c090-4c8c-11e8-b3d7-01146121b73d"
-      },
-      {
-        "name": "panel_8",
-        "type": "visualization",
-        "id": "707665a0-4c8c-11e8-b3d7-01146121b73d"
-      },
-      {
-        "name": "panel_9",
-        "type": "visualization",
-        "id": "79e8ff60-4c8e-11e8-b3d7-01146121b73d"
-      },
-      {
-        "name": "panel_10",
-        "type": "visualization",
-        "id": "293b5a30-4c8f-11e8-b3d7-01146121b73d"
-      },
-      {
-        "name": "panel_11",
-        "type": "visualization",
-        "id": "129be430-4c93-11e8-b3d7-01146121b73d"
-      },
-      {
-        "name": "panel_12",
-        "type": "visualization",
-        "id": "334084f0-52fd-11e8-a160-89cc2ad9e8e2"
-      },
-      {
-        "name": "panel_13",
-        "type": "visualization",
-        "id": "f8283bf0-52fd-11e8-a160-89cc2ad9e8e2"
-      },
-      {
-        "name": "panel_14",
-        "type": "visualization",
-        "id": "08884800-52fe-11e8-a160-89cc2ad9e8e2"
-      },
-      {
-        "name": "panel_15",
-        "type": "visualization",
-        "id": "e6944e50-52fe-11e8-a160-89cc2ad9e8e2"
-      },
-      {
-        "name": "panel_16",
-        "type": "visualization",
-        "id": "01c413e0-5395-11e8-99bf-1ba7b1bdaa61"
-      },
-      {
-        "name": "panel_17",
-        "type": "visualization",
-        "id": "2edf78b0-5395-11e8-99bf-1ba7b1bdaa61"
-      },
-      {
-        "name": "panel_18",
-        "type": "visualization",
-        "id": "ed78a660-53a0-11e8-acbd-0be0ad9d822b"
-      }
-    ]
+    }
   }
 ];
