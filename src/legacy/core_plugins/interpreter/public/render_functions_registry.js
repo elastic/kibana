@@ -17,41 +17,6 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { RenderFunctionsRegistry } from '@kbn/interpreter/public';
 
-export const tagcloud = () => ({
-  name: 'tagcloud',
-  type: 'render',
-  context: {
-    types: [
-      'datatable'
-    ],
-  },
-  help: i18n.translate('interpreter.functions.tagcloud.help', {
-    defaultMessage: 'Tagcloud visualization'
-  }),
-  args: {
-    visConfig: {
-      types: ['string', 'null'],
-      default: '"{}"',
-    },
-  },
-  fn(context, args) {
-    const visConfigParams = JSON.parse(args.visConfig);
-
-    return {
-      type: 'render',
-      as: 'visualization',
-      value: {
-        visData: context,
-        visConfig: {
-          type: 'tag_cloud',
-          params: visConfigParams,
-        },
-        params: {
-          listenOnChange: true,
-        }
-      },
-    };
-  },
-});
+export const renderFunctionsRegistry = new RenderFunctionsRegistry();

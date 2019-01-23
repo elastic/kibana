@@ -17,41 +17,13 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { Registry } from '../common';
+import { RenderFunction } from './render_function';
 
-export const tagcloud = () => ({
-  name: 'tagcloud',
-  type: 'render',
-  context: {
-    types: [
-      'datatable'
-    ],
-  },
-  help: i18n.translate('interpreter.functions.tagcloud.help', {
-    defaultMessage: 'Tagcloud visualization'
-  }),
-  args: {
-    visConfig: {
-      types: ['string', 'null'],
-      default: '"{}"',
-    },
-  },
-  fn(context, args) {
-    const visConfigParams = JSON.parse(args.visConfig);
+class RenderFunctionsRegistry extends Registry {
+  wrapper(obj) {
+    return new RenderFunction(obj);
+  }
+}
 
-    return {
-      type: 'render',
-      as: 'visualization',
-      value: {
-        visData: context,
-        visConfig: {
-          type: 'tag_cloud',
-          params: visConfigParams,
-        },
-        params: {
-          listenOnChange: true,
-        }
-      },
-    };
-  },
-});
+export { RenderFunctionsRegistry };

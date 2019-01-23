@@ -66,8 +66,7 @@ export class Plugin {
       this._server = server;
       this._options = options;
 
-      server.log(['plugins', 'debug'], {
-        tmpl: 'Initializing plugin <%= plugin.toString() %>',
+      server.logWithMetadata(['plugins', 'debug'], `Initializing plugin ${this.toString()}`, {
         plugin: this
       });
 
