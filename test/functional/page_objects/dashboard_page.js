@@ -457,7 +457,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async getPanelTitles() {
       log.debug('in getPanelTitles');
       const titleObjects = await testSubjects.findAll('dashboardPanelTitle');
-      console.log(`found ${titleObjects.length} titles`);
       return await Promise.all(titleObjects.map(async title => await title.getVisibleText()));
     }
 

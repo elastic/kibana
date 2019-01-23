@@ -691,7 +691,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         timeout: defaultFindTimeout
       });
       expect(successToast).to.be(true);
-      await this.waitForVisualization();
     }
 
     async saveVisualizationExpectSuccessAndBreadcrumb(vizName, { saveAsNew = false } = {}) {
