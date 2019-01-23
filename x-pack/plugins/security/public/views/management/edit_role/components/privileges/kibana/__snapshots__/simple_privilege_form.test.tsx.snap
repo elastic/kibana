@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiDescribedFormGroup
     description={
       <p>
@@ -45,5 +45,5 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
       />
     </EuiFormRow>
   </EuiDescribedFormGroup>
-</React.Fragment>
+</Fragment>
 `;

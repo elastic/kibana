@@ -169,6 +169,7 @@ export class QueryBarUI extends Component<Props, State> {
     },
     inputIsPristine: true,
     isSuggestionsVisible: false,
+    currentProps: this.props,
     index: null,
     suggestions: [],
     suggestionLimit: 50,
