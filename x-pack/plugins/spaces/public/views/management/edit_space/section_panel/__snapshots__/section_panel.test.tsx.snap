@@ -47,7 +47,7 @@ exports[`it renders without blowing up 1`] = `
         onClick={[Function]}
         type="button"
       >
-        hide desc
+        hide
       </EuiLink>
     </EuiFlexItem>
   </EuiFlexGroup>
