@@ -5,6 +5,7 @@
  */
 
 import { shallow } from 'enzyme';
+import { Location } from 'history';
 import 'jest-styled-components';
 import React from 'react';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
