@@ -546,6 +546,114 @@ describe('#getUIManagementReadActions', () => {
     ]);
   });
 
+  test(`includes management actions from the feature when not specified on the privilege`, () => {
+    const actions = new Actions(versionNumber);
+    const builder = new FeaturesPrivilegesBuilder(actions);
+    const features: Feature[] = [
+      {
+        id: 'foo',
+        name: '',
+        privileges: {
+          // wrong privilege name
+          bar: {
+            app: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+          // no management read privileges
+          read: {
+            app: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+      },
+      {
+        id: 'bar',
+        name: '',
+        management: {
+          kibana: ['fooManagementLink', 'otherManagementLink'],
+          es: ['barManagementLink', 'bazManagementLink'],
+        },
+        privileges: {
+          read: {
+            app: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+      },
+    ];
+    const result = builder.getUIManagementReadActions(features);
+    expect(result).toEqual([
+      actions.ui.get('management', 'kibana', 'fooManagementLink'),
+      actions.ui.get('management', 'kibana', 'otherManagementLink'),
+      actions.ui.get('management', 'es', 'barManagementLink'),
+      actions.ui.get('management', 'es', 'bazManagementLink'),
+    ]);
+  });
+
+  test(`excludes management actions when an empty object is specified on the privilege`, () => {
+    const actions = new Actions(versionNumber);
+    const builder = new FeaturesPrivilegesBuilder(actions);
+    const features: Feature[] = [
+      {
+        id: 'foo',
+        name: '',
+        privileges: {
+          // wrong privilege name
+          bar: {
+            app: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+          // no management read privileges
+          read: {
+            app: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+      },
+      {
+        id: 'bar',
+        name: '',
+        management: {
+          kibana: ['fooManagementLink', 'otherManagementLink'],
+          es: ['barManagementLink', 'bazManagementLink'],
+        },
+        privileges: {
+          read: {
+            app: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+            management: {},
+          },
+        },
+      },
+    ];
+    const result = builder.getUIManagementReadActions(features);
+    expect(result).toEqual([]);
+  });
+
   test(`includes management actions from other privileges when "grantWithBaseRead" is true`, () => {
     const actions = new Actions(versionNumber);
     const builder = new FeaturesPrivilegesBuilder(actions);
@@ -668,6 +776,108 @@ describe('#getUICatalogueReadActions', () => {
       actions.ui.get('catalogue', 'barCatalogueLink'),
       actions.ui.get('catalogue', 'bazCatalogueLink'),
     ]);
+  });
+
+  test(`includes catalogue actions from the feature when not specified on the privilege`, () => {
+    const actions = new Actions(versionNumber);
+    const builder = new FeaturesPrivilegesBuilder(actions);
+    const features: Feature[] = [
+      {
+        id: 'foo',
+        name: '',
+        privileges: {
+          // wrong privilege name
+          bar: {
+            catalogue: [],
+            app: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+          // no catalogue read privileges
+          read: {
+            app: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+      },
+      {
+        id: 'bar',
+        name: '',
+        catalogue: ['barCatalogueLink', 'bazCatalogueLink', 'anotherCatalogueLink'],
+        privileges: {
+          read: {
+            app: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+      },
+    ];
+    const result = builder.getUICatalogueReadActions(features);
+    expect(result).toEqual([
+      actions.ui.get('catalogue', 'barCatalogueLink'),
+      actions.ui.get('catalogue', 'bazCatalogueLink'),
+      actions.ui.get('catalogue', 'anotherCatalogueLink'),
+    ]);
+  });
+
+  test(`excludes catalogue actions from the feature when an empty array is specified on the privilege`, () => {
+    const actions = new Actions(versionNumber);
+    const builder = new FeaturesPrivilegesBuilder(actions);
+    const features: Feature[] = [
+      {
+        id: 'foo',
+        name: '',
+        privileges: {
+          // wrong privilege name
+          bar: {
+            catalogue: [],
+            app: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+          // no catalogue read privileges
+          read: {
+            app: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+      },
+      {
+        id: 'bar',
+        name: '',
+        catalogue: [],
+        privileges: {
+          read: {
+            app: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+      },
+    ];
+    const result = builder.getUICatalogueReadActions(features);
+    expect(result).toEqual([]);
   });
 
   test(`includes catalogue actions from other privileges when "grantWithBaseRead" is true`, () => {

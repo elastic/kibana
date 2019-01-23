@@ -78,15 +78,13 @@ export class FeaturesPrivilegesBuilder {
   public getUICatalogueReadActions(features: Feature[]): string[] {
     const allCatalogueReadActions = flatten(
       features.map(feature => {
-        const { privileges } = feature;
-        if (!privileges) {
-          return [];
-        }
+        const { privileges = {}, catalogue: featureCatalogueEntries } = feature;
 
         const catalogueReadActions = Object.entries(privileges).reduce<string[]>(
           (acc, [privilegeId, privilege]) => {
             if (this.includeInBaseRead(privilegeId, privilege)) {
-              return [...acc, ...this.buildCatalogueFeaturePrivileges(privilege)];
+              const catalogueEntries = privilege.catalogue || featureCatalogueEntries;
+              return [...acc, ...this.buildCatalogueFeaturePrivileges(catalogueEntries)];
             }
             return acc;
           },
@@ -103,15 +101,13 @@ export class FeaturesPrivilegesBuilder {
   public getUIManagementReadActions(features: Feature[]): string[] {
     const allManagementReadActions = flatten(
       features.map(feature => {
-        const { privileges } = feature;
-        if (!privileges) {
-          return [];
-        }
+        const { privileges = {}, management: featureManagementSections } = feature;
 
         const managementReadActions = Object.entries(privileges).reduce<string[]>(
           (acc, [privilegeId, privilege]) => {
             if (this.includeInBaseRead(privilegeId, privilege)) {
-              return [...acc, ...this.buildManagementFeaturePrivileges(privilege)];
+              const managementSections = privilege.management || featureManagementSections;
+              return [...acc, ...this.buildManagementFeaturePrivileges(managementSections)];
             }
             return acc;
           },
@@ -126,7 +122,7 @@ export class FeaturesPrivilegesBuilder {
   }
 
   private includeInBaseRead(privilegeId: string, privilege: FeaturePrivilegeDefinition): boolean {
-    return privilegeId === 'read' || !!privilege.grantWithBaseRead;
+    return privilegeId === 'read' || Boolean(privilege.grantWithBaseRead);
   }
 
   private buildFeaturePrivileges(feature: Feature): Dictionary<string[]> {
@@ -149,31 +145,29 @@ export class FeaturesPrivilegesBuilder {
       ),
       ...privilegeDefinition.ui.map(ui => this.actions.ui.get(feature.id, ui)),
       ...(feature.navLinkId ? [this.actions.ui.get('navLinks', feature.navLinkId)] : []),
-      ...this.buildCatalogueFeaturePrivileges(privilegeDefinition),
-      ...this.buildManagementFeaturePrivileges(privilegeDefinition),
+      ...this.buildCatalogueFeaturePrivileges(privilegeDefinition.catalogue),
+      ...this.buildManagementFeaturePrivileges(privilegeDefinition.management),
     ]);
   }
 
-  private buildCatalogueFeaturePrivileges(
-    privilegeDefinition: FeaturePrivilegeDefinition
-  ): string[] {
-    if (!privilegeDefinition.catalogue) {
+  private buildCatalogueFeaturePrivileges(catalogueEntries?: string[]): string[] {
+    if (!catalogueEntries) {
       return [];
     }
 
-    return privilegeDefinition.catalogue.map(catalogueEntryId =>
+    return catalogueEntries.map(catalogueEntryId =>
       this.actions.ui.get('catalogue', catalogueEntryId)
     );
   }
 
-  private buildManagementFeaturePrivileges(
-    privilegeDefinition: FeaturePrivilegeDefinition
-  ): string[] {
-    if (!privilegeDefinition.management) {
+  private buildManagementFeaturePrivileges(managementSections?: {
+    [managementSectionId: string]: string[];
+  }): string[] {
+    if (!managementSections) {
       return [];
     }
 
-    return Object.entries(privilegeDefinition.management).reduce(
+    return Object.entries(managementSections).reduce(
       (acc, [sectionId, items]) => {
         return [...acc, ...items.map(item => this.actions.ui.get('management', sectionId, item))];
       },
