@@ -23,9 +23,9 @@ export const pingsSchema = gql`
       size: Int
       monitorId: String
       status: String
-      dateRangeStart: UnsignedInteger!
-      dateRangeEnd: UnsignedInteger!
-    ): PingResults!
+      dateRangeStart: String!
+      dateRangeEnd: String!
+    ): [Ping!]!
 
     "Gets the number of documents in the target index"
     getDocCount: DocCount!
