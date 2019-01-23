@@ -33,15 +33,18 @@ import 'whatwg-fetch';
 import 'abortcontroller-polyfill';
 import 'childnode-remove-polyfill';
 
+import { i18n } from '@kbn/i18n';
 import { CoreSystem } from '__kibanaCore__'
 
 const injectedMetadata = JSON.parse(document.querySelector('kbn-injected-metadata').getAttribute('data'));
 
-new CoreSystem({
-  injectedMetadata,
-  rootDomElement: document.body,
-  requireLegacyFiles: () => {
-    ${bundle.getRequires().join('\n  ')}
-  }
-}).start()
+i18n.load(injectedMetadata.i18n.translationsUrl).then(() => {
+  new CoreSystem({
+    injectedMetadata,
+    rootDomElement: document.body,
+    requireLegacyFiles: () => {
+      ${bundle.getRequires().join('\n  ')}
+    }
+  }).start();
+}, (e) => console.error(e));
 `;

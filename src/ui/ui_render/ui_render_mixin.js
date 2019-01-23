@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { createHash } from 'crypto';
 import { props, reduce as reduceAsync } from 'bluebird';
 import Boom from 'boom';
 import { resolve } from 'path';
@@ -53,6 +54,26 @@ export function uiRenderMixin(kbnServer, server, config) {
 
   // expose built css
   server.exposeStaticDir('/built_assets/css/{path*}', fromRoot('built_assets/css'));
+
+  server.route({
+    path: '/bundles/translations/{locale}.json',
+    method: 'GET',
+    config: { auth: false },
+    handler(request, h) {
+      // Kibana server loads translations only for a single locale
+      // that is specified in `i18n.locale` config value.
+      const { locale } = request.params;
+      if (i18n.getLocale() !== locale.toLowerCase()) {
+        throw Boom.notFound(`Unknown locale: ${locale}`);
+      }
+
+      const translation = JSON.stringify(i18n.getTranslation());
+      return h.response(translation)
+        .header('cache-control', 'must-revalidate')
+        .header('content-type', 'application/json')
+        .etag(createHash('sha1').update(translation).digest('hex'));
+    }
+  });
 
   server.route({
     path: '/bundles/app/{id}/bootstrap.js',
@@ -150,12 +171,15 @@ export function uiRenderMixin(kbnServer, server, config) {
       uiPublicUrl: `${basePath}/ui`,
       bootstrapScriptUrl: `${basePath}/bundles/app/${app.getId()}/bootstrap.js`,
       i18n: (id, options) => i18n.translate(id, options),
-      locale: i18n.getLocale(),
 
       injectedMetadata: {
         version: kbnServer.version,
         buildNumber: config.get('pkg.buildNum'),
         basePath,
+        i18n: {
+          locale: i18n.getLocale(),
+          translationsUrl: `${basePath}/bundles/translations/${i18n.getLocale()}.json`,
+        },
         vars: await replaceInjectedVars(
           request,
           mergeVariables(

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { writeFile } from 'fs';
 import os from 'os';
 import Boom from 'boom';
@@ -272,10 +271,6 @@ export default class BaseOptimizer {
           uiBundles: this.uiBundles,
           threadLoaderPoolConfig: this.getThreadLoaderPoolConfig(),
           logWithMetadata: this.logWithMetadata
-        }),
-
-        new webpack.DefinePlugin({
-          __WEBPACK_TRANSLATIONS__: JSON.stringify(i18n.getTranslation()),
         }),
 
         new MiniCssExtractPlugin({

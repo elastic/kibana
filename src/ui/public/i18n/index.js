@@ -18,11 +18,11 @@
  */
 
 import { uiModules } from 'ui/modules';
-import { i18n } from '@kbn/i18n';
-import { I18nProvider, i18nFilter, i18nDirective } from '@kbn/i18n/angular';
-
-// eslint-disable-next-line no-undef
-i18n.init(__WEBPACK_TRANSLATIONS__);
+import {
+  I18nProvider,
+  i18nFilter,
+  i18nDirective,
+} from '@kbn/i18n/angular';
 
 uiModules.get('i18n')
   .provider('i18n', I18nProvider)
