@@ -80,10 +80,6 @@ uiModules
           $scope.dateFormat = dateFormat ? dateFormat : config.get('dateFormat');
         });
 
-        $scope.toggleRefresh = () => {
-          timefilter.toggleRefresh();
-        };
-
         $scope.updateFilter = function ({ start, end }) {
           timefilter.setTime({ from: start, to: end });
         };
