@@ -19,6 +19,7 @@
 
 const execa = require('execa');
 const chalk = require('chalk');
+const path = require('path');
 const { downloadSnapshot, installSnapshot, installSource, installArchive } = require('./install');
 const { ES_BIN } = require('./paths');
 const { log: defaultLog, parseEsLog, extractConfigFiles, decompress } = require('./utils');
@@ -124,12 +125,14 @@ exports.Cluster = class Cluster {
    * @param {String} archivePath
    */
   async extractDataDirectory(installPath, archivePath) {
-    this._log.info(chalk.bold(`Extracing data directory`));
+    this._log.info(chalk.bold(`Extracting data directory`));
     this._log.indent(4);
     this._log.info(`Data archive: ${archivePath}`);
     this._log.info(`Install path: ${installPath}`);
 
-    await decompress(archivePath, installPath);
+    // decompress excludes the root directory as that is how our archives are
+    // structured. This works in our favor as we can explicitly extract into the data dir
+    await decompress(archivePath, path.resolve(installPath, 'data'));
 
     this._log.indent(-4);
   }
