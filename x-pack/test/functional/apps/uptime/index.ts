@@ -8,10 +8,9 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 // tslint:disable-next-line:no-default-export
 export default ({ loadTestFile }: KibanaFunctionalTestDefaultProviders) => {
-  describe('Uptime app', () => {
-    // @ts-ignore
+  describe('Uptime app', function() {
     this.tags('ciGroup6');
 
-    loadTestFile(require.resolve('./overview'));
+    loadTestFile(require.resolve('./home_page'));
   });
 };
