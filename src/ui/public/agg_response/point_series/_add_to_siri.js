@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { findLastIndex } from 'lodash';
 
 function instantiateZeroFilledArray({ xKeys, series }) {
   // borrowed from `ui/public/vislib/components/zero_injection/zero_filled_array`
@@ -36,19 +37,17 @@ export function addToSiri(xKeys, series, point, id, label, agg) {
       aggLabel: agg.type ? agg.type.makeLabel(agg) : label,
       aggId: agg.parentId ? agg.parentId : agg.id,
       count: 0,
-      values: instantiateZeroFilledArray({ xKeys: xKeys.ordered, series: label }),
+      values: instantiateZeroFilledArray({ xKeys, series: label }),
     });
   }
 
   const seriesValues = series.get(id).values;
-  const xIndex = xKeys.indexMap[point.x];
-  if (seriesValues[xIndex].xi) {
+  const lastXIndex = findLastIndex(seriesValues, v => v.x === point.x);
+  if (seriesValues[lastXIndex].xi) {
     // update the ordered, zero-filled array with the "real" value
-    seriesValues[xIndex] = point;
+    seriesValues[lastXIndex] = point;
   } else {
     // add the point to the list of values at the correct position
-    seriesValues.splice(xIndex, 0, point);
-    // TODO: recalculate values in xKeys.indexMap
+    seriesValues.splice(lastXIndex + 1, 0, point);
   }
-  return;
 }

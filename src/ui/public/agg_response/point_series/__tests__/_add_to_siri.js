@@ -21,15 +21,7 @@ import expect from 'expect.js';
 import { addToSiri } from '../_add_to_siri';
 
 describe('addToSiri', function () {
-  const xKeys = {
-    ordered: ['', 'foo', 'bar', 'baz'],
-    indexMap: {
-      '': 0,
-      foo: 1,
-      bar: 2,
-      baz: 3,
-    }
-  };
+  const xKeys = ['', 'foo', 'bar', 'baz'];
 
   it('creates a new series the first time it sees an id', function () {
     const series = new Map();
