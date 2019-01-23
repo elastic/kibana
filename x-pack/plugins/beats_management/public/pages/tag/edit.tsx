@@ -43,7 +43,7 @@ class TagEditPageComponent extends React.PureComponent<
       tag: {
         id: props.match.params.tagid,
         name: '',
-        color: '#000',
+        color: '#fff',
         hasConfigurationBlocksTypes: [],
       },
       configuration_blocks: {
@@ -64,6 +64,7 @@ class TagEditPageComponent extends React.PureComponent<
 
     return (
       <PrimaryLayout
+        hideBreadcrumbs={this.props.libs.framework.versionGreaterThen('6.7.0')}
         title={intl.formatMessage(
           {
             id: 'xpack.beatsManagement.tag.updateTagTitle',
@@ -127,7 +128,7 @@ class TagEditPageComponent extends React.PureComponent<
               <EuiButton
                 fill
                 disabled={
-                  this.state.tag.id.search(/^[a-zA-Z0-9-]+$/) === -1 ||
+                  this.state.tag.id.search(/^[A-Za-z0-9? ,_-]+$/) === -1 ||
                   this.state.tag.id === '' ||
                   this.getNumExclusiveConfigurationBlocks() > 1 // || this.state.tag.configuration_blocks.length === 0
                 }

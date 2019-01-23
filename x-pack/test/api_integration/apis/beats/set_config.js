@@ -21,7 +21,7 @@ export default function ({ getService }) {
 
     it('should create a configuration block', async () => {
       const tagId = 'qa';
-      const response = await supertest
+      await supertest
         .put(`/api/beats/configurations`)
         .set('kbn-xsrf', 'xxx')
         .send([
@@ -32,7 +32,6 @@ export default function ({ getService }) {
           },
         ])
         .expect(201);
-      console.log(response);
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
         type: ES_TYPE_NAME,

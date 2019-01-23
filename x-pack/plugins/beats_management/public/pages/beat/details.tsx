@@ -84,6 +84,9 @@ class BeatDetailPageUi extends React.PureComponent<PageProps, PageState> {
           tagColor:
             ((this.state.tags || []).find(tag => tag.id === configuration.tag) || ({} as BeatTag))
               .color || 'grey',
+          tagName:
+            ((this.state.tags || []).find(tag => tag.id === configuration.tag) || ({} as BeatTag))
+              .name || configuration.tag,
           ...beat,
           ...configuration,
           displayValue: get(
@@ -141,7 +144,7 @@ class BeatDetailPageUi extends React.PureComponent<PageProps, PageState> {
           <ConnectedLink path={`/tag/edit/${id}`}>
             <TagBadge
               maxIdRenderSize={TABLE_CONFIG.TRUNCATE_TAG_LENGTH_SMALL}
-              tag={{ color: block.tagColor, id }}
+              tag={{ color: block.tagColor, id, name: block.tagName }}
             />
           </ConnectedLink>
         ),

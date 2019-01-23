@@ -64,6 +64,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
 
   public render() {
     const { tag, attachedBeats, configuration_blocks } = this.props;
+
     return (
       <div>
         <EuiFlexGroup>
@@ -85,7 +86,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
               </p>
             </EuiText>
             <div>
-              <TagBadge tag={{ color: tag.color || '#FF0', id: tag.name }} />
+              <TagBadge tag={tag} />
             </div>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -104,22 +105,19 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
                   name="name"
                   isInvalid={!!this.getNameError(tag.name)}
                   onChange={this.updateTag('name')}
-                  disabled={!!this.props.onDetachBeat}
                   value={tag.name}
                   placeholder={i18n.translate('xpack.beatsManagement.tag.tagNamePlaceholder', {
                     defaultMessage: 'Tag name (required)',
                   })}
                 />
               </EuiFormRow>
-              {!this.props.onDetachBeat && (
-                <EuiFormRow
-                  label={i18n.translate('xpack.beatsManagement.tag.tagColorLabel', {
-                    defaultMessage: 'Tag Color',
-                  })}
-                >
-                  <EuiColorPicker color={tag.color} onChange={this.updateTag('color')} />
-                </EuiFormRow>
-              )}
+              <EuiFormRow
+                label={i18n.translate('xpack.beatsManagement.tag.tagColorLabel', {
+                  defaultMessage: 'Tag Color',
+                })}
+              >
+                <EuiColorPicker color={tag.color} onChange={this.updateTag('color')} />
+              </EuiFormRow>
             </EuiForm>
           </EuiFlexItem>
         </EuiFlexGroup>

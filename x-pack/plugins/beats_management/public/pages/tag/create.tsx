@@ -50,6 +50,7 @@ class TagCreatePageComponent extends React.PureComponent<
     const blockStartingIndex = this.state.currentConfigPage * 5;
     return (
       <PrimaryLayout
+        hideBreadcrumbs={this.props.libs.framework.versionGreaterThen('6.7.0')}
         title={intl.formatMessage({
           id: 'xpack.beatsManagement.tag.createTagTitle',
           defaultMessage: 'Create Tag',
@@ -95,8 +96,8 @@ class TagCreatePageComponent extends React.PureComponent<
               <EuiButton
                 fill
                 disabled={
-                  this.state.tag.id.search(/^[a-zA-Z0-9-]+$/) === -1 ||
-                  this.state.tag.id === '' ||
+                  this.state.tag.name.search(/^[A-Za-z0-9? ,_-]+$/) === -1 ||
+                  this.state.tag.name === '' ||
                   this.getNumExclusiveConfigurationBlocks() > 1 // || this.state.tag.configuration_blocks.length === 0
                 }
                 onClick={this.saveTag}

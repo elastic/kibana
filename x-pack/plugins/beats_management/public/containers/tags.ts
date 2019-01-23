@@ -47,11 +47,7 @@ export class TagsContainer extends Container<ContainerState> {
 
   public upsertTag = async (tag: BeatTag) => {
     const beatTag = await this.libs.tags.upsertTag(tag);
-    if (beatTag !== null) {
-      this.setState({
-        list: this.state.list.concat([beatTag]),
-      });
-    }
+    await this.reload();
     return beatTag !== null;
   };
 }

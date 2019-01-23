@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import uuidv4 from 'uuid/v4';
 import { BeatTag, CMBeat } from '../../common/domain_types';
 import { CMTagsAdapter } from './adapters/tags/adapter_types';
 
@@ -10,6 +11,9 @@ export class TagsLib {
   constructor(private readonly adapter: CMTagsAdapter) {}
 
   public async getTagsWithIds(tagIds: string[]): Promise<BeatTag[]> {
+    if (tagIds.length === 0) {
+      return [];
+    }
     return await this.adapter.getTagsWithIds([...new Set(tagIds)]);
   }
   public async delete(tagIds: string[]): Promise<boolean> {
@@ -21,7 +25,9 @@ export class TagsLib {
     return await this.adapter.getAll(ESQuery);
   }
   public async upsertTag(tag: BeatTag): Promise<BeatTag | null> {
-    tag.id = tag.id.replace(' ', '-');
+    if (!tag.id) {
+      tag.id = uuidv4();
+    }
     return await this.adapter.upsertTag(tag);
   }
 
