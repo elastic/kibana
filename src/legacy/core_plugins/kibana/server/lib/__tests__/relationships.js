@@ -27,7 +27,6 @@ describe('findRelationships', () => {
     const size = 10;
 
     const savedObjectsClient = {
-      types: ['dashboard', 'visualization', 'search', 'index-pattern'],
       get: () => ({
         attributes: {
           panelsJSON: JSON.stringify([{ panelRef: 'panel_0' }, { panelRef: 'panel_1' }, { panelRef: 'panel_2' }]),
@@ -96,7 +95,6 @@ describe('findRelationships', () => {
     const size = 10;
 
     const savedObjectsClient = {
-      types: ['dashboard', 'visualization', 'search', 'index-pattern'],
       get: () => ({
         attributes: {
           kibanaSavedObjectMeta: {
@@ -187,7 +185,6 @@ describe('findRelationships', () => {
     const size = 10;
 
     const savedObjectsClient = {
-      types: ['dashboard', 'visualization', 'search', 'index-pattern'],
       get: () => ({
         id: '1',
         type: 'search',
@@ -266,7 +263,6 @@ describe('findRelationships', () => {
     const size = 10;
 
     const savedObjectsClient = {
-      types: ['dashboard', 'visualization', 'search', 'index-pattern'],
       get: () => ({
         id: '1',
         type: 'index-pattern',
@@ -343,7 +339,6 @@ describe('findRelationships', () => {
     const size = 10;
 
     const savedObjectsClient = {
-      types: ['dashboard', 'visualization', 'search', 'index-pattern'],
       get: () => ({
         id: '1',
         type: 'index-pattern',

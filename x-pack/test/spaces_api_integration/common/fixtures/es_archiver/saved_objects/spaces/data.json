@@ -62,7 +62,8 @@
       "namespace": "space_2",
       "dashboard": {
         "description": "Space 2",
-        "title": "This is the second test space"
+        "title": "This is the second test space",
+        "panelsJSON": "[]"
       }
     }
   }
@@ -80,7 +81,8 @@
       "namespace": "space_1",
       "dashboard": {
         "description": "Space 1",
-        "title": "This is the second test space"
+        "title": "This is the second test space",
+        "panelsJSON": "[]"
       }
     }
   }
@@ -97,7 +99,8 @@
       "updated_at": "2017-09-21T18:49:16.270Z",
       "dashboard": {
         "description": "Default Space",
-        "title": "This is the default test space"
+        "title": "This is the default test space",
+        "panelsJSON": "[]"
       }
     }
   }

@@ -25,7 +25,6 @@ export async function findRelationships(type, id, options = {}) {
 
   const { references = [] } = await savedObjectsClient.get(type, id);
   const bulkGetOpts = references.map(ref => ({ id: ref.id, type: ref.type }));
-  const allTypes = savedObjectsClient.types.filter(type => type !== 'space');
 
   const [{ saved_objects: referencedObjects }, referencedResponse] = await Promise.all([
     bulkGetOpts.length > 0
@@ -35,8 +34,7 @@ export async function findRelationships(type, id, options = {}) {
       referencedBy: { type, id },
       perPage: size,
       fields: ['title'],
-      type: allTypes,
-    })
+    }),
   ]);
 
   const relationshipObjects = [].concat(
