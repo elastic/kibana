@@ -355,7 +355,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       });
       await retry.try(async () => {
         const currentUrl = await browser.getCurrentUrl();
-        if (currentUrl.match(/indices\/.+\?/)) {
+        if (currentUrl.match(/index_patterns\/.+\?/)) {
           throw new Error('Index pattern not removed');
         }
       });
