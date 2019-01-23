@@ -89,6 +89,7 @@ function getExplorerDefaultState() {
     influencers: {},
     loading: true,
     noInfluencersConfigured: true,
+    noJobsFound: true,
     overallSwimlaneData: [],
     selectedCells: null,
     selectedJobs: null,
@@ -111,8 +112,10 @@ function mapSwimlaneOptionsToEuiOptions(options) {
 export const Explorer = injectI18n(
   class Explorer extends React.Component {
     static propTypes = {
-      noJobsFound: PropTypes.bool,
-      loading: PropTypes.bool,
+      appStateHandler: PropTypes.func.isRequired,
+      dateFormatTz: PropTypes.string.isRequired,
+      mlJobSelectService: PropTypes.object.isRequired,
+      MlTimeBuckets: PropTypes.func.isRequired,
     };
 
     state = getExplorerDefaultState();
@@ -174,10 +177,10 @@ export const Explorer = injectI18n(
       }
     });
 
-    dashboardListener = ((action, payload) => {
+    dashboardListener = ((action, payload = {}) => {
       // Listen to the initial loading of jobs
       if (action === EXPLORER_ACTION.INITIALIZE) {
-        const { selectedCells, selectedJobs, swimlaneViewByFieldName } = payload;
+        const { noJobsFound, selectedCells, selectedJobs, swimlaneViewByFieldName } = payload;
         let currentSelectedCells = this.state.selectedCells;
         let currentSwimlaneViewByFieldName = this.state.swimlaneViewByFieldName;
 
@@ -188,6 +191,7 @@ export const Explorer = injectI18n(
 
         const stateUpdate = {
           noInfluencersConfigured: !selectedJobsHaveInfluencers(selectedJobs),
+          noJobsFound,
           selectedCells: currentSelectedCells,
           selectedJobs,
           swimlaneViewByFieldName: currentSwimlaneViewByFieldName
@@ -199,8 +203,6 @@ export const Explorer = injectI18n(
       // Listen for changes to job selection.
       if (action === EXPLORER_ACTION.JOB_SELECTION_CHANGE) {
         const { selectedJobs } = payload;
-        this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
-
         const stateUpdate = {
           noInfluencersConfigured: !selectedJobsHaveInfluencers(selectedJobs),
           selectedJobs,
@@ -225,10 +227,10 @@ export const Explorer = injectI18n(
         this.updateExplorer(stateUpdate, true);
       }
 
-      // REFRESH reloads full Anomaly Explorer and clears the selection.
-      if (action === EXPLORER_ACTION.REFRESH) {
+      // RELOAD reloads full Anomaly Explorer and clears the selection.
+      if (action === EXPLORER_ACTION.RELOAD) {
         this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
-        this.updateExplorer(getClearedSelectedAnomaliesState(), true);
+        this.updateExplorer({ ...payload, ...getClearedSelectedAnomaliesState() }, true);
       }
 
       // REDRAW reloads Anomaly Explorer and tries to retain the selection.
@@ -604,6 +606,7 @@ export const Explorer = injectI18n(
     async updateExplorer(stateUpdate, showOverallLoadingIndicator = true) {
       const {
         noInfluencersConfigured,
+        noJobsFound,
         selectedCells,
         selectedJobs,
       } = {
@@ -612,6 +615,11 @@ export const Explorer = injectI18n(
       };
 
       this.skipCellClicks = false;
+
+      if (noJobsFound) {
+        this.setState(stateUpdate);
+        return;
+      }
 
       if (this.swimlaneCellClickQueue.length > 0) {
         this.setState(stateUpdate);
@@ -849,7 +857,6 @@ export const Explorer = injectI18n(
     render() {
       const {
         intl,
-        noJobsFound,
         MlTimeBuckets,
       } = this.props;
 
@@ -860,6 +867,7 @@ export const Explorer = injectI18n(
         influencers,
         hasResults,
         noInfluencersConfigured,
+        noJobsFound,
         overallSwimlaneData,
         selectedCells,
         swimlaneViewByFieldName,

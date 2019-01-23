@@ -19,9 +19,9 @@ export const DRAG_SELECT_ACTION = {
 export const EXPLORER_ACTION = {
   INITIALIZE: 'initialize',
   JOB_SELECTION_CHANGE: 'jobSelectionChange',
+  LOAD_JOBS: 'loadJobs',
   REDRAW: 'redraw',
-  REFRESH: 'refresh',
-  RENDER: 'render',
+  RELOAD: 'reload',
 };
 
 export const APP_STATE_ACTION = {

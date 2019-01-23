@@ -63,10 +63,8 @@ export function mapScopeToProps(scope) {
   return {
     appStateHandler: scope.appStateHandler,
     dateFormatTz: scope.dateFormatTz,
-    loading: scope.loading,
     mlJobSelectService: scope.mlJobSelectService,
     MlTimeBuckets: scope.MlTimeBuckets,
-    noJobsFound: scope.jobs.length === 0,
   };
 }
 

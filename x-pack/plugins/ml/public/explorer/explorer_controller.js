@@ -26,7 +26,6 @@ import template from './explorer.html';
 import uiRoutes from 'ui/routes';
 import {
   createJobs,
-  mapScopeToProps,
 } from './explorer_utils';
 import { getAnomalyExplorerBreadcrumbs } from './breadcrumbs';
 import { checkFullLicense } from '../license/check_license';
@@ -74,7 +73,6 @@ module.controller('MlExplorerController', function (
 
   // $scope should only contain what's actually still necessary for the angular part.
   // For the moment that's the job selector and the (hidden) filter bar.
-  $scope.loading = true;
   $scope.jobs = [];
   $scope.queryFilters = [];
   timefilter.enableTimeRangeSelector();
@@ -104,8 +102,14 @@ module.controller('MlExplorerController', function (
       $scope.jobs = jobs;
       $scope.$applyAsync();
 
-      mlExplorerDashboardService.explorer.changed(EXPLORER_ACTION.RENDER, mapScopeToProps($scope));
-      mlExplorerDashboardService.explorer.changed(action, { selectedCells, selectedJobs });
+      const noJobsFound = ($scope.jobs.length === 0);
+
+      mlExplorerDashboardService.explorer.changed(action, {
+        loading: false,
+        noJobsFound,
+        selectedCells,
+        selectedJobs
+      });
     }
 
     // Populate the map of jobs / detectors / field formatters for the selected IDs.
@@ -118,66 +122,71 @@ module.controller('MlExplorerController', function (
       });
   }
 
+  // Initialize the AppState in which to store filters and swimlane settings.
+  // AppState is used to store state in the URL.
+  $scope.appState = new AppState({
+    filters: [],
+    mlExplorerSwimlane: {},
+  });
+
   // Load the job info needed by the dashboard, then do the first load.
   // Calling loadJobs() ensures the full datafeed config is available for building the charts.
-  mlJobService.loadJobs()
-    .then((resp) => {
-      // Initialize the AppState in which to store filters and swimlane settings.
-      // AppState is used to store state in the URL.
-      $scope.appState = new AppState({
-        filters: [],
-        mlExplorerSwimlane: {},
-      });
+  // Using this listener ensures the jobs will only be loaded and passed on after
+  // <ml-explorer-react-wrapper /> and <Explorer /> have been initialized.
+  function loadJobsListener(action) {
+    if (action === EXPLORER_ACTION.LOAD_JOBS) {
+      mlJobService.loadJobs()
+        .then((resp) => {
+          if (resp.jobs.length > 0) {
+            // Select any jobs set in the global state (i.e. passed in the URL).
+            const selectedJobIds = $scope.mlJobSelectService.getSelectedJobIds(true);
+            let selectedCells;
 
-      $scope.loading = false;
-      $scope.$applyAsync();
+            // keep swimlane selection, restore selectedCells from AppState
+            if ($scope.appState.mlExplorerSwimlane.selectedType !== undefined) {
+              selectedCells = {
+                type: $scope.appState.mlExplorerSwimlane.selectedType,
+                lanes: $scope.appState.mlExplorerSwimlane.selectedLanes,
+                times: $scope.appState.mlExplorerSwimlane.selectedTimes,
+                showTopFieldValues: $scope.appState.mlExplorerSwimlane.showTopFieldValues,
+                viewByFieldName: $scope.appState.mlExplorerSwimlane.viewByFieldName,
+              };
+            }
 
-      if (resp.jobs.length > 0) {
-        // Select any jobs set in the global state (i.e. passed in the URL).
-        const selectedJobIds = $scope.mlJobSelectService.getSelectedJobIds(true);
-        let selectedCells;
-
-        // keep swimlane selection, restore selectedCells from AppState
-        if ($scope.appState.mlExplorerSwimlane.selectedType !== undefined) {
-          selectedCells = {
-            type: $scope.appState.mlExplorerSwimlane.selectedType,
-            lanes: $scope.appState.mlExplorerSwimlane.selectedLanes,
-            times: $scope.appState.mlExplorerSwimlane.selectedTimes,
-            showTopFieldValues: $scope.appState.mlExplorerSwimlane.showTopFieldValues,
-            viewByFieldName: $scope.appState.mlExplorerSwimlane.viewByFieldName,
-          };
-        }
-
-        jobSelectionUpdate(EXPLORER_ACTION.INITIALIZE, {
-          fullJobs: resp.jobs,
-          selectedCells,
-          selectedJobIds,
-          swimlaneViewByFieldName: $scope.appState.mlExplorerSwimlane.viewByFieldName
+            jobSelectionUpdate(EXPLORER_ACTION.INITIALIZE, {
+              fullJobs: resp.jobs,
+              selectedCells,
+              selectedJobIds,
+              swimlaneViewByFieldName: $scope.appState.mlExplorerSwimlane.viewByFieldName
+            });
+          } else {
+            mlExplorerDashboardService.explorer.changed(EXPLORER_ACTION.RELOAD, {
+              loading: false,
+              noJobsFound: true,
+            });
+          }
+        })
+        .catch((resp) => {
+          console.log('Explorer - error getting job info from elasticsearch:', resp);
         });
-      }
-    })
-    .catch((resp) => {
-      console.log('Explorer - error getting job info from elasticsearch:', resp);
-    });
+    }
+  }
+  mlExplorerDashboardService.explorer.watch(loadJobsListener);
 
   // Listen for changes to job selection.
   $scope.mlJobSelectService.listenJobSelectionChange($scope, (event, selectedJobIds) => {
     jobSelectionUpdate(EXPLORER_ACTION.JOB_SELECTION_CHANGE, { fullJobs: mlJobService.jobs, selectedJobIds });
   });
 
-  function overallRefresh() {
-    mlExplorerDashboardService.explorer.changed(EXPLORER_ACTION.REFRESH);
-  }
-
   // Refresh all the data when the time range is altered.
   $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
-    overallRefresh();
+    mlExplorerDashboardService.explorer.changed(EXPLORER_ACTION.RELOAD);
   });
 
   // Add a watcher for auto-refresh of the time filter to refresh all the data.
   const refreshWatcher = Private(refreshIntervalWatcher);
   refreshWatcher.init(async () => {
-    overallRefresh();
+    mlExplorerDashboardService.explorer.changed(EXPLORER_ACTION.RELOAD);
   });
 
   // Redraw the swimlane when the window resizes or the global nav is toggled.
@@ -237,6 +246,7 @@ module.controller('MlExplorerController', function (
   });
 
   $scope.$on('$destroy', () => {
+    mlExplorerDashboardService.explorer.unwatch(loadJobsListener);
     refreshWatcher.cancel();
     $(window).off('resize', jqueryRedrawOnResize);
     // Cancel listening for updates to the global nav state.

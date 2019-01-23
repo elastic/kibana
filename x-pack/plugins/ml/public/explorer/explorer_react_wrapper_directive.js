@@ -12,29 +12,27 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { Explorer } from './explorer';
-import { mlExplorerDashboardService } from './explorer_dashboard_service';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 import { I18nProvider } from '@kbn/i18n/react';
+import { mapScopeToProps } from './explorer_utils';
+
+import { EXPLORER_ACTION } from './explorer_constants';
+import { mlExplorerDashboardService } from './explorer_dashboard_service';
 
 module.directive('mlExplorerReactWrapper', function () {
   function link(scope, element) {
-    function render(action, props) {
-      if (action === 'render') {
-        ReactDOM.render(
-          <I18nProvider>{React.createElement(Explorer, props)}</I18nProvider>,
-          element[0]
-        );
-      }
-    }
+    ReactDOM.render(
+      <I18nProvider>{React.createElement(Explorer, mapScopeToProps(scope))}</I18nProvider>,
+      element[0]
+    );
 
-    mlExplorerDashboardService.explorer.watch(render);
+    mlExplorerDashboardService.explorer.changed(EXPLORER_ACTION.LOAD_JOBS);
 
     element.on('$destroy', () => {
       ReactDOM.unmountComponentAtNode(element[0]);
-      mlExplorerDashboardService.explorer.unwatch(render);
       scope.$destroy();
     });
   }
