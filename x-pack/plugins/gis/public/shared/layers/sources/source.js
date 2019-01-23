@@ -60,6 +60,10 @@ export class ASource {
     return false;
   }
 
+  isGeohashPrecisionAware() {
+    return false;
+  }
+
   isQueryAware() {
     return false;
   }

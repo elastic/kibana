@@ -35,7 +35,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
   const buildNum = chance.integer({ min: 1000, max: 5000 });
 
   function setup() {
-    const log = sinon.stub();
+    const logWithMetadata = sinon.stub();
     const getUpgradeableConfig = sandbox.stub(getUpgradeableConfigNS, 'getUpgradeableConfig');
     const savedObjectsClient = {
       create: sinon.stub().callsFake(async (type, attributes, options = {}) => ({
@@ -50,7 +50,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
         savedObjectsClient,
         version,
         buildNum,
-        log,
+        logWithMetadata,
         ...options
       });
 
@@ -62,7 +62,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
 
     return {
       buildNum,
-      log,
+      logWithMetadata,
       run,
       version,
       savedObjectsClient,
@@ -120,17 +120,17 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
     });
 
     it('should log a message for upgrades', async () => {
-      const { getUpgradeableConfig, log, run } = setup();
+      const { getUpgradeableConfig, logWithMetadata, run } = setup();
 
       getUpgradeableConfig
         .returns({ id: prevVersion, attributes: { buildNum: buildNum - 100 } });
 
       await run();
-      sinon.assert.calledOnce(log);
-      sinon.assert.calledWithExactly(log,
+      sinon.assert.calledOnce(logWithMetadata);
+      sinon.assert.calledWithExactly(logWithMetadata,
         ['plugin', 'elasticsearch'],
+        sinon.match('Upgrade'),
         sinon.match({
-          tmpl: sinon.match('Upgrade'),
           prevVersion,
           newVersion: version,
         })
@@ -138,7 +138,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
     });
 
     it('does not log when upgrade fails', async () => {
-      const { getUpgradeableConfig, log, run, savedObjectsClient } = setup();
+      const { getUpgradeableConfig, logWithMetadata, run, savedObjectsClient } = setup();
 
       getUpgradeableConfig
         .returns({ id: prevVersion, attributes: { buildNum: buildNum - 100 } });
@@ -154,7 +154,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
         expect(error.message).to.be('foo');
       }
 
-      sinon.assert.notCalled(log);
+      sinon.assert.notCalled(logWithMetadata);
     });
   });
 
