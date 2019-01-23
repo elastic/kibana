@@ -78,6 +78,7 @@ describe('findRelationships', () => {
       {
         size,
         savedObjectsClient,
+        savedObjectTypes: ['dashboard', 'visualization', 'search', 'index-pattern'],
       },
     );
     expect(result).to.eql({
@@ -166,6 +167,7 @@ describe('findRelationships', () => {
       {
         size,
         savedObjectsClient,
+        savedObjectTypes: ['dashboard', 'visualization', 'search', 'index-pattern'],
       },
     );
     expect(result).to.eql({
@@ -245,6 +247,7 @@ describe('findRelationships', () => {
       {
         size,
         savedObjectsClient,
+        savedObjectTypes: ['dashboard', 'visualization', 'search', 'index-pattern'],
       },
     );
     expect(result).to.eql({
@@ -325,6 +328,7 @@ describe('findRelationships', () => {
       {
         size,
         savedObjectsClient,
+        savedObjectTypes: ['dashboard', 'visualization', 'search', 'index-pattern'],
       },
     );
     expect(result).to.eql({
@@ -356,6 +360,7 @@ describe('findRelationships', () => {
       {
         size,
         savedObjectsClient,
+        savedObjectTypes: ['dashboard', 'visualization', 'search', 'index-pattern'],
       },
     );
     expect(result).to.eql({});

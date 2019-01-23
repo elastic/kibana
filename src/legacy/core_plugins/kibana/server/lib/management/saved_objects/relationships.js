@@ -21,6 +21,7 @@ export async function findRelationships(type, id, options = {}) {
   const {
     size = 10000,
     savedObjectsClient,
+    savedObjectTypes,
   } = options;
 
   const { references = [] } = await savedObjectsClient.get(type, id);
@@ -34,6 +35,7 @@ export async function findRelationships(type, id, options = {}) {
       referencedBy: { type, id },
       perPage: size,
       fields: ['title'],
+      type: savedObjectTypes,
     }),
   ]);
 

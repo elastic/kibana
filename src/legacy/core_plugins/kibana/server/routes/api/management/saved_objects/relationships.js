@@ -42,7 +42,12 @@ export function registerRelationships(server) {
       const size = req.query.size || 10000;
       const savedObjectsClient = req.getSavedObjectsClient();
 
-      return await findRelationships(type, id, { size, savedObjectsClient });
+      return await findRelationships(type, id, {
+        size,
+        savedObjectsClient,
+        // Pass in all types except space, spaces wrapper will throw error
+        savedObjectTypes: server.savedObjects.types.filter(type => type !== 'space'),
+      });
     },
   });
 }

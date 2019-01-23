@@ -129,6 +129,7 @@ export default function ({ getService }) {
     describe('visualizations', async () => {
       const VISUALIZATIONS_RESPONSE_SCHEMA = Joi.object().keys({
         dashboard: GENERIC_RESPONSE_SCHEMA,
+        search: GENERIC_RESPONSE_SCHEMA,
       });
 
       it('should validate visualization response schema', async () => {
@@ -147,6 +148,12 @@ export default function ({ getService }) {
           .expect(200)
           .then(resp => {
             expect(resp.body).to.eql({
+              search: [
+                {
+                  id: '960372e0-3224-11e8-a572-ffca06da1357',
+                  title: 'OneRecord'
+                },
+              ],
               dashboard: [
                 {
                   id: 'b70c7ae0-3224-11e8-a572-ffca06da1357',
