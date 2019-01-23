@@ -25,14 +25,14 @@
         class="kuiText kuiSubduedText"
         i18n-id="common.ui.paginateSelectableList.ofTotalHitCount"
         i18n-default-message="{matchingHits} of {hitCount}"
-        i18n-values="{ hitCount, matchingHits: ((hits | filter: query).length) }"
+        i18n-values="{ hitCount, matchingHits: hitsByQuery.length }"
       ></p>
     </div>
   </div>
 </form>
 
 <paginate
-  list="hits | filter: query"
+  list="hitsByQuery"
   per-page="{{ perPage }}"
   class="kuiVerticalRhythm"
 >
@@ -79,7 +79,7 @@
       </div>
     </li>
 
-    <li class="list-group-item list-group-no-results" ng-if="(hits | filter: query).length === 0">
+    <li class="list-group-item list-group-no-results" ng-if="hitsByQuery.length === 0">
       <p i18n-id="common.ui.paginateSelectableList.noMatchesFoundDescription"
         i18n-default-message="No matches found."
       ></p>
