@@ -195,6 +195,7 @@ export class Overrides extends Component {
       customDelimiter,
       originalColumnNames,
       linesToSampleValid,
+      overrides,
     } = this.state;
 
     const {
@@ -209,7 +210,7 @@ export class Overrides extends Component {
       columnNames,
       grokPattern,
       linesToSample,
-    } = this.state.overrides;
+    } = overrides;
 
     const fieldOptions = fields.map(f => ({ value: f, inputDisplay: f }));
 
