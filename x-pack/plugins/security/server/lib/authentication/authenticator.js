@@ -105,13 +105,11 @@ class Authenticator {
    * @param {Hapi.Server} server HapiJS Server instance.
    * @param {AuthScopeService} authScope AuthScopeService instance.
    * @param {Session} session Session instance.
-   * @param {AuthorizationMode} authorizationMode AuthorizationMode instance
    */
-  constructor(server, authScope, session, authorizationMode) {
+  constructor(server, authScope, session) {
     this._server = server;
     this._authScope = authScope;
     this._session = session;
-    this._authorizationMode = authorizationMode;
 
     const config = this._server.config();
     const authProviders = config.get('xpack.security.authProviders');
@@ -177,8 +175,6 @@ class Authenticator {
       }
 
       if (authenticationResult.succeeded()) {
-        // we have to do this here, as the auth scope's could be dependent on this
-        await this._authorizationMode.initialize(request);
         return AuthenticationResult.succeeded({
           ...authenticationResult.user,
           // Complement user returned from the provider with scopes.
@@ -280,10 +276,10 @@ class Authenticator {
   }
 }
 
-export async function initAuthenticator(server, authorizationMode) {
+export async function initAuthenticator(server) {
   const session = await Session.create(server);
   const authScope = new AuthScopeService();
-  const authenticator = new Authenticator(server, authScope, session, authorizationMode);
+  const authenticator = new Authenticator(server, authScope, session);
 
   const loginAttempts = new WeakMap();
   server.decorate('request', 'loginAttempt', function () {
