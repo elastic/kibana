@@ -21,23 +21,13 @@ import { get, set } from 'lodash';
 
 function migrateIndexPattern(type, doc) {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
-  if (
-    typeof searchSourceJSON !== 'string' &&
-    searchSourceJSON !== undefined &&
-    searchSourceJSON !== null
-  ) {
-    throw new Error(`searchSourceJSON is not a string on ${type} "${doc.id}"`);
-  }
-  if (searchSourceJSON) {
+  if (typeof searchSourceJSON === 'string') {
     let searchSource;
     try {
       searchSource = JSON.parse(searchSourceJSON);
     } catch (e) {
-      throw new Error(
-        `Failed to parse searchSourceJSON: "${searchSourceJSON}" because "${
-          e.message
-        }" on ${type} "${doc.id}"`
-      );
+      // Let it go, the data is invalid and we'll leave it as is
+      return;
     }
     if (searchSource.index) {
       doc.references.push({
@@ -79,32 +69,27 @@ export default {
       migrateIndexPattern('dashboard', doc);
       // Migrate panels
       const panelsJSON = get(doc, 'attributes.panelsJSON');
-      if (typeof panelsJSON !== 'string') {
-        throw new Error(`panelsJSON is ${panelsJSON ? 'not a string' : 'missing'} on dashboard "${doc.id}"`);
-      }
-      let panels;
-      try {
-        panels = JSON.parse(panelsJSON);
-      } catch (e) {
-        throw new Error(`Failed to parse panelsJSON: "${panelsJSON}" because "${e.message}" on dashboard "${doc.id}"`);
-      }
-      panels.forEach((panel, i) => {
-        panel.panelRef = `panel_${i}`;
-        if (!panel.type) {
-          throw new Error(`"type" attribute is missing from panel "${i}" on dashboard "${doc.id}"`);
+      if (typeof panelsJSON === 'string') {
+        let panels;
+        try {
+          panels = JSON.parse(panelsJSON);
+        } catch (e) {
+          // Let it go, the data is invalid and we'll leave it as is
+          return doc;
         }
-        if (!panel.id) {
-          throw new Error(`"id" attribute is missing from panel "${i}" on dashboard "${doc.id}"`);
-        }
-        doc.references.push({
-          name: `panel_${i}`,
-          type: panel.type,
-          id: panel.id
+        panels.forEach((panel, i) => {
+          if (!panel.type || !panel.id) return;
+          panel.panelRef = `panel_${i}`;
+          doc.references.push({
+            name: `panel_${i}`,
+            type: panel.type,
+            id: panel.id
+          });
+          delete panel.type;
+          delete panel.id;
         });
-        delete panel.type;
-        delete panel.id;
-      });
-      doc.attributes.panelsJSON = JSON.stringify(panels);
+        doc.attributes.panelsJSON = JSON.stringify(panels);
+      }
       return doc;
     },
   },

@@ -98,7 +98,7 @@ Object {
 `);
     });
 
-    test('throw error when searchSourceJSON is not a string', () => {
+    test('skips error when searchSourceJSON is not a string', () => {
       const doc = {
         id: '1',
         type: 'visualization',
@@ -109,9 +109,25 @@ Object {
           savedSearchId: '123',
         },
       };
-      expect(() => migration(doc)).toThrowErrorMatchingInlineSnapshot(
-        `"searchSourceJSON is not a string on visualization \\"1\\""`
-      );
+      expect(migration(doc)).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": 123,
+    },
+    "savedSearchId": "search_0",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "123",
+      "name": "search_0",
+      "type": "search",
+    },
+  ],
+  "type": "visualization",
+}
+`);
     });
 
     test('skips error when "index" is missing from searchSourceJSON', () => {
@@ -222,10 +238,12 @@ describe('dashboard', () => {
   describe('7.0.0', () => {
     const migration = migrations.dashboard['7.0.0'];
 
-    test('throw error on empty object', () => {
-      expect(() => migration({})).toThrowErrorMatchingInlineSnapshot(
-        `"panelsJSON is missing on dashboard \\"undefined\\""`
-      );
+    test('skips error on empty object', () => {
+      expect(migration({})).toMatchInlineSnapshot(`
+Object {
+  "references": Array [],
+}
+`);
     });
 
     test('skips errors when searchSourceJSON is null', () => {
@@ -306,7 +324,7 @@ Object {
 `);
     });
 
-    test('throw error when searchSourceJSON is not a string', () => {
+    test('skips error when searchSourceJSON is not a string', () => {
       const doc = {
         id: '1',
         type: 'dashboard',
@@ -318,9 +336,30 @@ Object {
             '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
         },
       };
-      expect(() => migration(doc)).toThrowErrorMatchingInlineSnapshot(
-        `"searchSourceJSON is not a string on dashboard \\"1\\""`
-      );
+      expect(migration(doc)).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": 123,
+    },
+    "panelsJSON": "[{\\"foo\\":true,\\"panelRef\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRef\\":\\"panel_1\\"}]",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "1",
+      "name": "panel_0",
+      "type": "visualization",
+    },
+    Object {
+      "id": "2",
+      "name": "panel_1",
+      "type": "visualization",
+    },
+  ],
+  "type": "dashboard",
+}
+`);
     });
 
     test('skips error when "index" is missing from searchSourceJSON', () => {
@@ -406,52 +445,76 @@ Object {
 `);
     });
 
-    test('throw error when panelsJSON is not a string', () => {
+    test('skips error when panelsJSON is not a string', () => {
       const doc = {
         id: '1',
         attributes: {
           panelsJSON: 123,
         },
       };
-      expect(() => migration(doc)).toThrowErrorMatchingInlineSnapshot(
-        `"panelsJSON is not a string on dashboard \\"1\\""`
-      );
+      expect(migration(doc)).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "panelsJSON": 123,
+  },
+  "id": "1",
+  "references": Array [],
+}
+`);
     });
 
-    test('throw error when panelsJSON is not valid JSON', () => {
+    test('skips error when panelsJSON is not valid JSON', () => {
       const doc = {
         id: '1',
         attributes: {
           panelsJSON: '{123abc}',
         },
       };
-      expect(() => migration(doc)).toThrowErrorMatchingInlineSnapshot(
-        `"Failed to parse panelsJSON: \\"{123abc}\\" because \\"Unexpected number in JSON at position 1\\" on dashboard \\"1\\""`
-      );
+      expect(migration(doc)).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "panelsJSON": "{123abc}",
+  },
+  "id": "1",
+  "references": Array [],
+}
+`);
     });
 
-    test('throw error when a panel is missing "type" attribute', () => {
+    test('skips error when a panel is missing "type" attribute', () => {
       const doc = {
         id: '1',
         attributes: {
           panelsJSON: '[{"id":"123"}]',
         },
       };
-      expect(() => migration(doc)).toThrowErrorMatchingInlineSnapshot(
-        `"\\"type\\" attribute is missing from panel \\"0\\" on dashboard \\"1\\""`
-      );
+      expect(migration(doc)).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "panelsJSON": "[{\\"id\\":\\"123\\"}]",
+  },
+  "id": "1",
+  "references": Array [],
+}
+`);
     });
 
-    test('throw error when a panel is missing "id" attribute', () => {
+    test('skips error when a panel is missing "id" attribute', () => {
       const doc = {
         id: '1',
         attributes: {
           panelsJSON: '[{"type":"visualization"}]',
         },
       };
-      expect(() => migration(doc)).toThrowErrorMatchingInlineSnapshot(
-        `"\\"id\\" attribute is missing from panel \\"0\\" on dashboard \\"1\\""`
-      );
+      expect(migration(doc)).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "panelsJSON": "[{\\"type\\":\\"visualization\\"}]",
+  },
+  "id": "1",
+  "references": Array [],
+}
+`);
     });
 
     test('extract panel references from doc', () => {
@@ -545,7 +608,7 @@ Object {
 `);
     });
 
-    test('throw error when searchSourceJSON is not a string', () => {
+    test('skips error when searchSourceJSON is not a string', () => {
       const doc = {
         id: '123',
         type: 'search',
@@ -556,9 +619,19 @@ Object {
           },
         },
       };
-      expect(() => migration(doc)).toThrowErrorMatchingInlineSnapshot(
-        `"searchSourceJSON is not a string on search \\"123\\""`
-      );
+      expect(migration(doc)).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "foo": true,
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": 123,
+    },
+  },
+  "id": "123",
+  "references": Array [],
+  "type": "search",
+}
+`);
     });
 
     test('skips error when "index" is missing from searchSourceJSON', () => {
