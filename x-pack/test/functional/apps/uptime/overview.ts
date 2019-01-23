@@ -9,7 +9,8 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 // tslint:disable-next-line:no-default-export
 export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) => {
   const esArchiver = getService('esArchiver');
-  const pageObjects = getPageObjects(['uptime']);
+  // TODO: add UI functional tests
+  // const pageObjects = getPageObjects(['uptime']);
   const archive = 'uptime/full_heartbeat';
 
   describe('Overview page', () => {
