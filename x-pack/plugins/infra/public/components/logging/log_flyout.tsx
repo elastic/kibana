@@ -13,6 +13,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { InfraLogItem, InfraLogItemField } from '../../graphql/types';
 
@@ -20,27 +21,46 @@ interface Props {
   flyoutItem: InfraLogItem;
   showFlyout: (show: boolean) => void;
   setFilter: (filter: string) => void;
+  intl: InjectedIntl;
 }
 
-export const LogFlyout: React.SFC<Props> = ({ flyoutItem, showFlyout, setFilter }) => {
+export const LogFlyout = injectI18n(({ flyoutItem, showFlyout, setFilter, intl }: Props) => {
   const handleFilter = (field: InfraLogItemField) => () => {
     const filter = `${field.field}:"${field.value}"`;
     setFilter(filter);
   };
 
   const columns = [
-    { field: 'field', name: 'Field', sortable: true },
+    {
+      field: 'field',
+      name: intl.formatMessage({
+        defaultMessage: 'Field',
+        id: 'xpack.infra.logFlyout.fieldColumnLabel',
+      }),
+      sortable: true,
+    },
     {
       field: 'value',
-      name: 'Value',
+      name: intl.formatMessage({
+        defaultMessage: 'Value',
+        id: 'xpack.infra.logFlyout.valueColumnLabel',
+      }),
       sortable: true,
       render: (name: string, item: InfraLogItemField) => (
         <span>
-          <EuiToolTip content="Add Filter">
+          <EuiToolTip
+            content={intl.formatMessage({
+              id: 'xpack.infra.logFlyout.addFilter',
+              defaultMessage: 'Add Filter',
+            })}
+          >
             <EuiButtonIcon
               color="text"
               iconType="filter"
-              aria-label="Filter"
+              aria-label={intl.formatMessage({
+                id: 'xpack.infra.logFlyout.filterAriaLabel',
+                defaultMessage: 'Filter',
+              })}
               onClick={handleFilter(item)}
             />
           </EuiToolTip>
@@ -53,7 +73,12 @@ export const LogFlyout: React.SFC<Props> = ({ flyoutItem, showFlyout, setFilter 
     <EuiFlyout onClose={() => showFlyout(false)} size="m">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <h3 id="flyoutTitle">Log event document details</h3>
+          <h3 id="flyoutTitle">
+            <FormattedMessage
+              defaultMessage="Log event document details"
+              id="xpack.infra.logFlyout.flyoutTitle"
+            />
+          </h3>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
@@ -61,4 +86,4 @@ export const LogFlyout: React.SFC<Props> = ({ flyoutItem, showFlyout, setFilter 
       </EuiFlyoutBody>
     </EuiFlyout>
   );
-};
+});
