@@ -30,6 +30,8 @@ const buttonLabel = (status?: ReindexStatus) => {
       return 'Reindexing…';
     case ReindexStatus.completed:
       return 'Done!';
+    case ReindexStatus.paused:
+      return 'Resume';
     default:
       return 'Run reindex';
   }
@@ -81,7 +83,8 @@ export const ChecklistFlyoutStep: React.StatelessComponent<{
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              color="primary"
+              color={status === ReindexStatus.paused ? 'warning' : 'primary'}
+              iconType={status === ReindexStatus.paused ? 'play' : undefined}
               onClick={startReindex}
               isLoading={loading}
               disabled={loading || status === ReindexStatus.completed}

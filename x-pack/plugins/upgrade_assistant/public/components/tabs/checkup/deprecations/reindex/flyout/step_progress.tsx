@@ -9,7 +9,7 @@ import React, { Fragment, ReactNode } from 'react';
 
 import { EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 
-type STATUS = 'incomplete' | 'inProgress' | 'complete' | 'failed';
+type STATUS = 'incomplete' | 'inProgress' | 'complete' | 'failed' | 'paused';
 
 const StepStatus: React.StatelessComponent<{ status: STATUS; idx: number }> = ({ status, idx }) => {
   if (status === 'incomplete') {
@@ -20,6 +20,12 @@ const StepStatus: React.StatelessComponent<{ status: STATUS; idx: number }> = ({
     return (
       <span className="upgStepProgress__status upgStepProgress__status--circle upgStepProgress__status--circle-complete">
         <EuiIcon type="check" size="s" />
+      </span>
+    );
+  } else if (status === 'paused') {
+    return (
+      <span className="upgStepProgress__status upgStepProgress__status--circle upgStepProgress__status--circle-paused">
+        <EuiIcon type="pause" size="s" />
       </span>
     );
   } else if (status === 'failed') {
@@ -40,7 +46,8 @@ const Step: React.StatelessComponent<StepProgressStep & { idx: number }> = ({
   idx,
 }) => {
   const titleClassName = classNames('upgStepProgress__title', {
-    'upgStepProgress__title--inProgress': status === 'inProgress',
+    'upgStepProgress__title--currentStep':
+      status === 'inProgress' || status === 'paused' || status === 'failed',
   });
 
   return (

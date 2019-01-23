@@ -89,9 +89,12 @@ export class ReindexPollingService {
   public startReindex = async () => {
     try {
       // Optimistically assume it will start, reset other state.
+      const currentValue = this.status$.value;
       this.status$.next({
-        ...this.status$.value,
-        lastCompletedStep: undefined,
+        ...currentValue,
+        // Only reset last completed step if we aren't currently paused
+        lastCompletedStep:
+          currentValue.status === ReindexStatus.paused ? currentValue.lastCompletedStep : undefined,
         status: ReindexStatus.inProgress,
         reindexTaskPercComplete: null,
         errorMessage: null,

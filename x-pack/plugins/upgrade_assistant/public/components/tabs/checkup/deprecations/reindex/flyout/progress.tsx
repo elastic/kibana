@@ -21,6 +21,13 @@ const ErrorCallout: React.StatelessComponent<{ errorMessage: string | null }> = 
   </EuiCallOut>
 );
 
+const PausedCallout = () => (
+  <EuiCallOut
+    color="warning"
+    title="This step was paused due to a Kibana restart. Click 'Resume' below to continue."
+  />
+);
+
 const orderedSteps = Object.values(ReindexStep).sort() as number[];
 
 /**
@@ -41,6 +48,11 @@ export const ReindexProgress: React.StatelessComponent<{
         status: 'failed',
         children: <ErrorCallout {...{ errorMessage }} />,
       };
+    } else if (reindexStatus === ReindexStatus.paused && lastCompletedStep === previousStep) {
+      return {
+        status: 'paused',
+        children: <PausedCallout />,
+      };
     } else if (reindexStatus === undefined || lastCompletedStep < previousStep) {
       return {
         status: 'incomplete',
@@ -56,7 +68,7 @@ export const ReindexProgress: React.StatelessComponent<{
     }
   };
 
-  // The reindexing step is speciall because it combines the starting and complete statuses into a single UI
+  // The reindexing step is special because it combines the starting and complete statuses into a single UI
   // with a progress bar.
   const reindexingDocsStep = { title: 'Reindexing documents' } as StepProgressStep;
   if (
@@ -66,6 +78,13 @@ export const ReindexProgress: React.StatelessComponent<{
   ) {
     reindexingDocsStep.status = 'failed';
     reindexingDocsStep.children = <ErrorCallout {...{ errorMessage }} />;
+  } else if (
+    reindexStatus === ReindexStatus.paused &&
+    (lastCompletedStep === ReindexStep.newIndexCreated ||
+      lastCompletedStep === ReindexStep.reindexStarted)
+  ) {
+    reindexingDocsStep.status = 'paused';
+    reindexingDocsStep.children = <PausedCallout />;
   } else if (reindexStatus === undefined || lastCompletedStep < ReindexStep.newIndexCreated) {
     reindexingDocsStep.status = 'incomplete';
   } else {

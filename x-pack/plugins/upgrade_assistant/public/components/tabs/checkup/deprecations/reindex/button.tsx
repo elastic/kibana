@@ -87,6 +87,11 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
           buttonProps.iconType = 'cross';
           buttonContent = 'Failed';
           break;
+        case ReindexStatus.paused:
+          buttonProps.color = 'warning';
+          buttonProps.iconSide = 'left';
+          buttonProps.iconType = 'pause';
+          buttonContent = 'Paused';
       }
     }
 

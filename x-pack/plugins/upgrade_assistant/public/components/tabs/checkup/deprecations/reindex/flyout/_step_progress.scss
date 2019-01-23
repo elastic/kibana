@@ -17,6 +17,7 @@
 $stepStatusToCallOutColor: (
   failed: 'danger',
   complete: 'success',
+  paused: 'warning',
 );
 
 .upgStepProgress__status--circle {
@@ -33,7 +34,7 @@ $stepStatusToCallOutColor: (
 }
 
 .upgStepProgress__title {
-  &--inProgress {
+  &--currentStep {
     font-weight: $euiFontWeightBold;
   }
 }
