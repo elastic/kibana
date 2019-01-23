@@ -34,11 +34,8 @@ import {
   EuiHeaderSectionItemButton,
   // @ts-ignore
   EuiHideFor,
-  // @ts-ignore
   EuiHorizontalRule,
-  // @ts-ignore
   EuiIcon,
-  // @ts-ignore
   EuiListGroup,
   // @ts-ignore
   EuiListGroupItem,
@@ -48,7 +45,6 @@ import {
   EuiNavDrawerFlyout,
   // @ts-ignore
   EuiNavDrawerMenu,
-  // @ts-ignore
   EuiOutsideClickDetector,
   // @ts-ignore
   EuiShowFor,
