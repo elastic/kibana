@@ -34,10 +34,10 @@ export default class DefaultSearchStrategy extends AbstractSearchStrategy {
     super(server, callWithRequestFactory, SearchRequest);
   }
 
-  checkForViability(req) {
+  checkForViability(req, indexPattern) {
     return {
       isViable: true,
-      capabilities: new DefaultSearchCapabilities(req, batchRequestsSupport)
+      capabilities: new DefaultSearchCapabilities(req, indexPattern, batchRequestsSupport)
     };
   }
 }

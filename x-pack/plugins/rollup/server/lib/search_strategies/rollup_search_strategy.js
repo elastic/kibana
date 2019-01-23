@@ -3,18 +3,14 @@
 * or more contributor license agreements. Licensed under the Elastic License;
 * you may not use this file except in compliance with the Elastic License.
 */
-import { merge, get } from 'lodash';
+import { merge, indexBy } from 'lodash';
 import { callWithRequestFactory } from '../call_with_request_factory';
+import mergeCapabilitiesWithFields from '../merge_capabilities_with_fields';
+import { getCapabilitiesForRollupIndices } from '../map_capabilities';
 
 const ROLLUP_INDEX_CAPABILITIES_METHOD = 'rollup.rollupIndexCapabilities';
 const INDEX_PATTERN_SEPARATOR = ',';
 const batchRequestsSupport = false;
-
-const getFieldsCapabilities = (rollupData) => {
-  const rollupIndexKey =  Object.keys(rollupData)[0];
-
-  return get(rollupData, `${rollupIndexKey}.rollup_jobs.[0].fields`);
-};
 
 export default (AbstractSearchStrategy, RollupSearchRequest, RollupSearchCapabilities) =>
   (class RollupSearchStrategy extends AbstractSearchStrategy {
@@ -45,9 +41,9 @@ export default (AbstractSearchStrategy, RollupSearchRequest, RollupSearchCapabil
       let capabilities = null;
 
       if (isViable) {
-        const fieldsCapabilities = getFieldsCapabilities(rollupData);
+        const fieldsCapabilities = getCapabilitiesForRollupIndices(rollupData);
 
-        capabilities = new RollupSearchCapabilities(req, batchRequestsSupport, fieldsCapabilities);
+        capabilities = new RollupSearchCapabilities(req, indexPattern, batchRequestsSupport, fieldsCapabilities);
       }
 
       return {
@@ -56,13 +52,11 @@ export default (AbstractSearchStrategy, RollupSearchRequest, RollupSearchCapabil
       };
     }
 
-    async getFieldsForWildcard(req, indexPattern/*, capabilities*/) {
+    async getFieldsForWildcard(req, indexPattern, { fieldsCapabilities }) {
       const fields  = await super.getFieldsForWildcard(req, indexPattern);
+      const fieldsFromFieldCapsApi = indexBy(fields, 'name');
+      const rollupIndexCapabilities = fieldsCapabilities[indexPattern].aggs;
 
-      // TODO: write your logic here
-      // try to reuse x-pack\plugins\rollup\server\routes\api\index_patterns.js
-      // probably it make sense to move logic related to merging rollup field to separate file
-
-      return fields;
+      return mergeCapabilitiesWithFields(rollupIndexCapabilities, fieldsFromFieldCapsApi);
     }
   });

@@ -30,8 +30,9 @@ const getTimezoneFromRequest = request => {
 };
 
 export default class DefaultSearchCapabilities {
-  constructor(request, batchRequestsSupport, fieldsCapabilities = {}) {
+  constructor(request, indexPattern, batchRequestsSupport, fieldsCapabilities = {}) {
     this.request = request;
+    this.indexPattern = indexPattern;
     this.batchRequestsSupport = batchRequestsSupport;
     this.fieldsCapabilities = fieldsCapabilities;
 
@@ -60,20 +61,5 @@ export default class DefaultSearchCapabilities {
 
   getSearchInterval(intervalString) {
     return this.isTimeIntervalValid(intervalString) ? intervalString : this.defaultTimeInterval;
-  }
-
-  getFieldsByAggregationType(aggregationType) {
-    const fields = {};
-
-    Object.keys(this.fieldsCapabilities).forEach(fieldKey => {
-      this.fieldsCapabilities[fieldKey].some(aggregation => {
-        if (aggregation.agg === aggregationType) {
-          fields[fieldKey] = aggregation;
-
-          return true;
-        }
-      });
-    });
-    return fields;
   }
 }

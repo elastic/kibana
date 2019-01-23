@@ -9,8 +9,8 @@ const intervalMultiple = (userTimeInterval, defaultTimeInterval) => !Boolean(use
 
 export default (DefaultSearchCapabilities) =>
   (class RollupSearchCapabilities extends DefaultSearchCapabilities {
-    constructor(req, batchRequestsSupport, fieldsCapabilities) {
-      super(req, batchRequestsSupport, fieldsCapabilities);
+    constructor(req, indexPattern, batchRequestsSupport, fieldsCapabilities) {
+      super(req, indexPattern, batchRequestsSupport, fieldsCapabilities);
 
       this.init();
     }
@@ -32,9 +32,9 @@ export default (DefaultSearchCapabilities) =>
     }
 
     getDateHistogramAggregation() {
-      const dateHistogramFields = this.getFieldsByAggregationType('date_histogram');
-      const keys = Object.keys(dateHistogramFields);
+      const dateHistogramField = this.fieldsCapabilities[this.indexPattern].aggs.date_histogram;
 
-      return dateHistogramFields[keys[0]];
+      // there is also only one valid date_histogram field
+      return Object.values(dateHistogramField)[0];
     }
   });
