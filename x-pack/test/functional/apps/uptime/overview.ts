@@ -19,9 +19,7 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
       });
       afterEach(async () => await esArchiver.unload(archive));
 
-      it('overviewpagefails', async () => {
-        await pageObjects.uptime.goToUptimeOverview();
-      });
+      // TODO: add UI functional tests
     });
   });
 };

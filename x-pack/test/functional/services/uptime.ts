@@ -10,9 +10,7 @@ export const UptimeProvider = ({ getService }: KibanaFunctionalTestDefaultProvid
   const testSubjects = getService('testSubjects');
 
   return {
-    async assertExists() {
-      const key = 'xpack.uptime.filterBar';
-      await new Promise(resolve => setTimeout(resolve, 12000000));
+    async assertExists(key: string) {
       if (!(await testSubjects.exists(key))) {
         throw new Error(`Couldn't find expected element with key "${key}".`);
       }
