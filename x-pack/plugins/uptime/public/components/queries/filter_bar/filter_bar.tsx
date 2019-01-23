@@ -10,29 +10,28 @@ import { i18n } from '@kbn/i18n';
 import { take } from 'lodash';
 import React from 'react';
 import { Query } from 'react-apollo';
+import { UptimeCommonProps } from '../../../uptime_app';
 import { getFilterBarQuery } from './get_filter_bar';
 import { filterBarSearchSchema } from './search_schema';
 
 interface FilterBarProps {
-  autorefreshInterval: number;
-  autorefreshEnabled: boolean;
-  dateRangeStart: number;
-  dateRangeEnd: number;
   updateQuery: (query: object | undefined) => void;
 }
+
+type Props = FilterBarProps & UptimeCommonProps;
 
 const MAX_SELECTION_LENGTH = 20;
 const SEARCH_THRESHOLD = 2;
 
 export const FilterBar = ({
   autorefreshInterval,
-  autorefreshEnabled,
-  dateRangeEnd,
+  autorefreshIsPaused,
   dateRangeStart,
+  dateRangeEnd,
   updateQuery,
-}: FilterBarProps) => (
+}: Props) => (
   <Query
-    pollInterval={autorefreshEnabled ? autorefreshInterval : undefined}
+    pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
     query={getFilterBarQuery}
     variables={{ dateRangeStart, dateRangeEnd }}
   >

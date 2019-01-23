@@ -7,7 +7,7 @@
 import gql from 'graphql-tag';
 
 export const getLatestMonitorsQueryString = `
-query GetLatestMonitorQuery($dateRangeStart: UnsignedInteger!, $dateRangeEnd: UnsignedInteger!) {
+query GetLatestMonitorQuery($dateRangeStart: String!, $dateRangeEnd: String!) {
   latestMonitors: getLatestMonitors(
     dateRangeStart: $dateRangeStart
     dateRangeEnd: $dateRangeEnd

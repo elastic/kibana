@@ -7,30 +7,29 @@
 // @ts-ignore No typing for EuiSuperSelect
 import { EuiHealth, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { Fragment } from 'react';
 import { Query } from 'react-apollo';
 import { Monitor } from '../../../../common/graphql/types';
+import { UptimeCommonProps } from '../../../uptime_app';
 import { getLatestMonitorsQuery } from './get_latest_monitors';
 
 interface MonitorSelectProps {
-  dateRangeStart: number;
-  dateRangeEnd: number;
   valueOfSelectedMonitor?: string;
-  autorefreshInterval: number;
-  autorefreshEnabled: boolean;
   onChange: (path: string, state: object) => void;
 }
+
+type Props = MonitorSelectProps & UptimeCommonProps;
 
 export const MonitorSelect = ({
   dateRangeStart,
   dateRangeEnd,
   valueOfSelectedMonitor,
   autorefreshInterval,
-  autorefreshEnabled,
+  autorefreshIsPaused,
   onChange,
-}: MonitorSelectProps) => (
+}: Props) => (
   <Query
-    pollInterval={autorefreshEnabled ? autorefreshInterval : undefined}
+    pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
     query={getLatestMonitorsQuery}
     variables={{ dateRangeStart, dateRangeEnd }}
   >
@@ -59,11 +58,18 @@ export const MonitorSelect = ({
         ),
       }));
       return (
-        <EuiSuperSelect
-          options={options}
-          valueOfSelected={valueOfSelectedMonitor}
-          onChange={(e: string) => onChange(`/monitor/${e}`, {})}
-        />
+        <Fragment>
+          {options.length > 0 && (
+            <EuiSuperSelect
+              options={options}
+              valueOfSelected={valueOfSelectedMonitor}
+              onChange={(e: string) => onChange(`/monitor/${e}`, {})}
+            />
+          )}
+          {options.length === 0 && (
+            <h4>There is no monitor data available for the selected time range</h4>
+          )}
+        </Fragment>
       );
     }}
   </Query>

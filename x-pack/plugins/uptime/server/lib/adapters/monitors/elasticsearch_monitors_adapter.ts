@@ -6,7 +6,6 @@
 
 import { get, set } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
-import { UMGqlRange } from '../../../../common/domain_types';
 import { ErrorListItem } from '../../../../common/graphql/types';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
@@ -37,7 +36,11 @@ const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
   };
 };
 
-const getFilteredQuery = (dateRangeStart: number, dateRangeEnd: number, filters?: string) => {
+const getFilteredQuery = (
+  dateRangeStart: string,
+  dateRangeEnd: string,
+  filters?: string | null
+) => {
   let filtersObj;
   // TODO: handle bad JSON gracefully
   filtersObj = filters ? JSON.parse(filters) : undefined;
@@ -68,8 +71,8 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
   public async getMonitorChartsData(
     request: any,
     monitorId: string,
-    dateRangeStart: number,
-    dateRangeEnd: number
+    dateRangeStart: string,
+    dateRangeEnd: string
   ): Promise<any> {
     const query = {
       bool: {
@@ -139,7 +142,12 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     );
   }
 
-  public async getSnapshotCount(request: any, range: UMGqlRange, filter?: string): Promise<any> {
+  public async getSnapshotCount(
+    request: any,
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filter?: string | null
+  ): Promise<any> {
     let statusFilter: string | undefined;
     if (filter) {
       statusFilter = this.getMonitorsListFilteredQuery(filter);
@@ -153,7 +161,6 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
         },
       };
     }
-    const { dateRangeStart, dateRangeEnd } = range;
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
@@ -231,9 +238,9 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
 
   public async getLatestMonitors(
     request: any,
-    dateRangeStart: number,
-    dateRangeEnd: number,
-    filters?: string
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string | null
   ): Promise<any> {
     let statusFilter: string | undefined;
     if (filters) {
@@ -341,8 +348,8 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
 
   public async getFilterBar(
     request: any,
-    dateRangeStart: number,
-    dateRangeEnd: number
+    dateRangeStart: string,
+    dateRangeEnd: string
   ): Promise<any> {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
@@ -407,9 +414,9 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
 
   public async getErrorsList(
     request: any,
-    dateRangeStart: number,
-    dateRangeEnd: number,
-    filters?: string | undefined
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string | null
   ): Promise<ErrorListItem[]> {
     const statusDown = {
       term: {

@@ -293,8 +293,6 @@ export interface Snapshot {
 
   down?: number | null;
 
-  trouble?: number | null;
-
   total?: number | null;
 
   histogram?: (HistogramSeries | null)[] | null;
@@ -393,51 +391,47 @@ export interface AllPingsQueryArgs {
 
   status?: string | null;
 
-  dateRangeStart: UnsignedInteger;
+  dateRangeStart: string;
 
-  dateRangeEnd: UnsignedInteger;
+  dateRangeEnd: string;
 }
 export interface GetMonitorsQueryArgs {
-  dateRangeStart: UnsignedInteger;
+  dateRangeStart: string;
 
-  dateRangeEnd: UnsignedInteger;
+  dateRangeEnd: string;
 
   filters?: string | null;
 }
 export interface GetSnapshotQueryArgs {
-  dateRangeStart?: UnsignedInteger | null;
+  dateRangeStart: string;
 
-  dateRangeEnd?: UnsignedInteger | null;
-
-  downCount?: number | null;
-
-  windowSize?: number | null;
+  dateRangeEnd: string;
 
   filters?: string | null;
 }
 export interface GetMonitorChartsDataQueryArgs {
-  monitorId?: string | null;
+  monitorId: string;
 
-  dateRangeStart?: UnsignedInteger | null;
+  dateRangeStart: string;
 
-  dateRangeEnd?: UnsignedInteger | null;
+  dateRangeEnd: string;
 }
 export interface GetLatestMonitorsQueryArgs {
-  dateRangeStart: UnsignedInteger;
+  dateRangeStart: string;
 
-  dateRangeEnd: UnsignedInteger;
+  dateRangeEnd: string;
 
   monitorId?: string | null;
 }
 export interface GetFilterBarQueryArgs {
-  dateRangeStart: UnsignedInteger;
+  dateRangeStart: string;
 
-  dateRangeEnd: UnsignedInteger;
+  dateRangeEnd: string;
 }
 export interface GetErrorsListQueryArgs {
-  dateRangeStart: UnsignedInteger;
+  dateRangeStart: string;
 
-  dateRangeEnd: UnsignedInteger;
+  dateRangeEnd: string;
 
   filters?: string | null;
 }

@@ -25,15 +25,14 @@ import React, { Fragment } from 'react';
 import { Query } from 'react-apollo';
 import { Link } from 'react-router-dom';
 import { LatestMonitorsResult } from 'x-pack/plugins/uptime/common/graphql/types';
+import { UptimeCommonProps } from '../../../uptime_app';
 import { getMonitorListQuery } from './get_monitor_list';
 
 interface MonitorListProps {
-  autorefreshInterval: number;
-  autorefreshEnabled: boolean;
-  dateRangeStart: number;
-  dateRangeEnd: number;
   filters?: string;
 }
+
+type Props = MonitorListProps & UptimeCommonProps;
 
 const MONITOR_LIST_DEFAULT_PAGINATION = 10;
 
@@ -136,13 +135,13 @@ const monitorListPagination = {
 
 export const MonitorList = ({
   autorefreshInterval,
-  autorefreshEnabled,
+  autorefreshIsPaused,
   dateRangeStart,
   dateRangeEnd,
   filters,
-}: MonitorListProps) => (
+}: Props) => (
   <Query
-    pollInterval={autorefreshEnabled ? autorefreshInterval : undefined}
+    pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
     query={getMonitorListQuery}
     variables={{ dateRangeStart, dateRangeEnd, filters }}
   >
