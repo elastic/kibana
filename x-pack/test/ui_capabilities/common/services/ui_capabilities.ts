@@ -18,6 +18,7 @@ export interface BasicCredentials {
 
 export enum GetUICapabilitiesFailureReason {
   RedirectedToRoot,
+  NotFound,
 }
 
 interface GetUICapabilitiesResult {
@@ -61,6 +62,13 @@ export class UICapabilitiesService {
       return {
         success: false,
         failureReason: GetUICapabilitiesFailureReason.RedirectedToRoot,
+      };
+    }
+
+    if (response.status === 404) {
+      return {
+        success: false,
+        failureReason: GetUICapabilitiesFailureReason.NotFound,
       };
     }
 
