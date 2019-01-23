@@ -17,29 +17,44 @@
  * under the License.
  */
 
+import { combineLatest } from 'rxjs';
+import { first, map } from 'rxjs/operators';
 import healthCheck from './lib/health_check';
 import { Cluster } from './lib/cluster';
 import { createProxy } from './lib/create_proxy';
 
 export default function (kibana) {
+  let defaultVars;
+
   return new kibana.Plugin({
     require: ['kibana'],
 
-    uiExports: {
-      injectDefaultVars(server) {
-        return {
-          esRequestTimeout: server.core.es.requestTimeout.asMilliseconds(),
-          esShardTimeout: server.core.es.shardTimeout.asMilliseconds(),
-          esApiVersion: server.core.es.apiVersion,
-        };
-      }
-    },
+    uiExports: { injectDefaultVars: () => defaultVars },
 
-    init(server) {
+    async init(server) {
+      // All methods that ES plugin exposes are synchronous so we should get the first
+      // value from all observables here to be able to synchronously return and create
+      // cluster clients afterwards.
+      const [bwcEsConfig, adminCluster, dataCluster] = await combineLatest(
+        server.core.es.bwc.config$,
+        server.core.es.adminClient$,
+        server.core.es.dataClient$
+      ).pipe(
+        first(),
+        map(([config, adminClusterClient, dataClusterClient]) => [
+          config,
+          new Cluster(adminClusterClient),
+          new Cluster(dataClusterClient)
+        ])
+      ).toPromise();
+
+      defaultVars = {
+        esRequestTimeout: bwcEsConfig.requestTimeout.asMilliseconds(),
+        esShardTimeout: bwcEsConfig.shardTimeout.asMilliseconds(),
+        esApiVersion: bwcEsConfig.apiVersion,
+      };
+
       const clusters = new Map();
-
-      const adminCluster = new Cluster(server.core.es.adminClient);
-      const dataCluster = new Cluster(server.core.es.dataClient);
       server.expose('getCluster', (name) => {
         if (name === 'admin') {
           return adminCluster;
@@ -52,12 +67,19 @@ export default function (kibana) {
         return clusters.get(name);
       });
 
-      server.expose('createCluster', (name, config) => {
+      server.expose('createCluster', (name, clientConfig = {}) => {
         if (clusters.has(name)) {
           throw new Error(`cluster '${name}' already exists`);
         }
 
-        const cluster = new Cluster(server.core.es.createClient(name, config));
+        // We fill all the missing properties in the `clientConfig` using the default
+        // Elasticsearch config so that we don't depend on default values set and
+        // controlled by underlying Elasticsearch JS client.
+        const cluster = new Cluster(server.core.es.createClient(name, {
+          ...bwcEsConfig,
+          ...clientConfig,
+        }));
+
         clusters.set(name, cluster);
 
         return cluster;
@@ -73,7 +95,7 @@ export default function (kibana) {
       createProxy(server);
 
       // Set up the health check service and start it.
-      const { start, waitUntilReady } = healthCheck(this, server);
+      const { start, waitUntilReady } = healthCheck(this, server, bwcEsConfig.healthCheckDelay.asMilliseconds());
       server.expose('waitUntilReady', waitUntilReady);
       start();
     }

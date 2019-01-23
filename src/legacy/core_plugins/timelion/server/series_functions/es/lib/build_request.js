@@ -21,7 +21,7 @@ import _ from 'lodash';
 import { buildAggBody } from './agg_body';
 import createDateAgg from './create_date_agg';
 
-export default function buildRequest(config, tlConfig, scriptedFields) {
+export default function buildRequest(config, tlConfig, scriptedFields, timeout) {
 
   const bool = { must: [] };
 
@@ -78,7 +78,6 @@ export default function buildRequest(config, tlConfig, scriptedFields) {
     }
   };
 
-  const timeout = tlConfig.server.core.es.shardTimeout.asMilliseconds();
   if (timeout) {
     request.timeout = `${timeout}ms`;
   }

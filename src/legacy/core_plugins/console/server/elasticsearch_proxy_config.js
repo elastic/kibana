@@ -25,8 +25,7 @@ import url from 'url';
 
 const readFile = (file) => readFileSync(file, 'utf8');
 
-const createAgent = (server) => {
-  const bwcConfig = server.core.es.bwc.config;
+const createAgent = (bwcConfig) => {
   const target = url.parse(_.head(bwcConfig.hosts));
   if (!/^https/.test(target.protocol)) return new http.Agent();
 
@@ -68,9 +67,9 @@ const createAgent = (server) => {
   return new https.Agent(agentOptions);
 };
 
-export const getElasticsearchProxyConfig = (server) => {
+export const getElasticsearchProxyConfig = (bwcConfig) => {
   return {
-    timeout: server.core.es.requestTimeout.asMilliseconds(),
-    agent: createAgent(server)
+    timeout: bwcConfig.requestTimeout.asMilliseconds(),
+    agent: createAgent(bwcConfig)
   };
 };

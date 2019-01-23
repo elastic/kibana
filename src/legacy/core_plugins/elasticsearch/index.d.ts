@@ -165,15 +165,6 @@ interface RequestHeaders {
   [name: string]: string;
 }
 
-interface ElasticsearchClientLogging {
-  error(err: Error): void;
-  warning(message: string): void;
-  trace(method: string, options: { path: string }, query?: string, statusCode?: number): void;
-  info(): void;
-  debug(): void;
-  close(): void;
-}
-
 interface AssistantAPIClientParams extends GenericParams {
   path: '/_xpack/migration/assistance';
   method: 'GET';

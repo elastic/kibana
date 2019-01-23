@@ -18,6 +18,7 @@
  */
 
 import Boom from 'boom';
+import { first } from 'rxjs/operators';
 import { resolve, join, sep } from 'path';
 import url from 'url';
 import { has, isEmpty, head, pick, isPlainObject } from 'lodash';
@@ -64,6 +65,7 @@ export default function (kibana) {
   const modules = resolve(__dirname, 'public/webpackShims/');
   const src = resolve(__dirname, 'public/src/');
 
+  let defaultVars;
   const apps = [];
   return new kibana.Plugin({
     id: 'console',
@@ -107,16 +109,22 @@ export default function (kibana) {
       ];
     },
 
-    init: function (server, options) {
+    async init(server, options) {
       server.expose('addExtensionSpecFilePath', addExtensionSpecFilePath);
       if (options.ssl && options.ssl.verify) {
         throw new Error('sense.ssl.verify is no longer supported.');
       }
 
       const config = server.config();
-      const bwcEsConfig = server.core.es.bwc.config;
+      const bwcEsConfig = await server.core.es.bwc.config$.pipe(first()).toPromise();
       const proxyConfigCollection = new ProxyConfigCollection(options.proxyConfig);
       const proxyPathFilters = options.proxyFilter.map(str => new RegExp(str));
+
+      defaultVars = {
+        elasticsearchUrl: url.format(
+          Object.assign(url.parse(head(bwcEsConfig.hosts)), { auth: false })
+        )
+      };
 
       server.route(createProxyRoute({
         baseUrl: head(bwcEsConfig.hosts),
@@ -133,7 +141,7 @@ export default function (kibana) {
           }
 
           return {
-            ...getElasticsearchProxyConfig(server),
+            ...getElasticsearchProxyConfig(bwcEsConfig),
             headers,
           };
         }
@@ -159,16 +167,7 @@ export default function (kibana) {
       devTools: ['plugins/console/console'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
 
-      injectDefaultVars(server) {
-        return {
-          elasticsearchUrl: url.format(
-            Object.assign(
-              url.parse(head(server.core.es.bwc.config.hosts)),
-              { auth: false }
-            )
-          )
-        };
-      },
+      injectDefaultVars: () => defaultVars,
 
       noParse: [
         join(modules, 'ace' + sep),
