@@ -14,7 +14,7 @@ import styled from 'styled-components';
 import { pure } from 'recompose';
 import { QueryDate } from './data_provider';
 
-const EuiBadgeStyled = styled(EuiBadge)`
+const ProviderBadgeStyled = styled(EuiBadge)`
   border: none;
   .euiToolTipAnchor {
     &::after {
@@ -73,7 +73,7 @@ export const ProviderBadge = pure<ProviderBadgeProps>(
       : `${moment(queryDate!.from).format('L LTS')} - ${moment(queryDate!.to).format('L LTS')}`;
 
     return (
-      <EuiBadgeStyled
+      <ProviderBadgeStyled
         id={`${providerId}-${field}-${val}`}
         className={classes}
         title={title}
@@ -84,8 +84,8 @@ export const ProviderBadge = pure<ProviderBadgeProps>(
         onClick={togglePopover}
         onClickAriaLabel={`Show Filter ${val} in timeline`}
         closeButtonProps={{
-          // Removing tab focus on close button because the same option can be optained through the context menu
-          // Also, we may want to add a `DEL` keyboard press functionality
+          // Removing tab focus on close button because the same option can be obtained through the context menu
+          // TODO: add a `DEL` keyboard press functionality
           tabIndex: '-1',
         }}
         data-test-subj="providerBadge"
@@ -98,7 +98,7 @@ export const ProviderBadge = pure<ProviderBadgeProps>(
         {prefix}
         <span className="field-value">{field}: </span>
         <span className="field-value">&quot;{val}&quot;</span>
-      </EuiBadgeStyled>
+      </ProviderBadgeStyled>
     );
   }
 );

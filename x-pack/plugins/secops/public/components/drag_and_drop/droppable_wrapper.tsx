@@ -45,6 +45,7 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; themeName: Them
   > div.timeline-drop-area {
     background-color: rgb(245, 247, 250);
     .provider-item-filter-container div:first-child{
+      /// Ooverwride dragNdrop beautifull so we do not have our droppable moving around for no good reason
       transform: none !important;
     }
   }
@@ -53,7 +54,7 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; themeName: Them
       background-color: rgb(245, 247, 250);
     }
     + div {
-      // This is to overwrite dragNdrop beautifull so we do not have our droppable moving around for no good reason
+      // Ooverwride dragNdrop beautifull so we do not have our droppable moving around for no good reason
       display: none !important;
     }
   }
@@ -62,7 +63,7 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; themeName: Them
       : ''}
   > div.timeline-drop-area {
     & + div {
-      // This is to overwrite dragNdrop beautifull so we do not have our droppable moving around for no good reason
+      // overwride dragNdrop beautifull so we do not have our droppable moving around for no good reason
       display: none !important;
     }
   }

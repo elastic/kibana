@@ -48,7 +48,6 @@ const EmptyContainer = styled.div`
 `;
 
 const NoWrap = styled.div`
-  margin: 6px;
   align-items: center;
   display: flex;
   flex-direction: row;

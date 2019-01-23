@@ -57,13 +57,13 @@ const EuiBadgeOrStyled = styled(EuiBadge)`
   border-radius: 100%;
 `;
 
-const EuiFlexGroupContainer = styled(EuiFlexGroup)`
+const PanelProvidersGroupContainer = styled(EuiFlexGroup)`
   position: relative;
   flex-grow: unset;
   margin-right: 40px;
 `;
 
-const MyEuiFlexItem = styled(EuiFlexItem)`
+const PanelProviderItemContainer = styled(EuiFlexItem)`
   height: 100%;
   .euiHorizontalRule {
     transform: rotate(90deg);
@@ -115,14 +115,14 @@ export const Providers = pure<Props>(
         return (
           // Providers are a special drop target that can't be drag-and-dropped
           // to another destination, so it doesn't use our DraggableWrapper
-          <EuiFlexGroupContainer
+          <PanelProvidersGroupContainer
             key={dataProvider.id}
             direction="row"
             className="provider-item-container"
             alignItems="center"
             gutterSize="none"
           >
-            <MyEuiFlexItem grow={false}>
+            <PanelProviderItemContainer grow={false}>
               <EuiFlexGroup direction="column" gutterSize="none" justifyContent="spaceAround">
                 <EuiFlexItem className="provider-item-filter-container" grow={false}>
                   <Draggable
@@ -156,7 +156,7 @@ export const Providers = pure<Props>(
                     )}
                   </Draggable>
                 </EuiFlexItem>
-                <EuiFlexItem className="provider-item-and-container" grow={false}>
+                <EuiFlexItem grow={false}>
                   <ProviderItemAndDragDrop
                     dataProvider={dataProvider}
                     onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
@@ -167,12 +167,12 @@ export const Providers = pure<Props>(
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </MyEuiFlexItem>
-            <MyEuiFlexItem className="provider-item-or-container" grow={false}>
+            </PanelProviderItemContainer>
+            <PanelProviderItemContainer grow={false}>
               <EuiBadgeOrStyled color="default">OR</EuiBadgeOrStyled>
               <EuiHorizontalRule />
-            </MyEuiFlexItem>
-          </EuiFlexGroupContainer>
+            </PanelProviderItemContainer>
+          </PanelProvidersGroupContainer>
         );
       })}
       <Empty />

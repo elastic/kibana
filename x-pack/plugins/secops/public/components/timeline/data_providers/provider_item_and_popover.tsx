@@ -26,7 +26,7 @@ import { DataProvider } from './data_provider';
 import { ProviderBadge } from './provider_badge';
 import { getProviderActions } from './provider_item_actions';
 
-const MyEuiBadge = styled(EuiBadge)`
+const NumberProviderAndBadge = styled(EuiBadge)`
   margin: 0px 5px;
 `;
 
@@ -93,7 +93,11 @@ export class ProviderItemAndPopover extends React.PureComponent<
         style={hasAndItem ? {} : { cursor: 'default' }}
       >
         <EuiButtonContent>
-          {hasAndItem && <MyEuiBadge color="primary">{dataProvidersAnd.length}</MyEuiBadge>}
+          {hasAndItem && (
+            <NumberProviderAndBadge color="primary">
+              {dataProvidersAnd.length}
+            </NumberProviderAndBadge>
+          )}
           <EuiBadgeAndStyled>AND</EuiBadgeAndStyled>
         </EuiButtonContent>
       </EuiButtonEmpty>
@@ -108,7 +112,7 @@ export class ProviderItemAndPopover extends React.PureComponent<
         closePopover={this.closePopover}
         data-test-subj="andProviderButton"
       >
-        <div style={{ width: '200px' }}>
+        <div style={{ width: 'auto' }}>
           {dataProvidersAnd.map((providerAnd: DataProvider, index: number) => {
             const badge = (
               <ProviderBadge
