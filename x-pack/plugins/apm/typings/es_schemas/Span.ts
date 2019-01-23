@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APMDoc, Context } from './APMDoc';
-import { IStackframe } from './Stackframe';
+import { APMDoc } from './APMDoc';
+import { IStackframe } from './fields/Stackframe';
 
 interface Processor {
   name: 'transaction';
   event: 'span';
 }
 
-// TODO: should spanContext extend shared context?
-interface SpanContext extends Context {
+interface SpanContext {
   db?: {
     instance?: string;
     statement?: string;
@@ -26,7 +25,7 @@ interface SpanContext extends Context {
     url?: string;
   };
   tags?: {
-    [key: string]: string; // is this always a string?
+    [key: string]: string; // TODO: is this always a string?
   };
 }
 
@@ -43,7 +42,5 @@ export interface Span extends APMDoc {
     sync: boolean;
     type: string;
   };
-  transaction: {
-    id: string;
-  };
+  transaction: { id: string };
 }

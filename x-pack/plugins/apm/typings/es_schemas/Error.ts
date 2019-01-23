@@ -5,7 +5,14 @@
  */
 
 import { APMDoc } from './APMDoc';
-import { IStackframe } from './Stackframe';
+import { Container } from './fields/Container';
+import { Context } from './fields/Context';
+import { Host } from './fields/Host';
+import { Kubernetes } from './fields/Kubernetes';
+import { Process } from './fields/Process';
+import { IStackframe } from './fields/Stackframe';
+import { Url } from './fields/Url';
+import { User } from './fields/User';
 
 interface Processor {
   name: 'error';
@@ -45,4 +52,13 @@ export interface APMError extends APMDoc {
     exception?: Exception;
     log?: Log;
   };
+
+  // Shared by errors and transactions
+  container?: Container;
+  context?: Context;
+  host?: Host;
+  kubernetes?: Kubernetes;
+  process?: Process;
+  url?: Url;
+  user?: User;
 }

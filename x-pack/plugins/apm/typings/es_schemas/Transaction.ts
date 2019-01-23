@@ -5,47 +5,45 @@
  */
 
 import { APMDoc } from './APMDoc';
+import { Container } from './fields/Container';
+import { Context } from './fields/Context';
+import { Host } from './fields/Host';
+import { Kubernetes } from './fields/Kubernetes';
+import { Process } from './fields/Process';
+import { Url } from './fields/Url';
+import { User } from './fields/User';
 
 interface Processor {
   name: 'transaction';
   event: 'transaction';
 }
 
-interface Marks {
-  agent?: {
-    [name: string]: number;
-  };
-}
-
 export interface Transaction extends APMDoc {
   processor: Processor;
   transaction: {
-    duration: {
-      us: number;
-    };
+    duration: { us: number };
     id: string;
-    marks?: Marks;
+    marks?: {
+      agent?: {
+        [name: string]: number;
+      };
+    };
     name: string; // name could be missing in ES but the UI will always only aggregate on transactions with a name
     result?: string;
     sampled: boolean;
-
     span_count?: {
       started?: number;
       dropped?: number;
     };
     type: string;
   };
-  kubernetes?: {
-    pod: {
-      uid: string;
-    };
-  };
-  docker?: {
-    container: {
-      id: string;
-    };
-  };
-  container: {
-    id: string;
-  };
+
+  // Shared by errors and transactions
+  container?: Container;
+  context?: Context;
+  host?: Host;
+  kubernetes?: Kubernetes;
+  process?: Process;
+  url?: Url;
+  user?: User;
 }

@@ -63,9 +63,6 @@ describe('Span', () => {
       name: 'agent name',
       version: 'agent version'
     },
-    host: {
-      hostname: 'my hostname'
-    },
     processor: {
       name: 'transaction',
       event: 'span'

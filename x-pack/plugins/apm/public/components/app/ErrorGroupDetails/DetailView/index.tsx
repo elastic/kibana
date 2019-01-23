@@ -33,7 +33,7 @@ import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/public/constants';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { ErrorGroupAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_error_group';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
-import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/Stackframe';
+import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/fields/Stackframe';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import {
   ERROR_EXC_HANDLED,

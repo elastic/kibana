@@ -73,7 +73,7 @@ export class TransactionActionMenu extends React.Component<Props, State> {
     const { transaction, location } = this.props;
     const hostName = idx(transaction, _ => _.host.hostname);
     const podId = idx(transaction, _ => _.kubernetes.pod.uid);
-    const containerId = idx(transaction, _ => _.docker.container.id);
+    const containerId = idx(transaction, _ => _.container.id);
     const pathname = '/app/infra';
     const time = new Date(transaction['@timestamp']).getTime();
     const infraMetricsQuery = getInfraMetricsQuery(transaction);
