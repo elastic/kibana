@@ -11,7 +11,7 @@ import React, { SFC } from 'react';
 import { fonts, FontValue } from '../../../common/lib/fonts';
 
 interface Props {
-  onSelect?: (value: typeof fonts[number]['value']) => void;
+  onSelect?: (value: FontValue) => void;
   value?: FontValue;
 }
 
@@ -36,7 +36,7 @@ export const FontPicker: SFC<Props> = props => {
         inputDisplay: <div style={{ fontFamily: font.value }}>{font.label}</div>,
       }))}
       valueOfSelected={value}
-      onChange={(newValue: typeof fonts[number]['value']) => onSelect && onSelect(newValue)}
+      onChange={(newValue: FontValue) => onSelect && onSelect(newValue)}
     />
   );
 };
