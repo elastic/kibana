@@ -11,6 +11,7 @@
     "metricVis": "src/legacy/core_plugins/metric_vis",
     "vega": "src/legacy/core_plugins/vega",
     "tableVis": "src/legacy/core_plugins/table_vis",
+    "stateSessionStorageRedirect": "src/legacy/core_plugins/state_session_storage_redirect",
     "regionMap": "src/legacy/core_plugins/region_map",
     "statusPage": "src/legacy/core_plugins/status_page",
     "tileMap": "src/legacy/core_plugins/tile_map",
