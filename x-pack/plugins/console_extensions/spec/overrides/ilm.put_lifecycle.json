@@ -1,10 +1,40 @@
 {
   "ilm.put_lifecycle": {
     "data_autocomplete_rules": {
-      "phases": {
-        "warm": {
-          "__template": {
-            "after": "1d",
+      "policy": {
+        "phases": {
+          "warm": {
+            "__template": {
+              "min_age": "1d",
+              "actions": {
+                "set_priority": {
+                  "priority": 50
+                },
+                "allocate": {
+                  "number_of_replicas": 1,
+                  "include": {
+                    "_name": "",
+                    "_ip": ""
+                  },
+                  "exclude": {
+                    "_name": "",
+                    "_ip": ""
+                  },
+                  "require": {
+                    "_name": "",
+                    "_ip": ""
+                  }
+                },
+                "shrink": {
+                  "number_of_shards": 1
+                },
+                "forcemerge": {
+                  "max_num_segments": 1
+                },
+                "unfollow": {}
+              }  
+            },
+            "min_age": "1d",
             "actions": {
               "set_priority": {
                 "priority": 50
@@ -31,46 +61,41 @@
                 "max_num_segments": 1
               },
               "unfollow": {}
-            }  
+            }
           },
-          "after": "1d",
-          "actions": {
-            "set_priority": {
-              "priority": 50
+          "cold": {
+            "__template": {
+              "min_age": "1d",
+              "actions": {
+                "set_priority": {
+                  "priority": 0
+                },
+                "freeze": {},
+                "unfollow": {},
+                "allocate": {
+                  "number_of_replicas": 1,
+                  "include": {
+                    "_name": "",
+                    "_ip": ""
+                  },
+                  "exclude": {
+                    "_name": "",
+                    "_ip": ""
+                  },
+                  "require": {
+                    "_name": "",
+                    "_ip": ""
+                  }
+                }
+              }  
             },
-            "allocate": {
-              "number_of_replicas": 1,
-              "include": {
-                "_name": "",
-                "_ip": ""
-              },
-              "exclude": {
-                "_name": "",
-                "_ip": ""
-              },
-              "require": {
-                "_name": "",
-                "_ip": ""
-              }
-            },
-            "shrink": {
-              "number_of_shards": 1
-            },
-            "forcemerge": {
-              "max_num_segments": 1
-            },
-            "unfollow": {}
-          }
-        },
-        "cold": {
-          "__template": {
-            "set_priority": {
-              "priority": 0
-            },
-            "freeze": {},
-            "unfollow": {},
-            "after": "1d",
+            "min_age": "1d",
             "actions": {
+              "set_priority": {
+                "priority": 0
+              },
+              "freeze": {},
+              "unfollow": {},
               "allocate": {
                 "number_of_replicas": 1,
                 "include": {
@@ -86,35 +111,24 @@
                   "_ip": ""
                 }
               }
-            }  
-          },
-          "after": "1d",
-          "actions": {
-            "set_priority": {
-              "priority": 0
-            },
-            "freeze": {},
-            "unfollow": {},
-            "allocate": {
-              "number_of_replicas": 1,
-              "include": {
-                "_name": "",
-                "_ip": ""
-              },
-              "exclude": {
-                "_name": "",
-                "_ip": ""
-              },
-              "require": {
-                "_name": "",
-                "_ip": ""
-              }
             }
-          }
-        },
-        "hot": {
-          "__template": {
-            "after": "1d",
+          },
+          "hot": {
+            "__template": {
+              "min_age": "1d",
+              "actions": {
+                "set_priority": {
+                  "priority": 100
+                },
+                "rollover": {
+                  "max_age": "7d",
+                  "max_docs": 1000,
+                  "max_size": "5gb"
+                },
+                "unfollow": {}
+              }  
+            },
+            "min_age": "1d",
             "actions": {
               "set_priority": {
                 "priority": 100
@@ -125,31 +139,19 @@
                 "max_size": "5gb"
               },
               "unfollow": {}
-            }  
+            }
           },
-          "after": "1d",
-          "actions": {
-            "set_priority": {
-              "priority": 100
+          "delete": {
+            "__template": {
+              "min_age": "1d",
+              "actions": {
+                "delete": {}
+              }
             },
-            "rollover": {
-              "max_age": "7d",
-              "max_docs": 1000,
-              "max_size": "5gb"
-            },
-            "unfollow": {}
-          }
-        },
-        "delete": {
-          "__template": {
-            "after": "1d",
+            "min_age": "1d",
             "actions": {
               "delete": {}
             }
-          },
-          "after": "1d",
-          "actions": {
-            "delete": {}
           }
         }
       }
