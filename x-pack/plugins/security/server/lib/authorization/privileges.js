@@ -28,8 +28,7 @@ export function buildPrivilegeMap(savedObjectTypes, actions) {
         ...buildSavedObjectsActions([
           'get',
           'bulk_get',
-          'find',
-          'find_relationships',
+          'find'
         ])
       ],
     },
@@ -44,8 +43,7 @@ export function buildPrivilegeMap(savedObjectTypes, actions) {
           'get',
           'bulk_get',
           'find',
-          'find_relationships',
-          'update',
+          'update'
         ])
       ],
       read: [
@@ -54,9 +52,7 @@ export function buildPrivilegeMap(savedObjectTypes, actions) {
         ...buildSavedObjectsActions([
           'get',
           'bulk_get',
-          'find',
-          'find_relationships',
-        ])
+          'find'])
       ],
     },
   };
