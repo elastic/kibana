@@ -148,7 +148,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                   <EuiHeaderSectionItem border="none">
                     <div
                       style={{
-                        marginTop: '10px',
+                        marginTop: '4px',
                         marginLeft: '16px',
                         marginRight: '16px',
                         minWidth: '600px',
