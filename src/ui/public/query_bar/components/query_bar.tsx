@@ -44,8 +44,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiOutsideClickDetector,
-  EuiSuperDatePicker,
 } from '@elastic/eui';
+
+// @ts-ignore
+import { EuiSuperDatePicker } from '@elastic/eui';
 
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 
@@ -119,7 +121,7 @@ export class QueryBarUI extends Component<Props, State> {
       };
     }
 
-    const nextState = {
+    const nextState: any = {
       currentProps: nextProps,
     };
     if (nextQuery) {
@@ -131,6 +133,8 @@ export class QueryBarUI extends Component<Props, State> {
     }
     return nextState;
   }
+
+  // @ts-ignore
   private static defaultProps = {
     showDatePicker: false,
     from: 'now-15m',
@@ -656,4 +660,5 @@ export class QueryBarUI extends Component<Props, State> {
   }
 }
 
+// @ts-ignore
 export const QueryBar = injectI18n(QueryBarUI);
