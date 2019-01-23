@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const spaceResourcePrefix = `space:`;
+export const spaceResourcePrefix = `space:`;
 
 export class ResourceSerializer {
   public static serializeSpaceResource(spaceId: string) {
@@ -12,10 +12,14 @@ export class ResourceSerializer {
   }
 
   public static deserializeSpaceResource(resource: string) {
-    if (!resource.startsWith(spaceResourcePrefix)) {
+    if (!this.isSerializedSpaceResource(resource)) {
       throw new Error(`Resource should have started with ${spaceResourcePrefix}`);
     }
 
     return resource.slice(spaceResourcePrefix.length);
+  }
+
+  public static isSerializedSpaceResource(resource: string) {
+    return resource.startsWith(spaceResourcePrefix);
   }
 }

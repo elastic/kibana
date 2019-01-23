@@ -19,6 +19,9 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { toastNotifications } from 'ui/notify';
+import { MarkdownSimple } from 'ui/markdown';
+
 import tickFormatter from '../../lib/tick_formatter';
 import _ from 'lodash';
 import Timeseries from '../../../visualizations/components/timeseries';
@@ -54,12 +57,35 @@ class TimeseriesVisualization extends Component {
     if (!scaledDataFormat || !dateFormat) return val;
     const formatter = createXaxisFormatter(this.getInterval(), scaledDataFormat, dateFormat);
     return formatter(val);
+  };
+
+  componentDidUpdate() {
+    if (this.showToastNotification && this.notificationReason !== this.showToastNotification.reason) {
+      if (this.notification) {
+        toastNotifications.remove(this.notification);
+      }
+
+      this.notificationReason = this.showToastNotification.reason;
+      this.notification = toastNotifications.addDanger({
+        title: this.showToastNotification.title,
+        text: <MarkdownSimple>{this.showToastNotification.reason}</MarkdownSimple>,
+      });
+    }
+
+    if (!this.showToastNotification && this.notification) {
+      toastNotifications.remove(this.notification);
+      this.notificationReason = null;
+      this.notification = null;
+    }
   }
 
   render() {
     const { backgroundColor, model, visData } = this.props;
     const series = _.get(visData, `${model.id}.series`, []);
     let annotations;
+
+    this.showToastNotification = null;
+
     if (model.annotations && Array.isArray(model.annotations)) {
       annotations = model.annotations.map(annotation => {
         const data = _.get(visData, `${model.id}.annotations.${annotation.id}`, [])
@@ -70,7 +96,15 @@ class TimeseriesVisualization extends Component {
           icon: annotation.icon,
           series: data.map(s => {
             return [s[0], s[1].map(doc => {
-              return replaceVars(annotation.template, null, doc);
+              const vars = replaceVars(annotation.template, null, doc);
+
+              if (vars instanceof Error) {
+                this.showToastNotification = vars.error.caused_by;
+
+                return annotation.template;
+              }
+
+              return vars;
             })];
           })
         };
@@ -218,7 +252,8 @@ TimeseriesVisualization.propTypes = {
   onChange: PropTypes.func,
   reversed: PropTypes.bool,
   visData: PropTypes.object,
-  dateFormat: PropTypes.string
+  dateFormat: PropTypes.string,
+  getConfig: PropTypes.func
 };
 
 export default TimeseriesVisualization;

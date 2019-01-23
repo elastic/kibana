@@ -40,7 +40,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
             expect(capabilities).to.have.property('discover');
             expect(capabilities.discover).to.eql({
               show: true,
-              showWriteControls: true,
+              save: true,
             });
             expect(capabilities.catalogue.discover).to.eql(true);
             break;
@@ -52,7 +52,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
             expect(capabilities).to.have.property('discover');
             expect(capabilities.discover).to.eql({
               show: true,
-              showWriteControls: false,
+              save: false,
             });
             expect(capabilities.catalogue.discover).to.eql(true);
             break;
@@ -71,7 +71,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
             expect(capabilities).to.have.property('discover');
             expect(capabilities.discover).to.eql({
               show: false,
-              showWriteControls: false,
+              save: false,
             });
             expect(capabilities.catalogue.discover).to.eql(false);
             break;

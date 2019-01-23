@@ -5,6 +5,7 @@
  */
 
 import { EuiEmptyPrompt, EuiEmptyPromptProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 interface Props {
@@ -14,14 +15,18 @@ interface Props {
 }
 
 const EmptyMessage: React.SFC<Props> = ({
-  heading = 'No data found.',
-  subheading = 'Try another time range or reset the search filter.',
+  heading = i18n.translate('xpack.apm.emptyMessage.noDataFoundLabel', {
+    defaultMessage: 'No data found.'
+  }),
+  subheading = i18n.translate('xpack.apm.emptyMessage.noDataFoundDescription', {
+    defaultMessage: 'Try another time range or reset the search filter.'
+  }),
   hideSubheading = false
 }) => {
   return (
     <EuiEmptyPrompt
       titleSize="s"
-      title={<div>{heading || 'No data found.'}</div>}
+      title={<div>{heading}</div>}
       body={!hideSubheading && subheading}
     />
   );

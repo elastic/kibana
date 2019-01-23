@@ -31,7 +31,6 @@ import { SearchItemsProvider } from 'plugins/ml/jobs/new_job/utils/new_job_utils
 import { loadCurrentIndexPattern, loadCurrentSavedSearch, timeBasedIndexCheck } from 'plugins/ml/util/index_utils';
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { ml } from 'plugins/ml/services/ml_api_service';
-import { initPromise } from 'plugins/ml/util/promise';
 import template from './datavisualizer.html';
 
 uiRoutes
@@ -43,8 +42,7 @@ uiRoutes
       privileges: checkGetJobsPrivilege,
       indexPattern: loadCurrentIndexPattern,
       savedSearch: loadCurrentSavedSearch,
-      checkMlNodesAvailable,
-      initPromise: initPromise(true)
+      checkMlNodesAvailable
     }
   });
 
@@ -307,12 +305,18 @@ module
 
       const metricCards = [];
 
-      // Add a config for 'document count', identified by no field name.
-      metricCards.push({
-        type: ML_JOB_FIELD_TYPES.NUMBER,
-        existsInDocs: true,
-        loading: true
-      });
+      // Add a config for 'document count', identified by no field name if index is timeseries based
+      if (indexPattern.timeFieldName !== undefined) {
+        metricCards.push({
+          type: ML_JOB_FIELD_TYPES.NUMBER,
+          existsInDocs: true,
+          loading: true
+        });
+      } else {
+        // disable timeRangeSelector and remove sidebar if index not timeseries based
+        timefilter.disableTimeRangeSelector();
+        $scope.showSidebar = false;
+      }
 
       // Add on 1 for the document count card.
       // TODO - remove the '+1' if document count goes in its own section.
@@ -482,7 +486,7 @@ module
         fields: numberFields
       })
         .then((resp) => {
-          // Add the metric stats to the existing stats in the corresponding card.
+          // Add the metric stats to the existing stats in the corresponding card. [ {documentCounts:...}, {fieldName: ..} ]
           _.each($scope.metricCards, (card) => {
             if (card.fieldName !== undefined) {
               card.stats = { ...card.stats, ...(_.find(resp, { fieldName: card.fieldName })) };
@@ -526,6 +530,9 @@ module
               { lifetime: 30000 }
             );
           }
+        })
+        .then(() => {
+          $scope.$applyAsync();
         });
 
     }
@@ -593,6 +600,9 @@ module
                 { lifetime: 30000 }
               );
             }
+          })
+          .then(() => {
+            $scope.$applyAsync();
           });
       } else {
         $scope.fieldFilterIcon = 0;
@@ -659,6 +669,9 @@ module
               { lifetime: 30000 }
             );
           }
+
+          $scope.$applyAsync();
+
         });
 
     }

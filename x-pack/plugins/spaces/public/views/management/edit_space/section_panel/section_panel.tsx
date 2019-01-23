@@ -94,6 +94,7 @@ export class SectionPanel extends Component<Props, State> {
         {this.props.collapsible && (
           <EuiFlexItem grow={false}>
             <EuiLink
+              data-test-subj="show-hide-section-link"
               onClick={this.toggleCollapsed}
               aria-label={this.state.collapsed ? showLinkText : hideLinkText}
             >

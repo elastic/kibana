@@ -77,7 +77,7 @@ export class SidebarNav extends React.Component<SidebarNavProps, SidebarNavState
         isOpenOnMobile={this.state.isSideNavOpenOnMobile}
         toggleOpenOnMobile={this.toggleOpenOnMobile}
         items={sideNavItems(this.props.sections, this.props.selectedId)}
-        style={{ width: 192, paddingBottom: '16px' }}
+        className="mgtSideBarNav"
       />
     );
   }

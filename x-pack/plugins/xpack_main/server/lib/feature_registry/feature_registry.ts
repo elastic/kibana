@@ -99,24 +99,28 @@ const schema = Joi.object({
     .required(),
 });
 
-const features: Record<string, Feature> = {};
+export class FeatureRegistry {
+  private locked = false;
+  private features: Record<string, Feature> = {};
 
-export function registerFeature(feature: Feature) {
-  validateFeature(feature);
+  public register(feature: Feature) {
+    if (this.locked) {
+      throw new Error(`Features are locked, can't register new features`);
+    }
 
-  if (feature.id in features) {
-    throw new Error(`Feature with id ${feature.id} is already registered.`);
+    validateFeature(feature);
+
+    if (feature.id in this.features) {
+      throw new Error(`Feature with id ${feature.id} is already registered.`);
+    }
+
+    this.features[feature.id] = feature;
   }
 
-  features[feature.id] = feature;
-}
-
-export function unregisterFeature(feature: Feature) {
-  delete features[feature.id];
-}
-
-export function getFeatures(): Feature[] {
-  return _.cloneDeep(Object.values(features));
+  public getAll(): Feature[] {
+    this.locked = true;
+    return _.cloneDeep(Object.values(this.features));
+  }
 }
 
 function validateFeature(feature: Feature) {

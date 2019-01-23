@@ -65,6 +65,7 @@ import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
+import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -260,6 +261,7 @@ function discoverController(
         showSaveModal(saveModal);
       }
     };
+
     const openSearch = {
       key: 'open',
       label: i18n('kbn.discover.localMenu.openTitle', {
@@ -321,12 +323,13 @@ function discoverController(
       }
     };
 
-    const { showWriteControls } = uiCapabilities.discover;
-
-    if (showWriteControls) {
-      return [newSearch, saveSearch, openSearch, shareSearch, inspectSearch];
-    }
-    return [newSearch, openSearch, shareSearch, inspectSearch];
+    return [
+      newSearch,
+      ...uiCapabilities.discover.save ? [saveSearch] : [],
+      openSearch,
+      shareSearch,
+      inspectSearch,
+    ];
   };
 
   $scope.topNavMenu = getTopNavLinks();
@@ -405,7 +408,8 @@ function discoverController(
     }
 
     const timeFieldName = $scope.indexPattern.timeFieldName;
-    const fields = timeFieldName ? [timeFieldName, ...selectedFields] : selectedFields;
+    const hideTimeColumn = config.get('doc_table:hideTimeColumn');
+    const fields = (timeFieldName && !hideTimeColumn) ? [timeFieldName, ...selectedFields] : selectedFields;
     return {
       searchFields: fields,
       selectFields: fields
@@ -784,7 +788,7 @@ function discoverController(
         const tabifiedData = tabifyAggResponse($scope.vis.aggs, merged);
         $scope.searchSource.rawResponse = merged;
         Promise
-          .resolve(responseHandler(tabifiedData))
+          .resolve(responseHandler(tabifiedData, buildVislibDimensions($scope.vis, $scope.timeRange)))
           .then(resp => {
             visualizeHandler.render({ value: resp });
           });

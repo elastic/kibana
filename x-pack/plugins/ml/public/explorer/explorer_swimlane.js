@@ -32,6 +32,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
   static propTypes = {
     chartWidth: PropTypes.number.isRequired,
     MlTimeBuckets: PropTypes.func.isRequired,
+    swimlaneCellClick: PropTypes.func.isRequired,
     swimlaneData: PropTypes.shape({
       laneLabels: PropTypes.array.isRequired
     }).isRequired,
@@ -124,6 +125,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
   selectCell(cellsToSelect, { laneLabels, bucketScore, times }) {
     const {
       selection,
+      swimlaneCellClick,
       swimlaneData,
       swimlaneType
     } = this.props;
@@ -156,7 +158,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
     }
 
     if (triggerNewSelection === false) {
-      mlExplorerDashboardService.swimlaneCellClick.changed({});
+      swimlaneCellClick({});
       return;
     }
 
@@ -166,7 +168,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       times: d3.extent(times),
       type: swimlaneType
     };
-    mlExplorerDashboardService.swimlaneCellClick.changed(cellData);
+    swimlaneCellClick(cellData);
   }
 
   highlightSelection(cellsToSelect, laneLabels, times) {
@@ -219,6 +221,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
     const {
       chartWidth,
       MlTimeBuckets,
+      swimlaneCellClick,
       swimlaneData,
       swimlaneType,
       selection,
@@ -307,7 +310,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       .html(label => mlEscape(label))
       .on('click', () => {
         if (typeof selection.selectedLanes !== 'undefined') {
-          mlExplorerDashboardService.swimlaneCellClick.changed({});
+          swimlaneCellClick({});
         }
       })
       .each(function () {
