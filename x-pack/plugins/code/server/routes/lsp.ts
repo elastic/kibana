@@ -143,7 +143,7 @@ export function lspRoute(
             repo: repoUri,
             file,
             language,
-            uri,
+            uri: url,
             revision,
             code,
             lineNumbers,
