@@ -23,22 +23,21 @@ import DefaultSearchCapabilities from './default_search_capabilities';
 
 const strategies = [];
 
+const addStrategy = searchStrategy => {
+  if (searchStrategy instanceof AbstractSearchStrategy) {
+    strategies.unshift(searchStrategy);
+  }
+  return this;
+};
+
 export default class SearchStrategiesRegister {
   static init(server) {
-    SearchStrategiesRegister.add(new DefaultSearchStrategy(server));
-
     server.expose('AbstractSearchStrategy', AbstractSearchStrategy);
     server.expose('AbstractSearchRequest', AbstractSearchRequest);
     server.expose('DefaultSearchCapabilities', DefaultSearchCapabilities);
+    server.expose('addSearchStrategy', searchStrategy => addStrategy(searchStrategy));
 
-    server.expose('addSearchStrategy', (searchStrategy) => SearchStrategiesRegister.add(searchStrategy));
-  }
-
-  static add(searchStrategy) {
-    if (searchStrategy instanceof AbstractSearchStrategy) {
-      strategies.unshift(searchStrategy);
-    }
-    return this;
+    addStrategy(new DefaultSearchStrategy(server));
   }
 
   static async getViableStrategy(req, indexPattern) {
