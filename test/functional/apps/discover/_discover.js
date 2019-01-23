@@ -391,17 +391,6 @@ export default function ({ getService, getPageObjects }) {
         const isVisible = await PageObjects.discover.hasNoResultsTimepicker();
         expect(isVisible).to.be(true);
       });
-
-      it('should have a link that opens and closes the time picker', async function () {
-        const noResultsTimepickerLink = await PageObjects.discover.getNoResultsTimepicker();
-        expect(await PageObjects.header.isTimepickerOpen()).to.be(false);
-
-        await noResultsTimepickerLink.click();
-        expect(await PageObjects.header.isTimepickerOpen()).to.be(true);
-
-        await noResultsTimepickerLink.click();
-        expect(await PageObjects.header.isTimepickerOpen()).to.be(false);
-      });
     });
 
     describe('filter editor', function () {

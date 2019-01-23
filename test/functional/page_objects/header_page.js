@@ -65,10 +65,6 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 
-    async isTimepickerOpen() {
-      return await testSubjects.exists('timePicker');
-    }
-
     async getToastMessage(findTimeout = defaultFindTimeout) {
       const toastMessage = await find.displayedByCssSelector(
         'kbn-truncated.kbnToast__message',
