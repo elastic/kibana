@@ -122,9 +122,6 @@ export const createLogEntriesResolvers = (libs: {
       };
     },
     async logItem(source, args, { req }) {
-      if (!args.id) {
-        throw new Error('id is a required field');
-      }
       return await libs.logEntries.getLogItem(req, args.id, source.configuration);
     },
   },

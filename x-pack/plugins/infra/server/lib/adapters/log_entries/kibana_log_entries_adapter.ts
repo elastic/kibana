@@ -174,8 +174,8 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
       body: {
         size: 1,
         query: {
-          match: {
-            _id: id,
+          ids: {
+            values: [id],
           },
         },
       },

@@ -7,6 +7,7 @@
 import React from 'react';
 import { Query } from 'react-apollo';
 import { FlyoutItemQuery, InfraLogItem } from '../../graphql/types';
+import { FlyoutVisibility } from '../../store/local/log_flyout';
 import { WithOptions } from '../with_options';
 import { flyoutItemQuery } from './flyout_item.gql_query';
 import { WithFlyoutOptions } from './with_log_flyout_options';
@@ -15,7 +16,8 @@ interface WithFlyoutArgs {
   flyoutItem: InfraLogItem | null;
   isFlyoutVisible: boolean;
   setFlyoutItem: (id: string) => void;
-  showFlyout: (isVisible: boolean) => void;
+  showFlyout: () => void;
+  hideFlyout: () => void;
   error?: string | undefined;
   loading: boolean;
 }
@@ -29,7 +31,7 @@ export const WithLogFlyout = ({ children }: WithFlyoutProps) => {
     <WithOptions>
       {({ sourceId }) => (
         <WithFlyoutOptions>
-          {({ showFlyout, setFlyoutItem, flyoutId, isFlyoutVisible }) => (
+          {({ showFlyout, hideFlyout, setFlyoutItem, flyoutId, flyoutVisibility }) => (
             <Query<FlyoutItemQuery.Query, FlyoutItemQuery.Variables>
               query={flyoutItemQuery}
               fetchPolicy="no-cache"
@@ -41,7 +43,8 @@ export const WithLogFlyout = ({ children }: WithFlyoutProps) => {
               {({ data, error, loading }) => {
                 return children({
                   showFlyout,
-                  isFlyoutVisible: !!isFlyoutVisible,
+                  hideFlyout,
+                  isFlyoutVisible: flyoutVisibility === FlyoutVisibility.visible,
                   setFlyoutItem,
                   flyoutItem: (data && data.source && data.source.logItem) || null,
                   error: error && error.message,

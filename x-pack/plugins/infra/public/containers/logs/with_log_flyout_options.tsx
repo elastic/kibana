@@ -8,30 +8,32 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
-import { isBoolean, isString } from 'lodash';
-import { flyoutOptionsActions, flyoutOptionsSelecctors, State } from '../../store';
+import { isString } from 'lodash';
+import { flyoutOptionsActions, flyoutOptionsSelectors, State } from '../../store';
+import { FlyoutVisibility } from '../../store/local/log_flyout';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
 import { UrlStateContainer } from '../../utils/url_state';
 
 const selectOptionsUrlState = createSelector(
-  flyoutOptionsSelecctors.selectFlyoutId,
-  flyoutOptionsSelecctors.selectFlyoutVisibility,
-  (flyoutId, isFlyoutVisible) => ({
-    isFlyoutVisible,
+  flyoutOptionsSelectors.selectFlyoutId,
+  flyoutOptionsSelectors.selectFlyoutVisibility,
+  (flyoutId, flyoutVisibility) => ({
+    flyoutVisibility,
     flyoutId,
   })
 );
 
 export const withFlyoutOptions = connect(
   (state: State) => ({
-    isFlyoutVisible: flyoutOptionsSelecctors.selectFlyoutVisibility(state),
-    flyoutId: flyoutOptionsSelecctors.selectFlyoutId(state),
+    flyoutVisibility: flyoutOptionsSelectors.selectFlyoutVisibility(state),
+    flyoutId: flyoutOptionsSelectors.selectFlyoutId(state),
     urlState: selectOptionsUrlState(state),
   }),
   bindPlainActionCreators({
     setFlyoutItem: flyoutOptionsActions.setFlyoutItem,
     showFlyout: flyoutOptionsActions.showFlyout,
+    hideFlyout: flyoutOptionsActions.hideFlyout,
   })
 );
 
@@ -42,13 +44,13 @@ export const WithFlyoutOptions = asChildFunctionRenderer(withFlyoutOptions);
  */
 
 interface FlyoutOptionsUrlState {
-  flyoutId?: ReturnType<typeof flyoutOptionsSelecctors.selectFlyoutId>;
-  isFlyoutVisible?: ReturnType<typeof flyoutOptionsSelecctors.selectFlyoutVisibility>;
+  flyoutId?: ReturnType<typeof flyoutOptionsSelectors.selectFlyoutId>;
+  flyoutVisibility?: ReturnType<typeof flyoutOptionsSelectors.selectFlyoutVisibility>;
 }
 
 export const WithFlyoutOptionsUrlState = () => (
   <WithFlyoutOptions>
-    {({ setFlyoutItem, showFlyout, urlState }) => (
+    {({ setFlyoutItem, showFlyout, hideFlyout, urlState }) => (
       <UrlStateContainer
         urlState={urlState}
         urlStateKey="flyoutOptions"
@@ -57,16 +59,22 @@ export const WithFlyoutOptionsUrlState = () => (
           if (newUrlState && newUrlState.flyoutId) {
             setFlyoutItem(newUrlState.flyoutId);
           }
-          if (newUrlState && newUrlState.isFlyoutVisible) {
-            showFlyout(newUrlState.isFlyoutVisible);
+          if (newUrlState && newUrlState.flyoutVisibility === FlyoutVisibility.visible) {
+            showFlyout();
+          }
+          if (newUrlState && newUrlState.flyoutVisibility === FlyoutVisibility.hidden) {
+            hideFlyout();
           }
         }}
         onInitialize={initialUrlState => {
           if (initialUrlState && initialUrlState.flyoutId) {
             setFlyoutItem(initialUrlState.flyoutId);
           }
-          if (initialUrlState && initialUrlState.isFlyoutVisible) {
-            showFlyout(initialUrlState.isFlyoutVisible);
+          if (initialUrlState && initialUrlState.flyoutVisibility === FlyoutVisibility.visible) {
+            showFlyout();
+          }
+          if (initialUrlState && initialUrlState.flyoutVisibility === FlyoutVisibility.hidden) {
+            hideFlyout();
           }
         }}
       />
@@ -78,7 +86,7 @@ const mapToUrlState = (value: any): FlyoutOptionsUrlState | undefined =>
   value
     ? {
         flyoutId: mapToFlyoutIdState(value.flyoutId),
-        isFlyoutVisible: mapToFlyoutVisibilityState(value.isFlyoutVisible),
+        flyoutVisibility: mapToFlyoutVisibilityState(value.flyoutVisibility),
       }
     : undefined;
 
@@ -86,5 +94,12 @@ const mapToFlyoutIdState = (subject: any) => {
   return subject && isString(subject) ? subject : undefined;
 };
 const mapToFlyoutVisibilityState = (subject: any) => {
-  return subject && isBoolean(subject) ? subject : undefined;
+  if (subject) {
+    if (subject === 'visible') {
+      return FlyoutVisibility.visible;
+    }
+    if (subject === 'hidden') {
+      return FlyoutVisibility.hidden;
+    }
+  }
 };

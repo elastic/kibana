@@ -130,6 +130,6 @@ export const logEntriesSchema = gql`
       "The query to filter the log entries by"
       filterQuery: String
     ): InfraLogSummaryInterval!
-    logItem(id: ID): InfraLogItem
+    logItem(id: ID!): InfraLogItem!
   }
 `;

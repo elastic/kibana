@@ -6,5 +6,5 @@
 
 import { FlyoutOptionsState } from './reducer';
 
-export const selectFlyoutId = (state: FlyoutOptionsState) => state.flyoutId;
-export const selectFlyoutVisibility = (state: FlyoutOptionsState) => state.isFlyoutVisible;
+export const selectFlyoutId = (state: FlyoutOptionsState) => state.itemId;
+export const selectFlyoutVisibility = (state: FlyoutOptionsState) => state.visibility;

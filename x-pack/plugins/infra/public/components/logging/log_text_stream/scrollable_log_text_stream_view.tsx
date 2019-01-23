@@ -42,7 +42,7 @@ interface ScrollableLogTextStreamViewProps {
   ) => any;
   loadNewerItems: () => void;
   setFlyoutItem: (id: string) => void;
-  showFlyout: (show: boolean) => void;
+  showFlyout: () => void;
 }
 
 interface ScrollableLogTextStreamViewState {
@@ -158,7 +158,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
 
   private handleOpenFlyout = (id: string) => {
     this.props.setFlyoutItem(id);
-    this.props.showFlyout(true);
+    this.props.showFlyout();
   };
 
   private handleReload = () => {

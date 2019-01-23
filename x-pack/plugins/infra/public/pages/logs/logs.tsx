@@ -67,7 +67,14 @@ export const LogsPage = injectI18n(
                   <WithFlyoutOptionsUrlState />
                   <LogsToolbar />
                   <WithLogFlyout>
-                    {({ isFlyoutVisible, flyoutItem, showFlyout, setFlyoutItem }) => (
+                    {({
+                      isFlyoutVisible,
+                      flyoutItem,
+                      hideFlyout,
+                      showFlyout,
+                      loading,
+                      setFlyoutItem,
+                    }) => (
                       <WithLogFilter indexPattern={derivedIndexPattern}>
                         {({ applyFilterQueryFromKueryExpression }) => (
                           <React.Fragment>
@@ -79,7 +86,8 @@ export const LogsPage = injectI18n(
                               <LogFlyout
                                 setFilter={applyFilterQueryFromKueryExpression}
                                 flyoutItem={flyoutItem}
-                                showFlyout={showFlyout}
+                                hideFlyout={hideFlyout}
+                                loading={loading}
                               />
                             ) : null}
                           </React.Fragment>

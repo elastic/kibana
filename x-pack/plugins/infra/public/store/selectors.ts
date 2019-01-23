@@ -39,7 +39,7 @@ export const metricTimeSelectors = globalizeSelectors(selectLocal, localMetricTi
 export const waffleFilterSelectors = globalizeSelectors(selectLocal, localWaffleFilterSelectors);
 export const waffleTimeSelectors = globalizeSelectors(selectLocal, localWaffleTimeSelectors);
 export const waffleOptionsSelectors = globalizeSelectors(selectLocal, localWaffleOptionsSelectors);
-export const flyoutOptionsSelecctors = globalizeSelectors(selectLocal, localFlyoutOptionsSelectors);
+export const flyoutOptionsSelectors = globalizeSelectors(selectLocal, localFlyoutOptionsSelectors);
 
 /**
  * remote selectors

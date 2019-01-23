@@ -19,12 +19,13 @@ import { InfraLogItem, InfraLogItemField } from '../../graphql/types';
 
 interface Props {
   flyoutItem: InfraLogItem;
-  showFlyout: (show: boolean) => void;
+  hideFlyout: () => void;
   setFilter: (filter: string) => void;
   intl: InjectedIntl;
+  loading: boolean;
 }
 
-export const LogFlyout = injectI18n(({ flyoutItem, showFlyout, setFilter, intl }: Props) => {
+export const LogFlyout = injectI18n(({ flyoutItem, hideFlyout, setFilter, intl }: Props) => {
   const handleFilter = (field: InfraLogItemField) => () => {
     const filter = `${field.field}:"${field.value}"`;
     setFilter(filter);
@@ -70,7 +71,7 @@ export const LogFlyout = injectI18n(({ flyoutItem, showFlyout, setFilter, intl }
     },
   ];
   return (
-    <EuiFlyout onClose={() => showFlyout(false)} size="m">
+    <EuiFlyout onClose={() => hideFlyout()} size="m">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h3 id="flyoutTitle">

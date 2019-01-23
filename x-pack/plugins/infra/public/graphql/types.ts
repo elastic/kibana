@@ -31,7 +31,7 @@ export interface InfraSource {
   /** A consecutive span of summary buckets within an interval */
   logSummaryBetween: InfraLogSummaryInterval;
 
-  logItem?: InfraLogItem | null;
+  logItem: InfraLogItem;
   /** A hierarchy of hosts, pods, containers, services or arbitrary groups */
   map?: InfraResponse | null;
 
@@ -202,7 +202,7 @@ export interface InfraNode {
 export interface InfraNodePath {
   value: string;
 
-  label?: string | null;
+  label: string;
 }
 
 export interface InfraNodeMetric {
@@ -317,7 +317,7 @@ export interface LogSummaryBetweenInfraSourceArgs {
   filterQuery?: string | null;
 }
 export interface LogItemInfraSourceArgs {
-  id?: string | null;
+  id: string;
 }
 export interface MapInfraSourceArgs {
   timerange: InfraTimerangeInput;
@@ -446,7 +446,7 @@ export namespace FlyoutItemQuery {
 
     id: string;
 
-    logItem?: LogItem | null;
+    logItem: LogItem;
   };
 
   export type LogItem = {
@@ -596,7 +596,7 @@ export namespace WaffleNodesQuery {
 
     value: string;
 
-    label?: string | null;
+    label: string;
   };
 
   export type Metric = {

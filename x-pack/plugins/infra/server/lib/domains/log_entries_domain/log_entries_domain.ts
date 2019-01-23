@@ -5,9 +5,9 @@
  */
 
 import { sortBy } from 'lodash';
-import { InfraLogItem } from 'x-pack/plugins/infra/public/graphql/types';
 import { TimeKey } from '../../../../common/time';
 import { JsonObject } from '../../../../common/typed_json';
+import { InfraLogItem } from '../../../graphql/types';
 import {
   InfraLogEntry,
   InfraLogMessageSegment,

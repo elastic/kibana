@@ -19,7 +19,7 @@ import { WithSummary } from '../../containers/logs/with_summary';
 
 interface Props {
   setFlyoutItem: (id: string) => void;
-  showFlyout: (show: boolean) => void;
+  showFlyout: () => void;
 }
 
 export const LogsPageContent: React.SFC<Props> = ({ showFlyout, setFlyoutItem }) => (

@@ -7,28 +7,33 @@
 import { combineReducers } from 'redux';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
-import { setFlyoutItem, showFlyout } from './actions';
+import { hideFlyout, setFlyoutItem, showFlyout } from './actions';
+
+export enum FlyoutVisibility {
+  hidden = 'hidden',
+  visible = 'visibile',
+}
 
 export interface FlyoutOptionsState {
-  isFlyoutVisible: boolean | null;
-  flyoutId: string | null;
+  visibility: FlyoutVisibility;
+  itemId: string;
 }
 
 export const initialFlyoutOptionsState: FlyoutOptionsState = {
-  flyoutId: null,
-  isFlyoutVisible: false,
+  visibility: FlyoutVisibility.hidden,
+  itemId: '',
 };
 
-const currentFlyoutReducer = reducerWithInitialState(initialFlyoutOptionsState.flyoutId).case(
+const currentFlyoutReducer = reducerWithInitialState(initialFlyoutOptionsState.itemId).case(
   setFlyoutItem,
   (current, target) => target
 );
 
-const currentFlyoutVisibilityReducer = reducerWithInitialState(
-  initialFlyoutOptionsState.isFlyoutVisible
-).case(showFlyout, (current, target) => target);
+const currentFlyoutVisibilityReducer = reducerWithInitialState(initialFlyoutOptionsState.visibility)
+  .case(hideFlyout, () => FlyoutVisibility.hidden)
+  .case(showFlyout, () => FlyoutVisibility.visible);
 
 export const flyoutOptionsReducer = combineReducers<FlyoutOptionsState>({
-  isFlyoutVisible: currentFlyoutVisibilityReducer,
-  flyoutId: currentFlyoutReducer,
+  itemId: currentFlyoutReducer,
+  visibility: currentFlyoutVisibilityReducer,
 });
