@@ -6,7 +6,10 @@
 
 import expect from 'expect.js';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
-import { UICapabilitiesService } from '../../common/services/ui_capabilities';
+import {
+  GetUICapabilitiesFailureReason,
+  UICapabilitiesService,
+} from '../../common/services/ui_capabilities';
 import { UserScenarios } from '../scenarios';
 
 // tslint:disable:no-default-export
@@ -22,11 +25,8 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
         });
         switch (scenario.username) {
           // these users have a read/write view of Dashboard
-          case 'no_kibana_privileges': // we're stuck with this one until post 7.0
           case 'superuser':
           case 'all':
-          case 'legacy_all':
-          case 'legacy_read':
           case 'dual_privileges_all':
           case 'dashboard_all':
             expect(uiCapabilities.success).to.be(true);
@@ -75,6 +75,11 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
               show: false,
               showWriteControls: false,
             });
+            break;
+          case 'legacy_all':
+          case 'no_kibana_privileges':
+            expect(uiCapabilities.success).to.be(false);
+            expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
             break;
           default:
             throw new UnreachableError(scenario);
