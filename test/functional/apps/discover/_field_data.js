@@ -83,9 +83,9 @@ export default function ({ getService, getPageObjects }) {
 
         // Note: Could just check the timestamp, but might as well check that the whole doc is as expected.
         const ExpectedDoc =
-          'September 20th 2015, 00:00:00.000\ntype:apache index:logstash-2015.09.20 @timestamp:September 20th 2015, 00:00:00.000'
+          'Sep 20, 2015 @ 00:00:00.000\ntype:apache index:logstash-2015.09.20 @timestamp:Sep 20, 2015 @ 00:00:00.000'
           + ' ip:143.84.142.7 extension:jpg response:200 geo.coordinates:{ "lat": 38.68407028, "lon": -120.9871642 }'
-          + ' geo.src:ES geo.dest:US geo.srcdest:ES:US @tags:error, info utc_time:September 20th 2015, 00:00:00.000'
+          + ' geo.src:ES geo.dest:US geo.srcdest:ES:US @tags:error, info utc_time:Sep 20, 2015 @ 00:00:00.000'
           + ' referer:http://www.slate.com/success/vladimir-kovalyonok agent:Mozilla/4.0 (compatible; MSIE 6.0;'
           + ' Windows NT 5.1; SV1; .NET CLR 1.1.4322) clientip:143.84.142.7 bytes:1,623'
           + ' host:media-for-the-masses.theacademyofperformingartsandscience.org request:/uploads/steven-hawley.jpg'

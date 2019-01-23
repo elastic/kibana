@@ -34,6 +34,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show the correct count in the legend', async function () {
+        await PageObjects.header.waitUntilLoadingHasFinished();
         const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
         expect(actualCount).to.be('156');
       });
