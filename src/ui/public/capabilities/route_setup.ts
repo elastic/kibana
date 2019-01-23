@@ -32,6 +32,4 @@ uiRoutes.addSetupWork((uiCapabilities: UICapabilities, kbnBaseUrl: string, $rout
     const url = chrome.addBasePath(`${kbnBaseUrl}#/home`);
     window.location.href = url;
   }
-
-  return undefined;
 });
