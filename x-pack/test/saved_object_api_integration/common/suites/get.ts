@@ -36,15 +36,6 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
     return createExpectNotFound(doesntExistId, spaceId);
   };
 
-  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      // eslint-disable-next-line max-len
-      message: `action [indices:data/read/get] is unauthorized for user [${username}]: [security_exception] action [indices:data/read/get] is unauthorized for user [${username}]`,
-    });
-  };
-
   const createExpectNotFound = (id: string, spaceId = DEFAULT_SPACE_ID) => (resp: {
     [key: string]: any;
   }) => {
@@ -175,7 +166,6 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
 
   return {
     createExpectDoesntExistNotFound,
-    createExpectLegacyForbidden,
     createExpectNotSpaceAwareNotFound,
     createExpectNotSpaceAwareRbacForbidden,
     createExpectNotSpaceAwareResults,

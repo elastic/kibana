@@ -845,6 +845,7 @@ export function getUiSettingDefaults() {
     'filterEditor:suggestValues': {
       name: i18n.translate('kbn.advancedSettings.suggestFilterValuesTitle', {
         defaultMessage: 'Filter editor suggest values',
+        description: '"Filter editor" refers to the UI you create filters in.',
       }),
       value: true,
       description: i18n.translate('kbn.advancedSettings.suggestFilterValuesText', {

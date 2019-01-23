@@ -55,7 +55,6 @@ export class GuideDemo extends Component {
   render() {
     const {
       isFullScreen,
-      isDarkTheme,
       children,
       className,
       js, // eslint-disable-line no-unused-vars
@@ -66,8 +65,6 @@ export class GuideDemo extends Component {
 
     const classes = classNames('guideDemo', className, {
       'guideDemo--fullScreen': isFullScreen,
-      'guideDemo--darkTheme': isDarkTheme,
-      'theme-dark': isDarkTheme,
     });
 
     return (
@@ -88,7 +85,6 @@ GuideDemo.propTypes = {
   html: PropTypes.string.isRequired,
   css: PropTypes.string.isRequired,
   isFullScreen: PropTypes.bool.isRequired,
-  isDarkTheme: PropTypes.bool.isRequired,
 };
 
 GuideDemo.defaultProps = {
@@ -96,5 +92,4 @@ GuideDemo.defaultProps = {
   html: '',
   css: '',
   isFullScreen: false,
-  isDarkTheme: false,
 };
