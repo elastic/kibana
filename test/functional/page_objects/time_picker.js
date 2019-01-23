@@ -85,10 +85,17 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
     }
 
     async showStartEndTimes() {
-      const isShowDatesButton = await testSubjects.exists('superDatePickerShowDatesButton');
-      if (isShowDatesButton) {
-        await testSubjects.click('superDatePickerShowDatesButton');
-      }
+      await retry.try(async () => {
+        const isShowDatesButton = await testSubjects.exists('superDatePickerShowDatesButton');
+        if (isShowDatesButton) {
+          await testSubjects.click('superDatePickerShowDatesButton');
+        }
+
+        const endButtonExists = await testSubjects.exists('superDatePickerendDatePopoverButton');
+        if (!endButtonExists) {
+          throw new Error('start/end date buttons are not showing');
+        }
+      });
     }
 
     async getRefreshConfig(keepQuickSelectOpen = false) {
@@ -111,6 +118,25 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       await this.showStartEndTimes();
       const start = await testSubjects.getVisibleText('superDatePickerstartDatePopoverButton');
       const end = await testSubjects.getVisibleText('superDatePickerendDatePopoverButton');
+      return {
+        start,
+        end
+      };
+    }
+
+    async getTimeConfigAsAbsoluteTimes() {
+      await this.showStartEndTimes();
+
+      // get to time
+      await testSubjects.click('superDatePickerendDatePopoverButton');
+      await testSubjects.click('superDatePickerAbsoluteTab');
+      const end = await testSubjects.getAttribute('superDatePickerAbsoluteDateInput', 'value');
+
+      // get from time
+      await testSubjects.click('superDatePickerstartDatePopoverButton');
+      await testSubjects.click('superDatePickerAbsoluteTab');
+      const start = await testSubjects.getAttribute('superDatePickerAbsoluteDateInput', 'value');
+
       return {
         start,
         end

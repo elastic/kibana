@@ -110,15 +110,6 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       await testSubjects.find('kibanaChrome', defaultFindTimeout * 10);
     }
 
-    // replaced with timePicker.getTimeConfig
-    async getPrettyDuration() {
-      return await testSubjects.getVisibleText('globalTimepickerRange');
-    }
-
-    async isSharedTimefilterEnabled() {
-      return await find.existsByCssSelector('[shared-timefilter=true]');
-    }
-
   }
 
   return new HeaderPage();

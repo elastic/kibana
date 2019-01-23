@@ -34,9 +34,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('discover app', function describeIndexTests() {
     const fromTime = '2015-09-19 06:31:44.000';
-    const fromTimeString = 'September 19th 2015, 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
-    const toTimeString = 'September 23rd 2015, 18:31:44.000';
 
     before(async function () {
       // delete .kibana index and update configDoc
@@ -56,10 +54,9 @@ export default function ({ getService, getPageObjects }) {
       const queryName1 = 'Query # 1';
 
       it('should show correct time range string by timepicker', async function () {
-        const actualTimeString = await PageObjects.header.getPrettyDuration();
-
-        const expectedTimeString = `${fromTimeString} to ${toTimeString}`;
-        expect(actualTimeString).to.be(expectedTimeString);
+        const time = await PageObjects.timePicker.getTimeConfig();
+        expect(time.start).to.be('Sep 19, 2015 @ 06:31:44.000');
+        expect(time.end).to.be('Sep 23, 2015 @ 18:31:44.000');
       });
 
       it('save query should show toast message and display query name', async function () {
@@ -119,8 +116,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct time range string in chart', async function () {
         const actualTimeString = await PageObjects.discover.getChartTimespan();
-
-        const expectedTimeString = `${fromTimeString} - ${toTimeString}`;
+        const expectedTimeString = `Sep 19, 2015 @ 06:31:44.000 - Sep 23, 2015 @ 18:31:44.000`;
         expect(actualTimeString).to.be(expectedTimeString);
       });
 
@@ -143,8 +139,9 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.clickHistogramBar(0);
         await PageObjects.visualize.waitForVisualization();
-        const actualTimeString = await PageObjects.header.getPrettyDuration();
-        expect(actualTimeString).to.be('September 20th 2015, 00:00:00.000 to September 20th 2015, 03:00:00.000');
+        const time = await PageObjects.timePicker.getTimeConfig();
+        expect(time.start).to.be('Sep 20, 2015 @ 00:00:00.000');
+        expect(time.end).to.be('Sep 20, 2015 @ 03:00:00.000');
       });
 
       it('should modify the time range when the histogram is brushed', async function () {
@@ -152,8 +149,9 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.brushHistogram(0, 1);
         await PageObjects.visualize.waitForVisualization();
-        const actualTimeString = await PageObjects.header.getPrettyDuration();
-        expect(actualTimeString).to.be('September 19th 2015, 23:59:02.606 to September 20th 2015, 02:56:40.744');
+        const time = await PageObjects.timePicker.getTimeConfig();
+        expect(time.start).to.be('Sep 19, 2015 @ 23:55:14.810');
+        expect(time.end).to.be('Sep 20, 2015 @ 02:56:40.744');
       });
 
       it('should show correct initial chart interval of Auto', async function () {
