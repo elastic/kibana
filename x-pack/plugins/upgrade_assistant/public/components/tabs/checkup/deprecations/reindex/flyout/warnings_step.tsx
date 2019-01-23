@@ -67,17 +67,12 @@ export class WarningsFlyoutStep extends React.Component<
       <Fragment>
         <EuiFlyoutBody>
           <EuiCallOut
-            title="This index required destructive changes"
+            title="This index requires destructive changes that can't be undone"
             color="danger"
             iconType="alert"
           >
             <p>
-              <strong>This cannot be undone.</strong> It is highly advised you backup this index
-              before proceeding.
-            </p>
-            <p>
-              To proceed with the reindex, you must accept each breaking change by checking the box
-              next to it.
+              Back up your index, then proceed with the reindex by accepting each breaking change.
             </p>
           </EuiCallOut>
 
@@ -96,9 +91,9 @@ export class WarningsFlyoutStep extends React.Component<
                 onChange={this.onChange}
               />
               <p className="upgWarningsStep__warningDescription">
-                The <EuiCode>_all</EuiCode> meta field is no longer supported in 7.0 and reindexing
-                will remove this field in the new index. Ensure that you have no application code or
-                scripts relying on this field to exist before reindexing.
+                The <EuiCode>_all</EuiCode> meta field is no longer supported in 7.0. Reindexing
+                removes the <EuiCode>_all</EuiCode> field in the new index. Ensure that no
+                application code or scripts reply on this field.
                 <br />
                 <EuiLink
                   href="https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_the_literal__all_literal_meta_field_is_now_disabled_by_default"
@@ -118,19 +113,18 @@ export class WarningsFlyoutStep extends React.Component<
                 id={idForWarning(ReindexWarning.booleanFields)}
                 label={
                   <strong>
-                    Boolean data in <EuiCode>_source</EuiCode> may change
+                    Boolean data in <EuiCode>_source</EuiCode> might change
                   </strong>
                 }
                 checked={checkedIds[idForWarning(ReindexWarning.booleanFields)]}
                 onChange={this.onChange}
               />
               <p className="upgWarningsStep__warningDescription">
-                If any documents contain any boolean fields that are not <EuiCode>true</EuiCode> or{' '}
-                <EuiCode>false</EuiCode> (eg. <EuiCode>"yes"</EuiCode>, <EuiCode>"on"</EuiCode>,{' '}
-                <EuiCode>1</EuiCode>), reindexing will convert these fields in the{' '}
-                <strong>source document</strong> to be <EuiCode>true</EuiCode> or{' '}
-                <EuiCode>false</EuiCode>. Ensure that you have no application code or scripts
-                relying on boolean fields in the deprecated format before reindexing.
+                If a documents contain a boolean field that is neither <EuiCode>true</EuiCode> or{' '}
+                <EuiCode>false</EuiCode> (for example, <EuiCode>"yes"</EuiCode>,{' '}
+                <EuiCode>"on"</EuiCode>, <EuiCode>1</EuiCode>), reindexing converts these fields to{' '}
+                <EuiCode>true</EuiCode> or <EuiCode>false</EuiCode>. Ensure that no application code
+                or scripts rely on boolean fields in the deprecated format.
                 <br />
                 <EuiLink
                   href="https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_coercion_of_boolean_fields"

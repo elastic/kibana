@@ -57,14 +57,17 @@ export const ChecklistFlyoutStep: React.StatelessComponent<{
   return (
     <Fragment>
       <EuiFlyoutBody>
-        <EuiCallOut title="Be careful" color="warning" iconType="help">
-          While reindexing, the index will not be able to ingest new documents, update documents, or
-          delete documents. Depending on how this index is being used in your system, this may cause
-          problems and you may need to use a different strategy to reindex this index.
+        <EuiCallOut
+          title="Index is unable to ingest, update, or delete documents while reindexing"
+          color="warning"
+          iconType="alert"
+        >
+          If you can’t stop document updates or need to reindex into a new cluster, consider using a
+          different upgrade strategy.
         </EuiCallOut>
         <EuiSpacer />
         <EuiTitle size="xs">
-          <h3>Steps to be performed during the reindex</h3>
+          <h3>Reindexing process</h3>
         </EuiTitle>
         <ReindexProgress
           lastCompletedStep={lastCompletedStep}

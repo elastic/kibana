@@ -7,16 +7,10 @@ exports[`WarningsFlyoutStep renders 1`] = `
       color="danger"
       iconType="alert"
       size="m"
-      title="This index required destructive changes"
+      title="This index requires destructive changes that can't be undone"
     >
       <p>
-        <strong>
-          This cannot be undone.
-        </strong>
-         It is highly advised you backup this index before proceeding.
-      </p>
-      <p>
-        To proceed with the reindex, you must accept each breaking change by checking the box next to it.
+        Back up your index, then proceed with the reindex by accepting each breaking change.
       </p>
     </EuiCallOut>
     <EuiSpacer
@@ -49,7 +43,11 @@ exports[`WarningsFlyoutStep renders 1`] = `
         <EuiCode>
           _all
         </EuiCode>
-         meta field is no longer supported in 7.0 and reindexing will remove this field in the new index. Ensure that you have no application code or scripts relying on this field to exist before reindexing.
+         meta field is no longer supported in 7.0. Reindexing removes the 
+        <EuiCode>
+          _all
+        </EuiCode>
+         field in the new index. Ensure that no application code or scripts reply on this field.
         <br />
         <EuiLink
           color="primary"
@@ -80,7 +78,7 @@ exports[`WarningsFlyoutStep renders 1`] = `
             <EuiCode>
               _source
             </EuiCode>
-             may change
+             might change
           </strong>
         }
         onChange={[Function]}
@@ -88,7 +86,7 @@ exports[`WarningsFlyoutStep renders 1`] = `
       <p
         className="upgWarningsStep__warningDescription"
       >
-        If any documents contain any boolean fields that are not 
+        If a documents contain a boolean field that is neither 
         <EuiCode>
           true
         </EuiCode>
@@ -97,34 +95,29 @@ exports[`WarningsFlyoutStep renders 1`] = `
         <EuiCode>
           false
         </EuiCode>
-         (eg. 
+         (for example, 
         <EuiCode>
           "yes"
-        </EuiCode>
-        , 
-        <EuiCode>
-          "on"
         </EuiCode>
         ,
          
         <EuiCode>
+          "on"
+        </EuiCode>
+        , 
+        <EuiCode>
           1
         </EuiCode>
-        ), reindexing will convert these fields in the
+        ), reindexing converts these fields to
          
-        <strong>
-          source document
-        </strong>
-         to be 
         <EuiCode>
           true
         </EuiCode>
-         or
-         
+         or 
         <EuiCode>
           false
         </EuiCode>
-        . Ensure that you have no application code or scripts relying on boolean fields in the deprecated format before reindexing.
+        . Ensure that no application code or scripts rely on boolean fields in the deprecated format.
         <br />
         <EuiLink
           color="primary"
