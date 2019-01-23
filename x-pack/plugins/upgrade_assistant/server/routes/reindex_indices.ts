@@ -5,15 +5,21 @@
  */
 
 import Boom from 'boom';
-import { Server } from 'hapi';
+import { Request, Server } from 'hapi';
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { SavedObjectsClient } from 'src/server/saved_objects';
+import { ReindexStatus } from '../../common/types';
 import { reindexServiceFactory, ReindexWorker } from '../lib/reindexing';
 import { reindexActionsFactory } from '../lib/reindexing/reindex_actions';
 
-export function registerReindexWorker(server: Server) {
-  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
+export function registerReindexWorker(
+  server: Server,
+  credentialMap: Map<string, Request['headers']>
+) {
+  const { callWithRequest, callWithInternalUser } = server.plugins.elasticsearch.getCluster(
+    'admin'
+  );
   const savedObjectsRepository = server.savedObjects.getSavedObjectsRepository(
     callWithInternalUser
   );
@@ -29,7 +35,13 @@ export function registerReindexWorker(server: Server) {
     timestamp?: number
   ) => server.log(tags, data, timestamp);
 
-  const worker = new ReindexWorker(savedObjectsClient, callWithInternalUser, log);
+  const worker = new ReindexWorker(
+    savedObjectsClient,
+    credentialMap,
+    callWithRequest,
+    callWithInternalUser,
+    log
+  );
 
   // Wait for ES connection before starting the polling loop.
   server.plugins.elasticsearch.waitUntilReady().then(() => {
@@ -40,7 +52,11 @@ export function registerReindexWorker(server: Server) {
   return worker;
 }
 
-export function registerReindexIndicesRoutes(server: Server, worker: ReindexWorker) {
+export function registerReindexIndicesRoutes(
+  server: Server,
+  worker: ReindexWorker,
+  credentialMap: Map<string, Request['headers']>
+) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
   const BASE_PATH = '/api/upgrade_assistant/reindex';
 
@@ -51,13 +67,24 @@ export function registerReindexIndicesRoutes(server: Server, worker: ReindexWork
     async handler(request) {
       const client = request.getSavedObjectsClient();
       const { indexName } = request.params;
+
+      // Add users credentials for the worker to use
+      credentialMap.set(indexName, request.headers);
+
       const callCluster = callWithRequest.bind(null, request) as CallCluster;
       const reindexActions = reindexActionsFactory(client, callCluster);
       const reindexService = reindexServiceFactory(callCluster, reindexActions);
 
       try {
-        // Create the reindex operation
-        const reindexOp = await reindexService.createReindexOperation(indexName);
+        const existingOp = await reindexService.findReindexOperation(indexName);
+
+        // If the reindexOp already exists and it's paused, resume it. Otherwise create a new one.
+        const reindexOp =
+          existingOp && existingOp.attributes.status === ReindexStatus.paused
+            ? await reindexService.resumeReindexOperation(indexName)
+            : await reindexService.createReindexOperation(indexName);
+
+        // Kick the worker on this node to immediately pickup the new reindex operation.
         worker.forceRefresh();
 
         return reindexOp.attributes;

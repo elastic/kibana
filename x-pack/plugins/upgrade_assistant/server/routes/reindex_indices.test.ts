@@ -12,6 +12,7 @@ const mockReindexService = {
   findAllInProgressOperations: jest.fn(),
   findReindexOperation: jest.fn(),
   processNextStep: jest.fn(),
+  resumeReindexOperation: jest.fn(),
 };
 
 jest.mock('../lib/reindexing', () => {
@@ -43,12 +44,14 @@ describe('reindex template API', () => {
   server.config = () => ({ get: () => '' } as any);
   server.decorate('request', 'getSavedObjectsClient', () => jest.fn());
 
+  const credentialMap = new Map();
+
   const worker = {
     includes: jest.fn(),
     forceRefresh: jest.fn(),
   } as any;
 
-  registerReindexIndicesRoutes(server, worker);
+  registerReindexIndicesRoutes(server, worker, credentialMap);
 
   beforeEach(() => {
     mockReindexService.detectReindexWarnings.mockReset();
@@ -56,8 +59,14 @@ describe('reindex template API', () => {
     mockReindexService.findAllInProgressOperations.mockReset();
     mockReindexService.findReindexOperation.mockReset();
     mockReindexService.processNextStep.mockReset();
+    mockReindexService.resumeReindexOperation.mockReset();
     worker.includes.mockReset();
     worker.forceRefresh.mockReset();
+
+    // Reset the credentialMap
+    for (const k of credentialMap.keys()) {
+      credentialMap.delete(k);
+    }
   });
 
   describe('GET /api/upgrade_assistant/reindex/{indexName}', () => {
@@ -129,6 +138,45 @@ describe('reindex template API', () => {
       });
 
       expect(worker.forceRefresh).toHaveBeenCalled();
+    });
+
+    it('inserts headers into the credentialMap', async () => {
+      mockReindexService.createReindexOperation.mockResolvedValueOnce({
+        attributes: { indexName: 'theIndex' },
+      });
+
+      await server.inject({
+        method: 'POST',
+        url: '/api/upgrade_assistant/reindex/theIndex',
+        headers: {
+          'kbn-auth-x': 'HERE!',
+        },
+      });
+
+      expect(credentialMap.get('theIndex')['kbn-auth-x']).toEqual('HERE!');
+    });
+
+    it('resumes a reindexOp if it is paused', async () => {
+      mockReindexService.findReindexOperation.mockResolvedValueOnce({
+        attributes: { indexName: 'theIndex', status: ReindexStatus.paused },
+      });
+      mockReindexService.resumeReindexOperation.mockResolvedValueOnce({
+        attributes: { indexName: 'theIndex', status: ReindexStatus.inProgress },
+      });
+
+      const resp = await server.inject({
+        method: 'POST',
+        url: '/api/upgrade_assistant/reindex/theIndex',
+      });
+
+      // It called resume correctly
+      expect(mockReindexService.resumeReindexOperation).toHaveBeenCalledWith('theIndex');
+      expect(mockReindexService.createReindexOperation).not.toHaveBeenCalled();
+
+      // It returned the right results
+      expect(resp.statusCode).toEqual(200);
+      const data = JSON.parse(resp.payload);
+      expect(data).toEqual({ indexName: 'theIndex', status: ReindexStatus.inProgress });
     });
   });
 

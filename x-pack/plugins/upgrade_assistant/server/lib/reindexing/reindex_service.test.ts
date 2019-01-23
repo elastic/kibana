@@ -33,11 +33,9 @@ describe('reindexService', () => {
       createReindexOp: jest.fn(unimplemented('createReindexOp')),
       deleteReindexOp: jest.fn(unimplemented('deleteReindexOp')),
       updateReindexOp: jest.fn(updateMockImpl),
-      acquireLock: jest.fn((reindexOp: ReindexSavedObject) => reindexOp),
-      releaseLock: jest.fn((reindexOp: ReindexSavedObject) => reindexOp),
-      releaseLocks: jest.fn(unimplemented('releaseLocks')),
+      runWhileLocked: jest.fn((reindexOp: any, func: any) => func(reindexOp)),
       findReindexOperations: jest.fn(unimplemented('findReindexOperations')),
-      findAllInProgressOperations: jest.fn(unimplemented('findAllInProgressOperations')),
+      findAllByStatus: jest.fn(unimplemented('findAllInProgressOperations')),
       getBooleanFieldPaths: jest.fn(unimplemented('getBooleanFieldPaths')),
       getFlatSettings: jest.fn(unimplemented('getFlatSettings')),
       cleanupChanges: jest.fn(),
@@ -141,13 +139,116 @@ describe('reindexService', () => {
       // These tests depend on an implementation detail that if no status is set, the state machine
       // is not activated, just the locking mechanism.
 
-      it('locks and unlocks if object is unlocked', async () => {
+      it('runs with runWhileLocked', async () => {
         const reindexOp = { id: '1', attributes: { locked: null } } as ReindexSavedObject;
         await service.processNextStep(reindexOp);
 
-        expect(actions.acquireLock).toHaveBeenCalled();
-        expect(actions.releaseLock).toHaveBeenCalled();
+        expect(actions.runWhileLocked).toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('pauseReindexOperation', () => {
+    it('runs with runWhileLocked', async () => {
+      const findSpy = jest.spyOn(service, 'findReindexOperation').mockResolvedValueOnce({
+        id: '2',
+        attributes: { indexName: 'myIndex', status: ReindexStatus.inProgress },
+      });
+
+      await service.pauseReindexOperation('myIndex');
+
+      expect(actions.runWhileLocked).toHaveBeenCalled();
+      findSpy.mockRestore();
+    });
+
+    it('sets the status to paused', async () => {
+      const reindexOp = {
+        id: '2',
+        attributes: { indexName: 'myIndex', status: ReindexStatus.inProgress },
+      } as ReindexSavedObject;
+      const findSpy = jest.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(reindexOp);
+
+      await expect(service.pauseReindexOperation('myIndex')).resolves.toEqual({
+        id: '2',
+        attributes: { indexName: 'myIndex', status: ReindexStatus.paused },
+      });
+
+      expect(findSpy).toHaveBeenCalledWith('myIndex');
+      expect(actions.updateReindexOp).toHaveBeenCalledWith(reindexOp, {
+        status: ReindexStatus.paused,
+      });
+      findSpy.mockRestore();
+    });
+
+    it('throws if reindexOp is not inProgress', async () => {
+      const reindexOp = {
+        id: '2',
+        attributes: { indexName: 'myIndex', status: ReindexStatus.failed },
+      } as ReindexSavedObject;
+      const findSpy = jest.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(reindexOp);
+
+      await expect(service.pauseReindexOperation('myIndex')).rejects.toThrow();
+      expect(actions.updateReindexOp).not.toHaveBeenCalled();
+      findSpy.mockRestore();
+    });
+
+    it('throws in reindex operation does not exist', async () => {
+      const findSpy = jest.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(null);
+      await expect(service.pauseReindexOperation('myIndex')).rejects.toThrow();
+      expect(actions.updateReindexOp).not.toHaveBeenCalled();
+      findSpy.mockRestore();
+    });
+  });
+
+  describe('resumeReindexOperation', () => {
+    it('runs with runWhileLocked', async () => {
+      const findSpy = jest.spyOn(service, 'findReindexOperation').mockResolvedValueOnce({
+        id: '2',
+        attributes: { indexName: 'myIndex', status: ReindexStatus.paused },
+      });
+
+      await service.resumeReindexOperation('myIndex');
+
+      expect(actions.runWhileLocked).toHaveBeenCalled();
+      findSpy.mockRestore();
+    });
+
+    it('sets the status to inProgress', async () => {
+      const reindexOp = {
+        id: '2',
+        attributes: { indexName: 'myIndex', status: ReindexStatus.paused },
+      } as ReindexSavedObject;
+      const findSpy = jest.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(reindexOp);
+
+      await expect(service.resumeReindexOperation('myIndex')).resolves.toEqual({
+        id: '2',
+        attributes: { indexName: 'myIndex', status: ReindexStatus.inProgress },
+      });
+
+      expect(findSpy).toHaveBeenCalledWith('myIndex');
+      expect(actions.updateReindexOp).toHaveBeenCalledWith(reindexOp, {
+        status: ReindexStatus.inProgress,
+      });
+      findSpy.mockRestore();
+    });
+
+    it('throws if reindexOp is not inProgress', async () => {
+      const reindexOp = {
+        id: '2',
+        attributes: { indexName: 'myIndex', status: ReindexStatus.failed },
+      } as ReindexSavedObject;
+      const findSpy = jest.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(reindexOp);
+
+      await expect(service.resumeReindexOperation('myIndex')).rejects.toThrow();
+      expect(actions.updateReindexOp).not.toHaveBeenCalled();
+      findSpy.mockRestore();
+    });
+
+    it('throws in reindex operation does not exist', async () => {
+      const findSpy = jest.spyOn(service, 'findReindexOperation').mockResolvedValueOnce(null);
+      await expect(service.resumeReindexOperation('myIndex')).rejects.toThrow();
+      expect(actions.updateReindexOp).not.toHaveBeenCalled();
+      findSpy.mockRestore();
     });
   });
 
@@ -538,7 +639,6 @@ describe('reindexService', () => {
         );
         // Mock call to /_ml/set_upgrade_mode?enabled=false
         callCluster.mockResolvedValueOnce({ acknowledged: true });
-        actions.releaseLocks.mockResolvedValueOnce();
 
         const updatedOp = await service.processNextStep(mlReindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.mlUpgradeModeUnset);

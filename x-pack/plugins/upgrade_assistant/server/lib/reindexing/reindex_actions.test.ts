@@ -8,7 +8,6 @@ import moment = require('moment');
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import {
   REINDEX_OP_TYPE,
-  ReindexOperation,
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
@@ -83,7 +82,7 @@ describe('ReindexActions', () => {
         {
           type: REINDEX_OP_TYPE,
           id: '9',
-          attributes: { indexName: 'hi' },
+          attributes: { indexName: 'hi', locked: moment().format() },
           version: 1,
         } as ReindexSavedObject,
         { newIndexName: 'test' }
@@ -96,17 +95,44 @@ describe('ReindexActions', () => {
       expect(args[2].newIndexName).toEqual('test');
       expect(args[3]).toEqual({ version: 1 });
     });
+
+    it('throws if the reindexOp is not locked', async () => {
+      await expect(
+        actions.updateReindexOp(
+          {
+            type: REINDEX_OP_TYPE,
+            id: '10',
+            attributes: { indexName: 'hi', locked: null },
+            version: 1,
+          } as ReindexSavedObject,
+          { newIndexName: 'test' }
+        )
+      ).rejects.toThrow();
+      expect(client.update).not.toHaveBeenCalled();
+    });
   });
 
-  describe('acquireLock', () => {
-    it('calls update if object is unlocked', async () => {
+  describe('runWhileLocked', () => {
+    it('locks and unlocks if object is unlocked', async () => {
       const reindexOp = { id: '1', attributes: { locked: null } } as ReindexSavedObject;
-      const locked = await actions.acquireLock(reindexOp);
-      expect(locked.attributes.locked).not.toBeNull();
-      expect(client.update).toHaveBeenCalled();
+      await actions.runWhileLocked(reindexOp, op => Promise.resolve(op));
+
+      expect(client.update).toHaveBeenCalledTimes(2);
+
+      // Locking update call
+      const id1 = client.update.mock.calls[0][1];
+      const attr1 = client.update.mock.calls[0][2];
+      expect(id1).toEqual('1');
+      expect(attr1.locked).not.toBeNull();
+
+      // Unlocking update call
+      const id2 = client.update.mock.calls[1][1];
+      const attr2 = client.update.mock.calls[1][2];
+      expect(id2).toEqual('1');
+      expect(attr2.locked).toBeNull();
     });
 
-    it('calls update if object lock has expired', async () => {
+    it("locks and unlocks if object's lock is expired", async () => {
       const reindexOp = {
         id: '1',
         attributes: {
@@ -117,9 +143,43 @@ describe('ReindexActions', () => {
             .format(),
         },
       } as ReindexSavedObject;
-      const locked = await actions.acquireLock(reindexOp);
-      expect(locked.attributes.locked).not.toBeNull();
-      expect(client.update).toHaveBeenCalled();
+      await actions.runWhileLocked(reindexOp, op => Promise.resolve(op));
+
+      expect(client.update).toHaveBeenCalledTimes(2);
+
+      // Locking update call
+      const id1 = client.update.mock.calls[0][1];
+      const attr1 = client.update.mock.calls[0][2];
+      expect(id1).toEqual('1');
+      expect(attr1.locked).not.toBeNull();
+
+      // Unlocking update call
+      const id2 = client.update.mock.calls[1][1];
+      const attr2 = client.update.mock.calls[1][2];
+      expect(id2).toEqual('1');
+      expect(attr2.locked).toBeNull();
+    });
+
+    it('still locks and unlocks if func throws', async () => {
+      const reindexOp = { id: '1', attributes: { locked: null } } as ReindexSavedObject;
+
+      await expect(
+        actions.runWhileLocked(reindexOp, op => Promise.reject(new Error('IT FAILED!')))
+      ).rejects.toThrow('IT FAILED!');
+
+      expect(client.update).toHaveBeenCalledTimes(2);
+
+      // Locking update call
+      const id1 = client.update.mock.calls[0][1];
+      const attr1 = client.update.mock.calls[0][2];
+      expect(id1).toEqual('1');
+      expect(attr1.locked).not.toBeNull();
+
+      // Unlocking update call
+      const id2 = client.update.mock.calls[1][1];
+      const attr2 = client.update.mock.calls[1][2];
+      expect(id2).toEqual('1');
+      expect(attr2.locked).toBeNull();
     });
 
     it('throws if lock is not exprired', async () => {
@@ -127,26 +187,16 @@ describe('ReindexActions', () => {
         id: '1',
         attributes: { locked: moment().format() },
       } as ReindexSavedObject;
-      await expect(actions.acquireLock(reindexOp)).rejects.toThrow();
+      await expect(actions.runWhileLocked(reindexOp, op => Promise.resolve(op))).rejects.toThrow();
     });
   });
 
-  describe('releaseLock', async () => {
-    it('calles update with unlocked', async () => {
-      const reindexOp = {
-        id: '1',
-        attributes: { locked: moment().format() },
-      } as ReindexSavedObject;
-      await expect(actions.releaseLock(reindexOp)).resolves;
-      expect(client.update).toHaveBeenCalled();
-      expect(client.update.mock.calls[0][2]).toHaveProperty('locked', null);
-    });
-  });
-
-  describe('findAllInProgressOperations', () => {
+  describe('findAllByStatus', () => {
     it('returns saved_objects', async () => {
       client.find.mockResolvedValue({ saved_objects: ['results!'] });
-      await expect(actions.findAllInProgressOperations()).resolves.toEqual(['results!']);
+      await expect(actions.findAllByStatus(ReindexStatus.inProgress)).resolves.toEqual([
+        'results!',
+      ]);
       expect(client.find).toHaveBeenCalledWith({
         type: REINDEX_OP_TYPE,
         search: '0',
@@ -170,7 +220,7 @@ describe('ReindexActions', () => {
         });
 
       // Really prettier??
-      await expect(actions.findAllInProgressOperations()).resolves.toEqual([
+      await expect(actions.findAllByStatus(ReindexStatus.completed)).resolves.toEqual([
         1,
         2,
         3,
@@ -280,17 +330,14 @@ describe('ReindexActions', () => {
         attributes: { mlReindexCount: 0 },
       });
 
-      const acquireLockSpy = jest
-        .spyOn(actions, 'acquireLock')
-        .mockRejectedValue(new Error('NO LOCKING!'));
+      client.update.mockRejectedValue(new Error('NO LOCKING!'));
 
       await expect(actions.runWhileMlLocked(async m => m)).rejects.toThrow(
         'Could not acquire lock for ML jobs'
       );
-      expect(acquireLockSpy).toHaveBeenCalledTimes(10);
+      expect(client.update).toHaveBeenCalledTimes(10);
 
-      // Restore the spy and timeout.
-      acquireLockSpy.mockRestore();
+      // Restore default timeout.
       jest.setTimeout(5000);
     });
   });

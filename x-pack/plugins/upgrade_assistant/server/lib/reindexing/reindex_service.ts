@@ -14,14 +14,53 @@ import {
   ReindexWarning,
 } from '../../../common/types';
 import { getReindexWarnings, transformFlatSettings } from './index_settings';
-import { ReindexActions } from './reindex_actions';
+import { LockError, ReindexActions } from './reindex_actions';
 
 export interface ReindexService {
+  /**
+   * Checks an index's settings and mappings to flag potential issues during reindex.
+   * Resolves to null if index does not exist.
+   * @param indexName
+   */
   detectReindexWarnings(indexName: string): Promise<ReindexWarning[] | null>;
+
+  /**
+   * Creates a new reindex operation for a given index.
+   * @param indexName
+   */
   createReindexOperation(indexName: string): Promise<ReindexSavedObject>;
-  findAllInProgressOperations(): Promise<ReindexSavedObject[]>;
+
+  /**
+   * Retrieves all reindex operations that have the given status.
+   * @param status
+   */
+  findAllByStatus(status: ReindexStatus): Promise<ReindexSavedObject[]>;
+
+  /**
+   * Finds the reindex operation for the given index.
+   * Resolves to null if there is no existing reindex operation for this index.
+   * @param indexName
+   */
   findReindexOperation(indexName: string): Promise<ReindexSavedObject | null>;
+
+  /**
+   * Process the reindex operation through one step of the state machine and resolves
+   * to the updated reindex operation.
+   * @param reindexOp
+   */
   processNextStep(reindexOp: ReindexSavedObject): Promise<ReindexSavedObject>;
+
+  /**
+   * Pauses the in-progress reindex operation for a given index.
+   * @param indexName
+   */
+  pauseReindexOperation(indexName: string): Promise<ReindexSavedObject>;
+
+  /**
+   * Resumes the paused reindex operation for a given index.
+   * @param indexName
+   */
+  resumeReindexOperation(indexName: string): Promise<ReindexSavedObject>;
 }
 
 export const reindexServiceFactory = (
@@ -347,52 +386,80 @@ export const reindexServiceFactory = (
       return findResponse.saved_objects[0];
     },
 
-    findAllInProgressOperations: actions.findAllInProgressOperations,
+    findAllByStatus: actions.findAllByStatus,
 
     async processNextStep(reindexOp: ReindexSavedObject) {
-      // If locking the operation fails, we don't want to catch it.
-      reindexOp = await actions.acquireLock(reindexOp);
+      return actions.runWhileLocked(reindexOp, async lockedReindexOp => {
+        try {
+          switch (lockedReindexOp.attributes.lastCompletedStep) {
+            case ReindexStep.created:
+              lockedReindexOp = await setMlUpgradeMode(lockedReindexOp);
+              break;
+            case ReindexStep.mlUpgradeModeSet:
+              lockedReindexOp = await setReadonly(lockedReindexOp);
+              break;
+            case ReindexStep.readonly:
+              lockedReindexOp = await createNewIndex(lockedReindexOp);
+              break;
+            case ReindexStep.newIndexCreated:
+              lockedReindexOp = await startReindexing(lockedReindexOp);
+              break;
+            case ReindexStep.reindexStarted:
+              lockedReindexOp = await updateReindexStatus(lockedReindexOp);
+              break;
+            case ReindexStep.reindexCompleted:
+              lockedReindexOp = await switchAlias(lockedReindexOp);
+              break;
+            case ReindexStep.aliasCreated:
+              lockedReindexOp = await unsetMlUpgradeMode(lockedReindexOp);
+              break;
+            default:
+              break;
+          }
+        } catch (e) {
+          // Trap the exception and add the message to the object so the UI can display it.
+          lockedReindexOp = await actions.updateReindexOp(lockedReindexOp, {
+            status: ReindexStatus.failed,
+            errorMessage: e instanceof Error ? e.stack : e.toString(),
+          });
 
-      try {
-        switch (reindexOp.attributes.lastCompletedStep) {
-          case ReindexStep.created:
-            reindexOp = await setMlUpgradeMode(reindexOp);
-            break;
-          case ReindexStep.mlUpgradeModeSet:
-            reindexOp = await setReadonly(reindexOp);
-            break;
-          case ReindexStep.readonly:
-            reindexOp = await createNewIndex(reindexOp);
-            break;
-          case ReindexStep.newIndexCreated:
-            reindexOp = await startReindexing(reindexOp);
-            break;
-          case ReindexStep.reindexStarted:
-            reindexOp = await updateReindexStatus(reindexOp);
-            break;
-          case ReindexStep.reindexCompleted:
-            reindexOp = await switchAlias(reindexOp);
-            break;
-          case ReindexStep.aliasCreated:
-            reindexOp = await unsetMlUpgradeMode(reindexOp);
-            break;
-          default:
-            break;
+          await actions.cleanupChanges(lockedReindexOp.attributes.indexName);
         }
-      } catch (e) {
-        // Trap the exception and add the message to the object so the UI can display it.
-        reindexOp = await actions.updateReindexOp(reindexOp, {
-          status: ReindexStatus.failed,
-          errorMessage: e instanceof Error ? e.stack : e.toString(),
-        });
 
-        await actions.cleanupChanges(reindexOp.attributes.indexName);
-      } finally {
-        // Always make sure we return the most recent version of the saved object.
-        reindexOp = await actions.releaseLock(reindexOp);
+        return lockedReindexOp;
+      });
+    },
+
+    async pauseReindexOperation(indexName: string) {
+      const reindexOp = await this.findReindexOperation(indexName);
+
+      if (!reindexOp) {
+        throw new Error(`No reindex operation found for index ${indexName}`);
       }
 
-      return reindexOp;
+      return actions.runWhileLocked(reindexOp, op => {
+        if (op.attributes.status !== ReindexStatus.inProgress) {
+          throw new Error(`Reindex operation must be inProgress in order to be paused.`);
+        }
+
+        return actions.updateReindexOp(op, { status: ReindexStatus.paused });
+      });
+    },
+
+    async resumeReindexOperation(indexName: string) {
+      const reindexOp = await this.findReindexOperation(indexName);
+
+      if (!reindexOp) {
+        throw new Error(`No reindex operation found for index ${indexName}`);
+      }
+
+      return actions.runWhileLocked(reindexOp, op => {
+        if (op.attributes.status !== ReindexStatus.paused) {
+          throw new Error(`Reindex operation must be paused in order to be resumed.`);
+        }
+
+        return actions.updateReindexOp(op, { status: ReindexStatus.inProgress });
+      });
     },
   };
 };

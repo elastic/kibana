@@ -3,15 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-import { Server } from 'src/server/kbn_server';
+import { CallCluster, CallClusterWithRequest } from 'src/legacy/core_plugins/elasticsearch';
+import { Request, Server } from 'src/server/kbn_server';
 import { SavedObjectsClient } from 'src/server/saved_objects';
 
-import { ReindexSavedObject } from '../../../common/types';
+import moment = require('moment');
+import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
 import { reindexActionsFactory } from './reindex_actions';
 import { ReindexService, reindexServiceFactory } from './reindex_service';
 
 const POLL_INTERVAL = 30000;
+// If no nodes have been able to update this index in 2 minutes (due to missing credentials), set to paused.
+const PAUSE_WINDOW = POLL_INTERVAL * 4;
 
 const LOG_TAGS = ['upgrade_assistant', 'reindex_worker'];
 
@@ -36,11 +39,11 @@ export class ReindexWorker {
   private inProgressOps: ReindexSavedObject[] = [];
   private readonly reindexService: ReindexService;
 
-  private processNextStep: (reindexOp: ReindexSavedObject) => Promise<ReindexSavedObject>;
-
   constructor(
-    client: SavedObjectsClient,
-    callWithInternalUser: CallCluster,
+    private client: SavedObjectsClient,
+    private credentialMap: Map<string, Request['headers']>,
+    private callWithRequest: CallClusterWithRequest,
+    private callWithInternalUser: CallCluster,
     private readonly log: Server['log']
   ) {
     if (ReindexWorker.workerSingleton) {
@@ -48,10 +51,10 @@ export class ReindexWorker {
     }
 
     this.reindexService = reindexServiceFactory(
-      callWithInternalUser,
-      reindexActionsFactory(client, callWithInternalUser)
+      this.callWithInternalUser,
+      reindexActionsFactory(this.client, this.callWithInternalUser)
     );
-    this.processNextStep = swallowExceptions(this.reindexService.processNextStep, this.log);
+
     ReindexWorker.workerSingleton = this;
   }
 
@@ -115,12 +118,36 @@ export class ReindexWorker {
   };
 
   private refresh = async () => {
-    this.inProgressOps = await this.reindexService.findAllInProgressOperations();
+    this.inProgressOps = await this.reindexService.findAllByStatus(ReindexStatus.inProgress);
 
     // If there are operations in progress and we're not already updating operations, kick off the update loop
     if (!this.updateOperationLoopRunning) {
       this.startUpdateOperationLoop();
     }
+  };
+
+  private processNextStep = (reindexOp: ReindexSavedObject) => {
+    const headers = this.credentialMap.get(reindexOp.attributes.indexName);
+
+    if (!headers) {
+      // Set to paused state if the job hasn't been updated in PAUSE_WINDOW.
+      // This indicates that no Kibana nodes currently have credentials to update this job.
+      const now = moment();
+      const updatedAt = moment(reindexOp.updated_at);
+      if (updatedAt < now.subtract(PAUSE_WINDOW)) {
+        return this.reindexService.pauseReindexOperation(reindexOp.attributes.indexName);
+      } else {
+        // If it has been updated recently, we assume another node has the necessary credentials,
+        // and this becomes a noop.
+        return reindexOp;
+      }
+    }
+
+    // Setup a ReindexService specific to these credentials.
+    const callCluster = this.callWithRequest.bind(null, { headers } as Request) as CallCluster;
+    const actions = reindexActionsFactory(this.client, callCluster);
+    const service = reindexServiceFactory(callCluster, actions);
+    return swallowExceptions(service.processNextStep, this.log)(reindexOp);
   };
 }
 

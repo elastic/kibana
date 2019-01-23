@@ -28,6 +28,8 @@ export const LOCK_WINDOW = moment.duration(90, 'seconds');
 
 export const ML_LOCK_DOC_ID = '___ML_REINDEX_LOCK___';
 
+export class LockError extends Error {}
+
 /**
  * A collection of utility functions pulled out out of the ReindexService to make testing simpler.
  * This is NOT intended to be used by any other code.
@@ -61,22 +63,14 @@ export interface ReindexActions {
   ): Promise<ReindexSavedObject>;
 
   /**
-   * Marks the reindex operation as locked by the current kibana process for up to LOCK_WINDOW
-   * @param reindexOp
+   * Runs a callback function while locking the reindex operation. Guaranteed to unlock the reindex operation when complete.
+   * @param func A function to run with the locked ML lock document. Must return a promise that resolves
+   * to the updated ReindexSavedObject.
    */
-  acquireLock(reindexOp: ReindexSavedObject): Promise<ReindexSavedObject>;
-
-  /**
-   * Releases the lock on the reindex operation.
-   * @param reindexOp
-   */
-  releaseLock(reindexOp: ReindexSavedObject): Promise<ReindexSavedObject>;
-
-  /**
-   * Releases the locks on an array of reindex operations.
-   * @param reindexOps
-   */
-  releaseLocks(reindexOps: ReindexSavedObject[]): Promise<ReindexSavedObject[]>;
+  runWhileLocked(
+    reindexOp: ReindexSavedObject,
+    func: (reindexOp: ReindexSavedObject) => Promise<ReindexSavedObject>
+  ): Promise<ReindexSavedObject>;
 
   /**
    * Finds the reindex operation saved object for the given index.
@@ -85,9 +79,9 @@ export interface ReindexActions {
   findReindexOperations(indexName: string): Promise<FindResponse<ReindexOperation>>;
 
   /**
-   * Returns an array of all reindex operations that are in-progress.
+   * Returns an array of all reindex operations that have a status.
    */
-  findAllInProgressOperations(): Promise<ReindexSavedObject[]>;
+  findAllByStatus(status: ReindexStatus): Promise<ReindexSavedObject[]>;
 
   /**
    * Returns array of field paths to boolean fields in the index's mapping.
@@ -164,6 +158,41 @@ export const reindexActionsFactory = (
     );
   };
 
+  const isLocked = (reindexOp: ReindexSavedObject) => {
+    if (reindexOp.attributes.locked) {
+      const now = moment();
+      const lockedTime = moment(reindexOp.attributes.locked);
+      // If the object has been locked for more than the LOCK_WINDOW, assume the process that locked it died.
+      if (now.subtract(LOCK_WINDOW) < lockedTime) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  const acquireLock = async (reindexOp: ReindexSavedObject) => {
+    if (isLocked(reindexOp)) {
+      throw new LockError(`Another Kibana process is currently modifying this reindex operation.`);
+    }
+
+    return client.update<ReindexOperation>(
+      REINDEX_OP_TYPE,
+      reindexOp.id,
+      { ...reindexOp.attributes, locked: moment().format() },
+      { version: reindexOp.version }
+    );
+  };
+
+  const releaseLock = (reindexOp: ReindexSavedObject) => {
+    return client.update<ReindexOperation>(
+      REINDEX_OP_TYPE,
+      reindexOp.id,
+      { ...reindexOp.attributes, locked: null },
+      { version: reindexOp.version }
+    );
+  };
+
   // ----- Public interface
   return {
     async createReindexOp(indexName: string) {
@@ -184,48 +213,27 @@ export const reindexActionsFactory = (
       return client.delete(REINDEX_OP_TYPE, reindexOp.id);
     },
 
-    updateReindexOp(reindexOp: ReindexSavedObject, attrs: Partial<ReindexOperation> = {}) {
+    async updateReindexOp(reindexOp: ReindexSavedObject, attrs: Partial<ReindexOperation> = {}) {
+      if (!isLocked(reindexOp)) {
+        throw new Error(`ReindexOperation must be locked before updating.`);
+      }
+
       const newAttrs = { ...reindexOp.attributes, locked: moment().format(), ...attrs };
       return client.update<ReindexOperation>(REINDEX_OP_TYPE, reindexOp.id, newAttrs, {
         version: reindexOp.version,
       });
     },
 
-    async acquireLock(reindexOp: ReindexSavedObject) {
-      const now = moment();
-      if (reindexOp.attributes.locked) {
-        const lockedTime = moment(reindexOp.attributes.locked);
-        // If the object has been locked for more than the LOCK_WINDOW, assume the process that locked it died.
-        if (now.subtract(LOCK_WINDOW) < lockedTime) {
-          throw Boom.conflict(
-            `Another Kibana process is currently modifying this reindex operation.`
-          );
-        }
+    async runWhileLocked(reindexOp, func) {
+      reindexOp = await acquireLock(reindexOp);
+
+      try {
+        reindexOp = await func(reindexOp);
+      } finally {
+        reindexOp = await releaseLock(reindexOp);
       }
 
-      return client.update<ReindexOperation>(
-        REINDEX_OP_TYPE,
-        reindexOp.id,
-        { ...reindexOp.attributes, locked: now.format() },
-        { version: reindexOp.version }
-      );
-    },
-
-    releaseLock(reindexOp: ReindexSavedObject) {
-      return client.update<ReindexOperation>(
-        REINDEX_OP_TYPE,
-        reindexOp.id,
-        { ...reindexOp.attributes, locked: null },
-        { version: reindexOp.version }
-      );
-    },
-
-    async releaseLocks(reindexOps: ReindexSavedObject[]) {
-      const updatedOps: ReindexSavedObject[] = [];
-      for (const op of reindexOps) {
-        updatedOps.push(await this.releaseLock(op));
-      }
-      return updatedOps;
+      return reindexOp;
     },
 
     findReindexOperations(indexName: string) {
@@ -236,10 +244,10 @@ export const reindexActionsFactory = (
       });
     },
 
-    async findAllInProgressOperations() {
+    async findAllByStatus(status: ReindexStatus) {
       const firstPage = await client.find<ReindexOperation>({
         type: REINDEX_OP_TYPE,
-        search: ReindexStatus.inProgress.toString(),
+        search: status.toString(),
         searchFields: ['status'],
       });
 
@@ -253,7 +261,7 @@ export const reindexActionsFactory = (
       while (allOps.length < firstPage.total) {
         const nextPage = await client.find<ReindexOperation>({
           type: REINDEX_OP_TYPE,
-          search: ReindexStatus.inProgress.toString(),
+          search: status.toString(),
           searchFields: ['status'],
           page,
         });
@@ -330,7 +338,7 @@ export const reindexActionsFactory = (
       const lockDoc = async (attempt = 1): Promise<ReindexSavedObject> => {
         try {
           // Refetch the document each time to avoid version conflicts.
-          return await this.acquireLock(await fetchDoc());
+          return await acquireLock(await fetchDoc());
         } catch (e) {
           if (attempt >= 10) {
             throw new Error(`Could not acquire lock for ML jobs`);
@@ -366,7 +374,7 @@ export const reindexActionsFactory = (
       try {
         mlDoc = await func(mlDoc);
       } finally {
-        await this.releaseLock(mlDoc);
+        await releaseLock(mlDoc);
       }
     },
   };
