@@ -78,15 +78,7 @@ interface DateRange {
 
 interface Props {
   query: Query;
-  onSubmit: (
-    {
-      dateRange,
-      query,
-    }: {
-      dateRange: DateRange;
-      query: Query;
-    }
-  ) => void;
+  onSubmit: (payload: { dateRange: DateRange; query: Query }) => void;
   disableAutoFocus?: boolean;
   appName: string;
   indexPatterns: IndexPattern[];
