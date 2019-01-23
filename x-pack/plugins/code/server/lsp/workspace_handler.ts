@@ -44,7 +44,7 @@ export class WorkspaceHandler {
   }
 
   /**
-   * open workspace for repositoryUri, updated it from bare repository if need.
+   * open workspace for repositoryUri, update it from bare repository if necessary.
    * @param repositoryUri the uri of bare repository.
    * @param revision
    */
@@ -64,13 +64,13 @@ export class WorkspaceHandler {
 
     const bareRepo = await this.git.openRepo(repositoryUri);
     const targetCommit = await this.git.getCommit(bareRepo, revision);
-    const defaultBranch = await getDefaultBranch(bareRepo.workdir());
+    const defaultBranch = await getDefaultBranch(bareRepo.path());
     if (revision !== defaultBranch) {
       await this.checkCommit(bareRepo, targetCommit);
       revision = defaultBranch;
     }
     let workspaceRepo: Repository;
-    if (this.workspaceExists(repositoryUri, revision)) {
+    if (await this.workspaceExists(repositoryUri, revision)) {
       workspaceRepo = await this.updateWorkspace(repositoryUri, revision, targetCommit);
     } else {
       workspaceRepo = await this.cloneWorkspace(bareRepo, repositoryUri, revision);
@@ -90,8 +90,8 @@ export class WorkspaceHandler {
     return { workspaceRepo, workspaceRevision: workspaceHeadCommit.sha().substring(0, 7) };
   }
 
-  public listWorkspaceFolders(repoUri: string) {
-    const workspaceDir = path.join(this.workspacePath, repoUri);
+  public async listWorkspaceFolders(repoUri: string) {
+    const workspaceDir = await this.workspaceDir(repoUri);
     const isDir = (source: string) => fs.lstatSync(source).isDirectory();
     return fs
       .readdirSync(workspaceDir)
@@ -100,11 +100,11 @@ export class WorkspaceHandler {
   }
 
   public async clearWorkspace(repoUri: string, revision?: string) {
-    const workspaceDir = path.join(this.workspacePath, repoUri);
+    const workspaceDir = await this.workspaceDir(repoUri);
     if (revision) {
-      await del([path.join(workspaceDir, revision)], { force: true });
+      await del([await this.revisionDir(repoUri, revision)], { force: true });
     } else {
-      await del([path.join(workspaceDir)], { force: true });
+      await del([workspaceDir], { force: true });
     }
   }
 
@@ -237,16 +237,16 @@ export class WorkspaceHandler {
   private parseLocation(location: Location) {
     const uri = location.uri;
     if (uri && uri.startsWith('file://')) {
-      const filePath = uri.substring('file://'.length);
-      if (filePath.startsWith(this.workspacePath)) {
-        const relativePath = path.relative(this.workspacePath, filePath);
-        const regex = /^(.*?\/.*?\/.*?)\/(.*?)\/(.*)$/;
+      const workspaceUrl = new URL(`file://${this.workspacePath}`).toString();
+      if (uri.startsWith(workspaceUrl)) {
+        const relativePath = uri.substring(workspaceUrl.length + 1);
+        const regex = /^(.*?\/.*?\/.*?)\/(__.*?\/)?([^_]+?)\/(.*)$/;
         const m = relativePath.match(regex);
         if (m) {
           const repoUri = m[1];
-          const revision = m[2];
+          const revision = m[3];
           const gitRevision = this.revisionMap[`${repoUri}/${revision}`] || revision;
-          const file = m[3];
+          const file = m[4];
           return { repoUri, revision: gitRevision, file };
         }
       }
@@ -304,9 +304,23 @@ export class WorkspaceHandler {
     }
   }
 
-  private workspaceExists(repositoryUri: string, revision: string) {
-    const workspaceDir = path.join(this.workspacePath, repositoryUri, revision);
+  private async workspaceExists(repositoryUri: string, revision: string) {
+    const workspaceDir = await this.revisionDir(repositoryUri, revision);
     return fs.existsSync(workspaceDir);
+  }
+
+  private async revisionDir(repositoryUri: string, revision: string) {
+    return path.join(await this.workspaceDir(repositoryUri), revision);
+  }
+
+  private async workspaceDir(repoUri: string) {
+    const randomStr = await this.objectClient.getRepositoryRandomStr(repoUri);
+    const base = path.join(this.workspacePath, repoUri);
+    if (randomStr) {
+      return path.join(base, `__${randomStr}`);
+    } else {
+      return base;
+    }
   }
 
   private async updateWorkspace(
@@ -314,7 +328,7 @@ export class WorkspaceHandler {
     revision: string,
     targetCommit: Commit
   ): Promise<Repository> {
-    const workspaceDir = path.join(this.workspacePath, repositoryUri, revision);
+    const workspaceDir = await this.revisionDir(repositoryUri, revision);
     const workspaceRepo = await Repository.open(workspaceDir);
     const workspaceHead = await workspaceRepo.getHeadCommit();
     if (workspaceHead.sha() !== targetCommit.sha()) {
@@ -329,7 +343,7 @@ export class WorkspaceHandler {
     repositoryUri: string,
     revision: string
   ): Promise<Repository> {
-    const workspaceDir = path.join(this.workspacePath, repositoryUri, revision);
+    const workspaceDir = await this.revisionDir(repositoryUri, revision);
     this.log.info(`clone workspace ${workspaceDir} from url ${bareRepo.path()}`);
     const parentDir = path.dirname(workspaceDir);
     // on windows, git clone will failed if parent folder is not exists;

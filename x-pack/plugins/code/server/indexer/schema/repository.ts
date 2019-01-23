@@ -26,3 +26,14 @@ export const RepositoryDeleteStatusReservedField = 'repository_delete_status';
 export const RepositoryLspIndexStatusReservedField = 'repository_lsp_index_status';
 // The field name of repository config object nested in the Document index.
 export const RepositoryConfigReservedField = 'repository_config';
+// The field name of repository config object nested in the Document index.
+export const RepositoryRandomPathReservedField = 'repository_random_path';
+
+export const ALL_RESERVED = [
+  RepositoryReservedField,
+  RepositoryGitStatusReservedField,
+  RepositoryDeleteStatusReservedField,
+  RepositoryLspIndexStatusReservedField,
+  RepositoryConfigReservedField,
+  RepositoryRandomPathReservedField,
+];
