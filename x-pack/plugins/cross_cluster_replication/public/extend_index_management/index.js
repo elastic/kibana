@@ -14,7 +14,7 @@ export const followerBadgeExtension = {
   matchIndex: (index) => {
     return get(index, propertyPath);
   },
-  label: i18n.translate('xpack.ccr.indexMgmtBadge.followerLabel', {
+  label: i18n.translate('xpack.crossClusterReplication.indexMgmtBadge.followerLabel', {
     defaultMessage: 'Follower',
   }),
   color: 'default'
