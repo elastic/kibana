@@ -1,9 +1,17 @@
+@import '@elastic/eui/src/components/header/variables';
+
 #gis-plugin {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: calc(100vh - #{$euiHeaderChildSize});
   width: 100%;
   overflow: hidden;
+}
+
+@include euiBreakpoint('xs') {
+  #gis-plugin {
+    height: calc(100vh - #{$euiHeaderChildSizeMobile});
+  }
 }
 
 #react-gis-root {
