@@ -405,6 +405,16 @@ describe('plugin discovery/plugin spec', () => {
       });
     });
 
+    describe('#getPostInitHandler()', () => {
+      it('returns spec.postInit', () => {
+        const spec = new PluginSpec(fooPack, {
+          postInit: 'foo'
+        });
+
+        expect(spec.getPostInitHandler()).to.be('foo');
+      });
+    });
+
     describe('#getConfigPrefix()', () => {
       describe('spec.configPrefix is truthy', () => {
         it('returns spec.configPrefix', () => {
