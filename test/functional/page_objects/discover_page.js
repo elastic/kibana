@@ -62,11 +62,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async getColumnHeaders() {
       const headerElements = await testSubjects.findAll('docTableHeaderField');
-      if (headerElements.length > 0) {
-        return await Promise.all(headerElements.map(el => el.getVisibleText()));
-      } else {
-        return [];
-      }
+      return await Promise.all(headerElements.map(async (el) => await el.getVisibleText()));
     }
 
     async openLoadSavedSearchPanel() {

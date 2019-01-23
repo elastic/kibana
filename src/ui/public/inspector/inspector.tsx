@@ -18,10 +18,15 @@
  */
 import React from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { FlyoutSession, openFlyout } from 'ui/flyout';
 import { Adapters } from './types';
 import { InspectorPanel } from './ui/inspector_panel';
 import { viewRegistry } from './view_registry';
+
+const closeButtonLabel = i18n.translate('common.ui.inspector.closeButton', {
+  defaultMessage: 'Close Inspector',
+});
 
 /**
  * Checks if a inspector panel could be shown based on the passed adapters.
@@ -69,7 +74,7 @@ function open(adapters: Adapters, options: InspectorOptions = {}): InspectorSess
 
   return openFlyout(<InspectorPanel views={views} adapters={adapters} title={options.title} />, {
     'data-test-subj': 'inspectorPanel',
-    closeButtonAriaLabel: 'Close Inspector',
+    closeButtonAriaLabel: closeButtonLabel,
   });
 }
 

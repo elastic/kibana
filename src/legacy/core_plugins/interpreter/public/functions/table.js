@@ -28,10 +28,10 @@ export const kibanaTable = () => ({
   type: 'render',
   context: {
     types: [
-      'kibana_table'
+      'datatable'
     ],
   },
-  help: i18n.translate('common.core_plugins.interpreter.public.functions.table.help', {
+  help: i18n.translate('interpreter.functions.table.help', {
     defaultMessage: 'Table visualization'
   }),
   args: {

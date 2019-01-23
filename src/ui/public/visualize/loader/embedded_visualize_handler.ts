@@ -29,12 +29,12 @@ import { RenderCompleteHelper } from '../../render_complete';
 import { AppState } from '../../state_management/app_state';
 import { timefilter } from '../../timefilter';
 import { RequestHandlerParams, Vis } from '../../vis';
-// import { VisualizeDataLoader } from './visualize_data_loader';
 import { PipelineDataLoader } from './pipeline_data_loader';
 import { visualizationLoader } from './visualization_loader';
 
 import { DataAdapter, RequestAdapter } from '../../inspector/adapters';
 
+import { getTableAggs } from './pipeline_helpers/utilities';
 import { VisSavedObject, VisualizeLoaderParams, VisualizeUpdateParams } from './types';
 
 interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
@@ -150,6 +150,7 @@ export class EmbeddedVisualizeHandler {
     this.events$ = this.vis.eventsSubject.asObservable().pipe(share());
     this.events$.subscribe(event => {
       if (this.actions[event.name]) {
+        event.data.aggConfigs = getTableAggs(this.vis);
         this.actions[event.name](event.data);
       }
     });

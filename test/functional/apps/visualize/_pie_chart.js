@@ -104,7 +104,6 @@ export default function ({ getService, getPageObjects }) {
       it('should apply correct filter on other bucket', async () => {
         const expectedTableData = [ 'Missing', 'osx' ];
 
-        await PageObjects.header.waitUntilLoadingHasFinished();
         await pieChart.filterOnPieSlice('Other');
         await PageObjects.visualize.waitForVisualization();
         await pieChart.expectPieChartLabels(expectedTableData);
