@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import { range } from 'lodash';
 import moment from 'moment';
 
@@ -27,8 +26,6 @@ import { FlatSettings } from './types';
 export const LOCK_WINDOW = moment.duration(90, 'seconds');
 
 export const ML_LOCK_DOC_ID = '___ML_REINDEX_LOCK___';
-
-export class LockError extends Error {}
 
 /**
  * A collection of utility functions pulled out out of the ReindexService to make testing simpler.
@@ -173,7 +170,7 @@ export const reindexActionsFactory = (
 
   const acquireLock = async (reindexOp: ReindexSavedObject) => {
     if (isLocked(reindexOp)) {
-      throw new LockError(`Another Kibana process is currently modifying this reindex operation.`);
+      throw new Error(`Another Kibana process is currently modifying this reindex operation.`);
     }
 
     return client.update<ReindexOperation>(

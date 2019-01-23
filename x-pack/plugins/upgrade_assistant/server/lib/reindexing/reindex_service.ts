@@ -14,7 +14,7 @@ import {
   ReindexWarning,
 } from '../../../common/types';
 import { getReindexWarnings, transformFlatSettings } from './index_settings';
-import { LockError, ReindexActions } from './reindex_actions';
+import { ReindexActions } from './reindex_actions';
 
 export interface ReindexService {
   /**
