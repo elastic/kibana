@@ -56,7 +56,7 @@ function createNewDashboardCtrl($scope, i18n) {
 uiRoutes
   .defaults(/dashboard/, {
     requireDefaultIndex: true,
-    requireUICapabilities: 'dashboard.show'
+    requireUICapability: 'dashboard.show'
   })
   .when(DashboardConstants.LANDING_PAGE_PATH, {
     template: dashboardListingTemplate,
@@ -108,7 +108,7 @@ uiRoutes
   .when(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {
     template: dashboardTemplate,
     controller: createNewDashboardCtrl,
-    requireUICapabilities: 'dashboard.createNew',
+    requireUICapability: 'dashboard.createNew',
     resolve: {
       dash: function (savedDashboards, redirectWhenMissing) {
         return savedDashboards.get()

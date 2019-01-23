@@ -24,11 +24,11 @@ import { UICapabilities } from './ui_capabilities';
 
 uiRoutes.addSetupWork((uiCapabilities: UICapabilities, kbnBaseUrl: string, $route: any) => {
   const route = get($route, 'current.$$route') as any;
-  if (!route.requireUICapabilities) {
+  if (!route.requireUICapability) {
     return;
   }
 
-  if (!get(uiCapabilities, route.requireUICapabilities)) {
+  if (!get(uiCapabilities, route.requireUICapability)) {
     const url = chrome.addBasePath(`${kbnBaseUrl}#/home`);
     window.location.href = url;
   }

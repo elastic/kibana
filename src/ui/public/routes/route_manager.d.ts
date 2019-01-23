@@ -30,7 +30,7 @@ interface RouteConfiguration {
   resolve?: object;
   template?: string;
   k7Breadcrumbs?: (...args: any[]) => Breadcrumb[];
-  requireUICapabilities?: string;
+  requireUICapability?: string;
 }
 
 interface RouteManager {
