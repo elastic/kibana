@@ -18,7 +18,6 @@
  */
 
 export function FilterBarProvider({ getService, getPageObjects }) {
-  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const comboBox = getService('comboBox');
@@ -73,15 +72,23 @@ export function FilterBarProvider({ getService, getPageObjects }) {
       await comboBox.set('filterFieldSuggestionList', field);
       await comboBox.set('filterOperatorList', operator);
       const params = await testSubjects.find('filterParams');
+      const comboBoxInputs = await params.findAllByCssSelector('[data-test-subj="comboBoxInput"]');
       const paramFields = await params.findAllByTagName('input');
       for (let i = 0; i < values.length; i++) {
         let fieldValues = values[i];
         if (!Array.isArray(fieldValues)) {
           fieldValues = [fieldValues];
         }
-        for (let j = 0; j < fieldValues.length; j++) {
-          await paramFields[i].type(fieldValues[j]);
-          await paramFields[i].pressKeys(browser.keys.RETURN);
+
+        if (comboBoxInputs && comboBoxInputs.length > 0) {
+          for (let j = 0; j < fieldValues.length; j++) {
+            await comboBox.setElement(comboBoxInputs[i], fieldValues[j]);
+          }
+        }
+        else if (paramFields && paramFields.length > 0) {
+          for (let j = 0; j < fieldValues.length; j++) {
+            await paramFields[i].type(fieldValues[j]);
+          }
         }
       }
       await testSubjects.click('saveFilter');
