@@ -24,7 +24,20 @@ export async function redirectSocketRoute(server: Server, redirect: string, log:
       redirectUrl = redirect.replace(BASE_PLACEHOLDER, '');
     }
     const socketUrl = `${redirectUrl}`;
-    return ClientIO(socketUrl, { path: `${baseUrl}/ws` });
+    return ClientIO(socketUrl, {
+      path: `${baseUrl}/ws`,
+      transports: ['polling', 'websocket'],
+      transportOptions: {
+        polling: {
+          extraHeaders: {
+            'kbn-xsrf': 'professionally-crafted-string-of-text',
+          },
+        },
+      },
+      timeout: 5000,
+      // ensure socket.io always tries polling first, otherwise auth will fail
+      rememberUpgrade: false,
+    });
   }
   // maintain a connection to main node
   let mainNodeSocket = await connectToMainNode();
