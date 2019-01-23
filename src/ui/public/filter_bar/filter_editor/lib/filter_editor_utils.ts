@@ -141,7 +141,7 @@ export function buildFilter(
   return filter;
 }
 
-export function buildBaseFilter(
+function buildBaseFilter(
   indexPattern: IndexPattern,
   field: Field,
   operator: Operator,
