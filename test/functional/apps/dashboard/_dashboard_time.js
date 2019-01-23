@@ -25,7 +25,7 @@ const fromTime = '2015-09-19 06:31:44.000';
 const toTime = '2015-09-23 18:31:44.000';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['dashboard', 'header']);
+  const PageObjects = getPageObjects(['dashboard', 'header', 'timePicker']);
   const browser = getService('browser');
 
   describe('dashboard time', () => {
@@ -46,7 +46,7 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('Does not set the time picker on open', async () => {
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
         await PageObjects.dashboard.loadSavedDashboard(dashboardName);
 
@@ -65,7 +65,7 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('sets quick time on open', async function () {
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
         await PageObjects.dashboard.loadSavedDashboard(dashboardName);
 
@@ -75,7 +75,7 @@ export default function ({ getPageObjects, getService }) {
 
       it('is saved with absolute time', async function () {
         await PageObjects.dashboard.switchToEditMode();
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
       });
 

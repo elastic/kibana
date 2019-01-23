@@ -116,32 +116,6 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async setFromTime(timeString) {
-      log.debug(`setFromTime: ${timeString}`);
-      await retry.try(async () => {
-        await this.ensureTimePickerIsOpen();
-        await this.showAbsoluteSection();
-        await find.setValue('input[ng-model=\'absolute.from\']', timeString);
-      });
-    }
-
-    async setToTime(timeString) {
-      log.debug(`setToTime: ${timeString}`);
-      await retry.try(async () => {
-        await this.ensureTimePickerIsOpen();
-        await this.showAbsoluteSection();
-        await find.setValue('input[ng-model=\'absolute.to\']', timeString);
-      });
-    }
-
-    async clickGoButton() {
-      log.debug('clickGoButton');
-      await retry.try(async () => {
-        await testSubjects.click('timepickerGoButton');
-        await this.waitUntilLoadingHasFinished();
-      });
-    }
-
     async ensureTimePickerIsOpen() {
       log.debug('ensureTimePickerIsOpen');
       const isOpen = await this.isTimepickerOpen();
@@ -152,19 +126,6 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
           if (!isOpen) throw new Error('Time picker still not open, try again.');
         });
       }
-    }
-
-    async setAbsoluteRange(fromTime, toTime) {
-      log.debug(`Setting absolute range to ${fromTime} to ${toTime}`);
-      await this.ensureTimePickerIsOpen();
-      log.debug('--Clicking Absolute button');
-      await this.showAbsoluteSection();
-      log.debug('--Setting From Time : ' + fromTime);
-      await this.setFromTime(fromTime);
-      log.debug('--Setting To Time : ' + toTime);
-      await this.setToTime(toTime);
-      await this.clickGoButton();
-      await this.awaitGlobalLoadingIndicatorHidden();
     }
 
     async setQuickTime(quickTime) {

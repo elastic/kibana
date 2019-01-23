@@ -6,7 +6,7 @@
 
 export const getLifecycleMethods = (getService, getPageObjects) => {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['monitoring', 'header', 'timePicker']);
+  const PageObjects = getPageObjects(['monitoring', 'timePicker']);
   const noData = getService('monitoringNoData');
   let _archive;
 
@@ -32,7 +32,7 @@ export const getLifecycleMethods = (getService, getPageObjects) => {
       // and we don't want ES to log a warning when data gets wiped out
       await PageObjects.timePicker.pauseAutoRefresh();
 
-      await PageObjects.header.setAbsoluteRange(from, to);
+      await PageObjects.timePicker.setAbsoluteRange(from, to);
     },
 
     tearDown() {

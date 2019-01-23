@@ -24,7 +24,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
-  const PageObjects = getPageObjects(['common', 'header', 'visualize']);
+  const PageObjects = getPageObjects(['common', 'header', 'visualize', 'timePicker']);
 
   class VisualBuilderPage {
 
@@ -36,8 +36,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       log.debug('clickVisualBuilderChart');
       await PageObjects.visualize.clickVisualBuilder();
       log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     }
 
     async clickMetric() {

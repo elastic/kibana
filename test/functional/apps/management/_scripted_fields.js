@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize', 'discover']);
+  const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize', 'discover', 'timePicker']);
 
   describe('scripted fields', () => {
 
@@ -96,9 +96,7 @@ export default function ({ getService, getPageObjects }) {
         const fromTime = '2015-09-17 06:31:44.000';
         const toTime = '2015-09-18 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
-        await log.debug('setAbsoluteRange (' + fromTime + ') to (' + toTime + ')');
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName);
         await retry.try(async function () {
@@ -159,9 +157,7 @@ export default function ({ getService, getPageObjects }) {
         const fromTime = '2015-09-17 06:31:44.000';
         const toTime = '2015-09-18 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
-        await log.debug('setAbsoluteRange (' + fromTime + ') to (' + toTime + ')');
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
@@ -221,9 +217,7 @@ export default function ({ getService, getPageObjects }) {
         const fromTime = '2015-09-17 06:31:44.000';
         const toTime = '2015-09-18 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
-        await log.debug('setAbsoluteRange (' + fromTime + ') to (' + toTime + ')');
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {
@@ -284,9 +278,7 @@ export default function ({ getService, getPageObjects }) {
         const fromTime = '2015-09-17 19:22:00.000';
         const toTime = '2015-09-18 07:00:00.000';
         await PageObjects.common.navigateToApp('discover');
-        await log.debug('setAbsoluteRange (' + fromTime + ') to (' + toTime + ')');
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await retry.try(async function () {

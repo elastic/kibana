@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'visualize']);
+  const PageObjects = getPageObjects(['common', 'discover', 'header', 'visualize', 'timePicker']);
   const defaultSettings = {
     'dateFormat:tz': 'UTC',
     defaultIndex: 'logstash-*',
@@ -49,8 +49,7 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.loadIfNeeded('logstash_functional');
       log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
-      log.debug('setAbsoluteRange');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     });
 
     describe('query', function () {
@@ -140,7 +139,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should modify the time range when a bar is clicked', async function () {
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.clickHistogramBar(0);
         await PageObjects.visualize.waitForVisualization();
@@ -149,7 +148,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should modify the time range when the histogram is brushed', async function () {
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.brushHistogram(0, 1);
         await PageObjects.visualize.waitForVisualization();
@@ -158,7 +157,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show correct initial chart interval of Auto', async function () {
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         const actualInterval = await PageObjects.discover.getChartInterval();
 
         const expectedInterval = 'Auto';
@@ -380,7 +379,7 @@ export default function ({ getService, getPageObjects }) {
 
       before(() => {
         log.debug('setAbsoluteRangeForAnotherQuery');
-        return PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        return PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       });
 
       it('should show "no results"', async () => {
@@ -442,7 +441,7 @@ export default function ({ getService, getPageObjects }) {
       it('should show bars in the correct time zone after switching', async function () {
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
         await browser.refresh();
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         const ticks = await PageObjects.discover.getBarChartXTicks();
         expect(ticks).to.eql([
           '2015-09-19 17:00',

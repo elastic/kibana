@@ -22,7 +22,7 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'pointSeries']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'pointSeries', 'timePicker']);
   const pointSeriesVis = PageObjects.pointSeries;
 
   describe('point series', function describeIndexTests() {
@@ -35,8 +35,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickLineChart');
       await PageObjects.visualize.clickLineChart();
       await PageObjects.visualize.clickNewSearch();
-      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       log.debug('Bucket = X-Axis');
       await PageObjects.visualize.clickBucket('X-Axis');
       log.debug('Aggregation = Date Histogram');

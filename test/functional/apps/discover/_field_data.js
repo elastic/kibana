@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
-  const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize']);
+  const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize', 'timePicker']);
 
   describe('discover tab', function describeIndexTests() {
     before(async function () {
@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     });
 
     describe('field data', function () {

@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const inspector = getService('inspector');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings', 'visualBuilder']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings', 'visualBuilder', 'timePicker']);
 
   describe('visual builder', function describeIndexTests() {
 
@@ -147,7 +147,7 @@ export default function ({ getService, getPageObjects }) {
       before(async () => {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMarkdown();
-        await PageObjects.header.setAbsoluteRange('2015-09-22 06:00:00.000', '2015-09-22 11:00:00.000');
+        await PageObjects.timePicker.setAbsoluteRange('2015-09-22 06:00:00.000', '2015-09-22 11:00:00.000');
       });
 
       it('should allow printing raw timestamp of data', async () => {
@@ -194,7 +194,7 @@ export default function ({ getService, getPageObjects }) {
       before(async () => {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickTable();
-        await PageObjects.header.setAbsoluteRange('2015-09-22 06:00:00.000', '2015-09-22 11:00:00.000');
+        await PageObjects.timePicker.setAbsoluteRange('2015-09-22 06:00:00.000', '2015-09-22 11:00:00.000');
         log.debug('clicked on Table');
       });
 
@@ -231,8 +231,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualBuilder.clickMetricPanelOptions();
         const fromTime = '2018-10-22 00:00:00.000';
         const toTime = '2018-10-28 23:59:59.999';
-        log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualBuilder.setIndexPatternValue('kibana_sample_data_flights');
         await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');
         const newValue = await PageObjects.visualBuilder.getMetricValue();

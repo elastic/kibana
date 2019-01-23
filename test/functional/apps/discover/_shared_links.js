@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'share']);
+  const PageObjects = getPageObjects(['common', 'discover', 'share', 'timePicker']);
 
   describe('shared links', function describeIndexTests() {
     let baseUrl;
@@ -54,8 +54,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
 
-      log.debug('setAbsoluteRange');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
       //After hiding the time picker, we need to wait for
       //the refresh button to hide before clicking the share button

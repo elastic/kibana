@@ -17,12 +17,46 @@
  * under the License.
  */
 
-export function TimePickerPageProvider({ getService }) {
+export function TimePickerPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const PageObjects = getPageObjects(['header']);
 
   class TimePickerPage {
+
+    async setAbsoluteRange(fromTime, toTime) {
+      log.debug(`Setting absolute range to ${fromTime} to ${toTime}`);
+      await this.showStartEndTimes();
+
+      // set from time
+      await testSubjects.click('superDatePickerstartDatePopoverButton');
+      await testSubjects.click('superDatePickerAbsoluteTab');
+      await testSubjects.setValue('superDatePickerAbsoluteDateInput', fromTime);
+
+      // set to time
+      await testSubjects.click('superDatePickerendDatePopoverButton');
+      await testSubjects.click('superDatePickerAbsoluteTab');
+      await testSubjects.setValue('superDatePickerAbsoluteDateInput', toTime);
+
+      const superDatePickerApplyButtonExists = await testSubjects.exists('superDatePickerApplyTimeButton');
+      if (superDatePickerApplyButtonExists) {
+        // Timepicker is in top nav
+        // Click super date picker apply button to apply time range
+        await testSubjects.click('superDatePickerApplyTimeButton');
+      } else {
+        // Timepicker is embedded in query bar
+        // click query bar submit button to apply time range
+        await testSubjects.click('querySubmitButton');
+      }
+      await testSubjects.click('superDatePickerApplyTimeButton');
+
+      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+    }
+
+    async openFromTimePanel() {
+      await testSubjects.click('superDatePickerstartDatePopoverButton');
+    }
 
     async isQuickSelectMenuOpen() {
       return await testSubjects.exists('superDatePickerQuickMenu');
