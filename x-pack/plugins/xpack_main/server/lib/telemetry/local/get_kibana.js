@@ -12,7 +12,7 @@ export function handleKibanaStats(server, response) {
     return;
   }
 
-  const { kibana, kibana_stats: stats, ...plugins } = response;
+  const { kibana, localization, kibana_stats: stats, ...plugins } = response;
 
   const platform = get(stats, 'os.platform', 'unknown');
   const platformRelease = get(stats, 'os.platformRelease', 'unknown');
@@ -34,6 +34,7 @@ export function handleKibanaStats(server, response) {
       platformReleases: [{ platformRelease, count: 1 }],
     },
     versions: [{ version, count: 1 }],
+    localization,
     plugins,
   };
 }

@@ -34,7 +34,7 @@ import { KIBANA_STATS_TYPE } from '../../constants';
 export function registerStatsApi(kbnServer, server, config) {
   const wrapAuth = wrapAuthConfig(config.get('status.allowAnonymous'));
   const { collectorSet } = server.usage;
-  
+
 
   const getClusterUuid = async callCluster => {
     const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid', });
@@ -130,15 +130,10 @@ export function registerStatsApi(kbnServer, server, config) {
         let kibanaStats = await kibanaStatsCollector.fetch();
         kibanaStats = collectorSet.toApiFieldNames(kibanaStats);
 
-        const translations = {
-          locale: kibanaStats.kibana.locale,
-          ...server.getTranslationsIntegrities(),
-        }
-
         return {
           ...kibanaStats,
+          locale: kibanaStats.kibana.locale,
           ...extended,
-          translations,
         };
       },
     })
