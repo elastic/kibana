@@ -21,7 +21,6 @@ describe('ML - Explorer Controller', () => {
 
       expect(Array.isArray(scope.jobs)).to.be(true);
       expect(Array.isArray(scope.queryFilters)).to.be(true);
-      expect(scope.loading).to.be(true);
     });
   });
 });
