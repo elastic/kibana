@@ -45,6 +45,7 @@ describe('Saved object does not have layer list', () => {
 
     const layers = getInitialLayers(null, dataSources);
     expect(layers).toEqual([{
+      "alpha": 1,
       dataRequests: [],
       id: layers[0].id,
       label: null,
@@ -56,9 +57,7 @@ describe('Saved object does not have layer list', () => {
         url: 'myTileUrl',
       },
       style: {
-        properties: {
-          alphaValue: 1
-        },
+        properties: {},
         type: 'TILE',
       },
       temporary: false,
@@ -74,6 +73,7 @@ describe('Saved object does not have layer list', () => {
 
     const layers = getInitialLayers(null, dataSources);
     expect(layers).toEqual([{
+      "alpha": 1,
       dataRequests: [],
       id: layers[0].id,
       label: null,
@@ -85,9 +85,7 @@ describe('Saved object does not have layer list', () => {
         type: 'EMS_TMS'
       },
       style: {
-        properties: {
-          alphaValue: 1
-        },
+        properties: {},
         type: 'TILE',
       },
       temporary: false,

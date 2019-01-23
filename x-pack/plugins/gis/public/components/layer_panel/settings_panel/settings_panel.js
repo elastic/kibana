@@ -46,8 +46,8 @@ export class SettingsPanel extends Component {
     this.props.updateMaxZoom(this.props.layerId, zoom);
   }
 
-  onAlphaValueChange = (alphaValue) => {
-    this.props.updateAlphaValue(this.props.layerId, alphaValue);
+  onAlphaChange = (alpha) => {
+    this.props.updateAlpha(this.props.layerId, alpha);
   }
 
   onSourceChange = ({ propName, value }) => {
@@ -116,8 +116,8 @@ export class SettingsPanel extends Component {
             min={.00}
             max={1.00}
             step={.05}
-            value={this.props.alphaValue}
-            onChange={this.onAlphaValueChange}
+            value={this.props.alpha}
+            onChange={this.onAlphaChange}
             showLabels
             showInput
             showRange

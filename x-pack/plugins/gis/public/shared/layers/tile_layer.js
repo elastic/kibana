@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import { ALayer } from './layer';
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
@@ -23,6 +24,7 @@ export class TileLayer extends ALayer {
   static createDescriptor(options) {
     const tileLayerDescriptor = super.createDescriptor(options);
     tileLayerDescriptor.type = TileLayer.type;
+    tileLayerDescriptor.alpha = _.get(options, 'alpha', 1);
     tileLayerDescriptor.style =
       TileStyle.createDescriptor(tileLayerDescriptor.style.properties);
     return tileLayerDescriptor;
@@ -53,7 +55,11 @@ export class TileLayer extends ALayer {
 
     mbMap.setLayoutProperty(layerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     mbMap.setLayerZoomRange(layerId, this._descriptor.minZoom, this._descriptor.maxZoom);
-    this._style && this._style.setMBPaintProperties(mbMap, layerId);
+    this._style && this._style.setMBPaintProperties({
+      alpha: this.getAlpha(),
+      mbMap,
+      layerId,
+    });
   }
 
   getIcon() {

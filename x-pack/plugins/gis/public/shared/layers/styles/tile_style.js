@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getDefaultStyleProperties } from './style_defaults';
-
 export class TileStyle {
 
   static type = 'TILE';
@@ -22,7 +20,6 @@ export class TileStyle {
     return {
       type: TileStyle.type,
       properties: {
-        ...getDefaultStyleProperties(true),
         ...properties,
       }
     };
@@ -32,12 +29,7 @@ export class TileStyle {
     return 'Tile style';
   }
 
-  _getMBOpacity() {
-    return this._descriptor.properties.alphaValue;
-  }
-
-  setMBPaintProperties(mbMap, tileLayerID) {
-    const opacity = this._getMBOpacity();
-    mbMap.setPaintProperty(tileLayerID, 'raster-opacity', opacity);
+  setMBPaintProperties({ alpha, mbMap, layerId }) {
+    mbMap.setPaintProperty(layerId, 'raster-opacity', alpha);
   }
 }

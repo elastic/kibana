@@ -10,8 +10,6 @@ import {
   EuiSuperSelect,
 } from '@elastic/eui';
 
-import { getDefaultStyleProperties } from './style_defaults';
-
 export class HeatmapStyle {
 
   static type = 'HEATMAP';
@@ -32,7 +30,6 @@ export class HeatmapStyle {
       type: HeatmapStyle.type,
       refinement: refinement || 'coarse',
       properties: {
-        ...getDefaultStyleProperties(),
         ...properties
       }
     };
@@ -53,14 +50,8 @@ export class HeatmapStyle {
 
   }
 
-  _getMBOpacity() {
-    return this._descriptor.properties.alphaValue;
-  }
-
-  setMBPaintProperties(mbMap, pointLayerID, property) {
-
+  setMBPaintProperties({ alpha, mbMap, layerId, propertyName }) {
     let radius;
-    const opacity = this._getMBOpacity();
     if (this._descriptor.refinement === 'coarse') {
       radius = 64;
     } else if (this._descriptor.refinement === 'fine') {
@@ -70,12 +61,12 @@ export class HeatmapStyle {
     } else {
       throw new Error(`Refinement param not recognized: ${this._descriptor.refinement}`);
     }
-    mbMap.setPaintProperty(pointLayerID, 'heatmap-radius', radius);
-    mbMap.setPaintProperty(pointLayerID, 'heatmap-weight', {
-      "type": 'identity',
-      "property": property
+    mbMap.setPaintProperty(layerId, 'heatmap-radius', radius);
+    mbMap.setPaintProperty(layerId, 'heatmap-weight', {
+      type: 'identity',
+      property: propertyName
     });
-    mbMap.setPaintProperty(pointLayerID, 'heatmap-opacity', opacity);
+    mbMap.setPaintProperty(layerId, 'heatmap-opacity', alpha);
   }
 
   getRefinement() {

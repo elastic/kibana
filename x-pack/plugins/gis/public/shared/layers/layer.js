@@ -38,6 +38,7 @@ export class ALayer {
     layerDescriptor.label = options.label && options.label.length > 0 ? options.label : null;
     layerDescriptor.minZoom = _.get(options, 'minZoom', 0);
     layerDescriptor.maxZoom = _.get(options, 'maxZoom', 24);
+    layerDescriptor.alpha = _.get(options, 'alpha', 0.75);
     layerDescriptor.source = options.source;
     layerDescriptor.sourceDescriptor = options.sourceDescriptor;
     layerDescriptor.visible = options.visible || true;
@@ -107,6 +108,10 @@ export class ALayer {
 
   getMaxZoom() {
     return this._descriptor.maxZoom;
+  }
+
+  getAlpha() {
+    return this._descriptor.alpha;
   }
 
   getZoomConfig() {

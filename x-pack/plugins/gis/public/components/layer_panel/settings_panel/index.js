@@ -11,14 +11,14 @@ import {
   updateLayerLabel,
   updateLayerMaxZoom,
   updateLayerMinZoom,
-  updateLayerAlphaValue,
+  updateLayerAlpha,
   updateSourceProp,
 } from '../../../actions/store_actions';
 
 function mapStateToProps(state = {}) {
   const selectedLayer = getSelectedLayer(state);
   return {
-    alphaValue: selectedLayer.getCurrentStyle()._descriptor.properties.alphaValue,
+    alpha: selectedLayer.getAlpha(),
     label: selectedLayer.getLabel(),
     layerId: selectedLayer.getId(),
     maxZoom: selectedLayer.getMaxZoom(),
@@ -33,7 +33,7 @@ function mapDispatchToProps(dispatch) {
     updateLabel: (id, label) => dispatch(updateLayerLabel(id, label)),
     updateMinZoom: (id, minZoom) => dispatch(updateLayerMinZoom(id, minZoom)),
     updateMaxZoom: (id, maxZoom) => dispatch(updateLayerMaxZoom(id, maxZoom)),
-    updateAlphaValue: (id, alphaValue) => dispatch(updateLayerAlphaValue(id, alphaValue)),
+    updateAlpha: (id, alpha) => dispatch(updateLayerAlpha(id, alpha)),
     updateSourceProp: (id, propName, value) => dispatch(updateSourceProp(id, propName, value)),
   };
 }
