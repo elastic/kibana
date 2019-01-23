@@ -84,7 +84,6 @@ export const ml = (kibana) => {
               })
             },
             grantWithBaseRead: true,
-            catalogue: ['ml'],
             app: ['ml', 'kibana'],
             savedObject: {
               all: [],

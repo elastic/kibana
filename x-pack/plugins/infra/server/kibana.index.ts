@@ -40,7 +40,6 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
     catalogue: ['infraops'],
     privileges: {
       read: {
-        catalogue: ['infraops'],
         app: ['infra', 'kibana'],
         savedObject: {
           all: [],
@@ -60,7 +59,6 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
     catalogue: ['infralogging'],
     privileges: {
       read: {
-        catalogue: ['infralogging'],
         app: ['infra', 'kibana'],
         savedObject: {
           all: [],

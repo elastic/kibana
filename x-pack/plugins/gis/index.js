@@ -65,6 +65,7 @@ export function gis(kibana) {
           name: 'Maps',
           icon: 'gisApp',
           navLinkId: 'gis',
+          catalogue: ['gis'],
           privileges: {
             all: {
               app: ['gis', 'kibana'],

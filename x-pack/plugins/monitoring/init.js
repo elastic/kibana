@@ -69,7 +69,6 @@ export const init = (monitoringPlugin, server) => {
           })
         },
         grantWithBaseRead: true,
-        catalogue: ['monitoring'],
         app: ['monitoring', 'kibana'],
         savedObject: {
           all: [],

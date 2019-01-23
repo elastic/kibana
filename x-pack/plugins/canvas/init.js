@@ -43,7 +43,6 @@ export default async function(server /*options*/) {
     catalogue: ['canvas'],
     privileges: {
       all: {
-        catalogue: ['canvas'],
         app: ['canvas', 'kibana'],
         savedObject: {
           all: ['canvas'],
@@ -52,7 +51,6 @@ export default async function(server /*options*/) {
         ui: [],
       },
       read: {
-        catalogue: ['canvas'],
         app: ['canvas', 'kibana'],
         savedObject: {
           all: [],
