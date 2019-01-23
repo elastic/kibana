@@ -54,6 +54,11 @@ export default function ({ getService, getPageObjects }) {
             .to.contain(`The index pattern you've entered doesn't match any indices`);
         });
       });
+
+      after(async () => {
+        await PageObjects.settings.navigateTo();
+        await PageObjects.settings.clickKibanaIndices();
+      });
     });
 
     describe('index pattern creation', function indexPatternCreation() {
