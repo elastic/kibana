@@ -66,11 +66,6 @@
   pointer-events: none;
 }
 
-.visNewVisDialog__typeLegacyIcon {
-  font-size: $euiSizeL;
-  color: $euiColorSecondary;
-}
-
 .visNewVisDialog__typeImage {
   @include size($euiSizeL);
 }

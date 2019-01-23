@@ -25,10 +25,10 @@ export const tilemap = () => ({
   type: 'render',
   context: {
     types: [
-      'kibana_table'
+      'datatable'
     ],
   },
-  help: i18n.translate('common.core_plugins.interpreter.public.functions.tilemap.help', {
+  help: i18n.translate('interpreter.functions.tilemap.help', {
     defaultMessage: 'Tilemap visualization'
   }),
   args: {
