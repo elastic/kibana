@@ -686,5 +686,205 @@
         "types": []
       }
     }
+  },
+  {
+    "cluster_name" : "expired_one",
+    "cluster_uuid" : "bbbd5y4oTiOu0dZYeY8ibw",
+    "version" : "5.3.0",
+    "license" : {
+      "status" : "expired",
+      "uid" : "bbb205db-d29a-494b-b9b2-6549e21683bd",
+      "expiry_date_in_millis" : 1546439627460,
+      "issue_date" : "2018-12-03T14:33:47.460Z",
+      "start_date_in_millis" : -1,
+      "issued_to" : "expired_one",
+      "expiry_date" : "2019-01-02T14:33:47.460Z",
+      "max_nodes" : 1000,
+      "issue_date_in_millis" : 1543847627460,
+      "type" : "trial",
+      "issuer" : "elasticsearch"
+    },
+    "cluster_stats" : {
+      "status" : "green",
+      "timestamp" : 1548265097151,
+      "indices" : {
+        "count": 6,
+        "shards": {
+          "total": 6,
+          "primaries": 6,
+          "replication": 0,
+          "index": {
+            "shards": {
+              "min": 1,
+              "max": 1,
+              "avg": 1
+            },
+            "primaries": {
+              "min": 1,
+              "max": 1,
+              "avg": 1
+            },
+            "replication": {
+              "min": 0,
+              "max": 0,
+              "avg": 0
+            }
+          }
+        },
+        "docs": {
+          "count": 557,
+          "deleted": 1
+        },
+        "store": {
+          "size_in_bytes": 651556
+        },
+        "fielddata": {
+          "memory_size_in_bytes": 848,
+          "evictions": 0
+        },
+        "query_cache": {
+          "memory_size_in_bytes": 0,
+          "total_count": 0,
+          "hit_count": 0,
+          "miss_count": 0,
+          "cache_size": 0,
+          "cache_count": 0,
+          "evictions": 0
+        },
+        "completion": {
+          "size_in_bytes": 0
+        },
+        "segments": {
+          "count": 27,
+          "memory_in_bytes": 120198,
+          "terms_memory_in_bytes": 85510,
+          "stored_fields_memory_in_bytes": 8480,
+          "term_vectors_memory_in_bytes": 0,
+          "norms_memory_in_bytes": 4928,
+          "points_memory_in_bytes": 1020,
+          "doc_values_memory_in_bytes": 20260,
+          "index_writer_memory_in_bytes": 174805,
+          "version_map_memory_in_bytes": 16836,
+          "fixed_bit_set_memory_in_bytes": 104,
+          "max_unsafe_auto_id_timestamp": -1,
+          "file_sizes": {}
+        }
+      },
+      "nodes" : {
+        "count": {
+          "total": 1,
+          "data": 1,
+          "coordinating_only": 0,
+          "master": 1,
+          "ingest": 1
+        },
+        "versions": [
+          "5.3.0"
+        ],
+        "os": {
+          "available_processors": 8,
+          "allocated_processors": 1,
+          "names": [
+            {
+              "name": "Mac OS X",
+              "count": 1
+            }
+          ],
+          "mem": {
+            "total_in_bytes": 17179869184,
+            "free_in_bytes": 359727104,
+            "used_in_bytes": 16820142080,
+            "free_percent": 2,
+            "used_percent": 98
+          }
+        },
+        "process": {
+          "cpu": {
+            "percent": 2
+          },
+          "open_file_descriptors": {
+            "min": 204,
+            "max": 204,
+            "avg": 204
+          }
+        },
+        "jvm": {
+          "max_uptime_in_millis": 922788,
+          "versions": [
+            {
+              "version": "10",
+              "vm_name": "Java HotSpot(TM) 64-Bit Server VM",
+              "vm_version": "10+46",
+              "vm_vendor": "\"Oracle Corporation\"",
+              "count": 1
+            }
+          ],
+          "mem": {
+            "heap_used_in_bytes": 271001920,
+            "heap_max_in_bytes": 731840512
+          },
+          "threads": 39
+        },
+        "fs": {
+          "total_in_bytes": 499963170816,
+          "free_in_bytes": 228403920896,
+          "available_in_bytes": 224468783104
+        },
+        "plugins": [
+          {
+            "name": "x-pack",
+            "version": "5.3.0",
+            "elasticsearch_version": "5.3.0",
+            "java_version": "1.8",
+            "description": "Elasticsearch Expanded Pack Plugin",
+            "classname": "org.elasticsearch.xpack.core.XPackPlugin",
+            "extended_plugins": [],
+            "has_native_controller": false
+          }
+        ],
+        "network_types": {
+          "transport_types": {
+            "security4": 1
+          },
+          "http_types": {
+            "security4": 1
+          }
+        }
+      }
+    },
+    "isSupported": true,
+    "alerts": {
+      "alertsMeta": {
+        "enabled": true
+      }
+    },
+    "kibana": {
+      "uuids": [],
+      "status": null,
+      "requests_total": 0,
+      "concurrent_connections": 0,
+      "response_time_max": 0,
+      "memory_size": 0,
+      "memory_limit": 0,
+      "count": 0
+    },
+    "logstash": {
+      "node_count": 0,
+      "events_in_total": 0,
+      "events_out_total": 0,
+      "avg_memory": 0,
+      "avg_memory_used": 0,
+      "max_uptime": 0,
+      "pipeline_count": 0,
+      "versions": []
+    },
+    "beats": {
+      "totalEvents": null,
+      "bytesSent": null,
+      "beats": {
+        "total": null,
+        "types": []
+      }
+    }
   }
 ]

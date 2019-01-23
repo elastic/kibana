@@ -47,7 +47,12 @@ export function getClustersSummary(clusters, kibanaUuid) {
       },
       jvm
     };
-    const { status } = cluster.cluster_state;
+    // fetch the cluster status from the cluster_stats object, if it exists, and fall back to the cluster_state
+    // It should exist in 100% of cluster_stats documents as long as they were upgraded via the ingest pipeline
+    // (which means they were the 5.0 - 5.4 cluster_info documents). Any pre-existing cluster_stats document did
+    // _not_ contain the status, and the cluster_state would not be reported in 5.0 - 5.4 when the license
+    // was expired
+    const status = get(cluster.cluster_stats, 'status', get(cluster.cluster_state, 'status', 'unknown'));
 
     return {
       isSupported,
