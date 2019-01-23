@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import uiRoutes from '../routes';
 import { KbnUrlProvider } from '../url';
 
@@ -41,6 +42,8 @@ uiRoutes
 
         this.url = urlOverflow.get();
         this.limit = urlOverflow.failLength();
+        this.advancedSettingsLabel = i18n.translate('common.ui.errorUrlOverflow.howTofixError.enableOptionText.advancedSettingsLinkText',
+          { defaultMessage: 'advanced settings' });
         $scope.$on('$destroy', () => urlOverflow.clear());
       }
     }
