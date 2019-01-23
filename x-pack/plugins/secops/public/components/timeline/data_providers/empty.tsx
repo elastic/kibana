@@ -40,6 +40,11 @@ const EmptyContainer = styled.div`
   justify-content: center;
   min-height: 100px;
   user-select: none;
+  flex: 1;
+  align-content: center;
+  + div {
+    display: none !important;
+  }
 `;
 
 const NoWrap = styled.div`
@@ -53,7 +58,7 @@ const NoWrap = styled.div`
  * Prompts the user to drop anything with a facet count into the data providers section.
  */
 export const Empty = pure(() => (
-  <EmptyContainer data-test-subj="empty">
+  <EmptyContainer className="timeline-drop-area" data-test-subj="empty">
     <NoWrap>
       <Text>{i18n.DROP_ANYTHING}</Text>
       <BadgeHighlighted color="#d9d9d9">{i18n.HIGHLIGHTED}</BadgeHighlighted>

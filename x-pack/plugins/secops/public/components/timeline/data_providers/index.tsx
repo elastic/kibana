@@ -11,7 +11,13 @@ import styled from 'styled-components';
 import { Theme } from '../../../store/local/app/model';
 import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';
 import { droppableTimelineProvidersPrefix } from '../../drag_and_drop/helpers';
-import { OnDataProviderRemoved, OnToggleDataProviderEnabled } from '../events';
+import {
+  OnChangeDataProviderKqlQuery,
+  OnChangeDroppableAndProvider,
+  OnDataProviderRemoved,
+  OnToggleDataProviderEnabled,
+  OnToggleDataProviderExcluded,
+} from '../events';
 import { DataProvider } from './data_provider';
 import { Empty } from './empty';
 import { Providers } from './providers';
@@ -19,21 +25,26 @@ import { Providers } from './providers';
 interface Props {
   id: string;
   dataProviders: DataProvider[];
+  onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
+  onChangeDroppableAndProvider: OnChangeDroppableAndProvider;
   onDataProviderRemoved: OnDataProviderRemoved;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
+  onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
   show: boolean;
   theme: Theme;
 }
 
 const DropTargetDataProviders = styled.div`
-  border: 0.3rem dashed #999999;
+  position: relative;
+  border: 0.2rem dashed #999999;
   border-radius: 5px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   margin: 5px;
+  padding: 0px;
   min-height: 100px;
-  padding: 5px;
+  overflow-y: auto;
 `;
 
 const getDroppableId = (id: string): string => `${droppableTimelineProvidersPrefix}${id}`;
@@ -59,19 +70,25 @@ export const DataProviders = pure<Props>(
   ({
     id,
     dataProviders,
+    onChangeDataProviderKqlQuery,
+    onChangeDroppableAndProvider,
     onDataProviderRemoved,
     onToggleDataProviderEnabled,
+    onToggleDataProviderExcluded,
     show,
     theme,
-  }: Props) => (
+  }) => (
     <DropTargetDataProviders data-test-subj="dataProviders">
       <DroppableWrapper isDropDisabled={!show} droppableId={getDroppableId(id)} theme={theme}>
         {dataProviders.length ? (
           <Providers
             id={id}
             dataProviders={dataProviders}
+            onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
+            onChangeDroppableAndProvider={onChangeDroppableAndProvider}
             onDataProviderRemoved={onDataProviderRemoved}
             onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+            onToggleDataProviderExcluded={onToggleDataProviderExcluded}
           />
         ) : (
           <Empty />

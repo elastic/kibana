@@ -5,14 +5,13 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import { has, noop } from 'lodash/fp';
+import { has } from 'lodash/fp';
 import moment from 'moment';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
 import { Ecs, EcsEdges } from '../../../../graphql/types';
-import { escapeQueryValue } from '../../../../lib/keury';
 import { eventsSelector, hostsActions, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { getEmptyValue, getOrEmpty } from '../../../empty_value';
@@ -119,18 +118,23 @@ const getEventsColumns = (startDate: number) => [
               enabled: true,
               id: node._id!,
               name: hostName,
-              negated: false,
-              queryMatch: `host.id: "${escapeQueryValue(node.host!.id!)}"`,
-              queryDate: `@timestamp >= ${startDate} and @timestamp <= ${moment().valueOf()}`,
+              excluded: false,
+              kqlQuery: '',
+              queryMatch: {
+                displayField: 'host.name',
+                displayValue: hostName,
+                field: 'host.id',
+                value: node.host!.id!,
+              },
+              queryDate: {
+                from: startDate,
+                to: moment().valueOf(),
+              },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
                 <DragEffects>
-                  <Provider
-                    dataProvider={dataProvider}
-                    onDataProviderRemoved={noop}
-                    onToggleDataProviderEnabled={noop}
-                  />
+                  <Provider dataProvider={dataProvider} />
                 </DragEffects>
               ) : (
                 hostName

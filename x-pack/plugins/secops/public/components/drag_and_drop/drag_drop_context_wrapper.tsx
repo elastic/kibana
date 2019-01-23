@@ -34,9 +34,7 @@ interface OnDragEndHandlerParams {
 const onDragEndHandler = ({ result, dataProviders, dispatch }: OnDragEndHandlerParams) => {
   if (providerWasDroppedOnTimeline(result)) {
     addProviderToTimeline({ dataProviders, result, dispatch });
-  }
-
-  if (providerWasDroppedOnTimelineButton(result)) {
+  } else if (providerWasDroppedOnTimelineButton(result)) {
     addProviderToTimeline({ dataProviders, result, dispatch });
   }
 };

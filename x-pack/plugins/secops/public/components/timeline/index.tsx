@@ -21,11 +21,14 @@ import { columnRenderers, rowRenderers } from './body/renderers';
 import { Sort } from './body/sort';
 import { DataProvider } from './data_providers/data_provider';
 import {
+  OnChangeDataProviderKqlQuery,
+  OnChangeDroppableAndProvider,
   OnChangeItemsPerPage,
   OnColumnSorted,
   OnDataProviderRemoved,
   OnRangeSelected,
   OnToggleDataProviderEnabled,
+  OnToggleDataProviderExcluded,
 } from './events';
 import { Timeline } from './timeline';
 
@@ -69,11 +72,24 @@ interface DispatchProps {
   removeProvider?: ActionCreator<{
     id: string;
     providerId: string;
+    andProviderId?: string;
   }>;
   updateDataProviderEnabled?: ActionCreator<{
     id: string;
     providerId: string;
     enabled: boolean;
+    andProviderId?: string;
+  }>;
+  updateDataProviderExcluded?: ActionCreator<{
+    id: string;
+    excluded: boolean;
+    providerId: string;
+    andProviderId?: string;
+  }>;
+  updateDataProviderKqlQuery?: ActionCreator<{
+    id: string;
+    kqlQuery: string;
+    providerId: string;
   }>;
   updateItemsPerPage?: ActionCreator<{
     id: string;
@@ -86,6 +102,10 @@ interface DispatchProps {
   updatePageIndex?: ActionCreator<{
     id: string;
     activePage: number;
+  }>;
+  updateHighlightedDropAndProviderId?: ActionCreator<{
+    id: string;
+    providerId: string;
   }>;
 }
 
@@ -115,22 +135,42 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
       updateRange,
       updateSort,
       updateDataProviderEnabled,
+      updateDataProviderExcluded,
+      updateDataProviderKqlQuery,
+      updateHighlightedDropAndProviderId,
       updateItemsPerPage,
     } = this.props;
 
     const onColumnSorted: OnColumnSorted = sorted => updateSort!({ id, sort: sorted });
 
-    const onDataProviderRemoved: OnDataProviderRemoved = dataProvider =>
-      removeProvider!({ id, providerId: dataProvider.id });
+    const onDataProviderRemoved: OnDataProviderRemoved = (
+      providerId: string,
+      andProviderId?: string
+    ) => removeProvider!({ id, providerId, andProviderId });
 
     const onRangeSelected: OnRangeSelected = selectedRange =>
       updateRange!({ id, range: selectedRange });
 
-    const onToggleDataProviderEnabled: OnToggleDataProviderEnabled = ({ dataProvider, enabled }) =>
-      updateDataProviderEnabled!({ id, enabled, providerId: dataProvider.id });
+    const onToggleDataProviderEnabled: OnToggleDataProviderEnabled = ({
+      providerId,
+      enabled,
+      andProviderId,
+    }) => updateDataProviderEnabled!({ id, enabled, providerId, andProviderId });
+
+    const onToggleDataProviderExcluded: OnToggleDataProviderExcluded = ({
+      providerId,
+      excluded,
+      andProviderId,
+    }) => updateDataProviderExcluded!({ id, excluded, providerId, andProviderId });
+
+    const onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery = ({ providerId, kqlQuery }) =>
+      updateDataProviderKqlQuery!({ id, kqlQuery, providerId });
 
     const onChangeItemsPerPage: OnChangeItemsPerPage = itemsChangedPerPage =>
       updateItemsPerPage!({ id, itemsPerPage: itemsChangedPerPage });
+
+    const onChangeDroppableAndProvider: OnChangeDroppableAndProvider = providerId =>
+      updateHighlightedDropAndProviderId!({ id, providerId });
 
     return (
       <WithSource sourceId="default">
@@ -144,12 +184,15 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
             flyoutHeight={flyoutHeight}
             itemsPerPage={itemsPerPage!}
             itemsPerPageOptions={itemsPerPageOptions!}
+            onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
+            onChangeDroppableAndProvider={onChangeDroppableAndProvider}
             onChangeItemsPerPage={onChangeItemsPerPage}
             onColumnSorted={onColumnSorted}
             onDataProviderRemoved={onDataProviderRemoved}
             onFilterChange={noop} // TODO: this is the callback for column filters, which is out scope for this phase of delivery
             onRangeSelected={onRangeSelected}
             onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+            onToggleDataProviderExcluded={onToggleDataProviderExcluded}
             range={range!}
             rowRenderers={rowRenderers}
             show={show!}
@@ -181,6 +224,9 @@ export const StatefulTimeline = connect(
     updateRange: timelineActions.updateRange,
     updateSort: timelineActions.updateSort,
     updateDataProviderEnabled: timelineActions.updateDataProviderEnabled,
+    updateDataProviderExcluded: timelineActions.updateDataProviderExcluded,
+    updateDataProviderKqlQuery: timelineActions.updateDataProviderKqlQuery,
+    updateHighlightedDropAndProviderId: timelineActions.updateHighlightedDropAndProviderId,
     updateItemsPerPage: timelineActions.updateItemsPerPage,
     updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,
     removeProvider: timelineActions.removeProvider,

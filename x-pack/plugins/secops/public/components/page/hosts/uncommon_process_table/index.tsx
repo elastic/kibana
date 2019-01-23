@@ -5,14 +5,12 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import { noop } from 'lodash/fp';
 import moment from 'moment';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
 import { HostEcsFields, UncommonProcessesEdges } from '../../../../graphql/types';
-import { escapeQueryValue } from '../../../../lib/keury';
 import { hostsActions, State, uncommonProcessesSelector } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { defaultToEmpty, getEmptyValue, getOrEmpty } from '../../../empty_value';
@@ -118,18 +116,21 @@ const getUncommonColumns = (startDate: number) => [
               enabled: true,
               id: node._id,
               name: processName!,
-              negated: false,
-              queryMatch: `process.name: "${escapeQueryValue(processName!)}"`,
-              queryDate: `@timestamp >= ${startDate} and @timestamp <= ${moment().valueOf()}`,
+              excluded: false,
+              kqlQuery: '',
+              queryMatch: {
+                field: 'process.name',
+                value: processName!,
+              },
+              queryDate: {
+                from: startDate,
+                to: moment().valueOf(),
+              },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
                 <DragEffects>
-                  <Provider
-                    dataProvider={dataProvider}
-                    onDataProviderRemoved={noop}
-                    onToggleDataProviderEnabled={noop}
-                  />
+                  <Provider dataProvider={dataProvider} />
                 </DragEffects>
               ) : (
                 processName

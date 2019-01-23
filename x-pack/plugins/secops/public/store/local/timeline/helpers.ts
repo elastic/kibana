@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { filter, getOr, omit, uniq } from 'lodash/fp';
+import { getOr, omit, uniq } from 'lodash/fp';
 import { TimelineById, TimelineState } from '.';
 import { Sort } from '../../../components/timeline/body/sort';
 import { DataProvider } from '../../../components/timeline/data_providers/data_provider';
-import { KqlMode, timelineDefaults } from './model';
+import { KqlMode, timelineDefaults, TimelineModel } from './model';
 
 const EMPTY_TIMELINE_BY_ID: TimelineById = {}; // stable reference
 
@@ -187,20 +187,50 @@ export const applyDeltaToCurrentWidth = ({
   };
 };
 
-interface AddTimelineProviderParams {
-  id: string;
-  provider: DataProvider;
-  timelineById: TimelineById;
-}
+const addAndToProviderInTimeline = (
+  id: string,
+  provider: DataProvider,
+  timeline: TimelineModel,
+  timelineById: TimelineById
+): TimelineById => {
+  const alreadyExistsProviderIndex = timeline.dataProviders.findIndex(
+    p => p.id === timeline.highlightedDropAndProviderId
+  );
+  const newProvider = timeline.dataProviders[alreadyExistsProviderIndex];
+  const alreadyExistsAndProviderIndex = newProvider.and.findIndex(p => p.id === provider.id);
 
-export const addTimelineProvider = ({
-  id,
-  provider,
-  timelineById,
-}: AddTimelineProviderParams): TimelineById => {
-  const timeline = timelineById[id];
+  const dataProviders = [
+    ...timeline.dataProviders.slice(0, alreadyExistsProviderIndex),
+    {
+      ...timeline.dataProviders[alreadyExistsProviderIndex],
+      and:
+        alreadyExistsAndProviderIndex > -1
+          ? [
+              ...newProvider.and.slice(0, alreadyExistsAndProviderIndex),
+              provider,
+              ...newProvider.and.slice(alreadyExistsAndProviderIndex + 1),
+            ]
+          : [...newProvider.and, provider],
+    },
+    ...timeline.dataProviders.slice(alreadyExistsProviderIndex + 1),
+  ];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      dataProviders,
+    },
+  };
+};
+
+const addProviderToTimeline = (
+  id: string,
+  provider: DataProvider,
+  timeline: TimelineModel,
+  timelineById: TimelineById
+): TimelineById => {
   const alreadyExistsAtIndex = timeline.dataProviders.findIndex(p => p.id === provider.id);
-
   const dataProviders =
     alreadyExistsAtIndex > -1
       ? [
@@ -217,6 +247,25 @@ export const addTimelineProvider = ({
       dataProviders,
     },
   };
+};
+interface AddTimelineProviderParams {
+  id: string;
+  provider: DataProvider;
+  timelineById: TimelineById;
+}
+
+export const addTimelineProvider = ({
+  id,
+  provider,
+  timelineById,
+}: AddTimelineProviderParams): TimelineById => {
+  const timeline = timelineById[id];
+
+  if (timeline.highlightedDropAndProviderId !== '') {
+    return addAndToProviderInTimeline(id, provider, timeline, timelineById);
+  } else {
+    return addProviderToTimeline(id, provider, timeline, timelineById);
+  }
 };
 
 interface UpdateTimelineKqlModeParams {
@@ -415,11 +464,39 @@ export const updateTimelineSort = ({
   };
 };
 
+const updateEnabledAndProvider = (
+  andProviderId: string,
+  enabled: boolean,
+  providerId: string,
+  timeline: TimelineModel
+) =>
+  timeline.dataProviders.map(provider =>
+    provider.id === providerId
+      ? {
+          ...provider,
+          and: provider.and.map(andProvider =>
+            andProvider.id === andProviderId ? { ...andProvider, enabled } : andProvider
+          ),
+        }
+      : provider
+  );
+
+const updateEnabledProvider = (enabled: boolean, providerId: string, timeline: TimelineModel) =>
+  timeline.dataProviders.map(provider =>
+    provider.id === providerId
+      ? {
+          ...provider,
+          enabled,
+        }
+      : provider
+  );
+
 interface UpdateTimelineProviderEnabledParams {
   id: string;
   providerId: string;
   enabled: boolean;
   timelineById: TimelineById;
+  andProviderId?: string;
 }
 
 export const updateTimelineProviderEnabled = ({
@@ -427,14 +504,94 @@ export const updateTimelineProviderEnabled = ({
   providerId,
   enabled,
   timelineById,
+  andProviderId,
 }: UpdateTimelineProviderEnabledParams): TimelineById => {
   const timeline = timelineById[id];
   return {
     ...timelineById,
     [id]: {
       ...timeline,
+      dataProviders: andProviderId
+        ? updateEnabledAndProvider(andProviderId, enabled, providerId, timeline)
+        : updateEnabledProvider(enabled, providerId, timeline),
+    },
+  };
+};
+
+const updateExcludedAndProvider = (
+  andProviderId: string,
+  excluded: boolean,
+  providerId: string,
+  timeline: TimelineModel
+) =>
+  timeline.dataProviders.map(provider =>
+    provider.id === providerId
+      ? {
+          ...provider,
+          and: provider.and.map(andProvider =>
+            andProvider.id === andProviderId ? { ...andProvider, excluded } : andProvider
+          ),
+        }
+      : provider
+  );
+
+const updateExcludedProvider = (excluded: boolean, providerId: string, timeline: TimelineModel) =>
+  timeline.dataProviders.map(provider =>
+    provider.id === providerId
+      ? {
+          ...provider,
+          excluded,
+        }
+      : provider
+  );
+
+interface UpdateTimelineProviderExcludedParams {
+  id: string;
+  providerId: string;
+  excluded: boolean;
+  timelineById: TimelineById;
+  andProviderId?: string;
+}
+
+export const updateTimelineProviderExcluded = ({
+  id,
+  providerId,
+  excluded,
+  timelineById,
+  andProviderId,
+}: UpdateTimelineProviderExcludedParams): TimelineById => {
+  const timeline = timelineById[id];
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      dataProviders: andProviderId
+        ? updateExcludedAndProvider(andProviderId, excluded, providerId, timeline)
+        : updateExcludedProvider(excluded, providerId, timeline),
+    },
+  };
+};
+
+interface UpdateTimelineProviderKqlQueryParams {
+  id: string;
+  providerId: string;
+  kqlQuery: string;
+  timelineById: TimelineById;
+}
+
+export const updateTimelineProviderKqlQuery = ({
+  id,
+  providerId,
+  kqlQuery,
+  timelineById,
+}: UpdateTimelineProviderKqlQueryParams): TimelineById => {
+  const timeline = timelineById[id];
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
       dataProviders: timeline.dataProviders.map(provider =>
-        provider.id === providerId ? { ...provider, ...{ enabled } } : provider
+        provider.id === providerId ? { ...provider, ...{ kqlQuery } } : provider
       ),
     },
   };
@@ -503,23 +660,54 @@ export const updateTimelinePerPageOptions = ({
   };
 };
 
+const removeAndProvider = (andProviderId: string, providerId: string, timeline: TimelineModel) => {
+  const providerIndex = timeline.dataProviders.findIndex(p => p.id === providerId);
+  const providerAndIndex = timeline.dataProviders[providerIndex].and.findIndex(
+    p => p.id === andProviderId
+  );
+  return [
+    ...timeline.dataProviders.slice(0, providerIndex),
+    {
+      ...timeline.dataProviders[providerIndex],
+      and: [
+        ...timeline.dataProviders[providerIndex].and.slice(0, providerAndIndex),
+        ...timeline.dataProviders[providerIndex].and.slice(providerAndIndex + 1),
+      ],
+    },
+    ...timeline.dataProviders.slice(providerIndex + 1),
+  ];
+};
+
+const removeProvider = (providerId: string, timeline: TimelineModel) => {
+  const providerIndex = timeline.dataProviders.findIndex(p => p.id === providerId);
+  return [
+    ...timeline.dataProviders.slice(0, providerIndex),
+    ...timeline.dataProviders.slice(providerIndex + 1),
+  ];
+};
+
 interface RemoveTimelineProviderParams {
   id: string;
   providerId: string;
   timelineById: TimelineById;
+  andProviderId?: string;
 }
 
 export const removeTimelineProvider = ({
   id,
   providerId,
   timelineById,
+  andProviderId,
 }: RemoveTimelineProviderParams): TimelineById => {
   const timeline = timelineById[id];
+
   return {
     ...timelineById,
     [id]: {
       ...timeline,
-      dataProviders: filter(p => p.id !== providerId, timeline.dataProviders),
+      dataProviders: andProviderId
+        ? removeAndProvider(andProviderId, providerId, timeline)
+        : removeProvider(providerId, timeline),
     },
   };
 };
@@ -541,6 +729,28 @@ export const unPinTimelineEvent = ({
     [id]: {
       ...timeline,
       pinnedEventIds: omit(eventId, timeline.pinnedEventIds),
+    },
+  };
+};
+
+interface UpdateHighlightedDropAndProviderIdParams {
+  id: string;
+  providerId: string;
+  timelineById: TimelineById;
+}
+
+export const updateHighlightedDropAndProvider = ({
+  id,
+  providerId,
+  timelineById,
+}: UpdateHighlightedDropAndProviderIdParams): TimelineById => {
+  const timeline = timelineById[id];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      highlightedDropAndProviderId: providerId,
     },
   };
 };

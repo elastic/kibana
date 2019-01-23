@@ -100,17 +100,17 @@ export const getItems = ({ data, populatedFields }: GetItemsParams): Item[] => {
             data,
             fieldName: field.name,
           })}`,
-          queryMatch: `${getOr(
-            field.name,
-            field.name,
-            mappedEcsSchemaFieldNames
-          )}: "${escapeQueryValue(
-            getMappedEcsValue({
-              data,
-              fieldName: field.name,
-            })
-          )}"`,
-          negated: false,
+          queryMatch: {
+            field: getOr(field.name, field.name, mappedEcsSchemaFieldNames),
+            value: escapeQueryValue(
+              getMappedEcsValue({
+                data,
+                fieldName: field.name,
+              })
+            ),
+          },
+          excluded: false,
+          kqlQuery: '',
           and: [],
         }}
         render={() => `${getMappedEcsValue({ data, fieldName: field.name })}`}

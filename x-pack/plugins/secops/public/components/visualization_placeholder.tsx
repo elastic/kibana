@@ -5,7 +5,7 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import { noop, range } from 'lodash/fp';
+import { range } from 'lodash/fp';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
@@ -61,11 +61,7 @@ class PlaceholdersComponent extends React.PureComponent<Props> {
               render={(dataProvider, _, snapshot) =>
                 snapshot.isDragging ? (
                   <DragEffects>
-                    <Provider
-                      dataProvider={dataProvider}
-                      onDataProviderRemoved={noop}
-                      onToggleDataProviderEnabled={noop}
-                    />
+                    <Provider dataProvider={dataProvider} />
                   </DragEffects>
                 ) : (
                   mockDataProviders[i].name

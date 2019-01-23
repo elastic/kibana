@@ -21,10 +21,51 @@ const getBackgroundColor = (theme: Theme): string =>
 
 const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; themeName: Theme }>`
   transition: background-color 0.7s ease;
-  min-height: 100px;
-  .euiPanel {
-    background-color: ${({ isDraggingOver, themeName }) =>
-      isDraggingOver ? '#f0f8ff' : getBackgroundColor(themeName)};
+  width: 100%;
+  height: 100%;
+  .flyout-overlay {
+    .euiPanel {
+      background-color: ${({ themeName }) => getBackgroundColor(themeName)};
+    }
+  }
+  ${({ isDraggingOver }) =>
+    isDraggingOver
+      ? `
+    .drop-and-provider-timeline {
+      &:hover {
+        background: repeating-linear-gradient(
+          -55deg,
+          rgb(52, 55, 65),
+          rgb(52, 55, 65) 10px,
+          rgb(245, 247, 250) 10px,
+          rgb(245, 247, 250) 20px
+        );
+      }
+    }
+  > div.timeline-drop-area {
+    background-color: rgb(245, 247, 250);
+    .provider-item-filter-container div:first-child{
+      /// Ooverwride dragNdrop beautifull so we do not have our droppable moving around for no good reason
+      transform: none !important;
+    }
+  }
+  .flyout-overlay {
+    .euiPanel {
+      background-color: rgb(245, 247, 250);
+    }
+    + div {
+      // Ooverwride dragNdrop beautifull so we do not have our droppable moving around for no good reason
+      display: none !important;
+    }
+  }
+  
+  `
+      : ''}
+  > div.timeline-drop-area {
+    & + div {
+      // overwride dragNdrop beautifull so we do not have our droppable moving around for no good reason
+      display: none !important;
+    }
   }
 `;
 

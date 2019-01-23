@@ -20,12 +20,15 @@ import { ColumnRenderer } from './body/renderers';
 import { Sort } from './body/sort';
 import { DataProvider } from './data_providers/data_provider';
 import {
+  OnChangeDataProviderKqlQuery,
+  OnChangeDroppableAndProvider,
   OnChangeItemsPerPage,
   OnColumnSorted,
   OnDataProviderRemoved,
   OnFilterChange,
   OnRangeSelected,
   OnToggleDataProviderEnabled,
+  OnToggleDataProviderExcluded,
 } from './events';
 import { Footer, footerHeight } from './footer';
 import { TimelineHeader } from './header/timeline_header';
@@ -41,12 +44,15 @@ interface Props {
   indexPattern: StaticIndexPattern;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
+  onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
+  onChangeDroppableAndProvider: OnChangeDroppableAndProvider;
   onChangeItemsPerPage: OnChangeItemsPerPage;
   onColumnSorted: OnColumnSorted;
   onDataProviderRemoved: OnDataProviderRemoved;
   onFilterChange: OnFilterChange;
   onRangeSelected: OnRangeSelected;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
+  onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
   range: string;
   rowRenderers: RowRenderer[];
   show: boolean;
@@ -70,12 +76,15 @@ export const Timeline = pure<Props>(
     indexPattern,
     itemsPerPage,
     itemsPerPageOptions,
+    onChangeDataProviderKqlQuery,
+    onChangeDroppableAndProvider,
     onChangeItemsPerPage,
     onColumnSorted,
     onDataProviderRemoved,
     onFilterChange,
     onRangeSelected,
     onToggleDataProviderEnabled,
+    onToggleDataProviderExcluded,
     range,
     rowRenderers,
     show,
@@ -93,11 +102,14 @@ export const Timeline = pure<Props>(
                   columnHeaders={columnHeaders}
                   id={id}
                   dataProviders={dataProviders}
+                  onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
+                  onChangeDroppableAndProvider={onChangeDroppableAndProvider}
                   onColumnSorted={onColumnSorted}
                   onDataProviderRemoved={onDataProviderRemoved}
                   onFilterChange={onFilterChange}
                   onRangeSelected={onRangeSelected}
                   onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+                  onToggleDataProviderExcluded={onToggleDataProviderExcluded}
                   range={range}
                   show={show}
                   sort={sort}

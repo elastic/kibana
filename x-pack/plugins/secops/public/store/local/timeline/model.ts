@@ -21,6 +21,8 @@ export interface TimelineModel {
   eventIdToNoteIds: { [eventId: string]: string[] };
   /** The chronological history of actions related to this timeline */
   historyIds: string[];
+  /** The chronological history of actions related to this timeline */
+  highlightedDropAndProviderId: string;
   /** Uniquely identifies the timeline */
   id: string;
   /** When true, this timeline was marked as "favorite" by the user */
@@ -57,6 +59,7 @@ export const timelineDefaults: Readonly<
     | 'dataProviders'
     | 'description'
     | 'eventIdToNoteIds'
+    | 'highlightedDropAndProviderId'
     | 'historyIds'
     | 'isFavorite'
     | 'isLive'
@@ -76,6 +79,7 @@ export const timelineDefaults: Readonly<
   dataProviders: [],
   description: '',
   eventIdToNoteIds: {},
+  highlightedDropAndProviderId: '',
   historyIds: [],
   isFavorite: false,
   isLive: false,

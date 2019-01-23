@@ -78,7 +78,11 @@ export const FlyoutButton = pure(
           droppableId={`${droppableTimelineFlyoutButtonPrefix}${timelineId}`}
           theme={theme}
         >
-          <BadgeButtonContainer data-test-subj="flyoutOverlay" onClick={onOpen}>
+          <BadgeButtonContainer
+            className="flyout-overlay"
+            data-test-subj="flyoutOverlay"
+            onClick={onOpen}
+          >
             {dataProviders.length !== 0 && (
               <Badge data-test-subj="badge" color="primary">
                 {dataProviders.length}

@@ -10,7 +10,7 @@ import * as React from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { DataProviders } from '.';
 import { DataProvider } from './data_provider';
-import { mockDataProviderNames, mockDataProviders } from './mock/mock_data_providers';
+import { mockDataProviders } from './mock/mock_data_providers';
 
 describe('DataProviders', () => {
   describe('rendering', () => {
@@ -24,8 +24,11 @@ describe('DataProviders', () => {
           <DataProviders
             id="foo"
             dataProviders={dataProviders}
+            onChangeDataProviderKqlQuery={noop}
+            onChangeDroppableAndProvider={noop}
             onDataProviderRemoved={noop}
             onToggleDataProviderEnabled={noop}
+            onToggleDataProviderExcluded={noop}
             show={true}
             theme="dark"
           />
@@ -35,21 +38,24 @@ describe('DataProviders', () => {
       dropMessage.forEach(word => expect(wrapper.text()).toContain(word));
     });
 
-    test('it should NOT render a placeholder given a non-empty collection of data providers', () => {
+    test('it should STILL render a placeholder given a non-empty collection of data providers', () => {
       const wrapper = mount(
         <DragDropContext onDragEnd={noop}>
           <DataProviders
             id="foo"
             dataProviders={mockDataProviders}
+            onChangeDataProviderKqlQuery={noop}
+            onChangeDroppableAndProvider={noop}
             onDataProviderRemoved={noop}
             onToggleDataProviderEnabled={noop}
+            onToggleDataProviderExcluded={noop}
             show={true}
             theme="dark"
           />
         </DragDropContext>
       );
 
-      dropMessage.forEach(word => expect(wrapper.text()).not.toContain(word));
+      dropMessage.forEach(word => expect(wrapper.text()).toContain(word));
     });
 
     test('it renders the data providers', () => {
@@ -58,15 +64,22 @@ describe('DataProviders', () => {
           <DataProviders
             id="foo"
             dataProviders={mockDataProviders}
+            onChangeDataProviderKqlQuery={noop}
+            onChangeDroppableAndProvider={noop}
             onDataProviderRemoved={noop}
             onToggleDataProviderEnabled={noop}
+            onToggleDataProviderExcluded={noop}
             show={true}
             theme="dark"
           />
         </DragDropContext>
       );
 
-      mockDataProviderNames().forEach(name => expect(wrapper.text()).toContain(name));
+      mockDataProviders.forEach(dataProvider =>
+        expect(wrapper.text()).toContain(
+          dataProvider.queryMatch.displayValue || dataProvider.queryMatch.value
+        )
+      );
     });
   });
 });

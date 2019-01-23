@@ -9,9 +9,10 @@
     "@types/boom": "^7.2.0",
     "@types/color": "^3.0.0",
     "@types/lodash": "^4.14.110",
-    "@types/react-beautiful-dnd": "^7.1.2"
+    "@types/react-beautiful-dnd": "^10.0.1"
   },
   "dependencies": {
+    "react-beautiful-dnd": "^10.0.1",
     "lodash": "^4.17.10"
   }
 }

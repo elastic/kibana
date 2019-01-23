@@ -4,11 +4,52 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, isNumber } from 'lodash/fp';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { convertKueryToElasticSearchQuery } from '../../lib/keury';
+import { convertKueryToElasticSearchQuery, escapeQueryValue } from '../../lib/keury';
 import { DataProvider } from './data_providers/data_provider';
+
+const buildQueryMatch = (dataProvider: DataProvider) =>
+  `${dataProvider.excluded ? 'NOT ' : ''}${
+    dataProvider.queryMatch
+      ? `${dataProvider.queryMatch.field} : ${
+          isNumber(dataProvider.queryMatch.value)
+            ? dataProvider.queryMatch.value
+            : escapeQueryValue(dataProvider.queryMatch.value)
+        }`
+      : ''
+  }`.trim();
+
+const buildQueryDate = (dataProvider: DataProvider) =>
+  dataProvider.queryDate
+    ? `@timestamp >= ${dataProvider.queryDate.from} and @timestamp <= ${dataProvider.queryDate.to}`
+    : '';
+
+const buildQueryForAndProvider = (dataAndProviders: DataProvider[]) =>
+  dataAndProviders
+    .reduce((andQuery, andDataProvider) => {
+      const prepend = (q: string) => `${q !== '' ? `${q} and ` : ''}`;
+      return andDataProvider.enabled
+        ? `${prepend(andQuery)} ${buildQueryMatch(andDataProvider)}`
+        : andQuery;
+    }, '')
+    .trim();
+
+export const buildGlobalQuery = (dataProviders: DataProvider[]) =>
+  dataProviders
+    .reduce((query, dataProvider) => {
+      const prepend = (q: string) => `${q !== '' ? `${q} or ` : ''}`;
+      return dataProvider.enabled
+        ? `${prepend(query)}(
+        ${buildQueryMatch(dataProvider)}
+        ${dataProvider.queryDate ? ` and ${buildQueryDate(dataProvider)}` : ''}
+        ${
+          dataProvider.and.length > 0 ? ` and ${buildQueryForAndProvider(dataProvider.and)}` : ''
+        })`.trim()
+        : query;
+    }, '')
+    .trim();
 
 export const combineQueries = (
   dataProviders: DataProvider[],
@@ -18,19 +59,11 @@ export const combineQueries = (
     return null;
   }
 
-  const globalQuery = dataProviders.reduce((query, dataProvider) => {
-    const prepend = (q: string) => `${q !== '' ? `${q} or ` : ''}`;
-
-    return dataProvider.enabled
-      ? `${prepend(query)} (${dataProvider.queryMatch}${
-          dataProvider.queryDate ? ` and ${dataProvider.queryDate})` : ')'
-        }`
-      : query;
-  }, '');
-
+  const globalQuery = buildGlobalQuery(dataProviders);
   if (isEmpty(globalQuery)) {
     return null;
   }
+
   return {
     filterQuery: convertKueryToElasticSearchQuery(globalQuery, indexPattern),
   };

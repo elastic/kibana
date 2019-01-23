@@ -6,14 +6,12 @@
 
 import { EuiBadge } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
-import { noop } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
 import moment from 'moment';
 import { AuthenticationsEdges } from '../../../../graphql/types';
-import { escapeQueryValue } from '../../../../lib/keury';
 import { authenticationsSelector, hostsActions, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { defaultToEmpty, getEmptyValue } from '../../../empty_value';
@@ -117,18 +115,21 @@ const getAuthenticationColumns = (startDate: number) => [
               enabled: true,
               id: node._id,
               name: userName!,
-              negated: false,
-              queryMatch: `auditd.data.acct: "${escapeQueryValue(userName!)}"`,
-              queryDate: `@timestamp >= ${startDate} and @timestamp <= ${moment().valueOf()}`,
+              excluded: false,
+              kqlQuery: '',
+              queryMatch: {
+                field: 'auditd.data.acct',
+                value: userName!,
+              },
+              queryDate: {
+                from: startDate,
+                to: moment().valueOf(),
+              },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
                 <DragEffects>
-                  <Provider
-                    dataProvider={dataProvider}
-                    onDataProviderRemoved={noop}
-                    onToggleDataProviderEnabled={noop}
-                  />
+                  <Provider dataProvider={dataProvider} />
                 </DragEffects>
               ) : (
                 userName

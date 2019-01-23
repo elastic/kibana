@@ -4,45 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface Props {
+import { noop } from 'lodash/fp';
+import React from 'react';
+import { pure } from 'recompose';
+
+import { DataProvider } from './data_provider';
+import { ProviderItemBadge } from './provider_item_badge';
+
+interface OwnProps {
   dataProvider: DataProvider;
-  onDataProviderRemoved: OnDataProviderRemoved;
-  onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
 }
 
-import { EuiPanel } from '@elastic/eui';
-import * as React from 'react';
-import { pure } from 'recompose';
-import styled from 'styled-components';
-
-import { OnDataProviderRemoved, OnToggleDataProviderEnabled } from '../events';
-import { Actions } from './actions';
-import { DataProvider } from './data_provider';
-import { IconsFooter } from './icons_footer';
-
-const PanelProvider = styled(EuiPanel)`
-  && {
-    align-items: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    margin: 5px;
-    min-height: 60px;
-    padding: 5px 5px 5px 10px;
-    min-width: 150px;
-  }
-`;
-
-export const Provider = pure<Props>(
-  ({ dataProvider, onDataProviderRemoved, onToggleDataProviderEnabled }: Props) => (
-    <PanelProvider data-test-subj="provider" key={dataProvider.id}>
-      {dataProvider.name}
-      <Actions
-        dataProvider={dataProvider}
-        onDataProviderRemoved={onDataProviderRemoved}
-        onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-      />
-      <IconsFooter dataProvider={dataProvider} />
-    </PanelProvider>
-  )
-);
+export const Provider = pure<OwnProps>(({ dataProvider }) => (
+  <ProviderItemBadge
+    deleteProvider={noop}
+    field={dataProvider.queryMatch.displayField || dataProvider.queryMatch.field}
+    kqlQuery={dataProvider.kqlQuery}
+    isEnabled={dataProvider.enabled}
+    isExcluded={dataProvider.excluded}
+    providerId={dataProvider.id}
+    queryDate={dataProvider.queryDate}
+    toggleEnabledProvider={noop}
+    toggleExcludedProvider={noop}
+    val={dataProvider.queryMatch.displayValue || dataProvider.queryMatch.value}
+  />
+));

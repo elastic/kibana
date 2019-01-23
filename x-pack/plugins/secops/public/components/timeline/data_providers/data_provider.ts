@@ -4,6 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export interface QueryDate {
+  from: number;
+  to: number;
+}
+
 /** Represents the Timeline data providers */
 export interface DataProvider {
   /** Uniquely identifies a data provider */
@@ -16,16 +21,24 @@ export interface DataProvider {
    */
   enabled: boolean;
   /**
+   * When `true`, a data provider is excluding the match, but not removed from
+   * the timeline. default: `false`
+   */
+  excluded: boolean;
+  /**
+   * Return the KQL query who have been added by user
+   */
+  kqlQuery: string;
+  /**
    * Returns a query properties that, when executed, returns the data for this provider
    */
-  queryMatch: string;
-  queryDate?: string;
-  /**
-   * When `true`, boolean logic is applied to the data provider to negate it.
-   * default: `false`
-   */
-  negated: boolean;
-
+  queryMatch: {
+    field: string;
+    displayField?: string;
+    value: string | number;
+    displayValue?: string | number;
+  };
+  queryDate?: QueryDate;
   /**
    * Additional query clauses that are ANDed with this query to narrow results
    */

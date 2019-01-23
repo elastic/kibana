@@ -34,7 +34,11 @@ export const createTimeline = actionCreator<{ id: string; show?: boolean }>('CRE
 
 export const pinEvent = actionCreator<{ id: string; eventId: string }>('PIN_EVENT');
 
-export const removeProvider = actionCreator<{ id: string; providerId: string }>('REMOVE_PROVIDER');
+export const removeProvider = actionCreator<{
+  id: string;
+  providerId: string;
+  andProviderId?: string;
+}>('REMOVE_PROVIDER');
 
 export const showTimeline = actionCreator<{ id: string; show: boolean }>('SHOW_TIMELINE');
 
@@ -44,7 +48,26 @@ export const updateDataProviderEnabled = actionCreator<{
   id: string;
   enabled: boolean;
   providerId: string;
+  andProviderId?: string;
 }>('TOGGLE_PROVIDER_ENABLED');
+
+export const updateDataProviderExcluded = actionCreator<{
+  id: string;
+  excluded: boolean;
+  providerId: string;
+  andProviderId?: string;
+}>('TOGGLE_PROVIDER_EXCLUDED');
+
+export const updateDataProviderKqlQuery = actionCreator<{
+  id: string;
+  kqlQuery: string;
+  providerId: string;
+}>('PROVIDER_EDIT_KQL_QUERY');
+
+export const updateHighlightedDropAndProviderId = actionCreator<{
+  id: string;
+  providerId: string;
+}>('UPDATE_DROP_AND_PROVIDER');
 
 export const updateDescription = actionCreator<{ id: string; description: string }>(
   'UPDATE_DESCRIPTION'
