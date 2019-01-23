@@ -118,7 +118,7 @@ export function isFilterValid(
       if (typeof params !== 'object') {
         return false;
       }
-      return validateParams(params.from, field.type) && validateParams(params.to, field.type);
+      return validateParams(params.from, field.type) || validateParams(params.to, field.type);
     case 'exists':
       return true;
     default:
@@ -141,7 +141,7 @@ export function buildFilter(
   return filter;
 }
 
-function buildBaseFilter(
+export function buildBaseFilter(
   indexPattern: IndexPattern,
   field: Field,
   operator: Operator,

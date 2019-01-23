@@ -17,24 +17,20 @@
  * under the License.
  */
 
-export const phraseFilter = {
+import { FilterStateStore, PhrasesFilter } from '@kbn/es-query';
+
+export const phrasesFilter: PhrasesFilter = {
   meta: {
-    negate: false,
     index: 'logstash-*',
-    type: 'phrase',
-    key: 'machine.os',
-    value: 'ios',
-    disabled: false
-  },
-  query: {
-    match: {
-      'machine.os': {
-        query: 'ios',
-        type: 'phrase'
-      }
-    }
+    type: 'phrases',
+    key: 'machine.os.raw',
+    value: 'win xp, osx',
+    params: ['win xp', 'osx'],
+    negate: false,
+    disabled: false,
+    alias: null,
   },
   $state: {
-    store: 'appState'
-  }
+    store: FilterStateStore.APP_STATE,
+  },
 };
