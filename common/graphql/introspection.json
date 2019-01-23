@@ -43,7 +43,7 @@
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+                  "ofType": { "kind": "SCALAR", "name": "UnsignedInteger", "ofType": null }
                 },
                 "defaultValue": null
               },
@@ -53,7 +53,7 @@
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+                  "ofType": { "kind": "SCALAR", "name": "UnsignedInteger", "ofType": null }
                 },
                 "defaultValue": null
               }
@@ -61,7 +61,15 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "PingResults", "ofType": null }
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "OBJECT", "name": "Ping", "ofType": null }
+                }
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -140,21 +148,13 @@
               {
                 "name": "downCount",
                 "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "Int", "ofType": null }
-                },
+                "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
                 "defaultValue": null
               },
               {
                 "name": "windowSize",
                 "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "Int", "ofType": null }
-                },
+                "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
                 "defaultValue": null
               },
               {
@@ -238,7 +238,11 @@
               {
                 "name": "monitorId",
                 "description": "",
-                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+                },
                 "defaultValue": null
               }
             ],
@@ -314,7 +318,11 @@
               {
                 "name": "filters",
                 "description": "",
-                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+                },
                 "defaultValue": null
               }
             ],
@@ -353,45 +361,12 @@
         "possibleTypes": null
       },
       {
-        "kind": "OBJECT",
-        "name": "PingResults",
+        "kind": "SCALAR",
+        "name": "UnsignedInteger",
         "description": "",
-        "fields": [
-          {
-            "name": "total",
-            "description": "",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "UnsignedInteger", "ofType": null }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "pings",
-            "description": "",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "OBJECT", "name": "Ping", "ofType": null }
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
+        "fields": null,
         "inputFields": null,
-        "interfaces": [],
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -1360,16 +1335,6 @@
         ],
         "inputFields": null,
         "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "SCALAR",
-        "name": "UnsignedInteger",
-        "description": "",
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },

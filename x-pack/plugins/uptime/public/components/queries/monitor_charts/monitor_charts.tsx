@@ -25,22 +25,21 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import { Query } from 'react-apollo';
+import { UptimeCommonProps } from '../../../uptime_app';
 import { createGetMonitorChartsQuery } from './get_monitor_charts';
 
 interface MonitorChartsProps {
-  dateRangeStart: number;
-  dateRangeEnd: number;
   monitorId: string;
-  autorefreshInterval: number;
-  autorefreshEnabled: boolean;
 }
 
 interface MonitorChartsState {
   crosshairLocation: number;
 }
 
-export class MonitorCharts extends React.Component<MonitorChartsProps, MonitorChartsState> {
-  constructor(props: MonitorChartsProps) {
+type Props = MonitorChartsProps & UptimeCommonProps;
+
+export class MonitorCharts extends React.Component<Props, MonitorChartsState> {
+  constructor(props: Props) {
     super(props);
     this.state = { crosshairLocation: 0 };
   }
@@ -50,12 +49,12 @@ export class MonitorCharts extends React.Component<MonitorChartsProps, MonitorCh
       dateRangeStart,
       dateRangeEnd,
       monitorId,
-      autorefreshEnabled,
+      autorefreshIsPaused,
       autorefreshInterval,
     } = this.props;
     return (
       <Query
-        pollInterval={autorefreshEnabled ? autorefreshInterval : undefined}
+        pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
         query={createGetMonitorChartsQuery}
         variables={{ dateRangeStart, dateRangeEnd, monitorId }}
       >
@@ -85,6 +84,7 @@ export class MonitorCharts extends React.Component<MonitorChartsProps, MonitorCh
           const downSeries: any[] = [];
           const upSeries: any[] = [];
           const checksSeries: any[] = [];
+          const maxRtt: any[] = [];
           monitorChartsData.forEach(
             ({
               maxWriteRequest,
@@ -97,6 +97,13 @@ export class MonitorCharts extends React.Component<MonitorChartsProps, MonitorCh
               minDuration,
               status,
             }: any) => {
+              // We're summing these values because we need to know what the max value of the RTT
+              // fields are in order to provide an accurate domain size for the RTT combination series.
+              maxRtt.push({
+                x: maxWriteRequest.x,
+                y: maxWriteRequest.y + maxValidate.y + maxContent.y + maxResponse.y + maxTcpRtt.y,
+              });
+              // TODO: these types of computations should take place on the server and be reflected in the GQL schema
               rttWriteRequestSeries.push(maxWriteRequest);
               rttValidateSeries.push(maxValidate);
               rttContentSeries.push(maxContent);
@@ -109,6 +116,16 @@ export class MonitorCharts extends React.Component<MonitorChartsProps, MonitorCh
               checksSeries.push({ x: status.x, y: status.total });
             }
           );
+
+          // As above, we are building a domain size for the chart to use.
+          // Without this code the chart could render data outside of the field.
+          const checksDomain = upSeries.concat(downSeries).map(({ y }) => y);
+          const domainLimits = [Math.min(...checksDomain), Math.max(...checksDomain)];
+          const durationDomain = avgDurationSeries.concat(areaRttSeries);
+          const durationLimits = [0, Math.max(...durationDomain.map(({ y }) => y))];
+
+          // find the greatest y-value for rtt chart
+          const rttLimits = [0, Math.max(...maxRtt.map(({ y }) => y))];
 
           return (
             <Fragment>
@@ -128,6 +145,7 @@ export class MonitorCharts extends React.Component<MonitorChartsProps, MonitorCh
                       stackBy="y"
                       margins={{ left: 60, right: 40, top: 10, bottom: 40 }}
                       xType={EuiSeriesChartUtils.SCALE.TIME}
+                      yDomain={rttLimits}
                       width={500}
                       height={200}
                       crosshairValue={this.state.crosshairLocation}
@@ -197,6 +215,7 @@ export class MonitorCharts extends React.Component<MonitorChartsProps, MonitorCh
                       width={500}
                       height={200}
                       xType={EuiSeriesChartUtils.SCALE.TIME}
+                      yDomain={durationLimits}
                       crosshairValue={this.state.crosshairLocation}
                       onCrosshairUpdate={this.updateCrosshairLocation}
                     >
@@ -241,6 +260,7 @@ export class MonitorCharts extends React.Component<MonitorChartsProps, MonitorCh
                   stackBy="y"
                   crosshairValue={this.state.crosshairLocation}
                   onCrosshairUpdate={this.updateCrosshairLocation}
+                  yDomain={domainLimits}
                 >
                   <EuiAreaSeries
                     name={i18n.translate(

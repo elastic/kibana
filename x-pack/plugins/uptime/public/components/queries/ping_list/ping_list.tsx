@@ -27,17 +27,16 @@ import React, { Fragment } from 'react';
 import { Query } from 'react-apollo';
 import { UMPingSortDirectionArg } from '../../../../common/domain_types';
 import { Ping } from '../../../../common/graphql/types';
+import { UptimeCommonProps } from '../../../uptime_app';
 import { getPingsQuery } from './get_pings';
 
 interface PingListProps {
   monitorId?: string;
-  dateRangeStart: number;
-  dateRangeEnd: number;
-  autorefreshInterval: number;
-  autorefreshEnabled: boolean;
   sort?: UMPingSortDirectionArg;
   size?: number;
 }
+
+type Props = PingListProps & UptimeCommonProps;
 
 interface PingListState {
   statusOptions: EuiComboBoxOptionProps[];
@@ -45,8 +44,8 @@ interface PingListState {
   maxSearchSize: number;
 }
 
-export class Pings extends React.Component<PingListProps, PingListState> {
-  constructor(props: PingListProps) {
+export class Pings extends React.Component<Props, PingListState> {
+  constructor(props: Props) {
     super(props);
 
     const statusOptions = [
@@ -80,7 +79,7 @@ export class Pings extends React.Component<PingListProps, PingListState> {
       monitorId,
       dateRangeStart,
       dateRangeEnd,
-      autorefreshEnabled,
+      autorefreshIsPaused,
       autorefreshInterval,
       sort,
       size,
@@ -88,7 +87,7 @@ export class Pings extends React.Component<PingListProps, PingListState> {
     const { statusOptions, selectedOption } = this.state;
     return (
       <Query
-        pollInterval={autorefreshEnabled ? autorefreshInterval : undefined}
+        pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
         variables={{
           monitorId,
           dateRangeStart,
