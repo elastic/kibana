@@ -78,7 +78,7 @@ const indexPatternsResolutions = {
 
 // add a dependency to all of the subsection routes
 uiRoutes
-  .defaults(/management\/kibana\/(indices|index)/, {
+  .defaults(/management\/kibana\/(index_patterns|index)/, {
     resolve: indexPatternsResolutions
   });
 
@@ -104,7 +104,7 @@ uiModules.get('apps/management')
             return {
               id: id,
               title: pattern.get('title'),
-              url: kbnUrl.eval('#/management/kibana/indices/{{id}}', { id: id }),
+              url: kbnUrl.eval('#/management/kibana/index_patterns/{{id}}', { id: id }),
               active: $scope.editingId === id,
               default: $scope.defaultIndex === id,
               tag: tags && tags.length ? tags[0] : null,
@@ -137,10 +137,10 @@ uiModules.get('apps/management')
     };
   });
 
-management.getSection('kibana').register('indices', {
+management.getSection('kibana').register('index_patterns', {
   display: i18n.translate('kbn.management.indexPattern.sectionsHeader', { defaultMessage: 'Index Patterns' }),
   order: 0,
-  url: '#/management/kibana/indices/'
+  url: '#/management/kibana/index_patterns/'
 });
 
 FeatureCatalogueRegistryProvider.register(() => {
@@ -150,7 +150,7 @@ FeatureCatalogueRegistryProvider.register(() => {
     description: i18n.translate('kbn.management.indexPatternLabel',
       { defaultMessage: 'Manage the index patterns that help retrieve your data from Elasticsearch.' }),
     icon: 'indexPatternApp',
-    path: '/app/kibana#/management/kibana/indices',
+    path: '/app/kibana#/management/kibana/index_patterns',
     showOnHomePage: true,
     category: FeatureCatalogueCategory.ADMIN
   };
