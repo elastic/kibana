@@ -20,24 +20,18 @@
 import moment from 'moment';
 
 export function orderedDateAxis(chart) {
-  const xAgg = chart.aspects.x.aggConfig;
-  const buckets = xAgg.buckets;
-  const format = buckets.getScaledDateFormat();
+  const x = chart.aspects.x[0];
+  const { format, bounds } = x.params;
 
   chart.xAxisFormatter = function (val) {
     return moment(val).format(format);
   };
 
-  chart.ordered = {
-    date: true,
-    interval: buckets.getInterval(),
-  };
+  chart.ordered.date = true;
 
-  const axisOnTimeField = xAgg.fieldIsTimeField();
-  const bounds = buckets.getBounds();
-  if (bounds && axisOnTimeField) {
-    chart.ordered.min = bounds.min;
-    chart.ordered.max = bounds.max;
+  if (bounds) {
+    chart.ordered.min = isNaN(bounds.min) ? Date.parse(bounds.min) : bounds.min;
+    chart.ordered.max = isNaN(bounds.max) ? Date.parse(bounds.max) : bounds.max;
   } else {
     chart.ordered.endzones = false;
   }
