@@ -30,9 +30,8 @@ const getTimezoneFromRequest = request => {
 };
 
 export default class DefaultSearchCapabilities {
-  constructor(request, indexPattern, batchRequestsSupport, fieldsCapabilities = {}) {
+  constructor(request, batchRequestsSupport, fieldsCapabilities = {}) {
     this.request = request;
-    this.indexPattern = indexPattern;
     this.batchRequestsSupport = batchRequestsSupport;
     this.fieldsCapabilities = fieldsCapabilities;
 
