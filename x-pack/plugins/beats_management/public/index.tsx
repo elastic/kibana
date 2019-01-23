@@ -33,7 +33,7 @@ async function startApp(libs: FrontendLibs) {
                 {(beats: BeatsContainer, tags: TagsContainer) => (
                   <Background>
                     <Breadcrumb
-                      title={i18n.translate('common.ui.management.breadcrumb', {
+                      title={i18n.translate('xpack.beatsManagement.management.breadcrumb', {
                         defaultMessage: 'Management',
                       })}
                     />
