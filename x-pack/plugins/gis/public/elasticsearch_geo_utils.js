@@ -6,7 +6,17 @@
 
 import _ from 'lodash';
 
-export function hitsToGeoJson(hits, geoFieldName, geoFieldType) {
+/**
+ * Converts Elasticsearch search results into GeoJson FeatureCollection
+ *
+ * @param {array} hits Elasticsearch search response hits array
+ * @param {function} flattenHit Method to flatten hits._source and hits.fields into properties object.
+ *   Should just be IndexPattern.flattenHit but wanted to avoid coupling this method to IndexPattern.
+ * @param {string} geoFieldName Geometry field name
+ * @param {string} geoFieldType Geometry field type ["geo_point", "geo_shape"]
+ * @returns {number}
+ */
+export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType) {
   const features = [];
   hits.forEach(hit => {
     const value = _.get(hit, `_source[${geoFieldName}]`);
@@ -19,22 +29,9 @@ export function hitsToGeoJson(hits, geoFieldName, geoFieldType) {
       throw new Error(`Unsupported field type, expected: geo_shape or geo_point, you provided: ${geoFieldType}`);
     }
 
-    const properties = {};
-    for (const fieldName in hit._source) {
-      if (hit._source.hasOwnProperty(fieldName)) {
-        if (fieldName !== geoFieldName) {
-          properties[fieldName] = hit._source[fieldName];
-        }
-      }
-    }
-
-    // hit.fields contains calculated values from docvalue_fields and script_fields
-    for (const fieldName in hit.fields) {
-      if (hit.fields.hasOwnProperty(fieldName)) {
-        const val = hit.fields[fieldName];
-        properties[fieldName] = Array.isArray(val) && val.length === 1 ? val[0] : val;
-      }
-    }
+    const properties = flattenHit(hit);
+    // don't include geometry field value in properties
+    delete properties[geoFieldName];
 
     return geometries.map(geometry => {
       features.push({
@@ -173,29 +170,20 @@ export function geoShapeToGeometry(value) {
   return [geoJson];
 }
 
+const POLYGON_COORDINATES_EXTERIOR_INDEX = 0;
+const TOP_LEFT_INDEX = 0;
+const BOTTOM_RIGHT_INDEX = 2;
+
 export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
-  // TODO this is not a complete implemenation. Need to handle other cases:
-  // 1) bounds are all east of 180
-  // 2) bounds are all west of -180
-  const noWrapMapExtent = {
-    minLon: mapExtent.minLon < -180 ? -180 : mapExtent.minLon,
-    minLat: mapExtent.minLat < -90 ? -90 : mapExtent.minLat,
-    maxLon: mapExtent.maxLon > 180 ? 180 : mapExtent.maxLon,
-    maxLat: mapExtent.maxLat > 90 ? 90 : mapExtent.maxLat,
-  };
+  const safePolygon = convertMapExtentToPolygon(mapExtent);
 
   if (geoFieldType === 'geo_point') {
+    const verticies = safePolygon.coordinates[POLYGON_COORDINATES_EXTERIOR_INDEX];
     return {
       geo_bounding_box: {
         [geoFieldName]: {
-          top_left: {
-            lat: noWrapMapExtent.maxLat,
-            lon: noWrapMapExtent.minLon
-          },
-          bottom_right: {
-            lat: noWrapMapExtent.minLat,
-            lon: noWrapMapExtent.maxLon
-          }
+          top_left: verticies[TOP_LEFT_INDEX],
+          bottom_right: verticies[BOTTOM_RIGHT_INDEX]
         }
       }
     };
@@ -203,13 +191,7 @@ export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
     return {
       geo_shape: {
         [geoFieldName]: {
-          shape: {
-            type: 'envelope',
-            coordinates: [
-              [noWrapMapExtent.minLon, noWrapMapExtent.maxLat],
-              [noWrapMapExtent.maxLon, noWrapMapExtent.minLat]
-            ]
-          },
+          shape: safePolygon,
           relation: 'INTERSECTS'
         }
       }
@@ -219,13 +201,32 @@ export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
   }
 }
 
+function formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon }) {
+  // GeoJSON mandates that the outer polygon must be counterclockwise to avoid ambiguous polygons
+  // when the shape crosses the dateline
+  const left = minLon;
+  const right = maxLon;
+  const top = maxLat > 90 ? 90 : maxLat;
+  const bottom = minLat < -90 ? -90 : minLat;
+  const topLeft = [left, top];
+  const bottomLeft = [left, bottom];
+  const bottomRight = [right, bottom];
+  const topRight = [right, top];
+  return {
+    "type": "polygon",
+    "coordinates": [
+      [ topLeft, bottomLeft, bottomRight, topRight, topLeft ]
+    ]
+  };
+}
+
 /*
- * Convert map bounds to envelope
- * Bounds that cross the dateline are split into 2 envelopes
+ * Convert map bounds to polygon
  */
-export function convertMapExtentToEnvelope({ maxLat, maxLon, minLat, minLon }) {
-  if (maxLon > 180 && minLon < -180) {
-    return convertMapExtentToEnvelope({
+export function convertMapExtentToPolygon({ maxLat, maxLon, minLat, minLon }) {
+  const lonDelta = maxLon - minLon;
+  if (lonDelta >= 360) {
+    return formatEnvelopeAsPolygon({
       maxLat,
       maxLon: 180,
       minLat,
@@ -234,47 +235,26 @@ export function convertMapExtentToEnvelope({ maxLat, maxLon, minLat, minLon }) {
   }
 
   if (maxLon > 180) {
-    // bounds cross datleine east to west, slit into 2 shapes
+    // bounds cross dateline east to west
     const overlapWestOfDateLine = maxLon - 180;
-    return [
-      convertMapExtentToEnvelope({
-        maxLat,
-        maxLon: 180,
-        minLat,
-        minLon,
-      }),
-      convertMapExtentToEnvelope({
-        maxLat,
-        maxLon: -180 + overlapWestOfDateLine,
-        minLat,
-        minLon: -180,
-      }),
-    ];
+    return formatEnvelopeAsPolygon({
+      maxLat,
+      maxLon: -180 + overlapWestOfDateLine,
+      minLat,
+      minLon,
+    });
   }
 
   if (minLon < -180) {
-    // bounds cross datleine west to east, slit into 2 shapes
+    // bounds cross dateline west to east
     const overlapEastOfDateLine = Math.abs(minLon) - 180;
-    return [
-      convertMapExtentToEnvelope({
-        maxLat,
-        maxLon: 180,
-        minLat,
-        minLon: 180 - overlapEastOfDateLine,
-      }),
-      convertMapExtentToEnvelope({
-        maxLat,
-        maxLon: maxLon,
-        minLat,
-        minLon: -180,
-      }),
-    ];
+    return formatEnvelopeAsPolygon({
+      maxLat,
+      maxLon,
+      minLat,
+      minLon: 180 - overlapEastOfDateLine,
+    });
   }
 
-  return {
-    "type": "envelope",
-    "coordinates": [
-      [minLon, maxLat], [maxLon, minLat]
-    ]
-  };
+  return formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon });
 }

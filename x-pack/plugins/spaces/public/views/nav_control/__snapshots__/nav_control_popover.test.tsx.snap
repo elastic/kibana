@@ -7,6 +7,7 @@ exports[`NavControlPopover renders without crashing 1`] = `
     <SpacesGlobalNavButton
       linkIcon={
         <Unknown
+          announceSpaceName={true}
           className="spaceNavGraphic"
           size="s"
           space={

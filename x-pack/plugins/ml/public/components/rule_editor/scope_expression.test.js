@@ -8,7 +8,7 @@
 // Mock the mlJobService that is imported for saving rules.
 jest.mock('../../services/job_service.js', () => 'mlJobService');
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { ScopeExpression } from './scope_expression';
@@ -36,7 +36,7 @@ describe('ScopeExpression', () => {
       enabled: true,
     };
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <ScopeExpression {...props} />
     );
 
@@ -50,7 +50,7 @@ describe('ScopeExpression', () => {
       enabled: true,
     };
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <ScopeExpression {...props} />
     );
 
@@ -66,7 +66,7 @@ describe('ScopeExpression', () => {
       enabled: true,
     };
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <ScopeExpression {...props} />
     );
 
@@ -82,7 +82,7 @@ describe('ScopeExpression', () => {
       enabled: false,
     };
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <ScopeExpression {...props} />
     );
 

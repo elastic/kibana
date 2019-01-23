@@ -31,7 +31,6 @@ import { managementApi } from './server/routes/api/management';
 import { scriptsApi } from './server/routes/api/scripts';
 import { registerSuggestionsApi } from './server/routes/api/suggestions';
 import { registerKqlTelemetryApi } from './server/routes/api/kql_telemetry';
-import { registerClustersRoute } from './server/routes/api/remote_info';
 import { registerFieldFormats } from './server/field_formats/register';
 import { registerTutorials } from './server/tutorials/register';
 import * as systemApi from './server/lib/system_api';
@@ -52,7 +51,8 @@ export default function (kibana) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         defaultAppId: Joi.string().default('home'),
-        index: Joi.string().default('.kibana')
+        index: Joi.string().default('.kibana'),
+        disableWelcomeScreen: Joi.boolean().default(false),
       }).default();
     },
 
@@ -190,7 +190,6 @@ export default function (kibana) {
       registerFieldFormats(server);
       registerTutorials(server);
       makeKQLUsageCollector(server);
-      registerClustersRoute(server);
       server.expose('systemApi', systemApi);
       server.expose('handleEsError', handleEsError);
       server.injectUiAppVars('kibana', () => injectVars(server));

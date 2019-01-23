@@ -29,10 +29,12 @@ import { notifications } from './plugins/notifications';
 import { kueryAutocomplete } from './plugins/kuery_autocomplete';
 import { canvas } from './plugins/canvas';
 import { infra } from './plugins/infra';
+import { taskManager } from './plugins/task_manager';
 import { rollup } from './plugins/rollup';
 import { remoteClusters } from './plugins/remote_clusters';
 import { crossClusterReplication } from './plugins/cross_cluster_replication';
 import { upgradeAssistant } from './plugins/upgrade_assistant';
+import { uptime } from './plugins/uptime';
 
 module.exports = function (kibana) {
   return [
@@ -61,9 +63,11 @@ module.exports = function (kibana) {
     indexLifecycleManagement(kibana),
     kueryAutocomplete(kibana),
     infra(kibana),
+    taskManager(kibana),
     rollup(kibana),
     remoteClusters(kibana),
     crossClusterReplication(kibana),
     upgradeAssistant(kibana),
+    uptime(kibana),
   ];
 };

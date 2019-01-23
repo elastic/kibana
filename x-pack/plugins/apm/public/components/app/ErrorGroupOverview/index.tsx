@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Location } from 'history';
 import React from 'react';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { ErrorGroupOverviewRequest } from '../../../store/reactReduxRequest/errorGroupList';
@@ -12,7 +13,7 @@ import List from './List';
 
 interface ErrorGroupOverviewProps {
   urlParams: IUrlParams;
-  location: any;
+  location: Location;
 }
 
 const ErrorGroupOverview: React.SFC<ErrorGroupOverviewProps> = ({

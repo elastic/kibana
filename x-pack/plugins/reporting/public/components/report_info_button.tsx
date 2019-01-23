@@ -15,7 +15,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { get } from 'lodash';
+import { get, has } from 'lodash';
 import React, { Component, Fragment } from 'react';
 import { USES_HEADLESS_JOB_TYPES } from '../../common/constants';
 import { JobInfo, jobQueueClient } from '../lib/job_queue_client';
@@ -76,6 +76,10 @@ export class ReportInfoButton extends Component<Props, State> {
     }
 
     const jobType = get(info, 'jobtype', NA);
+    const processedBy =
+      has(info, 'kibana_name') && has(info, 'kibana_id')
+        ? `${info.kibana_name} (${info.kibana_id})`
+        : UNKNOWN;
 
     // TODO queue method (clicked UI, watcher, etc)
     const jobInfoParts = {
@@ -95,6 +99,10 @@ export class ReportInfoButton extends Component<Props, State> {
         {
           title: 'Completed At',
           description: get(info, 'completed_at', NA),
+        },
+        {
+          title: 'Processed By',
+          description: processedBy,
         },
         {
           title: 'Browser Timezone',

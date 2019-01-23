@@ -33,6 +33,7 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
         },
       ]
     }
+    executeQueryOptions={Object {}}
     itemId="event_id"
     items={
       Array [
@@ -100,6 +101,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
         },
       ]
     }
+    executeQueryOptions={Object {}}
     itemId="event_id"
     items={
       Array [
@@ -140,7 +142,11 @@ exports[`EventsTable Renders events table with search bar 1`] = `
             size="s"
             type="button"
           >
-            New event
+            <FormattedMessage
+              defaultMessage="New event"
+              id="xpack.ml.calendarsEdit.eventsTable.newEventButtonLabel"
+              values={Object {}}
+            />
           </EuiButton>,
           <EuiButton
             color="primary"
@@ -153,7 +159,11 @@ exports[`EventsTable Renders events table with search bar 1`] = `
             size="s"
             type="button"
           >
-            Import events
+            <FormattedMessage
+              defaultMessage="Import events"
+              id="xpack.ml.calendarsEdit.eventsTable.importEventsButtonLabel"
+              values={Object {}}
+            />
           </EuiButton>,
         ],
       }

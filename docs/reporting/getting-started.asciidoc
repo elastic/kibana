@@ -2,7 +2,7 @@
 [[reporting-getting-started]]
 == Getting Started
 
-{reporting} is automatically enabled in {kib}. 
+{reporting} is automatically enabled in {kib}.
 
 To manually generate a report:
 
@@ -14,20 +14,24 @@ information, see <<secure-reporting>>.
 . Open the dashboard, visualization, or saved search you want to include
 in the report.
 
-. Click *Reporting* in the {kib} toolbar:
+. Click *Share* in the {kib} toolbar:
 +
 --
 [role="screenshot"]
-image:reporting/images/reporting-button.png["Reporting Button",link="reporting-button.png"]
+image:reporting/images/share-button.png["Reporting Button",link="share-button.png"]
 --
 
 . Depending on the {kib} application, choose the appropriate options:
 
-.. If you're on Discover, click the *Generate CSV* button.
+.. If you're on Discover:
+  ... Select *CSV Reports*
+
+  ... Click the *Generate CSV* button.
 
 .. If you're on Visualize or Dashboard:
+  ... Select *PDF Reports*
 
-  ... Select either *Optimize PDF for printing* or *Preserve existing layout in PDF*. For an explanation of the different layout modes, see <<pdf-layout-modes, PDF Layout Modes>>.
+  ... Choose to enable *Optimize for printing* layout mode. For an explanation of the different layout modes, see <<pdf-layout-modes, PDF Layout Modes>>.
 
   ... Click the *Generate PDF* button.
 

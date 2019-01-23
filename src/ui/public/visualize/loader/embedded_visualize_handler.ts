@@ -29,12 +29,12 @@ import { RenderCompleteHelper } from '../../render_complete';
 import { AppState } from '../../state_management/app_state';
 import { timefilter } from '../../timefilter';
 import { RequestHandlerParams, Vis } from '../../vis';
-// import { VisualizeDataLoader } from './visualize_data_loader';
 import { PipelineDataLoader } from './pipeline_data_loader';
 import { visualizationLoader } from './visualization_loader';
 
 import { DataAdapter, RequestAdapter } from '../../inspector/adapters';
 
+import { getTableAggs } from './pipeline_helpers/utilities';
 import { VisSavedObject, VisualizeLoaderParams, VisualizeUpdateParams } from './types';
 
 interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
@@ -45,6 +45,7 @@ interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
 
 const RENDER_COMPLETE_EVENT = 'render_complete';
 const LOADING_ATTRIBUTE = 'data-loading';
+const RENDERING_COUNT_ATTRIBUTE = 'data-rendering-count';
 
 /**
  * A handler to the embedded visualization. It offers several methods to interact
@@ -115,6 +116,7 @@ export class EmbeddedVisualizeHandler {
     });
 
     element.setAttribute(LOADING_ATTRIBUTE, '');
+    element.setAttribute(RENDERING_COUNT_ATTRIBUTE, '0');
     element.addEventListener('renderComplete', this.onRenderCompleteListener);
 
     this.appState = appState;
@@ -148,6 +150,7 @@ export class EmbeddedVisualizeHandler {
     this.events$ = this.vis.eventsSubject.asObservable().pipe(share());
     this.events$.subscribe(event => {
       if (this.actions[event.name]) {
+        event.data.aggConfigs = getTableAggs(this.vis);
         this.actions[event.name](event.data);
       }
     });
@@ -234,6 +237,9 @@ export class EmbeddedVisualizeHandler {
         throw new Error(pipelineResponse.error);
       }
       visData = pipelineResponse.value.visData || pipelineResponse.value;
+      if (pipelineResponse.value.visConfig) {
+        this.vis.params = pipelineResponse.value.visConfig.params;
+      }
     }
     return visualizationLoader
       .render(this.element, this.vis, visData, this.uiState, {
@@ -304,9 +310,15 @@ export class EmbeddedVisualizeHandler {
     this.fetchAndRender(true);
   };
 
+  private incrementRenderingCount = () => {
+    const renderingCount = Number(this.element.getAttribute(RENDERING_COUNT_ATTRIBUTE) || 0);
+    this.element.setAttribute(RENDERING_COUNT_ATTRIBUTE, `${renderingCount + 1}`);
+  };
+
   private onRenderCompleteListener = () => {
     this.listeners.emit(RENDER_COMPLETE_EVENT);
     this.element.removeAttribute(LOADING_ATTRIBUTE);
+    this.incrementRenderingCount();
   };
 
   private onUiStateChange = () => {
@@ -380,7 +392,9 @@ export class EmbeddedVisualizeHandler {
     this.vis.filters = { timeRange: this.dataLoaderParams.timeRange };
 
     return this.dataLoader.fetch(this.dataLoaderParams).then(data => {
-      this.dataSubject.next(data);
+      if (data.value) {
+        this.dataSubject.next(data.value);
+      }
       return data;
     });
   };

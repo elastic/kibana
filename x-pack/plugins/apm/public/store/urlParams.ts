@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { compact, pick } from 'lodash';
 import { AnyAction } from 'redux';
 import { createSelector } from 'reselect';
-// @ts-ignore
-import { legacyDecodeURIComponent, toQuery } from '../utils/url';
+import {
+  legacyDecodeURIComponent,
+  toQuery
+} from '../components/shared/Links/url_helpers';
 // @ts-ignore
 import { LOCATION_UPDATE } from './location';
-// @ts-ignore
 import { getDefaultTransactionType } from './reactReduxRequest/serviceDetails';
 import { getDefaultDistributionSample } from './reactReduxRequest/transactionDistribution';
 import { IReduxState } from './rootReducer';
@@ -102,11 +103,11 @@ function toString(str?: string | string[]) {
 }
 
 function getPathAsArray(pathname: string) {
-  return _.compact(pathname.split('/'));
+  return compact(pathname.split('/'));
 }
 
 function removeUndefinedProps<T>(obj: T): Partial<T> {
-  return _.pick(obj, value => value !== undefined);
+  return pick(obj, value => value !== undefined);
 }
 
 function getPathParams(pathname: string) {

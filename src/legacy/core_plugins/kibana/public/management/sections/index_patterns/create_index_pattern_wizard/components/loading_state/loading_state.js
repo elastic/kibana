@@ -23,32 +23,26 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiPanel,
-  EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const LoadingState = () => (
-  <EuiPanel paddingSize="l">
-    <EuiFlexGroup justifyContent="center" alignItems="center" direction="column" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="s">
-          <EuiTextColor color="subdued">
-            <h2 style={{ textAlign: 'center' }}>
-              <FormattedMessage
-                id="kbn.management.createIndexPattern.loadingState.checkingLabel"
-                defaultMessage="Checking for Elasticsearch data"
-              />
-            </h2>
-          </EuiTextColor>
-        </EuiTitle>
-      </EuiFlexItem>
+  <EuiFlexGroup justifyContent="center" alignItems="center" direction="column" gutterSize="s">
+    <EuiFlexItem grow={false}>
+      <EuiTitle size="s">
+        <h2 style={{ textAlign: 'center' }}>
+          <FormattedMessage
+            id="kbn.management.createIndexPattern.loadingState.checkingLabel"
+            defaultMessage="Checking for Elasticsearch data"
+          />
+        </h2>
+      </EuiTitle>
+    </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <EuiLoadingSpinner size="l"/>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiPanel>
+    <EuiFlexItem grow={false}>
+      <EuiLoadingSpinner size="l"/>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 );

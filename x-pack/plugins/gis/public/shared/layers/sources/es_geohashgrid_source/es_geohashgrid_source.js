@@ -24,7 +24,6 @@ import { AggConfigs } from 'ui/vis/agg_configs';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { convertToGeoJson } from './convert_to_geojson';
 import { ESSourceDetails } from '../../../components/es_source_details';
-import { ZOOM_TO_PRECISION } from '../../../utils/zoom_to_precision';
 import { VectorStyle } from '../../styles/vector_style';
 import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
@@ -58,7 +57,9 @@ const aggSchemas = new Schemas([
 export class ESGeohashGridSource extends VectorSource {
 
   static type = 'ES_GEOHASH_GRID';
-  static typeDisplayName = 'Elasticsearch geohash aggregation';
+  static title = 'Elasticsearch geohash aggregation';
+  static description = 'Group geospatial data in grids with metrics for each gridded cell';
+  static icon = 'logoElasticsearch';
 
   static createDescriptor({ indexPatternId, geoField, requestType }) {
     return {
@@ -106,14 +107,39 @@ export class ESGeohashGridSource extends VectorSource {
     inspectorAdapters.requests.resetRequest(this._descriptor.id);
   }
 
+  isFieldAware() {
+    return true;
+  }
+
+  isRefreshTimerAware() {
+    return true;
+  }
+
+  isQueryAware() {
+    return true;
+  }
+
+  getFieldNames() {
+    return this.getMetricFields().map(({ propertyKey }) => {
+      return propertyKey;
+    });
+  }
+
+  getIndexPatternIds() {
+    return  [this._descriptor.indexPatternId];
+  }
+
+  isGeohashPrecisionAware() {
+    return true;
+  }
+
   async getGeoJsonWithMeta({ layerName }, searchFilters) {
-    let targetPrecision = ZOOM_TO_PRECISION[Math.round(searchFilters.zoom)];
-    targetPrecision += 0;//should have refinement param, similar to heatmap style
-    const featureCollection = await this.getGeoJsonPointsWithTotalCount({
-      precision: targetPrecision,
+    const featureCollection = await this.getGeoJsonPoints({
+      geohashPrecision: searchFilters.geohashPrecision,
       extent: searchFilters.buffer,
       timeFilters: searchFilters.timeFilters,
       layerName,
+      query: searchFilters.query,
     });
 
     if (this._descriptor.requestType === RENDER_AS.GRID) {
@@ -126,23 +152,9 @@ export class ESGeohashGridSource extends VectorSource {
     return {
       data: featureCollection,
       meta: {
-        areResultsTrimmed: true
+        areResultsTrimmed: false
       }
     };
-  }
-
-  isFieldAware() {
-    return true;
-  }
-
-  isRefreshTimerAware() {
-    return true;
-  }
-
-  getFieldNames() {
-    return this.getMetricFields().map(({ propertyKey }) => {
-      return propertyKey;
-    });
   }
 
   async getNumberFields() {
@@ -151,7 +163,7 @@ export class ESGeohashGridSource extends VectorSource {
     });
   }
 
-  async getGeoJsonPointsWithTotalCount({ precision, extent, timeFilters, layerName }) {
+  async getGeoJsonPoints({ geohashPrecision, extent, timeFilters, layerName, query }) {
 
     let indexPattern;
     try {
@@ -165,7 +177,7 @@ export class ESGeohashGridSource extends VectorSource {
       throw new Error(`Index pattern ${indexPattern.title} no longer contains the geo field ${this._descriptor.geoField}`);
     }
 
-    const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(precision), aggSchemas.all);
+    const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(geohashPrecision), aggSchemas.all);
 
     let resp;
     try {
@@ -179,6 +191,7 @@ export class ESGeohashGridSource extends VectorSource {
         filters.push(timeService.createFilter(indexPattern, timeFilters));
         return filters;
       });
+      searchSource.setField('query', query);
 
       resp = await fetchSearchSourceAndRecordWithInspector({
         searchSource,
@@ -288,48 +301,31 @@ export class ESGeohashGridSource extends VectorSource {
       sourceDescriptor: this._descriptor,
       ...options
     });
-    descriptor.style = {
-      ...descriptor.style,
-      type: 'VECTOR',
-      properties: {
-        fillColor: {
-          type: 'DYNAMIC',
-          options: {
-            field: {
-              label: COUNT_PROP_LABEL,
-              name: COUNT_PROP_NAME,
-              origin: 'source'
-            },
-            color: 'Blues'
-          }
-        },
-        lineColor: {
-          type: 'STATIC',
-          options: {
-            color: '#cccccc'
-          }
-        },
-        lineWidth: {
-          type: 'STATIC',
-          options: {
-            size: 1
-          }
-        },
-        iconSize: {
-          type: 'DYNAMIC',
-          options: {
-            field: {
-              label: COUNT_PROP_LABEL,
-              name: COUNT_PROP_NAME,
-              origin: 'source'
-            },
-            minSize: 4,
-            maxSize: 32,
-          }
-        },
-        alphaValue: 1
+    descriptor.style = VectorStyle.createDescriptor({
+      fillColor: {
+        type: VectorStyle.STYLE_TYPE.DYNAMIC,
+        options: {
+          field: {
+            label: COUNT_PROP_LABEL,
+            name: COUNT_PROP_NAME,
+            origin: 'source'
+          },
+          color: 'Blues'
+        }
+      },
+      iconSize: {
+        type: VectorStyle.STYLE_TYPE.DYNAMIC,
+        options: {
+          field: {
+            label: COUNT_PROP_LABEL,
+            name: COUNT_PROP_NAME,
+            origin: 'source'
+          },
+          minSize: 4,
+          maxSize: 32,
+        }
       }
-    };
+    });
     return descriptor;
   }
 
