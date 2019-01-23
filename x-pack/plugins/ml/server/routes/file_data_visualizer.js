@@ -4,17 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
 import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { wrapError } from '../client/errors';
 import { fileDataVisualizerProvider, importDataProvider } from '../models/file_data_visualizer';
-import { INDEX_META_DATA_CREATED_BY, MAX_BYTES } from '../../common/constants/file_datavisualizer';
-
-import {
-  createMlTelementry,
-  storeMlTelemetry
-} from '../lib/ml_telemetry';
-
+import { MAX_BYTES } from '../../common/constants/file_datavisualizer';
 
 function analyzeFiles(callWithRequest, data, overrides) {
   const { analyzeFile } = fileDataVisualizerProvider(callWithRequest);
@@ -50,22 +43,6 @@ export function fileDataVisualizerRoutes(server, commonRouteConfig) {
       const callWithRequest = callWithRequestFactory(server, request);
       const { id } = request.query;
       const { index, data, settings, mappings, ingestPipeline } = request.payload;
-
-      // Store telemetry data (count of indices created by file_data_visualizer)
-      const allMappings = await callWithRequest('indices.getMapping');
-
-      const indicesCount = Object.keys(allMappings).reduce((count, mappingKey) => {
-        const mapping = allMappings[mappingKey];
-        const createdBy = get(mapping, 'mappings._meta.created_by');
-        if (createdBy === INDEX_META_DATA_CREATED_BY) {
-          count++;
-        }
-        return count;
-      }, 0);
-
-      const mlTelemetry = createMlTelementry(indicesCount);
-      console.warn('mlTelemetry', mlTelemetry);
-      storeMlTelemetry(server, mlTelemetry);
 
       return importData(callWithRequest, id, index, settings, mappings, ingestPipeline, data)
         .catch(wrapError);
