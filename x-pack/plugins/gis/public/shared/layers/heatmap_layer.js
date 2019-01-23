@@ -9,7 +9,7 @@ import React from 'react';
 import { ALayer } from './layer';
 import { EuiIcon } from '@elastic/eui';
 import { HeatmapStyle } from './styles/heatmap_style';
-import { ZOOM_TO_PRECISION } from '../utils/zoom_to_precision';
+import { getGeohashPrecisionForZoom } from '../utils/zoom_to_precision';
 
 const SCALED_PROPERTY_NAME = '__kbn_heatmap_weight__';//unique name to store scaled value for weighting
 
@@ -105,7 +105,8 @@ export class HeatmapLayer extends ALayer {
     const sourceDataRequest = this.getSourceDataRequest();
     const dataMeta = sourceDataRequest ? sourceDataRequest.getMeta() : {};
 
-    const targetPrecision = ZOOM_TO_PRECISION[Math.round(dataFilters.zoom)] + this._style.getPrecisionRefinementDelta();
+    const targetPrecisionUnadjusted = getGeohashPrecisionForZoom(dataFilters.zoom);
+    const targetPrecision = targetPrecisionUnadjusted + this._style.getPrecisionRefinementDelta();
     const isSamePrecision = dataMeta.precision === targetPrecision;
 
     const isSameTime = _.isEqual(dataMeta.timeFilters, dataFilters.timeFilters);
@@ -139,13 +140,13 @@ export class HeatmapLayer extends ALayer {
   }
 
   async _fetchNewData({ startLoading, stopLoading, onLoadError, dataMeta }) {
-    const { precision, timeFilters, buffer, query } = dataMeta;
+    const { precision: geohashPrecision, timeFilters, buffer, query } = dataMeta;
     const requestToken = Symbol(`layer-source-refresh: this.getId()`);
     startLoading('source', requestToken, dataMeta);
     try {
       const layerName = await this.getDisplayName();
       const data = await this._source.getGeoJsonPoints({
-        precision,
+        geohashPrecision: geohashPrecision,
         extent: buffer,
         timeFilters,
         layerName,

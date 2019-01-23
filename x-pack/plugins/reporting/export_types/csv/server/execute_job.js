@@ -48,11 +48,6 @@ function executeJobFn(server) {
       getBasePath: () => basePath || serverBasePath,
     };
 
-    if (server.plugins.security) {
-      const { authorization } = server.plugins.security;
-      await authorization.mode.initialize(fakeRequest);
-    }
-
     const callEndpoint = (endpoint, clientParams = {}, options = {}) => {
       return callWithRequest(fakeRequest, endpoint, clientParams, options);
     };

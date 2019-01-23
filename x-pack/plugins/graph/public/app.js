@@ -27,6 +27,7 @@ import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 
 import appTemplate from './templates/index.html';
 import { getHomeBreadcrumbs, getWorkspaceBreadcrumbs } from './breadcrumbs';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import './angular-venn-simple.js';
 import gws from './graphClientWorkspace.js';
@@ -754,8 +755,27 @@ app.controller('graphuiPlugin', function ($scope, $route, $http, kbnUrl, Private
 
   if ($scope.indices.length === 0) {
     toastNotifications.addWarning({
-      title: 'No data source',
-      text: <p>Go to <a href={url}>Management &gt; Index Patterns</a> and create an index pattern</p>,
+      title: i18n('xpack.graph.noDataSourceNotificationMessageTitle', {
+        defaultMessage: 'No data source',
+      }),
+      text: (
+        <p>
+          <FormattedMessage
+            id="xpack.graph.noDataSourceNotificationMessageText"
+            defaultMessage="Go to {managementIndexPatternsLink} and create an index pattern"
+            values={{
+              managementIndexPatternsLink: (
+                <a href={url}>
+                  <FormattedMessage
+                    id="xpack.graph.noDataSourceNotificationMessageText.managementIndexPatternLinkText"
+                    defaultMessage="Management &gt; Index Patterns"
+                  />
+                </a>
+              )
+            }}
+          />
+        </p>
+      ),
     });
   }
 
@@ -925,7 +945,7 @@ app.controller('graphuiPlugin', function ($scope, $route, $http, kbnUrl, Private
     if(!savedObjectIndexPattern) {
       toastNotifications.addDanger(
         i18n('xpack.graph.loadWorkspace.missingIndexPatternErrorMessage', {
-          defaultMessage: `'Missing index pattern {indexPattern}`,
+          defaultMessage: 'Missing index pattern {indexPattern}',
           values: { indexPattern: wsObj.indexPattern },
         })
       );
