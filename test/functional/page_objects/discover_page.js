@@ -62,7 +62,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async getColumnHeaders() {
       const headerElements = await testSubjects.findAll('docTableHeaderField');
-      return await Promise.all(headerElements.map(el => el.getVisibleText()));
+      return await Promise.all(headerElements.map(async (el) => await el.getVisibleText()));
     }
 
     async openLoadSavedSearchPanel() {
@@ -131,55 +131,27 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await Promise.all(elements.map(async el => el.getVisibleText()));
     }
 
-    getBarChartData() {
+    async getBarChartData() {
       let yAxisLabel = 0;
-      let yAxisHeight;
 
-      return PageObjects.header.waitUntilLoadingHasFinished()
-        .then(() => {
-          return find.byCssSelector('div.visAxis__splitAxes--y > div > svg > g > g:last-of-type');
-        })
-        .then(function setYAxisLabel(y) {
-          return y
-            .getVisibleText()
-            .then(function (yLabel) {
-              yAxisLabel = yLabel.replace(',', '');
-              log.debug('yAxisLabel = ' + yAxisLabel);
-              return yLabel;
-            });
-        })
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const y = await find.byCssSelector('div.visAxis__splitAxes--y > div > svg > g > g:last-of-type');
+      const yLabel = await y.getVisibleText();
+      yAxisLabel = yLabel.replace(',', '');
+      log.debug('yAxisLabel = ' + yAxisLabel);
       // 2). find and save the y-axis pixel size (the chart height)
-        .then(function getRect() {
-          return find.byCssSelector('rect.background')
-            .then(function getRectHeight(chartAreaObj) {
-              return chartAreaObj
-                .getAttribute('height')
-                .then(function (theHeight) {
-                  yAxisHeight = theHeight; // - 5; // MAGIC NUMBER - clipPath extends a bit above the top of the y-axis and below x-axis
-                  log.debug('theHeight = ' + theHeight);
-                  return theHeight;
-                });
-            });
-        })
+      const chartAreaObj = await find.byCssSelector('rect.background');
+      const yAxisHeight = await chartAreaObj.getAttribute('height');
+      log.debug('theHeight = ' + yAxisHeight);
       // 3). get the visWrapper__chart elements
-        .then(function () {
-          // #kibana-body > div.content > div > div > div > div.visEditor__canvas > visualize > div.visChart > div > div.visWrapper__column > div.visWrapper__chart > div > svg > g > g.series.\30 > rect:nth-child(1)
-          return find.allByCssSelector('svg > g > g.series > rect') // rect
-            .then(function (chartTypes) {
-              function getChartType(chart) {
-                return chart
-                  .getAttribute('height')
-                  .then(function (barHeight) {
-                    return Math.round(barHeight / yAxisHeight * yAxisLabel);
-                  });
-              }
-              const getChartTypesPromises = chartTypes.map(getChartType);
-              return Promise.all(getChartTypesPromises);
-            })
-            .then(function (bars) {
-              return bars;
-            });
-        });
+      // #kibana-body > div.content > div > div > div > div.visEditor__canvas > visualize > div.visChart > div > div.visWrapper__column > div.visWrapper__chart > div > svg > g > g.series.\30 > rect:nth-child(1)
+      const chartTypes = await find.allByCssSelector('svg > g > g.series > rect');
+      const bars = await Promise.all(chartTypes.map(async (chart) => {
+        const barHeight = await chart.getAttribute('height');
+        return Math.round(barHeight / yAxisHeight * yAxisLabel);
+      }));
+
+      return bars;
     }
 
     async getChartInterval() {

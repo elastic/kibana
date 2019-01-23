@@ -457,12 +457,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async getPanelTitles() {
       log.debug('in getPanelTitles');
       const titleObjects = await testSubjects.findAll('dashboardPanelTitle');
-
-      function getTitles(chart) {
-        return chart.getVisibleText();
-      }
-      const getTitlePromises = _.map(titleObjects, getTitles);
-      return Promise.all(getTitlePromises);
+      return await Promise.all(titleObjects.map(async title => await title.getVisibleText()));
     }
 
     async getPanelDimensions() {
