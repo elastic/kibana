@@ -89,7 +89,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
 
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
       await retry.try(async () => {
-        log.debug(`navigateToUrl ${appUrl}`);
+        log.debug(`navigateToActualUrl ${appUrl}`);
         await browser.get(appUrl);
 
         const currentUrl = shouldLoginIfPrompted ? await this.loginIfPrompted(appUrl) : browser.getCurrentUrl();
