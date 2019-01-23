@@ -6,6 +6,9 @@
           "__template": {
             "after": "1d",
             "actions": {
+              "set_priority": {
+                "priority": 50
+              },
               "allocate": {
                 "number_of_replicas": 1,
                 "include": {
@@ -31,6 +34,9 @@
           },
           "after": "1d",
           "actions": {
+            "set_priority": {
+              "priority": 50
+            },
             "allocate": {
               "number_of_replicas": 1,
               "include": {
@@ -56,6 +62,10 @@
         },
         "cold": {
           "__template": {
+            "set_priority": {
+              "priority": 0
+            },
+            "freeze": {},
             "after": "1d",
             "actions": {
               "allocate": {
@@ -77,6 +87,10 @@
           },
           "after": "1d",
           "actions": {
+            "set_priority": {
+              "priority": 0
+            },
+            "freeze": {},
             "allocate": {
               "number_of_replicas": 1,
               "include": {
@@ -96,6 +110,9 @@
         },
         "hot": {
           "__template": {
+            "set_priority": {
+              "priority": 100
+            },
             "after": "1d",
             "actions": {
               "rollover": {
@@ -107,6 +124,9 @@
           },
           "after": "1d",
           "actions": {
+            "set_priority": {
+              "priority": 100
+            },
             "rollover": {
               "max_age": "7d",
               "max_docs": 1000,
