@@ -8,9 +8,10 @@ Not to worry, we've created this guide to help you get the most out of Elastic A
 
 * <<services>>
 * <<traces>>
+** <<distributed-tracing>>
 * <<transactions>>
 ** <<transaction-details>>
-** <<spans>>
+* <<spans>>
 * <<errors>>
 ** <<errors-alerts-with-watcher>>
 * <<machine-learning-integration>>
@@ -20,7 +21,7 @@ Not to worry, we've created this guide to help you get the most out of Elastic A
 [[services]]
 === Services
 
-The Services overview page gives you quick insights into the health and general performance of each service.
+The *Services overview* page gives you quick insights into the health and general performance of each service.
 The <<set-time-filter,global time range filter>> in {kib} defines which services are available.
 
 You can add services by setting the `service.name` configuration in each of the {apm-agents-ref}[APM agents] you’re instrumenting.
@@ -31,8 +32,8 @@ image::apm/images/apm-services-overview.png[Example view of services table the A
 [[traces]]
 === Traces
 
-The Traces overview page displays every *transaction* occurring in your application,
-regardless of the service it originated from.
+The *Traces overview* page displays the entry transaction for all traces in your application.
+If you're using <<distributed-tracing>>, this view is key to finding the critical paths within your application.
 Transactions with the same name are grouped together and only shown once in this table.
 
 By default, transactions are sorted by _Impact_.
@@ -71,7 +72,7 @@ TIP: Distributed tracing is supported by all APM agents and there’s no additio
 TIP: A {apm-overview-ref-v}/transactions.html[transaction] describes an event captured by an Elastic APM agent instrumenting a service.
 The APM agents automatically collect performance metrics on HTTP requests, database queries, and much more.
 
-Selecting a service on the <<services,Services overview page>> will bring you to the Transaction overview page.
+Selecting a service on the <<services,Services overview>> page will bring you to the *Transaction overview* page.
 The charts and table on this dashboard display the transaction duration, requests per minute, and a list of transactions for the selected service.
 
 [role="screenshot"]
@@ -108,7 +109,7 @@ refer to the documentation for each {apm-agents-ref}[APM Agent] you've implement
 [[transaction-details]]
 ==== Transaction details
 
-Selecting a transaction group on the <<transactions,Transactions overview page>> will bring you to the Transaction detail page.
+Selecting a transaction group on the <<transactions,Transactions overview page>> will bring you to the *Transaction detail* page.
 The Transaction detail page shows a high-level overview of the transaction group duration,
 requests per minute, and transaction group duration distribution.
 It's important to note that all three of these graphs show data from every transaction within the selected transaction group. 
@@ -184,10 +185,13 @@ Services in a distributed trace are separated by color and listed in the order t
 [role="screenshot"]
 image::apm/images/apm-services-trace.png[Example of distributed trace colors in the APM UI in Kibana]
 
-If you select one of these sub-traces, the transaction link will be clickable.
-If you click on the transaction name, you will open a similar view,
-but just for the sub-trace you've selected.
-To return to the full trace, simply click the "View full trace" button in the upper right hand corner of the page.
+Don't forget, a distributed trace includes more than one transaction.
+When viewing these distributed traces in the timeline waterfall, you'll see this image:apm/images/transaction-icon.png[APM icon] icon,
+which indicates the next transaction in the trace.
+These transactions can be expanded and viewed in detail by clicking on them.
+
+After exploring these traces,
+you can return to the full trace by clicking the "View full trace" button in the upper right hand corner of the page.
 
 [role="screenshot"]
 image::apm/images/apm-view-full-trace.png[Example of distributed trace colors in the APM UI in Kibana]
@@ -197,16 +201,16 @@ image::apm/images/apm-view-full-trace.png[Example of distributed trace colors in
 
 TIP: {apm-overview-ref-v}/errors.html[Errors] are defined as groups of exceptions with matching exception or log messages.
 
-The _Errors overview_ page provides a high-level view of the error message and culprit,
+The *Errors overview* page provides a high-level view of the error message and culprit,
 the number of occurrences, and the most recent occurrence.
-Just like on the _Transaction overview_ page, you'll notice we group together like errors.
+Just like on the Transaction overview page, you'll notice we group together like errors.
 This makes it very easy to quickly see which errors are affecting your services,
 and to take actions to rectify them.
 
 [role="screenshot"]
 image::apm/images/apm-errors-overview.png[Example view of the errors overview in the APM UI in Kibana]
 
-Selecting an _error group ID_ or _error message_ brings you to the _Error group_ page.
+Selecting an error group ID or error message brings you to the *Error group* page.
 
 [role="screenshot"]
 image::apm/images/apm-error-group.png[Example view of the error group page in the APM UI in Kibana]
@@ -242,7 +246,7 @@ image::apm/images/apm-errors-watcher-assistant.png[Example view of the Watcher a
 [[metrics]]
 === Metrics
 
-The metrics overview page shows a combination of transaction, error, CPU, and memory data.
+The *Metrics overview* page shows a combination of transaction, error, CPU, and memory data.
 
 If you're experiencing a problem with your service, you can use this page to attempt to find the underlying cause.
 For example, you might be able to correlate a high number of errors with a long transaction duration, high CPU usage, or a memory leak.   
@@ -260,7 +264,7 @@ The response time graph will show the expected bounds and annotate the graph whe
 image::apm/images/apm-ml-integration.png[Example view of anomaly scores on response times in APM UI in Kibana]
 
 Jobs can be created per transaction type and based on the average response time.
-You can manage jobs in the Machine Learning jobs management page.
+You can manage jobs in the *Machine Learning jobs management* page.
 It might take some time for results to appear on the graph.
 
 [[query-bar]]

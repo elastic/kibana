@@ -23,10 +23,3 @@ you can also see contextual information such as the request header, user informa
 system values, or custom data that you manually attached to the request.
 
 Having access to application-level insights with just a few clicks can drastically decrease the time you spend debugging errors, slow response times, and crashes.
-
-////
-For example, in this screenshot, the APM UI shows that this transaction is spending `111ms` querying the order_lines database:
-
-[role="screenshot"]
-image::apm/images/apm-transaction.png[Example view of a transaction in the APM UI in Kibana]
-////
