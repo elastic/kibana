@@ -8,6 +8,7 @@ export const getLifecycleMethods = (getService, getPageObjects) => {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['monitoring', 'header']);
   const noData = getService('monitoringNoData');
+  const client = getService('es');
   let _archive;
 
   return {
@@ -19,6 +20,9 @@ export const getLifecycleMethods = (getService, getPageObjects) => {
 
       await browser.setWindowSize(1600, 1000);
 
+      try {
+        await client.indices.deleteTemplate({ name: '.monitoring-*' });
+      } catch (e) { /* do nothing if they do not exist */ }
       await esArchiver.load(archive);
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'UTC',
