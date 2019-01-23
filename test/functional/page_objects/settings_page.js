@@ -47,9 +47,10 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('objects');
     }
 
+    //TODO - rename
     async clickKibanaIndices() {
       log.debug('clickKibanaIndices link');
-      await testSubjects.click('indices');
+      await testSubjects.click('index_patterns');
     }
 
     async getAdvancedSettings(propertyName) {
