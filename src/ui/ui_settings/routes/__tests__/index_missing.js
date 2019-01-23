@@ -45,8 +45,7 @@ export function indexMissingSuite() {
           include_type_name: true,
         });
 
-        expect(resp[indexName].mappings).to.have.property('doc');
-        expect(resp[indexName].mappings.doc.properties).to.have.keys(
+        expect(resp[indexName].mappings.properties).to.have.keys(
           'index-pattern',
           'visualization',
           'search',
