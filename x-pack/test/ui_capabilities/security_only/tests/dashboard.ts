@@ -32,6 +32,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('dashboard');
             expect(uiCapabilities.value!.dashboard).to.eql({
+              createNew: true,
               show: true,
               showWriteControls: true,
             });
@@ -42,6 +43,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('dashboard');
             expect(uiCapabilities.value!.dashboard).to.eql({
+              createNew: false,
               show: true,
               showWriteControls: false,
             });
@@ -69,6 +71,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('dashboard');
             expect(uiCapabilities.value!.dashboard).to.eql({
+              createNew: false,
               show: false,
               showWriteControls: false,
             });
