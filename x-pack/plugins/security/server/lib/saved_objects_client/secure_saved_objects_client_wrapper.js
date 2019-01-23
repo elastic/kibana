@@ -116,23 +116,6 @@ export class SecureSavedObjectsClientWrapper {
     }
   }
 
-  async _getAuthorizedTypes(typeOrTypes, action) {
-    const actionMap = {};
-    const types = [].concat(typeOrTypes);
-    types.forEach((type) => {
-      const typeAction = this._actions.getSavedObjectAction(type, action);
-      actionMap[typeAction] = type;
-    });
-    const { privileges } = await this._checkSavedObjectPrivileges(Object.keys(actionMap));
-    const authorizedTypes = Object.keys(privileges)
-      .map(privilege => {
-        const authorized = privileges[privilege];
-        if (authorized) return actionMap[privilege];
-      })
-      .filter(value => !!value);
-    return authorizedTypes;
-  }
-
   async _ensureAuthorized(typeOrTypes, action, args) {
     const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
     const actions = types.map(type => this._actions.getSavedObjectAction(type, action));
