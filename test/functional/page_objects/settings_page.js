@@ -47,9 +47,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('objects');
     }
 
-    //TODO - rename
-    async clickKibanaIndices() {
-      log.debug('clickKibanaIndices link');
+    async clickKibanaIndexPatterns() {
+      log.debug('clickKibanaIndexPatterns link');
       await testSubjects.click('index_patterns');
     }
 
@@ -272,7 +271,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         await this.navigateTo();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await this.clickKibanaIndices();
+        await this.clickKibanaIndexPatterns();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickOptionalAddNewButton();
         await PageObjects.header.waitUntilLoadingHasFinished();
