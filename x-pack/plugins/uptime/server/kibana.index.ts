@@ -38,6 +38,7 @@ export const initServerWithKibana = (server: KibanaServer) => {
     id: PLUGIN.ID,
     name: 'Uptime',
     navLinkId: PLUGIN.ID,
+    catalogue: ['uptime'],
     privileges: {
       read: {
         app: ['uptime', 'kibana'],
