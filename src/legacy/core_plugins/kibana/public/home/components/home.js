@@ -146,7 +146,7 @@ export class Home extends Component {
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiPanel paddingSize="l">
-                <EuiTitle>
+                <EuiTitle size="s">
                   <h3>
                     <FormattedMessage
                       id="kbn.home.directories.visualize.nameTitle"
@@ -162,7 +162,7 @@ export class Home extends Component {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiPanel paddingSize="l">
-                <EuiTitle>
+                <EuiTitle size="s">
                   <h3>
                     <FormattedMessage
                       id="kbn.home.directories.manage.nameTitle"
@@ -181,8 +181,8 @@ export class Home extends Component {
           <EuiSpacer size="l" />
 
           <EuiFlexGroup justifyContent="center">
-            <EuiFlexItem grow={false}>
-              <EuiText>
+            <EuiFlexItem grow={false} className="eui-textCenter">
+              <EuiText size="s" color="subdued">
                 <p>
                   <FormattedMessage
                     id="kbn.home.directories.notFound.description"

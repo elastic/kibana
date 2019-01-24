@@ -366,7 +366,7 @@ export class IndexTableUi extends Component {
               </h1>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <EuiText>
+            <EuiText size="s" color="subdued">
               <p>
                 <FormattedMessage
                   id="xpack.idxMgmt.indexTable.sectionDescription"
