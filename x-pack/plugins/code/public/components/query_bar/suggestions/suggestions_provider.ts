@@ -5,15 +5,35 @@
  */
 
 import { AutocompleteSuggestionGroup, AutocompleteSuggestionType } from '.';
+import { SearchScope } from '../../../../model';
 
 export interface SuggestionsProvider {
-  getSuggestions(query: string): Promise<AutocompleteSuggestionGroup>;
+  getSuggestions(query: string, scope: SearchScope): Promise<AutocompleteSuggestionGroup>;
 }
 
 export abstract class AbstractSuggestionsProvider implements SuggestionsProvider {
   protected MAX_SUGGESTIONS_PER_GROUP = 5;
 
-  public async getSuggestions(_: string): Promise<AutocompleteSuggestionGroup> {
+  public async getSuggestions(
+    query: string,
+    scope: SearchScope
+  ): Promise<AutocompleteSuggestionGroup> {
+    if (this.matchSearchScope(scope)) {
+      return await this.fetchSuggestions(query);
+    } else {
+      // This is an abstract class. Do nothing here. You should override this.
+      return new Promise<AutocompleteSuggestionGroup>((resolve, reject) => {
+        resolve({
+          type: AutocompleteSuggestionType.SYMBOL,
+          total: 0,
+          hasMore: false,
+          suggestions: [],
+        });
+      });
+    }
+  }
+
+  protected async fetchSuggestions(_: string): Promise<AutocompleteSuggestionGroup> {
     // This is an abstract class. Do nothing here. You should override this.
     return new Promise<AutocompleteSuggestionGroup>((resolve, reject) => {
       resolve({
@@ -23,5 +43,9 @@ export abstract class AbstractSuggestionsProvider implements SuggestionsProvider
         suggestions: [],
       });
     });
+  }
+
+  protected matchSearchScope(scope: SearchScope): boolean {
+    return true;
   }
 }

@@ -11,10 +11,11 @@ import { connect } from 'react-redux';
 import styled from 'styled-components';
 import Url from 'url';
 
-import { DocumentSearchResult } from '../../../model';
-import { SearchScope } from '../../common/types';
+import { DocumentSearchResult, SearchScope } from '../../../model';
+import { changeSearchScope } from '../../actions';
 import { RootState } from '../../reducers';
 import { history } from '../../utils/url';
+import { ShortcutsProvider } from '../shortcuts';
 import { CodeResult } from './code_result';
 import { EmptyPlaceholder } from './empty_placeholder';
 import { Facet } from './facet';
@@ -50,6 +51,7 @@ interface Props {
   error?: Error;
   documentSearchResults?: DocumentSearchResult;
   repositorySearchResults?: any;
+  onSearchScopeChanged: (s: SearchScope) => void;
 }
 
 interface State {
@@ -130,7 +132,7 @@ class SearchPage extends React.PureComponent<Props, State> {
     } = this.props;
 
     if (
-      scope === SearchScope.repository &&
+      scope === SearchScope.REPOSITORY &&
       repositorySearchResults &&
       repositorySearchResults.total > 0
     ) {
@@ -182,11 +184,15 @@ class SearchPage extends React.PureComponent<Props, State> {
       );
       return (
         <SearchContainer>
-          <SearchBar query={query} />
+          <ShortcutsProvider />
+          <SearchBar
+            query={this.props.query}
+            onSearchScopeChanged={this.props.onSearchScopeChanged}
+          />
           {mainComp}
         </SearchContainer>
       );
-    } else if (scope === SearchScope.default && documentSearchResults) {
+    } else if (scope === SearchScope.REPOSITORY && documentSearchResults) {
       const { stats, results } = documentSearchResults!;
       const { total, from, to, page, totalPage, repoStats, languageStats } = stats!;
 
@@ -226,14 +232,22 @@ class SearchPage extends React.PureComponent<Props, State> {
 
       return (
         <SearchContainer>
-          <SearchBar query={this.props.query} />
+          <ShortcutsProvider />
+          <SearchBar
+            query={this.props.query}
+            onSearchScopeChanged={this.props.onSearchScopeChanged}
+          />
           {mainComp}
         </SearchContainer>
       );
     } else {
       return (
         <SearchContainer>
-          <SearchBar query={this.props.query} />
+          <ShortcutsProvider />
+          <SearchBar
+            query={this.props.query}
+            onSearchScopeChanged={this.props.onSearchScopeChanged}
+          />
           <EmptyPlaceholder />
         </SearchContainer>
       );
@@ -245,4 +259,11 @@ const mapStateToProps = (state: RootState) => ({
   ...state.search,
 });
 
-export const Search = connect(mapStateToProps)(SearchPage);
+const mapDispatchToProps = {
+  onSearchScopeChanged: changeSearchScope,
+};
+
+export const Search = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(SearchPage);

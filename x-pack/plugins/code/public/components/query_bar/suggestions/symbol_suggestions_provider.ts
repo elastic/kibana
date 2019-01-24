@@ -16,9 +16,14 @@ import {
 } from '.';
 import { RepositoryUtils } from '../../../../common/repository_utils';
 import { parseLspUrl, toRepoNameWithOrg } from '../../../../common/uri_util';
+import { SearchScope } from '../../../../model';
 
 export class SymbolSuggestionsProvider extends AbstractSuggestionsProvider {
-  public async getSuggestions(query: string): Promise<AutocompleteSuggestionGroup> {
+  protected matchSearchScope(scope: SearchScope): boolean {
+    return scope === SearchScope.DEFAULT || scope === SearchScope.SYMBOL;
+  }
+
+  protected async fetchSuggestions(query: string): Promise<AutocompleteSuggestionGroup> {
     const res = await kfetch({
       pathname: `../api/code/suggestions/symbol`,
       method: 'get',

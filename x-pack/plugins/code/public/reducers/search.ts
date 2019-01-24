@@ -8,7 +8,7 @@ import produce from 'immer';
 
 import { Action, handleActions } from 'redux-actions';
 
-import { DocumentSearchResult, RepositoryUri } from '../../model';
+import { DocumentSearchResult, RepositoryUri, SearchScope } from '../../model';
 import {
   changeSearchScope,
   documentSearch as documentSearchQuery,
@@ -22,7 +22,6 @@ import {
   saveSearchOptions,
   SearchOptions,
 } from '../actions';
-import { SearchScope } from '../common/types';
 
 export interface SearchState {
   scope: SearchScope;
@@ -40,7 +39,7 @@ export interface SearchState {
 const initialState: SearchState = {
   query: '',
   isLoading: false,
-  scope: SearchScope.default,
+  scope: SearchScope.DEFAULT,
 };
 
 export const search = handleActions<SearchState, any>(
@@ -50,7 +49,7 @@ export const search = handleActions<SearchState, any>(
         if (Object.values(SearchScope).includes(action.payload)) {
           draft.scope = action.payload;
         } else {
-          draft.scope = SearchScope.default;
+          draft.scope = SearchScope.DEFAULT;
         }
         draft.isLoading = false;
       }),

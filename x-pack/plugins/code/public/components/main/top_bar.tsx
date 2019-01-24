@@ -6,6 +6,8 @@
 
 import React from 'react';
 import styled from 'styled-components';
+
+import { SearchScope } from '../../../model';
 import { MainRouteParams } from '../../common/types';
 import { colors } from '../../style/variables';
 import { Breadcrumb } from './breadcrumb';
@@ -34,6 +36,7 @@ const TopBarContainer = styled.div`
 
 interface Props {
   routeParams: MainRouteParams;
+  onSearchScopeChanged: (s: SearchScope) => void;
 }
 
 export class TopBar extends React.Component<Props> {
@@ -41,7 +44,7 @@ export class TopBar extends React.Component<Props> {
     return (
       <TopBarContainer>
         <Breadcrumb routeParams={this.props.routeParams} />
-        <SearchBar />
+        <SearchBar onSearchScopeChanged={this.props.onSearchScopeChanged} />
       </TopBarContainer>
     );
   }

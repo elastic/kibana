@@ -11,10 +11,14 @@ import {
   AutocompleteSuggestionGroup,
   AutocompleteSuggestionType,
 } from '.';
-import { SearchResultItem } from '../../../../model';
+import { SearchResultItem, SearchScope } from '../../../../model';
 
 export class FileSuggestionsProvider extends AbstractSuggestionsProvider {
-  public async getSuggestions(query: string): Promise<AutocompleteSuggestionGroup> {
+  protected matchSearchScope(scope: SearchScope): boolean {
+    return scope === SearchScope.DEFAULT || scope === SearchScope.FILE;
+  }
+
+  protected async fetchSuggestions(query: string): Promise<AutocompleteSuggestionGroup> {
     const res = await kfetch({
       pathname: `../api/code/suggestions/doc`,
       method: 'get',

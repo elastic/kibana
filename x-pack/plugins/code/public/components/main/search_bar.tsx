@@ -7,7 +7,8 @@
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import styled from 'styled-components';
-import { MainRouteParams, SearchScope } from '../../common/types';
+import { SearchScope } from '../../../model';
+import { MainRouteParams, SearchScopeText } from '../../common/types';
 import { pxToRem } from '../../style/variables';
 import {
   AutocompleteSuggestion,
@@ -19,12 +20,16 @@ import {
 import { Shortcut } from '../shortcuts';
 
 const SearchBarContainer = styled.div`
-  width: ${pxToRem(600)};
+  width: ${pxToRem(800)};
 `;
 
-export class CodeSearchBar extends React.Component<RouteComponentProps<MainRouteParams>> {
+interface Props extends RouteComponentProps<MainRouteParams> {
+  onSearchScopeChanged: (s: SearchScope) => void;
+}
+
+export class CodeSearchBar extends React.Component<Props> {
   public state = {
-    searchScope: SearchScope.default,
+    searchScope: SearchScope.DEFAULT,
   };
 
   public suggestionProviders = [
@@ -38,8 +43,8 @@ export class CodeSearchBar extends React.Component<RouteComponentProps<MainRoute
     if (query.trim().length === 0) {
       return;
     }
-    if (this.state.searchScope === SearchScope.repository) {
-      history.push(`/search?q=${query}&scope=${SearchScope.repository}`);
+    if (this.state.searchScope === SearchScope.REPOSITORY) {
+      history.push(`/search?q=${query}&scope=${SearchScope.REPOSITORY}`);
     } else {
       history.push(`/search?q=${query}`);
     }
@@ -52,9 +57,27 @@ export class CodeSearchBar extends React.Component<RouteComponentProps<MainRoute
   public render() {
     return (
       <SearchBarContainer>
-        <Shortcut keyCode="p" help="Search projects" />
-        <Shortcut keyCode="y" help="Search symbols" />
-        <Shortcut keyCode="s" help="Search everything" />
+        <Shortcut
+          keyCode="p"
+          help={SearchScopeText[SearchScope.REPOSITORY]}
+          onPress={() => {
+            this.props.onSearchScopeChanged(SearchScope.REPOSITORY);
+          }}
+        />
+        <Shortcut
+          keyCode="y"
+          help={SearchScopeText[SearchScope.SYMBOL]}
+          onPress={() => {
+            this.props.onSearchScopeChanged(SearchScope.SYMBOL);
+          }}
+        />
+        <Shortcut
+          keyCode="s"
+          help={SearchScopeText[SearchScope.DEFAULT]}
+          onPress={() => {
+            this.props.onSearchScopeChanged(SearchScope.DEFAULT);
+          }}
+        />
         <QueryBar
           query=""
           onSubmit={this.onSubmit}
@@ -62,6 +85,7 @@ export class CodeSearchBar extends React.Component<RouteComponentProps<MainRoute
           appName="code"
           disableAutoFocus={true}
           suggestionProviders={this.suggestionProviders}
+          onSearchScopeChanged={this.props.onSearchScopeChanged}
         />
       </SearchBarContainer>
     );
