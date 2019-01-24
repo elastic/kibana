@@ -60,7 +60,7 @@ export function VislibLibDataProvider(Private) {
             newData[key] = data[key];
           } else {
             newData[key] = data[key].map(seri => {
-              const converter = getFormat(seri.yAxisFormat);
+              const converter = getFormat(seri.format);
               return {
                 id: seri.id,
                 label: seri.label,
