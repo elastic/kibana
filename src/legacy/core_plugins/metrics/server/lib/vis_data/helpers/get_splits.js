@@ -23,8 +23,16 @@ import _ from 'lodash';
 import getLastMetric from './get_last_metric';
 import getSplitColors from './get_split_colors';
 import { formatKey } from './format_key';
-export default function getSplits(resp, panel, series) {
-  const meta = _.get(resp, `aggregations.${series.id}.meta`);
+
+const getTimeSeries = (resp, series) =>
+  _.get(resp, `aggregations.timeseries`) ||
+  _.get(resp, `aggregations.${series.id}.timeseries`);
+
+export default function getSplits(resp, panel, series, meta) {
+  if (!meta) {
+    meta = _.get(resp, `aggregations.${series.id}.meta`);
+  }
+
   const color = new Color(series.color);
   const metric = getLastMetric(series);
   if (_.has(resp, `aggregations.${series.id}.buckets`)) {
@@ -41,7 +49,7 @@ export default function getSplits(resp, panel, series) {
       });
     }
 
-    if(series.split_mode === 'filters' && _.isPlainObject(buckets)) {
+    if (series.split_mode === 'filters' && _.isPlainObject(buckets)) {
       return series.split_filters.map(filter => {
         const bucket = _.get(resp, `aggregations.${series.id}.buckets.${filter.id}`);
         bucket.id = `${series.id}:${filter.id}`;
@@ -54,9 +62,10 @@ export default function getSplits(resp, panel, series) {
     }
   }
 
-  const timeseries = _.get(resp, `aggregations.${series.id}.timeseries`);
+  const timeseries = getTimeSeries(resp, series);
+
   const mergeObj = {
-    timeseries
+    timeseries,
   };
   series.metrics
     .filter(m => /_bucket/.test(m.type))
@@ -69,8 +78,8 @@ export default function getSplits(resp, panel, series) {
       label: series.label || calculateLabel(metric, series.metrics),
       color: color.string(),
       ...mergeObj,
-      meta
-    }
+      meta,
+    },
   ];
 }
 
