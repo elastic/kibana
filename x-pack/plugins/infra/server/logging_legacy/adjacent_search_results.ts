@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Boom from 'boom';
 import { RequestParams } from '@elastic/elasticsearch';
+import * as Boom from 'boom';
 import * as Joi from 'joi';
 
 import {
