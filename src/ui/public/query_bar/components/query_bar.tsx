@@ -110,6 +110,19 @@ export class QueryBarUI extends Component<Props, State> {
       return null;
     }
 
+    let nextQuery = null;
+    if (nextProps.query.query !== prevState.query.query) {
+      nextQuery = {
+        query: toUser(nextProps.query.query),
+        language: nextProps.query.language,
+      };
+    } else if (nextProps.query.language !== prevState.query.language) {
+      nextQuery = {
+        query: '',
+        language: nextProps.query.language,
+      };
+    }
+
     let nextDateRange = null;
     if (
       nextProps.from !== get(prevState, 'currentProps.from') ||
