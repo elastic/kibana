@@ -19,7 +19,7 @@
 
 import dedent from 'dedent';
 
-function generator({ artifactsServerContainer, artifactsDir, imageTag, imageFlavor, versionTag, dockerOutputDir }) {
+function generator({ imageTag, imageFlavor, versionTag, dockerOutputDir }) {
   return dedent(`
   #!/usr/bin/env bash
   #
@@ -28,18 +28,12 @@ function generator({ artifactsServerContainer, artifactsDir, imageTag, imageFlav
   set -euo pipefail
   
   clean_docker() {
-    (docker kill ${ artifactsServerContainer } 2>&1) >/dev/null
     docker rmi ${ imageTag }${ imageFlavor }:${ versionTag }
   }
   
   trap clean_docker EXIT
   
   docker pull centos:7
-  
-  docker run --rm -d --name=${ artifactsServerContainer } \\
-	           --network=host -v ${ artifactsDir }:/mnt \\
-	           python:3 bash -c 'cd /mnt && python3 -m http.server' \\
-	           timeout 120 bash -c 'until curl -s localhost:8000 > /dev/null; do sleep 1; done'
   
   echo "Building: kibana${ imageFlavor }-docker"; \\
   docker build --network=host -t ${ imageTag }${ imageFlavor }:${ versionTag } -f Dockerfile . || exit 1;

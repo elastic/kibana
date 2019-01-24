@@ -19,7 +19,7 @@
 
 import dedent from 'dedent';
 
-function generator({ artifactsUrlRoot, artifactTarball, versionTag, license  }) {
+function generator({ artifactTarball, versionTag, license  }) {
   return dedent(`
   #
   # ** THIS IS AN AUTO-GENERATED FILE **
@@ -32,11 +32,15 @@ function generator({ artifactsUrlRoot, artifactTarball, versionTag, license  }) 
   
   WORKDIR /usr/share/kibana
   
+  # Copy Kibana artifact tarball inside the docker image
+  COPY --chown=1000:0 ${ artifactTarball } .
+  
   # Set gid to 0 for kibana and make group permission similar to that of user
   # This is needed, for example, for Openshift Open:
   # https://docs.openshift.org/latest/creating_images/guidelines.html
   # and allows Kibana to run with an uid
-  RUN curl -Ls ${ artifactsUrlRoot }/${ artifactTarball } | tar --strip-components=1 -zxf - && \\
+  RUN tar --strip-components=1 -zxf ${ artifactTarball } && \\
+      rm -rf ${artifactTarball} && \\
       ln -s /usr/share/kibana /opt/kibana && \\
       chown -R 1000:0 . && \\
       chmod -R g=u /usr/share/kibana && \\

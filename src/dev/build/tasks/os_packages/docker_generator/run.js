@@ -17,32 +17,57 @@
  * under the License.
  */
 
+import { access, link, unlink } from 'fs';
 import { resolve } from 'path';
+import { promisify } from 'util';
 import { write, copyAll, exec } from '../../../lib';
 import * as dockerTemplates from './templates';
+
+const accessAsync = promisify(access);
+const linkAsync = promisify(link);
+const unlinkAsync = promisify(unlink);
 
 export async function runDockerGenerator(config, log, build) {
   const license = build.isOss() ? 'ASL 2.0' : 'Elastic License';
   const imageFlavor = build.isOss() ? '-oss' : '';
   const imageTag = 'docker.elastic.co/kibana/kibana';
   const versionTag = config.getBuildVersion();
-  const artifactsServerContainer = 'kibana-docker-artifacts-server';
-  const artifactsUrlRoot = 'http://localhost:8000';
   const artifactTarball = `kibana${ imageFlavor }-${ versionTag }-linux-x86_64.tar.gz`;
   const artifactsDir = config.resolveFromTarget('.');
   const dockerBuildDir = config.resolveFromRepo('build', 'kibana-docker', build.isOss() ? 'oss' : 'default');
   const dockerOutputDir = config.resolveFromTarget(`kibana${ imageFlavor }-${ versionTag }-docker.tar`);
 
+  // Verify if we have the needed kibana target in order
+  // to build the kibana docker image.
+  // Also delete the current linked target into the
+  // kibana docker build folder if we have one.
+  try {
+    await accessAsync(resolve(artifactsDir, artifactTarball));
+    await unlinkAsync(resolve(dockerBuildDir, artifactTarball));
+  } catch (e) {
+    if (e && e.code === 'ENOENT' && e.syscall === 'access') {
+      throw new Error(
+        `Kibana linux target (${ artifactTarball }) is needed in order to build ${''
+        }the docker image. None was found at ${ artifactsDir }`
+      );
+    }
+  }
+
+  // Create the kibana linux target inside the
+  // Kibana docker build
+  await linkAsync(
+    resolve(artifactsDir, artifactTarball),
+    resolve(dockerBuildDir, artifactTarball),
+  );
+
   // Write all the needed docker config files
   // into kibana-docker folder
   const scope = {
-    artifactsUrlRoot,
     artifactTarball,
     imageFlavor,
     versionTag,
     license,
     artifactsDir,
-    artifactsServerContainer,
     imageTag,
     dockerOutputDir
   };
