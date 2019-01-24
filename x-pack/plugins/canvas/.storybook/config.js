@@ -23,6 +23,14 @@ if (process.env.NODE_ENV === 'test') {
   addDecorator(
     withInfo({ 
       inline: true,
+      styles: {
+        infoBody: {
+          margin: 20
+        },
+        infoStory: {
+          margin: '40px 60px'
+        }
+      }
     })
   );
 
@@ -37,8 +45,8 @@ if (process.env.NODE_ENV === 'test') {
 const req = require.context('./..', true, /.examples.tsx$/);
 
 // Wrap each story with a div -- we may make this smarter later.
-const storyWrapper = story => <div style={{ margin: 24 }}>{story()}</div>;
-addDecorator(storyWrapper);
+// const storyWrapper = story => <div style={{ margin: 24 }}>{story()}</div>;
+// addDecorator(storyWrapper);
 
 function loadStories() {
   //require('./welcome');

@@ -5,8 +5,13 @@
  */
 
 import { compose, withState } from 'recompose';
-import { AdvancedFilter as Component, Props } from './advanced_filter';
+import { AdvancedFilter as Component, Props as ComponentProps } from './advanced_filter';
 
-export const AdvancedFilter = compose<Props, {}>(
+export interface Props {
+  value?: string;
+  commit: (value: string) => void;
+}
+
+export const AdvancedFilter = compose<ComponentProps, Props>(
   withState('value', 'onChange', ({ filter }) => filter || '')
 )(Component);
