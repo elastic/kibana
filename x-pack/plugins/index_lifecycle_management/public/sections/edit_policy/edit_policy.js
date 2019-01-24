@@ -166,8 +166,8 @@ class EditPolicyUi extends Component {
                 <p>
                   <FormattedMessage
                     id="xpack.indexLifecycleMgmt.editPolicy.lifecyclePolicyDescriptionText"
-                    defaultMessage={`Use an index policy to automate the four phases of the index lifecycle,
-                      from actively writing to the index to deleting it.`}
+                    defaultMessage="Use an index policy to automate the four phases of the index lifecycle,
+                      from actively writing to the index to deleting it."
                   />
                   {' '}
                   <LearnMoreLink
@@ -197,8 +197,9 @@ class EditPolicyUi extends Component {
                           .{' '}
                           <FormattedMessage
                             id="xpack.indexLifecycleMgmt.editPolicy.editingExistingPolicyExplanationMessage"
-                            defaultMessage={`Any changes you make will affect the indices that are attached to this policy.
-                              Alternatively, you can save these changes in a new policy.`}
+                            defaultMessage="Any changes you make will affect the indices that are
+                              attached to this policy. Alternatively, you can save these changes in
+                              a new policy."
                           />
                         </p>
                       </EuiText>
@@ -272,24 +273,24 @@ class EditPolicyUi extends Component {
                 errors={errors[PHASE_HOT]}
                 isShowingErrors={isShowingErrors && !!findFirstError(errors[PHASE_HOT], false)}
               />
-              <EuiHorizontalRule className="ilmHrule" />
+              <EuiHorizontalRule />
               <WarmPhase
                 errors={errors[PHASE_WARM]}
                 showNodeDetailsFlyout={this.showNodeDetailsFlyout}
                 isShowingErrors={isShowingErrors && !!findFirstError(errors[PHASE_WARM], false)}
               />
-              <EuiHorizontalRule className="ilmHrule" />
+              <EuiHorizontalRule />
               <ColdPhase
                 errors={errors[PHASE_COLD]}
                 showNodeDetailsFlyout={this.showNodeDetailsFlyout}
                 isShowingErrors={isShowingErrors && !!findFirstError(errors[PHASE_COLD], false)}
               />
-              <EuiHorizontalRule className="ilmHrule" />
+              <EuiHorizontalRule />
               <DeletePhase
                 errors={errors[PHASE_DELETE]}
                 isShowingErrors={isShowingErrors && !!findFirstError(errors[PHASE_DELETE], false)}
               />
-              <EuiHorizontalRule className="ilmHrule" />
+              <EuiHorizontalRule />
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup>

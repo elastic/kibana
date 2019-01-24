@@ -1,47 +1,25 @@
 // Normal colors
 $localNavTextColor: $kuiTextColor;
-$localNavBackgroundColor: $kuiColorWhite;
+$localNavBackgroundColor: $euiColorEmptyShade;
 $localNavButtonTextColor: $kuiTextColor;
 $localNavButtonTextColor-isHover: $kuiColorLightestGray;
 $localNavButtonBackgroundColor: transparent;
 $localNavButtonBackgroundColor-isHover: $kuiColorBlue;
 $localNavButtonBackgroundColor-isSelected: $kuiColorLightestGray;
-$localNavBreadcrumbDelimiterColor: #5a5a5a;
-$localSearchBackgroundColor: #ffffff;
-$localSearchBorderColor-isInvalid: #e74C3c;
+$localNavBreadcrumbDelimiterColor: $euiBorderColor;
+$localSearchBackgroundColor: $euiColorGhost;
+$localSearchBorderColor-isInvalid: $euiColorDanger;
 $localDropdownBackgroundColor: $localNavButtonBackgroundColor-isSelected;
-$localDropdownFormNoteTextColor: #737373;
+$localDropdownFormNoteTextColor: $euiColorDarkShade;
 $localTabTextColor: $kuiColorDarkestGray;
 $localTabTextColor-isHover: $kuiColorBlue;
 $localTabTextColor-isSelected: $kuiColorBlue;
 $localBreadcrumbLinkColor: $kuiColorBlue;
-$localSearchButtonBackgroundColor: $kuiColorDarkGray;
-$localSearchButtonTextColor: #ffffff;
+$localSearchButtonBackgroundColor: $euiColorPrimary;
+$localSearchButtonTextColor: $euiColorGhost;
 $localDatePickerButtonHoverBackgroundColor: $localNavButtonBackgroundColor-isHover;
-$localDatePickerCellSelectedBackgroundColor: #777777;
-$localDatePickerCellSelectedTextColor: #ffffff;
-
-// Dark theme colors
-$localNavTextColor--darkTheme: $kuiTextColor--darkTheme;
-$localNavBackgroundColor--darkTheme: #222;
-$localNavButtonTextColor--darkTheme: #dedede;
-$localNavButtonTextColor-isHover--darkTheme: #ffffff;
-$localNavButtonBackgroundColor-isHover--darkTheme: #000000;
-$localNavButtonBackgroundColor-isSelected--darkTheme: #525252;
-$localNavBreadcrumbDelimiterColor--darkTheme: #a5a5a5;
-$localSearchBackgroundColor--darkTheme: #4e4e4e;
-$localSearchBorderColor-isInvalid--darkTheme: #ff6758;
-$localDropdownBackgroundColor--darkTheme: $localNavButtonBackgroundColor-isSelected--darkTheme;
-$localDropdownFormNoteTextColor--darkTheme: #a2a2a2;
-$localDropdownWarningTextColor--darkTheme: $kuiTextColor--darkTheme;
-$localDropdownWarningBackgroundColor--darkTheme: #636363;
-$localTabTextColor--darkTheme: $localNavButtonTextColor--darkTheme;
-$localTabTextColor-isHover--darkTheme: $localNavButtonTextColor-isHover--darkTheme;
-$localTabTextColor-isSelected--darkTheme: $localNavButtonTextColor-isHover--darkTheme;
-$localSearchButtonBackgroundColor--darkTheme: #777777;
-$localSearchButtonTextColor--darkTheme: #ffffff;
-$localDatePickerButtonHoverBackgroundColor--darkTheme: rgba(#000000, 0.4);
-$localDatePickerCellSelectedTextColor--darkTheme: #ffffff;
+$localDatePickerCellSelectedBackgroundColor: $euiColorDarkShade;
+$localDatePickerCellSelectedTextColor: $euiTextColor;
 
 // Spacing
 $localNavSideSpacing: 10px;

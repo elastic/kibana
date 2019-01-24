@@ -21,8 +21,6 @@ import moment from 'moment-timezone';
 import numeralLanguages from '@elastic/numeral/languages';
 import { i18n } from '@kbn/i18n';
 
-import { IS_KIBANA_RELEASE } from '../../../utils';
-
 export function getUiSettingDefaults() {
   const weekdays = moment.weekdays().slice();
   const [defaultWeekday] = weekdays;
@@ -77,7 +75,7 @@ export function getUiSettingDefaults() {
       name: i18n.translate('kbn.advancedSettings.k7designTitle', {
         defaultMessage: 'Use the new K7 UI design',
       }),
-      value: IS_KIBANA_RELEASE,
+      value: true,
       description: i18n.translate('kbn.advancedSettings.k7designText', {
         defaultMessage:
           'When set, Kibana will use the new K7 design targeted for release in 7.0. At this time, not all features are implemented.',
@@ -825,16 +823,6 @@ export function getUiSettingDefaults() {
         },
       }),
     },
-    'dashboard:defaultDarkTheme': {
-      name: i18n.translate('kbn.advancedSettings.dashboardDarkThemeTitle', {
-        defaultMessage: 'Dark theme',
-      }),
-      value: false,
-      description: i18n.translate('kbn.advancedSettings.dashboardDarkThemeText', {
-        defaultMessage: 'New dashboards use dark theme by default',
-      }),
-      category: ['dashboard'],
-    },
     'filters:pinnedByDefault': {
       name: i18n.translate('kbn.advancedSettings.pinFiltersTitle', {
         defaultMessage: 'Pin filters by default',
@@ -847,6 +835,7 @@ export function getUiSettingDefaults() {
     'filterEditor:suggestValues': {
       name: i18n.translate('kbn.advancedSettings.suggestFilterValuesTitle', {
         defaultMessage: 'Filter editor suggest values',
+        description: '"Filter editor" refers to the UI you create filters in.',
       }),
       value: true,
       description: i18n.translate('kbn.advancedSettings.suggestFilterValuesText', {
