@@ -391,7 +391,7 @@ export class Listing extends Component {
             &nbsp;
             <FormattedMessage
               id="xpack.monitoring.cluster.listing.unlinkedDeploymentCallOutText"
-              defaultMessage="Or, click Unlinked Cluster in the table below"
+              defaultMessage="Or, click Standalone Cluster in the table below"
             />
           </p>
           <p>
