@@ -47,8 +47,15 @@ export class TOCEntry extends React.Component {
   render() {
 
     const { layer, openLayerPanel, zoom, toggleVisible } = this.props;
+    const fitToBounds = () => {
+      this.props.fitToBounds(this.props.layer.getId());
+    };
 
-    const smallIcon = layer.renderSmallTocIcon({ toggleVisible, zoom });
+    const legendIcon = layer.renderTocEntryIcon({
+      toggleVisible,
+      zoom,
+      fitToBounds
+    });
     let tocDetails = layer.getTOCDetails();
     if (tocDetails) {
       tocDetails = (
@@ -73,8 +80,8 @@ export class TOCEntry extends React.Component {
             layer.isVisible() && layer.showAtZoomLevel(zoom) && !layer.dataHasLoadError() ? 'gisTocEntry-visible' : 'gisTocEntry-notVisible'
           }
         >
-          <EuiFlexItem grow={false}>
-            { smallIcon }
+          <EuiFlexItem grow={false} alignItems={"center"}>
+            { legendIcon }
           </EuiFlexItem>
           <EuiFlexItem>
             <button

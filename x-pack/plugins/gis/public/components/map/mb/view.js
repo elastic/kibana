@@ -64,7 +64,7 @@ export class MBMapContainer extends React.Component {
   async _initializeMap() {
 
     try {
-      this._mbMap = await createMbMapInstance(this.refs.mapContainer, this.props.goto.center);
+      this._mbMap = await createMbMapInstance(this.refs.mapContainer, this.props.goto ? this.props.goto.center : null);
     } catch(e) {
       throw e;
     }

@@ -10,12 +10,9 @@ import { DataRequest } from './util/data_request';
 import React from 'react';
 
 import {
-  EuiButtonIcon,
-  EuiLoadingSpinner,
-  EuiToolTip,
-  EuiIconTip
+  EuiButtonIcon
 } from '@elastic/eui';
-import { VisibilityToggle } from '../components/visibility_toggle';
+import { LayerTocActions } from '../components/layer_toc_actions';
 
 const SOURCE_UPDATE_REQUIRED = true;
 const NO_SOURCE_UPDATE_REQUIRED = false;
@@ -145,56 +142,18 @@ export class AbstractLayer {
     return this._source.renderSourceSettingsEditor({ onChange });
   };
 
-
-  _renderVisibilityToggle({ toggleVisible }) {
-    const layer  = this;
+  renderTocEntryIcon({ fitToBounds, zoom, toggleVisible }) {
     return (
-      <VisibilityToggle
-        id={layer.getId()}
-        checked={layer.isVisible()}
-        onChange={() => toggleVisible(layer.getId())}
-        size={'l'}
-      >
-        {layer.getIcon()}
-      </VisibilityToggle>
+      <LayerTocActions
+        layer={this}
+        fitToBounds={fitToBounds}
+        zoom={zoom}
+        toggleVisible={() => {
+          toggleVisible(this.getId());
+        }}
+      />
     );
   }
-
-
-  renderSmallTocIcon({ toggleVisible, zoom }) {
-
-    let visibilityIndicator;
-    if (this.dataHasLoadError()) {
-      visibilityIndicator = (
-        <EuiIconTip
-          aria-label="Load warning"
-          size="m"
-          type="alert"
-          color="warning"
-          content={this.getDataLoadError()}
-        />
-      );
-    } else if (this.isLayerLoading()) {
-      visibilityIndicator = <EuiLoadingSpinner size="m"/>;
-    } else if (!this.showAtZoomLevel(zoom)) {
-      const { minZoom, maxZoom } = this.getZoomConfig();
-      visibilityIndicator = (
-        <EuiToolTip
-          position="left"
-          content={`Map is at zoom level ${zoom}.
-          This layer is only visible between zoom levels ${minZoom} to ${maxZoom}.`}
-        >
-          {this._renderVisibilityToggle({ toggleVisible })}
-        </EuiToolTip>
-      );
-    } else {
-      visibilityIndicator = this._renderVisibilityToggle({ toggleVisible });
-    }
-    return visibilityIndicator;
-
-
-  }
-
 
   isLayerLoading() {
     return this._dataRequests.some(dataRequest => dataRequest.isLoading());
