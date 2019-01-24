@@ -5,9 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import idx from 'idx';
 import { get } from 'lodash';
 import React from 'react';
+import { idx } from 'x-pack/plugins/apm/common/idx';
 import {
   REQUEST_URL_FULL,
   TRANSACTION_DURATION,
@@ -34,7 +34,7 @@ export function StickyTransactionProperties({
   const timestamp = transaction['@timestamp'];
   const url =
     idx(transaction, _ => _.context.page.url) ||
-    idx(transaction, _ => _.context.request.url.full) ||
+    idx(transaction, _ => _.url.full) ||
     NOT_AVAILABLE_LABEL;
   const duration = transaction.transaction.duration.us;
   const stickyProperties: IStickyProperty[] = [

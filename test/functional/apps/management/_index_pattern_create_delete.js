@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }) {
           return PageObjects.settings.navigateTo();
         })
         .then(function () {
-          return PageObjects.settings.clickKibanaIndices();
+          return PageObjects.settings.clickKibanaIndexPatterns();
         });
     });
 
