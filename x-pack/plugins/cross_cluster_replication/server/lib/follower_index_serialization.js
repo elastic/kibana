@@ -86,10 +86,7 @@ export const deserializeFollowerIndex = ({
   name: follower_index,
   remoteCluster: remote_cluster,
   leaderIndex: leader_index,
-
-  // TODO: Remove conditional when https://github.com/elastic/elasticsearch/issues/37738 is fixed
-  status: status === 'active' && shards ? 'active' : 'paused',
-
+  status,
   maxReadRequestOperationCount: max_read_request_operation_count,
   maxOutstandingReadRequests: max_outstanding_read_requests,
   maxReadRequestSize: max_read_request_size,

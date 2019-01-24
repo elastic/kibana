@@ -22,8 +22,6 @@ import {
   FollowerIndexUnfollowProvider
 } from '../../../../../components';
 
-import { getIndexListUri } from '../../../../../../../../index_management/public/services/navigation';
-
 export class ContextMenuUi extends PureComponent {
 
   static propTypes = {
@@ -154,16 +152,6 @@ export class ContextMenuUi extends PureComponent {
                 <FormattedMessage
                   id="xpack.crossClusterReplication.followerIndex.contextMenu.editLabel"
                   defaultMessage="Edit follower index"
-                />
-              </EuiContextMenuItem>
-
-              <EuiContextMenuItem
-                icon="inspect"
-                href={getIndexListUri(`name:${followerIndexNames[0]}`)}
-              >
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.followerIndex.contextMenu.viewIndexManagementLabel"
-                  defaultMessage="View in Index Management"
                 />
               </EuiContextMenuItem>
             </Fragment>

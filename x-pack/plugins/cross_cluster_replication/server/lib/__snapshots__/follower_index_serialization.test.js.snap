@@ -73,7 +73,7 @@ Object {
       "writeBufferSizeBytes": undefined,
     },
   ],
-  "status": "paused",
+  "status": "active",
 }
 `;
 

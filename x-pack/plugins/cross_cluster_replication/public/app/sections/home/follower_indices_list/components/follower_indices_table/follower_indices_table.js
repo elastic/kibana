@@ -91,7 +91,6 @@ export const FollowerIndicesTable = injectI18n(
                     <EuiIcon
                       aria-label={label}
                       type="play"
-                      color="primary"
                       className="euiContextMenu__icon"
                     />
                     <span>{label}</span>
@@ -105,7 +104,6 @@ export const FollowerIndicesTable = injectI18n(
                     <EuiIcon
                       aria-label={label}
                       type="pause"
-                      color="warning"
                       className="euiContextMenu__icon"
                     />
                     <span>{label}</span>
@@ -128,7 +126,6 @@ export const FollowerIndicesTable = injectI18n(
                 <EuiIcon
                   aria-label={label}
                   type="pencil"
-                  color="primary"
                   className="euiContextMenu__icon"
                 />
                 <span>{label}</span>
@@ -151,7 +148,6 @@ export const FollowerIndicesTable = injectI18n(
                     <EuiIcon
                       aria-label={label}
                       type="indexFlush"
-                      color="danger"
                       className="euiContextMenu__icon"
                     />
                     <span>{label}</span>
@@ -188,7 +184,7 @@ export const FollowerIndicesTable = injectI18n(
         sortable: true,
         render: (isPaused) => {
           return isPaused ? (
-            <EuiHealth color="warning">
+            <EuiHealth color="subdued">
               <FormattedMessage
                 id="xpack.crossClusterReplication.followerIndexList.table.pausedStatus"
                 defaultMessage="Paused"

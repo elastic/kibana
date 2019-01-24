@@ -51,6 +51,7 @@ describe('[CCR] follower index serialization', () => {
     it('deserializes Elasticsearch follower index object', () => {
       const serializedFollowerIndex = {
         index: 'follower index name',
+        status: 'active',
         shards: [{
           shard_id: 'shard 1',
         }, {

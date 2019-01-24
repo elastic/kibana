@@ -115,7 +115,7 @@ export class DetailPanelUi extends Component {
 
                 <EuiDescriptionListDescription>
                   {isPaused ? (
-                    <EuiHealth color="warning">
+                    <EuiHealth color="subdued">
                       <FormattedMessage
                         id="xpack.crossClusterReplication.followerIndexDetailPanel.pausedStatus"
                         defaultMessage="Paused"
@@ -176,7 +176,7 @@ export class DetailPanelUi extends Component {
                     <EuiDescriptionListTitle>
                       <EuiTitle size="xs">
                         <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexDetailPanel.maxReadRequestOperationCountLabel"
+                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestOperationCountTitle"
                           defaultMessage="Max read request operation count"
                         />
                       </EuiTitle>
@@ -191,7 +191,7 @@ export class DetailPanelUi extends Component {
                     <EuiDescriptionListTitle>
                       <EuiTitle size="xs">
                         <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexDetailPanel.maxOutstandingReadRequestsLabel"
+                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingReadRequestsTitle"
                           defaultMessage="Max outstanding read requests"
                         />
                       </EuiTitle>
@@ -210,7 +210,7 @@ export class DetailPanelUi extends Component {
                     <EuiDescriptionListTitle>
                       <EuiTitle size="xs">
                         <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexDetailPanel.maxReadRequestSizeLabel"
+                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestSizeTitle"
                           defaultMessage="Max read request size"
                         />
                       </EuiTitle>
@@ -225,7 +225,7 @@ export class DetailPanelUi extends Component {
                     <EuiDescriptionListTitle>
                       <EuiTitle size="xs">
                         <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexDetailPanel.maxWriteRequestOperationCountLabel"
+                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestOperationCountTitle"
                           defaultMessage="Max write request operation count"
                         />
                       </EuiTitle>
@@ -244,7 +244,7 @@ export class DetailPanelUi extends Component {
                     <EuiDescriptionListTitle>
                       <EuiTitle size="xs">
                         <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexDetailPanel.maxWriteRequestSizeLabel"
+                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestSizeTitle"
                           defaultMessage="Max write request size"
                         />
                       </EuiTitle>
@@ -259,7 +259,7 @@ export class DetailPanelUi extends Component {
                     <EuiDescriptionListTitle>
                       <EuiTitle size="xs">
                         <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexDetailPanel.maxOutstandingWriteRequestsLabel"
+                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingWriteRequestsTitle"
                           defaultMessage="Max outstanding write requests"
                         />
                       </EuiTitle>
@@ -278,7 +278,7 @@ export class DetailPanelUi extends Component {
                     <EuiDescriptionListTitle>
                       <EuiTitle size="xs">
                         <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexDetailPanel.maxWriteBufferCountLabel"
+                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferCountTitle"
                           defaultMessage="Max write buffer count"
                         />
                       </EuiTitle>
@@ -293,7 +293,7 @@ export class DetailPanelUi extends Component {
                     <EuiDescriptionListTitle>
                       <EuiTitle size="xs">
                         <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexDetailPanel.maxWriteBufferSizeLabel"
+                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferSizeTitle"
                           defaultMessage="Max write buffer size"
                         />
                       </EuiTitle>
@@ -312,7 +312,7 @@ export class DetailPanelUi extends Component {
                     <EuiDescriptionListTitle>
                       <EuiTitle size="xs">
                         <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexDetailPanel.maxRetryDelayLabel"
+                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxRetryDelayTitle"
                           defaultMessage="Max retry delay"
                         />
                       </EuiTitle>
@@ -327,7 +327,7 @@ export class DetailPanelUi extends Component {
                     <EuiDescriptionListTitle>
                       <EuiTitle size="xs">
                         <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndexDetailPanel.readPollTimeoutLabel"
+                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.readPollTimeoutTitle"
                           defaultMessage="Read poll timeout"
                         />
                       </EuiTitle>

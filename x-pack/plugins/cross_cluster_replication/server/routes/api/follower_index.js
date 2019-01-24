@@ -83,13 +83,11 @@ export const registerFollowerIndexRoutes = (server) => {
       const { id } = request.params;
 
       try {
-        // TODO: Replace with single follower index info request when
-        // https://github.com/elastic/elasticsearch/issues/37738 is fixed
         const {
           follower_indices: followerIndices
-        }  = await callWithRequest('ccr.info', { id: '_all' });
+        }  = await callWithRequest('ccr.info', { id });
 
-        const followerIndexInfo = followerIndices.find(followerIndex => followerIndex.follower_index === id);
+        const followerIndexInfo = followerIndices && followerIndices[0];
 
         if(!followerIndexInfo) {
           const error = Boom.notFound(`The follower index "${id}" does not exist.`);
