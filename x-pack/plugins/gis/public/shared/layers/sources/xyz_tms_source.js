@@ -19,6 +19,7 @@ export class XYZTMSSource extends TMSSource {
   static type = 'EMS_XYZ';
   static title = 'Tile Map Service from URL';
   static description = 'Map tiles from a URL that includes the XYZ coordinates';
+  static icon = 'grid';
 
   static createDescriptor(urlTemplate) {
     return {

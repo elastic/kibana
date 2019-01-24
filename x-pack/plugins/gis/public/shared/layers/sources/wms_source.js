@@ -19,6 +19,7 @@ export class WMSSource extends TMSSource {
   static type = 'WMS';
   static title = 'Web Map Service';
   static description = 'Maps from OGC Standard WMS';
+  static icon = 'grid';
 
   static createDescriptor({ serviceUrl, layers, styles }) {
     return {
