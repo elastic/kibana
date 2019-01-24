@@ -12,7 +12,7 @@ const { shallowEqual } = require('./functional');
 
 const makeUid = () => 1e11 + Math.floor((1e12 - 1e11) * Math.random());
 
-const selectReduce = (fun, previousValue, mapFun = d => d, logFun) => (...inputs) => {
+export const selectReduce = (fun, previousValue, mapFun = d => d, logFun) => (...inputs) => {
   // last-value memoizing version of this single line function:
   // (fun, previousValue) => (...inputs) => state => previousValue = fun(previousValue, ...inputs.map(input => input(state)))
   let argumentValues = [];
@@ -37,7 +37,7 @@ const selectReduce = (fun, previousValue, mapFun = d => d, logFun) => (...inputs
   };
 };
 
-const select = (fun, logFun) => (...inputs) => {
+export const select = (fun, logFun) => (...inputs) => {
   // last-value memoizing version of this single line function:
   // fun => (...inputs) => state => fun(...inputs.map(input => input(state)))
   let argumentValues = [];
@@ -61,7 +61,7 @@ const select = (fun, logFun) => (...inputs) => {
   };
 };
 
-const createStore = (initialState, onChangeCallback = () => {}) => {
+export const createStore = (initialState, onChangeCallback = () => {}) => {
   let currentState = initialState;
   let updater = state => state; // default: no side effect
   const getCurrentState = () => currentState;
@@ -84,11 +84,4 @@ const createStore = (initialState, onChangeCallback = () => {}) => {
   const dispatch = (type, payload) => setTimeout(() => commit(type, payload));
 
   return { getCurrentState, setUpdater, commit, dispatch };
-};
-
-module.exports = {
-  createStore,
-  select,
-  selectReduce,
-  makeUid,
 };

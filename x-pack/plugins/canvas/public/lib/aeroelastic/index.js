@@ -4,18 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const dom = require('./dom');
-const geometry = require('./geometry');
-const gestures = require('./gestures');
-const layout = require('./layout');
-const matrix = require('./matrix');
-const state = require('./state');
-
-module.exports = {
-  dom,
-  geometry,
-  gestures,
-  layout,
-  matrix,
-  state,
-};
+export const dom = require('./dom');
+export const geometry = require('./geometry');
+export const gestures = require('./gestures');
+export const layout = require('./layout');
+export const matrix = require('./matrix');
+export const state = require('./state');

@@ -76,7 +76,7 @@ const shapesAtPoint = (shapes, x, y) =>
 //
 // If it were a right handed coordinate system, AND Y still pointed down, then Z should increase away from the
 // viewer. But that's not the case. So we maximize the Z value to tell what's on top.
-const shapesAt = (shapes, { x, y }) =>
+export const shapesAt = (shapes, { x, y }) =>
   shapesAtPoint(shapes, x, y)
     .filter(shape => shape.inside)
     .sort((shape1, shape2) => shape2.z - shape1.z || shape2.index - shape1.index) // stable sort: DOM insertion order!!!
@@ -85,9 +85,5 @@ const shapesAt = (shapes, { x, y }) =>
 const getExtremum = (transformMatrix, a, b) =>
   matrix.normalize(matrix.mvMultiply(transformMatrix, [a, b, 0, 1]));
 
-const landmarkPoint = (a, b, transformMatrix, k, l) => getExtremum(transformMatrix, k * a, l * b);
-
-module.exports = {
-  landmarkPoint,
-  shapesAt,
-};
+export const landmarkPoint = (a, b, transformMatrix, k, l) =>
+  getExtremum(transformMatrix, k * a, l * b);
