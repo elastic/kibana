@@ -64,7 +64,7 @@ export class ALayer {
   }
 
   async getAttributions() {
-    if (!this.dataHasLoadError()) {
+    if (!this.hasErrors()) {
       return await this._source.getAttributions();
     }
     return '';
@@ -142,10 +142,6 @@ export class ALayer {
     return this._source.renderSourceSettingsEditor({ onChange });
   };
 
-  _findDataRequestForSource(sourceDataId) {
-    return this._dataRequests.find(dataRequest => dataRequest.getDataId() === sourceDataId);
-  }
-
   getSourceDataRequest() {
     return this._dataRequests.find(dataRequest => dataRequest.getDataId() === 'source');
   }
@@ -154,12 +150,12 @@ export class ALayer {
     return this._dataRequests.some(dataRequest => dataRequest.isLoading());
   }
 
-  dataHasLoadError() {
-    return this._descriptor && this._descriptor.errorState || false;
+  hasErrors() {
+    return _.get(this._descriptor, 'isInErrorState', false);
   }
 
-  getDataLoadError() {
-    return this.dataHasLoadError() ? this._descriptor.errorMessage : '';
+  getErrors() {
+    return this.hasErrors() ? this._descriptor.errorMessage : '';
   }
 
   toLayerDescriptor() {

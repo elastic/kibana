@@ -188,18 +188,10 @@ export class MBMapContainer extends React.Component {
 
     removeOrphanedSourcesAndLayers(this._mbMap, layerList);
     layerList.forEach(layer => {
-      if (!layer.dataHasLoadError()) {
+      if (!layer.hasErrors()) {
         Promise.resolve(layer.syncLayerWithMB(this._mbMap))
-          .catch(({ message }) => {
-            switch(layer._descriptor.type) {
-              case 'TILE':
-                console.warn(`Sync error retrieving tiles from TMS: ${message}`);
-                this.props.setTmsErrorStatus(layer.getId(), message);
-                break;
-              default:
-                console.warn(`Layer sync error: ${message}`);
-            }
-          });
+          .catch(({ message }) =>
+            this.props.setLayerErrorStatus(layer.getId(), message));
       }
     });
     syncLayerOrder(this._mbMap, layerList);

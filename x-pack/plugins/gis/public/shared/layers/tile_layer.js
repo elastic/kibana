@@ -42,27 +42,15 @@ export class TileLayer extends ALayer {
 
     return new Promise((resolve, reject) => {
       let tileLoadTimer = null;
-      let checkInterval = null;
 
       const clearChecks = () => {
-        clearInterval(checkInterval);
         clearTimeout(tileLoadTimer);
         map.off('dataloading');
       };
 
-      checkInterval = setInterval(() => {
-        if (tileLoad) {
-          resolve();
-          clearChecks();
-        }
-      }, 1000);
       tileLoadTimer = setTimeout(() => {
         if (!tileLoad) {
-          try {
-            throw new Error(`Tiles from "${url}" could not be loaded`);
-          } catch (e) {
-            reject(e);
-          }
+          reject(new Error(`Tiles from "${url}" could not be loaded`));
         } else {
           resolve();
         }

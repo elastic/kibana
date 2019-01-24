@@ -13,7 +13,7 @@ import {
   setMouseCoordinates,
   clearMouseCoordinates,
   clearGoto,
-  setTmsErrorStatus,
+  setLayerErrorStatus,
 } from '../../../actions/store_actions';
 import { getLayerList, getMapReady, getGoto } from "../../../selectors/map_selectors";
 
@@ -47,8 +47,8 @@ function mapDispatchToProps(dispatch) {
     clearGoto: () => {
       dispatch(clearGoto());
     },
-    setTmsErrorStatus: (id, msg) =>
-      dispatch(setTmsErrorStatus(id, msg))
+    setLayerErrorStatus: (id, msg) =>
+      dispatch(setLayerErrorStatus(id, msg))
   };
 }
 

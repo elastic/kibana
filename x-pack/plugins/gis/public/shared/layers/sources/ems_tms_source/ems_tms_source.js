@@ -79,7 +79,6 @@ export class EMSTMSSource extends TMSSource {
       return service.id === this._descriptor.id;
     });
     if (!emsTmsService) {
-      console.error(`EMS TMS Service: ${this._descriptor.id} currently unavailable`);
       return;
     }
     return emsTmsService;
@@ -108,7 +107,7 @@ export class EMSTMSSource extends TMSSource {
     let attributions;
     try {
       service = this._getTMSOptions();
-      attributions = service.attributionMarkdown.split('|');
+      attributions = service && service.attributionMarkdown.split('|');
     } catch (e) {
       console.warn(`Error obtaining attributions: ${e}`);
     }

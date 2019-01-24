@@ -11,7 +11,7 @@ import {
   LAYER_DATA_LOAD_ENDED,
   LAYER_DATA_LOAD_ERROR,
   ADD_LAYER,
-  SET_TMS_ERROR_STATUS,
+  SET_LAYER_ERROR_STATUS,
   ADD_WAITING_FOR_MAP_READY_LAYER,
   CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
   REMOVE_LAYER,
@@ -134,7 +134,7 @@ export function map(state = INITIAL_STATE, action) {
       };
     case LAYER_DATA_LOAD_STARTED:
       return updateWithDataRequest(state, action);
-    case SET_TMS_ERROR_STATUS:
+    case SET_LAYER_ERROR_STATUS:
       return setErrorStatus(state, action);
     case LAYER_DATA_LOAD_ERROR:
       const errorRequestResetState = resetDataRequest(state, action);
@@ -272,7 +272,7 @@ function setErrorStatus(state, { layerId, errorMessage }) {
   const tmsErrorLayer = state.layerList.find(({ id }) => id === layerId);
   return tmsErrorLayer
     ? updateLayerInList(
-      updateLayerInList(state, tmsErrorLayer.id, 'errorState', true),
+      updateLayerInList(state, tmsErrorLayer.id, 'isInErrorState', true),
       tmsErrorLayer.id, 'errorMessage', errorMessage)
     : state;
 }

@@ -62,14 +62,14 @@ export class TOCEntry extends React.Component {
     });
 
     let visibilityIndicator;
-    if (layer.dataHasLoadError()) {
+    if (layer.hasErrors()) {
       visibilityIndicator = (
         <EuiIconTip
           aria-label="Load warning"
           size="m"
           type="alert"
           color="warning"
-          content={layer.getDataLoadError()}
+          content={layer.getErrors()}
         />
       );
     } else if (layer.isLayerLoading()) {
@@ -110,7 +110,8 @@ export class TOCEntry extends React.Component {
           alignItems="center"
           responsive={false}
           className={
-            layer.isVisible() && layer.showAtZoomLevel(zoom) && !layer.dataHasLoadError() ? 'gisTocEntry-visible' : 'gisTocEntry-notVisible'
+            layer.isVisible() && layer.showAtZoomLevel(zoom)
+              && !layer.hasErrors() ? 'gisTocEntry-visible' : 'gisTocEntry-notVisible'
           }
         >
           <EuiFlexItem grow={false}>
