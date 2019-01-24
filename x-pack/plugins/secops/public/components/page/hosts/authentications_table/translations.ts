@@ -6,16 +6,43 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const LATEST = i18n.translate('xpack.secops.authenticationsTable.latest', {
-  defaultMessage: 'Latest',
-});
+export const LAST_SUCCESSFUL_SOURCE = i18n.translate(
+  'xpack.secops.authenticationsTable.lastSuccessfulSource',
+  {
+    defaultMessage: 'Last Successful Source',
+  }
+);
 
-export const TO = i18n.translate('xpack.secops.authenticationsTable.to', {
-  defaultMessage: 'To',
-});
+export const LAST_SUCCESSFUL_DESTINATION = i18n.translate(
+  'xpack.secops.authenticationsTable.lastSuccessfulDestination',
+  {
+    defaultMessage: 'Last Successful Destination',
+  }
+);
 
-export const FROM = i18n.translate('xpack.secops.authenticationsTable.from', {
-  defaultMessage: 'From',
+export const LAST_SUCCESSFUL_TIME = i18n.translate(
+  'xpack.secops.authenticationsTable.lastSuccessfulTime',
+  {
+    defaultMessage: 'Last Success',
+  }
+);
+
+export const LAST_FAILED_SOURCE = i18n.translate(
+  'xpack.secops.authenticationsTable.lastFailedSource',
+  {
+    defaultMessage: 'Last Failed Source',
+  }
+);
+
+export const LAST_FAILED_DESTINATION = i18n.translate(
+  'xpack.secops.authenticationsTable.lastFailedDestination',
+  {
+    defaultMessage: 'Last Failed Destination',
+  }
+);
+
+export const LAST_FAILED_TIME = i18n.translate('xpack.secops.authenticationsTable.lastFailedTime', {
+  defaultMessage: 'Last Failure',
 });
 
 export const SUCCESSES = i18n.translate('xpack.secops.authenticationsTable.successes', {
@@ -30,10 +57,10 @@ export const USER = i18n.translate('xpack.secops.authenticationsTable.user', {
   defaultMessage: 'User',
 });
 
-export const AUTHENTICATION_FAILURES = i18n.translate(
+export const AUTHENTICATIONS = i18n.translate(
   'xpack.secops.authenticationsTable.authenticationFailures',
   {
-    defaultMessage: 'Authentication Failures',
+    defaultMessage: 'Authentications',
   }
 );
 

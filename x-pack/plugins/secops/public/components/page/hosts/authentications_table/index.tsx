@@ -10,11 +10,12 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
+import { has } from 'lodash/fp';
 import moment from 'moment';
 import { AuthenticationsEdges } from '../../../../graphql/types';
 import { authenticationsSelector, hostsActions, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
-import { defaultToEmpty, getEmptyValue } from '../../../empty_value';
+import { defaultToEmpty, getEmptyValue, getOrEmpty } from '../../../empty_value';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
 import * as i18n from './translations';
@@ -74,7 +75,7 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
   }) => (
     <LoadMoreTable
       columns={getAuthenticationColumns(startDate)}
-      loadingTitle={i18n.AUTHENTICATION_FAILURES}
+      loadingTitle={i18n.AUTHENTICATIONS}
       loading={loading}
       pageOfItems={data}
       loadMore={() => loadMore(nextCursor)}
@@ -84,7 +85,7 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
       updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
       title={
         <h3>
-          {i18n.AUTHENTICATION_FAILURES} <EuiBadge color="hollow">{totalCount}</EuiBadge>
+          {i18n.AUTHENTICATIONS} <EuiBadge color="hollow">{totalCount}</EuiBadge>
         </h3>
       }
     />
@@ -147,29 +148,65 @@ const getAuthenticationColumns = (startDate: number) => [
     render: ({ node }: AuthenticationsEdges) => <>{defaultToEmpty(node.failures)}</>,
   },
   {
+    name: i18n.LAST_FAILED_TIME,
+    truncateText: false,
+    hideForMobile: false,
+    render: ({ node }: AuthenticationsEdges) => {
+      return (
+        <>
+          {has('lastFailure.timestamp', node) ? (
+            <FormattedRelative value={new Date(node.lastFailure!.timestamp!)} />
+          ) : (
+            getEmptyValue()
+          )}
+        </>
+      );
+    },
+  },
+  {
+    name: i18n.LAST_FAILED_SOURCE,
+    truncateText: false,
+    hideForMobile: false,
+    render: ({ node }: AuthenticationsEdges) => <>{getOrEmpty('lastFailure.source.ip', node)}</>,
+  },
+  {
+    name: i18n.LAST_FAILED_DESTINATION,
+    truncateText: false,
+    hideForMobile: false,
+    render: ({ node }: AuthenticationsEdges) => <>{getOrEmpty('lastFailure.host.name', node)}</>,
+  },
+  {
     name: i18n.SUCCESSES,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }: AuthenticationsEdges) => <>{defaultToEmpty(node.successes)}</>,
   },
   {
-    name: i18n.FROM,
+    name: i18n.LAST_SUCCESSFUL_TIME,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }: AuthenticationsEdges) => <>{defaultToEmpty(node.source.ip)}</>,
+    render: ({ node }: AuthenticationsEdges) => {
+      return (
+        <>
+          {has('lastSuccess.timestamp', node) ? (
+            <FormattedRelative value={new Date(node.lastSuccess!.timestamp!)} />
+          ) : (
+            getEmptyValue()
+          )}
+        </>
+      );
+    },
   },
   {
-    name: i18n.TO,
+    name: i18n.LAST_SUCCESSFUL_SOURCE,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }: AuthenticationsEdges) => <>{defaultToEmpty(node.host.name)}</>,
+    render: ({ node }: AuthenticationsEdges) => <>{getOrEmpty('lastSuccess.source.ip', node)}</>,
   },
   {
-    name: i18n.LATEST,
+    name: i18n.LAST_SUCCESSFUL_DESTINATION,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }: AuthenticationsEdges) => (
-      <>{node.latest ? <FormattedRelative value={new Date(node.latest)} /> : getEmptyValue()}</>
-    ),
+    render: ({ node }: AuthenticationsEdges) => <>{getOrEmpty('lastSuccess.host.name', node)}</>,
   },
 ];

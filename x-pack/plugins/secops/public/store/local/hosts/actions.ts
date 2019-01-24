@@ -19,7 +19,3 @@ export const updateEventsLimit = actionCreator<{ limit: number }>('UPDATE_EVENTS
 export const updateUncommonProcessesLimit = actionCreator<{ limit: number }>(
   'UPDATE_UNCOMMONPROCESSES_LIMIT'
 );
-
-export const updateUncommonProcessesUpperLimit = actionCreator<{ upperLimit: number }>(
-  'UPDATE_UNCOMMONPROCESSES_UPPER_LIMIT'
-);

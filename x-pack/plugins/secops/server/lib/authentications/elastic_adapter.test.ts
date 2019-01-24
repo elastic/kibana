@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { AuthenticationsEdges } from '../../graphql/types';
 import { formatAuthenticationData } from './elasticsearch_adapter';
 import { auditdFieldsMap } from './query.dsl';
@@ -17,14 +18,6 @@ describe('authentications elasticsearch_adapter', () => {
       _score: 10,
       _source: {
         '@timestamp': 'time-1',
-        source: {
-          ip: '192.168.0.1',
-        },
-        host: {
-          id: 'host-id-1',
-          ip: '127.0.0.1',
-          name: 'host-name-1',
-        },
       },
       cursor: 'cursor-1',
       sort: [0],
@@ -45,16 +38,8 @@ describe('authentications elasticsearch_adapter', () => {
           _id: 'id-123',
           failures: 10,
           successes: 20,
-          latest: '',
-          host: {
-            id: '',
-            name: '',
-          },
           user: {
             name: 'Evan',
-          },
-          source: {
-            ip: '',
           },
         },
       };
@@ -63,7 +48,7 @@ describe('authentications elasticsearch_adapter', () => {
     });
 
     test('it formats a authentications with a source ip correctly', () => {
-      const fields: ReadonlyArray<string> = ['source.ip'];
+      const fields: ReadonlyArray<string> = ['lastSuccess.source.ip'];
       const data = formatAuthenticationData(fields, hit, auditdFieldsMap);
       const expected: AuthenticationsEdges = {
         cursor: {
@@ -74,16 +59,8 @@ describe('authentications elasticsearch_adapter', () => {
           _id: 'id-123',
           failures: 10,
           successes: 20,
-          latest: '',
-          host: {
-            id: '',
-            name: '',
-          },
           user: {
             name: 'Evan',
-          },
-          source: {
-            ip: '192.168.0.1',
           },
         },
       };
@@ -92,7 +69,7 @@ describe('authentications elasticsearch_adapter', () => {
     });
 
     test('it formats a authentications with a host name only', () => {
-      const fields: ReadonlyArray<string> = ['host.name'];
+      const fields: ReadonlyArray<string> = ['lastSuccess.host.name'];
       const data = formatAuthenticationData(fields, hit, auditdFieldsMap);
       const expected: AuthenticationsEdges = {
         cursor: {
@@ -103,16 +80,8 @@ describe('authentications elasticsearch_adapter', () => {
           _id: 'id-123',
           failures: 10,
           successes: 20,
-          latest: '',
-          host: {
-            id: '',
-            name: 'host-name-1',
-          },
           user: {
             name: 'Evan',
-          },
-          source: {
-            ip: '',
           },
         },
       };
@@ -121,7 +90,7 @@ describe('authentications elasticsearch_adapter', () => {
     });
 
     test('it formats a authentications with a host id only', () => {
-      const fields: ReadonlyArray<string> = ['host.id'];
+      const fields: ReadonlyArray<string> = ['lastSuccess.host.id'];
       const data = formatAuthenticationData(fields, hit, auditdFieldsMap);
       const expected: AuthenticationsEdges = {
         cursor: {
@@ -132,16 +101,8 @@ describe('authentications elasticsearch_adapter', () => {
           _id: 'id-123',
           failures: 10,
           successes: 20,
-          latest: '',
-          host: {
-            id: 'host-id-1',
-            name: '',
-          },
           user: {
             name: 'Evan',
-          },
-          source: {
-            ip: '',
           },
         },
       };
@@ -150,7 +111,7 @@ describe('authentications elasticsearch_adapter', () => {
     });
 
     test('it formats a authentications with a host name and id correctly', () => {
-      const fields: ReadonlyArray<string> = ['host.name', 'host.id'];
+      const fields: ReadonlyArray<string> = ['lastSuccess.host.name', 'lastSuccess.host.id'];
       const data = formatAuthenticationData(fields, hit, auditdFieldsMap);
       const expected: AuthenticationsEdges = {
         cursor: {
@@ -161,16 +122,8 @@ describe('authentications elasticsearch_adapter', () => {
           _id: 'id-123',
           failures: 10,
           successes: 20,
-          latest: '',
-          host: {
-            id: 'host-id-1',
-            name: 'host-name-1',
-          },
           user: {
             name: 'Evan',
-          },
-          source: {
-            ip: '',
           },
         },
       };

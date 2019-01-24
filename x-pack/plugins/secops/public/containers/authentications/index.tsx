@@ -87,7 +87,7 @@ const AuthenticationsComponentQuery = pure<AuthenticationsProps>(
               variables: {
                 pagination: {
                   cursor: newCursor,
-                  limit,
+                  limit: limit + parseInt(newCursor, 10),
                 },
               },
               updateQuery: (prev, { fetchMoreResult }) => {

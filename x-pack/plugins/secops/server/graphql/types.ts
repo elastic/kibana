@@ -149,13 +149,33 @@ export interface AuthenticationItem {
 
   successes: number;
 
-  latest: string;
-
-  source: SourceEcsFields;
-
-  host: HostEcsFields;
-
   user: UserEcsFields;
+
+  lastSuccess?: LastSourceHost | null;
+
+  lastFailure?: LastSourceHost | null;
+}
+
+export interface UserEcsFields {
+  id?: number | null;
+
+  name?: string | null;
+
+  full_name?: string | null;
+
+  email?: string | null;
+
+  hash?: string | null;
+
+  group?: string | null;
+}
+
+export interface LastSourceHost {
+  timestamp?: string | null;
+
+  source?: SourceEcsFields | null;
+
+  host?: HostEcsFields | null;
 }
 
 export interface SourceEcsFields {
@@ -186,20 +206,6 @@ export interface OsEcsFields {
   version?: string | null;
 
   kernel?: string | null;
-}
-
-export interface UserEcsFields {
-  id?: number | null;
-
-  name?: string | null;
-
-  full_name?: string | null;
-
-  email?: string | null;
-
-  hash?: string | null;
-
-  group?: string | null;
 }
 
 export interface CursorType {
@@ -842,13 +848,11 @@ export namespace AuthenticationItemResolvers {
 
     successes?: SuccessesResolver<number, TypeParent, Context>;
 
-    latest?: LatestResolver<string, TypeParent, Context>;
-
-    source?: SourceResolver<SourceEcsFields, TypeParent, Context>;
-
-    host?: HostResolver<HostEcsFields, TypeParent, Context>;
-
     user?: UserResolver<UserEcsFields, TypeParent, Context>;
+
+    lastSuccess?: LastSuccessResolver<LastSourceHost | null, TypeParent, Context>;
+
+    lastFailure?: LastFailureResolver<LastSourceHost | null, TypeParent, Context>;
   }
 
   export type IdResolver<
@@ -866,24 +870,92 @@ export namespace AuthenticationItemResolvers {
     Parent = AuthenticationItem,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
-  export type LatestResolver<
-    R = string,
-    Parent = AuthenticationItem,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type SourceResolver<
-    R = SourceEcsFields,
-    Parent = AuthenticationItem,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type HostResolver<
-    R = HostEcsFields,
-    Parent = AuthenticationItem,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
   export type UserResolver<
     R = UserEcsFields,
     Parent = AuthenticationItem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type LastSuccessResolver<
+    R = LastSourceHost | null,
+    Parent = AuthenticationItem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type LastFailureResolver<
+    R = LastSourceHost | null,
+    Parent = AuthenticationItem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace UserEcsFieldsResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = UserEcsFields> {
+    id?: IdResolver<number | null, TypeParent, Context>;
+
+    name?: NameResolver<string | null, TypeParent, Context>;
+
+    full_name?: FullNameResolver<string | null, TypeParent, Context>;
+
+    email?: EmailResolver<string | null, TypeParent, Context>;
+
+    hash?: HashResolver<string | null, TypeParent, Context>;
+
+    group?: GroupResolver<string | null, TypeParent, Context>;
+  }
+
+  export type IdResolver<
+    R = number | null,
+    Parent = UserEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type NameResolver<
+    R = string | null,
+    Parent = UserEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type FullNameResolver<
+    R = string | null,
+    Parent = UserEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type EmailResolver<
+    R = string | null,
+    Parent = UserEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type HashResolver<
+    R = string | null,
+    Parent = UserEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type GroupResolver<
+    R = string | null,
+    Parent = UserEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace LastSourceHostResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = LastSourceHost> {
+    timestamp?: TimestampResolver<string | null, TypeParent, Context>;
+
+    source?: SourceResolver<SourceEcsFields | null, TypeParent, Context>;
+
+    host?: HostResolver<HostEcsFields | null, TypeParent, Context>;
+  }
+
+  export type TimestampResolver<
+    R = string | null,
+    Parent = LastSourceHost,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type SourceResolver<
+    R = SourceEcsFields | null,
+    Parent = LastSourceHost,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type HostResolver<
+    R = HostEcsFields | null,
+    Parent = LastSourceHost,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
 }
@@ -983,53 +1055,6 @@ export namespace OsEcsFieldsResolvers {
   export type KernelResolver<
     R = string | null,
     Parent = OsEcsFields,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-}
-
-export namespace UserEcsFieldsResolvers {
-  export interface Resolvers<Context = SecOpsContext, TypeParent = UserEcsFields> {
-    id?: IdResolver<number | null, TypeParent, Context>;
-
-    name?: NameResolver<string | null, TypeParent, Context>;
-
-    full_name?: FullNameResolver<string | null, TypeParent, Context>;
-
-    email?: EmailResolver<string | null, TypeParent, Context>;
-
-    hash?: HashResolver<string | null, TypeParent, Context>;
-
-    group?: GroupResolver<string | null, TypeParent, Context>;
-  }
-
-  export type IdResolver<
-    R = number | null,
-    Parent = UserEcsFields,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type NameResolver<
-    R = string | null,
-    Parent = UserEcsFields,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type FullNameResolver<
-    R = string | null,
-    Parent = UserEcsFields,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type EmailResolver<
-    R = string | null,
-    Parent = UserEcsFields,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type HashResolver<
-    R = string | null,
-    Parent = UserEcsFields,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type GroupResolver<
-    R = string | null,
-    Parent = UserEcsFields,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
 }

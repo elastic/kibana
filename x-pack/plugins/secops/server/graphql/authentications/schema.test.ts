@@ -31,17 +31,28 @@ const testCaseSource = {
               user {
                 name
               }
-              source {
-                ip
+              lastSuccess {
+                timestamp
+                source {
+                  ip
+                }
+                host {
+                  id
+                  name
+                }
               }
-              host {
-                id
-                ip
-                name
+              lastFailure {
+                timestamp
+                source {
+                  ip
+                }
+                host {
+                  id
+                  name
+                }
               }
-              latest
             }
-            cursor{
+            cursor {
               value
             }
           }
