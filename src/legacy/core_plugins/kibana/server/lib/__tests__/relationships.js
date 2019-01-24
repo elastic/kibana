@@ -29,7 +29,7 @@ describe('findRelationships', () => {
     const savedObjectsClient = {
       get: () => ({
         attributes: {
-          panelsJSON: JSON.stringify([{ panelRef: 'panel_0' }, { panelRef: 'panel_1' }, { panelRef: 'panel_2' }]),
+          panelsJSON: JSON.stringify([{ panelRefName: 'panel_0' }, { panelRefName: 'panel_1' }, { panelRefName: 'panel_2' }]),
         },
         references: [{
           name: 'panel_0',
@@ -100,7 +100,7 @@ describe('findRelationships', () => {
         attributes: {
           kibanaSavedObjectMeta: {
             searchSourceJSON: JSON.stringify({
-              index: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+              indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
             }),
           },
         },
@@ -193,7 +193,7 @@ describe('findRelationships', () => {
         attributes: {
           kibanaSavedObjectMeta: {
             searchSourceJSON: JSON.stringify({
-              index: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+              indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
             }),
           },
         },

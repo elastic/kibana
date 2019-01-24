@@ -85,7 +85,7 @@ Object {
 Object {
   "attributes": Object {
     "bar": true,
-    "wsState": "\\"{\\\\\\"foo\\\\\\":true,\\\\\\"indexPatternRef\\\\\\":\\\\\\"indexPattern_0\\\\\\"}\\"",
+    "wsState": "\\"{\\\\\\"foo\\\\\\":true,\\\\\\"indexPatternRefName\\\\\\":\\\\\\"indexPattern_0\\\\\\"}\\"",
   },
   "id": "1",
   "references": Array [

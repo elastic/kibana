@@ -139,11 +139,13 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       }
 
       // Inject index id if a reference is saved
-      if (searchSourceValues.index) {
-        const reference = references.find(reference => reference.name === searchSourceValues.index);
-        if (reference) {
-          searchSourceValues.index = reference.id;
+      if (searchSourceValues.indexRefName) {
+        const reference = references.find(reference => reference.name === searchSourceValues.indexRefName);
+        if (!reference) {
+          throw new Error(`Could not find reference for ${searchSourceValues.indexRefName} on ${this.getEsType()} ${this.id}`);
         }
+        searchSourceValues.index = reference.id;
+        delete searchSourceValues.indexRefName;
       }
 
       const searchSourceFields = this.searchSource.getFields();
@@ -268,7 +270,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
         parseSearchSource(meta.searchSourceJSON, resp.references);
         return this.hydrateIndexPattern();
       }).then(() => {
-        if (injectReferences) {
+        if (injectReferences && resp.references.length > 0) {
           injectReferences(this, resp.references);
         }
         return this;
@@ -298,12 +300,13 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
         const searchSourceFields = _.omit(this.searchSource.getFields(), ['sort', 'size']);
         if (searchSourceFields.index) {
           const indexId = searchSourceFields.index;
-          searchSourceFields.index = 'kibanaSavedObjectMeta.searchSourceJSON.index';
+          searchSourceFields.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
           references.push({
             name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
             type: 'index-pattern',
             id: indexId,
           });
+          delete searchSourceFields.index;
         }
         attributes.kibanaSavedObjectMeta = {
           searchSourceJSON: angular.toJson(searchSourceFields)

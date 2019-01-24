@@ -25,7 +25,7 @@ describe('extractReferences', () => {
 Object {
   "attributes": Object {
     "foo": true,
-    "wsState": "\\"{\\\\\\"bar\\\\\\":true,\\\\\\"indexPatternRef\\\\\\":\\\\\\"indexPattern_0\\\\\\"}\\"",
+    "wsState": "\\"{\\\\\\"bar\\\\\\":true,\\\\\\"indexPatternRefName\\\\\\":\\\\\\"indexPattern_0\\\\\\"}\\"",
   },
   "references": Array [
     Object {
@@ -61,7 +61,7 @@ describe('injectReferences', () => {
       id: '1',
       foo: true,
       wsState: JSON.stringify({
-        indexPatternRef: 'indexPattern_0',
+        indexPatternRefName: 'indexPattern_0',
         bar: true,
       }),
     };
@@ -82,13 +82,13 @@ Object {
 `);
   });
 
-  test('fails when indexPatternRef is missing wsState', () => {
+  test('fails when indexPatternRefName is missing wsState', () => {
     const context = {
       id: '1',
       wsState: JSON.stringify({ bar: true }),
     };
     expect(() => injectReferences(context, [])).toThrowErrorMatchingInlineSnapshot(
-      `"indexPatternRef attribute is missing from \\"wsState\\""`
+      `"indexPatternRefName attribute is missing from \\"wsState\\""`
     );
   });
 
@@ -96,7 +96,7 @@ Object {
     const context = {
       id: '1',
       wsState: JSON.stringify({
-        indexPatternRef: 'indexPattern_0',
+        indexPatternRefName: 'indexPattern_0',
       }),
     };
     expect(() => injectReferences(context, [])).toThrowErrorMatchingInlineSnapshot(

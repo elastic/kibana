@@ -51,7 +51,8 @@ Object {
 Object {
   "attributes": Object {
     "foo": true,
-    "savedSearchId": "search_0",
+    "savedSearchId": undefined,
+    "savedSearchRefName": "search_0",
   },
   "references": Array [
     Object {
@@ -66,7 +67,7 @@ Object {
 });
 
 describe('injectReferences', () => {
-  test('injects nothing when savedSearchId is null', () => {
+  test('injects nothing when savedSearchRefName is null', () => {
     const context = {
       id: '1',
       foo: true,
@@ -84,7 +85,7 @@ Object {
     const context = {
       id: '1',
       foo: true,
-      savedSearchId: 'search_0',
+      savedSearchRefName: 'search_0',
     };
     const references = [
       {
@@ -107,7 +108,7 @@ Object {
     const context = {
       id: '1',
       foo: true,
-      savedSearchId: 'search_0',
+      savedSearchRefName: 'search_0',
     };
     expect(() => injectReferences(context, [])).toThrowErrorMatchingInlineSnapshot(
       `"Could not find reference \\"search_0\\""`

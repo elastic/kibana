@@ -11,7 +11,7 @@ export function extractReferences({ attributes, references = [] }) {
   if (!indexPattern) {
     throw new Error('indexPattern attribute is missing in "wsState"');
   }
-  state.indexPatternRef = 'indexPattern_0';
+  state.indexPatternRefName = 'indexPattern_0';
   delete state.indexPattern;
   return {
     references: [
@@ -30,15 +30,18 @@ export function extractReferences({ attributes, references = [] }) {
 }
 
 export function injectReferences(savedObject, references) {
-  const state = JSON.parse(savedObject.wsState);
-  if (!state.indexPatternRef) {
-    throw new Error('indexPatternRef attribute is missing from "wsState"');
+  if (!savedObject.wsState) {
+    return;
   }
-  const indexPatternReference = references.find(reference => reference.name === state.indexPatternRef);
+  const state = JSON.parse(savedObject.wsState);
+  if (!state.indexPatternRefName) {
+    throw new Error('indexPatternRefName attribute is missing from "wsState"');
+  }
+  const indexPatternReference = references.find(reference => reference.name === state.indexPatternRefName);
   if (!indexPatternReference) {
-    throw new Error(`Could not find reference "${state.indexPatternRef}"`);
+    throw new Error(`Could not find reference "${state.indexPatternRefName}"`);
   }
   state.indexPattern = indexPatternReference.id;
-  delete state.indexPatternRef;
+  delete state.indexPatternRefName;
   savedObject.wsState = JSON.stringify(state);
 }

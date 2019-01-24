@@ -128,19 +128,21 @@ async function fetchRollupVisualizations(kibanaIndex, callCluster, rollupIndexPa
     const {
       _source: {
         visualization: {
-          savedSearchId,
+          savedSearchRefName,
           kibanaSavedObjectMeta: {
             searchSourceJSON,
           },
         },
+        references = [],
       },
     } = visualization;
 
     const searchSource = JSON.parse(searchSourceJSON);
 
-    if (savedSearchId) {
+    if (savedSearchRefName) {
       // This visualization depends upon a saved search.
-      if (rollupSavedSearchesToFlagMap[savedSearchId]) {
+      const savedSearch = references.find(ref => ref.name === savedSearchRefName);
+      if (rollupSavedSearchesToFlagMap[savedSearch.id]) {
         rollupVisualizations++;
         rollupVisualizationsFromSavedSearches++;
       }

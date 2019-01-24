@@ -23,7 +23,7 @@ export default {
         }
         const { indexPattern } = state;
         if (indexPattern) {
-          state.indexPatternRef = 'indexPattern_0';
+          state.indexPatternRefName = 'indexPattern_0';
           delete state.indexPattern;
           doc.attributes.wsState = JSON.stringify(JSON.stringify(state));
           doc.references.push({

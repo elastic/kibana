@@ -35,7 +35,8 @@ function migrateIndexPattern(type, doc) {
         type: 'index-pattern',
         id: searchSource.index,
       });
-      searchSource.index = 'kibanaSavedObjectMeta.searchSourceJSON.index';
+      searchSource.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
+      delete searchSource.index;
       set(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON', JSON.stringify(searchSource));
     }
   }
@@ -56,7 +57,8 @@ export default {
           name: 'search_0',
           id: savedSearchId,
         });
-        doc.attributes.savedSearchId = 'search_0';
+        doc.attributes.savedSearchRefName = 'search_0';
+        delete doc.attributes.savedSearchId;
       }
       return doc;
     },
@@ -79,7 +81,7 @@ export default {
         }
         panels.forEach((panel, i) => {
           if (!panel.type || !panel.id) return;
-          panel.panelRef = `panel_${i}`;
+          panel.panelRefName = `panel_${i}`;
           doc.references.push({
             name: `panel_${i}`,
             type: panel.type,

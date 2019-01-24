@@ -40,11 +40,12 @@ describe('extractReferences', () => {
       },
     };
     const updatedDoc = extractReferences(doc);
+    /* eslint-disable max-len */
     expect(updatedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
     "foo": true,
-    "panelsJSON": "[{\\"title\\":\\"Title 1\\",\\"panelRef\\":\\"panel_0\\"},{\\"title\\":\\"Title 2\\",\\"panelRef\\":\\"panel_1\\"}]",
+    "panelsJSON": "[{\\"title\\":\\"Title 1\\",\\"panelRefName\\":\\"panel_0\\"},{\\"title\\":\\"Title 2\\",\\"panelRefName\\":\\"panel_1\\"}]",
   },
   "references": Array [
     Object {
@@ -60,6 +61,7 @@ Object {
   ],
 }
 `);
+    /* eslint-enable max-len */
   });
 
   test('fails when type attribute is missing from a panel', () => {
@@ -106,11 +108,11 @@ describe('injectReferences', () => {
       foo: true,
       panelsJSON: JSON.stringify([
         {
-          panelRef: 'panel_0',
+          panelRefName: 'panel_0',
           title: 'Title 1',
         },
         {
-          panelRef: 'panel_1',
+          panelRefName: 'panel_1',
           title: 'Title 2',
         },
       ]),
@@ -145,7 +147,7 @@ Object {
       foo: true,
       panelsJSON: JSON.stringify([
         {
-          panelRef: 'panel_0',
+          panelRefName: 'panel_0',
           title: 'Title 1',
         },
       ]),

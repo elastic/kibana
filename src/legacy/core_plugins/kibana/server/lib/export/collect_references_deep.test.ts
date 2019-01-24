@@ -25,7 +25,7 @@ const data = [
     id: '1',
     type: 'dashboard',
     attributes: {
-      panelsJSON: JSON.stringify([{ panelRef: 'panel_0' }, { panelRef: 'panel_1' }]),
+      panelsJSON: JSON.stringify([{ panelRefName: 'panel_0' }, { panelRefName: 'panel_1' }]),
     },
     references: [
       {
@@ -45,7 +45,9 @@ const data = [
     type: 'visualization',
     attributes: {
       kibanaSavedObjectMeta: {
-        searchSourceJSON: JSON.stringify({ index: 'kibanaSavedObjectMeta.searchSourceJSON.index' }),
+        searchSourceJSON: JSON.stringify({
+          indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        }),
       },
     },
     references: [
@@ -60,7 +62,7 @@ const data = [
     id: '3',
     type: 'visualization',
     attributes: {
-      savedSearchId: 'search_0',
+      savedSearchRefName: 'search_0',
     },
     references: [
       {
@@ -82,7 +84,9 @@ const data = [
     type: 'search',
     attributes: {
       kibanaSavedObjectMeta: {
-        searchSourceJSON: JSON.stringify({ index: 'kibanaSavedObjectMeta.searchSourceJSON.index' }),
+        searchSourceJSON: JSON.stringify({
+          indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        }),
       },
     },
     references: [
@@ -117,7 +121,7 @@ test('collects dashboard and all dependencies', async () => {
 Array [
   Object {
     "attributes": Object {
-      "panelsJSON": "[{\\"panelRef\\":\\"panel_0\\"},{\\"panelRef\\":\\"panel_1\\"}]",
+      "panelsJSON": "[{\\"panelRefName\\":\\"panel_0\\"},{\\"panelRefName\\":\\"panel_1\\"}]",
     },
     "id": "1",
     "references": Array [
@@ -137,7 +141,7 @@ Array [
   Object {
     "attributes": Object {
       "kibanaSavedObjectMeta": Object {
-        "searchSourceJSON": "{\\"index\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
+        "searchSourceJSON": "{\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
       },
     },
     "id": "2",
@@ -152,7 +156,7 @@ Array [
   },
   Object {
     "attributes": Object {
-      "savedSearchId": "search_0",
+      "savedSearchRefName": "search_0",
     },
     "id": "3",
     "references": Array [
@@ -174,7 +178,7 @@ Array [
   Object {
     "attributes": Object {
       "kibanaSavedObjectMeta": Object {
-        "searchSourceJSON": "{\\"index\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
+        "searchSourceJSON": "{\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
       },
     },
     "id": "5",

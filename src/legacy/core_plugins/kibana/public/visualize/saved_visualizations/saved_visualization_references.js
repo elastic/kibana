@@ -30,17 +30,20 @@ export function extractReferences({ attributes, references = [] }) {
     ],
     attributes: {
       ...attributes,
-      savedSearchId: 'search_0'
+      savedSearchId: undefined,
+      savedSearchRefName: 'search_0'
     }
   };
 }
 
 export function injectReferences(savedObject, references) {
-  if (savedObject.savedSearchId) {
-    const reference = references.find(reference => reference.name === savedObject.savedSearchId);
-    if (!reference) {
-      throw new Error(`Could not find reference "${savedObject.savedSearchId}"`);
-    }
-    savedObject.savedSearchId = reference.id;
+  if (!savedObject.savedSearchRefName) {
+    return;
   }
+  const reference = references.find(reference => reference.name === savedObject.savedSearchRefName);
+  if (!reference) {
+    throw new Error(`Could not find reference "${savedObject.savedSearchRefName}"`);
+  }
+  savedObject.savedSearchId = reference.id;
+  delete savedObject.savedSearchRefName;
 }

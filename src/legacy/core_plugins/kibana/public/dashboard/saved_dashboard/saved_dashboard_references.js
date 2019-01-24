@@ -27,7 +27,7 @@ export function extractReferences({ attributes, references = [] }) {
     if (!panel.id) {
       throw new Error(`"id" attribute is missing from panel "${i}"`);
     }
-    panel.panelRef = `panel_${i}`;
+    panel.panelRefName = `panel_${i}`;
     panelReferences.push({
       name: `panel_${i}`,
       type: panel.type,
@@ -51,13 +51,16 @@ export function extractReferences({ attributes, references = [] }) {
 export function injectReferences(savedObject, references) {
   const panels = JSON.parse(savedObject.panelsJSON);
   panels.forEach((panel) => {
-    const reference = references.find(reference => reference.name === panel.panelRef);
+    if (!panel.panelRefName) {
+      return;
+    }
+    const reference = references.find(reference => reference.name === panel.panelRefName);
     if (!reference) {
-      throw new Error(`Could not find reference "${panel.panelRef}"`);
+      throw new Error(`Could not find reference "${panel.panelRefName}"`);
     }
     panel.id = reference.id;
     panel.type = reference.type;
-    delete panel.panelRef;
+    delete panel.panelRefName;
   });
   savedObject.panelsJSON = JSON.stringify(panels);
 }

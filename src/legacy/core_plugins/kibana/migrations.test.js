@@ -50,7 +50,7 @@ Object {
     "kibanaSavedObjectMeta": Object {
       "searchSourceJSON": null,
     },
-    "savedSearchId": "search_0",
+    "savedSearchRefName": "search_0",
   },
   "id": "1",
   "references": Array [
@@ -83,7 +83,7 @@ Object {
     "kibanaSavedObjectMeta": Object {
       "searchSourceJSON": undefined,
     },
-    "savedSearchId": "search_0",
+    "savedSearchRefName": "search_0",
   },
   "id": "1",
   "references": Array [
@@ -115,7 +115,7 @@ Object {
     "kibanaSavedObjectMeta": Object {
       "searchSourceJSON": 123,
     },
-    "savedSearchId": "search_0",
+    "savedSearchRefName": "search_0",
   },
   "id": "1",
   "references": Array [
@@ -148,7 +148,7 @@ Object {
     "kibanaSavedObjectMeta": Object {
       "searchSourceJSON": "{\\"bar\\":true}",
     },
-    "savedSearchId": "search_0",
+    "savedSearchRefName": "search_0",
   },
   "id": "1",
   "references": Array [
@@ -179,9 +179,9 @@ Object {
 Object {
   "attributes": Object {
     "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": "{\\"bar\\":true,\\"index\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
+      "searchSourceJSON": "{\\"bar\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
     },
-    "savedSearchId": "search_0",
+    "savedSearchRefName": "search_0",
   },
   "id": "1",
   "references": Array [
@@ -218,7 +218,7 @@ Object {
     "kibanaSavedObjectMeta": Object {
       "searchSourceJSON": "{}",
     },
-    "savedSearchId": "search_0",
+    "savedSearchRefName": "search_0",
   },
   "id": "1",
   "references": Array [
@@ -265,7 +265,7 @@ Object {
     "kibanaSavedObjectMeta": Object {
       "searchSourceJSON": null,
     },
-    "panelsJSON": "[{\\"foo\\":true,\\"panelRef\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRef\\":\\"panel_1\\"}]",
+    "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
   },
   "id": "1",
   "references": Array [
@@ -304,7 +304,7 @@ Object {
     "kibanaSavedObjectMeta": Object {
       "searchSourceJSON": undefined,
     },
-    "panelsJSON": "[{\\"foo\\":true,\\"panelRef\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRef\\":\\"panel_1\\"}]",
+    "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
   },
   "id": "1",
   "references": Array [
@@ -342,7 +342,7 @@ Object {
     "kibanaSavedObjectMeta": Object {
       "searchSourceJSON": 123,
     },
-    "panelsJSON": "[{\\"foo\\":true,\\"panelRef\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRef\\":\\"panel_1\\"}]",
+    "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
   },
   "id": "1",
   "references": Array [
@@ -381,7 +381,7 @@ Object {
     "kibanaSavedObjectMeta": Object {
       "searchSourceJSON": "{\\"bar\\":true}",
     },
-    "panelsJSON": "[{\\"foo\\":true,\\"panelRef\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRef\\":\\"panel_1\\"}]",
+    "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
   },
   "id": "1",
   "references": Array [
@@ -418,9 +418,9 @@ Object {
 Object {
   "attributes": Object {
     "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": "{\\"bar\\":true,\\"index\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
+      "searchSourceJSON": "{\\"bar\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
     },
-    "panelsJSON": "[{\\"foo\\":true,\\"panelRef\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRef\\":\\"panel_1\\"}]",
+    "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
   },
   "id": "1",
   "references": Array [
@@ -529,7 +529,7 @@ Object {
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
-    "panelsJSON": "[{\\"foo\\":true,\\"panelRef\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRef\\":\\"panel_1\\"}]",
+    "panelsJSON": "[{\\"foo\\":true,\\"panelRefName\\":\\"panel_0\\"},{\\"bar\\":true,\\"panelRefName\\":\\"panel_1\\"}]",
   },
   "id": "1",
   "references": Array [
@@ -678,7 +678,7 @@ Object {
   "attributes": Object {
     "foo": true,
     "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": "{\\"bar\\":true,\\"index\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
+      "searchSourceJSON": "{\\"bar\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
     },
   },
   "id": "123",
