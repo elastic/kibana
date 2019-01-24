@@ -15,6 +15,7 @@ import { RootState } from '../../reducers';
 import { refUrlSelector } from '../../selectors';
 import { Modifier, Shortcut } from '../shortcuts';
 import { ReferencesPanel } from './references_panel';
+import {BlameWidget} from "../../monaco/blame/blame_widget";
 
 export interface EditorActions {
   closeReferences(): void;
@@ -59,6 +60,7 @@ export class EditorComponent extends React.Component<Props> {
         if (this.props.revealPosition) {
           this.revealPosition(this.props.revealPosition);
         }
+
       });
     }
   }
@@ -108,7 +110,10 @@ export class EditorComponent extends React.Component<Props> {
 
   private async loadText(text: string, repo: string, file: string, lang: string, revision: string) {
     if (this.monaco) {
-      await this.monaco.loadFile(repo, file, text, lang, revision);
+      const editor = await this.monaco.loadFile(repo, file, text, lang, revision);
+      new BlameWidget(1, editor);
+      new BlameWidget(5, editor);
+      new BlameWidget(100, editor);
     }
   }
 

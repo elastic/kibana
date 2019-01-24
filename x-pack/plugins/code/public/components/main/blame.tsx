@@ -44,6 +44,17 @@ const BlameDate = styled.div`
   color: ${colors.textGrey};
   font-size: ${fontSizes.small};
 `;
+export class BlameComponent extends React.PureComponent<{ blame: GitBlame; lineHeight: number }> {
+  public render(): React.ReactNode {
+    const { blame, lineHeight } = this.props;
+    return (
+      <BlameContainer lines={blame.lines} lineHeight={this.props.lineHeight}>
+        <BlameMessage>{blame.commit.message}</BlameMessage>
+        <BlameDate>{moment(blame.commit.date).fromNow()}</BlameDate>
+      </BlameContainer>
+    );
+  }
+}
 
 export class Blame extends React.PureComponent<Props> {
   public render() {
