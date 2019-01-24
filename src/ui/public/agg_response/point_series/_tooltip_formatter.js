@@ -53,7 +53,7 @@ export function PointSeriesTooltipFormatter($compile, $rootScope) {
       if (datum.series && datum.parent) {
         const dimension = datum.parent;
         const seriesFormatter = getFormat(dimension.format);
-        addDetail(dimension.title, seriesFormatter(datum.series));
+        addDetail(dimension.title, seriesFormatter.convert(datum.series));
       }
       if (datum.tableRaw) {
         addDetail(datum.tableRaw.title, datum.tableRaw.value);

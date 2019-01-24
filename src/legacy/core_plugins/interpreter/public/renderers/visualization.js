@@ -33,11 +33,11 @@ export const visualization = () => ({
     const Vis = Private(VisProvider);
 
     if (handlers.vis) {
-      handlers.vis.setCurrentState({ type: visType, params: visConfig });
+      // special case in visualize, we need to render first (without executing the expression), for maps to work
+      if (visConfig) {
+        handlers.vis.setCurrentState({ type: visType, params: visConfig });
+      }
     } else {
-      // if (handlers.vis) {
-      //   visualizationLoader.destroy();
-      // }
       handlers.vis = new Vis({
         type: visType,
         params: visConfig,
