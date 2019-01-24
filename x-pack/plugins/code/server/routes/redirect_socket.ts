@@ -10,6 +10,7 @@ import ClientIO from 'socket.io-client';
 
 import { SocketKind } from '../../model';
 import { Logger } from '../log';
+import { getModifiedSocketRequest } from '../security';
 import { BASE_PLACEHOLDER, mainNodeBaseUrl } from './redirect';
 
 export async function redirectSocketRoute(server: Server, redirect: string, log: Logger) {
@@ -60,8 +61,22 @@ export async function redirectSocketRoute(server: Server, redirect: string, log:
     });
   });
 
-  socketIO.on('connection', (socket: Socket) => {
+  // add a POST ping route for `getRequest` to use
+  server.securedRoute({
+    method: 'POST',
+    path: `/api/code/ping`,
+    handler: () => 'pong',
+  });
+
+  socketIO.on('connection', async (socket: Socket) => {
     log.debug(`User ${socket.id} connected, attaching handlers and register socket.`);
+
+    // 'request' is the modified hapi request object
+    const request = await getModifiedSocketRequest(server, socket);
+    if (!request) {
+      socket.emit('connectionFailed', 'Socket connection failed');
+      return socket.disconnect(true);
+    }
   });
   socketIO.on('disconnect', () => {
     log.debug('User disconnected, removing handlers and unregister sockets.');
