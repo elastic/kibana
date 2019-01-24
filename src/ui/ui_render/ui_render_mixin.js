@@ -79,7 +79,7 @@ export function uiRenderMixin(kbnServer, server, config) {
         const uiSettings = request.getUiSettingsService();
         const darkMode = !authEnabled || request.auth.isAuthenticated
           ? await uiSettings.get('theme:darkMode')
-          : true;
+          : false;
 
         const basePath = config.get('server.basePath');
         const regularBundlePath = `${basePath}/bundles`;
