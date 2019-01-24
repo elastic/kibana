@@ -30,7 +30,7 @@ export interface Query {
 
   getFilterBar?: FilterBar | null;
 
-  getErrorsList?: (ErrorListItem | null)[] | null;
+  getErrorsList?: ErrorListItem[] | null;
 }
 
 export interface PingResults {
@@ -263,7 +263,7 @@ export interface DocCount {
 }
 
 export interface LatestMonitorsResult {
-  monitors?: (LatestMonitor | null)[] | null;
+  monitors?: LatestMonitor[] | null;
 }
 
 export interface LatestMonitor {
@@ -355,13 +355,13 @@ export interface StatusData {
 }
 
 export interface FilterBar {
-  id?: (string | null)[] | null;
+  id?: string[] | null;
 
-  port?: (number | null)[] | null;
+  port?: number[] | null;
 
-  scheme?: (string | null)[] | null;
+  scheme?: string[] | null;
 
-  status?: (string | null)[] | null;
+  status?: string[] | null;
 }
 
 export interface ErrorListItem {

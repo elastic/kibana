@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { ErrorList } from './error_list';
+export { FilterBar } from './filter_bar';
+export { PingList } from './ping_list';
 export { Snapshot } from './snapshot';
 export { SnapshotHistogram } from './snapshot_histogram';
-export { PingList } from './ping_list';
