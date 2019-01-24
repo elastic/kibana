@@ -84,7 +84,11 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              disabled={this.state.configuration_blocks.length === 0}
+              disabled={
+                this.state.tag.name.search(/^[A-Za-z0-9? ,_-]+$/) === -1 ||
+                this.state.tag.name === '' ||
+                this.state.configuration_blocks.length === 0
+              }
               onClick={this.saveTag}
             >
               <FormattedMessage
