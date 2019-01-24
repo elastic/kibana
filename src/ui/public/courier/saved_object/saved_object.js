@@ -270,7 +270,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
         parseSearchSource(meta.searchSourceJSON, resp.references);
         return this.hydrateIndexPattern();
       }).then(() => {
-        if (injectReferences && resp.references.length > 0) {
+        if (injectReferences && resp.references && resp.references.length > 0) {
           injectReferences(this, resp.references);
         }
         return this;
