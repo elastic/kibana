@@ -88,7 +88,12 @@ export class HeatmapLayer extends AbstractLayer {
     }
 
     mbMap.setLayoutProperty(heatmapLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
-    this._style.setMBPaintProperties(mbMap, heatmapLayerId, SCALED_PROPERTY_NAME);
+    this._style.setMBPaintProperties({
+      mbMap,
+      layerId: heatmapLayerId,
+      propertyName: SCALED_PROPERTY_NAME,
+      alpha: this.getAlpha(),
+    });
     mbMap.setLayerZoomRange(heatmapLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
   }
 

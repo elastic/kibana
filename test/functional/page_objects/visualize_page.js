@@ -817,13 +817,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const yAxisRatio = await this.getChartYAxisRatio(axis);
       // 3). get the visWrapper__chart elements
       const chartTypes = await find.allByCssSelector(`svg > g > g.series > rect[data-label="${dataLabel}"]`);
-
-      async function getChartType(chart) {
+      log.debug(`chartTypes count = ${chartTypes.length}`);
+      const chartData = await Promise.all(chartTypes.map(async chart => {
         const barHeight = await chart.getAttribute('height');
         return Math.round(barHeight * yAxisRatio);
-      }
-      const getChartTypesPromises = chartTypes.map(getChartType);
-      return await Promise.all(getChartTypesPromises);
+      }));
+
+      return chartData;
     }
 
 

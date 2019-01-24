@@ -226,48 +226,31 @@ export class ESGeohashGridSource extends AbstractESSource {
       sourceDescriptor: this._descriptor,
       ...options
     });
-    descriptor.style = {
-      ...descriptor.style,
-      type: 'VECTOR',
-      properties: {
-        fillColor: {
-          type: 'DYNAMIC',
-          options: {
-            field: {
-              label: COUNT_PROP_LABEL,
-              name: COUNT_PROP_NAME,
-              origin: 'source'
-            },
-            color: 'Blues'
-          }
-        },
-        lineColor: {
-          type: 'STATIC',
-          options: {
-            color: '#cccccc'
-          }
-        },
-        lineWidth: {
-          type: 'STATIC',
-          options: {
-            size: 1
-          }
-        },
-        iconSize: {
-          type: 'DYNAMIC',
-          options: {
-            field: {
-              label: COUNT_PROP_LABEL,
-              name: COUNT_PROP_NAME,
-              origin: 'source'
-            },
-            minSize: 4,
-            maxSize: 32,
-          }
-        },
-        alphaValue: 1
+    descriptor.style = VectorStyle.createDescriptor({
+      fillColor: {
+        type: VectorStyle.STYLE_TYPE.DYNAMIC,
+        options: {
+          field: {
+            label: COUNT_PROP_LABEL,
+            name: COUNT_PROP_NAME,
+            origin: 'source'
+          },
+          color: 'Blues'
+        }
+      },
+      iconSize: {
+        type: VectorStyle.STYLE_TYPE.DYNAMIC,
+        options: {
+          field: {
+            label: COUNT_PROP_LABEL,
+            name: COUNT_PROP_NAME,
+            origin: 'source'
+          },
+          minSize: 4,
+          maxSize: 32,
+        }
       }
-    };
+    });
     return descriptor;
   }
 

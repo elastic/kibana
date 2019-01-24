@@ -20,7 +20,7 @@ const NO_SOURCE_UPDATE_REQUIRED = false;
 export class AbstractLayer {
 
   constructor({ layerDescriptor, source, style }) {
-    this._descriptor = layerDescriptor;
+    this._descriptor = AbstractLayer.createDescriptor(layerDescriptor);
     this._source = source;
     this._style = style;
 
@@ -36,16 +36,15 @@ export class AbstractLayer {
     return mbStyle.sources[sourceId].data;
   }
 
-  static createDescriptor(options) {
-    const layerDescriptor = {};
+  static createDescriptor(options = {}) {
+    const layerDescriptor = { ...options };
 
-    layerDescriptor.dataRequests = [];
-    layerDescriptor.id = Math.random().toString(36).substr(2, 5);
+    layerDescriptor.dataRequests = _.get(options, 'dataRequests', []);
+    layerDescriptor.id = _.get(options, 'id', Math.random().toString(36).substr(2, 5));
     layerDescriptor.label = options.label && options.label.length > 0 ? options.label : null;
     layerDescriptor.minZoom = _.get(options, 'minZoom', 0);
     layerDescriptor.maxZoom = _.get(options, 'maxZoom', 24);
-    layerDescriptor.source = options.source;
-    layerDescriptor.sourceDescriptor = options.sourceDescriptor;
+    layerDescriptor.alpha = _.get(options, 'alpha', 0.75);
     layerDescriptor.visible = options.visible || true;
     layerDescriptor.temporary = options.temporary || false;
     layerDescriptor.style = options.style || {};
@@ -113,6 +112,10 @@ export class AbstractLayer {
 
   getMaxZoom() {
     return this._descriptor.maxZoom;
+  }
+
+  getAlpha() {
+    return this._descriptor.alpha;
   }
 
   getZoomConfig() {

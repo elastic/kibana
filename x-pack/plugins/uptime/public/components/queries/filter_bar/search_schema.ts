@@ -12,6 +12,6 @@ export const filterBarSearchSchema = {
     'monitor.ip': { type: 'string' },
     'monitor.host': { type: 'string' },
     'monitor.scheme': { type: 'string' },
-    'tcp.port': { type: 'number' },
+    'url.port': { type: 'number' },
   },
 };

@@ -422,13 +422,17 @@ export class VectorLayer extends AbstractLayer {
       });
       mbMap.setFilter(pointLayerId, ['any', ['==', ['geometry-type'], 'Point'], ['==', ['geometry-type'], 'MultiPoint']]);
     }
-    this._style.setMBPaintPropertiesForPoints(mbMap, this.getId(), pointLayerId);
+    this._style.setMBPaintPropertiesForPoints({
+      alpha: this.getAlpha(),
+      mbMap,
+      pointLayerId: pointLayerId,
+    });
     mbMap.setLayoutProperty(pointLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     mbMap.setLayerZoomRange(pointLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
     this._addTooltipListeners(mbMap, pointLayerId);
   }
 
-  _setMbLinePolygonProeprties(mbMap) {
+  _setMbLinePolygonProperties(mbMap) {
     const sourceId = this.getId();
     const fillLayerId = this.getId() + '_fill';
     const lineLayerId = this.getId() + '_line';
@@ -462,7 +466,12 @@ export class VectorLayer extends AbstractLayer {
         ['==', ['geometry-type'], 'MultiLineString']
       ]);
     }
-    this._style.setMBPaintProperties(mbMap, this.getId(), fillLayerId, lineLayerId, this.isTemporary());
+    this._style.setMBPaintProperties({
+      alpha: this.getAlpha(),
+      mbMap,
+      fillLayerId,
+      lineLayerId,
+    });
     mbMap.setLayoutProperty(fillLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     mbMap.setLayoutProperty(lineLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     mbMap.setLayerZoomRange(lineLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
@@ -472,7 +481,7 @@ export class VectorLayer extends AbstractLayer {
 
   _syncStylePropertiesWithMb(mbMap) {
     this._setMbPointsProperties(mbMap);
-    this._setMbLinePolygonProeprties(mbMap);
+    this._setMbLinePolygonProperties(mbMap);
   }
 
   _syncSourceBindingWithMb(mbMap) {
