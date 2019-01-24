@@ -171,7 +171,8 @@ describe('Flag Supported Clusters', () => {
                 ...basicLicense()
               },
               {
-                ...standaloneCluster()
+                ...standaloneCluster(),
+                isSupported: true,
               }
             ]);
             sinon.assert.calledWith(
@@ -205,7 +206,8 @@ describe('Flag Supported Clusters', () => {
                 ...basicLicense()
               },
               {
-                ...standaloneCluster()
+                ...standaloneCluster(),
+                isSupported: true,
               }
             ]);
             sinon.assert.calledWith(
@@ -240,7 +242,8 @@ describe('Flag Supported Clusters', () => {
                 ...goldLicense()
               },
               {
-                ...standaloneCluster()
+                ...standaloneCluster(),
+                isSupported: true,
               }
             ]);
             sinon.assert.calledWith(
@@ -317,7 +320,7 @@ describe('Flag Supported Clusters', () => {
         return flagSupportedClusters(req, kbnIndices)(clusters)
           .then(result => {
             expect(result).to.eql([
-              { ...standaloneCluster() }
+              { ...standaloneCluster(), isSupported: true, }
             ]);
             sinon.assert.calledWith(
               logStub,

@@ -7,7 +7,6 @@ import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 
 export const standaloneClusterDefinition = {
   cluster_uuid: STANDALONE_CLUSTER_CLUSTER_UUID,
-  isSupported: true,
   license: {},
   cluster_state: {},
   cluster_stats: {

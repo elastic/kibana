@@ -78,7 +78,14 @@ export function flagSupportedClusters(req, kbnIndexPattern) {
   return async function (clusters) {
     // Standalone clusters are automatically supported in the UI so ignore those for
     // our calculations here
-    const linkedClusterCount = clusters.filter(cluster => cluster.cluster_uuid !== STANDALONE_CLUSTER_CLUSTER_UUID).length;
+    let linkedClusterCount = 0;
+    for (const cluster of clusters) {
+      if (cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID) {
+        cluster.isSupported = true;
+      } else {
+        linkedClusterCount++;
+      }
+    }
     if (linkedClusterCount > 1) {
       const basicLicenseCount = clusters.reduce((accumCount, cluster) => {
         if (cluster.license && cluster.license.type === 'basic') {
