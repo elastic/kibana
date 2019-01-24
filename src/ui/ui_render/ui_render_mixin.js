@@ -56,7 +56,7 @@ export function uiRenderMixin(kbnServer, server, config) {
   server.exposeStaticDir('/built_assets/css/{path*}', fromRoot('built_assets/css'));
 
   server.route({
-    path: '/bundles/translations/{locale}.json',
+    path: '/translations/{locale}.json',
     method: 'GET',
     config: { auth: false },
     handler(request, h) {
@@ -178,7 +178,7 @@ export function uiRenderMixin(kbnServer, server, config) {
         basePath,
         i18n: {
           locale: i18n.getLocale(),
-          translationsUrl: `${basePath}/bundles/translations/${i18n.getLocale()}.json`,
+          translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
         },
         vars: await replaceInjectedVars(
           request,
