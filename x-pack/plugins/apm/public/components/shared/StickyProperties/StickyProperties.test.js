@@ -28,7 +28,7 @@ describe('StickyProperties', () => {
       },
       {
         label: 'Request method',
-        fieldName: 'context.request.method',
+        fieldName: 'http.request.method',
         val: 'GET'
       },
       {
