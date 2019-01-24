@@ -174,6 +174,36 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       await find.clickByLinkText(quickTime);
     }
 
+    async getAutoRefreshState() {
+      return testSubjects.getAttribute('globalTimepickerAutoRefreshButton', 'data-test-subj-state');
+    }
+
+    async getRefreshConfig() {
+      const refreshState = await testSubjects.getAttribute('globalTimepickerAutoRefreshButton', 'data-test-subj-state');
+      const refreshConfig = await testSubjects.getVisibleText('globalRefreshButton');
+      return `${refreshState} ${refreshConfig}`;
+    }
+
+    // check if the auto refresh state is active and to pause it
+    async pauseAutoRefresh() {
+      let result = false;
+      if ((await this.getAutoRefreshState()) === 'active') {
+        await testSubjects.click('globalTimepickerAutoRefreshButton');
+        result = true;
+      }
+      return result;
+    }
+
+    // check if the auto refresh state is inactive and to resume it
+    async resumeAutoRefresh() {
+      let result = false;
+      if ((await this.getAutoRefreshState()) === 'inactive') {
+        await testSubjects.click('globalTimepickerAutoRefreshButton');
+        result = true;
+      }
+      return result;
+    }
+
     async getToastMessage(findTimeout = defaultFindTimeout) {
       const toastMessage = await find.displayedByCssSelector(
         'kbn-truncated.kbnToast__message',
@@ -219,7 +249,6 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       await testSubjects.find('kibanaChrome', defaultFindTimeout * 10);
     }
 
-    // replaced with timePicker.getTimeConfig
     async getPrettyDuration() {
       return await testSubjects.getVisibleText('globalTimepickerRange');
     }
@@ -227,7 +256,6 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     async isSharedTimefilterEnabled() {
       return await find.existsByCssSelector('[shared-timefilter=true]');
     }
-
   }
 
   return new HeaderPage();
