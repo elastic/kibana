@@ -39,7 +39,7 @@ export class ALayer {
     layerDescriptor.minZoom = _.get(options, 'minZoom', 0);
     layerDescriptor.maxZoom = _.get(options, 'maxZoom', 24);
     layerDescriptor.alpha = _.get(options, 'alpha', 0.75);
-    layerDescriptor.visible = options.visible || true;
+    layerDescriptor.visible = typeof options.visible === 'boolean' ? options.visible : true;
     layerDescriptor.temporary = options.temporary || false;
     layerDescriptor.style = options.style || {};
     return layerDescriptor;
