@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
@@ -12,8 +13,6 @@ import { fontSizes, truncate } from '../../../style/variables';
 import { asMillis } from '../../../utils/formatters';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
-// @ts-ignore
-import TooltipOverlay from '../../shared/TooltipOverlay';
 import { TransactionLink } from '../../shared/TransactionLink';
 
 const StyledTransactionLink = styled(TransactionLink)`
@@ -36,11 +35,11 @@ const traceListColumns: ITableColumn[] = [
     width: '40%',
     sortable: true,
     render: (name, group: ITransactionGroup) => (
-      <TooltipOverlay content={name}>
+      <EuiToolTip content={name}>
         <StyledTransactionLink transaction={group.sample}>
           {name}
         </StyledTransactionLink>
-      </TooltipOverlay>
+      </EuiToolTip>
     )
   },
   {
