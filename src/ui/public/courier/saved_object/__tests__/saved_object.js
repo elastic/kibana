@@ -431,7 +431,7 @@ describe('Saved Object', function () {
         });
     });
 
-    it('injects references when function is provided', async () => {
+    it('does not inject references when references array is missing', async () => {
       const injectReferences = sinon.stub();
       const config = {
         type: 'dashboard',
@@ -442,7 +442,55 @@ describe('Saved Object', function () {
         .then(() => {
           const response = {
             found: true,
-            _source: { dinosaurs: { tRex: 'has big teeth' } },
+            _source: {
+              dinosaurs: { tRex: 'has big teeth' },
+            },
+          };
+          return savedObject.applyESResp(response);
+        })
+        .then(() => {
+          expect(injectReferences).to.have.property('notCalled', true);
+        });
+    });
+
+    it('does not inject references when references array is empty', async () => {
+      const injectReferences = sinon.stub();
+      const config = {
+        type: 'dashboard',
+        injectReferences,
+      };
+      const savedObject = new SavedObject(config);
+      return savedObject.init()
+        .then(() => {
+          const response = {
+            found: true,
+            _source: {
+              dinosaurs: { tRex: 'has big teeth' },
+            },
+            references: [],
+          };
+          return savedObject.applyESResp(response);
+        })
+        .then(() => {
+          expect(injectReferences).to.have.property('notCalled', true);
+        });
+    });
+
+    it('injects references when function is provided and references exist', async () => {
+      const injectReferences = sinon.stub();
+      const config = {
+        type: 'dashboard',
+        injectReferences,
+      };
+      const savedObject = new SavedObject(config);
+      return savedObject.init()
+        .then(() => {
+          const response = {
+            found: true,
+            _source: {
+              dinosaurs: { tRex: 'has big teeth' },
+            },
+            references: [{}],
           };
           return savedObject.applyESResp(response);
         })
