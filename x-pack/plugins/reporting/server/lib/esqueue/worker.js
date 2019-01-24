@@ -52,7 +52,7 @@ export class Worker extends events.EventEmitter {
     this.kibanaId = opts.kibanaId;
     this.kibanaName = opts.kibanaName;
     this.queue = queue;
-    this.client = opts.client || this.queue.client;
+    this._client = this.queue.client;
     this.jobtype = type;
     this.workerFn = workerFn;
     this.checkSize = opts.size || 10;
@@ -126,7 +126,7 @@ export class Worker extends events.EventEmitter {
       kibana_name: this.kibanaName,
     };
 
-    return this.client.update({
+    return this._client.callWithInternalUser('update', {
       index: job._index,
       type: job._type,
       id: job._id,
@@ -163,7 +163,7 @@ export class Worker extends events.EventEmitter {
       output: docOutput,
     });
 
-    return this.client.update({
+    return this._client.callWithInternalUser('update', {
       index: job._index,
       type: job._type,
       id: job._id,
@@ -240,7 +240,7 @@ export class Worker extends events.EventEmitter {
         output: docOutput
       };
 
-      return this.client.update({
+      return this._client.callWithInternalUser('update', {
         index: job._index,
         type: job._type,
         id: job._id,
@@ -382,7 +382,7 @@ export class Worker extends events.EventEmitter {
       size: this.checkSize
     };
 
-    return this.client.search({
+    return this._client.callWithInternalUser('search', {
       index: `${this.queue.index}-*`,
       type: this.doctype,
       version: true,
