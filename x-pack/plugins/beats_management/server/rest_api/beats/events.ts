@@ -7,7 +7,7 @@ import Joi from 'joi';
 import { CMServerLibs } from '../../lib/types';
 import { wrapEsError } from '../../utils/error_wrappers';
 
-export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
+export const beatEventsRoute = (libs: CMServerLibs) => ({
   method: 'POST',
   path: '/api/beats/{beatId?}/events',
   config: {
