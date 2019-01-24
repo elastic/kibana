@@ -4,12 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import React from 'react';
-//
-// import {
-//   EuiSuperSelect,
-// } from '@elastic/eui';
-
 import { GRID_RESOLUTION } from '../grid_resolution';
 
 export class HeatmapStyle {

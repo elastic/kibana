@@ -231,9 +231,7 @@ export class VectorLayer extends ALayer {
           join: join
         };
       }
-      startLoading(sourceDataId, requestToken, {
-        ...dataFilters
-      });
+      startLoading(sourceDataId, requestToken, dataFilters);
       const leftSourceName = await this.getSourceName();
       const {
         rawData,
