@@ -54,7 +54,7 @@ export function SpanFlyout({
   }
 
   const stackframes = span.span.stacktrace;
-  const codeLanguage = idx(span, _ => _.service.language.name);
+  const codeLanguage = idx(parentTransaction, _ => _.service.language.name);
   const dbContext = idx(span, _ => _.context.db);
   const httpContext = idx(span, _ => _.context.http);
   const labels = span.labels;
