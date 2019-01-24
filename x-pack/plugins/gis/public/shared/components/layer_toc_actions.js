@@ -159,7 +159,6 @@ export class LayerTocActions extends Component {
         isOpen={this.state.isPopoverOpen}
         closePopover={this._closePopover}
         panelPaddingSize="none"
-        s
         withTitle
         anchorPosition="downLeft"
       >
