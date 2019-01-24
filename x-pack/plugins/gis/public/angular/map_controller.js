@@ -54,7 +54,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   const $state = new AppState();
   $scope.$listen($state, 'fetch_with_changes', function (diff) {
     if (diff.includes('query')) {
-      $scope.updateQueryAndDispatch({ query: $state.query });
+      $scope.updateQueryAndDispatch({ query: $state.query, dateRange: $scope.time });
     }
   });
 
