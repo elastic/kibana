@@ -172,11 +172,17 @@ declare module '@elastic/eui' {
   export const EuiDatePickerRange: React.SFC<EuiDatePickerRangeProps>;
 
   type EuiInMemoryTableProps = CommonProps & {
-    items: any[];
-    columns: any[];
-    sorting?: { sort: { field: string; direction: string } } | boolean;
-    search?: boolean;
-    pagination?: { initialPageSize: number; pageSizeOptions: number[] } | boolean;
+    items?: any;
+    columns?: any;
+    sorting?: any;
+    search?: any;
+    selection?: any;
+    pagination?: any;
+    itemId?: any;
+    isSelectable?: any;
+    loading?: any;
+    hasActions?: any;
+    message?: any;
   };
   export const EuiInMemoryTable: React.SFC<EuiInMemoryTableProps>;
 }

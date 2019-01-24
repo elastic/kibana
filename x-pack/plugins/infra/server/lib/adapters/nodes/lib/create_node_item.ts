@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, last, max, mean } from 'lodash';
-import { isNumber } from 'lodash';
+import { get, isNumber, last, max, sum } from 'lodash';
 import moment from 'moment';
 
 import { InfraMetricType, InfraNode, InfraNodeMetric } from '../../../../graphql/types';
@@ -46,7 +45,7 @@ function calculateMax(bucket: InfraBucket, type: InfraMetricType) {
 
 function calculateAvg(bucket: InfraBucket, type: InfraMetricType) {
   const { buckets } = bucket.timeseries;
-  return mean(buckets.map(getMetricValueFromBucket(type))) || 0;
+  return sum(buckets.map(getMetricValueFromBucket(type))) / buckets.length || 0;
 }
 
 function createNodeMetrics(
