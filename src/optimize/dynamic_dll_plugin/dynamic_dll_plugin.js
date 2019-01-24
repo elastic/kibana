@@ -40,9 +40,9 @@ function inPluginNodeModules(checkPath) {
 }
 
 export class DynamicDllPlugin {
-  constructor({ uiBundles, threadLoaderPoolConfig, log, maxCompilations = 1 }) {
-    this.log = log || (() => null);
-    this.dllCompiler = new DllCompiler(uiBundles, threadLoaderPoolConfig, log);
+  constructor({ uiBundles, threadLoaderPoolConfig, logWithMetadata, maxCompilations = 1 }) {
+    this.logWithMetadata = logWithMetadata || (() => null);
+    this.dllCompiler = new DllCompiler(uiBundles, threadLoaderPoolConfig, logWithMetadata);
     this.entryPaths = '';
     this.afterCompilationEntryPaths = '';
     this.maxCompilations = maxCompilations;
@@ -92,7 +92,7 @@ export class DynamicDllPlugin {
   }
 
   registerTasksHooks(compiler) {
-    this.log(['info', 'optimize:dynamic_dll_plugin'], 'Started dynamic dll plugin tasks');
+    this.logWithMetadata(['info', 'optimize:dynamic_dll_plugin'], 'Started dynamic dll plugin tasks');
     this.registerBeforeCompileHook(compiler);
     this.registerCompilationHook(compiler);
     this.registerDoneHook(compiler);
@@ -231,7 +231,7 @@ export class DynamicDllPlugin {
         // Only run this info log in the first performed dll compilation
         // per each execution run
         if (this.performedCompilations === 0) {
-          this.log(
+          this.logWithMetadata(
             ['info', 'optimize:dynamic_dll_plugin'],
             compilation.needsDLLCompilation
               ? 'Need to compile the client vendors dll'
@@ -269,7 +269,7 @@ export class DynamicDllPlugin {
       if (this.forceDLLCreationFlag) {
         this.forceDLLCreationFlag = false;
       }
-      this.log(['info', 'optimize:dynamic_dll_plugin'], 'Finished all dynamic dll plugin tasks');
+      this.logWithMetadata(['info', 'optimize:dynamic_dll_plugin'], 'Finished all dynamic dll plugin tasks');
     });
   }
 

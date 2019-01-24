@@ -85,7 +85,7 @@ describe('plugins/elasticsearch', () => {
 
       // Setup the server mock
       server = {
-        log: sinon.stub(),
+        logWithMetadata: sinon.stub(),
         info: { port: 5601 },
         config: function () { return { get, set }; },
         plugins: {

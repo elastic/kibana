@@ -144,9 +144,7 @@ export default function ({ getService, getPageObjects }) {
     describe('disabled aggs', () => {
       before(async () => {
         await PageObjects.visualize.loadSavedVisualization(vizName1);
-        await PageObjects.visualize.waitForVisualization();
-        // sleep a bit before trying to get the pie chart data below
-        await PageObjects.common.sleep(2000);
+        await PageObjects.visualize.waitForRenderingCount();
       });
 
       it('should show correct result with one agg disabled', async () => {
@@ -166,7 +164,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
         await PageObjects.visualize.waitForVisualizationSavedToastGone();
         await PageObjects.visualize.loadSavedVisualization(vizName1);
-        await PageObjects.visualize.waitForVisualization();
+        await PageObjects.visualize.waitForRenderingCount();
 
         const expectedTableData =  [ 'win 8', 'win xp', 'win 7', 'ios', 'osx'  ];
         await pieChart.expectPieChartLabels(expectedTableData);
@@ -264,7 +262,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('geo.src');
         await PageObjects.visualize.clickGo();
-        await PageObjects.visualize.waitForVisualization();
       });
 
       it ('shows correct split chart', async () => {
