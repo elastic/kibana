@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import { ErrorPage } from '../../components/error_page';
@@ -15,7 +16,12 @@ interface SourceErrorPageProps {
 
 export const SourceErrorPage: React.SFC<SourceErrorPageProps> = ({ errorMessage, retry }) => (
   <ErrorPage
-    shortMessage="Failed to load data sources."
+    shortMessage={
+      <FormattedMessage
+        id="xpack.infra.sourceErrorPage.failedToLoadDataSourcesMessage"
+        defaultMessage="Failed to load data sources."
+      />
+    }
     detailedMessage={<code>{errorMessage}</code>}
     retry={retry}
   />

@@ -26,7 +26,7 @@ export async function createOrUpgradeSavedConfig(options) {
     savedObjectsClient,
     version,
     buildNum,
-    log,
+    logWithMetadata,
     onWriteError,
   } = options;
 
@@ -58,8 +58,7 @@ export async function createOrUpgradeSavedConfig(options) {
   }
 
   if (upgradeableConfig) {
-    log(['plugin', 'elasticsearch'], {
-      tmpl: 'Upgrade config from <%= prevVersion %> to <%= newVersion %>',
+    logWithMetadata(['plugin', 'elasticsearch'], `Upgrade config from ${upgradeableConfig.id} to ${version}`, {
       prevVersion: upgradeableConfig.id,
       newVersion: version
     });

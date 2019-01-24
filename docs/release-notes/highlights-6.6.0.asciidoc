@@ -121,3 +121,17 @@ occurring in your operational environment or to explain why anomalies were
 detected. After you add annotations, they are also listed in the
 *Anomaly Explorer* and the *Job Management* page. See <<xpack-ml>>.
 
+[float]
+=== Simplified creation of {ml} jobs for {auditbeat} data
+
+If you use {auditbeat} to collect data about processes that are running in your
+system, there are {ml} wizards that recognize this type of data. They expedite
+the creation of customized jobs, dashboards, searches, and visualizations. 
+
+For example, you can select a supplied configuration to detect unusual processes
+in Docker containers:
+
+[role="screenshot"]
+image::images/highlights-6.6.0-data-recognizer.jpg[{ml} jobs for {auditbeat} data]
+
+For more information, see <<ml-jobs>>.

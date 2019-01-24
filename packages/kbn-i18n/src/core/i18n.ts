@@ -30,7 +30,6 @@ import { isPseudoLocale, translateUsingPseudoLocale } from './pseudo_locale';
 import './locales.js';
 
 const EN_LOCALE = 'en';
-const LOCALE_DELIMITER = '-';
 const translationsForLocale: Record<string, Translation> = {};
 const getMessageFormat = memoizeIntlConstructor(IntlMessageFormat);
 
@@ -55,7 +54,7 @@ function getMessageById(id: string): string | undefined {
  * @param locale
  */
 function normalizeLocale(locale: string) {
-  return locale.toLowerCase().replace('_', LOCALE_DELIMITER);
+  return locale.toLowerCase();
 }
 
 /**
@@ -165,8 +164,8 @@ export function getRegisteredLocales() {
 }
 
 interface TranslateArguments {
-  values?: { [key: string]: string | number | Date };
-  defaultMessage?: string;
+  values?: Record<string, string | number | boolean | Date | null | undefined>;
+  defaultMessage: string;
   description?: string;
 }
 
@@ -177,13 +176,7 @@ interface TranslateArguments {
  * @param [options.values] - values to pass into translation
  * @param [options.defaultMessage] - will be used unless translation was successful
  */
-export function translate(
-  id: string,
-  { values = {}, defaultMessage = '' }: TranslateArguments = {
-    values: {},
-    defaultMessage: '',
-  }
-) {
+export function translate(id: string, { values = {}, defaultMessage }: TranslateArguments) {
   const shouldUsePseudoLocale = isPseudoLocale(currentLocale);
 
   if (!id || !isString(id)) {

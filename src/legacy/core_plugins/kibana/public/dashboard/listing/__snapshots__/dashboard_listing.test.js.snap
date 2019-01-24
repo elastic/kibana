@@ -445,7 +445,14 @@ exports[`after fetch renders table rows 1`] = `
               "onSelectionChange": [Function],
             }
           }
-          sorting={Object {}}
+          sorting={
+            Object {
+              "sort": Object {
+                "direction": "asc",
+                "field": "title",
+              },
+            }
+          }
         />
       </div>
     </EuiPageContent>
@@ -517,54 +524,48 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
         <EuiSpacer
           size="m"
         />
-        <React.Fragment>
-          <EuiCallOut
-            color="warning"
-            iconType="help"
-            size="m"
-            title={
-              <FormattedMessage
-                defaultMessage="Listing limit exceeded"
-                id="kbn.dashboard.listing.listingLimitExceededTitle"
-                values={Object {}}
-              />
-            }
-          >
-            <p>
-              <FormattedMessage
-                defaultMessage="You have {totalDashboards} dashboards, but your {listingLimitText} setting prevents the table below from displaying more than {listingLimitValue}. You can change this setting under {advancedSettingsLink}."
-                id="kbn.dashboard.listing.listingLimitExceededDescription"
-                values={
-                  Object {
-                    "advancedSettingsLink": <EuiLink
-                      color="primary"
-                      href="#/management/kibana/settings"
-                      type="button"
-                    >
-                      <FormattedMessage
-                        defaultMessage="Advanced Settings"
-                        id="kbn.dashboard.listing.listingLimitExceeded.advancedSettingsLinkText"
-                        values={Object {}}
-                      />
-                    </EuiLink>,
-                    "listingLimitText": <strong>
-                      <FormattedMessage
-                        defaultMessage="listingLimit"
-                        id="kbn.dashboard.listing.listingLimitExceededListingLimitTitle"
-                        values={Object {}}
-                      />
-                    </strong>,
-                    "listingLimitValue": 1,
-                    "totalDashboards": 2,
-                  }
+        <EuiCallOut
+          color="warning"
+          iconType="help"
+          size="m"
+          title={
+            <FormattedMessage
+              defaultMessage="Listing limit exceeded"
+              id="kbn.dashboard.listing.listingLimitExceededTitle"
+              values={Object {}}
+            />
+          }
+        >
+          <p>
+            <FormattedMessage
+              defaultMessage="You have {totalDashboards} dashboards, but your {listingLimitText} setting prevents the table below from displaying more than {listingLimitValue}. You can change this setting under {advancedSettingsLink}."
+              id="kbn.dashboard.listing.listingLimitExceededDescription"
+              values={
+                Object {
+                  "advancedSettingsLink": <EuiLink
+                    color="primary"
+                    href="#/management/kibana/settings"
+                    type="button"
+                  >
+                    <FormattedMessage
+                      defaultMessage="Advanced Settings"
+                      id="kbn.dashboard.listing.listingLimitExceeded.advancedSettingsLinkText"
+                      values={Object {}}
+                    />
+                  </EuiLink>,
+                  "listingLimitText": <strong>
+                    listingLimit
+                  </strong>,
+                  "listingLimitValue": 1,
+                  "totalDashboards": 2,
                 }
-              />
-            </p>
-          </EuiCallOut>
-          <EuiSpacer
-            size="m"
-          />
-        </React.Fragment>
+              }
+            />
+          </p>
+        </EuiCallOut>
+        <EuiSpacer
+          size="m"
+        />
         <EuiFlexGroup
           alignItems="stretch"
           component="div"
@@ -661,7 +662,14 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
               "onSelectionChange": [Function],
             }
           }
-          sorting={Object {}}
+          sorting={
+            Object {
+              "sort": Object {
+                "direction": "asc",
+                "field": "title",
+              },
+            }
+          }
         />
       </div>
     </EuiPageContent>

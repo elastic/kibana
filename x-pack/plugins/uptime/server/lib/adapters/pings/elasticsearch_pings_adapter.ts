@@ -6,12 +6,15 @@
 
 import { get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
-import { UMGqlRange, UMPingSortDirectionArg } from '../../../../common/domain_types';
-import { DocCount, HistogramSeries, Ping } from '../../../../common/graphql/types';
+import { DocCount, HistogramSeries, Ping, PingResults } from '../../../../common/graphql/types';
 import { DatabaseAdapter } from '../database';
 import { UMPingsAdapter } from './adapter_types';
 
-const getFilteredQuery = (dateRangeStart: number, dateRangeEnd: number, filters?: string) => {
+const getFilteredQuery = (
+  dateRangeStart: string,
+  dateRangeEnd: string,
+  filters?: string | null
+) => {
   let filtersObj;
   // TODO: handle bad JSON gracefully
   filtersObj = filters ? JSON.parse(filters) : undefined;
@@ -43,13 +46,13 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
 
   public async getAll(
     request: any,
-    dateRangeStart: number,
-    dateRangeEnd: number,
-    monitorId?: string,
-    status?: string,
-    sort?: UMPingSortDirectionArg,
-    size?: number
-  ): Promise<Ping[]> {
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    monitorId?: string | null,
+    status?: string | null,
+    sort?: string | null,
+    size?: number | null
+  ): Promise<PingResults> {
     const sortParam = sort ? { sort: [{ '@timestamp': { order: sort } }] } : undefined;
     const sizeParam = size ? { size } : undefined;
     const must: any[] = [];
@@ -72,20 +75,27 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
       },
     };
     const {
-      hits: { hits },
+      hits: { hits, total },
     } = await this.database.search(request, params);
 
-    return hits.map(({ _source }: any) => {
+    const pings: Ping[] = hits.map(({ _source }: any) => {
       const timestamp = _source['@timestamp'];
       return { timestamp, ..._source };
     });
+
+    const results: PingResults = {
+      total,
+      pings,
+    };
+
+    return results;
   }
 
   public async getLatestMonitorDocs(
     request: any,
-    dateRangeStart: number,
-    dateRangeEnd: number,
-    monitorId?: string
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    monitorId?: string | null
   ): Promise<Ping[]> {
     const must: any[] = [];
     if (monitorId) {
@@ -140,10 +150,10 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
 
   public async getPingHistogram(
     request: any,
-    range: UMGqlRange,
-    filters?: string
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string | null
   ): Promise<HistogramSeries[] | null> {
-    const { dateRangeStart, dateRangeEnd } = range;
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
