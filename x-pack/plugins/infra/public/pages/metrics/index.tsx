@@ -117,7 +117,7 @@ export const MetricDetail = withTheme(
                               nodeType={nodeType}
                               nodeId={nodeId}
                             >
-                              {({ metrics, error, loading }) => {
+                              {({ metrics, error, loading, refetch, refetching }) => {
                                 if (error) {
                                   return <ErrorPageBody message={error} />;
                                 }
@@ -164,6 +164,7 @@ export const MetricDetail = withTheme(
                                                       ? false
                                                       : loading
                                                   }
+                                                  refetch={refetch}
                                                   onChangeRangeTime={setRangeTime}
                                                 />
                                               </EuiPageContentWithRelative>
