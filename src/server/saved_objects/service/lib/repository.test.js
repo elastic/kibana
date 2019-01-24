@@ -26,6 +26,7 @@ import * as errors from './errors';
 import elasticsearch from 'elasticsearch';
 import { SavedObjectsSchema } from '../../schema';
 import { SavedObjectsSerializer } from '../../serialization';
+import { getRootPropertiesObjects } from '../../../mappings/lib/get_root_properties_objects';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -180,6 +181,21 @@ describe('SavedObjectsRepository', () => {
   const mappings = {
     doc: {
       properties: {
+        'config': {
+          properties: {
+            type: 'keyword'
+          },
+        },
+        'foo': {
+          properties: {
+            type: 'keyword',
+          },
+        },
+        'bar': {
+          properties: {
+            type: 'keyword',
+          },
+        },
         'index-pattern': {
           properties: {
             someField: {
@@ -214,6 +230,8 @@ describe('SavedObjectsRepository', () => {
 
   const schema = new SavedObjectsSchema({
     globaltype: { isNamespaceAgnostic: true },
+    foo: { isNamespaceAgnostic: true },
+    bar: { isNamespaceAgnostic: true },
     hiddenType: { isNamespaceAgnostic: true, hidden: true },
   });
 
@@ -226,6 +244,9 @@ describe('SavedObjectsRepository', () => {
     };
 
     const serializer = new SavedObjectsSerializer(schema);
+    const allTypes = Object.keys(getRootPropertiesObjects(mappings));
+    const allowedTypes = [...new Set(allTypes.filter(type => !schema.isHiddenType(type)))];
+
     savedObjectsRepository = new SavedObjectsRepository({
       index: '.kibana-test',
       mappings,
@@ -233,6 +254,7 @@ describe('SavedObjectsRepository', () => {
       migrator,
       schema,
       serializer,
+      allowedTypes,
       onBeforeWrite
     });
 
@@ -772,7 +794,7 @@ describe('SavedObjectsRepository', () => {
 
       sinon.assert.calledWithExactly(getSearchDsl, mappings, schema, {
         namespace: 'my-namespace',
-        type: ['index-pattern', 'dashboard']
+        type: ['config', 'index-pattern', 'dashboard']
       });
 
       sinon.assert.calledWithExactly(callAdminCluster, 'deleteByQuery', {
@@ -1487,7 +1509,7 @@ describe('SavedObjectsRepository', () => {
       onBeforeWrite.returns(delay(500));
       callAdminCluster.returns({ result: 'deleted', found: true });
 
-      const deletePromise = savedObjectsRepository.delete('type', 'id');
+      const deletePromise = savedObjectsRepository.delete('foo', 'id');
       await delay(100);
       sinon.assert.calledOnce(onBeforeWrite);
       sinon.assert.notCalled(callAdminCluster);
@@ -1504,7 +1526,7 @@ describe('SavedObjectsRepository', () => {
       onBeforeWrite.throws(es401);
 
       try {
-        await savedObjectsRepository.delete('type', 'id');
+        await savedObjectsRepository.delete('foo', 'id');
       } catch (error) {
         sinon.assert.calledOnce(onBeforeWrite);
         expect(error).toBe(es401);
@@ -1515,7 +1537,7 @@ describe('SavedObjectsRepository', () => {
 
   describe('hidden types', () => {
     it('should error when attempting to \'get\' hidden types', async () => {
-      await expect(savedObjectsRepository.get('hiddenType')).rejects.toEqual(new Error('Hidden types not allowed!'));
+      await expect(savedObjectsRepository.get('hiddenType')).rejects.toEqual(new Error('Type not allowed!'));
     });
 
     it('should error when attempting to \'bulkGet\' hidden types', async () => {
@@ -1539,34 +1561,34 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('should error when attempting to \'find\' hidden types', async () => {
-      await expect(savedObjectsRepository.find({ type: 'hiddenType' })).rejects.toEqual(new Error('Hidden types not allowed!'));
+      await expect(savedObjectsRepository.find({ type: 'hiddenType' })).rejects.toEqual(new Error('Type not allowed!'));
     });
 
     it('should error when attempting to \'find\' more than one hidden types', async () => {
       const findParams = { type: ['hiddenType', 'hiddenType2'] };
-      await expect(savedObjectsRepository.find(findParams)).rejects.toEqual(new Error('Hidden types not allowed!'));
+      await expect(savedObjectsRepository.find(findParams)).rejects.toEqual(new Error('Type not allowed!'));
     });
 
     it('should error when attempting to \'find\' an array of hidden types', async () => {
       const findParams = { type: ['hiddenType'] };
-      await expect(savedObjectsRepository.find(findParams)).rejects.toEqual(new Error('Hidden types not allowed!'));
+      await expect(savedObjectsRepository.find(findParams)).rejects.toEqual(new Error('Type not allowed!'));
     });
 
     it('should error when attempting to \'delete\' hidden types', async () => {
-      await expect(savedObjectsRepository.delete('hiddenType')).rejects.toEqual(new Error('Hidden types not allowed!'));
+      await expect(savedObjectsRepository.delete('hiddenType')).rejects.toEqual(new Error('Type not allowed!'));
     });
 
     it('should error when attempting to \'bulkCreate\' hidden types', async () => {
       await expect(savedObjectsRepository.bulkCreate([
         { type: 'config', id: 'one', attributes: { title: 'Test One' } },
         { type: 'hiddenType', id: 'two', attributes: { title: 'Test Two' } }
-      ])).rejects.toEqual(new Error('Hidden types not allowed!'));
+      ])).rejects.toEqual(new Error('Type not allowed!'));
     });
 
     it('should error when attempting to \'incrementCounter\' for a hidden type', async () => {
       await expect(
         savedObjectsRepository.incrementCounter('hiddenType', 'doesntmatter', 'fieldArg')
-      ).rejects.toEqual(new Error('Hidden types not allowed!'));
+      ).rejects.toEqual(new Error('Type not allowed!'));
     });
   });
 });

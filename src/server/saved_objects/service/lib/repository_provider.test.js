@@ -42,7 +42,7 @@ test('creates a valid Repository', async () => {
   const schema = Symbol();
   const serializer = Symbol();
   const onBeforeWrite = Symbol();
-  const includeHiddenTypes = Array();
+  const allowedTypes = Array();
   const provider = new SavedObjectsRepositoryProvider({
     index,
     mappings,
@@ -67,7 +67,7 @@ test('creates a valid Repository', async () => {
     schema,
     serializer,
     onBeforeWrite,
-    includeHiddenTypes,
+    allowedTypes,
     callCluster,
   });
 });

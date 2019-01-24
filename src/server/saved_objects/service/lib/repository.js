@@ -36,7 +36,7 @@ export class SavedObjectsRepository {
       schema,
       serializer,
       migrator,
-      includeHiddenTypes = [],
+      allowedTypes = [],
       onBeforeWrite = () => { },
     } = options;
 
@@ -51,7 +51,7 @@ export class SavedObjectsRepository {
     this._index = index;
     this._mappings = mappings;
     this._schema = schema;
-    this._includeHiddenTypes = includeHiddenTypes;
+    this._allowedTypes = allowedTypes;
     this._type = getRootType(this._mappings);
     this._onBeforeWrite = onBeforeWrite;
     this._unwrappedCallCluster = async (...args) => {
@@ -312,11 +312,12 @@ export class SavedObjectsRepository {
       fields,
       namespace,
     } = options;
-    this._assertAllowedType(type);
 
     if (!type) {
       throw new TypeError(`options.type must be a string or an array of strings`);
     }
+
+    this._assertAllowedType(type);
 
     if (searchFields && !Array.isArray(searchFields)) {
       throw new TypeError('options.searchFields must be an array');
@@ -622,9 +623,9 @@ export class SavedObjectsRepository {
   }
 
   _assertAllowedType(types) {
-    [].concat(types).forEach((type) => {
-      if(this._schema.isHiddenType(type) && !this._includeHiddenTypes.includes(type)) {
-        throw Error('Hidden types not allowed!');
+    [].concat(types).forEach(type => {
+      if(!this._allowedTypes.includes(type)) {
+        throw Error('Type not allowed!');
       }
     });
   }

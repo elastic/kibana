@@ -30,7 +30,7 @@ import { SavedObjectsClient } from './saved_objects_client';
 // import / export from the Kibana UI. Import / export functionality needs to apply migrations to documents.
 // Eventually, we hope to build a first-class import / export API, at which point, we can
 // remove the migrator from the saved objects client and leave only document validation here.
-export function createSavedObjectsService(server, schema, serializer, migrator, includeHiddenTypes) {
+export function createSavedObjectsService(server, schema, serializer, migrator, extraTypes) {
   const onBeforeWrite = async () => {
     const adminCluster = server.plugins.elasticsearch.getCluster('admin');
 
@@ -72,13 +72,15 @@ export function createSavedObjectsService(server, schema, serializer, migrator, 
   };
 
   const mappings = server.getKibanaIndexMappingsDsl();
+  const allTypes = Object.keys(getRootPropertiesObjects(mappings));
+  const allowedTypes = new Set(extraTypes.concat(allTypes.filter(type => !schema.isHiddenType(type))));
   const repositoryProvider = new SavedObjectsRepositoryProvider({
     index: server.config().get('kibana.index'),
     migrator,
     mappings,
     schema,
     serializer,
-    includeHiddenTypes,
+    allowedTypes,
     onBeforeWrite,
   });
 
@@ -99,7 +101,7 @@ export function createSavedObjectsService(server, schema, serializer, migrator, 
   });
 
   return {
-    types: Object.keys(getRootPropertiesObjects(mappings)),
+    types: allTypes,
     SavedObjectsClient,
     SavedObjectsRepository,
     getSavedObjectsRepository: (...args) => repositoryProvider.getRepository(...args),
