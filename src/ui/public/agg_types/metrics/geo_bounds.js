@@ -18,12 +18,17 @@
  */
 
 import { MetricAggType } from './metric_agg_type';
+import { i18n } from '@kbn/i18n';
 
 export const geoBoundsMetricAgg = new MetricAggType({
   name: 'geo_bounds',
-  title: 'Geo Bounds',
+  title: i18n.translate('common.ui.aggTypes.metrics.geoBoundsTitle', {
+    defaultMessage: 'Geo Bounds'
+  }),
   makeLabel: function () {
-    return 'Geo Bounds';
+    return i18n.translate('common.ui.aggTypes.metrics.geoBoundsLabel', {
+      defaultMessage: 'Geo Bounds'
+    });
   },
   params: [
     {

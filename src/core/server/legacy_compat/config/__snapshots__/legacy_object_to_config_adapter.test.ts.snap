@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`#get correctly handles server config. 1`] = `
+exports[`#get correctly handles server config.: default 1`] = `
 Object {
   "autoListen": true,
   "basePath": "/abc",
@@ -13,6 +13,23 @@ Object {
     "enabled": true,
     "keyPassphrase": "some-phrase",
     "someNewValue": "new",
+  },
+}
+`;
+
+exports[`#get correctly handles server config.: disabled ssl 1`] = `
+Object {
+  "autoListen": true,
+  "basePath": "/abc",
+  "cors": false,
+  "host": "host",
+  "maxPayload": 1000,
+  "port": 1234,
+  "rewriteBasePath": false,
+  "ssl": Object {
+    "certificate": "cert",
+    "enabled": false,
+    "key": "key",
   },
 }
 `;

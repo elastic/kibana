@@ -10,9 +10,9 @@ import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import {
   InfraMetricInput,
   InfraMetricType,
+  InfraNodeType,
   InfraPathInput,
-} from '../../../../common/graphql/types';
-import { InfraNodeType } from '../../../../server/lib/adapters/nodes';
+} from '../../../graphql/types';
 import { changeGroupBy, changeMetric, changeNodeType } from './actions';
 
 export interface WaffleOptionsState {

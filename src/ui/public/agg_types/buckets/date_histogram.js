@@ -29,6 +29,7 @@ import { intervalOptions } from './_interval_options';
 import intervalTemplate from '../controls/time_interval.html';
 import { timefilter } from '../../timefilter';
 import dropPartialTemplate from '../controls/drop_partials.html';
+import { i18n } from '@kbn/i18n';
 
 const config = chrome.getUiSettingsClient();
 const detectedTimezone = moment.tz.guess();
@@ -42,7 +43,7 @@ function getInterval(agg) {
   return interval;
 }
 
-function setBounds(agg, force) {
+export function setBounds(agg, force) {
   if (agg.buckets._alreadySet && !force) return;
   agg.buckets._alreadySet = true;
   const bounds = agg.params.timeRange ? timefilter.calculateBounds(agg.params.timeRange) : null;
@@ -52,14 +53,22 @@ function setBounds(agg, force) {
 
 export const dateHistogramBucketAgg = new BucketAggType({
   name: 'date_histogram',
-  title: 'Date Histogram',
+  title: i18n.translate('common.ui.aggTypes.buckets.dateHistogramTitle', {
+    defaultMessage: 'Date Histogram',
+  }),
   ordered: {
     date: true
   },
   makeLabel: function (agg) {
     const output = this.params.write(agg);
     const field = agg.getFieldDisplayName();
-    return field + ' per ' + (output.metricScaleText || output.bucketInterval.description);
+    return i18n.translate('common.ui.aggTypes.buckets.dateHistogramLabel', {
+      defaultMessage: '{fieldName} per {intervalDescription}',
+      values: {
+        fieldName: field,
+        intervalDescription: output.metricScaleText || output.bucketInterval.description,
+      }
+    });
   },
   createFilter: createFilterDateHistogram,
   decorateAggConfig: function () {

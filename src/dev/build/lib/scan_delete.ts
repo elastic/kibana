@@ -53,7 +53,7 @@ export async function scanDelete(options: Options) {
   const getChildPath$ = (path: string) =>
     getReadDir$(path).pipe(
       mergeAll(),
-      map(name => join(path, name))
+      map((name: string) => join(path, name))
     );
 
   // get an observable of all paths to be deleted, by starting with the arg

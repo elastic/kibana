@@ -38,18 +38,23 @@ import { SearchSourceProvider } from '../search_source';
 import { SavedObjectsClientProvider, findObjectByTitle } from '../../saved_objects';
 import { migrateLegacyQuery } from '../../utils/migrate_legacy_query';
 import { recentlyAccessed } from '../../persisted_log';
+import { i18n } from '@kbn/i18n';
 
 /**
  * An error message to be used when the user rejects a confirm overwrite.
  * @type {string}
  */
-const OVERWRITE_REJECTED = 'Overwrite confirmation was rejected';
+const OVERWRITE_REJECTED = i18n.translate('common.ui.courier.savedObject.overwriteRejectedDescription', {
+  defaultMessage: 'Overwrite confirmation was rejected'
+});
 
 /**
  * An error message to be used when the user rejects a confirm save with duplicate title.
  * @type {string}
  */
-const SAVE_DUPLICATE_REJECTED = 'Save with duplicate title confirmation was rejected';
+const SAVE_DUPLICATE_REJECTED = i18n.translate('common.ui.courier.savedObject.saveDuplicateRejectedDescription', {
+  defaultMessage: 'Save with duplicate title confirmation was rejected'
+});
 
 /**
  * @param error {Error} the error
@@ -312,9 +317,20 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
         .catch(err => {
           // record exists, confirm overwriting
           if (_.get(err, 'res.status') === 409) {
-            const confirmMessage = `Are you sure you want to overwrite ${this.title}?`;
+            const confirmMessage = i18n.translate('common.ui.courier.savedObject.confirmModal.overwriteConfirmationMessage', {
+              defaultMessage: 'Are you sure you want to overwrite {title}?',
+              values: { title: this.title }
+            });
 
-            return confirmModalPromise(confirmMessage, { confirmButtonText: `Overwrite ${this.getDisplayName()}` })
+            return confirmModalPromise(confirmMessage, {
+              confirmButtonText: i18n.translate('common.ui.courier.savedObject.confirmModal.overwriteButtonLabel', {
+                defaultMessage: 'Overwrite',
+              }),
+              title: i18n.translate('common.ui.courier.savedObject.confirmModal.overwriteTitle', {
+                defaultMessage: 'Overwrite {name}?',
+                values: { name: this.getDisplayName() }
+              }),
+            })
               .then(() => savedObjectsClient.create(esType, source, this.creationOpts({ overwrite: true })))
               .catch(() => Promise.reject(new Error(OVERWRITE_REJECTED)));
           }
@@ -323,10 +339,17 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
     };
 
     const displayDuplicateTitleConfirmModal = () => {
-      const confirmMessage =
-        `A ${this.getDisplayName()} with the title '${this.title}' already exists. Would you like to save anyway?`;
+      const confirmMessage = i18n.translate('common.ui.courier.savedObject.confirmModal.saveDuplicateConfirmationMessage', {
+        defaultMessage: `A {name} with the title '{title}' already exists. Would you like to save anyway?`,
+        values: { title: this.title, name: this.getDisplayName() }
+      });
 
-      return confirmModalPromise(confirmMessage, { confirmButtonText: `Save ${this.getDisplayName()}` })
+      return confirmModalPromise(confirmMessage, {
+        confirmButtonText: i18n.translate('common.ui.courier.savedObject.confirmModal.saveDuplicateButtonLabel', {
+          defaultMessage: 'Save {name}',
+          values: { name: this.getDisplayName() }
+        })
+      })
         .catch(() => Promise.reject(new Error(SAVE_DUPLICATE_REJECTED)));
     };
 

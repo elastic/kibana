@@ -23,7 +23,7 @@ export const PageConfig = ({
         <h4>Page</h4>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <EuiFormRow label="Background">
+      <EuiFormRow label="Background color">
         <ColorPickerMini onChange={setBackground} value={background} />
       </EuiFormRow>
       {/* No need to show the transition for the first page because transitions occur when

@@ -5,15 +5,15 @@
  */
 
 import { Server } from 'hapi';
+import { flatten } from 'lodash';
 // @ts-ignore
 import { initErrorsApi } from '../errors';
 import { initServicesApi } from '../services';
 // @ts-ignore
 import { initStatusApi } from '../status_check';
 import { initTracesApi } from '../traces';
-import { initTransactionsApi } from '../transactions';
 
-describe('route handlers fail properly', () => {
+describe('route handlers should fail with a Boom error', () => {
   let consoleErrorSpy: any;
 
   async function testRouteFailures(init: (server: Server) => void) {
@@ -21,23 +21,27 @@ describe('route handlers fail properly', () => {
     init((mockServer as unknown) as Server);
     expect(mockServer.route).toHaveBeenCalled();
 
-    const routes = mockServer.route.mock.calls;
+    const mockCluster = {
+      callWithRequest: () => Promise.reject(new Error('request failed'))
+    };
+    const mockConfig = { get: jest.fn() };
     const mockReq = {
       params: {},
       query: {},
-      pre: {
-        setup: {
-          config: { get: jest.fn() },
-          client: jest.fn(() => Promise.reject(new Error('request failed')))
+      server: {
+        config: () => mockConfig,
+        plugins: {
+          elasticsearch: {
+            getCluster: () => mockCluster
+          }
         }
       }
     };
 
+    const routes = flatten(mockServer.route.mock.calls);
     routes.forEach(async (route, i) => {
-      test(`route ${i + 1} of ${
-        routes.length
-      } should fail with a Boom error`, async () => {
-        await expect(route[0].handler(mockReq)).rejects.toMatchObject({
+      test(`${route.method} ${route.path}"`, async () => {
+        await expect(route.handler(mockReq)).rejects.toMatchObject({
           message: 'request failed',
           isBoom: true
         });
@@ -70,9 +74,5 @@ describe('route handlers fail properly', () => {
 
   describe('trace routes', async () => {
     await testRouteFailures(initTracesApi);
-  });
-
-  describe('transaction routes', async () => {
-    await testRouteFailures(initTransactionsApi);
   });
 });

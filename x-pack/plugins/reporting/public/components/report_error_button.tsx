@@ -5,11 +5,13 @@
  */
 
 import { EuiButtonIcon, EuiCallOut, EuiPopover } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { JobContent, jobQueueClient } from '../lib/job_queue_client';
 
 interface Props {
   jobId: string;
+  intl: InjectedIntl;
 }
 
 interface State {
@@ -19,7 +21,7 @@ interface State {
   error?: string;
 }
 
-export class ReportErrorButton extends Component<Props, State> {
+class ReportErrorButtonUi extends Component<Props, State> {
   private mounted?: boolean;
 
   constructor(props: Props) {
@@ -28,7 +30,10 @@ export class ReportErrorButton extends Component<Props, State> {
     this.state = {
       isLoading: false,
       isPopoverOpen: false,
-      calloutTitle: 'Unable to generate report',
+      calloutTitle: props.intl.formatMessage({
+        id: 'xpack.reporting.errorButton.unableToGenerateReportTitle',
+        defaultMessage: 'Unable to generate report',
+      }),
     };
   }
 
@@ -38,7 +43,10 @@ export class ReportErrorButton extends Component<Props, State> {
         onClick={this.togglePopover}
         iconType="alert"
         color={'danger'}
-        aria-label="Show report error"
+        aria-label={this.props.intl.formatMessage({
+          id: 'xpack.reporting.errorButton.showReportErrorAriaLabel',
+          defaultMessage: 'Show report error',
+        })}
       />
     );
 
@@ -90,10 +98,15 @@ export class ReportErrorButton extends Component<Props, State> {
       if (this.mounted) {
         this.setState({
           isLoading: false,
-          calloutTitle: 'Unable to fetch report content',
+          calloutTitle: this.props.intl.formatMessage({
+            id: 'xpack.reporting.errorButton.unableToFetchReportContentTitle',
+            defaultMessage: 'Unable to fetch report content',
+          }),
           error: kfetchError.message,
         });
       }
     }
   };
 }
+
+export const ReportErrorButton = injectI18n(ReportErrorButtonUi);

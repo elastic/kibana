@@ -4,7 +4,12 @@
   <div ng-controller="MlNewJobStepJobType">
     <!-- Presents the various options for creating a job -->
     <div class="job-types-content">
-      <h1 class="euiTitle euiTitle--large">Create a job from the {{pageTitleLabel}}</h1>
+      <h1
+        class="euiTitle euiTitle--large"
+        i18n-id="xpack.ml.newJob.wizard.jobType.createJobFromTitle"
+        i18n-default-message="Create a job from the {pageTitleLabel}"
+        i18n-values="{ pageTitleLabel }"
+      ></h1>
       <div class="euiSpacer euiSpacer--l"></div>
 
       <div ng-if="isTimeBasedIndex===false">
@@ -22,8 +27,18 @@
               <span class="euiCallOutHeader__title">{{indexWarningTitle}}</span>
             </div>
             <div class="euiText euiText--small">
-              <p>Anomaly detection can only be run over indices which are time based.<br/>
-                <a class="euiLink euiLink--primary" href="#jobs/new_job">Select a different index</a>
+              <p>
+                <span
+                  i18n-id="xpack.ml.newJob.wizard.jobType.howToRunAnomalyDetectionDescription"
+                  i18n-default-message="Anomaly detection can only be run over indices which are time based."
+                ></span>
+                <br/>
+                <a
+                  class="euiLink euiLink--primary"
+                  href="#jobs/new_job\"
+                  i18n-id="xpack.ml.newJob.wizard.jobType.selectDifferentIndexLinkText"
+                  i18n-default-message="Select a different index"
+                ></a>
               </p>
             </div>
           </div>
@@ -33,11 +48,17 @@
 
       <div ng-show="recognizerResults.count!==0" class="recognizer-section">
         <div class="euiText">
-          <h3 class="euiTitle euiTitle--small">Use a supplied configuration</h3>
-          <p>
-            The fields in your data have been recognized as matching known configurations.
-            Select to create a set of machine learning jobs and associated dashboards.
-          </p>
+          <h3
+            class="euiTitle euiTitle--small"
+            i18n-id="xpack.ml.newJob.wizard.jobType.useSuppliedConfigurationTitle"
+            i18n-default-message="Use a supplied configuration"
+            >
+          </h3>
+          <p
+            i18n-id="xpack.ml.newJob.wizard.jobType.useSuppliedConfigurationDescription"
+            i18n-default-message="The fields in your data have been recognized as matching known configurations.
+            Select to create a set of machine learning jobs and associated dashboards."
+          ></p>
         </div>
         <div class="euiSpacer euiSpacer--m"></div>
         <ml-data-recognizer
@@ -50,10 +71,15 @@
       </div>
 
       <div class="euiText">
-        <h3 class="euiTitle euiTitle--small">Use a wizard</h3>
-        <p>
-          Use one of the wizards to create a machine learning job to find anomalies in your data.
-        </p>
+        <h3
+          class="euiTitle euiTitle--small"
+          i18n-id="xpack.ml.newJob.wizard.jobType.useWizardTitle"
+          i18n-default-message="Use a wizard"
+        ></h3>
+        <p
+          i18n-id="xpack.ml.newJob.wizard.jobType.useWizardDescription"
+          i18n-default-message="Use one of the wizards to create a machine learning job to find anomalies in your data."
+        ></p>
       </div>
 
       <div class="euiSpacer euiSpacer--m"></div>
@@ -64,15 +90,26 @@
             <div class="euiPanel euiPanel--paddingMedium synopsisPanel">
               <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--responsive">
                 <div class="euiFlexItem euiFlexItem--flexGrowZero">
-                  <icon type="'createSingleMetricJob'" size="'xl'" aria-label="Single metric job" class="synopsisIcon" />
+                  <icon
+                    type="'createSingleMetricJob'"
+                    size="'xl'"
+                    aria-label="{{ ::'xpack.ml.newJob.wizard.jobType.singleMetricAriaLabel' | i18n: {defaultMessage: 'Single metric job'} }}"
+                    class="synopsisIcon"
+                  />
                 </div>
                 <div class="euiFlexItem synopsisContent">
-                  <h4 class="euiTitle euiTitle--small synopsisTitle">Single metric</h4>
+                  <h4
+                    class="euiTitle euiTitle--small synopsisTitle"
+                    i18n-id="xpack.ml.newJob.wizard.jobType.singleMetricTitle"
+                    i18n-default-message="Single metric"
+                  ></h4>
                   <div class="euiText synopsisBody">
                     <p>
-                      <span class="euiTextColor euiTextColor--subdued">
-                      Detect anomalies in a single time series.
-                      </span>
+                      <span
+                        class="euiTextColor euiTextColor--subdued"
+                        i18n-id="xpack.ml.newJob.wizard.jobType.singleMetricDescription"
+                        i18n-default-message="Detect anomalies in a single time series."
+                      ></span>
                     </p>
                   </div>
                 </div>
@@ -85,15 +122,26 @@
             <div class="euiPanel euiPanel--paddingMedium synopsisPanel">
               <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--responsive">
                 <div class="euiFlexItem euiFlexItem--flexGrowZero">
-                  <icon type="'createMultiMetricJob'" size="'xl'" aria-label="Multi metric job" class="synopsisIcon" />
+                  <icon
+                    type="'createMultiMetricJob'"
+                    size="'xl'"
+                    aria-label="{{ ::'xpack.ml.newJob.wizard.jobType.multiMetricAriaLabel' | i18n: {defaultMessage: 'Multi metric job'} }}"
+                    class="synopsisIcon"
+                  />
                 </div>
                 <div class="euiFlexItem synopsisContent">
-                  <h4 class="euiTitle euiTitle--small synopsisTitle">Multi metric</h4>
+                  <h4
+                    class="euiTitle euiTitle--small synopsisTitle"
+                    i18n-id="xpack.ml.newJob.wizard.jobType.multiMetricTitle"
+                    i18n-default-message="Multi metric"
+                  ></h4>
                   <div class="euiText synopsisBody">
                     <p>
-                      <span class="euiTextColor euiTextColor--subdued">
-                      Detect anomalies in multiple metrics by splitting a time series by a categorical field.
-                      </span>
+                      <span
+                        class="euiTextColor euiTextColor--subdued"
+                        i18n-id="xpack.ml.newJob.wizard.jobType.multiMetricDescription"
+                        i18n-default-message="Detect anomalies in multiple metrics by splitting a time series by a categorical field."
+                      ></span>
                     </p>
                   </div>
                 </div>
@@ -106,15 +154,26 @@
             <div class="euiPanel euiPanel--paddingMedium synopsisPanel">
               <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--responsive">
                 <div class="euiFlexItem euiFlexItem--flexGrowZero">
-                  <icon type="'createPopulationJob'" size="'xl'" aria-label="Population job" class="synopsisIcon" />
+                  <icon
+                    type="'createPopulationJob'"
+                    size="'xl'"
+                    aria-label="{{ ::'xpack.ml.newJob.wizard.jobType.populationAriaLabel' | i18n: {defaultMessage: 'Population job'} }}"
+                    class="synopsisIcon"
+                  />
                 </div>
                 <div class="euiFlexItem synopsisContent">
-                  <h4 class="euiTitle euiTitle--small synopsisTitle">Population</h4>
+                  <h4
+                    class="euiTitle euiTitle--small synopsisTitle"
+                    i18n-id="xpack.ml.newJob.wizard.jobType.populationTitle"
+                    i18n-default-message="Population"
+                  ></h4>
                   <div class="euiText synopsisBody">
                     <p>
-                      <span class="euiTextColor euiTextColor--subdued">
-                      Detect activity that is unusual compared to the behavior of the population.
-                      </span>
+                      <span
+                        class="euiTextColor euiTextColor--subdued"
+                        i18n-id="xpack.ml.newJob.wizard.jobType.populationDescription"
+                        i18n-default-message="Detect activity that is unusual compared to the behavior of the population."
+                      ></span>
                     </p>
                   </div>
                 </div>
@@ -127,15 +186,26 @@
             <div class="euiPanel euiPanel--paddingMedium synopsisPanel">
               <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--responsive">
                 <div class="euiFlexItem euiFlexItem--flexGrowZero">
-                  <icon type="'createAdvancedJob'" size="'xl'" aria-label="Advanced job" class="synopsisIcon" />
+                  <icon
+                    type="'createAdvancedJob'"
+                    size="'xl'"
+                    aria-label="{{ ::'xpack.ml.newJob.wizard.jobType.advancedAriaLabel' | i18n: {defaultMessage: 'Advanced job'} }}"
+                    class="synopsisIcon"
+                  />
                 </div>
                 <div class="euiFlexItem synopsisContent">
-                  <h4 class="euiTitle euiTitle--small synopsisTitle">Advanced</h4>
+                  <h4
+                    class="euiTitle euiTitle--small synopsisTitle"
+                    i18n-id="xpack.ml.newJob.wizard.jobType.advancedTitle"
+                    i18n-default-message="Advanced"
+                  ></h4>
                   <div class="euiText synopsisBody">
                     <p>
-                      <span class="euiTextColor euiTextColor--subdued">
-                      Use the full range of options to create a job for more advanced use cases.
-                      </span>
+                      <span
+                        class="euiTextColor euiTextColor--subdued"
+                        i18n-id="xpack.ml.newJob.wizard.jobType.advancedDescription"
+                        i18n-default-message="Use the full range of options to create a job for more advanced use cases."
+                      ></span>
                     </p>
                   </div>
                 </div>
@@ -148,10 +218,15 @@
       <div class="euiSpacer euiSpacer--xxl"></div>
 
       <div class="euiText">
-        <h3 class="euiTitle euiTitle--small">Learn more about your data</h3>
-        <p>
-          If you're not sure what type of job to create, first explore the fields and metrics in your data.
-        </p>
+        <h3
+          class="euiTitle euiTitle--small"
+          i18n-id="xpack.ml.newJob.wizard.jobType.learnMoreAboutDataTitle"
+          i18n-default-message="Learn more about your data"
+        ></h3>
+        <p
+          i18n-id="xpack.ml.newJob.wizard.jobType.learnMoreAboutDataDescription"
+          i18n-default-message="If you're not sure what type of job to create, first explore the fields and metrics in your data."
+        ></p>
       </div>
       <div class="euiSpacer euiSpacer--m"></div>
 
@@ -165,15 +240,26 @@
             <div class="euiPanel euiPanel--paddingMedium synopsisPanel">
               <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--responsive">
                 <div class="euiFlexItem euiFlexItem--flexGrowZero">
-                  <icon type="'dataVisualizer'" size="'xl'" aria-label="Data Visualizer" class="synopsisIcon" />
+                  <icon
+                    type="'dataVisualizer'"
+                    size="'xl'"
+                    aria-label="{{ ::'xpack.ml.newJob.wizard.jobType.dataVisualizerAriaLabel' | i18n: {defaultMessage: 'Data Visualizer'} }}"
+                    class="synopsisIcon"
+                  />
                 </div>
                 <div class="euiFlexItem synopsisContent">
-                  <h4 class="euiTitle euiTitle--small synopsisTitle">Data Visualizer</h4>
+                  <h4
+                    class="euiTitle euiTitle--small synopsisTitle"
+                    i18n-id="xpack.ml.newJob.wizard.jobType.dataVisualizerTitle"
+                    i18n-default-message="Data Visualizer"
+                  ></h4>
                   <div class="euiText synopsisBody">
                     <p>
-                      <span class="euiTextColor euiTextColor--subdued">
-                      Learn more about the characteristics of your data and identify the fields for analysis with machine learning.
-                      </span>
+                      <span
+                        class="euiTextColor euiTextColor--subdued"
+                        i18n-id="xpack.ml.newJob.wizard.jobType.dataVisualizerDescription"
+                        i18n-default-message="Learn more about the characteristics of your data and identify the fields for analysis with machine learning."
+                      ></span>
                     </p>
                   </div>
                 </div>

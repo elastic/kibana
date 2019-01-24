@@ -7,3 +7,4 @@
 export const PLUGIN = {
   ID: 'beats_management',
 };
+export const CONFIG_PREFIX = 'xpack.beats';

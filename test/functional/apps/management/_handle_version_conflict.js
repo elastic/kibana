@@ -31,7 +31,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const es = getService('es');
   const retry = getService('retry');
   const scriptedFiledName = 'versionConflictScript';
@@ -41,14 +41,14 @@ export default function ({ getService, getPageObjects }) {
 
   describe('index version conflict', function describeIndexTests() {
     before(async function () {
-      await remote.setWindowSize(1200, 800);
+      await browser.setWindowSize(1200, 800);
       await esArchiver.load('discover');
     });
 
 
     it('Should be able to surface version conflict notification while creating scripted field', async function () {
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
+      await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.clickOnOnlyIndexPattern();
       await PageObjects.settings.clickScriptedFieldsTab();
       await PageObjects.settings.clickAddScriptedField();
@@ -75,7 +75,7 @@ export default function ({ getService, getPageObjects }) {
     it('Should be able to surface version conflict notification while changing field format', async function () {
       const fieldName = 'geo.srcdest';
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
+      await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.clickOnOnlyIndexPattern();
       log.debug('Starting openControlsByName (' + fieldName + ')');
       await PageObjects.settings.openControlsByName(fieldName);

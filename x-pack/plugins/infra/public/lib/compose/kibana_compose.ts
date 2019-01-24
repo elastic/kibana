@@ -15,7 +15,7 @@ import { timezoneProvider } from 'ui/vis/lib/timezone';
 
 import { InfraKibanaObservableApiAdapter } from '../adapters/observable_api/kibana_observable_api';
 
-import introspectionQueryResultData from '../../../common/graphql/introspection.json';
+import introspectionQueryResultData from '../../graphql/introspection.json';
 import { InfraKibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
 import { InfraFrontendLibs } from '../lib';
 

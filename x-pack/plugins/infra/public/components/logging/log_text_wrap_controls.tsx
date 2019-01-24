@@ -5,6 +5,7 @@
  */
 
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import * as React from 'react';
 
 interface LogTextWrapControlsProps {
@@ -21,8 +22,24 @@ export class LogTextWrapControls extends React.PureComponent<LogTextWrapControls
     const { wrap } = this.props;
 
     return (
-      <EuiFormRow label="Line Wrapping">
-        <EuiSwitch label="Wrap long lines" checked={wrap} onChange={this.toggleWrap} />
+      <EuiFormRow
+        label={
+          <FormattedMessage
+            id="xpack.infra.logs.customizeLogs.lineWrappingFormRowLabel"
+            defaultMessage="Line Wrapping"
+          />
+        }
+      >
+        <EuiSwitch
+          label={
+            <FormattedMessage
+              id="xpack.infra.logs.customizeLogs.wrapLongLinesSwitchLabel"
+              defaultMessage="Wrap long lines"
+            />
+          }
+          checked={wrap}
+          onChange={this.toggleWrap}
+        />
       </EuiFormRow>
     );
   }

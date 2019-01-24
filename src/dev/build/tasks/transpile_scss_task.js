@@ -26,7 +26,7 @@ export const TranspileScssTask = {
   description: 'Transpiling SCSS to CSS',
 
   async run(config, log, build) {
-    const scanDirs = [ build.resolvePath('src/core_plugins') ];
+    const scanDirs = [ build.resolvePath('src/legacy/core_plugins') ];
     const paths = [ build.resolvePath('node_modules/x-pack') ];
 
     const { spec$ } = findPluginSpecs({ plugins: { scanDirs, paths } });
@@ -34,7 +34,7 @@ export const TranspileScssTask = {
     const uiExports = collectUiExports(enabledPlugins);
 
     try {
-      const bundles = await buildAll(uiExports.styleSheetPaths);
+      const bundles = await buildAll(uiExports.styleSheetPaths, log, build.resolvePath('built_assets/css'));
       bundles.forEach(bundle => log.info(`Compiled SCSS: ${bundle.source}`));
     } catch (error) {
       const { message, line, file } = error;

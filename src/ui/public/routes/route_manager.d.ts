@@ -21,12 +21,15 @@
  * WARNING: these types are incomplete
  */
 
+import { Breadcrumb } from '../../../core/public/chrome';
+
 interface RouteConfiguration {
   controller?: string | ((...args: any[]) => void);
   redirectTo?: string;
   reloadOnSearch?: boolean;
   resolve?: object;
   template?: string;
+  k7Breadcrumbs?: (...args: any[]) => Breadcrumb[];
 }
 
 interface RouteManager {

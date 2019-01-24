@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-import './table_header.less';
 import '../../filters/short_dots';
 import headerHtml from './table_header.html';
 import { uiModules } from '../../modules';
@@ -37,7 +36,9 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
       onMoveColumn: '=?',
     },
     template: headerHtml,
-    controller: function ($scope) {
+    controller: function ($scope, config) {
+      $scope.hideTimeColumn = config.get('doc_table:hideTimeColumn');
+
       $scope.isSortableColumn = function isSortableColumn(columnName) {
         return (
           !!$scope.indexPattern
@@ -76,7 +77,7 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
         if (!$scope.isSortableColumn(column)) return;
 
         const sortOrder = $scope.sortOrder;
-        const defaultClass = ['fa', 'fa-sort-up', 'table-header-sortchange'];
+        const defaultClass = ['fa', 'fa-sort-up', 'kbnDocTableHeader__sortChange'];
 
         if (!sortOrder || column !== sortOrder[0]) return defaultClass;
         return ['fa', sortOrder[1] === 'asc' ? 'fa-sort-up' : 'fa-sort-down'];

@@ -44,9 +44,8 @@ exports.downloadSnapshot = async function installSnapshot({
   installPath = path.resolve(basePath, version),
   log = defaultLog,
 }) {
-  // TODO: remove -alpha1 once elastic/elasticsearch#35172 has been merged
-  const fileName = getFilename(license, version + '-alpha1');
-  const url = `https://snapshots.elastic.co/downloads/elasticsearch/${fileName}`;
+  const fileName = getFilename(license, version);
+  const url = getUrl(fileName);
   const dest = path.resolve(basePath, 'cache', fileName);
 
   log.info('version: %s', chalk.bold(version));
@@ -150,4 +149,14 @@ function getFilename(license, version) {
   const basename = `elasticsearch${license === 'oss' ? '-oss-' : '-'}${version}`;
 
   return `${basename}-SNAPSHOT.${extension}`;
+}
+
+function getUrl(fileName) {
+  if (process.env.TEST_ES_SNAPSHOT_VERSION) {
+    return `https://snapshots.elastic.co/${
+      process.env.TEST_ES_SNAPSHOT_VERSION
+    }/downloads/elasticsearch/${fileName}`;
+  } else {
+    return `https://snapshots.elastic.co/downloads/elasticsearch/${fileName}`;
+  }
 }

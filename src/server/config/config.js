@@ -108,7 +108,8 @@ export class Config {
       version: _.get(pkg, 'version'),
       branch: _.get(pkg, 'branch'),
       buildNum: IS_KIBANA_DISTRIBUTABLE ? pkg.build.number : Number.MAX_SAFE_INTEGER,
-      buildSha: IS_KIBANA_DISTRIBUTABLE ? pkg.build.sha : 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+      buildSha: IS_KIBANA_DISTRIBUTABLE ? pkg.build.sha : 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+      dist: IS_KIBANA_DISTRIBUTABLE,
     };
 
     if (!context.dev && !context.prod) {
@@ -123,7 +124,10 @@ export class Config {
     });
 
     if (results.error) {
-      throw results.error;
+      const error = new Error(results.error.message);
+      error.name = results.error.name;
+      error.stack = results.error.stack;
+      throw error;
     }
 
     this[vals] = results.value;

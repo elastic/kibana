@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { last } from 'lodash';
+import { get, last } from 'lodash';
 import { isNumber } from 'lodash';
 import moment from 'moment';
-import { InfraNode, InfraNodeMetric } from '../../../../../common/graphql/types';
+
+import { InfraNode, InfraNodeMetric } from '../../../../graphql/types';
 import { InfraBucket, InfraNodeRequestOptions } from '../adapter_types';
+import { NAME_FIELDS } from '../constants';
 import { getBucketSizeInSeconds } from './get_bucket_size_in_seconds';
 
 // TODO: Break these function into seperate files and expand beyond just documnet count
@@ -56,8 +58,9 @@ export function createNodeItem(
   node: InfraBucket,
   bucket: InfraBucket
 ): InfraNode {
+  const nodeDoc = get(node, ['nodeDetails', 'hits', 'hits', 0]);
   return {
     metric: createNodeMetrics(options, node, bucket),
-    path: [{ value: node.key }],
+    path: [{ value: node.key, label: get(nodeDoc, `_source.${NAME_FIELDS[options.nodeType]}`) }],
   } as InfraNode;
 }

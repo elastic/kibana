@@ -9,7 +9,6 @@ import { GraphQLSchema } from 'graphql';
 import { Lifecycle, ResponseToolkit, RouteOptions } from 'hapi';
 import { InfraMetricModel } from '../metrics/adapter_types';
 
-export * from '../../../../common/graphql/typed_resolvers';
 import { JsonObject } from '../../../../common/typed_json';
 
 export const internalInfraFrameworkRequest = Symbol('internalInfraFrameworkRequest');
@@ -105,6 +104,12 @@ export interface InfraDatabaseResponse {
 
 export interface InfraDatabaseSearchResponse<Hit = {}, Aggregations = undefined>
   extends InfraDatabaseResponse {
+  _shards: {
+    total: number;
+    successful: number;
+    skipped: number;
+    failed: number;
+  };
   aggregations?: Aggregations;
   hits: {
     total: number;

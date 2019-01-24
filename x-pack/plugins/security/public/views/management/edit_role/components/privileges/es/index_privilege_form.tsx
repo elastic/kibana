@@ -15,7 +15,7 @@ import {
   EuiSwitch,
   EuiTextArea,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, Fragment } from 'react';
 import { IndexPrivilege } from '../../../../../../../common/model/index_privilege';
 // @ts-ignore
@@ -37,6 +37,7 @@ interface Props {
   allowDocumentLevelSecurity: boolean;
   allowFieldLevelSecurity: boolean;
   validator: RoleValidator;
+  intl: InjectedIntl;
 }
 
 interface State {
@@ -44,7 +45,7 @@ interface State {
   documentQuery?: string;
 }
 
-export class IndexPrivilegeForm extends Component<Props, State> {
+class IndexPrivilegeFormUI extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -54,6 +55,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
   }
 
   public render() {
+    const { intl } = this.props;
     return (
       <Fragment>
         <EuiHorizontalRule />
@@ -63,7 +65,11 @@ export class IndexPrivilegeForm extends Component<Props, State> {
             <EuiFlexItem grow={false}>
               <EuiFormRow hasEmptyLabelSpace>
                 <EuiButtonIcon
-                  aria-label={'Delete index privilege'}
+                  aria-label={intl.formatMessage({
+                    id:
+                      'xpack.security.management.editRoles.indexPrivilegeForm.deleteSpacePrivilegeAriaLabel',
+                    defaultMessage: 'Delete index privilege',
+                  })}
                   color={'danger'}
                   onClick={this.props.onDelete}
                   iconType={'trash'}
@@ -202,8 +208,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
               }
               // @ts-ignore
               compressed={true}
-              // @ts-ignore
-              value={this.state.queryExpanded}
+              checked={this.state.queryExpanded}
               onChange={this.toggleDocumentQuery}
             />
           </EuiFlexItem>
@@ -320,3 +325,5 @@ export class IndexPrivilegeForm extends Component<Props, State> {
     });
   };
 }
+
+export const IndexPrivilegeForm = injectI18n(IndexPrivilegeFormUI);

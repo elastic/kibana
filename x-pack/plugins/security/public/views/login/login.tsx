@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { parseNext } from 'plugins/security/lib/parse_next';
 import { LoginPage } from 'plugins/security/views/login/components';
@@ -17,7 +18,9 @@ import { parse } from 'url';
 import { LoginState } from '../../../common/login_state';
 import './login.less';
 const messageMap = {
-  SESSION_EXPIRED: 'Your session has timed out. Please log in again.',
+  SESSION_EXPIRED: i18n.translate('xpack.security.login.sessionExpiredDescription', {
+    defaultMessage: 'Your session has timed out. Please log in again.',
+  }),
 };
 
 interface AnyObject {

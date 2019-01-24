@@ -1,25 +1,28 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`HeaderBreadcrumbs renders updates to the breadcrumbs observable 1`] = `
+exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 1`] = `
 <span
   aria-current="page"
   className="euiBreadcrumb euiBreadcrumb--last"
+  data-test-subj="breadcrumb first last"
   title="First"
 >
   First
 </span>
 `;
 
-exports[`HeaderBreadcrumbs renders updates to the breadcrumbs observable 2`] = `
+exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 2`] = `
 Array [
   <EuiLink
     className="euiBreadcrumb"
     color="subdued"
+    data-test-subj="breadcrumb first"
     title="First"
     type="button"
   >
     <button
       className="euiLink euiLink--subdued euiBreadcrumb"
+      data-test-subj="breadcrumb first"
       title="First"
       type="button"
     >
@@ -28,6 +31,7 @@ Array [
   </EuiLink>,
   <button
     className="euiLink euiLink--subdued euiBreadcrumb"
+    data-test-subj="breadcrumb first"
     title="First"
     type="button"
   >
@@ -36,6 +40,7 @@ Array [
   <span
     aria-current="page"
     className="euiBreadcrumb euiBreadcrumb--last"
+    data-test-subj="breadcrumb last"
     title="Second"
   >
     Second
@@ -43,4 +48,4 @@ Array [
 ]
 `;
 
-exports[`HeaderBreadcrumbs renders updates to the breadcrumbs observable 3`] = `null`;
+exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 3`] = `null`;

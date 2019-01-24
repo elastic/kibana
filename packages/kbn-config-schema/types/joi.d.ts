@@ -29,11 +29,15 @@ declare module 'joi' {
     entries(key: AnySchema, value: AnySchema): this;
   }
 
-  // In more recent Joi types we can use `Root` type instead of `typeof Joi`.
-  export type JoiRoot = typeof Joi & {
+  interface RecordSchema extends AnySchema {
+    entries(key: AnySchema, value: AnySchema): this;
+  }
+
+  export type JoiRoot = Joi.Root & {
     bytes: () => BytesSchema;
     duration: () => AnySchema;
     map: () => MapSchema;
+    record: () => RecordSchema;
   };
 
   interface AnySchema {
@@ -44,8 +48,4 @@ declare module 'joi' {
   interface ObjectSchema {
     schema(): this;
   }
-
-  // Joi types define only signature with single extension, but Joi supports
-  // an array form as well. It's fixed in more recent Joi types.
-  function extend(extension: Joi.Extension | Joi.Extension[]): any;
 }

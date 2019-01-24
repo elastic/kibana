@@ -6,8 +6,9 @@
 
 import expect from 'expect.js';
 import { first, last } from 'lodash';
-import { MetricsQuery } from '../../../../plugins/infra/common/graphql/types';
+
 import { metricsQuery } from '../../../../plugins/infra/public/containers/metrics/metrics.gql_query';
+import { MetricsQuery } from '../../../../plugins/infra/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const metricTests: KbnTestProvider = ({ getService }) => {
@@ -15,8 +16,8 @@ const metricTests: KbnTestProvider = ({ getService }) => {
   const client = getService('infraOpsGraphQLClient');
 
   describe('metrics', () => {
-    before(() => esArchiver.load('infra'));
-    after(() => esArchiver.unload('infra'));
+    before(() => esArchiver.load('infra/metrics_and_logs'));
+    after(() => esArchiver.unload('infra/metrics_and_logs'));
 
     it('should basically work', () => {
       return client

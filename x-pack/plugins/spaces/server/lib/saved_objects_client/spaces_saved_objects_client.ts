@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DEFAULT_SPACE_ID } from '../../../common/constants';
-import { SpacesService } from '../create_spaces_service';
 import {
   BaseOptions,
   BulkCreateObject,
@@ -15,7 +13,9 @@ import {
   SavedObjectAttributes,
   SavedObjectsClient,
   UpdateOptions,
-} from './saved_objects_client_types';
+} from 'src/server/saved_objects/service/saved_objects_client';
+import { DEFAULT_SPACE_ID } from '../../../common/constants';
+import { SpacesService } from '../create_spaces_service';
 
 interface SpacesSavedObjectsClientOptions {
   baseClient: SavedObjectsClient;

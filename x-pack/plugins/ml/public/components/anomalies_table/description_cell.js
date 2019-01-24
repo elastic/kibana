@@ -15,7 +15,7 @@ import {
   EuiText
 } from '@elastic/eui';
 
-import { getMetricChangeDescription } from 'plugins/ml/formatters/metric_change_description';
+import { getMetricChangeDescription } from '../../formatters/metric_change_description';
 
 /*
  * Component for rendering the description cell in the anomalies table, which provides a

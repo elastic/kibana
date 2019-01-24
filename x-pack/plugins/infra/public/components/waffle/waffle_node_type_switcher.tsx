@@ -5,13 +5,14 @@
  */
 
 import { EuiKeyPadMenu, EuiKeyPadMenuItem } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import {
   InfraMetricInput,
   InfraMetricType,
   InfraNodeType,
   InfraPathInput,
-} from '../../../common/graphql/types';
+} from '../../graphql/types';
 
 interface Props {
   nodeType: InfraNodeType;
@@ -24,14 +25,37 @@ export class WaffleNodeTypeSwitcher extends React.PureComponent<Props> {
   public render() {
     return (
       <EuiKeyPadMenu>
-        <EuiKeyPadMenuItem label="Hosts" onClick={this.handleClick(InfraNodeType.host)}>
-          <img src="../plugins/infra/images/hosts.svg" className="euiIcon euiIcon--large" />
+        <EuiKeyPadMenuItem
+          label={
+            <FormattedMessage
+              id="xpack.infra.waffle.nodeTypeSwitcher.hostsLabel"
+              defaultMessage="Hosts"
+            />
+          }
+          onClick={this.handleClick(InfraNodeType.host)}
+        >
+          <img
+            src="../plugins/infra/images/hosts.svg"
+            role="presentation"
+            alt=""
+            className="euiIcon euiIcon--large"
+          />
         </EuiKeyPadMenuItem>
         <EuiKeyPadMenuItem label="Kubernetes" onClick={this.handleClick(InfraNodeType.pod)}>
-          <img src="../plugins/infra/images/k8.svg" className="euiIcon euiIcon--large" />
+          <img
+            src="../plugins/infra/images/k8.svg"
+            role="presentation"
+            alt=""
+            className="euiIcon euiIcon--large"
+          />
         </EuiKeyPadMenuItem>
         <EuiKeyPadMenuItem label="Docker" onClick={this.handleClick(InfraNodeType.container)}>
-          <img src="../plugins/infra/images/docker.svg" className="euiIcon euiIcon--large" />
+          <img
+            src="../plugins/infra/images/docker.svg"
+            role="presentation"
+            alt=""
+            className="euiIcon euiIcon--large"
+          />
         </EuiKeyPadMenuItem>
       </EuiKeyPadMenu>
     );

@@ -30,6 +30,8 @@ import { forceStartDatafeeds } from '../utils';
 
 import { TimeRangeSelector } from './time_range_selector';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 export class StartDatafeedModal extends Component {
   constructor(props) {
     super(props);
@@ -133,10 +135,18 @@ export class StartDatafeedModal extends Component {
           <EuiModal
             onClose={this.closeModal}
             style={{ width: '850px' }}
+            maxWidth={false}
           >
             <EuiModalHeader>
               <EuiModalHeaderTitle>
-                Start {(startableJobs.length > 1) ? `${startableJobs.length} jobs` : startableJobs[0].id}
+                <FormattedMessage
+                  id="xpack.ml.jobsList.startDatafeedModal.startJobsTitle"
+                  defaultMessage="Start {jobsCount, plural, one {{jobId}} other {# jobs}}"
+                  values={{
+                    jobsCount: startableJobs.length,
+                    jobId: startableJobs[0].id
+                  }}
+                />
               </EuiModalHeaderTitle>
             </EuiModalHeader>
 
@@ -154,7 +164,10 @@ export class StartDatafeedModal extends Component {
                   <EuiHorizontalRule />
                   <EuiCheckbox
                     id="createWatch"
-                    label="Create watch after datafeed has started"
+                    label={(<FormattedMessage
+                      id="xpack.ml.jobsList.startDatafeedModal.createWatchDescription"
+                      defaultMessage="Create watch after datafeed has started"
+                    />)}
                     checked={createWatch}
                     onChange={this.setCreateWatch}
                   />
@@ -166,7 +179,10 @@ export class StartDatafeedModal extends Component {
               <EuiButtonEmpty
                 onClick={this.closeModal}
               >
-                Cancel
+                <FormattedMessage
+                  id="xpack.ml.jobsList.startDatafeedModal.cancelButtonLabel"
+                  defaultMessage="Cancel"
+                />
               </EuiButtonEmpty>
 
               <EuiButton
@@ -174,7 +190,10 @@ export class StartDatafeedModal extends Component {
                 isDisabled={startDisabled}
                 fill
               >
-                Start
+                <FormattedMessage
+                  id="xpack.ml.jobsList.startDatafeedModal.startButtonLabel"
+                  defaultMessage="Start"
+                />
               </EuiButton>
             </EuiModalFooter>
           </EuiModal>

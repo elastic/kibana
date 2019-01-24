@@ -75,7 +75,12 @@ export function getXPack(callCluster) {
     getXPackLicense(callCluster),
     getXPackUsage(callCluster),
   ])
-    .then(([license, usage]) => handleXPack(license, usage))
+    .then(([license, xpack]) => {
+      return {
+        license,
+        xpack,
+      };
+    })
     .catch(() => { return {}; });
 }
 

@@ -33,11 +33,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                   className="euiIcon euiIcon--medium euiButtonEmpty__icon"
                   focusable="false"
                   height="16"
-                  style={
-                    Object {
-                      "fill": undefined,
-                    }
-                  }
+                  style={null}
                   viewBox="0 0 16 16"
                   width="16"
                   xmlns="http://www.w3.org/2000/svg"
@@ -172,26 +168,13 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                   className="euiIcon euiIcon--medium euiTableSortIcon"
                   focusable="false"
                   height="16"
-                  style={
-                    Object {
-                      "fill": undefined,
-                    }
-                  }
+                  style={null}
                   viewBox="0 0 16 16"
                   width="16"
                   xmlns="http://www.w3.org/2000/svg"
-                  xmlnsXlink="http://www.w3.org/1999/xlink"
                 >
-                  <defs>
-                    <path
-                      d="M8.93 4.244l5.061 4.599c.231.21.605.21.836 0 .23-.21.23-.55 0-.76l-5.075-4.61c-.694-.631-1.811-.63-2.504 0l-5.075 4.61c-.23.21-.23.55 0 .76.23.21.605.21.836 0l5.062-4.6A.498.498 0 0 0 8 4.5v8a.5.5 0 1 0 1 0v-8a.498.498 0 0 0-.07-.256z"
-                      id="sort_down-a"
-                    />
-                  </defs>
-                  <use
-                    fillRule="nonzero"
-                    transform="rotate(-180 8.5 8)"
-                    xlinkHref="#sort_down-a"
+                  <path
+                    d="M7 11.692V3.556C7 3.249 7.224 3 7.5 3s.5.249.5.556v8.136l4.096-4.096a.5.5 0 0 1 .707.707l-4.242 4.243a1.494 1.494 0 0 1-.925.433.454.454 0 0 1-.272 0 1.494 1.494 0 0 1-.925-.433L2.197 8.303a.5.5 0 1 1 .707-.707L7 11.692z"
                   />
                 </svg>
               </span>
@@ -253,11 +236,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                   className="euiIcon euiIcon--medium euiButtonEmpty__icon"
                   focusable="false"
                   height="16"
-                  style={
-                    Object {
-                      "fill": undefined,
-                    }
-                  }
+                  style={null}
                   viewBox="0 0 16 16"
                   width="16"
                   xmlns="http://www.w3.org/2000/svg"
@@ -351,11 +330,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   className="euiIcon euiIcon--medium euiButtonEmpty__icon"
                   focusable="false"
                   height="16"
-                  style={
-                    Object {
-                      "fill": undefined,
-                    }
-                  }
+                  style={null}
                   viewBox="0 0 16 16"
                   width="16"
                   xmlns="http://www.w3.org/2000/svg"
@@ -490,26 +465,13 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   className="euiIcon euiIcon--medium euiTableSortIcon"
                   focusable="false"
                   height="16"
-                  style={
-                    Object {
-                      "fill": undefined,
-                    }
-                  }
+                  style={null}
                   viewBox="0 0 16 16"
                   width="16"
                   xmlns="http://www.w3.org/2000/svg"
-                  xmlnsXlink="http://www.w3.org/1999/xlink"
                 >
-                  <defs>
-                    <path
-                      d="M8.93 4.244l5.061 4.599c.231.21.605.21.836 0 .23-.21.23-.55 0-.76l-5.075-4.61c-.694-.631-1.811-.63-2.504 0l-5.075 4.61c-.23.21-.23.55 0 .76.23.21.605.21.836 0l5.062-4.6A.498.498 0 0 0 8 4.5v8a.5.5 0 1 0 1 0v-8a.498.498 0 0 0-.07-.256z"
-                      id="sort_down-a"
-                    />
-                  </defs>
-                  <use
-                    fillRule="nonzero"
-                    transform="rotate(-180 8.5 8)"
-                    xlinkHref="#sort_down-a"
+                  <path
+                    d="M7 11.692V3.556C7 3.249 7.224 3 7.5 3s.5.249.5.556v8.136l4.096-4.096a.5.5 0 0 1 .707.707l-4.242 4.243a1.494 1.494 0 0 1-.925.433.454.454 0 0 1-.272 0 1.494 1.494 0 0 1-.925-.433L2.197 8.303a.5.5 0 1 1 .707-.707L7 11.692z"
                   />
                 </svg>
               </span>
@@ -531,8 +493,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             >
               <a
                 className="euiLink euiLink--primary c0"
-                href="#/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee"
-                onClick={[Function]}
+                href="#/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
               >
                 a0ce2
               </a>
@@ -552,8 +513,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 <a
                   aria-describedby="overlay1"
                   className="euiLink euiLink--primary c2"
-                  href="#/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee"
-                  onClick={[Function]}
+                  href="#/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
@@ -612,8 +572,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             >
               <a
                 className="euiLink euiLink--primary c0"
-                href="#/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a"
-                onClick={[Function]}
+                href="#/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
               >
                 f3ac9
               </a>
@@ -633,8 +592,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 <a
                   aria-describedby="overlay3"
                   className="euiLink euiLink--primary c2"
-                  href="#/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a"
-                  onClick={[Function]}
+                  href="#/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
@@ -693,8 +651,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             >
               <a
                 className="euiLink euiLink--primary c0"
-                href="#/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840"
-                onClick={[Function]}
+                href="#/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
               >
                 e9086
               </a>
@@ -714,8 +671,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 <a
                   aria-describedby="overlay5"
                   className="euiLink euiLink--primary c2"
-                  href="#/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840"
-                  onClick={[Function]}
+                  href="#/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
@@ -774,8 +730,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             >
               <a
                 className="euiLink euiLink--primary c0"
-                href="#/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc"
-                onClick={[Function]}
+                href="#/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
               >
                 8673d
               </a>
@@ -795,8 +750,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 <a
                   aria-describedby="overlay7"
                   className="euiLink euiLink--primary c2"
-                  href="#/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc"
-                  onClick={[Function]}
+                  href="#/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
@@ -877,11 +831,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   className="euiIcon euiIcon--medium euiButtonEmpty__icon"
                   focusable="false"
                   height="16"
-                  style={
-                    Object {
-                      "fill": undefined,
-                    }
-                  }
+                  style={null}
                   viewBox="0 0 16 16"
                   width="16"
                   xmlns="http://www.w3.org/2000/svg"

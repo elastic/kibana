@@ -1,7 +1,7 @@
 /*
  ******
  ****** This is a collection of CSS overrides that make Kibana look better for
- ****** generating PDF reports with Phantom.
+ ****** generating PDF reports with headless browser
  ******
  */
 
@@ -15,9 +15,9 @@
 }
 
 /* hide unusable controls */
-.global-nav,
+.kbnGlobalNav,
 kbn-top-nav,
-.toaster-container,
+.kbnToaster__container,
 filter-bar,
 ::-webkit-scrollbar {
   display: none !important;
@@ -36,7 +36,7 @@ filter-bar,
 /* hide unusable controls */
 discover-app .dscTimechart,
 discover-app .sidebar-container,
-discover-app .sidebar-collapser,
+discover-app .kbnCollapsibleSidebar__collapseButton,
 discover-app navbar[name=discover-search],
 discover-app .discover-table-footer {
   display: none;
@@ -87,7 +87,7 @@ visualize-app .visEditor__canvas {
 
 /* hide unusable controls */
 .visualize .visLegend__toggle,
-.visualize .agg-table-controls/* export raw, export formatted, etc. */ ,
+.visualize .kbnAggTable__controls/* export raw, export formatted, etc. */ ,
 .visualize .leaflet-container .leaflet-top.leaflet-left/* tilemap controls */ ,
 .visualize paginate-controls /* page numbers */ {
   display: none;

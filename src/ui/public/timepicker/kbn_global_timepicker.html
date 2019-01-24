@@ -25,6 +25,7 @@
     ng-class="{'kuiLocalMenuItem-isSelected': kbnTopNav.isCurrent('interval') }"
     ng-show="timefilterValues.isAutoRefreshSelectorEnabled"
     ng-click="kbnTopNav.toggle('interval')"
+    data-test-subj="globalRefreshButton"
   >
     <span ng-show="timefilterValues.refreshInterval.value === 0">
       <span aria-hidden="true" class="kuiIcon fa-repeat"></span> Auto-refresh

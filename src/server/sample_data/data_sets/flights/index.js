@@ -18,18 +18,23 @@
  */
 
 import path from 'path';
-import { savedObjects } from './saved_objects';
+import { i18n } from '@kbn/i18n';
+import { getSavedObjects } from './saved_objects';
 import { fieldMappings } from './field_mappings';
 
 export function flightsSpecProvider() {
   return {
     id: 'flights',
-    name: 'Sample flight data',
-    description: 'Sample data, visualizations, and dashboards for monitoring flight routes.',
+    name: i18n.translate('server.sampleData.flightsSpecTitle', {
+      defaultMessage: 'Sample flight data',
+    }),
+    description: i18n.translate('server.sampleData.flightsSpecDescription', {
+      defaultMessage: 'Sample data, visualizations, and dashboards for monitoring flight routes.',
+    }),
     previewImagePath: '/plugins/kibana/home/sample_data_resources/flights/dashboard.png',
     overviewDashboard: '7adfa750-4c81-11e8-b3d7-01146121b73d',
     defaultIndex: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
-    savedObjects: savedObjects,
+    savedObjects: getSavedObjects(),
     dataIndices: [
       {
         id: 'flights',

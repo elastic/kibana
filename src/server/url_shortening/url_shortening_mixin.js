@@ -18,6 +18,6 @@
  */
 import { createRoutes } from './routes/create_routes';
 
-export function urlShorteningMixin(kbnServer, server, config) {
-  createRoutes(server, config);
+export function urlShorteningMixin(kbnServer, server) {
+  createRoutes(server);
 }

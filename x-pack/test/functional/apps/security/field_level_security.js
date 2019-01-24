@@ -9,7 +9,7 @@ import { indexBy } from 'lodash';
 
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const retry = getService('retry');
   const log = getService('log');
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'discover', 'header']);
@@ -18,9 +18,9 @@ export default function ({ getService, getPageObjects }) {
     before('initialize tests', async () => {
       await esArchiver.loadIfNeeded('security/flstest');
       await esArchiver.load('empty_kibana');
-      remote.setWindowSize(1600, 1000);
+      browser.setWindowSize(1600, 1000);
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
+      await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.createIndexPattern('flstest', null);
     });
 

@@ -21,10 +21,11 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const log = getService('log');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['settings', 'common']);
+  const testSubjects = getService('testSubjects');
+  const PageObjects = getPageObjects(['settings', 'common', 'header']);
 
   describe('creating and deleting default index', function describeIndexTests() {
     before(function () {
@@ -34,8 +35,30 @@ export default function ({ getService, getPageObjects }) {
           return PageObjects.settings.navigateTo();
         })
         .then(function () {
-          return PageObjects.settings.clickKibanaIndices();
+          return PageObjects.settings.clickKibanaIndexPatterns();
         });
+    });
+
+    describe('special character handling', () => {
+      it('should handle special charaters in template input', async () => {
+        await PageObjects.settings.clickOptionalAddNewButton();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.setIndexPatternField({
+          indexPatternName: '❤️',
+          expectWildcard: false
+        });
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await retry.try(async () => {
+          expect(await testSubjects.getVisibleText('createIndexPatternStatusMessage'))
+            .to.contain(`The index pattern you've entered doesn't match any indices`);
+        });
+      });
+
+      after(async () => {
+        await PageObjects.settings.navigateTo();
+        await PageObjects.settings.clickKibanaIndices();
+      });
     });
 
     describe('index pattern creation', function indexPatternCreation() {
@@ -54,7 +77,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should have index pattern in url', function url() {
         return retry.try(function tryingForTime() {
-          return remote.getCurrentUrl()
+          return browser.getCurrentUrl()
             .then(function (currentUrl) {
               expect(currentUrl).to.contain(indexPatternId);
             });
@@ -107,7 +130,7 @@ export default function ({ getService, getPageObjects }) {
       it('should remove index pattern from url', function indexNotInUrl() {
         // give the url time to settle
         return retry.try(function tryingForTime() {
-          return remote.getCurrentUrl()
+          return browser.getCurrentUrl()
             .then(function (currentUrl) {
               log.debug('currentUrl = ' + currentUrl);
               expect(currentUrl).to.not.contain('logstash-*');

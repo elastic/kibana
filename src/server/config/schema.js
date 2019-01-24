@@ -135,7 +135,7 @@ export default () => Joi.object({
       }),
       keyPassphrase: Joi.string(),
       certificateAuthorities: Joi.array().single().items(Joi.string()).default([]),
-      supportedProtocols: Joi.array().items(Joi.string().valid('TLSv1', 'TLSv1.1', 'TLSv1.2')),
+      supportedProtocols: Joi.array().items(Joi.string().valid('TLSv1', 'TLSv1.1', 'TLSv1.2')).default(['TLSv1.1', 'TLSv1.2']),
       cipherSuites: Joi.array().items(Joi.string()).default(cryptoConstants.defaultCoreCipherList.split(':'))
     }).default(),
     cors: Joi.when('$dev', {
@@ -217,17 +217,6 @@ export default () => Joi.object({
     watchPrebuild: Joi.boolean().default(false),
     watchProxyTimeout: Joi.number().default(5 * 60000),
     useBundleCache: Joi.boolean().default(Joi.ref('$prod')),
-    unsafeCache: Joi.when('$prod', {
-      is: true,
-      then: Joi.boolean().valid(false),
-      otherwise: Joi
-        .alternatives()
-        .try(
-          Joi.boolean(),
-          Joi.string().regex(/^\/.+\/$/)
-        )
-        .default(true),
-    }),
     sourceMaps: Joi.when('$prod', {
       is: true,
       then: Joi.boolean().valid(false),
@@ -248,8 +237,8 @@ export default () => Joi.object({
     includeElasticMapsService: Joi.boolean().default(true),
     tilemap: tilemapSchema,
     regionmap: regionmapSchema,
-    manifestServiceUrl: Joi.string().default(' https://catalogue.maps.elastic.co/v2/manifest'),
-    emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v2'),
+    manifestServiceUrl: Joi.string().default('https://catalogue.maps.elastic.co/v6.6/manifest'),
+    emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v6.6'),
   }).default(),
   tilemap: tilemapSchema.notes('Deprecated'),
   regionmap: regionmapSchema.notes('Deprecated'),

@@ -9,8 +9,6 @@ patterns, advanced settings that tweak the behaviors of Kibana itself, and
 the various "objects" that you can save throughout Kibana such as searches,
 visualizations, and dashboards.
 
-This section is pluginable, so in addition to the out of the box capabilities,
-packs such as {xpack} can add additional management capabilities to Kibana.
 --
 
 include::management/managing-licenses.asciidoc[]
@@ -21,6 +19,16 @@ include::management/rollups/create_and_manage_rollups.asciidoc[]
 
 include::management/rollups/visualize_rollup_data.asciidoc[]
 
+include::management/index-lifecycle-policies/intro-to-lifecycle-policies.asciidoc[]
+
+include::management/index-lifecycle-policies/create-policy.asciidoc[]
+
+include::management/index-lifecycle-policies/manage-policy.asciidoc[]
+
+include::management/index-lifecycle-policies/add-policy-to-index.asciidoc[]
+
+include::management/index-lifecycle-policies/example-index-lifecycle-policy.asciidoc[]
+
 include::management/managing-fields.asciidoc[]
 
 include::management/managing-indices.asciidoc[]
@@ -28,3 +36,10 @@ include::management/managing-indices.asciidoc[]
 include::management/advanced-options.asciidoc[]
 
 include::management/managing-saved-objects.asciidoc[]
+
+include::management/managing-beats.asciidoc[]
+
+include::management/managing-remote-clusters.asciidoc[]
+
+
+

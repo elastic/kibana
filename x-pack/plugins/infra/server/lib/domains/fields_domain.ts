@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraIndexField, InfraIndexType } from '../../../common/graphql/types';
+import { InfraIndexField, InfraIndexType } from '../../graphql/types';
 import { FieldsAdapter } from '../adapters/fields';
 import { InfraFrameworkRequest } from '../adapters/framework';
 import { InfraSources } from '../sources';

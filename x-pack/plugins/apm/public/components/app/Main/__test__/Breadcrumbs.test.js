@@ -14,6 +14,9 @@ import { toJson } from '../../../../utils/testHelpers';
 jest.mock(
   'ui/chrome',
   () => ({
+    breadcrumbs: {
+      set: () => {}
+    },
     getBasePath: () => `/some/base/path`,
     getUiSettingsClient: () => {
       return {

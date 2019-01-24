@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { CATEGORY } from '../vis_category';
 import _ from 'lodash';
 import { VisFiltersProvider } from '../vis_filters';
 
@@ -36,7 +35,7 @@ export function BaseVisTypeProvider(Private) {
       if (!opts.description) {
         throw('vis_type must define its description');
       }
-      if (!opts.icon && !opts.image && !opts.legacyIcon) {
+      if (!opts.icon && !opts.image) {
         throw('vis_type must define its icon or image');
       }
       if (!opts.visualization) {
@@ -45,7 +44,6 @@ export function BaseVisTypeProvider(Private) {
 
       const _defaults = {
         // name, title, description, icon, image
-        category: CATEGORY.OTHER,
         visualization: null,       // must be a class with render/resize/destroy methods
         visConfig: {
           defaults: {},            // default configuration
@@ -69,7 +67,8 @@ export function BaseVisTypeProvider(Private) {
           }
         },
         stage: 'production',
-        feedbackMessage: ''
+        feedbackMessage: '',
+        hidden: false,
       };
 
       _.defaultsDeep(this, opts, _defaults);

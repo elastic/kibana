@@ -53,8 +53,7 @@
 
     .filter-button {
       opacity: 0.3;
-      width: 20px;
-      padding-top: 2px;
+      min-width: 14px;
 
       .euiIcon {
         width: 14px;
@@ -76,9 +75,29 @@
     min-width: 150px;
   }
 
+  .mlAnomalyCategoryExamples__header {
+    display: inline;
+  }
+
+  .mlAnomalyCategoryExamples__link {
+    width: 100%;
+  }
+
   .category-example {
     display: block;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mlAnomalyCategoryExamples {
+    padding: $euiSizeL;
+  }
+
+  .mlAnomalyCategoryExamples__item {
+    display: block;
+    white-space: wrap;
+    font-family: $euiCodeFontFamily;
   }
 
   .interim-result {
@@ -96,22 +115,20 @@
         margin-top: 0px;
         flex-basis: 15%;
         font-size: inherit;
+        line-height: 1.5rem;
+        @include euiTextTruncate;
       }
 
       .euiDescriptionList__description {
         margin-top: 0px;
         flex-basis: 85%;
         font-size: inherit;
+        line-height: 1.5rem;
       }
 
       .filter-button {
-        height: 20px;
-        padding-top: 2px;
-
-        .euiButtonIcon__icon {
-          -webkit-transform: translateY(-7px);
-          transform: translateY(-7px);
-        }
+        -webkit-transform: translateY(-1px);
+        transform: translateY(-1px);
       }
 
     }

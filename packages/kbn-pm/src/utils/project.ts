@@ -32,9 +32,13 @@ import {
 } from './package_json';
 import { installInDir, runScriptInPackage, runScriptInPackageStreaming } from './scripts';
 
-interface IBuildConfig {
+interface BuildConfig {
   skip?: boolean;
   intermediateBuildDirectory?: string;
+}
+
+interface CleanConfig {
+  extraPatterns?: string[];
 }
 
 export class Project {
@@ -46,7 +50,6 @@ export class Project {
   public readonly json: IPackageJson;
   public readonly packageJsonLocation: string;
   public readonly nodeModulesLocation: string;
-  public readonly optimizeLocation: string;
   public readonly targetLocation: string;
   public readonly path: string;
   public readonly allDependencies: IPackageDependencies;
@@ -62,7 +65,6 @@ export class Project {
 
     this.packageJsonLocation = resolvePath(this.path, 'package.json');
     this.nodeModulesLocation = resolvePath(this.path, 'node_modules');
-    this.optimizeLocation = resolvePath(this.path, 'data/optimize');
     this.targetLocation = resolvePath(this.path, 'target');
 
     this.productionDependencies = this.json.dependencies || {};
@@ -107,7 +109,7 @@ export class Project {
 
     throw new CliError(
       `[${this.name}] depends on [${
-        project.name
+      project.name
       }] ${problemMsg}. Update its package.json to the expected value below.`,
       {
         actual: `"${project.name}": "${versionInPackageJson}"`,
@@ -117,7 +119,7 @@ export class Project {
     );
   }
 
-  public getBuildConfig(): IBuildConfig {
+  public getBuildConfig(): BuildConfig {
     return (this.json.kibana && this.json.kibana.build) || {};
   }
 
@@ -128,6 +130,10 @@ export class Project {
    */
   public getIntermediateBuildDirectory() {
     return resolvePath(this.path, this.getBuildConfig().intermediateBuildDirectory || '.');
+  }
+
+  public getCleanConfig(): CleanConfig {
+    return (this.json.kibana && this.json.kibana.clean) || {};
   }
 
   public hasScript(name: string) {
@@ -157,7 +163,7 @@ export class Project {
 
     throw new CliError(
       `[${this.name}] has an invalid "bin" field in its package.json, ` +
-        `expected an object or a string`,
+      `expected an object or a string`,
       {
         binConfig: inspect(raw),
         package: `${this.name} (${this.packageJsonLocation})`,

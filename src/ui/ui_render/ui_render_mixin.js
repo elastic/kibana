@@ -23,6 +23,7 @@ import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
 import { AppBootstrap } from './bootstrap';
 import { mergeVariables } from './lib';
+import { fromRoot } from '../../utils';
 
 export function uiRenderMixin(kbnServer, server, config) {
   function replaceInjectedVars(request, injectedVars) {
@@ -50,6 +51,9 @@ export function uiRenderMixin(kbnServer, server, config) {
   // render all views from ./views
   server.setupViews(resolve(__dirname, 'views'));
 
+  // expose built css
+  server.exposeStaticDir('/built_assets/css/{path*}', fromRoot('built_assets/css'));
+
   server.route({
     path: '/bundles/app/{id}/bootstrap.js',
     method: 'GET',
@@ -62,17 +66,26 @@ export function uiRenderMixin(kbnServer, server, config) {
       }
 
       const basePath = config.get('server.basePath');
-      const bundlePath = `${basePath}/bundles`;
+      const regularBundlePath = `${basePath}/bundles`;
+      const dllBundlePath = `${basePath}/built_assets/dlls`;
       const styleSheetPaths = [
-        `${bundlePath}/vendors.style.css`,
-        `${bundlePath}/commons.style.css`,
-        `${bundlePath}/${app.getId()}.style.css`,
-      ].concat(kbnServer.uiExports.styleSheetPaths.map(path => `${basePath}/${path.publicPath}`).reverse());
+        `${dllBundlePath}/vendors.style.dll.css`,
+        `${regularBundlePath}/commons.style.css`,
+        `${regularBundlePath}/${app.getId()}.style.css`,
+        ...kbnServer.uiExports.styleSheetPaths
+          .map(path => (
+            path.localPath.endsWith('.scss')
+              ? `${basePath}/built_assets/css/${path.publicPath}`
+              : `${basePath}/${path.publicPath}`
+          ))
+          .reverse()
+      ];
 
       const bootstrap = new AppBootstrap({
         templateData: {
           appId: app.getId(),
-          bundlePath,
+          regularBundlePath,
+          dllBundlePath,
           styleSheetPaths,
         }
       });
@@ -138,6 +151,7 @@ export function uiRenderMixin(kbnServer, server, config) {
       uiPublicUrl: `${basePath}/ui`,
       bootstrapScriptUrl: `${basePath}/bundles/app/${app.getId()}/bootstrap.js`,
       i18n: (id, options) => i18n.translate(id, options),
+      locale: i18n.getLocale(),
 
       injectedMetadata: {
         version: kbnServer.version,

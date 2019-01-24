@@ -57,18 +57,18 @@ export function registerLoadRoute(server) {
           };
 
           const watchHistoryItem = WatchHistoryItem.fromUpstreamJson(json);
-          ({
+          return {
             watchHistoryItem: watchHistoryItem.downstreamJson
-          });
+          };
         })
         .catch(err => {
-        // Case: Error from Elasticsearch JS client
+          // Case: Error from Elasticsearch JS client
           if (isEsError(err)) {
             throw wrapEsError(err);
           }
 
           // Case: default
-          wrapUnknownError(err);
+          throw wrapUnknownError(err);
         });
     },
     config: {

@@ -2,26 +2,51 @@
 
 exports[`Home component should render 1`] = `
 <div>
-  <styled.div>
-    <h1>
-      APM
-    </h1>
-    <SetupInstructionsLink />
-  </styled.div>
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    direction="row"
+    gutterSize="l"
+    justifyContent="spaceBetween"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={true}
+    >
+      <EuiTitle
+        size="l"
+        textTransform="none"
+      >
+        <h1>
+          APM
+        </h1>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <SetupInstructionsLink />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="l"
+  />
   <Connect(KueryBarView) />
-  <EuiTabbedContent
-    className="k6Tab--large"
+  <withRouter(HistoryTabsWithoutRouter)
     tabs={
       Array [
         Object {
-          "content": <Connect(ServiceOverview) />,
-          "id": "services_overview",
           "name": "Services",
+          "path": "/services",
+          "render": [Function],
         },
         Object {
-          "content": <Connect(TraceOverview) />,
-          "id": "traces_overview",
           "name": "Traces",
+          "path": "/traces",
+          "render": [Function],
         },
       ]
     }

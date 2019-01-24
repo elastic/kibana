@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, has, set } from 'lodash';
+import { get, has, set, unset } from 'lodash';
 import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from './common/constants';
 
 /**
@@ -45,5 +45,21 @@ export const deprecations = ({ rename }) => {
         log(`Config key "${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}" will be required for email notifications to work in 7.0."`);
       }
     },
+    (settings, log) => {
+      const deprecatedUrl = get(settings, 'url');
+      const hosts = get(settings, 'hosts.length');
+      if (!deprecatedUrl) {
+        return;
+      }
+      if (hosts) {
+        log('Deprecated config key "xpack.monitoring.elasticsearch.url" ' +
+          'conflicts with "xpack.monitoring.elasticsearch.hosts".  Ignoring "elasticsearch.url"');
+      } else {
+        set(settings, 'hosts', [deprecatedUrl]);
+        log('Config key "xpack.monitoring.elasticsearch.url" is deprecated.' +
+          'It has been replaced with "xpack.monitoring.elasticsearch.hosts"');
+      }
+      unset(settings, 'url');
+    }
   ];
 };

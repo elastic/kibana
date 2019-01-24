@@ -71,16 +71,27 @@ describe('#get', () => {
         maxPayloadBytes: 1000,
         port: 1234,
         rewriteBasePath: false,
-        ssl: {
-          enabled: true,
-          keyPassphrase: 'some-phrase',
-          someNewValue: 'new',
-        },
+        ssl: { enabled: true, keyPassphrase: 'some-phrase', someNewValue: 'new' },
         someNotSupportedValue: 'val',
       },
     });
 
-    expect(configAdapter.get('server')).toMatchSnapshot();
+    const configAdapterWithDisabledSSL = new LegacyObjectToConfigAdapter({
+      server: {
+        autoListen: true,
+        basePath: '/abc',
+        cors: false,
+        host: 'host',
+        maxPayloadBytes: 1000,
+        port: 1234,
+        rewriteBasePath: false,
+        ssl: { enabled: false, certificate: 'cert', key: 'key' },
+        someNotSupportedValue: 'val',
+      },
+    });
+
+    expect(configAdapter.get('server')).toMatchSnapshot('default');
+    expect(configAdapterWithDisabledSSL.get('server')).toMatchSnapshot('disabled ssl');
   });
 });
 

@@ -10,8 +10,10 @@ import { SummaryStatus } from '../../summary_status';
 import { ApmStatusIcon } from '../status_icon';
 import { formatMetric } from '../../../lib/format_number';
 import { formatTimestampToDuration } from '../../../../common';
+import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export function Status({ stats }) {
+function StatusUI({ stats, intl }) {
   const {
     apms: {
       total
@@ -22,25 +24,46 @@ export function Status({ stats }) {
 
   const metrics = [
     {
-      label: 'Servers',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.apm.instances.status.serversLabel',
+        defaultMessage: 'Servers',
+      }),
       value: total,
-      dataTestSubj: 'total'
+      'data-test-subj': 'total'
     },
     {
-      label: 'Total Events',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.apm.instances.status.totalEventsLabel',
+        defaultMessage: 'Total Events',
+      }),
       value: formatMetric(totalEvents, '0.[0]a'),
-      dataTestSubj: 'totalEvents'
+      'data-test-subj': 'totalEvents'
     },
     {
-      label: 'Last Event',
-      value: formatTimestampToDuration(+moment(timeOfLastEvent), 'since') + ' ago',
-      dataTestSubj: 'timeOfLastEvent',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.apm.instances.status.lastEventLabel',
+        defaultMessage: 'Last Event',
+      }),
+      value: intl.formatMessage({
+        id: 'xpack.monitoring.apm.instances.status.lastEventDescription',
+        defaultMessage: '{timeOfLastEvent} ago' }, {
+        timeOfLastEvent: formatTimestampToDuration(+moment(timeOfLastEvent), CALCULATE_DURATION_SINCE)
+      }),
+      'data-test-subj': 'timeOfLastEvent',
     }
   ];
 
   const IconComponent = ({ status }) => (
     <Fragment>
-      Status: <ApmStatusIcon status={status} />
+      <FormattedMessage
+        id="xpack.monitoring.apm.instances.statusDescription"
+        defaultMessage="Status: {apmStatusIcon}"
+        values={{
+          apmStatusIcon: (
+            <ApmStatusIcon status={status} />
+          )
+        }}
+      />
     </Fragment>
   );
 
@@ -52,3 +75,5 @@ export function Status({ stats }) {
     />
   );
 }
+
+export const Status = injectI18n(StatusUI);

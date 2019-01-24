@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { mount, shallow } from 'enzyme';
+import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import { PipelinesTable } from './pipelines_table';
 
 describe('PipelinesTable component', () => {
@@ -38,33 +38,33 @@ describe('PipelinesTable component', () => {
   });
 
   it('renders component as expected', () => {
-    const wrapper = shallow(<PipelinesTable {...props} />);
+    const wrapper = shallowWithIntl(<PipelinesTable.WrappedComponent {...props} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('calls clone when cloned button clicked', () => {
     props.pipelines = [{ id: 'testPipeline', isCentrallyManaged: true }];
-    const wrapper = mount(<PipelinesTable {...props} />);
+    const wrapper = mountWithIntl(<PipelinesTable.WrappedComponent {...props} />);
     wrapper.find('[iconType="copy"]').simulate('click');
     expect(clonePipeline).toHaveBeenCalled();
   });
 
   it('calls createPipeline on create button clicked', () => {
-    const wrapper = mount(<PipelinesTable {...props} />);
+    const wrapper = mountWithIntl(<PipelinesTable.WrappedComponent {...props} />);
     wrapper.find('.euiButton--primary').simulate('click');
     expect(createPipeline).toHaveBeenCalled();
   });
 
   it('calls delete prompt on delete click', () => {
     props.selection = [{ id: 'testPipeline' }];
-    const wrapper = mount(<PipelinesTable {...props} />);
+    const wrapper = mountWithIntl(<PipelinesTable.WrappedComponent {...props} />);
     wrapper.find('.euiButton--danger').simulate('click');
     expect(onDeleteSelectedPipelines).toHaveBeenCalled();
   });
 
   it('calls openPipeline on id click', () => {
     props.pipelines = [{ id: 'testPipeline', isCentrallyManaged: true }];
-    const wrapper = mount(<PipelinesTable {...props} />);
+    const wrapper = mountWithIntl(<PipelinesTable.WrappedComponent {...props} />);
     wrapper.find('EuiLink').simulate('click');
     expect(openPipeline).toHaveBeenCalledWith('testPipeline');
   });

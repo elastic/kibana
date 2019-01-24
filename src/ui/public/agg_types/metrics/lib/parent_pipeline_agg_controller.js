@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import { safeMakeLabel } from './safe_make_label';
+import { i18n } from '@kbn/i18n';
 
 const parentPipelineAggController = function ($scope) {
 
@@ -59,8 +60,11 @@ const parentPipelineAggController = function ($scope) {
     } else {
       if (lastBucket) {
         const type = $scope.agg.type.title;
-        lastBucket.error = `Last bucket aggregation must be "Date Histogram" or 
-        "Histogram" when using "${type}" metric aggregation!`;
+        lastBucket.error = i18n.translate('common.ui.aggTypes.metrics.wrongLastBucketTypeErrorMessage', {
+          defaultMessage: 'Last bucket aggregation must be "Date Histogram" or "Histogram" when using "{type}" metric aggregation!',
+          values: { type },
+          description: 'Date Histogram and Histogram should not be translated'
+        });
       }
     }
   }

@@ -25,7 +25,7 @@ export const InstallDependenciesTask = {
   async run(config, log, build) {
     // We're using --no-bin-links to support systems that don't have symlinks.
     // This is commonly seen in shared folders on virtual machines
-    const args = ['--production', '--ignore-optional', '--frozen-lockfile', '--no-bin-links'];
+    const args = ['--production', '--ignore-optional', '--frozen-lockfile', '--no-bin-links', '--prefer-offline'];
 
     await exec(log, 'yarn', args, {
       cwd: build.resolvePath(),

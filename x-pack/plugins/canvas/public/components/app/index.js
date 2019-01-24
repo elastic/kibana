@@ -4,16 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createSocket } from '@kbn/interpreter/public/socket';
-import { initialize as initializeInterpreter } from '@kbn/interpreter/public/interpreter';
+import { functionsRegistry } from 'plugins/interpreter/functions_registry';
+import { getInterpreter, updateInterpreterFunctions } from 'plugins/interpreter/interpreter';
+import { loadBrowserRegistries } from '@kbn/interpreter/public';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
-import { populateBrowserRegistries } from '@kbn/interpreter/public/browser_registries';
 import { getAppReady, getBasePath } from '../../state/selectors/app';
 import { appReady, appError } from '../../state/actions/app';
 import { loadPrivateBrowserFunctions } from '../../lib/load_private_browser_functions';
 import { elementsRegistry } from '../../lib/elements_registry';
-import { renderFunctionsRegistry } from '../../lib/render_functions_registry';
+import { templatesRegistry } from '../../lib/templates_registry';
+import { tagsRegistry } from '../../lib/tags_registry';
+
 import {
   argTypeRegistry,
   datasourceRegistry,
@@ -36,23 +38,25 @@ const mapStateToProps = state => {
 
 const types = {
   elements: elementsRegistry,
-  renderers: renderFunctionsRegistry,
   transformUIs: transformRegistry,
   datasourceUIs: datasourceRegistry,
   modelUIs: modelRegistry,
   viewUIs: viewRegistry,
   argumentUIs: argTypeRegistry,
+  templates: templatesRegistry,
+  tagUIs: tagsRegistry,
 };
 
 const mapDispatchToProps = dispatch => ({
   // TODO: the correct socket path should come from upstream, using the constant here is not ideal
   setAppReady: basePath => async () => {
     try {
+      // wait for core interpreter to load
+      await getInterpreter();
       // initialize the socket and interpreter
-      await createSocket(basePath);
-      loadPrivateBrowserFunctions();
-      await populateBrowserRegistries(types);
-      await initializeInterpreter();
+      loadPrivateBrowserFunctions(functionsRegistry);
+      await updateInterpreterFunctions();
+      await loadBrowserRegistries(types, basePath);
 
       // set app state to ready
       dispatch(appReady());

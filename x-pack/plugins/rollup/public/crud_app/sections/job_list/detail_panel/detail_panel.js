@@ -209,9 +209,7 @@ export class DetailPanelUi extends Component {
           </EuiFlexGroup>
         </EuiFlyoutBody>
       );
-    }
-
-    if (job) {
+    } else if (job) {
       content = this.renderJob();
     } else {
       content = (
@@ -242,7 +240,7 @@ export class DetailPanelUi extends Component {
 
     return (
       <EuiFlyout
-        data-test-subj="indexDetailFlyout"
+        data-test-subj="rollupJobDetailFlyout"
         onClose={closeDetailPanel}
         aria-labelledby="rollupJobDetailsFlyoutTitle"
         size="m"

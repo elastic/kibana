@@ -5,6 +5,7 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import * as React from 'react';
 
@@ -51,7 +52,10 @@ export class LogSearchButtons extends React.PureComponent<LogSearchButtonsProps,
             isDisabled={!hasPreviousSearchResult}
             size="s"
           >
-            Previous
+            <FormattedMessage
+              id="xpack.infra.logs.search.previousButtonLabel"
+              defaultMessage="Previous"
+            />
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -62,7 +66,7 @@ export class LogSearchButtons extends React.PureComponent<LogSearchButtonsProps,
             isDisabled={!hasNextSearchResult}
             size="s"
           >
-            Next
+            <FormattedMessage id="xpack.infra.logs.search.nextButtonLabel" defaultMessage="Next" />
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>

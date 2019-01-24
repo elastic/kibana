@@ -10,27 +10,19 @@ import {
   DetailPanel,
   IndexTable,
 } from '../../components';
-import {
-  REFRESH_RATE_INDEX_LIST
-} from '../../../../constants';
 
 export class IndexList extends React.PureComponent {
-  componentWillMount() {
-    this.props.loadIndices();
-  }
-
-  componentDidMount() {
-    this.interval = setInterval(this.props.reloadIndices, REFRESH_RATE_INDEX_LIST);
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.interval);
-  }
-
   render() {
+    const {
+      match: {
+        params: {
+          filter
+        }
+      },
+    } = this.props;
     return (
-      <div className="indTable__horizontalScroll im-snapshotTestSubject">
-        <IndexTable />
+      <div className="im-snapshotTestSubject">
+        <IndexTable filterFromURI={filter}/>
         <DetailPanel />
       </div>
     );

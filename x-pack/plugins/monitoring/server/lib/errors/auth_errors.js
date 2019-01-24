@@ -5,6 +5,7 @@
  */
 
 import { forbidden } from 'boom';
+import { i18n } from '@kbn/i18n';
 
 const getStatusCode = err => {
   return err.isBoom ? err.output.statusCode : err.statusCode;
@@ -26,9 +27,11 @@ export function handleAuthError(err) {
    * connection but not the monitoring connection
    */
   if (statusCode === 401) {
-    message = 'Invalid authentication for monitoring cluster';
+    message = i18n.translate('xpack.monitoring.errors.invalidAuthErrorMessage', {
+      defaultMessage: 'Invalid authentication for monitoring cluster' });
   } else {
-    message = 'Insufficient user permissions for monitoring data';
+    message = i18n.translate('xpack.monitoring.errors.insufficientUserErrorMessage', {
+      defaultMessage: 'Insufficient user permissions for monitoring data' });
   }
 
   return forbidden(message);

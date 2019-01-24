@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IS_KIBANA_DISTRIBUTABLE } from '../../utils';
+import { IS_KIBANA_DISTRIBUTABLE, fromRoot } from '../../utils';
 
 export async function sassMixin(kbnServer, server, config) {
   if (process.env.kbnWorkerType === 'optmzr') {
@@ -38,8 +38,14 @@ export async function sassMixin(kbnServer, server, config) {
   let scssBundles = [];
   let trackedFiles = new Set();
 
+  const log = {
+    info: (msg) => server.log(['info', 'scss'], msg),
+    warn: (msg) => server.log(['warn', 'scss'], msg),
+    error: (msg) => server.log(['error', 'scss'], msg),
+  };
+
   try {
-    scssBundles = await buildAll(kbnServer.uiExports.styleSheetPaths);
+    scssBundles = await buildAll(kbnServer.uiExports.styleSheetPaths, log, fromRoot('built_assets/css'));
 
     scssBundles.forEach(bundle => {
       bundle.includedFiles.forEach(file => trackedFiles.add(file));
@@ -77,9 +83,10 @@ export async function sassMixin(kbnServer, server, config) {
     await Promise.all(scssBundles.map(async bundle => {
       try {
         if (await bundle.buildIfIncluded(path)) {
-          bundle.includedFiles.forEach(file => currentlyTrackedFiles.add(file));
           server.log(['info', 'scss'], `Compiled ${bundle.source} due to change in ${path}`);
         }
+        // if the bundle rebuilt, includedFiles is the new set; otherwise includedFiles is unchanged and remains tracked
+        bundle.includedFiles.forEach(file => currentlyTrackedFiles.add(file));
       } catch(error) {
         const { message, line, file } = error;
         currentlyTrackedFiles.add(file);
