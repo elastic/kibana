@@ -42,6 +42,7 @@ export const StatusBar = ({ timestamp, host, port, duration, scheme, status }: P
       <EuiFlexItem grow={false}>
         <FormattedMessage
           id="xpack.uptime.monitorStatusBar.healthStatus.hostMessage"
+          values={{ host }}
           defaultMessage="Host: {host}"
         />
       </EuiFlexItem>
