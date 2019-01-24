@@ -133,12 +133,14 @@ function callAPI(client, endpoint, clientParams = {}, options = {}) {
     throw new Error(`called with an invalid endpoint: ${endpoint}`);
   }
 
-  const requestOptions = {
-    requestTimeout: clientParams.requestTimeout,
-    ignore: clientParams.ignore,
-    maxRetries: clientParams.maxRetries
-  };
-  return Bluebird.resolve(api.call(apiContext, clientParams, requestOptions))
+  const {
+    ignore,
+    headers,
+    requestTimeout,
+    maxRetries,
+    ...esParams
+  } = clientParams
+  return Bluebird.resolve(api.call(apiContext, esParams, { ignore, headers, maxRetries, requestTimeout }))
     .then((result) => (result && result.body) ? result.body : result)
     .catch((err) => {
       if (!wrap401Errors || err.statusCode !== 401) {

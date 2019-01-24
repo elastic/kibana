@@ -113,7 +113,7 @@ async function execute(fn) {
 
     // run!
     const client = new elasticsearch.Client({
-      host: cmd.esUrl,
+      node: cmd.esUrl,
       log: cmd.verbose ? 'trace' : []
     });
 
@@ -129,6 +129,7 @@ async function execute(fn) {
       await client.close();
     }
   } catch (err) {
-    console.log('FATAL ERROR', err.stack);
+    console.log(err);
+    // console.log('FATAL ERROR', err.stack);
   }
 }

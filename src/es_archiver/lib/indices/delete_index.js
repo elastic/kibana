@@ -36,7 +36,7 @@ export async function deleteIndex(options) {
   } = options;
 
   const getIndicesToDelete = async () => {
-    const aliasInfo = await client.indices.getAlias({ name: index, ignore: [404] });
+    const aliasInfo = await client.indices.getAlias({ name: index }, { ignore: [404] });
     return aliasInfo.status === 404 ? index : Object.keys(aliasInfo);
   };
 

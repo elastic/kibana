@@ -85,7 +85,17 @@ export async function migrateKibanaIndex({ client, log }) {
   const ready = async () => undefined;
   const elasticsearch = {
     getCluster: () => ({
-      callWithInternalUser: (path, ...args) => _.get(client, path).call(client, ...args),
+      callWithInternalUser: async (path, clientParams) => {
+        const {
+          ignore,
+          headers,
+          requestTimeout,
+          maxRetries,
+          ...esParams
+        } = clientParams
+        const result = await _.get(client, path).call(client, esParams, { ignore, headers, requestTimeout, maxRetries })
+        return result && result.body ? result.body : result
+      },
     }),
     waitUntilReady: ready,
   };
@@ -160,7 +170,7 @@ export async function createDefaultSpace({ index, client }) {
  * @param {string} index
  */
 async function fetchKibanaIndices(client) {
-  const kibanaIndices = await client.cat.indices({ index: '.kibana*', format: 'json' });
+  const { body: kibanaIndices } = await client.cat.indices({ index: '.kibana*', format: 'json' });
   const isKibanaIndex = (index) => (/^\.kibana(:?_\d*)?$/).test(index);
   return kibanaIndices.map(x => x.index).filter(isKibanaIndex);
 }
