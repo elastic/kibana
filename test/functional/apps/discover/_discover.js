@@ -126,6 +126,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show bars in the correct time zone', async function () {
+        await browser.setWindowSize(1200, 800);
         const ticks = await PageObjects.discover.getBarChartXTicks();
         expect(ticks).to.eql([
           '2015-09-20 00:00',
