@@ -6,7 +6,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 <%_ } _%>
 
-import 'ui/autoload/styles';
+import 'ui/autoload/all';
 import './less/main.less';
 import { Main } from './components/main';
 
