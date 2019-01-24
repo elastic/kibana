@@ -52,12 +52,14 @@ export const timelionVis = () => ({
     const Private = $injector.get('Private');
     const timelionRequestHandler = Private(TimelionRequestHandlerProvider).handler;
 
+    const visParams = { expression: args.expression, interval: args.interval };
+
     const response = await timelionRequestHandler({
       timeRange: get(context, 'timeRange', null),
       query: get(context, 'query', null),
       filters: get(context, 'filters', null),
       forceFetch: true,
-      visParams: { expression: args.expression, interval: args.interval }
+      visParams: visParams,
     });
 
     response.visType = 'timelion';
@@ -65,7 +67,11 @@ export const timelionVis = () => ({
     return {
       type: 'render',
       as: 'visualization',
-      value: response,
+      value: {
+        visParams,
+        visType: 'timelion',
+        visData: response,
+      },
     };
   },
 });
