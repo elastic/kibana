@@ -81,12 +81,13 @@
     .sidebar-list-header {
       padding-left: $euiSizeS;
       padding-right: $euiSizeS;
-      color: $euiColorDarkShade;
+      color: $euiColorFullShade;
       border: 1px solid transparent;
 
       .sidebar-list-header-label {
         font-size: $euiFontSizeS;
         line-height: $euiLineHeight;
+        font-weight: $euiFontWeightBold;
       }
     }
 
