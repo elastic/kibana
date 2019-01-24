@@ -43,22 +43,13 @@ describe('orderedDateAxis', function () {
     }
   };
 
-  describe('xAxisFormatter', function () {
-    it('sets the xAxisFormatter', function () {
+  describe('xAxisFormat', function () {
+    it('sets the xAxisFormat', function () {
       const args = _.cloneDeep(baseArgs);
       orderedDateAxis(args.chart);
 
-      expect(args.chart).to.have.property('xAxisFormatter');
-      expect(args.chart.xAxisFormatter).to.be.a('function');
-    });
-
-    it('formats values using moment, and returns strings', function () {
-      const args = _.cloneDeep(baseArgs);
-      orderedDateAxis(args.chart);
-
-      const val = '2014-08-06T12:34:01';
-      expect(args.chart.xAxisFormatter(val))
-        .to.be(moment(val).format('hh:mm:ss'));
+      expect(args.chart).to.have.property('xAxisFormat');
+      expect(args.chart.xAxisFormat).to.be.a('object');
     });
   });
 
