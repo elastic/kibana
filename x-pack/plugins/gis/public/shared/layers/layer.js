@@ -40,8 +40,8 @@ export class ALayer {
     layerDescriptor.maxZoom = _.get(options, 'maxZoom', 24);
     layerDescriptor.alpha = _.get(options, 'alpha', 0.75);
     layerDescriptor.visible = _.get(options, 'visible', true);
-    layerDescriptor.temporary = options.temporary || false;
-    layerDescriptor.style = options.style || {};
+    layerDescriptor.temporary = _.get(options, 'temporary', false);
+    layerDescriptor.style = _.get(options, 'style',  {});
     return layerDescriptor;
   }
 
