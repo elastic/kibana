@@ -81,7 +81,7 @@ jest.mock('../../util/string_utils', () => ({
   mlEscape(d) { return d; }
 }));
 
-jest.mock('./legacy_utils', () => ({
+jest.mock('../legacy_utils', () => ({
   getChartContainerWidth() { return 1140; }
 }));
 

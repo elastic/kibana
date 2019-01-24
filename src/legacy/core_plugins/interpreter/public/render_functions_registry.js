@@ -17,17 +17,6 @@
  * under the License.
  */
 
-import buildRequestBody from './build_request_body';
-export default (req, panel, entities) => {
-  const bodies = [];
-  entities.forEach(entity => {
-    bodies.push({
-      index: panel.index_pattern,
-      ignoreUnavailable: true,
-    });
-    const body = buildRequestBody(req, panel, entity);
-    body.timeout = '90s';
-    bodies.push(body);
-  });
-  return bodies;
-};
+import { RenderFunctionsRegistry } from '@kbn/interpreter/public';
+
+export const renderFunctionsRegistry = new RenderFunctionsRegistry();

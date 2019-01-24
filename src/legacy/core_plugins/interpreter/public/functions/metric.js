@@ -24,7 +24,7 @@ export const metric = () => ({
   type: 'render',
   context: {
     types: [
-      'kibana_table'
+      'datatable'
     ],
   },
   help: i18n.translate('interpreter.functions.metric.help', {

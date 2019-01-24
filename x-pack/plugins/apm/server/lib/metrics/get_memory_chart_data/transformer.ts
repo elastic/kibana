@@ -8,37 +8,31 @@ import { ESResponse } from './fetcher';
 
 export interface MemoryChartAPIResponse {
   series: {
-    averagePercentMemoryUsed: Coordinate[];
-    maximumPercentMemoryUsed: Coordinate[];
+    memoryUsedAvg: Coordinate[];
+    memoryUsedMax: Coordinate[];
   };
   // overall totals for the whole time range
   overallValues: {
-    averagePercentMemoryUsed: number | null;
-    maximumPercentMemoryUsed: number | null;
+    memoryUsedAvg: number | null;
+    memoryUsedMax: number | null;
   };
   totalHits: number;
 }
 
-export type MemoryMetricName =
-  | 'averagePercentMemoryUsed'
-  | 'maximumPercentMemoryUsed';
+export type MemoryMetricName = 'memoryUsedAvg' | 'memoryUsedMax';
 
 const MEMORY_METRIC_NAMES: MemoryMetricName[] = [
-  'averagePercentMemoryUsed',
-  'maximumPercentMemoryUsed'
+  'memoryUsedAvg',
+  'memoryUsedMax'
 ];
 
 export function transform(result: ESResponse): MemoryChartAPIResponse {
   const { aggregations, hits } = result;
-  const {
-    timeseriesData,
-    averagePercentMemoryUsed,
-    maximumPercentMemoryUsed
-  } = aggregations;
+  const { timeseriesData, memoryUsedAvg, memoryUsedMax } = aggregations;
 
   const series: MemoryChartAPIResponse['series'] = {
-    averagePercentMemoryUsed: [],
-    maximumPercentMemoryUsed: []
+    memoryUsedAvg: [],
+    memoryUsedMax: []
   };
 
   // using forEach here to avoid looping over the entire dataset
@@ -52,8 +46,8 @@ export function transform(result: ESResponse): MemoryChartAPIResponse {
   return {
     series,
     overallValues: {
-      averagePercentMemoryUsed: averagePercentMemoryUsed.value,
-      maximumPercentMemoryUsed: maximumPercentMemoryUsed.value
+      memoryUsedAvg: memoryUsedAvg.value,
+      memoryUsedMax: memoryUsedMax.value
     },
     totalHits: hits.total
   };

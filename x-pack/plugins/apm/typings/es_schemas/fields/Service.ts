@@ -4,4 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { MonitorSelect } from './monitor_select';
+export interface Service {
+  name: string;
+  framework?: {
+    name: string;
+    version: string;
+  };
+  runtime?: {
+    name: string;
+    version: string;
+  };
+  language?: {
+    name: string;
+    version?: string;
+  };
+}

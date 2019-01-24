@@ -17,25 +17,13 @@
  * under the License.
  */
 
-export const kibanaTable = () => ({
-  name: 'kibana_table',
-  serialize: context => {
-    context.columns.forEach(column => {
-      column.aggConfig = column.aggConfig.toJSON();
-    });
-    return context;
-  },
-  validate: tabify => {
-    if (!tabify.columns) {
-      throw new Error('tabify must have a columns array, even if it is empty');
-    }
-  },
-  from: {
-    null: () => {
-      return {
-        type: 'kibana_table',
-        columns: [],
-      };
-    },
-  },
-});
+import { Registry } from '../common';
+import { RenderFunction } from './render_function';
+
+class RenderFunctionsRegistry extends Registry {
+  wrapper(obj) {
+    return new RenderFunction(obj);
+  }
+}
+
+export { RenderFunctionsRegistry };

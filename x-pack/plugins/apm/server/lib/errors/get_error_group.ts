@@ -5,7 +5,6 @@
  */
 
 import { ESFilter } from 'elasticsearch';
-import { get } from 'lodash';
 import { oc } from 'ts-optchain';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
@@ -72,7 +71,7 @@ export async function getErrorGroup({
   const resp = await client<APMError>('search', params);
   const error = oc(resp).hits.hits[0]._source();
   const transactionId = oc(error).transaction.id();
-  const traceId: string | undefined = get(error, 'trace.id'); // cannot use oc because 'trace' doesn't exist on v1 errors
+  const traceId = oc(error).trace.id();
 
   let transaction;
   if (transactionId) {
