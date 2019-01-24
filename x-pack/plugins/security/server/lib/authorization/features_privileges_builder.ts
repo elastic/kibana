@@ -3,8 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import _ from 'lodash';
-import { Dictionary, flatten, mapValues } from 'lodash';
+import { Dictionary, flatten, mapValues, uniq } from 'lodash';
 import { FeaturePrivilegeDefinition } from 'x-pack/plugins/xpack_main/server/lib/feature_registry/feature_registry';
 import { Feature } from '../../../../xpack_main/types';
 import { Actions } from './actions';
@@ -47,7 +46,7 @@ export class FeaturesPrivilegesBuilder {
       })
     );
 
-    return _.uniq(allApiReadActions);
+    return uniq(allApiReadActions);
   }
 
   public getUIFeaturesReadActions(features: Feature[]): string[] {
@@ -74,7 +73,7 @@ export class FeaturesPrivilegesBuilder {
       })
     );
 
-    return _.uniq(allUIReadActions);
+    return uniq(allUIReadActions);
   }
 
   public getUICatalogueReadActions(features: Feature[]): string[] {
@@ -96,7 +95,7 @@ export class FeaturesPrivilegesBuilder {
       })
     );
 
-    return _.uniq(allCatalogueReadActions);
+    return uniq(allCatalogueReadActions);
   }
 
   public getUIManagementReadActions(features: Feature[]): string[] {
@@ -118,7 +117,7 @@ export class FeaturesPrivilegesBuilder {
       })
     );
 
-    return _.uniq(allManagementReadActions);
+    return uniq(allManagementReadActions);
   }
 
   private includeInBaseRead(privilegeId: string, privilege: FeaturePrivilegeDefinition): boolean {
