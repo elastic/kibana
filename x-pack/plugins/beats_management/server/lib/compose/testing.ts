@@ -9,6 +9,7 @@ import { MemoryConfigurationBlockAdapter } from '../adapters/configuration_block
 import { HapiBackendFrameworkAdapter } from '../adapters/framework/hapi_framework_adapter';
 import { MemoryTagsAdapter } from '../adapters/tags/memory_tags_adapter';
 import { MemoryTokensAdapter } from '../adapters/tokens/memory_tokens_adapter';
+import { BeatEventsLib } from '../beat_events';
 import { CMBeatsDomain } from '../beats';
 import { ConfigurationBlocksLib } from '../configuration_blocks';
 import { BackendFrameworkLib } from '../framework';
@@ -30,10 +31,12 @@ export function compose(server: any): CMServerLibs {
     tokens,
     framework,
   });
+  const beatEvents = new BeatEventsLib({} as any, beats);
 
   const libs: CMServerLibs = {
     framework,
     beats,
+    beatEvents,
     tags,
     tokens,
     configurationBlocks,
