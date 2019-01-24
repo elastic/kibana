@@ -16,7 +16,7 @@ import {
 } from '../../lib/lib';
 import { isWaffleMapGroupWithGroups, isWaffleMapGroupWithNodes } from './type_guards';
 
-function createId(path: InfraNodePath[]) {
+export function createId(path: InfraNodePath[]) {
   return path.map(p => p.value).join('/');
 }
 
@@ -44,6 +44,7 @@ function findOrCreateGroupWithNodes(
   if (isWaffleMapGroupWithNodes(existingGroup)) {
     return existingGroup;
   }
+  const lastPath = last(path);
   return {
     id,
     name:
@@ -51,7 +52,7 @@ function findOrCreateGroupWithNodes(
         ? i18n.translate('xpack.infra.nodesToWaffleMap.groupsWithNodes.allName', {
             defaultMessage: 'All',
           })
-        : last(path).label,
+        : (lastPath && lastPath.label) || 'Unknown Group',
     count: 0,
     width: 0,
     squareSize: 0,
@@ -68,6 +69,7 @@ function findOrCreateGroupWithGroups(
   if (isWaffleMapGroupWithGroups(existingGroup)) {
     return existingGroup;
   }
+  const lastPath = last(path);
   return {
     id,
     name:
@@ -75,7 +77,7 @@ function findOrCreateGroupWithGroups(
         ? i18n.translate('xpack.infra.nodesToWaffleMap.groupsWithGroups.allName', {
             defaultMessage: 'All',
           })
-        : last(path).label,
+        : (lastPath && lastPath.label) || 'Unknown Group',
     count: 0,
     width: 0,
     squareSize: 0,
@@ -83,8 +85,11 @@ function findOrCreateGroupWithGroups(
   };
 }
 
-function createWaffleMapNode(node: InfraNode): InfraWaffleMapNode {
+export function createWaffleMapNode(node: InfraNode): InfraWaffleMapNode {
   const nodePathItem = last(node.path);
+  if (!nodePathItem) {
+    throw new Error('There must be at least one node path item');
+  }
   return {
     pathId: node.path.map(p => p.value).join('/'),
     path: node.path,

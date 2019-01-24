@@ -174,9 +174,9 @@ declare module '@elastic/eui' {
   type EuiInMemoryTableProps = CommonProps & {
     items: any[];
     columns: any[];
-    sorting?: boolean;
+    sorting?: { sort: { field: string; direction: string } } | boolean;
     search?: boolean;
-    pagination?: boolean;
+    pagination?: { initialPageSize: number; pageSizeOptions: number[] } | boolean;
   };
   export const EuiInMemoryTable: React.SFC<EuiInMemoryTableProps>;
 }

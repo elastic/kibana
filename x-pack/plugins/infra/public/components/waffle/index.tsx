@@ -3,39 +3,24 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiButton, EuiButtonEmpty, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get, max, min } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
 
-import { nodesToWaffleMap } from '../../containers/waffle/nodes_to_wafflemap';
-import {
-  isWaffleMapGroupWithGroups,
-  isWaffleMapGroupWithNodes,
-} from '../../containers/waffle/type_guards';
 import {
   InfraMetricType,
   InfraNode,
   InfraNodeType,
   InfraTimerangeInput,
 } from '../../graphql/types';
-import {
-  InfraFormatterType,
-  InfraWaffleData,
-  InfraWaffleMapBounds,
-  InfraWaffleMapGroup,
-  InfraWaffleMapOptions,
-} from '../../lib/lib';
+import { InfraFormatterType, InfraWaffleMapBounds, InfraWaffleMapOptions } from '../../lib/lib';
 import { KueryFilterQuery } from '../../store/local/waffle_filter';
 import { createFormatter } from '../../utils/formatters';
-import { AutoSizer } from '../auto_sizer';
 import { InfraLoadingPanel } from '../loading';
-import { GroupOfGroups } from './group_of_groups';
-import { GroupOfNodes } from './group_of_nodes';
-import { Legend } from './legend';
-import { applyWaffleMapLayout } from './lib/apply_wafflemap_layout';
 import { TableView } from './table';
+import { WaffleMap } from './waffle_map';
 
 interface Props {
   options: InfraWaffleMapOptions;
@@ -80,24 +65,8 @@ const METRIC_FORMATTERS: MetricFormatters = {
   },
 };
 
-const extractValuesFromMap = (groups: InfraWaffleMapGroup[], values: number[] = []): number[] => {
-  return groups.reduce((acc: number[], group: InfraWaffleMapGroup) => {
-    if (isWaffleMapGroupWithGroups(group)) {
-      return acc.concat(extractValuesFromMap(group.groups, values));
-    }
-    if (isWaffleMapGroupWithNodes(group)) {
-      return acc.concat(
-        group.nodes.map(node => {
-          return node.metric.value || 0;
-        })
-      );
-    }
-    return acc;
-  }, values);
-};
-
-const calculateBoundsFromMap = (map: InfraWaffleData): InfraWaffleMapBounds => {
-  const values = extractValuesFromMap(map);
+const calculateBoundsFromNodes = (nodes: InfraNode[]): InfraWaffleMapBounds => {
+  const values = nodes.map(node => node.metric.value);
   // if there is only one value then we need to set the bottom range to zero
   if (values.length === 1) {
     values.unshift(0);
@@ -162,75 +131,49 @@ export const Waffle = injectI18n(
       }
       if (view === 'table') {
         return (
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem grow={false}>
-              <div>
-                <EuiButtonEmpty size="s" onClick={this.handleViewChange('map')} role="link">
-                  Switch to Map View
-                </EuiButtonEmpty>
-              </div>
-            </EuiFlexItem>
-            <EuiFlexItem style={{ padding: 16 }}>
+          <div>
+            <EuiButtonEmpty size="s" onClick={this.handleViewChange('map')} role="link">
+              Switch to Map View
+            </EuiButtonEmpty>
+            <div style={{ padding: 16 }}>
               <TableView
                 nodeType={nodeType}
                 nodes={nodes}
                 options={options}
                 formatter={this.formatter}
                 timeRange={timeRange}
+                onFilter={this.handleDrilldown}
               />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            </div>
+          </div>
         );
       }
-      return (
-        <EuiFlexGroup direction="column">
-          <EuiFlexItem grow={false}>
-            <div>
-              <EuiButtonEmpty size="s" onClick={this.handleViewChange('table')} role="link">
-                Switch to Table View
-              </EuiButtonEmpty>
-            </div>
-          </EuiFlexItem>
-          <EuiFlexItem>{this.renderWaffle()}</EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    }
-
-    private handleViewChange = (view: string) => () => this.props.onViewChange(view);
-
-    private renderWaffle = () => {
-      const { nodes, timeRange } = this.props;
       const { metric } = this.props.options;
       const metricFormatter = get(
         METRIC_FORMATTERS,
         metric.type,
         METRIC_FORMATTERS[InfraMetricType.count]
       );
-      const map = nodesToWaffleMap(nodes);
-      const bounds = (metricFormatter && metricFormatter.bounds) || calculateBoundsFromMap(map);
+      const bounds = (metricFormatter && metricFormatter.bounds) || calculateBoundsFromNodes(nodes);
       return (
-        <AutoSizer content>
-          {({ measureRef, content: { width = 0, height = 0 } }) => {
-            const groupsWithLayout = applyWaffleMapLayout(map, width, height);
-            return (
-              <WaffleMapOuterContiner
-                innerRef={(el: any) => measureRef(el)}
-                data-test-subj="waffleMap"
-              >
-                <WaffleMapInnerContainer>
-                  {groupsWithLayout.map(this.renderGroup(bounds, timeRange))}
-                </WaffleMapInnerContainer>
-                <Legend
-                  formatter={this.formatter}
-                  bounds={bounds}
-                  legend={this.props.options.legend}
-                />
-              </WaffleMapOuterContiner>
-            );
-          }}
-        </AutoSizer>
+        <React.Fragment>
+          <EuiButtonEmpty size="s" onClick={this.handleViewChange('table')} role="link">
+            Switch to Table View
+          </EuiButtonEmpty>
+          <WaffleMap
+            nodeType={nodeType}
+            nodes={nodes}
+            options={options}
+            formatter={this.formatter}
+            timeRange={timeRange}
+            onFilter={this.handleDrilldown}
+            bounds={bounds}
+          />
+        </React.Fragment>
       );
-    };
+    }
+
+    private handleViewChange = (view: string) => () => this.props.onViewChange(view);
 
     // TODO: Change this to a real implimentation using the tickFormatter from the prototype as an example.
     private formatter = (val: string | number) => {
@@ -254,60 +197,8 @@ export const Waffle = injectI18n(
       });
       return;
     };
-
-    private renderGroup = (bounds: InfraWaffleMapBounds, timeRange: InfraTimerangeInput) => (
-      group: InfraWaffleMapGroup
-    ) => {
-      if (isWaffleMapGroupWithGroups(group)) {
-        return (
-          <GroupOfGroups
-            onDrilldown={this.handleDrilldown}
-            key={group.id}
-            options={this.props.options}
-            group={group}
-            formatter={this.formatter}
-            bounds={bounds}
-            nodeType={this.props.nodeType}
-            timeRange={timeRange}
-          />
-        );
-      }
-      if (isWaffleMapGroupWithNodes(group)) {
-        return (
-          <GroupOfNodes
-            key={group.id}
-            options={this.props.options}
-            group={group}
-            onDrilldown={this.handleDrilldown}
-            formatter={this.formatter}
-            isChild={false}
-            bounds={bounds}
-            nodeType={this.props.nodeType}
-            timeRange={timeRange}
-          />
-        );
-      }
-    };
   }
 );
-
-const WaffleMapOuterContiner = styled.div`
-  flex: 1 0 0%;
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
-  overflow-x: hidden;
-  overflow-y: auto;
-`;
-
-const WaffleMapInnerContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-content: flex-start;
-  padding: 10px;
-`;
 
 const CenteredEmptyPrompt = styled(EuiEmptyPrompt)`
   align-self: center;
