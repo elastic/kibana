@@ -8,6 +8,7 @@ import chrome from 'ui/chrome';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
+import { timefilter } from 'ui/timefilter';
 import { Provider } from 'react-redux';
 import { getStore } from '../store/store';
 import { GisMap } from '../components/gis_map';
@@ -232,7 +233,9 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     return { id };
   }
 
-  $scope.showTimepickerInTopNav = false; // used by kbn-top-nav directive to disable timepicker in top nav
+  // Hide angular timepicer/refresh UI from top nav
+  timefilter.disableTimeRangeSelector();
+  timefilter.disableAutoRefreshSelector();
   $scope.showDatePicker = true; // used by query-bar directive to enable timepikcer in query bar
   $scope.topNavMenu = [{
     key: 'inspect',
