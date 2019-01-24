@@ -6,6 +6,7 @@
 
 import chrome from 'ui/chrome';
 import React from 'react';
+import { I18nProvider } from '@kbn/i18n/react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
@@ -20,7 +21,12 @@ import {
   replaceLayerList,
   setQuery,
 } from '../actions/store_actions';
-import { updateFlyout, FLYOUT_STATE } from '../store/ui';
+import {
+  enableFullScreen,
+  getIsFullScreen,
+  updateFlyout,
+  FLYOUT_STATE
+} from '../store/ui';
 import { getDataSources, getUniqueIndexPatternIds } from '../selectors/map_selectors';
 import { Inspector } from 'ui/inspector';
 import { inspectorAdapters, indexPatternService } from '../kibana_services';
@@ -110,7 +116,9 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     const root = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
     render(
       <Provider store={store}>
-        <GisMap/>
+        <I18nProvider>
+          <GisMap/>
+        </I18nProvider>
       </Provider>,
       root);
   });
@@ -135,8 +143,16 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     $scope.indexPatterns = indexPatterns;
   }
 
+  let prevIsFullScreen;
   function handleStoreChanges(store) {
     const state = store.getState();
+
+    const isFullScreen = getIsFullScreen(state);
+    if (prevIsFullScreen !== isFullScreen) {
+      // Must trigger digest cycle for angular top nav to redraw itself when isFullScreen changes
+      $scope.$evalAsync(() => {});
+      prevIsFullScreen = isFullScreen;
+    }
 
     const nextIndexPatternIds = getUniqueIndexPatternIds(state);
     if (nextIndexPatternIds !== prevIndexPatternIds) {
@@ -198,6 +214,15 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   }
 
   $scope.topNavMenu = [{
+    key: 'fullScreen',
+    description: 'Full screen',
+    testId: 'fullScreenMode',
+    run() {
+      getStore().then(store => {
+        store.dispatch(enableFullScreen());
+      });
+    }
+  }, {
     key: 'inspect',
     description: 'Open Inspector',
     testId: 'openInspectorButton',

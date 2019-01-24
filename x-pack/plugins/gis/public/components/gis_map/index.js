@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import { GisMap } from './view';
-import { getFlyoutDisplay, FLYOUT_STATE } from '../../store/ui';
+import { getFlyoutDisplay, getIsFullScreen, exitFullScreen, FLYOUT_STATE } from '../../store/ui';
 import {
   setTimeFiltersToKbnGlobalTime,
   triggerRefreshTimer,
@@ -18,7 +18,8 @@ function mapStateToProps(state = {}) {
   return {
     layerDetailsVisible: flyoutDisplay === FLYOUT_STATE.LAYER_PANEL,
     addLayerVisible: flyoutDisplay === FLYOUT_STATE.ADD_LAYER_WIZARD,
-    noFlyoutVisible: flyoutDisplay === FLYOUT_STATE.NONE
+    noFlyoutVisible: flyoutDisplay === FLYOUT_STATE.NONE,
+    isFullScreen: getIsFullScreen(state),
   };
 }
 
@@ -27,6 +28,7 @@ function mapDispatchToProps(dispatch) {
     setTimeFiltersToKbnGlobalTime: () => dispatch(setTimeFiltersToKbnGlobalTime()),
     triggerRefreshTimer: () => dispatch(triggerRefreshTimer()),
     setRefreshConfig: (({ isPaused, interval }) => dispatch(setRefreshConfig({ isPaused, interval }))),
+    exitFullScreen: () => dispatch(exitFullScreen()),
   };
 }
 
