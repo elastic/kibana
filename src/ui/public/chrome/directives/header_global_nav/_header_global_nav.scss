@@ -9,7 +9,7 @@ $euiHeaderNavSizeMobile: $euiHeaderNavSize * .75;
   z-index: 10;
 }
 
-.header-global-wrapper + .app-wrapper {
+.header-global-wrapper + .app-wrapper:not(.hidden-chrome) {
   top: $euiHeaderNavSize;
   left: $euiHeaderNavSize;
 
@@ -22,7 +22,7 @@ $euiHeaderNavSizeMobile: $euiHeaderNavSize * .75;
 
 // Mobile header is smaller
 @include euiBreakpoint('xs') {
-  .header-global-wrapper + .app-wrapper {
+  .header-global-wrapper + .app-wrapper:not(.hidden-chrome) {
     top: $euiHeaderNavSizeMobile;
     left: 0;
 
@@ -34,7 +34,7 @@ $euiHeaderNavSizeMobile: $euiHeaderNavSize * .75;
 
 // Mobile header is smaller
 @include euiBreakpoint('s') {
-  .header-global-wrapper + .app-wrapper {
+  .header-global-wrapper + .app-wrapper:not(.hidden-chrome) {
     left: 0;
   }
 }
