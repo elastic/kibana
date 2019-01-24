@@ -23,8 +23,9 @@ function mapStateToProps(state = {}) {
     layerId: selectedLayer.getId(),
     maxZoom: selectedLayer.getMaxZoom(),
     minZoom: selectedLayer.getMinZoom(),
-    renderSourceDetails: selectedLayer.renderSourceDetails,
-    renderSourceSettingsEditor: selectedLayer.renderSourceSettingsEditor,
+    layer: selectedLayer,
+    // renderSourceDetails: selectedLayer.renderSourceDetails,
+    // renderSourceSettingsEditor: selectedLayer.renderSourceSettingsEditor,
   };
 }
 

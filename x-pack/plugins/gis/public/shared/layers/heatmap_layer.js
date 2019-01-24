@@ -93,6 +93,7 @@ export class HeatmapLayer extends ALayer {
       layerId: heatmapLayerId,
       propertyName: SCALED_PROPERTY_NAME,
       alpha: this.getAlpha(),
+      resolution: this._source.getGridResolution()
     });
     mbMap.setLayerZoomRange(heatmapLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
   }
@@ -111,7 +112,7 @@ export class HeatmapLayer extends ALayer {
     const dataMeta = sourceDataRequest ? sourceDataRequest.getMeta() : {};
 
     const targetPrecisionUnadjusted = getGeohashPrecisionForZoom(dataFilters.zoom);
-    const targetPrecision = targetPrecisionUnadjusted + this._style.getPrecisionRefinementDelta();
+    const targetPrecision = targetPrecisionUnadjusted + this._source.getGeohashPrecisionResolutionDelta();
     const isSamePrecision = dataMeta.precision === targetPrecision;
 
     const isSameTime = _.isEqual(dataMeta.timeFilters, dataFilters.timeFilters);
@@ -127,19 +128,24 @@ export class HeatmapLayer extends ALayer {
     const metricPropertyKey = this._getPropKeyOfSelectedMetric();
     const updateDueToMetricChange = !_.isEqual(dataMeta.metric, metricPropertyKey);
 
+    const updateDueToResolutionChange = !_.isEqual(dataFilters.geohashResolution, this._source.getGridResolution());
+
     if (isSamePrecision
       && isSameTime
       && !updateDueToExtent
       && !updateDueToRefreshTimer
       && !updateDueToQuery
-      && !updateDueToMetricChange) {
+      && !updateDueToMetricChange
+      && !updateDueToResolutionChange
+    ) {
       return;
     }
 
     const newDataMeta = {
       ...dataFilters,
       precision: targetPrecision,
-      metric: metricPropertyKey
+      metric: metricPropertyKey,
+      geohashResolution: this._source.getGridResolution()
     };
     await this._fetchNewData({ startLoading, stopLoading, onLoadError, dataMeta: newDataMeta });
   }
@@ -151,7 +157,7 @@ export class HeatmapLayer extends ALayer {
     try {
       const layerName = await this.getDisplayName();
       const data = await this._source.getGeoJsonPoints({
-        geohashPrecision: geohashPrecision,
+        geohashPrecifsion: geohashPrecision,
         extent: buffer,
         timeFilters,
         layerName,

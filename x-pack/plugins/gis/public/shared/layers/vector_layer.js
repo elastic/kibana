@@ -196,8 +196,10 @@ export class VectorLayer extends ALayer {
     }
 
     let updateDueToPrecisionChange = false;
+    let updateDueToResolutionChange = false;
     if (isGeohashPrecisionAware) {
-      updateDueToPrecisionChange = !_.isEqual(meta.geohashPrecision, searchFilters.geohashPrecision);
+      updateDueToPrecisionChange = !_.isEqual(meta.geohashPrecision, searchFilters.precision);
+      updateDueToResolutionChange = !_.isEqual(meta.geohashResolution, this._source.getGridResolution());
     }
 
     const updateDueToExtentChange = this.updateDueToExtent(source, meta, searchFilters);
@@ -207,7 +209,12 @@ export class VectorLayer extends ALayer {
       && !updateDueToExtentChange
       && !updateDueToFields
       && !updateDueToQuery
-      && !updateDueToPrecisionChange;
+      && !updateDueToPrecisionChange
+      && !updateDueToResolutionChange;
+  }
+
+  _getTargetGeohashPrecision(precision) {
+    return this._source.getGeohashPrecisionResolutionDelta() + precision;
   }
 
   async _syncJoin(join, { startLoading, stopLoading, onLoadError, dataFilters }) {
@@ -224,7 +231,9 @@ export class VectorLayer extends ALayer {
           join: join
         };
       }
-      startLoading(sourceDataId, requestToken, dataFilters);
+      startLoading(sourceDataId, requestToken, {
+        ...dataFilters
+      });
       const leftSourceName = await this.getSourceName();
       const {
         rawData,
@@ -264,7 +273,8 @@ export class VectorLayer extends ALayer {
       })
     ];
 
-    const targetPrecision = getGeohashPrecisionForZoom(dataFilters.zoom);
+    let targetPrecision = getGeohashPrecisionForZoom(dataFilters.zoom);
+    targetPrecision = this._getTargetGeohashPrecision(targetPrecision);
     return {
       ...dataFilters,
       fieldNames: _.uniq(fieldNames).sort(),
@@ -288,7 +298,11 @@ export class VectorLayer extends ALayer {
     }
 
     try {
-      startLoading(sourceDataId, requestToken, searchFilters);
+      const newMeta = {
+        ...searchFilters,
+        geohashResolution: this._source.getGridResolution()
+      };
+      startLoading(sourceDataId, requestToken, newMeta);
       const layerName = await this.getDisplayName();
       const { data, meta } = await this._source.getGeoJsonWithMeta({
         layerName,
