@@ -68,6 +68,7 @@ uiRoutes
   });
 
 import { uiModules } from 'ui/modules';
+import { getFromSavedObject } from 'ui/index_patterns/static_utils';
 const module = uiModules.get('apps/ml');
 
 function getDefaultViewBySwimlaneData() {
@@ -80,6 +81,7 @@ function getDefaultViewBySwimlaneData() {
 }
 
 module.controller('MlExplorerController', function (
+  $route,
   $scope,
   $timeout,
   AppState,
@@ -119,7 +121,14 @@ module.controller('MlExplorerController', function (
   let disableDragSelectOnMouseLeave = true;
   // skip listening to clicks on swimlanes while they are loading to avoid race conditions
   let skipCellClicks = true;
+
+  $scope.indexPatterns = $route.current.locals.indexPatterns.map(getFromSavedObject);
   $scope.queryFilters = [];
+
+  $scope.updateFilters = filters => {
+    // The filters will automatically be set when the queryFilter emits an update event (see below)
+    queryFilter.setFilters(filters);
+  };
 
   const anomalyDataChange = explorerChartsContainerServiceFactory((data) => {
     $scope.chartsData = {
