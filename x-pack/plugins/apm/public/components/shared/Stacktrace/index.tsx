@@ -8,7 +8,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, last } from 'lodash';
 import React, { Fragment } from 'react';
-import { IStackframe } from '../../../../typings/es_schemas/Stackframe';
+import { IStackframe } from '../../../../typings/es_schemas/fields/Stackframe';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 // @ts-ignore
 import { Ellipsis } from '../../shared/Icons';
@@ -46,10 +46,9 @@ export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
           const hasTrailingSpacer =
             hasMultipleStackframes && i !== groups.length - 1;
           return (
-            <Fragment>
+            <Fragment key={i}>
               {hasLeadingSpacer && <EuiSpacer size="m" />}
               <LibraryStackFrames
-                key={i}
                 initialVisiblity={!hasMultipleStackframes}
                 stackframes={group.stackframes}
                 codeLanguage={codeLanguage}

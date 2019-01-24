@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }) {
       describe('sort by heading - ' + col.heading, function indexPatternCreation() {
         before(async function () {
           await PageObjects.settings.navigateTo();
-          await PageObjects.settings.clickKibanaIndices();
+          await PageObjects.settings.clickKibanaIndexPatterns();
           await PageObjects.settings.createIndexPattern();
         });
 
