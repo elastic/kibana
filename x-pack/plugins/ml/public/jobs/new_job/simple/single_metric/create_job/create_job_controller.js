@@ -420,6 +420,7 @@ module
           })
           .catch((resp) => {
             msgs.error('Save datafeed failed: ', resp);
+            $scope.$applyAsync();
           });
       }
     };
