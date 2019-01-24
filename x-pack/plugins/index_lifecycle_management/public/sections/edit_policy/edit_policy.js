@@ -166,8 +166,8 @@ class EditPolicyUi extends Component {
                 <p>
                   <FormattedMessage
                     id="xpack.indexLifecycleMgmt.editPolicy.lifecyclePolicyDescriptionText"
-                    defaultMessage={`Use an index policy to automate the four phases of the index lifecycle,
-                      from actively writing to the index to deleting it.`}
+                    defaultMessage="Use an index policy to automate the four phases of the index lifecycle,
+                      from actively writing to the index to deleting it."
                   />
                   {' '}
                   <LearnMoreLink
@@ -197,8 +197,9 @@ class EditPolicyUi extends Component {
                           .{' '}
                           <FormattedMessage
                             id="xpack.indexLifecycleMgmt.editPolicy.editingExistingPolicyExplanationMessage"
-                            defaultMessage={`Any changes you make will affect the indices that are attached to this policy.
-                              Alternatively, you can save these changes in a new policy.`}
+                            defaultMessage="Any changes you make will affect the indices that are
+                              attached to this policy. Alternatively, you can save these changes in
+                              a new policy."
                           />
                         </p>
                       </EuiText>

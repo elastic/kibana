@@ -54,7 +54,7 @@ export function createProxy(server) {
     handler(req, h) {
       const { query, payload: body } = req;
       return callWithRequest(req, 'transport.request', {
-        path: `/${req.params.index}/_search`,
+        path: `/${encodeURIComponent(req.params.index)}/_search`,
         method: 'POST',
         query,
         body
