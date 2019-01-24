@@ -14,20 +14,23 @@ export class HeatmapStyle {
 
   static type = 'HEATMAP';
 
-  constructor(styleDescriptor) {
-    this._descriptor = styleDescriptor;
+  constructor(styleDescriptor = {}) {
+    this._descriptor = HeatmapStyle.createDescriptor(
+      styleDescriptor.refinement,
+      styleDescriptor.properties
+    );
   }
 
   static canEdit(styleInstance) {
     return styleInstance.constructor === HeatmapStyle;
   }
 
-  static createDescriptor(refinement) {
+  static createDescriptor(refinement, properties = {}) {
     return {
       type: HeatmapStyle.type,
       refinement: refinement || 'coarse',
       properties: {
-        alphaValue: 1
+        ...properties
       }
     };
   }
@@ -47,15 +50,8 @@ export class HeatmapStyle {
 
   }
 
-  _getMBOpacity() {
-    const DEFAULT_OPACITY = 1;
-    return typeof this._descriptor.properties.alphaValue === 'number' ?  this._descriptor.properties.alphaValue : DEFAULT_OPACITY;
-  }
-
-  setMBPaintProperties(mbMap, pointLayerID, property) {
-
+  setMBPaintProperties({ alpha, mbMap, layerId, propertyName }) {
     let radius;
-    const opacity = this._getMBOpacity();
     if (this._descriptor.refinement === 'coarse') {
       radius = 64;
     } else if (this._descriptor.refinement === 'fine') {
@@ -65,12 +61,12 @@ export class HeatmapStyle {
     } else {
       throw new Error(`Refinement param not recognized: ${this._descriptor.refinement}`);
     }
-    mbMap.setPaintProperty(pointLayerID, 'heatmap-radius', radius);
-    mbMap.setPaintProperty(pointLayerID, 'heatmap-weight', {
-      "type": 'identity',
-      "property": property
+    mbMap.setPaintProperty(layerId, 'heatmap-radius', radius);
+    mbMap.setPaintProperty(layerId, 'heatmap-weight', {
+      type: 'identity',
+      property: propertyName
     });
-    mbMap.setPaintProperty(pointLayerID, 'heatmap-opacity', opacity);
+    mbMap.setPaintProperty(layerId, 'heatmap-opacity', alpha);
   }
 
   getRefinement() {

@@ -68,10 +68,10 @@ export class UpdateSourceEditor extends Component {
     return (
       <Fragment>
         <EuiFormRow
-          label="Fields displayed in tooltip"
+          label="Fields to display in tooltip"
         >
           <MultiFieldSelect
-            placeholder="Select field(s)"
+            placeholder="Select fields"
             value={this.props.tooltipProperties}
             onChange={this.onTooltipPropertiesSelect}
             fields={this.state.fields}
@@ -80,7 +80,7 @@ export class UpdateSourceEditor extends Component {
 
         <EuiFormRow>
           <EuiSwitch
-            label="Use map extent to filter data"
+            label="Only filter for data in the visible map area"
             checked={this.props.filterByMapBounds}
             onChange={this.onFilterByMapBoundsChange}
           />
