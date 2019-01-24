@@ -4,6 +4,7 @@
     "type": "gis-map",
     "updated_at" : "2018-12-19T14:56:22.769Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes" : {
       "title" : "[Logs] Web Traffic",
       "description" : "",

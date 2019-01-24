@@ -104,6 +104,12 @@ export interface InfraDatabaseResponse {
 
 export interface InfraDatabaseSearchResponse<Hit = {}, Aggregations = undefined>
   extends InfraDatabaseResponse {
+  _shards: {
+    total: number;
+    successful: number;
+    skipped: number;
+    failed: number;
+  };
   aggregations?: Aggregations;
   hits: {
     total: number;

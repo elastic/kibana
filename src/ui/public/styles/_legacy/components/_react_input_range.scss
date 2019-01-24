@@ -102,24 +102,3 @@
   position: relative;
   width: calc(100% - #{$euiSize});
 }
-
-.theme-dark {
-  @import '@elastic/eui/src/themes/k6/k6_colors_dark';
-
-  .input-range__track {
-    background: $euiColorLightShade;
-  }
-
-  .input-range__slider {
-    background: $euiColorPrimary;
-    border-color: $euiColorPrimary;
-  }
-
-  .input-range__track--active {
-    background: $euiColorPrimary;
-  }
-
-  .input-range__label {
-    color: $euiColorDarkShade;
-  }
-}
