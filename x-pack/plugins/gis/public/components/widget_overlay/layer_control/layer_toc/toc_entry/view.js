@@ -69,14 +69,14 @@ export class TOCEntry extends React.Component {
         data-layerid={layer.getId()}
       >
         <EuiFlexGroup
-          gutterSize="s"
+          gutterSize="none"
           alignItems="center"
           responsive={false}
           className={
             layer.isVisible() && layer.showAtZoomLevel(zoom) && !layer.dataHasLoadError() ? 'gisTocEntry-visible' : 'gisTocEntry-notVisible'
           }
         >
-          <EuiFlexItem grow={false} alignItems={"center"}>
+          <EuiFlexItem grow={false}>
             { legendIcon }
           </EuiFlexItem>
           <EuiFlexItem>

@@ -55,8 +55,12 @@ export class LayerTocActions extends Component {
     const icon = this._renderIcon();
     return (
       <EuiButtonEmpty
+        size="xs"
+        flush="left"
+        color="text"
         onClick={this._onClick}
-      >{icon}
+      >
+        {icon}
       </EuiButtonEmpty>);
   }
 
@@ -146,7 +150,7 @@ export class LayerTocActions extends Component {
         closePopover={this._closePopover}
         panelPaddingSize="none"
         withTitle
-        anchorPosition="downLeft"
+        anchorPosition="leftUp"
       >
         <EuiContextMenu
           initialPanelId={0}
