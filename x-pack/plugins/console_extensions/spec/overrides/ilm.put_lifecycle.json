@@ -30,7 +30,7 @@
                 },
                 "forcemerge": {
                   "max_num_segments": 1
-                },
+                }
               }  
             },
             "min_age": "1d",
@@ -122,7 +122,7 @@
                   "max_age": "7d",
                   "max_docs": 1000,
                   "max_size": "5gb"
-                },
+                }
               }  
             },
             "min_age": "1d",
