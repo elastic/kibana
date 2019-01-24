@@ -91,6 +91,12 @@ if (flags.help) {
   process.exit(1);
 }
 
+// In order to build a docker image we always need
+// to generate all the platforms
+if (flags.docker) {
+  flags['all-platforms'] = true;
+}
+
 const log = new ToolingLog({
   level: pickLevelFromFlags(flags, {
     default: flags.debug === false ? 'info' : 'debug'
