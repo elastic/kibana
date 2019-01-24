@@ -24,19 +24,19 @@ import { errors as esErrors } from '@elastic/elasticsearch';
 describe('handleESError', function () {
 
   it('should transform elasticsearch errors into boom errors with the same status code', function () {
-    const conflict = handleESError(new esErrors.Conflict());
+    const conflict = handleESError(new esErrors.ResponseError({ statusCode: 409 }));
     expect(conflict.isBoom).to.be(true);
     expect(conflict.output.statusCode).to.be(409);
 
-    const forbidden = handleESError(new esErrors[403]);
+    const forbidden = handleESError(new esErrors.ResponseError({ statusCode: 403 }));
     expect(forbidden.isBoom).to.be(true);
     expect(forbidden.output.statusCode).to.be(403);
 
-    const notFound = handleESError(new esErrors.NotFound());
+    const notFound = handleESError(new esErrors.ResponseError({ statusCode: 404 }));
     expect(notFound.isBoom).to.be(true);
     expect(notFound.output.statusCode).to.be(404);
 
-    const badRequest = handleESError(new esErrors.BadRequest());
+    const badRequest = handleESError(new esErrors.ResponseError({ statusCode: 400 }));
     expect(badRequest.isBoom).to.be(true);
     expect(badRequest.output.statusCode).to.be(400);
   });
@@ -47,10 +47,10 @@ describe('handleESError', function () {
   });
 
   it('should return a boom 503 server timeout error for ES connection errors', function () {
-    expect(handleESError(new esErrors.ConnectionFault()).output.statusCode).to.be(503);
-    expect(handleESError(new esErrors.ServiceUnavailable()).output.statusCode).to.be(503);
-    expect(handleESError(new esErrors.NoConnections()).output.statusCode).to.be(503);
-    expect(handleESError(new esErrors.RequestTimeout()).output.statusCode).to.be(503);
+    expect(handleESError(new esErrors.ConnectionError()).output.statusCode).to.be(503);
+    expect(handleESError(new esErrors.ResponseError({ statusCode: 503 })).output.statusCode).to.be(503);
+    expect(handleESError(new esErrors.NoLivingConnectionsError()).output.statusCode).to.be(503);
+    expect(handleESError(new esErrors.TimeoutError()).output.statusCode).to.be(503);
   });
 
   it('should throw an error if called with a non-error argument', function () {

@@ -21,7 +21,7 @@ import Promise from 'bluebird';
 import sinon from 'sinon';
 import expect from 'expect.js';
 
-const NoConnections = require('elasticsearch').errors.NoConnections;
+const NoConnections = require('@elastic/elasticsearch').errors.NoLivingConnectionsError;
 
 import mappings from './fixtures/mappings';
 import healthCheck from '../health_check';

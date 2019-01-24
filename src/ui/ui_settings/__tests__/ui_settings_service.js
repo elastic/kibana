@@ -279,7 +279,7 @@ describe('ui settings', () => {
     it('returns an empty object on 404 responses', async () => {
       const { uiSettings } = setup({
         async callCluster() {
-          throw new esErrors[404]();
+          throw new esErrors.ResponseError({ statusCode: 404 });
         }
       });
 
@@ -289,7 +289,7 @@ describe('ui settings', () => {
     it('returns an empty object on 403 responses', async () => {
       const { uiSettings } = setup({
         async callCluster() {
-          throw new esErrors[403]();
+          throw new esErrors.ResponseError({ statusCode: 403 });
         }
       });
 
@@ -311,7 +311,7 @@ describe('ui settings', () => {
         savedObjectsClient: {
           errors: savedObjectsClientErrors,
           async get() {
-            throw new esErrors[401]();
+            throw new esErrors.ResponseError({ statusCode: 401 });
           }
         }
       });
@@ -320,7 +320,7 @@ describe('ui settings', () => {
         await uiSettings.getUserProvided();
         throw new Error('expect getUserProvided() to throw');
       } catch (err) {
-        expect(err).to.be.a(esErrors[401]);
+        expect(err).to.be.a(esErrors.ResponseError);
       }
     });
 
