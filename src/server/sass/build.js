@@ -77,10 +77,10 @@ export class Build {
 
     const prefixed = postcss([ autoprefixer ]).process(rendered.css);
 
+    this.includedFiles = rendered.stats.includedFiles;
+
     await mkdirpAsync(path.dirname(this.targetPath));
     await writeFile(this.targetPath, prefixed.css);
-
-    this.includedFiles = rendered.stats.includedFiles;
 
     return this;
   }
