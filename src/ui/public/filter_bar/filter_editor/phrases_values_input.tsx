@@ -53,6 +53,7 @@ class PhrasesValuesInputUI extends PhraseSuggestor<Props> {
           onCreateOption={(option: string) => onChange([...(values || []), option])}
           onChange={onChange}
           isClearable={false}
+          data-test-subj="filterParamsComboBox phrasesParamsComboxBox"
         />
       </EuiFormRow>
     );

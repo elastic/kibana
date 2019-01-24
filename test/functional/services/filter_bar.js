@@ -83,7 +83,7 @@ export function FilterBarProvider({ getService, getPageObjects }) {
       await comboBox.set('filterFieldSuggestionList', field);
       await comboBox.set('filterOperatorList', operator);
       const params = await testSubjects.find('filterParams');
-      const comboBoxInputs = await params.findAllByCssSelector('[data-test-subj="comboBoxInput"]');
+      const paramsComboBoxes = await params.findAllByCssSelector('[data-test-subj~="filterParamsComboBox"]');
       const paramFields = await params.findAllByTagName('input');
       for (let i = 0; i < values.length; i++) {
         let fieldValues = values[i];
@@ -91,9 +91,9 @@ export function FilterBarProvider({ getService, getPageObjects }) {
           fieldValues = [fieldValues];
         }
 
-        if (comboBoxInputs && comboBoxInputs.length > 0) {
+        if (paramsComboBoxes && paramsComboBoxes.length > 0) {
           for (let j = 0; j < fieldValues.length; j++) {
-            await comboBox.setElement(comboBoxInputs[i], fieldValues[j]);
+            await comboBox.setElement(paramsComboBoxes[i], fieldValues[j]);
           }
         }
         else if (paramFields && paramFields.length > 0) {
@@ -112,9 +112,8 @@ export function FilterBarProvider({ getService, getPageObjects }) {
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
-    async getFilterEditorPhrases() {
-      const optionsString = await comboBox.getOptionsList('phraseValueInput');
-      return optionsString.split('\n');
+    async getFilterEditorSelectedPhrases() {
+      return await comboBox.getComboBoxSelectedOptions('filterParamsComboBox');
     }
 
     async getFilterEditorFields() {

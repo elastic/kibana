@@ -75,6 +75,7 @@ class PhraseValueInputUI extends PhraseSuggestor<Props> {
         singleSelection={{ asPlainText: true }}
         onCreateOption={onChange}
         isClearable={false}
+        data-test-subj="filterParamsComboBox phraseParamsComboxBox"
       />
     );
   }
