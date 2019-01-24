@@ -45,17 +45,17 @@ export default async function(server /*options*/) {
         catalogue: ['canvas'],
         app: ['canvas', 'kibana'],
         savedObject: {
-          all: ['canvas'],
+          all: ['canvas-workpad'],
           read: ['config', 'index-pattern'],
         },
-        ui: [],
+        ui: ['showWriteControls'],
       },
       read: {
         catalogue: ['canvas'],
         app: ['canvas', 'kibana'],
         savedObject: {
           all: [],
-          read: ['config', 'index-pattern', 'canvas'],
+          read: ['config', 'index-pattern', 'canvas-workpad'],
         },
         ui: [],
       },
