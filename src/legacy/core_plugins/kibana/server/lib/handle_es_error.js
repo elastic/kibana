@@ -26,18 +26,23 @@ export default function handleESError(error) {
     throw new Error('Expected an instance of Error');
   }
 
-  if (error instanceof esErrors.ConnectionFault ||
-    error instanceof esErrors.ServiceUnavailable ||
-    error instanceof esErrors.NoConnections ||
-    error instanceof esErrors.RequestTimeout) {
+
+  function isResponseError (err, statusCode) {
+    return err instanceof esErrors.ResponseError && err.statusCode === statusCode
+  }
+
+  if (error instanceof esErrors.ConnectionError ||
+    isResponseError(error, 503) ||
+    error instanceof esErrors.NoLivingConnectionsError ||
+    error instanceof esErrors.TimeoutError) {
     return Boom.serverUnavailable(error);
-  } else if (error instanceof esErrors.Conflict || _.contains(error.message, 'index_template_already_exists')) {
+  } else if (isResponseError(error, 409) || _.contains(error.message, 'index_template_already_exists')) {
     return Boom.conflict(error);
-  } else if (error instanceof esErrors[403]) {
+  } else if (isResponseError(error, 403)) {
     return Boom.forbidden(error);
-  } else if (error instanceof esErrors.NotFound) {
+  } else if (isResponseError(error, 404)) {
     return Boom.notFound(error);
-  } else if (error instanceof esErrors.BadRequest) {
+  } else if (isResponseError(error, 400)) {
     return Boom.badRequest(error);
   } else {
     return error;
