@@ -35,7 +35,6 @@ export interface CallCluster {
   (path: 'indices.getMapping', opts: IndexOpts): Promise<MappingResult>;
   (path: 'indices.getSettings', opts: IndexOpts): Promise<IndexSettingsResult>;
   (path: 'indices.putMapping', opts: PutMappingOpts): Promise<any>;
-  (path: 'indices.putTemplate', opts: PutTemplateOpts): Promise<any>;
   (path: 'indices.refresh', opts: IndexOpts): Promise<any>;
   (path: 'indices.updateAliases', opts: UpdateAliasesOpts): Promise<any>;
   (path: 'reindex', opts: ReindexOpts): Promise<any>;
@@ -65,18 +64,6 @@ export interface CountOpts {
 export interface PutMappingOpts {
   body: IndexMapping;
   index: string;
-}
-
-export interface PutTemplateOpts {
-  name: string;
-  body: {
-    template: string;
-    settings: {
-      number_of_shards: number;
-      auto_expand_replicas: string;
-    };
-    mappings: IndexMapping;
-  };
 }
 
 export interface IndexOpts {
