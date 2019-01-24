@@ -327,7 +327,7 @@ export const RemoteClusterForm = injectI18n(
             helpText={(
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.sectionSeedsHelpText"
-                defaultMessage="An IP address or host name, followed by the port."
+                defaultMessage="An IP address or host name, followed by the transport port of the remote cluster."
               />
             )}
             isInvalid={showErrors}

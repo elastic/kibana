@@ -15,7 +15,7 @@ import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factor
 async function fetchTemplate(callWithRequest, templateName) {
   const params = {
     method: 'GET',
-    path: `/_template/${templateName}`,
+    path: `/_template/${encodeURIComponent(templateName)}`,
     // we allow 404 incase the user shutdown security in-between the check and now
     ignore: [ 404 ]
   };
