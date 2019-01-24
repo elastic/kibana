@@ -11,10 +11,6 @@ import filterList from './fixtures/filter_list';
 export default function ({ getService }) {
   describe('filterBar query', () => {
     const supertest = getService('supertest');
-    const esArchiver = getService('esArchiver');
-    const archive = 'uptime/full_heartbeat';
-    before('load heartbeat data', () => esArchiver.load(archive));
-    after('unload heartbeat index', () => esArchiver.unload(archive));
 
     it('returns the expected filters', async () => {
       const getFilterBarQuery = {

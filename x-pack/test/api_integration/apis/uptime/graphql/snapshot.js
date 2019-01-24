@@ -13,10 +13,6 @@ import snapshotFilteredByUp from './fixtures/snapshot_filtered_by_up';
 export default function ({ getService }) {
   describe('snapshot query', () => {
     const supertest = getService('supertest');
-    const esArchiver = getService('esArchiver');
-    const archive = 'uptime/full_heartbeat';
-    before('load heartbeat data', () => esArchiver.load(archive));
-    after('unload heartbeat index', () => esArchiver.unload(archive));
 
     it('will fetch a monitor snapshot summary', async () => {
       const getSnapshotQuery = {

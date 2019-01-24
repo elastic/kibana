@@ -13,10 +13,6 @@ import monitorStatusById from './fixtures/monitor_status_by_id';
 export default function ({ getService }) {
   describe('monitorStatusBar query', () => {
     const supertest = getService('supertest');
-    const esArchiver = getService('esArchiver');
-    const archive = 'uptime/full_heartbeat';
-    before('load heartbeat data', () => esArchiver.load(archive));
-    after('unload heartbeat index', () => esArchiver.unload(archive));
 
     it('returns the status for all monitors with no ID filtering', async () => {
       const getMonitorStatusBarQuery = {

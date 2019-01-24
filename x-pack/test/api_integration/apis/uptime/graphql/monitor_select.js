@@ -11,10 +11,6 @@ import monitorSelect from './fixtures/monitor_select';
 export default function ({ getService }) {
   describe('monitorSelect query', () => {
     const supertest = getService('supertest');
-    const esArchiver = getService('esArchiver');
-    const archive = 'uptime/full_heartbeat';
-    before('load heartbeat data', () => esArchiver.load(archive));
-    after('unload heartbeat index', () => esArchiver.unload(archive));
 
     it('returns a list of the monitors for the given date range', async () => {
       const getMonitorSelectQuery = {

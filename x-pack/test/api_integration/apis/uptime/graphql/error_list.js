@@ -14,10 +14,6 @@ import errorListFilteredBbyPortAndScheme from './fixtures/error_list_filtered_by
 export default function ({ getService }) {
   describe('errorList query', () => {
     const supertest = getService('supertest');
-    const esArchiver = getService('esArchiver');
-    const archive = 'uptime/full_heartbeat';
-    before('load heartbeat data', () => esArchiver.load(archive));
-    after('unload heartbeat index', () => esArchiver.unload(archive));
 
     it('returns expected error list', async () => {
       const getErrorListQuery = {
