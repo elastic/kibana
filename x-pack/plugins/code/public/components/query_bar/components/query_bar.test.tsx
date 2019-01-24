@@ -10,9 +10,15 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import sinon from 'sinon';
 
+import { SearchScope } from '../../../../model';
 import { AutocompleteSuggestionType } from '../suggestions';
 import props from './props.json';
 import { CodeQueryBar } from './query_bar';
+
+// Injest a mock random function to fixiate the output for generating component id.
+const mockMath = Object.create(global.Math);
+mockMath.random = () => 0.5;
+global.Math = mockMath;
 
 test('render correctly with empty query string', () => {
   const emptyFn = () => {
@@ -31,6 +37,8 @@ test('render correctly with empty query string', () => {
       suggestionProviders={[]}
       onSubmit={emptyFn}
       onSelect={emptyFn}
+      onSearchScopeChanged={emptyFn}
+      searchScope={SearchScope.DEFAULT}
     />
   );
   expect(toJson(queryBarComp)).toMatchSnapshot();
@@ -88,12 +96,17 @@ test('render correctly with input query string changed', done => {
         ]}
         onSubmit={submitSpy}
         onSelect={emptyFn}
+        onSearchScopeChanged={emptyFn}
+        searchScope={SearchScope.DEFAULT}
       />
     </MemoryRouter>
   );
 
   // Input 'mockquery' in the query bar.
-  queryBarComp.find('input').simulate('change', { target: { value: 'mockquery' } });
+  queryBarComp
+    .find('input[type="text"]')
+    .at(0)
+    .simulate('change', { target: { value: 'mockquery' } });
 
   // Wait for 101ms to make sure the getSuggestions has been triggered.
   setTimeout(() => {
@@ -103,7 +116,10 @@ test('render correctly with input query string changed', done => {
     expect(repoSuggestionsSpy.calledOnce).toBeTruthy();
 
     // Hit enter
-    queryBarComp.find('input').simulate('keyDown', { keyCode: 13, key: 'Enter', metaKey: true });
+    queryBarComp
+      .find('input[type="text"]')
+      .at(0)
+      .simulate('keyDown', { keyCode: 13, key: 'Enter', metaKey: true });
     expect(submitSpy.calledOnce).toBeTruthy();
 
     done();

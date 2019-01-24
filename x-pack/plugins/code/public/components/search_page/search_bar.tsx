@@ -11,7 +11,10 @@ import React from 'react';
 import styled from 'styled-components';
 import Url from 'url';
 
+import { SearchScope } from '../../../model';
+import { SearchScopeText } from '../../common/types';
 import { history } from '../../utils/url';
+import { Shortcut } from '../shortcuts';
 
 import {
   AutocompleteSuggestion,
@@ -29,6 +32,7 @@ const SearchBarContainer = styled(EuiFlexGroup)`
 
 interface Props {
   query: string;
+  onSearchScopeChanged: (s: SearchScope) => void;
 }
 
 export class SearchBar extends React.PureComponent<Props> {
@@ -63,6 +67,27 @@ export class SearchBar extends React.PureComponent<Props> {
 
     return (
       <SearchBarContainer>
+        <Shortcut
+          keyCode="p"
+          help={SearchScopeText[SearchScope.REPOSITORY]}
+          onPress={() => {
+            this.props.onSearchScopeChanged(SearchScope.REPOSITORY);
+          }}
+        />
+        <Shortcut
+          keyCode="y"
+          help={SearchScopeText[SearchScope.SYMBOL]}
+          onPress={() => {
+            this.props.onSearchScopeChanged(SearchScope.SYMBOL);
+          }}
+        />
+        <Shortcut
+          keyCode="s"
+          help={SearchScopeText[SearchScope.DEFAULT]}
+          onPress={() => {
+            this.props.onSearchScopeChanged(SearchScope.DEFAULT);
+          }}
+        />
         <EuiFlexItem>
           <QueryBar
             query={this.props.query}
@@ -70,6 +95,7 @@ export class SearchBar extends React.PureComponent<Props> {
             onSelect={onSelect}
             appName="code"
             suggestionProviders={suggestionProviders}
+            onSearchScopeChanged={this.props.onSearchScopeChanged}
           />
         </EuiFlexItem>
       </SearchBarContainer>

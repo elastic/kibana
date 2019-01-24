@@ -7,8 +7,6 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  // @ts-ignore
-  EuiButtonGroup,
   EuiComboBox,
   EuiFlexGroup,
   EuiFlyout,
@@ -36,16 +34,9 @@ const Icon = styled(EuiIcon)`
   cursor: pointer;
 `;
 
-enum Scope {
-  Default = 'Default',
-  Symbols = 'Symbols',
-  Repos = 'Repos',
-}
-
 interface State {
   isFlyoutOpen: boolean;
   repoScopes: any[];
-  scope: Scope;
 }
 
 interface Props {
@@ -59,24 +50,8 @@ interface Props {
 export class SearchOptions extends Component<Props, State> {
   public state: State = {
     isFlyoutOpen: false,
-    scope: Scope.Default,
     repoScopes: this.props.searchOptions.repoScopes,
   };
-
-  public buttonGroupOptions = [
-    {
-      id: Scope.Default,
-      label: Scope.Default,
-    },
-    {
-      id: Scope.Symbols,
-      label: Scope.Symbols,
-    },
-    {
-      id: Scope.Repos,
-      label: Scope.Repos,
-    },
-  ];
 
   public applyAndClose = () => {
     this.props.saveSearchOptions({ repoScopes: this.state.repoScopes });
@@ -92,10 +67,6 @@ export class SearchOptions extends Component<Props, State> {
   public render() {
     let optionsFlyout;
     if (this.state.isFlyoutOpen) {
-      const toggleIdToSelectedMap = {
-        [this.state.scope]: true,
-      };
-
       const selectedRepos = this.state.repoScopes.map((r: string) => {
         return (
           <div key={r}>
@@ -118,14 +89,6 @@ export class SearchOptions extends Component<Props, State> {
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <EuiButtonGroup
-              name="Primary"
-              options={this.buttonGroupOptions}
-              idToSelectedMap={toggleIdToSelectedMap}
-              onChange={this.onScopeChanged}
-              color="primary"
-            />
-            <EuiSpacer size="m" />
             <EuiTitle size="xs">
               <h3>Repo Scope</h3>
             </EuiTitle>
@@ -169,10 +132,6 @@ export class SearchOptions extends Component<Props, State> {
       </div>
     );
   }
-
-  private onScopeChanged = (scopeId: string) => {
-    this.setState({ scope: scopeId as Scope });
-  };
 
   private onRepoSearchChange = (searchValue: string) => {
     this.props.repositorySearch({ query: searchValue });

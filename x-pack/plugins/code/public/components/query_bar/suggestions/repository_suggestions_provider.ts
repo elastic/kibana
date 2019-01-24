@@ -12,10 +12,14 @@ import {
   AutocompleteSuggestionType,
 } from '.';
 import { toRepoNameWithOrg } from '../../../../common/uri_util';
-import { Repository } from '../../../../model';
+import { Repository, SearchScope } from '../../../../model';
 
 export class RepositorySuggestionsProvider extends AbstractSuggestionsProvider {
-  public async getSuggestions(query: string): Promise<AutocompleteSuggestionGroup> {
+  protected matchSearchScope(scope: SearchScope): boolean {
+    return scope === SearchScope.DEFAULT || scope === SearchScope.REPOSITORY;
+  }
+
+  protected async fetchSuggestions(query: string): Promise<AutocompleteSuggestionGroup> {
     const res = await kfetch({
       pathname: `../api/code/suggestions/repo`,
       method: 'get',

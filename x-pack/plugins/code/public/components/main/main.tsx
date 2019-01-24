@@ -10,7 +10,8 @@ import { RouteComponentProps } from 'react-router';
 import styled from 'styled-components';
 
 import { RepositoryUtils } from '../../../common/repository_utils';
-import { CloneProgress, WorkerReservedProgress } from '../../../model';
+import { CloneProgress, SearchScope, WorkerReservedProgress } from '../../../model';
+import { changeSearchScope } from '../../actions';
 import { MainRouteParams } from '../../common/types';
 import { RootState } from '../../reducers';
 import { cloneProgressSelector, progressSelector } from '../../selectors';
@@ -39,6 +40,7 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   progress: number;
   cloneProgress: CloneProgress;
   isNotFound: boolean;
+  onSearchScopeChanged: (s: SearchScope) => void;
 }
 
 class CodeMain extends React.Component<Props> {
@@ -75,7 +77,10 @@ class CodeMain extends React.Component<Props> {
     }
     return (
       <Root>
-        <TopBar routeParams={this.props.match.params} />
+        <TopBar
+          routeParams={this.props.match.params}
+          onSearchScopeChanged={this.props.onSearchScopeChanged}
+        />
         <Container>{this.renderContent()}</Container>
         <ShortcutsProvider />
       </Root>
@@ -89,5 +94,12 @@ const mapStateToProps = (state: RootState) => ({
   isNotFound: state.file.isNotFound,
 });
 
-// @ts-ignore
-export const Main = connect(mapStateToProps)(CodeMain);
+const mapDispatchToProps = {
+  onSearchScopeChanged: changeSearchScope,
+};
+
+export const Main = connect(
+  mapStateToProps,
+  mapDispatchToProps
+  // @ts-ignore
+)(CodeMain);
