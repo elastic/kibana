@@ -124,8 +124,12 @@ const updateFixableMappings = (mappings: FlatSettings['mappings']) => {
 
 const transformMappings = flow(updateFixableMappings);
 
-const getSingleMappingType = (mappings: FlatSettings['mappings']): TypeMapping | undefined => {
-  const mappingTypes = Object.keys(mappings);
+export const getSingleMappingType = (
+  mappings: FlatSettings['mappings']
+): TypeMapping | undefined => {
+  const mappingTypes = Object.keys(mappings)
+    // Ignore _default_ mapping types.
+    .filter(t => t !== '_default_');
 
   if (mappingTypes.length > 1) {
     throw new Error(`Indices with more than one mapping type are not supported in 7.0.`);

@@ -165,6 +165,18 @@ describe('getReindexWarnings', () => {
     ).toThrowError();
   });
 
+  it('does not fail if there is a _default_ mapping', () => {
+    expect(
+      getReindexWarnings({
+        settings: {},
+        mappings: {
+          _default_: {},
+          myType1: {},
+        },
+      })
+    ).toEqual([]);
+  });
+
   it('does not blow up for empty mappings', () => {
     expect(
       getReindexWarnings({

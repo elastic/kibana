@@ -19,7 +19,7 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
-import { findBooleanFields } from './index_settings';
+import { findBooleanFields, getSingleMappingType } from './index_settings';
 import { FlatSettings } from './types';
 
 // TODO: base on elasticsearch.requestTimeout?
@@ -272,16 +272,10 @@ export const reindexActionsFactory = (
 
     async getBooleanFieldPaths(indexName: string) {
       const results = await callCluster('indices.getMapping', { index: indexName });
-      const allMappings = results[indexName].mappings;
-      const mappingTypes = Object.keys(allMappings);
+      const mapping = getSingleMappingType(results[indexName].mappings);
 
-      if (mappingTypes.length > 1) {
-        throw new Error(`Cannot reindex indices with more than one mapping type.`);
-      }
-
-      const mapping = allMappings[mappingTypes[0]];
       // It's possible an index doesn't have a mapping.
-      return mapping ? findBooleanFields(mapping.properties) : [];
+      return mapping && mapping.properties ? findBooleanFields(mapping.properties) : [];
     },
 
     async getFlatSettings(indexName: string) {
