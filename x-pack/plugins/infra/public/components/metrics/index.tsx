@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPageContentBody, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiPageContentBody, EuiTitle } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
+import styled from 'styled-components';
 
 import { InfraMetricData } from '../../graphql/types';
 import { InfraMetricLayout, InfraMetricLayoutSection } from '../../pages/metrics/layouts/types';
@@ -18,6 +19,8 @@ interface Props {
   metrics: InfraMetricData[];
   layouts: InfraMetricLayout[];
   loading: boolean;
+  refetching: boolean;
+  refetch: () => void;
   nodeId: string;
   label: string;
   onChangeRangeTime?: (time: metricTimeActions.MetricRangeTimeState) => void;
@@ -37,7 +40,8 @@ export const Metrics = injectI18n(
 
     public render() {
       const { intl } = this.props;
-      if (this.props.loading) {
+
+      if (this.props.loading || this.props.refetching) {
         return (
           <InfraLoadingPanel
             height="100vh"
@@ -48,7 +52,46 @@ export const Metrics = injectI18n(
             })}
           />
         );
+      } else if (!this.props.loading && this.props.metrics && this.props.metrics.length === 0) {
+        return (
+          <CenteredEmptyPrompt
+            title={
+              <h2>
+                <FormattedMessage
+                  id="xpack.infra.waffle.noDataTitle"
+                  defaultMessage="There is no data to display."
+                />
+              </h2>
+            }
+            titleSize="m"
+            body={
+              <p>
+                <FormattedMessage
+                  id="xpack.infra.waffle.noDataDescription"
+                  defaultMessage="Try adjusting your time or filter."
+                />
+              </p>
+            }
+            actions={
+              <EuiButton
+                iconType="refresh"
+                color="primary"
+                fill
+                onClick={() => {
+                  this.props.refetch();
+                }}
+              >
+                <FormattedMessage
+                  id="xpack.infra.waffle.checkNewDataButtonLabel"
+                  defaultMessage="Check for new data"
+                />
+              </EuiButton>
+            }
+            data-test-subj="noMetricsDataPrompt"
+          />
+        );
       }
+
       return <React.Fragment>{this.props.layouts.map(this.renderLayout)}</React.Fragment>;
     }
 
@@ -100,3 +143,7 @@ export const Metrics = injectI18n(
     };
   }
 );
+
+const CenteredEmptyPrompt = styled(EuiEmptyPrompt)`
+  align-self: center;
+`;
