@@ -165,7 +165,7 @@ class FilterOptionsUI extends Component<Props, State> {
             data-test-subj="showFilterActions"
           />
         }
-        anchorPosition="downCenter"
+        anchorPosition="rightUp"
         panelPaddingSize="none"
         withTitle
       >

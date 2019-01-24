@@ -25,6 +25,7 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
   EuiFormRow,
   EuiPopoverTitle,
   EuiSpacer,
@@ -117,68 +118,70 @@ class FilterEditorUI extends Component<Props, State> {
         </EuiPopoverTitle>
 
         <div className="globalFilterItem__editorForm">
-          {this.renderIndexPatternInput()}
+          <EuiForm>
+            {this.renderIndexPatternInput()}
 
-          {this.state.isCustomEditorOpen ? this.renderCustomEditor() : this.renderRegularEditor()}
+            {this.state.isCustomEditorOpen ? this.renderCustomEditor() : this.renderRegularEditor()}
 
-          <EuiSpacer size="m" />
+            <EuiSpacer size="m" />
 
-          <EuiSwitch
-            label={this.props.intl.formatMessage({
-              id: 'common.ui.filterEditor.createCustomLabelSwitchLabel',
-              defaultMessage: 'Create custom label?',
-            })}
-            checked={this.state.useCustomLabel}
-            onChange={this.onCustomLabelSwitchChange}
-          />
+            <EuiSwitch
+              label={this.props.intl.formatMessage({
+                id: 'common.ui.filterEditor.createCustomLabelSwitchLabel',
+                defaultMessage: 'Create custom label?',
+              })}
+              checked={this.state.useCustomLabel}
+              onChange={this.onCustomLabelSwitchChange}
+            />
 
-          {this.state.useCustomLabel && (
-            <div>
-              <EuiSpacer size="m" />
-              <EuiFormRow
-                label={this.props.intl.formatMessage({
-                  id: 'common.ui.filterEditor.createCustomLabelInputLabel',
-                  defaultMessage: 'Custom label',
-                })}
-              >
-                <EuiFieldText
-                  value={`${this.state.customLabel}`}
-                  onChange={this.onCustomLabelChange}
-                />
-              </EuiFormRow>
-            </div>
-          )}
+            {this.state.useCustomLabel && (
+              <div>
+                <EuiSpacer size="m" />
+                <EuiFormRow
+                  label={this.props.intl.formatMessage({
+                    id: 'common.ui.filterEditor.createCustomLabelInputLabel',
+                    defaultMessage: 'Custom label',
+                  })}
+                >
+                  <EuiFieldText
+                    value={`${this.state.customLabel}`}
+                    onChange={this.onCustomLabelChange}
+                  />
+                </EuiFormRow>
+              </div>
+            )}
 
-          <EuiSpacer size="m" />
+            <EuiSpacer size="m" />
 
-          <EuiFlexGroup direction="rowReverse" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                onClick={this.onSubmit}
-                isDisabled={!this.isFilterValid()}
-                data-test-subj="saveFilter"
-              >
-                <FormattedMessage
-                  id="common.ui.filterEditor.saveButtonLabel"
-                  defaultMessage="Save"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                flush="right"
-                onClick={this.props.onCancel}
-                data-test-subj="cancelSaveFilter"
-              >
-                <FormattedMessage
-                  id="common.ui.filterEditor.cancelButtonLabel"
-                  defaultMessage="Cancel"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem />
-          </EuiFlexGroup>
+            <EuiFlexGroup direction="rowReverse" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  onClick={this.onSubmit}
+                  isDisabled={!this.isFilterValid()}
+                  data-test-subj="saveFilter"
+                >
+                  <FormattedMessage
+                    id="common.ui.filterEditor.saveButtonLabel"
+                    defaultMessage="Save"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  flush="right"
+                  onClick={this.props.onCancel}
+                  data-test-subj="cancelSaveFilter"
+                >
+                  <FormattedMessage
+                    id="common.ui.filterEditor.cancelButtonLabel"
+                    defaultMessage="Cancel"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem />
+            </EuiFlexGroup>
+          </EuiForm>
         </div>
       </div>
     );
@@ -240,6 +243,7 @@ class FilterEditorUI extends Component<Props, State> {
         })}
       >
         <FieldComboBox
+          id="fieldInput"
           isDisabled={!selectedIndexPattern}
           placeholder={this.props.intl.formatMessage({
             id: 'common.ui.filterEditor.fieldSelectPlaceholder',
