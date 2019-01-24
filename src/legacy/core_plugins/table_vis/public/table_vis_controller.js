@@ -56,6 +56,7 @@ module.controller('KbnTableVisController', function ($scope) {
 
     $scope.hasSomeRows = hasSomeRows;
     if (hasSomeRows) {
+      $scope.dimensions = $scope.vis.params.dimensions;
       $scope.tableGroups = tableGroups;
     }
     $scope.renderComplete();

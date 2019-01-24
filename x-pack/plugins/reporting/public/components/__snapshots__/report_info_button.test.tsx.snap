@@ -57,13 +57,21 @@ Array [
     size="s"
   >
     <span>
-      <WindowEvent
+      <EuiWindowEvent
         event="keydown"
         handler={[Function]}
       />
       <EuiOverlayMask
         onClick={[Function]}
-      />
+      >
+        <Portal
+          containerInfo={
+            <div
+              class="euiOverlayMask"
+            />
+          }
+        />
+      </EuiOverlayMask>
       <Component
         focusTrapOptions={
           Object {
@@ -281,13 +289,21 @@ Array [
     size="s"
   >
     <span>
-      <WindowEvent
+      <EuiWindowEvent
         event="keydown"
         handler={[Function]}
       />
       <EuiOverlayMask
         onClick={[Function]}
-      />
+      >
+        <Portal
+          containerInfo={
+            <div
+              class="euiOverlayMask"
+            />
+          }
+        />
+      </EuiOverlayMask>
       <Component
         focusTrapOptions={
           Object {

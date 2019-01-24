@@ -14,7 +14,7 @@ const NO_SOURCE_UPDATE_REQUIRED = false;
 export class ALayer {
 
   constructor({ layerDescriptor, source, style }) {
-    this._descriptor = layerDescriptor;
+    this._descriptor = ALayer.createDescriptor(layerDescriptor);
     this._source = source;
     this._style = style;
 
@@ -30,16 +30,15 @@ export class ALayer {
     return mbStyle.sources[sourceId].data;
   }
 
-  static createDescriptor(options) {
-    const layerDescriptor = {};
+  static createDescriptor(options = {}) {
+    const layerDescriptor = { ...options };
 
-    layerDescriptor.dataRequests = [];
-    layerDescriptor.id = Math.random().toString(36).substr(2, 5);
+    layerDescriptor.dataRequests = _.get(options, 'dataRequests', []);
+    layerDescriptor.id = _.get(options, 'id', Math.random().toString(36).substr(2, 5));
     layerDescriptor.label = options.label && options.label.length > 0 ? options.label : null;
     layerDescriptor.minZoom = _.get(options, 'minZoom', 0);
     layerDescriptor.maxZoom = _.get(options, 'maxZoom', 24);
-    layerDescriptor.source = options.source;
-    layerDescriptor.sourceDescriptor = options.sourceDescriptor;
+    layerDescriptor.alpha = _.get(options, 'alpha', 0.75);
     layerDescriptor.visible = options.visible || true;
     layerDescriptor.temporary = options.temporary || false;
     layerDescriptor.style = options.style || {};
@@ -62,6 +61,10 @@ export class ALayer {
     }
 
     return (await this._source.getDisplayName()) || `Layer ${this._descriptor.id}`;
+  }
+
+  async getAttributions() {
+    return await this._source.getAttributions();
   }
 
   getLabel() {
@@ -105,6 +108,10 @@ export class ALayer {
     return this._descriptor.maxZoom;
   }
 
+  getAlpha() {
+    return this._descriptor.alpha;
+  }
+
   getZoomConfig() {
     return {
       minZoom: this._descriptor.minZoom,
@@ -126,11 +133,11 @@ export class ALayer {
 
   renderSourceDetails = () => {
     return this._source.renderDetails();
-  }
+  };
 
   renderSourceSettingsEditor = ({ onChange }) => {
     return this._source.renderSourceSettingsEditor({ onChange });
-  }
+  };
 
   isLayerLoading() {
     return this._dataRequests.some(dataRequest => dataRequest.isLoading());
@@ -141,8 +148,12 @@ export class ALayer {
   }
 
   getDataLoadError() {
-    const loadErrors =  this._dataRequests.filter(dataRequest => dataRequest.hasLoadError());
-    return loadErrors.join(',');//todo
+    const loadErrors =  this._dataRequests
+      .filter(dataRequest => dataRequest.hasLoadError())
+      .map(dataRequest => {
+        return dataRequest._descriptor.dataLoadError;
+      });
+    return loadErrors.join(',');
   }
 
   toLayerDescriptor() {
@@ -183,7 +194,9 @@ export class ALayer {
       newBuffer.maxLat
     ]);
     const doesPreviousBufferContainNewBuffer = turfBooleanContains(previousBufferGeometry, newBufferGeometry);
-    return doesPreviousBufferContainNewBuffer && !_.get(meta, 'areResultsTrimmed', false)
+
+    const isTrimmed = _.get(meta, 'areResultsTrimmed', false);
+    return doesPreviousBufferContainNewBuffer && !isTrimmed
       ? NO_SOURCE_UPDATE_REQUIRED
       : SOURCE_UPDATE_REQUIRED;
   }

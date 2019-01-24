@@ -23,62 +23,46 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
+  const appsMenu = getService('appsMenu');
+  const globalNav = getService('globalNav');
   const PageObjects = getPageObjects(['common']);
 
   const defaultFindTimeout = config.get('timeouts.find');
 
   class HeaderPage {
-    async clickSelector(selector) {
-      log.debug(`clickSelector(${selector})`);
-      await find.clickByCssSelector(selector);
-    }
-
-    async confirmTopNavTextContains(text) {
-      await retry.try(async () => {
-        const topNavText = await PageObjects.common.getTopNavText();
-        if (topNavText.toLowerCase().indexOf(text.toLowerCase()) < 0) {
-          throw new Error(`Top nav text ${topNavText} does not contain ${text} (case insensitive)`);
-        }
-      });
-    }
-
     async clickDiscover() {
-      log.debug('click Discover tab');
-      await this.clickSelector('a[href*=\'discover\']');
+      await appsMenu.clickLink('Discover');
       await PageObjects.common.waitForTopNavToBeVisible();
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 
     async clickVisualize() {
-      log.debug('click Visualize tab');
-      await this.clickSelector('a[href*=\'visualize\']');
-      await PageObjects.common.waitForTopNavToBeVisible();
+      await appsMenu.clickLink('Visualize');
       await this.awaitGlobalLoadingIndicatorHidden();
-      await this.confirmTopNavTextContains('visualize');
+      await retry.waitFor('first breadcrumb to be "Visualize"', async () => {
+        const firstBreadcrumb = await globalNav.getFirstBreadcrumb();
+        if (firstBreadcrumb !== 'Visualize') {
+          log.debug('-- first breadcrumb =', firstBreadcrumb);
+          return false;
+        }
+
+        return true;
+      });
     }
 
     async clickDashboard() {
-      log.debug('click Dashboard tab');
-      await this.clickSelector('a[href*=\'dashboard\']');
-      await retry.try(async () => {
+      await appsMenu.clickLink('Dashboard');
+      await retry.waitFor('dashboard app to be loaded', async () => {
         const isNavVisible = await testSubjects.exists('top-nav');
         const isLandingPageVisible = await testSubjects.exists('dashboardLandingPage');
-        if (!isNavVisible && !isLandingPageVisible) {
-          throw new Error('Dashboard application not loaded yet');
-        }
+        return isNavVisible || isLandingPageVisible;
       });
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 
     async clickManagement() {
-      log.debug('click Management tab');
-      await this.clickSelector('a[href*=\'management\']');
+      await appsMenu.clickLink('Management');
       await this.awaitGlobalLoadingIndicatorHidden();
-    }
-
-    async clickSettings() {
-      log.debug('click Settings tab');
-      await this.clickSelector('a[href*=\'settings\']');
     }
 
     async clickTimepicker() {
@@ -254,23 +238,15 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     }
 
     async awaitGlobalLoadingIndicatorHidden() {
-      log.debug('awaitGlobalLoadingIndicatorHidden');
-      await testSubjects.find('globalLoadingIndicator-hidden', defaultFindTimeout * 10);
+      await testSubjects.existOrFail('globalLoadingIndicator-hidden', {
+        allowHidden: true,
+        timeout: defaultFindTimeout * 10
+      });
     }
 
     async awaitKibanaChrome() {
       log.debug('awaitKibanaChrome');
       await testSubjects.find('kibanaChrome', defaultFindTimeout * 10);
-    }
-
-    async getGlobalNavigationLink(linkText) {
-      const nav = await testSubjects.find('globalNav');
-      return await nav.findByPartialLinkText(linkText);
-    }
-
-    async clickGlobalNavigationLink(appTitle) {
-      const link = await this.getGlobalNavigationLink(appTitle);
-      await link.click();
     }
 
     async getPrettyDuration() {
