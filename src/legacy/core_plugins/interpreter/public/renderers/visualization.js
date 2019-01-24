@@ -33,7 +33,7 @@ export const visualization = () => ({
     const Vis = Private(VisProvider);
 
     if (handlers.vis) {
-      handlers.vis.setState({ type: visType, params: visConfig });
+      handlers.vis.setCurrentState({ type: visType, params: visConfig });
     } else {
       // if (handlers.vis) {
       //   visualizationLoader.destroy();

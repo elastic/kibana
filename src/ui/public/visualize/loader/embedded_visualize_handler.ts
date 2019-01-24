@@ -130,6 +130,7 @@ export class EmbeddedVisualizeHandler {
     this.uiState = this.vis.getUiState();
 
     this.handlers = {
+      vis: this.vis,
       uiState: this.uiState,
       onDestroy: (fn: () => never) => (this.handlers.destroyFn = fn),
     };
@@ -155,6 +156,7 @@ export class EmbeddedVisualizeHandler {
     });
 
     this.handlers.eventsSubject = new Rx.Subject();
+    this.vis.eventsSubject = this.handlers.eventsSubject;
     this.events$ = this.handlers.eventsSubject.asObservable().pipe(share());
     this.events$.subscribe(event => {
       if (this.actions[event.name]) {

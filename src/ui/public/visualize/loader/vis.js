@@ -85,6 +85,10 @@ export function VisProvider(Private, indexPatterns, getAppState) {
       );
     }
 
+    setCurrentState(state) {
+      this.setState(state);
+    }
+
     getState() {
       return {
         title: this.title,
