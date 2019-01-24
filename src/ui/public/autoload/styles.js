@@ -34,6 +34,6 @@ chrome.getUiSettingsClient()
   .pipe(filter(update => update.key === 'theme:darkMode'))
   .subscribe(() => {
     toastNotifications.addSuccess(i18n.translate('common.ui.styles.themeAppliedToast', {
-      defaultMessage: 'Theme updated, refresh the page to apply the changes.'
+      defaultMessage: 'Theme applied, please refresh your browser to take affect.'
     }));
   });
