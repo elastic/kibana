@@ -45,24 +45,27 @@ export class LayerPanel  extends React.Component {
 
   componentDidMount() {
     this._isMounted = true;
-    this.loadDisplayName();
-    this.loadImmutableSourceProperties();
+    this.loadAsyncState();
   }
 
   componentDidUpdate() {
     if (!this.state.isLayerAsyncStateLoaded) {
-      this.setState({
-        isLayerAsyncStateLoaded: true
-      },
-      () => {
-        this.loadDisplayName();
-        this.loadImmutableSourceProperties();
-      });
+      this.loadAsyncState();
     }
   }
 
   componentWillUnmount() {
     this._isMounted = false;
+  }
+
+  loadAsyncState = async () => {
+    this.setState({
+      isLayerAsyncStateLoaded: true
+    },
+    () => {
+      this.loadDisplayName();
+      this.loadImmutableSourceProperties();
+    });
   }
 
   loadDisplayName = async () => {
