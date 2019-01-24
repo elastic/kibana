@@ -27,8 +27,7 @@ import {
   PHASE_ROLLOVER_MAX_SIZE_STORED,
   PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS,
   PHASE_ROLLOVER_ENABLED,
-  MAX_SIZE_TYPE_DOCUMENT,
-  PHASE_ENABLED
+  MAX_SIZE_TYPE_DOCUMENT
 } from '../../../../store/constants';
 import { SetPriorityInput } from '../set_priority_input';
 
@@ -255,15 +254,13 @@ class HotPhaseUi extends PureComponent {
             </Fragment>
           ) : null}
         </EuiDescribedFormGroup>
-        { phaseData[PHASE_ENABLED] ? (
-          <SetPriorityInput
-            errors={errors}
-            phaseData={phaseData}
-            phase={PHASE_HOT}
-            isShowingErrors={isShowingErrors}
-            setPhaseData={setPhaseData}
-          />
-        ) : null }
+        <SetPriorityInput
+          errors={errors}
+          phaseData={phaseData}
+          phase={PHASE_HOT}
+          isShowingErrors={isShowingErrors}
+          setPhaseData={setPhaseData}
+        />
       </Fragment>
     );
   }
