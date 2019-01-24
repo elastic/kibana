@@ -79,7 +79,16 @@ function createFields(results) {
           }
         }
 
-        field.percent = ((field.count / numMessagesAnalyzed) * 100);
+        const percent = ((field.count / numMessagesAnalyzed) * 100);
+        field.percent = Math.round(percent * 100) / 100;
+
+        // round min, max, median, mean to 2dp.
+        if (field.median_value !== undefined) {
+          field.median_value = Math.round(field.median_value * 100) / 100;
+          field.mean_value = Math.round(field.mean_value * 100) / 100;
+          field.min_value = Math.round(field.min_value * 100) / 100;
+          field.max_value = Math.round(field.max_value * 100) / 100;
+        }
 
         return field;
       } else {
