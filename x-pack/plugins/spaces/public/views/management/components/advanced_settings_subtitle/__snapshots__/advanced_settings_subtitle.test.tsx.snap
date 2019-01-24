@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`AdvancedSettingsSubtitle renders as expected 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiSpacer
     size="m"
   />
@@ -25,5 +25,5 @@ exports[`AdvancedSettingsSubtitle renders as expected 1`] = `
       </p>
     }
   />
-</React.Fragment>
+</Fragment>
 `;

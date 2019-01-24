@@ -823,16 +823,6 @@ export function getUiSettingDefaults() {
         },
       }),
     },
-    'dashboard:defaultDarkTheme': {
-      name: i18n.translate('kbn.advancedSettings.dashboardDarkThemeTitle', {
-        defaultMessage: 'Dark theme',
-      }),
-      value: false,
-      description: i18n.translate('kbn.advancedSettings.dashboardDarkThemeText', {
-        defaultMessage: 'New dashboards use dark theme by default',
-      }),
-      category: ['dashboard'],
-    },
     'filters:pinnedByDefault': {
       name: i18n.translate('kbn.advancedSettings.pinFiltersTitle', {
         defaultMessage: 'Pin filters by default',

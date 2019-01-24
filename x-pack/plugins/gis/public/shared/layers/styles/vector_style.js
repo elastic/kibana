@@ -11,7 +11,7 @@ import { FillableCircle, FillableVector } from '../../icons/additional_layer_ico
 import { ColorGradient } from '../../icons/color_gradient';
 import { getHexColorRangeStrings } from '../../utils/color_utils';
 import { VectorStyleEditor } from './components/vector/vector_style_editor';
-import { DEFAULT_ALPHA_VALUE, getDefaultStaticProperties } from './vector_style_defaults';
+import { getDefaultStaticProperties } from './vector_style_defaults';
 
 export class VectorStyle {
 
@@ -22,7 +22,7 @@ export class VectorStyle {
     return `__kbn__scaled(${fieldName})`;
   }
 
-  constructor(descriptor) {
+  constructor(descriptor = {}) {
     this._descriptor = VectorStyle.createDescriptor(descriptor.properties);
   }
 
@@ -30,11 +30,10 @@ export class VectorStyle {
     return styleInstance.constructor === VectorStyle;
   }
 
-  static createDescriptor(properties) {
-    const defaultStyleProperties = getDefaultStaticProperties();
+  static createDescriptor(properties = {}) {
     return {
       type: VectorStyle.type,
-      properties: { ...defaultStyleProperties, ...properties }
+      properties: { ...getDefaultStaticProperties(), ...properties }
     };
   }
 
@@ -259,10 +258,6 @@ export class VectorStyle {
     return null;
   }
 
-  _getMBOpacity() {
-    return _.get(this._descriptor.properties, 'alphaValue', DEFAULT_ALPHA_VALUE);
-  }
-
   _getMbSize(styleDescriptor) {
     if (styleDescriptor.type === VectorStyle.STYLE_TYPE.STATIC) {
       return styleDescriptor.options.size;
@@ -282,13 +277,11 @@ export class VectorStyle {
     return null;
   }
 
-  setMBPaintProperties(mbMap, sourceId, fillLayerId, lineLayerId) {
-    const opacity = this._getMBOpacity();
-
+  setMBPaintProperties({ alpha, mbMap, fillLayerId, lineLayerId }) {
     if (this._descriptor.properties.fillColor) {
       const color = this._getMBColor(this._descriptor.properties.fillColor);
       mbMap.setPaintProperty(fillLayerId, 'fill-color', color);
-      mbMap.setPaintProperty(fillLayerId, 'fill-opacity', opacity);
+      mbMap.setPaintProperty(fillLayerId, 'fill-opacity', alpha);
     } else {
       mbMap.setPaintProperty(fillLayerId, 'fill-color', null);
       mbMap.setPaintProperty(fillLayerId, 'fill-opacity', 0);
@@ -297,7 +290,7 @@ export class VectorStyle {
     if (this._descriptor.properties.lineColor) {
       const color = this._getMBColor(this._descriptor.properties.lineColor);
       mbMap.setPaintProperty(lineLayerId, 'line-color', color);
-      mbMap.setPaintProperty(lineLayerId, 'line-opacity', opacity);
+      mbMap.setPaintProperty(lineLayerId, 'line-opacity', alpha);
 
     } else {
       mbMap.setPaintProperty(lineLayerId, 'line-color', null);
@@ -312,12 +305,11 @@ export class VectorStyle {
     }
   }
 
-  setMBPaintPropertiesForPoints(mbMap, sourceId, pointLayerId) {
-    const opacity = this._getMBOpacity();
+  setMBPaintPropertiesForPoints({ alpha, mbMap, pointLayerId }) {
     if (this._descriptor.properties.fillColor) {
       const color = this._getMBColor(this._descriptor.properties.fillColor);
       mbMap.setPaintProperty(pointLayerId, 'circle-color', color);
-      mbMap.setPaintProperty(pointLayerId, 'circle-opacity', opacity);
+      mbMap.setPaintProperty(pointLayerId, 'circle-opacity', alpha);
     } else {
       mbMap.setPaintProperty(pointLayerId, 'circle-color', null);
       mbMap.setPaintProperty(pointLayerId, 'circle-opacity', 0);
@@ -325,7 +317,7 @@ export class VectorStyle {
     if (this._descriptor.properties.lineColor) {
       const color = this._getMBColor(this._descriptor.properties.lineColor);
       mbMap.setPaintProperty(pointLayerId, 'circle-stroke-color', color);
-      mbMap.setPaintProperty(pointLayerId, 'circle-stroke-opacity', opacity);
+      mbMap.setPaintProperty(pointLayerId, 'circle-stroke-opacity', alpha);
 
     } else {
       mbMap.setPaintProperty(pointLayerId, 'circle-stroke-color', null);

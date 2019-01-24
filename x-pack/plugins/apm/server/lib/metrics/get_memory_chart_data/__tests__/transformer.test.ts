@@ -16,12 +16,12 @@ describe('memory chart data transformer', () => {
             .fill(1)
             .map((_, i) => ({
               key: i,
-              maximumPercentMemoryUsed: { value: i * 40 },
-              averagePercentMemoryUsed: { value: i * 30 }
+              memoryUsedMax: { value: i * 40 },
+              memoryUsedAvg: { value: i * 30 }
             }))
         },
-        maximumPercentMemoryUsed: { value: 400 },
-        averagePercentMemoryUsed: { value: 300 }
+        memoryUsedMax: { value: 400 },
+        memoryUsedAvg: { value: 300 }
       },
       hits: { total: 199 }
     } as ESResponse;
@@ -29,17 +29,14 @@ describe('memory chart data transformer', () => {
     const result = transform(response);
     expect(result).toMatchSnapshot();
 
-    expect(result.series.maximumPercentMemoryUsed).toHaveLength(10);
-    expect(result.series.averagePercentMemoryUsed).toHaveLength(10);
+    expect(result.series.memoryUsedMax).toHaveLength(10);
+    expect(result.series.memoryUsedAvg).toHaveLength(10);
 
     const overall = Object.keys(result.overallValues);
 
     expect(overall).toHaveLength(2);
     expect(overall).toEqual(
-      expect.arrayContaining([
-        'maximumPercentMemoryUsed',
-        'averagePercentMemoryUsed'
-      ])
+      expect.arrayContaining(['memoryUsedMax', 'memoryUsedAvg'])
     );
   });
 });

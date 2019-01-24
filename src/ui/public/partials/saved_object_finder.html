@@ -22,27 +22,32 @@
     </div>
 
     <div class="kuiBarSection">
-      <p class="kuiText kuiSubduedText">
-        {{ pageFirstItem }}-{{ pageLastItem }} of {{ finder.hitCount }}
-      </p>
-
+      <p class="kuiText kuiSubduedText"
+        i18n-id="common.ui.savedObjectFinder.pageItemsFromHitCountDescription"
+        i18n-default-message="{pageFirstItem}-{pageLastItem} of {hitCount}"
+        i18n-values="{pageFirstItem, pageLastItem, hitCount: finder.hitCount}"
+      ></p>
       <div class="kuiButtonGroup">
         <button
           class="kuiButton kuiButton--primary"
           ng-if="onAddNew"
           ng-click="onAddNew()"
           data-test-subj="addNewSavedObjectLink"
-        >
-          Add new {{ finder.properties.noun }}
-        </button>
+          i18n-id="common.ui.savedObjectFinder.addNewItemButtonLabel"
+          i18n-default-message="Add new {item}"
+          i18n-values="{item: finder.properties.noun}"
+          i18n-description="{item} can be a type of object in Kibana, like 'visualization', 'dashboard', etc"
+        ></button>
 
         <button
           class="kuiButton kuiButton--secondary"
           ng-if="!useLocalManagement"
           ng-click="finder.manageObjects(finder.properties.name)"
-        >
-          Manage {{ finder.properties.nouns }}
-        </button>
+          i18n-id="common.ui.savedObjectFinder.manageItemsButtonLabel"
+          i18n-default-message="Manage {items}"
+          i18n-values="{items: finder.properties.nouns}"
+          i18n-description="{items} can be a type of object in Kibana, like 'visualizations', 'dashboards', etc"
+        ></button>
       </div>
     </div>
   </div>
@@ -58,12 +63,28 @@
     ng-click="finder.sortHits(finder.hits)"
     aria-live="assertive"
   >
-    <span class="euiScreenReaderOnly">Sort by</span>
-    Name
+    <span class="euiScreenReaderOnly"
+      i18n-id="common.ui.savedObjectFinder.sortByButtonLabelScreenReaderOnly"
+      i18n-default-message="Sort by"
+    ></span>
+    <span
+      i18n-id="common.ui.savedObjectFinder.sortByButtonLabel"
+      i18n-default-message="Name"
+    ></span>
     <span
       class="fa"
-      ng-class="finder.isAscending ? 'fa-caret-up' : 'fa-caret-down'">
-      <span class="euiScreenReaderOnly">({{finder.isAscending ? 'ascending' : 'descending'}})</span>
+      ng-class="finder.isAscending ? 'fa-caret-up' : 'fa-caret-down'"
+    >
+      <span class="euiScreenReaderOnly"
+        ng-if="finder.isAscending"
+        i18n-id="common.ui.savedObjectFinder.sortByButtonLabeAscendingScreenReaderOnly"
+        i18n-default-message="ascending"
+      ></span>
+      <span class="euiScreenReaderOnly"
+        ng-if="!finder.isAscending"
+        i18n-id="common.ui.savedObjectFinder.sortByButtonLabeDescendingScreenReaderOnly"
+        i18n-default-message="descending"
+      ></span>
     </span>
   </button>
   <ul class="li-striped list-group list-group-menu" ng-class="{'select-mode': finder.selector.enabled}">
@@ -85,8 +106,13 @@
     </li>
     <li
       class="list-group-item list-group-no-results"
-      ng-if="finder.hits.length === 0">
-      <p ng-bind="'No matching ' + finder.properties.nouns + ' found.'"></p>
+      ng-if="finder.hits.length === 0"
+    >
+      <p i18n-id="common.ui.savedObjectFinder.noMatchesFoundDescription"
+        i18n-default-message="No matching {items} found."
+        i18n-values="{items: finder.properties.nouns}"
+        i18n-description="{items} can be a type of object in Kibana, like 'visualizations', 'dashboards', etc"
+      ></p>
     </li>
   </ul>
 </paginate>

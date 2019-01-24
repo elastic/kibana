@@ -24,6 +24,7 @@ export const ImportProgress = injectI18n(function ({ statuses, intl }) {
   const {
     reading,
     readStatus,
+    parseJSONStatus,
     indexCreatedStatus,
     ingestPipelineCreatedStatus,
     indexPatternCreatedStatus,
@@ -37,7 +38,11 @@ export const ImportProgress = injectI18n(function ({ statuses, intl }) {
 
   let completedStep = 0;
 
-  if (reading === true && readStatus === IMPORT_STATUS.INCOMPLETE) {
+  if (
+    reading === true &&
+    readStatus === IMPORT_STATUS.INCOMPLETE &&
+    parseJSONStatus === IMPORT_STATUS.INCOMPLETE
+  ) {
     completedStep = 0;
   }
   if (
@@ -183,8 +188,8 @@ export const ImportProgress = injectI18n(function ({ statuses, intl }) {
     {
       title: processFileTitle,
       isSelected: true,
-      isComplete: (readStatus === IMPORT_STATUS.COMPLETE),
-      status: readStatus,
+      isComplete: (readStatus === IMPORT_STATUS.COMPLETE && parseJSONStatus === IMPORT_STATUS.COMPLETE),
+      status: (parseJSONStatus === IMPORT_STATUS.FAILED) ? parseJSONStatus : readStatus, // if JSON parsing failed, fail the first step
       onClick: () => {},
     },
     {
