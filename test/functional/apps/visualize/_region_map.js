@@ -3,8 +3,9 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
 
-
-  describe('visualize app', function describeIndexTests() {
+  // The list of vector maps depends on an external manifest
+  // USA States is not selectable if the service is not reachable
+  describe.skip('visualize app', function describeIndexTests() {
 
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
