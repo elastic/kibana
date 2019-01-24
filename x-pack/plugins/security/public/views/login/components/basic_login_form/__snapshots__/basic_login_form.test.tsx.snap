@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`BasicLoginForm renders as expected 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiPanel
     grow={true}
     hasShadow={false}
@@ -81,5 +81,5 @@ exports[`BasicLoginForm renders as expected 1`] = `
       </EuiButton>
     </form>
   </EuiPanel>
-</React.Fragment>
+</Fragment>
 `;
