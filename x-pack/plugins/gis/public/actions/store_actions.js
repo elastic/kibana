@@ -258,10 +258,12 @@ export function fitToLayerExtent(layerId) {
       return layer.getId() === layerId;
     });
 
-    const dataFilters = getDataFilters(getState());
-    const bounds = await targetLayer.getBounds(dataFilters);
-    if (bounds) {
-      await dispatch(setGotoWithBounds(bounds));
+    if (targetLayer) {
+      const dataFilters = getDataFilters(getState());
+      const bounds = await targetLayer.getBounds(dataFilters);
+      if (bounds) {
+        await dispatch(setGotoWithBounds(bounds));
+      }
     }
   };
 }
