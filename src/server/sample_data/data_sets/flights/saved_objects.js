@@ -28,6 +28,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.flightsSpec.controlsTitle', {
         defaultMessage: '[Flights] Controls',
@@ -47,6 +48,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.flightsSpec.flightCountAndAverageTicketPriceTitle', {
         defaultMessage: '[Flights] Flight Count and Average Ticket Price',
@@ -72,6 +74,7 @@ export const getSavedObjects = () => [
     "type": "search",
     "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.flightsSpec.flightLogTitle', {
         defaultMessage: '[Flights] Flight Log',
@@ -111,6 +114,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.flightsSpec.airlineCarrierTitle', {
         defaultMessage: '[Flights] Airline Carrier',
@@ -136,6 +140,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.flightsSpec.delayTypeTitle', {
         defaultMessage: '[Flights] Delay Type',
@@ -161,6 +166,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.flightsSpec.delaysAndCancellationsTitle', {
         defaultMessage: '[Flights] Delays & Cancellations',
@@ -180,6 +186,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.flightsSpec.delayBucketsTitle', {
         defaultMessage: '[Flights] Delay Buckets',
@@ -205,6 +212,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.flightsSpec.flightDelaysTitle', {
         defaultMessage: '[Flights] Flight Delays',
@@ -230,6 +238,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.flightsSpec.flightCancellationsTitle', {
         defaultMessage: '[Flights] Flight Cancellations',
@@ -255,6 +264,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.flightsSpec.destinationAirportTitle', {
         defaultMessage: '[Flights] Destination Airport',
@@ -280,6 +290,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.flightsSpec.destinationWeatherTitle', {
         defaultMessage: '[Flights] Destination Weather',
@@ -305,6 +316,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.flightsSpec.markdownInstructionsTitle', {
         defaultMessage: '[Flights] Markdown Instructions',
@@ -324,6 +336,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.flightsSpec.originCountryTicketPricesTitle', {
         defaultMessage: '[Flights] Origin Country Ticket Prices',
@@ -349,6 +362,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.flightsSpec.totalFlightDelaysTitle', {
         defaultMessage: '[Flights] Total Flight Delays',
@@ -374,6 +388,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.flightsSpec.totalFlightCancellationsTitle', {
         defaultMessage: '[Flights] Total Flight Cancellations',
@@ -399,6 +414,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.flightsSpec.originCountryTitle', {
         defaultMessage: '[Flights] Origin Country vs. Destination Country',
@@ -424,6 +440,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.flightsSpec.totalFlightsTitle', {
         defaultMessage: '[Flights] Total Flights',
@@ -449,6 +466,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.flightsSpec.averageTicketPriceTitle', {
         defaultMessage: '[Flights] Average Ticket Price',
@@ -474,6 +492,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-05-09T15:55:51.195Z",
     "version": 3,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.flightsSpec.airportConnectionsTitle', {
         defaultMessage: '[Flights] Airport Connections (Hover Over Airport)',
@@ -493,6 +512,7 @@ export const getSavedObjects = () => [
     "type": "index-pattern",
     "updated_at": "2018-05-09T15:49:03.736Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": "kibana_sample_data_flights",
       "timeFieldName": "timestamp",
@@ -505,6 +525,7 @@ export const getSavedObjects = () => [
     "type": "dashboard",
     "updated_at": "2018-05-09T15:59:04.578Z",
     "version": 4,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.flightsSpec.globalFlightDashboardTitle', {
         defaultMessage: '[Flights] Global Flight Dashboard',

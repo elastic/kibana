@@ -28,6 +28,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.ecommerceSpec.salesByCategoryTitle', {
         defaultMessage: '[eCommerce] Sales by Category',
@@ -53,6 +54,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.ecommerceSpec.salesByGenderTitle', {
         defaultMessage: '[eCommerce] Sales by Gender',
@@ -78,6 +80,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.ecommerceSpec.markdownTitle', {
         defaultMessage: '[eCommerce] Markdown',
@@ -97,6 +100,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.ecommerceSpec.controlsTitle', {
         defaultMessage: '[eCommerce] Controls',
@@ -116,6 +120,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-10-01T15:17:30.755Z",
     "version": 2,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.ecommerceSpec.promotionTrackingTitle', {
         defaultMessage: '[eCommerce] Promotion Tracking',
@@ -135,6 +140,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.ecommerceSpec.totalRevenueTitle', {
         defaultMessage: '[eCommerce] Total Revenue',
@@ -160,6 +166,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.ecommerceSpec.soldProductsPerDayTitle', {
         defaultMessage: '[eCommerce] Sold Products per Day',
@@ -179,6 +186,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.ecommerceSpec.averageSalesPriceTitle', {
         defaultMessage: '[eCommerce] Average Sales Price',
@@ -204,6 +212,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.ecommerceSpec.averageSoldQuantityTitle', {
         defaultMessage: '[eCommerce] Average Sold Quantity',
@@ -229,6 +238,7 @@ export const getSavedObjects = () => [
     "type": "search",
     "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.ecommerceSpec.ordersTitle', {
         defaultMessage: '[eCommerce] Orders',
@@ -263,6 +273,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.ecommerceSpec.averageSalesPerRegionTitle', {
         defaultMessage: '[eCommerce] Average Sales Per Region',
@@ -288,6 +299,7 @@ export const getSavedObjects = () => [
     "type": "visualization",
     "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.ecommerceSpec.topSellingProductsTitle', {
         defaultMessage: '[eCommerce] Top Selling Products',
@@ -313,6 +325,7 @@ export const getSavedObjects = () => [
     "type": "index-pattern",
     "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": "kibana_sample_data_ecommerce",
       "timeFieldName": "order_date",
@@ -325,6 +338,7 @@ export const getSavedObjects = () => [
     "type": "dashboard",
     "updated_at": "2018-10-01T15:13:03.270Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "title": i18n.translate('server.sampleData.ecommerceSpec.revenueDashboardTitle', {
         defaultMessage: '[eCommerce] Revenue Dashboard',
