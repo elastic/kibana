@@ -86,10 +86,13 @@ export class Cluster {
     // This is just for initial debugging
     client.on('response', (err, meta) => {
       console.log();
-      if (err) console.log('Error', err);
       console.log('Connection ID:', meta.connection.id);
       console.log('Request', meta.request);
-      console.log('Response', meta.response);
+      if (err) {
+        console.log('Error', err);
+      } else {
+        console.log('Response', meta.response);
+      }
       console.log();
     });
     this._clients.add(client);
