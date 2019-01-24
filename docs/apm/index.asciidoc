@@ -20,5 +20,7 @@ see the {apm-get-started-ref}/overview.html[APM Overview].
 --
 
 include::getting-started.asciidoc[]
+
 include::bottlenecks.asciidoc[]
+
 include::using-the-apm-ui.asciidoc[]
