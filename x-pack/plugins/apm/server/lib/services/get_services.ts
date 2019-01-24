@@ -124,7 +124,7 @@ export async function getServices(
 
     return {
       serviceName: bucket.key,
-      agentName: idx(bucket, _ => _.agents.buckets[0].key) || undefined, // TODO: get rid of unneeded undefined
+      agentName: idx(bucket, _ => _.agents.buckets[0].key),
       transactionsPerMinute,
       errorsPerMinute,
       avgResponseTime: bucket.avg.value
