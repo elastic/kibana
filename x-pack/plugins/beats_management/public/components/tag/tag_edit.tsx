@@ -42,7 +42,7 @@ interface TagEditProps {
   onDetachBeat?: (beatIds: string[]) => void;
   onTagChange: (field: keyof BeatTag, value: string) => any;
   onConfigAddOrEdit: (block: ConfigurationBlock) => any;
-  onConfigRemoved: (id: string) => any;
+  onConfigRemoved: (block: ConfigurationBlock) => any;
   attachedBeats?: CMBeat[];
 }
 
@@ -151,7 +151,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
                 configs={configuration_blocks}
                 onConfigClick={(action: string, block: ConfigurationBlock) => {
                   if (action === 'delete') {
-                    this.props.onConfigRemoved(block.id);
+                    this.props.onConfigRemoved(block);
                   } else {
                     this.setState({
                       showFlyout: true,

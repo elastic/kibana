@@ -110,12 +110,12 @@ class TagEditPageComponent extends React.PureComponent<
                   this.loadConfigBlocks(this.state.configuration_blocks.page);
                 });
             }}
-            onConfigRemoved={(id: string) => {
+            onConfigRemoved={(block: ConfigurationBlock) => {
               this.props.libs.configBlocks
-                .delete(id)
+                .delete(block.id)
                 .catch((e: any) => {
                   // tslint:disable-next-line
-                  console.error(`Error removing block ${id}`, e);
+                  console.error(`Error removing block ${block.id}`, e);
                 })
                 .then(() => {
                   this.loadConfigBlocks(this.state.configuration_blocks.page);

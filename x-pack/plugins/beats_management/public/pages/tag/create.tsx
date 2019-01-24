@@ -10,8 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import 'brace/mode/yaml';
 import 'brace/theme/github';
+import { isEqual } from 'lodash';
 import React from 'react';
-import { UNIQUENESS_ENFORCING_TYPES } from 'x-pack/plugins/beats_management/common/constants';
+import { UNIQUENESS_ENFORCING_TYPES } from '../../../common/constants/configuration_blocks';
 import { BeatTag, ConfigurationBlock } from '../../../common/domain_types';
 import { PrimaryLayout } from '../../components/layouts/primary';
 import { TagEdit } from '../../components/tag';
@@ -82,12 +83,17 @@ class TagCreatePageComponent extends React.PureComponent<
                 configuration_blocks: previousState.configuration_blocks.concat([block]),
               }));
             }}
-            onConfigRemoved={(id: string) => {
-              this.setState(previousState => ({
-                configuration_blocks: previousState.configuration_blocks.filter(
-                  block => block.id !== id
-                ),
-              }));
+            onConfigRemoved={(block: ConfigurationBlock) => {
+              this.setState(previousState => {
+                const selectedIndex = previousState.configuration_blocks.findIndex(c => {
+                  return isEqual(block, c);
+                });
+                const blocks = [...previousState.configuration_blocks];
+                blocks.splice(selectedIndex, 1);
+                return {
+                  configuration_blocks: blocks,
+                };
+              });
             }}
           />
           <EuiSpacer size="m" />

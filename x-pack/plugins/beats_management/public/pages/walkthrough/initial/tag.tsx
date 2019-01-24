@@ -6,6 +6,7 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { isEqual } from 'lodash';
 import React, { Component } from 'react';
 import uuidv4 from 'uuid/v4';
 import { BeatTag, ConfigurationBlock } from '../../../../common/domain_types';
@@ -66,12 +67,17 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
               configuration_blocks: previousState.configuration_blocks.concat([block]),
             }));
           }}
-          onConfigRemoved={(id: string) => {
-            this.setState(previousState => ({
-              configuration_blocks: previousState.configuration_blocks.filter(
-                block => block.id !== id
-              ),
-            }));
+          onConfigRemoved={(block: ConfigurationBlock) => {
+            this.setState(previousState => {
+              const selectedIndex = previousState.configuration_blocks.findIndex(c => {
+                return isEqual(block, c);
+              });
+              const blocks = [...previousState.configuration_blocks];
+              blocks.splice(selectedIndex, 1);
+              return {
+                configuration_blocks: blocks,
+              };
+            });
           }}
         />
         <EuiFlexGroup>
