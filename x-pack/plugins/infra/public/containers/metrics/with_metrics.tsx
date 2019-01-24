@@ -20,6 +20,8 @@ interface WithMetricsArgs {
   metrics: InfraMetricData[];
   error?: string | undefined;
   loading: boolean;
+  refetching: boolean;
+  refetch: () => void;
 }
 
 interface WithMetricsProps {
@@ -50,6 +52,7 @@ export const WithMetrics = ({
     <Query<MetricsQuery.Query, MetricsQuery.Variables>
       query={metricsQuery}
       fetchPolicy="no-cache"
+      notifyOnNetworkStatusChange
       variables={{
         sourceId,
         metrics,
@@ -58,11 +61,13 @@ export const WithMetrics = ({
         timerange,
       }}
     >
-      {({ data, error, loading }) => {
+      {({ data, error, loading, refetch, networkStatus }) => {
         return children({
           metrics: filterOnlyInfraMetricData(data && data.source && data.source.metrics),
           error: error && error.message,
           loading,
+          refetching: networkStatus === 4,
+          refetch,
         });
       }}
     </Query>
