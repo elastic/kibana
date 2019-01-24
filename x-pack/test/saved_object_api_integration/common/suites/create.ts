@@ -71,7 +71,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     // query ES directory to ensure namespace was or wasn't specified
     const { _source } = await es.get({
       id: `${expectedSpacePrefix}${spaceAwareType}:${resp.body.id}`,
-      type: 'doc',
+      type: '_doc',
       index: '.kibana',
     });
 
@@ -109,7 +109,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     // query ES directory to ensure namespace wasn't specified
     const { _source } = await es.get({
       id: `${notSpaceAwareType}:${resp.body.id}`,
-      type: 'doc',
+      type: '_doc',
       index: '.kibana',
     });
 
