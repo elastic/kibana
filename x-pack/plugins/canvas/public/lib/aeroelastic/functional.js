@@ -12,7 +12,7 @@
  * @param {*[][]} arrays
  * @returns *[]
  */
-const flatten = arrays => [].concat(...arrays);
+export const flatten = arrays => [].concat(...arrays);
 
 /**
  * identity
@@ -20,7 +20,7 @@ const flatten = arrays => [].concat(...arrays);
  * @param d
  * @returns d
  */
-const identity = d => d;
+export const identity = d => d;
 
 /**
  * map
@@ -32,7 +32,7 @@ const identity = d => d;
  * @param {Function} fun
  * @returns {function(*): *}
  */
-const map = fun => array => array.map(value => fun(value));
+export const map = fun => array => array.map(value => fun(value));
 
 /**
  * log
@@ -41,7 +41,7 @@ const map = fun => array => array.map(value => fun(value));
  * @param {Function} printerFun
  * @returns d
  */
-const log = (d, printerFun = identity) => {
+export const log = (d, printerFun = identity) => {
   console.log(printerFun(d));
   return d;
 };
@@ -54,7 +54,7 @@ const log = (d, printerFun = identity) => {
  * @param {*[]} set2
  * @returns *[]
  */
-const disjunctiveUnion = (keyFun, set1, set2) =>
+export const disjunctiveUnion = (keyFun, set1, set2) =>
   set1
     .filter(s1 => !set2.find(s2 => keyFun(s2) === keyFun(s1)))
     .concat(set2.filter(s2 => !set1.find(s1 => keyFun(s1) === keyFun(s2))));
@@ -65,9 +65,9 @@ const disjunctiveUnion = (keyFun, set1, set2) =>
  * @param {number} b
  * @returns {number} the mean of the two parameters
  */
-const mean = (a, b) => (a + b) / 2;
+export const mean = (a, b) => (a + b) / 2;
 
-const shallowEqual = (a, b) => {
+export const shallowEqual = (a, b) => {
   if (a === b) {
     return true;
   }
@@ -82,31 +82,17 @@ const shallowEqual = (a, b) => {
   return true;
 };
 
-const not = fun => (...args) => !fun(...args);
+export const not = fun => (...args) => !fun(...args);
 
-const removeDuplicates = (idFun, a) =>
+export const removeDuplicates = (idFun, a) =>
   a.filter((d, i) => a.findIndex(s => idFun(s) === idFun(d)) === i);
 
-const arrayToMap = a => Object.assign({}, ...a.map(d => ({ [d]: true })));
+export const arrayToMap = a => Object.assign({}, ...a.map(d => ({ [d]: true })));
 
-const subMultitree = (pk, fk, elements, roots) => {
+export const subMultitree = (pk, fk, elements, roots) => {
   const getSubgraphs = roots => {
     const children = flatten(roots.map(r => elements.filter(e => fk(e) === pk(r))));
     return [...roots, ...(children.length && getSubgraphs(children, elements))];
   };
   return getSubgraphs(roots);
-};
-
-module.exports = {
-  arrayToMap,
-  disjunctiveUnion,
-  flatten,
-  subMultitree,
-  identity,
-  log,
-  map,
-  mean,
-  not,
-  removeDuplicates,
-  shallowEqual,
 };
