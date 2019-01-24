@@ -104,7 +104,7 @@ function PrefixIcon({ item }: { item: IWaterfallItem }) {
   }
 
   // icon for RUM agent transactions
-  const isRumAgent = item.transaction.context.service.agent.name === 'js-base';
+  const isRumAgent = item.transaction.agent.name === 'js-base';
   if (isRumAgent) {
     return <EuiIcon type="globe" />;
   }

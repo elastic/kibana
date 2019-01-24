@@ -41,6 +41,9 @@ export class DataRecognizer extends Component {
         ));
         if (typeof this.results === 'object') {
           this.results.count = results.length;
+          if (typeof this.results.onChange === 'function') {
+            this.results.onChange();
+          }
         }
 
         this.setState({

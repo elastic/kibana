@@ -100,7 +100,9 @@ describe('PropertiesTable', () => {
           label: 'requiredPropertyLabel'
         }
       ];
-      expect(getPropertyTabNames(['testProperty'])).toEqual(expectedTabsConfig);
+      expect(getPropertyTabNames({ testProperty: {} } as any)).toEqual(
+        expectedTabsConfig
+      );
     });
   });
 

@@ -14,7 +14,7 @@ describe('DiscoverErrorLink without kuery', () => {
   let wrapper: ShallowWrapper;
   beforeEach(() => {
     const error = {
-      context: { service: { name: 'myServiceName' } },
+      service: { name: 'myServiceName' },
       error: { grouping_key: 'myGroupingKey' }
     } as APMError;
 
@@ -24,7 +24,7 @@ describe('DiscoverErrorLink without kuery', () => {
   it('should have correct query', () => {
     const queryProp = wrapper.prop('query') as any;
     expect(queryProp._a.query.query).toEqual(
-      'context.service.name:"myServiceName" AND error.grouping_key:"myGroupingKey"'
+      'service.name:"myServiceName" AND error.grouping_key:"myGroupingKey"'
     );
   });
 
@@ -37,7 +37,7 @@ describe('DiscoverErrorLink with kuery', () => {
   let wrapper: ShallowWrapper;
   beforeEach(() => {
     const error = {
-      context: { service: { name: 'myServiceName' } },
+      service: { name: 'myServiceName' },
       error: { grouping_key: 'myGroupingKey' }
     } as APMError;
 
@@ -49,7 +49,7 @@ describe('DiscoverErrorLink with kuery', () => {
   it('should have correct query', () => {
     const queryProp = wrapper.prop('query') as any;
     expect(queryProp._a.query.query).toEqual(
-      'context.service.name:"myServiceName" AND error.grouping_key:"myGroupingKey" AND transaction.sampled: true'
+      'service.name:"myServiceName" AND error.grouping_key:"myGroupingKey" AND transaction.sampled: true'
     );
   });
 
