@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }) {
         `time:(from:'2012-11-17T00:00:00.000Z',mode:absolute,to:'2015-11-17T18:01:36.621Z'))&` +
     `_a=(description:'',filters:!(),` +
         `fullScreenMode:!f,` +
-        `options:(darkTheme:!f),` +
+        `options:(),` +
         `panels:!((col:1,id:Visualization-MetricChart,panelIndex:1,row:1,size_x:6,size_y:3,type:visualization),` +
                  `(col:7,id:Visualization-PieChart,panelIndex:2,row:1,size_x:6,size_y:3,type:visualization)),` +
         `query:(language:lucene,query:'memory:%3E220000'),` +
