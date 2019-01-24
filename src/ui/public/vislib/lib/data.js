@@ -60,6 +60,7 @@ export function VislibLibDataProvider(Private) {
             newData[key] = data[key];
           } else {
             newData[key] = data[key].map(seri => {
+              const converter = getFormat(seri.yAxisFormat);
               return {
                 id: seri.id,
                 label: seri.label,
@@ -69,14 +70,18 @@ export function VislibLibDataProvider(Private) {
                   newVal.series = val.series || seri.label;
                   return newVal;
                 }),
-                yAxisFormatatter: getFormat(seri.yAxisFormat)
+                yAxisFormatter: val => converter.convert(val)
               };
             });
           }
         });
-        newData.xAxisFormatter = getFormat(newData.xAxisFormat).convert;
-        newData.yAxisFormatter = getFormat(newData.yAxisFormat).convert;
-        newData.zAxisFormatter = getFormat(newData.zAxisFormat).convert;
+
+        const xConverter = getFormat(newData.xAxisFormat);
+        const yConverter = getFormat(newData.yAxisFormat);
+        const zConverter = getFormat(newData.zAxisFormat);
+        newData.xAxisFormatter = val => xConverter.convert(val);
+        newData.yAxisFormatter = val => yConverter.convert(val);
+        newData.zAxisFormatter = val => zConverter.convert(val);
 
         return newData;
       };
