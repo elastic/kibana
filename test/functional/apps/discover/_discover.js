@@ -128,6 +128,7 @@ export default function ({ getService, getPageObjects }) {
       it('should show bars in the correct time zone', async function () {
         const ticks = await PageObjects.discover.getBarChartXTicks();
         expect(ticks).to.eql([
+          '2015-09-20 00:00',
           '2015-09-20 12:00',
           '2015-09-21 00:00',
           '2015-09-21 12:00',
@@ -153,7 +154,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.discover.brushHistogram(0, 1);
         await PageObjects.visualize.waitForVisualization();
         const actualTimeString = await PageObjects.header.getPrettyDuration();
-        expect(actualTimeString).to.be('September 19th 2015, 23:57:47.763 to September 20th 2015, 02:58:41.941');
+        expect(actualTimeString).to.be('September 19th 2015, 23:58:37.207 to September 20th 2015, 02:54:22.490');
       });
 
       it('should show correct initial chart interval of Auto', async function () {
