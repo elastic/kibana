@@ -4,6 +4,7 @@
     "type": "canvas-workpad",
     "updated_at": "2018-10-22T15:19:02.081Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "name": "[eCommerce] Revenue Tracking",
       "id": "workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e",

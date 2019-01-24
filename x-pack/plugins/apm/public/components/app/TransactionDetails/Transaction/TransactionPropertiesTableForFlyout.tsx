@@ -5,16 +5,21 @@
  */
 
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import { Location } from 'history';
 import { first, get } from 'lodash';
 import React from 'react';
+import {
+  fromQuery,
+  history,
+  toQuery
+} from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import { Transaction } from '../../../../../typings/es_schemas/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
-import { fromQuery, history, toQuery } from '../../../../utils/url';
 import {
   getPropertyTabNames,
-  PropertiesTable,
-  Tab
+  PropertiesTable
 } from '../../../shared/PropertiesTable';
+import { Tab } from '../../../shared/PropertiesTable/propertyConfig';
 
 // Ensure the selected tab exists or use the first
 function getCurrentTab(tabs: Tab[] = [], selectedTabKey?: string) {
@@ -22,13 +27,12 @@ function getCurrentTab(tabs: Tab[] = [], selectedTabKey?: string) {
   return selectedTab ? selectedTab : first(tabs) || {};
 }
 
-function getTabs(transactionData: Transaction) {
-  const dynamicProps = Object.keys(transactionData.context || {});
-  return getPropertyTabNames(dynamicProps);
+function getTabs(transaction: Transaction) {
+  return getPropertyTabNames(transaction);
 }
 
 interface Props {
-  location: any;
+  location: Location;
   transaction: Transaction;
   urlParams: IUrlParams;
 }
@@ -40,7 +44,7 @@ export const TransactionPropertiesTableForFlyout: React.SFC<Props> = ({
 }) => {
   const tabs = getTabs(transaction);
   const currentTab = getCurrentTab(tabs, urlParams.flyoutDetailTab);
-  const agentName = transaction.context.service.agent.name;
+  const agentName = transaction.agent.name;
 
   return (
     <div>
@@ -67,7 +71,7 @@ export const TransactionPropertiesTableForFlyout: React.SFC<Props> = ({
       </EuiTabs>
       <EuiSpacer />
       <PropertiesTable
-        propData={get(transaction.context, currentTab.key)}
+        propData={get(transaction, currentTab.key)}
         propKey={currentTab.key}
         agentName={agentName}
       />

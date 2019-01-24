@@ -7,7 +7,7 @@
 import { get } from 'lodash';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { IStackframe } from '../../../../typings/es_schemas/Stackframe';
+import { IStackframe } from '../../../../typings/es_schemas/fields/Stackframe';
 import { colors, fontFamilyCode, px, units } from '../../../style/variables';
 
 const FileDetails = styled.div`

@@ -6,18 +6,23 @@
 
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Location } from 'history';
 import { first, get } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
+import {
+  fromQuery,
+  history,
+  toQuery
+} from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import { Transaction } from '../../../../../typings/es_schemas/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
 import { px, units } from '../../../../style/variables';
-import { fromQuery, history, toQuery } from '../../../../utils/url';
 import {
   getPropertyTabNames,
-  PropertiesTable,
-  Tab
+  PropertiesTable
 } from '../../../shared/PropertiesTable';
+import { Tab } from '../../../shared/PropertiesTable/propertyConfig';
 import { WaterfallContainer } from './WaterfallContainer';
 import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 
@@ -39,13 +44,12 @@ const timelineTab = {
   })
 };
 
-function getTabs(transactionData: Transaction) {
-  const dynamicProps = Object.keys(transactionData.context || {});
-  return [timelineTab, ...getPropertyTabNames(dynamicProps)];
+function getTabs(transaction: Transaction) {
+  return [timelineTab, ...getPropertyTabNames(transaction)];
 }
 
 interface TransactionPropertiesTableProps {
-  location: any;
+  location: Location;
   transaction: Transaction;
   urlParams: IUrlParams;
   waterfall: IWaterfall;
@@ -59,7 +63,8 @@ export function TransactionPropertiesTable({
 }: TransactionPropertiesTableProps) {
   const tabs = getTabs(transaction);
   const currentTab = getCurrentTab(tabs, urlParams.detailTab);
-  const agentName = transaction.context.service.agent.name;
+  const agentName = transaction.agent.name;
+  const isTimelineTab = currentTab.key === timelineTab.key;
 
   return (
     <div>
@@ -87,19 +92,17 @@ export function TransactionPropertiesTable({
 
       <EuiSpacer />
 
-      {currentTab.key === timelineTab.key && (
+      {isTimelineTab ? (
         <WaterfallContainer
           transaction={transaction}
           location={location}
           urlParams={urlParams}
           waterfall={waterfall}
         />
-      )}
-
-      {currentTab.key !== timelineTab.key && (
+      ) : (
         <TableContainer>
           <PropertiesTable
-            propData={get(transaction.context, currentTab.key)}
+            propData={get(transaction, currentTab.key)}
             propKey={currentTab.key}
             agentName={agentName}
           />

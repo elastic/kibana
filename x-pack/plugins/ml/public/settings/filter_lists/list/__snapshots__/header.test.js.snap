@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Filter Lists Header renders header 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiFlexGroup
     alignItems="baseline"
     component="div"
@@ -139,5 +139,5 @@ You can use the same filter list in multiple jobs.{br}{learnMoreLink}"
   <EuiSpacer
     size="m"
   />
-</React.Fragment>
+</Fragment>
 `;

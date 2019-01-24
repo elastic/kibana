@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import idx from 'idx';
+import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import React from 'react';
+import { idx } from 'x-pack/plugins/apm/common/idx';
 import {
   REQUEST_URL_FULL,
   TRANSACTION_DURATION,
@@ -14,6 +15,7 @@ import {
   USER_ID
 } from '../../../../../common/constants';
 import { Transaction } from '../../../../../typings/es_schemas/Transaction';
+import { NOT_AVAILABLE_LABEL } from '../../../../constants';
 import { asPercent, asTime } from '../../../../utils/formatters';
 import {
   IStickyProperty,
@@ -30,15 +32,16 @@ export function StickyTransactionProperties({
   totalDuration
 }: Props) {
   const timestamp = transaction['@timestamp'];
-
   const url =
     idx(transaction, _ => _.context.page.url) ||
-    idx(transaction, _ => _.context.request.url) ||
-    'N/A';
+    idx(transaction, _ => _.url.full) ||
+    NOT_AVAILABLE_LABEL;
   const duration = transaction.transaction.duration.us;
   const stickyProperties: IStickyProperty[] = [
     {
-      label: 'Timestamp',
+      label: i18n.translate('xpack.apm.transactionDetails.timestampLabel', {
+        defaultMessage: 'Timestamp'
+      }),
       fieldName: '@timestamp',
       val: timestamp,
       truncated: true,
@@ -52,26 +55,37 @@ export function StickyTransactionProperties({
       width: '50%'
     },
     {
-      label: 'Duration',
+      label: i18n.translate('xpack.apm.transactionDetails.durationLabel', {
+        defaultMessage: 'Duration'
+      }),
       fieldName: TRANSACTION_DURATION,
       val: asTime(duration),
       width: '25%'
     },
     {
-      label: '% of trace',
-      val: asPercent(duration, totalDuration, 'N/A'),
+      label: i18n.translate(
+        'xpack.apm.transactionDetails.percentOfTraceLabel',
+        {
+          defaultMessage: '% of trace'
+        }
+      ),
+      val: asPercent(duration, totalDuration, NOT_AVAILABLE_LABEL),
       width: '25%'
     },
     {
-      label: 'Result',
+      label: i18n.translate('xpack.apm.transactionDetails.resultLabel', {
+        defaultMessage: 'Result'
+      }),
       fieldName: TRANSACTION_RESULT,
-      val: get(transaction, TRANSACTION_RESULT, 'N/A'),
+      val: get(transaction, TRANSACTION_RESULT, NOT_AVAILABLE_LABEL),
       width: '25%'
     },
     {
-      label: 'User ID',
+      label: i18n.translate('xpack.apm.transactionDetails.userIdLabel', {
+        defaultMessage: 'User ID'
+      }),
       fieldName: USER_ID,
-      val: get(transaction, USER_ID, 'N/A'),
+      val: get(transaction, USER_ID, NOT_AVAILABLE_LABEL),
       truncated: true,
       width: '25%'
     }

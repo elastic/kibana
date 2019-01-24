@@ -28,16 +28,16 @@ function instantiateZeroFilledArray({ xKeys, series }) {
   }));
 }
 
-export function addToSiri(xKeys, series, point, id, label, agg) {
+export function addToSiri(xKeys, series, point, id, label, formatter) {
   id = id == null ? '' : id + '';
 
   if (!series.has(id)) {
     series.set(id, {
+      id: id.split('-').pop(),
       label: label == null ? id : label,
-      aggLabel: agg.type ? agg.type.makeLabel(agg) : label,
-      aggId: agg.parentId ? agg.parentId : agg.id,
       count: 0,
       values: instantiateZeroFilledArray({ xKeys, series: label }),
+      yAxisFormatter: formatter,
     });
   }
 

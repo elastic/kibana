@@ -5,38 +5,30 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
+import { ValidatedRange } from '../../../../../components/validated_range';
 
-import {
-  EuiRange
-} from '@elastic/eui';
+export function StaticSizeSelection({ onChange, styleOptions }) {
 
-export class StaticSizeSelection extends React.Component {
+  const onSizeChange = (size) => {
+    onChange({ size });
+  };
 
-  constructor() {
-    super();
-    this.state = {};
-  }
-
-  render() {
-
-    const onChange = (event) => {
-      const size = parseInt(event.target.value, 10);
-      this.props.changeOptions({
-        size: size
-      });
-    };
-
-    const selectedValue = (
-      this.props.selectedOptions && typeof this.props.selectedOptions.size === 'number'
-    ) ? this.props.selectedOptions.size : 0;
-    return (
-      <EuiRange
-        min={0}
-        max={100}
-        value={selectedValue.toString()}
-        onChange={onChange}
-        showInput
-      />
-    );
-  }
+  return (
+    <ValidatedRange
+      min={0}
+      max={100}
+      value={styleOptions.size}
+      onChange={onSizeChange}
+      showInput
+      showRange
+    />
+  );
 }
+
+StaticSizeSelection.propTypes = {
+  styleOptions: PropTypes.shape({
+    size: PropTypes.number.isRequired,
+  }).isRequired,
+  onChange: PropTypes.func.isRequired
+};
