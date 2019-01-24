@@ -85,7 +85,6 @@ function createFields(results) {
 
         // round min, max, median, mean to 2dp.
         if (field.median_value !== undefined) {
-          field.median_value = -0.000000234;
           field.median_value = roundToDecimalPlace(field.median_value);
           field.mean_value = roundToDecimalPlace(field.mean_value);
           field.min_value = roundToDecimalPlace(field.min_value);
