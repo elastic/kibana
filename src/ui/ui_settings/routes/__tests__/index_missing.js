@@ -42,7 +42,6 @@ export function indexMissingSuite() {
       async assertValidKibanaIndex() {
         const resp = await callCluster('indices.get', {
           index: indexName,
-          include_type_name: true,
         });
 
         expect(resp[indexName].mappings.properties).to.have.keys(
