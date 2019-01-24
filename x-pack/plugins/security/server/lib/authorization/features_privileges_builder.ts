@@ -33,7 +33,7 @@ export class FeaturesPrivilegesBuilder {
           return [];
         }
 
-        const apiPrivileges = Object.entries(privileges).reduce<string[]>(
+        const apiOperations = Object.entries(privileges).reduce<string[]>(
           (acc, [privilegeId, privilege]) => {
             if (this.includeInBaseRead(privilegeId, privilege)) {
               return [...acc, ...(privilege.api || [])];
@@ -43,7 +43,7 @@ export class FeaturesPrivilegesBuilder {
           []
         );
 
-        return apiPrivileges.map(api => this.actions.api.get(api));
+        return apiOperations.map(api => this.actions.api.get(api));
       })
     );
 
@@ -58,7 +58,7 @@ export class FeaturesPrivilegesBuilder {
           return [];
         }
 
-        const readPrivileges = Object.entries(privileges).reduce<string[]>(
+        const readUICapabilities = Object.entries(privileges).reduce<string[]>(
           (acc, [privilegeId, privilege]) => {
             if (this.includeInBaseRead(privilegeId, privilege)) {
               return [...acc, ...(privilege.ui || [])];
@@ -68,7 +68,9 @@ export class FeaturesPrivilegesBuilder {
           []
         );
 
-        return readPrivileges.map(uiCapability => this.actions.ui.get(feature.id, uiCapability));
+        return readUICapabilities.map(uiCapability =>
+          this.actions.ui.get(feature.id, uiCapability)
+        );
       })
     );
 
