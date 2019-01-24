@@ -7,12 +7,17 @@
 import expect from 'expect.js';
 
 export default function ({ getPageObjects, getService }) {
+
   const PageObjects = getPageObjects(['gis']);
   const queryBar = getService('queryBar');
   const inspector = getService('inspector');
   const DOC_COUNT_PROP_NAME = 'doc_count';
 
   describe('layer geohashgrid aggregation source', () => {
+
+    const EXPECTED_NUMBER_FEATURES = 6;
+    const DATA_CENTER_LON = -98;
+    const DATA_CENTER_LAT = 38;
 
     async function getRequestTimestamp() {
       await PageObjects.gis.openInspectorRequestsView();
@@ -22,13 +27,60 @@ export default function ({ getPageObjects, getService }) {
       return requestTimestamp;
     }
 
+    function makeRequestTestsForGeoPrecision(LAYER_ID) {
+
+      describe('geoprecision - requests', async () => {
+        let beforeTimestamp;
+        beforeEach(async () => {
+          await PageObjects.gis.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1);
+          beforeTimestamp = await getRequestTimestamp();
+        });
+
+        it('should not rerequest when zoom changes do not cause geohash precision to change', async () => {
+          await PageObjects.gis.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 2);
+          const afterTimestamp = await getRequestTimestamp();
+          expect(afterTimestamp).to.equal(beforeTimestamp);
+        });
+
+        it('should rerequest when zoom changes causes the geohash precision to change', async () => {
+          await PageObjects.gis.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 4);
+          const afterTimestamp = await getRequestTimestamp();
+          expect(afterTimestamp).not.to.equal(beforeTimestamp);
+        });
+      });
+
+      describe('geoprecision - data', async ()=> {
+
+        beforeEach(async () => {
+          await PageObjects.gis.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 1);
+        });
+
+        it ('should not return any data when the extent does not cover the data bounds', async () => {
+          await PageObjects.gis.setView(64, 179, 5);
+          const mapboxStyle = await PageObjects.gis.getMapboxStyle();
+          expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(0);
+        });
+
+        it ('should request the data when the map covers the databounds', async () => {
+          const mapboxStyle = await PageObjects.gis.getMapboxStyle();
+          expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(EXPECTED_NUMBER_FEATURES);
+        });
+
+        it ('should request only partial data when the map only covers part of the databounds', async () => {
+          //todo this verifies the extent-filtering behavior (not really the correct application of geohash-precision), and should ideally be moved to its own section
+          await PageObjects.gis.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 6);
+          const mapboxStyle = await PageObjects.gis.getMapboxStyle();
+          expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(2);
+        });
+      });
+    }
+
     describe('heatmap', () => {
       before(async () => {
         await PageObjects.gis.loadSavedMap('geohashgrid heatmap example');
       });
 
       const LAYER_ID = '3xlvm';
-      const EXPECTED_NUMBER_FEATURES = 6;
       const HEATMAP_PROP_NAME = '__kbn_heatmap_weight__';
 
       it('should re-fetch geohashgrid aggregation with refresh timer', async () => {
@@ -49,10 +101,13 @@ export default function ({ getPageObjects, getService }) {
         });
       });
 
+      makeRequestTestsForGeoPrecision(LAYER_ID);
+
       describe('query bar', () => {
         before(async () => {
           await queryBar.setQuery('machine.os.raw : "win 8"');
           await queryBar.submitQuery();
+          await PageObjects.gis.setView(0, 0, 0);
         });
 
         after(async () => {
@@ -99,7 +154,7 @@ export default function ({ getPageObjects, getService }) {
       });
 
       const LAYER_ID = 'g1xkv';
-      const EXPECTED_NUMBER_FEATURES = 6;
+
       const MAX_OF_BYTES_PROP_NAME = 'max_of_bytes';
 
       it('should re-fetch geohashgrid aggregation with refresh timer', async () => {
@@ -120,8 +175,12 @@ export default function ({ getPageObjects, getService }) {
         });
       });
 
+      makeRequestTestsForGeoPrecision(LAYER_ID);
+
+
       describe('query bar', () => {
         before(async () => {
+          await PageObjects.gis.setView(0, 0, 0);
           await queryBar.setQuery('machine.os.raw : "win 8"');
           await queryBar.submitQuery();
         });
@@ -162,6 +221,7 @@ export default function ({ getPageObjects, getService }) {
           expect(noRequests).to.equal(true);
         });
       });
+
     });
 
   });

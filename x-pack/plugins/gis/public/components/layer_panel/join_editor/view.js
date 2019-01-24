@@ -69,7 +69,7 @@ export function JoinEditor({ joins, layer, onChange }) {
     <div>
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem>
-          <EuiTitle size="xs"><h5>Joins</h5></EuiTitle>
+          <EuiTitle size="xs"><h5>Term joins</h5></EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonIcon iconType="plusInCircle" onClick={addJoin} aria-label="Add join" title="Add join" />
