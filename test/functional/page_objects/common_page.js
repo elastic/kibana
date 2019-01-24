@@ -251,8 +251,8 @@ export function CommonPageProvider({ getService, getPageObjects }) {
         await testSubjects.click('appsMenuButton');
         await testSubjects.existsOrFail('appsMenu');
       });
-      const appSwitcher = await testSubjects.find('appsMenu');
-      const appLinks = await testSubjects.findAllDescendant('appLink', appSwitcher);
+      const appsMenu = await testSubjects.find('appsMenu');
+      const appLinks = await testSubjects.findAllDescendant('appLink', appsMenu);
       const linksText = await Promise.all(appLinks.map((appLink) => appLink.getVisibleText()));
       return linksText;
     }
