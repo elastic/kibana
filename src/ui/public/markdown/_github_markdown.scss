@@ -1,43 +1,42 @@
-// The MIT License (MIT)
+// Default styles for Markdown element
+//
+// 1. Links
+// 2. Headings
+// 3. Images
+// 4. Blockquotes
+// 5. Horizontal rules
+// 6. Lists
+// 7. Tables
+// 8. Code blocks
 
-// Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)
+// Functions
+// Note: The inlined base font size is set in common/functions/font.js. It should match $kbnMdFontSize.
+$kbnDefaultFontSize: 14px;
 
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-
+@function canvasToEm($size) {
+  @return #{$size / $kbnDefaultFontSize}em;
+}
 
 .kbnMarkdown__body {
-  -ms-text-size-adjust: 100%;
-  -webkit-text-size-adjust: 100%;
-  line-height: 1.5;
-  color: $euiTextColor;
-  word-wrap: break-word;
 
-  &::before {
-    display: table;
-    content: "";
-  }
+  // Font size variables
+  $kbnMarkdownFontSizeS: canvasToEm(12px);
+  $kbnMarkdownFontSize: canvasToEm(14px);
+  $kbnMarkdownFontSizeL: canvasToEm(20px);
+  $kbnMarkdownFontSizeXL: canvasToEm(28px);
+  $kbnMarkdownFontSizeXXL: canvasToEm(36px);
 
-  &::after {
-    display: table;
-    clear: both;
-    content: "";
-  }
+  // Spacing variables
+  $kbnMarkdownSizeL: canvasToEm(24px);
+  $kbnMarkdownSize: canvasToEm(16px);
+  $kbnMarkdownSizeS: canvasToEm(12px);
+  $kbnMarkdownSizeXS: canvasToEm(8px);
+  $kbnMarkdownSizeXXS: canvasToEm(4px);
+
+  // Grayscale variables
+  $kbnMarkdownAlphaLightestShade: rgba(0,0,0,.05);
+  $kbnMarkdownAlphaLightShade: rgba(0,0,0,.15);
+  $kbnMarkdownAlphaDarkShade: rgba(0,0,0,.65);
 
   > *:first-child {
     margin-top: 0 !important;
@@ -45,151 +44,6 @@
 
   > *:last-child {
     margin-bottom: 0 !important;
-  }
-
-  a {
-    background-color: transparent;
-    -webkit-text-decoration-skip: objects;
-    color: $euiColorPrimary;
-    text-decoration: none;
-
-    &:active,
-    &:hover {
-      color: darken($euiColorPrimary, 10%);
-      text-decoration: underline;
-      outline-width: 0;
-    }
-
-    &:not([href]) {
-      color: inherit;
-      text-decoration: none;
-    }
-  }
-
-  strong {
-    font-weight: $euiFontWeightBold;
-  }
-
-  img {
-    border-style: none;
-    max-width: 100%;
-    box-sizing: content-box;
-    background-color: $euiColorEmptyShade;
-  }
-
-  svg:not(:root) {
-    overflow: hidden;
-  }
-
-  hr {
-    box-sizing: content-box;
-    overflow: hidden;
-    background: transparent;
-    height: $euiSizeXS;
-    padding: 0;
-    margin: $euiSizeL 0;
-    background-color: $euiColorLightShade;
-    border: 0;
-
-    &::before {
-      display: table;
-      content: "";
-    }
-
-    &::after {
-      display: table;
-      clear: both;
-      content: "";
-    }
-  }
-
-  input {
-    font: inherit;
-    font-family: inherit;
-    font-size: inherit;
-    line-height: inherit;
-    margin: 0;
-    overflow: visible;
-  }
-
-  [type="checkbox"] {
-    box-sizing: border-box;
-    padding: 0;
-  }
-
-  table {
-    @include euiScrollBar;
-    border-spacing: 0;
-    border-collapse: collapse;
-    display: block;
-    width: 100%;
-    overflow: auto;
-    border-left: $euiBorderThin;
-
-    th {
-      font-weight: $euiFontWeightMedium;
-      color: $euiColorMediumShade;
-    }
-
-    td,
-    th {
-      padding: $euiSizeS $euiSizeM;
-      border-top: $euiBorderThin;
-      border-bottom: $euiBorderThin;
-
-      &:last-child {
-        border-right: $euiBorderThin;
-      }
-    }
-
-    tr {
-      background-color: transparent;
-      border-top: $euiBorderThin;
-    }
-  }
-
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-weight: $euiFontWeightBold;
-    margin-top: $euiSizeL;
-    margin-bottom: $euiSize;
-    line-height: 1.25;
-
-    &:hover .anchor {
-      text-decoration: none;
-    }
-  }
-
-  h1 {
-    font-size: 2em;
-    padding-bottom: 0.3em;
-    border-bottom: $euiBorderThin;
-  }
-
-  h2 {
-    font-size: 1.5em;
-    padding-bottom: 0.3em;
-    border-bottom: $euiBorderThin;
-  }
-
-  h3 {
-    font-size: 1.25em;
-  }
-
-  h4 {
-    font-size: 1em;
-  }
-
-  h5 {
-    font-size: 0.875em;
-  }
-
-  h6 {
-    font-size: 0.8em;
   }
 
   p,
@@ -200,36 +54,134 @@
   table,
   pre {
     margin-top: 0;
-    margin-bottom: $euiSize;
+    margin-bottom: $kbnMarkdownSize;
+    line-height: 1.5em;
   }
 
+  strong {
+    font-weight: 600;
+  }
+
+  // 1. Links
+  a {
+    color: inherit;
+    text-decoration: underline;
+  }
+
+  a:hover {
+    text-decoration: underline dotted;
+  }
+
+  a:active,
+  a:hover {
+    outline-width: 0;
+  }
+
+  a:not([href]) {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  // 2. Headings
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin-top: 0;
+    margin-bottom: $kbnMarkdownSizeXS;
+  }
+
+  h1 {
+    font-size: $kbnMarkdownFontSizeXXL;
+    line-height: 1.333333em;
+    font-weight: 300;
+  }
+
+  h2 {
+    font-size: $kbnMarkdownFontSizeXL;
+    line-height: 1.428571em;
+    font-weight: 300;
+  }
+
+  h3 {
+    font-size: $kbnMarkdownFontSizeL;
+    line-height: 1.6em;
+    font-weight: 600;
+  }
+
+  h4 {
+    font-size: $kbnMarkdownSize;
+    line-height: 1.5em;
+    font-weight: 600;
+  }
+
+  h5 {
+    font-size: $kbnMarkdownFontSize;
+    line-height: 1.142857em;
+    font-weight: 700;
+  }
+
+  h6 {
+    font-size: $kbnMarkdownFontSizeS;
+    line-height: 1.333333em;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  // 3. Images
+  img {
+    max-width: 100%;
+    box-sizing: content-box;
+    border-style: none;
+  }
+
+  // 4. Blockquotes
   blockquote {
-    font-size: 1em;
     padding: 0 1em;
-    color: $euiColorDarkShade;
-    border-left: $euiBorderThick;
-
-    > :first-child {
-      margin-top: 0;
-    }
-
-    > :last-child {
-      margin-bottom: 0;
-    }
+    border-left: $kbnMarkdownSizeXXS solid $kbnMarkdownAlphaLightShade;
   }
 
+  // 5. Horizontal rules
+  hr {
+    overflow: hidden;
+    background: transparent;
+    height: 2px;
+    padding: 0;
+    margin: $kbnMarkdownSizeL 0;
+    background-color: $kbnMarkdownAlphaLightShade;
+    border: 0;
+  }
+
+  hr::before {
+    display: table;
+    content: "";
+  }
+
+  hr::after {
+    display: table;
+    clear: both;
+    content: "";
+  }
+
+  // 6. Lists
   ul,
   ol {
-    padding-left: 2em;
+    padding-left: 0;
     margin-top: 0;
+    margin-bottom: $kbnMarkdownSize;
   }
 
   ul {
     list-style-type: disc;
   }
-
   ol {
     list-style-type: decimal;
+  }
+
+  ul ul {
+    list-style-type: circle;
   }
 
   ol ol,
@@ -244,6 +196,15 @@
     list-style-type: lower-alpha;
   }
 
+  dd {
+    margin-left: 0;
+  }
+
+  ul,
+  ol {
+    padding-left: $kbnMarkdownSizeL;
+  }
+
   ul ul,
   ul ol,
   ol ol,
@@ -253,210 +214,89 @@
   }
 
   li > p {
-    margin-top: $euiSize;
+    margin-bottom: $kbnMarkdownSizeXS;
   }
 
   li + li {
-    margin-top: 0.25em;
+    margin-top: $kbnMarkdownSizeXXS;
   }
 
-  dd {
-    dt {
-      margin-top: $euiSize;
-      font-style: italic;
-      font-weight: $euiFontWeightBold;
-    }
+  // 7. Tables
+  table {
+    display: block;
+    width: 100%;
+    overflow: auto;
+    border-left: 1px solid $kbnMarkdownAlphaLightShade;
+    border-spacing: 0;
+    border-collapse: collapse;
+  }
 
-    dd {
-      padding: 0 $euiSize;
-      margin-bottom: $euiSize;
+  td,
+  th {
+    padding: 0;
+  }
+
+  table th,
+  table td {
+    padding: $kbnMarkdownSizeXXS $kbnMarkdownSizeS;
+    border-top: 1px solid $kbnMarkdownAlphaLightShade;
+    border-bottom: 1px solid $kbnMarkdownAlphaLightShade;
+
+    &:last-child {
+      border-right: 1px solid $kbnMarkdownAlphaLightShade;
     }
   }
 
-  .anchor {
-    float: left;
-    padding-right: $euiSizeXS;
-    margin-left: -$euiSizeL;
-    line-height: 1;
-
-    &:focus {
-      outline: none;
-    }
+  table tr {
+    background-color: transparent;
+    border-top: 1px solid $kbnMarkdownAlphaLightShade;
   }
 
+  // 8. Code blocks
   code,
-  kbd,
   pre {
-    font-family: $euiCodeFontFamily;
-    font-size: .85em;
-    background-color: $euiCodeBlockBackgroundColor;
-    color: $euiCodeBlockColor;
-  }
-
-  kbd {
-    padding: 0.2em;
-    border: $euiBorderThin;
-    border-bottom-color: shadeOrTint($euiColorLightShade, 10%, 10%);
-    border-radius: $euiBorderRadius;
-    box-shadow: inset 0 -1px 0 $euiColorLightShade;
+    margin-bottom: $kbnMarkdownSizeXS;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+    font-size: $kbnMarkdownFontSizeS;
   }
 
   code {
-    padding: 0.2em 0;
+    padding: $kbnMarkdownSizeXXS 0;
     margin: 0;
-    border-radius: $euiBorderRadius;
+    background-color: $kbnMarkdownAlphaLightestShade;
+    border-radius: $kbnMarkdownSizeXXS;
+  }
 
-    &::before,
-    &::after {
-      letter-spacing: -0.2em;
-      content: "\00a0";
-    }
+  code::before,
+  code::after {
+    letter-spacing: -0.2em;
+    content: "\00a0";
   }
 
   pre {
-    @include euiScrollBar;
-    line-height: 1.45;
-    word-wrap: normal;
-    padding: $euiSize;
+    padding: $kbnMarkdownSize;
     overflow: auto;
-    border-radius: $euiBorderRadius;
-
-    code {
-      font-size: 1em;
-      word-break: normal;
-      white-space: pre;
-      display: inline;
-      max-width: auto;
-      padding: 0;
-      margin: 0;
-      overflow: visible;
-      line-height: inherit;
-      word-wrap: normal;
-      background-color: transparent !important;
-      border: 0;
-
-      &::before,
-      &::after {
-        content: normal;
-      }
-    }
+    font-size: $kbnMarkdownFontSizeS;
+    line-height: 1.333333em;
+    background-color: $kbnMarkdownAlphaLightestShade;
+    border-radius: $kbnMarkdownSizeXXS;
+    word-wrap: normal;
   }
 
-  .highlight {
-    margin-bottom: 1em;
-
-    pre {
-      margin-bottom: 0;
-      word-break: normal;
-    }
+  pre code {
+    display: inline;
+    max-width: auto;
+    padding: 0;
+    overflow: visible;
+    line-height: inherit;
+    word-wrap: normal;
+    white-space: pre;
+    background-color: transparent;
+    border: 0;
   }
 
-  :checked + .radio-label {
-    position: relative;
-    z-index: 1;
-    border-color: $euiColorPrimary;
-  }
-
-  .task-list-item {
-    list-style-type: none;
-
-    + .task-list-item {
-      margin-top: $euiSizeXS;
-    }
-
-    input {
-      margin: 0 0.2em 0.25em -1.6em;
-      vertical-align: middle;
-    }
-  }
-
-  .pl-0 {
-    padding-left: 0 !important;
-  }
-
-  .pl-1 {
-    padding-left: $euiSizeXS !important;
-  }
-
-  .pl-2 {
-    padding-left: $euiSizeS !important;
-  }
-
-  .pl-3 {
-    padding-left: $euiSize !important;
-  }
-
-  .pl-4 {
-    padding-left: $euiSizeL !important;
-  }
-
-  .pl-5 {
-    padding-left: $euiSizeXL !important;
-  }
-
-  .pl-6 {
-    padding-left: $euiSizeXXL !important;
-  }
-}
-
-.theme-dark {
-  @import '@elastic/eui/src/themes/k6/k6_colors_dark';
-
-  .kbnMarkdown__body {
-    color: $euiTextColor;
-
-    a {
-      -webkit-text-decoration-skip: objects;
-      color: $euiColorPrimary;
-
-      &:active,
-      &:hover {
-        color: darken($euiColorPrimary, 10%);
-      }
-    }
-
-    img {
-      background-color: $euiColorEmptyShade;
-    }
-
-    hr {
-      background-color: $euiColorLightShade;
-    }
-
-    table {
-      &,
-      td,
-      th,
-      tr {
-        border-color: $euiColorLightShade;
-      }
-    }
-
-    h1,
-    h2 {
-      border-color: $euiColorLightShade;
-    }
-
-    blockquote {
-      color: $euiColorDarkShade;
-      border-color: $euiColorLightShade;
-    }
-
-    code,
-    kbd,
-    pre {
-      background-color: $euiCodeBlockBackgroundColor;
-      color: $euiCodeBlockColor;
-    }
-
-    kbd {
-      border-color: $euiColorLightShade;
-      border-bottom-color: shadeOrTint($euiColorLightShade, 10%, 10%);
-      box-shadow: inset 0 -1px 0 $euiColorLightShade;
-    }
-
-    :checked + .radio-label {
-      border-color: $euiColorPrimary;
-    }
+  pre code::before,
+  pre code::after {
+    content: normal;
   }
 }

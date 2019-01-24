@@ -7,7 +7,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Markdown from 'markdown-it';
-import './markdown.scss';
 
 const md = new Markdown();
 
@@ -22,7 +21,7 @@ export const markdown = () => ({
 
     /* eslint-disable react/no-danger */
     ReactDOM.render(
-      <div className="canvasMarkdown" style={fontStyle} dangerouslySetInnerHTML={html} />,
+      <div className="kbnMarkdown__body" style={fontStyle} dangerouslySetInnerHTML={html} />,
       domNode,
       () => handlers.done()
     );
