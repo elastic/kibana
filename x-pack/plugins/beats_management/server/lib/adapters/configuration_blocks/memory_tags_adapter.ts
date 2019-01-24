@@ -29,6 +29,10 @@ export class MemoryConfigurationBlockAdapter implements ConfigurationBlockAdapte
   }
   public async delete(user: FrameworkUser, blockIds: string[]) {
     this.db = this.db.filter(block => !blockIds.includes(block.id));
+    return blockIds.map(id => ({
+      id,
+      success: true,
+    }));
   }
   public async getForTags(user: FrameworkUser, tagIds: string[], page?: number, size?: number) {
     const results = this.db.filter(block => tagIds.includes(block.id));
