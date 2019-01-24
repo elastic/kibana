@@ -12,8 +12,7 @@ import { pure } from 'recompose';
 
 import { ESQuery } from '../../../common/typed_json';
 import { AuthenticationsEdges, GetAuthenticationsQuery, PageInfo } from '../../graphql/types';
-import { inputsModel, State } from '../../store';
-import { authenticationsSelector } from '../../store';
+import { hostsSelectors, inputsModel, State } from '../../store';
 import { createFilter } from '../helpers';
 import { authenticationsQuery } from './index.gql_query';
 
@@ -116,6 +115,6 @@ const AuthenticationsComponentQuery = pure<AuthenticationsProps>(
   )
 );
 
-const mapStateToProps = (state: State) => authenticationsSelector(state);
+const mapStateToProps = (state: State) => hostsSelectors.authenticationsSelector(state);
 
 export const AuthenticationsQuery = connect(mapStateToProps)(AuthenticationsComponentQuery);

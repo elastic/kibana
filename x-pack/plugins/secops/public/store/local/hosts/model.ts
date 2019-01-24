@@ -14,4 +14,6 @@ export interface HostsModel {
     events: BasicQuery;
     uncommonProcesses: BasicQuery;
   };
+  filterQuery: SerializedFilterQuery | null;
+  filterQueryDraft: KueryFilterQuery | null;
 }

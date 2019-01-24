@@ -12,7 +12,7 @@ import { pure } from 'recompose';
 
 import { ActionCreator } from 'typescript-fsa';
 import { Ecs, EcsEdges } from '../../../../graphql/types';
-import { eventsSelector, hostsActions, State } from '../../../../store';
+import { hostsActions, hostsSelectors, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { getEmptyTagValue, getEmptyValue, getOrEmpty, getOrEmptyTag } from '../../../empty_value';
@@ -92,7 +92,7 @@ const EventsTableComponent = pure<EventsTableProps>(
   )
 );
 
-const mapStateToProps = (state: State) => eventsSelector(state);
+const mapStateToProps = (state: State) => hostsSelectors.eventsSelector(state);
 
 export const EventsTable = connect(
   mapStateToProps,

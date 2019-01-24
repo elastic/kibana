@@ -5,7 +5,8 @@
  */
 
 import * as hostsActions from './actions';
+import * as hostsSelectors from './selectors';
 
 export { hostsActions };
-export * from './selectors';
+export { hostsSelectors };
 export * from './reducer';

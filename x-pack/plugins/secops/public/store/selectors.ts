@@ -5,11 +5,8 @@
  */
 
 export {
-  authenticationsSelector,
+  hostsSelectors,
   dataProvidersSelector,
-  hostsSelector,
-  eventsSelector,
-  uncommonProcessesSelector,
   timelineByIdSelector,
   globalTimeRangeSelector,
   globalPolicySelector,

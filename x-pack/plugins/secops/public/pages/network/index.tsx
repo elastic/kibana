@@ -7,11 +7,15 @@
 import React from 'react';
 import { pure } from 'recompose';
 
-import { Pane1FlexContent } from '../../components/page';
+import { Pane, Pane1FlexContent, PaneScrollContainer } from '../../components/page';
 import { Placeholders } from '../../components/visualization_placeholder';
 
 export const Network = pure(() => (
-  <Pane1FlexContent>
-    <Placeholders count={10} myRoute="Network" />
-  </Pane1FlexContent>
+  <Pane data-test-subj="pane">
+    <PaneScrollContainer data-test-subj="pane1ScrollContainer">
+      <Pane1FlexContent>
+        <Placeholders count={10} myRoute="Network" />
+      </Pane1FlexContent>
+    </PaneScrollContainer>
+  </Pane>
 ));

@@ -7,6 +7,8 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
+  applyHostsFilterQuery,
+  setHostsFilterQueryDraft,
   updateAuthenticationsLimit,
   updateEventsLimit,
   updateHostsLimit,
@@ -33,6 +35,8 @@ export const initialHostsState: HostsState = {
       limit: DEFAULT_LIMIT,
     },
   },
+  filterQuery: null,
+  filterQueryDraft: null,
 };
 
 export const hostsReducer = reducerWithInitialState(initialHostsState)
@@ -72,5 +76,14 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
         limit,
       },
     },
+  }))
+  .case(setHostsFilterQueryDraft, (state, filterQueryDraft) => ({
+    ...state,
+    filterQueryDraft,
+  }))
+  .case(applyHostsFilterQuery, (state, filterQuery) => ({
+    ...state,
+    filterQuery,
+    filterQueryDraft: filterQuery.query,
   }))
   .build();

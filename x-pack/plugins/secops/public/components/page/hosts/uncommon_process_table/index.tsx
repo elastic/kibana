@@ -12,7 +12,7 @@ import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 
 import { HostEcsFields, UncommonProcessesEdges } from '../../../../graphql/types';
-import { hostsActions, State, uncommonProcessesSelector } from '../../../../store';
+import { hostsActions, hostsSelectors, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import {
@@ -97,7 +97,7 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
   )
 );
 
-const mapStateToProps = (state: State) => uncommonProcessesSelector(state);
+const mapStateToProps = (state: State) => hostsSelectors.uncommonProcessesSelector(state);
 
 export const UncommonProcessTable = connect(
   mapStateToProps,

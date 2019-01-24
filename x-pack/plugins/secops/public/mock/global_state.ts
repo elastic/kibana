@@ -29,6 +29,8 @@ export const mockGlobalState: State = {
           limit: 0,
         },
       },
+      filterQuery: null,
+      filterQueryDraft: null,
     },
     inputs: {
       global: {

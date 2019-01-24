@@ -9,7 +9,9 @@ import React from 'react';
 import { pure } from 'recompose';
 import chrome from 'ui/chrome';
 
+import { AutocompleteField } from '../../components/autocomplete_field';
 import { EmptyPage } from '../../components/empty_page';
+import { Pane, PaneHeader, PaneScrollContainer } from '../../components/page';
 import {
   EventsTable,
   HostsTable,
@@ -21,7 +23,7 @@ import { manageQuery } from '../../components/page/manage_query';
 import { AuthenticationsQuery } from '../../containers/authentications';
 import { EventsQuery } from '../../containers/events';
 import { GlobalTime } from '../../containers/global_time';
-import { HostsQuery } from '../../containers/hosts';
+import { HostsFilter, HostsQuery } from '../../containers/hosts';
 import { HostsTableQuery } from '../../containers/hosts/hosts_table.gql_query';
 import { KpiEventsQuery } from '../../containers/kpi_events';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
@@ -38,113 +40,165 @@ const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
 const TypesBarManage = manageQuery(TypesBar);
 
 export const Hosts = pure(() => (
-  <WithSource sourceId="default">
-    {({ auditbeatIndicesExist }) =>
-      indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
-        <GlobalTime>
-          {({ poll, to, from, setQuery }) => (
-            <>
-              <KpiEventsQuery sourceId="default" startDate={from} endDate={to} poll={poll}>
-                {({ kpiEventType, loading, id, refetch }) => (
-                  <TypesBarManage
-                    id={id}
-                    refetch={refetch}
-                    setQuery={setQuery}
-                    loading={loading}
-                    data={kpiEventType!.map((i: KpiItem) => ({
-                      x: i.count,
-                      y: i.value,
-                    }))}
-                  />
+  <Pane data-test-subj="pane">
+    <WithSource sourceId="default">
+      {({ auditbeatIndicesExist, indexPattern }) =>
+        indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
+          <>
+            <PaneHeader data-test-subj="paneHeader">
+              <KueryAutocompletion indexPattern={indexPattern}>
+                {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
+                  <HostsFilter indexPattern={indexPattern}>
+                    {({
+                      applyFilterQueryFromKueryExpression,
+                      filterQueryDraft,
+                      isFilterQueryDraftValid,
+                      setFilterQueryDraftFromKueryExpression,
+                    }) => (
+                      <AutocompleteField
+                        isLoadingSuggestions={isLoadingSuggestions}
+                        isValid={isFilterQueryDraftValid}
+                        loadSuggestions={loadSuggestions}
+                        onChange={setFilterQueryDraftFromKueryExpression}
+                        onSubmit={applyFilterQueryFromKueryExpression}
+                        placeholder={i18n.KQL_PACE_HOLDER}
+                        suggestions={suggestions}
+                        value={filterQueryDraft ? filterQueryDraft.expression : ''}
+                      />
+                    )}
+                  </HostsFilter>
                 )}
-              </KpiEventsQuery>
-              <HostsQuery
-                sourceId="default"
-                query={HostsTableQuery}
-                startDate={from}
-                endDate={to}
-                poll={poll}
-              >
-                {({ hosts, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
-                  <HostsTableManage
-                    id={id}
-                    refetch={refetch}
-                    setQuery={setQuery}
-                    loading={loading}
-                    data={hosts}
-                    totalCount={totalCount}
-                    hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                    nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                    loadMore={loadMore}
-                  />
+              </KueryAutocompletion>
+            </PaneHeader>
+            <PaneScrollContainer data-test-subj="pane1ScrollContainer">
+              <GlobalTime>
+                {({ poll, to, from, setQuery }) => (
+                  <>
+                    <KpiEventsQuery sourceId="default" startDate={from} endDate={to} poll={poll}>
+                      {({ kpiEventType, loading, id, refetch }) => (
+                        <TypesBarManage
+                          id={id}
+                          refetch={refetch}
+                          setQuery={setQuery}
+                          loading={loading}
+                          data={kpiEventType!.map((i: KpiItem) => ({
+                            x: i.count,
+                            y: i.value,
+                          }))}
+                        />
+                      )}
+                    </KpiEventsQuery>
+                    <HostsQuery
+                      query={HostsTableQuery}
+                      sourceId="default"
+                      startDate={from}
+                      endDate={to}
+                      poll={poll}
+                    >
+                      {({ hosts, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
+                        <HostsTableManage
+                          id={id}
+                          refetch={refetch}
+                          setQuery={setQuery}
+                          loading={loading}
+                          data={hosts}
+                          totalCount={totalCount}
+                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                          nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                          loadMore={loadMore}
+                        />
+                      )}
+                    </HostsQuery>
+                    <UncommonProcessesQuery
+                      sourceId="default"
+                      startDate={from}
+                      endDate={to}
+                      poll={poll}
+                      cursor={null}
+                    >
+                      {({
+                        uncommonProcesses,
+                        totalCount,
+                        loading,
+                        pageInfo,
+                        loadMore,
+                        id,
+                        refetch,
+                      }) => (
+                        <UncommonProcessTableManage
+                          id={id}
+                          refetch={refetch}
+                          setQuery={setQuery}
+                          loading={loading}
+                          startDate={from}
+                          data={uncommonProcesses}
+                          totalCount={totalCount}
+                          nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                          loadMore={loadMore}
+                        />
+                      )}
+                    </UncommonProcessesQuery>
+                    <AuthenticationsQuery
+                      sourceId="default"
+                      startDate={from}
+                      endDate={to}
+                      poll={poll}
+                    >
+                      {({
+                        authentications,
+                        totalCount,
+                        loading,
+                        pageInfo,
+                        loadMore,
+                        id,
+                        refetch,
+                      }) => (
+                        <AuthenticationTableManage
+                          id={id}
+                          refetch={refetch}
+                          setQuery={setQuery}
+                          loading={loading}
+                          startDate={from}
+                          data={authentications}
+                          totalCount={totalCount}
+                          nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                          loadMore={loadMore}
+                        />
+                      )}
+                    </AuthenticationsQuery>
+                    <EventsQuery sourceId="default" startDate={from} endDate={to} poll={poll}>
+                      {({ events, loading, id, refetch, totalCount, pageInfo, loadMore }) => (
+                        <EventsTableManage
+                          id={id}
+                          refetch={refetch}
+                          setQuery={setQuery}
+                          data={events!}
+                          loading={loading}
+                          startDate={from}
+                          totalCount={totalCount}
+                          nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                          tiebreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)!}
+                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                          loadMore={loadMore}
+                        />
+                      )}
+                    </EventsQuery>
+                  </>
                 )}
-              </HostsQuery>
-              <UncommonProcessesQuery
-                sourceId="default"
-                startDate={from}
-                endDate={to}
-                poll={poll}
-                cursor={null}
-              >
-                {({ uncommonProcesses, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
-                  <UncommonProcessTableManage
-                    id={id}
-                    refetch={refetch}
-                    setQuery={setQuery}
-                    loading={loading}
-                    startDate={from}
-                    data={uncommonProcesses}
-                    totalCount={totalCount}
-                    nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                    hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                    loadMore={loadMore}
-                  />
-                )}
-              </UncommonProcessesQuery>
-              <AuthenticationsQuery sourceId="default" startDate={from} endDate={to} poll={poll}>
-                {({ authentications, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
-                  <AuthenticationTableManage
-                    id={id}
-                    refetch={refetch}
-                    setQuery={setQuery}
-                    loading={loading}
-                    startDate={from}
-                    data={authentications}
-                    totalCount={totalCount}
-                    nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                    hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                    loadMore={loadMore}
-                  />
-                )}
-              </AuthenticationsQuery>
-              <EventsQuery sourceId="default" startDate={from} endDate={to} poll={poll}>
-                {({ events, loading, id, refetch, totalCount, pageInfo, loadMore }) => (
-                  <EventsTableManage
-                    id={id}
-                    refetch={refetch}
-                    setQuery={setQuery}
-                    data={events!}
-                    loading={loading}
-                    startDate={from}
-                    totalCount={totalCount}
-                    nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                    tiebreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)!}
-                    hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                    loadMore={loadMore}
-                  />
-                )}
-              </EventsQuery>
-            </>
-          )}
-        </GlobalTime>
-      ) : (
-        <EmptyPage
-          title={i18n.NO_AUDITBEAT_INDICES}
-          message={i18n.LETS_ADD_SOME}
-          actionLabel={i18n.SETUP_INSTRUCTIONS}
-          actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/security`}
-        />
-      )
-    }
-  </WithSource>
+              </GlobalTime>
+            </PaneScrollContainer>
+          </>
+        ) : (
+          <EmptyPage
+            title={i18n.NO_AUDITBEAT_INDICES}
+            message={i18n.LETS_ADD_SOME}
+            actionLabel={i18n.SETUP_INSTRUCTIONS}
+            actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/security`}
+          />
+        )
+      }
+    </WithSource>
+  </Pane>
 ));

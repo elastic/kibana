@@ -13,7 +13,7 @@ import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 
 import { AuthenticationsEdges } from '../../../../graphql/types';
-import { authenticationsSelector, hostsActions, State } from '../../../../store';
+import { hostsActions, hostsSelectors, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
@@ -93,7 +93,7 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
   )
 );
 
-const mapStateToProps = (state: State) => authenticationsSelector(state);
+const mapStateToProps = (state: State) => hostsSelectors.authenticationsSelector(state);
 
 export const AuthenticationTable = connect(
   mapStateToProps,

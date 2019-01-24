@@ -5,6 +5,6 @@
  */
 
 export * from './drag_and_drop';
-export * from './hosts';
+export { hostsSelectors } from './hosts';
 export * from './inputs';
 export * from './timeline';

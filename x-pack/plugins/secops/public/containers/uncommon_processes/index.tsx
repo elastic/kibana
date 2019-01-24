@@ -12,8 +12,7 @@ import { pure } from 'recompose';
 
 import { ESQuery } from '../../../common/typed_json';
 import { GetUncommonProcessesQuery, PageInfo, UncommonProcessesEdges } from '../../graphql/types';
-import { inputsModel, State } from '../../store';
-import { uncommonProcessesSelector } from '../../store';
+import { hostsSelectors, inputsModel, State } from '../../store';
 import { createFilter } from '../helpers';
 import { uncommonProcessesQuery } from './index.gql_query';
 
@@ -118,6 +117,6 @@ const UncommonProcessesComponentQuery = pure<UncommonProcessesProps>(
   )
 );
 
-const mapStateToProps = (state: State) => uncommonProcessesSelector(state);
+const mapStateToProps = (state: State) => hostsSelectors.uncommonProcessesSelector(state);
 
 export const UncommonProcessesQuery = connect(mapStateToProps)(UncommonProcessesComponentQuery);

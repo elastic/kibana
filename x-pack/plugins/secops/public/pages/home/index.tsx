@@ -13,7 +13,7 @@ import {
 import * as darkTheme from '@elastic/eui/dist/eui_theme_k6_dark.json';
 import * as lightTheme from '@elastic/eui/dist/eui_theme_k6_light.json';
 
-import { defaultTo, noop } from 'lodash/fp';
+import { defaultTo } from 'lodash/fp';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { Redirect, Route, Switch } from 'react-router-dom';
@@ -27,14 +27,7 @@ import { AutoSizer } from '../../components/auto_sizer';
 import { DragDropContextWrapper } from '../../components/drag_and_drop/drag_drop_context_wrapper';
 import { Flyout, flyoutHeaderHeight } from '../../components/flyout';
 import { LinkToPage } from '../../components/link_to';
-import {
-  PageContainer,
-  PageContent,
-  PageHeader,
-  Pane,
-  PaneHeader,
-  PaneScrollContainer,
-} from '../../components/page';
+import { PageContainer, PageContent, PageHeader } from '../../components/page';
 import { Footer } from '../../components/page/footer';
 import { Navigation } from '../../components/page/navigation';
 import { RangeDatePicker } from '../../components/range_date_picker';
@@ -124,21 +117,14 @@ const HomePageComponent = pure<Props>(({ theme }) => (
                 </HeaderFlexGroup>
               </PageHeader>
               <PageContent data-test-subj="pageContent">
-                <Pane data-test-subj="pane">
-                  <PaneHeader data-test-subj="paneHeader">
-                    <EuiSearchBar onChange={noop} />
-                  </PaneHeader>
-                  <PaneScrollContainer data-test-subj="pane1ScrollContainer">
-                    <Switch>
-                      <Redirect from="/" exact={true} to="/overview" />
-                      <Route path="/overview" component={Overview} />
-                      <Route path="/hosts" component={HostsContainer} />
-                      <Route path="/network" component={Network} />
-                      <Route path="/link-to" component={LinkToPage} />
-                      <Route component={NotFoundPage} />
-                    </Switch>
-                  </PaneScrollContainer>
-                </Pane>
+                <Switch>
+                  <Redirect from="/" exact={true} to="/overview" />
+                  <Route path="/overview" component={Overview} />
+                  <Route path="/hosts" component={HostsContainer} />
+                  <Route path="/network" component={Network} />
+                  <Route path="/link-to" component={LinkToPage} />
+                  <Route component={NotFoundPage} />
+                </Switch>
               </PageContent>
               <Footer />
             </DragDropContextWrapper>

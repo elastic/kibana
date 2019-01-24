@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { fromKueryExpression } from '@kbn/es-query';
 import { createSelector } from 'reselect';
 
 import { State } from '../../reducer';
@@ -29,4 +30,34 @@ export const eventsSelector = createSelector(
 export const uncommonProcessesSelector = createSelector(
   hostsQuery,
   hosts => hosts.query.uncommonProcesses
+);
+
+export const hostsFilterQuery = createSelector(
+  hostsQuery,
+  hosts => (hosts.filterQuery ? hosts.filterQuery.query : null)
+);
+
+export const hostsFilterQueryAsJson = createSelector(
+  hostsQuery,
+  hosts => (hosts.filterQuery ? hosts.filterQuery.serializedQuery : null)
+);
+
+export const hostsFilterQueryDraft = createSelector(
+  hostsQuery,
+  hosts => hosts.filterQueryDraft
+);
+
+export const isHostFilterQueryDraftValid = createSelector(
+  hostsFilterQueryDraft,
+  filterQueryDraft => {
+    if (filterQueryDraft && filterQueryDraft.kind === 'kuery') {
+      try {
+        fromKueryExpression(filterQueryDraft.expression);
+      } catch (err) {
+        return false;
+      }
+    }
+
+    return true;
+  }
 );

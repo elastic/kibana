@@ -13,8 +13,10 @@ import { pure } from 'recompose';
 
 import { ESQuery } from '../../../common/typed_json';
 import { GetHostsTableQuery, GetHostSummaryQuery, HostsEdges, PageInfo } from '../../graphql/types';
-import { hostsSelector, inputsModel, State } from '../../store';
+import { hostsSelectors, inputsModel, State } from '../../store';
 import { createFilter } from '../helpers';
+
+export { HostsFilter } from './filter';
 
 export interface HostsArgs {
   id: string;
@@ -121,6 +123,6 @@ const HostsComponentQuery = pure<HostsProps>(
   )
 );
 
-const mapStateToProps = (state: State) => hostsSelector(state);
+const mapStateToProps = (state: State) => hostsSelectors.hostsSelector(state);
 
 export const HostsQuery = connect(mapStateToProps)(HostsComponentQuery);
