@@ -20,6 +20,7 @@
 export function TimePickerPageProvider({ getService }) {
   const log = getService('log');
   const retry = getService('retry');
+  const find = getService('find');
   const testSubjects = getService('testSubjects');
 
   class TimePickerPage {
@@ -60,7 +61,17 @@ export function TimePickerPageProvider({ getService }) {
     async getRefreshConfig(keepQuickSelectOpen = false) {
       await this.openQuickSelectTimeMenu();
       const interval = await testSubjects.getAttribute('superDatePickerRefreshIntervalInput', 'value');
-      const units = await testSubjects.getAttribute('superDatePickerRefreshIntervalUnitsSelect', 'value');
+
+      let selectedUnit;
+      const select = await testSubjects.find('superDatePickerRefreshIntervalUnitsSelect');
+      const options = await find.allDescendantDisplayedByCssSelector('option', select);
+      await Promise.all(options.map(async (optionElement) => {
+        const isSelected = await optionElement.isSelected();
+        if (isSelected) {
+          selectedUnit = await optionElement.getVisibleText();
+        }
+      }));
+
       const toggleButtonText = await testSubjects.getVisibleText('superDatePickerToggleRefreshButton');
       if (!keepQuickSelectOpen) {
         await this.closeQuickSelectTimeMenu();
@@ -68,7 +79,7 @@ export function TimePickerPageProvider({ getService }) {
 
       return {
         interval,
-        units,
+        units: selectedUnit,
         isPaused: toggleButtonText === 'Start' ? true : false
       };
     }
