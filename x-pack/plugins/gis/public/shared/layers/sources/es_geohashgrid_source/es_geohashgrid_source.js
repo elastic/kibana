@@ -23,7 +23,6 @@ import { createExtentFilter, makeGeohashGridPolygon } from '../../../../elastics
 import { AggConfigs } from 'ui/vis/agg_configs';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { convertToGeoJson } from './convert_to_geojson';
-import { ESSourceDetails } from '../../../components/es_source_details';
 import { VectorStyle } from '../../styles/vector_style';
 import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
@@ -92,15 +91,21 @@ export class ESGeohashGridSource extends VectorSource {
     );
   }
 
-  renderDetails() {
-    return (
-      <ESSourceDetails
-        source={this}
-        geoField={this._descriptor.geoField}
-        geoFieldType="Point field"
-        sourceType={ESGeohashGridSource.typeDisplayName}
-      />
-    );
+  async getImmutableProperties() {
+    let indexPatternTitle = this._descriptor.indexPatternId;
+    try {
+      const indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
+      indexPatternTitle = indexPattern.title;
+    } catch (error) {
+      // ignore error, title will just default to id
+    }
+
+    return [
+      { label: 'Data source', value: ESGeohashGridSource.title },
+      { label: 'Index pattern', value: indexPatternTitle },
+      { label: 'Geospatial field', value: this._descriptor.geoField },
+      { label: 'Show as', value: this._descriptor.requestType },
+    ];
   }
 
   destroy() {

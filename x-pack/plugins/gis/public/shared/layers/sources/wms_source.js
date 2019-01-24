@@ -8,7 +8,6 @@ import React, { Fragment } from 'react';
 
 import {
   EuiFieldText,
-  EuiText,
   EuiFormRow,
 } from '@elastic/eui';
 
@@ -39,20 +38,13 @@ export class WMSSource extends TMSSource {
     return (<WMSEditor previewWMS={previewWMS} />);
   }
 
-  renderDetails() {
-    return (
-      <EuiText color="subdued" size="s">
-        <p className="gisLayerDetails">
-          <strong className="gisLayerDetails__label">Type </strong><span>WMSSource.typeDisplayName</span><br/>
-          <strong className="gisLayerDetails__label">Service </strong>
-          <span className="eui-textBreakAll">{this._descriptor.serviceUrl}</span><br/>
-          <strong className="gisLayerDetails__label">Layers </strong>
-          <span className="eui-textBreakAll">{this._descriptor.layers}</span><br/>
-          <strong className="gisLayerDetails__label">Styles </strong>
-          <span className="eui-textBreakAll">{this._descriptor.styles}</span><br/>
-        </p>
-      </EuiText>
-    );
+  async getImmutableProperties() {
+    return [
+      { label: 'Data source', value: WMSSource.title },
+      { label: 'Url', value: this._descriptor.serviceUrl },
+      { label: 'Layers', value: this._descriptor.layers },
+      { label: 'Styles', value: this._descriptor.styles },
+    ];
   }
 
   _createDefaultLayerDescriptor(options) {

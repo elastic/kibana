@@ -20,17 +20,45 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiSpacer,
+  EuiAccordion,
+  EuiText,
+  EuiLink,
 } from '@elastic/eui';
 
 export class LayerPanel  extends React.Component {
 
-  state = {
-    displayName: null
+  static getDerivedStateFromProps(nextProps, prevState) {
+    const nextId = nextProps.selectedLayer.getId();
+    if (nextId !== prevState.prevId) {
+      return {
+        isLayerAsyncStateLoaded: false,
+        displayName: '',
+        immutableSourceProps: [],
+        prevId: nextId,
+      };
+    }
+
+    return null;
   }
+
+  state = {}
 
   componentDidMount() {
     this._isMounted = true;
     this.loadDisplayName();
+    this.loadImmutableSourceProperties();
+  }
+
+  componentDidUpdate() {
+    if (!this.state.isLayerAsyncStateLoaded) {
+      this.setState({
+        isLayerAsyncStateLoaded: true
+      },
+      () => {
+        this.loadDisplayName();
+        this.loadImmutableSourceProperties();
+      });
+    }
   }
 
   componentWillUnmount() {
@@ -41,6 +69,13 @@ export class LayerPanel  extends React.Component {
     const displayName = await this.props.selectedLayer.getDisplayName();
     if (this._isMounted) {
       this.setState({ displayName });
+    }
+  }
+
+  loadImmutableSourceProperties = async () => {
+    const immutableSourceProps = await this.props.selectedLayer.getImmutableSourceProperties();
+    if (this._isMounted) {
+      this.setState({ immutableSourceProps });
     }
   }
 
@@ -57,6 +92,23 @@ export class LayerPanel  extends React.Component {
         <EuiSpacer size="s" />
       </Fragment>
     );
+  }
+
+  _renderSourceProperties() {
+    return this.state.immutableSourceProps.map(({ label, value, link }) => {
+      function renderValue() {
+        if (link) {
+          return (<EuiLink href={link} target="_blank">{value}</EuiLink>);
+        }
+        return (<span>{value}</span>);
+      }
+      return (
+        <p key={label}>
+          <strong className="gisLayerDetails__label">{label}</strong>
+          {renderValue()}
+        </p>
+      );
+    });
   }
 
   render() {
@@ -78,6 +130,16 @@ export class LayerPanel  extends React.Component {
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiAccordion
+            id="accordion1"
+            buttonContent="Source details"
+          >
+            <EuiText color="subdued" size="s">
+              <div className="gisLayerDetails">
+                {this._renderSourceProperties()}
+              </div>
+            </EuiText>
+          </EuiAccordion>
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody className="gisLayerPanel__body">

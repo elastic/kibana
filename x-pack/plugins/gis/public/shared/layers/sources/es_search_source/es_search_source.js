@@ -17,7 +17,6 @@ import {
 } from '../../../../kibana_services';
 import { hitsToGeoJson, createExtentFilter } from '../../../../elasticsearch_geo_utils';
 import { timefilter } from 'ui/timefilter/timefilter';
-import { ESSourceDetails } from '../../../components/es_source_details';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 
@@ -98,15 +97,26 @@ export class ESSearchSource extends VectorSource {
     return  [this._descriptor.indexPatternId];
   }
 
-  renderDetails() {
-    return (
-      <ESSourceDetails
-        source={this}
-        geoField={this._descriptor.geoField}
-        geoFieldType="Shape field"
-        sourceType={ESSearchSource.typeDisplayName}
-      />
-    );
+  async getImmutableProperties() {
+    let indexPatternTitle = this._descriptor.indexPatternId;
+    let geoFieldType = '';
+    try {
+      const indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
+      indexPatternTitle = indexPattern.title;
+      const geoField = indexPattern.fields.byName[this._descriptor.geoField];
+      if (geoField) {
+        geoFieldType = geoField.type;
+      }
+    } catch (error) {
+      // ignore error, title will just default to id
+    }
+
+    return [
+      { label: 'Data source', value: ESSearchSource.title },
+      { label: 'Index pattern', value: indexPatternTitle },
+      { label: 'Geospatial field', value: this._descriptor.geoField },
+      { label: 'Geospatial field type', value: geoFieldType },
+    ];
   }
 
   async _getIndexPattern() {

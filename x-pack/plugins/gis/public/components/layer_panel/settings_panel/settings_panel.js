@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, Fragment } from 'react';
+import React from 'react';
 
 import {
   EuiFlexGroup,
@@ -15,46 +15,35 @@ import {
   EuiFieldText,
   EuiRange,
   EuiSpacer,
-  EuiLink,
 } from '@elastic/eui';
 import { ValidatedRange } from '../../../shared/components/validated_range';
 
-export class SettingsPanel extends Component {
+export function SettingsPanel(props) {
 
-  state = {
-    showSourceDetails: false,
-  }
-
-  toggleSourceDetails = () => {
-    this.setState((prevState) => ({
-      showSourceDetails: !prevState.showSourceDetails,
-    }));
-  }
-
-  onLabelChange = (event) => {
+  const onLabelChange = (event) => {
     const label = event.target.value;
-    this.props.updateLabel(this.props.layerId, label);
-  }
+    props.updateLabel(props.layerId, label);
+  };
 
-  onMinZoomChange = (event) => {
+  const onMinZoomChange = (event) => {
     const zoom = parseInt(event.target.value, 10);
-    this.props.updateMinZoom(this.props.layerId, zoom);
-  }
+    props.updateMinZoom(props.layerId, zoom);
+  };
 
-  onMaxZoomChange = (event) => {
+  const onMaxZoomChange = (event) => {
     const zoom = parseInt(event.target.value, 10);
-    this.props.updateMaxZoom(this.props.layerId, zoom);
-  }
+    props.updateMaxZoom(props.layerId, zoom);
+  };
 
-  onAlphaChange = (alpha) => {
-    this.props.updateAlpha(this.props.layerId, alpha);
-  }
+  const onAlphaChange = (alpha) => {
+    props.updateAlpha(props.layerId, alpha);
+  };
 
-  onSourceChange = ({ propName, value }) => {
-    this.props.updateSourceProp(this.props.layerId, propName, value);
-  }
+  const onSourceChange = ({ propName, value }) => {
+    props.updateSourceProp(props.layerId, propName, value);
+  };
 
-  renderZoomSliders() {
+  const renderZoomSliders = () => {
     return (
       <EuiFormRow
         helpText="Display layer when map is within zoom level range."
@@ -67,8 +56,8 @@ export class SettingsPanel extends Component {
               <EuiRange
                 min={0}
                 max={24}
-                value={this.props.minZoom.toString()}
-                onChange={this.onMinZoomChange}
+                value={props.minZoom.toString()}
+                onChange={onMinZoomChange}
                 showInput
                 showRange
               />
@@ -81,8 +70,8 @@ export class SettingsPanel extends Component {
               <EuiRange
                 min={0}
                 max={24}
-                value={this.props.maxZoom.toString()}
-                onChange={this.onMaxZoomChange}
+                value={props.maxZoom.toString()}
+                onChange={onMaxZoomChange}
                 showInput
                 showRange
               />
@@ -91,22 +80,22 @@ export class SettingsPanel extends Component {
         </EuiFlexGroup>
       </EuiFormRow>
     );
-  }
+  };
 
-  renderLabel() {
+  const renderLabel = () => {
     return (
       <EuiFormRow
         label="Layer display name"
       >
         <EuiFieldText
-          value={this.props.label}
-          onChange={this.onLabelChange}
+          value={props.label}
+          onChange={onLabelChange}
         />
       </EuiFormRow>
     );
-  }
+  };
 
-  renderAlphaSlider() {
+  const renderAlphaSlider = () => {
     return (
       <EuiFormRow
         label="Layer transparency"
@@ -116,8 +105,8 @@ export class SettingsPanel extends Component {
             min={.00}
             max={1.00}
             step={.05}
-            value={this.props.alpha}
-            onChange={this.onAlphaChange}
+            value={props.alpha}
+            onChange={onAlphaChange}
             showLabels
             showInput
             showRange
@@ -125,50 +114,26 @@ export class SettingsPanel extends Component {
         </div>
       </EuiFormRow>
     );
-  }
+  };
 
-  renderSourceDetails() {
-    if (!this.state.showSourceDetails) {
-      return null;
-    }
+  return (
+    <EuiPanel>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiTitle size="xs"><h5>Settings</h5></EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-    return (
-      <Fragment>
-        {this.props.renderSourceDetails()}
-        <EuiSpacer margin="m"/>
-      </Fragment>
-    );
-  }
+      <EuiSpacer margin="m"/>
 
-  render() {
-    return (
-      <EuiPanel>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiTitle size="xs"><h5>Settings</h5></EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLink
-              onClick={this.toggleSourceDetails}
-            >
-              source details
-            </EuiLink>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      {renderLabel()}
 
-        <EuiSpacer margin="m"/>
+      {renderZoomSliders()}
 
-        {this.renderSourceDetails()}
+      {renderAlphaSlider()}
 
-        {this.renderLabel()}
+      {props.renderSourceSettingsEditor({ onChange: onSourceChange })}
 
-        {this.renderZoomSliders()}
-
-        {this.renderAlphaSlider()}
-
-        {this.props.renderSourceSettingsEditor({ onChange: this.onSourceChange })}
-
-      </EuiPanel>
-    );
-  }
+    </EuiPanel>
+  );
 }

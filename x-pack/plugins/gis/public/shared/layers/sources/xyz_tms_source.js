@@ -8,7 +8,6 @@ import React from 'react';
 
 import {
   EuiFieldText,
-  EuiText,
   EuiFormRow,
 } from '@elastic/eui';
 
@@ -37,16 +36,11 @@ export class XYZTMSSource extends TMSSource {
     return (<XYZTMSEditor previewTMS={previewTMS} />);
   }
 
-  renderDetails() {
-    return (
-      <EuiText color="subdued" size="s">
-        <p className="gisLayerDetails">
-          <strong className="gisLayerDetails__label">Type </strong><span>Tile</span><br/>
-          <strong className="gisLayerDetails__label">Url </strong>
-          <span className="eui-textBreakAll">{this._descriptor.urlTemplate}</span><br/>
-        </p>
-      </EuiText>
-    );
+  async getImmutableProperties() {
+    return [
+      { label: 'Data source', value: XYZTMSSource.title },
+      { label: 'Url', value: this._descriptor.urlTemplate },
+    ];
   }
 
   _createDefaultLayerDescriptor(options) {

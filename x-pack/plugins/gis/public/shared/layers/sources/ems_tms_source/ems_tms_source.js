@@ -7,7 +7,6 @@ import React from 'react';
 import { TMSSource } from '../tms_source';
 import { TileLayer } from '../../tile_layer';
 import {
-  EuiText,
   EuiSelect,
   EuiFormRow,
 } from '@elastic/eui';
@@ -58,16 +57,11 @@ export class EMSTMSSource extends TMSSource {
     this._emsTileServices = emsTmsServices;
   }
 
-  renderDetails() {
-    return (
-      <EuiText color="subdued" size="s">
-        <p className="gisLayerDetails">
-          <strong className="gisLayerDetails__label">Source </strong><span>Elastic Maps Service</span><br/>
-          <strong className="gisLayerDetails__label">Type </strong><span>Tile</span><br/>
-          <strong className="gisLayerDetails__label">Id </strong><span>{this._descriptor.id}</span><br/>
-        </p>
-      </EuiText>
-    );
+  async getImmutableProperties() {
+    return [
+      { label: 'Data source', value: EMSTMSSource.title },
+      { label: 'Tile service', value: this._descriptor.id }
+    ];
   }
 
   _getTMSOptions() {

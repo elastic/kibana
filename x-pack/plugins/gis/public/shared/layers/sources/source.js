@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-
 export class ASource {
 
   static renderEditor() {
@@ -26,8 +24,12 @@ export class ASource {
 
   destroy() {}
 
-  renderDetails() {
-    return (<div>{`Here be details for source`}</div>);
+  /**
+   * return list of immutable source properties.
+   * Immutable source properties are properties that can not be edited by the user.
+   */
+  async getImmutableProperties() {
+    return [];
   }
 
   _createDefaultLayerDescriptor() {

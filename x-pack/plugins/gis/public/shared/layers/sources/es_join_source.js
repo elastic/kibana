@@ -5,8 +5,6 @@
  */
 
 import _ from 'lodash';
-import React, { Fragment } from 'react';
-
 import { ASource } from './source';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import {
@@ -66,10 +64,6 @@ export class ESJoinSource extends ASource {
 
   static renderEditor({}) {
     return `<div>editor details</div>`;
-  }
-
-  renderDetails() {
-    return (<Fragment>table source details</Fragment>);
   }
 
   hasCompleteConfig() {
