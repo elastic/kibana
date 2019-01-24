@@ -16,6 +16,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiCode,
   EuiDescribedFormGroup,
   EuiFlexGroup,
   EuiFlexItem,
@@ -511,7 +512,7 @@ export const FollowerIndexForm = injectI18n(
               <Fragment>
                 <EuiSpacer size="s"/>
                 {advancedSettingsFields.map((advancedSetting) => {
-                  const { field, title, description, label, helpText } = advancedSetting;
+                  const { field, title, description, label, helpText, defaultValue } = advancedSetting;
                   return (
                     <FormEntryRow
                       key={field}
@@ -523,7 +524,19 @@ export const FollowerIndexForm = injectI18n(
                           <h3>{title}</h3>
                         </EuiTitle>
                       )}
-                      description={description}
+                      description={(
+                        <Fragment>
+                          {description}
+                          <EuiSpacer size="s" />
+                          <EuiText size="xs">
+                            <FormattedMessage
+                              id="xpack.crossClusterReplication.followerIndexForm.advancedSettingsDefaultLabel"
+                              defaultMessage="Default:"
+                            />{' '}
+                            <EuiCode>{defaultValue}</EuiCode>
+                          </EuiText>
+                        </Fragment>
+                      )}
                       label={label}
                       helpText={helpText}
                       areErrorsVisible={areErrorsVisible}

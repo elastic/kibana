@@ -35,9 +35,30 @@ export const registerFollowerIndexRoutes = (server) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
-        const response = await callWithRequest('ccr.stats');
+        const {
+          follower_indices: followerIndices
+        }  = await callWithRequest('ccr.info', { id: '_all' });
+
+        const {
+          follow_stats: {
+            indices: followerIndicesStats
+          }
+        } = await callWithRequest('ccr.stats');
+
+        const followerIndicesStatsMap = followerIndicesStats.reduce((map, stats) => {
+          map[stats.index] = stats;
+          return map;
+        }, {});
+
+        const collatedFollowerIndices = followerIndices.map(followerIndex => {
+          return {
+            ...followerIndex,
+            ...followerIndicesStatsMap[followerIndex.follower_index]
+          };
+        });
+
         return ({
-          indices: deserializeListFollowerIndices(response.follow_stats.indices)
+          indices: deserializeListFollowerIndices(collatedFollowerIndices)
         });
       } catch(err) {
         if (isEsError(err)) {
@@ -62,15 +83,25 @@ export const registerFollowerIndexRoutes = (server) => {
       const { id } = request.params;
 
       try {
-        const response = await callWithRequest('ccr.followerIndexStats', { id });
-        const followerIndex = response.indices[0];
+        const {
+          follower_indices: followerIndices
+        }  = await callWithRequest('ccr.info', { id });
 
-        if (!followerIndex) {
+        const followerIndexInfo = followerIndices && followerIndices[0];
+
+        if(!followerIndexInfo) {
           const error = Boom.notFound(`The follower index "${id}" does not exist.`);
           throw(error);
         }
 
-        return deserializeFollowerIndex(followerIndex);
+        const {
+          indices: followerIndicesStats
+        } = await callWithRequest('ccr.followerIndexStats', { id });
+
+        return deserializeFollowerIndex({
+          ...followerIndexInfo,
+          ...(followerIndicesStats ? followerIndicesStats[0] : {})
+        });
       } catch(err) {
         if (isEsError(err)) {
           throw wrapEsError(err);
@@ -117,12 +148,15 @@ export const registerFollowerIndexRoutes = (server) => {
     handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { id: _id } = request.params;
+      const { isPaused = false } = request.payload;
       const body = removeEmptyFields(serializeAdvancedSettings(request.payload));
 
       // We need to first pause the follower and then resume it passing the advanced settings
       try {
-        // Pause follower
-        await callWithRequest('ccr.pauseFollowerIndex', { id: _id });
+        // Pause follower if not already paused
+        if(!isPaused) {
+          await callWithRequest('ccr.pauseFollowerIndex', { id: _id });
+        }
 
         // Resume follower
         return await callWithRequest('ccr.resumeFollowerIndex', { id: _id, body });
@@ -227,8 +261,12 @@ export const registerFollowerIndexRoutes = (server) => {
 
       await Promise.all(ids.map(async (_id) => {
         try {
-          // Pause follower
-          await callWithRequest('ccr.pauseFollowerIndex', { id: _id });
+          // Try to pause follower, let it fail silently since it may already be paused
+          try {
+            await callWithRequest('ccr.pauseFollowerIndex', { id: _id });
+          } catch (e) {
+            // Swallow errors
+          }
 
           // Close index
           await callWithRequest('indices.close', { index: _id });

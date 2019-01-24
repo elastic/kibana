@@ -8,6 +8,7 @@ import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import {
+  EuiHealth,
   EuiIcon,
   EuiInMemoryTable,
   EuiLink,
@@ -72,8 +73,7 @@ export const FollowerIndicesTable = injectI18n(
       const actions = [
         /* Pause or resume follower index */
         {
-          render: ({ name, shards }) => {
-            const isPaused = !shards || !shards.length;
+          render: ({ name, isPaused }) => {
             const label = isPaused
               ? intl.formatMessage({
                 id: 'xpack.crossClusterReplication.followerIndexList.table.actionResumeDescription',
@@ -91,7 +91,6 @@ export const FollowerIndicesTable = injectI18n(
                     <EuiIcon
                       aria-label={label}
                       type="play"
-                      color="primary"
                       className="euiContextMenu__icon"
                     />
                     <span>{label}</span>
@@ -105,7 +104,6 @@ export const FollowerIndicesTable = injectI18n(
                     <EuiIcon
                       aria-label={label}
                       type="pause"
-                      color="primary"
                       className="euiContextMenu__icon"
                     />
                     <span>{label}</span>
@@ -128,7 +126,6 @@ export const FollowerIndicesTable = injectI18n(
                 <EuiIcon
                   aria-label={label}
                   type="pencil"
-                  color="primary"
                   className="euiContextMenu__icon"
                 />
                 <span>{label}</span>
@@ -151,7 +148,6 @@ export const FollowerIndicesTable = injectI18n(
                     <EuiIcon
                       aria-label={label}
                       type="indexFlush"
-                      color="danger"
                       className="euiContextMenu__icon"
                     />
                     <span>{label}</span>
@@ -179,24 +175,28 @@ export const FollowerIndicesTable = injectI18n(
           );
         }
       }, {
-        field: 'shards',
+        field: 'isPaused',
         name: intl.formatMessage({
           id: 'xpack.crossClusterReplication.followerIndexList.table.statusColumnTitle',
           defaultMessage: 'Status',
         }),
         truncateText: true,
         sortable: true,
-        render: (shards) => {
-          return shards && shards.length ? (
-            <FormattedMessage
-              id="xpack.crossClusterReplication.followerIndexList.table.activeStatus"
-              defaultMessage="Active"
-            />
+        render: (isPaused) => {
+          return isPaused ? (
+            <EuiHealth color="subdued">
+              <FormattedMessage
+                id="xpack.crossClusterReplication.followerIndexList.table.pausedStatus"
+                defaultMessage="Paused"
+              />
+            </EuiHealth>
           ) : (
-            <FormattedMessage
-              id="xpack.crossClusterReplication.followerIndexList.table.pausedStatus"
-              defaultMessage="Paused"
-            />
+            <EuiHealth color="success">
+              <FormattedMessage
+                id="xpack.crossClusterReplication.followerIndexList.table.activeStatus"
+                defaultMessage="Active"
+              />
+            </EuiHealth>
           );
         }
       }, {

@@ -8,6 +8,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { byteUnitsUrl, timeUnitsUrl } from '../../services/documentation_links';
+import { getSettingDefault } from '../../services/follower_index_default_settings';
 
 const byteUnitsHelpText = (
   <FormattedMessage
@@ -57,6 +58,7 @@ export const advancedSettingsFields = [
         defaultMessage: 'Max read request operation count (optional)'
       }
     ),
+    defaultValue: getSettingDefault('maxReadRequestOperationCount'),
     type: 'number',
   }, {
     field: 'maxOutstandingReadRequests',
@@ -73,6 +75,7 @@ export const advancedSettingsFields = [
         defaultMessage: 'Max outstanding read requests (optional)'
       }
     ),
+    defaultValue: getSettingDefault('maxOutstandingReadRequests'),
     type: 'number',
   }, {
     field: 'maxReadRequestSize',
@@ -89,6 +92,7 @@ export const advancedSettingsFields = [
         defaultMessage: 'Max read request size (optional)'
       }
     ),
+    defaultValue: getSettingDefault('maxReadRequestSize'),
     helpText: byteUnitsHelpText,
   }, {
     field: 'maxWriteRequestOperationCount',
@@ -107,6 +111,7 @@ export const advancedSettingsFields = [
         defaultMessage: 'Max write request operation count (optional)'
       }
     ),
+    defaultValue: getSettingDefault('maxWriteRequestOperationCount'),
     type: 'number',
   }, {
     field: 'maxWriteRequestSize',
@@ -125,6 +130,7 @@ export const advancedSettingsFields = [
         defaultMessage: 'Max write request size (optional)'
       }
     ),
+    defaultValue: getSettingDefault('maxWriteRequestSize'),
     helpText: byteUnitsHelpText,
   }, {
     field: 'maxOutstandingWriteRequests',
@@ -143,6 +149,7 @@ export const advancedSettingsFields = [
         defaultMessage: 'Max outstanding write requests (optional)'
       }
     ),
+    defaultValue: getSettingDefault('maxOutstandingWriteRequests'),
     type: 'number',
   }, {
     field: 'maxWriteBufferCount',
@@ -163,6 +170,7 @@ export const advancedSettingsFields = [
         defaultMessage: 'Max write buffer count (optional)'
       }
     ),
+    defaultValue: getSettingDefault('maxWriteBufferCount'),
     type: 'number',
   }, {
     field: 'maxWriteBufferSize',
@@ -183,6 +191,7 @@ export const advancedSettingsFields = [
         defaultMessage: 'Max write buffer size (optional)'
       }
     ),
+    defaultValue: getSettingDefault('maxWriteBufferSize'),
     helpText: byteUnitsHelpText,
   }, {
     field: 'maxRetryDelay',
@@ -202,6 +211,7 @@ export const advancedSettingsFields = [
         defaultMessage: 'Max retry delay (optional)'
       }
     ),
+    defaultValue: getSettingDefault('maxRetryDelay'),
     helpText: timeUnitsHelpText,
   }, {
     field: 'readPollTimeout',
@@ -223,6 +233,7 @@ export const advancedSettingsFields = [
         defaultMessage: 'Read poll timeout (optional)'
       }
     ),
+    defaultValue: getSettingDefault('readPollTimeout'),
     helpText: timeUnitsHelpText,
   },
 ];

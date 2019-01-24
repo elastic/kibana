@@ -12,6 +12,8 @@ export {
 export { esErrors } from './es_errors';
 
 export {
-  getFollowerIndexMock,
-  getFollowerIndexListMock,
+  getFollowerIndexStatsMock,
+  getFollowerIndexListStatsMock,
+  getFollowerIndexInfoMock,
+  getFollowerIndexListInfoMock,
 } from './follower_index';

@@ -63,10 +63,43 @@ export const deserializeShard = ({
 });
 /* eslint-enable camelcase */
 
-export const deserializeFollowerIndex = ({ index, shards }) => ({
-  name: index,
-  shards: shards.map(deserializeShard),
+/* eslint-disable camelcase */
+export const deserializeFollowerIndex = ({
+  follower_index,
+  remote_cluster,
+  leader_index,
+  status,
+  parameters: {
+    max_read_request_operation_count,
+    max_outstanding_read_requests,
+    max_read_request_size,
+    max_write_request_operation_count,
+    max_write_request_size,
+    max_outstanding_write_requests,
+    max_write_buffer_count,
+    max_write_buffer_size,
+    max_retry_delay,
+    read_poll_timeout,
+  } = {},
+  shards,
+}) => ({
+  name: follower_index,
+  remoteCluster: remote_cluster,
+  leaderIndex: leader_index,
+  status,
+  maxReadRequestOperationCount: max_read_request_operation_count,
+  maxOutstandingReadRequests: max_outstanding_read_requests,
+  maxReadRequestSize: max_read_request_size,
+  maxWriteRequestOperationCount: max_write_request_operation_count,
+  maxWriteRequestSize: max_write_request_size,
+  maxOutstandingWriteRequests: max_outstanding_write_requests,
+  maxWriteBufferCount: max_write_buffer_count,
+  maxWriteBufferSize: max_write_buffer_size,
+  maxRetryDelay: max_retry_delay,
+  readPollTimeout: read_poll_timeout,
+  shards: shards && shards.map(deserializeShard),
 });
+/* eslint-enable camelcase */
 
 export const deserializeListFollowerIndices = followerIndices =>
   followerIndices.map(deserializeFollowerIndex);

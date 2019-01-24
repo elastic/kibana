@@ -7,7 +7,7 @@
 const Chance = require('chance'); // eslint-disable-line import/no-extraneous-dependencies
 const chance = new Chance();
 
-export const getFollowerIndexMock = (
+export const getFollowerIndexStatsMock = (
   name = chance.string(),
   shards = [{
     id: chance.string(),
@@ -100,16 +100,59 @@ export const getFollowerIndexMock = (
   };
 };
 
-export const getFollowerIndexListMock = (total = 3) => {
+export const getFollowerIndexListStatsMock = (total = 3, names) => {
   const list = {
     follow_stats: {
       indices: [],
     },
   };
 
-  let i = total;
-  while(i--) {
-    list.follow_stats.indices.push(getFollowerIndexMock());
+  for(let i = 0; i < total; i++) {
+    list.follow_stats.indices.push(getFollowerIndexStatsMock(names[i]));
+  }
+
+  return list;
+};
+
+export const getFollowerIndexInfoMock = (
+  name = chance.string(),
+  status = chance.string(),
+  parameters = {
+    maxReadRequestOperationCount: chance.string(),
+    maxOutstandingReadRequests: chance.string(),
+    maxReadRequestSize: chance.string(),
+    maxWriteRequestOperationCount: chance.string(),
+    maxWriteRequestSize: chance.string(),
+    maxOutstandingWriteRequests: chance.string(),
+    maxWriteBufferCount: chance.string(),
+    maxWriteBufferSize: chance.string(),
+    maxRetryDelay: chance.string(),
+    readPollTimeout: chance.string(),
+  }
+) => {
+  return {
+    follower_index: name,
+    status,
+    max_read_request_operation_count: parameters.maxReadRequestOperationCount,
+    max_outstanding_read_requests: parameters.maxOutstandingReadRequests,
+    max_read_request_size: parameters.maxReadRequestSize,
+    max_write_request_operation_count: parameters.maxWriteRequestOperationCount,
+    max_write_request_size: parameters.maxWriteRequestSize,
+    max_outstanding_write_requests: parameters.maxOutstandingWriteRequests,
+    max_write_buffer_count: parameters.maxWriteBufferCount,
+    max_write_buffer_size: parameters.maxWriteBufferSize,
+    max_retry_delay: parameters.maxRetryDelay,
+    read_poll_timeout: parameters.readPollTimeout,
+  };
+};
+
+export const getFollowerIndexListInfoMock = (total = 3) => {
+  const list = {
+    follower_indices: [],
+  };
+
+  for(let i = 0; i < total; i++) {
+    list.follower_indices.push(getFollowerIndexInfoMock());
   }
 
   return list;

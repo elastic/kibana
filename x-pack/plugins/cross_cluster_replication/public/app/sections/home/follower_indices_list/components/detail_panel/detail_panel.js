@@ -21,6 +21,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiHealth,
   EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
@@ -35,7 +36,8 @@ import 'brace/theme/textmate';
 import { ContextMenu } from '../context_menu';
 
 import { API_STATUS } from '../../../../../constants';
-// import routing from '../../../../../services/routing';
+import { isSettingDefault } from '../../../../../services/follower_index_default_settings';
+
 
 export class DetailPanelUi extends Component {
   static propTypes = {
@@ -45,13 +47,41 @@ export class DetailPanelUi extends Component {
     closeDetailPanel: PropTypes.func.isRequired,
   }
 
+  renderSetting(name, value) {
+    if(isSettingDefault(name, value)) {
+      return (
+        <Fragment>
+          {value}{' '}
+          <em>
+            <FormattedMessage
+              id="xpack.crossClusterReplication.followerIndexDetailPanel.defaultSettingLabel"
+              defaultMessage="(Default)"
+            />
+          </em>
+        </Fragment>
+      );
+    }
+    return value;
+  }
+
   renderFollowerIndex() {
     const {
       followerIndex: {
         name,
         remoteCluster,
         leaderIndex,
+        isPaused,
         shards,
+        maxReadRequestOperationCount,
+        maxOutstandingReadRequests,
+        maxReadRequestSize,
+        maxWriteRequestOperationCount,
+        maxWriteRequestSize,
+        maxOutstandingWriteRequests,
+        maxWriteBufferCount,
+        maxWriteBufferSize,
+        maxRetryDelay,
+        readPollTimeout,
       },
     } = this.props;
 
@@ -63,7 +93,7 @@ export class DetailPanelUi extends Component {
           <EuiTitle size="s">
             <h3>
               <FormattedMessage
-                id="xpack.crossClusterReplication.followerIndexDetailPanel.statusTitle"
+                id="xpack.crossClusterReplication.followerIndexDetailPanel.settingsTitle"
                 defaultMessage="Settings"
               />
             </h3>
@@ -72,6 +102,39 @@ export class DetailPanelUi extends Component {
           <EuiSpacer size="s" />
 
           <EuiDescriptionList>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiDescriptionListTitle>
+                  <EuiTitle size="xs">
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.followerIndexDetailPanel.statusLabel"
+                      defaultMessage="Status"
+                    />
+                  </EuiTitle>
+                </EuiDescriptionListTitle>
+
+                <EuiDescriptionListDescription>
+                  {isPaused ? (
+                    <EuiHealth color="subdued">
+                      <FormattedMessage
+                        id="xpack.crossClusterReplication.followerIndexDetailPanel.pausedStatus"
+                        defaultMessage="Paused"
+                      />
+                    </EuiHealth>
+                  ) : (
+                    <EuiHealth color="success">
+                      <FormattedMessage
+                        id="xpack.crossClusterReplication.followerIndexDetailPanel.activeStatus"
+                        defaultMessage="Active"
+                      />
+                    </EuiHealth>
+                  )}
+                </EuiDescriptionListDescription>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiSpacer size="s" />
+
             <EuiFlexGroup>
               <EuiFlexItem>
                 <EuiDescriptionListTitle>
@@ -104,6 +167,180 @@ export class DetailPanelUi extends Component {
               </EuiFlexItem>
             </EuiFlexGroup>
 
+            {isPaused ? null : (
+              <Fragment>
+                <EuiSpacer size="s" />
+
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <EuiDescriptionListTitle>
+                      <EuiTitle size="xs">
+                        <FormattedMessage
+                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestOperationCountTitle"
+                          defaultMessage="Max read request operation count"
+                        />
+                      </EuiTitle>
+                    </EuiDescriptionListTitle>
+
+                    <EuiDescriptionListDescription>
+                      {this.renderSetting('maxReadRequestOperationCount', maxReadRequestOperationCount)}
+                    </EuiDescriptionListDescription>
+                  </EuiFlexItem>
+
+                  <EuiFlexItem>
+                    <EuiDescriptionListTitle>
+                      <EuiTitle size="xs">
+                        <FormattedMessage
+                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingReadRequestsTitle"
+                          defaultMessage="Max outstanding read requests"
+                        />
+                      </EuiTitle>
+                    </EuiDescriptionListTitle>
+
+                    <EuiDescriptionListDescription>
+                      {this.renderSetting('maxOutstandingReadRequests', maxOutstandingReadRequests)}
+                    </EuiDescriptionListDescription>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+
+                <EuiSpacer size="s" />
+
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <EuiDescriptionListTitle>
+                      <EuiTitle size="xs">
+                        <FormattedMessage
+                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestSizeTitle"
+                          defaultMessage="Max read request size"
+                        />
+                      </EuiTitle>
+                    </EuiDescriptionListTitle>
+
+                    <EuiDescriptionListDescription>
+                      {this.renderSetting('maxReadRequestSize', maxReadRequestSize)}
+                    </EuiDescriptionListDescription>
+                  </EuiFlexItem>
+
+                  <EuiFlexItem>
+                    <EuiDescriptionListTitle>
+                      <EuiTitle size="xs">
+                        <FormattedMessage
+                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestOperationCountTitle"
+                          defaultMessage="Max write request operation count"
+                        />
+                      </EuiTitle>
+                    </EuiDescriptionListTitle>
+
+                    <EuiDescriptionListDescription>
+                      {this.renderSetting('maxWriteRequestOperationCount', maxWriteRequestOperationCount)}
+                    </EuiDescriptionListDescription>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+
+                <EuiSpacer size="s" />
+
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <EuiDescriptionListTitle>
+                      <EuiTitle size="xs">
+                        <FormattedMessage
+                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestSizeTitle"
+                          defaultMessage="Max write request size"
+                        />
+                      </EuiTitle>
+                    </EuiDescriptionListTitle>
+
+                    <EuiDescriptionListDescription>
+                      {this.renderSetting('maxWriteRequestSize', maxWriteRequestSize)}
+                    </EuiDescriptionListDescription>
+                  </EuiFlexItem>
+
+                  <EuiFlexItem>
+                    <EuiDescriptionListTitle>
+                      <EuiTitle size="xs">
+                        <FormattedMessage
+                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingWriteRequestsTitle"
+                          defaultMessage="Max outstanding write requests"
+                        />
+                      </EuiTitle>
+                    </EuiDescriptionListTitle>
+
+                    <EuiDescriptionListDescription>
+                      {this.renderSetting('maxOutstandingWriteRequests', maxOutstandingWriteRequests)}
+                    </EuiDescriptionListDescription>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+
+                <EuiSpacer size="s" />
+
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <EuiDescriptionListTitle>
+                      <EuiTitle size="xs">
+                        <FormattedMessage
+                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferCountTitle"
+                          defaultMessage="Max write buffer count"
+                        />
+                      </EuiTitle>
+                    </EuiDescriptionListTitle>
+
+                    <EuiDescriptionListDescription>
+                      {this.renderSetting('maxWriteBufferCount', maxWriteBufferCount)}
+                    </EuiDescriptionListDescription>
+                  </EuiFlexItem>
+
+                  <EuiFlexItem>
+                    <EuiDescriptionListTitle>
+                      <EuiTitle size="xs">
+                        <FormattedMessage
+                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferSizeTitle"
+                          defaultMessage="Max write buffer size"
+                        />
+                      </EuiTitle>
+                    </EuiDescriptionListTitle>
+
+                    <EuiDescriptionListDescription>
+                      {this.renderSetting('maxWriteBufferSize', maxWriteBufferSize)}
+                    </EuiDescriptionListDescription>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+
+                <EuiSpacer size="s" />
+
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <EuiDescriptionListTitle>
+                      <EuiTitle size="xs">
+                        <FormattedMessage
+                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxRetryDelayTitle"
+                          defaultMessage="Max retry delay"
+                        />
+                      </EuiTitle>
+                    </EuiDescriptionListTitle>
+
+                    <EuiDescriptionListDescription>
+                      {this.renderSetting('maxRetryDelay', maxRetryDelay)}
+                    </EuiDescriptionListDescription>
+                  </EuiFlexItem>
+
+                  <EuiFlexItem>
+                    <EuiDescriptionListTitle>
+                      <EuiTitle size="xs">
+                        <FormattedMessage
+                          id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.readPollTimeoutTitle"
+                          defaultMessage="Read poll timeout"
+                        />
+                      </EuiTitle>
+                    </EuiDescriptionListTitle>
+
+                    <EuiDescriptionListDescription>
+                      {this.renderSetting('readPollTimeout', readPollTimeout)}
+                    </EuiDescriptionListDescription>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </Fragment>
+            )}
+
             <EuiSpacer size="l" />
 
             <EuiLink
@@ -115,7 +352,7 @@ export class DetailPanelUi extends Component {
               />
             </EuiLink>
 
-            {shards.map((shard, i) => (
+            {shards && shards.map((shard, i) => (
               <Fragment key={i}>
                 <EuiSpacer size="m" />
                 <EuiTitle size="xs">
@@ -264,7 +501,7 @@ export class DetailPanelUi extends Component {
         onClose={closeDetailPanel}
         aria-labelledby="followerIndexDetailsFlyoutTitle"
         size="m"
-        maxWidth={400}
+        maxWidth={600}
       >
 
         <EuiFlyoutHeader>

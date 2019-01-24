@@ -148,7 +148,7 @@ export const FollowerIndexEdit = injectI18n(
     }
 
     renderConfirmModal = () => {
-      const { followerIndexId, intl } = this.props;
+      const { followerIndexId, intl, followerIndex: { isPaused } } = this.props;
       const title = intl.formatMessage({
         id: 'xpack.crossClusterReplication.followerIndexEditForm.confirmModal.title',
         defaultMessage: 'Update follower index \'{id}\'?',
@@ -166,19 +166,31 @@ export const FollowerIndexEdit = injectI18n(
                 defaultMessage: 'Cancel',
               })
             }
-            confirmButtonText={
-              intl.formatMessage({
-                id: 'xpack.crossClusterReplication.followerIndexEditForm.confirmModal.confirmButtonText',
-                defaultMessage: 'Update',
-              })
-            }
+            confirmButtonText={isPaused ? (
+              <FormattedMessage
+                id="xpack.crossClusterReplication.followerIndexEditForm.confirmModal.confirmAndResumeButtonText"
+                defaultMessage="Update and resume"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.crossClusterReplication.followerIndexEditForm.confirmModal.confirmButtonText"
+                defaultMessage="Update"
+              />
+            )}
           >
             <p>
-              <FormattedMessage
-                id="xpack.crossClusterReplication.followerIndexEditForm.confirmModal.description"
-                defaultMessage="To update the follower index, it will first be paused and then resumed.
+              {isPaused ? (
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.followerIndexEditForm.confirmModal.resumeDescription"
+                  defaultMessage="This follower index will also be resumed."
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.followerIndexEditForm.confirmModal.description"
+                  defaultMessage="To update the follower index, it will first be paused and then resumed.
                   If the update fails, you may need to manually resume the follower index."
-              />
+                />
+              )}
             </p>
           </EuiConfirmModal>
         </EuiOverlayMask>
