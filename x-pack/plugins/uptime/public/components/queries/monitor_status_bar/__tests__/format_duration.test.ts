@@ -19,6 +19,6 @@ describe('formatDuration', () => {
 
   it('returns duration value in ms', () => {
     const duration = 320000; // microseconds
-    expect(formatDuration(duration)).toEqual('320');
+    expect(formatDuration(duration)).toEqual('320.00');
   });
 });
