@@ -7,13 +7,16 @@
 import {
   // @ts-ignore: EuiBreadcrumbs has no exported member
   EuiBreadcrumbs,
+  EuiFlexGroup,
   EuiPanel,
+  EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 import { getHostsUrl, HostComponentProps } from '../../components/link_to/redirect_to_hosts';
+import { HostDetailsPanel } from '../../components/page/hosts/hosts_details_panel';
 
 export const HostDetails = pure<HostComponentProps>(({ match }) => (
   <>
@@ -26,6 +29,10 @@ export const HostDetails = pure<HostComponentProps>(({ match }) => (
         Match Params: <pre>{JSON.stringify(match, null, 2)}</pre>
       </div>
     </EuiPanel>
+    <EuiSpacer size="l" />
+    <EuiFlexGroup>
+      <HostDetailsPanel />
+    </EuiFlexGroup>
   </>
 ));
 
