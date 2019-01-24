@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SnapshotQuery } from './snapshot';
+export { Snapshot } from './snapshot';
+export { SnapshotHistogram } from './snapshot_histogram';
+export { PingList } from './ping_list';

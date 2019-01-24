@@ -19,7 +19,7 @@ import { getMonitorPageBreadcrumb } from '../breadcrumbs';
 import { MonitorCharts } from '../components/queries/monitor_charts';
 import { MonitorSelect } from '../components/queries/monitor_select';
 import { MonitorStatusBar } from '../components/queries/monitor_status_bar';
-import { Pings } from '../components/queries/ping_list';
+import { PingListQuery } from '../components/queries/ping_list';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeCommonProps } from '../uptime_app';
 
@@ -70,7 +70,7 @@ export class MonitorPage extends React.Component<Props> {
         <EuiSpacer />
         <MonitorCharts monitorId={id} {...this.props} />
         <EuiSpacer />
-        <Pings monitorId={id} {...this.props} />
+        <PingListQuery monitorId={id} {...this.props} />
       </Fragment>
     );
   }

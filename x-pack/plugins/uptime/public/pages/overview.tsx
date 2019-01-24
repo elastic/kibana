@@ -11,7 +11,7 @@ import { EmptyState } from '../components/queries/empty_state';
 import { ErrorList } from '../components/queries/error_list';
 import { FilterBar } from '../components/queries/filter_bar';
 import { MonitorList } from '../components/queries/monitor_list';
-import { Snapshot } from '../components/queries/snapshot';
+import { SnapshotQuery } from '../components/queries/snapshot';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeCommonProps } from '../uptime_app';
 
@@ -47,7 +47,7 @@ export class OverviewPage extends React.Component<Props, OverviewPageState> {
               this.setState({ currentFilterQuery: query ? JSON.stringify(query) : query });
             }}
           />
-          <Snapshot filters={this.state.currentFilterQuery} {...this.props} />
+          <SnapshotQuery filters={this.state.currentFilterQuery} {...this.props} />
           <EuiSpacer size="xl" />
           <MonitorList filters={this.state.currentFilterQuery} {...this.props} />
           <EuiSpacer />
