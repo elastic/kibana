@@ -26,7 +26,7 @@ export const beatEventsRoute = (libs: CMServerLibs) => ({
     try {
       const beat = await libs.beats.getById(libs.framework.internalUser, beatId);
       if (beat === null) {
-        return h.response({ message: `Beat "${beatId}" not found` }).code(404);
+        return h.response({ message: `Beat "${beatId}" not found` }).code(400);
       }
 
       const isAccessTokenValid = beat.access_token === accessToken;
