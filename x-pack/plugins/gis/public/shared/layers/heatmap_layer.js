@@ -157,7 +157,7 @@ export class HeatmapLayer extends ALayer {
     try {
       const layerName = await this.getDisplayName();
       const data = await this._source.getGeoJsonPoints({
-        geohashPrecifsion: geohashPrecision,
+        geohashPrecision: geohashPrecision,
         extent: buffer,
         timeFilters,
         layerName,
