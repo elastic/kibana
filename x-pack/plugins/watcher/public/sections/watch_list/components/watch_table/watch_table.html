@@ -16,7 +16,7 @@
           sort-field="watchTable.sortField"
           sort-reverse="watchTable.sortReverse"
         >
-          ID
+          {{ 'xpack.watcher.sections.watchList.watchTable.idColumnLabel' | i18n: { defaultMessage: 'ID' } }}
         </sortable-column>
       </th>
       <th scope="col" class="kuiTableHeaderCell" width="25%">
@@ -26,7 +26,7 @@
           sort-field="watchTable.sortField"
           sort-reverse="watchTable.sortReverse"
         >
-          Name
+          {{ 'xpack.watcher.sections.watchList.watchTable.nameColumnLabel' | i18n: { defaultMessage: 'Name' } }}
         </sortable-column>
       </th>
       <th scope="col" class="kuiTableHeaderCell">
@@ -36,7 +36,7 @@
           sort-field="watchTable.sortField"
           sort-reverse="watchTable.sortReverse"
         >
-          State
+          {{ 'xpack.watcher.sections.watchList.watchTable.stateColumnLabel' | i18n: { defaultMessage: 'State' } }}
         </sortable-column>
       </th>
       <th scope="col" class="kuiTableHeaderCell">
@@ -46,7 +46,7 @@
           sort-field="watchTable.sortField"
           sort-reverse="watchTable.sortReverse"
         >
-          Comment
+          {{ 'xpack.watcher.sections.watchList.watchTable.commentColumnLabel' | i18n: { defaultMessage: 'Comment' } }}
         </sortable-column>
       </th>
       <th scope="col" class="kuiTableHeaderCell">
@@ -56,7 +56,7 @@
           sort-field="watchTable.sortField"
           sort-reverse="watchTable.sortReverse"
         >
-          Last Fired
+          {{ 'xpack.watcher.sections.watchList.watchTable.lastFiredColumnLabel' | i18n: { defaultMessage: 'Last Fired' } }}
         </sortable-column>
       </th>
       <th scope="col" class="kuiTableHeaderCell">
@@ -66,7 +66,7 @@
           sort-field="watchTable.sortField"
           sort-reverse="watchTable.sortReverse"
         >
-          Last Triggered
+          {{ 'xpack.watcher.sections.watchList.watchTable.lastTriggeredColumnLabel' | i18n: { defaultMessage: 'Last Triggered' } }}
         </sortable-column>
       </th>
       <th scope="col" class="kuiTableHeaderCell"></th>
@@ -155,13 +155,16 @@
           <div class="kuiMenuButtonGroup kuiMenuButtonGroup--alignRight">
             <a
               class="kuiMenuButton kuiMenuButton--basic kuiMenuButton--iconText"
-              title="Edit"
+              title="{{ 'xpack.watcher.sections.watchList.watchTable.menuEditButtonTitle' | i18n: { defaultMessage: 'Edit' } }}"
               ng-href="#/management/elasticsearch/watcher/watches/watch/{{item.watch.id}}/edit"
               ng-if="watchTable.isEditable(item)"
               data-test-subj="lnkWatchEdit-{{ item.watch.id }}"
             >
               <span class="kuiMenuButton__icon kuiIcon fa-pencil"></span>
-              <span>Edit</span>
+              <span
+                i18n-id="xpack.watcher.sections.watchList.watchTable.menuEditButtonLabel"
+                i18n-default-message="Edit"
+              ></span>
             </a>
           </div>
         </div>

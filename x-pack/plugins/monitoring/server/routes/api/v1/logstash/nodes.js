@@ -5,7 +5,6 @@
  */
 
 import Joi from 'joi';
-import Promise from 'bluebird';
 import { getClusterStatus } from '../../../../lib/logstash/get_cluster_status';
 import { getNodes } from '../../../../lib/logstash/get_nodes';
 import { handleError } from '../../../../lib/errors';
@@ -42,7 +41,7 @@ export function logstashNodesRoute(server) {
         })
       }
     },
-    async handler(req, reply) {
+    async handler(req) {
       const config = server.config();
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
@@ -54,13 +53,13 @@ export function logstashNodesRoute(server) {
           getNodes(req, lsIndexPattern, { clusterUuid }),
         ]);
 
-        reply({
+        return {
           clusterStatus,
           nodes,
-        });
+        };
       }
       catch (err) {
-        reply(handleError(err, req));
+        throw handleError(err, req);
       }
     }
   });

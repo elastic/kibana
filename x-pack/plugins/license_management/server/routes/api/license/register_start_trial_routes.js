@@ -12,17 +12,17 @@ export function registerStartTrialRoutes(server) {
   server.route({
     path: '/api/license/start_trial',
     method: 'GET',
-    handler: (request, reply) => {
+    handler: (request) => {
       return canStartTrial(request)
-        .then(reply, e => reply(wrapEsError(e)));
+        .catch(e => wrapEsError(e));
     }
   });
   server.route({
     path: '/api/license/start_trial',
     method: 'POST',
-    handler: (request, reply) => {
+    handler: (request) => {
       return startTrial(request, xpackInfo)
-        .then(reply, e => reply(wrapEsError(e)));
+        .catch(e => wrapEsError(e));
     }
   });
 }

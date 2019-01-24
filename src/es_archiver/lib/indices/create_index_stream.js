@@ -19,12 +19,19 @@
 
 import { Transform } from 'stream';
 
-import { get } from 'lodash';
+import { get, once } from 'lodash';
+import { deleteKibanaIndices, isSpacesEnabled, createDefaultSpace } from './kibana_index';
 
 import { deleteIndex } from './delete_index';
 
-export function createCreateIndexStream({ client, stats, skipExisting, log }) {
+export function createCreateIndexStream({ client, stats, skipExisting, log, kibanaUrl }) {
   const skipDocsFromIndices = new Set();
+
+  // If we're trying to import Kibana index docs, we need to ensure that
+  // previous indices are removed so we're starting w/ a clean slate for
+  // migrations. This only needs to be done once per archive load operation.
+  // For the '.kibana' index, we will ignore 'skipExisting' and always load.
+  const clearKibanaIndices = once(async () => await deleteKibanaIndices({ client, stats }));
 
   async function handleDoc(stream, record) {
     if (skipDocsFromIndices.has(record.value.index)) {
@@ -34,16 +41,25 @@ export function createCreateIndexStream({ client, stats, skipExisting, log }) {
     stream.push(record);
   }
 
-  async function handleIndex(stream, record) {
+  async function handleIndex(record) {
     const { index, settings, mappings, aliases } = record.value;
 
     async function attemptToCreate(attemptNumber = 1) {
       try {
+        if (index.startsWith('.kibana')) {
+          await clearKibanaIndices();
+        }
+
         await client.indices.create({
           method: 'PUT',
           index,
           body: { settings, mappings, aliases },
         });
+
+        if (index.startsWith('.kibana') && await isSpacesEnabled({ kibanaUrl })) {
+          await createDefaultSpace({ index, client });
+        }
+
         stats.createdIndex(index, { settings });
       } catch (err) {
         if (get(err, 'body.error.type') !== 'resource_already_exists_exception' || attemptNumber >= 3) {
@@ -72,7 +88,7 @@ export function createCreateIndexStream({ client, stats, skipExisting, log }) {
       try {
         switch (record && record.type) {
           case 'index':
-            await handleIndex(this, record);
+            await handleIndex(record);
             break;
 
           case 'doc':

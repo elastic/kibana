@@ -13,6 +13,6 @@
   ></div>
   <div
     class="kuiIcon kuiIcon--error fa-exclamation-triangle"
-    ng-if="watchStateIcon.watchStatus.state === watchStateIcon.WATCH_STATES.ERROR"
+    ng-if="watchStateIcon.watchStatus.state === watchStateIcon.WATCH_STATES.ERROR || watchStateIcon.watchStatus.state === watchStateIcon.WATCH_STATES.CONFIG_ERROR"
   ></div>
 </div>

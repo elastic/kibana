@@ -27,7 +27,7 @@ function stubClientErrorEvent(errorMeta) {
     pid: 1234,
     timestamp: Date.now(),
     tags: ['connection', 'client', 'error'],
-    data: error
+    error
   };
 }
 

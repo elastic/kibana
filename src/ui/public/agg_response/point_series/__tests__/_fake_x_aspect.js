@@ -18,43 +18,18 @@
  */
 
 import expect from 'expect.js';
-import ngMock from 'ng_mock';
-import { VisProvider } from '../../../vis';
-import { AggConfig } from '../../../vis/agg_config';
-import { AggType } from '../../../agg_types/agg_type';
-import { PointSeriesFakeXAxisProvider } from '../_fake_x_aspect';
+import { makeFakeXAspect } from '../_fake_x_aspect';
 
 describe('makeFakeXAspect', function () {
 
-  let makeFakeXAspect;
-  let Vis;
-  let indexPattern;
-
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    Vis = Private(VisProvider);
-    indexPattern = Private(VisProvider);
-    makeFakeXAspect = Private(PointSeriesFakeXAxisProvider);
-  }));
-
   it('creates an object that looks like an aspect', function () {
-    const vis = new Vis(indexPattern, { type: 'histogram' });
-    const aspect = makeFakeXAspect(vis);
+    const aspect = makeFakeXAspect();
 
     expect(aspect)
-      .to.have.property('i', -1)
-      .and.have.property('aggConfig')
-      .and.have.property('title');
-
-    expect(aspect.aggConfig)
-      .to.be.an(AggConfig)
-      .and.to.have.property('type');
-
-    expect(aspect.aggConfig.type)
-      .to.be.an(AggType)
-      .and.to.have.property('name', 'all')
-      .and.to.have.property('title', 'All docs')
-      .and.to.have.property('hasNoDsl', true);
+      .to.have.property('accessor', -1)
+      .and.have.property('title', 'All docs')
+      .and.have.property('fieldFormatter')
+      .and.have.property('params');
 
   });
 });

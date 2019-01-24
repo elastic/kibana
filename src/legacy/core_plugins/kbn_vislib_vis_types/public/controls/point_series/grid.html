@@ -1,0 +1,64 @@
+<div>
+  <div class="kuiSideBarCollapsibleTitle">
+    <div
+      class="kuiSideBarCollapsibleTitle__label"
+      ng-click="isGridOpen = !isGridOpen"
+      kbn-accessible-click
+      aria-expanded="{{!!isGridOpen}}"
+      aria-controls="visGridOptions"
+      aria-label="Toggle grid options"
+    >
+      <span
+        aria-hidden="true"
+        ng-class="{ 'fa-caret-down': isGridOpen, 'fa-caret-right': !isGridOpen }"
+        class="kuiIcon fa-caret-right kuiSideBarCollapsibleTitle__caret"
+      ></span>
+      <span
+        class="kuiSideBarCollapsibleTitle__text"
+        i18n-id="kbnVislibVisTypes.controls.pointSeries.gridAxis.gridText"
+        i18n-default-message="Grid"
+      ></span>
+    </div>
+  </div>
+
+  <div id="visGridOptions" ng-show="isGridOpen" class="kuiSideBarCollapsibleSection">
+    <!-- General -->
+    <div class="kuiSideBarSection">
+      <div class="kuiSideBarFormRow">
+        <label
+          class="kuiSideBarFormRow__label"
+          for="showCategoryLines"
+          i18n-id="kbnVislibVisTypes.controls.pointSeries.gridAxis.xAxisLinesLabel"
+          i18n-default-message="X-Axis Lines"
+        ></label>
+        <div class="kuiSideBarFormRow__control">
+          <input class="kuiCheckBox" id="showCategoryLines" type="checkbox" ng-model="editorState.params.grid.categoryLines">
+        </div>
+      </div>
+
+      <div class="kuiSideBarFormRow">
+        <label
+          class="kuiSideBarFormRow__label"
+          for="gridAxis"
+          i18n-id="kbnVislibVisTypes.controls.pointSeries.gridAxis.yAxisLinesLabel"
+          i18n-default-message="Y-Axis Lines"
+        ></label>
+        <div class="kuiSideBarFormRow__control">
+          <select
+            id="gridAxis"
+            class="kuiSelect kuiSideBarSelect"
+            ng-model="editorState.params.grid.valueAxis"
+            ng-options="axis.id as axis.name for axis in editorState.params.valueAxes track by axis.id"
+          >
+            <option
+              value=""
+              i18n-id="kbnVislibVisTypes.controls.pointSeries.gridAxis.dontShowLabel"
+              i18n-default-message="Don't show"
+            ></option>
+          </select>
+        </div>
+      </div>
+
+    </div>
+
+  </div>

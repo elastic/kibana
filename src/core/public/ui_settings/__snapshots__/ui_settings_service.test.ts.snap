@@ -1,0 +1,78 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#start constructs UiSettingsClient and UiSettingsApi: UiSettingsApi args 1`] = `
+[MockFunction MockUiSettingsApi] {
+  "calls": Array [
+    Array [
+      Object {
+        "basePathStartContract": true,
+      },
+      "kibanaVersion",
+    ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": undefined,
+    },
+  ],
+}
+`;
+
+exports[`#start constructs UiSettingsClient and UiSettingsApi: UiSettingsClient args 1`] = `
+[MockFunction MockUiSettingsClient] {
+  "calls": Array [
+    Array [
+      Object {
+        "api": MockUiSettingsApi {
+          "getLoadingCount$": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "isThrow": false,
+                "value": Object {
+                  "loadingCountObservable": true,
+                },
+              },
+            ],
+          },
+          "stop": [MockFunction],
+        },
+        "defaults": Object {
+          "legacyInjectedUiSettingDefaults": true,
+        },
+        "initialSettings": Object {
+          "legacyInjectedUiSettingUserValues": true,
+        },
+        "onUpdateError": [Function],
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": undefined,
+    },
+  ],
+}
+`;
+
+exports[`#start passes the uiSettings loading count to the loading count api: loadingCount.add calls 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "loadingCountObservable": true,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": undefined,
+    },
+  ],
+}
+`;

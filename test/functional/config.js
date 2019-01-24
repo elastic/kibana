@@ -32,7 +32,7 @@ import {
   PointSeriesPageProvider,
   VisualBuilderPageProvider,
   TimelionPageProvider,
-  SharePageProvider
+  SharePageProvider,
 } from './page_objects';
 
 import {
@@ -54,6 +54,11 @@ import {
   EmbeddingProvider,
   RenderableProvider,
   TableProvider,
+  BrowserProvider,
+  InspectorProvider,
+  PieChartProvider,
+  AppsMenuProvider,
+  GlobalNavProvider,
 } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -95,7 +100,7 @@ export default async function ({ readConfigFile }) {
       esArchiver: commonConfig.get('services.esArchiver'),
       kibanaServer: commonConfig.get('services.kibanaServer'),
       retry: commonConfig.get('services.retry'),
-      remote: RemoteProvider,
+      __leadfoot__: RemoteProvider,
       filterBar: FilterBarProvider,
       queryBar: QueryBarProvider,
       find: FindProvider,
@@ -113,6 +118,11 @@ export default async function ({ readConfigFile }) {
       embedding: EmbeddingProvider,
       renderable: RenderableProvider,
       table: TableProvider,
+      browser: BrowserProvider,
+      pieChart: PieChartProvider,
+      inspector: InspectorProvider,
+      appsMenu: AppsMenuProvider,
+      globalNav: GlobalNavProvider,
     },
     servers: commonConfig.get('servers'),
 
@@ -162,6 +172,10 @@ export default async function ({ readConfigFile }) {
       console: {
         pathname: '/app/kibana',
         hash: '/dev_tools/console',
+      },
+      account: {
+        pathname: '/app/kibana',
+        hash: '/account',
       },
       home: {
         pathname: '/app/kibana',

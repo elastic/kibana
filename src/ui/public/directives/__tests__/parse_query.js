@@ -25,26 +25,23 @@ import ngMock from 'ng_mock';
 
 let $rootScope;
 let $compile;
-let Private;
 let config;
 let $elemScope;
 let $elem;
 
 let cycleIndex = 0;
 const markup = '<input ng-model="mockModel" parse-query input-focus type="text">';
-let fromUser;
 import { toUser } from '../../parse_query/lib/to_user';
-import '../../parse_query';
-import { ParseQueryLibFromUserProvider } from '../../parse_query/lib/from_user';
+import '../../parse_query/index';
+import { fromUser } from '../../parse_query/lib/from_user';
 
 const init = function () {
   // Load the application
   ngMock.module('kibana');
 
   // Create the scope
-  ngMock.inject(function ($injector, _$rootScope_, _$compile_, _$timeout_, _Private_, _config_) {
+  ngMock.inject(function ($injector, _$rootScope_, _$compile_, _$timeout_, _config_) {
     $compile = _$compile_;
-    Private = _Private_;
     config = _config_;
 
     // Give us a scope
@@ -77,7 +74,6 @@ describe('parse-query directive', function () {
   describe('user input parser', function () {
 
     beforeEach(function () {
-      fromUser = Private(ParseQueryLibFromUserProvider);
       config.set('query:queryString:options', {});
     });
 

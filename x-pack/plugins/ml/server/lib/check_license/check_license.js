@@ -5,6 +5,8 @@
  */
 
 
+import { LICENSE_TYPE } from '../../../common/constants/license';
+import { i18n } from '@kbn/i18n';
 
 export function checkLicense(xpackLicenseInfo) {
   // If, for some reason, we cannot get the license information
@@ -14,7 +16,9 @@ export function checkLicense(xpackLicenseInfo) {
       isAvailable: false,
       showLinks: true,
       enableLinks: false,
-      message: 'You cannot use Machine Learning because license information is not available at this time.'
+      message: i18n.translate('xpack.ml.checkLicense.licenseInformationNotAvailableThisTimeMessage', {
+        defaultMessage: 'You cannot use Machine Learning because license information is not available at this time.'
+      })
     };
   }
 
@@ -24,37 +28,34 @@ export function checkLicense(xpackLicenseInfo) {
       isAvailable: false,
       showLinks: false,
       enableLinks: false,
-      message: 'Machine Learning is unavailable'
+      message: i18n.translate('xpack.ml.checkLicense.mlIsUnavailableMessage', {
+        defaultMessage: 'Machine Learning is unavailable'
+      })
     };
   }
 
-  const VALID_LICENSE_MODES = [
+  const VALID_FULL_LICENSE_MODES = [
     'trial',
     'platinum'
   ];
 
-  const isLicenseModeValid = xpackLicenseInfo.license.isOneOf(VALID_LICENSE_MODES);
+  const isLicenseModeValid = xpackLicenseInfo.license.isOneOf(VALID_FULL_LICENSE_MODES);
+  const licenseType = (isLicenseModeValid === true) ? LICENSE_TYPE.FULL : LICENSE_TYPE.BASIC;
   const isLicenseActive = xpackLicenseInfo.license.isActive();
-  const licenseType = xpackLicenseInfo.license.getType();
+  const licenseTypeName = xpackLicenseInfo.license.getType();
 
-  // License is not valid
-  if (!isLicenseModeValid) {
-    return {
-      isAvailable: false,
-      showLinks: false,
-      enableLinks: false,
-      message: `Your ${licenseType} license does not support Machine Learning. Please upgrade your license.`
-    };
-  }
-
-  // License is valid but not active
-  if (!isLicenseActive) {
+  // Platinum or trial license is valid but not active, i.e. expired
+  if (licenseType === LICENSE_TYPE.FULL && isLicenseActive === false) {
     return {
       isAvailable: true,
       showLinks: true,
       enableLinks: true,
       hasExpired: true,
-      message: `Your ${licenseType} Machine Learning license has expired.`
+      licenseType,
+      message: i18n.translate('xpack.ml.checkLicense.licenseHasExpiredMessage', {
+        defaultMessage: 'Your {licenseTypeName} Machine Learning license has expired.',
+        values: { licenseTypeName }
+      })
     };
   }
 
@@ -63,6 +64,13 @@ export function checkLicense(xpackLicenseInfo) {
     isAvailable: true,
     showLinks: true,
     enableLinks: true,
+    licenseType,
     hasExpired: false,
   };
+}
+
+export function isBasicLicense(server) {
+  const xpackMainPlugin = server.plugins.xpack_main;
+  const xpackInfo = (xpackMainPlugin && xpackMainPlugin.info);
+  return (xpackInfo.license.getType() === 'basic');
 }

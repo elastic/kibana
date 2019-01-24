@@ -67,6 +67,8 @@ export function initAngularApi(chrome, internals) {
         $locationProvider.hashPrefix('');
       })
       .run(internals.capture$httpLoadingCount)
+      .run(internals.$setupBreadcrumbsAutoClear)
+      .run(internals.$initNavLinksDeepWatch)
       .run(($location, $rootScope, Private, config) => {
         chrome.getFirstPathSegment = () => {
           return $location.path().split('/')[1];

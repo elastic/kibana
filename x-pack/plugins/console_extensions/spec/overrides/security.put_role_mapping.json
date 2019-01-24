@@ -1,0 +1,10 @@
+{
+  "security.put_role_mapping": {
+    "data_autocomplete_rules": {
+      "enabled": true,
+      "metadata": {},
+      "roles": [],
+      "rules": {}
+    }
+  }
+}

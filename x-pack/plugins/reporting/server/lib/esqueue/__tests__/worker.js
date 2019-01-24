@@ -354,7 +354,7 @@ describe('Worker class', function () {
     });
 
     describe('query body', function () {
-      const conditionPath = 'query.constant_score.filter.bool';
+      const conditionPath = 'query.bool.filter.bool';
       const jobtype = 'test_jobtype';
 
       beforeEach(() => {
@@ -377,7 +377,7 @@ describe('Worker class', function () {
       it('should search by job type', function () {
         const { body } = getSearchParams(jobtype);
         const conditions = get(body, conditionPath);
-        expect(conditions.filter).to.eql({ term: { jobtype: jobtype } });
+        expect(conditions.must).to.eql({ term: { jobtype: jobtype } });
       });
 
       it('should search for pending or expired jobs', function () {
@@ -388,7 +388,7 @@ describe('Worker class', function () {
         // this works because we are stopping the clock, so all times match
         const nowTime = moment().toISOString();
         const pending = { term: { status: 'pending' } };
-        const expired = { bool: { filter: [
+        const expired = { bool: { must: [
           { term: { status: 'processing' } },
           { range: { process_expiration: { lte: nowTime } } }
         ] } };
@@ -398,6 +398,12 @@ describe('Worker class', function () {
 
         const expiredMatch = find(conditions.should, expired);
         expect(expiredMatch).to.not.be(undefined);
+      });
+
+      it('specify that there should be at least one match', function () {
+        const { body } = getSearchParams(jobtype);
+        const conditions = get(body, conditionPath);
+        expect(conditions).to.have.property('minimum_should_match', 1);
       });
 
       it('should use default size', function () {
@@ -860,6 +866,33 @@ describe('Worker class', function () {
     function getFailStub(workerWithFailure) {
       return sinon.stub(workerWithFailure, '_failJob').returns(Promise.resolve());
     }
+
+    describe('saving output failure', () => {
+      it('should mark the job as failed if saving to ES fails', async () => {
+        const job = {
+          _id: 'shouldSucced',
+          _source: {
+            timeout: 1000,
+            payload: 'test'
+          }
+        };
+
+        sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 413 }));
+
+        const workerFn = function (jobPayload) {
+          return new Promise(function (resolve) {
+            setTimeout(() => resolve(jobPayload), 10);
+          });
+        };
+        const worker = new Worker(mockQueue, 'test', workerFn, defaultWorkerOptions);
+        const failStub = getFailStub(worker);
+
+        await worker._performJob(job);
+        worker.destroy();
+
+        sinon.assert.called(failStub);
+      });
+    });
 
     describe('search failure', function () {
       it('causes _processPendingJobs to reject the Promise', function () {

@@ -30,6 +30,12 @@ describe('get_high_level_stats', () => {
             [`${product}_stats`]: {
               [`${product}`]: {
                 version: '1.2.3-alpha1'
+              },
+              os: {
+                platform: 'linux',
+                platformRelease: 'linux-4.0',
+                distro: 'Ubuntu Linux',
+                distroRelease: 'Ubuntu Linux-14.04'
               }
             }
           }
@@ -40,6 +46,12 @@ describe('get_high_level_stats', () => {
             [`${product}_stats`]: {
               [`${product}`]: {
                 version: '1.2.3-alpha1'
+              },
+              os: {
+                platform: 'linux',
+                platformRelease: 'linux-4.0',
+                distro: 'Ubuntu Linux',
+                distroRelease: 'Ubuntu Linux-14.04'
               }
             }
           }
@@ -50,6 +62,12 @@ describe('get_high_level_stats', () => {
             [`${product}_stats`]: {
               [`${product}`]: {
                 version: '2.3.4-rc1'
+              },
+              os: {
+                platform: 'linux',
+                platformRelease: 'linux-4.0',
+                distro: 'Ubuntu Linux',
+                distroRelease: 'Ubuntu Linux-14.04'
               }
             }
           }
@@ -60,11 +78,15 @@ describe('get_high_level_stats', () => {
             [`${product}_stats`]: {
               [`${product}`]: {
                 version: '2.3.4'
+              },
+              os: {
+                platform: 'darwin',
+                platformRelease: 'darwin-18.0'
               }
             }
           }
         },
-        // no version
+        // no version or os
         {
           _source: {
             cluster_uuid: 'b'
@@ -155,6 +177,12 @@ describe('get_high_level_stats', () => {
       versions: [
         { version: '1.2.3-alpha1', count: 2 }
       ],
+      os: {
+        platforms: [{ platform: 'linux', count: 2 }],
+        platformReleases: [{ platformRelease: 'linux-4.0', count: 2 }],
+        distros: [{ distro: 'Ubuntu Linux', count: 2 }],
+        distroReleases: [{ distroRelease: 'Ubuntu Linux-14.04', count: 2 }],
+      },
       cloud: undefined
     },
     b: {
@@ -163,6 +191,18 @@ describe('get_high_level_stats', () => {
         { version: '2.3.4-rc1', count: 1 },
         { version: '2.3.4', count: 1 }
       ],
+      os: {
+        platformReleases: [
+          { platformRelease: 'linux-4.0', count: 1 },
+          { platformRelease: 'darwin-18.0', count: 1 },
+        ],
+        platforms: [
+          { platform: 'linux', count: 1 },
+          { platform: 'darwin', count: 1 },
+        ],
+        distros: [{ distro: 'Ubuntu Linux', count: 1 }],
+        distroReleases: [{ distroRelease: 'Ubuntu Linux-14.04', count: 1 }],
+      },
       cloud: undefined
     },
     c: {
@@ -170,6 +210,12 @@ describe('get_high_level_stats', () => {
       versions: [
         { version: '5.6.1', count: 4 }
       ],
+      os: {
+        platforms: [],
+        platformReleases: [],
+        distros: [],
+        distroReleases: [],
+      },
       cloud: [
         {
           name: cloudName,

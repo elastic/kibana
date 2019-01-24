@@ -9,6 +9,7 @@ import { PathProvider } from 'plugins/xpack_main/services/path';
 import { fetchTelemetry } from '../fetch_telemetry';
 import { renderBanner } from './render_banner';
 import { shouldShowBanner } from './should_show_banner';
+import { TelemetryOptInProvider } from '../../services/telemetry_opt_in';
 
 /**
  * Add the Telemetry opt-in banner if the user has not already made a decision.
@@ -21,6 +22,7 @@ import { shouldShowBanner } from './should_show_banner';
 async function asyncInjectBanner($injector) {
   const telemetryEnabled = $injector.get('telemetryEnabled');
   const Private = $injector.get('Private');
+  const telemetryOptInProvider = Private(TelemetryOptInProvider);
   const config = $injector.get('config');
 
   // no banner if the server config has telemetry disabled
@@ -29,7 +31,7 @@ async function asyncInjectBanner($injector) {
   }
 
   // and no banner for non-logged in users
-  if (Private(PathProvider).isLoginOrLogout()) {
+  if (Private(PathProvider).isUnauthenticated()) {
     return;
   }
 
@@ -39,10 +41,10 @@ async function asyncInjectBanner($injector) {
   }
 
   // determine if the banner should be displayed
-  if (await shouldShowBanner(config)) {
-    const $http = $injector.get('$http');
+  if (await shouldShowBanner(telemetryOptInProvider, config)) {
+    const $http = $injector.get("$http");
 
-    renderBanner(config, () => fetchTelemetry($http));
+    renderBanner(telemetryOptInProvider, () => fetchTelemetry($http));
   }
 }
 

@@ -54,6 +54,7 @@ function getJobAuditMessages(fromRange, jobId) {
     ml.esSearch({
       index: ML_NOTIFICATION_INDEX_PATTERN,
       ignore_unavailable: true,
+      rest_total_hits_as_int: true,
       size: 1000,
       body:
       {
@@ -99,6 +100,7 @@ function getAuditMessagesSummary() {
     ml.esSearch({
       index: ML_NOTIFICATION_INDEX_PATTERN,
       ignore_unavailable: true,
+      rest_total_hits_as_int: true,
       size: 0,
       body: {
         query: {

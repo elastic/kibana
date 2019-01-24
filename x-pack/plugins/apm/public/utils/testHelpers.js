@@ -69,11 +69,11 @@ export function mountWithStore(Component, storeState = {}) {
 export function mockMoment() {
   // avoid timezone issues
   jest.spyOn(moment.prototype, 'format').mockImplementation(function() {
-    return this.unix();
+    return `1st of January (mocking ${this.unix()})`;
   });
 
   // convert relative time to absolute time to avoid timing issues
   jest.spyOn(moment.prototype, 'fromNow').mockImplementation(function() {
-    return this.unix();
+    return `1337 minutes ago (mocking ${this.unix()})`;
   });
 }

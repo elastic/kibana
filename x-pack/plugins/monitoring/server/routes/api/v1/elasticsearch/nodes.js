@@ -30,7 +30,7 @@ export function esNodesRoute(server) {
         })
       }
     },
-    async handler(req, reply) {
+    async handler(req) {
       const config = server.config();
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
@@ -42,9 +42,9 @@ export function esNodesRoute(server) {
         const clusterStatus = getClusterStatus(clusterStats, shardStats);
         const nodes = await getNodes(req, esIndexPattern, clusterStats, shardStats);
 
-        reply({ clusterStatus, nodes, });
+        return { clusterStatus, nodes, };
       } catch(err) {
-        reply(handleError(err, req));
+        throw handleError(err, req);
       }
     }
   });

@@ -17,10 +17,13 @@
  * under the License.
  */
 
+import { TimeIntervalParam } from 'ui/vis/editors/config/types';
 import { AggConfig } from '../..';
 import { AggType } from '../../../agg_types';
 import { IndexPattern } from '../../../index_patterns';
 import { leastCommonMultiple } from '../../../utils/math';
+import { parseEsInterval } from '../../../utils/parse_es_interval';
+import { leastCommonInterval } from '../../lib/least_common_interval';
 import { EditorConfig, EditorParamConfig, FixedParam, NumericIntervalParam } from './types';
 
 type EditorConfigProvider = (
@@ -47,6 +50,10 @@ class EditorConfigProviderRegistry {
     return this.mergeConfigs(configs);
   }
 
+  private isTimeBaseParam(config: EditorParamConfig): config is TimeIntervalParam {
+    return config.hasOwnProperty('default') && config.hasOwnProperty('timeBase');
+  }
+
   private isBaseParam(config: EditorParamConfig): config is NumericIntervalParam {
     return config.hasOwnProperty('base');
   }
@@ -59,12 +66,12 @@ class EditorConfigProviderRegistry {
     return Boolean(current.hidden || merged.hidden);
   }
 
-  private mergeWarning(current: EditorParamConfig, merged: EditorParamConfig): string | undefined {
-    if (!current.warning) {
-      return merged.warning;
+  private mergeHelp(current: EditorParamConfig, merged: EditorParamConfig): string | undefined {
+    if (!current.help) {
+      return merged.help;
     }
 
-    return merged.warning ? `${merged.warning}\n\n${current.warning}` : current.warning;
+    return merged.help ? `${merged.help}\n\n${current.help}` : current.help;
   }
 
   private mergeFixedAndBase(
@@ -95,7 +102,7 @@ class EditorConfigProviderRegistry {
     }
 
     if (this.isBaseParam(current) && this.isBaseParam(merged)) {
-      // In case both had where interval values, just use the least common multiple between both interval
+      // In case where both had interval values, just use the least common multiple between both interval
       return {
         base: leastCommonMultiple(current.base, merged.base),
       };
@@ -108,7 +115,6 @@ class EditorConfigProviderRegistry {
         fixedValue: current.fixedValue,
       };
     }
-
     if (this.isBaseParam(current)) {
       return {
         base: current.base,
@@ -118,18 +124,57 @@ class EditorConfigProviderRegistry {
     return {};
   }
 
+  private mergeTimeBase(
+    current: TimeIntervalParam,
+    merged: EditorParamConfig,
+    paramName: string
+  ): { timeBase?: string; default?: string } {
+    if (current.default !== current.timeBase) {
+      throw new Error(`Tried to provide differing default and timeBase values for ${paramName}.`);
+    }
+
+    if (this.isTimeBaseParam(current) && this.isTimeBaseParam(merged)) {
+      // In case both had where interval values, just use the least common multiple between both intervals
+      try {
+        const timeBase = leastCommonInterval(current.timeBase, merged.timeBase);
+        return {
+          default: timeBase,
+          timeBase,
+        };
+      } catch (e) {
+        throw e;
+      }
+    }
+
+    if (this.isTimeBaseParam(current)) {
+      try {
+        parseEsInterval(current.timeBase);
+        return {
+          default: current.timeBase,
+          timeBase: current.timeBase,
+        };
+      } catch (e) {
+        throw e;
+      }
+    }
+
+    return {};
+  }
+
   private mergeConfigs(configs: EditorConfig[]): EditorConfig {
     return configs.reduce((output, conf) => {
       Object.entries(conf).forEach(([paramName, paramConfig]) => {
         if (!output[paramName]) {
-          output[paramName] = { ...paramConfig };
-        } else {
-          output[paramName] = {
-            hidden: this.mergeHidden(paramConfig, output[paramName]),
-            warning: this.mergeWarning(paramConfig, output[paramName]),
-            ...this.mergeFixedAndBase(paramConfig, output[paramName], paramName),
-          };
+          output[paramName] = {};
         }
+
+        output[paramName] = {
+          hidden: this.mergeHidden(paramConfig, output[paramName]),
+          help: this.mergeHelp(paramConfig, output[paramName]),
+          ...(this.isTimeBaseParam(paramConfig)
+            ? this.mergeTimeBase(paramConfig, output[paramName], paramName)
+            : this.mergeFixedAndBase(paramConfig, output[paramName], paramName)),
+        };
       });
       return output;
     }, {});

@@ -25,7 +25,10 @@ import '../../filters/field_type';
 import { IndexedArray } from '../../indexed_array';
 import { toastNotifications } from '../../notify';
 import { createLegacyClass } from '../../utils/legacy_class';
-import { aggTypeFieldFilters } from './filter';
+import { propFilter } from '../../filters/_prop_filter';
+import { i18n } from '@kbn/i18n';
+
+const filterByType = propFilter('type');
 
 export function FieldParamType(config) {
   FieldParamType.Super.call(this, config);
@@ -50,21 +53,6 @@ FieldParamType.prototype.serialize = function (field) {
 };
 
 /**
- * Get the options for this field from the indexPattern
- */
-FieldParamType.prototype.getFieldOptions = function (aggConfig) {
-  const indexPattern = aggConfig.getIndexPattern();
-  const fields = aggTypeFieldFilters
-    .filter(indexPattern.fields.raw, this, indexPattern, aggConfig);
-
-  return new IndexedArray({
-    index: ['name'],
-    group: ['type'],
-    initialSet: sortBy(fields, ['type', 'name']),
-  });
-};
-
-/**
  * Called to read values from a database record into the
  * aggConfig object
  *
@@ -78,12 +66,44 @@ FieldParamType.prototype.deserialize = function (fieldName, aggConfig) {
     throw new SavedObjectNotFound('index-pattern-field', fieldName);
   }
 
-  const validField = this.getFieldOptions(aggConfig).byName[fieldName];
+  const validField = this.getAvailableFields(aggConfig.getIndexPattern().fields).byName[fieldName];
   if (!validField) {
-    toastNotifications.addDanger(`Saved "field" parameter is now invalid. Please select a new field.`);
+    toastNotifications.addDanger(
+      i18n.translate('common.ui.aggTypes.paramTypes.field.invalidSavedFieldParameterErrorMessage', {
+        defaultMessage: 'Saved {fieldParameter} parameter is now invalid. Please select a new field.',
+        values: {
+          fieldParameter: '"field"'
+        }
+      })
+    );
   }
 
   return validField;
+};
+
+/**
+ * filter the fields to the available ones
+ */
+FieldParamType.prototype.getAvailableFields = function (fields) {
+  const filteredFields = fields.filter(field => {
+    const { onlyAggregatable, scriptable, filterFieldTypes } = this;
+
+    if ((onlyAggregatable && !field.aggregatable) || (!scriptable && field.scripted)) {
+      return false;
+    }
+
+    if (!filterFieldTypes) {
+      return true;
+    }
+
+    return filterByType([field], filterFieldTypes).length !== 0;
+  });
+
+  return new IndexedArray({
+    index: ['name'],
+    group: ['type'],
+    initialSet: sortBy(filteredFields, ['type', 'name']),
+  });
 };
 
 /**
@@ -100,7 +120,14 @@ FieldParamType.prototype.write = function (aggConfig, output) {
   const field = aggConfig.getField();
 
   if (!field) {
-    throw new TypeError('"field" is a required parameter');
+    throw new TypeError(
+      i18n.translate('common.ui.aggTypes.paramTypes.field.requiredFieldParameterErrorMessage', {
+        defaultMessage: '{fieldParameter} is a required parameter',
+        values: {
+          fieldParameter: '"field"'
+        }
+      })
+    );
   }
 
   if (field.scripted) {

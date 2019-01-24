@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { schema, TypeOf } from '../../config/schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 import { LogRecord } from '../log_record';
 import { Layout } from './layouts';

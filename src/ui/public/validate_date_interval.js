@@ -19,6 +19,7 @@
 
 import { parseInterval } from './utils/parse_interval';
 import { uiModules } from './modules';
+import { leastCommonInterval } from './vis/lib/least_common_interval';
 
 uiModules
   .get('kibana')
@@ -27,13 +28,30 @@ uiModules
       restrict: 'A',
       require: 'ngModel',
       link: function ($scope, $el, attrs, ngModelCntrl) {
+        const baseInterval = attrs.validateDateInterval || null;
 
         ngModelCntrl.$parsers.push(check);
         ngModelCntrl.$formatters.push(check);
 
         function check(value) {
-          ngModelCntrl.$setValidity('dateInterval', parseInterval(value) != null);
+          if(baseInterval) {
+            ngModelCntrl.$setValidity('dateInterval', parseWithBase(value) === true);
+          } else {
+            ngModelCntrl.$setValidity('dateInterval', parseInterval(value) != null);
+          }
           return value;
+        }
+
+        // When base interval is set, check for least common interval and allow
+        // input the value is the same. This means that the input interval is a
+        // multiple of the base interval.
+        function parseWithBase(value) {
+          try {
+            const interval = leastCommonInterval(baseInterval, value);
+            return interval === value.replace(/\s/g, '');
+          } catch(e) {
+            return false;
+          }
         }
       }
     };

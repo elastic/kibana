@@ -103,6 +103,34 @@ export function processResults(results = [], { clusters, clusterHostSets, cluste
         clusters[clusterUuid].module.count += stateModule.count;
       }
 
+      const heartbeatState = get(hit, '_source.beats_state.state.heartbeat');
+      if (heartbeatState !== undefined) {
+        if (!clusters[clusterUuid].hasOwnProperty('heartbeat')) {
+          clusters[clusterUuid].heartbeat = {
+            monitors: 0,
+            endpoints: 0
+          };
+        }
+        const clusterHb = clusters[clusterUuid].heartbeat;
+
+        clusterHb.monitors += heartbeatState.monitors;
+        clusterHb.endpoints += heartbeatState.endpoints;
+        for (const proto in heartbeatState) {
+          if (!heartbeatState.hasOwnProperty(proto)) continue;
+          const val = heartbeatState[proto];
+          if (typeof val !== "object") continue;
+
+          if (!clusterHb.hasOwnProperty(proto)) {
+            clusterHb[proto] = {
+              monitors: 0,
+              endpoints: 0
+            };
+          }
+          clusterHb[proto].monitors += val.monitors;
+          clusterHb[proto].endpoints += val.endpoints;
+        }
+      }
+
       const stateHost = get(hit, '_source.beats_state.state.host');
       if (stateHost !== undefined) {
         const hostMap = clusterArchitectureMaps[clusterUuid];
@@ -161,6 +189,7 @@ async function fetchBeatsByType(server, callCluster, clusterUuids, start, end, {
       'hits.hits._source.beats_state.state.input',
       'hits.hits._source.beats_state.state.module',
       'hits.hits._source.beats_state.state.host',
+      'hits.hits._source.beats_state.state.heartbeat',
     ],
     body: {
       query: createQuery({

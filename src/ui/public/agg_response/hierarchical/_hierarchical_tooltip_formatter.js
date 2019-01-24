@@ -28,14 +28,12 @@ export function HierarchicalTooltipFormatterProvider($rootScope, $compile, $sce)
 
   $compile($tooltip)($tooltipScope);
 
-  return function (columns) {
+  return function (metricFieldFormatter) {
     return function (event) {
       const datum = event.datum;
 
       // Collect the current leaf and parents into an array of values
       $tooltipScope.rows = collectBranch(datum);
-
-      const metricCol = $tooltipScope.metricCol = _.find(columns, { categoryName: 'metric' });
 
       // Map those values to what the tooltipSource.rows format.
       _.forEachRight($tooltipScope.rows, function (row) {
@@ -46,7 +44,7 @@ export function HierarchicalTooltipFormatterProvider($rootScope, $compile, $sce)
           percent = row.item.percentOfGroup;
         }
 
-        row.metric = metricCol.aggConfig.fieldFormatter()(row.metric);
+        row.metric = metricFieldFormatter ? metricFieldFormatter.convert(row.metric) : row.metric;
 
         if (percent != null) {
           row.metric += ' (' + numeral(percent).format('0.[00]%') + ')';

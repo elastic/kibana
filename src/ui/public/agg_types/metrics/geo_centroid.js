@@ -18,16 +18,22 @@
  */
 
 import { MetricAggType } from './metric_agg_type';
+import { i18n } from '@kbn/i18n';
 
 export const geoCentroidMetricAgg = new MetricAggType({
   name: 'geo_centroid',
-  title: 'Geo Centroid',
+  title: i18n.translate('common.ui.aggTypes.metrics.geoCentroidTitle', {
+    defaultMessage: 'Geo Centroid'
+  }),
   makeLabel: function () {
-    return 'Geo Centroid';
+    return i18n.translate('common.ui.aggTypes.metrics.geoCentroidLabel', {
+      defaultMessage: 'Geo Centroid'
+    });
   },
   params: [
     {
       name: 'field',
+      type: 'field',
       filterFieldTypes: 'geo_point'
     }
   ],

@@ -6,6 +6,7 @@
   display: flex;
   align-items: center;
   padding-left: $localNavSideSpacing; /* 1 */
+  height: 100%;
 }
 
 .kuiLocalBreadcrumb {
@@ -21,10 +22,6 @@
       user-select: none;
       margin-right: 4px;
       color: $localNavBreadcrumbDelimiterColor;
-
-      @include darkTheme {
-        color: $localNavBreadcrumbDelimiterColor--darkTheme;
-      }
     }
   }
 }

@@ -1,0 +1,33 @@
+<div class="devApp app-container">
+  <kbn-top-nav name="devtools" config="kbnDevToolsApp.topNavConfig">
+    <!-- Transcluded elements. -->
+    <div data-transclude-slots>
+      <!-- Breadcrumbs. -->
+      <bread-crumbs
+        data-transclude-slot="topLeftCorner"
+        omit-current-page="true"
+      ></bread-crumbs>
+
+      <!-- Tabs. -->
+      <div data-transclude-slot="bottomRow" class="euiTabs" role="tablist">
+        <a
+          role="tab"
+          aria-selected="{{kbnDevToolsApp.currentPath === item.url}}"
+          ng-repeat="item in kbnDevToolsApp.devTools"
+          class="euiTab"
+          ng-class="{'euiTab-isSelected': kbnDevToolsApp.currentPath === item.url, 'euiTab-isDisabled': item.disabled}"
+          ng-disabled="item.disabled"
+          kbn-href="{{::item.url}}"
+          ng-click="kbnDevToolsApp.onClick(item, $event)"
+          tooltip="{{ item.tooltipContent }}"
+          tooltip-placement="bottom"
+          tooltip-popup-delay="0"
+          tooltip-append-to-body="1"
+        >
+          {{::item.display}}
+        </a>
+      </div>
+    </div>
+  </kbn-top-nav>
+  <main class="devApp__container" role="tabpanel" ng-transclude></main>
+</div>

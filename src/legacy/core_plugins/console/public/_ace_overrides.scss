@@ -1,0 +1,66 @@
+.conApp,
+.conHelp__example,
+.conHistory__viewer {
+
+  .ace-tm {
+    .ace_gutter {
+      background-color: $euiColorEmptyShade;
+      color: $euiColorMediumShade;
+    }
+
+    .ace_gutter-active-line,
+    .ace_marker-layer .ace_active-line {
+      background-color: transparentize($euiColorLightShade, .3);
+    }
+  }
+
+  .ace_snippet-marker {
+    width: 100%;
+    background-color: tintOrShade($euiColorLightShade, 50%, 0);
+    border: none;
+  }
+
+  .ace_search {
+    z-index: $euiZLevel1 + 1;
+  }
+
+  .ace_layer.ace_marker-layer {
+    overflow: visible;
+  }
+
+  .ace_scroller {
+    border-left: $euiBorderThin;
+  }
+
+  // SASSTODO: Coloring uses EUI code block variables.
+  // However, the naming does not currently line up (selector to variable).
+  // This is so that there is no drastic visual difference for the user.
+  // Eventually, we can update this to match all other editors.
+
+  .ace_warning {
+    color: $euiColorDanger;
+  }
+
+  .ace_method {
+    color: $euiCodeBlockStringColor;
+  }
+
+  .ace_url,
+  .ace_start_triple_quote,
+  .ace_end_triple_quote {
+    color: $euiCodeBlockNumberColor;
+  }
+
+  .ace_variable {
+    color: $euiCodeBlockTypeColor;
+  }
+
+  .ace_string,
+  .ace_multi_string {
+    color: $euiCodeBlockRegexpColor;
+  }
+
+  .ace_multi_string {
+    font-style: italic;
+  }
+}

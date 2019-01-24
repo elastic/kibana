@@ -4,153 +4,108 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import styled from 'styled-components';
-import { EuiBasicTable } from '@elastic/eui';
-import orderBy from 'lodash.orderby';
 import TooltipOverlay from '../../../shared/TooltipOverlay';
-import { RelativeLink, legacyEncodeURIComponent } from '../../../../utils/url';
-import {
-  asMillisWithDefault,
-  asDecimal,
-  tpmUnit
-} from '../../../../utils/formatters';
-
+import { asMillis, asDecimal } from '../../../../utils/formatters';
+import { ImpactBar } from '../../../shared/ImpactBar';
 import { fontFamilyCode, truncate } from '../../../../style/variables';
-import ImpactSparkline from './ImpactSparkLine';
+import { ManagedTable } from '../../../shared/ManagedTable';
+import { NOT_AVAILABLE_LABEL } from '../../../../constants';
+import { legacyEncodeURIComponent } from '../../../shared/Links/url_helpers';
+import { KibanaLink } from '../../../shared/Links/KibanaLink';
 
-function tpmLabel(type) {
-  return type === 'request' ? 'Req. per minute' : 'Trans. per minute';
-}
-
-function avgLabel(agentName) {
-  return agentName === 'js-base' ? 'Page load time' : 'Avg. resp. time';
-}
-
-function paginateItems({ items, pageIndex, pageSize }) {
-  return items.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
-}
-
-const TransactionNameLink = styled(RelativeLink)`
+const TransactionNameLink = styled(KibanaLink)`
   ${truncate('100%')};
   font-family: ${fontFamilyCode};
 `;
 
-class List extends Component {
-  state = {
-    page: {
-      index: 0,
-      size: 25
-    },
-    sort: {
-      field: 'impactRelative',
-      direction: 'desc'
-    }
-  };
+export default function TransactionList({ items, serviceName, ...rest }) {
+  const columns = [
+    {
+      field: 'name',
+      name: i18n.translate('xpack.apm.transactionsTable.nameColumnLabel', {
+        defaultMessage: 'Name'
+      }),
+      width: '50%',
+      sortable: true,
+      render: (transactionName, data) => {
+        const encodedType = legacyEncodeURIComponent(
+          data.sample.transaction.type
+        );
+        const encodedName = legacyEncodeURIComponent(transactionName);
+        const transactionPath = `/${serviceName}/transactions/${encodedType}/${encodedName}`;
 
-  onTableChange = ({ page = {}, sort = {} }) => {
-    this.setState({ page, sort });
-  };
-
-  render() {
-    const { agentName, serviceName, type } = this.props;
-
-    const columns = [
-      {
-        field: 'name',
-        name: 'Name',
-        width: '50%',
-        sortable: true,
-        render: transactionName => {
-          const transactionUrl = `${serviceName}/transactions/${legacyEncodeURIComponent(
-            type
-          )}/${legacyEncodeURIComponent(transactionName)}`;
-
-          return (
-            <TooltipOverlay content={transactionName || 'N/A'}>
-              <TransactionNameLink path={`/${transactionUrl}`}>
-                {transactionName || 'N/A'}
-              </TransactionNameLink>
-            </TooltipOverlay>
-          );
-        }
-      },
-      {
-        field: 'avg',
-        name: avgLabel(agentName),
-        sortable: true,
-        dataType: 'number',
-        render: value => asMillisWithDefault(value)
-      },
-      {
-        field: 'p95',
-        name: '95th percentile',
-        sortable: true,
-        dataType: 'number',
-        render: value => asMillisWithDefault(value)
-      },
-      {
-        field: 'tpm',
-        name: tpmLabel(type),
-        sortable: true,
-        dataType: 'number',
-        render: value => `${asDecimal(value)} ${tpmUnit(type)}`
-      },
-      {
-        field: 'impactRelative',
-        name: 'Impact',
-        sortable: true,
-        dataType: 'number',
-        render: value => <ImpactSparkline impact={value} />
+        return (
+          <TooltipOverlay content={transactionName || NOT_AVAILABLE_LABEL}>
+            <TransactionNameLink hash={transactionPath}>
+              {transactionName || NOT_AVAILABLE_LABEL}
+            </TransactionNameLink>
+          </TooltipOverlay>
+        );
       }
-    ];
-
-    const sortedItems = orderBy(
-      this.props.items,
-      this.state.sort.field,
-      this.state.sort.direction
-    );
-
-    const paginatedItems = paginateItems({
-      items: sortedItems,
-      pageIndex: this.state.page.index,
-      pageSize: this.state.page.size
-    });
-
-    return (
-      <EuiBasicTable
-        noItemsMessage="No transactions found"
-        items={paginatedItems}
-        columns={columns}
-        pagination={{
-          pageIndex: this.state.page.index,
-          pageSize: this.state.page.size,
-          totalItemCount: this.props.items.length
-        }}
-        sorting={{
-          sort: {
-            field: this.state.sort.field,
-            direction: this.state.sort.direction
+    },
+    {
+      field: 'averageResponseTime',
+      name: i18n.translate(
+        'xpack.apm.transactionsTable.avgDurationColumnLabel',
+        {
+          defaultMessage: 'Avg. duration'
+        }
+      ),
+      sortable: true,
+      dataType: 'number',
+      render: value => asMillis(value)
+    },
+    {
+      field: 'p95',
+      name: i18n.translate(
+        'xpack.apm.transactionsTable.95thPercentileColumnLabel',
+        {
+          defaultMessage: '95th percentile'
+        }
+      ),
+      sortable: true,
+      dataType: 'number',
+      render: value => asMillis(value)
+    },
+    {
+      field: 'transactionsPerMinute',
+      name: i18n.translate(
+        'xpack.apm.transactionsTable.transactionsPerMinuteColumnLabel',
+        {
+          defaultMessage: 'Trans. per minute'
+        }
+      ),
+      sortable: true,
+      dataType: 'number',
+      render: value =>
+        `${asDecimal(value)} ${i18n.translate(
+          'xpack.apm.transactionsTable.transactionsPerMinuteUnitLabel',
+          {
+            defaultMessage: 'tpm'
           }
-        }}
-        onChange={this.onTableChange}
-      />
-    );
-  }
+        )}`
+    },
+    {
+      field: 'impact',
+      name: i18n.translate('xpack.apm.transactionsTable.impactColumnLabel', {
+        defaultMessage: 'Impact'
+      }),
+      sortable: true,
+      dataType: 'number',
+      render: value => <ImpactBar value={value} />
+    }
+  ];
+
+  return (
+    <ManagedTable
+      columns={columns}
+      items={items}
+      initialSort={{ field: 'impact', direction: 'desc' }}
+      initialPageSize={25}
+      {...rest}
+    />
+  );
 }
-
-List.propTypes = {
-  agentName: PropTypes.string,
-  items: PropTypes.array,
-  serviceName: PropTypes.string,
-  type: PropTypes.string
-};
-
-export default List;
-
-// const renderFooterText = () => {
-//   return items.length === 500
-//     ? 'Showing first 500 results ordered by response time'
-//     : '';
-// };

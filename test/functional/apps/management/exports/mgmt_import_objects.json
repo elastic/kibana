@@ -1,0 +1,37 @@
+[
+  {
+    "_id": "6aea5700-ac94-11e8-a651-614b2788174a",
+    "_type": "search",
+    "_source": {
+      "title": "mysavedsearch",
+      "description": "",
+      "hits": 0,
+      "columns": [
+        "_source"
+      ],
+      "sort": [
+        "@timestamp",
+        "desc"
+      ],
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"4c3f3c30-ac94-11e8-a651-614b2788174a\",\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+      }
+    }
+  },
+  {
+    "_id": "8411daa0-ac94-11e8-a651-614b2788174a",
+    "_type": "visualization",
+    "_source": {
+      "title": "mysavedviz",
+      "visState": "{\"title\":\"mysavedviz\",\"type\":\"pie\",\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"addLegend\":true,\"legendPosition\":\"right\",\"isDonut\":true,\"labels\":{\"show\":false,\"values\":true,\"last_level\":true,\"truncate\":100}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}}]}",
+      "uiStateJSON": "{}",
+      "description": "",
+      "savedSearchId": "6aea5700-ac94-11e8-a651-614b2788174a",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+      }
+    }
+  }
+]

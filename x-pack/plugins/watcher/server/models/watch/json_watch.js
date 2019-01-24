@@ -48,8 +48,8 @@ export class JsonWatch extends BaseWatch {
   }
 
   // From Elasticsearch
-  static fromUpstreamJson(json) {
-    const baseProps = super.getPropsFromUpstreamJson(json);
+  static fromUpstreamJson(json, options) {
+    const baseProps = super.getPropsFromUpstreamJson(json, options);
     const watch = cloneDeep(baseProps.watchJson);
 
     if (has(watch, 'metadata.name')) {

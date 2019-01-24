@@ -6,7 +6,6 @@
 
 
 
-import './styles/main.less';
 import template from './messagebar.html';
 
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';

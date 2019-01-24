@@ -8,7 +8,9 @@ exports[`FilterListUsagePopover opens the popover onButtonClick 1`] = `
       <EuiButtonIcon
         aria-label="Edit description"
         color="primary"
+        iconSize="m"
         iconType="pencil"
+        isDisabled={false}
         onClick={[Function]}
         size="s"
         type="button"
@@ -33,7 +35,13 @@ exports[`FilterListUsagePopover opens the popover onButtonClick 1`] = `
           describedByIds={Array []}
           fullWidth={false}
           hasEmptyLabelSpace={false}
-          label="Filter list description"
+          label={
+            <FormattedMessage
+              defaultMessage="Filter list description"
+              id="xpack.ml.settings.filterLists.editDescriptionPopover.filterListDescriptionAriaLabel"
+              values={Object {}}
+            />
+          }
         >
           <EuiFieldText
             compressed={false}
@@ -58,7 +66,9 @@ exports[`FilterListUsagePopover renders the popover with a description 1`] = `
       <EuiButtonIcon
         aria-label="Edit description"
         color="primary"
+        iconSize="m"
         iconType="pencil"
+        isDisabled={false}
         onClick={[Function]}
         size="s"
         type="button"
@@ -83,7 +93,13 @@ exports[`FilterListUsagePopover renders the popover with a description 1`] = `
           describedByIds={Array []}
           fullWidth={false}
           hasEmptyLabelSpace={false}
-          label="Filter list description"
+          label={
+            <FormattedMessage
+              defaultMessage="Filter list description"
+              id="xpack.ml.settings.filterLists.editDescriptionPopover.filterListDescriptionAriaLabel"
+              values={Object {}}
+            />
+          }
         >
           <EuiFieldText
             compressed={false}
@@ -108,7 +124,9 @@ exports[`FilterListUsagePopover renders the popover with no description 1`] = `
       <EuiButtonIcon
         aria-label="Edit description"
         color="primary"
+        iconSize="m"
         iconType="pencil"
+        isDisabled={false}
         onClick={[Function]}
         size="s"
         type="button"
@@ -133,7 +151,13 @@ exports[`FilterListUsagePopover renders the popover with no description 1`] = `
           describedByIds={Array []}
           fullWidth={false}
           hasEmptyLabelSpace={false}
-          label="Filter list description"
+          label={
+            <FormattedMessage
+              defaultMessage="Filter list description"
+              id="xpack.ml.settings.filterLists.editDescriptionPopover.filterListDescriptionAriaLabel"
+              values={Object {}}
+            />
+          }
         >
           <EuiFieldText
             compressed={false}

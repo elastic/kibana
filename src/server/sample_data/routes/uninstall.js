@@ -31,24 +31,27 @@ export const createUninstallRoute = () => ({
         id: Joi.string().required(),
       }).required()
     },
-    handler: async (request, reply) => {
+    handler: async (request, h) => {
       const server = request.server;
       const sampleDataset = server.getSampleDatasets().find(({ id }) => {
         return id === request.params.id;
       });
 
       if (!sampleDataset) {
-        reply().code(404);
-        return;
+        return h.response().code(404);
       }
 
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-      const index = createIndexName(server, sampleDataset.id);
 
-      try {
-        await callWithRequest(request, 'indices.delete', { index: index });
-      } catch (err) {
-        return reply(`Unable to delete sample data index "${index}", error: ${err.message}`).code(err.status);
+      for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
+        const dataIndexConfig = sampleDataset.dataIndices[i];
+        const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
+
+        try {
+          await callWithRequest(request, 'indices.delete', { index: index });
+        } catch (err) {
+          return h.response(`Unable to delete sample data index "${index}", error: ${err.message}`).code(err.status);
+        }
       }
 
       const deletePromises = sampleDataset.savedObjects.map((savedObjectJson) => {
@@ -59,11 +62,11 @@ export const createUninstallRoute = () => ({
       } catch (err) {
         // ignore 404s since users could have deleted some of the saved objects via the UI
         if (_.get(err, 'output.statusCode') !== 404) {
-          return reply(`Unable to delete sample dataset saved objects, error: ${err.message}`).code(403);
+          return h.response(`Unable to delete sample dataset saved objects, error: ${err.message}`).code(403);
         }
       }
 
-      reply({});
+      return {};
     }
   }
 });

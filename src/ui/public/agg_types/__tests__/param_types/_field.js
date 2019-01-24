@@ -37,22 +37,20 @@ describe('Field', function () {
   describe('constructor', function () {
     it('it is an instance of BaseParamType', function () {
       const aggParam = new FieldParamType({
-        name: 'field'
+        name: 'field', type: 'field'
       });
 
       expect(aggParam).to.be.a(BaseParamType);
     });
   });
 
-  describe('getFieldOptions', function () {
+  describe('getAvailableFields', function () {
     it('should return only aggregatable fields by default', function () {
       const aggParam = new FieldParamType({
-        name: 'field'
+        name: 'field', type: 'field'
       });
 
-      const fields = aggParam.getFieldOptions({
-        getIndexPattern: () => indexPattern
-      });
+      const fields = aggParam.getAvailableFields(indexPattern.fields);
       expect(fields).to.not.have.length(0);
       for (const field of fields) {
         expect(field.aggregatable).to.be(true);
@@ -61,14 +59,12 @@ describe('Field', function () {
 
     it('should return all fields if onlyAggregatable is false', function () {
       const aggParam = new FieldParamType({
-        name: 'field'
+        name: 'field', type: 'field'
       });
 
       aggParam.onlyAggregatable = false;
 
-      const fields = aggParam.getFieldOptions({
-        getIndexPattern: () => indexPattern
-      });
+      const fields = aggParam.getAvailableFields(indexPattern.fields);
       const nonAggregatableFields = reject(fields, 'aggregatable');
       expect(nonAggregatableFields).to.not.be.empty();
     });

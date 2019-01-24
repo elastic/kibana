@@ -12,6 +12,7 @@ import { AlertsPanel } from './alerts_panel';
 import { BeatsPanel } from './beats_panel';
 
 import { EuiPage, EuiPageBody } from '@elastic/eui';
+import { ApmPanel } from './apm_panel';
 
 export function Overview(props) {
   return (
@@ -33,6 +34,8 @@ export function Overview(props) {
         <LogstashPanel {...props.cluster.logstash} changeUrl={props.changeUrl} />
 
         <BeatsPanel {...props.cluster.beats} changeUrl={props.changeUrl} />
+
+        <ApmPanel {...props.cluster.apm} changeUrl={props.changeUrl} />
       </EuiPageBody>
     </EuiPage>
   );

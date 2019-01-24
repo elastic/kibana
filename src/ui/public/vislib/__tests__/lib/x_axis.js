@@ -102,7 +102,7 @@ describe('Vislib xAxis Class Test Suite', function () {
     VisConfig = Private(VislibVisConfigProvider);
 
     el = d3.select('body').append('div')
-      .attr('class', 'x-axis-wrapper')
+      .attr('class', 'visAxis--x')
       .style('height', '40px');
 
     fixture = el.append('div')

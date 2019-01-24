@@ -32,18 +32,23 @@ describe('cli invalid config support', function () {
       cwd: ROOT_DIR
     });
 
-    const logLines = stdout.toString('utf8')
+    const [fatalLogLine] = stdout.toString('utf8')
       .split('\n')
       .filter(Boolean)
       .map(JSON.parse)
+      .filter(line => line.tags.includes('fatal'))
       .map(obj => ({
         ...obj,
         pid: '## PID ##',
-        '@timestamp': '## @timestamp ##'
+        '@timestamp': '## @timestamp ##',
+        error: '## Error with stack trace ##',
       }));
 
     expect(error).toBe(undefined);
     expect(status).toBe(64);
-    expect(logLines).toMatchSnapshot();
+    expect(fatalLogLine.message).toMatch('{ Error: "unknown.key", "other.unknown.key", "other.third", "some.flat.key", and "' +
+      'some.array" settings were not applied. Check for spelling errors and ensure that expected plugins are installed.');
+    expect(fatalLogLine.tags).toEqual(['fatal', 'root']);
+    expect(fatalLogLine.type).toEqual('log');
   }, 20 * 1000);
 });

@@ -6,7 +6,7 @@
 
 import { scaleLinear } from 'd3-scale';
 
-export function getPlotValues(duration, height, margins, width) {
+export function getPlotValues({ width, duration, height, margins }) {
   const xMin = 0;
   const xMax = duration;
   const xScale = scaleLinear()

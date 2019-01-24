@@ -41,10 +41,3 @@ exports[`start servers CLI options rejects invalid options even if valid options
     ...stack trace...
 "
 `;
-
-exports[`start servers CLI options rejects non-enum value for esFrom 1`] = `
-"
-[31mfunctional_tests_server: invalid argument [butter] to option [esFrom][39m
-    ...stack trace...
-"
-`;

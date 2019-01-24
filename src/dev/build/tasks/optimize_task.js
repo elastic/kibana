@@ -39,18 +39,19 @@ export const OptimizeBuildTask = {
     const kibanaArgs = [
       '--env.name=production',
       '--logging.json=false',
-      '--plugins.initialize=false',
-      '--server.autoListen=false',
+      '--optimize',
     ];
 
     log.info('Running bin/kibana to trigger the optimizer');
 
     await exec(log, kibanaScript, kibanaArgs, {
       cwd: build.resolvePath('.'),
-      exitAfter: /Optimization .+ complete/
+      env: {
+        FORCE_DLL_CREATION: 'true'
+      },
     });
 
     // clean up temporary node install
-    await deleteAll(log, [tempNodeInstallDir]);
+    await deleteAll([tempNodeInstallDir], log);
   },
 };

@@ -1,0 +1,18 @@
+<div class="kuiModal">
+    <div class="kuiModalHeader">
+        <h1 class="kuiModalHeader__title" id="watcher__error-display-modal-title">{{ vm.title }}</h1>
+    </div>
+    <div class="kuiModalBody">
+        <ul>
+            <li class="kuiVerticalRhythm" ng-repeat="error in vm.errors">{{ error.message }}</li>
+        </ul>
+    </div>
+    <div class="kuiModalFooter">
+        <button
+            ng-click="vm.close()"
+            class="kuiButton kuiButton--primary"
+            aria-label="close">
+              Close
+        </button>
+    </div>
+</div>

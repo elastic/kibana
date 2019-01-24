@@ -1,0 +1,54 @@
+<div class="kuiSideBarSection">
+  <div class="form-group">
+    <div class="clearfix form-group">
+      <label for="markdownVisInput">Markdown</label>
+      <small class="pull-right">
+        <a target="_window" href="https://help.github.com/articles/github-flavored-markdown/">
+          <icon aria-hidden="true" size="'s'" type="'link'"></icon>
+          <span
+            i18n-id="markdownVis.params.helpLinkLabel"
+            i18n-default-message="Help"
+          >
+          </span>
+        </a>
+      </small>
+    </div>
+    <div class="kuiSideBarFormRow">
+      <label class="kuiSideBarFormRow__label" for="markdownVisFontSize">
+        <span
+          i18n-id="markdownVis.params.fontSizeLabel"
+          i18n-default-message="Font Size ({fontSize}pt)"
+          i18n-values="{ fontSize: editorState.params.fontSize }"
+        >
+        </span>
+      </label>
+      <div class="kuiSideBarFormRow__control">
+        <input id="markdownVisFontSize" type="range" ng-model="editorState.params.fontSize" class="form-control" min="8" max="36" />
+      </div>
+    </div>
+    <div class="kuiSideBarFormRow">
+      <label
+        class="kuiSideBarFormRow__label"
+        for="markdownVisOpenLinksInNewTab"
+        i18n-id="markdownVis.params.openLinksLabel"
+        i18n-default-message="Open links in new tab"
+      >
+      </label>
+      <div class="kuiSideBarFormRow__control">
+        <input
+          id="markdownVisOpenLinksInNewTab"
+          type="checkbox"
+          ng-model="editorState.params.openLinksInNewTab"
+          class="kuiCheckBox"
+        />
+      </div>
+    </div>
+    <textarea
+      id="markdownVisInput"
+      ng-model="editorState.params.markdown"
+      class="form-control"
+      rows="20"
+      data-test-subj="markdownTextarea"
+    ></textarea>
+  </div>
+</div>

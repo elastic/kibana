@@ -9,7 +9,7 @@
 
 import chrome from 'ui/chrome';
 
-import { http } from 'plugins/ml/services/http_service';
+import { http } from '../../services/http_service';
 
 const basePath = chrome.addBasePath('/api/ml');
 
@@ -50,14 +50,21 @@ export const filters = {
     addItems,
     removeItems
   ) {
+    const data = {};
+    if (description !== undefined) {
+      data.description = description;
+    }
+    if (addItems !== undefined) {
+      data.addItems = addItems;
+    }
+    if (removeItems !== undefined) {
+      data.removeItems = removeItems;
+    }
+
     return http({
       url: `${basePath}/filters/${filterId}`,
       method: 'PUT',
-      data: {
-        description,
-        addItems,
-        removeItems
-      }
+      data
     });
   },
 

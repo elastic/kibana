@@ -14,20 +14,29 @@ import { EditUser } from '../../components/management/users';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { createApiClient } from '../../lib/api';
+import { I18nProvider } from '@kbn/i18n/react';
+import { getEditUserBreadcrumbs, getCreateUserBreadcrumbs } from './breadcrumbs';
 
 const renderReact = (elem, httpClient, changeUrl, username) => {
   render(
-    <EditUser
-      changeUrl={changeUrl}
-      apiClient={createApiClient(httpClient)}
-      username={username}
-    />,
+    <I18nProvider>
+      <EditUser
+        changeUrl={changeUrl}
+        apiClient={createApiClient(httpClient)}
+        username={username}
+      />
+    </I18nProvider>,
     elem
   );
 };
 
 routes.when(`${EDIT_USERS_PATH}/:username?`, {
   template,
+  k7Breadcrumbs: ($injector, $route) => $injector.invoke(
+    $route.current.params.username
+      ? getEditUserBreadcrumbs
+      : getCreateUserBreadcrumbs
+  ),
   controllerAs: 'editUser',
   controller($scope, $route, kbnUrl, Notifier, confirmModal, $http) {
     $scope.$on('$destroy', () => {

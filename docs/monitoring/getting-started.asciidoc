@@ -1,4 +1,0 @@
-[[monitoring-getting-started]]
-== Getting Started
-
-See {kibana-ref}/monitoring-data.html[Viewing Monitoring Data in {kib}]. 

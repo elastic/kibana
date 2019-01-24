@@ -17,54 +17,19 @@
  * under the License.
  */
 
-import { BehaviorSubject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { CoreContext } from '../../types';
+import { LegacyService } from './legacy_service';
 
-/** @internal */
-export { LegacyPlatformProxifier } from './legacy_platform_proxifier';
 /** @internal */
 export { LegacyObjectToConfigAdapter } from './config/legacy_object_to_config_adapter';
+/** @internal */
+export { LegacyService } from './legacy_service';
 
-import { LegacyObjectToConfigAdapter, LegacyPlatformProxifier } from '.';
-import { Env } from '../config';
-import { Root } from '../root';
-import { BasePathProxyRoot } from '../root/base_path_proxy_root';
+/** @internal */
+export class LegacyCompatModule {
+  public readonly service: LegacyService;
 
-function initEnvironment(rawKbnServer: any, isDevClusterMaster = false) {
-  const env = Env.createDefault({
-    // The core doesn't work with configs yet, everything is provided by the
-    // "legacy" Kibana, so we can have empty array here.
-    configs: [],
-    // `dev` is the only CLI argument we currently use.
-    cliArgs: { dev: rawKbnServer.config.get('env.dev') },
-    isDevClusterMaster,
-  });
-
-  const legacyConfig$ = new BehaviorSubject<Record<string, any>>(rawKbnServer.config.get());
-  return {
-    config$: legacyConfig$.pipe(map(legacyConfig => new LegacyObjectToConfigAdapter(legacyConfig))),
-    env,
-    // Propagates legacy config updates to the new platform.
-    updateConfig(legacyConfig: Record<string, any>) {
-      legacyConfig$.next(legacyConfig);
-    },
-  };
+  constructor(coreContext: CoreContext) {
+    this.service = new LegacyService(coreContext);
+  }
 }
-
-/**
- * @internal
- */
-export const injectIntoKbnServer = (rawKbnServer: any) => {
-  const { env, config$, updateConfig } = initEnvironment(rawKbnServer);
-
-  rawKbnServer.newPlatform = {
-    // Custom HTTP Listener that will be used within legacy platform by HapiJS server.
-    proxyListener: new LegacyPlatformProxifier(new Root(config$, env), env),
-    updateConfig,
-  };
-};
-
-export const createBasePathProxy = (rawKbnServer: any) => {
-  const { env, config$ } = initEnvironment(rawKbnServer, true /*isDevClusterMaster*/);
-  return new BasePathProxyRoot(config$, env);
-};

@@ -186,7 +186,7 @@ describe('Vislib Split Function Test Suite', function () {
       });
 
       it('should add the correct class name', function () {
-        expect(!!$('.chart-wrapper-row').length).to.be(true);
+        expect(!!$('.visWrapper__splitCharts--row').length).to.be(true);
       });
     });
 
@@ -196,20 +196,20 @@ describe('Vislib Split Function Test Suite', function () {
       let fixture;
 
       beforeEach(ngMock.inject(function () {
-        visEl = el.append('div').attr('class', 'vis-wrapper');
-        visEl.append('div').attr('class', 'x-axis-chart-title');
-        visEl.append('div').attr('class', 'y-axis-chart-title');
-        visEl.select('.x-axis-chart-title').call(chartTitleSplit);
-        visEl.select('.y-axis-chart-title').call(chartTitleSplit);
+        visEl = el.append('div').attr('class', 'visWrapper');
+        visEl.append('div').attr('class', 'visAxis__splitTitles--x');
+        visEl.append('div').attr('class', 'visAxis__splitTitles--y');
+        visEl.select('.visAxis__splitTitles--x').call(chartTitleSplit);
+        visEl.select('.visAxis__splitTitles--y').call(chartTitleSplit);
 
         newEl = d3.select('body').append('div')
-          .attr('class', 'vis-wrapper')
+          .attr('class', 'visWrapper')
           .datum({ series: [] });
 
-        newEl.append('div').attr('class', 'x-axis-chart-title');
-        newEl.append('div').attr('class', 'y-axis-chart-title');
-        newEl.select('.x-axis-chart-title').call(chartTitleSplit);
-        newEl.select('.y-axis-chart-title').call(chartTitleSplit);
+        newEl.append('div').attr('class', 'visAxis__splitTitles--x');
+        newEl.append('div').attr('class', 'visAxis__splitTitles--y');
+        newEl.select('.visAxis__splitTitles--x').call(chartTitleSplit);
+        newEl.select('.visAxis__splitTitles--y').call(chartTitleSplit);
 
         fixture = newEl.selectAll(this.childNodes)[0].length;
       }));
@@ -223,8 +223,8 @@ describe('Vislib Split Function Test Suite', function () {
       });
 
       it('should remove the correct div', function () {
-        expect($('.y-axis-chart-title').length).to.be(1);
-        expect($('.x-axis-chart-title').length).to.be(0);
+        expect($('.visAxis__splitTitles--y').length).to.be(1);
+        expect($('.visAxis__splitTitles--x').length).to.be(0);
       });
 
       it('should remove all chart title divs when only one chart is rendered', function () {

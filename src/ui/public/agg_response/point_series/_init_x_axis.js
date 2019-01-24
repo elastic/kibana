@@ -18,21 +18,13 @@
  */
 
 
-export function PointSeriesInitXAxisProvider() {
-  return function initXAxis(chart) {
-    const x = chart.aspects.x;
-    chart.xAxisFormatter = x.aggConfig ? x.aggConfig.fieldFormatter() : String;
-    chart.xAxisLabel = x.title;
-
-    if (!x.aggConfig || !x.aggConfig.type.ordered) return;
-
-    chart.indexPattern = x.aggConfig.vis.indexPattern;
-    chart.xAxisField = x.aggConfig.params.field;
-
-    chart.ordered = {};
-    const xAggOutput = x.aggConfig.write();
-    if (xAggOutput.params.interval) {
-      chart.ordered.interval = xAggOutput.params.interval;
-    }
-  };
+export function initXAxis(chart) {
+  const x = chart.aspects.x[0];
+  chart.xAxisFormatter = x.fieldFormatter ? x.fieldFormatter : String;
+  chart.xAxisLabel = x.title;
+  if (x.params.date) {
+    chart.ordered = {
+      interval: x.params.interval
+    };
+  }
 }

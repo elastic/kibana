@@ -19,5 +19,5 @@
 
 export const isDefaultTypeIndexPattern = indexPattern => {
   // Default index patterns don't have `type` defined.
-  return indexPattern.type == null;
+  return !indexPattern.type;
 };

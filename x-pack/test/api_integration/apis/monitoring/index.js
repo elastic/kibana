@@ -6,11 +6,13 @@
 
 export default function ({ loadTestFile }) {
   describe('Monitoring', () => {
+    loadTestFile(require.resolve('./apm'));
     loadTestFile(require.resolve('./beats'));
     loadTestFile(require.resolve('./cluster'));
     loadTestFile(require.resolve('./elasticsearch'));
     loadTestFile(require.resolve('./elasticsearch_settings'));
     loadTestFile(require.resolve('./kibana'));
     loadTestFile(require.resolve('./logstash'));
+    loadTestFile(require.resolve('./common'));
   });
 }

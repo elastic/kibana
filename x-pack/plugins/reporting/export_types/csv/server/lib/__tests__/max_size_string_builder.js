@@ -63,4 +63,18 @@ describe('MaxSizeStringBuilder', function () {
       expect(builder.getString()).to.be('a');
     });
   });
+
+  describe('getSizeInBytes', function () {
+    it(`should return 0 when no strings have been appended`, function () {
+      const builder = new MaxSizeStringBuilder(100);
+      expect(builder.getSizeInBytes()).to.be(0);
+    });
+
+    it(`should the size in bytes`, function () {
+      const builder = new MaxSizeStringBuilder(100);
+      const stringValue = 'foobar';
+      builder.tryAppend(stringValue);
+      expect(builder.getSizeInBytes()).to.be(stringValue.length);
+    });
+  });
 });

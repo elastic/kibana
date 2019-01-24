@@ -22,6 +22,13 @@ import v8 from 'v8';
 import { get, isObject, merge } from 'lodash';
 import { keysToSnakeCaseShallow } from '../../../utils/case_conversion';
 import { getAllStats as cGroupStats } from './cgroup';
+import { getOSInfo } from './get_os_info';
+
+const requestDefaults = {
+  disconnects: 0,
+  statusCodes: {},
+  total: 0,
+};
 
 export class Metrics {
   constructor(config, server) {
@@ -49,7 +56,7 @@ export class Metrics {
 
   async capture(hapiEvent) {
     const timestamp = new Date().toISOString();
-    const event = this.captureEvent(hapiEvent);
+    const event = await this.captureEvent(hapiEvent);
     const cgroup = await this.captureCGroupsIfAvailable();
 
     const metrics = {
@@ -60,7 +67,7 @@ export class Metrics {
     return merge(metrics, event, cgroup);
   }
 
-  captureEvent(hapiEvent) {
+  async captureEvent(hapiEvent) {
     const heapStats = v8.getHeapStatistics();
     const port = this.config.get('server.port');
     const avgInMillis = get(hapiEvent, ['responseTimes', port, 'avg']); // sadly, it's possible for this to be NaN
@@ -92,14 +99,18 @@ export class Metrics {
           free_in_bytes: os.freemem(),
           used_in_bytes: get(hapiEvent, 'osmem.total') - get(hapiEvent, 'osmem.free')
         },
-        uptime_in_millis: os.uptime() * 1000
+        uptime_in_millis: os.uptime() * 1000,
+        ...(await getOSInfo())
       },
       response_times: {
         avg_in_millis: isNaN(avgInMillis) ? undefined : avgInMillis, // convert NaN to undefined
         max_in_millis: maxInMillis
       },
-      requests: keysToSnakeCaseShallow(get(hapiEvent, ['requests', port])),
-      concurrent_connections: get(hapiEvent, ['concurrents', port]),
+      requests: {
+        ...requestDefaults,
+        ...keysToSnakeCaseShallow(get(hapiEvent, ['requests', port]))
+      },
+      concurrent_connections: hapiEvent.concurrent_connections
     };
   }
 

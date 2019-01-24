@@ -35,7 +35,7 @@ export function safeChildProcess(childProcess, observer) {
     ),
   );
 
-    // send termination signals
+  // send termination signals
   const terminate$ = Rx.merge(
     signalForChildProcess$.pipe(
       tap(signal => childProcess.kill(signal))

@@ -20,7 +20,9 @@
 import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
+  const esArchiver = getService('esArchiver');
   const log = getService('log');
+  const inspector = getService('inspector');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings', 'visualBuilder']);
 
@@ -69,8 +71,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should not have inspector enabled', async function () {
-        const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-        expect(spyToggleExists).to.be(false);
+        await inspector.expectIsNotEnabled();
       });
 
       it('should show correct data', async function () {
@@ -90,12 +91,12 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should not have inspector enabled', async function () {
-        const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-        expect(spyToggleExists).to.be(false);
+        await inspector.expectIsNotEnabled();
       });
 
       it('should show correct data', async function () {
         const expectedMetricValue =  '156';
+        await PageObjects.visualize.waitForVisualization();
         const value = await PageObjects.visualBuilder.getMetricValue();
         log.debug(`metric value: ${value}`);
         expect(value).to.eql(expectedMetricValue);
@@ -113,6 +114,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should verify gauge label and count display', async function () {
         await retry.try(async () => {
+          await PageObjects.visualize.waitForVisualization();
           const labelString = await PageObjects.visualBuilder.getGaugeLabel();
           expect(labelString).to.be('Count');
           const gaugeCount = await PageObjects.visualBuilder.getGaugeCount();
@@ -130,6 +132,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should verify topN label and count display', async function () {
+        await PageObjects.visualize.waitForVisualization();
         const labelString = await PageObjects.visualBuilder.getTopNLabel();
         expect(labelString).to.be('Count');
         const gaugeCount = await PageObjects.visualBuilder.getTopNCount();
@@ -208,11 +211,34 @@ export default function ({ getService, getPageObjects }) {
         const expectedData = 'OS Count\nwin 8 13\nwin xp 10\nwin 7 12\nios 5\nosx 3';
         expect(tableData).to.be(expectedData);
       });
-
-
-
     });
 
-
+    describe.skip('switch index patterns', () => {
+      before(async function () {
+        log.debug('Load kibana_sample_data_flights data');
+        await esArchiver.loadIfNeeded('kibana_sample_data_flights');
+        await PageObjects.visualBuilder.resetPage('2015-09-19 06:31:44.000', '2018-10-31 00:0:00.000');
+        await PageObjects.visualBuilder.clickMetric();
+      });
+      after(async function () {
+        await esArchiver.unload('kibana_sample_data_flights');
+      });
+      it('should be able to switch between index patterns', async () => {
+        const expectedMetricValue =  '156';
+        const value = await PageObjects.visualBuilder.getMetricValue();
+        log.debug(`metric value: ${value}`);
+        expect(value).to.eql(expectedMetricValue);
+        await PageObjects.visualBuilder.clickMetricPanelOptions();
+        const fromTime = '2018-10-22 00:00:00.000';
+        const toTime = '2018-10-28 23:59:59.999';
+        log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.visualBuilder.setIndexPatternValue('kibana_sample_data_flights');
+        await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');
+        const newValue = await PageObjects.visualBuilder.getMetricValue();
+        log.debug(`metric value: ${newValue}`);
+        expect(newValue).to.eql('10');
+      });
+    });
   });
 }

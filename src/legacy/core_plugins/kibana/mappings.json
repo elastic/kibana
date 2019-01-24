@@ -1,0 +1,187 @@
+{
+  "index-pattern": {
+    "properties": {
+      "fieldFormatMap": {
+        "type": "text"
+      },
+      "fields": {
+        "type": "text"
+      },
+      "intervalName": {
+        "type": "keyword"
+      },
+      "notExpandable": {
+        "type": "boolean"
+      },
+      "sourceFilters": {
+        "type": "text"
+      },
+      "timeFieldName": {
+        "type": "keyword"
+      },
+      "title": {
+        "type": "text"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "typeMeta": {
+        "type": "keyword"
+      }
+    }
+  },
+  "visualization": {
+    "properties": {
+      "description": {
+        "type": "text"
+      },
+      "kibanaSavedObjectMeta": {
+        "properties": {
+          "searchSourceJSON": {
+            "type": "text"
+          }
+        }
+      },
+      "savedSearchId": {
+        "type": "keyword"
+      },
+      "title": {
+        "type": "text"
+      },
+      "uiStateJSON": {
+        "type": "text"
+      },
+      "version": {
+        "type": "integer"
+      },
+      "visState": {
+        "type": "text"
+      }
+    }
+  },
+  "search": {
+    "properties": {
+      "columns": {
+        "type": "keyword"
+      },
+      "description": {
+        "type": "text"
+      },
+      "hits": {
+        "type": "integer"
+      },
+      "kibanaSavedObjectMeta": {
+        "properties": {
+          "searchSourceJSON": {
+            "type": "text"
+          }
+        }
+      },
+      "sort": {
+        "type": "keyword"
+      },
+      "title": {
+        "type": "text"
+      },
+      "version": {
+        "type": "integer"
+      }
+    }
+  },
+  "dashboard": {
+    "properties": {
+      "description": {
+        "type": "text"
+      },
+      "hits": {
+        "type": "integer"
+      },
+      "kibanaSavedObjectMeta": {
+        "properties": {
+          "searchSourceJSON": {
+            "type": "text"
+          }
+        }
+      },
+      "optionsJSON": {
+        "type": "text"
+      },
+      "panelsJSON": {
+        "type": "text"
+      },
+      "refreshInterval": {
+        "properties": {
+          "display": {
+            "type": "keyword"
+          },
+          "pause": {
+            "type": "boolean"
+          },
+          "section": {
+            "type": "integer"
+          },
+          "value": {
+            "type": "integer"
+          }
+        }
+      },
+      "timeFrom": {
+        "type": "keyword"
+      },
+      "timeRestore": {
+        "type": "boolean"
+      },
+      "timeTo": {
+        "type": "keyword"
+      },
+      "title": {
+        "type": "text"
+      },
+      "uiStateJSON": {
+        "type": "text"
+      },
+      "version": {
+        "type": "integer"
+      }
+    }
+  },
+  "url": {
+    "properties": {
+      "accessCount": {
+        "type": "long"
+      },
+      "accessDate": {
+        "type": "date"
+      },
+      "createDate": {
+        "type": "date"
+      },
+      "url": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 2048
+          }
+        }
+      }
+    }
+  },
+  "server": {
+    "properties": {
+      "uuid": {
+        "type": "keyword"
+      }
+    }
+  },
+  "kql-telemetry": {
+    "properties": {
+      "optInCount": {
+        "type": "long"
+      },
+      "optOutCount": {
+        "type": "long"
+      }
+    }
+  }
+}

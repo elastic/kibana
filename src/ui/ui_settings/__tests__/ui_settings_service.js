@@ -525,7 +525,7 @@ describe('ui settings', () => {
     it('returns the overridden value if the document does not exist', async () => {
       const overrides = { dateFormat: 'foo' };
       const { uiSettings, savedObjectsClient } = setup({ overrides });
-      savedObjectsClient.get.throws(savedObjectsClientErrors.createGenericNotFoundError());
+      savedObjectsClient.get.onFirstCall().throws(savedObjectsClientErrors.createGenericNotFoundError());
       expect(await uiSettings.get('dateFormat')).to.be('foo');
     });
   });

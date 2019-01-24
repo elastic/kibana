@@ -1,0 +1,55 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Home component should render 1`] = `
+<div>
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    direction="row"
+    gutterSize="l"
+    justifyContent="spaceBetween"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={true}
+    >
+      <EuiTitle
+        size="l"
+        textTransform="none"
+      >
+        <h1>
+          APM
+        </h1>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <SetupInstructionsLink />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="l"
+  />
+  <Connect(KueryBarView) />
+  <withRouter(HistoryTabsWithoutRouter)
+    tabs={
+      Array [
+        Object {
+          "name": "Services",
+          "path": "/services",
+          "render": [Function],
+        },
+        Object {
+          "name": "Traces",
+          "path": "/traces",
+          "render": [Function],
+        },
+      ]
+    }
+  />
+</div>
+`;

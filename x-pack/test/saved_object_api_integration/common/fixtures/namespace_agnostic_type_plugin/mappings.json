@@ -1,0 +1,15 @@
+{
+  "globaltype": {
+    "properties": {
+      "name": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 2048
+          }
+        }
+      }
+    }
+  }
+}

@@ -16,10 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { i18n } from '@kbn/i18n';
 
 export const intervalOptions = [
   {
-    display: 'Auto',
+    display: i18n.translate('common.ui.aggTypes.buckets.intervalOptions.autoDisplayName', {
+      defaultMessage: 'Auto',
+    }),
     val: 'auto',
     enabled: function (agg) {
       // not only do we need a time field, but the selected field needs
@@ -28,39 +31,57 @@ export const intervalOptions = [
     }
   },
   {
-    display: 'Millisecond',
+    display: i18n.translate('common.ui.aggTypes.buckets.intervalOptions.millisecondDisplayName', {
+      defaultMessage: 'Millisecond',
+    }),
     val: 'ms'
   },
   {
-    display: 'Second',
+    display: i18n.translate('common.ui.aggTypes.buckets.intervalOptions.secondDisplayName', {
+      defaultMessage: 'Second',
+    }),
     val: 's'
   },
   {
-    display: 'Minute',
+    display: i18n.translate('common.ui.aggTypes.buckets.intervalOptions.minuteDisplayName', {
+      defaultMessage: 'Minute',
+    }),
     val: 'm'
   },
   {
-    display: 'Hourly',
+    display: i18n.translate('common.ui.aggTypes.buckets.intervalOptions.hourlyDisplayName', {
+      defaultMessage: 'Hourly',
+    }),
     val: 'h'
   },
   {
-    display: 'Daily',
+    display: i18n.translate('common.ui.aggTypes.buckets.intervalOptions.dailyDisplayName', {
+      defaultMessage: 'Daily',
+    }),
     val: 'd'
   },
   {
-    display: 'Weekly',
+    display: i18n.translate('common.ui.aggTypes.buckets.intervalOptions.weeklyDisplayName', {
+      defaultMessage: 'Weekly',
+    }),
     val: 'w'
   },
   {
-    display: 'Monthly',
+    display: i18n.translate('common.ui.aggTypes.buckets.intervalOptions.monthlyDisplayName', {
+      defaultMessage: 'Monthly',
+    }),
     val: 'M'
   },
   {
-    display: 'Yearly',
+    display: i18n.translate('common.ui.aggTypes.buckets.intervalOptions.yearlyDisplayName', {
+      defaultMessage: 'Yearly',
+    }),
     val: 'y'
   },
   {
-    display: 'Custom',
+    display: i18n.translate('common.ui.aggTypes.buckets.intervalOptions.customDisplayName', {
+      defaultMessage: 'Custom',
+    }),
     val: 'custom'
   }
 ];

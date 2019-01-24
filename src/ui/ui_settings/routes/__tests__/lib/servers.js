@@ -27,14 +27,30 @@ export async function startServers() {
   servers = await startTestServers({
     adjustTimeout: (t) => this.timeout(t),
     settings: {
-      uiSettings: {
-        overrides: {
-          foo: 'bar',
-        }
+      kbn: {
+        uiSettings: {
+          overrides: {
+            foo: 'bar',
+          }
+        },
       },
-    }
+    },
   });
   kbnServer = servers.kbnServer;
+}
+
+async function deleteKibanaIndex(callCluster) {
+  const kibanaIndices = await callCluster('cat.indices', { index: '.kibana*', format: 'json' });
+  const indexNames = kibanaIndices.map(x => x.index);
+  if (!indexNames.length) {
+    return;
+  }
+  await callCluster('indices.putSettings', {
+    index: indexNames,
+    body: { index: { blocks: { read_only: false } } },
+  });
+  await callCluster('indices.delete', { index: indexNames });
+  return indexNames;
 }
 
 export function getServices() {
@@ -56,6 +72,7 @@ export function getServices() {
     callCluster,
     savedObjectsClient,
     uiSettings,
+    deleteKibanaIndex,
   };
 
   return services;

@@ -21,7 +21,7 @@ export function QueryBarProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const log = getService('log');
-  const PageObjects = getPageObjects(['header']);
+  const PageObjects = getPageObjects(['header', 'common']);
 
   class QueryBar {
 
@@ -44,8 +44,13 @@ export function QueryBarProvider({ getService, getPageObjects }) {
 
     async submitQuery() {
       log.debug('QueryBar.submitQuery');
-      await testSubjects.click('querySubmitButton');
+      await testSubjects.click('queryInput');
+      await PageObjects.common.pressEnterKey();
       await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async clickQuerySubmitButton() {
+      await testSubjects.click('querySubmitButton');
     }
 
   }

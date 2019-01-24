@@ -5,17 +5,21 @@
  */
 
 import { management } from 'ui/management';
+import { i18n } from '@kbn/i18n';
 import 'plugins/watcher/services/license';
-import 'plugins/watcher/styles/watcher_ui.less';
 
 management.getSection('elasticsearch').register('watcher', {
-  display: 'Watcher',
+  display: i18n.translate('xpack.watcher.sections.watchList.managementSection.watcherDisplayName', {
+    defaultMessage: 'Watcher' }
+  ),
   order: 4,
   url: '#/management/elasticsearch/watcher/'
 });
 
 management.getSection('elasticsearch/watcher').register('watches', {
-  display: 'Watches',
+  display: i18n.translate('xpack.watcher.sections.watchList.managementSection.watchesDisplayName', {
+    defaultMessage: 'Watches' }
+  ),
   order: 1
 });
 
@@ -24,19 +28,25 @@ management.getSection('elasticsearch/watcher').register('watch', {
 });
 
 management.getSection('elasticsearch/watcher/watch').register('status', {
-  display: 'Status',
+  display: i18n.translate('xpack.watcher.sections.watchList.managementSection.statusDisplayName', {
+    defaultMessage: 'Status' }
+  ),
   order: 1,
   visible: false
 });
 
 management.getSection('elasticsearch/watcher/watch').register('edit', {
-  display: 'Edit',
+  display: i18n.translate('xpack.watcher.sections.watchList.managementSection.editDisplayName', {
+    defaultMessage: 'Edit' }
+  ),
   order: 2,
   visible: false
 });
 
 management.getSection('elasticsearch/watcher/watch').register('new', {
-  display: 'New Watch',
+  display: i18n.translate('xpack.watcher.sections.watchList.managementSection.newWatchDisplayName', {
+    defaultMessage: 'New Watch' }
+  ),
   order: 1,
   visible: false
 });

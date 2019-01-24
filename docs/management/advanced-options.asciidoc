@@ -39,10 +39,14 @@ document.
 `discover:sort:defaultOrder`:: Controls the default sort direction for time based index patterns in the Discover app.
 `doc_table:highlight`:: Highlight results in Discover and Saved Searches Dashboard. Highlighting makes request slow when
 working on big documents. Set this property to `false` to disable highlighting.
+`doc_table:hideTimeColumn`:: Hide the 'Time' column in Discover and in all Saved Searches on Dashboards.
+`search:includeFrozen`:: Will include {ref}/frozen-indices.html[frozen indices] in results if enabled. Searching through frozen indices
+might increase the search time.
 `courier:maxSegmentCount`:: Kibana splits requests in the Discover app into segments to limit the size of requests sent to
 the Elasticsearch cluster. This setting constrains the length of the segment list. Long segment lists can significantly
 increase request processing time.
 `courier:ignoreFilterIfFieldNotInIndex`:: Set this property to `true` to skip filters that apply to fields that don't exist in a visualization's index. Useful when dashboards consist of visualizations from multiple index patterns.
+`courier:maxConcurrentShardRequests`:: Controls the {ref}/search-multi-search.html[max_concurrent_shard_requests] setting used for _msearch requests sent by Kibana. Set to 0 to disable this config and use the Elasticsearch default.
 `fields:popularLimit`:: This setting governs how many of the top most popular fields are shown.
 `histogram:barTarget`:: When date histograms use the `auto` interval, Kibana attempts to generate this number of bars.
 `histogram:maxBars`:: Date histograms are not generated with more bars than the value of this property, scaling values
@@ -73,7 +77,6 @@ mentioned use "_default_".
 `timepicker:timeDefaults`:: The default time filter selection.
 `timepicker:refreshIntervalDefaults`:: The time filter's default refresh interval.
 `timepicker:quickRanges`:: The list of ranges to show in the Quick section of the time picker. This should be an array of objects, with each object containing `from`, `to` (see {ref}/common-options.html#date-math[accepted formats]), `display` (the title to be displayed), and `section` (which column to put the option in).
-`dashboard:defaultDarkTheme`:: Set this property to `true` to make new dashboards use the dark theme by default.
 `filters:pinnedByDefault`:: Set this property to `true` to make filters have a global state by default.
 `filterEditor:suggestValues`:: Set this property to `false` to prevent the filter editor from suggesting values for fields.
 `notifications:banner`:: You can specify a custom banner to display temporary notices to all users. This field supports

@@ -19,47 +19,30 @@
 
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ng_mock';
-import { PointSeriesInitYAxisProvider } from '../_init_y_axis';
+import { initYAxis } from '../_init_y_axis';
 
 describe('initYAxis', function () {
-
-  let initYAxis;
-
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    initYAxis = Private(PointSeriesInitYAxisProvider);
-  }));
-
-  function agg() {
-    return {
-      fieldFormatter: _.constant({}),
-      write: _.constant({ params: {} }),
-      type: {}
-    };
-  }
 
   const baseChart = {
     aspects: {
       y: [
-        { aggConfig: agg(), title: 'y1' },
-        { aggConfig: agg(), title: 'y2' },
+        { title: 'y1', fieldFormatter: v => v },
+        { title: 'y2', fieldFormatter: v => v },
       ],
-      x: {
-        aggConfig: agg(),
+      x: [{
         title: 'x'
-      }
+      }]
     }
   };
 
   describe('with a single y aspect', function () {
     const singleYBaseChart = _.cloneDeep(baseChart);
-    singleYBaseChart.aspects.y = singleYBaseChart.aspects.y[0];
+    singleYBaseChart.aspects.y = [singleYBaseChart.aspects.y[0]];
 
     it('sets the yAxisFormatter the the field formats convert fn', function () {
       const chart = _.cloneDeep(singleYBaseChart);
       initYAxis(chart);
-      expect(chart).to.have.property('yAxisFormatter', chart.aspects.y.aggConfig.fieldFormatter());
+      expect(chart).to.have.property('yAxisFormatter');
     });
 
     it('sets the yAxisLabel', function () {
@@ -76,8 +59,8 @@ describe('initYAxis', function () {
 
       expect(chart).to.have.property('yAxisFormatter');
       expect(chart.yAxisFormatter)
-        .to.be(chart.aspects.y[0].aggConfig.fieldFormatter())
-        .and.not.be(chart.aspects.y[1].aggConfig.fieldFormatter());
+        .to.be(chart.aspects.y[0].fieldFormatter)
+        .and.not.be(chart.aspects.y[1].fieldFormatter);
     });
 
     it('does not set the yAxisLabel, it does not make sense to put multiple labels on the same axis', function () {

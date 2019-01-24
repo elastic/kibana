@@ -7,7 +7,7 @@
 // Mock the mlJobService that is imported for saving rules.
 jest.mock('../../services/job_service.js', () => 'mlJobService');
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { ConditionExpression } from './condition_expression';
@@ -30,8 +30,8 @@ describe('ConditionExpression', () => {
       value: 123,
     };
 
-    const component = shallow(
-      <ConditionExpression {...props} />
+    const component = shallowWithIntl(
+      <ConditionExpression.WrappedComponent {...props} />
     );
 
     expect(component).toMatchSnapshot();
@@ -45,8 +45,8 @@ describe('ConditionExpression', () => {
       value: 123,
     };
 
-    const component = shallow(
-      <ConditionExpression {...props} />
+    const component = shallowWithIntl(
+      <ConditionExpression.WrappedComponent {...props} />
     );
 
     expect(component).toMatchSnapshot();

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { buildQueryFilter } from '../../../filter_manager/lib/query';
+import { buildQueryFilter } from '@kbn/es-query';
 import _ from 'lodash';
 
 export function createFilterFilters(aggConfig, key) {
@@ -26,6 +26,6 @@ export function createFilterFilters(aggConfig, key) {
   const filter = dslFilters[key];
 
   if (filter) {
-    return buildQueryFilter(filter.query, aggConfig._indexPattern.id);
+    return buildQueryFilter(filter.query, aggConfig.getIndexPattern().id);
   }
 }

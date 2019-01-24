@@ -7,7 +7,7 @@
 import { map as mapAsync } from 'bluebird';
 
 export function SecurityPageProvider({ getService, getPageObjects }) {
-  const remote = getService('remote');
+  const browser = getService('browser');
   const config = getService('config');
   const retry = getService('retry');
   const find = getService('find');
@@ -15,20 +15,32 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
-  const defaultFindTimeout = config.get('timeouts.find');
+  const userMenu = getService('userMenu');
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'home']);
 
   class LoginPage {
-    async login(username, password) {
+    async login(username, password, options = {}) {
       const [superUsername, superPassword] = config.get('servers.elasticsearch.auth').split(':');
 
       username = username || superUsername;
       password = password || superPassword;
 
+      const expectSpaceSelector = options.expectSpaceSelector || false;
+      const expectSuccess = options.expectSuccess;
+
       await PageObjects.common.navigateToApp('login');
       await testSubjects.setValue('loginUsername', username);
       await testSubjects.setValue('loginPassword', password);
       await testSubjects.click('loginSubmit');
+
+      // wait for either space selector, kibanaChrome or loginErrorMessage
+      if (expectSpaceSelector) {
+        await retry.try(() => testSubjects.find('kibanaSpaceSelector'));
+        log.debug(`Finished login process, landed on space selector. currentUrl = ${await browser.getCurrentUrl()}`);
+      } else if (expectSuccess) {
+        await find.byCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide) ', 20000);
+        log.debug(`Finished login process currentUrl = ${await browser.getCurrentUrl()}`);
+      }
     }
 
     async getErrorMessage() {
@@ -55,57 +67,42 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       await esArchiver.load('empty_kibana');
       await kibanaServer.uiSettings.disableToastAutohide();
       await esArchiver.loadIfNeeded('logstash_functional');
-      remote.setWindowSize(1600, 1000);
+      browser.setWindowSize(1600, 1000);
     }
 
-    async login(username, password) {
-      await this.loginPage.login(username, password);
+    async login(username, password, options = {}) {
+      await this.loginPage.login(username, password, options);
 
-      await retry.try(async () => {
-        const logoutLinkExists = await find.existsByLinkText('Logout');
-        if (!logoutLinkExists) {
-          throw new Error('Login is not completed yet');
-        }
-      });
+      if (options.expectSpaceSelector) {
+        return;
+      }
+
+      await retry.waitFor('logout button visible', async () => (
+        await userMenu.logoutLinkExists()
+      ));
     }
 
     async logout() {
       log.debug('SecurityPage.logout');
 
-      const [isWelcomeShowing, logoutLinkExists] = await Promise.all([
-        PageObjects.home.isWelcomeShowing(),
-        find.existsByLinkText('Logout'),
-      ]);
-
-      if (!logoutLinkExists) {
+      if (!await userMenu.logoutLinkExists()) {
         log.debug('Logout not found');
         return;
       }
 
-      // This sometimes happens when hitting the home screen on a brand new / empty
-      // Kibana instance. It may not *always* happen, depending on how
-      // long it takes the home screen to query Elastic to see if it's a
-      // new Kibana instance.
-      if (isWelcomeShowing) {
-        await PageObjects.home.hideWelcomeScreen();
-      }
+      await userMenu.clickLogoutButton();
 
-      await find.clickByLinkText('Logout');
-
-      await retry.try(async () => {
-        const logoutLinkExists = await find.existsByDisplayedByCssSelector('.login-form');
-        if (!logoutLinkExists) {
-          throw new Error('Logout is not completed yet');
-        }
-      });
+      await retry.waitForWithTimeout('login form', config.get('timeouts.waitFor') * 5, async () => (
+        await find.existsByDisplayedByCssSelector('.login-form')
+      ));
     }
 
     async clickRolesSection() {
-      await PageObjects.settings.clickLinkText('Roles');
+      await testSubjects.click('roles');
     }
 
     async clickUsersSection() {
-      await PageObjects.settings.clickLinkText('Users');
+      await testSubjects.click('users');
     }
 
     async clickCreateNewUser() {
@@ -135,14 +132,14 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
 
     async clickSaveEditRole() {
       const saveButton = await retry.try(() => testSubjects.find('roleFormSaveButton'));
-      await remote.moveMouseTo(saveButton);
+      await browser.moveMouseTo(saveButton);
       await saveButton.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async addIndexToRole(index) {
       log.debug(`Adding index ${index} to role`);
-      const indexInput = await retry.try(() => find.byCssSelector('[data-test-subj="indicesInput0"] > div > input'));
+      const indexInput = await retry.try(() => find.byCssSelector('[data-test-subj="indicesInput0"] input'));
       await indexInput.type(index);
       await indexInput.type('\n');
     }
@@ -150,9 +147,18 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     async addPrivilegeToRole(privilege) {
       log.debug(`Adding privilege ${privilege} to role`);
       const privilegeInput =
-        await retry.try(() => find.byCssSelector('[data-test-subj="privilegesInput0"] > div > input'));
+        await retry.try(() => find.byCssSelector('[data-test-subj="privilegesInput0"] input'));
       await privilegeInput.type(privilege);
-      await privilegeInput.type('\n');
+
+      const btn = await find.byButtonText(privilege);
+      await btn.click();
+
+      // const options = await find.byCssSelector(`.euiComboBoxOption`);
+      // Object.entries(options).forEach(([key, prop]) => {
+      //   console.log({ key, proto: prop.__proto__ });
+      // });
+
+      // await options.click();
     }
 
     async assignRoleToUser(role) {
@@ -163,22 +169,14 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       await PageObjects.common.navigateToApp('settings');
     }
 
-    clickElasticsearchUsers() {
-      return this.navigateTo()
-        .then(() => {
-          return remote.setFindTimeout(defaultFindTimeout)
-            .findDisplayedByLinkText('Users')
-            .click();
-        });
+    async clickElasticsearchUsers() {
+      await this.navigateTo();
+      await this.clickUsersSection();
     }
 
-    clickElasticsearchRoles() {
-      return this.navigateTo()
-        .then(() => {
-          return remote.setFindTimeout(defaultFindTimeout)
-            .findDisplayedByLinkText('Roles')
-            .click();
-        });
+    async clickElasticsearchRoles() {
+      await this.navigateTo();
+      await this.clickRolesSection();
     }
 
 
@@ -189,7 +187,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
         const usernameElement = await user.findByCssSelector('[data-test-subj="userRowUserName"]');
         const emailElement = await user.findByCssSelector('[data-header="Email Address"]');
         const rolesElement = await user.findByCssSelector('[data-test-subj="userRowRoles"]');
-        const isReservedElementVisible =  await user.findByCssSelector('td:last-child');
+        const isReservedElementVisible = await user.findByCssSelector('td:last-child');
 
         return {
           username: await usernameElement.getVisibleText(),
@@ -205,9 +203,9 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       const users = await testSubjects.findAll('roleRow');
       return mapAsync(users, async role => {
         const rolenameElement = await role.findByCssSelector('[data-test-subj="roleRowName"]');
-        const isReservedElementVisible =  await role.findByCssSelector('td:nth-child(3)');
+        const isReservedElementVisible = await role.findByCssSelector('td:nth-child(3)');
 
-        return  {
+        return {
           rolename: await rolenameElement.getVisibleText(),
           reserved: (await isReservedElementVisible.getProperty('innerHTML')).includes('roleRowReserved')
         };
@@ -229,8 +227,13 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('userFormUserNameInput', userObj.username);
       await testSubjects.setValue('passwordInput', userObj.password);
       await testSubjects.setValue('passwordConfirmationInput', userObj.confirmPassword);
-      await testSubjects.setValue('userFormFullNameInput', userObj.fullname);
-      await testSubjects.setValue('userFormEmailInput', userObj.email);
+      if (userObj.fullname) {
+        await testSubjects.setValue('userFormFullNameInput', userObj.fullname);
+      }
+      if (userObj.email) {
+        await testSubjects.setValue('userFormEmailInput', userObj.email);
+      }
+
       log.debug('Add roles: ', userObj.roles);
       const rolesToAdd = userObj.roles || [];
       for (let i = 0; i < rolesToAdd.length; i++) {
@@ -245,27 +248,23 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     }
 
     addRole(roleName, userObj) {
+      const self = this;
+
       return this.clickNewRole()
         .then(function () {
           // We have to use non-test-subject selectors because this markup is generated by ui-select.
-          log.debug('userObj.indices[0].names = ' + userObj.indices[0].names);
+          log.debug('userObj.indices[0].names = ' + userObj.elasticsearch.indices[0].names);
           return testSubjects.append('roleFormNameInput', roleName);
         })
         .then(function () {
-          return remote.setFindTimeout(defaultFindTimeout)
-          // We have to use non-test-subject selectors because this markup is generated by ui-select.
-            .findByCssSelector('[data-test-subj="indicesInput0"] .ui-select-search')
-            .type(userObj.indices[0].names);
+          return find.setValue('[data-test-subj="indicesInput0"] input', userObj.elasticsearch.indices[0].names + '\n');
         })
         .then(function () {
-          return remote.setFindTimeout(defaultFindTimeout)
-          // We have to use non-test-subject selectors because this markup is generated by ui-select.
-            .findByCssSelector('span.ui-select-choices-row-inner > div[ng-bind-html="indexPattern"]')
-            .click();
+          return testSubjects.click('restrictDocumentsQuery0');
         })
         .then(function () {
-          if (userObj.indices[0].query) {
-            return testSubjects.setValue('queryInput0', userObj.indices[0].query);
+          if (userObj.elasticsearch.indices[0].query) {
+            return testSubjects.setValue('queryInput0', userObj.elasticsearch.indices[0].query);
           }
         })
 
@@ -278,19 +277,17 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
               // We have to use non-test-subject selectors because this markup is generated by ui-select.
               return promise
 
-                .then(function () {
+                .then(async function () {
                   log.debug('priv item = ' + privName);
-                  remote.setFindTimeout(defaultFindTimeout)
-                    .findByCssSelector(`[data-test-subj="kibanaPrivileges-${privName}"]`)
-                    .click();
+                  return find.byCssSelector(`[data-test-subj="kibanaMinimumPrivilege"] option[value="${privName}"]`);
                 })
-                .then(function () {
-                  return PageObjects.common.sleep(500);
+                .then(function (element) {
+                  return element.click();
                 });
 
             }, Promise.resolve());
           }
-          return userObj.kibana ? addKibanaPriv(userObj.kibana) : Promise.resolve();
+          return userObj.kibana.global ? addKibanaPriv(userObj.kibana.global) : Promise.resolve();
         })
 
         .then(function () {
@@ -299,25 +296,10 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
 
             return priv.reduce(function (promise, privName) {
               // We have to use non-test-subject selectors because this markup is generated by ui-select.
-              return promise
-                .then(function () {
-                  return remote.setFindTimeout(defaultFindTimeout)
-                    .findByCssSelector('[data-test-subj="privilegesInput0"] .ui-select-search')
-                    .click();
-                })
-                .then(function () {
-                  log.debug('priv item = ' + privName);
-                  remote.setFindTimeout(defaultFindTimeout)
-                    .findByCssSelector(`[data-test-subj="privilegeOption-${privName}"]`)
-                    .click();
-                })
-                .then(function () {
-                  return PageObjects.common.sleep(500);
-                });
-
+              return promise.then(() => self.addPrivilegeToRole(privName)).then(() => PageObjects.common.sleep(250));
             }, Promise.resolve());
           }
-          return addPriv(userObj.indices[0].privileges);
+          return addPriv(userObj.elasticsearch.indices[0].privileges);
         })
         //clicking the Granted fields and removing the asterix
         .then(function () {
@@ -326,9 +308,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
             return field.reduce(function (promise, fieldName) {
               return promise
                 .then(function () {
-                  return remote.setFindTimeout(defaultFindTimeout)
-                    .findByCssSelector('[data-test-subj="fieldInput0"] .ui-select-search')
-                    .type(fieldName + '\t');
+                  return find.setValue('[data-test-subj="fieldInput0"] input', fieldName + '\n');
                 })
                 .then(function () {
                   return PageObjects.common.sleep(1000);
@@ -337,13 +317,11 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
             }, Promise.resolve());
           }
 
-          if (userObj.indices[0].field_security) {
+          if (userObj.elasticsearch.indices[0].field_security) {
             // have to remove the '*'
-            return remote.setFindTimeout(defaultFindTimeout)
-              .findByCssSelector('div[data-test-subj="fieldInput0"] > div > span > span > span > span.ui-select-match-close')
-              .click()
+            return find.clickByCssSelector('div[data-test-subj="fieldInput0"] .euiBadge[title="*"]')
               .then(function () {
-                return addGrantedField(userObj.indices[0].field_security.grant);
+                return addGrantedField(userObj.elasticsearch.indices[0].field_security.grant);
               });
           }
         })    //clicking save button
@@ -368,7 +346,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     deleteUser(username) {
       let alertText;
       log.debug('Delete user ' + username);
-      return remote.findDisplayedByLinkText(username).click()
+      return find.clickByDisplayedLinkText(username)
         .then(() => {
           return PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         })
@@ -379,10 +357,10 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
         .then(() => {
           return PageObjects.common.sleep(2000);
         })
-        .then (() => {
+        .then(() => {
           return testSubjects.getVisibleText('confirmModalBodyText');
         })
-        .then ((alert) => {
+        .then((alert) => {
           alertText = alert;
           log.debug('Delete user alert text = ' + alertText);
           return testSubjects.click('confirmModalConfirmButton');
@@ -392,10 +370,9 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
         });
     }
 
-    getPermissionDeniedMessage() {
-      return remote.setFindTimeout(defaultFindTimeout)
-        .findDisplayedByCssSelector('span.kuiInfoPanelHeader__title')
-        .getVisibleText();
+    async getPermissionDeniedMessage() {
+      const el = await find.displayedByCssSelector('span.kuiInfoPanelHeader__title');
+      return await el.getVisibleText();
     }
   }
   return new SecurityPage();

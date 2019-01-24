@@ -1,0 +1,18 @@
+/**
+* 1. Show invalid state if the user has interacted with the input without selecting an option.
+*/
+.visEditorAggSelect__select {
+
+  .ui-select-match-text {
+    @include euiTextTruncate;
+  }
+
+  &.ng-invalid.ng-dirty,
+  &.ng-invalid.ng-touched {
+    .ui-select-match {
+      .btn {
+        border-color: $euiColorDanger; /* 1 */
+      }
+    }
+  }
+}

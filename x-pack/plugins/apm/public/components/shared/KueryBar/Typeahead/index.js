@@ -6,11 +6,10 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import Suggestions from './Suggestions';
 import ClickOutside from './ClickOutside';
-import { EuiFieldSearch, EuiProgress, EuiToolTip } from '@elastic/eui';
-import { units, fontSizes, colors } from '../../../../style/variables';
+import { EuiFieldSearch, EuiProgress } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 const KEY_CODES = {
   LEFT: 37,
@@ -21,16 +20,6 @@ const KEY_CODES = {
   ESC: 27,
   TAB: 9
 };
-
-const BetaLabel = styled.div`
-  position: absolute;
-  top: 0;
-  right: 0;
-  font-size: ${fontSizes.small};
-  transform: translateY(calc(-100% - ${units.quarter}px));
-  cursor: pointer;
-  color: ${colors.gray2};
-`;
 
 export class Typeahead extends Component {
   state = {
@@ -173,18 +162,22 @@ export class Typeahead extends Component {
         style={{ position: 'relative' }}
       >
         <div style={{ position: 'relative' }}>
-          <BetaLabel>
-            <EuiToolTip content="The Query bar feature is still in beta. Help us report any issues or bugs by using the APM feedback link in the top.">
-              <div>Beta</div>
-            </EuiToolTip>
-          </BetaLabel>
-
           <EuiFieldSearch
             fullWidth
             style={{
               backgroundImage: 'none'
             }}
-            placeholder="Search transactions and errors... (E.g. transaction.duration.us > 300000 AND context.response.status_code >= 400)"
+            placeholder={i18n.translate(
+              'xpack.apm.kueryBar.searchPlaceholder',
+              {
+                defaultMessage:
+                  'Search transactions and errors… (E.g. {queryExample})',
+                values: {
+                  queryExample:
+                    'transaction.duration.us > 300000 AND context.response.status_code >= 400'
+                }
+              }
+            )}
             inputRef={node => {
               if (node) {
                 this.inputRef = node;

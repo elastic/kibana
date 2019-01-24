@@ -5,37 +5,17 @@
  */
 
 import { uniq } from 'lodash';
-import { checkPrivilegesWithRequestFactory, CHECK_PRIVILEGES_RESULT } from './check_privileges';
-
-import { ALL_RESOURCE } from '../../../common/constants';
+import { checkPrivilegesWithRequestFactory } from './check_privileges';
+import { GLOBAL_RESOURCE } from '../../../common/constants';
 
 const application = 'kibana-our_application';
-const defaultVersion = 'default-version';
-const defaultKibanaIndex = 'default-index';
-const savedObjectTypes = ['foo-type', 'bar-type'];
 
 const mockActions = {
   login: 'mock-action:login',
   version: 'mock-action:version',
 };
 
-const createMockConfig = (settings = {}) => {
-  const mockConfig = {
-    get: jest.fn()
-  };
-
-  const defaultSettings = {
-    'pkg.version': defaultVersion,
-    'kibana.index': defaultKibanaIndex,
-    'xpack.security.authorization.legacyFallback.enabled': true,
-  };
-
-  mockConfig.get.mockImplementation(key => {
-    return key in settings ? settings[key] : defaultSettings[key];
-  });
-
-  return mockConfig;
-};
+const savedObjectTypes = ['foo-type', 'bar-type'];
 
 const createMockShieldClient = (response) => {
   const mockCallWithRequest = jest.fn();
@@ -47,424 +27,841 @@ const createMockShieldClient = (response) => {
   };
 };
 
-const checkPrivilegesTest = (
-  description, {
-    settings,
-    privileges,
-    applicationPrivilegesResponse,
-    indexPrivilegesResponse,
+describe('#checkPrivilegesAtSpace', () => {
+  const checkPrivilegesAtSpaceTest = (description, {
+    spaceId,
+    privilegeOrPrivileges,
+    esHasPrivilegesResponse,
     expectedResult,
-    expectErrorThrown,
+    expectErrorThrown
   }) => {
+    test(description, async () => {
+      const mockShieldClient = createMockShieldClient(esHasPrivilegesResponse);
+      const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(mockActions, application, mockShieldClient);
+      const request = Symbol();
+      const checkPrivileges = checkPrivilegesWithRequest(request);
 
-  test(description, async () => {
-    const username = 'foo-username';
-    const mockConfig = createMockConfig(settings);
-    const mockShieldClient = createMockShieldClient({
-      username,
+      let actualResult;
+      let errorThrown = null;
+      try {
+        actualResult = await checkPrivileges.atSpace(spaceId, privilegeOrPrivileges);
+      } catch (err) {
+        errorThrown = err;
+      }
+
+      expect(mockShieldClient.callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
+        body: {
+          applications: [{
+            application,
+            resources: [`space:${spaceId}`],
+            privileges: uniq([
+              mockActions.version,
+              mockActions.login,
+              ...Array.isArray(privilegeOrPrivileges) ? privilegeOrPrivileges : [privilegeOrPrivileges],
+            ])
+          }]
+        }
+      });
+
+      if (expectedResult) {
+        expect(errorThrown).toBeNull();
+        expect(actualResult).toEqual(expectedResult);
+      }
+
+      if (expectErrorThrown) {
+        expect(errorThrown).toMatchSnapshot();
+      }
+    });
+  };
+
+  checkPrivilegesAtSpaceTest('successful when checking for login and user has login', {
+    spaceId: 'space_1',
+    privilegeOrPrivileges: mockActions.login,
+    esHasPrivilegesResponse: {
+      has_all_requested: true,
+      username: 'foo-username',
       application: {
         [application]: {
-          [ALL_RESOURCE]: applicationPrivilegesResponse
+          'space:space_1': {
+            [mockActions.login]: true,
+            [mockActions.version]: true,
+          }
+        }
+      }
+    },
+    expectedResult: {
+      hasAllRequested: true,
+      username: 'foo-username',
+      privileges: {
+        [mockActions.login]: true
+      }
+    },
+  });
+
+  checkPrivilegesAtSpaceTest(`failure when checking for login and user doesn't have login`, {
+    spaceId: 'space_1',
+    privilegeOrPrivileges: mockActions.login,
+    esHasPrivilegesResponse: {
+      has_all_requested: false,
+      username: 'foo-username',
+      application: {
+        [application]: {
+          'space:space_1': {
+            [mockActions.login]: false,
+            [mockActions.version]: true,
+          }
+        }
+      }
+    },
+    expectedResult: {
+      hasAllRequested: false,
+      username: 'foo-username',
+      privileges: {
+        [mockActions.login]: false
+      }
+    },
+  });
+
+  checkPrivilegesAtSpaceTest(`throws error when checking for login and user has login but doesn't have version`, {
+    spaceId: 'space_1',
+    privilegeOrPrivileges: mockActions.login,
+    esHasPrivilegesResponse: {
+      has_all_requested: false,
+      username: 'foo-username',
+      application: {
+        [application]: {
+          'space:space_1': {
+            [mockActions.login]: true,
+            [mockActions.version]: false,
+          }
+        }
+      }
+    },
+    expectErrorThrown: true,
+  });
+
+  checkPrivilegesAtSpaceTest(`successful when checking for two actions and the user has both`, {
+    spaceId: 'space_1',
+    privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`, `action:saved_objects/${savedObjectTypes[1]}/get`],
+    esHasPrivilegesResponse: {
+      has_all_requested: true,
+      username: 'foo-username',
+      application: {
+        [application]: {
+          'space:space_1': {
+            [mockActions.login]: true,
+            [mockActions.version]: true,
+            [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
+            [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+          }
+        }
+      }
+    },
+    expectedResult: {
+      hasAllRequested: true,
+      username: 'foo-username',
+      privileges: {
+        [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
+        [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+      }
+    },
+  });
+
+  checkPrivilegesAtSpaceTest(`failure when checking for two actions and the user has only one`, {
+    spaceId: 'space_1',
+    privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`, `action:saved_objects/${savedObjectTypes[1]}/get`],
+    esHasPrivilegesResponse: {
+      has_all_requested: false,
+      username: 'foo-username',
+      application: {
+        [application]: {
+          'space:space_1': {
+            [mockActions.login]: true,
+            [mockActions.version]: true,
+            [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
+            [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+          }
+        }
+      }
+    },
+    expectedResult: {
+      hasAllRequested: false,
+      username: 'foo-username',
+      privileges: {
+        [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
+        [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+      }
+    },
+  });
+
+  describe('with a malformed Elasticsearch response', () => {
+    checkPrivilegesAtSpaceTest(`throws a validation error when an extra privilege is present in the response`, {
+      spaceId: 'space_1',
+      privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`],
+      esHasPrivilegesResponse: {
+        has_all_requested: false,
+        username: 'foo-username',
+        application: {
+          [application]: {
+            'space:space_1': {
+              [mockActions.login]: true,
+              [mockActions.version]: true,
+              [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
+              [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+            }
+          }
         }
       },
-      index: {
-        [defaultKibanaIndex]: indexPrivilegesResponse
-      },
+      expectErrorThrown: true,
     });
 
-    const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(mockShieldClient, mockConfig, mockActions, application);
-    const request = Symbol();
-    const checkPrivileges = checkPrivilegesWithRequest(request);
+    checkPrivilegesAtSpaceTest(`throws a validation error when privileges are missing in the response`, {
+      spaceId: 'space_1',
+      privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`],
+      esHasPrivilegesResponse: {
+        has_all_requested: false,
+        username: 'foo-username',
+        application: {
+          [application]: {
+            'space:space_1': {
+              [mockActions.login]: true,
+              [mockActions.version]: true,
+            }
+          }
+        }
+      },
+      expectErrorThrown: true,
+    });
+  });
+});
 
-    let actualResult;
-    let errorThrown = null;
-    try {
-      actualResult = await checkPrivileges(privileges);
-    } catch (err) {
-      errorThrown = err;
-    }
+describe('#checkPrivilegesAtSpaces', () => {
+  const checkPrivilegesAtSpacesTest = (description, {
+    spaceIds,
+    privilegeOrPrivileges,
+    esHasPrivilegesResponse,
+    expectedResult,
+    expectErrorThrown
+  }) => {
+    test(description, async () => {
+      const mockShieldClient = createMockShieldClient(esHasPrivilegesResponse);
+      const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(mockActions, application, mockShieldClient);
+      const request = Symbol();
+      const checkPrivileges = checkPrivilegesWithRequest(request);
 
+      let actualResult;
+      let errorThrown = null;
+      try {
+        actualResult = await checkPrivileges.atSpaces(spaceIds, privilegeOrPrivileges);
+      } catch (err) {
+        errorThrown = err;
+      }
 
-    expect(mockShieldClient.callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
-      body: {
-        applications: [{
-          application,
-          resources: [ALL_RESOURCE],
-          privileges: uniq([
-            mockActions.version, mockActions.login, ...privileges
-          ])
-        }],
-        index: [{
-          names: [defaultKibanaIndex],
-          privileges: ['create', 'delete', 'read', 'view_index_metadata']
-        }],
+      expect(mockShieldClient.callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
+        body: {
+          applications: [{
+            application,
+            resources: spaceIds.map(spaceId => `space:${spaceId}`),
+            privileges: uniq([
+              mockActions.version,
+              mockActions.login,
+              ...Array.isArray(privilegeOrPrivileges) ? privilegeOrPrivileges : [privilegeOrPrivileges],
+            ])
+          }]
+        }
+      });
+
+      if (expectedResult) {
+        expect(errorThrown).toBeNull();
+        expect(actualResult).toEqual(expectedResult);
+      }
+
+      if (expectErrorThrown) {
+        expect(errorThrown).toMatchSnapshot();
       }
     });
-
-    if (expectedResult) {
-      expect(errorThrown).toBeNull();
-      expect(actualResult).toEqual(expectedResult);
-    }
-
-    if (expectErrorThrown) {
-      expect(errorThrown).toMatchSnapshot();
-    }
-  });
-};
-
-describe(`with no index privileges`, () => {
-  const indexPrivilegesResponse = {
-    create: false,
-    delete: false,
-    read: false,
-    view_index_metadata: false,
   };
 
-  checkPrivilegesTest('returns authorized if they have all application privileges', {
-    username: 'foo-username',
-    privileges: [
-      `action:saved_objects/${savedObjectTypes[0]}/get`
-    ],
-    applicationPrivilegesResponse: {
-      [mockActions.version]: true,
-      [mockActions.login]: true,
-      [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
+  checkPrivilegesAtSpacesTest('successful when checking for login and user has login at both spaces', {
+    spaceIds: ['space_1', 'space_2'],
+    privilegeOrPrivileges: mockActions.login,
+    esHasPrivilegesResponse: {
+      has_all_requested: true,
+      username: 'foo-username',
+      application: {
+        [application]: {
+          'space:space_1': {
+            [mockActions.login]: true,
+            [mockActions.version]: true,
+          },
+          'space:space_2': {
+            [mockActions.login]: true,
+            [mockActions.version]: true,
+          }
+        }
+      }
     },
-    indexPrivilegesResponse,
     expectedResult: {
-      result: CHECK_PRIVILEGES_RESULT.AUTHORIZED,
+      hasAllRequested: true,
       username: 'foo-username',
-      missing: [],
-    }
+      spacePrivileges: {
+        space_1: {
+          [mockActions.login]: true
+        },
+        space_2: {
+          [mockActions.login]: true
+        },
+      }
+    },
   });
 
-  checkPrivilegesTest('returns unauthorized and missing application action when checking missing application action', {
-    username: 'foo-username',
-    privileges: [
-      `action:saved_objects/${savedObjectTypes[0]}/get`,
-      `action:saved_objects/${savedObjectTypes[0]}/create`,
-    ],
-    applicationPrivilegesResponse: {
-      [mockActions.version]: true,
-      [mockActions.login]: true,
-      [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
-      [`action:saved_objects/${savedObjectTypes[0]}/create`]: false,
+  checkPrivilegesAtSpacesTest('failure when checking for login and user has login at only one space', {
+    spaceIds: ['space_1', 'space_2'],
+    privilegeOrPrivileges: mockActions.login,
+    esHasPrivilegesResponse: {
+      has_all_requested: false,
+      username: 'foo-username',
+      application: {
+        [application]: {
+          'space:space_1': {
+            [mockActions.login]: true,
+            [mockActions.version]: true,
+          },
+          'space:space_2': {
+            [mockActions.login]: false,
+            [mockActions.version]: true,
+          }
+        }
+      }
     },
-    indexPrivilegesResponse,
     expectedResult: {
-      result: CHECK_PRIVILEGES_RESULT.UNAUTHORIZED,
+      hasAllRequested: false,
       username: 'foo-username',
-      missing: [`action:saved_objects/${savedObjectTypes[0]}/create`],
-    }
+      spacePrivileges: {
+        space_1: {
+          [mockActions.login]: true
+        },
+        space_2: {
+          [mockActions.login]: false
+        },
+      }
+    },
   });
 
-  checkPrivilegesTest('returns unauthorized and missing login when checking missing login action', {
-    username: 'foo-username',
-    privileges: [
-      mockActions.login
-    ],
-    applicationPrivilegesResponse: {
-      [mockActions.login]: false,
-      [mockActions.version]: false,
+  checkPrivilegesAtSpacesTest(`throws error when checking for login and user has login but doesn't have version`, {
+    spaceIds: ['space_1', 'space_2'],
+    privilegeOrPrivileges: mockActions.login,
+    esHasPrivilegesResponse: {
+      has_all_requested: false,
+      username: 'foo-username',
+      application: {
+        [application]: {
+          'space:space_1': {
+            [mockActions.login]: true,
+            [mockActions.version]: false,
+          },
+          'space:space_2': {
+            [mockActions.login]: true,
+            [mockActions.version]: false,
+          }
+        }
+      }
     },
-    indexPrivilegesResponse,
+    expectErrorThrown: true,
+  });
+
+  checkPrivilegesAtSpacesTest(`throws error when Elasticsearch returns malformed response`, {
+    spaceIds: ['space_1', 'space_2'],
+    privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`, `action:saved_objects/${savedObjectTypes[1]}/get`],
+    esHasPrivilegesResponse: {
+      has_all_requested: true,
+      username: 'foo-username',
+      application: {
+        [application]: {
+          'space:space_1': {
+            [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
+            [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+          },
+          'space:space_2': {
+            [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
+            [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+          }
+        }
+      }
+    },
+    expectErrorThrown: true,
+  });
+
+  checkPrivilegesAtSpacesTest(`successful when checking for two actions at two spaces and user has it all`, {
+    spaceIds: ['space_1', 'space_2'],
+    privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`, `action:saved_objects/${savedObjectTypes[1]}/get`],
+    esHasPrivilegesResponse: {
+      has_all_requested: true,
+      username: 'foo-username',
+      application: {
+        [application]: {
+          'space:space_1': {
+            [mockActions.login]: true,
+            [mockActions.version]: true,
+            [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
+            [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+          },
+          'space:space_2': {
+            [mockActions.login]: true,
+            [mockActions.version]: true,
+            [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
+            [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+          }
+        }
+      }
+    },
     expectedResult: {
-      result: CHECK_PRIVILEGES_RESULT.UNAUTHORIZED,
+      hasAllRequested: true,
       username: 'foo-username',
-      missing: [mockActions.login],
-    }
+      spacePrivileges: {
+        space_1: {
+          [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
+          [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+        },
+        space_2: {
+          [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
+          [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+        }
+      }
+    },
   });
 
-  checkPrivilegesTest('returns unauthorized and missing version if checking missing version action', {
-    username: 'foo-username',
-    privileges: [
-      mockActions.version
-    ],
-    applicationPrivilegesResponse: {
-      [mockActions.login]: false,
-      [mockActions.version]: false,
+  checkPrivilegesAtSpacesTest(`failure when checking for two actions at two spaces and user has one action at one space`, {
+    spaceIds: ['space_1', 'space_2'],
+    privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`, `action:saved_objects/${savedObjectTypes[1]}/get`],
+    esHasPrivilegesResponse: {
+      has_all_requested: false,
+      username: 'foo-username',
+      application: {
+        [application]: {
+          'space:space_1': {
+            [mockActions.login]: true,
+            [mockActions.version]: true,
+            [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
+            [`action:saved_objects/${savedObjectTypes[1]}/get`]: false,
+          },
+          'space:space_2': {
+            [mockActions.login]: true,
+            [mockActions.version]: true,
+            [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
+            [`action:saved_objects/${savedObjectTypes[1]}/get`]: false,
+          }
+        }
+      }
     },
-    indexPrivilegesResponse,
     expectedResult: {
-      result: CHECK_PRIVILEGES_RESULT.UNAUTHORIZED,
+      hasAllRequested: false,
       username: 'foo-username',
-      missing: [mockActions.version],
-    }
+      spacePrivileges: {
+        space_1: {
+          [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
+          [`action:saved_objects/${savedObjectTypes[1]}/get`]: false,
+        },
+        space_2: {
+          [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
+          [`action:saved_objects/${savedObjectTypes[1]}/get`]: false,
+        }
+      }
+    },
   });
 
-  checkPrivilegesTest('throws error if missing version privilege and has login privilege', {
-    username: 'foo-username',
-    privileges: [
-      `action:saved_objects/${savedObjectTypes[0]}/get`
-    ],
-    applicationPrivilegesResponse: {
-      [mockActions.login]: true,
-      [mockActions.version]: false,
-      [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
+  checkPrivilegesAtSpacesTest(`failure when checking for two actions at two spaces and user has two actions at one space`, {
+    spaceIds: ['space_1', 'space_2'],
+    privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`, `action:saved_objects/${savedObjectTypes[1]}/get`],
+    esHasPrivilegesResponse: {
+      has_all_requested: false,
+      username: 'foo-username',
+      application: {
+        [application]: {
+          'space:space_1': {
+            [mockActions.login]: true,
+            [mockActions.version]: true,
+            [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
+            [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+          },
+          'space:space_2': {
+            [mockActions.login]: true,
+            [mockActions.version]: true,
+            [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
+            [`action:saved_objects/${savedObjectTypes[1]}/get`]: false,
+          }
+        }
+      }
     },
-    indexPrivilegesResponse,
-    expectErrorThrown: true
-  });
-});
-
-describe(`with index privileges`, () => {
-  const indexPrivilegesResponse = {
-    create: true,
-    delete: true,
-    read: true,
-    view_index_metadata: true,
-  };
-
-  checkPrivilegesTest('returns authorized if they have all application privileges', {
-    username: 'foo-username',
-    privileges: [
-      `action:saved_objects/${savedObjectTypes[0]}/get`
-    ],
-    applicationPrivilegesResponse: {
-      [mockActions.version]: true,
-      [mockActions.login]: true,
-      [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
-    },
-    indexPrivilegesResponse,
     expectedResult: {
-      result: CHECK_PRIVILEGES_RESULT.AUTHORIZED,
+      hasAllRequested: false,
       username: 'foo-username',
-      missing: [],
-    }
+      spacePrivileges: {
+        space_1: {
+          [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
+          [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+        },
+        space_2: {
+          [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
+          [`action:saved_objects/${savedObjectTypes[1]}/get`]: false,
+        }
+      }
+    },
   });
 
-  checkPrivilegesTest('returns unauthorized and missing application action when checking missing application action', {
-    username: 'foo-username',
-    privileges: [
-      `action:saved_objects/${savedObjectTypes[0]}/get`,
-      `action:saved_objects/${savedObjectTypes[0]}/create`,
-    ],
-    applicationPrivilegesResponse: {
-      [mockActions.version]: true,
-      [mockActions.login]: true,
-      [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
-      [`action:saved_objects/${savedObjectTypes[0]}/create`]: false,
-    },
-    indexPrivilegesResponse,
-    expectedResult: {
-      result: CHECK_PRIVILEGES_RESULT.UNAUTHORIZED,
-      username: 'foo-username',
-      missing: [`action:saved_objects/${savedObjectTypes[0]}/create`],
-    }
-  });
-
-  checkPrivilegesTest('returns legacy and missing login when checking missing login action and fallback is enabled', {
-    username: 'foo-username',
-    privileges: [
-      mockActions.login
-    ],
-    applicationPrivilegesResponse: {
-      [mockActions.login]: false,
-      [mockActions.version]: false,
-    },
-    indexPrivilegesResponse,
-    expectedResult: {
-      result: CHECK_PRIVILEGES_RESULT.LEGACY,
-      username: 'foo-username',
-      missing: [mockActions.login],
-    }
-  });
-
-  checkPrivilegesTest('returns unauthorized and missing login when checking missing login action and fallback is disabled', {
-    settings: {
-      'xpack.security.authorization.legacyFallback.enabled': false,
-    },
-    username: 'foo-username',
-    privileges: [
-      mockActions.login
-    ],
-    applicationPrivilegesResponse: {
-      [mockActions.login]: false,
-      [mockActions.version]: false,
-    },
-    indexPrivilegesResponse,
-    expectedResult: {
-      result: CHECK_PRIVILEGES_RESULT.UNAUTHORIZED,
-      username: 'foo-username',
-      missing: [mockActions.login],
-    }
-  });
-
-  checkPrivilegesTest('returns legacy and missing version if checking missing version action and fallback is enabled', {
-    username: 'foo-username',
-    privileges: [
-      mockActions.version
-    ],
-    applicationPrivilegesResponse: {
-      [mockActions.login]: false,
-      [mockActions.version]: false,
-    },
-    indexPrivilegesResponse,
-    expectedResult: {
-      result: CHECK_PRIVILEGES_RESULT.LEGACY,
-      username: 'foo-username',
-      missing: [mockActions.version],
-    }
-  });
-
-  checkPrivilegesTest('returns unauthorized and missing version if checking missing version action and fallback is disabled', {
-    settings: {
-      'xpack.security.authorization.legacyFallback.enabled': false,
-    },
-    username: 'foo-username',
-    privileges: [
-      mockActions.version
-    ],
-    applicationPrivilegesResponse: {
-      [mockActions.login]: false,
-      [mockActions.version]: false,
-    },
-    indexPrivilegesResponse,
-    expectedResult: {
-      result: CHECK_PRIVILEGES_RESULT.UNAUTHORIZED,
-      username: 'foo-username',
-      missing: [mockActions.version],
-    }
-  });
-
-  checkPrivilegesTest('throws error if missing version privilege and has login privilege', {
-    username: 'foo-username',
-    privileges: [
-      `action:saved_objects/${savedObjectTypes[0]}/get`
-    ],
-    applicationPrivilegesResponse: {
-      [mockActions.login]: true,
-      [mockActions.version]: false,
-      [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
-    },
-    indexPrivilegesResponse,
-    expectErrorThrown: true
-  });
-});
-
-describe('with no application privileges', () => {
-  ['create', 'delete', 'read', 'view_index_metadata'].forEach(indexPrivilege => {
-    checkPrivilegesTest(`returns legacy if they have ${indexPrivilege} privilege on the kibana index and fallback is enabled`, {
-      username: 'foo-username',
-      privileges: [
-        `action:saved_objects/${savedObjectTypes[0]}/get`
-      ],
-      applicationPrivilegesResponse: {
-        [mockActions.version]: false,
-        [mockActions.login]: false,
-        [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
-      },
-      indexPrivilegesResponse: {
-        create: false,
-        delete: false,
-        read: false,
-        view_index_metadata: false,
-        [indexPrivilege]: true
+  checkPrivilegesAtSpacesTest(
+    `failure when checking for two actions at two spaces and user has two actions at one space & one action at the other`, {
+      spaceIds: ['space_1', 'space_2'],
+      privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`, `action:saved_objects/${savedObjectTypes[1]}/get`],
+      esHasPrivilegesResponse: {
+        has_all_requested: false,
+        username: 'foo-username',
+        application: {
+          [application]: {
+            'space:space_1': {
+              [mockActions.login]: true,
+              [mockActions.version]: true,
+              [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
+              [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+            },
+            'space:space_2': {
+              [mockActions.login]: true,
+              [mockActions.version]: true,
+              [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
+              [`action:saved_objects/${savedObjectTypes[1]}/get`]: false,
+            }
+          }
+        }
       },
       expectedResult: {
-        result: CHECK_PRIVILEGES_RESULT.LEGACY,
+        hasAllRequested: false,
         username: 'foo-username',
-        missing: [`action:saved_objects/${savedObjectTypes[0]}/get`],
-      }
+        spacePrivileges: {
+          space_1: {
+            [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
+            [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+          },
+          space_2: {
+            [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
+            [`action:saved_objects/${savedObjectTypes[1]}/get`]: false,
+          }
+        }
+      },
     });
 
-    checkPrivilegesTest(`returns unauthorized if they have ${indexPrivilege} privilege on the kibana index and fallback is disabled`, {
-      settings: {
-        'xpack.security.authorization.legacyFallback.enabled': false,
-      },
-      username: 'foo-username',
-      privileges: [
-        `action:saved_objects/${savedObjectTypes[0]}/get`
-      ],
-      applicationPrivilegesResponse: {
-        [mockActions.version]: false,
-        [mockActions.login]: false,
-        [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
-      },
-      indexPrivilegesResponse: {
-        create: false,
-        delete: false,
-        read: false,
-        view_index_metadata: false,
-        [indexPrivilege]: true
-      },
-      expectedResult: {
-        result: CHECK_PRIVILEGES_RESULT.UNAUTHORIZED,
+  describe('with a malformed Elasticsearch response', () => {
+    checkPrivilegesAtSpacesTest(`throws a validation error when an extra privilege is present in the response`, {
+      spaceIds: ['space_1', 'space_2'],
+      privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`],
+      esHasPrivilegesResponse: {
+        has_all_requested: false,
         username: 'foo-username',
-        missing: [`action:saved_objects/${savedObjectTypes[0]}/get`],
-      }
+        application: {
+          [application]: {
+            'space:space_1': {
+              [mockActions.login]: true,
+              [mockActions.version]: true,
+              [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
+              [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+            },
+            'space:space_1': {
+              [mockActions.login]: true,
+              [mockActions.version]: true,
+              [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
+            }
+          }
+        }
+      },
+      expectErrorThrown: true,
+    });
+
+    checkPrivilegesAtSpacesTest(`throws a validation error when privileges are missing in the response`, {
+      spaceIds: ['space_1', 'space_2'],
+      privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`],
+      esHasPrivilegesResponse: {
+        has_all_requested: false,
+        username: 'foo-username',
+        application: {
+          [application]: {
+            'space:space_1': {
+              [mockActions.login]: true,
+              [mockActions.version]: true,
+            },
+            'space:space_1': {
+              [mockActions.login]: true,
+              [mockActions.version]: true,
+              [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
+            }
+          }
+        }
+      },
+      expectErrorThrown: true,
+    });
+
+    checkPrivilegesAtSpacesTest(`throws a validation error when an extra space is present in the response`, {
+      spaceIds: ['space_1', 'space_2'],
+      privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`],
+      esHasPrivilegesResponse: {
+        has_all_requested: false,
+        username: 'foo-username',
+        application: {
+          [application]: {
+            'space:space_1': {
+              [mockActions.login]: true,
+              [mockActions.version]: true,
+              [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
+            },
+            'space:space_2': {
+              [mockActions.login]: true,
+              [mockActions.version]: true,
+              [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
+            },
+            'space:space_3': {
+              [mockActions.login]: true,
+              [mockActions.version]: true,
+              [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
+            },
+          }
+        }
+      },
+      expectErrorThrown: true,
+    });
+
+    checkPrivilegesAtSpacesTest(`throws a validation error when an a space is missing in the response`, {
+      spaceIds: ['space_1', 'space_2'],
+      privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`],
+      esHasPrivilegesResponse: {
+        has_all_requested: false,
+        username: 'foo-username',
+        application: {
+          [application]: {
+            'space:space_1': {
+              [mockActions.login]: true,
+              [mockActions.version]: true,
+              [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
+            }
+          }
+        }
+      },
+      expectErrorThrown: true,
     });
   });
 });
 
-describe('with a malformed Elasticsearch response', () => {
-  const indexPrivilegesResponse = {
-    create: true,
-    delete: true,
-    read: true,
-    view_index_metadata: true,
+describe('#checkPrivilegesGlobally', () => {
+  const checkPrivilegesGloballyTest = (description, {
+    privilegeOrPrivileges,
+    esHasPrivilegesResponse,
+    expectedResult,
+    expectErrorThrown
+  }) => {
+    test(description, async () => {
+      const mockShieldClient = createMockShieldClient(esHasPrivilegesResponse);
+      const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(mockActions, application, mockShieldClient);
+      const request = Symbol();
+      const checkPrivileges = checkPrivilegesWithRequest(request);
+
+      let actualResult;
+      let errorThrown = null;
+      try {
+        actualResult = await checkPrivileges.globally(privilegeOrPrivileges);
+      } catch (err) {
+        errorThrown = err;
+      }
+
+      expect(mockShieldClient.callWithRequest).toHaveBeenCalledWith(request, 'shield.hasPrivileges', {
+        body: {
+          applications: [{
+            application,
+            resources: [GLOBAL_RESOURCE],
+            privileges: uniq([
+              mockActions.version,
+              mockActions.login,
+              ...Array.isArray(privilegeOrPrivileges) ? privilegeOrPrivileges : [privilegeOrPrivileges],
+            ])
+          }]
+        }
+      });
+
+      if (expectedResult) {
+        expect(errorThrown).toBeNull();
+        expect(actualResult).toEqual(expectedResult);
+      }
+
+      if (expectErrorThrown) {
+        expect(errorThrown).toMatchSnapshot();
+      }
+    });
   };
 
-  checkPrivilegesTest('throws a validation error when an extra privilege is present in the response', {
-    username: 'foo-username',
-    privileges: [
-      `action:saved_objects/${savedObjectTypes[0]}/get`,
-    ],
-    applicationPrivilegesResponse: {
-      [mockActions.version]: true,
-      [mockActions.login]: true,
-      [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
-      ['oops-an-unexpected-privilege']: true,
+  checkPrivilegesGloballyTest('successful when checking for login and user has login', {
+    spaceId: 'space_1',
+    privilegeOrPrivileges: mockActions.login,
+    esHasPrivilegesResponse: {
+      has_all_requested: true,
+      username: 'foo-username',
+      application: {
+        [application]: {
+          [GLOBAL_RESOURCE]: {
+            [mockActions.login]: true,
+            [mockActions.version]: true,
+          }
+        }
+      }
     },
-    indexPrivilegesResponse,
+    expectedResult: {
+      hasAllRequested: true,
+      username: 'foo-username',
+      privileges: {
+        [mockActions.login]: true
+      }
+    },
+  });
+
+  checkPrivilegesGloballyTest(`failure when checking for login and user doesn't have login`, {
+    privilegeOrPrivileges: mockActions.login,
+    esHasPrivilegesResponse: {
+      has_all_requested: false,
+      username: 'foo-username',
+      application: {
+        [application]: {
+          [GLOBAL_RESOURCE]: {
+            [mockActions.login]: false,
+            [mockActions.version]: true,
+          }
+        }
+      }
+    },
+    expectedResult: {
+      hasAllRequested: false,
+      username: 'foo-username',
+      privileges: {
+        [mockActions.login]: false
+      }
+    },
+  });
+
+  checkPrivilegesGloballyTest(`throws error when checking for login and user has login but doesn't have version`, {
+    privilegeOrPrivileges: mockActions.login,
+    esHasPrivilegesResponse: {
+      has_all_requested: false,
+      username: 'foo-username',
+      application: {
+        [application]: {
+          [GLOBAL_RESOURCE]: {
+            [mockActions.login]: true,
+            [mockActions.version]: false,
+          }
+        }
+      }
+    },
     expectErrorThrown: true,
   });
 
-  checkPrivilegesTest('throws a validation error when privileges are missing in the response', {
-    username: 'foo-username',
-    privileges: [
-      `action:saved_objects/${savedObjectTypes[0]}/get`,
-    ],
-    applicationPrivilegesResponse: {
-      [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
-    },
-    indexPrivilegesResponse,
-    expectErrorThrown: true,
-  });
-
-  checkPrivilegesTest('throws a validation error when an extra index privilege is present in the response', {
-    username: 'foo-username',
-    privileges: [
-      `action:saved_objects/${savedObjectTypes[0]}/get`,
-    ],
-    applicationPrivilegesResponse: {
-      [mockActions.version]: true,
-      [mockActions.login]: true,
-      [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
-    },
-    indexPrivilegesResponse: {
-      ...indexPrivilegesResponse,
-      oopsAnExtraPrivilege: true,
+  checkPrivilegesGloballyTest(`throws error when Elasticsearch returns malformed response`, {
+    privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`, `action:saved_objects/${savedObjectTypes[1]}/get`],
+    esHasPrivilegesResponse: {
+      has_all_requested: false,
+      username: 'foo-username',
+      application: {
+        [application]: {
+          [GLOBAL_RESOURCE]: {
+            [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
+            [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+          }
+        }
+      }
     },
     expectErrorThrown: true,
   });
 
-  const missingIndexPrivileges = {
-    ...indexPrivilegesResponse
-  };
-  delete missingIndexPrivileges.read;
-
-  checkPrivilegesTest('throws a validation error when index privileges are missing in the response', {
-    username: 'foo-username',
-    privileges: [
-      `action:saved_objects/${savedObjectTypes[0]}/get`,
-    ],
-    applicationPrivilegesResponse: {
-      [mockActions.version]: true,
-      [mockActions.login]: true,
-      [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
+  checkPrivilegesGloballyTest(`successful when checking for two actions and the user has both`, {
+    privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`, `action:saved_objects/${savedObjectTypes[1]}/get`],
+    esHasPrivilegesResponse: {
+      has_all_requested: true,
+      username: 'foo-username',
+      application: {
+        [application]: {
+          [GLOBAL_RESOURCE]: {
+            [mockActions.login]: true,
+            [mockActions.version]: true,
+            [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
+            [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+          }
+        }
+      }
     },
-    indexPrivilegesResponse: missingIndexPrivileges,
-    expectErrorThrown: true,
+    expectedResult: {
+      hasAllRequested: true,
+      username: 'foo-username',
+      privileges: {
+        [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
+        [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+      }
+    },
+  });
+
+  checkPrivilegesGloballyTest(`failure when checking for two actions and the user has only one`, {
+    privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`, `action:saved_objects/${savedObjectTypes[1]}/get`],
+    esHasPrivilegesResponse: {
+      has_all_requested: false,
+      username: 'foo-username',
+      application: {
+        [application]: {
+          [GLOBAL_RESOURCE]: {
+            [mockActions.login]: true,
+            [mockActions.version]: true,
+            [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
+            [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+          }
+        }
+      }
+    },
+    expectedResult: {
+      hasAllRequested: false,
+      username: 'foo-username',
+      privileges: {
+        [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
+        [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+      }
+    },
+  });
+
+  describe('with a malformed Elasticsearch response', () => {
+    checkPrivilegesGloballyTest(`throws a validation error when an extra privilege is present in the response`, {
+      privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`],
+      esHasPrivilegesResponse: {
+        has_all_requested: false,
+        username: 'foo-username',
+        application: {
+          [application]: {
+            [GLOBAL_RESOURCE]: {
+              [mockActions.login]: true,
+              [mockActions.version]: true,
+              [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
+              [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+            }
+          }
+        }
+      },
+      expectErrorThrown: true,
+    });
+
+    checkPrivilegesGloballyTest(`throws a validation error when privileges are missing in the response`, {
+      privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`],
+      esHasPrivilegesResponse: {
+        has_all_requested: false,
+        username: 'foo-username',
+        application: {
+          [application]: {
+            [GLOBAL_RESOURCE]: {
+              [mockActions.login]: true,
+              [mockActions.version]: true,
+            }
+          }
+        }
+      },
+      expectErrorThrown: true,
+    });
   });
 });

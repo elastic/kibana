@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
+import chrome from 'ui/chrome';
 
 import {
   EuiFieldSearch,
@@ -29,7 +30,9 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-export class SavedObjectFinder extends React.Component {
+import { injectI18n } from '@kbn/i18n/react';
+
+class SavedObjectFinderUI extends React.Component {
   constructor(props) {
     super(props);
 
@@ -104,7 +107,24 @@ export class SavedObjectFinder extends React.Component {
   }
 
   debouncedFetch = _.debounce(async (filter) => {
-    const response = await this.props.find(this.props.savedObjectType, filter);
+    const resp = await chrome.getSavedObjectsClient().find({
+      type: this.props.savedObjectType,
+      fields: ['title', 'visState'],
+      search: filter ? `${filter}*` : undefined,
+      page: 1,
+      perPage: chrome.getUiSettingsClient().get('savedObjects:listingLimit'),
+      searchFields: ['title^3', 'description']
+    });
+
+    if (this.props.savedObjectType === 'visualization'
+    && !chrome.getUiSettingsClient().get('visualize:enableLabs')
+    && this.props.visTypes) {
+      resp.savedObjects = resp.savedObjects.filter(savedObject => {
+        const typeName = JSON.parse(savedObject.attributes.visState).type;
+        const visType = this.props.visTypes.byName[typeName];
+        return visType.stage !== 'experimental';
+      });
+    }
 
     if (!this._isMounted) {
       return;
@@ -115,7 +135,7 @@ export class SavedObjectFinder extends React.Component {
     if (filter === this.state.filter) {
       this.setState({
         isFetchingItems: false,
-        items: response.savedObjects.map(savedObject => {
+        items: resp.savedObjects.map(savedObject => {
           return {
             title: savedObject.attributes.title,
             id: savedObject.id,
@@ -146,7 +166,10 @@ export class SavedObjectFinder extends React.Component {
       <EuiFlexGroup>
         <EuiFlexItem grow={true}>
           <EuiFieldSearch
-            placeholder="Search..."
+            placeholder={this.props.intl.formatMessage({
+              id: 'common.ui.savedObjects.finder.searchPlaceholder',
+              defaultMessage: 'Search…',
+            })}
             fullWidth
             value={this.state.filter}
             onChange={(e) => {
@@ -181,18 +204,31 @@ export class SavedObjectFinder extends React.Component {
     const tableColumns = [
       {
         field: 'title',
-        name: 'Title',
+        name: this.props.intl.formatMessage({
+          id: 'common.ui.savedObjects.finder.titleLabel',
+          defaultMessage: 'Title',
+        }),
         sortable: true,
-        render: (field, record) => (
-          <EuiLink
-            onClick={() => {
-              this.props.onChoose(record.id, record.type);
-            }}
-            data-test-subj={`addPanel${field.split(' ').join('-')}`}
-          >
-            {field}
-          </EuiLink>
-        )
+        render: (title, record) => {
+          const {
+            onChoose,
+            makeUrl
+          } = this.props;
+
+          if (!onChoose && !makeUrl) {
+            return <span>{title}</span>;
+          }
+
+          return (
+            <EuiLink
+              onClick={onChoose ? () => { onChoose(record.id, record.type); } : undefined}
+              href={makeUrl ? makeUrl(record.id) : undefined}
+              data-test-subj={`savedObjectTitle${title.split(' ').join('-')}`}
+            >
+              {title}
+            </EuiLink>
+          );
+        }
       }
     ];
     const items = this.state.items.length === 0 ? [] : this.getPageOfItems();
@@ -219,10 +255,13 @@ export class SavedObjectFinder extends React.Component {
   }
 }
 
-SavedObjectFinder.propTypes = {
+SavedObjectFinderUI.propTypes = {
   callToActionButton: PropTypes.node,
-  onChoose: PropTypes.func.isRequired,
-  find: PropTypes.func.isRequired,
+  onChoose: PropTypes.func,
+  makeUrl: PropTypes.func,
   noItemsMessage: PropTypes.node,
   savedObjectType: PropTypes.oneOf(['visualization', 'search']).isRequired,
+  visTypes: PropTypes.object,
 };
+
+export const SavedObjectFinder = injectI18n(SavedObjectFinderUI);

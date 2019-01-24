@@ -1,0 +1,11 @@
+{
+  "ccr.resume_follow": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "{index}/_ccr/resume_follow"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ccr-post-resume-follow.html"
+  }
+}

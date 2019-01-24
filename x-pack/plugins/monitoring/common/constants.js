@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 /**
  * Helper string to add as a tag in every logging call
  */
@@ -49,6 +51,8 @@ export const NORMALIZED_DERIVATIVE_UNIT = '1s';
  * Values for column sorting in table options
  * @type {number} 1 or -1
  */
+export const EUI_SORT_ASCENDING = 'asc';
+export const EUI_SORT_DESCENDING = 'desc';
 export const SORT_ASCENDING = 1;
 export const SORT_DESCENDING = -1;
 
@@ -94,7 +98,7 @@ export const CALCULATE_DURATION_UNTIL = 'until';
 /**
  * In order to show ML Jobs tab in the Elasticsearch section / tab navigation, license must be supported
  */
-export const ML_SUPPORTED_LICENSES = [ 'trial', 'platinum' ];
+export const ML_SUPPORTED_LICENSES = ['trial', 'platinum'];
 
 /**
  * Metadata service URLs for the different cloud services that have constant URLs (e.g., unlike GCP, which is a constant prefix).
@@ -129,13 +133,20 @@ export const LOGSTASH = {
   }
 };
 
-export const DEFAULT_NO_DATA_MESSAGE = 'There are no records that match your query. Try changing the time range selection.';
-export const DEFAULT_NO_DATA_MESSAGE_WITH_FILTER = (
-  'There are no records that match your query with the filter [{{FILTER}}]. Try changing the filter or the time range selection.'
-);
+export const DEFAULT_NO_DATA_MESSAGE = i18n.translate('xpack.monitoring.defaultNoDataMessage', {
+  defaultMessage: 'There are no records that match your query. Try changing the time range selection.' });
+export const DEFAULT_NO_DATA_MESSAGE_WITH_FILTER = i18n.translate('xpack.monitoring.defaultNoDataWithFilterMessage', {
+  defaultMessage:
+  'There are no records that match your query with the filter [{filter}]. Try changing the filter or the time range selection.',
+  values: { filter: '{{FILTER}}' } });
 
 export const TABLE_ACTION_UPDATE_FILTER = 'UPDATE_FILTER';
-export const TABLE_ACTION_RESET_PAGING  = 'RESET_PAGING';
+export const TABLE_ACTION_RESET_PAGING = 'RESET_PAGING';
 
 export const DEBOUNCE_SLOW_MS = 17; // roughly how long it takes to render a frame at 60fps
 export const DEBOUNCE_FAST_MS = 10; // roughly how long it takes to render a frame at 100fps
+
+/**
+ * Configuration key for setting the email address used for cluster alert notifications.
+ */
+export const CLUSTER_ALERTS_ADDRESS_CONFIG_KEY = 'cluster_alerts.email_notifications.email_address';

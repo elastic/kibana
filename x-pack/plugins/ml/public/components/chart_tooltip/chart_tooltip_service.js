@@ -14,13 +14,15 @@ const FADE_TIMEOUT_MS = 200;
 export const mlChartTooltipService = {
   element: null,
   fadeTimeout: null,
+  visible: false
 };
 
 mlChartTooltipService.show = function (contents, target, offset = { x: 0, y: 0 }) {
-  if (this.element === null) {
+  if (this.element === null || typeof target === 'undefined') {
     return;
   }
 
+  this.visible = true;
   // if a previous fade out was happening, stop it
   if (this.fadeTimeout !== null) {
     clearTimeout(this.fadeTimeout);
@@ -30,7 +32,7 @@ mlChartTooltipService.show = function (contents, target, offset = { x: 0, y: 0 }
   this.element.html(contents);
 
   // side bar width
-  const navOffset = $('.global-nav').width();
+  const navOffset = $('.kbnGlobalNav').width() || 0;
   const contentWidth = $('body').width() - navOffset - 10;
   const tooltipWidth = this.element.width();
   const scrollTop = (window.pageYOffset || doc.scrollTop) - (doc.clientTop || 0);
@@ -64,6 +66,8 @@ mlChartTooltipService.hide = function () {
     return;
   }
 
+  this.visible = false;
+
   this.element.css({
     opacity: '0',
   });
@@ -71,7 +75,9 @@ mlChartTooltipService.hide = function () {
   // after the fade out transition has finished, set the display to
   // none so it doesn't block any mouse events underneath it.
   this.fadeTimeout = setTimeout(() => {
-    this.element.css('display', 'none');
+    if (this.visible === false) {
+      this.element.css('display', 'none');
+    }
     this.fadeTimeout = null;
   }, FADE_TIMEOUT_MS);
 };

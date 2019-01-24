@@ -17,12 +17,13 @@
  * under the License.
  */
 
-import { defaults } from 'lodash';
 import { props, reduce as reduceAsync } from 'bluebird';
 import Boom from 'boom';
 import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
 import { AppBootstrap } from './bootstrap';
+import { mergeVariables } from './lib';
+import { fromRoot } from '../../utils';
 
 export function uiRenderMixin(kbnServer, server, config) {
   function replaceInjectedVars(request, injectedVars) {
@@ -40,7 +41,7 @@ export function uiRenderMixin(kbnServer, server, config) {
     const { defaultInjectedVarProviders = [] } = kbnServer.uiExports;
     defaultInjectedVars = defaultInjectedVarProviders
       .reduce((allDefaults, { fn, pluginSpec }) => (
-        defaults(
+        mergeVariables(
           allDefaults,
           fn(kbnServer.server, pluginSpec.readConfigValue(kbnServer.config, []))
         )
@@ -50,62 +51,76 @@ export function uiRenderMixin(kbnServer, server, config) {
   // render all views from ./views
   server.setupViews(resolve(__dirname, 'views'));
 
+  // expose built css
+  server.exposeStaticDir('/built_assets/css/{path*}', fromRoot('built_assets/css'));
+
   server.route({
     path: '/bundles/app/{id}/bootstrap.js',
     method: 'GET',
     config: { auth: false },
-    async handler(request, reply) {
-      try {
-        const { id } = request.params;
-        const app = server.getUiAppById(id) || server.getHiddenUiAppById(id);
-        if (!app) {
-          throw Boom.notFound(`Unknown app: ${id}`);
-        }
-
-        const basePath = config.get('server.basePath');
-        const bootstrap = new AppBootstrap({
-          templateData: {
-            appId: app.getId(),
-            bundlePath: `${basePath}/bundles`,
-            styleSheetPath: app.getStyleSheetUrlPath() ? `${basePath}/${app.getStyleSheetUrlPath()}` : null,
-          },
-          translations: await server.getUiTranslations()
-        });
-
-        const body = await bootstrap.getJsFile();
-        const etag = await bootstrap.getJsFileHash();
-
-        reply(body)
-          .header('cache-control', 'must-revalidate')
-          .header('content-type', 'application/javascript')
-          .etag(etag);
-      } catch (err) {
-        reply(err);
+    async handler(request, h) {
+      const { id } = request.params;
+      const app = server.getUiAppById(id) || server.getHiddenUiAppById(id);
+      if (!app) {
+        throw Boom.notFound(`Unknown app: ${id}`);
       }
+
+      const basePath = config.get('server.basePath');
+      const regularBundlePath = `${basePath}/bundles`;
+      const dllBundlePath = `${basePath}/built_assets/dlls`;
+      const styleSheetPaths = [
+        `${dllBundlePath}/vendors.style.dll.css`,
+        `${regularBundlePath}/commons.style.css`,
+        `${regularBundlePath}/${app.getId()}.style.css`,
+        ...kbnServer.uiExports.styleSheetPaths
+          .map(path => (
+            path.localPath.endsWith('.scss')
+              ? `${basePath}/built_assets/css/${path.publicPath}`
+              : `${basePath}/${path.publicPath}`
+          ))
+          .reverse()
+      ];
+
+      const bootstrap = new AppBootstrap({
+        templateData: {
+          appId: app.getId(),
+          regularBundlePath,
+          dllBundlePath,
+          styleSheetPaths,
+        }
+      });
+
+      const body = await bootstrap.getJsFile();
+      const etag = await bootstrap.getJsFileHash();
+
+      return h.response(body)
+        .header('cache-control', 'must-revalidate')
+        .header('content-type', 'application/javascript')
+        .etag(etag);
     }
   });
 
   server.route({
     path: '/app/{id}',
     method: 'GET',
-    async handler(req, reply) {
+    async handler(req, h) {
       const id = req.params.id;
       const app = server.getUiAppById(id);
-      if (!app) return reply(Boom.notFound('Unknown app ' + id));
+      if (!app) throw Boom.notFound('Unknown app ' + id);
 
       try {
         if (kbnServer.status.isGreen()) {
-          await reply.renderApp(app);
+          return await h.renderApp(app);
         } else {
-          await reply.renderStatusPage();
+          return await h.renderStatusPage();
         }
       } catch (err) {
-        reply(Boom.wrap(err));
+        throw Boom.boomify(err);
       }
     }
   });
 
-  async function getLegacyKibanaPayload({ app, translations, request, includeUserProvidedConfig, injectedVarsOverrides }) {
+  async function getLegacyKibanaPayload({ app, translations, request, includeUserProvidedConfig }) {
     const uiSettings = request.getUiSettingsService();
 
     return {
@@ -117,65 +132,64 @@ export function uiRenderMixin(kbnServer, server, config) {
       branch: config.get('pkg.branch'),
       buildNum: config.get('pkg.buildNum'),
       buildSha: config.get('pkg.buildSha'),
-      basePath: config.get('server.basePath'),
+      basePath: request.getBasePath(),
       serverName: config.get('server.name'),
       devMode: config.get('env.dev'),
       uiSettings: await props({
         defaults: uiSettings.getDefaults(),
         user: includeUserProvidedConfig && uiSettings.getUserProvided()
-      }),
-      vars: await replaceInjectedVars(
-        request,
-        defaults(
-          injectedVarsOverrides,
-          await server.getInjectedUiAppVars(app.getId()),
-          defaultInjectedVars,
-        ),
-      )
+      })
     };
   }
 
-  async function renderApp({ app, reply, includeUserProvidedConfig = true, injectedVarsOverrides = {} }) {
-    try {
-      const request = reply.request;
-      const translations = await server.getUiTranslations();
-      const basePath = config.get('server.basePath');
+  async function renderApp({ app, h, includeUserProvidedConfig = true, injectedVarsOverrides = {} }) {
+    const request = h.request;
+    const translations = await server.getUiTranslations();
+    const basePath = request.getBasePath();
 
-      return reply.view('ui_app', {
-        uiPublicUrl: `${basePath}/ui`,
-        bootstrapScriptUrl: `${basePath}/bundles/app/${app.getId()}/bootstrap.js`,
-        i18n: (id, options) => i18n.translate(id, options),
+    return h.view('ui_app', {
+      uiPublicUrl: `${basePath}/ui`,
+      bootstrapScriptUrl: `${basePath}/bundles/app/${app.getId()}/bootstrap.js`,
+      i18n: (id, options) => i18n.translate(id, options),
+      locale: i18n.getLocale(),
 
-        injectedMetadata: {
-          version: kbnServer.version,
-          buildNumber: config.get('pkg.buildNum'),
-          legacyMetadata: await getLegacyKibanaPayload({
-            app,
-            translations,
-            request,
-            includeUserProvidedConfig,
-            injectedVarsOverrides
-          }),
-        },
-      });
-    } catch (err) {
-      reply(err);
-    }
+      injectedMetadata: {
+        version: kbnServer.version,
+        buildNumber: config.get('pkg.buildNum'),
+        basePath,
+        vars: await replaceInjectedVars(
+          request,
+          mergeVariables(
+            injectedVarsOverrides,
+            await server.getInjectedUiAppVars(app.getId()),
+            defaultInjectedVars,
+          ),
+        ),
+
+        legacyMetadata: await getLegacyKibanaPayload({
+          app,
+          translations,
+          request,
+          includeUserProvidedConfig,
+          injectedVarsOverrides
+        }),
+      },
+    });
   }
 
-  server.decorate('reply', 'renderApp', function (app, injectedVarsOverrides) {
+  server.decorate('toolkit', 'renderApp', function (app, injectedVarsOverrides) {
     return renderApp({
       app,
-      reply: this,
+      h: this,
       includeUserProvidedConfig: true,
       injectedVarsOverrides,
     });
   });
 
-  server.decorate('reply', 'renderAppWithDefaultConfig', function (app) {
+  server.decorate('toolkit', 'renderAppWithDefaultConfig', function (app) {
     return renderApp({
       app,
-      reply: this,
+      h: this,
       includeUserProvidedConfig: false,
     });
   });

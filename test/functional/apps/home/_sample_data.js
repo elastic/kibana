@@ -22,6 +22,7 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const find = getService('find');
+  const pieChart = getService('pieChart');
   const dashboardExpect = getService('dashboardExpect');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard']);
 
@@ -46,6 +47,13 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
+    it('should display registered ecommerce sample data sets', async ()=> {
+      await retry.try(async () => {
+        const exists = await PageObjects.home.doesSampleDataSetExist('ecommerce');
+        expect(exists).to.be(true);
+      });
+    });
+
     it('should install flights sample data set', async ()=> {
       await PageObjects.home.addSampleDataSet('flights');
       const isInstalled = await PageObjects.home.isSampleDataSetInstalled('flights');
@@ -55,6 +63,12 @@ export default function ({ getService, getPageObjects }) {
     it('should install logs sample data set', async ()=> {
       await PageObjects.home.addSampleDataSet('logs');
       const isInstalled = await PageObjects.home.isSampleDataSetInstalled('logs');
+      expect(isInstalled).to.be(true);
+    });
+
+    it('should install ecommerce sample data set', async ()=> {
+      await PageObjects.home.addSampleDataSet('ecommerce');
+      const isInstalled = await PageObjects.home.isSampleDataSetInstalled('ecommerce');
       expect(isInstalled).to.be(true);
     });
 
@@ -78,7 +92,7 @@ export default function ({ getService, getPageObjects }) {
 
 
       it.skip('pie charts rendered', async () => {
-        await dashboardExpect.pieSliceCount(4);
+        await pieChart.expectPieSliceCount(4);
       });
 
       it.skip('area, bar and heatmap charts rendered', async () => {
@@ -98,7 +112,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it.skip('vega chart renders', async () => {
-        const tsvb = await find.existsByCssSelector('.vega-view-container');
+        const tsvb = await find.existsByCssSelector('.vgaVis__view');
         expect(tsvb).to.be(true);
       });
 
@@ -112,6 +126,18 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);
         const panelCount = await PageObjects.dashboard.getPanelCount();
         expect(panelCount).to.be(11);
+      });
+
+      it('should launch sample ecommerce data set dashboard', async ()=> {
+        await PageObjects.home.launchSampleDataSet('ecommerce');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const today = new Date();
+        const todayYearMonthDay = today.toISOString().substring(0, 10);
+        const fromTime = `${todayYearMonthDay} 00:00:00.000`;
+        const toTime = `${todayYearMonthDay} 23:59:59.999`;
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        const panelCount = await PageObjects.dashboard.getPanelCount();
+        expect(panelCount).to.be(12);
       });
 
     });
@@ -130,6 +156,11 @@ export default function ({ getService, getPageObjects }) {
         expect(isInstalled).to.be(false);
       });
 
+      it('should uninstall ecommerce sample data set', async ()=> {
+        await PageObjects.home.removeSampleDataSet('ecommerce');
+        const isInstalled = await PageObjects.home.isSampleDataSetInstalled('ecommerce');
+        expect(isInstalled).to.be(false);
+      });
     });
   });
 }

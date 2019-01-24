@@ -1,0 +1,94 @@
+<div class="kuiSideBarSection">
+  <div class="form-group">
+    <div class="kuiSideBarSectionTitle">
+      <div
+        class="kuiSideBarSectionTitle__text"
+        i18n-id="kbnVislibVisTypes.editors.pie.pieSettingsTitle"
+        i18n-default-message="Pie Settings"
+      ></div>
+    </div>
+
+    <div class="kuiSideBarFormRow">
+      <label
+        class="kuiSideBarFormRow__label"
+        for="isDonut"
+        i18n-id="kbnVislibVisTypes.editors.pie.donutLabel"
+        i18n-default-message="Donut"
+      ></label>
+      <div class="kuiSideBarFormRow__control">
+        <input id="isDonut" name="isDonut" type="checkbox" value="{{isDonut}}"
+               ng-checked="editorState.params.isDonut"
+               ng-model="editorState.params.isDonut"
+        >
+      </div>
+    </div>
+  </div>
+
+  <vislib-basic-options></vislib-basic-options>
+</div>
+
+<!-- Labels -->
+<div class="kuiSideBarSection">
+  <div class="form-group">
+    <div class="kuiSideBarSectionTitle">
+      <div
+        class="kuiSideBarSectionTitle__text"
+        i18n-id="kbnVislibVisTypes.editors.pie.labelsSettingsTitle"
+        i18n-default-message="Labels Settings"
+      ></div>
+    </div>
+
+    <div class="kuiSideBarFormRow">
+      <label
+        class="kuiSideBarFormRow__label"
+        for="showLabels"
+        i18n-id="kbnVislibVisTypes.editors.pie.showLabelsLabel"
+        i18n-default-message="Show Labels"
+      ></label>
+      <div class="kuiSideBarFormRow__control">
+        <input class="kuiCheckBox" id="showLabels" type="checkbox" ng-model="editorState.params.labels.show">
+      </div>
+    </div>
+
+    <div class="kuiSideBarFormRow">
+      <label
+        class="kuiSideBarFormRow__label"
+        for="showLastLevel"
+        i18n-id="kbnVislibVisTypes.editors.pie.showTopLevelOnlyLabel"
+        i18n-default-message="Show Top Level Only"
+      ></label>
+      <div class="kuiSideBarFormRow__control">
+        <input class="kuiCheckBox" id="showLastLevel" type="checkbox" ng-model="editorState.params.labels.last_level">
+      </div>
+    </div>
+
+    <div class="kuiSideBarFormRow">
+      <label
+        class="kuiSideBarFormRow__label"
+        for="showValues"
+        i18n-id="kbnVislibVisTypes.editors.pie.showValuesLabel"
+        i18n-default-message="Show Values"
+      ></label>
+      <div class="kuiSideBarFormRow__control">
+        <input class="kuiCheckBox" id="showValues" type="checkbox" ng-model="editorState.params.labels.values">
+      </div>
+    </div>
+
+    <div class="kuiSideBarFormRow">
+      <label
+        class="kuiSideBarFormRow__label"
+        for="truncateLabels"
+        i18n-id="kbnVislibVisTypes.editors.pie.truncateLabel"
+        i18n-default-message="Truncate"
+      ></label>
+      <div class="kuiSideBarFormRow__control">
+        <input
+          id="truncateLabels"
+          class="kuiInput kuiSideBarInput"
+          type="number"
+          ng-model="editorState.params.labels.truncate"
+        >
+      </div>
+    </div>
+  </div>
+</div>

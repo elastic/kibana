@@ -6,7 +6,29 @@
 
 jest.mock('../../../services/job_service.js', () => 'mlJobService');
 
-import { shallow } from 'enzyme';
+// Mock the call for loading a filter.
+// The mock is hoisted to the top, so need to prefix the filter variable
+// with 'mock' so it can be used lazily.
+const mockTestFilter = {
+  filter_id: 'eu-airlines',
+  description: 'List of European airlines',
+  items: ['ABA', 'AEL'],
+  used_by: {
+    detectors: ['mean response time'],
+    jobs: ['farequote']
+  },
+};
+jest.mock('../../../services/ml_api_service', () => ({
+  ml: {
+    filters: {
+      filters: () => {
+        return Promise.resolve(mockTestFilter);
+      }
+    }
+  }
+}));
+
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { RuleActionPanel } from './rule_action_panel';
@@ -38,7 +60,7 @@ describe('RuleActionPanel', () => {
                 ACTION.SKIP_MODEL_UPDATE
               ],
               scope: {
-                instance: {
+                airline: {
                   filter_id: 'eu-airlines',
                   filter_type: 'exclude'
                 }
@@ -49,7 +71,7 @@ describe('RuleActionPanel', () => {
                 ACTION.SKIP_MODEL_UPDATE
               ],
               scope: {
-                instance: {
+                airline: {
                   filter_id: 'eu-airlines',
                   filter_type: 'exclude'
                 }
@@ -69,51 +91,70 @@ describe('RuleActionPanel', () => {
     },
   };
 
+  const anomaly = {
+    actual: [50],
+    typical: [1.23],
+    detectorIndex: 0,
+    source: {
+      function: 'mean',
+      airline: ['AAL'],
+    },
+  };
+
+  const setEditRuleIndex = jest.fn(() => {});
+  const updateRuleAtIndex = jest.fn(() => {});
+  const deleteRuleAtIndex = jest.fn(() => {});
+  const addItemToFilterList = jest.fn(() => {});
+
+  const requiredProps = {
+    job,
+    anomaly,
+    detectorIndex: 0,
+    setEditRuleIndex,
+    updateRuleAtIndex,
+    deleteRuleAtIndex,
+    addItemToFilterList,
+  };
+
   test('renders panel for rule with a condition', () => {
+    const props = {
+      ...requiredProps,
+      ruleIndex: 0,
+    };
 
-    const component = shallow(
-      <RuleActionPanel
-        job={job}
-        detectorIndex={0}
-        ruleIndex={0}
-        setEditRuleIndex={() => {}}
-        deleteRuleAtIndex={() => {}}
-      />
+    const component = shallowWithIntl(
+      <RuleActionPanel {...props} />
     );
 
     expect(component).toMatchSnapshot();
 
   });
 
-  test('renders panel for rule with scope ', () => {
+  test('renders panel for rule with scope, value in filter list', () => {
+    const props = {
+      ...requiredProps,
+      ruleIndex: 1,
+    };
 
-    const component = shallow(
-      <RuleActionPanel
-        job={job}
-        detectorIndex={0}
-        ruleIndex={1}
-        setEditRuleIndex={() => {}}
-        deleteRuleAtIndex={() => {}}
-      />
+    const component = shallowWithIntl(
+      <RuleActionPanel {...props} />
     );
 
     expect(component).toMatchSnapshot();
 
   });
 
-  test('renders panel for rule with a condition and scope ', () => {
+  test('renders panel for rule with a condition and scope, value not in filter list', () => {
+    const props = {
+      ...requiredProps,
+      ruleIndex: 1,
+    };
 
-    const component = shallow(
-      <RuleActionPanel
-        job={job}
-        detectorIndex={0}
-        ruleIndex={2}
-        setEditRuleIndex={() => {}}
-        deleteRuleAtIndex={() => {}}
-      />
+    const wrapper = shallowWithIntl(
+      <RuleActionPanel {...props} />
     );
-
-    expect(component).toMatchSnapshot();
+    wrapper.setState({ showAddToFilterListLink: true });
+    expect(wrapper).toMatchSnapshot();
 
   });
 

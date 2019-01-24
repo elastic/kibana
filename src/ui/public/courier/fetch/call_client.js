@@ -23,8 +23,9 @@ import { IsRequestProvider } from './is_request';
 import { MergeDuplicatesRequestProvider } from './merge_duplicate_requests';
 import { RequestStatus } from './req_status';
 import { SerializeFetchParamsProvider } from './request/serialize_fetch_params';
+import { i18n } from '@kbn/i18n';
 
-export function CallClientProvider(Private, Promise, es) {
+export function CallClientProvider(Private, Promise, es, config) {
   const errorAllowExplicitIndex = Private(ErrorAllowExplicitIndexProvider);
   const isRequest = Private(IsRequestProvider);
   const mergeDuplicateRequests = Private(MergeDuplicatesRequestProvider);
@@ -34,6 +35,9 @@ export function CallClientProvider(Private, Promise, es) {
   const DUPLICATE = RequestStatus.DUPLICATE;
 
   function callClient(searchRequests) {
+    const maxConcurrentShardRequests = config.get('courier:maxConcurrentShardRequests');
+    const includeFrozen = config.get('search:includeFrozen');
+
     // merging docs can change status to DUPLICATE, capture new statuses
     const searchRequestsAndStatuses = mergeDuplicateRequests(searchRequests);
 
@@ -93,7 +97,11 @@ export function CallClientProvider(Private, Promise, es) {
     // handle a request being aborted while being fetched
     const requestWasAborted = Promise.method(function (searchRequest, index) {
       if (searchRequestsAndStatuses[index] === ABORTED) {
-        defer.reject(new Error('Request was aborted twice?'));
+        defer.reject(new Error(
+          i18n.translate('common.ui.courier.fetch.requestWasAbortedTwiceErrorMessage', {
+            defaultMessage: 'Request was aborted twice?',
+          })
+        ));
       }
 
       requestsToFetchCount--;
@@ -136,7 +144,7 @@ export function CallClientProvider(Private, Promise, es) {
           searching,
           abort,
           failedSearchRequests,
-        } = await searchStrategy.search({ searchRequests, es, Promise, serializeFetchParams });
+        } = await searchStrategy.search({ searchRequests, es, Promise, serializeFetchParams, includeFrozen, maxConcurrentShardRequests });
 
         // Collect searchRequests which have successfully been sent.
         searchRequests.forEach(searchRequest => {
@@ -150,6 +158,7 @@ export function CallClientProvider(Private, Promise, es) {
         abortableSearches.push({
           searching,
           abort,
+          requestsCount: searchRequests.length,
         });
       }
 
@@ -159,7 +168,12 @@ export function CallClientProvider(Private, Promise, es) {
           return;
         }
 
-        const segregatedResponses = await Promise.all(abortableSearches.map(({ searching }) => searching));
+        const segregatedResponses = await Promise.all(abortableSearches.map(async ({ searching, requestsCount }) => {
+          return searching.catch((e) => {
+            // Duplicate errors so that they correspond to the original requests.
+            return new Array(requestsCount).fill({ error: e });
+          });
+        }));
 
         // Assigning searchRequests to strategies means that the responses come back in a different
         // order than the original searchRequests. So we'll put them back in order so that we can

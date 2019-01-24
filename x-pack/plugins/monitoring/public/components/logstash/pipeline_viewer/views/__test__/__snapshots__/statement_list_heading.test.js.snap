@@ -25,6 +25,7 @@ exports[`StatementListHeading component renders title and icon type 1`] = `
   >
     <EuiTitle
       size="s"
+      textTransform="none"
     >
       <h4>
         Filters

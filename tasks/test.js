@@ -31,9 +31,13 @@ module.exports = function (grunt) {
     }
   );
 
-  grunt.registerTask('test:server', ['checkPlugins', 'run:mocha']);
+  grunt.registerTask('test:mocha', ['checkPlugins', 'run:mocha']);
+  grunt.registerTask('test:server', () => {
+    grunt.log.writeln('`grunt test:server` is deprecated - use `grunt test:mocha`');
+    grunt.task.run(['test:mocha']);
+  });
 
-  grunt.registerTask('test:browser', ['checkPlugins', 'run:browserTestServer', 'karma:unit']);
+  grunt.registerTask('test:browser', ['checkPlugins', 'run:browserSCSS', 'run:browserTestServer', 'karma:unit']);
 
   grunt.registerTask('test:browser-ci', () => {
     const ciShardTasks = keys(grunt.config.get('karma'))
@@ -41,7 +45,7 @@ module.exports = function (grunt) {
       .map(key => `karma:${key}`);
 
     grunt.log.ok(`Running UI tests in ${ciShardTasks.length} shards`);
-
+    grunt.task.run(['run:browserSCSS']);
     grunt.task.run(['run:browserTestServer', ...ciShardTasks]);
   });
 
@@ -67,6 +71,7 @@ module.exports = function (grunt) {
       _.compact([
         !grunt.option('quick') && 'run:eslint',
         !grunt.option('quick') && 'run:tslint',
+        !grunt.option('quick') && 'run:sasslint',
         !grunt.option('quick') && 'run:typeCheck',
         !grunt.option('quick') && 'run:i18nCheck',
         'run:checkFileCasing',

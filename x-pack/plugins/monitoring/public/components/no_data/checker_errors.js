@@ -13,6 +13,7 @@ import {
   EuiDescriptionListDescription,
   EuiSpacer,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const ErrorList = ({ errors }) => {
   return errors.map((error, errorIndex) => {
@@ -44,9 +45,12 @@ export function CheckerErrors(props) {
         className="eui-textLeft"
       >
         <p>
-          There were some errors encountered in trying to check Elasticsearch
-          settings. You need administrator rights to check the settings and, if
-          needed, to enable the monitoring collection setting.
+          <FormattedMessage
+            id="xpack.monitoring.noData.checkerErrors.checkEsSettingsErrorMessage"
+            defaultMessage="There were some errors encountered in trying to check Elasticsearch
+            settings. You need administrator rights to check the settings and, if
+            needed, to enable the monitoring collection setting."
+          />
         </p>
 
         <EuiDescriptionList>

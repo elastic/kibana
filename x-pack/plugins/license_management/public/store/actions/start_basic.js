@@ -7,6 +7,7 @@
 import { createAction } from 'redux-actions';
 import { startBasic } from '../../lib/es';
 import { toastNotifications } from 'ui/notify';
+import { i18n } from '@kbn/i18n';
 
 export const startBasicLicenseStatus = createAction(
   'LICENSE_MANAGEMENT_START_BASIC_LICENSE_STATUS'
@@ -36,9 +37,13 @@ export const startBasicLicense = (currentLicenseType, ack) => async (
     const messages = Object.values(acknowledge).slice(1).map((item) => {
       return item[0];
     });
-    const first = `Some functionality will be lost if you replace your 
-        ${currentLicenseType.toUpperCase()} license with a
-        BASIC license.  Review the list of features below.`;
+    const first = i18n.translate('xpack.licenseMgmt.replacingCurrentLicenseWithBasicLicenseWarningMessage', {
+      //eslint-disable-next-line
+      defaultMessage: 'Some functionality will be lost if you replace your {currentLicenseType} license with a BASIC license. Review the list of features below.',
+      values: {
+        currentLicenseType: currentLicenseType.toUpperCase(),
+      }
+    });
     dispatch(startBasicLicenseStatus({ acknowledge: true, messages: [ first, ...messages] }));
   }
 

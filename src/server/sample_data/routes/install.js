@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import Boom from 'boom';
 import Joi from 'joi';
 
 import { loadData } from './lib/load_data';
@@ -26,6 +27,42 @@ import {
   translateTimeRelativeToDifference,
   translateTimeRelativeToWeek
 } from './lib/translate_timestamp';
+
+function insertDataIntoIndex(dataIndexConfig, index, nowReference, request, server, callWithRequest) {
+  const bulkInsert = async (docs) => {
+    function updateTimestamps(doc) {
+      dataIndexConfig.timeFields.forEach(timeFieldName => {
+        if (doc[timeFieldName]) {
+          doc[timeFieldName] = dataIndexConfig.preserveDayOfWeekTimeOfDay
+            ? translateTimeRelativeToWeek(doc[timeFieldName], dataIndexConfig.currentTimeMarker, nowReference)
+            : translateTimeRelativeToDifference(doc[timeFieldName], dataIndexConfig.currentTimeMarker, nowReference);
+        }
+      });
+      return doc;
+    }
+
+    const insertCmd = {
+      index: {
+        _index: index
+      }
+    };
+
+    const bulk = [];
+    docs.forEach(doc => {
+      bulk.push(insertCmd);
+      bulk.push(updateTimestamps(doc));
+    });
+    const resp = await callWithRequest(request, 'bulk', { body: bulk });
+    if (resp.errors) {
+      server.log(
+        ['warning'],
+        `sample_data install errors while bulk inserting. Elasticsearch response: ${JSON.stringify(resp, null, '')}`);
+      return Promise.reject(new Error(`Unable to load sample data into index "${index}", see kibana logs for details`));
+    }
+  };
+
+  return loadData(dataIndexConfig.dataPath, bulkInsert);
+}
 
 export const createInstallRoute = () => ({
   path: '/api/sample_data/{id}',
@@ -39,97 +76,82 @@ export const createInstallRoute = () => ({
         id: Joi.string().required(),
       }).required()
     },
-    handler: async (request, reply) => {
+    handler: async (request, h) => {
       const server = request.server;
       const sampleDataset = server.getSampleDatasets().find(sampleDataset => {
         return sampleDataset.id === request.params.id;
       });
       if (!sampleDataset) {
-        return reply().code(404);
+        return h.response().code(404);
       }
 
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-      const index = createIndexName(server, sampleDataset.id);
-      const insertCmd = {
-        index: {
-          _index: index
-        }
-      };
-
-      // clean up any old installation of dataset
-      try {
-        await callWithRequest(request, 'indices.delete', { index: index });
-      } catch (err) {
-        // ignore delete errors
-      }
-
-      try {
-        const createIndexParams = {
-          index: index,
-          body: {
-            settings: {
-              index: {
-                number_of_shards: 1,
-                number_of_replicas: 0
-              }
-            },
-            mappings: {
-              _doc: {
-                properties: sampleDataset.fields
-              }
-            }
-          }
-        };
-        await callWithRequest(request, 'indices.create', createIndexParams);
-      } catch (err) {
-        const errMsg = `Unable to create sample data index "${index}", error: ${err.message}`;
-        server.log(['warning'], errMsg);
-        return reply(errMsg).code(err.status);
-      }
 
       const now = request.query.now ? request.query.now : new Date();
       const nowReference = dateToIso8601IgnoringTime(now);
-      function updateTimestamps(doc) {
-        sampleDataset.timeFields.forEach(timeFieldName => {
-          if (doc[timeFieldName]) {
-            doc[timeFieldName] = sampleDataset.preserveDayOfWeekTimeOfDay
-              ? translateTimeRelativeToWeek(doc[timeFieldName], sampleDataset.currentTimeMarker, nowReference)
-              : translateTimeRelativeToDifference(doc[timeFieldName], sampleDataset.currentTimeMarker, nowReference);
-          }
-        });
-        return doc;
-      }
-      const bulkInsert = async (docs) => {
-        const bulk = [];
-        docs.forEach(doc => {
-          bulk.push(insertCmd);
-          bulk.push(updateTimestamps(doc));
-        });
-        const resp = await callWithRequest(request, 'bulk', { body: bulk });
-        if (resp.errors) {
-          server.log(
-            ['warning'],
-            `sample_data install errors while bulk inserting. Elasticsearch response: ${JSON.stringify(resp, null, ' ')}`);
-          return Promise.reject(new Error(`Unable to load sample data into index "${index}", see kibana logs for details`));
+
+      const counts = {};
+      for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
+        const dataIndexConfig = sampleDataset.dataIndices[i];
+        const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
+
+        // clean up any old installation of dataset
+        try {
+          await callWithRequest(request, 'indices.delete', { index: index });
+        } catch (err) {
+          // ignore delete errors
         }
-      };
-      loadData(sampleDataset.dataPath, bulkInsert, async (err, count) => {
-        if (err) {
+
+        try {
+          const createIndexParams = {
+            index: index,
+            body: {
+              settings: {
+                index: {
+                  number_of_shards: 1,
+                  number_of_replicas: 0
+                }
+              },
+              mappings: {
+                _doc: {
+                  properties: dataIndexConfig.fields
+                }
+              }
+            }
+          };
+          await callWithRequest(request, 'indices.create', createIndexParams);
+        } catch (err) {
+          const errMsg = `Unable to create sample data index "${index}", error: ${err.message}`;
+          server.log(['warning'], errMsg);
+          return h.response(errMsg).code(err.status);
+        }
+
+        try {
+          const count = await insertDataIntoIndex(
+            dataIndexConfig, index, nowReference, request, server, callWithRequest);
+          counts[index] = count;
+        } catch (err) {
           server.log(['warning'], `sample_data install errors while loading data. Error: ${err}`);
-          return reply(err.message).code(500);
+          return h.response(err.message).code(500);
         }
+      }
 
-        const createResults = await request.getSavedObjectsClient().bulkCreate(sampleDataset.savedObjects, { overwrite: true });
-        const errors = createResults.saved_objects.filter(savedObjectCreateResult => {
-          return savedObjectCreateResult.hasOwnProperty('error');
-        });
-        if (errors.length > 0) {
-          server.log(['warning'], `sample_data install errors while loading saved objects. Errors: ${errors.join(',')}`);
-          return reply(`Unable to load kibana saved objects, see kibana logs for details`).code(403);
-        }
-
-        return reply({ docsLoaded: count, kibanaSavedObjectsLoaded: sampleDataset.savedObjects.length });
+      let createResults;
+      try {
+        createResults = await request.getSavedObjectsClient().bulkCreate(sampleDataset.savedObjects, { overwrite: true });
+      }  catch (err) {
+        server.log(['warning'], `bulkCreate failed, error: ${err.message}`);
+        return Boom.badImplementation(`Unable to load kibana saved objects, see kibana logs for details`);
+      }
+      const errors = createResults.saved_objects.filter(savedObjectCreateResult => {
+        return savedObjectCreateResult.hasOwnProperty('error');
       });
+      if (errors.length > 0) {
+        server.log(['warning'], `sample_data install errors while loading saved objects. Errors: ${errors.join(',')}`);
+        return h.response(`Unable to load kibana saved objects, see kibana logs for details`).code(403);
+      }
+
+      return h.response({ elasticsearchIndicesCreated: counts, kibanaSavedObjectsLoaded: sampleDataset.savedObjects.length });
     }
   }
 });

@@ -8,7 +8,7 @@
           sort-field="actionStatusTable.sortField"
           sort-reverse="actionStatusTable.sortReverse"
         >
-          Action
+          {{ 'xpack.watcher.sections.watchDetail.actionStatusTable.actionColumnLabel' | i18n: { defaultMessage: 'Action' } }}
         </sortable-column>
       </th>
       <th scope="col" class="kuiTableHeaderCell">
@@ -18,8 +18,11 @@
           sort-field="actionStatusTable.sortField"
           sort-reverse="actionStatusTable.sortReverse"
         >
-          State
+          {{ 'xpack.watcher.sections.watchDetail.actionStatusTable.stateColumnLabel' | i18n: { defaultMessage: 'State' } }}
         </sortable-column>
+      </th>
+      <th scope="col" class="kuiTableHeaderCell" ng-if="actionStatusTable.actionErrors">
+          <span class="kuiTableHeaderCell__liner">Errors</span>
       </th>
       <th scope="col" class="kuiTableHeaderCell">
       </th>
@@ -39,18 +42,29 @@
           {{ actionStatus.state }}
         </div>
       </td>
+      <td class="kuiTableRowCell" ng-if="actionStatusTable.actionErrors">
+        <div class="kuiTableRowCell__liner">
+          <a
+            role="button"
+            ng-if="actionStatusTable.actionErrors[actionStatus.id]"
+            ng-click="actionStatusTable.showErrors(actionStatus.id, actionStatusTable.actionErrors[actionStatus.id])">{{actionStatusTable.getLabelErrors(actionStatus.id)}}</a>
+        </div>
+      </td>
       <td class="kuiTableRowCell">
         <div class="kuiTableRowCell__liner">
           <div class="kuiMenuButtonGroup kuiMenuButtonGroup--alignRight">
             <button
               class="kuiMenuButton kuiMenuButton--basic kuiMenuButton--iconText"
               ng-click="actionStatusTable.onActionAcknowledge(actionStatus)"
-              title="Acknowledge"
+              title="{{ 'xpack.watcher.sections.watchDetail.actionStatusTable.acknowledgeButtonTitle' | i18n: { defaultMessage: 'Acknowledge' } }}"
               ng-if="actionStatus.isAckable"
               data-test-subj="btnActionAcknowledge-{{ actionStatus.id }}"
             >
               <span class="kuiMenuButton__icon kuiIcon fa-thumbs-up"></span>
-              <span>Acknowledge</span>
+              <span
+                i18n-id="xpack.watcher.sections.watchDetail.actionStatusTable.acknowledgeButtonLabel"
+                i18n-default-message="Acknowledge"
+              ></span>
             </button>
           </div>
         </div>

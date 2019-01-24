@@ -1,0 +1,138 @@
+<div class="kuiSideBarSection kuiSideBarSection__main">
+  <div class="kuiSideBarSectionTitle">
+    <div
+      class="kuiSideBarSectionTitle__text"
+      i18n-id="kbnVislibVisTypes.controls.pointSeries.categoryAxis.xAxisTitle"
+      i18n-default-message="X-Axis"
+    ></div>
+  </div>
+
+  <!-- General -->
+  <div class="kuiSideBarSection">
+    <div class="kuiSideBarFormRow">
+      <label
+        class="kuiSideBarFormRow__label"
+        for="categoryAxisShow"
+        i18n-id="kbnVislibVisTypes.controls.pointSeries.categoryAxis.showLabel"
+        i18n-default-message="Show"
+      ></label>
+      <div class="kuiSideBarFormRow__control">
+        <input class="kuiCheckBox" id="categoryAxisShow" type="checkbox" ng-model="editorState.params.categoryAxes[0].show">
+      </div>
+    </div>
+
+    <div class="kuiSideBarFormRow">
+      <label
+        class="kuiSideBarFormRow__label"
+        for="categoryAxisPosition"
+        i18n-id="kbnVislibVisTypes.controls.pointSeries.categoryAxis.positionLabel"
+        i18n-default-message="Position"
+      ></label>
+      <div class="kuiSideBarFormRow__control">
+        <select
+          id="categoryAxisPosition"
+          class="kuiSelect kuiSideBarSelect"
+          ng-model="editorState.params.categoryAxes[0].position"
+          ng-options="mode for mode in vis.type.editorConfig.collections.positions"
+        ></select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Advanced options -->
+  <div class="kuiSideBarSection">
+    <a
+      class="kuiSideBarOptionsLink small"
+      ng-click="isCategoryAxisAdvancedOptionsOpen = !isCategoryAxisAdvancedOptionsOpen"
+      kbn-accessible-click
+    >
+      <span
+        aria-hidden="true"
+        ng-class="{ 'fa-caret-down': isCategoryAxisAdvancedOptionsOpen, 'fa-caret-right': !isCategoryAxisAdvancedOptionsOpen }"
+        class="kuiIcon fa-caret-right kuiSideBarOptionsLink__caret"
+      ></span>
+      <span
+        class="kuiSideBarOptionsLink__text"
+        ng-show="!isCategoryAxisAdvancedOptionsOpen"
+        i18n-id="kbnVislibVisTypes.controls.pointSeries.categoryAxis.showAdvancedOptionsLabel"
+        i18n-default-message="Show Advanced Options"
+      ></span>
+      <span
+        class="kuiSideBarOptionsLink__text"
+        ng-show="isCategoryAxisAdvancedOptionsOpen"
+        i18n-id="kbnVislibVisTypes.controls.pointSeries.categoryAxis.hideAdvancedOptionsLabel"
+        i18n-default-message="Hide Advanced Options"
+      ></span>
+    </a>
+
+    <div ng-show="isCategoryAxisAdvancedOptionsOpen">
+      <!-- Labels -->
+      <div class="kuiSideBarSection">
+        <h6
+          class="kuiSideBarFormSectionTitle"
+          i18n-id="kbnVislibVisTypes.controls.pointSeries.categoryAxis.labelsTitle"
+          i18n-default-message="Labels"
+        ></h6>
+
+        <div class="kuiSideBarFormRow">
+          <label
+            class="kuiSideBarFormRow__label"
+            for="categoryAxisShowLabels"
+            i18n-id="kbnVislibVisTypes.controls.pointSeries.categoryAxis.showLabelsLabel"
+            i18n-default-message="Show Labels"
+          ></label>
+          <div class="kuiSideBarFormRow__control">
+            <input class="kuiCheckBox" id="categoryAxisShowLabels" type="checkbox" ng-model="editorState.params.categoryAxes[0].labels.show">
+          </div>
+        </div>
+
+        <div class="kuiSideBarFormRow">
+          <label
+            class="kuiSideBarFormRow__label"
+            for="categoryAxisShowFilter"
+            i18n-id="kbnVislibVisTypes.controls.pointSeries.categoryAxis.filterLabelsLabel"
+            i18n-default-message="Filter Labels"
+          ></label>
+          <div class="kuiSideBarFormRow__control">
+            <input class="kuiCheckBox" id="categoryAxisShowFilter" type="checkbox" ng-model="editorState.params.categoryAxes[0].labels.filter">
+          </div>
+        </div>
+
+        <div class="kuiSideBarFormRow">
+          <label
+            class="kuiSideBarFormRow__label"
+            for="categoryAxisRotateLabels"
+            i18n-id="kbnVislibVisTypes.controls.pointSeries.categoryAxis.rotateLabel"
+            i18n-default-message="Rotate"
+          ></label>
+          <div class="kuiSideBarFormRow__control">
+            <select
+              id="categoryAxisRotateLabels"
+              class="kuiSelect kuiSideBarSelect"
+              ng-model="editorState.params.categoryAxes[0].labels.rotate"
+              ng-options="mode.value as mode.name for mode in rotateOptions"
+            ></select>
+          </div>
+        </div>
+
+        <div class="kuiSideBarFormRow">
+          <label
+            class="kuiSideBarFormRow__label"
+            for="categoryAxisTruncateLabels"
+            i18n-id="kbnVislibVisTypes.controls.pointSeries.categoryAxis.truncateLabel"
+            i18n-default-message="Truncate"
+          ></label>
+          <div class="kuiSideBarFormRow__control">
+            <input
+              id="categoryAxisTruncateLabels"
+              class="kuiInput kuiSideBarInput"
+              type="number"
+              ng-model="editorState.params.categoryAxes[0].labels.truncate"
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

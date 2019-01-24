@@ -11,6 +11,9 @@ import { validateJobObject } from './validate_job_object';
 import { calculateModelMemoryLimitProvider } from '../../models/calculate_model_memory_limit';
 import { ALLOWED_DATA_UNITS } from '../../../common/constants/validation';
 
+// The minimum value the backend expects is 1MByte
+const MODEL_MEMORY_LIMIT_MINIMUM_BYTES = 1048576;
+
 export async function validateModelMemoryLimit(callWithRequest, job, duration) {
   validateJobObject(job);
 
@@ -116,9 +119,15 @@ export async function validateModelMemoryLimit(callWithRequest, job, duration) {
       // the max mml
       if (runEstimateGreaterThenMml && mml !== null) {
         const mmlBytes = numeral(mml).value();
-        if (mmlBytes === 0) {
+        if (mmlBytes < MODEL_MEMORY_LIMIT_MINIMUM_BYTES) {
           messages.push({
             id: 'mml_value_invalid',
+            mml
+          });
+        } else if ((mmlEstimateBytes / 2) > mmlBytes) {
+          messages.push({
+            id: 'half_estimated_mml_greater_than_mml',
+            maxModelMemoryLimit,
             mml
           });
         } else if (mmlEstimateBytes > mmlBytes) {

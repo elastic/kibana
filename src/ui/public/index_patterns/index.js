@@ -17,6 +17,8 @@
  * under the License.
  */
 
+export { IndexPatternSelect } from './components/index_pattern_select';
+
 export { IndexPatternsProvider } from './index_patterns';
 
 export {
@@ -27,3 +29,9 @@ export {
   INDEX_PATTERN_ILLEGAL_CHARACTERS,
   INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
 } from './constants';
+
+export {
+  ILLEGAL_CHARACTERS,
+  CONTAINS_SPACES,
+  validateIndexPattern,
+} from './validate';

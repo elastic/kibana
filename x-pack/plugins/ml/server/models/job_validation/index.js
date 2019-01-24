@@ -7,3 +7,4 @@
 
 
 export { validateJob } from './job_validation';
+export { validateCardinality } from './validate_cardinality';

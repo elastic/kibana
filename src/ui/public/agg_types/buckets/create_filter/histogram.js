@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { buildRangeFilter } from '../../../filter_manager/lib/range';
+import { buildRangeFilter } from '@kbn/es-query';
 
 export function createFilterHistogram(aggConfig, key) {
   const value = parseInt(key, 10);
@@ -25,7 +25,7 @@ export function createFilterHistogram(aggConfig, key) {
   return buildRangeFilter(
     aggConfig.params.field,
     { gte: value, lt: value + aggConfig.params.interval },
-    aggConfig._indexPattern,
+    aggConfig.getIndexPattern(),
     aggConfig.fieldFormatter()(key)
   );
 }

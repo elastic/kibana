@@ -43,5 +43,11 @@ export const metricSet = [
       'beat_system_os_load_15'
     ],
     name: 'beat_os_load'
+  },
+  {
+    name: 'beat_handles',
+    keys: [
+      'beat_handles_open',
+    ]
   }
 ];

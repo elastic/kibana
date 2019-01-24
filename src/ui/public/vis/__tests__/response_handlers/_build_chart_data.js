@@ -22,7 +22,7 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'sinon';
 import { AggResponseIndexProvider } from '../../../agg_response';
-import { VislibResponseHandlerProvider } from '../../response_handlers/vislib';
+import { VislibSeriesResponseHandlerProvider } from '../../response_handlers/vislib';
 
 describe('renderbot#buildChartData', function () {
   let buildChartData;
@@ -31,7 +31,7 @@ describe('renderbot#buildChartData', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     aggResponse = Private(AggResponseIndexProvider);
-    buildChartData = Private(VislibResponseHandlerProvider).handler;
+    buildChartData = Private(VislibSeriesResponseHandlerProvider).handler;
   }));
 
   describe('for hierarchical vis', function () {

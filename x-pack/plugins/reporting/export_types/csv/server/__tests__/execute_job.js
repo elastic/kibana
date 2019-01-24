@@ -12,7 +12,7 @@ import nodeCrypto from '@elastic/node-crypto';
 import { CancellationToken } from '../../../../server/lib/esqueue/helpers/cancellation_token';
 import { FieldFormat } from  '../../../../../../../src/ui/field_formats/field_format.js';
 import { FieldFormatsService } from  '../../../../../../../src/ui/field_formats/field_formats_service.js';
-import { createStringFormat } from  '../../../../../../../src/core_plugins/kibana/common/field_formats/types/string.js';
+import { createStringFormat } from  '../../../../../../../src/legacy/core_plugins/kibana/common/field_formats/types/string.js';
 
 import { executeJobFactory } from '../execute_job';
 
@@ -109,12 +109,34 @@ describe('CSV Execute Job', function () {
     mockServer.config().get.withArgs('xpack.reporting.csv.scroll').returns({});
   });
 
-  describe('savedObjects', function () {
-    it('calls getScopedSavedObjectsClient with request containing decrypted headers', async function () {
+  describe('calls getScopedSavedObjectsClient with request', function () {
+    it('containing decrypted headers', async function () {
       const executeJob = executeJobFactory(mockServer);
       await executeJob({ headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } }, cancellationToken);
       expect(mockServer.savedObjects.getScopedSavedObjectsClient.calledOnce).to.be(true);
       expect(mockServer.savedObjects.getScopedSavedObjectsClient.firstCall.args[0].headers).to.be.eql(headers);
+    });
+
+    it(`containing getBasePath() returning server's basePath if the job doesn't have one`, async function () {
+      const serverBasePath = '/foo-server/basePath/';
+      mockServer.config().get.withArgs('server.basePath').returns(serverBasePath);
+      const executeJob = executeJobFactory(mockServer);
+      await executeJob({ headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null } }, cancellationToken);
+      expect(mockServer.savedObjects.getScopedSavedObjectsClient.calledOnce).to.be(true);
+      expect(mockServer.savedObjects.getScopedSavedObjectsClient.firstCall.args[0].getBasePath()).to.be.eql(serverBasePath);
+    });
+
+    it(`containing getBasePath() returning job's basePath if the job has one`, async function () {
+      const serverBasePath = '/foo-server/basePath/';
+      mockServer.config().get.withArgs('server.basePath').returns(serverBasePath);
+      const executeJob = executeJobFactory(mockServer);
+      const jobBasePath = 'foo-job/basePath/';
+      await executeJob(
+        { headers: encryptedHeaders, fields: [], searchRequest: { index: null, body: null }, basePath: jobBasePath },
+        cancellationToken
+      );
+      expect(mockServer.savedObjects.getScopedSavedObjectsClient.calledOnce).to.be(true);
+      expect(mockServer.savedObjects.getScopedSavedObjectsClient.firstCall.args[0].getBasePath()).to.be.eql(jobBasePath);
     });
   });
 

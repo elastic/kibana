@@ -19,7 +19,8 @@ describe('ML - Explorer Controller', () => {
       const scope = $rootScope.$new();
       $controller('MlExplorerController', { $scope: scope });
 
-      expect(scope.loading).to.be(true);
+      expect(Array.isArray(scope.jobs)).to.be(true);
+      expect(Array.isArray(scope.queryFilters)).to.be(true);
     });
   });
 });

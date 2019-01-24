@@ -28,7 +28,7 @@ export function clustersRoute(server) {
         })
       }
     },
-    handler: async (req, reply) => {
+    handler: async (req) => {
       let clusters = [];
 
       // NOTE using try/catch because checkMonitoringAuth is expected to throw
@@ -44,15 +44,16 @@ export function clustersRoute(server) {
         const kbnIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.kibana.index_pattern', ccs);
         const lsIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.logstash.index_pattern', ccs);
         const beatsIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.beats.index_pattern', ccs);
+        const apmIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.beats.index_pattern', ccs);
         const alertsIndex = prefixIndexPattern(config, 'xpack.monitoring.cluster_alerts.index', ccs);
-        const indexPatterns = { esIndexPattern, kbnIndexPattern, lsIndexPattern, beatsIndexPattern, alertsIndex };
+        const indexPatterns = { esIndexPattern, kbnIndexPattern, lsIndexPattern, beatsIndexPattern, apmIndexPattern, alertsIndex };
 
         clusters = await getClustersFromRequest(req, indexPatterns);
       } catch (err) {
-        return reply(handleError(err, req));
+        throw handleError(err, req);
       }
 
-      return reply(clusters);
+      return clusters;
     }
   });
 }

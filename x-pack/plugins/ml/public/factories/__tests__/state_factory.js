@@ -15,7 +15,10 @@ describe('ML - mlStateFactory', () => {
   let stateFactory;
   let AppState;
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', function (stateManagementConfigProvider) {
+    stateManagementConfigProvider.enable();
+  }));
+
   beforeEach(ngMock.inject(($injector) => {
     AppState = $injector.get('AppState');
     const Private = $injector.get('Private');

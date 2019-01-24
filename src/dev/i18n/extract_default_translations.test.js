@@ -20,9 +20,10 @@
 import path from 'path';
 
 import {
-  extractDefaultTranslations,
+  extractMessagesFromPathToMap,
   validateMessageNamespace,
 } from './extract_default_translations';
+import { ErrorReporter } from './utils';
 
 const fixturesPath = path.resolve(__dirname, '__fixtures__', 'extract_default_translations');
 const pluginsPaths = [
@@ -31,52 +32,32 @@ const pluginsPaths = [
   path.join(fixturesPath, 'test_plugin_3'),
 ];
 
-jest.mock('../../../.i18nrc.json', () => ({
+const config = {
   paths: {
     plugin_1: 'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_1',
     plugin_2: 'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_2',
     plugin_3: 'src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_3',
   },
   exclude: [],
-}));
-
-const utils = require('./utils');
-utils.writeFileAsync = jest.fn();
+};
 
 describe('dev/i18n/extract_default_translations', () => {
-  test('extracts messages to en.json', async () => {
+  test('extracts messages from path to map', async () => {
     const [pluginPath] = pluginsPaths;
+    const resultMap = new Map();
 
-    utils.writeFileAsync.mockClear();
-    await extractDefaultTranslations({
-      paths: [pluginPath],
-      output: pluginPath,
-    });
-
-    const [[, json]] = utils.writeFileAsync.mock.calls;
-
-    expect(json.toString()).toMatchSnapshot();
-  });
-
-  test('injects default formats into en.json', async () => {
-    const [, pluginPath] = pluginsPaths;
-
-    utils.writeFileAsync.mockClear();
-    await extractDefaultTranslations({
-      paths: [pluginPath],
-      output: pluginPath,
-    });
-
-    const [[, json]] = utils.writeFileAsync.mock.calls;
-
-    expect(json.toString()).toMatchSnapshot();
+    await extractMessagesFromPathToMap(pluginPath, resultMap, config, new ErrorReporter());
+    expect([...resultMap].sort()).toMatchSnapshot();
   });
 
   test('throws on id collision', async () => {
     const [, , pluginPath] = pluginsPaths;
+    const reporter = new ErrorReporter();
+
     await expect(
-      extractDefaultTranslations({ paths: [pluginPath], output: pluginPath })
-    ).rejects.toThrowErrorMatchingSnapshot();
+      extractMessagesFromPathToMap(pluginPath, new Map(), config, reporter)
+    ).resolves.not.toThrow();
+    expect(reporter.errors).toMatchSnapshot();
   });
 
   test('validates message namespace', () => {
@@ -85,15 +66,18 @@ describe('dev/i18n/extract_default_translations', () => {
       __dirname,
       '__fixtures__/extract_default_translations/test_plugin_2/test_file.html'
     );
-    expect(() => validateMessageNamespace(id, filePath)).not.toThrow();
+    expect(() => validateMessageNamespace(id, filePath, config.paths)).not.toThrow();
   });
 
   test('throws on wrong message namespace', () => {
+    const report = jest.fn();
     const id = 'wrong_plugin_namespace.message-id';
     const filePath = path.resolve(
       __dirname,
       '__fixtures__/extract_default_translations/test_plugin_2/test_file.html'
     );
-    expect(() => validateMessageNamespace(id, filePath)).toThrowErrorMatchingSnapshot();
+
+    expect(() => validateMessageNamespace(id, filePath, config.paths, { report })).not.toThrow();
+    expect(report.mock.calls).toMatchSnapshot();
   });
 });

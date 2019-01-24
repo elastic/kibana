@@ -11,7 +11,7 @@ Array [
     class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
   />,
   <div
-    class="euiText eui-textLeft"
+    class="euiText euiText--medium eui-textLeft"
   >
     <p>
       No monitoring data found. Try setting the time filter to "Last 1 hour" or check if data is available for a different time period.

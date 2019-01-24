@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "skipLibCheck": true,
+    "lib": [
+      "esnext"
+    ]
+  },
+  "files": [
+    "index.ts"
+  ]
+}
