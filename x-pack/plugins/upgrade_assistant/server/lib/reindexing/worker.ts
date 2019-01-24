@@ -9,6 +9,7 @@ import { SavedObjectsClient } from 'src/server/saved_objects';
 
 import moment = require('moment');
 import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
+import { CredentialStore } from './credential_store';
 import { reindexActionsFactory } from './reindex_actions';
 import { ReindexService, reindexServiceFactory } from './reindex_service';
 
@@ -41,7 +42,7 @@ export class ReindexWorker {
 
   constructor(
     private client: SavedObjectsClient,
-    private credentialMap: Map<string, Request['headers']>,
+    private credentialStore: CredentialStore,
     private callWithRequest: CallClusterWithRequest,
     private callWithInternalUser: CallCluster,
     private readonly log: Server['log']
@@ -126,10 +127,10 @@ export class ReindexWorker {
     }
   };
 
-  private processNextStep = (reindexOp: ReindexSavedObject) => {
-    const headers = this.credentialMap.get(reindexOp.attributes.indexName);
+  private processNextStep = async (reindexOp: ReindexSavedObject) => {
+    const credential = this.credentialStore.get(reindexOp);
 
-    if (!headers) {
+    if (!credential) {
       // Set to paused state if the job hasn't been updated in PAUSE_WINDOW.
       // This indicates that no Kibana nodes currently have credentials to update this job.
       const now = moment();
@@ -144,10 +145,14 @@ export class ReindexWorker {
     }
 
     // Setup a ReindexService specific to these credentials.
-    const callCluster = this.callWithRequest.bind(null, { headers } as Request) as CallCluster;
+    const fakeRequest = { headers: credential } as Request;
+    const callCluster = this.callWithRequest.bind(null, fakeRequest) as CallCluster;
     const actions = reindexActionsFactory(this.client, callCluster);
     const service = reindexServiceFactory(callCluster, actions);
-    return swallowExceptions(service.processNextStep, this.log)(reindexOp);
+    reindexOp = await swallowExceptions(service.processNextStep, this.log)(reindexOp);
+
+    // Update credential store with most recent state.
+    this.credentialStore.set(reindexOp, credential);
   };
 }
 

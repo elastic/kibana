@@ -21,7 +21,8 @@ jest.mock('../lib/reindexing', () => {
   };
 });
 
-import { ReindexStatus, ReindexWarning } from '../../common/types';
+import { ReindexSavedObject, ReindexStatus, ReindexWarning } from '../../common/types';
+import { credentialStoreFactory } from '../lib/reindexing/credential_store';
 import { registerReindexIndicesRoutes } from './reindex_indices';
 
 // Need to require to get mock on named export to work.
@@ -44,14 +45,14 @@ describe('reindex template API', () => {
   server.config = () => ({ get: () => '' } as any);
   server.decorate('request', 'getSavedObjectsClient', () => jest.fn());
 
-  const credentialMap = new Map();
+  const credentialStore = credentialStoreFactory();
 
   const worker = {
     includes: jest.fn(),
     forceRefresh: jest.fn(),
   } as any;
 
-  registerReindexIndicesRoutes(server, worker, credentialMap);
+  registerReindexIndicesRoutes(server, worker, credentialStore);
 
   beforeEach(() => {
     mockReindexService.detectReindexWarnings.mockReset();
@@ -64,9 +65,7 @@ describe('reindex template API', () => {
     worker.forceRefresh.mockReset();
 
     // Reset the credentialMap
-    for (const k of credentialMap.keys()) {
-      credentialMap.delete(k);
-    }
+    credentialStore.clear();
   });
 
   describe('GET /api/upgrade_assistant/reindex/{indexName}', () => {
@@ -140,10 +139,11 @@ describe('reindex template API', () => {
       expect(worker.forceRefresh).toHaveBeenCalled();
     });
 
-    it('inserts headers into the credentialMap', async () => {
-      mockReindexService.createReindexOperation.mockResolvedValueOnce({
+    it('inserts headers into the credentialStore', async () => {
+      const reindexOp = {
         attributes: { indexName: 'theIndex' },
-      });
+      } as ReindexSavedObject;
+      mockReindexService.createReindexOperation.mockResolvedValueOnce(reindexOp);
 
       await server.inject({
         method: 'POST',
@@ -153,7 +153,7 @@ describe('reindex template API', () => {
         },
       });
 
-      expect(credentialMap.get('theIndex')['kbn-auth-x']).toEqual('HERE!');
+      expect(credentialStore.get(reindexOp)!['kbn-auth-x']).toEqual('HERE!');
     });
 
     it('resumes a reindexOp if it is paused', async () => {

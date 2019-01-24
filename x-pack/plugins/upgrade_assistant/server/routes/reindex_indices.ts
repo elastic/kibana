@@ -11,12 +11,10 @@ import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { SavedObjectsClient } from 'src/server/saved_objects';
 import { ReindexStatus } from '../../common/types';
 import { reindexServiceFactory, ReindexWorker } from '../lib/reindexing';
+import { CredentialStore } from '../lib/reindexing/credential_store';
 import { reindexActionsFactory } from '../lib/reindexing/reindex_actions';
 
-export function registerReindexWorker(
-  server: Server,
-  credentialMap: Map<string, Request['headers']>
-) {
+export function registerReindexWorker(server: Server, credentialStore: CredentialStore) {
   const { callWithRequest, callWithInternalUser } = server.plugins.elasticsearch.getCluster(
     'admin'
   );
@@ -37,7 +35,7 @@ export function registerReindexWorker(
 
   const worker = new ReindexWorker(
     savedObjectsClient,
-    credentialMap,
+    credentialStore,
     callWithRequest,
     callWithInternalUser,
     log
@@ -55,7 +53,7 @@ export function registerReindexWorker(
 export function registerReindexIndicesRoutes(
   server: Server,
   worker: ReindexWorker,
-  credentialMap: Map<string, Request['headers']>
+  credentialStore: CredentialStore
 ) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
   const BASE_PATH = '/api/upgrade_assistant/reindex';
@@ -67,9 +65,6 @@ export function registerReindexIndicesRoutes(
     async handler(request) {
       const client = request.getSavedObjectsClient();
       const { indexName } = request.params;
-
-      // Add users credentials for the worker to use
-      credentialMap.set(indexName, request.headers);
 
       const callCluster = callWithRequest.bind(null, request) as CallCluster;
       const reindexActions = reindexActionsFactory(client, callCluster);
@@ -83,6 +78,9 @@ export function registerReindexIndicesRoutes(
           existingOp && existingOp.attributes.status === ReindexStatus.paused
             ? await reindexService.resumeReindexOperation(indexName)
             : await reindexService.createReindexOperation(indexName);
+
+        // Add users credentials for the worker to use
+        credentialStore.set(reindexOp, request.headers);
 
         // Kick the worker on this node to immediately pickup the new reindex operation.
         worker.forceRefresh();

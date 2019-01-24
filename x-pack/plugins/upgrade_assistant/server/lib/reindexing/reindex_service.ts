@@ -464,8 +464,11 @@ export const reindexServiceFactory = (
         throw new Error(`No reindex operation found for index ${indexName}`);
       }
 
-      return actions.runWhileLocked(reindexOp, op => {
-        if (op.attributes.status !== ReindexStatus.inProgress) {
+      return actions.runWhileLocked(reindexOp, async op => {
+        if (op.attributes.status === ReindexStatus.paused) {
+          // Another node already paused the operation, don't do anything
+          return reindexOp;
+        } else if (op.attributes.status !== ReindexStatus.inProgress) {
           throw new Error(`Reindex operation must be inProgress in order to be paused.`);
         }
 
@@ -480,8 +483,11 @@ export const reindexServiceFactory = (
         throw new Error(`No reindex operation found for index ${indexName}`);
       }
 
-      return actions.runWhileLocked(reindexOp, op => {
-        if (op.attributes.status !== ReindexStatus.paused) {
+      return actions.runWhileLocked(reindexOp, async op => {
+        if (op.attributes.status === ReindexStatus.inProgress) {
+          // Another node already resumed the operation, don't do anything
+          return reindexOp;
+        } else if (op.attributes.status !== ReindexStatus.paused) {
           throw new Error(`Reindex operation must be paused in order to be resumed.`);
         }
 
