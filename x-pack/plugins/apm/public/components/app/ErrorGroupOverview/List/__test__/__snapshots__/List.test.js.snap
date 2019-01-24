@@ -79,6 +79,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
           <th
             className="euiTableHeaderCell"
             data-test-subj="tableHeaderCell_groupId_0"
+            role="columnheader"
             scope="col"
             width="96px"
           >
@@ -95,6 +96,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
           <th
             className="euiTableHeaderCell"
             data-test-subj="tableHeaderCell_message_1"
+            role="columnheader"
             scope="col"
             width="50%"
           >
@@ -111,6 +113,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
           <th
             className="euiTableHeaderCell"
             data-test-subj="tableHeaderCell_handled_2"
+            role="columnheader"
             scope="col"
           >
             <div
@@ -122,12 +125,14 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
             </div>
           </th>
           <th
+            aria-live={true}
+            aria-sort="none"
             className="euiTableHeaderCell"
             data-test-subj="tableHeaderCell_occurrenceCount_3"
+            role="columnheader"
             scope="col"
           >
             <button
-              aria-label="Sort Occurrences ascending"
               className="euiTableHeaderButton"
               data-test-subj="tableHeaderSortButton"
               onClick={[Function]}
@@ -141,16 +146,23 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                 >
                   Occurrences
                 </span>
+                <span
+                  className="euiScreenReaderOnly"
+                >
+                  Click to sort in ascending order
+                </span>
               </span>
             </button>
           </th>
           <th
+            aria-live={true}
+            aria-sort="descending"
             className="euiTableHeaderCell"
             data-test-subj="tableHeaderCell_latestOccurrenceAt_4"
+            role="columnheader"
             scope="col"
           >
             <button
-              aria-label="Sort Latest occurrence ascending"
               className="euiTableHeaderButton euiTableHeaderButton-isSorted"
               data-test-subj="tableHeaderSortButton"
               onClick={[Function]}
@@ -165,6 +177,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                   Latest occurrence
                 </span>
                 <svg
+                  aria-label="Sorted in descending order"
                   className="euiIcon euiIcon--medium euiTableSortIcon"
                   focusable="false"
                   height="16"
@@ -177,6 +190,11 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                     d="M7 11.692V3.556C7 3.249 7.224 3 7.5 3s.5.249.5.556v8.136l4.096-4.096a.5.5 0 0 1 .707.707l-4.242 4.243a1.494 1.494 0 0 1-.925.433.454.454 0 0 1-.272 0 1.494 1.494 0 0 1-.925-.433L2.197 8.303a.5.5 0 1 1 .707-.707L7 11.692z"
                   />
                 </svg>
+                <span
+                  className="euiScreenReaderOnly"
+                >
+                  Click to sort in ascending order
+                </span>
               </span>
             </button>
           </th>
@@ -376,6 +394,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           <th
             className="euiTableHeaderCell"
             data-test-subj="tableHeaderCell_groupId_0"
+            role="columnheader"
             scope="col"
             width="96px"
           >
@@ -392,6 +411,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           <th
             className="euiTableHeaderCell"
             data-test-subj="tableHeaderCell_message_1"
+            role="columnheader"
             scope="col"
             width="50%"
           >
@@ -408,6 +428,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           <th
             className="euiTableHeaderCell"
             data-test-subj="tableHeaderCell_handled_2"
+            role="columnheader"
             scope="col"
           >
             <div
@@ -419,12 +440,14 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             </div>
           </th>
           <th
+            aria-live={true}
+            aria-sort="none"
             className="euiTableHeaderCell"
             data-test-subj="tableHeaderCell_occurrenceCount_3"
+            role="columnheader"
             scope="col"
           >
             <button
-              aria-label="Sort Occurrences ascending"
               className="euiTableHeaderButton"
               data-test-subj="tableHeaderSortButton"
               onClick={[Function]}
@@ -438,16 +461,23 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 >
                   Occurrences
                 </span>
+                <span
+                  className="euiScreenReaderOnly"
+                >
+                  Click to sort in ascending order
+                </span>
               </span>
             </button>
           </th>
           <th
+            aria-live={true}
+            aria-sort="descending"
             className="euiTableHeaderCell"
             data-test-subj="tableHeaderCell_latestOccurrenceAt_4"
+            role="columnheader"
             scope="col"
           >
             <button
-              aria-label="Sort Latest occurrence ascending"
               className="euiTableHeaderButton euiTableHeaderButton-isSorted"
               data-test-subj="tableHeaderSortButton"
               onClick={[Function]}
@@ -462,6 +492,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   Latest occurrence
                 </span>
                 <svg
+                  aria-label="Sorted in descending order"
                   className="euiIcon euiIcon--medium euiTableSortIcon"
                   focusable="false"
                   height="16"
@@ -474,6 +505,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                     d="M7 11.692V3.556C7 3.249 7.224 3 7.5 3s.5.249.5.556v8.136l4.096-4.096a.5.5 0 0 1 .707.707l-4.242 4.243a1.494 1.494 0 0 1-.925.433.454.454 0 0 1-.272 0 1.494 1.494 0 0 1-.925-.433L2.197 8.303a.5.5 0 1 1 .707-.707L7 11.692z"
                   />
                 </svg>
+                <span
+                  className="euiScreenReaderOnly"
+                >
+                  Click to sort in ascending order
+                </span>
               </span>
             </button>
           </th>
