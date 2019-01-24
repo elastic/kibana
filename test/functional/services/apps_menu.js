@@ -21,7 +21,6 @@ export function AppsMenuProvider({ getService }) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
   const retry = getService('retry');
-  const flyout = getService('flyout');
 
   return new class AppsMenu {
     async readLinks() {
@@ -50,30 +49,19 @@ export function AppsMenuProvider({ getService }) {
     }
 
     async _ensureMenuOpen() {
-      // some apps render flyouts that cover the global nav menu, so we make sure all flyouts are
-      // closed before trying to use the appsMenu
-      await flyout.ensureAllClosed();
-
-      if (!await testSubjects.exists('appsMenu')) {
-        await testSubjects.click('appsMenuButton');
-        await retry.waitFor('apps menu displayed', async () => (
-          await testSubjects.exists('appsMenu')
+      if (!await testSubjects.exists('navDrawer&expanded')) {
+        await testSubjects.moveMouseTo('navDrawer');
+        await retry.waitFor('apps drawer open', async () => (
+          await testSubjects.exists('navDrawer&expanded')
         ));
       }
     }
 
     async _ensureMenuClosed() {
-      const [appsMenuButtonExists, appsMenuExists] = await Promise.all([
-        testSubjects.exists('appsMenuButton'),
-        testSubjects.exists('appsMenu')
-      ]);
-
-      if (appsMenuButtonExists && appsMenuExists) {
-        await testSubjects.click('appsMenuButton');
-        await retry.waitFor('user menu closed', async () => (
-          !await testSubjects.exists('appsMenu')
-        ));
-      }
+      await testSubjects.moveMouseTo('kibanaLogo');
+      await retry.waitFor('apps drawer closed', async () => (
+        await testSubjects.exists('navDrawer&collapsed')
+      ));
     }
   };
 }

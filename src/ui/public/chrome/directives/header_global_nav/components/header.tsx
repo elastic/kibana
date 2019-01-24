@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import classNames from 'classnames';
 import React, { Component, Fragment } from 'react';
 import * as Rx from 'rxjs';
 
@@ -128,6 +129,7 @@ class HeaderUI extends Component<Props, State> {
     const { homeHref, intl } = this.props;
     return (
       <EuiHeaderLogo
+        data-test-subj="kibanaLogo"
         iconType="logoKibana"
         href={homeHref}
         aria-label={intl.formatMessage({
@@ -190,6 +192,10 @@ class HeaderUI extends Component<Props, State> {
             onMouseLeave={this.collapseDrawer}
             mobileIsHidden={this.state.mobileIsHidden}
             showScrollbar={this.state.showScrollbar}
+            data-test-subj={classNames(
+              'navDrawer',
+              this.state.isCollapsed ? 'collapsed' : 'expanded'
+            )}
           >
             <EuiNavDrawerMenu id="navDrawerMenu">
               <EuiListGroup>
@@ -212,7 +218,7 @@ class HeaderUI extends Component<Props, State> {
                 />
               </EuiListGroup>
               <EuiHorizontalRule margin="none" />
-              <EuiListGroup>
+              <EuiListGroup data-test-subj="appsMenu">
                 {navLinks.map(navLink =>
                   navLink.hidden ? null : (
                     <EuiListGroupItem
@@ -226,6 +232,7 @@ class HeaderUI extends Component<Props, State> {
                       style={{ color: 'inherit' }}
                       aria-label={navLink.title}
                       isActive={navLink.active}
+                      data-test-subj="appLink"
                     />
                   )
                 )}
@@ -261,7 +268,7 @@ class HeaderUI extends Component<Props, State> {
       this.setState({
         outsideClickDisabled: this.state.mobileIsHidden ? true : false,
       });
-    }, 350);
+    }, this.getTimeoutMs(350));
   };
 
   private expandDrawer = () => {
@@ -271,7 +278,7 @@ class HeaderUI extends Component<Props, State> {
       this.setState({
         showScrollbar: true,
       });
-    }, 350);
+    }, this.getTimeoutMs(350));
 
     // This prevents the drawer from collapsing when tabbing through children
     // by clearing the timeout thus cancelling the onBlur event (see focusOut).
@@ -303,7 +310,7 @@ class HeaderUI extends Component<Props, State> {
         showScrollbar: false,
         outsideClickDisabled: true,
       });
-    }, 350);
+    }, this.getTimeoutMs(350));
 
     // Scrolls the menu and flyout back to top when the nav drawer collapses
     setTimeout(() => {
@@ -316,7 +323,7 @@ class HeaderUI extends Component<Props, State> {
       if (flyoutEl) {
         flyoutEl.scrollTop = 0;
       }
-    }, 300);
+    }, this.getTimeoutMs(300));
   };
 
   private focusOut = () => {
@@ -352,7 +359,12 @@ class HeaderUI extends Component<Props, State> {
       this.setState({
         flyoutIsCollapsed: true,
       });
-    }, 250);
+    }, this.getTimeoutMs(250));
+  };
+
+  private getTimeoutMs = (defaultTimeout: number) => {
+    const uiSettings = chrome.getUiSettingsClient();
+    return uiSettings.get('accessibility:disableAnimations') ? 0 : defaultTimeout;
   };
 }
 
