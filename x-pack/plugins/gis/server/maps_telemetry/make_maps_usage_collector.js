@@ -5,24 +5,18 @@
  */
 
 import {
-  MAPS_TELEMETRY_DOC_ID,
-  createMapsTelemetry,
-  getSavedObjectsClient
+  getMapsTelemetry
 } from './maps_telemetry';
 
 export function makeMapsUsageCollector(server) {
   const mapsUsageCollector = server.usage.collectorSet.makeUsageCollector({
     type: 'maps',
-    fetch: async () => {
-      const savedObjectsClient = getSavedObjectsClient(server);
+    fetch: async callCluster => {
       try {
-        const mapsTelemetrySavedObject = await savedObjectsClient.get(
-          'maps-telemetry',
-          MAPS_TELEMETRY_DOC_ID
-        );
-        return mapsTelemetrySavedObject.attributes;
+        const mapsTelemetry = await getMapsTelemetry(server, callCluster);
+        return mapsTelemetry.attributes;
       } catch (err) {
-        return createMapsTelemetry();
+        server.log(['warning'], `Error loading maps telemetry: ${err}`);
       }
     }
   });
