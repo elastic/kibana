@@ -46,10 +46,9 @@ export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
           const hasTrailingSpacer =
             hasMultipleStackframes && i !== groups.length - 1;
           return (
-            <Fragment>
+            <Fragment key={i}>
               {hasLeadingSpacer && <EuiSpacer size="m" />}
               <LibraryStackFrames
-                key={i}
                 initialVisiblity={!hasMultipleStackframes}
                 stackframes={group.stackframes}
                 codeLanguage={codeLanguage}
