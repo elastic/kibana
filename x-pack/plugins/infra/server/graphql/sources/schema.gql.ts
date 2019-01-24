@@ -64,8 +64,8 @@ export const sourcesSchema = gql`
        'xpack.infra.sources.default'.
     3. The hard-coded default values.
 
-    As a consequence, querying a source without a corresponding saved object
-    doesn't error out, but returns the configured or hardcoded defaults.
+    As a consequence, querying a source that doesn't exist doesn't error out,
+    but returns the configured or hardcoded defaults.
     """
     source("The id of the source" id: ID!): InfraSource!
     "Get a list of all infrastructure data sources"
