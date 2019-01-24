@@ -22,9 +22,9 @@ function mapDispatchToProps(dispatch) {
       dispatch(setSelectedLayer(layerId));
       dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
     },
-    toggleVisible: layerId => dispatch(
-      toggleLayerVisible(layerId)
-    ),
+    toggleVisible: layerId => {
+      dispatch(toggleLayerVisible(layerId));
+    },
     fitToBounds: (layerId) => {
       dispatch(fitToLayerExtent(layerId));
     }

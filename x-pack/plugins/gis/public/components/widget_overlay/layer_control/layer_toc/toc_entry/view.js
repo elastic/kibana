@@ -46,11 +46,7 @@ export class TOCEntry extends React.Component {
 
   render() {
 
-    const { layer, openLayerPanel, zoom, toggleVisible } = this.props;
-    const fitToBounds = () => {
-      this.props.fitToBounds(this.props.layer.getId());
-    };
-
+    const { layer, openLayerPanel, zoom, toggleVisible, fitToBounds } = this.props;
     const legendIcon = layer.renderTocEntryIcon({
       toggleVisible,
       zoom,

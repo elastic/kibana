@@ -177,7 +177,8 @@ export class MBMapContainer extends React.Component {
 
     clearGoto();
 
-    if (goto.bounds) {//prioritize zooming to bounds after clicking
+    if (goto.bounds) {
+      //clamping ot -89/89 latitudes since Mapboxgl does not seem to handle bounds that contain the poles (logs errors to the console when using -90/90)
       const lnLatBounds = new mapboxgl.LngLatBounds(
         new mapboxgl.LngLat(clamp(goto.bounds.min_lon, -180, 180), clamp(goto.bounds.min_lat, -89, 89)),
         new mapboxgl.LngLat(clamp(goto.bounds.max_lon, -180, 180), clamp(goto.bounds.max_lat, -89, 89)),

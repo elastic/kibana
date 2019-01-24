@@ -149,7 +149,9 @@ export class AbstractLayer {
     return (
       <LayerTocActions
         layer={this}
-        fitToBounds={fitToBounds}
+        fitToBounds={() => {
+          fitToBounds(this.getId());
+        }}
         zoom={zoom}
         toggleVisible={() => {
           toggleVisible(this.getId());

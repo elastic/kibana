@@ -35,14 +35,9 @@ function flattenPanelTree(tree, array = []) {
 export class LayerTocActions extends Component {
 
 
-  constructor() {
-
-    super();
-    this.state = {
-      isPopoverOpen: false
-    };
-
-  }
+  state = {
+    isPopoverOpen: false
+  };
 
   _onClick = () => {
     this.setState(prevState => ({
@@ -55,15 +50,6 @@ export class LayerTocActions extends Component {
       isPopoverOpen: false
     }));
   };
-
-  componentDidMount() {
-    this._isMounted = true;
-  }
-
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
-
 
   _renderButton() {
     const icon = this._renderIcon();
