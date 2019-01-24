@@ -9,7 +9,7 @@ import { wrapEsError } from '../../utils/error_wrappers';
 
 export const beatEventsRoute = (libs: CMServerLibs) => ({
   method: 'POST',
-  path: '/api/beats/{beatId?}/events',
+  path: '/api/beats/{beatId}/events',
   config: {
     validate: {
       headers: Joi.object({
