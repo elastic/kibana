@@ -21,8 +21,6 @@ import _ from 'lodash';
 import expect from 'expect.js';
 import { getSeries } from '../_get_series';
 
-
-
 describe('getSeries', function () {
 
   it('produces a single series with points for each row', function () {

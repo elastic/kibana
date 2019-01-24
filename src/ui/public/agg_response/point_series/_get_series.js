@@ -20,13 +20,16 @@
 import _ from 'lodash';
 import { getPoint } from './_get_point';
 import { addToSiri } from './_add_to_siri';
+import { makeFakeXAspect } from './_fake_x_aspect';
 
 export function getSeries(table, chart) {
   const aspects = chart.aspects;
   const multiY = Array.isArray(aspects.y) && aspects.y.length > 1;
   const yScale = chart.yScale;
   const partGetPoint = _.partial(getPoint, table, aspects.x[0], aspects.series, yScale);
-  const xKeys = aspects.x.i > -1 ? _.uniq(table.rows.map(r => r[aspects.x.i].value)) : ['_all'];
+  const xKeys = aspects.x[0].accessor === -1
+    ? [makeFakeXAspect().params.defaultValue]
+    : _.uniq(table.rows.map(r => r[aspects.x[0].accessor]));
 
   let series = _(table.rows)
     .transform(function (series, row, rowIndex) {
