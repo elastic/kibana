@@ -19,6 +19,7 @@
 
 import React, { Component } from 'react';
 import * as Rx from 'rxjs';
+import { UICapabilities } from 'ui/capabilities';
 
 import {
   // TODO: add type annotations
@@ -39,6 +40,7 @@ import { NavLink } from '../';
 interface Props {
   navLinks$: Rx.Observable<NavLink[]>;
   intl: InjectedIntl;
+  uiCapabilities: UICapabilities;
 }
 
 interface State {
@@ -61,7 +63,10 @@ class HeaderAppMenuUI extends Component<Props, State> {
   public componentDidMount() {
     this.subscription = this.props.navLinks$.subscribe({
       next: navLinks => {
-        this.setState({ navLinks });
+        const visibleNavLinks = navLinks.filter(
+          navLink => this.props.uiCapabilities.navLinks[navLink.id]
+        );
+        this.setState({ navLinks: visibleNavLinks });
       },
     });
   }
