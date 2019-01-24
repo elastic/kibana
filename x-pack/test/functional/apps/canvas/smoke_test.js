@@ -61,7 +61,7 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
         // check that the elements are what we expect
 
         // first is a markdown element
-        const md = await elements[0].findByCssSelector('.canvasMarkdown');
+        const md = await elements[0].findByCssSelector('.kbnMarkdown__body');
         expect(await md.getVisibleText()).to.contain('Welcome to Canvas');
 
         // second element is a datatable that uses essql
