@@ -4,19 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const ORIGIN = [0, 0, 1];
+export const ORIGIN = [0, 0, 1];
 
-const NULLVECTOR = [0, 0, 0];
+export const UNITMATRIX = [1, 0, 0, 0, 1, 0, 0, 0, 1];
 
-const NULLMATRIX = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+export const translate = (x, y) => [1, 0, 0, 0, 1, 0, x, y, 1];
 
-const UNITMATRIX = [1, 0, 0, 0, 1, 0, 0, 0, 1];
-
-const translate = (x, y) => [1, 0, 0, 0, 1, 0, x, y, 1];
-
-const scale = (x, y) => [x, 0, 0, 0, y, 0, 0, 0, 1];
-
-const shear = (x, y) => [1, y, 0, x, 1, 0, 0, 0, 1];
+export const scale = (x, y) => [x, 0, 0, 0, y, 0, 0, 0, 1];
 
 /**
  * multiply
@@ -47,7 +41,7 @@ const mult = ([a, b, c, d, e, f, g, h, i], [A, B, C, D, E, F, G, H, I]) => [
   c * G + f * H + i * I,
 ];
 
-const multiply = (...elements) =>
+export const multiply = (...elements) =>
   elements.slice(1).reduce((prev, next) => mult(prev, next), elements[0]);
 
 /**
@@ -65,15 +59,15 @@ const multiply = (...elements) =>
  *         c    f    i      c * A + f * B + i * C
  *
  */
-const mvMultiply = ([a, b, c, d, e, f, g, h, i], [A, B, C]) => [
+export const mvMultiply = ([a, b, c, d, e, f, g, h, i], [A, B, C]) => [
   a * A + d * B + g * C,
   b * A + e * B + h * C,
   c * A + f * B + i * C,
 ];
 
-const normalize = ([A, B, C]) => (C === 1 ? [A, B, C] : [A / C, B / C, 1]);
+export const normalize = ([A, B, C]) => (C === 1 ? [A, B, C] : [A / C, B / C, 1]);
 
-const add = ([a, b, c, d, e, f, g, h, i], [A, B, C, D, E, F, G, H, I]) => [
+export const add = ([a, b, c, d, e, f, g, h, i], [A, B, C, D, E, F, G, H, I]) => [
   a + A,
   b + B,
   c + C,
@@ -85,7 +79,7 @@ const add = ([a, b, c, d, e, f, g, h, i], [A, B, C, D, E, F, G, H, I]) => [
   i + I,
 ];
 
-const subtract = ([a, b, c, d, e, f, g, h, i], [A, B, C, D, E, F, G, H, I]) => [
+export const subtract = ([a, b, c, d, e, f, g, h, i], [A, B, C, D, E, F, G, H, I]) => [
   a - A,
   b - B,
   c - C,
@@ -97,36 +91,9 @@ const subtract = ([a, b, c, d, e, f, g, h, i], [A, B, C, D, E, F, G, H, I]) => [
   i - I,
 ];
 
-const reduceTransforms = transforms =>
-  transforms.length === 1
-    ? transforms[0]
-    : transforms.slice(1).reduce((prev, next) => multiply(prev, next), transforms[0]);
-
-// applies an arbitrary number of transforms - left to right - to a preexisting transform matrix
-const applyTransforms = (transforms, previousTransformMatrix) =>
-  transforms.reduce((prev, next) => multiply(prev, next), previousTransformMatrix);
-
 /**
  *
  * componentProduct
  *
  */
-const componentProduct = ([a, b, c], [A, B, C]) => [a * A, b * B, c * C];
-
-module.exports = {
-  ORIGIN,
-  NULLVECTOR,
-  NULLMATRIX,
-  UNITMATRIX,
-  translate,
-  shear,
-  scale,
-  multiply,
-  mvMultiply,
-  normalize,
-  applyTransforms,
-  reduceTransforms,
-  add,
-  subtract,
-  componentProduct,
-};
+export const componentProduct = ([a, b, c], [A, B, C]) => [a * A, b * B, c * C];

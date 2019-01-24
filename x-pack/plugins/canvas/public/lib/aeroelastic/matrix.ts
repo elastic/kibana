@@ -26,21 +26,11 @@
  *
  */
 
-const ORIGIN = [0, 0, 0, 1];
+export const ORIGIN = [0, 0, 0, 1];
 
-const NULLVECTOR = [0, 0, 0, 0];
+export const translate = (x, y, z) => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, z, 1];
 
-const NULLMATRIX = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-
-const UNITMATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-
-const translate = (x, y, z) => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, z, 1];
-
-const scale = (x, y, z) => [x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1];
-
-const shear = (x, y) => [1, y, 0, 0, x, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-
-const perspective = d => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, -1 / d, 0, 0, 0, 1];
+export const scale = (x, y, z) => [x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1];
 
 /**
  * rotate
@@ -87,9 +77,7 @@ const rotate = (x, y, z, a) => {
  *
  * Should be replaced with more efficient direct versions rather than going through the generic `rotate3d` function.
  */
-const rotateX = a => rotate(1, 0, 0, a);
-const rotateY = a => rotate(0, 1, 0, a);
-const rotateZ = a => rotate(0, 0, 1, a);
+export const rotateZ = a => rotate(0, 0, 1, a);
 
 /**
  * multiply
@@ -133,7 +121,7 @@ const mult = (
   d * M + h * N + l * O + p * P,
 ];
 
-const multiply = (...elements) =>
+export const multiply = (...elements) =>
   elements.slice(1).reduce((prev, next) => mult(prev, next), elements[0]);
 
 /**
@@ -153,14 +141,14 @@ const multiply = (...elements) =>
  *         d    h    l    p      d * A + h * B + l * C + p * D
  *
  */
-const mvMultiply = ([a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p], [A, B, C, D]) => [
+export const mvMultiply = ([a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p], [A, B, C, D]) => [
   a * A + e * B + i * C + m * D,
   b * A + f * B + j * C + n * D,
   c * A + g * B + k * C + o * D,
   d * A + h * B + l * C + p * D,
 ];
 
-const normalize = ([A, B, C, D]) => (D === 1 ? [A, B, C, D] : [A / D, B / D, C / D, 1]);
+export const normalize = ([A, B, C, D]) => (D === 1 ? [A, B, C, D] : [A / D, B / D, C / D, 1]);
 
 /**
  * invert
@@ -172,7 +160,7 @@ const normalize = ([A, B, C, D]) => (D === 1 ? [A, B, C, D] : [A / D, B / D, C /
  *         c    g    k    o
  *         d    h    l    p
  */
-const invert = ([a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p]) => {
+export const invert = ([a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p]) => {
   const inv = [
     f * k * p - f * l * o - j * g * p + j * h * o + n * g * l - n * h * k,
     -b * k * p + b * l * o + j * c * p - j * d * o - n * c * l + n * d * k,
@@ -207,9 +195,9 @@ const invert = ([a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p]) => {
   }
 };
 
-const translateComponent = a => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, a[12], a[13], a[14], 1];
+export const translateComponent = a => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, a[12], a[13], a[14], 1];
 
-const compositeComponent = ([a, b, c, d, e, f, g, h, i, j, k, l, _m, _n, _o, p]) => [
+export const compositeComponent = ([a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p]) => [
   a,
   b,
   c,
@@ -228,7 +216,7 @@ const compositeComponent = ([a, b, c, d, e, f, g, h, i, j, k, l, _m, _n, _o, p])
   p,
 ];
 
-const add = (
+export const add = (
   [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p],
   [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P]
 ) => [
@@ -250,7 +238,7 @@ const add = (
   p + P,
 ];
 
-const subtract = (
+export const subtract = (
   [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p],
   [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P]
 ) => [
@@ -272,45 +260,16 @@ const subtract = (
   p - P,
 ];
 
-const reduceTransforms = transforms =>
+export const reduceTransforms = transforms =>
   transforms.length === 1
     ? transforms[0]
     : transforms.slice(1).reduce((prev, next) => multiply(prev, next), transforms[0]);
 
-// applies an arbitrary number of transforms - left to right - to a preexisting transform matrix
-const applyTransforms = (transforms, previousTransformMatrix) =>
-  transforms.reduce((prev, next) => multiply(prev, next), previousTransformMatrix);
-
 const clamp = (low, high, value) => Math.min(high, Math.max(low, value));
 
-const matrixToAngle = transformMatrix => {
+export const matrixToAngle = transformMatrix => {
   // clamping is needed, otherwise inevitable floating point inaccuracies can cause NaN
   const z0 = Math.acos(clamp(-1, 1, transformMatrix[0]));
   const z1 = Math.asin(clamp(-1, 1, transformMatrix[1]));
   return z1 > 0 ? z0 : -z0;
-};
-
-module.exports = {
-  ORIGIN,
-  NULLVECTOR,
-  NULLMATRIX,
-  UNITMATRIX,
-  translate,
-  shear,
-  rotateX,
-  rotateY,
-  rotateZ,
-  scale,
-  perspective,
-  matrixToAngle,
-  multiply,
-  mvMultiply,
-  invert,
-  normalize,
-  applyTransforms,
-  reduceTransforms,
-  translateComponent,
-  compositeComponent,
-  add,
-  subtract,
 };
