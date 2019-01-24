@@ -64,6 +64,9 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
       attributes: {
         title: 'My favorite vis',
       },
+      migrationVersion: {
+        visualization: '7.0.0',
+      },
       references: [],
     });
 

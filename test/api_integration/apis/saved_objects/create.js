@@ -52,6 +52,9 @@ export default function ({ getService }) {
               attributes: {
                 title: 'My favorite vis'
               },
+              migrationVersion: {
+                visualization: '7.0.0',
+              },
               references: [],
             });
           });
@@ -90,6 +93,9 @@ export default function ({ getService }) {
               version: 1,
               attributes: {
                 title: 'My favorite vis'
+              },
+              migrationVersion: {
+                visualization: '7.0.0',
               },
               references: [],
             });

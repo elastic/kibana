@@ -66,7 +66,14 @@ export default function ({ getService }) {
                     uiStateJSON: resp.body.saved_objects[0].attributes.uiStateJSON,
                     kibanaSavedObjectMeta: resp.body.saved_objects[0].attributes.kibanaSavedObjectMeta
                   },
-                  references: [],
+                  migrationVersion: {
+                    visualization: '7.0.0',
+                  },
+                  references: [{
+                    name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                    type: 'index-pattern',
+                    id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+                  }],
                 },
                 {
                   id: 'does not exist',

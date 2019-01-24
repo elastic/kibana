@@ -106,7 +106,16 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
         uiStateJSON: resp.body.attributes.uiStateJSON,
         kibanaSavedObjectMeta: resp.body.attributes.kibanaSavedObjectMeta,
       },
-      references: [],
+      migrationVersion: {
+        visualization: '7.0.0',
+      },
+      references: [
+        {
+          name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          type: 'index-pattern',
+          id: `${getIdPrefix(spaceId)}91200a00-9efd-11e7-acb3-3dab96693fab`,
+        },
+      ],
     });
   };
 
