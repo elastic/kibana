@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { Redirect, RouteComponentProps, RouteProps } from 'react-router-dom';
 import { legacyDecodeURIComponent } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import { StringMap } from '../../../../typings/common';
 // @ts-ignore
@@ -25,6 +25,25 @@ interface RouteParams {
   serviceName: string;
 }
 
+type BreadcrumbFunction = (args: BreadcrumbArgs) => string | null;
+
+interface Route extends RouteProps {
+  switch?: never;
+  breadcrumb: string | BreadcrumbFunction | null;
+}
+
+interface SwitchSet {
+  switch: true;
+  routes: Route[];
+}
+
+type RoutesConfig = Array<Route | SwitchSet>;
+
+// this function is used to tell TS what type the route is based on route.switch
+export function isSwitchSet(route: Route | SwitchSet): route is SwitchSet {
+  return Boolean(route.switch);
+}
+
 const renderAsRedirectTo = (to: string) => {
   return ({ location }: RouteComponentProps<RouteParams>) => (
     <Redirect
@@ -36,7 +55,7 @@ const renderAsRedirectTo = (to: string) => {
   );
 };
 
-export const routes = [
+export const routes: RoutesConfig = [
   {
     exact: true,
     path: '/',
