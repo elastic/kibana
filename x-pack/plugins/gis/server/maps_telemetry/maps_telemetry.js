@@ -12,6 +12,24 @@ function getSavedObjectsClient(server, callCluster) {
   return new SavedObjectsClient(internalRepository);
 }
 
+function getUniqueLayerCounts(layerCountsList, mapsCount) {
+  const uniqueLayerTypes = _.uniq(_.flatten(
+    layerCountsList.map(lTypes => Object.keys(lTypes))));
+
+  return uniqueLayerTypes.reduce((accu, type) => {
+    const typeCounts = layerCountsList.reduce((accu, tCounts) => {
+      tCounts[type] && accu.push(tCounts[type]);
+      return accu;
+    }, []);
+    accu[type] = {
+      min: _.min(typeCounts),
+      max: _.max(typeCounts),
+      avg: _.sum(typeCounts) / mapsCount
+    };
+    return accu;
+  }, {});
+}
+
 async function buildMapsTelemetry(savedObjectsClient) {
   const gisMapsSavedObject = await savedObjectsClient.find({
     type: 'gis-map'
@@ -38,57 +56,25 @@ async function buildMapsTelemetry(savedObjectsClient) {
     // Total count of maps
     mapsTotalCount: mapsCount,
     attributesPerMap: {
-      // Count of data sources per map (max,min,avg)
+      // Count of data sources per map
       dataSourcesCount: {
         min: _.min(dataSourcesCount),
         max: _.max(dataSourcesCount),
         avg: _.sum(dataSourcesCount) / mapsCount
       },
-      // Total count of layers per map (max,min,avg)
+      // Total count of layers per map
       layersCount: {
         min: _.min(layersCount),
         max: _.max(layersCount),
         avg: _.sum(layersCount) / mapsCount
       },
-      // Count of layers by type (max,min,avg)
+      // Count of layers by type
       layerTypesCount: {
-        ...(() => {
-          const uniqueLayerTypes = _.uniq(_.flatten(
-            layerTypesCount.map(lTypes => Object.keys(lTypes))));
-
-          return uniqueLayerTypes.reduce((accu, type) => {
-            const typeCounts = layerTypesCount.reduce((accu, tCounts) => {
-              tCounts[type] && accu.push(tCounts[type]);
-              return accu;
-            }, []);
-            accu[type] = {
-              min: _.min(typeCounts),
-              max: _.max(typeCounts),
-              avg: _.sum(typeCounts) / mapsCount
-            };
-            return accu;
-          }, {});
-        })()
+        ...getUniqueLayerCounts(layerTypesCount, mapsCount)
       },
-      // Count of layer by EMS region (Very nice to have)
+      // Count of layer by EMS region
       emsVectorLayersCount: {
-        ...(() => {
-          const uniqueLayerTypes = _.uniq(_.flatten(
-            emsLayersCount.map(lTypes => Object.keys(lTypes))));
-
-          return uniqueLayerTypes.reduce((accu, type) => {
-            const typeCounts = emsLayersCount.reduce((accu, tCounts) => {
-              tCounts[type] && accu.push(tCounts[type]);
-              return accu;
-            }, []);
-            accu[type] = {
-              min: _.min(typeCounts),
-              max: _.max(typeCounts),
-              avg: _.sum(typeCounts) / mapsCount
-            };
-            return accu;
-          }, {});
-        })()
+        ...getUniqueLayerCounts(emsLayersCount, mapsCount)
       }
     }
   };
