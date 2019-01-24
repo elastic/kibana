@@ -114,6 +114,9 @@ class TagEditPageComponent extends React.PureComponent<
               this.props.libs.configBlocks
                 .delete(block.id)
                 .catch((e: any) => {
+                  alert(
+                    'Error removing block, please check your browsers console logs for more details'
+                  );
                   // tslint:disable-next-line
                   console.error(`Error removing block ${block.id}`, e);
                 })

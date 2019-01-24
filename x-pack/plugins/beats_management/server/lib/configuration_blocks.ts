@@ -38,8 +38,7 @@ export class ConfigurationBlocksLib {
   }
 
   public async delete(user: FrameworkUser, ids: string[]) {
-    await this.adapter.delete(user, ids);
-    return true;
+    return await this.adapter.delete(user, ids);
   }
 
   public async save(user: FrameworkUser, block: ConfigurationBlock) {

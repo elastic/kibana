@@ -17,13 +17,10 @@ export const createDeleteConfidurationsRoute = (libs: CMServerLibs) => ({
     const idString: string = request.params.ids;
     const ids = idString.split(',').filter((id: string) => id.length > 0);
 
-    let success: boolean;
     try {
-      success = await libs.configurationBlocks.delete(request.user, ids);
+      return await libs.configurationBlocks.delete(request.user, ids);
     } catch (err) {
       return wrapEsError(err);
     }
-
-    return { success };
   },
 });

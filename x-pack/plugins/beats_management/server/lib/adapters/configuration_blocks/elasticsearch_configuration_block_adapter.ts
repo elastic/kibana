@@ -85,21 +85,39 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
     };
   }
 
-  public async delete(user: FrameworkUser, ids: string[]): Promise<void> {
-    await this.database.bulk(user, {
+  public async delete(
+    user: FrameworkUser,
+    ids: string[]
+  ): Promise<Array<{ id: string; success: boolean; reason?: string }>> {
+    const result = await this.database.bulk(user, {
       body: ids.map(id => ({ delete: { _id: `configuration_block:${id}` } })),
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
       type: '_doc',
+    });
+
+    if (result.errors) {
+      if (result.items[0].result) {
+        throw new Error(result.items[0].result);
+      }
+      throw new Error((result.items[0] as any).index.error.reason);
+    }
+
+    return result.items.map((item: any) => {
+      return {
+        id: item.delete._id,
+        success: item.delete.result === 'deleted',
+        reason: item.delete.result !== 'deleted' ? item.delete.result : undefined,
+      };
     });
   }
 
   public async create(user: FrameworkUser, configs: ConfigurationBlock[]): Promise<string[]> {
     const body = flatten(
       configs.map(config => {
-        const id = `configuration_block:${uuidv4()}`;
+        const id = uuidv4();
         return [
-          { index: { _id: id } },
+          { index: { _id: `configuration_block:${id}` } },
           {
             type: 'configuration_block',
             configuration_block: { id, ...config, config: JSON.stringify(config.config) },
