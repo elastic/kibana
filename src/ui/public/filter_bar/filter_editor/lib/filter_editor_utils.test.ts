@@ -18,7 +18,7 @@
  */
 
 import { FilterStateStore, toggleFilterNegated } from '@kbn/es-query';
-import { Field, IndexPattern } from 'ui/index_patterns';
+import { mockFields, mockIndexPattern } from 'ui/index_patterns/fixtures';
 import {
   buildFilter,
   getFieldFromFilter,
@@ -35,57 +35,6 @@ import { existsFilter } from './fixtures/exists_filter';
 import { phraseFilter } from './fixtures/phrase_filter';
 import { phrasesFilter } from './fixtures/phrases_filter';
 import { rangeFilter } from './fixtures/range_filter';
-
-const mockFields: Field[] = [
-  {
-    name: 'machine.os',
-    type: 'string',
-    aggregatable: false,
-    searchable: false,
-    filterable: true,
-  },
-  {
-    name: 'machine.os.raw',
-    type: 'string',
-    aggregatable: true,
-    searchable: true,
-    filterable: true,
-  },
-  {
-    name: 'not.filterable',
-    type: 'string',
-    aggregatable: true,
-    searchable: true,
-    filterable: false,
-  },
-  {
-    name: 'bytes',
-    type: 'number',
-    aggregatable: true,
-    searchable: true,
-    filterable: true,
-  },
-  {
-    name: '@timestamp',
-    type: 'date',
-    aggregatable: true,
-    searchable: true,
-    filterable: true,
-  },
-  {
-    name: 'clientip',
-    type: 'ip',
-    aggregatable: true,
-    searchable: true,
-    filterable: true,
-  },
-];
-
-const mockIndexPattern: IndexPattern = {
-  id: 'logstash-*',
-  title: 'logstash-*',
-  fields: mockFields,
-};
 
 describe('Filter editor utils', () => {
   describe('getQueryDslFromFilter', () => {

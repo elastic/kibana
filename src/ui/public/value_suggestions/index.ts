@@ -17,36 +17,8 @@
  * under the License.
  */
 
-import { memoize } from 'lodash';
 import chrome from 'ui/chrome';
-import { Field } from 'ui/index_patterns';
 import { kfetch } from 'ui/kfetch';
+import { getSuggestionsProvider } from './value_suggestions';
 
-const config = chrome.getUiSettingsClient();
-
-const requestSuggestions = memoize(
-  (index: string, field: Field, query: string, boolFilter: any = []) => {
-    return kfetch({
-      pathname: `/api/kibana/suggestions/values/${index}`,
-      method: 'POST',
-      body: JSON.stringify({ query, field: field.name, boolFilter }),
-    });
-  },
-  resolver
-);
-
-export async function getSuggestions(index: string, field: Field, query: string, boolFilter?: any) {
-  const shouldSuggestValues = config.get('filterEditor:suggestValues');
-  if (field.type === 'boolean') {
-    return [true, false];
-  } else if (!shouldSuggestValues || !field.aggregatable || field.type !== 'string') {
-    return [];
-  }
-  return await requestSuggestions(index, field, query, boolFilter);
-}
-
-function resolver(index: string, field: Field, query: string, boolFilter: any) {
-  // Only cache results for a minute
-  const ttl = Math.floor(Date.now() / 1000 / 60);
-  return [ttl, query, index, field.name, JSON.stringify(boolFilter)].join('|');
-}
+export const getSuggestions = getSuggestionsProvider(chrome.getUiSettingsClient(), kfetch);
