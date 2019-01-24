@@ -20,7 +20,7 @@ import { registerLanguage } from 'react-syntax-highlighter/dist/light';
 // @ts-ignore
 import { xcode } from 'react-syntax-highlighter/dist/styles';
 import styled from 'styled-components';
-import { IStackframeWithLineContext } from 'x-pack/plugins/apm/typings/es_schemas/Stackframe';
+import { IStackframeWithLineContext } from 'x-pack/plugins/apm/typings/es_schemas/fields/Stackframe';
 import {
   borderRadius,
   colors,

@@ -44,7 +44,7 @@ const traceListColumns: ITableColumn[] = [
     )
   },
   {
-    field: 'sample.context.service.name',
+    field: 'sample.service.name',
     name: i18n.translate(
       'xpack.apm.tracesTable.originatingServiceColumnLabel',
       {

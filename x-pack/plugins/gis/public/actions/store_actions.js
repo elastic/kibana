@@ -42,7 +42,6 @@ export const UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER = 'UPDATE_LAYER_STYLE';
 export const PROMOTE_TEMPORARY_STYLES = 'PROMOTE_TEMPORARY_STYLES';
 export const CLEAR_TEMPORARY_STYLES = 'CLEAR_TEMPORARY_STYLES';
 export const TOUCH_LAYER = 'TOUCH_LAYER';
-export const UPDATE_LAYER_ALPHA_VALUE = 'UPDATE_LAYER_ALPHA_VALUE';
 export const UPDATE_SOURCE_PROP = 'UPDATE_SOURCE_PROP';
 export const SET_REFRESH_CONFIG = 'SET_REFRESH_CONFIG';
 export const SET_MOUSE_COORDINATES = 'SET_MOUSE_COORDINATES';
@@ -352,11 +351,12 @@ export function updateLayerMaxZoom(id, maxZoom) {
   };
 }
 
-export function updateLayerAlphaValue(id, newAlphaValue) {
+export function updateLayerAlpha(id, alpha) {
   return {
-    type: UPDATE_LAYER_ALPHA_VALUE,
+    type: UPDATE_LAYER_PROP,
     id,
-    newAlphaValue
+    propName: 'alpha',
+    newValue: alpha,
   };
 }
 
