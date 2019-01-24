@@ -4,45 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/**
- * transpose
- *
- * Turns a row major ordered vector representation of a 4 x 4 matrix into a column major ordered vector representation, or
- * the other way around.
- *
- * Must pass a row major ordered vector if the goal is to obtain a column major ordered vector.
- *
- * We're using row major order in the _source code_ as this results in the correct visual shape of the matrix, but
- * `transform3d` needs column major order.
- *
- * This is what the matrix is:                  Eg. this is the equivalent matrix of `translate(${x}px, ${y}px)`:
- *
- *         a d g                                                             1 0 x
- *         b e h                                                             0 1 y
- *         c f i                                                             0 0 1
- *
- *  but it's _not_ represented as a 2D array or array of arrays.
- *
- *      [a, b, c, d, e, f, g, h, i]
- *
- */
-const transpose = ([a, d, g, b, e, h, c, f, i]) => [a, b, c, d, e, f, g, h, i];
-
 const ORIGIN = [0, 0, 1];
 
 const NULLVECTOR = [0, 0, 0];
 
-const NULLMATRIX = transpose([0, 0, 0, 0, 0, 0, 0, 0, 0]);
+const NULLMATRIX = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-const UNITMATRIX = transpose([1, 0, 0, 0, 1, 0, 0, 0, 1]);
+const UNITMATRIX = [1, 0, 0, 0, 1, 0, 0, 0, 1];
 
-// currently these functions expensively transpose; in a future version we can have way more efficient matrix operations
-// (eg. pre-transpose)
-const translate = (x, y) => transpose([1, 0, x, 0, 1, y, 0, 0, 1]);
+const translate = (x, y) => [1, 0, 0, 0, 1, 0, x, y, 1];
 
-const scale = (x, y) => transpose([x, 0, 0, 0, y, 0, 0, 0, 1]);
+const scale = (x, y) => [x, 0, 0, 0, y, 0, 0, 0, 1];
 
-const shear = (x, y) => transpose([1, x, 0, y, 1, 0, 0, 0, 1]);
+const shear = (x, y) => [1, y, 0, x, 1, 0, 0, 0, 1];
 
 /**
  * multiply
@@ -144,7 +118,6 @@ module.exports = {
   NULLVECTOR,
   NULLMATRIX,
   UNITMATRIX,
-  transpose,
   translate,
   shear,
   scale,

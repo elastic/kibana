@@ -7,15 +7,9 @@
 /*eslint no-unused-vars: ["error", { "argsIgnorePattern": "^_" }]*/
 
 /**
- * transpose
+ * Column major order:
  *
- * Turns a row major ordered vector representation of a 4 x 4 matrix into a column major ordered vector representation, or
- * the other way around.
- *
- * Must pass a row major ordered vector if the goal is to obtain a column major ordered vector.
- *
- * We're using row major order in the _source code_ as this results in the correct visual shape of the matrix, but
- * `transform3d` needs column major order.
+ * Instead of a row major ordered vector representation of a 4 x 4 matrix, we use column major ordered vectors.
  *
  * This is what the matrix is:                  Eg. this is the equivalent matrix of `translate3d(${x}px, ${y}px, ${z}px)`:
  *
@@ -28,47 +22,25 @@
  *
  *      [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p]
  *
- *  so it's clear that the first _column vector_ corresponds to a, b, c, d but in source code, we must write a, e, i, m in
- *  the first row if we want to visually resemble the above 4x4 matrix, ie. if we don't want that us programmers transpose
- *  matrices in our heads.
+ *  so it's clear that the first _column vector_ corresponds to a, b, c, d.
  *
  */
-const transpose = ([a, e, i, m, b, f, j, n, c, g, k, o, d, h, l, p]) => [
-  a,
-  b,
-  c,
-  d,
-  e,
-  f,
-  g,
-  h,
-  i,
-  j,
-  k,
-  l,
-  m,
-  n,
-  o,
-  p,
-];
 
 const ORIGIN = [0, 0, 0, 1];
 
 const NULLVECTOR = [0, 0, 0, 0];
 
-const NULLMATRIX = transpose([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+const NULLMATRIX = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-const UNITMATRIX = transpose([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
+const UNITMATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 
-// currently these functions expensively transpose; in a future version we can have way more efficient matrix operations
-// (eg. pre-transpose)
-const translate = (x, y, z) => transpose([1, 0, 0, x, 0, 1, 0, y, 0, 0, 1, z, 0, 0, 0, 1]);
+const translate = (x, y, z) => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, z, 1];
 
-const scale = (x, y, z) => transpose([x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1]);
+const scale = (x, y, z) => [x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1];
 
-const shear = (x, y) => transpose([1, x, 0, 0, y, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
+const shear = (x, y) => [1, y, 0, 0, x, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 
-const perspective = d => transpose([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, -1 / d, 1]);
+const perspective = d => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, -1 / d, 0, 0, 0, 1];
 
 /**
  * rotate
@@ -80,31 +52,31 @@ const perspective = d => transpose([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, -1
  * @returns {number[][]} a 4x4 transform matrix in column major order
  */
 const rotate = (x, y, z, a) => {
-  // it looks like the formula but inefficient; common terms could be precomputed, transpose can be avoided.
+  // it looks like the formula therefore a bit inefficient; common terms could be precomputed.
   // an optimizing compiler eg. Google Closure Advanced could perform most of the optimizations and JIT also watches out
   // for eg. common expressions
 
   const sinA = Math.sin(a);
   const coshAi = 1 - Math.cos(a);
 
-  return transpose([
+  return [
     1 + coshAi * (x * x - 1),
-    z * sinA + x * y * coshAi,
-    -y * sinA + x * y * coshAi,
-    0,
     -z * sinA + x * y * coshAi,
-    1 + coshAi * (y * y - 1),
-    x * sinA + y * x * coshAi,
-    0,
     y * sinA + x * z * coshAi,
+    0,
+    z * sinA + x * y * coshAi,
+    1 + coshAi * (y * y - 1),
     -x * sinA + y * z * coshAi,
+    0,
+    -y * sinA + x * y * coshAi,
+    x * sinA + y * x * coshAi,
     1 + coshAi * (z * z - 1),
     0,
     0,
     0,
     0,
     1,
-  ]);
+  ];
 };
 
 /**
@@ -323,7 +295,6 @@ module.exports = {
   NULLVECTOR,
   NULLMATRIX,
   UNITMATRIX,
-  transpose,
   translate,
   shear,
   rotateX,
