@@ -510,23 +510,36 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               <div
                 className="c1"
               >
-                <a
-                  aria-describedby="overlay1"
-                  className="euiLink euiLink--primary c2"
-                  href="#/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
+                <span
+                  className="euiToolTipAnchor"
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
-                  About to blow up!
-                </a>
-                <div
-                  aria-describedby="overlay2"
-                  className="c3"
+                  <a
+                    aria-describedby="bjviudbd"
+                    className="euiLink euiLink--primary c2"
+                    href="#/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                  >
+                    About to blow up!
+                  </a>
+                </span>
+                <br />
+                <span
+                  className="euiToolTipAnchor"
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
-                  elasticapm.contrib.django.client.capture
-                </div>
+                  <div
+                    aria-describedby="zwy8ege2"
+                    className="c3"
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                  >
+                    elasticapm.contrib.django.client.capture
+                  </div>
+                </span>
               </div>
             </div>
           </td>
@@ -589,23 +602,36 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               <div
                 className="c1"
               >
-                <a
-                  aria-describedby="overlay3"
-                  className="euiLink euiLink--primary c2"
-                  href="#/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
+                <span
+                  className="euiToolTipAnchor"
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
-                  AssertionError: 
-                </a>
-                <div
-                  aria-describedby="overlay4"
-                  className="c3"
+                  <a
+                    aria-describedby="7g93odgb"
+                    className="euiLink euiLink--primary c2"
+                    href="#/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                  >
+                    AssertionError: 
+                  </a>
+                </span>
+                <br />
+                <span
+                  className="euiToolTipAnchor"
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
-                  opbeans.views.oopsie
-                </div>
+                  <div
+                    aria-describedby="fmn2zdve"
+                    className="c3"
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                  >
+                    opbeans.views.oopsie
+                  </div>
+                </span>
               </div>
             </div>
           </td>
@@ -668,23 +694,36 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               <div
                 className="c1"
               >
-                <a
-                  aria-describedby="overlay5"
-                  className="euiLink euiLink--primary c2"
-                  href="#/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
+                <span
+                  className="euiToolTipAnchor"
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
-                  AssertionError: Bad luck!
-                </a>
-                <div
-                  aria-describedby="overlay6"
-                  className="c3"
+                  <a
+                    aria-describedby="9xe72pym"
+                    className="euiLink euiLink--primary c2"
+                    href="#/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                  >
+                    AssertionError: Bad luck!
+                  </a>
+                </span>
+                <br />
+                <span
+                  className="euiToolTipAnchor"
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
-                  opbeans.tasks.update_stats
-                </div>
+                  <div
+                    aria-describedby="q2nvl22u"
+                    className="c3"
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                  >
+                    opbeans.tasks.update_stats
+                  </div>
+                </span>
               </div>
             </div>
           </td>
@@ -747,23 +786,36 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               <div
                 className="c1"
               >
-                <a
-                  aria-describedby="overlay7"
-                  className="euiLink euiLink--primary c2"
-                  href="#/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
+                <span
+                  className="euiToolTipAnchor"
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
-                  Customer with ID 8517 not found
-                </a>
-                <div
-                  aria-describedby="overlay8"
-                  className="c3"
+                  <a
+                    aria-describedby="j6i6tk89"
+                    className="euiLink euiLink--primary c2"
+                    href="#/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                  >
+                    Customer with ID 8517 not found
+                  </a>
+                </span>
+                <br />
+                <span
+                  className="euiToolTipAnchor"
                   onMouseOut={[Function]}
                   onMouseOver={[Function]}
                 >
-                  opbeans.views.customer
-                </div>
+                  <div
+                    aria-describedby="ruutk68s"
+                    className="c3"
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                  >
+                    opbeans.views.customer
+                  </div>
+                </span>
               </div>
             </div>
           </td>
