@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
 import { AddData } from './add_data';
-import { RecentlyAccessed, recentlyAccessedShape } from './recently_accessed';
 import { FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
 
@@ -130,22 +129,11 @@ export class Home extends Component {
   };
 
   renderNormal() {
-    const { apmUiEnabled, recentlyAccessed, mlEnabled } = this.props;
-
-    let recentlyAccessedPanel;
-    if (recentlyAccessed.length > 0) {
-      recentlyAccessedPanel = (
-        <Fragment>
-          <RecentlyAccessed recentlyAccessed={recentlyAccessed} />
-          <EuiSpacer size="l" />
-        </Fragment>
-      );
-    }
+    const { apmUiEnabled, mlEnabled } = this.props;
 
     return (
       <EuiPage className="homPage">
         <EuiPageBody>
-          {recentlyAccessedPanel}
 
           <AddData
             apmUiEnabled={apmUiEnabled}
@@ -261,7 +249,6 @@ Home.propTypes = {
     })
   ),
   apmUiEnabled: PropTypes.bool.isRequired,
-  recentlyAccessed: PropTypes.arrayOf(recentlyAccessedShape).isRequired,
   find: PropTypes.func.isRequired,
   localStorage: PropTypes.object.isRequired,
   urlBasePath: PropTypes.string.isRequired,
