@@ -58,10 +58,10 @@ export function SpanFlyout({
   const codeLanguage: string = get(span, SERVICE_LANGUAGE_NAME);
   const dbContext = idx(span, _ => _.context.db);
   const httpContext = idx(span, _ => _.context.http);
-  const tagContext = idx(span, _ => _.context.tags);
-  const tags = keys(tagContext).map(key => ({
+  const labels = span.labels;
+  const tags = keys(labels).map(key => ({
     key,
-    value: get(tagContext, key)
+    value: get(labels, key)
   }));
 
   return (

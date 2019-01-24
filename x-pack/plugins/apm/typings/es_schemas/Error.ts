@@ -8,8 +8,10 @@ import { APMDoc } from './APMDoc';
 import { Container } from './fields/Container';
 import { Context } from './fields/Context';
 import { Host } from './fields/Host';
+import { Http } from './fields/Http';
 import { Kubernetes } from './fields/Kubernetes';
 import { Process } from './fields/Process';
+import { Service } from './fields/Service';
 import { IStackframe } from './fields/Stackframe';
 import { Url } from './fields/Url';
 import { User } from './fields/User';
@@ -43,6 +45,7 @@ export interface APMError extends APMDoc {
   transaction: {
     id: string;
     sampled?: boolean;
+    type?: string;
   };
   error: {
     id: string;
@@ -57,8 +60,10 @@ export interface APMError extends APMDoc {
   container?: Container;
   context?: Context;
   host?: Host;
+  http?: Http;
   kubernetes?: Kubernetes;
   process?: Process;
+  service: Service;
   url?: Url;
   user?: User;
 }

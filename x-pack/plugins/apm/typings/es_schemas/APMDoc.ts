@@ -4,38 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// all documents types extend APMDoc and inherit all properties
 export interface APMDoc {
   '@timestamp': string;
   agent: {
     name: string;
     version: string;
   };
-
-  // TODO: Is http on both spans, transactions and errors?
-  http?: {
-    request: { method: string };
-    response: { status_code: number };
-  };
-  service: {
-    name: string;
-    framework?: {
-      name: string;
-      version: string;
-    };
-    runtime?: {
-      name: string;
-      version: string;
-    };
-    language?: {
-      name: string;
-      version?: string;
-    };
-    [key: string]: unknown;
-  };
   timestamp: { us: number };
-  parent?: { id: string }; // parent ID is not available on the root transaction
+  parent?: { id: string }; // parent ID is not available on root transactions
   trace: { id: string };
   labels?: {
-    [key: string]: unknown;
+    [key: string]: string | number | boolean;
   };
 }

@@ -24,10 +24,6 @@ const transaction: Transaction = {
     hostname: '227453131a17'
   },
   service: {
-    agent: {
-      name: 'go',
-      version: '1.1.1'
-    },
     framework: {
       name: 'gin',
       version: 'v1.4.0-dev'

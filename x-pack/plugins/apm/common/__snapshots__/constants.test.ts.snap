@@ -112,7 +112,7 @@ exports[`Span REQUEST_URL_FULL 1`] = `undefined`;
 
 exports[`Span SERVICE_AGENT_NAME 1`] = `"agent name"`;
 
-exports[`Span SERVICE_LANGUAGE_NAME 1`] = `"nodejs"`;
+exports[`Span SERVICE_LANGUAGE_NAME 1`] = `undefined`;
 
 exports[`Span SERVICE_NAME 1`] = `"service name"`;
 

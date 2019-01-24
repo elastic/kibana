@@ -8,8 +8,10 @@ import { APMDoc } from './APMDoc';
 import { Container } from './fields/Container';
 import { Context } from './fields/Context';
 import { Host } from './fields/Host';
+import { Http } from './fields/Http';
 import { Kubernetes } from './fields/Kubernetes';
 import { Process } from './fields/Process';
+import { Service } from './fields/Service';
 import { Url } from './fields/Url';
 import { User } from './fields/User';
 
@@ -24,6 +26,7 @@ export interface Transaction extends APMDoc {
     duration: { us: number };
     id: string;
     marks?: {
+      // "agent": not defined by APM Server - only sent by RUM agent
       agent?: {
         [name: string]: number;
       };
@@ -42,8 +45,10 @@ export interface Transaction extends APMDoc {
   container?: Container;
   context?: Context;
   host?: Host;
+  http?: Http;
   kubernetes?: Kubernetes;
   process?: Process;
+  service: Service;
   url?: Url;
   user?: User;
 }

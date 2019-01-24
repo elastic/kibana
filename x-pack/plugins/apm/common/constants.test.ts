@@ -24,7 +24,6 @@ describe('Transaction', () => {
     url: { full: 'http://www.elastic.co' },
     service: {
       name: 'service name',
-      agent: { name: 'agent name', version: 'v1337' },
       language: { name: 'nodejs', version: 'v1337' }
     },
     host: { hostname: 'my hostname' },
@@ -74,15 +73,7 @@ describe('Span', () => {
       id: 'trace id'
     },
     service: {
-      name: 'service name',
-      agent: {
-        name: 'agent name',
-        version: 'v1337'
-      },
-      language: {
-        name: 'nodejs',
-        version: 'v1337'
-      }
+      name: 'service name'
     },
     context: {
       db: {
@@ -113,7 +104,7 @@ describe('Error', () => {
   const errorDoc: APMError = {
     agent: {
       name: 'agent name',
-      version: '7.0.0'
+      version: 'agent version'
     },
     error: {
       exception: {
@@ -142,10 +133,6 @@ describe('Error', () => {
     },
     service: {
       name: 'service name',
-      agent: {
-        name: 'agent name',
-        version: 'v1337'
-      },
       language: {
         name: 'nodejs',
         version: 'v1337'

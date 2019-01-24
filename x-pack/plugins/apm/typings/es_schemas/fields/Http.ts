@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface Process {
-  args: string[];
-  pid: number;
-  ppid: number;
-  title: string;
+export interface Http {
+  request: { method: string };
+  response: { status_code: number };
 }

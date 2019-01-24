@@ -24,14 +24,12 @@ interface SpanContext {
     status_code?: number;
     url?: string;
   };
-  tags?: {
-    [key: string]: string; // TODO: is this always a string?
-  };
 }
 
 export interface Span extends APMDoc {
   processor: Processor;
   context?: SpanContext;
+  service: { name: string };
   span: {
     action: string;
     duration: { us: number };

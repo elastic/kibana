@@ -4,9 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface Process {
-  args: string[];
-  pid: number;
-  ppid: number;
-  title: string;
+export interface Service {
+  name: string;
+  framework?: {
+    name: string;
+    version: string;
+  };
+  runtime?: {
+    name: string;
+    version: string;
+  };
+  language?: {
+    name: string;
+    version?: string;
+  };
 }
