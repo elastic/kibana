@@ -69,7 +69,7 @@ export class EMSFileSource extends VectorSource {
   }
 
   async getImmutableProperties() {
-    const emsLink = await emsServiceSettings.getEMSHotLink(this._descriptor.id);
+    const emsLink = await emsServiceSettings.getEMSHotLink({ id: this._descriptor.id });
     return [
       { label: 'Data source', value: EMSFileSource.title },
       { label: 'Layer', value: this._descriptor.id, link: emsLink }
