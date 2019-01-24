@@ -34,6 +34,8 @@ class TagsPageComponent extends React.PureComponent<PageProps, PageState> {
 
     if (props.urlState.tagsKBar) {
       props.containers.tags.reload(props.urlState.tagsKBar);
+    } else {
+      props.containers.tags.reload();
     }
 
     props.renderAction(this.renderActionArea);

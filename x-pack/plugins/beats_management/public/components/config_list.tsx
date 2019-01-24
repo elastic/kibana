@@ -71,9 +71,9 @@ const ConfigListUi: React.SFC<ComponentProps> = props => (
           defaultMessage: 'Module',
         }),
         truncateText: false,
-        render: (value: string) => {
+        render: (value: string, config: ConfigurationBlock) => {
           return (
-            value ||
+            config.config._sub_type ||
             props.intl.formatMessage({
               id: 'xpack.beatsManagement.tagTable.moduleColumn.notAvailibaleLabel',
               defaultMessage: 'N/A',
