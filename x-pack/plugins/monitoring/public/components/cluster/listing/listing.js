@@ -24,13 +24,13 @@ import { Tooltip } from 'plugins/monitoring/components/tooltip';
 import { AlertsIndicator } from 'plugins/monitoring/components/cluster/listing/alerts_indicator';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { UNLINKED_DEPLOYMENT_CLUSTER_UUID } from '../../../../common/constants';
+import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
 
 const IsClusterSupported = ({ isSupported, children }) => {
   return isSupported ? children : '-';
 };
 
-const UNLINKED_DEPLOYMENT_STORAGE_KEY = 'viewedUnlinkedDeployments';
+const STANDALONE_CLUSTER_STORAGE_KEY = 'viewedStandaloneCluster';
 
 /*
   * This checks if alerts feature is supported via monitoring cluster
@@ -360,12 +360,12 @@ export class Listing extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      [UNLINKED_DEPLOYMENT_STORAGE_KEY]: false,
+      [STANDALONE_CLUSTER_STORAGE_KEY]: false,
     };
   }
 
-  renderUnlinkedDeployment(changeCluster, storage) {
-    if (storage.get(UNLINKED_DEPLOYMENT_STORAGE_KEY)) {
+  renderStandaloneClusterCallout(changeCluster, storage) {
+    if (storage.get(STANDALONE_CLUSTER_STORAGE_KEY)) {
       return null;
     }
 
@@ -373,37 +373,37 @@ export class Listing extends Component {
       <div>
         <EuiCallOut
           color="warning"
-          title={i18n.translate('xpack.monitoring.cluster.listing.unlinkedDeploymentCallOutTitle', {
+          title={i18n.translate('xpack.monitoring.cluster.listing.standaloneClusterCallOutTitle', {
             defaultMessage: 'It looks like you have instances that aren\'t connected to an Elasticsearch cluster.'
           })}
           iconType="link"
         >
           <p>
             <EuiLink
-              onClick={() => changeCluster(UNLINKED_DEPLOYMENT_CLUSTER_UUID)}
-              data-test-subj="unlinkedDeploymentLink"
+              onClick={() => changeCluster(STANDALONE_CLUSTER_CLUSTER_UUID)}
+              data-test-subj="standaloneClusterLink"
             >
               <FormattedMessage
-                id="xpack.monitoring.cluster.listing.unlinkedDeploymentCallOutLink"
+                id="xpack.monitoring.cluster.listing.standaloneClusterCallOutLink"
                 defaultMessage="View these instances."
               />
             </EuiLink>
             &nbsp;
             <FormattedMessage
-              id="xpack.monitoring.cluster.listing.unlinkedDeploymentCallOutText"
+              id="xpack.monitoring.cluster.listing.standaloneClusterCallOutText"
               defaultMessage="Or, click Standalone Cluster in the table below"
             />
           </p>
           <p>
             <EuiLink onClick={() => {
-              storage.set(UNLINKED_DEPLOYMENT_STORAGE_KEY, true);
-              this.setState({ [UNLINKED_DEPLOYMENT_STORAGE_KEY]: true });
+              storage.set(STANDALONE_CLUSTER_STORAGE_KEY, true);
+              this.setState({ [STANDALONE_CLUSTER_STORAGE_KEY]: true });
             }}
             >
               <EuiIcon type="cross"/>
               &nbsp;
               <FormattedMessage
-                id="xpack.monitoring.cluster.listing.unlinkedDeploymentCallOutDismiss"
+                id="xpack.monitoring.cluster.listing.standaloneClusterCallOutDismiss"
                 defaultMessage="Dismiss"
               />
             </EuiLink>
@@ -420,14 +420,14 @@ export class Listing extends Component {
     const _changeCluster = partial(changeCluster, angular.scope, angular.globalState, angular.kbnUrl);
     const _handleClickIncompatibleLicense = partial(handleClickIncompatibleLicense, angular.scope);
     const _handleClickInvalidLicense = partial(handleClickInvalidLicense, angular.scope);
-    const hasUnlinkedDeployment = !!clusters.find(cluster => cluster.cluster_uuid === UNLINKED_DEPLOYMENT_CLUSTER_UUID);
+    const hasStandaloneCluster = !!clusters.find(cluster => cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID);
 
     return (
       <I18nProvider>
         <EuiPage>
           <EuiPageBody>
             <EuiPageContent>
-              {hasUnlinkedDeployment ? this.renderUnlinkedDeployment(_changeCluster, angular.storage) : null}
+              {hasStandaloneCluster ? this.renderStandaloneClusterCallout(_changeCluster, angular.storage) : null}
               <EuiMonitoringTable
                 className="clusterTable"
                 rows={clusters}

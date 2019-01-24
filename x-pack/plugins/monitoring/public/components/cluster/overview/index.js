@@ -13,17 +13,17 @@ import { BeatsPanel } from './beats_panel';
 
 import { EuiPage, EuiPageBody } from '@elastic/eui';
 import { ApmPanel } from './apm_panel';
-import { UNLINKED_DEPLOYMENT_CLUSTER_UUID } from '../../../../common/constants';
+import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
 
 export function Overview(props) {
-  const isFromUnlinkedDeployment = props.cluster.cluster_uuid === UNLINKED_DEPLOYMENT_CLUSTER_UUID;
+  const isFromStandaloneCluster = props.cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID;
 
   return (
     <EuiPage>
       <EuiPageBody>
         <AlertsPanel alerts={props.cluster.alerts} changeUrl={props.changeUrl} />
 
-        { !isFromUnlinkedDeployment ?
+        { !isFromStandaloneCluster ?
           (
             <Fragment>
               <ElasticsearchPanel

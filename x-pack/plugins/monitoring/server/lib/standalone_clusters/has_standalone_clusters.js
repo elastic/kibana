@@ -5,15 +5,15 @@
  */
 import moment from 'moment';
 import { get } from 'lodash';
-import { unlinkedDeploymentFilter } from './';
+import { standaloneClusterFilter } from './';
 
-export async function hasUnlinkedDeployments(req, indexPatterns) {
+export async function hasStandaloneClusters(req, indexPatterns) {
   const indexPatternList = indexPatterns.reduce((list, patterns) => {
     list.push(...patterns.split(','));
     return list;
   }, []);
 
-  const filters = [unlinkedDeploymentFilter];
+  const filters = [standaloneClusterFilter];
   // Not every page will contain a time range so check for that
   if (req.payload.timeRange) {
     const start = req.payload.timeRange.min;

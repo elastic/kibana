@@ -151,4 +151,4 @@ export const DEBOUNCE_FAST_MS = 10; // roughly how long it takes to render a fra
  */
 export const CLUSTER_ALERTS_ADDRESS_CONFIG_KEY = 'cluster_alerts.email_notifications.email_address';
 
-export const UNLINKED_DEPLOYMENT_CLUSTER_UUID = '__unlinked_deployment__';
+export const STANDALONE_CLUSTER_CLUSTER_UUID = '__standalone_cluster__';

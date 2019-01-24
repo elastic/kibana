@@ -12,7 +12,7 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('cluster', () => {
-    const archive = 'monitoring/unlinked_deployment';
+    const archive = 'monitoring/standalone_cluster';
     const timeRange = {
       min: '2019-01-15T19:00:49.104Z',
       max: '2019-01-15T19:59:49.104Z'
@@ -28,7 +28,7 @@ export default function ({ getService }) {
 
     it('should get cluster data', async () => {
       const { body } = await supertest
-        .post('/api/monitoring/v1/clusters/__unlinked_deployment__')
+        .post('/api/monitoring/v1/clusters/__standalone_cluster__')
         .set('kbn-xsrf', 'xxx')
         .send({ timeRange })
         .expect(200);

@@ -5,7 +5,7 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('Unlinked Deployment', () => {
+  describe('Standalone Cluster', () => {
     loadTestFile(require.resolve('./clusters'));
     loadTestFile(require.resolve('./cluster'));
   });

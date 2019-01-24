@@ -7,14 +7,14 @@
 import { uiModules } from 'ui/modules';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { timefilter } from 'ui/timefilter';
-import { UNLINKED_DEPLOYMENT_CLUSTER_UUID } from '../../common/constants';
+import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../common/constants';
 
 function formatClusters(clusters) {
   return clusters.map(formatCluster);
 }
 
 function formatCluster(cluster) {
-  if (cluster.cluster_uuid === UNLINKED_DEPLOYMENT_CLUSTER_UUID) {
+  if (cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID) {
     cluster.cluster_name = 'Standalone Cluster';
   }
   return cluster;

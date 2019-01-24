@@ -35,7 +35,7 @@ const mockReq = (log, queryResult = {}) => {
 };
 const goldLicense = () => ({ license: { type: 'gold' } });
 const basicLicense = () => ({ license: { type: 'basic' } });
-const unlinkedCluster = () => ({ cluster_uuid: '__unlinked_deployment__' });
+const standaloneCluster = () => ({ cluster_uuid: '__standalone_cluster__' });
 
 describe('Flag Supported Clusters', () => {
   describe('With multiple clusters in the monitoring data', () => {
@@ -143,8 +143,8 @@ describe('Flag Supported Clusters', () => {
         });
     });
 
-    describe('involving an unlinked cluster', () => {
-      it('should ignore the unlinked cluster in calculating supported basic clusters', () => {
+    describe('involving an standalone cluster', () => {
+      it('should ignore the standalone cluster in calculating supported basic clusters', () => {
         const logStub = sinon.stub();
         const req = mockReq(logStub, {
           hits: {
@@ -155,7 +155,7 @@ describe('Flag Supported Clusters', () => {
         const clusters = [
           { cluster_uuid: 'supported_cluster_uuid', ...basicLicense() },
           { cluster_uuid: 'unsupported_cluster_uuid', ...basicLicense() },
-          { ...unlinkedCluster() }
+          { ...standaloneCluster() }
         ];
 
         return flagSupportedClusters(req, kbnIndices)(clusters)
@@ -171,7 +171,7 @@ describe('Flag Supported Clusters', () => {
                 ...basicLicense()
               },
               {
-                ...unlinkedCluster()
+                ...standaloneCluster()
               }
             ]);
             sinon.assert.calledWith(
@@ -182,14 +182,14 @@ describe('Flag Supported Clusters', () => {
           });
       });
 
-      it('should ignore the unlinked cluster in calculating supported mixed license clusters', () => {
+      it('should ignore the standalone cluster in calculating supported mixed license clusters', () => {
         const logStub = sinon.stub();
         const req = mockReq(logStub);
         const kbnIndices = [];
         const clusters = [
           { cluster_uuid: 'supported_cluster_uuid', ...goldLicense() },
           { cluster_uuid: 'unsupported_cluster_uuid', ...basicLicense() },
-          { ...unlinkedCluster() }
+          { ...standaloneCluster() }
         ];
 
         return flagSupportedClusters(req, kbnIndices)(clusters)
@@ -205,7 +205,7 @@ describe('Flag Supported Clusters', () => {
                 ...basicLicense()
               },
               {
-                ...unlinkedCluster()
+                ...standaloneCluster()
               }
             ]);
             sinon.assert.calledWith(
@@ -216,14 +216,14 @@ describe('Flag Supported Clusters', () => {
           });
       });
 
-      it('should ignore the unlinked cluster in calculating supported non-basic clusters', () => {
+      it('should ignore the standalone cluster in calculating supported non-basic clusters', () => {
         const logStub = sinon.stub();
         const req = mockReq(logStub);
         const kbnIndices = [];
         const clusters = [
           { cluster_uuid: 'supported_cluster_uuid_1', ...goldLicense() },
           { cluster_uuid: 'supported_cluster_uuid_2', ...goldLicense() },
-          { ...unlinkedCluster() }
+          { ...standaloneCluster() }
         ];
 
         return flagSupportedClusters(req, kbnIndices)(clusters)
@@ -240,7 +240,7 @@ describe('Flag Supported Clusters', () => {
                 ...goldLicense()
               },
               {
-                ...unlinkedCluster()
+                ...standaloneCluster()
               }
             ]);
             sinon.assert.calledWith(
@@ -309,15 +309,15 @@ describe('Flag Supported Clusters', () => {
         });
     });
 
-    describe('involving an unlinked cluster', () => {
+    describe('involving an standalone cluster', () => {
       it('should ensure it is supported', () => {
         const req = mockReq(logStub);
         const kbnIndices = [];
-        const clusters = [{ ...unlinkedCluster() }];
+        const clusters = [{ ...standaloneCluster() }];
         return flagSupportedClusters(req, kbnIndices)(clusters)
           .then(result => {
             expect(result).to.eql([
-              { ...unlinkedCluster() }
+              { ...standaloneCluster() }
             ]);
             sinon.assert.calledWith(
               logStub,
