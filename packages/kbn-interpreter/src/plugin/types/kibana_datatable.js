@@ -17,12 +17,28 @@
  * under the License.
  */
 
-import { buildHierarchicalData } from './hierarchical/build_hierarchical_data';
-import { buildPointSeriesData } from './point_series/point_series';
-import { tabifyAggResponse } from './tabify/tabify';
+import { map } from 'lodash';
 
-export const aggResponseIndex = {
-  hierarchical: buildHierarchicalData,
-  pointSeries: buildPointSeriesData,
-  tabify: tabifyAggResponse
-};
+export const kibanaDatatable = () => ({
+  name: 'kibana_datatable',
+  from: {
+    datatable: context => {
+      context.columns.forEach(c => c.id = c.name);
+      return {
+        type: 'kibana_datatable',
+        rows: context.rows,
+        columns: context.columns,
+      };
+    },
+    pointseries: context => {
+      const columns = map(context.columns, (column, name) => {
+        return { id: name, name, ...column };
+      });
+      return {
+        type: 'kibana_datatable',
+        rows: context.rows,
+        columns: columns,
+      };
+    }
+  },
+});
