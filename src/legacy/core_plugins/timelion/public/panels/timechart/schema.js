@@ -21,7 +21,6 @@ require('./flot');
 import _ from 'lodash';
 import $ from 'jquery';
 import moment from 'moment-timezone';
-import observeResize from '../../lib/observe_resize';
 import { calculateInterval, DEFAULT_TIME_FORMAT } from '../../../common/lib';
 import { timefilter } from 'ui/timefilter';
 
@@ -157,12 +156,7 @@ export default function timechartFn(Private, config, $rootScope, $compile) {
           drawPlot($scope.chart);
         };
 
-        const cancelResize = observeResize($elem, function () {
-          drawPlot($scope.chart);
-        });
-
         $scope.$on('$destroy', function () {
-          cancelResize();
           $elem.off('plothover');
           $elem.off('plotselected');
           $elem.off('mouseleave');
