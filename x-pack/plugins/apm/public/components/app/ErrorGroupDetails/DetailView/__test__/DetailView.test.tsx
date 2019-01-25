@@ -67,7 +67,7 @@ describe('DetailView', () => {
       status: 'SUCCESS',
       data: {
         occurrencesCount: 10,
-        transaction: ({
+        transaction: {
           http: { request: { method: 'GET' } },
           url: { full: 'myUrl' },
           trace: { id: 'traceId' },
@@ -78,8 +78,8 @@ describe('DetailView', () => {
           },
           service: { name: 'myService' },
           user: { id: 'myUserId' }
-        } as unknown) as Transaction,
-        error: ({
+        } as Transaction,
+        error: {
           '@timestamp': 'myTimestamp',
           http: { request: { method: 'GET' } },
           url: { full: 'myUrl' },
@@ -87,7 +87,7 @@ describe('DetailView', () => {
           user: { id: 'myUserId' },
           error: { exception: { handled: true } },
           transaction: { id: 'myTransactionId', sampled: true }
-        } as unknown) as APMError
+        } as APMError
       }
     };
     const wrapper = shallow(

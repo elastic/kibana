@@ -7,15 +7,14 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { MemoryRouter } from 'react-router-dom';
-
-import Breadcrumbs from '../Breadcrumbs';
-import { toJson } from '../../../../utils/testHelpers';
+import { UpdateBreadcrumbs } from '../UpdateBreadcrumbs';
+import chrome from 'ui/chrome';
 
 jest.mock(
   'ui/chrome',
   () => ({
     breadcrumbs: {
-      set: () => {}
+      set: jest.fn()
     },
     getBasePath: () => `/some/base/path`,
     getUiSettingsClient: () => {
@@ -37,17 +36,20 @@ jest.mock(
 );
 
 function expectBreadcrumbToMatchSnapshot(route) {
-  const wrapper = mount(
+  mount(
     <MemoryRouter initialEntries={[`${route}?_g=myG&kuery=myKuery`]}>
-      <Breadcrumbs showPluginBreadcrumbs={true} />
+      <UpdateBreadcrumbs />
     </MemoryRouter>
   );
-  expect(
-    toJson(wrapper.find('.kuiLocalBreadcrumb').children())
-  ).toMatchSnapshot();
+  expect(chrome.breadcrumbs.set).toHaveBeenCalledTimes(1);
+  expect(chrome.breadcrumbs.set.mock.calls[0][0]).toMatchSnapshot();
 }
 
 describe('Breadcrumbs', () => {
+  beforeEach(() => {
+    chrome.breadcrumbs.set.mockReset();
+  });
+
   it('Homepage', () => {
     expectBreadcrumbToMatchSnapshot('/');
   });
@@ -76,14 +78,5 @@ describe('Breadcrumbs', () => {
     expectBreadcrumbToMatchSnapshot(
       '/:serviceName/transactions/request/my-transaction-name'
     );
-  });
-
-  it('does not render breadcrumbs when showPluginBreadcrumbs = false', () => {
-    const wrapper = mount(
-      <MemoryRouter initialEntries={[`/?_g=myG&kuery=myKuery`]}>
-        <Breadcrumbs showPluginBreadcrumbs={false} />
-      </MemoryRouter>
-    );
-    expect(wrapper.find('.kuiLocalBreadcrumbs').exists()).toEqual(false);
   });
 });
