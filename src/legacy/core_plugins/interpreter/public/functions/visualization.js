@@ -44,9 +44,6 @@ function getHandler(from, type) {
 export const visualization = () => ({
   name: 'visualization',
   type: 'render',
-  context: {
-    types: [],
-  },
   help: i18n.translate('interpreter.functions.visualization.help', {
     defaultMessage: 'A simple visualization'
   }),

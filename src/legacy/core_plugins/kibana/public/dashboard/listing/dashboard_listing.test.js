@@ -26,6 +26,7 @@ jest.mock('ui/notify',
 
 jest.mock('lodash',
   () => ({
+    ...require.requireActual('lodash'),
     // mock debounce to fire immediately with no internal timer
     debounce: function (func) {
       function debounced(...args) {
