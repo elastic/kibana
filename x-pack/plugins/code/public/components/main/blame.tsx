@@ -9,10 +9,12 @@ import React from 'react';
 import styled from 'styled-components';
 import { GitBlame } from '../../../common/git_blame';
 import { colors, fontSizes } from '../../style/variables';
+import { CommitLink } from '../diff_page/commit_link';
 
 interface Props {
   blames: GitBlame[];
   lineHeight: number;
+  repoUri: string;
 }
 
 interface BlameContainerProps {
@@ -47,7 +49,11 @@ export class Blame extends React.PureComponent<Props> {
   public render() {
     return this.props.blames.map((blame: GitBlame, index) => (
       <BlameContainer key={index} lines={blame.lines} lineHeight={this.props.lineHeight}>
-        <BlameMessage>{blame.commit.message}</BlameMessage>
+        <BlameMessage>
+          <CommitLink repoUri={this.props.repoUri} commit={blame.commit.id}>
+            {blame.commit.message}
+          </CommitLink>
+        </BlameMessage>
         <BlameDate>{moment(blame.commit.date).fromNow()}</BlameDate>
       </BlameContainer>
     ));
