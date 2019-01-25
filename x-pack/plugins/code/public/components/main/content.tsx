@@ -15,7 +15,6 @@ import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { withRouter } from 'react-router-dom';
 import styled from 'styled-components';
-import { GitBlame } from '../../../common/git_blame';
 import { FileTree } from '../../../model';
 import { CommitInfo } from '../../../model/commit';
 import { FetchFileResponse, fetchMoreCommits } from '../../actions';
@@ -25,7 +24,6 @@ import { hasMoreCommitsSelector, treeCommitsSelector } from '../../selectors';
 import { history } from '../../utils/url';
 import { Editor } from '../editor/editor';
 import { UnsupportedFileIcon } from '../shared/icons';
-import { Blame } from './blame';
 import { CommitHistory } from './commit_history';
 import { Directory } from './directory';
 import { UnsupportedFile } from './unsupported_file';
@@ -51,12 +49,6 @@ const EditorBlameContainer = styled.div`
   overflow: auto;
 `;
 
-const BlameContainer = styled.div`
-  flex-grow: 3;
-  flex-basis: calc(400rem / 14);
-  height: 100%;
-`;
-
 const DirectoryViewContainer = styled.div`
   overflow: auto;
   flex-grow: 1;
@@ -66,7 +58,6 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   tree: FileTree;
   file: FetchFileResponse | undefined;
   commits: CommitInfo[];
-  blames: GitBlame[];
   hasMoreCommits: boolean;
   loadingCommits: boolean;
   fetchMoreCommits(repoUri: string): void;
@@ -207,7 +198,7 @@ class CodeContent extends React.PureComponent<Props> {
   };
 
   public render() {
-    const { file, blames, commits, match, tree, hasMoreCommits, loadingCommits } = this.props;
+    const { file, commits, match, tree, hasMoreCommits, loadingCommits } = this.props;
     const { path, pathType, resource, org, repo, revision } = match.params;
     const repoUri = `${resource}/${org}/${repo}`;
     switch (pathType) {
@@ -270,20 +261,10 @@ class CodeContent extends React.PureComponent<Props> {
           </EditorBlameContainer>
         );
       case PathTypes.blame:
-        const blamesHeight = `calc(100% + ${blames.map(bl => bl.lines).reduce((a, b) => a + 6, 0) *
-          18}px)`;
-        const blame = (
-          <BlameContainer innerRef={this.scrollBlameInResponseOfScrollingEditor}>
-            <div style={{ height: blamesHeight }}>
-              <Blame repoUri={repoUri} blames={blames} lineHeight={18} />
-            </div>
-          </BlameContainer>
-        );
         return (
           <EditorBlameContainer>
             {this.renderButtons(ButtonOption.Blame)}
-            {blame}
-            <Editor />
+            <Editor showBlame={true} />
           </EditorBlameContainer>
         );
       case PathTypes.commits:
@@ -321,7 +302,6 @@ const mapStateToProps = (state: RootState) => ({
   file: state.file.file,
   tree: state.file.tree,
   commits: treeCommitsSelector(state),
-  blames: state.blame.blames,
   hasMoreCommits: hasMoreCommitsSelector(state),
   loadingCommits: state.file.loadingCommits,
 });

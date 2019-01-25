@@ -27,7 +27,7 @@ import {
 import React, { ChangeEvent } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
-import { Repository } from 'x-pack/plugins/code/model';
+import { Repository } from '../../../model';
 import { importRepo } from '../../actions';
 import { RootState } from '../../reducers';
 import { ProjectItem } from './project_item';

@@ -18,7 +18,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { Repository, WorkerReservedProgress } from 'x-pack/plugins/code/model';
+import { Repository, WorkerReservedProgress } from '../../../model';
 import { deleteRepo, indexRepo, initRepoCommand } from '../../actions';
 import { RepoState, RepoStatus } from '../../reducers/status';
 

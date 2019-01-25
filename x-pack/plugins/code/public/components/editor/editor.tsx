@@ -4,18 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-
 import { EuiFlexItem } from '@elastic/eui';
+import { editor as editorInterfaces } from 'monaco-editor';
+import React from 'react';
 import { connect } from 'react-redux';
+import { RouteComponentProps, withRouter } from 'react-router';
 import { Hover, Position, TextDocumentPositionParams } from 'vscode-languageserver-protocol';
-import { closeReferences, findReferences, hoverResult } from '../../actions';
+import { GitBlame } from '../../../common/git_blame';
+import { closeReferences, FetchFileResponse, findReferences, hoverResult } from '../../actions';
+import { MainRouteParams } from '../../common/types';
+import { BlameWidget } from '../../monaco/blame/blame_widget';
+import { monaco } from '../../monaco/monaco';
 import { MonacoHelper } from '../../monaco/monaco_helper';
 import { RootState } from '../../reducers';
 import { refUrlSelector } from '../../selectors';
+import { history } from '../../utils/url';
 import { Modifier, Shortcut } from '../shortcuts';
 import { ReferencesPanel } from './references_panel';
-import {BlameWidget} from "../../monaco/blame/blame_widget";
 
 export interface EditorActions {
   closeReferences(): void;
@@ -23,24 +28,24 @@ export interface EditorActions {
   hoverResult(hover: Hover): void;
 }
 
-interface Props extends EditorActions {
-  file: string;
-  repoUri: string;
-  revision: string;
+interface Props extends EditorActions, RouteComponentProps<MainRouteParams> {
+  file: FetchFileResponse;
   revealPosition?: Position;
   isReferencesOpen: boolean;
   isReferencesLoading: boolean;
   references: any[];
   referencesTitle: string;
-  fileContent?: string;
-  fileLanguage?: string;
   hover?: Hover;
   refUrl?: string;
+  blames: GitBlame[];
+  showBlame: boolean;
 }
 
 export class EditorComponent extends React.Component<Props> {
+  public blameWidgets: any;
   private container: HTMLElement | undefined;
   private monaco: MonacoHelper | undefined;
+  private editor: editorInterfaces.IStandaloneCodeEditor | undefined;
 
   constructor(props: Props, context: any) {
     super(props, context);
@@ -49,19 +54,18 @@ export class EditorComponent extends React.Component<Props> {
   public componentDidMount(): void {
     this.container = document.getElementById('mainEditor') as HTMLElement;
     this.monaco = new MonacoHelper(this.container, this.props);
-    if (this.props.fileContent) {
-      this.loadText(
-        this.props.fileContent!,
-        this.props.repoUri,
-        this.props.file,
-        this.props.fileLanguage!,
-        this.props.revision
-      ).then(() => {
+
+    const { file } = this.props;
+    if (file && file.content) {
+      const { uri, path, revision } = file.payload;
+      this.loadText(file.content, uri, path, file.lang!, revision).then(() => {
         if (this.props.revealPosition) {
           this.revealPosition(this.props.revealPosition);
         }
-
       });
+    }
+    if (this.props.showBlame) {
+      this.loadBlame(this.props.blames);
     }
   }
 
@@ -69,18 +73,26 @@ export class EditorComponent extends React.Component<Props> {
     if (nextProps.revealPosition && nextProps.revealPosition !== this.props.revealPosition) {
       this.revealPosition(nextProps.revealPosition);
     }
-    if (nextProps.fileContent && nextProps.fileContent !== this.props.fileContent) {
-      this.loadText(
-        nextProps.fileContent,
-        nextProps.repoUri,
-        nextProps.file,
-        nextProps.fileLanguage!,
-        nextProps.revision
-      ).then(() => {
+    const { file } = nextProps;
+    const currentFileContent = this.props.file.content;
+    if (file.content && file.content !== currentFileContent) {
+      const { uri, path, revision } = file.payload;
+      this.loadText(file.content, uri, path, file.lang!, revision).then(() => {
         if (nextProps.revealPosition) {
           this.revealPosition(nextProps.revealPosition);
         }
       });
+    }
+    if (nextProps.showBlame !== this.props.showBlame && nextProps.showBlame) {
+      this.loadBlame(nextProps.blames);
+      this.monaco!.editor!.updateOptions({ lineHeight: 38 });
+    } else if (!nextProps.showBlame) {
+      this.destroyBlameWidgets();
+      this.monaco!.editor!.updateOptions({ lineHeight: 24 });
+    }
+    if (nextProps.blames !== this.props.blames && nextProps.showBlame) {
+      this.loadBlame(nextProps.blames);
+      this.monaco!.editor!.updateOptions({ lineHeight: 38 });
     }
   }
 
@@ -102,18 +114,37 @@ export class EditorComponent extends React.Component<Props> {
           grow={1}
           className="code-editor-container code-no-overflow"
           id="mainEditor"
+          style={{ paddingLeft: this.props.showBlame ? 300 : 0 }}
         />
         {this.renderReferences()}
       </EuiFlexItem>
     );
   }
 
+  public loadBlame(blames: GitBlame[]) {
+    this.blameWidgets = blames.map((b, index) => {
+      return new BlameWidget(b, index === 0, this.editor);
+    });
+  }
+
+  public destroyBlameWidgets() {
+    if (this.blameWidgets) {
+      this.blameWidgets.forEach((bw: BlameWidget) => bw.destroy());
+    }
+    this.blameWidgets = null;
+  }
+
   private async loadText(text: string, repo: string, file: string, lang: string, revision: string) {
     if (this.monaco) {
-      const editor = await this.monaco.loadFile(repo, file, text, lang, revision);
-      new BlameWidget(1, editor);
-      new BlameWidget(5, editor);
-      new BlameWidget(100, editor);
+      this.editor = await this.monaco.loadFile(repo, file, text, lang, revision);
+      this.editor.onMouseDown((e: editorInterfaces.IEditorMouseEvent) => {
+        if (e.target.type === monaco.editor.MouseTargetType.GUTTER_LINE_NUMBERS) {
+          const { repo: repoName, org, resource, pathType, path } = this.props.match.params;
+          const uri = `${resource}/${org}/${repoName}/${pathType}/${revision}/${path}`;
+          history.push(`/${uri}!L${e.target.position.lineNumber}:0`);
+        }
+        this.monaco!.container.focus();
+      });
     }
   }
 
@@ -139,11 +170,7 @@ export class EditorComponent extends React.Component<Props> {
 }
 
 const mapStateToProps = (state: RootState) => ({
-  file: state.file.file!.payload.path,
-  repoUri: state.file.file!.payload.uri,
-  revision: state.file.file!.payload.revision,
-  fileContent: state.file.file!.content,
-  fileLanguage: state.file.file!.lang,
+  file: state.file.file,
   isReferencesOpen: state.editor.showing,
   isReferencesLoading: state.editor.loading,
   references: state.editor.references,
@@ -151,6 +178,7 @@ const mapStateToProps = (state: RootState) => ({
   hover: state.editor.hover,
   refUrl: refUrlSelector(state),
   revealPosition: state.editor.revealPosition,
+  blames: state.blame.blames,
 });
 
 const mapDispatchToProps = {
@@ -159,8 +187,10 @@ const mapDispatchToProps = {
   hoverResult,
 };
 
-export const Editor = connect(
-  mapStateToProps,
-  mapDispatchToProps
-  // @ts-ignore
-)(EditorComponent);
+export const Editor = withRouter(
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+    // @ts-ignore
+  )(EditorComponent)
+);

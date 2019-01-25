@@ -4,69 +4,51 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiText, EuiTextColor } from '@elastic/eui';
+import { euiBorderThick, euiSizeS, paddingSizes } from '@elastic/eui/dist/eui_theme_light.json';
+import _ from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import styled from 'styled-components';
 import { GitBlame } from '../../../common/git_blame';
-import { colors, fontSizes } from '../../style/variables';
-import { CommitLink } from '../diff_page/commit_link';
 
-interface Props {
-  blames: GitBlame[];
-  lineHeight: number;
-  repoUri: string;
-}
-
-interface BlameContainerProps {
-  lineHeight: number;
-  lines: number;
-}
-
-const BlameContainer = styled('div')<BlameContainerProps>`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  flex: 1 1 30rem;
-  padding: 0 0.5rem;
-  height: ${props => props.lineHeight * props.lines}px;
-  border-bottom: 1px solid ${colors.borderGrey};
-`;
-
-const BlameMessage = styled.div`
-  margin-right: 5px;
-  overflow: auto;
-  color: ${colors.textGrey};
-`;
-
-const BlameDate = styled.div`
+const BlameMessage = styled(EuiText)`
+  overflow: hidden;
+  max-width: 10rem;
   white-space: nowrap;
-  text-decoration: underline;
-  color: ${colors.textGrey};
-  font-size: ${fontSizes.small};
+  text-overflow: ellipsis;
 `;
-export class BlameComponent extends React.PureComponent<{ blame: GitBlame; lineHeight: number }> {
-  public render(): React.ReactNode {
-    const { blame, lineHeight } = this.props;
-    return (
-      <BlameContainer lines={blame.lines} lineHeight={this.props.lineHeight}>
-        <BlameMessage>{blame.commit.message}</BlameMessage>
-        <BlameDate>{moment(blame.commit.date).fromNow()}</BlameDate>
-      </BlameContainer>
-    );
-  }
-}
 
-export class Blame extends React.PureComponent<Props> {
-  public render() {
-    return this.props.blames.map((blame: GitBlame, index) => (
-      <BlameContainer key={index} lines={blame.lines} lineHeight={this.props.lineHeight}>
-        <BlameMessage>
-          <CommitLink repoUri={this.props.repoUri} commit={blame.commit.id}>
-            {blame.commit.message}
-          </CommitLink>
-        </BlameMessage>
-        <BlameDate>{moment(blame.commit.date).fromNow()}</BlameDate>
-      </BlameContainer>
-    ));
+const Avatar = styled(EuiAvatar)`
+  margin: auto ${euiSizeS} auto 0;
+`;
+
+const Root = styled(EuiFlexGroup)<{ isFirstLine: boolean }>`
+  padding: ${paddingSizes.xs} ${paddingSizes.s};
+  border-top: ${props => (props.isFirstLine ? 'none' : euiBorderThick)};
+`;
+
+export class Blame extends React.PureComponent<{ blame: GitBlame; isFirstLine: boolean }> {
+  public render(): React.ReactNode {
+    const { blame, isFirstLine } = this.props;
+    return (
+      <Root gutterSize="none" justifyContent="spaceBetween" isFirstLine={isFirstLine}>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="none" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <Avatar size="s" type="space" name={blame.committer.name} initialsLength={1} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <BlameMessage>{blame.commit.message}</BlameMessage>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText>
+            <EuiTextColor color="subdued">{moment(blame.commit.date).fromNow()}</EuiTextColor>
+          </EuiText>
+        </EuiFlexItem>
+      </Root>
+    );
   }
 }
