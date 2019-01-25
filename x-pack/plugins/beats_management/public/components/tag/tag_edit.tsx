@@ -123,7 +123,6 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
         </EuiFlexGroup>
         <EuiSpacer />
         <EuiHorizontalRule />
-
         <EuiFlexGroup alignItems="stretch">
           <EuiFlexItem>
             <EuiTitle size="xs">
@@ -196,7 +195,6 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
             />
           </div>
         )}
-
         {this.state.showFlyout && (
           <ConfigView
             configBlock={configuration_blocks.blocks.find(

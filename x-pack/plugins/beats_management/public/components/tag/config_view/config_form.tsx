@@ -26,7 +26,11 @@ interface ComponentProps {
   canSubmit(canIt: boolean): any;
 }
 
-class ConfigFormUi extends React.Component<ComponentProps, any> {
+interface ComponentState {
+  canSubmit: boolean;
+}
+
+class ConfigFormUi extends React.Component<ComponentProps, ComponentState> {
   private form = React.createRef<HTMLButtonElement>();
   constructor(props: ComponentProps) {
     super(props);
@@ -79,7 +83,7 @@ class ConfigFormUi extends React.Component<ComponentProps, any> {
                     id={schema.id}
                     defaultValue={get(
                       this.props,
-                      `values.configs[0].${schema.id}`,
+                      `values.config.${schema.id}`,
                       schema.defaultValue
                     )}
                     name={schema.id}
@@ -99,7 +103,7 @@ class ConfigFormUi extends React.Component<ComponentProps, any> {
                     disabled={!this.props.onSubmit}
                     defaultValue={get(
                       this.props,
-                      `values.configs[0].${schema.id}`,
+                      `values.config.${schema.id}`,
                       schema.defaultValue
                     )}
                     name={schema.id}
@@ -118,7 +122,7 @@ class ConfigFormUi extends React.Component<ComponentProps, any> {
                     disabled={!this.props.onSubmit}
                     defaultValue={get(
                       this.props,
-                      `values.configs[0].${schema.id}`,
+                      `values.config.${schema.id}`,
                       schema.defaultValue
                     )}
                     name={schema.id}
@@ -138,7 +142,7 @@ class ConfigFormUi extends React.Component<ComponentProps, any> {
                     disabled={!this.props.onSubmit}
                     defaultValue={get(
                       this.props,
-                      `values.configs[0].${schema.id}`,
+                      `values.config.${schema.id}`,
                       schema.defaultValue
                     )}
                     helpText={schema.ui.helpText}
@@ -165,7 +169,7 @@ class ConfigFormUi extends React.Component<ComponentProps, any> {
                     id={schema.id}
                     defaultValue={get(
                       this.props,
-                      `values.configs[0].${schema.id}`,
+                      `values.config.${schema.id}`,
                       schema.defaultValue
                     )}
                     name={schema.id}

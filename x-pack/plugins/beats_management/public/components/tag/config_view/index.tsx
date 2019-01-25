@@ -33,7 +33,12 @@ interface ComponentProps {
   onSave?(config: ConfigurationBlock): any;
 }
 
-class ConfigViewUi extends React.Component<ComponentProps, any> {
+interface ComponentState {
+  valid: boolean;
+  configBlock: ConfigurationBlock;
+}
+
+class ConfigViewUi extends React.Component<ComponentProps, ComponentState> {
   private form = React.createRef<any>();
   private editMode: boolean;
   private schema = translateConfigSchema(configBlockSchemas);
