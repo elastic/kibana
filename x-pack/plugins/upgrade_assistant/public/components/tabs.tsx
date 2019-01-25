@@ -39,11 +39,11 @@ export class UpgradeAssistantTabsUI extends React.Component<
     };
   }
 
-  public componentDidMount() {
+  public async componentDidMount() {
+    await this.loadData();
+
     // Send telemetry info about the default selected tab
     this.sendTelemetryInfo(this.tabs[this.state.selectedTabIndex].id);
-
-    this.loadData();
   }
 
   public render() {
@@ -66,7 +66,11 @@ export class UpgradeAssistantTabsUI extends React.Component<
     }
 
     // Send telemetry info about the current selected tab
-    this.sendTelemetryInfo(selectedTab.id);
+    // only in case the clicked tab id it's different from the
+    // current selected tab id
+    if (this.tabs[this.state.selectedTabIndex].id !== selectedTab.id) {
+      this.sendTelemetryInfo(selectedTab.id);
+    }
 
     this.setSelectedTabIndex(selectedTabIndex);
   };
@@ -149,6 +153,12 @@ export class UpgradeAssistantTabsUI extends React.Component<
   }
 
   private sendTelemetryInfo(tabName: string) {
+    // In case we don't have any date yet, we wanna to ignore the
+    // telemetry info update
+    if (this.state.loadingState !== LoadingState.Success) {
+      return;
+    }
+
     kfetch({
       pathname: '/api/upgrade_assistant/telemetry/ui_open',
       method: 'PUT',
