@@ -21,7 +21,6 @@ import path from 'path';
 import { existsSync } from 'fs';
 import { flatConcatAtType } from './reduce';
 import { mapSpec, wrap } from './modify_reduce';
-import { PUBLIC_PATH_PLACEHOLDER } from '../../../optimize/public_path_placeholder';
 
 const OK_EXTNAMES = ['.css', '.scss'];
 
@@ -48,7 +47,7 @@ function getStyleSheetPath(pluginSpec, localPath, theme) {
     localPath: existsSync(localCssPath) ? localCssPath : localPath,
     publicPath: getPublicPath(pluginSpec, localCssPath),
     urlImports: {
-      urlBase: `${PUBLIC_PATH_PLACEHOLDER}${getUrlBase(pluginSpec)}`,
+      urlBase: getUrlBase(pluginSpec),
       publicDir: pluginSpec.getPublicDir(),
     }
   };
