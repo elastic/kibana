@@ -1,19 +1,29 @@
-/* tslint:disable */
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { select } from './state';
 import { getId } from './../../lib/get_id';
+import { landmarkPoint, shapesAt } from './geometry';
+import { select } from './state';
+
+import {
+  arrayToMap,
+  disjunctiveUnion,
+  flatten,
+  identity,
+  mean,
+  not,
+  removeDuplicates,
+  shallowEqual,
+} from './functional';
 
 import {
   actionEvent,
+  cursorPosition,
   dragging,
   dragVector,
-  cursorPosition,
   gestureEnd,
   metaHeld,
   mouseButton,
@@ -22,8 +32,6 @@ import {
   optionHeld,
   shiftHeld,
 } from './gestures';
-
-import { shapesAt, landmarkPoint } from './geometry';
 
 import {
   compositeComponent,
@@ -35,9 +43,9 @@ import {
   ORIGIN,
   reduceTransforms,
   rotateZ,
+  scale,
   translate,
   translateComponent,
-  scale,
 } from './matrix';
 
 import {
@@ -47,17 +55,6 @@ import {
   translate as translate2d,
   UNITMATRIX as UNITMATRIX2D,
 } from './matrix2d';
-
-import {
-  arrayToMap,
-  disjunctiveUnion,
-  identity,
-  flatten,
-  mean,
-  not,
-  removeDuplicates,
-  shallowEqual,
-} from './functional';
 
 /**
  * Selectors directly from a state object
@@ -678,14 +675,12 @@ const alignmentGuides = (configuration, shapes, guidedShapes, draggedShape) => {
   const extremeVertical = resizeMultiplierVertical[draggedShape.verticalPosition];
   // todo replace for loops with [].map calls; DRY it up, break out parts; several of which to move to geometry.js
   // todo switch to informative variable names
-  for (let i = 0; i < guidedShapes.length; i++) {
-    const d = guidedShapes[i];
+  for (const d of guidedShapes) {
     if (d.type === 'annotation') {
       continue;
     } // fixme avoid this by not letting annotations get in here
     // key points of the dragged shape bounding box
-    for (let j = 0; j < shapes.length; j++) {
-      const referenceShape = shapes[j];
+    for (const referenceShape of shapes) {
       if (referenceShape.type === 'annotation') {
         continue;
       } // fixme avoid this by not letting annotations get in here
@@ -1292,21 +1287,20 @@ const resizeChild = groupScale => s => {
 
 const resizeGroup = (shapes, rootElement) => {
   const idMap = {};
-  for (let i = 0; i < shapes.length; i++) {
-    idMap[shapes[i].id] = shapes[i];
+  for (const shape of shapes) {
+    idMap[shape.id] = shapes[i];
   }
 
   const depths = {};
   const ancestorsLength = shape => (shape.parent ? ancestorsLength(idMap[shape.parent]) + 1 : 0);
-  for (let i = 0; i < shapes.length; i++) {
-    depths[shapes[i].id] = ancestorsLength(shapes[i]);
+  for (const shape of shapes) {
+    depths[shape.id] = ancestorsLength(shapes[i]);
   }
 
   const resizedParents = { [rootElement.id]: rootElement };
   const sortedShapes = shapes.slice().sort((a, b) => depths[a.id] - depths[b.id]);
   const parentResized = s => Boolean(s.childBaseAB || s.baseAB);
-  for (let i = 0; i < sortedShapes.length; i++) {
-    const shape = sortedShapes[i];
+  for (const shape of sortedShapes) {
     const parent = resizedParents[shape.parent];
     if (parent) {
       resizedParents[shape.id] = shape;
