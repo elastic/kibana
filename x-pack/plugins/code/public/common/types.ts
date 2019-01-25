@@ -15,6 +15,8 @@ export enum SearchScope {
 export enum PathTypes {
   blob = 'blob',
   tree = 'tree',
+  blame = 'blame',
+  commits = 'commits',
 }
 
 export interface MainRouteParams {

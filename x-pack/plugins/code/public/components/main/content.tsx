@@ -21,6 +21,7 @@ import { FetchFileResponse, fetchMoreCommits } from '../../actions';
 import { MainRouteParams, PathTypes } from '../../common/types';
 import { RootState } from '../../reducers';
 import { hasMoreCommitsSelector, treeCommitsSelector } from '../../selectors';
+import { history } from '../../utils/url';
 import { Editor } from '../editor/editor';
 import { Blame } from './blame';
 import { CommitHistory } from './commit_history';
@@ -69,14 +70,11 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   fetchMoreCommits(repoUri: string): void;
 }
 
-interface State {
-  selectedButtonId: string;
-}
-
 enum ButtonOption {
   Code = 'Code',
   Blame = 'Blame',
   History = 'History',
+  Folder = 'Folder',
 }
 
 const Title = styled.div`
@@ -86,11 +84,7 @@ const Title = styled.div`
   margin: 4px 0 18px;
 `;
 
-class CodeContent extends React.PureComponent<Props, State> {
-  public state = {
-    selectedButtonId: ButtonOption.Code,
-  };
-
+class CodeContent extends React.PureComponent<Props> {
   public buttonOptions = [
     {
       id: ButtonOption.Code,
@@ -144,7 +138,22 @@ class CodeContent extends React.PureComponent<Props, State> {
   };
 
   public switchButton = (id: string) => {
-    this.setState({ selectedButtonId: id });
+    const { path, resource, org, repo, revision } = this.props.match.params;
+    const repoUri = `${resource}/${org}/${repo}`;
+    switch (id) {
+      case ButtonOption.Code:
+        history.push(`/${repoUri}/${PathTypes.blob}/${revision}/${path || ''}`);
+        break;
+      case ButtonOption.Folder:
+        history.push(`/${repoUri}/${PathTypes.tree}/${revision}/${path || ''}`);
+        break;
+      case ButtonOption.Blame:
+        history.push(`/${repoUri}/${PathTypes.blame}/${revision}/${path || ''}`);
+        break;
+      case ButtonOption.History:
+        history.push(`/${repoUri}/${PathTypes.commits}/${revision}/${path || ''}`);
+        break;
+    }
   };
 
   public openRawFile = () => {
@@ -153,71 +162,127 @@ class CodeContent extends React.PureComponent<Props, State> {
     window.open(`../api/code/repo/${repoUri}/blob/${revision}/${path}`);
   };
 
-  public renderButtons = () => {
-    return (
-      <ButtonsContainer>
-        <EuiButtonGroup
-          color="primary"
-          options={this.buttonOptions}
-          type="single"
-          idSelected={this.state.selectedButtonId}
-          onChange={this.switchButton}
-        />
-        <EuiButtonGroup
-          color="primary"
-          options={this.rawButtonOptions}
-          type="single"
-          idSelected={''}
-          onChange={this.openRawFile}
-        />
-      </ButtonsContainer>
-    );
+  public renderButtons = (buttonId: ButtonOption) => {
+    const { file } = this.props;
+    if (file) {
+      return (
+        <ButtonsContainer>
+          <EuiButtonGroup
+            color="primary"
+            options={this.buttonOptions}
+            type="single"
+            idSelected={buttonId}
+            onChange={this.switchButton}
+          />
+          <EuiButtonGroup
+            color="primary"
+            options={this.rawButtonOptions}
+            type="single"
+            idSelected={''}
+            onChange={this.openRawFile}
+          />
+        </ButtonsContainer>
+      );
+    } else {
+      return (
+        <ButtonsContainer>
+          <EuiButtonGroup
+            color="primary"
+            options={[
+              {
+                id: ButtonOption.Folder,
+                label: ButtonOption.Folder,
+              },
+              {
+                id: ButtonOption.History,
+                label: ButtonOption.History,
+              },
+            ]}
+            type="single"
+            idSelected={buttonId}
+            onChange={this.switchButton}
+          />
+        </ButtonsContainer>
+      );
+    }
   };
 
   public render() {
     const { file, blames, commits, match, tree, hasMoreCommits, loadingCommits } = this.props;
-    const { path, pathType, resource, org, repo } = match.params;
+    const { path, pathType, resource, org, repo, revision } = match.params;
     const repoUri = `${resource}/${org}/${repo}`;
-    if (pathType === PathTypes.tree) {
-      const node = this.findNode(path ? path.split('/') : [], tree);
-      return (
-        <DirectoryViewContainer>
-          <Directory node={node} />
-          <InfiniteScroll
-            pageStart={0}
-            initialLoad={false}
-            loadMore={() => !loadingCommits && this.props.fetchMoreCommits(repoUri)}
-            hasMore={hasMoreCommits}
-            useWindow={false}
-            loader={
-              <div className="loader" key={0}>
-                Loading ...
-              </div>
-            }
-          >
+    switch (pathType) {
+      case PathTypes.tree:
+        const node = this.findNode(path ? path.split('/') : [], tree);
+        return (
+          <DirectoryViewContainer>
+            <Directory node={node} />
             <CommitHistory
               commits={commits}
               repoUri={repoUri}
               header={
                 <React.Fragment>
                   <Title>Recent Commits</Title>
-                  <EuiButton>View All</EuiButton>
+                  <EuiButton
+                    href={`#/${resource}/${org}/${repo}/${PathTypes.commits}/${revision}/${path ||
+                      ''}`}
+                  >
+                    View All
+                  </EuiButton>
                 </React.Fragment>
               }
             />
-          </InfiniteScroll>
-        </DirectoryViewContainer>
-      );
-    } else if (pathType === PathTypes.blob) {
-      if (this.state.selectedButtonId === ButtonOption.History) {
+          </DirectoryViewContainer>
+        );
+      case PathTypes.blob:
+        if (!file) {
+          return null;
+        }
+        const { lang: fileLanguage, content: fileContent, url } = file;
+        if (fileLanguage === 'markdown') {
+          return (
+            <div className="markdown-body markdownContainer">
+              <Markdown source={fileContent} escapeHtml={true} skipHtml={true} />
+            </div>
+          );
+        } else if (this.props.file!.isImage) {
+          return (
+            <div className="autoMargin">
+              <img src={url} alt={url} />
+            </div>
+          );
+        }
+        return (
+          <EditorBlameContainer>
+            {this.renderButtons(ButtonOption.Code)}
+            <Editor />
+          </EditorBlameContainer>
+        );
+      case PathTypes.blame:
+        const blamesHeight = `calc(100% + ${blames.map(bl => bl.lines).reduce((a, b) => a + 6, 0) *
+          18}px)`;
+        const blame = (
+          <BlameContainer innerRef={this.scrollBlameInResponseOfScrollingEditor}>
+            <div style={{ height: blamesHeight }}>
+              <Blame blames={blames} lineHeight={18} />
+            </div>
+          </BlameContainer>
+        );
+        return (
+          <EditorBlameContainer>
+            {this.renderButtons(ButtonOption.Blame)}
+            {blame}
+            <Editor />
+          </EditorBlameContainer>
+        );
+      case PathTypes.commits:
         return (
           <React.Fragment>
-            {this.renderButtons()}
+            {this.renderButtons(ButtonOption.History)}
             <InfiniteScroll
-              pageStart={0}
-              initialLoad={true}
+              initialLoad={false}
               loadMore={() => !loadingCommits && this.props.fetchMoreCommits(repoUri)}
-              hasMore={hasMoreCommits}
+              hasMore={!loadingCommits && hasMoreCommits}
               useWindow={true}
               loader={
                 <div className="loader" key={0}>
@@ -233,43 +298,6 @@ class CodeContent extends React.PureComponent<Props, State> {
             </InfiniteScroll>
           </React.Fragment>
         );
-      }
-      if (!file) {
-        return null;
-      }
-      const { lang: fileLanguage, content: fileContent, url } = file;
-      if (fileLanguage === 'markdown') {
-        return (
-          <div className="markdown-body markdownContainer">
-            <Markdown source={fileContent} escapeHtml={true} skipHtml={true} />
-          </div>
-        );
-      } else if (this.props.file!.isImage) {
-        return (
-          <div className="autoMargin">
-            <img src={url} alt={url} />
-          </div>
-        );
-      }
-      const blamesHeight = `calc(100% + ${blames.map(bl => bl.lines).reduce((a, b) => a + 6, 0) *
-        18}px)`;
-      const showBlame = this.state.selectedButtonId === ButtonOption.Blame;
-      const blame = showBlame && (
-        <BlameContainer innerRef={this.scrollBlameInResponseOfScrollingEditor}>
-          <div style={{ height: blamesHeight }}>
-            <Blame blames={blames} lineHeight={18} />
-          </div>
-        </BlameContainer>
-      );
-      return (
-        <EditorBlameContainer>
-          {this.renderButtons()}
-          {blame}
-          <Editor />
-        </EditorBlameContainer>
-      );
-    } else {
-      return null;
     }
   }
 }
