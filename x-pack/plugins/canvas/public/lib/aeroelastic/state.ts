@@ -12,32 +12,27 @@ import { shallowEqual } from './functional';
 
 const makeUid = () => 1e11 + Math.floor((1e12 - 1e11) * Math.random());
 
-export const selectReduce = (fun, previousValue, mapFun = d => d, logFun) => (...inputs) => {
+export const selectReduce = (fun, previousValue) => (...inputs) => {
   // last-value memoizing version of this single line function:
   // (fun, previousValue) => (...inputs) => state => previousValue = fun(previousValue, ...inputs.map(input => input(state)))
   let argumentValues = [];
   let value = previousValue;
   let prevValue = previousValue;
-  let mappedValue;
   return state => {
     if (
       shallowEqual(argumentValues, (argumentValues = inputs.map(input => input(state)))) &&
       value === prevValue
     ) {
-      return mappedValue;
+      return value;
     }
 
     prevValue = value;
     value = fun(prevValue, ...argumentValues);
-    if (logFun) {
-      logFun(value, argumentValues);
-    }
-    mappedValue = mapFun(value);
-    return mappedValue;
+    return value;
   };
 };
 
-export const select = (fun, logFun) => (...inputs) => {
+export const select = fun => (...inputs) => {
   // last-value memoizing version of this single line function:
   // fun => (...inputs) => state => fun(...inputs.map(input => input(state)))
   let argumentValues = [];
@@ -54,19 +49,11 @@ export const select = (fun, logFun) => (...inputs) => {
 
     value = fun(...argumentValues);
     actionId = lastActionId;
-    if (logFun) {
-      logFun(value, argumentValues);
-    }
     return value;
   };
 };
 
-export const createStore = (
-  initialState,
-  onChangeCallback = () => {
-    /* empty */
-  }
-) => {
+export const createStore = (initialState, onChangeCallback) => {
   let currentState = initialState;
   let updater = state => state; // default: no side effect
   const getCurrentState = () => currentState;
