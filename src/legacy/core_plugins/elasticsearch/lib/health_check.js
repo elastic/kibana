@@ -22,7 +22,7 @@ import elasticsearch from '@elastic/elasticsearch';
 import kibanaVersion from './kibana_version';
 import { ensureEsVersion } from './ensure_es_version';
 
-const NoConnections = elasticsearch.errors.NoConnections;
+const NoConnections = elasticsearch.errors.NoLivingConnectionsError;
 
 export default function (plugin, server) {
   const config = server.config();
