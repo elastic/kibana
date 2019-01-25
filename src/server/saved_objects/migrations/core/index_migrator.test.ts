@@ -52,6 +52,8 @@ describe('IndexMigrator', () => {
           updated_at: { type: 'date' },
         },
       },
+      include_type_name: true,
+      type: '_doc',
       index: '.kibana_1',
     });
   });
