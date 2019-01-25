@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AbstractLayer } from './layer';
 import _ from 'lodash';
-import { ALayer } from './layer';
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { TileStyle } from '../layers/styles/tile_style';
 
-export class TileLayer extends ALayer {
+export class TileLayer extends AbstractLayer {
 
   static type = "TILE";
   TMS_LOAD_TIMEOUT = 32000;
@@ -106,10 +106,14 @@ export class TileLayer extends ALayer {
     });
   }
 
+  getLayerTypeIconName() {
+    return 'grid';
+  }
+
   getIcon() {
     return (
       <EuiIcon
-        type={'grid'}
+        type={this.getLayerTypeIconName()}
       />
     );
   }

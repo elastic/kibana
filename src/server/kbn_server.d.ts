@@ -18,7 +18,9 @@
  */
 
 import { Server } from 'hapi';
-import { ElasticsearchPlugin } from '../legacy/core_plugins/elasticsearch';
+import { CallClusterWithRequest, ElasticsearchPlugin } from '../legacy/core_plugins/elasticsearch';
+import { IndexPatternsServiceFactory } from './index_patterns';
+import { SavedObjectsService } from './saved_objects';
 
 export interface KibanaConfig {
   get<T>(key: string): T;
@@ -34,6 +36,16 @@ declare module 'hapi' {
 
   interface Server {
     config: () => KibanaConfig;
+    indexPatternsServiceFactory: IndexPatternsServiceFactory;
+    savedObjects: SavedObjectsService;
+  }
+
+  interface Request {
+    getBasePath: () => string;
+  }
+
+  interface Request {
+    getUiSettingsService: () => any;
   }
 }
 
@@ -54,3 +66,7 @@ export default class KbnServer {
 
 // Re-export commonly used hapi types.
 export { Server, Request, ResponseToolkit } from 'hapi';
+
+// Re-export commonly accessed api types.
+export { IndexPatternsService } from './index_patterns';
+export { SavedObject, SavedObjectsClient, SavedObjectsService } from './saved_objects';

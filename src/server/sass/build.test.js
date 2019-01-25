@@ -31,21 +31,54 @@ afterEach(async () => {
   await del(TMP);
 });
 
-it('builds SASS', async () => {
-  const cssPath = resolve(TMP, 'style.css');
-  await (new Build(FIXTURE, {
-    info: () => {},
-    warn: () => {},
-    error: () => {},
-  }, cssPath)).build();
+it('builds light themed SASS', async () => {
+  const targetPath = resolve(TMP, 'style.css');
+  await new Build({
+    sourcePath: FIXTURE,
+    log: {
+      info: () => {},
+      warn: () => {},
+      error: () => {},
+    },
+    theme: 'light',
+    targetPath
+  }).build();
 
-  expect(readFileSync(cssPath, 'utf8').replace(/(\/\*# sourceMappingURL=).*( \*\/)/, '$1...$2'))
-    .toMatchInlineSnapshot(`
+  expect(
+    readFileSync(targetPath, 'utf8').replace(/(\/\*# sourceMappingURL=).*( \*\/)/, '$1...$2')
+  ).toMatchInlineSnapshot(`
 "foo bar {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
-  display: flex; }
+  display: flex;
+  background: #e6f0f8; }
+/*# sourceMappingURL=... */"
+`);
+});
+
+it('builds dark themed SASS', async () => {
+  const targetPath = resolve(TMP, 'style.css');
+  await new Build({
+    sourcePath: FIXTURE,
+    log: {
+      info: () => {},
+      warn: () => {},
+      error: () => {},
+    },
+    theme: 'dark',
+    targetPath
+  }).build();
+
+  expect(
+    readFileSync(targetPath, 'utf8').replace(/(\/\*# sourceMappingURL=).*( \*\/)/, '$1...$2')
+  ).toMatchInlineSnapshot(`
+"foo bar {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  background: #191919; }
 /*# sourceMappingURL=... */"
 `);
 });
