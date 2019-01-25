@@ -115,7 +115,10 @@ export function ApmServerInstancesUI({ apms, intl }) {
                 {
                   type: 'field_value_selection',
                   field: 'version',
-                  name: 'Version',
+                  name: intl.formatMessage({
+                    id: 'xpack.monitoring.apm.instances.versionFilter',
+                    defaultMessage: 'Version'
+                  }),
                   options: versions,
                   multiSelect: 'or',
                 }

@@ -67,7 +67,11 @@ const getColumns = showCgroupMetricsElasticsearch => {
     field: 'isOnline',
     sortable: true,
     render: value => {
-      const status = value ? 'Online' : 'Offline';
+      const status = value ? i18n.translate('xpack.monitoring.elasticsearch.nodes.statusOnline', {
+        defaultMessage: 'Online',
+      }) : i18n.translate('xpack.monitoring.elasticsearch.nodes.statusOffline', {
+        defaultMessage: 'Offline',
+      });
       return (
         <div className="monTableCell__status">
           <NodeStatusIcon

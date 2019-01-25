@@ -15,6 +15,7 @@ import { FormattedAlert } from 'plugins/monitoring/components/alerts/formatted_a
 import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
 import { EuiHealth, EuiIcon } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 const linkToCategories = {
   'elasticsearch/nodes': 'Elasticsearch Nodes',
@@ -24,7 +25,9 @@ const linkToCategories = {
 };
 const getColumns = (kbnUrl, scope) => ([
   {
-    name: 'Status',
+    name: i18n.translate('xpack.monitoring.alerts.statusColumnTitle', {
+      defaultMessage: 'Status',
+    }),
     field: 'status',
     sortable: true,
     render: severity => {
@@ -40,19 +43,30 @@ const getColumns = (kbnUrl, scope) => ([
     }
   },
   {
-    name: 'Resolved',
+    name: i18n.translate('xpack.monitoring.alerts.resolvedColumnTitle', {
+      defaultMessage: 'Resolved',
+    }),
     field: 'resolved_timestamp',
     sortable: true,
     render: (resolvedTimestamp) => {
+      const notResolvedLabel = i18n.translate('xpack.monitoring.alerts.notResolvedDescription', {
+        defaultMessage: 'Not Resolved',
+      });
+
       const resolution = {
         icon: null,
-        text: 'Not Resolved'
+        text: notResolvedLabel,
       };
 
       if (resolvedTimestamp) {
-        resolution.text = `${formatTimestampToDuration(resolvedTimestamp, CALCULATE_DURATION_SINCE)} ago`;
+        resolution.text = i18n.translate('xpack.monitoring.alerts.resolvedAgoDescription', {
+          defaultMessage: '{duration} ago',
+          values: {
+            duration: formatTimestampToDuration(resolvedTimestamp, CALCULATE_DURATION_SINCE)
+          }
+        });
       } else {
-        resolution.icon = <EuiIcon type="alert" size="m" aria-label="Not Resolved" />;
+        resolution.icon = <EuiIcon type="alert" size="m" aria-label={notResolvedLabel} />;
       }
 
       return (
@@ -63,7 +77,9 @@ const getColumns = (kbnUrl, scope) => ([
     },
   },
   {
-    name: 'Message',
+    name: i18n.translate('xpack.monitoring.alerts.messageColumnTitle', {
+      defaultMessage: 'Message',
+    }),
     field: 'message',
     sortable: true,
     render: (message, alert) => (
@@ -81,19 +97,27 @@ const getColumns = (kbnUrl, scope) => ([
     )
   },
   {
-    name: 'Category',
+    name: i18n.translate('xpack.monitoring.alerts.categoryColumnTitle', {
+      defaultMessage: 'Category',
+    }),
     field: 'category',
     sortable: true,
-    render: link => linkToCategories[link] ? linkToCategories[link] : 'General'
+    render: link => linkToCategories[link] ? linkToCategories[link] : i18n.translate('xpack.monitoring.alerts.categoryColumn.general', {
+      defaultMessage: 'General',
+    })
   },
   {
-    name: 'Last Checked',
+    name: i18n.translate('xpack.monitoring.alerts.lastCheckedColumnTitle', {
+      defaultMessage: 'Last Checked',
+    }),
     field: 'update_timestamp',
     sortable: true,
     render: timestamp => formatDateTimeLocal(timestamp)
   },
   {
-    name: 'Triggered',
+    name: i18n.translate('xpack.monitoring.alerts.triggeredColumnTitle', {
+      defaultMessage: 'Triggered',
+    }),
     field: 'timestamp',
     sortable: true,
     render: timestamp => formatTimestampToDuration(timestamp, CALCULATE_DURATION_SINCE) + ' ago'
