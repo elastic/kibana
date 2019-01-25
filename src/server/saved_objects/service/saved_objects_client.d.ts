@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { errors, SavedObjectsRepository } from './lib';
+
 export interface BaseOptions {
   namespace?: string;
 }
@@ -68,14 +70,14 @@ export interface BulkGetResponse {
 }
 
 export interface SavedObjectAttributes {
-  [key: string]: string | number | boolean | null;
+  [key: string]: SavedObjectAttributes | string | number | boolean | null;
 }
 
 export interface SavedObject {
   id: string;
   type: string;
   version?: number;
-  updatedAt?: string;
+  updated_at?: string;
   error?: {
     message: string;
   };
@@ -89,22 +91,27 @@ export interface SavedObjectReference {
   id: string;
 }
 
-export interface SavedObjectsClient {
-  errors: any;
-  create: (
+export declare class SavedObjectsClient {
+  public static errors: typeof errors;
+  public errors: typeof errors;
+  public create: (
     type: string,
     attributes: SavedObjectAttributes,
     options?: CreateOptions
   ) => Promise<SavedObject>;
-  bulkCreate: (objects: BulkCreateObject[], options?: CreateOptions) => Promise<BulkCreateResponse>;
-  delete: (type: string, id: string, options?: BaseOptions) => Promise<{}>;
-  find: (options: FindOptions) => Promise<FindResponse>;
-  bulkGet: (objects: BulkGetObjects, options?: BaseOptions) => Promise<BulkGetResponse>;
-  get: (type: string, id: string, options?: BaseOptions) => Promise<SavedObject>;
-  update: (
+  public bulkCreate: (
+    objects: BulkCreateObject[],
+    options?: CreateOptions
+  ) => Promise<BulkCreateResponse>;
+  public delete: (type: string, id: string, options?: BaseOptions) => Promise<{}>;
+  public find: (options: FindOptions) => Promise<FindResponse>;
+  public bulkGet: (objects: BulkGetObjects, options?: BaseOptions) => Promise<BulkGetResponse>;
+  public get: (type: string, id: string, options?: BaseOptions) => Promise<SavedObject>;
+  public update: (
     type: string,
     id: string,
     attributes: SavedObjectAttributes,
     options?: UpdateOptions
   ) => Promise<SavedObject>;
+  constructor(repository: SavedObjectsRepository);
 }
