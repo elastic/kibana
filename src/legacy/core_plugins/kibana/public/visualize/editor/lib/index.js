@@ -17,19 +17,4 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import { migrations } from './migrations';
-
-export default function (kibana) {
-
-  return new kibana.Plugin({
-    uiExports: {
-      visTypes: [
-        'plugins/table_vis/table_vis'
-      ],
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      migrations,
-    },
-  });
-
-}
+export { migrateAppState } from './migrate_app_state';
