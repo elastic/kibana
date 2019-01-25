@@ -15,9 +15,9 @@ export const getFilteredQuery = (
   // TODO: handle bad JSON gracefully
   filtersObj = filters ? JSON.parse(filters) : undefined;
   if (get(filtersObj, 'bool.must', undefined)) {
-    const f = get(filtersObj, 'bool.must', []);
+    const userFilters = get(filtersObj, 'bool.must', []);
     delete filtersObj.bool.must;
-    filtersObj.bool.filter = [...f];
+    filtersObj.bool.filter = [...userFilters];
   }
   const query = { ...filtersObj };
   const rangeSection = {
