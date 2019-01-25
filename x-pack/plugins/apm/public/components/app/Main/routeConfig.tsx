@@ -28,20 +28,8 @@ interface RouteParams {
 type BreadcrumbFunction = (args: BreadcrumbArgs) => string | null;
 
 interface Route extends RouteProps {
-  switch?: never;
-  breadcrumb: string | BreadcrumbFunction | null;
-}
-
-interface SwitchSet {
-  switch: true;
-  routes: Route[];
-}
-
-type RoutesConfig = Array<Route | SwitchSet>;
-
-// this function is used to tell TS what type the route is based on route.switch
-export function isSwitchSet(route: Route | SwitchSet): route is SwitchSet {
-  return Boolean(route.switch);
+  switchRoutes?: Route[];
+  breadcrumb?: string | BreadcrumbFunction | null;
 }
 
 const renderAsRedirectTo = (to: string) => {
@@ -55,7 +43,7 @@ const renderAsRedirectTo = (to: string) => {
   );
 };
 
-export const routes: RoutesConfig = [
+export const routes: Route[] = [
   {
     exact: true,
     path: '/',
@@ -77,8 +65,7 @@ export const routes: RoutesConfig = [
     })
   },
   {
-    switch: true,
-    routes: [
+    switchRoutes: [
       {
         exact: true,
         path: '/invalid-license',

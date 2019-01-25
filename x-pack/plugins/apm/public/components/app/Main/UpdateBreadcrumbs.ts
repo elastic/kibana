@@ -11,7 +11,7 @@ import React from 'react';
 import { withBreadcrumbs } from 'react-router-breadcrumbs-hoc';
 import chrome from 'ui/chrome';
 import { toQuery } from '../../shared/Links/url_helpers';
-import { isSwitchSet, routes } from './routeConfig';
+import { routes } from './routeConfig';
 
 interface Props {
   location: Location;
@@ -48,7 +48,7 @@ class UpdateBreadcrumbsComponent extends React.Component<Props> {
 }
 
 const flatRoutes = flatten(
-  routes.map(route => (isSwitchSet(route) ? route.routes : route))
+  routes.map(route => (route.switchRoutes ? route.switchRoutes : route))
 );
 
 const UpdateBreadcrumbs = withBreadcrumbs(flatRoutes)(

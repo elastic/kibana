@@ -26,9 +26,9 @@ export default function Main() {
       <Route component={ConnectRouterToRedux} />
       <Route component={ScrollToTopOnPathChange} />
       {routes.map((route, i) => {
-        return route.switch ? (
+        return route.switchRoutes ? (
           <Switch key={i}>
-            {route.routes.map((route, i) => (
+            {route.switchRoutes.map((route, i) => (
               <Route key={i} {...route} />
             ))}
           </Switch>
