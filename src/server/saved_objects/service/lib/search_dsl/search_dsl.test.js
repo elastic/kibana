@@ -57,7 +57,7 @@ describe('getSearchDsl', () => {
         searchFields: ['baz'],
         referencedBy: {
           type: 'bar',
-          id: '1'
+          id: '1',
         },
       };
 

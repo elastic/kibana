@@ -16,7 +16,7 @@ describe('extractReferences', () => {
           JSON.stringify({
             indexPattern: 'pattern*',
             bar: true,
-          })
+          }),
         ),
       },
     };
@@ -45,7 +45,7 @@ Object {
         wsState: JSON.stringify(
           JSON.stringify({
             bar: true,
-          })
+          }),
         ),
       },
     };

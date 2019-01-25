@@ -39,8 +39,8 @@ export const createUpdateRoute = (prereqs) => {
                 name: Joi.string().required(),
                 type: Joi.string().required(),
                 id: Joi.string().required(),
-              })
-          ).optional(),
+              }),
+          ).default([]),
         }).required()
       },
       handler(request) {

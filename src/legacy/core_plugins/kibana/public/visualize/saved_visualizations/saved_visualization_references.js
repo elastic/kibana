@@ -18,21 +18,23 @@
  */
 
 export function extractReferences({ attributes, references = [] }) {
-  if (!attributes.savedSearchId) return { attributes, references };
+  if (!attributes.savedSearchId) {
+    return { attributes, references };
+  }
   return {
     references: [
       ...references,
       {
         type: 'search',
         name: 'search_0',
-        id: attributes.savedSearchId
-      }
+        id: attributes.savedSearchId,
+      },
     ],
     attributes: {
       ...attributes,
       savedSearchId: undefined,
-      savedSearchRefName: 'search_0'
-    }
+      savedSearchRefName: 'search_0',
+    },
   };
 }
 

@@ -24,8 +24,8 @@ export function extractReferences({ attributes, references = [] }) {
     ],
     attributes: {
       ...attributes,
-      wsState: JSON.stringify(JSON.stringify(state))
-    }
+      wsState: JSON.stringify(JSON.stringify(state)),
+    },
   };
 }
 

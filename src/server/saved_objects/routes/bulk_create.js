@@ -43,7 +43,7 @@ export const createBulkCreateRoute = prereqs => ({
                 name: Joi.string().required(),
                 type: Joi.string().required(),
                 id: Joi.string().required(),
-              })
+              }),
           ).default([]),
         }).required()
       ),

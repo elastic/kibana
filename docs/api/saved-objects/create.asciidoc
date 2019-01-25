@@ -33,6 +33,8 @@ Note: You cannot access this endpoint via the Console in Kibana.
 `attributes` (required)::
   (object) The data to persist
 
+`references` (optional)::
+  (array) The references to other saved objects.
 
 ==== Examples
 

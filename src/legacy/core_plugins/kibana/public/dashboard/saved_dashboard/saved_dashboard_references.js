@@ -31,7 +31,7 @@ export function extractReferences({ attributes, references = [] }) {
     panelReferences.push({
       name: `panel_${i}`,
       type: panel.type,
-      id: panel.id
+      id: panel.id,
     });
     delete panel.type;
     delete panel.id;
@@ -39,16 +39,19 @@ export function extractReferences({ attributes, references = [] }) {
   return {
     references: [
       ...references,
-      ...panelReferences
+      ...panelReferences,
     ],
     attributes: {
       ...attributes,
-      panelsJSON: JSON.stringify(panels)
-    }
+      panelsJSON: JSON.stringify(panels),
+    },
   };
 }
 
 export function injectReferences(savedObject, references) {
+  if (!savedObject.panelsJSON) {
+    return;
+  }
   const panels = JSON.parse(savedObject.panelsJSON);
   panels.forEach((panel) => {
     if (!panel.panelRefName) {

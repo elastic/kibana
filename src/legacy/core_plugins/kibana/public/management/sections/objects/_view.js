@@ -144,10 +144,10 @@ uiModules.get('apps/management')
             $scope.obj = obj;
             $scope.link = service.urlFor(obj.id);
 
-            const fields =  [
-              ..._.reduce(obj.attributes, createField, []),
-              ...createField([], obj.references, 'references'),
-            ];
+            const fields = _.reduce(obj.attributes, createField, []);
+            // Special handling for references which isn't within "attributes"
+            createField(fields, obj.references, 'references');
+
             if (service.Class) readObjectClass(fields, service.Class);
 
             // sorts twice since we want numerical sort to prioritize over name,

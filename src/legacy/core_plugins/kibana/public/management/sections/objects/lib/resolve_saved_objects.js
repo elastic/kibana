@@ -84,7 +84,7 @@ async function importIndexPattern(doc, indexPatterns, overwriteAll) {
 async function importDocument(obj, doc, overwriteAll) {
   await obj.applyESResp({
     references: doc._references || [],
-    ...doc
+    ...doc,
   });
   return await obj.save({ confirmOverwrite: !overwriteAll });
 }

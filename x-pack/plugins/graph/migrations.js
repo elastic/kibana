@@ -13,26 +13,28 @@ export default {
       doc.references = doc.references || [];
       // Migrate index pattern
       const wsState = get(doc, 'attributes.wsState');
-      if (typeof wsState === 'string') {
-        let state;
-        try {
-          state = JSON.parse(JSON.parse(wsState));
-        } catch (e) {
-          // Let it go, the data is invalid and we'll leave it as is
-          return doc;
-        }
-        const { indexPattern } = state;
-        if (indexPattern) {
-          state.indexPatternRefName = 'indexPattern_0';
-          delete state.indexPattern;
-          doc.attributes.wsState = JSON.stringify(JSON.stringify(state));
-          doc.references.push({
-            name: 'indexPattern_0',
-            type: 'index-pattern',
-            id: indexPattern,
-          });
-        }
+      if (typeof wsState !== 'string') {
+        return doc;
       }
+      let state;
+      try {
+        state = JSON.parse(JSON.parse(wsState));
+      } catch (e) {
+        // Let it go, the data is invalid and we'll leave it as is
+        return doc;
+      }
+      const { indexPattern } = state;
+      if (!indexPattern) {
+        return doc;
+      }
+      state.indexPatternRefName = 'indexPattern_0';
+      delete state.indexPattern;
+      doc.attributes.wsState = JSON.stringify(JSON.stringify(state));
+      doc.references.push({
+        name: 'indexPattern_0',
+        type: 'index-pattern',
+        id: indexPattern,
+      });
       return doc;
     }
   }

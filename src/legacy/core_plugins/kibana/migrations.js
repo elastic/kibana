@@ -51,15 +51,16 @@ export default {
       // Migrate index pattern
       migrateIndexPattern('visualization', doc);
       // Migrate saved search
-      if (savedSearchId) {
-        doc.references.push({
-          type: 'search',
-          name: 'search_0',
-          id: savedSearchId,
-        });
-        doc.attributes.savedSearchRefName = 'search_0';
-        delete doc.attributes.savedSearchId;
+      if (!savedSearchId) {
+        return doc;
       }
+      doc.references.push({
+        type: 'search',
+        name: 'search_0',
+        id: savedSearchId,
+      });
+      doc.attributes.savedSearchRefName = 'search_0';
+      delete doc.attributes.savedSearchId;
       return doc;
     },
   },
@@ -71,27 +72,30 @@ export default {
       migrateIndexPattern('dashboard', doc);
       // Migrate panels
       const panelsJSON = get(doc, 'attributes.panelsJSON');
-      if (typeof panelsJSON === 'string') {
-        let panels;
-        try {
-          panels = JSON.parse(panelsJSON);
-        } catch (e) {
-          // Let it go, the data is invalid and we'll leave it as is
-          return doc;
-        }
-        panels.forEach((panel, i) => {
-          if (!panel.type || !panel.id) return;
-          panel.panelRefName = `panel_${i}`;
-          doc.references.push({
-            name: `panel_${i}`,
-            type: panel.type,
-            id: panel.id
-          });
-          delete panel.type;
-          delete panel.id;
-        });
-        doc.attributes.panelsJSON = JSON.stringify(panels);
+      if (typeof panelsJSON !== 'string') {
+        return doc;
       }
+      let panels;
+      try {
+        panels = JSON.parse(panelsJSON);
+      } catch (e) {
+        // Let it go, the data is invalid and we'll leave it as is
+        return doc;
+      }
+      panels.forEach((panel, i) => {
+        if (!panel.type || !panel.id) {
+          return;
+        }
+        panel.panelRefName = `panel_${i}`;
+        doc.references.push({
+          name: `panel_${i}`,
+          type: panel.type,
+          id: panel.id,
+        });
+        delete panel.type;
+        delete panel.id;
+      });
+      doc.attributes.panelsJSON = JSON.stringify(panels);
       return doc;
     },
   },

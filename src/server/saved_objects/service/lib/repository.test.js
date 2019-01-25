@@ -1294,7 +1294,7 @@ describe('SavedObjectsRepository', () => {
 
     it(`doesn't prepend namespace to the id or add namespace property when providing no namespace for namespaced type`, async () => {
       await savedObjectsRepository.update('index-pattern', 'logstash-*', {
-        title: 'Testing'
+        title: 'Testing',
       }, {
         references: [{
           name: 'ref_0',
