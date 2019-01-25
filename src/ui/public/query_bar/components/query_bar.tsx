@@ -44,7 +44,7 @@ import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector } from
 // @ts-ignore
 import { EuiSuperDatePicker, EuiSuperUpdateButton } from '@elastic/eui';
 
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 
 const KEY_CODES = {
   LEFT: 37,
@@ -97,6 +97,7 @@ interface State {
   currentProps?: Props;
   from: string;
   to: string;
+  isDateRangeInvalid: boolean;
 }
 
 export class QueryBarUI extends Component<Props, State> {
@@ -174,6 +175,7 @@ export class QueryBarUI extends Component<Props, State> {
     suggestionLimit: 50,
     from: this.props.from,
     to: this.props.to,
+    isDateRangeInvalid: false,
   };
 
   public updateSuggestions = debounce(async () => {
@@ -364,10 +366,19 @@ export class QueryBarUI extends Component<Props, State> {
     this.onInputChange(event.target.value);
   };
 
-  public onTimeChange = ({ start, end }: { start: string; end: string }) => {
+  public onTimeChange = ({
+    start,
+    end,
+    isInvalid,
+  }: {
+    start: string;
+    end: string;
+    isInvalid: boolean;
+  }) => {
     this.setState({
       from: start,
       to: end,
+      isDateRangeInvalid: isInvalid,
     });
   };
 
@@ -616,6 +627,7 @@ export class QueryBarUI extends Component<Props, State> {
     const button = (
       <EuiSuperUpdateButton
         needsUpdate={this.isDirty()}
+        isDisabled={this.state.isDateRangeInvalid}
         onClick={this.onClickSubmitButton}
         data-test-subj="querySubmitButton"
       />
