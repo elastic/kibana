@@ -1,0 +1,27 @@
+.kbnTopNav {
+  background-color: $euiColorLightestShade;
+  border-bottom: $euiBorderThin;
+}
+
+.kbnTopNav__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  // flex-wrap: wrap;
+  // justify-content: flex-end;
+}
+
+.kuiLocalNavRow__section {
+  flex-grow: 1;
+}
+
+.kbnTopNav__mainMenu {
+  &:empty {
+    // Make sure the area doesn't take up any space if it is empty
+    padding: 0;
+  }
+
+  .kuiLocalMenuItem:not(.kuiLocalMenuItem-isDisabled) {
+    color: $euiLinkColor;
+  }
+}
