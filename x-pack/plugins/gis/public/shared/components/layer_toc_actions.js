@@ -128,7 +128,7 @@ export class LayerTocActions extends Component {
           },
         },
         {
-          name: 'Change visibility',
+          name: this.props.layer.isVisible() ? 'Hide layer' : 'Show layer',
           icon: visibilityToggle,
           onClick: () => {
             this._closePopover();
