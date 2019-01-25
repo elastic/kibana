@@ -67,6 +67,47 @@ export class LspIndexer extends AbstractIndexer {
     ];
   }
 
+  protected async *getIndexRequestIterator(): AsyncIterableIterator<LspIndexRequest> {
+    try {
+      const {
+        workspaceRepo,
+        workspaceRevision,
+      } = await this.lspService.workspaceHandler.openWorkspace(this.repoUri, 'head');
+      const workspaceDir = workspaceRepo.workdir();
+      const gitOperator = new GitOperations(this.options.repoPath);
+      const fileIterator = await gitOperator.iterateRepo(this.repoUri, 'head');
+      for await (const file of fileIterator) {
+        const filePath = file.path!;
+        const lang = detectLanguageByFilename(filePath);
+        // filter file by language
+        if (lang && this.lspService.supportLanguage(lang)) {
+          const req: LspIndexRequest = {
+            repoUri: this.repoUri,
+            localRepoPath: workspaceDir,
+            filePath,
+            revision: workspaceRevision,
+          };
+          yield req;
+        }
+      }
+    } catch (error) {
+      this.log.error(`Prepare lsp indexing requests error.`);
+      this.log.error(error);
+      throw error;
+    }
+  }
+
+  protected async getIndexRequestCount(): Promise<number> {
+    try {
+      const gitOperator = new GitOperations(this.options.repoPath);
+      return await gitOperator.countRepoFiles(this.repoUri, 'head');
+    } catch (error) {
+      this.log.error(`Get lsp index requests count error.`);
+      this.log.error(error);
+      throw error;
+    }
+  }
+
   protected async prepareRequests() {
     try {
       const {
@@ -105,43 +146,43 @@ export class LspIndexer extends AbstractIndexer {
     }
   }
 
-  protected async cleanIndex(repoUri: RepositoryUri) {
+  protected async cleanIndex() {
     // Clean up all the symbol documents in the symbol index
     try {
       await this.client.deleteByQuery({
-        index: SymbolIndexName(repoUri),
+        index: SymbolIndexName(this.repoUri),
         body: {
           query: {
             match_all: {},
           },
         },
       });
-      this.log.info(`Clean up symbols for ${repoUri} done.`);
+      this.log.info(`Clean up symbols for ${this.repoUri} done.`);
     } catch (error) {
-      this.log.error(`Clean up symbols for ${repoUri} error.`);
+      this.log.error(`Clean up symbols for ${this.repoUri} error.`);
       this.log.error(error);
     }
 
     // Clean up all the reference documents in the reference index
     try {
       await this.client.deleteByQuery({
-        index: ReferenceIndexName(repoUri),
+        index: ReferenceIndexName(this.repoUri),
         body: {
           query: {
             match_all: {},
           },
         },
       });
-      this.log.info(`Clean up references for ${repoUri} done.`);
+      this.log.info(`Clean up references for ${this.repoUri} done.`);
     } catch (error) {
-      this.log.error(`Clean up references for ${repoUri} error.`);
+      this.log.error(`Clean up references for ${this.repoUri} error.`);
       this.log.error(error);
     }
 
     // Clean up all the document documents in the document index but keep the repository document.
     try {
       await this.client.deleteByQuery({
-        index: DocumentIndexName(repoUri),
+        index: DocumentIndexName(this.repoUri),
         body: {
           query: {
             bool: {
@@ -154,9 +195,9 @@ export class LspIndexer extends AbstractIndexer {
           },
         },
       });
-      this.log.info(`Clean up documents for ${repoUri} done.`);
+      this.log.info(`Clean up documents for ${this.repoUri} done.`);
     } catch (error) {
-      this.log.error(`Clean up documents for ${repoUri} error.`);
+      this.log.error(`Clean up documents for ${this.repoUri} error.`);
       this.log.error(error);
     }
   }

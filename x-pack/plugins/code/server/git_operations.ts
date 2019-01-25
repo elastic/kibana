@@ -149,6 +149,49 @@ export class GitOperations {
     return checkExists<Repository>(() => Repository.open(repoDir), `repo ${uri} not found`);
   }
 
+  public async countRepoFiles(uri: RepositoryUri, revision: string): Promise<number> {
+    const repo = await this.openRepo(uri);
+    const commit = await this.getCommit(repo, revision);
+    const tree = await commit.getTree();
+    let count = 0;
+    async function walk(t: Tree) {
+      for (const e of t.entries()) {
+        if (e.isFile() && e.filemode() !== TreeEntry.FILEMODE.LINK) {
+          count++;
+        } else if (e.isDirectory()) {
+          const subFolder = await e.getTree();
+          await walk(subFolder);
+        } else {
+          // ignore other files
+        }
+      }
+    }
+    await walk(tree);
+    return count;
+  }
+
+  public async iterateRepo(
+    uri: RepositoryUri,
+    revision: string
+  ): Promise<AsyncIterableIterator<FileTree>> {
+    const repo = await this.openRepo(uri);
+    const commit = await this.getCommit(repo, revision);
+    const tree = await commit.getTree();
+    async function* walk(t: Tree): AsyncIterableIterator<FileTree> {
+      for (const e of t.entries()) {
+        if (e.isFile() && e.filemode() !== TreeEntry.FILEMODE.LINK) {
+          yield entry2Tree(e);
+        } else if (e.isDirectory()) {
+          const subFolder = await e.getTree();
+          await (yield* walk(subFolder));
+        } else {
+          // ignore other files
+        }
+      }
+    }
+    return await walk(tree);
+  }
+
   /**
    * Return a fileTree structure by walking the repo file tree.
    * @param uri the repo uri
