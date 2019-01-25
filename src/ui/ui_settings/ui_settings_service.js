@@ -46,8 +46,8 @@ export class UiSettingsService {
       // we use a function for getDefaults() so that defaults can be different in
       // different scenarios, and so they can change over time
       getDefaults = () => ({}),
-      // function that accepts log messages in the same format as server.log
-      log = () => {},
+      // function that accepts log messages in the same format as server.logWithMetadata
+      logWithMetadata = () => {},
       overrides = {},
     } = options;
 
@@ -57,7 +57,7 @@ export class UiSettingsService {
     this._savedObjectsClient = savedObjectsClient;
     this._getDefaults = getDefaults;
     this._overrides = overrides;
-    this._log = log;
+    this._logWithMetadata = logWithMetadata;
   }
 
   async getDefaults() {
@@ -157,7 +157,7 @@ export class UiSettingsService {
         savedObjectsClient: this._savedObjectsClient,
         version: this._id,
         buildNum: this._buildNum,
-        log: this._log,
+        logWithMetadata: this._logWithMetadata,
       });
 
       await this._write({
@@ -195,7 +195,7 @@ export class UiSettingsService {
           savedObjectsClient: this._savedObjectsClient,
           version: this._id,
           buildNum: this._buildNum,
-          log: this._log,
+          logWithMetadata: this._logWithMetadata,
           onWriteError(error, attributes) {
             if (isNotAuthorizedError(error) || isForbiddenError(error)) {
               return attributes;

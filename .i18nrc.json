@@ -24,6 +24,7 @@
     "xpack.graph": "x-pack/plugins/graph",
     "xpack.grokDebugger": "x-pack/plugins/grokdebugger",
     "xpack.idxMgmt": "x-pack/plugins/index_management",
+    "xpack.indexLifecycleMgmt": "x-pack/plugins/index_lifecycle_management",
     "xpack.infra": "x-pack/plugins/infra",
     "xpack.licenseMgmt": "x-pack/plugins/license_management",
     "xpack.ml": "x-pack/plugins/ml",
