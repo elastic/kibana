@@ -102,7 +102,7 @@ async function fetchRollupVisualizations(kibanaIndex, callCluster, rollupIndexPa
     index: kibanaIndex,
     ignoreUnavailable: true,
     filterPath: [
-      'hits.hits._source.visualization.savedSearchId',
+      'hits.hits._source.visualization.savedSearchRefName',
       'hits.hits._source.visualization.kibanaSavedObjectMeta',
     ],
     body: {
