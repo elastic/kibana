@@ -57,10 +57,10 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: Props) 
               }),
             },
             {
-              value: i18n.translate('xpack.uptime.filterBar.filterDownLabel', {
+              value: 'down',
+              name: i18n.translate('xpack.uptime.filterBar.filterDownLabel', {
                 defaultMessage: 'Down',
               }),
-              name: 'Down',
             },
           ],
         },
@@ -72,9 +72,9 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: Props) 
             defaultMessage: 'ID',
           }),
           multiSelect: false,
-          options: take(id, MAX_SELECTION_LENGTH).map((idValue: any) => ({
+          options: take(id, MAX_SELECTION_LENGTH).map(({ id: idValue, url }: any) => ({
             value: idValue,
-            view: idValue,
+            view: url,
           })),
           searchThreshold: SEARCH_THRESHOLD,
         },
@@ -93,7 +93,7 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: Props) 
         },
         {
           type: 'field_value_selection',
-          field: 'monitor.scheme',
+          field: 'monitor.type',
           name: i18n.translate('xpack.uptime.filterBar.options.typeLabel', {
             defaultMessage: 'Type',
           }),

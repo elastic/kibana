@@ -11,7 +11,10 @@ export const getFilterBarQuery = gql`
     filterBar: getFilterBar(dateRangeStart: $dateRangeStart, dateRangeEnd: $dateRangeEnd) {
       status
       port
-      id
+      id {
+        id
+        url
+      }
       scheme
     }
   }

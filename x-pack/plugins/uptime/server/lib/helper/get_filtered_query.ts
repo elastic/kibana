@@ -1,0 +1,39 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { get, set } from 'lodash';
+
+export const getFilteredQuery = (
+  dateRangeStart: string,
+  dateRangeEnd: string,
+  filters?: string | null
+) => {
+  let filtersObj;
+  // TODO: handle bad JSON gracefully
+  filtersObj = filters ? JSON.parse(filters) : undefined;
+  if (get(filtersObj, 'bool.must', undefined)) {
+    const f = get(filtersObj, 'bool.must', []);
+    delete filtersObj.bool.must;
+    filtersObj.bool.filter = [...f];
+  }
+  const query = { ...filtersObj };
+  const rangeSection = {
+    range: {
+      '@timestamp': {
+        gte: dateRangeStart,
+        lte: dateRangeEnd,
+      },
+    },
+  };
+  if (get(query, 'bool.filter', undefined)) {
+    query.bool.filter.push({
+      ...rangeSection,
+    });
+  } else {
+    set(query, 'bool.filter', [rangeSection]);
+  }
+  return query;
+};

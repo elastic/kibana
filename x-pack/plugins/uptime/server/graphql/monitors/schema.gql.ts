@@ -8,10 +8,10 @@ import gql from 'graphql-tag';
 
 export const monitorsSchema = gql`
   type FilterBar {
-    id: [String]
-    port: [Int]
-    scheme: [String]
-    status: [String]
+    id: [MonitorKey!]
+    port: [Int!]
+    scheme: [String!]
+    status: [String!]
   }
 
   type HistogramDataPoint {
@@ -61,8 +61,8 @@ export const monitorsSchema = gql`
   }
 
   type MonitorKey {
-    id: String
-    port: Int
+    id: String!
+    url: String
   }
 
   type MonitorSeriesPoint {
@@ -71,7 +71,7 @@ export const monitorsSchema = gql`
   }
 
   type LatestMonitor {
-    key: MonitorKey
+    key: MonitorKey!
     ping: Ping
     upSeries: [MonitorSeriesPoint]
     downSeries: [MonitorSeriesPoint]
@@ -90,6 +90,12 @@ export const monitorsSchema = gql`
     timestamp: String
   }
 
+  type MonitorPageTitle {
+    id: String!
+    url: String
+    name: String
+  }
+
   extend type Query {
     getMonitors(
       dateRangeStart: String!
@@ -97,13 +103,7 @@ export const monitorsSchema = gql`
       filters: String
     ): LatestMonitorsResult
 
-    getSnapshot(
-      dateRangeStart: String!
-      dateRangeEnd: String!
-      downCount: Int!
-      windowSize: Int!
-      filters: String
-    ): Snapshot
+    getSnapshot(dateRangeStart: String!, dateRangeEnd: String!, filters: String): Snapshot
 
     getMonitorChartsData(
       monitorId: String!
@@ -116,5 +116,7 @@ export const monitorsSchema = gql`
     getFilterBar(dateRangeStart: String!, dateRangeEnd: String!): FilterBar
 
     getErrorsList(dateRangeStart: String!, dateRangeEnd: String!, filters: String): [ErrorListItem]
+
+    getMonitorPageTitle(monitorId: String!): MonitorPageTitle
   }
 `;

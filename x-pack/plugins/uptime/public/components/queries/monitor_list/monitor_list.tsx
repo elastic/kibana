@@ -25,7 +25,7 @@ import moment from 'moment';
 import React, { Fragment } from 'react';
 import { Query } from 'react-apollo';
 import { Link } from 'react-router-dom';
-import { LatestMonitorsResult } from 'x-pack/plugins/uptime/common/graphql/types';
+import { LatestMonitor, LatestMonitorsResult } from '../../../../common/graphql/types';
 import { UptimeCommonProps } from '../../../uptime_app';
 import { formatSparklineCounts } from './format_sparkline_counts';
 import { getMonitorListQuery } from './get_monitor_list';
@@ -70,7 +70,11 @@ const monitorListColumns = [
     name: i18n.translate('xpack.uptime.monitorList.idColumnLabel', {
       defaultMessage: 'ID',
     }),
-    render: (id: string, monitor: any) => <Link to={`/monitor/${monitor.key.id}`}>{id}</Link>,
+    render: (id: string, item: LatestMonitor) => (
+      <Link to={`/monitor/${item.key.id}`}>
+        {item.ping && item.ping.monitor && item.ping.monitor.name ? item.ping.monitor.name : id}
+      </Link>
+    ),
   },
   {
     field: 'ping.url.full',

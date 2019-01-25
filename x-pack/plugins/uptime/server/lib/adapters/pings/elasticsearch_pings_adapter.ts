@@ -8,35 +8,9 @@ import { get } from 'lodash';
 import moment from 'moment';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { DocCount, HistogramSeries, Ping, PingResults } from '../../../../common/graphql/types';
+import { getFilteredQuery } from '../../helper';
 import { DatabaseAdapter } from '../database';
 import { UMPingsAdapter } from './adapter_types';
-
-const getFilteredQuery = (
-  dateRangeStart: string,
-  dateRangeEnd: string,
-  filters?: string | null
-) => {
-  let filtersObj;
-  // TODO: handle bad JSON gracefully
-  filtersObj = filters ? JSON.parse(filters) : undefined;
-  let query = { ...filtersObj };
-  const rangeSection = {
-    range: {
-      '@timestamp': {
-        gte: dateRangeStart,
-        lte: dateRangeEnd,
-      },
-    },
-  };
-  if (get(query, 'bool.must', undefined)) {
-    query.bool.must.push({
-      ...rangeSection,
-    });
-  } else {
-    query = { ...rangeSection };
-  }
-  return query;
-};
 
 export class ElasticsearchPingsAdapter implements UMPingsAdapter {
   private database: DatabaseAdapter;
@@ -45,6 +19,16 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     this.database = database;
   }
 
+  /**
+   * Fetches ping documents from ES
+   * @param request Kibana server request
+   * @param dateRangeStart timestamp bounds
+   * @param dateRangeEnd timestamp bounds
+   * @param monitorId optional limit by monitorId
+   * @param status optional limit by check statuses
+   * @param sort optional sort by timestamp
+   * @param size optional limit query size
+   */
   public async getAll(
     request: any,
     dateRangeStart: string,
@@ -56,15 +40,14 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
   ): Promise<PingResults> {
     const sortParam = sort ? { sort: [{ '@timestamp': { order: sort } }] } : undefined;
     const sizeParam = size ? { size } : undefined;
-    const must: any[] = [];
+    const filter: any[] = [{ range: { '@timestamp': { gte: dateRangeStart, lte: dateRangeEnd } } }];
     if (monitorId) {
-      must.push({ term: { 'monitor.id': monitorId } });
+      filter.push({ term: { 'monitor.id': monitorId } });
     }
     if (status) {
-      must.push({ term: { 'monitor.status': status } });
+      filter.push({ term: { 'monitor.status': status } });
     }
-    const filter: any[] = [{ range: { '@timestamp': { gte: dateRangeStart, lte: dateRangeEnd } } }];
-    const queryContext = { bool: { must, filter } };
+    const queryContext = { bool: { filter } };
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
@@ -92,22 +75,28 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     return results;
   }
 
+  /**
+   * Fetch data to populate monitor status bar.
+   * @param request Kibana server request
+   * @param dateRangeStart timestamp bounds
+   * @param dateRangeEnd timestamp bounds
+   * @param monitorId optional limit to monitorId
+   */
   public async getLatestMonitorDocs(
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
     monitorId?: string | null
   ): Promise<Ping[]> {
-    const must: any[] = [];
+    const filter: any[] = [];
     if (monitorId) {
-      must.push({ term: { 'monitor.id': monitorId } });
+      filter.push({ term: { 'monitor.id': monitorId } });
     }
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
         query: {
           bool: {
-            must: must.length ? [...must] : undefined,
             filter: [
               {
                 range: {
@@ -117,13 +106,16 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
                   },
                 },
               },
+              filter.length ? [...filter] : undefined,
             ],
           },
         },
+        size: 0,
         aggs: {
           by_id: {
             terms: {
               field: 'monitor.id',
+              size: 1000,
             },
             aggs: {
               latest: {
@@ -139,11 +131,9 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
         },
       },
     };
-    const {
-      aggregations: {
-        by_id: { buckets },
-      },
-    } = await this.database.search(request, params);
+
+    const result = await this.database.search(request, params);
+    const buckets: any[] = get(result, 'aggregations.by_id.buckets', []);
 
     // @ts-ignore TODO fix destructuring implicit any
     return buckets.map(({ latest: { hits: { hits } } }) => {
@@ -158,6 +148,13 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     });
   }
 
+  /**
+   * Gets data used for a composite histogram for the currently-running monitors.
+   * @param request Kibana server request
+   * @param dateRangeStart timestamp bounds
+   * @param dateRangeEnd timestamp bounds
+   * @param filters user-defined filters
+   */
   public async getPingHistogram(
     request: any,
     dateRangeStart: string,
@@ -168,21 +165,25 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
         query: getFilteredQuery(dateRangeStart, dateRangeEnd, filters),
+        size: 0,
         aggs: {
           timeseries: {
             auto_date_histogram: {
               field: '@timestamp',
-              buckets: 50,
+              // limited to keep max bucket count to 10k, 25 * 200 * 2
+              buckets: 25,
             },
             aggs: {
               by_id: {
                 terms: {
                   field: 'monitor.id',
+                  size: 200,
                 },
                 aggs: {
                   status: {
                     terms: {
                       field: 'monitor.status',
+                      size: 2,
                     },
                   },
                 },
@@ -192,11 +193,9 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
         },
       },
     };
-    const {
-      aggregations: {
-        timeseries: { buckets },
-      },
-    } = await this.database.search(request, params);
+
+    const result = await this.database.search(request, params);
+    const buckets: any[] = get(result, 'aggregations.timeseries.buckets', []);
 
     if (buckets.length === 0) {
       return null;
@@ -245,6 +244,10 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     return ret;
   }
 
+  /**
+   * Count the number of documents in heartbeat indices
+   * @param request Kibana server request
+   */
   public async getDocCount(request: any): Promise<DocCount> {
     const { count } = await this.database.count(request, { index: INDEX_NAMES.HEARTBEAT });
 

@@ -16,17 +16,18 @@ export const getMonitorListQuery = gql`
       monitors {
         key {
           id
-          port
+          url
         }
         ping {
           timestamp
           monitor {
-            id
-            status
-            ip
             duration {
               us
             }
+            id
+            ip
+            name
+            status
           }
           url {
             full
