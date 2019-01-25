@@ -128,8 +128,11 @@ describe('plugins/elasticsearch', function () {
         cluster.callWithRequest(request, 'nodes.info');
 
         sinon.assert.calledOnce(client.nodes.info);
-        expect(client.nodes.info.getCall(0).args[0]).to.eql({
-          headers: headers
+        expect(client.nodes.info.getCall(0).args[1]).to.eql({
+          headers: headers,
+          ignore: undefined,
+          maxRetries: undefined,
+          requestTimeout: undefined
         });
       });
 

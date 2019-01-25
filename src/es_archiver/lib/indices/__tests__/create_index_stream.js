@@ -73,7 +73,8 @@ describe('esArchiver: createCreateIndexStream()', () => {
       ]);
 
       expect(client.indices.getAlias.calledOnce).to.be.ok();
-      expect(client.indices.getAlias.args[0][0]).to.eql({ name: 'existing-index', ignore: [404] });
+      expect(client.indices.getAlias.args[0][0]).to.eql({ name: 'existing-index' });
+      expect(client.indices.getAlias.args[0][1]).to.eql({ ignore: [404] });
       expect(client.indices.delete.calledOnce).to.be.ok();
       expect(client.indices.delete.args[0][0]).to.eql({ index: ['actual-index'] });
       sinon.assert.callCount(client.indices.create, 3); // one failed create because of existing

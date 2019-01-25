@@ -48,7 +48,8 @@ export const createStubClient = (responses = []) => {
     }
 
     const response = responses.shift();
-    return await response(name, params);
+    const body = await response(name, params);
+    return { body };
   });
 
   return {

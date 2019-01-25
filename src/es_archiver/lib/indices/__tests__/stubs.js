@@ -66,9 +66,11 @@ export const createStubClient = (existingIndices = [], aliases = {}) => ({
       }
 
       return {
-        [index]: {
-          mappings: {},
-          settings: {},
+        body: {
+          [index]: {
+            mappings: {},
+            settings: {},
+          }
         }
       };
     }),
@@ -78,14 +80,14 @@ export const createStubClient = (existingIndices = [], aliases = {}) => ({
     getAlias: sinon.spy(async ({ index, name }) => {
       if (index && existingIndices.indexOf(index) >= 0) {
         const result = indexAlias(aliases, index);
-        return { [index]: { aliases: result ? { [result]: {} } : {} } };
+        return { body: { [index]: { aliases: result ? { [result]: {} } : {} } } };
       }
 
       if (name && aliases[name]) {
-        return { [aliases[name]]: { aliases: { [name]: {} } } };
+        return { body: { [aliases[name]]: { aliases: { [name]: {} } } } };
       }
 
-      return { status: 404 };
+      return { body: { status: 404 } };
     }),
     updateAliases: sinon.spy(async ({ body }) => {
       body.actions.forEach(({ add: { index, alias } }) => {
@@ -95,14 +97,14 @@ export const createStubClient = (existingIndices = [], aliases = {}) => ({
         existingIndices.push({ index, alias });
       });
 
-      return { ok: true };
+      return { body: { ok: true } };
     }),
     create: sinon.spy(async ({ index }) => {
       if (existingIndices.includes(index) || aliases.hasOwnProperty(index)) {
         throw createEsClientError('resource_already_exists_exception');
       } else {
         existingIndices.push(index);
-        return { ok: true };
+        return { body: { ok: true } };
       }
     }),
     delete: sinon.spy(async ({ index }) => {
@@ -116,7 +118,7 @@ export const createStubClient = (existingIndices = [], aliases = {}) => ({
           }
         });
         indices.forEach(ix => existingIndices.splice(existingIndices.indexOf(ix), 1));
-        return { ok: true };
+        return { body: { ok: true } };
       } else {
         throw createEsClientError('index_not_found_exception');
       }
