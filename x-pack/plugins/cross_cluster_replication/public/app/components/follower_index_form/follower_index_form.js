@@ -198,7 +198,7 @@ export const FollowerIndexForm = injectI18n(
         // This error isn't an HTTP error, so let the fatal error screen tell the user something
         // unexpected happened.
         fatalError(error, i18n.translate('xpack.crossClusterReplication.followerIndexForm.indexNameValidationFatalErrorTitle', {
-          defaultMessage: 'Follower Index Forn index name validation',
+          defaultMessage: 'Follower Index Form index name validation',
         }));
       }
     };
