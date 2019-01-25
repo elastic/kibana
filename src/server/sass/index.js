@@ -49,7 +49,7 @@ export async function sassMixin(kbnServer, server, config) {
 
     scssBundles.forEach(bundle => {
       bundle.includedFiles.forEach(file => trackedFiles.add(file));
-      server.log(['info', 'scss'], `Compiled CSS: ${bundle.source}`);
+      server.log(['info', 'scss'], `Compiled CSS: ${bundle.sourcePath} (theme=${bundle.theme})`);
     });
   } catch(error) {
     const { message, line, file } = error;

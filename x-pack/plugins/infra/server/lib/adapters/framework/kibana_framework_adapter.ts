@@ -94,7 +94,13 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
     const internalRequest = req[internalInfraFrameworkRequest];
     const { elasticsearch } = internalRequest.server.plugins;
     const { callWithRequest } = elasticsearch.getCluster('data');
-    const fields = await callWithRequest(internalRequest, endpoint, params, ...rest);
+    const includeFrozen = await internalRequest.getUiSettingsService().get('search:includeFrozen');
+    const fields = await callWithRequest(
+      internalRequest,
+      endpoint,
+      { ...params, ignore_throttled: !includeFrozen },
+      ...rest
+    );
     return fields;
   }
 

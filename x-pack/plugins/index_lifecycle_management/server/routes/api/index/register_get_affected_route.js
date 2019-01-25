@@ -51,7 +51,7 @@ async function getAffectedIndices(
   }
   const indexParams = {
     method: 'GET',
-    path: `/${indexPatterns.join(',')}`,
+    path: `/${encodeURIComponent(indexPatterns.join(','))}`,
     // we allow 404 in case there are no indices
     ignore: [404]
   };

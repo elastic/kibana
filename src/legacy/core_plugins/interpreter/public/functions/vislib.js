@@ -26,10 +26,10 @@ export const vislib = () => ({
   type: 'render',
   context: {
     types: [
-      'kibana_table', 'null'
+      'datatable'
     ],
   },
-  help: i18n.translate('common.core_plugins.interpreter.public.functions.vislib.help', {
+  help: i18n.translate('interpreter.functions.vislib.help', {
     defaultMessage: 'Vislib visualization'
   }),
   args: {
