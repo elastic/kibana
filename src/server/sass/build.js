@@ -94,7 +94,7 @@ export class Build {
 
           const sourcePath = path.resolve(sourceBaseDir, asset.pathname);
           if (!fs.existsSync(sourcePath)) {
-            throw new Error(`Unable to locate url("${asset.url}"), it must resolve to a file relative to "${publicDir}"`);
+            throw new Error(`Unable to locate url("${asset.url}"), it must resolve to a file relative to "${sourceBaseDir}"`);
           }
 
           if (!isPathInside(sourcePath, publicDir)) {
