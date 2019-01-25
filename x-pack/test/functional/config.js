@@ -51,6 +51,7 @@ import {
   RandomProvider,
   AceEditorProvider,
   GrokDebuggerProvider,
+  UserMenuProvider,
 } from './services';
 
 import {
@@ -123,6 +124,7 @@ export default async function ({ readConfigFile }) {
       grokDebugger: GrokDebuggerProvider,
       security: SecurityServiceProvider,
       spaces: SpacesServiceProvider,
+      userMenu: UserMenuProvider,
     },
 
     // just like services, PageObjects are defined as a map of

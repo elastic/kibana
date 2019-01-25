@@ -164,7 +164,9 @@ export default function (kibana) {
               showWriteControls: true
             },
             dashboard: {
-              showWriteControls: true
+              createNew: true,
+              show: true,
+              showWriteControls: true,
             },
             catalogue: {
               discover: true,

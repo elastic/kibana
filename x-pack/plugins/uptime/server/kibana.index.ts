@@ -41,8 +41,9 @@ export const initServerWithKibana = (server: KibanaServer) => {
       defaultMessage: 'Uptime',
     }),
     navLinkId: PLUGIN.ID,
+    catalogue: ['uptime'],
     privileges: {
-      all: {
+      read: {
         app: ['uptime', 'kibana'],
         savedObject: {
           all: [],

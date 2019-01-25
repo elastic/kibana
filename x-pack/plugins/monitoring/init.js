@@ -62,9 +62,11 @@ export const init = (monitoringPlugin, server) => {
     }),
     icon: 'monitoringApp',
     navLinkId: 'monitoring',
+    catalogue: ['monitoring'],
     privileges: {
       all: {
         catalogue: ['monitoring'],
+        grantWithBaseRead: true,
         app: ['monitoring', 'kibana'],
         savedObject: {
           all: [],

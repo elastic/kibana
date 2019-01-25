@@ -117,6 +117,7 @@ function VisEditor(
   $route,
   AppState,
   $window,
+  $injector,
   kbnUrl,
   redirectWhenMissing,
   Private,
@@ -444,6 +445,7 @@ function VisEditor(
               kbnUrl.change(dashboardParsedUrl.appPath);
             } else if (savedVis.id === $route.current.params.id) {
               docTitle.change(savedVis.lastSavedTitle);
+              chrome.breadcrumbs.set($injector.invoke(getEditBreadcrumbs));
             } else {
               kbnUrl.change(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id });
             }

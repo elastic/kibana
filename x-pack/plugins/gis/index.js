@@ -68,6 +68,7 @@ export function gis(kibana) {
           }),
           icon: 'gisApp',
           navLinkId: 'gis',
+          catalogue: ['gis'],
           privileges: {
             all: {
               app: ['gis', 'kibana'],

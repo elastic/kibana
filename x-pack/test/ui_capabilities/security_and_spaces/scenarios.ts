@@ -49,23 +49,6 @@ const LegacyAll: User = {
   },
 };
 
-const LegacyRead: User = {
-  username: 'legacy_read',
-  fullName: 'legacy_read',
-  password: 'legacy_read-password',
-  role: {
-    name: 'legacy_read_role',
-    elasticsearch: {
-      indices: [
-        {
-          names: ['.kibana*'],
-          privileges: ['read'],
-        },
-      ],
-    },
-  },
-};
-
 const DualPrivilegesAll: User = {
   username: 'dual_privileges_all',
   fullName: 'dual_privileges_all',
@@ -206,7 +189,6 @@ export const Users: User[] = [
   NoKibanaPrivileges,
   Superuser,
   LegacyAll,
-  LegacyRead,
   DualPrivilegesAll,
   DualPrivilegesRead,
   GlobalAll,
@@ -291,24 +273,6 @@ interface LegacyAllAtNothingSpace extends Scenario {
 const LegacyAllAtNothingSpace: LegacyAllAtNothingSpace = {
   id: 'legacy_all at nothing_space',
   user: LegacyAll,
-  space: NothingSpace,
-};
-
-interface LegacyReadAtEverythingSpace extends Scenario {
-  id: 'legacy_read at everything_space';
-}
-const LegacyReadAtEverythingSpace: LegacyReadAtEverythingSpace = {
-  id: 'legacy_read at everything_space',
-  user: LegacyRead,
-  space: EverythingSpace,
-};
-
-interface LegacyReadAtNothingSpace extends Scenario {
-  id: 'legacy_read at nothing_space';
-}
-const LegacyReadAtNothingSpace: LegacyReadAtNothingSpace = {
-  id: 'legacy_read at nothing_space',
-  user: LegacyRead,
   space: NothingSpace,
 };
 
@@ -463,8 +427,6 @@ export type UserAtSpaceScenarios =
   | SuperuserAtNothingSpace
   | LegacyAllAtEverythingSpace
   | LegacyAllAtNothingSpace
-  | LegacyReadAtEverythingSpace
-  | LegacyReadAtNothingSpace
   | DualPrivilegesAllAtEverythingSpace
   | DualPrivilegesAllAtNothingSpace
   | DualPrivilegesReadAtEverythingSpace
@@ -488,8 +450,6 @@ export const UserAtSpaceScenarios: UserAtSpaceScenarios[] = [
   SuperuserAtNothingSpace,
   LegacyAllAtEverythingSpace,
   LegacyAllAtNothingSpace,
-  LegacyReadAtEverythingSpace,
-  LegacyReadAtNothingSpace,
   DualPrivilegesAllAtEverythingSpace,
   DualPrivilegesAllAtNothingSpace,
   DualPrivilegesReadAtEverythingSpace,
