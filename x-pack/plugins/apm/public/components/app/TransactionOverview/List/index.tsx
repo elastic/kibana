@@ -4,25 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
-import { asMillis, asDecimal } from '../../../../utils/formatters';
-import { ImpactBar } from '../../../shared/ImpactBar';
+import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
+import { ITransactionGroup } from 'x-pack/plugins/apm/server/lib/transaction_groups/transform';
 import { fontFamilyCode, truncate } from '../../../../style/variables';
-import { ManagedTable } from '../../../shared/ManagedTable';
-import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n'; // eslint-disable-line import/no-extraneous-dependencies
-import { legacyEncodeURIComponent } from '../../../shared/Links/url_helpers';
+import { asDecimal, asMillis } from '../../../../utils/formatters';
+import { ImpactBar } from '../../../shared/ImpactBar';
 import { KibanaLink } from '../../../shared/Links/KibanaLink';
+import { legacyEncodeURIComponent } from '../../../shared/Links/url_helpers';
+import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 
 const TransactionNameLink = styled(KibanaLink)`
   ${truncate('100%')};
   font-family: ${fontFamilyCode};
 `;
 
-export default function TransactionList({ items, serviceName, ...rest }) {
-  const columns = [
+interface Props {
+  items: ITransactionGroup[];
+  serviceName: string;
+}
+
+export function TransactionList({ items, serviceName, ...rest }: Props) {
+  const columns: ITableColumn[] = [
     {
       field: 'name',
       name: i18n.translate('xpack.apm.transactionsTable.nameColumnLabel', {
