@@ -60,7 +60,7 @@ export class UpdateSourceEditor extends Component {
       //these are countable metrics, where blending heatmap color blobs make sense
       return ['count', 'sum'].includes(metric.value);
     }) : null;
-    const allowMultipleMetrics = (this.props.renderAs !== RENDER_AS.HEATMAP);
+    const allowMultipleMetrics = this.props.renderAs !== RENDER_AS.HEATMAP;
     return (
       <MetricsEditor
         allowMultipleMetrics={allowMultipleMetrics}
@@ -75,9 +75,7 @@ export class UpdateSourceEditor extends Component {
   render() {
     return (
       <Fragment>
-        <Fragment>
-          <ResolutionEditor resolution={this.props.resolution} onChange={this._onResolutionChange}/>
-        </Fragment>
+        <ResolutionEditor resolution={this.props.resolution} onChange={this._onResolutionChange}/>
         {this._renderMetricsEditor()}
       </Fragment>
     );
