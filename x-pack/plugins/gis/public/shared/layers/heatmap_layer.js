@@ -131,15 +131,12 @@ export class HeatmapLayer extends AbstractLayer {
     const metricPropertyKey = this._getPropKeyOfSelectedMetric();
     const updateDueToMetricChange = !_.isEqual(dataMeta.metric, metricPropertyKey);
 
-    const updateDueToResolutionChange = !_.isEqual(dataFilters.geohashResolution, this._source.getGridResolution());
-
     if (isSamePrecision
       && isSameTime
       && !updateDueToExtent
       && !updateDueToRefreshTimer
       && !updateDueToQuery
       && !updateDueToMetricChange
-      && !updateDueToResolutionChange
     ) {
       return;
     }
@@ -147,8 +144,7 @@ export class HeatmapLayer extends AbstractLayer {
     const newDataMeta = {
       ...dataFilters,
       precision: targetPrecision,
-      metric: metricPropertyKey,
-      geohashResolution: this._source.getGridResolution()
+      metric: metricPropertyKey
     };
     await this._fetchNewData({ startLoading, stopLoading, onLoadError, dataMeta: newDataMeta });
   }
@@ -156,6 +152,7 @@ export class HeatmapLayer extends AbstractLayer {
   async _fetchNewData({ startLoading, stopLoading, onLoadError, dataMeta }) {
     const { precision: geohashPrecision, timeFilters, buffer, query } = dataMeta;
     const requestToken = Symbol(`layer-source-refresh: this.getId()`);
+    console.log('dm', dataMeta);
     startLoading('source', requestToken, dataMeta);
     try {
       const layerName = await this.getDisplayName();

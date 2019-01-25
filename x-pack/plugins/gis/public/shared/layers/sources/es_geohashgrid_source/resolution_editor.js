@@ -22,13 +22,6 @@ const OPTIONS = [
 
 export class ResolutionEditor extends React.Component {
 
-  constructor() {
-    super();
-    this.state =  {
-      resolution: null
-    };
-  }
-
   render() {
     return (
       <Fragment>
