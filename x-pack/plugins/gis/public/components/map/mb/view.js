@@ -98,8 +98,8 @@ export class MBMapContainer extends React.Component {
 
     const throttledSetMouseCoordinates = _.throttle(e => {
       this.props.setMouseCoordinates({
-        lat: _.round(e.lngLat.lat, DECIMAL_DEGREES_PRECISION),
-        lon: _.round(e.lngLat.lng, DECIMAL_DEGREES_PRECISION)
+        lat: e.lngLat.lat,
+        lon: e.lngLat.lng
       });
     }, 100);
     this._mbMap.on('mousemove', throttledSetMouseCoordinates);
