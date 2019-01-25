@@ -297,7 +297,10 @@ export class VectorLayer extends AbstractLayer {
     ];
 
     let targetPrecision = getGeohashPrecisionForZoom(dataFilters.zoom);
-    targetPrecision = this._getTargetGeohashPrecision(targetPrecision);
+
+    if (this._source.isGeohashPrecisionAware()) {
+      targetPrecision = this._getTargetGeohashPrecision(targetPrecision);
+    }
     return {
       ...dataFilters,
       fieldNames: _.uniq(fieldNames).sort(),
@@ -320,10 +323,14 @@ export class VectorLayer extends AbstractLayer {
       };
     }
 
+    let gridResolution = null;
+    if (this._source.isGeohashPrecisionAware()) {
+      gridResolution = this._source.getGridResolution();
+    }
     try {
       const newMeta = {
         ...searchFilters,
-        geohashResolution: this._source.getGridResolution()
+        geohashResolution: gridResolution
       };
       startLoading(sourceDataId, requestToken, newMeta);
       const layerName = await this.getDisplayName();
