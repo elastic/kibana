@@ -18,7 +18,6 @@ import './style/global_overrides.css';
 
 import template from './templates/index.html';
 import Main from './components/app/Main';
-import Breadcrumbs from './components/app/Main/Breadcrumbs';
 
 import { initTimepicker } from './utils/timepicker';
 import configureStore from './store/config/configureStore';
@@ -33,17 +32,6 @@ chrome.setRootTemplate(template);
 const store = configureStore();
 
 initTimepicker(history, store.dispatch).then(() => {
-  const showPluginBreadcrumbs = !chrome
-    .getUiSettingsClient()
-    .get('k7design', false);
-
-  ReactDOM.render(
-    <Router history={history}>
-      <Breadcrumbs showPluginBreadcrumbs={showPluginBreadcrumbs} />
-    </Router>,
-    document.getElementById('react-apm-breadcrumbs')
-  );
-
   ReactDOM.render(
     <I18nProvider>
       <Provider store={store}>
