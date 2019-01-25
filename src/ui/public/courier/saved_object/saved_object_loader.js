@@ -118,6 +118,7 @@ export class SavedObjectLoader {
         perPage: size,
         page: 1,
         searchFields: ['title^3', 'description'],
+        searchOperator: 'AND',
         fields,
       }).then((resp) => {
       return {

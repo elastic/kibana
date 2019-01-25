@@ -281,6 +281,7 @@ export class SavedObjectsRepository {
    * @param {object} [options={}]
    * @property {(string|Array<string>)} [options.type]
    * @property {string} [options.search]
+   * @property {string} [options.searchOperator]
    * @property {Array<string>} [options.searchFields] - see Elasticsearch Simple Query String
    *                                        Query field argument for more information
    * @property {integer} [options.page=1]
@@ -295,6 +296,7 @@ export class SavedObjectsRepository {
     const {
       type,
       search,
+      searchOperator,
       searchFields,
       page = 1,
       perPage = 20,
@@ -327,6 +329,7 @@ export class SavedObjectsRepository {
         version: true,
         ...getSearchDsl(this._mappings, this._schema, {
           search,
+          searchOperator,
           searchFields,
           type,
           sortField,
