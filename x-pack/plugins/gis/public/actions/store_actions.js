@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
 
-import { DECIMAL_DEGREES_PRECISION, GIS_API_PATH } from '../../common/constants';
+import { GIS_API_PATH } from '../../common/constants';
 import {
   getLayerList,
   getLayerListRaw,
@@ -243,8 +242,8 @@ export function setMouseCoordinates({ lat, lon }) {
 
   return {
     type: SET_MOUSE_COORDINATES,
-    lat: _.round(lat, DECIMAL_DEGREES_PRECISION),
-    lon: _.round(safeLon, DECIMAL_DEGREES_PRECISION),
+    lat,
+    lon: safeLon,
   };
 }
 
