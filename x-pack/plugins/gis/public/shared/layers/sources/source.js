@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-export class ASource {
+export class AbstractSource {
 
   static renderEditor() {
     throw new Error('Must implement Source.renderEditor');
