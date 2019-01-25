@@ -35,7 +35,7 @@ const traceListColumns: ITableColumn[] = [
     width: '40%',
     sortable: true,
     render: (name, group: ITransactionGroup) => (
-      <EuiToolTip content={name}>
+      <EuiToolTip id="trace-transaction-link-tooltip" content={name}>
         <StyledTransactionLink transaction={group.sample}>
           {name}
         </StyledTransactionLink>

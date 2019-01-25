@@ -106,13 +106,19 @@ class List extends Component {
         render: (message, item) => {
           return (
             <MessageAndCulpritCell>
-              <EuiToolTip content={message || NOT_AVAILABLE_LABEL}>
+              <EuiToolTip
+                id="error-message-tooltip"
+                content={message || NOT_AVAILABLE_LABEL}
+              >
                 <MessageLink hash={`/${serviceName}/errors/${item.groupId}`}>
                   {message || NOT_AVAILABLE_LABEL}
                 </MessageLink>
               </EuiToolTip>
               <br />
-              <EuiToolTip content={item.culprit || NOT_AVAILABLE_LABEL}>
+              <EuiToolTip
+                id="error-culprit-tooltip"
+                content={item.culprit || NOT_AVAILABLE_LABEL}
+              >
                 <Culprit>{item.culprit || NOT_AVAILABLE_LABEL}</Culprit>
               </EuiToolTip>
             </MessageAndCulpritCell>

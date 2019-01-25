@@ -38,7 +38,10 @@ export default function TransactionList({ items, serviceName, ...rest }) {
         const transactionPath = `/${serviceName}/transactions/${encodedType}/${encodedName}`;
 
         return (
-          <EuiToolTip content={transactionName || NOT_AVAILABLE_LABEL}>
+          <EuiToolTip
+            id="transaction-name-link-tooltip"
+            content={transactionName || NOT_AVAILABLE_LABEL}
+          >
             <TransactionNameLink hash={transactionPath}>
               {transactionName || NOT_AVAILABLE_LABEL}
             </TransactionNameLink>
