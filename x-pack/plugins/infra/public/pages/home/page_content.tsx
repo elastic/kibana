@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { oc } from 'ts-optchain';
 
 import { PageContent } from '../../components/page';
 import { Waffle } from '../../components/waffle';
@@ -45,7 +44,7 @@ export const HomePageContent: React.SFC = () => (
                               options={{
                                 ...wafflemap,
                                 metric,
-                                fields: oc(configuration).fields(),
+                                fields: configuration && configuration.fields,
                                 groupBy,
                               }}
                               reload={refetch}
