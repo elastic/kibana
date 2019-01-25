@@ -114,6 +114,28 @@ export const App = injectI18n(
         missingPermissions,
       } = this.state;
 
+      if (!isAvailable() || !isActive()) {
+        return (
+          <SectionUnauthorized
+            title={(
+              <FormattedMessage
+                id="xpack.crossClusterReplication.app.licenseErrorTitle"
+                defaultMessage="License error"
+              />
+            )}
+          >
+            {getReason()}
+            {' '}
+            <a href={chrome.addBasePath('/app/kibana#/management/elasticsearch/license_management/home')}>
+              <FormattedMessage
+                id="xpack.crossClusterReplication.app.licenseErrorLinkText"
+                defaultMessage="Manage your license."
+              />
+            </a>
+          </SectionUnauthorized>
+        );
+      }
+
       if (isFetchingPermissions) {
         return (
           <EuiPageContent horizontalPosition="center">
@@ -179,28 +201,6 @@ export const App = injectI18n(
                 </p>}
             />
           </EuiPageContent>
-        );
-      }
-
-      if (!isAvailable() || !isActive()) {
-        return (
-          <SectionUnauthorized
-            title={(
-              <FormattedMessage
-                id="xpack.crossClusterReplication.app.licenseErrorTitle"
-                defaultMessage="License error"
-              />
-            )}
-          >
-            {getReason()}
-            {' '}
-            <a href={chrome.addBasePath('/app/kibana#/management/elasticsearch/license_management/home')}>
-              <FormattedMessage
-                id="xpack.crossClusterReplication.app.licenseErrorLinkText"
-                defaultMessage="Manage your license."
-              />
-            </a>
-          </SectionUnauthorized>
         );
       }
 
