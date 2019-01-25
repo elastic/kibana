@@ -69,7 +69,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async selectDefaultIndex(indexName) {
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
+      await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.clickLinkText(indexName);
       await PageObjects.settings.clickDefaultIndexButton();
     }
@@ -277,22 +277,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await this.gotoDashboardLandingPage();
     }
 
-    async isDarkThemeOn() {
-      log.debug('isDarkThemeOn');
-      await this.openOptions();
-      const darkThemeCheckbox = await testSubjects.find('dashboardDarkThemeCheckbox');
-      return await darkThemeCheckbox.getProperty('checked');
-    }
-
-    async useDarkTheme(on) {
-      log.debug(`useDarkTheme: on ${on}`);
-      await this.openOptions();
-      const isDarkThemeOn = await this.isDarkThemeOn();
-      if (isDarkThemeOn !== on) {
-        return await testSubjects.click('dashboardDarkThemeCheckbox');
-      }
-    }
-
     async isMarginsOn() {
       log.debug('isMarginsOn');
       await this.openOptions();
@@ -457,12 +441,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async getPanelTitles() {
       log.debug('in getPanelTitles');
       const titleObjects = await testSubjects.findAll('dashboardPanelTitle');
-
-      function getTitles(chart) {
-        return chart.getVisibleText();
-      }
-      const getTitlePromises = _.map(titleObjects, getTitles);
-      return Promise.all(getTitlePromises);
+      return await Promise.all(titleObjects.map(async title => await title.getVisibleText()));
     }
 
     async getPanelDimensions() {

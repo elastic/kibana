@@ -71,15 +71,15 @@ const destroyFieldEditor = () => {
 };
 
 uiRoutes
-  .when('/management/kibana/indices/:indexPatternId/field/:fieldName*', {
+  .when('/management/kibana/index_patterns/:indexPatternId/field/:fieldName*', {
     mode: 'edit',
     k7Breadcrumbs: getEditFieldBreadcrumbs
   })
-  .when('/management/kibana/indices/:indexPatternId/create-field/', {
+  .when('/management/kibana/index_patterns/:indexPatternId/create-field/', {
     mode: 'create',
     k7Breadcrumbs: getCreateFieldBreadcrumbs
   })
-  .defaults(/management\/kibana\/indices\/[^\/]+\/(field|create-field)(\/|$)/, {
+  .defaults(/management\/kibana\/index_patterns\/[^\/]+\/(field|create-field)(\/|$)/, {
     template,
     mapBreadcrumbs($route, breadcrumbs) {
       const { indexPattern } = $route.current.locals;
@@ -97,7 +97,7 @@ uiRoutes
     resolve: {
       indexPattern: function ($route, redirectWhenMissing, indexPatterns) {
         return indexPatterns.get($route.current.params.indexPatternId)
-          .catch(redirectWhenMissing('/management/kibana/indices'));
+          .catch(redirectWhenMissing('/management/kibana/index_patterns'));
       }
     },
     controllerAs: 'fieldSettings',

@@ -237,7 +237,7 @@ describe('Vislib Data Class Test Suite', function () {
     describe('getVisData', function () {
       it('should return the rows property', function () {
         const visData = data.getVisData();
-        expect(visData).to.eql(geohashGridData.rows);
+        expect(visData[0].title).to.eql(geohashGridData.rows[0].title);
       });
     });
 
