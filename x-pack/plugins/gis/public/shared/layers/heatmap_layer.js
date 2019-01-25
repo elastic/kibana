@@ -152,7 +152,6 @@ export class HeatmapLayer extends AbstractLayer {
   async _fetchNewData({ startLoading, stopLoading, onLoadError, dataMeta }) {
     const { precision: geohashPrecision, timeFilters, buffer, query } = dataMeta;
     const requestToken = Symbol(`layer-source-refresh: this.getId()`);
-    console.log('dm', dataMeta);
     startLoading('source', requestToken, dataMeta);
     try {
       const layerName = await this.getDisplayName();

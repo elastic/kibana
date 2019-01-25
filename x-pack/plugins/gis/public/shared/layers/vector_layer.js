@@ -96,11 +96,6 @@ export class VectorLayer extends AbstractLayer {
     return 'vector';
   }
 
-  getColorRamp() {
-    // TODO: Determine if can be data-driven first
-    return this._style.getColorRamp();
-  }
-
   getTOCDetails() {
     return this._style.getTOCDetails();
   }
@@ -222,10 +217,8 @@ export class VectorLayer extends AbstractLayer {
     }
 
     let updateDueToPrecisionChange = false;
-    let updateDueToResolutionChange = false;
     if (isGeohashPrecisionAware) {
-      updateDueToPrecisionChange = !_.isEqual(meta.geohashPrecision, searchFilters.precision);
-      updateDueToResolutionChange = !_.isEqual(meta.geohashResolution, this._source.getGridResolution());
+      updateDueToPrecisionChange = !_.isEqual(meta.geohashPrecision, searchFilters.geohashPrecision);
     }
 
     const updateDueToExtentChange = this.updateDueToExtent(source, meta, searchFilters);
@@ -235,8 +228,7 @@ export class VectorLayer extends AbstractLayer {
       && !updateDueToExtentChange
       && !updateDueToFields
       && !updateDueToQuery
-      && !updateDueToPrecisionChange
-      && !updateDueToResolutionChange;
+      && !updateDueToPrecisionChange;
   }
 
   _getTargetGeohashPrecision(precision) {
@@ -323,16 +315,8 @@ export class VectorLayer extends AbstractLayer {
       };
     }
 
-    let gridResolution = null;
-    if (this._source.isGeohashPrecisionAware()) {
-      gridResolution = this._source.getGridResolution();
-    }
     try {
-      const newMeta = {
-        ...searchFilters,
-        geohashResolution: gridResolution
-      };
-      startLoading(sourceDataId, requestToken, newMeta);
+      startLoading(sourceDataId, requestToken, searchFilters);
       const layerName = await this.getDisplayName();
       const { data, meta } = await this._source.getGeoJsonWithMeta({
         layerName,
