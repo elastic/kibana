@@ -934,7 +934,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async waitForRenderingCount(previousCount = 0, increment = 1) {
       await retry.try(async () => {
         const currentRenderingCount = await this.getVisualizationRenderingCount();
-        log.debug(`Readed rendering count ${previousCount} ${currentRenderingCount}`);
+        const targetCount = previousCount + increment;
+        log.debug(`Readed prevCount ${previousCount}, current count ${currentRenderingCount}, target count ${targetCount}`);
         expect(currentRenderingCount).to.be(previousCount + increment);
       });
     }
