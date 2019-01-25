@@ -61,9 +61,8 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
 
   public async updateBeatsData() {
     const beats = sortBy(await this.props.libs.beats.getAll(), 'id') || [];
-    const tags = await this.props.libs.tags.getTagsWithIds(
-      flatten(this.props.containers.beats.state.list.map(beat => beat.tags))
-    );
+    const tags = await this.props.libs.tags.getTagsWithIds(flatten(beats.map(beat => beat.tags)));
+
     this.setState({
       tags,
       beats,
@@ -193,11 +192,11 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
                       payload,
                       this.getSelectedBeats()
                     );
-                    this.updateBeatsData();
+                    await this.updateBeatsData();
                     this.notifyUpdatedTagAssociation(status, this.getSelectedBeats(), payload);
                     break;
                   case AssignmentActionType.Delete:
-                    this.props.containers.beats.deactivate(this.getSelectedBeats());
+                    await this.props.containers.beats.deactivate(this.getSelectedBeats());
                     this.notifyBeatDisenrolled(this.getSelectedBeats());
                     break;
                   case AssignmentActionType.Reload:
