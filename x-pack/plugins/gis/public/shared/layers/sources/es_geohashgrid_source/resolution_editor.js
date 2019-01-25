@@ -20,24 +20,21 @@ const OPTIONS = [
   { value: GRID_RESOLUTION.MOST_FINE, inputDisplay: 'finest' }
 ];
 
-export class ResolutionEditor extends React.Component {
-
-  render() {
-    return (
-      <Fragment>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={true}>
-            <EuiFormLabel style={{ marginBottom: 0 }}>
+export function ResolutionEditor({ resolution, onChange }) {
+  return (
+    <Fragment>
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={true}>
+          <EuiFormLabel style={{ marginBottom: 0 }}>
               Grid resolution
-            </EuiFormLabel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={true}>
-            <EuiSuperSelect options={OPTIONS} valueOfSelected={this.props.resolution} onChange={this.props.onChange} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </Fragment>
-    );
-  }
+          </EuiFormLabel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={true}>
+          <EuiSuperSelect options={OPTIONS} valueOfSelected={resolution} onChange={onChange} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </Fragment>
+  );
 }
