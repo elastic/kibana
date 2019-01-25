@@ -47,9 +47,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('objects');
     }
 
-    async clickKibanaIndices() {
-      log.debug('clickKibanaIndices link');
-      await testSubjects.click('indices');
+    async clickKibanaIndexPatterns() {
+      log.debug('clickKibanaIndexPatterns link');
+      await testSubjects.click('index_patterns');
     }
 
     async getAdvancedSettings(propertyName) {
@@ -271,7 +271,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         await this.navigateTo();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await this.clickKibanaIndices();
+        await this.clickKibanaIndexPatterns();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickOptionalAddNewButton();
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -290,7 +290,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         const currentUrl = await browser.getCurrentUrl();
         log.info('currentUrl', currentUrl);
-        if (!currentUrl.match(/indices\/.+\?/)) {
+        if (!currentUrl.match(/index_patterns\/.+\?/)) {
           throw new Error('Index pattern not created');
         } else {
           log.debug('Index pattern created: ' + currentUrl);
@@ -354,7 +354,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       });
       await retry.try(async () => {
         const currentUrl = await browser.getCurrentUrl();
-        if (currentUrl.match(/indices\/.+\?/)) {
+        if (currentUrl.match(/index_patterns\/.+\?/)) {
           throw new Error('Index pattern not removed');
         }
       });

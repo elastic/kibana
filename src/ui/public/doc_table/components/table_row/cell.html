@@ -16,17 +16,17 @@ if (timefield) {
         ng-click="inlineFilter($event, '+')"
         class="fa fa-search-plus kbnDocTableRowFilterButton"
         data-column="<%- column %>"
-        tooltip="Filter for value"
         tooltip-append-to-body="1"
-        aria-label="Filter for value"
+        tooltip="{{ ::'common.ui.docTable.tableRow.filterForValueButtonTooltip' | i18n: {defaultMessage: 'Filter for value'} }}"
+        aria-label="{{ ::'common.ui.docTable.tableRow.filterForValueButtonAriaLabel' | i18n: {defaultMessage: 'Filter for value'} }}"
       ></button>
 
       <button
         ng-click="inlineFilter($event, '-')"
         class="fa fa-search-minus kbnDocTableRowFilterButton"
         data-column="<%- column %>"
-        tooltip="Filter out value"
-        aria-label="Filter out value"
+        tooltip="{{ ::'common.ui.docTable.tableRow.filterOutValueButtonTooltip' | i18n: {defaultMessage: 'Filter out value'} }}"
+        aria-label="{{ ::'common.ui.docTable.tableRow.filterOutValueButtonAriaLabel' | i18n: {defaultMessage: 'Filter out value'} }}"
         tooltip-append-to-body="1"
       ></button>
     <% } %>

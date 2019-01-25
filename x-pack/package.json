@@ -120,7 +120,7 @@
   },
   "dependencies": {
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "6.6.0",
+    "@elastic/eui": "6.7.0",
     "@elastic/node-crypto": "0.1.2",
     "@elastic/numeral": "2.3.2",
     "@kbn/babel-preset": "1.0.0",
@@ -182,7 +182,6 @@
     "history-extra": "^4.0.2",
     "humps": "2.0.1",
     "icalendar": "0.7.1",
-    "idx": "^2.5.2",
     "inline-style": "^2.0.0",
     "intl": "^1.2.5",
     "io-ts": "^1.4.2",

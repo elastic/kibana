@@ -95,7 +95,7 @@
   },
   "dependencies": {
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "6.6.0",
+    "@elastic/eui": "6.7.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "2.3.2",
@@ -226,7 +226,6 @@
     "topojson-client": "3.0.0",
     "trunc-html": "1.0.2",
     "trunc-text": "1.0.2",
-    "ts-optchain": "^0.1.1",
     "tslib": "^1.9.3",
     "type-detect": "^4.0.8",
     "ui-select": "0.19.6",
