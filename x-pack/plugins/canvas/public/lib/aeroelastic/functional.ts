@@ -80,7 +80,11 @@ export const arrayToMap = a => Object.assign({}, ...a.map(d => ({ [d]: true })))
 export const subMultitree = (pk, fk, elements, inputRoots) => {
   const getSubgraphs = roots => {
     const children = flatten(roots.map(r => elements.filter(e => fk(e) === pk(r))));
-    return [...roots, ...(children.length && getSubgraphs(children, elements))];
+    if (children.length) {
+      return [...roots, ...getSubgraphs(children, elements)];
+    } else {
+      return roots;
+    }
   };
   return getSubgraphs(inputRoots);
 };
