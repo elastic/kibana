@@ -175,9 +175,10 @@ const RequestSelector = injectI18n(class RequestSelector extends Component {
                 iconType={selectedRequest.status === RequestStatus.OK ? 'check' : 'cross'}
               >
 
-                {selectedRequest.time}<FormattedMessage
-                  id="inspectorViews.requests.msTimeUnitLabel"
-                  defaultMessage="ms"
+                <FormattedMessage
+                  id="inspectorViews.requests.requestTimeLabel"
+                  defaultMessage="{requestTime}ms"
+                  values={{ requestTime: selectedRequest.time }}
                 />
               </EuiBadge>
             </EuiToolTip>
