@@ -35,6 +35,10 @@ declare module 'hapi' {
   interface Server {
     config: () => KibanaConfig;
   }
+
+  interface Request {
+    getUiSettingsService: () => any;
+  }
 }
 
 type KbnMixinFunc = (kbnServer: KbnServer, server: Server, config: any) => Promise<any> | void;

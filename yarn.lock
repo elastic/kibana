@@ -11137,11 +11137,6 @@ icss-utils@^2.1.0:
   dependencies:
     postcss "^6.0.1"
 
-idx@^2.5.2:
-  version "2.5.2"
-  resolved "https://registry.yarnpkg.com/idx/-/idx-2.5.2.tgz#4b405c2e6d68d04136e0a368a7ab35b9caa0595f"
-  integrity sha512-MLoGF4lQU5q/RqJJjRsuid52emu7tPVtSSZaYXsqRvSjvXdBEmIwk2urvbNvPBRU9Ox9I4WYnxiz2GjhU34Lrw==
-
 ieee754@^1.1.4:
   version "1.1.8"
   resolved "https://registry.yarnpkg.com/ieee754/-/ieee754-1.1.8.tgz#be33d40ac10ef1926701f6f08a2d86fbfd1ad3e4"
@@ -21234,11 +21229,6 @@ ts-node@^7.0.1:
     mkdirp "^0.5.1"
     source-map-support "^0.5.6"
     yn "^2.0.0"
-
-ts-optchain@^0.1.1:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/ts-optchain/-/ts-optchain-0.1.1.tgz#9d45e2c3fc6201c2f9be82edad4c76fefb2a36d9"
-  integrity sha512-WWNaATI+rtNm6C3550HbLzvu32zIg0I0gBkvJZpOQnyeGIoGxg2RZOt96U7bi90ZlQ7bFiI5PCRaXScv4+4Y4A==
 
 tslib@1.9.3, tslib@^1.7.1, tslib@^1.8.0, tslib@^1.8.1, tslib@^1.9.0, tslib@^1.9.3:
   version "1.9.3"

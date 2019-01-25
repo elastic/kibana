@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import 'ui/autoload/modules';
 import 'ui/autoload/styles';
 import 'ui/i18n';
 import { uiModules } from 'ui/modules';
