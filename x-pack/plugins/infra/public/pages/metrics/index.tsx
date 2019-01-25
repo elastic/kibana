@@ -117,7 +117,7 @@ export const MetricDetail = withTheme(
                               nodeType={nodeType}
                               nodeId={nodeId}
                             >
-                              {({ metrics, error, loading, refetch, refetching }) => {
+                              {({ metrics, error, loading, refetch }) => {
                                 if (error) {
                                   return <ErrorPageBody message={error} />;
                                 }

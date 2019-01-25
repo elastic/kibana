@@ -20,7 +20,6 @@ interface WithMetricsArgs {
   metrics: InfraMetricData[];
   error?: string | undefined;
   loading: boolean;
-  refetching: boolean;
   refetch: () => void;
 }
 
@@ -61,12 +60,11 @@ export const WithMetrics = ({
         timerange,
       }}
     >
-      {({ data, error, loading, refetch, networkStatus }) => {
+      {({ data, error, loading, refetch }) => {
         return children({
           metrics: filterOnlyInfraMetricData(data && data.source && data.source.metrics),
           error: error && error.message,
           loading,
-          refetching: networkStatus === 4,
           refetch,
         });
       }}

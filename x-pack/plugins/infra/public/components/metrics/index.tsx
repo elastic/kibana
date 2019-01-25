@@ -19,7 +19,6 @@ interface Props {
   metrics: InfraMetricData[];
   layouts: InfraMetricLayout[];
   loading: boolean;
-  refetching: boolean;
   refetch: () => void;
   nodeId: string;
   label: string;
@@ -41,7 +40,7 @@ export const Metrics = injectI18n(
     public render() {
       const { intl } = this.props;
 
-      if (this.props.loading || this.props.refetching) {
+      if (this.props.loading) {
         return (
           <InfraLoadingPanel
             height="100vh"
