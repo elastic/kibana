@@ -81,6 +81,7 @@ export class ResultsLinks extends Component {
     const {
       indexPatternId,
       timeFieldName,
+      createIndexPattern,
     } = this.props;
 
     const {
@@ -92,21 +93,23 @@ export class ResultsLinks extends Component {
 
     return (
       <EuiFlexGroup gutterSize="l">
-        <EuiFlexItem>
-          <EuiCard
-            icon={<EuiIcon size="xxl" type={`discoverApp`} />}
-            title={
-              <FormattedMessage
-                id="xpack.ml.fileDatavisualizer.resultsLinks.viewIndexInDiscoverTitle"
-                defaultMessage="View index in Discover"
-              />
-            }
-            description=""
-            href={`${uiChrome.getBasePath()}/app/kibana#/discover?&_a=(index:'${indexPatternId}')${_g}`}
-          />
-        </EuiFlexItem>
+        {createIndexPattern &&
+          <EuiFlexItem>
+            <EuiCard
+              icon={<EuiIcon size="xxl" type={`discoverApp`} />}
+              title={
+                <FormattedMessage
+                  id="xpack.ml.fileDatavisualizer.resultsLinks.viewIndexInDiscoverTitle"
+                  defaultMessage="View index in Discover"
+                />
+              }
+              description=""
+              href={`${uiChrome.getBasePath()}/app/kibana#/discover?&_a=(index:'${indexPatternId}')${_g}`}
+            />
+          </EuiFlexItem>
+        }
 
-        {(isFullLicense() === true && timeFieldName !== undefined && this.showCreateJobLink) &&
+        {(isFullLicense() === true && timeFieldName !== undefined && this.showCreateJobLink && createIndexPattern) &&
           <EuiFlexItem>
             <EuiCard
               icon={<EuiIcon size="xxl" type={`machineLearningApp`} />}
@@ -146,7 +149,7 @@ export class ResultsLinks extends Component {
               />
             }
             description=""
-            href={`${uiChrome.getBasePath()}/app/kibana#/management/elasticsearch/index_management/home`}
+            href={`${uiChrome.getBasePath()}/app/kibana#/management/elasticsearch/index_management/indices`}
           />
         </EuiFlexItem>
 
@@ -160,7 +163,10 @@ export class ResultsLinks extends Component {
               />
             }
             description=""
-            href={`${uiChrome.getBasePath()}/app/kibana#/management/kibana/indices/${indexPatternId}`}
+            href={
+              `${uiChrome.getBasePath()}/app/kibana#/management/kibana/index_patterns/${(
+                createIndexPattern ? indexPatternId : '')}`
+            }
           />
         </EuiFlexItem>
 
