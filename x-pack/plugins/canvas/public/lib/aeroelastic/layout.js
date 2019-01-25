@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const { select } = require('./state');
-const { getId } = require('./../../lib/get_id');
+import { select } from './state';
+import { getId } from './../../lib/get_id';
 
-const {
+import {
   actionEvent,
   dragging,
   dragVector,
@@ -19,14 +19,34 @@ const {
   mouseIsDown,
   optionHeld,
   shiftHeld,
-} = require('./gestures');
+} from './gestures';
 
-const { shapesAt, landmarkPoint } = require('./geometry');
+import { shapesAt, landmarkPoint } from './geometry';
 
-const matrix = require('./matrix');
-const matrix2d = require('./matrix2d');
+import {
+  compositeComponent,
+  invert,
+  matrixToAngle,
+  multiply,
+  mvMultiply,
+  normalize,
+  ORIGIN,
+  reduceTransforms,
+  rotateZ,
+  translate,
+  translateComponent,
+  scale,
+} from './matrix';
 
-const {
+import {
+  componentProduct as componentProduct2d,
+  multiply as multiply2d,
+  mvMultiply as mvMultiply2d,
+  translate as translate2d,
+  UNITMATRIX as UNITMATRIX2D,
+} from './matrix2d';
+
+import {
   arrayToMap,
   disjunctiveUnion,
   identity,
@@ -35,13 +55,13 @@ const {
   not,
   removeDuplicates,
   shallowEqual,
-} = require('./functional');
+} from './functional';
 
 /**
  * Selectors directly from a state object
  */
 
-const primaryUpdate = state => state.primaryUpdate;
+export const primaryUpdate = state => state.primaryUpdate;
 const scene = state => state.currentScene;
 const configuration = state => {
   return state.configuration;
@@ -64,7 +84,7 @@ const draggingShape = ({ draggedShape, shapes }, hoveredShape, down, mouseDowned
  * Scenegraph update based on events, gestures...
  */
 
-const shapes = select(scene => scene.shapes)(scene);
+export const shapes = select(scene => scene.shapes)(scene);
 
 const hoveredShapes = select((configuration, shapes, cursorPosition) =>
   shapesAt(
@@ -86,13 +106,13 @@ const hoveredShape = select(hoveredShapes =>
 const draggedShape = select(draggingShape)(scene, hoveredShape, mouseIsDown, mouseDowned);
 
 // the currently dragged shape is considered in-focus; if no dragging is going on, then the hovered shape
-const focusedShape = select((draggedShape, hoveredShape) => draggedShape || hoveredShape)(
+export const focusedShape = select((draggedShape, hoveredShape) => draggedShape || hoveredShape)(
   draggedShape,
   hoveredShape
 );
 
 // focusedShapes has updated position etc. information while focusedShape may have stale position
-const focusedShapes = select((shapes, focusedShape) =>
+export const focusedShapes = select((shapes, focusedShape) =>
   shapes.filter(shape => focusedShape && shape.id === focusedShape.id)
 )(shapes, focusedShape);
 
@@ -115,8 +135,8 @@ const mouseTransformState = select((prev, dragging, { x0, y0, x1, y1 }) => {
   if (dragging) {
     const deltaX = x1 - x0;
     const deltaY = y1 - y0;
-    const transform = matrix.translate(deltaX - prev.deltaX, deltaY - prev.deltaY, 0);
-    const cumulativeTransform = matrix.translate(deltaX, deltaY, 0);
+    const transform = translate(deltaX - prev.deltaX, deltaY - prev.deltaY, 0);
+    const cumulativeTransform = translate(deltaX, deltaY, 0);
     return {
       deltaX,
       deltaY,
@@ -145,8 +165,8 @@ const restateShapesEvent = select(action => {
     if (!shape.parent) {
       return shape.transformMatrix;
     }
-    return matrix.multiply(
-      matrix.invert(shapes.find(s => s.id === shape.parent).transformMatrix),
+    return multiply(
+      invert(shapes.find(s => s.id === shape.parent).transformMatrix),
       shape.transformMatrix
     );
   };
@@ -265,7 +285,7 @@ const selectedShapes = select(selectionTuple => {
   return selectionTuple.shapes;
 })(selectionState);
 
-const selectedShapeIds = select(shapes => shapes.map(shape => shape.id))(selectedShapes);
+export const selectedShapeIds = select(shapes => shapes.map(shape => shape.id))(selectedShapes);
 
 const primaryShape = shape => (shape.type === 'annotation' ? shape.parent : shape.id); // fixme unify with contentShape
 
@@ -282,11 +302,8 @@ const rotationManipulation = configuration => ({
     return { transforms: [], shapes: [] };
   }
   const center = shape.transformMatrix;
-  const centerPosition = matrix.mvMultiply(center, matrix.ORIGIN);
-  const vector = matrix.mvMultiply(
-    matrix.multiply(center, directShape.localTransformMatrix),
-    matrix.ORIGIN
-  );
+  const centerPosition = mvMultiply(center, ORIGIN);
+  const vector = mvMultiply(multiply(center, directShape.localTransformMatrix), ORIGIN);
   const oldAngle = Math.atan2(centerPosition[1] - vector[1], centerPosition[0] - vector[0]);
   const newAngle = Math.atan2(centerPosition[1] - y, centerPosition[0] - x);
   const closest45deg = (Math.round(newAngle / (Math.PI / 4)) * Math.PI) / 4;
@@ -299,7 +316,7 @@ const rotationManipulation = configuration => ({
   const relaxed = alterSnapGesture.indexOf('relax') !== -1;
   const newSnappedAngle =
     pixelDifference < configuration.rotateSnapInPixels && !relaxed ? closest45deg : newAngle;
-  const result = matrix.rotateZ(oldAngle - newSnappedAngle);
+  const result = rotateZ(oldAngle - newSnappedAngle);
   return { transforms: [result], shapes: [shape.id] };
 };
 
@@ -324,23 +341,23 @@ const centeredResizeManipulation = configuration => ({ gesture, shape, directSha
     return { transforms: [], shapes: [] };
   }
   // transform the incoming `transform` so that resizing is aligned with shape orientation
-  const vector = matrix.mvMultiply(
-    matrix.multiply(
-      matrix.invert(matrix.compositeComponent(shape.localTransformMatrix)), // rid the translate component
+  const vector = mvMultiply(
+    multiply(
+      invert(compositeComponent(shape.localTransformMatrix)), // rid the translate component
       transform
     ),
-    matrix.ORIGIN
+    ORIGIN
   );
   const orientationMask = [
     resizeMultiplierHorizontal[directShape.horizontalPosition],
     resizeMultiplierVertical[directShape.verticalPosition],
     0,
   ];
-  const orientedVector = matrix2d.componentProduct(vector, orientationMask);
+  const orientedVector = componentProduct2d(vector, orientationMask);
   const cappedOrientedVector = minimumSize(configuration.minimumElementSize, shape, orientedVector);
   return {
     cumulativeTransforms: [],
-    cumulativeSizes: [gesture.sizes || matrix2d.translate(...cappedOrientedVector)],
+    cumulativeSizes: [gesture.sizes || translate2d(...cappedOrientedVector)],
     shapes: [shape.id],
   };
 };
@@ -352,32 +369,32 @@ const asymmetricResizeManipulation = configuration => ({ gesture, shape, directS
     return { transforms: [], shapes: [] };
   }
   // transform the incoming `transform` so that resizing is aligned with shape orientation
-  const compositeComponent = matrix.compositeComponent(shape.localTransformMatrix);
-  const inv = matrix.invert(compositeComponent); // rid the translate component
-  const vector = matrix.mvMultiply(matrix.multiply(inv, transform), matrix.ORIGIN);
+  const composite = compositeComponent(shape.localTransformMatrix);
+  const inv = invert(composite); // rid the translate component
+  const vector = mvMultiply(multiply(inv, transform), ORIGIN);
   const orientationMask = [
     resizeMultiplierHorizontal[directShape.horizontalPosition] / 2,
     resizeMultiplierVertical[directShape.verticalPosition] / 2,
     0,
   ];
-  const orientedVector = matrix2d.componentProduct(vector, orientationMask);
+  const orientedVector = componentProduct2d(vector, orientationMask);
   const cappedOrientedVector = minimumSize(configuration.minimumElementSize, shape, orientedVector);
 
-  const antiRotatedVector = matrix.mvMultiply(
-    matrix.multiply(
-      compositeComponent,
-      matrix.scale(
+  const antiRotatedVector = mvMultiply(
+    multiply(
+      composite,
+      scale(
         resizeMultiplierHorizontal[directShape.horizontalPosition],
         resizeMultiplierVertical[directShape.verticalPosition],
         1
       ),
-      matrix.translate(cappedOrientedVector[0], cappedOrientedVector[1], 0)
+      translate(cappedOrientedVector[0], cappedOrientedVector[1], 0)
     ),
-    matrix.ORIGIN
+    ORIGIN
   );
-  const sizeMatrix = gesture.sizes || matrix2d.translate(...cappedOrientedVector);
+  const sizeMatrix = gesture.sizes || translate2d(...cappedOrientedVector);
   return {
-    cumulativeTransforms: [matrix.translate(antiRotatedVector[0], antiRotatedVector[1], 0)],
+    cumulativeTransforms: [translate(antiRotatedVector[0], antiRotatedVector[1], 0)],
     cumulativeSizes: [sizeMatrix],
     shapes: [shape.id],
   };
@@ -490,9 +507,9 @@ const transformIntents = select(
 const fromScreen = currentTransform => transform => {
   const isTranslate = transform[12] !== 0 || transform[13] !== 0;
   if (isTranslate) {
-    const composite = matrix.compositeComponent(currentTransform);
-    const inverse = matrix.invert(composite);
-    const result = matrix.translateComponent(matrix.multiply(inverse, transform));
+    const composite = compositeComponent(currentTransform);
+    const inverse = invert(composite);
+    const result = translateComponent(multiply(inverse, transform));
     return result;
   } else {
     return transform;
@@ -547,20 +564,20 @@ const shapeApplyLocalTransforms = intents => shape => {
       .filter(identity)
   );
 
-  const baselineLocalTransformMatrix = matrix.multiply(
+  const baselineLocalTransformMatrix = multiply(
     shape.baselineLocalTransformMatrix || shape.localTransformMatrix,
     ...transformIntents
   );
-  const cumulativeTransformIntentMatrix = matrix.multiply(...cumulativeTransformIntents);
-  const baselineSizeMatrix = matrix2d.multiply(...sizeIntents) || matrix2d.UNITMATRIX;
+  const cumulativeTransformIntentMatrix = multiply(...cumulativeTransformIntents);
+  const baselineSizeMatrix = multiply2d(...sizeIntents) || UNITMATRIX2D;
   const localTransformMatrix = cumulativeTransformIntents.length
-    ? matrix.multiply(baselineLocalTransformMatrix, cumulativeTransformIntentMatrix)
+    ? multiply(baselineLocalTransformMatrix, cumulativeTransformIntentMatrix)
     : baselineLocalTransformMatrix;
 
-  const cumulativeSizeIntentMatrix = matrix2d.multiply(...cumulativeSizeIntents);
-  const sizeVector = matrix2d.mvMultiply(
+  const cumulativeSizeIntentMatrix = multiply2d(...cumulativeSizeIntents);
+  const sizeVector = mvMultiply2d(
     cumulativeSizeIntents.length
-      ? matrix2d.multiply(baselineSizeMatrix, cumulativeSizeIntentMatrix)
+      ? multiply2d(baselineSizeMatrix, cumulativeSizeIntentMatrix)
       : baselineSizeMatrix,
     shape.baseAB ? [...shape.baseAB, 1] : [shape.a, shape.b, 1]
   );
@@ -612,21 +629,21 @@ const cascadeUnsnappedTransforms = (shapes, shape) => {
   const upstreamTransforms = upstreams.map(shape => {
     return shape.localTransformMatrix;
   });
-  const cascadedTransforms = matrix.reduceTransforms(upstreamTransforms);
+  const cascadedTransforms = reduceTransforms(upstreamTransforms);
   return cascadedTransforms;
 };
 
 const cascadeTransforms = (shapes, shape) => {
   const cascade = s =>
     s.snapDeltaMatrix
-      ? matrix.multiply(s.localTransformMatrix, s.snapDeltaMatrix)
+      ? multiply(s.localTransformMatrix, s.snapDeltaMatrix)
       : s.localTransformMatrix;
   if (!shape.parent) {
     return cascade(shape);
   } // boost for common case of toplevel shape
   const upstreams = getUpstreams(shapes, shape);
   const upstreamTransforms = upstreams.map(cascade);
-  const cascadedTransforms = matrix.reduceTransforms(upstreamTransforms);
+  const cascadedTransforms = reduceTransforms(upstreamTransforms);
   return cascadedTransforms;
 };
 
@@ -737,7 +754,7 @@ const alignmentGuides = (configuration, shapes, guidedShapes, draggedShape) => {
                   const radius = midPoint - lowPoint;
                   result[key] = {
                     id: counter++,
-                    localTransformMatrix: matrix.translate(
+                    localTransformMatrix: translate(
                       dim ? midPoint : ss,
                       dim ? ss : midPoint,
                       configuration.atopZ
@@ -812,9 +829,9 @@ const hoverAnnotations = select(
             type: 'annotation',
             subtype: configuration.hoverAnnotationName,
             interactive: false,
-            localTransformMatrix: matrix.multiply(
+            localTransformMatrix: multiply(
               hoveredShape.localTransformMatrix,
-              matrix.translate(0, 0, configuration.hoverLift)
+              translate(0, 0, configuration.hoverLift)
             ),
             parent: null, // consider linking to proper parent, eg. for more regular typing (ie. all shapes have all props)
           },
@@ -839,13 +856,9 @@ const rotationAnnotation = (configuration, shapes, selectedShapes, shape, i) => 
     );
   }
   const b = snappedB(foundShape);
-  const centerTop = matrix.translate(0, -b, 0);
-  const pixelOffset = matrix.translate(
-    0,
-    -configuration.rotateAnnotationOffset,
-    configuration.atopZ
-  );
-  const transform = matrix.multiply(centerTop, pixelOffset);
+  const centerTop = translate(0, -b, 0);
+  const pixelOffset = translate(0, -configuration.rotateAnnotationOffset, configuration.atopZ);
+  const transform = multiply(centerTop, pixelOffset);
   return {
     id: configuration.rotationHandleName + '_' + i,
     type: 'annotation',
@@ -860,13 +873,13 @@ const rotationAnnotation = (configuration, shapes, selectedShapes, shape, i) => 
 };
 
 const resizePointAnnotations = (configuration, parent, a, b) => ([x, y, cursorAngle]) => {
-  const markerPlace = matrix.translate(x * a, y * b, configuration.resizeAnnotationOffsetZ);
-  const pixelOffset = matrix.translate(
+  const markerPlace = translate(x * a, y * b, configuration.resizeAnnotationOffsetZ);
+  const pixelOffset = translate(
     -x * configuration.resizeAnnotationOffset,
     -y * configuration.resizeAnnotationOffset,
     configuration.atopZ + 10
   );
-  const transform = matrix.multiply(markerPlace, pixelOffset);
+  const transform = multiply(markerPlace, pixelOffset);
   const xName = xNames[x];
   const yName = yNames[y];
   return {
@@ -888,7 +901,7 @@ const resizePointAnnotations = (configuration, parent, a, b) => ([x, y, cursorAn
 const resizeEdgeAnnotations = (configuration, parent, a, b) => ([[x0, y0], [x1, y1]]) => {
   const x = a * mean(x0, x1);
   const y = b * mean(y0, y1);
-  const markerPlace = matrix.translate(x, y, configuration.atopZ - 10);
+  const markerPlace = translate(x, y, configuration.atopZ - 10);
   const transform = markerPlace; // no offset etc. at the moment
   const horizontal = y0 === y1;
   const length = horizontal ? a * Math.abs(x1 - x0) : b * Math.abs(y1 - y0);
@@ -933,7 +946,7 @@ const magic = (configuration, shape, shapes) => {
   const epsilon = configuration.rotationEpsilon;
   const integralOf = Math.PI * 2;
   const isIntegerMultiple = shape => {
-    const zRotation = matrix.matrixToAngle(shape.localTransformMatrix);
+    const zRotation = matrixToAngle(shape.localTransformMatrix);
     const ratio = zRotation / integralOf;
     return Math.abs(Math.round(ratio) - ratio) < epsilon;
   };
@@ -1021,10 +1034,7 @@ function resizeAnnotationsFunction(configuration, { shapes, selectedShapes }) {
 const crystallizeConstraint = shape => {
   const result = { ...shape };
   if (shape.snapDeltaMatrix) {
-    result.localTransformMatrix = matrix.multiply(
-      shape.localTransformMatrix,
-      shape.snapDeltaMatrix
-    );
+    result.localTransformMatrix = multiply(shape.localTransformMatrix, shape.snapDeltaMatrix);
     result.snapDeltaMatrix = null;
   }
   if (shape.snapResizeVector) {
@@ -1044,10 +1054,10 @@ const translateShapeSnap = (horizontalConstraint, verticalConstraint, draggedEle
     if (!snapOffsetX && !snapOffsetY) {
       return shape;
     }
-    const snapOffset = matrix.translateComponent(
-      matrix.multiply(
-        matrix.rotateZ(matrix.matrixToAngle(draggedElement.localTransformMatrix)),
-        matrix.translate(snapOffsetX, snapOffsetY, 0)
+    const snapOffset = translateComponent(
+      multiply(
+        rotateZ(matrixToAngle(draggedElement.localTransformMatrix)),
+        translate(snapOffsetX, snapOffsetY, 0)
       )
     );
     return {
@@ -1076,7 +1086,7 @@ const resizeShapeSnap = (
   const snapOffsetY = constrainedY ? -verticalConstraint.signedDistance : 0;
   if (constrainedX || constrainedY) {
     const multiplier = symmetric ? 1 : 0.5;
-    const angle = matrix.matrixToAngle(draggedElement.localTransformMatrix);
+    const angle = matrixToAngle(draggedElement.localTransformMatrix);
     const horizontalSign = -resizeMultiplierHorizontal[horizontalPosition]; // fixme unify sign
     const verticalSign = resizeMultiplierVertical[verticalPosition];
     // todo turn it into matrix algebra via matrix2d.js
@@ -1084,10 +1094,10 @@ const resizeShapeSnap = (
     const cos = Math.cos(angle);
     const snapOffsetA = horizontalSign * (cos * snapOffsetX - sin * snapOffsetY);
     const snapOffsetB = verticalSign * (sin * snapOffsetX + cos * snapOffsetY);
-    const snapTranslateOffset = matrix.translateComponent(
-      matrix.multiply(
-        matrix.rotateZ(angle),
-        matrix.translate((1 - multiplier) * -snapOffsetX, (1 - multiplier) * snapOffsetY, 0)
+    const snapTranslateOffset = translateComponent(
+      multiply(
+        rotateZ(angle),
+        translate((1 - multiplier) * -snapOffsetX, (1 - multiplier) * snapOffsetY, 0)
       )
     );
     const snapSizeOffset = [multiplier * snapOffsetA, multiplier * snapOffsetB];
@@ -1173,13 +1183,8 @@ const getAABB = shapes =>
   shapes.reduce(
     (prev, shape) => {
       const shapeBounds = cornerVertices.reduce((prev, xyVertex) => {
-        const cornerPoint = matrix.normalize(
-          matrix.mvMultiply(shape.transformMatrix, [
-            shape.a * xyVertex[0],
-            shape.b * xyVertex[1],
-            0,
-            1,
-          ])
+        const cornerPoint = normalize(
+          mvMultiply(shape.transformMatrix, [shape.a * xyVertex[0], shape.b * xyVertex[1], 0, 1])
         );
         return extend(prev, cornerPoint, cornerPoint);
       }, prev);
@@ -1194,8 +1199,8 @@ const projectAABB = ([[xMin, yMin], [xMax, yMax]]) => {
   const xTranslate = xMin + a;
   const yTranslate = yMin + b;
   const zTranslate = 0; // todo fix hack that ensures that grouped elements continue to be selectable
-  const localTransformMatrix = matrix.translate(xTranslate, yTranslate, zTranslate);
-  const rigTransform = matrix.translate(-xTranslate, -yTranslate, -zTranslate);
+  const localTransformMatrix = translate(xTranslate, yTranslate, zTranslate);
+  const rigTransform = translate(-xTranslate, -yTranslate, -zTranslate);
   return { a, b, localTransformMatrix, rigTransform };
 };
 
@@ -1212,7 +1217,7 @@ const dissolveGroups = (groupsToDissolve, shapes, selectedShapes) => {
           ? {
               ...shape,
               parent: null,
-              localTransformMatrix: matrix.multiply(
+              localTransformMatrix: multiply(
                 // pulling preexistingGroupParent from `shapes` to get fresh matrices
                 shapes.find(s => s.id === preexistingGroupParent.id).localTransformMatrix, // reinstate the group offset onto the child
                 shape.localTransformMatrix
@@ -1262,27 +1267,21 @@ const childScaler = ({ a, b }, baseAB) => {
   const epsilon = 1e-6;
   const groupScaleX = Math.max(a / baseAB[0], epsilon);
   const groupScaleY = Math.max(b / baseAB[1], epsilon);
-  const groupScale = matrix.scale(groupScaleX, groupScaleY, 1);
+  const groupScale = scale(groupScaleX, groupScaleY, 1);
   return groupScale;
 };
 
 const resizeChild = groupScale => s => {
   const childBaseAB = s.childBaseAB || [s.a, s.b];
-  const impliedScale = matrix.scale(...childBaseAB, 1);
-  const inverseImpliedScale = matrix.invert(impliedScale);
+  const impliedScale = scale(...childBaseAB, 1);
+  const inverseImpliedScale = invert(impliedScale);
   const baseLocalTransformMatrix = s.baseLocalTransformMatrix || s.localTransformMatrix;
-  const normalizedBaseLocalTransformMatrix = matrix.multiply(
-    baseLocalTransformMatrix,
-    impliedScale
-  );
-  const T = matrix.multiply(groupScale, normalizedBaseLocalTransformMatrix);
+  const normalizedBaseLocalTransformMatrix = multiply(baseLocalTransformMatrix, impliedScale);
+  const T = multiply(groupScale, normalizedBaseLocalTransformMatrix);
   const backScaler = groupScale.map(d => Math.abs(d));
-  const inverseBackScaler = matrix.invert(backScaler);
-  const abTuple = matrix.mvMultiply(matrix.multiply(backScaler, impliedScale), [1, 1, 1, 1]);
-  s.localTransformMatrix = matrix.multiply(
-    T,
-    matrix.multiply(inverseImpliedScale, inverseBackScaler)
-  );
+  const inverseBackScaler = invert(backScaler);
+  const abTuple = mvMultiply(multiply(backScaler, impliedScale), [1, 1, 1, 1]);
+  s.localTransformMatrix = multiply(T, multiply(inverseImpliedScale, inverseBackScaler));
   s.a = abTuple[0];
   s.b = abTuple[1];
   s.childBaseAB = childBaseAB;
@@ -1418,7 +1417,7 @@ const grouping = select((configuration, shapes, selectedShapes, groupAction) => 
     const parentedSelectedShapes = selectedLeafShapes.map(shape => ({
       ...shape,
       parent: group.id,
-      localTransformMatrix: matrix.multiply(group.rigTransform, shape.transformMatrix),
+      localTransformMatrix: multiply(group.rigTransform, shape.transformMatrix),
     }));
     const nonGroupGraphConstituent = s =>
       s.subtype !== configuration.adHocGroupName &&
@@ -1499,7 +1498,7 @@ const cursor = select((configuration, shape, draggedPrimaryShape) => {
     case configuration.rotationHandleName:
       return 'crosshair';
     case configuration.resizeHandleName:
-      const angle = ((matrix.matrixToAngle(shape.transformMatrix) * 180) / Math.PI + 360) % 360;
+      const angle = ((matrixToAngle(shape.transformMatrix) * 180) / Math.PI + 360) % 360;
       const screenProjectedAngle = angle + shape.cursorAngle;
       const discretizedAngle = (Math.round(screenProjectedAngle / 45) * 45 + 360) % 360;
       return bidirectionalCursors[discretizedAngle];
@@ -1511,7 +1510,7 @@ const cursor = select((configuration, shape, draggedPrimaryShape) => {
 // this is the core scenegraph update invocation: upon new cursor position etc. emit the new scenegraph
 // it's _the_ state representation (at a PoC level...) comprising of transient properties eg. draggedShape, and the
 // collection of shapes themselves
-const nextScene = select(
+export const nextScene = select(
   (
     configuration,
     hoveredShape,
@@ -1562,15 +1561,3 @@ const nextScene = select(
   mouseTransformState,
   groupedSelectedShapes
 );
-
-module.exports = {
-  cursorPosition,
-  mouseIsDown,
-  dragVector,
-  nextScene,
-  focusedShape,
-  primaryUpdate,
-  shapes,
-  focusedShapes,
-  selectedShapes: selectedShapeIds,
-};

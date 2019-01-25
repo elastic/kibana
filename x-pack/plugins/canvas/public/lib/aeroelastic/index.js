@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const dom = require('./dom');
-export const geometry = require('./geometry');
-export const gestures = require('./gestures');
-export const layout = require('./layout');
-export const matrix = require('./matrix');
-export const state = require('./state');
+import { multiply, rotateZ, translate } from './matrix';
+import { createStore, select } from './state';
+import { nextScene, primaryUpdate } from './layout';
+import { matrixToCSS } from './dom';
+
+export const layout = { nextScene, primaryUpdate };
+export const matrix = { multiply, rotateZ, translate };
+export const state = { createStore, select };
+export const toCSS = matrixToCSS;
