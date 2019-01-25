@@ -19,19 +19,10 @@
 
 import _ from 'lodash';
 import expect from 'expect.js';
-import ngMock from 'ng_mock';
-import { AggResponsePointSeriesProvider } from '../point_series';
+import { buildPointSeriesData } from '../point_series';
 
 describe('pointSeriesChartDataFromTable', function () {
   this.slow(1000);
-
-
-  let pointSeriesChartDataFromTable;
-
-  beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    pointSeriesChartDataFromTable = Private(AggResponsePointSeriesProvider);
-  }));
 
   it('handles a table with just a count', function () {
     const table = {
@@ -40,7 +31,7 @@ describe('pointSeriesChartDataFromTable', function () {
         { '0': 100 }
       ],
     };
-    const chartData = pointSeriesChartDataFromTable(table, {
+    const chartData = buildPointSeriesData(table, {
       y: [{
         accessor: 0,
         params: {},
@@ -72,7 +63,7 @@ describe('pointSeriesChartDataFromTable', function () {
       y: [{ accessor: 1, params: {} }],
     };
 
-    const chartData = pointSeriesChartDataFromTable(table, dimensions);
+    const chartData = buildPointSeriesData(table, dimensions);
 
     expect(chartData).to.be.an('object');
     expect(chartData.series).to.be.an('array');
@@ -97,7 +88,7 @@ describe('pointSeriesChartDataFromTable', function () {
       y: [{ accessor: 1, params: {} }, { accessor: 2, params: {} }],
     };
 
-    const chartData = pointSeriesChartDataFromTable(table, dimensions);
+    const chartData = buildPointSeriesData(table, dimensions);
     expect(chartData).to.be.an('object');
     expect(chartData.series).to.be.an('array');
     expect(chartData.series).to.have.length(2);
@@ -128,7 +119,7 @@ describe('pointSeriesChartDataFromTable', function () {
       y: [{ accessor: 2, params: {} }, { accessor: 3, params: {} }],
     };
 
-    const chartData = pointSeriesChartDataFromTable(table, dimensions);
+    const chartData = buildPointSeriesData(table, dimensions);
     expect(chartData).to.be.an('object');
     expect(chartData.series).to.be.an('array');
     // one series for each extension, and then one for each metric inside
