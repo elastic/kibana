@@ -1,5 +1,3 @@
-/* tslint:disable */
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License;
@@ -88,39 +86,39 @@ export const gestureEnd = select(
  *    Edit: http://stable.ascii-flow.appspot.com/#567671116534197027/776257435
  *
  *
- *                             mouseIsDown
- *        initial state: 'up' +-----------> 'downed'
- *                        ^ ^                 +  +
- *                        | |  !mouseIsDown   |  |
- *           !mouseIsDown | +-----------------+  | mouseIsDown && movedAlready
- *                        |                      |
- *                        +----+ 'dragging' <----+
+ *                             mouseNowDown
+ *        initial state: 'up' +------------> 'downed'
+ *                        ^ ^                  +  +
+ *                        | |  !mouseNowDown   |  |
+ *          !mouseNowDown | +------------------+  | mouseNowDown && movedAlready
+ *                        |                       |
+ *                        +----+ 'dragging' <-----+
  *                                +      ^
  *                                |      |
  *                                +------+
- *                               mouseIsDown
+ *                               mouseNowDown
  *
  */
-const mouseButtonStateTransitions = (state, mouseIsDown, movedAlready) => {
+const mouseButtonStateTransitions = (state, mouseNowDown, movedAlready) => {
   switch (state) {
     case 'up':
-      return mouseIsDown ? 'downed' : 'up';
+      return mouseNowDown ? 'downed' : 'up';
     case 'downed':
-      if (mouseIsDown) {
+      if (mouseNowDown) {
         return movedAlready ? 'dragging' : 'downed';
       } else {
         return 'up';
       }
 
     case 'dragging':
-      return mouseIsDown ? 'dragging' : 'up';
+      return mouseNowDown ? 'dragging' : 'up';
   }
 };
 
 const mouseButtonState = selectReduce(
-  ({ buttonState, downX, downY }, mouseIsDown, { x, y }) => {
+  ({ buttonState, downX, downY }, mouseNowDown, { x, y }) => {
     const movedAlready = x !== downX || y !== downY;
-    const newButtonState = mouseButtonStateTransitions(buttonState, mouseIsDown, movedAlready);
+    const newButtonState = mouseButtonStateTransitions(buttonState, mouseNowDown, movedAlready);
     return {
       buttonState: newButtonState,
       downX: newButtonState === 'downed' ? x : downX,
