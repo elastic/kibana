@@ -6,8 +6,8 @@
 
 import { Legacy } from 'kibana';
 
-export const UPGRADE_ASSISTANT_TYPE = 'upgrade-assistant';
-export const UPGRADE_ASSISTANT_DOC_ID = 'upgrade-assistant';
+export const UPGRADE_ASSISTANT_TYPE = 'upgrade-assistant-telemetry';
+export const UPGRADE_ASSISTANT_DOC_ID = 'upgrade-assistant-telemetry';
 export type UIOpenOption = 'overview' | 'cluster' | 'indices';
 
 export interface UIOpen {
@@ -26,12 +26,10 @@ export interface UpgradeAssistantTelemetryServer extends Legacy.Server {
 }
 
 export interface UpgradeAssistantTelemetrySavedObject {
-  telemetry: {
-    ui_open: {
-      overview: number;
-      cluster: number;
-      indices: number;
-    };
+  ui_open: {
+    overview: number;
+    cluster: number;
+    indices: number;
   };
 }
 

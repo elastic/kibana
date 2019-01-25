@@ -45,12 +45,10 @@ export async function fetchUpgradeAssistantMetrics(
     upgradeAssistantTelemetrySavedObjectAttrs: UpgradeAssistantTelemetrySavedObjectAttributes | null
   ): UpgradeAssistantTelemetrySavedObject => {
     const defaultTelemetrySavedObject = {
-      telemetry: {
-        ui_open: {
-          overview: 0,
-          cluster: 0,
-          indices: 0,
-        },
+      ui_open: {
+        overview: 0,
+        cluster: 0,
+        indices: 0,
       },
     };
 
@@ -71,7 +69,7 @@ export async function fetchUpgradeAssistantMetrics(
   };
 
   return {
-    ...getTelemetrySavedObject(upgradeAssistantSOAttributes).telemetry,
+    ...getTelemetrySavedObject(upgradeAssistantSOAttributes),
     features: {
       deprecation_logging: {
         enabled: isDeprecationLoggingEnabled(loggerDeprecationCallResult),

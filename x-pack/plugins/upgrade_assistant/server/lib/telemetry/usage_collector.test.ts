@@ -31,9 +31,9 @@ describe('Upgrade Assistant Usage Collector', () => {
             get: () => {
               return {
                 attributes: {
-                  'telemetry.ui_open.overview': 10,
-                  'telemetry.ui_open.cluster': 20,
-                  'telemetry.ui_open.indices': 30,
+                  'ui_open.overview': 10,
+                  'ui_open.cluster': 20,
+                  'ui_open.indices': 30,
                 },
               };
             },
@@ -60,7 +60,7 @@ describe('Upgrade Assistant Usage Collector', () => {
     it('should call makeUsageCollector with type = upgrade-assistant', () => {
       usageCollector.makeUpgradeAssistantUsageCollector(server());
       expect(makeUsageCollectorStub).toHaveBeenCalledTimes(1);
-      expect(makeUsageCollectorStub.mock.calls[0][0].type).toBe('upgrade-assistant');
+      expect(makeUsageCollectorStub.mock.calls[0][0].type).toBe('upgrade-assistant-telemetry');
     });
 
     it('fetchUpgradeAssistantMetrics should return correct info', async () => {

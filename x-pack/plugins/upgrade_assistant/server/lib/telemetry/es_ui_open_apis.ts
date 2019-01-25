@@ -24,7 +24,7 @@ async function incrementUIOpenOptionCounter(
   await internalRepository.incrementCounter(
     UPGRADE_ASSISTANT_TYPE,
     UPGRADE_ASSISTANT_DOC_ID,
-    `telemetry.ui_open.${uiOpenOptionCounter}`
+    `ui_open.${uiOpenOptionCounter}`
   );
 }
 

@@ -16,7 +16,7 @@ export function upgradeAssistant(kibana: any) {
     uiExports: {
       managementSections: ['plugins/upgrade_assistant'],
       savedObjectSchemas: {
-        'upgrade-assistant': {
+        'upgrade-assistant-telemetry': {
           isNamespaceAgnostic: true,
         },
       },

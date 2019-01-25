@@ -59,17 +59,17 @@ describe('Upgrade Assistant Telemetry SavedObject UIOpen', () => {
       expect(incCounterSORepoFunc).toHaveBeenCalledWith(
         UPGRADE_ASSISTANT_TYPE,
         UPGRADE_ASSISTANT_DOC_ID,
-        `telemetry.ui_open.overview`
+        `ui_open.overview`
       );
       expect(incCounterSORepoFunc).toHaveBeenCalledWith(
         UPGRADE_ASSISTANT_TYPE,
         UPGRADE_ASSISTANT_DOC_ID,
-        `telemetry.ui_open.cluster`
+        `ui_open.cluster`
       );
       expect(incCounterSORepoFunc).toHaveBeenCalledWith(
         UPGRADE_ASSISTANT_TYPE,
         UPGRADE_ASSISTANT_DOC_ID,
-        `telemetry.ui_open.indices`
+        `ui_open.indices`
       );
     });
   });

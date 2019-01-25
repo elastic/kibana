@@ -1,33 +1,29 @@
 {
-  "upgrade-assistant": {
+  "upgrade-assistant-telemetry": {
     "properties": {
-      "telemetry": {
+      "ui_open": {
         "properties": {
-          "ui_open": {
-            "properties": {
-              "overview": {
-                "type": "long",
-                "null_value": 0
-              },
-              "cluster": {
-                "type": "long",
-                "null_value": 0
-              },
-              "indices": {
-                "type": "long",
-                "null_value": 0
-              }
-            }
+          "overview": {
+            "type": "long",
+            "null_value": 0
           },
-          "features": {
+          "cluster": {
+            "type": "long",
+            "null_value": 0
+          },
+          "indices": {
+            "type": "long",
+            "null_value": 0
+          }
+        }
+      },
+      "features": {
+        "properties": {
+          "deprecation_logging": {
             "properties": {
-              "deprecation_logging": {
-                "properties": {
-                  "enabled": {
-                    "type": "boolean",
-                    "null_value": true
-                  }
-                }
+              "enabled": {
+                "type": "boolean",
+                "null_value": true
               }
             }
           }
