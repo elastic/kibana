@@ -12,8 +12,6 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
-// @ts-ignore
-import { applyTheme } from 'ui/theme';
 import { State } from '../../store';
 import { appActions, themeSelector } from '../../store/local/app';
 import { Theme } from '../../store/local/app/model';
@@ -65,7 +63,6 @@ const ThemeSwitcherComponent = pure<Props>(({ currentTheme, setTheme }) => (
         defaultChecked={currentTheme === 'dark' ? true : false}
         onClick={() => {
           setTheme!({ name: currentTheme === 'dark' ? 'light' : 'dark' });
-          applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
         }}
       />
     </ThemeSwitcherContainer>
