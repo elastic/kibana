@@ -23,6 +23,7 @@ export class TOCEntry extends React.Component {
 
   componentDidMount() {
     this._isMounted = true;
+    this._updateDisplayName();
   }
 
   componentWillUnmount() {
