@@ -120,7 +120,7 @@ Object {
               "filter": Array [
                 Object {
                   "term": Object {
-                    "context.service.name": "opbeans-node",
+                    "service.name": "opbeans-node",
                   },
                 },
                 Object {

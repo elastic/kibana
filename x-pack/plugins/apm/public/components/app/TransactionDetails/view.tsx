@@ -5,6 +5,7 @@
  */
 
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React from 'react';
 import { TransactionDetailsRequest } from '../../../store/reactReduxRequest/transactionDetails';
@@ -70,8 +71,19 @@ export function TransactionDetailsView({ urlParams, location }: Props) {
           if (!transaction) {
             return (
               <EmptyMessage
-                heading="No transaction sample available."
-                subheading="Try another time range, reset the search filter or select another bucket from the distribution histogram."
+                heading={i18n.translate(
+                  'xpack.apm.transactionDetails.noTransactionTitle',
+                  {
+                    defaultMessage: 'No transaction sample available.'
+                  }
+                )}
+                subheading={i18n.translate(
+                  'xpack.apm.transactionDetails.noTransactionDescription',
+                  {
+                    defaultMessage:
+                      'Try another time range, reset the search filter or select another bucket from the distribution histogram.'
+                  }
+                )}
               />
             );
           }

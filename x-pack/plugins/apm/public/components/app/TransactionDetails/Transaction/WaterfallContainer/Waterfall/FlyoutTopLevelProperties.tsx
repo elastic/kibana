@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
   SERVICE_NAME,
@@ -25,17 +26,21 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
 
   const stickyProperties = [
     {
-      label: 'Service',
+      label: i18n.translate('xpack.apm.transactionDetails.serviceLabel', {
+        defaultMessage: 'Service'
+      }),
       fieldName: SERVICE_NAME,
       val: (
-        <KibanaLink hash={`/${transaction.context.service.name}`}>
-          {transaction.context.service.name}
+        <KibanaLink hash={`/${transaction.service.name}`}>
+          {transaction.service.name}
         </KibanaLink>
       ),
       width: '50%'
     },
     {
-      label: 'Transaction',
+      label: i18n.translate('xpack.apm.transactionDetails.transactionLabel', {
+        defaultMessage: 'Transaction'
+      }),
       fieldName: TRANSACTION_NAME,
       val: (
         <TransactionLink transaction={transaction}>

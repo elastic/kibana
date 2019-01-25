@@ -17,8 +17,7 @@ import {
   getRefreshConfig,
   getQuery,
 } from '../../selectors/map_selectors';
-import { getIsDarkTheme } from '../../store/ui';
-import { convertMapExtentToEnvelope } from '../../elasticsearch_geo_utils';
+import { convertMapExtentToPolygon } from '../../elasticsearch_geo_utils';
 
 const module = uiModules.get('app/gis');
 
@@ -84,11 +83,9 @@ module.factory('SavedGisMap', function (Private) {
       query: _.omit(getQuery(state), 'queryLastTriggeredAt'),
     });
 
-    this.uiStateJSON = JSON.stringify({
-      isDarkMode: getIsDarkTheme(state),
-    });
+    this.uiStateJSON = JSON.stringify({});
 
-    this.bounds = convertMapExtentToEnvelope(getMapExtent(state));
+    this.bounds = convertMapExtentToPolygon(getMapExtent(state));
   };
 
   return SavedGisMap;

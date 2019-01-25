@@ -10,7 +10,7 @@ export class DataRequest {
   }
 
   hasLoadError() {
-    return this._descriptor.dataHasLoadError;
+    return !!this._descriptor.dataHasLoadError;
   }
 
   getLoadError() {

@@ -26,6 +26,7 @@ import { FormattedData } from './adapters/data';
  * inspector. It will only be called when the data view in the inspector is opened.
  */
 export async function buildTabularInspectorData(table, queryFilter) {
+  const aggConfigs = table.columns.map(column => column.aggConfig);
   const rows = table.rows.map(row => {
     return table.columns.reduce((prev, cur, colIndex) => {
       const value = row[cur.id];
@@ -45,12 +46,12 @@ export async function buildTabularInspectorData(table, queryFilter) {
       field: `col-${colIndex}-${col.aggConfig.id}`,
       filter: isCellContentFilterable && (value => {
         const rowIndex = rows.findIndex(row => row[`col-${colIndex}-${col.aggConfig.id}`].raw === value.raw);
-        const filter = createFilter(table, colIndex, rowIndex, value.raw);
+        const filter = createFilter(aggConfigs, table, colIndex, rowIndex, value.raw);
         queryFilter.addFilters(filter);
       }),
       filterOut: isCellContentFilterable && (value => {
         const rowIndex = rows.findIndex(row => row[`col-${colIndex}-${col.aggConfig.id}`].raw === value.raw);
-        const filter = createFilter(table, colIndex, rowIndex, value.raw);
+        const filter = createFilter(aggConfigs, table, colIndex, rowIndex, value.raw);
         const notOther = value.raw !== '__other__';
         const notMissing = value.raw !== '__missing__';
         if (Array.isArray(filter)) {

@@ -35,7 +35,7 @@ export function BaseVisTypeProvider(Private) {
       if (!opts.description) {
         throw('vis_type must define its description');
       }
-      if (!opts.icon && !opts.image && !opts.legacyIcon) {
+      if (!opts.icon && !opts.image) {
         throw('vis_type must define its icon or image');
       }
       if (!opts.visualization) {

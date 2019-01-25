@@ -5,7 +5,7 @@
  */
 
 
-export const ZOOM_TO_PRECISION = {
+const ZOOM_TO_PRECISION = {
   "0": 1,
   "1": 2,
   "2": 2,
@@ -37,4 +37,10 @@ export const ZOOM_TO_PRECISION = {
   "28": 12,
   "29": 12,
   "30": 12
+};
+
+export const getGeohashPrecisionForZoom = (zoom) => {
+  let zoomNormalized = Math.round(zoom);
+  zoomNormalized = Math.max(0, Math.min(zoomNormalized, 30));
+  return ZOOM_TO_PRECISION[zoomNormalized];
 };
