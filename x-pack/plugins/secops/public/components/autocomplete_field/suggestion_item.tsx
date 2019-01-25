@@ -49,11 +49,11 @@ const SuggestionItemContainer = styled.div<{
 }>`
   display: flex;
   flex-direction: row;
-  font-size: ${props => props.theme.eui.default.euiFontSizeS};
-  height: ${props => props.theme.eui.default.euiSizeXl};
+  font-size: ${props => props.theme.eui.euiFontSizeS};
+  height: ${props => props.theme.eui.euiSizeXl};
   white-space: nowrap;
   background-color: ${props =>
-    props.isSelected ? props.theme.eui.default.euiColorLightestShade : 'transparent'};
+    props.isSelected ? props.theme.eui.euiColorLightestShade : 'transparent'};
 `;
 
 const SuggestionItemField = styled.div`
@@ -61,8 +61,8 @@ const SuggestionItemField = styled.div`
   cursor: pointer;
   display: flex;
   flex-direction: row;
-  height: ${props => props.theme.eui.default.euiSizeXl};
-  padding: ${props => props.theme.eui.default.euiSizeXs};
+  height: ${props => props.theme.eui.euiSizeXl};
+  padding: ${props => props.theme.eui.euiSizeXs};
 `;
 
 const SuggestionItemIconField = SuggestionItemField.extend<{ suggestionType: string }>`
@@ -70,12 +70,12 @@ const SuggestionItemIconField = SuggestionItemField.extend<{ suggestionType: str
   color: ${props => getEuiIconColor(props.theme, props.suggestionType)};
   flex: 0 0 auto;
   justify-content: center;
-  width: ${props => props.theme.eui.default.euiSizeXl};
+  width: ${props => props.theme.eui.euiSizeXl};
 `;
 
 const SuggestionItemTextField = SuggestionItemField.extend`
   flex: 2 0 0;
-  font-family: ${props => props.theme.eui.default.euiCodeFontFamily};
+  font-family: ${props => props.theme.eui.euiCodeFontFamily};
 `;
 
 const SuggestionItemDescriptionField = SuggestionItemField.extend`
@@ -85,7 +85,7 @@ const SuggestionItemDescriptionField = SuggestionItemField.extend`
     display: inline;
 
     span {
-      font-family: ${props => props.theme.eui.default.euiCodeFontFamily};
+      font-family: ${props => props.theme.eui.euiCodeFontFamily};
     }
   }
 `;
@@ -118,15 +118,15 @@ interface EuiTheme {
 const getEuiIconColor = (theme: EuiTheme, suggestionType: string): string => {
   switch (suggestionType) {
     case 'field':
-      return theme.eui.default.euiColorVis7;
+      return theme.eui.euiColorVis7;
     case 'value':
-      return theme.eui.default.euiColorVis0;
+      return theme.eui.euiColorVis0;
     case 'operator':
-      return theme.eui.default.euiColorVis1;
+      return theme.eui.euiColorVis1;
     case 'conjunction':
-      return theme.eui.default.euiColorVis2;
+      return theme.eui.euiColorVis2;
     case 'recentSearch':
     default:
-      return theme.eui.default.euiColorMediumShade;
+      return theme.eui.euiColorMediumShade;
   }
 };

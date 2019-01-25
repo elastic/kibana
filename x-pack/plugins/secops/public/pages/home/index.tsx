@@ -22,7 +22,7 @@ import { connect } from 'react-redux';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { pure } from 'recompose';
 import { Dispatch } from 'redux';
-import styled, { ThemeProvider } from 'styled-components';
+import styled from 'styled-components';
 import chrome from 'ui/chrome';
 
 import { AppSettings } from '../../components/app_settings';
@@ -30,7 +30,6 @@ import { AutoSizer } from '../../components/auto_sizer';
 import { DragDropContextWrapper } from '../../components/drag_and_drop/drag_drop_context_wrapper';
 import { Flyout, flyoutHeaderHeight } from '../../components/flyout';
 import { LinkToPage } from '../../components/link_to';
-import { Footer } from '../../components/page/footer';
 import { Navigation } from '../../components/page/navigation';
 import { RangeDatePicker } from '../../components/range_date_picker';
 import { StatefulTimeline } from '../../components/timeline';
@@ -98,12 +97,12 @@ const HomePageComponent = pure<Props>(() => (
             <EuiPageBody>
               <PageHeader data-test-subj="pageHeader">
                 <PageHeaderSection>
-                  <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                  <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
                     <EuiFlexItem grow={false} data-test-subj="datePickerContainer">
                       <Navigation data-test-subj="navigation" />
                     </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiFlexGroup alignItems="center" wrap={false}>
+                    <EuiFlexItem grow={false} style={{ marginTop: '13px' }}>
+                      <EuiFlexGroup alignItems="center" wrap={false} gutterSize="s">
                         <EuiFlexItem grow={false} data-test-subj="datePickerContainer">
                           <RangeDatePicker id="global" />
                         </EuiFlexItem>
@@ -125,7 +124,6 @@ const HomePageComponent = pure<Props>(() => (
                   <Route component={NotFoundPage} />
                 </Switch>
               </PageContent>
-              <Footer />
             </EuiPageBody>
           </DragDropContextWrapper>
         </Page>
@@ -145,21 +143,19 @@ const Page = styled(EuiPage)`
 `;
 
 const PageHeader = styled(EuiPageHeader)`
+  background-color: ${props => props.theme.eui.euiColorLightestShade};
   position: fixed;
-  width: calc(100% - 32px);
+  width: calc(100% - 30px);
   z-index: 1;
-  background-color: ${props =>
-    props.theme.darkMode
-      ? props.theme.eui.euiColorMediumShade
-      : props.theme.eui.euiColorLightestShade};
-  padding: 16px 0px 18px 0px;
+  padding: 6px 0px 15px 2px;
   margin-bottom: 0px;
+  margin-left: -1px;
+  margin-top: -1px;
 `;
 
 const PageContent = styled(EuiPageContent)`
-  margin-top: 80px;
+  margin-top: 61px;
   border-top: 0px solid white;
-  margin-bottom: 4rem;
 `;
 
 const PageHeaderSection = styled(EuiPageHeaderSection)`

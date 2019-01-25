@@ -209,17 +209,12 @@ export const Hosts = pure(() => (
 ));
 
 const PageContentHeader = styled(EuiPageContentHeader)`
-  padding: 24px;
+  padding: 12px;
   position: fixed;
   width: calc(100% - 32px);
   z-index: 1;
-  background-color: ${props =>
-    props.theme.darkMode ? props.theme.eui.euiColorFullShade : props.theme.eui.euiColorEmptyShade};
-  border: 1px solid
-    ${props =>
-      props.theme.darkMode
-        ? props.theme.eui.euiColorDarkShade
-        : props.theme.eui.euiColorLightShade};
+  background-color: ${props => props.theme.eui.euiColorEmptyShade};
+  border: 1px solid ${props => props.theme.eui.euiColorLightShade};
   border-radius: 4px;
   border-bottom: 0px solid white;
   border-bottom-left-radius: 0px;
@@ -232,5 +227,5 @@ const PageContentHeaderSection = styled(EuiPageContentHeaderSection)`
 `;
 
 const PageContentBody = styled(EuiPageContentBody)`
-  padding: 0px 24px 24px 24px;
+  padding: 60px 24px 24px 24px;
 `;
