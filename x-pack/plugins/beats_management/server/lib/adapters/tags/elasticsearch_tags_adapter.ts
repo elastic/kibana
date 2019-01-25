@@ -46,7 +46,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
     const response = await this.database.search(user, params);
     const tags = get<any>(response, 'hits.hits', []);
 
-    return tags.map((tag: any) => tag._source.tag);
+    return tags.map((tag: any) => ({ hasConfigurationBlocksTypes: [], ...tag._source.tag }));
   }
 
   public async delete(user: FrameworkUser, tagIds: string[]): Promise<boolean> {
@@ -125,6 +125,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
     return get(response, 'docs', [])
       .filter((b: any) => b.found)
       .map((b: any) => ({
+        hasConfigurationBlocksTypes: [],
         ...b._source.tag,
         id: b._id.replace('tag:', ''),
       }));

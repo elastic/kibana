@@ -91,6 +91,7 @@ export const RuntimeBeatTag = t.interface(
     id: t.union([t.undefined, t.string]),
     name: t.string,
     color: t.string,
+    hasConfigurationBlocksTypes: t.array(t.string),
   },
   'CMBeat'
 );
@@ -100,7 +101,6 @@ export interface BeatTag
     Exclude<keyof t.TypeOf<typeof RuntimeBeatTag>, 'id'>
   > {
   id: string;
-  hasConfigurationBlocksTypes?: string[];
   // Used by the UI and api when a tag exists but is an invalid option
   disabled?: boolean;
 }
