@@ -94,7 +94,12 @@ export async function sassMixin(kbnServer, server, config) {
       } catch(error) {
         const { message, line, file } = error;
         currentlyTrackedFiles.add(file);
-        server.log(['warning', 'scss'], `${message} on line ${line} of ${file}`);
+
+        if (!line || !file) {
+          server.log(['warning', 'scss'], error);
+        } else {
+          server.log(['warning', 'scss'], `${message} on line ${line} of ${file}`);
+        }
       }
     }, []));
 

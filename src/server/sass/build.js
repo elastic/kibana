@@ -29,6 +29,8 @@ import isPathInside from 'is-path-inside';
 
 const renderSass = promisify(sass.render);
 const writeFile = promisify(fs.writeFile);
+const exists = promisify(fs.exists);
+const copyFile = promisify(fs.copyFile);
 const mkdirpAsync = promisify(mkdirp);
 
 const DARK_THEME_IMPORTER = (url) => {
@@ -78,11 +80,11 @@ export class Build {
       importer: this.theme === 'dark' ? DARK_THEME_IMPORTER : undefined
     });
 
-    this.includedFiles = rendered.stats.includedFiles;
-
     const sourceBaseDir = path.dirname(this.sourcePath);
     const targetDir = path.dirname(this.targetPath);
     const processor = postcss([ autoprefixer ]);
+
+    const urlAssets = [];
 
     if (this.urlImports) {
       const { publicDir, urlBase } = this.urlImports;
@@ -93,19 +95,19 @@ export class Build {
           }
 
           const sourcePath = path.resolve(sourceBaseDir, asset.pathname);
-          if (!fs.existsSync(sourcePath)) {
-            throw new Error(`Unable to locate url("${asset.url}"), it must resolve to a file relative to "${sourceBaseDir}"`);
-          }
-
           if (!isPathInside(sourcePath, publicDir)) {
             throw new Error(`Unable to use url("${asset.url}"), it must resolve to a file within "${publicDir}"`);
           }
 
-          this.includedFiles.push(sourcePath);
+          const urlAsset = {
+            url: asset.url,
+            from: sourcePath,
+            to: path.resolve(targetDir, asset.pathname),
+          };
 
-          const targetPath = path.resolve(targetDir, asset.pathname);
-          mkdirp.sync(path.dirname(targetPath));
-          fs.copyFileSync(sourcePath, targetPath);
+          if (!urlAssets.some(({ from, to }) => from === urlAsset.from && to === urlAsset.to)) {
+            urlAssets.push(urlAsset);
+          }
 
           return `${urlBase}/${path.relative(publicDir, sourcePath)}`.replace(/\\/g, '/');
         }
@@ -116,8 +118,27 @@ export class Build {
       from: this.sourcePath
     });
 
+    this.includedFiles = [
+      ...rendered.stats.includedFiles,
+      ...urlAssets.map(({ from }) => from),
+    ];
+
+    // verify that source files exist before writing anything
+    await Promise.all(urlAssets.map(async ({ url, from }) => {
+      if (!await exists(from)) {
+        throw new Error(`Unable to locate url("${url}"), it must resolve to a file relative to "${sourceBaseDir}"`);
+      }
+    }));
+
+    // write css
     await mkdirpAsync(targetDir);
     await writeFile(this.targetPath, prefixed.css);
+
+    // copy urlAssets
+    await Promise.all(urlAssets.map(async ({ from, to }) => {
+      await mkdirpAsync(path.dirname(to));
+      await copyFile(from, to);
+    }));
 
     return this;
   }
