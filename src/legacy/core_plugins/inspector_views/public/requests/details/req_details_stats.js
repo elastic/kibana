@@ -53,7 +53,7 @@ class RequestDetailsStats extends Component {
               />
             }
           </span>
-          {stat.name}
+          {stat.label}
         </EuiTableRowCell>
         <EuiTableRowCell>{stat.value}</EuiTableRowCell>
       </EuiTableRow>
