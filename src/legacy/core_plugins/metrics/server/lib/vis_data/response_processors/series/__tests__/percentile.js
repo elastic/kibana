@@ -35,7 +35,7 @@ describe('percentile(resp, panel, series)', () => {
       line_width: 1,
       point_size: 1,
       fill: 0,
-      color: '#F00',
+      color: 'rgb(255, 0, 0)',
       id: 'test',
       split_mode: 'everything',
       metrics: [{
@@ -92,7 +92,7 @@ describe('percentile(resp, panel, series)', () => {
     expect(results).to.have.length(3);
 
     expect(results[0]).to.have.property('id', '10-90:test');
-    expect(results[0]).to.have.property('color', '#FF0000');
+    expect(results[0]).to.have.property('color', 'rgb(255, 0, 0)');
     expect(results[0]).to.have.property('fillBetween', '10-90:test:90');
     expect(results[0]).to.have.property('label', 'Percentile of cpu (10)');
     expect(results[0]).to.have.property('legend', false);
@@ -110,7 +110,7 @@ describe('percentile(resp, panel, series)', () => {
     ]);
 
     expect(results[1]).to.have.property('id', '10-90:test:90');
-    expect(results[1]).to.have.property('color', '#FF0000');
+    expect(results[1]).to.have.property('color', 'rgb(255, 0, 0)');
     expect(results[1]).to.have.property('label', 'Percentile of cpu (10)');
     expect(results[1]).to.have.property('legend', false);
     expect(results[1]).to.have.property('lines');
@@ -127,7 +127,7 @@ describe('percentile(resp, panel, series)', () => {
     ]);
 
     expect(results[2]).to.have.property('id', '50:test');
-    expect(results[2]).to.have.property('color', '#FF0000');
+    expect(results[2]).to.have.property('color', 'rgb(255, 0, 0)');
     expect(results[2]).to.have.property('label', 'Percentile of cpu (50)');
     expect(results[2]).to.have.property('stack', false);
     expect(results[2]).to.have.property('lines');

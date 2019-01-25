@@ -46,23 +46,54 @@ jest.mock('./utils', () => ({
   })),
 }));
 
-import { shallow, mount } from 'enzyme';
+import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { NewCalendar } from './new_calendar';
+
+const calendars = [
+  {
+    'calendar_id': 'farequote-calendar',
+    'job_ids': ['farequote'],
+    'description': 'test ',
+    'events': [{
+      'description': 'Downtime feb 9 2017 10:10 to 10:30',
+      'start_time': 1486656600000,
+      'end_time': 1486657800000,
+      'calendar_id': 'farequote-calendar',
+      'event_id': 'Ee-YgGcBxHgQWEhCO_xj'
+    }]
+  },
+  {
+    'calendar_id': 'this-is-a-new-calendar',
+    'job_ids': ['test'],
+    'description': 'new calendar',
+    'events': [{
+      'description': 'New event!',
+      'start_time': 1544076000000,
+      'end_time': 1544162400000,
+      'calendar_id': 'this-is-a-new-calendar',
+      'event_id': 'ehWKhGcBqHkXuWNrIrSV'
+    }]
+  }];
+
+const props = {
+  canCreateCalendar: true,
+  canDeleteCalendar: true
+};
 
 describe('NewCalendar', () => {
 
   test('Renders new calendar form', () => {
-    const wrapper = shallow(
-      <NewCalendar />
+    const wrapper = shallowWithIntl(
+      <NewCalendar.WrappedComponent {...props}/>
     );
 
     expect(wrapper).toMatchSnapshot();
   });
 
   test('Import modal shown on Import Events button click', () => {
-    const wrapper = mount(
-      <NewCalendar />
+    const wrapper = mountWithIntl(
+      <NewCalendar.WrappedComponent {...props}/>
     );
 
     const importButton = wrapper.find('[data-testid="ml_import_events"]');
@@ -73,8 +104,8 @@ describe('NewCalendar', () => {
   });
 
   test('New event modal shown on New event button click', () => {
-    const wrapper = mount(
-      <NewCalendar />
+    const wrapper = mountWithIntl(
+      <NewCalendar.WrappedComponent {...props}/>
     );
 
     const importButton = wrapper.find('[data-testid="ml_new_event"]');
@@ -82,6 +113,36 @@ describe('NewCalendar', () => {
     button.simulate('click');
 
     expect(wrapper.state('isNewEventModalVisible')).toBe(true);
+  });
+
+  test('isDuplicateId returns true if form calendar id already exists in calendars', () => {
+    const wrapper = mountWithIntl(
+      <NewCalendar.WrappedComponent {...props}/>
+    );
+
+    const instance = wrapper.instance();
+    instance.setState({
+      calendars,
+      formCalendarId: calendars[0].calendar_id
+    });
+    wrapper.update();
+    expect(instance.isDuplicateId()).toBe(true);
+  });
+
+  test('Save button is disabled if canCreateCalendar is false', () => {
+    const noCreateProps = {
+      ...props,
+      canCreateCalendar: false,
+    };
+
+    const wrapper = mountWithIntl(
+      <NewCalendar.WrappedComponent {...noCreateProps} />
+    );
+
+    const buttons = wrapper.find('[data-testid="ml_save_calendar_button"]');
+    const saveButton = buttons.find('EuiButton');
+
+    expect(saveButton.prop('isDisabled')).toBe(true);
   });
 
 });

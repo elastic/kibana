@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// @ts-nocheck
 
 import {
   // FIXME: need updated typedefs
@@ -34,7 +33,9 @@ export const SpaceCard = (props: Props) => {
 };
 
 function renderSpaceAvatar(space: Space) {
-  return <SpaceAvatar space={space} size={'l'} />;
+  // not announcing space name here because the title of the EuiCard that the SpaceAvatar lives in is already
+  // announcing it. See https://github.com/elastic/kibana/issues/27748
+  return <SpaceAvatar space={space} size={'l'} announceSpaceName={false} />;
 }
 
 function renderSpaceDescription(space: Space) {

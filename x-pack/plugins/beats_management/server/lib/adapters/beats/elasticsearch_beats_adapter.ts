@@ -134,6 +134,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     const params = {
       index: INDEX_NAMES.BEATS,
       size: 10000,
+      ignore: [404],
       type: '_doc',
       body: {
         query: {

@@ -43,7 +43,7 @@ export const GroupOfNodes: React.SFC<Props> = ({
       <Nodes>
         {group.nodes.map(node => (
           <Node
-            key={node.id}
+            key={node.pathId}
             options={options}
             squareSize={group.squareSize}
             node={node}

@@ -84,11 +84,9 @@ export class SearchEmbeddable extends Embeddable {
     $compile,
   }: SearchEmbeddableConfig) {
     super({
-      metadata: {
-        title: savedSearch.title,
-        editUrl,
-        indexPattern: savedSearch.searchSource.getField('index'),
-      },
+      title: savedSearch.title,
+      editUrl,
+      indexPattern: savedSearch.searchSource.getField('index'),
     });
     this.onEmbeddableStateChanged = onEmbeddableStateChanged;
     this.savedSearch = savedSearch;

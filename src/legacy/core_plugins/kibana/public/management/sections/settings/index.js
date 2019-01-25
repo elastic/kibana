@@ -85,11 +85,15 @@ management.getSection('kibana').register('settings', {
   url: '#/management/kibana/settings'
 });
 
-FeatureCatalogueRegistryProvider.register(() => {
+FeatureCatalogueRegistryProvider.register(i18n => {
   return {
     id: 'advanced_settings',
-    title: 'Advanced Settings',
-    description: 'Directly edit settings that control behavior in Kibana.',
+    title: i18n('kbn.management.settings.advancedSettingsLabel', {
+      defaultMessage: 'Advanced Settings',
+    }),
+    description: i18n('kbn.management.settings.advancedSettingsDescription', {
+      defaultMessage: 'Directly edit settings that control behavior in Kibana.',
+    }),
     icon: 'advancedSettingsApp',
     path: '/app/kibana#/management/kibana/settings',
     showOnHomePage: false,

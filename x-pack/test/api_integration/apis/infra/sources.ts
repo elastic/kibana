@@ -15,8 +15,8 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
   const client = getService('infraOpsGraphQLClient');
 
   describe('sources', () => {
-    before(() => esArchiver.load('infra'));
-    after(() => esArchiver.unload('infra'));
+    before(() => esArchiver.load('infra/metrics_and_logs'));
+    after(() => esArchiver.unload('infra/metrics_and_logs'));
 
     it('supports the redux store query', () => {
       return client
@@ -33,9 +33,9 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
           // shipped default values
           expect(sourceConfiguration.metricAlias).to.be('metricbeat-*');
           expect(sourceConfiguration.logAlias).to.be('filebeat-*');
-          expect(sourceConfiguration.fields.container).to.be('docker.container.name');
-          expect(sourceConfiguration.fields.host).to.be('beat.hostname');
-          expect(sourceConfiguration.fields.pod).to.be('kubernetes.pod.name');
+          expect(sourceConfiguration.fields.container).to.be('docker.container.id');
+          expect(sourceConfiguration.fields.host).to.be('host.name');
+          expect(sourceConfiguration.fields.pod).to.be('kubernetes.pod.uid');
 
           // test data in x-pack/test/functional/es_archives/infra/data.json.gz
           expect(sourceStatus.indexFields.length).to.be(1765);

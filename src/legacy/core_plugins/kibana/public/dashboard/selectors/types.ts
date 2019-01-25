@@ -58,6 +58,10 @@ export interface EmbeddableReduxState {
   readonly error?: string | object;
   readonly initialized: boolean;
   readonly stagedFilter?: object;
+  /**
+   * Timestamp of the last time this embeddable was requested to reload.
+   */
+  readonly lastReloadRequestTime: number;
 }
 
 export interface PanelsMap {

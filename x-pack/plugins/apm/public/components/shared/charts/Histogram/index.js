@@ -6,7 +6,7 @@
 
 import React, { PureComponent } from 'react';
 import d3 from 'd3';
-import _ from 'lodash';
+import { isEmpty } from 'lodash';
 import PropTypes from 'prop-types';
 import { scaleLinear } from 'd3-scale';
 import styled from 'styled-components';
@@ -91,7 +91,7 @@ export class HistogramInner extends PureComponent {
       width: XY_WIDTH
     } = this.props;
     const { hoveredBucket } = this.state;
-    if (_.isEmpty(buckets) || XY_WIDTH === 0) {
+    if (isEmpty(buckets) || XY_WIDTH === 0) {
       return null;
     }
 

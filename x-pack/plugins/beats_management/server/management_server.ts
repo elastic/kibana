@@ -17,16 +17,8 @@ import { createGetTagsWithIdsRoute } from './rest_api/tags/get';
 import { createListTagsRoute } from './rest_api/tags/list';
 import { createSetTagRoute } from './rest_api/tags/set';
 import { createTokensRoute } from './rest_api/tokens/create';
-import { beatsIndexTemplate } from './utils/index_templates';
 
 export const initManagementServer = (libs: CMServerLibs) => {
-  if (libs.database) {
-    libs.database.putTemplate(libs.framework.internalUser, {
-      name: '.management-beats',
-      body: beatsIndexTemplate,
-    });
-  }
-
   libs.framework.registerRoute(createGetBeatRoute(libs));
   libs.framework.registerRoute(createGetTagsWithIdsRoute(libs));
   libs.framework.registerRoute(createListTagsRoute(libs));

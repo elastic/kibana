@@ -28,8 +28,9 @@ export function getPdfUrl({ id, name: title, width, height }, { pageCount }) {
 
   // build a list of all page urls for exporting, they are captured one at a time
   const workpadUrls = [];
-  for (let i = 1; i <= pageCount; i++)
+  for (let i = 1; i <= pageCount; i++) {
     workpadUrls.push(rison.encode(`${canvasEntry}/export/workpad/pdf/${id}/page/${i}`));
+  }
 
   const jobParams = {
     browserTimezone: 'America/Phoenix', // TODO: get browser timezone, or Kibana setting?

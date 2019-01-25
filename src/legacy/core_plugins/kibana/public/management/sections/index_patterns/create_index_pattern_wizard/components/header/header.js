@@ -30,15 +30,16 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export const Header = ({
+const HeaderUi = ({
   prompt,
   indexPatternName,
   showSystemIndices,
   isIncludingSystemIndices,
   onChangeIncludingSystemIndices,
   isBeta,
+  intl
 }) => (
   <div>
     <EuiTitle>
@@ -53,7 +54,12 @@ export const Header = ({
         { isBeta ? (
           <Fragment>
             {' '}
-            <EuiBetaBadge label="Beta" />
+            <EuiBetaBadge
+              label={intl.formatMessage({
+                id: 'kbn.management.createIndexPattern.betaLabel',
+                defaultMessage: 'Beta'
+              })}
+            />
           </Fragment>
         ) : null }
       </h1>
@@ -98,3 +104,5 @@ export const Header = ({
     <EuiSpacer size="m"/>
   </div>
 );
+
+export const Header = injectI18n(HeaderUi);

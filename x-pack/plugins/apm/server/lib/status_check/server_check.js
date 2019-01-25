@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// Note: this logic is duplicated in tutorials/apm/envs/on_prem
 export async function getServerStatus({ setup }) {
   const { client, config } = setup;
 
@@ -26,6 +27,6 @@ export async function getServerStatus({ setup }) {
   const resp = await client('search', params);
 
   return {
-    data_found: resp.hits.total >= 1
+    dataFound: resp.hits.total >= 1
   };
 }

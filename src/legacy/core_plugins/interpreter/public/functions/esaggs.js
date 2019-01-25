@@ -41,7 +41,7 @@ export const esaggs = () => ({
       'null',
     ],
   },
-  help: i18n.translate('common.core_plugins.interpreter.public.functions.esaggs.help', { defaultMessage: 'Run AggConfig aggregation' }),
+  help: i18n.translate('interpreter.functions.esaggs.help', { defaultMessage: 'Run AggConfig aggregation' }),
   args: {
     index: {
       types: ['string', 'null'],
@@ -74,6 +74,7 @@ export const esaggs = () => ({
     // we should move searchSource creation inside courier request handler
     const searchSource = new SearchSource();
     searchSource.setField('index', indexPattern);
+    searchSource.setField('size', 0);
 
     const response = await courierRequestHandler({
       searchSource: searchSource,

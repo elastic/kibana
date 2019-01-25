@@ -78,12 +78,13 @@ class JobsListUI extends Component {
     let list = this.state.jobsSummaryList;
     list = sortBy(this.state.jobsSummaryList, (item) => item[sortField]);
     list = (sortDirection === 'asc') ? list : list.reverse();
+    const listLength = list.length;
 
     let pageStart = (index * size);
-    if (pageStart >= list.length) {
-      // if the page start is larger than the number of items
-      // due to filters being applied, calculate a new page start
-      pageStart = Math.floor(list.length / size) * size;
+    if (pageStart >= listLength && (listLength !== 0)) {
+      // if the page start is larger than the number of items due to
+      // filters being applied or jobs being deleted, calculate a new page start
+      pageStart = Math.floor((listLength - 1) / size) * size;
       // set the state out of the render cycle
       setTimeout(() => {
         this.setState({
@@ -93,12 +94,12 @@ class JobsListUI extends Component {
     }
     return {
       pageOfItems: list.slice(pageStart, (pageStart + size)),
-      totalItemCount: list.length,
+      totalItemCount: listLength,
     };
   }
 
   render() {
-    const { intl } = this.props;
+    const { intl, loading } = this.props;
     const selectionControls = {
       selectable: () => true,
       selectableMessage: (selectable) => (!selectable) ? intl.formatMessage({
@@ -253,6 +254,8 @@ class JobsListUI extends Component {
 
     return (
       <EuiBasicTable
+        loading={loading === true}
+        noItemsMessage={loading ? 'Loading jobs...' : 'No jobs found'}
         itemId="id"
         className={`jobs-list-table ${selectedJobsClass}`}
         items={pageOfItems}
@@ -279,6 +282,10 @@ JobsListUI.propTypes = {
   showStartDatafeedModal: PropTypes.func.isRequired,
   refreshJobs: PropTypes.func.isRequired,
   selectedJobsCount: PropTypes.number.isRequired,
+  loading: PropTypes.bool,
+};
+JobsListUI.defaultProps = {
+  loading: false,
 };
 
 export const JobsList = injectI18n(JobsListUI);

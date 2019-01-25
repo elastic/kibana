@@ -23,7 +23,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiPage,
   EuiPopover,
   EuiContextMenu,
   EuiSpacer,
@@ -42,7 +41,7 @@ import {
 
 import { ConfirmDelete } from './confirm_delete';
 import { AddPolicyToTemplateConfirmModal } from './add_policy_to_template_confirm_modal';
-import { getFilteredIndicesUri } from '../../../../../../index_management/public/services/navigation';
+import { getIndexListUri } from '../../../../../../index_management/public/services/navigation';
 const COLUMNS = {
   name: {
     label: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.nameHeader', {
@@ -243,7 +242,7 @@ export class PolicyTableUi extends Component {
         name: viewIndicesLabel,
         icon: 'list',
         onClick: () => {
-          window.location.hash = getFilteredIndicesUri(`ilm.policy:${policy.name}`);
+          window.location.hash = getIndexListUri(`ilm.policy:${policy.name}`);
         },
       });
     }
@@ -393,7 +392,7 @@ export class PolicyTableUi extends Component {
         tableContent = <EuiLoadingSpinner size="m" />;
       } else if (totalNumberOfPolicies > 0) {
         tableContent = (
-          <EuiTable>
+          <EuiTable className="policyTable__horizontalScroll">
             <EuiTableHeader>{this.buildHeader()}</EuiTableHeader>
             <EuiTableBody>{this.buildRows()}</EuiTableBody>
           </EuiTable>
@@ -441,56 +440,54 @@ export class PolicyTableUi extends Component {
     }
 
     return (
-      <EuiPage>
-        <EuiPageBody>
-          <EuiPageContent>
-            <div className="policyTable__horizontalScroll">
-              {this.renderConfirmModal()}
-              {totalNumberOfPolicies || !policyListLoaded ? (
-                <Fragment>
-                  <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiFlexGroup alignItems="center" gutterSize="m">
-                        <EuiFlexItem grow={false}>
-                          <EuiTitle size="l">
-                            <h1>
-                              <FormattedMessage
-                                id="xpack.indexLifecycleMgmt.policyTable.sectionHeading"
-                                defaultMessage="Index lifecycle policies"
-                              />
-                            </h1>
-                          </EuiTitle>
-                        </EuiFlexItem>
+      <EuiPageBody>
+        <EuiPageContent verticalPosition="center" horizontalPosition="center">
+          <div>
+            {this.renderConfirmModal()}
+            {totalNumberOfPolicies || !policyListLoaded ? (
+              <Fragment>
+                <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup alignItems="center" gutterSize="m">
+                      <EuiFlexItem grow={false}>
+                        <EuiTitle size="l">
+                          <h1>
+                            <FormattedMessage
+                              id="xpack.indexLifecycleMgmt.policyTable.sectionHeading"
+                              defaultMessage="Index lifecycle policies"
+                            />
+                          </h1>
+                        </EuiTitle>
+                      </EuiFlexItem>
 
-                        <EuiFlexItem grow={false}>
-                          <EuiBetaBadge label="Beta" />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                    {totalNumberOfPolicies ? (
-                      <EuiFlexItem grow={false}>{this.renderCreatePolicyButton()}</EuiFlexItem>
-                    ) : null}
-                  </EuiFlexGroup>
-                  <EuiSpacer size="s" />
-                  <EuiText>
-                    <p>
-                      <FormattedMessage
-                        id="xpack.indexLifecycleMgmt.policyTable.sectionDescription"
-                        defaultMessage="Manage your indices as they age.  Attach a policy to automate
-                          when and how to transition an index through its lifecycle."
-                      />
-                    </p>
-                  </EuiText>
-                </Fragment>
-              ) : null}
-              <EuiSpacer />
-              {content}
-              <EuiSpacer size="m" />
-              {totalNumberOfPolicies && totalNumberOfPolicies > 10 ? this.renderPager() : null}
-            </div>
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
+                      <EuiFlexItem grow={false}>
+                        <EuiBetaBadge label="Beta" />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  {totalNumberOfPolicies ? (
+                    <EuiFlexItem grow={false}>{this.renderCreatePolicyButton()}</EuiFlexItem>
+                  ) : null}
+                </EuiFlexGroup>
+                <EuiSpacer size="s" />
+                <EuiText>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.policyTable.sectionDescription"
+                      defaultMessage="Manage your indices as they age.  Attach a policy to automate
+                        when and how to transition an index through its lifecycle."
+                    />
+                  </p>
+                </EuiText>
+              </Fragment>
+            ) : null}
+            <EuiSpacer />
+            {content}
+            <EuiSpacer size="m" />
+            {totalNumberOfPolicies && totalNumberOfPolicies > 10 ? this.renderPager() : null}
+          </div>
+        </EuiPageContent>
+      </EuiPageBody>
     );
   }
 }

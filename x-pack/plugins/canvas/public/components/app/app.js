@@ -49,7 +49,9 @@ export class App extends React.PureComponent {
   };
 
   render() {
-    if (this.props.appState instanceof Error) return this.renderError();
+    if (this.props.appState instanceof Error) {
+      return this.renderError();
+    }
 
     return (
       <div className="canvas canvasContainer">

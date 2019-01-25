@@ -20,7 +20,9 @@ export const to = () => ({
     },
   },
   fn: (context, args, { types }) => {
-    if (!args.type) throw new Error('Must specify a casting type');
+    if (!args.type) {
+      throw new Error('Must specify a casting type');
+    }
 
     return castProvider(types)(context, args.type);
   },

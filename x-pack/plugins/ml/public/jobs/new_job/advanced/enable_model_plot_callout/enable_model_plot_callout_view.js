@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 
 export const EnableModelPlotCallout = ({ message }) => (
@@ -21,7 +22,10 @@ export const EnableModelPlotCallout = ({ message }) => (
     <EuiFlexGroup direction="column">
       <EuiFlexItem grow={false}>
         <EuiCallOut
-          title={'Proceed with caution!'}
+          title={<FormattedMessage
+            id="xpack.ml.newJob.advanced.enableModelPlot.proceedWithCautionTitle"
+            defaultMessage="Proceed with caution!"
+          />}
           color="warning"
           iconType="help"
         >

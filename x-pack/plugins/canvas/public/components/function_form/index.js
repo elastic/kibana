@@ -96,7 +96,9 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
       const existingId = Object.keys(assets).find(
         assetId => assets[assetId].type === type && assets[assetId].value === content
       );
-      if (existingId) return existingId;
+      if (existingId) {
+        return existingId;
+      }
       return onAssetAdd(type, content);
     },
   };

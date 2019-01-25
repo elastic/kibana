@@ -63,12 +63,16 @@ function wrapHistoryInstance(history) {
     },
 
     getPath(path) {
-      if (path != null) return createPath(parsePath(path));
+      if (path != null) {
+        return createPath(parsePath(path));
+      }
       return createPath(this.getLocation());
     },
 
     getFullPath(path) {
-      if (path != null) return history.createHref(parsePath(path));
+      if (path != null) {
+        return history.createHref(parsePath(path));
+      }
       return history.createHref(this.getLocation());
     },
 
@@ -82,7 +86,9 @@ function wrapHistoryInstance(history) {
 
     onChange(fn) {
       // if no handler fn passed, do nothing
-      if (fn == null) return;
+      if (fn == null) {
+        return;
+      }
 
       // push onChange function onto listener stack and return a function to remove it
       const pushedIndex = historyState.onChange.push(fn) - 1;
@@ -90,7 +96,9 @@ function wrapHistoryInstance(history) {
         // only allow the unlisten function to be called once
         let called = false;
         return () => {
-          if (called) return;
+          if (called) {
+            return;
+          }
           historyState.onChange.splice(pushedIndex, 1);
           called = true;
         };
@@ -129,14 +137,18 @@ const instances = new WeakMap();
 
 const getHistoryInstance = win => {
   // if no window object, use memory module
-  if (typeof win === 'undefined' || !win.history) return createMemoryHistory();
+  if (typeof win === 'undefined' || !win.history) {
+    return createMemoryHistory();
+  }
   return createHashStateHistory();
 };
 
 export const historyProvider = (win = getWindow()) => {
   // return cached instance if one exists
   const instance = instances.get(win);
-  if (instance) return instance;
+  if (instance) {
+    return instance;
+  }
 
   // create and cache wrapped history instance
   const historyInstance = getHistoryInstance(win);

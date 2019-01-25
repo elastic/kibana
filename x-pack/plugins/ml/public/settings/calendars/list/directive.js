@@ -13,12 +13,13 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
 import { checkFullLicense } from '../../../license/check_license';
-import { checkGetJobsPrivilege } from '../../../privilege/check_privilege';
+import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check_privilege';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
-import { initPromise } from '../../../util/promise';
 import { getCalendarManagementBreadcrumbs } from '../../breadcrumbs';
 
 import uiRoutes from 'ui/routes';
+
+import { I18nProvider } from '@kbn/i18n/react';
 
 const template = `
   <ml-nav-menu name="settings" />
@@ -35,7 +36,6 @@ uiRoutes
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       mlNodeCount: getMlNodeCount,
-      initPromise: initPromise(false)
     }
   });
 
@@ -48,8 +48,15 @@ module.directive('mlCalendarsList', function () {
     replace: false,
     scope: {},
     link: function (scope, element) {
+      const props = {
+        canCreateCalendar: checkPermission('canCreateCalendar'),
+        canDeleteCalendar: checkPermission('canDeleteCalendar'),
+      };
+
       ReactDOM.render(
-        React.createElement(CalendarsList),
+        <I18nProvider>
+          {React.createElement(CalendarsList, props)}
+        </I18nProvider>,
         element[0]
       );
     }

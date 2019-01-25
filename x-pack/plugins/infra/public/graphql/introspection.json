@@ -114,7 +114,7 @@
             "description": "A hierarchy of metadata entries by node",
             "args": [
               {
-                "name": "nodeName",
+                "name": "nodeId",
                 "description": "",
                 "type": {
                   "kind": "NON_NULL",
@@ -137,11 +137,7 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": { "kind": "OBJECT", "name": "InfraNodeMetadata", "ofType": null }
-              }
+              "ofType": { "kind": "OBJECT", "name": "InfraNodeMetadata", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -775,6 +771,61 @@
         "kind": "OBJECT",
         "name": "InfraNodeMetadata",
         "description": "One metadata entry for a node.",
+        "fields": [
+          {
+            "name": "id",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "ID", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "features",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "OBJECT", "name": "InfraNodeFeature", "ofType": null }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "InfraNodeFeature",
+        "description": "",
         "fields": [
           {
             "name": "name",
@@ -1533,6 +1584,18 @@
         "fields": [
           {
             "name": "value",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "displayName",
             "description": "",
             "args": [],
             "type": {

@@ -21,7 +21,6 @@ import { get } from 'lodash';
 
 import uiRoutes from '../routes';
 
-import './error_auto_create_index.less';
 import template from './error_auto_create_index.html';
 
 uiRoutes

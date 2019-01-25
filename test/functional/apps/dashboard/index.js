@@ -54,6 +54,11 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
       loadTestFile(require.resolve('./_dashboard_options'));
       loadTestFile(require.resolve('./_data_shared_attributes'));
       loadTestFile(require.resolve('./_embed_mode'));
+
+      // Note: This one must be last because it unloads some data for one of its tests!
+      // No, this isn't ideal, but loading/unloading takes so much time and these are all bunched
+      // to improve efficiency...
+      loadTestFile(require.resolve('./_dashboard_query_bar'));
     });
 
     describe('using current data', function () {

@@ -23,7 +23,7 @@ export interface InfraSource {
   /** The status of the source */
   status: InfraSourceStatus;
   /** A hierarchy of metadata entries by node */
-  metadataByNode: (InfraNodeMetadata | null)[];
+  metadataByNode: InfraNodeMetadata;
   /** A consecutive span of log entries surrounding a point in time */
   logEntriesAround: InfraLogEntryInterval;
   /** A consecutive span of log entries within an interval */
@@ -89,6 +89,14 @@ export interface InfraIndexField {
 }
 /** One metadata entry for a node. */
 export interface InfraNodeMetadata {
+  id: string;
+
+  name: string;
+
+  features: InfraNodeFeature[];
+}
+
+export interface InfraNodeFeature {
   name: string;
 
   source: string;
@@ -175,6 +183,8 @@ export interface InfraNode {
 
 export interface InfraNodePath {
   value: string;
+
+  label: string;
 }
 
 export interface InfraNodeMetric {
@@ -252,7 +262,7 @@ export interface SourceQueryArgs {
   id: string;
 }
 export interface MetadataByNodeInfraSourceArgs {
-  nodeName: string;
+  nodeId: string;
 
   nodeType: InfraNodeType;
 }
@@ -416,11 +426,19 @@ export namespace MetadataQuery {
 
     id: string;
 
-    metadataByNode: (MetadataByNode | null)[];
+    metadataByNode: MetadataByNode;
   };
 
   export type MetadataByNode = {
     __typename?: 'InfraNodeMetadata';
+
+    name: string;
+
+    features: Features[];
+  };
+
+  export type Features = {
+    __typename?: 'InfraNodeFeature';
 
     name: string;
 
@@ -517,6 +535,8 @@ export namespace WaffleNodesQuery {
     __typename?: 'InfraNodePath';
 
     value: string;
+
+    label: string;
   };
 
   export type Metric = {

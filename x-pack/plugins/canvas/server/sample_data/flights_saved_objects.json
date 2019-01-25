@@ -185,7 +185,7 @@
                 "height": 65,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\nquery=\"SELECT FLOOR((SUM(FlightTimeMin) % 1440) / 60) as hours\nFROM kibana_sample_data_flights\"\n| math \"hours\"\n| formatNumber \"00\"\n| metric\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"center\" color=\"#48A8E0\" weight=\"normal\" underline=false italic=false}\n| render\n",
+              "expression": "\nfilters\n| essql\nquery=\"SELECT FLOOR((SUM(FlightTimeMin) % 1440) / 60) as total_hours\nFROM kibana_sample_data_flights\"\n| math \"total_hours\"\n| formatNumber \"00\"\n| metric\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"center\" color=\"#48A8E0\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter": null
             },
             {
@@ -220,7 +220,7 @@
                 "height": 54,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\nquery=\"SELECT ((SUM(FlightTimeMin) % 1440) / 60 ) as minutes\nFROM kibana_sample_data_flights\"\n| math \"minutes\"\n| formatNumber \"00\"\n| metric\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"center\" color=\"#48A8E0\" weight=\"normal\" underline=false italic=false}\n| render\n",
+              "expression": "\nfilters\n| essql\nquery=\"SELECT ((SUM(FlightTimeMin) % 1440) / 60 ) as total_minutes\nFROM kibana_sample_data_flights\"\n| math \"total_minutes\"\n| formatNumber \"00\"\n| metric\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"center\" color=\"#48A8E0\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter": null
             },
             {

@@ -52,9 +52,13 @@ export class WorkpadTemplates extends React.PureComponent {
     clauses.forEach(clause => {
       const { type, field, value } = clause;
       // extract terms from the query AST
-      if (type === 'term') searchTerms.push(value);
+      if (type === 'term') {
+        searchTerms.push(value);
+      }
       // extracts tags from the query AST
-      else if (field === 'tags') filterTags.push(value);
+      else if (field === 'tags') {
+        filterTags.push(value);
+      }
     });
 
     this.setState({ searchTerm: searchTerms.join(' '), filterTags });
@@ -101,7 +105,9 @@ export class WorkpadTemplates extends React.PureComponent {
         dataType: 'string',
         width: '30%',
         render: tags => {
-          if (!tags) return 'No tags';
+          if (!tags) {
+            return 'No tags';
+          }
           return tags.map(tag => (
             <EuiHealth key={getId('tag')} color={get(uniqueTags, `${tag}.color`, '#666666')}>
               {tag}

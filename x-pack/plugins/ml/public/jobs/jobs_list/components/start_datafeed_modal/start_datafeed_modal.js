@@ -135,6 +135,7 @@ export class StartDatafeedModal extends Component {
           <EuiModal
             onClose={this.closeModal}
             style={{ width: '850px' }}
+            maxWidth={false}
           >
             <EuiModalHeader>
               <EuiModalHeaderTitle>

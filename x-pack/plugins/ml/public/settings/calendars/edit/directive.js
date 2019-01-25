@@ -13,12 +13,13 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
 import { checkFullLicense } from '../../../license/check_license';
-import { checkGetJobsPrivilege } from '../../../privilege/check_privilege';
+import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check_privilege';
 import { checkMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
-import { initPromise } from 'plugins/ml/util/promise';
 import { getCreateCalendarBreadcrumbs, getEditCalendarBreadcrumbs } from '../../breadcrumbs';
 
 import uiRoutes from 'ui/routes';
+
+import { I18nProvider } from '@kbn/i18n/react';
 
 const template = `
   <ml-nav-menu name="settings" />
@@ -35,7 +36,6 @@ uiRoutes
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       checkMlNodesAvailable,
-      initPromise: initPromise(false)
     }
   })
   .when('/settings/calendars_list/edit_calendar/:calendarId', {
@@ -45,7 +45,6 @@ uiRoutes
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       checkMlNodesAvailable,
-      initPromise: initPromise(false)
     }
   });
 
@@ -58,11 +57,15 @@ module.directive('mlNewCalendar', function ($route) {
     scope: {},
     link: function (scope, element) {
       const props = {
-        calendarId: $route.current.params.calendarId
+        calendarId: $route.current.params.calendarId,
+        canCreateCalendar: checkPermission('canCreateCalendar'),
+        canDeleteCalendar: checkPermission('canDeleteCalendar')
       };
 
       ReactDOM.render(
-        React.createElement(NewCalendar, props),
+        <I18nProvider>
+          {React.createElement(NewCalendar, props)}
+        </I18nProvider>,
         element[0]
       );
     }

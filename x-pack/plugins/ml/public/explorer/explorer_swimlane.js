@@ -19,17 +19,20 @@ import moment from 'moment';
 
 // don't use something like plugins/ml/../common
 // because it won't work with the jest tests
+import { formatHumanReadableDateTime } from '../util/date_utils';
 import { numTicksForDateFormat } from '../util/chart_utils';
 import { getSeverityColor } from '../../common/util/anomaly_utils';
 import { mlEscape } from '../util/string_utils';
 import { mlChartTooltipService } from '../components/chart_tooltip/chart_tooltip_service';
 import { mlExplorerDashboardService } from './explorer_dashboard_service';
 import { DRAG_SELECT_ACTION } from './explorer_constants';
+import { injectI18n } from '@kbn/i18n/react';
 
-export class ExplorerSwimlane extends React.Component {
+export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.Component {
   static propTypes = {
     chartWidth: PropTypes.number.isRequired,
     MlTimeBuckets: PropTypes.func.isRequired,
+    swimlaneCellClick: PropTypes.func.isRequired,
     swimlaneData: PropTypes.shape({
       laneLabels: PropTypes.array.isRequired
     }).isRequired,
@@ -122,6 +125,7 @@ export class ExplorerSwimlane extends React.Component {
   selectCell(cellsToSelect, { laneLabels, bucketScore, times }) {
     const {
       selection,
+      swimlaneCellClick,
       swimlaneData,
       swimlaneType
     } = this.props;
@@ -154,7 +158,7 @@ export class ExplorerSwimlane extends React.Component {
     }
 
     if (triggerNewSelection === false) {
-      mlExplorerDashboardService.swimlaneCellClick.changed({});
+      swimlaneCellClick({});
       return;
     }
 
@@ -164,7 +168,7 @@ export class ExplorerSwimlane extends React.Component {
       times: d3.extent(times),
       type: swimlaneType
     };
-    mlExplorerDashboardService.swimlaneCellClick.changed(cellData);
+    swimlaneCellClick(cellData);
   }
 
   highlightSelection(cellsToSelect, laneLabels, times) {
@@ -217,9 +221,11 @@ export class ExplorerSwimlane extends React.Component {
     const {
       chartWidth,
       MlTimeBuckets,
+      swimlaneCellClick,
       swimlaneData,
       swimlaneType,
-      selection
+      selection,
+      intl
     } = this.props;
 
     const {
@@ -274,12 +280,15 @@ export class ExplorerSwimlane extends React.Component {
       const displayScore = (bucketScore > 1 ? parseInt(bucketScore) : '< 1');
 
       // Display date using same format as Kibana visualizations.
-      const formattedDate = moment(time * 1000).format('MMMM Do YYYY, HH:mm');
+      const formattedDate = formatHumanReadableDateTime(time * 1000);
       let contents = `${formattedDate}<br/><hr/>`;
       if (swimlaneData.fieldName !== undefined) {
         contents += `${mlEscape(swimlaneData.fieldName)}: ${mlEscape(laneLabel)}<br/><hr/>`;
       }
-      contents += `Max anomaly score: ${displayScore}`;
+      contents += intl.formatMessage(
+        { id: 'xpack.ml.explorer.swimlane.maxAnomalyScoreLabel', defaultMessage: 'Max anomaly score: {displayScore}' },
+        { displayScore }
+      );
 
       const offsets = (target.className === 'sl-cell-inner' ? { x: 0, y: 0 } : { x: 2, y: 1 });
       mlChartTooltipService.show(contents, target, {
@@ -301,7 +310,7 @@ export class ExplorerSwimlane extends React.Component {
       .html(label => mlEscape(label))
       .on('click', () => {
         if (typeof selection.selectedLanes !== 'undefined') {
-          mlExplorerDashboardService.swimlaneCellClick.changed({});
+          swimlaneCellClick({});
         }
       })
       .each(function () {
@@ -479,4 +488,4 @@ export class ExplorerSwimlane extends React.Component {
   render() {
     return <div className="ml-swimlanes" ref={this.setRef.bind(this)} />;
   }
-}
+});

@@ -27,7 +27,7 @@ import { isEqual } from 'lodash';
 import React from 'react';
 import { BeatTag, CMBeat, ConfigurationBlock } from '../../../common/domain_types';
 import { ConfigList } from '../config_list';
-import { AssignmentActionType, BeatsTableType, Table, tagConfigAssignmentOptions } from '../table';
+import { AssignmentActionType, BeatsTableType, Table, tagConfigActions } from '../table';
 import { ConfigView } from './config_view';
 import { TagBadge } from './tag_badge';
 
@@ -190,12 +190,8 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
               </h3>
             </EuiTitle>
             <Table
-              assignmentOptions={{
-                schema: tagConfigAssignmentOptions,
-                items: [],
-                type: 'primary',
-                actionHandler: this.handleAssignmentActions,
-              }}
+              actions={tagConfigActions}
+              actionHandler={this.handleAssignmentActions}
               items={attachedBeats}
               ref={this.state.tableRef}
               type={BeatsTableType}

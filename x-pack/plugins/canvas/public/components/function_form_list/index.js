@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { interpretAst } from '@kbn/interpreter/public';
+import { interpretAst } from 'plugins/interpreter/interpreter';
 import { compose, withProps } from 'recompose';
 import { get } from 'lodash';
 import { toExpression } from '@kbn/interpreter/common';
@@ -12,7 +12,9 @@ import { modelRegistry, viewRegistry, transformRegistry } from '../../expression
 import { FunctionFormList as Component } from './function_form_list';
 
 function normalizeContext(chain) {
-  if (!Array.isArray(chain) || !chain.length) return null;
+  if (!Array.isArray(chain) || !chain.length) {
+    return null;
+  }
   return {
     type: 'expression',
     chain,

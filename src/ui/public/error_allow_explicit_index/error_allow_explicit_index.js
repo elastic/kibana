@@ -22,7 +22,6 @@ import { get } from 'lodash';
 import uiRoutes from '../routes';
 import { KbnUrlProvider } from '../url';
 
-import './error_allow_explicit_index.less';
 import template from './error_allow_explicit_index.html';
 
 uiRoutes

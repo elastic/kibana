@@ -98,6 +98,7 @@ beforeEach(() => {
             kibanaVersion: '1.2.3',
             requiredPlugins: ['a', 'b'],
             optionalPlugins: ['c', 'd'],
+            server: true,
           })
         )
       );

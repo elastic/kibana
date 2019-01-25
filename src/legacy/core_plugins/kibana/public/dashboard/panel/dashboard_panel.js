@@ -117,6 +117,10 @@ class DashboardPanelUi extends React.Component {
       this.embeddable.onContainerStateChanged(nextProps.containerState);
     }
 
+    if (this.embeddable && nextProps.lastReloadRequestTime !== this.props.lastReloadRequestTime) {
+      this.embeddable.reload();
+    }
+
     return nextProps.error !== this.props.error ||
       nextProps.initialized !== this.props.initialized;
   }
@@ -177,6 +181,7 @@ DashboardPanelUi.propTypes = {
   embeddableFactory: PropTypes.shape({
     create: PropTypes.func,
   }).isRequired,
+  lastReloadRequestTime: PropTypes.number.isRequired,
   embeddableStateChanged: PropTypes.func.isRequired,
   embeddableIsInitialized: PropTypes.func.isRequired,
   embeddableError: PropTypes.func.isRequired,

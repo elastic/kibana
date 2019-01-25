@@ -79,7 +79,9 @@ export const pie = () => ({
       const seriesStyle = seriesStyles[label];
 
       // append series style, if there is a match
-      if (seriesStyle) item.color = get(seriesStyle, 'color');
+      if (seriesStyle) {
+        item.color = get(seriesStyle, 'color');
+      }
 
       return item;
     });

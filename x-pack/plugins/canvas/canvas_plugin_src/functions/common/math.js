@@ -25,7 +25,9 @@ export const math = () => ({
     },
   },
   fn: (context, args) => {
-    if (!args.expression || args.expression.trim() === '') throw new Error('Empty expression');
+    if (!args.expression || args.expression.trim() === '') {
+      throw new Error('Empty expression');
+    }
 
     const isDatatable = context && context.type === 'datatable';
     const mathContext = isDatatable
@@ -34,17 +36,23 @@ export const math = () => ({
     try {
       const result = evaluate(args.expression, mathContext);
       if (Array.isArray(result)) {
-        if (result.length === 1) return result[0];
+        if (result.length === 1) {
+          return result[0];
+        }
         throw new Error(
           'Expressions must return a single number. Try wrapping your expression in mean() or sum()'
         );
       }
-      if (isNaN(result))
+      if (isNaN(result)) {
         throw new Error('Failed to execute math expression. Check your column names');
+      }
       return result;
     } catch (e) {
-      if (context.rows.length === 0) throw new Error('Empty datatable');
-      else throw e;
+      if (context.rows.length === 0) {
+        throw new Error('Empty datatable');
+      } else {
+        throw e;
+      }
     }
   },
 });

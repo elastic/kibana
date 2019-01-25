@@ -21,5 +21,6 @@ uiRoutes.addSetupWork(function (Private, serviceSettings) {
     return;
   }
   serviceSettings.addQueryParams({ license: tileMapPluginInfo.license.uid });
+  serviceSettings.disableZoomMessage();
 
 });

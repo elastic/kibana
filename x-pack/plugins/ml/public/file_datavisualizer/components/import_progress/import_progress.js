@@ -50,7 +50,10 @@ export const ImportProgress = injectI18n(function ({ statuses, intl }) {
   if (indexCreatedStatus === IMPORT_STATUS.COMPLETE) {
     completedStep = 2;
   }
-  if (ingestPipelineCreatedStatus === IMPORT_STATUS.COMPLETE) {
+  if (
+    ingestPipelineCreatedStatus === IMPORT_STATUS.COMPLETE ||
+    (createPipeline === false && indexCreatedStatus === IMPORT_STATUS.COMPLETE)
+  ) {
     completedStep = 3;
   }
   if (uploadStatus === IMPORT_STATUS.COMPLETE) {
@@ -81,6 +84,24 @@ export const ImportProgress = injectI18n(function ({ statuses, intl }) {
     defaultMessage: 'Create index pattern'
   });
 
+  const creatingIndexStatus = (
+    <p>
+      <FormattedMessage
+        id="xpack.ml.fileDatavisualizer.importProgress.stepTwoCreatingIndexDescription"
+        defaultMessage="Creating index"
+      />
+    </p>
+  );
+
+  const creatingIndexAndIngestPipelineStatus = (
+    <p>
+      <FormattedMessage
+        id="xpack.ml.fileDatavisualizer.importProgress.stepTwoCreatingIndexIngestPipelineDescription"
+        defaultMessage="Creating index and ingest pipeline"
+      />
+    </p>
+  );
+
   if (completedStep >= 0) {
     processFileTitle = intl.formatMessage({
       id: 'xpack.ml.fileDatavisualizer.importProgress.processingFileTitle',
@@ -104,14 +125,7 @@ export const ImportProgress = injectI18n(function ({ statuses, intl }) {
       id: 'xpack.ml.fileDatavisualizer.importProgress.creatingIndexTitle',
       defaultMessage: 'Creating index'
     });
-    statusInfo = (
-      <p>
-        <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.importProgress.stepTwoCreatingIndexIngestPipelineDescription"
-          defaultMessage="Creating index and ingest pipeline"
-        />
-      </p>
-    );
+    statusInfo = (createPipeline === true) ? creatingIndexAndIngestPipelineStatus : creatingIndexStatus;
   }
   if (completedStep >= 2) {
     createIndexTitle = intl.formatMessage({
@@ -122,14 +136,7 @@ export const ImportProgress = injectI18n(function ({ statuses, intl }) {
       id: 'xpack.ml.fileDatavisualizer.importProgress.creatingIngestPipelineTitle',
       defaultMessage: 'Creating ingest pipeline'
     });
-    statusInfo = (
-      <p>
-        <FormattedMessage
-          id="xpack.ml.fileDatavisualizer.importProgress.stepThreeCreatingIndexIngestPipelineDescription"
-          defaultMessage="Creating index and ingest pipeline"
-        />
-      </p>
-    );
+    statusInfo = (createPipeline === true) ? creatingIndexAndIngestPipelineStatus : creatingIndexStatus;
   }
   if (completedStep >= 3) {
     createIngestPipelineTitle = intl.formatMessage({

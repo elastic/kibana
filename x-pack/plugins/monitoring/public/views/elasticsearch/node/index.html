@@ -1,11 +1,11 @@
 <monitoring-main
   product="elasticsearch"
   name="nodes"
-  instance="{{ pageData.nodeSummary.name }}"
-  resolver="{{ pageData.nodeSummary.resolver }}"
+  instance="{{ monitoringElasticsearchNodeApp.nodeName }}"
+  resolver="{{ monitoringElasticsearchNodeApp.data.nodeSummary.resolver }}"
   page="overview"
-  tab-icon-class="{{ pageData.nodeSummary.nodeTypeClass }}"
-  tab-icon-class="{{ pageData.nodeSummary.nodeTypeLabel }}"
+  tab-icon-class="{{ monitoringElasticsearchNodeApp.data.nodeSummary.nodeTypeClass }}"
+  tab-icon-class="{{ monitoringElasticsearchNodeApp.data.nodeSummary.nodeTypeLabel }}"
 >
   <div id="monitoringElasticsearchNodeApp"></div>
 </monitoring-main>

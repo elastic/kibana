@@ -70,7 +70,9 @@ export const esdocs = () => ({
 
     if (args.sort) {
       const [sortField, sortOrder] = args.sort.split(',').map(str => str.trim());
-      if (sortField) query.order(`"${sortField}"`, sortOrder.toLowerCase() === 'asc');
+      if (sortField) {
+        query.order(`"${sortField}"`, sortOrder.toLowerCase() === 'asc');
+      }
     }
 
     return queryEsSQL(handlers.elasticsearchClient, {

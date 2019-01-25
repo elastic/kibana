@@ -57,6 +57,26 @@ exports[`dev/i18n/serializers/json5 should serialize default messages to JSON5 1
         timeZoneName: 'short',
       },
     },
+    relative: {
+      years: {
+        units: 'year',
+      },
+      months: {
+        units: 'month',
+      },
+      days: {
+        units: 'day',
+      },
+      hours: {
+        units: 'hour',
+      },
+      minutes: {
+        units: 'minute',
+      },
+      seconds: {
+        units: 'second',
+      },
+    },
   },
   messages: {
     'plugin1.message.id-1': 'Message text 1',
