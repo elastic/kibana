@@ -14,16 +14,15 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiEmptyPrompt,
-  EuiPageContent,
-  EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiCallOut,
+  EuiPageContent,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { BASE_PATH } from '../../common/constants';
-import { SectionUnauthorized } from './components';
+import { SectionUnauthorized, SectionError } from './components';
 import routing from './services/routing';
 import { isAvailable, isActive, getReason } from './services/license';
 import { loadPermissions } from './services/api';
@@ -89,7 +88,7 @@ export const App = injectI18n(
         if (error && error.data) {
           return this.setState({
             isFetchingPermissions: false,
-            fetchPermissionError: error.data,
+            fetchPermissionError: error,
           });
         }
 
@@ -160,21 +159,18 @@ export const App = injectI18n(
       }
 
       if (fetchPermissionError) {
-        const { error: errorString, statusCode, message } = fetchPermissionError;
+        // const { error: errorString, statusCode, message } = fetchPermissionError;
 
         return (
-          <EuiCallOut
+          <SectionError
             title={(
               <FormattedMessage
                 id="xpack.crossClusterReplication.app.permissionCheckErrorTitle"
                 defaultMessage="Error checking permissions"
               />
             )}
-            color="danger"
-            iconType="alert"
-          >
-            {`${statusCode}: ${errorString}. ${message}`}
-          </EuiCallOut>
+            error={fetchPermissionError}
+          />
         );
       }
 
