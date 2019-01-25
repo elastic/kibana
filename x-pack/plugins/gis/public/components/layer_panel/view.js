@@ -31,9 +31,9 @@ export class LayerPanel  extends React.Component {
     const nextId = nextProps.selectedLayer.getId();
     if (nextId !== prevState.prevId) {
       return {
-        isLayerAsyncStateLoaded: false,
         displayName: '',
         immutableSourceProps: [],
+        hasLoadedSourcePropsForLayer: false,
         prevId: nextId,
       };
     }
@@ -45,40 +45,39 @@ export class LayerPanel  extends React.Component {
 
   componentDidMount() {
     this._isMounted = true;
-    this.loadAsyncState();
+    this.loadDisplayName();
+    this.loadImmutableSourceProperties();
   }
 
   componentDidUpdate() {
-    if (!this.state.isLayerAsyncStateLoaded) {
-      this.loadAsyncState();
-    }
+    this.loadDisplayName();
+    this.loadImmutableSourceProperties();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
   }
 
-  loadAsyncState = async () => {
-    this.setState({
-      isLayerAsyncStateLoaded: true
-    },
-    () => {
-      this.loadDisplayName();
-      this.loadImmutableSourceProperties();
-    });
-  }
-
   loadDisplayName = async () => {
     const displayName = await this.props.selectedLayer.getDisplayName();
-    if (this._isMounted) {
-      this.setState({ displayName });
+    if (!this._isMounted || displayName === this.state.displayName) {
+      return;
     }
+
+    this.setState({ displayName });
   }
 
   loadImmutableSourceProperties = async () => {
+    if (this.state.hasLoadedSourcePropsForLayer) {
+      return;
+    }
+
     const immutableSourceProps = await this.props.selectedLayer.getImmutableSourceProperties();
     if (this._isMounted) {
-      this.setState({ immutableSourceProps });
+      this.setState({
+        immutableSourceProps,
+        hasLoadedSourcePropsForLayer: true,
+      });
     }
   }
 
