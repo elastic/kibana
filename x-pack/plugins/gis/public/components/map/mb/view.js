@@ -63,11 +63,7 @@ export class MBMapContainer extends React.Component {
 
   async _initializeMap() {
 
-    try {
-      this._mbMap = await createMbMapInstance(this.refs.mapContainer, this.props.goto ? this.props.goto.center : null);
-    } catch(e) {
-      throw e;
-    }
+    this._mbMap = await createMbMapInstance(this.refs.mapContainer, this.props.goto ? this.props.goto.center : null);
 
     // Override mapboxgl.Map "on" and "removeLayer" methods so we can track layer listeners
     // Tracked layer listerners are used to clean up event handlers
