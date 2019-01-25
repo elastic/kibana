@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { omit } from 'lodash';
 import expect from 'expect.js';
 // eslint-disable-next-line max-len
 import { getMonitorStatusBarQueryString } from '../../../../../plugins/uptime/public/components/queries/monitor_status_bar/get_monitor_status_bar';
@@ -21,12 +22,17 @@ export default function ({ getService }) {
         variables: { dateRangeStart: 1547805782000, dateRangeEnd: 1547852582000 },
       };
       const {
-        body: { data },
+        body: {
+          data: { monitorStatus: responseData },
+        },
       } = await supertest
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorStatusBarQuery });
-      expect(data).to.eql(monitorStatus);
+
+      expect({ monitorStatus: responseData.map(status => omit(status, 'millisFromNow')) }).to.eql(
+        monitorStatus
+      );
     });
 
     it('returns the status for only the given monitor', async () => {
@@ -40,12 +46,14 @@ export default function ({ getService }) {
         },
       };
       const {
-        body: { data },
+        body: {
+          data: { monitorStatus: responseData },
+        },
       } = await supertest
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorStatusBarQuery });
-      expect(data).to.eql(monitorStatusById);
+      expect({ monitorStatus: responseData.map(status => omit(status, 'millisFromNow')) }).to.eql(monitorStatusById);
     });
   });
 }

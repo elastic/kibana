@@ -1,100 +1,100 @@
 {
   "monitorStatus": [
     {
-      "timestamp": "2019-01-18T22:03:05.384Z",
+      "timestamp": "2019-01-18T23:03:01.393Z",
       "monitor": {
         "status": "up",
         "host": "localhost",
         "ip": "127.0.0.1",
-        "duration": { "us": 1022 },
+        "duration": { "us": 1525 },
         "scheme": "tcp"
       },
       "tcp": { "port": 9200 }
     },
     {
-      "timestamp": "2019-01-18T22:03:04.383Z",
+      "timestamp": "2019-01-18T22:42:22.385Z",
       "monitor": {
         "status": "up",
         "host": "www.elastic.co",
         "ip": "151.101.210.217",
-        "duration": { "us": 567900 },
+        "duration": { "us": 392993 },
         "scheme": "https"
       },
       "tcp": { "port": 443 }
     },
     {
-      "timestamp": "2019-01-18T22:03:08.383Z",
+      "timestamp": "2019-01-18T23:02:58.384Z",
       "monitor": {
         "status": "up",
         "host": "localhost",
         "ip": "127.0.0.1",
-        "duration": { "us": 3590 },
+        "duration": { "us": 4494 },
         "scheme": "http"
       },
       "tcp": { "port": 12349 }
     },
     {
-      "timestamp": "2019-01-18T22:03:08.383Z",
+      "timestamp": "2019-01-18T23:02:58.384Z",
       "monitor": {
         "status": "up",
         "host": "www.google.com",
-        "ip": "172.217.11.36",
-        "duration": { "us": 94613 },
+        "ip": "172.217.12.196",
+        "duration": { "us": 234267 },
         "scheme": "http"
       },
       "tcp": { "port": 80 }
     },
     {
-      "timestamp": "2019-01-18T22:03:08.383Z",
+      "timestamp": "2019-01-18T23:02:58.384Z",
       "monitor": {
         "status": "up",
         "host": "www.google.com",
-        "ip": "172.217.11.36",
-        "duration": { "us": 120698 },
+        "ip": "172.217.12.196",
+        "duration": { "us": 421935 },
         "scheme": "https"
       },
       "tcp": { "port": 443 }
     },
     {
-      "timestamp": "2019-01-18T22:03:08.383Z",
+      "timestamp": "2019-01-18T23:02:58.384Z",
       "monitor": {
         "status": "up",
         "host": "www.github.com",
-        "ip": "192.30.253.112",
-        "duration": { "us": 218065 },
+        "ip": "192.30.253.113",
+        "duration": { "us": 581801 },
         "scheme": "https"
       },
       "tcp": { "port": 443 }
     },
     {
-      "timestamp": "2019-01-18T22:03:03.383Z",
+      "timestamp": "2019-01-18T23:02:58.384Z",
       "monitor": {
         "status": "down",
         "host": "www.example.com",
         "ip": "198.71.248.67",
-        "duration": { "us": 1350724 },
+        "duration": { "us": 2479437 },
         "scheme": "http"
       },
       "tcp": { "port": 80 }
     },
     {
-      "timestamp": "2019-01-18T22:04:28.383Z",
+      "timestamp": "2019-01-18T23:02:27.006Z",
       "monitor": {
         "status": "up",
         "host": "news.google.com",
-        "ip": "172.217.9.238",
-        "duration": { "us": 1063909 },
+        "ip": "172.217.10.142",
+        "duration": { "us": 2822315 },
         "scheme": "https"
       },
       "tcp": { "port": 443 }
     },
     {
-      "timestamp": "2019-01-18T22:04:28.383Z",
+      "timestamp": "2019-01-18T23:02:27.007Z",
       "monitor": {
         "status": "up",
         "host": "www.wikipedia.org",
         "ip": "208.80.154.224",
-        "duration": { "us": 282347 },
+        "duration": { "us": 1552649 },
         "scheme": "https"
       },
       "tcp": { "port": 443 }

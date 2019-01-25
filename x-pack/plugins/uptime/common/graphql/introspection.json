@@ -403,6 +403,14 @@
             "deprecationReason": null
           },
           {
+            "name": "millisFromNow",
+            "description": "Milliseconds from the timestamp to the current time",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "beat",
             "description": "The agent that recorded the ping",
             "args": [],

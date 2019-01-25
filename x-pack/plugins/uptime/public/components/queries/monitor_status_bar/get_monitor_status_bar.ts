@@ -14,6 +14,7 @@ query MonitorStatus($dateRangeStart: String!, $dateRangeEnd: String!, $monitorId
     monitorId: $monitorId
   ) {
     timestamp
+    millisFromNow
     monitor {
       status
       host
