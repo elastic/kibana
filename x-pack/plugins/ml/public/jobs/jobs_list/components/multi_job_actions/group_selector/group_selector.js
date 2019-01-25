@@ -208,14 +208,14 @@ export const GroupSelector = injectI18n(class GroupSelector extends Component {
       <EuiToolTip
         position="bottom"
         content={<FormattedMessage
-          id="xpack.ml.jobsList.multiJobActions.groupeSelector.editJobGroupsButtonTooltip"
+          id="xpack.ml.jobsList.multiJobActions.groupSelector.editJobGroupsButtonTooltip"
           defaultMessage="Edit job groups"
         />}
       >
         <EuiButtonIcon
           iconType="indexEdit"
           aria-label={intl.formatMessage({
-            id: 'xpack.ml.jobsList.multiJobActions.groupeSelector.editJobGroupsButtonAriaLabel',
+            id: 'xpack.ml.jobsList.multiJobActions.groupSelector.editJobGroupsButtonAriaLabel',
             defaultMessage: 'Edit job groups'
           })}
           onClick={() => this.togglePopover()}
@@ -235,7 +235,7 @@ export const GroupSelector = injectI18n(class GroupSelector extends Component {
         <div className="group-selector">
           <EuiPopoverTitle>
             <FormattedMessage
-              id="xpack.ml.jobsList.multiJobActions.groupeSelector.applyGroupsToJobTitle"
+              id="xpack.ml.jobsList.multiJobActions.groupSelector.applyGroupsToJobTitle"
               defaultMessage="Apply groups to {jobsCount, plural, one {job} other {jobs}}"
               values={{ jobsCount: this.props.jobs.length }}
             />
@@ -265,7 +265,7 @@ export const GroupSelector = injectI18n(class GroupSelector extends Component {
                   isDisabled={(edited === false)}
                 >
                   <FormattedMessage
-                    id="xpack.ml.jobsList.multiJobActions.groupeSelector.applyButtonLabel"
+                    id="xpack.ml.jobsList.multiJobActions.groupSelector.applyButtonLabel"
                     defaultMessage="Apply"
                   />
                 </EuiButton>

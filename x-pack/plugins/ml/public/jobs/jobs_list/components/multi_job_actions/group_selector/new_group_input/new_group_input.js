@@ -46,7 +46,7 @@ export const NewGroupInput = injectI18n(class NewGroupInput extends Component {
       groupsValidationError = '';
     } else if (this.props.allJobIds.includes(tempNewGroupName)) {
       groupsValidationError = this.props.intl.formatMessage({
-        id: 'xpack.ml.jobsList.multiJobActions.groupeSelector.groupsAndJobsCanNotUseSameIdErrorMessage',
+        id: 'xpack.ml.jobsList.multiJobActions.groupSelector.groupsAndJobsCanNotUseSameIdErrorMessage',
         defaultMessage: 'A job with this ID already exists. Groups and jobs cannot use the same ID.'
       });
     } else {
@@ -94,7 +94,7 @@ export const NewGroupInput = injectI18n(class NewGroupInput extends Component {
               <EuiFieldText
                 compressed
                 placeholder={intl.formatMessage({
-                  id: 'xpack.ml.jobsList.multiJobActions.groupeSelector.addNewGroupPlaceholder',
+                  id: 'xpack.ml.jobsList.multiJobActions.groupSelector.addNewGroupPlaceholder',
                   defaultMessage: 'Add new group'
                 })}
                 value={tempNewGroupName}
@@ -111,7 +111,7 @@ export const NewGroupInput = injectI18n(class NewGroupInput extends Component {
                 onClick={this.addNewGroup}
                 iconType="plusInCircle"
                 aria-label={intl.formatMessage({
-                  id: 'xpack.ml.jobsList.multiJobActions.groupeSelector.addButtonAriaLabel',
+                  id: 'xpack.ml.jobsList.multiJobActions.groupSelector.addButtonAriaLabel',
                   defaultMessage: 'Add'
                 })}
                 disabled={(tempNewGroupName === '' || groupsValidationError !== '')}
