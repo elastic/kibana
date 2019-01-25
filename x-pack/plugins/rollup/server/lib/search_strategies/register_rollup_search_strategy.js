@@ -7,7 +7,11 @@ import getRollupSearchStrategy from './rollup_search_strategy';
 import getRollupSearchRequest from './rollup_search_request';
 import getRollupSearchCapabilities from './rollup_search_capabilities';
 
-export default (server) => {
+export default (kbnServer, server) => kbnServer.afterPluginsInit(() => {
+  if (!server.plugins.metrics) {
+    return;
+  }
+
   const {
     addSearchStrategy,
     AbstractSearchRequest,
@@ -15,13 +19,9 @@ export default (server) => {
     DefaultSearchCapabilities,
   } = server.plugins.metrics;
 
-  if (addSearchStrategy) {
-    const RollupSearchRequest = getRollupSearchRequest(AbstractSearchRequest);
-    const RollupSearchCapabilities = getRollupSearchCapabilities(DefaultSearchCapabilities);
-    const RollupSearchStrategy = getRollupSearchStrategy(AbstractSearchStrategy, RollupSearchRequest, RollupSearchCapabilities);
+  const RollupSearchRequest = getRollupSearchRequest(AbstractSearchRequest);
+  const RollupSearchCapabilities = getRollupSearchCapabilities(DefaultSearchCapabilities);
+  const RollupSearchStrategy = getRollupSearchStrategy(AbstractSearchStrategy, RollupSearchRequest, RollupSearchCapabilities);
 
-    addSearchStrategy(new RollupSearchStrategy(server));
-  }
-
-  return server;
-};
+  addSearchStrategy(new RollupSearchStrategy(server));
+});

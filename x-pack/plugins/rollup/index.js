@@ -21,7 +21,7 @@ export function rollup(kibana) {
   return new kibana.Plugin({
     id: PLUGIN.ID,
     publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'metrics'],
+    require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       managementSections: [
@@ -61,7 +61,8 @@ export function rollup(kibana) {
       ) {
         server.plugins.index_management.addIndexManagementDataEnricher(rollupDataEnricher);
       }
-      registerRollupSearchStrategy(server);
+
+      registerRollupSearchStrategy(this.kbnServer, server);
     }
   });
 }
