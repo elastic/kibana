@@ -45,13 +45,25 @@
             filters="filters"
             on-filters-updated="onFiltersUpdated"
             show-query-bar="vis.type.requiresSearch && vis.type.options.showQueryBar"
-            show-filter-bar="vis.type.requiresSearch && vis.type.options.showFilterBar"
+            show-filter-bar="vis.type.requiresSearch && vis.type.options.showFilterBar && chrome.getVisible()"
             watch-depth="reference"
           ></search-bar>
         </div>
       </div>
     </div>
   </kbn-top-nav>
+
+  <!--
+    The top nav is hidden in embed mode but the filter bar must still be present so
+    we show the filter bar on its own here if the chrome is not visible.
+  -->
+  <filter-bar
+    ng-if="vis.type.requiresSearch && vis.type.options.showFilterBar && !chrome.getVisible()"
+    class-name="'globalFilterGroup__filterBar'"
+    filters="filters"
+    on-filters-updated="onFiltersUpdated"
+    index-patterns="[indexPattern]"
+  ></filter-bar>
 
   <apply-filters-popover
     key="applyFiltersKey"
