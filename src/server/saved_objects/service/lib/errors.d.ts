@@ -17,23 +17,11 @@
  * under the License.
  */
 
-import { SavedObjectsClient } from '..';
-
-export interface SavedObjectsClientWrapperOptions<Request = any> {
-  client: SavedObjectsClient;
-  request: Request;
-}
-
-export type SavedObjectsClientWrapperFactory<Request = any> = (
-  options: SavedObjectsClientWrapperOptions<Request>
-) => SavedObjectsClient;
-
-export interface ScopedSavedObjectsClientProvider<Request = any> {
-  // ATTENTION: these types are incomplete
-
-  addClientWrapperFactory(
-    priority: number,
-    wrapperFactory: SavedObjectsClientWrapperFactory<Request>
-  ): void;
-  getClient(request: Request): SavedObjectsClient;
-}
+export function isBadRequestError(maybeError: any): boolean;
+export function isNotAuthorizedError(maybeError: any): boolean;
+export function isForbiddenError(maybeError: any): boolean;
+export function isRequestEntityTooLargeError(maybeError: any): boolean;
+export function isNotFoundError(maybeError: any): boolean;
+export function isConflictError(maybeError: any): boolean;
+export function isEsUnavailableError(maybeError: any): boolean;
+export function isEsAutoCreateIndexError(maybeError: any): boolean;
