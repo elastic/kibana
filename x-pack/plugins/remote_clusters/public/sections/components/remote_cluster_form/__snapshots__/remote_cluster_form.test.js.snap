@@ -164,7 +164,7 @@ Array [
               class="euiFormHelpText euiFormRow__text"
               id="my-id-help"
             >
-              An IP address or host name, followed by the port.
+              An IP address or host name, followed by the transport port of the remote cluster.
             </div>
           </div>
         </div>
