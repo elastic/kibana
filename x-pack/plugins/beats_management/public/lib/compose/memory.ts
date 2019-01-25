@@ -39,10 +39,12 @@ export function compose(
     mockKueryToEsQuery,
     suggestions
   );
+  const elasticsearchLib = new ElasticsearchLib(esAdapter);
+
   const configBlocks = new ConfigBlocksLib({} as any, translateConfigSchema(configBlockSchemas));
-  const tags = new TagsLib(new MemoryTagsAdapter([]));
+  const tags = new TagsLib(new MemoryTagsAdapter([]), elasticsearchLib);
   const tokens = new MemoryTokensAdapter();
-  const beats = new BeatsLib(new MemoryBeatsAdapter([]));
+  const beats = new BeatsLib(new MemoryBeatsAdapter([]), elasticsearchLib);
 
   const pluginUIModule = uiModules.get('app/beats_management');
 
@@ -60,7 +62,7 @@ export function compose(
   );
   const libs: FrontendLibs = {
     framework,
-    elasticsearch: new ElasticsearchLib(esAdapter),
+    elasticsearch: elasticsearchLib,
     tags,
     tokens,
     beats,

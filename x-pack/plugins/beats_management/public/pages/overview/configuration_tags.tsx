@@ -31,12 +31,7 @@ class TagsPageComponent extends React.PureComponent<PageProps, PageState> {
       tableRef: React.createRef(),
     };
 
-    if (props.urlState.tagsKBar) {
-      props.containers.tags.reload(props.urlState.tagsKBar);
-    } else {
-      props.containers.tags.reload();
-    }
-
+    props.containers.tags.reload(props.urlState.tagsKBar);
     props.renderAction(this.renderActionArea);
   }
 
@@ -75,7 +70,7 @@ class TagsPageComponent extends React.PureComponent<PageProps, PageState> {
                 ),
                 onChange: (value: any) => {
                   this.props.setUrlState({ tagsKBar: value });
-                  this.props.containers.tags.reload(this.props.urlState.tagsKBar);
+                  this.props.containers.tags.reload(value);
                 },
                 onSubmit: () => null, // todo
                 value: this.props.urlState.tagsKBar || '',

@@ -35,14 +35,14 @@ const onKibanaReady = chrome.dangerouslyGetActiveInjector;
 export function compose(): FrontendLibs {
   const api = new AxiosRestAPIAdapter(chrome.getXsrfToken(), chrome.getBasePath());
   const esAdapter = new RestElasticsearchAdapter(api, INDEX_NAMES.BEATS);
-
+  const elasticsearchLib = new ElasticsearchLib(esAdapter);
   const configBlocks = new ConfigBlocksLib(
     new RestConfigBlocksAdapter(api),
     translateConfigSchema(configBlockSchemas)
   );
-  const tags = new TagsLib(new RestTagsAdapter(api));
+  const tags = new TagsLib(new RestTagsAdapter(api), elasticsearchLib);
   const tokens = new RestTokensAdapter(api);
-  const beats = new BeatsLib(new RestBeatsAdapter(api));
+  const beats = new BeatsLib(new RestBeatsAdapter(api), elasticsearchLib);
 
   const framework = new FrameworkLib(
     new KibanaFrameworkAdapter(
@@ -59,7 +59,7 @@ export function compose(): FrontendLibs {
 
   const libs: FrontendLibs = {
     framework,
-    elasticsearch: new ElasticsearchLib(esAdapter),
+    elasticsearch: elasticsearchLib,
     tags,
     tokens,
     beats,

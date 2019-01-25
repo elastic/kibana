@@ -29,8 +29,8 @@ export const createListTagsRoute = (libs: CMServerLibs) => ({
     let tags: BeatTag[];
     try {
       tags = await libs.tags.getAll(
-        request.user
-        // request.query ? JSON.parse(request.query.ESQuery) : undefined
+        request.user,
+        request.query && request.query.ESQuery ? JSON.parse(request.query.ESQuery) : undefined
       );
     } catch (err) {
       return wrapEsError(err);

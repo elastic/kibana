@@ -11,9 +11,13 @@ import {
   CMAssignmentReturn,
   CMBeatsAdapter,
 } from './adapters/beats/adapter_types';
+import { ElasticsearchLib } from './elasticsearch';
 
 export class BeatsLib {
-  constructor(private readonly adapter: CMBeatsAdapter) {}
+  constructor(
+    private readonly adapter: CMBeatsAdapter,
+    private readonly elasticsearch: ElasticsearchLib
+  ) {}
 
   /** Get a single beat using it's ID for lookup */
   public async get(id: string): Promise<CMBeat | null> {
@@ -35,7 +39,11 @@ export class BeatsLib {
 
   // FIXME: This needs to be paginated https://github.com/elastic/kibana/issues/26022
   /** Get an array of all enrolled beats. */
-  public getAll = async (ESQuery?: string): Promise<CMBeat[]> => {
+  public getAll = async (kuery?: string): Promise<CMBeat[]> => {
+    let ESQuery;
+    if (kuery) {
+      ESQuery = await this.elasticsearch.convertKueryToEsQuery(kuery);
+    }
     const beats = await this.adapter.getAll(ESQuery);
     return beats;
   };

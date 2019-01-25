@@ -59,11 +59,11 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
     if (this.props.urlState.beatsKBar) {
       this.props.containers.beats.reload(this.props.urlState.beatsKBar);
     }
-    this.updateBeatsData();
+    this.updateBeatsData(this.props.urlState.beatsKBar);
   }
 
-  public async updateBeatsData() {
-    const beats = sortBy(await this.props.libs.beats.getAll(), 'id') || [];
+  public async updateBeatsData(beatsKBar?: string) {
+    const beats = sortBy(await this.props.libs.beats.getAll(beatsKBar), 'id') || [];
     const tags = await this.props.libs.tags.getTagsWithIds(flatten(beats.map(beat => beat.tags)));
 
     this.setState({
@@ -176,11 +176,12 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
                 filterQueryDraft: 'false', // todo
                 isValid: this.props.libs.elasticsearch.isKueryValid(
                   this.props.urlState.beatsKBar || ''
-                ), // todo check if query converts to es query correctly
+                ),
                 onChange: (value: any) => {
                   this.props.setUrlState({ beatsKBar: value });
-                  this.props.containers.beats.reload(this.props.urlState.beatsKBar);
-                }, // todo
+
+                  this.updateBeatsData(value);
+                },
                 onSubmit: () => null, // todo
                 value: this.props.urlState.beatsKBar || '',
               }}
