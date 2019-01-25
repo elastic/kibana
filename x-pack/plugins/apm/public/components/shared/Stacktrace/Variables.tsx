@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
-import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/Stackframe';
+import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/fields/Stackframe';
 import {
   borderRadius,
   colors,
