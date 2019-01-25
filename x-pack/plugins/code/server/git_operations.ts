@@ -154,27 +154,27 @@ export class GitOperations {
     await walk(tree);
     return count;
   }
+
   public async iterateRepo(
     uri: RepositoryUri,
-    revision: string,
-    callback: (file: FileTree) => Promise<void>
-  ) {
+    revision: string
+  ): Promise<AsyncIterableIterator<FileTree>> {
     const repo = await this.openRepo(uri);
     const commit = await this.getCommit(repo, revision);
     const tree = await commit.getTree();
-    async function walk(t: Tree) {
+    async function* walk(t: Tree): AsyncIterableIterator<FileTree> {
       for (const e of t.entries()) {
         if (e.isFile() && e.filemode() !== TreeEntry.FILEMODE.LINK) {
-          await callback(entry2Tree(e));
+          yield entry2Tree(e);
         } else if (e.isDirectory()) {
           const subFolder = await e.getTree();
-          await walk(subFolder);
+          await (yield* walk(subFolder));
         } else {
           // ignore other files
         }
       }
     }
-    await walk(tree);
+    return await walk(tree);
   }
 
   /**

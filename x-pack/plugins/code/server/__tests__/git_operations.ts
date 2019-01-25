@@ -14,7 +14,6 @@ import {getDefaultBranch, GitOperations} from '../git_operations';
 import {ServerOptions} from "../server_options";
 import * as mkdirp from "mkdirp";
 import Git from 'nodegit';
-import {FileTree} from "../../model";
 
 describe('git_operations', () => {
   it('get default branch from a non master repo', async () => {
@@ -95,7 +94,8 @@ describe('git_operations', () => {
   it('can iterate a repo', async () => {
     const g = new GitOperations(serverOptions.repoPath);
     let count = 0;
-    const cb = (value: FileTree) => {
+    const iterator = await g.iterateRepo(repoUri, 'HEAD');
+    for await (let value of iterator) {
       if(count=== 0) {
         assert.strictEqual("1", value.name);
         assert.strictEqual("1",value.path)
@@ -108,13 +108,12 @@ describe('git_operations', () => {
       } else {
         assert.fail("this repo should contains exactly 2 files")
       }
-      count ++
+      count++;
     }
-    await g.iterateRepo(repoUri, 'HEAD', cb);
     const totalFiles = await g.countRepoFiles(repoUri, 'HEAD');
     assert.strictEqual(count, 3, "this repo should contains exactly 2 files");
     assert.strictEqual(totalFiles, 3, "this repo should contains exactly 2 files");
   })
 });
- 
+
 

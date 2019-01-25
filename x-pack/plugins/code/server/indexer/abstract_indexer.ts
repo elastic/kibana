@@ -40,10 +40,9 @@ export abstract class AbstractIndexer implements Indexer {
     }
 
     // Clean up the index if necessary
-    await this.cleanIndex(this.repoUri);
+    await this.cleanIndex();
 
     // Prepare all the index requests
-    let reqs;
     let totalCount = 0;
     let prevPercentage = 0;
     let successCount = 0;
@@ -51,15 +50,15 @@ export abstract class AbstractIndexer implements Indexer {
     const statsBuffer: IndexStats[] = [];
 
     try {
-      reqs = await this.prepareRequests(this.repoUri);
-      totalCount = reqs.length;
+      totalCount = await this.getIndexRequestCount();
     } catch (error) {
-      this.log.error(`Prepare requests for ${this.repoUri} error.`);
+      this.log.error(`Get index request count for ${this.repoUri} error.`);
       this.log.error(error);
       throw error;
     }
 
-    for (const req of reqs) {
+    const reqsIterator = await this.getIndexRequestIterator();
+    for await (const req of reqsIterator) {
       if (this.isCancelled()) {
         this.log.info(`Indexer cancelled. Stop right now.`);
         break;
@@ -101,16 +100,20 @@ export abstract class AbstractIndexer implements Indexer {
     return this.cancelled;
   }
 
-  protected async cleanIndex(repoUri: RepositoryUri): Promise<void> {
+  protected async cleanIndex(): Promise<void> {
     // This is the abstract implementation. You should override this.
     return new Promise<void>((resolve, reject) => {
       resolve();
     });
   }
 
-  protected async prepareRequests(repoUri: RepositoryUri): Promise<IndexRequest[]> {
+  protected async *getIndexRequestIterator(): AsyncIterableIterator<IndexRequest> {
     // This is the abstract implementation. You should override this.
-    return new Promise<IndexRequest[]>((resolve, reject) => {
+  }
+
+  protected async getIndexRequestCount(): Promise<number> {
+    // This is the abstract implementation. You should override this.
+    return new Promise<number>((resolve, reject) => {
       resolve();
     });
   }
