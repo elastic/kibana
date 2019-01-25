@@ -4782,13 +4782,6 @@ call@5.x.x:
     boom "7.x.x"
     hoek "5.x.x"
 
-caller-id@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/caller-id/-/caller-id-0.1.0.tgz#59bdac0893d12c3871408279231f97458364f07b"
-  integrity sha1-Wb2sCJPRLDhxQIJ5Ix+XRYNk8Hs=
-  dependencies:
-    stack-trace "~0.0.7"
-
 caller-path@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/caller-path/-/caller-path-0.1.0.tgz#94085ef63581ecd3daa92444a8fe94e82577751f"
@@ -14910,13 +14903,6 @@ mocha@^2.0.1, mocha@^2.3.4:
     supports-color "1.2.0"
     to-iso-string "0.0.2"
 
-mock-require@^2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/mock-require/-/mock-require-2.0.2.tgz#1eaa71aad23013773d127dc7e91a3fbb4837d60d"
-  integrity sha1-HqpxqtIwE3c9En3H6Ro/u0g31g0=
-  dependencies:
-    caller-id "^0.1.0"
-
 module-not-found-error@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/module-not-found-error/-/module-not-found-error-1.0.1.tgz#cf8b4ff4f29640674d6cdd02b0e3bc523c2bbdc0"
@@ -19872,7 +19858,7 @@ ssri@^6.0.0:
   dependencies:
     figgy-pudding "^3.5.1"
 
-stack-trace@0.0.x, stack-trace@~0.0.7:
+stack-trace@0.0.x:
   version "0.0.10"
   resolved "https://registry.yarnpkg.com/stack-trace/-/stack-trace-0.0.10.tgz#547c70b347e8d32b4e108ea1a2a159e5fdde19c0"
   integrity sha1-VHxws0fo0ytOEI6hoqFZ5f3eGcA=
@@ -21170,13 +21156,6 @@ tslint-config-prettier@^1.15.0:
   version "1.15.0"
   resolved "https://registry.yarnpkg.com/tslint-config-prettier/-/tslint-config-prettier-1.15.0.tgz#76b9714399004ab6831fdcf76d89b73691c812cf"
   integrity sha512-06CgrHJxJmNYVgsmeMoa1KXzQRoOdvfkqnJth6XUkNeOz707qxN0WfxfhYwhL5kXHHbYJRby2bqAPKwThlZPhw==
-
-tslint-language-service@^0.9.9:
-  version "0.9.9"
-  resolved "https://registry.yarnpkg.com/tslint-language-service/-/tslint-language-service-0.9.9.tgz#f546dc38483979e6fb3cfa59584ad8525b3ad4da"
-  integrity sha1-9UbcOEg5eeb7PPpZWErYUls61No=
-  dependencies:
-    mock-require "^2.0.2"
 
 tslint-microsoft-contrib@^6.0.0:
   version "6.0.0"
