@@ -10,6 +10,16 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   Client.prototype.ccr = components.clientAction.namespaceFactory();
   const ccr = Client.prototype.ccr.prototype;
 
+  ccr.permissions = ca({
+    urls: [
+      {
+        fmt: '/_security/user/_has_privileges',
+      }
+    ],
+    needBody: true,
+    method: 'POST'
+  });
+
   ccr.autoFollowPatterns = ca({
     urls: [
       {

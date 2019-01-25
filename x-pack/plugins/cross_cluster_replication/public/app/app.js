@@ -8,12 +8,25 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Route, Switch, Redirect } from 'react-router-dom';
 import chrome from 'ui/chrome';
+import { fatalError } from 'ui/notify';
+import { i18n } from '@kbn/i18n';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+
+import {
+  EuiEmptyPrompt,
+  EuiPageContent,
+  EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiCallOut,
+} from '@elastic/eui';
 
 import { BASE_PATH } from '../../common/constants';
 import { SectionUnauthorized } from './components';
 import routing from './services/routing';
 import { isAvailable, isActive, getReason } from './services/license';
+import { loadPermissions } from './services/api';
 
 import {
   CrossClusterReplicationHome,
@@ -37,14 +50,55 @@ export const App = injectI18n(
     constructor(...args) {
       super(...args);
       this.registerRouter();
+
+      this.state = {
+        isFetchingPermissions: false,
+        fetchPermissionError: undefined,
+        hasPermission: false,
+        missingPermissions: [],
+      };
     }
 
     componentWillMount() {
       routing.userHasLeftApp = false;
     }
 
+    componentDidMount() {
+      this.checkPermissions();
+    }
+
     componentWillUnmount() {
       routing.userHasLeftApp = true;
+    }
+
+    async checkPermissions() {
+      this.setState({
+        isFetchingPermissions: true,
+      });
+
+      try {
+        const { hasPermission, missingPermissions } = await loadPermissions();
+
+        this.setState({
+          isFetchingPermissions: false,
+          hasPermission,
+          missingPermissions,
+        });
+      } catch (error) {
+        // Expect an error in the shape provided by Angular's $http service.
+        if (error && error.data) {
+          return this.setState({
+            isFetchingPermissions: false,
+            fetchPermissionError: error.data,
+          });
+        }
+
+        // This error isn't an HTTP error, so let the fatal error screen tell the user something
+        // unexpected happened.
+        fatalError(error, i18n.translate('xpack.crossClusterReplication.app.checkPermissionsFatalErrorTitle', {
+          defaultMessage: 'Cross Cluster Replication app',
+        }));
+      }
     }
 
     registerRouter() {
@@ -53,12 +107,87 @@ export const App = injectI18n(
     }
 
     render() {
+      const {
+        isFetchingPermissions,
+        fetchPermissionError,
+        hasPermission,
+        missingPermissions,
+      } = this.state;
+
+      if (isFetchingPermissions) {
+        return (
+          <EuiPageContent horizontalPosition="center">
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiLoadingSpinner size="xl"/>
+              </EuiFlexItem>
+
+              <EuiFlexItem>
+                <EuiTitle>
+                  <h2>
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.app.permissionCheckTitle"
+                      defaultMessage="Checking permissions..."
+                    />
+                  </h2>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPageContent>
+        );
+      }
+
+      if (fetchPermissionError) {
+        const { error: errorString, statusCode, message } = fetchPermissionError;
+
+        return (
+          <EuiCallOut
+            title={(
+              <FormattedMessage
+                id="xpack.crossClusterReplication.app.permissionCheckErrorTitle"
+                defaultMessage="Error checking permissions"
+              />
+            )}
+            color="danger"
+            iconType="alert"
+          >
+            {`${statusCode}: ${errorString}. ${message}`}
+          </EuiCallOut>
+        );
+      }
+
+      if (!hasPermission) {
+        return (
+          <EuiPageContent horizontalPosition="center">
+            <EuiEmptyPrompt
+              iconType="securityApp"
+              iconColor={null}
+              title={
+                <h2>
+                  <FormattedMessage
+                    id="xpack.crossClusterReplication.app.deniedPermissionTitle"
+                    defaultMessage="Permission denied"
+                  />
+                </h2>}
+              body={
+                <p>
+                  <FormattedMessage
+                    id="xpack.crossClusterReplication.app.deniedPermissionDescription"
+                    defaultMessage="You do not have required permissions ({permissions}) for Cross Cluster Replication."
+                    values={{ permissions: missingPermissions.join(', ') }}
+                  />
+                </p>}
+            />
+          </EuiPageContent>
+        );
+      }
+
       if (!isAvailable() || !isActive()) {
         return (
           <SectionUnauthorized
             title={(
               <FormattedMessage
-                id="xpack.crossClusterReplication.home.licenseErrorTitle"
+                id="xpack.crossClusterReplication.app.licenseErrorTitle"
                 defaultMessage="License error"
               />
             )}
@@ -67,7 +196,7 @@ export const App = injectI18n(
             {' '}
             <a href={chrome.addBasePath('/app/kibana#/management/elasticsearch/license_management/home')}>
               <FormattedMessage
-                id="xpack.crossClusterReplication.home.licenseErrorLinkText"
+                id="xpack.crossClusterReplication.app.licenseErrorLinkText"
                 defaultMessage="Manage your license."
               />
             </a>
