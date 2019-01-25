@@ -159,7 +159,7 @@ describe('index table', () => {
   });
   test('should show more when per page value is increased', () => {
     const rendered = mountWithIntl(component);
-    const perPageButton = rendered.find('span[children="Rows per page: 10"]');
+    const perPageButton = rendered.find('span[children="Rows per page"]');
     perPageButton.simulate('click');
     rendered.update();
     const fiftyButton = rendered.find('span[children="50 rows"]');
