@@ -9,12 +9,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLoadingSpinner,
-  EuiToolTip,
-  EuiIconTip,
   EuiSpacer
 } from '@elastic/eui';
-import { VisibilityToggle } from '../../../../../shared/components/visibility_toggle';
+import { LayerTocActions } from '../../../../../shared/components/layer_toc_actions';
 
 export class TOCEntry extends React.Component {
 
@@ -26,69 +23,44 @@ export class TOCEntry extends React.Component {
 
   componentDidMount() {
     this._isMounted = true;
+    this._updateDisplayName();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
   }
 
-  _renderVisibilityToggle() {
-    const { layer, toggleVisible } = this.props;
-    return (
-      <VisibilityToggle
-        id={layer.getId()}
-        checked={layer.isVisible()}
-        onChange={() => toggleVisible(layer.getId())}
-        size={'l'}
-      >
-        {layer.getIcon()}
-      </VisibilityToggle>
-    );
+
+  async _updateDisplayName() {
+    const label = await this.props.layer.getDisplayName();
+    if (this._isMounted) {
+      if (label !== this.state.displayName) {
+        this.setState({
+          displayName: label
+        });
+      }
+    }
+  }
+
+  componentDidUpdate() {
+    this._updateDisplayName();
   }
 
   render() {
 
-    const { layer, openLayerPanel, zoom } = this.props;
-
-    const displayName = layer.getDisplayName();
-    Promise.resolve(displayName).then(label => {
-      if (this._isMounted) {
-        if (label !== this.state.displayName) {
-          this.setState({
-            displayName: label
-          });
-        }
-      }
-    });
-
-    let visibilityIndicator;
-    if (layer.dataHasLoadError()) {
-      visibilityIndicator = (
-        <EuiIconTip
-          aria-label="Load warning"
-          size="m"
-          type="alert"
-          color="warning"
-          content={layer.getDataLoadError()}
-        />
-      );
-    } else if (layer.isLayerLoading()) {
-      visibilityIndicator = <EuiLoadingSpinner size="m"/>;
-    } else if (!layer.showAtZoomLevel(zoom)) {
-      const { minZoom, maxZoom } = layer.getZoomConfig();
-      visibilityIndicator = (
-        <EuiToolTip
-          position="left"
-          content={`Map is at zoom level ${zoom}.
-          This layer is only visible between zoom levels ${minZoom} to ${maxZoom}.`}
-        >
-          {this._renderVisibilityToggle()}
-        </EuiToolTip>
-      );
-    } else {
-      visibilityIndicator = this._renderVisibilityToggle();
-    }
-
+    const { layer, openLayerPanel, zoom, toggleVisible, fitToBounds } = this.props;
+    const legendIcon = (
+      <LayerTocActions
+        layer={layer}
+        fitToBounds={() => {
+          fitToBounds(layer.getId());
+        }}
+        zoom={zoom}
+        toggleVisible={() => {
+          toggleVisible(layer.getId());
+        }}
+      />
+    );
     let tocDetails = layer.getTOCDetails();
     if (tocDetails) {
       tocDetails = (
@@ -106,7 +78,7 @@ export class TOCEntry extends React.Component {
         data-layerid={layer.getId()}
       >
         <EuiFlexGroup
-          gutterSize="s"
+          gutterSize="none"
           alignItems="center"
           responsive={false}
           className={
@@ -114,7 +86,7 @@ export class TOCEntry extends React.Component {
           }
         >
           <EuiFlexItem grow={false}>
-            {visibilityIndicator}
+            { legendIcon }
           </EuiFlexItem>
           <EuiFlexItem>
             <button

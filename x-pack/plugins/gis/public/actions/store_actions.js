@@ -251,12 +251,35 @@ export function clearMouseCoordinates() {
   return { type: CLEAR_MOUSE_COORDINATES };
 }
 
-export function setGoto({ lat, lon, zoom }) {
+
+export function fitToLayerExtent(layerId) {
+  return async function (dispatch, getState) {
+    const targetLayer = getLayerList(getState()).find(layer => {
+      return layer.getId() === layerId;
+    });
+
+    if (targetLayer) {
+      const dataFilters = getDataFilters(getState());
+      const bounds = await targetLayer.getBounds(dataFilters);
+      if (bounds) {
+        await dispatch(setGotoWithBounds(bounds));
+      }
+    }
+  };
+}
+
+export function setGotoWithBounds(bounds) {
   return {
     type: SET_GOTO,
-    lat,
-    lon,
-    zoom,
+    bounds: bounds
+  };
+}
+
+
+export function setGotoWithCenter({ lat, lon, zoom }) {
+  return {
+    type: SET_GOTO,
+    center: { lat, lon, zoom }
   };
 }
 

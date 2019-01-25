@@ -17,7 +17,7 @@ import {
   setSelectedLayer,
   setTimeFilters,
   setRefreshConfig,
-  setGoto,
+  setGotoWithCenter,
   replaceLayerList,
   setQuery,
 } from '../actions/store_actions';
@@ -85,7 +85,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       queryFromSavedObject = mapState.query;
       const timeFilters = mapState.timeFilters ? mapState.timeFilters : timefilter.getTime();
       store.dispatch(setTimeFilters(timeFilters));
-      store.dispatch(setGoto({
+      store.dispatch(setGotoWithCenter({
         lat: mapState.center.lat,
         lon: mapState.center.lon,
         zoom: mapState.zoom,
