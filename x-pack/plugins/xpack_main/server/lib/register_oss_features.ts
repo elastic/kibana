@@ -9,7 +9,7 @@ import { Feature } from './feature_registry';
 const kibanaFeatures: Feature[] = [
   {
     id: 'discover',
-    name: i18n.translate('xpack.xpack_main.featureRegistry.discoverFeatureName', {
+    name: i18n.translate('xpack.main.featureRegistry.discoverFeatureName', {
       defaultMessage: 'Discover',
     }),
     icon: 'discoverApp',
@@ -36,7 +36,7 @@ const kibanaFeatures: Feature[] = [
   },
   {
     id: 'visualize',
-    name: i18n.translate('xpack.xpack_main.featureRegistry.visualizeFeatureName', {
+    name: i18n.translate('xpack.main.featureRegistry.visualizeFeatureName', {
       defaultMessage: 'Visualize',
     }),
     icon: 'visualizeApp',
@@ -63,7 +63,7 @@ const kibanaFeatures: Feature[] = [
   },
   {
     id: 'dashboard',
-    name: i18n.translate('xpack.xpack_main.featureRegistry.dashboardFeatureName', {
+    name: i18n.translate('xpack.main.featureRegistry.dashboardFeatureName', {
       defaultMessage: 'Dashboard',
     }),
     icon: 'dashboardApp',
@@ -105,7 +105,7 @@ const kibanaFeatures: Feature[] = [
   },
   {
     id: 'dev_tools',
-    name: i18n.translate('xpack.xpack_main.featureRegistry.devToolsFeatureName', {
+    name: i18n.translate('xpack.main.featureRegistry.devToolsFeatureName', {
       defaultMessage: 'Dev Tools',
     }),
     icon: 'devToolsApp',
@@ -125,7 +125,7 @@ const kibanaFeatures: Feature[] = [
   },
   {
     id: 'advancedSettings',
-    name: i18n.translate('xpack.xpack_main.featureRegistry.advancedSettingsFeatureName', {
+    name: i18n.translate('xpack.main.featureRegistry.advancedSettingsFeatureName', {
       defaultMessage: 'Advanced Settings',
     }),
     icon: 'advancedSettingsApp',
@@ -146,7 +146,7 @@ const kibanaFeatures: Feature[] = [
   },
   {
     id: 'indexPatterns',
-    name: i18n.translate('xpack.xpack_main.featureRegistry.indexPatternFeatureName', {
+    name: i18n.translate('xpack.main.featureRegistry.indexPatternFeatureName', {
       defaultMessage: 'Index Pattern Management',
     }),
     icon: 'indexPatternApp',
