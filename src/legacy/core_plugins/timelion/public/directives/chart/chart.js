@@ -63,8 +63,7 @@ require('ui/modules')
           panelSchema.render(panelScope, $elem);
         }
 
-        $scope.$watch('seriesList', render);
-        $scope.$watch('rerenderTrigger', render);
+        $scope.$watchGroup(['seriesList', 'rerenderTrigger'], render);
       }
     };
   });
