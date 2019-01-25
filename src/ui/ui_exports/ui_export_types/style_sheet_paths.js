@@ -24,6 +24,27 @@ import { mapSpec, wrap } from './modify_reduce';
 
 const OK_EXTNAMES = ['.css', '.scss'];
 
+function getPublicPath(pluginSpec, localPath) {
+  // get the path of the stylesheet relative to the public dir for the plugin
+  let relativePath = path.relative(pluginSpec.getPublicDir(), localPath);
+
+  // replace back slashes on windows
+  relativePath = relativePath.split('\\').join('/');
+
+  return `plugins/${pluginSpec.getId()}/${relativePath}`;
+}
+
+function getStyleSheetPath(pluginSpec, localPath, theme) {
+  const extname = path.extname(localPath);
+  const localCssPath = localPath.slice(0, -extname.length) + `.${theme}.css`;
+
+  return {
+    theme,
+    localPath: existsSync(localCssPath) ? localCssPath : localPath,
+    publicPath: getPublicPath(pluginSpec, localCssPath),
+  };
+}
+
 function normalize(localPath, type, pluginSpec) {
   const pluginId = pluginSpec.getId();
   const publicDir = path.normalize(pluginSpec.getPublicDir());
@@ -47,28 +68,20 @@ function normalize(localPath, type, pluginSpec) {
     );
   }
 
-  // replace the extension of localPath to be .css
-  // publicPath will always point to the css file
-  const localCssPath = localPath.slice(0, -extname.length) + '.css';
-
-  // update localPath to point to the .css file if it exists and
-  // the .scss path does not, which is the case for built plugins
-  if (extname === '.scss' && !existsSync(localPath) && existsSync(localCssPath)) {
-    localPath = localCssPath;
+  if (extname === '.css') {
+    // when the localPath points to a css file, assume it will be included in every theme
+    // and don't create ligkt/dark variations of it
+    return {
+      theme: '*',
+      localPath: localPath,
+      publicPath: getPublicPath(pluginSpec, localPath)
+    };
   }
 
-  // get the path of the stylesheet relative to the public dir for the plugin
-  let relativePath = path.relative(publicDir, localCssPath);
-
-  // replace back slashes on windows
-  relativePath = relativePath.split('\\').join('/');
-
-  const publicPath = `plugins/${pluginSpec.getId()}/${relativePath}`;
-
-  return {
-    localPath,
-    publicPath
-  };
+  return [
+    getStyleSheetPath(pluginSpec, localPath, 'light'),
+    getStyleSheetPath(pluginSpec, localPath, 'dark'),
+  ];
 }
 
 export const styleSheetPaths = wrap(mapSpec(normalize), flatConcatAtType);
