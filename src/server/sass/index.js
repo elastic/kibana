@@ -53,13 +53,15 @@ export async function sassMixin(kbnServer, server, config) {
     });
   } catch(error) {
     const { message, line, file } = error;
-
-    if (!line || !file) {
+    if (!file) {
       throw error;
     }
 
     trackedFiles.add(file);
-    server.log(['warning', 'scss'], `${message} on line ${line} of ${file}`);
+    server.log(
+      ['error', 'scss'],
+      `${message}${line ? ` on line ${line} of ${file}` : ''}`
+    );
   }
 
 
@@ -93,13 +95,15 @@ export async function sassMixin(kbnServer, server, config) {
         bundle.includedFiles.forEach(file => currentlyTrackedFiles.add(file));
       } catch(error) {
         const { message, line, file } = error;
-        currentlyTrackedFiles.add(file);
-
-        if (!line || !file) {
-          server.log(['warning', 'scss'], error);
-        } else {
-          server.log(['warning', 'scss'], `${message} on line ${line} of ${file}`);
+        if (!file) {
+          throw error;
         }
+
+        currentlyTrackedFiles.add(file);
+        server.log(
+          ['error', 'scss'],
+          `${message}${line ? ` on line ${line} of ${file}` : ''}`
+        );
       }
     }, []));
 

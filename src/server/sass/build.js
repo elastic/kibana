@@ -25,6 +25,7 @@ import autoprefixer from 'autoprefixer';
 import postcss from 'postcss';
 import postcssUrl from 'postcss-url';
 import mkdirp from 'mkdirp';
+import chalk from 'chalk';
 import isPathInside from 'is-path-inside';
 
 const renderSass = promisify(sass.render);
@@ -95,10 +96,6 @@ export class Build {
           }
 
           const sourcePath = path.resolve(sourceBaseDir, asset.pathname);
-          if (!isPathInside(sourcePath, publicDir)) {
-            throw new Error(`Unable to use url("${asset.url}"), it must resolve to a file within "${publicDir}"`);
-          }
-
           const urlAsset = {
             url: asset.url,
             from: sourcePath,
@@ -123,10 +120,14 @@ export class Build {
       ...urlAssets.map(({ from }) => from),
     ];
 
-    // verify that source files exist before writing anything
+    // verify that source files exist and import is valid before writing anything
     await Promise.all(urlAssets.map(async ({ url, from }) => {
+      if (!isPathInside(from, this.urlImports.publicDir)) {
+        throw this._makeError(`Unable to use url("${url}"), it must resolve to a file within "${this.urlImports.publicDir}"`);
+      }
+
       if (!await exists(from)) {
-        throw new Error(`Unable to locate url("${url}"), it must resolve to a file relative to "${sourceBaseDir}"`);
+        throw this._makeError(`Unable to locate url("${url}"), it must resolve to a file relative to "${sourceBaseDir}"`);
       }
     }));
 
@@ -141,5 +142,11 @@ export class Build {
     }));
 
     return this;
+  }
+
+  _makeError(message) {
+    const error = new Error(chalk.red(message));
+    error.file = this.sourcePath;
+    return error;
   }
 }
