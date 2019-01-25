@@ -9,7 +9,7 @@
   <div class="kbnTopNav__row">
     <!-- Right-side: menu -->
 
-    <div class="kuiLocalMenu kbnTopNav__mainMenu">
+    <div class="kuiLocalMenu kbnTopNav__mainMenu" ng-if="kbnTopNav.menuItems.length">
       <button
         class="kuiLocalMenuItem"
         ng-repeat="menuItem in kbnTopNav.menuItems"

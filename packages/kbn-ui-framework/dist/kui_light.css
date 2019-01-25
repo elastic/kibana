@@ -1181,8 +1181,7 @@ main {
   padding: 10px 8px 14px;
   background-color: transparent;
   margin-bottom: 10px;
-  line-height: 20px;
-  border-bottom: 1px solid #D3DAE6; }
+  line-height: 20px; }
 
 .kuiLocalDropdownCloseButton {
   -webkit-appearance: none;
