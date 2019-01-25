@@ -28,6 +28,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
   const browser = getService('browser');
   const retry = getService('retry');
   const find = getService('find');
+  const globalNav = getService('globalNav');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['shield']);
@@ -62,6 +63,34 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
       await retry.try(async () => {
         log.debug(`navigateToUrl ${appUrl}`);
+        await browser.get(appUrl);
+
+        const currentUrl = shouldLoginIfPrompted ? await this.loginIfPrompted(appUrl) : browser.getCurrentUrl();
+
+        if (ensureCurrentUrl && !currentUrl.includes(appUrl)) {
+          throw new Error(`expected ${currentUrl}.includes(${appUrl})`);
+        }
+      });
+    }
+
+    /**
+     * @param {string} appName As defined in the apps config
+     * @param {string} hash The route after the hash (#)
+     */
+    async navigateToActualUrl(appName, hash, {
+      basePath = '',
+      ensureCurrentUrl = true,
+      shouldLoginIfPrompted = true
+    } = {}) {
+      // we only use the apps config to get the application path
+      const appConfig = {
+        pathname: `${basePath}${config.get(['apps', appName]).pathname}`,
+        hash,
+      };
+
+      const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
+      await retry.try(async () => {
+        log.debug(`navigateToActualUrl ${appUrl}`);
         await browser.get(appUrl);
 
         const currentUrl = shouldLoginIfPrompted ? await this.loginIfPrompted(appUrl) : browser.getCurrentUrl();
@@ -159,7 +188,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
 
               // Browsers don't show the ':port' if it's 80 or 443 so we have to
               // remove that part so we can get a match in the tests.
-              const navSuccessful = new RegExp(appUrl.replace(':80', '').replace(':443', '')
+              const navSuccessful = new RegExp(appUrl.replace(':80/', '/').replace(':443/', '/')
                 + '.{0,' + maxAdditionalLengthOnNavUrl + '}$')
                 .test(currentUrl);
 
@@ -242,8 +271,16 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     }
 
     async getAppNavLinksText() {
-      const appSwitcher = await testSubjects.find('appSwitcher');
-      const appLinks = await testSubjects.findAllDescendant('appLink', appSwitcher);
+      await retry.try(async () => {
+        if (await testSubjects.exists('appsMenu')) {
+          return;
+        }
+
+        await testSubjects.click('appsMenuButton');
+        await testSubjects.existsOrFail('appsMenu');
+      });
+      const appsMenu = await testSubjects.find('appsMenu');
+      const appLinks = await testSubjects.findAllDescendant('appLink', appsMenu);
       const linksText = await Promise.all(appLinks.map((appLink) => appLink.getVisibleText()));
       return linksText;
     }
@@ -296,16 +333,8 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async getBreadcrumbPageTitle() {
-      return await testSubjects.getVisibleText('breadcrumbPageTitle');
-    }
-
-    async getTopNavText() {
-      return await testSubjects.getVisibleText('top-nav');
-    }
-
     async isChromeVisible() {
-      const globalNavShown = await testSubjects.exists('globalNav');
+      const globalNavShown = await globalNav.exists();
       const topNavShown = await testSubjects.exists('top-nav');
       return globalNavShown && topNavShown;
     }

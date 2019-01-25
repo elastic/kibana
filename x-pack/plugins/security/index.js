@@ -47,13 +47,19 @@ export const security = (kibana) => new kibana.Plugin({
       }).default(),
       authorization: Joi.object({
         legacyFallback: Joi.object({
-          enabled: Joi.boolean().default(true)
+          enabled: Joi.boolean().default(true) // deprecated
         }).default()
       }).default(),
       audit: Joi.object({
         enabled: Joi.boolean().default(false)
       }).default(),
     }).default();
+  },
+
+  deprecations: function ({ unused }) {
+    return [
+      unused('authorization.legacyFallback.enabled'),
+    ];
   },
 
   uiExports: {
@@ -94,7 +100,7 @@ export const security = (kibana) => new kibana.Plugin({
       // if we have a license which doesn't enable security, or we're a legacy user
       // we shouldn't disable any ui capabilities
       const { authorization } = server.plugins.security;
-      if (!authorization.mode.useRbacForRequest(request)) {
+      if (!authorization.mode.useRbac()) {
         return originalInjectedVars;
       }
 
@@ -161,7 +167,7 @@ export const security = (kibana) => new kibana.Plugin({
       const { callWithRequest, callWithInternalUser } = adminCluster;
       const callCluster = (...args) => callWithRequest(request, ...args);
 
-      if (authorization.mode.useRbacForRequest(request)) {
+      if (authorization.mode.useRbac()) {
         const internalRepository = savedObjects.getSavedObjectsRepository(callWithInternalUser);
         return new savedObjects.SavedObjectsClient(internalRepository);
       }
@@ -171,8 +177,7 @@ export const security = (kibana) => new kibana.Plugin({
     });
 
     savedObjects.addScopedSavedObjectsClientWrapperFactory(Number.MIN_VALUE, ({ client, request }) => {
-      if (authorization.mode.useRbacForRequest(request)) {
-
+      if (authorization.mode.useRbac()) {
         return new SecureSavedObjectsClientWrapper({
           actions: authorization.actions,
           auditLogger,
@@ -189,7 +194,7 @@ export const security = (kibana) => new kibana.Plugin({
 
     getUserProvider(server);
 
-    await initAuthenticator(server, authorization.mode);
+    await initAuthenticator(server);
     initAuthenticateApi(server);
     initUsersApi(server);
     initPublicRolesApi(server);
@@ -219,7 +224,7 @@ export const security = (kibana) => new kibana.Plugin({
       const { actions, checkPrivilegesDynamicallyWithRequest, mode } = server.plugins.security.authorization;
 
       // if we don't have a license enabling security, or we're a legacy user, don't validate this request
-      if (!mode.useRbacForRequest(req)) {
+      if (!mode.useRbac()) {
         return h.continue;
       }
 

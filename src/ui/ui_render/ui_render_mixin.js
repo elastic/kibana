@@ -164,6 +164,7 @@ export function uiRenderMixin(kbnServer, server, config) {
       uiPublicUrl: `${basePath}/ui`,
       bootstrapScriptUrl: `${basePath}/bundles/app/${app.getId()}/bootstrap.js`,
       i18n: (id, options) => i18n.translate(id, options),
+      locale: i18n.getLocale(),
 
       injectedMetadata: {
         version: kbnServer.version,

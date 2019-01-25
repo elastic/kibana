@@ -69,7 +69,7 @@ export const EmptyState = ({ autorefreshInterval, autorefreshIsPaused, children 
                         configureHeartbeatLink: (
                           <EuiLink
                             target="_blank"
-                            href="https://www.elastic.co/guide/en/beats/heartbeat/6.5/configuring-howto-heartbeat.html"
+                            href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuring-howto-heartbeat.html"
                           >
                             <FormattedMessage
                               id="xpack.uptime.emptyState.configureHeartbeatLinkText"
