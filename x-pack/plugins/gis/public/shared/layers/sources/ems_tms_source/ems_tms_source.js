@@ -71,17 +71,13 @@ export class EMSTMSSource extends TMSSource {
   }
 
   _getTMSOptions() {
-    if(!this._emsTileServices || !this._emsTileServices.length) {
+    if(!this._emsTileServices) {
       return;
     }
 
-    const emsTmsService = this._emsTileServices.find(service => {
+    return this._emsTileServices.find(service => {
       return service.id === this._descriptor.id;
     });
-    if (!emsTmsService) {
-      return;
-    }
-    return emsTmsService;
   }
 
   _createDefaultLayerDescriptor(options) {
@@ -103,26 +99,21 @@ export class EMSTMSSource extends TMSSource {
   }
 
   async getAttributions() {
-    let service;
-    let attributions;
-    try {
-      service = this._getTMSOptions();
-      attributions = service && service.attributionMarkdown.split('|');
-    } catch (e) {
-      console.warn(`Error obtaining attributions: ${e}`);
+    const service = this._getTMSOptions();
+    if (!service || !service.attributionMarkdown) {
+      return [];
     }
-    return attributions
-      ? attributions.map((attribution) => {
-        attribution = attribution.trim();
-        //this assumes attribution is plain markdown link
-        const extractLink = /\[(.*)\]\((.*)\)/;
-        const result = extractLink.exec(attribution);
-        return {
-          label: result ? result[1] : null,
-          url: result ? result[2] : null
-        };
-      })
-      : '';
+
+    return service.attributionMarkdown.split('|').map((attribution) => {
+      attribution = attribution.trim();
+      //this assumes attribution is plain markdown link
+      const extractLink = /\[(.*)\]\((.*)\)/;
+      const result = extractLink.exec(attribution);
+      return {
+        label: result ? result[1] : null,
+        url: result ? result[2] : null
+      };
+    });
   }
 
   getUrlTemplate() {
