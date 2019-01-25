@@ -6,6 +6,7 @@
 
 import { getId } from './../../lib/get_id';
 import { landmarkPoint, shapesAt } from './geometry';
+import { draggingShape } from './layout_functions';
 import { select } from './state';
 
 import {
@@ -66,26 +67,15 @@ const configuration = state => {
   return state.configuration;
 };
 
-/**
- * Pure calculations
- */
-
-// returns the currently dragged shape, or a falsey value otherwise
-const draggingShape = ({ draggedShape, shapes }, hoveredShape, down, mouseDowned) => {
-  const dragInProgress =
-    down &&
-    shapes.reduce((prev, next) => prev || (draggedShape && next.id === draggedShape.id), false);
-  const result = (dragInProgress && draggedShape) || (down && mouseDowned && hoveredShape);
-  return result;
-};
+const getShapes = scene => scene.shapes;
 
 /**
  * Scenegraph update based on events, gestures...
  */
 
-export const shapes = select(scene => scene.shapes)(scene);
+export const shapes = select(getShapes)(scene);
 
-const hoveredShapes = select((configuration, shapes, cursorPosition) =>
+const getHoveredShapes = (configuration, shapes, cursorPosition) =>
   shapesAt(
     shapes.filter(
       // second AND term excludes intra-group element hover (and therefore drag & drop), todo: remove this current limitation
@@ -94,13 +84,12 @@ const hoveredShapes = select((configuration, shapes, cursorPosition) =>
         (configuration.intraGroupManipulation || !s.parent || s.type === 'annotation')
     ),
     cursorPosition
-  )
-)(configuration, shapes, cursorPosition);
+  );
+const hoveredShapes = select(getHoveredShapes)(configuration, shapes, cursorPosition);
 
 const depthIndex = 0;
-const hoveredShape = select(hoveredShapes =>
-  hoveredShapes.length ? hoveredShapes[depthIndex] : null
-)(hoveredShapes);
+const getHoveredShape = hoveredShapes => (hoveredShapes.length ? hoveredShapes[depthIndex] : null);
+const hoveredShape = select(getHoveredShape)(hoveredShapes);
 
 const draggedShape = select(draggingShape)(scene, hoveredShape, mouseIsDown, mouseDowned);
 
@@ -1288,13 +1277,13 @@ const resizeChild = groupScale => s => {
 const resizeGroup = (shapes, rootElement) => {
   const idMap = {};
   for (const shape of shapes) {
-    idMap[shape.id] = shapes[i];
+    idMap[shape.id] = shape;
   }
 
   const depths = {};
   const ancestorsLength = shape => (shape.parent ? ancestorsLength(idMap[shape.parent]) + 1 : 0);
   for (const shape of shapes) {
-    depths[shape.id] = ancestorsLength(shapes[i]);
+    depths[shape.id] = ancestorsLength(shape);
   }
 
   const resizedParents = { [rootElement.id]: rootElement };
