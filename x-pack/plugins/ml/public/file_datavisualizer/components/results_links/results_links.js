@@ -164,7 +164,7 @@ export class ResultsLinks extends Component {
             }
             description=""
             href={
-              `${uiChrome.getBasePath()}/app/kibana#/management/kibana/index_patterns/${(
+              `${uiChrome.getBasePath()}/app/kibana#/management/kibana/indices/${(
                 createIndexPattern ? indexPatternId : '')}`
             }
           />
