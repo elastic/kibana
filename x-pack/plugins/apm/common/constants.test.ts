@@ -107,12 +107,14 @@ describe('Error', () => {
       version: 'agent version'
     },
     error: {
-      exception: {
-        module: 'errors',
-        handled: false,
-        message: 'sonic boom',
-        type: 'errorString'
-      },
+      exception: [
+        {
+          module: 'errors',
+          handled: false,
+          message: 'sonic boom',
+          type: 'errorString'
+        }
+      ],
       culprit: 'handleOopsie',
       id: 'error id',
       grouping_key: 'grouping key'

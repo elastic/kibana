@@ -4,26 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createErrorGroupWatch } from '../createErrorGroupWatch';
+import { isArray, isObject, isString } from 'lodash';
 import mustache from 'mustache';
 import chrome from 'ui/chrome';
+import uuid from 'uuid';
+import { StringMap } from 'x-pack/plugins/apm/typings/common';
+// @ts-ignore
 import * as rest from '../../../../../services/rest/watcher';
-import { isObject, isArray, isString } from 'lodash';
-import esResponse from './esResponse.json';
-
-jest.mock('uuid', () => ({
-  v4: jest.fn(() => 'mocked-uuid')
-}));
+import { createErrorGroupWatch } from '../createErrorGroupWatch';
+import { esResponse } from './esResponse';
 
 // disable html escaping since this is also disabled in watcher\s mustache implementation
 mustache.escape = value => value;
 
 describe('createErrorGroupWatch', () => {
-  let createWatchResponse;
-  let tmpl;
+  let createWatchResponse: string;
+  let tmpl: any;
   beforeEach(async () => {
     chrome.getInjected = jest.fn().mockReturnValue('myIndexPattern');
-    jest.spyOn(rest, 'createWatch').mockReturnValue();
+    jest.spyOn(uuid, 'v4').mockReturnValue('mocked-uuid');
+    jest.spyOn(rest, 'createWatch').mockReturnValue(undefined);
 
     createWatchResponse = await createErrorGroupWatch({
       emails: ['my@email.dk', 'mySecond@email.dk'],
@@ -86,11 +86,11 @@ describe('createErrorGroupWatch', () => {
 });
 
 // Recursively iterate a nested structure and render strings as mustache templates
-function renderMustache(input, ctx) {
+function renderMustache(input: string | string[], ctx: StringMap): any {
   if (isString(input)) {
     return mustache.render(input, {
       ctx,
-      join: () => (text, render) => render(`{{${text}}}`, { ctx })
+      join: () => (text: string, render: any) => render(`{{${text}}}`, { ctx })
     });
   }
 
