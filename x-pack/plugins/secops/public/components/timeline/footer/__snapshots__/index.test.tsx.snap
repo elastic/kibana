@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Footer Timeline Component rendering it renders the default timeline footer 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiHorizontalRule
     margin="xs"
     size="full"
@@ -155,5 +155,5 @@ exports[`Footer Timeline Component rendering it renders the default timeline foo
       </EuiFlexItem>
     </EuiFlexGroup>
   </styled.div>
-</React.Fragment>
+</Fragment>
 `;
