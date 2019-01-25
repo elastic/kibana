@@ -11,7 +11,6 @@ import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
 export function CanvasPageProvider({ getService }: KibanaFunctionalTestDefaultProviders) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
-  const browser = getService('browser');
 
   return {
     async expectCreateWorkpadButtonEnabled() {
@@ -24,6 +23,22 @@ export function CanvasPageProvider({ getService }: KibanaFunctionalTestDefaultPr
       const button = await testSubjects.find('create-workpad-button');
       const disabledAttr = await button.getAttribute('disabled');
       expect(disabledAttr).to.be('');
+    },
+
+    async expectAddElementButton() {
+      await testSubjects.existOrFail('add-element-button');
+    },
+
+    async expectNoAddElementButton() {
+      // Ensure page is fully loaded first by waiting for the refresh button
+      const refreshPopoverExists = await find.existsByCssSelector('#auto-refresh-popover', 20000);
+      expect(refreshPopoverExists).to.be(true);
+
+      const addElementButtonExists = await find.existsByCssSelector(
+        'button[data-test-subj=add-element-button]',
+        10 // don't need much of a wait at all here, because we already waited for refresh button above
+      );
+      expect(addElementButtonExists).to.be(false);
     },
   };
 }

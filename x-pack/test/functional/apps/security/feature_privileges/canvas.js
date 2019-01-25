@@ -22,7 +22,6 @@ export default function ({ getPageObjects, getService }) {
         "telemetry:optIn": false,
         "defaultIndex": "logstash-*",
       });
-      await esArchiver.loadIfNeeded('logstash_functional');
     });
 
     after(async () => {
@@ -79,11 +78,22 @@ export default function ({ getPageObjects, getService }) {
         await PageObjects.canvas.expectCreateWorkpadButtonEnabled();
       });
 
+      it(`allows a workpad to be created`, async () => {
+        await PageObjects.common.navigateToActualUrl('canvas', 'workpad/create', {
+          ensureCurrentUrl: true,
+          showLoginIfPrompted: false,
+        });
+
+        await PageObjects.canvas.expectAddElementButton();
+      });
+
       it(`allows a workpad to be edited`, async () => {
         await PageObjects.common.navigateToActualUrl('canvas', 'workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31', {
           ensureCurrentUrl: true,
           showLoginIfPrompted: false,
         });
+
+        await PageObjects.canvas.expectAddElementButton();
       });
     });
 
@@ -137,11 +147,23 @@ export default function ({ getPageObjects, getService }) {
         await PageObjects.canvas.expectCreateWorkpadButtonDisabled();
       });
 
-      it(`allows a workpad to be edited`, async () => {
+      it(`does not allow a workpad to be created`, async () => {
+        await PageObjects.common.navigateToActualUrl('canvas', 'workpad/create', {
+          ensureCurrentUrl: false,
+          showLoginIfPrompted: false,
+        });
+
+        // expect redirection to canvas landing
+        await PageObjects.canvas.expectCreateWorkpadButtonDisabled();
+      });
+
+      it(`does not allow a workpad to be edited`, async () => {
         await PageObjects.common.navigateToActualUrl('canvas', 'workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31', {
           ensureCurrentUrl: true,
           showLoginIfPrompted: false,
         });
+
+        await PageObjects.canvas.expectNoAddElementButton();
       });
     });
 
