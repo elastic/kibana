@@ -24,7 +24,7 @@ export const mockAuthenticationsData: { Authentications: AuthenticationsData } =
           host: {
             id: '123',
             name: 'host-computer-1',
-            ip: '192.168.0.1',
+            ip: ['192.168.0.1'],
           },
         },
         cursor: {
@@ -42,7 +42,7 @@ export const mockAuthenticationsData: { Authentications: AuthenticationsData } =
           host: {
             id: '234',
             name: 'host-computer-2',
-            ip: '192.168.0.1',
+            ip: ['192.168.0.1'],
           },
         },
         cursor: {

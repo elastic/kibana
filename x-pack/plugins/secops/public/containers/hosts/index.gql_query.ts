@@ -9,20 +9,24 @@ import gql from 'graphql-tag';
 export const hostsQuery = gql`
   query GetHostsQuery(
     $sourceId: ID!
+    $id: String
     $timerange: TimerangeInput!
     $pagination: PaginationInput!
     $filterQuery: String
   ) {
     source(id: $sourceId) {
       id
-      Hosts(timerange: $timerange, pagination: $pagination, filterQuery: $filterQuery) {
+      Hosts(id: $id, timerange: $timerange, pagination: $pagination, filterQuery: $filterQuery) {
         totalCount
         edges {
           node {
             _id
             firstSeen
             host {
+              architecture
               id
+              ip
+              mac
               name
               os {
                 name

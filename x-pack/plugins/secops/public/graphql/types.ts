@@ -136,9 +136,13 @@ export interface SourceEcsFields {
 }
 
 export interface HostEcsFields {
+  architecture?: string | null;
+
   id?: string | null;
 
-  ip?: string | null;
+  ip?: (string | null)[] | null;
+
+  mac?: (string | null)[] | null;
 
   name?: string | null;
 
@@ -401,6 +405,8 @@ export interface EventsSourceArgs {
   filterQuery?: string | null;
 }
 export interface HostsSourceArgs {
+  id?: string | null;
+
   timerange: TimerangeInput;
 
   pagination: PaginationInput;
@@ -636,7 +642,7 @@ export namespace GetEventsQuery {
 
     name?: string | null;
 
-    ip?: string | null;
+    ip?: (string | null)[] | null;
 
     id?: string | null;
   };
@@ -693,6 +699,7 @@ export namespace GetEventsQuery {
 export namespace GetHostsQuery {
   export type Variables = {
     sourceId: string;
+    id?: string | null;
     timerange: TimerangeInput;
     pagination: PaginationInput;
     filterQuery?: string | null;
@@ -743,7 +750,13 @@ export namespace GetHostsQuery {
   export type Host = {
     __typename?: 'HostEcsFields';
 
+    architecture?: string | null;
+
     id?: string | null;
+
+    ip?: (string | null)[] | null;
+
+    mac?: (string | null)[] | null;
 
     name?: string | null;
 
@@ -970,7 +983,7 @@ export namespace GetTimelineQuery {
 
     name?: string | null;
 
-    ip?: string | null;
+    ip?: (string | null)[] | null;
   };
 
   export type _Source = {

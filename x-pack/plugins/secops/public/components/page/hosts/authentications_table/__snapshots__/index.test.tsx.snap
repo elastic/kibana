@@ -13,7 +13,9 @@ exports[`Authentication Table Component rendering it renders the default Authent
           "failures": 10,
           "host": Object {
             "id": "123",
-            "ip": "192.168.0.1",
+            "ip": Array [
+              "192.168.0.1",
+            ],
             "name": "host-computer-1",
           },
           "latest": "2019-01-11T06:18:30.745Z",
@@ -35,7 +37,9 @@ exports[`Authentication Table Component rendering it renders the default Authent
           "failures": 10,
           "host": Object {
             "id": "234",
-            "ip": "192.168.0.1",
+            "ip": Array [
+              "192.168.0.1",
+            ],
             "name": "host-computer-2",
           },
           "latest": "2019-01-11T06:18:30.745Z",

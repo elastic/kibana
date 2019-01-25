@@ -5,8 +5,10 @@
  */
 
 export const hostFieldsMap: Readonly<Record<string, string>> = {
+  'host.architecture': 'host.architecture',
   'host.id': 'host.id',
-  'host.ip': 'host.ip',
+  'host.ip': 'system.audit.host.ip',
+  'host.mac': 'system.audit.host.mac',
   'host.name': 'host.name',
   'host.os.platform': 'host.os.platform',
   'host.os.name': 'host.os.name',
