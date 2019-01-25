@@ -13,7 +13,7 @@
 
 
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { Fragment } from 'react';
 
 import _ from 'lodash';
 import d3 from 'd3';
@@ -25,8 +25,8 @@ import {
   getSeverityWithLow,
   getMultiBucketImpactLabel,
 } from '../../../../common/util/anomaly_utils';
-import { AnnotationFlyout } from '../annotation_flyout';
-import { DeleteAnnotationModal } from '../delete_annotation_modal';
+import { AnnotationFlyout } from '../../../components/annotations/annotation_flyout';
+import { annotation$ } from '../../../components/annotations/annotations_observable';
 import { formatValue } from '../../../formatters/format_value';
 import {
   LINE_CHART_ANOMALY_RADIUS,
@@ -93,20 +93,18 @@ function getSvgHeight() {
 
 export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Component {
   static propTypes = {
-    indexAnnotation: PropTypes.func,
     autoZoomDuration: PropTypes.number,
     contextAggregationInterval: PropTypes.object,
     contextChartData: PropTypes.array,
     contextForecastData: PropTypes.array,
     contextChartSelected: PropTypes.func.isRequired,
-    deleteAnnotation: PropTypes.func,
     detectorIndex: PropTypes.string,
     focusAggregationInterval: PropTypes.object,
     focusAnnotationData: PropTypes.array,
     focusChartData: PropTypes.array,
     focusForecastData: PropTypes.array,
+    mlAnnotations: PropTypes.object.isRequired,
     modelPlotEnabled: PropTypes.bool.isRequired,
-    refresh: PropTypes.func,
     renderFocusChartOnly: PropTypes.bool.isRequired,
     selectedJob: PropTypes.object,
     showForecast: PropTypes.bool.isRequired,
@@ -114,7 +112,6 @@ export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Co
     svgWidth: PropTypes.number.isRequired,
     swimlaneData: PropTypes.array,
     timefilter: PropTypes.object.isRequired,
-    toastNotifications: PropTypes.object,
     zoomFrom: PropTypes.object,
     zoomTo: PropTypes.object
   };
@@ -123,122 +120,11 @@ export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Co
     super(props);
 
     this.state = {
-      annotation: {},
-      isFlyoutVisible: false,
-      isDeleteModalVisible: false,
+      annotation: null,
     };
   }
 
-  closeDeleteModal = () => {
-    this.setState({ isDeleteModalVisible: false });
-  }
-
-  closeFlyout = () => {
-    const chartElement = d3.select(this.rootNode);
-    chartElement.select('g.mlAnnotationBrush').call(this.annotateBrush.extent([0, 0]));
-    this.setState({ isFlyoutVisible: false, annotation: {} });
-  }
-
-  showFlyout = (annotation) => {
-    this.setState({ isFlyoutVisible: true, annotation });
-  }
-
-  handleAnnotationChange = (e) => {
-    // e is a React Syntethic Event, we need to cast it to
-    // a placeholder variable so it's still valid in the
-    // setState() asynchronous callback
-    const annotation = e.target.value;
-    this.setState((state) => {
-      state.annotation.annotation = annotation;
-      return state;
-    });
-  }
-
-  deleteAnnotation = () => {
-    this.setState({ isDeleteModalVisible: true });
-  }
-
-  deleteAnnotationConfirmation = async () => {
-    const {
-      deleteAnnotation,
-      refresh,
-      toastNotifications,
-      intl
-    } = this.props;
-
-    const { annotation } = this.state;
-
-    try {
-      await deleteAnnotation(annotation._id);
-      toastNotifications.addSuccess(
-        intl.formatMessage({
-          id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.deletedAnnotationNotificationMessage',
-          defaultMessage: 'Deleted annotation for job with ID {jobId}.',
-        }, { jobId: annotation.job_id })
-      );
-    } catch (err) {
-      toastNotifications
-        .addDanger(
-          intl.formatMessage({
-            id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.errorWithDeletingAnnotationNotificationErrorMessage',
-            defaultMessage: 'An error occured deleting the annotation for job with ID {jobId}: {error}',
-          }, { jobId: annotation.job_id, error: JSON.stringify(err) })
-        );
-    }
-
-    this.closeDeleteModal();
-    this.closeFlyout();
-
-    refresh();
-  }
-
-  indexAnnotation = (annotation) => {
-    const {
-      indexAnnotation,
-      refresh,
-      toastNotifications,
-      intl
-    } = this.props;
-
-    this.closeFlyout();
-
-    indexAnnotation(annotation)
-      .then(() => {
-        refresh();
-        if (typeof annotation._id === 'undefined') {
-          toastNotifications.addSuccess(
-            intl.formatMessage({
-              id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.addedAnnotationNotificationMessage',
-              defaultMessage: 'Added an annotation for job with ID {jobId}.',
-            }, { jobId: annotation.job_id })
-          );
-        } else {
-          toastNotifications.addSuccess(
-            intl.formatMessage({
-              id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.updatedAnnotationNotificationMessage',
-              defaultMessage: 'Updated annotation for job with ID {jobId}.',
-            }, { jobId: annotation.job_id })
-          );
-        }
-      })
-      .catch((resp) => {
-        if (typeof annotation._id === 'undefined') {
-          toastNotifications.addDanger(
-            intl.formatMessage({
-              id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.errorWithCreatingAnnotationNotificationErrorMessage',
-              defaultMessage: 'An error occured creating the annotation for job with ID {jobId}: {error}',
-            }, { jobId: annotation.job_id, error: JSON.stringify(resp) })
-          );
-        } else {
-          toastNotifications.addDanger(
-            intl.formatMessage({
-              id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.errorWithUpdatingAnnotationNotificationErrorMessage',
-              defaultMessage: 'An error occured updating the annotation for job with ID {jobId}: {error}',
-            }, { jobId: annotation.job_id, error: JSON.stringify(resp) })
-          );
-        }
-      });
-  }
+  annotationSub = null;
 
   componentWillUnmount() {
     const element = d3.select(this.rootNode);
@@ -246,9 +132,19 @@ export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Co
 
     mlTableService.rowMouseenter.unwatch(this.tableRecordMousenterListener);
     mlTableService.rowMouseleave.unwatch(this.tableRecordMouseleaveListener);
+
+    this.annotationSub.unsubscribe();
   }
 
   componentDidMount() {
+    this.annotationSub = annotation$.subscribe((annotation) => {
+      if (annotation === null) {
+        const chartElement = d3.select(this.rootNode);
+        chartElement.select('g.mlAnnotationBrush').call(this.annotateBrush.extent([0, 0]));
+      }
+      this.setState({ annotation });
+    });
+
     const {
       svgWidth
     } = this.props;
@@ -626,7 +522,6 @@ export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Co
     const data = focusChartData;
 
     const contextYScale = this.contextYScale;
-    const showFlyout = this.showFlyout.bind(this);
     const showFocusChartTooltip = this.showFocusChartTooltip.bind(this);
 
     const focusChart = d3.select('.focus-chart');
@@ -754,8 +649,7 @@ export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Co
         focusChartHeight,
         this.focusXScale,
         showAnnotations,
-        showFocusChartTooltip,
-        showFlyout
+        showFocusChartTooltip
       );
 
       // disable brushing (creation of annotations) when annotations aren't shown
@@ -1568,29 +1462,15 @@ export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Co
   }
 
   render() {
-    const { annotation, isDeleteModalVisible, isFlyoutVisible } = this.state;
-
     return (
-      <React.Fragment>
+      <Fragment>
         <div className="ml-timeseries-chart-react" ref={this.setRef.bind(this)} />
-        {mlAnnotationsEnabled && isFlyoutVisible &&
-          <React.Fragment>
-            <AnnotationFlyout
-              annotation={annotation}
-              cancelAction={this.closeFlyout}
-              controlFunc={this.handleAnnotationChange}
-              deleteAction={this.deleteAnnotation}
-              saveAction={this.indexAnnotation}
-            />
-            <DeleteAnnotationModal
-              annotation={annotation}
-              cancelAction={this.closeDeleteModal}
-              deleteAction={this.deleteAnnotationConfirmation}
-              isVisible={isDeleteModalVisible}
-            />
-          </React.Fragment>
-        }
-      </React.Fragment>
+        {mlAnnotationsEnabled && (
+          <AnnotationFlyout
+            mlAnnotations={this.props.mlAnnotations}
+          />
+        )}
+      </Fragment>
     );
   }
 });

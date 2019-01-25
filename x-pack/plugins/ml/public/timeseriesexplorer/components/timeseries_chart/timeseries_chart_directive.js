@@ -18,7 +18,6 @@ import { TimeseriesChart } from './timeseries_chart';
 
 import angular from 'angular';
 import { timefilter } from 'ui/timefilter';
-import { toastNotifications } from 'ui/notify';
 
 import { ResizeChecker } from 'ui/resize_checker';
 
@@ -47,18 +46,17 @@ module.directive('mlTimeseriesChart', function ($timeout) {
       svgWidth = Math.max(angular.element('.results-container').width(), 0);
 
       const props = {
-        indexAnnotation: ml.annotations.indexAnnotation,
         autoZoomDuration: scope.autoZoomDuration,
         contextAggregationInterval: scope.contextAggregationInterval,
         contextChartData: scope.contextChartData,
         contextForecastData: scope.contextForecastData,
         contextChartSelected: contextChartSelected,
-        deleteAnnotation: ml.annotations.deleteAnnotation,
         detectorIndex: scope.detectorIndex,
         focusAnnotationData: scope.focusAnnotationData,
         focusChartData: scope.focusChartData,
         focusForecastData: scope.focusForecastData,
         focusAggregationInterval: scope.focusAggregationInterval,
+        mlAnnotations: ml.annotations,
         modelPlotEnabled: scope.modelPlotEnabled,
         refresh: scope.refresh,
         renderFocusChartOnly,
@@ -69,14 +67,13 @@ module.directive('mlTimeseriesChart', function ($timeout) {
         svgWidth,
         swimlaneData: scope.swimlaneData,
         timefilter,
-        toastNotifications,
         zoomFrom: scope.zoomFrom,
         zoomTo: scope.zoomTo
       };
 
       ReactDOM.render(
         <I18nContext>
-          {React.createElement(TimeseriesChart, props)}
+          <TimeseriesChart {...props} />
         </I18nContext>,
         element[0]
       );

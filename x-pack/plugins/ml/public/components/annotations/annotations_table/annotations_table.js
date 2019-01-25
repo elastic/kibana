@@ -15,7 +15,7 @@ import PropTypes from 'prop-types';
 import rison from 'rison-node';
 
 import React, {
-  Component
+  Component, Fragment
 } from 'react';
 
 import {
@@ -30,6 +30,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+// import { AnnotationFlyout } from '../annotation_flyout';
+
 import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui/lib/services';
@@ -37,15 +39,14 @@ import {
 import { formatDate } from '@elastic/eui/lib/services/format';
 import chrome from 'ui/chrome';
 
-import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
-import { ml } from '../../services/ml_api_service';
-import { mlJobService } from '../../services/job_service';
-import { mlTableService } from '../../services/table_service';
-import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
-import { isTimeSeriesViewJob } from '../../../common/util/job_utils';
+import { addItemToRecentlyAccessed } from '../../../util/recently_accessed';
+import { ml } from '../../../services/ml_api_service';
+import { mlJobService } from '../../../services/job_service';
+import { mlTableService } from '../../../services/table_service';
+import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../../common/constants/search';
+import { isTimeSeriesViewJob } from '../../../../common/util/job_utils';
 
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-
 
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
@@ -379,14 +380,39 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
       });
     }
 
+    const actions = [];
+
+    actions.push({
+      render: (annotation) => {
+        const editAnnotationsTooltipText = (
+          <FormattedMessage
+            id="xpack.ml.annotationsTable.editAnnotationsTooltip"
+            defaultMessage="Edit Annotation"
+          />
+        );
+        const editAnnotationsTooltipAriaLabelText = (
+          <FormattedMessage
+            id="xpack.ml.annotationsTable.editAnnotationsTooltipAriaLabel"
+            defaultMessage="Edit Annotation"
+          />
+        );
+        return (
+          <EuiToolTip
+            position="bottom"
+            content={editAnnotationsTooltipText}
+          >
+            <EuiButtonIcon
+              onClick={() => this.editAnnotationHandler(annotation)}
+              iconType="pencil"
+              aria-label={editAnnotationsTooltipAriaLabelText}
+            />
+          </EuiToolTip>
+        );
+      }
+    });
+
     if (isSingleMetricViewerLinkVisible) {
-      columns.push({
-        align: RIGHT_ALIGNMENT,
-        width: '60px',
-        name: intl.formatMessage({
-          id: 'xpack.ml.annotationsTable.viewColumnName',
-          defaultMessage: 'View',
-        }),
+      actions.push({
         render: (annotation) => {
           const isDrillDownAvailable = isTimeSeriesViewJob(this.getJob(annotation.job_id));
           const openInSingleMetricViewerTooltipText = isDrillDownAvailable ? (
@@ -429,6 +455,16 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
       });
     }
 
+    columns.push({
+      align: RIGHT_ALIGNMENT,
+      width: '60px',
+      name: intl.formatMessage({
+        id: 'xpack.ml.annotationsTable.actionsColumnName',
+        defaultMessage: 'Actions',
+      }),
+      actions
+    });
+
     const getRowProps = (item) => {
       return {
         onMouseOver: () => this.onMouseOverRow(item),
@@ -436,22 +472,33 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
       };
     };
 
+    //const annotation = {};
+
     return (
-      <EuiInMemoryTable
-        className="eui-textOverflowWrap"
-        compressed={true}
-        items={annotations}
-        columns={columns}
-        pagination={{
-          pageSizeOptions: [5, 10, 25]
-        }}
-        sorting={{
-          sort: {
-            field: 'timestamp', direction: 'asc'
-          }
-        }}
-        rowProps={getRowProps}
-      />
+      <Fragment>
+        <EuiInMemoryTable
+          className="eui-textOverflowWrap"
+          compressed={true}
+          items={annotations}
+          columns={columns}
+          pagination={{
+            pageSizeOptions: [5, 10, 25]
+          }}
+          sorting={{
+            sort: {
+              field: 'timestamp', direction: 'asc'
+            }
+          }}
+          rowProps={getRowProps}
+        />
+        {/*<AnnotationFlyout
+          annotation={annotation}
+          cancelAction={this.closeFlyout}
+          controlFunc={this.handleAnnotationChange}
+          deleteAction={this.deleteAnnotation}
+          saveAction={this.indexAnnotation}
+        />*/}
+      </Fragment>
     );
   }
 });

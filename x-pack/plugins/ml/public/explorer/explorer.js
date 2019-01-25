@@ -23,7 +23,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { AnnotationsTable } from '../components/annotations_table';
+import { AnnotationsTable } from '../components/annotations/annotations_table';
 import {
   ExplorerNoInfluencersFound,
   ExplorerNoJobsFound,
