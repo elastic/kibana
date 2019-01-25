@@ -1,5 +1,3 @@
-/* tslint:disable */
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License;
@@ -79,10 +77,10 @@ export const removeDuplicates = (idFun, a) =>
 
 export const arrayToMap = a => Object.assign({}, ...a.map(d => ({ [d]: true })));
 
-export const subMultitree = (pk, fk, elements, roots) => {
+export const subMultitree = (pk, fk, elements, inputRoots) => {
   const getSubgraphs = roots => {
     const children = flatten(roots.map(r => elements.filter(e => fk(e) === pk(r))));
     return [...roots, ...(children.length && getSubgraphs(children, elements))];
   };
-  return getSubgraphs(roots);
+  return getSubgraphs(inputRoots);
 };
