@@ -109,7 +109,7 @@ export class Project {
 
     throw new CliError(
       `[${this.name}] depends on [${
-      project.name
+        project.name
       }] ${problemMsg}. Update its package.json to the expected value below.`,
       {
         actual: `"${project.name}": "${versionInPackageJson}"`,
@@ -163,7 +163,7 @@ export class Project {
 
     throw new CliError(
       `[${this.name}] has an invalid "bin" field in its package.json, ` +
-      `expected an object or a string`,
+        `expected an object or a string`,
       {
         binConfig: inspect(raw),
         package: `${this.name} (${this.packageJsonLocation})`,
