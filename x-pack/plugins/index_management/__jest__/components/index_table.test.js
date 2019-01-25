@@ -24,12 +24,12 @@ jest.mock('react-ace', () => {
     editor = {
       textInput: {
         getElement() {
-          return { addEventListener() {} };
+          return { removeAttribute() {}, addEventListener() {} };
         }
       }
     };
     render() {
-      return null;
+      return <div />;
     }
   };
 });
