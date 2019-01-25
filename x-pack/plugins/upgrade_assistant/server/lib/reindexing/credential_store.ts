@@ -6,7 +6,9 @@
 
 import { createHash } from 'crypto';
 import { Request } from 'hapi';
-import { ReindexSavedObject } from 'x-pack/plugins/upgrade_assistant/common/types';
+import stringify from 'json-stable-stringify';
+
+import { ReindexSavedObject } from '../../../common/types';
 
 export type Credential = Request['headers'];
 
@@ -26,19 +28,10 @@ export const credentialStoreFactory = (): CredentialStore => {
   const credMap = new Map<string, Credential>();
 
   // Generates a stable hash for the reindex operation's current state.
-  const getHash = (reindexOp: ReindexSavedObject) => {
-    let sortedAttrsStr = `${reindexOp.id}\n`;
-
-    // Sort keys so we can get a stable serialized string.
-    sortedAttrsStr += Object.keys(reindexOp.attributes)
-      .sort()
-      .map(k => `${k}: ${JSON.stringify(reindexOp.attributes[k])}`)
-      .join('\n');
-
-    return createHash('md5')
-      .update(sortedAttrsStr)
+  const getHash = (reindexOp: ReindexSavedObject) =>
+    createHash('sha256')
+      .update(stringify({ id: reindexOp.id, ...reindexOp.attributes }))
       .digest('base64');
-  };
 
   return {
     get(reindexOp: ReindexSavedObject) {
