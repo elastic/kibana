@@ -73,7 +73,7 @@ export class TagCloudVisualization {
       this._updateParams();
     }
 
-    if (status.data) {
+    if (status.data || status.params) {
       this._updateData(data);
     }
 
@@ -115,10 +115,11 @@ export class TagCloudVisualization {
       return;
     }
 
-    const bucketFormatter = this._vis.params.bucket ? getFormat(this._vis.params.bucket.format) : null;
-    const hasTags = data.columns.length === 2;
-    const tagColumn = hasTags ? data.columns[0].id : -1;
-    const metricColumn = data.columns[hasTags ? 1 : 0].id;
+    const bucket = this._vis.params.bucket;
+    const metric = this._vis.params.metric;
+    const bucketFormatter = bucket ? getFormat(bucket.format) : null;
+    const tagColumn = bucket ? data.columns[bucket.accessor].id : -1;
+    const metricColumn = data.columns[metric.accessor].id;
     const tags = data.rows.map((row, rowIndex) => {
       const tag = row[tagColumn] === undefined ? 'all' : row[tagColumn];
       const metric = row[metricColumn];

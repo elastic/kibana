@@ -7,6 +7,8 @@
 import { defaults, get } from 'lodash';
 import { MissingRequiredError } from './error_missing_required';
 import moment from 'moment';
+import { standaloneClusterFilter } from './standalone_clusters';
+import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../common/constants';
 
 /*
  * Builds a type filter syntax that supports backwards compatibility to read
@@ -46,13 +48,15 @@ export function createQuery(options) {
   options = defaults(options, { filters: [] });
   const { type, clusterUuid, uuid, start, end, filters } = options;
 
+  const isFromStandaloneCluster = clusterUuid === STANDALONE_CLUSTER_CLUSTER_UUID;
+
   let typeFilter;
   if (type) {
     typeFilter = createTypeFilter(type);
   }
 
   let clusterUuidFilter;
-  if (clusterUuid) {
+  if (clusterUuid && !isFromStandaloneCluster) {
     clusterUuidFilter = { term: { 'cluster_uuid': clusterUuid } };
   }
 
@@ -89,9 +93,15 @@ export function createQuery(options) {
     combinedFilters.push(timeRangeFilter);
   }
 
-  return {
+  if (isFromStandaloneCluster) {
+    combinedFilters.push(standaloneClusterFilter);
+  }
+
+  const query = {
     bool: {
       filter: combinedFilters.filter(Boolean)
     }
   };
+
+  return query;
 }
