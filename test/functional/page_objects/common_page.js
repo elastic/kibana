@@ -73,6 +73,34 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       });
     }
 
+    /**
+     * @param {string} appName As defined in the apps config
+     * @param {string} hash The route after the hash (#)
+     */
+    async navigateToActualUrl(appName, hash, {
+      basePath = '',
+      ensureCurrentUrl = true,
+      shouldLoginIfPrompted = true
+    } = {}) {
+      // we only use the apps config to get the application path
+      const appConfig = {
+        pathname: `${basePath}${config.get(['apps', appName]).pathname}`,
+        hash,
+      };
+
+      const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
+      await retry.try(async () => {
+        log.debug(`navigateToActualUrl ${appUrl}`);
+        await browser.get(appUrl);
+
+        const currentUrl = shouldLoginIfPrompted ? await this.loginIfPrompted(appUrl) : browser.getCurrentUrl();
+
+        if (ensureCurrentUrl && !currentUrl.includes(appUrl)) {
+          throw new Error(`expected ${currentUrl}.includes(${appUrl})`);
+        }
+      });
+    }
+
 
     async loginIfPrompted(appUrl) {
       let currentUrl = await browser.getCurrentUrl();

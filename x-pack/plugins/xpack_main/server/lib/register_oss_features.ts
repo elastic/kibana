@@ -72,7 +72,7 @@ const kibanaFeatures: Feature[] = [
           all: ['dashboard'],
           read: ['config', 'index-pattern', 'search', 'visualization', 'timelion', 'canvas'],
         },
-        ui: [],
+        ui: ['createNew', 'show', 'showWriteControls'],
       },
       read: {
         catalogue: ['dashboard'],
@@ -89,7 +89,7 @@ const kibanaFeatures: Feature[] = [
             'dashboard',
           ],
         },
-        ui: [],
+        ui: ['show'],
       },
     },
   },

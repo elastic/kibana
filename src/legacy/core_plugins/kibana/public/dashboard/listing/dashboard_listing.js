@@ -483,7 +483,7 @@ class DashboardListingUi extends React.Component {
       totalItemCount: this.state.dashboards.length,
       pageSizeOptions: [10, 20, 50],
     };
-    const selection = {
+    const selection = this.props.hideWriteControls ? null : {
       onSelectionChange: (selection) => {
         this.setState({
           selectedIds: selection.map(item => { return item.id; })

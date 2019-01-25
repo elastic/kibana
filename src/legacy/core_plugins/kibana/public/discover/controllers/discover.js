@@ -66,6 +66,7 @@ import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
+import 'ui/capabilities/route_setup';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -77,12 +78,13 @@ const app = uiModules.get('apps/discover', [
 uiRoutes
   .defaults(/^\/discover(\/|$)/, {
     requireDefaultIndex: true,
+    requireUICapability: 'discover.show',
     k7Breadcrumbs: ($route, $injector) =>
       $injector.invoke(
         $route.current.params.id
           ? getSavedSearchBreadcrumbs
           : getRootBreadcrumbs
-      )
+      ),
   })
   .when('/discover/:id?', {
     template: indexTemplate,
@@ -138,12 +140,6 @@ uiRoutes
             'search': '/discover',
             'index-pattern': '/management/kibana/objects/savedSearches/' + $route.current.params.id
           }));
-      },
-      redirect: function (uiCapabilities, kbnBaseUrl) {
-        if (!uiCapabilities.discover.show) {
-          const url = chrome.addBasePath(`${kbnBaseUrl}#/home`);
-          window.location.href = url;
-        }
       }
     }
   });

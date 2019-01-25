@@ -17,27 +17,19 @@
  * under the License.
  */
 
-/**
- * WARNING: these types are incomplete
- */
+import { get } from 'lodash';
+import chrome from 'ui/chrome';
+import uiRoutes from 'ui/routes';
+import { UICapabilities } from './ui_capabilities';
 
-import { Breadcrumb } from '../../../core/public/chrome';
+uiRoutes.addSetupWork((uiCapabilities: UICapabilities, kbnBaseUrl: string, $route: any) => {
+  const route = get($route, 'current.$$route') as any;
+  if (!route.requireUICapability) {
+    return;
+  }
 
-interface RouteConfiguration {
-  controller?: string | ((...args: any[]) => void);
-  redirectTo?: string;
-  reloadOnSearch?: boolean;
-  resolve?: object;
-  template?: string;
-  k7Breadcrumbs?: (...args: any[]) => Breadcrumb[];
-  requireUICapability?: string;
-}
-
-interface RouteManager {
-  addSetupWork(cb: (...args: any[]) => void): void;
-  when(path: string, routeConfiguration: RouteConfiguration): RouteManager;
-  otherwise(routeConfiguration: RouteConfiguration): RouteManager;
-  defaults(path: string | RegExp, defaults: RouteConfiguration): RouteManager;
-}
-
-export default RouteManager;
+  if (!get(uiCapabilities, route.requireUICapability)) {
+    const url = chrome.addBasePath(`${kbnBaseUrl}#/home`);
+    window.location.href = url;
+  }
+});

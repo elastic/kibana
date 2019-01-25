@@ -7,6 +7,7 @@
 
 export default function ({ loadTestFile }) {
   describe('feature privileges', function () {
+    loadTestFile(require.resolve('./dashboard'));
     loadTestFile(require.resolve('./discover'));
   });
 }

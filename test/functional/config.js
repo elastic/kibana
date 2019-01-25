@@ -143,6 +143,9 @@ export default async function ({ readConfigFile }) {
     },
 
     apps: {
+      kibana: {
+        pathname: '/app/kibana',
+      },
       status_page: {
         pathname: '/status',
       },
