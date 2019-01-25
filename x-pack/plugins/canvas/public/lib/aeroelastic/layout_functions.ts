@@ -16,3 +16,15 @@ export const draggingShape = ({ draggedShape, shapes }, hoveredShape, down, mous
   const result = (dragInProgress && draggedShape) || (down && mouseDowned && hoveredShape);
   return result;
 };
+// the currently dragged shape is considered in-focus; if no dragging is going on, then the hovered shape
+export const getFocusedShape = (draggedShape, hoveredShape) => draggedShape || hoveredShape;// focusedShapes has updated position etc. information while focusedShape may have stale position
+export const getFocusedShapes = (shapes, focusedShape) =>
+  shapes.filter(shape => focusedShape && shape.id === focusedShape.id);
+export const getAlterSnapGesture = metaHeld => (metaHeld ? ['relax'] : []);
+export const initialTransformTuple = {
+  deltaX: 0,
+  deltaY: 0,
+  transform: null,
+  cumulativeTransform: null,
+};
+export const getMouseTransformGesturePrev = ({mouseTransformState}) => mouseTransformState || initialTransformTuple;

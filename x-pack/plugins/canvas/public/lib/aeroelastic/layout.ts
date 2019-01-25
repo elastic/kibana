@@ -6,7 +6,14 @@
 
 import { getId } from './../../lib/get_id';
 import { landmarkPoint, shapesAt } from './geometry';
-import { draggingShape } from './layout_functions';
+import {
+  draggingShape,
+  getAlterSnapGesture,
+  getFocusedShape,
+  getFocusedShapes,
+  getMouseTransformGesturePrev,
+  initialTransformTuple,
+} from './layout_functions';
 import { select } from './state';
 
 import {
@@ -93,31 +100,15 @@ const hoveredShape = select(getHoveredShape)(hoveredShapes);
 
 const draggedShape = select(draggingShape)(scene, hoveredShape, mouseIsDown, mouseDowned);
 
-// the currently dragged shape is considered in-focus; if no dragging is going on, then the hovered shape
-export const focusedShape = select((draggedShape, hoveredShape) => draggedShape || hoveredShape)(
-  draggedShape,
-  hoveredShape
-);
+export const focusedShape = select(getFocusedShape)(draggedShape, hoveredShape);
 
-// focusedShapes has updated position etc. information while focusedShape may have stale position
-export const focusedShapes = select((shapes, focusedShape) =>
-  shapes.filter(shape => focusedShape && shape.id === focusedShape.id)
-)(shapes, focusedShape);
+export const focusedShapes = select(getFocusedShapes)(shapes, focusedShape);
 
-const alterSnapGesture = select(metaHeld => (metaHeld ? ['relax'] : []))(metaHeld);
+const alterSnapGesture = select(getAlterSnapGesture)(metaHeld);
 
 const multiselectModifier = shiftHeld; // todo abstract out keybindings
 
-const initialTransformTuple = {
-  deltaX: 0,
-  deltaY: 0,
-  transform: null,
-  cumulativeTransform: null,
-};
-
-const mouseTransformGesturePrev = select(
-  ({ mouseTransformState }) => mouseTransformState || initialTransformTuple
-)(scene);
+const mouseTransformGesturePrev = select(getMouseTransformGesturePrev)(scene);
 
 const mouseTransformState = select((prev, dragging, { x0, y0, x1, y1 }) => {
   if (dragging) {
