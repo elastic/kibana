@@ -24,12 +24,12 @@ jest.mock('react-ace', () => {
     editor = {
       textInput: {
         getElement() {
-          return { addEventListener() {} };
+          return { removeAttribute() {}, addEventListener() {} };
         }
       }
     };
     render() {
-      return null;
+      return <div />;
     }
   };
 });
@@ -157,18 +157,16 @@ describe('index table', () => {
     rendered.update();
     snapshot(namesText(rendered));
   });
-  // TODO fix test with a non-brittal selector
-  /*test('should show more when per page value is increased', () => {
+  test('should show more when per page value is increased', () => {
     const rendered = mountWithIntl(component);
-
-    const perPageButton = rendered.find('span[children="Rows per page: 10"]');
+    const perPageButton = rendered.find('#customizablePagination').find('button');
     perPageButton.simulate('click');
     rendered.update();
-    const fiftyButton = rendered.find('#customizablePagination');
+    const fiftyButton = rendered.find('.euiContextMenuItem').at(1);
     fiftyButton.simulate('click');
     rendered.update();
     expect(namesText(rendered).length).toBe(50);
-  });*/
+  });
   test('should show the Actions menu button only when at least one row is selected', () => {
     const rendered = mountWithIntl(component);
     let button = findTestSubject(rendered, 'indexTableContextMenuButton');

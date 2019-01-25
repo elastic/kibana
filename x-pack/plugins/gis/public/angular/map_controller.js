@@ -15,7 +15,7 @@ import { GisMap } from '../components/gis_map';
 import {
   setSelectedLayer,
   setRefreshConfig,
-  setGoto,
+  setGotoWithCenter,
   replaceLayerList,
   setQuery,
 } from '../actions/store_actions';
@@ -132,7 +132,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     // sync store with savedMap mapState
     if (savedMap.mapStateJSON) {
       const mapState = JSON.parse(savedMap.mapStateJSON);
-      store.dispatch(setGoto({
+      store.dispatch(setGotoWithCenter({
         lat: mapState.center.lat,
         lon: mapState.center.lon,
         zoom: mapState.zoom,
