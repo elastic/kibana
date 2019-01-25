@@ -125,19 +125,21 @@ export class ResultsLinks extends Component {
           </EuiFlexItem>
         }
 
-        <EuiFlexItem>
-          <EuiCard
-            icon={<EuiIcon size="xxl" type={`dataVisualizer`} />}
-            title={
-              <FormattedMessage
-                id="xpack.ml.fileDatavisualizer.resultsLinks.openInDataVisualizerTitle"
-                defaultMessage="Open in Data Visualizer"
-              />
-            }
-            description=""
-            href={`${uiChrome.getBasePath()}/app/ml#/jobs/new_job/datavisualizer?index=${indexPatternId}${_g}`}
-          />
-        </EuiFlexItem>
+        {createIndexPattern &&
+          <EuiFlexItem>
+            <EuiCard
+              icon={<EuiIcon size="xxl" type={`dataVisualizer`} />}
+              title={
+                <FormattedMessage
+                  id="xpack.ml.fileDatavisualizer.resultsLinks.openInDataVisualizerTitle"
+                  defaultMessage="Open in Data Visualizer"
+                />
+              }
+              description=""
+              href={`${uiChrome.getBasePath()}/app/ml#/jobs/new_job/datavisualizer?index=${indexPatternId}${_g}`}
+            />
+          </EuiFlexItem>
+        }
 
         <EuiFlexItem>
           <EuiCard
