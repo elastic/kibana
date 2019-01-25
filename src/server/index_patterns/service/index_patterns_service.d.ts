@@ -17,23 +17,16 @@
  * under the License.
  */
 
-import { SavedObjectsClient } from '..';
+export interface IndexPatternsService {
+  // ATTENTION: this interface is incomplete
 
-export interface SavedObjectsClientWrapperOptions<Request = any> {
-  client: SavedObjectsClient;
-  request: Request;
+  getFieldsForWildcard(options: { pattern: string | string[] }): Promise<FieldDescriptor[]>;
 }
 
-export type SavedObjectsClientWrapperFactory<Request = any> = (
-  options: SavedObjectsClientWrapperOptions<Request>
-) => SavedObjectsClient;
-
-export interface ScopedSavedObjectsClientProvider<Request = any> {
-  // ATTENTION: these types are incomplete
-
-  addClientWrapperFactory(
-    priority: number,
-    wrapperFactory: SavedObjectsClientWrapperFactory<Request>
-  ): void;
-  getClient(request: Request): SavedObjectsClient;
+export interface FieldDescriptor {
+  aggregatable: boolean;
+  name: string;
+  readFromDocValues: boolean;
+  searchable: boolean;
+  type: string;
 }

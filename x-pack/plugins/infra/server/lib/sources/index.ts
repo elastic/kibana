@@ -4,15 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import gql from 'graphql-tag';
-
-export const rootSchema = gql`
-  schema {
-    query: Query
-    mutation: Mutation
-  }
-
-  type Query
-
-  type Mutation
-`;
+export * from './defaults';
+export * from './saved_object_mappings';
+export * from './sources';
+export * from './types';
