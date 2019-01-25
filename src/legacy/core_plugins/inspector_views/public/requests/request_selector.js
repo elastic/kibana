@@ -33,16 +33,12 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import { RequestStatus } from 'ui/inspector/adapters';
 
-const RequestSelector = injectI18n(class RequestSelector extends Component {
-  static propTypes = {
-    requests: PropTypes.array.isRequired,
-    selectedRequest: PropTypes.object.isRequired,
-  };
-
+class RequestSelector extends Component {
   state = {
     isPopoverOpen: false,
   };
@@ -84,8 +80,7 @@ const RequestSelector = injectI18n(class RequestSelector extends Component {
           { inProgress &&
             <EuiLoadingSpinner
               size="s"
-              aria-label={this.props.intl.formatMessage({
-                id: 'inspectorViews.requests.requestInProgressAriaLabel',
+              aria-label={i18n.translate('inspectorViews.requests.requestInProgressAriaLabel', {
                 defaultMessage: 'Request in progress'
               })}
               className="insRequestSelector__menuSpinner"
@@ -196,6 +191,11 @@ const RequestSelector = injectI18n(class RequestSelector extends Component {
       </EuiFlexGroup>
     );
   }
-});
+}
+
+RequestSelector.propTypes = {
+  requests: PropTypes.array.isRequired,
+  selectedRequest: PropTypes.object.isRequired,
+};
 
 export { RequestSelector };
