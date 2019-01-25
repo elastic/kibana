@@ -38,7 +38,6 @@ export const HostDetails = pure<HostComponentProps>(({ match }) => (
 
               <EuiFlexGroup>
                 <HostsQuery
-                  id={match.params.hostId!}
                   sourceId="default"
                   startDate={from}
                   endDate={to}

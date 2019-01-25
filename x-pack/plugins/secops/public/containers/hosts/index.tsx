@@ -49,7 +49,6 @@ const HostsComponentQuery = pure<HostsProps>(
       pollInterval={poll}
       notifyOnNetworkStatusChange
       variables={{
-        id,
         sourceId,
         timerange: {
           interval: '12h',

@@ -699,7 +699,6 @@ export namespace GetEventsQuery {
 export namespace GetHostsQuery {
   export type Variables = {
     sourceId: string;
-    id?: string | null;
     timerange: TimerangeInput;
     pagination: PaginationInput;
     filterQuery?: string | null;
