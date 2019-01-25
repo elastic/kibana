@@ -18,6 +18,7 @@
  */
 
 import { ExistsFilter } from '@kbn/es-query';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 interface Props {
@@ -25,5 +26,10 @@ interface Props {
 }
 
 export function ExistsFilterView({ filter }: Props) {
-  return <span>{filter.meta.key} exists</span>;
+  return (
+    <span>
+      {filter.meta.key}{' '}
+      <FormattedMessage id="common.ui.filterBar.existsFilterSuffix" defaultMessage="exists" />
+    </span>
+  );
 }
