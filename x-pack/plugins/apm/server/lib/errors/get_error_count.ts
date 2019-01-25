@@ -1,0 +1,61 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { ESFilter } from 'elasticsearch';
+import { oc } from 'ts-optchain';
+import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
+import {
+  PROCESSOR_EVENT,
+  SERVICE_NAME,
+  TRANSACTION_ID,
+  TRANSACTION_SAMPLED
+} from '../../../common/constants';
+import { Setup } from '../helpers/setup_request';
+
+export async function getErrorCount({
+  serviceName,
+  transactionId,
+  setup
+}: {
+  serviceName: string;
+  transactionId: string;
+  setup: Setup;
+}): Promise<number> {
+  const { start, end, esFilterQuery, client, config } = setup;
+  const filter: ESFilter[] = [
+    { term: { [SERVICE_NAME]: serviceName } },
+    { term: { [TRANSACTION_ID]: transactionId } },
+    { term: { [PROCESSOR_EVENT]: 'error' } },
+    {
+      range: {
+        '@timestamp': {
+          gte: start,
+          lte: end,
+          format: 'epoch_millis'
+        }
+      }
+    }
+  ];
+
+  if (esFilterQuery) {
+    filter.push(esFilterQuery);
+  }
+
+  const params = {
+    index: config.get<string>('apm_oss.errorIndices'),
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter,
+          should: [{ term: { [TRANSACTION_SAMPLED]: true } }]
+        }
+      }
+    }
+  };
+  const resp = await client<APMError>('search', params);
+  return oc(resp).hits.total() || 0;
+}

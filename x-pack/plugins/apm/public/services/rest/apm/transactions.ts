@@ -5,7 +5,7 @@
  */
 
 import { KFetchError } from 'ui/kfetch/kfetch_error';
-import { TransactionAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/get_transaction';
+import { TransactionWithErrorCount } from 'x-pack/plugins/apm/typings/get_transaction';
 import { IUrlParams } from '../../../store/urlParams';
 import { callApi } from '../callApi';
 import { getEncodedEsQuery } from './apm';
@@ -19,7 +19,7 @@ export async function loadTransaction({
   kuery
 }: IUrlParams) {
   try {
-    const result = await callApi<TransactionAPIResponse>({
+    const result = await callApi<TransactionWithErrorCount>({
       pathname: `/api/apm/services/${serviceName}/transactions/${transactionId}`,
       query: {
         traceId,
