@@ -64,6 +64,11 @@ export function getTpmBuckets(
       };
     });
 
+    // Handle "missing" result keys
+    if (key === '') {
+      key = 'N/A';
+    }
+
     return { key, dataPoints };
   });
 
