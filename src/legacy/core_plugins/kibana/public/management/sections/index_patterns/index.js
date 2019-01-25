@@ -70,7 +70,6 @@ export const destroyIndexPatternList = () => {
 
 const indexPatternsResolutions = {
   indexPatterns: function (Private) {
-    console.log('indexPatternsResolutions indexPatterns');
     const savedObjectsClient = Private(SavedObjectsClientProvider);
 
     return savedObjectsClient.find({
@@ -100,16 +99,11 @@ uiModules.get('apps/management')
         const indexPatternCreationProvider = Private(IndexPatternCreationFactory)();
         const indexPatternCreationType = indexPatternCreationProvider.getType();
         const indexPatternCreationOptions = await indexPatternCreationProvider.getIndexPatternCreationOptions((url) => {
-          console.log('url', url);
           $scope.$evalAsync(() => kbnUrl.change(url));
         });
-        console.log('indexPatternCreationOptions', indexPatternCreationOptions);
-        console.log('$route', $route.current.params.indexPatternId);
 
         const renderList = () => {
-          console.log('$route.current.locals.indexPatterns', $route.current.locals.indexPatterns);
           $scope.indexPatternList = $route.current.locals.indexPatterns.map(pattern => {
-            console.log('pattern', pattern);
             const id = pattern.id;
             const tags = indexPatternListProvider.getIndexPatternTags(pattern, $scope.defaultIndex === id);
 
@@ -137,8 +131,13 @@ uiModules.get('apps/management')
             return 0;
           }) || [];
 
-          console.log('updateIndexPatternList', $scope, indexPatternCreationOptions, $scope.defaultIndex, $scope.indexPatternList, indexPatternCreationType);
-          updateIndexPatternList($scope, indexPatternCreationOptions, $scope.defaultIndex, $scope.indexPatternList, indexPatternCreationType);
+          updateIndexPatternList(
+            $scope,
+            indexPatternCreationOptions,
+            $scope.defaultIndex,
+            $scope.indexPatternList,
+            indexPatternCreationType
+          );
         };
 
         $scope.$on('$destroy', destroyIndexPatternList);

@@ -28,15 +28,13 @@ export class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      dismissIntro: false
+      dismissIntro: false,
     };
   }
 
-  //               indexPatternCreationOptions={this.props.indexPatternCreationOptions}
-  //              defaultIndex={this.props.defaultIndex}
   render() {
-    const showList = !!this.props.indexPatterns.length || this.state.dismissIntro;
-    console.log('this.props.indexPatterns', this.props.indexPatterns);
+    const showList = !this.state.showCreateIndexPattern && this.props.indexPatterns.length > 0;
+    const showPrompt = !this.state.showCreateIndexPattern && this.props.indexPatterns.length === 0;
 
     return (
       <I18nProvider>
@@ -49,18 +47,17 @@ export class App extends React.Component {
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem  grow={false}>
-              <EuiButton fill>
+              <EuiButton fill onClick={() => this.setState({ 'showCreateIndexPattern': true })}>
                 Create index pattern
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
-          {showList ?
-            (<IndexPatternTable
-              indexPatterns={this.props.indexPatterns}
-            />) : (<RenderCreateIndexPatternPrompt
-              onCreateIndexPattern={() => this.setState({ 'dismissIntro': true })}
-              onShowSystemIndices={() => this.props.indexPatternCreationType.getShowSystemIndices()}
-            />)}
+          {showList && (<IndexPatternTable indexPatterns={this.props.indexPatterns} />)}
+          {showPrompt && (<RenderCreateIndexPatternPrompt
+            onCreateIndexPattern={() => this.setState({ 'showCreateIndexPattern': true })}
+            onShowSystemIndices={() => this.setState({ 'showCreateIndexPattern': true })}
+          />)}
+          {this.state.showCreateIndexPattern && 'Wizard'}
         </div>
       </I18nProvider>
     );
