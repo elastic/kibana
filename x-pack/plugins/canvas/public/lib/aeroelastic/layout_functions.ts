@@ -78,7 +78,7 @@ export const getMouseTransformState = (prev, dragging, { x0, y0, x1, y1 }) => {
 };
 export const getMouseTransformGesture = tuple =>
   [tuple]
-    .filter(tuple => tuple.transform)
+    .filter(tpl => tpl.transform)
     .map(({ transform, cumulativeTransform }) => ({ transform, cumulativeTransform }));
 export const getRestateShapesEvent = action => {
   if (!action || action.type !== 'restateShapesEvent') {
@@ -109,7 +109,9 @@ const contentShape = allShapes => shape =>
   shape.type === 'annotation'
     ? contentShape(allShapes)(allShapes.find(s => s.id === shape.parent))
     : shape;
-export const contentShapes = (allShapes, shapes) => {
+
+export const getContentShapes = (allShapes, shapes) => {
+  // fixme no need to export, why doesn't linter or highlighter complain?
   const idMap = arrayToMap(allShapes.map(shape => shape.id));
   return shapes.filter(shape => idMap[shape.id]).map(contentShape(allShapes));
 };
@@ -383,8 +385,8 @@ const cascadeUnsnappedTransforms = (shapes, shape) => {
     return shape.localTransformMatrix;
   } // boost for common case of toplevel shape
   const upstreams = getUpstreams(shapes, shape);
-  const upstreamTransforms = upstreams.map(shape => {
-    return shape.localTransformMatrix;
+  const upstreamTransforms = upstreams.map(s => {
+    return s.localTransformMatrix;
   });
   const cascadedTransforms = reduceTransforms(upstreamTransforms);
   return cascadedTransforms;
@@ -616,18 +618,18 @@ const groupedShape = properShape => shape => shape.parent === properShape.id;
 const magic = (configuration, shape, shapes) => {
   const epsilon = configuration.rotationEpsilon;
   const integralOf = Math.PI * 2;
-  const isIntegerMultiple = shape => {
-    const zRotation = matrixToAngle(shape.localTransformMatrix);
+  const isIntegerMultiple = s => {
+    const zRotation = matrixToAngle(s.localTransformMatrix);
     const ratio = zRotation / integralOf;
     return Math.abs(Math.round(ratio) - ratio) < epsilon;
   };
 
-  function recurse(shape) {
-    return shapes.filter(groupedShape(shape)).every(resizableChild);
+  function recurse(s) {
+    return shapes.filter(groupedShape(s)).every(resizableChild);
   }
 
-  function resizableChild(shape) {
-    return isIntegerMultiple(shape) && recurse(shape);
+  function resizableChild(s) {
+    return isIntegerMultiple(s) && recurse(s);
   }
 
   return recurse(shape);
@@ -789,16 +791,17 @@ const extend = ([[xMin, yMin], [xMax, yMax]], [x0, y0], [x1, y1]) => [
   [Math.min(xMin, x0, x1), Math.min(yMin, y0, y1)],
   [Math.max(xMax, x0, x1), Math.max(yMax, y0, y1)],
 ];
+
 const getAABB = shapes =>
   shapes.reduce(
-    (prev, shape) => {
-      const shapeBounds = cornerVertices.reduce((prev, xyVertex) => {
+    (prevOuter, shape) => {
+      const shapeBounds = cornerVertices.reduce((prevInner, xyVertex) => {
         const cornerPoint = normalize(
           mvMultiply(shape.transformMatrix, [shape.a * xyVertex[0], shape.b * xyVertex[1], 0, 1])
         );
-        return extend(prev, cornerPoint, cornerPoint);
-      }, prev);
-      return extend(prev, ...shapeBounds);
+        return extend(prevInner, cornerPoint, cornerPoint);
+      }, prevOuter);
+      return extend(prevOuter, ...shapeBounds);
     },
     [[Infinity, Infinity], [-Infinity, -Infinity]]
   );
@@ -925,7 +928,7 @@ export const getLeafs = (descendCondition, allShapes, shapes) =>
     )
   );
 export const preserveCurrentGroups = (shapes, selectedShapes) => ({ shapes, selectedShapes });
-export const scene = state => state.currentScene;
+export const getScene = state => state.currentScene;
 export const configuration = state => {
   return state.configuration;
 };
@@ -940,9 +943,8 @@ export const getHoveredShapes = (configuration, shapes, cursorPosition) =>
     ),
     cursorPosition
   );
-export const depthIndex = 0;
 export const getHoveredShape = hoveredShapes =>
-  hoveredShapes.length ? hoveredShapes[depthIndex] : null;
+  hoveredShapes.length ? hoveredShapes[0] : null;
 export const singleSelect = (prev, configuration, hoveredShapes, metaHeld, uid) => {
   // cycle from top ie. from zero after the cursor position changed ie. !sameLocation
   const down = true; // this function won't be called otherwise
@@ -1046,7 +1048,7 @@ export const getGrouping = (configuration, shapes, selectedShapes, groupAction) 
   }
 
   // preserve the current selection if the sole ad hoc group is being manipulated
-  const elements = contentShapes(shapes, selectedShapes);
+  const elements = getContentShapes(shapes, selectedShapes);
   if (elements.length === 1 && elements[0].type === 'group') {
     return configuration.groupResize
       ? {
@@ -1122,7 +1124,6 @@ export const getCursor = (configuration, shape, draggedPrimaryShape) => {
 /**
  * Selectors directly from a state object
  */
-
 export const primaryUpdate = state => state.primaryUpdate;
 export const getSelectedShapesPrev = scene =>
   scene.selectionState || {

@@ -49,6 +49,7 @@ import {
   getResizeManipulator,
   getRestateShapesEvent,
   getRotationAnnotations,
+  getScene,
   getSelectedPrimaryShapeIds,
   getSelectedShapeObjects,
   getSelectedShapes,
@@ -59,20 +60,19 @@ import {
   getTransformIntents,
   primaryUpdate,
   resizeAnnotationsFunction,
-  scene,
 } from './layout_functions';
 
 /**
  * Scenegraph update based on events, gestures...
  */
 
-export const shapes = select(getShapes)(scene);
+export const shapes = select(getShapes)(getScene);
 
 const hoveredShapes = select(getHoveredShapes)(configuration, shapes, cursorPosition);
 
 const hoveredShape = select(getHoveredShape)(hoveredShapes);
 
-const draggedShape = select(draggingShape)(scene, hoveredShape, mouseIsDown, mouseDowned);
+const draggedShape = select(draggingShape)(getScene, hoveredShape, mouseIsDown, mouseDowned);
 
 export const focusedShape = select(getFocusedShape)(draggedShape, hoveredShape);
 
@@ -80,7 +80,7 @@ const alterSnapGesture = select(getAlterSnapGesture)(metaHeld);
 
 const multiselectModifier = shiftHeld; // todo abstract out keybindings
 
-const mouseTransformGesturePrev = select(getMouseTransformGesturePrev)(scene);
+const mouseTransformGesturePrev = select(getMouseTransformGesturePrev)(getScene);
 
 const mouseTransformState = select(getMouseTransformState)(
   mouseTransformGesturePrev,
@@ -97,9 +97,9 @@ const restateShapesEvent = select(getRestateShapesEvent)(primaryUpdate);
 // directSelect is an API entry point (via the `shapeSelect` action) that lets the client directly specify what thing
 const directSelect = select(getDirectSelect)(primaryUpdate);
 
-const selectedShapeObjects = select(getSelectedShapeObjects)(scene);
+const selectedShapeObjects = select(getSelectedShapeObjects)(getScene);
 
-const selectedShapesPrev = select(getSelectedShapesPrev)(scene);
+const selectedShapesPrev = select(getSelectedShapesPrev)(getScene);
 
 const selectionState = select(getSelectionState)(
   selectedShapesPrev,
