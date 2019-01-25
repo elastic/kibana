@@ -4,20 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiTab, EuiTabs } from '@elastic/eui';
 import querystring from 'querystring';
 import React from 'react';
+import styled from 'styled-components';
 import Url from 'url';
 
 import { SearchScope } from '../../../model';
 import { history } from '../../utils/url';
+
+const ScopeTabContainer = styled.div`
+  background-color: #ffffff;
+  height: 56px;
+`;
+
+const ScopeTab = styled(EuiTab)`
+  width: 50%;
+`;
 
 interface Props {
   query: string;
   scope: SearchScope;
 }
 
-export class ScopeTab extends React.PureComponent<Props> {
+export class ScopeTabs extends React.PureComponent<Props> {
   public onTabClicked = (scope: SearchScope) => {
     return () => {
       const { query } = this.props;
@@ -37,22 +47,22 @@ export class ScopeTab extends React.PureComponent<Props> {
 
   public render() {
     return (
-      <EuiFlexGroup>
-        <EuiTabs>
-          <EuiTab
+      <ScopeTabContainer>
+        <EuiTabs style={{ height: '100%' }}>
+          <ScopeTab
             isSelected={this.props.scope !== SearchScope.REPOSITORY}
-            onClick={this.onTabClicked(SearchScope.SYMBOL)}
+            onClick={this.onTabClicked(SearchScope.DEFAULT)}
           >
             Code
-          </EuiTab>
-          <EuiTab
+          </ScopeTab>
+          <ScopeTab
             isSelected={this.props.scope === SearchScope.REPOSITORY}
             onClick={this.onTabClicked(SearchScope.REPOSITORY)}
           >
             Repository
-          </EuiTab>
+          </ScopeTab>
         </EuiTabs>
-      </EuiFlexGroup>
+      </ScopeTabContainer>
     );
   }
 }
