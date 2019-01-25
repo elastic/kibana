@@ -17,23 +17,4 @@
  * under the License.
  */
 
-import { SavedObjectsClient } from '..';
-
-export interface SavedObjectsClientWrapperOptions<Request = any> {
-  client: SavedObjectsClient;
-  request: Request;
-}
-
-export type SavedObjectsClientWrapperFactory<Request = any> = (
-  options: SavedObjectsClientWrapperOptions<Request>
-) => SavedObjectsClient;
-
-export interface ScopedSavedObjectsClientProvider<Request = any> {
-  // ATTENTION: these types are incomplete
-
-  addClientWrapperFactory(
-    priority: number,
-    wrapperFactory: SavedObjectsClientWrapperFactory<Request>
-  ): void;
-  getClient(request: Request): SavedObjectsClient;
-}
+export { IndexPatternsService } from './index_patterns_service';
