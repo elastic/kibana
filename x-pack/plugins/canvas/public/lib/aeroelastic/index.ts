@@ -5,7 +5,8 @@
  */
 
 import { matrixToCSS } from './dom';
-import { nextScene, primaryUpdate } from './layout';
+import { nextScene } from './layout';
+import { primaryUpdate } from './layout_functions';
 import { multiply, rotateZ, translate } from './matrix';
 import { createStore, select } from './state';
 
