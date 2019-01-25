@@ -19,6 +19,8 @@
 
 import { SavedObjectsClient } from '../../../../../../server/saved_objects/service/saved_objects_client';
 
+const MAX_BULK_GET_SIZE = 10000;
+
 interface ObjectsToCollect {
   id: string;
   type: string;
@@ -31,7 +33,7 @@ export async function collectReferencesDeep(
   const result = [];
   const queue = [...objects];
   while (queue.length !== 0) {
-    const itemsToGet = queue.splice(0, 10000);
+    const itemsToGet = queue.splice(0, MAX_BULK_GET_SIZE);
     const { saved_objects: savedObjects } = await savedObjectClient.bulkGet(itemsToGet);
     result.push(...savedObjects);
     const references = Array<ObjectsToCollect>().concat(

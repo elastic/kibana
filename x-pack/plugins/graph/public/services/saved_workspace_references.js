@@ -30,7 +30,7 @@ export function extractReferences({ attributes, references = [] }) {
 }
 
 export function injectReferences(savedObject, references) {
-  if (!savedObject.wsState) {
+  if (typeof savedObject.wsState !== 'string') {
     return;
   }
   const state = JSON.parse(savedObject.wsState);

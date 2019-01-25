@@ -27,7 +27,7 @@ export async function findRelationships(type, id, options = {}) {
   const { references = [] } = await savedObjectsClient.get(type, id);
   const bulkGetOpts = references.map(ref => ({ id: ref.id, type: ref.type }));
 
-  const [{ saved_objects: referencedObjects }, referencedResponse] = await Promise.all([
+  const [referencedObjects, referencedResponse] = await Promise.all([
     bulkGetOpts.length > 0
       ? savedObjectsClient.bulkGet(bulkGetOpts)
       : Promise.resolve({ saved_objects: [] }),
@@ -40,15 +40,14 @@ export async function findRelationships(type, id, options = {}) {
   ]);
 
   const relationshipObjects = [].concat(
-    referencedObjects.map(extractCommonProperties),
+    referencedObjects.saved_objects.map(extractCommonProperties),
     referencedResponse.saved_objects.map(extractCommonProperties),
   );
 
   return relationshipObjects.reduce((result, relationshipObject) => {
     const objectsForType = (result[relationshipObject.type] || []);
-    const { type } = relationshipObject;
-    delete relationshipObject.type;
-    result[type] = objectsForType.concat(relationshipObject);
+    const { type, ...relationshipObjectWithoutType } = relationshipObject;
+    result[type] = objectsForType.concat(relationshipObjectWithoutType);
     return result;
   }, {});
 }

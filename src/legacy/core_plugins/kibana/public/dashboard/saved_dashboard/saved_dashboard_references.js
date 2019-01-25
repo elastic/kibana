@@ -49,10 +49,13 @@ export function extractReferences({ attributes, references = [] }) {
 }
 
 export function injectReferences(savedObject, references) {
-  if (!savedObject.panelsJSON) {
+  if (typeof savedObject.panelsJSON !== 'string') {
     return;
   }
   const panels = JSON.parse(savedObject.panelsJSON);
+  if (!Array.isArray(panels)) {
+    return;
+  }
   panels.forEach((panel) => {
     if (!panel.panelRefName) {
       return;

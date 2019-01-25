@@ -245,10 +245,9 @@ uiModules.get('apps/management')
             _.set(source, field.name, value);
           });
 
-          const { references } = source;
-          delete source.references;
+          const { references, ...attributes } = source;
 
-          savedObjectsClient.update(service.type, $routeParams.id, source, { references })
+          savedObjectsClient.update(service.type, $routeParams.id, attributes, { references })
             .then(function () {
               return redirectHandler('updated');
             })
