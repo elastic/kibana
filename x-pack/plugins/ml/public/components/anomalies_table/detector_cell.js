@@ -12,6 +12,7 @@ import {
   EuiIcon,
   EuiToolTip
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 /*
  * Component for rendering a detector cell in the anomalies table, displaying the
@@ -21,7 +22,12 @@ export function DetectorCell({ detectorDescription, numberOfRules }) {
   let rulesIcon;
   if (numberOfRules !== undefined && numberOfRules > 0) {
     rulesIcon = (
-      <EuiToolTip content="rules have been configured for this detector">
+      <EuiToolTip
+        content={<FormattedMessage
+          id="xpack.ml.anomaliesTable.detectorCell.rulesConfiguredTooltip"
+          defaultMessage="rules have been configured for this detector"
+        />}
+      >
         <EuiIcon
           type="controlsHorizontal"
           className="detector-rules-icon"

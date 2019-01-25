@@ -28,7 +28,7 @@ const createMockRequest = (space: Partial<Space>) => ({
 });
 
 const createMockClient = () => {
-  const errors = Symbol();
+  const errors = Symbol() as any;
 
   return {
     get: jest.fn(),

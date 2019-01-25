@@ -38,7 +38,6 @@ import {
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
-import { initPromise } from 'plugins/ml/util/promise';
 
 uiRoutes
   .when('/jobs/new_job/advanced', {
@@ -52,7 +51,6 @@ uiRoutes
       savedSearch: loadCurrentSavedSearch,
       checkMlNodesAvailable,
       loadNewJobDefaults,
-      initPromise: initPromise(true)
     }
   })
   .when('/jobs/new_job/advanced/:jobId', {
@@ -66,7 +64,6 @@ uiRoutes
       savedSearch: loadCurrentSavedSearch,
       checkMlNodesAvailable,
       loadNewJobDefaults,
-      initPromise: initPromise(true)
     }
   });
 
@@ -389,6 +386,9 @@ module.controller('MlNewJob',
       loadFields()
         .catch(() => {
           // No need to do anything here as loadFields handles the displaying of any errors.
+        })
+        .then(() => {
+          $scope.$applyAsync();
         });
     };
 
@@ -595,6 +595,7 @@ module.controller('MlNewJob',
                     );
                     // update status
                     $scope.ui.saveStatus.job = 2;
+                    $scope.$applyAsync();
 
                     // save successful, attempt to open the job
                     mlJobService.openJob($scope.job.job_id)
@@ -631,10 +632,14 @@ module.controller('MlNewJob',
                               resp
                             );
                             $scope.saveLock = false;
+                          })
+                          .then(() => {
+                            $scope.$applyAsync();
                           });
                       } else {
                         // no datafeed, so save is complete
                         $scope.saveLock = false;
+                        $scope.$applyAsync();
                       }
                     }
 
@@ -650,6 +655,7 @@ module.controller('MlNewJob',
                         values: { message: result.resp.message }
                       })
                     );
+                    $scope.$applyAsync();
                   }
                 }).catch((result) => {
                   $scope.ui.saveStatus.job = -1;
@@ -660,6 +666,7 @@ module.controller('MlNewJob',
                       values: { message: result.resp.message }
                     })
                   );
+                  $scope.$applyAsync();
                 });
             }
           })
@@ -670,11 +677,13 @@ module.controller('MlNewJob',
               })
             );
             console.log('save(): job validation failed. Jobs list could not be loaded.');
+            $scope.$applyAsync();
           });
       }
       else {
         msgs.error(jobValid.message);
         console.log('save(): job validation failed');
+        $scope.$applyAsync();
       }
     };
 
@@ -689,6 +698,7 @@ module.controller('MlNewJob',
       })
         .then(() => {
           msgs.clear();
+          $scope.$applyAsync();
           $location.path('jobs');
         });
     };
@@ -826,6 +836,9 @@ module.controller('MlNewJob',
             }
           );
           $scope.ui.cardinalityValidator.status = STATUS.FAILED;
+        })
+        .then(() => {
+          $scope.$applyAsync();
         });
     }
 
@@ -1122,6 +1135,9 @@ module.controller('MlNewJob',
       getCustomUrlSelection();
       getCategorizationFilterSelection();
       $scope.ui.jsonText = angular.toJson($scope.job, true);
+      setTimeout(() => {
+        $scope.$applyAsync();
+      }, 0);
     }
 
     // add new custom URL
@@ -1389,11 +1405,15 @@ module.controller('MlNewJob',
           })
           .catch(function (resp) {
             $scope.ui.dataPreview = angular.toJson(resp, true);
+          })
+          .then(() => {
+            $scope.$applyAsync();
           });
       } else {
         $scope.ui.dataPreview = i18n('xpack.ml.newJob.advanced.dataPreview.datafeedDoesNotExistLabel', {
           defaultMessage: 'Datafeed does not exist'
         });
+        $scope.$applyAsync();
       }
     }
 

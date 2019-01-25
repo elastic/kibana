@@ -19,7 +19,13 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
       button={
         <EuiExpression
           color="secondary"
-          description="when"
+          description={
+            <FormattedMessage
+              defaultMessage="when"
+              id="xpack.ml.ruleEditor.conditionExpression.appliesToButtonLabel"
+              values={Object {}}
+            />
+          }
           isActive={false}
           onClick={[Function]}
           uppercase={true}
@@ -42,7 +48,11 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
         }
       >
         <EuiPopoverTitle>
-          When
+          <FormattedMessage
+            defaultMessage="When"
+            id="xpack.ml.ruleEditor.conditionExpression.appliesToPopoverTitle"
+            values={Object {}}
+          />
         </EuiPopoverTitle>
         <div
           className="euiExpression"
@@ -89,7 +99,17 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
       button={
         <EuiExpression
           color="secondary"
-          description="is greater than"
+          description={
+            <FormattedMessage
+              defaultMessage="is {operator}"
+              id="xpack.ml.ruleEditor.conditionExpression.operatorValueButtonLabel"
+              values={
+                Object {
+                  "operator": "greater than",
+                }
+              }
+            />
+          }
           isActive={false}
           onClick={[Function]}
           uppercase={true}
@@ -112,7 +132,11 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
         }
       >
         <EuiPopoverTitle>
-          Is
+          <FormattedMessage
+            defaultMessage="Is"
+            id="xpack.ml.ruleEditor.conditionExpression.operatorValuePopoverTitle"
+            values={Object {}}
+          />
         </EuiPopoverTitle>
         <div
           className="euiExpression"
@@ -196,7 +220,7 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
     grow={false}
   >
     <EuiButtonIcon
-      aria-label="Next"
+      aria-label="Delete condition"
       color="danger"
       iconSize="m"
       iconType="trash"
@@ -227,7 +251,13 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
       button={
         <EuiExpression
           color="secondary"
-          description="when"
+          description={
+            <FormattedMessage
+              defaultMessage="when"
+              id="xpack.ml.ruleEditor.conditionExpression.appliesToButtonLabel"
+              values={Object {}}
+            />
+          }
           isActive={false}
           onClick={[Function]}
           uppercase={true}
@@ -250,7 +280,11 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
         }
       >
         <EuiPopoverTitle>
-          When
+          <FormattedMessage
+            defaultMessage="When"
+            id="xpack.ml.ruleEditor.conditionExpression.appliesToPopoverTitle"
+            values={Object {}}
+          />
         </EuiPopoverTitle>
         <div
           className="euiExpression"
@@ -296,7 +330,17 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
       button={
         <EuiExpression
           color="secondary"
-          description="is "
+          description={
+            <FormattedMessage
+              defaultMessage="is {operator}"
+              id="xpack.ml.ruleEditor.conditionExpression.operatorValueButtonLabel"
+              values={
+                Object {
+                  "operator": "",
+                }
+              }
+            />
+          }
           isActive={false}
           onClick={[Function]}
           uppercase={true}
@@ -319,7 +363,11 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
         }
       >
         <EuiPopoverTitle>
-          Is
+          <FormattedMessage
+            defaultMessage="Is"
+            id="xpack.ml.ruleEditor.conditionExpression.operatorValuePopoverTitle"
+            values={Object {}}
+          />
         </EuiPopoverTitle>
         <div
           className="euiExpression"
@@ -402,7 +450,7 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
     grow={false}
   >
     <EuiButtonIcon
-      aria-label="Next"
+      aria-label="Delete condition"
       color="danger"
       iconSize="m"
       iconType="trash"

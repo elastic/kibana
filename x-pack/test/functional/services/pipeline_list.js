@@ -5,7 +5,6 @@
  */
 
 import expect from 'expect.js';
-import { props as propsAsync } from 'bluebird';
 import { times, mapValues } from 'lodash';
 
 export function PipelineListProvider({ getService }) {
@@ -55,7 +54,7 @@ export function PipelineListProvider({ getService }) {
     async getRowCounts() {
       const ids = await this.getRowIds();
       const isSelecteds = await Promise.all(
-        ids.map(id => testSubjects.isSelected(getSelectCheckbox(id)))
+        ids.map(async (id) => await testSubjects.isSelected(getSelectCheckbox(id)))
       );
       const total = isSelecteds.length;
       const isSelected = isSelecteds.filter(Boolean).length;
@@ -70,13 +69,11 @@ export function PipelineListProvider({ getService }) {
      */
     async getRowsFromTable() {
       const ids = await this.getRowIds();
-      const valuesByKey = await propsAsync({
-        selected: Promise.all(ids.map(id => testSubjects.isSelected(getSelectCheckbox(id)))),
-        id: ids,
-        description: testSubjects.getVisibleTextAll(SUBJ_CELL_DESCRIPTION),
-        lastModified: testSubjects.getVisibleTextAll(SUBJ_CELL_LAST_MODIFIED),
-        username: testSubjects.getVisibleTextAll(SUBJ_CELL_USERNAME),
-      });
+      const selected = await Promise.all(ids.map(async (id) => await testSubjects.isSelected(getSelectCheckbox(id))));
+      const description = await testSubjects.getVisibleTextAll(SUBJ_CELL_DESCRIPTION);
+      const lastModified = await testSubjects.getVisibleTextAll(SUBJ_CELL_LAST_MODIFIED);
+      const username = await testSubjects.getVisibleTextAll(SUBJ_CELL_USERNAME);
+      const valuesByKey = { selected, id: ids, description, lastModified, username };
 
       // ensure that we got values for every row, otherwise we can't
       // recombine these into a list of rows

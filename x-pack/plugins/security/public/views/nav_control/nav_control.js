@@ -64,7 +64,8 @@ chromeHeaderNavControlsRegistry.register((ShieldUser, kbnBaseUrl, Private) => ({
 
     const props = {
       user: ShieldUser.getCurrent(),
-      route: chrome.addBasePath(`${kbnBaseUrl}#/account`),
+      editProfileUrl: chrome.addBasePath(`${kbnBaseUrl}#/account`),
+      logoutUrl: chrome.addBasePath(`/logout`)
     };
 
     props.user.$promise.then(() => {

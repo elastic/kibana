@@ -27,9 +27,9 @@ import {
   EuiTableRow,
   EuiTableRowCell,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 class RequestDetailsStats extends Component {
-
   static shouldShow = (request) => !!request.stats && Object.keys(request.stats).length;
 
   renderStatRow = (stat) => {
@@ -41,7 +41,9 @@ class RequestDetailsStats extends Component {
           <span className="insRequestDetailsStats__icon">
             { stat.description &&
               <EuiIconTip
-                aria-label="Description"
+                aria-label={i18n.translate('inspectorViews.requests.descriptionRowIconAriaLabel', {
+                  defaultMessage: 'Description'
+                })}
                 type="questionInCircle"
                 color="subdued"
                 content={stat.description}
@@ -65,7 +67,9 @@ class RequestDetailsStats extends Component {
     const sortedStats = Object.keys(stats).sort().map(name => ({ name, ...stats[name] }));
     // TODO: Replace by property once available
     return (
-      <EuiTable style={{ tableLayout: 'auto' }}>
+      <EuiTable
+        responsive={false}
+      >
         <EuiTableBody>
           { sortedStats.map(this.renderStatRow) }
         </EuiTableBody>

@@ -13,35 +13,8 @@
 //   dshChart__legend--small
 //   dshChart__legend-isLoading
 
-/**
- * 1. Don't duplicate styles in dark mode
- */
-.theme-light { /* 1 */
-  @import 'dashboard_app';
-  @import 'grid/index';
-  @import 'panel/index';
-  @import 'viewport/index';
-}
-
-// Imports outside of theme selector don't change between light/dark modes
+@import 'dashboard_app';
+@import 'grid/index';
+@import 'panel/index';
+@import 'viewport/index';
 @import 'components/index';
-
-// Must be outside of theme selector because it lives in a portal
-@import 'panel/panel_header/panel_options_menu_form';
-
-// DARK THEME
-// EUI global scope -- dark
-@import '@elastic/eui/src/themes/k6/k6_colors_dark';
-
-.theme-dark {
-  background-color: $euiColorEmptyShade;
-
-  @import 'dashboard_app';
-  @import 'grid/index';
-  @import 'panel/index';
-  @import 'viewport/index';
-
-  // Vis imports
-  @import 'src/ui/public/vis/index';
-  @import 'src/ui/public/vislib/index';
-}

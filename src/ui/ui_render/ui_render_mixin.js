@@ -20,9 +20,11 @@
 import { props, reduce as reduceAsync } from 'bluebird';
 import Boom from 'boom';
 import { resolve } from 'path';
+import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { AppBootstrap } from './bootstrap';
 import { mergeVariables } from './lib';
+import { fromRoot } from '../../utils';
 
 export function uiRenderMixin(kbnServer, server, config) {
   function replaceInjectedVars(request, injectedVars) {
@@ -50,43 +52,83 @@ export function uiRenderMixin(kbnServer, server, config) {
   // render all views from ./views
   server.setupViews(resolve(__dirname, 'views'));
 
-  server.route({
-    path: '/bundles/app/{id}/bootstrap.js',
-    method: 'GET',
-    config: { auth: false },
-    async handler(request, h) {
-      const { id } = request.params;
-      const app = server.getUiAppById(id) || server.getHiddenUiAppById(id);
-      if (!app) {
-        throw Boom.notFound(`Unknown app: ${id}`);
-      }
+  // expose built css
+  server.exposeStaticDir('/built_assets/css/{path*}', fromRoot('built_assets/css'));
+  server.exposeStaticDir('/node_modules/@elastic/eui/dist/{path*}', fromRoot('node_modules/@elastic/eui/dist'));
+  server.exposeStaticDir('/node_modules/@kbn/ui-framework/dist/{path*}', fromRoot('node_modules/@kbn/ui-framework/dist'));
 
-      const basePath = config.get('server.basePath');
-      const regularBundlePath = `${basePath}/bundles`;
-      const dllBundlePath = `${basePath}/dlls`;
-      const styleSheetPaths = [
-        `${dllBundlePath}/vendors.style.dll.css`,
-        `${regularBundlePath}/commons.style.css`,
-        `${regularBundlePath}/${app.getId()}.style.css`,
-      ].concat(kbnServer.uiExports.styleSheetPaths.map(path => `${basePath}/${path.publicPath}`).reverse());
+  // register the bootstrap.js route after plugins are initialized so that we can
+  // detect if any default auth strategies were registered
+  kbnServer.afterPluginsInit(() => {
+    const authEnabled = !!server.auth.settings.default;
 
-      const bootstrap = new AppBootstrap({
-        templateData: {
-          appId: app.getId(),
-          regularBundlePath,
-          dllBundlePath,
-          styleSheetPaths,
+    server.route({
+      path: '/bundles/app/{id}/bootstrap.js',
+      method: 'GET',
+      config: {
+        tags: ['api'],
+        auth: authEnabled ? { mode: 'try' } : false,
+      },
+      async handler(request, h) {
+        const { id } = request.params;
+        const app = server.getUiAppById(id) || server.getHiddenUiAppById(id);
+        if (!app) {
+          throw Boom.notFound(`Unknown app: ${id}`);
         }
-      });
 
-      const body = await bootstrap.getJsFile();
-      const etag = await bootstrap.getJsFileHash();
+        const uiSettings = request.getUiSettingsService();
+        const darkMode = !authEnabled || request.auth.isAuthenticated
+          ? await uiSettings.get('theme:darkMode')
+          : false;
 
-      return h.response(body)
-        .header('cache-control', 'must-revalidate')
-        .header('content-type', 'application/javascript')
-        .etag(etag);
-    }
+        const basePath = config.get('server.basePath');
+        const regularBundlePath = `${basePath}/bundles`;
+        const dllBundlePath = `${basePath}/built_assets/dlls`;
+        const styleSheetPaths = [
+          `${dllBundlePath}/vendors.style.dll.css`,
+          ...(
+            darkMode ?
+              [
+                `${basePath}/node_modules/@elastic/eui/dist/eui_theme_k6_dark.css`,
+                `${basePath}/node_modules/@kbn/ui-framework/dist/kui_dark.css`,
+              ] : [
+                `${basePath}/node_modules/@elastic/eui/dist/eui_theme_k6_light.css`,
+                `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
+              ]
+          ),
+          `${regularBundlePath}/${darkMode ? 'dark' : 'light'}_theme.style.css`,
+          `${regularBundlePath}/commons.style.css`,
+          `${regularBundlePath}/${app.getId()}.style.css`,
+          ...kbnServer.uiExports.styleSheetPaths
+            .filter(path => (
+              path.theme === '*' || path.theme === (darkMode ? 'dark' : 'light')
+            ))
+            .map(path => (
+              path.localPath.endsWith('.scss')
+                ? `${basePath}/built_assets/css/${path.publicPath}`
+                : `${basePath}/${path.publicPath}`
+            ))
+            .reverse()
+        ];
+
+        const bootstrap = new AppBootstrap({
+          templateData: {
+            appId: app.getId(),
+            regularBundlePath,
+            dllBundlePath,
+            styleSheetPaths,
+          }
+        });
+
+        const body = await bootstrap.getJsFile();
+        const etag = await bootstrap.getJsFileHash();
+
+        return h.response(body)
+          .header('cache-control', 'must-revalidate')
+          .header('content-type', 'application/javascript')
+          .etag(etag);
+      }
+    });
   });
 
   server.route({
@@ -136,10 +178,20 @@ export function uiRenderMixin(kbnServer, server, config) {
     const translations = await server.getUiTranslations();
     const basePath = request.getBasePath();
 
+    const legacyMetadata = await getLegacyKibanaPayload({
+      app,
+      translations,
+      request,
+      includeUserProvidedConfig,
+      injectedVarsOverrides
+    });
+
     return h.view('ui_app', {
       uiPublicUrl: `${basePath}/ui`,
       bootstrapScriptUrl: `${basePath}/bundles/app/${app.getId()}/bootstrap.js`,
       i18n: (id, options) => i18n.translate(id, options),
+      locale: i18n.getLocale(),
+      darkMode: get(legacyMetadata.uiSettings.user, ['theme:darkMode', 'userValue'], false),
 
       injectedMetadata: {
         version: kbnServer.version,
@@ -154,13 +206,7 @@ export function uiRenderMixin(kbnServer, server, config) {
           ),
         ),
 
-        legacyMetadata: await getLegacyKibanaPayload({
-          app,
-          translations,
-          request,
-          includeUserProvidedConfig,
-          injectedVarsOverrides
-        }),
+        legacyMetadata,
       },
     });
   }
