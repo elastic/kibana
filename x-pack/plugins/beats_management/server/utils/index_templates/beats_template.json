@@ -57,6 +57,9 @@
             },
             "color": {
               "type": "keyword"
+            },
+            "hasConfigurationBlocksTypes": {
+              "type": "keyword"
             }
           }
         },
