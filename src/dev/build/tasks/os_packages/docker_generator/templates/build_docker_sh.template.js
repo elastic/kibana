@@ -36,7 +36,7 @@ function generator({ imageTag, imageFlavor, versionTag, dockerOutputDir }) {
   docker pull centos:7
   
   echo "Building: kibana${ imageFlavor }-docker"; \\
-  docker build --network=host -t ${ imageTag }${ imageFlavor }:${ versionTag } -f Dockerfile . || exit 1;
+  docker build -t ${ imageTag }${ imageFlavor }:${ versionTag } -f Dockerfile . || exit 1;
 
   docker save -o ${ dockerOutputDir } ${ imageTag }${ imageFlavor }:${ versionTag }
   
