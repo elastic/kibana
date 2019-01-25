@@ -104,6 +104,7 @@ async function fetchRollupVisualizations(kibanaIndex, callCluster, rollupIndexPa
     filterPath: [
       'hits.hits._source.visualization.savedSearchRefName',
       'hits.hits._source.visualization.kibanaSavedObjectMeta',
+      'hits.hits._source.references',
     ],
     body: {
       query: {
