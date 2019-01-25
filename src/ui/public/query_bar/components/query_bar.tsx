@@ -38,16 +38,10 @@ import { matchPairs } from '../lib/match_pairs';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 
-import {
-  EuiButton,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiOutsideClickDetector,
-} from '@elastic/eui';
+import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector } from '@elastic/eui';
 
 // @ts-ignore
-import { EuiSuperDatePicker } from '@elastic/eui';
+import { EuiSuperDatePicker, EuiSuperUpdateButton } from '@elastic/eui';
 
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 
@@ -606,25 +600,11 @@ export class QueryBarUI extends Component<Props, State> {
         </EuiFlexItem>
         {this.renderDatePicker()}
         <EuiFlexItem grow={false}>
-          <EuiButton
-            aria-label={this.props.intl.formatMessage({
-              id: 'common.ui.queryBar.searchButtonAriaLabel',
-              defaultMessage: 'Search',
-            })}
-            data-test-subj="querySubmitButton"
-            color={this.isDirty() ? 'secondary' : 'primary'}
-            fill
+          <EuiSuperUpdateButton
+            needsUpdate={this.isDirty()}
             onClick={this.onClickSubmitButton}
-          >
-            {this.isDirty() ? (
-              <FormattedMessage id="common.ui.queryBar.updateButtonLabel" defaultMessage="Update" />
-            ) : (
-              <FormattedMessage
-                id="common.ui.queryBar.refreshButtonLabel"
-                defaultMessage="Refresh"
-              />
-            )}
-          </EuiButton>
+            data-test-subj="querySubmitButton"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
