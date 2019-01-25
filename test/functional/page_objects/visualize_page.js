@@ -935,7 +935,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await retry.waitFor(`rendering count to be greater than or equal to [${minimumCount}]`, async () => {
         const currentRenderingCount = await this.getVisualizationRenderingCount();
         log.debug(`-- currentRenderingCount=${currentRenderingCount}`);
-        return currentRenderingCount < minimumCount;
+        return currentRenderingCount >= minimumCount;
       });
     }
 
