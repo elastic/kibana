@@ -11,6 +11,7 @@ import {
   EuiIcon,
   EuiSpacer
 } from '@elastic/eui';
+import { LayerTocActions } from '../../../../../shared/components/layer_toc_actions';
 
 export class TOCEntry extends React.Component {
 
@@ -47,11 +48,18 @@ export class TOCEntry extends React.Component {
   render() {
 
     const { layer, openLayerPanel, zoom, toggleVisible, fitToBounds } = this.props;
-    const legendIcon = layer.renderTocEntryIcon({
-      toggleVisible,
-      zoom,
-      fitToBounds
-    });
+    const legendIcon = (
+      <LayerTocActions
+        layer={layer}
+        fitToBounds={() => {
+          fitToBounds(layer.getId());
+        }}
+        zoom={zoom}
+        toggleVisible={() => {
+          toggleVisible(layer.getId());
+        }}
+      />
+    );
     let tocDetails = layer.getTOCDetails();
     if (tocDetails) {
       tocDetails = (

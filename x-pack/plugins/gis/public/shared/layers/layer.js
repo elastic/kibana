@@ -7,12 +7,6 @@ import _ from 'lodash';
 import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
 import { DataRequest } from './util/data_request';
-import React from 'react';
-
-import {
-  EuiButtonIcon
-} from '@elastic/eui';
-import { LayerTocActions } from '../components/layer_toc_actions';
 
 const SOURCE_UPDATE_REQUIRED = true;
 const NO_SOURCE_UPDATE_REQUIRED = false;
@@ -145,21 +139,6 @@ export class AbstractLayer {
     return this._source.renderSourceSettingsEditor({ onChange });
   };
 
-  renderTocEntryIcon({ fitToBounds, zoom, toggleVisible }) {
-    return (
-      <LayerTocActions
-        layer={this}
-        fitToBounds={() => {
-          fitToBounds(this.getId());
-        }}
-        zoom={zoom}
-        toggleVisible={() => {
-          toggleVisible(this.getId());
-        }}
-      />
-    );
-  }
-
   isLayerLoading() {
     return this._dataRequests.some(dataRequest => dataRequest.isLoading());
   }
@@ -220,18 +199,6 @@ export class AbstractLayer {
     return doesPreviousBufferContainNewBuffer && !isTrimmed
       ? NO_SOURCE_UPDATE_REQUIRED
       : SOURCE_UPDATE_REQUIRED;
-  }
-
-  renderFitToBoundsButton({ onFitToData }) {
-    const onClick = async () => {
-      onFitToData(this.getId());
-    };
-    const iconName = this.getLayerTypeIconName();
-    return (
-      <EuiButtonIcon iconType={iconName} iconSide="right" onClick={onClick}>
-      Fit
-      </EuiButtonIcon>
-    );
   }
 
   getLayerTypeIconName() {
