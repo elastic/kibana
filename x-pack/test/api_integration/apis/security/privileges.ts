@@ -17,6 +17,9 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
       const versionService = getService('kibanaServer').version;
       version = await versionService.get();
     });
+
+    // This test also functions as a sanity check for assigned privilege actions, to ensure that feature privileges are being granted in the way that developers expect.
+
     describe('GET /api/security/privileges?includeActions=true', () => {
       it('should return a privilege map with all known privileges with actions', async () => {
         await supertest
@@ -140,6 +143,9 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'saved_object:canvas-workpad/bulk_get',
                   'saved_object:canvas-workpad/get',
                   'saved_object:canvas-workpad/find',
+                  'ui:dashboard/createNew',
+                  'ui:dashboard/show',
+                  'ui:dashboard/showWriteControls',
                   'ui:navLinks/kibana:dashboard',
                   'ui:catalogue/dashboard',
                 ],
@@ -168,12 +174,13 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'saved_object:dashboard/bulk_get',
                   'saved_object:dashboard/get',
                   'saved_object:dashboard/find',
+                  'ui:dashboard/show',
                   'ui:navLinks/kibana:dashboard',
                   'ui:catalogue/dashboard',
                 ],
               },
               dev_tools: {
-                all: [
+                read: [
                   'login:',
                   `version:${version}`,
                   'api:console/execute',
@@ -358,6 +365,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'saved_object:config/get',
                   'saved_object:config/find',
                   'ui:navLinks/gis',
+                  'ui:catalogue/gis',
                 ],
                 read: [
                   'login:',
@@ -371,6 +379,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'saved_object:config/get',
                   'saved_object:config/find',
                   'ui:navLinks/gis',
+                  'ui:catalogue/gis',
                 ],
               },
               canvas: {
@@ -414,7 +423,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 ],
               },
               infrastructure: {
-                all: [
+                read: [
                   'login:',
                   `version:${version}`,
                   'app:infra',
@@ -427,7 +436,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 ],
               },
               logs: {
-                all: [
+                read: [
                   'login:',
                   `version:${version}`,
                   'app:infra',
@@ -440,7 +449,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 ],
               },
               uptime: {
-                all: [
+                read: [
                   'login:',
                   `version:${version}`,
                   'app:uptime',
@@ -449,6 +458,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'saved_object:config/get',
                   'saved_object:config/find',
                   'ui:navLinks/uptime',
+                  'ui:catalogue/uptime',
                 ],
               },
             },
@@ -465,6 +475,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
               read: [
                 'login:',
                 `version:${version}`,
+                'api:console/execute',
                 'app:*',
                 'saved_object:config/bulk_get',
                 'saved_object:config/get',
@@ -512,12 +523,23 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 'saved_object:timelion-sheet/get',
                 'saved_object:timelion-sheet/find',
                 'ui:discover/show',
+                'ui:dashboard/show',
                 'ui:catalogue/discover',
                 'ui:catalogue/visualize',
                 'ui:catalogue/dashboard',
+                'ui:catalogue/console',
+                'ui:catalogue/searchprofiler',
+                'ui:catalogue/grokdebugger',
                 'ui:catalogue/timelion',
                 'ui:catalogue/graph',
+                'ui:catalogue/monitoring',
+                'ui:catalogue/ml',
+                'ui:catalogue/apm',
+                'ui:catalogue/gis',
                 'ui:catalogue/canvas',
+                'ui:catalogue/infraops',
+                'ui:catalogue/infralogging',
+                'ui:catalogue/uptime',
                 'ui:navLinks/*',
               ],
             },
@@ -637,6 +659,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
               read: [
                 'login:',
                 `version:${version}`,
+                'api:console/execute',
                 'app:*',
                 'saved_object:config/bulk_get',
                 'saved_object:config/get',
@@ -684,12 +707,23 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 'saved_object:timelion-sheet/get',
                 'saved_object:timelion-sheet/find',
                 'ui:discover/show',
+                'ui:dashboard/show',
                 'ui:catalogue/discover',
                 'ui:catalogue/visualize',
                 'ui:catalogue/dashboard',
+                'ui:catalogue/console',
+                'ui:catalogue/searchprofiler',
+                'ui:catalogue/grokdebugger',
                 'ui:catalogue/timelion',
                 'ui:catalogue/graph',
+                'ui:catalogue/monitoring',
+                'ui:catalogue/ml',
+                'ui:catalogue/apm',
+                'ui:catalogue/gis',
                 'ui:catalogue/canvas',
+                'ui:catalogue/infraops',
+                'ui:catalogue/infralogging',
+                'ui:catalogue/uptime',
                 'ui:navLinks/*',
               ],
             },
@@ -708,7 +742,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
               discover: ['all', 'read'],
               visualize: ['all', 'read'],
               dashboard: ['all', 'read'],
-              dev_tools: ['all'],
+              dev_tools: ['read'],
               advancedSettings: ['all'],
               indexPatterns: ['all'],
               timelion: ['all', 'read'],
@@ -718,9 +752,9 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
               apm: ['all'],
               gis: ['all', 'read'],
               canvas: ['all', 'read'],
-              infrastructure: ['all'],
-              logs: ['all'],
-              uptime: ['all'],
+              infrastructure: ['read'],
+              logs: ['read'],
+              uptime: ['read'],
             },
             global: ['all', 'read'],
             space: ['all', 'read'],
