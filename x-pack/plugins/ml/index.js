@@ -75,6 +75,7 @@ export const ml = (kibana) => {
         name: 'Machine Learning',
         icon: 'machineLearningApp',
         navLinkId: 'ml',
+        catalogue: ['ml'],
         privileges: {
           all: {
             metadata: {
@@ -82,7 +83,7 @@ export const ml = (kibana) => {
                 defaultMessage: 'The machine_learning_user or machine_learning_admin role should be assigned to grant access'
               })
             },
-            catalogue: ['ml'],
+            grantWithBaseRead: true,
             app: ['ml', 'kibana'],
             savedObject: {
               all: [],

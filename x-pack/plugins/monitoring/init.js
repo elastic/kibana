@@ -60,6 +60,7 @@ export const init = (monitoringPlugin, server) => {
     name: 'Monitoring',
     icon: 'monitoringApp',
     navLinkId: 'monitoring',
+    catalogue: ['monitoring'],
     privileges: {
       all: {
         metadata: {
@@ -67,7 +68,7 @@ export const init = (monitoringPlugin, server) => {
             defaultMessage: 'The monitoring_user role should be assigned to grant access'
           })
         },
-        catalogue: ['monitoring'],
+        grantWithBaseRead: true,
         app: ['monitoring', 'kibana'],
         savedObject: {
           all: [],

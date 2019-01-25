@@ -32,10 +32,19 @@ describe('FeatureRegistry', () => {
       icon: 'addDataApp',
       navLinkId: 'someNavLink',
       validLicenses: ['standard', 'basic', 'gold', 'platinum'],
+      catalogue: ['foo'],
+      management: {
+        foo: ['bar'],
+      },
       privileges: {
         all: {
           metadata: {
             tooltip: 'some fancy tooltip',
+          },
+          grantWithBaseRead: true,
+          catalogue: ['foo'],
+          management: {
+            foo: ['bar'],
           },
           app: ['app1', 'app2'],
           savedObject: {
@@ -115,6 +124,93 @@ describe('FeatureRegistry', () => {
     const featureRegistry = new FeatureRegistry();
     expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
       `"child \\"privileges\\" fails because [\\"some invalid key\\" is not allowed]"`
+    );
+  });
+
+  it(`prevents privileges from specifying catalogue entries that don't exist at the root level`, () => {
+    const feature: Feature = {
+      id: 'test-feature',
+      name: 'Test Feature',
+      catalogue: ['bar'],
+      privileges: {
+        all: {
+          catalogue: ['foo', 'bar', 'baz'],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+          app: [],
+        },
+      },
+    };
+
+    const featureRegistry = new FeatureRegistry();
+
+    expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
+      `"Feature privilege test-feature.all has unknown catalogue entries: foo, baz"`
+    );
+  });
+
+  it(`prevents privileges from specifying management sections that don't exist at the root level`, () => {
+    const feature: Feature = {
+      id: 'test-feature',
+      name: 'Test Feature',
+      catalogue: ['bar'],
+      management: {
+        kibana: ['hey'],
+      },
+      privileges: {
+        all: {
+          catalogue: ['bar'],
+          management: {
+            elasticsearch: ['hey'],
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+          app: [],
+        },
+      },
+    };
+
+    const featureRegistry = new FeatureRegistry();
+
+    expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
+      `"Feature privilege test-feature.all has unknown management section: elasticsearch"`
+    );
+  });
+
+  it(`prevents privileges from specifying management entries that don't exist at the root level`, () => {
+    const feature: Feature = {
+      id: 'test-feature',
+      name: 'Test Feature',
+      catalogue: ['bar'],
+      management: {
+        kibana: ['hey'],
+      },
+      privileges: {
+        all: {
+          catalogue: ['bar'],
+          management: {
+            kibana: ['hey-there'],
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+          app: [],
+        },
+      },
+    };
+
+    const featureRegistry = new FeatureRegistry();
+
+    expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
+      `"Feature privilege test-feature.all has unknown management entries for section kibana: hey-there"`
     );
   });
 

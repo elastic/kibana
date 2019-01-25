@@ -21,12 +21,16 @@ test(`builds privileges correctly`, () => {
       name: 'Foo Feature',
       icon: 'arrowDown',
       navLinkId: 'kibana:foo-feature',
+      catalogue: ['fooAppEntry1', 'fooAppEntry2', 'fooReadEntry'],
+      management: {
+        foo: ['fooManagementLink', 'anotherFooManagementLink'],
+      },
       privileges: {
         all: {
           app: ['foo-app'],
           catalogue: ['fooAppEntry1', 'fooAppEntry2'],
           management: {
-            foo: ['fooManagementLink'],
+            foo: ['fooManagementLink', 'anotherFooManagementLink'],
           },
           savedObject: {
             all: ['foo-saved-object-type'],
@@ -53,6 +57,10 @@ test(`builds privileges correctly`, () => {
       id: 'bar-feature',
       name: 'Bar Feature',
       icon: 'arrowUp',
+      catalogue: ['barCatalogue'],
+      management: {
+        kibana: ['yeppers'],
+      },
       privileges: {
         all: {
           app: ['bar-app'],
@@ -63,6 +71,34 @@ test(`builds privileges correctly`, () => {
           ui: ['show', 'showSaveButton', 'showCreateButton'],
         },
         read: {
+          management: {
+            kibana: ['yeppers'],
+          },
+          app: ['bar-app'],
+          api: ['bar/read/api'],
+          savedObject: {
+            all: [],
+            read: ['foo-saved-object-type', 'bar-saved-object-type'],
+          },
+          ui: ['show'],
+        },
+      },
+    },
+    {
+      id: 'baz-feature',
+      name: 'Baz Feature',
+      icon: 'arrowUp',
+      catalogue: ['bazCatalogue'],
+      management: {
+        kibana: ['bazKibana'],
+      },
+      privileges: {
+        all: {
+          grantWithBaseRead: true,
+          catalogue: ['bazCatalogue'],
+          management: {
+            kibana: ['bazKibana'],
+          },
           app: ['bar-app'],
           api: ['bar/read/api'],
           savedObject: {
@@ -104,6 +140,8 @@ test(`builds privileges correctly`, () => {
           'ui:bar-feature/show',
           'ui:bar-feature/showSaveButton',
           'ui:bar-feature/showCreateButton',
+          'ui:catalogue/barCatalogue',
+          'ui:management/kibana/yeppers',
         ],
         read: [
           'login:',
@@ -117,6 +155,25 @@ test(`builds privileges correctly`, () => {
           'saved_object:bar-saved-object-type/get',
           'saved_object:bar-saved-object-type/find',
           'ui:bar-feature/show',
+          'ui:catalogue/barCatalogue',
+          'ui:management/kibana/yeppers',
+        ],
+      },
+      'baz-feature': {
+        all: [
+          'login:',
+          'version:1.0.0-zeta1',
+          'api:bar/read/api',
+          'app:bar-app',
+          'saved_object:foo-saved-object-type/bulk_get',
+          'saved_object:foo-saved-object-type/get',
+          'saved_object:foo-saved-object-type/find',
+          'saved_object:bar-saved-object-type/bulk_get',
+          'saved_object:bar-saved-object-type/get',
+          'saved_object:bar-saved-object-type/find',
+          'ui:baz-feature/show',
+          'ui:catalogue/bazCatalogue',
+          'ui:management/kibana/bazKibana',
         ],
       },
       'foo-feature': {
@@ -141,6 +198,7 @@ test(`builds privileges correctly`, () => {
           'ui:catalogue/fooAppEntry1',
           'ui:catalogue/fooAppEntry2',
           'ui:management/foo/fooManagementLink',
+          'ui:management/foo/anotherFooManagementLink',
         ],
         read: [
           'login:',
@@ -184,8 +242,13 @@ test(`builds privileges correctly`, () => {
         'saved_object:bar-saved-object-type/find',
         'ui:foo-feature/show',
         'ui:bar-feature/show',
+        'ui:baz-feature/show',
         'ui:management/foo/anotherFooManagementLink',
+        'ui:management/kibana/yeppers',
+        'ui:management/kibana/bazKibana',
         'ui:catalogue/fooReadEntry',
+        'ui:catalogue/barCatalogue',
+        'ui:catalogue/bazCatalogue',
         'ui:navLinks/*',
       ],
     },
@@ -225,8 +288,13 @@ test(`builds privileges correctly`, () => {
         'saved_object:bar-saved-object-type/find',
         'ui:foo-feature/show',
         'ui:bar-feature/show',
+        'ui:baz-feature/show',
         'ui:management/foo/anotherFooManagementLink',
+        'ui:management/kibana/yeppers',
+        'ui:management/kibana/bazKibana',
         'ui:catalogue/fooReadEntry',
+        'ui:catalogue/barCatalogue',
+        'ui:catalogue/bazCatalogue',
         'ui:navLinks/*',
       ],
     },
