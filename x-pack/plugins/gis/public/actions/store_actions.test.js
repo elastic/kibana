@@ -234,5 +234,18 @@ describe('store_actions', () => {
         lon: 170,
       });
     });
+
+    it('should round results to 5 decimal places', () => {
+      const action = setMouseCoordinates({
+        lat: 10.666666666666666666,
+        lon: 310.30711,
+      });
+
+      expect(action).toEqual({
+        type: 'SET_MOUSE_COORDINATES',
+        lat: 10.66667,
+        lon: -49.69289,
+      });
+    });
   });
 });
