@@ -36,7 +36,7 @@ export async function deleteIndex(options) {
   } = options;
 
   const getIndicesToDelete = async () => {
-    const aliasInfo = await client.indices.getAlias({ name: index }, { ignore: [404] });
+    const { body: aliasInfo } = await client.indices.getAlias({ name: index }, { ignore: [404] });
     return aliasInfo.status === 404 ? index : Object.keys(aliasInfo);
   };
 
@@ -82,24 +82,26 @@ export function isDeleteWhileSnapshotInProgressError(error) {
  */
 export async function waitForSnapshotCompletion(client, index, log) {
   const isSnapshotPending = async (repository, snapshot) => {
-    const { snapshots: [status] } = await client.snapshot.status({
+    const result = await client.snapshot.status({
       repository,
       snapshot,
     });
-
+    const { snapshots: [status] } = result.body;
     log.debug(`Snapshot ${repository}/${snapshot} is ${status.state}`);
     return PENDING_SNAPSHOT_STATUSES.includes(status.state);
   };
 
   const getInProgressSnapshots = async (repository) => {
-    const { snapshots: inProgressSnapshots } = await client.snapshot.get({
+    const result = await client.snapshot.get({
       repository,
       snapshot: '_current'
     });
+    const { snapshots: inProgressSnapshots } = result.body;
     return inProgressSnapshots;
   };
 
-  for (const repository of Object.keys(await client.snapshot.getRepository())) {
+  const { body } = await client.snapshot.getRepository();
+  for (const repository of Object.keys(body)) {
     const allInProgress = await getInProgressSnapshots(repository);
     const found = allInProgress.find(s => s.indices.includes(index));
 

@@ -92,9 +92,9 @@ export async function migrateKibanaIndex({ client, log }) {
           requestTimeout,
           maxRetries,
           ...esParams
-        } = clientParams
-        const result = await _.get(client, path).call(client, esParams, { ignore, headers, requestTimeout, maxRetries })
-        return result && result.body ? result.body : result
+        } = clientParams;
+        const result = await _.get(client, path).call(client, esParams, { ignore, headers, requestTimeout, maxRetries });
+        return result && result.body ? result.body : result;
       },
     }),
     waitUntilReady: ready,

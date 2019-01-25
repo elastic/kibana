@@ -27,8 +27,8 @@ export default function handleESError(error) {
   }
 
 
-  function isResponseError (err, statusCode) {
-    return err instanceof esErrors.ResponseError && err.statusCode === statusCode
+  function isResponseError(err, statusCode) {
+    return err instanceof esErrors.ResponseError && err.statusCode === statusCode;
   }
 
   if (error instanceof esErrors.ConnectionError ||

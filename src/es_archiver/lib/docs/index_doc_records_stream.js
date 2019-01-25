@@ -38,7 +38,7 @@ export function createIndexDocRecordsStream(client, stats) {
       );
     });
 
-    const resp = await client.bulk({ body });
+    const { body: resp } = await client.bulk({ body });
     if (resp.errors) {
       throw new Error(`Failed to index all documents: ${JSON.stringify(resp, null, 2)}`);
     }

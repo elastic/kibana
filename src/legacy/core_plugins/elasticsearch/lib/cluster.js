@@ -139,7 +139,7 @@ function callAPI(client, endpoint, clientParams = {}, options = {}) {
     requestTimeout,
     maxRetries,
     ...esParams
-  } = clientParams
+  } = clientParams;
   return Bluebird.resolve(api.call(apiContext, esParams, { ignore, headers, maxRetries, requestTimeout }))
     .then((result) => (result && result.body) ? result.body : result)
     .catch((err) => {

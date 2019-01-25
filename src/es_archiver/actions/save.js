@@ -42,10 +42,11 @@ export async function saveAction({ name, indices, client, dataDir, log, raw }) {
   log.info('[%s] Creating archive of %j', name, indices);
 
   await fromNode(cb => mkdirp(outputDir, cb));
-  const resolvedIndexes = Object.keys(await client.indices.getSettings({
+  const { body } = await client.indices.getSettings({
     index: indices,
     filterPath: ['*.settings.index.uuid']
-  }));
+  });
+  const resolvedIndexes = Object.keys(body);
 
   await Promise.all([
     // export and save the matching indices to mappings.json

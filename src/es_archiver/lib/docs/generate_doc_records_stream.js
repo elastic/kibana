@@ -33,19 +33,21 @@ export function createGenerateDocRecordsStream(client, stats) {
 
         while (!resp || remainingHits > 0) {
           if (!resp) {
-            resp = await client.search({
+            const result = await client.search({
               index: index,
               scroll: SCROLL_TIMEOUT,
               size: SCROLL_SIZE,
               _source: true,
               rest_total_hits_as_int: true
             });
+            resp = result.body;
             remainingHits = resp.hits.total;
           } else {
-            resp = await client.scroll({
+            const result = await client.scroll({
               scrollId: resp._scroll_id,
               scroll: SCROLL_TIMEOUT
             });
+            resp = result.body;
           }
 
           for (const hit of resp.hits.hits) {

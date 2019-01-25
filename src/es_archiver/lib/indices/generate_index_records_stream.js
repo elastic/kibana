@@ -25,7 +25,7 @@ export function createGenerateIndexRecordsStream(client, stats) {
     readableObjectMode: true,
     async transform(index, enc, callback) {
       try {
-        const resp = await client.indices.get({
+        const { body: resp } = await client.indices.get({
           index,
           filterPath: [
             '*.settings',
@@ -38,7 +38,8 @@ export function createGenerateIndexRecordsStream(client, stats) {
           ]
         });
 
-        const { [index]: { aliases } } = await client.indices.getAlias({ index });
+        const result = await client.indices.getAlias({ index });
+        const { [index]: { aliases } } = result.body;
         const { settings, mappings } = resp[index];
 
         stats.archivedIndex(index, { settings, mappings });
