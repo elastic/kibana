@@ -127,6 +127,7 @@ export class SavedObjectsClient {
    * @property {integer} [options.page=1]
    * @property {integer} [options.perPage=20]
    * @property {array} options.fields
+   * @property {object} [options.referencedBy] - { type, id }
    * @returns {promise} - { savedObjects: [ SavedObject({ id, type, version, attributes }) ]}
    */
   find = (options = {}) => {

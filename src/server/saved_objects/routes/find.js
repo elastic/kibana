@@ -33,6 +33,11 @@ export const createFindRoute = (prereqs) => ({
         search: Joi.string().allow('').optional(),
         search_fields: Joi.array().items(Joi.string()).single(),
         sort_field: Joi.array().items(Joi.string()).single(),
+        referenced_by: Joi.object()
+          .keys({
+            type: Joi.string().required(),
+            id: Joi.string().required(),
+          }).optional(),
         fields: Joi.array().items(Joi.string()).single()
       }).default()
     },

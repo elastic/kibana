@@ -27,6 +27,8 @@ Note: You cannot access this endpoint via the Console in Kibana.
   (array|string) The fields to return in the response
 `sort_field` (optional)::
   (string) The field on which the response will be sorted
+`referenced_by` (optional)::
+  (object) Filters to objects having a relationship with the type and id combination
 
 [NOTE]
 ==============================================
