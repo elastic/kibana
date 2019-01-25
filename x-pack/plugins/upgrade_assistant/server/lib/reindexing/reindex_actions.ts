@@ -95,12 +95,6 @@ export interface ReindexActions {
    */
   getFlatSettings(indexName: string): Promise<FlatSettings | null>;
 
-  /**
-   * Returns whether or not an indexName is a special ML index that requires suspending ML jobs.
-   * @param indexName
-   */
-  isMlIndex(indexName: string): boolean;
-
   // ----- Below are only for ML indices
 
   /**
@@ -283,10 +277,6 @@ export const reindexActionsFactory = (
       }
 
       return flatSettings[indexName];
-    },
-
-    isMlIndex(indexName: string) {
-      return indexName.startsWith('.ml-state') || indexName.startsWith('.ml-anomalies');
     },
 
     async _fetchAndLockMlDoc() {

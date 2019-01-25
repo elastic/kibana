@@ -71,6 +71,32 @@ export const reindexServiceFactory = (
 ): ReindexService => {
   // ------ Utility functions
 
+  /**
+   * If the index is a ML index that will cause jobs to fail when set to readonly,
+   * turn on 'upgrade mode' to pause all ML jobs.
+   * @param reindexOp
+   */
+  const stopMlJobs = async () => {
+    await actions.incrementMlReindexes();
+    await actions.runWhileMlLocked(async mlDoc => {
+      await validateNodesMinimumVersion(6, 7);
+
+      const res = await callCluster('transport.request', {
+        path: '/_ml/set_upgrade_mode?enabled=true',
+        method: 'POST',
+      });
+
+      if (!res.acknowledged) {
+        throw new Error(`Could not stop ML jobs`);
+      }
+
+      return mlDoc;
+    });
+  };
+
+  /**
+   * Resumes ML jobs if there are no more remaining reindex operations.
+   */
   const resumeMlJobs = async () => {
     await actions.decrementMlReindexes();
     await actions.runWhileMlLocked(async mlDoc => {
@@ -89,14 +115,46 @@ export const reindexServiceFactory = (
     });
   };
 
-  const cleanupChanges = async (indexName: string) => {
-    await callCluster('indices.putSettings', {
-      index: indexName,
-      body: { 'index.blocks.write': false },
+  /**
+   * Stops Watcher in Elasticsearch.
+   */
+  const stopWatcher = async () => {
+    const { acknowledged } = await callCluster('transport.request', {
+      path: '/_xpack/watcher/_stop',
+      method: 'POST',
     });
 
-    if (actions.isMlIndex(indexName)) {
-      await resumeMlJobs();
+    if (!acknowledged) {
+      throw new Error('Could not stop Watcher');
+    }
+  };
+
+  /**
+   * Starts Watcher in Elasticsearch.
+   */
+  const startWatcher = async () => {
+    const { acknowledged } = await callCluster('transport.request', {
+      path: '/_xpack/watcher/_start',
+      method: 'POST',
+    });
+
+    if (!acknowledged) {
+      throw new Error('Could not start Watcher');
+    }
+  };
+
+  const cleanupChanges = async (reindexOp: ReindexSavedObject) => {
+    // Set back to writable if we ever got past this point.
+    if (reindexOp.attributes.lastCompletedStep >= ReindexStep.readonly) {
+      await callCluster('indices.putSettings', {
+        index: reindexOp.attributes.indexName,
+        body: { 'index.blocks.write': false },
+      });
+    }
+
+    // Stop consumers if we ever got past this point.
+    if (reindexOp.attributes.lastCompletedStep >= ReindexStep.indexConsumersStopped) {
+      await resumeConsumers(reindexOp);
     }
   };
 
@@ -125,36 +183,15 @@ export const reindexServiceFactory = (
     }
   };
 
-  /**
-   * If the index is a ML index that will cause jobs to fail when set to readonly,
-   * turn on 'upgrade mode' to pause all ML jobs.
-   * @param reindexOp
-   */
-  const setMlUpgradeMode = async (reindexOp: ReindexSavedObject) => {
-    if (!actions.isMlIndex(reindexOp.attributes.indexName)) {
-      return actions.updateReindexOp(reindexOp, {
-        lastCompletedStep: ReindexStep.mlUpgradeModeSet,
-      });
+  const stopConsumers = async (reindexOp: ReindexSavedObject) => {
+    if (isMlIndex(reindexOp.attributes.indexName)) {
+      await stopMlJobs();
+    } else if (isWatcherIndex(reindexOp.attributes.indexName)) {
+      await stopWatcher();
     }
 
-    await actions.incrementMlReindexes();
-    await actions.runWhileMlLocked(async mlDoc => {
-      await validateNodesMinimumVersion(6, 7);
-
-      const res = await callCluster('transport.request', {
-        path: '/_ml/set_upgrade_mode?enabled=true',
-        method: 'POST',
-      });
-
-      if (!res.acknowledged) {
-        throw new Error(`Could not stop ML jobs`);
-      }
-
-      return mlDoc;
-    });
-
     return actions.updateReindexOp(reindexOp, {
-      lastCompletedStep: ReindexStep.mlUpgradeModeSet,
+      lastCompletedStep: ReindexStep.indexConsumersStopped,
     });
   };
 
@@ -363,31 +400,25 @@ export const reindexServiceFactory = (
 
     return actions.updateReindexOp(reindexOp, {
       lastCompletedStep: ReindexStep.aliasCreated,
-      // Only set to completed if this is not an ML index.
-      status: actions.isMlIndex(indexName) ? ReindexStatus.inProgress : ReindexStatus.completed,
     });
   };
 
-  /**
-   * Turn off 'upgrade mode' to resume ML jobs if this reindex is the only running ML ReindexOp.
-   * @param reindexOp
-   */
-  const unsetMlUpgradeMode = async (reindexOp: ReindexSavedObject) => {
-    // In theory the reindexOp should never get passed through this function in this case
-    // because it should already be marked as completed. However, let's be safe.
-    if (!actions.isMlIndex(reindexOp.attributes.indexName)) {
-      return actions.updateReindexOp(reindexOp, {
-        lastCompletedStep: ReindexStep.mlUpgradeModeUnset,
-        status: ReindexStatus.completed,
-      });
+  const resumeConsumers = async (reindexOp: ReindexSavedObject) => {
+    if (isMlIndex(reindexOp.attributes.indexName)) {
+      await resumeMlJobs();
+    } else if (isWatcherIndex(reindexOp.attributes.indexName)) {
+      await startWatcher();
     }
 
-    await resumeMlJobs();
-
-    return actions.updateReindexOp(reindexOp, {
-      lastCompletedStep: ReindexStep.mlUpgradeModeUnset,
-      status: ReindexStatus.completed,
-    });
+    // Only change the status if we're still in-progress (this function is also called when the reindex fails)
+    if (reindexOp.attributes.status === ReindexStatus.inProgress) {
+      return actions.updateReindexOp(reindexOp, {
+        lastCompletedStep: ReindexStep.indexConsumersStarted,
+        status: ReindexStatus.completed,
+      });
+    } else {
+      return reindexOp;
+    }
   };
 
   // ------ The service itself
@@ -442,9 +473,9 @@ export const reindexServiceFactory = (
         try {
           switch (lockedReindexOp.attributes.lastCompletedStep) {
             case ReindexStep.created:
-              lockedReindexOp = await setMlUpgradeMode(lockedReindexOp);
+              lockedReindexOp = await stopConsumers(lockedReindexOp);
               break;
-            case ReindexStep.mlUpgradeModeSet:
+            case ReindexStep.indexConsumersStopped:
               lockedReindexOp = await setReadonly(lockedReindexOp);
               break;
             case ReindexStep.readonly:
@@ -460,7 +491,7 @@ export const reindexServiceFactory = (
               lockedReindexOp = await switchAlias(lockedReindexOp);
               break;
             case ReindexStep.aliasCreated:
-              lockedReindexOp = await unsetMlUpgradeMode(lockedReindexOp);
+              lockedReindexOp = await resumeConsumers(lockedReindexOp);
               break;
             default:
               break;
@@ -472,7 +503,8 @@ export const reindexServiceFactory = (
             errorMessage: e instanceof Error ? e.stack : e.toString(),
           });
 
-          await cleanupChanges(lockedReindexOp.attributes.indexName);
+          // Cleanup any changes, ignoring any errors.
+          await cleanupChanges(lockedReindexOp).catch(e => undefined);
         }
 
         return lockedReindexOp;
@@ -518,3 +550,8 @@ export const reindexServiceFactory = (
     },
   };
 };
+
+const isMlIndex = (indexName: string) =>
+  indexName.startsWith('.ml-state') || indexName.startsWith('.ml-anomalies');
+
+const isWatcherIndex = (indexName: string) => indexName.startsWith('.watches');

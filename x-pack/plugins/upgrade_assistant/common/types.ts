@@ -12,13 +12,13 @@ import {
 export enum ReindexStep {
   // Enum values are spaced out by 10 to give us room to insert steps in between.
   created = 0,
-  mlUpgradeModeSet = 10,
+  indexConsumersStopped = 10,
   readonly = 20,
   newIndexCreated = 30,
   reindexStarted = 40,
   reindexCompleted = 50,
   aliasCreated = 60,
-  mlUpgradeModeUnset = 70,
+  indexConsumersStarted = 70,
 }
 
 export enum ReindexStatus {
