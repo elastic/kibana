@@ -105,7 +105,12 @@ it('rewrites url imports', async () => {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  background: #191919 url(foo/bar/images/img.png); }
+  background: #191919 url(__REPLACE_WITH_PUBLIC_PATH__foo/bar/images/img.png); }
 /*# sourceMappingURL=... */"
 `);
+
+  expect(Buffer.compare(
+    readFileSync(resolve(TMP, 'images/img.png')),
+    readFileSync(resolve(dirname(FIXTURE), 'images/img.png'))
+  )).toBe(0);
 });
