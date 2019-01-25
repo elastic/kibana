@@ -97,9 +97,6 @@ export default function ({ getService, getPageObjects }) {
         await alerts.clickViewAll();
         expect(await alerts.isOnListingPage()).to.be(true);
 
-        const rows = await alerts.getTableAlerts();
-        expect(rows.length).to.be(10);
-
         // check the all data in the table
         const tableData = [
           {

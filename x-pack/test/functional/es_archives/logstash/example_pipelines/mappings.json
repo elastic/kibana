@@ -1,54 +1,6 @@
 {
   "type": "index",
   "value": {
-    "index": ".logstash",
-    "settings": {
-      "index": {
-        "codec": "best_compression",
-        "number_of_shards": "1",
-        "number_of_replicas": "1"
-      }
-    },
-    "mappings": {
-      "dynamic": "strict",
-      "_meta": {
-        "logstash-version": "7.0.0-alpha1"
-      },
-      "properties": {
-        "description": {
-          "type": "text"
-        },
-        "last_modified": {
-          "type": "date"
-        },
-        "metadata": {
-          "type": "object",
-          "dynamic": "false"
-        },
-        "pipeline": {
-          "type": "text"
-        },
-        "pipeline_metadata": {
-          "properties": {
-            "type": {
-              "type": "keyword"
-            },
-            "version": {
-              "type": "short"
-            }
-          }
-        },
-        "username": {
-          "type": "keyword"
-        }
-      }
-    }
-  }
-}
-
-{
-  "type": "index",
-  "value": {
     "index": ".kibana",
     "settings": {
       "index": {
