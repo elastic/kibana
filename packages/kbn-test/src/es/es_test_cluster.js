@@ -125,13 +125,21 @@ export function createEsTestCluster(options = {}) {
  *  @return {Function}
  */
 function createCallCluster(esClient) {
-  return function callCluster(method, params) {
+  return async function callCluster(method, params) {
     const path = toPath(method);
     const contextPath = path.slice(0, -1);
 
     const action = get(esClient, path);
     const context = contextPath.length ? get(esClient, contextPath) : esClient;
 
-    return action.call(context, params);
+    const {
+      ignore,
+      headers,
+      requestTimeout,
+      maxRetries,
+      ...esParams
+    } = params;
+    const { body } = await action.call(context, esParams, { ignore, headers, maxRetries, requestTimeout });
+    return body;
   };
 }
