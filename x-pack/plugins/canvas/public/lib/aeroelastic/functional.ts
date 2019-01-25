@@ -1,3 +1,5 @@
+/* tslint:disable */
+
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License;
@@ -33,18 +35,6 @@ export const identity = d => d;
  * @returns {function(*): *}
  */
 export const map = fun => array => array.map(value => fun(value));
-
-/**
- * log
- *
- * @param d
- * @param {Function} printerFun
- * @returns d
- */
-export const log = (d, printerFun = identity) => {
-  console.log(printerFun(d));
-  return d;
-};
 
 /**
  * disjunctiveUnion
