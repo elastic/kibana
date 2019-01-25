@@ -1,7 +1,7 @@
 [[traces]]
 === Traces
 
-The *Traces overview* page displays the entry transaction for all traces in your application.
+The *Traces* overview displays the entry transaction for all traces in your application.
 If you're using <<distributed-tracing>>, this view is key to finding the critical paths within your application.
 Transactions with the same name are grouped together and only shown once in this table.
 
