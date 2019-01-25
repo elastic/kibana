@@ -55,7 +55,7 @@ export const getFocusedShape = (draggedShape, hoveredShape) => draggedShape || h
 
 export const getAlterSnapGesture = metaHeld => (metaHeld ? ['relax'] : []);
 
-export const initialTransformTuple = {
+const initialTransformTuple = {
   deltaX: 0,
   deltaY: 0,
   transform: null,
@@ -113,7 +113,7 @@ export const getSelectedShapeObjects = scene => scene.selectedShapeObjects || []
 // fixme put it into geometry.js
 // broken.
 // is the composition of the baseline (previously absorbed transforms) and the cumulative (ie. ongoing interaction)
-export const reselectShapes = (allShapes, shapes) =>
+const reselectShapes = (allShapes, shapes) =>
   shapes.map(id => allShapes.find(shape => shape.id === id));
 
 const contentShape = allShapes => shape =>
@@ -121,13 +121,13 @@ const contentShape = allShapes => shape =>
     ? contentShape(allShapes)(allShapes.find(s => s.id === shape.parent))
     : shape;
 
-export const getContentShapes = (allShapes, shapes) => {
+const getContentShapes = (allShapes, shapes) => {
   // fixme no need to export, why doesn't linter or highlighter complain?
   const idMap = arrayToMap(allShapes.map(shape => shape.id));
   return shapes.filter(shape => idMap[shape.id]).map(contentShape(allShapes));
 };
 
-export const primaryShape = shape => (shape.type === 'annotation' ? shape.parent : shape.id);
+const primaryShape = shape => (shape.type === 'annotation' ? shape.parent : shape.id);
 
 const rotationManipulation = config => ({
   shape,
@@ -167,7 +167,7 @@ const minimumSize = (min, { a, b, baseAB }, vector) => {
   ];
 };
 
-export const centeredResizeManipulation = config => ({ gesture, shape, directShape }) => {
+const centeredResizeManipulation = config => ({ gesture, shape, directShape }) => {
   const transform = gesture.cumulativeTransform;
   // scaling such that the center remains in place (ie. the other side of the shape can grow/shrink)
   if (!shape || !directShape) {
@@ -195,7 +195,7 @@ export const centeredResizeManipulation = config => ({ gesture, shape, directSha
   };
 };
 
-export const asymmetricResizeManipulation = config => ({ gesture, shape, directShape }) => {
+const asymmetricResizeManipulation = config => ({ gesture, shape, directShape }) => {
   const transform = gesture.cumulativeTransform;
   // scaling such that the center remains in place (ie. the other side of the shape can grow/shrink)
   if (!shape || !directShape) {
@@ -233,14 +233,14 @@ export const asymmetricResizeManipulation = config => ({ gesture, shape, directS
   };
 };
 
-export const directShapeTranslateManipulation = (cumulativeTransforms, directShapes) => {
+const directShapeTranslateManipulation = (cumulativeTransforms, directShapes) => {
   const shapes = directShapes
     .map(shape => shape.type !== 'annotation' && shape.id)
     .filter(identity);
   return [{ cumulativeTransforms, shapes }];
 };
 
-export const rotationAnnotationManipulation = (
+const rotationAnnotationManipulation = (
   config,
   directTransforms,
   directShapes,
@@ -267,7 +267,7 @@ export const rotationAnnotationManipulation = (
   return tuples.map(rotationManipulation(config));
 };
 
-export const resizeAnnotationManipulation = (
+const resizeAnnotationManipulation = (
   config,
   transformGestures,
   directShapes,
@@ -439,7 +439,7 @@ const shapeCascadeProperties = shapes => shape => {
 
 export const cascadeProperties = shapes => shapes.map(shapeCascadeProperties(shapes));
 
-export const alignmentGuides = (config, shapes, guidedShapes, draggedShape) => {
+const alignmentGuides = (config, shapes, guidedShapes, draggedShape) => {
   const result = {};
   let counter = 0;
   const extremeHorizontal = resizeMultiplierHorizontal[draggedShape.horizontalPosition];
@@ -548,19 +548,19 @@ export const alignmentGuides = (config, shapes, guidedShapes, draggedShape) => {
   return Object.values(result);
 };
 
-export const isHorizontal = constraint => constraint.dimension === 'horizontal';
-export const isVertical = constraint => constraint.dimension === 'vertical';
+const isHorizontal = constraint => constraint.dimension === 'horizontal';
+const isVertical = constraint => constraint.dimension === 'vertical';
 
 const closestConstraint = (prev = { distance: Infinity }, next) =>
   next.distance < prev.distance ? { constraint: next, distance: next.distance } : prev;
 
-export const directionalConstraint = (constraints, filterFun) => {
+const directionalConstraint = (constraints, filterFun) => {
   const directionalConstraints = constraints.filter(filterFun);
   const closest = directionalConstraints.reduce(closestConstraint, undefined);
   return closest && closest.constraint;
 };
 
-export const rotationAnnotation = (config, shapes, selectedShapes, shape, i) => {
+const rotationAnnotation = (config, shapes, selectedShapes, shape, i) => {
   const foundShape = shapes.find(s => shape.id === s.id);
   if (!foundShape) {
     return false;
@@ -741,11 +741,7 @@ const crystallizeConstraint = shape => {
   return result;
 };
 
-export const translateShapeSnap = (
-  horizontalConstraint,
-  verticalConstraint,
-  draggedElement
-) => shape => {
+const translateShapeSnap = (horizontalConstraint, verticalConstraint, draggedElement) => shape => {
   const constrainedX = horizontalConstraint && horizontalConstraint.constrained === shape.id;
   const constrainedY = verticalConstraint && verticalConstraint.constrained === shape.id;
   const snapOffsetX = constrainedX ? -horizontalConstraint.signedDistance : 0;
@@ -771,7 +767,7 @@ export const translateShapeSnap = (
   }
 };
 
-export const resizeShapeSnap = (
+const resizeShapeSnap = (
   horizontalConstraint,
   verticalConstraint,
   draggedElement,
@@ -847,7 +843,7 @@ const projectAABB = ([[xMin, yMin], [xMax, yMax]]) => {
   return { a, b, localTransformMatrix, rigTransform };
 };
 
-export const dissolveGroups = (groupsToDissolve, shapes, selectedShapes) => {
+const dissolveGroups = (groupsToDissolve, shapes, selectedShapes) => {
   return {
     shapes: shapes
       .filter(s => !groupsToDissolve.find(g => s.id === g.id))
@@ -874,14 +870,14 @@ export const dissolveGroups = (groupsToDissolve, shapes, selectedShapes) => {
 
 const hasNoParentWithin = shapes => shape => !shapes.some(g => shape.parent === g.id);
 
-export const asYetUngroupedShapes = (preexistingAdHocGroups, selectedShapes) =>
+const asYetUngroupedShapes = (preexistingAdHocGroups, selectedShapes) =>
   selectedShapes.filter(hasNoParentWithin(preexistingAdHocGroups));
 
 const idMatch = shape => s => s.id === shape.id;
 
-export const idsMatch = selectedShapes => shape => selectedShapes.find(idMatch(shape));
+const idsMatch = selectedShapes => shape => selectedShapes.find(idMatch(shape));
 
-export const axisAlignedBoundingBoxShape = (config, shapesToBox) => {
+const axisAlignedBoundingBoxShape = (config, shapesToBox) => {
   const axisAlignedBoundingBox = getAABB(shapesToBox);
   const { a, b, localTransformMatrix, rigTransform } = projectAABB(axisAlignedBoundingBox);
   const id = getId(config.groupName);
@@ -931,7 +927,7 @@ const resizeChild = groupScale => s => {
   s.baseLocalTransformMatrix = baseLocalTransformMatrix;
 };
 
-export const resizeGroup = (shapes, rootElement) => {
+const resizeGroup = (shapes, rootElement) => {
   const idMap = {};
   for (const shape of shapes) {
     idMap[shape.id] = shape;
@@ -960,7 +956,7 @@ export const resizeGroup = (shapes, rootElement) => {
   return sortedShapes;
 };
 
-export const getLeafs = (descendCondition, allShapes, shapes) =>
+const getLeafs = (descendCondition, allShapes, shapes) =>
   removeDuplicates(
     s => s.id,
     flatten(
@@ -970,7 +966,7 @@ export const getLeafs = (descendCondition, allShapes, shapes) =>
     )
   );
 
-export const preserveCurrentGroups = (shapes, selectedShapes) => ({ shapes, selectedShapes });
+const preserveCurrentGroups = (shapes, selectedShapes) => ({ shapes, selectedShapes });
 
 export const getScene = state => state.currentScene;
 
@@ -993,7 +989,7 @@ export const getHoveredShapes = (config, shapes, cursorPosition) =>
 
 export const getHoveredShape = hoveredShapes => (hoveredShapes.length ? hoveredShapes[0] : null);
 
-export const singleSelect = (prev, config, hoveredShapes, metaHeld, uid) => {
+const singleSelect = (prev, config, hoveredShapes, metaHeld, uid) => {
   // cycle from top ie. from zero after the cursor position changed ie. !sameLocation
   const down = true; // this function won't be called otherwise
   const depthIndex =
@@ -1008,7 +1004,7 @@ export const singleSelect = (prev, config, hoveredShapes, metaHeld, uid) => {
   };
 };
 
-export const multiSelect = (prev, config, hoveredShapes, metaHeld, uid, selectedShapeObjects) => {
+const multiSelect = (prev, config, hoveredShapes, metaHeld, uid, selectedShapeObjects) => {
   const shapes =
     hoveredShapes.length > 0
       ? disjunctiveUnion(shape => shape.id, selectedShapeObjects, hoveredShapes.slice(0, 1)) // ie. depthIndex of 0, if any
@@ -1140,7 +1136,7 @@ export const getGrouping = (config, shapes, selectedShapes, groupAction) => {
   }
 };
 
-export const bidirectionalCursors = {
+const bidirectionalCursors = {
   '0': 'ns-resize',
   '45': 'nesw-resize',
   '90': 'ew-resize',
