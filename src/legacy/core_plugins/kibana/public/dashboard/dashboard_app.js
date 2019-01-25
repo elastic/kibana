@@ -22,6 +22,7 @@ import React from 'react';
 import angular from 'angular';
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
+import { wrapIntoI18nContext } from 'ui/i18n/context';
 import { toastNotifications } from 'ui/notify';
 
 import 'ui/query_bar';
@@ -65,7 +66,7 @@ const app = uiModules.get('app/dashboard', [
 ]);
 
 app.directive('dashboardViewportProvider', function (reactDirective) {
-  return reactDirective(DashboardViewportProvider);
+  return reactDirective(wrapIntoI18nContext(DashboardViewportProvider));
 });
 
 app.directive('dashboardApp', function ($injector) {

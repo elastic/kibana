@@ -6,8 +6,8 @@
 
 
 import 'ngreact';
-import { injectI18nProvider } from '@kbn/i18n/react';
 
+import { wrapIntoI18nContext } from 'ui/i18n/context';
 import { uiModules } from 'ui/modules';
 
 const module = uiModules.get('apps/ml', ['react']);
@@ -42,5 +42,5 @@ module.directive('fileDatavisualizerPage', function ($injector) {
   const indexPatterns = $injector.get('indexPatterns');
   const kibanaConfig = $injector.get('config');
 
-  return reactDirective(injectI18nProvider(FileDataVisualizerPage), undefined, { restrict: 'E' }, { indexPatterns, kibanaConfig });
+  return reactDirective(wrapIntoI18nContext(FileDataVisualizerPage), undefined, { restrict: 'E' }, { indexPatterns, kibanaConfig });
 });

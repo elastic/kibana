@@ -21,7 +21,8 @@ import 'ngreact';
 import React, { Fragment } from 'react';
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
-import { FormattedMessage, injectI18nProvider } from '@kbn/i18n/react';
+import { wrapIntoI18nContext } from 'ui/i18n/context';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiFlexGroup,
@@ -95,4 +96,4 @@ const DiscoverFetchError = ({ fetchError }) => {
 
 const app = uiModules.get('apps/discover', ['react']);
 
-app.directive('discoverFetchError', reactDirective => reactDirective(injectI18nProvider(DiscoverFetchError)));
+app.directive('discoverFetchError', reactDirective => reactDirective(wrapIntoI18nContext(DiscoverFetchError)));
