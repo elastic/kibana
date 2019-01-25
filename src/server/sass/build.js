@@ -30,8 +30,8 @@ const writeFile = promisify(fs.writeFile);
 const mkdirpAsync = promisify(mkdirp);
 
 const DARK_THEME_IMPORTER = (url) => {
-  if (url.includes('k6_colors_light')) {
-    return { file: url.replace('k6_colors_light', 'k6_colors_dark') };
+  if (url.includes('eui_colors_light')) {
+    return { file: url.replace('eui_colors_light', 'eui_colors_dark') };
   }
 
   return { file: url };
