@@ -122,12 +122,12 @@ export class Build {
 
     // verify that source files exist and import is valid before writing anything
     await Promise.all(urlAssets.map(async ({ url, from }) => {
-      if (!isPathInside(from, this.urlImports.publicDir)) {
-        throw this._makeError(`Unable to use url("${url}"), it must resolve to a file within "${this.urlImports.publicDir}"`);
+      if (!await exists(from)) {
+        throw this._makeError('Invalid url() in css output', `url("${url}") must resolve to a file relative to "${sourceBaseDir}"`);
       }
 
-      if (!await exists(from)) {
-        throw this._makeError(`Unable to locate url("${url}"), it must resolve to a file relative to "${sourceBaseDir}"`);
+      if (!isPathInside(from, this.urlImports.publicDir)) {
+        throw this._makeError('Invalid url() in css output', `url("${url}") must resolve to a file within "${this.urlImports.publicDir}"`);
       }
     }));
 
@@ -144,8 +144,8 @@ export class Build {
     return this;
   }
 
-  _makeError(message) {
-    const error = new Error(chalk.red(message));
+  _makeError(title, message) {
+    const error = new Error(`${chalk.red(`${title} [${this.sourcePath}]`)}\n\n  ${message}\n`);
     error.file = this.sourcePath;
     return error;
   }
