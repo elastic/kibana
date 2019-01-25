@@ -38,7 +38,7 @@ export const mockFields: Field[] = [
     name: 'not.filterable',
     type: 'string',
     aggregatable: true,
-    searchable: true,
+    searchable: false,
     filterable: false,
   },
   {
