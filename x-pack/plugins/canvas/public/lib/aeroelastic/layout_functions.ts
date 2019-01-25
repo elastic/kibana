@@ -1406,7 +1406,7 @@ export const getNextScene = (
     .filter(shape => shape.type !== 'annotation')
     .map(s => s.id);
   return {
-    config,
+    configuration: config,
     hoveredShape,
     selectedShapes: selectedShapeIds,
     selectedLeafShapes,
