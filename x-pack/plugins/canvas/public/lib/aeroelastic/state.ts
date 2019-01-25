@@ -1,5 +1,3 @@
-/* tslint:disable */
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License;
@@ -63,7 +61,12 @@ export const select = (fun, logFun) => (...inputs) => {
   };
 };
 
-export const createStore = (initialState, onChangeCallback = () => {}) => {
+export const createStore = (
+  initialState,
+  onChangeCallback = () => {
+    /* empty */
+  }
+) => {
   let currentState = initialState;
   let updater = state => state; // default: no side effect
   const getCurrentState = () => currentState;
