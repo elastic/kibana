@@ -1,0 +1,77 @@
+{
+  "allPings": {
+    "total": 798,
+    "pings": [
+      {
+        "timestamp": "2019-01-18T22:02:31.383Z",
+        "http": { "response": { "status_code": 200 } },
+        "error": null,
+        "monitor": {
+          "duration": { "us": 925862 },
+          "id": "http@https://www.elastic.co",
+          "ip": "151.101.202.217",
+          "name": "http",
+          "scheme": "https",
+          "status": "up",
+          "type": "http"
+        }
+      },
+      {
+        "timestamp": "2019-01-18T22:02:34.383Z",
+        "http": { "response": { "status_code": 200 } },
+        "error": null,
+        "monitor": {
+          "duration": { "us": 738176 },
+          "id": "http@https://www.elastic.co",
+          "ip": "151.101.202.217",
+          "name": "http",
+          "scheme": "https",
+          "status": "up",
+          "type": "http"
+        }
+      },
+      {
+        "timestamp": "2019-01-18T22:02:37.383Z",
+        "http": { "response": { "status_code": 200 } },
+        "error": null,
+        "monitor": {
+          "duration": { "us": 684949 },
+          "id": "http@https://www.elastic.co",
+          "ip": "151.101.202.217",
+          "name": "http",
+          "scheme": "https",
+          "status": "up",
+          "type": "http"
+        }
+      },
+      {
+        "timestamp": "2019-01-18T22:02:40.384Z",
+        "http": { "response": { "status_code": 200 } },
+        "error": null,
+        "monitor": {
+          "duration": { "us": 773959 },
+          "id": "http@https://www.elastic.co",
+          "ip": "151.101.202.217",
+          "name": "http",
+          "scheme": "https",
+          "status": "up",
+          "type": "http"
+        }
+      },
+      {
+        "timestamp": "2019-01-18T22:02:43.385Z",
+        "http": { "response": { "status_code": 200 } },
+        "error": null,
+        "monitor": {
+          "duration": { "us": 483803 },
+          "id": "http@https://www.elastic.co",
+          "ip": "151.101.202.217",
+          "name": "http",
+          "scheme": "https",
+          "status": "up",
+          "type": "http"
+        }
+      }
+    ]
+  }
+}

@@ -295,8 +295,6 @@ export interface Snapshot {
 
   down?: number | null;
 
-  trouble?: number | null;
-
   total?: number | null;
 
   histogram?: (HistogramSeries | null)[] | null;
@@ -410,10 +408,6 @@ export interface GetSnapshotQueryArgs {
   dateRangeStart: string;
 
   dateRangeEnd: string;
-
-  downCount: number;
-
-  windowSize: number;
 
   filters?: string | null;
 }

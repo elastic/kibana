@@ -33,18 +33,9 @@ export class UMMonitorsDomain {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    downCount: number,
-    windowSize: number,
     filters?: string | null
   ): Promise<any> {
-    return this.adapter.getSnapshotCount(
-      request,
-      dateRangeStart,
-      dateRangeEnd,
-      downCount,
-      windowSize,
-      filters
-    );
+    return this.adapter.getSnapshotCount(request, dateRangeStart, dateRangeEnd, filters);
   }
 
   public async getFilterBar(
