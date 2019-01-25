@@ -54,6 +54,10 @@ export async function sassMixin(kbnServer, server, config) {
   } catch(error) {
     const { message, line, file } = error;
 
+    if (!line || !file) {
+      throw error;
+    }
+
     trackedFiles.add(file);
     server.log(['warning', 'scss'], `${message} on line ${line} of ${file}`);
   }
@@ -83,7 +87,7 @@ export async function sassMixin(kbnServer, server, config) {
     await Promise.all(scssBundles.map(async bundle => {
       try {
         if (await bundle.buildIfIncluded(path)) {
-          server.log(['info', 'scss'], `Compiled ${bundle.source} due to change in ${path}`);
+          server.log(['info', 'scss'], `Compiled ${bundle.sourcePath} due to change in ${path}`);
         }
         // if the bundle rebuilt, includedFiles is the new set; otherwise includedFiles is unchanged and remains tracked
         bundle.includedFiles.forEach(file => currentlyTrackedFiles.add(file));

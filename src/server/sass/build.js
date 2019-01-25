@@ -23,7 +23,9 @@ import fs from 'fs';
 import sass from 'node-sass';
 import autoprefixer from 'autoprefixer';
 import postcss from 'postcss';
+import postcssUrl from 'postcss-url';
 import mkdirp from 'mkdirp';
+import isPathInside from 'is-path-inside';
 
 const renderSass = promisify(sass.render);
 const writeFile = promisify(fs.writeFile);
@@ -38,10 +40,11 @@ const DARK_THEME_IMPORTER = (url) => {
 };
 
 export class Build {
-  constructor({ sourcePath, log, targetPath, theme }) {
-    this.sourcePath = sourcePath;
+  constructor({ log, sourcePath, targetPath, urlImports, theme }) {
     this.log = log;
+    this.sourcePath = sourcePath;
     this.targetPath = targetPath;
+    this.urlImports = urlImports;
     this.theme = theme;
     this.includedFiles = [sourcePath];
   }
@@ -75,11 +78,45 @@ export class Build {
       importer: this.theme === 'dark' ? DARK_THEME_IMPORTER : undefined
     });
 
-    const prefixed = postcss([ autoprefixer ]).process(rendered.css);
-
     this.includedFiles = rendered.stats.includedFiles;
 
-    await mkdirpAsync(path.dirname(this.targetPath));
+    const sourceBaseDir = path.dirname(this.sourcePath);
+    const targetDir = path.dirname(this.targetPath);
+    const processor = postcss([ autoprefixer ]);
+
+    if (this.urlImports) {
+      const { publicDir, urlBase } = this.urlImports;
+      processor.use(postcssUrl({
+        url: (asset) => {
+          if (!asset.pathname) {
+            return asset.url;
+          }
+
+          const sourcePath = path.resolve(sourceBaseDir, asset.pathname);
+          if (!fs.existsSync(sourcePath)) {
+            throw new Error(`Unable to locate url("${asset.url}"), it must resolve to a file relative to "${publicDir}"`);
+          }
+
+          if (!isPathInside(sourcePath, publicDir)) {
+            throw new Error(`Unable to use url("${asset.url}"), it must resolve to a file within "${publicDir}"`);
+          }
+
+          this.includedFiles.push(sourcePath);
+
+          const targetPath = path.resolve(targetDir, asset.pathname);
+          mkdirp.sync(path.dirname(targetPath));
+          fs.copyFileSync(sourcePath, targetPath);
+
+          return `${urlBase}/${path.relative(publicDir, sourcePath)}`.replace(/\\/g, '/');
+        }
+      }));
+    }
+
+    const prefixed = await processor.process(rendered.css, {
+      from: this.sourcePath
+    });
+
+    await mkdirpAsync(targetDir);
     await writeFile(this.targetPath, prefixed.css);
 
     return this;

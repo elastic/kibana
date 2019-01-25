@@ -34,7 +34,7 @@ import { createDynamicAssetResponse } from './dynamic_asset_response';
  *
  *  @return Array.of({Hapi.Route})
  */
-export function createBundlesRoute({ regularBundlesPath, dllBundlesPath, basePublicPath }) {
+export function createBundlesRoute({ regularBundlesPath, dllBundlesPath, basePublicPath, builtCssPath }) {
 
   // rather than calculate the fileHash on every request, we
   // provide a cache object to `createDynamicAssetResponse()` that
@@ -60,6 +60,7 @@ export function createBundlesRoute({ regularBundlesPath, dllBundlesPath, basePub
   return [
     buildRouteForBundles(basePublicPath, '/bundles/', regularBundlesPath, fileHashCache),
     buildRouteForBundles(basePublicPath, '/built_assets/dlls/', dllBundlesPath, fileHashCache),
+    buildRouteForBundles(basePublicPath, '/built_assets/css/', builtCssPath, fileHashCache),
   ];
 }
 

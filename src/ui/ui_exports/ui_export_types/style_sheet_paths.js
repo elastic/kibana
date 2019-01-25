@@ -21,8 +21,13 @@ import path from 'path';
 import { existsSync } from 'fs';
 import { flatConcatAtType } from './reduce';
 import { mapSpec, wrap } from './modify_reduce';
+import { PUBLIC_PATH_PLACEHOLDER } from '../../../optimize/public_path_placeholder';
 
 const OK_EXTNAMES = ['.css', '.scss'];
+
+function getUrlBase(pluginSpec) {
+  return `plugins/${pluginSpec.getId()}`;
+}
 
 function getPublicPath(pluginSpec, localPath) {
   // get the path of the stylesheet relative to the public dir for the plugin
@@ -31,7 +36,7 @@ function getPublicPath(pluginSpec, localPath) {
   // replace back slashes on windows
   relativePath = relativePath.split('\\').join('/');
 
-  return `plugins/${pluginSpec.getId()}/${relativePath}`;
+  return `${getUrlBase(pluginSpec)}/${relativePath}`;
 }
 
 function getStyleSheetPath(pluginSpec, localPath, theme) {
@@ -42,6 +47,10 @@ function getStyleSheetPath(pluginSpec, localPath, theme) {
     theme,
     localPath: existsSync(localCssPath) ? localCssPath : localPath,
     publicPath: getPublicPath(pluginSpec, localCssPath),
+    urlImports: {
+      urlBase: `${PUBLIC_PATH_PLACEHOLDER}${getUrlBase(pluginSpec)}`,
+      publicDir: pluginSpec.getPublicDir(),
+    }
   };
 }
 
@@ -74,7 +83,7 @@ function normalize(localPath, type, pluginSpec) {
     return {
       theme: '*',
       localPath: localPath,
-      publicPath: getPublicPath(pluginSpec, localPath)
+      publicPath: getPublicPath(pluginSpec, localPath),
     };
   }
 

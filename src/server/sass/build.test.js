@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+import { dirname, resolve } from 'path';
 import { readFileSync } from 'fs';
 
 import del from 'del';
@@ -41,18 +41,17 @@ it('builds light themed SASS', async () => {
       error: () => {},
     },
     theme: 'light',
-    targetPath
+    targetPath,
   }).build();
 
-  expect(
-    readFileSync(targetPath, 'utf8').replace(/(\/\*# sourceMappingURL=).*( \*\/)/, '$1...$2')
-  ).toMatchInlineSnapshot(`
+  expect(readFileSync(targetPath, 'utf8').replace(/(\/\*# sourceMappingURL=).*( \*\/)/, '$1...$2'))
+    .toMatchInlineSnapshot(`
 "foo bar {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  background: #e6f0f8; }
+  background: #e6f0f8 url(\\"./images/img.png\\"); }
 /*# sourceMappingURL=... */"
 `);
 });
@@ -67,18 +66,46 @@ it('builds dark themed SASS', async () => {
       error: () => {},
     },
     theme: 'dark',
-    targetPath
+    targetPath,
   }).build();
 
-  expect(
-    readFileSync(targetPath, 'utf8').replace(/(\/\*# sourceMappingURL=).*( \*\/)/, '$1...$2')
-  ).toMatchInlineSnapshot(`
+  expect(readFileSync(targetPath, 'utf8').replace(/(\/\*# sourceMappingURL=).*( \*\/)/, '$1...$2'))
+    .toMatchInlineSnapshot(`
 "foo bar {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  background: #191919; }
+  background: #191919 url(\\"./images/img.png\\"); }
+/*# sourceMappingURL=... */"
+`);
+});
+
+it('rewrites url imports', async () => {
+  const targetPath = resolve(TMP, 'style.css');
+  await new Build({
+    sourcePath: FIXTURE,
+    log: {
+      info: () => {},
+      warn: () => {},
+      error: () => {},
+    },
+    theme: 'dark',
+    targetPath,
+    urlImports: {
+      publicDir: dirname(FIXTURE),
+      urlBase: 'foo/bar',
+    },
+  }).build();
+
+  expect(readFileSync(targetPath, 'utf8').replace(/(\/\*# sourceMappingURL=).*( \*\/)/, '$1...$2'))
+    .toMatchInlineSnapshot(`
+"foo bar {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  background: #191919 url(\\"foo/bar/images/img.png\\"); }
 /*# sourceMappingURL=... */"
 `);
 });

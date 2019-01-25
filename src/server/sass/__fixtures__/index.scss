@@ -3,6 +3,6 @@
 foo {
   bar {
     display: flex;
-    background: $euiFocusBackgroundColor;
+    background: $euiFocusBackgroundColor url('./images/img.png');
   }
 }
