@@ -50,7 +50,7 @@ export function RenderCreateIndexPatternPrompt(props) {
     }
     actions={[
       <EuiButton color="primary" fill onClick={props.onCreateIndexPattern} iconSide="right" iconType="arrowDown">Create index pattern</EuiButton>,
-      <EuiButtonEmpty color="danger">View system indices Kibana auto-creates</EuiButtonEmpty>,
+      <EuiButtonEmpty color="danger" onClick={() => {props.onShowSystemIndices(); props.onCreateIndexPattern();}}>View system indices Kibana auto-creates</EuiButtonEmpty>,
     ]}
   />);
 }

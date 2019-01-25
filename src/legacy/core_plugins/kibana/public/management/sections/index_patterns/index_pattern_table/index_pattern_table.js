@@ -31,17 +31,10 @@ const columns = [
     field: 'title',
     name: 'Pattern',
     //name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.fields.table.nameHeader', defaultMessage: 'Name' }),
-    render: (name, { id }) => (<EuiButtonEmpty size="xs" href={`#/management/kibana/indices/${id}`}>${name}</EuiButtonEmpty>),
+    render: (name, { id }) => (<EuiButtonEmpty size="xs" href={`#/management/kibana/index_patterns/${id}`}>{name}</EuiButtonEmpty>),
     dataType: 'string',
     sortable: true,
-  },
-  {
-    field: 'id',
-    name: 'id',
-    //name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.fields.table.nameHeader', defaultMessage: 'Name' }),
-    dataType: 'string',
-    sortable: true,
-  },
+  }
 ];
 
 const pagination = {
@@ -49,16 +42,35 @@ const pagination = {
   pageSizeOptions: [5, 10, 25, 50]
 };
 
+const sorting = {
+  sort: {
+    field: 'title',
+    direction: 'asc',
+  },
+};
+
+const search = {
+  box: {
+    incremental: true,
+    schema: {
+      fields: { title: { type: 'string' } }
+    }
+  }
+};
+
+//    selection={{}}
 const Table = ({
   indexPatterns
 }) => (
   <EuiInMemoryTable
+    itemId="id"
+    isSelectable={false}
     items={indexPatterns}
     columns={columns}
     pagination={pagination}
-    sorting={true}
+    sorting={sorting}
+    search={search}
   />
 );
 
 export const IndexPatternTable = injectI18n(Table);
-//

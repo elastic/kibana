@@ -19,8 +19,10 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
-import { IndexPatternList } from './index_pattern_list';
+// import { IndexPatternList } from './index_pattern_list';
+import { IndexPatternTable } from './index_pattern_table';
 import { RenderCreateIndexPatternPrompt } from './create_index_pattern_prompt';
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 
 export class App extends React.Component {
   constructor(props) {
@@ -30,18 +32,35 @@ export class App extends React.Component {
     };
   }
 
+  //               indexPatternCreationOptions={this.props.indexPatternCreationOptions}
+  //              defaultIndex={this.props.defaultIndex}
   render() {
     const showList = !!this.props.indexPatterns.length || this.state.dismissIntro;
+    console.log('this.props.indexPatterns', this.props.indexPatterns);
 
     return (
       <I18nProvider>
         <div>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiText>
+                <h2>Index patterns</h2>
+                <p>Index patterns allow you to bucket disparate data sources together so their shared fields may be queried in Kibana.</p>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem  grow={false}>
+              <EuiButton fill>
+                Create index pattern
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
           {showList ?
-            (<IndexPatternList
-              indexPatternCreationOptions={this.props.indexPatternCreationOptions}
-              defaultIndex={this.props.defaultIndex}
+            (<IndexPatternTable
               indexPatterns={this.props.indexPatterns}
-            />) : (<RenderCreateIndexPatternPrompt onCreateIndexPattern={() => this.setState({ 'dismissIntro': true })} />)}
+            />) : (<RenderCreateIndexPatternPrompt
+              onCreateIndexPattern={() => this.setState({ 'dismissIntro': true })}
+              onShowSystemIndices={() => this.props.indexPatternCreationType.getShowSystemIndices()}
+            />)}
         </div>
       </I18nProvider>
     );

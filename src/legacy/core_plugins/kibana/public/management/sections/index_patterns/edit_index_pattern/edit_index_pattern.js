@@ -136,6 +136,7 @@ function updateIndexedFieldsTable($scope, $state) {
             indexedFieldTypeFilter={$scope.indexedFieldTypeFilter}
             helpers={{
               redirectToRoute: (obj, route) => {
+                console.log('redirectToRoute', obj, route);
                 $scope.kbnUrl.redirectToRoute(obj, route);
                 $scope.$apply();
               },
@@ -162,6 +163,7 @@ uiRoutes
     k7Breadcrumbs: getEditBreadcrumbs,
     resolve: {
       indexPattern: function ($route, redirectWhenMissing, indexPatterns) {
+        console.log('uiRoutes w/patternId indexPattern');
         return indexPatterns
           .get($route.current.params.indexPatternId)
           .catch(redirectWhenMissing('/management/kibana/index_pattern'));
@@ -172,6 +174,7 @@ uiRoutes
 uiRoutes
   .when('/management/kibana/index_patterns', {
     redirectTo() {
+      console.log('uiRoutes w/o patternId redirect');
       const defaultIndex = chrome.getUiSettingsClient().get('defaultIndex');
       if (defaultIndex) {
         return `/management/kibana/index_patterns/${defaultIndex}`;

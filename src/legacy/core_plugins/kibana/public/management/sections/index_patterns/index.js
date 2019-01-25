@@ -43,6 +43,7 @@ export function updateIndexPatternList(
   indexPatternCreationOptions,
   defaultIndex,
   indexPatterns,
+  indexPatternCreationType,
 ) {
   const node = document.getElementById(INDEX_PATTERN_LIST_DOM_ELEMENT_ID);
   if (!node) {
@@ -55,6 +56,7 @@ export function updateIndexPatternList(
         indexPatternCreationOptions={indexPatternCreationOptions}
         defaultIndex={defaultIndex}
         indexPatterns={indexPatterns}
+        indexPatternCreationType={indexPatternCreationType}
       />
     </I18nProvider>,
     node,
@@ -68,6 +70,7 @@ export const destroyIndexPatternList = () => {
 
 const indexPatternsResolutions = {
   indexPatterns: function (Private) {
+    console.log('indexPatternsResolutions indexPatterns');
     const savedObjectsClient = Private(SavedObjectsClientProvider);
 
     return savedObjectsClient.find({
@@ -92,14 +95,21 @@ uiModules.get('apps/management')
       transclude: true,
       template: indexTemplate,
       link: async function ($scope) {
+
         const indexPatternListProvider = Private(IndexPatternListFactory)();
         const indexPatternCreationProvider = Private(IndexPatternCreationFactory)();
+        const indexPatternCreationType = indexPatternCreationProvider.getType();
         const indexPatternCreationOptions = await indexPatternCreationProvider.getIndexPatternCreationOptions((url) => {
+          console.log('url', url);
           $scope.$evalAsync(() => kbnUrl.change(url));
         });
+        console.log('indexPatternCreationOptions', indexPatternCreationOptions);
+        console.log('$route', $route.current.params.indexPatternId);
 
         const renderList = () => {
+          console.log('$route.current.locals.indexPatterns', $route.current.locals.indexPatterns);
           $scope.indexPatternList = $route.current.locals.indexPatterns.map(pattern => {
+            console.log('pattern', pattern);
             const id = pattern.id;
             const tags = indexPatternListProvider.getIndexPatternTags(pattern, $scope.defaultIndex === id);
 
@@ -127,7 +137,8 @@ uiModules.get('apps/management')
             return 0;
           }) || [];
 
-          updateIndexPatternList($scope, indexPatternCreationOptions, $scope.defaultIndex, $scope.indexPatternList);
+          console.log('updateIndexPatternList', $scope, indexPatternCreationOptions, $scope.defaultIndex, $scope.indexPatternList, indexPatternCreationType);
+          updateIndexPatternList($scope, indexPatternCreationOptions, $scope.defaultIndex, $scope.indexPatternList, indexPatternCreationType);
         };
 
         $scope.$on('$destroy', destroyIndexPatternList);
@@ -135,6 +146,7 @@ uiModules.get('apps/management')
         $scope.$watch('defaultIndex', () => renderList());
         config.bindToScope($scope, 'defaultIndex');
         $scope.$apply();
+
       }
     };
   });
@@ -142,7 +154,7 @@ uiModules.get('apps/management')
 management.getSection('kibana').register('index_patterns', {
   display: i18n.translate('kbn.management.indexPattern.sectionsHeader', { defaultMessage: 'Index Patterns' }),
   order: 0,
-  url: '#/management/kibana/index_patterns/'
+  url: '#/management/kibana/index_pattern/'
 });
 
 FeatureCatalogueRegistryProvider.register(() => {
@@ -152,7 +164,7 @@ FeatureCatalogueRegistryProvider.register(() => {
     description: i18n.translate('kbn.management.indexPatternLabel',
       { defaultMessage: 'Manage the index patterns that help retrieve your data from Elasticsearch.' }),
     icon: 'indexPatternApp',
-    path: '/app/kibana#/management/kibana/index_patterns',
+    path: '/app/kibana#/management/kibana/index_pattern',
     showOnHomePage: true,
     category: FeatureCatalogueCategory.ADMIN
   };
