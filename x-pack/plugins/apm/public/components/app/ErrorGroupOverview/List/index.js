@@ -19,7 +19,7 @@ import {
   fontSizes,
   truncate
 } from '../../../../style/variables';
-import { NOT_AVAILABLE_LABEL } from '../../../../constants';
+import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n'; // eslint-disable-line import/no-extraneous-dependencies
 import { i18n } from '@kbn/i18n';
 
 function paginateItems({ items, pageIndex, pageSize }) {

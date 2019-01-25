@@ -12,7 +12,7 @@ import { asMillis, asDecimal } from '../../../../utils/formatters';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { fontFamilyCode, truncate } from '../../../../style/variables';
 import { ManagedTable } from '../../../shared/ManagedTable';
-import { NOT_AVAILABLE_LABEL } from '../../../../constants';
+import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n'; // eslint-disable-line import/no-extraneous-dependencies
 import { legacyEncodeURIComponent } from '../../../shared/Links/url_helpers';
 import { KibanaLink } from '../../../shared/Links/KibanaLink';
 
