@@ -128,7 +128,7 @@ function validateFeature(feature: Feature) {
   if (validateResult.error) {
     throw validateResult.error;
   }
-
+// the following validation can't be enforced by the Joi schema, since it'd require us looking "up" the object graph for the list of valid value, which they explicitly forbid.
   const { management = {}, catalogue = [] } = feature;
 
   Object.entries(feature.privileges).forEach(([privilegeId, privilegeDefinition]) => {
