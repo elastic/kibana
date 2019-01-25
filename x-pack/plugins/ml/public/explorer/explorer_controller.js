@@ -77,7 +77,7 @@ module.controller('MlExplorerController', function (
   // For the moment that's the job selector and the (hidden) filter bar.
   $scope.jobs = [];
   $scope.queryFilters = [];
-  $scope.indexPatterns = $route.current.locals.indexPatterns.map(getFromSavedObject);
+  $scope.indexPatterns = $route.current ? $route.current.locals.indexPatterns.map(getFromSavedObject) : [];
   timefilter.enableTimeRangeSelector();
   timefilter.enableAutoRefreshSelector();
 
