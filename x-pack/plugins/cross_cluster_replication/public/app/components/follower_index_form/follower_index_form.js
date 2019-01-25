@@ -190,7 +190,7 @@ export const FollowerIndexForm = injectI18n(
         if (error && error.data) {
           // All validation does is check for a name collision, so we can just let the user attempt
           // to save the follower index and get an error back from the API.
-          this.setState({
+          return this.setState({
             isValidatingIndexName: false,
           });
         }
