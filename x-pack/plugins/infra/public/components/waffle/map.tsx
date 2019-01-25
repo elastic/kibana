@@ -28,7 +28,7 @@ interface Props {
   bounds: InfraWaffleMapBounds;
 }
 
-export const WaffleMap: React.SFC<Props> = ({
+export const Map: React.SFC<Props> = ({
   nodes,
   options,
   timeRange,

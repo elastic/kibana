@@ -185,4 +185,19 @@ declare module '@elastic/eui' {
     message?: any;
   };
   export const EuiInMemoryTable: React.SFC<EuiInMemoryTableProps>;
+
+  type EuiButtonGroupProps = CommonProps & {
+    buttonSize?: any;
+    color?: any;
+    idToSelectedMap?: any;
+    options?: any;
+    type?: any;
+    onChange?: any;
+    isIconOnly?: any;
+    isDisabled?: any;
+    isFullWidth?: any;
+    legend?: any;
+    idSelected?: any;
+  };
+  export const EuiButtonGroup: React.SFC<EuiButtonGroupProps>;
 }

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiButton, EuiButtonEmpty, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get, max, min } from 'lodash';
 import React from 'react';
@@ -19,8 +19,9 @@ import { InfraFormatterType, InfraWaffleMapBounds, InfraWaffleMapOptions } from 
 import { KueryFilterQuery } from '../../store/local/waffle_filter';
 import { createFormatter } from '../../utils/formatters';
 import { InfraLoadingPanel } from '../loading';
+import { Map } from './map';
 import { TableView } from './table';
-import { WaffleMap } from './waffle_map';
+import { ViewSwitcher } from './view_switcher';
 
 interface Props {
   options: InfraWaffleMapOptions;
@@ -74,7 +75,7 @@ const calculateBoundsFromNodes = (nodes: InfraNode[]): InfraWaffleMapBounds => {
   return { min: min(values) || 0, max: max(values) || 0 };
 };
 
-export const Waffle = injectI18n(
+export const WaffleMapVisualization = injectI18n(
   class extends React.Component<Props, {}> {
     public static displayName = 'Waffle';
     public render() {
@@ -129,25 +130,6 @@ export const Waffle = injectI18n(
           />
         );
       }
-      if (view === 'table') {
-        return (
-          <div>
-            <EuiButtonEmpty size="s" onClick={this.handleViewChange('map')} role="link">
-              Switch to Map View
-            </EuiButtonEmpty>
-            <div style={{ padding: 16 }}>
-              <TableView
-                nodeType={nodeType}
-                nodes={nodes}
-                options={options}
-                formatter={this.formatter}
-                timeRange={timeRange}
-                onFilter={this.handleDrilldown}
-              />
-            </div>
-          </div>
-        );
-      }
       const { metric } = this.props.options;
       const metricFormatter = get(
         METRIC_FORMATTERS,
@@ -156,24 +138,39 @@ export const Waffle = injectI18n(
       );
       const bounds = (metricFormatter && metricFormatter.bounds) || calculateBoundsFromNodes(nodes);
       return (
-        <React.Fragment>
-          <EuiButtonEmpty size="s" onClick={this.handleViewChange('table')} role="link">
-            Switch to Table View
-          </EuiButtonEmpty>
-          <WaffleMap
-            nodeType={nodeType}
-            nodes={nodes}
-            options={options}
-            formatter={this.formatter}
-            timeRange={timeRange}
-            onFilter={this.handleDrilldown}
-            bounds={bounds}
-          />
-        </React.Fragment>
+        <MainContainer>
+          <ViewSwitcherContainer>
+            <ViewSwitcher view={view} onChange={this.handleViewChange} />
+          </ViewSwitcherContainer>
+          {view === 'table' ? (
+            <TableContainer>
+              <TableView
+                nodeType={nodeType}
+                nodes={nodes}
+                options={options}
+                formatter={this.formatter}
+                timeRange={timeRange}
+                onFilter={this.handleDrilldown}
+              />
+            </TableContainer>
+          ) : (
+            <MapContainer>
+              <Map
+                nodeType={nodeType}
+                nodes={nodes}
+                options={options}
+                formatter={this.formatter}
+                timeRange={timeRange}
+                onFilter={this.handleDrilldown}
+                bounds={bounds}
+              />
+            </MapContainer>
+          )}
+        </MainContainer>
       );
     }
 
-    private handleViewChange = (view: string) => () => this.props.onViewChange(view);
+    private handleViewChange = (view: string) => this.props.onViewChange(view);
 
     // TODO: Change this to a real implimentation using the tickFormatter from the prototype as an example.
     private formatter = (val: string | number) => {
@@ -202,4 +199,26 @@ export const Waffle = injectI18n(
 
 const CenteredEmptyPrompt = styled(EuiEmptyPrompt)`
   align-self: center;
+`;
+
+const MainContainer = styled.div`
+  position: relative;
+  flex: 1 1 auto;
+`;
+
+const TableContainer = styled.div`
+  padding: 16px;
+`;
+
+const ViewSwitcherContainer = styled.div`
+  padding: 16px;
+`;
+
+const MapContainer = styled.div`
+  position: absolute;
+  display: flex;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
 `;
