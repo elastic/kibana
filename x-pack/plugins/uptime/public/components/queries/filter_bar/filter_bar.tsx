@@ -23,8 +23,18 @@ type Props = FilterBarProps & UptimeCommonProps;
 const MAX_SELECTION_LENGTH = 20;
 const SEARCH_THRESHOLD = 2;
 
-export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: Props) => (
-  <Query query={getFilterBarQuery} variables={{ dateRangeStart, dateRangeEnd }}>
+export const FilterBar = ({
+  autorefreshInterval,
+  autorefreshIsPaused,
+  dateRangeStart,
+  dateRangeEnd,
+  updateQuery,
+}: Props) => (
+  <Query
+    pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
+    query={getFilterBarQuery}
+    variables={{ dateRangeStart, dateRangeEnd }}
+  >
     {({ loading, error, data }) => {
       if (loading) {
         return i18n.translate('xpack.uptime.filterBar.loadingMessage', {
@@ -57,10 +67,10 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: Props) 
               }),
             },
             {
-              value: i18n.translate('xpack.uptime.filterBar.filterDownLabel', {
+              value: 'down',
+              name: i18n.translate('xpack.uptime.filterBar.filterDownLabel', {
                 defaultMessage: 'Down',
               }),
-              name: 'Down',
             },
           ],
         },

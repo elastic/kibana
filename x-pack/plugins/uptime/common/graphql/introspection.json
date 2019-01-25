@@ -138,26 +138,6 @@
                 "defaultValue": null
               },
               {
-                "name": "downCount",
-                "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "Int", "ofType": null }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "windowSize",
-                "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "Int", "ofType": null }
-                },
-                "defaultValue": null
-              },
-              {
                 "name": "filters",
                 "description": "",
                 "type": { "kind": "SCALAR", "name": "String", "ofType": null },
@@ -1543,14 +1523,6 @@
           },
           {
             "name": "down",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "trouble",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
