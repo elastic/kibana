@@ -9,6 +9,7 @@
 import { resolve } from 'path';
 
 import {
+  CanvasPageProvider,
   SecurityPageProvider,
   MonitoringPageProvider,
   LogstashPageProvider,
@@ -75,19 +76,19 @@ export default async function ({ readConfigFile }) {
   return {
     // list paths to the files that contain your plugins tests
     testFiles: [
-      resolve(__dirname, './apps/canvas'),
-      resolve(__dirname, './apps/graph'),
-      resolve(__dirname, './apps/monitoring'),
-      resolve(__dirname, './apps/watcher'),
-      resolve(__dirname, './apps/dashboard_mode'),
+      // resolve(__dirname, './apps/canvas'),
+      // resolve(__dirname, './apps/graph'),
+      // resolve(__dirname, './apps/monitoring'),
+      // resolve(__dirname, './apps/watcher'),
+      // resolve(__dirname, './apps/dashboard_mode'),
       resolve(__dirname, './apps/security'),
-      resolve(__dirname, './apps/spaces'),
-      resolve(__dirname, './apps/logstash'),
-      resolve(__dirname, './apps/grok_debugger'),
-      resolve(__dirname, './apps/infra'),
-      resolve(__dirname, './apps/gis'),
-      resolve(__dirname, './apps/status_page'),
-      resolve(__dirname, './apps/upgrade_assistant'),
+      // resolve(__dirname, './apps/spaces'),
+      // resolve(__dirname, './apps/logstash'),
+      // resolve(__dirname, './apps/grok_debugger'),
+      // resolve(__dirname, './apps/infra'),
+      // resolve(__dirname, './apps/gis'),
+      // resolve(__dirname, './apps/status_page'),
+      // resolve(__dirname, './apps/upgrade_assistant'),
     ],
 
     // define the name and providers for services that should be
@@ -131,6 +132,7 @@ export default async function ({ readConfigFile }) {
     // names to Providers. Merge in Kibana's or pick specific ones
     pageObjects: {
       ...kibanaFunctionalConfig.get('pageObjects'),
+      canvas: CanvasPageProvider,
       security: SecurityPageProvider,
       accountSetting: AccountSettingProvider,
       monitoring: MonitoringPageProvider,
