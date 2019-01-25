@@ -1,7 +1,7 @@
 {
   "id": "apache_ecs",
   "title": "Filebeat apache",
-  "description": "Find unusual activity in Apache web access logs (ECS)",
+  "description": "Find unusual activity in HTTP web access logs (ECS)",
   "type": "Web Access Logs",
   "logoFile": "logo.json",
   "defaultIndexPattern": "filebeat-*",
@@ -22,8 +22,8 @@
       "file": "visitor_rate_ecs.json"
     },
     {
-      "id": "response_code_ecs",
-      "file": "response_code_ecs.json"
+      "id": "http_status_code_ecs",
+      "file": "http_status_code_ecs.json"
     },
     {
       "id": "source_ip_url_count_ecs",
@@ -45,9 +45,9 @@
       "job_id": "visitor_rate_ecs"
     },
     {
-      "id": "datafeed-response_code_ecs",
-      "file": "datafeed_response_code_ecs.json",
-      "job_id": "response_code_ecs"
+      "id": "datafeed-http_status_code_ecs",
+      "file": "datafeed_http_status_code_ecs.json",
+      "job_id": "http_status_code_ecs"
     },
     {
       "id": "datafeed-source_ip_url_count_ecs",
@@ -68,44 +68,44 @@
   "kibana": {
     "dashboard": [
       {
-        "id": "ML-Apache-Access-Source-IP-Count-Explorer-ECS",
-        "file": "ML-Apache-Access-Source-IP-Count-Explorer-ECS.json"
-      },
-      {
-        "id": "ML-Apache-Source-IP-URL-Explorer-ECS",
-        "file": "ML-Apache-Source-IP-URL-Explorer-ECS.json"
+        "id": "ML-HTTP-Access-Source-IP-Count-Explorer-ECS",
+        "file": "ML-HTTP-Access-Source-IP-Count-Explorer-ECS.json"
       }
     ],
     "search": [
       {
-        "id": "ML-Filebeat-Apache-Access-ECS",
-        "file": "ML-Filebeat-Apache-Access-ECS.json"
+        "id": "ML-Filebeat-HTTP-Access-ECS",
+        "file": "ML-Filebeat-HTTP-Access-ECS.json"
       }
     ],
     "visualization": [
       {
-        "id": "ML-Apache-Access-Map-ECS",
-        "file": "ML-Apache-Access-Map-ECS.json"
+        "id": "ML-HTTP-Access-Map-ECS",
+        "file": "ML-HTTP-Access-Map-ECS.json"
       },
       {
-        "id": "ML-Apache-Access-Source-IP-Timechart-ECS",
-        "file": "ML-Apache-Access-Source-IP-Timechart-ECS.json"
+        "id": "ML-HTTP-Access-Source-IP-Timechart-ECS",
+        "file": "ML-HTTP-Access-Source-IP-Timechart-ECS.json"
       },
       {
-        "id": "ML-Apache-Access-Response-Code-Timechart-ECS",
-        "file": "ML-Apache-Access-Response-Code-Timechart-ECS.json"
+        "id": "ML-HTTP-Access-Status-Code-Timechart-ECS",
+        "file": "ML-HTTP-Access-Status-Code-Timechart-ECS.json"
       },
       {
-        "id": "ML-Apache-Access-Top-Source-IPs-Table-ECS",
-        "file": "ML-Apache-Access-Top-Source-IPs-Table-ECS.json"
+        "id": "ML-HTTP-Access-Top-Source-IPs-Table-ECS",
+        "file": "ML-HTTP-Access-Top-Source-IPs-Table-ECS.json"
       },
       {
-        "id": "ML-Apache-Access-Top-URLs-Table-ECS",
-        "file": "ML-Apache-Access-Top-URLs-Table-ECS.json"
+        "id": "ML-HTTP-Access-Top-URLs-Table-ECS",
+        "file": "ML-HTTP-Access-Top-URLs-Table-ECS.json"
       },
       {
-        "id": "ML-Apache-Access-Unique-Count-URL-Timechart-ECS",
-        "file": "ML-Apache-Access-Unique-Count-URL-Timechart-ECS.json"
+        "id": "ML-HTTP-Access-Unique-Count-URL-Timechart-ECS",
+        "file": "ML-HTTP-Access-Unique-Count-URL-Timechart-ECS.json"
+      },
+      {
+        "id": "ML-HTTP-Access-Events-Timechart-ECS",
+        "file": "ML-HTTP-Access-Events-Timechart-ECS.json"
       }
     ]
   }

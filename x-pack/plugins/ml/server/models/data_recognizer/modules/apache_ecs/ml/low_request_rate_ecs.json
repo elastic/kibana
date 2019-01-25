@@ -1,6 +1,6 @@
 {
   "groups": ["apache"],
-  "description": "Apache Access Logs: Detect low request rate (ECS)",
+  "description": "HTTP Access Logs: Detect low request rate (ECS)",
   "analysis_config" : {
     "bucket_span": "15m",
     "summary_count_field_name": "doc_count",
@@ -23,10 +23,11 @@
     "enabled": true
   },
   "custom_settings": {
+    "created_by": "ml-module-apache",
     "custom_urls": [
       {
         "url_name": "Raw Data",
-        "url_value": "kibana#/discover/ML-Filebeat-Apache-Access-ECS?_g=(time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(columns:!(_source),filters:!(),index:\u0027INDEX_PATTERN_ID\u0027,interval:auto,query:(query_string:(analyze_wildcard:!t,query:\u0027*\u0027)),sort:!(\u0027@timestamp\u0027,desc))"
+        "url_value": "kibana#/discover/ML-Filebeat-HTTP-Access-ECS?_g=(time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(columns:!(_source),filters:!(),index:\u0027INDEX_PATTERN_ID\u0027,interval:auto,query:(query_string:(analyze_wildcard:!t,query:\u0027event.module:apache%20AND%20event.dataset:access\u0027)),sort:!(\u0027@timestamp\u0027,desc))"
       }
     ]
   }
