@@ -5,7 +5,6 @@
  */
 
 import Chance from 'chance'; // eslint-disable-line
-import { uniq } from 'lodash';
 import { ConfigurationBlock } from '../../../../common/domain_types';
 import { FrameworkUser } from '../framework/adapter_types';
 import { ConfigurationBlockAdapter } from './adapter_types';
@@ -34,6 +33,17 @@ export class MemoryConfigurationBlockAdapter implements ConfigurationBlockAdapte
       success: true,
     }));
   }
+  public async deleteForTags(
+    user: FrameworkUser,
+    tagIds: string[]
+  ): Promise<Array<{ id: string; success: boolean; reason?: string }>> {
+    this.db = this.db.filter(block => !tagIds.includes(block.tag));
+    return tagIds.map(id => ({
+      id,
+      success: true,
+    }));
+  }
+
   public async getForTags(user: FrameworkUser, tagIds: string[], page?: number, size?: number) {
     const results = this.db.filter(block => tagIds.includes(block.id));
     return {
@@ -53,13 +63,6 @@ export class MemoryConfigurationBlockAdapter implements ConfigurationBlockAdapte
       }
       return block.id;
     });
-  }
-
-  public async getTagIdsExcludingTypes(
-    user: FrameworkUser,
-    blockTypes: string[]
-  ): Promise<string[]> {
-    return uniq(this.db.map(block => block.tag));
   }
 
   public setDB(db: ConfigurationBlock[]) {

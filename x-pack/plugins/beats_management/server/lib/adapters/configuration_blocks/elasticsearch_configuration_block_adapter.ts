@@ -112,6 +112,33 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
     });
   }
 
+  public async deleteForTags(
+    user: FrameworkUser,
+    tagIds: string[]
+  ): Promise<Array<{ id: string; success: boolean; reason?: string }>> {
+    const result = await this.database.bulk(user, {
+      body: tagIds.map(id => ({ delete: { 'configuration_block.tag': id } })),
+      index: INDEX_NAMES.BEATS,
+      refresh: 'wait_for',
+      type: '_doc',
+    });
+
+    if (result.errors) {
+      if (result.items[0].result) {
+        throw new Error(result.items[0].result);
+      }
+      throw new Error((result.items[0] as any).index.error.reason);
+    }
+
+    return result.items.map((item: any) => {
+      return {
+        id: item.delete._id,
+        success: item.delete.result === 'deleted',
+        reason: item.delete.result !== 'deleted' ? item.delete.result : undefined,
+      };
+    });
+  }
+
   public async create(user: FrameworkUser, configs: ConfigurationBlock[]): Promise<string[]> {
     const body = flatten(
       configs.map(config => {
@@ -141,38 +168,5 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
     }
 
     return result.items.map((item: any) => item.index._id);
-  }
-
-  public async getTagIdsExcludingTypes(
-    user: FrameworkUser,
-    blockTypes: string[]
-  ): Promise<string[]> {
-    const body = {
-      query: {
-        bool: {
-          must_not: {
-            terms: { type: blockTypes },
-          },
-        },
-      },
-      aggs: {
-        tags: {
-          terms: { field: 'configuration_block.tag' },
-        },
-      },
-    };
-
-    const params = {
-      body,
-      index: INDEX_NAMES.BEATS,
-      ignore: [404],
-      _source: true,
-      size: 10000,
-      type: '_doc',
-    };
-    const response = await this.database.search(user, params);
-
-    // @ts-ignore
-    return get<any>(response, 'aggregations.tags.buckets', []).map(bucket => bucket.key);
   }
 }

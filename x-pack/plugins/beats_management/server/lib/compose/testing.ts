@@ -19,13 +19,18 @@ import { CMServerLibs } from '../types';
 export function compose(server: any): CMServerLibs {
   const framework = new BackendFrameworkLib(new HapiBackendFrameworkAdapter(undefined, server));
 
+  const beatsAdapter = new MemoryBeatsAdapter(server.beatsDB || []);
   const configAdapter = new MemoryConfigurationBlockAdapter(server.configsDB || []);
-  const tags = new CMTagsDomain(new MemoryTagsAdapter(server.tagsDB || []), configAdapter);
+  const tags = new CMTagsDomain(
+    new MemoryTagsAdapter(server.tagsDB || []),
+    configAdapter,
+    beatsAdapter
+  );
   const configurationBlocks = new ConfigurationBlocksLib(configAdapter, tags);
   const tokens = new CMTokensDomain(new MemoryTokensAdapter(server.tokensDB || []), {
     framework,
   });
-  const beats = new CMBeatsDomain(new MemoryBeatsAdapter(server.beatsDB || []), {
+  const beats = new CMBeatsDomain(beatsAdapter, {
     tags,
     tokens,
     framework,

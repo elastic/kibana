@@ -52,10 +52,13 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
       assignmentOptions: null,
     };
 
-    if (props.urlState.beatsKBar) {
-      props.containers.beats.reload(props.urlState.beatsKBar);
-    }
     props.renderAction(this.renderActionArea);
+  }
+
+  public componentDidMount() {
+    if (this.props.urlState.beatsKBar) {
+      this.props.containers.beats.reload(this.props.urlState.beatsKBar);
+    }
     this.updateBeatsData();
   }
 

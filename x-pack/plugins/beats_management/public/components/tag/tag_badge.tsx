@@ -19,7 +19,9 @@ interface TagBadgeProps {
 export const TagBadge = (props: TagBadgeProps) => {
   const { iconType, onClick, onClickAriaLabel, tag } = props;
   const maxIdRenderSize = props.maxIdRenderSize || TABLE_CONFIG.TRUNCATE_TAG_LENGTH;
-  const idToRender = `${tag.name.substring(0, maxIdRenderSize)}...`;
+  const idToRender = `${tag.name.substring(0, maxIdRenderSize)}${
+    tag.name.length > maxIdRenderSize ? '...' : ''
+  }`;
 
   return (
     <EuiBadge

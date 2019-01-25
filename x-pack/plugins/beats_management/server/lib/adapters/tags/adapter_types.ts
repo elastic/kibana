@@ -11,4 +11,5 @@ export interface CMTagsAdapter {
   delete(user: FrameworkUser, tagIds: string[]): Promise<boolean>;
   getTagsWithIds(user: FrameworkUser, tagIds: string[]): Promise<BeatTag[]>;
   upsertTag(user: FrameworkUser, tag: BeatTag): Promise<string>;
+  getWithoutConfigTypes(user: FrameworkUser, blockTypes: string[]): Promise<BeatTag[]>;
 }

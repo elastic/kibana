@@ -38,9 +38,7 @@ export class TagsContainer extends Container<ContainerState> {
     const tagIds = tags.map((tag: BeatTag) => tag.id);
     const success = await this.libs.tags.delete(tagIds);
     if (success) {
-      this.setState({
-        list: this.state.list.filter(tag => tagIds.includes(tag.id)),
-      });
+      this.reload(this.query);
     }
     return success;
   };

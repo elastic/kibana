@@ -26,14 +26,19 @@ export function compose(server: KibanaLegacyServer): CMServerLibs {
     new KibanaBackendFrameworkAdapter(PLUGIN.ID, server, CONFIG_PREFIX)
   );
   const database = new KibanaDatabaseAdapter(server.plugins.elasticsearch as DatabaseKbnESPlugin);
-
+  const beatsAdapter = new ElasticsearchBeatsAdapter(database);
   const configAdapter = new ElasticsearchConfigurationBlockAdapter(database);
-  const tags = new CMTagsDomain(new ElasticsearchTagsAdapter(database), configAdapter);
+
+  const tags = new CMTagsDomain(
+    new ElasticsearchTagsAdapter(database),
+    configAdapter,
+    beatsAdapter
+  );
   const configurationBlocks = new ConfigurationBlocksLib(configAdapter, tags);
   const tokens = new CMTokensDomain(new ElasticsearchTokensAdapter(database), {
     framework,
   });
-  const beats = new CMBeatsDomain(new ElasticsearchBeatsAdapter(database), {
+  const beats = new CMBeatsDomain(beatsAdapter, {
     tags,
     tokens,
     framework,

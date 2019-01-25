@@ -8,7 +8,6 @@ import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
-import { BeatTag } from '../../../common/domain_types';
 import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { AssignmentActionType, Table, TagsTableType } from '../../components/table';
 import { tagListActions } from '../../components/table/action_schema';
@@ -97,8 +96,7 @@ class TagsPageComponent extends React.PureComponent<PageProps, PageState> {
     const { intl } = this.props;
     switch (action) {
       case AssignmentActionType.Delete:
-        const tags = this.getSelectedTags().map((tag: BeatTag) => tag.id);
-        const success = await this.props.containers.tags.delete(tags);
+        const success = await this.props.containers.tags.delete(this.getSelectedTags());
         if (!success) {
           alert(
             intl.formatMessage({

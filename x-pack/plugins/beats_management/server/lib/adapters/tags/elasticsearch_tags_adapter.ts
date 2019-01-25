@@ -148,4 +148,37 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
 
     return get<string>(response, 'result');
   }
+
+  public async getWithoutConfigTypes(
+    user: FrameworkUser,
+    blockTypes: string[]
+  ): Promise<BeatTag[]> {
+    const body = {
+      query: {
+        bool: {
+          filter: {
+            match: {
+              type: 'tag',
+            },
+          },
+          must_not: {
+            terms: { 'tag.hasConfigurationBlocksTypes': blockTypes },
+          },
+        },
+      },
+    };
+
+    const params = {
+      body,
+      index: INDEX_NAMES.BEATS,
+      ignore: [404],
+      _source: true,
+      size: 10000,
+      type: '_doc',
+    };
+    const response = await this.database.search(user, params);
+    const tags = get<any>(response, 'hits.hits', []);
+
+    return tags.map((tag: any) => ({ hasConfigurationBlocksTypes: [], ...tag._source.tag }));
+  }
 }

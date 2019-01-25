@@ -6,6 +6,7 @@
 import { uniq } from 'lodash';
 import { UNIQUENESS_ENFORCING_TYPES } from '../../common/constants/configuration_blocks';
 import { BeatTag } from '../../common/domain_types';
+import { CMBeatsAdapter } from './adapters/beats/adapter_types';
 import { ConfigurationBlockAdapter } from './adapters/configuration_blocks/adapter_types';
 import { FrameworkUser } from './adapters/framework/adapter_types';
 import { CMTagsAdapter } from './adapters/tags/adapter_types';
@@ -13,7 +14,8 @@ import { CMTagsAdapter } from './adapters/tags/adapter_types';
 export class CMTagsDomain {
   constructor(
     private readonly adapter: CMTagsAdapter,
-    private readonly configurationBlocksAdapter: ConfigurationBlockAdapter
+    private readonly configurationBlocksAdapter: ConfigurationBlockAdapter,
+    private readonly beatsAdabter: CMBeatsAdapter
   ) {}
 
   public async getAll(user: FrameworkUser, ESQuery?: any): Promise<BeatTag[]> {
@@ -27,6 +29,11 @@ export class CMTagsDomain {
   }
 
   public async delete(user: FrameworkUser, tagIds: string[]) {
+    const beats = await this.beatsAdabter.getAllWithTags(user, tagIds);
+    if (beats.length > 0) {
+      return false;
+    }
+    await this.configurationBlocksAdapter.deleteForTags(user, tagIds);
     return await this.adapter.delete(user, tagIds);
   }
 
@@ -44,11 +51,8 @@ export class CMTagsDomain {
       )
     ).filter(type => UNIQUENESS_ENFORCING_TYPES.includes(type));
 
-    const tagIds = await this.configurationBlocksAdapter.getTagIdsExcludingTypes(
-      user,
-      existingUniqueBlockTypes
-    );
-    return await this.adapter.getTagsWithIds(user, tagIds);
+    const safeTags = await this.adapter.getWithoutConfigTypes(user, existingUniqueBlockTypes);
+    return safeTags;
   }
 
   public async upsertTag(user: FrameworkUser, tag: BeatTag): Promise<string> {
