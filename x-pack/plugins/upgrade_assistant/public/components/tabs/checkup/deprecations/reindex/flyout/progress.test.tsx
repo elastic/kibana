@@ -39,7 +39,7 @@ describe('ReindexProgress', () => {
       },
       Object {
         "status": "incomplete",
-        "title": "Creating alias",
+        "title": "Swapping original index with alias",
       },
     ]
   }

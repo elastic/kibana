@@ -1,31 +1,11 @@
 {
   "upgrade-assistant-reindex-operation": {
+    "dynamic": true,
     "properties": {
       "indexName": {
-        "type": "text"
-      },
-      "newIndexName": {
-        "type": "text"
+        "type": "keyword"
       },
       "status": {
-        "type": "integer"
-      },
-      "lastCompletedStep": {
-        "type": "integer"
-      },
-      "locked": {
-        "type": "text"
-      },
-      "reindexTaskId": {
-        "type": "text"
-      },
-      "reindexTaskPercComplete": {
-        "type": "float"
-      },
-      "errorMessage": {
-        "type": "text"
-      },
-      "mlReindexCount": {
         "type": "integer"
       }
     }

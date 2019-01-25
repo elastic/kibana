@@ -114,7 +114,7 @@ export const ReindexProgress: React.StatelessComponent<{
         },
         reindexingDocsStep,
         {
-          title: 'Creating alias',
+          title: 'Swapping original index with alias',
           ...stepDetails(ReindexStep.aliasCreated),
         },
       ]}

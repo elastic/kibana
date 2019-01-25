@@ -62,8 +62,14 @@ export const ChecklistFlyoutStep: React.StatelessComponent<{
           color="warning"
           iconType="alert"
         >
-          If you can’t stop document updates or need to reindex into a new cluster, consider using a
-          different upgrade strategy.
+          <p>
+            If you can’t stop document updates or need to reindex into a new cluster, consider using
+            a different upgrade strategy.
+          </p>
+          <p>
+            Reindexing will continue in the background, but if Kibana shuts down or restarts you
+            will need to return to this page to resume reindexing.
+          </p>
         </EuiCallOut>
         <EuiSpacer />
         <EuiTitle size="xs">

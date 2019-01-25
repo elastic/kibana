@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { range } from 'lodash';
 import moment from 'moment';
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
@@ -12,6 +11,10 @@ import {
   FindResponse,
   SavedObjectsClient,
 } from 'src/server/saved_objects/service/saved_objects_client';
+import {
+  CURRENT_MAJOR_VERSION,
+  PREV_MAJOR_VERSION,
+} from 'x-pack/plugins/upgrade_assistant/common/version';
 import {
   REINDEX_OP_TYPE,
   ReindexOperation,
@@ -93,13 +96,6 @@ export interface ReindexActions {
   getFlatSettings(indexName: string): Promise<FlatSettings | null>;
 
   /**
-   * Tries to undo any changes that were made in the event of a failure.
-   * TODO: move back to reindex service?
-   * @param indexName
-   */
-  cleanupChanges(indexName: string): Promise<void>;
-
-  /**
    * Returns whether or not an indexName is a special ML index that requires suspending ML jobs.
    * @param indexName
    */
@@ -142,17 +138,15 @@ export const reindexActionsFactory = (
    * that doesn't already exist.
    * @param indexName
    */
-  const getNewIndexName = async (indexName: string, attempts = 100) => {
-    for (const i of range(0, attempts)) {
-      const newIndexName = `${indexName}-reindex-${i}`;
-      if (!(await callCluster('indices.exists', { index: newIndexName }))) {
-        return newIndexName;
-      }
-    }
+  const getNewIndexName = (indexName: string) => {
+    const prevVersionSuffix = `-reindexed-v${PREV_MAJOR_VERSION}`;
+    const currentVersionSuffix = `-reindexed-v${CURRENT_MAJOR_VERSION}`;
 
-    throw new Error(
-      `Could not generate an indexName that does not already exist after ${attempts} attempts.`
-    );
+    if (indexName.endsWith(prevVersionSuffix)) {
+      return indexName.replace(new RegExp(`${prevVersionSuffix}$`), currentVersionSuffix);
+    } else {
+      return `${indexName}${currentVersionSuffix}`;
+    }
   };
 
   const isLocked = (reindexOp: ReindexSavedObject) => {
@@ -195,7 +189,7 @@ export const reindexActionsFactory = (
     async createReindexOp(indexName: string) {
       return client.create<ReindexOperation>(REINDEX_OP_TYPE, {
         indexName,
-        newIndexName: await getNewIndexName(indexName),
+        newIndexName: getNewIndexName(indexName),
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
         locked: null,
@@ -291,13 +285,6 @@ export const reindexActionsFactory = (
       return flatSettings[indexName];
     },
 
-    async cleanupChanges(indexName: string) {
-      await callCluster('indices.putSettings', {
-        index: indexName,
-        body: { 'index.blocks.write': false },
-      });
-    },
-
     isMlIndex(indexName: string) {
       return indexName.startsWith('.ml-state') || indexName.startsWith('.ml-anomalies');
     },
@@ -307,22 +294,25 @@ export const reindexActionsFactory = (
         try {
           return await client.get<ReindexOperation>(REINDEX_OP_TYPE, ML_LOCK_DOC_ID);
         } catch (e) {
-          // TODO: guard
-          return await client.create<ReindexOperation>(
-            REINDEX_OP_TYPE,
-            {
-              indexName: null,
-              newIndexName: null,
-              locked: null,
-              status: null,
-              lastCompletedStep: null,
-              reindexTaskId: null,
-              reindexTaskPercComplete: null,
-              errorMessage: null,
-              mlReindexCount: 0,
-            } as any,
-            { id: ML_LOCK_DOC_ID }
-          );
+          if (e.isBoom && e.output.statusCode === 404) {
+            return await client.create<ReindexOperation>(
+              REINDEX_OP_TYPE,
+              {
+                indexName: null,
+                newIndexName: null,
+                locked: null,
+                status: null,
+                lastCompletedStep: null,
+                reindexTaskId: null,
+                reindexTaskPercComplete: null,
+                errorMessage: null,
+                mlReindexCount: 0,
+              } as any,
+              { id: ML_LOCK_DOC_ID }
+            );
+          } else {
+            throw e;
+          }
         }
       };
 

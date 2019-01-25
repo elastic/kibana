@@ -69,6 +69,37 @@ export const reindexServiceFactory = (
   callCluster: CallCluster,
   actions: ReindexActions
 ): ReindexService => {
+  // ------ Utility functions
+
+  const resumeMlJobs = async () => {
+    await actions.decrementMlReindexes();
+    await actions.runWhileMlLocked(async mlDoc => {
+      if (mlDoc.attributes.mlReindexCount === 0) {
+        const res = await callCluster('transport.request', {
+          path: '/_ml/set_upgrade_mode?enabled=false',
+          method: 'POST',
+        });
+
+        if (!res.acknowledged) {
+          throw new Error(`Could not resume ML jobs`);
+        }
+      }
+
+      return mlDoc;
+    });
+  };
+
+  const cleanupChanges = async (indexName: string) => {
+    await callCluster('indices.putSettings', {
+      index: indexName,
+      body: { 'index.blocks.write': false },
+    });
+
+    if (actions.isMlIndex(indexName)) {
+      await resumeMlJobs();
+    }
+  };
+
   // ------ Functions used to process the state machine
 
   const validateNodesMinimumVersion = async (minMajor: number, minMinor: number) => {
@@ -267,9 +298,14 @@ export const reindexServiceFactory = (
     });
 
     if (taskResponse.completed) {
-      if (taskResponse.task.status.created < taskResponse.task.status.total) {
-        const failureExample = JSON.stringify(taskResponse.response.failures[0]);
-        throw Boom.badData(`Reindexing failed with failures like: ${failureExample}`);
+      const { count } = await callCluster('count', { index: reindexOp.attributes.indexName });
+      if (taskResponse.task.status.created < count) {
+        if (taskResponse.response.failures && taskResponse.response.failures.length > 0) {
+          const failureExample = JSON.stringify(taskResponse.response.failures[0]);
+          throw Boom.badData(`Reindexing failed with failures like: ${failureExample}`);
+        } else {
+          throw Boom.badData('Reindexing failed due to new documents created in original index.');
+        }
       }
 
       // Delete the task from ES .tasks index
@@ -346,21 +382,7 @@ export const reindexServiceFactory = (
       });
     }
 
-    await actions.decrementMlReindexes();
-    await actions.runWhileMlLocked(async mlDoc => {
-      if (mlDoc.attributes.mlReindexCount === 0) {
-        const res = await callCluster('transport.request', {
-          path: '/_ml/set_upgrade_mode?enabled=false',
-          method: 'POST',
-        });
-
-        if (!res.acknowledged) {
-          throw new Error(`Could not resume ML jobs`);
-        }
-      }
-
-      return mlDoc;
-    });
+    await resumeMlJobs();
 
     return actions.updateReindexOp(reindexOp, {
       lastCompletedStep: ReindexStep.mlUpgradeModeUnset,
@@ -450,7 +472,7 @@ export const reindexServiceFactory = (
             errorMessage: e instanceof Error ? e.stack : e.toString(),
           });
 
-          await actions.cleanupChanges(lockedReindexOp.attributes.indexName);
+          await cleanupChanges(lockedReindexOp.attributes.indexName);
         }
 
         return lockedReindexOp;

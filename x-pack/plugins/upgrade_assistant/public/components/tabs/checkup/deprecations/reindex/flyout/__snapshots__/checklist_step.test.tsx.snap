@@ -9,7 +9,12 @@ exports[`ChecklistFlyout renders 1`] = `
       size="m"
       title="Index is unable to ingest, update, or delete documents while reindexing"
     >
-      If you can’t stop document updates or need to reindex into a new cluster, consider using a different upgrade strategy.
+      <p>
+        If you can’t stop document updates or need to reindex into a new cluster, consider using a different upgrade strategy.
+      </p>
+      <p>
+        Reindexing will continue in the background, but if Kibana shuts down or restarts you will need to return to this page to resume reindexing.
+      </p>
     </EuiCallOut>
     <EuiSpacer
       size="l"
@@ -24,6 +29,7 @@ exports[`ChecklistFlyout renders 1`] = `
     </EuiTitle>
     <Component
       errorMessage={null}
+      lastCompletedStep={20}
       reindexStatus={0}
       reindexTaskPercComplete={null}
     />

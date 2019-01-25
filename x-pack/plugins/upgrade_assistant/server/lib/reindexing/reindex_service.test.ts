@@ -449,7 +449,10 @@ describe('reindexService', () => {
         expect(updatedOp.attributes.errorMessage).not.toBeNull();
 
         // Original index should have been set back to allow reads.
-        expect(actions.cleanupChanges).toHaveBeenCalledWith('myIndex');
+        expect(callCluster).toHaveBeenCalledWith('indices.putSettings', {
+          index: 'myIndex',
+          body: { 'index.blocks.write': false },
+        });
       });
     });
 
@@ -490,7 +493,8 @@ describe('reindexService', () => {
       });
 
       it('fails if starting reindex fails', async () => {
-        callCluster.mockRejectedValueOnce(new Error('blah!'));
+        actions.getBooleanFieldPaths.mockResolvedValue([['field1'], ['nested', 'field2']]);
+        callCluster.mockRejectedValueOnce(new Error('blah!')).mockResolvedValueOnce({});
         const updatedOp = await service.processNextStep(reindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.newIndexCreated);
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
@@ -527,6 +531,7 @@ describe('reindexService', () => {
               completed: true,
               task: { status: { created: 100, total: 100 } },
             })
+            .mockResolvedValueOnce({ count: 100 })
             .mockResolvedValueOnce({ result: 'deleted' });
 
           const updatedOp = await service.processNextStep(reindexOp);
@@ -539,11 +544,14 @@ describe('reindexService', () => {
           });
         });
 
-        it('fails if docs created is less than total docs', async () => {
-          callCluster.mockResolvedValueOnce({
-            completed: true,
-            task: { status: { created: 95, total: 100 } },
-          });
+        it('fails if docs created is less than count in source index', async () => {
+          callCluster
+            .mockResolvedValueOnce({
+              completed: true,
+              task: { status: { created: 95, total: 95 } },
+            })
+            .mockReturnValueOnce({ count: 100 });
+
           const updatedOp = await service.processNextStep(reindexOp);
           expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexStarted);
           expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);

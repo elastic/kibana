@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment = require('moment');
+import Boom from 'boom';
+import moment from 'moment';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import {
   REINDEX_OP_TYPE,
@@ -12,6 +13,10 @@ import {
   ReindexStatus,
   ReindexStep,
 } from 'x-pack/plugins/upgrade_assistant/common/types';
+import {
+  CURRENT_MAJOR_VERSION,
+  PREV_MAJOR_VERSION,
+} from 'x-pack/plugins/upgrade_assistant/common/version';
 import {
   LOCK_WINDOW,
   ML_LOCK_DOC_ID,
@@ -48,16 +53,11 @@ describe('ReindexActions', () => {
   describe('createReindexOp', () => {
     beforeEach(() => client.create.mockResolvedValue());
 
-    it('generates fallback newIndexName if already exists', async () => {
-      callCluster
-        .mockResolvedValueOnce(true)
-        .mockResolvedValueOnce(true)
-        .mockResolvedValueOnce(false);
-
+    it(`appends -reindexed-v${CURRENT_MAJOR_VERSION} to new name`, async () => {
       await actions.createReindexOp('myIndex');
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
         indexName: 'myIndex',
-        newIndexName: 'myIndex-reindex-2',
+        newIndexName: `myIndex-reindexed-v${CURRENT_MAJOR_VERSION}`,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
         locked: null,
@@ -68,11 +68,19 @@ describe('ReindexActions', () => {
       });
     });
 
-    it('fails if it cannot find a newIndexName that does not already exist', async () => {
-      callCluster.mockResolvedValue(true); // always return true
-
-      await expect(actions.createReindexOp('myIndex')).rejects.toThrow();
-      expect(client.create).not.toHaveBeenCalled();
+    it(`replaces -reindexed-v${PREV_MAJOR_VERSION} with -reindexed-v${CURRENT_MAJOR_VERSION}`, async () => {
+      await actions.createReindexOp(`myIndex-reindexed-v${PREV_MAJOR_VERSION}`);
+      expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
+        indexName: `myIndex-reindexed-v${PREV_MAJOR_VERSION}`,
+        newIndexName: `myIndex-reindexed-v${CURRENT_MAJOR_VERSION}`,
+        status: ReindexStatus.inProgress,
+        lastCompletedStep: ReindexStep.created,
+        locked: null,
+        reindexTaskId: null,
+        reindexTaskPercComplete: null,
+        errorMessage: null,
+        mlReindexCount: null,
+      });
     });
   });
 
@@ -297,13 +305,10 @@ describe('ReindexActions', () => {
     });
   });
 
-  // TODO
-  // describe('cleanupChanges');
-
   describe('runWhileMlLocked', () => {
     it('creates the ML doc if it does not exist and executes callback', async () => {
       expect.assertions(3);
-      client.get.mockRejectedValueOnce(new Error()); // mock no ML doc exists yet
+      client.get.mockRejectedValueOnce(Boom.notFound()); // mock no ML doc exists yet
       client.create.mockImplementationOnce((type: any, attributes: any, { id }: any) =>
         Promise.resolve({
           type,

@@ -20,7 +20,7 @@ describe('ChecklistFlyout', () => {
     startReindex: jest.fn(),
     reindexState: {
       loadingState: LoadingState.Success,
-      lastCompletedSte: ReindexStep.readonly,
+      lastCompletedStep: ReindexStep.readonly,
       status: ReindexStatus.inProgress,
       reindexTaskPercComplete: null,
       errorMessage: null,

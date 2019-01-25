@@ -74,11 +74,12 @@ const removeUnsettableSettings = (settings: FlatSettings['settings']) =>
     'index.uuid',
     'index.blocks.write',
     'index.creation_date',
+    'index.legacy',
+    'index.mapping.single_type',
+    'index.provided_name',
     'index.routing.allocation.initial_recovery._id',
     'index.version.created',
     'index.version.upgraded',
-    'index.provided_name',
-    'index.legacy',
   ]);
 
 const updateFixableSettings = (settings: FlatSettings['settings']) => {
