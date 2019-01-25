@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { errors, SavedObjectsRepository } from './lib';
+
 export interface BaseOptions {
   namespace?: string;
 }
@@ -70,7 +72,7 @@ export interface BulkGetResponse<T extends SavedObjectAttributes = any> {
 }
 
 export interface SavedObjectAttributes {
-  [key: string]: string | number | boolean | null;
+  [key: string]: SavedObjectAttributes | string | number | boolean | null;
 }
 
 export interface SavedObject<T extends SavedObjectAttributes = any> {
@@ -85,9 +87,10 @@ export interface SavedObject<T extends SavedObjectAttributes = any> {
 }
 
 export declare class SavedObjectsClient {
-  public errors: any;
+  public static errors: typeof errors;
+  public errors: typeof errors;
 
-  constructor(repository: any);
+  constructor(repository: SavedObjectsRepository);
 
   public create<T extends SavedObjectAttributes = any>(
     type: string,

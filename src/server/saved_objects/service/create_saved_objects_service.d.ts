@@ -18,16 +18,15 @@
  */
 
 import { ScopedSavedObjectsClientProvider } from './lib';
-import { SavedObjectsClient as SavedObjectClientClass } from './saved_objects_client';
+import { SavedObjectsClient } from './saved_objects_client';
 
 export interface SavedObjectsService<Request = any> {
   // ATTENTION: these types are incomplete
   addScopedSavedObjectsClientWrapperFactory: ScopedSavedObjectsClientProvider<
     Request
   >['addClientWrapperFactory'];
+  getScopedSavedObjectsClient: ScopedSavedObjectsClientProvider<Request>['getClient'];
+  SavedObjectsClient: typeof SavedObjectsClient;
   types: string[];
-  SavedObjectsClient: {
-    new (repository: any): SavedObjectClientClass;
-  };
   getSavedObjectsRepository(...rest: any[]): any;
 }
