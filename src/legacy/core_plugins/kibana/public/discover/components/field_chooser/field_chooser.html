@@ -1,0 +1,201 @@
+<section class="sidebar-list" aria-label="{{::'kbn.discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel' | i18n: {defaultMessage: 'Index and fields'} }}">
+  <div ng-show="indexPatternList.length > 1">
+    <ui-select
+      class="index-pattern-selection"
+      ng-model="selectedIndexPattern"
+      on-select="setIndexPattern($item)"
+    >
+      <ui-select-match>
+        <span
+          class="uiSelectMatch--ellipsis"
+          tooltip="{{$select.selected.get('title')}}"
+          tooltip-append-to-body="true"
+        >
+          {{$select.selected.get('title')}}
+        </span>
+      </ui-select-match>
+      <ui-select-choices repeat="pattern in indexPatternList | filter:$select.search">
+        <div ng-bind-html="pattern.get('title') | highlight: $select.search"></div>
+      </ui-select-choices>
+    </ui-select>
+  </div>
+  <div ng-hide="indexPatternList.length > 1">
+    <div class="index-pattern">
+      <h2
+        class="index-pattern-label"
+        id="index_pattern_id"
+        tabindex="0"
+        css-truncate>
+
+        {{ indexPattern.title }}</h2>
+    </div>
+  </div>
+
+  <div class="dscSidebar__listHeader sidebar-list-header" ng-if="fields.length">
+    <h3
+      class="sidebar-list-header-label"
+      id="selected_fields"
+      tabindex="0"
+      i18n-id="kbn.discover.fieldChooser.filter.selectedFieldsTitle"
+      i18n-default-message="Selected fields"
+    ></h3>
+  </div>
+  <ul class="list-unstyled dscFieldList--selected" >
+    <discover-field
+      ng-repeat="field in fields.raw|filter:{display:true}"
+      field="field"
+      on-add-field="onAddField"
+      on-add-filter="onAddFilter"
+      on-remove-field="onRemoveField"
+      on-show-details="computeDetails"
+    >
+    </discover-field>
+  </ul>
+
+  <div class="sidebar-list-header sidebar-item euiFlexGroup euiFlexGroup--gutterMedium" ng-if="fields.length">
+    <h3
+      class="euiFlexItem sidebar-list-header-label"
+      id="available_fields"
+      tabindex="0"
+      i18n-id="kbn.discover.fieldChooser.filter.availableFieldsTitle"
+      i18n-default-message="Available fields"
+    ></h3>
+
+    <div class="euiFlexItem euiFlexItem--flexGrowZero">
+      <button
+        ng-click="$parent.showFields = !$parent.showFields"
+        aria-hidden="true"
+        class="kuiButton kuiButton--small visible-xs visible-sm pull-right dscFieldChooser__toggle"
+      >
+        <span
+          aria-hidden="true"
+          class="kuiIcon"
+          ng-class="{ 'fa-chevron-right': !$parent.showFields, 'fa-chevron-down': $parent.showFields }"
+        ></span>
+      </button>
+    </div>
+    <div class="euiFlexItem euiFlexItem--flexGrowZero">
+      <button
+        type="button"
+        ng-class="{ 'kuiButton--basic': !filter.active, 'kuiButton--primary': filter.active, 'hidden-xs': !$parent.showFields, 'hidden-sm': !$parent.showFields }"
+        class="kuiButton kuiButton--small pull-right discover-field-filter-toggle"
+        ng-click="$parent.showFilter = !$parent.showFilter"
+        aria-label="{{toggleFieldFilterButtonAriaLabel}}"
+        aria-expanded="{{!!$parent.showFilter}}"
+        aria-controls="discoverFieldFilter"
+        data-test-subj="toggleFieldFilterButton"
+      >
+        <span aria-hidden="true" class="kuiIcon fa-gear"></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="sidebar-item dscFieldDetails" ng-show="showFilter" id="discoverFieldFilter" data-test-subj="discoverFieldFilter">
+    <form role="form">
+      <div class="form-group">
+        <label
+          for="discoverFieldChooserFilterAggregatable"
+          i18n-id="kbn.discover.fieldChooser.filter.aggregatableLabel"
+          i18n-default-message="Aggregatable"
+        ></label>
+        <select
+          id="discoverFieldChooserFilterAggregatable"
+          ng-options="opt.value as opt.label for opt in filter.boolOpts"
+          ng-model="filter.vals.aggregatable"
+          class="form-control">
+        </select>
+      </div>
+      <div class="form-group">
+        <label
+          for="discoverFieldChooserFilterSearchable"
+          i18n-id="kbn.discover.fieldChooser.filter.searchableLabel"
+          i18n-default-message="Searchable"
+        ></label>
+        <select
+          id="discoverFieldChooserFilterSearchable"
+          ng-options="opt.value as opt.label for opt in filter.boolOpts"
+          ng-model="filter.vals.searchable"
+          class="form-control">
+        </select>
+      </div>
+      <div class="form-group">
+        <label
+          for="discoverFieldChooserFilterType"
+          i18n-id="kbn.discover.fieldChooser.filter.typeLabel"
+          i18n-default-message="Type"
+        ></label>
+        <select
+          id="discoverFieldChooserFilterType"
+          ng-options="field as field for field in fieldTypes"
+          ng-model="filter.vals.type"
+          class="form-control">
+        </select>
+      </div>
+      <div class="form-group">
+        <label
+          for="discoverFieldChooserFilterFieldName"
+          i18n-id="kbn.discover.fieldChooser.filter.fieldNameLabel"
+          i18n-default-message="Field name"
+        ></label>
+        <input
+          id="discoverFieldChooserFilterFieldName"
+          type="text"
+          class="form-control"
+          ng-model="filter.vals.name"
+        >
+      </div>
+      <div class="form-group">
+        <label for="discoverFieldChooserHideMissingFields">
+          <input id="discoverFieldChooserHideMissingFields" type="checkbox" ng-model="filter.vals.missing">
+          <span
+            i18n-id="kbn.discover.fieldChooser.filter.hideMissingFieldsLabel"
+            i18n-default-message="Hide missing fields"
+          ></span>
+        </label>
+      </div>
+      <button
+        ng-click="filter.reset()"
+        ng-disabled="!filter.active"
+        class="kuiButton kuiButton--danger kuiButton--fullWidth"
+        i18n-id="kbn.discover.fieldChooser.filter.resetFiltersButtonLabel"
+        i18n-default-message="Reset filters"
+      ></button>
+    </form>
+  </div>
+
+  <ul
+    ng-show="(popularFields | filter:filter.isFieldFiltered).length > 0"
+    ng-class="{ 'hidden-sm': !showFields, 'hidden-xs': !showFields }"
+    class="list-unstyled sidebar-well dscFieldList--popular">
+    <li class="sidebar-item sidebar-list-header">
+      <h6
+        i18n-id="kbn.discover.fieldChooser.filter.popularTitle"
+        i18n-default-message="Popular"
+      ></h6>
+    </li>
+    <discover-field
+      ng-repeat="field in popularFields | filter:filter.isFieldFiltered"
+      field="field"
+      on-add-field="onAddField"
+      on-add-filter="onAddFilter"
+      on-remove-field="onRemoveField"
+      on-show-details="computeDetails"
+    >
+    </discover-field>
+  </ul>
+
+  <ul
+    ng-class="{ 'hidden-sm': !showFields, 'hidden-xs': !showFields  }"
+    class="list-unstyled dscFieldList--unpopular">
+    <discover-field
+      ng-repeat="field in unpopularFields | filter:filter.isFieldFiltered"
+      field="field"
+      on-add-field="onAddField"
+      on-add-filter="onAddFilter"
+      on-remove-field="onRemoveField"
+      on-show-details="computeDetails"
+    >
+    </discover-field>
+  </ul>
+
+</section>

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import { EuiBasicTable } from '@elastic/eui';
-import { get, sortByOrder } from 'lodash';
+import { sortByOrder } from 'lodash';
 import React, { Component } from 'react';
+import { idx } from 'x-pack/plugins/apm/common/idx';
 import { StringMap } from '../../../../typings/common';
 
 // TODO: this should really be imported from EUI
@@ -18,7 +18,7 @@ export interface ITableColumn {
   align?: string;
   width?: string;
   sortable?: boolean;
-  render?: (value: any, item?: any) => any;
+  render?: (value: any, item?: any) => unknown;
 }
 
 export interface IManagedTableProps {
@@ -31,7 +31,7 @@ export interface IManagedTableProps {
     field: string;
     direction: 'asc' | 'desc';
   };
-  noItemsMessage?: any;
+  noItemsMessage?: React.ReactNode;
 }
 
 export class ManagedTable extends Component<IManagedTableProps, any> {
@@ -39,7 +39,7 @@ export class ManagedTable extends Component<IManagedTableProps, any> {
     super(props);
 
     const defaultSort = {
-      field: get(props, 'columns[0].field', ''),
+      field: idx(props, _ => _.columns[0].field) || '',
       direction: 'asc'
     };
 

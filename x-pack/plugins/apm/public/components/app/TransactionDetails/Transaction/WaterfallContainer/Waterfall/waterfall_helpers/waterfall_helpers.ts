@@ -15,8 +15,8 @@ import {
   zipObject
 } from 'lodash';
 import { colors } from 'x-pack/plugins/apm/public/style/variables';
-import { Span } from '../../../../../../../../typings/Span';
-import { Transaction } from '../../../../../../../../typings/Transaction';
+import { Span } from '../../../../../../../../typings/es_schemas/Span';
+import { Transaction } from '../../../../../../../../typings/es_schemas/Transaction';
 
 export interface IWaterfallIndex {
   [key: string]: IWaterfallItem;
@@ -84,24 +84,10 @@ export type IWaterfallItem = IWaterfallItemSpan | IWaterfallItemTransaction;
 function getTransactionItem(
   transaction: Transaction
 ): IWaterfallItemTransaction {
-  if (transaction.version === 'v1') {
-    return {
-      id: transaction.transaction.id,
-      serviceName: transaction.context.service.name,
-      name: transaction.transaction.name,
-      duration: transaction.transaction.duration.us,
-      timestamp: new Date(transaction['@timestamp']).getTime() * 1000,
-      offset: 0,
-      skew: 0,
-      docType: 'transaction',
-      transaction
-    };
-  }
-
   return {
     id: transaction.transaction.id,
     parentId: transaction.parent && transaction.parent.id,
-    serviceName: transaction.context.service.name,
+    serviceName: transaction.service.name,
     name: transaction.transaction.name,
     duration: transaction.transaction.duration.us,
     timestamp: transaction.timestamp.us,
@@ -113,26 +99,10 @@ function getTransactionItem(
 }
 
 function getSpanItem(span: Span): IWaterfallItemSpan {
-  if (span.version === 'v1') {
-    return {
-      id: span.span.id,
-      parentId: span.span.parent || span.transaction.id,
-      serviceName: span.context.service.name,
-      name: span.span.name,
-      duration: span.span.duration.us,
-      timestamp:
-        new Date(span['@timestamp']).getTime() * 1000 + span.span.start.us,
-      offset: 0,
-      skew: 0,
-      docType: 'span',
-      span
-    };
-  }
-
   return {
-    id: span.span.hex_id,
+    id: span.span.id,
     parentId: span.parent && span.parent.id,
-    serviceName: span.context.service.name,
+    serviceName: span.service.name,
     name: span.span.name,
     duration: span.span.duration.us,
     timestamp: span.timestamp.us,
@@ -287,9 +257,8 @@ export function getWaterfall(
       }
     });
 
-  const childrenByParentId = groupBy(
-    filteredHits,
-    hit => (hit.parentId ? hit.parentId : 'root')
+  const childrenByParentId = groupBy(filteredHits, hit =>
+    hit.parentId ? hit.parentId : 'root'
   );
   const entryTransactionItem = getTransactionItem(entryTransaction);
   const itemsById: IWaterfallIndex = indexBy(filteredHits, 'id');

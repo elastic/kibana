@@ -387,6 +387,9 @@
                                   },
                                   "validate": {
                                     "type": "long"
+                                  },
+                                  "internal": {
+                                    "type": "long"
                                   }
                                 }
                               },

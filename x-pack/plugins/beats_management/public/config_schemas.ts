@@ -4,30 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { YamlConfigSchema } from './lib/lib';
+import { YamlConfigSchema } from './lib/types';
 
 const filebeatInputConfig: YamlConfigSchema[] = [
   {
     id: 'paths',
     ui: {
-      label: 'Paths',
+      label: 'filebeatInputConfig.paths.ui.label',
       type: 'multi-input',
-      helpText: 'Put each of the paths on a seperate line',
+      helpText: 'filebeatInputConfig.paths.ui.helpText',
       placeholder: `first/path/to/file.json                   second/path/to/otherfile.json`,
     },
     validations: 'isPaths',
-    error: 'One file path per line',
+    error: 'filebeatInputConfig.paths.error',
     required: true,
   },
   {
     id: 'other',
     ui: {
-      label: 'Other Config',
+      label: 'filebeatInputConfig.other.ui.label',
       type: 'code',
-      helpText: 'Use YAML format to specify other settings for the Filebeat Input',
+      helpText: 'filebeatInputConfig.other.ui.helpText',
     },
     validations: 'isYaml',
-    error: 'Use valid YAML format',
+    error: 'filebeatInputConfig.other.error',
   },
 ];
 
@@ -35,7 +35,7 @@ const filebeatModuleConfig: YamlConfigSchema[] = [
   {
     id: 'module',
     ui: {
-      label: 'Module',
+      label: 'filebeatModuleConfig.module.ui.label',
       type: 'select',
     },
     options: [
@@ -108,18 +108,18 @@ const filebeatModuleConfig: YamlConfigSchema[] = [
         text: 'traefik',
       },
     ],
-    error: 'Please select a module',
+    error: 'filebeatModuleConfig.module.error',
     required: true,
   },
   {
     id: 'other',
     ui: {
-      label: 'Other Config',
+      label: 'filebeatModuleConfig.other.ui.label',
       type: 'code',
-      helpText: 'Use YAML format to specify other settings for the Filebeat Module',
+      helpText: 'filebeatModuleConfig.other.ui.helpText',
     },
     validations: 'isYaml',
-    error: 'Use valid YAML format',
+    error: 'filebeatModuleConfig.other.error',
   },
 ];
 
@@ -127,7 +127,7 @@ const metricbeatModuleConfig: YamlConfigSchema[] = [
   {
     id: 'module',
     ui: {
-      label: 'Module',
+      label: 'metricbeatModuleConfig.module.ui.label',
       type: 'select',
     },
     options: [
@@ -272,41 +272,41 @@ const metricbeatModuleConfig: YamlConfigSchema[] = [
         text: 'zookeeper',
       },
     ],
-    error: 'Please select a module',
+    error: 'metricbeatModuleConfig.module.error',
     required: true,
   },
   {
     id: 'hosts',
     ui: {
-      label: 'Hosts',
+      label: 'metricbeatModuleConfig.hosts.ui.label',
       type: 'multi-input',
-      helpText: 'Put each of the paths on a seperate line',
+      helpText: 'metricbeatModuleConfig.hosts.ui.helpText',
       placeholder: `somehost.local                                                             otherhost.local`,
     },
     validations: 'isHosts',
-    error: 'One file host per line',
+    error: 'metricbeatModuleConfig.hosts.error',
     required: false,
   },
   {
     id: 'period',
     ui: {
-      label: 'Period',
+      label: 'metricbeatModuleConfig.period.ui.label',
       type: 'input',
     },
     defaultValue: '10s',
     validations: 'isPeriod',
-    error: 'Invalid Period, must be formatted as `10s` for 10 seconds',
+    error: 'metricbeatModuleConfig.period.error',
     required: true,
   },
   {
     id: 'other',
     ui: {
-      label: 'Other Config',
+      label: 'metricbeatModuleConfig.other.ui.label',
       type: 'code',
-      helpText: 'Use YAML format to specify other settings for the Metricbeat Module',
+      helpText: 'metricbeatModuleConfig.other.ui.helpText',
     },
     validations: 'isYaml',
-    error: 'Use valid YAML format',
+    error: 'metricbeatModuleConfig.other.error',
   },
 ];
 
@@ -314,7 +314,7 @@ const outputConfig: YamlConfigSchema[] = [
   {
     id: 'output',
     ui: {
-      label: 'Output Type',
+      label: 'outputConfig.output.ui.label',
       type: 'select',
     },
     options: [
@@ -331,46 +331,58 @@ const outputConfig: YamlConfigSchema[] = [
         text: 'Kafka',
       },
       {
-        value: 'console',
-        text: 'Console',
+        value: 'redis',
+        text: 'Redis',
       },
     ],
-    error: 'Please select an output type',
+    error: 'outputConfig.output.error',
     required: true,
   },
   {
     id: '{{output}}.hosts',
     ui: {
-      label: 'Hosts',
+      label: 'outputConfig.hosts.ui.label',
       type: 'multi-input',
     },
     validations: 'isHosts',
-    error: 'One file host per line',
+    error: 'outputConfig.hosts.error',
     parseValidResult: v => v.split('\n'),
   },
   {
     id: '{{output}}.username',
     ui: {
-      label: 'Username',
+      label: 'outputConfig.username.ui.label',
       type: 'input',
     },
     validations: 'isString',
-    error: 'Unprocessable username',
+    error: 'outputConfig.username.error',
   },
   {
     id: '{{output}}.password',
     ui: {
-      label: 'Password',
+      label: 'outputConfig.password.ui.label',
       type: 'password',
     },
     validations: 'isString',
-    error: 'Unprocessable password',
+    error: 'outputConfig.password.error',
   },
 ];
 
 export const supportedConfigs = [
-  { text: 'Filebeat Input', value: 'filebeat.inputs', config: filebeatInputConfig },
-  { text: 'Filebeat Module', value: 'filebeat.modules', config: filebeatModuleConfig },
-  { text: 'Metricbeat Module', value: 'metricbeat.modules', config: metricbeatModuleConfig },
-  { text: 'Output', value: 'output', config: outputConfig },
+  {
+    text: 'supportedConfigs.filebeatInput.text',
+    value: 'filebeat.inputs',
+    config: filebeatInputConfig,
+  },
+  {
+    text: 'supportedConfigs.filebeatModule.text',
+    value: 'filebeat.modules',
+    config: filebeatModuleConfig,
+  },
+  {
+    text: 'supportedConfigs.metricbeatModule.text',
+    value: 'metricbeat.modules',
+    config: metricbeatModuleConfig,
+  },
+  { text: 'supportedConfigs.output.text', value: 'output', config: outputConfig },
 ];

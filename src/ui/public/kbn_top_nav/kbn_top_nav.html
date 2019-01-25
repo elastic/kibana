@@ -42,7 +42,11 @@
     class="kuiLocalDropdown"
     ng-show="kbnTopNav.rendered"
   >
-    <button class="kuiLocalDropdownCloseButton" ng-click="kbnTopNav.close()" aria-label="Close">
+    <button
+      class="kuiLocalDropdownCloseButton"
+      ng-click="kbnTopNav.close()"
+      aria-label="{{ ::'common.ui.topNav.closeAriaLabel' | i18n: { defaultMessage: 'Close' } }}"
+    >
       <span class="kuiIcon fa-chevron-circle-up"></span>
     </button>
     <div id="template_wrapper">

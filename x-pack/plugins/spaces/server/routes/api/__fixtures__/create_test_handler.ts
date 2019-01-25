@@ -48,10 +48,6 @@ const baseConfig: TestConfig = {
 
 // Merge / extend default interfaces for hapi. This is all faked out below.
 declare module 'hapi' {
-  interface Server {
-    savedObjects: any;
-  }
-
   interface PluginProperties {
     spaces: any;
   }
@@ -148,6 +144,7 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
         getScopedClient: jest.fn((req: any) => {
           return new SpacesClient(
             null as any,
+            () => null,
             null,
             mockSavedObjectsRepository,
             mockConfig,

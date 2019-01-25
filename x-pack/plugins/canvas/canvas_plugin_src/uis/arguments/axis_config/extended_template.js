@@ -51,7 +51,9 @@ export class ExtendedTemplate extends React.PureComponent {
   render() {
     const isDisabled = typeof this.props.argValue === 'boolean' && this.props.argValue === false;
 
-    if (isDisabled) return <EuiText color="subdued">The axis is disabled</EuiText>;
+    if (isDisabled) {
+      return <EuiText color="subdued">The axis is disabled</EuiText>;
+    }
 
     const positions = {
       xaxis: ['bottom', 'top'],

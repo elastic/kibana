@@ -7,8 +7,9 @@
 import React from 'react';
 import { SummaryStatus } from '../../summary_status';
 import { formatMetric } from '../../../lib/format_number';
+import { injectI18n } from '@kbn/i18n/react';
 
-export function Status({ stat, formattedLeader, oldestStat }) {
+function StatusUI({ stat, formattedLeader, oldestStat, intl }) {
   const {
     follower_index: followerIndex,
     shard_id: shardId,
@@ -23,29 +24,44 @@ export function Status({ stat, formattedLeader, oldestStat }) {
 
   const metrics = [
     {
-      label: 'Follower Index',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.ccrShard.status.followerIndexLabel',
+        defaultMessage: 'Follower Index',
+      }),
       value: followerIndex,
-      dataTestSubj: 'followerIndex'
+      'data-test-subj': 'followerIndex'
     },
     {
-      label: 'Shard Id',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.ccrShard.status.shardIdLabel',
+        defaultMessage: 'Shard Id',
+      }),
       value: shardId,
-      dataTestSubj: 'shardId'
+      'data-test-subj': 'shardId'
     },
     {
-      label: 'Leader Index',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.ccrShard.status.leaderIndexLabel',
+        defaultMessage: 'Leader Index',
+      }),
       value: formattedLeader,
-      dataTestSubj: 'leaderIndex'
+      'data-test-subj': 'leaderIndex'
     },
     {
-      label: 'Ops Synced',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.ccrShard.status.opsSyncedLabel',
+        defaultMessage: 'Ops Synced',
+      }),
       value: formatMetric(operationsReceived - oldestOperationsReceived, 'int_commas'),
-      dataTestSubj: 'operationsReceived'
+      'data-test-subj': 'operationsReceived'
     },
     {
-      label: 'Failed Fetches',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.ccrShard.status.failedFetchesLabel',
+        defaultMessage: 'Failed Fetches',
+      }),
       value: formatMetric(failedFetches - oldestFailedFetches, 'int_commas'),
-      dataTestSubj: 'failedFetches'
+      'data-test-subj': 'failedFetches'
     },
   ];
 
@@ -56,3 +72,5 @@ export function Status({ stat, formattedLeader, oldestStat }) {
     />
   );
 }
+
+export const Status = injectI18n(StatusUI);

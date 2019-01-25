@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CustomUrlList renders a list of custom URLs 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
@@ -22,7 +22,13 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         fullWidth={false}
         hasEmptyLabelSpace={false}
         isInvalid={false}
-        label="Label"
+        label={
+          <FormattedMessage
+            defaultMessage="Label"
+            id="xpack.ml.customUrlEditorList.labelLabel"
+            values={Object {}}
+          />
+        }
       >
         <EuiFieldText
           compressed={false}
@@ -42,7 +48,13 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
-        label="URL"
+        label={
+          <FormattedMessage
+            defaultMessage="URL"
+            id="xpack.ml.customUrlEditorList.urlLabel"
+            values={Object {}}
+          />
+        }
       >
         <EuiFieldText
           compressed={false}
@@ -63,7 +75,13 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         fullWidth={false}
         hasEmptyLabelSpace={false}
         isInvalid={false}
-        label="Time range"
+        label={
+          <FormattedMessage
+            defaultMessage="Time range"
+            id="xpack.ml.customUrlEditorList.timeRangeLabel"
+            values={Object {}}
+          />
+        }
       >
         <EuiFieldText
           compressed={false}
@@ -86,7 +104,13 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         hasEmptyLabelSpace={true}
       >
         <EuiToolTip
-          content="Test custom URL"
+          content={
+            <FormattedMessage
+              defaultMessage="Test custom URL"
+              id="xpack.ml.customUrlEditorList.testCustomUrlTooltip"
+              values={Object {}}
+            />
+          }
           delay="regular"
           position="top"
         >
@@ -112,7 +136,13 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         hasEmptyLabelSpace={true}
       >
         <EuiToolTip
-          content="Delete custom URL"
+          content={
+            <FormattedMessage
+              defaultMessage="Delete custom URL"
+              id="xpack.ml.customUrlEditorList.deleteCustomUrlTooltip"
+              values={Object {}}
+            />
+          }
           delay="regular"
           position="top"
         >
@@ -149,7 +179,13 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         fullWidth={false}
         hasEmptyLabelSpace={false}
         isInvalid={false}
-        label="Label"
+        label={
+          <FormattedMessage
+            defaultMessage="Label"
+            id="xpack.ml.customUrlEditorList.labelLabel"
+            values={Object {}}
+          />
+        }
       >
         <EuiFieldText
           compressed={false}
@@ -169,7 +205,13 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
-        label="URL"
+        label={
+          <FormattedMessage
+            defaultMessage="URL"
+            id="xpack.ml.customUrlEditorList.urlLabel"
+            values={Object {}}
+          />
+        }
       >
         <EuiFieldText
           compressed={false}
@@ -190,7 +232,13 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         fullWidth={false}
         hasEmptyLabelSpace={false}
         isInvalid={false}
-        label="Time range"
+        label={
+          <FormattedMessage
+            defaultMessage="Time range"
+            id="xpack.ml.customUrlEditorList.timeRangeLabel"
+            values={Object {}}
+          />
+        }
       >
         <EuiFieldText
           compressed={false}
@@ -213,7 +261,13 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         hasEmptyLabelSpace={true}
       >
         <EuiToolTip
-          content="Test custom URL"
+          content={
+            <FormattedMessage
+              defaultMessage="Test custom URL"
+              id="xpack.ml.customUrlEditorList.testCustomUrlTooltip"
+              values={Object {}}
+            />
+          }
           delay="regular"
           position="top"
         >
@@ -239,7 +293,13 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         hasEmptyLabelSpace={true}
       >
         <EuiToolTip
-          content="Delete custom URL"
+          content={
+            <FormattedMessage
+              defaultMessage="Delete custom URL"
+              id="xpack.ml.customUrlEditorList.deleteCustomUrlTooltip"
+              values={Object {}}
+            />
+          }
           delay="regular"
           position="top"
         >
@@ -276,7 +336,13 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         fullWidth={false}
         hasEmptyLabelSpace={false}
         isInvalid={false}
-        label="Label"
+        label={
+          <FormattedMessage
+            defaultMessage="Label"
+            id="xpack.ml.customUrlEditorList.labelLabel"
+            values={Object {}}
+          />
+        }
       >
         <EuiFieldText
           compressed={false}
@@ -296,7 +362,13 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
-        label="URL"
+        label={
+          <FormattedMessage
+            defaultMessage="URL"
+            id="xpack.ml.customUrlEditorList.urlLabel"
+            values={Object {}}
+          />
+        }
       >
         <EuiFieldText
           compressed={false}
@@ -317,7 +389,13 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         fullWidth={false}
         hasEmptyLabelSpace={false}
         isInvalid={false}
-        label="Time range"
+        label={
+          <FormattedMessage
+            defaultMessage="Time range"
+            id="xpack.ml.customUrlEditorList.timeRangeLabel"
+            values={Object {}}
+          />
+        }
       >
         <EuiFieldText
           compressed={false}
@@ -340,7 +418,13 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         hasEmptyLabelSpace={true}
       >
         <EuiToolTip
-          content="Test custom URL"
+          content={
+            <FormattedMessage
+              defaultMessage="Test custom URL"
+              id="xpack.ml.customUrlEditorList.testCustomUrlTooltip"
+              values={Object {}}
+            />
+          }
           delay="regular"
           position="top"
         >
@@ -366,7 +450,13 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         hasEmptyLabelSpace={true}
       >
         <EuiToolTip
-          content="Delete custom URL"
+          content={
+            <FormattedMessage
+              defaultMessage="Delete custom URL"
+              id="xpack.ml.customUrlEditorList.deleteCustomUrlTooltip"
+              values={Object {}}
+            />
+          }
           delay="regular"
           position="top"
         >
@@ -383,5 +473,5 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
       </EuiFormRow>
     </EuiFlexItem>
   </EuiFlexGroup>
-</React.Fragment>
+</Fragment>
 `;

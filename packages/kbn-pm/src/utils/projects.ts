@@ -23,6 +23,7 @@ import { promisify } from 'util';
 
 import { CliError } from './errors';
 import { Project } from './project';
+import { workspacePackagePaths } from './workspaces';
 
 const glob = promisify(globSync);
 
@@ -40,6 +41,8 @@ export async function getProjects(
 ) {
   const projects: ProjectMap = new Map();
 
+  const workspaceProjectsPaths = await workspacePackagePaths(rootPath);
+
   for (const pattern of projectsPathsPatterns) {
     const pathsToProcess = await packagesFromGlobPattern({ pattern, rootPath });
 
@@ -47,6 +50,10 @@ export async function getProjects(
       const projectConfigPath = normalize(filePath);
       const projectDir = path.dirname(projectConfigPath);
       const project = await Project.fromPath(projectDir);
+
+      if (workspaceProjectsPaths.indexOf(filePath) >= 0) {
+        project.isWorkspaceProject = true;
+      }
 
       const excludeProject =
         exclude.includes(project.name) || (include.length > 0 && !include.includes(project.name));
@@ -105,7 +112,9 @@ export function buildProjectGraph(projects: ProjectMap) {
       if (projects.has(depName)) {
         const dep = projects.get(depName)!;
 
-        project.ensureValidProjectDependency(dep);
+        const dependentProjectIsInWorkspace =
+          project.isWorkspaceProject || project.json.name === 'kibana';
+        project.ensureValidProjectDependency(dep, dependentProjectIsInWorkspace);
 
         projectDeps.push(dep);
       }
@@ -119,21 +128,47 @@ export function buildProjectGraph(projects: ProjectMap) {
 
 export function topologicallyBatchProjects(
   projectsToBatch: ProjectMap,
-  projectGraph: ProjectGraph
+  projectGraph: ProjectGraph,
+  { batchByWorkspace = false } = {}
 ) {
   // We're going to be chopping stuff out of this list, so copy it.
-  const projectToBatchNames = new Set(projectsToBatch.keys());
-
+  const projectsLeftToBatch = new Set(projectsToBatch.keys());
   const batches = [];
-  while (projectToBatchNames.size > 0) {
+
+  if (batchByWorkspace) {
+    const workspaceRootProject = Array.from(projectsToBatch.values()).find(p => p.isWorkspaceRoot);
+
+    if (!workspaceRootProject) {
+      throw new CliError(`There was no yarn workspace root found.`);
+    }
+
+    // Push in the workspace root first.
+    batches.push([workspaceRootProject]);
+    projectsLeftToBatch.delete(workspaceRootProject.name);
+
+    // In the next batch, push in all workspace projects.
+    const workspaceBatch = [];
+    for (const projectName of projectsLeftToBatch) {
+      const project = projectsToBatch.get(projectName)!;
+
+      if (project.isWorkspaceProject) {
+        workspaceBatch.push(project);
+        projectsLeftToBatch.delete(projectName);
+      }
+    }
+
+    batches.push(workspaceBatch);
+  }
+
+  while (projectsLeftToBatch.size > 0) {
     // Get all projects that have no remaining dependencies within the repo
     // that haven't yet been picked.
     const batch = [];
-    for (const projectName of projectToBatchNames) {
+    for (const projectName of projectsLeftToBatch) {
       const projectDeps = projectGraph.get(projectName)!;
-      const hasNotBatchedDependencies = projectDeps.some(dep => projectToBatchNames.has(dep.name));
+      const needsDependenciesBatched = projectDeps.some(dep => projectsLeftToBatch.has(dep.name));
 
-      if (!hasNotBatchedDependencies) {
+      if (!needsDependenciesBatched) {
         batch.push(projectsToBatch.get(projectName)!);
       }
     }
@@ -142,7 +177,7 @@ export function topologicallyBatchProjects(
     // then we've encountered a cycle in the dependency graph.
     const hasCycles = batch.length === 0;
     if (hasCycles) {
-      const cycleProjectNames = [...projectToBatchNames];
+      const cycleProjectNames = [...projectsLeftToBatch];
       const message =
         'Encountered a cycle in the dependency graph. Projects in cycle are:\n' +
         cycleProjectNames.join(', ');
@@ -152,7 +187,7 @@ export function topologicallyBatchProjects(
 
     batches.push(batch);
 
-    batch.forEach(project => projectToBatchNames.delete(project.name));
+    batch.forEach(project => projectsLeftToBatch.delete(project.name));
   }
 
   return batches;

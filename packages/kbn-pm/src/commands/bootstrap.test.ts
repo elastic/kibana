@@ -34,8 +34,8 @@ const mockInstallInDir = installInDir as jest.Mock;
 const mockRunScriptInPackageStreaming = runScriptInPackageStreaming as jest.Mock;
 const mockLinkProjectExecutables = linkProjectExecutables as jest.Mock;
 
-const createProject = (packageJson: IPackageJson, path = '.') =>
-  new Project(
+const createProject = (packageJson: IPackageJson, path = '.') => {
+  const project = new Project(
     {
       name: 'kibana',
       version: '1.0.0',
@@ -44,6 +44,12 @@ const createProject = (packageJson: IPackageJson, path = '.') =>
     resolve(__dirname, path)
   );
 
+  if (packageJson.workspaces) {
+    project.isWorkspaceRoot = true;
+  }
+
+  return project;
+};
 expect.addSnapshotSerializer(absolutePathSnapshotSerializer);
 expect.addSnapshotSerializer(stripAnsiSnapshotSerializer);
 
@@ -59,7 +65,10 @@ afterEach(() => {
 test('handles dependencies of dependencies', async () => {
   const kibana = createProject({
     dependencies: {
-      bar: 'link:packages/bar',
+      bar: '1.0.0',
+    },
+    workspaces: {
+      packages: ['packages/*'],
     },
   });
   const foo = createProject(
@@ -86,6 +95,7 @@ test('handles dependencies of dependencies', async () => {
     },
     'packages/baz'
   );
+
   const projects = new Map([['kibana', kibana], ['foo', foo], ['bar', bar], ['baz', baz]]);
   const projectGraph = buildProjectGraph(projects);
 
@@ -104,7 +114,10 @@ test('handles dependencies of dependencies', async () => {
 test('does not run installer if no deps in package', async () => {
   const kibana = createProject({
     dependencies: {
-      bar: 'link:packages/bar',
+      bar: '1.0.0',
+    },
+    workspaces: {
+      packages: ['packages/*'],
     },
   });
   // bar has no dependencies
@@ -135,6 +148,9 @@ test('handles "frozen-lockfile"', async () => {
     dependencies: {
       foo: '2.2.0',
     },
+    workspaces: {
+      packages: ['packages/*'],
+    },
   });
 
   const projects = new Map([['kibana', kibana]]);
@@ -156,7 +172,10 @@ test('handles "frozen-lockfile"', async () => {
 test('calls "kbn:bootstrap" scripts and links executables after installing deps', async () => {
   const kibana = createProject({
     dependencies: {
-      bar: 'link:packages/bar',
+      bar: '1.0.0',
+    },
+    workspaces: {
+      packages: ['packages/*'],
     },
   });
   const bar = createProject(

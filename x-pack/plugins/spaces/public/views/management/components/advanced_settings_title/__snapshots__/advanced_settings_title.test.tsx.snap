@@ -15,6 +15,7 @@ exports[`AdvancedSettingsTitle renders as expected 1`] = `
     grow={false}
   >
     <Component
+      announceSpaceName={true}
       space={
         Object {
           "id": "my-space",
@@ -32,16 +33,20 @@ exports[`AdvancedSettingsTitle renders as expected 1`] = `
       }
     }
   >
-    <EuiText
-      grow={true}
+    <EuiTitle
       size="m"
+      textTransform="none"
     >
       <h1
         data-test-subj="managementSettingsTitle"
       >
-        Settings
+        <FormattedMessage
+          defaultMessage="Settings"
+          id="xpack.spaces.management.advancedSettingsTitle.settingsTitle"
+          values={Object {}}
+        />
       </h1>
-    </EuiText>
+    </EuiTitle>
   </EuiFlexItem>
 </EuiFlexGroup>
 `;

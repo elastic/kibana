@@ -5,7 +5,9 @@
  */
 
 export const getLegendConfig = (legend, size) => {
-  if (!legend || size < 2) return { show: false };
+  if (!legend || size < 2) {
+    return { show: false };
+  }
 
   const config = {
     show: true,

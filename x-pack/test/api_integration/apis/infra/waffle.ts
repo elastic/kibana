@@ -6,8 +6,9 @@
 
 import expect from 'expect.js';
 import { first, last } from 'lodash';
-import { WaffleNodesQuery } from '../../../../plugins/infra/common/graphql/types';
+
 import { waffleNodesQuery } from '../../../../plugins/infra/public/containers/waffle/waffle_nodes.gql_query';
+import { WaffleNodesQuery } from '../../../../plugins/infra/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const waffleTests: KbnTestProvider = ({ getService }) => {
@@ -15,8 +16,8 @@ const waffleTests: KbnTestProvider = ({ getService }) => {
   const client = getService('infraOpsGraphQLClient');
 
   describe('waffle nodes', () => {
-    before(() => esArchiver.load('infra'));
-    after(() => esArchiver.unload('infra'));
+    before(() => esArchiver.load('infra/metrics_and_logs'));
+    after(() => esArchiver.unload('infra/metrics_and_logs'));
 
     it('should basically work', () => {
       return client

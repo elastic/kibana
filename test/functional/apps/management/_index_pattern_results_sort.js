@@ -35,14 +35,16 @@ export default function ({ getService, getPageObjects }) {
       first: '@message',
       last: 'xss.raw',
       selector: async function () {
-        return await PageObjects.settings.getTableRow(0, 0).getVisibleText();
+        const tableRow = await PageObjects.settings.getTableRow(0, 0);
+        return await tableRow.getVisibleText();
       }
     }, {
       heading: 'Type',
       first: '_source',
       last: 'string',
       selector: async function () {
-        return await PageObjects.settings.getTableRow(0, 1).getVisibleText();
+        const tableRow = await PageObjects.settings.getTableRow(0, 1);
+        return await tableRow.getVisibleText();
       }
     }];
 
@@ -50,7 +52,7 @@ export default function ({ getService, getPageObjects }) {
       describe('sort by heading - ' + col.heading, function indexPatternCreation() {
         before(async function () {
           await PageObjects.settings.navigateTo();
-          await PageObjects.settings.clickKibanaIndices();
+          await PageObjects.settings.clickKibanaIndexPatterns();
           await PageObjects.settings.createIndexPattern();
         });
 

@@ -25,6 +25,7 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiTextColor,
+  EuiToolTip,
 } from '@elastic/eui';
 import { ConfirmModal } from '../confirm_modal';
 import { Clipboard } from '../clipboard';
@@ -33,6 +34,7 @@ import { Download } from '../download';
 export class AssetManager extends React.PureComponent {
   static propTypes = {
     assets: PropTypes.array,
+    addImageElement: PropTypes.func,
     removeAsset: PropTypes.func,
     copyAsset: PropTypes.func,
   };
@@ -48,6 +50,10 @@ export class AssetManager extends React.PureComponent {
   doDelete = () => {
     this.resetDelete();
     this.props.removeAsset(this.state.deleteId);
+  };
+
+  addElement = assetId => {
+    this.props.addImageElement(assetId);
   };
 
   resetDelete = () => this.setState({ deleteId: null });
@@ -81,31 +87,44 @@ export class AssetManager extends React.PureComponent {
         <EuiSpacer size="s" />
 
         <EuiFlexGroup alignItems="baseline" justifyContent="center" responsive={false}>
-          <EuiFlexItem className="asset-download" grow={false}>
-            <Download fileName={asset.id} content={asset.value}>
-              <EuiButtonIcon iconType="sortDown" aria-label="Download" title="Download" />
-            </Download>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <Clipboard
-              content={asset.id}
-              onCopy={result => result && this.props.copyAsset(asset.id)}
-            >
+          <EuiFlexItem className="asset-create-image" grow={false}>
+            <EuiToolTip content="Create image element">
               <EuiButtonIcon
-                iconType="copyClipboard"
-                aria-label="Copy to clipboard"
-                title="Copy to clipboard"
+                iconType="vector"
+                aria-label="Create image element"
+                onClick={() => {
+                  this.addElement(asset.id);
+                  this.closeModal();
+                }}
               />
-            </Clipboard>
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem className="asset-download" grow={false}>
+            <EuiToolTip content="Download">
+              <Download fileName={asset.id} content={asset.value}>
+                <EuiButtonIcon iconType="sortDown" aria-label="Download" />
+              </Download>
+            </EuiToolTip>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              title="Delete asset"
-              color="danger"
-              iconType="trash"
-              aria-label="Delete asset"
-              onClick={() => this.setState({ deleteId: asset.id })}
-            />
+            <EuiToolTip content="Copy id to clipboard">
+              <Clipboard
+                content={asset.id}
+                onCopy={result => result && this.props.copyAsset(asset.id)}
+              >
+                <EuiButtonIcon iconType="copyClipboard" aria-label="Copy id to clipboard" />
+              </Clipboard>
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content="Delete">
+              <EuiButtonIcon
+                color="danger"
+                iconType="trash"
+                aria-label="Delete"
+                onClick={() => this.setState({ deleteId: asset.id })}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

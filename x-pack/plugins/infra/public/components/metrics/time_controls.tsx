@@ -5,6 +5,7 @@
  */
 
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import moment, { Moment } from 'moment';
 import React from 'react';
 import styled from 'styled-components';
@@ -53,16 +54,27 @@ export class MetricsTimeControls extends React.Component<
               iconType="pause"
               onClick={this.stopLiveStreaming}
             >
-              Stop refreshing
+              <FormattedMessage
+                id="xpack.infra.metricsTimeControls.stopRefreshingButtonLabel"
+                defaultMessage="Stop refreshing"
+              />
             </EuiButton>
           ) : (
             <EuiButton iconSide="left" iconType="play" onClick={this.startLiveStreaming}>
-              Auto-refresh
+              <FormattedMessage
+                id="xpack.infra.metricsTimeControls.autoRefreshButtonLabel"
+                defaultMessage="Auto-refresh"
+              />
             </EuiButton>
           )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={this.resetSearch}>Reset</EuiButtonEmpty>
+          <EuiButtonEmpty onClick={this.resetSearch}>
+            <FormattedMessage
+              id="xpack.infra.metricsTimeControls.resetButtonLabel"
+              defaultMessage="Reset"
+            />
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -72,11 +84,19 @@ export class MetricsTimeControls extends React.Component<
       <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
         <EuiFlexItem grow={false}>
           <EuiButton color={goColor} fill onClick={this.searchRangeTime}>
-            Go
+            <FormattedMessage
+              id="xpack.infra.metricsTimeControls.goButtonLabel"
+              defaultMessage="Go"
+            />
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={this.cancelSearch}>Cancel</EuiButtonEmpty>
+          <EuiButtonEmpty onClick={this.cancelSearch}>
+            <FormattedMessage
+              id="xpack.infra.metricsTimeControls.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
     ) : (

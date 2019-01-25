@@ -1,4 +1,7 @@
-const RESTRICTED_GLOBALS = require('./restricted_globals')
+const semver = require('semver');
+
+const PKG = require('../../package.json');
+const RESTRICTED_GLOBALS = require('./restricted_globals');
 
 module.exports = {
   parser: 'babel-eslint',
@@ -12,7 +15,13 @@ module.exports = {
     'prefer-object-spread',
     'jsx-a11y',
   ],
-  
+
+  settings: {
+    react: {
+      version: semver.coerce(PKG.dependencies.react),
+    },
+  },
+
   env: {
     es6: true,
     node: true,
@@ -141,6 +150,7 @@ module.exports = {
     'jsx-a11y/role-supports-aria-props': 'error',
     'jsx-a11y/scope': 'error',
     'jsx-a11y/tabindex-no-positive': 'error',
+    'jsx-a11y/label-has-associated-control': 'error',  
     'react/jsx-equals-spacing': ['error', 'never'],
     'react/jsx-indent': ['error', 2],
     'react/no-will-update-set-state': 'error',
@@ -162,6 +172,7 @@ module.exports = {
     'import/no-named-as-default': 'error',
     'import/no-named-as-default-member': 'error',
     'import/no-duplicates': 'error',
+    'import/no-dynamic-require': 'error',
 
     'prefer-object-spread/prefer-object-spread': 'error',
   }

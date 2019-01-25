@@ -1,0 +1,182 @@
+<div>
+
+
+  <div class="kuiSideBarSection">
+    <div class="kuiSideBarSectionTitle">
+      <div
+        class="kuiSideBarSectionTitle__text"
+        i18n-id="tileMap.wmsOptions.baseLayerSettingsTitle"
+        i18n-default-message="Base Layer Settings"
+      ></div>
+    </div>
+
+
+    <div class="kuiSideBarFormRow" ng-show="!options.enabled">
+      <label
+        class="kuiSideBarFormRow__label"
+        for="tmsLayers"
+        i18n-id="tileMap.wmsOptions.layersLabel"
+        i18n-default-message="Layers"
+      ></label>
+      <div class="kuiSideBarFormRow__control">
+        <select
+          id="tmsLayers"
+          class="kuiSelect kuiSideBarSelect"
+          ng-model="options.selectedTmsLayer"
+          ng-options="layer.id for layer in collections.tmsLayers track by layer.id"
+        ></select>
+      </div>
+    </div>
+
+    <div class="kuiSideBarFormRow">
+      <label
+        class="kuiSideBarFormRow__label"
+        for="wmsCompliantMapServer"
+        i18n-id="tileMap.wmsOptions.wmsMapServerLabel"
+        i18n-default-message="WMS map server"
+      ></label>
+
+      <div class="kuiSideBarFormRow__control">
+        <input
+          id="wmsCompliantMapServer"
+          type="checkbox"
+          name="wms.enabled"
+          ng-model="options.enabled"
+        >
+        &nbsp;
+        <icon-tip
+          content="::'tileMap.wmsOptions.useWMSCompliantMapTileServerTip' | i18n: {
+            defaultMessage: 'Use WMS compliant map tile server. For advanced users only.'
+          }"
+          position="'right'"
+        ></icon-tip>
+      </div>
+    </div>
+
+    <div ng-show="options.enabled">
+      <div class="form-group">
+        <p
+          i18n-id="tileMap.wmsOptions.wmsDescription"
+          i18n-default-message="WMS is an OGC standard for map image services. For more information, go {wmsLink}."
+          i18n-values="{
+            html_wmsLink:  '<a href=\'http://www.opengeospatial.org/standards/wms\'>' + wmsLinkText + '</a>'
+          }"
+        ></p>
+		<br>
+        <label>
+          <span
+            i18n-id="tileMap.wmsOptions.wmsUrlLabel"
+            i18n-default-message="WMS url*"
+          ></span>
+          <icon-tip
+            content="::'tileMap.wmsOptions.urlOfWMSWebServiceTip' | i18n: {
+              defaultMessage: 'The URL of the WMS web service'
+            }"
+            position="'right'"
+          ></icon-tip>
+        </label>
+        <input type="text" class="form-control"
+               name="wms.url"
+               ng-model="options.url">
+      </div>
+
+      <div class="form-group">
+        <label>
+          <span
+            i18n-id="tileMap.wmsOptions.wmsLayersLabel"
+            i18n-default-message="WMS layers*"
+          ></span>
+          <icon-tip
+            content="::'tileMap.wmsOptions.listOfLayersToUseTip' | i18n: {
+              defaultMessage: 'A comma separated list of layers to use'
+            }"
+            position="'right'"
+          ></icon-tip>
+        </label>
+        <input type="text" class="form-control"
+               ng-require="options.enabled"
+               name="wms.options.layers"
+               ng-model="options.options.layers">
+      </div>
+
+      <div class="form-group">
+        <label>
+          <span
+            i18n-id="tileMap.wmsOptions.wmsVersionLabel"
+            i18n-default-message="WMS version*"
+          ></span>
+          <icon-tip
+            content="::'tileMap.wmsOptions.versionOfWMSserverSupportsTip' | i18n: {
+              defaultMessage: 'The version of WMS the server supports'
+            }"
+            position="'right'"
+          ></icon-tip>
+        </label>
+        <input type="text" class="form-control"
+               name="wms.options.version"
+               ng-model="options.options.version">
+      </div>
+
+      <div class="form-group">
+        <label>
+          <span
+            i18n-id="tileMap.wmsOptions.wmsFormatLabel"
+            i18n-default-message="WMS format*"
+          ></span>
+          <icon-tip
+            content="::'tileMap.wmsOptions.imageFormatToUseTip' | i18n: {
+              defaultMessage: 'Usually image/png or image/jpeg. Use png if the server will return transparent layers.'
+            }"
+            position="'right'"
+          ></icon-tip>
+        </label>
+        <input type="text" class="form-control"
+               name="wms.options.format"
+               ng-model="options.options.format">
+      </div>
+
+      <div class="form-group">
+        <label>
+          <span
+            i18n-id="tileMap.wmsOptions.wmsAttributionLabel"
+            i18n-default-message="WMS attribution"
+          ></span>
+          <icon-tip
+            content="::'tileMap.wmsOptions.attributionStringTip' | i18n: {
+              defaultMessage: 'Attribution string for the lower right corner'
+            }"
+            position="'right'"
+          ></icon-tip>
+        </label>
+        <input type="text" class="form-control"
+               name="wms.options.attribution"
+               ng-model="options.options.attribution">
+      </div>
+
+      <div class="form-group">
+        <label>
+          <span
+            i18n-id="tileMap.wmsOptions.wmsStylesLabel"
+            i18n-default-message="WMS styles*"
+          ></span>
+          <icon-tip
+            content="::'tileMap.wmsOptions.wmsServerSupportedStylesListTip' | i18n: {
+              defaultMessage: 'A comma separated list of WMS server supported styles to use. Blank in most cases.'
+            }"
+            position="'right'"
+          ></icon-tip>
+        </label>
+        <input type="text" class="form-control"
+               name="wms.options.styles"
+               ng-model="options.options.styles">
+      </div>
+
+      <p
+        i18n-id="tileMap.wmsOptions.mapLoadFailDescription"
+        i18n-default-message="* if this parameter is incorrect, maps will fail to load."
+      ></p>
+
+
+    </div>
+  </div>
+</div>

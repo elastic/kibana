@@ -1,0 +1,36 @@
+<form role="form">
+  <h2
+    class="kuiLocalDropdownTitle"
+    i18n-id="timelion.topNavMenu.sheetOptionsTitle"
+    i18n-default-message="Sheet options"
+  ></h2>
+
+  <div>
+    <div class="form-group col-md-6">
+      <label
+        for="timelionColCount"
+        i18n-id="timelion.topNavMenu.options.columnsCountLabel"
+        i18n-default-message="Columns (Column count must divide evenly into 12)"
+      ></label>
+      <select class="form-control"
+        id="timelionColCount"
+        ng-change="opts.search()"
+        ng-options="column for column in [1, 2, 3, 4, 6, 12]"
+        ng-model="opts.state.columns">
+      </select>
+    </div>
+    <div class="form-group col-md-6">
+      <label
+        for="timelionRowCount"
+        i18n-id="timelion.topNavMenu.options.rowsCountLabel"
+        i18n-default-message="Rows (This is a target based on the current window height)"
+      ></label>
+      <select class="form-control"
+        id="timelionRowCount"
+        ng-change="opts.search()"
+        ng-options="row for row in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]"
+        ng-model="opts.state.rows">
+      </select>
+    </div>
+  </div>
+</form>

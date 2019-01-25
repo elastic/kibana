@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import datemath from '@kbn/datemath';
+import datemath from '@elastic/datemath';
 
 export function getAbsoluteTime(time) {
   const mode = get(time, 'mode');

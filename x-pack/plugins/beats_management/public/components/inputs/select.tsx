@@ -5,11 +5,11 @@
  */
 
 import {
-  CommonProps,
   EuiFormRow,
   // @ts-ignore
   EuiSelect,
 } from '@elastic/eui';
+import { CommonProps } from '@elastic/eui/src/components/common';
 // @ts-ignore
 import { FormsyInputProps, withFormsy } from 'formsy-react';
 import React, { Component, InputHTMLAttributes } from 'react';

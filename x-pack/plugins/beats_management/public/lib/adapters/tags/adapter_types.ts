@@ -8,6 +8,6 @@ import { BeatTag } from '../../../../common/domain_types';
 export interface CMTagsAdapter {
   getTagsWithIds(tagIds: string[]): Promise<BeatTag[]>;
   delete(tagIds: string[]): Promise<boolean>;
-  getAll(): Promise<BeatTag[]>;
+  getAll(ESQuery?: string): Promise<BeatTag[]>;
   upsertTag(tag: BeatTag): Promise<BeatTag | null>;
 }

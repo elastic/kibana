@@ -32,7 +32,9 @@ export class ElementWrapper extends React.PureComponent {
 
   render() {
     // wait until the handlers have been created
-    if (!this.state.handlers) return null;
+    if (!this.state.handlers) {
+      return null;
+    }
 
     const { renderable, transformMatrix, width, height, state } = this.props;
 

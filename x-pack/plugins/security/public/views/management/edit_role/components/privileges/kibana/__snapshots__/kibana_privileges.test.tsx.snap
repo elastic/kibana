@@ -5,7 +5,7 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
   iconType="logoKibana"
   title="Kibana"
 >
-  <SpaceAwarePrivilegeForm
+  <InjectIntl(SpaceAwarePrivilegeFormUI)
     editable={true}
     kibanaAppPrivileges={
       Array [

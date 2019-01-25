@@ -19,11 +19,14 @@ describe('ML - Detector Filter Modal Controller', () => {
   it('Initialize Detector Filter Modal Controller', (done) => {
     ngMock.inject(function ($rootScope, $controller) {
       const scope = $rootScope.$new();
-      $controller('MlDetectorFilterModal', {
-        $scope: scope,
-        $modalInstance: mockModalInstance,
-        params: { detector: {} }
-      });
+
+      expect(() => {
+        $controller('MlDetectorFilterModal', {
+          $scope: scope,
+          $modalInstance: mockModalInstance,
+          params: { detector: {} }
+        });
+      }).to.not.throwError();
 
       expect(scope.title).to.eql('Add new filter');
       done();

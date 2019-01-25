@@ -6,3 +6,4 @@
 
 import './register_management_section';
 import './register_routes';
+import './index_management_extensions';

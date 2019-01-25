@@ -5,16 +5,10 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
-
-import { MemoryRouter } from 'react-router-dom';
-import { ServiceList } from '../index';
+import { shallow } from 'enzyme';
+import { ServiceList, SERVICE_COLUMNS } from '../index';
 import props from './props.json';
-import {
-  mountWithRouterAndStore,
-  mockMoment,
-  toJson
-} from '../../../../../utils/testHelpers';
+import { mockMoment } from '../../../../../utils/testHelpers';
 
 describe('ErrorGroupOverview -> List', () => {
   beforeAll(() => {
@@ -22,24 +16,32 @@ describe('ErrorGroupOverview -> List', () => {
   });
 
   it('should render empty state', () => {
-    const storeState = {};
-    const wrapper = mount(
-      <MemoryRouter>
-        <ServiceList items={[]} />
-      </MemoryRouter>,
-      storeState
-    );
-
-    expect(toJson(wrapper)).toMatchSnapshot();
+    const wrapper = shallow(<ServiceList items={[]} />);
+    expect(wrapper).toMatchSnapshot();
   });
 
   it('should render with data', () => {
-    const storeState = { location: {} };
-    const wrapper = mountWithRouterAndStore(
-      <ServiceList items={props.items} />,
-      storeState
-    );
+    const wrapper = shallow(<ServiceList items={props.items} />);
+    expect(wrapper).toMatchSnapshot();
+  });
 
-    expect(toJson(wrapper)).toMatchSnapshot();
+  it('should render columns correctly', () => {
+    const service = {
+      serviceName: 'opbeans-python',
+      agentName: 'python',
+      transactionsPerMinute: 86.93333333333334,
+      errorsPerMinute: 12.6,
+      avgResponseTime: 91535.42944785276
+    };
+    const renderedColumns = SERVICE_COLUMNS.map(c =>
+      c.render(service[c.field], service)
+    );
+    expect(renderedColumns[0]).toMatchSnapshot();
+    expect(renderedColumns.slice(1)).toEqual([
+      'python',
+      '92 ms',
+      '86.9 tpm',
+      '12.6 err.'
+    ]);
   });
 });

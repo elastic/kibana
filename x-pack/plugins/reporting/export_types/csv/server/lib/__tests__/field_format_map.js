@@ -8,8 +8,8 @@ import expect from 'expect.js';
 
 import { FieldFormat } from '../../../../../../../../src/ui/field_formats/field_format.js';
 import { FieldFormatsService } from '../../../../../../../../src/ui/field_formats/field_formats_service.js';
-import { createBytesFormat } from '../../../../../../../../src/core_plugins/kibana/common/field_formats/types/bytes.js';
-import { createNumberFormat } from '../../../../../../../../src/core_plugins/kibana/common/field_formats/types/number.js';
+import { createBytesFormat } from '../../../../../../../../src/legacy/core_plugins/kibana/common/field_formats/types/bytes.js';
+import { createNumberFormat } from '../../../../../../../../src/legacy/core_plugins/kibana/common/field_formats/types/number.js';
 
 import { fieldFormatMapFactory } from '../field_format_map';
 

@@ -7,14 +7,14 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
 import { get, set } from 'lodash';
-import { fromExpression, toExpression } from '../../../common/lib/ast';
+import { fromExpression, toExpression } from '@kbn/interpreter/common';
 import { TimeFilter } from './components/time_filter';
 
 export const timeFilter = () => ({
   name: 'time_filter',
   displayName: 'Time filter',
   help: 'Set a time window',
-  reuseDomNode: true,
+  reuseDomNode: false,
   render(domNode, config, handlers) {
     const ast = fromExpression(handlers.getFilter());
 

@@ -1,11 +1,11 @@
 [[canvas-workpad]]
-== Using the workpad
+=== Using the workpad
 
-beta[]You have a workpad you can mess with, so let’s mess with it. We’ll start 
-out easy and make a couple simple changes. 
+beta[]Now that you have a workpad with sample data that you can mess with, let’s mess with it. 
+We’ll start out by making a few stylistic changes. 
 
 . Click the gauge chart in the top left of the workpad (fun fact, these are actually pie charts). 
-Try clicking the little red slice. If you click the number, you'll notice that
+Try clicking on the small red slice. If you click the number, you'll notice that
 you’ve actually selected a number element, not the gauge itself. 
 + 
 This element is now selected. Off to the right, you'll see that the side bar has changed. 
@@ -29,8 +29,8 @@ background color or rename your workpad.
 
 Speaking of pages, Canvas workpads can have multiple pages.
 
-. Click the arrow to the right of the *Page 1 of 2* text in the toolbar at the bottom. 
-You'll see a whole new view of the the eCommerce data.
+. Click the arrow to the right of the *Page 1 of 2* text in the toolbar at the bottom
+of the page. You'll see a whole new view of the the eCommerce data.
 . Click the *Page 2 of 2* text to see a live preview of all of the pages in your 
 workpad.
 . Click the (+) button to create a new, blank page.
@@ -40,10 +40,9 @@ workpad.
 [role="screenshot"]
 image::images/canvas_workpad_3_page.png[]
 
-You should now have a three-page workpad wired, and a new element connected 
+You now have a three-page workpad, and a new element connected 
 to some demo data.  Your next step is to wire your new element 
-up to some real data.
-
-
+up to some real data; you can click on the *Data* tab in the right sidebar menu 
+and click "Change your data source" to start working with your Elasticsearch data.
 
 

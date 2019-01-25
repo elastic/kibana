@@ -31,6 +31,8 @@ import {
 import fs from 'fs';
 import glob from 'glob';
 import { promisify } from 'util';
+import normalize from 'normalize-path';
+import path from 'path';
 import chalk from 'chalk';
 import parser from 'intl-messageformat-parser';
 
@@ -39,9 +41,18 @@ import { createFailError } from '../run';
 const ESCAPE_LINE_BREAK_REGEX = /(?<!\\)\\\n/g;
 const HTML_LINE_BREAK_REGEX = /[\s]*\n[\s]*/g;
 
+const ARGUMENT_ELEMENT_TYPE = 'argumentElement';
+const HTML_KEY_PREFIX = 'html_';
+
 export const readFileAsync = promisify(fs.readFile);
 export const writeFileAsync = promisify(fs.writeFile);
+export const makeDirAsync = promisify(fs.mkdir);
+export const accessAsync = promisify(fs.access);
 export const globAsync = promisify(glob);
+
+export function normalizePath(inputPath) {
+  return normalize(path.relative('.', inputPath));
+}
 
 export function difference(left = [], right = []) {
   return left.filter(value => !right.includes(value));
@@ -127,18 +138,53 @@ export function createParserErrorMessage(content, error) {
 }
 
 /**
+ * Recursively extracts all references from ICU message ast.
+ *
+ * Example: `'Removed tag {tag} from {assignmentsLength, plural, one {beat {beatName}} other {# beats}}.'`
+ *
+ * @param {any} node
+ * @param {Set<string>} keys
+ */
+function extractValueReferencesFromIcuAst(node, keys = new Set()) {
+  if (Array.isArray(node.elements)) {
+    for (const element of node.elements) {
+      if (element.type !== ARGUMENT_ELEMENT_TYPE) {
+        continue;
+      }
+
+      keys.add(element.id);
+
+      // format contains all specific parameters for complex argumentElements
+      if (element.format && Array.isArray(element.format.options)) {
+        for (const option of element.format.options) {
+          extractValueReferencesFromIcuAst(option, keys);
+        }
+      }
+    }
+  } else if (node.value) {
+    extractValueReferencesFromIcuAst(node.value, keys);
+  }
+
+  return [...keys];
+}
+
+/**
  * Checks whether values from "values" and "defaultMessage" correspond to each other.
  *
- * @param {string[]} valuesKeys array of "values" property keys
+ * @param {string[]} prefixedValuesKeys array of "values" property keys
  * @param {string} defaultMessage "defaultMessage" value
  * @param {string} messageId message id for fail errors
  * @throws if "values" and "defaultMessage" don't correspond to each other
  */
-export function checkValuesProperty(valuesKeys, defaultMessage, messageId) {
+export function checkValuesProperty(prefixedValuesKeys, defaultMessage, messageId) {
   // skip validation if defaultMessage doesn't use ICU and values prop has no keys
-  if (!valuesKeys.length && !defaultMessage.includes('{')) {
+  if (!prefixedValuesKeys.length && !defaultMessage.includes('{')) {
     return;
   }
+
+  const valuesKeys = prefixedValuesKeys.map(key =>
+    key.startsWith(HTML_KEY_PREFIX) ? key.slice(HTML_KEY_PREFIX.length) : key
+  );
 
   let defaultMessageAst;
 
@@ -162,19 +208,12 @@ export function checkValuesProperty(valuesKeys, defaultMessage, messageId) {
     throw error;
   }
 
-  const ARGUMENT_ELEMENT_TYPE = 'argumentElement';
-
   // skip validation if intl-messageformat-parser didn't return an AST with nonempty elements array
   if (!defaultMessageAst || !defaultMessageAst.elements || !defaultMessageAst.elements.length) {
     return;
   }
 
-  const defaultMessageValueReferences = defaultMessageAst.elements.reduce((keys, element) => {
-    if (element.type === ARGUMENT_ELEMENT_TYPE) {
-      keys.push(element.id);
-    }
-    return keys;
-  }, []);
+  const defaultMessageValueReferences = extractValueReferencesFromIcuAst(defaultMessageAst);
 
   const missingValuesKeys = difference(defaultMessageValueReferences, valuesKeys);
   if (missingValuesKeys.length) {
@@ -253,7 +292,21 @@ export function extractValuesKeysFromNode(node, messageId) {
     throw createFailError(`"values" value should be an object expression ("${messageId}").`);
   }
 
-  return node.properties.map(
-    property => (isStringLiteral(property.key) ? property.key.value : property.key.name)
+  return node.properties.map(property =>
+    isStringLiteral(property.key) ? property.key.value : property.key.name
   );
+}
+
+export class ErrorReporter {
+  errors = [];
+
+  withContext(context) {
+    return { report: error => this.report(error, context) };
+  }
+
+  report(error, context) {
+    this.errors.push(
+      `${chalk.white.bgRed(' I18N ERROR ')} Error in ${normalizePath(context.name)}\n${error}`
+    );
+  }
 }

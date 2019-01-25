@@ -24,7 +24,7 @@ export const searchprofiler = (kibana) => {
       devTools: ['plugins/searchprofiler/app'],
       hacks: ['plugins/searchprofiler/register'],
       home: ['plugins/searchprofiler/register_feature'],
-      styleSheetPaths: `${__dirname}/public/index.scss`,
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     },
     init: function (server) {
       const thisPlugin = this;

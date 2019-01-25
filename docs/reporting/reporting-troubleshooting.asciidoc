@@ -22,8 +22,9 @@ There is currently a known limitation with the Data Table visualization that onl
 
 [float]
 ==== `You must install fontconfig and freetype for Reporting to work'`
-Reporting using PhantomJS, the default browser, relies on system packages. Install the appropriate fontconfig and freetype
-packages for your distribution.
+Reporting uses a headless browser on the Kibana server, which relies on some
+system packages. Install the appropriate fontconfig and freetype packages for
+your distribution.
 
 [float]
 ==== `Max attempts reached (3)`
@@ -53,11 +54,6 @@ the CAP_SYS_ADMIN capability.
 
 Elastic recommends that you research the feasibility of enabling unprivileged user namespaces before disabling the sandbox. An exception
 is if you are running Kibana in Docker because the container runs in a user namespace with the built-in seccomp/bpf filters.
-
-[float]
-==== `spawn EACCES`
-Ensure that the `phantomjs` binary in your Kibana data directory is owned by the user who is running Kibana, that the user has the execute permission,
-and if applicable, that the filesystem is mounted with the `exec` option.
 
 [float]
 ==== `Caught error spawning Chromium`

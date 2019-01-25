@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import { fromExpression } from '../../../../../common/lib/ast';
+import { fromExpression } from '@kbn/interpreter/common';
 import { TimePicker } from '../time_picker';
 import { TimePickerMini } from '../time_picker_mini';
 
@@ -26,8 +26,11 @@ export const TimeFilter = ({ compact, filter, setFilter, commit }) => {
     commit(filter);
   }
 
-  if (compact) return <TimePickerMini from={from} to={to} onSelect={doSetFilter} />;
-  else return <TimePicker from={from} to={to} onSelect={doSetFilter} />;
+  if (compact) {
+    return <TimePickerMini from={from} to={to} onSelect={doSetFilter} />;
+  } else {
+    return <TimePicker from={from} to={to} onSelect={doSetFilter} />;
+  }
 };
 
 TimeFilter.propTypes = {

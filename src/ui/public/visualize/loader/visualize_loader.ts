@@ -29,7 +29,7 @@ import { IPrivate } from '../../private';
 import { EmbeddedVisualizeHandler } from './embedded_visualize_handler';
 import { VisSavedObject, VisualizeLoaderParams } from './types';
 
-class VisualizeLoader {
+export class VisualizeLoader {
   constructor(private readonly savedVisualizations: any, private readonly Private: IPrivate) {}
 
   /**

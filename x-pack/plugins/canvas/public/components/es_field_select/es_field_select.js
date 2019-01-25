@@ -20,7 +20,9 @@ export const ESFieldSelect = ({ value, fields = [], onChange, onFocus, onBlur })
       onChange={([field]) => onChange(get(field, 'label', null))}
       onSearchChange={searchValue => {
         // resets input when user starts typing
-        if (searchValue) onChange(null);
+        if (searchValue) {
+          onChange(null);
+        }
       }}
       onFocus={onFocus}
       onBlur={onBlur}

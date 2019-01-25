@@ -4,80 +4,98 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import TooltipOverlay from '../../../shared/TooltipOverlay';
-import { RelativeLink, legacyEncodeURIComponent } from '../../../../utils/url';
-import { asMillis, asDecimal, tpmUnit } from '../../../../utils/formatters';
+import { asMillis, asDecimal } from '../../../../utils/formatters';
 import { ImpactBar } from '../../../shared/ImpactBar';
-
 import { fontFamilyCode, truncate } from '../../../../style/variables';
 import { ManagedTable } from '../../../shared/ManagedTable';
+import { NOT_AVAILABLE_LABEL } from '../../../../constants';
+import { legacyEncodeURIComponent } from '../../../shared/Links/url_helpers';
+import { KibanaLink } from '../../../shared/Links/KibanaLink';
 
-function tpmLabel(type) {
-  return type === 'request' ? 'Req. per minute' : 'Trans. per minute';
-}
-
-function avgLabel(agentName) {
-  return agentName === 'js-base' ? 'Page load time' : 'Avg. resp. time';
-}
-
-const TransactionNameLink = styled(RelativeLink)`
+const TransactionNameLink = styled(KibanaLink)`
   ${truncate('100%')};
   font-family: ${fontFamilyCode};
 `;
 
-export default function TransactionList({
-  items,
-  agentName,
-  serviceName,
-  type,
-  ...rest
-}) {
+export default function TransactionList({ items, serviceName, ...rest }) {
   const columns = [
     {
       field: 'name',
-      name: 'Name',
+      name: i18n.translate('xpack.apm.transactionsTable.nameColumnLabel', {
+        defaultMessage: 'Name'
+      }),
       width: '50%',
       sortable: true,
-      render: transactionName => {
-        const transactionUrl = `${serviceName}/transactions/${legacyEncodeURIComponent(
-          type
-        )}/${legacyEncodeURIComponent(transactionName)}`;
+      render: (transactionName, data) => {
+        const encodedType = legacyEncodeURIComponent(
+          data.sample.transaction.type
+        );
+        const encodedName = legacyEncodeURIComponent(transactionName);
+        const transactionPath = `/${serviceName}/transactions/${encodedType}/${encodedName}`;
 
         return (
-          <TooltipOverlay content={transactionName || 'N/A'}>
-            <TransactionNameLink path={`/${transactionUrl}`}>
-              {transactionName || 'N/A'}
+          <EuiToolTip
+            id="transaction-name-link-tooltip"
+            content={transactionName || NOT_AVAILABLE_LABEL}
+          >
+            <TransactionNameLink hash={transactionPath}>
+              {transactionName || NOT_AVAILABLE_LABEL}
             </TransactionNameLink>
-          </TooltipOverlay>
+          </EuiToolTip>
         );
       }
     },
     {
       field: 'averageResponseTime',
-      name: avgLabel(agentName),
+      name: i18n.translate(
+        'xpack.apm.transactionsTable.avgDurationColumnLabel',
+        {
+          defaultMessage: 'Avg. duration'
+        }
+      ),
       sortable: true,
       dataType: 'number',
       render: value => asMillis(value)
     },
     {
       field: 'p95',
-      name: '95th percentile',
+      name: i18n.translate(
+        'xpack.apm.transactionsTable.95thPercentileColumnLabel',
+        {
+          defaultMessage: '95th percentile'
+        }
+      ),
       sortable: true,
       dataType: 'number',
       render: value => asMillis(value)
     },
     {
       field: 'transactionsPerMinute',
-      name: tpmLabel(type),
+      name: i18n.translate(
+        'xpack.apm.transactionsTable.transactionsPerMinuteColumnLabel',
+        {
+          defaultMessage: 'Trans. per minute'
+        }
+      ),
       sortable: true,
       dataType: 'number',
-      render: value => `${asDecimal(value)} ${tpmUnit(type)}`
+      render: value =>
+        `${asDecimal(value)} ${i18n.translate(
+          'xpack.apm.transactionsTable.transactionsPerMinuteUnitLabel',
+          {
+            defaultMessage: 'tpm'
+          }
+        )}`
     },
     {
       field: 'impact',
-      name: 'Impact',
+      name: i18n.translate('xpack.apm.transactionsTable.impactColumnLabel', {
+        defaultMessage: 'Impact'
+      }),
       sortable: true,
       dataType: 'number',
       render: value => <ImpactBar value={value} />

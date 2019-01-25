@@ -1,0 +1,120 @@
+<dashboard-app
+  class="app-container dshAppContainer"
+  ng-class="{'dshAppContainer--withMargins': model.useMargins}"
+>
+  <!-- Local nav. -->
+  <kbn-top-nav name="dashboard" config="topNavMenu">
+    <!-- Transcluded elements. -->
+    <div data-transclude-slots>
+      <!-- Title. -->
+        <div data-transclude-slot="topLeftCorner">
+          <div
+            class="kuiLocalBreadcrumbs"
+            data-test-subj="breadcrumbs"
+            role="heading"
+            aria-level="1"
+            ng-if="showPluginBreadcrumbs">
+            <div class="kuiLocalBreadcrumb">
+              <a
+                class="kuiLocalBreadcrumb__link"
+                href="{{landingPageUrl()}}"
+                i18n-id="kbn.dashboard.dashboardLinkLabel"
+                i18n-default-message="Dashboard"
+              ></a>
+            </div>
+            <div class="kuiLocalBreadcrumb">
+              {{ getDashTitle() }}
+            </div>
+          </div>
+        </div>
+
+      <!-- Search. -->
+      <div ng-show="chrome.getVisible()" class="fullWidth" data-transclude-slot="bottomRow">
+        <query-bar
+          query="model.query"
+          app-name="'dashboard'"
+          on-submit="updateQueryAndFetch"
+          index-patterns="indexPatterns"
+        ></query-bar>
+      </div>
+    </div>
+  </kbn-top-nav>
+
+  <!-- Filters. -->
+  <filter-bar
+    ng-show="showFilterBar()"
+    state="state"
+    index-patterns="indexPatterns"
+  ></filter-bar>
+
+  <div
+    ng-show="getShouldShowEditHelp()"
+    class="dshStartScreen"
+  >
+    <h2
+      class="kuiTitle kuiVerticalRhythm"
+      i18n-id="kbn.dashboard.fillDashboardTitle"
+      i18n-default-message="This dashboard is empty. Let&rsquo;s fill it up!"
+    >
+    </h2>
+
+    <p>
+      <span
+        i18n-id="kbn.dashboard.addVisualizationDescription1"
+        i18n-default-message="Click the "
+        i18n-context="Part of composite label kbn.dashboard.addVisualizationDescription1 + kbn.dashboard.addVisualizationLinkText + kbn.dashboard.addVisualizationDescription2"
+      ></span>
+      <a
+        kbn-accessible-click
+        class="kuiButton kuiButton--primary kuiButton--small"
+        ng-click="showAddPanel()"
+        aria-label="{{::'kbn.dashboard.addVisualizationLinkAriaLabel' | i18n: { defaultMessage: 'Add visualization' } }}"
+        data-test-subj="emptyDashboardAddPanelButton"
+        i18n-id="kbn.dashboard.addVisualizationLinkText"
+        i18n-default-message="Add"
+      ></a>
+      <span
+        i18n-id="kbn.dashboard.addVisualizationDescription2"
+        i18n-default-message=" button in the menu bar above to add a visualization to the dashboard. {br}If you haven't set up any visualizations yet, {visitVisualizeAppLink} to create your first visualization."
+        i18n-values="{
+          html_br: '<br/>',
+          html_visitVisualizeAppLink: '<a class=\'kuiLink\' href=\'#/visualize\'>' + visitVisualizeAppLinkText + '</a>'
+        }"
+      ></span>
+    </p>
+  </div>
+
+  <div ng-show="getShouldShowViewHelp()" class="dshStartScreen">
+    <h2
+      class="kuiTitle kuiVerticalRhythm"
+      i18n-id="kbn.dashboard.fillDashboardTitle"
+      i18n-default-message="This dashboard is empty. Let&rsquo;s fill it up!"
+    >
+    </h2>
+
+    <p class="kuiText kuiVerticalRhythm">
+      <span
+        i18n-id="kbn.dashboard.howToStartWorkingOnNewDashboardDescription1"
+        i18n-default-message="Click the "
+        i18n-context="Part of composite label kbn.dashboard.howToStartWorkingOnNewDashboardDescription1 + kbn.dashboard.howToStartWorkingOnNewDashboardEditLinkText + kbn.dashboard.howToStartWorkingOnNewDashboardDescription2"
+      ></span>
+      <a
+        kbn-accessible-click
+        class="kuiButton kuiButton--primary kuiButton--small"
+        ng-click="enterEditMode()"
+        i18n-id="kbn.dashboard.howToStartWorkingOnNewDashboardEditLinkText"
+        i18n-default-message="Edit"
+      ></a>
+      <span
+        i18n-id="kbn.dashboard.howToStartWorkingOnNewDashboardDescription2"
+        i18n-default-message=" button in the menu bar above to start working on your new dashboard."
+      ></span>
+    </p>
+  </div>
+
+  <dashboard-viewport-provider
+    get-embeddable-factory="getEmbeddableFactory"
+  >
+  </dashboard-viewport-provider>
+
+</dashboard-app>

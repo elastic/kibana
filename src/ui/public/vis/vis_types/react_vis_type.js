@@ -20,44 +20,50 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import chrome from '../../chrome';
-import { BaseVisType } from './base_vis_type';
+import { BaseVisTypeProvider } from './base_vis_type';
 
-class ReactVisController {
-  constructor(element, vis) {
-    this.el = element;
-    this.vis = vis;
-  }
+export function ReactVisTypeProvider(Private) {
+  const BaseVisType = Private(BaseVisTypeProvider);
 
-  render(visData, updateStatus) {
-    this.visData = visData;
+  class ReactVisController {
+    constructor(element, vis) {
+      this.el = element;
+      this.vis = vis;
+    }
 
-    return new Promise((resolve) => {
-      const Component = this.vis.type.visConfig.component;
-      const config = chrome.getUiSettingsClient();
-      render(<Component
-        config={config}
-        vis={this.vis}
-        visData={visData}
-        renderComplete={resolve}
-        updateStatus={updateStatus}
-      />, this.el);
-    });
-  }
+    render(visData, updateStatus) {
+      this.visData = visData;
 
-  destroy() {
-    unmountComponentAtNode(this.el);
-  }
-}
+      return new Promise((resolve) => {
+        const Component = this.vis.type.visConfig.component;
+        const config = chrome.getUiSettingsClient();
+        render(<Component
+          config={config}
+          vis={this.vis}
+          visData={visData}
+          renderComplete={resolve}
+          updateStatus={updateStatus}
+        />, this.el);
+      });
+    }
 
-export class ReactVisType extends BaseVisType {
-  constructor(opts) {
-    super({
-      ...opts,
-      visualization: ReactVisController
-    });
-
-    if (!this.visConfig.component) {
-      throw new Error('Missing component for ReactVisType');
+    destroy() {
+      unmountComponentAtNode(this.el);
     }
   }
+
+  class ReactVisType extends BaseVisType {
+    constructor(opts) {
+      super({
+        ...opts,
+        visualization: ReactVisController
+      });
+
+      if (!this.visConfig.component) {
+        throw new Error('Missing component for ReactVisType');
+      }
+    }
+  }
+
+  return ReactVisType;
 }

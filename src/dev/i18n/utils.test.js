@@ -27,6 +27,7 @@ import {
   formatJSString,
   checkValuesProperty,
   createParserErrorMessage,
+  normalizePath,
   extractMessageValueFromNode,
 } from './utils';
 
@@ -107,6 +108,10 @@ describe('i18n utils', () => {
     }
   });
 
+  test('should normalizePath', () => {
+    expect(normalizePath(__dirname)).toMatchSnapshot();
+  });
+
   test('should validate conformity of "values" and "defaultMessage"', () => {
     const valuesKeys = ['url', 'username', 'password'];
     const defaultMessage = 'Test message with {username}, {password} and [markdown link]({url}).';
@@ -148,6 +153,26 @@ describe('i18n utils', () => {
   test(`should throw if "values" property is provided and defaultMessage doesn't include any references`, () => {
     const valuesKeys = ['url', 'username'];
     const defaultMessage = 'Test message';
+    const messageId = 'namespace.message.id';
+
+    expect(() =>
+      checkValuesProperty(valuesKeys, defaultMessage, messageId)
+    ).toThrowErrorMatchingSnapshot();
+  });
+
+  test('should parse nested ICU message', () => {
+    const valuesKeys = ['first', 'second', 'third'];
+    const defaultMessage = 'Test message {first, plural, one {{second}} other {{third}}}';
+    const messageId = 'namespace.message.id';
+
+    expect(() =>
+      checkValuesProperty(valuesKeys, defaultMessage, messageId)
+    ).not.toThrow();
+  });
+
+  test(`should throw on wrong nested ICU message`, () => {
+    const valuesKeys = ['first', 'second', 'third'];
+    const defaultMessage = 'Test message {first, plural, one {{second}} other {other}}';
     const messageId = 'namespace.message.id';
 
     expect(() =>

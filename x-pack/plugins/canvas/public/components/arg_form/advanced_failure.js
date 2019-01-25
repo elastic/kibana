@@ -8,8 +8,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { compose, withProps, withPropsOnChange } from 'recompose';
 import { EuiForm, EuiTextArea, EuiButton, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
+import { fromExpression, toExpression } from '@kbn/interpreter/common';
 import { createStatefulPropHoc } from '../../components/enhance/stateful_prop';
-import { fromExpression, toExpression } from '../../../common/lib/ast';
 
 export const AdvancedFailureComponent = props => {
   const {
@@ -27,7 +27,9 @@ export const AdvancedFailureComponent = props => {
 
     resetErrorState(); // when setting a new value, attempt to reset the error state
 
-    if (valid) return onValueChange(fromExpression(argExpression.trim(), 'argument'));
+    if (valid) {
+      return onValueChange(fromExpression(argExpression.trim(), 'argument'));
+    }
   };
 
   const confirmReset = ev => {
@@ -51,12 +53,11 @@ export const AdvancedFailureComponent = props => {
         <EuiButton disabled={!valid} onClick={e => valueChange(e)} size="s" type="submit">
           Apply
         </EuiButton>
-        {defaultValue &&
-          defaultValue.length && (
-            <EuiButtonEmpty size="s" color="danger" onClick={confirmReset}>
-              Reset
-            </EuiButtonEmpty>
-          )}
+        {defaultValue && defaultValue.length && (
+          <EuiButtonEmpty size="s" color="danger" onClick={confirmReset}>
+            Reset
+          </EuiButtonEmpty>
+        )}
       </div>
     </EuiForm>
   );

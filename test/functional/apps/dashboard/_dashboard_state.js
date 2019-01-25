@@ -22,13 +22,15 @@ import expect from 'expect.js';
 import { PIE_CHART_VIS_NAME, AREA_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
 import {
   DEFAULT_PANEL_WIDTH,
-} from '../../../../src/core_plugins/kibana/public/dashboard/dashboard_constants';
+} from '../../../../src/legacy/core_plugins/kibana/public/dashboard/dashboard_constants';
 
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'visualize', 'header', 'discover']);
   const testSubjects = getService('testSubjects');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const queryBar = getService('queryBar');
+  const pieChart = getService('pieChart');
+  const inspector = getService('inspector');
   const retry = getService('retry');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -116,6 +118,20 @@ export default function ({ getService, getPageObjects }) {
       expect(headers[1]).to.be('agent');
     });
 
+    it('Saved search will update when the query is changed in the URL', async () => {
+      const currentQuery = await queryBar.getQueryString();
+      expect(currentQuery).to.equal('');
+      const currentUrl = await browser.getCurrentUrl();
+      const newUrl = currentUrl.replace('query:%27%27', 'query:%27abc12345678910%27');
+      // Don't add the timestamp to the url or it will cause a hard refresh and we want to test a
+      // soft refresh.
+      await browser.get(newUrl.toString(), false);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      const headers = await PageObjects.discover.getColumnHeaders();
+      expect(headers.length).to.be(0);
+    });
+
     it('Tile map with no changes will update with visualization changes', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
@@ -126,10 +142,11 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.saveDashboard('No local edits');
 
       await dashboardPanelActions.openInspector();
-      const tileMapData = await PageObjects.visualize.getInspectorTableData();
-      await PageObjects.visualize.closeInspector();
+      const tileMapData = await inspector.getTableData();
+      await inspector.close();
 
       await PageObjects.dashboard.switchToEditMode();
+      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
 
       await PageObjects.visualize.clickMapZoomIn();
@@ -137,25 +154,14 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickMapZoomIn();
       await PageObjects.visualize.clickMapZoomIn();
 
-      await PageObjects.visualize.clickGo();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
       await PageObjects.visualize.saveVisualizationExpectSuccess('Visualization TileMap');
 
       await PageObjects.header.clickDashboard();
 
       await dashboardPanelActions.openInspector();
-      const changedTileMapData = await PageObjects.visualize.getInspectorTableData();
-      await PageObjects.visualize.closeInspector();
+      const changedTileMapData = await inspector.getTableData();
+      await inspector.close();
       expect(changedTileMapData.length).to.not.equal(tileMapData.length);
-    });
-
-    it('retains dark theme', async function () {
-      await PageObjects.dashboard.useDarkTheme(true);
-      await PageObjects.header.clickVisualize();
-      await PageObjects.header.clickDashboard();
-      const isDarkThemeOn = await PageObjects.dashboard.isDarkThemeOn();
-      expect(isDarkThemeOn).to.equal(true);
     });
 
     describe('Directly modifying url updates dashboard state', () => {
@@ -165,21 +171,21 @@ export default function ({ getService, getPageObjects }) {
 
         const currentQuery = await queryBar.getQueryString();
         expect(currentQuery).to.equal('');
-        const currentUrl = await remote.getCurrentUrl();
+        const currentUrl = await browser.getCurrentUrl();
         const newUrl = currentUrl.replace('query:%27%27', 'query:%27hi%27');
         // Don't add the timestamp to the url or it will cause a hard refresh and we want to test a
         // soft refresh.
-        await remote.get(newUrl.toString(), false);
+        await browser.get(newUrl.toString(), false);
         const newQuery = await queryBar.getQueryString();
         expect(newQuery).to.equal('hi');
       });
 
       it('for panel size parameters', async function () {
         await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
-        const currentUrl = await remote.getCurrentUrl();
+        const currentUrl = await browser.getCurrentUrl();
         const currentPanelDimensions = await PageObjects.dashboard.getPanelDimensions();
         const newUrl = currentUrl.replace(`w:${DEFAULT_PANEL_WIDTH}`, `w:${DEFAULT_PANEL_WIDTH * 2}`);
-        await remote.get(newUrl.toString(), false);
+        await browser.get(newUrl.toString(), false);
         await retry.try(async () => {
           const newPanelDimensions = await PageObjects.dashboard.getPanelDimensions();
           if (newPanelDimensions.length < 0) {
@@ -195,9 +201,9 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('when removing a panel', async function () {
-        const currentUrl = await remote.getCurrentUrl();
+        const currentUrl = await browser.getCurrentUrl();
         const newUrl = currentUrl.replace(/panels:\!\(.*\),query/, 'panels:!(),query');
-        await remote.get(newUrl.toString(), false);
+        await browser.get(newUrl.toString(), false);
 
         await retry.try(async () => {
           const newPanelCount = await PageObjects.dashboard.getPanelCount();
@@ -210,13 +216,13 @@ export default function ({ getService, getPageObjects }) {
           await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
           await PageObjects.visualize.openLegendOptionColors('80,000');
           await PageObjects.visualize.selectNewLegendColorChoice('#F9D9F9');
-          const currentUrl = await remote.getCurrentUrl();
+          const currentUrl = await browser.getCurrentUrl();
           const newUrl = currentUrl.replace('F9D9F9', 'FFFFFF');
-          await remote.get(newUrl.toString(), false);
+          await browser.get(newUrl.toString(), false);
           await PageObjects.header.waitUntilLoadingHasFinished();
 
           await retry.try(async () => {
-            const allPieSlicesColor = await PageObjects.visualize.getAllPieSliceStyles('80,000');
+            const allPieSlicesColor = await pieChart.getAllPieSliceStyles('80,000');
             let whitePieSliceCounts = 0;
             allPieSlicesColor.forEach(style => {
               if (style.indexOf('rgb(255, 255, 255)') > 0) {
@@ -237,13 +243,13 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('resets a pie slice color to the original when removed', async function () {
-          const currentUrl = await remote.getCurrentUrl();
+          const currentUrl = await browser.getCurrentUrl();
           const newUrl = currentUrl.replace('vis:(colors:(%2780,000%27:%23FFFFFF))', '');
-          await remote.get(newUrl.toString(), false);
+          await browser.get(newUrl.toString(), false);
           await PageObjects.header.waitUntilLoadingHasFinished();
 
           await retry.try(async () => {
-            const pieSliceStyle = await PageObjects.visualize.getPieSliceStyle('80,000');
+            const pieSliceStyle = await pieChart.getPieSliceStyle('80,000');
             // The default green color that was stored with the visualization before any dashboard overrides.
             expect(pieSliceStyle.indexOf('rgb(87, 193, 123)')).to.be.greaterThan(0);
           });

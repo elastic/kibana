@@ -10,11 +10,11 @@ import { checkPermission } from 'plugins/ml/privilege/check_privilege';
 import { mlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 
 import React from 'react';
-import './styles/main.less';
 
 import {
   EuiButton,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 function newJob() {
   window.location.href = `#/jobs/new_job`;
@@ -28,9 +28,12 @@ export function NewJobButton() {
       size="s"
       disabled={(buttonEnabled === false)}
       fill
+      iconType="plusInCircle"
     >
-      <i className="new-job-button fa fa-plus" />
-      Create new job
+      <FormattedMessage
+        id="xpack.ml.jobsList.createNewJobButtonLabel"
+        defaultMessage="Create new job"
+      />
     </EuiButton>
   );
 }

@@ -1,24 +1,31 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`it renders without crashing 1`] = `
-<CollapsiblePanel
-  iconType="logoElasticsearch"
-  title="Elasticsearch"
->
-  <React.Fragment>
+<I18nProvider>
+  <CollapsiblePanel
+    iconType="logoElasticsearch"
+    title="Elasticsearch"
+  >
     <EuiDescribedFormGroup
       description={
         <p>
-          Manage the actions this role can perform against your cluster.
-           
+          <FormattedMessage
+            defaultMessage="Manage the actions this role can perform against your cluster. "
+            id="xpack.security.management.editRoles.elasticSearchPrivileges.manageRoleActionsDescription"
+            values={Object {}}
+          />
           <EuiLink
             className="editRole__learnMore"
             color="primary"
-            href="undefinedguide/en/x-pack/undefined/security-privileges.html#security-privileges"
+            href="undefinedguide/en/elastic-stack-overview/undefined/security-privileges.html#privileges-list-cluster"
             target="_blank"
             type="button"
           >
-            Learn more
+            <FormattedMessage
+              defaultMessage="Learn more"
+              id="xpack.security.management.editRoles.elasticSearchPrivileges.learnMoreLinkText"
+              values={Object {}}
+            />
           </EuiLink>
         </p>
       }
@@ -26,7 +33,11 @@ exports[`it renders without crashing 1`] = `
       gutterSize="l"
       title={
         <h3>
-          Cluster privileges
+          <FormattedMessage
+            defaultMessage="Cluster privileges"
+            id="xpack.security.management.editRoles.elasticSearchPrivileges.clusterPrivilegesTitle"
+            values={Object {}}
+          />
         </h3>
       }
       titleSize="xs"
@@ -61,16 +72,23 @@ exports[`it renders without crashing 1`] = `
     <EuiDescribedFormGroup
       description={
         <p>
-          Allow requests to be submitted on the behalf of other users.
-           
+          <FormattedMessage
+            defaultMessage="Allow requests to be submitted on the behalf of other users. "
+            id="xpack.security.management.editRoles.elasticSearchPrivileges.howToBeSubmittedOnBehalfOfOtherUsersDescription"
+            values={Object {}}
+          />
           <EuiLink
             className="editRole__learnMore"
             color="primary"
-            href="undefinedguide/en/x-pack/undefined/security-privileges.html#_run_as_privilege"
+            href="undefinedguide/en/elastic-stack-overview/undefined/security-privileges.html#_run_as_privilege"
             target="_blank"
             type="button"
           >
-            Learn more
+            <FormattedMessage
+              defaultMessage="Learn more"
+              id="xpack.security.management.editRoles.elasticSearchPrivileges.learnMoreLinkText"
+              values={Object {}}
+            />
           </EuiLink>
         </p>
       }
@@ -78,7 +96,11 @@ exports[`it renders without crashing 1`] = `
       gutterSize="l"
       title={
         <h3>
-          Run As privileges
+          <FormattedMessage
+            defaultMessage="Run As privileges"
+            id="xpack.security.management.editRoles.elasticSearchPrivileges.runAsPrivilegesTitle"
+            values={Object {}}
+          />
         </h3>
       }
       titleSize="xs"
@@ -95,7 +117,7 @@ exports[`it renders without crashing 1`] = `
           isDisabled={false}
           onChange={[Function]}
           options={Array []}
-          placeholder="Add a user..."
+          placeholder="Add a user…"
           selectedOptions={Array []}
           singleSelection={false}
         />
@@ -109,7 +131,11 @@ exports[`it renders without crashing 1`] = `
       textTransform="none"
     >
       <h3>
-        Index privileges
+        <FormattedMessage
+          defaultMessage="Index privileges"
+          id="xpack.security.management.editRoles.elasticSearchPrivileges.indexPrivilegesTitle"
+          values={Object {}}
+        />
       </h3>
     </EuiTitle>
     <EuiSpacer
@@ -121,16 +147,23 @@ exports[`it renders without crashing 1`] = `
       size="s"
     >
       <p>
-        Control access to the data in your cluster.
-         
+        <FormattedMessage
+          defaultMessage="Control access to the data in your cluster. "
+          id="xpack.security.management.editRoles.elasticSearchPrivileges.controlAccessToClusterDataDescription"
+          values={Object {}}
+        />
         <EuiLink
           className="editRole__learnMore"
           color="primary"
-          href="undefinedguide/en/x-pack/undefined/security-privileges.html#privileges-list-indices"
+          href="undefinedguide/en/elastic-stack-overview/undefined/security-privileges.html#privileges-list-indices"
           target="_blank"
           type="button"
         >
-          Learn more
+          <FormattedMessage
+            defaultMessage="Learn more"
+            id="xpack.security.management.editRoles.elasticSearchPrivileges.learnMoreLinkText"
+            values={Object {}}
+          />
         </EuiLink>
       </p>
     </EuiText>
@@ -174,8 +207,12 @@ exports[`it renders without crashing 1`] = `
       size="s"
       type="button"
     >
-      Add index privilege
+      <FormattedMessage
+        defaultMessage="Add index privilege"
+        id="xpack.security.management.editRoles.elasticSearchPrivileges.addIndexPrivilegesButtonLabel"
+        values={Object {}}
+      />
     </EuiButton>
-  </React.Fragment>
-</CollapsiblePanel>
+  </CollapsiblePanel>
+</I18nProvider>
 `;

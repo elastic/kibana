@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
 import lzString from 'lz-string';
-import { createBrowserHistory, createMemoryHistory, parsePath, createPath } from 'history';
-import { get } from 'lodash';
-import { APP_ROUTE } from '../../common/lib/constants';
+import { createMemoryHistory, parsePath, createPath } from 'history';
+import createHashStateHistory from 'history-extra';
 import { getWindow } from './get_window';
 
 function wrapHistoryInstance(history) {
@@ -65,12 +63,16 @@ function wrapHistoryInstance(history) {
     },
 
     getPath(path) {
-      if (path != null) return createPath(parsePath(path));
+      if (path != null) {
+        return createPath(parsePath(path));
+      }
       return createPath(this.getLocation());
     },
 
     getFullPath(path) {
-      if (path != null) return history.createHref(parsePath(path));
+      if (path != null) {
+        return history.createHref(parsePath(path));
+      }
       return history.createHref(this.getLocation());
     },
 
@@ -84,7 +86,9 @@ function wrapHistoryInstance(history) {
 
     onChange(fn) {
       // if no handler fn passed, do nothing
-      if (fn == null) return;
+      if (fn == null) {
+        return;
+      }
 
       // push onChange function onto listener stack and return a function to remove it
       const pushedIndex = historyState.onChange.push(fn) - 1;
@@ -92,7 +96,9 @@ function wrapHistoryInstance(history) {
         // only allow the unlisten function to be called once
         let called = false;
         return () => {
-          if (called) return;
+          if (called) {
+            return;
+          }
           historyState.onChange.splice(pushedIndex, 1);
           called = true;
         };
@@ -131,29 +137,18 @@ const instances = new WeakMap();
 
 const getHistoryInstance = win => {
   // if no window object, use memory module
-  if (typeof win === 'undefined' || !win.history) return createMemoryHistory();
-
-  const basePath = chrome.getBasePath();
-  const basename = `${basePath}${APP_ROUTE}#/`;
-
-  // hacky fix for initial page load so basename matches with the hash
-  if (win.location.hash === '') win.history.replaceState({}, '', `${basename}`);
-
-  // if window object, create browser instance
-  return createBrowserHistory({
-    basename,
-  });
+  if (typeof win === 'undefined' || !win.history) {
+    return createMemoryHistory();
+  }
+  return createHashStateHistory();
 };
 
 export const historyProvider = (win = getWindow()) => {
   // return cached instance if one exists
   const instance = instances.get(win);
-  if (instance) return instance;
-
-  // temporary fix for search params before the hash; remove them via location redirect
-  // they can't be preserved given this upstream issue https://github.com/ReactTraining/history/issues/564
-  if (get(win, 'location.search', '').length > 0)
-    win.location = `${chrome.getBasePath()}${APP_ROUTE}${win.location.hash}`;
+  if (instance) {
+    return instance;
+  }
 
   // create and cache wrapped history instance
   const historyInstance = getHistoryInstance(win);

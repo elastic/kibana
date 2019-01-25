@@ -8,6 +8,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { DetailStatus } from 'plugins/monitoring/components/kibana/detail_status';
+import { I18nProvider } from '@kbn/i18n/react';
 
 const uiModule = uiModules.get('monitoring/directives', []);
 uiModule.directive('monitoringKibanaSummary', () => {
@@ -18,7 +19,7 @@ uiModule.directive('monitoringKibanaSummary', () => {
     },
     link(scope, $el) {
       scope.$watch('kibana', kibana => {
-        render(<DetailStatus stats={kibana} />, $el[0]);
+        render(<I18nProvider><DetailStatus stats={kibana} /></I18nProvider>, $el[0]);
       });
     }
   };

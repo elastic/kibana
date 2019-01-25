@@ -5,12 +5,12 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { EnableMonitoringAlert } from './enable_monitoring_alert';
 
 describe('EnableMonitoringAlert component', () => {
   it('renders expected component', () => {
-    const wrapper = shallow(<EnableMonitoringAlert />);
+    const wrapper = shallowWithIntl(<EnableMonitoringAlert />);
     expect(wrapper).toMatchSnapshot();
   });
 });

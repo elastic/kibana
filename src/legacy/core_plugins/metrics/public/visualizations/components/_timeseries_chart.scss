@@ -1,0 +1,116 @@
+.tvbVisTimeSeries {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+}
+
+.tvbVisTimeSeries__content {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex: 1 0 auto;
+  // TODO: Remove once tooltips are portaled
+  overflow: hidden; // Ensures the tooltip doesn't cause scrollbars
+}
+
+.tvbVisTimeSeries__visualization {
+  cursor: crosshair;
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  position: relative;
+
+  > .tvbVisTimeSeries__container {
+    min-width: 1px;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.tvbVisTimeSeries__container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+}
+
+.tvbVisTimeSeries__axisLabel {
+  @include euiFontSizeXS;
+  color: $tvbTextColor;
+  text-align: center;
+  min-height: 1.2em;
+
+  &.tvbVisTimeSeries__axisLabel--reversed {
+    color: $tvbTextColorReversed;
+  }
+}
+
+// TOOLTIP
+
+// EUITODO: Use EuiTooltip or somehow portal the current one
+.tvbTooltip__container {
+  pointer-events: none;
+  position: absolute;
+  z-index: $euiZLevel9;
+  display: flex;
+  align-items: center;
+  padding: 0 $euiSizeS;
+  transform: translate(0, -50%);
+}
+
+.tvbTooltip__container--right {
+  flex-direction: row-reverse;
+}
+
+.tvbTooltip {
+  background-color: tintOrShade($euiColorFullShade, 25%, 90%);
+  @include euiBottomShadow($color: $euiColorFullShade);
+  @include euiFontSizeXS;
+  padding: $euiSizeS;
+  border-radius: $euiBorderRadius;
+  color: $euiColorGhost;
+  max-width: 320px;
+}
+
+.tvbTooltip__caret {
+  $temp-arrowSize: $euiSizeM;
+  width: $temp-arrowSize;
+  height: $temp-arrowSize;
+  color: tintOrShade($euiColorFullShade, 25%, 90%);
+  border-radius: 2px;
+  background-color: tintOrShade($euiColorFullShade, 25%, 90%);
+  transform-origin: center;
+  transform: rotateZ(45deg);
+
+  .tvbTooltip__container--left & {
+    margin-right: (($temp-arrowSize/2) + 1px) * -1;
+  }
+
+  .tvbTooltip__container--right & {
+    margin-left: (($temp-arrowSize/2) + 1px) * -1;
+  }
+}
+
+.tvbTooltip__item {
+  display: flex;
+}
+
+.tvbTooltip__label {
+  flex-grow: 1;
+  margin-left: $euiSizeXS;
+  margin-right: $euiSizeXS;
+}
+
+.tvbTooltip__icon,
+.tvbTooltip__value {
+  flex-shrink: 0;
+}
+
+.tvbTooltip__timestamp {
+  color: $euiColorLightShade;
+  white-space: nowrap;
+}

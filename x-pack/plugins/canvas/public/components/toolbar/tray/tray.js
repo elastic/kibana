@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
 export const Tray = ({ children, done }) => {
   return (
     <Fragment>
-      <EuiFlexGroup justifyContent="spaceAround">
+      <EuiFlexGroup className="canvasTray__toggle" justifyContent="spaceAround">
         <EuiFlexItem grow={false}>
           <EuiButtonIcon size="s" onClick={done} aria-label="Dismiss tray" iconType="arrowDown" />
         </EuiFlexItem>

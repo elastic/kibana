@@ -21,12 +21,14 @@ export class Clipboard extends React.PureComponent {
 
     const result = copy(content, { debug: true });
 
-    if (typeof onCopy === 'function') onCopy(result);
+    if (typeof onCopy === 'function') {
+      onCopy(result);
+    }
   };
 
   render() {
     return (
-      <div className="canvas_clipboard" onClick={this.onClick}>
+      <div className="canvasClipboard" onClick={this.onClick}>
         {this.props.children}
       </div>
     );

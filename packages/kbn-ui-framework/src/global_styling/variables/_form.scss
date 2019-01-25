@@ -1,6 +1,6 @@
-$kuiFormControlHorizontalPadding: 12px;
-$kuiFormControlPadding: 3px $kuiFormControlHorizontalPadding 4px;
-$kuiFormInputHeight: 30px;
+$kuiFormControlHorizontalPadding: $euiSizeM;
+$kuiFormControlPadding: $euiSizeXS $kuiFormControlHorizontalPadding $euiSizeXS;
+$kuiFormInputHeight: $euiSizeXL;
 $kuiFormFieldDefaultWidth: 180px;
 $kuiFormFieldSmallWidth: 60px;
-$kuiFormFieldLargeWidth: 400px;
+$kuiFormFieldLargeWidth: $euiFormMaxWidth;

@@ -5,25 +5,23 @@
  */
 
 import React from 'react';
-import { Transaction } from '../../../typings/Transaction';
-import { KibanaLink, legacyEncodeURIComponent } from '../../utils/url';
+import { Transaction } from '../../../typings/es_schemas/Transaction';
+import { KibanaLink } from './Links/KibanaLink';
+import { legacyEncodeURIComponent } from './Links/url_helpers';
 
 interface TransactionLinkProps {
   transaction?: Transaction;
 }
 
 /**
- * Return the path and query used to build a trace link,
- * given either a v2 Transaction or a Transaction Group
+ * Return the path and query used to build a trace link
  */
 export function getLinkProps(transaction: Transaction) {
-  const serviceName = transaction.context.service.name;
+  const serviceName = transaction.service.name;
   const transactionType = transaction.transaction.type;
-  const traceId =
-    transaction.version === 'v2' ? transaction.trace.id : undefined;
+  const traceId = transaction.trace.id;
   const transactionId = transaction.transaction.id;
   const name = transaction.transaction.name;
-
   const encodedName = legacyEncodeURIComponent(name);
 
   return {
@@ -50,9 +48,5 @@ export const TransactionLink: React.SFC<TransactionLinkProps> = ({
     return <React.Fragment>{children}</React.Fragment>;
   }
 
-  return (
-    <KibanaLink pathname="/app/apm" {...linkProps}>
-      {children}
-    </KibanaLink>
-  );
+  return <KibanaLink {...linkProps}>{children}</KibanaLink>;
 };

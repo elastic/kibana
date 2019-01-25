@@ -18,5 +18,12 @@
  */
 
 // It's currenty hard to properly type PersistedState, since it dynamically
-// inherits the class passed into the constructor.
-export type PersistedState = any;
+// inherits the class passed into the constructor.  These typings are really pretty bad
+// but needed in the short term to make incremental progress elsewhere. Can't even
+// just use `any` since then typescript complains about using PersistedState as a
+// constructor.
+export class PersistedState {
+  constructor(value?: any, path?: any, EmitterClass?: any);
+  // method you want typed so far
+  [prop: string]: any;
+}

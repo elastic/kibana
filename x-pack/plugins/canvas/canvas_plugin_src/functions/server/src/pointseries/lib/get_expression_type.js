@@ -12,7 +12,9 @@ import { getFieldNames } from './get_field_names';
 export function getExpressionType(columns, mathExpression) {
   // if isColumnReference returns true, then mathExpression is just a string
   // referencing a column in a datatable
-  if (isColumnReference(mathExpression)) return getFieldType(columns, mathExpression);
+  if (isColumnReference(mathExpression)) {
+    return getFieldType(columns, mathExpression);
+  }
 
   const parsedMath = parse(mathExpression);
 
@@ -22,7 +24,9 @@ export function getExpressionType(columns, mathExpression) {
     if (fieldNames.length > 0) {
       const fieldTypes = fieldNames.reduce((types, name) => {
         const type = getFieldType(columns, name);
-        if (type !== 'null' && types.indexOf(type) === -1) return types.concat(type);
+        if (type !== 'null' && types.indexOf(type) === -1) {
+          return types.concat(type);
+        }
 
         return types;
       }, []);

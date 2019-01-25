@@ -37,8 +37,10 @@ export class ElementShareContainer extends React.PureComponent {
     // dispatches a custom DOM event on the container when the element is complete
     onComplete(() => {
       clearTimeout(this.timeout);
-      if (!this.sharedItemRef) return; // without this, crazy fast forward/backward paging leads to an error
-      const ev = new Event('renderComplete');
+      if (!this.sharedItemRef) {
+        return;
+      } // without this, crazy fast forward/backward paging leads to an error
+      const ev = new CustomEvent('renderComplete');
       this.sharedItemRef.dispatchEvent(ev);
 
       // if the element is finished before reporting is listening for then

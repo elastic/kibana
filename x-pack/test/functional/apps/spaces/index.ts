@@ -8,6 +8,8 @@ import { TestInvoker } from './lib/types';
 // tslint:disable:no-default-export
 export default function spacesApp({ loadTestFile }: TestInvoker) {
   describe('Spaces app', function spacesAppTestSuite() {
+    this.tags('ciGroup4');
+
     loadTestFile(require.resolve('./spaces_selection'));
   });
 }

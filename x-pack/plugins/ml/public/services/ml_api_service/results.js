@@ -21,6 +21,7 @@ export const results = {
     threshold,
     earliestMs,
     latestMs,
+    dateFormatTz,
     maxRecords,
     maxExamples) {
 
@@ -35,6 +36,7 @@ export const results = {
         threshold,
         earliestMs,
         latestMs,
+        dateFormatTz,
         maxRecords,
         maxExamples
       }

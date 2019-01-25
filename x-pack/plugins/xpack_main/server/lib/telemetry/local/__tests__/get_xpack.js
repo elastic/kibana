@@ -93,15 +93,15 @@ describe('get_xpack', () => {
 
     it('returns the formatted response object', async () => {
       const license = { fancy: 'license' };
-      const usage = { also: 'fancy' };
+      const xpack = { also: 'fancy' };
 
       const callCluster = sinon.stub();
 
-      mockGetXPack(callCluster, Promise.resolve(license), Promise.resolve(usage));
+      mockGetXPack(callCluster, Promise.resolve(license), Promise.resolve(xpack));
 
       const data = await getXPack(callCluster);
 
-      expect(data).to.eql({ license, stack_stats: { xpack: usage } });
+      expect(data).to.eql({ license, xpack });
     });
 
     it('returns empty object upon license failure', async () => {

@@ -5,6 +5,7 @@
  */
 
 import Boom from 'boom';
+import { i18n } from '@kbn/i18n';
 
 /**
  * Wraps ES errors into a Boom error response and returns it
@@ -16,7 +17,9 @@ import Boom from 'boom';
 export function wrapEsError(err) {
   const statusCode = err.statusCode;
   if (statusCode === 403) {
-    return Boom.forbidden('Insufficient user permissions for managing Logstash pipelines');
+    return Boom.forbidden(i18n.translate('xpack.logstash.insufficientUserPermissionsDescription', {
+      defaultMessage: 'Insufficient user permissions for managing Logstash pipelines',
+    }));
   }
   return Boom.boomify(err, { statusCode: err.statusCode });
 }

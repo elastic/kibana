@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import expect from 'expect.js';
-import { asPrettyString } from '../../../core_plugins/kibana/common/utils/as_pretty_string';
+import { asPrettyString } from '../../../legacy/core_plugins/kibana/common/utils/as_pretty_string';
 import { FieldFormat } from '../field_format';
 
 describe('FieldFormat class', function () {

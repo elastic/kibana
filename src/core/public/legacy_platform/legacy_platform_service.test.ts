@@ -110,6 +110,14 @@ jest.mock('ui/chrome/api/theme', () => {
   };
 });
 
+const mockChromeBreadcrumbsInit = jest.fn();
+jest.mock('ui/chrome/api/breadcrumbs', () => {
+  mockLoadOrder.push('ui/chrome/api/breadcrumbs');
+  return {
+    __newPlatformInit__: mockChromeBreadcrumbsInit,
+  };
+});
+
 const mockGlobalNavStateInit = jest.fn();
 jest.mock('ui/chrome/services/global_nav_state', () => {
   mockLoadOrder.push('ui/chrome/services/global_nav_state');
@@ -270,6 +278,17 @@ describe('#start()', () => {
 
       expect(mockChromeThemeInit).toHaveBeenCalledTimes(1);
       expect(mockChromeThemeInit).toHaveBeenCalledWith(chromeStartContract);
+    });
+
+    it('passes chrome service to ui/chrome/api/breadcrumbs', () => {
+      const legacyPlatform = new LegacyPlatformService({
+        ...defaultParams,
+      });
+
+      legacyPlatform.start(defaultStartDeps);
+
+      expect(mockChromeBreadcrumbsInit).toHaveBeenCalledTimes(1);
+      expect(mockChromeBreadcrumbsInit).toHaveBeenCalledWith(chromeStartContract);
     });
 
     it('passes chrome service to ui/chrome/api/global_nav_state', () => {

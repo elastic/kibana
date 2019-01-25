@@ -10,6 +10,7 @@ import {
   EuiInMemoryTable,
   EuiText,
 } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { SpaceAvatar } from '../../../../../../../../spaces/public/components';
@@ -25,6 +26,7 @@ interface Props {
   spacePrivileges: any;
   onChange?: (privs: { [spaceId: string]: KibanaPrivilege[] }) => void;
   readonly?: boolean;
+  intl: InjectedIntl;
 }
 
 interface State {
@@ -35,13 +37,13 @@ interface DeletedSpace extends Space {
   deleted: boolean;
 }
 
-export class PrivilegeSpaceTable extends Component<Props, State> {
+class PrivilegeSpaceTableUI extends Component<Props, State> {
   public state = {
     searchTerm: '',
   };
 
   public render() {
-    const { role, spaces, availablePrivileges, spacePrivileges } = this.props;
+    const { role, spaces, availablePrivileges, spacePrivileges, intl } = this.props;
 
     const { searchTerm } = this.state;
 
@@ -74,7 +76,10 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
         search={{
           box: {
             incremental: true,
-            placeholder: 'Filter',
+            placeholder: intl.formatMessage({
+              id: 'xpack.security.management.editRoles.privilegeSpaceTable.filterPlaceholder',
+              defaultMessage: 'Filter',
+            }),
           },
           onChange: (search: any) => {
             this.setState({
@@ -88,6 +93,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
   }
 
   public getTableColumns = (role: Role, availablePrivileges: KibanaPrivilege[] = []) => {
+    const { intl } = this.props;
     const columns: any[] = [
       {
         field: 'space',
@@ -103,11 +109,22 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
       },
       {
         field: 'space',
-        name: 'Space',
+        name: intl.formatMessage({
+          id: 'xpack.security.management.editRoles.privilegeSpaceTable.spaceName',
+          defaultMessage: 'Space',
+        }),
         width: this.props.readonly ? '75%' : '50%',
         render: (space: Space | DeletedSpace) => {
           if ('deleted' in space) {
-            return <EuiText color={'subdued'}>{space.id} (deleted)</EuiText>;
+            return (
+              <EuiText color={'subdued'}>
+                <FormattedMessage
+                  id="xpack.security.management.editRoles.privilegeSpaceTable.deletedSpaceDescription"
+                  defaultMessage="{value} (deleted)"
+                  values={{ value: space.id }}
+                />
+              </EuiText>
+            );
           } else {
             return <EuiText>{space.name}</EuiText>;
           }
@@ -115,7 +132,10 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
       },
       {
         field: 'privilege',
-        name: 'Privilege',
+        name: intl.formatMessage({
+          id: 'xpack.security.management.editRoles.privilegeSpaceTable.privilegeName',
+          defaultMessage: 'Privilege',
+        }),
         width: this.props.readonly ? '25%' : undefined,
         render: (privilege: KibanaPrivilege, record: any) => {
           if (this.props.readonly || record.space.deleted) {
@@ -137,7 +157,10 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
     ];
     if (!this.props.readonly) {
       columns.push({
-        name: 'Actions',
+        name: intl.formatMessage({
+          id: 'xpack.security.management.editRoles.privilegeSpaceTable.actionsName',
+          defaultMessage: 'Actions',
+        }),
         actions: [
           {
             render: (record: any) => {
@@ -182,3 +205,5 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
     }
   };
 }
+
+export const PrivilegeSpaceTable = injectI18n(PrivilegeSpaceTableUI);

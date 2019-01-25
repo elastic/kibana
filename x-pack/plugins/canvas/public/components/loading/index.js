@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { connect } from 'react-redux';
-import { getSelectedPage, getPageById } from '../../state/selectors/workpad';
+import { pure } from 'recompose';
 import { Loading as Component } from './loading';
 
-const mapStateToProps = state => ({
-  backgroundColor: getPageById(state, getSelectedPage(state)).style.background,
-});
-
-export const Loading = connect(mapStateToProps)(Component);
+export const Loading = pure(Component);

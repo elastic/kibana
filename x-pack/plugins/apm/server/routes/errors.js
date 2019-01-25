@@ -13,7 +13,6 @@ import { getErrorGroup } from '../lib/errors/get_error_group';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 
-const pre = [{ method: setupRequest, assign: 'setup' }];
 const ROOT = '/api/apm/services/{serviceName}/errors';
 const defaultErrorHandler = err => {
   console.error(err.stack);
@@ -25,7 +24,6 @@ export function initErrorsApi(server) {
     method: 'GET',
     path: ROOT,
     config: {
-      pre,
       validate: {
         query: withDefaultValidators({
           sortField: Joi.string(),
@@ -34,7 +32,7 @@ export function initErrorsApi(server) {
       }
     },
     handler: req => {
-      const { setup } = req.pre;
+      const setup = setupRequest(req);
       const { serviceName } = req.params;
       const { sortField, sortDirection } = req.query;
 
@@ -51,13 +49,12 @@ export function initErrorsApi(server) {
     method: 'GET',
     path: `${ROOT}/{groupId}`,
     config: {
-      pre,
       validate: {
         query: withDefaultValidators()
       }
     },
     handler: req => {
-      const { setup } = req.pre;
+      const setup = setupRequest(req);
       const { serviceName, groupId } = req.params;
       return getErrorGroup({ serviceName, groupId, setup }).catch(
         defaultErrorHandler
@@ -65,22 +62,34 @@ export function initErrorsApi(server) {
     }
   });
 
+  const distributionHandler = req => {
+    const setup = setupRequest(req);
+    const { serviceName, groupId } = req.params;
+
+    return getDistribution({ serviceName, groupId, setup }).catch(
+      defaultErrorHandler
+    );
+  };
+
   server.route({
     method: 'GET',
     path: `${ROOT}/{groupId}/distribution`,
     config: {
-      pre,
       validate: {
         query: withDefaultValidators()
       }
     },
-    handler: req => {
-      const { setup } = req.pre;
-      const { serviceName, groupId } = req.params;
+    handler: distributionHandler
+  });
 
-      return getDistribution({ serviceName, groupId, setup }).catch(
-        defaultErrorHandler
-      );
-    }
+  server.route({
+    method: 'GET',
+    path: `${ROOT}/distribution`,
+    config: {
+      validate: {
+        query: withDefaultValidators()
+      }
+    },
+    handler: distributionHandler
   });
 }

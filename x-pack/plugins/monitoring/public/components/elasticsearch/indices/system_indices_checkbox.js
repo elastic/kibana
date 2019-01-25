@@ -13,6 +13,7 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 import { TABLE_ACTION_RESET_PAGING } from '../../../../common/constants';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export class SystemIndicesCheckbox extends React.Component {
   constructor(props) {
@@ -31,7 +32,12 @@ export class SystemIndicesCheckbox extends React.Component {
       <KuiToolBarSection>
         <KuiToolBarText>
           <EuiSwitch
-            label="System indices"
+            label={(
+              <FormattedMessage
+                id="xpack.monitoring.elasticsearch.indices.systemIndicesLabel"
+                defaultMessage="System indices"
+              />
+            )}
             onChange={this.toggleShowSystemIndices}
             checked={this.state.showSystemIndices}
           />

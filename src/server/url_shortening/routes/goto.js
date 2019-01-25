@@ -20,7 +20,7 @@
 import { handleShortUrlError } from './lib/short_url_error';
 import { shortUrlAssertValid } from './lib/short_url_assert_valid';
 
-export const createGotoRoute = ({ server, config, shortUrlLookup }) => ({
+export const createGotoRoute = ({ server, shortUrlLookup }) => ({
   method: 'GET',
   path: '/goto/{urlId}',
   handler: async function (request, h) {
@@ -31,7 +31,7 @@ export const createGotoRoute = ({ server, config, shortUrlLookup }) => ({
       const uiSettings = request.getUiSettingsService();
       const stateStoreInSessionStorage = await uiSettings.get('state:storeInSessionStorage');
       if (!stateStoreInSessionStorage) {
-        return h.redirect(config.get('server.basePath') + url);
+        return h.redirect(request.getBasePath() + url);
       }
 
       const app = server.getHiddenUiAppById('stateSessionStorageRedirect');

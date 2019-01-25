@@ -1,8 +1,8 @@
-<table ng-if="rows" class="table agg-table-group" ng-repeat="table in rows">
+<table ng-if="rows" class="table kbnAggTable__group" ng-repeat="table in rows">
   <thead>
     <tr>
       <th ng-if="table.tables" scope="col">
-        <span class="agg-table-group-header">{{ table.title }}</span>
+        <span class="kbnAggTable__groupHeader">{{ table.title }}</span>
       </th>
     </tr>
   </thead>
@@ -12,13 +12,17 @@
         <kbn-agg-table-group
           ng-if="table.tables"
           group="table"
+          filter="filter"
+          dimensions="dimensions"
           per-page="perPage"
           sort="sort"
           show-total="showTotal"
           total-func="totalFunc"></kbn-agg-table-group>
         <kbn-agg-table
           ng-if="table.rows"
+          filter="filter"
           table="table"
+          dimensions="dimensions"
           export-title="exportTitle"
           per-page="perPage"
           sort="sort"
@@ -30,11 +34,11 @@
   </tbody>
 </table>
 
-<table ng-if="columns" class="table agg-table-group">
+<table ng-if="columns" class="table kbnAggTable__group">
   <thead>
     <tr>
       <th ng-repeat="table in columns" ng-if="table.tables" scope="col">
-        <span class="agg-table-group-header">{{ table.title }}</span>
+        <span class="kbnAggTable__groupHeader">{{ table.title }}</span>
       </th>
     </tr>
   </thead>
@@ -43,14 +47,18 @@
       <td ng-repeat="table in columns">
         <kbn-agg-table-group
           ng-if="table.tables"
+          filter="filter"
           group="table"
+          dimensions="dimensions"
           per-page="perPage"
           sort="sort"
           show-total="showTotal"
           total-func="totalFunc"></kbn-agg-table-group>
         <kbn-agg-table
           ng-if="table.rows"
+          filter="filter"
           table="table"
+          dimensions="dimensions"
           export-title="exportTitle"
           per-page="perPage"
           sort="sort"

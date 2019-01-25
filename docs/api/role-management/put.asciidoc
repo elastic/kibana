@@ -6,6 +6,8 @@ experimental[This API is experimental and may be changed or removed completely i
 Creates a new {kib} role or updates the attributes of an existing role. {kib} roles are stored in the
 {es} native realm.
 
+Note: You cannot access this endpoint via the Console in Kibana.
+
 ==== Authorization
 
 To use this API, you must have at least the `manage_security` cluster privilege.

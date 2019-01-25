@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { mount, shallow } from 'enzyme';
+import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import { UpgradeFailure } from './upgrade_failure';
 
 describe('UpgradeFailure component', () => {
@@ -26,29 +26,29 @@ describe('UpgradeFailure component', () => {
   });
 
   it('renders component as expected', () => {
-    const wrapper = shallow(<UpgradeFailure {...props} />);
+    const wrapper = shallowWithIntl(<UpgradeFailure {...props} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('passes expected text for new pipeline', () => {
-    const wrapper = mount(<UpgradeFailure {...props} />);
+    const wrapper = mountWithIntl(<UpgradeFailure {...props} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('passes expected text for not new pipeline', () => {
     props.isNewPipeline = false;
-    const wrapper = mount(<UpgradeFailure {...props} />);
+    const wrapper = mountWithIntl(<UpgradeFailure {...props} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('passes expected text for not manual upgrade', () => {
     props.isManualUpgrade = false;
-    const wrapper = mount(<UpgradeFailure {...props} />);
+    const wrapper = mountWithIntl(<UpgradeFailure {...props} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('propogates onClose and onRetry functions to child', () => {
-    const wrapper = mount(<UpgradeFailure {...props} />);
+    const wrapper = mountWithIntl(<UpgradeFailure {...props} />);
     expect(wrapper.find('UpgradeFailureActions').props().onClose).toEqual(onClose);
     expect(wrapper.find('UpgradeFailureActions').props().onRetry).toEqual(onRetry);
   });

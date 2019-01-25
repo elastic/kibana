@@ -53,7 +53,7 @@ const defaultEditor = function ($rootScope, $compile, i18n) {
       }
     }
 
-    render({ uiState, timeRange, appState }) {
+    render({ uiState, timeRange, filters, appState }) {
       let $scope;
 
       const updateScope = () => {
@@ -166,12 +166,14 @@ const defaultEditor = function ($rootScope, $compile, i18n) {
               uiState: uiState,
               listenOnChange: false,
               timeRange: timeRange,
+              filters: filters,
               appState: appState,
             });
           });
         } else {
           this._handler.update({
-            timeRange: timeRange
+            timeRange: timeRange,
+            filters: filters,
           });
         }
 

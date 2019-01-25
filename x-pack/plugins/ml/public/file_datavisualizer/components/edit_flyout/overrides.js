@@ -5,6 +5,8 @@
  */
 
 
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import React, {
   Component,
 } from 'react';
@@ -18,6 +20,7 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiTextArea,
+  EuiFieldNumber,
 } from '@elastic/eui';
 
 import {
@@ -34,6 +37,9 @@ const delimiterOptions = getDelimiterOptions();
 const quoteOptions = getQuoteOptions();
 // const charsetOptions = getCharsetOptions();
 
+const LINES_TO_SAMPLE_VALUE_MIN = 3;
+const LINES_TO_SAMPLE_VALUE_MAX = 1000000;
+
 export class Overrides extends Component {
   constructor(props) {
     super(props);
@@ -41,7 +47,15 @@ export class Overrides extends Component {
     this.state = {};
   }
 
-  static getDerivedStateFromProps(props) {
+  linesToSampleErrors = i18n.translate('xpack.ml.fileDatavisualizer.editFlyout.overrides.linesToSampleErrorMessage', {
+    defaultMessage: 'Value must be greater than {min} and less than or equal to {max}',
+    values: {
+      min: LINES_TO_SAMPLE_VALUE_MIN,
+      max: LINES_TO_SAMPLE_VALUE_MAX,
+    }
+  });
+
+  static getDerivedStateFromProps(props, state) {
     const { originalSettings } = props;
 
     const {
@@ -55,6 +69,7 @@ export class Overrides extends Component {
       grokPattern,
       timestampField,
       timestampFormat,
+      linesToSample,
     } = props.overrides;
 
     const {
@@ -67,19 +82,26 @@ export class Overrides extends Component {
       originalColumnNames
     } = getColumnNames(columnNames, originalSettings);
 
-    return {
+    const overrides =  {
       charset: (charset === undefined) ? originalSettings.charset : charset,
       format: (format === undefined) ? originalSettings.format : format,
       hasHeaderRow: (hasHeaderRow === undefined) ? originalSettings.hasHeaderRow : hasHeaderRow,
       columnNames: newColumnNames,
-      originalColumnNames,
       delimiter: d,
-      customDelimiter: (customD === undefined) ? '' : customD,
       quote: (quote === undefined) ? originalSettings.quote : quote,
       shouldTrimFields: (shouldTrimFields === undefined) ? originalSettings.shouldTrimFields : shouldTrimFields,
       grokPattern: (grokPattern === undefined) ? originalSettings.grokPattern : grokPattern,
       timestampFormat: (timestampFormat === undefined) ? originalSettings.timestampFormat : timestampFormat,
       timestampField: (timestampField === undefined) ? originalSettings.timestampField : timestampField,
+      linesToSample: (linesToSample === undefined) ? originalSettings.linesToSample : +linesToSample,
+    };
+
+    return {
+      originalColumnNames,
+      customDelimiter: (customD === undefined) ? '' : customD,
+      linesToSampleValid: true,
+      overrides,
+      ...state,
     };
   }
 
@@ -96,28 +118,31 @@ export class Overrides extends Component {
   }
 
   applyOverrides = () => {
-    const overrides = { ...this.state };
-    overrides.delimiter = convertDelimiterBack(overrides);
-    delete overrides.customDelimiter;
-    delete overrides.originalColumnNames;
+    const overrides = { ...this.state.overrides };
+    overrides.delimiter = convertDelimiterBack(overrides.delimiter, this.state.customDelimiter);
 
     this.props.setOverrides(overrides);
   }
 
+  setOverride(o) {
+    const overrides = { ...this.state.overrides, ...o };
+    this.setState({ overrides });
+  }
+
   onFormatChange = (format) => {
-    this.setState({ format });
+    this.setOverride({ format });
   }
 
   onTimestampFormatChange = (timestampFormat) => {
-    this.setState({ timestampFormat });
+    this.setOverride({ timestampFormat });
   }
 
   onTimestampFieldChange = (timestampField) => {
-    this.setState({ timestampField });
+    this.setOverride({ timestampField });
   }
 
   onDelimiterChange = (delimiter) => {
-    this.setState({ delimiter });
+    this.setOverride({ delimiter });
   }
 
   onCustomDelimiterChange = (e) => {
@@ -125,48 +150,67 @@ export class Overrides extends Component {
   }
 
   onQuoteChange = (quote) => {
-    this.setState({ quote });
+    this.setOverride({ quote });
   }
 
   onHasHeaderRowChange = (e) => {
-    this.setState({ hasHeaderRow: e.target.checked });
+    this.setOverride({ hasHeaderRow: e.target.checked });
   }
 
   onShouldTrimFieldsChange = (e) => {
-    this.setState({ shouldTrimFields: e.target.checked });
+    this.setOverride({ shouldTrimFields: e.target.checked });
   }
 
   onCharsetChange = (charset) => {
-    this.setState({ charset });
+    this.setOverride({ charset });
   }
 
   onColumnNameChange = (e, i) => {
-    const columnNames = this.state.columnNames;
+    const columnNames = this.state.overrides.columnNames;
     columnNames[i] = e.target.value;
-    this.setState({ columnNames });
+    this.setOverride({ columnNames });
   }
 
   grokPatternChange = (e) => {
-    this.setState({ grokPattern: e.target.value });
+    this.setOverride({ grokPattern: e.target.value });
+  }
+
+  onLinesToSampleChange = (e) => {
+    const linesToSample = +e.target.value;
+    this.setOverride({ linesToSample });
+
+    // check whether the value is valid and set that to state.
+    const linesToSampleValid = isLinesToSampleValid(linesToSample);
+    this.setState({ linesToSampleValid });
+
+    // set the overrides valid setting in the parent component,
+    // used to disable the Apply button if any of the overrides are invalid
+    this.props.setOverridesValid(linesToSampleValid);
   }
 
 
   render() {
     const { fields } = this.props;
     const {
+      customDelimiter,
+      originalColumnNames,
+      linesToSampleValid,
+      overrides,
+    } = this.state;
+
+    const {
       timestampFormat,
       timestampField,
       format,
       delimiter,
-      customDelimiter,
       quote,
       hasHeaderRow,
       shouldTrimFields,
       // charset,
       columnNames,
-      originalColumnNames,
       grokPattern,
-    } = this.state;
+      linesToSample,
+    } = overrides;
 
     const fieldOptions = fields.map(f => ({ value: f, inputDisplay: f }));
 
@@ -174,7 +218,29 @@ export class Overrides extends Component {
 
       <EuiForm>
         <EuiFormRow
-          label="Data format"
+          error={this.linesToSampleErrors}
+          isInvalid={(linesToSampleValid === false)}
+          label={
+            <FormattedMessage
+              id="xpack.ml.fileDatavisualizer.editFlyout.overrides.linesToSampleFormRowLabel"
+              defaultMessage="Number of lines to sample"
+            />
+          }
+        >
+          <EuiFieldNumber
+            value={linesToSample}
+            onChange={this.onLinesToSampleChange}
+            isInvalid={(linesToSampleValid === false)}
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.ml.fileDatavisualizer.editFlyout.overrides.dataFormatFormRowLabel"
+              defaultMessage="Data format"
+            />
+          }
         >
           <EuiSuperSelect
             options={formatOptions}
@@ -183,10 +249,15 @@ export class Overrides extends Component {
           />
         </EuiFormRow>
         {
-          (this.state.format === 'delimited') &&
+          (format === 'delimited') &&
           <React.Fragment>
             <EuiFormRow
-              label="Delimiter"
+              label={
+                <FormattedMessage
+                  id="xpack.ml.fileDatavisualizer.editFlyout.overrides.delimiterFormRowLabel"
+                  defaultMessage="Delimiter"
+                />
+              }
             >
               <EuiSuperSelect
                 options={delimiterOptions}
@@ -197,7 +268,12 @@ export class Overrides extends Component {
             {
               (delimiter === 'other') &&
               <EuiFormRow
-                label="Custom delimiter"
+                label={
+                  <FormattedMessage
+                    id="xpack.ml.fileDatavisualizer.editFlyout.overrides.customDelimiterFormRowLabel"
+                    defaultMessage="Custom delimiter"
+                  />
+                }
               >
                 <EuiFieldText
                   value={customDelimiter}
@@ -207,7 +283,12 @@ export class Overrides extends Component {
             }
 
             <EuiFormRow
-              label="Quote character"
+              label={
+                <FormattedMessage
+                  id="xpack.ml.fileDatavisualizer.editFlyout.overrides.quoteCharacterFormRowLabel"
+                  defaultMessage="Quote character"
+                />
+              }
             >
               <EuiSuperSelect
                 options={quoteOptions}
@@ -220,7 +301,12 @@ export class Overrides extends Component {
             <EuiFormRow>
               <EuiCheckbox
                 id={'hasHeaderRow'}
-                label="Has header row"
+                label={
+                  <FormattedMessage
+                    id="xpack.ml.fileDatavisualizer.editFlyout.overrides.hasHeaderRowLabel"
+                    defaultMessage="Has header row"
+                  />
+                }
                 checked={hasHeaderRow}
                 onChange={this.onHasHeaderRowChange}
               />
@@ -229,7 +315,12 @@ export class Overrides extends Component {
             <EuiFormRow>
               <EuiCheckbox
                 id={'shouldTrimFields'}
-                label="Should trim fields"
+                label={
+                  <FormattedMessage
+                    id="xpack.ml.fileDatavisualizer.editFlyout.overrides.trimFieldsLabel"
+                    defaultMessage="Should trim fields"
+                  />
+                }
                 checked={shouldTrimFields}
                 onChange={this.onShouldTrimFieldsChange}
               />
@@ -238,10 +329,15 @@ export class Overrides extends Component {
           </React.Fragment>
         }
         {
-          (this.state.format === 'semi_structured_text') &&
+          (format === 'semi_structured_text') &&
           <React.Fragment>
             <EuiFormRow
-              label="Grok pattern"
+              label={
+                <FormattedMessage
+                  id="xpack.ml.fileDatavisualizer.editFlyout.overrides.grokPatternFormRowLabel"
+                  defaultMessage="Grok pattern"
+                />
+              }
             >
               <EuiTextArea
                 placeholder={grokPattern}
@@ -252,7 +348,12 @@ export class Overrides extends Component {
           </React.Fragment>
         }
         <EuiFormRow
-          label="Timestamp format"
+          label={
+            <FormattedMessage
+              id="xpack.ml.fileDatavisualizer.editFlyout.overrides.timestampFormatFormRowLabel"
+              defaultMessage="Timestamp format"
+            />
+          }
         >
           <EuiSuperSelect
             options={timestampFormatOptions}
@@ -262,7 +363,12 @@ export class Overrides extends Component {
         </EuiFormRow>
 
         <EuiFormRow
-          label="Time field"
+          label={
+            <FormattedMessage
+              id="xpack.ml.fileDatavisualizer.editFlyout.overrides.timeFieldFormRowLabel"
+              defaultMessage="Time field"
+            />
+          }
         >
           <EuiSuperSelect
             options={fieldOptions}
@@ -281,12 +387,17 @@ export class Overrides extends Component {
           />
         </EuiFormRow> */}
         {
-          (this.state.format === 'delimited' && originalColumnNames.length > 0) &&
+          (format === 'delimited' && originalColumnNames.length > 0) &&
 
           <React.Fragment>
             <EuiSpacer />
             <EuiTitle size="s">
-              <h3>Edit field names</h3>
+              <h3>
+                <FormattedMessage
+                  id="xpack.ml.fileDatavisualizer.editFlyout.overrides.editFieldNamesTitle"
+                  defaultMessage="Edit field names"
+                />
+              </h3>
             </EuiTitle>
 
             {
@@ -345,7 +456,7 @@ function convertDelimiter(d) {
 }
 
 // Convert the delimiter textual descriptions back to their real characters.
-function convertDelimiterBack({ delimiter, customDelimiter }) {
+function convertDelimiterBack(delimiter, customDelimiter) {
   switch (delimiter) {
     case 'comma':
       return ',';
@@ -375,4 +486,8 @@ function getColumnNames(columnNames, originalSettings) {
     newColumnNames,
     originalColumnNames,
   };
+}
+
+function isLinesToSampleValid(linesToSample) {
+  return (linesToSample > LINES_TO_SAMPLE_VALUE_MIN && linesToSample <= LINES_TO_SAMPLE_VALUE_MAX);
 }

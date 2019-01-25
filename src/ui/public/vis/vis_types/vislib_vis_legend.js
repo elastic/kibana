@@ -21,12 +21,14 @@ import _ from 'lodash';
 import html from './vislib_vis_legend.html';
 import { VislibLibDataProvider } from '../../vislib/lib/data';
 import { uiModules } from '../../modules';
+import { VisFiltersProvider } from '../vis_filters';
 import { htmlIdGenerator, keyCodes } from '@elastic/eui';
-
+import { getTableAggs } from '../../visualize/loader/pipeline_helpers/utilities';
 
 uiModules.get('kibana')
   .directive('vislibLegend', function (Private, $timeout, i18n) {
     const Data = Private(VislibLibDataProvider);
+    const visFilters = Private(VisFiltersProvider);
 
     return {
       restrict: 'E',
@@ -100,11 +102,11 @@ uiModules.get('kibana')
         };
 
         $scope.filter = function (legendData, negate) {
-          $scope.vis.API.events.filter({ datum: legendData.values, negate: negate });
+          $scope.vis.API.events.filter({ data: legendData.values, negate: negate });
         };
 
         $scope.canFilter = function (legendData) {
-          const filters = $scope.vis.API.events.filter({ datum: legendData.values }, { simulate: true });
+          const filters = visFilters.filter({ aggConfigs: $scope.tableAggs, data: legendData.values }, { simulate: true });
           return filters.length;
         };
 
@@ -155,6 +157,8 @@ uiModules.get('kibana')
           if (vislibVis.visConfig) {
             $scope.getColor = vislibVis.visConfig.data.getColorFunc();
           }
+
+          $scope.tableAggs = getTableAggs($scope.vis);
         }
 
         // Most of these functions were moved directly from the old Legend class. Not a fan of this.
@@ -172,7 +176,12 @@ uiModules.get('kibana')
             .reduce(function (a, b) {
               return a.concat(b);
             }, []);
-          return _.compact(_.uniq(values, 'label'));
+          return _.compact(_.uniq(values, 'label')).map(label => {
+            return {
+              ...label,
+              values: [label.values[0].seriesRaw],
+            };
+          });
         }
       }
     };

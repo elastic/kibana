@@ -27,6 +27,7 @@ export { encodeQueryComponent } from './encode_query_component';
 export { getFlattenedObject } from './get_flattened_object';
 export { watchStdioForLine } from './watch_stdio_for_line';
 export { IS_KIBANA_DISTRIBUTABLE } from './artifact_type';
+export { IS_KIBANA_RELEASE } from './artifact_type';
 
 export {
   getKbnTypeNames,

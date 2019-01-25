@@ -8,7 +8,7 @@ import expect from 'expect.js';
 import sinon from 'sinon';
 import fetchMock from 'fetch-mock';
 import { getSuggestionsProvider } from '../value';
-import indexPatternResponse from 'ui/kuery/__tests__/index_pattern_response.json';
+import indexPatternResponse from '../__fixtures__/index_pattern_response.json';
 
 describe('Kuery value suggestions', function () {
   let config;

@@ -30,6 +30,10 @@ export {
 } from './saved_object';
 
 export {
+  taskDefinitions
+} from './task_definitions';
+
+export {
   app,
   apps,
 } from './ui_apps';
@@ -60,10 +64,6 @@ export {
   autocompleteProviders,
   shareContextMenuExtensions,
 } from './ui_app_extensions';
-
-export {
-  translations,
-} from './ui_i18n';
 
 export {
   link,

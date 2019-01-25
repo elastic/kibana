@@ -5,11 +5,12 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiToolTip, IconColor } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { first, sortBy, sortByOrder, uniq } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import { BeatTag, CMPopulatedBeat, ConfigurationBlock } from '../../../common/domain_types';
-import { ConnectedLink } from '../connected_link';
+import { ConnectedLink } from '../navigation/connected_link';
 import { TagBadge } from '../tag';
 
 export interface ColumnDefinition {
@@ -56,20 +57,26 @@ export const BeatsTableType: TableType = {
   columnDefinitions: [
     {
       field: 'name',
-      name: 'Beat name',
+      name: i18n.translate('xpack.beatsManagement.beatsTable.beatNameTitle', {
+        defaultMessage: 'Beat name',
+      }),
       render: (name: string, beat: CMPopulatedBeat) => (
-        <ConnectedLink path={`/beat/${beat.id}`}>{name}</ConnectedLink>
+        <ConnectedLink path={`/beat/${beat.id}/details`}>{name}</ConnectedLink>
       ),
       sortable: true,
     },
     {
       field: 'type',
-      name: 'Type',
+      name: i18n.translate('xpack.beatsManagement.beatsTable.typeTitle', {
+        defaultMessage: 'Type',
+      }),
       sortable: true,
     },
     {
       field: 'full_tags',
-      name: 'Tags',
+      name: i18n.translate('xpack.beatsManagement.beatsTable.tagsTitle', {
+        defaultMessage: 'Tags',
+      }),
       render: (value: string, beat: CMPopulatedBeat) => (
         <EuiFlexGroup wrap responsive={true} gutterSize="xs">
           {(sortBy(beat.full_tags, 'id') || []).map(tag => (
@@ -84,28 +91,61 @@ export const BeatsTableType: TableType = {
       sortable: false,
     },
     {
-      // TODO: update to use actual metadata field
       field: 'config_status',
-      name: 'Config Status',
+      name: i18n.translate('xpack.beatsManagement.beatsTable.configStatusTitle', {
+        defaultMessage: 'Config Status',
+      }),
       render: (value: string, beat: CMPopulatedBeat) => {
         let color: IconColor = 'success';
-        let statusText = 'OK';
-        let tooltipText = 'Beat successfully applied latest config';
+        let statusText = i18n.translate('xpack.beatsManagement.beatsTable.configStatus.okLabel', {
+          defaultMessage: 'OK',
+        });
+        let tooltipText = i18n.translate(
+          'xpack.beatsManagement.beatsTable.configStatus.okTooltip',
+          {
+            defaultMessage: 'Beat successfully applied latest config',
+          }
+        );
 
         switch (beat.config_status) {
           case 'UNKNOWN':
             color = 'subdued';
-            statusText = 'Offline';
+            statusText = i18n.translate(
+              'xpack.beatsManagement.beatsTable.configStatus.offlineLabel',
+              {
+                defaultMessage: 'Offline',
+              }
+            );
             if (moment().diff(beat.last_checkin, 'minutes') >= 10) {
-              tooltipText = 'This Beat has not connected to kibana in over 10min';
+              tooltipText = i18n.translate(
+                'xpack.beatsManagement.beatsTable.configStatus.noConnectionTooltip',
+                {
+                  defaultMessage: 'This Beat has not connected to kibana in over 10min',
+                }
+              );
             } else {
-              tooltipText = 'This Beat has not yet been started.';
+              tooltipText = i18n.translate(
+                'xpack.beatsManagement.beatsTable.configStatus.notStartedTooltip',
+                {
+                  defaultMessage: 'This Beat has not yet been started.',
+                }
+              );
             }
             break;
           case 'ERROR':
             color = 'danger';
-            statusText = 'Error';
-            tooltipText = 'Please check the logs of this Beat for error details';
+            statusText = i18n.translate(
+              'xpack.beatsManagement.beatsTable.configStatus.errorLabel',
+              {
+                defaultMessage: 'Error',
+              }
+            );
+            tooltipText = i18n.translate(
+              'xpack.beatsManagement.beatsTable.configStatus.errorTooltip',
+              {
+                defaultMessage: 'Please check the logs of this Beat for error details',
+              }
+            );
             break;
         }
 
@@ -121,9 +161,11 @@ export const BeatsTableType: TableType = {
     },
     {
       field: 'full_tags',
-      name: 'Last config update',
-      render: (tags: BeatTag[]) =>
-        tags.length ? (
+      name: i18n.translate('xpack.beatsManagement.beatsTable.lastConfigUpdateTitle', {
+        defaultMessage: 'Last config update',
+      }),
+      render: (tags?: BeatTag[]) =>
+        tags && tags.length ? (
           <span>
             {moment(first(sortByOrder(tags, ['last_updated'], ['desc'])).last_updated).fromNow()}
           </span>
@@ -134,7 +176,9 @@ export const BeatsTableType: TableType = {
   controlDefinitions: (data: any[]) => ({
     actions: [
       {
-        name: 'Disenroll Selected',
+        name: i18n.translate('xpack.beatsManagement.beatsTable.disenrollSelectedLabel', {
+          defaultMessage: 'Unenroll Selected',
+        }),
         action: 'delete',
         danger: true,
       },
@@ -143,7 +187,9 @@ export const BeatsTableType: TableType = {
       {
         type: 'field_value_selection',
         field: 'type',
-        name: 'Type',
+        name: i18n.translate('xpack.beatsManagement.beatsTable.typeLabel', {
+          defaultMessage: 'Type',
+        }),
         options: uniq(data.map(({ type }: { type: any }) => ({ value: type })), 'value'),
       },
     ],
@@ -155,7 +201,9 @@ export const TagsTableType: TableType = {
   columnDefinitions: [
     {
       field: 'id',
-      name: 'Tag name',
+      name: i18n.translate('xpack.beatsManagement.tagsTable.tagNameTitle', {
+        defaultMessage: 'Tag name',
+      }),
       render: (id: string, tag: BeatTag) => (
         <ConnectedLink path={`/tag/edit/${tag.id}`}>
           <TagBadge tag={tag} />
@@ -167,7 +215,9 @@ export const TagsTableType: TableType = {
     {
       align: 'right',
       field: 'configuration_blocks',
-      name: 'Configurations',
+      name: i18n.translate('xpack.beatsManagement.tagsTable.configurationsTitle', {
+        defaultMessage: 'Configurations',
+      }),
       render: (configurationBlocks: ConfigurationBlock[]) => (
         <div>{configurationBlocks.length}</div>
       ),
@@ -176,7 +226,9 @@ export const TagsTableType: TableType = {
     {
       align: 'right',
       field: 'last_updated',
-      name: 'Last update',
+      name: i18n.translate('xpack.beatsManagement.tagsTable.lastUpdateTitle', {
+        defaultMessage: 'Last update',
+      }),
       render: (lastUpdate: Date) => <div>{moment(lastUpdate).fromNow()}</div>,
       sortable: true,
     },
@@ -184,7 +236,9 @@ export const TagsTableType: TableType = {
   controlDefinitions: (data: any) => ({
     actions: [
       {
-        name: 'Remove Selected',
+        name: i18n.translate('xpack.beatsManagement.tagsTable.removeSelectedLabel', {
+          defaultMessage: 'Remove Selected',
+        }),
         action: 'delete',
         danger: true,
       },
@@ -198,7 +252,9 @@ export const BeatDetailTagsTable: TableType = {
   columnDefinitions: [
     {
       field: 'id',
-      name: 'Tag name',
+      name: i18n.translate('xpack.beatsManagement.beatTagsTable.tagNameTitle', {
+        defaultMessage: 'Tag name',
+      }),
       render: (id: string, tag: BeatTag) => (
         <ConnectedLink path={`/tag/edit/${tag.id}`}>
           <TagBadge tag={tag} />
@@ -210,14 +266,18 @@ export const BeatDetailTagsTable: TableType = {
     {
       align: 'right',
       field: 'configuration_blocks',
-      name: 'Configurations',
+      name: i18n.translate('xpack.beatsManagement.beatTagsTable.configurationsTitle', {
+        defaultMessage: 'Configurations',
+      }),
       render: (configurations: ConfigurationBlock[]) => <span>{configurations.length}</span>,
       sortable: true,
     },
     {
       align: 'right',
       field: 'last_updated',
-      name: 'Last update',
+      name: i18n.translate('xpack.beatsManagement.beatTagsTable.lastUpdateTitle', {
+        defaultMessage: 'Last update',
+      }),
       render: (lastUpdate: string) => <span>{moment(lastUpdate).fromNow()}</span>,
       sortable: true,
     },
@@ -227,12 +287,16 @@ export const BeatDetailTagsTable: TableType = {
     filters: [],
     primaryActions: [
       {
-        name: 'Add Tag',
+        name: i18n.translate('xpack.beatsManagement.beatTagsTable.addTagLabel', {
+          defaultMessage: 'Add Tag',
+        }),
         action: 'add',
         danger: false,
       },
       {
-        name: 'Remove Selected',
+        name: i18n.translate('xpack.beatsManagement.beatTagsTable.removeSelectedLabel', {
+          defaultMessage: 'Remove Selected',
+        }),
         action: 'remove',
         danger: true,
       },

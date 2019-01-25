@@ -18,7 +18,7 @@
  */
 
 import Joi from 'joi';
-import { tutorialSchema } from '../core_plugins/kibana/common/tutorials/tutorial_schema';
+import { tutorialSchema } from '../legacy/core_plugins/kibana/common/tutorials/tutorial_schema';
 
 export function tutorialsMixin(kbnServer, server) {
   const tutorialProviders = [];

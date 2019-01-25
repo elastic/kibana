@@ -1,0 +1,11 @@
+{
+  "security.clear_cached_roles": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_security/role/{name}/_clear_cache"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-clear-role-cache.html"
+  }
+}

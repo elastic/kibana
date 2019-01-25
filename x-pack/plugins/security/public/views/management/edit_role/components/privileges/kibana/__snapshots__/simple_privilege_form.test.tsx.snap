@@ -1,18 +1,26 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiDescribedFormGroup
     description={
       <p>
-        Specifies the Kibana privilege for this role.
+        <FormattedMessage
+          defaultMessage="Specifies the Kibana privilege for this role."
+          id="xpack.security.management.editRoles.simplePrivilegeForm.specifyPrivilegeForRoleDescription"
+          values={Object {}}
+        />
       </p>
     }
     fullWidth={false}
     gutterSize="l"
     title={
       <h3>
-        Kibana privileges
+        <FormattedMessage
+          defaultMessage="Kibana privileges"
+          id="xpack.security.management.editRoles.simplePrivilegeForm.kibanaPrivilegesTitle"
+          values={Object {}}
+        />
       </h3>
     }
     titleSize="xs"
@@ -37,5 +45,5 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
       />
     </EuiFormRow>
   </EuiDescribedFormGroup>
-</React.Fragment>
+</Fragment>
 `;

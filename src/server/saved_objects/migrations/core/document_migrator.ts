@@ -36,7 +36,7 @@
  *
  * This way, we keep looping until there are no transforms left to apply, and we properly
  * handle property addition / deletion / renaming.
- * 
+ *
  * A caveat is that this means we must restrict what a migration can do to the doc's
  * migrationVersion itself. We allow only these kinds of changes:
  *
@@ -54,11 +54,11 @@
  * and those documents are simply given a stamp of approval by this transformer. This is why it is
  * important for migration authors to *also* write a saved object validation that will prevent this
  * assumption from inserting out-of-date documents into the index.
- * 
+ *
  * If the client(s) send us documents with migrationVersion specified, we will migrate them as
  * appropriate. This means for data import scenarios, any documetns being imported should be explicitly
  * given an empty migrationVersion property {} if no such property exists.
-*/
+ */
 
 import Boom from 'boom';
 import _ from 'lodash';

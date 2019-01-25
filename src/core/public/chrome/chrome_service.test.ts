@@ -205,16 +205,59 @@ Array [
 `);
     });
   });
+
+  describe('breadcrumbs', () => {
+    it('updates/emits the current set of breadcrumbs', async () => {
+      const service = new ChromeService();
+      const start = service.start();
+      const promise = start
+        .getBreadcrumbs$()
+        .pipe(toArray())
+        .toPromise();
+
+      start.setBreadcrumbs([{ text: 'foo' }, { text: 'bar' }]);
+      start.setBreadcrumbs([{ text: 'foo' }]);
+      start.setBreadcrumbs([{ text: 'bar' }]);
+      start.setBreadcrumbs([]);
+      service.stop();
+
+      await expect(promise).resolves.toMatchInlineSnapshot(`
+Array [
+  Array [],
+  Array [
+    Object {
+      "text": "foo",
+    },
+    Object {
+      "text": "bar",
+    },
+  ],
+  Array [
+    Object {
+      "text": "foo",
+    },
+  ],
+  Array [
+    Object {
+      "text": "bar",
+    },
+  ],
+  Array [],
+]
+`);
+    });
+  });
 });
 
 describe('stop', () => {
-  it('completes applicationClass$, isCollapsed$, isVisible$, and brand$ observables', async () => {
+  it('completes applicationClass$, isCollapsed$, breadcrumbs$, isVisible$, and brand$ observables', async () => {
     const service = new ChromeService();
     const start = service.start();
     const promise = Rx.combineLatest(
       start.getBrand$(),
       start.getApplicationClasses$(),
       start.getIsCollapsed$(),
+      start.getBreadcrumbs$(),
       start.getIsVisible$()
     ).toPromise();
 
@@ -232,6 +275,7 @@ describe('stop', () => {
         start.getBrand$(),
         start.getApplicationClasses$(),
         start.getIsCollapsed$(),
+        start.getBreadcrumbs$(),
         start.getIsVisible$()
       ).toPromise()
     ).resolves.toBe(undefined);

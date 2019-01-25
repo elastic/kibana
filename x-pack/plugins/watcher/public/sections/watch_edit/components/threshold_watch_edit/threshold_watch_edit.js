@@ -22,7 +22,7 @@ import 'plugins/watcher/services/watch';
 import 'plugins/watcher/services/interval';
 import 'plugins/watcher/services/action_defaults';
 
-import dateMath from '@kbn/datemath';
+import dateMath from '@elastic/datemath';
 import { toastNotifications } from 'ui/notify';
 import { VisualizeOptions } from 'plugins/watcher/models/visualize_options';
 import { REFRESH_INTERVALS } from 'plugins/watcher/../common/constants';

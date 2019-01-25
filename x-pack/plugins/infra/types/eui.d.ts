@@ -9,7 +9,12 @@
  *       package includes them.
  */
 
-import { CommonProps, EuiToolTipPosition } from '@elastic/eui';
+declare module '@elastic/eui' {
+  export const EuiWrappingPopover: React.SFC<any>;
+}
+
+import { IconType, ToolTipPositions } from '@elastic/eui';
+import { CommonProps } from '@elastic/eui/src/components/common';
 import moment from 'moment';
 import { MouseEventHandler, ReactType, Ref } from 'react';
 import { ReactDatePickerProps } from 'react-datepicker';
@@ -34,6 +39,7 @@ declare module '@elastic/eui' {
   export type EuiHeaderSectionSide = 'left' | 'right';
   type EuiHeaderSectionProps = CommonProps & {
     side?: EuiHeaderSectionSide;
+    grow?: boolean;
   };
   export const EuiHeaderSection: React.SFC<EuiHeaderSectionProps>;
 
@@ -89,6 +95,8 @@ declare module '@elastic/eui' {
     rel?: string;
     target?: string;
     type?: string;
+    hasActiveFilters?: boolean;
+    numFilters?: number;
   };
   export const EuiFilterButton: React.SFC<EuiFilterButtonProps>;
 
@@ -141,8 +149,6 @@ declare module '@elastic/eui' {
     children: React.ReactNode;
   };
 
-  export const EuiErrorBoundary: React.SFC<EuiErrorBoundaryProps>;
-
   type EuiSizesResponsive = 'xs' | 's' | 'm' | 'l' | 'xl';
   type EuiResponsiveProps = CommonProps & {
     children: React.ReactNode;
@@ -164,13 +170,4 @@ declare module '@elastic/eui' {
   };
 
   export const EuiDatePickerRange: React.SFC<EuiDatePickerRangeProps>;
-
-  export type EuiBetaBadgeProps = CommonProps & {
-    iconType?: IconType;
-    label: React.ReactNode;
-    title?: string;
-    tooltipContent?: React.ReactNode;
-    tooltipPosition?: EuiToolTipPosition;
-  };
-  export const EuiBetaBadge: React.SFC<EuiBetaBadgeProps>;
 }

@@ -18,12 +18,18 @@
  */
 
 import { MetricAggType } from './metric_agg_type';
+import { i18n } from '@kbn/i18n';
 
 export const minMetricAgg = new MetricAggType({
   name: 'min',
-  title: 'Min',
+  title: i18n.translate('common.ui.aggTypes.metrics.minTitle', {
+    defaultMessage: 'Min'
+  }),
   makeLabel: function (aggConfig) {
-    return 'Min ' + aggConfig.getFieldDisplayName();
+    return i18n.translate('common.ui.aggTypes.metrics.minLabel', {
+      defaultMessage: 'Min {field}',
+      values: { field: aggConfig.getFieldDisplayName() }
+    });
   },
   params: [
     {
