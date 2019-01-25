@@ -94,7 +94,7 @@ export class LayerTocActions extends Component {
       const icon = layer.getIcon();
       smallLegendIcon = (
         <EuiToolTip
-          position="left"
+          position="top"
           content={`Map is at zoom level ${zoom}.
           This layer is only visible between zoom levels ${minZoom} to ${maxZoom}.`}
         >
