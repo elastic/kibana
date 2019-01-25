@@ -19,6 +19,7 @@
 
 import { IndexPattern } from 'ui/index_patterns';
 
+import classNames from 'classnames';
 import { compact, debounce, get, isEqual } from 'lodash';
 import React, { Component } from 'react';
 import { getFromLegacyIndexPattern } from 'ui/index_patterns/static_utils';
@@ -527,8 +528,16 @@ export class QueryBarUI extends Component<Props, State> {
   }
 
   public render() {
+    const classes = classNames('kbnQueryBar', {
+      'kbnQueryBar--withDatePicker': this.props.showDatePicker,
+    });
+
     return (
-      <EuiFlexGroup responsive={false} gutterSize="s">
+      <EuiFlexGroup
+        className={classes}
+        responsive={this.props.showDatePicker ? true : false}
+        gutterSize="s"
+      >
         <EuiFlexItem>
           <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
             {/* position:relative required on container so the suggestions appear under the query bar*/}
@@ -598,16 +607,29 @@ export class QueryBarUI extends Component<Props, State> {
             </div>
           </EuiOutsideClickDetector>
         </EuiFlexItem>
-        {this.renderDatePicker()}
-        <EuiFlexItem grow={false}>
-          <EuiSuperUpdateButton
-            needsUpdate={this.isDirty()}
-            onClick={this.onClickSubmitButton}
-            data-test-subj="querySubmitButton"
-          />
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{this.renderUpdateButton()}</EuiFlexItem>
       </EuiFlexGroup>
     );
+  }
+
+  private renderUpdateButton() {
+    const button = (
+      <EuiSuperUpdateButton
+        needsUpdate={this.isDirty()}
+        onClick={this.onClickSubmitButton}
+        data-test-subj="querySubmitButton"
+      />
+    );
+    if (this.props.showDatePicker) {
+      return (
+        <EuiFlexGroup responsive={false} gutterSize="s">
+          {this.renderDatePicker()}
+          <EuiFlexItem grow={false}>{button}</EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    } else {
+      return button;
+    }
   }
 
   private renderDatePicker() {
@@ -635,7 +657,7 @@ export class QueryBarUI extends Component<Props, State> {
       });
 
     return (
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem className="kbnQueryBar__datePickerWrapper">
         <EuiSuperDatePicker
           start={this.state.from}
           end={this.state.to}
