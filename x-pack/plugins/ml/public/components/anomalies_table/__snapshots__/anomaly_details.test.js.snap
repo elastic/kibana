@@ -1,0 +1,2827 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AnomalyDetails Renders only with examples when definition prop is undefined 1`] = `
+<AnomalyDetails
+  anomaly={
+    Object {
+      "actual": Array [
+        1,
+      ],
+      "actualSort": 1,
+      "detector": "count by mlcategory",
+      "detectorIndex": 0,
+      "entityName": "mlcategory",
+      "entityValue": "1",
+      "isTimeSeriesViewDetector": false,
+      "jobId": "it-ops-count-by-mlcategory-one",
+      "metricDescriptionSort": 82.83851409101328,
+      "rowId": "1546553208554_0",
+      "severity": 25.662,
+      "source": Object {
+        "actual": Array [
+          1,
+        ],
+        "bucket_span": 900,
+        "by_field_name": "mlcategory",
+        "by_field_value": "1",
+        "detector_index": 0,
+        "function": "count",
+        "function_description": "count",
+        "initial_record_score": 41.00971774894037,
+        "is_interim": false,
+        "job_id": "it-ops-count-by-mlcategory-one",
+        "mlcategory": Array [
+          "1",
+        ],
+        "multi_bucket_impact": 0,
+        "probability": 0.004741615571416013,
+        "record_score": 25.662,
+        "result_type": "record",
+        "timestamp": 1486062900000,
+        "typical": Array [
+          0.012071679592192066,
+        ],
+      },
+      "time": 1486018800000,
+      "typical": Array [
+        0.012071679592192066,
+      ],
+      "typicalSort": 0.012071679592192066,
+    }
+  }
+  examples={
+    Array [
+      "Actual Transaction Already Voided / Reversed;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com",
+      "REC Not INSERTED [DB TRAN] Table;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com",
+    ]
+  }
+  influencersLimit={5}
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  isAggregatedData={true}
+  tabIndex={1}
+>
+  <EuiTabbedContent
+    initialSelectedTab={
+      Object {
+        "content": <React.Fragment>
+          <EuiFlexGroup
+            alignItems="stretch"
+            className="mlAnomalyCategoryExamples"
+            component="div"
+            direction="column"
+            gutterSize="m"
+            justifyContent="center"
+            responsive={true}
+            wrap={false}
+          >
+            <EuiFlexItem
+              component="div"
+              grow={true}
+            >
+              <span
+                className="mlAnomalyCategoryExamples__item"
+              >
+                Actual Transaction Already Voided / Reversed;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com
+              </span>
+            </EuiFlexItem>
+            <EuiFlexItem
+              component="div"
+              grow={true}
+            >
+              <span
+                className="mlAnomalyCategoryExamples__item"
+              >
+                REC Not INSERTED [DB TRAN] Table;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com
+              </span>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </React.Fragment>,
+        "id": "Category examples",
+        "name": "Category examples",
+      }
+    }
+    onTabClick={[Function]}
+    size="s"
+    tabs={
+      Array [
+        Object {
+          "content": <React.Fragment>
+            <div
+              className="ml-anomalies-table-details"
+            >
+              <React.Fragment>
+                <EuiText
+                  grow={true}
+                  size="xs"
+                >
+                  <h4>
+                    <FormattedMessage
+                      defaultMessage="Description"
+                      id="xpack.ml.anomaliesTable.anomalyDetails.descriptionTitle"
+                      values={Object {}}
+                    />
+                  </h4>
+                  minor anomaly in count by mlcategory found for mlcategory 1
+                </EuiText>
+              </React.Fragment>
+              <EuiSpacer
+                size="m"
+              />
+              <React.Fragment>
+                <EuiText
+                  grow={true}
+                  size="xs"
+                >
+                  <h4>
+                    <FormattedMessage
+                      defaultMessage="Details on highest severity anomaly"
+                      id="xpack.ml.anomaliesTable.anomalyDetails.detailsOnHighestSeverityAnomalyTitle"
+                      values={Object {}}
+                    />
+                  </h4>
+                </EuiText>
+                <EuiDescriptionList
+                  align="left"
+                  className="anomaly-description-list"
+                  compressed={false}
+                  listItems={
+                    Array [
+                      Object {
+                        "description": <InjectIntl(EntityCell)
+                          entityName="mlcategory"
+                          entityValue="1"
+                        />,
+                        "title": "mlcategory",
+                      },
+                      Object {
+                        "description": "February 2nd 2017, 22:15:00 to February 2nd 2017, 22:30:00",
+                        "title": "time",
+                      },
+                      Object {
+                        "description": "count",
+                        "title": "function",
+                      },
+                      Object {
+                        "description": 1,
+                        "title": "actual",
+                      },
+                      Object {
+                        "description": 0.0121,
+                        "title": "typical",
+                      },
+                      Object {
+                        "description": "it-ops-count-by-mlcategory-one",
+                        "title": "job ID",
+                      },
+                      Object {
+                        "description": 0.004741615571416013,
+                        "title": "probability",
+                      },
+                    ]
+                  }
+                  textStyle="normal"
+                  type="column"
+                />
+              </React.Fragment>
+            </div>
+          </React.Fragment>,
+          "id": "Details",
+          "name": "Details",
+        },
+        Object {
+          "content": <React.Fragment>
+            <EuiFlexGroup
+              alignItems="stretch"
+              className="mlAnomalyCategoryExamples"
+              component="div"
+              direction="column"
+              gutterSize="m"
+              justifyContent="center"
+              responsive={true}
+              wrap={false}
+            >
+              <EuiFlexItem
+                component="div"
+                grow={true}
+              >
+                <span
+                  className="mlAnomalyCategoryExamples__item"
+                >
+                  Actual Transaction Already Voided / Reversed;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com
+                </span>
+              </EuiFlexItem>
+              <EuiFlexItem
+                component="div"
+                grow={true}
+              >
+                <span
+                  className="mlAnomalyCategoryExamples__item"
+                >
+                  REC Not INSERTED [DB TRAN] Table;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com
+                </span>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </React.Fragment>,
+          "id": "Category examples",
+          "name": "Category examples",
+        },
+      ]
+    }
+  >
+    <div>
+      <EuiTabs
+        expand={false}
+        size="s"
+      >
+        <div
+          className="euiTabs euiTabs--small"
+          role="tablist"
+        >
+          <EuiTab
+            aria-controls="iaac84a70-207b-11e9-b7da-f1c441eb26f2_ac254260-207b-11e9-b7da-f1c441eb26f2"
+            disabled={false}
+            id="Details"
+            isSelected={false}
+            key="Details"
+            onClick={[Function]}
+          >
+            <button
+              aria-controls="iaac84a70-207b-11e9-b7da-f1c441eb26f2_ac254260-207b-11e9-b7da-f1c441eb26f2"
+              aria-selected={false}
+              className="euiTab"
+              disabled={false}
+              id="Details"
+              onClick={[Function]}
+              role="tab"
+              type="button"
+            >
+              <span
+                className="euiTab__content"
+              >
+                Details
+              </span>
+            </button>
+          </EuiTab>
+          <EuiTab
+            aria-controls="iaac84a70-207b-11e9-b7da-f1c441eb26f2_ac254260-207b-11e9-b7da-f1c441eb26f2"
+            disabled={false}
+            id="Category examples"
+            isSelected={true}
+            key="Category examples"
+            onClick={[Function]}
+          >
+            <button
+              aria-controls="iaac84a70-207b-11e9-b7da-f1c441eb26f2_ac254260-207b-11e9-b7da-f1c441eb26f2"
+              aria-selected={true}
+              className="euiTab euiTab-isSelected"
+              disabled={false}
+              id="Category examples"
+              onClick={[Function]}
+              role="tab"
+              type="button"
+            >
+              <span
+                className="euiTab__content"
+              >
+                Category examples
+              </span>
+            </button>
+          </EuiTab>
+        </div>
+      </EuiTabs>
+      <div
+        aria-labelledby="Category examples"
+        id="iaac84a70-207b-11e9-b7da-f1c441eb26f2_ac254260-207b-11e9-b7da-f1c441eb26f2"
+        role="tabpanel"
+      >
+        <EuiFlexGroup
+          alignItems="stretch"
+          className="mlAnomalyCategoryExamples"
+          component="div"
+          direction="column"
+          gutterSize="m"
+          justifyContent="center"
+          responsive={true}
+          wrap={false}
+        >
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive mlAnomalyCategoryExamples"
+          >
+            <EuiFlexItem
+              component="div"
+              grow={true}
+              key="example0"
+            >
+              <div
+                className="euiFlexItem"
+              >
+                <span
+                  className="mlAnomalyCategoryExamples__item"
+                >
+                  Actual Transaction Already Voided / Reversed;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com
+                </span>
+              </div>
+            </EuiFlexItem>
+            <EuiFlexItem
+              component="div"
+              grow={true}
+              key="example1"
+            >
+              <div
+                className="euiFlexItem"
+              >
+                <span
+                  className="mlAnomalyCategoryExamples__item"
+                >
+                  REC Not INSERTED [DB TRAN] Table;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com
+                </span>
+              </div>
+            </EuiFlexItem>
+          </div>
+        </EuiFlexGroup>
+      </div>
+    </div>
+  </EuiTabbedContent>
+</AnomalyDetails>
+`;
+
+exports[`AnomalyDetails Renders only with regex when definition.terms is undefined 1`] = `
+<AnomalyDetails
+  anomaly={
+    Object {
+      "actual": Array [
+        1,
+      ],
+      "actualSort": 1,
+      "detector": "count by mlcategory",
+      "detectorIndex": 0,
+      "entityName": "mlcategory",
+      "entityValue": "1",
+      "isTimeSeriesViewDetector": false,
+      "jobId": "it-ops-count-by-mlcategory-one",
+      "metricDescriptionSort": 82.83851409101328,
+      "rowId": "1546553208554_0",
+      "severity": 25.662,
+      "source": Object {
+        "actual": Array [
+          1,
+        ],
+        "bucket_span": 900,
+        "by_field_name": "mlcategory",
+        "by_field_value": "1",
+        "detector_index": 0,
+        "function": "count",
+        "function_description": "count",
+        "initial_record_score": 41.00971774894037,
+        "is_interim": false,
+        "job_id": "it-ops-count-by-mlcategory-one",
+        "mlcategory": Array [
+          "1",
+        ],
+        "multi_bucket_impact": 0,
+        "probability": 0.004741615571416013,
+        "record_score": 25.662,
+        "result_type": "record",
+        "timestamp": 1486062900000,
+        "typical": Array [
+          0.012071679592192066,
+        ],
+      },
+      "time": 1486018800000,
+      "typical": Array [
+        0.012071679592192066,
+      ],
+      "typicalSort": 0.012071679592192066,
+    }
+  }
+  definition={
+    Object {
+      "regex": ".*?DBMS.+?ERROR.+?svc_prod.+?Err.+?Microsoft.+?ODBC.+?SQL.+?Server.+?Driver",
+    }
+  }
+  examples={
+    Array [
+      "Actual Transaction Already Voided / Reversed;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com",
+      "REC Not INSERTED [DB TRAN] Table;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com",
+    ]
+  }
+  influencersLimit={5}
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  isAggregatedData={true}
+  tabIndex={1}
+>
+  <EuiTabbedContent
+    initialSelectedTab={
+      Object {
+        "content": <React.Fragment>
+          <EuiFlexGroup
+            alignItems="stretch"
+            className="mlAnomalyCategoryExamples"
+            component="div"
+            direction="column"
+            gutterSize="m"
+            justifyContent="center"
+            responsive={true}
+            wrap={false}
+          >
+            <React.Fragment>
+              <EuiFlexItem
+                component="div"
+                grow={true}
+              >
+                <EuiText
+                  grow={true}
+                  size="xs"
+                >
+                  <h4
+                    className="mlAnomalyCategoryExamples__header"
+                  >
+                    Regex
+                  </h4>
+                   
+                  <EuiIconTip
+                    aria-label="Description"
+                    color="subdued"
+                    content={
+                      <FormattedMessage
+                        defaultMessage="The regular expression that is used to search for values that match the category
+ (may have been truncated to a max character limit of {maxChars})"
+                        id="xpack.ml.anomaliesTable.anomalyDetails.regexDescriptionTooltip"
+                        values={
+                          Object {
+                            "maxChars": 500,
+                          }
+                        }
+                      />
+                    }
+                    size="s"
+                    type="questionInCircle"
+                  />
+                </EuiText>
+                <EuiText
+                  grow={true}
+                  size="xs"
+                >
+                  .*?DBMS.+?ERROR.+?svc_prod.+?Err.+?Microsoft.+?ODBC.+?SQL.+?Server.+?Driver
+                </EuiText>
+              </EuiFlexItem>
+              <EuiSpacer
+                size="l"
+              />
+            </React.Fragment>
+            <EuiFlexItem
+              component="div"
+              grow={true}
+            >
+              <EuiText
+                grow={true}
+                size="s"
+              >
+                <h4>
+                  <FormattedMessage
+                    defaultMessage="Examples"
+                    id="xpack.ml.anomaliesTable.anomalyDetails.examplesTitle"
+                    values={Object {}}
+                  />
+                </h4>
+              </EuiText>
+              <span
+                className="mlAnomalyCategoryExamples__item"
+              >
+                Actual Transaction Already Voided / Reversed;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com
+              </span>
+            </EuiFlexItem>
+            <EuiFlexItem
+              component="div"
+              grow={true}
+            >
+              <span
+                className="mlAnomalyCategoryExamples__item"
+              >
+                REC Not INSERTED [DB TRAN] Table;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com
+              </span>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </React.Fragment>,
+        "id": "Category examples",
+        "name": "Category examples",
+      }
+    }
+    onTabClick={[Function]}
+    size="s"
+    tabs={
+      Array [
+        Object {
+          "content": <React.Fragment>
+            <div
+              className="ml-anomalies-table-details"
+            >
+              <React.Fragment>
+                <EuiText
+                  grow={true}
+                  size="xs"
+                >
+                  <h4>
+                    <FormattedMessage
+                      defaultMessage="Description"
+                      id="xpack.ml.anomaliesTable.anomalyDetails.descriptionTitle"
+                      values={Object {}}
+                    />
+                  </h4>
+                  minor anomaly in count by mlcategory found for mlcategory 1
+                </EuiText>
+              </React.Fragment>
+              <EuiSpacer
+                size="m"
+              />
+              <React.Fragment>
+                <EuiText
+                  grow={true}
+                  size="xs"
+                >
+                  <h4>
+                    <FormattedMessage
+                      defaultMessage="Details on highest severity anomaly"
+                      id="xpack.ml.anomaliesTable.anomalyDetails.detailsOnHighestSeverityAnomalyTitle"
+                      values={Object {}}
+                    />
+                  </h4>
+                </EuiText>
+                <EuiDescriptionList
+                  align="left"
+                  className="anomaly-description-list"
+                  compressed={false}
+                  listItems={
+                    Array [
+                      Object {
+                        "description": <InjectIntl(EntityCell)
+                          entityName="mlcategory"
+                          entityValue="1"
+                        />,
+                        "title": "mlcategory",
+                      },
+                      Object {
+                        "description": "February 2nd 2017, 22:15:00 to February 2nd 2017, 22:30:00",
+                        "title": "time",
+                      },
+                      Object {
+                        "description": "count",
+                        "title": "function",
+                      },
+                      Object {
+                        "description": 1,
+                        "title": "actual",
+                      },
+                      Object {
+                        "description": 0.0121,
+                        "title": "typical",
+                      },
+                      Object {
+                        "description": "it-ops-count-by-mlcategory-one",
+                        "title": "job ID",
+                      },
+                      Object {
+                        "description": 0.004741615571416013,
+                        "title": "probability",
+                      },
+                    ]
+                  }
+                  textStyle="normal"
+                  type="column"
+                />
+              </React.Fragment>
+            </div>
+          </React.Fragment>,
+          "id": "Details",
+          "name": "Details",
+        },
+        Object {
+          "content": <React.Fragment>
+            <EuiFlexGroup
+              alignItems="stretch"
+              className="mlAnomalyCategoryExamples"
+              component="div"
+              direction="column"
+              gutterSize="m"
+              justifyContent="center"
+              responsive={true}
+              wrap={false}
+            >
+              <React.Fragment>
+                <EuiFlexItem
+                  component="div"
+                  grow={true}
+                >
+                  <EuiText
+                    grow={true}
+                    size="xs"
+                  >
+                    <h4
+                      className="mlAnomalyCategoryExamples__header"
+                    >
+                      Regex
+                    </h4>
+                     
+                    <EuiIconTip
+                      aria-label="Description"
+                      color="subdued"
+                      content={
+                        <FormattedMessage
+                          defaultMessage="The regular expression that is used to search for values that match the category
+ (may have been truncated to a max character limit of {maxChars})"
+                          id="xpack.ml.anomaliesTable.anomalyDetails.regexDescriptionTooltip"
+                          values={
+                            Object {
+                              "maxChars": 500,
+                            }
+                          }
+                        />
+                      }
+                      size="s"
+                      type="questionInCircle"
+                    />
+                  </EuiText>
+                  <EuiText
+                    grow={true}
+                    size="xs"
+                  >
+                    .*?DBMS.+?ERROR.+?svc_prod.+?Err.+?Microsoft.+?ODBC.+?SQL.+?Server.+?Driver
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiSpacer
+                  size="l"
+                />
+              </React.Fragment>
+              <EuiFlexItem
+                component="div"
+                grow={true}
+              >
+                <EuiText
+                  grow={true}
+                  size="s"
+                >
+                  <h4>
+                    <FormattedMessage
+                      defaultMessage="Examples"
+                      id="xpack.ml.anomaliesTable.anomalyDetails.examplesTitle"
+                      values={Object {}}
+                    />
+                  </h4>
+                </EuiText>
+                <span
+                  className="mlAnomalyCategoryExamples__item"
+                >
+                  Actual Transaction Already Voided / Reversed;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com
+                </span>
+              </EuiFlexItem>
+              <EuiFlexItem
+                component="div"
+                grow={true}
+              >
+                <span
+                  className="mlAnomalyCategoryExamples__item"
+                >
+                  REC Not INSERTED [DB TRAN] Table;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com
+                </span>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </React.Fragment>,
+          "id": "Category examples",
+          "name": "Category examples",
+        },
+      ]
+    }
+  >
+    <div>
+      <EuiTabs
+        expand={false}
+        size="s"
+      >
+        <div
+          className="euiTabs euiTabs--small"
+          role="tablist"
+        >
+          <EuiTab
+            aria-controls="iaac84a70-207b-11e9-b7da-f1c441eb26f2_ac2876b0-207b-11e9-b7da-f1c441eb26f2"
+            disabled={false}
+            id="Details"
+            isSelected={false}
+            key="Details"
+            onClick={[Function]}
+          >
+            <button
+              aria-controls="iaac84a70-207b-11e9-b7da-f1c441eb26f2_ac2876b0-207b-11e9-b7da-f1c441eb26f2"
+              aria-selected={false}
+              className="euiTab"
+              disabled={false}
+              id="Details"
+              onClick={[Function]}
+              role="tab"
+              type="button"
+            >
+              <span
+                className="euiTab__content"
+              >
+                Details
+              </span>
+            </button>
+          </EuiTab>
+          <EuiTab
+            aria-controls="iaac84a70-207b-11e9-b7da-f1c441eb26f2_ac2876b0-207b-11e9-b7da-f1c441eb26f2"
+            disabled={false}
+            id="Category examples"
+            isSelected={true}
+            key="Category examples"
+            onClick={[Function]}
+          >
+            <button
+              aria-controls="iaac84a70-207b-11e9-b7da-f1c441eb26f2_ac2876b0-207b-11e9-b7da-f1c441eb26f2"
+              aria-selected={true}
+              className="euiTab euiTab-isSelected"
+              disabled={false}
+              id="Category examples"
+              onClick={[Function]}
+              role="tab"
+              type="button"
+            >
+              <span
+                className="euiTab__content"
+              >
+                Category examples
+              </span>
+            </button>
+          </EuiTab>
+        </div>
+      </EuiTabs>
+      <div
+        aria-labelledby="Category examples"
+        id="iaac84a70-207b-11e9-b7da-f1c441eb26f2_ac2876b0-207b-11e9-b7da-f1c441eb26f2"
+        role="tabpanel"
+      >
+        <EuiFlexGroup
+          alignItems="stretch"
+          className="mlAnomalyCategoryExamples"
+          component="div"
+          direction="column"
+          gutterSize="m"
+          justifyContent="center"
+          responsive={true}
+          wrap={false}
+        >
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive mlAnomalyCategoryExamples"
+          >
+            <EuiFlexItem
+              component="div"
+              grow={true}
+              key="example-regex"
+            >
+              <div
+                className="euiFlexItem"
+              >
+                <EuiText
+                  grow={true}
+                  size="xs"
+                >
+                  <div
+                    className="euiText euiText--extraSmall"
+                  >
+                    <h4
+                      className="mlAnomalyCategoryExamples__header"
+                    >
+                      Regex
+                    </h4>
+                     
+                    <EuiIconTip
+                      aria-label="Description"
+                      color="subdued"
+                      content={
+                        <FormattedMessage
+                          defaultMessage="The regular expression that is used to search for values that match the category
+ (may have been truncated to a max character limit of {maxChars})"
+                          id="xpack.ml.anomaliesTable.anomalyDetails.regexDescriptionTooltip"
+                          values={
+                            Object {
+                              "maxChars": 500,
+                            }
+                          }
+                        />
+                      }
+                      size="s"
+                      type="questionInCircle"
+                    >
+                      <EuiToolTip
+                        content={
+                          <FormattedMessage
+                            defaultMessage="The regular expression that is used to search for values that match the category
+ (may have been truncated to a max character limit of {maxChars})"
+                            id="xpack.ml.anomaliesTable.anomalyDetails.regexDescriptionTooltip"
+                            values={
+                              Object {
+                                "maxChars": 500,
+                              }
+                            }
+                          />
+                        }
+                        delay="regular"
+                        position="top"
+                      >
+                        <span
+                          className="euiToolTipAnchor"
+                          onMouseOut={[Function]}
+                          onMouseOver={[Function]}
+                        >
+                          <EuiIcon
+                            aria-describedby="nuin127a"
+                            aria-label="Description"
+                            color="subdued"
+                            onBlur={[Function]}
+                            onFocus={[Function]}
+                            size="s"
+                            tabIndex="0"
+                            type="questionInCircle"
+                          >
+                            <questionInCircle
+                              aria-describedby="nuin127a"
+                              aria-label="Description"
+                              className="euiIcon euiIcon--small euiIcon--subdued"
+                              focusable="true"
+                              height="16"
+                              onBlur={[Function]}
+                              onFocus={[Function]}
+                              style={null}
+                              tabIndex="0"
+                              viewBox="0 0 16 16"
+                              width="16"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <svg
+                                aria-describedby="nuin127a"
+                                aria-label="Description"
+                                className="euiIcon euiIcon--small euiIcon--subdued"
+                                focusable="true"
+                                height="16"
+                                onBlur={[Function]}
+                                onFocus={[Function]}
+                                style={null}
+                                tabIndex="0"
+                                viewBox="0 0 16 16"
+                                width="16"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M8 14A6 6 0 1 1 8 2a6 6 0 0 1 0 12zm0-1A5 5 0 1 0 8 3a5 5 0 0 0 0 10zm-.186-1.065A.785.785 0 0 1 7 11.12c0-.48.34-.82.814-.82.475 0 .809.34.809.82 0 .475-.334.815-.809.815zM5.9 6.317C5.96 5.168 6.755 4.4 8.048 4.4c1.218 0 2.091.759 2.091 1.8 0 .736-.36 1.304-1.03 1.707-.56.33-.717.56-.717 1.022v.305l-.1.1H7.47l-.1-.1v-.431c-.005-.646.302-1.104.987-1.514.527-.322.708-.59.708-1.047 0-.536-.416-.91-1.05-.91-.652 0-1.064.374-1.112.998l-.1.092H6l-.1-.105z"
+                                />
+                              </svg>
+                            </questionInCircle>
+                          </EuiIcon>
+                        </span>
+                      </EuiToolTip>
+                    </EuiIconTip>
+                  </div>
+                </EuiText>
+                <EuiText
+                  grow={true}
+                  size="xs"
+                >
+                  <div
+                    className="euiText euiText--extraSmall"
+                  >
+                    .*?DBMS.+?ERROR.+?svc_prod.+?Err.+?Microsoft.+?ODBC.+?SQL.+?Server.+?Driver
+                  </div>
+                </EuiText>
+              </div>
+            </EuiFlexItem>
+            <EuiSpacer
+              size="l"
+            >
+              <div
+                className="euiSpacer euiSpacer--l"
+              />
+            </EuiSpacer>
+            <EuiFlexItem
+              component="div"
+              grow={true}
+              key="example0"
+            >
+              <div
+                className="euiFlexItem"
+              >
+                <EuiText
+                  grow={true}
+                  size="s"
+                >
+                  <div
+                    className="euiText euiText--small"
+                  >
+                    <h4>
+                      <FormattedMessage
+                        defaultMessage="Examples"
+                        id="xpack.ml.anomaliesTable.anomalyDetails.examplesTitle"
+                        values={Object {}}
+                      >
+                        Examples
+                      </FormattedMessage>
+                    </h4>
+                  </div>
+                </EuiText>
+                <span
+                  className="mlAnomalyCategoryExamples__item"
+                >
+                  Actual Transaction Already Voided / Reversed;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com
+                </span>
+              </div>
+            </EuiFlexItem>
+            <EuiFlexItem
+              component="div"
+              grow={true}
+              key="example1"
+            >
+              <div
+                className="euiFlexItem"
+              >
+                <span
+                  className="mlAnomalyCategoryExamples__item"
+                >
+                  REC Not INSERTED [DB TRAN] Table;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com
+                </span>
+              </div>
+            </EuiFlexItem>
+          </div>
+        </EuiFlexGroup>
+      </div>
+    </div>
+  </EuiTabbedContent>
+</AnomalyDetails>
+`;
+
+exports[`AnomalyDetails Renders only with terms when definition.regex is undefined 1`] = `
+<AnomalyDetails
+  anomaly={
+    Object {
+      "actual": Array [
+        1,
+      ],
+      "actualSort": 1,
+      "detector": "count by mlcategory",
+      "detectorIndex": 0,
+      "entityName": "mlcategory",
+      "entityValue": "1",
+      "isTimeSeriesViewDetector": false,
+      "jobId": "it-ops-count-by-mlcategory-one",
+      "metricDescriptionSort": 82.83851409101328,
+      "rowId": "1546553208554_0",
+      "severity": 25.662,
+      "source": Object {
+        "actual": Array [
+          1,
+        ],
+        "bucket_span": 900,
+        "by_field_name": "mlcategory",
+        "by_field_value": "1",
+        "detector_index": 0,
+        "function": "count",
+        "function_description": "count",
+        "initial_record_score": 41.00971774894037,
+        "is_interim": false,
+        "job_id": "it-ops-count-by-mlcategory-one",
+        "mlcategory": Array [
+          "1",
+        ],
+        "multi_bucket_impact": 0,
+        "probability": 0.004741615571416013,
+        "record_score": 25.662,
+        "result_type": "record",
+        "timestamp": 1486062900000,
+        "typical": Array [
+          0.012071679592192066,
+        ],
+      },
+      "time": 1486018800000,
+      "typical": Array [
+        0.012071679592192066,
+      ],
+      "typicalSort": 0.012071679592192066,
+    }
+  }
+  definition={
+    Object {
+      "terms": "example terms for test",
+    }
+  }
+  examples={
+    Array [
+      "Actual Transaction Already Voided / Reversed;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com",
+      "REC Not INSERTED [DB TRAN] Table;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com",
+    ]
+  }
+  influencersLimit={5}
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  isAggregatedData={true}
+  tabIndex={1}
+>
+  <EuiTabbedContent
+    initialSelectedTab={
+      Object {
+        "content": <React.Fragment>
+          <EuiFlexGroup
+            alignItems="stretch"
+            className="mlAnomalyCategoryExamples"
+            component="div"
+            direction="column"
+            gutterSize="m"
+            justifyContent="center"
+            responsive={true}
+            wrap={false}
+          >
+            <React.Fragment>
+              <EuiFlexItem
+                component="div"
+                grow={true}
+              >
+                <EuiText
+                  grow={true}
+                  size="xs"
+                >
+                  <h4
+                    className="mlAnomalyCategoryExamples__header"
+                  >
+                    <FormattedMessage
+                      defaultMessage="Terms"
+                      id="xpack.ml.anomaliesTable.anomalyDetails.termsTitle"
+                      values={Object {}}
+                    />
+                  </h4>
+                   
+                  <EuiIconTip
+                    aria-label="Description"
+                    color="subdued"
+                    content={
+                      <FormattedMessage
+                        defaultMessage="A space separated list of the common tokens that are matched in values of the category
+ (may have been truncated to a max character limit of {maxChars})"
+                        id="xpack.ml.anomaliesTable.anomalyDetails.termsDescriptionTooltip"
+                        values={
+                          Object {
+                            "maxChars": 500,
+                          }
+                        }
+                      />
+                    }
+                    size="s"
+                    type="questionInCircle"
+                  />
+                </EuiText>
+                <EuiText
+                  grow={true}
+                  size="xs"
+                >
+                  example terms for test
+                </EuiText>
+              </EuiFlexItem>
+              <EuiSpacer
+                size="m"
+              />
+            </React.Fragment>
+            <EuiFlexItem
+              component="div"
+              grow={true}
+            >
+              <EuiText
+                grow={true}
+                size="s"
+              >
+                <h4>
+                  <FormattedMessage
+                    defaultMessage="Examples"
+                    id="xpack.ml.anomaliesTable.anomalyDetails.examplesTitle"
+                    values={Object {}}
+                  />
+                </h4>
+              </EuiText>
+              <span
+                className="mlAnomalyCategoryExamples__item"
+              >
+                Actual Transaction Already Voided / Reversed;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com
+              </span>
+            </EuiFlexItem>
+            <EuiFlexItem
+              component="div"
+              grow={true}
+            >
+              <span
+                className="mlAnomalyCategoryExamples__item"
+              >
+                REC Not INSERTED [DB TRAN] Table;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com
+              </span>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </React.Fragment>,
+        "id": "Category examples",
+        "name": "Category examples",
+      }
+    }
+    onTabClick={[Function]}
+    size="s"
+    tabs={
+      Array [
+        Object {
+          "content": <React.Fragment>
+            <div
+              className="ml-anomalies-table-details"
+            >
+              <React.Fragment>
+                <EuiText
+                  grow={true}
+                  size="xs"
+                >
+                  <h4>
+                    <FormattedMessage
+                      defaultMessage="Description"
+                      id="xpack.ml.anomaliesTable.anomalyDetails.descriptionTitle"
+                      values={Object {}}
+                    />
+                  </h4>
+                  minor anomaly in count by mlcategory found for mlcategory 1
+                </EuiText>
+              </React.Fragment>
+              <EuiSpacer
+                size="m"
+              />
+              <React.Fragment>
+                <EuiText
+                  grow={true}
+                  size="xs"
+                >
+                  <h4>
+                    <FormattedMessage
+                      defaultMessage="Details on highest severity anomaly"
+                      id="xpack.ml.anomaliesTable.anomalyDetails.detailsOnHighestSeverityAnomalyTitle"
+                      values={Object {}}
+                    />
+                  </h4>
+                </EuiText>
+                <EuiDescriptionList
+                  align="left"
+                  className="anomaly-description-list"
+                  compressed={false}
+                  listItems={
+                    Array [
+                      Object {
+                        "description": <InjectIntl(EntityCell)
+                          entityName="mlcategory"
+                          entityValue="1"
+                        />,
+                        "title": "mlcategory",
+                      },
+                      Object {
+                        "description": "February 2nd 2017, 22:15:00 to February 2nd 2017, 22:30:00",
+                        "title": "time",
+                      },
+                      Object {
+                        "description": "count",
+                        "title": "function",
+                      },
+                      Object {
+                        "description": 1,
+                        "title": "actual",
+                      },
+                      Object {
+                        "description": 0.0121,
+                        "title": "typical",
+                      },
+                      Object {
+                        "description": "it-ops-count-by-mlcategory-one",
+                        "title": "job ID",
+                      },
+                      Object {
+                        "description": 0.004741615571416013,
+                        "title": "probability",
+                      },
+                    ]
+                  }
+                  textStyle="normal"
+                  type="column"
+                />
+              </React.Fragment>
+            </div>
+          </React.Fragment>,
+          "id": "Details",
+          "name": "Details",
+        },
+        Object {
+          "content": <React.Fragment>
+            <EuiFlexGroup
+              alignItems="stretch"
+              className="mlAnomalyCategoryExamples"
+              component="div"
+              direction="column"
+              gutterSize="m"
+              justifyContent="center"
+              responsive={true}
+              wrap={false}
+            >
+              <React.Fragment>
+                <EuiFlexItem
+                  component="div"
+                  grow={true}
+                >
+                  <EuiText
+                    grow={true}
+                    size="xs"
+                  >
+                    <h4
+                      className="mlAnomalyCategoryExamples__header"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Terms"
+                        id="xpack.ml.anomaliesTable.anomalyDetails.termsTitle"
+                        values={Object {}}
+                      />
+                    </h4>
+                     
+                    <EuiIconTip
+                      aria-label="Description"
+                      color="subdued"
+                      content={
+                        <FormattedMessage
+                          defaultMessage="A space separated list of the common tokens that are matched in values of the category
+ (may have been truncated to a max character limit of {maxChars})"
+                          id="xpack.ml.anomaliesTable.anomalyDetails.termsDescriptionTooltip"
+                          values={
+                            Object {
+                              "maxChars": 500,
+                            }
+                          }
+                        />
+                      }
+                      size="s"
+                      type="questionInCircle"
+                    />
+                  </EuiText>
+                  <EuiText
+                    grow={true}
+                    size="xs"
+                  >
+                    example terms for test
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiSpacer
+                  size="m"
+                />
+              </React.Fragment>
+              <EuiFlexItem
+                component="div"
+                grow={true}
+              >
+                <EuiText
+                  grow={true}
+                  size="s"
+                >
+                  <h4>
+                    <FormattedMessage
+                      defaultMessage="Examples"
+                      id="xpack.ml.anomaliesTable.anomalyDetails.examplesTitle"
+                      values={Object {}}
+                    />
+                  </h4>
+                </EuiText>
+                <span
+                  className="mlAnomalyCategoryExamples__item"
+                >
+                  Actual Transaction Already Voided / Reversed;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com
+                </span>
+              </EuiFlexItem>
+              <EuiFlexItem
+                component="div"
+                grow={true}
+              >
+                <span
+                  className="mlAnomalyCategoryExamples__item"
+                >
+                  REC Not INSERTED [DB TRAN] Table;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com
+                </span>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </React.Fragment>,
+          "id": "Category examples",
+          "name": "Category examples",
+        },
+      ]
+    }
+  >
+    <div>
+      <EuiTabs
+        expand={false}
+        size="s"
+      >
+        <div
+          className="euiTabs euiTabs--small"
+          role="tablist"
+        >
+          <EuiTab
+            aria-controls="iaac84a70-207b-11e9-b7da-f1c441eb26f2_ac262cc0-207b-11e9-b7da-f1c441eb26f2"
+            disabled={false}
+            id="Details"
+            isSelected={false}
+            key="Details"
+            onClick={[Function]}
+          >
+            <button
+              aria-controls="iaac84a70-207b-11e9-b7da-f1c441eb26f2_ac262cc0-207b-11e9-b7da-f1c441eb26f2"
+              aria-selected={false}
+              className="euiTab"
+              disabled={false}
+              id="Details"
+              onClick={[Function]}
+              role="tab"
+              type="button"
+            >
+              <span
+                className="euiTab__content"
+              >
+                Details
+              </span>
+            </button>
+          </EuiTab>
+          <EuiTab
+            aria-controls="iaac84a70-207b-11e9-b7da-f1c441eb26f2_ac262cc0-207b-11e9-b7da-f1c441eb26f2"
+            disabled={false}
+            id="Category examples"
+            isSelected={true}
+            key="Category examples"
+            onClick={[Function]}
+          >
+            <button
+              aria-controls="iaac84a70-207b-11e9-b7da-f1c441eb26f2_ac262cc0-207b-11e9-b7da-f1c441eb26f2"
+              aria-selected={true}
+              className="euiTab euiTab-isSelected"
+              disabled={false}
+              id="Category examples"
+              onClick={[Function]}
+              role="tab"
+              type="button"
+            >
+              <span
+                className="euiTab__content"
+              >
+                Category examples
+              </span>
+            </button>
+          </EuiTab>
+        </div>
+      </EuiTabs>
+      <div
+        aria-labelledby="Category examples"
+        id="iaac84a70-207b-11e9-b7da-f1c441eb26f2_ac262cc0-207b-11e9-b7da-f1c441eb26f2"
+        role="tabpanel"
+      >
+        <EuiFlexGroup
+          alignItems="stretch"
+          className="mlAnomalyCategoryExamples"
+          component="div"
+          direction="column"
+          gutterSize="m"
+          justifyContent="center"
+          responsive={true}
+          wrap={false}
+        >
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive mlAnomalyCategoryExamples"
+          >
+            <EuiFlexItem
+              component="div"
+              grow={true}
+              key="example-terms"
+            >
+              <div
+                className="euiFlexItem"
+              >
+                <EuiText
+                  grow={true}
+                  size="xs"
+                >
+                  <div
+                    className="euiText euiText--extraSmall"
+                  >
+                    <h4
+                      className="mlAnomalyCategoryExamples__header"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Terms"
+                        id="xpack.ml.anomaliesTable.anomalyDetails.termsTitle"
+                        values={Object {}}
+                      >
+                        Terms
+                      </FormattedMessage>
+                    </h4>
+                     
+                    <EuiIconTip
+                      aria-label="Description"
+                      color="subdued"
+                      content={
+                        <FormattedMessage
+                          defaultMessage="A space separated list of the common tokens that are matched in values of the category
+ (may have been truncated to a max character limit of {maxChars})"
+                          id="xpack.ml.anomaliesTable.anomalyDetails.termsDescriptionTooltip"
+                          values={
+                            Object {
+                              "maxChars": 500,
+                            }
+                          }
+                        />
+                      }
+                      size="s"
+                      type="questionInCircle"
+                    >
+                      <EuiToolTip
+                        content={
+                          <FormattedMessage
+                            defaultMessage="A space separated list of the common tokens that are matched in values of the category
+ (may have been truncated to a max character limit of {maxChars})"
+                            id="xpack.ml.anomaliesTable.anomalyDetails.termsDescriptionTooltip"
+                            values={
+                              Object {
+                                "maxChars": 500,
+                              }
+                            }
+                          />
+                        }
+                        delay="regular"
+                        position="top"
+                      >
+                        <span
+                          className="euiToolTipAnchor"
+                          onMouseOut={[Function]}
+                          onMouseOver={[Function]}
+                        >
+                          <EuiIcon
+                            aria-describedby="33ossm4n"
+                            aria-label="Description"
+                            color="subdued"
+                            onBlur={[Function]}
+                            onFocus={[Function]}
+                            size="s"
+                            tabIndex="0"
+                            type="questionInCircle"
+                          >
+                            <questionInCircle
+                              aria-describedby="33ossm4n"
+                              aria-label="Description"
+                              className="euiIcon euiIcon--small euiIcon--subdued"
+                              focusable="true"
+                              height="16"
+                              onBlur={[Function]}
+                              onFocus={[Function]}
+                              style={null}
+                              tabIndex="0"
+                              viewBox="0 0 16 16"
+                              width="16"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <svg
+                                aria-describedby="33ossm4n"
+                                aria-label="Description"
+                                className="euiIcon euiIcon--small euiIcon--subdued"
+                                focusable="true"
+                                height="16"
+                                onBlur={[Function]}
+                                onFocus={[Function]}
+                                style={null}
+                                tabIndex="0"
+                                viewBox="0 0 16 16"
+                                width="16"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M8 14A6 6 0 1 1 8 2a6 6 0 0 1 0 12zm0-1A5 5 0 1 0 8 3a5 5 0 0 0 0 10zm-.186-1.065A.785.785 0 0 1 7 11.12c0-.48.34-.82.814-.82.475 0 .809.34.809.82 0 .475-.334.815-.809.815zM5.9 6.317C5.96 5.168 6.755 4.4 8.048 4.4c1.218 0 2.091.759 2.091 1.8 0 .736-.36 1.304-1.03 1.707-.56.33-.717.56-.717 1.022v.305l-.1.1H7.47l-.1-.1v-.431c-.005-.646.302-1.104.987-1.514.527-.322.708-.59.708-1.047 0-.536-.416-.91-1.05-.91-.652 0-1.064.374-1.112.998l-.1.092H6l-.1-.105z"
+                                />
+                              </svg>
+                            </questionInCircle>
+                          </EuiIcon>
+                        </span>
+                      </EuiToolTip>
+                    </EuiIconTip>
+                  </div>
+                </EuiText>
+                <EuiText
+                  grow={true}
+                  size="xs"
+                >
+                  <div
+                    className="euiText euiText--extraSmall"
+                  >
+                    example terms for test
+                  </div>
+                </EuiText>
+              </div>
+            </EuiFlexItem>
+            <EuiSpacer
+              size="m"
+            >
+              <div
+                className="euiSpacer euiSpacer--m"
+              />
+            </EuiSpacer>
+            <EuiFlexItem
+              component="div"
+              grow={true}
+              key="example0"
+            >
+              <div
+                className="euiFlexItem"
+              >
+                <EuiText
+                  grow={true}
+                  size="s"
+                >
+                  <div
+                    className="euiText euiText--small"
+                  >
+                    <h4>
+                      <FormattedMessage
+                        defaultMessage="Examples"
+                        id="xpack.ml.anomaliesTable.anomalyDetails.examplesTitle"
+                        values={Object {}}
+                      >
+                        Examples
+                      </FormattedMessage>
+                    </h4>
+                  </div>
+                </EuiText>
+                <span
+                  className="mlAnomalyCategoryExamples__item"
+                >
+                  Actual Transaction Already Voided / Reversed;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com
+                </span>
+              </div>
+            </EuiFlexItem>
+            <EuiFlexItem
+              component="div"
+              grow={true}
+              key="example1"
+            >
+              <div
+                className="euiFlexItem"
+              >
+                <span
+                  className="mlAnomalyCategoryExamples__item"
+                >
+                  REC Not INSERTED [DB TRAN] Table;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com
+                </span>
+              </div>
+            </EuiFlexItem>
+          </div>
+        </EuiFlexGroup>
+      </div>
+    </div>
+  </EuiTabbedContent>
+</AnomalyDetails>
+`;
+
+exports[`AnomalyDetails Renders with terms and regex when definition prop is not undefined 1`] = `
+<AnomalyDetails
+  anomaly={
+    Object {
+      "actual": Array [
+        1,
+      ],
+      "actualSort": 1,
+      "detector": "count by mlcategory",
+      "detectorIndex": 0,
+      "entityName": "mlcategory",
+      "entityValue": "1",
+      "isTimeSeriesViewDetector": false,
+      "jobId": "it-ops-count-by-mlcategory-one",
+      "metricDescriptionSort": 82.83851409101328,
+      "rowId": "1546553208554_0",
+      "severity": 25.662,
+      "source": Object {
+        "actual": Array [
+          1,
+        ],
+        "bucket_span": 900,
+        "by_field_name": "mlcategory",
+        "by_field_value": "1",
+        "detector_index": 0,
+        "function": "count",
+        "function_description": "count",
+        "initial_record_score": 41.00971774894037,
+        "is_interim": false,
+        "job_id": "it-ops-count-by-mlcategory-one",
+        "mlcategory": Array [
+          "1",
+        ],
+        "multi_bucket_impact": 0,
+        "probability": 0.004741615571416013,
+        "record_score": 25.662,
+        "result_type": "record",
+        "timestamp": 1486062900000,
+        "typical": Array [
+          0.012071679592192066,
+        ],
+      },
+      "time": 1486018800000,
+      "typical": Array [
+        0.012071679592192066,
+      ],
+      "typicalSort": 0.012071679592192066,
+    }
+  }
+  definition={
+    Object {
+      "regex": ".*?DBMS.+?ERROR.+?svc_prod.+?Err.+?Microsoft.+?ODBC.+?SQL.+?Server.+?Driver",
+      "terms": "example terms for test",
+    }
+  }
+  examples={
+    Array [
+      "Actual Transaction Already Voided / Reversed;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com",
+      "REC Not INSERTED [DB TRAN] Table;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com",
+    ]
+  }
+  influencersLimit={5}
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  isAggregatedData={true}
+  tabIndex={1}
+>
+  <EuiTabbedContent
+    initialSelectedTab={
+      Object {
+        "content": <React.Fragment>
+          <EuiFlexGroup
+            alignItems="stretch"
+            className="mlAnomalyCategoryExamples"
+            component="div"
+            direction="column"
+            gutterSize="m"
+            justifyContent="center"
+            responsive={true}
+            wrap={false}
+          >
+            <React.Fragment>
+              <EuiFlexItem
+                component="div"
+                grow={true}
+              >
+                <EuiText
+                  grow={true}
+                  size="xs"
+                >
+                  <h4
+                    className="mlAnomalyCategoryExamples__header"
+                  >
+                    <FormattedMessage
+                      defaultMessage="Terms"
+                      id="xpack.ml.anomaliesTable.anomalyDetails.termsTitle"
+                      values={Object {}}
+                    />
+                  </h4>
+                   
+                  <EuiIconTip
+                    aria-label="Description"
+                    color="subdued"
+                    content={
+                      <FormattedMessage
+                        defaultMessage="A space separated list of the common tokens that are matched in values of the category
+ (may have been truncated to a max character limit of {maxChars})"
+                        id="xpack.ml.anomaliesTable.anomalyDetails.termsDescriptionTooltip"
+                        values={
+                          Object {
+                            "maxChars": 500,
+                          }
+                        }
+                      />
+                    }
+                    size="s"
+                    type="questionInCircle"
+                  />
+                </EuiText>
+                <EuiText
+                  grow={true}
+                  size="xs"
+                >
+                  example terms for test
+                </EuiText>
+              </EuiFlexItem>
+              <EuiSpacer
+                size="m"
+              />
+            </React.Fragment>
+            <React.Fragment>
+              <EuiFlexItem
+                component="div"
+                grow={true}
+              >
+                <EuiText
+                  grow={true}
+                  size="xs"
+                >
+                  <h4
+                    className="mlAnomalyCategoryExamples__header"
+                  >
+                    Regex
+                  </h4>
+                   
+                  <EuiIconTip
+                    aria-label="Description"
+                    color="subdued"
+                    content={
+                      <FormattedMessage
+                        defaultMessage="The regular expression that is used to search for values that match the category
+ (may have been truncated to a max character limit of {maxChars})"
+                        id="xpack.ml.anomaliesTable.anomalyDetails.regexDescriptionTooltip"
+                        values={
+                          Object {
+                            "maxChars": 500,
+                          }
+                        }
+                      />
+                    }
+                    size="s"
+                    type="questionInCircle"
+                  />
+                </EuiText>
+                <EuiText
+                  grow={true}
+                  size="xs"
+                >
+                  .*?DBMS.+?ERROR.+?svc_prod.+?Err.+?Microsoft.+?ODBC.+?SQL.+?Server.+?Driver
+                </EuiText>
+              </EuiFlexItem>
+              <EuiSpacer
+                size="l"
+              />
+            </React.Fragment>
+            <EuiFlexItem
+              component="div"
+              grow={true}
+            >
+              <EuiText
+                grow={true}
+                size="s"
+              >
+                <h4>
+                  <FormattedMessage
+                    defaultMessage="Examples"
+                    id="xpack.ml.anomaliesTable.anomalyDetails.examplesTitle"
+                    values={Object {}}
+                  />
+                </h4>
+              </EuiText>
+              <span
+                className="mlAnomalyCategoryExamples__item"
+              >
+                Actual Transaction Already Voided / Reversed;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com
+              </span>
+            </EuiFlexItem>
+            <EuiFlexItem
+              component="div"
+              grow={true}
+            >
+              <span
+                className="mlAnomalyCategoryExamples__item"
+              >
+                REC Not INSERTED [DB TRAN] Table;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com
+              </span>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </React.Fragment>,
+        "id": "Category examples",
+        "name": "Category examples",
+      }
+    }
+    onTabClick={[Function]}
+    size="s"
+    tabs={
+      Array [
+        Object {
+          "content": <React.Fragment>
+            <div
+              className="ml-anomalies-table-details"
+            >
+              <React.Fragment>
+                <EuiText
+                  grow={true}
+                  size="xs"
+                >
+                  <h4>
+                    <FormattedMessage
+                      defaultMessage="Description"
+                      id="xpack.ml.anomaliesTable.anomalyDetails.descriptionTitle"
+                      values={Object {}}
+                    />
+                  </h4>
+                  minor anomaly in count by mlcategory found for mlcategory 1
+                </EuiText>
+              </React.Fragment>
+              <EuiSpacer
+                size="m"
+              />
+              <React.Fragment>
+                <EuiText
+                  grow={true}
+                  size="xs"
+                >
+                  <h4>
+                    <FormattedMessage
+                      defaultMessage="Details on highest severity anomaly"
+                      id="xpack.ml.anomaliesTable.anomalyDetails.detailsOnHighestSeverityAnomalyTitle"
+                      values={Object {}}
+                    />
+                  </h4>
+                </EuiText>
+                <EuiDescriptionList
+                  align="left"
+                  className="anomaly-description-list"
+                  compressed={false}
+                  listItems={
+                    Array [
+                      Object {
+                        "description": <InjectIntl(EntityCell)
+                          entityName="mlcategory"
+                          entityValue="1"
+                        />,
+                        "title": "mlcategory",
+                      },
+                      Object {
+                        "description": "February 2nd 2017, 22:15:00 to February 2nd 2017, 22:30:00",
+                        "title": "time",
+                      },
+                      Object {
+                        "description": "count",
+                        "title": "function",
+                      },
+                      Object {
+                        "description": 1,
+                        "title": "actual",
+                      },
+                      Object {
+                        "description": 0.0121,
+                        "title": "typical",
+                      },
+                      Object {
+                        "description": "it-ops-count-by-mlcategory-one",
+                        "title": "job ID",
+                      },
+                      Object {
+                        "description": 0.004741615571416013,
+                        "title": "probability",
+                      },
+                    ]
+                  }
+                  textStyle="normal"
+                  type="column"
+                />
+              </React.Fragment>
+            </div>
+          </React.Fragment>,
+          "id": "Details",
+          "name": "Details",
+        },
+        Object {
+          "content": <React.Fragment>
+            <EuiFlexGroup
+              alignItems="stretch"
+              className="mlAnomalyCategoryExamples"
+              component="div"
+              direction="column"
+              gutterSize="m"
+              justifyContent="center"
+              responsive={true}
+              wrap={false}
+            >
+              <React.Fragment>
+                <EuiFlexItem
+                  component="div"
+                  grow={true}
+                >
+                  <EuiText
+                    grow={true}
+                    size="xs"
+                  >
+                    <h4
+                      className="mlAnomalyCategoryExamples__header"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Terms"
+                        id="xpack.ml.anomaliesTable.anomalyDetails.termsTitle"
+                        values={Object {}}
+                      />
+                    </h4>
+                     
+                    <EuiIconTip
+                      aria-label="Description"
+                      color="subdued"
+                      content={
+                        <FormattedMessage
+                          defaultMessage="A space separated list of the common tokens that are matched in values of the category
+ (may have been truncated to a max character limit of {maxChars})"
+                          id="xpack.ml.anomaliesTable.anomalyDetails.termsDescriptionTooltip"
+                          values={
+                            Object {
+                              "maxChars": 500,
+                            }
+                          }
+                        />
+                      }
+                      size="s"
+                      type="questionInCircle"
+                    />
+                  </EuiText>
+                  <EuiText
+                    grow={true}
+                    size="xs"
+                  >
+                    example terms for test
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiSpacer
+                  size="m"
+                />
+              </React.Fragment>
+              <React.Fragment>
+                <EuiFlexItem
+                  component="div"
+                  grow={true}
+                >
+                  <EuiText
+                    grow={true}
+                    size="xs"
+                  >
+                    <h4
+                      className="mlAnomalyCategoryExamples__header"
+                    >
+                      Regex
+                    </h4>
+                     
+                    <EuiIconTip
+                      aria-label="Description"
+                      color="subdued"
+                      content={
+                        <FormattedMessage
+                          defaultMessage="The regular expression that is used to search for values that match the category
+ (may have been truncated to a max character limit of {maxChars})"
+                          id="xpack.ml.anomaliesTable.anomalyDetails.regexDescriptionTooltip"
+                          values={
+                            Object {
+                              "maxChars": 500,
+                            }
+                          }
+                        />
+                      }
+                      size="s"
+                      type="questionInCircle"
+                    />
+                  </EuiText>
+                  <EuiText
+                    grow={true}
+                    size="xs"
+                  >
+                    .*?DBMS.+?ERROR.+?svc_prod.+?Err.+?Microsoft.+?ODBC.+?SQL.+?Server.+?Driver
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiSpacer
+                  size="l"
+                />
+              </React.Fragment>
+              <EuiFlexItem
+                component="div"
+                grow={true}
+              >
+                <EuiText
+                  grow={true}
+                  size="s"
+                >
+                  <h4>
+                    <FormattedMessage
+                      defaultMessage="Examples"
+                      id="xpack.ml.anomaliesTable.anomalyDetails.examplesTitle"
+                      values={Object {}}
+                    />
+                  </h4>
+                </EuiText>
+                <span
+                  className="mlAnomalyCategoryExamples__item"
+                >
+                  Actual Transaction Already Voided / Reversed;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com
+                </span>
+              </EuiFlexItem>
+              <EuiFlexItem
+                component="div"
+                grow={true}
+              >
+                <span
+                  className="mlAnomalyCategoryExamples__item"
+                >
+                  REC Not INSERTED [DB TRAN] Table;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com
+                </span>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </React.Fragment>,
+          "id": "Category examples",
+          "name": "Category examples",
+        },
+      ]
+    }
+  >
+    <div>
+      <EuiTabs
+        expand={false}
+        size="s"
+      >
+        <div
+          className="euiTabs euiTabs--small"
+          role="tablist"
+        >
+          <EuiTab
+            aria-controls="iaac84a70-207b-11e9-b7da-f1c441eb26f2_ac206060-207b-11e9-b7da-f1c441eb26f2"
+            disabled={false}
+            id="Details"
+            isSelected={false}
+            key="Details"
+            onClick={[Function]}
+          >
+            <button
+              aria-controls="iaac84a70-207b-11e9-b7da-f1c441eb26f2_ac206060-207b-11e9-b7da-f1c441eb26f2"
+              aria-selected={false}
+              className="euiTab"
+              disabled={false}
+              id="Details"
+              onClick={[Function]}
+              role="tab"
+              type="button"
+            >
+              <span
+                className="euiTab__content"
+              >
+                Details
+              </span>
+            </button>
+          </EuiTab>
+          <EuiTab
+            aria-controls="iaac84a70-207b-11e9-b7da-f1c441eb26f2_ac206060-207b-11e9-b7da-f1c441eb26f2"
+            disabled={false}
+            id="Category examples"
+            isSelected={true}
+            key="Category examples"
+            onClick={[Function]}
+          >
+            <button
+              aria-controls="iaac84a70-207b-11e9-b7da-f1c441eb26f2_ac206060-207b-11e9-b7da-f1c441eb26f2"
+              aria-selected={true}
+              className="euiTab euiTab-isSelected"
+              disabled={false}
+              id="Category examples"
+              onClick={[Function]}
+              role="tab"
+              type="button"
+            >
+              <span
+                className="euiTab__content"
+              >
+                Category examples
+              </span>
+            </button>
+          </EuiTab>
+        </div>
+      </EuiTabs>
+      <div
+        aria-labelledby="Category examples"
+        id="iaac84a70-207b-11e9-b7da-f1c441eb26f2_ac206060-207b-11e9-b7da-f1c441eb26f2"
+        role="tabpanel"
+      >
+        <EuiFlexGroup
+          alignItems="stretch"
+          className="mlAnomalyCategoryExamples"
+          component="div"
+          direction="column"
+          gutterSize="m"
+          justifyContent="center"
+          responsive={true}
+          wrap={false}
+        >
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive mlAnomalyCategoryExamples"
+          >
+            <EuiFlexItem
+              component="div"
+              grow={true}
+              key="example-terms"
+            >
+              <div
+                className="euiFlexItem"
+              >
+                <EuiText
+                  grow={true}
+                  size="xs"
+                >
+                  <div
+                    className="euiText euiText--extraSmall"
+                  >
+                    <h4
+                      className="mlAnomalyCategoryExamples__header"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Terms"
+                        id="xpack.ml.anomaliesTable.anomalyDetails.termsTitle"
+                        values={Object {}}
+                      >
+                        Terms
+                      </FormattedMessage>
+                    </h4>
+                     
+                    <EuiIconTip
+                      aria-label="Description"
+                      color="subdued"
+                      content={
+                        <FormattedMessage
+                          defaultMessage="A space separated list of the common tokens that are matched in values of the category
+ (may have been truncated to a max character limit of {maxChars})"
+                          id="xpack.ml.anomaliesTable.anomalyDetails.termsDescriptionTooltip"
+                          values={
+                            Object {
+                              "maxChars": 500,
+                            }
+                          }
+                        />
+                      }
+                      size="s"
+                      type="questionInCircle"
+                    >
+                      <EuiToolTip
+                        content={
+                          <FormattedMessage
+                            defaultMessage="A space separated list of the common tokens that are matched in values of the category
+ (may have been truncated to a max character limit of {maxChars})"
+                            id="xpack.ml.anomaliesTable.anomalyDetails.termsDescriptionTooltip"
+                            values={
+                              Object {
+                                "maxChars": 500,
+                              }
+                            }
+                          />
+                        }
+                        delay="regular"
+                        position="top"
+                      >
+                        <span
+                          className="euiToolTipAnchor"
+                          onMouseOut={[Function]}
+                          onMouseOver={[Function]}
+                        >
+                          <EuiIcon
+                            aria-describedby="nvs60748"
+                            aria-label="Description"
+                            color="subdued"
+                            onBlur={[Function]}
+                            onFocus={[Function]}
+                            size="s"
+                            tabIndex="0"
+                            type="questionInCircle"
+                          >
+                            <questionInCircle
+                              aria-describedby="nvs60748"
+                              aria-label="Description"
+                              className="euiIcon euiIcon--small euiIcon--subdued"
+                              focusable="true"
+                              height="16"
+                              onBlur={[Function]}
+                              onFocus={[Function]}
+                              style={null}
+                              tabIndex="0"
+                              viewBox="0 0 16 16"
+                              width="16"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <svg
+                                aria-describedby="nvs60748"
+                                aria-label="Description"
+                                className="euiIcon euiIcon--small euiIcon--subdued"
+                                focusable="true"
+                                height="16"
+                                onBlur={[Function]}
+                                onFocus={[Function]}
+                                style={null}
+                                tabIndex="0"
+                                viewBox="0 0 16 16"
+                                width="16"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M8 14A6 6 0 1 1 8 2a6 6 0 0 1 0 12zm0-1A5 5 0 1 0 8 3a5 5 0 0 0 0 10zm-.186-1.065A.785.785 0 0 1 7 11.12c0-.48.34-.82.814-.82.475 0 .809.34.809.82 0 .475-.334.815-.809.815zM5.9 6.317C5.96 5.168 6.755 4.4 8.048 4.4c1.218 0 2.091.759 2.091 1.8 0 .736-.36 1.304-1.03 1.707-.56.33-.717.56-.717 1.022v.305l-.1.1H7.47l-.1-.1v-.431c-.005-.646.302-1.104.987-1.514.527-.322.708-.59.708-1.047 0-.536-.416-.91-1.05-.91-.652 0-1.064.374-1.112.998l-.1.092H6l-.1-.105z"
+                                />
+                              </svg>
+                            </questionInCircle>
+                          </EuiIcon>
+                        </span>
+                      </EuiToolTip>
+                    </EuiIconTip>
+                  </div>
+                </EuiText>
+                <EuiText
+                  grow={true}
+                  size="xs"
+                >
+                  <div
+                    className="euiText euiText--extraSmall"
+                  >
+                    example terms for test
+                  </div>
+                </EuiText>
+              </div>
+            </EuiFlexItem>
+            <EuiSpacer
+              size="m"
+            >
+              <div
+                className="euiSpacer euiSpacer--m"
+              />
+            </EuiSpacer>
+            <EuiFlexItem
+              component="div"
+              grow={true}
+              key="example-regex"
+            >
+              <div
+                className="euiFlexItem"
+              >
+                <EuiText
+                  grow={true}
+                  size="xs"
+                >
+                  <div
+                    className="euiText euiText--extraSmall"
+                  >
+                    <h4
+                      className="mlAnomalyCategoryExamples__header"
+                    >
+                      Regex
+                    </h4>
+                     
+                    <EuiIconTip
+                      aria-label="Description"
+                      color="subdued"
+                      content={
+                        <FormattedMessage
+                          defaultMessage="The regular expression that is used to search for values that match the category
+ (may have been truncated to a max character limit of {maxChars})"
+                          id="xpack.ml.anomaliesTable.anomalyDetails.regexDescriptionTooltip"
+                          values={
+                            Object {
+                              "maxChars": 500,
+                            }
+                          }
+                        />
+                      }
+                      size="s"
+                      type="questionInCircle"
+                    >
+                      <EuiToolTip
+                        content={
+                          <FormattedMessage
+                            defaultMessage="The regular expression that is used to search for values that match the category
+ (may have been truncated to a max character limit of {maxChars})"
+                            id="xpack.ml.anomaliesTable.anomalyDetails.regexDescriptionTooltip"
+                            values={
+                              Object {
+                                "maxChars": 500,
+                              }
+                            }
+                          />
+                        }
+                        delay="regular"
+                        position="top"
+                      >
+                        <span
+                          className="euiToolTipAnchor"
+                          onMouseOut={[Function]}
+                          onMouseOver={[Function]}
+                        >
+                          <EuiIcon
+                            aria-describedby="ica1qcpp"
+                            aria-label="Description"
+                            color="subdued"
+                            onBlur={[Function]}
+                            onFocus={[Function]}
+                            size="s"
+                            tabIndex="0"
+                            type="questionInCircle"
+                          >
+                            <questionInCircle
+                              aria-describedby="ica1qcpp"
+                              aria-label="Description"
+                              className="euiIcon euiIcon--small euiIcon--subdued"
+                              focusable="true"
+                              height="16"
+                              onBlur={[Function]}
+                              onFocus={[Function]}
+                              style={null}
+                              tabIndex="0"
+                              viewBox="0 0 16 16"
+                              width="16"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <svg
+                                aria-describedby="ica1qcpp"
+                                aria-label="Description"
+                                className="euiIcon euiIcon--small euiIcon--subdued"
+                                focusable="true"
+                                height="16"
+                                onBlur={[Function]}
+                                onFocus={[Function]}
+                                style={null}
+                                tabIndex="0"
+                                viewBox="0 0 16 16"
+                                width="16"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M8 14A6 6 0 1 1 8 2a6 6 0 0 1 0 12zm0-1A5 5 0 1 0 8 3a5 5 0 0 0 0 10zm-.186-1.065A.785.785 0 0 1 7 11.12c0-.48.34-.82.814-.82.475 0 .809.34.809.82 0 .475-.334.815-.809.815zM5.9 6.317C5.96 5.168 6.755 4.4 8.048 4.4c1.218 0 2.091.759 2.091 1.8 0 .736-.36 1.304-1.03 1.707-.56.33-.717.56-.717 1.022v.305l-.1.1H7.47l-.1-.1v-.431c-.005-.646.302-1.104.987-1.514.527-.322.708-.59.708-1.047 0-.536-.416-.91-1.05-.91-.652 0-1.064.374-1.112.998l-.1.092H6l-.1-.105z"
+                                />
+                              </svg>
+                            </questionInCircle>
+                          </EuiIcon>
+                        </span>
+                      </EuiToolTip>
+                    </EuiIconTip>
+                  </div>
+                </EuiText>
+                <EuiText
+                  grow={true}
+                  size="xs"
+                >
+                  <div
+                    className="euiText euiText--extraSmall"
+                  >
+                    .*?DBMS.+?ERROR.+?svc_prod.+?Err.+?Microsoft.+?ODBC.+?SQL.+?Server.+?Driver
+                  </div>
+                </EuiText>
+              </div>
+            </EuiFlexItem>
+            <EuiSpacer
+              size="l"
+            >
+              <div
+                className="euiSpacer euiSpacer--l"
+              />
+            </EuiSpacer>
+            <EuiFlexItem
+              component="div"
+              grow={true}
+              key="example0"
+            >
+              <div
+                className="euiFlexItem"
+              >
+                <EuiText
+                  grow={true}
+                  size="s"
+                >
+                  <div
+                    className="euiText euiText--small"
+                  >
+                    <h4>
+                      <FormattedMessage
+                        defaultMessage="Examples"
+                        id="xpack.ml.anomaliesTable.anomalyDetails.examplesTitle"
+                        values={Object {}}
+                      >
+                        Examples
+                      </FormattedMessage>
+                    </h4>
+                  </div>
+                </EuiText>
+                <span
+                  className="mlAnomalyCategoryExamples__item"
+                >
+                  Actual Transaction Already Voided / Reversed;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com
+                </span>
+              </div>
+            </EuiFlexItem>
+            <EuiFlexItem
+              component="div"
+              grow={true}
+              key="example1"
+            >
+              <div
+                className="euiFlexItem"
+              >
+                <span
+                  className="mlAnomalyCategoryExamples__item"
+                >
+                  REC Not INSERTED [DB TRAN] Table;hostname=dbserver.acme.com;physicalhost=esxserver1.acme.com;vmhost=app1.acme.com
+                </span>
+              </div>
+            </EuiFlexItem>
+          </div>
+        </EuiFlexGroup>
+      </div>
+    </div>
+  </EuiTabbedContent>
+</AnomalyDetails>
+`;

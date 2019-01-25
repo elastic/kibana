@@ -101,9 +101,7 @@ describe('AnomalyDetails', () => {
       <AnomalyDetails.WrappedComponent {...categoryTabProps} />
     );
 
-    expect(wrapper.containsMatchingElement(<h4>Regex</h4>)).toBe(true);
-    expect(wrapper.containsMatchingElement(<h4>Terms</h4>)).toBe(true);
-    expect(wrapper.contains(<h4>Examples</h4>)).toBe(true);
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('Renders only with examples when definition prop is undefined', () => {
@@ -117,9 +115,7 @@ describe('AnomalyDetails', () => {
       <AnomalyDetails.WrappedComponent {...categoryTabProps} />
     );
 
-    expect(wrapper.containsMatchingElement(<h4>Regex</h4>)).toBe(false);
-    expect(wrapper.containsMatchingElement(<h4>Terms</h4>)).toBe(false);
-    expect(wrapper.contains(<h4>Examples</h4>)).toBe(false);
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('Renders only with terms when definition.regex is undefined', () => {
@@ -135,9 +131,7 @@ describe('AnomalyDetails', () => {
       <AnomalyDetails.WrappedComponent {...categoryTabProps} />
     );
 
-    expect(wrapper.containsMatchingElement(<h4>Regex</h4>)).toBe(false);
-    expect(wrapper.containsMatchingElement(<h4>Terms</h4>)).toBe(true);
-    expect(wrapper.contains(<h4>Examples</h4>)).toBe(true);
+    expect(wrapper).toMatchSnapshot();
   });
 
   test('Renders only with regex when definition.terms is undefined', () => {
@@ -153,8 +147,6 @@ describe('AnomalyDetails', () => {
       <AnomalyDetails.WrappedComponent {...categoryTabProps} />
     );
 
-    expect(wrapper.containsMatchingElement(<h4>Regex</h4>)).toBe(true);
-    expect(wrapper.containsMatchingElement(<h4>Terms</h4>)).toBe(false);
-    expect(wrapper.contains(<h4>Examples</h4>)).toBe(true);
+    expect(wrapper).toMatchSnapshot();
   });
 });
