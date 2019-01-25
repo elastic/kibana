@@ -64,7 +64,7 @@ Object {
     /* eslint-enable max-len */
   });
 
-  test('fails when type attribute is missing from a panel', () => {
+  test('fails when "type" attribute is missing from a panel', () => {
     const doc = {
       id: '1',
       attributes: {
@@ -82,7 +82,7 @@ Object {
     );
   });
 
-  test('fails when id attribute is missing from a panel', () => {
+  test('fails when "id" attribute is missing from a panel', () => {
     const doc = {
       id: '1',
       attributes: {
@@ -139,6 +139,67 @@ Object {
 }
 `);
     /* eslint-enable max-len */
+  });
+
+  test('skips when panelsJSON is missing', () => {
+    const context = {
+      id: '1',
+      foo: true,
+    };
+    injectReferences(context, []);
+    expect(context).toMatchInlineSnapshot(`
+Object {
+  "foo": true,
+  "id": "1",
+}
+`);
+  });
+
+  test('skips when panelsJSON is not an array', () => {
+    const context = {
+      id: '1',
+      foo: true,
+      panelsJSON: '{}',
+    };
+    injectReferences(context, []);
+    expect(context).toMatchInlineSnapshot(`
+Object {
+  "foo": true,
+  "id": "1",
+  "panelsJSON": "{}",
+}
+`);
+  });
+
+  test('skips a panel when panelRefName is missing', () => {
+    const context = {
+      id: '1',
+      foo: true,
+      panelsJSON: JSON.stringify([
+        {
+          panelRefName: 'panel_0',
+          title: 'Title 1',
+        },
+        {
+          title: 'Title 2',
+        },
+      ]),
+    };
+    const references = [
+      {
+        name: 'panel_0',
+        type: 'visualization',
+        id: '1',
+      },
+    ];
+    injectReferences(context, references);
+    expect(context).toMatchInlineSnapshot(`
+Object {
+  "foo": true,
+  "id": "1",
+  "panelsJSON": "[{\\"title\\":\\"Title 1\\",\\"id\\":\\"1\\",\\"type\\":\\"visualization\\"},{\\"title\\":\\"Title 2\\"}]",
+}
+`);
   });
 
   test(`fails when it can't find the reference in the array`, () => {

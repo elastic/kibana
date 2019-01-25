@@ -16,7 +16,7 @@ describe('extractReferences', () => {
           JSON.stringify({
             indexPattern: 'pattern*',
             bar: true,
-          }),
+          })
         ),
       },
     };
@@ -38,14 +38,14 @@ Object {
 `);
   });
 
-  test('fails when index is missing from workspace', () => {
+  test('fails when indexPattern is missing from workspace', () => {
     const doc = {
       id: '1',
       attributes: {
         wsState: JSON.stringify(
           JSON.stringify({
             bar: true,
-          }),
+          })
         ),
       },
     };
@@ -78,6 +78,20 @@ Object {
   "foo": true,
   "id": "1",
   "wsState": "{\\"bar\\":true,\\"indexPattern\\":\\"pattern*\\"}",
+}
+`);
+  });
+
+  test('skips when wsState is not a string', () => {
+    const context = {
+      id: '1',
+      foo: true,
+    };
+    injectReferences(context, []);
+    expect(context).toMatchInlineSnapshot(`
+Object {
+  "foo": true,
+  "id": "1",
 }
 `);
   });
