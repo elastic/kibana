@@ -84,6 +84,10 @@ export class ESJoinSource extends ASource {
     inspectorAdapters.requests.resetRequest(this._descriptor.id);
   }
 
+  getIndexPatternIds() {
+    return  [this._descriptor.indexPatternId];
+  }
+
   async getPropertiesMap(searchFilters, leftSourceName, leftFieldName) {
 
     if (!this.hasCompleteConfig()) {
@@ -108,6 +112,7 @@ export class ESJoinSource extends ASource {
         }
         return filters;
       });
+      searchSource.setField('query', searchFilters.query);
 
       const dsl = aggConfigs.toDsl();
       searchSource.setField('aggs', dsl);
@@ -165,17 +170,19 @@ export class ESJoinSource extends ASource {
     return true;
   }
 
+  isQueryAware() {
+    return true;
+  }
+
   getJoinDescription(leftSourceName, leftFieldName) {
     const metrics = this._getValidMetrics().map(metric => {
-      return metric.type !== 'count' ? `${metric.type}(${metric.field})` : 'count(*)';
+      return metric.type !== 'count' ? `${metric.type} ${metric.field}` : 'count';
     });
     const joinStatement = [];
-    joinStatement.push(`SELECT ${metrics.join(',')}`);
-    joinStatement.push(`FROM ${leftSourceName} left`);
-    joinStatement.push(`JOIN ${this._descriptor.indexPatternTitle} right`);
-    joinStatement.push(`ON left.${leftFieldName} right.${this._descriptor.term}`);
-    joinStatement.push(`GROUP BY right.${this._descriptor.term}`);
-    return `Elasticsearch terms aggregation request for join: "${joinStatement.join(' ')}"`;
+    joinStatement.push(`Join ${leftSourceName}:${leftFieldName} with`);
+    joinStatement.push(`${this._descriptor.indexPatternTitle}:${this._descriptor.term}`);
+    joinStatement.push(`for metrics ${metrics.join(',')}`);
+    return `Elasticsearch terms aggregation request for ${joinStatement.join(' ')}`;
   }
 
   _getValidMetrics() {
@@ -198,11 +205,11 @@ export class ESJoinSource extends ASource {
   getMetricFields() {
     return this._getValidMetrics().map(metric => {
       const metricKey = metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : metric.type;
-      const metricLabel = metric.type !== 'count' ? `${metric.type}(${metric.field})` : 'count(*)';
+      const metricLabel = metric.type !== 'count' ? `${metric.type} ${metric.field}` : 'count';
       return {
         ...metric,
         propertyKey: `__kbnjoin__${metricKey}_groupby_${this._descriptor.indexPatternTitle}.${this._descriptor.term}`,
-        propertyLabel: `${metricLabel} group by ${this._descriptor.indexPatternTitle}.${this._descriptor.term}`,
+        propertyLabel: `${metricLabel} of ${this._descriptor.indexPatternTitle}:${this._descriptor.term}`,
       };
     });
   }
@@ -240,6 +247,4 @@ export class ESJoinSource extends ASource {
   async getDisplayName() {
     return `es_table ${this._descriptor.indexPatternId}`;
   }
-
-
 }

@@ -35,12 +35,15 @@ import {
   PHASE_ATTRIBUTES_THAT_ARE_NUMBERS,
   MAX_SIZE_TYPE_DOCUMENT,
   WARM_PHASE_ON_ROLLOVER,
-  PHASE_SHRINK_ENABLED
+  PHASE_SHRINK_ENABLED,
+  PHASE_FREEZE_ENABLED,
+  PHASE_INDEX_PRIORITY
 } from '../constants';
 import { filterItems, sortTable } from '../../services';
 
 
 export const getPolicies = state => state.policies.policies;
+export const getPolicyByName = (state, name) => getPolicies(state).find((policy) => policy.name === name) || {};
 export const getIsNewPolicy = state => state.policies.selectedPolicy.isNew;
 export const getSelectedPolicy = state => state.policies.selectedPolicy;
 export const getIsSelectedPolicySet = state => state.policies.selectedPolicySet;
@@ -193,6 +196,12 @@ export const phaseFromES = (phase, phaseName, defaultPolicy) => {
     if (actions.shrink) {
       policy[PHASE_PRIMARY_SHARD_COUNT] = actions.shrink.number_of_shards;
     }
+    if (actions.freeze) {
+      policy[PHASE_FREEZE_ENABLED] = true;
+    }
+    if (actions.set_priority) {
+      policy[PHASE_INDEX_PRIORITY] = actions.set_priority.priority;
+    }
   }
   return policy;
 };
@@ -212,17 +221,17 @@ export const policyFromES = (policy) => {
   };
 };
 
-export const phaseToES = (state, phase) => {
-  const esPhase = {};
+export const phaseToES = (phase, originalEsPhase) => {
+  const esPhase = { ...originalEsPhase };
 
   if (!phase[PHASE_ENABLED]) {
-    return esPhase;
+    return {};
   }
   if (isNumber(phase[PHASE_ROLLOVER_MINIMUM_AGE])) {
     esPhase.min_age = `${phase[PHASE_ROLLOVER_MINIMUM_AGE]}${phase[PHASE_ROLLOVER_MINIMUM_AGE_UNITS]}`;
   }
 
-  esPhase.actions = {};
+  esPhase.actions = esPhase.actions || {};
 
   if (phase[PHASE_ROLLOVER_ENABLED]) {
     esPhase.actions.rollover = {};
@@ -241,29 +250,49 @@ export const phaseToES = (state, phase) => {
         }`;
       }
     }
+  } else {
+    delete esPhase.actions.rollover;
   }
   if (phase[PHASE_NODE_ATTRS]) {
     const [ name, value, ] = phase[PHASE_NODE_ATTRS].split(':');
-    esPhase.actions.allocate = {
-      require: {
-        [name]: value
-      }
+    esPhase.actions.allocate = esPhase.actions.allocate || {};
+    esPhase.actions.allocate.require = {
+      [name]: value
     };
   }
   if (isNumber(phase[PHASE_REPLICA_COUNT])) {
     esPhase.actions.allocate = esPhase.actions.allocate || {};
     esPhase.actions.allocate.number_of_replicas = phase[PHASE_REPLICA_COUNT];
+  } else {
+    if (esPhase.actions.allocate) {
+      delete esPhase.actions.allocate.require;
+    }
   }
 
   if (phase[PHASE_FORCE_MERGE_ENABLED]) {
     esPhase.actions.forcemerge = {
       max_num_segments: phase[PHASE_FORCE_MERGE_SEGMENTS]
     };
+  } else {
+    delete esPhase.actions.forcemerge;
   }
 
   if (phase[PHASE_SHRINK_ENABLED] && isNumber(phase[PHASE_PRIMARY_SHARD_COUNT])) {
     esPhase.actions.shrink = {
       number_of_shards: phase[PHASE_PRIMARY_SHARD_COUNT]
+    };
+  } else {
+    delete esPhase.actions.shrink;
+  }
+
+  if (phase[PHASE_FREEZE_ENABLED]) {
+    esPhase.actions.freeze = {};
+  } else {
+    delete esPhase.actions.freeze;
+  }
+  if (isNumber(phase[PHASE_INDEX_PRIORITY])) {
+    esPhase.actions.set_priority = {
+      priority: phase[PHASE_INDEX_PRIORITY]
     };
   }
   return esPhase;

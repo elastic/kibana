@@ -6,6 +6,7 @@
 
 
 import { ML_BREADCRUMB } from '../breadcrumbs';
+import { i18n } from '@kbn/i18n';
 
 
 export function getJobManagementBreadcrumbs() {
@@ -20,7 +21,9 @@ export function getCreateJobBreadcrumbs() {
   return [
     ML_BREADCRUMB,
     {
-      text: 'Create job',
+      text: i18n.translate('xpack.ml.jobsBreadcrumbs.createJobLabel', {
+        defaultMessage: 'Create job'
+      }),
       href: '#/jobs/new_job'
     }
   ];
@@ -30,7 +33,9 @@ export function getCreateSingleMetricJobBreadcrumbs() {
   return [
     ...getCreateJobBreadcrumbs(),
     {
-      text: 'Single metric',
+      text: i18n.translate('xpack.ml.jobsBreadcrumbs.singleMetricLabel', {
+        defaultMessage: 'Single metric'
+      }),
       href: ''
     }
   ];
@@ -40,7 +45,9 @@ export function getCreateMultiMetricJobBreadcrumbs() {
   return [
     ...getCreateJobBreadcrumbs(),
     {
-      text: 'Multi metric',
+      text: i18n.translate('xpack.ml.jobsBreadcrumbs.multiMetricLabel', {
+        defaultMessage: 'Multi metric'
+      }),
       href: ''
     }
   ];
@@ -50,7 +57,9 @@ export function getCreatePopulationJobBreadcrumbs() {
   return [
     ...getCreateJobBreadcrumbs(),
     {
-      text: 'Population',
+      text: i18n.translate('xpack.ml.jobsBreadcrumbs.populationLabel', {
+        defaultMessage: 'Population'
+      }),
       href: ''
     }
   ];
@@ -60,7 +69,9 @@ export function getAdvancedJobConfigurationBreadcrumbs() {
   return [
     ...getCreateJobBreadcrumbs(),
     {
-      text: 'Advanced configuration',
+      text: i18n.translate('xpack.ml.jobsBreadcrumbs.advancedConfigurationLabel', {
+        defaultMessage: 'Advanced configuration'
+      }),
       href: ''
     }
   ];
@@ -80,7 +91,9 @@ export function getDataVisualizerIndexOrSearchBreadcrumbs() {
   return [
     ML_BREADCRUMB,
     {
-      text: 'Select index or search',
+      text: i18n.translate('xpack.ml.jobsBreadcrumbs.selectIndexOrSearchLabel', {
+        defaultMessage: 'Select index or search'
+      }),
       href: ''
     }
   ];

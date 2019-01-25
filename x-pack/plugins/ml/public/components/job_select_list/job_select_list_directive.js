@@ -117,6 +117,7 @@ module.directive('mlJobSelectList', function (Private) {
           } else {
             $scope.noJobsCreated = true;
           }
+          $scope.$applyAsync();
         }).catch((resp) => {
           console.log('mlJobSelectList controller - error getting job info from ES:', resp);
         });

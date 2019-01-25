@@ -74,7 +74,7 @@ export const alterColumn = () => ({
           case 'null':
             return () => null;
           default:
-            throw new Error(`Cannot convert to ${type}`);
+            throw new Error(`Cannot convert to '${type}'`);
         }
       })();
     }

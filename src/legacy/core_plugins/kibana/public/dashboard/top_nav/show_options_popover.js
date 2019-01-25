@@ -38,8 +38,6 @@ const onClose = () => {
 
 export function showOptionsPopover({
   anchorElement,
-  darkTheme,
-  onDarkThemeChange,
   useMargins,
   onUseMarginsChange,
   hidePanelTitles,
@@ -56,15 +54,14 @@ export function showOptionsPopover({
   const element = (
     <I18nProvider>
       <EuiWrappingPopover
-        className="navbar__popover"
+        className="kuiLocalNav__popover"
+        anchorClassName="kuiLocalNav__popoverAnchor"
         id="popover"
         button={anchorElement}
         isOpen={true}
         closePopover={onClose}
       >
         <OptionsMenu
-          darkTheme={darkTheme}
-          onDarkThemeChange={onDarkThemeChange}
           useMargins={useMargins}
           onUseMarginsChange={onUseMarginsChange}
           hidePanelTitles={hidePanelTitles}

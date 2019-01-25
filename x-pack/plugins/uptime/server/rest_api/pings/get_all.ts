@@ -5,7 +5,7 @@
  */
 
 import Joi from 'joi';
-import { Ping } from '../../../common/graphql/types';
+import { PingResults } from '../../../common/graphql/types';
 import { UMServerLibs } from '../../lib/lib';
 
 export const createGetAllRoute = (libs: UMServerLibs) => ({
@@ -23,7 +23,7 @@ export const createGetAllRoute = (libs: UMServerLibs) => ({
       }),
     },
   },
-  handler: async (request: any): Promise<Ping[]> => {
+  handler: async (request: any): Promise<PingResults> => {
     const { size, sort, dateRangeStart, dateRangeEnd, monitorId, status } = request.query;
     return await libs.pings.getAll(
       request,

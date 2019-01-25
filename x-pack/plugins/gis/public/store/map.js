@@ -20,13 +20,13 @@ import {
   MAP_READY,
   MAP_DESTROYED,
   SET_TIME_FILTERS,
+  SET_QUERY,
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
   PROMOTE_TEMPORARY_STYLES,
   CLEAR_TEMPORARY_STYLES,
   SET_JOINS,
   TOUCH_LAYER,
-  UPDATE_LAYER_ALPHA_VALUE,
   UPDATE_SOURCE_PROP,
   SET_REFRESH_CONFIG,
   TRIGGER_REFRESH_TIMER,
@@ -85,6 +85,7 @@ const INITIAL_STATE = {
     extent: null,
     mouseCoordinates: null,
     timeFilters: null,
+    query: null,
     refreshConfig: null,
     refreshTimerLastTriggeredAt: null,
   },
@@ -162,6 +163,9 @@ export function map(state = INITIAL_STATE, action) {
     case SET_TIME_FILTERS:
       const { from, to } = action;
       return { ...state, mapState: { ...state.mapState, timeFilters: { from, to } } };
+    case SET_QUERY:
+      const { query } = action;
+      return { ...state, mapState: { ...state.mapState, query } };
     case SET_REFRESH_CONFIG:
       const { isPaused, interval } = action;
       return {
@@ -187,13 +191,6 @@ export function map(state = INITIAL_STATE, action) {
       return { ...state, selectedLayerId: match ? action.selectedLayerId : null };
     case UPDATE_LAYER_ORDER:
       return { ...state, layerList: action.newLayerOrder.map(layerNumber => state.layerList[layerNumber]) };
-    case UPDATE_LAYER_ALPHA_VALUE:
-      const alphaLayer = state.layerList.find(layer => layer.id === action.id);
-      const preAlphaStyle = alphaLayer.style;
-      return updateLayerInList(state, action.id, 'style',
-        { ...preAlphaStyle, properties: { ...preAlphaStyle.properties,
-          alphaValue: action.newAlphaValue }
-        });
     case UPDATE_LAYER_PROP:
       return updateLayerInList(state, action.id, action.propName, action.newValue);
     case UPDATE_SOURCE_PROP:

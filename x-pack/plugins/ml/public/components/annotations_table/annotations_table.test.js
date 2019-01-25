@@ -7,7 +7,7 @@
 import jobConfig from '../../../common/types/__mocks__/job_config_farequote';
 import mockAnnotations from './__mocks__/mock_annotations.json';
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { AnnotationsTable } from './annotations_table';
@@ -33,17 +33,17 @@ jest.mock('../../services/ml_api_service', () => ({
 
 describe('AnnotationsTable', () => {
   test('Minimal initialization without props.', () => {
-    const wrapper = shallow(<AnnotationsTable />);
+    const wrapper = shallowWithIntl(<AnnotationsTable.WrappedComponent />);
     expect(wrapper).toMatchSnapshot();
   });
 
   test('Initialization with job config prop.', () => {
-    const wrapper = shallow(<AnnotationsTable jobs={[jobConfig]} />);
+    const wrapper = shallowWithIntl(<AnnotationsTable.WrappedComponent jobs={[jobConfig]} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   test('Initialization with annotations prop.', () => {
-    const wrapper = shallow(<AnnotationsTable annotations={mockAnnotations} />);
+    const wrapper = shallowWithIntl(<AnnotationsTable.WrappedComponent annotations={mockAnnotations} />);
     expect(wrapper).toMatchSnapshot();
   });
 
