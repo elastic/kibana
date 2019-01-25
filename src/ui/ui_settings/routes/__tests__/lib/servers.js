@@ -40,7 +40,7 @@ export async function startServers() {
 }
 
 async function deleteKibanaIndex(callCluster) {
-  const { body: kibanaIndices } = await callCluster('cat.indices', { index: '.kibana*', format: 'json' });
+  const kibanaIndices = await callCluster('cat.indices', { index: '.kibana*', format: 'json' });
   const indexNames = kibanaIndices.map(x => x.index);
   if (!indexNames.length) {
     return;

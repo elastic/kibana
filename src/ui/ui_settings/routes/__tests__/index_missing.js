@@ -40,7 +40,7 @@ export function indexMissingSuite() {
       // an incorrect number of shards is how we determine when the index was not created by Kibana,
       // but automatically by writing to es when index didn't exist
       async assertValidKibanaIndex() {
-        const { body: resp } = await callCluster('indices.get', {
+        const resp = await callCluster('indices.get', {
           index: indexName,
           include_type_name: true,
         });
