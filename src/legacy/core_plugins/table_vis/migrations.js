@@ -17,11 +17,55 @@
  * under the License.
  */
 
-import { cloneDeep, get, omit } from 'lodash';
+import { cloneDeep, get, set, omit } from 'lodash';
+
+function migrateIndexPattern(type, doc) {
+  const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
+  if (typeof searchSourceJSON !== 'string') {
+    return;
+  }
+  let searchSource;
+  try {
+    searchSource = JSON.parse(searchSourceJSON);
+  } catch (e) {
+    // Let it go, the data is invalid and we'll leave it as is
+    return;
+  }
+  if (!searchSource.index) {
+    return;
+  }
+  doc.references.push({
+    name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+    type: 'index-pattern',
+    id: searchSource.index,
+  });
+  searchSource.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
+  delete searchSource.index;
+  set(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON', JSON.stringify(searchSource));
+}
 
 export const migrations = {
   visualization: {
     '7.0.0': (doc) => {
+      // Set new "references" attribute
+      doc.references = doc.references || [];
+
+      // Migrate index pattern
+      migrateIndexPattern('visualization', doc);
+
+      // Migrate saved search
+      const savedSearchId = get(doc, 'attributes.savedSearchId');
+      if (savedSearchId) {
+        doc.references.push({
+          type: 'search',
+          name: 'search_0',
+          id: savedSearchId,
+        });
+        doc.attributes.savedSearchRefName = 'search_0';
+        delete doc.attributes.savedSearchId;
+      }
+
+      // Migrate table splits
       try {
         const visState = JSON.parse(doc.attributes.visState);
         if (get(visState, 'type') !== 'table') {

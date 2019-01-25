@@ -45,27 +45,6 @@ function migrateIndexPattern(type, doc) {
 }
 
 export default {
-  visualization: {
-    '7.0.0': (doc) => {
-      // Set new "references" attribute
-      doc.references = doc.references || [];
-      // Migrate index pattern
-      migrateIndexPattern('visualization', doc);
-      // Migrate saved search
-      const savedSearchId = get(doc, 'attributes.savedSearchId');
-      if (!savedSearchId) {
-        return doc;
-      }
-      doc.references.push({
-        type: 'search',
-        name: 'search_0',
-        id: savedSearchId,
-      });
-      doc.attributes.savedSearchRefName = 'search_0';
-      delete doc.attributes.savedSearchId;
-      return doc;
-    },
-  },
   dashboard: {
     '7.0.0': (doc) => {
       // Set new "references" attribute

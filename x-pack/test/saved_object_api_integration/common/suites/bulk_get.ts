@@ -103,9 +103,6 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
             uiStateJSON: resp.body.saved_objects[0].attributes.uiStateJSON,
             kibanaSavedObjectMeta: resp.body.saved_objects[0].attributes.kibanaSavedObjectMeta,
           },
-          migrationVersion: {
-            visualization: '7.0.0',
-          },
           references: [
             {
               name: 'kibanaSavedObjectMeta.searchSourceJSON.index',

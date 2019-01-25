@@ -109,9 +109,6 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
         uiStateJSON: resp.body.attributes.uiStateJSON,
         kibanaSavedObjectMeta: resp.body.attributes.kibanaSavedObjectMeta,
       },
-      migrationVersion: {
-        visualization: '7.0.0',
-      },
       references: [
         {
           name: 'kibanaSavedObjectMeta.searchSourceJSON.index',

@@ -1,0 +1,174 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`table vis migrations 7.0.0 does not throw error on empty object 1`] = `
+Object {
+  "attributes": Object {
+    "visState": "{}",
+  },
+  "references": Array [],
+}
+`;
+
+exports[`table vis migrations 7.0.0 extract savedSearchId from doc 1`] = `
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": "{}",
+    },
+    "savedSearchRefName": "search_0",
+    "visState": "{}",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "123",
+      "name": "search_0",
+      "type": "search",
+    },
+  ],
+}
+`;
+
+exports[`table vis migrations 7.0.0 extracts "index" attribute from doc 1`] = `
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": "{\\"bar\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
+    },
+    "savedSearchRefName": "search_0",
+    "visState": "{}",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "pattern*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "123",
+      "name": "search_0",
+      "type": "search",
+    },
+  ],
+  "type": "visualization",
+}
+`;
+
+exports[`table vis migrations 7.0.0 skips error when "index" is missing from searchSourceJSON 1`] = `
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": "{\\"bar\\":true}",
+    },
+    "savedSearchRefName": "search_0",
+    "visState": "{}",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "123",
+      "name": "search_0",
+      "type": "search",
+    },
+  ],
+  "type": "visualization",
+}
+`;
+
+exports[`table vis migrations 7.0.0 skips error when searchSourceJSON is invalid json 1`] = `
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": "{abc123}",
+    },
+    "savedSearchRefName": "search_0",
+    "visState": "{}",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "123",
+      "name": "search_0",
+      "type": "search",
+    },
+  ],
+  "type": "visualization",
+}
+`;
+
+exports[`table vis migrations 7.0.0 skips error when searchSourceJSON is not a string 1`] = `
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": 123,
+    },
+    "savedSearchRefName": "search_0",
+    "visState": "{}",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "123",
+      "name": "search_0",
+      "type": "search",
+    },
+  ],
+  "type": "visualization",
+}
+`;
+
+exports[`table vis migrations 7.0.0 skips errors when searchSourceJSON is null 1`] = `
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": null,
+    },
+    "savedSearchRefName": "search_0",
+    "visState": "{}",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "123",
+      "name": "search_0",
+      "type": "search",
+    },
+  ],
+  "type": "visualization",
+}
+`;
+
+exports[`table vis migrations 7.0.0 skips errors when searchSourceJSON is undefined 1`] = `
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": undefined,
+    },
+    "savedSearchRefName": "search_0",
+    "visState": "{}",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "123",
+      "name": "search_0",
+      "type": "search",
+    },
+  ],
+  "type": "visualization",
+}
+`;
+
+exports[`table vis migrations 7.0.0 skips extracting savedSearchId when missing 1`] = `
+Object {
+  "attributes": Object {
+    "kibanaSavedObjectMeta": Object {
+      "searchSourceJSON": "{}",
+    },
+    "visState": "{}",
+  },
+  "id": "1",
+  "references": Array [],
+}
+`;

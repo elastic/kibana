@@ -101,7 +101,7 @@ const data = [
 
 test('collects dashboard and all dependencies', async () => {
   const savedObjectClient = {
-    errors: {},
+    errors: {} as any,
     create: jest.fn(),
     bulkCreate: jest.fn(),
     delete: jest.fn(),

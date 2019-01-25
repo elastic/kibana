@@ -36,6 +36,138 @@ describe('table vis migrations', () => {
       }
     });
 
+    it('does not throw error on empty object', () => {
+      const migratedDoc = migrate({
+        attributes: {
+          visState: '{}',
+        },
+      });
+      expect(migratedDoc).toMatchSnapshot();
+    });
+
+    it('skips errors when searchSourceJSON is null', () => {
+      const doc = {
+        id: '1',
+        type: 'visualization',
+        attributes: {
+          visState: '{}',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: null,
+          },
+          savedSearchId: '123',
+        },
+      };
+      const migratedDoc = migrate(doc);
+      expect(migratedDoc).toMatchSnapshot();
+    });
+
+    it('skips errors when searchSourceJSON is undefined', () => {
+      const doc = {
+        id: '1',
+        type: 'visualization',
+        attributes: {
+          visState: '{}',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: undefined,
+          },
+          savedSearchId: '123',
+        },
+      };
+      const migratedDoc = migrate(doc);
+      expect(migratedDoc).toMatchSnapshot();
+    });
+
+    it('skips error when searchSourceJSON is not a string', () => {
+      const doc = {
+        id: '1',
+        type: 'visualization',
+        attributes: {
+          visState: '{}',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: 123,
+          },
+          savedSearchId: '123',
+        },
+      };
+      expect(migrate(doc)).toMatchSnapshot();
+    });
+
+    it('skips error when searchSourceJSON is invalid json', () => {
+      const doc = {
+        id: '1',
+        type: 'visualization',
+        attributes: {
+          visState: '{}',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: '{abc123}',
+          },
+          savedSearchId: '123',
+        },
+      };
+      expect(migrate(doc)).toMatchSnapshot();
+    });
+
+    it('skips error when "index" is missing from searchSourceJSON', () => {
+      const doc = {
+        id: '1',
+        type: 'visualization',
+        attributes: {
+          visState: '{}',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({ bar: true }),
+          },
+          savedSearchId: '123',
+        },
+      };
+      const migratedDoc = migrate(doc);
+      expect(migratedDoc).toMatchSnapshot();
+    });
+
+    it('extracts "index" attribute from doc', () => {
+      const doc = {
+        id: '1',
+        type: 'visualization',
+        attributes: {
+          visState: '{}',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({ bar: true, index: 'pattern*' }),
+          },
+          savedSearchId: '123',
+        },
+      };
+      const migratedDoc = migrate(doc);
+      expect(migratedDoc).toMatchSnapshot();
+    });
+
+    it('skips extracting savedSearchId when missing', () => {
+      const doc = {
+        id: '1',
+        attributes: {
+          visState: '{}',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: '{}',
+          },
+        },
+      };
+      const migratedDoc = migrate(doc);
+      expect(migratedDoc).toMatchSnapshot();
+    });
+
+    it('extract savedSearchId from doc', () => {
+      const doc = {
+        id: '1',
+        attributes: {
+          visState: '{}',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: '{}',
+          },
+          savedSearchId: '123',
+        },
+      };
+      const migratedDoc = migrate(doc);
+      expect(migratedDoc).toMatchSnapshot();
+    });
+
     it('should return a new object if vis is table and has multiple split aggs', () => {
       const aggs = [
         {
