@@ -34,8 +34,10 @@ import { SectionUnauthorized } from '../../components';
 export const CrossClusterReplicationHome = injectI18n(
   class extends PureComponent {
     static propTypes = {
+      autoFollowPatterns: PropTypes.array,
       isAutoFollowApiAuthorized: PropTypes.bool,
       isFollowerIndexApiAuthorized: PropTypes.bool,
+      followerIndices: PropTypes.array,
     }
 
     state = {
@@ -76,7 +78,10 @@ export const CrossClusterReplicationHome = injectI18n(
     }
 
     renderHeaderSection() {
-      if (this.state.activeSection === 'follower_indices') {
+      const { followerIndices, autoFollowPatterns } = this.props;
+
+      // If we're rendering the empty prompt, we don't want to render the header.
+      if (this.state.activeSection === 'follower_indices' && followerIndices.length > 0) {
         return (
           <Fragment>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
@@ -110,38 +115,41 @@ export const CrossClusterReplicationHome = injectI18n(
         );
       }
 
-      return (
-        <Fragment>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
-            <EuiFlexItem grow={false}>
-              <EuiText>
-                <p>
+      // If we're rendering the empty prompt, we don't want to render the header.
+      if (autoFollowPatterns.length > 0) {
+        return (
+          <Fragment>
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
+              <EuiFlexItem grow={false}>
+                <EuiText>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.autoFollowPatternList.autoFollowPatternsDescription"
+                      defaultMessage="Auto-follow patterns replicate leader indices from a remote
+                      cluster to follower indices on the local cluster."
+                    />
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  {...routing.getRouterLinkProps('/auto_follow_patterns/add')}
+                  fill
+                  iconType="plusInCircle"
+                >
                   <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPatternList.autoFollowPatternsDescription"
-                    defaultMessage="Auto-follow patterns replicate leader indices from a remote
-                    cluster to follower indices on the local cluster."
+                    id="xpack.crossClusterReplication.autoFollowPatternList.addAutoFollowPatternButtonLabel"
+                    defaultMessage="Create an auto-follow pattern"
                   />
-                </p>
-              </EuiText>
-            </EuiFlexItem>
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
 
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                {...routing.getRouterLinkProps('/auto_follow_patterns/add')}
-                fill
-                iconType="plusInCircle"
-              >
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.autoFollowPatternList.addAutoFollowPatternButtonLabel"
-                  defaultMessage="Create an auto-follow pattern"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-
-          <EuiSpacer />
-        </Fragment>
-      );
+            <EuiSpacer />
+          </Fragment>
+        );
+      }
     }
 
     renderContent() {
