@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }) {
           return PageObjects.settings.navigateTo();
         })
         .then(function () {
-          return PageObjects.settings.clickKibanaIndices();
+          return PageObjects.settings.clickKibanaIndexPatterns();
         });
     });
 
@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }) {
 
       after(async () => {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndices();
+        await PageObjects.settings.clickKibanaIndexPatterns();
       });
     });
 
