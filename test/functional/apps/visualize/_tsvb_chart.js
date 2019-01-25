@@ -24,6 +24,8 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const inspector = getService('inspector');
   const retry = getService('retry');
+  const kibanaServer = getService('kibanaServer');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings', 'visualBuilder']);
 
   describe('visual builder', function describeIndexTests() {
@@ -238,6 +240,18 @@ export default function ({ getService, getPageObjects }) {
         const newValue = await PageObjects.visualBuilder.getMetricValue();
         log.debug(`metric value: ${newValue}`);
         expect(newValue).to.eql('10');
+      });
+    });
+
+    describe('dark mode', () => {
+      it('uses dark mode flag', async () => {
+        await kibanaServer.uiSettings.update({
+          'theme:darkMode': true
+        });
+
+        await PageObjects.visualBuilder.resetPage();
+        const classNames = await testSubjects.getAttribute('timeseriesChart', 'class');
+        expect(classNames.includes('reversed')).to.be(true);
       });
     });
   });
