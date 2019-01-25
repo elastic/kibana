@@ -11,7 +11,8 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import * as dark from '@elastic/eui/dist/eui_theme_k6_dark.json';
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { I18nProvider } from '@kbn/i18n/react';
 
 import { AppFrontendLibs } from '../lib/lib';
@@ -28,7 +29,12 @@ export const startApp = async (libs: AppFrontendLibs) => {
       <I18nProvider>
         <ReduxStoreProvider store={store}>
           <ApolloProvider client={libs.apolloClient}>
-            <ThemeProvider theme={{ eui: dark }}>
+            <ThemeProvider
+              theme={() => ({
+                eui: libs.framework.darkMode ? euiDarkVars : euiLightVars,
+                darkMode: libs.framework.darkMode,
+              })}
+            >
               <PageRouter history={history} />
             </ThemeProvider>
           </ApolloProvider>

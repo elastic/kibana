@@ -24,6 +24,7 @@ const BREADCRUMBS_ELEMENT_ID = 'react-secops-breadcrumbs';
 
 export class AppKibanaFrameworkAdapter implements AppFrameworkAdapter {
   public dateFormat?: string;
+  public darkMode?: boolean;
   public kbnVersion?: string;
   public scaledDateFormat?: string;
   public timezone?: string;
@@ -114,10 +115,7 @@ export class AppKibanaFrameworkAdapter implements AppFrameworkAdapter {
       }),
       scope: true,
       template: `
-        <div
-          id="${ROOT_ELEMENT_ID}"
-          style="display: flex; flex-direction: column; align-items: stretch; flex: 1 0 0; overflow: hidden;"
-        ></div>
+        <div id="${ROOT_ELEMENT_ID}"></div>
       `,
     }));
 
@@ -132,6 +130,11 @@ export class AppKibanaFrameworkAdapter implements AppFrameworkAdapter {
       this.timezone = Private(this.timezoneProvider)();
       this.kbnVersion = kbnVersion;
       this.dateFormat = config.get('dateFormat');
+      try {
+        this.darkMode = config.get('theme:darkMode');
+      } catch (e) {
+        this.darkMode = false;
+      }
       this.scaledDateFormat = config.get('dateFormat:scaled');
     });
 
@@ -139,8 +142,7 @@ export class AppKibanaFrameworkAdapter implements AppFrameworkAdapter {
 
     uiRoutes.otherwise({
       reloadOnSearch: false,
-      template:
-        '<app-ui-kibana-adapter style="display: flex; align-items: stretch; flex: 1 0 0;"></app-ui-kibana-adapter>',
+      template: '<app-ui-kibana-adapter></app-ui-kibana-adapter>',
     });
   };
 }

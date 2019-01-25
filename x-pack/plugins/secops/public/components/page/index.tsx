@@ -37,6 +37,7 @@ export const PageContent = styled.div`
   position: relative;
   overflow-y: hidden;
   background-color: ${props => props.theme.eui.euiColorEmptyShade};
+  margin-top: 62px;
 `;
 
 export const FlexPage = styled(EuiPage)`
@@ -47,6 +48,9 @@ export const PageHeader = styled.div`
   background-color: ${props => props.theme.eui.euiColorEmptyShade};
   display: flex;
   user-select: none;
+  padding: 1rem 1rem 0rem 1rem;
+  width: 100vw;
+  position: fixed;
 `;
 
 export const FooterContainer = styled.div`
@@ -54,10 +58,13 @@ export const FooterContainer = styled.div`
   color: #666;
   left: 0;
   padding: 8px;
-  position: relative;
+  position: fixed;
   text-align: left;
   user-select: none;
   width: 100%;
+  background-color: #f5f7fa;
+  padding: 16px;
+  border-top: 1px solid #d3dae6;
 `;
 
 export const PaneScrollContainer = styled.div`

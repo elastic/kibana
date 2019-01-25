@@ -19,12 +19,12 @@ import * as i18n from './translations';
 const Container = styled.div`
   overflow-x: auto;
   overflow-y: hidden;
-  position: absolute;
+  position: fixed;
   top: 40%;
-  right: 0%;
+  right: -3px;
   min-width: 50px;
   max-width: 80px;
-  z-index: 1;
+  z-index: 2;
   height: 240px;
   max-height: 240px;
 `;
