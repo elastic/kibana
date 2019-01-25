@@ -43,16 +43,6 @@ describe('orderedDateAxis', function () {
     }
   };
 
-  describe('xAxisFormat', function () {
-    it('sets the xAxisFormat', function () {
-      const args = _.cloneDeep(baseArgs);
-      orderedDateAxis(args.chart);
-
-      expect(args.chart).to.have.property('xAxisFormat');
-      expect(args.chart.xAxisFormat).to.be.a('object');
-    });
-  });
-
   describe('ordered object', function () {
     it('sets date: true', function () {
       const args = _.cloneDeep(baseArgs);

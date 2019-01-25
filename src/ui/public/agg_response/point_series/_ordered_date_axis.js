@@ -21,12 +21,7 @@
 
 export function orderedDateAxis(chart) {
   const x = chart.aspects.x[0];
-  const { bounds, format } = x.params;
-
-  chart.xAxisFormat = {
-    id: 'date',
-    params: { format },
-  };
+  const { bounds } = x.params;
 
   chart.ordered.date = true;
 
