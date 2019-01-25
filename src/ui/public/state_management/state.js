@@ -41,7 +41,7 @@ import {
   isStateHash,
 } from './state_storage';
 
-export function StateProvider(Private, $rootScope, $location, stateManagementConfig, config, kbnUrl) {
+export function StateProvider(Private, $rootScope, $location, stateManagementConfig, config, kbnUrl, i18n) {
   const Events = Private(EventsProvider);
 
   createLegacyClass(State).inherits(Events);
@@ -103,7 +103,9 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
     }
 
     if (unableToParse) {
-      toastNotifications.addDanger('Unable to parse URL');
+      toastNotifications.addDanger(i18n('common.ui.stateManagement.unableToParseUrlErrorMessage', {
+        defaultMessage: 'Unable to parse URL'
+      }));
       search[this._urlParam] = this.toQueryParam(this._defaults);
       $location.search(search).replace();
     }
@@ -242,7 +244,9 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
   State.prototype._parseStateHash = function (stateHash) {
     const json = this._hashedItemStore.getItem(stateHash);
     if (json === null) {
-      toastNotifications.addDanger('Unable to completely restore the URL, be sure to use the share functionality.');
+      toastNotifications.addDanger(i18n('common.ui.stateManagement.unableToRestoreUrlErrorMessage', {
+        defaultMessage: 'Unable to completely restore the URL, be sure to use the share functionality.'
+      }));
     }
 
     return JSON.parse(json);
@@ -289,17 +293,16 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
     }
 
     // If we ran out of space trying to persist the state, notify the user.
-    fatalError(
-      new Error(
-        'Kibana is unable to store history items in your session ' +
-        'because it is full and there don\'t seem to be items any items safe ' +
-        'to delete.\n' +
-        '\n' +
+    const message = i18n('common.ui.stateManagement.unableToStoreHistoryInSessionErrorMessage', {
+      defaultMessage: 'Kibana is unable to store history items in your session ' +
+        `because it is full and there don't seem to be items any items safe ` +
+        'to delete.\n\n' +
         'This can usually be fixed by moving to a fresh tab, but could ' +
         'be caused by a larger issue. If you are seeing this message regularly, ' +
-        'please file an issue at https://github.com/elastic/kibana/issues.'
-      )
-    );
+        'please file an issue at {gitHubIssuesUrl}.',
+      values: { gitHubIssuesUrl: 'https://github.com/elastic/kibana/issues' }
+    });
+    fatalError(new Error(message));
   };
 
   /**

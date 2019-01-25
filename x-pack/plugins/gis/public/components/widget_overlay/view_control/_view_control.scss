@@ -1,0 +1,16 @@
+/**
+ * 1. The overlay captures mouse events even if it's empty space. To counter-act this,
+ *    we remove all pointer events from the overlay then add them back on the
+ *    individual widgets.
+ */
+
+.gisViewControl__coordinates {
+  padding: $euiSizeXS $euiSizeS;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.gisViewControl__gotoButton {
+  min-width: 0;
+  pointer-events: all; /* 1 */
+}

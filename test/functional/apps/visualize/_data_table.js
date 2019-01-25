@@ -68,10 +68,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should be able to save and load', async function () {
-      await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
-      const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
-      log.debug(`Save viz page title is ${pageTitle}`);
-      expect(pageTitle).to.contain(vizName1);
+      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
       await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
@@ -202,7 +199,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.selectField('extension.raw');
         await PageObjects.visualize.setSize(2);
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
 
         await PageObjects.visualize.toggleOtherBucket();
         await PageObjects.visualize.toggleMissingBucket();

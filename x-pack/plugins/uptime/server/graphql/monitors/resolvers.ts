@@ -6,88 +6,60 @@
 
 import { UMGqlRange } from '../../../common/domain_types';
 import { UMResolver } from '../../../common/graphql/resolver_types';
-import { Ping, Snapshot } from '../../../common/graphql/types';
+import {
+  GetErrorsListQueryArgs,
+  GetFilterBarQueryArgs,
+  GetLatestMonitorsQueryArgs,
+  GetMonitorChartsDataQueryArgs,
+  GetMonitorsQueryArgs,
+  GetSnapshotQueryArgs,
+  Ping,
+  Snapshot,
+} from '../../../common/graphql/types';
 import { UMServerLibs } from '../../lib/lib';
 import { CreateUMGraphQLResolvers, UMContext } from '../types';
 
 export type UMSnapshotResolver = UMResolver<
   Snapshot | Promise<Snapshot>,
   any,
-  GetSnapshotArgs,
+  GetSnapshotQueryArgs,
   UMContext
 >;
 
 export type UMMonitorsResolver = UMResolver<any | Promise<any>, any, UMGqlRange, UMContext>;
 
-interface UMLatestMonitorsArgs {
-  dateRangeStart: number;
-  dateRangeEnd: number;
-  monitorId?: string;
-}
-
-interface UMGetMonitorsArgs {
-  dateRangeStart: number;
-  dateRangeEnd: number;
-  filters: string;
-}
-
 export type UMGetMonitorsResolver = UMResolver<
   any | Promise<any>,
   any,
-  UMGetMonitorsArgs,
+  GetMonitorsQueryArgs,
   UMContext
 >;
 
 export type UMLatestMonitorsResolver = UMResolver<
   Ping[] | Promise<Ping[]>,
   any,
-  UMLatestMonitorsArgs,
+  GetLatestMonitorsQueryArgs,
   UMContext
 >;
-
-interface GetSnapshotArgs {
-  dateRangeStart: number;
-  dateRangeEnd: number;
-  downCount: number;
-  windowSize: number;
-  filters?: string;
-}
-
-interface UMMonitorChartsArgs {
-  dateRangeStart: number;
-  dateRangeEnd: number;
-  monitorId: string;
-}
 
 export type UMGetMonitorChartsResolver = UMResolver<
   any | Promise<any>,
   any,
-  UMMonitorChartsArgs,
+  GetMonitorChartsDataQueryArgs,
   UMContext
 >;
-
-interface UMGetFilterBarArgs {
-  dateRangeStart: number;
-  dateRangeEnd: number;
-}
 
 export type UMGetFilterBarResolver = UMResolver<
   any | Promise<any>,
   any,
-  UMGetFilterBarArgs,
+  GetFilterBarQueryArgs,
   UMContext
 >;
-
-interface UMGetErrorsList {
-  dateRangeStart: number;
-  dateRangeEnd: number;
-  filters?: string;
-}
 
 export type UMGetErrorsListResolver = UMResolver<
   any | Promise<any>,
   any,
-  UMGetErrorsList,
+  GetErrorsListQueryArgs,
   UMContext
 >;
 
@@ -118,7 +90,8 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
     ): Promise<any> {
       const { up, down, trouble } = await libs.monitors.getSnapshotCount(
         req,
-        { dateRangeStart, dateRangeEnd },
+        dateRangeStart,
+        dateRangeEnd,
         downCount,
         windowSize,
         filters
@@ -130,7 +103,7 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
         // @ts-ignore TODO update typings and remove this comment
         trouble,
         total: up + down + trouble,
-        histogram: await libs.pings.getHist(req, { dateRangeStart, dateRangeEnd }, filters),
+        histogram: await libs.pings.getPingHistogram(req, dateRangeStart, dateRangeEnd, filters),
       };
     },
     async getMonitorChartsData(
