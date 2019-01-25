@@ -28,7 +28,12 @@ export async function buildAll(styleSheets, log, buildDir) {
       return;
     }
 
-    const bundle = new Build(styleSheet.localPath, log, resolve(buildDir, styleSheet.publicPath));
+    const bundle = new Build({
+      sourcePath: styleSheet.localPath,
+      log,
+      theme: styleSheet.theme,
+      targetPath: resolve(buildDir, styleSheet.publicPath),
+    });
     await bundle.build();
 
     return bundle;

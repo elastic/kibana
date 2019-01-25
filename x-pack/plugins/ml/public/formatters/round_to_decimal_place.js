@@ -4,4 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { MonitorSelect } from './monitor_select';
+
+export function roundToDecimalPlace(num, dp = 2) {
+  if (Math.abs(num) < Math.pow(10, -dp)) {
+    return Number.parseFloat(num).toExponential(2);
+  } else {
+    const m = Math.pow(10, dp);
+    return Math.round(num * m) / m;
+  }
+}

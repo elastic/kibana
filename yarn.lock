@@ -21230,11 +21230,6 @@ ts-node@^7.0.1:
     source-map-support "^0.5.6"
     yn "^2.0.0"
 
-ts-optchain@^0.1.1:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/ts-optchain/-/ts-optchain-0.1.1.tgz#9d45e2c3fc6201c2f9be82edad4c76fefb2a36d9"
-  integrity sha512-WWNaATI+rtNm6C3550HbLzvu32zIg0I0gBkvJZpOQnyeGIoGxg2RZOt96U7bi90ZlQ7bFiI5PCRaXScv4+4Y4A==
-
 tslib@1.9.3, tslib@^1.7.1, tslib@^1.8.0, tslib@^1.8.1, tslib@^1.9.0, tslib@^1.9.3:
   version "1.9.3"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.9.3.tgz#d7e4dd79245d85428c4d7e4822a79917954ca286"
