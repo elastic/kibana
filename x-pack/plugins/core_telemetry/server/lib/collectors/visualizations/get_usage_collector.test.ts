@@ -5,7 +5,7 @@
  */
 
 import sinon from 'sinon';
-import { IHapiServer } from '../../../../';
+import { HapiServer } from '../../../../';
 import {
   getMockCallWithInternal,
   getMockKbnServer,
@@ -14,7 +14,7 @@ import {
 import { getUsageCollector } from './get_usage_collector';
 
 describe('getVisualizationsCollector#fetch', () => {
-  let mockKbnServer: IHapiServer;
+  let mockKbnServer: HapiServer;
 
   beforeEach(() => {
     mockKbnServer = getMockKbnServer(getMockCallWithInternal(), getMockTaskFetch());

@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import { IHapiServer, ITaskInstance } from '../../../../';
+import { HapiServer, TaskInstance } from '../../../../';
 import {
   getMockCallWithInternal,
   getMockKbnServer,
@@ -14,8 +14,8 @@ import {
 import { visualizationsTaskRunner } from './task_runner';
 
 describe('visualizationsTaskRunner', () => {
-  let mockTaskInstance: ITaskInstance;
-  let mockKbnServer: IHapiServer;
+  let mockTaskInstance: TaskInstance;
+  let mockKbnServer: HapiServer;
   beforeEach(() => {
     mockTaskInstance = getMockTaskInstance();
     mockKbnServer = getMockKbnServer();

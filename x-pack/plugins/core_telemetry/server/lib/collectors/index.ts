@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IHapiServer } from '../../../';
+import { HapiServer } from '../../../';
 import { getUsageCollector } from './visualizations/get_usage_collector';
 
-export function registerCollectors(server: IHapiServer) {
+export function registerCollectors(server: HapiServer) {
   getUsageCollector(server);
 }

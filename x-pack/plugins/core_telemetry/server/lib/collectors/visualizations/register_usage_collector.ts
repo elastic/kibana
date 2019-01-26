@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IHapiServer } from '../../../../';
+import { HapiServer } from '../../../../';
 import { getUsageCollector } from './get_usage_collector';
 
-export function getVisualizationsCollector(server: IHapiServer): void {
+export function getVisualizationsCollector(server: HapiServer): void {
   const { usage } = server;
   const collector = usage.collectorSet.makeUsageCollector(getUsageCollector(server));
   server.usage.collectorSet.register(collector);

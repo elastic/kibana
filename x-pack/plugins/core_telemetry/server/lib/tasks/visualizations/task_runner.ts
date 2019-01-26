@@ -7,15 +7,15 @@
 import _, { countBy, groupBy } from 'lodash';
 import moment from 'moment';
 import {
-  IESQueryResponse,
-  IHapiServer,
-  ISavedObjectDoc,
-  ITaskInstance,
-  IVisState,
-  IVisualization,
+  ESQueryResponse,
+  HapiServer,
+  SavedObjectDoc,
+  TaskInstance,
+  VisState,
+  Visualization,
 } from '../../../../';
 
-interface IVisSummary {
+interface VisSummary {
   type: string;
   space: string;
 }
@@ -35,18 +35,18 @@ async function getStats(callCluster: (method: string, params: any) => Promise<an
       },
     },
   };
-  const esResponse: IESQueryResponse = await callCluster('search', searchParams);
+  const esResponse: ESQueryResponse = await callCluster('search', searchParams);
   const size = _.get(esResponse, 'hits.hits.length');
   if (size < 1) {
     return;
   }
 
   // `map` to get the raw types
-  const visSummaries: IVisSummary[] = esResponse.hits.hits.map((hit: ISavedObjectDoc) => {
+  const visSummaries: VisSummary[] = esResponse.hits.hits.map((hit: SavedObjectDoc) => {
     const spacePhrases: string[] = hit._id.split(':');
     const space = spacePhrases.length === 3 ? spacePhrases[0] : 'default'; // if in a custom space, the format of a saved object ID is space:type:id
-    const visualization: IVisualization = _.get(hit, '_source.visualization', { visState: '{}' });
-    const visState: IVisState = JSON.parse(visualization.visState);
+    const visualization: Visualization = _.get(hit, '_source.visualization', { visState: '{}' });
+    const visState: VisState = JSON.parse(visualization.visState);
 
     return {
       type: visState.type || '_na_',
@@ -76,8 +76,8 @@ async function getStats(callCluster: (method: string, params: any) => Promise<an
 }
 
 export function visualizationsTaskRunner(
-  taskInstance: ITaskInstance,
-  kbnServer: { server: IHapiServer }
+  taskInstance: TaskInstance,
+  kbnServer: { server: HapiServer }
 ) {
   const { server } = kbnServer;
   const { callWithInternalUser: callCluster } = server.plugins.elasticsearch.getCluster('data');

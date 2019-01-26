@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IESQueryResponse, IHapiServer, ISavedObjectDoc, ITaskInstance } from '../';
+import { ESQueryResponse, HapiServer, SavedObjectDoc, TaskInstance } from '../';
 
-export const getMockTaskInstance = (): ITaskInstance => ({ state: { runs: 0, stats: {} } });
+export const getMockTaskInstance = (): TaskInstance => ({ state: { runs: 0, stats: {} } });
 
 const defaultMockSavedObjects = [
   {
@@ -20,20 +20,20 @@ const defaultMockSavedObjects = [
 
 const defaultMockTaskDocs = [getMockTaskInstance()];
 
-export const getMockCallWithInternal = (hits: ISavedObjectDoc[] = defaultMockSavedObjects) => {
-  return (): Promise<IESQueryResponse> => {
+export const getMockCallWithInternal = (hits: SavedObjectDoc[] = defaultMockSavedObjects) => {
+  return (): Promise<ESQueryResponse> => {
     return Promise.resolve({ hits: { hits } });
   };
 };
 
-export const getMockTaskFetch = (docs: ITaskInstance[] = defaultMockTaskDocs) => {
+export const getMockTaskFetch = (docs: TaskInstance[] = defaultMockTaskDocs) => {
   return () => Promise.resolve({ docs });
 };
 
 export const getMockKbnServer = (
   mockCallWithInternal = getMockCallWithInternal(),
   mockTaskFetch = getMockTaskFetch()
-): IHapiServer => ({
+): HapiServer => ({
   taskManager: {
     registerTaskDefinitions: (opts: any) => undefined,
     schedule: (opts: any) => Promise.resolve(),

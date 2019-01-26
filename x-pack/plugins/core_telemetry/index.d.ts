@@ -4,29 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface IVisState {
+export interface VisState {
   type: string;
 }
 
-export interface IVisualization {
+export interface Visualization {
   visState: string;
 }
 
-export interface ISavedObjectDoc {
+export interface SavedObjectDoc {
   _id: string;
   _source: {
-    visualization: IVisualization;
+    visualization: Visualization;
     type: 'visualization';
   };
 }
 
-export interface IESQueryResponse {
+export interface ESQueryResponse {
   hits: {
-    hits: ISavedObjectDoc[];
+    hits: SavedObjectDoc[];
   };
 }
 
-export interface ITaskInstance {
+export interface TaskInstance {
   state: {
     runs: number;
     stats: any;
@@ -34,14 +34,14 @@ export interface ITaskInstance {
   error?: any;
 }
 
-export interface IHapiServer {
+export interface HapiServer {
   taskManager: {
     registerTaskDefinitions: (opts: any) => void;
     schedule: (opts: any) => Promise<void>;
     fetch: (
       opts: any
     ) => Promise<{
-      docs: ITaskInstance[];
+      docs: TaskInstance[];
     }>;
   };
   plugins: {
@@ -50,7 +50,7 @@ export interface IHapiServer {
       getCluster: (
         cluster: string
       ) => {
-        callWithInternalUser: () => Promise<IESQueryResponse>;
+        callWithInternalUser: () => Promise<ESQueryResponse>;
       };
     };
   };

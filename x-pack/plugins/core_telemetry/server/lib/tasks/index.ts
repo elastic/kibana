@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IHapiServer } from '../../../';
+import { HapiServer } from '../../../';
 import { PLUGIN_ID, VIS_TELEMETRY_TASK } from '../../../constants';
 import { visualizationsTaskRunner } from './visualizations/task_runner';
 
-export function registerTasks(server: IHapiServer) {
+export function registerTasks(server: HapiServer) {
   const { taskManager } = server;
 
   taskManager.registerTaskDefinitions({
@@ -25,7 +25,7 @@ export function registerTasks(server: IHapiServer) {
   });
 }
 
-export function scheduleTasks(server: IHapiServer) {
+export function scheduleTasks(server: HapiServer) {
   const { taskManager } = server;
   const { kbnServer } = server.plugins.xpack_main.status.plugin;
 
