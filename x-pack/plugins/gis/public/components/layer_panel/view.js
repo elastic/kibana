@@ -135,16 +135,19 @@ export class LayerPanel  extends React.Component {
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiAccordion
-            id="accordion1"
-            buttonContent="Source details"
-          >
-            <EuiText color="subdued" size="s">
-              <div className="gisLayerDetails">
-                {this._renderSourceProperties()}
-              </div>
-            </EuiText>
-          </EuiAccordion>
+          <div className="gisLayerPanel__sourceDetails">
+            <EuiAccordion
+              id="accordion1"
+              buttonContent="Source details"
+            >
+              <EuiText color="subdued" size="s">
+                <div className="gisLayerDetails">
+                  <EuiSpacer size="s" />
+                  {this._renderSourceProperties()}
+                </div>
+              </EuiText>
+            </EuiAccordion>
+          </div>
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody className="gisLayerPanel__body">
