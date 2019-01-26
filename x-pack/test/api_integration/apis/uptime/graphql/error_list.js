@@ -19,7 +19,7 @@ export default function ({ getService }) {
       const getErrorListQuery = {
         operationName: 'ErrorList',
         query: getErrorListQueryString,
-        variables: { dateRangeStart: 1547805782000, dateRangeEnd: 1547852582000 },
+        variables: { dateRangeStart: '2019-01-26T04:30:54.740Z', dateRangeEnd: '2019-01-26T04:50:54.740Z' },
       };
       const {
         body: { data },
