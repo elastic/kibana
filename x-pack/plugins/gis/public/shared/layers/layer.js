@@ -11,10 +11,10 @@ import { DataRequest } from './util/data_request';
 const SOURCE_UPDATE_REQUIRED = true;
 const NO_SOURCE_UPDATE_REQUIRED = false;
 
-export class ALayer {
+export class AbstractLayer {
 
   constructor({ layerDescriptor, source, style }) {
-    this._descriptor = ALayer.createDescriptor(layerDescriptor);
+    this._descriptor = AbstractLayer.createDescriptor(layerDescriptor);
     this._source = source;
     this._style = style;
 
@@ -39,9 +39,9 @@ export class ALayer {
     layerDescriptor.minZoom = _.get(options, 'minZoom', 0);
     layerDescriptor.maxZoom = _.get(options, 'maxZoom', 24);
     layerDescriptor.alpha = _.get(options, 'alpha', 0.75);
-    layerDescriptor.visible = options.visible || true;
-    layerDescriptor.temporary = options.temporary || false;
-    layerDescriptor.style = options.style || {};
+    layerDescriptor.visible = _.get(options, 'visible', true);
+    layerDescriptor.temporary = _.get(options, 'temporary', false);
+    layerDescriptor.style = _.get(options, 'style',  {});
     return layerDescriptor;
   }
 
@@ -199,6 +199,20 @@ export class ALayer {
     return doesPreviousBufferContainNewBuffer && !isTrimmed
       ? NO_SOURCE_UPDATE_REQUIRED
       : SOURCE_UPDATE_REQUIRED;
+  }
+
+  getLayerTypeIconName() {
+    throw new Error('should implement Layer#getLayerTypeIconName');
+  }
+
+
+  async getBounds() {
+    return {
+      min_lon: -180,
+      max_lon: 180,
+      min_lat: -89,
+      max_lat: 89
+    };
   }
 
   renderStyleEditor(style, options) {

@@ -121,9 +121,8 @@ export function map(state = INITIAL_STATE, action) {
       return {
         ...state,
         goto: {
-          lat: action.lat,
-          lon: action.lon,
-          zoom: action.zoom,
+          center: action.center,
+          bounds: action.bounds
         }
       };
     case CLEAR_GOTO:
