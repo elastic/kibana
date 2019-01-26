@@ -7,11 +7,13 @@
 import { EuiSpacer } from '@elastic/eui';
 import React, { Fragment } from 'react';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
-import { EmptyStateQuery } from '../components/queries/empty_state';
-import { ErrorListQuery } from '../components/queries/error_list';
-import { FilterBarQuery } from '../components/queries/filter_bar';
-import { MonitorListQuery } from '../components/queries/monitor_list';
-import { SnapshotQuery } from '../components/queries/snapshot';
+import {
+  EmptyStateQuery,
+  ErrorListQuery,
+  FilterBarQuery,
+  MonitorListQuery,
+  SnapshotQuery,
+} from '../components/queries';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeCommonProps } from '../uptime_app';
 

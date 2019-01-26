@@ -41,6 +41,13 @@ function title(statuses) {
           defaultMessage="Error reading file"
         />
       );
+    case statuses.parseJSONStatus:
+      return (
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.importErrors.parsingJSONErrorMessage"
+          defaultMessage="Error parsing JSON"
+        />
+      );
     case statuses.indexCreatedStatus:
       return (
         <FormattedMessage

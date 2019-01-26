@@ -13,10 +13,6 @@ import { getMonitorListQueryString } from '../../../../../plugins/uptime/public/
 export default function ({ getService }) {
   describe('monitorList query', () => {
     const supertest = getService('supertest');
-    const esArchiver = getService('esArchiver');
-    const archive = 'uptime/full_heartbeat';
-    before('load heartbeat data', () => esArchiver.load(archive));
-    after('unload heartbeat index', () => esArchiver.unload(archive));
 
     it('will fetch a list of all the monitors', async () => {
       const getMonitorListQuery = {

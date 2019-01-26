@@ -20,7 +20,7 @@ interface MonitorSelectProps {
 
 type Props = MonitorSelectProps & UptimeCommonProps;
 
-export const MonitorSelect = ({
+export const MonitorSelectQuery = ({
   dateRangeStart,
   dateRangeEnd,
   valueOfSelectedMonitor,

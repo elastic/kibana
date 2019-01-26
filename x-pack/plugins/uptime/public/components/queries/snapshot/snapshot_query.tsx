@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { UptimeCommonProps } from '../../../uptime_app';
-import { Snapshot as FuncComponent } from '../../functional';
+import { Snapshot } from '../../functional';
 import { getSnapshotQuery } from './get_snapshot';
 
 interface SnapshotProps {
@@ -43,7 +43,7 @@ export const SnapshotQuery = ({
       }
       const { snapshot } = data;
 
-      return <FuncComponent snapshot={snapshot} />;
+      return <Snapshot snapshot={snapshot} />;
     }}
   </Query>
 );

@@ -4,8 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
+export default function ({ getService, loadTestFile }) {
+  const esArchiver = getService('esArchiver');
+  const archive = 'uptime/full_heartbeat';
+
   describe('graphql queries', () => {
+    before('load heartbeat data', () => esArchiver.load(archive));
+    after('unload heartbeat index', () => esArchiver.unload(archive));
     // each of these test files imports a GQL query from
     // the uptime app and runs it against the live HTTP server,
     // verifying the pre-loaded documents are returned in a way that

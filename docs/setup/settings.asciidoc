@@ -202,3 +202,7 @@ Specify the position of the subdomain the URL with the token `{s}`.
 unauthenticated users to access the Kibana server status API and status page.
 
 `vega.enableExternalUrls:`:: *Default: false* Set this value to true to allow Vega to use any URL to access external data sources and images. If false, Vega can only get data from Elasticsearch.
+
+`rollup.enabled:`:: *Default: true* Set this value to false to disable the Rollup user interface.
+
+`license_management.enabled`:: *Default: true* Set this value to false to disable the License Management user interface.

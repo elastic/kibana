@@ -11,10 +11,6 @@ import docCount from './fixtures/doc_count';
 export default function ({ getService }) {
   describe('docCount query', () => {
     const supertest = getService('supertest');
-    const esArchiver = getService('esArchiver');
-    const archive = 'uptime/full_heartbeat';
-    before('load heartbeat data', () => esArchiver.load(archive));
-    after('unload heartbeat index', () => esArchiver.unload(archive));
 
     it(`will fetch the index's count`, async () => {
       const getDocCountQuery = {
