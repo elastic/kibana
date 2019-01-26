@@ -12,6 +12,7 @@ import {
 } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React from 'react';
+import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 import chrome from 'ui/chrome';
@@ -35,6 +36,7 @@ import { KpiEventsQuery } from '../../containers/kpi_events';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
 import { KpiItem } from '../../graphql/types';
+import { hostsSelectors, State } from '../../store';
 import * as i18n from './translations';
 
 const basePath = chrome.getBasePath();
@@ -45,7 +47,13 @@ const EventsTableManage = manageQuery(EventsTable);
 const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
 const TypesBarManage = manageQuery(TypesBar);
 
-export const Hosts = pure(() => (
+interface HostsComponentReduxProps {
+  filterQuery: string;
+}
+
+type HostsComponentProps = HostsComponentReduxProps;
+
+const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
   <WithSource sourceId="default">
     {({ auditbeatIndicesExist, indexPattern }) =>
       indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
@@ -82,7 +90,13 @@ export const Hosts = pure(() => (
               <GlobalTime>
                 {({ poll, to, from, setQuery }) => (
                   <>
-                    <KpiEventsQuery sourceId="default" startDate={from} endDate={to} poll={poll}>
+                    <KpiEventsQuery
+                      endDate={to}
+                      filterQuery={filterQuery}
+                      poll={poll}
+                      sourceId="default"
+                      startDate={from}
+                    >
                       {({ kpiEventType, loading, id, refetch }) => (
                         <TypesBarManage
                           id={id}
@@ -97,10 +111,11 @@ export const Hosts = pure(() => (
                       )}
                     </KpiEventsQuery>
                     <HostsQuery
+                      endDate={to}
+                      filterQuery={filterQuery}
                       query={HostsTableQuery}
                       sourceId="default"
                       startDate={from}
-                      endDate={to}
                       poll={poll}
                     >
                       {({ hosts, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
@@ -118,11 +133,12 @@ export const Hosts = pure(() => (
                       )}
                     </HostsQuery>
                     <UncommonProcessesQuery
+                      cursor={null}
+                      endDate={to}
+                      filterQuery={filterQuery}
+                      poll={poll}
                       sourceId="default"
                       startDate={from}
-                      endDate={to}
-                      poll={poll}
-                      cursor={null}
                     >
                       {({
                         uncommonProcesses,
@@ -148,10 +164,11 @@ export const Hosts = pure(() => (
                       )}
                     </UncommonProcessesQuery>
                     <AuthenticationsQuery
+                      endDate={to}
+                      filterQuery={filterQuery}
+                      poll={poll}
                       sourceId="default"
                       startDate={from}
-                      endDate={to}
-                      poll={poll}
                     >
                       {({
                         authentications,
@@ -176,7 +193,13 @@ export const Hosts = pure(() => (
                         />
                       )}
                     </AuthenticationsQuery>
-                    <EventsQuery sourceId="default" startDate={from} endDate={to} poll={poll}>
+                    <EventsQuery
+                      endDate={to}
+                      filterQuery={filterQuery}
+                      poll={poll}
+                      sourceId="default"
+                      startDate={from}
+                    >
                       {({ events, loading, id, refetch, totalCount, pageInfo, loadMore }) => (
                         <EventsTableManage
                           id={id}
@@ -210,6 +233,11 @@ export const Hosts = pure(() => (
     }
   </WithSource>
 ));
+
+const mapStateToProps = (state: State) => ({ filterQuery:  hostsSelectors.hostsFilterQueryAsJson(state) || ''});
+};
+
+export const Hosts = connect(mapStateToProps)(HostsComponent);
 
 const PageContent = styled(EuiPageContent)`
   margin-top: 116px;
