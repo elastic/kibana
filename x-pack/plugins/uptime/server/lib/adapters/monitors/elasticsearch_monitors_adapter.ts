@@ -354,7 +354,9 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
           port: {
             terms: {
               field: 'url.port',
-              _key: 'asc',
+              order: {
+                _key: 'asc',
+              },
             },
           },
           scheme: {

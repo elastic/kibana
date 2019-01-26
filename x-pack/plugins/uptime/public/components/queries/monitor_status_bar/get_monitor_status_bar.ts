@@ -8,22 +8,21 @@ import gql from 'graphql-tag';
 
 export const getMonitorStatusBarQueryString = `
 query MonitorStatus($dateRangeStart: String!, $dateRangeEnd: String!, $monitorId: String) {
-    monitorStatus: getLatestMonitors(
-      dateRangeStart: $dateRangeStart
-      dateRangeEnd: $dateRangeEnd
-      monitorId: $monitorId
-    ) {
-      timestamp
-      millisFromNow
-      monitor {
-        status
-        duration {
-          us
-        }
+  monitorStatus: getLatestMonitors(
+    dateRangeStart: $dateRangeStart
+    dateRangeEnd: $dateRangeEnd
+    monitorId: $monitorId
+  ) {
+    timestamp
+    millisFromNow
+    monitor {
+      status
+      duration {
+        us
       }
-      url {
-        full
-      }
+    }
+    url {
+      full
     }
   }
 }
