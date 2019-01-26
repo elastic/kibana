@@ -2,11 +2,19 @@
   "errorList": [
     {
       "latestMessage": "Get http://localhost:12349/: dial tcp 127.0.0.1:12349: connect: connection refused",
-      "monitorId": "http@http://localhost:12349/",
+      "monitorId": "auto-http-0XE929FD0451F4DA95",
       "type": "io",
-      "count": 6,
+      "count": 258,
       "statusCode": null,
-      "timestamp": "2019-01-18T22:11:18.387Z"
+      "timestamp": "2019-01-26T04:50:49.739Z"
+    },
+    {
+      "latestMessage": "received status code 301 expecting 200",
+      "monitorId": "auto-http-0XE929FD0451F4DA95",
+      "type": "validate",
+      "count": 166,
+      "statusCode": "301",
+      "timestamp": "2019-01-26T04:50:49.739Z"
     }
   ]
 }
