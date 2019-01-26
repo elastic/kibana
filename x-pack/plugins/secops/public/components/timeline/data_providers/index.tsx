@@ -43,7 +43,7 @@ const DropTargetDataProviders = styled.div`
   padding: 0px;
   min-height: 100px;
   overflow-y: auto;
-  background-color: ${props => props.theme.eui.euiColorLightestShade};
+  background-color: ${props => props.theme.eui.euiFormBackgroundColor};
 `;
 
 const getDroppableId = (id: string): string => `${droppableTimelineProvidersPrefix}${id}`;

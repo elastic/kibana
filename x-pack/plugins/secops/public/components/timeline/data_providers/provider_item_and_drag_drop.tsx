@@ -18,15 +18,15 @@ import { DataProvider } from './data_provider';
 import { ProviderItemAndPopover } from './provider_item_and_popover';
 
 const DropAndTargetDataProviders = styled.div<{ hasAndItem: boolean }>`
-  border: 0.1rem dashed #999999;
+  border: 0.1rem dashed ${props => props.theme.eui.euiColorMediumShade};
   border-radius: 5px;
   text-align: center;
   padding: 2px 3px;
-  ${({ hasAndItem }) =>
-    hasAndItem
+  ${props =>
+    props.hasAndItem
       ? `&:hover {
     transition: background-color 0.7s ease;
-    background-color: rgb(52, 55, 65);
+    background-color: ${props.theme.eui.euiColorDarkestShade};
   }`
       : ''};
   cursor: ${({ hasAndItem }) => (!hasAndItem ? `default` : 'inherit')};

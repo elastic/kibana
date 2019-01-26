@@ -20,7 +20,7 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean }>`
   height: 100%;
   .flyout-overlay {
     .euiPanel {
-      background-color: ${props => props.theme.eui.euiColorLightestShade};
+      background-color: ${props => props.theme.eui.euiFormBackgroundColor};
     }
   }
   ${props =>
@@ -38,7 +38,7 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean }>`
       }
     }
   > div.timeline-drop-area {
-    background-color: ${props.theme.eui.euiColorMediumShade};
+    background-color: ${props.theme.eui.euiColorLightShade};
     .provider-item-filter-container div:first-child{
       /// Overwride dragNdrop beautifull so we do not have our droppable moving around for no good reason
       transform: none !important;
@@ -46,7 +46,7 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean }>`
   }
   .flyout-overlay {
     .euiPanel {
-      background-color: ${props.theme.eui.euiColorMediumShade};
+      background-color: ${props.theme.eui.euiColorLightShade};
     }
     + div {
       // Overwride dragNdrop beautifull so we do not have our droppable moving around for no good reason
