@@ -7,14 +7,7 @@
 import { createSelector } from 'reselect';
 
 import { State } from '../../reducer';
-import { NotesById, Theme } from './model';
-
-const selectTheme = (state: State): Theme => state.local.app.theme;
-
-export const themeSelector = createSelector(
-  selectTheme,
-  theme => theme
-);
+import { NotesById } from './model';
 
 const selectNotesById = (state: State): NotesById => state.local.app.notesById;
 

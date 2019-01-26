@@ -30,7 +30,6 @@ describe('DataProviders', () => {
             onToggleDataProviderEnabled={noop}
             onToggleDataProviderExcluded={noop}
             show={true}
-            theme="dark"
           />
         </DragDropContext>
       );
@@ -50,7 +49,6 @@ describe('DataProviders', () => {
             onToggleDataProviderEnabled={noop}
             onToggleDataProviderExcluded={noop}
             show={true}
-            theme="dark"
           />
         </DragDropContext>
       );
@@ -70,7 +68,6 @@ describe('DataProviders', () => {
             onToggleDataProviderEnabled={noop}
             onToggleDataProviderExcluded={noop}
             show={true}
-            theme="dark"
           />
         </DragDropContext>
       );

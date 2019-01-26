@@ -13,8 +13,6 @@ import styled from 'styled-components';
 
 import { ActionCreator } from 'typescript-fsa';
 import { State, timelineActions } from '../../store';
-import { themeSelector } from '../../store/local/app';
-import { Theme } from '../../store/local/app/model';
 import { timelineByIdSelector } from '../../store/selectors';
 import { defaultWidth } from '../timeline/body';
 import { DataProvider } from '../timeline/data_providers/data_provider';
@@ -66,7 +64,6 @@ interface DispatchProps {
 interface StateReduxProps {
   dataProviders?: DataProvider[];
   show?: boolean;
-  theme?: Theme;
   width?: number;
 }
 
@@ -81,7 +78,6 @@ export const FlyoutComponent = pure<Props>(
     show,
     showTimeline,
     timelineId,
-    theme,
     width,
   }) => (
     <>
@@ -99,7 +95,6 @@ export const FlyoutComponent = pure<Props>(
       <FlyoutButton
         dataProviders={dataProviders!}
         show={!show}
-        theme={theme!}
         timelineId={timelineId}
         onOpen={() => showTimeline!({ id: timelineId, show: true })}
       />
@@ -111,10 +106,9 @@ const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
   const timelineById = defaultTo({}, timelineByIdSelector(state));
   const dataProviders = getOr([], `${timelineId}.dataProviders`, timelineById);
   const show = getOr('false', `${timelineId}.show`, timelineById);
-  const theme = defaultTo('dark', themeSelector(state));
   const width = getOr(defaultWidth, `${timelineId}.width`, timelineById);
 
-  return { dataProviders, show, theme, width };
+  return { dataProviders, show, width };
 };
 
 export const Flyout = connect(

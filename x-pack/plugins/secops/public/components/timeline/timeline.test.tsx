@@ -117,7 +117,6 @@ describe('Timeline', () => {
                   rowRenderers={rowRenderers}
                   show={true}
                   sort={sort}
-                  theme="dark"
                   indexPattern={indexPattern}
                 />
               </MockedProvider>
@@ -157,7 +156,6 @@ describe('Timeline', () => {
                   rowRenderers={rowRenderers}
                   show={true}
                   sort={sort}
-                  theme="dark"
                   indexPattern={indexPattern}
                 />
               </MockedProvider>
@@ -197,7 +195,6 @@ describe('Timeline', () => {
                   rowRenderers={rowRenderers}
                   show={true}
                   sort={sort}
-                  theme="dark"
                   indexPattern={indexPattern}
                 />
               </MockedProvider>
@@ -242,7 +239,6 @@ describe('Timeline', () => {
                     rowRenderers={rowRenderers}
                     show={true}
                     sort={sort}
-                    theme="dark"
                     indexPattern={indexPattern}
                   />
                 </MockedProvider>
@@ -294,7 +290,6 @@ describe('Timeline', () => {
                     rowRenderers={rowRenderers}
                     show={true}
                     sort={sort}
-                    theme="dark"
                     indexPattern={indexPattern}
                   />
                 </MockedProvider>
@@ -341,7 +336,6 @@ describe('Timeline', () => {
                     rowRenderers={rowRenderers}
                     show={true}
                     sort={sort}
-                    theme="dark"
                     indexPattern={indexPattern}
                   />
                 </MockedProvider>
@@ -403,7 +397,6 @@ describe('Timeline', () => {
                     rowRenderers={rowRenderers}
                     show={true}
                     sort={sort}
-                    theme="dark"
                     indexPattern={indexPattern}
                   />
                 </MockedProvider>
@@ -461,7 +454,6 @@ describe('Timeline', () => {
                     rowRenderers={rowRenderers}
                     show={true}
                     sort={sort}
-                    theme="dark"
                     indexPattern={indexPattern}
                   />
                 </MockedProvider>
@@ -526,7 +518,6 @@ describe('Timeline', () => {
                     rowRenderers={rowRenderers}
                     show={true}
                     sort={sort}
-                    theme="dark"
                     indexPattern={indexPattern}
                   />
                 </MockedProvider>
@@ -592,7 +583,6 @@ describe('Timeline', () => {
                     rowRenderers={rowRenderers}
                     show={true}
                     sort={sort}
-                    theme="dark"
                     indexPattern={indexPattern}
                   />
                 </MockedProvider>
@@ -646,7 +636,6 @@ describe('Timeline', () => {
                     rowRenderers={rowRenderers}
                     show={true}
                     sort={sort}
-                    theme="dark"
                     indexPattern={indexPattern}
                   />
                 </MockedProvider>
@@ -708,7 +697,6 @@ describe('Timeline', () => {
                     rowRenderers={rowRenderers}
                     show={true}
                     sort={sort}
-                    theme="dark"
                     indexPattern={indexPattern}
                   />
                 </MockedProvider>
@@ -774,7 +762,6 @@ describe('Timeline', () => {
                     rowRenderers={rowRenderers}
                     show={true}
                     sort={sort}
-                    theme="dark"
                     indexPattern={indexPattern}
                   />
                 </MockedProvider>

@@ -9,16 +9,13 @@ import {
   EuiFlexItem,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
   EuiPageHeader,
   EuiPageHeaderSection,
   // @ts-ignore
   EuiSearchBar,
 } from '@elastic/eui';
 
-import { defaultTo } from 'lodash/fp';
 import * as React from 'react';
-import { connect } from 'react-redux';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { pure } from 'recompose';
 import { Dispatch } from 'redux';
@@ -34,9 +31,6 @@ import { Navigation } from '../../components/page/navigation';
 import { RangeDatePicker } from '../../components/range_date_picker';
 import { StatefulTimeline } from '../../components/timeline';
 import { headers } from '../../components/timeline/body/column_headers/headers';
-import { themeSelector } from '../../store/local/app';
-import { Theme } from '../../store/local/app/model';
-import { State } from '../../store/reducer';
 import { NotFoundPage } from '../404';
 import { HostsContainer } from '../hosts';
 import { Network } from '../network';
@@ -44,7 +38,6 @@ import { Overview } from '../overview';
 
 interface Props {
   dispatch: Dispatch;
-  theme?: Theme;
 }
 
 const WrappedByAutoSizer = styled.div`
@@ -68,7 +61,7 @@ const calculateFlyoutHeight = ({
   windowHeight: number;
 }): number => Math.max(0, windowHeight - (globalHeaderSize + additionalFlyoutPadding));
 
-const HomePageComponent = pure<Props>(() => (
+export const HomePage = pure<Props>(() => (
   <AutoSizer detectAnyWindowResize={true} content>
     {({ measureRef, windowMeasurement: { height: windowHeight = 0 } }) => (
       <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" innerRef={measureRef}>
@@ -114,16 +107,14 @@ const HomePageComponent = pure<Props>(() => (
                   </EuiFlexGroup>
                 </PageHeaderSection>
               </PageHeader>
-              <PageContent data-test-subj="pageContent" panelPaddingSize="none">
-                <Switch>
-                  <Redirect from="/" exact={true} to="/overview" />
-                  <Route path="/overview" component={Overview} />
-                  <Route path="/hosts" component={HostsContainer} />
-                  <Route path="/network" component={Network} />
-                  <Route path="/link-to" component={LinkToPage} />
-                  <Route component={NotFoundPage} />
-                </Switch>
-              </PageContent>
+              <Switch>
+                <Redirect from="/" exact={true} to="/overview" />
+                <Route path="/overview" component={Overview} />
+                <Route path="/hosts" component={HostsContainer} />
+                <Route path="/network" component={Network} />
+                <Route path="/link-to" component={LinkToPage} />
+                <Route component={NotFoundPage} />
+              </Switch>
             </EuiPageBody>
           </DragDropContextWrapper>
         </Page>
@@ -131,12 +122,6 @@ const HomePageComponent = pure<Props>(() => (
     )}
   </AutoSizer>
 ));
-
-const mapStateToProps = (state: State) => ({
-  theme: defaultTo('dark', themeSelector(state)),
-});
-
-export const HomePage = connect(mapStateToProps)(HomePageComponent);
 
 const Page = styled(EuiPage)`
   padding: 0px 16px 16px 16px;
@@ -147,15 +132,10 @@ const PageHeader = styled(EuiPageHeader)`
   position: fixed;
   width: calc(100% - 30px);
   z-index: 1;
-  padding: 6px 0px 15px 2px;
+  padding: 6px 0px 6px 0px;
   margin-bottom: 0px;
   margin-left: -1px;
   margin-top: -1px;
-`;
-
-const PageContent = styled(EuiPageContent)`
-  margin-top: 61px;
-  border-top: 0px solid white;
 `;
 
 const PageHeaderSection = styled(EuiPageHeaderSection)`

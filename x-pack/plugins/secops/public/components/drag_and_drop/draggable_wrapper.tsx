@@ -44,7 +44,7 @@ export const DragEffects = styled.div`
 const ProviderContainer = styled.div`
   &:hover {
     transition: background-color 0.7s ease;
-    background-color: #f0f8ff;
+    background-color: ${props => props.theme.eui.euiColorLightShade};
   }
 `;
 

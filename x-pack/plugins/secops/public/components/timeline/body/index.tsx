@@ -10,7 +10,6 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { Ecs } from '../../../graphql/types';
-import { Theme } from '../../../store/local/app/model';
 import { StatefulEventDetails } from '../../event_details/stateful_event_details';
 import { LazyAccordion } from '../../lazy_accordion';
 import { ColumnHeader } from './column_headers/column_header';
@@ -23,7 +22,6 @@ interface Props {
   height: number;
   id: string;
   rowRenderers: RowRenderer[];
-  theme: Theme;
 }
 
 const ScrollableArea = styled.div<{
@@ -56,12 +54,9 @@ const Cell = styled(EuiText)`
   overflow-wrap: break-word;
 `;
 
-const getBackgroundColor = (theme: Theme): string =>
-  theme === 'dark' ? 'rgb(63,63,63)' : '#F5F7FA';
-
-const TimeGutter = styled.span<{ themeName: Theme }>`
+const TimeGutter = styled.span`
   min-width: 50px;
-  background-color: ${({ themeName }) => getBackgroundColor(themeName)};
+  background-color: ${props => props.theme.eui.euiColorLightShade};
 `;
 
 const Pin = styled(EuiIcon)`
@@ -82,12 +77,10 @@ const ColumnRender = styled.div<{
   minwidth: string;
   maxwidth: string;
   index: number;
-  themeName: Theme;
 }>`
   max-width: ${props => props.minwidth};
   min-width: ${props => props.maxwidth};
-  background: ${({ index, themeName }) =>
-    index % 2 !== 0 ? getBackgroundColor(themeName) : 'inherit'};
+  background: ${props => (props.index % 2 !== 0 ? props.theme.eui.euiColorLightShade : 'inherit')};
   padding: 5px;
 `;
 
@@ -99,11 +92,11 @@ const ExpandableDetails = styled.div`
 
 /** Renders the timeline body */
 export const Body = pure<Props>(
-  ({ columnHeaders, columnRenderers, data, height, id, rowRenderers, theme }) => (
+  ({ columnHeaders, columnRenderers, data, height, id, rowRenderers }) => (
     <ScrollableArea height={height} data-test-subj="scrollableArea">
       {data.map(ecs => (
         <Row key={ecs._id!}>
-          <TimeGutter themeName={theme} />
+          <TimeGutter />
           {getRowRenderer(ecs, rowRenderers).renderRow(
             ecs,
             <>
@@ -117,7 +110,6 @@ export const Body = pure<Props>(
                       maxwidth={`${header.minWidth}px`}
                       minwidth={`${header.minWidth}px`}
                       index={index}
-                      themeName={theme}
                     >
                       <Cell size="xs">
                         {getColumnRenderer(header.id, columnRenderers, ecs).renderColumn(

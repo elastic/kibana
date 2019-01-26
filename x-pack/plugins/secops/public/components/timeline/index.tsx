@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultTo, noop } from 'lodash/fp';
+import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
 import { WithSource } from '../../containers/source';
 import { timelineActions } from '../../store';
-import { themeSelector } from '../../store/local/app';
-import { Theme } from '../../store/local/app/model';
 import { timelineDefaults } from '../../store/local/timeline/model';
 import { State } from '../../store/reducer';
 import { timelineByIdSelector } from '../../store/selectors';
@@ -48,7 +46,6 @@ interface StateReduxProps {
   range?: string;
   sort?: Sort;
   show?: boolean;
-  theme?: Theme;
 }
 
 interface DispatchProps {
@@ -131,7 +128,6 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
       removeProvider,
       show,
       sort,
-      theme,
       updateRange,
       updateSort,
       updateDataProviderEnabled,
@@ -197,7 +193,6 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
             rowRenderers={rowRenderers}
             show={show!}
             sort={sort!}
-            theme={theme!}
             indexPattern={indexPattern}
           />
         )}
@@ -210,9 +205,8 @@ const mapStateToProps = (state: State, { id }: OwnProps) => {
   const timeline = timelineByIdSelector(state)[id];
   const { dataProviders, sort, show, itemsPerPage, itemsPerPageOptions } =
     timeline || timelineDefaults;
-  const theme = defaultTo('dark', themeSelector(state));
 
-  return { id, dataProviders, sort, show, theme, itemsPerPage, itemsPerPageOptions };
+  return { id, dataProviders, sort, show, itemsPerPage, itemsPerPageOptions };
 };
 
 export const StatefulTimeline = connect(

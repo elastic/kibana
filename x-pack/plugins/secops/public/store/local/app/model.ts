@@ -6,12 +6,10 @@
 
 import { Note } from '../../../lib/note';
 
-export type Theme = 'light' | 'dark';
 export interface NotesById {
   [id: string]: Note;
 }
 
 export interface AppModel {
   notesById: NotesById;
-  theme: Theme;
 }

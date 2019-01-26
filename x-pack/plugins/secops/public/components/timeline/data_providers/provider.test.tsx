@@ -17,7 +17,7 @@ describe('Provider', () => {
     test('it renders the data provider', () => {
       const wrapper = mount(
         <DragDropContext onDragEnd={noop}>
-          <DroppableWrapper droppableId="unitTest" theme="dark">
+          <DroppableWrapper droppableId="unitTest">
             <Provider dataProvider={mockDataProviders[0]} />
           </DroppableWrapper>
         </DragDropContext>

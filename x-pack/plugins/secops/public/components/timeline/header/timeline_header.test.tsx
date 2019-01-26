@@ -48,7 +48,6 @@ describe('Header', () => {
                 columnId: 'timestamp',
                 sortDirection: Direction.descending,
               }}
-              theme="dark"
             />
           </DragDropContext>
         </ReduxStoreProvider>

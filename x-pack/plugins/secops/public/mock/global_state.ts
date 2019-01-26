@@ -12,7 +12,6 @@ export const mockGlobalState: State = {
   local: {
     app: {
       notesById: {},
-      theme: 'dark',
     },
     hosts: {
       query: {

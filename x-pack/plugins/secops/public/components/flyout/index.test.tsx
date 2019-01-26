@@ -355,7 +355,6 @@ describe('Flyout', () => {
             <FlyoutButton
               dataProviders={mockDataProviders}
               show={true}
-              theme="dark"
               timelineId="test"
               onOpen={openMock}
             />{' '}
@@ -373,7 +372,6 @@ describe('Flyout', () => {
             <FlyoutButton
               dataProviders={mockDataProviders}
               show={false}
-              theme="dark"
               timelineId="test"
               onOpen={openMock}
             />{' '}
@@ -391,7 +389,6 @@ describe('Flyout', () => {
             <FlyoutButton
               dataProviders={mockDataProviders}
               show={true}
-              theme="dark"
               timelineId="test"
               onOpen={openMock}
             />{' '}
@@ -414,7 +411,6 @@ describe('Flyout', () => {
             <FlyoutButton
               dataProviders={mockDataProviders}
               show={true}
-              theme="dark"
               timelineId="test"
               onOpen={openMock}
             />

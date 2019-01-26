@@ -109,9 +109,7 @@ const getEuiIconType = (suggestionType: string) => {
 
 interface EuiTheme {
   eui: {
-    default: {
-      [attribute: string]: string;
-    };
+    [attribute: string]: string;
   };
 }
 

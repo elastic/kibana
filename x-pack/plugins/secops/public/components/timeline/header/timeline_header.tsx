@@ -9,7 +9,6 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { Theme } from '../../../store/local/app/model';
 import { ColumnHeaders } from '../body/column_headers';
 import { ColumnHeader } from '../body/column_headers/column_header';
 import { Sort } from '../body/sort';
@@ -42,7 +41,6 @@ interface Props {
   range: string;
   show: boolean;
   sort: Sort;
-  theme: Theme;
 }
 
 const TimelineHeaderContainer = styled.div`
@@ -65,7 +63,6 @@ export const TimelineHeader = pure<Props>(
     range,
     show,
     sort,
-    theme,
   }) => (
     <TimelineHeaderContainer data-test-subj="timelineHeader">
       <DataProviders
@@ -77,11 +74,8 @@ export const TimelineHeader = pure<Props>(
         onToggleDataProviderEnabled={onToggleDataProviderEnabled}
         onToggleDataProviderExcluded={onToggleDataProviderExcluded}
         show={show}
-        theme={theme}
       />
-
       <StatefulSearchOrFilter timelineId={id} />
-
       <ColumnHeaders
         columnHeaders={columnHeaders}
         onColumnSorted={onColumnSorted}
@@ -90,7 +84,6 @@ export const TimelineHeader = pure<Props>(
         range={range}
         sort={sort}
       />
-
       <EuiHorizontalRule margin="xs" />
     </TimelineHeaderContainer>
   )

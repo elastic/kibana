@@ -17,7 +17,7 @@ describe('Providers', () => {
     test('it renders the data providers', () => {
       const wrapper = mount(
         <DragDropContext onDragEnd={noop}>
-          <DroppableWrapper droppableId="unitTest" theme="dark">
+          <DroppableWrapper droppableId="unitTest">
             <Providers
               id="foo"
               dataProviders={mockDataProviders}
@@ -45,7 +45,7 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <DragDropContext onDragEnd={noop}>
-          <DroppableWrapper droppableId="unitTest" theme="dark">
+          <DroppableWrapper droppableId="unitTest">
             <Providers
               id="foo"
               dataProviders={mockDataProviders}
@@ -71,7 +71,7 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <DragDropContext onDragEnd={noop}>
-          <DroppableWrapper droppableId="unitTest" theme="dark">
+          <DroppableWrapper droppableId="unitTest">
             <Providers
               id="foo"
               dataProviders={mockDataProviders}
@@ -114,7 +114,7 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <DragDropContext onDragEnd={noop}>
-          <DroppableWrapper droppableId="unitTest" theme="dark">
+          <DroppableWrapper droppableId="unitTest">
             <Providers
               id="foo"
               dataProviders={mockDataProviders}
@@ -153,7 +153,7 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <DragDropContext onDragEnd={noop}>
-          <DroppableWrapper droppableId="unitTest" theme="dark">
+          <DroppableWrapper droppableId="unitTest">
             <Providers
               id="foo"
               dataProviders={mockDataProviders}
@@ -193,7 +193,7 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <DragDropContext onDragEnd={noop}>
-          <DroppableWrapper droppableId="unitTest" theme="dark">
+          <DroppableWrapper droppableId="unitTest">
             <Providers
               id="foo"
               dataProviders={dataProviders}
@@ -221,7 +221,7 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <DragDropContext onDragEnd={noop}>
-          <DroppableWrapper droppableId="unitTest" theme="dark">
+          <DroppableWrapper droppableId="unitTest">
             <Providers
               id="foo"
               dataProviders={mockDataProviders}
@@ -257,7 +257,7 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <DragDropContext onDragEnd={noop}>
-          <DroppableWrapper droppableId="unitTest" theme="dark">
+          <DroppableWrapper droppableId="unitTest">
             <Providers
               id="foo"
               dataProviders={dataProviders}
@@ -297,7 +297,7 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <DragDropContext onDragEnd={noop}>
-          <DroppableWrapper droppableId="unitTest" theme="dark">
+          <DroppableWrapper droppableId="unitTest">
             <Providers
               id="foo"
               dataProviders={dataProviders}

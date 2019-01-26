@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPopover, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPopover } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { ThemeSwitcher } from '../theme_switcher';
 import * as i18n from './translations';
 
 interface Props {
@@ -20,14 +19,6 @@ interface Props {
 
 const SettingsPopover = styled(EuiPopover)`
   cursor: pointer;
-`;
-
-const Title = styled(EuiTitle)`
-  margin-bottom: 5px;
-`;
-
-const TitleText = styled.h1`
-  text-align: center;
 `;
 
 export const AppSettingsPopover = pure<Props>(({ showPopover, onClick, onClose }) => (
@@ -48,12 +39,6 @@ export const AppSettingsPopover = pure<Props>(({ showPopover, onClick, onClose }
         >
           {i18n.ADD_DATA}
         </EuiButton>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <Title size="xs">
-          <TitleText>{i18n.THEME}</TitleText>
-        </Title>
-        <ThemeSwitcher />
       </EuiFlexItem>
     </EuiFlexGroup>
   </SettingsPopover>

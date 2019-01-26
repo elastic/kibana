@@ -5,9 +5,10 @@
  */
 
 import {
+  EuiPageContent,
   EuiPageContentBody,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
+  EuiPageHeader,
+  EuiPageHeaderSection,
 } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React from 'react';
@@ -49,8 +50,8 @@ export const Hosts = pure(() => (
     {({ auditbeatIndicesExist, indexPattern }) =>
       indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
         <>
-          <PageContentHeader data-test-subj="paneHeader">
-            <PageContentHeaderSection>
+          <PageHeader data-test-subj="paneHeader">
+            <PageHeaderSection>
               <KueryAutocompletion indexPattern={indexPattern}>
                 {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
                   <HostsFilter indexPattern={indexPattern}>
@@ -74,127 +75,129 @@ export const Hosts = pure(() => (
                   </HostsFilter>
                 )}
               </KueryAutocompletion>
-            </PageContentHeaderSection>
-          </PageContentHeader>
-          <PageContentBody data-test-subj="pane1ScrollContainer">
-            <GlobalTime>
-              {({ poll, to, from, setQuery }) => (
-                <>
-                  <KpiEventsQuery sourceId="default" startDate={from} endDate={to} poll={poll}>
-                    {({ kpiEventType, loading, id, refetch }) => (
-                      <TypesBarManage
-                        id={id}
-                        refetch={refetch}
-                        setQuery={setQuery}
-                        loading={loading}
-                        data={kpiEventType!.map((i: KpiItem) => ({
-                          x: i.count,
-                          y: i.value,
-                        }))}
-                      />
-                    )}
-                  </KpiEventsQuery>
-                  <HostsQuery
-                    query={HostsTableQuery}
-                    sourceId="default"
-                    startDate={from}
-                    endDate={to}
-                    poll={poll}
-                  >
-                    {({ hosts, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
-                      <HostsTableManage
-                        id={id}
-                        refetch={refetch}
-                        setQuery={setQuery}
-                        loading={loading}
-                        data={hosts}
-                        totalCount={totalCount}
-                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                        nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                        loadMore={loadMore}
-                      />
-                    )}
-                  </HostsQuery>
-                  <UncommonProcessesQuery
-                    sourceId="default"
-                    startDate={from}
-                    endDate={to}
-                    poll={poll}
-                    cursor={null}
-                  >
-                    {({
-                      uncommonProcesses,
-                      totalCount,
-                      loading,
-                      pageInfo,
-                      loadMore,
-                      id,
-                      refetch,
-                    }) => (
-                      <UncommonProcessTableManage
-                        id={id}
-                        refetch={refetch}
-                        setQuery={setQuery}
-                        loading={loading}
-                        startDate={from}
-                        data={uncommonProcesses}
-                        totalCount={totalCount}
-                        nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                        loadMore={loadMore}
-                      />
-                    )}
-                  </UncommonProcessesQuery>
-                  <AuthenticationsQuery
-                    sourceId="default"
-                    startDate={from}
-                    endDate={to}
-                    poll={poll}
-                  >
-                    {({
-                      authentications,
-                      totalCount,
-                      loading,
-                      pageInfo,
-                      loadMore,
-                      id,
-                      refetch,
-                    }) => (
-                      <AuthenticationTableManage
-                        id={id}
-                        refetch={refetch}
-                        setQuery={setQuery}
-                        loading={loading}
-                        startDate={from}
-                        data={authentications}
-                        totalCount={totalCount}
-                        nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                        loadMore={loadMore}
-                      />
-                    )}
-                  </AuthenticationsQuery>
-                  <EventsQuery sourceId="default" startDate={from} endDate={to} poll={poll}>
-                    {({ events, loading, id, refetch, totalCount, pageInfo, loadMore }) => (
-                      <EventsTableManage
-                        id={id}
-                        refetch={refetch}
-                        setQuery={setQuery}
-                        data={events!}
-                        loading={loading}
-                        startDate={from}
-                        totalCount={totalCount}
-                        nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                        tiebreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)!}
-                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                        loadMore={loadMore}
-                      />
-                    )}
-                  </EventsQuery>
-                </>
-              )}
-            </GlobalTime>
-          </PageContentBody>
+            </PageHeaderSection>
+          </PageHeader>
+          <PageContent data-test-subj="pageContent" panelPaddingSize="none">
+            <PageContentBody data-test-subj="pane1ScrollContainer">
+              <GlobalTime>
+                {({ poll, to, from, setQuery }) => (
+                  <>
+                    <KpiEventsQuery sourceId="default" startDate={from} endDate={to} poll={poll}>
+                      {({ kpiEventType, loading, id, refetch }) => (
+                        <TypesBarManage
+                          id={id}
+                          refetch={refetch}
+                          setQuery={setQuery}
+                          loading={loading}
+                          data={kpiEventType!.map((i: KpiItem) => ({
+                            x: i.count,
+                            y: i.value,
+                          }))}
+                        />
+                      )}
+                    </KpiEventsQuery>
+                    <HostsQuery
+                      query={HostsTableQuery}
+                      sourceId="default"
+                      startDate={from}
+                      endDate={to}
+                      poll={poll}
+                    >
+                      {({ hosts, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
+                        <HostsTableManage
+                          id={id}
+                          refetch={refetch}
+                          setQuery={setQuery}
+                          loading={loading}
+                          data={hosts}
+                          totalCount={totalCount}
+                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                          nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                          loadMore={loadMore}
+                        />
+                      )}
+                    </HostsQuery>
+                    <UncommonProcessesQuery
+                      sourceId="default"
+                      startDate={from}
+                      endDate={to}
+                      poll={poll}
+                      cursor={null}
+                    >
+                      {({
+                        uncommonProcesses,
+                        totalCount,
+                        loading,
+                        pageInfo,
+                        loadMore,
+                        id,
+                        refetch,
+                      }) => (
+                        <UncommonProcessTableManage
+                          id={id}
+                          refetch={refetch}
+                          setQuery={setQuery}
+                          loading={loading}
+                          startDate={from}
+                          data={uncommonProcesses}
+                          totalCount={totalCount}
+                          nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                          loadMore={loadMore}
+                        />
+                      )}
+                    </UncommonProcessesQuery>
+                    <AuthenticationsQuery
+                      sourceId="default"
+                      startDate={from}
+                      endDate={to}
+                      poll={poll}
+                    >
+                      {({
+                        authentications,
+                        totalCount,
+                        loading,
+                        pageInfo,
+                        loadMore,
+                        id,
+                        refetch,
+                      }) => (
+                        <AuthenticationTableManage
+                          id={id}
+                          refetch={refetch}
+                          setQuery={setQuery}
+                          loading={loading}
+                          startDate={from}
+                          data={authentications}
+                          totalCount={totalCount}
+                          nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                          loadMore={loadMore}
+                        />
+                      )}
+                    </AuthenticationsQuery>
+                    <EventsQuery sourceId="default" startDate={from} endDate={to} poll={poll}>
+                      {({ events, loading, id, refetch, totalCount, pageInfo, loadMore }) => (
+                        <EventsTableManage
+                          id={id}
+                          refetch={refetch}
+                          setQuery={setQuery}
+                          data={events!}
+                          loading={loading}
+                          startDate={from}
+                          totalCount={totalCount}
+                          nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                          tiebreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)!}
+                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                          loadMore={loadMore}
+                        />
+                      )}
+                    </EventsQuery>
+                  </>
+                )}
+              </GlobalTime>
+            </PageContentBody>
+          </PageContent>
         </>
       ) : (
         <EmptyPage
@@ -208,24 +211,25 @@ export const Hosts = pure(() => (
   </WithSource>
 ));
 
-const PageContentHeader = styled(EuiPageContentHeader)`
-  padding: 12px;
+const PageContent = styled(EuiPageContent)`
+  margin-top: 116px;
+`;
+
+const PageHeader = styled(EuiPageHeader)`
+  background-color: ${props => props.theme.eui.euiColorLightestShade};
   position: fixed;
   width: calc(100% - 32px);
   z-index: 1;
-  background-color: ${props => props.theme.eui.euiColorEmptyShade};
-  border: 1px solid ${props => props.theme.eui.euiColorLightShade};
-  border-radius: 4px;
-  border-bottom: 0px solid white;
-  border-bottom-left-radius: 0px;
-  border-bottom-right-radius: 0px;
-  margin-left: -1px;
+  padding: 6px 0px 0px 0px;
+  margin-bottom: 0px;
+  /* margin-left: -1px; */
+  margin-top: 56px;
 `;
 
-const PageContentHeaderSection = styled(EuiPageContentHeaderSection)`
+const PageHeaderSection = styled(EuiPageHeaderSection)`
   width: 100%;
 `;
 
 const PageContentBody = styled(EuiPageContentBody)`
-  padding: 60px 24px 24px 24px;
+  padding: 12px;
 `;

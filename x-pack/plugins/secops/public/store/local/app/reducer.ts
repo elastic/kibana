@@ -7,13 +7,12 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import { Note } from '../../../lib/note';
-import { setTheme, updateNote } from './actions';
+import { updateNote } from './actions';
 import { AppModel, NotesById } from './model';
 
 export type AppState = AppModel;
 
 export const initialAppState: AppState = {
-  theme: 'dark',
   notesById: {},
 };
 
@@ -28,10 +27,6 @@ export const updateNotesById = ({ note, notesById }: UpdateNotesByIdParams): Not
 });
 
 export const appReducer = reducerWithInitialState(initialAppState)
-  .case(setTheme, (state, { name }) => ({
-    ...state,
-    theme: name,
-  }))
   .case(updateNote, (state, { note }) => ({
     ...state,
     notesById: updateNotesById({ note, notesById: state.notesById }),

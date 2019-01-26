@@ -7,10 +7,7 @@
 import actionCreatorFactory from 'typescript-fsa';
 
 import { Note } from '../../../lib/note';
-import { Theme } from './model';
 
 const actionCreator = actionCreatorFactory('x-pack/secops/local/app');
 
 export const updateNote = actionCreator<{ note: Note }>('UPDATE_NOTE');
-
-export const setTheme = actionCreator<{ name: Theme }>('SET_THEME');

@@ -29,7 +29,6 @@ describe('ColumnHeaders', () => {
           data={mockEcsData}
           rowRenderers={rowRenderers}
           height={testBodyHeight}
-          theme="dark"
         />
       );
 
@@ -54,7 +53,6 @@ describe('ColumnHeaders', () => {
           data={mockEcsData}
           rowRenderers={rowRenderers}
           height={testBodyHeight}
-          theme="dark"
         />
       );
 

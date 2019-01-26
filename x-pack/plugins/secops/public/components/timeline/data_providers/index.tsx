@@ -8,7 +8,6 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { Theme } from '../../../store/local/app/model';
 import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';
 import { droppableTimelineProvidersPrefix } from '../../drag_and_drop/helpers';
 import {
@@ -31,12 +30,11 @@ interface Props {
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
   onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
   show: boolean;
-  theme: Theme;
 }
 
 const DropTargetDataProviders = styled.div`
   position: relative;
-  border: 0.2rem dashed #999999;
+  border: 0.2rem dashed ${props => props.theme.eui.euiColorMediumShade};
   border-radius: 5px;
   display: flex;
   flex-direction: column;
@@ -45,6 +43,7 @@ const DropTargetDataProviders = styled.div`
   padding: 0px;
   min-height: 100px;
   overflow-y: auto;
+  background-color: ${props => props.theme.eui.euiColorLightestShade};
 `;
 
 const getDroppableId = (id: string): string => `${droppableTimelineProvidersPrefix}${id}`;
@@ -76,10 +75,9 @@ export const DataProviders = pure<Props>(
     onToggleDataProviderEnabled,
     onToggleDataProviderExcluded,
     show,
-    theme,
   }) => (
     <DropTargetDataProviders data-test-subj="dataProviders">
-      <DroppableWrapper isDropDisabled={!show} droppableId={getDroppableId(id)} theme={theme}>
+      <DroppableWrapper isDropDisabled={!show} droppableId={getDroppableId(id)}>
         {dataProviders.length ? (
           <Providers
             id={id}

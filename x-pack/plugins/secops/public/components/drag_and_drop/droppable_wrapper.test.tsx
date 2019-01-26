@@ -21,9 +21,7 @@ describe('DroppableWrapper', () => {
       const wrapper = mount(
         <ReduxStoreProvider store={store}>
           <DragDropContextWrapper>
-            <DroppableWrapper droppableId="testing" theme="dark">
-              {message}
-            </DroppableWrapper>
+            <DroppableWrapper droppableId="testing">{message}</DroppableWrapper>
           </DragDropContextWrapper>
         </ReduxStoreProvider>
       );

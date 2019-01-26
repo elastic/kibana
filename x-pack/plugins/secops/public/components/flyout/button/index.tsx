@@ -10,7 +10,6 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { Theme } from '../../../store/local/app/model';
 import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';
 import { droppableTimelineFlyoutButtonPrefix } from '../../drag_and_drop/helpers';
 import { DataProvider } from '../../timeline/data_providers/data_provider';
@@ -40,11 +39,14 @@ export const Button = styled(EuiPanel)`
   z-index: 2;
   justify-content: center;
   text-align: center;
-  border-top: 1px solid #c5c5c5;
-  border-bottom: 1px solid #c5c5c5;
-  border-left: 1px solid #c5c5c5;
+  border-top: 1px solid ${props => props.theme.eui.euiColorLightShade};
+  border-bottom: 1px solid ${props => props.theme.eui.euiColorLightShade};
+  border-left: 1px solid ${props => props.theme.eui.euiColorLightShade};
   border-radius: 6px 0 0 6px;
-  box-shadow: 0 3px 3px -1px rgba(173, 173, 173, 0.5), 0 5px 7px -2px rgba(173, 173, 173, 0.5);
+  box-shadow: ${props =>
+    `0 3px 3px -1px ${props.theme.eui.euiColorLightestShade}, 0 5px 7px -2px ${
+      props.theme.eui.euiColorLightestShade
+    }`};
   background-color: inherit;
   cursor: pointer;
 `;
@@ -67,36 +69,31 @@ interface FlyoutButtonProps {
   onOpen: () => void;
   show: boolean;
   timelineId: string;
-  theme: Theme;
 }
 
-export const FlyoutButton = pure(
-  ({ onOpen, show, dataProviders, theme, timelineId }: FlyoutButtonProps) =>
-    show ? (
-      <Container>
-        <DroppableWrapper
-          droppableId={`${droppableTimelineFlyoutButtonPrefix}${timelineId}`}
-          theme={theme}
+export const FlyoutButton = pure(({ onOpen, show, dataProviders, timelineId }: FlyoutButtonProps) =>
+  show ? (
+    <Container>
+      <DroppableWrapper droppableId={`${droppableTimelineFlyoutButtonPrefix}${timelineId}`}>
+        <BadgeButtonContainer
+          className="flyout-overlay"
+          data-test-subj="flyoutOverlay"
+          onClick={onOpen}
         >
-          <BadgeButtonContainer
-            className="flyout-overlay"
-            data-test-subj="flyoutOverlay"
-            onClick={onOpen}
-          >
-            {dataProviders.length !== 0 && (
-              <Badge data-test-subj="badge" color="primary">
-                {dataProviders.length}
-              </Badge>
-            )}
-            <Button>
-              <Text data-test-subj="flyoutButton">
-                {i18n.TIMELINE.toLocaleUpperCase()
-                  .split('')
-                  .join(' ')}
-              </Text>
-            </Button>
-          </BadgeButtonContainer>
-        </DroppableWrapper>
-      </Container>
-    ) : null
+          {dataProviders.length !== 0 && (
+            <Badge data-test-subj="badge" color="primary">
+              {dataProviders.length}
+            </Badge>
+          )}
+          <Button>
+            <Text data-test-subj="flyoutButton">
+              {i18n.TIMELINE.toLocaleUpperCase()
+                .split('')
+                .join(' ')}
+            </Text>
+          </Button>
+        </BadgeButtonContainer>
+      </DroppableWrapper>
+    </Container>
+  ) : null
 );
