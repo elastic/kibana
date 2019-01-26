@@ -234,8 +234,9 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
   </WithSource>
 ));
 
-const mapStateToProps = (state: State) => ({ filterQuery:  hostsSelectors.hostsFilterQueryAsJson(state) || ''});
-};
+const mapStateToProps = (state: State) => ({
+  filterQuery: hostsSelectors.hostsFilterQueryAsJson(state) || '',
+});
 
 export const Hosts = connect(mapStateToProps)(HostsComponent);
 
