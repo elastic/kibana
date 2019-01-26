@@ -9,6 +9,7 @@ import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/r
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 import { HashRouter } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import { management } from 'ui/management';
 import routes from 'ui/routes';
@@ -86,7 +87,9 @@ FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'rollup_jobs',
     title: 'Rollups',
-    description: 'Summarize and store historical data in a smaller index for future analysis.',
+    description: i18n.translate('xpack.rollupJobs.featureCatalogueDescription', {
+      defaultMessage: 'Summarize and store historical data in a smaller index for future analysis.',
+    }),
     icon: 'indexRollupApp',
     path: `#${CRUD_APP_BASE_PATH}/job_list`,
     showOnHomePage: true,

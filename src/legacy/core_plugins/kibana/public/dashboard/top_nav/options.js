@@ -30,15 +30,8 @@ import {
 class OptionsMenuUi extends Component {
 
   state = {
-    darkTheme: this.props.darkTheme,
     useMargins: this.props.useMargins,
     hidePanelTitles: this.props.hidePanelTitles,
-  }
-
-  handleDarkThemeChange = (evt) => {
-    const isChecked = evt.target.checked;
-    this.props.onDarkThemeChange(isChecked);
-    this.setState({ darkTheme: isChecked });
   }
 
   handleUseMarginsChange = (evt) => {
@@ -58,18 +51,6 @@ class OptionsMenuUi extends Component {
       <EuiForm
         data-test-subj="dashboardOptionsMenu"
       >
-
-        <EuiFormRow>
-          <EuiSwitch
-            label={this.props.intl.formatMessage({
-              id: 'kbn.dashboard.topNav.options.useDarkThemeSwitchLabel',
-              defaultMessage: 'Use dark theme',
-            })}
-            checked={this.state.darkTheme}
-            onChange={this.handleDarkThemeChange}
-            data-test-subj="dashboardDarkThemeCheckbox"
-          />
-        </EuiFormRow>
 
         <EuiFormRow>
           <EuiSwitch
@@ -101,8 +82,6 @@ class OptionsMenuUi extends Component {
 }
 
 OptionsMenuUi.propTypes = {
-  darkTheme: PropTypes.bool.isRequired,
-  onDarkThemeChange: PropTypes.func.isRequired,
   useMargins: PropTypes.bool.isRequired,
   onUseMarginsChange: PropTypes.func.isRequired,
   hidePanelTitles: PropTypes.bool.isRequired,

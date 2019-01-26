@@ -4,6 +4,28 @@ exports[`Overrides render overrides 1`] = `
 <EuiForm>
   <EuiFormRow
     describedByIds={Array []}
+    error="Value must be greater than 3 and less than or equal to 1000000"
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    isInvalid={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Number of lines to sample"
+        id="xpack.ml.fileDatavisualizer.editFlyout.overrides.linesToSampleFormRowLabel"
+        values={Object {}}
+      />
+    }
+  >
+    <EuiFieldNumber
+      compressed={false}
+      fullWidth={false}
+      isInvalid={false}
+      isLoading={false}
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
     label={

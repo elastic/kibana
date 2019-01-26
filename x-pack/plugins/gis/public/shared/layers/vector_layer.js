@@ -5,10 +5,11 @@
  */
 
 import mapboxgl from 'mapbox-gl';
+import turf from 'turf';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { ALayer } from './layer';
+import { AbstractLayer } from './layer';
 import { VectorStyle } from './styles/vector_style';
 import { LeftInnerJoin } from './joins/left_inner_join';
 
@@ -16,15 +17,14 @@ import { FeatureTooltip } from 'plugins/gis/components/map/feature_tooltip';
 import { store } from '../../store/store';
 import { getMapColors } from '../../selectors/map_selectors';
 import _ from 'lodash';
-
-const DEFAULT_COLORS = ['#e6194b', '#3cb44b', '#ffe119', '#f58231', '#911eb4'];
+import { getGeohashPrecisionForZoom } from '../utils/zoom_to_precision';
 
 const EMPTY_FEATURE_COLLECTION = {
   type: 'FeatureCollection',
   features: []
 };
 
-export class VectorLayer extends ALayer {
+export class VectorLayer extends AbstractLayer {
 
   static type = 'VECTOR';
 
@@ -37,44 +37,16 @@ export class VectorLayer extends ALayer {
   static tooltipContainer = document.createElement('div');
 
   static createDescriptor(options) {
-    // Colors must be state-aware to reduce unnecessary incrementation
-    const DEFAULT_ALPHA_VALUE = 1;
-    const mapColors = getMapColors(store.getState());
-    const lastColor = mapColors.pop();
-    const nextColor = DEFAULT_COLORS[
-      (DEFAULT_COLORS.indexOf(lastColor) + 1) % (DEFAULT_COLORS.length - 1)
-    ];
     const layerDescriptor = super.createDescriptor(options);
     layerDescriptor.type = VectorLayer.type;
+
     if (!options.style) {
-      layerDescriptor.style = VectorStyle.createDescriptor({
-        fillColor: {
-          type: VectorStyle.STYLE_TYPE.STATIC,
-          options: {
-            color: nextColor,
-          }
-        },
-        lineColor: {
-          type: VectorStyle.STYLE_TYPE.STATIC,
-          options: {
-            color: '#FFFFFF'
-          }
-        },
-        lineWidth: {
-          type: VectorStyle.STYLE_TYPE.STATIC,
-          options: {
-            size: 1
-          }
-        },
-        iconSize: {
-          type: VectorStyle.STYLE_TYPE.STATIC,
-          options: {
-            size: 10
-          }
-        },
-        alphaValue: DEFAULT_ALPHA_VALUE
-      });
+      // TODO pass store in as argument. Accessing store this way is unsafe
+      const mapColors = getMapColors(store.getState());
+      const styleProperties = VectorStyle.createDefaultStyleProperties(mapColors);
+      layerDescriptor.style = VectorStyle.createDescriptor(styleProperties);
     }
+
     return layerDescriptor;
   }
 
@@ -120,6 +92,10 @@ export class VectorLayer extends ALayer {
     return this._style.getIcon(isPointsOnly);
   }
 
+  getLayerTypeIconName() {
+    return 'vector';
+  }
+
   getColorRamp() {
     // TODO: Determine if can be data-driven first
     return this._style.getColorRamp();
@@ -127,6 +103,27 @@ export class VectorLayer extends ALayer {
 
   getTOCDetails() {
     return this._style.getTOCDetails();
+  }
+
+  _getBoundsBasedOnData() {
+    const featureCollection = this._getSourceFeatureCollection();
+    if (!featureCollection) {
+      return null;
+    }
+    const bbox =  turf.bbox(featureCollection);
+    return {
+      min_lon: bbox[0],
+      min_lat: bbox[1],
+      max_lon: bbox[2],
+      max_lat: bbox[3]
+    };
+  }
+
+  async getBounds(filters) {
+    if (this._source.isBoundsAware()) {
+      return await this._source.getBoundsForFilters(filters);
+    }
+    return this._getBoundsBasedOnData();
   }
 
   async getStringFields() {
@@ -172,19 +169,26 @@ export class VectorLayer extends ALayer {
     return this._dataRequests.find(dataRequest => dataRequest.getDataId() === sourceDataId);
   }
 
-  async _canSkipSourceUpdate(source, sourceDataId, filters) {
+  async _canSkipSourceUpdate(source, sourceDataId, searchFilters) {
     const timeAware = await source.isTimeAware();
     const refreshTimerAware = await source.isRefreshTimerAware();
     const extentAware = source.isFilterByMapBounds();
     const isFieldAware = source.isFieldAware();
     const isQueryAware = source.isQueryAware();
+    const isGeohashPrecisionAware = source.isGeohashPrecisionAware();
 
-    if (!timeAware && !refreshTimerAware && !extentAware && !isFieldAware && !isQueryAware) {
+    if (
+      !timeAware &&
+      !refreshTimerAware &&
+      !extentAware &&
+      !isFieldAware &&
+      !isQueryAware &&
+      !isGeohashPrecisionAware
+    ) {
       const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
       if (sourceDataRequest && sourceDataRequest.hasDataOrRequestInProgress()) {
         return true;
       }
-
       return false;
     }
 
@@ -199,29 +203,37 @@ export class VectorLayer extends ALayer {
 
     let updateDueToTime = false;
     if (timeAware) {
-      updateDueToTime = !_.isEqual(meta.timeFilters, filters.timeFilters);
+      updateDueToTime = !_.isEqual(meta.timeFilters, searchFilters.timeFilters);
     }
 
     let updateDueToRefreshTimer = false;
-    if (refreshTimerAware && filters.refreshTimerLastTriggeredAt) {
-      updateDueToRefreshTimer = !_.isEqual(meta.refreshTimerLastTriggeredAt, filters.refreshTimerLastTriggeredAt);
+    if (refreshTimerAware && searchFilters.refreshTimerLastTriggeredAt) {
+      updateDueToRefreshTimer = !_.isEqual(meta.refreshTimerLastTriggeredAt, searchFilters.refreshTimerLastTriggeredAt);
     }
 
     let updateDueToFields = false;
     if (isFieldAware) {
-      updateDueToFields = !_.isEqual(meta.fieldNames, filters.fieldNames);
+      updateDueToFields = !_.isEqual(meta.fieldNames, searchFilters.fieldNames);
     }
 
     let updateDueToQuery = false;
     if (isQueryAware) {
-      updateDueToQuery = !_.isEqual(meta.query, filters.query);
+      updateDueToQuery = !_.isEqual(meta.query, searchFilters.query);
     }
+
+    let updateDueToPrecisionChange = false;
+    if (isGeohashPrecisionAware) {
+      updateDueToPrecisionChange = !_.isEqual(meta.geohashPrecision, searchFilters.geohashPrecision);
+    }
+
+    const updateDueToExtentChange = this.updateDueToExtent(source, meta, searchFilters);
 
     return !updateDueToTime
       && !updateDueToRefreshTimer
-      && !this.updateDueToExtent(source, meta, filters)
+      && !updateDueToExtentChange
       && !updateDueToFields
-      && !updateDueToQuery;
+      && !updateDueToQuery
+      && !updateDueToPrecisionChange;
   }
 
   async _syncJoin(join, { startLoading, stopLoading, onLoadError, dataFilters }) {
@@ -268,35 +280,44 @@ export class VectorLayer extends ALayer {
     return await Promise.all(joinSyncs);
   }
 
+  _getSearchFilters(dataFilters) {
+    const fieldNames = [
+      ...this._source.getFieldNames(),
+      ...this._style.getSourceFieldNames(),
+      ...this.getValidJoins().map(join => {
+        return join.getLeftFieldName();
+      })
+    ];
+
+    const targetPrecision = getGeohashPrecisionForZoom(dataFilters.zoom);
+    return {
+      ...dataFilters,
+      fieldNames: _.uniq(fieldNames).sort(),
+      geohashPrecision: targetPrecision
+    };
+  }
 
   async _syncSource({ startLoading, stopLoading, onLoadError, dataFilters }) {
+
     const sourceDataId = 'source';
     const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
-    try {
-      const fieldNames = [
-        ...this._source.getFieldNames(),
-        ...this._style.getSourceFieldNames(),
-        ...this.getValidJoins().map(join => {
-          return join.getLeftFieldName();
-        })
-      ];
-      const filters = {
-        ...dataFilters,
-        fieldNames: _.uniq(fieldNames).sort()
+
+    const searchFilters = this._getSearchFilters(dataFilters);
+    const canSkip = await this._canSkipSourceUpdate(this._source, sourceDataId, searchFilters);
+    if (canSkip) {
+      const sourceDataRequest = this.getSourceDataRequest();
+      return {
+        refreshed: false,
+        featureCollection: sourceDataRequest.getData()
       };
-      const canSkip = await this._canSkipSourceUpdate(this._source, sourceDataId, filters);
-      if (canSkip) {
-        const sourceDataRequest = this.getSourceDataRequest();
-        return {
-          refreshed: false,
-          featureCollection: sourceDataRequest.getData()
-        };
-      }
-      startLoading(sourceDataId, requestToken, filters);
+    }
+
+    try {
+      startLoading(sourceDataId, requestToken, searchFilters);
       const layerName = await this.getDisplayName();
       const { data, meta } = await this._source.getGeoJsonWithMeta({
         layerName,
-      }, filters);
+      }, searchFilters);
       stopLoading(sourceDataId, requestToken, data, meta);
       return {
         refreshed: true,
@@ -377,7 +398,7 @@ export class VectorLayer extends ALayer {
       return;
     }
 
-    const dataBoundToMap = ALayer.getBoundDataForSource(mbMap, this.getId());
+    const dataBoundToMap = AbstractLayer.getBoundDataForSource(mbMap, this.getId());
     if (featureCollection !== dataBoundToMap) {
       mbGeoJSONSource.setData(featureCollection);
     }
@@ -401,13 +422,17 @@ export class VectorLayer extends ALayer {
       });
       mbMap.setFilter(pointLayerId, ['any', ['==', ['geometry-type'], 'Point'], ['==', ['geometry-type'], 'MultiPoint']]);
     }
-    this._style.setMBPaintPropertiesForPoints(mbMap, this.getId(), pointLayerId);
+    this._style.setMBPaintPropertiesForPoints({
+      alpha: this.getAlpha(),
+      mbMap,
+      pointLayerId: pointLayerId,
+    });
     mbMap.setLayoutProperty(pointLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     mbMap.setLayerZoomRange(pointLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
     this._addTooltipListeners(mbMap, pointLayerId);
   }
 
-  _setMbLinePolygonProeprties(mbMap) {
+  _setMbLinePolygonProperties(mbMap) {
     const sourceId = this.getId();
     const fillLayerId = this.getId() + '_fill';
     const lineLayerId = this.getId() + '_line';
@@ -441,7 +466,12 @@ export class VectorLayer extends ALayer {
         ['==', ['geometry-type'], 'MultiLineString']
       ]);
     }
-    this._style.setMBPaintProperties(mbMap, this.getId(), fillLayerId, lineLayerId, this.isTemporary());
+    this._style.setMBPaintProperties({
+      alpha: this.getAlpha(),
+      mbMap,
+      fillLayerId,
+      lineLayerId,
+    });
     mbMap.setLayoutProperty(fillLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     mbMap.setLayoutProperty(lineLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     mbMap.setLayerZoomRange(lineLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
@@ -451,7 +481,7 @@ export class VectorLayer extends ALayer {
 
   _syncStylePropertiesWithMb(mbMap) {
     this._setMbPointsProperties(mbMap);
-    this._setMbLinePolygonProeprties(mbMap);
+    this._setMbLinePolygonProperties(mbMap);
   }
 
   _syncSourceBindingWithMb(mbMap) {
