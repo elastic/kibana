@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { MonitorPageTitle as TitleType } from '../../../../common/graphql/types';
@@ -29,7 +30,7 @@ export const MonitorPageTitleQuery = ({
   >
     {({ loading, error, data }) => {
       if (loading) {
-        return <h2>…</h2>;
+        return <EuiLoadingSpinner size="xl" />;
       }
       if (error) {
         return error;
