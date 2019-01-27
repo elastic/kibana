@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr, isUndefined } from 'lodash/fp';
+import { getOr } from 'lodash/fp';
 import React from 'react';
 import { pure } from 'recompose';
 import chrome from 'ui/chrome';
@@ -24,7 +24,7 @@ import { GlobalTime } from '../../containers/global_time';
 import { HostsQuery } from '../../containers/hosts';
 import { HostsTableQuery } from '../../containers/hosts/index.gql_query';
 import { KpiEventsQuery } from '../../containers/kpi_events';
-import { WithSource } from '../../containers/source';
+import { indiciesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
 import { KpiItem } from '../../graphql/types';
 import * as i18n from './translations';
@@ -40,7 +40,7 @@ const TypesBarManage = manageQuery(TypesBar);
 export const Hosts = pure(() => (
   <WithSource sourceId="default">
     {({ auditbeatIndicesExist }) =>
-      auditbeatIndicesExist || isUndefined(auditbeatIndicesExist) ? (
+      indiciesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
         <GlobalTime>
           {({ poll, to, from, setQuery }) => (
             <>

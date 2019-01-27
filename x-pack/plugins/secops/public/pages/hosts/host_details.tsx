@@ -9,7 +9,7 @@ import {
   EuiBreadcrumbs,
   EuiFlexGroup,
 } from '@elastic/eui';
-import { isUndefined } from 'lodash';
+
 import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
@@ -21,7 +21,7 @@ import { manageQuery } from '../../components/page/manage_query';
 import { GlobalTime } from '../../containers/global_time';
 import { HostsQuery } from '../../containers/hosts';
 import { HostSummaryQuery } from '../../containers/hosts/index.gql_query';
-import { WithSource } from '../../containers/source';
+import { indiciesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import * as i18n from './translations';
 
 const basePath = chrome.getBasePath();
@@ -31,7 +31,7 @@ const HostDetailsPanelManage = manageQuery(HostDetailsPanel);
 export const HostDetails = pure<HostComponentProps>(({ match }) => (
   <WithSource sourceId="default">
     {({ auditbeatIndicesExist }) =>
-      auditbeatIndicesExist || isUndefined(auditbeatIndicesExist) ? (
+      indiciesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
         <GlobalTime>
           {({ poll, to, from, setQuery }) => (
             <>

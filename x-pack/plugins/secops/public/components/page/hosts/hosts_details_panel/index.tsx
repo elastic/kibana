@@ -16,9 +16,10 @@ import {
 import moment from 'moment';
 import React from 'react';
 import { pure } from 'recompose';
+import uuid from 'uuid';
 import { HostsEdges } from 'x-pack/plugins/secops/server/graphql/types';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
-import { getOrEmpty } from '../../../empty_value';
+import { getEmptyValue, getOrEmpty } from '../../../empty_value';
 import { Provider } from '../../../timeline/data_providers/provider';
 import * as i18n from './translations';
 
@@ -42,7 +43,7 @@ export const HostDetailsPanel = pure<HostDetailsPanelProps>(({ data, loading }) 
   </EuiFlexItem>
 ));
 
-const fieldTitleMapping = {
+const fieldTitleMapping: Readonly<Record<string, string>> = {
   'node.host.name': i18n.NAME,
   'node.host.last_beat': i18n.LAST_BEAT,
   'node.host.id': i18n.ID,
@@ -59,45 +60,56 @@ const fieldTitleMapping = {
 const getEuiDescriptionList = (host: HostsEdges) => {
   return (
     <EuiDescriptionList type="column" compressed>
-      {Object.entries(fieldTitleMapping).map(k => {
-        const summaryValue = getOrEmpty(k[0], host);
+      {Object.entries(fieldTitleMapping).map(([field, title]: [string, string]) => {
+        const summaryValue = getOrEmpty(field, host);
         return (
-          <>
-            <EuiDescriptionListTitle>{k[1]}</EuiDescriptionListTitle>
+          <React.Fragment key={field}>
+            <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              <DraggableWrapper
-                dataProvider={{
-                  and: [],
-                  enabled: true,
-                  excluded: false,
-                  id: `${getOrEmpty('node.host.id', host)}-${k[0]}`,
-                  name: summaryValue,
-                  kqlQuery: '',
-                  queryMatch: {
-                    displayField: k[0],
-                    displayValue: summaryValue,
-                    field: k[0],
-                    value: summaryValue,
-                  },
-                  queryDate: {
-                    from: moment().valueOf(),
-                    to: moment().valueOf(),
-                  },
-                }}
-                render={(dataProvider, _, snapshot) =>
-                  snapshot.isDragging ? (
-                    <DragEffects>
-                      <Provider dataProvider={dataProvider} />
-                    </DragEffects>
-                  ) : (
-                    <>{summaryValue}</>
-                  )
-                }
-              />
+              {_.isArray(summaryValue)
+                ? summaryValue.map(v => createDraggable(v.toString(), field, title, host)) // TODO: Fix typing to ECS
+                : createDraggable(summaryValue, field, title, host)}
             </EuiDescriptionListDescription>
-          </>
+          </React.Fragment>
         );
       })}
     </EuiDescriptionList>
+  );
+};
+
+const createDraggable = (summaryValue: string, field: string, title: string, host: HostsEdges) => {
+  return summaryValue === getEmptyValue() ? (
+    <>{summaryValue}</>
+  ) : (
+    <DraggableWrapper
+      key={summaryValue} // TODO: Better way to handle keys in this situation?
+      dataProvider={{
+        and: [],
+        enabled: true,
+        excluded: false,
+        id: `${uuid.v4()}`, // TODO: https://github.com/elastic/ingest-dev/issues/223
+        name: summaryValue,
+        kqlQuery: '',
+        queryMatch: {
+          displayField: field, // TODO: Remove .node prefix?
+          displayValue: summaryValue,
+          field,
+          value: summaryValue,
+        },
+        queryDate: {
+          from: moment().valueOf(),
+          to: moment().valueOf(),
+        },
+      }}
+      render={(dataProvider, _, snapshot) =>
+        snapshot.isDragging ? (
+          <DragEffects>
+            <Provider dataProvider={dataProvider} />
+          </DragEffects>
+        ) : (
+          <>{summaryValue}</>
+        )
+      }
+    />
   );
 };
