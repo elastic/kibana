@@ -37,8 +37,8 @@ export default function ({ getService }) {
         operationName: 'Snapshot',
         query: getSnapshotQueryString,
         variables: {
-          dateRangeStart: 1547805782000,
-          dateRangeEnd: 1547852582000,
+          dateRangeStart: '2019-01-25T04:30:54.740Z',
+          dateRangeEnd: '2019-01-28T04:50:54.740Z',
           filters: `{"bool":{"must":[{"match":{"monitor.status":{"query":"down","operator":"and"}}}]}}`,
         },
       };

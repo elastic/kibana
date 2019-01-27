@@ -1,40 +1,52 @@
 {
   "snapshot": {
     "up": 0,
-    "down": 1,
-    "total": 1,
+    "down": 0,
+    "total": 0,
     "histogram": [
       {
-        "monitorId": "http@http://www.example.com",
+        "monitorId": "auto-http-0XE929FD0451F4DA95",
         "data": [
-          { "upCount": null, "downCount": 54, "x": 1547849220000, "x0": 1547848920000, "y": 1 },
-          { "upCount": null, "downCount": 60, "x": 1547849520000, "x0": 1547849220000, "y": 1 },
-          { "upCount": null, "downCount": 60, "x": 1547849820000, "x0": 1547849520000, "y": 1 },
-          { "upCount": null, "downCount": 60, "x": 1547850120000, "x0": 1547849820000, "y": 1 },
-          { "upCount": null, "downCount": 60, "x": 1547850420000, "x0": 1547850120000, "y": 1 },
-          { "upCount": null, "downCount": 60, "x": 1547850720000, "x0": 1547850420000, "y": 1 },
-          { "upCount": null, "downCount": 60, "x": 1547851020000, "x0": 1547850720000, "y": 1 },
-          { "upCount": null, "downCount": 60, "x": 1547851320000, "x0": 1547851020000, "y": 1 },
-          { "upCount": null, "downCount": 5, "x": 1547851620000, "x0": 1547851320000, "y": 1 },
-          { "upCount": null, "downCount": 4, "x": 1547852820000, "x0": 1547852520000, "y": 1 }
-        ]
-      },
-      {
-        "monitorId": "http@http://localhost:12349/",
-        "data": [
-          { "upCount": null, "downCount": 6, "x": 1547849520000, "x0": 1547849220000, "y": 1 }
-        ]
-      },
-      {
-        "monitorId": "http@http://www.google.com/",
-        "data": [
-          { "upCount": null, "downCount": 1, "x": 1547852820000, "x0": 1547852520000, "y": 1 }
-        ]
-      },
-      {
-        "monitorId": "http@https://www.google.com/",
-        "data": [
-          { "upCount": null, "downCount": 1, "x": 1547852820000, "x0": 1547852520000, "y": 1 }
+          { "upCount": null, "downCount": 20, "x": 1548477639000, "x0": 1548477609000, "y": 1 },
+          { "upCount": null, "downCount": 20, "x": 1548477669000, "x0": 1548477639000, "y": 1 },
+          { "upCount": null, "downCount": 18, "x": 1548477699000, "x0": 1548477669000, "y": 1 },
+          { "upCount": null, "downCount": 20, "x": 1548477729000, "x0": 1548477699000, "y": 1 },
+          { "upCount": null, "downCount": 20, "x": 1548477759000, "x0": 1548477729000, "y": 1 },
+          { "upCount": null, "downCount": 20, "x": 1548477789000, "x0": 1548477759000, "y": 1 },
+          { "upCount": null, "downCount": 20, "x": 1548477819000, "x0": 1548477789000, "y": 1 },
+          { "upCount": null, "downCount": 20, "x": 1548477849000, "x0": 1548477819000, "y": 1 },
+          { "upCount": null, "downCount": 20, "x": 1548477879000, "x0": 1548477849000, "y": 1 },
+          { "upCount": null, "downCount": 18, "x": 1548477909000, "x0": 1548477879000, "y": 1 },
+          { "upCount": null, "downCount": 20, "x": 1548477939000, "x0": 1548477909000, "y": 1 },
+          { "upCount": null, "downCount": 20, "x": 1548477969000, "x0": 1548477939000, "y": 1 },
+          { "upCount": null, "downCount": 20, "x": 1548477999000, "x0": 1548477969000, "y": 1 },
+          { "upCount": null, "downCount": 20, "x": 1548478029000, "x0": 1548477999000, "y": 1 },
+          { "upCount": null, "downCount": 20, "x": 1548478059000, "x0": 1548478029000, "y": 1 },
+          { "upCount": null, "downCount": 18, "x": 1548478089000, "x0": 1548478059000, "y": 1 },
+          { "upCount": null, "downCount": 20, "x": 1548478119000, "x0": 1548478089000, "y": 1 },
+          { "upCount": null, "downCount": 20, "x": 1548478149000, "x0": 1548478119000, "y": 1 },
+          { "upCount": null, "downCount": 20, "x": 1548478179000, "x0": 1548478149000, "y": 1 },
+          { "upCount": null, "downCount": 20, "x": 1548478209000, "x0": 1548478179000, "y": 1 },
+          { "upCount": null, "downCount": 20, "x": 1548478239000, "x0": 1548478209000, "y": 1 },
+          { "upCount": null, "downCount": 20, "x": 1548478269000, "x0": 1548478239000, "y": 1 },
+          { "upCount": null, "downCount": 18, "x": 1548478299000, "x0": 1548478269000, "y": 1 },
+          { "upCount": null, "downCount": 20, "x": 1548478329000, "x0": 1548478299000, "y": 1 },
+          { "upCount": null, "downCount": 20, "x": 1548478359000, "x0": 1548478329000, "y": 1 },
+          { "upCount": null, "downCount": 24, "x": 1548478389000, "x0": 1548478359000, "y": 1 },
+          { "upCount": null, "downCount": 24, "x": 1548478419000, "x0": 1548478389000, "y": 1 },
+          { "upCount": null, "downCount": 22, "x": 1548478449000, "x0": 1548478419000, "y": 1 },
+          { "upCount": null, "downCount": 24, "x": 1548478479000, "x0": 1548478449000, "y": 1 },
+          { "upCount": null, "downCount": 22, "x": 1548478509000, "x0": 1548478479000, "y": 1 },
+          { "upCount": null, "downCount": 24, "x": 1548478539000, "x0": 1548478509000, "y": 1 },
+          { "upCount": null, "downCount": 22, "x": 1548478569000, "x0": 1548478539000, "y": 1 },
+          { "upCount": null, "downCount": 24, "x": 1548478599000, "x0": 1548478569000, "y": 1 },
+          { "upCount": null, "downCount": 24, "x": 1548478629000, "x0": 1548478599000, "y": 1 },
+          { "upCount": null, "downCount": 22, "x": 1548478659000, "x0": 1548478629000, "y": 1 },
+          { "upCount": null, "downCount": 24, "x": 1548478689000, "x0": 1548478659000, "y": 1 },
+          { "upCount": null, "downCount": 24, "x": 1548478719000, "x0": 1548478689000, "y": 1 },
+          { "upCount": null, "downCount": 24, "x": 1548478749000, "x0": 1548478719000, "y": 1 },
+          { "upCount": null, "downCount": 22, "x": 1548478779000, "x0": 1548478749000, "y": 1 },
+          { "upCount": null, "downCount": 20, "x": 1548478809000, "x0": 1548478779000, "y": 1 }
         ]
       }
     ]
