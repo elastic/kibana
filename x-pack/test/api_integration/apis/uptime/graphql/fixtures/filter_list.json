@@ -1,18 +1,15 @@
 {
   "filterBar": {
     "status": ["down", "up"],
-    "port": [80, 443, 9200, 12349],
+    "port": [9200, 12349],
     "id": [
-      "http@http://localhost:12349/",
-      "http@http://www.example.com",
-      "http@http://www.google.com/",
-      "http@https://news.google.com/",
-      "http@https://www.elastic.co",
-      "http@https://www.github.com/",
-      "http@https://www.google.com/",
-      "http@https://www.wikipedia.org/",
-      "tcp-tcp@localhost:9200"
+      "auto-http-0X970CBD2F2102BFA8",
+      "auto-http-0XC9CDA429418EDC2B",
+      "auto-http-0XDD2D4E60FD4A61C3",
+      "auto-http-0XE3B163481423197D",
+      "auto-http-0XE929FD0451F4DA95",
+      "auto-tcp-0X81440A68E839814C"
     ],
-    "scheme": ["http", "https", "tcp"]
+    "scheme": []
   }
 }

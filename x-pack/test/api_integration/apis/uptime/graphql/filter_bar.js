@@ -16,7 +16,10 @@ export default function ({ getService }) {
       const getFilterBarQuery = {
         operationName: 'FilterBar',
         query: getFilterBarQueryString,
-        variables: { dateRangeStart: 1547805782000, dateRangeEnd: 1547852582000 },
+        variables: {
+          dateRangeStart: '2019-01-25T04:30:54.740Z',
+          dateRangeEnd: '2019-01-28T04:50:54.740Z',
+        },
       };
       const {
         body: { data },
