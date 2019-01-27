@@ -61,7 +61,7 @@ export const monitorsSchema = gql`
   }
 
   type MonitorKey {
-    id: String!
+    key: String!
     url: String
   }
 
@@ -71,7 +71,7 @@ export const monitorsSchema = gql`
   }
 
   type LatestMonitor {
-    key: MonitorKey!
+    id: MonitorKey!
     ping: Ping
     upSeries: [MonitorSeriesPoint]
     downSeries: [MonitorSeriesPoint]

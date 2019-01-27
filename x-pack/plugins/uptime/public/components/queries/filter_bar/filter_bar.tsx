@@ -72,8 +72,8 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: Props) 
             defaultMessage: 'ID',
           }),
           multiSelect: false,
-          options: take(id, MAX_SELECTION_LENGTH).map(({ id: idValue, url }: any) => ({
-            value: idValue,
+          options: take(id, MAX_SELECTION_LENGTH).map(({ key, url }: any) => ({
+            value: key,
             view: url,
           })),
           searchThreshold: SEARCH_THRESHOLD,

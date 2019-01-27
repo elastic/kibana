@@ -12,7 +12,7 @@ export const getFilterBarQuery = gql`
       status
       port
       id {
-        id
+        key
         url
       }
       scheme

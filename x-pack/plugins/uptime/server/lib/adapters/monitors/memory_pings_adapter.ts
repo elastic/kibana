@@ -14,7 +14,7 @@ export class UMMemoryMonitorsAdapter implements UMMonitorsAdapter {
     this.monitorsDB = monitorsDB;
   }
 
-  public async getLatestMonitors(
+  public async getMonitors(
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,

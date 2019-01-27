@@ -309,7 +309,7 @@ export interface LatestMonitorsResult {
 }
 
 export interface LatestMonitor {
-  key: MonitorKey;
+  id: MonitorKey;
 
   ping?: Ping | null;
 
@@ -319,7 +319,7 @@ export interface LatestMonitor {
 }
 
 export interface MonitorKey {
-  id: string;
+  key: string;
 
   url?: string | null;
 }

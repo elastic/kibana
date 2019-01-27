@@ -13,7 +13,7 @@ export interface UMMonitorsAdapter {
     dateRangeStart: string,
     dateRangeEnd: string
   ): Promise<any>;
-  getLatestMonitors(
+  getMonitors(
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,

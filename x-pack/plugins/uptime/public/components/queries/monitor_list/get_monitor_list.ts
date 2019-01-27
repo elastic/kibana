@@ -14,8 +14,8 @@ export const getMonitorListQuery = gql`
       filters: $filters
     ) {
       monitors {
-        key {
-          id
+        id {
+          key
           url
         }
         ping {

@@ -1570,7 +1570,7 @@
         "description": "",
         "fields": [
           {
-            "name": "key",
+            "name": "id",
             "description": "",
             "args": [],
             "type": {
@@ -1625,7 +1625,7 @@
         "description": "",
         "fields": [
           {
-            "name": "id",
+            "name": "key",
             "description": "",
             "args": [],
             "type": {

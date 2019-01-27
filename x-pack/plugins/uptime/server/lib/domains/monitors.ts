@@ -27,7 +27,7 @@ export class UMMonitorsDomain {
     dateRangeEnd: string,
     filters?: string | null
   ): Promise<any> {
-    return this.adapter.getLatestMonitors(request, dateRangeStart, dateRangeEnd, filters);
+    return this.adapter.getMonitors(request, dateRangeStart, dateRangeEnd, filters);
   }
 
   public async getSnapshotCount(

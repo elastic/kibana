@@ -6,7 +6,13 @@
 
 import { get, set } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
-import { ErrorListItem, MonitorPageTitle, Ping } from '../../../../common/graphql/types';
+import {
+  ErrorListItem,
+  LatestMonitor,
+  MonitorPageTitle,
+  MonitorSeriesPoint,
+  Ping,
+} from '../../../../common/graphql/types';
 import { getFilteredQuery } from '../../helper';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
@@ -215,12 +221,12 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
    * @param dateRangeEnd timestamp bounds
    * @param filters filters defined by client
    */
-  public async getLatestMonitors(
+  public async getMonitors(
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
     filters?: string | null
-  ): Promise<any> {
+  ): Promise<LatestMonitor[]> {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
@@ -278,39 +284,35 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     };
     const queryResult = await this.database.search(request, params);
     const aggBuckets: any[] = get(queryResult, 'aggregations.hosts.buckets', []);
-    const latestMonitors = aggBuckets.map(
-      ({
-        key,
-        histogram: { buckets },
-        latest: {
-          hits: { hits },
-        },
-      }) => {
-        const upSeries: any[] = [];
-        const downSeries: any[] = [];
+    const latestMonitors: LatestMonitor[] = aggBuckets.map(bucket => {
+      const key: string = get(bucket, 'key');
+      const upSeries: MonitorSeriesPoint[] = [];
+      const downSeries: MonitorSeriesPoint[] = [];
+      const histogramBuckets: any[] = get(bucket, 'histogram.buckets', []);
+      const url: string | null = get(bucket, 'latest.hits.hits[0]._source.url.full', null);
+      const ping: Ping = get(bucket, 'latest.hits.hits[0]._source');
+      const timestamp: string = get(bucket, 'latest.hits.hits[0]._source.@timestamp');
+      histogramBuckets.forEach(histogramBucket => {
+        const status = get(histogramBucket, 'status.buckets', []);
         // @ts-ignore TODO update typings and remove this comment
-        buckets.forEach(bucket => {
-          const status = get(bucket, 'status.buckets', []);
-          // @ts-ignore TODO update typings and remove this comment
-          const up = status.find(f => f.key === 'up');
-          // @ts-ignore TODO update typings and remove this comment
-          const down = status.find(f => f.key === 'down');
-          // @ts-ignore TODO update typings and remove this comment
-          upSeries.push({ x: bucket.key, y: up ? up.doc_count : null });
-          // @ts-ignore TODO update typings and remove this comment
-          downSeries.push({ x: bucket.key, y: down ? down.doc_count : null });
-        });
-        return {
-          key,
-          ping: {
-            ...hits[0]._source,
-            timestamp: hits[0]._source['@timestamp'],
-          },
-          upSeries,
-          downSeries,
-        };
-      }
-    );
+        const up = status.find(f => f.key === 'up');
+        // @ts-ignore TODO update typings and remove this comment
+        const down = status.find(f => f.key === 'down');
+        // @ts-ignore TODO update typings and remove this comment
+        upSeries.push({ x: histogramBucket.key, y: up ? up.doc_count : null });
+        // @ts-ignore TODO update typings and remove this comment
+        downSeries.push({ x: histogramBucket.key, y: down ? down.doc_count : null });
+      });
+      return {
+        id: { key, url },
+        ping: {
+          ...ping,
+          timestamp,
+        },
+        upSeries,
+        downSeries,
+      };
+    });
     return latestMonitors;
   }
 
@@ -391,7 +393,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       scheme: getKey(type),
       port: getKey(port),
       id: ids.map((value: any) => ({
-        id: value.key,
+        key: value.key,
         url: get(value, 'latest.hits.hits[0]._source.url.full', null),
       })),
       status: getKey(status),
