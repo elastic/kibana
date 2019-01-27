@@ -6,8 +6,8 @@
 
 import expect from 'expect.js';
 import monitorList from './fixtures/monitor_list';
-import downFiltered from './fixtures/down_filtered';
-import upFiltered from './fixtures/up_filtered';
+import monitorListDownFiltered from './fixtures/monitor_list_down_filtered';
+import monitorListUpFiltered from './fixtures/monitor_list_up_filtered';
 import { getMonitorListQueryString } from '../../../../../plugins/uptime/public/components/queries/monitor_list/get_monitor_list';
 
 export default function ({ getService }) {
@@ -18,7 +18,10 @@ export default function ({ getService }) {
       const getMonitorListQuery = {
         operationName: 'MonitorList',
         query: getMonitorListQueryString,
-        variables: { dateRangeStart: 1547805782000, dateRangeEnd: 1547852582000 },
+        variables: {
+          dateRangeStart: '2019-01-25T04:30:54.740Z',
+          dateRangeEnd: '2019-01-28T04:50:54.740Z',
+        },
       };
       const {
         body: { data },
@@ -34,8 +37,8 @@ export default function ({ getService }) {
         operationName: 'MonitorList',
         query: getMonitorListQueryString,
         variables: {
-          dateRangeStart: 1547805782000,
-          dateRangeEnd: 1547852582000,
+          dateRangeStart: '2019-01-25T04:30:54.740Z',
+          dateRangeEnd: '2019-01-28T04:50:54.740Z',
           filters: `{"bool":{"must":[{"match":{"monitor.status":{"query":"down","operator":"and"}}}]}}`,
         },
       };
@@ -45,7 +48,7 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorListQuery });
-      expect(data).to.eql(downFiltered);
+      expect(data).to.eql(monitorListDownFiltered);
     });
 
     it('will fetch a filtered list of all up monitors', async () => {
@@ -53,8 +56,8 @@ export default function ({ getService }) {
         operationName: 'MonitorList',
         query: getMonitorListQueryString,
         variables: {
-          dateRangeStart: 1547805782000,
-          dateRangeEnd: 1547852582000,
+          dateRangeStart: '2019-01-25T04:30:54.740Z',
+          dateRangeEnd: '2019-01-28T04:50:54.740Z',
           filters: `{"bool":{"must":[{"match":{"monitor.status":{"query":"up","operator":"and"}}}]}}`,
         },
       };
@@ -64,7 +67,7 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorListQuery });
-      expect(data).to.eql(upFiltered);
+      expect(data).to.eql(monitorListUpFiltered);
     });
 
     // TODO: add filters for host and port
