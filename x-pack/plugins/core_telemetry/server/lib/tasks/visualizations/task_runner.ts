@@ -5,7 +5,6 @@
  */
 
 import _, { countBy, groupBy, mapValues } from 'lodash';
-import moment from 'moment';
 import {
   ESQueryResponse,
   HapiServer,
@@ -14,6 +13,7 @@ import {
   VisState,
   Visualization,
 } from '../../../../';
+import { getNextMidnight } from '../../get_next_midnight';
 
 interface VisSummary {
   type: string;
@@ -95,13 +95,8 @@ export function visualizationsTaskRunner(
       }
     }
 
-    const nextMidnight = moment()
-      .add(1, 'days')
-      .startOf('day')
-      .toISOString();
-
     return {
-      runAt: nextMidnight,
+      runAt: getNextMidnight(),
       state: {
         runs: taskInstance.state.runs + 1,
         stats,
