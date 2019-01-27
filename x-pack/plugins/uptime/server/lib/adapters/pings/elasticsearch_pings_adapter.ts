@@ -106,7 +106,6 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
                   },
                 },
               },
-              filter.length ? [...filter] : undefined,
             ],
           },
         },
@@ -131,6 +130,10 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
         },
       },
     };
+
+    if (filter.length) {
+      params.body.query.bool.filter.push(...filter);
+    }
 
     const result = await this.database.search(request, params);
     const buckets: any[] = get(result, 'aggregations.by_id.buckets', []);
