@@ -828,11 +828,11 @@ export function getUiSettingDefaults() {
     'context:tieBreakerFields': {
       name: _toi18n('Tie breaker fields', 'tieBreakerFieldsTitle', 'context'),
       value: ['_doc'],
-      description: i18n.translate('kbn.advancedSettings.context.tieBreakerFieldsText', {
-        defaultMessage:
-          'A comma-separated list of fields to use for tie-breaking between documents that have the same timestamp value. ' +
-          'From this list the first field that is present and sortable in the current index pattern is used.',
-      }),
+      description: _toi18n(
+        'A comma-separated list of fields to use for tie-breaking between documents that have the same timestamp value. ' +
+        'From this list the first field that is present and sortable in the current index pattern is used.',
+        'tieBreakerFieldsText'
+      ),
       category: ['discover'],
     },
     'accessibility:disableAnimations': {
@@ -845,11 +845,11 @@ export function getUiSettingDefaults() {
     'rollups:enableIndexPatterns': {
       name: _toi18n('Enable rollup index patterns', 'rollupIndexPatternsTitle'),
       value: true,
-      description: i18n.translate('kbn.advancedSettings.rollupIndexPatternsText', {
-        defaultMessage:
-          'Enable the creation of index patterns which capture rollup indices, which in turn enable ' +
-          'visualizations based on rollup data. Refresh the page to apply the changes.',
-      }),
+      description: _toi18n(
+        'Enable the creation of index patterns which capture rollup indices, which in turn enable ' +
+        'visualizations based on rollup data. Refresh the page to apply the changes.',
+        'rollupIndexPatternsText'
+      ),
       category: ['rollups'],
     },
   };
