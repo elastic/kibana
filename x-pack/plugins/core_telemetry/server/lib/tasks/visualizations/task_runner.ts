@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _, { countBy, groupBy } from 'lodash';
+import _, { countBy, groupBy, mapValues } from 'lodash';
 import moment from 'moment';
 import {
   ESQueryResponse,
@@ -58,21 +58,18 @@ async function getStats(callCluster: (method: string, params: any) => Promise<an
   const visTypes = groupBy(visSummaries, 'type');
 
   // get the final result
-  return Object.keys(visTypes).reduce((accum, curr) => {
-    const total = visTypes[curr].length;
-    const spacesBreakdown = countBy(visTypes[curr], 'space');
+  return mapValues(visTypes, curr => {
+    const total = curr.length;
+    const spacesBreakdown = countBy(curr, 'space');
     const spaceCounts: number[] = _.values(spacesBreakdown);
 
     return {
-      ...accum,
-      [curr]: {
-        total,
-        spaces_min: _.min(spaceCounts),
-        spaces_max: _.max(spaceCounts),
-        spaces_avg: total / spaceCounts.length,
-      },
+      total,
+      spaces_min: _.min(spaceCounts),
+      spaces_max: _.max(spaceCounts),
+      spaces_avg: total / spaceCounts.length,
     };
-  }, {});
+  });
 }
 
 export function visualizationsTaskRunner(
