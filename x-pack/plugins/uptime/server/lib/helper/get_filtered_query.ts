@@ -29,9 +29,7 @@ export const getFilteredQuery = (
     },
   };
   if (get(query, 'bool.filter', undefined)) {
-    query.bool.filter.push({
-      ...rangeSection,
-    });
+    query.bool.filter.push(rangeSection);
   } else {
     set(query, 'bool.filter', [rangeSection]);
   }
