@@ -8,10 +8,12 @@ import moment from 'moment';
 import { getNextMidnight } from './get_next_midnight';
 
 describe('getNextMidnight', () => {
-  const nextMidnightMoment = moment()
-    .add(1, 'days')
-    .startOf('day')
-    .toISOString();
+  test('Returns the next time and date of midnight as an iso string', () => {
+    const nextMidnightMoment = moment()
+      .add(1, 'days')
+      .startOf('day')
+      .toISOString();
 
-  expect(getNextMidnight()).toEqual(nextMidnightMoment);
+    expect(getNextMidnight()).toEqual(nextMidnightMoment);
+  });
 });
