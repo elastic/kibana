@@ -19,7 +19,10 @@ export default function ({ getService }) {
       const getMonitorStatusBarQuery = {
         operationName: 'MonitorStatus',
         query: getMonitorStatusBarQueryString,
-        variables: { dateRangeStart: 1547805782000, dateRangeEnd: 1547852582000 },
+        variables: {
+          dateRangeStart: '2019-01-25T04:30:54.740Z',
+          dateRangeEnd: '2019-01-28T04:50:54.740Z',
+        },
       };
       const {
         body: {
@@ -40,9 +43,9 @@ export default function ({ getService }) {
         operationName: 'MonitorStatus',
         query: getMonitorStatusBarQueryString,
         variables: {
-          dateRangeStart: 1547805782000,
-          dateRangeEnd: 1547852582000,
-          monitorId: 'http@http://www.google.com/',
+          dateRangeStart: '2019-01-25T04:30:54.740Z',
+          dateRangeEnd: '2019-01-28T04:50:54.740Z',
+          monitorId: 'auto-tcp-0X81440A68E839814C',
         },
       };
       const {
@@ -53,7 +56,9 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorStatusBarQuery });
-      expect({ monitorStatus: responseData.map(status => omit(status, 'millisFromNow')) }).to.eql(monitorStatusById);
+      expect({ monitorStatus: responseData.map(status => omit(status, 'millisFromNow')) }).to.eql(
+        monitorStatusById
+      );
     });
   });
 }
