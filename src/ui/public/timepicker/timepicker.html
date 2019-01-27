@@ -5,7 +5,10 @@
     <div ng-show="activeTab === 'filter'" role="tabpanel" class="tab-pane active">
       <div class="kbn-timepicker-title">
         <h2 class="kuiLocalDropdownTitle kbn-timepicker-title__text">
-          Time Range
+          <FormattedMessage
+            i18n-id="common.ui.timepicker.timerange"
+            i18n-default-message="Time Range"
+          ></FormattedMessage>
         </h2>
       </div>
 
@@ -20,7 +23,10 @@
             aria-selected="{{mode === 'quick'}}"
             data-test-subj="timepicker-quick-button"
           >
-            Quick
+          <FormattedMessage
+            i18n-id="common.ui.timepicker.categoryquick"
+            i18n-default-message="Quick"
+          ></FormattedMessage>
           </button>
 
           <button
@@ -32,7 +38,10 @@
             aria-selected="{{mode === 'relative'}}"
             data-test-subj="timepicker-relative-button"
           >
-            Relative
+          <FormattedMessage
+            i18n-id="common.ui.timepicker.categoryrelative"
+            i18n-default-message="Relative"
+          ></FormattedMessage>
           </button>
 
           <button
@@ -44,7 +53,11 @@
             aria-selected="{{mode === 'absolute'}}"
             data-test-subj="timepicker-absolute-button"
           >
-            Absolute
+            
+          <FormattedMessage
+          i18n-id="common.ui.timepicker.categoryabsolute"
+          i18n-default-message="Absolute"
+          ></FormattedMessage>
           </button>
 
           <button
@@ -56,7 +69,11 @@
             aria-selected="{{mode === 'recent'}}"
             data-test-subj="timepicker-recent-button"
           >
-            Recent
+            
+          <FormattedMessage
+          i18n-id="common.ui.timepicker.categoryrecent"
+          i18n-default-message="Recent"
+          ></FormattedMessage>
           </button>
         </div>
       </div>

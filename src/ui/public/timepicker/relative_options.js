@@ -17,21 +17,31 @@
  * under the License.
  */
 
-export const relativeOptions = [
-  { text: 'Seconds ago', value: 's' },
-  { text: 'Minutes ago', value: 'm' },
-  { text: 'Hours ago', value: 'h' },
-  { text: 'Days ago', value: 'd' },
-  { text: 'Weeks ago', value: 'w' },
-  { text: 'Months ago', value: 'M' },
-  { text: 'Years ago', value: 'y' },
+import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
 
-  { text: 'Seconds from now', value: 's+' },
-  { text: 'Minutes from now', value: 'm+' },
-  { text: 'Hours from now', value: 'h+' },
-  { text: 'Days from now', value: 'd+' },
-  { text: 'Weeks from now', value: 'w+' },
-  { text: 'Months from now', value: 'M+' },
-  { text: 'Years from now', value: 'y+' },
+function _toi18n(defaultString) {
+  const id = _.camelCase(defaultString);
+  return i18n.translate(`kbn.timeline.relativeOptions.${id}`, {
+    defaultMessage: defaultString,
+  });
+}
+
+export const relativeOptions = [
+  { text: _toi18n('Seconds ago'), value: 's' },
+  { text: _toi18n('Minutes ago'), value: 'm' },
+  { text: _toi18n('Hours ago'), value: 'h' },
+  { text: _toi18n('Days ago'), value: 'd' },
+  { text: _toi18n('Weeks ago'), value: 'w' },
+  { text: _toi18n('Months ago'), value: 'M' },
+  { text: _toi18n('Years ago'), value: 'y' },
+
+  { text: _toi18n('Seconds from now'), value: 's+' },
+  { text: _toi18n('Minutes from now'), value: 'm+' },
+  { text: _toi18n('Hours from now'), value: 'h+' },
+  { text: _toi18n('Days from now'), value: 'd+' },
+  { text: _toi18n('Weeks from now'), value: 'w+' },
+  { text: _toi18n('Months from now'), value: 'M+' },
+  { text: _toi18n('Years from now'), value: 'y+' },
 
 ];
