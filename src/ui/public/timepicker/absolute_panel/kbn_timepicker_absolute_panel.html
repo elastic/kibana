@@ -3,7 +3,10 @@
     <div class="kbn-timepicker-section kbn-timepicker-body-column">
       <div class="kuiLocalDropdownHeader kbn-timepicker-form-header">
         <label class="kuiLocalDropdownHeader__label">
-          From
+            <FormattedMessage
+            i18n-id="common.ui.timepicker.from"
+            i18n-default-message="From"
+            />
         </label>
 
         <div class="kuiLocalDropdownHeader__actions">
@@ -12,7 +15,10 @@
             ng-click="setToNow({key:'from'})"
             kbn-accessible-click
           >
-            Set To Now
+            <FormattedMessage
+            i18n-id="common.ui.timepicker.setToNow"
+            i18n-default-message="Set To Now"
+            />
           </a>
         </div>
       </div>
@@ -24,7 +30,14 @@
         input-datetime="{{format}}"
         ng-model="absolute.from"
       >
-      <div ng-show="!absolute.from"><em>Invalid Date</em></div>
+      <div ng-show="!absolute.from">
+        <em>
+            <FormattedMessage
+            i18n-id="common.ui.timepicker.invalidDate"
+            i18n-default-message="Invalid Date"
+            />
+        </em>
+      </div>
 
       <div>
         <datepicker ng-model="pickFromDate" ng-model-options="{ getterSetter: true }" max-date="pickToDate()" show-weeks="false"></datepicker>
@@ -34,7 +47,10 @@
     <div class="kbn-timepicker-section kbn-timepicker-body-column">
       <div class="kuiLocalDropdownHeader kbn-timepicker-form-header">
         <label class="kuiLocalDropdownHeader__label">
-          To
+          <FormattedMessage
+          i18n-id="common.ui.timepicker.to"
+          i18n-default-message="To"
+          />
         </label>
 
         <div class="kuiLocalDropdownHeader__actions">
@@ -43,12 +59,22 @@
             ng-click="setToNow({key:'to'})"
             kbn-accessible-click
           >
-            Set To Now
+            <FormattedMessage
+            i18n-id="common.ui.timepicker.setToNow"
+            i18n-default-message="Set To Now"
+            />
           </a>
         </div>
       </div>
 
-      <span ng-show="!absolute.to"><em>Invalid Date</em></span>
+      <span ng-show="!absolute.to">
+        <em>
+          <FormattedMessage
+          i18n-id="common.ui.timepicker.invalidDate"
+          i18n-default-message="Invalid Date"
+          />
+        </em>
+      </span>
       <input
         type="text"
         required
@@ -68,7 +94,14 @@
       class="kbn-timepicker-action-item kbn-timepicker-error"
       ng-show="absolute.from > absolute.to"
     >
-      <strong>From</strong> must occur before <strong>To</strong>
+    <FormattedMessage 
+    i18n-id="common.ui.timepicker.fromToError"
+    i18n-default-message="{strongStr}From{strongEnd} must occur before {strongStr}To{strongEnd}"
+    i18n-values="{
+      html_strongStr: '<strong>',
+      html_strongEnd: '</strong>'
+    }"
+    />
     </span>
     <button
       type="submit"
@@ -76,7 +109,11 @@
       ng-disabled="absolute.from > absolute.to || !absolute.from || !absolute.to"
       data-test-subj="timepickerGoButton"
     >
-      Go
+      
+      <FormattedMessage
+      i18n-id="common.ui.timepicker.go"
+      i18n-default-message="Go"
+      />
     </button>
   </div>
 </form>

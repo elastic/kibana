@@ -20,6 +20,14 @@
 import moment from 'moment-timezone';
 import numeralLanguages from '@elastic/numeral/languages';
 import { i18n } from '@kbn/i18n';
+import _ from 'lodash';
+
+function _toi18n(defaultString, id, component = '') {
+  id = id | _.camelCase(defaultString);
+  return i18n.translate(`kbn.advancedSettings.${component}.${id}`, {
+    defaultMessage: defaultString,
+  });
+}
 
 export function getUiSettingDefaults() {
   const weekdays = moment.weekdays().slice();
@@ -36,9 +44,7 @@ export function getUiSettingDefaults() {
       readonly: true
     },
     'query:queryString:options': {
-      name: i18n.translate('kbn.advancedSettings.query.queryStringOptionsTitle', {
-        defaultMessage: 'Query string options',
-      }),
+      name: _toi18n('Query string options', 'queryStringOptionsTitle', 'query'),
       value: '{ "analyze_wildcard": true }',
       description:
         i18n.translate('kbn.advancedSettings.query.queryStringOptionsText', {
@@ -57,9 +63,7 @@ export function getUiSettingDefaults() {
       type: 'json'
     },
     'query:allowLeadingWildcards': {
-      name: i18n.translate('kbn.advancedSettings.query.allowWildcardsTitle', {
-        defaultMessage: 'Allow leading wildcards in query',
-      }),
+      name: _toi18n('Allow leading wildcards in query', 'allowWildcardsTitle', 'query'),
       value: true,
       description: i18n.translate('kbn.advancedSettings.query.allowWildcardsText', {
         defaultMessage:
@@ -82,21 +86,15 @@ export function getUiSettingDefaults() {
       }),
     },
     'search:queryLanguage': {
-      name: i18n.translate('kbn.advancedSettings.searchQueryLanguageTitle', {
-        defaultMessage: 'Query language',
-      }),
+      name: _toi18n('Query language', 'searchQueryLanguageTitle'),
       value: 'lucene',
-      description: i18n.translate('kbn.advancedSettings.searchQueryLanguageText', {
-        defaultMessage:
-          'Query language used by the query bar. Kuery is an experimental new language built specifically for Kibana.',
-      }),
+      description: _toi18n('Query language used by the query bar. Kuery is an experimental new language built specifically for Kibana.',
+        'searchQueryLanguageText'),
       type: 'select',
       options: ['lucene', 'kuery']
     },
     'sort:options': {
-      name: i18n.translate('kbn.advancedSettings.sortOptionsTitle', {
-        defaultMessage: 'Sort options',
-      }),
+      name: _toi18n('Sort options', 'sortOptionsTitle'),
       value: '{ "unmapped_type": "boolean" }',
       description: i18n.translate('kbn.advancedSettings.sortOptionsText', {
         defaultMessage: '{optionsLink} for the Elasticsearch sort parameter',
@@ -105,18 +103,14 @@ export function getUiSettingDefaults() {
         values: {
           optionsLink:
             '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html" target="_blank" rel="noopener noreferrer">' +
-            i18n.translate('kbn.advancedSettings.sortOptions.optionsLinkText', {
-              defaultMessage: 'Options',
-            }) +
+            _toi18n('Options', 'optionsLinkText', 'sortOptions') +
             '</a>',
         },
       }),
       type: 'json'
     },
     'dateFormat': {
-      name: i18n.translate('kbn.advancedSettings.dateFormatTitle', {
-        defaultMessage: 'Date format',
-      }),
+      name: _toi18n('Date format', 'dateFormatTitle'),
       value: 'MMMM Do YYYY, HH:mm:ss.SSS',
       description: i18n.translate('kbn.advancedSettings.dateFormatText', {
         defaultMessage: 'When displaying a pretty formatted date, use this {formatLink}',
@@ -125,17 +119,13 @@ export function getUiSettingDefaults() {
         values: {
           formatLink:
             '<a href="http://momentjs.com/docs/#/displaying/format/" target="_blank" rel="noopener noreferrer">' +
-            i18n.translate('kbn.advancedSettings.dateFormat.optionsLinkText', {
-              defaultMessage: 'format',
-            }) +
+            _toi18n('format', 'optionsLinkText', 'dateFormat') +
             '</a>',
         },
       }),
     },
     'dateFormat:tz': {
-      name: i18n.translate('kbn.advancedSettings.dateFormat.timezoneTitle', {
-        defaultMessage: 'Timezone for date formatting',
-      }),
+      name: _toi18n('Timezone for date formatting', 'timezoneTitle', 'dateFormat'),
       value: 'Browser',
       description: i18n.translate('kbn.advancedSettings.dateFormat.timezoneText', {
         defaultMessage:
@@ -148,9 +138,7 @@ export function getUiSettingDefaults() {
       options: ['Browser', ...moment.tz.names()]
     },
     'dateFormat:scaled': {
-      name: i18n.translate('kbn.advancedSettings.dateFormat.scaledTitle', {
-        defaultMessage: 'Scaled date format',
-      }),
+      name: _toi18n('Scaled date format', 'scaledTitle', 'dateFormat'),
       type: 'json',
       value:
 `[
@@ -180,59 +168,36 @@ export function getUiSettingDefaults() {
       }),
     },
     'dateFormat:dow': {
-      name: i18n.translate('kbn.advancedSettings.dateFormat.dayOfWeekTitle', {
-        defaultMessage: 'Day of week',
-      }),
+      name: _toi18n('Day of week', 'dayOfWeekTitle', 'dateFormat'),
       value: defaultWeekday,
-      description: i18n.translate('kbn.advancedSettings.dateFormat.dayOfWeekText', {
-        defaultMessage: 'What day should weeks start on?',
-      }),
+      description: _toi18n('What day should weeks start on?', 'dayOfWeekText', 'dateFormat'),
       type: 'select',
       options: weekdays
     },
     'defaultIndex': {
-      name: i18n.translate('kbn.advancedSettings.defaultIndexTitle', {
-        defaultMessage: 'Default index',
-      }),
+      name: _toi18n('Default index', 'defaultIndexTitle'),
       value: null,
-      description: i18n.translate('kbn.advancedSettings.defaultIndexText', {
-        defaultMessage: 'The index to access if no index is set',
-      }),
+      description: _toi18n('The index to access if no index is set', 'defaultIndexText'),
     },
     'defaultColumns': {
-      name: i18n.translate('kbn.advancedSettings.defaultColumnsTitle', {
-        defaultMessage: 'Default columns',
-      }),
+      name: _toi18n('Default columns', 'defaultColumnsTitle'),
       value: ['_source'],
-      description: i18n.translate('kbn.advancedSettings.defaultColumnsText', {
-        defaultMessage: 'Columns displayed by default in the Discovery tab',
-      }),
+      description: _toi18n('Columns displayed by default in the Discovery tab', 'defaultColumnsText'),
       category: ['discover'],
     },
     'metaFields': {
-      name: i18n.translate('kbn.advancedSettings.metaFieldsTitle', {
-        defaultMessage: 'Meta fields',
-      }),
+      name: _toi18n('Meta fields', 'metaFieldsTitle'),
       value: ['_source', '_id', '_type', '_index', '_score'],
-      description: i18n.translate('kbn.advancedSettings.metaFieldsText', {
-        defaultMessage:
-          'Fields that exist outside of _source to merge into our document when displaying it',
-      }),
+      description: _toi18n('Fields that exist outside of _source to merge into our document when displaying it', 'metaFieldsText'),
     },
     'discover:sampleSize': {
-      name: i18n.translate('kbn.advancedSettings.discover.sampleSizeTitle', {
-        defaultMessage: 'Number of rows',
-      }),
+      name: _toi18n('Number of rows', 'sampleSizeTitle', 'discover'),
       value: 500,
-      description: i18n.translate('kbn.advancedSettings.discover.sampleSizeText', {
-        defaultMessage: 'The number of rows to show in the table',
-      }),
+      description: _toi18n('The number of rows to show in the table', 'sampleSizeText', 'discover'),
       category: ['discover'],
     },
     'discover:aggs:terms:size': {
-      name: i18n.translate('kbn.advancedSettings.discover.aggsTermsSizeTitle', {
-        defaultMessage: 'Number of terms',
-      }),
+      name: _toi18n('Number of terms', 'aggsTermsSizeTitle', 'discover'),
       value: 20,
       type: 'number',
       description: i18n.translate('kbn.advancedSettings.discover.aggsTermsSizeText', {
@@ -243,22 +208,16 @@ export function getUiSettingDefaults() {
       category: ['discover'],
     },
     'discover:sort:defaultOrder': {
-      name: i18n.translate('kbn.advancedSettings.discover.sortDefaultOrderTitle', {
-        defaultMessage: 'Default sort direction',
-      }),
+      name: _toi18n('Default sort direction', 'sortDefaultOrderTitle', 'discover'),
       value: 'desc',
       options: ['desc', 'asc'],
       type: 'select',
-      description: i18n.translate('kbn.advancedSettings.discover.sortDefaultOrderText', {
-        defaultMessage:
-          'Controls the default sort direction for time based index patterns in the Discover app.',
-      }),
+      description: _toi18n('Controls the default sort direction for time based index patterns in the Discover app.',
+        'sortDefaultOrderText', 'discover'),
       category: ['discover'],
     },
     'doc_table:highlight': {
-      name: i18n.translate('kbn.advancedSettings.docTableHighlightTitle', {
-        defaultMessage: 'Highlight results',
-      }),
+      name: _toi18n('Highlight results', 'docTableHighlightTitle'),
       value: true,
       description: i18n.translate('kbn.advancedSettings.docTableHighlightText', {
         defaultMessage:
@@ -278,9 +237,7 @@ export function getUiSettingDefaults() {
       category: ['discover'],
     },
     'courier:maxSegmentCount': {
-      name: i18n.translate('kbn.advancedSettings.courier.maxSegmentCountTitle', {
-        defaultMessage: 'Maximum segment count',
-      }),
+      name: _toi18n('Maximum segment count', 'maxSegmentCountTitle', 'courier'),
       value: 30,
       description: i18n.translate('kbn.advancedSettings.courier.maxSegmentCountText', {
         defaultMessage:
@@ -305,9 +262,7 @@ export function getUiSettingDefaults() {
       category: ['search'],
     },
     'courier:setRequestPreference': {
-      name: i18n.translate('kbn.advancedSettings.courier.requestPreferenceTitle', {
-        defaultMessage: 'Request preference',
-      }),
+      name: _toi18n('Request preference', 'requestPreferenceTitle', 'courier'),
       value: 'sessionId',
       options: ['sessionId', 'custom', 'none'],
       type: 'select',
@@ -327,9 +282,7 @@ export function getUiSettingDefaults() {
       category: ['search'],
     },
     'courier:customRequestPreference': {
-      name: i18n.translate('kbn.advancedSettings.courier.customRequestPreferenceTitle', {
-        defaultMessage: 'Custom request preference',
-      }),
+      name: _toi18n('Custom request preference', 'customRequestPreferenceTitle', 'courier'),
       value: '_local',
       type: 'string',
       description: i18n.translate('kbn.advancedSettings.courier.customRequestPreferenceText', {
@@ -352,9 +305,7 @@ export function getUiSettingDefaults() {
       category: ['search'],
     },
     'courier:maxConcurrentShardRequests': {
-      name: i18n.translate('kbn.advancedSettings.courier.maxRequestsTitle', {
-        defaultMessage: 'Max Concurrent Shard Requests',
-      }),
+      name: _toi18n('Max Concurrent Shard Requests', 'maxRequestsTitle', 'courier'),
       value: 0,
       type: 'number',
       description: i18n.translate('kbn.advancedSettings.courier.maxRequestsText', {
@@ -378,38 +329,23 @@ export function getUiSettingDefaults() {
       category: ['search'],
     },
     'fields:popularLimit': {
-      name: i18n.translate('kbn.advancedSettings.fieldsPopularLimitTitle', {
-        defaultMessage: 'Popular fields limit',
-      }),
+      name: _toi18n('Popular fields limit', 'fieldsPopularLimitTitle'),
       value: 10,
-      description: i18n.translate('kbn.advancedSettings.fieldsPopularLimitText', {
-        defaultMessage: 'The top N most popular fields to show',
-      }),
+      description: _toi18n('The top N most popular fields to show', 'fieldsPopularLimitText'),
     },
     'histogram:barTarget': {
-      name: i18n.translate('kbn.advancedSettings.histogram.barTargetTitle', {
-        defaultMessage: 'Target bars',
-      }),
+      name: _toi18n('Target bars', 'barTargetTitle', 'histogram'),
       value: 50,
-      description: i18n.translate('kbn.advancedSettings.histogram.barTargetText', {
-        defaultMessage:
-          'Attempt to generate around this many bars when using "auto" interval in date histograms',
-      }),
+      description: _toi18n('Attempt to generate around this many bars when using "auto" interval in date histograms',
+        'barTargetText', 'histogram'),
     },
     'histogram:maxBars': {
-      name: i18n.translate('kbn.advancedSettings.histogram.maxBarsTitle', {
-        defaultMessage: 'Maximum bars',
-      }),
+      name: _toi18n('Maximum bars', 'maxBarsTitle', 'histogram'),
       value: 100,
-      description: i18n.translate('kbn.advancedSettings.histogram.maxBarsText', {
-        defaultMessage:
-          'Never show more than this many bars in date histograms, scale values if needed',
-      }),
+      description: _toi18n('Never show more than this many bars in date histograms, scale values if needed', 'maxBarsText', 'histogram'),
     },
     'visualize:enableLabs': {
-      name: i18n.translate('kbn.advancedSettings.visualizeEnableLabsTitle', {
-        defaultMessage: 'Enable experimental visualizations',
-      }),
+      name: _toi18n('Enable experimental visualizations', 'visualizeEnableLabsTitle'),
       value: true,
       description: i18n.translate('kbn.advancedSettings.visualizeEnableLabsText', {
         defaultMessage:
@@ -476,43 +412,29 @@ export function getUiSettingDefaults() {
       category: ['visualization'],
     },
     'visualization:regionmap:showWarnings': {
-      name: i18n.translate('kbn.advancedSettings.visualization.showRegionMapWarningsTitle', {
-        defaultMessage: 'Show region map warning',
-      }),
+      name: _toi18n('Show region map warning', 'showRegionMapWarningsTitle', 'visualization'),
       value: true,
-      description: i18n.translate('kbn.advancedSettings.visualization.showRegionMapWarningsText', {
-        defaultMessage:
-          'Whether the region map shows a warning when terms cannot be joined to a shape on the map.',
-      }),
+      description: _toi18n('Whether the region map shows a warning when terms cannot be joined to a shape on the map.',
+        'showRegionMapWarningsText', 'visualization'),
       category: ['visualization'],
     },
     'visualization:colorMapping': {
-      name: i18n.translate('kbn.advancedSettings.visualization.colorMappingTitle', {
-        defaultMessage: 'Color mapping',
-      }),
+      name: _toi18n('Color mapping', 'colorMappingTitle', 'visualization'),
       value: JSON.stringify({
         Count: '#00A69B'
       }),
       type: 'json',
-      description: i18n.translate('kbn.advancedSettings.visualization.colorMappingText', {
-        defaultMessage: 'Maps values to specified colors within visualizations',
-      }),
+      description: _toi18n('Maps values to specified colors within visualizations', 'colorMappingText', 'visualization'),
       category: ['visualization'],
     },
     'visualization:loadingDelay': {
-      name: i18n.translate('kbn.advancedSettings.visualization.loadingDelayTitle', {
-        defaultMessage: 'Loading delay',
-      }),
+      name: _toi18n('Loading delay', 'loadingDelayTitle', 'visualization'),
       value: '2s',
-      description: i18n.translate('kbn.advancedSettings.visualization.loadingDelayText', {
-        defaultMessage: 'Time to wait before dimming visualizations during query',
-      }),
+      description: _toi18n('Time to wait before dimming visualizations during query', 'loadingDelayText', 'visualization'),
       category: ['visualization'],
     },
     'visualization:dimmingOpacity': {
-      name: i18n.translate('kbn.advancedSettings.visualization.dimmingOpacityTitle', {
-        defaultMessage: 'Dimming opacity',
-      }),
+      name: _toi18n('Dimming opacity', 'dimmingOpacityTitle', 'visualization'),
       value: 0.5,
       type: 'number',
       description: i18n.translate('kbn.advancedSettings.visualization.dimmingOpacityText', {
@@ -524,27 +446,17 @@ export function getUiSettingDefaults() {
       category: ['visualization'],
     },
     'csv:separator': {
-      name: i18n.translate('kbn.advancedSettings.csv.separatorTitle', {
-        defaultMessage: 'CSV separator',
-      }),
+      name: _toi18n('CSV separator', 'separatorTitle', 'csv'),
       value: ',',
-      description: i18n.translate('kbn.advancedSettings.csv.separatorText', {
-        defaultMessage: 'Separate exported values with this string',
-      }),
+      description: _toi18n('Separate exported values with this string', 'separatorText', 'csv'),
     },
     'csv:quoteValues': {
-      name: i18n.translate('kbn.advancedSettings.csv.quoteValuesTitle', {
-        defaultMessage: 'Quote CSV values',
-      }),
+      name: _toi18n('Quote CSV values', 'quoteValuesTitle', 'csv'),
       value: true,
-      description: i18n.translate('kbn.advancedSettings.csv.quoteValuesText', {
-        defaultMessage: 'Should values be quoted in csv exports?',
-      }),
+      description: _toi18n('Should values be quoted in csv exports?', 'quoteValuesText', 'csv'),
     },
     'history:limit': {
-      name: i18n.translate('kbn.advancedSettings.historyLimitTitle', {
-        defaultMessage: 'History limit',
-      }),
+      name: _toi18n('History limit', 'historyLimitTitle'),
       value: 10,
       description: i18n.translate('kbn.advancedSettings.historyLimitText', {
         defaultMessage:
@@ -552,18 +464,12 @@ export function getUiSettingDefaults() {
       }),
     },
     'shortDots:enable': {
-      name: i18n.translate('kbn.advancedSettings.shortenFieldsTitle', {
-        defaultMessage: 'Shorten fields',
-      }),
+      name: _toi18n('Shorten fields', 'shortenFieldsTitle'),
       value: false,
-      description: i18n.translate('kbn.advancedSettings.shortenFieldsText', {
-        defaultMessage: 'Shorten long fields, for example, instead of foo.bar.baz, show f.b.baz',
-      }),
+      description: _toi18n('Shorten long fields, for example, instead of foo.bar.baz, show f.b.baz', 'shortenFieldsText'),
     },
     'truncate:maxHeight': {
-      name: i18n.translate('kbn.advancedSettings.maxCellHeightTitle', {
-        defaultMessage: 'Maximum table cell height',
-      }),
+      name: _toi18n('Maximum table cell height', 'maxCellHeightTitle'),
       value: 115,
       description: i18n.translate('kbn.advancedSettings.maxCellHeightText', {
         defaultMessage:
@@ -571,9 +477,7 @@ export function getUiSettingDefaults() {
       }),
     },
     'indexPattern:fieldMapping:lookBack': {
-      name: i18n.translate('kbn.advancedSettings.indexPattern.recentMatchingTitle', {
-        defaultMessage: 'Recent matching patterns',
-      }),
+      name: _toi18n('Recent matching patterns', 'recentMatchingTitle', 'indexPattern'),
       value: 5,
       description: i18n.translate('kbn.advancedSettings.indexPattern.recentMatchingText', {
         defaultMessage:
@@ -582,9 +486,7 @@ export function getUiSettingDefaults() {
       }),
     },
     'indexPatterns:warnAboutUnsupportedTimePatterns': {
-      name: i18n.translate('kbn.advancedSettings.indexPattern.unsupportedTimePatternWarningTitle', {
-        defaultMessage: 'Time pattern warning',
-      }),
+      name: _toi18n('Time pattern warning', 'unsupportedTimePatternWarningTitle', 'indexPattern'),
       value: false,
       description: i18n.translate('kbn.advancedSettings.indexPattern.unsupportedTimePatternWarningText', {
         defaultMessage:
@@ -593,9 +495,7 @@ export function getUiSettingDefaults() {
       }),
     },
     'format:defaultTypeMap': {
-      name: i18n.translate('kbn.advancedSettings.format.defaultTypeMapTitle', {
-        defaultMessage: 'Field type format name',
-      }),
+      name: _toi18n('Field type format name', 'defaultTypeMapTitle', 'format'),
       value:
 `{
   "ip": { "id": "ip", "params": {} },
@@ -616,9 +516,7 @@ export function getUiSettingDefaults() {
       }),
     },
     'format:number:defaultPattern': {
-      name: i18n.translate('kbn.advancedSettings.format.numberFormatTitle', {
-        defaultMessage: 'Number format',
-      }),
+      name: _toi18n('Number format', 'numberFormatTitle', 'format'),
       value: '0,0.[000]',
       type: 'string',
       description: i18n.translate('kbn.advancedSettings.format.numberFormatText', {
@@ -638,9 +536,7 @@ export function getUiSettingDefaults() {
       }),
     },
     'format:bytes:defaultPattern': {
-      name: i18n.translate('kbn.advancedSettings.format.bytesFormatTitle', {
-        defaultMessage: 'Bytes format',
-      }),
+      name: _toi18n('Bytes format', 'bytesFormatTitle', 'format'),
       value: '0,0.[000]b',
       type: 'string',
       description: i18n.translate('kbn.advancedSettings.format.bytesFormatText', {
@@ -659,9 +555,7 @@ export function getUiSettingDefaults() {
       }),
     },
     'format:percent:defaultPattern': {
-      name: i18n.translate('kbn.advancedSettings.format.percentFormatTitle', {
-        defaultMessage: 'Percent format',
-      }),
+      name: _toi18n('Percent format', 'percentFormatTitle', 'format'),
       value: '0,0.[000]%',
       type: 'string',
       description: i18n.translate('kbn.advancedSettings.format.percentFormatText', {
@@ -680,9 +574,7 @@ export function getUiSettingDefaults() {
       }),
     },
     'format:currency:defaultPattern': {
-      name: i18n.translate('kbn.advancedSettings.format.currencyFormatTitle', {
-        defaultMessage: 'Currency format',
-      }),
+      name: _toi18n('Currency format', 'currencyFormatTitle', 'format'),
       value: '($0,0.[00])',
       type: 'string',
       description: i18n.translate('kbn.advancedSettings.format.currencyFormatText', {
@@ -701,9 +593,7 @@ export function getUiSettingDefaults() {
       }),
     },
     'format:number:defaultLocale': {
-      name: i18n.translate('kbn.advancedSettings.format.formattingLocaleTitle', {
-        defaultMessage: 'Formatting locale',
-      }),
+      name: _toi18n('Formatting locale', 'formattingLocaleTitle', 'format'),
       value: 'en',
       type: 'select',
       options: numeralLanguageIds,
@@ -724,29 +614,19 @@ export function getUiSettingDefaults() {
       }),
     },
     'savedObjects:perPage': {
-      name: i18n.translate('kbn.advancedSettings.savedObjects.perPageTitle', {
-        defaultMessage: 'Objects per page',
-      }),
+      name: _toi18n('Objects per page', 'perPageTitle', 'savedObjects'),
       value: 20,
       type: 'number',
-      description: i18n.translate('kbn.advancedSettings.savedObjects.perPageText', {
-        defaultMessage: 'Number of objects to show per page in the load dialog',
-      }),
+      description: _toi18n('Number of objects to show per page in the load dialog', 'perPageText', 'savedObjects'),
     },
     'savedObjects:listingLimit': {
-      name: i18n.translate('kbn.advancedSettings.savedObjects.listingLimitTitle', {
-        defaultMessage: 'Objects listing limit',
-      }),
+      name: _toi18n('Objects listing limit', 'listingLimitTitle', 'savedObjects'),
       type: 'number',
       value: 1000,
-      description: i18n.translate('kbn.advancedSettings.savedObjects.listingLimitText', {
-        defaultMessage: 'Number of objects to fetch for the listing pages',
-      }),
+      description: _toi18n('Number of objects to fetch for the listing pages', 'listingLimitText', 'savedObjects'),
     },
     'timepicker:timeDefaults': {
-      name: i18n.translate('kbn.advancedSettings.timepicker.timeDefaultsTitle', {
-        defaultMessage: 'Time picker defaults',
-      }),
+      name: _toi18n('Time picker defaults', 'timeDefaultsTitle', 'timepicker'),
       value:
 `{
   "from": "now-15m",
@@ -754,53 +634,45 @@ export function getUiSettingDefaults() {
   "mode": "quick"
 }`,
       type: 'json',
-      description: i18n.translate('kbn.advancedSettings.timepicker.timeDefaultsText', {
-        defaultMessage: 'The timefilter selection to use when Kibana is started without one',
-      }),
+      description: _toi18n('The timefilter selection to use when Kibana is started without one', 'timeDefaultsText', 'timepicker'),
     },
     'timepicker:refreshIntervalDefaults': {
-      name: i18n.translate('kbn.advancedSettings.timepicker.refreshIntervalDefaultsTitle', {
-        defaultMessage: 'Time picker refresh interval',
-      }),
+      name: _toi18n('Time picker refresh interval', 'refreshIntervalDefaultsTitle', 'timepicker'),
       value:
 `{
   "pause": false,
   "value": 0
 }`,
       type: 'json',
-      description: i18n.translate('kbn.advancedSettings.timepicker.refreshIntervalDefaultsText', {
-        defaultMessage: `The timefilter's default refresh interval`,
-      }),
+      description: _toi18n('timepicker', 'refreshIntervalDefaultsText', `The timefilter's default refresh interval`),
     },
     'timepicker:quickRanges': {
-      name: i18n.translate('kbn.advancedSettings.timepicker.quickRangesTitle', {
-        defaultMessage: 'Time picker quick ranges',
-      }),
+      name: _toi18n('Time picker quick ranges', 'quickRangesTitle', 'timepicker'),
       value: JSON.stringify([
-        { from: 'now/d',    to: 'now/d',    display: 'Today',                 section: 0 },
-        { from: 'now/w',    to: 'now/w',    display: 'This week',             section: 0 },
-        { from: 'now/M',    to: 'now/M',    display: 'This month',            section: 0 },
-        { from: 'now/y',    to: 'now/y',    display: 'This year',             section: 0 },
-        { from: 'now/d',    to: 'now',      display: 'Today so far',          section: 0 },
-        { from: 'now/w',    to: 'now',      display: 'Week to date',          section: 0 },
-        { from: 'now/M',    to: 'now',      display: 'Month to date',         section: 0 },
-        { from: 'now/y',    to: 'now',      display: 'Year to date',          section: 0 },
+        { from: 'now/d',    to: 'now/d',    display: _toi18n('Today', '', 'timepicker'),                 section: 0 },
+        { from: 'now/w',    to: 'now/w',    display: _toi18n('This week', '', 'timepicker'),             section: 0 },
+        { from: 'now/M',    to: 'now/M',    display: _toi18n('This month', '', 'timepicker'),            section: 0 },
+        { from: 'now/y',    to: 'now/y',    display: _toi18n('This year', '', 'timepicker'),             section: 0 },
+        { from: 'now/d',    to: 'now',      display: _toi18n('Today so far', '', 'timepicker'),          section: 0 },
+        { from: 'now/w',    to: 'now',      display: _toi18n('Week to date', '', 'timepicker'),          section: 0 },
+        { from: 'now/M',    to: 'now',      display: _toi18n('Month to date', '', 'timepicker'),         section: 0 },
+        { from: 'now/y',    to: 'now',      display: _toi18n('Year to date', '', 'timepicker'),          section: 0 },
 
-        { from: 'now-15m',  to: 'now',      display: 'Last 15 minutes',       section: 1 },
-        { from: 'now-30m',  to: 'now',      display: 'Last 30 minutes',       section: 1 },
-        { from: 'now-1h',   to: 'now',      display: 'Last 1 hour',           section: 1 },
-        { from: 'now-4h',   to: 'now',      display: 'Last 4 hours',          section: 1 },
-        { from: 'now-12h',  to: 'now',      display: 'Last 12 hours',         section: 1 },
-        { from: 'now-24h',  to: 'now',      display: 'Last 24 hours',         section: 1 },
-        { from: 'now-7d',   to: 'now',      display: 'Last 7 days',           section: 1 },
+        { from: 'now-15m',  to: 'now',      display: _toi18n('Last 15 minutes', '', 'timepicker'),       section: 1 },
+        { from: 'now-30m',  to: 'now',      display: _toi18n('Last 30 minutes', '', 'timepicker'),       section: 1 },
+        { from: 'now-1h',   to: 'now',      display: _toi18n('Last 1 hour', '', 'timepicker'),           section: 1 },
+        { from: 'now-4h',   to: 'now',      display: _toi18n('Last 4 hours', '', 'timepicker'),          section: 1 },
+        { from: 'now-12h',  to: 'now',      display: _toi18n('Last 12 hours', '', 'timepicker'),         section: 1 },
+        { from: 'now-24h',  to: 'now',      display: _toi18n('Last 24 hours', '', 'timepicker'),         section: 1 },
+        { from: 'now-7d',   to: 'now',      display: _toi18n('Last 7 days', '', 'timepicker'),           section: 1 },
 
-        { from: 'now-30d',  to: 'now',      display: 'Last 30 days',          section: 2 },
-        { from: 'now-60d',  to: 'now',      display: 'Last 60 days',          section: 2 },
-        { from: 'now-90d',  to: 'now',      display: 'Last 90 days',          section: 2 },
-        { from: 'now-6M',   to: 'now',      display: 'Last 6 months',         section: 2 },
-        { from: 'now-1y',   to: 'now',      display: 'Last 1 year',           section: 2 },
-        { from: 'now-2y',   to: 'now',      display: 'Last 2 years',          section: 2 },
-        { from: 'now-5y',   to: 'now',      display: 'Last 5 years',          section: 2 },
+        { from: 'now-30d',  to: 'now',      display: _toi18n('Last 30 days', '', 'timepicker'),          section: 2 },
+        { from: 'now-60d',  to: 'now',      display: _toi18n('Last 60 days', '', 'timepicker'),          section: 2 },
+        { from: 'now-90d',  to: 'now',      display: _toi18n('Last 90 days', '', 'timepicker'),          section: 2 },
+        { from: 'now-6M',   to: 'now',      display: _toi18n('Last 6 months', '', 'timepicker'),         section: 2 },
+        { from: 'now-1y',   to: 'now',      display: _toi18n('Last 1 year', '', 'timepicker'),           section: 2 },
+        { from: 'now-2y',   to: 'now',      display: _toi18n('Last 2 years', '', 'timepicker'),          section: 2 },
+        { from: 'now-5y',   to: 'now',      display: _toi18n('Last 5 years', '', 'timepicker'),          section: 2 },
 
       ], null, 2),
       type: 'json',
@@ -824,22 +696,15 @@ export function getUiSettingDefaults() {
       }),
     },
     'theme:darkMode': {
-      name: i18n.translate('kbn.advancedSettings.darkModeTitle', {
-        defaultMessage: 'Dark mode',
-      }),
+      name: _toi18n('Dark mode', 'darkModeTitle'),
       value: false,
-      description: i18n.translate('kbn.advancedSettings.darkModeText', {
-        defaultMessage: `Enable a dark mode for the Kibana UI. A page refresh is required for the setting to be applied.`,
-      }),
+      description: _toi18n(`Enable a dark mode for the Kibana UI. A page refresh is required for the setting to be applied.`,
+        'darkModeText')
     },
     'filters:pinnedByDefault': {
-      name: i18n.translate('kbn.advancedSettings.pinFiltersTitle', {
-        defaultMessage: 'Pin filters by default',
-      }),
+      name: _toi18n('Pin filters by default', 'pinFiltersTitle'),
       value: false,
-      description: i18n.translate('kbn.advancedSettings.pinFiltersText', {
-        defaultMessage: 'Whether the filters should have a global state (be pinned) by default',
-      }),
+      description: _toi18n('Whether the filters should have a global state (be pinned) by default', 'pinFiltersText'),
     },
     'filterEditor:suggestValues': {
       name: i18n.translate('kbn.advancedSettings.suggestFilterValuesTitle', {
@@ -847,14 +712,11 @@ export function getUiSettingDefaults() {
         description: '"Filter editor" refers to the UI you create filters in.',
       }),
       value: true,
-      description: i18n.translate('kbn.advancedSettings.suggestFilterValuesText', {
-        defaultMessage: 'Set this property to false to prevent the filter editor from suggesting values for fields.',
-      }),
+      description: _toi18n('Set this property to false to prevent the filter editor from suggesting values for fields.',
+        'suggestFilterValuesText'),
     },
     'notifications:banner': {
-      name: i18n.translate('kbn.advancedSettings.notifications.bannerTitle', {
-        defaultMessage: 'Custom banner notification',
-      }),
+      name: _toi18n('Custom banner notification', 'bannerTitle', 'notifications'),
       value: '',
       type: 'markdown',
       description: i18n.translate('kbn.advancedSettings.notifications.bannerText', {
@@ -875,9 +737,7 @@ export function getUiSettingDefaults() {
       category: ['notifications'],
     },
     'notifications:lifetime:banner': {
-      name: i18n.translate('kbn.advancedSettings.notifications.bannerLifetimeTitle', {
-        defaultMessage: 'Banner notification lifetime',
-      }),
+      name: _toi18n('Banner notification lifetime', 'bannerLifetimeTitle', 'notifications'),
       value: 3000000,
       description: i18n.translate('kbn.advancedSettings.notifications.bannerLifetimeText', {
         defaultMessage:
@@ -891,9 +751,7 @@ export function getUiSettingDefaults() {
       category: ['notifications'],
     },
     'notifications:lifetime:error': {
-      name: i18n.translate('kbn.advancedSettings.notifications.errorLifetimeTitle', {
-        defaultMessage: 'Error notification lifetime',
-      }),
+      name: _toi18n('Error notification lifetime', 'errorLifetimeTitle', 'notifications'),
       value: 300000,
       description: i18n.translate('kbn.advancedSettings.notifications.errorLifetimeText', {
         defaultMessage:
@@ -907,9 +765,7 @@ export function getUiSettingDefaults() {
       category: ['notifications'],
     },
     'notifications:lifetime:warning': {
-      name: i18n.translate('kbn.advancedSettings.notifications.warningLifetimeTitle', {
-        defaultMessage: 'Warning notification lifetime',
-      }),
+      name: _toi18n('Warning notification lifetime', 'warningLifetimeTitle', 'notifications'),
       value: 10000,
       description: i18n.translate('kbn.advancedSettings.notifications.warningLifetimeText', {
         defaultMessage:
@@ -923,9 +779,7 @@ export function getUiSettingDefaults() {
       category: ['notifications'],
     },
     'notifications:lifetime:info': {
-      name: i18n.translate('kbn.advancedSettings.notifications.infoLifetimeTitle', {
-        defaultMessage: 'Info notification lifetime',
-      }),
+      name: _toi18n('Info notification lifetime', 'infoLifetimeTitle', 'notifications'),
       value: 5000,
       description: i18n.translate('kbn.advancedSettings.notifications.infoLifetimeText', {
         defaultMessage:
@@ -939,60 +793,40 @@ export function getUiSettingDefaults() {
       category: ['notifications'],
     },
     'metrics:max_buckets': {
-      name: i18n.translate('kbn.advancedSettings.maxBucketsTitle', {
-        defaultMessage: 'Maximum buckets',
-      }),
+      name: _toi18n('Maximum buckets', 'maxBucketsTitle'),
       value: 2000,
-      description: i18n.translate('kbn.advancedSettings.maxBucketsText', {
-        defaultMessage: 'The maximum number of buckets a single datasource can return',
-      }),
+      description: _toi18n('The maximum number of buckets a single datasource can return', 'maxBucketsText'),
     },
     'state:storeInSessionStorage': {
-      name: i18n.translate('kbn.advancedSettings.storeUrlTitle', {
-        defaultMessage: 'Store URLs in session storage',
-      }),
+      name: _toi18n('Store URLs in session storage', 'storeUrlTitle'),
       value: false,
-      description: i18n.translate('kbn.advancedSettings.storeUrlText', {
-        defaultMessage:
-          'The URL can sometimes grow to be too large for some browsers to handle. ' +
-          'To counter-act this we are testing if storing parts of the URL in session storage could help. ' +
-          'Please let us know how it goes!'
-      }),
+      description: _toi18n(
+        'The URL can sometimes grow to be too large for some browsers to handle. ' +
+        'To counter-act this we are testing if storing parts of the URL in session storage could help. ' +
+        'Please let us know how it goes!',
+        'storeUrlText'
+      ),
     },
     'indexPattern:placeholder': {
-      name: i18n.translate('kbn.advancedSettings.indexPatternPlaceholderTitle', {
-        defaultMessage: 'Index pattern placeholder',
-      }),
+      name: _toi18n('Index pattern placeholder', 'indexPatternPlaceholderTitle'),
       value: '',
-      description: i18n.translate('kbn.advancedSettings.indexPatternPlaceholderText', {
-        defaultMessage:
-          'The placeholder for the "Index pattern name" field in "Management > Index Patterns > Create Index Pattern".',
-      }),
+      description: _toi18n('The placeholder for the "Index pattern name" field in "Management > Index Patterns > Create Index Pattern".',
+        'indexPatternPlaceholderText'),
     },
     'context:defaultSize': {
-      name: i18n.translate('kbn.advancedSettings.context.defaultSizeTitle', {
-        defaultMessage: 'Context size',
-      }),
+      name: _toi18n('Context size', 'defaultSizeTitle', 'context'),
       value: 5,
-      description: i18n.translate('kbn.advancedSettings.context.defaultSizeText', {
-        defaultMessage: 'The number of surrounding entries to show in the context view',
-      }),
+      description: _toi18n('The number of surrounding entries to show in the context view', 'defaultSizeText', 'context'),
       category: ['discover'],
     },
     'context:step': {
-      name: i18n.translate('kbn.advancedSettings.context.sizeStepTitle', {
-        defaultMessage: 'Context size step',
-      }),
+      name: _toi18n('Context size step', 'sizeStepTitle', 'context'),
       value: 5,
-      description: i18n.translate('kbn.advancedSettings.context.sizeStepText', {
-        defaultMessage: 'The step size to increment or decrement the context size by',
-      }),
+      description: _toi18n('The step size to increment or decrement the context size by', 'sizeStepText', 'context'),
       category: ['discover'],
     },
     'context:tieBreakerFields': {
-      name: i18n.translate('kbn.advancedSettings.context.tieBreakerFieldsTitle', {
-        defaultMessage: 'Tie breaker fields',
-      }),
+      name: _toi18n('Tie breaker fields', 'tieBreakerFieldsTitle', 'context'),
       value: ['_doc'],
       description: i18n.translate('kbn.advancedSettings.context.tieBreakerFieldsText', {
         defaultMessage:
@@ -1002,19 +836,14 @@ export function getUiSettingDefaults() {
       category: ['discover'],
     },
     'accessibility:disableAnimations': {
-      name: i18n.translate('kbn.advancedSettings.disableAnimationsTitle', {
-        defaultMessage: 'Disable Animations',
-      }),
+      name: _toi18n('Disable Animations', 'disableAnimationsTitle'),
       value: false,
-      description: i18n.translate('kbn.advancedSettings.disableAnimationsText', {
-        defaultMessage: 'Turn off all unnecessary animations in the Kibana UI. Refresh the page to apply the changes.',
-      }),
+      description: _toi18n('Turn off all unnecessary animations in the Kibana UI. Refresh the page to apply the changes.',
+        'disableAnimationsText'),
       category: ['accessibility'],
     },
     'rollups:enableIndexPatterns': {
-      name: i18n.translate('kbn.advancedSettings.rollupIndexPatternsTitle', {
-        defaultMessage: 'Enable rollup index patterns',
-      }),
+      name: _toi18n('Enable rollup index patterns', 'rollupIndexPatternsTitle'),
       value: true,
       description: i18n.translate('kbn.advancedSettings.rollupIndexPatternsText', {
         defaultMessage:

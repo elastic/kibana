@@ -15,6 +15,7 @@ angular.module('ui.bootstrap.timepicker', [])
       meridians = angular.isDefined($attrs.meridians) ? $scope.$parent.$eval($attrs.meridians) : timepickerConfig.meridians || $locale.DATETIME_FORMATS.AMPMS;
 
   this.init = function( ngModelCtrl_, inputs ) {
+    debugger;
     ngModelCtrl = ngModelCtrl_;
     ngModelCtrl.$render = this.render;
 
