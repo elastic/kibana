@@ -10,5 +10,5 @@ import { getUsageCollector } from './get_usage_collector';
 export function registerVisualizationsCollector(server: HapiServer): void {
   const { usage } = server;
   const collector = usage.collectorSet.makeUsageCollector(getUsageCollector(server));
-  server.usage.collectorSet.register(collector);
+  usage.collectorSet.register(collector);
 }
