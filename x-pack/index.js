@@ -5,7 +5,6 @@
  */
 
 import { xpackMain } from './plugins/xpack_main';
-import { coreTelemetry } from './plugins/core_telemetry';
 import { graph } from './plugins/graph';
 import { monitoring } from './plugins/monitoring';
 import { reporting } from './plugins/reporting';
@@ -36,11 +35,11 @@ import { remoteClusters } from './plugins/remote_clusters';
 import { crossClusterReplication } from './plugins/cross_cluster_replication';
 import { upgradeAssistant } from './plugins/upgrade_assistant';
 import { uptime } from './plugins/uptime';
+import { ossTelemetry } from './plugins/oss_telemetry';
 
 module.exports = function (kibana) {
   return [
     xpackMain(kibana),
-    coreTelemetry(kibana),
     graph(kibana),
     monitoring(kibana),
     reporting(kibana),
@@ -71,5 +70,6 @@ module.exports = function (kibana) {
     crossClusterReplication(kibana),
     upgradeAssistant(kibana),
     uptime(kibana),
+    ossTelemetry(kibana),
   ];
 };

@@ -6,10 +6,11 @@
 
 import { registerCollectors } from './server/lib/collectors';
 import { registerTasks, scheduleTasks } from './server/lib/tasks';
+import { PLUGIN_ID } from './constants';
 
-export const coreTelemetry = (kibana) => {
+export const ossTelemetry = (kibana) => {
   return new kibana.Plugin({
-    id: 'core_telemetry',
+    id: PLUGIN_ID,
     require: ['elasticsearch', 'xpack_main', 'task_manager'],
 
     init(server) {
