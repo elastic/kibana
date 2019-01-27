@@ -5,9 +5,8 @@
  */
 
 import expect from 'expect.js';
-import { hostsQuery } from '../../../../plugins/secops/public/containers/hosts/index.gql_query';
-import { GetHostsQuery } from '../../../../plugins/secops/public/graphql/types';
-
+import { GetHostsTableQuery } from '../../../../plugins/secops/public/graphql/types';
+import { HostsTableQuery } from './../../../../plugins/secops/public/containers/hosts/index.gql_query';
 import { KbnTestProvider } from './types';
 
 const hostsTests: KbnTestProvider = ({ getService }) => {
@@ -20,8 +19,8 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
 
     it('Make sure that we get Hosts data', () => {
       return client
-        .query<GetHostsQuery.Query>({
-          query: hostsQuery,
+        .query<GetHostsTableQuery.Query>({
+          query: HostsTableQuery,
           variables: {
             sourceId: 'default',
             timerange: {
@@ -45,8 +44,8 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
 
     it('Make sure that pagination is working in Hosts query', () => {
       return client
-        .query<GetHostsQuery.Query>({
-          query: hostsQuery,
+        .query<GetHostsTableQuery.Query>({
+          query: HostsTableQuery,
           variables: {
             sourceId: 'default',
             timerange: {

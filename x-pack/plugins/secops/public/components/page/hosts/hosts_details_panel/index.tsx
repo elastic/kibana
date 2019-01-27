@@ -28,7 +28,7 @@ export const HostDetailsPanel = pure<HostDetailsPanelProps>(({ data, loading }) 
   <EuiFlexItem style={{ maxWidth: 600 }}>
     <EuiPanel>
       <EuiTitle size="s">
-        <h3>{i18n.HOST}</h3>
+        <h3>{i18n.SUMMARY}</h3>
       </EuiTitle>
 
       <EuiHorizontalRule margin="xs" />
@@ -44,7 +44,7 @@ const getHostDetailsItems = (host: HostsEdges) => [
   },
   {
     title: i18n.LAST_BEAT,
-    description: getOrEmpty('node.lastSeen', host),
+    description: getOrEmpty('node.host.last_beat', host),
   },
   {
     title: i18n.ID,

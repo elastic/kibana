@@ -20,6 +20,7 @@ import { HostDetailsPanel } from '../../components/page/hosts/hosts_details_pane
 import { manageQuery } from '../../components/page/manage_query';
 import { GlobalTime } from '../../containers/global_time';
 import { HostsQuery } from '../../containers/hosts';
+import { HostSummaryQuery } from '../../containers/hosts/index.gql_query';
 import { WithSource } from '../../containers/source';
 import * as i18n from './translations';
 
@@ -39,6 +40,7 @@ export const HostDetails = pure<HostComponentProps>(({ match }) => (
               <EuiFlexGroup>
                 <HostsQuery
                   sourceId="default"
+                  query={HostSummaryQuery}
                   startDate={from}
                   endDate={to}
                   poll={poll}

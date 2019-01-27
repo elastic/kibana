@@ -9,11 +9,11 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { pure } from 'recompose';
 
-import { GetHostsQuery, HostsEdges, PageInfo } from '../../graphql/types';
+import { GetHostsTableQuery, GetHostSummaryQuery, HostsEdges, PageInfo } from '../../graphql/types';
 
+import { DocumentNode } from 'graphql';
 import { connect } from 'react-redux';
 import { hostsSelector, inputsModel, State } from '../../store';
-import { hostsQuery } from './index.gql_query';
 
 export interface HostsArgs {
   id: string;
@@ -27,6 +27,7 @@ export interface HostsArgs {
 
 export interface OwnProps {
   id?: string;
+  query: DocumentNode;
   children: (args: HostsArgs) => React.ReactNode;
   sourceId: string;
   startDate: number;
@@ -42,9 +43,22 @@ export interface HostsComponentReduxProps {
 type HostsProps = OwnProps & HostsComponentReduxProps;
 
 const HostsComponentQuery = pure<HostsProps>(
-  ({ id = 'hostsQuery', children, filterQuery, sourceId, startDate, endDate, limit, poll }) => (
-    <Query<GetHostsQuery.Query, GetHostsQuery.Variables>
-      query={hostsQuery}
+  ({
+    id = 'hostsQuery',
+    query,
+    children,
+    filterQuery,
+    sourceId,
+    startDate,
+    endDate,
+    limit,
+    poll,
+  }) => (
+    <Query<
+      GetHostsTableQuery.Query | GetHostSummaryQuery.Query,
+      GetHostsTableQuery.Variables | GetHostSummaryQuery.Variables
+    >
+      query={query}
       fetchPolicy="cache-and-network"
       pollInterval={poll}
       notifyOnNetworkStatusChange

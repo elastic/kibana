@@ -6,8 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const HOST = i18n.translate('xpack.secops.hostDetails.host', {
-  defaultMessage: 'Host',
+export const SUMMARY = i18n.translate('xpack.secops.hostDetails.summary', {
+  defaultMessage: 'Summary',
 });
 
 export const NAME = i18n.translate('xpack.secops.hostDetails.name', {
