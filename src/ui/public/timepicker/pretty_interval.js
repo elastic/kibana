@@ -17,29 +17,39 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 const MS_IN_SECOND = 1000;
 const MS_IN_MINUTE = 60 * MS_IN_SECOND;
 const MS_IN_HOUR = 60 * MS_IN_MINUTE;
 const MS_IN_DAY = 24 * MS_IN_HOUR;
 
 export function prettyInterval(intervalInMs) {
+  let interval;
+  let units;
   if (intervalInMs === 0) {
-    return 'Off';
+    return i18n.translate(`kbn.timeline.off`, { defaultMessage: 'off' });
   } else if (intervalInMs < MS_IN_MINUTE) {
-    const intervalInSeconds = Math.round(intervalInMs / MS_IN_SECOND);
-    const units = intervalInSeconds > 1 ? 'seconds' : 'second';
-    return `${intervalInSeconds} ${units}`;
+    interval = Math.round(intervalInMs / MS_IN_SECOND);
+    units = (interval > 1 ?
+      (i18n.translate(`kbn.timeline.seconds`, { defaultMessage: 'seconds' })) :
+      (i18n.translate(`kbn.timeline.second`, { defaultMessage: 'second' })));
   } else if (intervalInMs < MS_IN_HOUR) {
-    const intervalInMinutes = Math.round(intervalInMs / MS_IN_MINUTE);
-    const units = intervalInMinutes > 1 ? 'minutes' : 'minute';
-    return `${intervalInMinutes} ${units}`;
+    interval = Math.round(intervalInMs / MS_IN_MINUTE);
+    units = (interval > 1 ?
+      (i18n.translate(`kbn.timeline.minutes`, { defaultMessage: 'minutes' })) :
+      (i18n.translate(`kbn.timeline.minute`, { defaultMessage: 'minute' })));
   } else if (intervalInMs < MS_IN_DAY) {
-    const intervalInHours = Math.round(intervalInMs / MS_IN_HOUR);
-    const units = intervalInHours > 1 ? 'hours' : 'hour';
-    return `${intervalInHours} ${units}`;
+    interval = Math.round(intervalInMs / MS_IN_HOUR);
+    units = (interval > 1 ?
+      (i18n.translate(`kbn.timeline.hours`, { defaultMessage: 'hours' })) :
+      (i18n.translate(`kbn.timeline.hour`, { defaultMessage: 'hour' })));
+  } else {
+    interval = Math.round(intervalInMs / MS_IN_DAY);
+    units = (interval > 1 ?
+      (i18n.translate(`kbn.timeline.hours`, { defaultMessage: 'days' })) :
+      (i18n.translate(`kbn.timeline.hour`, { defaultMessage: 'day' })));
   }
 
-  const intervalInDays = Math.round(intervalInMs / MS_IN_DAY);
-  const units = intervalInDays > 1 ? 'days' : 'day';
-  return `${intervalInDays} ${units}`;
+  return `${interval} ${units}`;
 }
