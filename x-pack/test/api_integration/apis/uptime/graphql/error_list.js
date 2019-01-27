@@ -9,7 +9,7 @@ import { getErrorListQueryString } from '../../../../../plugins/uptime/public/co
 import errorList from './fixtures/error_list';
 import errorListFilteredById from './fixtures/error_list_filtered_by_id';
 import errorListFilteredByPort from './fixtures/error_list_filtered_by_port';
-import errorListFilteredBbyPortAndScheme from './fixtures/error_list_filtered_by_port_and_scheme';
+import errorListFilteredByPortAndType from './fixtures/error_list_filtered_by_port_and_type';
 
 export default function ({ getService }) {
   describe('errorList query', () => {
@@ -57,9 +57,9 @@ export default function ({ getService }) {
         operationName: 'ErrorList',
         query: getErrorListQueryString,
         variables: {
-          dateRangeStart: 1547805782000,
-          dateRangeEnd: 1547852582000,
-          filters: `{"bool":{"must":[{"match":{"tcp.port":{"query":"80","operator":"and"}}}]}}`,
+          dateRangeStart: '2019-01-25T04:30:54.740Z',
+          dateRangeEnd: '2019-01-28T04:50:54.740Z',
+          filters: `{"bool":{"must":[{"match":{"url.port":{"query":"12349","operator":"and"}}}]}}`,
         },
       };
       const {
@@ -76,11 +76,11 @@ export default function ({ getService }) {
         operationName: 'ErrorList',
         query: getErrorListQueryString,
         variables: {
-          dateRangeStart: 1547805782000,
-          dateRangeEnd: 1547852582000,
+          dateRangeStart: '2019-01-25T04:30:54.740Z',
+          dateRangeEnd: '2019-01-28T04:50:54.740Z',
           filters:
-            `{"bool":{"must":[{"match":{"tcp.port":{"query":"80","operator":"and"}}},` +
-            `{"match":{"monitor.scheme":{"query":"http","operator":"and"}}}]}}`,
+            `{"bool":{"must":[{"match":{"url.port":{"query":"12349","operator":"and"}}},` +
+            `{"match":{"monitor.type":{"query":"http","operator":"and"}}}]}}`,
         },
       };
       const {
@@ -89,7 +89,7 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getErrorListQuery });
-      expect(data).to.eql(errorListFilteredBbyPortAndScheme);
+      expect(data).to.eql(errorListFilteredByPortAndType);
     });
   });
 }
