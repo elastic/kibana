@@ -19,7 +19,10 @@ export default function ({ getService }) {
       const getPingsQuery = {
         operationName: 'PingList',
         query: getPingsQueryString,
-        variables: { dateRangeStart: 1547827200000, dateRangeEnd: 1547852582000 },
+        variables: {
+          dateRangeStart: '2019-01-25T04:30:54.740Z',
+          dateRangeEnd: '2019-01-28T04:50:54.740Z',
+        },
       };
       const {
         body: { data },
@@ -27,7 +30,9 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getPingsQuery });
-      const { allPings: { pings } } = data;
+      const {
+        allPings: { pings },
+      } = data;
       expect(pings).length(10);
       expect(data).to.eql(pingList);
     });
@@ -37,7 +42,11 @@ export default function ({ getService }) {
       const getPingsQuery = {
         operationName: 'PingList',
         query: getPingsQueryString,
-        variables: { dateRangeStart: 1547827200000, dateRangeEnd: 1547852582000, size: SIZE },
+        variables: {
+          dateRangeStart: '2019-01-25T04:30:54.740Z',
+          dateRangeEnd: '2019-01-28T04:50:54.740Z',
+          size: SIZE,
+        },
       };
       const {
         body: { data },
@@ -45,20 +54,22 @@ export default function ({ getService }) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getPingsQuery });
-      const { allPings: { pings } } = data;
+      const {
+        allPings: { pings },
+      } = data;
       expect(pings).length(SIZE);
       expect(data).to.eql(pingListCount);
     });
 
     it('returns a list of pings for a monitor ID', async () => {
       const SIZE = 15;
-      const MONITOR_ID = 'http@https://www.elastic.co';
+      const MONITOR_ID = 'auto-tcp-0X81440A68E839814C';
       const getPingsQuery = {
         operationName: 'PingList',
         query: getPingsQueryString,
         variables: {
-          dateRangeStart: 1547805782000,
-          dateRangeEnd: 1547852582000,
+          dateRangeStart: '2019-01-25T04:30:54.740Z',
+          dateRangeEnd: '2019-01-28T04:50:54.740Z',
           monitorId: MONITOR_ID,
           size: SIZE,
         },
@@ -74,13 +85,13 @@ export default function ({ getService }) {
 
     it('returns a list of pings sorted ascending', async () => {
       const SIZE = 5;
-      const MONITOR_ID = 'http@https://www.elastic.co';
+      const MONITOR_ID = 'auto-tcp-0X81440A68E839814C';
       const getPingsQuery = {
         operationName: 'PingList',
         query: getPingsQueryString,
         variables: {
-          dateRangeStart: 1547805782000,
-          dateRangeEnd: 1547852582000,
+          dateRangeStart: '2019-01-25T04:30:54.740Z',
+          dateRangeEnd: '2019-01-28T04:50:54.740Z',
           monitorId: MONITOR_ID,
           size: SIZE,
           sort: 'asc',

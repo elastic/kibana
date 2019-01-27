@@ -1,75 +1,75 @@
 {
   "allPings": {
-    "total": 798,
+    "total": 2390,
     "pings": [
       {
-        "timestamp": "2019-01-18T22:02:31.383Z",
-        "http": { "response": { "status_code": 200 } },
+        "timestamp": "2019-01-26T04:40:05.739Z",
+        "http": null,
         "error": null,
         "monitor": {
-          "duration": { "us": 925862 },
-          "id": "http@https://www.elastic.co",
-          "ip": "151.101.202.217",
-          "name": "http",
-          "scheme": "https",
+          "duration": { "us": 1343 },
+          "id": "auto-tcp-0X81440A68E839814C",
+          "ip": "127.0.0.1",
+          "name": "",
+          "scheme": null,
           "status": "up",
-          "type": "http"
+          "type": "tcp"
         }
       },
       {
-        "timestamp": "2019-01-18T22:02:34.383Z",
-        "http": { "response": { "status_code": 200 } },
+        "timestamp": "2019-01-26T04:40:05.739Z",
+        "http": null,
         "error": null,
         "monitor": {
-          "duration": { "us": 738176 },
-          "id": "http@https://www.elastic.co",
-          "ip": "151.101.202.217",
-          "name": "http",
-          "scheme": "https",
+          "duration": { "us": 1343 },
+          "id": "auto-tcp-0X81440A68E839814C",
+          "ip": "127.0.0.1",
+          "name": "",
+          "scheme": null,
           "status": "up",
-          "type": "http"
+          "type": "tcp"
         }
       },
       {
-        "timestamp": "2019-01-18T22:02:37.383Z",
-        "http": { "response": { "status_code": 200 } },
+        "timestamp": "2019-01-26T04:40:06.739Z",
+        "http": null,
         "error": null,
         "monitor": {
-          "duration": { "us": 684949 },
-          "id": "http@https://www.elastic.co",
-          "ip": "151.101.202.217",
-          "name": "http",
-          "scheme": "https",
+          "duration": { "us": 1153 },
+          "id": "auto-tcp-0X81440A68E839814C",
+          "ip": "127.0.0.1",
+          "name": "",
+          "scheme": null,
           "status": "up",
-          "type": "http"
+          "type": "tcp"
         }
       },
       {
-        "timestamp": "2019-01-18T22:02:40.384Z",
-        "http": { "response": { "status_code": 200 } },
+        "timestamp": "2019-01-26T04:40:06.739Z",
+        "http": null,
         "error": null,
         "monitor": {
-          "duration": { "us": 773959 },
-          "id": "http@https://www.elastic.co",
-          "ip": "151.101.202.217",
-          "name": "http",
-          "scheme": "https",
+          "duration": { "us": 1153 },
+          "id": "auto-tcp-0X81440A68E839814C",
+          "ip": "127.0.0.1",
+          "name": "",
+          "scheme": null,
           "status": "up",
-          "type": "http"
+          "type": "tcp"
         }
       },
       {
-        "timestamp": "2019-01-18T22:02:43.385Z",
-        "http": { "response": { "status_code": 200 } },
+        "timestamp": "2019-01-26T04:40:07.739Z",
+        "http": null,
         "error": null,
         "monitor": {
-          "duration": { "us": 483803 },
-          "id": "http@https://www.elastic.co",
-          "ip": "151.101.202.217",
-          "name": "http",
-          "scheme": "https",
+          "duration": { "us": 1842 },
+          "id": "auto-tcp-0X81440A68E839814C",
+          "ip": "127.0.0.1",
+          "name": "",
+          "scheme": null,
           "status": "up",
-          "type": "http"
+          "type": "tcp"
         }
       }
     ]
