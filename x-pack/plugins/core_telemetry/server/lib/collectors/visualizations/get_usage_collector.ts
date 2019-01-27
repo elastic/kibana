@@ -16,7 +16,7 @@ export function getUsageCollector(server: HapiServer) {
       let docs;
       try {
         ({ docs } = await taskManager.fetch({
-          bool: { filter: { term: { _id: `${PLUGIN_ID}-${VIS_TELEMETRY_TASK}` } } },
+          query: { bool: { filter: { term: { _id: `${PLUGIN_ID}-${VIS_TELEMETRY_TASK}` } } } },
         }));
       } catch (err) {
         const errMessage = err && err.message ? err.message : err.toString();

@@ -5,8 +5,8 @@
  */
 
 import { HapiServer } from '../../../';
-import { getUsageCollector } from './visualizations/get_usage_collector';
+import { registerVisualizationsCollector } from './visualizations/register_usage_collector';
 
 export function registerCollectors(server: HapiServer) {
-  getUsageCollector(server);
+  registerVisualizationsCollector(server);
 }
