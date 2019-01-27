@@ -25,17 +25,7 @@ import { RenderCreateIndexPatternPrompt } from './create_index_pattern_prompt';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 
 export class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      dismissIntro: false,
-    };
-  }
-
   render() {
-    const showList = !this.state.showCreateIndexPattern && this.props.indexPatterns.length > 0;
-    const showPrompt = !this.state.showCreateIndexPattern && this.props.indexPatterns.length === 0;
-
     return (
       <I18nProvider>
         <div>
@@ -52,12 +42,10 @@ export class App extends React.Component {
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
-          {showList && (<IndexPatternTable indexPatterns={this.props.indexPatterns} />)}
-          {showPrompt && (<RenderCreateIndexPatternPrompt
+          {this.props.indexPatterns.length === 0 ? (<RenderCreateIndexPatternPrompt
             onCreateIndexPattern={() => this.setState({ 'showCreateIndexPattern': true })}
             onShowSystemIndices={() => this.setState({ 'showCreateIndexPattern': true })}
-          />)}
-          {this.state.showCreateIndexPattern && 'Wizard'}
+          />) : (<IndexPatternTable indexPatterns={this.props.indexPatterns} />)}
         </div>
       </I18nProvider>
     );

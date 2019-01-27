@@ -26,6 +26,7 @@ import './edit_index_pattern';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import indexTemplate from './index.html';
+import indexPatternListTemplate from './index_pattern_list/list.html';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { i18n } from '@kbn/i18n';
@@ -84,6 +85,13 @@ const indexPatternsResolutions = {
 uiRoutes
   .defaults(/management\/kibana\/(index_patterns|index_pattern)/, {
     resolve: indexPatternsResolutions
+  });
+
+
+uiRoutes
+  .when('/management/kibana/index_patterns', {
+    template: indexPatternListTemplate
+    //todo - template aaand breadcrumbs aaaand ?
   });
 
 // wrapper directive, which sets some global stuff up like the left nav
@@ -153,7 +161,7 @@ uiModules.get('apps/management')
 management.getSection('kibana').register('index_patterns', {
   display: i18n.translate('kbn.management.indexPattern.sectionsHeader', { defaultMessage: 'Index Patterns' }),
   order: 0,
-  url: '#/management/kibana/index_pattern/'
+  url: '#/management/kibana/index_patterns/'
 });
 
 FeatureCatalogueRegistryProvider.register(() => {
@@ -163,7 +171,7 @@ FeatureCatalogueRegistryProvider.register(() => {
     description: i18n.translate('kbn.management.indexPatternLabel',
       { defaultMessage: 'Manage the index patterns that help retrieve your data from Elasticsearch.' }),
     icon: 'indexPatternApp',
-    path: '/app/kibana#/management/kibana/index_pattern',
+    path: '/app/kibana#/management/kibana/index_patterns',
     showOnHomePage: true,
     category: FeatureCatalogueCategory.ADMIN
   };
