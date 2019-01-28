@@ -53,7 +53,7 @@ export const LogFlyout = injectI18n(
           <span>
             <EuiToolTip
               content={intl.formatMessage({
-                id: 'xpack.infra.logFlyout.setFilter',
+                id: 'xpack.infra.logFlyout.setFilterTooltip',
                 defaultMessage: 'Set Filter',
               })}
             >
