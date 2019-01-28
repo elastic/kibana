@@ -175,7 +175,7 @@ interface ElasticsearchClientLogging {
 }
 
 interface AssistantAPIClientParams extends GenericParams {
-  path: '/_xpack/migration/assistance';
+  path: '/_migration/assistance';
   method: 'GET';
 }
 
@@ -191,7 +191,7 @@ export interface AssistanceAPIResponse {
 }
 
 interface DeprecationAPIClientParams extends GenericParams {
-  path: '/_xpack/migration/deprecations';
+  path: '/_migration/deprecations';
   method: 'GET';
 }
 
