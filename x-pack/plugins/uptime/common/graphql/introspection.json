@@ -138,26 +138,6 @@
                 "defaultValue": null
               },
               {
-                "name": "downCount",
-                "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "Int", "ofType": null }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "windowSize",
-                "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "Int", "ofType": null }
-                },
-                "defaultValue": null
-              },
-              {
                 "name": "filters",
                 "description": "",
                 "type": { "kind": "SCALAR", "name": "String", "ofType": null },
@@ -396,6 +376,16 @@
         "possibleTypes": null
       },
       {
+        "kind": "SCALAR",
+        "name": "UnsignedInteger",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "Ping",
         "description": "A request sent from a monitor to a host",
@@ -409,6 +399,14 @@
               "name": null,
               "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
             },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "millisFromNow",
+            "description": "Milliseconds from the timestamp to the current time",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -1364,16 +1362,6 @@
         "possibleTypes": null
       },
       {
-        "kind": "SCALAR",
-        "name": "UnsignedInteger",
-        "description": "",
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
         "kind": "OBJECT",
         "name": "LatestMonitorsResult",
         "description": "",
@@ -1516,14 +1504,6 @@
           },
           {
             "name": "down",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "trouble",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Int", "ofType": null },

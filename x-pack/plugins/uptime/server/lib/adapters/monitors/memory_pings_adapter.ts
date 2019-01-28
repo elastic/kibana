@@ -39,8 +39,6 @@ export class UMMemoryMonitorsAdapter implements UMMonitorsAdapter {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    downCount: number,
-    windowSize: number,
     filters?: string | null
   ): Promise<any> {
     throw new Error('Method not implemented.');

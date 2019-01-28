@@ -11,7 +11,7 @@ import React, { Fragment } from 'react';
 import { Query } from 'react-apollo';
 import { Monitor } from '../../../../common/graphql/types';
 import { UptimeCommonProps } from '../../../uptime_app';
-import { createGetLatestMonitorsQuery } from './get_latest_monitors';
+import { getLatestMonitorsQuery } from './get_latest_monitors';
 
 interface MonitorSelectProps {
   valueOfSelectedMonitor?: string;
@@ -30,7 +30,7 @@ export const MonitorSelect = ({
 }: Props) => (
   <Query
     pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
-    query={createGetLatestMonitorsQuery}
+    query={getLatestMonitorsQuery}
     variables={{ dateRangeStart, dateRangeEnd }}
   >
     {({ loading, error, data }) => {
