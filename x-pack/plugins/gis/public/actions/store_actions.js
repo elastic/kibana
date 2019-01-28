@@ -487,14 +487,12 @@ export function triggerRefreshTimer() {
 }
 
 export function updateLayerStyleForSelectedLayer(style, temporary = true) {
-  return async (dispatch) => {
-    await dispatch({
-      type: UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
-      style: {
-        ...style,
-        temporary
-      },
-    });
+  return {
+    type: UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
+    style: {
+      ...style,
+      temporary
+    },
   };
 }
 
