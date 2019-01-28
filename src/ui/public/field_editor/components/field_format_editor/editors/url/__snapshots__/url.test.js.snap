@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`UrlFormatEditor should render label template help 1`] = `
-<React.Fragment>
+<Fragment>
   <InjectIntl(LabelTemplateFlyout)
     isVisible={true}
     onClose={[Function]}
@@ -122,11 +122,11 @@ exports[`UrlFormatEditor should render label template help 1`] = `
   <InjectIntl(FormatEditorSamplesComponent)
     samples={Array []}
   />
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`UrlFormatEditor should render normally 1`] = `
-<React.Fragment>
+<Fragment>
   <InjectIntl(LabelTemplateFlyout)
     isVisible={false}
     onClose={[Function]}
@@ -247,11 +247,11 @@ exports[`UrlFormatEditor should render normally 1`] = `
   <InjectIntl(FormatEditorSamplesComponent)
     samples={Array []}
   />
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`UrlFormatEditor should render url template help 1`] = `
-<React.Fragment>
+<Fragment>
   <InjectIntl(LabelTemplateFlyout)
     isVisible={false}
     onClose={[Function]}
@@ -372,5 +372,5 @@ exports[`UrlFormatEditor should render url template help 1`] = `
   <InjectIntl(FormatEditorSamplesComponent)
     samples={Array []}
   />
-</React.Fragment>
+</Fragment>
 `;

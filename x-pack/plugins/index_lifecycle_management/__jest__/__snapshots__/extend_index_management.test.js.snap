@@ -248,7 +248,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
     >
       <FormattedMessage
         defaultMessage="Index lifecycle management"
-        id="xpack.idxMgmt.indexLifecycleMgmtSummary.summaryTitle"
+        id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.summaryTitle"
         values={Object {}}
       >
         Index lifecycle management
@@ -269,7 +269,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
     title={
       <FormattedMessage
         defaultMessage="Index lifecycle error"
-        id="xpack.idxMgmt.indexLifecycleMgmtSummary.summaryErrorMessage"
+        id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.summaryErrorMessage"
         values={Object {}}
       />
     }
@@ -317,7 +317,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
         >
           <FormattedMessage
             defaultMessage="Index lifecycle error"
-            id="xpack.idxMgmt.indexLifecycleMgmtSummary.summaryErrorMessage"
+            id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.summaryErrorMessage"
             values={Object {}}
           >
             Index lifecycle error
@@ -521,7 +521,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                   >
                     <FormattedMessage
                       defaultMessage="Show phase definition"
-                      id="xpack.idxMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton"
+                      id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton"
                       values={Object {}}
                     />
                   </EuiLink>
@@ -559,7 +559,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                         >
                           <FormattedMessage
                             defaultMessage="Show phase definition"
-                            id="xpack.idxMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton"
+                            id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton"
                             values={Object {}}
                           >
                             Show phase definition
@@ -720,7 +720,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
     >
       <FormattedMessage
         defaultMessage="Index lifecycle management"
-        id="xpack.idxMgmt.indexLifecycleMgmtSummary.summaryTitle"
+        id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.summaryTitle"
         values={Object {}}
       >
         Index lifecycle management

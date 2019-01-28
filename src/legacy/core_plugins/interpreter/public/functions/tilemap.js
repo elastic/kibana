@@ -25,10 +25,10 @@ export const tilemap = () => ({
   type: 'render',
   context: {
     types: [
-      'kibana_table'
+      'kibana_datatable'
     ],
   },
-  help: i18n.translate('common.core_plugins.interpreter.public.functions.tilemap.help', {
+  help: i18n.translate('interpreter.functions.tilemap.help', {
     defaultMessage: 'Tilemap visualization'
   }),
   args: {
@@ -51,10 +51,8 @@ export const tilemap = () => ({
       as: 'visualization',
       value: {
         visData: convertedData,
-        visConfig: {
-          type: 'tile_map',
-          params: visConfigParams,
-        },
+        visType: 'tile_map',
+        visConfig: visConfigParams,
         params: {
           listenOnChange: true,
         }

@@ -78,7 +78,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       savedObjectsClient,
       version: '5.4.0',
       buildNum: 54099,
-      log: sinon.stub(),
+      logWithMetadata: sinon.stub(),
     });
 
     const config540 = await savedObjectsClient.get('config', '5.4.0');
@@ -104,7 +104,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       savedObjectsClient,
       version: '5.4.1',
       buildNum: 54199,
-      log: sinon.stub(),
+      logWithMetadata: sinon.stub(),
     });
 
     const config541 = await savedObjectsClient.get('config', '5.4.1');
@@ -130,7 +130,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       savedObjectsClient,
       version: '7.0.0-rc1',
       buildNum: 70010,
-      log: sinon.stub(),
+      logWithMetadata: sinon.stub(),
     });
 
     const config700rc1 = await savedObjectsClient.get('config', '7.0.0-rc1');
@@ -157,7 +157,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       savedObjectsClient,
       version: '7.0.0',
       buildNum: 70099,
-      log: sinon.stub(),
+      logWithMetadata: sinon.stub(),
     });
 
     const config700 = await savedObjectsClient.get('config', '7.0.0');
@@ -185,7 +185,7 @@ describe('createOrUpgradeSavedConfig()', () => {
       savedObjectsClient,
       version: '6.2.3-rc1',
       buildNum: 62310,
-      log: sinon.stub(),
+      logWithMetadata: sinon.stub(),
     });
 
     const config623rc1 = await savedObjectsClient.get('config', '6.2.3-rc1');

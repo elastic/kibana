@@ -109,13 +109,10 @@ export function getMemorySeries(
                 defaultMessage: 'System max'
               }
             ),
-            data: series.maximumPercentMemoryUsed,
+            data: series.memoryUsedMax,
             type: 'linemark',
             color: colors.apmBlue,
-            legendValue: asPercent(
-              overallValues.maximumPercentMemoryUsed || 0,
-              1
-            )
+            legendValue: asPercent(overallValues.memoryUsedMax || 0, 1)
           },
           {
             title: i18n.translate(
@@ -124,13 +121,10 @@ export function getMemorySeries(
                 defaultMessage: 'System average'
               }
             ),
-            data: series.averagePercentMemoryUsed,
+            data: series.memoryUsedAvg,
             type: 'linemark',
             color: colors.apmGreen,
-            legendValue: asPercent(
-              overallValues.averagePercentMemoryUsed || 0,
-              1
-            )
+            legendValue: asPercent(overallValues.memoryUsedAvg || 0, 1)
           }
         ];
 

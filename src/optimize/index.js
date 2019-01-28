@@ -62,7 +62,7 @@ export default async (kbnServer, server, config) => {
 
   // only require the FsOptimizer when we need to
   const optimizer = new FsOptimizer({
-    log: (tags, data) => server.log(tags, data),
+    logWithMetadata: (tags, message, metadata) => server.logWithMetadata(tags, message, metadata),
     uiBundles,
     profile: config.get('optimize.profile'),
     sourceMaps: config.get('optimize.sourceMaps'),

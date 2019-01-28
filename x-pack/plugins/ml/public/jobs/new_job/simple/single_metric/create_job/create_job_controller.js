@@ -475,6 +475,7 @@ module
             msgs.error(i18n('xpack.ml.newJob.simple.singleMetric.saveDatafeedFailedErrorMessage', {
               defaultMessage: 'Save datafeed failed: '
             }), resp);
+            $scope.$applyAsync();
           });
       }
     };

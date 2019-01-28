@@ -4,29 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ALayer } from './layer';
+import { AbstractLayer } from './layer';
+import _ from 'lodash';
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { TileStyle } from '../layers/styles/tile_style';
-import _ from 'lodash';
 
-export class TileLayer extends ALayer {
+export class TileLayer extends AbstractLayer {
 
   static type = "TILE";
 
   constructor({ layerDescriptor, source, style }) {
     super({ layerDescriptor, source, style });
-    if (!style || !_.get(style, '_descriptor.properties.alphaValue')) {
-      const defaultStyle = TileStyle.createDescriptor({
-        alphaValue: 1
-      });
-      this._style = new TileStyle(defaultStyle);
+    if (!style) {
+      this._style = new TileStyle();
     }
   }
 
   static createDescriptor(options) {
     const tileLayerDescriptor = super.createDescriptor(options);
     tileLayerDescriptor.type = TileLayer.type;
+    tileLayerDescriptor.alpha = _.get(options, 'alpha', 1);
     tileLayerDescriptor.style =
       TileStyle.createDescriptor(tileLayerDescriptor.style.properties);
     return tileLayerDescriptor;
@@ -57,13 +55,21 @@ export class TileLayer extends ALayer {
 
     mbMap.setLayoutProperty(layerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     mbMap.setLayerZoomRange(layerId, this._descriptor.minZoom, this._descriptor.maxZoom);
-    this._style && this._style.setMBPaintProperties(mbMap, layerId);
+    this._style && this._style.setMBPaintProperties({
+      alpha: this.getAlpha(),
+      mbMap,
+      layerId,
+    });
+  }
+
+  getLayerTypeIconName() {
+    return 'grid';
   }
 
   getIcon() {
     return (
       <EuiIcon
-        type={'grid'}
+        type={this.getLayerTypeIconName()}
       />
     );
   }
