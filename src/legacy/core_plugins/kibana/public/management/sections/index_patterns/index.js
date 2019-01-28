@@ -27,6 +27,8 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import indexTemplate from './index.html';
 import indexPatternListTemplate from './list.html';
+import { IndexPatternTable } from './index_pattern_table';
+import { CreateIndexPatternPrompt } from './create_index_pattern_prompt';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { i18n } from '@kbn/i18n';
@@ -35,7 +37,6 @@ import { EuiBadge } from '@elastic/eui';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { App } from './app';
 
 const INDEX_PATTERN_LIST_DOM_ELEMENT_ID = 'indexPatternListReact';
 
@@ -50,7 +51,10 @@ export function updateIndexPatternList(
 
   render(
     <I18nProvider>
-      <App indexPatterns={indexPatterns} navTo={kbnUrl.redirect} />
+      {indexPatterns.length === 0 ? (<CreateIndexPatternPrompt
+        onCreateIndexPattern={() => kbnUrl.redirect('/management/kibana/index_pattern')}
+        onCreateIndexPatternViewSystem={() => kbnUrl.redirect('/management/kibana/index_pattern?showSystem=true')}
+      />) : (<IndexPatternTable indexPatterns={indexPatterns} navTo={kbnUrl.redirect} />)}
     </I18nProvider>,
     node,
   );
