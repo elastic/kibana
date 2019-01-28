@@ -13,11 +13,16 @@ export interface MappingProperties {
   [key: string]: Mapping;
 }
 
+interface MetaProperties {
+  [key: string]: string;
+}
+
 export interface FlatSettings {
   settings: {
     [key: string]: string;
   };
   mappings: {
     properties?: MappingProperties;
+    _meta?: MetaProperties;
   };
 }

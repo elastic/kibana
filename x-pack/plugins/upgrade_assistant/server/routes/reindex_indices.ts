@@ -38,7 +38,8 @@ export function registerReindexWorker(server: Server, credentialStore: Credentia
     credentialStore,
     callWithRequest,
     callWithInternalUser,
-    log
+    log,
+    server.plugins.apm_oss.indexPatterns
   );
 
   // Wait for ES connection before starting the polling loop.
@@ -68,7 +69,11 @@ export function registerReindexIndicesRoutes(
 
       const callCluster = callWithRequest.bind(null, request) as CallCluster;
       const reindexActions = reindexActionsFactory(client, callCluster);
-      const reindexService = reindexServiceFactory(callCluster, reindexActions);
+      const reindexService = reindexServiceFactory(
+        callCluster,
+        reindexActions,
+        server.plugins.apm_oss.indexPatterns
+      );
 
       try {
         const existingOp = await reindexService.findReindexOperation(indexName);
@@ -105,7 +110,11 @@ export function registerReindexIndicesRoutes(
       const { indexName } = request.params;
       const callCluster = callWithRequest.bind(null, request) as CallCluster;
       const reindexActions = reindexActionsFactory(client, callCluster);
-      const reindexService = reindexServiceFactory(callCluster, reindexActions);
+      const reindexService = reindexServiceFactory(
+        callCluster,
+        reindexActions,
+        server.plugins.apm_oss.indexPatterns
+      );
 
       try {
         const reindexOp = await reindexService.findReindexOperation(indexName);

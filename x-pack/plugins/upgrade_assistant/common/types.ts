@@ -49,4 +49,5 @@ export enum ReindexWarning {
   booleanFields = 1,
 
   // 7.0 -> 8.0 warnings
+  apmReindex,
 }

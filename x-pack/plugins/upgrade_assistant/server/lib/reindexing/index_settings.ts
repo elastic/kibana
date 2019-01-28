@@ -8,6 +8,8 @@ import { flow, omit } from 'lodash';
 import { ReindexWarning } from '../../../common/types';
 import { FlatSettings } from './types';
 
+import { isLegacyApmIndex } from '../apm';
+
 /**
  * Validates, and updates deprecated settings and mappings to be applied to the
  * new updated index.
@@ -23,10 +25,16 @@ export const transformFlatSettings = (flatSettings: FlatSettings) => {
  * Returns an array of warnings that should be displayed to user before reindexing begins.
  * @param flatSettings
  */
-export const getReindexWarnings = (flatSettings: FlatSettings): ReindexWarning[] => {
-  const warnings = [
-    // No warnings yet for 7.0 -> 8.0
-  ] as Array<[ReindexWarning, boolean]>;
+export const getReindexWarnings = (
+  flatSettings: FlatSettings,
+  apmIndexPatterns: string[] = []
+): ReindexWarning[] => {
+  const indexName = flatSettings.settings['index.provided_name'];
+  const apmReindexWarning = isLegacyApmIndex(indexName, apmIndexPatterns, flatSettings.mappings);
+
+  const warnings = [[ReindexWarning.apmReindex, apmReindexWarning]] as Array<
+    [ReindexWarning, boolean]
+  >;
 
   return warnings.filter(([_, applies]) => applies).map(([warning, _]) => warning);
 };

@@ -107,6 +107,35 @@ export class WarningsFlyoutStep extends React.Component<
 
           <EuiSpacer />
 
+          {warnings.includes(ReindexWarning.apmReindex) && (
+            <EuiText>
+              <EuiCheckbox
+                id={idForWarning(ReindexWarning.apmReindex)}
+                label={<strong>This index will be converted to ECS format</strong>}
+                checked={checkedIds[idForWarning(ReindexWarning.apmReindex)]}
+                onChange={this.onChange}
+              />
+              <p className="upgWarningsStep__warningDescription">
+                Starting in version 7.0.0, APM data will be represented in the Elastic Common
+                Schema. In order for legacy data to be included, it is required that the data is
+                re-indexed to support this new format.
+                <br />
+                <EuiLink
+                  href="https://www.elastic.co/guide/en/apm/server/master/breaking-changes.html"
+                  target="_blank"
+                >
+                  Documentation
+                </EuiLink>
+                <br />
+                <EuiLink href="https://github.com/elastic/ecs" target="_blank">
+                  More about ECS
+                </EuiLink>
+              </p>
+            </EuiText>
+          )}
+
+          <EuiSpacer />
+
           {warnings.includes(ReindexWarning.booleanFields) && (
             <EuiText>
               <EuiCheckbox
