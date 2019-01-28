@@ -32,7 +32,6 @@ export class AbstractLayer {
   static createDescriptor(options = {}) {
     const layerDescriptor = { ...options };
 
-    layerDescriptor.source = this._source;
     layerDescriptor.dataRequests = _.get(options, 'dataRequests', []);
     layerDescriptor.id = _.get(options, 'id', Math.random().toString(36).substr(2, 5));
     layerDescriptor.label = options.label && options.label.length > 0 ? options.label : null;
@@ -67,7 +66,7 @@ export class AbstractLayer {
     if (!this.hasErrors()) {
       return await this._source.getAttributions();
     }
-    return '';
+    return [];
   }
 
   getLabel() {

@@ -10,10 +10,11 @@ import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { TileStyle } from '../layers/styles/tile_style';
 
+const TMS_LOAD_TIMEOUT = 32000;
+
 export class TileLayer extends AbstractLayer {
 
   static type = "TILE";
-  TMS_LOAD_TIMEOUT = 32000;
 
   constructor({ layerDescriptor, source, style }) {
     super({ layerDescriptor, source, style });
@@ -36,7 +37,11 @@ export class TileLayer extends AbstractLayer {
     map.on('dataloading', ({ tile }) => {
       if (tile && tile.request) {
         // If at least one tile loads, endpoint/resource is valid
-        tile.request.onloadend = ({ loaded }) => loaded && (tileLoad = true);
+        tile.request.onloadend = ({ loaded }) => {
+          if (loaded) {
+            tileLoad = true;
+          }
+        };
       }
     });
 
@@ -55,7 +60,7 @@ export class TileLayer extends AbstractLayer {
           resolve();
         }
         clearChecks();
-      }, this.TMS_LOAD_TIMEOUT);
+      }, TMS_LOAD_TIMEOUT);
     });
   }
 
@@ -67,42 +72,31 @@ export class TileLayer extends AbstractLayer {
       return;
     }
 
-    let url;
-    return new Promise((resolve, reject) => {
-      try {
-        url = this._source.getUrlTemplate();
-      } catch (e) {
-        reject(e);
-      }
+    const url = this._source.getUrlTemplate();
+    const sourceId = this.getId();
+    mbMap.addSource(sourceId, {
+      type: 'raster',
+      tiles: [url],
+      tileSize: 256,
+      scheme: 'xyz',
+    });
 
-      const sourceId = this.getId();
-      mbMap.addSource(sourceId, {
-        type: 'raster',
-        tiles: [url],
-        tileSize: 256,
-        scheme: 'xyz',
-      });
+    mbMap.addLayer({
+      id: layerId,
+      type: 'raster',
+      source: sourceId,
+      minzoom: 0,
+      maxzoom: 22,
+    });
 
-      mbMap.addLayer({
-        id: layerId,
-        type: 'raster',
-        source: sourceId,
-        minzoom: 0,
-        maxzoom: 22,
-      });
-      resolve();
-    }).then(() => this._tileLoadErrorTracker(mbMap, url)
-    ).then(() => {
-      mbMap.setLayoutProperty(layerId, 'visibility', this.isVisible()
-        ? 'visible'
-        : 'none');
-      mbMap.setLayerZoomRange(layerId, this._descriptor.minZoom,
-        this._descriptor.maxZoom);
-      this._style && this._style.setMBPaintProperties({
-        alpha: this.getAlpha(),
-        mbMap,
-        layerId,
-      });
+    await this._tileLoadErrorTracker(mbMap, url);
+
+    mbMap.setLayoutProperty(layerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+    mbMap.setLayerZoomRange(layerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    this._style && this._style.setMBPaintProperties({
+      alpha: this.getAlpha(),
+      mbMap,
+      layerId,
     });
   }
 
