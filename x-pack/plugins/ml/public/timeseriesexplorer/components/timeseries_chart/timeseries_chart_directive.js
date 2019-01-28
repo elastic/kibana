@@ -24,8 +24,6 @@ import { ResizeChecker } from 'ui/resize_checker';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-import { ml } from 'plugins/ml/services/ml_api_service';
-
 import { I18nContext } from 'ui/i18n';
 
 import chrome from 'ui/chrome';
@@ -56,7 +54,6 @@ module.directive('mlTimeseriesChart', function ($timeout) {
         focusChartData: scope.focusChartData,
         focusForecastData: scope.focusForecastData,
         focusAggregationInterval: scope.focusAggregationInterval,
-        mlAnnotations: ml.annotations,
         modelPlotEnabled: scope.modelPlotEnabled,
         refresh: scope.refresh,
         renderFocusChartOnly,

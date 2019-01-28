@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, ReactNode } from 'react';
+import React, { Component, ComponentType, Fragment, ReactNode } from 'react';
 import * as Rx from 'rxjs';
 
 import {
@@ -26,13 +26,16 @@ import { AnnotationDescriptionList } from '../annotation_description_list';
 import { DeleteAnnotationModal } from '../delete_annotation_modal';
 
 import { Annotation } from '../../../../common/types/annotations';
+import { injectObservablesAsProps } from '../../../util/observable_utils';
 import { annotation$, annotationsRefresh$, AnnotationState } from '../annotations_observable';
 
+import { CommonProps } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { InjectedIntlProps } from 'react-intl';
 import { toastNotifications } from 'ui/notify';
 
 interface Props {
+  annotation: AnnotationState;
   mlAnnotations: {
     deleteAnnotation(id: string | undefined): Promise<any>;
     indexAnnotation(annotation: Annotation): Promise<object>;
@@ -40,257 +43,245 @@ interface Props {
 }
 
 interface State {
-  annotation: AnnotationState;
   isDeleteModalVisible: boolean;
 }
 
-export const AnnotationFlyout = injectI18n(
-  class AnnotationFlyoutIntl extends React.Component<Props & InjectedIntlProps, State> {
-    public state: State = {
-      annotation: null,
-      isDeleteModalVisible: false,
-    };
+class AnnotationFlyoutIntl extends Component<CommonProps & Props & InjectedIntlProps> {
+  public state: State = {
+    isDeleteModalVisible: false,
+  };
 
-    public annotationSub: Rx.Subscription | null = null;
+  public annotationSub: Rx.Subscription | null = null;
 
-    public componentDidMount = () => {
-      this.annotationSub = annotation$.subscribe(annotation => this.setState({ annotation }));
-    };
+  public annotationTextChangeHandler = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    if (this.props.annotation === null) {
+      return;
+    }
 
-    public componentWillUnmount = () => {
-      if (this.annotationSub !== null) {
-        this.annotationSub.unsubscribe();
-      }
-    };
+    annotation$.next({
+      ...this.props.annotation,
+      annotation: e.target.value,
+    });
+  };
 
-    public annotationTextChangeHandler = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      if (this.state.annotation === null) {
-        return;
-      }
+  public cancelEditingHandler = () => {
+    annotation$.next(null);
+  };
 
-      annotation$.next({
-        ...this.state.annotation,
-        annotation: e.target.value,
+  public deleteConfirmHandler = () => {
+    this.setState({ isDeleteModalVisible: true });
+  };
+
+  public deleteHandler = async () => {
+    const { annotation, mlAnnotations, intl } = this.props;
+
+    if (annotation === null) {
+      return;
+    }
+
+    try {
+      await mlAnnotations.deleteAnnotation(annotation._id);
+      toastNotifications.addSuccess(
+        intl.formatMessage(
+          {
+            id: 'xpack.ml.timeSeriesExplorer.timeSeriesChart.deletedAnnotationNotificationMessage',
+            defaultMessage: 'Deleted annotation for job with ID {jobId}.',
+          },
+          { jobId: annotation.job_id }
+        )
+      );
+    } catch (err) {
+      toastNotifications.addDanger(
+        intl.formatMessage(
+          {
+            id:
+              'xpack.ml.timeSeriesExplorer.timeSeriesChart.errorWithDeletingAnnotationNotificationErrorMessage',
+            defaultMessage:
+              'An error occured deleting the annotation for job with ID {jobId}: {error}',
+          },
+          { jobId: annotation.job_id, error: JSON.stringify(err) }
+        )
+      );
+    }
+
+    this.closeDeleteModal();
+    annotation$.next(null);
+    annotationsRefresh$.next();
+  };
+
+  public closeDeleteModal = () => {
+    this.setState({ isDeleteModalVisible: false });
+  };
+
+  public saveOrUpdateAnnotation = () => {
+    const { annotation, mlAnnotations, intl } = this.props;
+
+    if (annotation === null) {
+      return;
+    }
+
+    annotation$.next(null);
+
+    mlAnnotations
+      .indexAnnotation(annotation)
+      .then(() => {
+        annotationsRefresh$.next();
+        if (typeof annotation._id === 'undefined') {
+          toastNotifications.addSuccess(
+            intl.formatMessage(
+              {
+                id:
+                  'xpack.ml.timeSeriesExplorer.timeSeriesChart.addedAnnotationNotificationMessage',
+                defaultMessage: 'Added an annotation for job with ID {jobId}.',
+              },
+              { jobId: annotation.job_id }
+            )
+          );
+        } else {
+          toastNotifications.addSuccess(
+            intl.formatMessage(
+              {
+                id:
+                  'xpack.ml.timeSeriesExplorer.timeSeriesChart.updatedAnnotationNotificationMessage',
+                defaultMessage: 'Updated annotation for job with ID {jobId}.',
+              },
+              { jobId: annotation.job_id }
+            )
+          );
+        }
+      })
+      .catch(resp => {
+        if (typeof annotation._id === 'undefined') {
+          toastNotifications.addDanger(
+            intl.formatMessage(
+              {
+                id:
+                  'xpack.ml.timeSeriesExplorer.timeSeriesChart.errorWithCreatingAnnotationNotificationErrorMessage',
+                defaultMessage:
+                  'An error occured creating the annotation for job with ID {jobId}: {error}',
+              },
+              { jobId: annotation.job_id, error: JSON.stringify(resp) }
+            )
+          );
+        } else {
+          toastNotifications.addDanger(
+            intl.formatMessage(
+              {
+                id:
+                  'xpack.ml.timeSeriesExplorer.timeSeriesChart.errorWithUpdatingAnnotationNotificationErrorMessage',
+                defaultMessage:
+                  'An error occured updating the annotation for job with ID {jobId}: {error}',
+              },
+              { jobId: annotation.job_id, error: JSON.stringify(resp) }
+            )
+          );
+        }
       });
-    };
+  };
 
-    public cancelEditingHandler = () => {
-      annotation$.next(null);
-    };
+  public render(): ReactNode {
+    const { annotation } = this.props;
+    const { isDeleteModalVisible } = this.state;
 
-    public deleteConfirmHandler = () => {
-      this.setState({ isDeleteModalVisible: true });
-    };
+    if (annotation === null) {
+      return null;
+    }
 
-    public deleteHandler = async () => {
-      const { mlAnnotations, intl } = this.props;
-      const { annotation } = this.state;
+    const isExistingAnnotation = typeof annotation._id !== 'undefined';
 
-      if (annotation === null) {
-        return;
-      }
-
-      try {
-        await mlAnnotations.deleteAnnotation(annotation._id);
-        toastNotifications.addSuccess(
-          intl.formatMessage(
-            {
-              id:
-                'xpack.ml.timeSeriesExplorer.timeSeriesChart.deletedAnnotationNotificationMessage',
-              defaultMessage: 'Deleted annotation for job with ID {jobId}.',
-            },
-            { jobId: annotation.job_id }
-          )
-        );
-      } catch (err) {
-        toastNotifications.addDanger(
-          intl.formatMessage(
-            {
-              id:
-                'xpack.ml.timeSeriesExplorer.timeSeriesChart.errorWithDeletingAnnotationNotificationErrorMessage',
-              defaultMessage:
-                'An error occured deleting the annotation for job with ID {jobId}: {error}',
-            },
-            { jobId: annotation.job_id, error: JSON.stringify(err) }
-          )
-        );
-      }
-
-      this.closeDeleteModal();
-      annotation$.next(null);
-      annotationsRefresh$.next();
-    };
-
-    public closeDeleteModal = () => {
-      this.setState({ isDeleteModalVisible: false });
-    };
-
-    public saveOrUpdateAnnotation = () => {
-      const { mlAnnotations, intl } = this.props;
-      const { annotation } = this.state;
-
-      if (annotation === null) {
-        return;
-      }
-
-      annotation$.next(null);
-
-      mlAnnotations
-        .indexAnnotation(annotation)
-        .then(() => {
-          annotationsRefresh$.next();
-          if (typeof annotation._id === 'undefined') {
-            toastNotifications.addSuccess(
-              intl.formatMessage(
-                {
-                  id:
-                    'xpack.ml.timeSeriesExplorer.timeSeriesChart.addedAnnotationNotificationMessage',
-                  defaultMessage: 'Added an annotation for job with ID {jobId}.',
-                },
-                { jobId: annotation.job_id }
-              )
-            );
-          } else {
-            toastNotifications.addSuccess(
-              intl.formatMessage(
-                {
-                  id:
-                    'xpack.ml.timeSeriesExplorer.timeSeriesChart.updatedAnnotationNotificationMessage',
-                  defaultMessage: 'Updated annotation for job with ID {jobId}.',
-                },
-                { jobId: annotation.job_id }
-              )
-            );
-          }
-        })
-        .catch(resp => {
-          if (typeof annotation._id === 'undefined') {
-            toastNotifications.addDanger(
-              intl.formatMessage(
-                {
-                  id:
-                    'xpack.ml.timeSeriesExplorer.timeSeriesChart.errorWithCreatingAnnotationNotificationErrorMessage',
-                  defaultMessage:
-                    'An error occured creating the annotation for job with ID {jobId}: {error}',
-                },
-                { jobId: annotation.job_id, error: JSON.stringify(resp) }
-              )
-            );
-          } else {
-            toastNotifications.addDanger(
-              intl.formatMessage(
-                {
-                  id:
-                    'xpack.ml.timeSeriesExplorer.timeSeriesChart.errorWithUpdatingAnnotationNotificationErrorMessage',
-                  defaultMessage:
-                    'An error occured updating the annotation for job with ID {jobId}: {error}',
-                },
-                { jobId: annotation.job_id, error: JSON.stringify(resp) }
-              )
-            );
-          }
-        });
-    };
-
-    public render(): ReactNode {
-      const { annotation, isDeleteModalVisible } = this.state;
-
-      if (annotation === null) {
-        return null;
-      }
-
-      const isExistingAnnotation = typeof annotation._id !== 'undefined';
-
-      return (
-        <Fragment>
-          <EuiFlyout onClose={this.cancelEditingHandler} size="s" aria-labelledby="Add annotation">
-            <EuiFlyoutHeader hasBorder>
-              <EuiTitle size="s">
-                <h2 id="mlAnnotationFlyoutTitle">
+    return (
+      <Fragment>
+        <EuiFlyout onClose={this.cancelEditingHandler} size="s" aria-labelledby="Add annotation">
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="s">
+              <h2 id="mlAnnotationFlyoutTitle">
+                {isExistingAnnotation ? (
+                  <FormattedMessage
+                    id="xpack.ml.timeSeriesExplorer.annotationFlyout.editAnnotationTitle"
+                    defaultMessage="Edit annotation"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.ml.timeSeriesExplorer.annotationFlyout.addAnnotationTitle"
+                    defaultMessage="Add annotation"
+                  />
+                )}
+              </h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <AnnotationDescriptionList annotation={annotation} />
+            <EuiSpacer size="m" />
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.ml.timeSeriesExplorer.annotationFlyout.annotationTextLabel"
+                  defaultMessage="Annotation text"
+                />
+              }
+              fullWidth
+            >
+              <EuiTextArea
+                fullWidth
+                isInvalid={annotation.annotation === ''}
+                onChange={this.annotationTextChangeHandler}
+                placeholder="..."
+                value={annotation.annotation}
+              />
+            </EuiFormRow>
+          </EuiFlyoutBody>
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty iconType="cross" onClick={this.cancelEditingHandler} flush="left">
+                  <FormattedMessage
+                    id="xpack.ml.timeSeriesExplorer.annotationFlyout.cancelButtonLabel"
+                    defaultMessage="Cancel"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {isExistingAnnotation && (
+                  <EuiButtonEmpty color="danger" onClick={this.deleteConfirmHandler}>
+                    <FormattedMessage
+                      id="xpack.ml.timeSeriesExplorer.annotationFlyout.deleteButtonLabel"
+                      defaultMessage="Delete"
+                    />
+                  </EuiButtonEmpty>
+                )}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  isDisabled={annotation.annotation === ''}
+                  onClick={this.saveOrUpdateAnnotation}
+                >
                   {isExistingAnnotation ? (
                     <FormattedMessage
-                      id="xpack.ml.timeSeriesExplorer.annotationFlyout.editAnnotationTitle"
-                      defaultMessage="Edit annotation"
+                      id="xpack.ml.timeSeriesExplorer.annotationFlyout.updateButtonLabel"
+                      defaultMessage="Update"
                     />
                   ) : (
                     <FormattedMessage
-                      id="xpack.ml.timeSeriesExplorer.annotationFlyout.addAnnotationTitle"
-                      defaultMessage="Add annotation"
+                      id="xpack.ml.timeSeriesExplorer.annotationFlyout.createButtonLabel"
+                      defaultMessage="Create"
                     />
                   )}
-                </h2>
-              </EuiTitle>
-            </EuiFlyoutHeader>
-            <EuiFlyoutBody>
-              <AnnotationDescriptionList annotation={annotation} />
-              <EuiSpacer size="m" />
-              <EuiFormRow
-                label={
-                  <FormattedMessage
-                    id="xpack.ml.timeSeriesExplorer.annotationFlyout.annotationTextLabel"
-                    defaultMessage="Annotation text"
-                  />
-                }
-                fullWidth
-              >
-                <EuiTextArea
-                  fullWidth
-                  isInvalid={annotation.annotation === ''}
-                  onChange={this.annotationTextChangeHandler}
-                  placeholder="..."
-                  value={annotation.annotation}
-                />
-              </EuiFormRow>
-            </EuiFlyoutBody>
-            <EuiFlyoutFooter>
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty iconType="cross" onClick={this.cancelEditingHandler} flush="left">
-                    <FormattedMessage
-                      id="xpack.ml.timeSeriesExplorer.annotationFlyout.cancelButtonLabel"
-                      defaultMessage="Cancel"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  {isExistingAnnotation && (
-                    <EuiButtonEmpty color="danger" onClick={this.deleteConfirmHandler}>
-                      <FormattedMessage
-                        id="xpack.ml.timeSeriesExplorer.annotationFlyout.deleteButtonLabel"
-                        defaultMessage="Delete"
-                      />
-                    </EuiButtonEmpty>
-                  )}
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill
-                    isDisabled={annotation.annotation === ''}
-                    onClick={this.saveOrUpdateAnnotation}
-                  >
-                    {isExistingAnnotation ? (
-                      <FormattedMessage
-                        id="xpack.ml.timeSeriesExplorer.annotationFlyout.updateButtonLabel"
-                        defaultMessage="Update"
-                      />
-                    ) : (
-                      <FormattedMessage
-                        id="xpack.ml.timeSeriesExplorer.annotationFlyout.createButtonLabel"
-                        defaultMessage="Create"
-                      />
-                    )}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlyoutFooter>
-          </EuiFlyout>
-          <DeleteAnnotationModal
-            cancelAction={this.closeDeleteModal}
-            deleteAction={this.deleteHandler}
-            isVisible={isDeleteModalVisible}
-          />
-        </Fragment>
-      );
-    }
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
+        </EuiFlyout>
+        <DeleteAnnotationModal
+          cancelAction={this.closeDeleteModal}
+          deleteAction={this.deleteHandler}
+          isVisible={isDeleteModalVisible}
+        />
+      </Fragment>
+    );
   }
-);
+}
+
+export const AnnotationFlyout = injectObservablesAsProps({ annotation: annotation$ }, (injectI18n(
+  AnnotationFlyoutIntl
+) as any) as ComponentType);

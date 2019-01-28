@@ -15,6 +15,7 @@
 import _ from 'lodash';
 import moment from 'moment-timezone';
 
+import 'plugins/ml/components/annotations/annotation_flyout/annotation_flyout_directive';
 import 'plugins/ml/components/annotations/annotations_table';
 import 'plugins/ml/components/anomalies_table';
 import 'plugins/ml/components/controls';

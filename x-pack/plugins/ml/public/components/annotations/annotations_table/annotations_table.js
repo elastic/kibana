@@ -30,8 +30,6 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-// import { AnnotationFlyout } from '../annotation_flyout';
-
 import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui/lib/services';
@@ -45,6 +43,8 @@ import { mlJobService } from '../../../services/job_service';
 import { mlTableService } from '../../../services/table_service';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../../common/constants/search';
 import { isTimeSeriesViewJob } from '../../../../common/util/job_utils';
+
+import { annotation$ } from '../annotations_observable';
 
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
@@ -402,7 +402,7 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
             content={editAnnotationsTooltipText}
           >
             <EuiButtonIcon
-              onClick={() => this.editAnnotationHandler(annotation)}
+              onClick={() => annotation$.next(annotation)}
               iconType="pencil"
               aria-label={editAnnotationsTooltipAriaLabelText}
             />
@@ -472,8 +472,6 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
       };
     };
 
-    //const annotation = {};
-
     return (
       <Fragment>
         <EuiInMemoryTable
@@ -491,13 +489,6 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
           }}
           rowProps={getRowProps}
         />
-        {/*<AnnotationFlyout
-          annotation={annotation}
-          cancelAction={this.closeFlyout}
-          controlFunc={this.handleAnnotationChange}
-          deleteAction={this.deleteAnnotation}
-          saveAction={this.indexAnnotation}
-        />*/}
       </Fragment>
     );
   }

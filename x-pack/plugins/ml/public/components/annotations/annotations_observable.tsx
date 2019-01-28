@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 import { Annotation } from '../../../common/types/annotations';
 
@@ -39,11 +39,35 @@ export type AnnotationState = Annotation | null;
   - To trigger an update, use `annotation$.next(<Annotation>)`
   - To reset the currently editable annotation, use `annotation$.next(null)`
 
+  There are two ways to deal with updates of the observable:
+
+  1. Inline subscription in an existing component. 
+     This requires the component to be a class component and manage its own state.
+
   - To react to an update, use `annotation$.subscribe(annotation => { <callback> })`.
   - To add it to a given components state, just use
     `annotation$.subscribe(annotation => this.setState({ annotation }));` in `componentDidMount()`.
+
+  2. injectObservablesAsProps() from public/utils/observable_utils.tsx, as the name implies, offers
+     a way to wrap observables into another component which passes on updated values as props.
+
+  - To subscribe to updates this way, wrap your component like:
+
+      const MyOriginalComponent = ({ annotation }) => {
+        // don't render if the annotation isn't set
+        if (annotation === null) {
+          return null;
+        }
+
+        return <span>{annotation.annotation}</span>;
+      }
+
+      export const MyObservableComponent = injectObservablesAsProps(
+        { annotation: annotaton$ },
+        MyOriginalComponent
+      );
 */
-export const annotation$ = new Subject<AnnotationState>();
+export const annotation$ = new BehaviorSubject<AnnotationState>(null);
 
 /*
   This observable provides a way to trigger a reload of annotations based on a give event.
