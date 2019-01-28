@@ -67,7 +67,7 @@ export class PingListQuery extends React.Component<Props, PingListState> {
       sort,
       size,
     } = this.props;
-    const { statusOptions, selectedOption } = this.state;
+    const { selectedOption } = this.state;
     return (
       <Query
         pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
