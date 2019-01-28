@@ -7,7 +7,6 @@
 import './main';
 import './chart';
 import './sparkline';
-import './cluster/listing';
 import './elasticsearch/cluster_status';
 import './elasticsearch/index_summary';
 import './elasticsearch/node_summary';

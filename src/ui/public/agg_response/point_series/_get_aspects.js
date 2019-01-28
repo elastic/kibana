@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { makeFakeXAspect } from './_fake_x_aspect';
 
 /**
@@ -40,7 +39,6 @@ export function getAspects(table, dimensions) {
       if (!column) {
         return;
       }
-      const formatter = getFormat(d.format);
       if (!aspects[name]) {
         aspects[name] = [];
       }
@@ -48,7 +46,7 @@ export function getAspects(table, dimensions) {
         accessor: column.id,
         column: d.accessor,
         title: column.name,
-        fieldFormatter: val => formatter.convert(val, 'text'),
+        format: d.format,
         params: d.params,
       });
     });
