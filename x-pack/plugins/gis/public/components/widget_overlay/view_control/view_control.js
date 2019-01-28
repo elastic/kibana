@@ -37,7 +37,7 @@ export function ViewControl({ isSetViewOpen, closeSetView, openSetView, mouseCoo
           onClick={toggleSetViewVisibility}
           data-test-subj="toggleSetViewVisibilityButton"
         >
-          Goto
+          Go to
         </EuiButton>)}
       isOpen={isSetViewOpen}
       closePopover={closeSetView}
