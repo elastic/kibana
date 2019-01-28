@@ -96,11 +96,6 @@ export class VectorLayer extends AbstractLayer {
     return 'vector';
   }
 
-  getColorRamp() {
-    // TODO: Determine if can be data-driven first
-    return this._style.getColorRamp();
-  }
-
   getTOCDetails() {
     return this._style.getTOCDetails();
   }
@@ -236,6 +231,10 @@ export class VectorLayer extends AbstractLayer {
       && !updateDueToPrecisionChange;
   }
 
+  _getTargetGeohashPrecision(precision) {
+    return this._source.getGeohashPrecisionResolutionDelta() + precision;
+  }
+
   async _syncJoin(join, { startLoading, stopLoading, onLoadError, dataFilters }) {
 
     const joinSource = join.getJoinSource();
@@ -289,7 +288,11 @@ export class VectorLayer extends AbstractLayer {
       })
     ];
 
-    const targetPrecision = getGeohashPrecisionForZoom(dataFilters.zoom);
+    let targetPrecision = getGeohashPrecisionForZoom(dataFilters.zoom);
+
+    if (this._source.isGeohashPrecisionAware()) {
+      targetPrecision = this._getTargetGeohashPrecision(targetPrecision);
+    }
     return {
       ...dataFilters,
       fieldNames: _.uniq(fieldNames).sort(),
