@@ -51,10 +51,8 @@ export function updateIndexPatternList(
 
   render(
     <I18nProvider>
-      {indexPatterns.length === 0 ? (<CreateIndexPatternPrompt
-        onCreateIndexPattern={() => kbnUrl.redirect('/management/kibana/index_pattern')}
-        onCreateIndexPatternViewSystem={() => kbnUrl.redirect('/management/kibana/index_pattern?showSystem=true')}
-      />) : (<IndexPatternTable indexPatterns={indexPatterns} navTo={kbnUrl.redirect} />)}
+      {indexPatterns.length === 0 ? (<CreateIndexPatternPrompt />) :
+        (<IndexPatternTable indexPatterns={indexPatterns} navTo={kbnUrl.redirect} />)}
     </I18nProvider>,
     node,
   );

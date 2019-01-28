@@ -46,7 +46,7 @@ const pagination = {
 const sorting = {
   sort: {
     field: 'title',
-    direction: 'asc',
+    direction: 'desc',
   },
 };
 
@@ -60,8 +60,7 @@ const search = {
 };
 
 const Table = ({
-  indexPatterns,
-  navTo
+  indexPatterns
 }) => (
   <div>
     <EuiFlexGroup>
@@ -78,13 +77,7 @@ const Table = ({
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem  grow={false}>
-        <EuiButton
-          fill
-          onClick={() => {
-            // console.log('euibutton hi', navTo);
-            // debugger;
-            navTo('/management/kibana/index_pattern');}}
-        >
+        <EuiButton fill href="#/management/kibana/index_pattern">
           <FormattedMessage id="kbn.management.indexPatternTable.createBtn" defaultMessage="Create index pattern" />
         </EuiButton>
       </EuiFlexItem>

@@ -27,10 +27,7 @@ import {
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-export const Prompt = ({
-  onCreateIndexPattern,
-  onCreateIndexPatternViewSystem
-}) => (<EuiEmptyPrompt
+export const Prompt = () => (<EuiEmptyPrompt
   iconType="editorStrike"
   title={
     <EuiText grow={false}>
@@ -79,10 +76,10 @@ export const Prompt = ({
     </Fragment>
   }
   actions={[
-    <EuiButton color="primary" fill onClick={onCreateIndexPattern} iconSide="right" iconType="arrowDown">
+    <EuiButton color="primary" fill href="#/management/kibana/index_pattern" iconSide="right" iconType="arrowDown">
       <FormattedMessage id="kbn.management.indexPatternPrompt.createBtn" defaultMessage="Create index pattern" />
     </EuiButton>,
-    <EuiButtonEmpty color="danger" onClick={onCreateIndexPatternViewSystem}>View system indices Kibana auto-creates</EuiButtonEmpty>,
+    <EuiButtonEmpty color="danger" href="#/management/kibana/index_pattern">View system indices Kibana auto-creates</EuiButtonEmpty>,
   ]}
 />);
 
