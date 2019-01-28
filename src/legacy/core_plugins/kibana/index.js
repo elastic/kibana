@@ -21,7 +21,7 @@ import Promise from 'bluebird';
 import { mkdirp as mkdirpNode } from 'mkdirp';
 import { resolve } from 'path';
 
-import migrations from './migrations';
+import { migrations } from './migrations';
 import manageUuid from './server/lib/manage_uuid';
 import { searchApi } from './server/routes/api/search';
 import { scrollSearchApi } from './server/routes/api/scroll_search';

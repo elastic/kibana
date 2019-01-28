@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import migrations from './migrations';
+import { migrations } from './migrations';
 
 describe('table vis migrations', () => {
 
