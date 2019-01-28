@@ -18,8 +18,10 @@
   }
 
   // SASSTODO: Remove font awesome
-  .betaIcon {
+  .monTabs--icon {
+    margin-left: $euiSizeXS;
     color: $euiColorDarkShade;
+    font-size: $euiFontSize;
   }
 
   .monCallout--meta {

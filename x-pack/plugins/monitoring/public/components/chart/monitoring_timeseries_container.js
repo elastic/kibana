@@ -40,8 +40,9 @@ function MonitoringTimeseriesContainerUI({ series, onBrush, intl }) {
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiTitle tabIndex="0">
-              <Fragment>
+            <EuiTitle size="s" tabIndex="0">
+              <h2>
+                { getTitle(series) }{ units ? ` (${units})` : '' }
                 <EuiScreenReaderOnly>
                   <span>
                     <FormattedMessage
@@ -50,10 +51,7 @@ function MonitoringTimeseriesContainerUI({ series, onBrush, intl }) {
                     />
                   </span>
                 </EuiScreenReaderOnly>
-                <h2>
-                  { getTitle(series) }{ units ? ` (${units})` : '' }
-                </h2>
-              </Fragment>
+              </h2>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
