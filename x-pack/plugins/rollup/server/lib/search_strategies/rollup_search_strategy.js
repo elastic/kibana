@@ -3,7 +3,7 @@
 * or more contributor license agreements. Licensed under the Elastic License;
 * you may not use this file except in compliance with the Elastic License.
 */
-import { indexBy } from 'lodash';
+import { indexBy, isString } from 'lodash';
 import { callWithRequestFactory } from '../call_with_request_factory';
 import mergeCapabilitiesWithFields from '../merge_capabilities_with_fields';
 import { getCapabilitiesForRollupIndices } from '../map_capabilities';
@@ -13,6 +13,7 @@ const DEFAULT_INDEX_PATTERN = '*';
 const batchRequestsSupport = false;
 
 const getRollupIndices = rollupData => Object.keys(rollupData);
+const isIndexPatternValid = indexPattern => isString(indexPattern) && indexPattern !== DEFAULT_INDEX_PATTERN;
 
 export default (AbstractSearchStrategy, RollupSearchRequest, RollupSearchCapabilities) =>
   (class RollupSearchStrategy extends AbstractSearchStrategy {
@@ -30,16 +31,21 @@ export default (AbstractSearchStrategy, RollupSearchRequest, RollupSearchCapabil
     }
 
     async checkForViability(req, indexPattern = DEFAULT_INDEX_PATTERN) {
-      const rollupData = await this.getRollupData(req, indexPattern);
-      const rollupIndices = getRollupIndices(rollupData);
-      const isViable = rollupIndices.length === 1 && indexPattern !== DEFAULT_INDEX_PATTERN;
+      let isViable = false;
       let capabilities = null;
 
-      if (isViable) {
-        const [rollupIndex] = rollupIndices;
-        const fieldsCapabilities = getCapabilitiesForRollupIndices(rollupData);
+      if (isIndexPatternValid(indexPattern)) {
+        const rollupData = await this.getRollupData(req, indexPattern);
+        const rollupIndices = getRollupIndices(rollupData);
 
-        capabilities = new RollupSearchCapabilities(req, batchRequestsSupport, fieldsCapabilities, rollupIndex);
+        isViable = rollupIndices.length === 1;
+
+        if (isViable) {
+          const [rollupIndex] = rollupIndices;
+          const fieldsCapabilities = getCapabilitiesForRollupIndices(rollupData);
+
+          capabilities = new RollupSearchCapabilities(req, batchRequestsSupport, fieldsCapabilities, rollupIndex);
+        }
       }
 
       return {
