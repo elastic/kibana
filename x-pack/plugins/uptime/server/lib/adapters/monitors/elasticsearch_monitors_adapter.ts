@@ -10,6 +10,7 @@ import {
   ErrorListItem,
   FilterBar,
   LatestMonitor,
+  MonitorKey,
   MonitorPageTitle,
   MonitorSeriesPoint,
   Ping,
@@ -326,6 +327,8 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
+        _source: ['monitor.id', 'monitor.type', 'url.full', 'url.port'],
+        size: 1000,
         query: {
           range: {
             '@timestamp': {
@@ -334,65 +337,42 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
             },
           },
         },
-        size: 0,
-        aggs: {
-          id: {
-            terms: {
-              field: 'monitor.id',
-              size: 1000,
-            },
-            aggs: {
-              latest: {
-                top_hits: {
-                  size: 1,
-                  sort: [
-                    {
-                      '@timestamp': {
-                        order: 'desc',
-                      },
-                    },
-                  ],
-                },
-              },
-            },
-          },
-          port: {
-            terms: {
-              field: 'url.port',
-              size: 1000,
-            },
-          },
-          status: {
-            terms: {
-              field: 'monitor.status',
-              size: 1000,
-            },
-          },
-          type: {
-            terms: {
-              field: 'monitor.type',
-              size: 1000,
-            },
-          },
+        collapse: {
+          field: 'monitor.id',
+        },
+        sort: {
+          '@timestamp': 'desc',
         },
       },
     };
     const result = await this.database.search(request, params);
-    const ids: any[] = get(result, 'aggregations.id.buckets', []);
-    const port: any[] = get(result, 'aggregations.port.buckets', []);
-    const status: any[] = get(result, 'aggregations.status.buckets', []);
-    const type: any[] = get(result, 'aggregations.type.buckets', []);
+    const ids: MonitorKey[] = [];
+    const ports = new Set<number>();
+    const types = new Set<string>();
 
-    // TODO update typings
-    const getKey = (buckets: any[]) => buckets.map(value => value.key);
+    const hits = get(result, 'hits.hits', []);
+    hits.forEach((hit: any) => {
+      const key: string = get(hit, '_source.monitor.id');
+      const url: string | null = get(hit, '_source.url.full', null);
+      const port: number | undefined = get(hit, '_source.url.port', undefined);
+      const type: string | undefined = get(hit, '_source.monitor.type', undefined);
+
+      if (key) {
+        ids.push({ key, url });
+      }
+      if (port) {
+        ports.add(port);
+      }
+      if (type) {
+        types.add(type);
+      }
+    });
+
     return {
-      schemes: getKey(type),
-      ports: getKey(port),
-      ids: ids.map((value: any) => ({
-        key: value.key,
-        url: get(value, 'latest.hits.hits[0]._source.url.full', null),
-      })),
-      statuses: getKey(status),
+      ids,
+      ports: Array.from(ports),
+      schemes: Array.from(types),
+      statuses: ['up', 'down'],
     };
   }
 
