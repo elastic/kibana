@@ -112,7 +112,7 @@ export class ESGeoGridSource extends AbstractESSource {
   }
 
   getGeoGridPrecision(zoom) {
-    return zoom + 3 + this._getGeoGridPrecisionResolutionDelta();
+    return Math.round(zoom) + 3 + this._getGeoGridPrecisionResolutionDelta();
   }
 
   _getGeoGridPrecisionResolutionDelta() {
