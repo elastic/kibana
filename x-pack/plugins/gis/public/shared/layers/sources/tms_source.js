@@ -5,9 +5,9 @@
  */
 
 
-import { ASource } from './source';
+import { AbstractSource } from './source';
 
-export class TMSSource extends ASource {
+export class AbstractTMSSource extends AbstractSource {
   getUrlTemplate() {
     throw new Error('Should implement TMSSource#getUrlTemplate');
   }
