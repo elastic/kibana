@@ -6,16 +6,18 @@
 
 import { EuiBadge } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
+import { get, has } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
+import { ActionCreator } from 'typescript-fsa';
 
-import moment from 'moment';
 import { AuthenticationsEdges } from '../../../../graphql/types';
 import { authenticationsSelector, hostsActions, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
-import { defaultToEmpty, getEmptyValue } from '../../../empty_value';
-import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
+import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
+import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
+import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
 import * as i18n from './translations';
 
@@ -34,7 +36,7 @@ interface AuthenticationTableReduxProps {
 }
 
 interface AuthenticationTableDispatchProps {
-  updateLimitPagination: (param: { limit: number }) => void;
+  updateLimitPagination: ActionCreator<{ limit: number }>;
 }
 
 type AuthenticationTableProps = OwnProps &
@@ -74,17 +76,17 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
   }) => (
     <LoadMoreTable
       columns={getAuthenticationColumns(startDate)}
-      loadingTitle={i18n.AUTHENTICATION_FAILURES}
+      loadingTitle={i18n.AUTHENTICATIONS}
       loading={loading}
       pageOfItems={data}
       loadMore={() => loadMore(nextCursor)}
       limit={limit}
       hasNextPage={hasNextPage}
       itemsPerRow={rowItems}
-      updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
+      updateLimitPagination={newLimit => updateLimitPagination({ limit: newLimit })}
       title={
         <h3>
-          {i18n.AUTHENTICATION_FAILURES} <EuiBadge color="hollow">{totalCount}</EuiBadge>
+          {i18n.AUTHENTICATIONS} <EuiBadge color="hollow">{totalCount}</EuiBadge>
         </h3>
       }
     />
@@ -100,30 +102,30 @@ export const AuthenticationTable = connect(
   }
 )(AuthenticationTableComponent);
 
-const getAuthenticationColumns = (startDate: number) => [
+const getAuthenticationColumns = (startDate: number): Array<Columns<AuthenticationsEdges>> => [
   {
     name: i18n.USER,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }: AuthenticationsEdges) => {
-      const userName = defaultToEmpty(node.user.name);
-      return (
-        <>
+    render: ({ node }) => {
+      const userName: string | null = get('user.name', node);
+      if (userName != null) {
+        return (
           <DraggableWrapper
             dataProvider={{
               and: [],
               enabled: true,
-              id: node._id,
-              name: userName!,
+              id: escapeDataProviderId(`authentications-table-${node._id}-user-${userName}`),
+              name: userName,
               excluded: false,
               kqlQuery: '',
               queryMatch: {
-                field: 'auditd.data.acct',
-                value: userName!,
+                field: 'user.name',
+                value: userName,
               },
               queryDate: {
                 from: startDate,
-                to: moment().valueOf(),
+                to: Date.now(),
               },
             }}
             render={(dataProvider, _, snapshot) =>
@@ -136,40 +138,212 @@ const getAuthenticationColumns = (startDate: number) => [
               )
             }
           />
-        </>
-      );
+        );
+      } else {
+        return getEmptyTagValue();
+      }
     },
   },
   {
     name: i18n.FAILURES,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }: AuthenticationsEdges) => <>{defaultToEmpty(node.failures)}</>,
+    render: ({ node }) => defaultToEmptyTag(node.failures),
+  },
+  {
+    name: i18n.LAST_FAILED_TIME,
+    truncateText: false,
+    hideForMobile: false,
+    render: ({ node }) =>
+      has('lastFailure.timestamp', node) ? (
+        <FormattedRelative value={new Date(node.lastFailure!.timestamp!)} />
+      ) : (
+        getEmptyTagValue()
+      ),
+  },
+  {
+    name: i18n.LAST_FAILED_SOURCE,
+    truncateText: false,
+    hideForMobile: false,
+    render: ({ node }) => {
+      const sourceIp: string | null = get('lastFailure.source.ip', node);
+      if (sourceIp != null) {
+        return (
+          <DraggableWrapper
+            dataProvider={{
+              and: [],
+              enabled: true,
+              id: escapeDataProviderId(`authentications-table-${node._id}-lastFailure-${sourceIp}`),
+              name: sourceIp,
+              excluded: false,
+              kqlQuery: '',
+              queryMatch: {
+                field: 'source.ip',
+                value: sourceIp,
+              },
+              queryDate: {
+                from: startDate,
+                to: Date.now(),
+              },
+            }}
+            render={(dataProvider, _, snapshot) =>
+              snapshot.isDragging ? (
+                <DragEffects>
+                  <Provider dataProvider={dataProvider} />
+                </DragEffects>
+              ) : (
+                sourceIp
+              )
+            }
+          />
+        );
+      } else {
+        return getEmptyTagValue();
+      }
+    },
+  },
+  {
+    name: i18n.LAST_FAILED_DESTINATION,
+    truncateText: false,
+    hideForMobile: false,
+    render: ({ node }) => {
+      const hostName: string | null = get('lastFailure.host.name', node);
+      if (hostName != null) {
+        return (
+          <DraggableWrapper
+            dataProvider={{
+              and: [],
+              enabled: true,
+              id: escapeDataProviderId(`authentications-table-${node._id}-lastFailure-${hostName}`),
+              name: hostName,
+              excluded: false,
+              kqlQuery: '',
+              queryMatch: {
+                displayField: 'host.name',
+                displayValue: hostName,
+                field: 'host.id',
+                value: node.lastFailure!.host!.id!,
+              },
+              queryDate: {
+                from: startDate,
+                to: Date.now(),
+              },
+            }}
+            render={(dataProvider, _, snapshot) =>
+              snapshot.isDragging ? (
+                <DragEffects>
+                  <Provider dataProvider={dataProvider} />
+                </DragEffects>
+              ) : (
+                hostName
+              )
+            }
+          />
+        );
+      } else {
+        return getEmptyTagValue();
+      }
+    },
   },
   {
     name: i18n.SUCCESSES,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }: AuthenticationsEdges) => <>{defaultToEmpty(node.successes)}</>,
+    render: ({ node }) => defaultToEmptyTag(node.successes),
   },
   {
-    name: i18n.FROM,
+    name: i18n.LAST_SUCCESSFUL_TIME,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }: AuthenticationsEdges) => <>{defaultToEmpty(node.source.ip)}</>,
+    render: ({ node }) =>
+      has('lastSuccess.timestamp', node) ? (
+        <FormattedRelative value={new Date(node.lastSuccess!.timestamp!)} />
+      ) : (
+        getEmptyTagValue()
+      ),
   },
   {
-    name: i18n.TO,
+    name: i18n.LAST_SUCCESSFUL_SOURCE,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }: AuthenticationsEdges) => <>{defaultToEmpty(node.host.name)}</>,
+    render: ({ node }) => {
+      const sourceIp: string | null = get('lastSuccess.source.ip', node);
+      if (sourceIp != null) {
+        return (
+          <DraggableWrapper
+            dataProvider={{
+              and: [],
+              enabled: true,
+              id: escapeDataProviderId(`authentications-table-${node._id}-lastSuccess-${sourceIp}`),
+              name: sourceIp,
+              excluded: false,
+              kqlQuery: '',
+              queryMatch: {
+                field: 'source.ip',
+                value: sourceIp,
+              },
+              queryDate: {
+                from: startDate,
+                to: Date.now(),
+              },
+            }}
+            render={(dataProvider, _, snapshot) =>
+              snapshot.isDragging ? (
+                <DragEffects>
+                  <Provider dataProvider={dataProvider} />
+                </DragEffects>
+              ) : (
+                sourceIp
+              )
+            }
+          />
+        );
+      } else {
+        return getEmptyTagValue();
+      }
+    },
   },
   {
-    name: i18n.LATEST,
+    name: i18n.LAST_SUCCESSFUL_DESTINATION,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }: AuthenticationsEdges) => (
-      <>{node.latest ? <FormattedRelative value={new Date(node.latest)} /> : getEmptyValue()}</>
-    ),
+    render: ({ node }) => {
+      const hostName: string | null = get('lastSuccess.host.name', node);
+      if (hostName != null) {
+        return (
+          <DraggableWrapper
+            dataProvider={{
+              and: [],
+              enabled: true,
+              id: escapeDataProviderId(`authentications-table-${node._id}-lastSuccess-${hostName}`),
+              name: hostName,
+              excluded: false,
+              kqlQuery: '',
+              queryMatch: {
+                displayField: 'host.name',
+                displayValue: hostName,
+                field: 'host.id',
+                value: node.lastSuccess!.host!.id!,
+              },
+              queryDate: {
+                from: startDate,
+                to: Date.now(),
+              },
+            }}
+            render={(dataProvider, _, snapshot) =>
+              snapshot.isDragging ? (
+                <DragEffects>
+                  <Provider dataProvider={dataProvider} />
+                </DragEffects>
+              ) : (
+                hostName
+              )
+            }
+          />
+        );
+      } else {
+        return getEmptyTagValue();
+      }
+    },
   },
 ];

@@ -11,6 +11,7 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 
 import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
+import { ActionCreator } from 'typescript-fsa';
 import { Flyout, FlyoutComponent, flyoutHeaderHeight } from '.';
 import { mockGlobalState } from '../../mock';
 import { createStore, State } from '../../store';
@@ -204,7 +205,7 @@ describe('Flyout', () => {
     });
 
     test('should call the onOpen when the mouse is clicked for rendering', () => {
-      const showTimeline = jest.fn();
+      const showTimeline = (jest.fn() as unknown) as ActionCreator<{ id: string; show: boolean }>;
       const wrapper = mount(
         <ReduxStoreProvider store={store}>
           <ThemeProvider theme={{ eui: euiVars }}>
@@ -234,7 +235,7 @@ describe('Flyout', () => {
       const stateShowIsTrue = set('local.timeline.timelineById.test.show', true, state);
       const storeShowIsTrue = createStore(stateShowIsTrue);
 
-      const showTimeline = jest.fn();
+      const showTimeline = (jest.fn() as unknown) as ActionCreator<{ id: string; show: boolean }>;
       const wrapper = mount(
         <ReduxStoreProvider store={storeShowIsTrue}>
           <ThemeProvider theme={{ eui: euiVars }}>

@@ -27,7 +27,6 @@ export const mockGlobalState: State = {
         },
         uncommonProcesses: {
           limit: 0,
-          upperLimit: 0,
         },
       },
     },

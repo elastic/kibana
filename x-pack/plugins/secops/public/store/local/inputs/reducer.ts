@@ -27,7 +27,7 @@ export const initialInputsState: InputsState = {
       from: moment()
         .subtract(1, 'day') // subtracts 24 hours from 'now'
         .valueOf(),
-      to: moment().valueOf(),
+      to: Date.now(),
     },
     query: [],
     policy: {

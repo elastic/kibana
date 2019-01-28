@@ -4,14 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultToEmpty, getEmptyValue, getOrEmpty } from '.';
+import { mount } from 'enzyme';
+import React from 'react';
+import {
+  defaultToEmpty,
+  defaultToEmptyTag,
+  getEmptyTagValue,
+  getEmptyValue,
+  getOrEmpty,
+  getOrEmptyTag,
+} from '.';
 
 describe('EmptyValue', () => {
   describe('#getEmptyValue', () =>
-    it('should return an empty value', () => expect(getEmptyValue()).toBe('--')));
+    test('should return an empty value', () => expect(getEmptyValue()).toBe('--')));
 
-  describe('#getOr', () => {
-    it('should default empty value when a deep rooted value is null', () => {
+  describe('#getEmptyTagValue', () => {
+    const wrapper = mount(<p>{getEmptyTagValue()}</p>);
+    test('should return an empty tag value', () => expect(wrapper.text()).toBe('--'));
+  });
+
+  describe('#getOrEmpty', () => {
+    test('should default empty value when a deep rooted value is null', () => {
       const test = {
         a: {
           b: {
@@ -22,7 +36,7 @@ describe('EmptyValue', () => {
       expect(getOrEmpty('a.b.c', test)).toBe(getEmptyValue());
     });
 
-    it('should default empty value when a deep rooted value is undefined', () => {
+    test('should default empty value when a deep rooted value is undefined', () => {
       const test = {
         a: {
           b: {
@@ -33,7 +47,7 @@ describe('EmptyValue', () => {
       expect(getOrEmpty('a.b.c', test)).toBe(getEmptyValue());
     });
 
-    it('should default empty value when a deep rooted value is missing', () => {
+    test('should default empty value when a deep rooted value is missing', () => {
       const test = {
         a: {
           b: {},
@@ -42,7 +56,7 @@ describe('EmptyValue', () => {
       expect(getOrEmpty('a.b.c', test)).toBe(getEmptyValue());
     });
 
-    it('should return a deep path value', () => {
+    test('should return a deep path value', () => {
       const test = {
         a: {
           b: {
@@ -54,8 +68,56 @@ describe('EmptyValue', () => {
     });
   });
 
+  describe('#getOrEmptyTag', () => {
+    test('should default empty value when a deep rooted value is null', () => {
+      const test = {
+        a: {
+          b: {
+            c: null,
+          },
+        },
+      };
+      const wrapper = mount(<p>{getOrEmptyTag('a.b.c', test)}</p>);
+      expect(wrapper.text()).toBe(getEmptyValue());
+    });
+
+    test('should default empty value when a deep rooted value is undefined', () => {
+      const test = {
+        a: {
+          b: {
+            c: undefined,
+          },
+        },
+      };
+      const wrapper = mount(<p>{getOrEmptyTag('a.b.c', test)}</p>);
+      expect(wrapper.text()).toBe(getEmptyValue());
+    });
+
+    test('should default empty value when a deep rooted value is missing', () => {
+      const test = {
+        a: {
+          b: {},
+        },
+      };
+      const wrapper = mount(<p>{getOrEmptyTag('a.b.c', test)}</p>);
+      expect(wrapper.text()).toBe(getEmptyValue());
+    });
+
+    test('should return a deep path value', () => {
+      const test = {
+        a: {
+          b: {
+            c: 1,
+          },
+        },
+      };
+      const wrapper = mount(<p>{getOrEmptyTag('a.b.c', test)}</p>);
+      expect(wrapper.text()).toBe('1');
+    });
+  });
+
   describe('#defaultToEmpty', () => {
-    it('should default to an empty value when a deep rooted value is null', () => {
+    test('should default to an empty value when a deep rooted value is null', () => {
       const test = {
         a: {
           b: {
@@ -66,7 +128,7 @@ describe('EmptyValue', () => {
       expect(defaultToEmpty(test.a.b.c)).toBe(getEmptyValue());
     });
 
-    it('should default to an empty value when a deep rooted value is undefined', () => {
+    test('should default to an empty value when a deep rooted value is undefined', () => {
       const test = {
         a: {
           b: {
@@ -77,7 +139,7 @@ describe('EmptyValue', () => {
       expect(defaultToEmpty(test.a.b.c)).toBe(getEmptyValue());
     });
 
-    it('should return a deep path value', () => {
+    test('should return a deep path value', () => {
       const test = {
         a: {
           b: {
@@ -86,6 +148,44 @@ describe('EmptyValue', () => {
         },
       };
       expect(defaultToEmpty(test.a.b.c)).toBe(1);
+    });
+  });
+
+  describe('#defaultToEmptyTag', () => {
+    test('should default to an empty value when a deep rooted value is null', () => {
+      const test = {
+        a: {
+          b: {
+            c: null,
+          },
+        },
+      };
+      const wrapper = mount(<p>{defaultToEmptyTag(test.a.b.c)}</p>);
+      expect(wrapper.text()).toBe(getEmptyValue());
+    });
+
+    test('should default to an empty value when a deep rooted value is undefined', () => {
+      const test = {
+        a: {
+          b: {
+            c: undefined,
+          },
+        },
+      };
+      const wrapper = mount(<p>{defaultToEmptyTag(test.a.b.c)}</p>);
+      expect(wrapper.text()).toBe(getEmptyValue());
+    });
+
+    test('should return a deep path value', () => {
+      const test = {
+        a: {
+          b: {
+            c: 1,
+          },
+        },
+      };
+      const wrapper = mount(<p>{defaultToEmptyTag(test.a.b.c)}</p>);
+      expect(wrapper.text()).toBe('1');
     });
   });
 });

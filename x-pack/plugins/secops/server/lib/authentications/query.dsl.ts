@@ -4,24 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { merge } from 'lodash/fp';
 import { createQueryFilterClauses } from '../../utils/build_query';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { hostFieldsMap, sourceFieldsMap } from '../ecs_fields';
+import { extendMap } from '../ecs_fields/extend_map';
 import { RequestOptions } from '../framework';
 import { FilterQuery } from '../types';
 
 export const auditdFieldsMap: Readonly<Record<string, string>> = {
   latest: '@timestamp',
-  ...{ ...sourceFieldsMap },
-  ...{ ...hostFieldsMap },
+  'lastSuccess.timestamp': 'lastSuccess.@timestamp',
+  'lastFailure.timestamp': 'lastFailure.@timestamp',
+  ...{ ...extendMap('lastSuccess', sourceFieldsMap) },
+  ...{ ...extendMap('lastSuccess', hostFieldsMap) },
+  ...{ ...extendMap('lastFailure', sourceFieldsMap) },
+  ...{ ...extendMap('lastFailure', hostFieldsMap) },
 };
 
 export const buildQuery = (options: RequestOptions) => {
   const { to, from } = options.timerange;
-  const { limit, cursor } = options.pagination;
+  const { limit } = options.pagination;
   const { fields, filterQuery } = options;
-  const esFields = reduceFields(fields, auditdFieldsMap);
+  const esFields = reduceFields(fields, { ...hostFieldsMap, ...sourceFieldsMap });
 
   const filter = [
     ...createQueryFilterClauses(filterQuery as FilterQuery),
@@ -54,9 +58,10 @@ export const buildQuery = (options: RequestOptions) => {
       aggregations: {
         ...agg,
         group_by_users: {
-          composite: {
+          terms: {
             size: limit + 1,
-            sources: [{ user_uid: { terms: { field: 'auditd.data.acct' } } }],
+            field: 'auditd.data.acct',
+            order: { 'failures.doc_count': 'desc' },
           },
           aggs: {
             failures: {
@@ -65,11 +70,29 @@ export const buildQuery = (options: RequestOptions) => {
                   'auditd.result': 'fail',
                 },
               },
+              aggs: {
+                lastFailure: {
+                  top_hits: {
+                    size: 1,
+                    _source: esFields,
+                    sort: [{ '@timestamp': { order: 'desc' } }],
+                  },
+                },
+              },
             },
             successes: {
               filter: {
                 term: {
                   'auditd.result': 'success',
+                },
+              },
+              aggs: {
+                lastSuccess: {
+                  top_hits: {
+                    size: 1,
+                    _source: esFields,
+                    sort: [{ '@timestamp': { order: 'desc' } }],
+                  },
                 },
               },
             },
@@ -93,20 +116,5 @@ export const buildQuery = (options: RequestOptions) => {
     track_total_hits: false,
   };
 
-  if (cursor) {
-    return merge(dslQuery, {
-      body: {
-        aggregations: {
-          group_by_users: {
-            composite: {
-              after: {
-                user_uid: cursor,
-              },
-            },
-          },
-        },
-      },
-    });
-  }
   return dslQuery;
 };

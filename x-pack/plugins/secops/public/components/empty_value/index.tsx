@@ -5,10 +5,17 @@
  */
 
 import { defaultTo, get } from 'lodash/fp';
+import React from 'react';
+
+export const getEmptyTagValue = () => <>{getEmptyValue()}</>;
 
 export const getEmptyValue = () => '--';
 
+export const getOrEmptyTag = (path: string, item: unknown) => <>{getOrEmpty(path, item)}</>;
+
 export const getOrEmpty = (path: string, item: unknown) =>
   get(path, item) != null ? get(path, item) : getEmptyValue();
+
+export const defaultToEmptyTag = <T extends unknown>(item: T) => <>{defaultToEmpty(item)}</>;
 
 export const defaultToEmpty = <T extends unknown>(item: T) => defaultTo(getEmptyValue(), item);

@@ -26,9 +26,7 @@ describe('Load More Table Component', () => {
           limit={1}
           hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
           itemsPerRow={rowItems}
-          updateLimitPagination={newlimit => {
-            updateLimitPagination({ limit: newlimit });
-          }}
+          updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
           title={<h3>Hosts</h3>}
         />
       );
@@ -47,9 +45,7 @@ describe('Load More Table Component', () => {
           limit={1}
           hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
           itemsPerRow={rowItems}
-          updateLimitPagination={newlimit => {
-            updateLimitPagination({ limit: newlimit });
-          }}
+          updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
           title={<h3>Hosts</h3>}
         />
       );
@@ -68,9 +64,7 @@ describe('Load More Table Component', () => {
           limit={1}
           hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
           itemsPerRow={rowItems}
-          updateLimitPagination={newlimit => {
-            updateLimitPagination({ limit: newlimit });
-          }}
+          updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
           title={<h3>Hosts</h3>}
         />
       );
@@ -94,9 +88,7 @@ describe('Load More Table Component', () => {
           limit={1}
           hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
           itemsPerRow={rowItems}
-          updateLimitPagination={newlimit => {
-            updateLimitPagination({ limit: newlimit });
-          }}
+          updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
           title={<h3>Hosts</h3>}
         />
       );
@@ -121,9 +113,7 @@ describe('Load More Table Component', () => {
           limit={2}
           hasNextPage={false}
           itemsPerRow={rowItems}
-          updateLimitPagination={newlimit => {
-            updateLimitPagination({ limit: newlimit });
-          }}
+          updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
           title={<h3>Hosts</h3>}
         />
       );
@@ -142,9 +132,7 @@ describe('Load More Table Component', () => {
           limit={2}
           hasNextPage={true}
           itemsPerRow={rowItems}
-          updateLimitPagination={newlimit => {
-            updateLimitPagination({ limit: newlimit });
-          }}
+          updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
           title={<h3>Hosts</h3>}
         />
       );
@@ -167,9 +155,7 @@ describe('Load More Table Component', () => {
           limit={2}
           hasNextPage={true}
           itemsPerRow={[]}
-          updateLimitPagination={newlimit => {
-            updateLimitPagination({ limit: newlimit });
-          }}
+          updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
           title={<h3>Hosts</h3>}
         />
       );
@@ -190,9 +176,7 @@ describe('Load More Table Component', () => {
           limit={1}
           hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
           itemsPerRow={rowItems}
-          updateLimitPagination={newlimit => {
-            updateLimitPagination({ limit: newlimit });
-          }}
+          updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
           title={<h3>Hosts</h3>}
         />
       );
@@ -216,9 +200,7 @@ describe('Load More Table Component', () => {
           limit={2}
           hasNextPage={true}
           itemsPerRow={rowItems}
-          updateLimitPagination={newlimit => {
-            updateLimitPagination({ limit: newlimit });
-          }}
+          updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
           title={<h3>Hosts</h3>}
         />
       );

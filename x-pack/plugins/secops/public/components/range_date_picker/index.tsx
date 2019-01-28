@@ -9,6 +9,7 @@ import { get, getOr, has, isEqual } from 'lodash/fp';
 import moment, { Moment } from 'moment';
 import React from 'react';
 import { connect } from 'react-redux';
+import { ActionCreator } from 'typescript-fsa';
 import { inputsActions, inputsModel, State } from '../../store';
 import { GlobalDateButton } from './global_date_button';
 import { QuickSelectPopover } from './quick_select_popover';
@@ -26,13 +27,16 @@ interface RangeDatePickerStateRedux {
 }
 
 interface RangeDatePickerDispatchProps {
-  setAbsoluteRangeDatePicker: (params: { id: string; from: number; to: number }) => void;
-  setRelativeRangeDatePicker: (
-    params: { id: string; option: string; from: number; to: number }
-  ) => void;
-  startAutoReload: (params: { id: string }) => void;
-  stopAutoReload: (params: { id: string }) => void;
-  setDuration: (params: { id: string; duration: number }) => void;
+  setAbsoluteRangeDatePicker: ActionCreator<{ id: string; from: number; to: number }>;
+  setRelativeRangeDatePicker: ActionCreator<{
+    id: string;
+    option: string;
+    from: number;
+    to: number;
+  }>;
+  startAutoReload: ActionCreator<{ id: string }>;
+  stopAutoReload: ActionCreator<{ id: string }>;
+  setDuration: ActionCreator<{ id: string; duration: number }>;
 }
 interface OwnProps {
   id: string;

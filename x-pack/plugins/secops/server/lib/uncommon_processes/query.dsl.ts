@@ -45,7 +45,7 @@ export const buildQuery = (options: RequestOptions) => {
         ...agg,
         group_by_process: {
           terms: {
-            size: limit,
+            size: limit + 1,
             field: 'process.name',
             order: [
               {

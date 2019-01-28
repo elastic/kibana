@@ -11,6 +11,7 @@ import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import { ActionCreator } from 'typescript-fsa';
 import { State, timelineActions } from '../../store';
 import { themeSelector } from '../../store/local/app';
 import { Theme } from '../../store/local/app/model';
@@ -44,7 +45,7 @@ interface OwnProps {
 }
 
 interface DispatchProps {
-  showTimeline?: ({ id, show }: { id: string; show: boolean }) => void;
+  showTimeline?: ActionCreator<{ id: string; show: boolean }>;
   applyDeltaToWidth?: (
     {
       id,

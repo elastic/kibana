@@ -7,6 +7,8 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
+import { ActionCreator } from 'typescript-fsa';
+
 import {
   globalPolicySelector,
   globalTimeRangeSelector,
@@ -19,7 +21,7 @@ interface GlobalTimeArgs {
   poll: number;
   from: number;
   to: number;
-  setQuery: (params: { id: string; loading: boolean; refetch: inputsModel.Refetch }) => void;
+  setQuery: ActionCreator<{ id: string; loading: boolean; refetch: inputsModel.Refetch }>;
 }
 
 interface OwnProps {
@@ -27,7 +29,7 @@ interface OwnProps {
 }
 
 interface GlobalTimeDispatch {
-  setQuery: (params: { id: string; loading: boolean; refetch: inputsModel.Refetch }) => void;
+  setQuery: ActionCreator<{ id: string; loading: boolean; refetch: inputsModel.Refetch }>;
 }
 
 interface GlobalTimeReduxState {

@@ -120,13 +120,33 @@ export interface AuthenticationItem {
 
   successes: number;
 
-  latest: string;
-
-  source: SourceEcsFields;
-
-  host: HostEcsFields;
-
   user: UserEcsFields;
+
+  lastSuccess?: LastSourceHost | null;
+
+  lastFailure?: LastSourceHost | null;
+}
+
+export interface UserEcsFields {
+  id?: number | null;
+
+  name?: string | null;
+
+  full_name?: string | null;
+
+  email?: string | null;
+
+  hash?: string | null;
+
+  group?: string | null;
+}
+
+export interface LastSourceHost {
+  timestamp?: string | null;
+
+  source?: SourceEcsFields | null;
+
+  host?: HostEcsFields | null;
 }
 
 export interface SourceEcsFields {
@@ -157,20 +177,6 @@ export interface OsEcsFields {
   version?: string | null;
 
   kernel?: string | null;
-}
-
-export interface UserEcsFields {
-  id?: number | null;
-
-  name?: string | null;
-
-  full_name?: string | null;
-
-  email?: string | null;
-
-  hash?: string | null;
-
-  group?: string | null;
 }
 
 export interface CursorType {
@@ -492,17 +498,25 @@ export namespace GetAuthenticationsQuery {
 
     user: User;
 
-    source: _Source;
+    lastSuccess?: LastSuccess | null;
 
-    host: Host;
-
-    latest: string;
+    lastFailure?: LastFailure | null;
   };
 
   export type User = {
     __typename?: 'UserEcsFields';
 
     name?: string | null;
+  };
+
+  export type LastSuccess = {
+    __typename?: 'LastSourceHost';
+
+    timestamp?: string | null;
+
+    source?: _Source | null;
+
+    host?: Host | null;
   };
 
   export type _Source = {
@@ -512,6 +526,30 @@ export namespace GetAuthenticationsQuery {
   };
 
   export type Host = {
+    __typename?: 'HostEcsFields';
+
+    id?: string | null;
+
+    name?: string | null;
+  };
+
+  export type LastFailure = {
+    __typename?: 'LastSourceHost';
+
+    timestamp?: string | null;
+
+    source?: __Source | null;
+
+    host?: _Host | null;
+  };
+
+  export type __Source = {
+    __typename?: 'SourceEcsFields';
+
+    ip?: string | null;
+  };
+
+  export type _Host = {
     __typename?: 'HostEcsFields';
 
     id?: string | null;

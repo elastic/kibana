@@ -7,14 +7,19 @@
 import gql from 'graphql-tag';
 
 export const authenticationsSchema = gql`
+  type LastSourceHost {
+    timestamp: String
+    source: SourceEcsFields
+    host: HostEcsFields
+  }
+
   type AuthenticationItem {
     _id: String!
     failures: Float!
     successes: Float!
-    latest: String!
-    source: SourceEcsFields!
-    host: HostEcsFields!
     user: UserEcsFields!
+    lastSuccess: LastSourceHost
+    lastFailure: LastSourceHost
   }
 
   type AuthenticationsEdges {

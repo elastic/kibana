@@ -30,7 +30,7 @@ export class ElasticsearchUncommonProcessesAdapter implements UncommonProcessesA
       'search',
       buildQuery(options)
     );
-    const { limit } = options.pagination;
+    const { cursor, limit } = options.pagination;
     const totalCount = getOr(0, 'aggregations.process_count.value', response);
     const buckets = getOr([], 'aggregations.group_by_process.buckets', response);
     const hits = getHits(buckets);
@@ -38,13 +38,18 @@ export class ElasticsearchUncommonProcessesAdapter implements UncommonProcessesA
     const uncommonProcessesEdges = hits.map(hit =>
       formatUncommonProcessesData(options.fields, hit, processFieldsMap)
     );
-    const edges = uncommonProcessesEdges.splice(0, limit);
+    const hasNextPage = uncommonProcessesEdges.length === limit + 1;
+    const beginning = cursor != null ? parseInt(cursor!, 10) : 0;
+    const edges = uncommonProcessesEdges.splice(beginning, limit);
     return {
       edges,
       totalCount,
       pageInfo: {
-        hasNextPage: null,
-        endCursor: { value: '' },
+        hasNextPage,
+        endCursor: {
+          value: String(limit),
+          tiebreaker: null,
+        },
       },
     };
   }
@@ -68,7 +73,7 @@ export const getHits = (
 export const getHosts = (buckets: ReadonlyArray<{ key: string; host: HostHits }>) =>
   buckets.map(bucket => ({
     id: bucket.key,
-    name: bucket.host.hits.hits[0]._source.host.name,
+    name: bucket.host.hits.hits[0]._source.host.name!,
   }));
 
 export const formatUncommonProcessesData = (
