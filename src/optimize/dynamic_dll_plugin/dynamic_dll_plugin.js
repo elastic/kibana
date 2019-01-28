@@ -30,9 +30,8 @@ import { parseSingleFileSync, dependenciesVisitorsGenerator } from '@kbn/babel-c
 const realPathAsync = promisify(fs.realpath);
 const DLL_ENTRY_STUB_MODULE_TYPE = 'javascript/dll-entry-stub';
 
-function inNodeModulesOrWebpackShims(checkPath) {
-  return checkPath.includes(`${path.sep}node_modules${path.sep}`)
-    || checkPath.includes(`${path.sep}webpackShims${path.sep}`);
+function inNodeModules(checkPath) {
+  return checkPath.includes(`${path.sep}node_modules${path.sep}`);
 }
 
 function inPluginNodeModules(checkPath) {
@@ -412,13 +411,13 @@ export class DynamicDllPlugin {
     }
 
     // ignore files that are not in node_modules
-    if (!inNodeModulesOrWebpackShims(module.resource)) {
+    if (!inNodeModules(module.resource)) {
       return;
     }
 
     // also ignore files that are symlinked into node_modules, but only
     // do the `realpath` call after checking the plain resource path
-    if (!inNodeModulesOrWebpackShims(await realPathAsync(module.resource))) {
+    if (!inNodeModules(await realPathAsync(module.resource))) {
       return;
     }
 
