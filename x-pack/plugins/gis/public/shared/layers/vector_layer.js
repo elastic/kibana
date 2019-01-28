@@ -286,7 +286,7 @@ export class VectorLayer extends AbstractLayer {
     return {
       ...dataFilters,
       fieldNames: _.uniq(fieldNames).sort(),
-      precision: this._source.getGeoGridPrecision(dataFilters.zoom),
+      geogridPrecision: this._source.getGeoGridPrecision(dataFilters.zoom),
     };
   }
 
