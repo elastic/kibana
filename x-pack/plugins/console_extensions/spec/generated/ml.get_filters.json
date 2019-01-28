@@ -1,0 +1,15 @@
+{
+  "ml.get_filters": {
+    "url_params": {
+      "from": "",
+      "size": ""
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_ml/filters",
+      "_ml/filters/{filter_id}"
+    ]
+  }
+}
