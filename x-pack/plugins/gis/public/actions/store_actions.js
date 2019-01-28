@@ -319,7 +319,6 @@ export function onDataLoadError(layerId, dataId, requestToken, errorMessage) {
 }
 
 export function updateSourceProp(layerId, propName, value) {
-
   return (dispatch) => {
     dispatch({
       type: UPDATE_SOURCE_PROP,
@@ -488,7 +487,7 @@ export function triggerRefreshTimer() {
 }
 
 export function updateLayerStyleForSelectedLayer(style, temporary = true) {
-  return async (dispatch, getState) => {
+  return async (dispatch) => {
     await dispatch({
       type: UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
       style: {
@@ -496,8 +495,6 @@ export function updateLayerStyleForSelectedLayer(style, temporary = true) {
         temporary
       },
     });
-    const layer = getSelectedLayer(getState());
-    dispatch(syncDataForLayer(layer.getId()));
   };
 }
 
