@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from 'expect.js';
-// eslint-disable-next-line max-len
-import { DashboardConstants, createDashboardEditUrl } from '../../../../../../src/legacy/core_plugins/kibana/public/dashboard/dashboard_constants';
 
 export default function ({ getPageObjects, getService }) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'canvas', 'security', 'spaceSelector']);
-  const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
   describe('canvas', () => {
     before(async () => {
@@ -150,7 +148,7 @@ export default function ({ getPageObjects, getService }) {
       it(`does not allow a workpad to be created`, async () => {
         await PageObjects.common.navigateToActualUrl('canvas', 'workpad/create', {
           ensureCurrentUrl: false,
-          showLoginIfPrompted: false,
+          shouldLoginIfPrompted: false,
         });
 
         // expect redirection to canvas landing
@@ -160,14 +158,14 @@ export default function ({ getPageObjects, getService }) {
       it(`does not allow a workpad to be edited`, async () => {
         await PageObjects.common.navigateToActualUrl('canvas', 'workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31', {
           ensureCurrentUrl: true,
-          showLoginIfPrompted: false,
+          shouldLoginIfPrompted: false,
         });
 
         await PageObjects.canvas.expectNoAddElementButton();
       });
     });
 
-    describe.skip('no canvas privileges', () => {
+    describe('no canvas privileges', () => {
       before(async () => {
         await security.role.create('no_canvas_privileges_role', {
           elasticsearch: {
@@ -193,6 +191,7 @@ export default function ({ getPageObjects, getService }) {
 
         await PageObjects.security.login('no_canvas_privileges_user', 'no_canvas_privileges_user-password', {
           expectSpaceSelector: false,
+          shouldLoginIfPrompted: false,
         });
       });
 
@@ -201,36 +200,32 @@ export default function ({ getPageObjects, getService }) {
         await security.user.delete('no_canvas_privileges_user');
       });
 
-      it(`landing page redirects to the home page`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', DashboardConstants.LANDING_PAGE_PATH, {
+      const getMessageText = async () => await (await find.byCssSelector('body>pre')).getVisibleText();
+
+      it(`returns a 404`, async () => {
+        await PageObjects.common.navigateToActualUrl('canvas', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', 10000);
+        const messageText = await getMessageText();
+        expect(messageText).to.eql(JSON.stringify({
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Not Found',
+        }));
       });
 
-      it(`create new dashboard redirects to the home page`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', DashboardConstants.CREATE_NEW_DASHBOARD_URL, {
+      it(`create new workpad returns a 404`, async () => {
+        await PageObjects.common.navigateToActualUrl('canvas', 'workpad/create', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', 10000);
-      });
-
-      it(`edit dashboard for object which doesn't exist redirects to the home page`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', createDashboardEditUrl('i-dont-exist'), {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
-        await testSubjects.existOrFail('homeApp', 10000);
-      });
-
-      it(`edit dashboard for object which exists redirects to the home page`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', createDashboardEditUrl('i-exist'), {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
-        await testSubjects.existOrFail('homeApp', 10000);
+        const messageText = await getMessageText();
+        expect(messageText).to.eql(JSON.stringify({
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Not Found',
+        }));
       });
     });
   });

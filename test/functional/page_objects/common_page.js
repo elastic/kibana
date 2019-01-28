@@ -65,7 +65,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
         log.debug(`navigateToUrl ${appUrl}`);
         await browser.get(appUrl);
 
-        const currentUrl = shouldLoginIfPrompted ? await this.loginIfPrompted(appUrl) : browser.getCurrentUrl();
+        const currentUrl = shouldLoginIfPrompted ? await this.loginIfPrompted(appUrl) : await browser.getCurrentUrl();
 
         if (ensureCurrentUrl && !currentUrl.includes(appUrl)) {
           throw new Error(`expected ${currentUrl}.includes(${appUrl})`);
@@ -93,7 +93,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
         log.debug(`navigateToActualUrl ${appUrl}`);
         await browser.get(appUrl);
 
-        const currentUrl = shouldLoginIfPrompted ? await this.loginIfPrompted(appUrl) : browser.getCurrentUrl();
+        const currentUrl = shouldLoginIfPrompted ? await this.loginIfPrompted(appUrl) : await browser.getCurrentUrl();
 
         if (ensureCurrentUrl && !currentUrl.includes(appUrl)) {
           throw new Error(`expected ${currentUrl}.includes(${appUrl})`);
