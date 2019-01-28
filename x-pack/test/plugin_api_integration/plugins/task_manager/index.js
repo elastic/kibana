@@ -43,7 +43,6 @@ export default function (kibana) {
               const callCluster = kbnServer.server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
               await callCluster('index', {
                 index: '.task_manager_test_result',
-                type: '_doc',
                 body: {
                   type: 'task',
                   taskId: taskInstance.id,
