@@ -27,7 +27,8 @@ export function XPackInfoProvider($window, $injector, Private) {
     };
 
     setAll = (updatedXPackInfo) => {
-      $window.sessionStorage.setItem(XPACK_INFO_KEY, JSON.stringify(updatedXPackInfo));
+      const camelCasedXPackInfo = convertKeysToCamelCaseDeep(updatedXPackInfo);
+      $window.sessionStorage.setItem(XPACK_INFO_KEY, JSON.stringify(camelCasedXPackInfo));
     };
 
     clear = () => {
@@ -52,7 +53,7 @@ export function XPackInfoProvider($window, $injector, Private) {
             throw err;
           })
           .then((xpackInfoResponse) => {
-            this.setAll(convertKeysToCamelCaseDeep(xpackInfoResponse.data));
+            this.setAll(xpackInfoResponse.data);
             xpackInfoSignature.set(xpackInfoResponse.headers('kbn-xpack-sig'));
           })
           .finally(() => {

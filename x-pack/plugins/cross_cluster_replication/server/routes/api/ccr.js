@@ -18,7 +18,7 @@ export const registerCcrRoutes = (server) => {
    * Returns Auto-follow stats
    */
   server.route({
-    path: `${API_BASE_PATH}/stats/auto-follow`,
+    path: `${API_BASE_PATH}/stats/auto_follow`,
     method: 'GET',
     config: {
       pre: [ licensePreRouting ]
@@ -32,6 +32,48 @@ export const registerCcrRoutes = (server) => {
         } = await callWithRequest('ccr.stats');
 
         return deserializeAutoFollowStats(autoFollowStats);
+      } catch(err) {
+        if (isEsError(err)) {
+          throw wrapEsError(err);
+        }
+        throw wrapUnknownError(err);
+      }
+    },
+  });
+
+  /**
+   * Returns whether the user has CCR permissions
+   */
+  server.route({
+    path: `${API_BASE_PATH}/permissions`,
+    method: 'GET',
+    config: {
+      pre: [ licensePreRouting ]
+    },
+    handler: async (request) => {
+      const callWithRequest = callWithRequestFactory(server, request);
+
+      try {
+        const {
+          has_all_requested: hasPermission,
+          cluster,
+        } = await callWithRequest('ccr.permissions', {
+          body: {
+            cluster: ['manage', 'manage_ccr'],
+          },
+        });
+
+        const missingPermissions = Object.keys(cluster).reduce((permissions, permissionName) => {
+          if (!cluster[permissionName]) {
+            permissions.push(permissionName);
+            return permissions;
+          }
+        }, []);
+
+        return {
+          hasPermission,
+          missingPermissions,
+        };
       } catch(err) {
         if (isEsError(err)) {
           throw wrapEsError(err);
