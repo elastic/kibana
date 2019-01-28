@@ -101,7 +101,7 @@ function getClauseForType(schema, namespace, type) {
  *  @param  {String} searchOperator
  *  @return {Object}
  */
-export function getQueryParams(mappings, schema, namespace, type, search, searchFields, searchOperator) {
+export function getQueryParams(mappings, schema, namespace, type, search, searchFields, searchOperator = 'OR') {
   const types = getTypes(mappings, type);
   const bool = {
     filter: [{
