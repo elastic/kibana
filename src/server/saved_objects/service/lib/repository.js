@@ -296,7 +296,7 @@ export class SavedObjectsRepository {
     const {
       type,
       search,
-      searchOperator,
+      searchOperator = 'OR',
       searchFields,
       page = 1,
       perPage = 20,

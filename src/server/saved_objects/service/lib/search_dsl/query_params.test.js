@@ -236,7 +236,6 @@ describe('searchDsl/queryParams', () => {
               must: [
                 {
                   simple_query_string: {
-                    default_operator: 'OR',
                     query: 'us*',
                     all_fields: true
                   }
@@ -267,7 +266,6 @@ describe('searchDsl/queryParams', () => {
               must: [
                 {
                   simple_query_string: {
-                    default_operator: 'OR',
                     query: 'us*',
                     all_fields: true
                   }
@@ -297,7 +295,6 @@ describe('searchDsl/queryParams', () => {
               must: [
                 {
                   simple_query_string: {
-                    default_operator: 'OR',
                     query: 'us*',
                     all_fields: true
                   }
@@ -327,7 +324,6 @@ describe('searchDsl/queryParams', () => {
               must: [
                 {
                   simple_query_string: {
-                    default_operator: 'OR',
                     query: 'us*',
                     all_fields: true
                   }
@@ -359,7 +355,6 @@ describe('searchDsl/queryParams', () => {
                 {
                   simple_query_string: {
                     query: 'y*',
-                    default_operator: 'OR',
                     fields: [
                       'pending.title',
                       'saved.title',
@@ -391,7 +386,6 @@ describe('searchDsl/queryParams', () => {
                 {
                   simple_query_string: {
                     query: 'y*',
-                    default_operator: 'OR',
                     fields: [
                       'pending.title^3',
                       'saved.title^3',
@@ -423,7 +417,6 @@ describe('searchDsl/queryParams', () => {
                 {
                   simple_query_string: {
                     query: 'y*',
-                    default_operator: 'OR',
                     fields: [
                       'pending.title',
                       'saved.title',
@@ -461,7 +454,6 @@ describe('searchDsl/queryParams', () => {
                 {
                   simple_query_string: {
                     query: 'y*',
-                    default_operator: 'OR',
                     fields: [
                       'pending.title',
                       'saved.title',
@@ -493,7 +485,6 @@ describe('searchDsl/queryParams', () => {
                 {
                   simple_query_string: {
                     query: 'y*',
-                    default_operator: 'OR',
                     fields: [
                       'pending.title^3',
                       'saved.title^3',
@@ -525,7 +516,6 @@ describe('searchDsl/queryParams', () => {
                 {
                   simple_query_string: {
                     query: 'y*',
-                    default_operator: 'OR',
                     fields: [
                       'pending.title',
                       'saved.title',
@@ -562,7 +552,6 @@ describe('searchDsl/queryParams', () => {
                 {
                   simple_query_string: {
                     query: 'y*',
-                    default_operator: 'OR',
                     fields: [
                       'saved.title',
                       'global.title',
@@ -592,7 +581,6 @@ describe('searchDsl/queryParams', () => {
                 {
                   simple_query_string: {
                     query: 'y*',
-                    default_operator: 'OR',
                     fields: [
                       'saved.title^3',
                       'global.title^3',
@@ -622,7 +610,6 @@ describe('searchDsl/queryParams', () => {
                 {
                   simple_query_string: {
                     query: 'y*',
-                    default_operator: 'OR',
                     fields: [
                       'saved.title',
                       'global.title',
@@ -657,7 +644,6 @@ describe('searchDsl/queryParams', () => {
                 {
                   simple_query_string: {
                     query: 'y*',
-                    default_operator: 'OR',
                     fields: [
                       'saved.title',
                       'global.title',
@@ -687,7 +673,6 @@ describe('searchDsl/queryParams', () => {
                 {
                   simple_query_string: {
                     query: 'y*',
-                    default_operator: 'OR',
                     fields: [
                       'saved.title^3',
                       'global.title^3',
@@ -717,7 +702,6 @@ describe('searchDsl/queryParams', () => {
                 {
                   simple_query_string: {
                     query: 'y*',
-                    default_operator: 'OR',
                     fields: [
                       'saved.title',
                       'global.title',

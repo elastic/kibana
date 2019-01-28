@@ -101,7 +101,7 @@ function getClauseForType(schema, namespace, type) {
  *  @param  {String} searchOperator
  *  @return {Object}
  */
-export function getQueryParams(mappings, schema, namespace, type, search, searchFields, searchOperator = 'OR') {
+export function getQueryParams(mappings, schema, namespace, type, search, searchFields, searchOperator) {
   const types = getTypes(mappings, type);
   const bool = {
     filter: [{
@@ -117,11 +117,11 @@ export function getQueryParams(mappings, schema, namespace, type, search, search
       {
         simple_query_string: {
           query: search,
-          default_operator: searchOperator,
           ...getFieldsForTypes(
             searchFields,
             types
-          )
+          ),
+          ...(searchOperator ? { default_operator: searchOperator } : {}),
         }
       }
     ];
