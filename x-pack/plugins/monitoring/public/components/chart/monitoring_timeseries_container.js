@@ -38,8 +38,8 @@ function MonitoringTimeseriesContainerUI({ series, onBrush, intl }) {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" style={{ flexGrow: 0 }}>
-          <EuiFlexItem>
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
             <EuiTitle tabIndex="0">
               <Fragment>
                 <EuiScreenReaderOnly>

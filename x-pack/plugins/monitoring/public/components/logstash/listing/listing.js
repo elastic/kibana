@@ -5,7 +5,7 @@
  */
 
 import React, { PureComponent } from 'react';
-import { EuiPage, EuiLink, EuiPageBody, EuiPageContent, EuiSpacer } from '@elastic/eui';
+import { EuiPage, EuiLink, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { formatPercentageUsage, formatNumber } from '../../../lib/format_number';
 import { ClusterStatus } from '..//cluster_status';
 import { EuiMonitoringTable } from '../../table';
@@ -125,9 +125,11 @@ class ListingUI extends PureComponent {
     return (
       <EuiPage>
         <EuiPageBody>
-          <EuiPageContent>
+          <EuiPanel>
             <ClusterStatus stats={stats} />
-            <EuiSpacer size="m"/>
+          </EuiPanel>
+          <EuiSpacer size="m" />
+          <EuiPageContent>
             <EuiMonitoringTable
               className="logstashNodesTable"
               rows={flattenedData}
