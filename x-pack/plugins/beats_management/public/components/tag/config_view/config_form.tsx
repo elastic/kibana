@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 // @ts-ignore
+import { i18n } from '@kbn/i18n';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import Formsy from 'formsy-react';
 import { get } from 'lodash';
@@ -182,6 +183,23 @@ class ConfigFormUi extends React.Component<ComponentProps, ComponentState> {
                 );
             }
           })}
+          <FormsyEuiCodeEditor
+            mode="yaml"
+            disabled={!this.props.onSubmit}
+            id={'other'}
+            defaultValue={get(this.props, `values.config.other`, '')}
+            name={'other'}
+            helpText={i18n.translate('xpack.beatsManagement.config.otherConfigDescription', {
+              defaultMessage: 'Use YAML format to specify other settings for the Filebeat Input',
+            })}
+            label={i18n.translate('xpack.beatsManagement.config.otherConfigLabel', {
+              defaultMessage: 'Other Config',
+            })}
+            validationError={i18n.translate('xpack.beatsManagement.config.other.error', {
+              defaultMessage: 'Use valid YAML format',
+            })}
+            required={false}
+          />
           {this.props.onSubmit && (
             <button
               type="submit"
