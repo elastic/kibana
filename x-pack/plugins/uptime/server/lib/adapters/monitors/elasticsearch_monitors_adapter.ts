@@ -503,7 +503,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
           bool: {
             filter: {
               term: {
-                'monitor.id': 'auto-tcp-0X81440A68E839814C',
+                'monitor.id': monitorId,
               },
             },
           },
