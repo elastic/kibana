@@ -23,7 +23,7 @@ import chrome from 'ui/chrome';
 import { functionsRegistry } from './functions_registry';
 import { typesRegistry } from './types_registry';
 
-const basePath = chrome.getInjected('defaultSpaceBasePath');
+const basePath = chrome.getInjected('serverBasePath');
 
 const types = {
   browserFunctions: functionsRegistry,
