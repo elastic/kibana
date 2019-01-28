@@ -566,7 +566,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const prevRenderingCount = await this.getVisualizationRenderingCount();
       log.debug(`Before Rendering count ${prevRenderingCount}`);
       await testSubjects.clickWhenNotDisabled('visualizeEditorRenderButton');
-      await this.waitForRenderingCount(prevRenderingCount);
+      await this.waitForRenderingCount(prevRenderingCount + 1);
     }
 
     async clickReset() {
@@ -817,13 +817,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const yAxisRatio = await this.getChartYAxisRatio(axis);
       // 3). get the visWrapper__chart elements
       const chartTypes = await find.allByCssSelector(`svg > g > g.series > rect[data-label="${dataLabel}"]`);
-
-      async function getChartType(chart) {
+      log.debug(`chartTypes count = ${chartTypes.length}`);
+      const chartData = await Promise.all(chartTypes.map(async chart => {
         const barHeight = await chart.getAttribute('height');
         return Math.round(barHeight * yAxisRatio);
-      }
-      const getChartTypesPromises = chartTypes.map(getChartType);
-      return await Promise.all(getChartTypesPromises);
+      }));
+
+      return chartData;
     }
 
 
@@ -931,22 +931,26 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return Number(renderingCount);
     }
 
-    async waitForRenderingCount(previousCount = 0, increment = 1) {
-      await retry.try(async () => {
+    async waitForRenderingCount(minimumCount = 1) {
+      await retry.waitFor(`rendering count to be greater than or equal to [${minimumCount}]`, async () => {
         const currentRenderingCount = await this.getVisualizationRenderingCount();
-        log.debug(`Readed rendering count ${previousCount} ${currentRenderingCount}`);
-        expect(currentRenderingCount).to.be(previousCount + increment);
+        log.debug(`-- currentRenderingCount=${currentRenderingCount}`);
+        return currentRenderingCount >= minimumCount;
       });
     }
 
     async waitForVisualizationRenderingStabilized() {
       //assuming rendering is done when data-rendering-count is constant within 1000 ms
-      await retry.try(async () => {
-        const previousCount = await this.getVisualizationRenderingCount();
+      await retry.waitFor('rendering count to stabilize', async () => {
+        const firstCount = await this.getVisualizationRenderingCount();
+        log.debug(`-- firstCount=${firstCount}`);
+
         await PageObjects.common.sleep(1000);
-        const currentCount = await this.getVisualizationRenderingCount();
-        log.debug(`Readed rendering count ${previousCount} ${currentCount}`);
-        expect(currentCount).to.be(previousCount);
+
+        const secondCount = await this.getVisualizationRenderingCount();
+        log.debug(`-- secondCount=${secondCount}`);
+
+        return firstCount === secondCount;
       });
     }
 

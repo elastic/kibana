@@ -40,6 +40,7 @@ const DEFAULT_STATE = {
   reading: false,
   readProgress: 0,
   readStatus: IMPORT_STATUS.INCOMPLETE,
+  parseJSONStatus: IMPORT_STATUS.INCOMPLETE,
   indexCreatedStatus: IMPORT_STATUS.INCOMPLETE,
   indexPatternCreatedStatus: IMPORT_STATUS.INCOMPLETE,
   ingestPipelineCreatedStatus: IMPORT_STATUS.INCOMPLETE,
@@ -142,34 +143,62 @@ export class ImportView extends Component {
         }, () => {
           this.props.hideBottomBar();
           setTimeout(async () => {
-            let success = false;
+            let success = true;
             const createPipeline = (pipelineString !== '');
 
-            let indexCreationSettings = {};
+            let settings = {};
+            let mappings = {};
+            let pipeline = {};
+
             try {
-              const settings = JSON.parse(indexSettingsString);
-              const mappings = JSON.parse(mappingsString);
-              indexCreationSettings = {
-                settings,
-                mappings,
-              };
-              if (createPipeline) {
-                indexCreationSettings.pipeline = JSON.parse(pipelineString);
-              }
-
-              // if an @timestamp field has been added to the
-              // mappings, use this field as the time field.
-              // This relies on the field being populated by
-              // the ingest pipeline on ingest
-              if (mappings[DEFAULT_TIME_FIELD] !== undefined) {
-                timeFieldName = DEFAULT_TIME_FIELD;
-                this.setState({ timeFieldName });
-              }
-
-              success = true;
+              settings = JSON.parse(indexSettingsString);
             } catch (error) {
               success = false;
-              errors.push(error);
+              const parseError = i18n.translate('xpack.ml.fileDatavisualizer.importView.parseSettingsError', {
+                defaultMessage: 'Error parsing settings:'
+              });
+              errors.push(`${parseError} ${error.message}`);
+            }
+
+            try {
+              mappings = JSON.parse(mappingsString);
+            } catch (error) {
+              success = false;
+              const parseError = i18n.translate('xpack.ml.fileDatavisualizer.importView.parseMappingsError', {
+                defaultMessage: 'Error parsing mappings:'
+              });
+              errors.push(`${parseError} ${error.message}`);
+            }
+
+            const indexCreationSettings = {
+              settings,
+              mappings,
+            };
+
+            try {
+              if (createPipeline) {
+                pipeline = JSON.parse(pipelineString);
+                indexCreationSettings.pipeline = pipeline;
+              }
+            } catch (error) {
+              success = false;
+              const parseError = i18n.translate('xpack.ml.fileDatavisualizer.importView.parsePipelineError', {
+                defaultMessage: 'Error parsing ingest pipeline:'
+              });
+              errors.push(`${parseError} ${error.message}`);
+            }
+
+            this.setState({
+              parseJSONStatus: success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
+            });
+
+            // if an @timestamp field has been added to the
+            // mappings, use this field as the time field.
+            // This relies on the field being populated by
+            // the ingest pipeline on ingest
+            if (mappings[DEFAULT_TIME_FIELD] !== undefined) {
+              timeFieldName = DEFAULT_TIME_FIELD;
+              this.setState({ timeFieldName });
             }
 
             if (success) {
@@ -345,6 +374,7 @@ export class ImportView extends Component {
       reading,
       initialized,
       readStatus,
+      parseJSONStatus,
       indexCreatedStatus,
       ingestPipelineCreatedStatus,
       indexPatternCreatedStatus,
@@ -368,6 +398,7 @@ export class ImportView extends Component {
     const statuses = {
       reading,
       readStatus,
+      parseJSONStatus,
       indexCreatedStatus,
       ingestPipelineCreatedStatus,
       indexPatternCreatedStatus,
@@ -488,6 +519,7 @@ export class ImportView extends Component {
                     index={index}
                     indexPatternId={indexPatternId}
                     timeFieldName={timeFieldName}
+                    createIndexPattern={createIndexPattern}
                   />
                 </React.Fragment>
               }

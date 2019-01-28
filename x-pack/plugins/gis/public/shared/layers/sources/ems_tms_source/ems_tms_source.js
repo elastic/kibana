@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { TMSSource } from '../tms_source';
+import { AbstractTMSSource } from '../tms_source';
 import { TileLayer } from '../../tile_layer';
 import {
   EuiText,
@@ -14,7 +14,7 @@ import {
 import _ from 'lodash';
 
 
-export class EMSTMSSource extends TMSSource {
+export class EMSTMSSource extends AbstractTMSSource {
 
   static type = 'EMS_TMS';
   static title = 'Elastic Maps Service tiles';
