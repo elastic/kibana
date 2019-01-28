@@ -5,13 +5,17 @@
  */
 
 import { get } from 'lodash';
+import moment from 'moment';
 import { INDEX_NAMES } from '../../../../common/constants';
-import { UMGqlRange, UMPingSortDirectionArg } from '../../../../common/domain_types';
 import { DocCount, HistogramSeries, Ping, PingResults } from '../../../../common/graphql/types';
 import { DatabaseAdapter } from '../database';
 import { UMPingsAdapter } from './adapter_types';
 
-const getFilteredQuery = (dateRangeStart: number, dateRangeEnd: number, filters?: string) => {
+const getFilteredQuery = (
+  dateRangeStart: string,
+  dateRangeEnd: string,
+  filters?: string | null
+) => {
   let filtersObj;
   // TODO: handle bad JSON gracefully
   filtersObj = filters ? JSON.parse(filters) : undefined;
@@ -43,12 +47,12 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
 
   public async getAll(
     request: any,
-    dateRangeStart: number,
-    dateRangeEnd: number,
-    monitorId?: string,
-    status?: string,
-    sort?: UMPingSortDirectionArg,
-    size?: number
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    monitorId?: string | null,
+    status?: string | null,
+    sort?: string | null,
+    size?: number | null
   ): Promise<PingResults> {
     const sortParam = sort ? { sort: [{ '@timestamp': { order: sort } }] } : undefined;
     const sizeParam = size ? { size } : undefined;
@@ -90,9 +94,9 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
 
   public async getLatestMonitorDocs(
     request: any,
-    dateRangeStart: number,
-    dateRangeEnd: number,
-    monitorId?: string
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    monitorId?: string | null
   ): Promise<Ping[]> {
     const must: any[] = [];
     if (monitorId) {
@@ -125,6 +129,9 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
               latest: {
                 top_hits: {
                   size: 1,
+                  sort: {
+                    '@timestamp': { order: 'desc' },
+                  },
                 },
               },
             },
@@ -139,18 +146,24 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     } = await this.database.search(request, params);
 
     // @ts-ignore TODO fix destructuring implicit any
-    return buckets.map(({ latest: { hits: { hits } } }) => ({
-      ...hits[0]._source,
-      timestamp: hits[0]._source[`@timestamp`],
-    }));
+    return buckets.map(({ latest: { hits: { hits } } }) => {
+      const timestamp = hits[0]._source[`@timestamp`];
+      const momentTs = moment(timestamp);
+      const millisFromNow = moment().diff(momentTs);
+      return {
+        ...hits[0]._source,
+        timestamp,
+        millisFromNow,
+      };
+    });
   }
 
   public async getPingHistogram(
     request: any,
-    range: UMGqlRange,
-    filters?: string
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string | null
   ): Promise<HistogramSeries[] | null> {
-    const { dateRangeStart, dateRangeEnd } = range;
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {

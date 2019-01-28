@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 
 import uiRoutes from '../routes';
@@ -26,7 +27,7 @@ import template from './error_auto_create_index.html';
 uiRoutes
   .when('/error/action.auto_create_index', {
     template,
-    k7Breadcrumbs: () => [{ text: 'Error' }],
+    k7Breadcrumbs: () => [{ text: i18n.translate('common.ui.errorAutoCreateIndex.breadcrumbs.errorText', { defaultMessage: 'Error' }) }],
   });
 
 export function isAutoCreateIndexError(error) {

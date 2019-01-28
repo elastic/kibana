@@ -72,7 +72,7 @@ describe('ElasticsearchPingsAdapter class', () => {
         body: {
           query: {
             bool: {
-              filter: [{ range: { '@timestamp': { gte: 100, lte: 200 } } }],
+              filter: [{ range: { '@timestamp': { gte: 'now-1h', lte: 'now' } } }],
               must: [],
             },
           },
@@ -83,7 +83,15 @@ describe('ElasticsearchPingsAdapter class', () => {
     });
 
     it('returns data in the appropriate shape', async () => {
-      const result = await adapter.getAll(serverRequest, 100, 200, undefined, undefined, 'asc', 12);
+      const result = await adapter.getAll(
+        serverRequest,
+        'now-1h',
+        'now',
+        undefined,
+        undefined,
+        'asc',
+        12
+      );
       const count = 3;
 
       expect(result.total).toBe(count);
@@ -98,7 +106,7 @@ describe('ElasticsearchPingsAdapter class', () => {
     it('creates appropriate sort and size parameters', async () => {
       database.search = getAllSearchMock;
 
-      await adapter.getAll(serverRequest, 100, 200, undefined, undefined, 'asc', 12);
+      await adapter.getAll(serverRequest, 'now-1h', 'now', undefined, undefined, 'asc', 12);
 
       expect(database.search).toHaveBeenCalledTimes(1);
       expect(database.search).toHaveBeenCalledWith(serverRequest, expectedGetAllParams);
@@ -106,14 +114,14 @@ describe('ElasticsearchPingsAdapter class', () => {
 
     it('omits the sort param when no sort passed', async () => {
       database.search = getAllSearchMock;
-      await adapter.getAll(serverRequest, 100, 200, undefined, undefined, undefined, 12);
+      await adapter.getAll(serverRequest, 'now-1h', 'now', undefined, undefined, undefined, 12);
       delete expectedGetAllParams.body.sort;
       expect(database.search).toHaveBeenCalledWith(serverRequest, expectedGetAllParams);
     });
 
     it('omits the size param when no size passed', async () => {
       database.search = getAllSearchMock;
-      await adapter.getAll(serverRequest, 100, 200, undefined, undefined, 'desc');
+      await adapter.getAll(serverRequest, 'now-1h', 'now', undefined, undefined, 'desc');
       delete expectedGetAllParams.body.size;
       set(expectedGetAllParams, 'body.sort[0].@timestamp.order', 'desc');
       expect(database.search).toHaveBeenCalledWith(serverRequest, expectedGetAllParams);
@@ -121,7 +129,7 @@ describe('ElasticsearchPingsAdapter class', () => {
 
     it('adds a filter for monitor ID', async () => {
       database.search = getAllSearchMock;
-      await adapter.getAll(serverRequest, 100, 200, 'testmonitorid');
+      await adapter.getAll(serverRequest, 'now-1h', 'now', 'testmonitorid');
       delete expectedGetAllParams.body.size;
       delete expectedGetAllParams.body.sort;
       expectedGetAllParams.body.query.bool.must.push({ term: { 'monitor.id': 'testmonitorid' } });
@@ -130,7 +138,7 @@ describe('ElasticsearchPingsAdapter class', () => {
 
     it('adds a filter for monitor status', async () => {
       database.search = getAllSearchMock;
-      await adapter.getAll(serverRequest, 100, 200, undefined, 'down');
+      await adapter.getAll(serverRequest, 'now-1h', 'now', undefined, 'down');
       delete expectedGetAllParams.body.size;
       delete expectedGetAllParams.body.sort;
       expectedGetAllParams.body.query.bool.must.push({ term: { 'monitor.status': 'down' } });
@@ -152,8 +160,8 @@ describe('ElasticsearchPingsAdapter class', () => {
                 {
                   range: {
                     '@timestamp': {
-                      gte: 100,
-                      lte: 200,
+                      gte: 'now-1h',
+                      lte: 'now',
                     },
                   },
                 },
@@ -174,6 +182,9 @@ describe('ElasticsearchPingsAdapter class', () => {
                 latest: {
                   top_hits: {
                     size: 1,
+                    sort: {
+                      '@timestamp': { order: 'desc' },
+                    },
                   },
                 },
               },
@@ -209,7 +220,12 @@ describe('ElasticsearchPingsAdapter class', () => {
 
     it('returns data in expected shape', async () => {
       database.search = getLatestSearchMock;
-      const result = await adapter.getLatestMonitorDocs(serverRequest, 100, 200, 'testmonitor');
+      const result = await adapter.getLatestMonitorDocs(
+        serverRequest,
+        'now-1h',
+        'now',
+        'testmonitor'
+      );
       expect(result).toHaveLength(1);
       expect(result[0].timestamp).toBe(123456);
       expect(result[0].monitor).not.toBeFalsy();

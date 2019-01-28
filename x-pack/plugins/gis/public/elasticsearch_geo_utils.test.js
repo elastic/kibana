@@ -299,6 +299,21 @@ describe('convertMapExtentToPolygon', () => {
     });
   });
 
+  it('should clamp longitudes to -180 to 180 when bounds span entire globe (360)', () => {
+    const bounds = {
+      maxLat: 10,
+      maxLon: 170,
+      minLat: -10,
+      minLon: -400,
+    };
+    expect(convertMapExtentToPolygon(bounds)).toEqual({
+      "type": "polygon",
+      "coordinates": [
+        [[-180, 10], [-180, -10], [180, -10], [180, 10], [-180, 10]]
+      ]
+    });
+  });
+
   it('should handle bounds that cross dateline(east to west)', () => {
     const bounds = {
       maxLat: 10,
