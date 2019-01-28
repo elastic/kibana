@@ -266,7 +266,8 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
                   status: {
                     terms: {
                       field: 'monitor.status',
-                      size: 400,
+                      size: 2,
+                      shard_size: 2,
                     },
                   },
                 },
