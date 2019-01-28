@@ -17,9 +17,20 @@
  * under the License.
  */
 
-export { KuiLocalNav } from './local_nav';
-export { KuiLocalNavRow } from './local_nav_row';
-export { KuiLocalNavRowSection } from './local_nav_row_section';
-export { KuiLocalTab } from './local_tab';
-export { KuiLocalTabs } from './local_tabs';
-export { KuiLocalTitle } from './local_title';
+import classnames from 'classnames';
+import PropTypes from 'prop-types';
+import React from 'react';
+
+export function KuiLocalNavRowSection({ className, children, ...rest }) {
+  const classes = classnames('kuiLocalNavRow__section', className);
+  return (
+    <div className={classes} {...rest}>
+      { children }
+    </div>
+  );
+}
+
+KuiLocalNavRowSection.propTypes = {
+  className: PropTypes.string,
+  children: PropTypes.node,
+};

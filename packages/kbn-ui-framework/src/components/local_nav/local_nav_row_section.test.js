@@ -17,9 +17,13 @@
  * under the License.
  */
 
-export { KuiLocalNav } from './local_nav';
-export { KuiLocalNavRow } from './local_nav_row';
-export { KuiLocalNavRowSection } from './local_nav_row_section';
-export { KuiLocalTab } from './local_tab';
-export { KuiLocalTabs } from './local_tabs';
-export { KuiLocalTitle } from './local_title';
+import React from 'react';
+import { render } from 'enzyme';
+import { requiredProps } from '../../test/required_props';
+
+import { KuiLocalNavRowSection } from './local_nav_row_section';
+
+test('renders KuiLocalNavRowSection', () => {
+  const component = <KuiLocalNavRowSection {...requiredProps}>children</KuiLocalNavRowSection>;
+  expect(render(component)).toMatchSnapshot();
+});
