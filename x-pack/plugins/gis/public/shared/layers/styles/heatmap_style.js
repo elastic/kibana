@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-
-import {
-  EuiSuperSelect,
-} from '@elastic/eui';
+import { GRID_RESOLUTION } from '../grid_resolution';
 
 export class HeatmapStyle {
 
@@ -39,24 +35,17 @@ export class HeatmapStyle {
     return 'Heatmap style';
   }
 
-  static renderEditor({ style, handleStyleChange }) {
-
-    const onChange = (refinement) => {
-      const styleDescriptor = HeatmapStyle.createDescriptor(refinement);
-      handleStyleChange(styleDescriptor);
-    };
-
-    return (<HeatmapEditor seedRefinement={style.getRefinement()} onRefinementChange={onChange} />);
-
+  static renderEditor() {
+    return null;
   }
 
-  setMBPaintProperties({ alpha, mbMap, layerId, propertyName }) {
+  setMBPaintProperties({ alpha, mbMap, layerId, propertyName, resolution }) {
     let radius;
-    if (this._descriptor.refinement === 'coarse') {
+    if (resolution === GRID_RESOLUTION.COARSE) {
       radius = 64;
-    } else if (this._descriptor.refinement === 'fine') {
+    } else if (resolution === GRID_RESOLUTION.FINE) {
       radius = 32;
-    } else if (this._descriptor.refinement === 'most_fine') {
+    } else if (resolution === GRID_RESOLUTION.MOST_FINE) {
       radius = 16;
     } else {
       throw new Error(`Refinement param not recognized: ${this._descriptor.refinement}`);
@@ -69,57 +58,5 @@ export class HeatmapStyle {
     mbMap.setPaintProperty(layerId, 'heatmap-opacity', alpha);
   }
 
-  getRefinement() {
-    return this._descriptor.refinement;
-  }
-
-  getPrecisionRefinementDelta() {
-    let refinementFactor;
-    if (this._descriptor.refinement === 'coarse') {
-      refinementFactor = 0;
-    } else if (this._descriptor.refinement === 'fine') {
-      refinementFactor = 1;
-    } else if (this._descriptor.refinement === 'most_fine') {
-      refinementFactor = 2;
-    } else {
-      throw new Error(`Refinement param not recognized: ${this._descriptor.refinement}`);
-    }
-    return refinementFactor;
-  }
-
 }
 
-
-class HeatmapEditor extends React.Component {
-
-  constructor() {
-    super();
-    this.state =  {
-      refinement: null
-    };
-  }
-
-  render() {
-
-    const options = [
-      { value: 'coarse', inputDisplay: 'coarse' },
-      { value: 'fine', inputDisplay: 'fine' },
-      { value: 'most_fine', inputDisplay: 'finest' }
-    ];
-
-    const onChange = (value) => {
-      this.setState({
-        refinement: value
-      });
-      this.props.onRefinementChange(value);
-    };
-
-    const refinement = this.state.refinement === null ?  this.props.seedRefinement  : this.state.refinement;
-
-    return (
-      <div>
-        <EuiSuperSelect options={options} valueOfSelected={refinement} onChange={onChange} />
-      </div>
-    );
-  }
-}

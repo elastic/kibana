@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { createHash } from 'crypto';
 import { props, reduce as reduceAsync } from 'bluebird';
 import Boom from 'boom';
 import { resolve } from 'path';
@@ -52,10 +53,37 @@ export function uiRenderMixin(kbnServer, server, config) {
   // render all views from ./views
   server.setupViews(resolve(__dirname, 'views'));
 
-  // expose built css
-  server.exposeStaticDir('/built_assets/css/{path*}', fromRoot('built_assets/css'));
   server.exposeStaticDir('/node_modules/@elastic/eui/dist/{path*}', fromRoot('node_modules/@elastic/eui/dist'));
   server.exposeStaticDir('/node_modules/@kbn/ui-framework/dist/{path*}', fromRoot('node_modules/@kbn/ui-framework/dist'));
+
+  const translationsCache = { translations: null, hash: null };
+  server.route({
+    path: '/translations/{locale}.json',
+    method: 'GET',
+    config: { auth: false },
+    handler(request, h) {
+      // Kibana server loads translations only for a single locale
+      // that is specified in `i18n.locale` config value.
+      const { locale } = request.params;
+      if (i18n.getLocale() !== locale.toLowerCase()) {
+        throw Boom.notFound(`Unknown locale: ${locale}`);
+      }
+
+      // Stringifying thousands of labels and calculating hash on the resulting
+      // string can be expensive so it makes sense to do it once and cache.
+      if (translationsCache.translations == null) {
+        translationsCache.translations = JSON.stringify(i18n.getTranslation());
+        translationsCache.hash = createHash('sha1')
+          .update(translationsCache.translations)
+          .digest('hex');
+      }
+
+      return h.response(translationsCache.translations)
+        .header('cache-control', 'must-revalidate')
+        .header('content-type', 'application/json')
+        .etag(translationsCache.hash);
+    }
+  });
 
   // register the bootstrap.js route after plugins are initialized so that we can
   // detect if any default auth strategies were registered
@@ -175,12 +203,10 @@ export function uiRenderMixin(kbnServer, server, config) {
 
   async function renderApp({ app, h, includeUserProvidedConfig = true, injectedVarsOverrides = {} }) {
     const request = h.request;
-    const translations = await server.getUiTranslations();
     const basePath = request.getBasePath();
 
     const legacyMetadata = await getLegacyKibanaPayload({
       app,
-      translations,
       request,
       includeUserProvidedConfig,
       injectedVarsOverrides
@@ -197,6 +223,9 @@ export function uiRenderMixin(kbnServer, server, config) {
         version: kbnServer.version,
         buildNumber: config.get('pkg.buildNum'),
         basePath,
+        i18n: {
+          translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
+        },
         vars: await replaceInjectedVars(
           request,
           mergeVariables(
