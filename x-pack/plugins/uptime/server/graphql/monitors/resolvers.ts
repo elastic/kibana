@@ -11,8 +11,10 @@ import {
   GetFilterBarQueryArgs,
   GetLatestMonitorsQueryArgs,
   GetMonitorChartsDataQueryArgs,
+  GetMonitorPageTitleQueryArgs,
   GetMonitorsQueryArgs,
   GetSnapshotQueryArgs,
+  MonitorPageTitle,
   Ping,
   Snapshot,
 } from '../../../common/graphql/types';
@@ -63,6 +65,13 @@ export type UMGetErrorsListResolver = UMResolver<
   UMContext
 >;
 
+export type UMGetMontiorPageTitleResolver = UMResolver<
+  MonitorPageTitle | Promise<MonitorPageTitle | null> | null,
+  any,
+  GetMonitorPageTitleQueryArgs,
+  UMContext
+>;
+
 export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
   libs: UMServerLibs
 ): {
@@ -73,6 +82,7 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
     getLatestMonitors: UMLatestMonitorsResolver;
     getFilterBar: UMGetFilterBarResolver;
     getErrorsList: UMGetErrorsListResolver;
+    getMonitorPageTitle: UMGetMontiorPageTitleResolver;
   };
 } => ({
   Query: {
@@ -121,6 +131,13 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
       { req }
     ): Promise<any> {
       return libs.monitors.getErrorsList(req, dateRangeStart, dateRangeEnd, filters);
+    },
+    async getMonitorPageTitle(
+      resolver: any,
+      { monitorId },
+      { req }
+    ): Promise<MonitorPageTitle | null> {
+      return await libs.monitors.getMonitorPageTitle(req, monitorId);
     },
   },
 });

@@ -14,19 +14,20 @@ export const getMonitorListQueryString = `
       filters: $filters
     ) {
       monitors {
-        key {
-          id
-          port
+        id {
+          key
+          url
         }
         ping {
           timestamp
           monitor {
-            id
-            status
-            ip
             duration {
               us
             }
+            id
+            ip
+            name
+            status
           }
           url {
             full

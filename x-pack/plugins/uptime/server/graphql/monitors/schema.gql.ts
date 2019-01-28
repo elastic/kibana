@@ -8,10 +8,10 @@ import gql from 'graphql-tag';
 
 export const monitorsSchema = gql`
   type FilterBar {
-    id: [String]
-    port: [Int]
-    scheme: [String]
-    status: [String]
+    ids: [MonitorKey!]
+    ports: [Int!]
+    schemes: [String!]
+    statuses: [String!]
   }
 
   type HistogramDataPoint {
@@ -60,8 +60,8 @@ export const monitorsSchema = gql`
   }
 
   type MonitorKey {
-    id: String
-    port: Int
+    key: String!
+    url: String
   }
 
   type MonitorSeriesPoint {
@@ -70,7 +70,7 @@ export const monitorsSchema = gql`
   }
 
   type LatestMonitor {
-    key: MonitorKey
+    id: MonitorKey!
     ping: Ping
     upSeries: [MonitorSeriesPoint]
     downSeries: [MonitorSeriesPoint]
@@ -87,6 +87,12 @@ export const monitorsSchema = gql`
     count: Int
     statusCode: String
     timestamp: String
+  }
+
+  type MonitorPageTitle {
+    id: String!
+    url: String
+    name: String
   }
 
   extend type Query {
@@ -109,5 +115,7 @@ export const monitorsSchema = gql`
     getFilterBar(dateRangeStart: String!, dateRangeEnd: String!): FilterBar
 
     getErrorsList(dateRangeStart: String!, dateRangeEnd: String!, filters: String): [ErrorListItem]
+
+    getMonitorPageTitle(monitorId: String!): MonitorPageTitle
   }
 `;
