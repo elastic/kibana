@@ -17,7 +17,6 @@ query FilterBar($dateRangeStart: String!, $dateRangeEnd: String!) {
       schemes
     }
   }
-}
 `;
 
 export const getFilterBarQuery = gql`
