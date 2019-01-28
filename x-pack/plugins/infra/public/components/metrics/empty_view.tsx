@@ -8,7 +8,7 @@ import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-interface NoDataProps {
+interface MetricsEmptyViewProps {
   titleText: string;
   bodyText: string;
   refetchText: string;
@@ -16,7 +16,7 @@ interface NoDataProps {
   testString?: string;
 }
 
-export const NoData: React.SFC<NoDataProps> = ({
+export const MetricsEmptyView: React.SFC<MetricsEmptyViewProps> = ({
   titleText,
   bodyText,
   refetchText,
