@@ -65,7 +65,7 @@ Array [
     "theme": "light",
     "urlImports": Object {
       "publicDir": <absolute>/kibana/public,
-      "urlBase": "plugins/test",
+      "urlBase": "built_assets/css/plugins/test",
     },
   },
   Object {
@@ -74,7 +74,7 @@ Array [
     "theme": "dark",
     "urlImports": Object {
       "publicDir": <absolute>/kibana/public,
-      "urlBase": "plugins/test",
+      "urlBase": "built_assets/css/plugins/test",
     },
   },
 ]
@@ -93,7 +93,7 @@ Array [
     "theme": "light",
     "urlImports": Object {
       "publicDir": <absolute>/kibana/public,
-      "urlBase": "plugins/test",
+      "urlBase": "built_assets/css/plugins/test",
     },
   },
   Object {
@@ -102,7 +102,7 @@ Array [
     "theme": "dark",
     "urlImports": Object {
       "publicDir": <absolute>/kibana/public,
-      "urlBase": "plugins/test",
+      "urlBase": "built_assets/css/plugins/test",
     },
   },
 ]
@@ -121,7 +121,7 @@ Array [
     "theme": "light",
     "urlImports": Object {
       "publicDir": <absolute>/kibana/public,
-      "urlBase": "plugins/test",
+      "urlBase": "built_assets/css/plugins/test",
     },
   },
   Object {
@@ -130,7 +130,7 @@ Array [
     "theme": "dark",
     "urlImports": Object {
       "publicDir": <absolute>/kibana/public,
-      "urlBase": "plugins/test",
+      "urlBase": "built_assets/css/plugins/test",
     },
   },
 ]

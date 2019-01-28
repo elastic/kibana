@@ -47,7 +47,7 @@ function getStyleSheetPath(pluginSpec, localPath, theme) {
     localPath: existsSync(localCssPath) ? localCssPath : localPath,
     publicPath: getPublicPath(pluginSpec, localCssPath),
     urlImports: {
-      urlBase: getUrlBase(pluginSpec),
+      urlBase: `built_assets/css/${getUrlBase(pluginSpec)}`,
       publicDir: pluginSpec.getPublicDir(),
     }
   };
