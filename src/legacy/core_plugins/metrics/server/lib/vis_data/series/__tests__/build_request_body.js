@@ -75,24 +75,40 @@ const body = JSON.parse(`
 }
 `);
 
-import buildRequestBody from '../build_request_body';
+import sinon from 'sinon';
 import { expect } from 'chai';
+import buildRequestBody from '../build_request_body';
 
 describe('buildRequestBody(req)', () => {
   it('returns a valid body', () => {
     const panel = body.panels[0];
     const series = panel.series[0];
-    const config = {
+    const getSearchTimezone =  sinon.spy(() => 'UTC');
+    const getSearchInterval = sinon.spy();
+    const capabilities = {
+      getSearchTimezone,
+      getSearchInterval
+    };
+     const config = {
       allowLeadingWildcards: true,
       queryStringOptions: {},
     };
     const doc = buildRequestBody({ payload: body }, panel, series, config);
+    expect(getSearchTimezone.calledOnce).to.equal(true);
     expect(doc).to.eql({
       size: 0,
       query: {
         bool: {
-          filter: [],
           must: [
+            {
+              range: {
+                '@timestamp': {
+                  gte: 1485463055881,
+                  lte: 1485463955881,
+                  format: 'epoch_millis'
+                }
+              }
+            },
             {
               bool: {
                 must: [
@@ -105,58 +121,41 @@ describe('buildRequestBody(req)', () => {
                 ],
                 must_not: []
               }
-            },
-            {
-              range: {
-                '@timestamp': {
-                  gte: 1485463055881,
-                  lte: 1485463955881,
-                  format: 'epoch_millis'
-                }
-              }
-            },
-          ],
-          must_not: [],
-          should: [],
+            }
+          ]
         }
       },
-      aggs: {
-        'c9b5f9c0-e403-11e6-be91-6f7688e9fac7': {
-          filter: {
-            match_all: {}
-          },
-          meta: {
-            timeField: '@timestamp',
-            bucketSize: 10,
-            intervalString: '10s'
-          },
-          aggs: {
-            timeseries: {
-              date_histogram: {
-                field: '@timestamp',
-                interval: '10s',
-                min_doc_count: 0,
-                time_zone: 'UTC',
-                extended_bounds: {
-                  min: 1485463055881,
-                  max: 1485463955881
-                }
-              },
-              aggs: {
-                'c9b5f9c1-e403-11e6-be91-6f7688e9fac7': {
-                  bucket_script: {
-                    buckets_path: {
-                      count: '_count'
-                    },
-                    script: {
-                      source: 'count * 1',
-                      lang: 'expression'
-                    },
-                    gap_policy: 'skip'
-                  }
+      'aggs': {
+        'timeseries': {
+          'aggs': {
+            'c9b5f9c1-e403-11e6-be91-6f7688e9fac7': {
+              'bucket_script': {
+                'buckets_path': {
+                  'count': '_count'
+                },
+                'gap_policy': 'skip',
+                'script': {
+                  'lang': 'expression',
+                  'source': 'count * 1'
                 }
               }
             }
+          },
+          'date_histogram': {
+            'extended_bounds': {
+              'max': 1485463955881,
+              'min': 1485463055881
+            },
+            'field': '@timestamp',
+            'interval': '10s',
+            'min_doc_count': 0,
+            'time_zone': 'UTC'
+          },
+          'meta': {
+            'bucketSize': 10,
+            'intervalString': '10s',
+            'seriesId': 'c9b5f9c0-e403-11e6-be91-6f7688e9fac7',
+            'timeField': '@timestamp'
           }
         }
       }
