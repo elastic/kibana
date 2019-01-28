@@ -5,9 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import TooltipOverlay from '../../../shared/TooltipOverlay';
 import { asMillis, asDecimal } from '../../../../utils/formatters';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { fontFamilyCode, truncate } from '../../../../style/variables';
@@ -38,11 +38,14 @@ export default function TransactionList({ items, serviceName, ...rest }) {
         const transactionPath = `/${serviceName}/transactions/${encodedType}/${encodedName}`;
 
         return (
-          <TooltipOverlay content={transactionName || NOT_AVAILABLE_LABEL}>
+          <EuiToolTip
+            id="transaction-name-link-tooltip"
+            content={transactionName || NOT_AVAILABLE_LABEL}
+          >
             <TransactionNameLink hash={transactionPath}>
               {transactionName || NOT_AVAILABLE_LABEL}
             </TransactionNameLink>
-          </TooltipOverlay>
+          </EuiToolTip>
         );
       }
     },

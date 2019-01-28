@@ -17,13 +17,10 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import expect from 'expect.js';
 import { getPoint } from '../_get_point';
 
 describe('getPoint', function () {
-
-  const truthFormatted = _.constant(true);
 
   const table = {
     columns: [{ id: '0' }, { id: '1' }, { id: '3' }],
@@ -80,7 +77,7 @@ describe('getPoint', function () {
     });
 
     it('properly unwraps and scales values', function () {
-      const seriesAspect = [{ accessor: 1, fieldFormatter: _.identity }];
+      const seriesAspect = [{ accessor: 1  }];
       const point = getPoint(table, xAspect, seriesAspect, yScale, row, 0, yAspect);
 
       expect(point)
@@ -90,12 +87,12 @@ describe('getPoint', function () {
     });
 
     it('properly formats series values', function () {
-      const seriesAspect = [{ accessor: 1, fieldFormatter: truthFormatted }];
+      const seriesAspect = [{ accessor: 1, format: { id: 'number', params: { pattern: '$' } } }];
       const point = getPoint(table, xAspect, seriesAspect, yScale, row, 0, yAspect);
 
       expect(point)
         .to.have.property('x', 1)
-        .and.have.property('series', 'true')
+        .and.have.property('series', '$2')
         .and.have.property('y', 3);
     });
   });

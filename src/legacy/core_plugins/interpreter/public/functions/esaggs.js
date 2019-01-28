@@ -34,7 +34,7 @@ const courierRequestHandler = courierRequestHandlerProvider().handler;
 
 export const esaggs = () => ({
   name: 'esaggs',
-  type: 'datatable',
+  type: 'kibana_datatable',
   context: {
     types: [
       'kibana_context',
@@ -90,7 +90,7 @@ export const esaggs = () => ({
     });
 
     return {
-      type: 'datatable',
+      type: 'kibana_datatable',
       rows: response.rows,
       columns: response.columns.map(column => ({
         id: column.id,
