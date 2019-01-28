@@ -8,7 +8,7 @@ import { get } from 'lodash';
 import moment from 'moment';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { DocCount, HistogramSeries, Ping, PingResults } from '../../../../common/graphql/types';
-import { getFilteredQuery } from '../../helper';
+import { getFilteredQuery, getFilteredQueryAndStatusFilter } from '../../helper';
 import { DatabaseAdapter } from '../database';
 import { UMPingsAdapter } from './adapter_types';
 
@@ -164,10 +164,15 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     dateRangeEnd: string,
     filters?: string | null
   ): Promise<HistogramSeries[] | null> {
+    const { statusFilter, query } = getFilteredQueryAndStatusFilter(
+      dateRangeStart,
+      dateRangeEnd,
+      filters
+    );
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
-        query: getFilteredQuery(dateRangeStart, dateRangeEnd, filters),
+        query,
         size: 0,
         aggs: {
           timeseries: {
@@ -193,12 +198,31 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
               },
             },
           },
+          current_status: {
+            terms: {
+              field: 'monitor.id',
+              size: 200,
+            },
+            aggs: {
+              latest: {
+                top_hits: {
+                  size: 1,
+                  sort: [
+                    {
+                      '@timestamp': 'desc',
+                    },
+                  ],
+                },
+              },
+            },
+          },
         },
       },
     };
 
     const result = await this.database.search(request, params);
     const buckets: any[] = get(result, 'aggregations.timeseries.buckets', []);
+    const currentStatus: any[] = get(result, 'aggregations.current_status.buckets', []);
 
     if (buckets.length === 0) {
       return null;
@@ -206,11 +230,18 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     const defaultBucketSize = Math.abs(buckets[0].key - buckets[1].key);
     const ret: Array<{ monitorId: string; data: any[] }> = [];
     const upsertHash = (key: string, value: object) => {
-      const fa = ret.find(f => f.monitorId === key);
-      if (fa) {
-        fa.data.push(value);
-      } else {
-        ret.push({ monitorId: key, data: [value] });
+      const status = get(
+        currentStatus.find(h => h.key === key),
+        'latest.hits.hits[0]._source.monitor.status',
+        null
+      );
+      if (!statusFilter || (statusFilter && status === statusFilter)) {
+        const fa = ret.find(f => f.monitorId === key);
+        if (fa) {
+          fa.data.push(value);
+        } else {
+          ret.push({ monitorId: key, data: [value] });
+        }
       }
     };
     buckets.forEach((bucket: any, index: number, array: any[]) => {
