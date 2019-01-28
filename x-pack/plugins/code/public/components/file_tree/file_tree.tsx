@@ -31,12 +31,13 @@ interface Props extends RouteComponentProps<MainRouteParams> {
 }
 
 export class CodeFileTree extends React.Component<Props> {
-  public fetchTree(path = '') {
+  public fetchTree(path = '', isDir: boolean) {
     const { resource, org, repo, revision } = this.props.match.params;
     this.props.fetchRepoTree({
       uri: `${resource}/${org}/${repo}`,
       revision,
       path: path || '',
+      isDir,
     });
   }
 
@@ -53,11 +54,11 @@ export class CodeFileTree extends React.Component<Props> {
     }
   };
 
-  public getTreeToggler = (path: string) => () => {
+  public getTreeToggler = (path: string, isDir: boolean) => () => {
     if (this.props.openedPaths.includes(path)) {
       this.props.closeTreePath(path);
     } else {
-      this.fetchTree(path);
+      this.fetchTree(path, isDir);
     }
   };
 
@@ -76,7 +77,7 @@ export class CodeFileTree extends React.Component<Props> {
     switch (node.type) {
       case FileTreeItemType.Directory: {
         const onFolderClick = () => {
-          this.getTreeToggler(node.path || '')();
+          this.getTreeToggler(node.path || '', true)();
         };
         return (
           <div className={className}>
@@ -126,7 +127,10 @@ export class CodeFileTree extends React.Component<Props> {
   };
 
   public treeToItems = (node: Tree): EuiSideNavItem => {
-    const forceOpen = this.props.openedPaths.includes(node.path!);
+    const forceOpen =
+      node.type === FileTreeItemType.Directory
+        ? this.props.openedPaths.includes(node.path!)
+        : false;
     const data: EuiSideNavItem = {
       id: node.name,
       name: node.name,
