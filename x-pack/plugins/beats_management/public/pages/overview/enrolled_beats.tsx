@@ -201,6 +201,7 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
                     break;
                   case AssignmentActionType.Delete:
                     await this.props.containers.beats.deactivate(this.getSelectedBeats());
+                    await this.updateBeatsData();
                     this.notifyBeatDisenrolled(this.getSelectedBeats());
                     break;
                   case AssignmentActionType.Reload:
