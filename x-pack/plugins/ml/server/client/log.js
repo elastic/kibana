@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const STATUS = {
-  FAILURE: 'FAILURE',
-  SUCCESS: 'SUCCESS',
-  LOADING: 'LOADING'
-};
+export let mlLog = () => {};
+
+export function initMlServerLog(server) {
+  mlLog = (level, message) => server.log(['ml', level], message);
+}
