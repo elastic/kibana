@@ -159,8 +159,6 @@ export const App = injectI18n(
       }
 
       if (fetchPermissionError) {
-        // const { error: errorString, statusCode, message } = fetchPermissionError;
-
         return (
           <SectionError
             title={(
