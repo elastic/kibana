@@ -45,7 +45,7 @@ export class VectorStyle {
     return 'Vector style';
   }
 
-  static description = 'Link styles to property values for data driven styling.';
+  static description = 'Use property values to symbolize features.';
 
   static renderEditor({ handleStyleChange, style, layer }) {
 
