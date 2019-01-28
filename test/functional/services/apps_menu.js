@@ -41,11 +41,15 @@ export function AppsMenuProvider({ getService }) {
     }
 
     async clickLink(appTitle) {
-      log.debug(`click "${appTitle}" tab`);
-      await this._ensureMenuOpen();
-      const container = await testSubjects.find('appsMenu');
-      const link = await container.findByPartialLinkText(appTitle);
-      await link.click();
+      try {
+        log.debug(`click "${appTitle}" tab`);
+        await this._ensureMenuOpen();
+        const container = await testSubjects.find('appsMenu');
+        const link = await container.findByPartialLinkText(appTitle);
+        await link.click();
+      } finally {
+        await this._ensureMenuClosed();
+      }
     }
 
     async _ensureMenuOpen() {
