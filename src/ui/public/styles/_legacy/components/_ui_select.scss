@@ -148,7 +148,7 @@ body > .select2-container.open {
   /* Instead of center because of .btn */
   text-align: left !important;
   border: $euiBorderThin;
-  background-color: $euiColorEmptyShade;
+  background-color: $euiFormBackgroundColor;
   color: $euiColorDarkestShade;
 
   .ui-select-placeholder {
@@ -190,7 +190,7 @@ body > .ui-select-bootstrap.open {
   height: auto;
   padding: 3px 5px 2px;
   border: $euiBorderThin;
-  background-color: $euiColorEmptyShade;
+  background-color: $euiFormBackgroundColor;
 
   &.kuiInputError {
     border-color: $euiColorDanger;

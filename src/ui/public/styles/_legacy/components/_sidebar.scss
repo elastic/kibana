@@ -95,7 +95,7 @@
     padding: $euiSizeXS $euiSizeS;
     display: flex;
     justify-content: space-between;
-    background-color: shade($euiColorPrimary, 60%);
+    background-color: shadeOrTint($euiColorPrimary, 60%, 30%);
     color: $euiColorEmptyShade;
     line-height: $euiSizeL;
 
