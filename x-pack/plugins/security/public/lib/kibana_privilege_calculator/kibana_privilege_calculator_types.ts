@@ -25,8 +25,8 @@ export interface PrivilegeExplanation {
   actualPrivilege: string;
   actualPrivilegeSource: PRIVILEGE_SOURCE;
   isDirectlyAssigned: boolean;
-  supercededPrivilege?: string;
-  supercededPrivilegeSource?: PRIVILEGE_SOURCE;
+  supersededPrivilege?: string;
+  supersededPrivilegeSource?: PRIVILEGE_SOURCE;
 }
 
 export interface CalculatedPrivilege {
@@ -39,8 +39,8 @@ export interface CalculatedPrivilege {
 export interface PrivilegeScenario {
   actualPrivilegeSource: PRIVILEGE_SOURCE;
   isDirectlyAssigned: boolean;
-  supercededPrivilege?: string;
-  supercededPrivilegeSource?: PRIVILEGE_SOURCE;
+  supersededPrivilege?: string;
+  supersededPrivilegeSource?: PRIVILEGE_SOURCE;
   actions: string[];
 }
 

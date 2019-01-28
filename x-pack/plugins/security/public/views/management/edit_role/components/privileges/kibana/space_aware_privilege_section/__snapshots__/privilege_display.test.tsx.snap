@@ -7,8 +7,8 @@ exports[`PrivilegeDisplay renders a superceded privilege 1`] = `
       "actualPrivilege": "all",
       "actualPrivilegeSource": 40,
       "isDirectlyAssigned": false,
-      "supercededPrivilege": "read",
-      "supercededPrivilegeSource": 20,
+      "supersededPrivilege": "read",
+      "supersededPrivilegeSource": 20,
     }
   }
   intl={

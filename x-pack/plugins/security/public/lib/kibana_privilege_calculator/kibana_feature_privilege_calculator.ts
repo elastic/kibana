@@ -57,8 +57,8 @@ export class KibanaFeaturePrivilegeCalculator {
             isDirectlyAssigned: scenario.isDirectlyAssigned,
             ...this.buildSupercededFields(
               !scenario.isDirectlyAssigned,
-              scenario.supercededPrivilege,
-              scenario.supercededPrivilegeSource
+              scenario.supersededPrivilege,
+              scenario.supersededPrivilegeSource
             ),
           };
         }
@@ -126,10 +126,10 @@ export class KibanaFeaturePrivilegeCalculator {
 
     const includeSpaceBaseScenario =
       basePrivilegeExplanation.actualPrivilegeSource === PRIVILEGE_SOURCE.SPACE_BASE ||
-      basePrivilegeExplanation.supercededPrivilegeSource === PRIVILEGE_SOURCE.SPACE_BASE;
+      basePrivilegeExplanation.supersededPrivilegeSource === PRIVILEGE_SOURCE.SPACE_BASE;
 
     const spaceBasePrivilege =
-      basePrivilegeExplanation.supercededPrivilege || basePrivilegeExplanation.actualPrivilege;
+      basePrivilegeExplanation.supersededPrivilege || basePrivilegeExplanation.actualPrivilege;
 
     if (includeSpaceBaseScenario) {
       scenarios.push({
@@ -188,15 +188,15 @@ export class KibanaFeaturePrivilegeCalculator {
 
   private buildSupercededFields(
     isSuperceding: boolean,
-    supercededPrivilege?: string,
-    supercededPrivilegeSource?: PRIVILEGE_SOURCE
+    supersededPrivilege?: string,
+    supersededPrivilegeSource?: PRIVILEGE_SOURCE
   ) {
     if (!isSuperceding) {
       return {};
     }
     return {
-      supercededPrivilege,
-      supercededPrivilegeSource,
+      supersededPrivilege,
+      supersededPrivilegeSource,
     };
   }
 }

@@ -40,8 +40,8 @@ describe('PrivilegeDisplay', () => {
       <PrivilegeDisplay
         privilege={'all'}
         explanation={{
-          supercededPrivilege: 'read',
-          supercededPrivilegeSource: PRIVILEGE_SOURCE.SPACE_BASE,
+          supersededPrivilege: 'read',
+          supersededPrivilegeSource: PRIVILEGE_SOURCE.SPACE_BASE,
           actualPrivilege: 'all',
           actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
           isDirectlyAssigned: false,

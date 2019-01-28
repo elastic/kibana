@@ -178,8 +178,8 @@ describe('calculateEffectivePrivileges', () => {
               actualPrivilege: 'all',
               actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
               isDirectlyAssigned: false,
-              supercededPrivilege: 'read',
-              supercededPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_FEATURE,
+              supersededPrivilege: 'read',
+              supersededPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_FEATURE,
             }),
           },
           {
@@ -192,8 +192,8 @@ describe('calculateEffectivePrivileges', () => {
               actualPrivilege: 'all',
               actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
               isDirectlyAssigned: false,
-              supercededPrivilege: 'read',
-              supercededPrivilegeSource: PRIVILEGE_SOURCE.SPACE_FEATURE,
+              supersededPrivilege: 'read',
+              supersededPrivilegeSource: PRIVILEGE_SOURCE.SPACE_FEATURE,
             }),
           },
         ]);
@@ -436,8 +436,8 @@ describe('calculateEffectivePrivileges', () => {
             actualPrivilege: 'all',
             actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
             isDirectlyAssigned: false,
-            supercededPrivilege: 'read',
-            supercededPrivilegeSource: PRIVILEGE_SOURCE.SPACE_BASE,
+            supersededPrivilege: 'read',
+            supersededPrivilegeSource: PRIVILEGE_SOURCE.SPACE_BASE,
           },
           ...buildExpectedFeaturePrivileges({
             actualPrivilege: 'all',
@@ -500,8 +500,8 @@ describe('calculateEffectivePrivileges', () => {
             actualPrivilege: 'read',
             actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
             isDirectlyAssigned: false,
-            supercededPrivilege: 'read',
-            supercededPrivilegeSource: PRIVILEGE_SOURCE.SPACE_BASE,
+            supersededPrivilege: 'read',
+            supersededPrivilegeSource: PRIVILEGE_SOURCE.SPACE_BASE,
           },
           ...buildExpectedFeaturePrivileges({
             feature1: {

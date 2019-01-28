@@ -156,8 +156,8 @@ describe('getMostPermissiveBasePrivilege', () => {
         actualPrivilege: 'all',
         actualPrivilegeSource: PRIVILEGE_SOURCE.GLOBAL_BASE,
         isDirectlyAssigned: false,
-        supercededPrivilege: 'read',
-        supercededPrivilegeSource: PRIVILEGE_SOURCE.SPACE_BASE,
+        supersededPrivilege: 'read',
+        supersededPrivilegeSource: PRIVILEGE_SOURCE.SPACE_BASE,
       } as PrivilegeExplanation);
     });
   });

@@ -27,8 +27,8 @@ export const PrivilegeDisplay: SFC<Props> = (props: Props) => {
     return <SimplePrivilegeDisplay {...props} />;
   }
 
-  if (explanation.supercededPrivilege) {
-    return <SupercededPrivilegeDisplay {...props} />;
+  if (explanation.supersededPrivilege) {
+    return <supersededPrivilegeDisplay {...props} />;
   }
 
   if (!explanation.isDirectlyAssigned) {
@@ -48,8 +48,8 @@ const SimplePrivilegeDisplay: SFC<Props> = (props: Props) => {
   );
 };
 
-export const SupercededPrivilegeDisplay: SFC<Props> = (props: Props) => {
-  const { supercededPrivilege, actualPrivilegeSource } =
+export const supersededPrivilegeDisplay: SFC<Props> = (props: Props) => {
+  const { supersededPrivilege, actualPrivilegeSource } =
     props.explanation || ({} as PrivilegeExplanation);
 
   return (
@@ -59,9 +59,9 @@ export const SupercededPrivilegeDisplay: SFC<Props> = (props: Props) => {
       tooltipContent={
         <FormattedMessage
           id="xpack.security.management.editRole.spaceAwarePrivilegeDisplay.privilegeSupercededMessage"
-          defaultMessage="Original privilege of {supercededPrivilege} has been overriden by {actualPrivilegeSource}"
+          defaultMessage="Original privilege of {supersededPrivilege} has been overriden by {actualPrivilegeSource}"
           values={{
-            supercededPrivilege: `'${supercededPrivilege}'`,
+            supersededPrivilege: `'${supersededPrivilege}'`,
             actualPrivilegeSource: getReadablePrivilegeSource(actualPrivilegeSource),
           }}
         />

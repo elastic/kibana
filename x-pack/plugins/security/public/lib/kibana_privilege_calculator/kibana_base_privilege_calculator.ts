@@ -85,15 +85,15 @@ export class KibanaBasePrivilegeCalculator {
 
   private buildSupercededFields(
     isSuperceding: boolean,
-    supercededPrivilege?: string,
-    supercededPrivilegeSource?: PRIVILEGE_SOURCE
+    supersededPrivilege?: string,
+    supersededPrivilegeSource?: PRIVILEGE_SOURCE
   ) {
     if (!isSuperceding) {
       return {};
     }
     return {
-      supercededPrivilege,
-      supercededPrivilegeSource,
+      supersededPrivilege,
+      supersededPrivilegeSource,
     };
   }
 }
