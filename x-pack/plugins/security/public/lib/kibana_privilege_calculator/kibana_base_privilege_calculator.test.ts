@@ -34,8 +34,8 @@ describe('getMostPermissiveBasePrivilege', () => {
   describe('without ignoring assigned', () => {
     it('returns "none" when no privileges are granted', () => {
       const role = buildRole();
-      const effecetiveBasePrivilegesCalculator = buildEffectiveBasePrivilegeCalculator(role);
-      const result: PrivilegeExplanation = effecetiveBasePrivilegesCalculator.getMostPermissiveBasePrivilege(
+      const effectiveBasePrivilegesCalculator = buildEffectiveBasePrivilegeCalculator(role);
+      const result: PrivilegeExplanation = effectiveBasePrivilegesCalculator.getMostPermissiveBasePrivilege(
         role.kibana[0],
         false
       );
@@ -61,8 +61,8 @@ describe('getMostPermissiveBasePrivilege', () => {
               },
             ],
           });
-          const effecetiveBasePrivilegesCalculator = buildEffectiveBasePrivilegeCalculator(role);
-          const result: PrivilegeExplanation = effecetiveBasePrivilegesCalculator.getMostPermissiveBasePrivilege(
+          const effectiveBasePrivilegesCalculator = buildEffectiveBasePrivilegeCalculator(role);
+          const result: PrivilegeExplanation = effectiveBasePrivilegesCalculator.getMostPermissiveBasePrivilege(
             role.kibana[0],
             false
           );
@@ -89,8 +89,8 @@ describe('getMostPermissiveBasePrivilege', () => {
               },
             ],
           });
-          const effecetiveBasePrivilegesCalculator = buildEffectiveBasePrivilegeCalculator(role);
-          const result: PrivilegeExplanation = effecetiveBasePrivilegesCalculator.getMostPermissiveBasePrivilege(
+          const effectiveBasePrivilegesCalculator = buildEffectiveBasePrivilegeCalculator(role);
+          const result: PrivilegeExplanation = effectiveBasePrivilegesCalculator.getMostPermissiveBasePrivilege(
             role.kibana[0],
             false
           );
@@ -118,8 +118,8 @@ describe('getMostPermissiveBasePrivilege', () => {
           },
         ],
       });
-      const effecetiveBasePrivilegesCalculator = buildEffectiveBasePrivilegeCalculator(role);
-      const result: PrivilegeExplanation = effecetiveBasePrivilegesCalculator.getMostPermissiveBasePrivilege(
+      const effectiveBasePrivilegesCalculator = buildEffectiveBasePrivilegeCalculator(role);
+      const result: PrivilegeExplanation = effectiveBasePrivilegesCalculator.getMostPermissiveBasePrivilege(
         role.kibana[1],
         false
       );
@@ -146,8 +146,8 @@ describe('getMostPermissiveBasePrivilege', () => {
           },
         ],
       });
-      const effecetiveBasePrivilegesCalculator = buildEffectiveBasePrivilegeCalculator(role);
-      const result: PrivilegeExplanation = effecetiveBasePrivilegesCalculator.getMostPermissiveBasePrivilege(
+      const effectiveBasePrivilegesCalculator = buildEffectiveBasePrivilegeCalculator(role);
+      const result: PrivilegeExplanation = effectiveBasePrivilegesCalculator.getMostPermissiveBasePrivilege(
         role.kibana[1],
         false
       );
@@ -165,8 +165,8 @@ describe('getMostPermissiveBasePrivilege', () => {
   describe('ignoring assigned', () => {
     it('returns "none" when no privileges are granted', () => {
       const role = buildRole();
-      const effecetiveBasePrivilegesCalculator = buildEffectiveBasePrivilegeCalculator(role);
-      const result: PrivilegeExplanation = effecetiveBasePrivilegesCalculator.getMostPermissiveBasePrivilege(
+      const effectiveBasePrivilegesCalculator = buildEffectiveBasePrivilegeCalculator(role);
+      const result: PrivilegeExplanation = effectiveBasePrivilegesCalculator.getMostPermissiveBasePrivilege(
         role.kibana[0],
         true
       );
@@ -192,8 +192,8 @@ describe('getMostPermissiveBasePrivilege', () => {
               },
             ],
           });
-          const effecetiveBasePrivilegesCalculator = buildEffectiveBasePrivilegeCalculator(role);
-          const result: PrivilegeExplanation = effecetiveBasePrivilegesCalculator.getMostPermissiveBasePrivilege(
+          const effectiveBasePrivilegesCalculator = buildEffectiveBasePrivilegeCalculator(role);
+          const result: PrivilegeExplanation = effectiveBasePrivilegesCalculator.getMostPermissiveBasePrivilege(
             role.kibana[0],
             true
           );
@@ -220,8 +220,8 @@ describe('getMostPermissiveBasePrivilege', () => {
               },
             ],
           });
-          const effecetiveBasePrivilegesCalculator = buildEffectiveBasePrivilegeCalculator(role);
-          const result: PrivilegeExplanation = effecetiveBasePrivilegesCalculator.getMostPermissiveBasePrivilege(
+          const effectiveBasePrivilegesCalculator = buildEffectiveBasePrivilegeCalculator(role);
+          const result: PrivilegeExplanation = effectiveBasePrivilegesCalculator.getMostPermissiveBasePrivilege(
             role.kibana[0],
             true
           );
@@ -249,8 +249,8 @@ describe('getMostPermissiveBasePrivilege', () => {
           },
         ],
       });
-      const effecetiveBasePrivilegesCalculator = buildEffectiveBasePrivilegeCalculator(role);
-      const result: PrivilegeExplanation = effecetiveBasePrivilegesCalculator.getMostPermissiveBasePrivilege(
+      const effectiveBasePrivilegesCalculator = buildEffectiveBasePrivilegeCalculator(role);
+      const result: PrivilegeExplanation = effectiveBasePrivilegesCalculator.getMostPermissiveBasePrivilege(
         role.kibana[1],
         true
       );
@@ -277,8 +277,8 @@ describe('getMostPermissiveBasePrivilege', () => {
           },
         ],
       });
-      const effecetiveBasePrivilegesCalculator = buildEffectiveBasePrivilegeCalculator(role);
-      const result: PrivilegeExplanation = effecetiveBasePrivilegesCalculator.getMostPermissiveBasePrivilege(
+      const effectiveBasePrivilegesCalculator = buildEffectiveBasePrivilegeCalculator(role);
+      const result: PrivilegeExplanation = effectiveBasePrivilegesCalculator.getMostPermissiveBasePrivilege(
         role.kibana[1],
         true
       );
@@ -305,8 +305,8 @@ describe('getMostPermissiveBasePrivilege', () => {
           },
         ],
       });
-      const effecetiveBasePrivilegesCalculator = buildEffectiveBasePrivilegeCalculator(role);
-      const result: PrivilegeExplanation = effecetiveBasePrivilegesCalculator.getMostPermissiveBasePrivilege(
+      const effectiveBasePrivilegesCalculator = buildEffectiveBasePrivilegeCalculator(role);
+      const result: PrivilegeExplanation = effectiveBasePrivilegesCalculator.getMostPermissiveBasePrivilege(
         role.kibana[1],
         true
       );
