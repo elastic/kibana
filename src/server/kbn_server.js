@@ -75,7 +75,7 @@ export default class KbnServer {
       // writes pid file
       pidMixin,
 
-      // scan translations dirs, register locale files, initialize i18n engine and define `server.getUiTranslations`
+      // scan translations dirs, register locale files and initialize i18n engine.
       i18nMixin,
 
       // find plugins and set this.plugins and this.pluginSpecs

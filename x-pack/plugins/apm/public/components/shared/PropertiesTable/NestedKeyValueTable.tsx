@@ -7,9 +7,8 @@
 import { isBoolean, isNumber, isObject } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
-
+import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
 import { StringMap } from '../../../../typings/common';
-import { NOT_AVAILABLE_LABEL } from '../../../constants';
 import {
   colors,
   fontFamilyCode,
