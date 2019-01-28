@@ -45,8 +45,8 @@ export default function handleResponseBody(panel) {
       );
     }
     const [ seriesId ] = keys;
-    const { meta } = resp.aggregations[seriesId];
-    const series = panel.series.find(s => s.id === meta.seriesId);
+    const meta = get(resp, `aggregations.${seriesId}.meta`, {});
+    const series = panel.series.find(s => s.id === (meta.seriesId || seriesId));
     const processor = buildProcessorFunction(processors, resp, panel, series, meta);
 
     return processor([]);
