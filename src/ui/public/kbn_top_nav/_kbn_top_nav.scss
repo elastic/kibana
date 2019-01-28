@@ -21,6 +21,10 @@
     padding: 0;
   }
 
+  .kuiLocalMenuItem {
+    font-weight: $euiFontWeightMedium;
+  }
+
   .kuiLocalMenuItem:not(.kuiLocalMenuItem-isDisabled) {
     color: $euiLinkColor;
   }
