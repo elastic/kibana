@@ -270,7 +270,7 @@ export class MonitorCharts extends React.Component<Props, MonitorChartsState> {
                       }
                     )}
                     data={upSeries}
-                    color="green"
+                    color="#006BB4"
                   />
                   <EuiAreaSeries
                     name={i18n.translate(
@@ -280,7 +280,7 @@ export class MonitorCharts extends React.Component<Props, MonitorChartsState> {
                       }
                     )}
                     data={downSeries}
-                    color="red"
+                    color="#BD271E"
                   />
                 </EuiSeriesChart>
               </EuiPanel>

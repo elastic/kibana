@@ -110,14 +110,14 @@ const monitorListColumns = [
             name={i18n.translate('xpack.uptime.monitorList.downLineSeries.downLabel', {
               defaultMessage: 'Down',
             })}
-            color="red"
+            color="#BD271E"
           />
           <EuiHistogramSeries
             data={formatSparklineCounts(upSeries)}
             name={i18n.translate('xpack.uptime.monitorList.upLineSeries.upLabel', {
               defaultMessage: 'Up',
             })}
-            color="green"
+            color="#006BB4"
           />
         </EuiSeriesChart>
       );

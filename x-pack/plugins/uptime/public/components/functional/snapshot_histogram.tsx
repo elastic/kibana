@@ -25,14 +25,14 @@ export const SnapshotHistogram = ({ histogram }: SnapshotHistogramProps) => {
         name={i18n.translate('xpack.uptime.snapshotHistogram.series.upLabel', {
           defaultMessage: 'Up',
         })}
-        color="green"
+        color="#006BB4"
       />
       <EuiHistogramSeries
         data={downSeriesData}
         name={i18n.translate('xpack.uptime.snapshotHistogram.series.downLabel', {
           defaultMessage: 'Down',
         })}
-        color="red"
+        color="#BD271E"
       />
     </EuiSeriesChart>
   );
