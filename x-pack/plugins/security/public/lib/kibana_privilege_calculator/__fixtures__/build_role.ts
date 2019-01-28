@@ -28,7 +28,7 @@ export const buildRole = (options: BuildRoleOpts = {}) => {
     role.kibana.push(...options.spacesPrivileges);
   } else {
     role.kibana.push({
-      spaces: ['*'],
+      spaces: [],
       base: [],
       feature: {},
     });
