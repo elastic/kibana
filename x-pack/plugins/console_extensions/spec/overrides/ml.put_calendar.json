@@ -1,5 +1,5 @@
 {
-  "xpack.ml.put_calendar": {
+  "ml.put_calendar": {
     "data_autocomplete_rules": {
       "description": ""
     }

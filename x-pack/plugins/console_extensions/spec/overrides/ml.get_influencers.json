@@ -1,9 +1,9 @@
 {
-  "xpack.ml.get_records": {
+  "ml.get_influencers": {
     "data_autocomplete_rules": {
       "desc": { "__one_of": ["true", "false"] },
       "exclude_interim": { "__one_of": ["true", "false"] },
-      "record_score": 0,
+      "influencer_score": 0,
       "end": "",
       "page": {
         "from": 0,

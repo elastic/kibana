@@ -1,5 +1,5 @@
 {
-  "xpack.ml.post_calendar_events": {
+  "ml.post_calendar_events": {
     "data_autocomplete_rules": {
       "events": [{}]
     }

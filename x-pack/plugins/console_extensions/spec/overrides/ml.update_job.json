@@ -1,10 +1,9 @@
 {
-  "xpack.ml.put_job": {
+  "ml.update_job": {
     "data_autocomplete_rules": {
-      "analysis_config": {},
+      "analysis_limits": {},
       "background_persist_interval": "",
       "custom_settings": {},
-      "data_description": {},
       "description": "",
       "groups": [""],
       "model_plot_config": {},
@@ -13,5 +12,5 @@
       "results_index_name": "",
       "results_retention_days": 1
     }
-  }  
+  }
 }
