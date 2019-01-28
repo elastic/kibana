@@ -251,12 +251,35 @@ export function clearMouseCoordinates() {
   return { type: CLEAR_MOUSE_COORDINATES };
 }
 
-export function setGoto({ lat, lon, zoom }) {
+
+export function fitToLayerExtent(layerId) {
+  return async function (dispatch, getState) {
+    const targetLayer = getLayerList(getState()).find(layer => {
+      return layer.getId() === layerId;
+    });
+
+    if (targetLayer) {
+      const dataFilters = getDataFilters(getState());
+      const bounds = await targetLayer.getBounds(dataFilters);
+      if (bounds) {
+        await dispatch(setGotoWithBounds(bounds));
+      }
+    }
+  };
+}
+
+export function setGotoWithBounds(bounds) {
   return {
     type: SET_GOTO,
-    lat,
-    lon,
-    zoom,
+    bounds: bounds
+  };
+}
+
+
+export function setGotoWithCenter({ lat, lon, zoom }) {
+  return {
+    type: SET_GOTO,
+    center: { lat, lon, zoom }
   };
 }
 
@@ -296,7 +319,6 @@ export function onDataLoadError(layerId, dataId, requestToken, errorMessage) {
 }
 
 export function updateSourceProp(layerId, propName, value) {
-
   return (dispatch) => {
     dispatch({
       type: UPDATE_SOURCE_PROP,
@@ -465,16 +487,12 @@ export function triggerRefreshTimer() {
 }
 
 export function updateLayerStyleForSelectedLayer(style, temporary = true) {
-  return async (dispatch, getState) => {
-    await dispatch({
-      type: UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
-      style: {
-        ...style,
-        temporary
-      },
-    });
-    const layer = getSelectedLayer(getState());
-    dispatch(syncDataForLayer(layer.getId()));
+  return {
+    type: UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
+    style: {
+      ...style,
+      temporary
+    },
   };
 }
 

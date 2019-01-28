@@ -19,7 +19,7 @@ import {
   fontSizes,
   truncate
 } from '../../../../style/variables';
-import { NOT_AVAILABLE_LABEL } from '../../../../constants';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { i18n } from '@kbn/i18n';
 
 function paginateItems({ items, pageIndex, pageSize }) {
@@ -44,7 +44,7 @@ const Culprit = styled.div`
   font-family: ${fontFamilyCode};
 `;
 
-class List extends Component {
+export class ErrorGroupList extends Component {
   state = {
     page: {
       index: 0,
@@ -187,8 +187,6 @@ class List extends Component {
   }
 }
 
-List.propTypes = {
+ErrorGroupList.propTypes = {
   location: PropTypes.object.isRequired
 };
-
-export default List;
