@@ -142,7 +142,7 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
   public async create(user: FrameworkUser, configs: ConfigurationBlock[]): Promise<string[]> {
     const body = flatten(
       configs.map(config => {
-        const id = uuidv4();
+        const id = config.id || uuidv4();
         return [
           { index: { _id: `configuration_block:${id}` } },
           {
