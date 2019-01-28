@@ -136,7 +136,7 @@ export class ESGeoGridSource extends AbstractESSource {
   async getGeoJsonWithMeta({ layerName }, searchFilters) {
 
     const featureCollection = await this.getGeoJsonPoints({ layerName }, {
-      precision: searchFilters.precision,
+      geogridPrecision: searchFilters.geogridPrecision,
       buffer: searchFilters.buffer,
       timeFilters: searchFilters.timeFilters,
       query: searchFilters.query,
@@ -164,11 +164,11 @@ export class ESGeoGridSource extends AbstractESSource {
   }
 
 
-  async getGeoJsonPoints({ layerName }, { precision, buffer, timeFilters, query }) {
+  async getGeoJsonPoints({ layerName }, { geogridPrecision, buffer, timeFilters, query }) {
 
     const indexPattern = await this._getIndexPattern();
     const searchSource  = await this._makeSearchSource({ buffer, timeFilters, query }, 0);
-    const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(precision), aggSchemas.all);
+    const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(geogridPrecision), aggSchemas.all);
     searchSource.setField('aggs', aggConfigs.toDsl());
     const esResponse = await this._runEsQuery(layerName, searchSource, 'Elasticsearch geohash_grid aggregation request');
 

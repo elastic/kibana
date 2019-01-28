@@ -113,8 +113,8 @@ export class HeatmapLayer extends AbstractLayer {
     const sourceDataRequest = this.getSourceDataRequest();
     const dataMeta = sourceDataRequest ? sourceDataRequest.getMeta() : {};
 
-    const precision = this._source.getGeoGridPrecision(dataFilters.zoom);
-    const isSamePrecision = dataMeta.precision === precision;
+    const geogridPrecision = this._source.getGeoGridPrecision(dataFilters.zoom);
+    const isSamePrecision = dataMeta.geogridPrecision === geogridPrecision;
 
     const isSameTime = _.isEqual(dataMeta.timeFilters, dataFilters.timeFilters);
 
@@ -141,20 +141,20 @@ export class HeatmapLayer extends AbstractLayer {
 
     const newDataMeta = {
       ...dataFilters,
-      precision,
+      geogridPrecision,
       metric: metricPropertyKey
     };
     await this._fetchNewData({ startLoading, stopLoading, onLoadError, dataMeta: newDataMeta });
   }
 
   async _fetchNewData({ startLoading, stopLoading, onLoadError, dataMeta }) {
-    const { precision, timeFilters, buffer, query } = dataMeta;
+    const { geogridPrecision, timeFilters, buffer, query } = dataMeta;
     const requestToken = Symbol(`layer-source-refresh: this.getId()`);
     startLoading('source', requestToken, dataMeta);
     try {
       const layerName = await this.getDisplayName();
       const data = await this._source.getGeoJsonPoints({ layerName }, {
-        precision,
+        geogridPrecision,
         buffer,
         timeFilters,
         query,

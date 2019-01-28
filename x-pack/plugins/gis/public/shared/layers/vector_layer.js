@@ -217,7 +217,7 @@ export class VectorLayer extends AbstractLayer {
 
     let updateDueToPrecisionChange = false;
     if (isGeoGridPrecisionAware) {
-      updateDueToPrecisionChange = !_.isEqual(meta.precision, searchFilters.precision);
+      updateDueToPrecisionChange = !_.isEqual(meta.geogridPrecision, searchFilters.geogridPrecision);
     }
 
     const updateDueToExtentChange = this.updateDueToExtent(source, meta, searchFilters);
@@ -228,10 +228,6 @@ export class VectorLayer extends AbstractLayer {
       && !updateDueToFields
       && !updateDueToQuery
       && !updateDueToPrecisionChange;
-  }
-
-  _getTargetGeohashPrecision(precision) {
-    return this._source.getGeohashPrecisionResolutionDelta() + precision;
   }
 
   async _syncJoin(join, { startLoading, stopLoading, onLoadError, dataFilters }) {
