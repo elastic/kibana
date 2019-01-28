@@ -42,82 +42,7 @@ export default function ({ getService }) {
   describe('/api/telemetry/v1/clusters/_stats with monitoring disabled', () => {
     before('', async () => {
       await esSupertest.put('/_cluster/settings').send(disableCollection).expect(200);
-    });
-
-    it('should pull local stats and validate fields', async () => {
-      const timeRange = {
-        min: '2018-07-23T22:07:00Z',
-        max: '2018-07-23T22:13:00Z'
-      };
-
-      const { body } = await supertest
-        .post('/api/telemetry/v1/clusters/_stats')
-        .set('kbn-xsrf', 'xxx')
-        .send({ timeRange })
-        .expect(200);
-
-      const stats = body[0];
-      const actual = flatKeys(stats).sort();
-      const expected = [
-        'cluster_name',
-        'cluster_stats.cluster_uuid',
-        'cluster_stats.indices.completion',
-        'cluster_stats.indices.count',
-        'cluster_stats.indices.docs',
-        'cluster_stats.indices.fielddata',
-        'cluster_stats.indices.query_cache',
-        'cluster_stats.indices.segments',
-        'cluster_stats.indices.shards',
-        'cluster_stats.indices.store',
-        'cluster_stats.nodes.count',
-        'cluster_stats.nodes.discovery_types',
-        'cluster_stats.nodes.fs',
-        'cluster_stats.nodes.jvm',
-        'cluster_stats.nodes.network_types',
-        'cluster_stats.nodes.os',
-        'cluster_stats.nodes.plugins',
-        'cluster_stats.nodes.process',
-        'cluster_stats.nodes.versions',
-        'cluster_stats.status',
-        'cluster_stats.timestamp',
-        'cluster_uuid',
-        'collection',
-        'license.expiry_date',
-        'license.expiry_date_in_millis',
-        'license.issue_date',
-        'license.issue_date_in_millis',
-        'license.issued_to',
-        'license.issuer',
-        'license.max_nodes',
-        'license.start_date_in_millis',
-        'license.status',
-        'license.type',
-        'license.uid',
-        'stack_stats.kibana.count',
-        'stack_stats.kibana.dashboard',
-        'stack_stats.kibana.graph_workspace',
-        'stack_stats.kibana.index_pattern',
-        'stack_stats.kibana.indices',
-        'stack_stats.kibana.os',
-        'stack_stats.kibana.plugins',
-        'stack_stats.kibana.search',
-        'stack_stats.kibana.timelion_sheet',
-        'stack_stats.kibana.versions',
-        'stack_stats.kibana.visualization',
-        'stack_stats.xpack.graph',
-        'stack_stats.xpack.ilm',
-        'stack_stats.xpack.logstash',
-        'stack_stats.xpack.ml',
-        'stack_stats.xpack.monitoring',
-        'stack_stats.xpack.rollup',
-        'stack_stats.xpack.security',
-        'stack_stats.xpack.sql',
-        'stack_stats.xpack.watcher',
-        'timestamp',
-        'version'
-      ];
-
-      expect(actual).to.eql(expected);
+      await new Promise(r => setTimeout(r, 1000));
     });
 
     it('should pull local stats and validate data types', async () => {
@@ -131,6 +56,8 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .send({ timeRange })
         .expect(200);
+
+      // console.log(JSON.stringify(body, null, 2));
 
       expect(body.length).to.be(1);
       const stats = body[0];
@@ -168,6 +95,84 @@ export default function ({ getService }) {
       expect(stats.stack_stats.xpack.monitoring).to.be.an('object');
       expect(stats.stack_stats.xpack.rollup).to.be.an('object');
     });
+
+    it('should pull local stats and validate fields', async () => {
+      const timeRange = {
+        min: '2018-07-23T22:07:00Z',
+        max: '2018-07-23T22:13:00Z'
+      };
+
+      const { body } = await supertest
+        .post('/api/telemetry/v1/clusters/_stats')
+        .set('kbn-xsrf', 'xxx')
+        .send({ timeRange })
+        .expect(200);
+
+      const stats = body[0];
+      const actual = flatKeys(stats);
+
+      const expected = [
+        "cluster_name",
+        "cluster_stats.cluster_uuid",
+        "cluster_stats.indices.completion",
+        "cluster_stats.indices.count",
+        "cluster_stats.indices.docs",
+        "cluster_stats.indices.fielddata",
+        "cluster_stats.indices.query_cache",
+        "cluster_stats.indices.segments",
+        "cluster_stats.indices.shards",
+        "cluster_stats.indices.store",
+        "cluster_stats.nodes.count",
+        "cluster_stats.nodes.discovery_types",
+        "cluster_stats.nodes.fs",
+        "cluster_stats.nodes.jvm",
+        "cluster_stats.nodes.network_types",
+        "cluster_stats.nodes.os",
+        "cluster_stats.nodes.plugins",
+        "cluster_stats.nodes.process",
+        "cluster_stats.nodes.versions",
+        "cluster_stats.status",
+        "cluster_stats.timestamp",
+        "cluster_uuid",
+        "collection",
+        "license.expiry_date",
+        "license.expiry_date_in_millis",
+        "license.issue_date",
+        "license.issue_date_in_millis",
+        "license.issued_to",
+        "license.issuer",
+        "license.max_nodes",
+        "license.start_date_in_millis",
+        "license.status",
+        "license.type",
+        "license.uid",
+        "stack_stats.kibana.count",
+        "stack_stats.kibana.dashboard",
+        "stack_stats.kibana.graph_workspace",
+        "stack_stats.kibana.index_pattern",
+        "stack_stats.kibana.indices",
+        "stack_stats.kibana.os",
+        "stack_stats.kibana.plugins",
+        "stack_stats.kibana.search",
+        "stack_stats.kibana.timelion_sheet",
+        "stack_stats.kibana.versions",
+        "stack_stats.kibana.visualization",
+        "stack_stats.xpack.graph",
+        "stack_stats.xpack.ilm",
+        "stack_stats.xpack.logstash",
+        "stack_stats.xpack.ml",
+        "stack_stats.xpack.monitoring",
+        "stack_stats.xpack.rollup",
+        "stack_stats.xpack.security",
+        "stack_stats.xpack.sql",
+        "stack_stats.xpack.watcher",
+        "timestamp",
+        "version"
+      ];
+
+      expect(actual).to.eql(expected);
+    });
+
   });
 }
 
