@@ -7,12 +7,19 @@
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import routing from '../../../services/routing';
 import { extractQueryParams } from '../../../services/query_params';
 import { API_STATUS } from '../../../constants';
-import { SectionLoading, SectionError } from '../../../components';
+import { SectionLoading, SectionError, SectionUnauthorized } from '../../../components';
 import { AutoFollowPatternTable, DetailPanel } from './components';
 
 const REFRESH_RATE_MS = 30000;
@@ -88,6 +95,71 @@ export const AutoFollowPatternList = injectI18n(
       clearInterval(this.interval);
     }
 
+    renderHeader() {
+      const { isAuthorized } = this.props;
+      return (
+        <Fragment>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                <p>
+                  <FormattedMessage
+                    id="xpack.crossClusterReplication.followerIndexList.followerIndicesDescription"
+                    defaultMessage="Followers replicate operations from the leader index to the follower index."
+                  />
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              {isAuthorized && (
+                <EuiButton
+                  {...routing.getRouterLinkProps('/follower_indices/add')}
+                  fill
+                  iconType="plusInCircle"
+                >
+                  <FormattedMessage
+                    id="xpack.crossClusterReplication.followerIndexList.addFollowerButtonLabel"
+                    defaultMessage="Create a follower index"
+                  />
+                </EuiButton>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiSpacer />
+        </Fragment>
+      );
+    }
+
+    renderContent() {
+      const { autoFollowPatterns, apiStatus, apiError, isAuthorized, intl } = this.props;
+      if (!isAuthorized) {
+        return (
+          <SectionUnauthorized>
+            <FormattedMessage
+              id="xpack.crossClusterReplication.autoFollowPatternList.noPermissionText"
+              defaultMessage="You do not have permission to view or add auto-follow patterns."
+            />
+          </SectionUnauthorized>
+        );
+      }
+
+      if (apiError) {
+        const title = intl.formatMessage({
+          id: 'xpack.crossClusterReplication.autoFollowPatternList.loadingErrorTitle',
+          defaultMessage: 'Error loading auto-follow patterns',
+        });
+        return <SectionError title={title} error={apiError} />;
+      }
+
+      if (apiStatus === API_STATUS.IDLE && !autoFollowPatterns.length) {
+        return this.renderEmpty();
+      }
+
+      return this.renderList();
+    }
+
     renderEmpty() {
       return (
         <EuiEmptyPrompt
@@ -156,25 +228,12 @@ export const AutoFollowPatternList = injectI18n(
     }
 
     render() {
-      const { autoFollowPatterns, apiStatus, apiError, isAuthorized, intl } = this.props;
-
-      if (!isAuthorized) {
-        return null;
-      }
-
-      if (apiStatus === API_STATUS.IDLE && !autoFollowPatterns.length) {
-        return this.renderEmpty();
-      }
-
-      if (apiError) {
-        const title = intl.formatMessage({
-          id: 'xpack.crossClusterReplication.autoFollowPatternList.loadingErrorTitle',
-          defaultMessage: 'Error loading auto-follow patterns',
-        });
-        return <SectionError title={title} error={apiError} />;
-      }
-
-      return this.renderList();
+      return (
+        <Fragment>
+          {this.renderHeader()}
+          {this.renderContent()}
+        </Fragment>
+      );
     }
   }
 );
