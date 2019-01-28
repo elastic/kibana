@@ -120,6 +120,8 @@ export class CoreSystem {
         uiSettings,
         chrome,
       });
+
+      return { fatalErrors };
     } catch (error) {
       this.fatalErrors.add(error);
     }

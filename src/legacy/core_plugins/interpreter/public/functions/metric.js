@@ -24,7 +24,7 @@ export const metric = () => ({
   type: 'render',
   context: {
     types: [
-      'datatable'
+      'kibana_datatable'
     ],
   },
   help: i18n.translate('interpreter.functions.metric.help', {
@@ -44,10 +44,8 @@ export const metric = () => ({
       as: 'visualization',
       value: {
         visData: context,
-        visConfig: {
-          type: 'metric',
-          params: visConfigParams,
-        },
+        visType: 'metric',
+        visConfig: visConfigParams,
         params: {
           listenOnChange: true,
         }
