@@ -100,11 +100,11 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
     params: DatabaseSearchParams
   ): Promise<DatabaseSearchResponse<Source>> {
     const result = await this.callWithUser(user, 'search', {
-      ...params,
       scroll: '1m',
+      ...params,
       body: {
-        ...params.body,
         size: 1000,
+        ...params.body,
       },
     });
     return result;
