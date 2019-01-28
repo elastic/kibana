@@ -49,6 +49,8 @@ export class Worker extends events.EventEmitter {
     super();
 
     this.id = puid.generate();
+    this.kibanaId = opts.kibanaId;
+    this.kibanaName = opts.kibanaName;
     this.queue = queue;
     this.client = opts.client || this.queue.client;
     this.jobtype = type;
@@ -120,6 +122,8 @@ export class Worker extends events.EventEmitter {
       started_at: startTime,
       process_expiration: expirationTime,
       status: constants.JOB_STATUS_PROCESSING,
+      kibana_id: this.kibanaId,
+      kibana_name: this.kibanaName,
     };
 
     return this.client.update({
@@ -255,6 +259,7 @@ export class Worker extends events.EventEmitter {
           if (err.statusCode === 409) return false;
           this.warn(`Failure saving job output ${job._id}`, err);
           this.emit(constants.EVENT_WORKER_JOB_UPDATE_ERROR, this._formatErrorParams(err, job));
+          return this._failJob(job, (err.message) ? err.message : false);
         });
     }, (jobErr) => {
       if (!jobErr) {

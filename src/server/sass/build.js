@@ -23,30 +23,32 @@ import fs from 'fs';
 import sass from 'node-sass';
 import autoprefixer from 'autoprefixer';
 import postcss from 'postcss';
+import mkdirp from 'mkdirp';
 
 const renderSass = promisify(sass.render);
 const writeFile = promisify(fs.writeFile);
+const mkdirpAsync = promisify(mkdirp);
 
-export class Build {
-  constructor(source, log) {
-    this.source = source;
-    this.log = log;
-    this.includedFiles = [source];
+const DARK_THEME_IMPORTER = (url) => {
+  if (url.includes('k6_colors_light')) {
+    return { file: url.replace('k6_colors_light', 'k6_colors_dark') };
   }
 
-  outputPath() {
-    const fileName = path.basename(this.source, path.extname(this.source)) + '.css';
-    return path.join(path.dirname(this.source), fileName);
+  return { file: url };
+};
+
+export class Build {
+  constructor({ sourcePath, log, targetPath, theme }) {
+    this.sourcePath = sourcePath;
+    this.log = log;
+    this.targetPath = targetPath;
+    this.theme = theme;
+    this.includedFiles = [sourcePath];
   }
 
   /**
    * Glob based on source path
    */
-
-  getGlob() {
-    return path.join(path.dirname(this.source), '**', '*.s{a,c}ss');
-  }
-
   async buildIfIncluded(path) {
     if (this.includedFiles && this.includedFiles.includes(path)) {
       await this.build();
@@ -61,24 +63,24 @@ export class Build {
    */
 
   async build() {
-    const outFile = this.outputPath();
-
     const rendered = await renderSass({
-      file: this.source,
-      outFile,
+      file: this.sourcePath,
+      outFile: this.targetPath,
       sourceMap: true,
       sourceMapEmbed: true,
       includePaths: [
         path.resolve(__dirname, '../..'),
-        path.resolve(__dirname, '../../../node_modules')
-      ]
+        path.resolve(__dirname, '../../../node_modules'),
+      ],
+      importer: this.theme === 'dark' ? DARK_THEME_IMPORTER : undefined
     });
 
     const prefixed = postcss([ autoprefixer ]).process(rendered.css);
 
     this.includedFiles = rendered.stats.includedFiles;
 
-    await writeFile(outFile, prefixed.css);
+    await mkdirpAsync(path.dirname(this.targetPath));
+    await writeFile(this.targetPath, prefixed.css);
 
     return this;
   }

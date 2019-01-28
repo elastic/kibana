@@ -5,15 +5,12 @@
  */
 
 import { EuiBadge, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { get } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { Location } from 'history';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import {
-  ERROR_CULPRIT,
-  ERROR_EXC_HANDLED,
-  ERROR_EXC_MESSAGE,
-  ERROR_LOG_MESSAGE
-} from '../../../../common/constants';
+import { idx } from 'x-pack/plugins/apm/common/idx';
+import { NOT_AVAILABLE_LABEL } from '../../../constants';
 import { ErrorDistributionRequest } from '../../../store/reactReduxRequest/errorDistribution';
 import { ErrorGroupDetailsRequest } from '../../../store/reactReduxRequest/errorGroup';
 import { IUrlParams } from '../../../store/urlParams';
@@ -59,7 +56,7 @@ const Culprit = styled.div`
 
 function getShortGroupId(errorGroupId?: string) {
   if (!errorGroupId) {
-    return 'N/A';
+    return NOT_AVAILABLE_LABEL;
   }
 
   return errorGroupId.slice(0, 5);
@@ -67,7 +64,7 @@ function getShortGroupId(errorGroupId?: string) {
 
 interface Props {
   urlParams: IUrlParams;
-  location: any;
+  location: Location;
 }
 
 export function ErrorGroupDetails({ urlParams, location }: Props) {
@@ -77,19 +74,34 @@ export function ErrorGroupDetails({ urlParams, location }: Props) {
       render={errorGroup => {
         // If there are 0 occurrences, show only distribution chart w. empty message
         const showDetails = errorGroup.data.occurrencesCount !== 0;
-        const logMessage = get(errorGroup.data.error, ERROR_LOG_MESSAGE);
-        const excMessage = get(errorGroup.data.error, ERROR_EXC_MESSAGE);
-        const culprit = get(errorGroup.data.error, ERROR_CULPRIT);
+        const logMessage = idx(errorGroup, _ => _.data.error.error.log.message);
+        const excMessage = idx(
+          errorGroup,
+          _ => _.data.error.error.exception.message
+        );
+        const culprit = idx(errorGroup, _ => _.data.error.error.culprit);
         const isUnhandled =
-          get(errorGroup.data.error, ERROR_EXC_HANDLED) === false;
+          idx(errorGroup, _ => _.data.error.error.exception.handled) === false;
 
         return (
           <div>
             <EuiTitle>
               <span>
-                Error group {getShortGroupId(urlParams.errorGroupId)}
+                {i18n.translate('xpack.apm.errorGroupDetails.errorGroupTitle', {
+                  defaultMessage: 'Error group {errorGroupId}',
+                  values: {
+                    errorGroupId: getShortGroupId(urlParams.errorGroupId)
+                  }
+                })}
                 {isUnhandled && (
-                  <UnhandledBadge color="warning">Unhandled</UnhandledBadge>
+                  <UnhandledBadge color="warning">
+                    {i18n.translate(
+                      'xpack.apm.errorGroupDetails.unhandledLabel',
+                      {
+                        defaultMessage: 'Unhandled'
+                      }
+                    )}
+                  </UnhandledBadge>
                 )}
               </span>
             </EuiTitle>
@@ -105,14 +117,35 @@ export function ErrorGroupDetails({ urlParams, location }: Props) {
                 <EuiText>
                   {logMessage && (
                     <Fragment>
-                      <Label>Log message</Label>
+                      <Label>
+                        {i18n.translate(
+                          'xpack.apm.errorGroupDetails.logMessageLabel',
+                          {
+                            defaultMessage: 'Log message'
+                          }
+                        )}
+                      </Label>
                       <Message>{logMessage}</Message>
                     </Fragment>
                   )}
-                  <Label>Exception message</Label>
-                  <Message>{excMessage || 'N/A'}</Message>
-                  <Label>Culprit</Label>
-                  <Culprit>{culprit || 'N/A'}</Culprit>
+                  <Label>
+                    {i18n.translate(
+                      'xpack.apm.errorGroupDetails.exceptionMessageLabel',
+                      {
+                        defaultMessage: 'Exception message'
+                      }
+                    )}
+                  </Label>
+                  <Message>{excMessage || NOT_AVAILABLE_LABEL}</Message>
+                  <Label>
+                    {i18n.translate(
+                      'xpack.apm.errorGroupDetails.culpritLabel',
+                      {
+                        defaultMessage: 'Culprit'
+                      }
+                    )}
+                  </Label>
+                  <Culprit>{culprit || NOT_AVAILABLE_LABEL}</Culprit>
                 </EuiText>
               </Titles>
             )}

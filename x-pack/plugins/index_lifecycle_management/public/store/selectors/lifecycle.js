@@ -22,7 +22,8 @@ import {
   PHASE_FORCE_MERGE_ENABLED,
   PHASE_FORCE_MERGE_SEGMENTS,
   PHASE_REPLICA_COUNT,
-  WARM_PHASE_ON_ROLLOVER
+  WARM_PHASE_ON_ROLLOVER,
+  PHASE_INDEX_PRIORITY
 } from '../constants';
 import {
   getPhase,
@@ -34,6 +35,7 @@ import {
   getSelectedOriginalPolicyName,
   getPolicies
 } from '.';
+import { getPolicyByName } from './policies';
 export const numberRequiredMessage = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.numberRequiredError', {
   defaultMessage: 'A number is required.'
 });
@@ -73,8 +75,12 @@ export const validatePhase = (type, phase, errors) => {
       if (numberedAttribute === PHASE_FORCE_MERGE_SEGMENTS && !phase[PHASE_FORCE_MERGE_ENABLED]) {
         continue;
       }
-      // PHASE_REPLICA_COUNT is optional
+      // PHASE_REPLICA_COUNT is optional and can be zero
       if (numberedAttribute === PHASE_REPLICA_COUNT && !phase[numberedAttribute]) {
+        continue;
+      }
+      // PHASE_INDEX_PRIORITY is optional and can be zero
+      if (numberedAttribute === PHASE_INDEX_PRIORITY && !phase[numberedAttribute]) {
         continue;
       }
       if (!isNumber(phase[numberedAttribute])) {
@@ -204,15 +210,17 @@ export const validateLifecycle = state => {
 };
 
 export const getLifecycle = state => {
+  const policyName = getSelectedPolicyName(state);
   const phases = Object.entries(getPhases(state)).reduce(
     (accum, [phaseName, phase]) => {
       // Hot is ALWAYS enabled
       if (phaseName === PHASE_HOT) {
         phase[PHASE_ENABLED] = true;
       }
-
+      const esPolicy = getPolicyByName(state, policyName).policy || {};
+      const esPhase = esPolicy.phases ? esPolicy.phases[phaseName] : {};
       if (phase[PHASE_ENABLED]) {
-        accum[phaseName] = phaseToES(state, phase);
+        accum[phaseName] = phaseToES(phase, esPhase);
 
         // These seem to be constants
         if (phaseName === PHASE_DELETE) {

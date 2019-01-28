@@ -27,18 +27,21 @@ export const PHASE_ROLLOVER_MINIMUM_AGE_UNITS = 'selectedMinimumAgeUnits';
 
 export const PHASE_FORCE_MERGE_SEGMENTS = 'selectedForceMergeSegments';
 export const PHASE_FORCE_MERGE_ENABLED = 'forceMergeEnabled';
+export const PHASE_FREEZE_ENABLED = 'freezeEnabled';
 
 export const PHASE_SHRINK_ENABLED = 'shrinkEnabled';
 
 export const PHASE_NODE_ATTRS = 'selectedNodeAttrs';
 export const PHASE_PRIMARY_SHARD_COUNT = 'selectedPrimaryShardCount';
 export const PHASE_REPLICA_COUNT = 'selectedReplicaCount';
+export const PHASE_INDEX_PRIORITY = 'phaseIndexPriority';
 
 export const PHASE_ATTRIBUTES_THAT_ARE_NUMBERS_VALIDATE = [
   PHASE_ROLLOVER_MINIMUM_AGE,
   PHASE_FORCE_MERGE_SEGMENTS,
   PHASE_PRIMARY_SHARD_COUNT,
   PHASE_REPLICA_COUNT,
+  PHASE_INDEX_PRIORITY,
 ];
 export const PHASE_ATTRIBUTES_THAT_ARE_NUMBERS = [
   ...PHASE_ATTRIBUTES_THAT_ARE_NUMBERS_VALIDATE,
@@ -68,6 +71,7 @@ export const ERROR_STRUCTURE = {
     [PHASE_ROLLOVER_MAX_AGE_UNITS]: [],
     [PHASE_ROLLOVER_MAX_SIZE_STORED]: [],
     [PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS]: [],
+    [PHASE_INDEX_PRIORITY]: []
   },
   [PHASE_WARM]: {
     [PHASE_ROLLOVER_ALIAS]: [],
@@ -77,6 +81,7 @@ export const ERROR_STRUCTURE = {
     [PHASE_PRIMARY_SHARD_COUNT]: [],
     [PHASE_REPLICA_COUNT]: [],
     [PHASE_FORCE_MERGE_SEGMENTS]: [],
+    [PHASE_INDEX_PRIORITY]: []
   },
   [PHASE_COLD]: {
     [PHASE_ROLLOVER_ALIAS]: [],
@@ -84,6 +89,7 @@ export const ERROR_STRUCTURE = {
     [PHASE_ROLLOVER_MINIMUM_AGE_UNITS]: [],
     [PHASE_NODE_ATTRS]: [],
     [PHASE_REPLICA_COUNT]: [],
+    [PHASE_INDEX_PRIORITY]: []
   },
   [PHASE_DELETE]: {
     [PHASE_ROLLOVER_ALIAS]: [],

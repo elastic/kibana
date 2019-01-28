@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import { VislibSlicesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
-import chrome from 'ui/chrome';
+import { VislibSlicesResponseHandlerProvider as vislibSlicesResponseHandler } from 'ui/vis/response_handlers/vislib';
 import { i18n } from '@kbn/i18n';
 
 export const kibanaPie = () => ({
@@ -27,54 +25,31 @@ export const kibanaPie = () => ({
   type: 'render',
   context: {
     types: [
-      'kibana_table', 'null'
+      'kibana_datatable'
     ],
   },
-  help: i18n.translate('common.core_plugins.interpreter.public.functions.pie.help', {
+  help: i18n.translate('interpreter.functions.pie.help', {
     defaultMessage: 'Pie visualization'
   }),
   args: {
-    schemas: {
-      types: ['string'],
-      default: '"{}"',
-    },
     visConfig: {
       types: ['string', 'null'],
       default: '"{}"',
     },
   },
   async fn(context, args) {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const Private = $injector.get('Private');
-    const responseHandler = Private(VislibSlicesResponseHandlerProvider).handler;
-    const visTypes = Private(VisTypesRegistryProvider);
+    const responseHandler = vislibSlicesResponseHandler().handler;
     const visConfigParams = JSON.parse(args.visConfig);
-    const visType = visTypes.byName.pie;
-    const schemas = JSON.parse(args.schemas);
 
-    if (context.columns) {
-      context.columns.forEach(column => {
-        column.aggConfig.aggConfigs.schemas = visType.schemas.all;
-      });
-
-      Object.keys(schemas).forEach(key => {
-        schemas[key].forEach(i => {
-          context.columns[i].aggConfig.schema = key;
-        });
-      });
-    }
-
-    const convertedData = await responseHandler(context);
+    const convertedData = await responseHandler(context, visConfigParams.dimensions);
 
     return {
       type: 'render',
       as: 'visualization',
       value: {
         visData: convertedData,
-        visConfig: {
-          type: args.type,
-          params: visConfigParams,
-        },
+        visType: 'pie',
+        visConfig: visConfigParams,
         params: {
           listenOnChange: true,
         }

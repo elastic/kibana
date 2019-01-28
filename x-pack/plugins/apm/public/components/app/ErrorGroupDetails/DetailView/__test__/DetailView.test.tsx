@@ -5,6 +5,7 @@
  */
 
 import { shallow } from 'enzyme';
+import { Location } from 'history';
 import React from 'react';
 import { RRRRenderResponse } from 'react-redux-request';
 import { ErrorGroupAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_error_group';
@@ -25,7 +26,7 @@ describe('DetailView', () => {
       <DetailView
         errorGroup={{} as any}
         urlParams={{}}
-        location={{ state: '' }}
+        location={{} as Location}
       />
     );
     expect(wrapper.isEmptyRender()).toBe(true);
@@ -39,11 +40,10 @@ describe('DetailView', () => {
         occurrencesCount: 10,
         error: ({
           '@timestamp': 'myTimestamp',
-          context: {
-            service: { name: 'myService' },
-            user: { id: 'myUserId' },
-            request: { method: 'GET', url: { full: 'myUrl' } }
-          },
+          http: { request: { method: 'GET' } },
+          url: { full: 'myUrl' },
+          service: { name: 'myService' },
+          user: { id: 'myUserId' },
           error: { exception: { handled: true } },
           transaction: { id: 'myTransactionId', sampled: true }
         } as unknown) as APMError
@@ -53,9 +53,9 @@ describe('DetailView', () => {
       <DetailView
         errorGroup={errorGroup}
         urlParams={{}}
-        location={{ state: '' }}
+        location={{} as Location}
       />
-    ).find('DiscoverErrorButton');
+    ).find('DiscoverErrorLink');
 
     expect(wrapper.exists()).toBe(true);
     expect(wrapper).toMatchSnapshot();
@@ -67,36 +67,34 @@ describe('DetailView', () => {
       status: 'SUCCESS',
       data: {
         occurrencesCount: 10,
-        transaction: ({
+        transaction: {
+          http: { request: { method: 'GET' } },
+          url: { full: 'myUrl' },
           trace: { id: 'traceId' },
           transaction: {
             type: 'myTransactionType',
             name: 'myTransactionName',
             id: 'myTransactionName'
           },
-          context: {
-            service: { name: 'myService' },
-            user: { id: 'myUserId' },
-            request: { method: 'GET', url: { full: 'myUrl' } }
-          }
-        } as unknown) as Transaction,
-        error: ({
+          service: { name: 'myService' },
+          user: { id: 'myUserId' }
+        } as Transaction,
+        error: {
           '@timestamp': 'myTimestamp',
-          context: {
-            service: { name: 'myService' },
-            user: { id: 'myUserId' },
-            request: { method: 'GET', url: { full: 'myUrl' } }
-          },
+          http: { request: { method: 'GET' } },
+          url: { full: 'myUrl' },
+          service: { name: 'myService' },
+          user: { id: 'myUserId' },
           error: { exception: { handled: true } },
           transaction: { id: 'myTransactionId', sampled: true }
-        } as unknown) as APMError
+        } as APMError
       }
     };
     const wrapper = shallow(
       <DetailView
         errorGroup={errorGroup}
         urlParams={{}}
-        location={{ state: '' }}
+        location={{} as Location}
       />
     ).find('StickyProperties');
 
@@ -112,7 +110,8 @@ describe('DetailView', () => {
         occurrencesCount: 10,
         error: ({
           '@timestamp': 'myTimestamp',
-          context: { service: {}, user: {}, request: {} }
+          service: {},
+          user: {}
         } as unknown) as APMError
       }
     };
@@ -120,7 +119,7 @@ describe('DetailView', () => {
       <DetailView
         errorGroup={errorGroup}
         urlParams={{}}
-        location={{ state: '' }}
+        location={{} as Location}
       />
     ).find('EuiTabs');
 
@@ -144,7 +143,7 @@ describe('DetailView', () => {
       <DetailView
         errorGroup={errorGroup}
         urlParams={{}}
-        location={{ state: '' }}
+        location={{} as Location}
       />
     ).find('TabContent');
 

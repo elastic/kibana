@@ -5,34 +5,23 @@
  */
 
 import _ from 'lodash';
-import React, { Fragment } from 'react';
+import React from 'react';
 import uuid from 'uuid/v4';
 
-import { VectorSource } from '../vector_source';
+import { AbstractESSource } from '../es_source';
 import { HeatmapLayer } from '../../heatmap_layer';
 import { VectorLayer } from '../../vector_layer';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import {
-  indexPatternService,
-  fetchSearchSourceAndRecordWithInspector,
-  inspectorAdapters,
-  SearchSource,
-  timeService,
-} from '../../../../kibana_services';
-import { createExtentFilter, makeGeohashGridPolygon } from '../../../../elasticsearch_geo_utils';
+import { makeGeohashGridPolygon } from '../../../../elasticsearch_geo_utils';
 import { AggConfigs } from 'ui/vis/agg_configs';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { convertToGeoJson } from './convert_to_geojson';
 import { ESSourceDetails } from '../../../components/es_source_details';
-import { ZOOM_TO_PRECISION } from '../../../utils/zoom_to_precision';
 import { VectorStyle } from '../../styles/vector_style';
 import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
-import {
-  EuiText,
-  EuiSpacer
-} from '@elastic/eui';
+import { GRID_RESOLUTION } from '../../grid_resolution';
 
 const COUNT_PROP_LABEL = 'Count';
 const COUNT_PROP_NAME = 'doc_count';
@@ -59,18 +48,20 @@ const aggSchemas = new Schemas([
   }
 ]);
 
-export class ESGeohashGridSource extends VectorSource {
+export class ESGeohashGridSource extends AbstractESSource {
 
   static type = 'ES_GEOHASH_GRID';
-  static typeDisplayName = 'Elasticsearch geohash aggregation';
+  static title = 'Elasticsearch geohash aggregation';
+  static description = 'Group geospatial data in grids with metrics for each gridded cell';
 
-  static createDescriptor({ indexPatternId, geoField, requestType }) {
+  static createDescriptor({ indexPatternId, geoField, requestType, resolution }) {
     return {
       type: ESGeohashGridSource.type,
       id: uuid(),
       indexPatternId: indexPatternId,
       geoField: geoField,
-      requestType: requestType
+      requestType: requestType,
+      resolution: resolution ? resolution : GRID_RESOLUTION.COARSE
     };
   }
 
@@ -84,21 +75,6 @@ export class ESGeohashGridSource extends VectorSource {
     return (<CreateSourceEditor onSelect={onSelect}/>);
   }
 
-  static renderDropdownDisplayOption() {
-    return (
-      <Fragment>
-        <strong>{ESGeohashGridSource.typeDisplayName}</strong>
-        <EuiSpacer size="xs" />
-        <EuiText size="s" color="subdued">
-          <p className="euiTextColor--subdued">
-            Group documents into grid cells and display metrics for each cell.
-            Great for displaying large datasets.
-          </p>
-        </EuiText>
-      </Fragment>
-    );
-  }
-
   renderSourceSettingsEditor({ onChange }) {
     return (
       <UpdateSourceEditor
@@ -106,6 +82,7 @@ export class ESGeohashGridSource extends VectorSource {
         onChange={onChange}
         metrics={this._descriptor.metrics}
         renderAs={this._descriptor.requestType}
+        resolution={this._descriptor.resolution}
       />
     );
   }
@@ -121,18 +98,41 @@ export class ESGeohashGridSource extends VectorSource {
     );
   }
 
-  destroy() {
-    inspectorAdapters.requests.resetRequest(this._descriptor.id);
+  getFieldNames() {
+    return this.getMetricFields().map(({ propertyKey }) => {
+      return propertyKey;
+    });
+  }
+
+  isGeohashPrecisionAware() {
+    return true;
+  }
+
+  getGridResolution() {
+    return this._descriptor.resolution;
+  }
+
+  getGeohashPrecisionResolutionDelta() {
+    let refinementFactor;
+    if (this._descriptor.resolution === GRID_RESOLUTION.COARSE) {
+      refinementFactor = 0;
+    } else if (this._descriptor.resolution === GRID_RESOLUTION.FINE) {
+      refinementFactor = 1;
+    } else if (this._descriptor.resolution === GRID_RESOLUTION.MOST_FINE) {
+      refinementFactor = 2;
+    } else {
+      throw new Error(`Resolution param not recognized: ${this._descriptor.resolution}`);
+    }
+    return refinementFactor;
   }
 
   async getGeoJsonWithMeta({ layerName }, searchFilters) {
-    let targetPrecision = ZOOM_TO_PRECISION[Math.round(searchFilters.zoom)];
-    targetPrecision += 0;//should have refinement param, similar to heatmap style
-    const featureCollection = await this.getGeoJsonPointsWithTotalCount({
-      precision: targetPrecision,
-      extent: searchFilters.buffer,
+
+    const featureCollection = await this.getGeoJsonPoints({ layerName }, {
+      geohashPrecision: searchFilters.geohashPrecision,
+      buffer: searchFilters.buffer,
       timeFilters: searchFilters.timeFilters,
-      layerName,
+      query: searchFilters.query,
     });
 
     if (this._descriptor.requestType === RENDER_AS.GRID) {
@@ -145,23 +145,9 @@ export class ESGeohashGridSource extends VectorSource {
     return {
       data: featureCollection,
       meta: {
-        areResultsTrimmed: true
+        areResultsTrimmed: false
       }
     };
-  }
-
-  isFieldAware() {
-    return true;
-  }
-
-  isRefreshTimerAware() {
-    return true;
-  }
-
-  getFieldNames() {
-    return this.getMetricFields().map(({ propertyKey }) => {
-      return propertyKey;
-    });
   }
 
   async getNumberFields() {
@@ -170,69 +156,23 @@ export class ESGeohashGridSource extends VectorSource {
     });
   }
 
-  async getGeoJsonPointsWithTotalCount({ precision, extent, timeFilters, layerName }) {
 
-    let indexPattern;
-    try {
-      indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
-    } catch (error) {
-      throw new Error(`Unable to find Index pattern ${this._descriptor.indexPatternId}`);
-    }
+  async getGeoJsonPoints({ layerName }, { geohashPrecision, buffer, timeFilters, query }) {
 
-    const geoField = indexPattern.fields.byName[this._descriptor.geoField];
-    if (!geoField) {
-      throw new Error(`Index pattern ${indexPattern.title} no longer contains the geo field ${this._descriptor.geoField}`);
-    }
+    const indexPattern = await this._getIndexPattern();
+    const searchSource  = await this._makeSearchSource({ buffer, timeFilters, query }, 0);
+    const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(geohashPrecision), aggSchemas.all);
+    searchSource.setField('aggs', aggConfigs.toDsl());
+    const esResponse = await this._runEsQuery(layerName, searchSource, 'Elasticsearch geohash_grid aggregation request');
 
-    const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(precision), aggSchemas.all);
-
-    let resp;
-    try {
-      const searchSource = new SearchSource();
-      searchSource.setField('index', indexPattern);
-      searchSource.setField('size', 0);
-      searchSource.setField('aggs', aggConfigs.toDsl());
-      searchSource.setField('filter', () => {
-        const filters = [];
-        filters.push(createExtentFilter(extent, geoField.name, geoField.type));
-        filters.push(timeService.createFilter(indexPattern, timeFilters));
-        return filters;
-      });
-
-      resp = await fetchSearchSourceAndRecordWithInspector({
-        searchSource,
-        requestName: layerName,
-        requestId: this._descriptor.id,
-        requestDesc: 'Elasticsearch geohash_grid aggregation request'
-      });
-    } catch(error) {
-      throw new Error(`Elasticsearch search request failed, error: ${error.message}`);
-    }
-
-    const tabifiedResp = tabifyAggResponse(aggConfigs, resp);
+    const tabifiedResp = tabifyAggResponse(aggConfigs, esResponse);
     const { featureCollection } = convertToGeoJson(tabifiedResp);
 
     return featureCollection;
   }
 
-  async isTimeAware() {
-    const indexPattern = await this._getIndexPattern();
-    const timeField = indexPattern.timeFieldName;
-    return !!timeField;
-  }
-
   isFilterByMapBounds() {
     return true;
-  }
-
-  async _getIndexPattern() {
-    let indexPattern;
-    try {
-      indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
-    } catch (error) {
-      throw new Error(`Unable to find Index pattern ${this._descriptor.indexPatternId}`);
-    }
-    return indexPattern;
   }
 
   _getValidMetrics() {
@@ -307,48 +247,31 @@ export class ESGeohashGridSource extends VectorSource {
       sourceDescriptor: this._descriptor,
       ...options
     });
-    descriptor.style = {
-      ...descriptor.style,
-      type: 'VECTOR',
-      properties: {
-        fillColor: {
-          type: 'DYNAMIC',
-          options: {
-            field: {
-              label: COUNT_PROP_LABEL,
-              name: COUNT_PROP_NAME,
-              origin: 'source'
-            },
-            color: 'Blues'
-          }
-        },
-        lineColor: {
-          type: 'STATIC',
-          options: {
-            color: '#cccccc'
-          }
-        },
-        lineWidth: {
-          type: 'STATIC',
-          options: {
-            size: 1
-          }
-        },
-        iconSize: {
-          type: 'DYNAMIC',
-          options: {
-            field: {
-              label: COUNT_PROP_LABEL,
-              name: COUNT_PROP_NAME,
-              origin: 'source'
-            },
-            minSize: 4,
-            maxSize: 32,
-          }
-        },
-        alphaValue: 1
+    descriptor.style = VectorStyle.createDescriptor({
+      fillColor: {
+        type: VectorStyle.STYLE_TYPE.DYNAMIC,
+        options: {
+          field: {
+            label: COUNT_PROP_LABEL,
+            name: COUNT_PROP_NAME,
+            origin: 'source'
+          },
+          color: 'Blues'
+        }
+      },
+      iconSize: {
+        type: VectorStyle.STYLE_TYPE.DYNAMIC,
+        options: {
+          field: {
+            label: COUNT_PROP_LABEL,
+            name: COUNT_PROP_NAME,
+            origin: 'source'
+          },
+          minSize: 4,
+          maxSize: 32,
+        }
       }
-    };
+    });
     return descriptor;
   }
 
@@ -367,11 +290,6 @@ export class ESGeohashGridSource extends VectorSource {
       source: this,
       style: style
     });
-  }
-
-  async getDisplayName() {
-    const indexPattern = await this._getIndexPattern();
-    return indexPattern.title;
   }
 
   canFormatFeatureProperties() {

@@ -18,22 +18,51 @@
  */
 
 import _ from 'lodash';
+import { getFormat } from '../../visualize/loader/pipeline_helpers/utilities';
 
-function unwrap(aggConfigResult, def) {
-  return aggConfigResult ? aggConfigResult.value : def;
-}
-
-export function getPoint(x, series, yScale, row, y, z) {
-  const zRow = z && row[z.i];
-  const xRow = row[x.i];
+export function getPoint(table, x, series, yScale, row, rowIndex, y, z) {
+  const zRow = z && row[z.accessor];
+  const xRow = x.accessor === -1 ? '_all' : row[x.accessor];
+  const yRow = row[y.accessor];
 
   const point = {
-    x: unwrap(xRow, '_all'),
-    y: unwrap(row[y.i]),
-    z: zRow && unwrap(zRow),
-    aggConfigResult: row[y.i],
+    x: xRow,
+    y: yRow,
+    z: zRow,
     extraMetrics: _.compact([zRow]),
-    yScale: yScale
+    yScale: yScale,
+    seriesRaw: series && {
+      table,
+      column: series[0].column,
+      row: rowIndex,
+      value: row[series[0].accessor],
+    },
+    xRaw: {
+      table,
+      column: x.column,
+      row: rowIndex,
+      value: xRow,
+    },
+    yRaw: {
+      table,
+      column: y.column,
+      row: rowIndex,
+      value: yRow,
+    },
+    zRaw: z && {
+      table,
+      column: z.column,
+      row: rowIndex,
+      value: zRow,
+    },
+    tableRaw: table.$parent && {
+      table: table.$parent.table,
+      column: table.$parent.column,
+      row: table.$parent.row,
+      value: table.$parent.key,
+      title: table.$parent.name,
+    },
+    parent: series ? series[0] : null,
   };
 
   if (point.y === 'NaN') {
@@ -44,12 +73,13 @@ export function getPoint(x, series, yScale, row, y, z) {
 
   if (series) {
     const seriesArray = series.length ? series : [ series ];
-    point.aggConfig = seriesArray[0].aggConfig;
-    point.series = seriesArray.map(s => s.aggConfig.fieldFormatter()(unwrap(row[s.i]))).join(' - ');
+    point.series = seriesArray.map(s => {
+      const fieldFormatter = getFormat(s.format);
+      return fieldFormatter.convert(row[s.accessor]);
+    }).join(' - ');
   } else if (y) {
     // If the data is not split up with a series aspect, then
     // each point's "series" becomes the y-agg that produced it
-    point.aggConfig = y.aggConfig;
     point.series = y.title;
   }
 

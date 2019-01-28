@@ -24,7 +24,7 @@ import { uiModules } from '../../modules';
 const module = uiModules.get('app/discover');
 
 
-module.directive('kbnTableHeader', function (shortDotsFilter) {
+module.directive('kbnTableHeader', function (shortDotsFilter, i18n) {
   return {
     restrict: 'A',
     scope: {
@@ -36,7 +36,9 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
       onMoveColumn: '=?',
     },
     template: headerHtml,
-    controller: function ($scope) {
+    controller: function ($scope, config) {
+      $scope.hideTimeColumn = config.get('doc_table:hideTimeColumn');
+
       $scope.isSortableColumn = function isSortableColumn(columnName) {
         return (
           !!$scope.indexPattern
@@ -47,7 +49,10 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
 
       $scope.tooltip = function (column) {
         if (!$scope.isSortableColumn(column)) return '';
-        return 'Sort by ' + shortDotsFilter(column);
+        return i18n('common.ui.docTable.tableHeader.sortByColumnTooltip', {
+          defaultMessage: 'Sort by {columnName}',
+          values: { columnName: shortDotsFilter(column) },
+        });
       };
 
       $scope.canMoveColumnLeft = function canMoveColumn(columnName) {
@@ -121,10 +126,15 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
 
         const [currentColumnName, currentDirection = 'asc'] = $scope.sortOrder;
         if(name === currentColumnName && currentDirection === 'asc') {
-          return `Sort ${name} descending`;
+          return i18n('common.ui.docTable.tableHeader.sortByColumnDescendingAriaLabel', {
+            defaultMessage: 'Sort {columnName} descending',
+            values: { columnName: name },
+          });
         }
-
-        return `Sort ${name} ascending`;
+        return i18n('common.ui.docTable.tableHeader.sortByColumnAscendingAriaLabel', {
+          defaultMessage: 'Sort {columnName} ascending',
+          values: { columnName: name },
+        });
       };
     }
   };

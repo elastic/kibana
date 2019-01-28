@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import { SetView } from './set_view';
-import { setGoto } from '../../../../actions/store_actions';
+import { setGotoWithCenter } from '../../../../actions/store_actions';
 import { getMapZoom, getMapCenter } from "../../../../selectors/map_selectors";
 import { closeSetView } from '../../../../store/ui';
 
@@ -21,7 +21,7 @@ function mapDispatchToProps(dispatch) {
   return {
     onSubmit: ({ lat, lon, zoom }) => {
       dispatch(closeSetView());
-      dispatch(setGoto({ lat, lon, zoom }));
+      dispatch(setGotoWithCenter({ lat, lon, zoom }));
     }
   };
 }

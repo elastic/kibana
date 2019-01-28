@@ -15,6 +15,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
+  const userMenu = getService('userMenu');
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'home']);
 
   class LoginPage {
@@ -76,50 +77,24 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
         return;
       }
 
-      await retry.try(async () => {
-        const logoutLinkExists = await find.existsByLinkText('Logout');
-        if (!logoutLinkExists) {
-          throw new Error('Login is not completed yet');
-        }
-      });
+      await retry.waitFor('logout button visible', async () => (
+        await userMenu.logoutLinkExists()
+      ));
     }
 
     async logout() {
       log.debug('SecurityPage.logout');
 
-      const [isWelcomeShowing, logoutLinkExists] = await Promise.all([
-        PageObjects.home.isWelcomeShowing(),
-        find.existsByLinkText('Logout'),
-      ]);
-
-      if (!logoutLinkExists) {
+      if (!await userMenu.logoutLinkExists()) {
         log.debug('Logout not found');
         return;
       }
 
-      // This sometimes happens when hitting the home screen on a brand new / empty
-      // Kibana instance. It may not *always* happen, depending on how
-      // long it takes the home screen to query Elastic to see if it's a
-      // new Kibana instance.
-      if (isWelcomeShowing) {
-        log.debug('welcome screen showing when attempting logout');
-        await PageObjects.home.hideWelcomeScreen();
-      }
+      await userMenu.clickLogoutButton();
 
-      await find.clickByLinkText('Logout');
-
-      await retry.try(async () => {
-        const loginFormExists = await find.existsByDisplayedByCssSelector('.login-form');
-
-        const logoutLinkExists = await find.existsByLinkText('Logout');
-        if (logoutLinkExists) {
-          await find.clickByLinkText('Logout');
-        }
-
-        if (!loginFormExists) {
-          throw new Error('Logout is not completed yet');
-        }
-      });
+      await retry.waitForWithTimeout('login form', config.get('timeouts.waitFor') * 5, async () => (
+        await find.existsByDisplayedByCssSelector('.login-form')
+      ));
     }
 
     async clickRolesSection() {

@@ -10,17 +10,16 @@ import {
   EuiFieldText,
   EuiText,
   EuiFormRow,
-  EuiSpacer
 } from '@elastic/eui';
 
-import { TMSSource } from './tms_source';
+import { AbstractTMSSource } from './tms_source';
 import { TileLayer } from '../tile_layer';
 
-export class WMSSource extends TMSSource {
+export class WMSSource extends AbstractTMSSource {
 
   static type = 'WMS';
-
-  static typeDisplayName = 'WMS';
+  static title = 'Web Map Service';
+  static description = 'Maps from OGC Standard WMS';
 
   static createDescriptor({ serviceUrl, layers, styles }) {
     return {
@@ -38,18 +37,6 @@ export class WMSSource extends TMSSource {
       onPreviewSource(source);
     };
     return (<WMSEditor previewWMS={previewWMS} />);
-  }
-
-  static renderDropdownDisplayOption() {
-    return (
-      <Fragment>
-        <strong>{WMSSource.typeDisplayName}</strong>
-        <EuiSpacer size="xs" />
-        <EuiText size="s" color="subdued">
-          <p className="euiTextColor--subdued">Web Map Service (WMS)</p>
-        </EuiText>
-      </Fragment>
-    );
   }
 
   renderDetails() {

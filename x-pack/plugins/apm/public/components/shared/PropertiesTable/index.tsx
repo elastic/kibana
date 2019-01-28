@@ -5,10 +5,13 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get, indexBy, uniq } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
+import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { StringMap } from '../../../../typings/common';
 import {
   colors,
@@ -19,7 +22,6 @@ import {
   units
 } from '../../../style/variables';
 import { getAgentFeatureDocsUrl } from '../../../utils/documentation/agents';
-import { ExternalLink } from '../../../utils/url';
 import { KeySorter, NestedKeyValueTable } from './NestedKeyValueTable';
 import { PROPERTY_CONFIG } from './propertyConfig';
 
@@ -44,14 +46,9 @@ const EuiIconWithSpace = styled(EuiIcon)`
   margin-right: ${px(units.half)};
 `;
 
-export interface Tab {
-  key: string;
-  label: string;
-}
-
-export function getPropertyTabNames(selected: string[]): Tab[] {
+export function getPropertyTabNames(obj: Transaction | APMError) {
   return PROPERTY_CONFIG.filter(
-    ({ key, required }) => required || selected.includes(key)
+    ({ key, required }) => required || obj.hasOwnProperty(key)
   ).map(({ key, label }) => ({ key, label }));
 }
 
@@ -100,12 +97,12 @@ export function AgentFeatureTipMessage({
     <TableInfo>
       <EuiIconWithSpace type="iInCircle" />
       {getAgentFeatureText(featureName)}{' '}
-      <ExternalLink href={docsUrl}>
+      <EuiLink target="_blank" rel="noopener noreferrer" href={docsUrl}>
         {i18n.translate(
           'xpack.apm.propertiesTable.agentFeature.learnMoreLinkLabel',
           { defaultMessage: 'Learn more in the documentation.' }
         )}
-      </ExternalLink>
+      </EuiLink>
     </TableInfo>
   );
 }

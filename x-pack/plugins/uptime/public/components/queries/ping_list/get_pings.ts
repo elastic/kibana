@@ -8,8 +8,8 @@ import gql from 'graphql-tag';
 
 export const getPingsQuery = gql`
   query PingList(
-    $dateRangeStart: UnsignedInteger!
-    $dateRangeEnd: UnsignedInteger!
+    $dateRangeStart: String!
+    $dateRangeEnd: String!
     $monitorId: String
     $status: String
     $sort: String
@@ -23,26 +23,29 @@ export const getPingsQuery = gql`
       sort: $sort
       size: $size
     ) {
-      timestamp
-      http {
-        response {
-          status_code
+      total
+      pings {
+        timestamp
+        http {
+          response {
+            status_code
+          }
         }
-      }
-      error {
-        message
-        type
-      }
-      monitor {
-        duration {
-          us
+        error {
+          message
+          type
         }
-        id
-        ip
-        name
-        scheme
-        status
-        type
+        monitor {
+          duration {
+            us
+          }
+          id
+          ip
+          name
+          scheme
+          status
+          type
+        }
       }
     }
   }

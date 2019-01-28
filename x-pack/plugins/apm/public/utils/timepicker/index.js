@@ -15,7 +15,7 @@ let currentInterval;
 // hack to wait for angular template to be ready
 const waitForAngularReady = new Promise(resolve => {
   const checkInterval = setInterval(() => {
-    const hasElm = !!document.querySelector('#react-apm-breadcrumbs');
+    const hasElm = !!document.querySelector('#kibana-angular-template');
     if (hasElm) {
       clearInterval(checkInterval);
       resolve();

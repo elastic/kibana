@@ -37,6 +37,7 @@ export interface Brand {
 export interface Breadcrumb {
   text: string;
   href?: string;
+  'data-test-subj'?: string;
 }
 
 export class ChromeService {

@@ -101,7 +101,6 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
 }
 
 .c0 {
-  margin: 0 0 24px 0;
   position: relative;
   font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
   border: 1px solid #D3DAE6;
