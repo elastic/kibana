@@ -49,7 +49,7 @@ function formatTimeString(timeString, dateFormat, roundUp = false) {
   }
 }
 
-function _getDateLookupKey(startDate, endDate) {
+function getDateLookupKey(startDate, endDate) {
   return startDate + ' to ' + endDate;
 }
 
@@ -59,12 +59,12 @@ export function prettyDuration(timeFrom, timeTo, getConfig) {
 
   const lookupByRange = {};
   quickRanges.forEach((frame) => {
-    lookupByRange[_getDateLookupKey(frame.from, frame.to)] = frame;
+    lookupByRange[getDateLookupKey(frame.from, frame.to)] = frame;
   });
 
   // If both parts are date math, try to look up a reasonable string
   if (timeFrom && timeTo && !moment.isMoment(timeFrom) && !moment.isMoment(timeTo)) {
-    const tryLookup = lookupByRange[_getDateLookupKey(timeFrom, timeTo)];
+    const tryLookup = lookupByRange[getDateLookupKey(timeFrom, timeTo)];
     if (tryLookup) {
       return tryLookup.display;
     } else {
