@@ -6,6 +6,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Location } from 'history';
 import React from 'react';
 // @ts-ignore
 import Distribution from 'x-pack/plugins/apm/public/components/app/ErrorGroupDetails/Distribution';
@@ -17,10 +18,12 @@ import { ErrorGroupList } from './List';
 
 interface ErrorGroupOverviewProps {
   urlParams: IUrlParams;
+  location: Location;
 }
 
 const ErrorGroupOverview: React.SFC<ErrorGroupOverviewProps> = ({
-  urlParams
+  urlParams,
+  location
 }) => {
   return (
     <React.Fragment>
@@ -54,7 +57,11 @@ const ErrorGroupOverview: React.SFC<ErrorGroupOverviewProps> = ({
       <ErrorGroupOverviewRequest
         urlParams={urlParams}
         render={({ data }) => (
-          <ErrorGroupList urlParams={urlParams} items={data} />
+          <ErrorGroupList
+            urlParams={urlParams}
+            items={data}
+            location={location}
+          />
         )}
       />
     </React.Fragment>

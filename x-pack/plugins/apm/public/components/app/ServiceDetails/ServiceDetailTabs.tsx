@@ -43,7 +43,9 @@ export class ServiceDetailTabs extends React.Component<TabsProps> {
         }),
         path: `/${serviceName}/errors`,
         render: () => {
-          return <ErrorGroupOverview urlParams={urlParams} />;
+          return (
+            <ErrorGroupOverview urlParams={urlParams} location={location} />
+          );
         }
       },
       {
