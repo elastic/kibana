@@ -10,6 +10,8 @@ import { SearchScope } from '../../model';
 export enum PathTypes {
   blob = 'blob',
   tree = 'tree',
+  blame = 'blame',
+  commits = 'commits',
 }
 
 export const SearchScopeText = {
