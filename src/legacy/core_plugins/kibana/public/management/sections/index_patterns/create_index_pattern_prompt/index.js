@@ -25,32 +25,65 @@ import {
   EuiText,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-export function RenderCreateIndexPatternPrompt(props) {
-  // return (<div>Index Pattern Prompt Graphics TBD</div>);
-  return (<EuiEmptyPrompt
-    iconType="editorStrike"
-    title={<EuiText grow={false}><h2>Create your first index pattern</h2></EuiText>}
-    body={
-      <Fragment>
-        <p>
-          Index patterns allow you to bucket disparate data sources together so their shared fields may be queried in Kibana.
-        </p>
-        <EuiHorizontalRule margin="m" />
-        <p>Examples of index patterns</p>
-        <ul>
-          <li>Index a single data source named log-west-001 so you can build charts or query its contents fast.
-          </li>
-          <li>
-            Group all incoming data sources starting with log-west* so you can query against all your west coast server logs.
-          </li>
-          <li>Specifically group your archived, monthly, roll-up metrics of those logs into a separate index pattern so you can aggregate histotical trends to compare.</li>
-        </ul>
-      </Fragment>
-    }
-    actions={[
-      <EuiButton color="primary" fill onClick={props.onCreateIndexPattern} iconSide="right" iconType="arrowDown">Create index pattern</EuiButton>,
-      <EuiButtonEmpty color="danger" onClick={() => {props.onShowSystemIndices(); props.onCreateIndexPattern();}}>View system indices Kibana auto-creates</EuiButtonEmpty>,
-    ]}
-  />);
-}
+export const Prompt = ({
+  onCreateIndexPattern,
+  onCreateIndexPatternViewSystem
+}) => (<EuiEmptyPrompt
+  iconType="editorStrike"
+  title={
+    <EuiText grow={false}>
+      <h2>
+        <FormattedMessage id="kbn.management.indexPatternPrompt.title" defaultMessage="Create your first index pattern" />
+      </h2>
+    </EuiText>}
+  body={
+    <Fragment>
+      <p>
+        <FormattedMessage
+          id="kbn.management.indexPatternPrompt.subtitle"
+          defaultMessage="Index patterns allow you to bucket disparate data sources together so their shared fields may be queried in
+          Kibana."
+        />
+      </p>
+      <EuiHorizontalRule margin="m" />
+      <p>
+        <FormattedMessage
+          id="kbn.management.indexPatternPrompt.examplesTitle"
+          defaultMessage="Examples of index patterns"
+        />
+      </p>
+      <ul>
+        <li>
+          <FormattedMessage
+            id="kbn.management.indexPatternPrompt.exampleOne"
+            defaultMessage="Index a single data source named log-west-001 so you can build charts or query its contents fast."
+          />
+        </li>
+        <li>
+          <FormattedMessage
+            id="kbn.management.indexPatternPrompt.exampleTwo"
+            defaultMessage="Group all incoming data sources starting with log-west* so you can query against all your west coast server
+            logs."
+          />
+        </li>
+        <li>
+          <FormattedMessage
+            id="kbn.management.indexPatternPrompt.exampleThree"
+            defaultMessage="Specifically group your archived, monthly, roll-up metrics of those logs into a separate index pattern so you
+            can aggregate histotical trends to compare."
+          />
+        </li>
+      </ul>
+    </Fragment>
+  }
+  actions={[
+    <EuiButton color="primary" fill onClick={onCreateIndexPattern} iconSide="right" iconType="arrowDown">
+      <FormattedMessage id="kbn.management.indexPatternPrompt.createBtn" defaultMessage="Create index pattern" />
+    </EuiButton>,
+    <EuiButtonEmpty color="danger" onClick={onCreateIndexPatternViewSystem}>View system indices Kibana auto-creates</EuiButtonEmpty>,
+  ]}
+/>);
+
+export const CreateIndexPatternPrompt = injectI18n(Prompt);

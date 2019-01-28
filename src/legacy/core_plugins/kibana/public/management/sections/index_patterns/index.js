@@ -31,6 +31,7 @@ import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
+import { EuiBadge } from '@elastic/eui';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -40,11 +41,8 @@ import { App } from './app';
 const INDEX_PATTERN_LIST_DOM_ELEMENT_ID = 'indexPatternListReact';
 
 export function updateIndexPatternList(
-  $scope,
-  indexPatternCreationOptions,
-  defaultIndex,
   indexPatterns,
-  indexPatternCreationType,
+  kbnUrl,
 ) {
   const node = document.getElementById(INDEX_PATTERN_LIST_DOM_ELEMENT_ID);
   if (!node) {
@@ -53,12 +51,7 @@ export function updateIndexPatternList(
 
   render(
     <I18nProvider>
-      <App
-        indexPatternCreationOptions={indexPatternCreationOptions}
-        defaultIndex={defaultIndex}
-        indexPatterns={indexPatterns}
-        indexPatternCreationType={indexPatternCreationType}
-      />
+      <App indexPatterns={indexPatterns} navTo={kbnUrl.redirect} />
     </I18nProvider>,
     node,
   );
@@ -104,11 +97,16 @@ uiModules.get('apps/management')
       link: async function ($scope) {
 
         const indexPatternListProvider = Private(IndexPatternListFactory)();
+
         const indexPatternCreationProvider = Private(IndexPatternCreationFactory)();
-        const indexPatternCreationType = indexPatternCreationProvider.getType();
-        const indexPatternCreationOptions = await indexPatternCreationProvider.getIndexPatternCreationOptions((url) => {
+
+        //const indexPatternCreationType = indexPatternCreationProvider.getType();
+
+        // TODO - I'm not sure what this does
+        await indexPatternCreationProvider.getIndexPatternCreationOptions((url) => {
           $scope.$evalAsync(() => kbnUrl.change(url));
         });
+
 
         const renderList = () => {
           $scope.indexPatternList = $route.current.locals.indexPatterns.map(pattern => {
@@ -117,7 +115,10 @@ uiModules.get('apps/management')
 
             return {
               id: id,
-              title: pattern.get('title'),
+              title:
+  <span>
+    {pattern.get('title')}{$scope.defaultIndex === id && (<EuiBadge style={{ marginLeft: '8px' }}>Default</EuiBadge>)}
+  </span>,
               url: kbnUrl.eval('#/management/kibana/index_patterns/{{id}}', { id: id }),
               active: $scope.editingId === id,
               default: $scope.defaultIndex === id,
@@ -139,13 +140,7 @@ uiModules.get('apps/management')
             return 0;
           }) || [];
 
-          updateIndexPatternList(
-            $scope,
-            indexPatternCreationOptions,
-            $scope.defaultIndex,
-            $scope.indexPatternList,
-            indexPatternCreationType
-          );
+          updateIndexPatternList($scope.indexPatternList, kbnUrl);
         };
 
         $scope.$on('$destroy', destroyIndexPatternList);

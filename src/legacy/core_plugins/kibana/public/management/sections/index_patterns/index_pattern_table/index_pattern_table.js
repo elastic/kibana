@@ -19,18 +19,19 @@
 
 import React from 'react';
 import {
-  EuiIcon,
   EuiButtonEmpty,
   EuiInMemoryTable,
-  EuiIconTip,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton
 } from '@elastic/eui';
-import { injectI18n } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 const columns = [
   {
     field: 'title',
     name: 'Pattern',
-    //name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.fields.table.nameHeader', defaultMessage: 'Name' }),
     render: (name, { id }) => (<EuiButtonEmpty size="xs" href={`#/management/kibana/index_patterns/${id}`}>{name}</EuiButtonEmpty>),
     dataType: 'string',
     sortable: true,
@@ -58,19 +59,46 @@ const search = {
   }
 };
 
-//    selection={{}}
 const Table = ({
-  indexPatterns
+  indexPatterns,
+  navTo
 }) => (
-  <EuiInMemoryTable
-    itemId="id"
-    isSelectable={false}
-    items={indexPatterns}
-    columns={columns}
-    pagination={pagination}
-    sorting={sorting}
-    search={search}
-  />
+  <div>
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiText>
+          <h2><FormattedMessage id="kbn.management.indexPatternTable.title" defaultMessage="Index patterns" /></h2>
+          <p>
+            <FormattedMessage
+              id="kbn.management.indexPatternTable.subtitle"
+              defaultMessage="Index patterns allow you to bucket disparate data sources together so their shared fields may be queried in
+              Kibana."
+            />
+          </p>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem  grow={false}>
+        <EuiButton
+          fill
+          onClick={() => {
+            // console.log('euibutton hi', navTo);
+            // debugger;
+            navTo('/management/kibana/index_pattern');}}
+        >
+          <FormattedMessage id="kbn.management.indexPatternTable.createBtn" defaultMessage="Create index pattern" />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiInMemoryTable
+      itemId="id"
+      isSelectable={false}
+      items={indexPatterns}
+      columns={columns}
+      pagination={pagination}
+      sorting={sorting}
+      search={search}
+    />
+  </div>
 );
 
 export const IndexPatternTable = injectI18n(Table);

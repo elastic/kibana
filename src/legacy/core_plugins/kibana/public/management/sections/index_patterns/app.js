@@ -21,33 +21,12 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 // import { IndexPatternList } from './index_pattern_list';
 import { IndexPatternTable } from './index_pattern_table';
-import { RenderCreateIndexPatternPrompt } from './create_index_pattern_prompt';
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import { CreateIndexPatternPrompt } from './create_index_pattern_prompt';
 
-export class App extends React.Component {
-  render() {
-    return (
-      <I18nProvider>
-        <div>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiText>
-                <h2>Index patterns</h2>
-                <p>Index patterns allow you to bucket disparate data sources together so their shared fields may be queried in Kibana.</p>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem  grow={false}>
-              <EuiButton fill onClick={() => this.setState({ 'showCreateIndexPattern': true })}>
-                Create index pattern
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          {this.props.indexPatterns.length === 0 ? (<RenderCreateIndexPatternPrompt
-            onCreateIndexPattern={() => this.setState({ 'showCreateIndexPattern': true })}
-            onShowSystemIndices={() => this.setState({ 'showCreateIndexPattern': true })}
-          />) : (<IndexPatternTable indexPatterns={this.props.indexPatterns} />)}
-        </div>
-      </I18nProvider>
-    );
-  }
-}
+export const App = ({ indexPatterns, navTo }) => (
+  <I18nProvider>
+    {indexPatterns.length === 0 ? (<CreateIndexPatternPrompt
+      onCreateIndexPattern={() => navTo('/management/kibana/index_pattern')}
+      onCreateIndexPatternViewSystem={() => navTo('/management/kibana/index_pattern?showSystem=true')}
+    />) : (<IndexPatternTable indexPatterns={indexPatterns} navTo={navTo} />)}
+  </I18nProvider>);
