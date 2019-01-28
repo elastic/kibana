@@ -5,6 +5,7 @@
  */
 
 import 'ui/autoload/all';
+import { uiCapabilities } from 'ui/capabilities';
 import chrome from 'ui/chrome';
 import './angular/config';
 import './angular/services';
@@ -23,5 +24,10 @@ import 'uiExports/fieldFormats';
 import './lib/load_expression_types';
 import './lib/load_transitions';
 
-// load the application
-chrome.setRootController('canvas', CanvasRootController);
+// Redirect to Kibana home if canvas shouldn't be visible
+if (!uiCapabilities.canvas.show) {
+  window.location = chrome.addBasePath('/app/kibana');
+} else {
+  // load the application
+  chrome.setRootController('canvas', CanvasRootController);
+}

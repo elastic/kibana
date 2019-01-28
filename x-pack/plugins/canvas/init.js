@@ -48,7 +48,7 @@ export default async function(server /*options*/) {
           all: ['canvas-workpad'],
           read: ['config', 'index-pattern'],
         },
-        ui: ['showWriteControls'],
+        ui: ['show', 'showWriteControls'],
       },
       read: {
         catalogue: ['canvas'],
@@ -57,7 +57,7 @@ export default async function(server /*options*/) {
           all: [],
           read: ['config', 'index-pattern', 'canvas-workpad'],
         },
-        ui: [],
+        ui: ['show'],
       },
     },
   });
