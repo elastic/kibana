@@ -37,7 +37,7 @@ function getUnconnectedKibanLink() {
 describe('UnconnectedKibanaLink', () => {
   it('should have correct url', () => {
     const wrapper = getUnconnectedKibanLink();
-    const href = wrapper.find('EuiLink').prop('href') || '';
+    const href = wrapper.find('EuiLink').prop('href') as string;
     const { _g, _a } = getUrlQuery(href);
     const { pathname } = url.parse(href);
 
@@ -53,7 +53,7 @@ describe('UnconnectedKibanaLink', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('should include existing _g values in link href', () => {
+  it('should preserve _g from location', () => {
     const wrapper = getUnconnectedKibanLink();
     wrapper.setProps({
       location: {
@@ -61,7 +61,7 @@ describe('UnconnectedKibanaLink', () => {
           '?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-7d,mode:relative,to:now-1d))'
       }
     });
-    const href = wrapper.find('EuiLink').prop('href');
+    const href = wrapper.find('EuiLink').prop('href') as string;
     const { _g } = getUrlQuery(href);
 
     expect(_g).toBe(
@@ -78,7 +78,6 @@ describe('UnconnectedKibanaLink', () => {
 
   it('should use default time range when _g is empty', () => {
     const wrapper = getUnconnectedKibanLink();
-    wrapper.setProps({ location: { search: '?_g=()' } });
     const href = wrapper.find('EuiLink').prop('href') as string;
     const { _g } = getUrlQuery(href);
     expect(_g).toBe('(time:(from:now-24h,mode:quick,to:now))');
@@ -110,9 +109,27 @@ describe('UnconnectedKibanaLink', () => {
       '(ml:(jobIds:!(1337)),time:(from:now-24h,mode:quick,to:now))'
     );
   });
+
+  it('should preserve kql from `location`', () => {
+    const wrapper = shallow(
+      <UnconnectedKibanaLink
+        location={
+          { search: '?kuery=transaction.duration.us~20~3E~201' } as Location
+        }
+        pathname={'/app/apm'}
+        hash={'/opbeans-node/transactions'}
+      >
+        View Transactions
+      </UnconnectedKibanaLink>
+    );
+
+    const href = wrapper.find('EuiLink').prop('href') as string;
+    const { kuery } = getUrlQuery(href);
+    expect(kuery).toEqual('transaction.duration.us~20~3E~201');
+  });
 });
 
-function getUrlQuery(href?: string) {
-  const hash = url.parse(href!).hash!.slice(1);
+function getUrlQuery(href: string) {
+  const hash = url.parse(href).hash!.slice(1);
   return url.parse(hash, true).query;
 }

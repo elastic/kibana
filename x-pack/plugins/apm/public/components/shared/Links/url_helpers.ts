@@ -70,6 +70,7 @@ function getQueryWithRisonParams(location: Location, query: RisonDecoded = {}) {
 
   return {
     ...query,
+    kuery: currentQuery.kuery,
     _g: encodedG,
     _a: encodedA
   };
