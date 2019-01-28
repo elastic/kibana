@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiToken } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import querystring from 'querystring';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -18,25 +18,26 @@ import { history } from '../../utils/url';
 import { ShortcutsProvider } from '../shortcuts';
 import { CodeResult } from './code_result';
 import { EmptyPlaceholder } from './empty_placeholder';
-import { Facet } from './facet';
 import { Pagination } from './pagination';
 import { RepoItem } from './repository_item';
-import { ScopeTab } from './scope_tab';
 import { SearchBar } from './search_bar';
+import { SideBar } from './side_bar';
 
 const SearchContainer = styled.div`
+  position: absolute;
   height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 `;
 
-const MainContentContainer = styled(EuiFlexItem)`
-  height: calc(100vh - 128px);
+const MainContentContainer = styled.div`
   overflow-y: scroll;
-  padding: '0 1rem';
-  margin-right: 0px;
+  padding: 16px;
 `;
 
 const CodeResultContainer = styled.div`
-  margin-top: 80px;
+  margin-top: 16px;
 `;
 
 const RepositoryResultContainer = CodeResultContainer;
@@ -131,6 +132,9 @@ class SearchPage extends React.PureComponent<Props, State> {
       repositorySearchResults,
     } = this.props;
 
+    let mainComp = <EmptyPlaceholder query={query} />;
+    let repoStats: any[] = [];
+    let languageStats: any[] = [];
     if (
       scope === SearchScope.REPOSITORY &&
       repositorySearchResults &&
@@ -144,57 +148,20 @@ class SearchPage extends React.PureComponent<Props, State> {
             <RepoItem uri={repo.uri} />
           </EuiFlexItem>
         ));
-      const mainComp = (
-        <EuiFlexGroup style={{ padding: '0 1rem' }}>
-          <EuiFlexItem grow={2}>
-            <EuiFlexGroup gutterSize="s" alignItems="center" style={{ marginBottom: '.5rem' }}>
-              <EuiFlexItem grow={false}>
-                <EuiToken iconType="tokenRepo" />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiTitle size="s">
-                  <h3>Repositories</h3>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiFlexGroup gutterSize="s" alignItems="center" style={{ marginBottom: '.5rem' }}>
-              <EuiFlexItem grow={false}>
-                <EuiToken
-                  iconType="tokenElement"
-                  displayOptions={{ color: 'tokenTint07', shape: 'rectangle', fill: true }}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiTitle size="s">
-                  <h3>Languages</h3>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <MainContentContainer grow={8}>
-            <EuiFlexGroup>
-              <EuiFlexItem style={{ height: '32px' }}>
-                <ScopeTab query={query} scope={scope} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer />
-            <RepositoryResultContainer>{resultComps}</RepositoryResultContainer>
-          </MainContentContainer>
-        </EuiFlexGroup>
+      mainComp = (
+        <MainContentContainer>
+          <RepositoryResultContainer>{resultComps}</RepositoryResultContainer>
+        </MainContentContainer>
       );
-      return (
-        <SearchContainer>
-          <ShortcutsProvider />
-          <SearchBar
-            query={this.props.query}
-            onSearchScopeChanged={this.props.onSearchScopeChanged}
-          />
-          {mainComp}
-        </SearchContainer>
-      );
-    } else if (scope === SearchScope.REPOSITORY && documentSearchResults) {
+    } else if (
+      scope === SearchScope.DEFAULT &&
+      documentSearchResults &&
+      documentSearchResults.total > 0
+    ) {
       const { stats, results } = documentSearchResults!;
-      const { total, from, to, page, totalPage, repoStats, languageStats } = stats!;
+      const { total, from, to, page, totalPage } = stats!;
+      languageStats = stats!.languageStats;
+      repoStats = stats!.repoStats;
 
       const statsComp = (
         <EuiTitle size="m">
@@ -203,55 +170,44 @@ class SearchPage extends React.PureComponent<Props, State> {
           </h1>
         </EuiTitle>
       );
-
-      const mainComp = (
-        <EuiFlexGroup style={{ paddingRight: '1rem' }}>
-          <Facet
-            repositories={repositories}
-            languages={languages}
-            repoFacets={repoStats}
-            langFacets={languageStats}
-            onLanguageFilterToggled={this.onLanguageFilterToggled}
-            onRepositoryFilterToggled={this.onRepositoryFilterToggled}
-          />
-          <MainContentContainer grow={8}>
-            <EuiFlexGroup>
-              <EuiFlexItem>{statsComp}</EuiFlexItem>
-              <EuiFlexItem style={{ height: '32px' }}>
-                <ScopeTab query={query} scope={scope} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer />
-            <CodeResultContainer>
-              <CodeResult results={results!} />
-            </CodeResultContainer>
-            <Pagination query={this.props.query} totalPage={totalPage} currentPage={page - 1} />
-          </MainContentContainer>
-        </EuiFlexGroup>
-      );
-
-      return (
-        <SearchContainer>
-          <ShortcutsProvider />
-          <SearchBar
-            query={this.props.query}
-            onSearchScopeChanged={this.props.onSearchScopeChanged}
-          />
-          {mainComp}
-        </SearchContainer>
-      );
-    } else {
-      return (
-        <SearchContainer>
-          <ShortcutsProvider />
-          <SearchBar
-            query={this.props.query}
-            onSearchScopeChanged={this.props.onSearchScopeChanged}
-          />
-          <EmptyPlaceholder />
-        </SearchContainer>
+      mainComp = (
+        <MainContentContainer>
+          {statsComp}
+          <EuiSpacer />
+          <CodeResultContainer>
+            <CodeResult results={results!} />
+          </CodeResultContainer>
+          <Pagination query={this.props.query} totalPage={totalPage} currentPage={page - 1} />
+        </MainContentContainer>
       );
     }
+
+    return (
+      <SearchContainer>
+        <ShortcutsProvider />
+        <EuiFlexGroup gutterSize="none">
+          <EuiFlexItem style={{ maxWidth: '256px' }}>
+            <SideBar
+              query={this.props.query}
+              scope={scope}
+              repositories={repositories}
+              languages={languages}
+              repoFacets={repoStats}
+              langFacets={languageStats}
+              onLanguageFilterToggled={this.onLanguageFilterToggled}
+              onRepositoryFilterToggled={this.onRepositoryFilterToggled}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <SearchBar
+              query={this.props.query}
+              onSearchScopeChanged={this.props.onSearchScopeChanged}
+            />
+            {mainComp}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </SearchContainer>
+    );
   }
 }
 

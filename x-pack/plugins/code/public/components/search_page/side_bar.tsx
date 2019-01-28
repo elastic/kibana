@@ -24,12 +24,19 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { RepositoryUtils } from '../../../common/repository_utils';
+import { SearchScope } from '../../../model';
+import { ScopeTabs } from './scope_tabs';
 
-const FacetContainer = styled(EuiFlexItem)`
-  width: 256px;
-  min-width: 256px;
-  height: calc(100vh - 128px);
+const SideBarContainer = styled.div`
+  background-color: #f5f7fa;
   border-right: ${euiBorderWidthThin} solid ${euiBorderColor};
+  flex-grow: 1;
+  flex-shrink: 1;
+  overflow: auto;
+`;
+
+const FacetContainer = styled.div`
+  padding: 0 1rem;
 `;
 
 const FacetTitle = styled(EuiFlexGroup)`
@@ -41,6 +48,8 @@ const FacetItem = styled(EuiFacetButton)`
 `;
 
 interface Props {
+  query: string;
+  scope: SearchScope;
   languages?: Set<string>;
   repositories?: Set<string>;
   langFacets: any[];
@@ -49,7 +58,7 @@ interface Props {
   onRepositoryFilterToggled: (repo: string) => any;
 }
 
-export class Facet extends React.PureComponent<Props> {
+export class SideBar extends React.PureComponent<Props> {
   public render() {
     const { languages, langFacets, repoFacets, repositories } = this.props;
     const repoStatsComp = repoFacets.map((item, index) => {
@@ -103,40 +112,37 @@ export class Facet extends React.PureComponent<Props> {
     });
 
     return (
-      <FacetContainer grow={2}>
-        <div style={{ padding: '0 1rem' }}>
-          <div>
-            <FacetTitle gutterSize="s" alignItems="center" style={{ marginBottom: '.5rem' }}>
-              <EuiFlexItem grow={false}>
-                <EuiToken iconType="tokenRepo" />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiTitle size="s">
-                  <h3>Repositories</h3>
-                </EuiTitle>
-              </EuiFlexItem>
-            </FacetTitle>
-            <EuiFacetGroup>{repoStatsComp}</EuiFacetGroup>
-          </div>
+      <SideBarContainer>
+        <ScopeTabs query={this.props.query} scope={this.props.scope} />
+        <FacetContainer>
+          <FacetTitle gutterSize="s" alignItems="center" style={{ marginBottom: '.5rem' }}>
+            <EuiFlexItem grow={false}>
+              <EuiToken iconType="tokenRepo" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiTitle size="s">
+                <h3>Repositories</h3>
+              </EuiTitle>
+            </EuiFlexItem>
+          </FacetTitle>
+          <EuiFacetGroup>{repoStatsComp}</EuiFacetGroup>
           <EuiSpacer />
-          <div>
-            <FacetTitle gutterSize="s" alignItems="center" style={{ marginBottom: '.5rem' }}>
-              <EuiFlexItem grow={false}>
-                <EuiToken
-                  iconType="tokenElement"
-                  displayOptions={{ color: 'tokenTint07', shape: 'rectangle', fill: true }}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiTitle size="s">
-                  <h3>Languages</h3>
-                </EuiTitle>
-              </EuiFlexItem>
-            </FacetTitle>
-            <EuiFacetGroup>{langStatsComp}</EuiFacetGroup>
-          </div>
-        </div>
-      </FacetContainer>
+          <FacetTitle gutterSize="s" alignItems="center" style={{ marginBottom: '.5rem' }}>
+            <EuiFlexItem grow={false}>
+              <EuiToken
+                iconType="tokenElement"
+                displayOptions={{ color: 'tokenTint07', shape: 'rectangle', fill: true }}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiTitle size="s">
+                <h3>Languages</h3>
+              </EuiTitle>
+            </EuiFlexItem>
+          </FacetTitle>
+          <EuiFacetGroup>{langStatsComp}</EuiFacetGroup>
+        </FacetContainer>
+      </SideBarContainer>
     );
   }
 }

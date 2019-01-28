@@ -8,7 +8,6 @@ import fs from 'fs';
 import util from 'util';
 
 import { ProgressReporter } from '.';
-import { RepositoryUtils } from '../../common/repository_utils';
 import { toCanonicalUrl } from '../../common/uri_util';
 import { Document, IndexStats, IndexStatsKey, LspIndexRequest, RepositoryUri } from '../../model';
 import { GitOperations } from '../git_operations';
@@ -103,44 +102,6 @@ export class LspIndexer extends AbstractIndexer {
       return await gitOperator.countRepoFiles(this.repoUri, 'head');
     } catch (error) {
       this.log.error(`Get lsp index requests count error.`);
-      this.log.error(error);
-      throw error;
-    }
-  }
-
-  protected async prepareRequests() {
-    try {
-      const {
-        workspaceRepo,
-        workspaceRevision,
-      } = await this.lspService.workspaceHandler.openWorkspace(this.repoUri, 'head');
-      const workspaceDir = workspaceRepo.workdir();
-      const gitOperator = new GitOperations(this.options.repoPath);
-      const fileTree = await gitOperator.fileTree(
-        this.repoUri,
-        '',
-        'HEAD',
-        0,
-        Number.MAX_SAFE_INTEGER,
-        false,
-        Number.MAX_SAFE_INTEGER
-      );
-      return RepositoryUtils.getAllFiles(fileTree)
-        .filter((filePath: string) => {
-          const lang = detectLanguageByFilename(filePath);
-          return lang && this.lspService.supportLanguage(lang);
-        })
-        .map((filePath: string) => {
-          const req: LspIndexRequest = {
-            repoUri: this.repoUri,
-            localRepoPath: workspaceDir,
-            filePath,
-            revision: workspaceRevision,
-          };
-          return req;
-        });
-    } catch (error) {
-      this.log.error(`Prepare lsp indexing requests error.`);
       this.log.error(error);
       throw error;
     }
