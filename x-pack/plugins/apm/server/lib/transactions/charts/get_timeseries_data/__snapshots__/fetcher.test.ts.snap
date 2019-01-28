@@ -55,7 +55,7 @@ Array [
             },
             "terms": Object {
               "field": "transaction.result",
-              "missing": "transaction_result_missing",
+              "missing": "",
             },
           },
         },

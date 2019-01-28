@@ -289,19 +289,11 @@ export function getTpmSeries(
   const { tpmBuckets } = apmTimeseries;
   const bucketKeys = tpmBuckets.map(({ key }) => key);
   const getColor = getColorByKey(bucketKeys);
-  const getTpmLegendTitle = (bucketKey: string) => {
-    // hide legend text for transactions without "result"
-    if (bucketKey === 'transaction_result_missing') {
-      return '';
-    }
-
-    return bucketKey;
-  };
 
   return tpmBuckets.map(bucket => {
     const avg = mean(bucket.dataPoints.map(p => p.y));
     return {
-      title: getTpmLegendTitle(bucket.key),
+      title: bucket.key,
       data: bucket.dataPoints,
       legendValue: `${asDecimal(avg)} ${tpmUnit(transactionType || '')}`,
       type: 'linemark',
