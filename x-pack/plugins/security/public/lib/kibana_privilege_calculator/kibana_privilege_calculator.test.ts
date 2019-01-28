@@ -6,8 +6,19 @@
 
 import { PrivilegeDefinition, Role } from '../../../common/model';
 import { NO_PRIVILEGE_VALUE } from '../../views/management/edit_role/lib/constants';
-import { buildRole, defaultPrivilegeDefinition } from './__fixtures__';
-import { PRIVILEGE_SOURCE, PrivilegeExplanation } from './kibana_privilege_calculator_types';
+import {
+  buildRole,
+  defaultPrivilegeDefinition,
+  fullyRestrictedBasePrivileges,
+  fullyRestrictedFeaturePrivileges,
+  unrestrictedBasePrivileges,
+  unrestrictedFeaturePrivileges,
+} from './__fixtures__';
+import {
+  AllowedPrivilege,
+  PRIVILEGE_SOURCE,
+  PrivilegeExplanation,
+} from './kibana_privilege_calculator_types';
 import { KibanaPrivilegeCalculatorFactory } from './kibana_privileges_calculator_factory';
 
 const buildEffectivePrivileges = (
@@ -523,5 +534,258 @@ describe('calculateEffectivePrivileges', () => {
         },
       ]);
     });
+  });
+});
+
+describe('calculateAllowedPrivileges', () => {
+  it('allows all privileges when none are currently assigned', () => {
+    const role = buildRole({
+      spacesPrivileges: [
+        {
+          spaces: ['*'],
+          base: [],
+          feature: {},
+        },
+        {
+          spaces: ['foo'],
+          base: [],
+          feature: {},
+        },
+      ],
+    });
+
+    const privilegeCalculator = buildEffectivePrivileges(role);
+
+    const result: AllowedPrivilege[] = privilegeCalculator.calculateAllowedPrivileges();
+
+    expect(result).toEqual([
+      {
+        ...unrestrictedBasePrivileges,
+        ...unrestrictedFeaturePrivileges,
+      },
+      {
+        ...unrestrictedBasePrivileges,
+        ...unrestrictedFeaturePrivileges,
+      },
+    ]);
+  });
+
+  it('allows all global base privileges, but just "all" for everything else when global is set to "all"', () => {
+    const role = buildRole({
+      spacesPrivileges: [
+        {
+          spaces: ['*'],
+          base: ['all'],
+          feature: {},
+        },
+        {
+          spaces: ['foo'],
+          base: [],
+          feature: {},
+        },
+      ],
+    });
+
+    const privilegeCalculator = buildEffectivePrivileges(role);
+
+    const result: AllowedPrivilege[] = privilegeCalculator.calculateAllowedPrivileges();
+
+    expect(result).toEqual([
+      {
+        ...unrestrictedBasePrivileges,
+        ...fullyRestrictedFeaturePrivileges,
+      },
+      {
+        ...fullyRestrictedBasePrivileges,
+        ...fullyRestrictedFeaturePrivileges,
+      },
+    ]);
+  });
+
+  it(`allows feature privileges to be set to "all" or "read" when global base is "read"`, () => {
+    const role = buildRole({
+      spacesPrivileges: [
+        {
+          spaces: ['*'],
+          base: ['read'],
+          feature: {},
+        },
+        {
+          spaces: ['foo'],
+          base: [],
+          feature: {},
+        },
+      ],
+    });
+
+    const privilegeCalculator = buildEffectivePrivileges(role);
+
+    const result: AllowedPrivilege[] = privilegeCalculator.calculateAllowedPrivileges();
+
+    const expectedFeaturePrivileges = {
+      feature: {
+        feature1: {
+          privileges: ['all', 'read'],
+          canUnassign: false,
+        },
+        feature2: {
+          privileges: ['all', 'read'],
+          canUnassign: false,
+        },
+        feature3: {
+          privileges: ['all'],
+          canUnassign: true, // feature 3 has no "read" privilege governed by global "all"
+        },
+      },
+    };
+
+    expect(result).toEqual([
+      {
+        ...unrestrictedBasePrivileges,
+        ...expectedFeaturePrivileges,
+      },
+      {
+        base: {
+          privileges: ['all', 'read'],
+          canUnassign: false,
+        },
+        ...expectedFeaturePrivileges,
+      },
+    ]);
+  });
+
+  it(`allows feature privileges to be set to "all" or "read" when space base is "read"`, () => {
+    const role = buildRole({
+      spacesPrivileges: [
+        {
+          spaces: ['*'],
+          base: [],
+          feature: {},
+        },
+        {
+          spaces: ['foo'],
+          base: ['read'],
+          feature: {},
+        },
+      ],
+    });
+
+    const privilegeCalculator = buildEffectivePrivileges(role);
+
+    const result: AllowedPrivilege[] = privilegeCalculator.calculateAllowedPrivileges();
+
+    expect(result).toEqual([
+      {
+        ...unrestrictedBasePrivileges,
+        ...unrestrictedFeaturePrivileges,
+      },
+      {
+        base: {
+          privileges: ['all', 'read'],
+          canUnassign: true,
+        },
+        feature: {
+          feature1: {
+            privileges: ['all', 'read'],
+            canUnassign: false,
+          },
+          feature2: {
+            privileges: ['all', 'read'],
+            canUnassign: false,
+          },
+          feature3: {
+            privileges: ['all'],
+            canUnassign: true, // feature 3 has no "read" privilege governed by space "all"
+          },
+        },
+      },
+    ]);
+  });
+
+  it(`allows space base privilege to be set to "all" or "read" when space base is already "all"`, () => {
+    const role = buildRole({
+      spacesPrivileges: [
+        {
+          spaces: ['foo'],
+          base: ['all'],
+          feature: {},
+        },
+      ],
+    });
+
+    const privilegeCalculator = buildEffectivePrivileges(role);
+
+    const result: AllowedPrivilege[] = privilegeCalculator.calculateAllowedPrivileges();
+
+    expect(result).toEqual([
+      {
+        ...unrestrictedBasePrivileges,
+        feature: {
+          feature1: {
+            privileges: ['all'],
+            canUnassign: false,
+          },
+          feature2: {
+            privileges: ['all'],
+            canUnassign: false,
+          },
+          feature3: {
+            privileges: ['all'],
+            canUnassign: false,
+          },
+        },
+      },
+    ]);
+  });
+
+  it(`restricts space feature privileges when global feature privileges are set`, () => {
+    const role = buildRole({
+      spacesPrivileges: [
+        {
+          spaces: ['*'],
+          base: [],
+          feature: {
+            feature1: ['all'],
+            feature2: ['read'],
+          },
+        },
+        {
+          spaces: ['foo'],
+          base: [],
+          feature: {},
+        },
+      ],
+    });
+
+    const privilegeCalculator = buildEffectivePrivileges(role);
+
+    const result: AllowedPrivilege[] = privilegeCalculator.calculateAllowedPrivileges();
+
+    expect(result).toEqual([
+      {
+        ...unrestrictedBasePrivileges,
+        ...unrestrictedFeaturePrivileges,
+      },
+      {
+        base: {
+          privileges: ['all', 'read'],
+          canUnassign: true,
+        },
+        feature: {
+          feature1: {
+            privileges: ['all'],
+            canUnassign: false,
+          },
+          feature2: {
+            privileges: ['all', 'read'],
+            canUnassign: false,
+          },
+          feature3: {
+            privileges: ['all'],
+            canUnassign: true, // feature 3 has no "read" privilege governed by space "all"
+          },
+        },
+      },
+    ]);
   });
 });

@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { PrivilegeDefinition, Role } from '../../../common/model';
-import { buildRole, defaultPrivilegeDefinition } from './__fixtures__';
+import {
+  buildRole,
+  defaultPrivilegeDefinition,
+  fullyRestrictedBasePrivileges,
+  fullyRestrictedFeaturePrivileges,
+  unrestrictedBasePrivileges,
+  unrestrictedFeaturePrivileges,
+} from './__fixtures__';
 import { KibanaAllowedPrivilegesCalculator } from './kibana_allowed_privileges_calculator';
 import { KibanaPrivilegeCalculatorFactory } from './kibana_privileges_calculator_factory';
 
@@ -21,53 +28,6 @@ const buildEffectivePrivilegesCalculator = (
 ) => {
   const factory = new KibanaPrivilegeCalculatorFactory(privilegeDefinition);
   return factory.getInstance(role);
-};
-
-const unrestrictedBasePrivileges = {
-  base: {
-    privileges: ['all', 'read'],
-    canUnassign: true,
-  },
-};
-const unrestrictedFeaturePrivileges = {
-  feature: {
-    feature1: {
-      privileges: ['all', 'read'],
-      canUnassign: true,
-    },
-    feature2: {
-      privileges: ['all', 'read'],
-      canUnassign: true,
-    },
-    feature3: {
-      privileges: ['all'],
-      canUnassign: true,
-    },
-  },
-};
-
-const fullyRestrictedBasePrivileges = {
-  base: {
-    privileges: ['all'],
-    canUnassign: false,
-  },
-};
-
-const fullyRestrictedFeaturePrivileges = {
-  feature: {
-    feature1: {
-      privileges: ['all'],
-      canUnassign: false,
-    },
-    feature2: {
-      privileges: ['all'],
-      canUnassign: false,
-    },
-    feature3: {
-      privileges: ['all'],
-      canUnassign: false,
-    },
-  },
 };
 
 describe('AllowedPrivileges', () => {
