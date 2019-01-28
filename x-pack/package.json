@@ -133,6 +133,7 @@
     "@scant/router": "^0.1.0",
     "@slack/client": "^4.8.0",
     "@turf/boolean-contains": "6.0.1",
+    "@types/json-stable-stringify": "^1.0.32",
     "angular-resource": "1.4.9",
     "angular-sanitize": "1.6.5",
     "angular-ui-ace": "0.2.3",
