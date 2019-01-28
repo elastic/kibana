@@ -22,5 +22,5 @@ export interface ConfigurationBlockAdapter {
   deleteForTags(
     user: FrameworkUser,
     tagIds: string[]
-  ): Promise<Array<{ id: string; success: boolean; reason?: string }>>;
+  ): Promise<{ success: boolean; reason?: string }>;
 }

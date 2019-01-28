@@ -36,12 +36,11 @@ export class MemoryConfigurationBlockAdapter implements ConfigurationBlockAdapte
   public async deleteForTags(
     user: FrameworkUser,
     tagIds: string[]
-  ): Promise<Array<{ id: string; success: boolean; reason?: string }>> {
+  ): Promise<{ success: boolean; reason?: string }> {
     this.db = this.db.filter(block => !tagIds.includes(block.tag));
-    return tagIds.map(id => ({
-      id,
+    return {
       success: true,
-    }));
+    };
   }
 
   public async getForTags(user: FrameworkUser, tagIds: string[], page?: number, size?: number) {

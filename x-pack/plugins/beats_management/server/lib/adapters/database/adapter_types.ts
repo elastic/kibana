@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { ESClient } from 'x-pack/plugins/apm/server/lib/helpers/setup_request';
 import { FrameworkRequest, FrameworkUser } from '../framework/adapter_types';
 
 export interface DatabaseAdapter {
@@ -22,6 +23,10 @@ export interface DatabaseAdapter {
     user: FrameworkUser,
     params: DatabaseDeleteDocumentParams
   ): Promise<DatabaseDeleteDocumentResponse>;
+  deleteByQuery(
+    user: FrameworkUser,
+    params: DatabaseSearchParams
+  ): ReturnType<ESClient['deleteByQuery']>;
   mget<T>(user: FrameworkUser, params: DatabaseMGetParams): Promise<DatabaseMGetResponse<T>>;
   bulk(
     user: FrameworkUser,

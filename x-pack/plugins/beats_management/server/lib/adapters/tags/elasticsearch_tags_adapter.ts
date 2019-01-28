@@ -76,7 +76,8 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
     }
     const beatIds = inactiveBeats.map((beat: BeatTag) => beat.id);
 
-    const bulkBeatsUpdates = flatten(
+    // While we block tag deletion when on an active beat, we should remove from inactive
+    const bulkInactiveBeatsUpdates = flatten(
       beatIds.map(beatId => {
         const script = `
         def beat = ctx._source.beat;
@@ -96,7 +97,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
     const bulkTagsDelete = ids.map(tagId => ({ delete: { _id: `tag:${tagId}` } }));
 
     await this.database.bulk(user, {
-      body: flatten([...bulkBeatsUpdates, ...bulkTagsDelete]),
+      body: flatten([...bulkInactiveBeatsUpdates, ...bulkTagsDelete]),
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
       type: '_doc',

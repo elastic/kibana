@@ -115,28 +115,27 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
   public async deleteForTags(
     user: FrameworkUser,
     tagIds: string[]
-  ): Promise<Array<{ id: string; success: boolean; reason?: string }>> {
-    const result = await this.database.bulk(user, {
-      body: tagIds.map(id => ({ delete: { 'configuration_block.tag': id } })),
+  ): Promise<{ success: boolean; reason?: string }> {
+    const result: any = await this.database.deleteByQuery(user, {
+      body: {
+        query: {
+          terms: { 'configuration_block.tag': tagIds },
+        },
+      },
       index: INDEX_NAMES.BEATS,
-      refresh: 'wait_for',
       type: '_doc',
     });
 
-    if (result.errors) {
-      if (result.items[0].result) {
-        throw new Error(result.items[0].result);
-      }
-      throw new Error((result.items[0] as any).index.error.reason);
+    if (result.failures.length > 0) {
+      return {
+        success: false,
+        reason: result.failures[0],
+      };
     }
 
-    return result.items.map((item: any) => {
-      return {
-        id: item.delete._id,
-        success: item.delete.result === 'deleted',
-        reason: item.delete.result !== 'deleted' ? item.delete.result : undefined,
-      };
-    });
+    return {
+      success: true,
+    };
   }
 
   public async create(user: FrameworkUser, configs: ConfigurationBlock[]): Promise<string[]> {

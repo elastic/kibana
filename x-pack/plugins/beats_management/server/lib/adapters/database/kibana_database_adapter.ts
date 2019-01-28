@@ -79,6 +79,14 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
     return result;
   }
 
+  public async deleteByQuery(
+    user: FrameworkUser,
+    params: DatabaseSearchParams
+  ): Promise<DatabaseDeleteDocumentResponse> {
+    const result = await this.callWithUser(user, 'deleteByQuery', params);
+    return result;
+  }
+
   public async search<Source>(
     user: FrameworkUser,
     params: DatabaseSearchParams
