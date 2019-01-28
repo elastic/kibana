@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UncommonProcessesData } from '../../graphql/types';
+import { ProcessEcsFields, UncommonProcessesData } from '../../graphql/types';
 import { FrameworkRequest, RequestOptions } from '../framework';
 import { Hit, Hits, HostHits, SearchHit, TotalHit } from '../types';
 
@@ -21,10 +21,7 @@ export interface UncommonProcessHit extends Hit {
   host: Array<{ id: string; name: string }>;
   _source: {
     '@timestamp': string;
-    process: {
-      name: string;
-      title: string;
-    };
+    process: ProcessEcsFields;
   };
   cursor: string;
   sort: StringOrNumber[];

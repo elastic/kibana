@@ -6,10 +6,11 @@
 
 import * as React from 'react';
 import { connect } from 'react-redux';
-import styled from 'styled-components';
-
 import { fromEvent, Observable } from 'rxjs';
 import { mergeMap, takeUntil } from 'rxjs/operators';
+import styled from 'styled-components';
+import { ActionCreator } from 'typescript-fsa';
+
 import { timelineActions } from '../../store';
 
 interface OwnProps {
@@ -18,21 +19,13 @@ interface OwnProps {
 }
 
 interface DispatchProps {
-  applyDeltaToWidth: (
-    {
-      id,
-      delta,
-      bodyClientWidthPixels,
-      maxWidthPercent,
-      minWidthPixels,
-    }: {
-      id: string;
-      delta: number;
-      bodyClientWidthPixels: number;
-      maxWidthPercent: number;
-      minWidthPixels: number;
-    }
-  ) => void;
+  applyDeltaToWidth: ActionCreator<{
+    id: string;
+    delta: number;
+    bodyClientWidthPixels: number;
+    maxWidthPercent: number;
+    minWidthPixels: number;
+  }>;
 }
 
 type Props = OwnProps & DispatchProps;

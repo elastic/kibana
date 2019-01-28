@@ -5,7 +5,6 @@
  */
 
 import { getOr } from 'lodash/fp';
-import moment from 'moment';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { pure } from 'recompose';
@@ -87,7 +86,7 @@ export const TimelineQuery = pure<OwnProps>(
                 };
               },
             }),
-          updatedAt: moment().valueOf(),
+          updatedAt: Date.now(),
         });
       }}
     </Query>

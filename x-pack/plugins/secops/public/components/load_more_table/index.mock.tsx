@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { HostItem } from '../../graphql/types';
-import { getOrEmpty } from '../empty_value';
-import { ItemsPerRow } from './index';
+import { HostsEdges } from '../../graphql/types';
+import { getOrEmptyTag } from '../empty_value';
+import { Columns, ItemsPerRow } from './index';
 
 export const mockData = {
   Hosts: {
@@ -47,30 +46,30 @@ export const mockData = {
   },
 };
 
-export const getHostsColumns = () => [
+export const getHostsColumns = (): Array<Columns<HostsEdges>> => [
   {
     name: 'Host',
     truncateText: false,
     hideForMobile: false,
-    render: (item: HostItem) => <>{getOrEmpty('host.name', item)}</>,
+    render: node => getOrEmptyTag('host.name', node),
   },
   {
     name: 'First seen',
     truncateText: false,
     hideForMobile: false,
-    render: (item: HostItem) => <>{getOrEmpty('host.firstSeen', item)}</>,
+    render: node => getOrEmptyTag('host.firstSeen', node),
   },
   {
     name: 'OS',
     truncateText: false,
     hideForMobile: false,
-    render: (item: HostItem) => <>{getOrEmpty('host.os', item)}</>,
+    render: node => getOrEmptyTag('host.os', node),
   },
   {
     name: 'Version',
     truncateText: false,
     hideForMobile: false,
-    render: (item: HostItem) => <>{getOrEmpty('host.version', item)}</>,
+    render: node => getOrEmptyTag('host.version', node),
   },
 ];
 

@@ -13,6 +13,7 @@ import {
   droppableIdPrefix,
   droppableTimelineFlyoutButtonPrefix,
   droppableTimelineProvidersPrefix,
+  escapeDataProviderId,
   getDraggableId,
   getDroppableId,
   getProviderIdFromDraggable,
@@ -442,6 +443,18 @@ describe('helpers', () => {
           mode: 'FLUID',
         })
       ).toEqual(false);
+    });
+  });
+
+  describe('#escapeDataProviderId', () => {
+    test('it should escape dotted notation', () => {
+      const escaped = escapeDataProviderId('hello.how.are.you');
+      expect(escaped).toEqual('hello_how_are_you');
+    });
+
+    test('it should not escape a string without dotted notation', () => {
+      const escaped = escapeDataProviderId('hello how are you?');
+      expect(escaped).toEqual('hello how are you?');
     });
   });
 });

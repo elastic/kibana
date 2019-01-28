@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HostsData } from '../../graphql/types';
+import { HostEcsFields, HostsData } from '../../graphql/types';
 import { FrameworkRequest, RequestOptions } from '../framework';
 import { Hit, Hits, SearchHit } from '../types';
 
@@ -17,14 +17,7 @@ type StringOrNumber = string | number;
 export interface HostHit extends Hit {
   _source: {
     '@timestamp'?: string;
-    host: {
-      id?: string;
-      name: string;
-      os?: {
-        name: string;
-        version: string;
-      };
-    };
+    host: HostEcsFields;
   };
   cursor?: string;
   sort?: StringOrNumber[];

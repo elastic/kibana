@@ -56,6 +56,8 @@ export const getTimelineIdFromDestination = (result: DropResult): string =>
 export const getProviderIdFromDraggable = (result: DropResult): string =>
   result.draggableId.substring(result.draggableId.lastIndexOf('.') + 1);
 
+export const escapeDataProviderId = (path: string) => path.replace(/\./g, '_');
+
 export const providerWasDroppedOnTimeline = (result: DropResult): boolean =>
   reasonIsDrop(result) &&
   draggableIsContent(result) &&

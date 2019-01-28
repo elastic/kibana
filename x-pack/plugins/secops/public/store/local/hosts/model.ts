@@ -7,15 +7,11 @@
 export interface BasicQuery {
   limit: number;
 }
-export interface InMemoryPaginationQuery extends BasicQuery {
-  upperLimit: number;
-}
-
 export interface HostsModel {
   query: {
     authentications: BasicQuery;
     hosts: BasicQuery;
     events: BasicQuery;
-    uncommonProcesses: InMemoryPaginationQuery;
+    uncommonProcesses: BasicQuery;
   };
 }

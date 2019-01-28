@@ -16,12 +16,25 @@ export const mockData: { Authentications: AuthenticationsData } = {
           failures: 10,
           successes: 0,
           user: { name: 'Evan Hassanabad' },
-          source: { ip: '127.0.0.1' },
-          latest: '2019-01-11T06:18:30.745Z',
-          host: {
-            id: '123',
-            name: 'host-computer-1',
-            ip: ['192.168.0.1'],
+          lastSuccess: {
+            timestamp: '2019-01-23T22:35:32.222Z',
+            source: {
+              ip: '127.0.0.1',
+            },
+            host: {
+              id: 'host-id-1',
+              name: 'host-1',
+            },
+          },
+          lastFailure: {
+            timestamp: '2019-01-23T22:35:32.222Z',
+            source: {
+              ip: '8.8.8.8',
+            },
+            host: {
+              id: 'host-id-1',
+              name: 'host-2',
+            },
           },
         },
         cursor: {
@@ -34,12 +47,25 @@ export const mockData: { Authentications: AuthenticationsData } = {
           failures: 10,
           successes: 0,
           user: { name: 'Braden Hassanabad' },
-          source: { ip: '127.0.0.1' },
-          latest: '2019-01-11T06:18:30.745Z',
-          host: {
-            id: '234',
-            name: 'host-computer-2',
-            ip: ['192.168.0.1'],
+          lastSuccess: {
+            timestamp: '2019-01-23T22:35:32.222Z',
+            source: {
+              ip: '127.0.0.1',
+            },
+            host: {
+              id: 'host-id-1',
+              name: 'host-1',
+            },
+          },
+          lastFailure: {
+            timestamp: '2019-01-23T22:35:32.222Z',
+            source: {
+              ip: '8.8.8.8',
+            },
+            host: {
+              id: 'host-id-1',
+              name: 'host-2',
+            },
           },
         },
         cursor: {

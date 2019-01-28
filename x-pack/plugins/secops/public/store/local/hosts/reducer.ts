@@ -11,7 +11,6 @@ import {
   updateEventsLimit,
   updateHostsLimit,
   updateUncommonProcessesLimit,
-  updateUncommonProcessesUpperLimit,
 } from './actions';
 import { HostsModel } from './model';
 
@@ -32,7 +31,6 @@ export const initialHostsState: HostsState = {
     },
     uncommonProcesses: {
       limit: DEFAULT_LIMIT,
-      upperLimit: 100,
     },
   },
 };
@@ -72,16 +70,6 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
       uncommonProcesses: {
         ...state.query.uncommonProcesses,
         limit,
-      },
-    },
-  }))
-  .case(updateUncommonProcessesUpperLimit, (state, { upperLimit }) => ({
-    ...state,
-    query: {
-      ...state.query,
-      uncommonProcesses: {
-        ...state.query.uncommonProcesses,
-        upperLimit,
       },
     },
   }))

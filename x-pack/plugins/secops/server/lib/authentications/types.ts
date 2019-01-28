@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AuthenticationsData } from '../../graphql/types';
+import { AuthenticationsData, LastSourceHost } from '../../graphql/types';
 import { FrameworkRequest, RequestOptions } from '../framework';
 import { Hit, SearchHit, TotalHit } from '../types';
 
@@ -16,14 +16,8 @@ type StringOrNumber = string | number;
 export interface AuthenticationHit extends Hit {
   _source: {
     '@timestamp': string;
-    source: {
-      ip: string;
-    };
-    host: {
-      id: string;
-      ip: string;
-      name: string;
-    };
+    lastSuccess?: LastSourceHost;
+    lastFailure?: LastSourceHost;
   };
   user: string;
   failures: number;

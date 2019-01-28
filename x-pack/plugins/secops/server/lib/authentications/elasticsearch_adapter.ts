@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, getOr, head, last } from 'lodash/fp';
-
+import { getOr } from 'lodash/fp';
 import { AuthenticationsData, AuthenticationsEdges } from '../../graphql/types';
 import { mergeFieldsWithHit } from '../../utils/build_query';
 import { FrameworkAdapter, FrameworkRequest, RequestOptions } from '../framework';
@@ -30,16 +29,19 @@ export class ElasticsearchAuthenticationAdapter implements AuthenticationsAdapte
       'search',
       buildQuery(options)
     );
-    const { limit } = options.pagination;
+    const { cursor, limit } = options.pagination;
     const totalCount = getOr(0, 'aggregations.user_count.value', response);
-
     const hits: AuthenticationHit[] = getOr(
       [],
       'aggregations.group_by_users.buckets',
       response
     ).map((bucket: AuthenticationBucket) => ({
-      ...head(bucket.authentication.hits.hits),
-      user: bucket.key.user_uid,
+      _id: bucket.authentication.hits.hits[0]._id,
+      _source: {
+        lastSuccess: getOr(null, 'successes.lastSuccess.hits.hits[0]._source', bucket),
+        lastFailure: getOr(null, 'failures.lastFailure.hits.hits[0]._source', bucket),
+      },
+      user: bucket.key,
       cursor: bucket.key.user_uid,
       failures: bucket.failures.doc_count,
       successes: bucket.successes.doc_count,
@@ -50,14 +52,17 @@ export class ElasticsearchAuthenticationAdapter implements AuthenticationsAdapte
     );
 
     const hasNextPage = authenticationEdges.length === limit + 1;
-    const edges = hasNextPage ? authenticationEdges.splice(0, limit) : authenticationEdges;
-    const lastCursor = get('cursor', last(edges));
+    const beginning = cursor != null ? parseInt(cursor!, 10) : 0;
+    const edges = authenticationEdges.splice(beginning, limit);
     return {
       edges,
       totalCount,
       pageInfo: {
         hasNextPage,
-        endCursor: lastCursor,
+        endCursor: {
+          value: String(limit),
+          tiebreaker: null,
+        },
       },
     };
   }
@@ -74,12 +79,6 @@ export const formatAuthenticationData = (
       successes: 0,
       _id: '',
       user: {
-        name: '',
-      },
-      source: { ip: '' },
-      latest: '',
-      host: {
-        id: '',
         name: '',
       },
     },

@@ -5,16 +5,23 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import moment from 'moment';
+import { get } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
+import { ActionCreator } from 'typescript-fsa';
 
 import { HostEcsFields, UncommonProcessesEdges } from '../../../../graphql/types';
 import { hostsActions, State, uncommonProcessesSelector } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
-import { defaultToEmpty, getEmptyValue, getOrEmpty } from '../../../empty_value';
-import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
+import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
+import {
+  defaultToEmptyTag,
+  getEmptyTagValue,
+  getEmptyValue,
+  getOrEmptyTag,
+} from '../../../empty_value';
+import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
 import * as i18n from './translations';
 
@@ -33,7 +40,7 @@ interface UncommonProcessTableReduxProps {
 }
 
 interface UncommonProcessTableDispatchProps {
-  updateLimitPagination: (param: { limit: number }) => void;
+  updateLimitPagination: ActionCreator<{ limit: number }>;
 }
 
 type UncommonProcessTableProps = OwnProps &
@@ -80,7 +87,7 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
       limit={limit}
       hasNextPage={hasNextPage}
       itemsPerRow={rowItems}
-      updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
+      updateLimitPagination={newLimit => updateLimitPagination({ limit: newLimit })}
       title={
         <h3>
           {i18n.UNCOMMON_PROCESSES} <EuiBadge color="hollow">{totalCount}</EuiBadge>
@@ -101,30 +108,32 @@ export const UncommonProcessTable = connect(
 
 const extractHostNames = (hosts: HostEcsFields[]) => hosts.map(host => host.name).join(', ');
 
-const getUncommonColumns = (startDate: number) => [
+const getUncommonColumns = (startDate: number): Array<Columns<UncommonProcessesEdges>> => [
   {
     name: i18n.NAME,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }: UncommonProcessesEdges) => {
-      const processName = defaultToEmpty(node.process.name);
-      return (
-        <>
+    render: ({ node }) => {
+      const processName: string | null = get('process.name', node);
+      if (processName != null) {
+        return (
           <DraggableWrapper
             dataProvider={{
               and: [],
               enabled: true,
-              id: node._id,
-              name: processName!,
+              id: escapeDataProviderId(
+                `uncommon-process-table-${node._id}-processName-${processName}`
+              ),
+              name: processName,
               excluded: false,
               kqlQuery: '',
               queryMatch: {
                 field: 'process.name',
-                value: processName!,
+                value: processName,
               },
               queryDate: {
                 from: startDate,
-                to: moment().valueOf(),
+                to: Date.now(),
               },
             }}
             render={(dataProvider, _, snapshot) =>
@@ -137,42 +146,40 @@ const getUncommonColumns = (startDate: number) => [
               )
             }
           />
-        </>
-      );
+        );
+      } else {
+        return getEmptyTagValue();
+      }
     },
   },
   {
     name: i18n.USER,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }: UncommonProcessesEdges) => <>{getOrEmpty('user.name', node)}</>,
+    render: ({ node }) => getOrEmptyTag('user.name', node),
   },
   {
     name: i18n.COMMAND_LINE,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }: UncommonProcessesEdges) => <>{defaultToEmpty(node.process.title)}</>,
+    render: ({ node }) => defaultToEmptyTag(node.process.title),
   },
   {
     name: i18n.NUMBER_OF_INSTANCES,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }: UncommonProcessesEdges) => <>{defaultToEmpty(node.instances)}</>,
+    render: ({ node }) => defaultToEmptyTag(node.instances),
   },
   {
     name: i18n.NUMBER_OF_HOSTS,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }: UncommonProcessesEdges) => (
-      <>{node.host != null ? node.host.length : getEmptyValue()}</>
-    ),
+    render: ({ node }) => <>{node.host != null ? node.host.length : getEmptyValue()}</>,
   },
   {
     name: i18n.HOSTS,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }: UncommonProcessesEdges) => (
-      <>{node.host != null ? extractHostNames(node.host) : getEmptyValue()}</>
-    ),
+    render: ({ node }) => <>{node.host != null ? extractHostNames(node.host) : getEmptyValue()}</>,
   },
 ];

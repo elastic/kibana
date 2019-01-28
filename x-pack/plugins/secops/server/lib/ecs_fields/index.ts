@@ -4,6 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { extendMap } from './extend_map';
+
+export const osFieldsMap: Readonly<Record<string, string>> = {
+  'os.platform': 'os.platform',
+  'os.name': 'os.name',
+  'os.full': 'os.full',
+  'os.family': 'os.family',
+  'os.version': 'os.version',
+  'os.kernel': 'os.kernel',
+};
+
 export const hostFieldsMap: Readonly<Record<string, string>> = {
   'host.architecture': 'host.architecture',
   'host.id': 'host.id',
@@ -11,12 +22,7 @@ export const hostFieldsMap: Readonly<Record<string, string>> = {
   // 'host.last_beat': '_source.@timestamp',
   'host.mac': 'system.audit.host.mac',
   'host.name': 'host.name',
-  'host.os.platform': 'host.os.platform',
-  'host.os.name': 'host.os.name',
-  'host.os.full': 'host.os.full',
-  'host.os.family': 'host.os.family',
-  'host.os.version': 'host.os.version',
-  'host.os.kernel': 'host.os.kernel',
+  ...extendMap('host', osFieldsMap),
 };
 
 export const processFieldsMap: Readonly<Record<string, string>> = {
