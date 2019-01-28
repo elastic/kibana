@@ -58,6 +58,7 @@ export function uiRenderMixin(kbnServer, server, config) {
   server.exposeStaticDir('/node_modules/@elastic/eui/dist/{path*}', fromRoot('node_modules/@elastic/eui/dist'));
   server.exposeStaticDir('/node_modules/@kbn/ui-framework/dist/{path*}', fromRoot('node_modules/@kbn/ui-framework/dist'));
 
+  const translationsCache = { translations: null, hash: null };
   server.route({
     path: '/translations/{locale}.json',
     method: 'GET',
@@ -70,11 +71,19 @@ export function uiRenderMixin(kbnServer, server, config) {
         throw Boom.notFound(`Unknown locale: ${locale}`);
       }
 
-      const translation = JSON.stringify(i18n.getTranslation());
-      return h.response(translation)
+      // Stringifying thousands of labels and calculating hash on the resulting
+      // string can be expensive so it makes sense to do it once and cache.
+      if (translationsCache.translations == null) {
+        translationsCache.translations = JSON.stringify(i18n.getTranslation());
+        translationsCache.hash = createHash('sha1')
+          .update(translationsCache.translations)
+          .digest('hex');
+      }
+
+      return h.response(translationsCache.translations)
         .header('cache-control', 'must-revalidate')
         .header('content-type', 'application/json')
-        .etag(createHash('sha1').update(translation).digest('hex'));
+        .etag(translationsCache.hash);
     }
   });
 
@@ -209,6 +218,7 @@ export function uiRenderMixin(kbnServer, server, config) {
       uiPublicUrl: `${basePath}/ui`,
       bootstrapScriptUrl: `${basePath}/bundles/app/${app.getId()}/bootstrap.js`,
       i18n: (id, options) => i18n.translate(id, options),
+      locale: i18n.getLocale(),
       darkMode: get(legacyMetadata.uiSettings.user, ['theme:darkMode', 'userValue'], false),
 
       injectedMetadata: {
@@ -216,7 +226,6 @@ export function uiRenderMixin(kbnServer, server, config) {
         buildNumber: config.get('pkg.buildNum'),
         basePath,
         i18n: {
-          locale: i18n.getLocale(),
           translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
         },
         vars: await replaceInjectedVars(
