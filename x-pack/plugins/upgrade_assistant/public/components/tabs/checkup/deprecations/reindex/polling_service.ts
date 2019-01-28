@@ -35,11 +35,13 @@ export interface ReindexState {
   reindexTaskPercComplete: number | null;
   errorMessage: string | null;
   reindexWarnings?: ReindexWarning[];
+  hasRequiredPrivileges?: boolean;
 }
 
 interface StatusResponse {
   warnings?: ReindexWarning[];
   reindexOp?: ReindexOperation;
+  hasRequiredPrivileges?: boolean;
 }
 
 /**
@@ -110,7 +112,7 @@ export class ReindexPollingService {
     }
   };
 
-  private updateWithResponse = ({ reindexOp, warnings }: StatusResponse) => {
+  private updateWithResponse = ({ reindexOp, warnings, hasRequiredPrivileges }: StatusResponse) => {
     // Next value should always include the entire state, not just what changes.
     // We make a shallow copy as a starting new state.
     const nextValue = {
@@ -121,6 +123,10 @@ export class ReindexPollingService {
 
     if (warnings) {
       nextValue.reindexWarnings = warnings;
+    }
+
+    if (hasRequiredPrivileges !== undefined) {
+      nextValue.hasRequiredPrivileges = hasRequiredPrivileges;
     }
 
     if (reindexOp) {

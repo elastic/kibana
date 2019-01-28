@@ -71,6 +71,10 @@ export function registerReindexIndicesRoutes(
       const reindexService = reindexServiceFactory(callCluster, reindexActions);
 
       try {
+        if (!(await reindexService.hasRequiredPrivileges(indexName))) {
+          throw Boom.forbidden(`You do not have adequate privileges to reindex this index.`);
+        }
+
         const existingOp = await reindexService.findReindexOperation(indexName);
 
         // If the reindexOp already exists and it's paused, resume it. Otherwise create a new one.
@@ -108,12 +112,17 @@ export function registerReindexIndicesRoutes(
       const reindexService = reindexServiceFactory(callCluster, reindexActions);
 
       try {
+        const hasRequiredPrivileges = await reindexService.hasRequiredPrivileges(indexName);
         const reindexOp = await reindexService.findReindexOperation(indexName);
-        const reindexWarnings = await reindexService.detectReindexWarnings(indexName);
+        // If the user doesn't have privileges than querying for warnings is going to fail.
+        const warnings = hasRequiredPrivileges
+          ? await reindexService.detectReindexWarnings(indexName)
+          : [];
 
         return {
-          warnings: reindexWarnings,
           reindexOp: reindexOp ? reindexOp.attributes : null,
+          warnings,
+          hasRequiredPrivileges,
         };
       } catch (e) {
         if (!e.isBoom) {

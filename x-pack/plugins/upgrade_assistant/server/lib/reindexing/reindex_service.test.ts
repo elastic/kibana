@@ -45,6 +45,78 @@ describe('reindexService', () => {
     service = reindexServiceFactory(callCluster, actions);
   });
 
+  describe('hasRequiredPrivileges', () => {
+    it('calls security API with basic requirements', async () => {
+      callCluster.mockResolvedValueOnce({ has_all_requested: true });
+
+      const hasRequired = await service.hasRequiredPrivileges('anIndex');
+      expect(hasRequired).toBe(true);
+      expect(callCluster).toHaveBeenCalledWith('transport.request', {
+        path: '/_xpack/security/user/_has_privileges',
+        method: 'POST',
+        body: {
+          cluster: ['manage'],
+          index: [
+            {
+              names: [`anIndex*`],
+              privileges: ['all'],
+            },
+            {
+              names: ['.tasks'],
+              privileges: ['read', 'delete'],
+            },
+          ],
+        },
+      });
+    });
+
+    it('includes manage_ml for ML indices', async () => {
+      callCluster.mockResolvedValueOnce({ has_all_requested: true });
+
+      await service.hasRequiredPrivileges('.ml-anomalies');
+      expect(callCluster).toHaveBeenCalledWith('transport.request', {
+        path: '/_xpack/security/user/_has_privileges',
+        method: 'POST',
+        body: {
+          cluster: ['manage', 'manage_ml'],
+          index: [
+            {
+              names: [`.ml-anomalies*`],
+              privileges: ['all'],
+            },
+            {
+              names: ['.tasks'],
+              privileges: ['read', 'delete'],
+            },
+          ],
+        },
+      });
+    });
+
+    it('includes manage_watcher for watcher indices', async () => {
+      callCluster.mockResolvedValueOnce({ has_all_requested: true });
+
+      await service.hasRequiredPrivileges('.watches');
+      expect(callCluster).toHaveBeenCalledWith('transport.request', {
+        path: '/_xpack/security/user/_has_privileges',
+        method: 'POST',
+        body: {
+          cluster: ['manage', 'manage_watcher'],
+          index: [
+            {
+              names: [`.watches*`],
+              privileges: ['all'],
+            },
+            {
+              names: ['.tasks'],
+              privileges: ['read', 'delete'],
+            },
+          ],
+        },
+      });
+    });
+  });
+
   describe('detectReindexWarnings', () => {
     it('fetches reindex warnings from flat settings', async () => {
       actions.getFlatSettings.mockResolvedValueOnce({

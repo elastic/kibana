@@ -7,6 +7,7 @@
 import { Server } from 'hapi';
 
 const mockReindexService = {
+  hasRequiredPrivileges: jest.fn(),
   detectReindexWarnings: jest.fn(),
   createReindexOperation: jest.fn(),
   findAllInProgressOperations: jest.fn(),
@@ -35,7 +36,7 @@ import { registerReindexIndicesRoutes } from './reindex_indices';
  * to ensure they're wired up to the lib functions correctly. Business logic is tested
  * more thoroughly in the es_migration_apis test.
  */
-describe('reindex template API', () => {
+describe('reindex API', () => {
   const server = new Server();
   server.plugins = {
     elasticsearch: {
@@ -55,6 +56,7 @@ describe('reindex template API', () => {
   registerReindexIndicesRoutes(server, worker, credentialStore);
 
   beforeEach(() => {
+    mockReindexService.hasRequiredPrivileges.mockResolvedValue(true);
     mockReindexService.detectReindexWarnings.mockReset();
     mockReindexService.createReindexOperation.mockReset();
     mockReindexService.findAllInProgressOperations.mockReset();
@@ -102,7 +104,8 @@ describe('reindex template API', () => {
 
       expect(resp.statusCode).toEqual(200);
       const data = JSON.parse(resp.payload);
-      expect(data).toEqual({ warnings: null, reindexOp: null });
+      expect(data.reindexOp).toBeNull();
+      expect(data.warnings).toBeNull();
     });
   });
 
@@ -177,6 +180,17 @@ describe('reindex template API', () => {
       expect(resp.statusCode).toEqual(200);
       const data = JSON.parse(resp.payload);
       expect(data).toEqual({ indexName: 'theIndex', status: ReindexStatus.inProgress });
+    });
+
+    it('returns a 403 if required privileges fails', async () => {
+      mockReindexService.hasRequiredPrivileges.mockResolvedValueOnce(false);
+
+      const resp = await server.inject({
+        method: 'POST',
+        url: '/api/upgrade_assistant/reindex/theIndex',
+      });
+
+      expect(resp.statusCode).toEqual(403);
     });
   });
 

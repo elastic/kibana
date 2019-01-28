@@ -20,6 +20,12 @@ const VERSION_REGEX = new RegExp(/^([1-9]+)\.([0-9]+)\.([0-9]+)/);
 
 export interface ReindexService {
   /**
+   * Checks whether or not the user has proper privileges required to reindex this index.
+   * @param indexName
+   */
+  hasRequiredPrivileges(indexName: string): Promise<boolean>;
+
+  /**
    * Checks an index's settings and mappings to flag potential issues during reindex.
    * Resolves to null if index does not exist.
    * @param indexName
@@ -369,6 +375,38 @@ export const reindexServiceFactory = (
   // ------ The service itself
 
   return {
+    async hasRequiredPrivileges(indexName: string) {
+      const body = {
+        cluster: ['manage'],
+        index: [
+          {
+            names: [`${indexName}*`],
+            privileges: ['all'],
+          },
+          {
+            names: ['.tasks'],
+            privileges: ['read', 'delete'],
+          },
+        ],
+      } as any;
+
+      if (isMlIndex(indexName)) {
+        body.cluster = [...body.cluster, 'manage_ml'];
+      }
+
+      if (isWatcherIndex(indexName)) {
+        body.cluster = [...body.cluster, 'manage_watcher'];
+      }
+
+      const resp = await callCluster('transport.request', {
+        path: '/_xpack/security/user/_has_privileges',
+        method: 'POST',
+        body,
+      });
+
+      return resp.has_all_requested;
+    },
+
     async detectReindexWarnings(indexName: string) {
       const flatSettings = await actions.getFlatSettings(indexName);
       if (!flatSettings) {
