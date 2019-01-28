@@ -259,6 +259,7 @@ export const RemoteClusterList = injectI18n(
       const { isLoading, clusters, clusterLoadError } = this.props;
       const isEmpty = !isLoading && !clusters.length;
       const isAuthorized = !clusterLoadError || clusterLoadError.status !== 403;
+      const isHeaderVisible = clusterLoadError || !isEmpty;
 
       let content;
 
@@ -279,7 +280,7 @@ export const RemoteClusterList = injectI18n(
       return (
         <EuiPageBody>
           <EuiPageContent>
-            {!isEmpty && this.getHeaderSection(isAuthorized)}
+            {(isHeaderVisible) && this.getHeaderSection(isAuthorized)}
             {content}
             {this.renderBlockingAction()}
           </EuiPageContent>

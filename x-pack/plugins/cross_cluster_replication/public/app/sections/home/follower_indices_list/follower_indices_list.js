@@ -129,8 +129,8 @@ export const FollowerIndicesList = injectI18n(
       );
     }
 
-    renderContent() {
-      const { followerIndices, apiStatus, apiError, isAuthorized, intl } = this.props;
+    renderContent(isEmpty) {
+      const { apiError, isAuthorized, intl } = this.props;
 
       if (!isAuthorized) {
         return (
@@ -151,7 +151,7 @@ export const FollowerIndicesList = injectI18n(
         return <SectionError title={title} error={apiError} />;
       }
 
-      if (apiStatus === API_STATUS.IDLE && !followerIndices.length) {
+      if (isEmpty) {
         return this.renderEmpty();
       }
 
@@ -226,10 +226,12 @@ export const FollowerIndicesList = injectI18n(
     }
 
     render() {
+      const { followerIndices, apiStatus } = this.props;
+      const isEmpty = apiStatus === API_STATUS.IDLE && !followerIndices.length;
       return (
         <Fragment>
-          {this.renderHeader()}
-          {this.renderContent()}
+          {!isEmpty && this.renderHeader()}
+          {this.renderContent(isEmpty)}
         </Fragment>
       );
     }

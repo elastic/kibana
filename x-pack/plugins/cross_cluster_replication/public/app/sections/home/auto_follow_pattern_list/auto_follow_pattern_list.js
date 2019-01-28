@@ -132,8 +132,8 @@ export const AutoFollowPatternList = injectI18n(
       );
     }
 
-    renderContent() {
-      const { autoFollowPatterns, apiStatus, apiError, isAuthorized, intl } = this.props;
+    renderContent(isEmpty) {
+      const { apiError, isAuthorized, intl } = this.props;
       if (!isAuthorized) {
         return (
           <SectionUnauthorized>
@@ -153,7 +153,7 @@ export const AutoFollowPatternList = injectI18n(
         return <SectionError title={title} error={apiError} />;
       }
 
-      if (apiStatus === API_STATUS.IDLE && !autoFollowPatterns.length) {
+      if (isEmpty) {
         return this.renderEmpty();
       }
 
@@ -228,10 +228,13 @@ export const AutoFollowPatternList = injectI18n(
     }
 
     render() {
+      const { autoFollowPatterns, apiStatus,  } = this.props;
+      const isEmpty = apiStatus === API_STATUS.IDLE && !autoFollowPatterns.length;
+
       return (
         <Fragment>
-          {this.renderHeader()}
-          {this.renderContent()}
+          {!isEmpty && this.renderHeader()}
+          {this.renderContent(isEmpty)}
         </Fragment>
       );
     }
