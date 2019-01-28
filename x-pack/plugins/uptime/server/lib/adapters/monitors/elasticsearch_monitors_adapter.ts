@@ -86,7 +86,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
               max_total: { max: { field: 'http.rtt.total.us' } },
               max_write_request: { max: { field: 'http.rtt.write_request.us' } },
               max_tcp_rtt: { max: { field: 'tcp.rtt.connect.us' } },
-              status: { terms: { field: 'monitor.status' } },
+              status: { terms: { field: 'monitor.status', size: 2, shard_size: 2 } },
               max_duration: { max: { field: 'monitor.duration.us' } },
               min_duration: { min: { field: 'monitor.duration.us' } },
               avg_duration: { avg: { field: 'monitor.duration.us' } },
