@@ -37,7 +37,6 @@ export default function ({ getService }) {
     function historyDocs() {
       return es.search({
         index: testHistoryIndex,
-        type: '_doc',
         q: 'type:task',
       }).then(result => result.hits.hits);
     }
