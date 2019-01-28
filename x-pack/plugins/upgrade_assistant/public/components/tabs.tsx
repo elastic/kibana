@@ -153,7 +153,7 @@ export class UpgradeAssistantTabsUI extends React.Component<
   }
 
   private sendTelemetryInfo(tabName: string) {
-    // In case we don't have any date yet, we wanna to ignore the
+    // In case we don't have any data yet, we wanna to ignore the
     // telemetry info update
     if (this.state.loadingState !== LoadingState.Success) {
       return;
