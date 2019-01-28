@@ -4,6 +4,7 @@ exports[`render correctly with empty query string 1`] = `
 <CodeQueryBar
   appName="mockapp"
   disableAutoFocus={false}
+  onSearchScopeChanged={[Function]}
   onSelect={[Function]}
   onSubmit={[Function]}
   query=""
@@ -16,20 +17,488 @@ exports[`render correctly with empty query string 1`] = `
       "repoScopes": Array [],
     }
   }
+  searchScope="default"
   suggestionProviders={Array []}
 >
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
     direction="row"
-    gutterSize="s"
+    gutterSize="none"
     justifyContent="flexStart"
     responsive={false}
     wrap={false}
   >
     <div
-      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow"
+      className="euiFlexGroup euiFlexGroup--directionRow"
     >
+      <EuiFlexItem
+        component="div"
+        grow={false}
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <ScopeSelector
+            onScopeChanged={[Function]}
+            scope="default"
+          >
+            <EuiSuperSelect
+              compressed={false}
+              fullWidth={false}
+              hasDividers={false}
+              onChange={[Function]}
+              options={
+                Array [
+                  Object {
+                    "inputDisplay": <div>
+                      <EuiText
+                        grow={true}
+                        size="s"
+                      >
+                        <EuiIcon
+                          size="m"
+                          type="bullseye"
+                        />
+                         
+                        Search Everything
+                      </EuiText>
+                    </div>,
+                    "value": "default",
+                  },
+                  Object {
+                    "inputDisplay": <EuiText
+                      grow={true}
+                      size="s"
+                    >
+                      <EuiIcon
+                        size="m"
+                        type="crosshairs"
+                      />
+                       
+                      Search Symbols
+                    </EuiText>,
+                    "value": "symbol",
+                  },
+                  Object {
+                    "inputDisplay": <EuiText
+                      grow={true}
+                      size="s"
+                    >
+                      <EuiIcon
+                        size="m"
+                        type="branch"
+                      />
+                       
+                      Search Repositories
+                    </EuiText>,
+                    "value": "repository",
+                  },
+                  Object {
+                    "inputDisplay": <EuiText
+                      grow={true}
+                      size="s"
+                    >
+                      <EuiIcon
+                        size="m"
+                        type="document"
+                      />
+                       
+                      Search Files
+                    </EuiText>,
+                    "value": "file",
+                  },
+                ]
+              }
+              style={
+                Object {
+                  "width": "14.285714285714286rem",
+                }
+              }
+              valueOfSelected="default"
+            >
+              <EuiPopover
+                anchorClassName="euiSuperSelect__popoverAnchor"
+                anchorPosition="downCenter"
+                button={
+                  <EuiSuperSelectControl
+                    className=""
+                    compressed={false}
+                    fullWidth={false}
+                    isLoading={false}
+                    onChange={[Function]}
+                    onClick={[Function]}
+                    onKeyDown={[Function]}
+                    options={
+                      Array [
+                        Object {
+                          "inputDisplay": <div>
+                            <EuiText
+                              grow={true}
+                              size="s"
+                            >
+                              <EuiIcon
+                                size="m"
+                                type="bullseye"
+                              />
+                               
+                              Search Everything
+                            </EuiText>
+                          </div>,
+                          "value": "default",
+                        },
+                        Object {
+                          "inputDisplay": <EuiText
+                            grow={true}
+                            size="s"
+                          >
+                            <EuiIcon
+                              size="m"
+                              type="crosshairs"
+                            />
+                             
+                            Search Symbols
+                          </EuiText>,
+                          "value": "symbol",
+                        },
+                        Object {
+                          "inputDisplay": <EuiText
+                            grow={true}
+                            size="s"
+                          >
+                            <EuiIcon
+                              size="m"
+                              type="branch"
+                            />
+                             
+                            Search Repositories
+                          </EuiText>,
+                          "value": "repository",
+                        },
+                        Object {
+                          "inputDisplay": <EuiText
+                            grow={true}
+                            size="s"
+                          >
+                            <EuiIcon
+                              size="m"
+                              type="document"
+                            />
+                             
+                            Search Files
+                          </EuiText>,
+                          "value": "file",
+                        },
+                      ]
+                    }
+                    style={
+                      Object {
+                        "width": "14.285714285714286rem",
+                      }
+                    }
+                    value="default"
+                  />
+                }
+                className="euiSuperSelect"
+                closePopover={[Function]}
+                hasArrow={false}
+                isOpen={false}
+                ownFocus={false}
+                panelClassName="euiSuperSelect__popoverPanel"
+                panelPaddingSize="none"
+                popoverRef={[Function]}
+              >
+                <EuiOutsideClickDetector
+                  onOutsideClick={[Function]}
+                >
+                  <div
+                    className="euiPopover euiPopover--anchorDownCenter euiSuperSelect"
+                    onClick={[Function]}
+                    onKeyDown={[Function]}
+                  >
+                    <div
+                      className="euiPopover__anchor euiSuperSelect__popoverAnchor"
+                    >
+                      <EuiSuperSelectControl
+                        className=""
+                        compressed={false}
+                        fullWidth={false}
+                        isLoading={false}
+                        onChange={[Function]}
+                        onClick={[Function]}
+                        onKeyDown={[Function]}
+                        options={
+                          Array [
+                            Object {
+                              "inputDisplay": <div>
+                                <EuiText
+                                  grow={true}
+                                  size="s"
+                                >
+                                  <EuiIcon
+                                    size="m"
+                                    type="bullseye"
+                                  />
+                                   
+                                  Search Everything
+                                </EuiText>
+                              </div>,
+                              "value": "default",
+                            },
+                            Object {
+                              "inputDisplay": <EuiText
+                                grow={true}
+                                size="s"
+                              >
+                                <EuiIcon
+                                  size="m"
+                                  type="crosshairs"
+                                />
+                                 
+                                Search Symbols
+                              </EuiText>,
+                              "value": "symbol",
+                            },
+                            Object {
+                              "inputDisplay": <EuiText
+                                grow={true}
+                                size="s"
+                              >
+                                <EuiIcon
+                                  size="m"
+                                  type="branch"
+                                />
+                                 
+                                Search Repositories
+                              </EuiText>,
+                              "value": "repository",
+                            },
+                            Object {
+                              "inputDisplay": <EuiText
+                                grow={true}
+                                size="s"
+                              >
+                                <EuiIcon
+                                  size="m"
+                                  type="document"
+                                />
+                                 
+                                Search Files
+                              </EuiText>,
+                              "value": "file",
+                            },
+                          ]
+                        }
+                        style={
+                          Object {
+                            "width": "14.285714285714286rem",
+                          }
+                        }
+                        value="default"
+                      >
+                        <input
+                          type="hidden"
+                          value="default"
+                        />
+                        <EuiFormControlLayout
+                          compressed={false}
+                          fullWidth={false}
+                          icon={
+                            Object {
+                              "side": "right",
+                              "type": "arrowDown",
+                            }
+                          }
+                          isLoading={false}
+                        >
+                          <div
+                            className="euiFormControlLayout"
+                          >
+                            <div
+                              className="euiFormControlLayout__childrenWrapper"
+                            >
+                              <EuiScreenReaderOnly>
+                                <span
+                                  className="euiScreenReaderOnly"
+                                  id="0.i"
+                                >
+                                  Select an option: 
+                                  <div>
+                                    <EuiText
+                                      grow={true}
+                                      size="s"
+                                    >
+                                      <div
+                                        className="euiText euiText--small"
+                                      >
+                                        <EuiIcon
+                                          size="m"
+                                          type="bullseye"
+                                        >
+                                          <bullseye
+                                            className="euiIcon euiIcon--medium"
+                                            focusable="false"
+                                            height="16"
+                                            style={null}
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                          >
+                                            <svg
+                                              className="euiIcon euiIcon--medium"
+                                              focusable="false"
+                                              height="16"
+                                              style={null}
+                                              viewBox="0 0 16 16"
+                                              width="16"
+                                              xmlns="http://www.w3.org/2000/svg"
+                                            >
+                                              <path
+                                                d="M8 14A6 6 0 1 0 8 2a6 6 0 0 0 0 12zm0 1A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0-3a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0-1a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0-2a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"
+                                              />
+                                            </svg>
+                                          </bullseye>
+                                        </EuiIcon>
+                                         
+                                        Search Everything
+                                      </div>
+                                    </EuiText>
+                                  </div>
+                                  , is selected
+                                </span>
+                              </EuiScreenReaderOnly>
+                              <button
+                                aria-haspopup="true"
+                                aria-labelledby="undefined 0.i"
+                                className="euiSuperSelectControl"
+                                onChange={[Function]}
+                                onClick={[Function]}
+                                onKeyDown={[Function]}
+                                role="option"
+                                style={
+                                  Object {
+                                    "width": "14.285714285714286rem",
+                                  }
+                                }
+                                type="button"
+                              >
+                                <div>
+                                  <EuiText
+                                    grow={true}
+                                    size="s"
+                                  >
+                                    <div
+                                      className="euiText euiText--small"
+                                    >
+                                      <EuiIcon
+                                        size="m"
+                                        type="bullseye"
+                                      >
+                                        <bullseye
+                                          className="euiIcon euiIcon--medium"
+                                          focusable="false"
+                                          height="16"
+                                          style={null}
+                                          viewBox="0 0 16 16"
+                                          width="16"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <svg
+                                            className="euiIcon euiIcon--medium"
+                                            focusable="false"
+                                            height="16"
+                                            style={null}
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                          >
+                                            <path
+                                              d="M8 14A6 6 0 1 0 8 2a6 6 0 0 0 0 12zm0 1A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0-3a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0-1a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0-2a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"
+                                            />
+                                          </svg>
+                                        </bullseye>
+                                      </EuiIcon>
+                                       
+                                      Search Everything
+                                    </div>
+                                  </EuiText>
+                                </div>
+                              </button>
+                              <EuiFormControlLayoutIcons
+                                icon={
+                                  Object {
+                                    "side": "right",
+                                    "type": "arrowDown",
+                                  }
+                                }
+                                isLoading={false}
+                              >
+                                <div
+                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                >
+                                  <EuiFormControlLayoutCustomIcon
+                                    type="arrowDown"
+                                  >
+                                    <span
+                                      className="euiFormControlLayoutCustomIcon"
+                                    >
+                                      <EuiIcon
+                                        aria-hidden="true"
+                                        className="euiFormControlLayoutCustomIcon__icon"
+                                        size="m"
+                                        type="arrowDown"
+                                      >
+                                        <arrowDown
+                                          aria-hidden="true"
+                                          className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                          focusable="false"
+                                          height="16"
+                                          style={null}
+                                          viewBox="0 0 16 16"
+                                          width="16"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          xmlnsXlink="http://www.w3.org/1999/xlink"
+                                        >
+                                          <svg
+                                            aria-hidden="true"
+                                            className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                            focusable="false"
+                                            height="16"
+                                            style={null}
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            xmlnsXlink="http://www.w3.org/1999/xlink"
+                                          >
+                                            <defs>
+                                              <path
+                                                d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                                                id="arrow_down-a"
+                                              />
+                                            </defs>
+                                            <use
+                                              fillRule="nonzero"
+                                              xlinkHref="#arrow_down-a"
+                                            />
+                                          </svg>
+                                        </arrowDown>
+                                      </EuiIcon>
+                                    </span>
+                                  </EuiFormControlLayoutCustomIcon>
+                                </div>
+                              </EuiFormControlLayoutIcons>
+                            </div>
+                          </div>
+                        </EuiFormControlLayout>
+                      </EuiSuperSelectControl>
+                    </div>
+                  </div>
+                </EuiOutsideClickDetector>
+              </EuiPopover>
+            </EuiSuperSelect>
+          </ScopeSelector>
+        </div>
+      </EuiFlexItem>
       <EuiFlexItem
         component="div"
         grow={true}
@@ -75,14 +544,13 @@ exports[`render correctly with empty query string 1`] = `
                       compressed={false}
                       data-test-subj="queryInput"
                       fullWidth={true}
-                      icon="search"
                       inputRef={[Function]}
                       isLoading={false}
                       onChange={[Function]}
                       onClick={[Function]}
                       onKeyDown={[Function]}
                       onKeyUp={[Function]}
-                      placeholder="Search... (e.g. java.lang.String)"
+                      placeholder="Type to find anything"
                       role="textbox"
                       spellCheck={false}
                       type="text"
@@ -91,7 +559,6 @@ exports[`render correctly with empty query string 1`] = `
                       <EuiFormControlLayout
                         compressed={false}
                         fullWidth={true}
-                        icon="search"
                         isLoading={false}
                       >
                         <div
@@ -108,13 +575,13 @@ exports[`render correctly with empty query string 1`] = `
                                 aria-label="Search input"
                                 autoComplete="off"
                                 autoFocus={true}
-                                className="euiFieldText kuiLocalSearchAssistedInput__input euiFieldText--withIcon euiFieldText--fullWidth"
+                                className="euiFieldText kuiLocalSearchAssistedInput__input euiFieldText--fullWidth"
                                 data-test-subj="queryInput"
                                 onChange={[Function]}
                                 onClick={[Function]}
                                 onKeyDown={[Function]}
                                 onKeyUp={[Function]}
-                                placeholder="Search... (e.g. java.lang.String)"
+                                placeholder="Type to find anything"
                                 role="textbox"
                                 spellCheck={false}
                                 type="text"
@@ -122,62 +589,8 @@ exports[`render correctly with empty query string 1`] = `
                               />
                             </EuiValidatableControl>
                             <EuiFormControlLayoutIcons
-                              icon="search"
                               isLoading={false}
-                            >
-                              <div
-                                className="euiFormControlLayoutIcons"
-                              >
-                                <EuiFormControlLayoutCustomIcon
-                                  type="search"
-                                >
-                                  <span
-                                    className="euiFormControlLayoutCustomIcon"
-                                  >
-                                    <EuiIcon
-                                      aria-hidden="true"
-                                      className="euiFormControlLayoutCustomIcon__icon"
-                                      size="m"
-                                      type="search"
-                                    >
-                                      <search
-                                        aria-hidden="true"
-                                        className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
-                                        focusable="false"
-                                        height="16"
-                                        style={null}
-                                        viewBox="0 0 16 16"
-                                        width="16"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        xmlnsXlink="http://www.w3.org/1999/xlink"
-                                      >
-                                        <svg
-                                          aria-hidden="true"
-                                          className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
-                                          focusable="false"
-                                          height="16"
-                                          style={null}
-                                          viewBox="0 0 16 16"
-                                          width="16"
-                                          xmlns="http://www.w3.org/2000/svg"
-                                          xmlnsXlink="http://www.w3.org/1999/xlink"
-                                        >
-                                          <defs>
-                                            <path
-                                              d="M11.271 11.978l3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738z"
-                                              id="search-a"
-                                            />
-                                          </defs>
-                                          <use
-                                            xlinkHref="#search-a"
-                                          />
-                                        </svg>
-                                      </search>
-                                    </EuiIcon>
-                                  </span>
-                                </EuiFormControlLayoutCustomIcon>
-                              </div>
-                            </EuiFormControlLayoutIcons>
+                            />
                           </div>
                         </div>
                       </EuiFormControlLayout>
@@ -291,6 +704,7 @@ exports[`render correctly with input query string changed 1`] = `
     <CodeQueryBar
       appName="mockapp"
       disableAutoFocus={false}
+      onSearchScopeChanged={[Function]}
       onSelect={[Function]}
       onSubmit={[Function]}
       query=""
@@ -303,6 +717,7 @@ exports[`render correctly with input query string changed 1`] = `
           "repoScopes": Array [],
         }
       }
+      searchScope="default"
       suggestionProviders={
         Array [
           Object {
@@ -321,14 +736,481 @@ exports[`render correctly with input query string changed 1`] = `
         alignItems="stretch"
         component="div"
         direction="row"
-        gutterSize="s"
+        gutterSize="none"
         justifyContent="flexStart"
         responsive={false}
         wrap={false}
       >
         <div
-          className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow"
+          className="euiFlexGroup euiFlexGroup--directionRow"
         >
+          <EuiFlexItem
+            component="div"
+            grow={false}
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <ScopeSelector
+                onScopeChanged={[Function]}
+                scope="default"
+              >
+                <EuiSuperSelect
+                  compressed={false}
+                  fullWidth={false}
+                  hasDividers={false}
+                  onChange={[Function]}
+                  options={
+                    Array [
+                      Object {
+                        "inputDisplay": <div>
+                          <EuiText
+                            grow={true}
+                            size="s"
+                          >
+                            <EuiIcon
+                              size="m"
+                              type="bullseye"
+                            />
+                             
+                            Search Everything
+                          </EuiText>
+                        </div>,
+                        "value": "default",
+                      },
+                      Object {
+                        "inputDisplay": <EuiText
+                          grow={true}
+                          size="s"
+                        >
+                          <EuiIcon
+                            size="m"
+                            type="crosshairs"
+                          />
+                           
+                          Search Symbols
+                        </EuiText>,
+                        "value": "symbol",
+                      },
+                      Object {
+                        "inputDisplay": <EuiText
+                          grow={true}
+                          size="s"
+                        >
+                          <EuiIcon
+                            size="m"
+                            type="branch"
+                          />
+                           
+                          Search Repositories
+                        </EuiText>,
+                        "value": "repository",
+                      },
+                      Object {
+                        "inputDisplay": <EuiText
+                          grow={true}
+                          size="s"
+                        >
+                          <EuiIcon
+                            size="m"
+                            type="document"
+                          />
+                           
+                          Search Files
+                        </EuiText>,
+                        "value": "file",
+                      },
+                    ]
+                  }
+                  style={
+                    Object {
+                      "width": "14.285714285714286rem",
+                    }
+                  }
+                  valueOfSelected="default"
+                >
+                  <EuiPopover
+                    anchorClassName="euiSuperSelect__popoverAnchor"
+                    anchorPosition="downCenter"
+                    button={
+                      <EuiSuperSelectControl
+                        className=""
+                        compressed={false}
+                        fullWidth={false}
+                        isLoading={false}
+                        onChange={[Function]}
+                        onClick={[Function]}
+                        onKeyDown={[Function]}
+                        options={
+                          Array [
+                            Object {
+                              "inputDisplay": <div>
+                                <EuiText
+                                  grow={true}
+                                  size="s"
+                                >
+                                  <EuiIcon
+                                    size="m"
+                                    type="bullseye"
+                                  />
+                                   
+                                  Search Everything
+                                </EuiText>
+                              </div>,
+                              "value": "default",
+                            },
+                            Object {
+                              "inputDisplay": <EuiText
+                                grow={true}
+                                size="s"
+                              >
+                                <EuiIcon
+                                  size="m"
+                                  type="crosshairs"
+                                />
+                                 
+                                Search Symbols
+                              </EuiText>,
+                              "value": "symbol",
+                            },
+                            Object {
+                              "inputDisplay": <EuiText
+                                grow={true}
+                                size="s"
+                              >
+                                <EuiIcon
+                                  size="m"
+                                  type="branch"
+                                />
+                                 
+                                Search Repositories
+                              </EuiText>,
+                              "value": "repository",
+                            },
+                            Object {
+                              "inputDisplay": <EuiText
+                                grow={true}
+                                size="s"
+                              >
+                                <EuiIcon
+                                  size="m"
+                                  type="document"
+                                />
+                                 
+                                Search Files
+                              </EuiText>,
+                              "value": "file",
+                            },
+                          ]
+                        }
+                        style={
+                          Object {
+                            "width": "14.285714285714286rem",
+                          }
+                        }
+                        value="default"
+                      />
+                    }
+                    className="euiSuperSelect"
+                    closePopover={[Function]}
+                    hasArrow={false}
+                    isOpen={false}
+                    ownFocus={false}
+                    panelClassName="euiSuperSelect__popoverPanel"
+                    panelPaddingSize="none"
+                    popoverRef={[Function]}
+                  >
+                    <EuiOutsideClickDetector
+                      onOutsideClick={[Function]}
+                    >
+                      <div
+                        className="euiPopover euiPopover--anchorDownCenter euiSuperSelect"
+                        onClick={[Function]}
+                        onKeyDown={[Function]}
+                      >
+                        <div
+                          className="euiPopover__anchor euiSuperSelect__popoverAnchor"
+                        >
+                          <EuiSuperSelectControl
+                            className=""
+                            compressed={false}
+                            fullWidth={false}
+                            isLoading={false}
+                            onChange={[Function]}
+                            onClick={[Function]}
+                            onKeyDown={[Function]}
+                            options={
+                              Array [
+                                Object {
+                                  "inputDisplay": <div>
+                                    <EuiText
+                                      grow={true}
+                                      size="s"
+                                    >
+                                      <EuiIcon
+                                        size="m"
+                                        type="bullseye"
+                                      />
+                                       
+                                      Search Everything
+                                    </EuiText>
+                                  </div>,
+                                  "value": "default",
+                                },
+                                Object {
+                                  "inputDisplay": <EuiText
+                                    grow={true}
+                                    size="s"
+                                  >
+                                    <EuiIcon
+                                      size="m"
+                                      type="crosshairs"
+                                    />
+                                     
+                                    Search Symbols
+                                  </EuiText>,
+                                  "value": "symbol",
+                                },
+                                Object {
+                                  "inputDisplay": <EuiText
+                                    grow={true}
+                                    size="s"
+                                  >
+                                    <EuiIcon
+                                      size="m"
+                                      type="branch"
+                                    />
+                                     
+                                    Search Repositories
+                                  </EuiText>,
+                                  "value": "repository",
+                                },
+                                Object {
+                                  "inputDisplay": <EuiText
+                                    grow={true}
+                                    size="s"
+                                  >
+                                    <EuiIcon
+                                      size="m"
+                                      type="document"
+                                    />
+                                     
+                                    Search Files
+                                  </EuiText>,
+                                  "value": "file",
+                                },
+                              ]
+                            }
+                            style={
+                              Object {
+                                "width": "14.285714285714286rem",
+                              }
+                            }
+                            value="default"
+                          >
+                            <input
+                              type="hidden"
+                              value="default"
+                            />
+                            <EuiFormControlLayout
+                              compressed={false}
+                              fullWidth={false}
+                              icon={
+                                Object {
+                                  "side": "right",
+                                  "type": "arrowDown",
+                                }
+                              }
+                              isLoading={false}
+                            >
+                              <div
+                                className="euiFormControlLayout"
+                              >
+                                <div
+                                  className="euiFormControlLayout__childrenWrapper"
+                                >
+                                  <EuiScreenReaderOnly>
+                                    <span
+                                      className="euiScreenReaderOnly"
+                                      id="0.i"
+                                    >
+                                      Select an option: 
+                                      <div>
+                                        <EuiText
+                                          grow={true}
+                                          size="s"
+                                        >
+                                          <div
+                                            className="euiText euiText--small"
+                                          >
+                                            <EuiIcon
+                                              size="m"
+                                              type="bullseye"
+                                            >
+                                              <bullseye
+                                                className="euiIcon euiIcon--medium"
+                                                focusable="false"
+                                                height="16"
+                                                style={null}
+                                                viewBox="0 0 16 16"
+                                                width="16"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                              >
+                                                <svg
+                                                  className="euiIcon euiIcon--medium"
+                                                  focusable="false"
+                                                  height="16"
+                                                  style={null}
+                                                  viewBox="0 0 16 16"
+                                                  width="16"
+                                                  xmlns="http://www.w3.org/2000/svg"
+                                                >
+                                                  <path
+                                                    d="M8 14A6 6 0 1 0 8 2a6 6 0 0 0 0 12zm0 1A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0-3a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0-1a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0-2a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"
+                                                  />
+                                                </svg>
+                                              </bullseye>
+                                            </EuiIcon>
+                                             
+                                            Search Everything
+                                          </div>
+                                        </EuiText>
+                                      </div>
+                                      , is selected
+                                    </span>
+                                  </EuiScreenReaderOnly>
+                                  <button
+                                    aria-haspopup="true"
+                                    aria-labelledby="undefined 0.i"
+                                    className="euiSuperSelectControl"
+                                    onChange={[Function]}
+                                    onClick={[Function]}
+                                    onKeyDown={[Function]}
+                                    role="option"
+                                    style={
+                                      Object {
+                                        "width": "14.285714285714286rem",
+                                      }
+                                    }
+                                    type="button"
+                                  >
+                                    <div>
+                                      <EuiText
+                                        grow={true}
+                                        size="s"
+                                      >
+                                        <div
+                                          className="euiText euiText--small"
+                                        >
+                                          <EuiIcon
+                                            size="m"
+                                            type="bullseye"
+                                          >
+                                            <bullseye
+                                              className="euiIcon euiIcon--medium"
+                                              focusable="false"
+                                              height="16"
+                                              style={null}
+                                              viewBox="0 0 16 16"
+                                              width="16"
+                                              xmlns="http://www.w3.org/2000/svg"
+                                            >
+                                              <svg
+                                                className="euiIcon euiIcon--medium"
+                                                focusable="false"
+                                                height="16"
+                                                style={null}
+                                                viewBox="0 0 16 16"
+                                                width="16"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                              >
+                                                <path
+                                                  d="M8 14A6 6 0 1 0 8 2a6 6 0 0 0 0 12zm0 1A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0-3a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0-1a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0-2a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"
+                                                />
+                                              </svg>
+                                            </bullseye>
+                                          </EuiIcon>
+                                           
+                                          Search Everything
+                                        </div>
+                                      </EuiText>
+                                    </div>
+                                  </button>
+                                  <EuiFormControlLayoutIcons
+                                    icon={
+                                      Object {
+                                        "side": "right",
+                                        "type": "arrowDown",
+                                      }
+                                    }
+                                    isLoading={false}
+                                  >
+                                    <div
+                                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                    >
+                                      <EuiFormControlLayoutCustomIcon
+                                        type="arrowDown"
+                                      >
+                                        <span
+                                          className="euiFormControlLayoutCustomIcon"
+                                        >
+                                          <EuiIcon
+                                            aria-hidden="true"
+                                            className="euiFormControlLayoutCustomIcon__icon"
+                                            size="m"
+                                            type="arrowDown"
+                                          >
+                                            <arrowDown
+                                              aria-hidden="true"
+                                              className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                              focusable="false"
+                                              height="16"
+                                              style={null}
+                                              viewBox="0 0 16 16"
+                                              width="16"
+                                              xmlns="http://www.w3.org/2000/svg"
+                                              xmlnsXlink="http://www.w3.org/1999/xlink"
+                                            >
+                                              <svg
+                                                aria-hidden="true"
+                                                className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                                focusable="false"
+                                                height="16"
+                                                style={null}
+                                                viewBox="0 0 16 16"
+                                                width="16"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                xmlnsXlink="http://www.w3.org/1999/xlink"
+                                              >
+                                                <defs>
+                                                  <path
+                                                    d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                                                    id="arrow_down-a"
+                                                  />
+                                                </defs>
+                                                <use
+                                                  fillRule="nonzero"
+                                                  xlinkHref="#arrow_down-a"
+                                                />
+                                              </svg>
+                                            </arrowDown>
+                                          </EuiIcon>
+                                        </span>
+                                      </EuiFormControlLayoutCustomIcon>
+                                    </div>
+                                  </EuiFormControlLayoutIcons>
+                                </div>
+                              </div>
+                            </EuiFormControlLayout>
+                          </EuiSuperSelectControl>
+                        </div>
+                      </div>
+                    </EuiOutsideClickDetector>
+                  </EuiPopover>
+                </EuiSuperSelect>
+              </ScopeSelector>
+            </div>
+          </EuiFlexItem>
           <EuiFlexItem
             component="div"
             grow={true}
@@ -374,14 +1256,13 @@ exports[`render correctly with input query string changed 1`] = `
                           compressed={false}
                           data-test-subj="queryInput"
                           fullWidth={true}
-                          icon="search"
                           inputRef={[Function]}
                           isLoading={false}
                           onChange={[Function]}
                           onClick={[Function]}
                           onKeyDown={[Function]}
                           onKeyUp={[Function]}
-                          placeholder="Search... (e.g. java.lang.String)"
+                          placeholder="Type to find anything"
                           role="textbox"
                           spellCheck={false}
                           type="text"
@@ -390,7 +1271,6 @@ exports[`render correctly with input query string changed 1`] = `
                           <EuiFormControlLayout
                             compressed={false}
                             fullWidth={true}
-                            icon="search"
                             isLoading={false}
                           >
                             <div
@@ -407,13 +1287,13 @@ exports[`render correctly with input query string changed 1`] = `
                                     aria-label="Search input"
                                     autoComplete="off"
                                     autoFocus={true}
-                                    className="euiFieldText kuiLocalSearchAssistedInput__input euiFieldText--withIcon euiFieldText--fullWidth"
+                                    className="euiFieldText kuiLocalSearchAssistedInput__input euiFieldText--fullWidth"
                                     data-test-subj="queryInput"
                                     onChange={[Function]}
                                     onClick={[Function]}
                                     onKeyDown={[Function]}
                                     onKeyUp={[Function]}
-                                    placeholder="Search... (e.g. java.lang.String)"
+                                    placeholder="Type to find anything"
                                     role="textbox"
                                     spellCheck={false}
                                     type="text"
@@ -421,62 +1301,8 @@ exports[`render correctly with input query string changed 1`] = `
                                   />
                                 </EuiValidatableControl>
                                 <EuiFormControlLayoutIcons
-                                  icon="search"
                                   isLoading={false}
-                                >
-                                  <div
-                                    className="euiFormControlLayoutIcons"
-                                  >
-                                    <EuiFormControlLayoutCustomIcon
-                                      type="search"
-                                    >
-                                      <span
-                                        className="euiFormControlLayoutCustomIcon"
-                                      >
-                                        <EuiIcon
-                                          aria-hidden="true"
-                                          className="euiFormControlLayoutCustomIcon__icon"
-                                          size="m"
-                                          type="search"
-                                        >
-                                          <search
-                                            aria-hidden="true"
-                                            className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
-                                            focusable="false"
-                                            height="16"
-                                            style={null}
-                                            viewBox="0 0 16 16"
-                                            width="16"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            xmlnsXlink="http://www.w3.org/1999/xlink"
-                                          >
-                                            <svg
-                                              aria-hidden="true"
-                                              className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
-                                              focusable="false"
-                                              height="16"
-                                              style={null}
-                                              viewBox="0 0 16 16"
-                                              width="16"
-                                              xmlns="http://www.w3.org/2000/svg"
-                                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                                            >
-                                              <defs>
-                                                <path
-                                                  d="M11.271 11.978l3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738z"
-                                                  id="search-a"
-                                                />
-                                              </defs>
-                                              <use
-                                                xlinkHref="#search-a"
-                                              />
-                                            </svg>
-                                          </search>
-                                        </EuiIcon>
-                                      </span>
-                                    </EuiFormControlLayoutCustomIcon>
-                                  </div>
-                                </EuiFormControlLayoutIcons>
+                                />
                               </div>
                             </div>
                           </EuiFormControlLayout>

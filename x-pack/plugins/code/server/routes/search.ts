@@ -31,7 +31,7 @@ export function repositorySearchRoute(server: hapi.Server, log: Logger) {
         const res = await repoSearchClient.search(searchReq);
         return res;
       } catch (error) {
-        return Boom.internal(`Search Exception ${error}`);
+        return Boom.internal(`Search Exception`);
       }
     },
   });
@@ -54,7 +54,7 @@ export function repositorySearchRoute(server: hapi.Server, log: Logger) {
         const res = await repoSearchClient.suggest(searchReq);
         return res;
       } catch (error) {
-        return Boom.internal(`Search Exception ${error}`);
+        return Boom.internal(`Search Exception`);
       }
     },
   });
@@ -81,7 +81,7 @@ export function documentSearchRoute(server: hapi.Server, log: Logger) {
         const res = await docSearchClient.search(searchReq);
         return res;
       } catch (error) {
-        return Boom.internal(`Search Exception ${error}`);
+        return Boom.internal(`Search Exception`);
       }
     },
   });
@@ -104,7 +104,7 @@ export function documentSearchRoute(server: hapi.Server, log: Logger) {
         const res = await docSearchClient.suggest(searchReq);
         return res;
       } catch (error) {
-        return Boom.internal(`Search Exception ${error}`);
+        return Boom.internal(`Search Exception`);
       }
     },
   });
@@ -126,7 +126,7 @@ export function symbolSearchRoute(server: hapi.Server, log: Logger) {
       const res = await symbolSearchClient.suggest(searchReq);
       return res;
     } catch (error) {
-      return Boom.internal(`Search Exception ${error}`);
+      return Boom.internal(`Search Exception`);
     }
   };
 

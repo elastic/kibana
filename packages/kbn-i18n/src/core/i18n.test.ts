@@ -153,8 +153,7 @@ describe('I18n engine', () => {
     });
 
     test('should add messages with normalized passed locale', () => {
-      const locale = 'en-us';
-      i18n.setLocale(locale);
+      i18n.setLocale('en-US');
 
       i18n.addTranslation(
         {
@@ -162,10 +161,10 @@ describe('I18n engine', () => {
             ['a.b.c']: 'bar',
           },
         },
-        'en_US'
+        'en-us'
       );
 
-      expect(i18n.getLocale()).toBe(locale);
+      expect(i18n.getLocale()).toBe('en-us');
       expect(i18n.getTranslation()).toEqual({
         messages: {
           ['a.b.c']: 'bar',
@@ -234,7 +233,7 @@ describe('I18n engine', () => {
     });
 
     test('should normalize passed locale', () => {
-      i18n.setLocale('en_US');
+      i18n.setLocale('en-US');
       expect(i18n.getLocale()).toBe('en-us');
     });
   });
@@ -267,7 +266,7 @@ describe('I18n engine', () => {
     });
 
     test('should normalize passed locale', () => {
-      i18n.setDefaultLocale('en_US');
+      i18n.setDefaultLocale('en-US');
       expect(i18n.getDefaultLocale()).toBe('en-us');
     });
 

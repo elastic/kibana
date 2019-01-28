@@ -823,16 +823,6 @@ export function getUiSettingDefaults() {
         },
       }),
     },
-    'dashboard:defaultDarkTheme': {
-      name: i18n.translate('kbn.advancedSettings.dashboardDarkThemeTitle', {
-        defaultMessage: 'Dark theme',
-      }),
-      value: false,
-      description: i18n.translate('kbn.advancedSettings.dashboardDarkThemeText', {
-        defaultMessage: 'New dashboards use dark theme by default',
-      }),
-      category: ['dashboard'],
-    },
     'filters:pinnedByDefault': {
       name: i18n.translate('kbn.advancedSettings.pinFiltersTitle', {
         defaultMessage: 'Pin filters by default',
@@ -845,6 +835,7 @@ export function getUiSettingDefaults() {
     'filterEditor:suggestValues': {
       name: i18n.translate('kbn.advancedSettings.suggestFilterValuesTitle', {
         defaultMessage: 'Filter editor suggest values',
+        description: '"Filter editor" refers to the UI you create filters in.',
       }),
       value: true,
       description: i18n.translate('kbn.advancedSettings.suggestFilterValuesText', {

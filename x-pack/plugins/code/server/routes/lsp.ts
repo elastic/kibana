@@ -143,7 +143,7 @@ export function lspRoute(
             repo: repoUri,
             file,
             language,
-            uri,
+            uri: url,
             revision,
             code,
             lineNumbers,
@@ -182,7 +182,7 @@ export function symbolByQnameRoute(server: hapi.Server, log: Logger) {
         const res = await symbolSearchClient.findByQname(req.params.qname);
         return res;
       } catch (error) {
-        return Boom.internal(`Search Exception ${error}`);
+        return Boom.internal(`Search Exception`);
       }
     },
   });

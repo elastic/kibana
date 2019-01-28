@@ -46,9 +46,13 @@ themselves, and those messages will always be in English, so we don't have to ke
 defined inline.
 
 __Note:__ locale defined in `i18n.locale` and the one used for translation files should
-match exactly, e.g. `i18n.locale: zn` and `.../translations/zh_CN.json` won't match and
-default English translations will be used, but `i18n.locale: zh_CN` and`.../translations/zh_CN.json`
-or `i18n.locale: zn` and `.../translations/zn.json` will work as expected.
+match exactly, e.g. `i18n.locale: zh` and `.../translations/zh-CN.json` won't match and
+default English translations will be used, but `i18n.locale: zh-CN` and`.../translations/zh-CN.json`
+or `i18n.locale: zh` and `.../translations/zh.json` will work as expected.
+
+__Note:__ locale should look like `zh-CN` where `zh` - lowercase two-letter or three-letter ISO-639 code
+and `CN` - uppercase two-letter ISO-3166 code (optional).
+[ISO-639](https://www.iso.org/iso-639-language-codes.html) and [ISO-3166](https://www.iso.org/iso-3166-country-codes.html) codes should be separated with `-` character.
 
 ## I18n engine
 

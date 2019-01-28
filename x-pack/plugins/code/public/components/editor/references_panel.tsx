@@ -91,7 +91,11 @@ export class ReferencesPanel extends React.Component<Props> {
     const { uri } = parseSchema(url)!;
     const line = parseInt(lineNumbers[pos.lineNumber - 1], 10);
     if (!isNaN(line)) {
-      const queries = queryString.parse(history.location.search);
+      let search = history.location.search;
+      if (search.startsWith('?')) {
+        search = search.substring(1);
+      }
+      const queries = queryString.parse(search);
       const query = queryString.stringify({
         ...queries,
         tab: 'references',

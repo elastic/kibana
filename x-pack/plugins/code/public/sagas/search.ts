@@ -8,6 +8,8 @@ import { call, put, takeLatest } from 'redux-saga/effects';
 import { kfetch } from 'ui/kfetch';
 
 import { Action } from 'redux-actions';
+
+import { SearchScope } from '../../model';
 import {
   changeSearchScope,
   documentSearch,
@@ -21,7 +23,6 @@ import {
   repositorySearchQueryChanged,
   repositorySearchSuccess,
 } from '../actions';
-import { SearchScope } from '../common/types';
 import { searchRoutePattern } from './patterns';
 
 function requestDocumentSearch(payload: DocumentSearchPayload) {
@@ -99,8 +100,8 @@ function* handleSearchRouteChange(action: Action<Match>) {
   const rawSearchStr = location.search.length > 0 ? location.search.substring(1) : '';
   const queryParams = queryString.parse(rawSearchStr);
   const { q, p, langs, repos, scope } = queryParams;
-  yield put(changeSearchScope(scope as string));
-  if (scope === SearchScope.repository) {
+  yield put(changeSearchScope(scope as SearchScope));
+  if (scope === SearchScope.REPOSITORY) {
     yield put(repositorySearch({ query: q as string }));
   } else {
     yield put(

@@ -18,6 +18,7 @@ import {
   RepositoryIndexName,
   RepositoryIndexNamePrefix,
   RepositoryLspIndexStatusReservedField,
+  RepositoryRandomPathReservedField,
   RepositoryReservedField,
 } from '../indexer/schema';
 import { EsClient } from '../lib/esqueue';
@@ -47,6 +48,10 @@ export class RepositoryObjectClient {
 
   public async getRepository(repoUri: RepositoryUri): Promise<Repository> {
     return await this.getRepositoryObject(repoUri, RepositoryReservedField);
+  }
+
+  public async getRepositoryRandomStr(repoUri: RepositoryUri): Promise<string> {
+    return await this.getRepositoryObject(repoUri, RepositoryRandomPathReservedField);
   }
 
   public async getAllRepositories(): Promise<Repository[]> {
@@ -92,6 +97,10 @@ export class RepositoryObjectClient {
 
   public async setRepositoryConfig(repoUri: RepositoryUri, config: RepositoryConfig) {
     return await this.setRepositoryObject(repoUri, RepositoryConfigReservedField, config);
+  }
+
+  public async setRepositoryRandomStr(repoUri: RepositoryUri, randomStr: string) {
+    return await this.setRepositoryObject(repoUri, RepositoryRandomPathReservedField, randomStr);
   }
 
   public async setRepository(repoUri: RepositoryUri, repo: Repository) {

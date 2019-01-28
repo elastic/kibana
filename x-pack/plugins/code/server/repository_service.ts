@@ -65,6 +65,7 @@ export class RepositoryService {
       // Go head with the actual clone.
       try {
         const gitRepo = await Git.Clone.clone(repo.url, localPath, {
+          bare: 1,
           fetchOpts: {
             callbacks: {
               transferProgress: {

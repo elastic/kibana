@@ -60,7 +60,10 @@ export function repositoryRoute(
 
           // Persist to elasticsearch
           await repoObjectClient.setRepository(repo.uri, repo);
-
+          const randomStr = Math.random()
+            .toString(36)
+            .substring(2, 15);
+          await repoObjectClient.setRepositoryRandomStr(repo.uri, randomStr);
           // Kick off clone job
           const payload = {
             url: repoUrl,
@@ -68,8 +71,9 @@ export function repositoryRoute(
           await cloneWorker.enqueueJob(payload, {});
           return repo;
         } catch (error) {
-          const msg = `Issue repository clone request for ${repoUrl} error: ${error}`;
+          const msg = `Issue repository clone request for ${repoUrl} error`;
           log.error(msg);
+          log.error(error);
           return Boom.badRequest(msg);
         }
       }
@@ -108,8 +112,9 @@ export function repositoryRoute(
 
         return {};
       } catch (error) {
-        const msg = `Issue repository delete request for ${repoUri} error: ${error}`;
+        const msg = `Issue repository delete request for ${repoUri} error`;
         log.error(msg);
+        log.error(error);
         return Boom.notFound(msg);
       }
     },
@@ -126,8 +131,9 @@ export function repositoryRoute(
         const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
         return await repoObjectClient.getRepository(repoUri);
       } catch (error) {
-        const msg = `Get repository ${repoUri} error: ${error}`;
+        const msg = `Get repository ${repoUri} error`;
         log.error(msg);
+        log.error(error);
         return Boom.notFound(msg);
       }
     },
@@ -167,8 +173,9 @@ export function repositoryRoute(
           deleteStatus,
         };
       } catch (error) {
-        const msg = `Get repository status ${repoUri} error: ${error}`;
+        const msg = `Get repository status ${repoUri} error`;
         log.error(msg);
+        log.error(error);
         return Boom.notFound(msg);
       }
     },
@@ -184,8 +191,9 @@ export function repositoryRoute(
         const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
         return await repoObjectClient.getAllRepositories();
       } catch (error) {
-        const msg = `Get all repositories error: ${error}`;
+        const msg = `Get all repositories error`;
         log.error(msg);
+        log.error(error);
         return Boom.notFound(msg);
       }
     },
@@ -211,8 +219,9 @@ export function repositoryRoute(
         await indexWorker.enqueueJob(payload, {});
         return {};
       } catch (error) {
-        const msg = `Index repository ${repoUri} error: ${error}`;
+        const msg = `Index repository ${repoUri} error`;
         log.error(msg);
+        log.error(error);
         return Boom.notFound(msg);
       }
     },
@@ -249,8 +258,9 @@ export function repositoryRoute(
         repoConfigController.resetConfigCache(repo.uri);
         return {};
       } catch (error) {
-        const msg = `Issue repository clone request for ${repoUrl} error: ${error}`;
+        const msg = `Issue repository clone request for ${repoUrl} error`;
         log.error(msg);
+        log.error(error);
         return Boom.badRequest(msg);
       }
     },

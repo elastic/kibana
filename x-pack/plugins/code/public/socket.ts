@@ -12,9 +12,24 @@ import { SocketKind } from '../model';
 import { updateCloneProgress, updateDeleteProgress, updateIndexProgress } from './actions';
 import { installLanguageServerSuccess } from './actions/language_server';
 
+const SOCKET_CONNECTION_TIMEOUT = 5000; // timeout in ms
+
 export function bindSocket(store: Store) {
   const basePath = chrome.getBasePath();
-  const socket = io('/', { path: `${basePath}/ws` });
+  const socket = io({
+    path: `${basePath}/ws`,
+    transports: ['polling', 'websocket'],
+    transportOptions: {
+      polling: {
+        extraHeaders: {
+          'kbn-xsrf': 'professionally-crafted-string-of-text',
+        },
+      },
+    },
+    timeout: SOCKET_CONNECTION_TIMEOUT,
+    // ensure socket.io always tries polling first, otherwise auth will fail
+    rememberUpgrade: false,
+  });
 
   socket.on(SocketKind.CLONE_PROGRESS, (data: any) => {
     const { repoUri, progress, cloneProgress } = data;

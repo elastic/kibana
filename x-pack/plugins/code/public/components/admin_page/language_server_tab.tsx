@@ -8,7 +8,14 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiLoadingSpinner,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiOverlayMask,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -21,6 +28,8 @@ import { LanguageServer, LanguageServerStatus } from '../../../common/language_s
 import { requestInstallLanguageServer } from '../../actions/language_server';
 import { RootState } from '../../reducers';
 import { JavaIcon, TypeScriptIcon } from '../shared/icons';
+const JAVA_URL =
+  'https://artifacts.elastic.co/downloads/kibana-plugins/https://github.com/elastic/java-langserver/releases/download/1.0.0-SNAPSHOT/java_languageserver-1.0.0-SNAPSHO';
 
 const LanguageServerState = styled(EuiTextColor)`
   color: ${props => props.color};
@@ -95,14 +104,35 @@ interface Props {
   requestInstallLanguageServer: (ls: string) => void;
   installLoading: { [ls: string]: boolean };
 }
+interface State {
+  showingInstruction: boolean;
+  name?: string;
+  url?: string;
+}
 
-class AdminLanguageSever extends React.PureComponent<Props> {
+class AdminLanguageSever extends React.PureComponent<Props, State> {
+  constructor(props: Props, context: any) {
+    super(props, context);
+    this.state = { showingInstruction: false };
+  }
+
+  public toggleInstruction = (showingInstruction: boolean, name?: string, url?: string) => {
+    this.setState({ showingInstruction, name, url });
+  };
+
   public render() {
     const languageServers = this.props.languageServers.map(ls => (
       <LanguageServerLi
         languageServer={ls}
         key={ls.name}
-        requestInstallLanguageServer={this.props.requestInstallLanguageServer}
+        requestInstallLanguageServer={
+          () =>
+            this.toggleInstruction(
+              true,
+              ls.name,
+              JAVA_URL
+            ) /*this.props.requestInstallLanguageServer*/
+        }
         loading={this.props.installLoading[ls.name]}
       />
     ));
@@ -123,10 +153,59 @@ class AdminLanguageSever extends React.PureComponent<Props> {
         <EuiFlexGroup direction="column" gutterSize="s">
           {languageServers}
         </EuiFlexGroup>
+        <LanguageServerInstruction
+          show={this.state.showingInstruction}
+          name={this.state.name!}
+          url={this.state.url!}
+          close={() => this.toggleInstruction(false)}
+        />
       </div>
     );
   }
 }
+
+const LanguageServerInstruction = (props: {
+  name: string;
+  url: string;
+  show: boolean;
+  close: () => void;
+}) => {
+  return (
+    <React.Fragment> {
+    props.show && (
+      <EuiOverlayMask>
+        <EuiModal onClose={props.close}>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>Install Instruction</EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            <EuiText grow={false}>
+              <h3>Download</h3>
+              <p>
+                Download {props.name} language server plugin from
+                <EuiLink href={props.url}> here.</EuiLink>
+              </p>
+              <h3>Install</h3>
+              <p>
+                Stop your kibana code node. Install it using kibana-plugin command.
+                <pre>
+                  <code>bin/kibana-plugin install file://path/to/plugin.zip</code>
+                </pre>
+              </p>
+            </EuiText>
+          </EuiModalBody>
+          <EuiModalFooter>
+            <EuiButton onClick={props.close} fill>
+              Close
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
+      </EuiOverlayMask>
+    )
+    }
+    </React.Fragment>
+  )
+};
 
 const mapStateToProps = (state: RootState) => ({
   languageServers: state.languageServer.languageServers,

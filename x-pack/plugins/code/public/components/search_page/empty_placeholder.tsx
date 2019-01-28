@@ -4,23 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
-import HeroGraphic from '../../images/codesearch_hero_graphic.png';
 
 export const EmptyPlaceholder = (props: any) => {
   return (
     <EuiFlexGroup direction="column" alignItems="center">
-      <EuiFlexItem>
-        <EuiTitle size="l">
-          <h1>Search for anything in your code...</h1>
-        </EuiTitle>
+      <EuiSpacer size="xxl" />
+      <EuiSpacer size="xxl" />
+      <EuiFlexItem grow={false}>
+        <EuiText style={{ fontSize: '24px', color: '#98A2B3' }}>"{props.query}"</EuiText>
       </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiButton fill={true}>Search Settings</EuiButton>
+      <EuiSpacer size="l" />
+      <EuiFlexItem grow={false}>
+        <EuiText style={{ fontSize: '28px', color: '#1A1A1A' }}>
+          Hmmm... we looked for that, but couldn’t find anything.
+        </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem>
-        <img src={HeroGraphic} alt="empty" style={{ marginTop: '4rem' }} />
+      <EuiSpacer size="l" />
+      <EuiFlexItem grow={false}>
+        <EuiText style={{ fontSize: '16px', color: '#69707D' }}>
+          You can search for something else or modify your search settings.
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton fill={true}>Modify your search settings</EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

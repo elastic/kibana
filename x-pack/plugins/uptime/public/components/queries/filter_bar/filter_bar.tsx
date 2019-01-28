@@ -80,7 +80,7 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: Props) 
         },
         {
           type: 'field_value_selection',
-          field: 'tcp.port',
+          field: 'url.port',
           name: i18n.translate('xpack.uptime.filterBar.options.portLabel', {
             defaultMessage: 'Port',
           }),

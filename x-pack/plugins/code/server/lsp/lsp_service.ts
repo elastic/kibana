@@ -63,7 +63,7 @@ export class LspService {
   }
 
   public async deleteWorkspace(repoUri: string) {
-    for (const path of this.workspaceHandler.listWorkspaceFolders(repoUri)) {
+    for (const path of await this.workspaceHandler.listWorkspaceFolders(repoUri)) {
       await this.controller.unloadWorkspace(path);
     }
     await this.workspaceHandler.clearWorkspace(repoUri);

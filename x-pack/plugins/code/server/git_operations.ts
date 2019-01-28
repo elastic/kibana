@@ -41,15 +41,30 @@ async function checkExists<R>(func: () => Promise<R>, message: string): Promise<
 }
 
 function entry2Tree(entry: TreeEntry): FileTree {
+  let type: FileTreeItemType;
+  switch (entry.filemode()) {
+    case TreeEntry.FILEMODE.LINK:
+      type = FileTreeItemType.Link;
+      break;
+    case TreeEntry.FILEMODE.COMMIT:
+      type = FileTreeItemType.Submodule;
+      break;
+    case TreeEntry.FILEMODE.TREE:
+      type = FileTreeItemType.Directory;
+      break;
+    case TreeEntry.FILEMODE.BLOB:
+    case TreeEntry.FILEMODE.EXECUTABLE:
+      type = FileTreeItemType.File;
+      break;
+    default:
+      // @ts-ignore
+      throw new Error('unreadable file');
+  }
   return {
     name: entry.name(),
     path: entry.path(),
     sha1: entry.sha(),
-    type: entry.isDirectory()
-      ? FileTreeItemType.Directory
-      : entry.isSubmodule()
-      ? FileTreeItemType.Submodule
-      : FileTreeItemType.File,
+    type,
   };
 }
 
@@ -74,7 +89,7 @@ export class GitOperations {
       () => commit.getEntry(path),
       `file ${uri}/${path} not found `
     );
-    if (entry.isFile()) {
+    if (entry.isFile() || entry.filemode() === TreeEntry.FILEMODE.LINK) {
       return await entry.getBlob();
     } else {
       throw Boom.unsupportedMediaType(`${uri}/${path} is not a file.`);
@@ -132,6 +147,49 @@ export class GitOperations {
   public async openRepo(uri: RepositoryUri): Promise<Repository> {
     const repoDir = Path.join(this.repoRoot, uri);
     return checkExists<Repository>(() => Repository.open(repoDir), `repo ${uri} not found`);
+  }
+
+  public async countRepoFiles(uri: RepositoryUri, revision: string): Promise<number> {
+    const repo = await this.openRepo(uri);
+    const commit = await this.getCommit(repo, revision);
+    const tree = await commit.getTree();
+    let count = 0;
+    async function walk(t: Tree) {
+      for (const e of t.entries()) {
+        if (e.isFile() && e.filemode() !== TreeEntry.FILEMODE.LINK) {
+          count++;
+        } else if (e.isDirectory()) {
+          const subFolder = await e.getTree();
+          await walk(subFolder);
+        } else {
+          // ignore other files
+        }
+      }
+    }
+    await walk(tree);
+    return count;
+  }
+
+  public async iterateRepo(
+    uri: RepositoryUri,
+    revision: string
+  ): Promise<AsyncIterableIterator<FileTree>> {
+    const repo = await this.openRepo(uri);
+    const commit = await this.getCommit(repo, revision);
+    const tree = await commit.getTree();
+    async function* walk(t: Tree): AsyncIterableIterator<FileTree> {
+      for (const e of t.entries()) {
+        if (e.isFile() && e.filemode() !== TreeEntry.FILEMODE.LINK) {
+          yield entry2Tree(e);
+        } else if (e.isDirectory()) {
+          const subFolder = await e.getTree();
+          await (yield* walk(subFolder));
+        } else {
+          // ignore other files
+        }
+      }
+    }
+    return await walk(tree);
   }
 
   /**

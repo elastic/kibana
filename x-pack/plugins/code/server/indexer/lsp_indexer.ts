@@ -8,7 +8,6 @@ import fs from 'fs';
 import util from 'util';
 
 import { ProgressReporter } from '.';
-import { RepositoryUtils } from '../../common/repository_utils';
 import { toCanonicalUrl } from '../../common/uri_util';
 import { Document, IndexStats, IndexStatsKey, LspIndexRequest, RepositoryUri } from '../../model';
 import { GitOperations } from '../git_operations';
@@ -24,15 +23,7 @@ import {
   getReferenceIndexCreationRequest,
   getSymbolIndexCreationRequest,
 } from './index_creation_request';
-import {
-  DocumentIndexName,
-  ReferenceIndexName,
-  RepositoryDeleteStatusReservedField,
-  RepositoryGitStatusReservedField,
-  RepositoryLspIndexStatusReservedField,
-  RepositoryReservedField,
-  SymbolIndexName,
-} from './schema';
+import { ALL_RESERVED, DocumentIndexName, ReferenceIndexName, SymbolIndexName } from './schema';
 
 export class LspIndexer extends AbstractIndexer {
   protected type: string = 'lsp';
@@ -75,7 +66,7 @@ export class LspIndexer extends AbstractIndexer {
     ];
   }
 
-  protected async prepareRequests() {
+  protected async *getIndexRequestIterator(): AsyncIterableIterator<LspIndexRequest> {
     try {
       const {
         workspaceRepo,
@@ -83,29 +74,21 @@ export class LspIndexer extends AbstractIndexer {
       } = await this.lspService.workspaceHandler.openWorkspace(this.repoUri, 'head');
       const workspaceDir = workspaceRepo.workdir();
       const gitOperator = new GitOperations(this.options.repoPath);
-      const fileTree = await gitOperator.fileTree(
-        this.repoUri,
-        '',
-        'HEAD',
-        0,
-        Number.MAX_SAFE_INTEGER,
-        false,
-        Number.MAX_SAFE_INTEGER
-      );
-      return RepositoryUtils.getAllFiles(fileTree)
-        .filter((filePath: string) => {
-          const lang = detectLanguageByFilename(filePath);
-          return lang && this.lspService.supportLanguage(lang);
-        })
-        .map((filePath: string) => {
+      const fileIterator = await gitOperator.iterateRepo(this.repoUri, 'head');
+      for await (const file of fileIterator) {
+        const filePath = file.path!;
+        const lang = detectLanguageByFilename(filePath);
+        // filter file by language
+        if (lang && this.lspService.supportLanguage(lang)) {
           const req: LspIndexRequest = {
             repoUri: this.repoUri,
             localRepoPath: workspaceDir,
             filePath,
             revision: workspaceRevision,
           };
-          return req;
-        });
+          yield req;
+        }
+      }
     } catch (error) {
       this.log.error(`Prepare lsp indexing requests error.`);
       this.log.error(error);
@@ -113,75 +96,69 @@ export class LspIndexer extends AbstractIndexer {
     }
   }
 
-  protected async cleanIndex(repoUri: RepositoryUri) {
+  protected async getIndexRequestCount(): Promise<number> {
+    try {
+      const gitOperator = new GitOperations(this.options.repoPath);
+      return await gitOperator.countRepoFiles(this.repoUri, 'head');
+    } catch (error) {
+      this.log.error(`Get lsp index requests count error.`);
+      this.log.error(error);
+      throw error;
+    }
+  }
+
+  protected async cleanIndex() {
     // Clean up all the symbol documents in the symbol index
     try {
       await this.client.deleteByQuery({
-        index: SymbolIndexName(repoUri),
+        index: SymbolIndexName(this.repoUri),
         body: {
           query: {
             match_all: {},
           },
         },
       });
-      this.log.info(`Clean up symbols for ${repoUri} done.`);
+      this.log.info(`Clean up symbols for ${this.repoUri} done.`);
     } catch (error) {
-      this.log.error(`Clean up symbols for ${repoUri} error.`);
+      this.log.error(`Clean up symbols for ${this.repoUri} error.`);
       this.log.error(error);
     }
 
     // Clean up all the reference documents in the reference index
     try {
       await this.client.deleteByQuery({
-        index: ReferenceIndexName(repoUri),
+        index: ReferenceIndexName(this.repoUri),
         body: {
           query: {
             match_all: {},
           },
         },
       });
-      this.log.info(`Clean up references for ${repoUri} done.`);
+      this.log.info(`Clean up references for ${this.repoUri} done.`);
     } catch (error) {
-      this.log.error(`Clean up references for ${repoUri} error.`);
+      this.log.error(`Clean up references for ${this.repoUri} error.`);
       this.log.error(error);
     }
 
     // Clean up all the document documents in the document index but keep the repository document.
     try {
       await this.client.deleteByQuery({
-        index: DocumentIndexName(repoUri),
+        index: DocumentIndexName(this.repoUri),
         body: {
           query: {
             bool: {
-              must_not: [
-                {
-                  exists: {
-                    field: RepositoryReservedField,
-                  },
+              must_not: ALL_RESERVED.map((field: string) => ({
+                exists: {
+                  field,
                 },
-                {
-                  exists: {
-                    field: RepositoryGitStatusReservedField,
-                  },
-                },
-                {
-                  exists: {
-                    field: RepositoryLspIndexStatusReservedField,
-                  },
-                },
-                {
-                  exists: {
-                    field: RepositoryDeleteStatusReservedField,
-                  },
-                },
-              ],
+              })),
             },
           },
         },
       });
-      this.log.info(`Clean up documents for ${repoUri} done.`);
+      this.log.info(`Clean up documents for ${this.repoUri} done.`);
     } catch (error) {
-      this.log.error(`Clean up documents for ${repoUri} error.`);
+      this.log.error(`Clean up documents for ${this.repoUri} error.`);
       this.log.error(error);
     }
   }

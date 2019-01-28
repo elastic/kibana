@@ -42,7 +42,12 @@ export class CodeFileTree extends React.Component<Props> {
   public onClick = (node: Tree) => {
     const { resource, org, repo, revision, path } = this.props.match.params;
     if (!(path === node.path)) {
-      const pathType = node.type === FileTreeItemType.File ? PathTypes.blob : PathTypes.tree;
+      let pathType: PathTypes;
+      if (node.type === FileTreeItemType.Link || node.type === FileTreeItemType.File) {
+        pathType = PathTypes.blob;
+      } else {
+        pathType = PathTypes.tree;
+      }
       this.props.history.push(`/${resource}/${org}/${repo}/${pathType}/${revision}/${node.path}`);
     }
   };
@@ -86,7 +91,16 @@ export class CodeFileTree extends React.Component<Props> {
       case FileTreeItemType.Submodule: {
         return (
           <div onClick={onClick} className={className} role="button">
-            {node.name}
+            <EuiIcon type="submodule" />
+            <DirectoryNode>{node.name}</DirectoryNode>
+          </div>
+        );
+      }
+      case FileTreeItemType.Link: {
+        return (
+          <div onClick={onClick} className={classes(className, 'fileTreeFile')} role="button">
+            <EuiIcon type="symlink" />
+            <DirectoryNode>{node.name}</DirectoryNode>
           </div>
         );
       }

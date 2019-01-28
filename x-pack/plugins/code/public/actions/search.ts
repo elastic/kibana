@@ -5,7 +5,7 @@
  */
 
 import { createAction } from 'redux-actions';
-import { DocumentSearchResult } from '../../model';
+import { DocumentSearchResult, SearchScope } from '../../model';
 
 export interface DocumentSearchPayload {
   query: string;
@@ -32,7 +32,7 @@ export const repositorySearch = createAction<RepositorySearchPayload>('REPOSITOR
 export const repositorySearchSuccess = createAction('REPOSITORY SEARCH SUCCESS');
 export const repositorySearchFailed = createAction<Error>('REPOSITORY SEARCH FAILED');
 
-export const changeSearchScope = createAction<string>('CHANGE SEARCH SCOPE');
+export const changeSearchScope = createAction<SearchScope>('CHANGE SEARCH SCOPE');
 
 // For repository search typeahead
 export const repositorySearchQueryChanged = createAction<RepositorySearchPayload>(

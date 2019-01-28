@@ -7,13 +7,12 @@
 import { PathTypes } from '../common/types';
 
 export const ROOT = '/';
-export const MAIN = `/:resource/:org/:repo/:pathType(${PathTypes.blob}|${
-  PathTypes.tree
-})/:revision/:path*:goto(!.*)?`;
+const pathTypes = `:pathType(${PathTypes.blob}|${PathTypes.tree}|${PathTypes.blame}|${
+  PathTypes.commits
+})`;
+export const MAIN = `/:resource/:org/:repo/${pathTypes}/:revision/:path*:goto(!.*)?`;
 export const REPO = `/:resource/:org/:repo`;
-export const MAIN_ROOT = `/:resource/:org/:repo/:pathType(${PathTypes.blob}|${
-  PathTypes.tree
-})/:revision`;
+export const MAIN_ROOT = `/:resource/:org/:repo/${pathTypes}/:revision`;
 export const ADMIN = '/admin';
 export const SEARCH = '/search';
 export const DIFF = '/commit/:resource/:org/:repo/:commitId';

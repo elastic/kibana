@@ -5,17 +5,28 @@
  */
 
 import { ReactNode } from 'react';
-
-export enum SearchScope {
-  repository = 'repository',
-  default = 'default',
-  symbol = 'symbol',
-}
+import { SearchScope } from '../../model';
 
 export enum PathTypes {
   blob = 'blob',
   tree = 'tree',
+  blame = 'blame',
+  commits = 'commits',
 }
+
+export const SearchScopeText = {
+  [SearchScope.DEFAULT]: 'Search Everything',
+  [SearchScope.REPOSITORY]: 'Search Repositories',
+  [SearchScope.SYMBOL]: 'Search Symbols',
+  [SearchScope.FILE]: 'Search Files',
+};
+
+export const SearchScopePlaceholderText = {
+  [SearchScope.DEFAULT]: 'Type to find anything',
+  [SearchScope.REPOSITORY]: 'Type to find repositories',
+  [SearchScope.SYMBOL]: 'Type to find symbols',
+  [SearchScope.FILE]: 'Type to find files',
+};
 
 export interface MainRouteParams {
   path: string;

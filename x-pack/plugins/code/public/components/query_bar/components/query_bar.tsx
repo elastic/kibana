@@ -13,7 +13,9 @@ import { SuggestionsComponent } from './typeahead/suggestions_component';
 
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector } from '@elastic/eui';
 import { connect } from 'react-redux';
+import { SearchScope } from '../../../../model';
 import { repositorySearch, saveSearchOptions } from '../../../actions';
+import { SearchScopePlaceholderText } from '../../../common/types';
 import { RootState } from '../../../reducers';
 import {
   AutocompleteSuggestion,
@@ -21,6 +23,7 @@ import {
   SuggestionsProvider,
 } from '../suggestions';
 import { SearchOptions } from './options';
+import { ScopeSelector } from './scope_selector';
 
 const KEY_CODES = {
   LEFT: 37,
@@ -43,8 +46,10 @@ interface Props {
   suggestionProviders: SuggestionsProvider[];
   repositorySearch: (p: { query: string }) => void;
   saveSearchOptions: (searchOptions: ISearchOptions) => void;
+  onSearchScopeChanged: (s: SearchScope) => void;
   repoSearchResults: any[];
   searchLoading: boolean;
+  searchScope: SearchScope;
   searchOptions: ISearchOptions;
 }
 
@@ -181,7 +186,7 @@ export class CodeQueryBar extends Component<Props, State> {
 
     const res = await Promise.all(
       this.props.suggestionProviders.map((provider: SuggestionsProvider) => {
-        return provider.getSuggestions(query.toLowerCase());
+        return provider.getSuggestions(query.toLowerCase(), this.props.searchScope);
       })
     );
 
@@ -379,7 +384,13 @@ export class CodeQueryBar extends Component<Props, State> {
       ? `suggestion-${this.state.groupIndex}-${this.state.itemIndex}`
       : '';
     return (
-      <EuiFlexGroup responsive={false} gutterSize="s">
+      <EuiFlexGroup responsive={false} gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <ScopeSelector
+            scope={this.props.searchScope}
+            onScopeChanged={this.props.onSearchScopeChanged}
+          />
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
             {/* position:relative required on container so the suggestions appear under the query bar*/}
@@ -396,7 +407,7 @@ export class CodeQueryBar extends Component<Props, State> {
                   <div className="kuiLocalSearchAssistedInput">
                     <EuiFieldText
                       className="kuiLocalSearchAssistedInput__input"
-                      placeholder="Search... (e.g. java.lang.String)"
+                      placeholder={SearchScopePlaceholderText[this.props.searchScope]}
                       value={this.state.query}
                       onKeyDown={this.onKeyDown}
                       onKeyUp={this.onKeyUp}
@@ -407,7 +418,6 @@ export class CodeQueryBar extends Component<Props, State> {
                       inputRef={inputRef}
                       autoComplete="off"
                       spellCheck={false}
-                      icon="search"
                       aria-label="Search input"
                       type="text"
                       data-test-subj="queryInput"
@@ -450,6 +460,7 @@ const mapStateToProps = (state: RootState) => ({
     ? state.search.repositorySearchResults.repositories
     : [],
   searchLoading: state.search.isLoading,
+  searchScope: state.search.scope,
   searchOptions: state.search.searchOptions || { repoScopes: [] },
 });
 

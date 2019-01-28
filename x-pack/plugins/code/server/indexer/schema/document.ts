@@ -76,6 +76,9 @@ export const DocumentSchema = {
       },
     },
   },
+  repository_random_path: {
+    type: 'keyword',
+  },
   // A single Repository Git Status object resides in this document index.
   repository_git_status: {
     properties: {

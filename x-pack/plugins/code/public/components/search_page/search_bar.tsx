@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { euiBorderColor, euiBorderWidthThin } from '@elastic/eui/dist/eui_theme_light.json';
 import querystring from 'querystring';
 import React from 'react';
 import styled from 'styled-components';
 import Url from 'url';
 
+import { SearchScope } from '../../../model';
+import { SearchScopeText } from '../../common/types';
 import { history } from '../../utils/url';
+import { Shortcut } from '../shortcuts';
 
 import {
   AutocompleteSuggestion,
@@ -21,14 +23,15 @@ import {
   SymbolSuggestionsProvider,
 } from '../query_bar';
 
-const SearchBarContainer = styled(EuiFlexGroup)`
-  height: 68px;
+const SearchBarContainer = styled.div`
+  height: 56px;
   padding: 8px;
   border-bottom: ${euiBorderWidthThin} solid ${euiBorderColor};
 `;
 
 interface Props {
   query: string;
+  onSearchScopeChanged: (s: SearchScope) => void;
 }
 
 export class SearchBar extends React.PureComponent<Props> {
@@ -63,15 +66,35 @@ export class SearchBar extends React.PureComponent<Props> {
 
     return (
       <SearchBarContainer>
-        <EuiFlexItem>
-          <QueryBar
-            query={this.props.query}
-            onSubmit={onSubmit}
-            onSelect={onSelect}
-            appName="code"
-            suggestionProviders={suggestionProviders}
-          />
-        </EuiFlexItem>
+        <Shortcut
+          keyCode="p"
+          help={SearchScopeText[SearchScope.REPOSITORY]}
+          onPress={() => {
+            this.props.onSearchScopeChanged(SearchScope.REPOSITORY);
+          }}
+        />
+        <Shortcut
+          keyCode="y"
+          help={SearchScopeText[SearchScope.SYMBOL]}
+          onPress={() => {
+            this.props.onSearchScopeChanged(SearchScope.SYMBOL);
+          }}
+        />
+        <Shortcut
+          keyCode="s"
+          help={SearchScopeText[SearchScope.DEFAULT]}
+          onPress={() => {
+            this.props.onSearchScopeChanged(SearchScope.DEFAULT);
+          }}
+        />
+        <QueryBar
+          query={this.props.query}
+          onSubmit={onSubmit}
+          onSelect={onSelect}
+          appName="code"
+          suggestionProviders={suggestionProviders}
+          onSearchScopeChanged={this.props.onSearchScopeChanged}
+        />
       </SearchBarContainer>
     );
   }

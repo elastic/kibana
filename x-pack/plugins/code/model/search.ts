@@ -130,3 +130,10 @@ export interface SourceHit {
   score: number;
   term: string;
 }
+
+export enum SearchScope {
+  DEFAULT = 'default', // Search everything
+  SYMBOL = 'symbol', // Only search symbols
+  REPOSITORY = 'repository', // Only search repositories
+  FILE = 'file', // Only search files
+}

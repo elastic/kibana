@@ -69,7 +69,7 @@ Array [
               },
               Object {
                 "term": Object {
-                  "context.service.name": "myServiceName",
+                  "service.name": "myServiceName",
                 },
               },
               Object {

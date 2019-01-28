@@ -8,17 +8,27 @@ import { Server } from 'hapi';
 import { Socket } from 'socket.io';
 
 import { Logger } from '../log';
+import { getModifiedSocketRequest } from '../security';
 import { SocketService } from '../socket_service';
 
 export function socketRoute(server: Server, socketService: SocketService, log: Logger) {
   const socketIO = socketService.io;
 
-  socketIO.on('connection', (socket: Socket) => {
-    log.debug(`User ${socket.id} connected, attaching handlers and register socket.`);
+  // add a POST ping route for `getRequest` to use
+  server.securedRoute({
+    method: 'POST',
+    path: `/api/code/ping`,
+    handler: () => 'pong',
+  });
 
-    // TODO(mengwei): apply the same security check as Canvas does.
-    // const request = socket.handshake;
-    // const authHeader = getAuthHeader(request, server);
+  socketIO.on('connection', async (socket: Socket) => {
+    log.info(`User ${socket.id} connected, attaching handlers and register socket.`);
+    // 'request' is the modified hapi request object
+    const request = await getModifiedSocketRequest(server, socket);
+    if (!request) {
+      socket.emit('connectionFailed', 'Socket connection failed');
+      return socket.disconnect(true);
+    }
 
     socket.on('disconnect', () => {
       log.debug('User disconnected, removing handlers and unregister sockets.');

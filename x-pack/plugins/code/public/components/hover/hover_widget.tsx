@@ -15,7 +15,6 @@ import { MarkedString } from 'vscode-languageserver-types';
 export interface HoverWidgetProps {
   state: HoverState;
   contents?: MarkedString[];
-  fontFamily?: string;
   gotoDefinition: () => void;
   findReferences: () => void;
 }
@@ -84,7 +83,7 @@ export class HoverWidget extends React.PureComponent<HoverWidgetProps> {
           {
             codeBlockRenderer: (language: string, value: string) => {
               const code = tokenizeToString(value, language);
-              return `<span style="font-family: ${this.props.fontFamily}">${code}</span>`;
+              return `<span>${code}</span>`;
             },
           }
         ).innerHTML;
