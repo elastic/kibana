@@ -18,8 +18,8 @@
  */
 
 import { ExistsFilter } from '@kbn/es-query';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
+import { existsOperator } from '../filter_editor/lib/filter_operators';
 
 interface Props {
   filter: ExistsFilter;
@@ -28,8 +28,7 @@ interface Props {
 export function ExistsFilterView({ filter }: Props) {
   return (
     <span>
-      {filter.meta.key}{' '}
-      <FormattedMessage id="common.ui.filterBar.existsFilterSuffix" defaultMessage="exists" />
+      {filter.meta.key} {existsOperator.message}
     </span>
   );
 }

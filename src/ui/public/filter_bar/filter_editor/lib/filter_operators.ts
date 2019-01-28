@@ -26,65 +26,81 @@ export interface Operator {
   fieldTypes?: string[];
 }
 
+export const isOperator = {
+  message: i18n.translate('common.ui.filterEditor.isOperatorOptionLabel', {
+    defaultMessage: 'is',
+  }),
+  type: 'phrase',
+  negate: false,
+};
+
+export const isNotOperator = {
+  message: i18n.translate('common.ui.filterEditor.isNotOperatorOptionLabel', {
+    defaultMessage: 'is not',
+  }),
+  type: 'phrase',
+  negate: true,
+};
+
+export const isOneOfOperator = {
+  message: i18n.translate('common.ui.filterEditor.isOneOfOperatorOptionLabel', {
+    defaultMessage: 'is one of',
+  }),
+  type: 'phrases',
+  negate: false,
+  fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape'],
+};
+
+export const isNotOneOfOperator = {
+  message: i18n.translate('common.ui.filterEditor.isNotOneOfOperatorOptionLabel', {
+    defaultMessage: 'is not one of',
+  }),
+  type: 'phrases',
+  negate: true,
+  fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape'],
+};
+
+export const isBetweenOperator = {
+  message: i18n.translate('common.ui.filterEditor.isBetweenOperatorOptionLabel', {
+    defaultMessage: 'is between',
+  }),
+  type: 'range',
+  negate: false,
+  fieldTypes: ['number', 'date', 'ip'],
+};
+
+export const isNotBetweenOperator = {
+  message: i18n.translate('common.ui.filterEditor.isNotBetweenOperatorOptionLabel', {
+    defaultMessage: 'is not between',
+  }),
+  type: 'range',
+  negate: true,
+  fieldTypes: ['number', 'date', 'ip'],
+};
+
+export const existsOperator = {
+  message: i18n.translate('common.ui.filterEditor.existsOperatorOptionLabel', {
+    defaultMessage: 'exists',
+  }),
+  type: 'exists',
+  negate: false,
+};
+
+export const doesNotExistOperator = {
+  message: i18n.translate('common.ui.filterEditor.doesNotExistOperatorOptionLabel', {
+    defaultMessage: 'does not exist',
+  }),
+  type: 'exists',
+  negate: true,
+};
+
 export const FILTER_OPERATORS: Operator[] = [
-  {
-    message: i18n.translate('common.ui.filterEditor.isOperatorOptionLabel', {
-      defaultMessage: 'is',
-    }),
-    type: 'phrase',
-    negate: false,
-  },
-  {
-    message: i18n.translate('common.ui.filterEditor.isNotOperatorOptionLabel', {
-      defaultMessage: 'is not',
-    }),
-    type: 'phrase',
-    negate: true,
-  },
-  {
-    message: i18n.translate('common.ui.filterEditor.isOneOfOperatorOptionLabel', {
-      defaultMessage: 'is one of',
-    }),
-    type: 'phrases',
-    negate: false,
-    fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape'],
-  },
-  {
-    message: i18n.translate('common.ui.filterEditor.isNotOneOfOperatorOptionLabel', {
-      defaultMessage: 'is not one of',
-    }),
-    type: 'phrases',
-    negate: true,
-    fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape'],
-  },
-  {
-    message: i18n.translate('common.ui.filterEditor.isBetweenOperatorOptionLabel', {
-      defaultMessage: 'is between',
-    }),
-    type: 'range',
-    negate: false,
-    fieldTypes: ['number', 'date', 'ip'],
-  },
-  {
-    message: i18n.translate('common.ui.filterEditor.isNotBetweenOperatorOptionLabel', {
-      defaultMessage: 'is not between',
-    }),
-    type: 'range',
-    negate: true,
-    fieldTypes: ['number', 'date', 'ip'],
-  },
-  {
-    message: i18n.translate('common.ui.filterEditor.existsOperatorOptionLabel', {
-      defaultMessage: 'exists',
-    }),
-    type: 'exists',
-    negate: false,
-  },
-  {
-    message: i18n.translate('common.ui.filterEditor.doesNotExistOperatorOptionLabel', {
-      defaultMessage: 'does not exist',
-    }),
-    type: 'exists',
-    negate: true,
-  },
+  isOperator,
+  isNotOperator,
+  isOneOfOperator,
+  isNotOneOfOperator,
+  isBetweenOperator,
+  isNotBetweenOperator,
+  existsOperator,
+  doesNotExistOperator,
 ];
