@@ -139,6 +139,7 @@ export const schema = Joi.object().keys({
     license: Joi.string().default('oss'),
     from: Joi.string().default('snapshot'),
     serverArgs: Joi.array(),
+    dataArchive: Joi.string(),
   }).default(),
 
   kbnTestServer: Joi.object().keys({
@@ -180,5 +181,10 @@ export const schema = Joi.object().keys({
   // settings for the failureDebugging module
   failureDebugging: Joi.object().keys({
     htmlDirectory: Joi.string().default(defaultRelativeToConfigPath('failure_debug/html'))
+  }).default(),
+
+  // settings for the find service
+  layout: Joi.object().keys({
+    fixedHeaderHeight: Joi.number().default(50),
   }).default(),
 }).default();

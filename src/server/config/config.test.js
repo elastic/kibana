@@ -174,7 +174,7 @@ describe('lib/config/config', function () {
       });
 
       it('should thow an exception when setting a value with the wrong type', function (done) {
-        expect.assertions(2);
+        expect.assertions(4);
 
         const run = function () {
           config.set('test.enable', 'something');
@@ -184,7 +184,11 @@ describe('lib/config/config', function () {
           run();
         } catch (err) {
           expect(err).toHaveProperty('name', 'ValidationError');
-          expect(err.details[0].message).toBe('"enable" must be a boolean');
+          expect(err).toHaveProperty('message',
+            'child \"test\" fails because [child \"enable\" fails because [\"enable\" must be a boolean]]'
+          );
+          expect(err).not.toHaveProperty('details');
+          expect(err).not.toHaveProperty('_object');
         }
 
         done();

@@ -13,12 +13,12 @@ import {
 FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'gis',
-    title: 'GIS',
-    description: 'Map and analyze the geo-data from Elasticsearch and the Elastic Maps Service',
-    icon: 'gisApp', //no gis logo yet
+    title: 'Maps',
+    description: 'Explore geospatial data from Elasticsearch and the Elastic Maps Service',
+    icon: 'gisApp',
     path: '/app/gis',
     showOnHomePage: true,
-    category: FeatureCatalogueCategory.OTHER
+    category: FeatureCatalogueCategory.DATA
   };
 });
 
