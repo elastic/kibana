@@ -52,7 +52,7 @@ export class ESGeohashGridSource extends AbstractESSource {
 
   static type = 'ES_GEOHASH_GRID';
   static title = 'Elasticsearch geohash aggregation';
-  static description = 'Group geospatial data in grids with metrics for each gridded cell';
+  static description = 'Geospatial data grouped in grids with metrics for each gridded cell';
 
   static createDescriptor({ indexPatternId, geoField, requestType, resolution }) {
     return {

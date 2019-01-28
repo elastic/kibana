@@ -41,7 +41,7 @@ export class CreateSourceEditor extends Component {
         value: RENDER_AS.GRID
       },
       {
-        label: 'heatmap',
+        label: 'heat map',
         value: RENDER_AS.HEATMAP
       }
     ];
