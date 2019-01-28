@@ -38,8 +38,6 @@ const onClose = () => {
 
 export function showOptionsPopover({
   anchorElement,
-  darkTheme,
-  onDarkThemeChange,
   useMargins,
   onUseMarginsChange,
   hidePanelTitles,
@@ -64,8 +62,6 @@ export function showOptionsPopover({
         closePopover={onClose}
       >
         <OptionsMenu
-          darkTheme={darkTheme}
-          onDarkThemeChange={onDarkThemeChange}
           useMargins={useMargins}
           onUseMarginsChange={onUseMarginsChange}
           hidePanelTitles={hidePanelTitles}

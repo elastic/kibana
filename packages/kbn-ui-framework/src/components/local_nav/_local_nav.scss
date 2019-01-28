@@ -11,12 +11,6 @@
   background-color: $localNavBackgroundColor;
   line-height: $kuiLineHeight;
   border-bottom: solid 1px $kuiColorLightGray;
-
-  @include darkTheme {
-    color: $localNavTextColor--darkTheme;
-    background-color: $localNavBackgroundColor--darkTheme;
-    border-color: darken($localNavBackgroundColor--darkTheme, 10%);
-  }
 }
 
 /**
