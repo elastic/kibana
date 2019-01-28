@@ -19,7 +19,6 @@ const metricTests: KbnTestProvider = ({ getService }) => {
   const client = getService('infraOpsGraphQLClient');
 
   describe('metrics', () => {
-
     before(() => esArchiver.load('infra/7.0.0/hosts'));
     after(() => esArchiver.unload('infra/7.0.0/hosts'));
 
