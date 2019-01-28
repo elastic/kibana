@@ -27,7 +27,7 @@ const TIME_NOW = 'now';
 function cantLookup(timeFrom, timeTo, dateFormat) {
   const displayFrom = formatTimeString(timeFrom, dateFormat);
   const displayTo = formatTimeString(timeTo, dateFormat, true);
-  return i18n.translate(`kbn.timeline.fullTimeRange`, {
+  return i18n.translate('common.ui.timepicker.fullTimeRange', {
     defaultMessage: '{displayFrom} to {displayTo}',
     values: {
       displayFrom,
@@ -41,7 +41,7 @@ function formatTimeString(timeString, dateFormat, roundUp = false) {
     return moment(timeString).format(dateFormat);
   } else {
     if (timeString === TIME_NOW) {
-      return i18n.translate(`kbn.timeline.timeNow`, { defaultMessage: 'now' });
+      return i18n.translate('common.ui.timepicker.timeNow', { defaultMessage: 'now' });
     } else {
       const tryParse = dateMath.parse(timeString, { roundUp: roundUp });
       return moment.isMoment(tryParse) ? '~ ' + tryParse.fromNow() : timeString;
@@ -71,13 +71,13 @@ export function prettyDuration(timeFrom, timeTo, getConfig) {
       const [start, end] = timeFrom.toString().split('-');
       if (timeTo.toString() === TIME_NOW && start === TIME_NOW && end) {
         const [amount, unitId] = end.split('/');
-        let text = i18n.translate(`kbn.timeline.timeUntilNowStr`, {
+        let text = i18n.translate('common.ui.timepicker.timeUntilNowStr', {
           defaultMessage: 'Last {amount}',
           values: { amount }
         });
 
         if (unitId) {
-          text = text + ' ' + i18n.translate(`kbn.timeline.roundedTo`, {
+          text = text + ' ' + i18n.translate('common.ui.timepicker.roundedTo', {
             defaultMessage: 'rounded to the {unit}',
             values: { unit: timeUnits[unitId] }
           });

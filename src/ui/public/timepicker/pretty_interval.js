@@ -28,27 +28,27 @@ export function prettyInterval(intervalInMs) {
   let interval;
   let units;
   if (intervalInMs === 0) {
-    return i18n.translate(`kbn.timeline.off`, { defaultMessage: 'off' });
+    return i18n.translate('common.ui.timepicker.off', { defaultMessage: 'off' });
   } else if (intervalInMs < MS_IN_MINUTE) {
     interval = Math.round(intervalInMs / MS_IN_SECOND);
     units = (interval > 1 ?
-      (i18n.translate(`kbn.timeline.seconds`, { defaultMessage: 'seconds' })) :
-      (i18n.translate(`kbn.timeline.second`, { defaultMessage: 'second' })));
+      (i18n.translate('common.ui.timepicker.seconds', { defaultMessage: 'seconds' })) :
+      (i18n.translate('common.ui.timepicker.second', { defaultMessage: 'second' })));
   } else if (intervalInMs < MS_IN_HOUR) {
     interval = Math.round(intervalInMs / MS_IN_MINUTE);
     units = (interval > 1 ?
-      (i18n.translate(`kbn.timeline.minutes`, { defaultMessage: 'minutes' })) :
-      (i18n.translate(`kbn.timeline.minute`, { defaultMessage: 'minute' })));
+      (i18n.translate('common.ui.timepicker.minutes', { defaultMessage: 'minutes' })) :
+      (i18n.translate('common.ui.timepicker.minute', { defaultMessage: 'minute' })));
   } else if (intervalInMs < MS_IN_DAY) {
     interval = Math.round(intervalInMs / MS_IN_HOUR);
     units = (interval > 1 ?
-      (i18n.translate(`kbn.timeline.hours`, { defaultMessage: 'hours' })) :
-      (i18n.translate(`kbn.timeline.hour`, { defaultMessage: 'hour' })));
+      (i18n.translate('common.ui.timepicker.hours', { defaultMessage: 'hours' })) :
+      (i18n.translate('common.ui.timepicker.hour', { defaultMessage: 'hour' })));
   } else {
     interval = Math.round(intervalInMs / MS_IN_DAY);
     units = (interval > 1 ?
-      (i18n.translate(`kbn.timeline.hours`, { defaultMessage: 'days' })) :
-      (i18n.translate(`kbn.timeline.hour`, { defaultMessage: 'day' })));
+      (i18n.translate('common.ui.timepicker.days', { defaultMessage: 'days' })) :
+      (i18n.translate('common.ui.timepicker.day', { defaultMessage: 'day' })));
   }
 
   return `${interval} ${units}`;
