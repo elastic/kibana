@@ -105,7 +105,7 @@ const getHostsColumns = (): Array<Columns<HostsEdges>> => [
     name: i18n.NAME,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }: HostsEdges) => {
+    render: ({ node }) => {
       const hostName: string | null = get('host.name', node);
       if (hostName != null) {
         return (
