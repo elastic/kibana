@@ -8,6 +8,7 @@ import { defaultWidth } from '../../../components/timeline/body';
 import { Sort } from '../../../components/timeline/body/sort';
 import { DataProvider } from '../../../components/timeline/data_providers/data_provider';
 import { Direction } from '../../../graphql/types';
+import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';
@@ -36,7 +37,10 @@ export interface TimelineModel {
   /** determines the behavior of the KQL bar */
   kqlMode: KqlMode;
   /** the KQL query in the KQL bar */
-  kqlQuery: string;
+  kqlQuery: {
+    filterQuery: SerializedFilterQuery | null;
+    filterQueryDraft: KueryFilterQuery | null;
+  };
   /** Title */
   title: string;
   /** Notes added to the timeline itself. Notes added to events are stored (separately) in `eventIdToNote` */
@@ -86,7 +90,10 @@ export const timelineDefaults: Readonly<
   itemsPerPage: 25,
   itemsPerPageOptions: [10, 25, 50],
   kqlMode: 'filter',
-  kqlQuery: '',
+  kqlQuery: {
+    filterQuery: null,
+    filterQueryDraft: null,
+  },
   title: '',
   noteIds: [],
   pinnedEventIds: {},

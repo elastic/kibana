@@ -47,7 +47,8 @@ export const sharedSchema = gql`
 
   enum IndexType {
     ANY
-    LOGS
+    FILEBEAT
     AUDITBEAT
+    PACKETBEAT
   }
 `;

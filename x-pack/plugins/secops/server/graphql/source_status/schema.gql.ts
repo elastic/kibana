@@ -39,6 +39,6 @@ export const sourceStatusSchema = gql`
     "The list of indices in the packetbeat alias"
     packetbeatIndices: [String!]!
     "The list of fields defined in the index mappings"
-    indexFields(indexType: IndexType = ANY): [IndexField!]!
+    indexFields(indexTypes: [IndexType!] = [ANY]): [IndexField!]!
   }
 `;

@@ -15,7 +15,7 @@ export const NO_AUDITBEAT_INDICES = i18n.translate('xpack.secops.hosts.noAuditBe
 });
 
 export const KQL_PACE_HOLDER = i18n.translate('xpack.secops.hosts.kqlPlaceHolder', {
-  defaultMessage: 'Search for host… (e.g. host.name:host-1)',
+  defaultMessage: 'Search… (e.g. host.name:"foo" AND process.name:"bar")',
 });
 
 export const LETS_ADD_SOME = i18n.translate('xpack.secops.hosts.letsAddSome', {

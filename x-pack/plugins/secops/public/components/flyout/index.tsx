@@ -10,10 +10,9 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import styled from 'styled-components';
-
 import { ActionCreator } from 'typescript-fsa';
-import { State, timelineActions } from '../../store';
-import { timelineByIdSelector } from '../../store/selectors';
+
+import { State, timelineActions, timelineSelectors } from '../../store';
 import { defaultWidth } from '../timeline/body';
 import { DataProvider } from '../timeline/data_providers/data_provider';
 import { FlyoutButton } from './button';
@@ -103,7 +102,7 @@ export const FlyoutComponent = pure<Props>(
 );
 
 const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
-  const timelineById = defaultTo({}, timelineByIdSelector(state));
+  const timelineById = defaultTo({}, timelineSelectors.timelineByIdSelector(state));
   const dataProviders = getOr([], `${timelineId}.dataProviders`, timelineById);
   const show = getOr('false', `${timelineId}.show`, timelineById);
   const width = getOr(defaultWidth, `${timelineId}.width`, timelineById);

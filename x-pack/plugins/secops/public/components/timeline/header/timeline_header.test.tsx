@@ -18,6 +18,41 @@ import { TimelineHeader } from './timeline_header';
 
 describe('Header', () => {
   const state: State = mockGlobalState;
+  const indexPattern = {
+    fields: [
+      {
+        name: '@timestamp',
+        searchable: true,
+        type: 'date',
+        aggregatable: true,
+      },
+      {
+        name: '@version',
+        searchable: true,
+        type: 'string',
+        aggregatable: true,
+      },
+      {
+        name: 'agent.ephemeral_id',
+        searchable: true,
+        type: 'string',
+        aggregatable: true,
+      },
+      {
+        name: 'agent.hostname',
+        searchable: true,
+        type: 'string',
+        aggregatable: true,
+      },
+      {
+        name: 'agent.id',
+        searchable: true,
+        type: 'string',
+        aggregatable: true,
+      },
+    ],
+    title: 'filebeat-*,auditbeat-*,packetbeat-*',
+  };
 
   let store = createStore(state);
 
@@ -32,6 +67,7 @@ describe('Header', () => {
           <DragDropContext onDragEnd={noop}>
             <TimelineHeader
               id="foo"
+              indexPattern={indexPattern}
               columnHeaders={[]}
               dataProviders={mockDataProviders}
               onChangeDataProviderKqlQuery={noop}

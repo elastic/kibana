@@ -61,7 +61,10 @@ export const mockGlobalState: State = {
           isFavorite: false,
           isLive: false,
           kqlMode: 'filter',
-          kqlQuery: '',
+          kqlQuery: {
+            filterQuery: null,
+            filterQueryDraft: null,
+          },
           title: '',
           noteIds: [],
           range: '1 Day',

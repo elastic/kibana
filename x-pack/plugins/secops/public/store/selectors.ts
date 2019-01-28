@@ -5,9 +5,10 @@
  */
 
 export {
-  hostsSelectors,
+  appSelectors,
   dataProvidersSelector,
-  timelineByIdSelector,
   globalTimeRangeSelector,
   globalPolicySelector,
+  hostsSelectors,
+  timelineSelectors,
 } from './local';

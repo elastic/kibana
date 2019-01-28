@@ -43,6 +43,7 @@ interface Props {
   indexPattern: StaticIndexPattern;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
+  kqlQuery: string;
   onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
   onChangeDroppableAndProvider: OnChangeDroppableAndProvider;
   onChangeItemsPerPage: OnChangeItemsPerPage;
@@ -74,6 +75,7 @@ export const Timeline = pure<Props>(
     indexPattern,
     itemsPerPage,
     itemsPerPageOptions,
+    kqlQuery,
     onChangeDataProviderKqlQuery,
     onChangeDroppableAndProvider,
     onChangeItemsPerPage,
@@ -88,7 +90,7 @@ export const Timeline = pure<Props>(
     show,
     sort,
   }) => {
-    const combinedQueries = combineQueries(dataProviders, indexPattern);
+    const combinedQueries = combineQueries(dataProviders, indexPattern, kqlQuery);
     return (
       <>
         <AutoSizer detectAnyWindowResize={true} content>
@@ -98,6 +100,7 @@ export const Timeline = pure<Props>(
                 <TimelineHeader
                   columnHeaders={columnHeaders}
                   id={id}
+                  indexPattern={indexPattern}
                   dataProviders={dataProviders}
                   onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
                   onChangeDroppableAndProvider={onChangeDroppableAndProvider}

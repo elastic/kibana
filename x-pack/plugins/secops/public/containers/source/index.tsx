@@ -10,7 +10,7 @@ import { Query } from 'react-apollo';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { isUndefined } from 'lodash';
-import { SourceQuery } from '../../graphql/types';
+import { IndexType, SourceQuery } from '../../graphql/types';
 import { sourceQuery } from './index.gql_query';
 
 interface WithSourceArgs {
@@ -20,10 +20,15 @@ interface WithSourceArgs {
 
 interface WithSourceProps {
   children: (args: WithSourceArgs) => React.ReactNode;
+  indexTypes: IndexType[];
   sourceId: string;
 }
 
-export const WithSource = ({ children, sourceId }: WithSourceProps) => (
+export const WithSource = ({
+  children,
+  sourceId,
+  indexTypes = [IndexType.ANY],
+}: WithSourceProps) => (
   <Query<SourceQuery.Query, SourceQuery.Variables>
     query={sourceQuery}
     fetchPolicy="cache-first"
@@ -34,11 +39,25 @@ export const WithSource = ({ children, sourceId }: WithSourceProps) => (
       const logAlias = get('source.configuration.logAlias', data);
       const auditbeatAlias = get('source.configuration.auditbeatAlias', data);
       const packetbeatAlias = get('source.configuration.packetbeatAlias', data);
+      let indexPatternTitle: string[] = [];
+      if (indexTypes.includes(IndexType.ANY)) {
+        indexPatternTitle = [...indexPatternTitle, logAlias, auditbeatAlias, packetbeatAlias];
+      } else {
+        if (indexTypes.includes(IndexType.AUDITBEAT)) {
+          indexPatternTitle = [...indexPatternTitle, auditbeatAlias];
+        }
+        if (indexTypes.includes(IndexType.FILEBEAT)) {
+          indexPatternTitle = [...indexPatternTitle, logAlias];
+        }
+        if (indexTypes.includes(IndexType.PACKETBEAT)) {
+          indexPatternTitle = [...indexPatternTitle, packetbeatAlias];
+        }
+      }
       return children({
         auditbeatIndicesExist: get('source.status.auditbeatIndicesExist', data),
         indexPattern: {
           fields: get('source.status.indexFields', data),
-          title: `${logAlias},${auditbeatAlias},${packetbeatAlias}`,
+          title: indexPatternTitle.join(),
         },
       });
     }}

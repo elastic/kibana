@@ -429,7 +429,7 @@ export interface UncommonProcessesSourceArgs {
   filterQuery?: string | null;
 }
 export interface IndexFieldsSourceStatusArgs {
-  indexType?: IndexType | null;
+  indexTypes?: IndexType[] | null;
 }
 
 // ====================================================
@@ -438,8 +438,9 @@ export interface IndexFieldsSourceStatusArgs {
 
 export enum IndexType {
   ANY = 'ANY',
-  LOGS = 'LOGS',
+  FILEBEAT = 'FILEBEAT',
   AUDITBEAT = 'AUDITBEAT',
+  PACKETBEAT = 'PACKETBEAT',
 }
 
 export enum Direction {
@@ -967,6 +968,7 @@ export namespace GetKpiEventsQuery {
 export namespace SourceQuery {
   export type Variables = {
     sourceId?: string | null;
+    indexTypes?: IndexType[] | null;
   };
 
   export type Query = {

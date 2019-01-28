@@ -35,7 +35,7 @@ import { HostsTableQuery } from '../../containers/hosts/hosts_table.gql_query';
 import { KpiEventsQuery } from '../../containers/kpi_events';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
-import { KpiItem } from '../../graphql/types';
+import { IndexType, KpiItem } from '../../graphql/types';
 import { hostsSelectors, State } from '../../store';
 import * as i18n from './translations';
 
@@ -54,7 +54,7 @@ interface HostsComponentReduxProps {
 type HostsComponentProps = HostsComponentReduxProps;
 
 const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
-  <WithSource sourceId="default">
+  <WithSource sourceId="default" indexTypes={[IndexType.AUDITBEAT]}>
     {({ auditbeatIndicesExist, indexPattern }) =>
       indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
         <>

@@ -16,8 +16,12 @@ import {
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled, { injectGlobal } from 'styled-components';
+import { StaticIndexPattern } from 'ui/index_patterns';
 
+import { KueryAutocompletion } from '../../../containers/kuery_autocompletion';
+import { KueryFilterQuery } from '../../../store';
 import { KqlMode } from '../../../store/local/timeline/model';
+import { AutocompleteField } from '../../autocomplete_field';
 import { modes, options } from './helpers';
 import * as i18n from './translations';
 
@@ -32,6 +36,10 @@ injectGlobal`
 `;
 
 interface Props {
+  applyKqlFilterQuery: (expression: string) => void;
+  filterQueryDraft: KueryFilterQuery;
+  indexPattern: StaticIndexPattern;
+  isFilterQueryDraftValid: boolean;
   kqlMode: KqlMode;
   kqlQuery: string;
   timelineId: string;
@@ -44,15 +52,7 @@ interface Props {
       kqlMode: KqlMode;
     }
   ) => void;
-  updateKqlQuery: (
-    {
-      id,
-      kqlQuery,
-    }: {
-      id: string;
-      kqlQuery: string;
-    }
-  ) => void;
+  setKqlFilterQueryDraft: (expression: string) => void;
 }
 
 const SearchAndFilterContainer = styled.div`
@@ -67,7 +67,17 @@ const ModeFlexItem = styled(EuiFlexItem)`
 const SuperSelect = styled(EuiSuperSelect)``;
 
 export const SearchOrFilter = pure<Props>(
-  ({ kqlMode, kqlQuery, timelineId, updateKqlMode, updateKqlQuery }) => (
+  ({
+    applyKqlFilterQuery,
+    indexPattern,
+    isFilterQueryDraftValid,
+    filterQueryDraft,
+    kqlMode,
+    kqlQuery,
+    timelineId,
+    setKqlFilterQueryDraft,
+    updateKqlMode,
+  }) => (
     <SearchAndFilterContainer>
       <EuiFlexGroup data-test-subj="timeline-search-and-filter-container">
         <ModeFlexItem grow={false}>
@@ -85,22 +95,42 @@ export const SearchOrFilter = pure<Props>(
         </ModeFlexItem>
         <EuiFlexItem data-test-subj="timeline-search-container">
           <EuiToolTip content={modes[kqlMode].kqlBarTooltip}>
-            <EuiSearchBar
-              data-test-subj="timeline-search-bar"
-              box={{
-                placeholder: modes[kqlMode].placeholder,
-                incremental: false,
-                schema: {
-                  flags: [],
-                  fields: {},
-                },
-              }}
-              query={kqlQuery}
-              onChange={({ queryText }: { queryText: string }) =>
-                // TODO: this handler is NOT being called by `EuiSearchBar`, which causes the query entered by the user to disappear
-                updateKqlQuery({ id: timelineId, kqlQuery: queryText })
-              }
-            />
+            <>
+              {kqlMode === 'filter' && (
+                <EuiSearchBar
+                  data-test-subj="timeline-search-bar"
+                  box={{
+                    placeholder: modes[kqlMode].placeholder,
+                    incremental: false,
+                    schema: {
+                      flags: [],
+                      fields: {},
+                    },
+                  }}
+                  query=""
+                  onChange={({ queryText }: { queryText: string }) =>
+                    // TODO: this handler is NOT being called by `EuiSearchBar`, which causes the query entered by the user to disappear
+                    alert('I will be doing filter at one point')
+                  }
+                />
+              )}
+              {kqlMode === 'search' && (
+                <KueryAutocompletion indexPattern={indexPattern}>
+                  {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
+                    <AutocompleteField
+                      isLoadingSuggestions={isLoadingSuggestions}
+                      isValid={isFilterQueryDraftValid}
+                      loadSuggestions={loadSuggestions}
+                      onChange={setKqlFilterQueryDraft}
+                      onSubmit={applyKqlFilterQuery}
+                      placeholder={i18n.SEARCH_KQL_PLACEHOLDER}
+                      suggestions={suggestions}
+                      value={filterQueryDraft ? filterQueryDraft.expression : ''}
+                    />
+                  )}
+                </KueryAutocompletion>
+              )}
+            </>
           </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>

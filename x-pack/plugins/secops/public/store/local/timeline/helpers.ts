@@ -8,6 +8,7 @@ import { getOr, omit, uniq } from 'lodash/fp';
 import { TimelineById, TimelineState } from '.';
 import { Sort } from '../../../components/timeline/body/sort';
 import { DataProvider } from '../../../components/timeline/data_providers/data_provider';
+import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 import { KqlMode, timelineDefaults, TimelineModel } from './model';
 
 const EMPTY_TIMELINE_BY_ID: TimelineById = {}; // stable reference
@@ -268,6 +269,31 @@ export const addTimelineProvider = ({
   }
 };
 
+interface ApplyKqlFilterQueryDraftParams {
+  id: string;
+  filterQuery: SerializedFilterQuery;
+  timelineById: TimelineById;
+}
+
+export const applyKqlFilterQueryDraft = ({
+  id,
+  filterQuery,
+  timelineById,
+}: ApplyKqlFilterQueryDraftParams): TimelineById => {
+  const timeline = timelineById[id];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      kqlQuery: {
+        ...timeline.kqlQuery,
+        filterQuery,
+      },
+    },
+  };
+};
+
 interface UpdateTimelineKqlModeParams {
   id: string;
   kqlMode: KqlMode;
@@ -290,24 +316,27 @@ export const updateTimelineKqlMode = ({
   };
 };
 
-interface UpdateTimelineKqlQueryParams {
+interface UpdateKqlFilterQueryDraftParams {
   id: string;
-  kqlQuery: string;
+  filterQueryDraft: KueryFilterQuery;
   timelineById: TimelineById;
 }
 
-export const updateTimelineKqlQuery = ({
+export const updateKqlFilterQueryDraft = ({
   id,
-  kqlQuery,
+  filterQueryDraft,
   timelineById,
-}: UpdateTimelineKqlQueryParams): TimelineById => {
+}: UpdateKqlFilterQueryDraftParams): TimelineById => {
   const timeline = timelineById[id];
 
   return {
     ...timelineById,
     [id]: {
       ...timeline,
-      kqlQuery,
+      kqlQuery: {
+        ...timeline.kqlQuery,
+        filterQueryDraft,
+      },
     },
   };
 };

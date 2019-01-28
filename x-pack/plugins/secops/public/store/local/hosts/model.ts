@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { KueryFilterQuery, SerializedFilterQuery } from '../model';
+
 export interface BasicQuery {
   limit: number;
 }

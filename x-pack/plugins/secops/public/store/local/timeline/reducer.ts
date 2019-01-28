@@ -12,9 +12,11 @@ import {
   addNoteToEvent,
   addProvider,
   applyDeltaToWidth,
+  applyKqlFilterQuery,
   createTimeline,
   pinEvent,
   removeProvider,
+  setKqlFilterQueryDraft,
   showTimeline,
   unPinEvent,
   updateDataProviderEnabled,
@@ -27,7 +29,6 @@ import {
   updateItemsPerPage,
   updateItemsPerPageOptions,
   updateKqlMode,
-  updateKqlQuery,
   updatePageIndex,
   updateProviders,
   updateRange,
@@ -41,16 +42,17 @@ import {
   addTimelineNoteToEvent,
   addTimelineProvider,
   applyDeltaToCurrentWidth,
+  applyKqlFilterQueryDraft,
   pinTimelineEvent,
   removeTimelineProvider,
   unPinTimelineEvent,
   updateHighlightedDropAndProvider,
+  updateKqlFilterQueryDraft,
   updateTimelineDescription,
   updateTimelineIsFavorite,
   updateTimelineIsLive,
   updateTimelineItemsPerPage,
   updateTimelineKqlMode,
-  updateTimelineKqlQuery,
   updateTimelinePageIndex,
   updateTimelinePerPageOptions,
   updateTimelineProviderEnabled,
@@ -102,6 +104,18 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: addTimelineProvider({ id, provider, timelineById: state.timelineById }),
   }))
+  .case(applyKqlFilterQuery, (state, { id, filterQuery }) => ({
+    ...state,
+    timelineById: applyKqlFilterQueryDraft({ id, filterQuery, timelineById: state.timelineById }),
+  }))
+  .case(setKqlFilterQueryDraft, (state, { id, filterQueryDraft }) => ({
+    ...state,
+    timelineById: updateKqlFilterQueryDraft({
+      id,
+      filterQueryDraft,
+      timelineById: state.timelineById,
+    }),
+  }))
   .case(showTimeline, (state, { id, show }) => ({
     ...state,
     timelineById: updateTimelineShowTimeline({ id, show, timelineById: state.timelineById }),
@@ -152,10 +166,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   .case(updateKqlMode, (state, { id, kqlMode }) => ({
     ...state,
     timelineById: updateTimelineKqlMode({ id, kqlMode, timelineById: state.timelineById }),
-  }))
-  .case(updateKqlQuery, (state, { id, kqlQuery }) => ({
-    ...state,
-    timelineById: updateTimelineKqlQuery({ id, kqlQuery, timelineById: state.timelineById }),
   }))
   .case(updateTitle, (state, { id, title }) => ({
     ...state,

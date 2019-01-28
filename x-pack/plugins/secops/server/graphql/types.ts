@@ -458,7 +458,7 @@ export interface UncommonProcessesSourceArgs {
   filterQuery?: string | null;
 }
 export interface IndexFieldsSourceStatusArgs {
-  indexType?: IndexType | null;
+  indexTypes?: IndexType[] | null;
 }
 
 // ====================================================
@@ -467,8 +467,9 @@ export interface IndexFieldsSourceStatusArgs {
 
 export enum IndexType {
   ANY = 'ANY',
-  LOGS = 'LOGS',
+  FILEBEAT = 'FILEBEAT',
   AUDITBEAT = 'AUDITBEAT',
+  PACKETBEAT = 'PACKETBEAT',
 }
 
 export enum Direction {
@@ -767,7 +768,7 @@ export namespace SourceStatusResolvers {
     Context = SecOpsContext
   > = Resolver<R, Parent, Context, IndexFieldsArgs>;
   export interface IndexFieldsArgs {
-    indexType?: IndexType | null;
+    indexTypes?: IndexType[] | null;
   }
 }
 /** A descriptor of a field in an index */

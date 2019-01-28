@@ -5,3 +5,14 @@
  */
 
 export { inputsModel } from './inputs';
+export { timelineModel } from './timeline';
+
+export interface KueryFilterQuery {
+  kind: 'kuery';
+  expression: string;
+}
+
+export interface SerializedFilterQuery {
+  query: KueryFilterQuery;
+  serializedQuery: string;
+}

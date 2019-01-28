@@ -8,6 +8,7 @@ import { EuiHorizontalRule } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
+import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { ColumnHeaders } from '../body/column_headers';
 import { ColumnHeader } from '../body/column_headers/column_header';
@@ -29,6 +30,7 @@ import { StatefulSearchOrFilter } from '../search_or_filter';
 interface Props {
   columnHeaders: ColumnHeader[];
   id: string;
+  indexPattern: StaticIndexPattern;
   dataProviders: DataProvider[];
   onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
   onChangeDroppableAndProvider: OnChangeDroppableAndProvider;
@@ -51,6 +53,7 @@ export const TimelineHeader = pure<Props>(
   ({
     columnHeaders,
     id,
+    indexPattern,
     dataProviders,
     onChangeDataProviderKqlQuery,
     onChangeDroppableAndProvider,
@@ -75,7 +78,7 @@ export const TimelineHeader = pure<Props>(
         onToggleDataProviderExcluded={onToggleDataProviderExcluded}
         show={show}
       />
-      <StatefulSearchOrFilter timelineId={id} />
+      <StatefulSearchOrFilter timelineId={id} indexPattern={indexPattern} />
       <ColumnHeaders
         columnHeaders={columnHeaders}
         onColumnSorted={onColumnSorted}

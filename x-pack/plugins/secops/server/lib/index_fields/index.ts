@@ -22,15 +22,20 @@ export class IndexFields implements FieldsAdapter {
   public async getFields(
     request: FrameworkRequest,
     sourceId: string,
-    indexType: IndexType
+    indexTypes: IndexType[]
   ): Promise<IndexField[]> {
     const sourceConfiguration = await this.sources.getConfiguration(sourceId);
-    const includeAuditBeatIndices = [IndexType.ANY, IndexType.AUDITBEAT].includes(indexType);
-    const includeLogIndices = [IndexType.ANY, IndexType.LOGS].includes(indexType);
+    const includeAuditBeatIndices =
+      indexTypes.includes(IndexType.ANY) || indexTypes.includes(IndexType.AUDITBEAT);
+    const includeFileBeatIndices =
+      indexTypes.includes(IndexType.ANY) || indexTypes.includes(IndexType.FILEBEAT);
+    const includePacketBeatIndices =
+      indexTypes.includes(IndexType.ANY) || indexTypes.includes(IndexType.PACKETBEAT);
 
     const indices = [
       ...(includeAuditBeatIndices ? [sourceConfiguration.auditbeatAlias] : []),
-      ...(includeLogIndices ? [sourceConfiguration.logAlias] : []),
+      ...(includeFileBeatIndices ? [sourceConfiguration.logAlias] : []),
+      ...(includePacketBeatIndices ? [sourceConfiguration.packetbeatAlias] : []),
     ];
 
     return this.getIndexFields(request, indices);

@@ -10,10 +10,8 @@ import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
 import { WithSource } from '../../containers/source';
-import { timelineActions } from '../../store';
-import { timelineDefaults } from '../../store/local/timeline/model';
-import { State } from '../../store/reducer';
-import { timelineByIdSelector } from '../../store/selectors';
+import { IndexType } from '../../graphql/types';
+import { State, timelineActions, timelineModel, timelineSelectors } from '../../store';
 import { ColumnHeader } from './body/column_headers/column_header';
 import { columnRenderers, rowRenderers } from './body/renderers';
 import { Sort } from './body/sort';
@@ -42,6 +40,7 @@ interface StateReduxProps {
   dataProviders?: DataProvider[];
   itemsPerPage?: number;
   itemsPerPageOptions?: number[];
+  kqlQueryExpression: string;
   pageCount?: number;
   range?: string;
   sort?: Sort;
@@ -124,6 +123,7 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
       id,
       itemsPerPage,
       itemsPerPageOptions,
+      kqlQueryExpression,
       range,
       removeProvider,
       show,
@@ -169,7 +169,7 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
       updateHighlightedDropAndProviderId!({ id, providerId });
 
     return (
-      <WithSource sourceId="default">
+      <WithSource sourceId="default" indexTypes={[IndexType.ANY]}>
         {({ indexPattern }) => (
           <Timeline
             columnHeaders={headers}
@@ -180,6 +180,7 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
             flyoutHeight={flyoutHeight}
             itemsPerPage={itemsPerPage!}
             itemsPerPageOptions={itemsPerPageOptions!}
+            kqlQuery={kqlQueryExpression}
             onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
             onChangeDroppableAndProvider={onChangeDroppableAndProvider}
             onChangeItemsPerPage={onChangeItemsPerPage}
@@ -201,16 +202,28 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
   }
 }
 
-const mapStateToProps = (state: State, { id }: OwnProps) => {
-  const timeline = timelineByIdSelector(state)[id];
-  const { dataProviders, sort, show, itemsPerPage, itemsPerPageOptions } =
-    timeline || timelineDefaults;
-
-  return { id, dataProviders, sort, show, itemsPerPage, itemsPerPageOptions };
+const makeMapStateToProps = () => {
+  const getTimeline = timelineSelectors.getTimelineByIdSelector();
+  const getKqlQueryTimeline = timelineSelectors.getKqlFilterQuerySelector();
+  const mapStateToProps = (state: State, { id }: OwnProps) => {
+    const timeline: timelineModel.TimelineModel = getTimeline(state, id);
+    const { dataProviders, itemsPerPage, itemsPerPageOptions, sort, show } = timeline;
+    const kqlQueryExpression = getKqlQueryTimeline(state, id);
+    return {
+      dataProviders,
+      id,
+      itemsPerPage,
+      itemsPerPageOptions,
+      kqlQueryExpression,
+      sort,
+      show,
+    };
+  };
+  return mapStateToProps;
 };
 
 export const StatefulTimeline = connect(
-  mapStateToProps,
+  makeMapStateToProps,
   {
     addProvider: timelineActions.addProvider,
     createTimeline: timelineActions.createTimeline,

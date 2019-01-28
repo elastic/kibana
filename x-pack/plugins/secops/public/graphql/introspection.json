@@ -593,10 +593,18 @@
             "description": "The list of fields defined in the index mappings",
             "args": [
               {
-                "name": "indexType",
+                "name": "indexTypes",
                 "description": "",
-                "type": { "kind": "ENUM", "name": "IndexType", "ofType": null },
-                "defaultValue": "ANY"
+                "type": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": { "kind": "ENUM", "name": "IndexType", "ofType": null }
+                  }
+                },
+                "defaultValue": "[ANY]"
               }
             ],
             "type": {
@@ -640,9 +648,20 @@
         "interfaces": null,
         "enumValues": [
           { "name": "ANY", "description": "", "isDeprecated": false, "deprecationReason": null },
-          { "name": "LOGS", "description": "", "isDeprecated": false, "deprecationReason": null },
+          {
+            "name": "FILEBEAT",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "AUDITBEAT",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "PACKETBEAT",
             "description": "",
             "isDeprecated": false,
             "deprecationReason": null

@@ -8,9 +8,14 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import { StaticIndexPattern } from 'ui/index_patterns';
-import { convertKueryToElasticSearchQuery } from '../../lib/keury';
-import { hostsActions, hostsSelectors, State } from '../../store';
-import { KueryFilterQuery, SerializedFilterQuery } from '../../store/local/hosts/model';
+import {
+  hostsActions,
+  hostsSelectors,
+  KueryFilterQuery,
+  SerializedFilterQuery,
+  State,
+} from '../../store';
+import { getFilterComponent } from '../utils/filter_component';
 
 export interface HostsFilterArgs {
   applyFilterQueryFromKueryExpression: (expression: string) => void;
@@ -46,23 +51,15 @@ const HostsFilterComponent = pure<HostsFilterProps>(
     setHostsFilterQueryDraft,
   }) => (
     <>
-      {children({
-        applyFilterQueryFromKueryExpression: (expression: string) =>
-          applyHostsFilterQuery({
-            query: {
-              kind: 'kuery',
-              expression,
-            },
-            serializedQuery: convertKueryToElasticSearchQuery(expression, indexPattern),
-          }),
-        filterQueryDraft: hostsFilterQueryDraft,
-        isFilterQueryDraftValid: isHostFilterQueryDraftValid,
-        setFilterQueryDraftFromKueryExpression: (expression: string) =>
-          setHostsFilterQueryDraft({
-            kind: 'kuery',
-            expression,
-          }),
-      })}
+      {children(
+        getFilterComponent({
+          applyFilterQuery: applyHostsFilterQuery,
+          filterQueryDraft: hostsFilterQueryDraft,
+          indexPattern,
+          isFilterQueryDraftValid: isHostFilterQueryDraftValid,
+          setFilterQueryDraft: setHostsFilterQueryDraft,
+        })
+      )}
     </>
   )
 );

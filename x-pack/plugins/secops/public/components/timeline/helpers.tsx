@@ -53,16 +53,22 @@ export const buildGlobalQuery = (dataProviders: DataProvider[]) =>
 
 export const combineQueries = (
   dataProviders: DataProvider[],
-  indexPattern: StaticIndexPattern
+  indexPattern: StaticIndexPattern,
+  kqlQuery: string
 ): { filterQuery: string } | null => {
-  if (isEmpty(dataProviders)) {
+  if (isEmpty(dataProviders) && isEmpty(kqlQuery)) {
     return null;
+  } else if (isEmpty(dataProviders) && !isEmpty(kqlQuery)) {
+    return {
+      filterQuery: convertKueryToElasticSearchQuery(kqlQuery, indexPattern),
+    };
+  } else if (!isEmpty(dataProviders) && isEmpty(kqlQuery)) {
+    return {
+      filterQuery: convertKueryToElasticSearchQuery(buildGlobalQuery(dataProviders), indexPattern),
+    };
   }
-
-  const globalQuery = buildGlobalQuery(dataProviders);
-  if (isEmpty(globalQuery)) {
-    return null;
-  }
+  const postpend = (q: string) => `${!isEmpty(q) ? ` or (${q})` : ''}`;
+  const globalQuery = `${buildGlobalQuery(dataProviders)}${postpend(kqlQuery)}`;
 
   return {
     filterQuery: convertKueryToElasticSearchQuery(globalQuery, indexPattern),
