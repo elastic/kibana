@@ -431,11 +431,13 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
           error_type: {
             terms: {
               field: 'error.type',
+              size: 100,
             },
             aggs: {
               by_id: {
                 terms: {
                   field: 'monitor.id',
+                  size: 100,
                 },
                 aggs: {
                   latest: {
