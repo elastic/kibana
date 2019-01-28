@@ -1,0 +1,217 @@
+{
+  "allPings": {
+    "total": 798,
+    "pings": [
+      {
+        "timestamp": "2019-01-18T22:03:04.383Z",
+        "http": { "response": { "status_code": 200 } },
+        "error": null,
+        "monitor": {
+          "duration": { "us": 567900 },
+          "id": "http@https://www.elastic.co",
+          "ip": "151.101.210.217",
+          "name": "http",
+          "scheme": "https",
+          "status": "up",
+          "type": "http"
+        }
+      },
+      {
+        "timestamp": "2019-01-18T22:03:07.383Z",
+        "http": { "response": { "status_code": 200 } },
+        "error": null,
+        "monitor": {
+          "duration": { "us": 872441 },
+          "id": "http@https://www.elastic.co",
+          "ip": "151.101.210.217",
+          "name": "http",
+          "scheme": "https",
+          "status": "up",
+          "type": "http"
+        }
+      },
+      {
+        "timestamp": "2019-01-18T22:02:34.383Z",
+        "http": { "response": { "status_code": 200 } },
+        "error": null,
+        "monitor": {
+          "duration": { "us": 738176 },
+          "id": "http@https://www.elastic.co",
+          "ip": "151.101.202.217",
+          "name": "http",
+          "scheme": "https",
+          "status": "up",
+          "type": "http"
+        }
+      },
+      {
+        "timestamp": "2019-01-18T22:02:37.383Z",
+        "http": { "response": { "status_code": 200 } },
+        "error": null,
+        "monitor": {
+          "duration": { "us": 684949 },
+          "id": "http@https://www.elastic.co",
+          "ip": "151.101.202.217",
+          "name": "http",
+          "scheme": "https",
+          "status": "up",
+          "type": "http"
+        }
+      },
+      {
+        "timestamp": "2019-01-18T22:02:49.383Z",
+        "http": { "response": { "status_code": 200 } },
+        "error": null,
+        "monitor": {
+          "duration": { "us": 830951 },
+          "id": "http@https://www.elastic.co",
+          "ip": "151.101.210.217",
+          "name": "http",
+          "scheme": "https",
+          "status": "up",
+          "type": "http"
+        }
+      },
+      {
+        "timestamp": "2019-01-18T22:02:52.383Z",
+        "http": { "response": { "status_code": 200 } },
+        "error": null,
+        "monitor": {
+          "duration": { "us": 849573 },
+          "id": "http@https://www.elastic.co",
+          "ip": "151.101.210.217",
+          "name": "http",
+          "scheme": "https",
+          "status": "up",
+          "type": "http"
+        }
+      },
+      {
+        "timestamp": "2019-01-18T22:03:16.383Z",
+        "http": { "response": { "status_code": 200 } },
+        "error": null,
+        "monitor": {
+          "duration": { "us": 835426 },
+          "id": "http@https://www.elastic.co",
+          "ip": "151.101.210.217",
+          "name": "http",
+          "scheme": "https",
+          "status": "up",
+          "type": "http"
+        }
+      },
+      {
+        "timestamp": "2019-01-18T22:02:46.384Z",
+        "http": { "response": { "status_code": 200 } },
+        "error": null,
+        "monitor": {
+          "duration": { "us": 759308 },
+          "id": "http@https://www.elastic.co",
+          "ip": "151.101.202.217",
+          "name": "http",
+          "scheme": "https",
+          "status": "up",
+          "type": "http"
+        }
+      },
+      {
+        "timestamp": "2019-01-18T22:03:01.383Z",
+        "http": { "response": { "status_code": 200 } },
+        "error": null,
+        "monitor": {
+          "duration": { "us": 790639 },
+          "id": "http@https://www.elastic.co",
+          "ip": "151.101.210.217",
+          "name": "http",
+          "scheme": "https",
+          "status": "up",
+          "type": "http"
+        }
+      },
+      {
+        "timestamp": "2019-01-18T22:02:55.387Z",
+        "http": { "response": { "status_code": 200 } },
+        "error": null,
+        "monitor": {
+          "duration": { "us": 775795 },
+          "id": "http@https://www.elastic.co",
+          "ip": "151.101.210.217",
+          "name": "http",
+          "scheme": "https",
+          "status": "up",
+          "type": "http"
+        }
+      },
+      {
+        "timestamp": "2019-01-18T22:02:58.383Z",
+        "http": { "response": { "status_code": 200 } },
+        "error": null,
+        "monitor": {
+          "duration": { "us": 859491 },
+          "id": "http@https://www.elastic.co",
+          "ip": "151.101.210.217",
+          "name": "http",
+          "scheme": "https",
+          "status": "up",
+          "type": "http"
+        }
+      },
+      {
+        "timestamp": "2019-01-18T22:02:40.384Z",
+        "http": { "response": { "status_code": 200 } },
+        "error": null,
+        "monitor": {
+          "duration": { "us": 773959 },
+          "id": "http@https://www.elastic.co",
+          "ip": "151.101.202.217",
+          "name": "http",
+          "scheme": "https",
+          "status": "up",
+          "type": "http"
+        }
+      },
+      {
+        "timestamp": "2019-01-18T22:02:43.385Z",
+        "http": { "response": { "status_code": 200 } },
+        "error": null,
+        "monitor": {
+          "duration": { "us": 483803 },
+          "id": "http@https://www.elastic.co",
+          "ip": "151.101.202.217",
+          "name": "http",
+          "scheme": "https",
+          "status": "up",
+          "type": "http"
+        }
+      },
+      {
+        "timestamp": "2019-01-18T22:03:10.384Z",
+        "http": { "response": { "status_code": 200 } },
+        "error": null,
+        "monitor": {
+          "duration": { "us": 849835 },
+          "id": "http@https://www.elastic.co",
+          "ip": "151.101.210.217",
+          "name": "http",
+          "scheme": "https",
+          "status": "up",
+          "type": "http"
+        }
+      },
+      {
+        "timestamp": "2019-01-18T22:03:13.387Z",
+        "http": { "response": { "status_code": 200 } },
+        "error": null,
+        "monitor": {
+          "duration": { "us": 872957 },
+          "id": "http@https://www.elastic.co",
+          "ip": "151.101.210.217",
+          "name": "http",
+          "scheme": "https",
+          "status": "up",
+          "type": "http"
+        }
+      }
+    ]
+  }
+}

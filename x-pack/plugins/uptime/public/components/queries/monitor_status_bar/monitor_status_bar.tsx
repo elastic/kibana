@@ -4,17 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import moment from 'moment';
+import { ApolloError } from 'apollo-client';
+import { get } from 'lodash';
 import React from 'react';
 import { Query } from 'react-apollo';
+import { Ping } from 'x-pack/plugins/uptime/common/graphql/types';
 import { UptimeCommonProps } from '../../../uptime_app';
-import { createGetMonitorStatusBarQuery } from './get_monitor_status_bar';
+import { StatusBar } from '../../functional';
+import { EmptyStatusBar } from '../../functional/empty_status_bar';
+import { formatDuration } from './format_duration';
+import { getMonitorStatusBarQuery } from './get_monitor_status_bar';
 
 interface MonitorStatusBarProps {
   monitorId: string;
+}
+
+interface MonitorStatusBarQueryParams {
+  loading: boolean;
+  error?: ApolloError | any;
+  data?: { monitorStatus: Ping[] };
 }
 
 type Props = MonitorStatusBarProps & UptimeCommonProps;
@@ -28,14 +37,12 @@ export const MonitorStatusBar = ({
 }: Props) => (
   <Query
     pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
-    query={createGetMonitorStatusBarQuery}
+    query={getMonitorStatusBarQuery}
     variables={{ dateRangeStart, dateRangeEnd, monitorId }}
   >
-    {({ loading, error, data }) => {
+    {({ loading, error, data }: MonitorStatusBarQueryParams) => {
       if (loading) {
-        return i18n.translate('xpack.uptime.monitorStatusBar.loadingMessage', {
-          defaultMessage: 'Loading…',
-        });
+        return <EmptyStatusBar message="Fetching data" monitorId={monitorId} />;
       }
       if (error) {
         return i18n.translate('xpack.uptime.monitorStatusBar.errorMessage', {
@@ -43,91 +50,28 @@ export const MonitorStatusBar = ({
           defaultMessage: 'Error {message}',
         });
       }
-      const { monitorStatus } = data;
-      if (!monitorStatus.length) {
-        return i18n.translate('xpack.uptime.monitorStatusBar.noDataMessage', {
-          values: { monitorId },
-          defaultMessage: 'No data found for monitor id {monitorId}',
-        });
+
+      const monitorStatus: Ping[] = get(data, 'monitorStatus');
+      if (!monitorStatus || !monitorStatus.length) {
+        return <EmptyStatusBar monitorId={monitorId} />;
       }
-      const {
-        monitor: {
-          status,
-          timestamp,
-          host,
-          duration: { us },
-          scheme,
-        },
-        tcp: { port },
-      } = monitorStatus[0];
+
+      const { monitor, timestamp, tcp } = monitorStatus[0];
+      const status = get(monitor, 'status', undefined);
+      const host = get(monitor, 'host', undefined);
+      const port = get(tcp, 'port', undefined);
+      const scheme = get(monitor, 'scheme', undefined);
+      const duration = parseInt(get(monitor, 'duration.us'), 10);
 
       return (
-        <EuiPanel>
-          <EuiFlexGroup gutterSize="l">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <FormattedMessage
-                    id="xpack.uptime.monitorStatusBar.statusLabel"
-                    defaultMessage="Status:"
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiHealth
-                    color={status === 'up' ? 'success' : 'danger'}
-                    style={{ lineHeight: 'inherit' }}
-                  >
-                    {status === 'up'
-                      ? i18n.translate(
-                          'xpack.uptime.monitorStatusBar.healthStatusMessage.upLabel',
-                          { defaultMessage: 'Up' }
-                        )
-                      : i18n.translate(
-                          'xpack.uptime.monitorStatusBar.healthStatusMessage.downLabel',
-                          { defaultMessage: 'Down' }
-                        )}
-                  </EuiHealth>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <FormattedMessage
-                id="xpack.uptime.monitorStatusBar.healthStatus.lastUpdateMessage"
-                values={{ timeFromNow: moment(timestamp).fromNow() }}
-                defaultMessage="Last update: {timeFromNow}"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <FormattedMessage
-                id="xpack.uptime.monitorStatusBar.healthStatus.hostMessage"
-                values={{ host }}
-                defaultMessage="Host: {host}"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <FormattedMessage
-                id="xpack.uptime.monitorStatusBar.healthStatus.portMessage"
-                values={{ port }}
-                defaultMessage="Port: {port}"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <FormattedMessage
-                id="xpack.uptime.monitorStatusBar.healthStatus.durationInMillisecondsMessage"
-                // TODO: this should not be computed inline
-                values={{ duration: us / 1000 }}
-                defaultMessage="Duration: {duration} ms"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <FormattedMessage
-                id="xpack.uptime.monitorStatusBar.healthStatus.schemeMessage"
-                values={{ scheme }}
-                defaultMessage="Scheme: {scheme}"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
+        <StatusBar
+          duration={formatDuration(duration)}
+          host={host}
+          port={port}
+          scheme={scheme}
+          status={status}
+          timestamp={timestamp}
+        />
       );
     }}
   </Query>

@@ -16,11 +16,11 @@ import {
   EuiPageContent,
   EuiCallOut,
   EuiSpacer,
-  EuiIcon
+  EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
-import { Tooltip } from 'plugins/monitoring/components/tooltip';
 import { AlertsIndicator } from 'plugins/monitoring/components/cluster/listing/alerts_indicator';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -49,15 +49,14 @@ const IsAlertsSupported = (props) => {
 
   const message = alertsMeta.message || clusterMeta.message;
   return (
-    <Tooltip
-      text={message}
-      placement="bottom"
-      trigger="hover"
+    <EuiToolTip
+      content={message}
+      position="bottom"
     >
       <EuiHealth color="subdued" data-test-subj="alertIcon">
         N/A
       </EuiHealth>
-    </Tooltip>
+    </EuiToolTip>
   );
 };
 

@@ -6,16 +6,20 @@
 
 import gql from 'graphql-tag';
 
-export const createGetLatestMonitorsQuery = gql`
-  query GetLatestMonitorQuery($dateRangeStart: String!, $dateRangeEnd: String!) {
-    latestMonitors: getLatestMonitors(
-      dateRangeStart: $dateRangeStart
-      dateRangeEnd: $dateRangeEnd
-    ) {
-      monitor {
-        status
-        id
-      }
+export const getLatestMonitorsQueryString = `
+query GetLatestMonitorQuery($dateRangeStart: String!, $dateRangeEnd: String!) {
+  latestMonitors: getLatestMonitors(
+    dateRangeStart: $dateRangeStart
+    dateRangeEnd: $dateRangeEnd
+  ) {
+    monitor {
+      status
+      id
     }
   }
+}
+`;
+
+export const getLatestMonitorsQuery = gql`
+  ${getLatestMonitorsQueryString}
 `;
