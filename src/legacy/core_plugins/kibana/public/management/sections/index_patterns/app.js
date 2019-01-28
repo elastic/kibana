@@ -19,7 +19,6 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
-// import { IndexPatternList } from './index_pattern_list';
 import { IndexPatternTable } from './index_pattern_table';
 import { CreateIndexPatternPrompt } from './create_index_pattern_prompt';
 
