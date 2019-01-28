@@ -717,8 +717,8 @@ describe('searchDsl/queryParams', () => {
     });
   });
 
-  describe('type (plural, namespaced and global), search, searchOperator', () => {
-    it('supports searchOperator', () => {
+  describe('type (plural, namespaced and global), search, defaultSearchOperator', () => {
+    it('supports defaultSearchOperator', () => {
       expect(getQueryParams(MAPPINGS, SCHEMA, 'foo-namespace', ['saved', 'global'], 'foo', null, 'AND'))
         .toEqual({
           query: {

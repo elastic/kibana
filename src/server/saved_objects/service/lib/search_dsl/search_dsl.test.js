@@ -55,7 +55,7 @@ describe('getSearchDsl', () => {
         type: 'foo',
         search: 'bar',
         searchFields: ['baz'],
-        searchOperator: 'AND',
+        defaultSearchOperator: 'AND',
       };
 
       getSearchDsl(mappings, schema, opts);
@@ -68,7 +68,7 @@ describe('getSearchDsl', () => {
         opts.type,
         opts.search,
         opts.searchFields,
-        opts.searchOperator,
+        opts.defaultSearchOperator,
       );
     });
 

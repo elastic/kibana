@@ -114,7 +114,7 @@ class SavedObjectFinderUI extends React.Component {
       page: 1,
       perPage: chrome.getUiSettingsClient().get('savedObjects:listingLimit'),
       searchFields: ['title^3', 'description'],
-      searchOperator: 'AND',
+      defaultSearchOperator: 'AND',
     });
 
     if (this.props.savedObjectType === 'visualization'

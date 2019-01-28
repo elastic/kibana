@@ -26,7 +26,7 @@ export function getSearchDsl(mappings, schema, options = {}) {
   const {
     type,
     search,
-    searchOperator,
+    defaultSearchOperator,
     searchFields,
     sortField,
     sortOrder,
@@ -42,7 +42,7 @@ export function getSearchDsl(mappings, schema, options = {}) {
   }
 
   return {
-    ...getQueryParams(mappings, schema, namespace, type, search, searchFields, searchOperator),
+    ...getQueryParams(mappings, schema, namespace, type, search, searchFields, defaultSearchOperator),
     ...getSortingParams(mappings, type, sortField, sortOrder),
   };
 }
