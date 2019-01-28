@@ -287,16 +287,11 @@ export class VectorLayer extends AbstractLayer {
       })
     ];
 
-    const searchFilters = {
+    return {
       ...dataFilters,
       fieldNames: _.uniq(fieldNames).sort(),
+      precision: this._source.getGeoGridPrecision(dataFilters.zoom),
     };
-
-    if (this._source.isGeoGridPrecisionAware()) {
-      searchFilters.precision = this._source.getGeoGridPrecision(dataFilters.zoom);
-    }
-
-    return searchFilters;
   }
 
   async _syncSource({ startLoading, stopLoading, onLoadError, dataFilters }) {
