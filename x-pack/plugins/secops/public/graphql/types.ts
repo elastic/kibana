@@ -892,7 +892,11 @@ export namespace GetHostSummaryQuery {
   export type Os = {
     __typename?: 'OsEcsFields';
 
+    family?: string | null;
+
     name?: string | null;
+
+    platform?: string | null;
 
     version?: string | null;
   };

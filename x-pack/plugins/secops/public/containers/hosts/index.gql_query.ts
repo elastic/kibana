@@ -67,7 +67,9 @@ export const HostSummaryQuery = gql`
               mac
               name
               os {
+                family
                 name
+                platform
                 version
               }
             }

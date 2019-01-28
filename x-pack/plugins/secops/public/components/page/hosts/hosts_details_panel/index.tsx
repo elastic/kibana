@@ -19,6 +19,7 @@ import { pure } from 'recompose';
 import uuid from 'uuid';
 import { HostsEdges } from 'x-pack/plugins/secops/server/graphql/types';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
+import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { getEmptyValue, getOrEmpty } from '../../../empty_value';
 import { Provider } from '../../../timeline/data_providers/provider';
 import * as i18n from './translations';
@@ -50,9 +51,9 @@ const fieldTitleMapping: Readonly<Record<string, string>> = {
   'node.host.ip': i18n.IP_ADDRESS,
   'node.host.mac': i18n.MAC_ADDRESS,
   'node.type': i18n.TYPE,
-  'node.lastSeen': i18n.PLATFORM,
+  'node.host.os.platform': i18n.PLATFORM,
   'node.host.os.name': i18n.OS_NAME,
-  'node.family': i18n.FAMILY,
+  'node.host.os.family': i18n.FAMILY,
   'node.host.os.version': i18n.VERSION,
   'node.host.architecture': i18n.ARCHITECTURE,
 };
@@ -67,8 +68,8 @@ const getEuiDescriptionList = (host: HostsEdges) => {
             <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
               {_.isArray(summaryValue)
-                ? summaryValue.map(v => createDraggable(v.toString(), field, title, host)) // TODO: Fix typing to ECS
-                : createDraggable(summaryValue, field, title, host)}
+                ? summaryValue.map(v => createDraggable(v.toString(), field, host)) // TODO: Fix typing to ECS
+                : createDraggable(summaryValue, field.replace(/^node./, ''), host)}
             </EuiDescriptionListDescription>
           </React.Fragment>
         );
@@ -77,7 +78,7 @@ const getEuiDescriptionList = (host: HostsEdges) => {
   );
 };
 
-const createDraggable = (summaryValue: string, field: string, title: string, host: HostsEdges) => {
+const createDraggable = (summaryValue: string, field: string, host: HostsEdges) => {
   return summaryValue === getEmptyValue() ? (
     <>{summaryValue}</>
   ) : (
@@ -87,18 +88,16 @@ const createDraggable = (summaryValue: string, field: string, title: string, hos
         and: [],
         enabled: true,
         excluded: false,
-        id: `${uuid.v4()}`, // TODO: https://github.com/elastic/ingest-dev/issues/223
+        id: escapeDataProviderId(`${uuid.v4()}`), // TODO: https://github.com/elastic/ingest-dev/issues/223
         name: summaryValue,
         kqlQuery: '',
         queryMatch: {
-          displayField: field, // TODO: Remove .node prefix?
-          displayValue: summaryValue,
           field,
           value: summaryValue,
         },
         queryDate: {
           from: moment().valueOf(),
-          to: moment().valueOf(),
+          to: Date.now(),
         },
       }}
       render={(dataProvider, _, snapshot) =>
