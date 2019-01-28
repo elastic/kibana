@@ -6,9 +6,9 @@
 
 import _ from 'lodash';
 import { connect } from 'react-redux';
-import { TOCEntry } from './toc_entry';
+import { TOCEntry } from './view';
 import { updateFlyout, FLYOUT_STATE } from '../../../../../store/ui';
-import { setSelectedLayer, toggleLayerVisible } from '../../../../../actions/store_actions';
+import { fitToLayerExtent, setSelectedLayer, toggleLayerVisible } from '../../../../../actions/store_actions';
 
 function mapStateToProps(state = {}) {
   return {
@@ -22,7 +22,12 @@ function mapDispatchToProps(dispatch) {
       dispatch(setSelectedLayer(layerId));
       dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
     },
-    toggleVisible: layerId => dispatch(toggleLayerVisible(layerId))
+    toggleVisible: layerId => {
+      dispatch(toggleLayerVisible(layerId));
+    },
+    fitToBounds: (layerId) => {
+      dispatch(fitToLayerExtent(layerId));
+    }
   });
 }
 

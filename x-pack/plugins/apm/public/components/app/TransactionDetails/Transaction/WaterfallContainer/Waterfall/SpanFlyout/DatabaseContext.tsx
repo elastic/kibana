@@ -16,7 +16,7 @@ import SyntaxHighlighter, {
 // @ts-ignore
 import { xcode } from 'react-syntax-highlighter/dist/styles';
 import styled from 'styled-components';
-import { DbContext } from '../../../../../../../../typings/es_schemas/Span';
+import { Span } from 'x-pack/plugins/apm/typings/es_schemas/Span';
 import {
   borderRadius,
   colors,
@@ -37,7 +37,7 @@ const DatabaseStatement = styled.div`
 `;
 
 interface Props {
-  dbContext?: DbContext;
+  dbContext?: NonNullable<Span['context']>['db'];
 }
 
 export function DatabaseContext({ dbContext }: Props) {

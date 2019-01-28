@@ -58,11 +58,9 @@ export const vega = () => ({
       as: 'visualization',
       value: {
         visData: response,
+        visType: 'vega',
         visConfig: {
-          type: 'vega',
-          params: {
-            spec: args.spec
-          }
+          spec: args.spec
         },
       }
     };

@@ -12,10 +12,10 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 
-import { TMSSource } from './tms_source';
+import { AbstractTMSSource } from './tms_source';
 import { TileLayer } from '../tile_layer';
 
-export class XYZTMSSource extends TMSSource {
+export class XYZTMSSource extends AbstractTMSSource {
 
   static type = 'EMS_XYZ';
   static title = 'Tile Map Service from URL';

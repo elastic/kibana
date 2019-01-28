@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       await esArchiver.loadIfNeeded('large_fields');
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
+      await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.createIndexPattern('testhuge', 'date');
     });
 
