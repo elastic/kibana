@@ -103,6 +103,9 @@ export const getFormat = (mapping: any) => {
 };
 
 export const getTableAggs = (vis: Vis): AggConfig[] => {
+  if (!vis.aggs || !vis.aggs.getResponseAggs) {
+    return [];
+  }
   const columns = tabifyGetColumns(vis.aggs.getResponseAggs(), !vis.isHierarchical());
   return columns.map((c: any) => c.aggConfig);
 };

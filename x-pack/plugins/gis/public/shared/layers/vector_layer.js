@@ -5,10 +5,11 @@
  */
 
 import mapboxgl from 'mapbox-gl';
+import turf from 'turf';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { ALayer } from './layer';
+import { AbstractLayer } from './layer';
 import { VectorStyle } from './styles/vector_style';
 import { LeftInnerJoin } from './joins/left_inner_join';
 
@@ -23,7 +24,7 @@ const EMPTY_FEATURE_COLLECTION = {
   features: []
 };
 
-export class VectorLayer extends ALayer {
+export class VectorLayer extends AbstractLayer {
 
   static type = 'VECTOR';
 
@@ -91,6 +92,10 @@ export class VectorLayer extends ALayer {
     return this._style.getIcon(isPointsOnly);
   }
 
+  getLayerTypeIconName() {
+    return 'vector';
+  }
+
   getColorRamp() {
     // TODO: Determine if can be data-driven first
     return this._style.getColorRamp();
@@ -98,6 +103,27 @@ export class VectorLayer extends ALayer {
 
   getTOCDetails() {
     return this._style.getTOCDetails();
+  }
+
+  _getBoundsBasedOnData() {
+    const featureCollection = this._getSourceFeatureCollection();
+    if (!featureCollection) {
+      return null;
+    }
+    const bbox =  turf.bbox(featureCollection);
+    return {
+      min_lon: bbox[0],
+      min_lat: bbox[1],
+      max_lon: bbox[2],
+      max_lat: bbox[3]
+    };
+  }
+
+  async getBounds(filters) {
+    if (this._source.isBoundsAware()) {
+      return await this._source.getBoundsForFilters(filters);
+    }
+    return this._getBoundsBasedOnData();
   }
 
   async getStringFields() {
@@ -254,7 +280,6 @@ export class VectorLayer extends ALayer {
     return await Promise.all(joinSyncs);
   }
 
-
   _getSearchFilters(dataFilters) {
     const fieldNames = [
       ...this._source.getFieldNames(),
@@ -373,7 +398,7 @@ export class VectorLayer extends ALayer {
       return;
     }
 
-    const dataBoundToMap = ALayer.getBoundDataForSource(mbMap, this.getId());
+    const dataBoundToMap = AbstractLayer.getBoundDataForSource(mbMap, this.getId());
     if (featureCollection !== dataBoundToMap) {
       mbGeoJSONSource.setData(featureCollection);
     }

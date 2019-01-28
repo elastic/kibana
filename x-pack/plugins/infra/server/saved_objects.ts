@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { InfraConfigurationSourcesAdapter } from './configuration_sources_adapter';
+import { infraSourceConfigurationSavedObjectMappings } from './lib/sources';
+
+export const savedObjectMappings = {
+  ...infraSourceConfigurationSavedObjectMappings,
+};

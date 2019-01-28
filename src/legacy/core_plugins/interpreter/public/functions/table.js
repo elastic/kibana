@@ -28,7 +28,7 @@ export const kibanaTable = () => ({
   type: 'render',
   context: {
     types: [
-      'datatable'
+      'kibana_datatable'
     ],
   },
   help: i18n.translate('interpreter.functions.table.help', {
@@ -50,10 +50,8 @@ export const kibanaTable = () => ({
       as: 'visualization',
       value: {
         visData: convertedData,
-        visConfig: {
-          type: 'table',
-          params: visConfigParams,
-        },
+        visType: 'table',
+        visConfig: visConfigParams,
         params: {
           listenOnChange: true,
         }
