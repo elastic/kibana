@@ -12,6 +12,7 @@ import Distribution from 'x-pack/plugins/apm/public/components/app/ErrorGroupDet
 import { ErrorDistributionRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/errorDistribution';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { ErrorGroupOverviewRequest } from '../../../store/reactReduxRequest/errorGroupList';
+// @ts-ignore
 import { ErrorGroupList } from './List';
 
 interface ErrorGroupOverviewProps {

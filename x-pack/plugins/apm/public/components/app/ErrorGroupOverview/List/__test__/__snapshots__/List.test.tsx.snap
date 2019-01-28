@@ -214,7 +214,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
               <span
                 className="euiTableCellContent__text"
               >
-                No items found
+                No errors were found
               </span>
             </div>
           </td>
@@ -231,7 +231,58 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
     >
       <div
         className="euiFlexItem euiFlexItem--flexGrowZero"
-      />
+      >
+        <div
+          className="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
+          id="customizablePagination"
+          onClick={[Function]}
+          onKeyDown={[Function]}
+        >
+          <div
+            className="euiPopover__anchor"
+          >
+            <button
+              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty--iconRight"
+              onClick={[Function]}
+              type="button"
+            >
+              <span
+                className="euiButtonEmpty__content"
+              >
+                <svg
+                  aria-hidden="true"
+                  className="euiIcon euiIcon--medium euiButtonEmpty__icon"
+                  focusable="false"
+                  height="16"
+                  style={null}
+                  viewBox="0 0 16 16"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                  xmlnsXlink="http://www.w3.org/1999/xlink"
+                >
+                  <defs>
+                    <path
+                      d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                      id="arrow_down-a"
+                    />
+                  </defs>
+                  <use
+                    fillRule="nonzero"
+                    xlinkHref="#arrow_down-a"
+                  />
+                </svg>
+                <span
+                  className="euiButtonEmpty__text"
+                >
+                  Rows per page
+                  : 
+                  25
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
       <div
         className="euiFlexItem euiFlexItem--flexGrowZero"
       >
@@ -480,9 +531,9 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             >
               <a
                 className="euiLink euiLink--primary c0"
-                href="#/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
+                href="#/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
               >
-                f3ac9
+                a0ce2
               </a>
             </div>
           </td>
@@ -505,11 +556,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   <a
                     aria-describedby="error-message-tooltip"
                     className="euiLink euiLink--primary c2"
-                    href="#/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
+                    href="#/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
                     onBlur={[Function]}
                     onFocus={[Function]}
                   >
-                    AssertionError: 
+                    About to blow up!
                   </a>
                 </span>
                 <br />
@@ -524,7 +575,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                     onBlur={[Function]}
                     onFocus={[Function]}
                   >
-                    opbeans.views.oopsie
+                    elasticapm.contrib.django.client.capture
                   </div>
                 </span>
               </div>
@@ -572,9 +623,9 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             >
               <a
                 className="euiLink euiLink--primary c0"
-                href="#/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
+                href="#/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
               >
-                a0ce2
+                f3ac9
               </a>
             </div>
           </td>
@@ -597,11 +648,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   <a
                     aria-describedby="error-message-tooltip"
                     className="euiLink euiLink--primary c2"
-                    href="#/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
+                    href="#/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?_g=(time:(from:now-24h,mode:quick,to:now))&_a="
                     onBlur={[Function]}
                     onFocus={[Function]}
                   >
-                    About to blow up!
+                    AssertionError: 
                   </a>
                 </span>
                 <br />
@@ -616,7 +667,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                     onBlur={[Function]}
                     onFocus={[Function]}
                   >
-                    elasticapm.contrib.django.client.capture
+                    opbeans.views.oopsie
                   </div>
                 </span>
               </div>
@@ -847,7 +898,58 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
     >
       <div
         className="euiFlexItem euiFlexItem--flexGrowZero"
-      />
+      >
+        <div
+          className="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
+          id="customizablePagination"
+          onClick={[Function]}
+          onKeyDown={[Function]}
+        >
+          <div
+            className="euiPopover__anchor"
+          >
+            <button
+              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiButtonEmpty--iconRight"
+              onClick={[Function]}
+              type="button"
+            >
+              <span
+                className="euiButtonEmpty__content"
+              >
+                <svg
+                  aria-hidden="true"
+                  className="euiIcon euiIcon--medium euiButtonEmpty__icon"
+                  focusable="false"
+                  height="16"
+                  style={null}
+                  viewBox="0 0 16 16"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                  xmlnsXlink="http://www.w3.org/1999/xlink"
+                >
+                  <defs>
+                    <path
+                      d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                      id="arrow_down-a"
+                    />
+                  </defs>
+                  <use
+                    fillRule="nonzero"
+                    xlinkHref="#arrow_down-a"
+                  />
+                </svg>
+                <span
+                  className="euiButtonEmpty__text"
+                >
+                  Rows per page
+                  : 
+                  25
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
       <div
         className="euiFlexItem euiFlexItem--flexGrowZero"
       >

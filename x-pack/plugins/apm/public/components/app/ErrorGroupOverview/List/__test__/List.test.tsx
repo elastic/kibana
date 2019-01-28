@@ -13,6 +13,7 @@ import {
   toJson
   // @ts-ignore
 } from '../../../../../utils/testHelpers';
+// @ts-ignore
 import { ErrorGroupList } from '../index';
 import props from './props.json';
 
