@@ -48,15 +48,15 @@ const aggSchemas = new Schemas([
   }
 ]);
 
-export class ESGeohashGridSource extends AbstractESSource {
+export class ESGeoGridSource extends AbstractESSource {
 
-  static type = 'ES_GEOHASH_GRID';
-  static title = 'Elasticsearch geohash aggregation';
+  static type = 'ES_GEO_GRID';
+  static title = 'Elasticsearch grid aggregation';
   static description = 'Group geospatial data in grids with metrics for each gridded cell';
 
   static createDescriptor({ indexPatternId, geoField, requestType, resolution }) {
     return {
-      type: ESGeohashGridSource.type,
+      type: ESGeoGridSource.type,
       id: uuid(),
       indexPatternId: indexPatternId,
       geoField: geoField,
@@ -67,8 +67,8 @@ export class ESGeohashGridSource extends AbstractESSource {
 
   static renderEditor({ onPreviewSource }) {
     const onSelect = (sourceConfig) => {
-      const sourceDescriptor = ESGeohashGridSource.createDescriptor(sourceConfig);
-      const source = new ESGeohashGridSource(sourceDescriptor);
+      const sourceDescriptor = ESGeoGridSource.createDescriptor(sourceConfig);
+      const source = new ESGeoGridSource(sourceDescriptor);
       onPreviewSource(source);
     };
 
@@ -93,7 +93,7 @@ export class ESGeohashGridSource extends AbstractESSource {
         source={this}
         geoField={this._descriptor.geoField}
         geoFieldType="Point field"
-        sourceType={ESGeohashGridSource.typeDisplayName}
+        sourceType={ESGeoGridSource.typeDisplayName}
       />
     );
   }
