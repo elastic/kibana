@@ -279,11 +279,11 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     const queryResult = await this.database.search(request, params);
     const aggBuckets: any[] = get(queryResult, 'aggregations.hosts.buckets', []);
     const latestMonitors: LatestMonitor[] = aggBuckets.map(bucket => {
-      const key: string = get(bucket, 'key');
+      const key: string = get(bucket, 'key.id');
+      const url: string | null = get(bucket, 'key.url', null);
       const upSeries: MonitorSeriesPoint[] = [];
       const downSeries: MonitorSeriesPoint[] = [];
       const histogramBuckets: any[] = get(bucket, 'histogram.buckets', []);
-      const url: string | null = get(bucket, 'latest.hits.hits[0]._source.url.full', null);
       const ping: Ping = get(bucket, 'latest.hits.hits[0]._source');
       const timestamp: string = get(bucket, 'latest.hits.hits[0]._source.@timestamp');
       histogramBuckets.forEach(histogramBucket => {
