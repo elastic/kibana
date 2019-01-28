@@ -1991,7 +1991,7 @@
         "description": "",
         "fields": [
           {
-            "name": "id",
+            "name": "ids",
             "description": "",
             "args": [],
             "type": {
@@ -2007,7 +2007,7 @@
             "deprecationReason": null
           },
           {
-            "name": "port",
+            "name": "ports",
             "description": "",
             "args": [],
             "type": {
@@ -2023,7 +2023,7 @@
             "deprecationReason": null
           },
           {
-            "name": "scheme",
+            "name": "schemes",
             "description": "",
             "args": [],
             "type": {
@@ -2039,7 +2039,7 @@
             "deprecationReason": null
           },
           {
-            "name": "status",
+            "name": "statuses",
             "description": "",
             "args": [],
             "type": {

@@ -399,13 +399,13 @@ export interface StatusData {
 }
 
 export interface FilterBar {
-  id?: MonitorKey[] | null;
+  ids?: MonitorKey[] | null;
 
-  port?: number[] | null;
+  ports?: number[] | null;
 
-  scheme?: string[] | null;
+  schemes?: string[] | null;
 
-  status?: string[] | null;
+  statuses?: string[] | null;
 }
 
 export interface ErrorListItem {

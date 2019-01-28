@@ -8,10 +8,10 @@ import gql from 'graphql-tag';
 
 export const monitorsSchema = gql`
   type FilterBar {
-    id: [MonitorKey!]
-    port: [Int!]
-    scheme: [String!]
-    status: [String!]
+    ids: [MonitorKey!]
+    ports: [Int!]
+    schemes: [String!]
+    statuses: [String!]
   }
 
   type HistogramDataPoint {

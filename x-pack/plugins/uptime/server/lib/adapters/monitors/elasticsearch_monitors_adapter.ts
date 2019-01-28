@@ -8,6 +8,7 @@ import { get, set } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
 import {
   ErrorListItem,
+  FilterBar,
   LatestMonitor,
   MonitorPageTitle,
   MonitorSeriesPoint,
@@ -321,7 +322,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string
-  ): Promise<any> {
+  ): Promise<FilterBar> {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
@@ -385,13 +386,13 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     // TODO update typings
     const getKey = (buckets: any[]) => buckets.map(value => value.key);
     return {
-      scheme: getKey(type),
-      port: getKey(port),
-      id: ids.map((value: any) => ({
+      schemes: getKey(type),
+      ports: getKey(port),
+      ids: ids.map((value: any) => ({
         key: value.key,
         url: get(value, 'latest.hits.hits[0]._source.url.full', null),
       })),
-      status: getKey(status),
+      statuses: getKey(status),
     };
   }
 
