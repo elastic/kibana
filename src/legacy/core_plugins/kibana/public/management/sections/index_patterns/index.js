@@ -26,7 +26,7 @@ import './edit_index_pattern';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import indexTemplate from './index.html';
-import indexPatternListTemplate from './index_pattern_list/list.html';
+import indexPatternListTemplate from './list.html';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { i18n } from '@kbn/i18n';
@@ -35,7 +35,6 @@ import { EuiBadge } from '@elastic/eui';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-//import { IndexPatternList } from './index_pattern_list';
 import { App } from './app';
 
 const INDEX_PATTERN_LIST_DOM_ELEMENT_ID = 'indexPatternListReact';
