@@ -28,7 +28,7 @@ export function prettyInterval(intervalInMs) {
   let interval;
   let units;
   if (intervalInMs === 0) {
-    return i18n.translate('common.ui.timepicker.off', { defaultMessage: 'off' });
+    return i18n.translate('common.ui.timepicker.off', { defaultMessage: 'Off' });
   } else if (intervalInMs < MS_IN_MINUTE) {
     interval = Math.round(intervalInMs / MS_IN_SECOND);
     units = (interval > 1 ?
