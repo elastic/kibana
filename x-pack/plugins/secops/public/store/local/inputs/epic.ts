@@ -48,7 +48,7 @@ export const createGlobalTimeEpic = <State>(): Epic<
             return setRelativeRangeDatePicker({
               id: 'global',
               option,
-              to: moment().valueOf(),
+              to: Date.now(),
               from: moment()
                 .subtract(diff, 'ms')
                 .valueOf(),
@@ -57,7 +57,7 @@ export const createGlobalTimeEpic = <State>(): Epic<
           return setRelativeRangeDatePicker({
             id: 'global',
             option,
-            to: moment().valueOf(),
+            to: Date.now(),
             from: timerange.from,
           });
         }),

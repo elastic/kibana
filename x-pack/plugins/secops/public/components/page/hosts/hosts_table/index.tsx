@@ -6,16 +6,17 @@
 
 import { EuiBadge, EuiLink } from '@elastic/eui';
 import { get, isNil } from 'lodash/fp';
-import moment from 'moment';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
+import { ActionCreator } from 'typescript-fsa';
 import { HostsEdges } from '../../../../graphql/types';
 import { hostsActions, hostsSelector, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
-import { defaultToEmpty, getOrEmpty } from '../../../empty_value';
-import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
+import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
+import { defaultToEmptyTag, getEmptyTagValue, getOrEmptyTag } from '../../../empty_value';
+import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
 import * as i18n from './translations';
 interface OwnProps {
@@ -32,7 +33,7 @@ interface HostsTableReduxProps {
 }
 
 interface HostsTableDispatchProps {
-  updateLimitPagination: (param: { limit: number }) => void;
+  updateLimitPagination: ActionCreator<{ limit: number }>;
 }
 
 type HostsTableProps = OwnProps & HostsTableReduxProps & HostsTableDispatchProps;
@@ -78,11 +79,9 @@ const HostsTableComponent = pure<HostsTableProps>(
       pageOfItems={data}
       loadMore={() => loadMore(nextCursor)}
       limit={limit}
-      hasNextPage={hasNextPage!}
+      hasNextPage={hasNextPage}
       itemsPerRow={rowItems}
-      updateLimitPagination={newlimit => {
-        updateLimitPagination({ limit: newlimit });
-      }}
+      updateLimitPagination={newLimit => updateLimitPagination({ limit: newLimit })}
       title={
         <h3>
           {i18n.HOSTS} <EuiBadge color="hollow">{totalCount}</EuiBadge>
@@ -101,21 +100,21 @@ export const HostsTable = connect(
   }
 )(HostsTableComponent);
 
-const getHostsColumns = () => [
+const getHostsColumns = (): Array<Columns<HostsEdges>> => [
   {
     name: i18n.NAME,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }: HostsEdges) => {
-      const hostName = getOrEmpty('host.name', node);
-      return (
-        <>
+      const hostName: string | null = get('host.name', node);
+      if (hostName != null) {
+        return (
           <DraggableWrapper
             dataProvider={{
               and: [],
               enabled: true,
               excluded: false,
-              id: node._id!,
+              id: escapeDataProviderId(`hosts-table-${node._id!}-hostName-${hostName}`),
               name: hostName,
               kqlQuery: '',
               queryMatch: {
@@ -125,8 +124,8 @@ const getHostsColumns = () => [
                 value: node.host!.id!,
               },
               queryDate: {
-                from: moment(node.firstSeen!).valueOf(),
-                to: moment().valueOf(),
+                from: new Date(node.firstSeen!).valueOf(),
+                to: Date.now(),
               },
             }}
             render={(dataProvider, _, snapshot) =>
@@ -143,26 +142,28 @@ const getHostsColumns = () => [
               )
             }
           />
-        </>
-      );
+        );
+      } else {
+        return getEmptyTagValue();
+      }
     },
   },
   {
     name: i18n.FIRST_SEEN,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }: HostsEdges) => <>{defaultToEmpty(node.firstSeen)}</>,
+    render: ({ node }) => defaultToEmptyTag(node.firstSeen),
   },
   {
     name: i18n.OS,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }: HostsEdges) => <>{getOrEmpty('host.os.name', node)}</>,
+    render: ({ node }) => getOrEmptyTag('host.os.name', node),
   },
   {
     name: i18n.VERSION,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }: HostsEdges) => <>{getOrEmpty('host.os.version', node)}</>,
+    render: ({ node }) => getOrEmptyTag('host.os.version', node),
   },
 ];

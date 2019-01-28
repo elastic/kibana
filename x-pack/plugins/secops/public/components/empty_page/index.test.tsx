@@ -9,7 +9,7 @@ import toJson from 'enzyme-to-json';
 import React from 'react';
 import { EmptyPage } from './index';
 
-it('renders correctly', () => {
+test('renders correctly', () => {
   const EmptyComponent = shallow(
     <EmptyPage
       title="My Super Title"

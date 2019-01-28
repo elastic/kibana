@@ -10,7 +10,7 @@ import React from 'react';
 
 import { ColumnRenderer } from '.';
 import { Ecs } from '../../../../graphql/types';
-import { getOrEmpty } from '../../../empty_value';
+import { getOrEmptyTag } from '../../../empty_value';
 
 export const dataExistsAtColumn = (columnName: string, data: Ecs): boolean => has(columnName, data);
 
@@ -19,7 +19,7 @@ export const plainColumnRenderer: ColumnRenderer = {
 
   renderColumn: (columnName: string, data: Ecs) => {
     return columnName !== 'timestamp' ? (
-      <>{getOrEmpty(columnName, data)}</>
+      getOrEmptyTag(columnName, data)
     ) : (
       <>{moment(data!.timestamp!).format()}</>
     );

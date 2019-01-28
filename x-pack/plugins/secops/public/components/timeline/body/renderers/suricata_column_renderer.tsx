@@ -9,7 +9,7 @@ import React from 'react';
 
 import { ColumnRenderer, getSuricataCVEFromSignature } from '.';
 import { Ecs } from '../../../../graphql/types';
-import { getEmptyValue, getOrEmpty } from '../../../empty_value';
+import { getEmptyTagValue, getOrEmptyTag } from '../../../empty_value';
 
 const suricataColumnsOverridden = ['event.id'];
 
@@ -30,16 +30,16 @@ export const suricataColumnRenderer: ColumnRenderer = {
   renderColumn: (columnName: string, data: Ecs) => {
     switch (columnName) {
       case 'event.id':
-        const signature = get('suricata.eve.alert.signature', data) as string;
+        const signature: string = get('suricata.eve.alert.signature', data);
         const cve = getSuricataCVEFromSignature(signature);
         if (cve != null) {
           return <>{cve}</>;
         } else {
-          return <>{getOrEmpty('event.id', data)}</>;
+          return getOrEmptyTag('event.id', data);
         }
       default:
         // unknown column name
-        return <>{getEmptyValue()}</>;
+        return getEmptyTagValue();
     }
   },
 };

@@ -5,17 +5,18 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import { has } from 'lodash/fp';
-import moment from 'moment';
+import { get, has } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
+import { ActionCreator } from 'typescript-fsa';
 import { Ecs, EcsEdges } from '../../../../graphql/types';
 import { eventsSelector, hostsActions, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
-import { getEmptyValue, getOrEmpty } from '../../../empty_value';
-import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
+import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
+import { getEmptyTagValue, getEmptyValue, getOrEmpty, getOrEmptyTag } from '../../../empty_value';
+import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
 import * as i18n from './translations';
 
@@ -35,7 +36,7 @@ interface EventsTableReduxProps {
 }
 
 interface EventsTableDispatchProps {
-  updateLimitPagination: (param: { limit: number }) => void;
+  updateLimitPagination: ActionCreator<{ limit: number }>;
 }
 
 type EventsTableProps = OwnProps & EventsTableReduxProps & EventsTableDispatchProps;
@@ -63,7 +64,7 @@ const EventsTableComponent = pure<EventsTableProps>(
   ({
     data,
     hasNextPage,
-    limit = 5,
+    limit,
     loading,
     loadMore,
     tiebreaker,
@@ -79,11 +80,9 @@ const EventsTableComponent = pure<EventsTableProps>(
       pageOfItems={data}
       loadMore={() => loadMore(nextCursor, tiebreaker)}
       limit={limit}
-      hasNextPage={hasNextPage!}
+      hasNextPage={hasNextPage}
       itemsPerRow={rowItems}
-      updateLimitPagination={newlimit => {
-        updateLimitPagination({ limit: newlimit });
-      }}
+      updateLimitPagination={newLimit => updateLimitPagination({ limit: newLimit })}
       title={
         <h3>
           {i18n.EVENTS} <EuiBadge color="hollow">{totalCount}</EuiBadge>
@@ -102,21 +101,21 @@ export const EventsTable = connect(
   }
 )(EventsTableComponent);
 
-const getEventsColumns = (startDate: number) => [
+const getEventsColumns = (startDate: number): Array<Columns<EcsEdges>> => [
   {
     name: i18n.HOST_NAME,
     sortable: true,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }: EcsEdges) => {
-      const hostName = getOrEmpty('host.name', node);
-      return (
-        <>
+    render: ({ node }) => {
+      const hostName: string | null = get('host.name', node);
+      if (hostName != null) {
+        return (
           <DraggableWrapper
             dataProvider={{
               and: [],
               enabled: true,
-              id: node._id!,
+              id: escapeDataProviderId(`events-table-${node._id!}-hostName-${hostName}`),
               name: hostName,
               excluded: false,
               kqlQuery: '',
@@ -128,7 +127,7 @@ const getEventsColumns = (startDate: number) => [
               },
               queryDate: {
                 from: startDate,
-                to: moment().valueOf(),
+                to: Date.now(),
               },
             }}
             render={(dataProvider, _, snapshot) =>
@@ -141,8 +140,10 @@ const getEventsColumns = (startDate: number) => [
               )
             }
           />
-        </>
-      );
+        );
+      } else {
+        return getEmptyTagValue();
+      }
     },
   },
   {
@@ -150,12 +151,12 @@ const getEventsColumns = (startDate: number) => [
     sortable: true,
     truncateText: true,
     hideForMobile: true,
-    render: ({ node }: EcsEdges) => <>{getOrEmpty('event.type', node)}</>,
+    render: ({ node }) => getOrEmptyTag('event.type', node),
   },
   {
     name: i18n.SOURCE,
     truncateText: true,
-    render: ({ node }: EcsEdges) => (
+    render: ({ node }) => (
       <>
         {formatSafely('source.ip', node)} : {getOrEmpty('source.port', node)}
       </>
@@ -165,7 +166,7 @@ const getEventsColumns = (startDate: number) => [
     name: i18n.DESTINATION,
     sortable: true,
     truncateText: true,
-    render: ({ node }: EcsEdges) => (
+    render: ({ node }) => (
       <>
         {formatSafely('destination.ip', node)} : {getOrEmpty('destination.port', node)}
       </>
@@ -175,7 +176,7 @@ const getEventsColumns = (startDate: number) => [
     name: i18n.LOCATION,
     sortable: true,
     truncateText: true,
-    render: ({ node }: EcsEdges) => (
+    render: ({ node }) => (
       <>
         {getOrEmpty('geo.region_name', node)} : {getOrEmpty('geo.country_iso_code', node)}
       </>
