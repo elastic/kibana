@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// export default function ({ loadTestFile }) {
-export default function () {
+export default function ({ loadTestFile }) {
   describe('apis', function () {
     this.tags('ciGroup5');
 
@@ -17,9 +16,10 @@ export default function () {
     // loadTestFile(require.resolve('./logstash'));
     // loadTestFile(require.resolve('./kibana'));
     // loadTestFile(require.resolve('./infra'));
+
     // Only running our secops test for now since we are working in our own branch
     // TODO: Re add this whenever tests are working again
-    // loadTestFile(require.resolve('./secops'));
+    loadTestFile(require.resolve('./secops'));
 
     // loadTestFile(require.resolve('./beats'));
     // loadTestFile(require.resolve('./management'));
