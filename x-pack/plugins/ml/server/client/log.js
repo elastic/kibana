@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export let mlLog = () => {};
 
-import { AbstractSource } from './source';
-
-export class AbstractTMSSource extends AbstractSource {
-  getUrlTemplate() {
-    throw new Error('Should implement TMSSource#getUrlTemplate');
-  }
+export function initMlServerLog(server) {
+  mlLog = (level, message) => server.log(['ml', level], message);
 }
