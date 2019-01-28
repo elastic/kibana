@@ -130,7 +130,8 @@ export default function (kibana) {
           }),
           value: '1ms',
           description: i18n.translate('timelion.uiSettings.minimumIntervalDescription', {
-            defaultMessage: 'The smallest interval that will be calculated when using "auto"'
+            defaultMessage: 'The smallest interval that will be calculated when using "auto"',
+            description: '"auto" is a technical value in that context, that should not be translated.'
           }),
           category: ['timelion'],
         },
