@@ -324,7 +324,7 @@ export class MapListing extends React.Component {
             data-test-subj="newMapLink"
             fill
           >
-            Create new map
+            Create map
           </EuiButton>
         </EuiFlexItem>
       );
