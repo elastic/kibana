@@ -8,6 +8,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
+
 import {
   globalPolicySelector,
   globalTimeRangeSelector,

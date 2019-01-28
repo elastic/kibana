@@ -7,11 +7,10 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
+import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
 import { GetUncommonProcessesQuery, PageInfo, UncommonProcessesEdges } from '../../graphql/types';
-
-import { connect } from 'react-redux';
 import { inputsModel, State } from '../../store';
 import { uncommonProcessesSelector } from '../../store';
 import { uncommonProcessesQuery } from './index.gql_query';

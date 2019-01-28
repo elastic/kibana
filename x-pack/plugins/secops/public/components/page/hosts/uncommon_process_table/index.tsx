@@ -9,8 +9,8 @@ import { get } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
-
 import { ActionCreator } from 'typescript-fsa';
+
 import { HostEcsFields, UncommonProcessesEdges } from '../../../../graphql/types';
 import { hostsActions, State, uncommonProcessesSelector } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';

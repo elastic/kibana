@@ -10,8 +10,8 @@ import { get, has } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
-
 import { ActionCreator } from 'typescript-fsa';
+
 import { AuthenticationsEdges } from '../../../../graphql/types';
 import { authenticationsSelector, hostsActions, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
