@@ -9,19 +9,11 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import { Annotation } from '../../../../common/types/annotations';
 import { AnnotationFlyout } from './index';
 
 describe('AnnotationFlyout', () => {
   test('Initialization.', () => {
-    const props = {
-      mlAnnotations: {
-        deleteAnnotation: (id: string | undefined) => new Promise(resolve => ({})),
-        indexAnnotation: (annotation: Annotation) => new Promise(resolve => ({})),
-      },
-    };
-
-    const wrapper = shallowWithIntl(<AnnotationFlyout {...props} />);
+    const wrapper = shallowWithIntl(<AnnotationFlyout />);
     expect(wrapper).toMatchSnapshot();
   });
 });

@@ -14,7 +14,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { AnnotationFlyout } from './index';
-import { ml } from 'plugins/ml/services/ml_api_service';
 
 import 'angular';
 
@@ -26,37 +25,17 @@ import { I18nProvider } from '@kbn/i18n/react';
 module.directive('mlAnnotationFlyout', function () {
 
   function link(scope, element) {
-    function renderReactComponent() {
-      const props = {
-        annotations: scope.annotations,
-        mlAnnotations: ml.annotations,
-      };
-
-      ReactDOM.render(
-        <I18nProvider>
-          {React.createElement(AnnotationFlyout, props)}
-        </I18nProvider>,
-        element[0]
-      );
-    }
-
-    renderReactComponent();
-
-    scope.$on('render', () => {
-      renderReactComponent();
-    });
-
-    function renderFocusChart() {
-      renderReactComponent();
-    }
-
-    scope.$watchCollection('annotations', renderFocusChart);
+    ReactDOM.render(
+      <I18nProvider>
+        {React.createElement(AnnotationFlyout)}
+      </I18nProvider>,
+      element[0]
+    );
 
     element.on('$destroy', () => {
       ReactDOM.unmountComponentAtNode(element[0]);
       scope.$destroy();
     });
-
   }
 
   return {

@@ -44,7 +44,7 @@ import { mlTableService } from '../../../services/table_service';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../../common/constants/search';
 import { isTimeSeriesViewJob } from '../../../../common/util/job_utils';
 
-import { annotation$ } from '../annotations_observable';
+import { annotation$, annotationsRefresh$ } from '../annotations_observable';
 
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
@@ -118,12 +118,15 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
     return mlJobService.getJob(jobId);
   }
 
+  annotationsRefreshSubscription = null;
+
   componentDidMount() {
     if (
       this.props.annotations === undefined &&
       Array.isArray(this.props.jobs) && this.props.jobs.length > 0
     ) {
-      this.getAnnotations();
+      this.annotationsRefreshSubscription = annotationsRefresh$.subscribe(() => this.getAnnotations());
+      annotationsRefresh$.next();
     }
   }
 
@@ -134,8 +137,12 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
       Array.isArray(this.props.jobs) && this.props.jobs.length > 0 &&
       this.state.jobId !== this.props.jobs[0].job_id
     ) {
-      this.getAnnotations();
+      annotationsRefresh$.next();
     }
+  }
+
+  componentWillUnmount() {
+    this.annotationsRefreshSubscription.unsubscribe();
   }
 
   openSingleMetricView = (annotation = {}) => {

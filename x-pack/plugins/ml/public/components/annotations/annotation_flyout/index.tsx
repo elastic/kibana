@@ -25,7 +25,6 @@ import {
 import { AnnotationDescriptionList } from '../annotation_description_list';
 import { DeleteAnnotationModal } from '../delete_annotation_modal';
 
-import { Annotation } from '../../../../common/types/annotations';
 import { injectObservablesAsProps } from '../../../util/observable_utils';
 import { annotation$, annotationsRefresh$, AnnotationState } from '../annotations_observable';
 
@@ -34,12 +33,10 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { InjectedIntlProps } from 'react-intl';
 import { toastNotifications } from 'ui/notify';
 
+import { ml } from '../../../services/ml_api_service';
+
 interface Props {
   annotation: AnnotationState;
-  mlAnnotations: {
-    deleteAnnotation(id: string | undefined): Promise<any>;
-    indexAnnotation(annotation: Annotation): Promise<object>;
-  };
 }
 
 interface State {
@@ -73,14 +70,14 @@ class AnnotationFlyoutIntl extends Component<CommonProps & Props & InjectedIntlP
   };
 
   public deleteHandler = async () => {
-    const { annotation, mlAnnotations, intl } = this.props;
+    const { annotation, intl } = this.props;
 
     if (annotation === null) {
       return;
     }
 
     try {
-      await mlAnnotations.deleteAnnotation(annotation._id);
+      await ml.annotations.deleteAnnotation(annotation._id);
       toastNotifications.addSuccess(
         intl.formatMessage(
           {
@@ -114,7 +111,7 @@ class AnnotationFlyoutIntl extends Component<CommonProps & Props & InjectedIntlP
   };
 
   public saveOrUpdateAnnotation = () => {
-    const { annotation, mlAnnotations, intl } = this.props;
+    const { annotation, intl } = this.props;
 
     if (annotation === null) {
       return;
@@ -122,7 +119,7 @@ class AnnotationFlyoutIntl extends Component<CommonProps & Props & InjectedIntlP
 
     annotation$.next(null);
 
-    mlAnnotations
+    ml.annotations
       .indexAnnotation(annotation)
       .then(() => {
         annotationsRefresh$.next();

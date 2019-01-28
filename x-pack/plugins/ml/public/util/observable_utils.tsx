@@ -6,7 +6,7 @@
 
 import React, { Component, ComponentType } from 'react';
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { Dictionary } from '../../common/types/common';
 
 // Sets up a ObservableComponent which subscribes to given observable updates and
@@ -26,18 +26,18 @@ export function injectObservablesAsProps(
       return reducedState;
     }, {});
 
+    public subscriptions = {} as Dictionary<Subscription>;
+
     public componentDidMount() {
       observableKeys.forEach(k => {
-        observables[k].subscribe(v => {
-          this.setState({ [k]: v });
-        });
+        this.subscriptions[k] = observables[k].subscribe(v => this.setState({ [k]: v }));
       });
     }
 
     public componentWillUnmount() {
-      observableKeys.forEach(k => {
-        observables[k].unsubscribe();
-      });
+      Object.keys(this.subscriptions).forEach((key: string) =>
+        this.subscriptions[key].unsubscribe()
+      );
     }
 
     public render() {
