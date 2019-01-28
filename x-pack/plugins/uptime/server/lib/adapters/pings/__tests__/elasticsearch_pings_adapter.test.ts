@@ -164,11 +164,9 @@ describe('ElasticsearchPingsAdapter class', () => {
                     },
                   },
                 },
-                [
-                  {
-                    term: { 'monitor.id': 'testmonitor' },
-                  },
-                ],
+                {
+                  term: { 'monitor.id': 'testmonitor' },
+                },
               ],
             },
           },
