@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, set } from 'lodash';
+import { cloneDeep, get, set, omit } from 'lodash';
 
 function migrateIndexPattern(type, doc) {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
@@ -45,6 +45,61 @@ function migrateIndexPattern(type, doc) {
 }
 
 export default {
+  visualization: {
+    '7.0.0': (doc) => {
+      // Set new "references" attribute
+      doc.references = doc.references || [];
+
+      // Migrate index pattern
+      migrateIndexPattern('visualization', doc);
+
+      // Migrate saved search
+      const savedSearchId = get(doc, 'attributes.savedSearchId');
+      if (savedSearchId) {
+        doc.references.push({
+          type: 'search',
+          name: 'search_0',
+          id: savedSearchId,
+        });
+        doc.attributes.savedSearchRefName = 'search_0';
+        delete doc.attributes.savedSearchId;
+      }
+
+      // Migrate table splits
+      try {
+        const visState = JSON.parse(doc.attributes.visState);
+        if (get(visState, 'type') !== 'table') {
+          return doc; // do nothing; we only want to touch tables
+        }
+
+        let splitCount = 0;
+        visState.aggs = visState.aggs.map(agg => {
+          if (agg.schema !== 'split') {
+            return agg;
+          }
+
+          splitCount++;
+          if (splitCount === 1) {
+            return agg; // leave the first split agg unchanged
+          }
+          agg.schema = 'bucket';
+          // the `row` param is exclusively used by split aggs, so we remove it
+          agg.params = omit(agg.params, ['row']);
+          return agg;
+        });
+
+        if (splitCount <= 1) {
+          return doc; // do nothing; we only want to touch tables with multiple split aggs
+        }
+
+        const newDoc = cloneDeep(doc);
+        newDoc.attributes.visState = JSON.stringify(visState);
+        return newDoc;
+      } catch (e) {
+        throw new Error(`Failure attempting to migrate saved object '${doc.attributes.title}' - ${e}`);
+      }
+    }
+  },
   dashboard: {
     '7.0.0': (doc) => {
       // Set new "references" attribute
