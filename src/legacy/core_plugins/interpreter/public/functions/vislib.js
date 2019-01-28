@@ -18,7 +18,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { VislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 import chrome from 'ui/chrome';
 
@@ -27,21 +26,13 @@ export const vislib = () => ({
   type: 'render',
   context: {
     types: [
-      'kibana_table', 'null'
+      'kibana_datatable'
     ],
   },
-  help: i18n.translate('common.core_plugins.interpreter.public.functions.vislib.help', {
+  help: i18n.translate('interpreter.functions.vislib.help', {
     defaultMessage: 'Vislib visualization'
   }),
   args: {
-    type: {
-      types: ['string'],
-      default: 'metric',
-    },
-    schemas: {
-      types: ['string'],
-      default: '"{}"',
-    },
     visConfig: {
       types: ['string', 'null'],
       default: '"{}"',
@@ -51,39 +42,17 @@ export const vislib = () => ({
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const Private = $injector.get('Private');
     const responseHandler = Private(VislibSeriesResponseHandlerProvider).handler;
-    const visTypes = Private(VisTypesRegistryProvider);
     const visConfigParams = JSON.parse(args.visConfig);
-    const schemas = JSON.parse(args.schemas);
-    const visType = visTypes.byName[args.type || 'histogram'];
 
-    if (context.columns) {
-      // assign schemas to aggConfigs
-      context.columns.forEach(column => {
-        column.aggConfig.aggConfigs.schemas = visType.schemas.all;
-      });
-
-      Object.keys(schemas).forEach(key => {
-        schemas[key].forEach(i => {
-          const schema = key.split('_');
-          context.columns[i].aggConfig.schema = schema[0];
-          if (schema[1] === 'row') {
-            context.columns[i].aggConfig.params.row = true;
-          }
-        });
-      });
-    }
-
-    const convertedData = await responseHandler(context);
+    const convertedData = await responseHandler(context, visConfigParams.dimensions);
 
     return {
       type: 'render',
       as: 'visualization',
       value: {
         visData: convertedData,
-        visConfig: {
-          type: args.type,
-          params: visConfigParams,
-        },
+        visType: args.type,
+        visConfig: visConfigParams,
         params: {
           listenOnChange: true,
         }

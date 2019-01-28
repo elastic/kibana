@@ -11,19 +11,19 @@ import { connect } from 'react-redux';
 import { ColdPhase as PresentationComponent } from './cold_phase';
 import {
   getPhase,
-  getPhaseData
 } from '../../../../store/selectors';
 import { setPhaseData } from '../../../../store/actions';
 import {
   PHASE_COLD,
-  PHASE_WARM,
-  PHASE_REPLICA_COUNT
+  PHASE_HOT,
+  PHASE_ROLLOVER_ENABLED
 } from '../../../../store/constants';
 
 export const ColdPhase = connect(
   (state) => ({
     phaseData: getPhase(state, PHASE_COLD),
-    warmPhaseReplicaCount: getPhaseData(state, PHASE_WARM, PHASE_REPLICA_COUNT)
+    hotPhaseRolloverEnabled: getPhase(state, PHASE_HOT)[PHASE_ROLLOVER_ENABLED],
+
   }),
   {
     setPhaseData: (key, value) => setPhaseData(PHASE_COLD, key, value),

@@ -10,8 +10,6 @@ import {
   EuiIcon,
   EuiLink,
   EuiInMemoryTable,
-  EuiPage,
-  EuiPageBody,
   EuiPageContent,
   EuiTitle,
   EuiPageContentHeader,
@@ -93,30 +91,28 @@ class UsersUI extends Component {
     const { apiClient, intl } = this.props;
     if (permissionDenied) {
       return (
-        <EuiPage className="mgtUsersListingPage">
-          <EuiPageBody>
-            <EuiPageContent horizontalPosition="center">
-              <EuiEmptyPrompt
-                iconType="securityApp"
-                iconColor={null}
-                title={
-                  <h2>
-                    <FormattedMessage
-                      id="xpack.security.management.users.deniedPermissionTitle"
-                      defaultMessage="Permission denied"
-                    />
-                  </h2>}
-                body={
-                  <p data-test-subj="permissionDeniedMessage">
-                    <FormattedMessage
-                      id="xpack.security.management.users.permissionDeniedToManageUsersDescription"
-                      defaultMessage="You do not have permission to manage users."
-                    />
-                  </p>}
-              />
-            </EuiPageContent>
-          </EuiPageBody>
-        </EuiPage>
+        <div className="mgtUsersListingPage">
+          <EuiPageContent horizontalPosition="center">
+            <EuiEmptyPrompt
+              iconType="securityApp"
+              iconColor={null}
+              title={
+                <h2>
+                  <FormattedMessage
+                    id="xpack.security.management.users.deniedPermissionTitle"
+                    defaultMessage="Permission denied"
+                  />
+                </h2>}
+              body={
+                <p data-test-subj="permissionDeniedMessage">
+                  <FormattedMessage
+                    id="xpack.security.management.users.permissionDeniedToManageUsersDescription"
+                    defaultMessage="You do not have permission to manage users."
+                  />
+                </p>}
+            />
+          </EuiPageContent>
+        </div>
       );
     }
     const path = '#/management/security/';
@@ -222,60 +218,58 @@ class UsersUI extends Component {
         return normalized.indexOf(normalizedQuery) !== -1;
       }) : users;
     return (
-      <EuiPage className="mgtUsersListingPage">
-        <EuiPageBody>
-          <EuiPageContent className="mgtUsersListingPage__content">
-            <EuiPageContentHeader>
-              <EuiPageContentHeaderSection>
-                <EuiTitle>
-                  <h2>
-                    <FormattedMessage
-                      id="xpack.security.management.users.usersTitle"
-                      defaultMessage="Users"
-                    />
-                  </h2>
-                </EuiTitle>
-              </EuiPageContentHeaderSection>
-              <EuiPageContentHeaderSection>
-                <EuiButton
-                  data-test-subj="createUserButton"
-                  href="#/management/security/users/edit"
-                >
+      <div className="mgtUsersListingPage">
+        <EuiPageContent className="mgtUsersListingPage__content">
+          <EuiPageContentHeader>
+            <EuiPageContentHeaderSection>
+              <EuiTitle>
+                <h2>
                   <FormattedMessage
-                    id="xpack.security.management.users.createNewUserButtonLabel"
-                    defaultMessage="Create new user"
+                    id="xpack.security.management.users.usersTitle"
+                    defaultMessage="Users"
                   />
-                </EuiButton>
-              </EuiPageContentHeaderSection>
-            </EuiPageContentHeader>
-            <EuiPageContentBody>
-
-              {showDeleteConfirmation ? (
-                <ConfirmDelete
-                  onCancel={this.onCancelDelete}
-                  apiClient={apiClient}
-                  usersToDelete={selection.map((user) => user.username)}
-                  callback={this.handleDelete}
+                </h2>
+              </EuiTitle>
+            </EuiPageContentHeaderSection>
+            <EuiPageContentHeaderSection>
+              <EuiButton
+                data-test-subj="createUserButton"
+                href="#/management/security/users/edit"
+              >
+                <FormattedMessage
+                  id="xpack.security.management.users.createNewUserButtonLabel"
+                  defaultMessage="Create new user"
                 />
-              ) : null}
+              </EuiButton>
+            </EuiPageContentHeaderSection>
+          </EuiPageContentHeader>
+          <EuiPageContentBody>
 
-              <EuiInMemoryTable
-                itemId="username"
-                columns={columns}
-                selection={selectionConfig}
-                pagination={pagination}
-                items={usersToShow}
-                loading={users.length === 0}
-                search={search}
-                sorting={sorting}
-                rowProps={rowProps}
-                isSelectable
+            {showDeleteConfirmation ? (
+              <ConfirmDelete
+                onCancel={this.onCancelDelete}
+                apiClient={apiClient}
+                usersToDelete={selection.map((user) => user.username)}
+                callback={this.handleDelete}
               />
+            ) : null}
 
-            </EuiPageContentBody>
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
+            <EuiInMemoryTable
+              itemId="username"
+              columns={columns}
+              selection={selectionConfig}
+              pagination={pagination}
+              items={usersToShow}
+              loading={users.length === 0}
+              search={search}
+              sorting={sorting}
+              rowProps={rowProps}
+              isSelectable
+            />
+
+          </EuiPageContentBody>
+        </EuiPageContent>
+      </div>
     );
   }
 }

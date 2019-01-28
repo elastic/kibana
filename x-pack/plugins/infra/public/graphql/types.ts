@@ -9,7 +9,7 @@
 // ====================================================
 
 export interface Query {
-  /** Get an infrastructure data source by id */
+  /** Get an infrastructure data source by id.The resolution order for the source configuration attributes is as followswith the first defined value winning:1. The attributes of the saved object with the given 'id'.2. The attributes defined in the static Kibana configuration key'xpack.infra.sources.default'.3. The hard-coded default values.As a consequence, querying a source without a corresponding saved objectdoesn't error out, but returns the configured or hardcoded defaults. */
   source: InfraSource;
   /** Get a list of all infrastructure data sources */
   allSources: InfraSource[];
@@ -18,12 +18,16 @@ export interface Query {
 export interface InfraSource {
   /** The id of the source */
   id: string;
+  /** The version number the source configuration was last persisted with */
+  version?: number | null;
+  /** The timestamp the source configuration was last persisted at */
+  updatedAt?: number | null;
   /** The raw configuration of the source */
   configuration: InfraSourceConfiguration;
   /** The status of the source */
   status: InfraSourceStatus;
   /** A hierarchy of metadata entries by node */
-  metadataByNode: (InfraNodeMetadata | null)[];
+  metadataByNode: InfraNodeMetadata;
   /** A consecutive span of log entries surrounding a point in time */
   logEntriesAround: InfraLogEntryInterval;
   /** A consecutive span of log entries within an interval */
@@ -37,6 +41,10 @@ export interface InfraSource {
 }
 /** A set of configuration options for an infrastructure data source */
 export interface InfraSourceConfiguration {
+  /** The name of the data source */
+  name: string;
+  /** A description of the data source */
+  description: string;
   /** The alias to read metric data from */
   metricAlias: string;
   /** The alias to read log data from */
@@ -50,8 +58,6 @@ export interface InfraSourceFields {
   container: string;
   /** The fields to identify a host by */
   host: string;
-  /** The fields that may contain the log event message. The first field found win. */
-  message: string[];
   /** The field to identify a pod by */
   pod: string;
   /** The field to use as a tiebreaker for log events that have identical timestamps */
@@ -89,6 +95,14 @@ export interface InfraIndexField {
 }
 /** One metadata entry for a node. */
 export interface InfraNodeMetadata {
+  id: string;
+
+  name: string;
+
+  features: InfraNodeFeature[];
+}
+
+export interface InfraNodeFeature {
   name: string;
 
   source: string;
@@ -175,6 +189,8 @@ export interface InfraNode {
 
 export interface InfraNodePath {
   value: string;
+
+  label: string;
 }
 
 export interface InfraNodeMetric {
@@ -199,6 +215,30 @@ export interface InfraDataPoint {
   timestamp: number;
 
   value?: number | null;
+}
+
+export interface Mutation {
+  /** Create a new source of infrastructure data */
+  createSource: CreateSourceResult;
+  /** Modify an existing source using the given sequence of update operations */
+  updateSource: UpdateSourceResult;
+  /** Delete a source of infrastructure data */
+  deleteSource: DeleteSourceResult;
+}
+/** The result of a successful source creation */
+export interface CreateSourceResult {
+  /** The source that was created */
+  source: InfraSource;
+}
+/** The result of a sequence of source update operations */
+export interface UpdateSourceResult {
+  /** The source after the operations were performed */
+  source: InfraSource;
+}
+/** The result of a source deletion operations */
+export interface DeleteSourceResult {
+  /** The id of the source that was deleted */
+  id: string;
 }
 
 // ====================================================
@@ -242,6 +282,73 @@ export interface InfraMetricInput {
   /** The type of metric */
   type: InfraMetricType;
 }
+/** The source to be created */
+export interface CreateSourceInput {
+  /** The name of the data source */
+  name: string;
+  /** A description of the data source */
+  description?: string | null;
+  /** The alias to read metric data from */
+  metricAlias?: string | null;
+  /** The alias to read log data from */
+  logAlias?: string | null;
+  /** The field mapping to use for this source */
+  fields?: CreateSourceFieldsInput | null;
+}
+/** The mapping of semantic fields of the source to be created */
+export interface CreateSourceFieldsInput {
+  /** The field to identify a container by */
+  container?: string | null;
+  /** The fields to identify a host by */
+  host?: string | null;
+  /** The field to identify a pod by */
+  pod?: string | null;
+  /** The field to use as a tiebreaker for log events that have identical timestamps */
+  tiebreaker?: string | null;
+  /** The field to use as a timestamp for metrics and logs */
+  timestamp?: string | null;
+}
+/** The update operations to be performed */
+export interface UpdateSourceInput {
+  /** The name update operation to be performed */
+  setName?: UpdateSourceNameInput | null;
+  /** The description update operation to be performed */
+  setDescription?: UpdateSourceDescriptionInput | null;
+  /** The alias update operation to be performed */
+  setAliases?: UpdateSourceAliasInput | null;
+  /** The field update operation to be performed */
+  setFields?: UpdateSourceFieldsInput | null;
+}
+/** A name update operation */
+export interface UpdateSourceNameInput {
+  /** The new name to be set */
+  name: string;
+}
+/** A description update operation */
+export interface UpdateSourceDescriptionInput {
+  /** The new description to be set */
+  description: string;
+}
+/** An alias update operation */
+export interface UpdateSourceAliasInput {
+  /** The new log index pattern or alias to bet set */
+  logAlias?: string | null;
+  /** The new metric index pattern or alias to bet set */
+  metricAlias?: string | null;
+}
+/** A field update operations */
+export interface UpdateSourceFieldsInput {
+  /** The new container field to be set */
+  container?: string | null;
+  /** The new host field to be set */
+  host?: string | null;
+  /** The new pod field to be set */
+  pod?: string | null;
+  /** The new tiebreaker field to be set */
+  tiebreaker?: string | null;
+  /** The new timestamp field to be set */
+  timestamp?: string | null;
+}
 
 // ====================================================
 // Arguments
@@ -252,7 +359,7 @@ export interface SourceQueryArgs {
   id: string;
 }
 export interface MetadataByNodeInfraSourceArgs {
-  nodeName: string;
+  nodeId: string;
 
   nodeType: InfraNodeType;
 }
@@ -309,6 +416,22 @@ export interface NodesInfraResponseArgs {
   path: InfraPathInput[];
 
   metric: InfraMetricInput;
+}
+export interface CreateSourceMutationArgs {
+  /** The id of the source */
+  id: string;
+
+  source: CreateSourceInput;
+}
+export interface UpdateSourceMutationArgs {
+  /** The id of the source */
+  id: string;
+  /** A sequence of update operations */
+  changes: UpdateSourceInput[];
+}
+export interface DeleteSourceMutationArgs {
+  /** The id of the source */
+  id: string;
 }
 
 // ====================================================
@@ -416,11 +539,19 @@ export namespace MetadataQuery {
 
     id: string;
 
-    metadataByNode: (MetadataByNode | null)[];
+    metadataByNode: MetadataByNode;
   };
 
   export type MetadataByNode = {
     __typename?: 'InfraNodeMetadata';
+
+    name: string;
+
+    features: Features[];
+  };
+
+  export type Features = {
+    __typename?: 'InfraNodeFeature';
 
     name: string;
 
@@ -517,6 +648,8 @@ export namespace WaffleNodesQuery {
     __typename?: 'InfraNodePath';
 
     value: string;
+
+    label: string;
   };
 
   export type Metric = {

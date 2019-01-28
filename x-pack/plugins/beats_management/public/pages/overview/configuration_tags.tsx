@@ -11,7 +11,7 @@ import React from 'react';
 import { BeatTag } from '../../../common/domain_types';
 import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { AssignmentActionType, Table, TagsTableType } from '../../components/table';
-import { tagListAssignmentOptions } from '../../components/table/assignment_schema';
+import { tagListActions } from '../../components/table/action_schema';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 import { AppPageProps } from '../../frontend_types';
 
@@ -79,12 +79,8 @@ class TagsPageComponent extends React.PureComponent<PageProps, PageState> {
                 onSubmit: () => null, // todo
                 value: this.props.urlState.tagsKBar || '',
               }}
-              assignmentOptions={{
-                schema: tagListAssignmentOptions,
-                type: 'primary',
-                items: [],
-                actionHandler: this.handleTagsAction,
-              }}
+              actions={tagListActions}
+              actionHandler={this.handleTagsAction}
               ref={this.state.tableRef}
               items={this.props.containers.tags.state.list}
               type={TagsTableType}

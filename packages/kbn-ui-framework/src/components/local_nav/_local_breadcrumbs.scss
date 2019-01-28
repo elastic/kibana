@@ -22,10 +22,6 @@
       user-select: none;
       margin-right: 4px;
       color: $localNavBreadcrumbDelimiterColor;
-
-      @include darkTheme {
-        color: $localNavBreadcrumbDelimiterColor--darkTheme;
-      }
     }
   }
 }

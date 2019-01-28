@@ -21,11 +21,13 @@ import getRequestParams from './series/get_request_params';
 import handleResponseBody from './series/handle_response_body';
 import handleErrorResponse from './handle_error_response';
 import getAnnotations from './get_annotations';
-export function getSeriesData(req, panel) {
+export async function getSeriesData(req, panel) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
+  const includeFrozen = await req.getUiSettingsService().get('search:includeFrozen');
   const bodies = panel.series.map(series => getRequestParams(req, panel, series));
   const params = {
     rest_total_hits_as_int: true,
+    ignore_throttled: !includeFrozen,
     body: bodies.reduce((acc, items) => acc.concat(items), [])
   };
   return callWithRequest(req, 'msearch', params)

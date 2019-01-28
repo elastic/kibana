@@ -44,7 +44,7 @@ export const spaces = (kibana: any) =>
 
     uiExports: {
       chromeNavControls: ['plugins/spaces/views/nav_control'],
-      styleSheetPaths: `${__dirname}/public/index.scss`,
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       managementSections: ['plugins/spaces/views/management'],
       apps: [
         {

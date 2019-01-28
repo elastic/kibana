@@ -15,8 +15,8 @@ const metadataTests: KbnTestProvider = ({ getService }) => {
   const client = getService('infraOpsGraphQLClient');
 
   describe('metadata', () => {
-    before(() => esArchiver.load('infra'));
-    after(() => esArchiver.unload('infra'));
+    before(() => esArchiver.load('infra/metrics_and_logs'));
+    after(() => esArchiver.unload('infra/metrics_and_logs'));
 
     it('supports the metadata container query', () => {
       return client
@@ -30,7 +30,12 @@ const metadataTests: KbnTestProvider = ({ getService }) => {
         })
         .then(resp => {
           const metadata = resp.data.source.metadataByNode;
-          expect(metadata.length).to.be(14);
+          if (metadata) {
+            expect(metadata.features.length).to.be(14);
+            expect(metadata.name).to.equal('demo-stack-nginx-01');
+          } else {
+            throw new Error('Metadata should never be empty');
+          }
         });
     });
   });

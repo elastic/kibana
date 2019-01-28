@@ -21,7 +21,7 @@ import { fromRoot, IS_KIBANA_DISTRIBUTABLE } from '../../utils';
 import webpack from 'webpack';
 import webpackMerge from 'webpack-merge';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
-import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
+import TerserPlugin from 'terser-webpack-plugin';
 
 function generateDLL(config) {
   const {
@@ -34,7 +34,9 @@ function generateDLL(config) {
     dllBundleName,
     dllBundleFilename,
     dllStyleFilename,
-    dllManifestPath
+    dllManifestPath,
+    babelLoaderCacheDir,
+    threadLoaderPoolConfig
   } = config;
 
   const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
@@ -78,15 +80,41 @@ function generateDLL(config) {
               exclude: /[\/\\]node_modules[\/\\]x-pack[\/\\](.+?[\/\\])*node_modules[\/\\]/,
             }
           ],
-          use: {
-            loader: 'babel-loader',
-            options: {
-              babelrc: false,
-              presets: [
-                BABEL_PRESET_PATH,
-              ],
+          // Self calling function with the equivalent logic
+          // from maybeAddCacheLoader one from base optimizer
+          use: ((babelLoaderCacheDirPath, loaders) => {
+            // Only deactivate cache-loader and thread-loader on
+            // distributable. It is valid when running from source
+            // both with dev or prod bundles or even when running
+            // kibana for dev only.
+            if (IS_KIBANA_DISTRIBUTABLE) {
+              return loaders;
+            }
+
+            return [
+              {
+                loader: 'cache-loader',
+                options: {
+                  cacheDirectory: babelLoaderCacheDirPath
+                }
+              },
+              ...loaders
+            ];
+          })(babelLoaderCacheDir, [
+            {
+              loader: 'thread-loader',
+              options: threadLoaderPoolConfig
             },
-          }
+            {
+              loader: 'babel-loader',
+              options: {
+                babelrc: false,
+                presets: [
+                  BABEL_PRESET_PATH,
+                ],
+              },
+            }
+          ])
         },
         {
           test: /\.(html|tmpl)$/,
@@ -131,8 +159,9 @@ function generateDLL(config) {
 
 function extendRawConfig(rawConfig) {
   // Build all extended configs from raw config
-  const dllAlias = rawConfig.alias;
-  const dllNoParseRules = rawConfig.noParseRules;
+  const dllAlias = rawConfig.uiBundles.getAliases();
+  const dllNoParseRules = rawConfig.uiBundles.getWebpackNoParseRules();
+  const dllDevMode = rawConfig.uiBundles.isDevMode();
   const dllContext = rawConfig.context;
   const dllEntry = {};
   const dllEntryName = rawConfig.entryName;
@@ -148,6 +177,8 @@ function extendRawConfig(rawConfig) {
   const dllBundleFilename = `${dllBundleName}${dllBundleExt}`;
   const dllManifestPath = `${dllOutputPath}/${dllManifestName}${dllManifestExt}`;
   const dllStyleFilename = `${dllStyleName}${dllStyleExt}`;
+  const babelLoaderCacheDir = rawConfig.babelLoaderCacheDir;
+  const threadLoaderPoolConfig = rawConfig.threadLoaderPoolConfig;
 
   // Create webpack entry object key with the provided dllEntryName
   dllEntry[dllEntryName] = [
@@ -158,6 +189,7 @@ function extendRawConfig(rawConfig) {
   return {
     dllAlias,
     dllNoParseRules,
+    dllDevMode,
     dllContext,
     dllEntry,
     dllOutputPath,
@@ -165,27 +197,31 @@ function extendRawConfig(rawConfig) {
     dllBundleName,
     dllBundleFilename,
     dllStyleFilename,
-    dllManifestPath
+    dllManifestPath,
+    babelLoaderCacheDir,
+    threadLoaderPoolConfig
   };
 }
 
-function common(rawConfig) {
+function common(config) {
   return webpackMerge(
-    generateDLL(extendRawConfig(rawConfig))
+    generateDLL(config)
   );
 }
 
-function optimized() {
+function optimized(config) {
   return webpackMerge(
     {
       mode: 'production',
       optimization: {
-        minimize: true,
         minimizer: [
-          new UglifyJsPlugin({
-            parallel: true,
+          new TerserPlugin({
+            // Apply the same logic used to calculate the
+            // threadLoaderPool workers number to spawn
+            // the parallel processes on terser
+            parallel: config.threadLoaderPoolConfig.workers,
             sourceMap: false,
-            uglifyOptions: {
+            terserOptions: {
               compress: {
                 // The following is required for dead-code the removal
                 // check in React DevTools
@@ -234,9 +270,11 @@ function unoptimized() {
 }
 
 export function configModel(rawConfig = {}) {
-  if (IS_KIBANA_DISTRIBUTABLE) {
-    return webpackMerge(common(rawConfig), optimized());
+  const config = extendRawConfig(rawConfig);
+
+  if (config.dllDevMode) {
+    return webpackMerge(common(config), unoptimized());
   }
 
-  return webpackMerge(common(rawConfig), unoptimized());
+  return webpackMerge(common(config), optimized(config));
 }

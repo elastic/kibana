@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import { EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
   HistoryTabs,
@@ -14,32 +14,42 @@ import {
 // @ts-ignore
 import { KueryBar } from '../../shared/KueryBar';
 import { SetupInstructionsLink } from '../../shared/SetupInstructionsLink';
-// @ts-ignore
-import { HeaderContainer } from '../../shared/UIComponents';
-// @ts-ignore
 import { ServiceOverview } from '../ServiceOverview';
 import { TraceOverview } from '../TraceOverview';
 
 const homeTabs: IHistoryTab[] = [
   {
     path: '/services',
-    name: 'Services',
-    component: ServiceOverview
+    name: i18n.translate('xpack.apm.home.servicesTabLabel', {
+      defaultMessage: 'Services'
+    }),
+    render: props => <ServiceOverview {...props} />
   },
   {
     path: '/traces',
-    name: 'Traces',
-    component: TraceOverview
+    name: i18n.translate('xpack.apm.home.tracesTabLabel', {
+      defaultMessage: 'Traces'
+    }),
+    render: props => <TraceOverview {...props} />
   }
 ];
 
 export function Home() {
   return (
     <div>
-      <HeaderContainer>
-        <h1>APM</h1>
-        <SetupInstructionsLink />
-      </HeaderContainer>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem>
+          <EuiTitle size="l">
+            <h1>APM</h1>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <SetupInstructionsLink />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer />
+
       <KueryBar />
       <HistoryTabs tabs={homeTabs} />
     </div>

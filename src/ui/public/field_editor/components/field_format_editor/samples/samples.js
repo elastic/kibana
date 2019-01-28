@@ -20,21 +20,18 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
-import {
-  EuiBasicTable,
-  EuiFormRow,
-} from '@elastic/eui';
-
-import './samples.less';
+import { EuiBasicTable, EuiFormRow } from '@elastic/eui';
 
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 export class FormatEditorSamplesComponent extends PureComponent {
   static propTypes = {
-    samples: PropTypes.arrayOf(PropTypes.shape({
-      input: PropTypes.any.isRequired,
-      output: PropTypes.any.isRequired,
-    })).isRequired,
+    samples: PropTypes.arrayOf(
+      PropTypes.shape({
+        input: PropTypes.any.isRequired,
+        output: PropTypes.any.isRequired,
+      })
+    ).isRequired,
   };
 
   render() {
@@ -43,15 +40,21 @@ export class FormatEditorSamplesComponent extends PureComponent {
     const columns = [
       {
         field: 'input',
-        name: intl.formatMessage({ id: 'common.ui.fieldEditor.samples.inputHeader', defaultMessage: 'Input' }),
-        render: (input) => {
+        name: intl.formatMessage({
+          id: 'common.ui.fieldEditor.samples.inputHeader',
+          defaultMessage: 'Input',
+        }),
+        render: input => {
           return typeof input === 'object' ? JSON.stringify(input) : input;
         },
       },
       {
         field: 'output',
-        name: intl.formatMessage({ id: 'common.ui.fieldEditor.samples.outputHeader', defaultMessage: 'Output' }),
-        render: (output) => {
+        name: intl.formatMessage({
+          id: 'common.ui.fieldEditor.samples.outputHeader',
+          defaultMessage: 'Output',
+        }),
+        render: output => {
           return (
             <div
               /*
@@ -62,16 +65,17 @@ export class FormatEditorSamplesComponent extends PureComponent {
             />
           );
         },
-      }
+      },
     ];
-
 
     return samples.length ? (
       <EuiFormRow
-        label={<FormattedMessage id="common.ui.fieldEditor.samplesHeader" defaultMessage="Samples" />}
+        label={
+          <FormattedMessage id="common.ui.fieldEditor.samplesHeader" defaultMessage="Samples" />
+        }
       >
         <EuiBasicTable
-          className="fieldFormatEditor__samples"
+          className="kbnFieldFormatEditor__samples"
           compressed={true}
           items={samples}
           columns={columns}

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PROCESSOR_EVENT } from 'x-pack/plugins/apm/common/constants';
 import { ESResponse, timeseriesFetcher } from './fetcher';
 
 describe('timeseriesFetcher', () => {
@@ -29,6 +30,19 @@ describe('timeseriesFetcher', () => {
 
   it('should call client with correct query', () => {
     expect(clientSpy.mock.calls).toMatchSnapshot();
+  });
+
+  it('should restrict results to only transaction documents', () => {
+    const query = clientSpy.mock.calls[0][1];
+    expect(query.body.query.bool.filter).toEqual(
+      expect.arrayContaining([
+        {
+          term: {
+            [PROCESSOR_EVENT]: 'transaction'
+          }
+        } as any
+      ])
+    );
   });
 
   it('should return correct response', () => {

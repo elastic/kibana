@@ -42,7 +42,7 @@ const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http
         if (panel && panel.id) {
           const params = {
             timerange: { timezone, ...parsedTimeRange },
-            filters: [buildEsQuery(undefined, [query], filters, esQueryConfigs)],
+            filters: [buildEsQuery(undefined, query, filters, esQueryConfigs)],
             panels: [panel],
             state: uiStateObj
           };

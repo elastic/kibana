@@ -32,10 +32,11 @@ const existsAsync = promisify(fs.exists);
 const writeFileAsync = promisify(fs.writeFile);
 
 export class DllCompiler {
-  static getRawDllConfig(alias = {}, noParseRules = []) {
+  static getRawDllConfig(uiBundles = {}, babelLoaderCacheDir = '', threadLoaderPoolConfig = {}) {
     return {
-      alias,
-      noParseRules,
+      uiBundles,
+      babelLoaderCacheDir,
+      threadLoaderPoolConfig,
       context: fromRoot('.'),
       entryName: 'vendors',
       dllName: '[name]',
@@ -45,17 +46,18 @@ export class DllCompiler {
       dllExt: '.bundle.dll.js',
       manifestExt: '.manifest.dll.json',
       styleExt: '.style.dll.css',
-      outputPath: fromRoot('./dlls'),
+      outputPath: fromRoot('built_assets/dlls'),
       publicPath: PUBLIC_PATH_PLACEHOLDER
     };
   }
 
-  constructor(uiBundles, log) {
+  constructor(uiBundles, threadLoaderPoolConfig, logWithMetadata) {
     this.rawDllConfig = DllCompiler.getRawDllConfig(
-      uiBundles.getAliases(),
-      uiBundles.getWebpackNoParseRules()
+      uiBundles,
+      uiBundles.getCacheDirectory('babel'),
+      threadLoaderPoolConfig
     );
-    this.log = log || (() => null);
+    this.logWithMetadata = logWithMetadata || (() => null);
   }
 
   async init() {
@@ -180,7 +182,7 @@ export class DllCompiler {
 
   async runWebpack(config) {
     return new Promise((resolve, reject) => {
-      this.log(['info', 'optimize:dynamic_dll_plugin'], 'Client vendors dll compilation started');
+      this.logWithMetadata(['info', 'optimize:dynamic_dll_plugin'], 'Client vendors dll compilation started');
 
       webpack(config, (err, stats) => {
         // If a critical error occurs or we have
@@ -195,7 +197,7 @@ export class DllCompiler {
         }));
 
         if (webpackErrors) {
-          this.log(
+          this.logWithMetadata(
             ['fatal', 'optimize:dynamic_dll_plugin'],
             `Client vendors dll compilation failed`
           );
@@ -203,7 +205,7 @@ export class DllCompiler {
         }
 
         // Otherwise let it proceed
-        this.log(
+        this.logWithMetadata(
           ['info', 'optimize:dynamic_dll_plugin'],
           `Client vendors dll compilation finished with success`
         );

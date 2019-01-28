@@ -22,6 +22,8 @@ import {
 
 import { ItemsGridPagination } from './items_grid_pagination';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 export function ItemsGrid({
   numberColumns,
   totalItemCount,
@@ -39,7 +41,18 @@ export function ItemsGrid({
       <EuiFlexGroup justifyContent="spaceAround">
         <EuiFlexItem grow={false}>
           <EuiText>
-            <h4>{(totalItemCount === 0) ? 'No items have been added' : 'No matching items'}</h4>
+            <h4>{(totalItemCount === 0) ? (
+              <FormattedMessage
+                id="xpack.ml.itemsGrid.noItemsAddedTitle"
+                defaultMessage="No items have been added"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.ml.itemsGrid.noMatchingItemsTitle"
+                defaultMessage="No matching items"
+              />
+            )}
+            </h4>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>

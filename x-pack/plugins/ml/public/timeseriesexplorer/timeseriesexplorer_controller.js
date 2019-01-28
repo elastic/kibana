@@ -15,6 +15,7 @@
 import _ from 'lodash';
 import moment from 'moment-timezone';
 
+import 'plugins/ml/components/annotations_table';
 import 'plugins/ml/components/anomalies_table';
 import 'plugins/ml/components/controls';
 
@@ -49,7 +50,14 @@ import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { JobSelectServiceProvider } from 'plugins/ml/components/job_select_list/job_select_service';
 import { mlForecastService } from 'plugins/ml/services/forecast_service';
 import { mlTimeSeriesSearchService } from 'plugins/ml/timeseriesexplorer/timeseries_search_service';
-import { initPromise } from 'plugins/ml/util/promise';
+import {
+  ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
+  ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
+} from '../../common/constants/search';
+
+
+import chrome from 'ui/chrome';
+const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
 uiRoutes
   .when('/timeseriesexplorer/?', {
@@ -60,7 +68,6 @@ uiRoutes
       privileges: checkGetJobsPrivilege,
       indexPatterns: loadIndexPatterns,
       mlNodeCount: getMlNodeCount,
-      initPromise: initPromise(true)
     }
   });
 
@@ -69,20 +76,19 @@ const module = uiModules.get('apps/ml');
 
 module.controller('MlTimeSeriesExplorerController', function (
   $scope,
-  $route,
   $timeout,
   Private,
   AppState,
   config,
   mlSelectIntervalService,
-  mlSelectSeverityService) {
+  mlSelectSeverityService,
+  i18n) {
 
   $scope.timeFieldName = 'timestamp';
   timefilter.enableTimeRangeSelector();
   timefilter.enableAutoRefreshSelector();
 
   const CHARTS_POINT_TARGET = 500;
-  const ANOMALIES_MAX_RESULTS = 500;
   const MAX_SCHEDULED_EVENTS = 10;          // Max number of scheduled events displayed per bucket.
   const TimeBuckets = Private(IntervalHelperProvider);
   const mlJobSelectService = Private(JobSelectServiceProvider);
@@ -98,8 +104,12 @@ module.controller('MlTimeSeriesExplorerController', function (
   $scope.modelPlotEnabled = false;
   $scope.showModelBounds = true;            // Toggles display of model bounds in the focus chart
   $scope.showModelBoundsCheckbox = false;
+  $scope.showAnnotations = mlAnnotationsEnabled;// Toggles display of annotations in the focus chart
+  $scope.showAnnotationsCheckbox = mlAnnotationsEnabled;
   $scope.showForecast = true;               // Toggles display of forecast data in the focus chart
   $scope.showForecastCheckbox = false;
+
+  $scope.focusAnnotationData = [];
 
   // Pass the timezone to the server for use when aggregating anomalies (by day / hour) for the table.
   const tzConfig = config.get('dateFormat:tz');
@@ -108,7 +118,6 @@ module.controller('MlTimeSeriesExplorerController', function (
   $scope.permissions = {
     canForecastJob: checkPermission('canForecastJob')
   };
-
 
   $scope.initializeVis = function () {
     // Initialize the AppState in which to store the zoom range.
@@ -135,10 +144,17 @@ module.controller('MlTimeSeriesExplorerController', function (
           const invalidIds = _.difference(selectedJobIds, timeSeriesJobIds);
           selectedJobIds = _.without(selectedJobIds, ...invalidIds);
           if (invalidIds.length > 0) {
-            const s = invalidIds.length === 1 ? '' : 's';
-            let warningText = `You can't view requested job${s} ${invalidIds} in this dashboard`;
+            let warningText = i18n('xpack.ml.timeSeriesExplorer.canNotViewRequestedJobsWarningMessage', {
+              defaultMessage: `You can't view requested {invalidIdsCount, plural, one {job} other {jobs}} {invalidIds} in this dashboard`,
+              values: {
+                invalidIdsCount: invalidIds.length,
+                invalidIds
+              }
+            });
             if (selectedJobIds.length === 0 && timeSeriesJobIds.length > 0) {
-              warningText += ', auto selecting first job';
+              warningText += i18n('xpack.ml.timeSeriesExplorer.autoSelectingFirstJobText', {
+                defaultMessage: ', auto selecting first job'
+              });
             }
             toastNotifications.addWarning(warningText);
           }
@@ -147,13 +163,21 @@ module.controller('MlTimeSeriesExplorerController', function (
           // if more than one job or a group has been loaded from the URL
             if (selectedJobIds.length > 1) {
             // if more than one job, select the first job from the selection.
-              toastNotifications.addWarning('You can only view one job at a time in this dashboard');
+              toastNotifications.addWarning(
+                i18n('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
+                  defaultMessage: 'You can only view one job at a time in this dashboard'
+                })
+              );
               mlJobSelectService.setJobIds([selectedJobIds[0]]);
             } else {
             // if a group has been loaded
               if (selectedJobIds.length > 0) {
               // if the group contains valid jobs, select the first
-                toastNotifications.addWarning('You can only view one job at a time in this dashboard');
+                toastNotifications.addWarning(
+                  i18n('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
+                    defaultMessage: 'You can only view one job at a time in this dashboard'
+                  })
+                );
                 mlJobSelectService.setJobIds([selectedJobIds[0]]);
               } else if ($scope.jobs.length > 0) {
               // if there are no valid jobs in the group but there are valid jobs
@@ -185,6 +209,7 @@ module.controller('MlTimeSeriesExplorerController', function (
           $scope.loading = false;
         }
 
+        $scope.$applyAsync();
       }).catch((resp) => {
         console.log('Time series explorer - error getting job info from elasticsearch:', resp);
       });
@@ -237,6 +262,10 @@ module.controller('MlTimeSeriesExplorerController', function (
           $timeout(() => {
             $scope.$broadcast('render');
           }, 0);
+        } else {
+          // Call $applyAsync() if for any reason the upper condition doesn't trigger the $timeout.
+          // We still want to trigger a scope update about the changes above the condition.
+          $scope.$applyAsync();
         }
 
       }
@@ -351,7 +380,7 @@ module.controller('MlTimeSeriesExplorerController', function (
   $scope.refreshFocusData = function (fromDate, toDate) {
 
     // Counter to keep track of the queries to populate the chart.
-    let awaitingCount = 3;
+    let awaitingCount = 4;
 
     // This object is used to store the results of individual remote requests
     // before we transform it into the final data and apply it to $scope. Otherwise
@@ -421,7 +450,7 @@ module.controller('MlTimeSeriesExplorerController', function (
       0,
       searchBounds.min.valueOf(),
       searchBounds.max.valueOf(),
-      ANOMALIES_MAX_RESULTS
+      ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
     ).then((resp) => {
       // Sort in descending time order before storing in scope.
       refreshFocusData.anomalyRecords = _.chain(resp.records)
@@ -446,6 +475,33 @@ module.controller('MlTimeSeriesExplorerController', function (
     }).catch((resp) => {
       console.log('Time series explorer - error getting scheduled events from elasticsearch:', resp);
     });
+
+    // Query 4 - load any annotations for the selected job.
+    if (mlAnnotationsEnabled) {
+      ml.annotations.getAnnotations({
+        jobIds: [$scope.selectedJob.job_id],
+        earliestMs: searchBounds.min.valueOf(),
+        latestMs: searchBounds.max.valueOf(),
+        maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE
+      }).then((resp) => {
+        refreshFocusData.focusAnnotationData = resp.annotations[$scope.selectedJob.job_id]
+          .sort((a, b) => {
+            return a.timestamp - b.timestamp;
+          })
+          .map((d, i) => {
+            d.key = String.fromCharCode(65 + i);
+            return d;
+          });
+
+        finish();
+      }).catch(() => {
+        // silent fail
+        refreshFocusData.focusAnnotationData = [];
+        finish();
+      });
+    } else {
+      finish();
+    }
 
     // Plus query for forecast data if there is a forecastId stored in the appState.
     const forecastId = _.get($scope, 'appState.mlTimeSeriesExplorer.forecastId');
@@ -560,6 +616,14 @@ module.controller('MlTimeSeriesExplorerController', function (
     }, 0);
   };
 
+  if (mlAnnotationsEnabled) {
+    $scope.toggleShowAnnotations = function () {
+      $timeout(() => {
+        $scope.showAnnotations = !$scope.showAnnotations;
+      }, 0);
+    };
+  }
+
   $scope.toggleShowForecast = function () {
     $timeout(() => {
       $scope.showForecast = !$scope.showForecast;
@@ -666,7 +730,13 @@ module.controller('MlTimeSeriesExplorerController', function (
     const appStateDtrIdx = $scope.appState.mlTimeSeriesExplorer.detectorIndex;
     let detectorIndex = appStateDtrIdx !== undefined ? appStateDtrIdx : +(viewableDetectors[0].index);
     if (_.find(viewableDetectors, { 'index': '' + detectorIndex }) === undefined) {
-      const warningText = `Requested detector index ${detectorIndex} is not valid for job ${$scope.selectedJob.job_id}`;
+      const warningText = i18n('xpack.ml.timeSeriesExplorer.requestedDetectorIndexNotValidWarningMessage', {
+        defaultMessage: 'Requested detector index {detectorIndex} is not valid for job {jobId}',
+        values: {
+          detectorIndex,
+          jobId: $scope.selectedJob.job_id
+        }
+      });
       toastNotifications.addWarning(warningText);
       detectorIndex = +(viewableDetectors[0].index);
       $scope.appState.mlTimeSeriesExplorer.detectorIndex = detectorIndex;
@@ -699,7 +769,7 @@ module.controller('MlTimeSeriesExplorerController', function (
       earliestMs,
       latestMs,
       dateFormatTz,
-      ANOMALIES_MAX_RESULTS
+      ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
     ).then((resp) => {
       const anomalies = resp.anomalies;
       const detectorsByJob = mlJobService.detectorsByJob;
@@ -784,7 +854,7 @@ module.controller('MlTimeSeriesExplorerController', function (
       0,
       bounds.min.valueOf(),
       bounds.max.valueOf(),
-      ANOMALIES_MAX_RESULTS)
+      ANOMALIES_TABLE_DEFAULT_QUERY_SIZE)
       .then((resp) => {
         if (resp.records && resp.records.length > 0) {
           const firstRec = resp.records[0];
@@ -800,6 +870,7 @@ module.controller('MlTimeSeriesExplorerController', function (
               entity.fieldValues = _.chain(resp.records).pluck('by_field_value').uniq().value();
             }
           });
+          $scope.$applyAsync();
         }
 
       });

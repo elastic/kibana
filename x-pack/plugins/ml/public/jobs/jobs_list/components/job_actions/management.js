@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { checkPermission } from 'plugins/ml/privilege/check_privilege';
-import { mlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
+import { checkPermission } from '../../../../privilege/check_privilege';
+import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
+import { getIndexPatternNames } from '../../../../util/index_utils';
 
 import {
   stopDatafeeds,
@@ -76,7 +77,18 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
         defaultMessage: 'Clone job'
       }),
       icon: 'copy',
-      enabled: () => (canCreateJob),
+      enabled: (item) => {
+        // We only allow cloning of a job if the user has the right permissions and can still access
+        // the indexPattern the job was created for. An indexPattern could either have been deleted
+        // since the the job was created or the current user doesn't have the required permissions to
+        // access the indexPattern.
+        const indexPatternNames = getIndexPatternNames();
+        const jobIndicesAvailable = item.datafeedIndices.every((dfiName) => {
+          return indexPatternNames.some(ipName => ipName === dfiName);
+        });
+
+        return canCreateJob && jobIndicesAvailable;
+      },
       onClick: (item) => {
         cloneJob(item.id);
         closeMenu(true);

@@ -23,7 +23,9 @@ export const inFlight = ({ dispatch }) => next => {
       } else if (isSetting) {
         const idx = pendingCache.indexOf(cacheKey);
         pendingCache.splice(idx, 1);
-        if (pendingCache.length === 0) dispatch(inFlightComplete());
+        if (pendingCache.length === 0) {
+          dispatch(inFlightComplete());
+        }
       }
     }
 

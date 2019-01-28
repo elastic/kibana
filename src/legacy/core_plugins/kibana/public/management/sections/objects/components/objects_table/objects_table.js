@@ -37,9 +37,7 @@ import {
   EUI_MODAL_CONFIRM_BUTTON,
   EuiCheckboxGroup,
   EuiToolTip,
-  EuiPage,
   EuiPageContent,
-  EuiPageBody,
 } from '@elastic/eui';
 import {
   retrieveAndExportDocs,
@@ -164,7 +162,7 @@ class ObjectsTableUI extends Component {
   }
 
   debouncedFetch = debounce(async () => {
-    const { savedObjectsClient } = this.props;
+    const { intl, savedObjectsClient } = this.props;
     const { activeQuery: query, page, perPage } = this.state;
     const { queryText, visibleTypes } = parseQuery(query);
     const findOptions = {
@@ -191,7 +189,10 @@ class ObjectsTableUI extends Component {
         });
       }
       toastNotifications.addDanger({
-        title: `Unable find saved objects`,
+        title: intl.formatMessage({
+          id: 'kbn.management.objects.objectsTable.unableFindSavedObjectsNotificationMessage',
+          defaultMessage: 'Unable find saved objects'
+        }),
         text: `${error}`,
       });
       return;
@@ -590,47 +591,41 @@ class ObjectsTableUI extends Component {
     }));
 
     return (
-      <EuiPage>
-        <EuiPageBody>
-          <EuiPageContent
-            verticalPosition="center"
-            horizontalPosition="center"
-            style={{ maxWidth: 1000, marginTop: 16, marginBottom: 16 }}
-          >
-            {this.renderFlyout()}
-            {this.renderRelationships()}
-            {this.renderDeleteConfirmModal()}
-            {this.renderExportAllOptionsModal()}
-            <Header
-              onExportAll={() =>
-                this.setState({ isShowingExportAllOptionsModal: true })
-              }
-              onImport={this.showImportFlyout}
-              onRefresh={this.refreshData}
-              filteredCount={filteredItemCount}
-            />
-            <EuiSpacer size="xs" />
-            <Table
-              itemId={'id'}
-              selectionConfig={selectionConfig}
-              selectedSavedObjects={selectedSavedObjects}
-              onQueryChange={this.onQueryChange}
-              onTableChange={this.onTableChange}
-              filterOptions={filterOptions}
-              onExport={this.onExport}
-              onDelete={this.onDelete}
-              getEditUrl={this.props.getEditUrl}
-              goInApp={this.props.goInApp}
-              pageIndex={page}
-              pageSize={perPage}
-              items={savedObjects}
-              totalItemCount={filteredItemCount}
-              isSearching={isSearching}
-              onShowRelationships={this.onShowRelationships}
-            />
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
+      <EuiPageContent
+        horizontalPosition="center"
+      >
+        {this.renderFlyout()}
+        {this.renderRelationships()}
+        {this.renderDeleteConfirmModal()}
+        {this.renderExportAllOptionsModal()}
+        <Header
+          onExportAll={() =>
+            this.setState({ isShowingExportAllOptionsModal: true })
+          }
+          onImport={this.showImportFlyout}
+          onRefresh={this.refreshData}
+          filteredCount={filteredItemCount}
+        />
+        <EuiSpacer size="xs" />
+        <Table
+          itemId={'id'}
+          selectionConfig={selectionConfig}
+          selectedSavedObjects={selectedSavedObjects}
+          onQueryChange={this.onQueryChange}
+          onTableChange={this.onTableChange}
+          filterOptions={filterOptions}
+          onExport={this.onExport}
+          onDelete={this.onDelete}
+          getEditUrl={this.props.getEditUrl}
+          goInApp={this.props.goInApp}
+          pageIndex={page}
+          pageSize={perPage}
+          items={savedObjects}
+          totalItemCount={filteredItemCount}
+          isSearching={isSearching}
+          onShowRelationships={this.onShowRelationships}
+        />
+      </EuiPageContent>
     );
   }
 }

@@ -23,7 +23,7 @@ export const createMetadataResolvers = (libs: {
 } => ({
   InfraSource: {
     async metadataByNode(source, args, { req }) {
-      const result = await libs.metadata.getMetadata(req, source.id, args.nodeName, args.nodeType);
+      const result = await libs.metadata.getMetadata(req, source.id, args.nodeId, args.nodeType);
       return result;
     },
   },

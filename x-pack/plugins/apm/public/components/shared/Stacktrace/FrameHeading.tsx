@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { Stackframe } from '../../../../typings/es_schemas/APMDoc';
+import { idx } from 'x-pack/plugins/apm/common/idx';
+import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/fields/Stackframe';
 import { colors, fontFamilyCode, px, units } from '../../../style/variables';
 
 const FileDetails = styled.div`
@@ -24,18 +24,15 @@ const AppFrameFileDetail = styled.span`
 `;
 
 interface Props {
-  stackframe: Stackframe;
-  isLibraryFrame?: boolean;
+  stackframe: IStackframe;
+  isLibraryFrame: boolean;
 }
 
-const FrameHeading: React.SFC<Props> = ({
-  stackframe,
-  isLibraryFrame = false
-}) => {
+const FrameHeading: React.SFC<Props> = ({ stackframe, isLibraryFrame }) => {
   const FileDetail = isLibraryFrame
     ? LibraryFrameFileDetail
     : AppFrameFileDetail;
-  const lineNumber: number = get(stackframe, 'line.number');
+  const lineNumber = idx(stackframe, _ => _.line.number) || 0;
   return (
     <FileDetails>
       <FileDetail>{stackframe.filename}</FileDetail> in{' '}

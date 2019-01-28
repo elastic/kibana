@@ -9,11 +9,17 @@
 import fs from 'fs';
 import Boom from 'boom';
 import { prefixDatafeedId } from '../../../common/util/job_utils';
+import { mlLog } from '../../client/log';
 
 const ML_DIR = 'ml';
 const KIBANA_DIR = 'kibana';
 const INDEX_PATTERN_ID = 'INDEX_PATTERN_ID';
 const INDEX_PATTERN_NAME = 'INDEX_PATTERN_NAME';
+export const SAVED_OBJECT_TYPES = {
+  DASHBOARD: 'dashboard',
+  SEARCH: 'search',
+  VISUALIZATION: 'visualization'
+};
 
 export class DataRecognizer {
   constructor(callWithRequest) {
@@ -58,10 +64,14 @@ export class DataRecognizer {
     const dirs = await this.listDirs(this.modulesDir);
     await Promise.all(dirs.map(async (dir) => {
       const file = await this.readFile(`${this.modulesDir}/${dir}/manifest.json`);
-      configs.push({
-        dirName: dir,
-        json: JSON.parse(file)
-      });
+      try {
+        configs.push({
+          dirName: dir,
+          json: JSON.parse(file)
+        });
+      } catch (error) {
+        mlLog('warning', `Error parsing ${dir}/manifest.json`);
+      }
     }));
 
     return configs;
@@ -572,8 +582,8 @@ export class DataRecognizer {
     }
   }
 
-  // loop through each kibana saved objects and replace the INDEX_PATTERN_ID
-  // marker for the id of the specified index pattern
+  // loop through each kibana saved object and replace any INDEX_PATTERN_ID and
+  // INDEX_PATTERN_NAME markers for the id or name of the specified index pattern
   updateSavedObjectIndexPatterns(moduleConfig) {
     if (moduleConfig.kibana) {
       Object.keys(moduleConfig.kibana).forEach((category) => {
@@ -582,6 +592,16 @@ export class DataRecognizer {
           if (jsonString.match(INDEX_PATTERN_ID)) {
             jsonString = jsonString.replace(new RegExp(INDEX_PATTERN_ID, 'g'), this.indexPatternId);
             item.config.kibanaSavedObjectMeta.searchSourceJSON = jsonString;
+          }
+
+          if (category === SAVED_OBJECT_TYPES.VISUALIZATION) {
+            // Look for any INDEX_PATTERN_NAME tokens in visualization visState,
+            // as e.g. Vega visualizations reference the Elasticsearch index pattern directly.
+            let visStateString = item.config.visState;
+            if (visStateString !== undefined && visStateString.match(INDEX_PATTERN_NAME)) {
+              visStateString = visStateString.replace(new RegExp(INDEX_PATTERN_NAME, 'g'), this.indexPatternName);
+              item.config.visState = visStateString;
+            }
           }
         });
       });

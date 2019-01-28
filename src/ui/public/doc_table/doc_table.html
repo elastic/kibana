@@ -26,7 +26,7 @@
         ></tool-bar-pager-buttons>
       </div>
     </div>
-    <table class="kbn-table table" ng-if="indexPattern">
+    <table class="kbnDocTable table" ng-if="indexPattern">
       <thead
         kbn-table-header
         columns="columns"
@@ -108,5 +108,7 @@
 
 <div ng-if="hits != null && !hits.length" class="kbnDocTable__error">
   <h2><i class="fa fa-meh-o"></i></h2>
-  <h4>No results found</h4>
+  <h4 i18n-id="common.ui.docTable.noResultsTitle"
+    i18n-default-message="No results found"
+  ></h4>
 </div>

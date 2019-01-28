@@ -1,9 +1,16 @@
 <div class="kuiLocalNav" ng-if="!k7design">
   <div class="kuiLocalNavRow">
     <div class="kuiLocalNavRow__section">
-      <div class="kuiLocalTitle" role="heading" aria-level="1">
-        Surrounding Documents in {{ contextApp.state.queryParameters.indexPatternId }}
-      </div>
+      <div
+        class="kuiLocalTitle"
+        role="heading"
+        aria-level="1"
+        i18n-id="kbn.context.surroundingDocumentsDescription"
+        i18n-default-message="Surrounding Documents in {indexPatternId}"
+        i18n-values="{
+          indexPatternId: contextApp.state.queryParameters.indexPatternId 
+        }"
+      ></div>
     </div>
   </div>
   <div class="kuiLocalNavRow kuiLocalNavRow--secondary">
@@ -25,31 +32,46 @@
   <div class="kuiInfoPanel kuiInfoPanel--error kuiVerticalRhythm">
     <div class="kuiInfoPanelHeader">
       <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning"></span>
-      <span class="kuiInfoPanelHeader__title">
-        Failed to load the anchor document
-      </span>
+      <span
+        class="kuiInfoPanelHeader__title"
+        i18n-id="kbn.context.failedToLoadAnchorDocumentDescription"
+        i18n-default-message="Failed to load the anchor document"
+      ></span>
     </div>
 
     <div class="kuiInfoPanelBody">
       <div
         class="kuiInfoPanelBody__message"
         ng-if="contextApp.state.loadingStatus.anchor.reason === contextApp.constants.FAILURE_REASONS.INVALID_TIEBREAKER"
+        i18n-id="kbn.context.noSearchableTiebreakerFieldDescription"
+        i18n-default-message="No searchable tiebreaker field could be found in the index pattern {indexPatternId}. Please change the advanced setting {tieBreakerFields} to include a valid field for this index pattern."
+        i18n-values="{
+          indexPatternId: contextApp.state.queryParameters.indexPatternId,
+          html_tieBreakerFields: '<code>context:tieBreakerFields</code>'
+        }"
       >
-        No searchable tiebreaker field could be found in the index pattern
-        {{ contextApp.state.queryParameters.indexPatternId}}.
-
-        Please change the advanced setting
-        <code>context:tieBreakerFields</code> to include a valid field for this
-        index pattern.
       </div>
       <div
         class="kuiInfoPanelBody__message"
         ng-if="contextApp.state.loadingStatus.anchor.reason === contextApp.constants.FAILURE_REASONS.UNKNOWN"
       >
-        Please reload or visit
-        <a ng-href="{{ contextApp.state.navigation.discover.url }}">Discover</a>
-        to select a valid anchor document.
-      </div>
+        <span
+          i18n-id="kbn.context.reloadPageDescription.reloadOrVisitTextMessage"
+          i18n-default-message="Please reload or visit"
+          i18n-description="Part of composite text kbn.context.reloadPageDescription.reloadOrVisitTextMessage + kbn.context.reloadPageDescription.discoverLinkText + kbn.context.reloadPageDescription.selectValidAnchorDocumentTextMessage"
+        ></span>
+        <a
+          ng-href="{{ contextApp.state.navigation.discover.url }}"
+          i18n-id="kbn.context.reloadPageDescription.discoverLinkText"
+          i18n-default-message="Discover"
+          i18n-description="Part of composite text kbn.context.reloadPageDescription.reloadOrVisitTextMessage + kbn.context.reloadPageDescription.discoverLinkText + kbn.context.reloadPageDescription.selectValidAnchorDocumentTextMessage"
+        ></a>
+        <span
+          i18n-id="kbn.context.reloadPageDescription.selectValidAnchorDocumentTextMessage"
+          i18n-default-message="to select a valid anchor document."
+          i18n-description="Part of composite text kbn.context.reloadPageDescription.reloadOrVisitTextMessage + kbn.context.reloadPageDescription.discoverLinkText + kbn.context.reloadPageDescription.selectValidAnchorDocumentTextMessage"
+      ></span>
+    </div>
     </div>
   </div>
 </div>
@@ -70,7 +92,13 @@
         icon="'fa-chevron-up'"
         ng-click="contextApp.actions.fetchMorePredecessorRows()"
       >
-        Load {{ contextApp.state.queryParameters.defaultStepSize }} more
+        <span
+          i18n-id="kbn.context.loadMoreDescription"
+          i18n-default-message="Load {defaultStepSize} more"
+          i18n-values="{
+            defaultStepSize: contextApp.state.queryParameters.defaultStepSize
+          }"
+        ></span>
       </context-loading-button>
       <context-size-picker
         count="contextApp.state.queryParameters.predecessorCount"
@@ -78,7 +106,10 @@
         is-disabled="contextApp.state.loadingStatus.anchor.status !== contextApp.constants.LOADING_STATUS.LOADED"
         on-change-count="contextApp.actions.fetchGivenPredecessorRows"
       ></context-size-picker>
-      <span>newer documents</span>
+      <span
+        i18n-id="kbn.context.newerDocumentsDescription"
+        i18n-default-message="newer documents"
+      ></span>
       <span
         class="kuiStatusText kuiStatusText--warning"
         ng-if="(contextApp.state.loadingStatus.predecessors.status === contextApp.constants.LOADING_STATUS.LOADED)
@@ -101,9 +132,11 @@
     ].includes(contextApp.state.loadingStatus.anchor.status)"
     class="kuiPanel kuiPanel--centered kuiVerticalRhythm"
   >
-    <div class="kuiTableInfo">
-      Loading&hellip;
-    </div>
+    <div
+      class="kuiTableInfo"
+      i18n-id="kbn.context.loadingDescription"
+      i18n-default-message="Loading…"
+    ></div>
   </div>
 
   <!-- Table -->
@@ -136,7 +169,13 @@
         icon="'fa-chevron-down'"
         ng-click="contextApp.actions.fetchMoreSuccessorRows()"
       >
-        Load {{ contextApp.state.queryParameters.defaultStepSize }} more
+        <span
+          i18n-id="kbn.context.loadMoreDescription"
+          i18n-default-message="Load {defaultStepSize} more"
+          i18n-values="{
+            defaultStepSize: contextApp.state.queryParameters.defaultStepSize
+          }"
+        ></span>
       </context-loading-button>
       <context-size-picker
         count="contextApp.state.queryParameters.successorCount"
@@ -144,7 +183,10 @@
         is-disabled="contextApp.state.loadingStatus.anchor.status !== contextApp.constants.LOADING_STATUS.LOADED"
         on-change-count="contextApp.actions.fetchGivenSuccessorRows"
       ></context-size-picker>
-      <div>older documents</div>
+      <div
+        i18n-id="kbn.context.olderDocumentsDescription"
+        i18n-default-message="older documents"
+      ></div>
       <span
         class="kuiStatusText kuiStatusText--warning"
         ng-if="(contextApp.state.loadingStatus.successors.status === contextApp.constants.LOADING_STATUS.LOADED)

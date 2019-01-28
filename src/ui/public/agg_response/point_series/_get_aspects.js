@@ -17,32 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { makeFakeXAspect } from './_fake_x_aspect';
-
-const map = {
-  segment: 'x',
-  metric: 'y',
-  radius: 'z',
-  width: 'width',
-  group: 'series'
-};
-
-function columnToAspect(aspects, col, i) {
-  const schema = col.aggConfig.schema.name;
-
-  const name = map[schema];
-  if (!name) throw new TypeError('unknown schema name "' + schema + '"');
-
-  const aspect = {
-    i: i,
-    title: col.title,
-    aggConfig: col.aggConfig
-  };
-
-  if (!aspects[name]) aspects[name] = [];
-  aspects[name].push(aspect);
-}
 
 /**
  * Identify and group the columns based on the aspect of the pointSeries
@@ -52,22 +27,33 @@ function columnToAspect(aspects, col, i) {
  * @return {object} - an object with a key for each aspect (see map). The values
  *                    may be undefined, a single aspect, or an array of aspects.
  */
-export function getAspects(table) {
-  const aspects = _(table.columns)
-  // write each column into the aspects under it's group
-    .transform(columnToAspect, {})
-    // unwrap groups that only have one value, and validate groups that have more
-    .transform(function (aspects, group, name) {
-      if ((name !== 'y' && name !== 'series') && group.length > 1) {
-        throw new TypeError('Only multiple metrics and series are supported in point series');
+export function getAspects(table, dimensions) {
+  const aspects = {};
+  Object.keys(dimensions).forEach(name => {
+    const dimension = Array.isArray(dimensions[name]) ? dimensions[name] : [dimensions[name]];
+    dimension.forEach(d => {
+      if (!d) {
+        return;
       }
-
-      aspects[name] = group.length > 1 ? group : group[0];
-    })
-    .value();
+      const column = table.columns[d.accessor];
+      if (!column) {
+        return;
+      }
+      if (!aspects[name]) {
+        aspects[name] = [];
+      }
+      aspects[name].push({
+        accessor: column.id,
+        column: d.accessor,
+        title: column.name,
+        format: d.format,
+        params: d.params,
+      });
+    });
+  });
 
   if (!aspects.x) {
-    aspects.x = makeFakeXAspect();
+    aspects.x = [makeFakeXAspect()];
   }
 
   return aspects;

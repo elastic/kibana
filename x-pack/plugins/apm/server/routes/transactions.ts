@@ -10,13 +10,6 @@ import Joi from 'joi';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getTransaction } from '../lib/transactions/get_transaction';
-import { getSpans } from '../lib/transactions/spans/get_spans';
-
-const defaultErrorHandler = (err: Error) => {
-  // tslint:disable-next-line
-  console.error(err.stack);
-  throw Boom.boomify(err, { statusCode: 400 });
-};
 
 export function initTransactionsApi(server: Server) {
   server.route({
@@ -29,29 +22,16 @@ export function initTransactionsApi(server: Server) {
         })
       }
     },
-    handler: req => {
+    handler: async req => {
       const { transactionId } = req.params;
       const { traceId } = req.query as { traceId: string };
       const setup = setupRequest(req);
-      return getTransaction(transactionId, traceId, setup).catch(
-        defaultErrorHandler
-      );
-    }
-  });
-
-  // TODO: this can be removed by 7.0 when v1 compatability can be dropped
-  server.route({
-    method: 'GET',
-    path: `/api/apm/services/{serviceName}/transactions/{transactionId}/spans`,
-    options: {
-      validate: {
-        query: withDefaultValidators()
+      const transaction = await getTransaction(transactionId, traceId, setup);
+      if (transaction) {
+        return transaction;
+      } else {
+        throw Boom.notFound('Cannot find the requested page');
       }
-    },
-    handler: req => {
-      const { transactionId } = req.params;
-      const setup = setupRequest(req);
-      return getSpans(transactionId, setup).catch(defaultErrorHandler);
     }
   });
 }

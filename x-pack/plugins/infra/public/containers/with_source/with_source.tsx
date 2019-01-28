@@ -9,7 +9,6 @@ import { Container as ConstateContainer, OnMount } from 'constate';
 import React from 'react';
 import { ApolloConsumer } from 'react-apollo';
 import { createSelector } from 'reselect';
-import { oc } from 'ts-optchain';
 
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { memoizeLast } from 'ui/utils/memoize';
@@ -46,9 +45,20 @@ const createContainerProps = memoizeLast((sourceId: string, apolloClient: Apollo
   });
 
   const getDerivedIndexPattern = createSelector(
-    (state: State) => oc(state).source.status.indexFields([]),
-    (state: State) => oc(state).source.configuration.logAlias(),
-    (state: State) => oc(state).source.configuration.metricAlias(),
+    (state: State) =>
+      (state && state.source && state.source.status && state.source.status.indexFields) || [],
+    (state: State) =>
+      (state &&
+        state.source &&
+        state.source.configuration &&
+        state.source.configuration.logAlias) ||
+      undefined,
+    (state: State) =>
+      (state &&
+        state.source &&
+        state.source.configuration &&
+        state.source.configuration.metricAlias) ||
+      undefined,
     (indexFields, logAlias, metricAlias) => ({
       fields: indexFields,
       title: `${logAlias},${metricAlias}`,
@@ -57,9 +67,15 @@ const createContainerProps = memoizeLast((sourceId: string, apolloClient: Apollo
 
   const selectors = inferSelectorMap<State>()({
     ...createStatusSelectors(({ operationStatusHistory }: State) => operationStatusHistory),
-    getConfiguredFields: () => state => oc(state).source.configuration.fields(),
-    getLogIndicesExist: () => state => oc(state).source.status.logIndicesExist(),
-    getMetricIndicesExist: () => state => oc(state).source.status.metricIndicesExist(),
+    getConfiguredFields: () => state =>
+      (state && state.source && state.source.configuration && state.source.configuration.fields) ||
+      undefined,
+    getLogIndicesExist: () => state =>
+      (state && state.source && state.source.status && state.source.status.logIndicesExist) ||
+      undefined,
+    getMetricIndicesExist: () => state =>
+      (state && state.source && state.source.status && state.source.status.metricIndicesExist) ||
+      undefined,
     getDerivedIndexPattern: () => getDerivedIndexPattern,
   });
 
@@ -122,7 +138,7 @@ interface WithSourceProps {
 export const WithSource: React.SFC<WithSourceProps> = ({ children }) => (
   <ApolloConsumer>
     {client => (
-      <ConstateContainer pure {...createContainerProps('default', client)}>
+      <ConstateContainer {...createContainerProps('default', client)}>
         {({
           getConfiguredFields,
           getDerivedIndexPattern,

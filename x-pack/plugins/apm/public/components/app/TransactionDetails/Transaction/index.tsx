@@ -6,7 +6,6 @@
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -14,10 +13,12 @@ import {
   EuiTitle,
   EuiToolTip
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { Location } from 'history';
 import React from 'react';
 import { Transaction as ITransaction } from '../../../../../typings/es_schemas/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
-import { DiscoverTransactionButton } from '../../../shared/DiscoverButtons/DiscoverTransactionButton';
+import { TransactionActionMenu } from '../../../shared/TransactionActionMenu/TransactionActionMenu';
 import { TransactionLink } from '../../../shared/TransactionLink';
 import { StickyTransactionProperties } from './StickyTransactionProperties';
 import { TransactionPropertiesTable } from './TransactionPropertiesTable';
@@ -30,13 +31,27 @@ function MaybeViewTraceLink({
   transaction: ITransaction;
   waterfall: IWaterfall;
 }) {
+  const viewFullTraceButtonLabel = i18n.translate(
+    'xpack.apm.transactionDetails.viewFullTraceButtonLabel',
+    {
+      defaultMessage: 'View full trace'
+    }
+  );
+
   // the traceroot cannot be found, so we cannot link to it
   if (!waterfall.traceRoot) {
     return (
       <EuiFlexItem grow={false}>
-        <EuiToolTip content="The trace parent cannot be found">
-          <EuiButton iconType="apmApp" disabled={true}>
-            View full trace
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.apm.transactionDetails.noTraceParentButtonTooltip',
+            {
+              defaultMessage: 'The trace parent cannot be found'
+            }
+          )}
+        >
+          <EuiButton iconType="apmTrace" disabled={true}>
+            {viewFullTraceButtonLabel}
           </EuiButton>
         </EuiToolTip>
       </EuiFlexItem>
@@ -50,9 +65,16 @@ function MaybeViewTraceLink({
   if (isRoot) {
     return (
       <EuiFlexItem grow={false}>
-        <EuiToolTip content="Currently viewing the full trace">
-          <EuiButton iconType="apmApp" disabled={true}>
-            View full trace
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.apm.transactionDetails.viewingFullTraceButtonTooltip',
+            {
+              defaultMessage: 'Currently viewing the full trace'
+            }
+          )}
+        >
+          <EuiButton iconType="apmTrace" disabled={true}>
+            {viewFullTraceButtonLabel}
           </EuiButton>
         </EuiToolTip>
       </EuiFlexItem>
@@ -63,7 +85,7 @@ function MaybeViewTraceLink({
     return (
       <EuiFlexItem grow={false}>
         <TransactionLink transaction={waterfall.traceRoot}>
-          <EuiButton iconType="apmApp">View full trace</EuiButton>
+          <EuiButton iconType="apmTrace">{viewFullTraceButtonLabel}</EuiButton>
         </TransactionLink>
       </EuiFlexItem>
     );
@@ -88,18 +110,24 @@ export const Transaction: React.SFC<Props> = ({
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
           <EuiTitle size="s">
-            <h5>Transaction sample</h5>
+            <h5>
+              {i18n.translate(
+                'xpack.apm.transactionDetails.transactionSampleTitle',
+                {
+                  defaultMessage: 'Transaction sample'
+                }
+              )}
+            </h5>
           </EuiTitle>
         </EuiFlexItem>
 
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <DiscoverTransactionButton transaction={transaction}>
-                <EuiButtonEmpty iconType="discoverApp">
-                  View transaction in Discover
-                </EuiButtonEmpty>
-              </DiscoverTransactionButton>
+              <TransactionActionMenu
+                transaction={transaction}
+                location={location}
+              />
             </EuiFlexItem>
             <MaybeViewTraceLink
               transaction={transaction}

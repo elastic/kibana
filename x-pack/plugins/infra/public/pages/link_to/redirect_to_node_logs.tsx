@@ -17,7 +17,7 @@ import { InfraNodeType } from '../../graphql/types';
 import { getTimeFromLocation } from './query_params';
 
 type RedirectToNodeLogsType = RouteComponentProps<{
-  nodeName: string;
+  nodeId: string;
   nodeType: InfraNodeType;
 }>;
 
@@ -28,7 +28,7 @@ interface RedirectToNodeLogsProps extends RedirectToNodeLogsType {
 export const RedirectToNodeLogs = injectI18n(
   ({
     match: {
-      params: { nodeName, nodeType },
+      params: { nodeId, nodeType },
     },
     location,
     intl,
@@ -52,7 +52,7 @@ export const RedirectToNodeLogs = injectI18n(
         }
 
         const searchString = compose(
-          replaceLogFilterInQueryString(`${configuredFields[nodeType]}: ${nodeName}`),
+          replaceLogFilterInQueryString(`${configuredFields[nodeType]}: ${nodeId}`),
           replaceLogPositionInQueryString(getTimeFromLocation(location))
         )('');
 
@@ -63,11 +63,11 @@ export const RedirectToNodeLogs = injectI18n(
 );
 
 export const getNodeLogsUrl = ({
-  nodeName,
+  nodeId,
   nodeType,
   time,
 }: {
-  nodeName: string;
+  nodeId: string;
   nodeType: InfraNodeType;
   time?: number;
-}) => [`#/link-to/${nodeType}-logs/`, nodeName, ...(time ? [`?time=${time}`] : [])].join('');
+}) => [`#/link-to/${nodeType}-logs/`, nodeId, ...(time ? [`?time=${time}`] : [])].join('');

@@ -5,97 +5,32 @@
  */
 
 import { get } from 'lodash';
+import { APMError } from '../typings/es_schemas/Error';
 import { Span } from '../typings/es_schemas/Span';
 import { Transaction } from '../typings/es_schemas/Transaction';
 import * as constants from './constants';
 
-describe('Transaction v1:', () => {
+describe('Transaction', () => {
   const transaction: Transaction = {
-    version: 'v1',
     '@timestamp': new Date().toString(),
-    beat: {
-      hostname: 'beat hostname',
-      name: 'beat name',
-      version: 'beat version'
+    agent: {
+      name: 'agent name',
+      version: 'agent version'
     },
-    host: {
-      name: 'string;'
+    http: {
+      request: { method: 'GET' },
+      response: { status_code: 200 }
     },
-    processor: {
-      name: 'transaction',
-      event: 'transaction'
+    url: { full: 'http://www.elastic.co' },
+    service: {
+      name: 'service name',
+      language: { name: 'nodejs', version: 'v1337' }
     },
-    context: {
-      system: {
-        architecture: 'x86',
-        hostname: 'some-host',
-        ip: '111.0.2.3',
-        platform: 'linux'
-      },
-      service: {
-        name: 'service name',
-        agent: {
-          name: 'agent name',
-          version: 'v1337'
-        },
-        language: {
-          name: 'nodejs',
-          version: 'v1337'
-        }
-      },
-      user: {
-        id: '1337'
-      },
-      request: {
-        url: {
-          full: 'http://www.elastic.co'
-        },
-        method: 'GET'
-      }
-    },
-    transaction: {
-      duration: {
-        us: 1337
-      },
-      id: 'transaction id',
-      name: 'transaction name',
-      result: 'transaction result',
-      sampled: true,
-      type: 'transaction type'
-    }
-  };
-
-  matchSnapshot(transaction);
-});
-
-describe('Transaction v2', () => {
-  const transaction: Transaction = {
-    version: 'v2',
-    '@timestamp': new Date().toString(),
-    beat: {
-      hostname: 'beat hostname',
-      name: 'beat name',
-      version: 'beat version'
-    },
-    host: { name: 'string;' },
+    host: { hostname: 'my hostname' },
     processor: { name: 'transaction', event: 'transaction' },
     timestamp: { us: 1337 },
     trace: { id: 'trace id' },
-    context: {
-      system: {
-        architecture: 'x86',
-        hostname: 'some-host',
-        ip: '111.0.2.3',
-        platform: 'linux'
-      },
-      service: {
-        name: 'service name',
-        agent: { name: 'agent name', version: 'v1337' },
-        language: { name: 'nodejs', version: 'v1337' }
-      },
-      user: { id: '1337' },
-      request: { url: { full: 'http://www.elastic.co' }, method: 'GET' }
-    },
+    user: { id: '1337' },
     parent: {
       id: 'parentId'
     },
@@ -106,74 +41,26 @@ describe('Transaction v2', () => {
       result: 'transaction result',
       sampled: true,
       type: 'transaction type'
+    },
+    kubernetes: {
+      pod: {
+        uid: 'pod1234567890abcdef'
+      }
+    },
+    container: {
+      id: 'container1234567890abcdef'
     }
   };
 
   matchSnapshot(transaction);
 });
 
-describe('Span v1', () => {
+describe('Span', () => {
   const span: Span = {
-    version: 'v1',
     '@timestamp': new Date().toString(),
-    beat: {
-      hostname: 'beat hostname',
-      name: 'beat name',
-      version: 'beat version'
-    },
-    host: {
-      name: 'string;'
-    },
-    processor: {
-      name: 'transaction',
-      event: 'span'
-    },
-    context: {
-      db: {
-        statement: 'db statement'
-      },
-      service: {
-        name: 'service name',
-        agent: {
-          name: 'agent name',
-          version: 'v1337'
-        },
-        language: {
-          name: 'nodejs',
-          version: 'v1337'
-        }
-      }
-    },
-    span: {
-      duration: {
-        us: 1337
-      },
-      start: {
-        us: 1337
-      },
-      name: 'span name',
-      type: 'span type',
-      id: 1337
-    },
-    transaction: {
-      id: 'transaction id'
-    }
-  };
-
-  matchSnapshot(span);
-});
-
-describe('Span v2', () => {
-  const span: Span = {
-    version: 'v2',
-    '@timestamp': new Date().toString(),
-    beat: {
-      hostname: 'beat hostname',
-      name: 'beat name',
-      version: 'beat version'
-    },
-    host: {
-      name: 'string;'
+    agent: {
+      name: 'agent name',
+      version: 'agent version'
     },
     processor: {
       name: 'transaction',
@@ -185,33 +72,25 @@ describe('Span v2', () => {
     trace: {
       id: 'trace id'
     },
+    service: {
+      name: 'service name'
+    },
     context: {
       db: {
         statement: 'db statement'
-      },
-      service: {
-        name: 'service name',
-        agent: {
-          name: 'agent name',
-          version: 'v1337'
-        },
-        language: {
-          name: 'nodejs',
-          version: 'v1337'
-        }
       }
     },
     parent: {
       id: 'parentId'
     },
     span: {
-      duration: {
-        us: 1337
-      },
+      action: 'my action',
+      duration: { us: 1337 },
+      id: 'span id',
       name: 'span name',
-      type: 'span type',
-      id: 1337,
-      hex_id: 'hex id'
+      subtype: 'my subtype',
+      sync: false,
+      type: 'span type'
     },
     transaction: {
       id: 'transaction id'
@@ -221,7 +100,57 @@ describe('Span v2', () => {
   matchSnapshot(span);
 });
 
-function matchSnapshot(obj: Span | Transaction) {
+describe('Error', () => {
+  const errorDoc: APMError = {
+    agent: {
+      name: 'agent name',
+      version: 'agent version'
+    },
+    error: {
+      exception: {
+        module: 'errors',
+        handled: false,
+        message: 'sonic boom',
+        type: 'errorString'
+      },
+      culprit: 'handleOopsie',
+      id: 'error id',
+      grouping_key: 'grouping key'
+    },
+    '@timestamp': new Date().toString(),
+    host: {
+      hostname: 'my hostname'
+    },
+    processor: {
+      name: 'error',
+      event: 'error'
+    },
+    timestamp: {
+      us: 1337
+    },
+    trace: {
+      id: 'trace id'
+    },
+    service: {
+      name: 'service name',
+      language: {
+        name: 'nodejs',
+        version: 'v1337'
+      }
+    },
+    context: {},
+    parent: {
+      id: 'parentId'
+    },
+    transaction: {
+      id: 'transaction id'
+    }
+  };
+
+  matchSnapshot(errorDoc);
+});
+
+function matchSnapshot(obj: Span | Transaction | APMError) {
   Object.entries(constants).forEach(([key, longKey]) => {
     const value = get(obj, longKey);
     it(key, () => {

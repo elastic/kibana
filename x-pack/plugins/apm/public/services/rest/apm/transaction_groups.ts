@@ -9,7 +9,7 @@ import { ITransactionDistributionAPIResponse } from 'x-pack/plugins/apm/server/l
 import { TransactionListAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/get_top_transactions';
 import { IUrlParams } from '../../../store/urlParams';
 import { callApi } from '../callApi';
-import { addVersion, getEncodedEsQuery } from './apm';
+import { getEncodedEsQuery } from './apm';
 
 export async function loadTransactionList({
   serviceName,
@@ -18,18 +18,13 @@ export async function loadTransactionList({
   kuery,
   transactionType = 'request'
 }: IUrlParams) {
-  const groups = await callApi<TransactionListAPIResponse>({
+  return await callApi<TransactionListAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/transaction_groups/${transactionType}`,
     query: {
       start,
       end,
       esFilterQuery: await getEncodedEsQuery(kuery)
     }
-  });
-
-  return groups.map(group => {
-    group.sample = addVersion(group.sample);
-    return group;
   });
 }
 
@@ -40,6 +35,7 @@ export async function loadTransactionDistribution({
   transactionName,
   transactionType = 'request',
   transactionId,
+  traceId,
   kuery
 }: Required<IUrlParams>) {
   return callApi<ITransactionDistributionAPIResponse>({
@@ -50,6 +46,7 @@ export async function loadTransactionDistribution({
       start,
       end,
       transactionId,
+      traceId,
       esFilterQuery: await getEncodedEsQuery(kuery)
     }
   });
@@ -84,6 +81,22 @@ export async function loadOverviewCharts({
 }: IUrlParams) {
   return callApi<TimeSeriesAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/transaction_groups/${transactionType}/charts`,
+    query: {
+      start,
+      end,
+      esFilterQuery: await getEncodedEsQuery(kuery)
+    }
+  });
+}
+
+export async function loadOverviewChartsForAllTypes({
+  serviceName,
+  start,
+  end,
+  kuery
+}: IUrlParams) {
+  return callApi<TimeSeriesAPIResponse>({
+    pathname: `/api/apm/services/${serviceName}/transaction_groups/charts`,
     query: {
       start,
       end,

@@ -10,8 +10,6 @@ import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { loadTransaction } from '../../services/rest/apm/transactions';
 import { IReduxState } from '../rootReducer';
 import { IUrlParams } from '../urlParams';
-// @ts-ignore
-import { createInitialDataSelector } from './helpers';
 
 const ID = 'transactionDetails';
 export function getTransactionDetails(state: IReduxState) {

@@ -32,6 +32,7 @@ import {
   PHASE_ROLLOVER_MINIMUM_AGE_UNITS,
   PHASE_SHRINK_ENABLED,
 } from '../../../../store/constants';
+import { SetPriorityInput } from '../set_priority_input';
 import { NodeAllocation } from '../node_allocation';
 import { ErrableFormRow } from '../../form_errors';
 import { LearnMoreLink, ActiveBadge, PhaseErrorMessage, OptionalLabel } from '../../../components';
@@ -102,8 +103,8 @@ class WarmPhaseUi extends PureComponent {
               <p>
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.warmPhaseDescriptionMessage"
-                  defaultMessage="You are still querying your index, but it is read-only, and you are no longer
-                    updating it.  You can allocate shards to less performant hardware.
+                  defaultMessage="You are still querying your index, but it is read-only.
+                    You can allocate shards to less performant hardware.
                     For faster searches, you can reduce the number of shards and force merge segments."
                 />
               </p>
@@ -164,6 +165,7 @@ class WarmPhaseUi extends PureComponent {
                       phase={PHASE_WARM}
                       isShowingErrors={isShowingErrors}
                       setPhaseData={setPhaseData}
+                      rolloverEnabled={hotPhaseRolloverEnabled}
                     />
                   ) : null}
 
@@ -194,6 +196,12 @@ class WarmPhaseUi extends PureComponent {
                         errorKey={PHASE_REPLICA_COUNT}
                         isShowingErrors={isShowingErrors}
                         errors={errors}
+                        helpText={
+                          intl.formatMessage({
+                            id: 'xpack.indexLifecycleMgmt.warmPhase.replicaCountHelpText',
+                            defaultMessage: 'By default, the number of replicas remains the same.'
+                          })
+                        }
                       >
                         <EuiFieldNumber
                           id={`${PHASE_WARM}-${PHASE_REPLICA_COUNT}`}
@@ -337,6 +345,13 @@ class WarmPhaseUi extends PureComponent {
                 ) : null}
               </div>
             </EuiDescribedFormGroup>
+            <SetPriorityInput
+              errors={errors}
+              phaseData={phaseData}
+              phase={PHASE_WARM}
+              isShowingErrors={isShowingErrors}
+              setPhaseData={setPhaseData}
+            />
           </Fragment>
         ) : null}
       </Fragment>

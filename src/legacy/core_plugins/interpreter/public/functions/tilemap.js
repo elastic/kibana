@@ -17,31 +17,21 @@
  * under the License.
  */
 
-import { makeGeoJsonResponseHandler } from 'plugins/tile_map/coordinatemap_response_handler';
+import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 import { i18n } from '@kbn/i18n';
-
-const responseHandler = makeGeoJsonResponseHandler();
 
 export const tilemap = () => ({
   name: 'tilemap',
   type: 'render',
   context: {
     types: [
-      'kibana_table'
+      'kibana_datatable'
     ],
   },
-  help: i18n.translate('common.core_plugins.interpreter.public.functions.tilemap.help', {
+  help: i18n.translate('interpreter.functions.tilemap.help', {
     defaultMessage: 'Tilemap visualization'
   }),
   args: {
-    bucket: {
-      types: ['string'],
-      default: '0',
-    },
-    metric: {
-      types: ['string'],
-      default: '1',
-    },
     visConfig: {
       types: ['string', 'null'],
       default: '"{}"',
@@ -49,27 +39,20 @@ export const tilemap = () => ({
   },
   fn(context, args) {
     const visConfigParams = JSON.parse(args.visConfig);
-    const metricColumn = context.columns.find((column, i) =>
-      column.id === args.metric || column.name === args.metric || i === parseInt(args.metric)
-    );
-    const bucketColumn = context.columns.find((column, i) =>
-      column.id === args.bucket || column.name === args.bucket || i === parseInt(args.bucket)
-    );
 
-    metricColumn.aggConfig.schema = 'metric';
-    bucketColumn.aggConfig.schema = 'segment';
-
-    const convertedData = responseHandler(context);
+    const convertedData = convertToGeoJson(context, {
+      geohash: visConfigParams.geohash,
+      metric: visConfigParams.metric,
+      geocentroid: visConfigParams.geocentroid,
+    });
 
     return {
       type: 'render',
       as: 'visualization',
       value: {
         visData: convertedData,
-        visConfig: {
-          type: 'tile_map',
-          params: visConfigParams,
-        },
+        visType: 'tile_map',
+        visConfig: visConfigParams,
         params: {
           listenOnChange: true,
         }

@@ -22,7 +22,16 @@ import { FilterBarPushFiltersProvider } from '../filter_bar/push_filters';
 import { FilterBarQueryFilterProvider } from '../filter_bar/query_filter';
 import { onBrushEvent } from '../utils/brush_event';
 
-const getTerms = (table, columnIndex, rowIndex) => {
+/**
+ * For terms aggregations on `__other__` buckets, this assembles a list of applicable filter
+ * terms based on a specific cell in the tabified data.
+ *
+ * @param  {object} table - tabified table data
+ * @param  {number} columnIndex - current column index
+ * @param  {number} rowIndex - current row index
+ * @return {array} - array of terms to filter against
+ */
+const getOtherBucketFilterTerms = (table, columnIndex, rowIndex) => {
   if (rowIndex === -1) {
     return [];
   }
@@ -42,19 +51,35 @@ const getTerms = (table, columnIndex, rowIndex) => {
   }))];
 };
 
-const createFilter = (data, columnIndex, rowIndex, cellValue) => {
-  const { aggConfig, id: columnId } = data.columns[columnIndex];
+/**
+ * Assembles the filters needed to apply filtering against a specific cell value, while accounting
+ * for cases like if the value is a terms agg in an `__other__` or `__missing__` bucket.
+ *
+ * @param  {object} table - tabified table data
+ * @param  {number} columnIndex - current column index
+ * @param  {number} rowIndex - current row index
+ * @param  {string} cellValue - value of the current cell
+ * @return {array|string} - filter or list of filters to provide to queryFilter.addFilters()
+ */
+const createFilter = (aggConfigs, table, columnIndex, rowIndex, cellValue) => {
+  const column = table.columns[columnIndex];
+  const aggConfig = aggConfigs[columnIndex];
   let filter = [];
-  const value = rowIndex > -1 ? data.rows[rowIndex][columnId] : cellValue;
-  if (value === null || value === undefined) {
+  const value = rowIndex > -1 ? table.rows[rowIndex][column.id] : cellValue;
+  if (value === null || value === undefined || !aggConfig.isFilterable()) {
     return;
   }
   if (aggConfig.type.name === 'terms' && aggConfig.params.otherBucket) {
-    const terms = getTerms(data, columnIndex, rowIndex);
+    const terms = getOtherBucketFilterTerms(table, columnIndex, rowIndex);
     filter = aggConfig.createFilter(value, { terms });
   } else {
     filter = aggConfig.createFilter(value);
   }
+
+  if (!Array.isArray(filter)) {
+    filter = [filter];
+  }
+
   return filter;
 };
 
@@ -62,34 +87,38 @@ const VisFiltersProvider = (Private, getAppState) => {
   const filterBarPushFilters = Private(FilterBarPushFiltersProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
-  const filter = (event, { simulate } = {}) => {
-    let data = event.datum.aggConfigResult;
+  const pushFilters = (filters, simulate) => {
+    const appState = getAppState();
+    if (filters.length && !simulate) {
+      const flatFilters = _.flatten(filters);
+      const deduplicatedFilters = flatFilters.filter((v, i) => i === flatFilters.findIndex(f => _.isEqual(v, f)));
+      filterBarPushFilters(appState)(deduplicatedFilters);
+    }
+  };
+
+  const filter = (event, { simulate = false } = {}) => {
+    const dataPoints = event.data;
     const filters = [];
-    while (data) {
-      if (data.type === 'bucket') {
-        const { key, rawData } = data;
-        const { table, column, row } = rawData;
-        const filter = createFilter(table, column, row, key);
-        if (event.negate) {
-          if (Array.isArray(filter)) {
-            filter.forEach(f => f.meta.negate = !f.meta.negate);
-          } else {
-            filter.meta.negate = !filter.meta.negate;
+
+    dataPoints.forEach(val => {
+      const { table, column, row, value } = val;
+      const filter = createFilter(event.aggConfigs, table, column, row, value);
+      if (filter) {
+        filter.forEach(f => {
+          if (event.negate) {
+            f.meta.negate = !f.meta.negate;
           }
-        }
-        filters.push(filter);
+          filters.push(f);
+        });
       }
-      data = data.$parent;
-    }
-    if (!simulate) {
-      const appState = getAppState();
-      filterBarPushFilters(appState)(_.flatten(filters));
-    }
+    });
+
+    pushFilters(filters, simulate);
     return filters;
   };
 
   const addFilter = (event) => {
-    const filter = createFilter(event.table, event.column, event.row, event.value);
+    const filter = createFilter(event.aggConfigs, event.table, event.column, event.row, event.value);
     queryFilter.addFilters(filter);
   };
 

@@ -21,7 +21,7 @@ export const pointseries = () => ({
   name: 'pointseries',
   type: 'pointseries',
   help:
-    'Turn a datatable into a point series model. Currently we differentiate measure from dimensions by looking for a [TinyMath function](http://canvas.elastic.co/reference/tinymath.html). ' +
+    'Turn a datatable into a point series model. Currently we differentiate measure from dimensions by looking for a [TinyMath function](https://www.elastic.co/guide/en/kibana/current/canvas-tinymath-functions.html). ' +
     'If you enter a TinyMath expression in your argument, we treat that argument as a measure, otherwise it is a dimension. Dimensions are combined to create unique ' +
     'keys. Measures are then deduplicated by those keys using the specified TinyMath function',
   context: {
@@ -56,7 +56,9 @@ export const pointseries = () => ({
     const columnNames = context.columns.map(col => col.name);
     const mathScope = pivotObjectArray(context.rows, columnNames);
     const autoQuoteColumn = col => {
-      if (!columnNames.includes(col)) return col;
+      if (!columnNames.includes(col)) {
+        return col;
+      }
       return col.match(/\s/) ? `'${col}'` : col;
     };
 
@@ -78,7 +80,9 @@ export const pointseries = () => ({
 
         if (isColumnReference(mathExp)) {
           // TODO: Do something better if the column does not exist
-          if (!columnExists(columnNames, mathExp)) return;
+          if (!columnExists(columnNames, mathExp)) {
+            return;
+          }
 
           dimensions.push({
             name: arg,
@@ -147,8 +151,9 @@ export const pointseries = () => ({
       const measureValues = measureNames.map(measure => {
         try {
           const ev = evaluate(args[measure], subScope);
-          if (Array.isArray(ev))
+          if (Array.isArray(ev)) {
             throw new Error('Expressions must be wrapped in a function such as sum()');
+          }
 
           return ev;
         } catch (e) {

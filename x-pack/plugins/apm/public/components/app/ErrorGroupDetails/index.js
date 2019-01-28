@@ -5,7 +5,7 @@
  */
 
 import { connect } from 'react-redux';
-import ErrorGroupDetails from './view';
+import { ErrorGroupDetails } from './view';
 import { getUrlParams } from '../../../store/urlParams';
 
 function mapStateToProps(state = {}) {
