@@ -99,13 +99,10 @@ export const RemoteClustersFormField = injectI18n(
       const hasClusters = Boolean(remoteClusters.length);
       const remoteClustersOptions = hasClusters ? remoteClusters.map(({ name, isConnected }) => ({
         value: name,
-        text: isConnected ? name : (
-          <FormattedMessage
-            id="xpack.crossClusterReplication.forms.remoteClusterDropdownNotConnected"
-            defaultMessage="{name} (not connected)"
-            values={{ name }}
-          />
-        ),
+        text: isConnected ? name : this.props.intl.formatMessage({
+          id: 'xpack.crossClusterReplication.forms.remoteClusterDropdownNotConnected',
+          defaultMessage: '{name} (not connected)',
+        }, { name }),
         'data-test-subj': `option-${name}`
       })) : [];
       const errorMessage = this.renderErrorMessage();
