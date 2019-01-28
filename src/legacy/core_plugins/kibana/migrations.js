@@ -19,7 +19,7 @@
 
 import { cloneDeep, get, omit } from 'lodash';
 
-export const migrations = {
+export default {
   visualization: {
     '7.0.0': (doc) => {
       try {
