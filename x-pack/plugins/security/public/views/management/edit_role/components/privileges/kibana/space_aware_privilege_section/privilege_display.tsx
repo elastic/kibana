@@ -28,7 +28,7 @@ export const PrivilegeDisplay: SFC<Props> = (props: Props) => {
   }
 
   if (explanation.supersededPrivilege) {
-    return <supersededPrivilegeDisplay {...props} />;
+    return <SupersededPrivilegeDisplay {...props} />;
   }
 
   if (!explanation.isDirectlyAssigned) {
@@ -48,7 +48,7 @@ const SimplePrivilegeDisplay: SFC<Props> = (props: Props) => {
   );
 };
 
-export const supersededPrivilegeDisplay: SFC<Props> = (props: Props) => {
+export const SupersededPrivilegeDisplay: SFC<Props> = (props: Props) => {
   const { supersededPrivilege, actualPrivilegeSource } =
     props.explanation || ({} as PrivilegeExplanation);
 
