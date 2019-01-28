@@ -141,7 +141,7 @@ export default function (kibana) {
           value: 'https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite',
           description: i18n.translate('timelion.uiSettings.graphiteURLDescription', {
             defaultMessage: '{experimentalLabel} The URL of your graphite host',
-            values: { experimentalLabel: `<em>${experimentalLabel}</em>` }
+            values: { experimentalLabel: `<em>[${experimentalLabel}]</em>` }
           }),
           category: ['timelion'],
         },
@@ -152,7 +152,7 @@ export default function (kibana) {
           value: 'someKeyHere',
           description: i18n.translate('timelion.uiSettings.quandlKeyDescription', {
             defaultMessage: '{experimentalLabel} Your API key from www.quandl.com',
-            values: { experimentalLabel: `<em>${experimentalLabel}</em>` }
+            values: { experimentalLabel: `<em>[${experimentalLabel}]</em>` }
           }),
           category: ['timelion'],
         }
