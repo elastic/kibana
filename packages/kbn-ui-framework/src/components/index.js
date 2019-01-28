@@ -62,7 +62,6 @@ export {
 export {
   KuiLocalNav,
   KuiLocalNavRow,
-  KuiLocalNavRowSection,
   KuiLocalTab,
   KuiLocalTabs,
   KuiLocalTitle,
