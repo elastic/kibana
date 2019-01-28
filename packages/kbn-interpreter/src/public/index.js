@@ -17,6 +17,7 @@
  * under the License.
  */
 
-export { populateBrowserRegistries, getBrowserRegistries } from './browser_registries';
+export { loadBrowserRegistries } from './browser_registries';
 export { createSocket } from './socket';
-export { initializeInterpreter, interpretAst, getInitializedFunctions } from './interpreter';
+export { initializeInterpreter } from './interpreter';
+export { RenderFunctionsRegistry } from './render_functions_registry';

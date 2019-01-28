@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import { oc } from 'ts-optchain';
+import { idx } from 'x-pack/plugins/apm/common/idx';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { ESResponse } from './fetcher';
 
@@ -38,7 +38,7 @@ export function transactionGroupsTransformer({
   start: number;
   end: number;
 }): ITransactionGroup[] {
-  const buckets = oc(response).aggregations.transactions.buckets([]);
+  const buckets = idx(response, _ => _.aggregations.transactions.buckets) || [];
   const duration = moment.duration(end - start);
   const minutes = duration.asMinutes();
   const results = buckets.map(bucket => {

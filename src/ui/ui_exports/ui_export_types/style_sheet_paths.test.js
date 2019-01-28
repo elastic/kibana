@@ -61,7 +61,13 @@ describe('uiExports.styleSheetPaths', () => {
 Array [
   Object {
     "localPath": <absolute>/kibana/public/bar.scss,
-    "publicPath": "plugins/test/bar.css",
+    "publicPath": "plugins/test/bar.light.css",
+    "theme": "light",
+  },
+  Object {
+    "localPath": <absolute>/kibana/public/bar.scss,
+    "publicPath": "plugins/test/bar.dark.css",
+    "theme": "dark",
   },
 ]
 `);
@@ -75,7 +81,13 @@ Array [
 Array [
   Object {
     "localPath": <absolute>/kibana/public/bar.scss,
-    "publicPath": "plugins/test/bar.css",
+    "publicPath": "plugins/test/bar.light.css",
+    "theme": "light",
+  },
+  Object {
+    "localPath": <absolute>/kibana/public/bar.scss,
+    "publicPath": "plugins/test/bar.dark.css",
+    "theme": "dark",
   },
 ]
 `);
@@ -89,7 +101,13 @@ Array [
 Array [
   Object {
     "localPath": <absolute>/kibana/public\\bar.scss,
-    "publicPath": "plugins/test/../public/bar.css",
+    "publicPath": "plugins/test/../public/bar.light.css",
+    "theme": "light",
+  },
+  Object {
+    "localPath": <absolute>/kibana/public\\bar.scss,
+    "publicPath": "plugins/test/../public/bar.dark.css",
+    "theme": "dark",
   },
 ]
 `);

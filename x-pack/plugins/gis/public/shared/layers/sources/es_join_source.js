@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import React, { Fragment } from 'react';
 
-import { ASource } from './source';
+import { AbstractSource } from './source';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import {
   fetchSearchSourceAndRecordWithInspector,
@@ -59,7 +59,7 @@ export function extractPropertiesMap(resp, propertyNames, countPropertyName) {
   return propertiesMap;
 }
 
-export class ESJoinSource extends ASource {
+export class ESJoinSource extends AbstractSource {
 
   static type = 'ES_JOIN_SOURCE';
 
@@ -176,15 +176,13 @@ export class ESJoinSource extends ASource {
 
   getJoinDescription(leftSourceName, leftFieldName) {
     const metrics = this._getValidMetrics().map(metric => {
-      return metric.type !== 'count' ? `${metric.type}(${metric.field})` : 'count(*)';
+      return metric.type !== 'count' ? `${metric.type} ${metric.field}` : 'count';
     });
     const joinStatement = [];
-    joinStatement.push(`SELECT ${metrics.join(',')}`);
-    joinStatement.push(`FROM ${leftSourceName} left`);
-    joinStatement.push(`JOIN ${this._descriptor.indexPatternTitle} right`);
-    joinStatement.push(`ON left.${leftFieldName} right.${this._descriptor.term}`);
-    joinStatement.push(`GROUP BY right.${this._descriptor.term}`);
-    return `Elasticsearch terms aggregation request for join: "${joinStatement.join(' ')}"`;
+    joinStatement.push(`Join ${leftSourceName}:${leftFieldName} with`);
+    joinStatement.push(`${this._descriptor.indexPatternTitle}:${this._descriptor.term}`);
+    joinStatement.push(`for metrics ${metrics.join(',')}`);
+    return `Elasticsearch terms aggregation request for ${joinStatement.join(' ')}`;
   }
 
   _getValidMetrics() {
@@ -207,11 +205,11 @@ export class ESJoinSource extends ASource {
   getMetricFields() {
     return this._getValidMetrics().map(metric => {
       const metricKey = metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : metric.type;
-      const metricLabel = metric.type !== 'count' ? `${metric.type}(${metric.field})` : 'count(*)';
+      const metricLabel = metric.type !== 'count' ? `${metric.type} ${metric.field}` : 'count';
       return {
         ...metric,
         propertyKey: `__kbnjoin__${metricKey}_groupby_${this._descriptor.indexPatternTitle}.${this._descriptor.term}`,
-        propertyLabel: `${metricLabel} group by ${this._descriptor.indexPatternTitle}.${this._descriptor.term}`,
+        propertyLabel: `${metricLabel} of ${this._descriptor.indexPatternTitle}:${this._descriptor.term}`,
       };
     });
   }
@@ -249,6 +247,4 @@ export class ESJoinSource extends ASource {
   async getDisplayName() {
     return `es_table ${this._descriptor.indexPatternId}`;
   }
-
-
 }

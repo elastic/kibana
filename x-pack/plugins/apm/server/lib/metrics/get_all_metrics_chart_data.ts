@@ -16,15 +16,15 @@ export interface MetricsChartAPIResponse {
   cpu: CPUChartAPIResponse;
 }
 
-export async function getAllMetricsChartData(args: MetricsRequestArgs) {
+export async function getAllMetricsChartData(
+  args: MetricsRequestArgs
+): Promise<MetricsChartAPIResponse> {
   const [memoryChartData, cpuChartData] = await Promise.all([
     getMemoryChartData(args),
     getCPUChartData(args)
   ]);
-  const result: MetricsChartAPIResponse = {
+  return {
     memory: memoryChartData,
     cpu: cpuChartData
   };
-
-  return result;
 }

@@ -7,7 +7,7 @@
 import React from 'react';
 import { StickyProperties } from './index';
 import { shallow } from 'enzyme';
-import { USER_ID, REQUEST_URL_FULL } from '../../../../common/constants';
+import { USER_ID, URL_FULL } from '../../../../common/constants';
 import { mockMoment } from '../../../utils/testHelpers';
 
 describe('StickyProperties', () => {
@@ -21,14 +21,14 @@ describe('StickyProperties', () => {
         val: 1536405447640
       },
       {
-        fieldName: REQUEST_URL_FULL,
+        fieldName: URL_FULL,
         label: 'URL',
         val: 'https://www.elastic.co/test',
         truncated: true
       },
       {
         label: 'Request method',
-        fieldName: 'context.request.method',
+        fieldName: 'http.request.method',
         val: 'GET'
       },
       {

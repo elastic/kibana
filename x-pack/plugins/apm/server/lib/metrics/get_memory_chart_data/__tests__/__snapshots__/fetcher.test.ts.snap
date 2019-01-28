@@ -7,41 +7,38 @@ Array [
     Object {
       "body": Object {
         "aggs": Object {
-          "freeMemory": Object {
+          "memoryUsedAvg": Object {
             "avg": Object {
-              "field": "system.memory.actual.free",
+              "script": Object {
+                "lang": "expression",
+                "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+              },
             },
           },
-          "processMemoryRss": Object {
-            "avg": Object {
-              "field": "system.process.memory.rss.bytes",
-            },
-          },
-          "processMemorySize": Object {
-            "avg": Object {
-              "field": "system.process.memory.size",
+          "memoryUsedMax": Object {
+            "max": Object {
+              "script": Object {
+                "lang": "expression",
+                "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+              },
             },
           },
           "timeseriesData": Object {
             "aggs": Object {
-              "freeMemory": Object {
+              "memoryUsedAvg": Object {
                 "avg": Object {
-                  "field": "system.memory.actual.free",
+                  "script": Object {
+                    "lang": "expression",
+                    "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+                  },
                 },
               },
-              "processMemoryRss": Object {
-                "avg": Object {
-                  "field": "system.process.memory.rss.bytes",
-                },
-              },
-              "processMemorySize": Object {
-                "avg": Object {
-                  "field": "system.process.memory.size",
-                },
-              },
-              "totalMemory": Object {
-                "avg": Object {
-                  "field": "system.memory.total",
+              "memoryUsedMax": Object {
+                "max": Object {
+                  "script": Object {
+                    "lang": "expression",
+                    "source": "1 - doc['system.memory.actual.free'] / doc['system.memory.total']",
+                  },
                 },
               },
             },
@@ -55,18 +52,13 @@ Array [
               "min_doc_count": 0,
             },
           },
-          "totalMemory": Object {
-            "avg": Object {
-              "field": "system.memory.total",
-            },
-          },
         },
         "query": Object {
           "bool": Object {
             "filter": Array [
               Object {
                 "term": Object {
-                  "context.service.name": "test-service",
+                  "service.name": "test-service",
                 },
               },
               Object {
@@ -81,6 +73,16 @@ Array [
                     "gte": 100,
                     "lte": 200,
                   },
+                },
+              },
+              Object {
+                "exists": Object {
+                  "field": "system.memory.total",
+                },
+              },
+              Object {
+                "exists": Object {
+                  "field": "system.memory.actual.free",
                 },
               },
               Object {

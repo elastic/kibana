@@ -42,28 +42,6 @@
       color: $localNavButtonTextColor;
     }
   }
-
-  @include darkTheme {
-    color: $localNavButtonTextColor--darkTheme;
-
-    &:hover {
-      background-color: $localNavButtonBackgroundColor-isHover--darkTheme;
-      color: $localNavButtonTextColor-isHover--darkTheme;
-    }
-
-    &.kuiLocalMenuItem-isSelected {
-      background-color: $localNavButtonBackgroundColor-isSelected--darkTheme;
-      border-color: darken($localNavBackgroundColor--darkTheme, 10%);
-      color: $localNavButtonTextColor-isHover--darkTheme;
-    }
-
-    &.kuiLocalMenuItem-isDisabled {
-      &:hover {
-        background-color: transparent;
-        color: $localNavButtonTextColor--darkTheme;
-      }
-    }
-  }
 }
 
     .kuiLocalMenuItem__icon {

@@ -18,53 +18,68 @@
  */
 
 import { toArray } from 'lodash';
-import { HierarchicalTooltipFormatterProvider } from './_hierarchical_tooltip_formatter';
+import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 
-export function BuildHierarchicalDataProvider(Private) {
-  const tooltipFormatter = Private(HierarchicalTooltipFormatterProvider);
+export const buildHierarchicalData = (table, { metric, buckets = [] }) => {
+  let slices;
+  const names = {};
+  const metricColumn = table.columns[metric.accessor];
+  const metricFieldFormatter = metric.format;
 
-  return function (table) {
-    let slices;
-    const names = {};
-    if (table.columns.length === 1) {
-      slices = [{ name: table.columns[0].title, size: table.rows[0][0].value }];
-      names[table.columns[0].title] = table.columns[0].title;
-    } else {
+  if (!buckets.length) {
+    slices = [{
+      name: metricColumn.name,
+      size: table.rows[0][metricColumn.id],
+      aggConfig: metricColumn.aggConfig
+    }];
+    names[metricColumn.name] = metricColumn.name;
+  } else {
+    slices = [];
+    table.rows.forEach((row, rowIndex) => {
       let parent;
-      slices = [];
-      table.rows.forEach(row => {
-        let dataLevel = slices;
-        // we always have one bucket column and one metric column (for every level)
-        for (let columnIndex = 0; columnIndex < table.columns.length; columnIndex += 2) {
-          const { aggConfig } = table.columns[columnIndex];
-          const fieldFormatter = aggConfig.fieldFormatter('text');
-          const bucketColumn = row[columnIndex];
-          const metricColumn = row[columnIndex + 1];
-          const name = fieldFormatter(bucketColumn.value);
-          const size = metricColumn.value;
-          names[name] = name;
+      let dataLevel = slices;
 
-          let slice  = dataLevel.find(slice => slice.name === name);
-          if (!slice) {
-            slice = { name, size, parent, aggConfig, aggConfigResult: metricColumn, children: [] };
-            dataLevel.push(slice);
-          }
-          parent = slice;
-          dataLevel = slice.children;
+      buckets.forEach(bucket => {
+        const bucketColumn = table.columns[bucket.accessor];
+        const bucketValueColumn = table.columns[bucket.accessor + 1];
+        const bucketFormatter = getFormat(bucket.format);
+        const name = bucketFormatter.convert(row[bucketColumn.id]);
+        const size = row[bucketValueColumn.id];
+        names[name] = name;
+
+        let slice  = dataLevel.find(slice => slice.name === name);
+        if (!slice) {
+          slice = {
+            name,
+            size,
+            parent,
+            children: [],
+            aggConfig: bucketColumn.aggConfig,
+            rawData: {
+              table,
+              row: rowIndex,
+              column: bucket.accessor,
+              value: row[bucketColumn.id],
+            },
+          };
+          dataLevel.push(slice);
         }
-      });
-    }
 
-    return {
-      hits: table.rows.length,
-      raw: table,
-      names: toArray(names),
-      tooltipFormatter: tooltipFormatter(table.columns),
-      slices: {
-        children: [
-          ...slices
-        ]
-      }
-    };
+        parent = slice;
+        dataLevel = slice.children;
+      });
+    });
+  }
+
+  return {
+    hits: table.rows.length,
+    raw: table,
+    names: toArray(names),
+    tooltipFormatter: metricFieldFormatter,
+    slices: {
+      children: [
+        ...slices
+      ]
+    }
   };
-}
+};

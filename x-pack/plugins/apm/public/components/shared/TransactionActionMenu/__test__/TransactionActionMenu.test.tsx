@@ -7,14 +7,13 @@
 import { shallow } from 'enzyme';
 import 'jest-styled-components';
 import React from 'react';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { TransactionActionMenu } from '../TransactionActionMenu';
-import transactionActionMenuProps from './transactionActionMenuProps.json';
+import { props } from './transactionActionMenuProps';
 
 describe('TransactionActionMenu component', () => {
   it('should render with data', () => {
-    const transaction: Transaction = transactionActionMenuProps.transaction;
-    const location: Location = transactionActionMenuProps.location;
+    const transaction = props.transaction;
+    const location = props.location;
 
     expect(
       shallow(

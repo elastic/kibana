@@ -9,6 +9,7 @@
 import fs from 'fs';
 import Boom from 'boom';
 import { prefixDatafeedId } from '../../../common/util/job_utils';
+import { mlLog } from '../../client/log';
 
 const ML_DIR = 'ml';
 const KIBANA_DIR = 'kibana';
@@ -63,10 +64,14 @@ export class DataRecognizer {
     const dirs = await this.listDirs(this.modulesDir);
     await Promise.all(dirs.map(async (dir) => {
       const file = await this.readFile(`${this.modulesDir}/${dir}/manifest.json`);
-      configs.push({
-        dirName: dir,
-        json: JSON.parse(file)
-      });
+      try {
+        configs.push({
+          dirName: dir,
+          json: JSON.parse(file)
+        });
+      } catch (error) {
+        mlLog('warning', `Error parsing ${dir}/manifest.json`);
+      }
     }));
 
     return configs;

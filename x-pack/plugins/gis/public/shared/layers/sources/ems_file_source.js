@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { VectorSource } from './vector_source';
+import { AbstractVectorSource } from './vector_source';
 import React from 'react';
 import {
   EuiLink,
@@ -16,7 +16,7 @@ import {
 import { GIS_API_PATH } from '../../../../common/constants';
 import { emsServiceSettings } from '../../../kibana_services';
 
-export class EMSFileSource extends VectorSource {
+export class EMSFileSource extends AbstractVectorSource {
 
   static type = 'EMS_FILE';
   static title = 'Elastic Maps Service vector shapes';
@@ -63,7 +63,7 @@ export class EMSFileSource extends VectorSource {
   async getGeoJsonWithMeta() {
     const fileSource = this._emsFiles.find((source => source.id === this._descriptor.id));
     const fetchUrl = `../${GIS_API_PATH}/data/ems?id=${encodeURIComponent(this._descriptor.id)}`;
-    const featureCollection = await VectorSource.getGeoJson(fileSource, fetchUrl);
+    const featureCollection = await AbstractVectorSource.getGeoJson(fileSource, fetchUrl);
     return {
       data: featureCollection,
       meta: {}
@@ -77,7 +77,7 @@ export class EMSFileSource extends VectorSource {
         <p className="gisLayerDetails">
           <strong className="gisLayerDetails__label">Source </strong><span>Elastic Maps Service</span><br/>
           <strong className="gisLayerDetails__label">Id </strong><span>{this._descriptor.id}</span><br/>
-          <EuiLink href={emsHotLink} target="_blank">Preview on landing page</EuiLink><br/>
+          <EuiLink href={emsHotLink} target="_blank">Preview on maps.elastic.co</EuiLink><br/>
         </p>
       </EuiText>
     );

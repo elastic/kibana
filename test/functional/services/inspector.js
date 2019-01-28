@@ -99,7 +99,7 @@ export function InspectorProvider({ getService }) {
       const rows = await tableBody.findAllByTagName('tr');
       return await Promise.all(rows.map(async row => {
         const cells = await row.findAllByTagName('td');
-        return await Promise.all(cells.map(async cell => cell.getVisibleText()));
+        return await Promise.all(cells.map(async cell => await cell.getVisibleText()));
       }));
     }
 
