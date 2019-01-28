@@ -460,6 +460,7 @@ export class ImportView extends Component {
                     index={index}
                     indexPatternId={indexPatternId}
                     timeFieldName={timeFieldName}
+                    createIndexPattern={createIndexPattern}
                   />
                 </React.Fragment>
               }
