@@ -39,7 +39,7 @@ const authenticationsTests: KbnTestProvider = ({ getService }) => {
           const authentications = resp.data.source.Authentications;
           expect(authentications.edges.length).to.be(1);
           expect(authentications.totalCount).to.be(2);
-          expect(authentications.pageInfo.endCursor!.value).to.equal('(invalid user)');
+          expect(authentications.pageInfo.endCursor!.value).to.equal('1');
         });
     });
 
@@ -56,7 +56,7 @@ const authenticationsTests: KbnTestProvider = ({ getService }) => {
             },
             pagination: {
               limit: 2,
-              cursor: '(invalid user)',
+              cursor: '1',
             },
           },
         })
