@@ -11,7 +11,7 @@ import { hideFlyout, setFlyoutItem, showFlyout } from './actions';
 
 export enum FlyoutVisibility {
   hidden = 'hidden',
-  visible = 'visibile',
+  visible = 'visible',
 }
 
 export interface FlyoutOptionsState {
