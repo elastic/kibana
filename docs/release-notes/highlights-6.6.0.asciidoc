@@ -119,7 +119,9 @@ You can now add annotations by drag-selecting in the *Single Metric Viewer*
 charts. For example, you can annotate a time period to describe what is
 occurring in your operational environment or to explain why anomalies were
 detected. After you add annotations, they are also listed in the
-*Anomaly Explorer* and the *Job Management* page. See <<xpack-ml>>.
+*Anomaly Explorer* and the *Job Management* page. Some annotations are also
+added automatically, for example when data is missing due to ingestion delays.
+See <<xpack-ml>>.
 
 [float]
 === Simplified creation of {ml} jobs for {auditbeat} data
