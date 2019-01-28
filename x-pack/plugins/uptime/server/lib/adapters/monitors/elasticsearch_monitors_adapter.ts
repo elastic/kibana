@@ -87,9 +87,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
               max_write_request: { max: { field: 'http.rtt.write_request.us' } },
               max_tcp_rtt: { max: { field: 'tcp.rtt.connect.us' } },
               status: { terms: { field: 'monitor.status', size: 2, shard_size: 2 } },
-              max_duration: { max: { field: 'monitor.duration.us' } },
-              min_duration: { min: { field: 'monitor.duration.us' } },
-              avg_duration: { avg: { field: 'monitor.duration.us' } },
+              duration: { stats: { field: 'monitor.duration.us' } },
             },
           },
         },
@@ -103,30 +101,26 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       ({
         key,
         max_content,
-        avg_duration,
+        duration: { avg, max, min },
         max_write_request,
         max_validate,
         max_tcp_rtt,
         max_response,
-        min_duration,
         max_total,
-        max_duration,
         status,
         doc_count,
-      }: any) => {
-        return {
-          maxContent: formatChartValue(key, max_content),
-          avgDuration: formatChartValue(key, avg_duration),
-          maxWriteRequest: formatChartValue(key, max_write_request),
-          maxValidate: formatChartValue(key, max_validate),
-          maxTcpRtt: formatChartValue(key, max_tcp_rtt),
-          maxResponse: formatChartValue(key, max_response),
-          minDuration: formatChartValue(key, min_duration),
-          maxTotal: formatChartValue(key, max_total),
-          maxDuration: formatChartValue(key, max_duration),
-          status: formatStatusBuckets(key, status.buckets, doc_count),
-        };
-      }
+      }: any) => ({
+        maxContent: formatChartValue(key, max_content),
+        maxWriteRequest: formatChartValue(key, max_write_request),
+        maxValidate: formatChartValue(key, max_validate),
+        maxTcpRtt: formatChartValue(key, max_tcp_rtt),
+        maxResponse: formatChartValue(key, max_response),
+        maxTotal: formatChartValue(key, max_total),
+        avgDuration: formatChartValue(key, { value: avg }),
+        maxDuration: formatChartValue(key, { value: max }),
+        minDuration: formatChartValue(key, { value: min }),
+        status: formatStatusBuckets(key, status.buckets, doc_count),
+      })
     );
   }
 
