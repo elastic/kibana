@@ -5,6 +5,7 @@
  */
 
 
+console.log("Did you load?");
 export default function ({ loadTestFile }) {
   describe('InfraOps GraphQL Endpoints', () => {
     loadTestFile(require.resolve('./metadata'));
