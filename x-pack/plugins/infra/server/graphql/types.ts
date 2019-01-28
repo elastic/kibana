@@ -480,7 +480,7 @@ export namespace QueryResolvers {
     R = InfraSource[],
     Parent = never,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
 }
 /** A source of infrastructure data */
 export namespace InfraSourceResolvers {
@@ -516,17 +516,17 @@ export namespace InfraSourceResolvers {
     R = InfraSourceConfiguration,
     Parent = InfraSource,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type StatusResolver<
     R = InfraSourceStatus,
     Parent = InfraSource,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type MetadataByNodeResolver<
     R = InfraNodeMetadata,
     Parent = InfraSource,
     Context = InfraContext
-    > = Resolver<R, Parent, Context, MetadataByNodeArgs>;
+  > = Resolver<R, Parent, Context, MetadataByNodeArgs>;
   export interface MetadataByNodeArgs {
     nodeId: string;
 
@@ -537,7 +537,7 @@ export namespace InfraSourceResolvers {
     R = InfraLogEntryInterval,
     Parent = InfraSource,
     Context = InfraContext
-    > = Resolver<R, Parent, Context, LogEntriesAroundArgs>;
+  > = Resolver<R, Parent, Context, LogEntriesAroundArgs>;
   export interface LogEntriesAroundArgs {
     /** The sort key that corresponds to the point in time */
     key: InfraTimeKeyInput;
@@ -555,7 +555,7 @@ export namespace InfraSourceResolvers {
     R = InfraLogEntryInterval,
     Parent = InfraSource,
     Context = InfraContext
-    > = Resolver<R, Parent, Context, LogEntriesBetweenArgs>;
+  > = Resolver<R, Parent, Context, LogEntriesBetweenArgs>;
   export interface LogEntriesBetweenArgs {
     /** The sort key that corresponds to the start of the interval */
     startKey: InfraTimeKeyInput;
@@ -571,7 +571,7 @@ export namespace InfraSourceResolvers {
     R = InfraLogSummaryInterval,
     Parent = InfraSource,
     Context = InfraContext
-    > = Resolver<R, Parent, Context, LogSummaryBetweenArgs>;
+  > = Resolver<R, Parent, Context, LogSummaryBetweenArgs>;
   export interface LogSummaryBetweenArgs {
     /** The millisecond timestamp that corresponds to the start of the interval */
     start: number;
@@ -587,7 +587,7 @@ export namespace InfraSourceResolvers {
     R = InfraLogItem,
     Parent = InfraSource,
     Context = InfraContext
-    > = Resolver<R, Parent, Context, LogItemArgs>;
+  > = Resolver<R, Parent, Context, LogItemArgs>;
   export interface LogItemArgs {
     id: string;
   }
@@ -596,7 +596,7 @@ export namespace InfraSourceResolvers {
     R = InfraResponse | null,
     Parent = InfraSource,
     Context = InfraContext
-    > = Resolver<R, Parent, Context, MapArgs>;
+  > = Resolver<R, Parent, Context, MapArgs>;
   export interface MapArgs {
     timerange: InfraTimerangeInput;
 
@@ -607,7 +607,7 @@ export namespace InfraSourceResolvers {
     R = InfraMetricData[],
     Parent = InfraSource,
     Context = InfraContext
-    > = Resolver<R, Parent, Context, MetricsArgs>;
+  > = Resolver<R, Parent, Context, MetricsArgs>;
   export interface MetricsArgs {
     nodeId: string;
 
@@ -633,17 +633,17 @@ export namespace InfraSourceConfigurationResolvers {
     R = string,
     Parent = InfraSourceConfiguration,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type LogAliasResolver<
     R = string,
     Parent = InfraSourceConfiguration,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type FieldsResolver<
     R = InfraSourceFields,
     Parent = InfraSourceConfiguration,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
 }
 /** A mapping of semantic fields to their document counterparts */
 export namespace InfraSourceFieldsResolvers {
@@ -666,32 +666,32 @@ export namespace InfraSourceFieldsResolvers {
     R = string,
     Parent = InfraSourceFields,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type HostResolver<
     R = string,
     Parent = InfraSourceFields,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type MessageResolver<
     R = string[],
     Parent = InfraSourceFields,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type PodResolver<
     R = string,
     Parent = InfraSourceFields,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type TiebreakerResolver<
     R = string,
     Parent = InfraSourceFields,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type TimestampResolver<
     R = string,
     Parent = InfraSourceFields,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
 }
 /** The status of an infrastructure data source */
 export namespace InfraSourceStatusResolvers {
@@ -716,37 +716,37 @@ export namespace InfraSourceStatusResolvers {
     R = boolean,
     Parent = InfraSourceStatus,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type LogAliasExistsResolver<
     R = boolean,
     Parent = InfraSourceStatus,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type MetricIndicesExistResolver<
     R = boolean,
     Parent = InfraSourceStatus,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type LogIndicesExistResolver<
     R = boolean,
     Parent = InfraSourceStatus,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type MetricIndicesResolver<
     R = string[],
     Parent = InfraSourceStatus,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type LogIndicesResolver<
     R = string[],
     Parent = InfraSourceStatus,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type IndexFieldsResolver<
     R = InfraIndexField[],
     Parent = InfraSourceStatus,
     Context = InfraContext
-    > = Resolver<R, Parent, Context, IndexFieldsArgs>;
+  > = Resolver<R, Parent, Context, IndexFieldsArgs>;
   export interface IndexFieldsArgs {
     indexType?: InfraIndexType | null;
   }
@@ -778,12 +778,12 @@ export namespace InfraIndexFieldResolvers {
     R = boolean,
     Parent = InfraIndexField,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type AggregatableResolver<
     R = boolean,
     Parent = InfraIndexField,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
 }
 /** One metadata entry for a node. */
 export namespace InfraNodeMetadataResolvers {
@@ -804,12 +804,12 @@ export namespace InfraNodeMetadataResolvers {
     R = string,
     Parent = InfraNodeMetadata,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type FeaturesResolver<
     R = InfraNodeFeature[],
     Parent = InfraNodeMetadata,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace InfraNodeFeatureResolvers {
@@ -823,12 +823,12 @@ export namespace InfraNodeFeatureResolvers {
     R = string,
     Parent = InfraNodeFeature,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type SourceResolver<
     R = string,
     Parent = InfraNodeFeature,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
 }
 /** A consecutive sequence of log entries */
 export namespace InfraLogEntryIntervalResolvers {
@@ -853,37 +853,37 @@ export namespace InfraLogEntryIntervalResolvers {
     R = InfraTimeKey | null,
     Parent = InfraLogEntryInterval,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type EndResolver<
     R = InfraTimeKey | null,
     Parent = InfraLogEntryInterval,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type HasMoreBeforeResolver<
     R = boolean,
     Parent = InfraLogEntryInterval,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type HasMoreAfterResolver<
     R = boolean,
     Parent = InfraLogEntryInterval,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type FilterQueryResolver<
     R = string | null,
     Parent = InfraLogEntryInterval,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type HighlightQueryResolver<
     R = string | null,
     Parent = InfraLogEntryInterval,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type EntriesResolver<
     R = InfraLogEntry[],
     Parent = InfraLogEntryInterval,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
 }
 /** A representation of the log entry's position in the event stream */
 export namespace InfraTimeKeyResolvers {
@@ -903,7 +903,7 @@ export namespace InfraTimeKeyResolvers {
     R = number,
     Parent = InfraTimeKey,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
 }
 /** A log entry */
 export namespace InfraLogEntryResolvers {
@@ -922,7 +922,7 @@ export namespace InfraLogEntryResolvers {
     R = InfraTimeKey,
     Parent = InfraLogEntry,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type GidResolver<R = string, Parent = InfraLogEntry, Context = InfraContext> = Resolver<
     R,
     Parent,
@@ -937,7 +937,7 @@ export namespace InfraLogEntryResolvers {
     R = InfraLogMessageSegment[],
     Parent = InfraLogEntry,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
 }
 /** A segment of the log entry message that was derived from a field */
 export namespace InfraLogMessageFieldSegmentResolvers {
@@ -954,17 +954,17 @@ export namespace InfraLogMessageFieldSegmentResolvers {
     R = string,
     Parent = InfraLogMessageFieldSegment,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type ValueResolver<
     R = string,
     Parent = InfraLogMessageFieldSegment,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type HighlightsResolver<
     R = string[],
     Parent = InfraLogMessageFieldSegment,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
 }
 /** A segment of the log entry message that was derived from a field */
 export namespace InfraLogMessageConstantSegmentResolvers {
@@ -977,7 +977,7 @@ export namespace InfraLogMessageConstantSegmentResolvers {
     R = string,
     Parent = InfraLogMessageConstantSegment,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
 }
 /** A consecutive sequence of log summary buckets */
 export namespace InfraLogSummaryIntervalResolvers {
@@ -996,22 +996,22 @@ export namespace InfraLogSummaryIntervalResolvers {
     R = number | null,
     Parent = InfraLogSummaryInterval,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type EndResolver<
     R = number | null,
     Parent = InfraLogSummaryInterval,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type FilterQueryResolver<
     R = string | null,
     Parent = InfraLogSummaryInterval,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type BucketsResolver<
     R = InfraLogSummaryBucket[],
     Parent = InfraLogSummaryInterval,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
 }
 /** A log summary bucket */
 export namespace InfraLogSummaryBucketResolvers {
@@ -1028,17 +1028,17 @@ export namespace InfraLogSummaryBucketResolvers {
     R = number,
     Parent = InfraLogSummaryBucket,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type EndResolver<
     R = number,
     Parent = InfraLogSummaryBucket,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type EntriesCountResolver<
     R = number,
     Parent = InfraLogSummaryBucket,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace InfraLogItemResolvers {
@@ -1065,7 +1065,7 @@ export namespace InfraLogItemResolvers {
     R = InfraLogItemField[],
     Parent = InfraLogItem,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace InfraLogItemFieldResolvers {
@@ -1080,12 +1080,12 @@ export namespace InfraLogItemFieldResolvers {
     R = string,
     Parent = InfraLogItemField,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type ValueResolver<
     R = string,
     Parent = InfraLogItemField,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace InfraResponseResolvers {
@@ -1097,7 +1097,7 @@ export namespace InfraResponseResolvers {
     R = InfraNode[],
     Parent = InfraResponse,
     Context = InfraContext
-    > = Resolver<R, Parent, Context, NodesArgs>;
+  > = Resolver<R, Parent, Context, NodesArgs>;
   export interface NodesArgs {
     path: InfraPathInput[];
 
@@ -1116,12 +1116,12 @@ export namespace InfraNodeResolvers {
     R = InfraNodePath[],
     Parent = InfraNode,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type MetricResolver<
     R = InfraNodeMetric,
     Parent = InfraNode,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace InfraNodePathResolvers {
@@ -1154,12 +1154,12 @@ export namespace InfraNodeMetricResolvers {
     R = InfraMetricType,
     Parent = InfraNodeMetric,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type ValueResolver<
     R = number,
     Parent = InfraNodeMetric,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace InfraMetricDataResolvers {
@@ -1173,12 +1173,12 @@ export namespace InfraMetricDataResolvers {
     R = InfraMetric | null,
     Parent = InfraMetricData,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type SeriesResolver<
     R = InfraDataSeries[],
     Parent = InfraMetricData,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace InfraDataSeriesResolvers {
@@ -1197,7 +1197,7 @@ export namespace InfraDataSeriesResolvers {
     R = InfraDataPoint[],
     Parent = InfraDataSeries,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace InfraDataPointResolvers {
@@ -1211,10 +1211,10 @@ export namespace InfraDataPointResolvers {
     R = number,
     Parent = InfraDataPoint,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
   export type ValueResolver<
     R = number | null,
     Parent = InfraDataPoint,
     Context = InfraContext
-    > = Resolver<R, Parent, Context>;
+  > = Resolver<R, Parent, Context>;
 }
