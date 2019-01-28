@@ -26,7 +26,7 @@ import { typesRegistry } from './types_registry';
 import { renderFunctionsRegistry } from './render_functions_registry';
 import { visualization } from './renderers/visualization';
 
-const basePath = chrome.getBasePath();
+const basePath = chrome.getInjected('defaultSpaceBasePath');
 
 const types = {
   browserFunctions: functionsRegistry,
