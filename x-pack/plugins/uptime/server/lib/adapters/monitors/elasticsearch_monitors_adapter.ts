@@ -419,7 +419,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     if (get(query, 'bool.filter', undefined)) {
       query.bool.filter.push(statusDown);
     } else {
-      set(query, 'bool.filter', [{ ...statusDown }]);
+      set(query, 'bool.filter', [statusDown]);
     }
 
     const params = {
