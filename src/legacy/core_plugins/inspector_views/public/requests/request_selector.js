@@ -181,8 +181,7 @@ class RequestSelector extends Component {
           { selectedRequest.status === RequestStatus.PENDING &&
             <EuiLoadingSpinner
               size="m"
-              aria-label={this.props.intl.formatMessage({
-                id: 'inspectorViews.requests.requestInProgressAriaLabel',
+              aria-label={i18n.translate('inspectorViews.requests.requestInProgressAriaLabel', {
                 defaultMessage: 'Request in progress'
               })}
             />
