@@ -48,7 +48,7 @@ export function test(node, string) {
     .split(wildcardSymbol)
     .map(escapeRegExp)
     .join('.*');
-  const regexp = new RegExp(`^${regex}$`);
+  const regexp = new RegExp(`^${regex}$`, 'm');
   return regexp.test(string);
 }
 
