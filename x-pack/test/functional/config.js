@@ -139,7 +139,7 @@ export default async function ({ readConfigFile }) {
       gis: GisPageProvider,
       statusPage: StatusPagePageProvider,
       upgradeAssistant: UpgradeAssistantProvider,
-      rollup: RollUpPageProvider,
+      rollup: RollUpPageProvider
 
     },
 
