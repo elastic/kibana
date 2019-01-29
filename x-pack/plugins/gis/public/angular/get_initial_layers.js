@@ -44,5 +44,6 @@ export async function getInitialLayers(savedMapLayerListJSON) {
     ];
   }
 
+  return [];
 
 }
