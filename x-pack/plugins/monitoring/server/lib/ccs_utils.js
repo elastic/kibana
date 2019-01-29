@@ -11,7 +11,7 @@
  * which means that the index pattern will be returned without using {@code ccs}.
  *
  * @param  {Object} config The Kibana configuration object.
- * @param  {String} indexPatternName The index pattern name
+ * @param  {String} indexPattern The index pattern name
  * @param  {String} ccs The optional cluster-prefix to prepend.
  * @return {String} The index pattern with the {@code cluster} prefix appropriately prepended.
  */
