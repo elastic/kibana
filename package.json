@@ -11,8 +11,8 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "6.7.0",
-  "branch": "6.7",
+  "version": "6.6.1",
+  "branch": "6.6",
   "types": "./kibana.d.ts",
   "build": {
     "number": 8467,
