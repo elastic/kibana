@@ -30,10 +30,10 @@ export function awsMetricsSpecProvider(server, context) {
     }),
     category: TUTORIAL_CATEGORY.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.awsMetrics.shortDescription', {
-      defaultMessage: 'Fetch internal metrics from the aws server.',
+      defaultMessage: 'Fetch monitoring metrics from the aws apis and cloudwatch.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.awsMetrics.longDescription', {
-      defaultMessage: 'The `aws` Metricbeat module fetches internal metrics from the aws server. \
+      defaultMessage: 'The `aws` Metricbeat module fetches monitoring metrics from the aws apis and cloudwatch. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-aws.html',
@@ -44,7 +44,7 @@ export function awsMetricsSpecProvider(server, context) {
     artifacts: {
       dashboards: [
         {
-          id: 'AV4YobKIge1VCbKU_qVo',
+          id: 'c5846400-f7fb-11e8-af03-c999c9dea608',
           linkLabel: i18n.translate('kbn.server.tutorials.awsMetrics.artifacts.dashboards.linkLabel', {
             defaultMessage: 'aws metrics dashboard',
           }),
