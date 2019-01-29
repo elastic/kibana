@@ -9,7 +9,7 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import Formsy from 'formsy-react';
 import { get } from 'lodash';
 import React from 'react';
-import { BeatConfigSchema, ConfigurationBlock } from '../../../../common/domain_types';
+import { ConfigBlockSchema, ConfigurationBlock } from '../../../../common/domain_types';
 import {
   FormsyEuiCodeEditor,
   FormsyEuiFieldText,
@@ -21,7 +21,7 @@ import {
 interface ComponentProps {
   intl: InjectedIntl;
   values: ConfigurationBlock;
-  schema: BeatConfigSchema[];
+  schema: ConfigBlockSchema;
   id: string;
   onSubmit?: (modal: any) => any;
   canSubmit(canIt: boolean): any;
@@ -75,7 +75,7 @@ class ConfigFormUi extends React.Component<ComponentProps, ComponentState> {
           onValid={this.enableButton}
           onInvalid={this.disableButton}
         >
-          {this.props.schema.map(schema => {
+          {this.props.schema.configs.map(schema => {
             switch (schema.ui.type) {
               case 'input':
                 return (
@@ -183,23 +183,25 @@ class ConfigFormUi extends React.Component<ComponentProps, ComponentState> {
                 );
             }
           })}
-          <FormsyEuiCodeEditor
-            mode="yaml"
-            disabled={!this.props.onSubmit}
-            id={'other'}
-            defaultValue={get(this.props, `values.config.other`, '')}
-            name={'other'}
-            helpText={i18n.translate('xpack.beatsManagement.config.otherConfigDescription', {
-              defaultMessage: 'Use YAML format to specify other settings for the Filebeat Input',
-            })}
-            label={i18n.translate('xpack.beatsManagement.config.otherConfigLabel', {
-              defaultMessage: 'Other Config',
-            })}
-            validationError={i18n.translate('xpack.beatsManagement.config.other.error', {
-              defaultMessage: 'Use valid YAML format',
-            })}
-            required={false}
-          />
+          {this.props.schema && (
+            <FormsyEuiCodeEditor
+              mode="yaml"
+              disabled={!this.props.onSubmit}
+              id={'other'}
+              defaultValue={get(this.props, `values.config.other`, '')}
+              name={'other'}
+              helpText={i18n.translate('xpack.beatsManagement.config.otherConfigDescription', {
+                defaultMessage: 'Use YAML format to specify other settings for the Filebeat Input',
+              })}
+              label={i18n.translate('xpack.beatsManagement.config.otherConfigLabel', {
+                defaultMessage: 'Other Config',
+              })}
+              validationError={i18n.translate('xpack.beatsManagement.config.other.error', {
+                defaultMessage: 'Use valid YAML format',
+              })}
+              required={false}
+            />
+          )}
           {this.props.onSubmit && (
             <button
               type="submit"

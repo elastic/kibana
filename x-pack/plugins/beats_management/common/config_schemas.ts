@@ -311,6 +311,7 @@ export const configBlockSchemas: ConfigBlockSchema[] = [
   {
     id: 'output',
     name: 'Outputs',
+    allowOtherConfigs: true,
     version: 6.7,
     configs: [
       {

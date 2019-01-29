@@ -88,9 +88,15 @@ export class ConfigBlocksLib {
         .filter((id: string) => id !== 'other');
 
       const picked = this.pickDeep(config, knownConfigIds);
+      let other = yaml.safeLoad(config.other || '{}');
+      if (typeof other === 'string') {
+        other = {
+          [other]: '',
+        };
+      }
 
       const convertedConfig = {
-        ...yaml.safeLoad(config.other || '{}'),
+        ...other,
         ...picked,
       };
 

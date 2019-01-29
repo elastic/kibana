@@ -81,7 +81,7 @@ export class ElasticsearchConfigurationBlockAdapter implements ConfigurationBloc
         config: JSON.parse(block._source.configuration_block.config || '{}'),
       })),
       page,
-      total: (response.hits.total as any).value,
+      total: response.hits ? (response.hits.total as any).value : 0,
     };
   }
 

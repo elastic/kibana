@@ -49,13 +49,15 @@ export class ConfigurationBlocksLib {
     }
 
     if (
+      !block.id &&
+      UNIQUENESS_ENFORCING_TYPES.includes(block.type) &&
       tag.hasConfigurationBlocksTypes.some((type: string) =>
         UNIQUENESS_ENFORCING_TYPES.includes(type)
       )
     ) {
       return {
         error:
-          'Block is of type that already exists on this tag, and only one config of this type can exist at a time on a beat. Confog not saved',
+          'Block is of type that already exists on this tag, and only one config of this type can exist at a time on a beat. Config not saved',
       };
     }
 
