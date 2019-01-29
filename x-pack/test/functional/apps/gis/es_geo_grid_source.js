@@ -13,7 +13,7 @@ export default function ({ getPageObjects, getService }) {
   const inspector = getService('inspector');
   const DOC_COUNT_PROP_NAME = 'doc_count';
 
-  describe('layer geohashgrid aggregation source', () => {
+  describe('layer geo grid aggregation source', () => {
 
     const EXPECTED_NUMBER_FEATURES = 6;
     const DATA_CENTER_LON = -98;

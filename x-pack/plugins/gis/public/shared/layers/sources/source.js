@@ -60,7 +60,7 @@ export class AbstractSource {
     return false;
   }
 
-  isGeohashPrecisionAware() {
+  isGeoGridPrecisionAware() {
     return false;
   }
 
@@ -82,6 +82,10 @@ export class AbstractSource {
 
   getIndexPatternIds() {
     return  [];
+  }
+
+  getGeoGridPrecision() {
+    return 0;
   }
 }
 
