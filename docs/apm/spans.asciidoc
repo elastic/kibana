@@ -1,5 +1,5 @@
 [[spans]]
-=== Spans
+=== Span timeline
 
 TIP: A {apm-overview-ref-v}/transaction-spans.html[span] is defined as the duration of a single event.
 Spans are automatically captured by APM agents, and you can also define custom spans.

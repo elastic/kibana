@@ -1,5 +1,5 @@
 [[errors]]
-=== Errors
+=== Errors overview
 
 TIP: {apm-overview-ref-v}/errors.html[Errors] are defined as groups of exceptions with matching exception or log messages.
 

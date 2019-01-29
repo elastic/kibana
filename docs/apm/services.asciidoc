@@ -1,5 +1,5 @@
 [[services]]
-=== Services
+=== Services overview
 
 The *Services* overview gives you quick insights into the health and general performance of each service.
 The <<set-time-filter,global time range filter>> in {kib} defines which services are available.

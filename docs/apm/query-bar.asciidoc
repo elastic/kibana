@@ -1,5 +1,5 @@
 [[query-bar]]
-=== Query bar
+=== Advanced queries
 
 The query bar is a powerful data query feature.
 Similar to the query bar in {kibana-ref}/discover.html[Discover],

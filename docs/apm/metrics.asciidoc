@@ -1,5 +1,5 @@
 [[metrics]]
-=== Metrics
+=== Metrics overview
 
 The *Metrics* overview shows a combination of transaction, error, CPU, and memory data.
 
@@ -21,3 +21,6 @@ image::apm/images/apm-ml-integration.png[Example view of anomaly scores on respo
 Jobs can be created per transaction type and based on the average response time.
 You can manage jobs in the *Machine Learning jobs management*.
 It might take some time for results to appear on the graph.
+
+Machine learning is a platinum feature. For a comparison of the Elastic license levels,
+see https://www.elastic.co/subscriptions[the subscription page]. 
