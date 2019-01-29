@@ -65,6 +65,10 @@ export class EMSTMSSource extends AbstractTMSSource {
   }
 
   _getTMSOptions() {
+    if(!this._emsTileServices) {
+      return;
+    }
+
     return this._emsTileServices.find(service => {
       return service.id === this._descriptor.id;
     });
@@ -90,9 +94,11 @@ export class EMSTMSSource extends AbstractTMSSource {
 
   async getAttributions() {
     const service = this._getTMSOptions();
-    const attributions = service.attributionMarkdown.split('|');
+    if (!service || !service.attributionMarkdown) {
+      return [];
+    }
 
-    return attributions.map((attribution) => {
+    return service.attributionMarkdown.split('|').map((attribution) => {
       attribution = attribution.trim();
       //this assumes attribution is plain markdown link
       const extractLink = /\[(.*)\]\((.*)\)/;
@@ -106,8 +112,9 @@ export class EMSTMSSource extends AbstractTMSSource {
 
   getUrlTemplate() {
     const service = this._getTMSOptions();
+    if (!service || !service.url) {
+      throw new Error('Can not generate EMS TMS url template');
+    }
     return service.url;
   }
-
-
 }
