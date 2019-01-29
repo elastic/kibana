@@ -77,14 +77,14 @@ export class LayerTocActions extends Component {
   _renderIcon() {
     const { zoom, layer } = this.props;
     let smallLegendIcon;
-    if (layer.dataHasLoadError()) {
+    if (layer.hasErrors()) {
       smallLegendIcon = (
         <EuiIconTip
           aria-label="Load warning"
           size="m"
           type="alert"
           color="warning"
-          content={layer.getDataLoadError()}
+          content={layer.getErrors()}
         />
       );
     } else if (layer.isLayerLoading()) {

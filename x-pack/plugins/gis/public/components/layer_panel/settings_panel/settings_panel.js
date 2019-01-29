@@ -132,7 +132,7 @@ export function SettingsPanel(props) {
 
       {renderAlphaSlider()}
 
-      {props.renderSourceSettingsEditor({ onChange: onSourceChange })}
+      {props.layer.renderSourceSettingsEditor({ onChange: onSourceChange })}
 
     </EuiPanel>
   );
