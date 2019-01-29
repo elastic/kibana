@@ -115,8 +115,11 @@
 
     <!-- Refresh Intervals -->
     <div ng-show="activeTab === 'interval'" role="tabpanel" class="tab-pane active">
-      <h2 class="kuiLocalDropdownTitle">
-        Refresh Interval
+      <h2 
+      class="kuiLocalDropdownTitle"
+      i18n-id="common.ui.timepicker.refreshInterval"
+      i18n-default-message="Refresh Interval">
+        
       </h2>
 
       <div ng-repeat="list in refreshLists" class="kbn-refresh-section">
