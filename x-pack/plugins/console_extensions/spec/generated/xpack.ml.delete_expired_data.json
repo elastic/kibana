@@ -1,0 +1,10 @@
+{
+  "xpack.ml.delete_expired_data": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_xpack/ml/_delete_expired_data"
+    ]
+  }
+}

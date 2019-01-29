@@ -4,7 +4,6 @@
       "metric": [
         "_all",
         "queued_watches",
-        "current_watches",
         "pending_watches"
       ],
       "emit_stacktraces": "__flag__"
@@ -13,17 +12,16 @@
       "GET"
     ],
     "patterns": [
-      "_watcher/stats",
-      "_watcher/stats/{metrics}"
+      "_xpack/watcher/stats",
+      "_xpack/watcher/stats/{metrics}"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/watcher-api-stats.html",
     "url_components": {
       "metrics": [
         "_all",
-        "current_watches",
         "pending_watches",
         "queued_watches"
       ]
-    }
+    },
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/watcher-api-stats.html"
   }
 }

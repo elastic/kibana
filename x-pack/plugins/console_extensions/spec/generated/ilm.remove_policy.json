@@ -4,7 +4,8 @@
       "POST"
     ],
     "patterns": [
-      "{indices}/_ilm/remove"
+      "{indices}/_ilm/remove",
+      "_ilm/remove"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ilm-remove-policy.html"
   }

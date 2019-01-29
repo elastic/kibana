@@ -8,7 +8,7 @@
       "GET"
     ],
     "patterns": [
-      "_sql"
+      "_xpack/sql"
     ],
     "documentation": "Execute SQL"
   }

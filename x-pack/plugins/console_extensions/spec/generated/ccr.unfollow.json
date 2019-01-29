@@ -4,8 +4,8 @@
       "POST"
     ],
     "patterns": [
-      "{indices}/_ccr/unfollow"
+      "{index}/_ccr/unfollow"
     ],
-    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ccr-post-unfollow.html"
   }
 }
