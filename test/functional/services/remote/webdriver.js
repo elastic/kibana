@@ -18,8 +18,8 @@
  */
 
 import { delay } from 'bluebird';
-import  { Builder, By, Key, until, logging } from 'selenium-webdriver';
-const { LegacyActionSequence } =  require('selenium-webdriver/lib/actions');
+import { Builder, By, Key, until, logging } from 'selenium-webdriver';
+const { LegacyActionSequence } = require('selenium-webdriver/lib/actions');
 const chrome = require('selenium-webdriver/chrome');
 const firefox = require('selenium-webdriver/firefox');
 const geckoDriver = require('geckodriver');
@@ -34,17 +34,19 @@ async function attemptToCreateCommand(log, browserType) {
   log.debug('[webdriver] Creating session');
 
   const buildDriverInstance = async (browserType) => {
+    const chromeOptions = new chrome.Options();
+    const firefoxOptions = new firefox.Options();
+    if (process.env.TEST_BROWSER_HEADLESS) {
+      // Use --disable-gpu to avoid an error from a missing Mesa library, as per
+      // https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md
+      chromeOptions.addArguments('headless', 'disable-gpu');
+      firefoxOptions.addArguments('headless', 'disable-gpu');
+    }
+    const prefs = new logging.Preferences();
+    const loggingPref = prefs.setLevel(logging.Type.BROWSER, logging.Level.ALL);
     switch (browserType) {
       case 'chrome':
-        const chromeOptions = new chrome.Options();
-        const prefs = new logging.Preferences();
-        const loggingPref = prefs.setLevel(logging.Type.BROWSER, logging.Level.ALL);
         chromeOptions.addArguments('verbose');
-        if (process.env.TEST_BROWSER_HEADLESS) {
-          // Use --disable-gpu to avoid an error from a missing Mesa library, as per
-          // https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md
-          chromeOptions.addArguments('headless', 'disable-gpu');
-        }
         chromeOptions.setLoggingPrefs(loggingPref);
         const chromeService = new chrome.ServiceBuilder(chromeDriver.path).enableVerboseLogging();
         return new Builder()
@@ -53,7 +55,8 @@ async function attemptToCreateCommand(log, browserType) {
           .setChromeService(chromeService)
           .build();
       case 'firefox':
-        const firefoxOptions = new firefox.Options();
+        firefoxOptions.addArguments('verbose');
+        firefoxOptions.setLoggingPreferences(loggingPref);
         const firefoxService = new firefox.ServiceBuilder(geckoDriver.path).enableVerboseLogging();
         return new Builder()
           .forBrowser(browserType)
