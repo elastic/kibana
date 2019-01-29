@@ -37,7 +37,11 @@ import { loadIndices } from '../../services/api';
 import { API_STATUS } from '../../constants';
 import { SectionError } from '../section_error';
 import { FormEntryRow } from '../form_entry_row';
-import { advancedSettingsFields, emptyAdvancedSettings } from './advanced_settings_fields';
+import {
+  advancedSettingsFields,
+  emptyAdvancedSettings,
+  areAdvancedSettingsEdited,
+} from './advanced_settings_fields';
 import { extractQueryParams } from '../../services/query_params';
 import { getRemoteClusterName } from '../../services/get_remote_cluster_name';
 import { RemoteClustersFormField } from '../remote_clusters_form_field';
@@ -94,9 +98,10 @@ export const FollowerIndexForm = injectI18n(
     constructor(props) {
       super(props);
 
-      const isNew = this.props.followerIndex === undefined;
       const { route: { location: { search } } } = routing.reactRouter;
       const queryParams = extractQueryParams(search);
+
+      const isNew = this.props.followerIndex === undefined;
       const remoteClusterName = getRemoteClusterName(this.props.remoteClusters, queryParams.cluster);
       const followerIndex = isNew
         ? getEmptyFollowerIndex(remoteClusterName)
@@ -104,6 +109,9 @@ export const FollowerIndexForm = injectI18n(
           ...getEmptyFollowerIndex(),
           ...this.props.followerIndex,
         };
+      const areAdvancedSettingsVisible = isNew ? false : ( // eslint-disable-line no-nested-ternary
+        areAdvancedSettingsEdited(followerIndex) ? true : false
+      );
 
       const fieldsErrors = this.getFieldsErrors(followerIndex);
 
@@ -112,7 +120,7 @@ export const FollowerIndexForm = injectI18n(
         followerIndex,
         fieldsErrors,
         areErrorsVisible: false,
-        areAdvancedSettingsVisible: isNew ? false : true,
+        areAdvancedSettingsVisible,
         isValidatingIndexName: false,
       };
 
@@ -460,8 +468,6 @@ export const FollowerIndexForm = injectI18n(
        */
 
       const renderAdvancedSettings = () => {
-        const { isNew } = this.state;
-
         return (
           <Fragment>
             <EuiHorizontalRule />
@@ -485,18 +491,17 @@ export const FollowerIndexForm = injectI18n(
                         If you don't customize them, default advanced settings will be applied."
                     />
                   </p>
-                  {isNew ? (
-                    <EuiSwitch
-                      label={(
-                        <FormattedMessage
-                          id="xpack.crossClusterReplication.followerIndex.advancedSettingsForm.showSwitchLabel"
-                          defaultMessage="Customize advanced settings"
-                        />
-                      )}
-                      checked={areAdvancedSettingsVisible}
-                      onChange={this.toggleAdvancedSettings}
-                    />
-                  ) : null}
+
+                  <EuiSwitch
+                    label={(
+                      <FormattedMessage
+                        id="xpack.crossClusterReplication.followerIndex.advancedSettingsForm.showSwitchLabel"
+                        defaultMessage="Customize advanced settings"
+                      />
+                    )}
+                    checked={areAdvancedSettingsVisible}
+                    onChange={this.toggleAdvancedSettings}
+                  />
                 </Fragment>
               )}
               fullWidth

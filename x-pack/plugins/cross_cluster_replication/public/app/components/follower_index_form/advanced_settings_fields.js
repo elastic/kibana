@@ -242,3 +242,10 @@ export const emptyAdvancedSettings = advancedSettingsFields.reduce((obj, advance
   const { field, defaultValue } = advancedSetting;
   return { ...obj, [field]: defaultValue };
 }, {});
+
+export function areAdvancedSettingsEdited(followerIndex) {
+  return advancedSettingsFields.some(advancedSetting => {
+    const { field } = advancedSetting;
+    return followerIndex[field] !== emptyAdvancedSettings[field];
+  });
+}
