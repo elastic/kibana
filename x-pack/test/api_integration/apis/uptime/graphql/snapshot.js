@@ -9,6 +9,7 @@ import { getSnapshotQueryString } from '../../../../../plugins/uptime/public/com
 import snapshot from './fixtures/snapshot';
 import snapshotFilteredByDown from './fixtures/snapshot_filtered_by_down';
 import snapshotFilteredByUp from './fixtures/snapshot_filtered_by_up';
+import snapshotEmpty from './fixtures/snapshot_empty';
 
 export default function ({ getService }) {
   describe('snapshot query', () => {
@@ -56,8 +57,8 @@ export default function ({ getService }) {
         operationName: 'Snapshot',
         query: getSnapshotQueryString,
         variables: {
-          dateRangeStart: '2019-01-25T04:30:54.740Z',
-          dateRangeEnd: '2019-01-28T04:50:54.740Z',
+          dateRangeStart: '2019-01-28T17:40:08.078Z',
+          dateRangeEnd: '2019-01-28T19:00:16.078Z',
           filters: `{"bool":{"must":[{"match":{"monitor.status":{"query":"up","operator":"and"}}}]}}`,
         },
       };
@@ -70,6 +71,24 @@ export default function ({ getService }) {
       expect(data).to.eql(snapshotFilteredByUp);
     });
 
+    it('returns null histogram data when no data present', async () => {
+      const getSnapshotQuery = {
+        operationName: 'Snapshot',
+        query: getSnapshotQueryString,
+        variables: {
+          dateRangeStart: '2019-01-25T04:30:54.740Z',
+          dateRangeEnd: '2019-01-28T04:50:54.740Z',
+          filters: `{"bool":{"must":[{"match":{"monitor.status":{"query":"down","operator":"and"}}}]}}`,
+        },
+      };
+      const {
+        body: { data },
+      } = await supertest
+        .post('/api/uptime/graphql')
+        .set('kbn-xsrf', 'foo')
+        .send({ ...getSnapshotQuery });
+      expect(data).to.eql(snapshotEmpty);
+    });
     // TODO: test for host, port, etc.
   });
 }
