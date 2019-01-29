@@ -77,7 +77,7 @@ enum ButtonOption {
   Code = 'Code',
   Blame = 'Blame',
   History = 'History',
-  Folder = 'Folder',
+  Folder = 'Directory',
 }
 
 const Title = styled(EuiTitle)`
@@ -216,6 +216,7 @@ class CodeContent extends React.PureComponent<Props> {
         const node = this.findNode(path ? path.split('/') : [], tree);
         return (
           <DirectoryViewContainer>
+            {this.renderButtons(ButtonOption.Folder)}
             <Directory node={node} />
             <CommitHistory
               commits={commits}
