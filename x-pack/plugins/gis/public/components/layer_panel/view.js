@@ -106,8 +106,8 @@ export class LayerPanel  extends React.Component {
         return (<span>{value}</span>);
       }
       return (
-        <p key={label}>
-          <strong className="gisLayerDetails__label">{label}</strong>
+        <p key={label} className="gisLayerPanel__sourceDetail">
+          <strong>{label}</strong>{' '}
           {renderValue()}
         </p>
       );
@@ -135,16 +135,15 @@ export class LayerPanel  extends React.Component {
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiSpacer size="xs" />
           <div className="gisLayerPanel__sourceDetails">
             <EuiAccordion
               id="accordion1"
               buttonContent="Source details"
             >
               <EuiText color="subdued" size="s">
-                <div className="gisLayerDetails">
-                  <EuiSpacer size="s" />
-                  {this._renderSourceProperties()}
-                </div>
+                <EuiSpacer size="xs" />
+                {this._renderSourceProperties()}
               </EuiText>
             </EuiAccordion>
           </div>
