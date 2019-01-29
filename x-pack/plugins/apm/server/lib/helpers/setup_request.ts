@@ -43,8 +43,11 @@ export function setupRequest(req: Legacy.Request): Setup {
   const uiSettings = req.getUiSettingsService();
 
   const client: ESClient = async (type, params) => {
+    const includeFrozen = await uiSettings.get('search:includeFrozen');
+
     if (query._debug) {
       console.log(`DEBUG ES QUERY:`);
+      console.log({ includeFrozen });
       console.log(
         `${req.method.toUpperCase()} ${req.url.pathname} ${JSON.stringify(
           query
@@ -53,8 +56,6 @@ export function setupRequest(req: Legacy.Request): Setup {
       console.log(`GET ${params.index}/_search`);
       console.log(JSON.stringify(params.body, null, 4));
     }
-
-    const includeFrozen = await uiSettings.get('search:includeFrozen');
 
     const nextParams = {
       ...params,
