@@ -12,6 +12,7 @@ import { pure } from 'recompose';
 import { GetHostsQuery, HostsEdges, PageInfo } from '../../graphql/types';
 
 import { connect } from 'react-redux';
+import { ESQuery } from '../../../common/typed_json';
 import { hostsSelector, inputsModel, State } from '../../store';
 import { hostsQuery } from './index.gql_query';
 
@@ -31,7 +32,7 @@ export interface OwnProps {
   sourceId: string;
   startDate: number;
   endDate: number;
-  filterQuery?: string;
+  filterQuery?: ESQuery;
   poll: number;
 }
 
@@ -60,7 +61,7 @@ const HostsComponentQuery = pure<HostsProps>(
           cursor: null,
           tiebreaker: null,
         },
-        filterQuery,
+        filterQuery: JSON.stringify(filterQuery),
       }}
     >
       {({ data, loading, fetchMore, refetch }) => {

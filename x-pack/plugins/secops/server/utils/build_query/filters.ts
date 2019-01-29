@@ -5,7 +5,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { ESQuery } from '../../lib/types';
+import { ESQuery } from '../../../common/typed_json';
 
 export const createQueryFilterClauses = (filterQuery: ESQuery | undefined) =>
   !isEmpty(filterQuery) ? [filterQuery] : [];
