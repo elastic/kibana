@@ -6,15 +6,15 @@
 // file.skip
 
 // @ts-ignore
-import { esTestConfig, kbnTestConfig, OPTIMIZE_BUNDLE_DIR } from '@kbn/test';
 // @ts-ignore
+import { camelCase } from 'lodash';
 import * as kbnTestServer from '../../../../../../../../src/test_utils/kbn_server';
 // @ts-ignore
 import { xpackKbnServerConfig } from '../../../../../../../test_utils/kbn_server_config';
 import { PLUGIN } from './../../../../../common/constants/plugin';
-
 import { KibanaBackendFrameworkAdapter } from './../kibana_framework_adapter';
 import { contractTests } from './test_contract';
+
 let servers: any;
 contractTests('Kibana  Framework Adapter', {
   async before() {
@@ -27,6 +27,6 @@ contractTests('Kibana  Framework Adapter', {
     await servers.stop();
   },
   adapterSetup: () => {
-    return new KibanaBackendFrameworkAdapter(PLUGIN.ID, servers.kbnServer.server);
+    return new KibanaBackendFrameworkAdapter(camelCase(PLUGIN.ID), servers.kbnServer.server);
   },
 });
