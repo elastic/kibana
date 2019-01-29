@@ -104,13 +104,6 @@ You'll find this feature in *Management > {es} > Upgrade Assistant*.
 image::images/highlights-6.6.0-upgrade-assistant.png[Share menu]
 
 [float]
-=== Production version of Time Series Visual Builder
-
-{kibana-ref}/time-series-visual-builder.html[Time Series Visual Builder] is now in production use.  
-This visualization has also been enhanced to use the 
-{kibana-ref}/kuery-query.html[Kibana query language (KQL)] to filter and query data.
-
-[float]
 === Annotation of {ml} results
 
 You can now add annotations by drag-selecting in the *Single Metric Viewer*
