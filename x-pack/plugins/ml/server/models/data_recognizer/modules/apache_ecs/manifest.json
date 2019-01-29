@@ -74,8 +74,8 @@
     ],
     "search": [
       {
-        "id": "ml_filebeat_http_access_ecs",
-        "file": "ml_filebeat_http_access_ecs.json"
+        "id": "ml_http_access_filebeat_ecs",
+        "file": "ml_http_access_filebeat_ecs.json"
       }
     ],
     "visualization": [

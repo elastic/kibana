@@ -4,7 +4,7 @@
   "title": "ML HTTP Access Map (ECS)", 
   "uiStateJSON": "{\n  \"mapCenter\": [\n    12.039320557540572,\n    -0.17578125\n  ]\n}", 
   "version": 1, 
-  "savedSearchId": "ml_filebeat_http_access_ecs", 
+  "savedSearchId": "ml_http_access_filebeat_ecs", 
   "kibanaSavedObjectMeta": {
     "searchSourceJSON": "{}"
   }
