@@ -11,13 +11,13 @@ import { XYZTMSSource } from './xyz_tms_source';
 import { EMSTMSSource } from './ems_tms_source';
 import { WMSSource } from './wms_source';
 import { KibanaTilemapSource } from './kibana_tilemap_source';
-import { ESGeohashGridSource } from './es_geohashgrid_source';
+import { ESGeoGridSource } from './es_geo_grid_source';
 import { ESSearchSource } from './es_search_source';
 
 
 export const ALL_SOURCES = [
   ESSearchSource,
-  ESGeohashGridSource,
+  ESGeoGridSource,
   EMSFileSource,
   EMSTMSSource,
   KibanaRegionmapSource,
