@@ -14,6 +14,7 @@ import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 import chrome from 'ui/chrome';
+import { ESTermQuery } from '../../../common/typed_json';
 import { EmptyPage } from '../../components/empty_page';
 import { getHostsUrl, HostComponentProps } from '../../components/link_to/redirect_to_hosts';
 import { HostSummary } from '../../components/page/hosts/host_summary';
@@ -84,7 +85,7 @@ const getBreadcrumbs = (hostId: string) => [
   },
 ];
 
-const getFilterQuery = (hostId: string) => ({ term: { 'host.id': hostId } });
+const getFilterQuery = (hostId: string): ESTermQuery => ({ term: { 'host.id': hostId } });
 
 const HostBreadcrumbWrapper = styled(EuiBreadcrumbs)`
   margin: 10px 0;
