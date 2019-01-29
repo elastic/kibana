@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { createHash } from 'crypto';
+import { createHash, randomBytes } from 'crypto';
+import { promisify } from 'util';
 import { props, reduce as reduceAsync } from 'bluebird';
 import Boom from 'boom';
 import { resolve } from 'path';
@@ -26,6 +27,8 @@ import { i18n } from '@kbn/i18n';
 import { AppBootstrap } from './bootstrap';
 import { mergeVariables } from './lib';
 import { fromRoot } from '../../utils';
+
+const randomBytesAsync = promisify(randomBytes);
 
 export function uiRenderMixin(kbnServer, server, config) {
   function replaceInjectedVars(request, injectedVars) {
@@ -212,7 +215,10 @@ export function uiRenderMixin(kbnServer, server, config) {
       injectedVarsOverrides
     });
 
-    return h.view('ui_app', {
+    const nonce = (await randomBytesAsync(12)).toString('base64');
+
+    const response = h.view('ui_app', {
+      nonce,
       uiPublicUrl: `${basePath}/ui`,
       bootstrapScriptUrl: `${basePath}/bundles/app/${app.getId()}/bootstrap.js`,
       i18n: (id, options) => i18n.translate(id, options),
@@ -238,6 +244,17 @@ export function uiRenderMixin(kbnServer, server, config) {
         legacyMetadata,
       },
     });
+
+    const csp = [
+      `script-src 'unsafe-eval' 'nonce-${nonce}'`,
+      'worker-src blob:',
+      'child-src blob:',
+      'img-src * data: blob:',
+    ];
+
+    response.header('content-security-policy', csp.join(';'));
+
+    return response;
   }
 
   server.decorate('toolkit', 'renderApp', function (app, injectedVarsOverrides) {
