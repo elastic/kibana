@@ -30,7 +30,7 @@ export default function ({ getService }) {
         .send({
           "name": name,
           "seeds": [
-            "localhost:9400"
+            "localhost:9300"
           ],
           "skipUnavailable": true,
         })
@@ -65,12 +65,10 @@ export default function ({ getService }) {
   const createAutoFollowIndexRequest = (name = getRandomName(), payload = getAutoFollowIndexPayload()) => {
     autoFollowPatternsCreated.push(name);
 
-    return (
-      supertest
-        .post(AUTOFOLLOW_PATTERNS_API_BASE_PATH)
-        .set('kbn-xsrf', 'xxx')
-        .send({ ...payload, id: name })
-    );
+    return supertest
+      .post(AUTOFOLLOW_PATTERNS_API_BASE_PATH)
+      .set('kbn-xsrf', 'xxx')
+      .send({ ...payload, id: name });
   };
 
   const cleanUp = () => (
@@ -106,11 +104,10 @@ export default function ({ getService }) {
         payload = getAutoFollowIndexPayload();
       });
 
-      it('should throw a Bad Request when cluster is unknown', async () => {
+      it('should throw a 404 error when cluster is unknown', async () => {
         payload.remote_cluster = 'cluster-never-declared';
 
         const { body } = await createAutoFollowIndexRequest(undefined, payload).expect(404);
-
         expect(body.cause[0]).to.contain('no such remote cluster');
       });
 
