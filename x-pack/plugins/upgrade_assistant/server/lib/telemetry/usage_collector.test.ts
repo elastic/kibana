@@ -34,6 +34,8 @@ describe('Upgrade Assistant Usage Collector', () => {
                   'ui_open.overview': 10,
                   'ui_open.cluster': 20,
                   'ui_open.indices': 30,
+                  'ui_reindex.start': 2,
+                  'ui_reindex.cancel': 1,
                 },
               };
             },
@@ -73,6 +75,10 @@ describe('Upgrade Assistant Usage Collector', () => {
           overview: 10,
           cluster: 20,
           indices: 30,
+        },
+        ui_reindex: {
+          start: 2,
+          cancel: 1,
         },
         features: {
           deprecation_logging: {

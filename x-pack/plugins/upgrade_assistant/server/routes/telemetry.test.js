@@ -8,8 +8,13 @@ jest.mock('../lib/telemetry/es_ui_open_apis', () => ({
   upsertUIOpenOption: jest.fn(),
 }));
 
+jest.mock('../lib/telemetry/es_ui_reindex_apis', () => ({
+  upsertUIReindexOption: jest.fn(),
+}));
+
 import { Server } from 'hapi';
 import { upsertUIOpenOption } from '../lib/telemetry/es_ui_open_apis';
+import { upsertUIReindexOption } from '../lib/telemetry/es_ui_reindex_apis';
 import { registerTelemetryRoutes } from './telemetry';
 
 /**
@@ -72,6 +77,60 @@ describe('Upgrade Assistant Telemetry API', () => {
         url: '/api/upgrade_assistant/telemetry/ui_open',
         payload: {
           overview: false,
+        },
+      });
+
+      expect(resp.statusCode).toEqual(500);
+    });
+  });
+
+  describe('PUT /api/upgrade_assistant/telemetry/ui_reindex', () => {
+    it('returns correct payload with single option', async () => {
+      const returnPayload = {
+        start: true,
+        cancel: false,
+      };
+
+      upsertUIReindexOption.mockResolvedValue(returnPayload);
+
+      const resp = await server.inject({
+        method: 'PUT',
+        url: '/api/upgrade_assistant/telemetry/ui_reindex',
+        payload: {
+          start: true,
+        },
+      });
+
+      expect(JSON.parse(resp.payload)).toEqual(returnPayload);
+    });
+
+    it('returns correct payload with multiple option', async () => {
+      const returnPayload = {
+        start: true,
+        cancel: true,
+      };
+
+      upsertUIReindexOption.mockResolvedValue(returnPayload);
+
+      const resp = await server.inject({
+        method: 'PUT',
+        url: '/api/upgrade_assistant/telemetry/ui_reindex',
+        payload: {
+          start: true,
+          cancel: true,
+        },
+      });
+
+      expect(JSON.parse(resp.payload)).toEqual(returnPayload);
+    });
+
+    it('returns an error if it throws', async () => {
+      upsertUIReindexOption.mockRejectedValue(new Error(`scary error!`));
+      const resp = await server.inject({
+        method: 'PUT',
+        url: '/api/upgrade_assistant/telemetry/ui_reindex',
+        payload: {
+          start: false,
         },
       });
 

@@ -5,7 +5,7 @@
  */
 
 import { set } from 'lodash';
-import { SavedObjectsClient } from 'src/server/saved_objects/service/saved_objects_client';
+import { SavedObjectsRepository } from 'src/server/saved_objects/service/lib/repository';
 import {
   UPGRADE_ASSISTANT_DOC_ID,
   UPGRADE_ASSISTANT_TYPE,
@@ -17,7 +17,7 @@ import {
 import { isDeprecationLoggingEnabled } from '../es_deprecation_logging_apis';
 
 async function getSavedObjectAttributesFromRepo(
-  savedObjectsRepository: SavedObjectsClient,
+  savedObjectsRepository: SavedObjectsRepository,
   docType: string,
   docID: string
 ) {
@@ -49,6 +49,10 @@ export async function fetchUpgradeAssistantMetrics(
         overview: 0,
         cluster: 0,
         indices: 0,
+      },
+      ui_reindex: {
+        start: 0,
+        cancel: 0,
       },
     };
 

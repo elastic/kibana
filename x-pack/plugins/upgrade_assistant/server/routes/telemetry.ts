@@ -8,6 +8,7 @@ import Boom from 'boom';
 import Joi from 'joi';
 import { UpgradeAssistantTelemetryServer } from '../../common/types';
 import { upsertUIOpenOption } from '../lib/telemetry/es_ui_open_apis';
+import { upsertUIReindexOption } from '../lib/telemetry/es_ui_reindex_apis';
 
 export function registerTelemetryRoutes(server: UpgradeAssistantTelemetryServer) {
   server.route({
@@ -25,6 +26,26 @@ export function registerTelemetryRoutes(server: UpgradeAssistantTelemetryServer)
     async handler(request) {
       try {
         return await upsertUIOpenOption(server, request);
+      } catch (e) {
+        return Boom.boomify(e, { statusCode: 500 });
+      }
+    },
+  });
+
+  server.route({
+    path: '/api/upgrade_assistant/telemetry/ui_reindex',
+    method: 'PUT',
+    options: {
+      validate: {
+        payload: Joi.object({
+          start: Joi.boolean().default(false),
+          cancel: Joi.boolean().default(false),
+        }),
+      },
+    },
+    async handler(request) {
+      try {
+        return await upsertUIReindexOption(server, request);
       } catch (e) {
         return Boom.boomify(e, { statusCode: 500 });
       }

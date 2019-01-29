@@ -9,11 +9,17 @@ import { Legacy } from 'kibana';
 export const UPGRADE_ASSISTANT_TYPE = 'upgrade-assistant-telemetry';
 export const UPGRADE_ASSISTANT_DOC_ID = 'upgrade-assistant-telemetry';
 export type UIOpenOption = 'overview' | 'cluster' | 'indices';
+export type UIReindexOption = 'start' | 'cancel';
 
 export interface UIOpen {
   overview: boolean;
   cluster: boolean;
   indices: boolean;
+}
+
+export interface UIReindex {
+  start: boolean;
+  cancel: boolean;
 }
 
 export interface UpgradeAssistantTelemetryServer extends Legacy.Server {
@@ -31,6 +37,10 @@ export interface UpgradeAssistantTelemetrySavedObject {
     cluster: number;
     indices: number;
   };
+  ui_reindex: {
+    start: number;
+    cancel: number;
+  };
 }
 
 export interface UpgradeAssistantTelemetry {
@@ -38,6 +48,10 @@ export interface UpgradeAssistantTelemetry {
     overview: number;
     cluster: number;
     indices: number;
+  };
+  ui_reindex: {
+    start: number;
+    cancel: number;
   };
   features: {
     deprecation_logging: {
