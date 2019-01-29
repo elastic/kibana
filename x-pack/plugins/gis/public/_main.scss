@@ -1,9 +1,17 @@
+@import '@elastic/eui/src/components/header/variables';
+
 #gis-plugin {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: calc(100vh - #{$euiHeaderChildSize});
   width: 100%;
   overflow: hidden;
+}
+
+@include euiBreakpoint('xs') {
+  #gis-plugin {
+    height: calc(100vh - #{$euiHeaderChildSizeMobile});
+  }
 }
 
 #react-gis-root {
@@ -21,6 +29,15 @@
 
 .mapboxgl-popup {
   z-index: 100;
+  border-color: $euiColorEmptyShade;
+}
+
+.mapboxgl-popup-content {
+  background-color: $euiColorEmptyShade;
+}
+
+.mapboxgl-popup-tip {
+  border-top-color: $euiColorEmptyShade !important;
 }
 
 // This is not good practice to create such a generic class.

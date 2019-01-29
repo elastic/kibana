@@ -14,7 +14,7 @@ describe('getUpgradeAssistantStatus', () => {
   let deprecationsResponse: DeprecationAPIResponse;
 
   const callWithRequest = jest.fn().mockImplementation(async (req, api, { path }) => {
-    if (path === '/_xpack/migration/deprecations') {
+    if (path === '/_migration/deprecations') {
       return deprecationsResponse;
     } else {
       throw new Error(`Unexpected API call: ${path}`);
@@ -25,10 +25,10 @@ describe('getUpgradeAssistantStatus', () => {
     deprecationsResponse = _.cloneDeep(fakeDeprecations);
   });
 
-  it('calls /_xpack/migration/deprecations', async () => {
+  it('calls /_migration/deprecations', async () => {
     await getUpgradeAssistantStatus(callWithRequest, {} as any, '/');
     expect(callWithRequest).toHaveBeenCalledWith({}, 'transport.request', {
-      path: '/_xpack/migration/deprecations',
+      path: '/_migration/deprecations',
       method: 'GET',
     });
   });

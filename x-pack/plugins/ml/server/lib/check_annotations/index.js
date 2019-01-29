@@ -5,6 +5,7 @@
  */
 
 import { callWithInternalUserFactory } from '../../client/call_with_internal_user_factory';
+import { mlLog } from '../../client/log';
 
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
@@ -42,7 +43,7 @@ export async function isAnnotationsFeatureAvailable(server) {
     if (!annotationsWriteAliasExists) return false;
 
   } catch (err) {
-    server.log(['info', 'ml'], 'Disabling ML annotations feature because the index/alias integrity check failed.');
+    mlLog('info', 'Disabling ML annotations feature because the index/alias integrity check failed.');
     return false;
   }
 

@@ -26,7 +26,7 @@ describe('initXAxis', function () {
   const baseChart = {
     aspects: {
       x: [{
-        fieldFormatter: _.constant({}),
+        format: {},
         title: 'label',
         params: {}
       }]
@@ -38,7 +38,7 @@ describe('initXAxis', function () {
     initXAxis(chart);
     expect(chart)
       .to.have.property('xAxisLabel', 'label')
-      .and.have.property('xAxisFormatter', chart.aspects.x[0].fieldFormatter);
+      .and.have.property('xAxisFormat', chart.aspects.x[0].format);
   });
 
   it('makes the chart ordered if the agg is ordered', function () {
@@ -48,7 +48,7 @@ describe('initXAxis', function () {
     initXAxis(chart);
     expect(chart)
       .to.have.property('xAxisLabel', 'label')
-      .and.have.property('xAxisFormatter', chart.aspects.x[0].fieldFormatter)
+      .and.have.property('xAxisFormat', chart.aspects.x[0].format)
       .and.have.property('ordered');
   });
 
@@ -59,7 +59,7 @@ describe('initXAxis', function () {
     initXAxis(chart);
     expect(chart)
       .to.have.property('xAxisLabel', 'label')
-      .and.have.property('xAxisFormatter', chart.aspects.x[0].fieldFormatter)
+      .and.have.property('xAxisFormat', chart.aspects.x[0].format)
       .and.have.property('ordered');
 
     expect(chart.ordered)

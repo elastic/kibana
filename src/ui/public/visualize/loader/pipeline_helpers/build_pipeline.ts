@@ -234,7 +234,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   },
   tagcloud: (visState, schemas) => {
     const visConfig = visState.params;
-    visConfig.metrics = schemas.metric;
+    visConfig.metric = schemas.metric[0];
     if (schemas.segment) {
       visConfig.bucket = schemas.segment[0];
     }

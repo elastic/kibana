@@ -5,28 +5,31 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import {
   EuiColorPicker,
   EuiFormControlLayout
 } from '@elastic/eui';
 
-export class StaticColorSelection extends React.Component {
-  render() {
+export function StaticColorSelection({ onChange, styleOptions }) {
+  const onColorChange = color => {
+    onChange({ color });
+  };
 
-    const onOptionChange = color => {
-      this.props.changeOptions({
-        color
-      });
-    };
-
-    return (
-      <EuiFormControlLayout>
-        <EuiColorPicker
-          onChange={onOptionChange}
-          color={this.props.selectedOptions ? this.props.selectedOptions.color : null}
-          className="gisColorPicker euiFieldText"
-        />
-      </EuiFormControlLayout>
-    );
-  }
+  return (
+    <EuiFormControlLayout>
+      <EuiColorPicker
+        onChange={onColorChange}
+        color={styleOptions.color}
+        className="gisColorPicker euiFieldText"
+      />
+    </EuiFormControlLayout>
+  );
 }
+
+StaticColorSelection.propTypes = {
+  styleOptions: PropTypes.shape({
+    color: PropTypes.string.isRequired,
+  }).isRequired,
+  onChange: PropTypes.func.isRequired
+};

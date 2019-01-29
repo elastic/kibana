@@ -10,6 +10,7 @@ import { ResizeChecker } from 'ui/resize_checker';
 import { syncLayerOrder, removeOrphanedSourcesAndLayers, createMbMapInstance } from './utils';
 import { inspectorAdapters } from '../../../kibana_services';
 import { DECIMAL_DEGREES_PRECISION, ZOOM_PRECISION } from '../../../../common/constants';
+import mapboxgl from 'mapbox-gl';
 
 export class MBMapContainer extends React.Component {
 
@@ -61,7 +62,8 @@ export class MBMapContainer extends React.Component {
   }
 
   async _initializeMap() {
-    this._mbMap = await createMbMapInstance(this.refs.mapContainer, this.props.goto);
+
+    this._mbMap = await createMbMapInstance(this.refs.mapContainer, this.props.goto ? this.props.goto.center : null);
 
     // Override mapboxgl.Map "on" and "removeLayer" methods so we can track layer listeners
     // Tracked layer listerners are used to clean up event handlers
@@ -88,6 +90,7 @@ export class MBMapContainer extends React.Component {
 
     this.assignSizeWatch();
 
+
     // moveend callback is debounced to avoid updating map extent state while map extent is still changing
     // moveend is fired while the map extent is still changing in the following scenarios
     // 1) During opening/closing of layer details panel, the EUI animation results in 8 moveend events
@@ -98,8 +101,8 @@ export class MBMapContainer extends React.Component {
 
     const throttledSetMouseCoordinates = _.throttle(e => {
       this.props.setMouseCoordinates({
-        lat: _.round(e.lngLat.lat, DECIMAL_DEGREES_PRECISION),
-        lon: _.round(e.lngLat.lng, DECIMAL_DEGREES_PRECISION)
+        lat: e.lngLat.lat,
+        lon: e.lngLat.lng
       });
     }, 100);
     this._mbMap.on('mousemove', throttledSetMouseCoordinates);
@@ -169,11 +172,23 @@ export class MBMapContainer extends React.Component {
     }
 
     clearGoto();
-    this._mbMap.setZoom(goto.zoom);
-    this._mbMap.setCenter({
-      lng: goto.lon,
-      lat: goto.lat
-    });
+
+    if (goto.bounds) {
+      //clamping ot -89/89 latitudes since Mapboxgl does not seem to handle bounds that contain the poles (logs errors to the console when using -90/90)
+      const lnLatBounds = new mapboxgl.LngLatBounds(
+        new mapboxgl.LngLat(clamp(goto.bounds.min_lon, -180, 180), clamp(goto.bounds.min_lat, -89, 89)),
+        new mapboxgl.LngLat(clamp(goto.bounds.max_lon, -180, 180), clamp(goto.bounds.max_lat, -89, 89)),
+      );
+      this._mbMap.fitBounds(lnLatBounds);
+    } else if (goto.center) {
+      this._mbMap.setZoom(goto.center.zoom);
+      this._mbMap.setCenter({
+        lng: goto.center.lon,
+        lat: goto.center.lat
+      });
+    }
+
+
   };
 
   _syncMbMapWithLayerList = () => {
@@ -185,9 +200,14 @@ export class MBMapContainer extends React.Component {
     if (!isMapReady) {
       return;
     }
+
     removeOrphanedSourcesAndLayers(this._mbMap, layerList);
-    layerList.forEach((layer) => {
-      layer.syncLayerWithMB(this._mbMap);
+    layerList.forEach(layer => {
+      if (!layer.hasErrors()) {
+        Promise.resolve(layer.syncLayerWithMB(this._mbMap))
+          .catch(({ message }) =>
+            this.props.setLayerErrorStatus(layer.getId(), message));
+      }
     });
     syncLayerOrder(this._mbMap, layerList);
   };
@@ -216,4 +236,11 @@ export class MBMapContainer extends React.Component {
       <div id={'mapContainer'} className="mapContainer" ref="mapContainer"/>
     );
   }
+}
+
+
+function clamp(val, min, max) {
+  if (val > max) val = max;
+  else if (val < min) val = min;
+  return val;
 }

@@ -110,7 +110,6 @@ State communicated to the embeddable.
    // TODO:
    filters: FilterObject,
    timeRange: TimeRangeObject,
-   darkTheme: boolean,
 }
 ```
 
