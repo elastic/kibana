@@ -4,25 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { euiBorderThick, paddingSizes } from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import styled from 'styled-components';
 
 import { SearchScope } from '../../../model';
 import { MainRouteParams } from '../../common/types';
-import { colors } from '../../style/variables';
 import { Breadcrumb } from './breadcrumb';
 import { SearchBar } from './search_bar';
 
 const TopBarContainer = styled.div`
-  --topBarContainerHeight: 40px;
+  --topBarContainerHeight: calc(40 / 14 rem);
   box-sizing: content-box;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  padding: 8px;
+  padding: ${paddingSizes.s};
   height: var(--topBarContainerHeight);
   min-height: var(--topBarContainerHeight);
-  border-bottom: 2px solid ${colors.borderGrey};
+  border-bottom: ${euiBorderThick};
   nav {
     line-height: var(--topBarContainerHeight);
     a {

@@ -146,10 +146,10 @@ export class DiffPage extends React.Component<Props> {
           </div>
           <EuiFlexItem>
             <div>
-              <EuiButton className="diffLayoutButton" onClick={this.setLayoutUnified}>
+              <EuiButton className="code-diff-layout-button" onClick={this.setLayoutUnified}>
                 Unified
               </EuiButton>
-              <EuiButton className="diffLayoutButton" onClick={this.setLayoutSplit}>
+              <EuiButton className="code-diff-layout-button" onClick={this.setLayoutSplit}>
                 Split
               </EuiButton>
             </div>

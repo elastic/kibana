@@ -5,12 +5,21 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiText } from '@elastic/eui';
+import { euiFontSizeXs } from '@elastic/eui/dist/eui_theme_light.json';
 // @ts-ignore
 import { renderMarkdown } from 'monaco-editor/esm/vs/base/browser/htmlContentRenderer';
 // @ts-ignore
 import { tokenizeToString } from 'monaco-editor/esm/vs/editor/common/modes/textToHtmlTokenizer';
 import React from 'react';
+import styled from 'styled-components';
 import { MarkedString } from 'vscode-languageserver-types';
+
+const Text = styled(EuiText)`
+  p {
+    color: #8c8c8c;
+    font-size: ${euiFontSizeXs};
+  }
+`;
 
 export interface HoverWidgetProps {
   state: HoverState;
@@ -100,12 +109,12 @@ export class HoverWidget extends React.PureComponent<HoverWidgetProps> {
   private renderInitialting() {
     return (
       <div className="hover-row">
-        <EuiText>
-          <h4 style={{ textAlign: 'center' }}>Language Server is initializing…</h4>
-          <p style={{ color: '#8C8C8C', textAlign: 'center', fontSize: '12px' }}>
-            Depending on the size of your repo, this could take a few minutes.
-          </p>
-        </EuiText>
+        {/*
+              // @ts-ignore */}
+        <Text textAlign="center">
+          <h4>Language Server is initializing…</h4>
+          <p>Depending on the size of your repo, this could take a few minutes.</p>
+        </Text>
       </div>
     );
   }

@@ -5,7 +5,8 @@
  */
 
 // @ts-ignore
-import { EuiButton, EuiButtonGroup } from '@elastic/eui';
+import { EuiButton, EuiButtonGroup, EuiTitle } from '@elastic/eui';
+import { euiSize, euiSizeS, euiSizeXs } from '@elastic/eui/dist/eui_theme_light.json';
 import 'github-markdown-css/github-markdown.css';
 import React from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
@@ -33,10 +34,10 @@ const ButtonsContainer = styled.div`
   display: flex;
   flex-direction: row;
   position: absolute;
-  right: 1rem;
+  right: ${euiSize};
   z-index: ${LARGE_Z_INDEX_NUMBER};
   & > div:first-child {
-    margin-right: 8px;
+    margin-right: ${euiSizeS};
   }
 `;
 
@@ -50,7 +51,7 @@ const EditorBlameContainer = styled.div`
 
 const BlameContainer = styled.div`
   flex-grow: 3;
-  flex-basis: 400px;
+  flex-basis: calc(400 / 14rem);
   height: 100%;
   overflow: auto;
 `;
@@ -77,11 +78,8 @@ enum ButtonOption {
   Folder = 'Folder',
 }
 
-const Title = styled.div`
-  color: #1a1a1a;
-  font-size: 20px;
-  font-weight: 600;
-  margin: 4px 0 18px;
+const Title = styled(EuiTitle)`
+  margin: ${euiSizeXs} 0 ${euiSize};
 `;
 
 class CodeContent extends React.PureComponent<Props> {

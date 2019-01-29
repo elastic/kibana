@@ -5,19 +5,25 @@
  */
 
 import { EuiProgress } from '@elastic/eui';
+import {
+  euiBorderThin,
+  euiSizeL,
+  euiSizeXs,
+  paddingSizes,
+} from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import styled from 'styled-components';
 import { CloneProgress } from '../../../model';
 
 export const Caption = styled.div`
-  margin-bottom: 0.5rem;
-  font-size: 1.5rem;
+  margin-bottom: ${euiSizeXs};
+  font-size: ${euiSizeL};
 `;
 
 export const ProgressContainer = styled.div`
   width: 40rem;
-  padding: 2px;
-  border: 1px solid;
+  padding: ${paddingSizes.xs};
+  border: ${euiBorderThin};
 `;
 
 interface Props {

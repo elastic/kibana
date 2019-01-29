@@ -1,19 +1,19 @@
-%fileNode {
-  padding: 4px 4px 4px 16px;
+%code-file-node {
+  padding: $euiSizeXS $euiSizeXS $euiSizeXS $euiSize;
   cursor: pointer;
   white-space: nowrap;
-  margin-left: 5px;
+  margin-left: $euiSizeXS;
 }
 
-.fileNode {
-  @extend %fileNode;
+.code-file-node {
+  @extend %code-file-node;
 }
 
-.activeFileNode {
-  @extend %fileNode;
-  background: #D9D9D9;;
+.code-active-file-node {
+  @extend %code-file-node;
+  background: $euiColorLightShade;;
 }
 
-.fileTreeFile {
-  margin-left: 20px;
+.code-file-tree-file {
+  margin-left: $euiSizeL;
 }
