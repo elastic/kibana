@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Request, RRRRender } from 'react-redux-request';
-import { TransactionWithErrorCount } from 'x-pack/plugins/apm/typings/get_transaction';
+import { TransactionWithErrorCountAPIResponse } from 'x-pack/plugins/apm/typings/get_transaction';
 import { loadTransaction } from '../../services/rest/apm/transactions';
 import { IReduxState } from '../rootReducer';
 import { IUrlParams } from '../urlParams';
@@ -21,7 +21,7 @@ export function TransactionDetailsRequest({
   render
 }: {
   urlParams: IUrlParams;
-  render: RRRRender<TransactionWithErrorCount>;
+  render: RRRRender<TransactionWithErrorCountAPIResponse>;
 }) {
   const { serviceName, start, end, transactionId, traceId, kuery } = urlParams;
 

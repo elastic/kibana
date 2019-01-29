@@ -9,7 +9,7 @@ import { idx } from 'x-pack/plugins/apm/common/idx';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import {
   TransactionAPIResponse,
-  TransactionWithErrorCount
+  TransactionWithErrorCountAPIResponse
 } from 'x-pack/plugins/apm/typings/get_transaction';
 import {
   PROCESSOR_EVENT,
@@ -65,22 +65,19 @@ export async function getTransactionWithErrorCount(
   transactionId: string,
   traceId: string,
   setup: Setup
-): Promise<TransactionWithErrorCount> {
+): Promise<TransactionWithErrorCountAPIResponse> {
   const transaction = await getTransaction(transactionId, traceId, setup);
-
-  if (transaction) {
-    return {
-      transaction,
-      errorCount: await getErrorCount({
+  const errorCount = transaction
+    ? await getErrorCount({
         serviceName: transaction.service.name,
         transactionId: transaction.transaction.id,
+        traceId,
         setup
       })
-    };
-  }
+    : 0;
 
   return {
-    transaction: undefined,
-    errorCount: 0
+    transaction,
+    errorCount
   };
 }

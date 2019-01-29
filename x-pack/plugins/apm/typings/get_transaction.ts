@@ -8,7 +8,7 @@ import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 
 export type TransactionAPIResponse = Transaction | undefined;
 
-export interface TransactionWithErrorCount {
+export interface TransactionWithErrorCountAPIResponse {
   transaction: TransactionAPIResponse;
   errorCount: number;
 }
