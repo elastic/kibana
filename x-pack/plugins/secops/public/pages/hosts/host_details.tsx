@@ -12,10 +12,15 @@ import {
 import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
+<<<<<<< HEAD
 import chrome from 'ui/chrome';
 
 import { ESTermQuery } from '../../../common/typed_json';
 import { EmptyPage } from '../../components/empty_page';
+=======
+
+import { ESTermQuery } from '../../../common/typed_json';
+>>>>>>> Improved types
 import { getHostsUrl, HostComponentProps } from '../../components/link_to/redirect_to_hosts';
 import { HostSummary } from '../../components/page/hosts/host_summary';
 import { manageQuery } from '../../components/page/manage_query';
