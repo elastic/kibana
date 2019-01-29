@@ -17,10 +17,15 @@
  * under the License.
  */
 
-export default [
+export const EXTENDED_STATS_TYPES = [
   'std_deviation',
   'variance',
   'sum_of_squares'
 ];
 
-
+export const METRIC_TYPES = {
+  PERCENTILE: 'percentile',
+  PERCENTILE_RANK: 'percentile_rank',
+  TOP_HIT: 'top_hit',
+  COUNT: 'count'
+};
