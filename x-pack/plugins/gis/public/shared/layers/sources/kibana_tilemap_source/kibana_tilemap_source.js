@@ -7,7 +7,6 @@ import React from 'react';
 import { AbstractTMSSource } from '../tms_source';
 import { TileLayer } from '../../tile_layer';
 import { CreateSourceEditor } from './create_source_editor';
-import { EuiText } from '@elastic/eui';
 
 export class KibanaTilemapSource extends  AbstractTMSSource {
 
@@ -33,16 +32,11 @@ export class KibanaTilemapSource extends  AbstractTMSSource {
     return (<CreateSourceEditor previewTilemap={previewTilemap} url={url} />);
   };
 
-  renderDetails() {
-    return (
-      <EuiText color="subdued" size="s">
-        <p className="gisLayerDetails">
-          <strong className="gisLayerDetails__label">Source </strong><span>Kibana Tilemap Configuration</span><br/>
-          <strong className="gisLayerDetails__label">Type </strong><span>Tile</span><br/>
-          <strong className="gisLayerDetails__label">Id </strong><span>{this._descriptor.id}</span><br/>
-        </p>
-      </EuiText>
-    );
+  async getImmutableProperties() {
+    return [
+      { label: 'Data source', value: KibanaTilemapSource.title },
+      { label: 'Tilemap url', value: this.getUrlTemplate() },
+    ];
   }
 
   _createDefaultLayerDescriptor(options) {

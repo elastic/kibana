@@ -8,7 +8,7 @@ import { get } from 'lodash';
 import moment from 'moment';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { DocCount, HistogramSeries, Ping, PingResults } from '../../../../common/graphql/types';
-import { getFilteredQuery, getFilteredQueryAndStatusFilter } from '../../helper';
+import { getFilteredQueryAndStatusFilter } from '../../helper';
 import { DatabaseAdapter } from '../database';
 import { UMPingsAdapter } from './adapter_types';
 
