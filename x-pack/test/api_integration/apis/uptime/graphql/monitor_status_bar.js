@@ -20,8 +20,8 @@ export default function ({ getService }) {
         operationName: 'MonitorStatus',
         query: getMonitorStatusBarQueryString,
         variables: {
-          dateRangeStart: '2019-01-25T04:30:54.740Z',
-          dateRangeEnd: '2019-01-28T04:50:54.740Z',
+          dateRangeStart: '2019-01-28T17:40:08.078Z',
+          dateRangeEnd: '2019-01-28T19:00:16.078Z',
         },
       };
       const {
@@ -43,8 +43,8 @@ export default function ({ getService }) {
         operationName: 'MonitorStatus',
         query: getMonitorStatusBarQueryString,
         variables: {
-          dateRangeStart: '2019-01-25T04:30:54.740Z',
-          dateRangeEnd: '2019-01-28T04:50:54.740Z',
+          dateRangeStart: '2019-01-28T17:40:08.078Z',
+          dateRangeEnd: '2019-01-28T19:00:16.078Z',
           monitorId: 'auto-tcp-0X81440A68E839814C',
         },
       };
