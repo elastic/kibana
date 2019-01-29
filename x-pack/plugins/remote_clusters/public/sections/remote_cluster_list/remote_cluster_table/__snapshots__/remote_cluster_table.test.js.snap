@@ -16,8 +16,8 @@ exports[`RemoteClusterTable renders a row for an API-defined remote cluster 1`] 
         <input
           aria-label="Select this row"
           class="euiCheckbox__input"
-          data-test-subj="checkboxSelectRow-Default remote cluster"
-          id="_selection_column_Default remote cluster-checkbox"
+          data-test-subj="checkboxSelectRow-test-cluster"
+          id="_selection_column_test-cluster-checkbox"
           type="checkbox"
         />
         <div
@@ -35,9 +35,10 @@ exports[`RemoteClusterTable renders a row for an API-defined remote cluster 1`] 
     >
       <button
         class="euiLink euiLink--primary"
+        data-test-subj="remoteClusterTableRowName-test-cluster"
         type="button"
       >
-        Default remote cluster
+        test-cluster
       </button>
     </div>
   </td>
@@ -149,6 +150,7 @@ exports[`RemoteClusterTable renders a row for an API-defined remote cluster 1`] 
           <button
             aria-label="Delete remote cluster"
             class="euiButtonIcon euiButtonIcon--danger"
+            data-test-subj="remoteClusterTableRowRemoveButton-test-cluster"
             type="button"
           >
             <svg
@@ -184,7 +186,8 @@ exports[`RemoteClusterTable renders a row for an API-defined remote cluster 1`] 
             aria-describedby="fakeId"
             aria-label="Edit remote cluster"
             class="euiButtonIcon euiButtonIcon--primary"
-            href="#/management/elasticsearch/remote_clusters/edit/Default remote cluster"
+            data-test-subj="remoteClusterTableRowEditButton-test-cluster"
+            href="/management/elasticsearch/remote_clusters/edit/test-cluster"
           >
             <svg
               aria-hidden="true"
@@ -230,9 +233,9 @@ exports[`RemoteClusterTable renders a row with a tooltip for a remote cluster de
         <input
           aria-label="Select this row"
           class="euiCheckbox__input"
-          data-test-subj="checkboxSelectRow-Remote cluster in elasticsearch.yml"
+          data-test-subj="checkboxSelectRow-test-cluster-in-elasticsearch-yml"
           disabled=""
-          id="_selection_column_Remote cluster in elasticsearch.yml-checkbox"
+          id="_selection_column_test-cluster-in-elasticsearch-yml-checkbox"
           type="checkbox"
         />
         <div
@@ -256,9 +259,10 @@ exports[`RemoteClusterTable renders a row with a tooltip for a remote cluster de
         >
           <button
             class="euiLink euiLink--primary"
+            data-test-subj="remoteClusterTableRowName-test-cluster-in-elasticsearch-yml"
             type="button"
           >
-            Remote cluster in elasticsearch.yml
+            test-cluster-in-elasticsearch-yml
           </button>
         </div>
         <div
@@ -396,6 +400,7 @@ exports[`RemoteClusterTable renders a row with a tooltip for a remote cluster de
           <button
             aria-label="Remote clusters defined in elasticsearch.yml can't be deleted"
             class="euiButtonIcon euiButtonIcon--danger"
+            data-test-subj="remoteClusterTableRowRemoveButton-test-cluster-in-elasticsearch-yml"
             disabled=""
             type="button"
           >
@@ -432,6 +437,7 @@ exports[`RemoteClusterTable renders a row with a tooltip for a remote cluster de
             aria-describedby="fakeId"
             aria-label="Remote clusters defined in elasticsearch.yml can't be edited"
             class="euiButtonIcon euiButtonIcon--primary"
+            data-test-subj="remoteClusterTableRowEditButton-test-cluster-in-elasticsearch-yml"
             disabled=""
             type="button"
           >

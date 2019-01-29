@@ -29,6 +29,7 @@ import {
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../../constants';
+import { getRouterLinkProps } from '../../../services';
 import { ConfiguredByNodeWarning } from '../../components';
 import { ConnectionStatus, RemoveClusterButtonProvider } from '../components';
 
@@ -312,6 +313,7 @@ export const DetailPanel = injectI18n(
                         <EuiButtonEmpty
                           color="danger"
                           onClick={removeCluster}
+                          data-test-subj="remoteClusterDetailPanelRemoveButton"
                         >
                           <FormattedMessage
                             id="xpack.remoteClusters.detailPanel.removeButtonLabel"
@@ -324,7 +326,7 @@ export const DetailPanel = injectI18n(
 
                   <EuiFlexItem grow={false}>
                     <EuiButton
-                      href={`#${CRUD_APP_BASE_PATH}/edit/${clusterName}`}
+                      {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/edit/${clusterName}`)}
                       fill
                       color="primary"
                     >
