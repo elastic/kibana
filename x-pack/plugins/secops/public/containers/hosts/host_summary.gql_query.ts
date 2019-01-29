@@ -6,45 +6,6 @@
 
 import gql from 'graphql-tag';
 
-export const HostsTableQuery = gql`
-  query GetHostsTableQuery(
-    $sourceId: ID!
-    $timerange: TimerangeInput!
-    $pagination: PaginationInput!
-    $filterQuery: String
-  ) {
-    source(id: $sourceId) {
-      id
-      Hosts(timerange: $timerange, pagination: $pagination, filterQuery: $filterQuery) {
-        totalCount
-        edges {
-          node {
-            _id
-            firstSeen
-            host {
-              id
-              name
-              os {
-                name
-                version
-              }
-            }
-          }
-          cursor {
-            value
-          }
-        }
-        pageInfo {
-          endCursor {
-            value
-          }
-          hasNextPage
-        }
-      }
-    }
-  }
-`;
-
 export const HostSummaryQuery = gql`
   query GetHostSummaryQuery(
     $sourceId: ID!

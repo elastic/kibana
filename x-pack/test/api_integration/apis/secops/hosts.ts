@@ -6,7 +6,7 @@
 
 import expect from 'expect.js';
 import { GetHostsTableQuery } from '../../../../plugins/secops/public/graphql/types';
-import { HostsTableQuery } from './../../../../plugins/secops/public/containers/hosts/index.gql_query';
+import { HostsTableQuery } from './../../../../plugins/secops/public/containers/hosts/hosts_table.gql_query';
 import { KbnTestProvider } from './types';
 
 const hostsTests: KbnTestProvider = ({ getService }) => {

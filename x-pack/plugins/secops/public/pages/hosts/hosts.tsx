@@ -22,7 +22,7 @@ import { AuthenticationsQuery } from '../../containers/authentications';
 import { EventsQuery } from '../../containers/events';
 import { GlobalTime } from '../../containers/global_time';
 import { HostsQuery } from '../../containers/hosts';
-import { HostsTableQuery } from '../../containers/hosts/index.gql_query';
+import { HostsTableQuery } from '../../containers/hosts/hosts_table.gql_query';
 import { KpiEventsQuery } from '../../containers/kpi_events';
 import { indiciesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { UncommonProcessesQuery } from '../../containers/uncommon_processes';

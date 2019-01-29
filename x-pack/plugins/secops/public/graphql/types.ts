@@ -734,95 +734,6 @@ export namespace GetEventsQuery {
   };
 }
 
-export namespace GetHostsTableQuery {
-  export type Variables = {
-    sourceId: string;
-    timerange: TimerangeInput;
-    pagination: PaginationInput;
-    filterQuery?: string | null;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    Hosts: Hosts;
-  };
-
-  export type Hosts = {
-    __typename?: 'HostsData';
-
-    totalCount: number;
-
-    edges: Edges[];
-
-    pageInfo: PageInfo;
-  };
-
-  export type Edges = {
-    __typename?: 'HostsEdges';
-
-    node: Node;
-
-    cursor: Cursor;
-  };
-
-  export type Node = {
-    __typename?: 'HostItem';
-
-    _id?: string | null;
-
-    firstSeen?: string | null;
-
-    host?: Host | null;
-  };
-
-  export type Host = {
-    __typename?: 'HostEcsFields';
-
-    id?: string | null;
-
-    name?: string | null;
-
-    os?: Os | null;
-  };
-
-  export type Os = {
-    __typename?: 'OsEcsFields';
-
-    name?: string | null;
-
-    version?: string | null;
-  };
-
-  export type Cursor = {
-    __typename?: 'CursorType';
-
-    value: string;
-  };
-
-  export type PageInfo = {
-    __typename?: 'PageInfo';
-
-    endCursor?: EndCursor | null;
-
-    hasNextPage?: boolean | null;
-  };
-
-  export type EndCursor = {
-    __typename?: 'CursorType';
-
-    value: string;
-  };
-}
-
 export namespace GetHostSummaryQuery {
   export type Variables = {
     sourceId: string;
@@ -897,6 +808,95 @@ export namespace GetHostSummaryQuery {
     name?: string | null;
 
     platform?: string | null;
+
+    version?: string | null;
+  };
+
+  export type Cursor = {
+    __typename?: 'CursorType';
+
+    value: string;
+  };
+
+  export type PageInfo = {
+    __typename?: 'PageInfo';
+
+    endCursor?: EndCursor | null;
+
+    hasNextPage?: boolean | null;
+  };
+
+  export type EndCursor = {
+    __typename?: 'CursorType';
+
+    value: string;
+  };
+}
+
+export namespace GetHostsTableQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    pagination: PaginationInput;
+    filterQuery?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    Hosts: Hosts;
+  };
+
+  export type Hosts = {
+    __typename?: 'HostsData';
+
+    totalCount: number;
+
+    edges: Edges[];
+
+    pageInfo: PageInfo;
+  };
+
+  export type Edges = {
+    __typename?: 'HostsEdges';
+
+    node: Node;
+
+    cursor: Cursor;
+  };
+
+  export type Node = {
+    __typename?: 'HostItem';
+
+    _id?: string | null;
+
+    firstSeen?: string | null;
+
+    host?: Host | null;
+  };
+
+  export type Host = {
+    __typename?: 'HostEcsFields';
+
+    id?: string | null;
+
+    name?: string | null;
+
+    os?: Os | null;
+  };
+
+  export type Os = {
+    __typename?: 'OsEcsFields';
+
+    name?: string | null;
 
     version?: string | null;
   };
