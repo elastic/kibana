@@ -34,7 +34,7 @@ export function validateSeed(seed) {
 
   if (isPortInvalid) {
     errors.push(i18n.translate(
-      'xpack.translate.remoteClusterForm.localSeedError.invalidPortMessage',
+      'xpack.remoteClusters.remoteClusterForm.localSeedError.invalidPortMessage',
       {
         defaultMessage: 'A port is required.',
       },
