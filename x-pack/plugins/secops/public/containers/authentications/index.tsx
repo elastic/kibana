@@ -7,13 +7,14 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
+import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
+import { ESQuery } from '../../../common/typed_json';
 import { AuthenticationsEdges, GetAuthenticationsQuery, PageInfo } from '../../graphql/types';
-
-import { connect } from 'react-redux';
 import { inputsModel, State } from '../../store';
 import { authenticationsSelector } from '../../store';
+import { createFilter } from '../helpers';
 import { authenticationsQuery } from './index.gql_query';
 
 export interface AuthenticationArgs {
@@ -32,7 +33,7 @@ export interface OwnProps {
   sourceId: string;
   startDate: number;
   endDate: number;
-  filterQuery?: string;
+  filterQuery?: ESQuery | string;
   poll: number;
 }
 
@@ -70,7 +71,7 @@ const AuthenticationsComponentQuery = pure<AuthenticationsProps>(
           cursor: null,
           tiebreaker: null,
         },
-        filterQuery,
+        filterQuery: createFilter(filterQuery),
       }}
     >
       {({ data, loading, fetchMore, refetch }) => {

@@ -5,14 +5,14 @@
  */
 
 import { GraphQLSchema } from 'graphql';
+
+import { ESQuery } from '../../../common/typed_json';
 import {
   PaginationInput,
   SortField,
   SourceConfiguration,
   TimerangeInput,
 } from '../../graphql/types';
-import { ESQuery } from '../types';
-
 export * from '../../utils/typed_resolvers';
 
 export const internalFrameworkRequest = Symbol('internalFrameworkRequest');

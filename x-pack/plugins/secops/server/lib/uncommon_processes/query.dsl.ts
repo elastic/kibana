@@ -8,19 +8,24 @@ import { createQueryFilterClauses } from '../../utils/build_query';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { hostFieldsMap, processFieldsMap, userFieldsMap } from '../ecs_fields';
 import { RequestOptions } from '../framework';
-import { FilterQuery } from '../types';
 
-export const buildQuery = (options: RequestOptions) => {
-  const { to, from } = options.timerange;
-  const { limit } = options.pagination;
-  const { fields, filterQuery } = options;
+export const buildQuery = ({
+  fields,
+  filterQuery,
+  timerange: { from, to },
+  pagination: { limit },
+  sourceConfiguration: {
+    fields: { timestamp },
+    auditbeatAlias,
+  },
+}: RequestOptions) => {
   const processUserFields = reduceFields(fields, { ...processFieldsMap, ...userFieldsMap });
   const hostFields = reduceFields(fields, hostFieldsMap);
   const filter = [
-    ...createQueryFilterClauses(filterQuery as FilterQuery),
+    ...createQueryFilterClauses(filterQuery),
     {
       range: {
-        [options.sourceConfiguration.fields.timestamp]: {
+        [timestamp]: {
           gte: from,
           lte: to,
         },
@@ -38,7 +43,7 @@ export const buildQuery = (options: RequestOptions) => {
 
   const dslQuery = {
     allowNoIndices: true,
-    index: options.sourceConfiguration.auditbeatAlias,
+    index: auditbeatAlias,
     ignoreUnavailable: true,
     body: {
       aggregations: {

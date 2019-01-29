@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty } from 'lodash/fp';
+import { isString } from 'lodash/fp';
 
-import { ESQuery } from '../../../common/typed_json';
+import { ESQuery } from '../../common/typed_json';
 
-export const createQueryFilterClauses = (filterQuery: ESQuery | undefined) =>
-  !isEmpty(filterQuery) ? [filterQuery] : [];
+export const createFilter = (filterQuery: ESQuery | string | undefined) =>
+  isString(filterQuery) ? filterQuery : JSON.stringify(filterQuery);

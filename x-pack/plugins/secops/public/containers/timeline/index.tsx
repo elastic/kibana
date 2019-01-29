@@ -9,8 +9,10 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { pure } from 'recompose';
 
+import { ESQuery } from '../../../common/typed_json';
 import { Ecs, EcsEdges, GetTimelineQuery, PageInfo, SortField } from '../../graphql/types';
 import { inputsModel } from '../../store';
+import { createFilter } from '../helpers';
 import { timelineQuery } from './index.gql_query';
 
 export interface TimelineArgs {
@@ -28,7 +30,7 @@ export interface OwnProps {
   children?: (args: TimelineArgs) => React.ReactNode;
   id?: string;
   limit: number;
-  filterQuery: string;
+  filterQuery: ESQuery | string;
   poll?: number;
   sortField: SortField;
   sourceId: string;
@@ -42,7 +44,7 @@ export const TimelineQuery = pure<OwnProps>(
       notifyOnNetworkStatusChange
       pollInterval={poll}
       variables={{
-        filterQuery,
+        filterQuery: createFilter(filterQuery),
         sourceId,
         pagination: {
           limit,

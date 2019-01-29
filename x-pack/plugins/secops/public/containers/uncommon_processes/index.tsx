@@ -10,9 +10,11 @@ import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
+import { ESQuery } from '../../../common/typed_json';
 import { GetUncommonProcessesQuery, PageInfo, UncommonProcessesEdges } from '../../graphql/types';
 import { inputsModel, State } from '../../store';
 import { uncommonProcessesSelector } from '../../store';
+import { createFilter } from '../helpers';
 import { uncommonProcessesQuery } from './index.gql_query';
 
 export interface UncommonProcessesArgs {
@@ -31,7 +33,7 @@ export interface OwnProps {
   sourceId: string;
   startDate: number;
   endDate: number;
-  filterQuery?: string;
+  filterQuery?: ESQuery | string;
   cursor: string | null;
   poll: number;
 }
@@ -71,7 +73,7 @@ const UncommonProcessesComponentQuery = pure<UncommonProcessesProps>(
           cursor,
           tiebreaker: null,
         },
-        filterQuery,
+        filterQuery: createFilter(filterQuery),
       }}
     >
       {({ data, loading, fetchMore, refetch }) => {
