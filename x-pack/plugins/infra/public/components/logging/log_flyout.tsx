@@ -19,7 +19,7 @@ import styled from 'styled-components';
 import { InfraLogItem, InfraLogItemField } from '../../graphql/types';
 import { InfraLoadingPanel } from '../loading';
 interface Props {
-  flyoutItem: InfraLogItem;
+  flyoutItem: InfraLogItem | null;
   hideFlyout: () => void;
   setFilter: (filter: string) => void;
   intl: InjectedIntl;
@@ -85,7 +85,7 @@ export const LogFlyout = injectI18n(
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          {loading ? (
+          {loading || flyoutItem === null ? (
             <InfraFlyoutLoadingPanel>
               <InfraLoadingPanel
                 height="100%"

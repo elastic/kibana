@@ -14,7 +14,6 @@ import { WithFlyoutOptions } from './with_log_flyout_options';
 
 interface WithFlyoutArgs {
   flyoutItem: InfraLogItem | null;
-  isFlyoutVisible: boolean;
   setFlyoutItem: (id: string) => void;
   showFlyout: () => void;
   hideFlyout: () => void;
@@ -31,28 +30,29 @@ export const WithLogFlyout = ({ children }: WithFlyoutProps) => {
     <WithOptions>
       {({ sourceId }) => (
         <WithFlyoutOptions>
-          {({ showFlyout, hideFlyout, setFlyoutItem, flyoutId, flyoutVisibility }) => (
-            <Query<FlyoutItemQuery.Query, FlyoutItemQuery.Variables>
-              query={flyoutItemQuery}
-              fetchPolicy="no-cache"
-              variables={{
-                itemId: (flyoutId != null && flyoutId) || '',
-                sourceId,
-              }}
-            >
-              {({ data, error, loading }) => {
-                return children({
-                  showFlyout,
-                  hideFlyout,
-                  isFlyoutVisible: flyoutVisibility === FlyoutVisibility.visible,
-                  setFlyoutItem,
-                  flyoutItem: (data && data.source && data.source.logItem) || null,
-                  error: error && error.message,
-                  loading,
-                });
-              }}
-            </Query>
-          )}
+          {({ showFlyout, hideFlyout, setFlyoutItem, flyoutId, flyoutVisibility }) =>
+            flyoutVisibility === FlyoutVisibility.visible ? (
+              <Query<FlyoutItemQuery.Query, FlyoutItemQuery.Variables>
+                query={flyoutItemQuery}
+                fetchPolicy="no-cache"
+                variables={{
+                  itemId: (flyoutId != null && flyoutId) || '',
+                  sourceId,
+                }}
+              >
+                {({ data, error, loading }) => {
+                  return children({
+                    showFlyout,
+                    hideFlyout,
+                    setFlyoutItem,
+                    flyoutItem: (data && data.source && data.source.logItem) || null,
+                    error: error && error.message,
+                    loading,
+                  });
+                }}
+              </Query>
+            ) : null
+          }
         </WithFlyoutOptions>
       )}
     </WithOptions>

@@ -11,7 +11,7 @@
         "fields": [
           {
             "name": "source",
-            "description": "Get an infrastructure data source by id.\n\nThe resolution order for the source configuration attributes is as follows\nwith the first defined value winning:\n\n1. The attributes of the saved object with the given 'id'.\n2. The attributes defined in the static Kibana configuration key\n   'xpack.infra.sources.default'.\n3. The hard-coded default values.\n\nAs a consequence, querying a source without a corresponding saved object\ndoesn't error out, but returns the configured or hardcoded defaults.",
+            "description": "Get an infrastructure data source by id.\n\nThe resolution order for the source configuration attributes is as follows\nwith the first defined value winning:\n\n1. The attributes of the saved object with the given 'id'.\n2. The attributes defined in the static Kibana configuration key\n   'xpack.infra.sources.default'.\n3. The hard-coded default values.\n\nAs a consequence, querying a source that doesn't exist doesn't error out,\nbut returns the configured or hardcoded defaults.",
             "args": [
               {
                 "name": "id",
