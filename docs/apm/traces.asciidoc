@@ -15,7 +15,7 @@ image::apm/images/apm-traces.png[Example view of the Traces overview in APM UI i
 
 [float]
 [[distributed-tracing]]
-==== Distributed Tracing
+==== Distributed tracing
 
 Elastic APM supports distributed tracing.
 Distributed tracing is a key feature of modern application performance monitoring as application architectures are shifting from monolithic to more distributed,

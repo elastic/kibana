@@ -3,7 +3,7 @@
 
 TIP: {apm-overview-ref-v}/errors.html[Errors] are defined as groups of exceptions with matching exception or log messages.
 
-The *errors* overview provides a high-level view of the error message and culprit,
+The *Errors* overview provides a high-level view of the error message and culprit,
 the number of occurrences, and the most recent occurrence.
 Just like the transaction overview, you'll notice we group together like errors.
 This makes it very easy to quickly see which errors are affecting your services,
