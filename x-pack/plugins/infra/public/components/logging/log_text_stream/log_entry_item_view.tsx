@@ -38,6 +38,7 @@ export const LogTextStreamLogEntryItemView = injectI18n(
   > {
     public readonly state = {
       isHovered: false,
+      showIcon: true,
     };
 
     public handleMouseEnter: React.MouseEventHandler<HTMLDivElement> = () => {
@@ -121,6 +122,7 @@ const LogTextStreamIconDiv = styled<IconProps, 'div'>('div')`
         : darken(0.05, props.theme.eui.euiColorHighlight)
       : 'transparent'};
   text-align: center;
+  user-select: none;
 `;
 
 const LogTextStreamLogEntryItemDiv = styled.div`
