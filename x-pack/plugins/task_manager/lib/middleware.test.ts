@@ -24,6 +24,7 @@ const getMockConcreteTaskInstance = () => {
     attempts: number;
     status: TaskStatus;
     runAt: Date;
+    scheduledAt: Date;
     state: any;
     taskType: string;
     params: any;
@@ -33,6 +34,7 @@ const getMockConcreteTaskInstance = () => {
     attempts: 0,
     status: 'idle',
     runAt: new Date(moment('2018-09-18T05:33:09.588Z').valueOf()),
+    scheduledAt: new Date(moment('2018-09-18T05:33:09.588Z').valueOf()),
     state: {},
     taskType: 'nice_task',
     params: { abc: 'def' },
