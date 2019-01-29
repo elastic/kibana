@@ -102,9 +102,11 @@ const getColumns = (kbnUrl, scope) => ([
     }),
     field: 'category',
     sortable: true,
-    render: link => linkToCategories[link] ? linkToCategories[link] : i18n.translate('xpack.monitoring.alerts.categoryColumn.generalLabel', {
-      defaultMessage: 'General',
-    })
+    render: link => linkToCategories[link]
+      ? linkToCategories[link]
+      : i18n.translate('xpack.monitoring.alerts.categoryColumn.generalLabel', {
+        defaultMessage: 'General',
+      })
   },
   {
     name: i18n.translate('xpack.monitoring.alerts.lastCheckedColumnTitle', {
@@ -120,7 +122,12 @@ const getColumns = (kbnUrl, scope) => ([
     }),
     field: 'timestamp',
     sortable: true,
-    render: timestamp => formatTimestampToDuration(timestamp, CALCULATE_DURATION_SINCE) + ' ago'
+    render: timestamp => i18n.translate('xpack.monitoring.alerts.triggeredColumnValue', {
+      defaultMessage: '{timestamp} ago',
+      values: {
+        timestamp: formatTimestampToDuration(timestamp, CALCULATE_DURATION_SINCE)
+      }
+    })
   },
 ]);
 

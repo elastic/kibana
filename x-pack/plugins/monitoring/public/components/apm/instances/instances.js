@@ -62,7 +62,12 @@ const columns = [
       defaultMessage: 'Last Event'
     }),
     field: 'time_of_last_event',
-    render: value => formatTimestampToDuration(+moment(value), 'since') + ' ago'
+    render: value => i18n.translate('xpack.monitoring.apm.instances.lastEventValue', {
+      defaultMessage: '{timeOfLastEvent} ago',
+      values: {
+        timeOfLastEvent: formatTimestampToDuration(+moment(value), 'since')
+      }
+    })
   },
   {
     name: i18n.translate('xpack.monitoring.apm.instances.allocatedMemoryTitle', {
