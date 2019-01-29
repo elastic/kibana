@@ -8,18 +8,20 @@ export class TileStyle {
 
   static type = 'TILE';
 
-  constructor(styleDescriptor) {
-    this._descriptor = styleDescriptor;
+  constructor(styleDescriptor = {}) {
+    this._descriptor = TileStyle.createDescriptor(styleDescriptor.properties);
   }
 
   static canEdit(styleInstance) {
     return styleInstance.constructor === TileStyle;
   }
 
-  static createDescriptor(properties) {
+  static createDescriptor(properties = {}) {
     return {
       type: TileStyle.type,
-      properties
+      properties: {
+        ...properties,
+      }
     };
   }
 
@@ -27,13 +29,7 @@ export class TileStyle {
     return 'Tile style';
   }
 
-  _getMBOpacity() {
-    const DEFAULT_OPACITY = 1;
-    return typeof this._descriptor.properties.alphaValue === 'number' ? this._descriptor.properties.alphaValue : DEFAULT_OPACITY;
-  }
-
-  setMBPaintProperties(mbMap, tileLayerID) {
-    const opacity = this._getMBOpacity();
-    mbMap.setPaintProperty(tileLayerID, 'raster-opacity', opacity);
+  setMBPaintProperties({ alpha, mbMap, layerId }) {
+    mbMap.setPaintProperty(layerId, 'raster-opacity', alpha);
   }
 }

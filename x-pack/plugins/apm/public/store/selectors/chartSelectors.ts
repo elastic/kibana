@@ -109,13 +109,10 @@ export function getMemorySeries(
                 defaultMessage: 'System max'
               }
             ),
-            data: series.maximumPercentMemoryUsed,
+            data: series.memoryUsedMax,
             type: 'linemark',
             color: colors.apmBlue,
-            legendValue: asPercent(
-              overallValues.maximumPercentMemoryUsed || 0,
-              1
-            )
+            legendValue: asPercent(overallValues.memoryUsedMax || 0, 1)
           },
           {
             title: i18n.translate(
@@ -124,13 +121,10 @@ export function getMemorySeries(
                 defaultMessage: 'System average'
               }
             ),
-            data: series.averagePercentMemoryUsed,
+            data: series.memoryUsedAvg,
             type: 'linemark',
             color: colors.apmGreen,
-            legendValue: asPercent(
-              overallValues.averagePercentMemoryUsed || 0,
-              1
-            )
+            legendValue: asPercent(overallValues.memoryUsedAvg || 0, 1)
           }
         ];
 
@@ -295,19 +289,11 @@ export function getTpmSeries(
   const { tpmBuckets } = apmTimeseries;
   const bucketKeys = tpmBuckets.map(({ key }) => key);
   const getColor = getColorByKey(bucketKeys);
-  const getTpmLegendTitle = (bucketKey: string) => {
-    // hide legend text for transactions without "result"
-    if (bucketKey === 'transaction_result_missing') {
-      return '';
-    }
-
-    return bucketKey;
-  };
 
   return tpmBuckets.map(bucket => {
     const avg = mean(bucket.dataPoints.map(p => p.y));
     return {
-      title: getTpmLegendTitle(bucket.key),
+      title: bucket.key,
       data: bucket.dataPoints,
       legendValue: `${asDecimal(avg)} ${tpmUnit(transactionType || '')}`,
       type: 'linemark',

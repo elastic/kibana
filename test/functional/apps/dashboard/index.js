@@ -47,7 +47,6 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
       after(unloadCurrentData);
 
       loadTestFile(require.resolve('./_empty_dashboard'));
-      loadTestFile(require.resolve('./_dark_theme'));
       loadTestFile(require.resolve('./_embeddable_rendering'));
       loadTestFile(require.resolve('./_create_and_add_embeddables'));
       loadTestFile(require.resolve('./_time_zones'));

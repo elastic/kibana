@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { overrideDefaults } from './overrides';
+import { overrideDefaults, DEFAULT_LINES_TO_SAMPLE } from './overrides';
 import { isEqual } from 'lodash';
 import { ml } from '../../../services/ml_api_service';
 
@@ -86,12 +86,20 @@ export function createUrlOverrides(overrides, originalSettings) {
   if (formattedOverrides.grok_pattern !== '') {
     formattedOverrides.grok_pattern = encodeURIComponent(formattedOverrides.grok_pattern);
   }
+
+  if (formattedOverrides.lines_to_sample === '') {
+    formattedOverrides.lines_to_sample = overrides.linesToSample;
+  }
+
   return formattedOverrides;
 }
 
 export function processResults(results) {
-  const timestampFormat = (results.joda_timestamp_formats !== undefined && results.joda_timestamp_formats.length) ?
-    results.joda_timestamp_formats[0] : undefined;
+  const timestampFormat = (results.java_timestamp_formats !== undefined && results.java_timestamp_formats.length) ?
+    results.java_timestamp_formats[0] : undefined;
+
+  const linesToSample = (results.overrides !== undefined && results.overrides.lines_to_sample !== undefined) ?
+    results.overrides.lines_to_sample : DEFAULT_LINES_TO_SAMPLE;
 
   return {
     format: results.format,
@@ -104,6 +112,7 @@ export function processResults(results) {
     charset: results.charset,
     columnNames: results.column_names,
     grokPattern: results.grok_pattern,
+    linesToSample,
   };
 }
 

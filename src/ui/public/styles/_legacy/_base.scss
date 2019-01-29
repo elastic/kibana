@@ -1,10 +1,10 @@
 // Forms
 
 // Angular form states
-.ng-dirty, .ng-touched {
-  input.ng-invalid#{&},
-  textarea.ng-invalid#{&},
-  select.ng-invalid#{&} {
+input.ng-invalid,
+textarea.ng-invalid,
+select.ng-invalid {
+  &.ng-dirty, &.ng-touched {
     border-color: $euiColorDanger !important;
   }
 }

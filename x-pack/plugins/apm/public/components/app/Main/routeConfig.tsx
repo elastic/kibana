@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { Redirect, RouteComponentProps, RouteProps } from 'react-router-dom';
 import { legacyDecodeURIComponent } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import { StringMap } from '../../../../typings/common';
 // @ts-ignore
@@ -25,6 +25,13 @@ interface RouteParams {
   serviceName: string;
 }
 
+type BreadcrumbFunction = (args: BreadcrumbArgs) => string | null;
+
+interface Route extends RouteProps {
+  switchRoutes?: Route[];
+  breadcrumb?: string | BreadcrumbFunction | null;
+}
+
 const renderAsRedirectTo = (to: string) => {
   return ({ location }: RouteComponentProps<RouteParams>) => (
     <Redirect
@@ -36,7 +43,7 @@ const renderAsRedirectTo = (to: string) => {
   );
 };
 
-export const routes = [
+export const routes: Route[] = [
   {
     exact: true,
     path: '/',
@@ -58,8 +65,7 @@ export const routes = [
     })
   },
   {
-    switch: true,
-    routes: [
+    switchRoutes: [
       {
         exact: true,
         path: '/invalid-license',

@@ -79,6 +79,13 @@ export function initRoutes(server, licenseUid) {
 
   async function getEMSResources(licenseUid) {
 
+    if (!mapConfig.includeElasticMapsService) {
+      return {
+        fileLayers: [],
+        tmsServices: []
+      };
+    }
+
     emsClient.addQueryParams({ license: licenseUid });
     const fileLayerObjs = await emsClient.getFileLayers();
     const tmsServicesObjs = await emsClient.getTMSServices();

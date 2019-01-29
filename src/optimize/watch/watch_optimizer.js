@@ -20,6 +20,7 @@
 import BaseOptimizer from '../base_optimizer';
 import { createBundlesRoute } from '../bundles_route';
 import { DllCompiler } from '../dynamic_dll_plugin';
+import { fromRoot } from '../../utils';
 import * as Rx from 'rxjs';
 import { mergeMap, take } from 'rxjs/operators';
 
@@ -117,7 +118,8 @@ export default class WatchOptimizer extends BaseOptimizer {
     server.route(createBundlesRoute({
       regularBundlesPath: this.compiler.outputPath,
       dllBundlesPath: DllCompiler.getRawDllConfig().outputPath,
-      basePublicPath: basePath
+      basePublicPath: basePath,
+      builtCssPath: fromRoot('built_assets/css'),
     }));
   }
 
@@ -156,16 +158,14 @@ export default class WatchOptimizer extends BaseOptimizer {
     switch (type) {
       case STATUS.RUNNING:
         if (!this.initialBuildComplete) {
-          this.log(['info', 'optimize'], {
-            tmpl: 'Optimization started',
+          this.logWithMetadata(['info', 'optimize'], `Optimization started`, {
             bundles: this.uiBundles.getIds()
           });
         }
         break;
 
       case STATUS.SUCCESS:
-        this.log(['info', 'optimize'], {
-          tmpl: 'Optimization <%= status %> in <%= seconds %> seconds',
+        this.logWithMetadata(['info', 'optimize'], `Optimization success in ${seconds} seconds`, {
           bundles: this.uiBundles.getIds(),
           status: 'success',
           seconds
@@ -176,8 +176,7 @@ export default class WatchOptimizer extends BaseOptimizer {
         // errors during initialization to the server, unlike the rest of the
         // errors produced here. Lets not muddy the console with extra errors
         if (!this.initializing) {
-          this.log(['fatal', 'optimize'], {
-            tmpl: 'Optimization <%= status %> in <%= seconds %> seconds<%= err %>',
+          this.logWithMetadata(['fatal', 'optimize'], `Optimization failed in ${seconds} seconds${error}`, {
             bundles: this.uiBundles.getIds(),
             status: 'failed',
             seconds,
@@ -187,7 +186,7 @@ export default class WatchOptimizer extends BaseOptimizer {
         break;
 
       case STATUS.FATAL:
-        this.log('fatal', error);
+        this.logWithMetadata('fatal', error);
         process.exit(1);
         break;
     }

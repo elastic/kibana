@@ -16,14 +16,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
-import idx from 'idx';
 import React from 'react';
+import { idx } from 'x-pack/plugins/apm/common/idx';
 import { getKibanaHref } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import { StringMap } from 'x-pack/plugins/apm/typings/common';
-import {
-  Transaction,
-  TransactionV2
-} from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { getDiscoverQuery } from '../Links/DiscoverLinks/DiscoverTransactionLink';
 import { QueryWithIndexPattern } from '../Links/DiscoverLinks/QueryWithIndexPattern';
 
@@ -74,12 +71,9 @@ export class TransactionActionMenu extends React.Component<Props, State> {
 
   public getInfraActions() {
     const { transaction, location } = this.props;
-    const hostName = idx(transaction, _ => _.context.system.hostname);
-    const podId = idx(transaction as TransactionV2, _ => _.kubernetes.pod.uid);
-    const containerId = idx(
-      transaction as TransactionV2,
-      _ => _.docker.container.id
-    );
+    const hostName = idx(transaction, _ => _.host.hostname);
+    const podId = idx(transaction, _ => _.kubernetes.pod.uid);
+    const containerId = idx(transaction, _ => _.container.id);
     const pathname = '/app/infra';
     const time = new Date(transaction['@timestamp']).getTime();
     const infraMetricsQuery = getInfraMetricsQuery(transaction);
