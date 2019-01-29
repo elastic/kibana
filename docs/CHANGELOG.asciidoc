@@ -95,6 +95,15 @@ Platform::
 * Upgrades Hapi in legacy platform to v17 {pull}21707[#21707]
 
 [float]
+[[known-issues-6.6.0]]
+=== Known issues
+Canvas::
+A known issue prevents Canvas from loading outside of the default space. {pull}27262[#27262]   
++
+This issue will be fixed in a future bug fix release. {pull}29393[#29393]                 
+
+
+[float]
 [[deprecation-6.6.0]]
 === Deprecations
 Operations::
