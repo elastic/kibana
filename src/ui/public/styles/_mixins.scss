@@ -72,14 +72,18 @@
     top: 0;
     right: 0;
     z-index: 1;
-    content: url('ui/assets/images/bg_top_branded.svg');
+    width: 400px;
+    height: 370px;
+    content: url(lightOrDarkTheme('ui/assets/images/bg_top_branded.svg', 'ui/assets/images/bg_top_branded_dark.svg'));
   }
 
   &::after {
     position: fixed;
-    bottom: -2px; // Hides an odd space at the bottom of the svg
+    bottom: 0;
     left: 0;
     z-index: 1;
-    content: url('ui/assets/images/bg_bottom_branded.svg');
+    width: 1170px;
+    height: 880px;
+    content: url(lightOrDarkTheme('ui/assets/images/bg_bottom_branded.svg', 'ui/assets/images/bg_bottom_branded_dark.svg'));
   }
 }

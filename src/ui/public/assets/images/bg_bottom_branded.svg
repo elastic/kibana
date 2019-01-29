@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1169" height="880" viewBox="0 0 1169 880">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1170" height="880" viewBox="0 0 1170 880">
   <defs>
     <radialGradient id="bg_bottom_branded-b" cx="44.645%" cy="43.259%" r="93.821%" fx="44.645%" fy="43.259%" gradientTransform="matrix(.54075 .76504 -.6424 .64398 .483 -.188)">
       <stop offset="0%" stop-color="#D9D9D9"/>
@@ -13,7 +13,7 @@
       <stop offset="0%" stop-color="#FFF" stop-opacity=".6"/>
       <stop offset="100%" stop-opacity=".25"/>
     </linearGradient>
-    <polygon id="bg_bottom_branded-d" points="560 364 1169 880 560 880"/>
+    <polygon id="bg_bottom_branded-d" points="561 364 1170 880 561 880"/>
     <linearGradient id="bg_bottom_branded-g" x1="0%" y1="0%" y2="100%">
       <stop offset="0%" stop-color="#FFF" stop-opacity=".2"/>
       <stop offset="100%" stop-opacity="0"/>
