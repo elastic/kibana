@@ -6,13 +6,9 @@
 import React from 'react';
 import { AbstractTMSSource } from '../tms_source';
 import { TileLayer } from '../../tile_layer';
-import {
-  EuiSelect,
-  EuiFormRow,
-} from '@elastic/eui';
-import _ from 'lodash';
 
 import { getEmsTMSServices } from '../../../../meta';
+import { EMSTMSCreateSourceEditor } from './ems_tms_source_editor';
 
 
 export class EMSTMSSource extends AbstractTMSSource {
@@ -29,29 +25,16 @@ export class EMSTMSSource extends AbstractTMSSource {
     };
   }
 
-  static renderEditor({ dataSourcesMeta, onPreviewSource }) {
-
-    const emsTmsOptionsRaw = _.get(dataSourcesMeta, "ems.tms", []);
-    const emsTileOptions = emsTmsOptionsRaw.map((service) => ({
-      value: service.id,
-      text: service.id //due to not having human readable names
-    }));
+  static renderEditor({ onPreviewSource }) {
 
     const onChange = ({ target }) => {
       const selectedId = target.options[target.selectedIndex].value;
       const emsTMSSourceDescriptor = EMSTMSSource.createDescriptor(selectedId);
-      const emsTMSSource = new EMSTMSSource(emsTMSSourceDescriptor, emsTmsOptionsRaw);
+      const emsTMSSource = new EMSTMSSource(emsTMSSourceDescriptor);
       onPreviewSource(emsTMSSource);
     };
-    return (
-      <EuiFormRow label="Tile service">
-        <EuiSelect
-          hasNoInitialSelection
-          options={emsTileOptions}
-          onChange={onChange}
-        />
-      </EuiFormRow>
-    );
+
+    return <EMSTMSCreateSourceEditor onChange={onChange}/>;
   }
 
   constructor(descriptor) {
