@@ -382,7 +382,7 @@ describe('reindexService', () => {
         const updatedOp = await service.processNextStep(watcherReindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.indexConsumersStopped);
         expect(callCluster).toHaveBeenCalledWith('transport.request', {
-          path: '/_xpack/watcher/_stop',
+          path: '/_watcher/_stop',
           method: 'POST',
         });
       });
@@ -393,7 +393,7 @@ describe('reindexService', () => {
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.created);
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
         expect(callCluster).toHaveBeenCalledWith('transport.request', {
-          path: '/_xpack/watcher/_stop',
+          path: '/_watcher/_stop',
           method: 'POST',
         });
       });
@@ -404,7 +404,7 @@ describe('reindexService', () => {
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.created);
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
         expect(callCluster).toHaveBeenCalledWith('transport.request', {
-          path: '/_xpack/watcher/_stop',
+          path: '/_watcher/_stop',
           method: 'POST',
         });
       });
@@ -787,7 +787,7 @@ describe('reindexService', () => {
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.indexConsumersStarted);
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.completed);
         expect(callCluster).toHaveBeenCalledWith('transport.request', {
-          path: '/_xpack/watcher/_start',
+          path: '/_watcher/_start',
           method: 'POST',
         });
       });
@@ -798,7 +798,7 @@ describe('reindexService', () => {
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.aliasCreated);
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
         expect(callCluster).toHaveBeenCalledWith('transport.request', {
-          path: '/_xpack/watcher/_start',
+          path: '/_watcher/_start',
           method: 'POST',
         });
       });
@@ -809,7 +809,7 @@ describe('reindexService', () => {
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.aliasCreated);
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
         expect(callCluster).toHaveBeenCalledWith('transport.request', {
-          path: '/_xpack/watcher/_start',
+          path: '/_watcher/_start',
           method: 'POST',
         });
       });

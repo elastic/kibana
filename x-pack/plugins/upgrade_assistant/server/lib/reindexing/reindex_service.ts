@@ -120,7 +120,7 @@ export const reindexServiceFactory = (
    */
   const stopWatcher = async () => {
     const { acknowledged } = await callCluster('transport.request', {
-      path: '/_xpack/watcher/_stop',
+      path: '/_watcher/_stop',
       method: 'POST',
     });
 
@@ -134,7 +134,7 @@ export const reindexServiceFactory = (
    */
   const startWatcher = async () => {
     const { acknowledged } = await callCluster('transport.request', {
-      path: '/_xpack/watcher/_start',
+      path: '/_watcher/_start',
       method: 'POST',
     });
 
