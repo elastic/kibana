@@ -86,7 +86,7 @@ export function init(server: Server, options: any) {
         if (serverHost !== undefined && serverHost !== 'localhost') {
           const serverPort = server.config().get('server.port');
           const schema = server.config().get('server.ssl.enabled') ? 'https' : 'http';
-          let basePath: string = server.config().get('basePath') || '';
+          let basePath: string = server.config().get('server.basePath') || '';
           if (!basePath.startsWith('/')) {
             basePath = '/' + basePath;
           }
