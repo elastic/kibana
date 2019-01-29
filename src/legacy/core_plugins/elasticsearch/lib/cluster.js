@@ -81,6 +81,8 @@ export class Cluster {
       ...configOverrides
     };
 
+    console.log(JSON.stringify(config, parseOptions));
+
     const client = new elasticsearch.Client(parseConfig(config, parseOptions));
     this._clients.add(client);
     return client;
