@@ -26,10 +26,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-const msTimeUnitLabel = i18n.translate('common.ui.courier.msTimeUnitLabel', {
-  defaultMessage: 'ms'
-});
-
 function getRequestInspectorStats(searchSource) {
   const stats = {};
   const index = searchSource.getField('index');
@@ -67,7 +63,10 @@ function getResponseInspectorStats(searchSource, resp) {
       label: i18n.translate('common.ui.courier.queryTimeLabel', {
         defaultMessage: 'Query time'
       }),
-      value: `${resp.took}${msTimeUnitLabel}`,
+      value: i18n.translate('common.ui.courier.requestTimeValue', {
+        defaultMessage: '{queryTime}ms',
+        values: { queryTime: resp.took },
+      }),
       description: i18n.translate('common.ui.courier.queryTimeDescription', {
         defaultMessage: 'The time it took to process the query.' +
           'Does not include the time to send the request or parse it in the browser.'
@@ -102,7 +101,10 @@ function getResponseInspectorStats(searchSource, resp) {
       label: i18n.translate('common.ui.courier.requestTimeLabel', {
         defaultMessage: 'Request time'
       }),
-      value: `${lastRequest.ms}${msTimeUnitLabel}`,
+      value: i18n.translate('common.ui.courier.requestTimeValue', {
+        defaultMessage: '{requestTime}ms',
+        values: { requestTime: lastRequest.ms },
+      }),
       description: i18n.translate('common.ui.courier.requestTimeDescription', {
         defaultMessage: 'The time of the request from the browser to Elasticsearch and back.' +
           'Does not include the time the requested waited in the queue.'
