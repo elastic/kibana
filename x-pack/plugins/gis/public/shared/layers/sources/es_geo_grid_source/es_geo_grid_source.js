@@ -21,6 +21,7 @@ import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import { GRID_RESOLUTION } from '../../grid_resolution';
+import { getGeohashPrecisionForZoom } from './zoom_to_precision';
 
 const COUNT_PROP_LABEL = 'Count';
 const COUNT_PROP_NAME = 'doc_count';
@@ -47,15 +48,15 @@ const aggSchemas = new Schemas([
   }
 ]);
 
-export class ESGeohashGridSource extends AbstractESSource {
+export class ESGeoGridSource extends AbstractESSource {
 
-  static type = 'ES_GEOHASH_GRID';
-  static title = 'Elasticsearch geohash aggregation';
+  static type = 'ES_GEO_GRID';
+  static title = 'Elasticsearch grid aggregation';
   static description = 'Group geospatial data in grids with metrics for each gridded cell';
 
   static createDescriptor({ indexPatternId, geoField, requestType, resolution }) {
     return {
-      type: ESGeohashGridSource.type,
+      type: ESGeoGridSource.type,
       id: uuid(),
       indexPatternId: indexPatternId,
       geoField: geoField,
@@ -66,8 +67,8 @@ export class ESGeohashGridSource extends AbstractESSource {
 
   static renderEditor({ onPreviewSource }) {
     const onSelect = (sourceConfig) => {
-      const sourceDescriptor = ESGeohashGridSource.createDescriptor(sourceConfig);
-      const source = new ESGeohashGridSource(sourceDescriptor);
+      const sourceDescriptor = ESGeoGridSource.createDescriptor(sourceConfig);
+      const source = new ESGeoGridSource(sourceDescriptor);
       onPreviewSource(source);
     };
 
@@ -96,7 +97,7 @@ export class ESGeohashGridSource extends AbstractESSource {
     }
 
     return [
-      { label: 'Data source', value: ESGeohashGridSource.title },
+      { label: 'Data source', value: ESGeoGridSource.title },
       { label: 'Index pattern', value: indexPatternTitle },
       { label: 'Geospatial field', value: this._descriptor.geoField },
       { label: 'Show as', value: this._descriptor.requestType },
@@ -109,7 +110,7 @@ export class ESGeohashGridSource extends AbstractESSource {
     });
   }
 
-  isGeohashPrecisionAware() {
+  isGeoGridPrecisionAware() {
     return true;
   }
 
@@ -117,24 +118,30 @@ export class ESGeohashGridSource extends AbstractESSource {
     return this._descriptor.resolution;
   }
 
-  getGeohashPrecisionResolutionDelta() {
-    let refinementFactor;
+  getGeoGridPrecision(zoom) {
+    return getGeohashPrecisionForZoom(zoom) + this._getGeoGridPrecisionResolutionDelta();
+  }
+
+  _getGeoGridPrecisionResolutionDelta() {
     if (this._descriptor.resolution === GRID_RESOLUTION.COARSE) {
-      refinementFactor = 0;
-    } else if (this._descriptor.resolution === GRID_RESOLUTION.FINE) {
-      refinementFactor = 1;
-    } else if (this._descriptor.resolution === GRID_RESOLUTION.MOST_FINE) {
-      refinementFactor = 2;
-    } else {
-      throw new Error(`Resolution param not recognized: ${this._descriptor.resolution}`);
+      return 0;
     }
-    return refinementFactor;
+
+    if (this._descriptor.resolution === GRID_RESOLUTION.FINE) {
+      return 1;
+    }
+
+    if (this._descriptor.resolution === GRID_RESOLUTION.MOST_FINE) {
+      return 2;
+    }
+
+    throw new Error(`Grid resolution param not recognized: ${this._descriptor.resolution}`);
   }
 
   async getGeoJsonWithMeta({ layerName }, searchFilters) {
 
     const featureCollection = await this.getGeoJsonPoints({ layerName }, {
-      geohashPrecision: searchFilters.geohashPrecision,
+      geogridPrecision: searchFilters.geogridPrecision,
       buffer: searchFilters.buffer,
       timeFilters: searchFilters.timeFilters,
       query: searchFilters.query,
@@ -162,11 +169,11 @@ export class ESGeohashGridSource extends AbstractESSource {
   }
 
 
-  async getGeoJsonPoints({ layerName }, { geohashPrecision, buffer, timeFilters, query }) {
+  async getGeoJsonPoints({ layerName }, { geogridPrecision, buffer, timeFilters, query }) {
 
     const indexPattern = await this._getIndexPattern();
     const searchSource  = await this._makeSearchSource({ buffer, timeFilters, query }, 0);
-    const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(geohashPrecision), aggSchemas.all);
+    const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(geogridPrecision), aggSchemas.all);
     searchSource.setField('aggs', aggConfigs.toDsl());
     const esResponse = await this._runEsQuery(layerName, searchSource, 'Elasticsearch geohash_grid aggregation request');
 
