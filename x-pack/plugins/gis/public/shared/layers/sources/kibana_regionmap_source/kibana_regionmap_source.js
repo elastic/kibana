@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import { AbstractVectorSource } from '../vector_source';
 import React from 'react';
 import { CreateSourceEditor } from './create_source_editor';
@@ -29,12 +28,10 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
     };
   }
 
-  static renderEditor = ({ dataSourcesMeta, onPreviewSource }) => {
-    const regionmapLayers = _.get(dataSourcesMeta, 'kibana.regionmap', []);
-
+  static renderEditor = ({ onPreviewSource }) => {
     const onSelect = (layerConfig) => {
       const sourceDescriptor = KibanaRegionmapSource.createDescriptor(layerConfig);
-      const source = new KibanaRegionmapSource(sourceDescriptor, { ymlFileLayers: regionmapLayers });
+      const source = new KibanaRegionmapSource(sourceDescriptor);
       onPreviewSource(source);
     };
 

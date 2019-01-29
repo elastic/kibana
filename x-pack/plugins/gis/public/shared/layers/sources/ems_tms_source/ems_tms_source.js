@@ -39,7 +39,6 @@ export class EMSTMSSource extends AbstractTMSSource {
 
   constructor(descriptor) {
     super(descriptor);
-    // this._emsTileServices = emsTmsServices;
   }
 
   async getImmutableProperties() {
