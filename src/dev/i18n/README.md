@@ -187,5 +187,4 @@ node scripts/i18n_integrate --path path/to/locale.json
 
 ### Output
 
-The tool generates locale files in plugins folders after splitting them by namespaces.\
-The tool outputs paths of created files to the console, so the person who performs locale file integration should just register listed translation files.
+The tool generates locale files in plugins folders after splitting them by namespaces.
