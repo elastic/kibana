@@ -85,9 +85,12 @@ describe('buildRequestBody(req)', () => {
     const series = panel.series[0];
     const getSearchTimezone =  sinon.spy(() => 'UTC');
     const getSearchInterval = sinon.spy();
+    const getValidTimeInterval = sinon.spy(() => '10s');
+
     const capabilities = {
       getSearchTimezone,
-      getSearchInterval
+      getSearchInterval,
+      getValidTimeInterval
     };
      const config = {
       allowLeadingWildcards: true,
