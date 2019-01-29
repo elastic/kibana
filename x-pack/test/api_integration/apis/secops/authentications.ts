@@ -14,11 +14,11 @@ const authenticationsTests: KbnTestProvider = ({ getService }) => {
   const esArchiver = getService('esArchiver');
   const client = getService('secOpsGraphQLClient');
 
-  describe('authorizations', () => {
+  describe('authentications', () => {
     before(() => esArchiver.load('auditbeat/hosts'));
     after(() => esArchiver.unload('auditbeat/hosts'));
 
-    it('Make sure that we get Authorizations data', () => {
+    it('Make sure that we get Authentication data', () => {
       return client
         .query<GetAuthenticationsQuery.Query>({
           query: authenticationsQuery,
@@ -36,10 +36,10 @@ const authenticationsTests: KbnTestProvider = ({ getService }) => {
           },
         })
         .then(resp => {
-          const authorizations = resp.data.source.Authentications;
-          expect(authorizations.edges.length).to.be(1);
-          expect(authorizations.totalCount).to.be(2);
-          expect(authorizations.pageInfo.endCursor!.value).to.equal('(invalid user)');
+          const authentications = resp.data.source.Authentications;
+          expect(authentications.edges.length).to.be(1);
+          expect(authentications.totalCount).to.be(2);
+          expect(authentications.pageInfo.endCursor!.value).to.equal('1');
         });
     });
 
@@ -56,16 +56,16 @@ const authenticationsTests: KbnTestProvider = ({ getService }) => {
             },
             pagination: {
               limit: 2,
-              cursor: '(invalid user)',
+              cursor: '1',
             },
           },
         })
         .then(resp => {
-          const authorizations = resp.data.source.Authentications;
+          const authentications = resp.data.source.Authentications;
 
-          expect(authorizations.edges.length).to.be(1);
-          expect(authorizations.totalCount).to.be(2);
-          expect(authorizations.edges[0]!.node.lastFailure!.host!.name).to.be('siem-kibana');
+          expect(authentications.edges.length).to.be(1);
+          expect(authentications.totalCount).to.be(2);
+          expect(authentications.edges[0]!.node.lastFailure!.host!.name).to.be('siem-kibana');
         });
     });
   });

@@ -103,10 +103,11 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
           },
         },
       });
+
       expect(UncommonProcesses.edges[0].node).to.eql({
         _id: 'QD1yEWgBiyhPd5Zoyisj',
         instances: 2,
-        hosts: [
+        host: [
           {
             id: 'aa7ca589f1b8220002f2fc61c64cfbf1',
             name: 'siem-kibana',
@@ -119,11 +120,7 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
           name: 'sshd',
           title: null,
         },
-        user: {
-          __typename: 'UserEcsFields',
-          id: 0,
-          name: 'root',
-        },
+        user: null,
       });
     });
   });
