@@ -30,10 +30,10 @@ export function awsMetricsSpecProvider(server, context) {
     }),
     category: TUTORIAL_CATEGORY.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.awsMetrics.shortDescription', {
-      defaultMessage: 'Fetch monitoring metrics from the aws apis and cloudwatch.',
+      defaultMessage: 'Fetch monitoring metrics for EC2 instances from the AWS APIs and Cloudwatch.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.awsMetrics.longDescription', {
-      defaultMessage: 'The `aws` Metricbeat module fetches monitoring metrics from the aws apis and cloudwatch. \
+      defaultMessage: 'The `aws` Metricbeat module fetches monitoring metrics from the AWS APIs and Cloudwatch. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-aws.html',
