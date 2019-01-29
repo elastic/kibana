@@ -778,7 +778,7 @@ export function getUiSettingDefaults() {
       }),
       value: JSON.stringify([
         { from: 'now/d',    to: 'now/d',
-          display: i18n.translate('kbn.advancedSettings.timepicker.Today', { defaultMessage: 'Today' }),			              section: 0 },
+          display: i18n.translate('kbn.advancedSettings.timepicker.today', { defaultMessage: 'Today' }),			              section: 0 },
         { from: 'now/w',    to: 'now/w',
           display: i18n.translate('kbn.advancedSettings.timepicker.thisWeek', { defaultMessage: 'This week' }),			      section: 0 },
         { from: 'now/M',    to: 'now/M',
