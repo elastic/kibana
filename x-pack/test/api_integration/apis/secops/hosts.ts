@@ -64,7 +64,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
 
           expect(hosts.edges.length).to.be(1);
           expect(hosts.totalCount).to.be(2);
-          expect(hosts.edges[0]!.node.host!.os!.name).to.be('siem-general');
+          expect(hosts.edges[0]!.node.host!.os!.name).to.be('Debian GNU/Linux');
         });
     });
   });
