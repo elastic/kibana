@@ -18,44 +18,6 @@ export function initTelemetryCollection(server) {
   makeMapsUsageCollector(server);
 }
 
-function makeMapsUsageCollector(server) {
-
-  const mapsUsageCollector = server.usage.collectorSet.makeUsageCollector({
-    type: 'maps',
-    fetch: async () => {
-      let docs;
-      try {
-        ({ docs } = await server.taskManager.fetch({
-          query: {
-            bool: {
-              filter: {
-                term: {
-                  _id: TASK_ID
-                }
-              }
-            }
-          }
-        }));
-      } catch (err) {
-        const errMessage = err && err.message ? err.message : err.toString();
-        /*
-         * The usage service WILL to try to fetch from this collector before the task manager has been initialized, because the task manager
-         * has to wait for all plugins to initialize first.
-         * It's fine to ignore it as next time around it will be initialized (or it will throw a different type of error)
-         */
-        if (errMessage.indexOf('NotInitialized') >= 0) {
-          docs = {};
-        } else {
-          throw err;
-        }
-      }
-
-      return _.get(docs, '[0].state.telemetry');
-    },
-  });
-  server.usage.collectorSet.register(mapsUsageCollector);
-}
-
 function registerMapsTelemetryTask(taskManager) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
@@ -102,6 +64,44 @@ function scheduleTasks(server, taskManager) {
       state: { telemetry: {}, runs: 0 },
     });
   });
+}
+
+function makeMapsUsageCollector(server) {
+
+  const mapsUsageCollector = server.usage.collectorSet.makeUsageCollector({
+    type: 'maps',
+    fetch: async () => {
+      let docs;
+      try {
+        ({ docs } = await server.taskManager.fetch({
+          query: {
+            bool: {
+              filter: {
+                term: {
+                  _id: TASK_ID
+                }
+              }
+            }
+          }
+        }));
+      } catch (err) {
+        const errMessage = err && err.message ? err.message : err.toString();
+        /*
+         * The usage service WILL to try to fetch from this collector before the task manager has been initialized, because the task manager
+         * has to wait for all plugins to initialize first.
+         * It's fine to ignore it as next time around it will be initialized (or it will throw a different type of error)
+         */
+        if (errMessage.indexOf('NotInitialized') >= 0) {
+          docs = {};
+        } else {
+          throw err;
+        }
+      }
+
+      return _.get(docs, '[0].state.telemetry');
+    },
+  });
+  server.usage.collectorSet.register(mapsUsageCollector);
 }
 
 export function getNextMidnight() {
