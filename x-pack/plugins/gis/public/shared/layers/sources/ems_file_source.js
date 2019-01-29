@@ -13,6 +13,7 @@ import {
 
 import { GIS_API_PATH } from '../../../../common/constants';
 import { emsServiceSettings } from '../../../kibana_services';
+import { getEmsFiles } from '../../../meta';
 
 export class EMSFileSource extends AbstractVectorSource {
 
@@ -53,13 +54,13 @@ export class EMSFileSource extends AbstractVectorSource {
     );
   }
 
-  constructor(descriptor, { emsFileLayers }) {
+  constructor(descriptor) {
     super(descriptor);
-    this._emsFiles = emsFileLayers;
   }
 
   async getGeoJsonWithMeta() {
-    const fileSource = this._emsFiles.find((source => source.id === this._descriptor.id));
+    const emsFiles = await getEmsFiles();
+    const fileSource = emsFiles.find((source => source.id === this._descriptor.id));
     const fetchUrl = `../${GIS_API_PATH}/data/ems?id=${encodeURIComponent(this._descriptor.id)}`;
     const featureCollection = await AbstractVectorSource.getGeoJson(fileSource, fetchUrl);
     return {
@@ -77,24 +78,24 @@ export class EMSFileSource extends AbstractVectorSource {
   }
 
   async getDisplayName() {
-    const fileSource = this._emsFiles.find((source => source.id === this._descriptor.id));
+    const emsFiles = await getEmsFiles();
+    const fileSource = emsFiles.find((source => source.id === this._descriptor.id));
     return fileSource.name;
   }
 
   async getAttributions() {
-    const fileSource = this._emsFiles.find((source => source.id === this._descriptor.id));
+    const emsFiles = await getEmsFiles();
+    const fileSource = emsFiles.find((source => source.id === this._descriptor.id));
     return fileSource.attributions;
   }
 
 
   async getStringFields() {
-    //todo: use map/service-settings instead.
-    const fileSource = this._emsFiles.find((source => source.id === this._descriptor.id));
-
+    const emsFiles = await getEmsFiles();
+    const fileSource = emsFiles.find((source => source.id === this._descriptor.id));
     return fileSource.fields.map(f => {
       return { name: f.name, label: f.description };
     });
-
   }
 
   canFormatFeatureProperties() {

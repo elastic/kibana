@@ -35,7 +35,7 @@ export class KibanaTilemapSource extends  AbstractTMSSource {
   async getImmutableProperties() {
     return [
       { label: 'Data source', value: KibanaTilemapSource.title },
-      { label: 'Tilemap url', value: this.getUrlTemplate() },
+      { label: 'Tilemap url', value: (await this.getUrlTemplate()) },
     ];
   }
 
@@ -54,11 +54,11 @@ export class KibanaTilemapSource extends  AbstractTMSSource {
   }
 
 
-  getUrlTemplate() {
+  async getUrlTemplate() {
     return this._descriptor.url;
   }
 
   async getDisplayName() {
-    return this.getUrlTemplate();
+    return await this.getUrlTemplate();
   }
 }

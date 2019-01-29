@@ -9,6 +9,8 @@ import { AbstractVectorSource } from '../vector_source';
 import React from 'react';
 import { CreateSourceEditor } from './create_source_editor';
 
+import { getKibanaRegionList } from '../../../../meta';
+
 export class KibanaRegionmapSource extends AbstractVectorSource {
 
   static type = 'REGIONMAP_FILE';
@@ -16,9 +18,8 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
   static description = 'Vector shapes from static files configured in kibana.yml';
   static icon = 'logoKibana';
 
-  constructor(descriptor, { ymlFileLayers }) {
+  constructor(descriptor) {
     super(descriptor);
-    this._regionList = ymlFileLayers;
   }
 
   static createDescriptor(options) {
@@ -40,7 +41,6 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
     return (
       <CreateSourceEditor
         onSelect={onSelect}
-        regionmapLayers={regionmapLayers}
       />
     );
   };
@@ -53,7 +53,8 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
   }
 
   async getGeoJsonWithMeta() {
-    const fileSource = this._regionList.find(source => source.name === this._descriptor.name);
+    const regionList = await getKibanaRegionList();
+    const fileSource = regionList.find(source => source.name === this._descriptor.name);
     const featureCollection = await AbstractVectorSource.getGeoJson(fileSource, fileSource.url);
     return {
       data: featureCollection
@@ -61,8 +62,8 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
   }
 
   async getStringFields() {
-    //todo: use map/service-settings instead.
-    const fileSource = this._regionList.find((source => source.name === this._descriptor.name));
+    const regionList = await getKibanaRegionList();
+    const fileSource = regionList.find((source => source.name === this._descriptor.name));
 
     return fileSource.fields.map(f => {
       return { name: f.name, label: f.description };

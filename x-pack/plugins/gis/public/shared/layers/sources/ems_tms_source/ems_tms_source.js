@@ -12,6 +12,8 @@ import {
 } from '@elastic/eui';
 import _ from 'lodash';
 
+import { getEmsTMSServices } from '../../../../meta';
+
 
 export class EMSTMSSource extends AbstractTMSSource {
 
@@ -52,9 +54,9 @@ export class EMSTMSSource extends AbstractTMSSource {
     );
   }
 
-  constructor(descriptor, { emsTmsServices }) {
+  constructor(descriptor) {
     super(descriptor);
-    this._emsTileServices = emsTmsServices;
+    // this._emsTileServices = emsTmsServices;
   }
 
   async getImmutableProperties() {
@@ -64,12 +66,13 @@ export class EMSTMSSource extends AbstractTMSSource {
     ];
   }
 
-  _getTMSOptions() {
-    if(!this._emsTileServices) {
+  async _getTMSOptions() {
+    const emsTileServices = await getEmsTMSServices();
+    if(!emsTileServices) {
       return;
     }
 
-    return this._emsTileServices.find(service => {
+    return emsTileServices.find(service => {
       return service.id === this._descriptor.id;
     });
   }
@@ -93,7 +96,7 @@ export class EMSTMSSource extends AbstractTMSSource {
   }
 
   async getAttributions() {
-    const service = this._getTMSOptions();
+    const service = await this._getTMSOptions();
     if (!service || !service.attributionMarkdown) {
       return [];
     }
@@ -110,10 +113,10 @@ export class EMSTMSSource extends AbstractTMSSource {
     });
   }
 
-  getUrlTemplate() {
-    const service = this._getTMSOptions();
+  async getUrlTemplate() {
+    const service = await this._getTMSOptions();
     if (!service || !service.url) {
-      throw new Error('Can not generate EMS TMS url template');
+      throw new Error('Cannot generate EMS TMS url template');
     }
     return service.url;
   }

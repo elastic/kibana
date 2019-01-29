@@ -15,8 +15,8 @@ import { HeatmapStyle } from '../shared/layers/styles/heatmap_style';
 import { TileStyle } from '../shared/layers/styles/tile_style';
 import { timefilter } from 'ui/timefilter';
 
-function createLayerInstance(layerDescriptor, dataSources) {
-  const source = createSourceInstance(layerDescriptor.sourceDescriptor, dataSources);
+function createLayerInstance(layerDescriptor) {
+  const source = createSourceInstance(layerDescriptor.sourceDescriptor);
   const style = createStyleInstance(layerDescriptor.style);
   switch (layerDescriptor.type) {
     case TileLayer.type:
@@ -30,21 +30,14 @@ function createLayerInstance(layerDescriptor, dataSources) {
   }
 }
 
-function createSourceInstance(sourceDescriptor, dataSources) {
-
-  const dataMeta = {
-    emsTmsServices: _.get(dataSources, 'ems.tms', []),
-    emsFileLayers: _.get(dataSources, 'ems.file', []),
-    ymlFileLayers: _.get(dataSources, 'kibana.regionmap', [])
-  };
-
+function createSourceInstance(sourceDescriptor) {
   const Source = ALL_SOURCES.find(Source => {
     return Source.type === sourceDescriptor.type;
   });
   if (!Source) {
     throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
   }
-  return new Source(sourceDescriptor, dataMeta);
+  return new Source(sourceDescriptor);
 }
 
 
@@ -141,10 +134,9 @@ export const getDataSources = createSelector(getMetadata, metadata => metadata ?
 
 export const getLayerList = createSelector(
   getLayerListRaw,
-  getDataSources,
-  (layerDescriptorList, dataSources) => {
+  (layerDescriptorList) => {
     return layerDescriptorList.map(layerDescriptor =>
-      createLayerInstance(layerDescriptor, dataSources));
+      createLayerInstance(layerDescriptor));
   });
 
 export const getSelectedLayer = createSelector(

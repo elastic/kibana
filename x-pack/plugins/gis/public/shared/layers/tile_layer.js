@@ -72,7 +72,7 @@ export class TileLayer extends AbstractLayer {
       return;
     }
 
-    const url = this._source.getUrlTemplate();
+    const url = await this._source.getUrlTemplate();
     const sourceId = this.getId();
     mbMap.addSource(sourceId, {
       type: 'raster',
