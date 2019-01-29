@@ -167,6 +167,8 @@ export interface HostEcsFields {
   name?: string | null;
 
   os?: OsEcsFields | null;
+
+  type?: string | null;
 }
 
 export interface OsEcsFields {
@@ -798,6 +800,8 @@ export namespace GetHostSummaryQuery {
     name?: string | null;
 
     os?: Os | null;
+
+    type?: string | null;
   };
 
   export type Os = {

@@ -21,6 +21,7 @@ export const hostFieldsMap: Readonly<Record<string, string>> = {
   'host.ip': 'system.audit.host.ip',
   'host.mac': 'system.audit.host.mac',
   'host.name': 'host.name',
+  'host.type': 'cloud.machine.type',
   ...extendMap('host', osFieldsMap),
 };
 

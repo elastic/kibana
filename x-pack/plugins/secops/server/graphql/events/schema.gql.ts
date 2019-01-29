@@ -41,6 +41,7 @@ export const eventsSchema = gql`
     mac: [String]
     name: String
     os: OsEcsFields
+    type: String
   }
 
   type Thread {

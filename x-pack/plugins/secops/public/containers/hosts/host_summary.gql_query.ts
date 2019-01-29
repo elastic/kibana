@@ -33,6 +33,7 @@ export const HostSummaryQuery = gql`
                 platform
                 version
               }
+              type
             }
           }
           cursor {

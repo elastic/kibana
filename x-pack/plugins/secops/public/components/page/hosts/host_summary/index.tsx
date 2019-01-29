@@ -31,22 +31,20 @@ interface OwnProps {
   endDate: number;
 }
 
-type HostDetailsPanelProps = OwnProps;
+type HostSummaryProps = OwnProps;
 
-export const HostDetailsPanel = pure<HostDetailsPanelProps>(
-  ({ data, startDate, endDate, loading }) => (
-    <EuiFlexItem style={{ maxWidth: 600 }}>
-      <EuiPanel>
-        <EuiTitle size="s">
-          <h3>{i18n.SUMMARY}</h3>
-        </EuiTitle>
+export const HostSummary = pure<HostSummaryProps>(({ data, startDate, endDate, loading }) => (
+  <EuiFlexItem style={{ maxWidth: 600 }}>
+    <EuiPanel>
+      <EuiTitle size="s">
+        <h3>{i18n.SUMMARY}</h3>
+      </EuiTitle>
 
-        <EuiHorizontalRule margin="xs" />
-        {getEuiDescriptionList(getOr(null, 'node', data[0]), startDate, endDate)}
-      </EuiPanel>
-    </EuiFlexItem>
-  )
-);
+      <EuiHorizontalRule margin="xs" />
+      {getEuiDescriptionList(getOr(null, 'node', data[0]), startDate, endDate)}
+    </EuiPanel>
+  </EuiFlexItem>
+));
 
 const fieldTitleMapping: Readonly<Record<string, string>> = {
   'host.name': i18n.NAME,
@@ -54,7 +52,7 @@ const fieldTitleMapping: Readonly<Record<string, string>> = {
   'host.id': i18n.ID,
   'host.ip': i18n.IP_ADDRESS,
   'host.mac': i18n.MAC_ADDRESS,
-  type: i18n.TYPE,
+  'host.type': i18n.TYPE,
   'host.os.platform': i18n.PLATFORM,
   'host.os.name': i18n.OS_NAME,
   'host.os.family': i18n.FAMILY,

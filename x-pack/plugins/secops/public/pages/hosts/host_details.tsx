@@ -16,7 +16,7 @@ import styled from 'styled-components';
 import chrome from 'ui/chrome';
 import { EmptyPage } from '../../components/empty_page';
 import { getHostsUrl, HostComponentProps } from '../../components/link_to/redirect_to_hosts';
-import { HostDetailsPanel } from '../../components/page/hosts/hosts_details_panel';
+import { HostSummary } from '../../components/page/hosts/host_summary';
 import { manageQuery } from '../../components/page/manage_query';
 import { GlobalTime } from '../../containers/global_time';
 import { HostsQuery } from '../../containers/hosts';
@@ -26,7 +26,7 @@ import * as i18n from './translations';
 
 const basePath = chrome.getBasePath();
 
-const HostDetailsPanelManage = manageQuery(HostDetailsPanel);
+const HostSummaryManage = manageQuery(HostSummary);
 
 export const HostDetails = pure<HostComponentProps>(({ match }) => (
   <WithSource sourceId="default">
@@ -47,7 +47,7 @@ export const HostDetails = pure<HostComponentProps>(({ match }) => (
                   filterQuery={getFilterQuery(match.params.hostId!)}
                 >
                   {({ hosts, loading, id, refetch, startDate, endDate }) => (
-                    <HostDetailsPanelManage
+                    <HostSummaryManage
                       id={id}
                       refetch={refetch}
                       setQuery={setQuery}
@@ -76,7 +76,7 @@ export const HostDetails = pure<HostComponentProps>(({ match }) => (
 
 const getBreadcrumbs = (hostId: string) => [
   {
-    text: 'Hosts',
+    text: i18n.HOSTS,
     href: getHostsUrl(),
   },
   {
@@ -84,7 +84,7 @@ const getBreadcrumbs = (hostId: string) => [
   },
 ];
 
-const getFilterQuery = (hostId: string) =>
+export const getFilterQuery = (hostId: string) =>
   JSON.stringify({
     term: {
       'host.id': hostId,

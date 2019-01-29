@@ -196,6 +196,8 @@ export interface HostEcsFields {
   name?: string | null;
 
   os?: OsEcsFields | null;
+
+  type?: string | null;
 }
 
 export interface OsEcsFields {
@@ -1000,6 +1002,8 @@ export namespace HostEcsFieldsResolvers {
     name?: NameResolver<string | null, TypeParent, Context>;
 
     os?: OsResolver<OsEcsFields | null, TypeParent, Context>;
+
+    type?: TypeResolver<string | null, TypeParent, Context>;
   }
 
   export type ArchitectureResolver<
@@ -1029,6 +1033,11 @@ export namespace HostEcsFieldsResolvers {
   > = Resolver<R, Parent, Context>;
   export type OsResolver<
     R = OsEcsFields | null,
+    Parent = HostEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type TypeResolver<
+    R = string | null,
     Parent = HostEcsFields,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
