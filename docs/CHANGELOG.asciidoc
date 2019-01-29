@@ -87,8 +87,6 @@ This section summarizes the changes in each release.
 [[release-notes-6.6.0]]
 == {kib} 6.6.0
 
-coming[6.6]
-
 
 [float]
 [[breaking-6.6.0]]
@@ -129,9 +127,6 @@ Canvas::
 * Adds persistent grouping and ungrouping {pull}25854[#25854]
 Geo::
 * Improves message for maximum zoom level {pull}26267[#26267]
-Kibana App::
-* Moves Canvas interpreter to OSS {pull}25711[#25711]
-* Adds `en` as a valid locale to the settings {pull}25948[#25948]
 Machine Learning::
 * Adds checkbox to enable model plot in Advanced job wizard {pull}25468[#25468]
 * Adds auditbeat process data recognizer modules {pull}25716[#25716]
@@ -157,6 +152,8 @@ Operations::
 * Creates vendor DLL for the client modules {pull}22618[#22618]
 Platform::
 * Migrates to new design system for breadcrumbs {pull}25914[#25914]
+* Moves Canvas interpreter to OSS {pull}25711[#25711]
+* Adds `en` as a valid locale to the settings {pull}25948[#25948]
 Reporting::
 * Add png output to reports {pull}24759[#24759]
 Security::
@@ -363,6 +360,7 @@ Visualizations::
 * Enables visualisations in a dashboard to be opened in a new tab {pull}25233[#25233]
 * Fixes other bucket option to correctly apply without having to change other settings {pull}26874[#26874]
 * Stops using schemas in aggconfigs to output dsl {pull}26010[#26010].
+* Fixes Timelion props function {pull}28834[#28834]
 
 
 

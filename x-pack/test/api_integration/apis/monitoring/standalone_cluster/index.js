@@ -4,4 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ESGeohashGridSource } from './es_geohashgrid_source';
+export default function ({ loadTestFile }) {
+  describe('Standalone Cluster', () => {
+    loadTestFile(require.resolve('./clusters'));
+    loadTestFile(require.resolve('./cluster'));
+  });
+}

@@ -131,9 +131,9 @@ export class AbstractLayer {
     return this._style;
   }
 
-  renderSourceDetails = () => {
-    return this._source.renderDetails();
-  };
+  async getImmutableSourceProperties() {
+    return this._source.getImmutableProperties();
+  }
 
   renderSourceSettingsEditor = ({ onChange }) => {
     return this._source.renderSourceSettingsEditor({ onChange });
