@@ -11,12 +11,14 @@ import _ from 'lodash';
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
 let meta = null;
+let isLoaded = false;
 export async function getDataSources() {
   if (!meta) {
     meta = new Promise(async (resolve, reject) => {
       try {
         const meta = await fetch(`${GIS_API_RELATIVE}/meta`);
         const metaJson = await meta.json();
+        isLoaded = true;
         resolve(metaJson.data_sources);
       } catch(e) {
         reject(e);
@@ -24,6 +26,10 @@ export async function getDataSources() {
     });
   }
   return meta;
+}
+
+export async function isMetaDataLoaded() {
+  return isLoaded;
 }
 
 export async function getEmsFiles() {
@@ -35,7 +41,6 @@ export async function getEmsTMSServices() {
   const dataSource = await getDataSources();
   return _.get(dataSource, 'ems.tms', []);
 }
-
 
 export async function getKibanaRegionList() {
   const dataSource = await getDataSources();

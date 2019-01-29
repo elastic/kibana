@@ -28,7 +28,6 @@ import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_s
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { toastNotifications } from 'ui/notify';
 import { getInitialLayers } from './get_initial_layers';
-import { getDataSources } from '../meta';
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-gis-root';
 const DEFAULT_QUERY_LANGUAGE = 'kuery';
@@ -112,9 +111,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       </Provider>,
       root);
 
-    //initialization takes into account presenve/absnece of EMS
-    const dataSources = await getDataSources();
-    const layerList = getInitialLayers(savedMap.layerListJSON, dataSources);
+    const layerList = await getInitialLayers(savedMap.layerListJSON);
     store.dispatch(replaceLayerList(layerList));
   });
 

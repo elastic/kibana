@@ -74,12 +74,13 @@ export class TileLayer extends AbstractLayer {
     try {
       const url = await this._source.getUrlTemplate();
       stopLoading(sourceDataId, requestToken, url, {});
-    }catch(error) {
+    } catch(error) {
       onLoadError(sourceDataId, requestToken, error.message);
     }
   }
 
   async syncLayerWithMB(mbMap) {
+
     const source = mbMap.getSource(this.getId());
     const layerId = this.getId() + '_raster';
 
