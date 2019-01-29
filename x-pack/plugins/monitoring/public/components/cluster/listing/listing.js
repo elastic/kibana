@@ -3,20 +3,20 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import React, { Fragment } from 'react';
-import { render } from 'react-dom';
-import { capitalize, partial } from 'lodash';
+import React, { Fragment, Component } from 'react';
+import chrome from 'ui/chrome';
 import moment from 'moment';
 import numeral from '@elastic/numeral';
-import { uiModules } from 'ui/modules';
-import chrome from 'ui/chrome';
+import { capitalize, partial } from 'lodash';
 import {
   EuiHealth,
   EuiLink,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
+  EuiCallOut,
+  EuiSpacer,
+  EuiIcon,
   EuiToolTip,
 } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
@@ -24,10 +24,13 @@ import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
 import { AlertsIndicator } from 'plugins/monitoring/components/cluster/listing/alerts_indicator';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
 
 const IsClusterSupported = ({ isSupported, children }) => {
   return isSupported ? children : '-';
 };
+
+const STANDALONE_CLUSTER_STORAGE_KEY = 'viewedStandaloneCluster';
 
 /*
   * This checks if alerts feature is supported via monitoring cluster
@@ -194,6 +197,17 @@ const getColumns = (
       sortable: true,
       render: (licenseType, cluster) => {
         const license = cluster.license;
+
+        if (!licenseType) {
+          return (
+            <div>
+              <div className="monTableCell__clusterCellLiscense">
+                N/A
+              </div>
+            </div>
+          );
+        }
+
         if (license) {
           const licenseExpiry = () => {
             if (license.expiry_date_in_millis < moment().valueOf()) {
@@ -341,72 +355,112 @@ const handleClickInvalidLicense = (scope, clusterName) => {
   });
 };
 
-const uiModule = uiModules.get('monitoring/directives', []);
-uiModule.directive('monitoringClusterListing', ($injector) => {
-  return {
-    restrict: 'E',
-    scope: {
-      clusters: '=',
-      sorting: '=',
-      filterText: '=',
-      paginationSettings: '=pagination',
-      onTableChange: '=',
-    },
-    link(scope, $el) {
-      const globalState = $injector.get('globalState');
-      const kbnUrl = $injector.get('kbnUrl');
-      const showLicenseExpiration = $injector.get('showLicenseExpiration');
+export class Listing extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      [STANDALONE_CLUSTER_STORAGE_KEY]: false,
+    };
+  }
 
-      const _changeCluster = partial(changeCluster, scope, globalState, kbnUrl);
-      const _handleClickIncompatibleLicense = partial(handleClickIncompatibleLicense, scope);
-      const _handleClickInvalidLicense = partial(handleClickInvalidLicense, scope);
-
-      const { sorting, pagination, onTableChange } = scope;
-
-      scope.$watch('clusters', (clusters = []) => {
-        const clusterTable = (
-          <I18nProvider>
-            <EuiPage>
-              <EuiPageBody>
-                <EuiPageContent>
-                  <EuiMonitoringTable
-                    className="clusterTable"
-                    rows={clusters}
-                    columns={getColumns(
-                      showLicenseExpiration,
-                      _changeCluster,
-                      _handleClickIncompatibleLicense,
-                      _handleClickInvalidLicense
-                    )}
-                    rowProps={item => {
-                      return {
-                        'data-test-subj': `clusterRow_${item.cluster_uuid}`
-                      };
-                    }}
-                    sorting={{
-                      ...sorting,
-                      sort: {
-                        ...sorting.sort,
-                        field: 'cluster_name'
-                      }
-                    }}
-                    pagination={pagination}
-                    search={{
-                      box: {
-                        incremental: true,
-                        placeholder: scope.filterText
-                      },
-                    }}
-                    onTableChange={onTableChange}
-                  />
-                </EuiPageContent>
-              </EuiPageBody>
-            </EuiPage>
-          </I18nProvider>
-        );
-        render(clusterTable, $el[0]);
-      });
-
+  renderStandaloneClusterCallout(changeCluster, storage) {
+    if (storage.get(STANDALONE_CLUSTER_STORAGE_KEY)) {
+      return null;
     }
-  };
-});
+
+    return (
+      <div>
+        <EuiCallOut
+          color="warning"
+          title={i18n.translate('xpack.monitoring.cluster.listing.standaloneClusterCallOutTitle', {
+            defaultMessage: 'It looks like you have instances that aren\'t connected to an Elasticsearch cluster.'
+          })}
+          iconType="link"
+        >
+          <p>
+            <EuiLink
+              onClick={() => changeCluster(STANDALONE_CLUSTER_CLUSTER_UUID)}
+              data-test-subj="standaloneClusterLink"
+            >
+              <FormattedMessage
+                id="xpack.monitoring.cluster.listing.standaloneClusterCallOutLink"
+                defaultMessage="View these instances."
+              />
+            </EuiLink>
+            &nbsp;
+            <FormattedMessage
+              id="xpack.monitoring.cluster.listing.standaloneClusterCallOutText"
+              defaultMessage="Or, click Standalone Cluster in the table below"
+            />
+          </p>
+          <p>
+            <EuiLink onClick={() => {
+              storage.set(STANDALONE_CLUSTER_STORAGE_KEY, true);
+              this.setState({ [STANDALONE_CLUSTER_STORAGE_KEY]: true });
+            }}
+            >
+              <EuiIcon type="cross"/>
+              &nbsp;
+              <FormattedMessage
+                id="xpack.monitoring.cluster.listing.standaloneClusterCallOutDismiss"
+                defaultMessage="Dismiss"
+              />
+            </EuiLink>
+          </p>
+        </EuiCallOut>
+        <EuiSpacer/>
+      </div>
+    );
+  }
+
+  render() {
+    const { angular, clusters, sorting, pagination, onTableChange } = this.props;
+
+    const _changeCluster = partial(changeCluster, angular.scope, angular.globalState, angular.kbnUrl);
+    const _handleClickIncompatibleLicense = partial(handleClickIncompatibleLicense, angular.scope);
+    const _handleClickInvalidLicense = partial(handleClickInvalidLicense, angular.scope);
+    const hasStandaloneCluster = !!clusters.find(cluster => cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID);
+
+    return (
+      <I18nProvider>
+        <EuiPage>
+          <EuiPageBody>
+            <EuiPageContent>
+              {hasStandaloneCluster ? this.renderStandaloneClusterCallout(_changeCluster, angular.storage) : null}
+              <EuiMonitoringTable
+                className="clusterTable"
+                rows={clusters}
+                columns={getColumns(
+                  angular.showLicenseExpiration,
+                  _changeCluster,
+                  _handleClickIncompatibleLicense,
+                  _handleClickInvalidLicense
+                )}
+                rowProps={item => {
+                  return {
+                    'data-test-subj': `clusterRow_${item.cluster_uuid}`
+                  };
+                }}
+                sorting={{
+                  ...sorting,
+                  sort: {
+                    ...sorting.sort,
+                    field: 'cluster_name'
+                  }
+                }}
+                pagination={pagination}
+                search={{
+                  box: {
+                    incremental: true,
+                    placeholder: angular.scope.filterText
+                  },
+                }}
+                onTableChange={onTableChange}
+              />
+            </EuiPageContent>
+          </EuiPageBody>
+        </EuiPage>
+      </I18nProvider>
+    );
+  }
+}
