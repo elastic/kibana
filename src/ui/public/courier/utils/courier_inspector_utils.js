@@ -35,7 +35,7 @@ function getRequestInspectorStats(searchSource) {
   const index = searchSource.getField('index');
 
   if (index) {
-    stats['Index pattern'] = {
+    stats.indexPattern = {
       label: i18n.translate('common.ui.courier.indexPatternLabel', {
         defaultMessage: 'Index pattern'
       }),
@@ -44,7 +44,7 @@ function getRequestInspectorStats(searchSource) {
         defaultMessage: 'The index pattern that connected to the Elasticsearch indices.'
       }),
     };
-    stats ['Index pattern ID'] = {
+    stats.indexPatternId = {
       label: i18n.translate('common.ui.courier.indexPatternIdLabel', {
         defaultMessage: 'Index pattern ID'
       }),
@@ -63,7 +63,7 @@ function getResponseInspectorStats(searchSource, resp) {
   const stats = {};
 
   if (resp && resp.took) {
-    stats['Query time'] = {
+    stats.queryTime = {
       label: i18n.translate('common.ui.courier.queryTimeLabel', {
         defaultMessage: 'Query time'
       }),
@@ -76,7 +76,7 @@ function getResponseInspectorStats(searchSource, resp) {
   }
 
   if (resp && resp.hits) {
-    stats['Hits (total)'] = {
+    stats.hitsTotal = {
       label: i18n.translate('common.ui.courier.hitsTotalLabel', {
         defaultMessage: 'Hits (total)'
       }),
@@ -86,7 +86,7 @@ function getResponseInspectorStats(searchSource, resp) {
       }),
     };
 
-    stats.Hits = {
+    stats.hits = {
       label: i18n.translate('common.ui.courier.hitsLabel', {
         defaultMessage: 'Hits'
       }),
@@ -98,7 +98,7 @@ function getResponseInspectorStats(searchSource, resp) {
   }
 
   if (lastRequest && (lastRequest.ms === 0 || lastRequest.ms)) {
-    stats['Request time'] = {
+    stats.requestTime = {
       label: i18n.translate('common.ui.courier.requestTimeLabel', {
         defaultMessage: 'Request time'
       }),

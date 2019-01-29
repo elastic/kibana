@@ -46,9 +46,8 @@ export class RequestResponder {
     };
 
     const startDate = new Date(this.request.startTime);
-    const timestampKey = 'Request timestamp';
 
-    this.request.stats[timestampKey] = {
+    this.request.stats.requestTimestamp = {
       label: i18n.translate('common.ui.inspector.reqTimestampKey', {
         defaultMessage: 'Request timestamp',
       }),
