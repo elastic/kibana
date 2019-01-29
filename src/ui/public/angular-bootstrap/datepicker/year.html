@@ -15,7 +15,10 @@
             type="button"
             class="kuiDatePickerNavigationButton"
             ng-click="move(-1)"
-            aria-label="Previous {{yearRange}} years"
+            aria-label="{{ 'common.ui.angularBootstrap.datepicker.previousYearsRangeButtonAriaLabel' | i18n: {
+              defaultMessage: 'Previous {yearRange} years',
+              values: {yearRange}
+            } }}"
           >
             <span class="kuiIcon fa-chevron-left"></span>
           </button>
@@ -36,7 +39,10 @@
             type="button"
             class="kuiDatePickerNavigationButton"
             ng-click="move(1)"
-            aria-label="Next {{yearRange}} years"
+            aria-label="{{ 'common.ui.angularBootstrap.datepicker.nextYearsRangeButtonAriaLabel' | i18n: {
+              defaultMessage: 'Next {yearRange} years',
+              values: {yearRange}
+            } }}"
           >
             <span class="kuiIcon fa-chevron-right"></span>
           </button>

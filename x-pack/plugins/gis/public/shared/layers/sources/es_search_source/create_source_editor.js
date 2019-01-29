@@ -7,11 +7,12 @@
 import _ from 'lodash';
 import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
-import { EuiFormRow } from '@elastic/eui';
+import { EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_select';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { indexPatternService } from '../../../../kibana_services';
+import { NoIndexPatternCallout } from '../../../components/no_index_pattern_callout';
 
 function filterGeoField(field) {
   return ['geo_point', 'geo_shape'].includes(field.type);
@@ -23,13 +24,11 @@ export class CreateSourceEditor extends Component {
     onSelect: PropTypes.func.isRequired,
   }
 
-  constructor() {
-    super();
-    this.state = {
-      isLoadingIndexPattern: false,
-      indexPatternId: '',
-      geoField: '',
-    };
+  state = {
+    isLoadingIndexPattern: false,
+    indexPatternId: '',
+    geoField: '',
+    noGeoIndexPatternsExist: false,
   }
 
   componentWillUnmount() {
@@ -117,6 +116,10 @@ export class CreateSourceEditor extends Component {
     }
   }
 
+  _onNoIndexPatterns = () => {
+    this.setState({ noGeoIndexPatternsExist: true });
+  }
+
   _renderGeoSelect() {
     if (!this.state.indexPattern) {
       return;
@@ -137,18 +140,35 @@ export class CreateSourceEditor extends Component {
     );
   }
 
+  _renderNoIndexPatternWarning() {
+    if (!this.state.noGeoIndexPatternsExist) {
+      return null;
+    }
+
+    return (
+      <Fragment>
+        <NoIndexPatternCallout />
+        <EuiSpacer size="s" />
+      </Fragment>
+    );
+  }
+
   render() {
     return (
       <Fragment>
+
+        {this._renderNoIndexPatternWarning()}
 
         <EuiFormRow
           label="Index pattern"
         >
           <IndexPatternSelect
+            isDisabled={this.state.noGeoIndexPatternsExist}
             indexPatternId={this.state.indexPatternId}
             onChange={this.onIndexPatternSelect}
             placeholder="Select index pattern"
             fieldTypes={['geo_point', 'geo_shape']}
+            onNoIndexPatterns={this._onNoIndexPatterns}
           />
         </EuiFormRow>
 

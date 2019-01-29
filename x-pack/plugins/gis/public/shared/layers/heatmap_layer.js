@@ -93,6 +93,7 @@ export class HeatmapLayer extends AbstractLayer {
       layerId: heatmapLayerId,
       propertyName: SCALED_PROPERTY_NAME,
       alpha: this.getAlpha(),
+      resolution: this._source.getGridResolution()
     });
     mbMap.setLayerZoomRange(heatmapLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
   }
@@ -114,7 +115,7 @@ export class HeatmapLayer extends AbstractLayer {
     const dataMeta = sourceDataRequest ? sourceDataRequest.getMeta() : {};
 
     const targetPrecisionUnadjusted = getGeohashPrecisionForZoom(dataFilters.zoom);
-    const targetPrecision = targetPrecisionUnadjusted + this._style.getPrecisionRefinementDelta();
+    const targetPrecision = targetPrecisionUnadjusted + this._source.getGeohashPrecisionResolutionDelta();
     const isSamePrecision = dataMeta.precision === targetPrecision;
 
     const isSameTime = _.isEqual(dataMeta.timeFilters, dataFilters.timeFilters);
@@ -135,7 +136,8 @@ export class HeatmapLayer extends AbstractLayer {
       && !updateDueToExtent
       && !updateDueToRefreshTimer
       && !updateDueToQuery
-      && !updateDueToMetricChange) {
+      && !updateDueToMetricChange
+    ) {
       return;
     }
 

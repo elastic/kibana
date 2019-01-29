@@ -21,6 +21,7 @@ import { VectorStyle } from '../../styles/vector_style';
 import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
+import { GRID_RESOLUTION } from '../../grid_resolution';
 
 const COUNT_PROP_LABEL = 'Count';
 const COUNT_PROP_NAME = 'doc_count';
@@ -53,13 +54,14 @@ export class ESGeohashGridSource extends AbstractESSource {
   static title = 'Elasticsearch geohash aggregation';
   static description = 'Group geospatial data in grids with metrics for each gridded cell';
 
-  static createDescriptor({ indexPatternId, geoField, requestType }) {
+  static createDescriptor({ indexPatternId, geoField, requestType, resolution }) {
     return {
       type: ESGeohashGridSource.type,
       id: uuid(),
       indexPatternId: indexPatternId,
       geoField: geoField,
-      requestType: requestType
+      requestType: requestType,
+      resolution: resolution ? resolution : GRID_RESOLUTION.COARSE
     };
   }
 
@@ -80,6 +82,7 @@ export class ESGeohashGridSource extends AbstractESSource {
         onChange={onChange}
         metrics={this._descriptor.metrics}
         renderAs={this._descriptor.requestType}
+        resolution={this._descriptor.resolution}
       />
     );
   }
@@ -103,6 +106,24 @@ export class ESGeohashGridSource extends AbstractESSource {
 
   isGeohashPrecisionAware() {
     return true;
+  }
+
+  getGridResolution() {
+    return this._descriptor.resolution;
+  }
+
+  getGeohashPrecisionResolutionDelta() {
+    let refinementFactor;
+    if (this._descriptor.resolution === GRID_RESOLUTION.COARSE) {
+      refinementFactor = 0;
+    } else if (this._descriptor.resolution === GRID_RESOLUTION.FINE) {
+      refinementFactor = 1;
+    } else if (this._descriptor.resolution === GRID_RESOLUTION.MOST_FINE) {
+      refinementFactor = 2;
+    } else {
+      throw new Error(`Resolution param not recognized: ${this._descriptor.resolution}`);
+    }
+    return refinementFactor;
   }
 
   async getGeoJsonWithMeta({ layerName }, searchFilters) {
