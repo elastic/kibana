@@ -502,6 +502,7 @@ export class DetailPanelUi extends Component {
         aria-labelledby="followerIndexDetailsFlyoutTitle"
         size="m"
         maxWidth={600}
+        style={{ zIndex: 5999 }} // Prevent context menu popover appearing above confirmation modal
       >
 
         <EuiFlyoutHeader>
