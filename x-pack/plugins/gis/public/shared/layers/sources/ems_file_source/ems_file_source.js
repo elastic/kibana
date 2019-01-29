@@ -4,16 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AbstractVectorSource } from './vector_source';
+import { AbstractVectorSource } from '../vector_source';
 import React from 'react';
-import {
-  EuiSelect,
-  EuiFormRow,
-} from '@elastic/eui';
-
-import { GIS_API_PATH } from '../../../../common/constants';
-import { emsServiceSettings } from '../../../kibana_services';
-import { getEmsFiles } from '../../../meta';
+import { GIS_API_PATH } from '../../../../../common/constants';
+import { emsServiceSettings } from '../../../../kibana_services';
+import { getEmsFiles } from '../../../../meta';
+import { EMSFileCreateSourceEditor } from './ems_file_source_source_editor';
 
 export class EMSFileSource extends AbstractVectorSource {
 
@@ -29,29 +25,14 @@ export class EMSFileSource extends AbstractVectorSource {
     };
   }
 
-  static renderEditor({ dataSourcesMeta, onPreviewSource }) {
-
-    const emsVectorOptionsRaw = (dataSourcesMeta) ? dataSourcesMeta.ems.file : [];
-    const emsVectorOptions = emsVectorOptionsRaw ? emsVectorOptionsRaw.map((file) => ({
-      value: file.id,
-      text: file.name
-    })) : [];
-
+  static renderEditor({ onPreviewSource }) {
     const onChange = ({ target }) => {
       const selectedId = target.options[target.selectedIndex].value;
       const emsFileSourceDescriptor = EMSFileSource.createDescriptor(selectedId);
-      const emsFileSource = new EMSFileSource(emsFileSourceDescriptor, emsVectorOptionsRaw);
+      const emsFileSource = new EMSFileSource(emsFileSourceDescriptor);
       onPreviewSource(emsFileSource);
     };
-    return (
-      <EuiFormRow label="Layer">
-        <EuiSelect
-          hasNoInitialSelection
-          options={emsVectorOptions}
-          onChange={onChange}
-        />
-      </EuiFormRow>
-    );
+    return <EMSFileCreateSourceEditor onChange={onChange}/>;
   }
 
   constructor(descriptor) {
