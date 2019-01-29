@@ -7,13 +7,13 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
+import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
-import { GetHostsQuery, HostsEdges, PageInfo } from '../../graphql/types';
-
-import { connect } from 'react-redux';
 import { ESQuery } from '../../../common/typed_json';
+import { GetHostsQuery, HostsEdges, PageInfo } from '../../graphql/types';
 import { hostsSelector, inputsModel, State } from '../../store';
+import { createFilter } from '../helpers';
 import { hostsQuery } from './index.gql_query';
 
 export interface HostsArgs {
@@ -32,7 +32,7 @@ export interface OwnProps {
   sourceId: string;
   startDate: number;
   endDate: number;
-  filterQuery?: ESQuery;
+  filterQuery?: ESQuery | string;
   poll: number;
 }
 
@@ -61,7 +61,7 @@ const HostsComponentQuery = pure<HostsProps>(
           cursor: null,
           tiebreaker: null,
         },
-        filterQuery: JSON.stringify(filterQuery),
+        filterQuery: createFilter(filterQuery),
       }}
     >
       {({ data, loading, fetchMore, refetch }) => {

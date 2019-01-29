@@ -9,8 +9,10 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { pure } from 'recompose';
 
+import { ESQuery } from '../../../common/typed_json';
 import { Direction, GetKpiEventsQuery, KpiItem } from '../../graphql/types';
 import { inputsModel } from '../../store';
+import { createFilter } from '../helpers';
 import { kpiEventsQuery } from './index.gql_query';
 
 export interface KpiEventsArgs {
@@ -23,7 +25,7 @@ export interface KpiEventsArgs {
 export interface OwnProps {
   children?: (args: KpiEventsArgs) => React.ReactNode;
   id?: string;
-  filterQuery?: string;
+  filterQuery?: ESQuery | string;
   poll: number;
   sourceId: string;
   startDate: number;
@@ -38,7 +40,7 @@ export const KpiEventsQuery = pure<OwnProps>(
       notifyOnNetworkStatusChange
       pollInterval={poll}
       variables={{
-        filterQuery,
+        filterQuery: createFilter(filterQuery),
         sourceId,
         pagination: {
           limit: 0,

@@ -10,8 +10,10 @@ import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
+import { ESQuery } from '../../../common/typed_json';
 import { Direction, Ecs, GetEventsQuery, PageInfo } from '../../graphql/types';
 import { eventsSelector, inputsModel, State } from '../../store';
+import { createFilter } from '../helpers';
 import { eventsQuery } from './index.gql_query';
 
 export interface EventsArgs {
@@ -26,7 +28,7 @@ export interface EventsArgs {
 
 export interface OwnProps {
   children?: (args: EventsArgs) => React.ReactNode;
-  filterQuery?: string;
+  filterQuery?: ESQuery | string;
   id?: string;
   poll: number;
   sourceId: string;
@@ -48,7 +50,7 @@ const EventsComponentQuery = pure<EventsProps>(
       notifyOnNetworkStatusChange
       pollInterval={poll}
       variables={{
-        filterQuery,
+        filterQuery: createFilter(filterQuery),
         sourceId,
         pagination: {
           limit,
