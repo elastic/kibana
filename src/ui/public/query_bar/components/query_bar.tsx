@@ -26,7 +26,6 @@ import { getFromLegacyIndexPattern } from 'ui/index_patterns/static_utils';
 import { kfetch } from 'ui/kfetch';
 import { PersistedLog } from 'ui/persisted_log';
 import { Storage } from 'ui/storage';
-// @ts-ignore
 import { timeHistory } from 'ui/timefilter/time_history';
 import {
   AutocompleteSuggestion,
@@ -80,9 +79,9 @@ interface Props {
   store: Storage;
   intl: InjectedIntl;
   showDatePicker: boolean;
-  from: string;
-  to: string;
-  isPaused: boolean;
+  dateRangeFrom: string;
+  dateRangeTo: string;
+  isRefreshPaused: boolean;
   refreshInterval: number;
   onRefreshChange?: (isPaused: boolean, refreshInterval: number) => void;
 }
@@ -95,8 +94,8 @@ interface State {
   suggestions: AutocompleteSuggestion[];
   suggestionLimit: number;
   currentProps?: Props;
-  from: string;
-  to: string;
+  dateRangeFrom: string;
+  dateRangeTo: string;
   isDateRangeInvalid: boolean;
 }
 
@@ -121,12 +120,12 @@ export class QueryBarUI extends Component<Props, State> {
 
     let nextDateRange = null;
     if (
-      nextProps.from !== get(prevState, 'currentProps.from') ||
-      nextProps.to !== get(prevState, 'currentProps.to')
+      nextProps.dateRangeFrom !== get(prevState, 'currentProps.dateRangeFrom') ||
+      nextProps.dateRangeTo !== get(prevState, 'currentProps.dateRangeTo')
     ) {
       nextDateRange = {
-        from: nextProps.from,
-        to: nextProps.to,
+        dateRangeFrom: nextProps.dateRangeFrom,
+        dateRangeTo: nextProps.dateRangeTo,
       };
     }
 
@@ -137,8 +136,8 @@ export class QueryBarUI extends Component<Props, State> {
       nextState.query = nextQuery;
     }
     if (nextDateRange) {
-      nextState.from = nextDateRange.from;
-      nextState.to = nextDateRange.to;
+      nextState.dateRangeFrom = nextDateRange.dateRangeFrom;
+      nextState.dateRangeTo = nextDateRange.dateRangeTo;
     }
     return nextState;
   }
@@ -146,8 +145,8 @@ export class QueryBarUI extends Component<Props, State> {
   // @ts-ignore
   private static defaultProps = {
     showDatePicker: false,
-    from: 'now-15m',
-    to: 'now',
+    dateRangeFrom: 'now-15m',
+    dateRangeTo: 'now',
   };
 
   /*
@@ -173,8 +172,8 @@ export class QueryBarUI extends Component<Props, State> {
     index: null,
     suggestions: [],
     suggestionLimit: 50,
-    from: this.props.from,
-    to: this.props.to,
+    dateRangeFrom: this.props.dateRangeFrom,
+    dateRangeTo: this.props.dateRangeTo,
     isDateRangeInvalid: false,
   };
 
@@ -193,8 +192,8 @@ export class QueryBarUI extends Component<Props, State> {
   public isDirty = () => {
     return (
       this.state.query.query !== this.props.query.query ||
-      this.state.from !== this.props.from ||
-      this.state.to !== this.props.to
+      this.state.dateRangeFrom !== this.props.dateRangeFrom ||
+      this.state.dateRangeTo !== this.props.dateRangeTo
     );
   };
 
@@ -376,8 +375,8 @@ export class QueryBarUI extends Component<Props, State> {
     isInvalid: boolean;
   }) => {
     this.setState({
-      from: start,
-      to: end,
+      dateRangeFrom: start,
+      dateRangeTo: end,
       isDateRangeInvalid: isInvalid,
     });
   };
@@ -469,8 +468,8 @@ export class QueryBarUI extends Component<Props, State> {
     }
 
     timeHistory.add({
-      from: this.state.from,
-      to: this.state.to,
+      from: this.state.dateRangeFrom,
+      to: this.state.dateRangeTo,
     });
 
     this.props.onSubmit({
@@ -479,8 +478,8 @@ export class QueryBarUI extends Component<Props, State> {
         language: this.state.query.language,
       },
       dateRange: {
-        from: this.state.from,
-        to: this.state.to,
+        from: this.state.dateRangeFrom,
+        to: this.state.dateRangeTo,
       },
     });
     this.setState({ isSuggestionsVisible: false });
@@ -503,8 +502,8 @@ export class QueryBarUI extends Component<Props, State> {
         language,
       },
       dateRange: {
-        from: this.props.from,
-        to: this.props.to,
+        from: this.props.dateRangeFrom,
+        to: this.props.dateRangeTo,
       },
     });
   };
@@ -671,9 +670,9 @@ export class QueryBarUI extends Component<Props, State> {
     return (
       <EuiFlexItem className="kbnQueryBar__datePickerWrapper">
         <EuiSuperDatePicker
-          start={this.state.from}
-          end={this.state.to}
-          isPaused={this.props.isPaused}
+          start={this.state.dateRangeFrom}
+          end={this.state.dateRangeTo}
+          isPaused={this.props.isRefreshPaused}
           refreshInterval={this.props.refreshInterval}
           onTimeChange={this.onTimeChange}
           onRefreshChange={this.props.onRefreshChange}
