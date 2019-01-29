@@ -14,7 +14,7 @@ import PropTypes from 'prop-types';
 import React, { Component, Fragment } from 'react';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiDescriptionList,
@@ -216,7 +216,7 @@ function getDetailsItems(anomaly, examples, filter) {
   return items;
 }
 
-export const AnomalyDetails = injectI18n(class AnomalyDetails extends Component {
+export class AnomalyDetails extends Component {
   static propTypes = {
     anomaly: PropTypes.object.isRequired,
     examples: PropTypes.array,
@@ -270,7 +270,7 @@ export const AnomalyDetails = injectI18n(class AnomalyDetails extends Component 
   }
 
   renderCategoryExamples() {
-    const { examples, definition, intl } = this.props;
+    const { examples, definition } = this.props;
 
     return (
       <EuiFlexGroup
@@ -284,14 +284,14 @@ export const AnomalyDetails = injectI18n(class AnomalyDetails extends Component 
           <EuiFlexItem key={`example-terms`}>
             <EuiText size="xs">
               <h4 className="mlAnomalyCategoryExamples__header">
-                <FormattedMessage
-                  id="xpack.ml.anomaliesTable.anomalyDetails.termsTitle"
-                  defaultMessage="Terms"
-                />
+                {
+                  i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.termsTitle', {
+                    defaultMessage: 'Terms'
+                  })
+                }
               </h4>&nbsp;
               <EuiIconTip
-                aria-label={intl.formatMessage({
-                  id: 'xpack.ml.anomaliesTable.anomalyDetails.termsDescriptionAriaLabel',
+                aria-label={i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.termsDescriptionAriaLabel', {
                   defaultMessage: 'Description'
                 })}
                 type="questionInCircle"
@@ -315,10 +315,15 @@ export const AnomalyDetails = injectI18n(class AnomalyDetails extends Component 
           <Fragment>
             <EuiFlexItem key={`example-regex`}>
               <EuiText size="xs">
-                <h4 className="mlAnomalyCategoryExamples__header">Regex</h4>&nbsp;
+                <h4 className="mlAnomalyCategoryExamples__header">
+                  {
+                    i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.regexTitle', {
+                      defaultMessage: 'Regex'
+                    })
+                  }
+                </h4>&nbsp;
                 <EuiIconTip
-                  aria-label={intl.formatMessage({
-                    id: 'xpack.ml.anomaliesTable.anomalyDetails.regexDescriptionAriaLabel',
+                  aria-label={i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.regexDescriptionAriaLabel', {
                     defaultMessage: 'Description'
                   })}
                   type="questionInCircle"
@@ -345,10 +350,11 @@ export const AnomalyDetails = injectI18n(class AnomalyDetails extends Component 
               {(i === 0 && definition !== undefined) &&
                 <EuiText size="s">
                   <h4>
-                    <FormattedMessage
-                      id="xpack.ml.anomaliesTable.anomalyDetails.examplesTitle"
-                      defaultMessage="Examples"
-                    />
+                    {
+                      i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.examplesTitle', {
+                        defaultMessage: 'Examples'
+                      })
+                    }
                   </h4>
                 </EuiText>}
               <span className="mlAnomalyCategoryExamples__item">{example}</span>
@@ -560,14 +566,4 @@ export const AnomalyDetails = injectI18n(class AnomalyDetails extends Component 
       );
     }
   }
-});
-
-AnomalyDetails.propTypes = {
-  anomaly: PropTypes.object.isRequired,
-  examples: PropTypes.array,
-  definition: PropTypes.object,
-  isAggregatedData: PropTypes.bool,
-  filter: PropTypes.func,
-  influencersLimit: PropTypes.number,
-  tabIndex: PropTypes.number.isRequired
-};
+}

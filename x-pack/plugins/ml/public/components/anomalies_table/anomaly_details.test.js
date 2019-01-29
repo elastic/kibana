@@ -69,7 +69,7 @@ describe('AnomalyDetails', () => {
 
   test('Renders with anomaly details tab selected by default', () => {
     const wrapper = shallowWithIntl(
-      <AnomalyDetails.WrappedComponent {...props} />
+      <AnomalyDetails {...props} />
     );
 
     expect(wrapper.prop('tabs').length).toBe(2);
@@ -82,7 +82,7 @@ describe('AnomalyDetails', () => {
       tabIndex: 1
     };
     const wrapper = shallowWithIntl(
-      <AnomalyDetails.WrappedComponent {...categoryTabProps} />
+      <AnomalyDetails {...categoryTabProps} />
     );
     expect(wrapper.prop('initialSelectedTab').id).toBe('Category examples');
   });
@@ -98,10 +98,12 @@ describe('AnomalyDetails', () => {
     };
 
     const wrapper = mountWithIntl(
-      <AnomalyDetails.WrappedComponent {...categoryTabProps} />
+      <AnomalyDetails {...categoryTabProps} />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.containsMatchingElement(<h4>Regex</h4>)).toBe(true);
+    expect(wrapper.containsMatchingElement(<h4>Terms</h4>)).toBe(true);
+    expect(wrapper.contains(<h4>Examples</h4>)).toBe(true);
   });
 
   test('Renders only with examples when definition prop is undefined', () => {
@@ -112,10 +114,12 @@ describe('AnomalyDetails', () => {
     };
 
     const wrapper = mountWithIntl(
-      <AnomalyDetails.WrappedComponent {...categoryTabProps} />
+      <AnomalyDetails {...categoryTabProps} />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.containsMatchingElement(<h4>Regex</h4>)).toBe(false);
+    expect(wrapper.containsMatchingElement(<h4>Terms</h4>)).toBe(false);
+    expect(wrapper.contains(<h4>Examples</h4>)).toBe(false);
   });
 
   test('Renders only with terms when definition.regex is undefined', () => {
@@ -128,10 +132,12 @@ describe('AnomalyDetails', () => {
     };
 
     const wrapper = mountWithIntl(
-      <AnomalyDetails.WrappedComponent {...categoryTabProps} />
+      <AnomalyDetails {...categoryTabProps} />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.containsMatchingElement(<h4>Regex</h4>)).toBe(false);
+    expect(wrapper.containsMatchingElement(<h4>Terms</h4>)).toBe(true);
+    expect(wrapper.contains(<h4>Examples</h4>)).toBe(true);
   });
 
   test('Renders only with regex when definition.terms is undefined', () => {
@@ -144,9 +150,11 @@ describe('AnomalyDetails', () => {
     };
 
     const wrapper = mountWithIntl(
-      <AnomalyDetails.WrappedComponent {...categoryTabProps} />
+      <AnomalyDetails {...categoryTabProps} />
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.containsMatchingElement(<h4>Regex</h4>)).toBe(true);
+    expect(wrapper.containsMatchingElement(<h4>Terms</h4>)).toBe(false);
+    expect(wrapper.contains(<h4>Examples</h4>)).toBe(true);
   });
 });
