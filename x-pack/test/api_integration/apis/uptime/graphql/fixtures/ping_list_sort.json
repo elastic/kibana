@@ -1,13 +1,13 @@
 {
   "allPings": {
-    "total": 2390,
+    "total": 3371,
     "pings": [
       {
-        "timestamp": "2019-01-26T04:40:05.739Z",
+        "timestamp": "2019-01-28T17:47:06.077Z",
         "http": null,
         "error": null,
         "monitor": {
-          "duration": { "us": 1343 },
+          "duration": { "us": 1452 },
           "id": "auto-tcp-0X81440A68E839814C",
           "ip": "127.0.0.1",
           "name": "",
@@ -17,58 +17,70 @@
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:05.739Z",
+        "timestamp": "2019-01-28T17:47:07.075Z",
         "http": null,
-        "error": null,
+        "error": {
+          "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
+          "type": "io"
+        },
         "monitor": {
-          "duration": { "us": 1343 },
+          "duration": { "us": 1094 },
           "id": "auto-tcp-0X81440A68E839814C",
           "ip": "127.0.0.1",
           "name": "",
           "scheme": null,
-          "status": "up",
+          "status": "down",
           "type": "tcp"
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:06.739Z",
+        "timestamp": "2019-01-28T17:47:08.078Z",
         "http": null,
-        "error": null,
+        "error": {
+          "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
+          "type": "io"
+        },
         "monitor": {
-          "duration": { "us": 1153 },
+          "duration": { "us": 1430 },
           "id": "auto-tcp-0X81440A68E839814C",
           "ip": "127.0.0.1",
           "name": "",
           "scheme": null,
-          "status": "up",
+          "status": "down",
           "type": "tcp"
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:06.739Z",
+        "timestamp": "2019-01-28T17:47:09.075Z",
         "http": null,
-        "error": null,
+        "error": {
+          "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
+          "type": "io"
+        },
         "monitor": {
-          "duration": { "us": 1153 },
+          "duration": { "us": 1370 },
           "id": "auto-tcp-0X81440A68E839814C",
           "ip": "127.0.0.1",
           "name": "",
           "scheme": null,
-          "status": "up",
+          "status": "down",
           "type": "tcp"
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:07.739Z",
+        "timestamp": "2019-01-28T17:47:10.075Z",
         "http": null,
-        "error": null,
+        "error": {
+          "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
+          "type": "io"
+        },
         "monitor": {
-          "duration": { "us": 1842 },
+          "duration": { "us": 1922 },
           "id": "auto-tcp-0X81440A68E839814C",
           "ip": "127.0.0.1",
           "name": "",
           "scheme": null,
-          "status": "up",
+          "status": "down",
           "type": "tcp"
         }
       }

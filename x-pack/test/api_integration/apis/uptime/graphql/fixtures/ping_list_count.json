@@ -1,13 +1,47 @@
 {
   "allPings": {
-    "total": 5440,
+    "total": 9231,
     "pings": [
       {
-        "timestamp": "2019-01-26T04:40:37.741Z",
+        "timestamp": "2019-01-28T17:47:08.078Z",
+        "http": null,
+        "error": {
+          "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
+          "type": "io"
+        },
+        "monitor": {
+          "duration": { "us": 1430 },
+          "id": "auto-tcp-0X81440A68E839814C",
+          "ip": "127.0.0.1",
+          "name": "",
+          "scheme": null,
+          "status": "down",
+          "type": "tcp"
+        }
+      },
+      {
+        "timestamp": "2019-01-28T17:47:09.075Z",
+        "http": null,
+        "error": {
+          "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
+          "type": "io"
+        },
+        "monitor": {
+          "duration": { "us": 1370 },
+          "id": "auto-tcp-0X81440A68E839814C",
+          "ip": "127.0.0.1",
+          "name": "",
+          "scheme": null,
+          "status": "down",
+          "type": "tcp"
+        }
+      },
+      {
+        "timestamp": "2019-01-28T17:47:06.077Z",
         "http": null,
         "error": null,
         "monitor": {
-          "duration": { "us": 1544 },
+          "duration": { "us": 1452 },
           "id": "auto-tcp-0X81440A68E839814C",
           "ip": "127.0.0.1",
           "name": "",
@@ -17,43 +51,32 @@
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:38.738Z",
+        "timestamp": "2019-01-28T17:47:07.075Z",
         "http": null,
-        "error": null,
+        "error": {
+          "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
+          "type": "io"
+        },
         "monitor": {
-          "duration": { "us": 986 },
+          "duration": { "us": 1094 },
           "id": "auto-tcp-0X81440A68E839814C",
           "ip": "127.0.0.1",
           "name": "",
           "scheme": null,
-          "status": "up",
+          "status": "down",
           "type": "tcp"
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:37.741Z",
-        "http": { "response": { "status_code": 200 } },
-        "error": null,
-        "monitor": {
-          "duration": { "us": 1847219 },
-          "id": "auto-http-0XDD2D4E60FD4A61C3",
-          "ip": "151.101.210.217",
-          "name": "",
-          "scheme": null,
-          "status": "up",
-          "type": "http"
-        }
-      },
-      {
-        "timestamp": "2019-01-26T04:40:39.738Z",
+        "timestamp": "2019-01-28T17:47:07.074Z",
         "http": null,
         "error": {
           "message": "Get http://localhost:12349/: dial tcp 127.0.0.1:12349: connect: connection refused",
           "type": "io"
         },
         "monitor": {
-          "duration": { "us": 1784 },
-          "id": "auto-http-0XE929FD0451F4DA95",
+          "duration": { "us": 1597 },
+          "id": "auto-http-0X3675F89EF0612091",
           "ip": "127.0.0.1",
           "name": "",
           "scheme": null,
@@ -62,41 +85,64 @@
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:39.738Z",
+        "timestamp": "2019-01-28T17:47:18.080Z",
         "http": null,
-        "error": null,
+        "error": {
+          "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
+          "type": "io"
+        },
         "monitor": {
-          "duration": { "us": 1681 },
+          "duration": { "us": 1699 },
           "id": "auto-tcp-0X81440A68E839814C",
           "ip": "127.0.0.1",
           "name": "",
           "scheme": null,
-          "status": "up",
+          "status": "down",
           "type": "tcp"
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:40.739Z",
+        "timestamp": "2019-01-28T17:47:19.076Z",
         "http": null,
-        "error": null,
+        "error": {
+          "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
+          "type": "io"
+        },
         "monitor": {
-          "duration": { "us": 2024 },
+          "duration": { "us": 5384 },
           "id": "auto-tcp-0X81440A68E839814C",
           "ip": "127.0.0.1",
           "name": "",
           "scheme": null,
-          "status": "up",
+          "status": "down",
           "type": "tcp"
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:39.738Z",
+        "timestamp": "2019-01-28T17:47:19.076Z",
+        "http": null,
+        "error": {
+          "message": "Get http://localhost:12349/: dial tcp 127.0.0.1:12349: connect: connection refused",
+          "type": "io"
+        },
+        "monitor": {
+          "duration": { "us": 5397 },
+          "id": "auto-http-0X3675F89EF0612091",
+          "ip": "127.0.0.1",
+          "name": "",
+          "scheme": null,
+          "status": "down",
+          "type": "http"
+        }
+      },
+      {
+        "timestamp": "2019-01-28T17:47:19.077Z",
         "http": { "response": { "status_code": 200 } },
         "error": null,
         "monitor": {
-          "duration": { "us": 1122102 },
-          "id": "auto-http-0XE929FD0451F4DA95",
-          "ip": "74.125.141.105",
+          "duration": { "us": 127511 },
+          "id": "auto-http-0X131221E73F825974",
+          "ip": "172.217.7.4",
           "name": "",
           "scheme": null,
           "status": "up",
@@ -104,26 +150,12 @@
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:39.738Z",
+        "timestamp": "2019-01-28T17:47:19.077Z",
         "http": { "response": { "status_code": 200 } },
         "error": null,
         "monitor": {
-          "duration": { "us": 1128903 },
-          "id": "auto-http-0X970CBD2F2102BFA8",
-          "ip": "74.125.141.105",
-          "name": "",
-          "scheme": null,
-          "status": "up",
-          "type": "http"
-        }
-      },
-      {
-        "timestamp": "2019-01-26T04:40:39.738Z",
-        "http": { "response": { "status_code": 200 } },
-        "error": null,
-        "monitor": {
-          "duration": { "us": 1250574 },
-          "id": "auto-http-0XE929FD0451F4DA95",
+          "duration": { "us": 287543 },
+          "id": "auto-http-0X9CB71300ABD5A2A8",
           "ip": "192.30.253.112",
           "name": "",
           "scheme": null,
@@ -132,13 +164,13 @@
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:40.739Z",
-        "http": { "response": { "status_code": 200 } },
+        "timestamp": "2019-01-28T17:47:19.076Z",
+        "http": { "response": { "status_code": 301 } },
         "error": null,
         "monitor": {
-          "duration": { "us": 779478 },
-          "id": "auto-http-0XDD2D4E60FD4A61C3",
-          "ip": "151.101.210.217",
+          "duration": { "us": 357805 },
+          "id": "auto-http-0XD9AE729FC1C1E04A",
+          "ip": "151.101.209.140",
           "name": "",
           "scheme": null,
           "status": "up",
@@ -146,13 +178,58 @@
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:34.738Z",
+        "timestamp": "2019-01-28T17:47:19.076Z",
+        "http": { "response": { "status_code": 200 } },
+        "error": null,
+        "monitor": {
+          "duration": { "us": 850839 },
+          "id": "auto-http-0XDD2D4E60FD4A61C3",
+          "ip": "151.101.250.217",
+          "name": "",
+          "scheme": null,
+          "status": "up",
+          "type": "http"
+        }
+      },
+      {
+        "timestamp": "2019-01-28T17:47:20.077Z",
+        "http": null,
+        "error": {
+          "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
+          "type": "io"
+        },
+        "monitor": {
+          "duration": { "us": 2278 },
+          "id": "auto-tcp-0X81440A68E839814C",
+          "ip": "127.0.0.1",
+          "name": "",
+          "scheme": null,
+          "status": "down",
+          "type": "tcp"
+        }
+      },
+      {
+        "timestamp": "2019-01-28T17:47:20.077Z",
+        "http": { "response": { "status_code": 200 } },
+        "error": null,
+        "monitor": {
+          "duration": { "us": 76702 },
+          "id": "auto-http-0X970CBD2F2102BFA8",
+          "ip": "172.217.7.4",
+          "name": "",
+          "scheme": null,
+          "status": "up",
+          "type": "http"
+        }
+      },
+      {
+        "timestamp": "2019-01-28T17:47:19.077Z",
         "http": { "response": { "status_code": 301 } },
         "error": { "message": "received status code 301 expecting 200", "type": "validate" },
         "monitor": {
-          "duration": { "us": 6927705 },
-          "id": "auto-http-0XE929FD0451F4DA95",
-          "ip": "184.168.131.233",
+          "duration": { "us": 1629848 },
+          "id": "auto-http-0XA8096548ECEB85B7",
+          "ip": "198.71.248.67",
           "name": "",
           "scheme": null,
           "status": "down",
@@ -160,85 +237,49 @@
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:41.740Z",
+        "timestamp": "2019-01-28T17:47:21.076Z",
         "http": null,
-        "error": null,
+        "error": {
+          "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
+          "type": "io"
+        },
         "monitor": {
-          "duration": { "us": 1629 },
+          "duration": { "us": 1757 },
           "id": "auto-tcp-0X81440A68E839814C",
           "ip": "127.0.0.1",
           "name": "",
           "scheme": null,
-          "status": "up",
+          "status": "down",
           "type": "tcp"
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:42.738Z",
+        "timestamp": "2019-01-28T17:47:22.075Z",
         "http": null,
-        "error": null,
+        "error": {
+          "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
+          "type": "io"
+        },
         "monitor": {
-          "duration": { "us": 1150 },
+          "duration": { "us": 1040 },
           "id": "auto-tcp-0X81440A68E839814C",
           "ip": "127.0.0.1",
           "name": "",
           "scheme": null,
-          "status": "up",
+          "status": "down",
           "type": "tcp"
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:12.739Z",
-        "http": null,
-        "error": null,
-        "monitor": {
-          "duration": { "us": 1045 },
-          "id": "auto-tcp-0X81440A68E839814C",
-          "ip": "127.0.0.1",
-          "name": "",
-          "scheme": null,
-          "status": "up",
-          "type": "tcp"
-        }
-      },
-      {
-        "timestamp": "2019-01-26T04:40:13.738Z",
-        "http": null,
-        "error": null,
-        "monitor": {
-          "duration": { "us": 1536 },
-          "id": "auto-tcp-0X81440A68E839814C",
-          "ip": "127.0.0.1",
-          "name": "",
-          "scheme": null,
-          "status": "up",
-          "type": "tcp"
-        }
-      },
-      {
-        "timestamp": "2019-01-26T04:40:13.739Z",
-        "http": { "response": { "status_code": 200 } },
-        "error": null,
-        "monitor": {
-          "duration": { "us": 434091 },
-          "id": "auto-http-0XDD2D4E60FD4A61C3",
-          "ip": "151.101.210.217",
-          "name": "",
-          "scheme": null,
-          "status": "up",
-          "type": "http"
-        }
-      },
-      {
-        "timestamp": "2019-01-26T04:40:14.739Z",
+        "timestamp": "2019-01-28T17:47:23.074Z",
         "http": null,
         "error": {
           "message": "Get http://localhost:12349/: dial tcp 127.0.0.1:12349: connect: connection refused",
           "type": "io"
         },
         "monitor": {
-          "duration": { "us": 1621 },
-          "id": "auto-http-0XE929FD0451F4DA95",
+          "duration": { "us": 4578 },
+          "id": "auto-http-0X3675F89EF0612091",
           "ip": "127.0.0.1",
           "name": "",
           "scheme": null,
@@ -247,27 +288,95 @@
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:14.739Z",
+        "timestamp": "2019-01-28T17:47:23.075Z",
         "http": null,
-        "error": null,
+        "error": {
+          "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
+          "type": "io"
+        },
         "monitor": {
-          "duration": { "us": 1618 },
+          "duration": { "us": 4171 },
           "id": "auto-tcp-0X81440A68E839814C",
           "ip": "127.0.0.1",
           "name": "",
           "scheme": null,
-          "status": "up",
+          "status": "down",
           "type": "tcp"
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:14.739Z",
+        "timestamp": "2019-01-28T17:47:24.077Z",
+        "http": null,
+        "error": {
+          "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
+          "type": "io"
+        },
+        "monitor": {
+          "duration": { "us": 1343 },
+          "id": "auto-tcp-0X81440A68E839814C",
+          "ip": "127.0.0.1",
+          "name": "",
+          "scheme": null,
+          "status": "down",
+          "type": "tcp"
+        }
+      },
+      {
+        "timestamp": "2019-01-28T17:47:25.075Z",
+        "http": null,
+        "error": {
+          "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
+          "type": "io"
+        },
+        "monitor": {
+          "duration": { "us": 647 },
+          "id": "auto-tcp-0X81440A68E839814C",
+          "ip": "127.0.0.1",
+          "name": "",
+          "scheme": null,
+          "status": "down",
+          "type": "tcp"
+        }
+      },
+      {
+        "timestamp": "2019-01-28T17:47:26.075Z",
+        "http": null,
+        "error": {
+          "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
+          "type": "io"
+        },
+        "monitor": {
+          "duration": { "us": 1227 },
+          "id": "auto-tcp-0X81440A68E839814C",
+          "ip": "127.0.0.1",
+          "name": "",
+          "scheme": null,
+          "status": "down",
+          "type": "tcp"
+        }
+      },
+      {
+        "timestamp": "2019-01-28T17:47:23.074Z",
         "http": { "response": { "status_code": 200 } },
         "error": null,
         "monitor": {
-          "duration": { "us": 106793 },
+          "duration": { "us": 3077816 },
+          "id": "auto-http-0X131221E73F825974",
+          "ip": "172.217.7.4",
+          "name": "",
+          "scheme": null,
+          "status": "up",
+          "type": "http"
+        }
+      },
+      {
+        "timestamp": "2019-01-28T17:47:25.074Z",
+        "http": { "response": { "status_code": 200 } },
+        "error": null,
+        "monitor": {
+          "duration": { "us": 1090949 },
           "id": "auto-http-0X970CBD2F2102BFA8",
-          "ip": "74.125.141.105",
+          "ip": "172.217.7.4",
           "name": "",
           "scheme": null,
           "status": "up",
@@ -275,13 +384,27 @@
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:14.739Z",
+        "timestamp": "2019-01-28T17:47:22.074Z",
+        "http": { "response": { "status_code": 301 } },
+        "error": null,
+        "monitor": {
+          "duration": { "us": 4166351 },
+          "id": "auto-http-0XD9AE729FC1C1E04A",
+          "ip": "151.101.209.140",
+          "name": "",
+          "scheme": null,
+          "status": "up",
+          "type": "http"
+        }
+      },
+      {
+        "timestamp": "2019-01-28T17:47:23.074Z",
         "http": { "response": { "status_code": 200 } },
         "error": null,
         "monitor": {
-          "duration": { "us": 134487 },
-          "id": "auto-http-0XE929FD0451F4DA95",
-          "ip": "74.125.141.105",
+          "duration": { "us": 3286549 },
+          "id": "auto-http-0X9CB71300ABD5A2A8",
+          "ip": "192.30.253.113",
           "name": "",
           "scheme": null,
           "status": "up",
@@ -289,13 +412,13 @@
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:14.739Z",
+        "timestamp": "2019-01-28T17:47:22.073Z",
         "http": { "response": { "status_code": 200 } },
         "error": null,
         "monitor": {
-          "duration": { "us": 228996 },
-          "id": "auto-http-0XE929FD0451F4DA95",
-          "ip": "192.30.253.112",
+          "duration": { "us": 4717236 },
+          "id": "auto-http-0XDD2D4E60FD4A61C3",
+          "ip": "151.101.250.217",
           "name": "",
           "scheme": null,
           "status": "up",
@@ -303,13 +426,75 @@
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:09.742Z",
+        "timestamp": "2019-01-28T17:47:27.075Z",
+        "http": null,
+        "error": {
+          "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
+          "type": "io"
+        },
+        "monitor": {
+          "duration": { "us": 1449 },
+          "id": "auto-tcp-0X81440A68E839814C",
+          "ip": "127.0.0.1",
+          "name": "",
+          "scheme": null,
+          "status": "down",
+          "type": "tcp"
+        }
+      },
+      {
+        "timestamp": "2019-01-28T17:47:27.074Z",
+        "http": null,
+        "error": {
+          "message": "Get http://localhost:12349/: dial tcp 127.0.0.1:12349: connect: connection refused",
+          "type": "io"
+        },
+        "monitor": {
+          "duration": { "us": 1769 },
+          "id": "auto-http-0X3675F89EF0612091",
+          "ip": "127.0.0.1",
+          "name": "",
+          "scheme": null,
+          "status": "down",
+          "type": "http"
+        }
+      },
+      {
+        "timestamp": "2019-01-28T17:47:27.074Z",
+        "http": { "response": { "status_code": 200 } },
+        "error": null,
+        "monitor": {
+          "duration": { "us": 112937 },
+          "id": "auto-http-0X131221E73F825974",
+          "ip": "172.217.7.4",
+          "name": "",
+          "scheme": null,
+          "status": "up",
+          "type": "http"
+        }
+      },
+      {
+        "timestamp": "2019-01-28T17:47:27.074Z",
+        "http": { "response": { "status_code": 200 } },
+        "error": null,
+        "monitor": {
+          "duration": { "us": 281296 },
+          "id": "auto-http-0X9CB71300ABD5A2A8",
+          "ip": "192.30.253.113",
+          "name": "",
+          "scheme": null,
+          "status": "up",
+          "type": "http"
+        }
+      },
+      {
+        "timestamp": "2019-01-28T17:47:23.074Z",
         "http": { "response": { "status_code": 301 } },
         "error": { "message": "received status code 301 expecting 200", "type": "validate" },
         "monitor": {
-          "duration": { "us": 5740833 },
-          "id": "auto-http-0XE929FD0451F4DA95",
-          "ip": "184.168.131.233",
+          "duration": { "us": 4414658 },
+          "id": "auto-http-0XA8096548ECEB85B7",
+          "ip": "198.71.248.67",
           "name": "",
           "scheme": null,
           "status": "down",
@@ -317,41 +502,30 @@
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:15.738Z",
+        "timestamp": "2019-01-28T17:47:28.075Z",
         "http": null,
-        "error": null,
+        "error": {
+          "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
+          "type": "io"
+        },
         "monitor": {
-          "duration": { "us": 897 },
+          "duration": { "us": 780 },
           "id": "auto-tcp-0X81440A68E839814C",
           "ip": "127.0.0.1",
           "name": "",
           "scheme": null,
-          "status": "up",
+          "status": "down",
           "type": "tcp"
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:16.738Z",
-        "http": null,
+        "timestamp": "2019-01-28T17:47:28.074Z",
+        "http": { "response": { "status_code": 301 } },
         "error": null,
         "monitor": {
-          "duration": { "us": 1337 },
-          "id": "auto-tcp-0X81440A68E839814C",
-          "ip": "127.0.0.1",
-          "name": "",
-          "scheme": null,
-          "status": "up",
-          "type": "tcp"
-        }
-      },
-      {
-        "timestamp": "2019-01-26T04:40:16.739Z",
-        "http": { "response": { "status_code": 200 } },
-        "error": null,
-        "monitor": {
-          "duration": { "us": 786550 },
-          "id": "auto-http-0XDD2D4E60FD4A61C3",
-          "ip": "151.101.210.217",
+          "duration": { "us": 297465 },
+          "id": "auto-http-0XD9AE729FC1C1E04A",
+          "ip": "151.101.209.140",
           "name": "",
           "scheme": null,
           "status": "up",
@@ -359,29 +533,94 @@
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:23.739Z",
-        "http": null,
+        "timestamp": "2019-01-28T17:47:28.073Z",
+        "http": { "response": { "status_code": 200 } },
         "error": null,
         "monitor": {
-          "duration": { "us": 1098 },
+          "duration": { "us": 786082 },
+          "id": "auto-http-0XDD2D4E60FD4A61C3",
+          "ip": "151.101.250.217",
+          "name": "",
+          "scheme": null,
+          "status": "up",
+          "type": "http"
+        }
+      },
+      {
+        "timestamp": "2019-01-28T17:47:29.078Z",
+        "http": null,
+        "error": {
+          "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
+          "type": "io"
+        },
+        "monitor": {
+          "duration": { "us": 1006 },
           "id": "auto-tcp-0X81440A68E839814C",
           "ip": "127.0.0.1",
           "name": "",
           "scheme": null,
-          "status": "up",
+          "status": "down",
           "type": "tcp"
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:24.738Z",
+        "timestamp": "2019-01-28T17:47:30.078Z",
+        "http": null,
+        "error": {
+          "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
+          "type": "io"
+        },
+        "monitor": {
+          "duration": { "us": 1572 },
+          "id": "auto-tcp-0X81440A68E839814C",
+          "ip": "127.0.0.1",
+          "name": "",
+          "scheme": null,
+          "status": "down",
+          "type": "tcp"
+        }
+      },
+      {
+        "timestamp": "2019-01-28T17:47:30.078Z",
+        "http": { "response": { "status_code": 200 } },
+        "error": null,
+        "monitor": {
+          "duration": { "us": 80485 },
+          "id": "auto-http-0X970CBD2F2102BFA8",
+          "ip": "172.217.7.4",
+          "name": "",
+          "scheme": null,
+          "status": "up",
+          "type": "http"
+        }
+      },
+      {
+        "timestamp": "2019-01-28T17:47:31.075Z",
+        "http": null,
+        "error": {
+          "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
+          "type": "io"
+        },
+        "monitor": {
+          "duration": { "us": 3263 },
+          "id": "auto-tcp-0X81440A68E839814C",
+          "ip": "127.0.0.1",
+          "name": "",
+          "scheme": null,
+          "status": "down",
+          "type": "tcp"
+        }
+      },
+      {
+        "timestamp": "2019-01-28T17:47:31.074Z",
         "http": null,
         "error": {
           "message": "Get http://localhost:12349/: dial tcp 127.0.0.1:12349: connect: connection refused",
           "type": "io"
         },
         "monitor": {
-          "duration": { "us": 1673 },
-          "id": "auto-http-0XE929FD0451F4DA95",
+          "duration": { "us": 4109 },
+          "id": "auto-http-0X3675F89EF0612091",
           "ip": "127.0.0.1",
           "name": "",
           "scheme": null,
@@ -390,27 +629,13 @@
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:24.738Z",
-        "http": null,
-        "error": null,
-        "monitor": {
-          "duration": { "us": 1693 },
-          "id": "auto-tcp-0X81440A68E839814C",
-          "ip": "127.0.0.1",
-          "name": "",
-          "scheme": null,
-          "status": "up",
-          "type": "tcp"
-        }
-      },
-      {
-        "timestamp": "2019-01-26T04:40:24.738Z",
+        "timestamp": "2019-01-28T17:47:31.074Z",
         "http": { "response": { "status_code": 200 } },
         "error": null,
         "monitor": {
-          "duration": { "us": 166359 },
-          "id": "auto-http-0X970CBD2F2102BFA8",
-          "ip": "74.125.141.104",
+          "duration": { "us": 129148 },
+          "id": "auto-http-0X131221E73F825974",
+          "ip": "172.217.7.4",
           "name": "",
           "scheme": null,
           "status": "up",
@@ -418,13 +643,13 @@
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:24.738Z",
+        "timestamp": "2019-01-28T17:47:31.074Z",
         "http": { "response": { "status_code": 200 } },
         "error": null,
         "monitor": {
-          "duration": { "us": 246424 },
-          "id": "auto-http-0XE929FD0451F4DA95",
-          "ip": "74.125.141.104",
+          "duration": { "us": 196839 },
+          "id": "auto-http-0X9CB71300ABD5A2A8",
+          "ip": "192.30.253.113",
           "name": "",
           "scheme": null,
           "status": "up",
@@ -432,13 +657,13 @@
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:24.738Z",
-        "http": { "response": { "status_code": 200 } },
+        "timestamp": "2019-01-28T17:47:31.074Z",
+        "http": { "response": { "status_code": 301 } },
         "error": null,
         "monitor": {
-          "duration": { "us": 274682 },
-          "id": "auto-http-0XE929FD0451F4DA95",
-          "ip": "192.30.253.112",
+          "duration": { "us": 362680 },
+          "id": "auto-http-0XD9AE729FC1C1E04A",
+          "ip": "151.101.209.140",
           "name": "",
           "scheme": null,
           "status": "up",
@@ -446,27 +671,13 @@
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:25.739Z",
-        "http": null,
-        "error": null,
-        "monitor": {
-          "duration": { "us": 957 },
-          "id": "auto-tcp-0X81440A68E839814C",
-          "ip": "127.0.0.1",
-          "name": "",
-          "scheme": null,
-          "status": "up",
-          "type": "tcp"
-        }
-      },
-      {
-        "timestamp": "2019-01-26T04:40:22.739Z",
+        "timestamp": "2019-01-28T17:47:31.073Z",
         "http": { "response": { "status_code": 200 } },
         "error": null,
         "monitor": {
-          "duration": { "us": 3374818 },
+          "duration": { "us": 987186 },
           "id": "auto-http-0XDD2D4E60FD4A61C3",
-          "ip": "151.101.210.217",
+          "ip": "151.101.250.217",
           "name": "",
           "scheme": null,
           "status": "up",
@@ -474,27 +685,30 @@
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:26.740Z",
+        "timestamp": "2019-01-28T17:47:32.076Z",
         "http": null,
-        "error": null,
+        "error": {
+          "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
+          "type": "io"
+        },
         "monitor": {
-          "duration": { "us": 1235 },
+          "duration": { "us": 1731 },
           "id": "auto-tcp-0X81440A68E839814C",
           "ip": "127.0.0.1",
           "name": "",
           "scheme": null,
-          "status": "up",
+          "status": "down",
           "type": "tcp"
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:19.740Z",
+        "timestamp": "2019-01-28T17:47:31.073Z",
         "http": { "response": { "status_code": 301 } },
         "error": { "message": "received status code 301 expecting 200", "type": "validate" },
         "monitor": {
-          "duration": { "us": 7418865 },
-          "id": "auto-http-0XE929FD0451F4DA95",
-          "ip": "184.168.131.233",
+          "duration": { "us": 1512820 },
+          "id": "auto-http-0XA8096548ECEB85B7",
+          "ip": "198.71.248.67",
           "name": "",
           "scheme": null,
           "status": "down",
@@ -502,212 +716,61 @@
         }
       },
       {
-        "timestamp": "2019-01-26T04:40:27.743Z",
-        "http": null,
-        "error": null,
-        "monitor": {
-          "duration": { "us": 1019 },
-          "id": "auto-tcp-0X81440A68E839814C",
-          "ip": "127.0.0.1",
-          "name": "",
-          "scheme": null,
-          "status": "up",
-          "type": "tcp"
-        }
-      },
-      {
-        "timestamp": "2019-01-26T04:40:57.738Z",
-        "http": null,
-        "error": null,
-        "monitor": {
-          "duration": { "us": 1446 },
-          "id": "auto-tcp-0X81440A68E839814C",
-          "ip": "127.0.0.1",
-          "name": "",
-          "scheme": null,
-          "status": "up",
-          "type": "tcp"
-        }
-      },
-      {
-        "timestamp": "2019-01-26T04:40:58.740Z",
-        "http": null,
-        "error": null,
-        "monitor": {
-          "duration": { "us": 2662 },
-          "id": "auto-tcp-0X81440A68E839814C",
-          "ip": "127.0.0.1",
-          "name": "",
-          "scheme": null,
-          "status": "up",
-          "type": "tcp"
-        }
-      },
-      {
-        "timestamp": "2019-01-26T04:40:58.740Z",
-        "http": { "response": { "status_code": 200 } },
-        "error": null,
-        "monitor": {
-          "duration": { "us": 775646 },
-          "id": "auto-http-0XDD2D4E60FD4A61C3",
-          "ip": "151.101.210.217",
-          "name": "",
-          "scheme": null,
-          "status": "up",
-          "type": "http"
-        }
-      },
-      {
-        "timestamp": "2019-01-26T04:40:59.738Z",
-        "http": null,
-        "error": null,
-        "monitor": {
-          "duration": { "us": 3689 },
-          "id": "auto-tcp-0X81440A68E839814C",
-          "ip": "127.0.0.1",
-          "name": "",
-          "scheme": null,
-          "status": "up",
-          "type": "tcp"
-        }
-      },
-      {
-        "timestamp": "2019-01-26T04:40:59.738Z",
+        "timestamp": "2019-01-28T17:47:33.075Z",
         "http": null,
         "error": {
-          "message": "Get http://localhost:12349/: dial tcp 127.0.0.1:12349: connect: connection refused",
+          "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
           "type": "io"
         },
         "monitor": {
-          "duration": { "us": 3680 },
-          "id": "auto-http-0XE929FD0451F4DA95",
+          "duration": { "us": 1489 },
+          "id": "auto-tcp-0X81440A68E839814C",
           "ip": "127.0.0.1",
           "name": "",
           "scheme": null,
           "status": "down",
-          "type": "http"
-        }
-      },
-      {
-        "timestamp": "2019-01-26T04:40:59.738Z",
-        "http": { "response": { "status_code": 200 } },
-        "error": null,
-        "monitor": {
-          "duration": { "us": 108699 },
-          "id": "auto-http-0X970CBD2F2102BFA8",
-          "ip": "74.125.141.105",
-          "name": "",
-          "scheme": null,
-          "status": "up",
-          "type": "http"
-        }
-      },
-      {
-        "timestamp": "2019-01-26T04:40:59.738Z",
-        "http": { "response": { "status_code": 200 } },
-        "error": null,
-        "monitor": {
-          "duration": { "us": 183682 },
-          "id": "auto-http-0XE929FD0451F4DA95",
-          "ip": "74.125.141.105",
-          "name": "",
-          "scheme": null,
-          "status": "up",
-          "type": "http"
-        }
-      },
-      {
-        "timestamp": "2019-01-26T04:40:59.738Z",
-        "http": { "response": { "status_code": 200 } },
-        "error": null,
-        "monitor": {
-          "duration": { "us": 197514 },
-          "id": "auto-http-0XE929FD0451F4DA95",
-          "ip": "192.30.253.112",
-          "name": "",
-          "scheme": null,
-          "status": "up",
-          "type": "http"
-        }
-      },
-      {
-        "timestamp": "2019-01-26T04:41:00.738Z",
-        "http": null,
-        "error": null,
-        "monitor": {
-          "duration": { "us": 1515 },
-          "id": "auto-tcp-0X81440A68E839814C",
-          "ip": "127.0.0.1",
-          "name": "",
-          "scheme": null,
-          "status": "up",
           "type": "tcp"
         }
       },
       {
-        "timestamp": "2019-01-26T04:41:01.738Z",
+        "timestamp": "2019-01-28T17:47:34.075Z",
         "http": null,
-        "error": null,
+        "error": {
+          "message": "dial tcp 127.0.0.1:9200: connect: connection refused",
+          "type": "io"
+        },
         "monitor": {
-          "duration": { "us": 2365 },
+          "duration": { "us": 2608 },
           "id": "auto-tcp-0X81440A68E839814C",
           "ip": "127.0.0.1",
           "name": "",
           "scheme": null,
-          "status": "up",
+          "status": "down",
           "type": "tcp"
         }
       },
       {
-        "timestamp": "2019-01-26T04:41:01.739Z",
+        "timestamp": "2019-01-28T17:47:34.075Z",
+        "http": { "response": { "status_code": 301 } },
+        "error": null,
+        "monitor": {
+          "duration": { "us": 317978 },
+          "id": "auto-http-0XD9AE729FC1C1E04A",
+          "ip": "151.101.209.140",
+          "name": "",
+          "scheme": null,
+          "status": "up",
+          "type": "http"
+        }
+      },
+      {
+        "timestamp": "2019-01-28T17:47:34.075Z",
         "http": { "response": { "status_code": 200 } },
         "error": null,
         "monitor": {
-          "duration": { "us": 786454 },
+          "duration": { "us": 752672 },
           "id": "auto-http-0XDD2D4E60FD4A61C3",
-          "ip": "151.101.210.217",
-          "name": "",
-          "scheme": null,
-          "status": "up",
-          "type": "http"
-        }
-      },
-      {
-        "timestamp": "2019-01-26T04:41:02.738Z",
-        "http": null,
-        "error": null,
-        "monitor": {
-          "duration": { "us": 1235 },
-          "id": "auto-tcp-0X81440A68E839814C",
-          "ip": "127.0.0.1",
-          "name": "",
-          "scheme": null,
-          "status": "up",
-          "type": "tcp"
-        }
-      },
-      {
-        "timestamp": "2019-01-26T04:40:28.740Z",
-        "http": null,
-        "error": null,
-        "monitor": {
-          "duration": { "us": 1453 },
-          "id": "auto-tcp-0X81440A68E839814C",
-          "ip": "127.0.0.1",
-          "name": "",
-          "scheme": null,
-          "status": "up",
-          "type": "tcp"
-        }
-      },
-      {
-        "timestamp": "2019-01-26T04:40:28.740Z",
-        "http": { "response": { "status_code": 200 } },
-        "error": null,
-        "monitor": {
-          "duration": { "us": 265256 },
-          "id": "auto-http-0XDD2D4E60FD4A61C3",
-          "ip": "151.101.210.217",
+          "ip": "151.101.250.217",
           "name": "",
           "scheme": null,
           "status": "up",
