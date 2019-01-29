@@ -31,7 +31,7 @@ export async function getUpgradeAssistantStatus(
   basePath: string
 ): Promise<UpgradeAssistantStatus> {
   const deprecations = (await callWithRequest(req, 'transport.request', {
-    path: '/_xpack/migration/deprecations',
+    path: '/_migration/deprecations',
     method: 'GET',
   })) as DeprecationAPIResponse;
 

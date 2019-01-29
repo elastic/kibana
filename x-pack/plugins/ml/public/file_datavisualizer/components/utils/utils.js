@@ -95,8 +95,8 @@ export function createUrlOverrides(overrides, originalSettings) {
 }
 
 export function processResults(results) {
-  const timestampFormat = (results.joda_timestamp_formats !== undefined && results.joda_timestamp_formats.length) ?
-    results.joda_timestamp_formats[0] : undefined;
+  const timestampFormat = (results.java_timestamp_formats !== undefined && results.java_timestamp_formats.length) ?
+    results.java_timestamp_formats[0] : undefined;
 
   const linesToSample = (results.overrides !== undefined && results.overrides.lines_to_sample !== undefined) ?
     results.overrides.lines_to_sample : DEFAULT_LINES_TO_SAMPLE;

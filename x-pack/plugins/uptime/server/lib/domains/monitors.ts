@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { MonitorPageTitle } from '../../../common/graphql/types';
 import { UMMonitorsAdapter } from '../adapters/monitors';
 
 export class UMMonitorsDomain {
@@ -26,25 +27,16 @@ export class UMMonitorsDomain {
     dateRangeEnd: string,
     filters?: string | null
   ): Promise<any> {
-    return this.adapter.getLatestMonitors(request, dateRangeStart, dateRangeEnd, filters);
+    return this.adapter.getMonitors(request, dateRangeStart, dateRangeEnd, filters);
   }
 
   public async getSnapshotCount(
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    downCount: number,
-    windowSize: number,
     filters?: string | null
   ): Promise<any> {
-    return this.adapter.getSnapshotCount(
-      request,
-      dateRangeStart,
-      dateRangeEnd,
-      downCount,
-      windowSize,
-      filters
-    );
+    return this.adapter.getSnapshotCount(request, dateRangeStart, dateRangeEnd, filters);
   }
 
   public async getFilterBar(
@@ -62,5 +54,12 @@ export class UMMonitorsDomain {
     filters?: string | null
   ): Promise<any> {
     return this.adapter.getErrorsList(request, dateRangeStart, dateRangeEnd, filters);
+  }
+
+  public async getMonitorPageTitle(
+    request: any,
+    monitorId: string
+  ): Promise<MonitorPageTitle | null> {
+    return await this.adapter.getMonitorPageTitle(request, monitorId);
   }
 }

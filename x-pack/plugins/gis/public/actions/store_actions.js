@@ -21,6 +21,7 @@ import { timeService } from '../kibana_services';
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
 export const ADD_LAYER = 'ADD_LAYER';
+export const SET_LAYER_ERROR_STATUS = 'SET_LAYER_ERROR_STATUS';
 export const ADD_WAITING_FOR_MAP_READY_LAYER = 'ADD_WAITING_FOR_MAP_READY_LAYER';
 export const CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST = 'CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST';
 export const REMOVE_LAYER = 'REMOVE_LAYER';
@@ -105,6 +106,16 @@ export function addLayer(layerDescriptor) {
       layer: layerDescriptor,
     });
     dispatch(syncDataForLayer(layerDescriptor.id));
+  };
+}
+
+export function setLayerErrorStatus(id, errorMessage) {
+  return dispatch => {
+    dispatch({
+      type: SET_LAYER_ERROR_STATUS,
+      layerId: id,
+      errorMessage,
+    });
   };
 }
 
