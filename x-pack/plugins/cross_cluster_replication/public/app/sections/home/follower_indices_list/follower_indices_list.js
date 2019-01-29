@@ -134,7 +134,14 @@ export const FollowerIndicesList = injectI18n(
 
       if (!isAuthorized) {
         return (
-          <SectionUnauthorized>
+          <SectionUnauthorized
+            title={(
+              <FormattedMessage
+                id="xpack.crossClusterReplication.followerIndexList.permissionErrorTitle"
+                defaultMessage="Permission error"
+              />
+            )}
+          >
             <FormattedMessage
               id="xpack.crossClusterReplication.followerIndexList.noPermissionText"
               defaultMessage="You do not have permission to view or add follower indices."

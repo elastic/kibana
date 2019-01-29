@@ -17,15 +17,11 @@
  * under the License.
  */
 
-import moment from 'moment';
+// import moment from 'moment';
 
 export function orderedDateAxis(chart) {
   const x = chart.aspects.x[0];
-  const { format, bounds } = x.params;
-
-  chart.xAxisFormatter = function (val) {
-    return moment(val).format(format);
-  };
+  const { bounds } = x.params;
 
   chart.ordered.date = true;
 

@@ -5,12 +5,10 @@
  */
 
 import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
 import { Route, Switch } from 'react-router-dom';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
-import { BASE_PATH } from '../../../../common/constants';
 
 import {
   EuiPageBody,
@@ -21,6 +19,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { BASE_PATH } from '../../../../common/constants';
 import { listBreadcrumb } from '../../services/breadcrumbs';
 import routing from '../../services/routing';
 import { AutoFollowPatternList } from './auto_follow_pattern_list';
@@ -28,13 +27,6 @@ import { FollowerIndicesList } from './follower_indices_list';
 
 export const CrossClusterReplicationHome = injectI18n(
   class extends PureComponent {
-    static propTypes = {
-      autoFollowPatterns: PropTypes.array,
-      isAutoFollowApiAuthorized: PropTypes.bool,
-      followerIndices: PropTypes.array,
-      isFollowerIndexApiAuthorized: PropTypes.bool,
-    }
-
     state = {
       activeSection: 'follower_indices'
     }

@@ -112,3 +112,7 @@ export const loadIndices = () => {
       return extractData(response);
     });
 };
+
+export const loadPermissions = () => (
+  httpClient.get(`${apiPrefix}/permissions`).then(extractData)
+);

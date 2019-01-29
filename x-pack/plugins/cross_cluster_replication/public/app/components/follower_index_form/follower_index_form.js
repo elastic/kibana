@@ -191,7 +191,7 @@ export const FollowerIndexForm = injectI18n(
         if (error && error.data) {
           // All validation does is check for a name collision, so we can just let the user attempt
           // to save the follower index and get an error back from the API.
-          this.setState({
+          return this.setState({
             isValidatingIndexName: false,
           });
         }
@@ -199,7 +199,7 @@ export const FollowerIndexForm = injectI18n(
         // This error isn't an HTTP error, so let the fatal error screen tell the user something
         // unexpected happened.
         fatalError(error, i18n.translate('xpack.crossClusterReplication.followerIndexForm.indexNameValidationFatalErrorTitle', {
-          defaultMessage: 'Follower Index Forn index name validation',
+          defaultMessage: 'Follower Index Form index name validation',
         }));
       }
     };

@@ -48,10 +48,6 @@ const baseConfig: TestConfig = {
 
 // Merge / extend default interfaces for hapi. This is all faked out below.
 declare module 'hapi' {
-  interface Server {
-    savedObjects: any;
-  }
-
   interface PluginProperties {
     spaces: any;
   }

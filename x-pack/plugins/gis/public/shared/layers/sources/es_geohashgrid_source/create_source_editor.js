@@ -12,15 +12,32 @@ import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_s
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { RENDER_AS } from './render_as';
 import { indexPatternService } from '../../../../kibana_services';
+import { NoIndexPatternCallout } from '../../../components/no_index_pattern_callout';
 
 import {
   EuiFormRow,
-  EuiComboBox
+  EuiComboBox,
+  EuiSpacer,
 } from '@elastic/eui';
 
 function filterGeoField({ type }) {
   return ['geo_point'].includes(type);
 }
+
+const requestTypeOptions = [
+  {
+    label: 'points',
+    value: RENDER_AS.POINT
+  },
+  {
+    label: 'grid rectangles',
+    value: RENDER_AS.GRID
+  },
+  {
+    label: 'heatmap',
+    value: RENDER_AS.HEATMAP
+  }
+];
 
 export class CreateSourceEditor extends Component {
 
@@ -28,30 +45,12 @@ export class CreateSourceEditor extends Component {
     onSelect: PropTypes.func.isRequired,
   };
 
-  constructor() {
-    super();
-
-    this._requestTypeOptions = [
-      {
-        label: 'points',
-        value: RENDER_AS.POINT
-      },
-      {
-        label: 'grid rectangles',
-        value: RENDER_AS.GRID
-      },
-      {
-        label: 'heatmap',
-        value: RENDER_AS.HEATMAP
-      }
-    ];
-
-    this.state = {
-      isLoadingIndexPattern: false,
-      indexPatternId: '',
-      geoField: '',
-      requestType: this._requestTypeOptions[0],
-    };
+  state = {
+    isLoadingIndexPattern: false,
+    indexPatternId: '',
+    geoField: '',
+    requestType: requestTypeOptions[0],
+    noGeoIndexPatternsExist: false,
   }
 
   componentWillUnmount() {
@@ -139,6 +138,10 @@ export class CreateSourceEditor extends Component {
     }
   };
 
+  _onNoIndexPatterns = () => {
+    this.setState({ noGeoIndexPatternsExist: true });
+  }
+
   _renderGeoSelect() {
     if (!this.state.indexPattern) {
       return null;
@@ -158,12 +161,16 @@ export class CreateSourceEditor extends Component {
   }
 
   _renderLayerSelect() {
+    if (!this.state.indexPattern) {
+      return null;
+    }
+
     return (
       <EuiFormRow label="Show as">
         <EuiComboBox
           placeholder="Select a single option"
           singleSelection={{ asPlainText: true }}
-          options={this._requestTypeOptions}
+          options={requestTypeOptions}
           selectedOptions={[this.state.requestType]}
           onChange={this._onRequestTypeSelect}
           isClearable={false}
@@ -175,18 +182,34 @@ export class CreateSourceEditor extends Component {
     return (
       <EuiFormRow label="Index pattern">
         <IndexPatternSelect
+          isDisabled={this.state.noGeoIndexPatternsExist}
           indexPatternId={this.state.indexPatternId}
           onChange={this.onIndexPatternSelect}
           placeholder="Select index pattern"
           fieldTypes={['geo_point']}
+          onNoIndexPatterns={this._onNoIndexPatterns}
         />
       </EuiFormRow>
+    );
+  }
+
+  _renderNoIndexPatternWarning() {
+    if (!this.state.noGeoIndexPatternsExist) {
+      return null;
+    }
+
+    return (
+      <Fragment>
+        <NoIndexPatternCallout />
+        <EuiSpacer size="s" />
+      </Fragment>
     );
   }
 
   render() {
     return (
       <Fragment>
+        {this._renderNoIndexPatternWarning()}
         {this._renderIndexPatternSelect()}
         {this._renderGeoSelect()}
         {this._renderLayerSelect()}

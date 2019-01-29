@@ -136,7 +136,14 @@ export const AutoFollowPatternList = injectI18n(
       const { apiError, isAuthorized, intl } = this.props;
       if (!isAuthorized) {
         return (
-          <SectionUnauthorized>
+          <SectionUnauthorized
+            title={(
+              <FormattedMessage
+                id="xpack.crossClusterReplication.autoFollowPatternList.permissionErrorTitle"
+                defaultMessage="Permission error"
+              />
+            )}
+          >
             <FormattedMessage
               id="xpack.crossClusterReplication.autoFollowPatternList.noPermissionText"
               defaultMessage="You do not have permission to view or add auto-follow patterns."
