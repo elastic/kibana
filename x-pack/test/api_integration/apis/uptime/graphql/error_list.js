@@ -20,8 +20,8 @@ export default function ({ getService }) {
         operationName: 'ErrorList',
         query: getErrorListQueryString,
         variables: {
-          dateRangeStart: '2019-01-26T04:30:54.740Z',
-          dateRangeEnd: '2019-01-26T04:50:54.740Z',
+          dateRangeStart: '2019-01-28T17:40:08.078Z',
+          dateRangeEnd: '2019-01-28T19:00:16.078Z',
         },
       };
       const {
@@ -38,9 +38,9 @@ export default function ({ getService }) {
         operationName: 'ErrorList',
         query: getErrorListQueryString,
         variables: {
-          dateRangeStart: '2019-01-26T04:30:54.740Z',
-          dateRangeEnd: '2019-01-26T04:50:54.740Z',
-          filters: `{"bool":{"must":[{"match":{"monitor.id":{"query":"auto-http-0XE929FD0451F4DA95","operator":"and"}}}]}}`,
+          dateRangeStart: '2019-01-28T17:40:08.078Z',
+          dateRangeEnd: '2019-01-28T19:00:16.078Z',
+          filters: `{"bool":{"must":[{"match":{"monitor.id":{"query":"auto-http-0X3675F89EF0612091","operator":"and"}}}]}}`,
         },
       };
       const {
@@ -57,9 +57,9 @@ export default function ({ getService }) {
         operationName: 'ErrorList',
         query: getErrorListQueryString,
         variables: {
-          dateRangeStart: '2019-01-25T04:30:54.740Z',
-          dateRangeEnd: '2019-01-28T04:50:54.740Z',
-          filters: `{"bool":{"must":[{"match":{"url.port":{"query":"12349","operator":"and"}}}]}}`,
+          dateRangeStart: '2019-01-28T17:40:08.078Z',
+          dateRangeEnd: '2019-01-28T19:00:16.078Z',
+          filters: `{"bool":{"must":[{"match":{"url.port":{"query":"9200","operator":"and"}}}]}}`,
         },
       };
       const {
@@ -76,8 +76,8 @@ export default function ({ getService }) {
         operationName: 'ErrorList',
         query: getErrorListQueryString,
         variables: {
-          dateRangeStart: '2019-01-25T04:30:54.740Z',
-          dateRangeEnd: '2019-01-28T04:50:54.740Z',
+          dateRangeStart: '2019-01-28T17:40:08.078Z',
+          dateRangeEnd: '2019-01-28T19:00:16.078Z',
           filters:
             `{"bool":{"must":[{"match":{"url.port":{"query":"12349","operator":"and"}}},` +
             `{"match":{"monitor.type":{"query":"http","operator":"and"}}}]}}`,
