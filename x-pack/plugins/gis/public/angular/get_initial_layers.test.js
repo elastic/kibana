@@ -20,7 +20,7 @@ const mockEmsDataSource = {
 };
 
 describe('Saved object has layer list', () => {
-  it('Should get initial layers from saved object first', () => {
+  it('Should get initial layers from saved object first', async () => {
     const layerListFromSavedObject = [
       {
         id: 'layerId',
@@ -32,18 +32,18 @@ describe('Saved object has layer list', () => {
       kibana: mockKibanaDataSource,
       ems: mockEmsDataSource
     };
-    expect(getInitialLayers(layerListJSON, dataSources)).toEqual(layerListFromSavedObject);
+    expect((await getInitialLayers(layerListJSON, dataSources))).toEqual(layerListFromSavedObject);
   });
 });
 
 describe('Saved object does not have layer list', () => {
-  it('Should get initial layer from Kibana tilemap data source when Kibana tilemap is configured ', () => {
+  it('Should get initial layer from Kibana tilemap data source when Kibana tilemap is configured ', async () => {
     const dataSources = {
       kibana: mockKibanaDataSource,
       ems: mockEmsDataSource
     };
 
-    const layers = getInitialLayers(null, dataSources);
+    const layers = await getInitialLayers(null, dataSources);
     expect(layers).toEqual([{
       "alpha": 1,
       dataRequests: [],
@@ -66,12 +66,12 @@ describe('Saved object does not have layer list', () => {
     }]);
   });
 
-  it('Should get initial layer from ems data source when Kibana tilemap is not configured', () => {
+  it('Should get initial layer from ems data source when Kibana tilemap is not configured', async () => {
     const dataSources = {
       ems: mockEmsDataSource
     };
 
-    const layers = getInitialLayers(null, dataSources);
+    const layers = await getInitialLayers(null, dataSources);
     expect(layers).toEqual([{
       "alpha": 1,
       dataRequests: [],
@@ -94,16 +94,16 @@ describe('Saved object does not have layer list', () => {
     }]);
   });
 
-  it('Should return empty list when no ems.tms sources are provided', () => {
+  it('Should return empty list when no ems.tms sources are provided', async () => {
     const dataSources = {
       ems: {
         tms: []
       }
     };
-    expect(getInitialLayers(null, dataSources)).toEqual([]);
+    expect((await getInitialLayers(null, dataSources))).toEqual([]);
   });
 
-  it('Should return empty list when no dataSoures are provided', () => {
-    expect(getInitialLayers(null, null)).toEqual([]);
+  it('Should return empty list when no dataSoures are provided', async () => {
+    expect((await getInitialLayers(null, null))).toEqual([]);
   });
 });
