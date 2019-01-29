@@ -20,6 +20,7 @@
 import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
+  const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header', 'home']);
 
@@ -29,13 +30,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.common.navigateToApp('settings');
     });
 
-    it('should show in navigation', async () => {
-      const link = await PageObjects.header.getGlobalNavigationLink('Test Plugin App');
-      expect(link).not.to.be(undefined);
-    });
-
-    it('should navigate to the app', async () => {
-      await PageObjects.header.clickGlobalNavigationLink('Test Plugin App');
+    it('should should nav link that navigates to the app', async () => {
+      await appsMenu.clickLink('Test Plugin App');
       const pluginContent = await testSubjects.find('pluginContent');
       expect(await pluginContent.getVisibleText()).to.be('Super simple app plugin');
     });

@@ -34,7 +34,7 @@ async function updateIndexTemplate(callWithRequest, indexTemplatePatch) {
 
   const params = {
     method: 'PUT',
-    path: `/_template/${indexTemplatePatch.templateName}`,
+    path: `/_template/${encodeURIComponent(indexTemplatePatch.templateName)}`,
     ignore: [ 404 ],
     body: template,
   };

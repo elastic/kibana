@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 
 import { StyleTabs } from './style_tabs';
 import { JoinEditor } from './join_editor';
@@ -12,23 +12,47 @@ import { FlyoutFooter } from './flyout_footer';
 import { SettingsPanel } from './settings_panel';
 
 import {
-  EuiHorizontalRule,
+  EuiButtonIcon,
   EuiFlexItem,
   EuiTitle,
-  EuiSpacer,
   EuiPanel,
   EuiFlexGroup,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiSpacer,
+  EuiAccordion,
+  EuiText,
+  EuiLink,
 } from '@elastic/eui';
 
 export class LayerPanel  extends React.Component {
 
-  state = {
-    displayName: null
+  static getDerivedStateFromProps(nextProps, prevState) {
+    const nextId = nextProps.selectedLayer.getId();
+    if (nextId !== prevState.prevId) {
+      return {
+        displayName: '',
+        immutableSourceProps: [],
+        hasLoadedSourcePropsForLayer: false,
+        prevId: nextId,
+      };
+    }
+
+    return null;
   }
+
+  state = {}
 
   componentDidMount() {
     this._isMounted = true;
     this.loadDisplayName();
+    this.loadImmutableSourceProperties();
+  }
+
+  componentDidUpdate() {
+    this.loadDisplayName();
+    this.loadImmutableSourceProperties();
   }
 
   componentWillUnmount() {
@@ -37,8 +61,24 @@ export class LayerPanel  extends React.Component {
 
   loadDisplayName = async () => {
     const displayName = await this.props.selectedLayer.getDisplayName();
+    if (!this._isMounted || displayName === this.state.displayName) {
+      return;
+    }
+
+    this.setState({ displayName });
+  }
+
+  loadImmutableSourceProperties = async () => {
+    if (this.state.hasLoadedSourcePropsForLayer) {
+      return;
+    }
+
+    const immutableSourceProps = await this.props.selectedLayer.getImmutableSourceProperties();
     if (this._isMounted) {
-      this.setState({ displayName });
+      this.setState({
+        immutableSourceProps,
+        hasLoadedSourcePropsForLayer: true,
+      });
     }
   }
 
@@ -48,10 +88,30 @@ export class LayerPanel  extends React.Component {
     }
 
     return (
-      <EuiPanel>
-        <JoinEditor/>
-      </EuiPanel>
+      <Fragment>
+        <EuiPanel>
+          <JoinEditor/>
+        </EuiPanel>
+        <EuiSpacer size="s" />
+      </Fragment>
     );
+  }
+
+  _renderSourceProperties() {
+    return this.state.immutableSourceProps.map(({ label, value, link }) => {
+      function renderValue() {
+        if (link) {
+          return (<EuiLink href={link} target="_blank">{value}</EuiLink>);
+        }
+        return (<span>{value}</span>);
+      }
+      return (
+        <p key={label} className="gisLayerPanel__sourceDetail">
+          <strong>{label}</strong>{' '}
+          {renderValue()}
+        </p>
+      );
+    });
   }
 
   render() {
@@ -62,28 +122,43 @@ export class LayerPanel  extends React.Component {
         direction="column"
         gutterSize="none"
       >
-        <EuiFlexItem grow={false} className="gisViewPanel__header">
-          <EuiTitle size="s" className="gisViewPanel__title">
-            <h1>
-              {selectedLayer.getIcon()}
-              {this.state.displayName}
-            </h1>
-          </EuiTitle>
-          <EuiSpacer size="m"/>
-          <EuiHorizontalRule margin="none"/>
-        </EuiFlexItem>
+        <EuiFlyoutHeader hasBorder className="gisLayerPanel__header">
+          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon iconType={selectedLayer.getLayerTypeIconName()} iconSide="right" onClick={this.props.fitToBounds}>
+                Fit
+              </EuiButtonIcon>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiTitle size="s">
+                <h2>{this.state.displayName}</h2>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="xs" />
+          <div className="gisLayerPanel__sourceDetails">
+            <EuiAccordion
+              id="accordion1"
+              buttonContent="Source details"
+            >
+              <EuiText color="subdued" size="s">
+                <EuiSpacer size="xs" />
+                {this._renderSourceProperties()}
+              </EuiText>
+            </EuiAccordion>
+          </div>
+        </EuiFlyoutHeader>
 
-        <EuiFlexItem className="gisViewPanel__body">
+        <EuiFlyoutBody className="gisLayerPanel__body">
           <SettingsPanel/>
+          <EuiSpacer size="s" />
           {this._renderJoinSection()}
           <StyleTabs layer={selectedLayer}/>
-        </EuiFlexItem>
+        </EuiFlyoutBody>
 
-        <EuiFlexItem grow={false} className="gisViewPanel__footer">
-          <EuiHorizontalRule margin="none"/>
-          <EuiSpacer size="m"/>
+        <EuiFlyoutFooter className="gisLayerPanel__footer">
           <FlyoutFooter/>
-        </EuiFlexItem>
+        </EuiFlyoutFooter>
       </EuiFlexGroup>
     );
   }

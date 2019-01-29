@@ -5,6 +5,7 @@
  */
 
 import { EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
 import { px, unit } from '../../../../../style/variables';
@@ -31,7 +32,11 @@ export function ServiceLegends({ serviceColors }: Props) {
   return (
     <Legends>
       <EuiTitle size="xxxs">
-        <span>Services</span>
+        <span>
+          {i18n.translate('xpack.apm.transactionDetails.servicesTitle', {
+            defaultMessage: 'Services'
+          })}
+        </span>
       </EuiTitle>
       {Object.entries(serviceColors).map(([label, color]) => (
         <Legend key={color} color={color} text={label} />

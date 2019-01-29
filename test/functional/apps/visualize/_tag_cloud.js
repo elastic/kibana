@@ -98,10 +98,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should save and load', async function () {
-      await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
-      const pageTitle = await PageObjects.common.getBreadcrumbPageTitle();
-      log.debug(`Save viz page title is ${pageTitle}`);
-      expect(pageTitle).to.contain(vizName1);
+      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
       await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
@@ -135,7 +132,7 @@ export default function ({ getService, getPageObjects }) {
     describe('formatted field', function () {
       before(async function () {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndices();
+        await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.filterField(termsField);
         await PageObjects.settings.openControlsByName(termsField);
         await PageObjects.settings.setFieldFormat('bytes');
@@ -150,7 +147,7 @@ export default function ({ getService, getPageObjects }) {
       after(async function () {
         await filterBar.removeFilter(termsField);
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndices();
+        await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.filterField(termsField);
         await PageObjects.settings.openControlsByName(termsField);
         await PageObjects.settings.setFieldFormat('');

@@ -27,7 +27,7 @@ export default function (kibana) {
         'plugins/table_vis/table_vis'
       ],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-    }
+    },
   });
 
 }

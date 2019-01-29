@@ -7,9 +7,10 @@
 import {
   EuiHealth,
   // @ts-ignore missing type definition
-  EuiInMemoryTable,
+  EuiHistogramSeries,
   // @ts-ignore missing type definition
-  EuiLineSeries,
+  EuiInMemoryTable,
+  EuiLink,
   EuiPanel,
   // @ts-ignore missing type definition
   EuiSeriesChart,
@@ -24,16 +25,16 @@ import moment from 'moment';
 import React, { Fragment } from 'react';
 import { Query } from 'react-apollo';
 import { Link } from 'react-router-dom';
-import { LatestMonitorsResult } from 'x-pack/plugins/uptime/common/graphql/types';
+import { LatestMonitor, LatestMonitorsResult } from '../../../../common/graphql/types';
+import { UptimeCommonProps } from '../../../uptime_app';
+import { formatSparklineCounts } from './format_sparkline_counts';
 import { getMonitorListQuery } from './get_monitor_list';
 
 interface MonitorListProps {
-  autorefreshInterval: number;
-  autorefreshEnabled: boolean;
-  dateRangeStart: number;
-  dateRangeEnd: number;
   filters?: string;
 }
+
+type Props = MonitorListProps & UptimeCommonProps;
 
 const MONITOR_LIST_DEFAULT_PAGINATION = 10;
 
@@ -65,25 +66,26 @@ const monitorListColumns = [
     sortable: true,
   },
   {
-    field: 'ping.monitor.host',
-    name: i18n.translate('xpack.uptime.monitorList.hostColumnLabel', {
-      defaultMessage: 'Host',
+    field: 'ping.monitor.id',
+    name: i18n.translate('xpack.uptime.monitorList.idColumnLabel', {
+      defaultMessage: 'ID',
     }),
-    render: (host: string, monitor: any) => <Link to={`/monitor/${monitor.key.id}`}>{host}</Link>,
+    render: (id: string, item: LatestMonitor) => (
+      <Link to={`/monitor/${id}`}>
+        {item.ping && item.ping.monitor && item.ping.monitor.name ? item.ping.monitor.name : id}
+      </Link>
+    ),
   },
   {
-    field: 'key.port',
-    name: i18n.translate('xpack.uptime.monitorList.portColumnLabel', {
-      defaultMessage: 'Port',
+    field: 'ping.url.full',
+    name: i18n.translate('xpack.uptime.monitorList.urlColumnLabel', {
+      defaultMessage: 'URL',
     }),
-    sortable: true,
-  },
-  {
-    field: 'ping.monitor.type',
-    name: i18n.translate('xpack.uptime.monitorList.typeColumnLabel', {
-      defaultMessage: 'Type',
-    }),
-    sortable: true,
+    render: (url: string, monitor: any) => (
+      <EuiLink href={url} target="_blank">
+        {url}
+      </EuiLink>
+    ),
   },
   {
     field: 'ping.monitor.ip',
@@ -101,27 +103,25 @@ const monitorListColumns = [
       return (
         <EuiSeriesChart
           showDefaultAxis={false}
-          width={160}
           height={70}
+          stackBy="y"
+          // TODO: style hack
+          style={{ marginBottom: '-20px' }}
           xType={EuiSeriesChartUtils.SCALE.TIME}
         >
-          <EuiLineSeries
-            lineSize={2}
-            color="green"
-            name={i18n.translate('xpack.uptime.monitorList.upLineSeries.upLabel', {
-              defaultMessage: 'Up',
-            })}
-            data={upSeries}
-            showLineMarks={true}
-          />
-          <EuiLineSeries
-            lineSize={2}
-            color="red"
+          <EuiHistogramSeries
+            data={formatSparklineCounts(downSeries)}
             name={i18n.translate('xpack.uptime.monitorList.downLineSeries.downLabel', {
               defaultMessage: 'Down',
             })}
-            data={downSeries}
-            showLineMarks={true}
+            color="red"
+          />
+          <EuiHistogramSeries
+            data={formatSparklineCounts(upSeries)}
+            name={i18n.translate('xpack.uptime.monitorList.upLineSeries.upLabel', {
+              defaultMessage: 'Up',
+            })}
+            color="green"
           />
         </EuiSeriesChart>
       );
@@ -136,13 +136,13 @@ const monitorListPagination = {
 
 export const MonitorList = ({
   autorefreshInterval,
-  autorefreshEnabled,
+  autorefreshIsPaused,
   dateRangeStart,
   dateRangeEnd,
   filters,
-}: MonitorListProps) => (
+}: Props) => (
   <Query
-    pollInterval={autorefreshEnabled ? autorefreshInterval : undefined}
+    pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
     query={getMonitorListQuery}
     variables={{ dateRangeStart, dateRangeEnd, filters }}
   >

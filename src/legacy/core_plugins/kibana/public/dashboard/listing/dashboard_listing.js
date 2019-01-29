@@ -56,6 +56,7 @@ class DashboardListingUi extends React.Component {
     super(props);
 
     this.state = {
+      ...defaultSortOrder(this.props.initialFilter),
       hasInitialFetchReturned: false,
       isFetchingItems: false,
       showDeleteModal: false,
@@ -136,6 +137,15 @@ class DashboardListingUi extends React.Component {
     this.setState({ showDeleteModal: true });
   };
 
+  setFilter(filter) {
+    // If the user is searching, we want to clear the sort order so that
+    // results are ordered by Elasticsearch's relevance.
+    this.setState({
+      ...defaultSortOrder(filter),
+      filter,
+    }, this.fetchItems);
+  }
+
   onTableChange = ({ page, sort = {} }) => {
     const {
       index: pageIndex,
@@ -147,13 +157,17 @@ class DashboardListingUi extends React.Component {
       direction: sortDirection,
     } = sort;
 
-    // 3rd sorting state that is not captured by sort - native order (no sort)
-    // when switching from desc to asc for the same field - use native order
+    // 3rd sorting state that is not captured by sort - default order (asc by title)
+    // when switching from desc to asc for the same, non-default field - use default order,
+    // unless we have a filter, in which case, we want to use Elasticsearch's ranking order.
     if (this.state.sortField === sortField
       && this.state.sortDirection === 'desc'
       && sortDirection === 'asc') {
-      sortField = null;
-      sortDirection = null;
+
+      const defaultSort = defaultSortOrder(this.state.filter);
+
+      sortField = defaultSort.sortField;
+      sortDirection = defaultSort.sortDirection;
     }
 
     this.setState({
@@ -257,10 +271,7 @@ class DashboardListingUi extends React.Component {
                   listingLimitValue: this.props.listingLimit,
                   listingLimitText: (
                     <strong>
-                      <FormattedMessage
-                        id="kbn.dashboard.listing.listingLimitExceededListingLimitTitle"
-                        defaultMessage="listingLimit"
-                      />
+                      listingLimit
                     </strong>
                   ),
                   advancedSettingsLink: (
@@ -397,6 +408,7 @@ class DashboardListingUi extends React.Component {
             aria-label={intl.formatMessage({
               id: 'kbn.dashboard.listing.searchBar.searchFieldAriaLabel',
               defaultMessage: 'Filter dashboards',
+              description: '"Filter" is used as a verb here, similar to "search through dashboards".',
             })}
             placeholder={intl.formatMessage({
               id: 'kbn.dashboard.listing.searchBar.searchFieldPlaceholder',
@@ -404,11 +416,7 @@ class DashboardListingUi extends React.Component {
             })}
             fullWidth
             value={this.state.filter}
-            onChange={(e) => {
-              this.setState({
-                filter: e.target.value
-              }, this.fetchItems);
-            }}
+            onChange={(e) => this.setFilter(e.target.value)}
             data-test-subj="searchFilter"
           />
         </EuiFlexItem>
@@ -601,3 +609,22 @@ DashboardListingUi.defaultProps = {
 };
 
 export const DashboardListing = injectI18n(DashboardListingUi);
+
+// The table supports three sort states:
+// field-asc, field-desc, and default.
+//
+// If you click a non-default sort header three times,
+// the sort returns to the default sort, described here.
+function defaultSortOrder(filter) {
+  // If the user has searched for something, we want our
+  // default sort to be by Elasticsearch's relevance, so
+  // we clear out our overriding sort options.
+  if (filter.length > 0) {
+    return { sortField: undefined, sortDirection: undefined };
+  }
+
+  return {
+    sortField: 'title',
+    sortDirection: 'asc',
+  };
+}

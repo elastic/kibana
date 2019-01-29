@@ -11,6 +11,7 @@ import {
   LAYER_DATA_LOAD_ENDED,
   LAYER_DATA_LOAD_ERROR,
   ADD_LAYER,
+  SET_LAYER_ERROR_STATUS,
   ADD_WAITING_FOR_MAP_READY_LAYER,
   CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
   REMOVE_LAYER,
@@ -27,7 +28,6 @@ import {
   CLEAR_TEMPORARY_STYLES,
   SET_JOINS,
   TOUCH_LAYER,
-  UPDATE_LAYER_ALPHA_VALUE,
   UPDATE_SOURCE_PROP,
   SET_REFRESH_CONFIG,
   TRIGGER_REFRESH_TIMER,
@@ -122,9 +122,8 @@ export function map(state = INITIAL_STATE, action) {
       return {
         ...state,
         goto: {
-          lat: action.lat,
-          lon: action.lon,
-          zoom: action.zoom,
+          center: action.center,
+          bounds: action.bounds
         }
       };
     case CLEAR_GOTO:
@@ -134,8 +133,11 @@ export function map(state = INITIAL_STATE, action) {
       };
     case LAYER_DATA_LOAD_STARTED:
       return updateWithDataRequest(state, action);
+    case SET_LAYER_ERROR_STATUS:
+      return setErrorStatus(state, action);
     case LAYER_DATA_LOAD_ERROR:
-      return updateWithDataLoadError(state, action);
+      const errorRequestResetState = resetDataRequest(state, action);
+      return setErrorStatus(errorRequestResetState, action);
     case LAYER_DATA_LOAD_ENDED:
       return updateWithDataResponse(state, action);
     case TOUCH_LAYER:
@@ -192,13 +194,6 @@ export function map(state = INITIAL_STATE, action) {
       return { ...state, selectedLayerId: match ? action.selectedLayerId : null };
     case UPDATE_LAYER_ORDER:
       return { ...state, layerList: action.newLayerOrder.map(layerNumber => state.layerList[layerNumber]) };
-    case UPDATE_LAYER_ALPHA_VALUE:
-      const alphaLayer = state.layerList.find(layer => layer.id === action.id);
-      const preAlphaStyle = alphaLayer.style;
-      return updateLayerInList(state, action.id, 'style',
-        { ...preAlphaStyle, properties: { ...preAlphaStyle.properties,
-          alphaValue: action.newAlphaValue }
-        });
     case UPDATE_LAYER_PROP:
       return updateLayerInList(state, action.id, action.propName, action.newValue);
     case UPDATE_SOURCE_PROP:
@@ -272,6 +267,15 @@ export function map(state = INITIAL_STATE, action) {
   }
 }
 
+function setErrorStatus(state, { layerId, errorMessage }) {
+  const tmsErrorLayer = state.layerList.find(({ id }) => id === layerId);
+  return tmsErrorLayer
+    ? updateLayerInList(
+      updateLayerInList(state, tmsErrorLayer.id, 'isInErrorState', true),
+      tmsErrorLayer.id, 'errorMessage', errorMessage)
+    : state;
+}
+
 function findDataRequest(layerDescriptor, dataRequestAction) {
 
   if (!layerDescriptor.dataRequests) {
@@ -285,24 +289,17 @@ function findDataRequest(layerDescriptor, dataRequestAction) {
 
 
 function updateWithDataRequest(state, action) {
+  let dataRequest = getValidDataRequest(state, action, false);
   const layerRequestingData = findLayerById(state, action.layerId);
-  if (!layerRequestingData) {
-    return state;
-  }
 
-  if (!layerRequestingData.dataRequests) {
-    layerRequestingData.dataRequests = [];
-  }
-
-  let dataRequest = findDataRequest(layerRequestingData, action);
   if (!dataRequest) {
     dataRequest = {
       dataId: action.dataId
     };
-    layerRequestingData.dataRequests.push(dataRequest);
+    layerRequestingData.dataRequests = [
+      ...(layerRequestingData.dataRequests
+        ? layerRequestingData.dataRequests : []), dataRequest ];
   }
-  dataRequest.dataHasLoadError = false;
-  dataRequest.dataLoadError = null;
   dataRequest.dataMetaAtStart = action.meta;
   dataRequest.dataRequestToken = action.requestToken;
   const layerList = [...state.layerList];
@@ -310,59 +307,45 @@ function updateWithDataRequest(state, action) {
 }
 
 function updateWithDataResponse(state, action) {
-  const layerReceivingData = findLayerById(state, action.layerId);
-  if (!layerReceivingData) {
-    return state;
-  }
-
-
-  const dataRequest = findDataRequest(layerReceivingData, action);
-  if (!dataRequest) {
-    throw new Error('Data request should be initialized. Cannot call stopLoading before startLoading');
-  }
-
-  if (
-    dataRequest.dataRequestToken &&
-    dataRequest.dataRequestToken !== action.requestToken
-  ) {
-    // ignore responses to outdated requests
-    return { ...state };
-  }
+  const dataRequest = getValidDataRequest(state, action);
+  if (!dataRequest) { return state; }
 
   dataRequest.data = action.data;
   dataRequest.dataMeta = { ...dataRequest.dataMetaAtStart, ...action.meta };
   dataRequest.dataMetaAtStart = null;
+  return resetDataRequest(state, action, dataRequest);
+}
+
+function resetDataRequest(state, action, request) {
+  const dataRequest = request || getValidDataRequest(state, action);
+  if (!dataRequest) { return state; }
+
   dataRequest.dataRequestToken = null;
   dataRequest.dataId = action.dataId;
   const layerList = [...state.layerList];
   return { ...state, layerList };
 }
 
-function updateWithDataLoadError(state, action) {
+function getValidDataRequest(state, action, checkRequestToken = true) {
   const layer = findLayerById(state, action.layerId);
   if (!layer) {
-    return state;
+    return;
   }
 
   const dataRequest = findDataRequest(layer, action);
   if (!dataRequest) {
-    throw new Error('Data request should be initialized. Cannot call loadError before startLoading');
+    return;
   }
 
   if (
+    checkRequestToken &&
     dataRequest.dataRequestToken &&
     dataRequest.dataRequestToken !== action.requestToken
   ) {
     // ignore responses to outdated requests
-    return state;
+    return;
   }
-
-  dataRequest.dataHasLoadError = true;
-  dataRequest.dataLoadError = action.errorMessage;
-  dataRequest.dataRequestToken = null;
-  dataRequest.dataId = action.dataId;
-  const layerList = [...state.layerList];
-  return { ...state, layerList };
+  return dataRequest;
 }
 
 function findLayerById(state, id) {

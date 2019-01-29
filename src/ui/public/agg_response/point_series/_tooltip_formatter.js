@@ -18,6 +18,7 @@
  */
 
 import $ from 'jquery';
+import { getFormat } from '../../visualize/loader/pipeline_helpers/utilities';
 
 export function PointSeriesTooltipFormatter($compile, $rootScope) {
 
@@ -25,39 +26,41 @@ export function PointSeriesTooltipFormatter($compile, $rootScope) {
   const $tooltip = $(require('ui/agg_response/point_series/_tooltip.html'));
   $compile($tooltip)($tooltipScope);
 
-  return function tooltipFormatter(event) {
-    const datum = event.datum;
-    if (!datum || !datum.aggConfigResult) return '';
+  return function () {
+    return function tooltipFormatter(event) {
+      const data = event.data;
+      const datum = event.datum;
+      if (!datum) return '';
 
-    const details = $tooltipScope.details = [];
-    let result = { $parent: datum.aggConfigResult };
+      const details = $tooltipScope.details = [];
 
-    function addDetail(result) {
-      const agg = result.aggConfig;
-      const value = result.value;
+      const addDetail = (label, value) => details.push({ label, value });
 
-      const detail = {
-        value: agg.fieldFormatter()(value),
-        label: agg.makeLabel()
-      };
+      datum.extraMetrics.forEach(metric => {
+        addDetail(metric.label, metric.value);
+      });
 
-      if (agg === datum.aggConfigResult.aggConfig) {
-        detail.percent = event.percent;
-        if (datum.yScale != null) {
-          detail.value = agg.fieldFormatter()(value * datum.yScale);
-        }
+      if (datum.x) {
+        addDetail(data.xAxisLabel, data.xAxisFormatter(datum.x));
+      }
+      if (datum.y) {
+        const value = datum.yScale ? datum.yScale * datum.y : datum.y;
+        addDetail(data.yAxisLabel, data.yAxisFormatter(value));
+      }
+      if (datum.z) {
+        addDetail(data.zAxisLabel, data.zAxisFormatter(datum.z));
+      }
+      if (datum.series && datum.parent) {
+        const dimension = datum.parent;
+        const seriesFormatter = getFormat(dimension.format);
+        addDetail(dimension.title, seriesFormatter.convert(datum.series));
+      }
+      if (datum.tableRaw) {
+        addDetail(datum.tableRaw.title, datum.tableRaw.value);
       }
 
-      details.push(detail);
-    }
-
-    datum.extraMetrics.forEach(addDetail);
-    while ((result = result.$parent) && result.aggConfig) {
-      addDetail(result);
-    }
-
-
-    $tooltipScope.$apply();
-    return $tooltip[0].outerHTML;
+      $tooltipScope.$apply();
+      return $tooltip[0].outerHTML;
+    };
   };
 }

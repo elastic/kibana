@@ -27,6 +27,7 @@ export const rollupBadgeExtension = {
   label: i18n.translate('xpack.rollupJobs.indexMgmtBadge.rollupLabel', {
     defaultMessage: 'Rollup',
   }),
+  color: 'secondary'
 };
 
 addBadgeExtension(rollupBadgeExtension);

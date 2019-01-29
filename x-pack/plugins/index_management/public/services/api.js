@@ -83,6 +83,20 @@ export async function clearCacheIndices(indices) {
   const response = await httpClient.post(`${apiPrefix}/indices/clear_cache`, body);
   return response.data;
 }
+export async function freezeIndices(indices) {
+  const body = {
+    indices
+  };
+  const response = await httpClient.post(`${apiPrefix}/indices/freeze`, body);
+  return response.data;
+}
+export async function unfreezeIndices(indices) {
+  const body = {
+    indices
+  };
+  const response = await httpClient.post(`${apiPrefix}/indices/unfreeze`, body);
+  return response.data;
+}
 
 export async function loadIndexSettings(indexName) {
   const response = await httpClient.get(`${apiPrefix}/settings/${indexName}`);

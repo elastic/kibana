@@ -21,8 +21,6 @@ import moment from 'moment-timezone';
 import numeralLanguages from '@elastic/numeral/languages';
 import { i18n } from '@kbn/i18n';
 
-import { IS_KIBANA_RELEASE } from '../../../utils';
-
 export function getUiSettingDefaults() {
   const weekdays = moment.weekdays().slice();
   const [defaultWeekday] = weekdays;
@@ -77,7 +75,7 @@ export function getUiSettingDefaults() {
       name: i18n.translate('kbn.advancedSettings.k7designTitle', {
         defaultMessage: 'Use the new K7 UI design',
       }),
-      value: IS_KIBANA_RELEASE,
+      value: true,
       description: i18n.translate('kbn.advancedSettings.k7designText', {
         defaultMessage:
           'When set, Kibana will use the new K7 design targeted for release in 7.0. At this time, not all features are implemented.',
@@ -779,30 +777,52 @@ export function getUiSettingDefaults() {
         defaultMessage: 'Time picker quick ranges',
       }),
       value: JSON.stringify([
-        { from: 'now/d',    to: 'now/d',    display: 'Today',                 section: 0 },
-        { from: 'now/w',    to: 'now/w',    display: 'This week',             section: 0 },
-        { from: 'now/M',    to: 'now/M',    display: 'This month',            section: 0 },
-        { from: 'now/y',    to: 'now/y',    display: 'This year',             section: 0 },
-        { from: 'now/d',    to: 'now',      display: 'Today so far',          section: 0 },
-        { from: 'now/w',    to: 'now',      display: 'Week to date',          section: 0 },
-        { from: 'now/M',    to: 'now',      display: 'Month to date',         section: 0 },
-        { from: 'now/y',    to: 'now',      display: 'Year to date',          section: 0 },
+        { from: 'now/d',    to: 'now/d',
+          display: i18n.translate('kbn.advancedSettings.timepicker.today', { defaultMessage: 'Today' }),			              section: 0 },
+        { from: 'now/w',    to: 'now/w',
+          display: i18n.translate('kbn.advancedSettings.timepicker.thisWeek', { defaultMessage: 'This week' }),			      section: 0 },
+        { from: 'now/M',    to: 'now/M',
+          display: i18n.translate('kbn.advancedSettings.timepicker.thisMonth', { defaultMessage: 'This month' }),			    section: 0 },
+        { from: 'now/y',    to: 'now/y',
+          display: i18n.translate('kbn.advancedSettings.timepicker.thisYear', { defaultMessage: 'This year' }),			      section: 0 },
+        { from: 'now/d',    to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.todaySoFar', { defaultMessage: 'Today so far' }),			  section: 0 },
+        { from: 'now/w',    to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.weekToDate', { defaultMessage: 'Week to date' }),			  section: 0 },
+        { from: 'now/M',    to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.monthToDate', { defaultMessage: 'Month to date' }),			section: 0 },
+        { from: 'now/y',    to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.yearToDate', { defaultMessage: 'Year to date' }),			  section: 0 },
 
-        { from: 'now-15m',  to: 'now',      display: 'Last 15 minutes',       section: 1 },
-        { from: 'now-30m',  to: 'now',      display: 'Last 30 minutes',       section: 1 },
-        { from: 'now-1h',   to: 'now',      display: 'Last 1 hour',           section: 1 },
-        { from: 'now-4h',   to: 'now',      display: 'Last 4 hours',          section: 1 },
-        { from: 'now-12h',  to: 'now',      display: 'Last 12 hours',         section: 1 },
-        { from: 'now-24h',  to: 'now',      display: 'Last 24 hours',         section: 1 },
-        { from: 'now-7d',   to: 'now',      display: 'Last 7 days',           section: 1 },
+        { from: 'now-15m',  to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last15Minutes', { defaultMessage: 'Last 15 minutes' }),	section: 1 },
+        { from: 'now-30m',  to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last30Minutes', { defaultMessage: 'Last 30 minutes' }),	section: 1 },
+        { from: 'now-1h',   to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last1Hour', { defaultMessage: 'Last 1 hour' }),			    section: 1 },
+        { from: 'now-4h',   to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last4Hours', { defaultMessage: 'Last 4 hours' }),			  section: 1 },
+        { from: 'now-12h',  to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last12Hours', { defaultMessage: 'Last 12 hours' }),			section: 1 },
+        { from: 'now-24h',  to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last24Hours', { defaultMessage: 'Last 24 hours' }),			section: 1 },
+        { from: 'now-7d',   to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last7Days', { defaultMessage: 'Last 7 days' }),			    section: 1 },
 
-        { from: 'now-30d',  to: 'now',      display: 'Last 30 days',          section: 2 },
-        { from: 'now-60d',  to: 'now',      display: 'Last 60 days',          section: 2 },
-        { from: 'now-90d',  to: 'now',      display: 'Last 90 days',          section: 2 },
-        { from: 'now-6M',   to: 'now',      display: 'Last 6 months',         section: 2 },
-        { from: 'now-1y',   to: 'now',      display: 'Last 1 year',           section: 2 },
-        { from: 'now-2y',   to: 'now',      display: 'Last 2 years',          section: 2 },
-        { from: 'now-5y',   to: 'now',      display: 'Last 5 years',          section: 2 },
+        { from: 'now-30d',  to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last30Days', { defaultMessage: 'Last 30 days' }),			  section: 2 },
+        { from: 'now-60d',  to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last60Days', { defaultMessage: 'Last 60 days' }),			  section: 2 },
+        { from: 'now-90d',  to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last90Days', { defaultMessage: 'Last 90 days' }),			  section: 2 },
+        { from: 'now-6M',   to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last6Months', { defaultMessage: 'Last 6 months' }),			section: 2 },
+        { from: 'now-1y',   to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last1Year', { defaultMessage: 'Last 1 year' }),			    section: 2 },
+        { from: 'now-2y',   to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last2Years', { defaultMessage: 'Last 2 years' }),			  section: 2 },
+        { from: 'now-5y',   to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last5Years', { defaultMessage: 'Last 5 years' }),			  section: 2 },
 
       ], null, 2),
       type: 'json',
@@ -825,15 +845,14 @@ export function getUiSettingDefaults() {
         },
       }),
     },
-    'dashboard:defaultDarkTheme': {
-      name: i18n.translate('kbn.advancedSettings.dashboardDarkThemeTitle', {
-        defaultMessage: 'Dark theme',
+    'theme:darkMode': {
+      name: i18n.translate('kbn.advancedSettings.darkModeTitle', {
+        defaultMessage: 'Dark mode',
       }),
       value: false,
-      description: i18n.translate('kbn.advancedSettings.dashboardDarkThemeText', {
-        defaultMessage: 'New dashboards use dark theme by default',
+      description: i18n.translate('kbn.advancedSettings.darkModeText', {
+        defaultMessage: `Enable a dark mode for the Kibana UI. A page refresh is required for the setting to be applied.`,
       }),
-      category: ['dashboard'],
     },
     'filters:pinnedByDefault': {
       name: i18n.translate('kbn.advancedSettings.pinFiltersTitle', {
@@ -847,6 +866,7 @@ export function getUiSettingDefaults() {
     'filterEditor:suggestValues': {
       name: i18n.translate('kbn.advancedSettings.suggestFilterValuesTitle', {
         defaultMessage: 'Filter editor suggest values',
+        description: '"Filter editor" refers to the UI you create filters in.',
       }),
       value: true,
       description: i18n.translate('kbn.advancedSettings.suggestFilterValuesText', {
