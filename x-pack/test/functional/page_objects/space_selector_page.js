@@ -12,7 +12,7 @@ export function SpaceSelectorPageProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const find = getService('find');
-  const PageObjects = getPageObjects(['common', 'home', 'security']);
+  const PageObjects = getPageObjects(['common', 'header', 'security']);
 
   class SpaceSelectorPage {
     async initTests() {
@@ -51,6 +51,27 @@ export function SpaceSelectorPageProvider({ getService, getPageObjects }) {
         await testSubjects.click(`space-avatar-${spaceId}`);
         await PageObjects.common.sleep(1000);
       });
+    }
+
+    /**
+     * @param {string} [spaceId]
+     * @param {string} [opts] - options object
+     * @param {string} [opts.redirectPath] - subroute to redirect to (the part after the hash #)
+     */
+    async switchToSpace(spaceId = 'default', opts = { redirectPath: null }) {
+      log.debug(`switchToSpace(${spaceId})`);
+      await this.openSpacesNav();
+      await this.clickSpaceAvatar(spaceId);
+      if (opts.redirectPath) {
+        const serverBasePath = spaceId === 'default'
+          ? PageObjects.common.getHostPort() + '/app/kibana'
+          : PageObjects.common.getHostPort() + `/s/${spaceId}/app/kibana`;
+        await retry.try(async () => {
+          log.debug(`switchToSpace(${spaceId}): redirect to ${serverBasePath}`);
+          await browser.get(`${serverBasePath}#${opts.redirectPath}`);
+          await PageObjects.header.waitUntilLoadingHasFinished();
+        });
+      }
     }
   }
 
