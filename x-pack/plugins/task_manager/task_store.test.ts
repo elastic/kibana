@@ -70,7 +70,6 @@ describe('TaskStore', () => {
 
       expect(arg).toMatchObject({
         index: 'tasky',
-        type: '_doc',
         body: {
           task: {
             params: JSON.stringify(task.params),
@@ -138,7 +137,6 @@ describe('TaskStore', () => {
     test('empty call filters by type, sorts by runAt and id', async () => {
       const { args } = await testFetch();
       expect(args).toMatchObject({
-        type: '_doc',
         index: 'tasky',
         body: {
           sort: [{ 'task.runAt': 'asc' }, { _id: 'desc' }],
@@ -350,7 +348,6 @@ describe('TaskStore', () => {
           version: true,
         },
         index,
-        type: '_doc',
       });
     });
 
@@ -457,7 +454,6 @@ describe('TaskStore', () => {
       expect(callCluster.args[0][1]).toMatchObject({
         id: task.id,
         index: 'tasky',
-        type: '_doc',
         version: 2,
         refresh: true,
         body: {
@@ -507,7 +503,6 @@ describe('TaskStore', () => {
       expect(callCluster.args[0][1]).toMatchObject({
         id,
         index: 'myindex',
-        type: '_doc',
         refresh: true,
       });
     });

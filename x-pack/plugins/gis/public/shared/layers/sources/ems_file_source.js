@@ -7,8 +7,6 @@
 import { AbstractVectorSource } from './vector_source';
 import React from 'react';
 import {
-  EuiLink,
-  EuiText,
   EuiSelect,
   EuiFormRow,
 } from '@elastic/eui';
@@ -70,17 +68,12 @@ export class EMSFileSource extends AbstractVectorSource {
     };
   }
 
-  renderDetails() {
-    const emsHotLink = emsServiceSettings.getEMSHotLink(this._descriptor.id);
-    return (
-      <EuiText color="subdued" size="s">
-        <p className="gisLayerDetails">
-          <strong className="gisLayerDetails__label">Source </strong><span>Elastic Maps Service</span><br/>
-          <strong className="gisLayerDetails__label">Id </strong><span>{this._descriptor.id}</span><br/>
-          <EuiLink href={emsHotLink} target="_blank">Preview on maps.elastic.co</EuiLink><br/>
-        </p>
-      </EuiText>
-    );
+  async getImmutableProperties() {
+    const emsLink = await emsServiceSettings.getEMSHotLink({ id: this._descriptor.id });
+    return [
+      { label: 'Data source', value: EMSFileSource.title },
+      { label: 'Layer', value: this._descriptor.id, link: emsLink }
+    ];
   }
 
   async getDisplayName() {

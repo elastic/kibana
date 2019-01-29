@@ -9,7 +9,6 @@ import React from 'react';
 import { AbstractLayer } from './layer';
 import { EuiIcon } from '@elastic/eui';
 import { HeatmapStyle } from './styles/heatmap_style';
-import { getGeohashPrecisionForZoom } from '../utils/zoom_to_precision';
 
 const SCALED_PROPERTY_NAME = '__kbn_heatmap_weight__';//unique name to store scaled value for weighting
 
@@ -114,9 +113,8 @@ export class HeatmapLayer extends AbstractLayer {
     const sourceDataRequest = this.getSourceDataRequest();
     const dataMeta = sourceDataRequest ? sourceDataRequest.getMeta() : {};
 
-    const targetPrecisionUnadjusted = getGeohashPrecisionForZoom(dataFilters.zoom);
-    const targetPrecision = targetPrecisionUnadjusted + this._source.getGeohashPrecisionResolutionDelta();
-    const isSamePrecision = dataMeta.precision === targetPrecision;
+    const geogridPrecision = this._source.getGeoGridPrecision(dataFilters.zoom);
+    const isSamePrecision = dataMeta.geogridPrecision === geogridPrecision;
 
     const isSameTime = _.isEqual(dataMeta.timeFilters, dataFilters.timeFilters);
 
@@ -143,21 +141,21 @@ export class HeatmapLayer extends AbstractLayer {
 
     const newDataMeta = {
       ...dataFilters,
-      precision: targetPrecision,
+      geogridPrecision,
       metric: metricPropertyKey
     };
     await this._fetchNewData({ startLoading, stopLoading, onLoadError, dataMeta: newDataMeta });
   }
 
   async _fetchNewData({ startLoading, stopLoading, onLoadError, dataMeta }) {
-    const { precision: geohashPrecision, timeFilters, buffer, query } = dataMeta;
+    const { geogridPrecision, timeFilters, buffer, query } = dataMeta;
     const requestToken = Symbol(`layer-source-refresh: this.getId()`);
     startLoading('source', requestToken, dataMeta);
     try {
       const layerName = await this.getDisplayName();
       const data = await this._source.getGeoJsonPoints({ layerName }, {
-        geohashPrecision: geohashPrecision,
-        buffer: buffer,
+        geogridPrecision,
+        buffer,
         timeFilters,
         query,
       });
