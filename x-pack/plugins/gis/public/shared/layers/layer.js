@@ -11,13 +11,12 @@ import { DataRequest } from './util/data_request';
 const SOURCE_UPDATE_REQUIRED = true;
 const NO_SOURCE_UPDATE_REQUIRED = false;
 
-export class ALayer {
+export class AbstractLayer {
 
   constructor({ layerDescriptor, source, style }) {
-    this._descriptor = layerDescriptor;
+    this._descriptor = AbstractLayer.createDescriptor(layerDescriptor);
     this._source = source;
     this._style = style;
-
     if (this._descriptor.dataRequests) {
       this._dataRequests = this._descriptor.dataRequests.map(dataRequest => new DataRequest(dataRequest));
     } else {
@@ -30,19 +29,18 @@ export class ALayer {
     return mbStyle.sources[sourceId].data;
   }
 
-  static createDescriptor(options) {
-    const layerDescriptor = {};
+  static createDescriptor(options = {}) {
+    const layerDescriptor = { ...options };
 
-    layerDescriptor.dataRequests = [];
-    layerDescriptor.id = Math.random().toString(36).substr(2, 5);
+    layerDescriptor.dataRequests = _.get(options, 'dataRequests', []);
+    layerDescriptor.id = _.get(options, 'id', Math.random().toString(36).substr(2, 5));
     layerDescriptor.label = options.label && options.label.length > 0 ? options.label : null;
     layerDescriptor.minZoom = _.get(options, 'minZoom', 0);
     layerDescriptor.maxZoom = _.get(options, 'maxZoom', 24);
-    layerDescriptor.source = options.source;
-    layerDescriptor.sourceDescriptor = options.sourceDescriptor;
-    layerDescriptor.visible = options.visible || true;
-    layerDescriptor.temporary = options.temporary || false;
-    layerDescriptor.style = options.style || {};
+    layerDescriptor.alpha = _.get(options, 'alpha', 0.75);
+    layerDescriptor.visible = _.get(options, 'visible', true);
+    layerDescriptor.temporary = _.get(options, 'temporary', false);
+    layerDescriptor.style = _.get(options, 'style',  {});
     return layerDescriptor;
   }
 
@@ -65,7 +63,10 @@ export class ALayer {
   }
 
   async getAttributions() {
-    return await this._source.getAttributions();
+    if (!this.hasErrors()) {
+      return await this._source.getAttributions();
+    }
+    return [];
   }
 
   getLabel() {
@@ -109,6 +110,10 @@ export class ALayer {
     return this._descriptor.maxZoom;
   }
 
+  getAlpha() {
+    return this._descriptor.alpha;
+  }
+
   getZoomConfig() {
     return {
       minZoom: this._descriptor.minZoom,
@@ -136,21 +141,20 @@ export class ALayer {
     return this._source.renderSourceSettingsEditor({ onChange });
   };
 
+  getSourceDataRequest() {
+    return this._dataRequests.find(dataRequest => dataRequest.getDataId() === 'source');
+  }
+
   isLayerLoading() {
     return this._dataRequests.some(dataRequest => dataRequest.isLoading());
   }
 
-  dataHasLoadError() {
-    return this._dataRequests.some(dataRequest => dataRequest.hasLoadError());
+  hasErrors() {
+    return _.get(this._descriptor, 'isInErrorState', false);
   }
 
-  getDataLoadError() {
-    const loadErrors =  this._dataRequests
-      .filter(dataRequest => dataRequest.hasLoadError())
-      .map(dataRequest => {
-        return dataRequest._descriptor.dataLoadError;
-      });
-    return loadErrors.join(',');
+  getErrors() {
+    return this.hasErrors() ? this._descriptor.errorMessage : '';
   }
 
   toLayerDescriptor() {
@@ -198,12 +202,22 @@ export class ALayer {
       : SOURCE_UPDATE_REQUIRED;
   }
 
-  renderStyleEditor(style, options) {
-    return style.renderEditor(options);
+  getLayerTypeIconName() {
+    throw new Error('should implement Layer#getLayerTypeIconName');
   }
 
-  getSourceDataRequest() {
-    return this._dataRequests.find(dataRequest => dataRequest.getDataId() === 'source');
+
+  async getBounds() {
+    return {
+      min_lon: -180,
+      max_lon: 180,
+      min_lat: -89,
+      max_lat: 89
+    };
+  }
+
+  renderStyleEditor(style, options) {
+    return style.renderEditor(options);
   }
 
   getIndexPatternIds() {

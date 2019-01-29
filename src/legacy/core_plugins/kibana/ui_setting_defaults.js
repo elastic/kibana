@@ -823,15 +823,14 @@ export function getUiSettingDefaults() {
         },
       }),
     },
-    'dashboard:defaultDarkTheme': {
-      name: i18n.translate('kbn.advancedSettings.dashboardDarkThemeTitle', {
-        defaultMessage: 'Dark theme',
+    'theme:darkMode': {
+      name: i18n.translate('kbn.advancedSettings.darkModeTitle', {
+        defaultMessage: 'Dark mode',
       }),
       value: false,
-      description: i18n.translate('kbn.advancedSettings.dashboardDarkThemeText', {
-        defaultMessage: 'New dashboards use dark theme by default',
+      description: i18n.translate('kbn.advancedSettings.darkModeText', {
+        defaultMessage: `Enable a dark mode for the Kibana UI. A page refresh is required for the setting to be applied.`,
       }),
-      category: ['dashboard'],
     },
     'filters:pinnedByDefault': {
       name: i18n.translate('kbn.advancedSettings.pinFiltersTitle', {

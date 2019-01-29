@@ -5,10 +5,11 @@
  */
 
 import mapboxgl from 'mapbox-gl';
+import turf from 'turf';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { ALayer } from './layer';
+import { AbstractLayer } from './layer';
 import { VectorStyle } from './styles/vector_style';
 import { LeftInnerJoin } from './joins/left_inner_join';
 
@@ -16,14 +17,13 @@ import { FeatureTooltip } from 'plugins/gis/components/map/feature_tooltip';
 import { store } from '../../store/store';
 import { getMapColors } from '../../selectors/map_selectors';
 import _ from 'lodash';
-import { getGeohashPrecisionForZoom } from '../utils/zoom_to_precision';
 
 const EMPTY_FEATURE_COLLECTION = {
   type: 'FeatureCollection',
   features: []
 };
 
-export class VectorLayer extends ALayer {
+export class VectorLayer extends AbstractLayer {
 
   static type = 'VECTOR';
 
@@ -91,13 +91,33 @@ export class VectorLayer extends ALayer {
     return this._style.getIcon(isPointsOnly);
   }
 
-  getColorRamp() {
-    // TODO: Determine if can be data-driven first
-    return this._style.getColorRamp();
+  getLayerTypeIconName() {
+    return 'vector';
   }
 
   getTOCDetails() {
     return this._style.getTOCDetails();
+  }
+
+  _getBoundsBasedOnData() {
+    const featureCollection = this._getSourceFeatureCollection();
+    if (!featureCollection) {
+      return null;
+    }
+    const bbox =  turf.bbox(featureCollection);
+    return {
+      min_lon: bbox[0],
+      min_lat: bbox[1],
+      max_lon: bbox[2],
+      max_lat: bbox[3]
+    };
+  }
+
+  async getBounds(filters) {
+    if (this._source.isBoundsAware()) {
+      return await this._source.getBoundsForFilters(filters);
+    }
+    return this._getBoundsBasedOnData();
   }
 
   async getStringFields() {
@@ -149,7 +169,7 @@ export class VectorLayer extends ALayer {
     const extentAware = source.isFilterByMapBounds();
     const isFieldAware = source.isFieldAware();
     const isQueryAware = source.isQueryAware();
-    const isGeohashPrecisionAware = source.isGeohashPrecisionAware();
+    const isGeoGridPrecisionAware = source.isGeoGridPrecisionAware();
 
     if (
       !timeAware &&
@@ -157,7 +177,7 @@ export class VectorLayer extends ALayer {
       !extentAware &&
       !isFieldAware &&
       !isQueryAware &&
-      !isGeohashPrecisionAware
+      !isGeoGridPrecisionAware
     ) {
       const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
       if (sourceDataRequest && sourceDataRequest.hasDataOrRequestInProgress()) {
@@ -196,8 +216,8 @@ export class VectorLayer extends ALayer {
     }
 
     let updateDueToPrecisionChange = false;
-    if (isGeohashPrecisionAware) {
-      updateDueToPrecisionChange = !_.isEqual(meta.geohashPrecision, searchFilters.geohashPrecision);
+    if (isGeoGridPrecisionAware) {
+      updateDueToPrecisionChange = !_.isEqual(meta.geogridPrecision, searchFilters.geogridPrecision);
     }
 
     const updateDueToExtentChange = this.updateDueToExtent(source, meta, searchFilters);
@@ -254,7 +274,6 @@ export class VectorLayer extends ALayer {
     return await Promise.all(joinSyncs);
   }
 
-
   _getSearchFilters(dataFilters) {
     const fieldNames = [
       ...this._source.getFieldNames(),
@@ -264,11 +283,10 @@ export class VectorLayer extends ALayer {
       })
     ];
 
-    const targetPrecision = getGeohashPrecisionForZoom(dataFilters.zoom);
     return {
       ...dataFilters,
       fieldNames: _.uniq(fieldNames).sort(),
-      geohashPrecision: targetPrecision
+      geogridPrecision: this._source.getGeoGridPrecision(dataFilters.zoom),
     };
   }
 
@@ -373,7 +391,7 @@ export class VectorLayer extends ALayer {
       return;
     }
 
-    const dataBoundToMap = ALayer.getBoundDataForSource(mbMap, this.getId());
+    const dataBoundToMap = AbstractLayer.getBoundDataForSource(mbMap, this.getId());
     if (featureCollection !== dataBoundToMap) {
       mbGeoJSONSource.setData(featureCollection);
     }
@@ -397,13 +415,17 @@ export class VectorLayer extends ALayer {
       });
       mbMap.setFilter(pointLayerId, ['any', ['==', ['geometry-type'], 'Point'], ['==', ['geometry-type'], 'MultiPoint']]);
     }
-    this._style.setMBPaintPropertiesForPoints(mbMap, this.getId(), pointLayerId);
+    this._style.setMBPaintPropertiesForPoints({
+      alpha: this.getAlpha(),
+      mbMap,
+      pointLayerId: pointLayerId,
+    });
     mbMap.setLayoutProperty(pointLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     mbMap.setLayerZoomRange(pointLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
     this._addTooltipListeners(mbMap, pointLayerId);
   }
 
-  _setMbLinePolygonProeprties(mbMap) {
+  _setMbLinePolygonProperties(mbMap) {
     const sourceId = this.getId();
     const fillLayerId = this.getId() + '_fill';
     const lineLayerId = this.getId() + '_line';
@@ -437,7 +459,12 @@ export class VectorLayer extends ALayer {
         ['==', ['geometry-type'], 'MultiLineString']
       ]);
     }
-    this._style.setMBPaintProperties(mbMap, this.getId(), fillLayerId, lineLayerId, this.isTemporary());
+    this._style.setMBPaintProperties({
+      alpha: this.getAlpha(),
+      mbMap,
+      fillLayerId,
+      lineLayerId,
+    });
     mbMap.setLayoutProperty(fillLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     mbMap.setLayoutProperty(lineLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     mbMap.setLayerZoomRange(lineLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
@@ -447,7 +474,7 @@ export class VectorLayer extends ALayer {
 
   _syncStylePropertiesWithMb(mbMap) {
     this._setMbPointsProperties(mbMap);
-    this._setMbLinePolygonProeprties(mbMap);
+    this._setMbLinePolygonProperties(mbMap);
   }
 
   _syncSourceBindingWithMb(mbMap) {

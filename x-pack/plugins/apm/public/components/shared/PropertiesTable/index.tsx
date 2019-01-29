@@ -10,6 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { get, indexBy, uniq } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
+import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { StringMap } from '../../../../typings/common';
 import {
   colors,
@@ -44,14 +46,9 @@ const EuiIconWithSpace = styled(EuiIcon)`
   margin-right: ${px(units.half)};
 `;
 
-export interface Tab {
-  key: string;
-  label: string;
-}
-
-export function getPropertyTabNames(selected: string[]): Tab[] {
+export function getPropertyTabNames(obj: Transaction | APMError) {
   return PROPERTY_CONFIG.filter(
-    ({ key, required }) => required || selected.includes(key)
+    ({ key, required }) => required || obj.hasOwnProperty(key)
   ).map(({ key, label }) => ({ key, label }));
 }
 
