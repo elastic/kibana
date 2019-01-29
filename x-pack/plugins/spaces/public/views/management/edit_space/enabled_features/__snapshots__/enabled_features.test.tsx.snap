@@ -164,21 +164,19 @@ exports[`EnabledFeatures renders as expected 1`] = `
       <EuiSpacer
         size="s"
       />
-      <React.Fragment>
-        <EuiText
-          color="subdued"
-          grow={true}
-          size="s"
-        >
-          <p>
-            <FormattedMessage
-              defaultMessage="This is not a security mechanism."
-              id="xpack.spaces.management.enabledSpaceFeatures.notASecurityMechanismMessage"
-              values={Object {}}
-            />
-          </p>
-        </EuiText>
-      </React.Fragment>
+      <EuiText
+        color="subdued"
+        grow={true}
+        size="s"
+      >
+        <p>
+          <FormattedMessage
+            defaultMessage="This is not a security mechanism."
+            id="xpack.spaces.management.enabledSpaceFeatures.notASecurityMechanismMessage"
+            values={Object {}}
+          />
+        </p>
+      </EuiText>
     </EuiFlexItem>
     <EuiFlexItem
       component="div"
