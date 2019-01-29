@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { oc } from 'ts-optchain';
+import { idx } from 'x-pack/plugins/apm/common/idx';
 import { Setup } from '../../../helpers/setup_request';
 
 interface IOptions {
@@ -53,7 +53,7 @@ export async function getMlBucketSize({
 
   try {
     const resp = await client<ESResponse>('search', params);
-    return oc(resp).hits.hits[0]._source.bucket_span(0);
+    return idx(resp, _ => _.hits.hits[0]._source.bucket_span) || 0;
   } catch (err) {
     const isHttpError = 'statusCode' in err;
     if (isHttpError) {

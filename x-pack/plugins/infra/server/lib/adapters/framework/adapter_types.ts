@@ -7,9 +7,10 @@
 import { SearchResponse } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
 import { Lifecycle, ResponseToolkit, RouteOptions } from 'hapi';
-import { InfraMetricModel } from '../metrics/adapter_types';
+import { Legacy } from 'kibana';
 
 import { JsonObject } from '../../../../common/typed_json';
+import { InfraMetricModel } from '../metrics/adapter_types';
 
 export const internalInfraFrameworkRequest = Symbol('internalInfraFrameworkRequest');
 
@@ -50,7 +51,8 @@ export interface InfraBackendFrameworkAdapter {
     method: string,
     options?: object
   ): Promise<InfraDatabaseSearchResponse>;
-  getIndexPatternsService(req: InfraFrameworkRequest<any>): InfraFrameworkIndexPatternsService;
+  getIndexPatternsService(req: InfraFrameworkRequest<any>): Legacy.IndexPatternsService;
+  getSavedObjectsService(): Legacy.SavedObjectsService;
   makeTSVBRequest(
     req: InfraFrameworkRequest,
     model: InfraMetricModel,
@@ -104,6 +106,12 @@ export interface InfraDatabaseResponse {
 
 export interface InfraDatabaseSearchResponse<Hit = {}, Aggregations = undefined>
   extends InfraDatabaseResponse {
+  _shards: {
+    total: number;
+    successful: number;
+    skipped: number;
+    failed: number;
+  };
   aggregations?: Aggregations;
   hits: {
     total: number;
@@ -170,20 +178,6 @@ export interface InfraFieldDetails {
 
 export interface InfraFieldDef {
   [type: string]: InfraFieldDetails;
-}
-
-interface InfraFrameworkIndexFieldDescriptor {
-  name: string;
-  type: string;
-  searchable: boolean;
-  aggregatable: boolean;
-  readFromDocValues: boolean;
-}
-
-export interface InfraFrameworkIndexPatternsService {
-  getFieldsForWildcard(options: {
-    pattern: string | string[];
-  }): Promise<InfraFrameworkIndexFieldDescriptor[]>;
 }
 
 export interface InfraTSVBResponse {

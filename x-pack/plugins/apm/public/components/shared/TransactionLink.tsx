@@ -14,17 +14,14 @@ interface TransactionLinkProps {
 }
 
 /**
- * Return the path and query used to build a trace link,
- * given either a v2 Transaction or a Transaction Group
+ * Return the path and query used to build a trace link
  */
 export function getLinkProps(transaction: Transaction) {
-  const serviceName = transaction.context.service.name;
+  const serviceName = transaction.service.name;
   const transactionType = transaction.transaction.type;
-  const traceId =
-    transaction.version === 'v2' ? transaction.trace.id : undefined;
+  const traceId = transaction.trace.id;
   const transactionId = transaction.transaction.id;
   const name = transaction.transaction.name;
-
   const encodedName = legacyEncodeURIComponent(name);
 
   return {

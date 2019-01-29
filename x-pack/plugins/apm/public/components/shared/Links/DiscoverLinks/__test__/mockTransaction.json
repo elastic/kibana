@@ -13,7 +13,38 @@
   },
   "@timestamp": "2018-12-18T00:14:30.952Z",
   "host": {
-    "name": "227453131a17"
+    "hostname": "227453131a17"
+  },
+  "service": {
+    "agent": {
+      "name": "go",
+      "version": "1.1.1"
+    },
+    "framework": {
+      "name": "gin",
+      "version": "v1.4.0-dev"
+    },
+    "name": "opbeans-go",
+    "runtime": {
+      "name": "gc",
+      "version": "go1.10.6"
+    },
+    "language": {
+      "name": "go",
+      "version": "go1.10.6"
+    }
+  },
+  "process": {
+    "pid": 1,
+    "title": "opbeans-go",
+    "argv": [
+      "/opbeans-go",
+      "-listen=:3000",
+      "-frontend=/opbeans-frontend",
+      "-db=postgres:",
+      "-cache=redis://redis:6379"
+    ],
+    "ppid": 0
   },
   "context": {
     "request": {
@@ -35,18 +66,6 @@
         "pathname": "/api/products/3/customers"
       }
     },
-    "process": {
-      "pid": 1,
-      "title": "opbeans-go",
-      "argv": [
-        "/opbeans-go",
-        "-listen=:3000",
-        "-frontend=/opbeans-frontend",
-        "-db=postgres:",
-        "-cache=redis://redis:6379"
-      ],
-      "ppid": 0
-    },
     "system": {
       "hostname": "8acb9c1a71f3",
       "ip": "172.18.0.7",
@@ -63,25 +82,6 @@
         "Content-Type": "application/json; charset=utf-8"
       },
       "status_code": 200
-    },
-    "service": {
-      "agent": {
-        "name": "go",
-        "version": "1.1.1"
-      },
-      "framework": {
-        "name": "gin",
-        "version": "v1.4.0-dev"
-      },
-      "name": "opbeans-go",
-      "runtime": {
-        "name": "gc",
-        "version": "go1.10.6"
-      },
-      "language": {
-        "name": "go",
-        "version": "go1.10.6"
-      }
     }
   },
   "transaction": {
@@ -110,6 +110,5 @@
   },
   "timestamp": {
     "us": 1545092070952472
-  },
-  "version": "v2"
+  }
 }

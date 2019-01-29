@@ -9,7 +9,7 @@ import * as React from 'react';
 import styled from 'styled-components';
 
 interface InfraLoadingProps {
-  text: string;
+  text: string | JSX.Element;
   height: number | string;
   width: number | string;
 }
