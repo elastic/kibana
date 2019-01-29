@@ -38,13 +38,9 @@
       line-height: normal;
 
       label {
+        @include __legacyLabelStyles__bad;
         margin-bottom: $euiSizeXS;
-        font-weight: $euiFontWeightBold;
         display: block;
-      }
-
-      label[for] {
-        cursor: pointer;
       }
 
       &.active {
@@ -95,7 +91,7 @@
     padding: $euiSizeXS $euiSizeS;
     display: flex;
     justify-content: space-between;
-    background-color: shadeOrTint($euiColorPrimary, 60%, 30%);
+    background-color: shade($euiColorPrimary, 60%);
     color: $euiColorEmptyShade;
     line-height: $euiSizeL;
 

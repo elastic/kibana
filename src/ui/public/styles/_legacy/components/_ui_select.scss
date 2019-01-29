@@ -107,15 +107,12 @@ body > .select2-container.open {
 }
 
 .ui-select-bootstrap .ui-select-toggle {
-  position: relative;
+  @include __legacyInputStyles__bad;
+  @include __legacySelectStyles__bad;
 }
 
 .ui-select-bootstrap .ui-select-toggle > .caret {
-  position: absolute;
-  height: 10px;
-  top: 50%;
-  right: 10px;
-  margin-top: -2px;
+  display: none;
 }
 
 /* Fix Bootstrap dropdown position when inside a input-group */
@@ -145,15 +142,12 @@ body > .select2-container.open {
 }
 
 .ui-select-bootstrap > .ui-select-match > .btn {
-  /* Instead of center because of .btn */
-  text-align: left !important;
-  border: $euiBorderThin;
-  background-color: $euiFormBackgroundColor;
-  color: $euiColorDarkestShade;
+  @include __legacyInputStyles__bad;
+  @include __legacySelectStyles__bad;
+  text-align: left !important; // Instead of center because of .btn
 
   .ui-select-placeholder {
     color: $euiColorMediumShade;
-    padding-right: 1em;
   }
 
   &:focus {
@@ -167,9 +161,7 @@ body > .select2-container.open {
 }
 
 .ui-select-bootstrap > .ui-select-match > .caret {
-  position: absolute;
-  top: 45%;
-  right: 15px;
+  display: none;
 }
 
 /* See Scrollable Menu with Bootstrap 3 http://stackoverflow.com/questions/19227496 */

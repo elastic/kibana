@@ -63,10 +63,6 @@
     max-width: calc(100% - #{$vis-editor-resizer-width});
   }
 
-  .kuiSideBarFormRow__label {
-    font-size: $euiFontSizeXS;
-  }
-
   .form-group {
     margin-bottom: $vis-editor-agg-editor-spacing;
   }
