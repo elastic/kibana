@@ -13,37 +13,31 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
-import idx from 'idx';
-import { first, get } from 'lodash';
-import React from 'react';
+import { first, get, isEmpty } from 'lodash';
+import React, { Fragment } from 'react';
 import { RRRRenderResponse } from 'react-redux-request';
 import styled from 'styled-components';
 import {
-  ERROR_EXC_STACKTRACE,
-  ERROR_LOG_STACKTRACE
+  ERROR_EXC_HANDLED,
+  HTTP_REQUEST_METHOD,
+  TRANSACTION_ID,
+  URL_FULL,
+  USER_ID
 } from 'x-pack/plugins/apm/common/constants';
+import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
+import { idx } from 'x-pack/plugins/apm/common/idx';
 import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
-import { legacyEncodeURIComponent } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import {
   fromQuery,
   history,
   toQuery
 } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
-import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/public/constants';
+import { legacyEncodeURIComponent } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
+import { STATUS } from 'x-pack/plugins/apm/public/constants';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { ErrorGroupAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_error_group';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
-import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/Stackframe';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
-import {
-  ERROR_EXC_HANDLED,
-  REQUEST_METHOD,
-  REQUEST_URL_FULL,
-  TRACE_ID,
-  TRANSACTION_ID,
-  USER_ID
-} from '../../../../../common/constants';
-import { STATUS } from '../../../../constants';
 import {
   borderRadius,
   colors,
@@ -54,9 +48,9 @@ import {
 import { DiscoverErrorLink } from '../../../shared/Links/DiscoverLinks/DiscoverErrorLink';
 import {
   getPropertyTabNames,
-  PropertiesTable,
-  Tab
+  PropertiesTable
 } from '../../../shared/PropertiesTable';
+import { Tab } from '../../../shared/PropertiesTable/propertyConfig';
 import { Stacktrace } from '../../../shared/Stacktrace';
 import { StickyProperties } from '../../../shared/StickyProperties';
 
@@ -111,7 +105,6 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
     return null;
   }
 
-  const transactionLink = getTransactionLink(error, transaction);
   const stickyProperties = [
     {
       fieldName: '@timestamp',
@@ -122,21 +115,21 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
       width: '50%'
     },
     {
-      fieldName: REQUEST_URL_FULL,
+      fieldName: URL_FULL,
       label: 'URL',
       val:
         idx(error, _ => _.context.page.url) ||
-        idx(transaction, _ => _.context.request.url.full) ||
+        idx(error, _ => _.url.full) ||
         NOT_AVAILABLE_LABEL,
       truncated: true,
       width: '50%'
     },
     {
-      fieldName: REQUEST_METHOD,
+      fieldName: HTTP_REQUEST_METHOD,
       label: i18n.translate('xpack.apm.errorGroupDetails.requestMethodLabel', {
         defaultMessage: 'Request method'
       }),
-      val: get(error, REQUEST_METHOD, NOT_AVAILABLE_LABEL),
+      val: idx(error, _ => _.http.request.method) || NOT_AVAILABLE_LABEL,
       width: '25%'
     },
     {
@@ -144,7 +137,9 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
       label: i18n.translate('xpack.apm.errorGroupDetails.handledLabel', {
         defaultMessage: 'Handled'
       }),
-      val: String(get(error, ERROR_EXC_HANDLED, NOT_AVAILABLE_LABEL)),
+      val:
+        String(idx(error, _ => _.error.exception.handled)) ||
+        NOT_AVAILABLE_LABEL,
       width: '25%'
     },
     {
@@ -155,7 +150,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
           defaultMessage: 'Transaction sample ID'
         }
       ),
-      val: transactionLink || NOT_AVAILABLE_LABEL,
+      val: <TransactionLink transaction={transaction} error={error} />,
       width: '25%'
     },
     {
@@ -163,7 +158,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
       label: i18n.translate('xpack.apm.errorGroupDetails.userIdLabel', {
         defaultMessage: 'User ID'
       }),
-      val: get(error, USER_ID, NOT_AVAILABLE_LABEL),
+      val: idx(error, _ => _.user.id) || NOT_AVAILABLE_LABEL,
       width: '25%'
     }
   ];
@@ -233,13 +228,23 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
   );
 }
 
-function getTransactionLink(error: APMError, transaction?: Transaction) {
-  if (!transaction || !get(error, 'transaction.sampled')) {
-    return;
+interface TransactionLinkProps {
+  error: APMError;
+  transaction?: Transaction;
+}
+
+function TransactionLink({ error, transaction }: TransactionLinkProps) {
+  if (!transaction) {
+    return <Fragment>{NOT_AVAILABLE_LABEL}</Fragment>;
+  }
+
+  const isSampled = idx(error, _ => _.transaction.sampled);
+  if (!isSampled) {
+    return <Fragment>{transaction.transaction.id}</Fragment>;
   }
 
   const path = `/${
-    transaction.context.service.name
+    transaction.service.name
   }/transactions/${legacyEncodeURIComponent(
     transaction.transaction.type
   )}/${legacyEncodeURIComponent(transaction.transaction.name)}`;
@@ -249,15 +254,13 @@ function getTransactionLink(error: APMError, transaction?: Transaction) {
       hash={path}
       query={{
         transactionId: transaction.transaction.id,
-        traceId: get(transaction, TRACE_ID)
+        traceId: idx(transaction, _ => _.trace.id)
       }}
     >
       {transaction.transaction.id}
     </KibanaLink>
   );
 }
-
-type MaybeStackframes = IStackframe[] | undefined;
 
 export function TabContent({
   error,
@@ -266,10 +269,10 @@ export function TabContent({
   error: APMError;
   currentTab: Tab;
 }) {
-  const codeLanguage = error.context.service.name;
-  const agentName = error.context.service.agent.name;
-  const excStackframes: MaybeStackframes = get(error, ERROR_EXC_STACKTRACE);
-  const logStackframes: MaybeStackframes = get(error, ERROR_LOG_STACKTRACE);
+  const codeLanguage = error.service.name;
+  const agentName = error.agent.name;
+  const excStackframes = idx(error, _ => _.error.exception.stacktrace);
+  const logStackframes = idx(error, _ => _.error.exception.stacktrace);
 
   switch (currentTab.key) {
     case logStacktraceTab.key:
@@ -281,7 +284,7 @@ export function TabContent({
         <Stacktrace stackframes={excStackframes} codeLanguage={codeLanguage} />
       );
     default:
-      const propData = error.context[currentTab.key] as any;
+      const propData = get(error, currentTab.key);
       return (
         <PropertiesTable
           propData={propData}
@@ -299,12 +302,10 @@ export function getCurrentTab(tabs: Tab[] = [], selectedTabKey?: string) {
 }
 
 export function getTabs(error: APMError) {
-  const hasLogStacktrace = get(error, ERROR_LOG_STACKTRACE, []).length > 0;
-  const contextKeys = Object.keys(error.context);
-
+  const hasLogStacktrace = !isEmpty(idx(error, _ => _.error.log.stacktrace));
   return [
     ...(hasLogStacktrace ? [logStacktraceTab] : []),
     exceptionStacktraceTab,
-    ...getPropertyTabNames(contextKeys)
+    ...getPropertyTabNames(error)
   ];
 }
