@@ -8,7 +8,7 @@ import { get } from 'lodash';
 import { APMError } from '../typings/es_schemas/Error';
 import { Span } from '../typings/es_schemas/Span';
 import { Transaction } from '../typings/es_schemas/Transaction';
-import * as constants from './constants';
+import * as fieldnames from './elasticsearch_fieldnames';
 
 describe('Transaction', () => {
   const transaction: Transaction = {
@@ -153,7 +153,7 @@ describe('Error', () => {
 });
 
 function matchSnapshot(obj: Span | Transaction | APMError) {
-  Object.entries(constants).forEach(([key, longKey]) => {
+  Object.entries(fieldnames).forEach(([key, longKey]) => {
     const value = get(obj, longKey);
     it(key, () => {
       expect(value).toMatchSnapshot();

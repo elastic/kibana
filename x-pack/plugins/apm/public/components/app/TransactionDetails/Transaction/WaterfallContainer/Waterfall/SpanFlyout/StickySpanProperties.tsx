@@ -11,7 +11,7 @@ import {
   SPAN_DURATION,
   SPAN_NAME,
   SPAN_TYPE
-} from 'x-pack/plugins/apm/common/constants';
+} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
 import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
 import { Span } from '../../../../../../../../typings/es_schemas/Span';
 import { asMillis, asPercent } from '../../../../../../../utils/formatters';

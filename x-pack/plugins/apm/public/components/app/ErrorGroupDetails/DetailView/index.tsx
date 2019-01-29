@@ -24,7 +24,7 @@ import {
   TRANSACTION_ID,
   URL_FULL,
   USER_ID
-} from 'x-pack/plugins/apm/common/constants';
+} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
 import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
 import { idx } from 'x-pack/plugins/apm/common/idx';
 import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';

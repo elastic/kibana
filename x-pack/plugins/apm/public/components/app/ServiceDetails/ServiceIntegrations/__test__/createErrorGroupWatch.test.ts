@@ -86,7 +86,8 @@ describe('createErrorGroupWatch', () => {
 });
 
 // Recursively iterate a nested structure and render strings as mustache templates
-function renderMustache(input: string | string[], ctx: StringMap): any {
+type InputOutput = string | string[] | StringMap<any>;
+function renderMustache(input: InputOutput, ctx: StringMap): InputOutput {
   if (isString(input)) {
     return mustache.render(input, {
       ctx,

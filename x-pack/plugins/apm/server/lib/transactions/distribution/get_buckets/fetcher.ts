@@ -17,7 +17,7 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_SAMPLED,
   TRANSACTION_TYPE
-} from 'x-pack/plugins/apm/common/constants';
+} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
 import { Setup } from 'x-pack/plugins/apm/server/lib/helpers/setup_request';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 

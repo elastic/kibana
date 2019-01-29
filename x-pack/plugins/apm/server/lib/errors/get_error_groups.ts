@@ -14,7 +14,7 @@ import {
   ERROR_LOG_MESSAGE,
   PROCESSOR_EVENT,
   SERVICE_NAME
-} from '../../../common/constants';
+} from '../../../common/elasticsearch_fieldnames';
 import { Setup } from '../helpers/setup_request';
 
 interface ErrorResponseItems {
