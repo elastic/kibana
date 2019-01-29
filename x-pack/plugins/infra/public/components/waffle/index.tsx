@@ -207,11 +207,11 @@ const MainContainer = styled.div`
 `;
 
 const TableContainer = styled.div`
-  padding: 16px;
+  padding: ${props => props.theme.eui.paddingSizes.l};
 `;
 
 const ViewSwitcherContainer = styled.div`
-  padding: 16px;
+  padding: ${props => props.theme.eui.paddingSizes.l};
 `;
 
 const MapContainer = styled.div`
