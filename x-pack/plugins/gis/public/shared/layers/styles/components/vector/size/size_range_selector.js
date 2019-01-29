@@ -43,6 +43,8 @@ export function SizeRangeSelector({ minSize, maxSize, onChange }) {
             max={DEFAULT_MAX_SIZE}
             value={minSize}
             onChange={onMinSizeChange}
+            showInput
+            showRange
           />
         </EuiFormRow>
       </EuiFlexItem>
@@ -56,6 +58,8 @@ export function SizeRangeSelector({ minSize, maxSize, onChange }) {
             max={DEFAULT_MAX_SIZE}
             value={maxSize}
             onChange={onMaxSizeChange}
+            showInput
+            showRange
           />
         </EuiFormRow>
       </EuiFlexItem>
