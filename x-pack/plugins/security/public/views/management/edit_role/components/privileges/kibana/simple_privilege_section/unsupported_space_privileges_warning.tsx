@@ -17,7 +17,7 @@ export class UnsupportedSpacePrivilegesWarning extends Component<{}, {}> {
     return (
       <FormattedMessage
         id="xpack.security.management.editRole.simplePrivilegeForm.unsupportedSpacePrivilegesWarning"
-        defaultMessage="This role contains privilege definitons for spaces, but spaces are not enabled in Kibana. Saving this role will remove these privileges."
+        defaultMessage="This role contains privilege definitions for spaces, but spaces are not enabled in Kibana. Saving this role will remove these privileges."
       />
     );
   };
