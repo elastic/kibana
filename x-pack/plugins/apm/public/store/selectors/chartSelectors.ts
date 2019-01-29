@@ -21,7 +21,6 @@ import {
 import { colors } from '../../style/variables';
 import {
   asDecimal,
-  asGB,
   asMillis,
   asPercent,
   tpmUnit
@@ -104,32 +103,28 @@ export function getMemorySeries(
       ? getEmptySerie(start, end)
       : [
           {
-            title: 'System total mem.',
-            data: series.totalMemory,
-            type: 'area',
-            color: colors.apmPink,
-            legendValue: asGB(overallValues.totalMemory)
-          },
-          {
-            title: 'System avail. mem.',
-            data: series.freeMemory,
-            type: 'area',
-            color: colors.apmPurple,
-            legendValue: asGB(overallValues.freeMemory)
-          },
-          {
-            title: 'Process RSS',
-            data: series.processMemoryRss,
-            type: 'area',
-            color: colors.apmGreen,
-            legendValue: asGB(overallValues.processMemoryRss)
-          },
-          {
-            title: 'Process mem. size',
-            data: series.processMemorySize,
-            type: 'area',
+            title: i18n.translate(
+              'xpack.apm.chart.memorySeries.systemMaxLabel',
+              {
+                defaultMessage: 'System max'
+              }
+            ),
+            data: series.memoryUsedMax,
+            type: 'linemark',
             color: colors.apmBlue,
-            legendValue: asGB(overallValues.freeMemory)
+            legendValue: asPercent(overallValues.memoryUsedMax || 0, 1)
+          },
+          {
+            title: i18n.translate(
+              'xpack.apm.chart.memorySeries.systemAverageLabel',
+              {
+                defaultMessage: 'System average'
+              }
+            ),
+            data: series.memoryUsedAvg,
+            type: 'linemark',
+            color: colors.apmGreen,
+            legendValue: asPercent(overallValues.memoryUsedAvg || 0, 1)
           }
         ];
 
@@ -148,32 +143,40 @@ export function getCPUSeries(CPUChartResponse: MetricsChartAPIResponse['cpu']) {
 
   const seriesList: TimeSerie[] = [
     {
-      title: 'Process average',
-      data: series.processCPUAverage,
-      type: 'line',
-      color: colors.apmPink,
-      legendValue: asPercent(overallValues.processCPUAverage || 0)
-    },
-    {
-      title: 'Process max',
-      data: series.processCPUMax,
-      type: 'line',
-      color: colors.apmPurple,
-      legendValue: asPercent(overallValues.processCPUMax || 0)
-    },
-    {
-      title: 'System average',
-      data: series.systemCPUAverage,
-      type: 'line',
-      color: colors.apmGreen,
-      legendValue: asPercent(overallValues.systemCPUAverage || 0)
-    },
-    {
-      title: 'System max',
+      title: i18n.translate('xpack.apm.chart.cpuSeries.systemMaxLabel', {
+        defaultMessage: 'System max'
+      }),
       data: series.systemCPUMax,
-      type: 'line',
+      type: 'linemark',
       color: colors.apmBlue,
-      legendValue: asPercent(overallValues.systemCPUMax || 0)
+      legendValue: asPercent(overallValues.systemCPUMax || 0, 1)
+    },
+    {
+      title: i18n.translate('xpack.apm.chart.cpuSeries.systemAverageLabel', {
+        defaultMessage: 'System average'
+      }),
+      data: series.systemCPUAverage,
+      type: 'linemark',
+      color: colors.apmGreen,
+      legendValue: asPercent(overallValues.systemCPUAverage || 0, 1)
+    },
+    {
+      title: i18n.translate('xpack.apm.chart.cpuSeries.processMaxLabel', {
+        defaultMessage: 'Process max'
+      }),
+      data: series.processCPUMax,
+      type: 'linemark',
+      color: colors.apmOrange,
+      legendValue: asPercent(overallValues.processCPUMax || 0, 1)
+    },
+    {
+      title: i18n.translate('xpack.apm.chart.cpuSeries.processAverageLabel', {
+        defaultMessage: 'Process average'
+      }),
+      data: series.processCPUAverage,
+      type: 'linemark',
+      color: colors.apmYellow,
+      legendValue: asPercent(overallValues.processCPUAverage || 0, 1)
     }
   ];
 
@@ -206,7 +209,7 @@ export function getResponseTimeSeries(
       }),
       data: avg,
       legendValue: asMillis(overallAvgDuration),
-      type: 'line',
+      type: 'linemark',
       color: colors.apmBlue
     },
     {
@@ -218,7 +221,7 @@ export function getResponseTimeSeries(
       ),
       titleShort: '95th',
       data: p95,
-      type: 'line',
+      type: 'linemark',
       color: colors.apmYellow
     },
     {
@@ -230,7 +233,7 @@ export function getResponseTimeSeries(
       ),
       titleShort: '99th',
       data: p99,
-      type: 'line',
+      type: 'linemark',
       color: colors.apmOrange
     }
   ];
@@ -286,22 +289,14 @@ export function getTpmSeries(
   const { tpmBuckets } = apmTimeseries;
   const bucketKeys = tpmBuckets.map(({ key }) => key);
   const getColor = getColorByKey(bucketKeys);
-  const getTpmLegendTitle = (bucketKey: string) => {
-    // hide legend text for transactions without "result"
-    if (bucketKey === 'transaction_result_missing') {
-      return '';
-    }
-
-    return bucketKey;
-  };
 
   return tpmBuckets.map(bucket => {
     const avg = mean(bucket.dataPoints.map(p => p.y));
     return {
-      title: getTpmLegendTitle(bucket.key),
+      title: bucket.key,
       data: bucket.dataPoints,
       legendValue: `${asDecimal(avg)} ${tpmUnit(transactionType || '')}`,
-      type: 'line',
+      type: 'linemark',
       color: getColor(bucket.key)
     };
   });

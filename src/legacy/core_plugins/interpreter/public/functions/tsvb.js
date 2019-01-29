@@ -34,7 +34,7 @@ export const tsvb = () => ({
       'null',
     ],
   },
-  help: i18n.translate('common.core_plugins.interpreter.public.functions.tsvb.help', {
+  help: i18n.translate('interpreter.functions.tsvb.help', {
     defaultMessage: 'TSVB visualization'
   }),
   args: {
@@ -64,10 +64,17 @@ export const tsvb = () => ({
       uiState: uiState,
     });
 
+    response.visType = 'metrics';
+
     return {
       type: 'render',
       as: 'visualization',
-      value: response,
+      value: {
+        visType: 'metrics',
+        visConfig: params,
+        uiState: uiState,
+        visData: response,
+      },
     };
   },
 });

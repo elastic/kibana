@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 
 export const ML_BREADCRUMB = Object.freeze({
-  text: 'Machine Learning',
+  text: i18n.translate('xpack.ml.machineLearningBreadcrumbLabel', {
+    defaultMessage: 'Machine Learning'
+  }),
   href: '#/'
 });

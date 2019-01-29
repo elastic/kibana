@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { interpretAst } from '@kbn/interpreter/public';
+import { interpretAst } from 'plugins/interpreter/interpreter';
 import { createAction } from 'redux-actions';
 import { createThunk } from 'redux-thunks';
 import { set, del } from 'object-path-immutable';
@@ -192,51 +192,23 @@ export const fetchAllRenderables = createThunk(
   }
 );
 
-export const duplicateElement = createThunk(
-  'duplicateElement',
-  ({ dispatch, type }, element, pageId) => {
-    const newElement = { ...getDefaultElement(), ...getBareElement(element) };
-    // move the element so users can see that it was added
+export const insertNodes = createThunk('insertNodes', ({ dispatch, type }, elements, pageId) => {
+  const _insertNodes = createAction(type);
+  const newElements = elements.map(cloneDeep);
+  // move the root element so users can see that it was added
+  newElements.forEach(newElement => {
     newElement.position.top = newElement.position.top + 10;
     newElement.position.left = newElement.position.left + 10;
-    const _duplicateElement = createAction(type);
-    dispatch(_duplicateElement({ pageId, element: newElement }));
+  });
+  dispatch(_insertNodes({ pageId, elements: newElements }));
 
-    // refresh all elements if there's a filter, otherwise just render the new element
-    if (element.filter) {
-      dispatch(fetchAllRenderables());
-    } else {
-      dispatch(fetchRenderable(newElement));
-    }
-
-    // select the new element
-    dispatch(selectElement(newElement.id));
+  // refresh all elements just once per `insertNodes call` if there's a filter on any, otherwise just render the new element
+  if (elements.some(element => element.filter)) {
+    dispatch(fetchAllRenderables());
+  } else {
+    newElements.forEach(newElement => dispatch(fetchRenderable(newElement)));
   }
-);
-
-export const rawDuplicateElement = createThunk(
-  'rawDuplicateElement',
-  ({ dispatch, type }, element, pageId, root) => {
-    const newElement = cloneDeep(element);
-    // move the root element so users can see that it was added
-    newElement.position.top = newElement.position.top + 10;
-    newElement.position.left = newElement.position.left + 10;
-    const _rawDuplicateElement = createAction(type);
-    dispatch(_rawDuplicateElement({ pageId, element: newElement }));
-
-    // refresh all elements if there's a filter, otherwise just render the new element
-    if (element.filter) {
-      dispatch(fetchAllRenderables());
-    } else {
-      dispatch(fetchRenderable(newElement));
-    }
-
-    // select the new element
-    if (root) {
-      window.setTimeout(() => dispatch(selectElement(newElement.id)));
-    }
-  }
-);
+});
 
 export const removeElements = createThunk(
   'removeElements',

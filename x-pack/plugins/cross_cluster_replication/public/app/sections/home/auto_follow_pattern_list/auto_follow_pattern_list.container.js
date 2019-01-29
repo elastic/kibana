@@ -18,6 +18,7 @@ import {
   loadAutoFollowPatterns,
   openAutoFollowPatternDetailPanel as openDetailPanel,
   closeAutoFollowPatternDetailPanel as closeDetailPanel,
+  loadAutoFollowStats,
 } from '../../../store/actions';
 import { AutoFollowPatternList as AutoFollowPatternListView } from './auto_follow_pattern_list';
 
@@ -39,6 +40,7 @@ const mapDispatchToProps = dispatch => ({
   closeDetailPanel: () => {
     dispatch(closeDetailPanel());
   },
+  loadAutoFollowStats: () => dispatch(loadAutoFollowStats())
 });
 
 export const AutoFollowPatternList = connect(

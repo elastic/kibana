@@ -17,7 +17,9 @@ import {
   refreshIndices,
   openDetailPanel,
   performExtensionAction,
-  reloadIndices
+  reloadIndices,
+  freezeIndices,
+  unfreezeIndices,
 } from '../../../../store/actions';
 
 import {
@@ -56,6 +58,12 @@ const mapDispatchToProps = (dispatch, { indexNames }) => {
     },
     refreshIndices: () => {
       dispatch(refreshIndices({ indexNames }));
+    },
+    freezeIndices: () => {
+      dispatch(freezeIndices({ indexNames }));
+    },
+    unfreezeIndices: () => {
+      dispatch(unfreezeIndices({ indexNames }));
     },
     forcemergeIndices: (maxNumSegments) => {
       dispatch(forcemergeIndices({ indexNames, maxNumSegments }));

@@ -4,25 +4,25 @@
     <!-- Transcluded elements. -->
     <div data-transclude-slots>
       <!-- Title. -->
-      <div data-transclude-slot="topLeftCorner" class="kuiLocalTitle">
-        <strong
-          ng-if="!k7design && savedWorkspace.lastSavedTitle"
-        >{{ savedWorkspace.lastSavedTitle }}</strong>
-        <strong
-          ng-if="!k7design && !savedWorkspace.lastSavedTitle"
+      <div data-transclude-slot="topLeftCorner">
+        <div class="kuiLocalTitle" ng-if="!k7design">
+          <strong ng-if="savedWorkspace.lastSavedTitle">{{ savedWorkspace.lastSavedTitle }}</strong>
+          <strong
+          ng-if="!savedWorkspace.lastSavedTitle"
           i18n-id="xpack.graph.topNavMenu.defaultNewWorkspaceTitle"
           i18n-default-message="New Graph Workspace"
-        ></strong>
+          ></strong>
+        </div>
       </div>
 
-      <div data-transclude-slot="bottomRow" class="flexGroup">
+      <div data-transclude-slot="bottomRow" class="gphGraph__flexGroup">
         <!-- Select index pattern. -->
         <select class="form-control gphIndexSelect" name="mySelect" ng-change="uiSelectIndex()" ng-class="{'gphIndexSelect-unselected':selectedIndex === null}"
           ng-options="option.attributes.title for option in indices" ng-model="grr.proposedIndex">
           <option
             value=""
             i18n-id="xpack.graph.topNavMenu.selectIndexPatternOptionLabel"
-            i18n-default-message="Select index pattern..."
+            i18n-default-message="Select index pattern…"
           ></option>
         </select>
 
@@ -62,7 +62,7 @@
         </span>
 
         <!-- Search. -->
-        <form ng-submit="submit()" name="graphBasicSearch" class="flexGroup__filler" style="width: 100%">
+        <form ng-submit="submit()" name="graphBasicSearch" class="gphGraph__flexGroupFiller" style="width: 100%">
           <div class="kuiLocalSearch">
             <input name="searchTerm" type="text" class="kuiLocalSearchInput" ng-model="grr.searchTerm" ng-disabled="liveResponseFields.length === 0"
               ng-focus="kbnTopNav.close()" placeholder="foo AND bar NOT baz" autocomplete="off">
@@ -94,7 +94,7 @@
             </span>
             <input
               input-focus ng-model="fieldNamesFilterString"
-              placeholder="{{ ::'xpack.graph.queryConfig.filterPlaceholder' | i18n: { defaultMessage: 'Filter...' } }}"
+              placeholder="{{ ::'xpack.graph.queryConfig.filterPlaceholder' | i18n: { defaultMessage: 'Filter…' } }}"
               ng-change="filterFieldsKeyDown()"
               class="form-control"
               name="filter"
@@ -225,7 +225,11 @@
 
       </div>
 
-      <div class="kuiLocalDropdownCloseButton" aria-label="close" ng-click="kbnTopNav.close()">
+      <div
+        class="kuiLocalDropdownCloseButton"
+        aria-label="{{ ::'xpack.graph.queryConfig.closeAriaLabel' | i18n: { defaultMessage: 'close' } }}"
+        ng-click="kbnTopNav.close()"
+      >
         <span class="kuiIcon fa-chevron-circle-up"></span>
       </div>
 
@@ -480,8 +484,15 @@
           {{detail.latestNodeSelection.data.field}} {{detail.latestNodeSelection.data.term}}
         </div>
 
-        <button class="kuiButton kuiButton--basic kuiButton--iconText kuiButton--small" ng-if="workspace.selectedNodes.length>1||(workspace.selectedNodes.length>0&&workspace.selectedNodes[0] !== detail.latestNodeSelection)"
-          tooltip="group the currently selected items into {{detail.latestNodeSelection.label}}" ng-click="workspace.groupSelections(detail.latestNodeSelection)">
+        <button
+          class="kuiButton kuiButton--basic kuiButton--iconText kuiButton--small"
+          ng-if="workspace.selectedNodes.length>1||(workspace.selectedNodes.length>0&&workspace.selectedNodes[0] !== detail.latestNodeSelection)"
+          tooltip="{{ 'xpack.graph.sidebar.groupButtonTooltip' | i18n: {
+            defaultMessage: 'group the currently selected items into {latestSelectionLabel}',
+            values: { latestSelectionLabel: detail.latestNodeSelection.label },
+          } }}"
+          ng-click="workspace.groupSelections(detail.latestNodeSelection)"
+        >
           <span class="kuiButton__icon kuiIcon fa-object-group"></span>
           <span
             i18n-id="xpack.graph.sidebar.groupButtonLabel"
@@ -489,8 +500,15 @@
           ></span>
         </button>
 
-        <button class="kuiButton kuiButton--basic kuiButton--iconText kuiButton--small" ng-if="detail.latestNodeSelection.numChildren>0"
-          tooltip="ungroup {{detail.latestNodeSelection.label}}" ng-click="workspace.ungroup(detail.latestNodeSelection)">
+        <button
+          class="kuiButton kuiButton--basic kuiButton--iconText kuiButton--small"
+          ng-if="detail.latestNodeSelection.numChildren>0"
+          tooltip="{{ 'xpack.graph.sidebar.ungroupButtonTooltip' | i18n: {
+            defaultMessage: 'ungroup {latestSelectionLabel}',
+            values: { latestSelectionLabel: detail.latestNodeSelection.label },
+          } }}"
+          ng-click="workspace.ungroup(detail.latestNodeSelection)"
+        >
           <span class="kuiIcon fa-object-ungroup"></span>
           <span
             i18n-id="xpack.graph.sidebar.ungroupButtonLabel"

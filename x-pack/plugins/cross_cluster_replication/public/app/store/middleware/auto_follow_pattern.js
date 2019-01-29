@@ -7,8 +7,9 @@
 import routing from '../../services/routing';
 import * as t from '../action_types';
 import { extractQueryParams } from '../../services/query_params';
+import { loadAutoFollowStats } from '../actions';
 
-export const autoFollowPatternMiddleware = () => next => action => {
+export const autoFollowPatternMiddleware = ({ dispatch }) => next => action => {
   const { type, payload: name } = action;
   const { history } = routing.reactRouter;
   const search = history.location.search;
@@ -28,9 +29,10 @@ export const autoFollowPatternMiddleware = () => next => action => {
           history.replace({
             search: `?pattern=${encodeURIComponent(name)}`,
           });
+
+          dispatch(loadAutoFollowStats());
         }
       }
-
       break;
   }
 

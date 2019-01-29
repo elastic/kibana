@@ -4,90 +4,51 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APMDocV1, APMDocV2 } from './APMDoc';
-import {
-  ContextProcess,
-  ContextRequest,
-  ContextService,
-  ContextSystem
-} from './Context';
+import { APMDoc } from './APMDoc';
+import { Container } from './fields/Container';
+import { Context } from './fields/Context';
+import { Host } from './fields/Host';
+import { Http } from './fields/Http';
+import { Kubernetes } from './fields/Kubernetes';
+import { Process } from './fields/Process';
+import { Service } from './fields/Service';
+import { Url } from './fields/Url';
+import { User } from './fields/User';
 
 interface Processor {
   name: 'transaction';
   event: 'transaction';
 }
 
-interface Context {
-  process?: ContextProcess;
-  service: ContextService;
-  system?: ContextSystem;
-  request: ContextRequest;
-  user?: {
-    id: string;
-    username?: string;
-    email?: string;
-  };
-  [key: string]: unknown;
-}
-
-interface Marks {
-  agent?: {
-    [name: string]: number;
-  };
-}
-
-export interface TransactionV1 extends APMDocV1 {
-  version: 'v1';
+export interface Transaction extends APMDoc {
   processor: Processor;
-  context: Context;
   transaction: {
-    duration: {
-      us: number;
-    };
+    duration: { us: number };
     id: string;
-    marks?: Marks;
+    marks?: {
+      // "agent": not defined by APM Server - only sent by RUM agent
+      agent?: {
+        [name: string]: number;
+      };
+    };
     name: string; // name could be missing in ES but the UI will always only aggregate on transactions with a name
     result?: string;
     sampled: boolean;
     span_count?: {
-      dropped?: {
-        total?: number;
-      };
+      started?: number;
+      dropped?: number;
     };
     type: string;
   };
+
+  // Shared by errors and transactions
+  container?: Container;
+  context?: Context;
+  host?: Host;
+  http?: Http;
+  kubernetes?: Kubernetes;
+  process?: Process;
+  service: Service;
+  url?: Url;
+  user?: User;
 }
-
-export interface TransactionV2 extends APMDocV2 {
-  version: 'v2';
-  processor: Processor;
-  context: Context;
-  transaction: {
-    duration: {
-      us: number;
-    };
-    id: string;
-    marks?: Marks;
-    name: string; // name could be missing in ES but the UI will always only aggregate on transactions with a name
-    result?: string;
-    sampled: boolean;
-
-    span_count?: {
-      started?: number; // only v2
-      dropped?: {
-        total?: number;
-      };
-    };
-    type: string;
-  };
-  kubernetes: {
-    pod: {
-      uid: string;
-    };
-  };
-  container: {
-    id: string;
-  };
-}
-
-export type Transaction = TransactionV1 | TransactionV2;

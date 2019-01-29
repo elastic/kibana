@@ -91,16 +91,8 @@ visualizations, try increasing this value.
 Defaults to `3000` (3 seconds).
 
 [[xpack-reporting-browser]]`xpack.reporting.capture.browser.type`::
-Specifies the browser to use to capture screenshots. Valid options are `phantom`
-and `chromium`. When `chromium` is set, the settings specified in the <<reporting-chromium-settings, Chromium settings>>
-are respected. Defaults to `chromium`.
-
-[NOTE]
-============
-Starting in 7.0, Phantom support will be removed from Kibana, and `chromium`
-will be the only valid option for the `xpack.reporting.capture.browser.type` setting.
-============
-
+Specifies the browser to use to capture screenshots. This setting exists for
+backward compatibility. The only valid option is `chromium`. 
 
 [float]
 [[reporting-chromium-settings]]

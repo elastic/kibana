@@ -6,45 +6,41 @@
 
 import _ from 'lodash';
 
-export function hitsToGeoJson(hits, geoFieldName, geoFieldType) {
-  const features = hits
-    .filter(hit => {
-      return _.has(hit, `_source[${geoFieldName}]`);
-    })
-    .map(hit => {
-      const value = _.get(hit, `_source[${geoFieldName}]`);
-      let geometry;
-      if (geoFieldType === 'geo_point') {
-        geometry = geoPointToGeometry(value);
-      } else if (geoFieldType === 'geo_shape') {
-        geometry = geoShapeToGeometry(value);
-      } else {
-        throw new Error(`Unsupported field type, expected: geo_shape or geo_point, you provided: ${geoFieldType}`);
-      }
+/**
+ * Converts Elasticsearch search results into GeoJson FeatureCollection
+ *
+ * @param {array} hits Elasticsearch search response hits array
+ * @param {function} flattenHit Method to flatten hits._source and hits.fields into properties object.
+ *   Should just be IndexPattern.flattenHit but wanted to avoid coupling this method to IndexPattern.
+ * @param {string} geoFieldName Geometry field name
+ * @param {string} geoFieldType Geometry field type ["geo_point", "geo_shape"]
+ * @returns {number}
+ */
+export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType) {
+  const features = [];
+  hits.forEach(hit => {
+    const value = _.get(hit, `_source[${geoFieldName}]`);
+    let geometries;
+    if (geoFieldType === 'geo_point') {
+      geometries = geoPointToGeometry(value);
+    } else if (geoFieldType === 'geo_shape') {
+      geometries = geoShapeToGeometry(value);
+    } else {
+      throw new Error(`Unsupported field type, expected: geo_shape or geo_point, you provided: ${geoFieldType}`);
+    }
 
-      const properties = {};
-      for (const fieldName in hit._source) {
-        if (hit._source.hasOwnProperty(fieldName)) {
-          if (fieldName !== geoFieldName) {
-            properties[fieldName] = hit._source[fieldName];
-          }
-        }
-      }
+    const properties = flattenHit(hit);
+    // don't include geometry field value in properties
+    delete properties[geoFieldName];
 
-      // hit.fields contains calculated values from docvalue_fields and script_fields
-      for (const fieldName in hit.fields) {
-        if (hit.fields.hasOwnProperty(fieldName)) {
-          const val = hit.fields[fieldName];
-          properties[fieldName] = Array.isArray(val) && val.length === 1 ? val[0] : val;
-        }
-      }
-
-      return {
+    return geometries.map(geometry => {
+      features.push({
         type: 'Feature',
         geometry: geometry,
         properties: properties
-      };
+      });
     });
+  });
 
   return {
     type: 'FeatureCollection',
@@ -52,9 +48,18 @@ export function hitsToGeoJson(hits, geoFieldName, geoFieldType) {
   };
 }
 
+function pointGeometryFactory(lat, lon) {
+  return {
+    type: 'Point',
+    coordinates: [lon, lat]
+  };
+}
+
 export function geoPointToGeometry(value) {
-  let lat;
-  let lon;
+  if (!value) {
+    return [];
+  }
+
   if (typeof value === 'string') {
     const commaSplit = value.split(',');
     if (commaSplit.length === 1) {
@@ -62,21 +67,36 @@ export function geoPointToGeometry(value) {
       throw new Error(`Unable to convert to geojson, geohash not supported`);
     }
     // Geo-point expressed as a string with the format: "lat,lon".
-    lat = parseFloat(commaSplit[0]);
-    lon = parseFloat(commaSplit[1]);
-  } else if (Array.isArray(value)) {
-    // Geo-point expressed as an array with the format: [ lon, lat]
-    lat = value[1];
-    lon = value[0];
-  } else if (value !== null && typeof value === 'object') {
-    lat = value.lat;
-    lon = value.lon;
+    const lat = parseFloat(commaSplit[0]);
+    const lon = parseFloat(commaSplit[1]);
+    return [pointGeometryFactory(lat, lon)];
   }
 
-  return {
-    type: 'Point',
-    coordinates: [lon, lat]
-  };
+  if (typeof value === 'object' && _.has(value, 'lat') && _.has(value, 'lon')) {
+    // Geo-point expressed as an object with the format: { lon, lat }
+    return [pointGeometryFactory(value.lat, value.lon)];
+  }
+
+  if (!Array.isArray(value)) {
+    throw new Error(`Unsupported geo_point value: ${value}`);
+  }
+
+  if (value.length === 2
+      && typeof value[0] === 'number'
+      && typeof value[1] === 'number') {
+    // Geo-point expressed as an array with the format: [lon, lat]
+    const lat = value[1];
+    const lon = value[0];
+    return [pointGeometryFactory(lat, lon)];
+  }
+
+  // Geo-point expressed as an array of values
+  return value.reduce(
+    (points, itemInValueArray) => {
+      return points.concat(geoPointToGeometry(itemInValueArray));
+    },
+    []
+  );
 }
 
 
@@ -97,6 +117,20 @@ export function makeGeohashGridPolygon(geohashGridFeature) {
 }
 
 export function geoShapeToGeometry(value) {
+  if (!value) {
+    return [];
+  }
+
+  if (Array.isArray(value)) {
+    // value expressed as an array of values
+    return value.reduce(
+      (shapes, itemInValueArray) => {
+        return shapes.concat(geoShapeToGeometry(itemInValueArray));
+      },
+      []
+    );
+  }
+
   // TODO handle case where value is WKT and convert to geojson
   if (typeof value === "string") {
     throw new Error(`Unable to convert WKT to geojson, not supported`);
@@ -127,39 +161,29 @@ export function geoShapeToGeometry(value) {
     case 'geometrycollection':
       geoJson.type = 'GeometryCollection';
       break;
+    case 'envelope':
+    case 'circle':
+      // TODO handle envelope and circle geometry types which exist in elasticsearch but not in geojson
+      throw new Error(`Unable to convert ${geoJson.type} geometry to geojson, not supported`);
   }
 
-  // TODO handle envelope and circle geometry types which exist in elasticsearch but not in geojson
-  if (geoJson.type === 'envelope' || geoJson.type === 'circle') {
-    throw new Error(`Unable to convert ${geoJson.type} geometry to geojson, not supported`);
-  }
-
-  return geoJson;
+  return [geoJson];
 }
 
+const POLYGON_COORDINATES_EXTERIOR_INDEX = 0;
+const TOP_LEFT_INDEX = 0;
+const BOTTOM_RIGHT_INDEX = 2;
+
 export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
-  // TODO this is not a complete implemenation. Need to handle other cases:
-  // 1) bounds are all east of 180
-  // 2) bounds are all west of -180
-  const noWrapMapExtent = {
-    min_lon: mapExtent.min_lon < -180 ? -180 : mapExtent.min_lon,
-    min_lat: mapExtent.min_lat < -90 ? -90 : mapExtent.min_lat,
-    max_lon: mapExtent.max_lon > 180 ? 180 : mapExtent.max_lon,
-    max_lat: mapExtent.max_lat > 90 ? 90 : mapExtent.max_lat,
-  };
+  const safePolygon = convertMapExtentToPolygon(mapExtent);
 
   if (geoFieldType === 'geo_point') {
+    const verticies = safePolygon.coordinates[POLYGON_COORDINATES_EXTERIOR_INDEX];
     return {
       geo_bounding_box: {
         [geoFieldName]: {
-          top_left: {
-            lat: noWrapMapExtent.max_lat,
-            lon: noWrapMapExtent.min_lon
-          },
-          bottom_right: {
-            lat: noWrapMapExtent.min_lat,
-            lon: noWrapMapExtent.max_lon
-          }
+          top_left: verticies[TOP_LEFT_INDEX],
+          bottom_right: verticies[BOTTOM_RIGHT_INDEX]
         }
       }
     };
@@ -167,13 +191,7 @@ export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
     return {
       geo_shape: {
         [geoFieldName]: {
-          shape: {
-            type: 'envelope',
-            coordinates: [
-              [noWrapMapExtent.min_lon, noWrapMapExtent.max_lat],
-              [noWrapMapExtent.max_lon, noWrapMapExtent.min_lat]
-            ]
-          },
+          shape: safePolygon,
           relation: 'INTERSECTS'
         }
       }
@@ -181,4 +199,62 @@ export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
   } else {
     throw new Error(`Unsupported field type, expected: geo_shape or geo_point, you provided: ${geoFieldType}`);
   }
+}
+
+function formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon }) {
+  // GeoJSON mandates that the outer polygon must be counterclockwise to avoid ambiguous polygons
+  // when the shape crosses the dateline
+  const left = minLon;
+  const right = maxLon;
+  const top = maxLat > 90 ? 90 : maxLat;
+  const bottom = minLat < -90 ? -90 : minLat;
+  const topLeft = [left, top];
+  const bottomLeft = [left, bottom];
+  const bottomRight = [right, bottom];
+  const topRight = [right, top];
+  return {
+    "type": "polygon",
+    "coordinates": [
+      [ topLeft, bottomLeft, bottomRight, topRight, topLeft ]
+    ]
+  };
+}
+
+/*
+ * Convert map bounds to polygon
+ */
+export function convertMapExtentToPolygon({ maxLat, maxLon, minLat, minLon }) {
+  const lonDelta = maxLon - minLon;
+  if (lonDelta >= 360) {
+    return formatEnvelopeAsPolygon({
+      maxLat,
+      maxLon: 180,
+      minLat,
+      minLon: -180,
+    });
+  }
+
+  if (maxLon > 180) {
+    // bounds cross dateline east to west
+    const overlapWestOfDateLine = maxLon - 180;
+    return formatEnvelopeAsPolygon({
+      maxLat,
+      maxLon: -180 + overlapWestOfDateLine,
+      minLat,
+      minLon,
+    });
+  }
+
+  if (minLon < -180) {
+    // bounds cross dateline west to east
+    const overlapEastOfDateLine = Math.abs(minLon) - 180;
+    return formatEnvelopeAsPolygon({
+      maxLat,
+      maxLon,
+      minLat,
+      minLon: 180 - overlapEastOfDateLine,
+    });
+  }
+
+  return formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon });
 }

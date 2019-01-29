@@ -46,9 +46,13 @@ themselves, and those messages will always be in English, so we don't have to ke
 defined inline.
 
 __Note:__ locale defined in `i18n.locale` and the one used for translation files should
-match exactly, e.g. `i18n.locale: zn` and `.../translations/zh_CN.json` won't match and
-default English translations will be used, but `i18n.locale: zh_CN` and`.../translations/zh_CN.json`
-or `i18n.locale: zn` and `.../translations/zn.json` will work as expected.
+match exactly, e.g. `i18n.locale: zh` and `.../translations/zh-CN.json` won't match and
+default English translations will be used, but `i18n.locale: zh-CN` and`.../translations/zh-CN.json`
+or `i18n.locale: zh` and `.../translations/zh.json` will work as expected.
+
+__Note:__ locale should look like `zh-CN` where `zh` - lowercase two-letter or three-letter ISO-639 code
+and `CN` - uppercase two-letter ISO-3166 code (optional).
+[ISO-639](https://www.iso.org/iso-639-language-codes.html) and [ISO-3166](https://www.iso.org/iso-3166-country-codes.html) codes should be separated with `-` character.
 
 ## I18n engine
 
@@ -298,7 +302,7 @@ React component as a pure function:
 import React from 'react';
 import { injectI18n, intlShape } from '@kbn/i18n/react';
 
-const MyComponentContent = ({ intl }) => (
+export const MyComponent = injectI18n({ intl }) => (
   <input
     type="text"
     placeholder={intl.formatMessage(
@@ -311,13 +315,11 @@ const MyComponentContent = ({ intl }) => (
       { name, unreadCount }
     )}
   />
-);
+));
 
-MyComponentContent.propTypes = {
+MyComponent.WrappedComponent.propTypes = {
   intl: intlShape.isRequired,
 };
-
-export const MyComponent = injectI18n(MyComponentContent);
 ```
 
 React component as a class:
@@ -326,27 +328,27 @@ React component as a class:
 import React from 'react';
 import { injectI18n, intlShape } from '@kbn/i18n/react';
 
-class MyComponentContent extends React.Component {
-  static propTypes = {
-    intl: intlShape.isRequired,
-  };
+export const MyComponent = injectI18n(
+  class MyComponent extends React.Component {
+    static propTypes = {
+      intl: intlShape.isRequired,
+    };
 
-  render() {
-    const { intl } = this.props;
+    render() {
+      const { intl } = this.props;
 
-    return (
-      <input
-        type="text"
-        placeholder={intl.formatMessage({
-          id: 'kbn.management.objects.searchPlaceholder',
-          defaultMessage: 'Search',
-        })}
-      />
-    );
+      return (
+        <input
+          type="text"
+          placeholder={intl.formatMessage({
+            id: 'kbn.management.objects.searchPlaceholder',
+            defaultMessage: 'Search',
+          })}
+        />
+      );
+    }
   }
-}
-
-export const MyComponent = injectI18n(MyComponentContent);
+);
 ```
 
 ## AngularJS

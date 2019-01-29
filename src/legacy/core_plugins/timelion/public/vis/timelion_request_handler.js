@@ -43,7 +43,7 @@ const TimelionRequestHandlerProvider = function (Private, Notifier, $http, confi
           sheet: [expression],
           extended: {
             es: {
-              filter: buildEsQuery(undefined, [query], filters, esQueryConfigs)
+              filter: buildEsQuery(undefined, query, filters, esQueryConfigs)
             }
           },
           time: _.extend(timeRange, {

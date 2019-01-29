@@ -5,6 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { Location } from 'history';
 import React from 'react';
 import { ServiceDetailsRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/serviceDetails';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
@@ -15,7 +16,7 @@ import { ServiceIntegrations } from './ServiceIntegrations';
 
 interface ServiceDetailsProps {
   urlParams: IUrlParams;
-  location: any;
+  location: Location;
 }
 
 export class ServiceDetailsView extends React.Component<ServiceDetailsProps> {

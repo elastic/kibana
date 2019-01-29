@@ -23,7 +23,7 @@ export function VislibTypesPointSeries() {
 
   const createSerieFromParams = (cfg, seri) => {
     const matchingSeriesParams = cfg.seriesParams ? cfg.seriesParams.find(seriConfig => {
-      return seri.aggId === seriConfig.data.id;
+      return seri.id === seriConfig.data.id;
     }) : null;
 
 

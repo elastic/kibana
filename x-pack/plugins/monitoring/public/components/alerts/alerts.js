@@ -10,10 +10,9 @@ import { formatDateTimeLocal } from '../../../common/formatting';
 import { formatTimestampToDuration } from '../../../common';
 import { CALCULATE_DURATION_SINCE, EUI_SORT_DESCENDING } from '../../../common/constants';
 import { mapSeverity } from './map_severity';
-import { Tooltip } from 'plugins/monitoring/components/tooltip';
 import { FormattedAlert } from 'plugins/monitoring/components/alerts/formatted_alert';
 import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
-import { EuiHealth, EuiIcon } from '@elastic/eui';
+import { EuiHealth, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 
 const linkToCategories = {
@@ -25,17 +24,17 @@ const linkToCategories = {
 const getColumns = (kbnUrl, scope) => ([
   {
     name: 'Status',
-    field: 'metadata.severity',
+    field: 'status',
     sortable: true,
     render: severity => {
       const severityIcon = mapSeverity(severity);
 
       return (
-        <Tooltip text={severityIcon.title} placement="bottom" trigger="hover">
+        <EuiToolTip content={severityIcon.title} position="bottom">
           <EuiHealth color={severityIcon.color} data-test-subj="alertIcon" aria-label={severityIcon.title}>
             { capitalize(severityIcon.value) }
           </EuiHealth>
-        </Tooltip>
+        </EuiToolTip>
       );
     }
   },
@@ -82,7 +81,7 @@ const getColumns = (kbnUrl, scope) => ([
   },
   {
     name: 'Category',
-    field: 'metadata.link',
+    field: 'category',
     sortable: true,
     render: link => linkToCategories[link] ? linkToCategories[link] : 'General'
   },
@@ -101,16 +100,22 @@ const getColumns = (kbnUrl, scope) => ([
 ]);
 
 const AlertsUI = ({ alerts, angular, sorting, pagination, onTableChange, intl }) => {
+  const alertsFlattened = alerts.map(alert => ({
+    ...alert,
+    status: alert.metadata.severity,
+    category: alert.metadata.link,
+  }));
+
   return (
     <EuiMonitoringTable
       className="alertsTable"
-      rows={alerts}
+      rows={alertsFlattened}
       columns={getColumns(angular.kbnUrl, angular.scope)}
       sorting={{
         ...sorting,
         sort: {
           ...sorting.sort,
-          field: 'metadata.severity',
+          field: 'status',
           direction: EUI_SORT_DESCENDING,
         }
       }}

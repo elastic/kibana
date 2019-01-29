@@ -6,6 +6,7 @@
 
 import { resolve } from 'path';
 import init from './init';
+import './server/build_fix';
 import { mappings } from './server/mappings';
 import { CANVAS_APP } from './common/lib';
 
@@ -13,7 +14,7 @@ export function canvas(kibana) {
   return new kibana.Plugin({
     id: CANVAS_APP,
     configPrefix: 'xpack.canvas',
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'interpreter'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       app: {

@@ -31,7 +31,7 @@ function clonePage(page) {
   // TODO: would be nice if we could more reliably know which parameters need to get a unique id
   // this makes a pretty big assumption about the shape of the page object
   const elements = page.elements;
-  const groups = page.groups;
+  const groups = page.groups || [];
   const nodes = elements.concat(groups);
   const newNodes = cloneSubgraphs(nodes);
   return {

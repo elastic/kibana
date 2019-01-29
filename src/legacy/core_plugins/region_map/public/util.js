@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { ORIGIN } from '../../../../core_plugins/ems_util/common/origin';
+import { ORIGIN } from '../../../../legacy/core_plugins/tile_map/common/origin';
 
 export function mapToLayerWithId(prefix, layer) {
   const clonedLayer = _.cloneDeep(layer);

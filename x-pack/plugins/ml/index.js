@@ -28,6 +28,8 @@ import { resultsServiceRoutes } from './server/routes/results_service';
 import { jobServiceRoutes } from './server/routes/job_service';
 import { jobAuditMessagesRoutes } from './server/routes/job_audit_messages';
 import { fileDataVisualizerRoutes } from './server/routes/file_data_visualizer';
+import { i18n } from '@kbn/i18n';
+import { initMlServerLog } from './server/client/log';
 
 export const ml = (kibana) => {
   return new kibana.Plugin({
@@ -38,8 +40,12 @@ export const ml = (kibana) => {
 
     uiExports: {
       app: {
-        title: 'Machine Learning',
-        description: 'Machine Learning for the Elastic Stack',
+        title: i18n.translate('xpack.ml.mlNavTitle', {
+          defaultMessage: 'Machine Learning'
+        }),
+        description: i18n.translate('xpack.ml.mlNavDescription', {
+          defaultMessage: 'Machine Learning for the Elastic Stack'
+        }),
         icon: 'plugins/ml/ml.svg',
         euiIconType: 'machineLearningApp',
         main: 'plugins/ml/app',
@@ -103,6 +109,8 @@ export const ml = (kibana) => {
       jobServiceRoutes(server, commonRouteConfig);
       jobAuditMessagesRoutes(server, commonRouteConfig);
       fileDataVisualizerRoutes(server, commonRouteConfig);
+
+      initMlServerLog(server);
     }
 
   });

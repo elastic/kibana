@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink } from '@elastic/eui';
-import React from 'react';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/Stackframe';
-import { px, units } from '../../../style/variables';
+import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/fields/Stackframe';
+import { units } from '../../../style/variables';
 // @ts-ignore
 import { Ellipsis } from '../../shared/Icons';
 import { Stackframe } from './Stackframe';
 
 const LibraryFrameToggle = styled.div`
-  margin: 0 0 ${px(units.plus)} 0;
   user-select: none;
 `;
 
@@ -62,20 +62,30 @@ export class LibraryStackFrames extends React.Component<Props, State> {
               horizontal={isVisible}
               style={{ marginRight: units.half }}
             />{' '}
-            {stackframes.length} library frames
+            {i18n.translate(
+              'xpack.apm.stacktraceTab.libraryFramesToogleButtonLabel',
+              {
+                defaultMessage: '{stackframesLength} library frames',
+                values: { stackframesLength: stackframes.length }
+              }
+            )}
           </EuiLink>
         </LibraryFrameToggle>
 
         <div>
-          {isVisible &&
-            stackframes.map((stackframe, i) => (
-              <Stackframe
-                key={i}
-                isLibraryFrame
-                codeLanguage={codeLanguage}
-                stackframe={stackframe}
-              />
-            ))}
+          {isVisible && (
+            <Fragment>
+              <EuiSpacer size="m" />
+              {stackframes.map((stackframe, i) => (
+                <Stackframe
+                  key={i}
+                  isLibraryFrame
+                  codeLanguage={codeLanguage}
+                  stackframe={stackframe}
+                />
+              ))}
+            </Fragment>
+          )}
         </div>
       </div>
     );

@@ -5,7 +5,9 @@
  */
 
 import { registerAutoFollowPatternRoutes } from './api/auto_follow_pattern';
+import { registerCcrRoutes } from './api/ccr';
 
 export function registerRoutes(server) {
   registerAutoFollowPatternRoutes(server);
+  registerCcrRoutes(server);
 }

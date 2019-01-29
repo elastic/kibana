@@ -22,7 +22,7 @@ import { toastNotifications } from 'ui/notify';
 import regionMapVisParamsTemplate from './region_map_vis_params.html';
 import { mapToLayerWithId } from './util';
 import '../../tile_map/public/editors/wms_options';
-import { ORIGIN } from '../../../../core_plugins/ems_util/common/origin';
+import { ORIGIN } from '../../../../legacy/core_plugins/tile_map/common/origin';
 
 uiModules.get('kibana/region_map')
   .directive('regionMapVisParams', function (serviceSettings, regionmapsConfig) {

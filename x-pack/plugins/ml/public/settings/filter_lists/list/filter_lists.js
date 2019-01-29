@@ -19,6 +19,8 @@ import {
   EuiPageContent,
 } from '@elastic/eui';
 
+import { injectI18n } from '@kbn/i18n/react';
+
 import { toastNotifications } from 'ui/notify';
 
 import { FilterListsHeader } from './header';
@@ -26,7 +28,13 @@ import { FilterListsTable } from './table';
 import { ml } from '../../../services/ml_api_service';
 
 
-export class FilterLists extends Component {
+export const FilterLists = injectI18n(class extends Component {
+  static displayName = 'FilterLists';
+  static propTypes = {
+    canCreateFilter: PropTypes.bool.isRequired,
+    canDeleteFilter: PropTypes.bool.isRequired
+  };
+
   constructor(props) {
     super(props);
 
@@ -60,6 +68,7 @@ export class FilterLists extends Component {
   }
 
   refreshFilterLists = () => {
+    const { intl } = this.props;
     // Load the list of filters.
     ml.filters.filtersStats()
       .then((filterLists) => {
@@ -67,7 +76,10 @@ export class FilterLists extends Component {
       })
       .catch((resp) => {
         console.log('Error loading list of filters:', resp);
-        toastNotifications.addDanger('An error occurred loading the filter lists');
+        toastNotifications.addDanger(intl.formatMessage({
+          id: 'xpack.ml.settings.filterLists.filterLists.loadingFilterListsErrorMessage',
+          defaultMessage: 'An error occurred loading the filter lists',
+        }));
       });
   }
 
@@ -98,9 +110,4 @@ export class FilterLists extends Component {
       </EuiPage>
     );
   }
-}
-
-FilterLists.propTypes = {
-  canCreateFilter: PropTypes.bool.isRequired,
-  canDeleteFilter: PropTypes.bool.isRequired
-};
+});

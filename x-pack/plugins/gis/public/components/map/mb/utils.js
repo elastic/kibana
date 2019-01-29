@@ -7,9 +7,10 @@
 import _ from 'lodash';
 import mapboxgl from 'mapbox-gl';
 
-export async function createMbMapInstance(node, initialZoom, initialCenter) {
+export async function createMbMapInstance(node, initialView) {
   return new Promise((resolve) => {
     const options = {
+      attributionControl: false,
       container: node,
       style: {
         version: 8,
@@ -17,13 +18,11 @@ export async function createMbMapInstance(node, initialZoom, initialCenter) {
         layers: [],
       },
     };
-    if (initialZoom) {
-      options.zoom = initialZoom;
-    }
-    if (initialCenter) {
+    if (initialView) {
+      options.zoom = initialView.zoom;
       options.center = {
-        lng: initialCenter.lon,
-        lat: initialCenter.lat
+        lng: initialView.lon,
+        lat: initialView.lat
       };
     }
     const mbMap = new mapboxgl.Map(options);
@@ -64,7 +63,8 @@ export function syncLayerOrder(mbMap, layerList) {
     const mbLayers = mbMap.getStyle().layers.slice();
     const currentLayerOrder = _.uniq( // Consolidate layers and remove suffix
       mbLayers.map(({ id }) => id.substring(0, id.lastIndexOf('_'))));
-    const newLayerOrder = layerList.map(l => l.getId());
+    const newLayerOrder = layerList.map(l => l.getId())
+      .filter(layerId => currentLayerOrder.includes(layerId));
     let netPos = 0;
     let netNeg = 0;
     const movementArr = currentLayerOrder.reduce((accu, id, idx) => {

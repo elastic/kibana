@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import { createLegacyClass } from 'ui/utils/legacy_class';
 import { SavedObjectProvider } from 'ui/courier';
@@ -13,9 +14,10 @@ import {
   getMapCenter,
   getLayerListRaw,
   getMapExtent,
+  getRefreshConfig,
+  getQuery,
 } from '../../selectors/map_selectors';
-import { getIsDarkTheme } from '../../store/ui';
-import { TileStyle } from '../../shared/layers/styles/tile_style';
+import { convertMapExtentToPolygon } from '../../elasticsearch_geo_utils';
 
 const module = uiModules.get('app/gis');
 
@@ -35,23 +37,6 @@ module.factory('SavedGisMap', function (Private) {
       defaults: {
         title: 'New Map',
         description: '',
-        layerListJSON: JSON.stringify([
-          {
-            id: "0hmz5",
-            sourceDescriptor: { "type": "EMS_TMS", "id": "road_map" },
-            visible: true,
-            temporary: false,
-            style: {
-              type: TileStyle.type,
-              properties: {
-                alphaValue: 1
-              }
-            },
-            type: "TILE",
-            minZoom: 0,
-            maxZoom: 24,
-          }
-        ])
       },
     });
 
@@ -94,17 +79,13 @@ module.factory('SavedGisMap', function (Private) {
       zoom: getMapZoom(state),
       center: getMapCenter(state),
       timeFilters: getTimeFilters(state),
+      refreshConfig: getRefreshConfig(state),
+      query: _.omit(getQuery(state), 'queryLastTriggeredAt'),
     });
 
-    this.uiStateJSON = JSON.stringify({
-      isDarkMode: getIsDarkTheme(state),
-    });
+    this.uiStateJSON = JSON.stringify({});
 
-    const mapExtent = getMapExtent(state);
-    this.bounds = {
-      "type": "envelope",
-      "coordinates": [ [mapExtent.min_lon, mapExtent.max_lat], [mapExtent.max_lon, mapExtent.min_lat] ]
-    };
+    this.bounds = convertMapExtentToPolygon(getMapExtent(state));
   };
 
   return SavedGisMap;

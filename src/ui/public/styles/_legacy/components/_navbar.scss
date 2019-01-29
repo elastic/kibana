@@ -1,0 +1,86 @@
+navbar {
+  @extend .control-group;
+
+  max-height: 340px;
+  margin-bottom: 0;
+  padding: 0 $euiSizeS $euiSizeXS;
+  color: $euiColorDarkShade;
+  background-color: $euiColorLightShade;
+  border: none;
+  z-index: $euiZLevel1;
+
+  > * {
+    padding-right: $euiSizeS;
+  }
+
+  .navbar-text {
+    margin-top: $euiSizeXS;
+    margin-bottom: $euiSizeXS;
+  }
+
+  // the "brand" that is displayed, usually on the left of the navbar
+  > .name {
+    @include euiTextTruncate;
+
+    align-self: center;
+    font-size: $euiFontSizeL;
+  }
+
+  button {
+    color: $euiColorDarkShade;
+    background-color: transparent;
+
+    &:hover,
+    &:focus {
+      color: $euiColorDarkShade;
+      background-color: transparent;
+    }
+
+    &:active, &.active {
+      color: $euiColorDarkestShade;
+      background-color: transparent;
+      box-shadow: none;
+
+      &:focus {
+        outline: none;
+      }
+    }
+
+    &[disabled] {
+      color: $euiColorMediumShade;
+      background-color: transparent;
+    }
+  }
+
+  .inline-form .input-group {
+    button {
+      color: $euiColorEmptyShade;
+      background-color: $euiColorDarkShade;
+      border: none;
+    }
+  }
+
+  // responsive modifications
+
+  // desktop
+  @include euiBreakpoint('l', 'xl') {
+    > .name {
+      // 500px is sort of arbitrary, not sure how to deal with lots of buttons
+      max-width: 500px;
+    }
+  }
+
+  // tablets/phones
+  @include euiBreakpoint('xs', 's', 'm') {
+    > .fill {
+      flex: 1 1 map-get($euiBreakpoints, 'l');
+    }
+  }
+
+  // phones
+  @include euiBreakpoint('xs', 's') {
+    > .name {
+      max-width: 100%;
+    }
+  }
+}

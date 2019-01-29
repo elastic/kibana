@@ -186,7 +186,9 @@ exports[`render 1`] = `
     afterMessage="Copied"
     anchorClassName="sharePanel__copyAnchor"
     textToCopy="http://localhost/"
-  />
+  >
+    <Component />
+  </EuiCopy>
 </EuiForm>
 `;
 
@@ -365,6 +367,8 @@ exports[`should enable saved object export option when objectId is provided 1`] 
     afterMessage="Copied"
     anchorClassName="sharePanel__copyAnchor"
     textToCopy="http://localhost/"
-  />
+  >
+    <Component />
+  </EuiCopy>
 </EuiForm>
 `;

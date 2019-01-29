@@ -11,12 +11,13 @@ import { notify } from '../../lib/notify';
 import { aeroelastic } from '../../lib/aeroelastic_kibana';
 import { setClipboardData, getClipboardData } from '../../lib/clipboard';
 import { cloneSubgraphs } from '../../lib/clone_subgraphs';
-import { removeElements, rawDuplicateElement } from '../../state/actions/elements';
+import { removeElements, insertNodes } from '../../state/actions/elements';
 import { getFullscreen, canUserWrite } from '../../state/selectors/app';
 import { getNodes, isWriteable } from '../../state/selectors/workpad';
 import { flatten } from '../../lib/aeroelastic/functional';
 import { withEventHandlers } from './event_handlers';
 import { WorkpadPage as Component } from './workpad_page';
+import { selectElement } from './../../state/actions/transient';
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -27,9 +28,9 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    rawDuplicateElement: pageId => (selectedElement, root) =>
-      dispatch(rawDuplicateElement(selectedElement, pageId, root)),
+    insertNodes: pageId => selectedElements => dispatch(insertNodes(selectedElements, pageId)),
     removeElements: pageId => elementIds => dispatch(removeElements(elementIds, pageId)),
+    selectElement: selectedElement => dispatch(selectElement(selectedElement)),
   };
 };
 
@@ -80,8 +81,9 @@ export const WorkpadPage = compose(
       setUpdateCount,
       page,
       elements: pageElements,
-      rawDuplicateElement,
+      insertNodes,
       removeElements,
+      selectElement,
     }) => {
       const { shapes, selectedPrimaryShapes = [], cursor } = aeroelastic.getStore(
         page.id
@@ -149,13 +151,24 @@ export const WorkpadPage = compose(
           }
         },
         pasteElements: () => {
-          const { selectedElements, rootShapes } = JSON.parse(getClipboardData());
-          const indices = rootShapes.map(r => selectedElements.findIndex(s => s.id === r));
+          const { selectedElements, rootShapes } = JSON.parse(getClipboardData()) || {};
           const clonedElements = selectedElements && cloneSubgraphs(selectedElements);
           if (clonedElements) {
-            clonedElements.map((element, index) =>
-              rawDuplicateElement(page.id)(element, indices.indexOf(index) >= 0)
-            );
+            // first clone and persist the new node(s)
+            insertNodes(page.id)(clonedElements);
+            // then select the cloned node
+            if (rootShapes.length) {
+              if (selectedElements.length > 1) {
+                // adHocGroup branch (currently, pasting will leave only the 1st element selected, rather than forming a
+                // new adHocGroup - todo)
+                selectElement(clonedElements[0].id);
+              } else {
+                // single element or single persistentGroup branch
+                selectElement(
+                  clonedElements[selectedElements.findIndex(s => s.id === rootShapes[0])].id
+                );
+              }
+            }
           }
         },
       };
