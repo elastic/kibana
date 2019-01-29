@@ -34,14 +34,14 @@ export interface SymbolState {
   error?: Error;
   loading: boolean;
   lastRequestPath?: string;
-  openPaths: string[];
+  closedPaths: string[];
 }
 
 const initialState: SymbolState = {
   symbols: {},
   loading: false,
   structureTree: {},
-  openPaths: [],
+  closedPaths: [],
 };
 
 const generateStructureTree: (symbols: SymbolInformation[]) => any = symbols => {
@@ -127,18 +127,18 @@ export const symbol = handleActions(
         return state;
       }
     },
-    [String(openSymbolPath)]: (state: SymbolState, action: any) =>
+    [String(closeSymbolPath)]: (state: SymbolState, action: any) =>
       produce<SymbolState>(state, (draft: SymbolState) => {
         const path = action.payload!;
-        if (!state.openPaths.includes(path)) {
-          draft.openPaths.push(path);
+        if (!state.closedPaths.includes(path)) {
+          draft.closedPaths.push(path);
         }
       }),
-    [String(closeSymbolPath)]: (state: SymbolState, action: any) =>
+    [String(openSymbolPath)]: (state: SymbolState, action: any) =>
       produce<SymbolState>(state, draft => {
-        const idx = state.openPaths.indexOf(action.payload!);
+        const idx = state.closedPaths.indexOf(action.payload!);
         if (idx >= 0) {
-          draft.openPaths.splice(idx, 1);
+          draft.closedPaths.splice(idx, 1);
         }
       }),
   },
