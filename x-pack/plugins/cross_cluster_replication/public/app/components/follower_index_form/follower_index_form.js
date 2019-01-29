@@ -519,6 +519,7 @@ export const FollowerIndexForm = injectI18n(
                       key={field}
                       field={field}
                       value={followerIndex[field]}
+                      defaultValue={defaultValue}
                       error={fieldsErrors[field]}
                       title={(
                         <EuiTitle size="xs">
