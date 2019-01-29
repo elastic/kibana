@@ -481,7 +481,8 @@ export const FollowerIndexForm = injectI18n(
                   <p>
                     <FormattedMessage
                       id="xpack.crossClusterReplication.followerIndexForm.advancedSettingsDescription"
-                      defaultMessage="Use advanced settings to control the rate at which data is replicated."
+                      defaultMessage="Customize advanced settings to control the rate at which data is replicated.
+                        If you don't customize them, default advanced settings will be applied."
                     />
                   </p>
                   {isNew ? (
@@ -489,7 +490,7 @@ export const FollowerIndexForm = injectI18n(
                       label={(
                         <FormattedMessage
                           id="xpack.crossClusterReplication.followerIndex.advancedSettingsForm.showSwitchLabel"
-                          defaultMessage="Use advanced settings"
+                          defaultMessage="Customize advanced settings"
                         />
                       )}
                       checked={areAdvancedSettingsVisible}
