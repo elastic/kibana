@@ -51,7 +51,7 @@ uiRoutes
   });
 
 require('ui/index_patterns/route_setup/load_default')({
-  whenMissingRedirectTo: '/management/kibana/index_patterns'
+  whenMissingRedirectTo: '/management/kibana/index_pattern'
 });
 
 export function updateLandingPage(version) {
