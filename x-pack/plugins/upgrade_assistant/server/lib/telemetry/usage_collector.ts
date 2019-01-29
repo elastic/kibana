@@ -39,7 +39,10 @@ export async function fetchUpgradeAssistantMetrics(
     UPGRADE_ASSISTANT_TYPE,
     UPGRADE_ASSISTANT_DOC_ID
   );
-  const loggerDeprecationCallResult = await callCluster('cluster.getSettings', { ignore: [404] });
+  const loggerDeprecationCallResult = await callCluster('cluster.getSettings', {
+    includeDefaults: true,
+    ignore: [404],
+  });
 
   const getTelemetrySavedObject = (
     upgradeAssistantTelemetrySavedObjectAttrs: UpgradeAssistantTelemetrySavedObjectAttributes | null
