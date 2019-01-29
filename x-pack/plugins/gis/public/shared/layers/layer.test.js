@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ALayer } from './layer';
+import { AbstractLayer } from './layer';
 
 describe('layer', () => {
-  const layer = new ALayer({ layerDescriptor: {} });
+  const layer = new AbstractLayer({ layerDescriptor: {} });
 
   describe('updateDueToExtent', () => {
 

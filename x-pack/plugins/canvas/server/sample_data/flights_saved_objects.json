@@ -4,6 +4,7 @@
     "type": "canvas-workpad",
     "updated_at": "2018-10-22T14:17:04.040Z",
     "version": 1,
+    "migrationVersion": {},
     "attributes": {
       "name": "[Flights] Overview",
       "id": "workpad-a474e74b-aedc-47c3-894a-db77e62c41e0",

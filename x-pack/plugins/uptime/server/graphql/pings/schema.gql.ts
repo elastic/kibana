@@ -11,6 +11,11 @@ export const pingsSchema = gql`
     query: Query
   }
 
+  type PingResults {
+    total: UnsignedInteger!
+    pings: [Ping!]!
+  }
+
   type Query {
     "Get a list of all recorded pings for all monitors"
     allPings(
@@ -18,9 +23,9 @@ export const pingsSchema = gql`
       size: Int
       monitorId: String
       status: String
-      dateRangeStart: UnsignedInteger!
-      dateRangeEnd: UnsignedInteger!
-    ): [Ping!]!
+      dateRangeStart: String!
+      dateRangeEnd: String!
+    ): PingResults!
 
     "Gets the number of documents in the target index"
     getDocCount: DocCount!
@@ -179,6 +184,8 @@ export const pingsSchema = gql`
   type Ping {
     "The timestamp of the ping's creation"
     timestamp: String!
+    "Milliseconds from the timestamp to the current time"
+    millisFromNow: Int
     "The agent that recorded the ping"
     beat: Beat
     docker: Docker

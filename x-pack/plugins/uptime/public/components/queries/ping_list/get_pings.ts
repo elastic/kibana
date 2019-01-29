@@ -6,44 +6,51 @@
 
 import gql from 'graphql-tag';
 
-export const getPingsQuery = gql`
-  query PingList(
-    $dateRangeStart: UnsignedInteger!
-    $dateRangeEnd: UnsignedInteger!
-    $monitorId: String
-    $status: String
-    $sort: String
-    $size: Int
+export const getPingsQueryString = `
+query PingList(
+  $dateRangeStart: String!
+  $dateRangeEnd: String!
+  $monitorId: String
+  $status: String
+  $sort: String
+  $size: Int
+) {
+  allPings(
+    dateRangeStart: $dateRangeStart
+    dateRangeEnd: $dateRangeEnd
+    monitorId: $monitorId
+    status: $status
+    sort: $sort
+    size: $size
   ) {
-    allPings(
-      dateRangeStart: $dateRangeStart
-      dateRangeEnd: $dateRangeEnd
-      monitorId: $monitorId
-      status: $status
-      sort: $sort
-      size: $size
-    ) {
-      timestamp
-      http {
-        response {
-          status_code
+      total
+      pings {
+        timestamp
+        http {
+          response {
+            status_code
+          }
         }
-      }
-      error {
-        message
-        type
-      }
-      monitor {
-        duration {
-          us
+        error {
+          message
+          type
         }
-        id
-        ip
-        name
-        scheme
-        status
-        type
+        monitor {
+          duration {
+            us
+          }
+          id
+          ip
+          name
+          scheme
+          status
+          type
+        }
       }
     }
   }
+`;
+
+export const getPingsQuery = gql`
+  ${getPingsQueryString}
 `;

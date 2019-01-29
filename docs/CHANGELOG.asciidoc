@@ -87,7 +87,286 @@ This section summarizes the changes in each release.
 [[release-notes-6.6.0]]
 == {kib} 6.6.0
 
-coming[6.6]
+
+[float]
+[[breaking-6.6.0]]
+=== Breaking Changes
+Platform::
+* Upgrades Hapi in legacy platform to v17 {pull}21707[#21707]
+
+[float]
+[[deprecation-6.6.0]]
+=== Deprecations
+Operations::
+* Deprecates tribe settings in 6.x {pull}25548[#25548]
+
+[float]
+[[plugin-6.6.0]]
+=== Plugin API Changes 
+See https://www.elastic.co/blog/kibana-plugin-api-changes-in-6-6[Kibana plugin API changes in 6.6].
+
+[float]
+[[highlights-6.6.0]]
+=== Highlights
+6.6.0 includes the following highlights:
+
+* Index Lifecycle Management
+* Remote Clusters and Cross Cluster Replication 
+* Upgrade Assistant for Elasticsearch 7.0
+
+For more information, see <<release-highlights-6.6.0, 6.6.0 Release Highlights>>.
+
+[float]
+[[enhancement-6.6.0]]
+=== Enhancements
+Canvas::
+* Implements a clipboard with simple copy/cut/paste for elements only that stores in local storage {pull}25890[#25890]
+* Adds the ability to reuse assets without editing an element's expression. {pull}25764[#25764]
+* Adds a template tab to the workpad manager where users can find workpad templates, demos, and tutorials {pull}23966[#23966]
+* Renames cloned templates {pull}28708[#28708]
+* Adds persistent grouping and ungrouping {pull}25854[#25854]
+Geo::
+* Improves message for maximum zoom level {pull}26267[#26267]
+Machine Learning::
+* Adds checkbox to enable model plot in Advanced job wizard {pull}25468[#25468]
+* Adds auditbeat process data recognizer modules {pull}25716[#25716]
+* Adds support for Kuery to job wizards {pull}26094[#26094]
+* Does not pass datafeed query to Discover in custom URL {pull}26957[#26957]
+* Adds `created_by` meta data to the mapping of indexes from file data visualizer imports {pull}27303[#27303]
+* Allows users to add/edit/delete annotations in the Single Series Viewer {pull}26034[#26034]
+* Allows model plot enablement via checkbox in the MultiMetric and Population job creation wizards {pull}24914[#24914]
+* Prevents a new calendar save if that ID already exists {pull}27104[#27104]
+* Converts Settings page to React {pull}27144[#27144]
+* Displays a ordinal y axis for low cardinality rare charts. {pull}24852[#24852]
+Management::
+* Adds `ignore_failure` to ingest common auto complete in Console {pull}24915[#24915]
+* Adds timestamp to inspector request stats {pull}25667[#25667]
+* Support date fields in Metrics step for rollup data {pull}26450[#26450]
+* Implements a CRUD UI for index lifecycle management policies {pull}25553[#25553]
+Observability::
+* Adds Overview and Monitor pages for Uptime Monitoring {pull}27279[#27279]
+Operations::
+* Adds support for multiple Elasticsearch nodes and sniffing {pull}21928[#21928]
+* Upgrades to NodeJS 10 {pull}25157[#25157]
+* Optimizes with thread loader and terser {pull}27014[#27014]
+* Creates vendor DLL for the client modules {pull}22618[#22618]
+Platform::
+* Migrates to new design system for breadcrumbs {pull}25914[#25914]
+* Moves Canvas interpreter to OSS {pull}25711[#25711]
+* Adds `en` as a valid locale to the settings {pull}25948[#25948]
+Reporting::
+* Add png output to reports {pull}24759[#24759]
+Security::
+* Updates User Management to sort the list of roles by name {pull}26491[#26491]
+* Adds “Successfully logged out” message {pull}23890[#23890]
+* Resolves issue with the link to the user profile in the K7 header not respecting the basePath {pull}26417[#26417]
+* Adds index privileges for Index Lifecycle Management {pull}27461[#27461]
+* Makes space selector a button {pull}26889[#26889]
+Visualizations::
+* Removes experimental status flag from Visual Builder {pull}25634[#25634]
+* Adds setting to enable frozen index search {pull}27297[#27297]
+
+[float]
+[[bug-6.6.0]]
+=== Bug fixes
+APM::
+* Fixes linking between errors and transactions, and link from errors to Discover {pull}28477[#28477]
+* Updates APM index pattern {pull}27075[#27075]
+* Updates index pattern to add ECS fields & aliases {pull}27434[#27434]
+* Adds support for microseconds {pull}24974[#24974]
+* Passes constants to  `_.get` instead of simple strings {pull}25177[#25177]
+* Switches to ‘render’ prop in history tabs component to avoid unnecessary mount cycles {pull}28389[#28389]
+* Removes entries for APM aliases {pull}28849[#28849]
+Canvas::
+* Fixes minor visual bug when opening workpad loader {pull}26647[#26647]
+* Adds `clear` function {pull}26397[#26397]
+* Fixes page thumbnail sizes {pull}26573[#26573]
+* Fixes tag registry {pull}27423[#27423]
+* Fixes PropType error in toggle arg {pull}27514[#27514]
+* Fixes page manager for workpads without style property {pull}27556[#27556]
+* Adds custom font size to list of sizes options {pull}27785[#27785]
+* Ignores mouse movement over popovers and sidebars {pull}27818[#27818]
+* Fixes time filter component {pull}27532[#27532]
+* Fixes error handling of NetworkErrors {pull}28282[#28282]
+* Fixes error handling in the case of failure when creating a workpad via the API {pull}28129[#28129]
+* Fixes clipboard paste error {pull}28781[#28781]
+* Fixes SQL issues in sample data {pull}27161[#27161]
+* Minifies assets in production and generates stats on demand {pull}28391[#28391]
+* Fixes socket and thread memory leaks {pull}26984[#26984]
+* Fixes build to include dependencies {pull}27858[#27858]
+* Makes timelion a browser function {pull}27944[#27944]
+* Fixes immediate delete after an element resize {pull}27767[#27767]
+* Fixes time filter calendar bounce {pull}24913[#24913]
+* Decreases size of tray toggle {pull}25470[#25470]
+* Adds workpad-level CSS {pull}24143[#24143]
+* Allows timelion data source to use configured certificateAuthorities {pull}26809[#26809]
+* Fixes interpreter socket error {pull}26870[#26870]
+* Adds filtering so that only files are returned when loading `get_plugin_paths` {pull}27638[#27638]
+* Moves state out of kbn-interpreter {pull}27317[#27317]
+Console::
+* Adds new specs for security endpoints without `_xpack` prefix {pull}27057[#27057]
+* Fixes missing escape field name in history list directive {pull}27112[#27112]
+Geo::
+* Resolves URL dynamically when requesting EMS data {pull}25685[#25685]
+* Fixes EMS hotlink {pull}26868[#26868]
+* Fixes TMS without EMS access {pull}28111[#28111]
+* Removes fetch ‘finally’ block to fix map loading error {pull}28306[#28306]
+* Ensures reporting works with unsaturated baselayers {pull}28185[#28185]
+Infrastructure:: 
+* Fixes potential color bugs {pull}26292[#26292]
+* Changes time range for waffle map from last hour to last 5m {pull}26278[#26278]
+* Fixes AutoRefresh button on node detail page {pull}26426[#26426]
+* Changes node detail link to set time range to 1 hour {pull}26977[#26977]
+* Updates links for containers to use ID instead of name {pull}27088[#27088]
+* Adds linking support for APM {pull}27319[#27319]
+* Fails out of auth flow on first provider failure {pull}26648[#26648]
+* Preserves time values when navigating from the waffle map to the logs and details pages {pull}24666[#24666]
+* Removes duplicate text in detail page title {pull}25283[#25283]
+* Moves `SavedObjectClient` types alongside JavaScript source files {pull}26448[#26448]
+* Passes flag in request to force BWC hit count {pull}26517[#26517]
+* Replaces redux source slice with constate container {pull}26121[#26121]
+* Fixes styling after breaking EUI changes {pull}27021[#27021]
+* Fixes graphql type generation after package upgrades {pull}26991[#26991]
+* Removes usage of ts-optchain in the browser {pull}27148[#27148]
+* Refactors "capabilites" to "metadata" in GraphQL {pull}25580[#25580]
+* Hides sidenav while loading {pull}27119[#27119]
+Kibana App::
+* Fixes wildcard queries against the default field {pull}24778[#24778]
+* Adds raw data to split column {pull}26321[#26321]
+* Fixes dashboard to refresh visualizations when the refresh button is clicked {pull}27353[#27353]
+* Removes `_remote/info` query to fix remote clusters error message when creating an index pattern {pull}27345[#27345]
+* Adds description for visualisation types {pull}26243[#26243]
+* Moves `timeout` to request body in TSVB requests {pull}26510[#26510]
+* Add `rest_total_hits_as_int` into Kibana App {pull}26404[#26404]
+* Fixes issue with filtering `_other_` aggregation buckets in inspector. {pull}26794[#26794]
+* Fixes scrolling list on Firefox {pull}26246[#26246]
+* Adds workaround for getDerivedStateFromProps change in React 16.4 {pull}25142[#25142]
+Machine Learning::
+* Adds useful error on invalid query in Job List search bar {pull}25153[#25153]
+* Adds user privilege check to Jobs List group selector control {pull}25225[#25225]
+* Ensures loading indicator is present on initial jobs load {pull}27151[#27151]
+* Ensures loading message is present on jobs load {pull}27316[#27316]
+* Ensures correct permissions are applied to Settings Calendars/Filter Lists {pull}27346[#27346]
+* Converts to EuiSuperSelect component for the 'Create Watch' severity control in Job wizard {pull}27272[#27272]
+* Ensures that content in Jobs list start datafeed time range selector does not overflow modal {pull}27438[#27438]
+* Fixes sort on Calendars list events column so that it is done numerically {pull}27517[#27517]
+* Fixes import modal flex items so that they don’t overflow in IE11 {pull}27529[#27529]
+* Fixes missing permission callout in jobs list datafeed preview for `machine_learning_user` {pull}27545[#27545]
+* Fixes FileViz new ML Job link shown without `canCreateJob` permission {pull}27612[#27612]
+* Fixes the File Data Visualizer file size check, and formats the values displayed in error message as bytes {pull}25295[#25295]
+* Fixes the layout of the cards in the Data Visualizer on IE {pull}25383[#25383]
+* Fixes alignment of filter icons in anomalies table {pull}26253[#26253]
+* Fixes word break in anomalies and jobs tables {pull}26978[#26978]
+* Fixes job list page index when deleting jobs off last page {pull}27481[#27481]
+* Fixes the calculation used to set the width of the margin for the y-axis labels of the chart in the Single Metric job wizard  {pull}27521[#27521]
+* Adds a check if the current user can clone a job {pull}27496[#27496]
+* Fixes the trigger for watch creation in the advanced job wizard. {pull}27594[#27594]
+* Fixes missing job list error icon {pull}27575[#27575]
+* Retains model memory limit when cloning job {pull}27670[#27670]
+* Fixes job validation message typo {pull}25130[#25130]
+* Removes deprecated angularjs based jobs list and related code {pull}25216[#25216]
+Management::
+* Fixes rollup data job wizard {pull}27413[#27413]
+* Fixes Index Management not loading when ILM enricher errors out {pull}28108[#28108]
+* Fixes Index Management enricher response variable {pull}28404[#28404]
+* Reverts styles to fix watcher popups {pull}28266[#28266]
+* Fixes index pattern wizard in case when there are remote clusters but no local indices  {pull}24339[#24339]
+* Adds WatchErrors to capture invalid watches {pull}23887[#23887]
+* Notifies user when multiple auto-follow patterns try to replicate the same data {pull}27783[#27783]
+* Fixes issue with multiple execution in Console {pull}26933[#26933]
+* Fixes validation issues with editing an index lifecycle policy {pull}27045[#27045]
+* Adds reload button to index management {pull}27033[#27033]
+* Returns wrapped unknown errors from rollup API. {pull}25032[#25032]
+* Adjusts spacing of Management nav items so they're easier to differentiate when they contain wrapped lines {pull}25666[#25666]
+* Shows loading state in Rollup Job detail panel. {pull}25752[#25752]
+* Specifies Rollup Jobs breadcrumbs in header {pull}26590[#26590]
+* Requires histogram interval in Rollup Job wizard to be a whole number {pull}26596[#26596]
+* Adds informational callout in index lifecycle management when step_info message is present {pull}27046[#27046]
+* Fixes broken breadcrumb link for index management {pull}27164[#27164]
+* Fixes issues with index lifecycle summary and includes minor changes to the Index lifecycle management UI {pull}27153[#27153]
+* Adds ODBC blurb to Start trial UI {pull}27223[#27223]
+* Reloads full index list in index lifecycle management when reload hits missing index {pull}27197[#27197]
+* Adds loading spinner for index management table {pull}27204[#27204]
+* Fixes logic for when license error shows {pull}27326[#27326]
+* Update 'Disenroll' text to be consistent with menu option 'Unenroll' {pull}26816[#26816]
+* Puts template index before any ES write operation to prevent risk of startup errors in Beats Central Management {pull}28955[#28955]
+Monitoring::
+* Renames Monitoring FormattedMessage to FormattedAlert {pull}24197[#24197]
+* Uses the cluster name from metadata if it exists {pull}24495[#24495]
+* Converts the monitoring plugin to use EUI tables {pull}27064[#27064]
+* Stops a new request when one is inflight {pull}27253[#27253]
+* Updates additional Logstash pages to EUI {pull}27258[#27258]
+* Resolves some Logstash UI regressions {pull}27530[#27530]
+* Ensures all monitoring charts respond to onBrush {pull}28098[#28098]
+* Fixes error handling for local stats collection/permissions {pull}26560[#26560]
+* Removes initial delay to check and send {pull}26575[#26575]
+* Pulls local Kibana usage stats {pull}26496[#26496]
+Operations::
+* Modifies settings to start limit and interval {pull}25474[#25474]
+Platform::
+* Transforms plugin deprecations before checking for unused settings {pull}21294[#21294]
+* Establishes pattern for typing legacy plugins {pull}26045[#26045]
+* Upgrades resize-observer-polyfill version {pull}26990[#26990]
+* Fixes saved objects client _processBatchQueue function to handle errors {pull}26763[#26763]
+* Adds reference to es script in Kibana {pull}25607[#25607]
+* Adds ability to get included/excluded test counts {pull}25760[#25760]
+* Wraps remote in browser service {pull}26394[#26394]
+* Implements k7Breadcrumbs in Kibana mangement routes {pull}26503[#26503]
+* Prepares @kbn/datemath for publishing {pull}26559[#26559]
+* Adds dist flag to config context {pull}26545[#26545]
+* Moves moment to peerDependency in elastic-datemath {pull}27264[#27264]
+* Deletes all objects but the default space {pull}27412[#27412]
+* Changes the way a routing module is imported from the init function {pull}26494[#26494]
+* Adds jsxa11y into eslint rules {pull}23932[#23932]
+Querying & Filtering::
+* Moves `buildEsQuery` to a separate package {pull}23345[#23345]
+* Adds comment about `docvalue` for each date fields in `getComputedFields` {pull}25725[#25725]
+* Moves filtering functions out of `vis.API.events` {pull}25280[#25280]
+Reporting::
+* Adds in browser info to the report-info drawer {pull}26307[#26307]
+* Adds sort order to share menu options. {pull}25058[#25058]
+* Adds logging for waitForSelector failure {pull}25762[#25762]
+* Enhances error messaging and handling {pull}26299[#26299]
+* Uses data-test-subj on toast to check for failure {pull}25482[#25482]
+* Adds Info button in Reporting listing {pull}25421[#25421]
+Security::
+* Shows change password form only when a password change is possible {pull}26779[#26779]
+* Fixes issues with the url.search being null in Node 10 {pull}26992[#26992]
+* Fixes prettier throw rule error  {pull}26071[#26071]
+Spaces::
+* Fixes duplicate space name on the space selector screen {pull}27906[#27906]
+* Adds context to spaces grid action buttons {pull}27911[#27911]
+Visualizations::
+* Implements new visualization type selection modal {pull}23833[#23833]
+* Ensures extra columns are not shown in a table visualization when showPartialRows:true {pull}25690[#25690]
+* Reverts settings.html to fix Graph display {pull}26008[#26008]
+* Defaults the scroll zoom capability of Vega Maps to 'false'  {pull}21169[#21169]
+* Fixes TSVB number/percentage format {pull}27704[#27704]
+* Enables TSVB series opacity {pull}27956[#27956]
+* Fixes error in Visual Builder markdown rendering on dashboard {pull}27835[#27835]
+* Fixes fatal error in Visual Builder using annotations {pull}27780[#27780]
+* Fixes Visual Builder color rules on multiple gauges {pull}27810[#27810]
+* Adds support for using Kuery/KQL without passing an index pattern object {pull}28010[#28010]
+* Fixes date labels to show in milliseconds after dates selection {pull}25654[#25654]
+* Removes lab stage for visualizations {pull}25702[#25702]
+* Rewrites URL when closing the visualization type selection modal {pull}26327[#26327]
+* Fixes incorrect calls from .on to .off in TSVB {pull}24575[#24575]
+* Guards against empty and undefined index pattern arrays passed to QueryBar {pull}24607[#24607]
+* Maps inspector requests by ID so that single requests can be reset at a time {pull}26770[#26770]
+* Updates ecommerce index pattern fields to have the same type as Elasticsearch mappings {pull}27549[#27549]
+* Removes `dashboardContext` {pull}23227[#23227]
+* Removes `indexPattern` from vega/tsvb/timelion request handler {pull}26007[#26007]
+* Passes global filters from editor {pull}26009[#26009]
+* Enables visualisations in a dashboard to be opened in a new tab {pull}25233[#25233]
+* Fixes other bucket option to correctly apply without having to change other settings {pull}26874[#26874]
+* Stops using schemas in aggconfigs to output dsl {pull}26010[#26010].
+* Fixes Timelion props function {pull}28834[#28834]
+
+
+
+
+
+
 
 [[release-notes-6.5.4]]
 == {kib} 6.5.4

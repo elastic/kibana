@@ -7,9 +7,9 @@
 import {
   EuiHealth,
   // @ts-ignore missing type definition
-  EuiInMemoryTable,
+  EuiHistogramSeries,
   // @ts-ignore missing type definition
-  EuiLineSeries,
+  EuiInMemoryTable,
   EuiPanel,
   // @ts-ignore missing type definition
   EuiSeriesChart,
@@ -25,15 +25,15 @@ import React, { Fragment } from 'react';
 import { Query } from 'react-apollo';
 import { Link } from 'react-router-dom';
 import { LatestMonitorsResult } from 'x-pack/plugins/uptime/common/graphql/types';
+import { UptimeCommonProps } from '../../../uptime_app';
+import { formatSparklineCounts } from './format_sparkline_counts';
 import { getMonitorListQuery } from './get_monitor_list';
 
 interface MonitorListProps {
-  autorefreshInterval: number;
-  autorefreshEnabled: boolean;
-  dateRangeStart: number;
-  dateRangeEnd: number;
   filters?: string;
 }
+
+type Props = MonitorListProps & UptimeCommonProps;
 
 const MONITOR_LIST_DEFAULT_PAGINATION = 10;
 
@@ -101,27 +101,25 @@ const monitorListColumns = [
       return (
         <EuiSeriesChart
           showDefaultAxis={false}
-          width={160}
           height={70}
+          stackBy="y"
+          // TODO: style hack
+          style={{ marginBottom: '-20px' }}
           xType={EuiSeriesChartUtils.SCALE.TIME}
         >
-          <EuiLineSeries
-            lineSize={2}
-            color="green"
+          <EuiHistogramSeries
+            data={formatSparklineCounts(upSeries)}
             name={i18n.translate('xpack.uptime.monitorList.upLineSeries.upLabel', {
               defaultMessage: 'Up',
             })}
-            data={upSeries}
-            showLineMarks={true}
+            color="green"
           />
-          <EuiLineSeries
-            lineSize={2}
-            color="red"
+          <EuiHistogramSeries
+            data={formatSparklineCounts(downSeries)}
             name={i18n.translate('xpack.uptime.monitorList.downLineSeries.downLabel', {
               defaultMessage: 'Down',
             })}
-            data={downSeries}
-            showLineMarks={true}
+            color="red"
           />
         </EuiSeriesChart>
       );
@@ -136,13 +134,13 @@ const monitorListPagination = {
 
 export const MonitorList = ({
   autorefreshInterval,
-  autorefreshEnabled,
+  autorefreshIsPaused,
   dateRangeStart,
   dateRangeEnd,
   filters,
-}: MonitorListProps) => (
+}: Props) => (
   <Query
-    pollInterval={autorefreshEnabled ? autorefreshInterval : undefined}
+    pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
     query={getMonitorListQuery}
     variables={{ dateRangeStart, dateRangeEnd, filters }}
   >

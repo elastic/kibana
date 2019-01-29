@@ -10,10 +10,9 @@ import { formatDateTimeLocal } from '../../../common/formatting';
 import { formatTimestampToDuration } from '../../../common';
 import { CALCULATE_DURATION_SINCE, EUI_SORT_DESCENDING } from '../../../common/constants';
 import { mapSeverity } from './map_severity';
-import { Tooltip } from 'plugins/monitoring/components/tooltip';
 import { FormattedAlert } from 'plugins/monitoring/components/alerts/formatted_alert';
 import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
-import { EuiHealth, EuiIcon } from '@elastic/eui';
+import { EuiHealth, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 
 const linkToCategories = {
@@ -31,11 +30,11 @@ const getColumns = (kbnUrl, scope) => ([
       const severityIcon = mapSeverity(severity);
 
       return (
-        <Tooltip text={severityIcon.title} placement="bottom" trigger="hover">
+        <EuiToolTip content={severityIcon.title} position="bottom">
           <EuiHealth color={severityIcon.color} data-test-subj="alertIcon" aria-label={severityIcon.title}>
             { capitalize(severityIcon.value) }
           </EuiHealth>
-        </Tooltip>
+        </EuiToolTip>
       );
     }
   },

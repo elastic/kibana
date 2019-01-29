@@ -26,29 +26,27 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { Query } from 'react-apollo';
-import { SnapshotHistogram } from '../../functional/snapshot_histogram';
+import { UptimeCommonProps } from '../../../uptime_app';
+import { SnapshotHistogram } from '../../functional';
 import { getSnapshotQuery } from './get_snapshot';
 
 interface SnapshotProps {
-  dateRangeStart: number;
-  dateRangeEnd: number;
-  autorefreshEnabled: boolean;
-  autorefreshInterval: number;
   filters?: string;
 }
+
+type Props = SnapshotProps & UptimeCommonProps;
 
 export const Snapshot = ({
   dateRangeStart,
   dateRangeEnd,
-  autorefreshEnabled,
+  autorefreshIsPaused,
   autorefreshInterval,
   filters,
-}: SnapshotProps) => (
+}: Props) => (
   <Query
-    pollInterval={autorefreshEnabled ? autorefreshInterval : undefined}
+    pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
     query={getSnapshotQuery}
-    // TODO downCount and windowSize aren't needed for MVP
-    variables={{ dateRangeStart, dateRangeEnd, downCount: 1, windowSize: 1, filters }}
+    variables={{ dateRangeStart, dateRangeEnd, filters }}
   >
     {({ loading, error, data }) => {
       if (loading) {

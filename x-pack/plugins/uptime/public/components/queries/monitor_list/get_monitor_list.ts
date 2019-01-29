@@ -6,12 +6,8 @@
 
 import gql from 'graphql-tag';
 
-export const getMonitorListQuery = gql`
-  query MonitorList(
-    $dateRangeStart: UnsignedInteger!
-    $dateRangeEnd: UnsignedInteger!
-    $filters: String
-  ) {
+export const getMonitorListQueryString = `
+  query MonitorList($dateRangeStart: String!, $dateRangeEnd: String!, $filters: String) {
     monitorStatus: getMonitors(
       dateRangeStart: $dateRangeStart
       dateRangeEnd: $dateRangeEnd
@@ -45,4 +41,8 @@ export const getMonitorListQuery = gql`
       }
     }
   }
+`;
+
+export const getMonitorListQuery = gql`
+  ${getMonitorListQueryString}
 `;

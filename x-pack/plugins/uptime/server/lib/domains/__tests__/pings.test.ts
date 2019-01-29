@@ -45,78 +45,83 @@ describe('Pings domain lib', () => {
       const request: any = {};
       const apiResponse = await libs.pings.getAll(
         request,
-        100,
-        200,
+        'now-1h',
+        'now',
         undefined,
         undefined,
         'asc',
         2
       );
-      expect(apiResponse).toHaveLength(2);
-      testMonitorId('foo', apiResponse[0].monitor);
-      testMonitorId('baz', apiResponse[1].monitor);
+      expect(apiResponse.total).toBe(2);
+      expect(apiResponse.pings).toHaveLength(2);
+      testMonitorId('foo', apiResponse.pings[0].monitor);
+      testMonitorId('baz', apiResponse.pings[1].monitor);
     });
 
     it('should sort desc and take a range', async () => {
       const apiResponse = await libs.pings.getAll(
         undefined,
-        100,
-        200,
+        'now-1h',
+        'now',
         undefined,
         undefined,
         'desc',
         2
       );
-      expect(apiResponse).toHaveLength(2);
-      testMonitorId('bar', apiResponse[0].monitor);
-      testMonitorId('baz', apiResponse[1].monitor);
+      expect(apiResponse.total).toBe(2);
+      expect(apiResponse.pings).toHaveLength(2);
+      testMonitorId('bar', apiResponse.pings[0].monitor);
+      testMonitorId('baz', apiResponse.pings[1].monitor);
     });
 
     it('should take range without sort', async () => {
       const apiResponse = await libs.pings.getAll(
         undefined,
-        100,
-        200,
+        'now-1h',
+        'now',
         undefined,
         undefined,
         undefined,
         2
       );
-      expect(apiResponse).toHaveLength(2);
-      testMonitorId('foo', apiResponse[0].monitor);
-      testMonitorId('bar', apiResponse[1].monitor);
+      expect(apiResponse.total).toBe(2);
+      expect(apiResponse.pings).toHaveLength(2);
+      testMonitorId('foo', apiResponse.pings[0].monitor);
+      testMonitorId('bar', apiResponse.pings[1].monitor);
     });
 
     it('should sort without range', async () => {
       const apiResponse = await libs.pings.getAll(
         undefined,
-        100,
-        200,
+        'now-1h',
+        'now',
         undefined,
         undefined,
         'desc',
         undefined
       );
-      expect(apiResponse).toHaveLength(3);
-      testMonitorId('bar', apiResponse[0].monitor);
-      testMonitorId('baz', apiResponse[1].monitor);
-      testMonitorId('foo', apiResponse[2].monitor);
+      expect(apiResponse.total).toBe(10);
+      expect(apiResponse.pings).toHaveLength(3);
+      testMonitorId('bar', apiResponse.pings[0].monitor);
+      testMonitorId('baz', apiResponse.pings[1].monitor);
+      testMonitorId('foo', apiResponse.pings[2].monitor);
     });
 
     it('should return unsorted, with default size of 10', async () => {
       const apiResponse = await libs.pings.getAll(
         undefined,
-        100,
-        200,
+        'now-1h',
+        'now',
         undefined,
         undefined,
         undefined,
         undefined
       );
-      expect(apiResponse).toHaveLength(3);
-      testMonitorId('foo', apiResponse[0].monitor);
-      testMonitorId('bar', apiResponse[1].monitor);
-      testMonitorId('baz', apiResponse[2].monitor);
+      expect(apiResponse.total).toBe(10);
+      expect(apiResponse.pings).toHaveLength(3);
+      testMonitorId('foo', apiResponse.pings[0].monitor);
+      testMonitorId('bar', apiResponse.pings[1].monitor);
+      testMonitorId('baz', apiResponse.pings[2].monitor);
     });
   });
 });

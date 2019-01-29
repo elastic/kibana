@@ -10,6 +10,7 @@ import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
+import { i18n } from '@kbn/i18n';
 
 import { SavedWorkspaceProvider } from './saved_workspace';
 
@@ -23,8 +24,12 @@ export function SavedWorkspacesProvider(kbnUrl, Private, Promise) {
 
   this.loaderProperties = {
     name: 'Graph workspace',
-    noun: 'Graph workspace',
-    nouns: 'Graph workspaces'
+    noun: i18n.translate('xpack.graph.savedWorkspaces.graphWorkspaceLabel', {
+      defaultMessage: 'Graph workspace'
+    }),
+    nouns: i18n.translate('xpack.graph.savedWorkspaces.graphWorkspacesLabel', {
+      defaultMessage: 'Graph workspaces'
+    })
   };
 
   // Returns a single dashboard by ID, should be the name of the workspace
