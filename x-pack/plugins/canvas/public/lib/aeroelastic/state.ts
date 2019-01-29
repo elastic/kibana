@@ -5,20 +5,16 @@
  */
 
 import { shallowEqual } from './functional';
-
-type ActionId = number;
-type TypeName = string;
-type NodeResult = any;
-type Payload = any;
-interface Meta {
-  silent: boolean;
-}
-type NodeFunction = (...args: any[]) => any;
-type UpdaterFunction = (arg: NodeResult) => NodeResult;
-type ChangeCallbackFunction = (
-  { type, state }: { type: TypeName; state: NodeResult },
-  meta: Meta
-) => void;
+import {
+  ActionId,
+  ChangeCallbackFunction,
+  Meta,
+  NodeFunction,
+  NodeResult,
+  Payload,
+  TypeName,
+  UpdaterFunction,
+} from './types';
 
 const makeUid = (): ActionId => 1e11 + Math.floor((1e12 - 1e11) * Math.random());
 
