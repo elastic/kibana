@@ -48,7 +48,7 @@ describe('getKibanaHref', () => {
     const hash = '/discover';
     const href = getKibanaHref({ location, pathname, hash });
     expect(href).toBe(
-      '/app/kibana#/discover?_g=(time:(from:now-24h,mode:quick,to:now))&_a='
+      '/app/kibana#/discover?_g=(time:(from:now-24h,mode:quick,to:now))'
     );
   });
 

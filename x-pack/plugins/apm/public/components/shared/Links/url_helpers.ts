@@ -72,21 +72,22 @@ function getQueryWithRisonParams(
   const encodedG = rison.encode(combinedG);
   const encodedA = query._a ? rison.encode(query._a) : '';
 
-  const defaultQuery: StringMap = {
-    ...query
+  const nextQuery: StringMap = {
+    ...query,
+    _g: encodedG
   };
 
   // Preserve kuery for apm links
   const isApmLink = pathname.includes('app/apm') || pathname === '';
   if (currentQuery.kuery && isApmLink) {
-    defaultQuery.kuery = currentQuery.kuery;
+    nextQuery.kuery = currentQuery.kuery;
   }
 
-  return {
-    ...defaultQuery,
-    _g: encodedG,
-    _a: encodedA
-  };
+  if (encodedA) {
+    nextQuery._a = encodedA;
+  }
+
+  return nextQuery;
 }
 
 export interface KibanaHrefArgs {
