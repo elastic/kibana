@@ -14,7 +14,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
-import { get, getOr } from 'lodash/fp';
+import { get, getOr, isArray } from 'lodash/fp';
 import React from 'react';
 import { pure } from 'recompose';
 import { HostItem, HostsEdges } from 'x-pack/plugins/secops/server/graphql/types';
@@ -34,7 +34,7 @@ interface OwnProps {
 type HostSummaryProps = OwnProps;
 
 export const HostSummary = pure<HostSummaryProps>(({ data, startDate, endDate, loading }) => (
-  <EuiFlexItem style={{ maxWidth: 600 }}>
+  <EuiFlexItem style={{ maxWidth: 750 }}>
     <EuiPanel>
       <EuiTitle size="s">
         <h3>{i18n.SUMMARY}</h3>
@@ -60,10 +60,9 @@ const fieldTitleMapping: Readonly<Record<string, string>> = {
   'host.architecture': i18n.ARCHITECTURE,
 };
 
-const relativeFields: string[] = ['firstSeen'];
+const dateFields: string[] = ['firstSeen'];
 
-// TODO: create test - run mount
-const getEuiDescriptionList = (
+export const getEuiDescriptionList = (
   host: HostItem | null,
   startDate: number,
   endDate: number
@@ -71,15 +70,17 @@ const getEuiDescriptionList = (
   return (
     <EuiDescriptionList type="column" compressed>
       {Object.entries(fieldTitleMapping).map(([field, title]) => {
-        const summaryValue: string | string[] = get(field, host);
+        const summaryValue: string | string[] | null = get(field, host);
         return (
           <React.Fragment key={field}>
             <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
             {/*Using EuiDescriptionListDescription throws off sizing of Draggable*/}
             <div>
-              {_.isArray(summaryValue)
-                ? summaryValue.map((v: string) => createDraggable(v, field, startDate, endDate))
-                : createDraggable(summaryValue, field, startDate, endDate)}
+              {isArray(summaryValue)
+                ? summaryValue.map((v: string) =>
+                    createDraggable(v, field, startDate, endDate, dateFields)
+                  )
+                : createDraggable(summaryValue, field, startDate, endDate, dateFields)}
             </div>
           </React.Fragment>
         );
@@ -88,12 +89,12 @@ const getEuiDescriptionList = (
   );
 };
 
-// Create test
-const createDraggable = (
-  summaryValue: string,
+export const createDraggable = (
+  summaryValue: string | null,
   field: string,
   startDate: number,
-  endDate: number
+  endDate: number,
+  relativeFields: string[]
 ) => {
   return summaryValue == null ? (
     <>{getEmptyValue()}</>
@@ -126,7 +127,7 @@ const createDraggable = (
             <FormattedRelative value={new Date(summaryValue)} />
           </EuiToolTip>
         ) : (
-          <> {summaryValue} </>
+          <>{summaryValue}</>
         )
       }
     />

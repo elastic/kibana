@@ -44,7 +44,7 @@ export const HostDetails = pure<HostComponentProps>(({ match }) => (
                   startDate={from}
                   endDate={to}
                   poll={poll}
-                  filterQuery={getFilterQuery(match.params.hostId!)}
+                  filterQuery={getFilterQuery(match.params.hostId)}
                 >
                   {({ hosts, loading, id, refetch, startDate, endDate }) => (
                     <HostSummaryManage
@@ -84,12 +84,7 @@ const getBreadcrumbs = (hostId: string) => [
   },
 ];
 
-export const getFilterQuery = (hostId: string) =>
-  JSON.stringify({
-    term: {
-      'host.id': hostId,
-    },
-  });
+const getFilterQuery = (hostId: string) => ({ term: { 'host.id': hostId } });
 
 const HostBreadcrumbWrapper = styled(EuiBreadcrumbs)`
   margin: 10px 0;
