@@ -7,7 +7,6 @@ import React from 'react';
 import { AbstractTMSSource } from '../tms_source';
 import { TileLayer } from '../../tile_layer';
 import { CreateSourceEditor } from './create_source_editor';
-
 export class KibanaTilemapSource extends  AbstractTMSSource {
 
   static type = 'KIBANA_TILEMAP';
@@ -22,14 +21,13 @@ export class KibanaTilemapSource extends  AbstractTMSSource {
     };
   }
 
-  static renderEditor = ({ dataSourcesMeta, onPreviewSource }) => {
-    const { url } = dataSourcesMeta ? dataSourcesMeta.kibana.tilemap : {};
+  static renderEditor = ({ onPreviewSource }) => {
     const previewTilemap = (urlTemplate) => {
       const sourceDescriptor = KibanaTilemapSource.createDescriptor(urlTemplate);
       const source = new KibanaTilemapSource(sourceDescriptor);
       onPreviewSource(source);
     };
-    return (<CreateSourceEditor previewTilemap={previewTilemap} url={url} />);
+    return (<CreateSourceEditor previewTilemap={previewTilemap}  />);
   };
 
   async getImmutableProperties() {

@@ -22,9 +22,7 @@ export class EMSTMSCreateSourceEditor extends React.Component {
   };
 
   _loadTmsOptions = async () => {
-    console.log('loa');
     const options = await getEmsTMSServices();
-    console.log(options);
     if (this._isMounted) {
       this.setState({
         emsTmsOptionsRaw: options

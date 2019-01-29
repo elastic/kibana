@@ -26,20 +26,23 @@ export async function getDataSources() {
   return meta;
 }
 
-
-
-
 export async function getEmsFiles() {
   const dataSource = await getDataSources();
   return _.get(dataSource, 'ems.file', []);
 }
+
+export async function getEmsTMSServices() {
+  const dataSource = await getDataSources();
+  return _.get(dataSource, 'ems.tms', []);
+}
+
 
 export async function getKibanaRegionList() {
   const dataSource = await getDataSources();
   return _.get(dataSource, 'kibana.regionmap', []);
 }
 
-export async function getEmsTMSServices() {
+export async function getKibanaTileMap() {
   const dataSource = await getDataSources();
-  return _.get(dataSource, 'ems.tms', []);
+  return _.get(dataSource, 'kibana.tilemap', []);
 }
