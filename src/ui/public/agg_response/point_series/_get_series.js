@@ -32,7 +32,7 @@ export function getSeries(table, chart) {
       if (!multiY) {
         const point = partGetPoint(row, rowIndex, aspects.y[0], aspects.z);
         const id = `${point.series}-${aspects.y[0].accessor}`;
-        if (point) addToSiri(series, point, id, point.series, aspects.y[0].fieldFormatter);
+        if (point) addToSiri(series, point, id, point.series, aspects.y[0].format);
         return;
       }
 
@@ -52,7 +52,7 @@ export function getSeries(table, chart) {
           seriesLabel = prefix + seriesLabel;
         }
 
-        addToSiri(series, point, seriesId, seriesLabel, y.fieldFormatter);
+        addToSiri(series, point, seriesId, seriesLabel, y.format);
       });
 
     }, new Map())

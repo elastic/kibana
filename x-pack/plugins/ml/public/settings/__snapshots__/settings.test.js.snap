@@ -22,7 +22,11 @@ exports[`Settings Renders settings page 1`] = `
           textTransform="none"
         >
           <h2>
-            Job Management
+            <FormattedMessage
+              defaultMessage="Job Management"
+              id="xpack.ml.settings.jobManagementTitle"
+              values={Object {}}
+            />
           </h2>
         </EuiTitle>
       </EuiPageContentHeader>
@@ -48,7 +52,11 @@ exports[`Settings Renders settings page 1`] = `
             size="l"
             type="button"
           >
-            Calendar management
+            <FormattedMessage
+              defaultMessage="Calendar management"
+              id="xpack.ml.settings.calendarManagementButtonLabel"
+              values={Object {}}
+            />
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem
@@ -64,7 +72,11 @@ exports[`Settings Renders settings page 1`] = `
             size="l"
             type="button"
           >
-            Filter Lists
+            <FormattedMessage
+              defaultMessage="Filter Lists"
+              id="xpack.ml.settings.filterListsButtonLabel"
+              values={Object {}}
+            />
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
