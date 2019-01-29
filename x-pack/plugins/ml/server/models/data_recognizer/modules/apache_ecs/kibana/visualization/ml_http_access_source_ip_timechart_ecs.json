@@ -4,7 +4,7 @@
   "title": "ML HTTP Access Source IP Timechart (ECS)", 
   "uiStateJSON": "{\"vis\":{\"legendOpen\":false}}", 
   "version": 1, 
-  "savedSearchId": "ML-Filebeat-HTTP-Access-ECS", 
+  "savedSearchId": "ml_filebeat_http_access_ecs", 
   "kibanaSavedObjectMeta": {
     "searchSourceJSON": "{}"
   }

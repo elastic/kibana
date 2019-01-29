@@ -4,7 +4,7 @@
   "title": "ML HTTP Access Top URLs Table (ECS)", 
   "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}", 
   "version": 1, 
-  "savedSearchId": "ML-Filebeat-HTTP-Access-ECS", 
+  "savedSearchId": "ml_filebeat_http_access_ecs", 
   "kibanaSavedObjectMeta": {
     "searchSourceJSON": "{}"
   }

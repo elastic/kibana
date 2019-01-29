@@ -68,44 +68,44 @@
   "kibana": {
     "dashboard": [
       {
-        "id": "ML-HTTP-Access-Source-IP-Count-Explorer-ECS",
-        "file": "ML-HTTP-Access-Source-IP-Count-Explorer-ECS.json"
+        "id": "ml_http_access_source_ip_count_explorer_ecs",
+        "file": "ml_http_access_source_ip_count_explorer_ecs.json"
       }
     ],
     "search": [
       {
-        "id": "ML-Filebeat-HTTP-Access-ECS",
-        "file": "ML-Filebeat-HTTP-Access-ECS.json"
+        "id": "ml_filebeat_http_access_ecs",
+        "file": "ml_filebeat_http_access_ecs.json"
       }
     ],
     "visualization": [
       {
-        "id": "ML-HTTP-Access-Map-ECS",
-        "file": "ML-HTTP-Access-Map-ECS.json"
+        "id": "ml_http_access_map_ecs",
+        "file": "ml_http_access_map_ecs.json"
       },
       {
-        "id": "ML-HTTP-Access-Source-IP-Timechart-ECS",
-        "file": "ML-HTTP-Access-Source-IP-Timechart-ECS.json"
+        "id": "ml_http_access_source_ip_timechart_ecs",
+        "file": "ml_http_access_source_ip_timechart_ecs.json"
       },
       {
-        "id": "ML-HTTP-Access-Status-Code-Timechart-ECS",
-        "file": "ML-HTTP-Access-Status-Code-Timechart-ECS.json"
+        "id": "ml_http_access_status_code_timechart_ecs",
+        "file": "ml_http_access_status_code_timechart_ecs.json"
       },
       {
-        "id": "ML-HTTP-Access-Top-Source-IPs-Table-ECS",
-        "file": "ML-HTTP-Access-Top-Source-IPs-Table-ECS.json"
+        "id": "ml_http_access_top_source_ips_table_ecs",
+        "file": "ml_http_access_top_source_ips_table_ecs.json"
       },
       {
-        "id": "ML-HTTP-Access-Top-URLs-Table-ECS",
-        "file": "ML-HTTP-Access-Top-URLs-Table-ECS.json"
+        "id": "ml_http_access_top_urls_table_ecs",
+        "file": "ml_http_access_top_urls_table_ecs.json"
       },
       {
-        "id": "ML-HTTP-Access-Unique-Count-URL-Timechart-ECS",
-        "file": "ML-HTTP-Access-Unique-Count-URL-Timechart-ECS.json"
+        "id": "ml_http_access_unique_count_url_timechart_ecs",
+        "file": "ml_http_access_unique_count_url_timechart_ecs.json"
       },
       {
-        "id": "ML-HTTP-Access-Events-Timechart-ECS",
-        "file": "ML-HTTP-Access-Events-Timechart-ECS.json"
+        "id": "ml_http_access_events_timechart_ecs",
+        "file": "ml_http_access_events_timechart_ecs.json"
       }
     ]
   }

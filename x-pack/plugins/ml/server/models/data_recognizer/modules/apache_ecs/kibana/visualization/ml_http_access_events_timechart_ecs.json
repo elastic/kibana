@@ -4,7 +4,7 @@
     "title": "ML HTTP Access Event Timechart (ECS)", 
     "uiStateJSON": "{\"vis\":{\"colors\":{\"apache - access\":\"#629E51\",\"nginx - access\":\"#1F78C1\"}}}", 
     "version": 1, 
-    "savedSearchId": "ML-Filebeat-HTTP-Access-ECS", 
+    "savedSearchId": "ml_filebeat_http_access_ecs", 
     "kibanaSavedObjectMeta": {
       "searchSourceJSON": "{}"
     }
