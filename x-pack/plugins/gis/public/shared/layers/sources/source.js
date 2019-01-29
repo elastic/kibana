@@ -60,7 +60,7 @@ export class AbstractSource {
     return false;
   }
 
-  isGeohashPrecisionAware() {
+  isGeoGridPrecisionAware() {
     return false;
   }
 

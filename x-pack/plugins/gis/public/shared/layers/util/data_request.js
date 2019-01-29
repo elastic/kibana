@@ -13,14 +13,6 @@ export class DataRequest {
     };
   }
 
-  hasLoadError() {
-    return !!this._descriptor.dataHasLoadError;
-  }
-
-  getLoadError() {
-    return this._descriptor.dataLoadError;
-  }
-
   getData() {
     return this._descriptor.data;
   }
