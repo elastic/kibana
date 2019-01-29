@@ -30,7 +30,7 @@ exports[`rendering render matches snapshot 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Clear your session"
-                id="fatalErrors.clearYourSessionButtonLabel"
+                id="core.fatalErrors.clearYourSessionButtonLabel"
                 values={Object {}}
               />
             </EuiButton>,
@@ -43,7 +43,7 @@ exports[`rendering render matches snapshot 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Go back"
-                id="fatalErrors.goBackButtonLabel"
+                id="core.fatalErrors.goBackButtonLabel"
                 values={Object {}}
               />
             </EuiButtonEmpty>,
@@ -54,7 +54,7 @@ exports[`rendering render matches snapshot 1`] = `
             <FormattedMessage
               defaultMessage="Try refreshing the page. If that doesn't work, go back to the previous page or
                     clear your session data."
-              id="fatalErrors.tryRefreshingPageDescription"
+              id="core.fatalErrors.tryRefreshingPageDescription"
               values={Object {}}
             />
           </p>
@@ -65,7 +65,7 @@ exports[`rendering render matches snapshot 1`] = `
           <h2>
             <FormattedMessage
               defaultMessage="Something went wrong"
-              id="fatalErrors.somethingWentWrongTitle"
+              id="core.fatalErrors.somethingWentWrongTitle"
               values={Object {}}
             />
           </h2>

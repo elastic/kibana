@@ -3,7 +3,7 @@
     "common.ui": "src/ui",
     "server": "src/server",
     "console": "src/legacy/core_plugins/console",
-    "fatalErrors": "src/core/public/fatal_errors",
+    "core": "src/core",
     "inputControl": "src/legacy/core_plugins/input_control_vis",
     "interpreter": "src/legacy/core_plugins/interpreter",
     "kbn": "src/legacy/core_plugins/kibana",

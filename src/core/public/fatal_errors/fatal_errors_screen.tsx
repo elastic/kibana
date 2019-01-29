@@ -96,7 +96,7 @@ export class FatalErrorsScreen extends React.Component<Props, State> {
               title={
                 <h2>
                   <FormattedMessage
-                    id="fatalErrors.somethingWentWrongTitle"
+                    id="core.fatalErrors.somethingWentWrongTitle"
                     defaultMessage="Something went wrong"
                   />
                 </h2>
@@ -104,7 +104,7 @@ export class FatalErrorsScreen extends React.Component<Props, State> {
               body={
                 <p>
                   <FormattedMessage
-                    id="fatalErrors.tryRefreshingPageDescription"
+                    id="core.fatalErrors.tryRefreshingPageDescription"
                     defaultMessage="Try refreshing the page. If that doesn't work, go back to the previous page or
                     clear your session data."
                   />
@@ -118,12 +118,15 @@ export class FatalErrorsScreen extends React.Component<Props, State> {
                   data-test-subj="clearSession"
                 >
                   <FormattedMessage
-                    id="fatalErrors.clearYourSessionButtonLabel"
+                    id="core.fatalErrors.clearYourSessionButtonLabel"
                     defaultMessage="Clear your session"
                   />
                 </EuiButton>,
                 <EuiButtonEmpty onClick={this.onClickGoBack} data-test-subj="goBack">
-                  <FormattedMessage id="fatalErrors.goBackButtonLabel" defaultMessage="Go back" />
+                  <FormattedMessage
+                    id="core.fatalErrors.goBackButtonLabel"
+                    defaultMessage="Go back"
+                  />
                 </EuiButtonEmpty>,
               ]}
             />
