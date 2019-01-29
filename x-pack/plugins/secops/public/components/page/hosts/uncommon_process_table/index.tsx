@@ -153,13 +153,13 @@ const getUncommonColumns = (startDate: number): Array<Columns<UncommonProcessesE
     },
   },
   {
-    name: i18n.USER,
+    name: i18n.LAST_USER,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => getOrEmptyTag('user.name', node),
   },
   {
-    name: i18n.COMMAND_LINE,
+    name: i18n.LAST_COMMAND,
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => defaultToEmptyTag(node.process.title),

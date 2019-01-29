@@ -21,12 +21,12 @@ export const NUMBER_OF_INSTANCES = i18n.translate(
   }
 );
 
-export const COMMAND_LINE = i18n.translate('xpack.secops.uncommonProcessTable.commandLine', {
-  defaultMessage: 'Command Line',
+export const LAST_COMMAND = i18n.translate('xpack.secops.uncommonProcessTable.commandLine', {
+  defaultMessage: 'Last Command',
 });
 
-export const USER = i18n.translate('xpack.secops.uncommonProcessTable.user', {
-  defaultMessage: 'User',
+export const LAST_USER = i18n.translate('xpack.secops.uncommonProcessTable.user', {
+  defaultMessage: 'Last User',
 });
 
 export const NAME = i18n.translate('xpack.secops.uncommonProcessTable.name', {
