@@ -59,6 +59,10 @@ export const LogTextStreamLogEntryItemView = injectI18n(
     public render() {
       const { intl, boundingBoxRef, logEntry, scale, searchResult, wrap } = this.props;
       const { isHovered } = this.state;
+      const viewDetailsLabel = intl.formatMessage({
+        id: 'xpack.infra.logEntryItemView.viewDetailsToolTip',
+        defaultMessage: 'View Details',
+      });
 
       return (
         <LogTextStreamLogEntryItemDiv
@@ -78,13 +82,12 @@ export const LogTextStreamLogEntryItemView = injectI18n(
           </LogTextStreamItemDateField>
           <LogTextStreamIconDiv isHovered={isHovered}>
             {isHovered ? (
-              <EuiToolTip
-                content={intl.formatMessage({
-                  id: 'xpack.infra.logEntryItemView.viewDetailsToolTip',
-                  defaultMessage: 'View Details',
-                })}
-              >
-                <EuiButtonIcon onClick={this.handleClick} iconType="expand" />
+              <EuiToolTip content={viewDetailsLabel}>
+                <EuiButtonIcon
+                  onClick={this.handleClick}
+                  iconType="expand"
+                  aria-label={viewDetailsLabel}
+                />
               </EuiToolTip>
             ) : (
               <EmptyIcon />
