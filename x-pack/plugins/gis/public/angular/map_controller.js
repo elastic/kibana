@@ -93,10 +93,6 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       }
     }
 
-    const dataSources = await getDataSources();
-    const layerList = getInitialLayers(savedMap.layerListJSON, dataSources);
-    store.dispatch(replaceLayerList(layerList));
-
     // Initialize query, syncing appState and store
     if ($state.query) {
       $scope.updateQueryAndDispatch($state.query);
@@ -115,6 +111,11 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
         <GisMap/>
       </Provider>,
       root);
+
+    //initialization takes into account presenve/absnece of EMS
+    const dataSources = await getDataSources();
+    const layerList = getInitialLayers(savedMap.layerListJSON, dataSources);
+    store.dispatch(replaceLayerList(layerList));
   });
 
   let prevIndexPatternIds;
