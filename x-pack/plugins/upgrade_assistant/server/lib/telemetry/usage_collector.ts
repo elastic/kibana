@@ -28,6 +28,18 @@ async function getSavedObjectAttributesFromRepo(
   }
 }
 
+async function getDeprecationLoggingStatusValue(callCluster: any): Promise<boolean> {
+  try {
+    const loggerDeprecationCallResult = await callCluster('cluster.getSettings', {
+      includeDefaults: true,
+    });
+
+    return isDeprecationLoggingEnabled(loggerDeprecationCallResult);
+  } catch (e) {
+    return false;
+  }
+}
+
 export async function fetchUpgradeAssistantMetrics(
   callCluster: any,
   server: UpgradeAssistantTelemetryServer
@@ -39,9 +51,7 @@ export async function fetchUpgradeAssistantMetrics(
     UPGRADE_ASSISTANT_TYPE,
     UPGRADE_ASSISTANT_DOC_ID
   );
-  const loggerDeprecationCallResult = await callCluster('cluster.getSettings', {
-    includeDefaults: true,
-  });
+  const deprecationLoggingStatusValue = await getDeprecationLoggingStatusValue(callCluster);
 
   const getTelemetrySavedObject = (
     upgradeAssistantTelemetrySavedObjectAttrs: UpgradeAssistantTelemetrySavedObjectAttributes | null
@@ -78,7 +88,7 @@ export async function fetchUpgradeAssistantMetrics(
     ...getTelemetrySavedObject(upgradeAssistantSOAttributes),
     features: {
       deprecation_logging: {
-        enabled: isDeprecationLoggingEnabled(loggerDeprecationCallResult),
+        enabled: deprecationLoggingStatusValue,
       },
     },
   };
