@@ -26,6 +26,7 @@ import {
   EuiLoadingSpinner,
   EuiOverlayMask,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -212,33 +213,36 @@ export const FollowerIndexForm = injectI18n(
       return this.state.followerIndex;
     };
 
-    toggleAdvancedSettings = () => {
-      this.setState(({ areAdvancedSettingsVisible, cachedAdvancedSettings }) => {
-        // Hide settings, clear fields, and create cache.
-        if (areAdvancedSettingsVisible) {
-          const fields = this.getFields();
-
-          const newCachedAdvancedSettings = advancedSettingsFields.reduce((cache, { field }) => {
-            const value = fields[field];
-            if (value !== '') {
-              cache[field] = value;
-            }
-            return cache;
-          }, {});
-
-          this.onFieldsChange(emptyAdvancedSettings);
-
+    toggleAdvancedSettings = (event) => {
+      // Cache reference to target, otherwise SyntheticEvent will be returned to pool by the time
+      // async setState is executed.
+      const { target } = event;
+      this.setState(({ cachedAdvancedSettings }) => {
+        if (target.checked) {
+          // Show settings and restore fields from the cache.
+          this.onFieldsChange(cachedAdvancedSettings);
           return {
-            areAdvancedSettingsVisible: false,
-            cachedAdvancedSettings: newCachedAdvancedSettings,
+            areAdvancedSettingsVisible: true,
+            cachedAdvancedSettings: {},
           };
         }
 
-        // Show settings and restore fields from the cache.
-        this.onFieldsChange(cachedAdvancedSettings);
+        // Hide settings, clear fields, and create cache.
+        const fields = this.getFields();
+
+        const newCachedAdvancedSettings = advancedSettingsFields.reduce((cache, { field }) => {
+          const value = fields[field];
+          if (value !== '') {
+            cache[field] = value;
+          }
+          return cache;
+        }, {});
+
+        this.onFieldsChange(emptyAdvancedSettings);
+
         return {
-          areAdvancedSettingsVisible: true,
-          cachedAdvancedSettings: {},
+          areAdvancedSettingsVisible: false,
+          cachedAdvancedSettings: newCachedAdvancedSettings,
         };
       });
     }
@@ -455,19 +459,6 @@ export const FollowerIndexForm = injectI18n(
        * Advanced settings
        */
 
-      const toggleAdvancedSettingButtonLabel = areAdvancedSettingsVisible
-        ? (
-          <FormattedMessage
-            id="xpack.crossClusterReplication.followerIndex.advancedSettingsForm.hideButtonLabel"
-            defaultMessage="Don't use advanced settings"
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.crossClusterReplication.followerIndex.advancedSettingsForm.showButtonLabel"
-            defaultMessage="Use advanced settings"
-          />
-        );
-
       const renderAdvancedSettings = () => {
         const { isNew } = this.state;
 
@@ -494,12 +485,16 @@ export const FollowerIndexForm = injectI18n(
                     />
                   </p>
                   {isNew ? (
-                    <EuiButton
-                      color="primary"
-                      onClick={this.toggleAdvancedSettings}
-                    >
-                      {toggleAdvancedSettingButtonLabel}
-                    </EuiButton>
+                    <EuiSwitch
+                      label={(
+                        <FormattedMessage
+                          id="xpack.crossClusterReplication.followerIndex.advancedSettingsForm.showSwitchLabel"
+                          defaultMessage="Use advanced settings"
+                        />
+                      )}
+                      checked={areAdvancedSettingsVisible}
+                      onChange={this.toggleAdvancedSettings}
+                    />
                   ) : null}
                 </Fragment>
               )}
