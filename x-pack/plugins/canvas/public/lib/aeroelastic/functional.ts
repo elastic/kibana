@@ -53,9 +53,9 @@ export const disjunctiveUnion = (keyFun, set1, set2) =>
  * @param {number} b
  * @returns {number} the mean of the two parameters
  */
-export const mean = (a, b) => (a + b) / 2;
+export const mean = (a: number, b: number): number => (a + b) / 2;
 
-export const shallowEqual = (a, b) => {
+export const shallowEqual = (a: any, b: any): boolean => {
   if (a === b) {
     return true;
   }
