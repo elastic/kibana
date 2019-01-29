@@ -54,6 +54,9 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
 
   async getGeoJsonWithMeta() {
     const fileSource = this._regionList.find(source => source.name === this._descriptor.name);
+    if (!fileSource) {
+      throw new Error(`Unable to find map.regionmap configuration for ${this._descriptor.name}`);
+    }
     const featureCollection = await AbstractVectorSource.getGeoJson(fileSource, fileSource.url);
     return {
       data: featureCollection
@@ -63,6 +66,10 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
   async getStringFields() {
     //todo: use map/service-settings instead.
     const fileSource = this._regionList.find((source => source.name === this._descriptor.name));
+
+    if (!fileSource) {
+      return [];
+    }
 
     return fileSource.fields.map(f => {
       return { name: f.name, label: f.description };

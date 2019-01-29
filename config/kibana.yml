@@ -111,3 +111,15 @@
 
 # Specifies locale to be used for all localizable strings, dates and number formats.
 #i18n.locale: "en"
+
+map.regionmap:
+ layers:
+  - name: "Warsaw Districts"
+    url: "https://realmdevstrg.blob.core.windows.net/json/pl-warsaw-geojson.json"
+    fields:
+     - name: "name"
+       description: "Name"
+     - name: "regionId"
+       description: "Region.Id"
+
+map.tilemap.url: "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"

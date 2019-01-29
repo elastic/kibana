@@ -113,7 +113,7 @@ export class EMSTMSSource extends AbstractTMSSource {
   getUrlTemplate() {
     const service = this._getTMSOptions();
     if (!service || !service.url) {
-      throw new Error('Can not generate EMS TMS url template');
+      throw new Error(`Unable to find EMS tiles for id: ${this._descriptor.id}`);
     }
     return service.url;
   }

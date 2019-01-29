@@ -60,6 +60,9 @@ export class EMSFileSource extends AbstractVectorSource {
 
   async getGeoJsonWithMeta() {
     const fileSource = this._emsFiles.find((source => source.id === this._descriptor.id));
+    if (!fileSource) {
+      throw new Error(`Unable to find EMS vector shapes for id: ${this._descriptor.id}`);
+    }
     const fetchUrl = `../${GIS_API_PATH}/data/ems?id=${encodeURIComponent(this._descriptor.id)}`;
     const featureCollection = await AbstractVectorSource.getGeoJson(fileSource, fetchUrl);
     return {
@@ -78,11 +81,17 @@ export class EMSFileSource extends AbstractVectorSource {
 
   async getDisplayName() {
     const fileSource = this._emsFiles.find((source => source.id === this._descriptor.id));
+    if (!fileSource) {
+      return this._descriptor.id;
+    }
     return fileSource.name;
   }
 
   async getAttributions() {
     const fileSource = this._emsFiles.find((source => source.id === this._descriptor.id));
+    if (!fileSource) {
+      return '';
+    }
     return fileSource.attributions;
   }
 
@@ -90,6 +99,10 @@ export class EMSFileSource extends AbstractVectorSource {
   async getStringFields() {
     //todo: use map/service-settings instead.
     const fileSource = this._emsFiles.find((source => source.id === this._descriptor.id));
+
+    if (!fileSource) {
+      return [];
+    }
 
     return fileSource.fields.map(f => {
       return { name: f.name, label: f.description };
