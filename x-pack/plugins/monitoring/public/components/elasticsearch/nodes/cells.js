@@ -53,7 +53,7 @@ function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="xs">
-                {i18n.translate('xpack.monitoring.elasticsearch.nodes.cells.max', {
+                {i18n.translate('xpack.monitoring.elasticsearch.nodes.cells.maxText', {
                   defaultMessage: '{metric} max',
                   values: {
                     metric: metricVal(maxVal, format, isPercent)
@@ -61,7 +61,7 @@ function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
                 })}
               </EuiText>
               <EuiText size="xs">
-                {i18n.translate('xpack.monitoring.elasticsearch.nodes.cells.min', {
+                {i18n.translate('xpack.monitoring.elasticsearch.nodes.cells.minText', {
                   defaultMessage: '{metric} min',
                   values: {
                     metric: metricVal(minVal, format, isPercent)

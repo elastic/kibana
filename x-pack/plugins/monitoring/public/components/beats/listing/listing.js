@@ -108,7 +108,7 @@ class ListingUI extends PureComponent {
                   {
                     type: 'field_value_selection',
                     field: 'type',
-                    name: i18n.translate('xpack.monitoring.apm.instances.typeFilter', {
+                    name: i18n.translate('xpack.monitoring.beats.instances.typeFilter', {
                       defaultMessage: 'Type'
                     }),
                     options: types,
@@ -117,7 +117,7 @@ class ListingUI extends PureComponent {
                   {
                     type: 'field_value_selection',
                     field: 'version',
-                    name: i18n.translate('xpack.monitoring.apm.instances.versionFilter', {
+                    name: i18n.translate('xpack.monitoring.beats.instances.versionFilter', {
                       defaultMessage: 'Version'
                     }),
                     options: versions,

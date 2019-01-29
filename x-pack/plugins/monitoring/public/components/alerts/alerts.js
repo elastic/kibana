@@ -102,7 +102,7 @@ const getColumns = (kbnUrl, scope) => ([
     }),
     field: 'category',
     sortable: true,
-    render: link => linkToCategories[link] ? linkToCategories[link] : i18n.translate('xpack.monitoring.alerts.categoryColumn.general', {
+    render: link => linkToCategories[link] ? linkToCategories[link] : i18n.translate('xpack.monitoring.alerts.categoryColumn.generalLabel', {
       defaultMessage: 'General',
     })
   },
