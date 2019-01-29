@@ -110,8 +110,6 @@ export class SearchSelect extends Component {
           fullWidth
         />
 
-        Oh hello there
-
         <EuiSpacer size="s" />
 
         <div className="searchSelectContainer">
