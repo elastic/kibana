@@ -134,7 +134,7 @@ export class SettingsPanel extends Component {
 
     return (
       <Fragment>
-        {this.props.renderSourceDetails()}
+        {this.props.layer.renderSourceDetails()}
         <EuiSpacer margin="m"/>
       </Fragment>
     );
@@ -166,7 +166,7 @@ export class SettingsPanel extends Component {
 
         {this.renderAlphaSlider()}
 
-        {this.props.renderSourceSettingsEditor({ onChange: this.onSourceChange })}
+        {this.props.layer.renderSourceSettingsEditor({ onChange: this.onSourceChange })}
 
       </EuiPanel>
     );

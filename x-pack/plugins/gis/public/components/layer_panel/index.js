@@ -7,6 +7,9 @@
 import { connect } from 'react-redux';
 import { LayerPanel } from './view';
 import { getSelectedLayer } from '../../selectors/map_selectors';
+import {
+  fitToLayerExtent
+} from '../../actions/store_actions';
 
 function mapStateToProps(state = {}) {
   return {
@@ -14,8 +17,12 @@ function mapStateToProps(state = {}) {
   };
 }
 
-function mapDispatchToProps(/* dispatch */) {
-  return {};
+function mapDispatchToProps(dispatch) {
+  return {
+    fitToBounds: (layerId) => {
+      dispatch(fitToLayerExtent(layerId));
+    }
+  };
 }
 
 const connectedLayerPanel = connect(mapStateToProps, mapDispatchToProps)(LayerPanel);
