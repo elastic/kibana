@@ -6,6 +6,7 @@
 import { get } from 'lodash';
 
 const intervalMultiple = (userTimeInterval, defaultTimeInterval) => !Boolean(userTimeInterval % defaultTimeInterval);
+const roundN = (num, base) => Math.ceil(num / base) * base;
 
 export default (DefaultSearchCapabilities) =>
   (class RollupSearchCapabilities extends DefaultSearchCapabilities {
@@ -37,5 +38,15 @@ export default (DefaultSearchCapabilities) =>
 
       // there is also only one valid date_histogram field
       return Object.values(dateHistogramField)[0];
+    }
+
+    getValidTimeInterval(intervalString) {
+      if (this.isTimeIntervalValid(intervalString)) {
+        return intervalString;
+      }
+
+      const userInterval = this.getIntervalInSeconds(intervalString);
+
+      return `${roundN(userInterval, this.defaultTimeIntervalInSeconds)}s`;
     }
   });

@@ -34,7 +34,6 @@ export default class DefaultSearchCapabilities {
     this.request = request;
     this.batchRequestsSupport = batchRequestsSupport;
     this.fieldsCapabilities = fieldsCapabilities;
-
     this.validateTimeIntervalRules = [];
   }
 
@@ -46,19 +45,26 @@ export default class DefaultSearchCapabilities {
     return null;
   }
 
+  get defaultTimeIntervalInSeconds() {
+    return this.getIntervalInSeconds(this.defaultTimeInterval);
+  }
+
   getSearchTimezone() {
     return this.fixedTimeZone || getTimezoneFromRequest(this.request);
   }
 
-  isTimeIntervalValid(intervalString) {
-    const userInterval = convertUnitToSeconds(intervalString);
-    const defaultInterval = convertUnitToSeconds(this.defaultTimeInterval);
-
-    return this.validateTimeIntervalRules
-      .every(validationRule => validationRule(userInterval, defaultInterval));
+  getIntervalInSeconds(intervalString) {
+    return Boolean(intervalString) ? convertUnitToSeconds(intervalString) : 0;
   }
 
-  getSearchInterval(intervalString) {
+  isTimeIntervalValid(intervalString) {
+    const userInterval = this.getIntervalInSeconds(intervalString);
+
+    return this.validateTimeIntervalRules
+      .every(validationRule => validationRule(userInterval, this.defaultTimeIntervalInSeconds));
+  }
+
+  getValidTimeInterval(intervalString) {
     return this.isTimeIntervalValid(intervalString) ? intervalString : this.defaultTimeInterval;
   }
 }
