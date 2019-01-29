@@ -44,7 +44,7 @@ function migrateIndexPattern(type, doc) {
   set(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON', JSON.stringify(searchSource));
 }
 
-export default {
+export const migrations = {
   visualization: {
     '7.0.0': (doc) => {
       // Set new "references" attribute

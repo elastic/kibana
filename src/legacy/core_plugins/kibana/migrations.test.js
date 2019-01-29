@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import migrations from './migrations';
+import { migrations } from './migrations';
 
 describe('visualization', () => {
   describe('7.0.0', () => {
