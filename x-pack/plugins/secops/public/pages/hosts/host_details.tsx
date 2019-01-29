@@ -9,7 +9,6 @@ import {
   EuiBreadcrumbs,
   EuiFlexGroup,
 } from '@elastic/eui';
-
 import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
