@@ -89,7 +89,9 @@ class Provider extends PureComponent {
               <p>
                 <FormattedMessage
                   id="xpack.crossClusterReplication.unfollowLeaderIndex.confirmModal.singleUnfollowDescription"
-                  defaultMessage="This follower index will be paused, closed, and converted into a regular index."
+                  defaultMessage="This follower index will be paused, closed, and converted into a regular index.
+                    The index will no longer appear in Cross Cluster Replication but can still be managed using Index
+                    Management. This operation cannot be undone."
                 />
               </p>
             </Fragment>
@@ -98,7 +100,9 @@ class Provider extends PureComponent {
               <p>
                 <FormattedMessage
                   id="xpack.crossClusterReplication.unfollowLeaderIndex.confirmModal.multipleUnfollowDescription"
-                  defaultMessage="These follower indices will be paused, closed, and converted into regular indices:"
+                  defaultMessage="The follower indices below will be paused, closed, and converted into regular indices.
+                    The indices will no longer appear in Cross Cluster Replication but can still be managed using Index
+                    Management. This operation cannot be undone."
                 />
               </p>
               <ul>{ids.map(id => <li key={id}>{id}</li>)}</ul>

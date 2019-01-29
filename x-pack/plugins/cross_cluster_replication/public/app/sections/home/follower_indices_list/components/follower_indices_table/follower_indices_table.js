@@ -73,7 +73,8 @@ export const FollowerIndicesTable = injectI18n(
       const actions = [
         /* Pause or resume follower index */
         {
-          render: ({ name, isPaused }) => {
+          render: (followerIndex) => {
+            const { name, isPaused } = followerIndex;
             const label = isPaused
               ? intl.formatMessage({
                 id: 'xpack.crossClusterReplication.followerIndexList.table.actionResumeDescription',
@@ -100,7 +101,7 @@ export const FollowerIndicesTable = injectI18n(
             ) : (
               <FollowerIndexPauseProvider>
                 {(pauseFollowerIndex) => (
-                  <span onClick={() => pauseFollowerIndex(name)}>
+                  <span onClick={() => pauseFollowerIndex(followerIndex)}>
                     <EuiIcon
                       aria-label={label}
                       type="pause"

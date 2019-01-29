@@ -28,3 +28,7 @@ export const getSettingDefault = (name) => {
 export const isSettingDefault = (name, value) => {
   return getSettingDefault(name) === value;
 };
+
+export const areAllSettingsDefault = (settings) => {
+  return Object.keys(defaultSettings).every((name) => isSettingDefault(name, settings[name]));
+};
