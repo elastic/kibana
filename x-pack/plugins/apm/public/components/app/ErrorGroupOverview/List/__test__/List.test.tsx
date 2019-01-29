@@ -4,17 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
-
+import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import List from '../index';
-import props from './props.json';
 import {
-  mountWithRouterAndStore,
   mockMoment,
+  mountWithRouterAndStore,
   toJson
+  // @ts-ignore
 } from '../../../../../utils/testHelpers';
+// @ts-ignore
+import { ErrorGroupList } from '../index';
+import props from './props.json';
 
 describe('ErrorGroupOverview -> List', () => {
   beforeAll(() => {
@@ -25,7 +26,7 @@ describe('ErrorGroupOverview -> List', () => {
     const storeState = {};
     const wrapper = mount(
       <MemoryRouter>
-        <List items={[]} urlParams={props.urlParams} location={{}} />
+        <ErrorGroupList items={[]} urlParams={props.urlParams} />
       </MemoryRouter>,
       storeState
     );
@@ -35,7 +36,10 @@ describe('ErrorGroupOverview -> List', () => {
 
   it('should render with data', () => {
     const storeState = { location: {} };
-    const wrapper = mountWithRouterAndStore(<List {...props} />, storeState);
+    const wrapper = mountWithRouterAndStore(
+      <ErrorGroupList {...props} />,
+      storeState
+    );
 
     expect(toJson(wrapper)).toMatchSnapshot();
   });
