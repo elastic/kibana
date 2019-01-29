@@ -4,13 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const ORIGIN = [0, 0, 1];
+type vector2d = [number, number, number] & ReadonlyArray<number> & { length: 3 };
+type transformMatrix2d = [number, number, number, number, number, number, number, number, number] &
+  ReadonlyArray<number> & { length: 9 };
 
-export const UNITMATRIX = [1, 0, 0, 0, 1, 0, 0, 0, 1];
+export const ORIGIN = [0, 0, 1] as vector2d;
 
-export const translate = (x, y) => [1, 0, 0, 0, 1, 0, x, y, 1];
+export const UNITMATRIX = [1, 0, 0, 0, 1, 0, 0, 0, 1] as transformMatrix2d;
 
-export const scale = (x, y) => [x, 0, 0, 0, y, 0, 0, 0, 1];
+export const translate = (x: number, y: number): transformMatrix2d => [1, 0, 0, 0, 1, 0, x, y, 1];
+
+export const scale = (x: number, y: number): transformMatrix2d => [x, 0, 0, 0, y, 0, 0, 0, 1];
 
 /**
  * multiply
@@ -27,7 +31,10 @@ export const scale = (x, y) => [x, 0, 0, 0, y, 0, 0, 0, 1];
  *         c    f    i      .    .    c * G + f * H + i * I
  *
  */
-const mult = ([a, b, c, d, e, f, g, h, i], [A, B, C, D, E, F, G, H, I]) => [
+const mult = (
+  [a, b, c, d, e, f, g, h, i]: transformMatrix2d,
+  [A, B, C, D, E, F, G, H, I]: transformMatrix2d
+): transformMatrix2d => [
   a * A + d * B + g * C,
   b * A + e * B + h * C,
   c * A + f * B + i * C,
@@ -41,8 +48,10 @@ const mult = ([a, b, c, d, e, f, g, h, i], [A, B, C, D, E, F, G, H, I]) => [
   c * G + f * H + i * I,
 ];
 
-export const multiply = (...elements) =>
-  elements.slice(1).reduce((prev, next) => mult(prev, next), elements[0]);
+export const multiply = (
+  first: transformMatrix2d,
+  ...rest: transformMatrix2d[]
+): transformMatrix2d => rest.reduce((prev, next) => mult(prev, next), first);
 
 /**
  * mvMultiply
@@ -59,41 +68,31 @@ export const multiply = (...elements) =>
  *         c    f    i      c * A + f * B + i * C
  *
  */
-export const mvMultiply = ([a, b, c, d, e, f, g, h, i], [A, B, C]) => [
-  a * A + d * B + g * C,
-  b * A + e * B + h * C,
-  c * A + f * B + i * C,
-];
+export const mvMultiply = (
+  [a, b, c, d, e, f, g, h, i]: transformMatrix2d,
+  [A, B, C]: vector2d
+): vector2d => [a * A + d * B + g * C, b * A + e * B + h * C, c * A + f * B + i * C];
 
-export const normalize = ([A, B, C]) => (C === 1 ? [A, B, C] : [A / C, B / C, 1]);
+export const normalize = ([A, B, C]: vector2d): vector2d =>
+  C === 1 ? [A, B, C] : [A / C, B / C, 1];
 
-export const add = ([a, b, c, d, e, f, g, h, i], [A, B, C, D, E, F, G, H, I]) => [
-  a + A,
-  b + B,
-  c + C,
-  d + D,
-  e + E,
-  f + F,
-  g + G,
-  h + H,
-  i + I,
-];
+export const add = (
+  [a, b, c, d, e, f, g, h, i]: transformMatrix2d,
+  [A, B, C, D, E, F, G, H, I]: transformMatrix2d
+): transformMatrix2d => [a + A, b + B, c + C, d + D, e + E, f + F, g + G, h + H, i + I];
 
-export const subtract = ([a, b, c, d, e, f, g, h, i], [A, B, C, D, E, F, G, H, I]) => [
-  a - A,
-  b - B,
-  c - C,
-  d - D,
-  e - E,
-  f - F,
-  g - G,
-  h - H,
-  i - I,
-];
+export const subtract = (
+  [a, b, c, d, e, f, g, h, i]: transformMatrix2d,
+  [A, B, C, D, E, F, G, H, I]: transformMatrix2d
+): transformMatrix2d => [a - A, b - B, c - C, d - D, e - E, f - F, g - G, h - H, i - I];
 
 /**
  *
  * componentProduct
  *
  */
-export const componentProduct = ([a, b, c], [A, B, C]) => [a * A, b * B, c * C];
+export const componentProduct = ([a, b, c]: vector2d, [A, B, C]: vector2d): vector2d => [
+  a * A,
+  b * B,
+  c * C,
+];
