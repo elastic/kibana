@@ -1,6 +1,4 @@
-// Size variables
-$euiHeaderNavSize: $euiSizeXL + $euiSize;
-$euiHeaderNavSizeMobile: $euiHeaderNavSize * .75;
+@import '@elastic/eui/src/components/header/variables';
 
 .header-global-wrapper {
   width: 100%;
@@ -10,30 +8,18 @@ $euiHeaderNavSizeMobile: $euiHeaderNavSize * .75;
 }
 
 .header-global-wrapper + .app-wrapper:not(.hidden-chrome) {
-  top: $euiHeaderNavSize;
-  left: $euiHeaderNavSize;
+  top: $euiHeaderChildSize;
+  left: $euiHeaderChildSize;
 
   // HOTFIX: Temporary fix for flyouts not inside portals
   // SASSTODO: Find an actual solution
   .euiFlyout {
-    top: $euiHeaderNavSize;
+    top: $euiHeaderChildSize;
   }
 }
 
 // Mobile header is smaller
-@include euiBreakpoint('xs') {
-  .header-global-wrapper + .app-wrapper:not(.hidden-chrome) {
-    top: $euiHeaderNavSizeMobile;
-    left: 0;
-
-    .euiFlyout {
-      top: $euiHeaderNavSizeMobile;
-    }
-  }
-}
-
-// Mobile header is smaller
-@include euiBreakpoint('s') {
+@include euiBreakpoint('xs', 's') {
   .header-global-wrapper + .app-wrapper:not(.hidden-chrome) {
     left: 0;
   }
