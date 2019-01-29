@@ -239,5 +239,6 @@ export const advancedSettingsFields = [
 ];
 
 export const emptyAdvancedSettings = advancedSettingsFields.reduce((obj, advancedSetting) => {
-  return { ...obj, [advancedSetting.field]: '' };
+  const { field, defaultValue } = advancedSetting;
+  return { ...obj, [field]: defaultValue };
 }, {});
