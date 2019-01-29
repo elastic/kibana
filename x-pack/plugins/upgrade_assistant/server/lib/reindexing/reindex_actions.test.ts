@@ -253,38 +253,6 @@ describe('ReindexActions', () => {
     });
   });
 
-  describe('getBooleanFieldPaths', () => {
-    it('returns array of array of boolean path strings', async () => {
-      callCluster.mockResolvedValueOnce({
-        myIndex: {
-          mappings: {
-            _doc: {
-              properties: {
-                field1: { type: 'boolean' },
-                nested: { properties: { field2: { type: 'boolean' } } },
-              },
-            },
-          },
-        },
-      });
-
-      await expect(actions.getBooleanFieldPaths('myIndex')).resolves.toEqual([
-        ['field1'],
-        ['nested', 'field2'],
-      ]);
-    });
-
-    it('returns [] if there are no mapping types', async () => {
-      callCluster.mockResolvedValueOnce({ myIndex: { mappings: {} } });
-      await expect(actions.getBooleanFieldPaths('myIndex')).resolves.toEqual([]);
-    });
-
-    it('throws if there are multiple mapping types', async () => {
-      callCluster.mockResolvedValueOnce({ myIndex: { mappings: { type1: {}, type2: {} } } });
-      await expect(actions.getBooleanFieldPaths('myIndex')).rejects.toThrow();
-    });
-  });
-
   describe('getFlatSettings', () => {
     it('returns flat settings', async () => {
       callCluster.mockResolvedValueOnce({

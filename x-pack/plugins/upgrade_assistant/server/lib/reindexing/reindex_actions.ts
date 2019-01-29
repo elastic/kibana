@@ -22,7 +22,6 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
-import { findBooleanFields, getSingleMappingType } from './index_settings';
 import { FlatSettings } from './types';
 
 // TODO: base on elasticsearch.requestTimeout?
@@ -82,12 +81,6 @@ export interface ReindexActions {
    * Returns an array of all reindex operations that have a status.
    */
   findAllByStatus(status: ReindexStatus): Promise<ReindexSavedObject[]>;
-
-  /**
-   * Returns array of field paths to boolean fields in the index's mapping.
-   * @param indexName
-   */
-  getBooleanFieldPaths(indexName: string): Promise<string[][]>;
 
   /**
    * Retrieve index settings (in flat, dot-notation style) and mappings.
@@ -258,18 +251,9 @@ export const reindexActionsFactory = (
       return allOps;
     },
 
-    async getBooleanFieldPaths(indexName: string) {
-      const results = await callCluster('indices.getMapping', { index: indexName });
-      const mapping = getSingleMappingType(results[indexName].mappings);
-
-      // It's possible an index doesn't have a mapping.
-      return mapping && mapping.properties ? findBooleanFields(mapping.properties) : [];
-    },
-
     async getFlatSettings(indexName: string) {
       const flatSettings = (await callCluster('transport.request', {
-        // TODO: set `&include_type_name=true` to false in 7.0
-        path: `/${encodeURIComponent(indexName)}?flat_settings=true`,
+        path: `/${encodeURIComponent(indexName)}?flat_settings=true&include_type_name=false`,
       })) as { [indexName: string]: FlatSettings };
 
       if (!flatSettings[indexName]) {

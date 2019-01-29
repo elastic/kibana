@@ -13,15 +13,11 @@ export interface MappingProperties {
   [key: string]: Mapping;
 }
 
-export interface TypeMapping extends Mapping {
-  _all?: { enabled: boolean };
-}
-
 export interface FlatSettings {
   settings: {
     [key: string]: string;
   };
   mappings: {
-    [type: string]: TypeMapping;
+    properties?: MappingProperties;
   };
 }

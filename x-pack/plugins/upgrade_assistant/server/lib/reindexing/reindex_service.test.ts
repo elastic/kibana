@@ -10,7 +10,6 @@ import {
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
-  ReindexWarning,
 } from '../../../common/types';
 import { ReindexService, reindexServiceFactory } from './reindex_service';
 
@@ -36,7 +35,6 @@ describe('reindexService', () => {
       runWhileLocked: jest.fn((reindexOp: any, func: any) => func(reindexOp)),
       findReindexOperations: jest.fn(unimplemented('findReindexOperations')),
       findAllByStatus: jest.fn(unimplemented('findAllInProgressOperations')),
-      getBooleanFieldPaths: jest.fn(unimplemented('getBooleanFieldPaths')),
       getFlatSettings: jest.fn(unimplemented('getFlatSettings')),
       cleanupChanges: jest.fn(),
       incrementMlReindexes: jest.fn(unimplemented('incrementMlReindexes')),
@@ -52,15 +50,12 @@ describe('reindexService', () => {
       actions.getFlatSettings.mockResolvedValueOnce({
         settings: {},
         mappings: {
-          _doc: {
-            properties: { https: { type: 'boolean' } },
-            _all: { enabled: true },
-          },
+          properties: { https: { type: 'boolean' } },
         },
       });
 
       const reindexWarnings = await service.detectReindexWarnings('myIndex');
-      expect(reindexWarnings).toEqual([ReindexWarning.allField, ReindexWarning.booleanFields]);
+      expect(reindexWarnings).toEqual([]);
     });
 
     it('returns null if index does not exist', async () => {
@@ -501,7 +496,6 @@ describe('reindexService', () => {
       } as ReindexSavedObject;
 
       it('starts reindex, saves taskId, and updates lastCompletedStep', async () => {
-        actions.getBooleanFieldPaths.mockResolvedValue([]);
         callCluster.mockResolvedValueOnce({ task: 'xyz' }); // reindex
         const updatedOp = await service.processNextStep(reindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexStarted);
@@ -517,21 +511,7 @@ describe('reindexService', () => {
         });
       });
 
-      it('adds painless script if there are boolean fields', async () => {
-        actions.getBooleanFieldPaths.mockResolvedValue([['field1'], ['nested', 'field2']]);
-        callCluster.mockResolvedValueOnce({ task: 'xyz' }); // reindex
-        await service.processNextStep(reindexOp);
-        const reindexBody = callCluster.mock.calls[0][1].body;
-        expect(reindexBody.script.lang).toEqual('painless');
-        expect(typeof reindexBody.script.source).toEqual('string');
-        expect(reindexBody.script.params.booleanFieldPaths).toEqual([
-          ['field1'],
-          ['nested', 'field2'],
-        ]);
-      });
-
       it('fails if starting reindex fails', async () => {
-        actions.getBooleanFieldPaths.mockResolvedValue([['field1'], ['nested', 'field2']]);
         callCluster.mockRejectedValueOnce(new Error('blah!')).mockResolvedValueOnce({});
         const updatedOp = await service.processNextStep(reindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.newIndexCreated);

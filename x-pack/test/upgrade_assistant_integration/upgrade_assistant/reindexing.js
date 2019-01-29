@@ -7,7 +7,7 @@
 
 import expect from 'expect.js';
 
-import { ReindexStatus, REINDEX_OP_TYPE, ReindexWarning } from '../../../plugins/upgrade_assistant/common/types';
+import { ReindexStatus, REINDEX_OP_TYPE } from '../../../plugins/upgrade_assistant/common/types';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -128,40 +128,21 @@ export default function ({ getService }) {
       });
     });
 
-    it('shows warnings for boolean fields', async () => {
-      const resp = await supertest.get(`/api/upgrade_assistant/reindex/boolean-test`);
-      expect(resp.body.warnings.includes(ReindexWarning.booleanFields)).to.be(true);
+    it('shows no warnings', async () => {
+      const resp = await supertest.get(`/api/upgrade_assistant/reindex/6.0-data`);
+      expect(resp.body.warnings.length).to.be(0);
     });
 
-    it('shows warnings for all meta field', async () => {
-      const resp = await supertest.get(`/api/upgrade_assistant/reindex/all-field-test`);
-      expect(resp.body.warnings.includes(ReindexWarning.allField)).to.be(true);
-    });
-
-    it('reindexes index with boolean fields', async () => {
+    it('reindexes old 6.0 index', async () => {
       const { body } = await supertest
-        .post(`/api/upgrade_assistant/reindex/boolean-test`)
+        .post(`/api/upgrade_assistant/reindex/6.0-data`)
         .set('kbn-xsrf', 'xxx')
         .expect(200);
 
-      expect(body.indexName).to.equal('boolean-test');
+      expect(body.indexName).to.equal('6.0-data');
       expect(body.status).to.equal(ReindexStatus.inProgress);
 
-      const lastState = await waitForReindexToComplete('boolean-test');
-      expect(lastState.errorMessage).to.equal(null);
-      expect(lastState.status).to.equal(ReindexStatus.completed);
-    });
-
-    it('reindexes index with _all field', async () => {
-      const { body } = await supertest
-        .post(`/api/upgrade_assistant/reindex/all-field-test`)
-        .set('kbn-xsrf', 'xxx')
-        .expect(200);
-
-      expect(body.indexName).to.equal('all-field-test');
-      expect(body.status).to.equal(ReindexStatus.inProgress);
-
-      const lastState = await waitForReindexToComplete('all-field-test');
+      const lastState = await waitForReindexToComplete('6.0-data');
       expect(lastState.errorMessage).to.equal(null);
       expect(lastState.status).to.equal(ReindexStatus.completed);
     });

@@ -44,6 +44,9 @@ export interface ReindexOperation extends SavedObjectAttributes {
 export type ReindexSavedObject = SavedObject<ReindexOperation>;
 
 export enum ReindexWarning {
-  allField,
-  booleanFields,
+  // 6.0 -> 7.0 warnings, now unused
+  allField = 0,
+  booleanFields = 1,
+
+  // 7.0 -> 8.0 warnings
 }
