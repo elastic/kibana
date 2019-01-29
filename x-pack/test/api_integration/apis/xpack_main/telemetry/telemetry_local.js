@@ -57,8 +57,6 @@ export default function ({ getService }) {
         .send({ timeRange })
         .expect(200);
 
-      // console.log(JSON.stringify(body, null, 2));
-
       expect(body.length).to.be(1);
       const stats = body[0];
 
