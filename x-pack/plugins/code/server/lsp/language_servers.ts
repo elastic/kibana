@@ -47,3 +47,4 @@ export const JAVA: LanguageServerDefinition = {
     }/jdt-language-server-${lang.version}-${lang.build}.tar.gz`,
 };
 export const LanguageServers: LanguageServerDefinition[] = [TYPESCRIPT, JAVA];
+export const LanguageServersDeveloping: LanguageServerDefinition[] = [];
