@@ -53,8 +53,7 @@ export class FormEntryRow extends PureComponent {
     let valueParsed = value;
 
     if (isNumber) {
-      valueParsed = !!value ? parseInt(value, 10) : value; // make sure we don't send NaN value
-      valueParsed = valueParsed  && valueParsed < 0 ? 0 : valueParsed; // make sure we don't send negative value
+      valueParsed = !!value ? Math.max(0, parseInt(value, 10)) : value; // make sure we don't send NaN value or a negative number
     }
 
     onValueUpdate({ [field]: valueParsed });
