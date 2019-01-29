@@ -26,30 +26,43 @@ const MS_IN_DAY = 24 * MS_IN_HOUR;
 
 export function prettyInterval(intervalInMs) {
   let interval;
-  let units;
   if (intervalInMs === 0) {
     return i18n.translate('common.ui.timepicker.off', { defaultMessage: 'Off' });
   } else if (intervalInMs < MS_IN_MINUTE) {
     interval = Math.round(intervalInMs / MS_IN_SECOND);
-    units = (interval > 1 ?
-      (i18n.translate('common.ui.timepicker.seconds', { defaultMessage: 'seconds' })) :
-      (i18n.translate('common.ui.timepicker.second', { defaultMessage: 'second' })));
+    return i18n.translate('common.ui.timepicker.totalSeconds', {
+      defaultMessage: `{interval} {interval, plural,
+        one {second}
+        other {seconds}
+      }`,
+      values: { interval },
+    });
   } else if (intervalInMs < MS_IN_HOUR) {
     interval = Math.round(intervalInMs / MS_IN_MINUTE);
-    units = (interval > 1 ?
-      (i18n.translate('common.ui.timepicker.minutes', { defaultMessage: 'minutes' })) :
-      (i18n.translate('common.ui.timepicker.minute', { defaultMessage: 'minute' })));
+    return i18n.translate('common.ui.timepicker.totalMinutes', {
+      defaultMessage: `{interval} {interval, plural,
+        one {minute}
+        other {minutes}
+      }`,
+      values: { interval },
+    });
   } else if (intervalInMs < MS_IN_DAY) {
     interval = Math.round(intervalInMs / MS_IN_HOUR);
-    units = (interval > 1 ?
-      (i18n.translate('common.ui.timepicker.hours', { defaultMessage: 'hours' })) :
-      (i18n.translate('common.ui.timepicker.hour', { defaultMessage: 'hour' })));
+    return i18n.translate('common.ui.timepicker.totalHours', {
+      defaultMessage: `{interval} {interval, plural,
+        one {hour}
+        other {hours}
+      }`,
+      values: { interval },
+    });
   } else {
     interval = Math.round(intervalInMs / MS_IN_DAY);
-    units = (interval > 1 ?
-      (i18n.translate('common.ui.timepicker.days', { defaultMessage: 'days' })) :
-      (i18n.translate('common.ui.timepicker.day', { defaultMessage: 'day' })));
+    return i18n.translate('common.ui.timepicker.totalDays', {
+      defaultMessage: `{interval} {interval, plural,
+        one {day}
+        other {days}
+      }`,
+      values: { interval },
+    });
   }
-
-  return `${interval} ${units}`;
 }
