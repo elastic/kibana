@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { darken } from 'polished';
+import { darken, transparentize } from 'polished';
 import * as React from 'react';
 import styled from 'styled-components';
 
@@ -115,7 +115,11 @@ const EmptyIcon = styled.div`
 const LogTextStreamIconDiv = styled<IconProps, 'div'>('div')`
   flex-grow: 0;
   background-color: ${props =>
-    props.isHovered ? darken(0.05, props.theme.eui.euiColorHighlight) : 'transparent'};
+    props.isHovered
+      ? props.theme.darkMode
+        ? transparentize(0.9, darken(0.05, props.theme.eui.euiColorHighlight))
+        : darken(0.05, props.theme.eui.euiColorHighlight)
+      : 'transparent'};
   text-align: center;
 `;
 
