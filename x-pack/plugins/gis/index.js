@@ -11,12 +11,12 @@ import mappings from './mappings.json';
 import { checkLicense } from './check_license';
 import { watchStatusAndLicenseToInitialize } from
   '../../server/lib/watch_status_and_license_to_initialize';
-import { makeMapsUsageCollector } from './server/maps_telemetry';
+import { initTelemetryCollection } from './server/maps_telemetry';
 
 export function gis(kibana) {
 
   return new kibana.Plugin({
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'tile_map'],
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'tile_map', 'task_manager'],
     id: 'gis',
     configPrefix: 'xpack.gis',
     publicDir: resolve(__dirname, 'public'),
@@ -63,6 +63,7 @@ export function gis(kibana) {
           if (license && license.gis && !routesInitialized) {
             routesInitialized = true;
             initRoutes(server, license.uid);
+            initTelemetryCollection(server);
           }
         });
 
@@ -74,7 +75,6 @@ export function gis(kibana) {
       server.injectUiAppVars('gis', async () => {
         return await server.getInjectedUiAppVars('kibana');
       });
-      makeMapsUsageCollector(server);
     }
   });
 }
