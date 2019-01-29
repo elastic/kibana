@@ -26,6 +26,9 @@ module.directive('mlGeneralJobDetails', function () {
       $scope.showAdvancedButtonAriaLabel = i18n('xpack.ml.newJob.simple.generalJobDetails.showAdvancedButtonAriaLabel', {
         defaultMessage: 'Show Advanced'
       });
+      $scope.enterNameForJobLabel = i18n('xpack.ml.newJob.simple.generalJobDetails.enterNameForJobLabel', {
+        defaultMessage: 'Enter a name for the job'
+      });
     }
   };
 });

@@ -123,3 +123,9 @@ The port is now protocol dependent: https ports will use 443, and http ports wil
 It's now required that the user sets `server.ssl.enabled` to true for this to occur.
 
 *Impact:* Users with both `server.ssl.certificate` and `server.ssl.key` set must now also set `server.ssl.enabled` to enable SSL.
+
+[float]
+=== kibana.yml setting `i18n.defaultLocale` is no longer valid
+*Details:* This deprecated setting has been removed and `i18n.locale` should be used instead.
+
+*Impact:* Users with `i18n.defaultLocale` set should use `i18n.locale` instead

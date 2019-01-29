@@ -27,6 +27,6 @@ export function makeFakeXAspect() {
       defaultMessage: 'All docs'
     }),
     params: {},
-    fieldFormatter: () => '',
+    format: {}
   };
 }
