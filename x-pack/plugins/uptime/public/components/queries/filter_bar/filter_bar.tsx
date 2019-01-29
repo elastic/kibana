@@ -7,7 +7,6 @@
 // @ts-ignore No typings for EuiSearchBar
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSearchBar, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { take } from 'lodash';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { FilterBar as FilterBarType } from '../../../../common/graphql/types';
@@ -21,8 +20,7 @@ interface FilterBarProps {
 
 type Props = FilterBarProps & UptimeCommonProps;
 
-const MAX_SELECTION_LENGTH = 20;
-const SEARCH_THRESHOLD = 2;
+const SEARCH_THRESHOLD = 8;
 
 export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: Props) => (
   <Query query={getFilterBarQuery} variables={{ dateRangeStart, dateRangeEnd }}>
@@ -41,9 +39,6 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: Props) 
       const {
         filterBar: { ports, ids, schemes },
       }: { filterBar: FilterBarType } = data;
-      const showFilterDisclaimer =
-        (ids && ids.length && ids.length > MAX_SELECTION_LENGTH) ||
-        (ports && ports.length && ports.length > MAX_SELECTION_LENGTH);
 
       // TODO: add a factory function + type for these filter options
       const filters = [
@@ -74,7 +69,8 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: Props) 
           }),
           multiSelect: false,
           options: ids
-            ? take(ids, MAX_SELECTION_LENGTH).map(({ key, url }: any) => ({
+            ? ids.map(({ key, url }: any) => ({
+                name: url,
                 value: key,
                 view: url,
               }))
@@ -89,7 +85,7 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: Props) 
           }),
           multiSelect: false,
           options: ports
-            ? take(ports, MAX_SELECTION_LENGTH).map((portValue: any) => ({
+            ? ports.map((portValue: any) => ({
                 value: portValue,
                 view: portValue,
               }))
@@ -133,23 +129,6 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: Props) 
               schema={filterBarSearchSchema}
             />
           </EuiFlexItem>
-          {showFilterDisclaimer && (
-            <EuiFlexItem grow={false}>
-              <EuiToolTip
-                position="left"
-                title={i18n.translate('xpack.uptime.filterBar.filterLimitationsTooltipTitle', {
-                  defaultMessage: 'Filter limitations',
-                })}
-                content={i18n.translate('xpack.uptime.filterBar.filterLimitationsTooltipText', {
-                  values: { selectionLength: MAX_SELECTION_LENGTH },
-                  defaultMessage:
-                    'The top {selectionLength} filter options for each field are displayed, but you can modify the filters manually or search for additional values.',
-                })}
-              >
-                <EuiIcon type="iInCircle" size="l" />
-              </EuiToolTip>
-            </EuiFlexItem>
-          )}
         </EuiFlexGroup>
       );
     }}
