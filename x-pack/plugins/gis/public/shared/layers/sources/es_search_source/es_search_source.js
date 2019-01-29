@@ -13,7 +13,6 @@ import {
   indexPatternService,
 } from '../../../../kibana_services';
 import { hitsToGeoJson } from '../../../../elasticsearch_geo_utils';
-import { ESSourceDetails } from '../../../components/es_source_details';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 
@@ -73,21 +72,27 @@ export class ESSearchSource extends AbstractESSource {
     ];
   }
 
+  async getImmutableProperties() {
+    let indexPatternTitle = this._descriptor.indexPatternId;
+    let geoFieldType = '';
+    try {
+      const indexPattern = await this._getIndexPattern();
+      indexPatternTitle = indexPattern.title;
+      const geoField = await this._getGeoField();
+      geoFieldType = geoField.type;
+    } catch (error) {
+      // ignore error, title will just default to id
+    }
 
-  renderDetails() {
-    return (
-      <ESSourceDetails
-        source={this}
-        geoField={this._descriptor.geoField}
-        geoFieldType="Shape field"
-        sourceType={ESSearchSource.typeDisplayName}
-      />
-    );
+    return [
+      { label: 'Data source', value: ESSearchSource.title },
+      { label: 'Index pattern', value: indexPatternTitle },
+      { label: 'Geospatial field', value: this._descriptor.geoField },
+      { label: 'Geospatial field type', value: geoFieldType },
+    ];
   }
 
   async getGeoJsonWithMeta({ layerName }, searchFilters) {
-
-
     const searchSource = await this._makeSearchSource(searchFilters, this._descriptor.limit);
     // Setting "fields" instead of "source: { includes: []}"
     // because SearchSource automatically adds the following by default
@@ -106,7 +111,6 @@ export class ESSearchSource extends AbstractESSource {
       });
       return properties;
     };
-
 
     const resp = await this._runEsQuery(layerName, searchSource, 'Elasticsearch document request');
     try {
@@ -158,7 +162,6 @@ export class ESSearchSource extends AbstractESSource {
     return _.get(this._descriptor, 'filterByMapBounds', false);
   }
 
-
   async getStringFields() {
     const indexPattern = await this._getIndexPattern();
     const stringFields = indexPattern.fields.filter(field => {
@@ -168,5 +171,4 @@ export class ESSearchSource extends AbstractESSource {
       return { name: stringField.name, label: stringField.name };
     });
   }
-
 }
