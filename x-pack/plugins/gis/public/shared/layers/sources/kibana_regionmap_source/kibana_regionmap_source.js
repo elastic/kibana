@@ -7,9 +7,6 @@
 import _ from 'lodash';
 import { AbstractVectorSource } from '../vector_source';
 import React from 'react';
-import {
-  EuiText,
-} from '@elastic/eui';
 import { CreateSourceEditor } from './create_source_editor';
 
 export class KibanaRegionmapSource extends AbstractVectorSource {
@@ -48,16 +45,11 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
     );
   };
 
-  renderDetails() {
-    return (
-      <EuiText color="subdued" size="s">
-        <p className="gisLayerDetails">
-          <strong className="gisLayerDetails__label">Source </strong><span>Kibana Region Map</span><br/>
-          <strong className="gisLayerDetails__label">Type </strong><span>Vector</span><br/>
-          <strong className="gisLayerDetails__label">Name </strong><span>{this._descriptor.name}</span><br/>
-        </p>
-      </EuiText>
-    );
+  async getImmutableProperties() {
+    return [
+      { label: 'Data source', value: KibanaRegionmapSource.title },
+      { label: 'Vector layer', value: this._descriptor.name },
+    ];
   }
 
   async getGeoJsonWithMeta() {

@@ -35,27 +35,5 @@
       "groupId": "8673d8bf7a032e387c101bafbab0d2bc",
       "latestOccurrenceAt": "2018-01-10T10:06:13.211Z"
     }
-  ],
-  "match": {
-    "path": "/:serviceName/errors",
-    "url": "/opbeans-python/errors",
-    "isExact": true,
-    "params": { "serviceName": "opbeans-python" }
-  },
-  "location": {
-    "pathname": "/opbeans-python/errors",
-    "search":
-      "?_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-15m,mode:quick,to:now))",
-    "hash": ""
-  },
-  "history": {
-    "length": 17,
-    "action": "POP",
-    "location": {
-      "pathname": "/opbeans-python/errors",
-      "search":
-        "?_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-15m,mode:quick,to:now))",
-      "hash": ""
-    }
-  }
+  ]
 }

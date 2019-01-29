@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const STATUS = {
-  FAILURE: 'FAILURE',
-  SUCCESS: 'SUCCESS',
-  LOADING: 'LOADING'
-};
+export { ESGeoGridSource } from './es_geo_grid_source';

@@ -23,6 +23,14 @@
   box-shadow: 0 $euiSize $euiSize (-$euiSize / 2) $euiColorLightestShade;
 }
 
+.gisLayerPanel__sourceDetails {
+  margin-left: $euiSizeXL;
+}
+
+.gisLayerPanel__sourceDetail {
+  margin-bottom: 0px !important;
+}
+
 .gisLayerPanel__footer {
   border-top: $euiBorderThin;
   box-shadow: 0 ($euiSize *-1) $euiSize (-$euiSize / 2) $euiColorLightestShade;
