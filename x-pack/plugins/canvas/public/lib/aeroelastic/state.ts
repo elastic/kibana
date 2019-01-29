@@ -85,7 +85,7 @@ export const createStore = (initialState: NodeResult, onChangeCallback: ChangeCa
     }
   };
 
-  const dispatch = (type: TypeName, payload: Payload) => setTimeout(() => commit(type, payload));
+  const dispatch = (type: TypeName, payload: Payload) => commit(type, payload);
 
   return { getCurrentState, setUpdater, commit, dispatch };
 };
