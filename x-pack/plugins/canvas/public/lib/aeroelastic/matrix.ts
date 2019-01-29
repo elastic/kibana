@@ -24,7 +24,9 @@
  *
  */
 
-export const NANMATRIX = [
+import { transformMatrix3d, vector3d } from './types';
+
+const NANMATRIX = [
   NaN,
   NaN,
   NaN,
@@ -42,26 +44,6 @@ export const NANMATRIX = [
   NaN,
   NaN,
 ] as transformMatrix3d;
-
-type vector3d = [number, number, number, number] & ReadonlyArray<number> & { length: 4 };
-type transformMatrix3d = ReadonlyArray<number> & { length: 16 } & [
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-    number
-  ];
 
 export const ORIGIN = [0, 0, 0, 1] as vector3d;
 

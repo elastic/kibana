@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-type vector2d = [number, number, number] & ReadonlyArray<number> & { length: 3 };
-type transformMatrix2d = [number, number, number, number, number, number, number, number, number] &
-  ReadonlyArray<number> & { length: 9 };
+import { transformMatrix2d, vector2d } from './types';
 
 export const ORIGIN = [0, 0, 1] as vector2d;
 
