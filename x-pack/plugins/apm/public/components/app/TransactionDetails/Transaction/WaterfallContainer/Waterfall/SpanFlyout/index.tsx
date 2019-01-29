@@ -26,7 +26,6 @@ import { idx } from 'x-pack/plugins/apm/common/idx';
 import { DiscoverSpanLink } from 'x-pack/plugins/apm/public/components/shared/Links/DiscoverLinks/DiscoverSpanLink';
 import { Stacktrace } from 'x-pack/plugins/apm/public/components/shared/Stacktrace';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
-import { SERVICE_LANGUAGE_NAME } from '../../../../../../../../common/constants';
 import { Span } from '../../../../../../../../typings/es_schemas/Span';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
 import { DatabaseContext } from './DatabaseContext';
@@ -55,7 +54,7 @@ export function SpanFlyout({
   }
 
   const stackframes = span.span.stacktrace;
-  const codeLanguage: string = get(span, SERVICE_LANGUAGE_NAME);
+  const codeLanguage = idx(parentTransaction, _ => _.service.language.name);
   const dbContext = idx(span, _ => _.context.db);
   const httpContext = idx(span, _ => _.context.http);
   const labels = span.labels;
