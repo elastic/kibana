@@ -136,27 +136,20 @@ export const SourceConfigurationFlyout = injectI18n(({ intl }: SourceConfigurati
                             <EuiButton color="primary" isLoading fill>
                               Loading
                             </EuiButton>
-                          ) : exists ? (
+                          ) : (
                             <EuiButton
                               color="primary"
                               isDisabled={updates.length === 0}
                               fill
-                              onClick={() => update(updates).then(() => resetForm())}
+                              onClick={() =>
+                                (exists ? update(updates) : create(currentFormState)).then(() =>
+                                  resetForm()
+                                )
+                              }
                             >
                               <FormattedMessage
                                 id="xpack.infra.sourceConfiguration.updateSourceConfigurationButtonLabel"
                                 defaultMessage="Update Source"
-                              />
-                            </EuiButton>
-                          ) : (
-                            <EuiButton
-                              color="primary"
-                              fill
-                              onClick={() => create(currentFormState).then(() => resetForm())}
-                            >
-                              <FormattedMessage
-                                id="xpack.infra.sourceConfiguration.createSourceConfigurationButtonLabel"
-                                defaultMessage="Create Source"
                               />
                             </EuiButton>
                           )}
