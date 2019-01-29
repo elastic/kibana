@@ -471,7 +471,7 @@ export const FollowerIndexForm = injectI18n(
                   <h2>
                     <FormattedMessage
                       id="xpack.crossClusterReplication.followerIndexForm.advancedSettingsTitle"
-                      defaultMessage="Advanced settings"
+                      defaultMessage="Advanced settings (optional)"
                     />
                   </h2>
                 </EuiTitle>
