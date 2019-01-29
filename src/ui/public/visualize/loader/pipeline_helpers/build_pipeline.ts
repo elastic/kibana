@@ -286,7 +286,6 @@ export const buildVislibDimensions = (vis: any, timeRange?: any) => {
       dimensions.x.params.format = xAgg.buckets.getScaledDateFormat();
       dimensions.x.params.bounds = xAgg.buckets.getBounds();
     } else if (xAgg.type.name === 'histogram') {
-      dimensions.x.params.date = true;
       dimensions.x.params.interval = xAgg.params.interval;
     }
   }

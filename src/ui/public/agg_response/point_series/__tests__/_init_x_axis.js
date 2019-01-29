@@ -43,7 +43,7 @@ describe('initXAxis', function () {
 
   it('makes the chart ordered if the agg is ordered', function () {
     const chart = _.cloneDeep(baseChart);
-    chart.aspects.x[0].params.date = true;
+    chart.aspects.x[0].params.interval = 10;
 
     initXAxis(chart);
     expect(chart)
@@ -54,7 +54,6 @@ describe('initXAxis', function () {
 
   it('reads the interval param from the x agg', function () {
     const chart = _.cloneDeep(baseChart);
-    chart.aspects.x[0].params.date = true;
     chart.aspects.x[0].params.interval = 10;
     initXAxis(chart);
     expect(chart)
