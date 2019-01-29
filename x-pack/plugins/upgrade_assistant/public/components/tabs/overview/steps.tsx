@@ -26,6 +26,7 @@ import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 
 // Leaving these here even if unused so they are picked up for i18n static analysis
 // Keep this until last minor release (when next major is also released).
+// @ts-ignore
 const WAIT_FOR_RELEASE_STEP = {
   title: i18n.translate('xpack.upgradeAssistant.overviewTab.steps.waitForReleaseStep.stepTitle', {
     defaultMessage: 'Wait for the Elasticsearch {nextEsVersion} release',
@@ -266,7 +267,7 @@ export const StepsUI: StatelessComponent<
         },
 
         // Swap in START_UPGRADE_STEP on the last minor release.
-        WAIT_FOR_RELEASE_STEP,
+        START_UPGRADE_STEP,
       ]}
     />
   );
