@@ -1,5 +1,5 @@
 {
-  "security.put_user": {
+  "xpack.security.put_user": {
     "data_autocomplete_rules": {
       "metadata": {},
       "password": "",
