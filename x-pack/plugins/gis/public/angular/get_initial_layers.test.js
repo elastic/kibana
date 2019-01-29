@@ -9,7 +9,6 @@ jest.mock('../meta', () => {
 });
 
 import { getInitialLayers } from './get_initial_layers';
-import sinon from 'sinon';
 
 const mockKibanaDataSource = {
   tilemap: {
