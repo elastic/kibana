@@ -758,8 +758,8 @@
     to-fast-properties "^2.0.0"
 
 "@elastic/elasticsearch@elastic/elasticsearch-js#next":
-  version "0.1.0-alpha.4"
-  resolved "https://codeload.github.com/elastic/elasticsearch-js/tar.gz/8e26dc874f51f1e1a3b39b363948fc3366023260"
+  version "0.1.0-alpha.5"
+  resolved "https://codeload.github.com/elastic/elasticsearch-js/tar.gz/2f3e2a6c962acf6c883202c0a616df58154fdf80"
   dependencies:
     debug "^4.1.0"
     decompress-response "^3.3.0"
