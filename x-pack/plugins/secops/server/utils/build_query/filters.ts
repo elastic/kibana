@@ -5,7 +5,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { FilterQuery } from '../../lib/types';
+import { ESQuery } from '../../lib/types';
 
-export const createQueryFilterClauses = (filterQuery: FilterQuery) =>
+export const createQueryFilterClauses = (filterQuery: ESQuery | undefined) =>
   !isEmpty(filterQuery) ? [filterQuery] : [];

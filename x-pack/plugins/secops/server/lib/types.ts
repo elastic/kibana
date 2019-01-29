@@ -46,7 +46,6 @@ export interface SecOpsContext {
 }
 
 export type ESQuery = ESRangeQuery | ESQueryStringQuery | ESMatchQuery | JsonObject;
-export type FilterQuery = JsonObject;
 
 export interface ESRangeQuery {
   range: {

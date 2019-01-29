@@ -9,14 +9,14 @@ import { createQueryFilterClauses } from '../../utils/build_query';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { eventFieldsMap } from '../ecs_fields';
 import { RequestOptions } from '../framework';
-import { FilterQuery, SortRequest, SortRequestDirection } from '../types';
+import { SortRequest, SortRequestDirection } from '../types';
 import { TimerangeFilter } from './types';
 
 export const buildQuery = (options: RequestOptions) => {
   const { limit, cursor, tiebreaker } = options.pagination;
   const { fields, filterQuery } = options;
   const esFields = [...reduceFields(fields, eventFieldsMap)];
-  const filterClause = [...createQueryFilterClauses(filterQuery as FilterQuery)];
+  const filterClause = [...createQueryFilterClauses(filterQuery)];
 
   const getTimerangeFilter = (timerange: TimerangeInput | undefined): TimerangeFilter[] => {
     if (timerange) {

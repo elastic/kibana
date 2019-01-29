@@ -9,7 +9,6 @@ import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { hostFieldsMap, sourceFieldsMap } from '../ecs_fields';
 import { extendMap } from '../ecs_fields/extend_map';
 import { RequestOptions } from '../framework';
-import { FilterQuery } from '../types';
 
 export const auditdFieldsMap: Readonly<Record<string, string>> = {
   latest: '@timestamp',
@@ -21,20 +20,26 @@ export const auditdFieldsMap: Readonly<Record<string, string>> = {
   ...{ ...extendMap('lastFailure', hostFieldsMap) },
 };
 
-export const buildQuery = (options: RequestOptions) => {
-  const { to, from } = options.timerange;
-  const { limit } = options.pagination;
-  const { fields, filterQuery } = options;
+export const buildQuery = ({
+  fields,
+  filterQuery,
+  timerange: { from, to },
+  pagination: { limit },
+  sourceConfiguration: {
+    fields: { timestamp },
+    auditbeatAlias,
+  },
+}: RequestOptions) => {
   const esFields = reduceFields(fields, { ...hostFieldsMap, ...sourceFieldsMap });
 
   const filter = [
-    ...createQueryFilterClauses(filterQuery as FilterQuery),
+    ...createQueryFilterClauses(filterQuery),
     { term: { 'event.category': 'user-login' } },
     { term: { 'process.exe': '/usr/sbin/sshd' } },
     { terms: { 'event.type': ['user_login', 'user_start'] } },
     {
       range: {
-        [options.sourceConfiguration.fields.timestamp]: {
+        [timestamp]: {
           gte: from,
           lte: to,
         },
@@ -52,7 +57,7 @@ export const buildQuery = (options: RequestOptions) => {
 
   const dslQuery = {
     allowNoIndices: true,
-    index: options.sourceConfiguration.auditbeatAlias,
+    index: auditbeatAlias,
     ignoreUnavailable: true,
     body: {
       aggregations: {
