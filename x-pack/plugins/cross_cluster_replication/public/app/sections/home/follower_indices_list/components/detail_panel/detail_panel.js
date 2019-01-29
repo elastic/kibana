@@ -36,8 +36,6 @@ import 'brace/theme/textmate';
 import { ContextMenu } from '../context_menu';
 
 import { API_STATUS } from '../../../../../constants';
-import { isSettingDefault } from '../../../../../services/follower_index_default_settings';
-
 
 export class DetailPanelUi extends Component {
   static propTypes = {
@@ -45,23 +43,6 @@ export class DetailPanelUi extends Component {
     followerIndexId: PropTypes.string,
     followerIndex: PropTypes.object,
     closeDetailPanel: PropTypes.func.isRequired,
-  }
-
-  renderSetting(name, value) {
-    if(isSettingDefault(name, value)) {
-      return (
-        <Fragment>
-          {value}{' '}
-          <em>
-            <FormattedMessage
-              id="xpack.crossClusterReplication.followerIndexDetailPanel.defaultSettingLabel"
-              defaultMessage="(Default)"
-            />
-          </em>
-        </Fragment>
-      );
-    }
-    return value;
   }
 
   renderFollowerIndex() {
@@ -183,7 +164,7 @@ export class DetailPanelUi extends Component {
                     </EuiDescriptionListTitle>
 
                     <EuiDescriptionListDescription>
-                      {this.renderSetting('maxReadRequestOperationCount', maxReadRequestOperationCount)}
+                      {maxReadRequestOperationCount}
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
 
@@ -198,7 +179,7 @@ export class DetailPanelUi extends Component {
                     </EuiDescriptionListTitle>
 
                     <EuiDescriptionListDescription>
-                      {this.renderSetting('maxOutstandingReadRequests', maxOutstandingReadRequests)}
+                      {maxOutstandingReadRequests}
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -217,7 +198,7 @@ export class DetailPanelUi extends Component {
                     </EuiDescriptionListTitle>
 
                     <EuiDescriptionListDescription>
-                      {this.renderSetting('maxReadRequestSize', maxReadRequestSize)}
+                      {maxReadRequestSize}
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
 
@@ -232,7 +213,7 @@ export class DetailPanelUi extends Component {
                     </EuiDescriptionListTitle>
 
                     <EuiDescriptionListDescription>
-                      {this.renderSetting('maxWriteRequestOperationCount', maxWriteRequestOperationCount)}
+                      {maxWriteRequestOperationCount}
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -251,7 +232,7 @@ export class DetailPanelUi extends Component {
                     </EuiDescriptionListTitle>
 
                     <EuiDescriptionListDescription>
-                      {this.renderSetting('maxWriteRequestSize', maxWriteRequestSize)}
+                      {maxWriteRequestSize}
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
 
@@ -266,7 +247,7 @@ export class DetailPanelUi extends Component {
                     </EuiDescriptionListTitle>
 
                     <EuiDescriptionListDescription>
-                      {this.renderSetting('maxOutstandingWriteRequests', maxOutstandingWriteRequests)}
+                      {maxOutstandingWriteRequests}
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -285,7 +266,7 @@ export class DetailPanelUi extends Component {
                     </EuiDescriptionListTitle>
 
                     <EuiDescriptionListDescription>
-                      {this.renderSetting('maxWriteBufferCount', maxWriteBufferCount)}
+                      {maxWriteBufferCount}
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
 
@@ -300,7 +281,7 @@ export class DetailPanelUi extends Component {
                     </EuiDescriptionListTitle>
 
                     <EuiDescriptionListDescription>
-                      {this.renderSetting('maxWriteBufferSize', maxWriteBufferSize)}
+                      {maxWriteBufferSize}
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -319,7 +300,7 @@ export class DetailPanelUi extends Component {
                     </EuiDescriptionListTitle>
 
                     <EuiDescriptionListDescription>
-                      {this.renderSetting('maxRetryDelay', maxRetryDelay)}
+                      {maxRetryDelay}
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
 
@@ -334,7 +315,7 @@ export class DetailPanelUi extends Component {
                     </EuiDescriptionListTitle>
 
                     <EuiDescriptionListDescription>
-                      {this.renderSetting('readPollTimeout', readPollTimeout)}
+                      {readPollTimeout}
                     </EuiDescriptionListDescription>
                   </EuiFlexItem>
                 </EuiFlexGroup>
