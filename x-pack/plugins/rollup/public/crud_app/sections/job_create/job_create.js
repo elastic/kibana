@@ -511,8 +511,8 @@ export class JobCreateUi extends Component {
         <EuiPageContent
           horizontalPosition="center"
         >
-              <EuiBreadcrumbs breadcrumbs={breadcrumbs} responsive={false} />
-              <EuiSpacer size="xs" />
+          <EuiBreadcrumbs breadcrumbs={breadcrumbs} responsive={false} />
+          <EuiSpacer size="xs" />
           <EuiPageContentHeader>
             <EuiTitle size="m">
               <h1>

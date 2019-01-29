@@ -374,21 +374,26 @@ export class IndexTableUi extends Component {
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {indicesLoading && allIndices.length === 0 ? null :
-              (
-                <EuiSwitch
-                  id="checkboxShowSystemIndices"
-                  checked={showSystemIndices}
-                  onChange={event => showSystemIndicesChanged(event.target.checked)}
-                  label={
-                    <FormattedMessage
-                      id="xpack.idxMgmt.indexTable.systemIndicesSwitchLabel"
-                      defaultMessage="Include system indices"
-                    />
-                  }
-                />
-              )
-            }
+            {indicesLoading && allIndices.length === 0 ? null : (
+              <EuiFlexGroup>
+                {getToggleExtensions().map(toggle => {
+                  return this.renderToggleControl(toggle);
+                })}
+                <EuiFlexItem grow={false}>
+                  <EuiSwitch
+                    id="checkboxShowSystemIndices"
+                    checked={showSystemIndices}
+                    onChange={event => showSystemIndicesChanged(event.target.checked)}
+                    label={
+                      <FormattedMessage
+                        id="xpack.idxMgmt.indexTable.systemIndicesSwitchLabel"
+                        defaultMessage="Include system indices"
+                      />
+                    }
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer />
@@ -432,43 +437,17 @@ export class IndexTableUi extends Component {
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                {indicesLoading && allIndices.length === 0 ? null : (
-                  <EuiFlexGroup>
-                    {getToggleExtensions().map(toggle => {
-                      return this.renderToggleControl(toggle);
-                    })}
-                    <EuiFlexItem grow={false}>
-                      <EuiSwitch
-                        id="checkboxShowSystemIndices"
-                        checked={showSystemIndices}
-                        onChange={event => showSystemIndicesChanged(event.target.checked)}
-                        label={
-                          <FormattedMessage
-                            id="xpack.idxMgmt.indexTable.systemIndicesSwitchLabel"
-                            defaultMessage="Include system indices"
-                          />
-                        }
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer />
-            {this.renderBanners()}
-            <EuiFlexGroup gutterSize="l" alignItems="center">
-              {atLeastOneItemSelected ? (
-                <EuiFlexItem grow={false}>
-                  <Route
-                    key="menu"
-                    render={() => (
-                      <IndexActionsContextMenu
-                        indexNames={Object.keys(selectedIndicesMap)}
-                        resetSelection={() => {
-                          this.setState({ selectedIndicesMap: {} });
-                        }}
-                      />
-                    )}
+                <EuiButton
+                  isLoading={indicesLoading}
+                  color="secondary"
+                  onClick={() => {
+                    loadIndices();
+                  }}
+                  iconType="refresh"
+                >
+                  <FormattedMessage
+                    id="xpack.idxMgmt.indexTable.reloadIndicesButton"
+                    defaultMessage="Reload indices"
                   />
                 </EuiButton>
               </EuiFlexItem>
