@@ -38,7 +38,6 @@ export const LogTextStreamLogEntryItemView = injectI18n(
   > {
     public readonly state = {
       isHovered: false,
-      showIcon: true,
     };
 
     public handleMouseEnter: React.MouseEventHandler<HTMLDivElement> = () => {
