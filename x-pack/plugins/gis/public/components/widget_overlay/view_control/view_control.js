@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import React from 'react';
 import {
   EuiFlexGroup,
@@ -14,6 +15,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { SetView } from './set_view';
+import { DECIMAL_DEGREES_PRECISION } from '../../../../common/constants';
 
 export function ViewControl({ isSetViewOpen, closeSetView, openSetView, mouseCoordinates }) {
   const toggleSetViewVisibility = () => {
@@ -45,12 +47,18 @@ export function ViewControl({ isSetViewOpen, closeSetView, openSetView, mouseCoo
   );
 
   function renderMouseCoordinates() {
+    const lat = mouseCoordinates
+      ? _.round(mouseCoordinates.lat, DECIMAL_DEGREES_PRECISION)
+      : '';
+    const lon = mouseCoordinates
+      ? _.round(mouseCoordinates.lon, DECIMAL_DEGREES_PRECISION)
+      : '';
     return (
       <EuiPanel className="gisWidgetControl gisViewControl__coordinates" paddingSize="none">
         <EuiText size="xs">
           <p>
-            <strong>lat:</strong> {mouseCoordinates && mouseCoordinates.lat},{' '}
-            <strong>lon:</strong> {mouseCoordinates && mouseCoordinates.lon}
+            <strong>lat:</strong> {lat},{' '}
+            <strong>lon:</strong> {lon}
           </p>
         </EuiText>
       </EuiPanel>

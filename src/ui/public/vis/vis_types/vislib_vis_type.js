@@ -25,14 +25,12 @@ import 'plugins/kbn_vislib_vis_types/controls/gauge_options';
 import 'plugins/kbn_vislib_vis_types/controls/point_series';
 import './vislib_vis_legend';
 import { BaseVisTypeProvider } from './base_vis_type';
-import { AggResponsePointSeriesProvider } from '../../agg_response/point_series/point_series';
 import VislibProvider from '../../vislib';
 import { VisFiltersProvider } from '../vis_filters';
 import $ from 'jquery';
 import { defaultsDeep } from 'lodash';
 
 export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
-  const pointSeries = Private(AggResponsePointSeriesProvider);
   const vislib = Private(VislibProvider);
   const visFilters = Private(VisFiltersProvider);
   const BaseVisType = Private(BaseVisTypeProvider);
@@ -118,9 +116,6 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
       if (!opts.responseHandler) {
         opts.responseHandler = 'vislib_series';
         opts.responseHandlerConfig = { asAggConfigResults: true };
-      }
-      if (!opts.responseConverter) {
-        opts.responseConverter = pointSeries;
       }
       opts.events = defaultsDeep({}, opts.events, {
         filterBucket: {
