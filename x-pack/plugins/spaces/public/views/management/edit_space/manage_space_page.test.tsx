@@ -44,7 +44,7 @@ describe('ManageSpacePage', () => {
       <ManageSpacePage.WrappedComponent
         spacesManager={spacesManager}
         spacesNavState={spacesNavState}
-        features={[{ id: 'foo', name: 'foo', privileges: {} }]}
+        features={[{ id: 'foo', name: 'foo', app: [], privileges: {} }]}
         intl={null as any}
       />
     );
@@ -99,7 +99,7 @@ describe('ManageSpacePage', () => {
         spaceId={'existing-space'}
         spacesManager={spacesManager}
         spacesNavState={spacesNavState}
-        features={[{ id: 'foo', name: 'foo', privileges: {} }]}
+        features={[{ id: 'foo', name: 'foo', app: [], privileges: {} }]}
         intl={null as any}
       />
     );
@@ -157,7 +157,7 @@ describe('ManageSpacePage', () => {
         spaceId={'my-space'}
         spacesManager={spacesManager}
         spacesNavState={spacesNavState}
-        features={[{ id: 'foo', name: 'foo', privileges: {} }]}
+        features={[{ id: 'foo', name: 'foo', app: [], privileges: {} }]}
         intl={null as any}
       />
     );
@@ -224,7 +224,7 @@ describe('ManageSpacePage', () => {
         spaceId={'my-space'}
         spacesManager={spacesManager}
         spacesNavState={spacesNavState}
-        features={[{ id: 'foo', name: 'foo', privileges: {} }]}
+        features={[{ id: 'foo', name: 'foo', app: [], privileges: {} }]}
         intl={null as any}
       />
     );

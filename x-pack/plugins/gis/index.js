@@ -65,10 +65,10 @@ export function gis(kibana) {
           name: 'Maps',
           icon: 'gisApp',
           navLinkId: 'gis',
+          app: ['gis', 'kibana'],
           catalogue: ['gis'],
           privileges: {
             all: {
-              app: ['gis', 'kibana'],
               savedObject: {
                 all: ['gis-map'],
                 read: ['config']
@@ -76,7 +76,6 @@ export function gis(kibana) {
               ui: [],
             },
             read: {
-              app: ['gis', 'kibana'],
               savedObject: {
                 all: [],
                 read: ['gis-map', 'config']

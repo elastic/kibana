@@ -21,13 +21,13 @@ test(`builds privileges correctly`, () => {
       name: 'Foo Feature',
       icon: 'arrowDown',
       navLinkId: 'kibana:foo-feature',
+      app: ['foo-app'],
       catalogue: ['fooAppEntry1', 'fooAppEntry2', 'fooReadEntry'],
       management: {
         foo: ['fooManagementLink', 'anotherFooManagementLink'],
       },
       privileges: {
         all: {
-          app: ['foo-app'],
           catalogue: ['fooAppEntry1', 'fooAppEntry2'],
           management: {
             foo: ['fooManagementLink', 'anotherFooManagementLink'],
@@ -39,7 +39,6 @@ test(`builds privileges correctly`, () => {
           ui: ['show', 'showSaveButton', 'showCreateButton'],
         },
         read: {
-          app: ['foo-app'],
           api: ['foo/read/api'],
           catalogue: ['fooReadEntry'],
           management: {
@@ -57,13 +56,13 @@ test(`builds privileges correctly`, () => {
       id: 'bar-feature',
       name: 'Bar Feature',
       icon: 'arrowUp',
+      app: ['bar-app'],
       catalogue: ['barCatalogue'],
       management: {
         kibana: ['yeppers'],
       },
       privileges: {
         all: {
-          app: ['bar-app'],
           savedObject: {
             all: ['bar-saved-object-type'],
             read: ['foo-saved-object-type'],
@@ -74,7 +73,6 @@ test(`builds privileges correctly`, () => {
           management: {
             kibana: ['yeppers'],
           },
-          app: ['bar-app'],
           api: ['bar/read/api'],
           savedObject: {
             all: [],
@@ -88,6 +86,7 @@ test(`builds privileges correctly`, () => {
       id: 'baz-feature',
       name: 'Baz Feature',
       icon: 'arrowUp',
+      app: ['bar-app'],
       catalogue: ['bazCatalogue'],
       management: {
         kibana: ['bazKibana'],
@@ -99,7 +98,6 @@ test(`builds privileges correctly`, () => {
           management: {
             kibana: ['bazKibana'],
           },
-          app: ['bar-app'],
           api: ['bar/read/api'],
           savedObject: {
             all: [],

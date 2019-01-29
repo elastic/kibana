@@ -43,12 +43,14 @@ describe('GET /api/features/v1', () => {
     featureRegistry.register({
       id: 'feature_1',
       name: 'Feature 1',
+      app: [],
       privileges: {},
     });
 
     featureRegistry.register({
       id: 'licensed_feature',
       name: 'Licensed Feature',
+      app: ['bar-app'],
       validLicenses: ['gold'],
       privileges: {},
     });

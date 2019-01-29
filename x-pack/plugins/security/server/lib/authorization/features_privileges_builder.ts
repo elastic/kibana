@@ -131,7 +131,7 @@ export class FeaturesPrivilegesBuilder {
       ...(privilegeDefinition.api
         ? privilegeDefinition.api.map(api => this.actions.api.get(api))
         : []),
-      ...privilegeDefinition.app.map(appId => this.actions.app.get(appId)),
+      ...this.buildAppFeaturePrivileges(privilegeDefinition, feature),
       ...flatten(
         privilegeDefinition.savedObject.all.map(types =>
           this.actions.savedObject.allOperations(types)
@@ -148,6 +148,19 @@ export class FeaturesPrivilegesBuilder {
       ...this.buildCatalogueFeaturePrivileges(privilegeDefinition, feature),
       ...this.buildManagementFeaturePrivileges(privilegeDefinition, feature),
     ]);
+  }
+
+  private buildAppFeaturePrivileges(
+    privilegeDefinition: FeaturePrivilegeDefinition,
+    feature: Feature
+  ): string[] {
+    const appEntries = privilegeDefinition.app || feature.app;
+
+    if (!appEntries) {
+      return [];
+    }
+
+    return appEntries.map(appId => this.actions.app.get(appId));
   }
 
   private buildCatalogueFeaturePrivileges(

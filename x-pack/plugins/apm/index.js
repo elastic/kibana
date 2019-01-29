@@ -74,12 +74,12 @@ export function apm(kibana) {
         name: 'APM',
         icon: 'apmApp',
         navLinkId: 'apm',
+        app: ['apm', 'kibana'],
         catalogue: ['apm'],
         privileges: {
           all: {
             grantWithBaseRead: true,
             catalogue: ['apm'],
-            app: ['apm', 'kibana'],
             savedObject: {
               all: [],
               read: ['config']

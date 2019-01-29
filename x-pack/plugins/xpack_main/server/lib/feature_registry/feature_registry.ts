@@ -19,7 +19,7 @@ export interface FeaturePrivilegeDefinition {
   };
   catalogue?: string[];
   api?: string[];
-  app: string[];
+  app?: string[];
   savedObject: {
     all: string[];
     read: string[];
@@ -34,6 +34,7 @@ export interface Feature {
   icon?: IconType;
   description?: string;
   navLinkId?: string;
+  app: string[];
   management?: {
     [sectionId: string]: string[];
   };
@@ -67,6 +68,9 @@ const schema = Joi.object({
   icon: Joi.string(),
   description: Joi.string(),
   navLinkId: Joi.string(),
+  app: Joi.array()
+    .items(Joi.string())
+    .required(),
   management: managementSchema,
   catalogue: catalogueSchema,
   privileges: Joi.object()
@@ -80,9 +84,7 @@ const schema = Joi.object({
         management: managementSchema,
         catalogue: catalogueSchema,
         api: Joi.array().items(Joi.string()),
-        app: Joi.array()
-          .items(Joi.string())
-          .required(),
+        app: Joi.array().items(Joi.string()),
         savedObject: Joi.object({
           all: Joi.array()
             .items(Joi.string())
@@ -128,10 +130,19 @@ function validateFeature(feature: Feature) {
   if (validateResult.error) {
     throw validateResult.error;
   }
-// the following validation can't be enforced by the Joi schema, since it'd require us looking "up" the object graph for the list of valid value, which they explicitly forbid.
-  const { management = {}, catalogue = [] } = feature;
+  // the following validation can't be enforced by the Joi schema, since it'd require us looking "up" the object graph for the list of valid value, which they explicitly forbid.
+  const { app = [], management = {}, catalogue = [] } = feature;
 
   Object.entries(feature.privileges).forEach(([privilegeId, privilegeDefinition]) => {
+    const unknownAppEntries = _.difference(privilegeDefinition.app || [], app);
+    if (unknownAppEntries.length > 0) {
+      throw new Error(
+        `Feature privilege ${
+          feature.id
+        }.${privilegeId} has unknown app entries: ${unknownAppEntries.join(', ')}`
+      );
+    }
+
     const unknownCatalogueEntries = _.difference(privilegeDefinition.catalogue || [], catalogue);
     if (unknownCatalogueEntries.length > 0) {
       throw new Error(
