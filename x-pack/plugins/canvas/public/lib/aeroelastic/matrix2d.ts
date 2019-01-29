@@ -86,11 +86,6 @@ export const subtract = (
   [A, B, C, D, E, F, G, H, I]: transformMatrix2d
 ): transformMatrix2d => [a - A, b - B, c - C, d - D, e - E, f - F, g - G, h - H, i - I];
 
-/**
- *
- * componentProduct
- *
- */
 export const componentProduct = ([a, b, c]: vector2d, [A, B, C]: vector2d): vector2d => [
   a * A,
   b * B,

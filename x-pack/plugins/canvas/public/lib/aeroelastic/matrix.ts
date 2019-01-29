@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/*eslint no-unused-vars: ["error", { "argsIgnorePattern": "^_" }]*/
-
 /**
  * Column major order:
  *
@@ -26,58 +24,90 @@
  *
  */
 
-export const ORIGIN = [0, 0, 0, 1];
+export const NANMATRIX = [
+  NaN,
+  NaN,
+  NaN,
+  NaN,
+  NaN,
+  NaN,
+  NaN,
+  NaN,
+  NaN,
+  NaN,
+  NaN,
+  NaN,
+  NaN,
+  NaN,
+  NaN,
+  NaN,
+] as transformMatrix3d;
 
-export const translate = (x, y, z) => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, z, 1];
-
-export const scale = (x, y, z) => [x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1];
-
-/**
- * rotate
- *
- * @param {number} x the x coordinate of the vector around which to rotate
- * @param {number} y the y coordinate of the vector around which to rotate
- * @param {number} z the z coordinate of the vector around which to rotate
- * @param {number} a rotation angle in radians
- * @returns {number[][]} a 4x4 transform matrix in column major order
- */
-const rotate = (x, y, z, a) => {
-  // it looks like the formula therefore a bit inefficient; common terms could be precomputed.
-  // an optimizing compiler eg. Google Closure Advanced could perform most of the optimizations and JIT also watches out
-  // for eg. common expressions
-
-  const sinA = Math.sin(a);
-  const coshAi = 1 - Math.cos(a);
-
-  return [
-    1 + coshAi * (x * x - 1),
-    -z * sinA + x * y * coshAi,
-    y * sinA + x * z * coshAi,
-    0,
-    z * sinA + x * y * coshAi,
-    1 + coshAi * (y * y - 1),
-    -x * sinA + y * z * coshAi,
-    0,
-    -y * sinA + x * y * coshAi,
-    x * sinA + y * x * coshAi,
-    1 + coshAi * (z * z - 1),
-    0,
-    0,
-    0,
-    0,
-    1,
+type vector3d = [number, number, number, number] & ReadonlyArray<number> & { length: 4 };
+type transformMatrix3d = ReadonlyArray<number> & { length: 16 } & [
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number
   ];
-};
 
-/**
- * rotate_ functions
- *
- * @param {number} a
- * @returns {number[][]}
- *
- * Should be replaced with more efficient direct versions rather than going through the generic `rotate3d` function.
- */
-export const rotateZ = a => rotate(0, 0, 1, a);
+export const ORIGIN = [0, 0, 0, 1] as vector3d;
+
+export const translate = (x: number, y: number, z: number): transformMatrix3d => [
+  1,
+  0,
+  0,
+  0,
+  0,
+  1,
+  0,
+  0,
+  0,
+  0,
+  1,
+  0,
+  x,
+  y,
+  z,
+  1,
+];
+
+export const scale = (x: number, y: number, z: number): transformMatrix3d => [
+  x,
+  0,
+  0,
+  0,
+  0,
+  y,
+  0,
+  0,
+  0,
+  0,
+  z,
+  0,
+  0,
+  0,
+  0,
+  1,
+];
+
+export const rotateZ = (a: number): transformMatrix3d => {
+  const sinA = Math.sin(a);
+  const cosA = Math.cos(a);
+  return [cosA, -sinA, 0, 0, sinA, cosA, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+};
 
 /**
  * multiply
@@ -97,9 +127,9 @@ export const rotateZ = a => rotate(0, 0, 1, a);
  *
  */
 const mult = (
-  [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p],
-  [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P]
-) => [
+  [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p]: transformMatrix3d,
+  [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P]: transformMatrix3d
+): transformMatrix3d => [
   a * A + e * B + i * C + m * D,
   b * A + f * B + j * C + n * D,
   c * A + g * B + k * C + o * D,
@@ -121,8 +151,10 @@ const mult = (
   d * M + h * N + l * O + p * P,
 ];
 
-export const multiply = (...elements) =>
-  elements.slice(1).reduce((prev, next) => mult(prev, next), elements[0]);
+export const multiply = (
+  first: transformMatrix3d,
+  ...rest: transformMatrix3d[]
+): transformMatrix3d => rest.reduce((prev, next) => mult(prev, next), first);
 
 /**
  * mvMultiply
@@ -141,14 +173,18 @@ export const multiply = (...elements) =>
  *         d    h    l    p      d * A + h * B + l * C + p * D
  *
  */
-export const mvMultiply = ([a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p], [A, B, C, D]) => [
+export const mvMultiply = (
+  [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p]: transformMatrix3d,
+  [A, B, C, D]: vector3d
+): vector3d => [
   a * A + e * B + i * C + m * D,
   b * A + f * B + j * C + n * D,
   c * A + g * B + k * C + o * D,
   d * A + h * B + l * C + p * D,
 ];
 
-export const normalize = ([A, B, C, D]) => (D === 1 ? [A, B, C, D] : [A / D, B / D, C / D, 1]);
+export const normalize = ([A, B, C, D]: vector3d): vector3d =>
+  D === 1 ? [A, B, C, D] : [A / D, B / D, C / D, 1];
 
 /**
  * invert
@@ -160,7 +196,24 @@ export const normalize = ([A, B, C, D]) => (D === 1 ? [A, B, C, D] : [A / D, B /
  *         c    g    k    o
  *         d    h    l    p
  */
-export const invert = ([a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p]) => {
+export const invert = ([
+  a,
+  b,
+  c,
+  d,
+  e,
+  f,
+  g,
+  h,
+  i,
+  j,
+  k,
+  l,
+  m,
+  n,
+  o,
+  p,
+]: transformMatrix3d): transformMatrix3d => {
   const inv = [
     f * k * p - f * l * o - j * g * p + j * h * o + n * g * l - n * h * k,
     -b * k * p + b * l * o + j * c * p - j * d * o - n * c * l + n * d * k,
@@ -178,12 +231,12 @@ export const invert = ([a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p]) => {
     a * j * o - a * k * n - i * b * o + i * c * n + m * b * k - m * c * j,
     -a * f * o + a * g * n + e * b * o - e * c * n - m * b * g + m * c * f,
     a * f * k - a * g * j - e * b * k + e * c * j + i * b * g - i * c * f,
-  ];
+  ] as transformMatrix3d;
 
   const det = a * inv[0] + b * inv[4] + c * inv[8] + d * inv[12];
 
   if (det === 0) {
-    return false; // no solution
+    return NANMATRIX; // no real solution
   } else {
     const recDet = 1 / det;
 
@@ -195,9 +248,26 @@ export const invert = ([a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p]) => {
   }
 };
 
-export const translateComponent = a => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, a[12], a[13], a[14], 1];
+export const translateComponent = (a: transformMatrix3d): transformMatrix3d => [
+  1,
+  0,
+  0,
+  0,
+  0,
+  1,
+  0,
+  0,
+  0,
+  0,
+  1,
+  0,
+  a[12],
+  a[13],
+  a[14],
+  1,
+];
 
-export const compositeComponent = ([a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p]) => [
+export const compositeComponent = ([
   a,
   b,
   c,
@@ -210,16 +280,16 @@ export const compositeComponent = ([a, b, c, d, e, f, g, h, i, j, k, l, m, n, o,
   j,
   k,
   l,
-  0,
-  0,
-  0,
+  m,
+  n,
+  o,
   p,
-];
+]: transformMatrix3d): transformMatrix3d => [a, b, c, d, e, f, g, h, i, j, k, l, 0, 0, 0, p];
 
 export const add = (
-  [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p],
-  [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P]
-) => [
+  [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p]: transformMatrix3d,
+  [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P]: transformMatrix3d
+): transformMatrix3d => [
   a + A,
   b + B,
   c + C,
@@ -239,9 +309,9 @@ export const add = (
 ];
 
 export const subtract = (
-  [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p],
-  [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P]
-) => [
+  [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p]: transformMatrix3d,
+  [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P]: transformMatrix3d
+): transformMatrix3d => [
   a - A,
   b - B,
   c - C,
@@ -260,14 +330,15 @@ export const subtract = (
   p - P,
 ];
 
-export const reduceTransforms = transforms =>
+export const reduceTransforms = (transforms: transformMatrix3d[]): transformMatrix3d =>
   transforms.length === 1
     ? transforms[0]
     : transforms.slice(1).reduce((prev, next) => multiply(prev, next), transforms[0]);
 
-const clamp = (low, high, value) => Math.min(high, Math.max(low, value));
+const clamp = (low: number, high: number, value: number): number =>
+  Math.min(high, Math.max(low, value));
 
-export const matrixToAngle = transformMatrix => {
+export const matrixToAngle = (transformMatrix: transformMatrix3d): number => {
   // clamping is needed, otherwise inevitable floating point inaccuracies can cause NaN
   const z0 = Math.acos(clamp(-1, 1, transformMatrix[0]));
   const z1 = Math.asin(clamp(-1, 1, transformMatrix[1]));
