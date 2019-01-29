@@ -42,11 +42,13 @@ export class SimplePrivilegeSection extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    const globalPrivs = this.locateGlobalPrivilege(props.role, true);
+    const globalPrivs = this.locateGlobalPrivilege(props.role);
     const globalPrivsIndex = this.locateGlobalPrivilegeIndex(props.role);
 
     this.state = {
-      isCustomizingGlobalPrivilege: Object.keys(globalPrivs.feature).length > 0,
+      isCustomizingGlobalPrivilege: Boolean(
+        globalPrivs && Object.keys(globalPrivs.feature).length > 0
+      ),
       globalPrivsIndex,
     };
   }
@@ -203,7 +205,7 @@ export class SimplePrivilegeSection extends Component<Props, State> {
               valueOfSelected={kibanaPrivilege}
             />
           </EuiFormRow>
-          {kibanaPrivilege === CUSTOM_PRIVILEGE_VALUE && (
+          {this.state.isCustomizingGlobalPrivilege && (
             <EuiFormRow>
               <FeatureTable
                 role={this.props.role}
@@ -234,34 +236,35 @@ export class SimplePrivilegeSection extends Component<Props, State> {
 
     const form = this.locateGlobalPrivilege(role);
 
-    return form.base.length > 0 ? form.base[0] : NO_PRIVILEGE_VALUE;
+    return form && form.base.length > 0 ? form.base[0] : NO_PRIVILEGE_VALUE;
   };
 
   public onKibanaPrivilegeChange = (privilege: string) => {
     const role = copyRole(this.props.role);
 
-    const form = this.locateGlobalPrivilege(role, true);
+    const form = this.locateGlobalPrivilege(role) || this.createGlobalPrivilegeEntry(role);
 
-    // Remove base privilege value
-    form.base = [];
-
-    if (privilege !== NO_PRIVILEGE_VALUE && privilege !== CUSTOM_PRIVILEGE_VALUE) {
+    if (privilege === NO_PRIVILEGE_VALUE) {
+      // Remove global entry if no privilege value
+      role.kibana = role.kibana.filter(entry => !isGlobalPrivilegeDefinition(entry));
+    } else if (privilege === CUSTOM_PRIVILEGE_VALUE) {
+      // Remove base privilege if customizing feature privileges
+      form.base = [];
+    } else {
       form.base = [privilege];
-    }
-
-    if (privilege !== CUSTOM_PRIVILEGE_VALUE) {
       form.feature = {};
     }
 
     this.props.onChange(role);
     this.setState({
       isCustomizingGlobalPrivilege: privilege === CUSTOM_PRIVILEGE_VALUE,
+      globalPrivsIndex: role.kibana.indexOf(form),
     });
   };
 
   public onFeaturePrivilegeChange = (featureId: string, privileges: string[]) => {
     const role = copyRole(this.props.role);
-    const form = this.locateGlobalPrivilege(role, true);
+    const form = this.locateGlobalPrivilege(role) || this.createGlobalPrivilegeEntry(role);
     if (privileges.length > 0) {
       form.feature[featureId] = [...privileges];
     } else {
@@ -273,7 +276,7 @@ export class SimplePrivilegeSection extends Component<Props, State> {
   private onChangeAllFeaturePrivileges = (privileges: string[]) => {
     const role = copyRole(this.props.role);
 
-    const form = this.locateGlobalPrivilege(role, true);
+    const form = this.locateGlobalPrivilege(role) || this.createGlobalPrivilegeEntry(role);
     if (privileges.length > 0) {
       this.props.features.forEach(feature => {
         form.feature[feature.id] = [...privileges];
@@ -300,33 +303,13 @@ export class SimplePrivilegeSection extends Component<Props, State> {
     return null;
   };
 
-  private locateGlobalPrivilegeIndex = (role: Role, createIfMissing = false) => {
-    const index = role.kibana.findIndex(privileges => isGlobalPrivilegeDefinition(privileges));
-
-    if (index < 0 && createIfMissing) {
-      const entry = this.createGlobalPrivilegeEntry(role);
-      return role.kibana.indexOf(entry);
-    }
-
-    return index;
+  private locateGlobalPrivilegeIndex = (role: Role) => {
+    return role.kibana.findIndex(privileges => isGlobalPrivilegeDefinition(privileges));
   };
 
-  private locateGlobalPrivilege = (role: Role, createIfMissing = false) => {
+  private locateGlobalPrivilege = (role: Role) => {
     const spacePrivileges = role.kibana;
-    const existing = spacePrivileges.find(privileges => isGlobalPrivilegeDefinition(privileges));
-    if (existing) {
-      return existing;
-    }
-
-    if (createIfMissing) {
-      return this.createGlobalPrivilegeEntry(role);
-    }
-
-    return {
-      spaces: ['*'],
-      base: [],
-      feature: {},
-    };
+    return spacePrivileges.find(privileges => isGlobalPrivilegeDefinition(privileges));
   };
 
   private createGlobalPrivilegeEntry(role: Role) {
