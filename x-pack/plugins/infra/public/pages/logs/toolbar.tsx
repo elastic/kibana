@@ -28,9 +28,6 @@ export const LogsToolbar = injectI18n(({ intl }) => (
     <WithSource>
       {({ configuration, derivedIndexPattern }) => (
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <SourceConfigurationButton />
-          </EuiFlexItem>
           <EuiFlexItem>
             <WithKueryAutocompletion indexPattern={derivedIndexPattern}>
               {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
@@ -58,6 +55,9 @@ export const LogsToolbar = injectI18n(({ intl }) => (
                 </WithLogFilter>
               )}
             </WithKueryAutocompletion>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <SourceConfigurationButton />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <LogCustomizationMenu>
