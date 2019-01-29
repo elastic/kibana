@@ -21,13 +21,14 @@ import {
   setQuery,
 } from '../actions/store_actions';
 import { updateFlyout, FLYOUT_STATE } from '../store/ui';
-import { getDataSources, getUniqueIndexPatternIds } from '../selectors/map_selectors';
+import {  getUniqueIndexPatternIds } from '../selectors/map_selectors';
 import { Inspector } from 'ui/inspector';
 import { inspectorAdapters, indexPatternService } from '../kibana_services';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { toastNotifications } from 'ui/notify';
 import { getInitialLayers } from './get_initial_layers';
+import { getDataSources } from '../meta';
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-gis-root';
 const DEFAULT_QUERY_LANGUAGE = 'kuery';
@@ -65,7 +66,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     });
   };
 
-  getStore().then(store => {
+  getStore().then(async store => {
     // clear old UI state
     store.dispatch(setSelectedLayer(null));
     store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
@@ -92,7 +93,8 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       }
     }
 
-    const layerList = getInitialLayers(savedMap.layerListJSON, getDataSources(store.getState()));
+    const dataSources = await getDataSources();
+    const layerList = getInitialLayers(savedMap.layerListJSON, dataSources);
     store.dispatch(replaceLayerList(layerList));
 
     // Initialize query, syncing appState and store
