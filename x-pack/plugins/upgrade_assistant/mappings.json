@@ -18,13 +18,15 @@
         }
       },
       "ui_reindex": {
-        "start": {
-          "type": "long",
-          "null_value": 0
-        },
-        "cancel": {
-          "type": "long",
-          "null_value": 0
+        "properties": {
+          "start": {
+            "type": "long",
+            "null_value": 0
+          },
+          "cancel": {
+            "type": "long",
+            "null_value": 0
+          }
         }
       },
       "features": {
