@@ -12,10 +12,16 @@ import { HistogramSeries } from '../../../common/graphql/types';
 import { formatHistogramData } from '../../lib/adapters/monitors/format_histogram_data';
 
 interface SnapshotHistogramProps {
+  primaryColor: string;
+  dangerColor: string;
   histogram: HistogramSeries[];
 }
 
-export const SnapshotHistogram = ({ histogram }: SnapshotHistogramProps) => {
+export const SnapshotHistogram = ({
+  dangerColor,
+  histogram,
+  primaryColor,
+}: SnapshotHistogramProps) => {
   const { upSeriesData, downSeriesData } = formatHistogramData(histogram);
 
   return (
@@ -25,14 +31,14 @@ export const SnapshotHistogram = ({ histogram }: SnapshotHistogramProps) => {
         name={i18n.translate('xpack.uptime.snapshotHistogram.series.upLabel', {
           defaultMessage: 'Up',
         })}
-        color="#006BB4"
+        color={primaryColor}
       />
       <EuiHistogramSeries
         data={downSeriesData}
         name={i18n.translate('xpack.uptime.snapshotHistogram.series.downLabel', {
           defaultMessage: 'Down',
         })}
-        color="#BD271E"
+        color={dangerColor}
       />
     </EuiSeriesChart>
   );

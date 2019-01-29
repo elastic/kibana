@@ -21,6 +21,8 @@ import {
   // @ts-ignore missing typings
   EuiTitle,
 } from '@elastic/eui';
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
@@ -46,6 +48,7 @@ export class MonitorCharts extends React.Component<Props, MonitorChartsState> {
 
   public render() {
     const {
+      colors: { primary, secondary, danger },
       dateRangeStart,
       dateRangeEnd,
       monitorId,
@@ -228,6 +231,7 @@ export class MonitorCharts extends React.Component<Props, MonitorChartsState> {
                         )}
                         data={areaRttSeries}
                         curve="curveBasis"
+                        color={secondary}
                       />
                       <EuiLineSeries
                         name={i18n.translate(
@@ -237,6 +241,7 @@ export class MonitorCharts extends React.Component<Props, MonitorChartsState> {
                           }
                         )}
                         data={avgDurationSeries}
+                        color={primary}
                       />
                     </EuiSeriesChart>
                   </EuiPanel>
@@ -270,7 +275,7 @@ export class MonitorCharts extends React.Component<Props, MonitorChartsState> {
                       }
                     )}
                     data={upSeries}
-                    color="#006BB4"
+                    color={primary}
                   />
                   <EuiAreaSeries
                     name={i18n.translate(
@@ -280,7 +285,7 @@ export class MonitorCharts extends React.Component<Props, MonitorChartsState> {
                       }
                     )}
                     data={downSeries}
-                    color="#BD271E"
+                    color={danger}
                   />
                 </EuiSeriesChart>
               </EuiPanel>

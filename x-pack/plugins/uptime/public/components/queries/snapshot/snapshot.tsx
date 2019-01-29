@@ -37,10 +37,11 @@ interface SnapshotProps {
 type Props = SnapshotProps & UptimeCommonProps;
 
 export const Snapshot = ({
-  dateRangeStart,
-  dateRangeEnd,
   autorefreshIsPaused,
   autorefreshInterval,
+  colors: { danger, primary },
+  dateRangeStart,
+  dateRangeEnd,
   filters,
 }: Props) => (
   <Query
@@ -129,7 +130,13 @@ export const Snapshot = ({
             </EuiTitle>
             {/* TODO: this is a UI hack that should be replaced */}
             <EuiPanel paddingSize="s">
-              {histogram && <SnapshotHistogram histogram={histogram} />}
+              {histogram && (
+                <SnapshotHistogram
+                  dangerColor={danger}
+                  primaryColor={primary}
+                  histogram={histogram}
+                />
+              )}
               {!histogram && (
                 <EuiEmptyPrompt
                   title={
