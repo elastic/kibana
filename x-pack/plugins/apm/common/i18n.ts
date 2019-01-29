@@ -4,4 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ESGeohashGridSource } from './es_geohashgrid_source';
+import { i18n } from '@kbn/i18n';
+
+export const NOT_AVAILABLE_LABEL = i18n.translate(
+  'xpack.apm.notAvailableLabel',
+  {
+    defaultMessage: 'N/A'
+  }
+);

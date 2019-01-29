@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-
-export class ASource {
+export class AbstractSource {
 
   static renderEditor() {
     throw new Error('Must implement Source.renderEditor');
@@ -26,8 +24,12 @@ export class ASource {
 
   destroy() {}
 
-  renderDetails() {
-    return (<div>{`Here be details for source`}</div>);
+  /**
+   * return list of immutable source properties.
+   * Immutable source properties are properties that can not be edited by the user.
+   */
+  async getImmutableProperties() {
+    return [];
   }
 
   _createDefaultLayerDescriptor() {
@@ -60,7 +62,7 @@ export class ASource {
     return false;
   }
 
-  isGeohashPrecisionAware() {
+  isGeoGridPrecisionAware() {
     return false;
   }
 
@@ -82,6 +84,10 @@ export class ASource {
 
   getIndexPatternIds() {
     return  [];
+  }
+
+  getGeoGridPrecision() {
+    return 0;
   }
 }
 
