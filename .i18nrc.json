@@ -7,6 +7,7 @@
     "inspectorViews": "src/legacy/core_plugins/inspector_views",
     "interpreter": "src/legacy/core_plugins/interpreter",
     "kbn": "src/legacy/core_plugins/kibana",
+    "kbnDocViews": "src/legacy/core_plugins/kbn_doc_views",
     "kbnVislibVisTypes": "src/legacy/core_plugins/kbn_vislib_vis_types",
     "markdownVis": "src/legacy/core_plugins/markdown_vis",
     "metricVis": "src/legacy/core_plugins/metric_vis",

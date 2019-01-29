@@ -1,40 +1,35 @@
 <div
-  class="kuiLocalNav"
+  class="kbnTopNav"
   ng-show="kbnTopNav.isVisible()"
   data-test-subj="top-nav"
 >
-  <!-- Top row -->
-  <div class="kuiLocalNavRow">
-    <!-- Top left corner slot, e.g. breadcrumbs, title. -->
-    <div
-      class="kuiLocalNavRow__section"
-      data-transclude-slot="topLeftCorner"
-    ></div>
+  <!-- Top row slot, e.g. breadcrumbs, title. -->
+  <div data-transclude-slot="topLeftCorner"></div>
 
+  <div class="kbnTopNav__row">
     <!-- Right-side: menu -->
-    <div class="kuiLocalNavRow__section">
-      <div class="kuiLocalMenu">
-        <button
-          class="kuiLocalMenuItem"
-          ng-repeat="menuItem in kbnTopNav.menuItems"
-          aria-label="{{::menuItem.description}}"
-          aria-haspopup="{{!menuItem.hasFunction}}"
-          aria-expanded="{{kbnTopNav.isCurrent(menuItem.key)}}"
-          aria-disabled="{{menuItem.disableButton()}}"
-          ng-class="{'kuiLocalMenuItem-isSelected': kbnTopNav.isCurrent(menuItem.key), 'kuiLocalMenuItem-isDisabled': menuItem.disableButton()}"
-          ng-click="kbnTopNav.handleClick(menuItem, $event)"
-          ng-bind="menuItem.label"
-          tooltip="{{menuItem.tooltip()}}"
-          tooltip-placement="bottom"
-          tooltip-popup-delay="400"
-          tooltip-append-to-body="1"
-          data-test-subj="{{menuItem.testId}}"
-        ></button>
 
-        <!-- Time-picker "menu item" -->
-        <kbn-global-timepicker></kbn-global-timepicker>
-      </div>
+    <div class="kuiLocalMenu kbnTopNav__mainMenu" ng-if="kbnTopNav.menuItems.length">
+      <button
+        class="kuiLocalMenuItem"
+        ng-repeat="menuItem in kbnTopNav.menuItems"
+        aria-label="{{::menuItem.description}}"
+        aria-haspopup="{{!menuItem.hasFunction}}"
+        aria-expanded="{{kbnTopNav.isCurrent(menuItem.key)}}"
+        aria-disabled="{{menuItem.disableButton()}}"
+        ng-class="{'kuiLocalMenuItem-isSelected': kbnTopNav.isCurrent(menuItem.key), 'kuiLocalMenuItem-isDisabled': menuItem.disableButton()}"
+        ng-click="kbnTopNav.handleClick(menuItem, $event)"
+        ng-bind="menuItem.label"
+        tooltip="{{menuItem.tooltip()}}"
+        tooltip-placement="bottom"
+        tooltip-popup-delay="400"
+        tooltip-append-to-body="1"
+        data-test-subj="{{menuItem.testId}}"
+      ></button>
     </div>
+
+    <!-- Time-picker "menu item" -->
+    <kbn-global-timepicker></kbn-global-timepicker>
   </div>
 
   <!-- Dropdown content, e.g. time-picker. -->
