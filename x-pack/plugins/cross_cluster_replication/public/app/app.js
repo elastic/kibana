@@ -54,7 +54,7 @@ export const App = injectI18n(
         isFetchingPermissions: false,
         fetchPermissionError: undefined,
         hasPermission: false,
-        missingPermissions: [],
+        missingClusterPrivileges: [],
       };
     }
 
@@ -76,12 +76,12 @@ export const App = injectI18n(
       });
 
       try {
-        const { hasPermission, missingPermissions } = await loadPermissions();
+        const { hasPermission, missingClusterPrivileges } = await loadPermissions();
 
         this.setState({
           isFetchingPermissions: false,
           hasPermission,
-          missingPermissions,
+          missingClusterPrivileges,
         });
       } catch (error) {
         // Expect an error in the shape provided by Angular's $http service.
@@ -110,7 +110,7 @@ export const App = injectI18n(
         isFetchingPermissions,
         fetchPermissionError,
         hasPermission,
-        missingPermissions,
+        missingClusterPrivileges,
       } = this.state;
 
       if (!isAvailable() || !isActive()) {
@@ -189,8 +189,8 @@ export const App = injectI18n(
                 <p>
                   <FormattedMessage
                     id="xpack.crossClusterReplication.app.deniedPermissionDescription"
-                    defaultMessage="You do not have required permissions ({permissions}) for Cross Cluster Replication."
-                    values={{ permissions: missingPermissions.join(', ') }}
+                    defaultMessage="You do not have required cluster privileges ({clusterPrivileges}) for Cross Cluster Replication."
+                    values={{ clusterPrivileges: missingClusterPrivileges.join(', ') }}
                   />
                 </p>}
             />
