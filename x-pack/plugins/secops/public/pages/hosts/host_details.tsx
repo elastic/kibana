@@ -46,11 +46,13 @@ export const HostDetails = pure<HostComponentProps>(({ match }) => (
                   poll={poll}
                   filterQuery={getFilterQuery(match.params.hostId!)}
                 >
-                  {({ hosts, loading, id, refetch }) => (
+                  {({ hosts, loading, id, refetch, startDate, endDate }) => (
                     <HostDetailsPanelManage
                       id={id}
                       refetch={refetch}
                       setQuery={setQuery}
+                      startDate={startDate}
+                      endDate={endDate}
                       data={hosts}
                       loading={loading}
                     />

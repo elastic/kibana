@@ -19,7 +19,6 @@ export const hostFieldsMap: Readonly<Record<string, string>> = {
   'host.architecture': 'host.architecture',
   'host.id': 'host.id',
   'host.ip': 'system.audit.host.ip',
-  // 'host.last_beat': '_source.@timestamp',
   'host.mac': 'system.audit.host.mac',
   'host.name': 'host.name',
   ...extendMap('host', osFieldsMap),

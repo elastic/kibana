@@ -6,71 +6,83 @@
 
 import {
   EuiDescriptionList,
-  EuiDescriptionListDescription,
   EuiDescriptionListTitle,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiPanel,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
-import moment from 'moment';
+import { FormattedRelative } from '@kbn/i18n/react';
+import { get, getOr } from 'lodash/fp';
 import React from 'react';
 import { pure } from 'recompose';
-import uuid from 'uuid';
-import { HostsEdges } from 'x-pack/plugins/secops/server/graphql/types';
+import { HostItem, HostsEdges } from 'x-pack/plugins/secops/server/graphql/types';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
-import { getEmptyValue, getOrEmpty } from '../../../empty_value';
+import { getEmptyValue } from '../../../empty_value';
 import { Provider } from '../../../timeline/data_providers/provider';
 import * as i18n from './translations';
 
 interface OwnProps {
   data: HostsEdges[];
   loading: boolean;
+  startDate: number;
+  endDate: number;
 }
 
 type HostDetailsPanelProps = OwnProps;
 
-export const HostDetailsPanel = pure<HostDetailsPanelProps>(({ data, loading }) => (
-  <EuiFlexItem style={{ maxWidth: 600 }}>
-    <EuiPanel>
-      <EuiTitle size="s">
-        <h3>{i18n.SUMMARY}</h3>
-      </EuiTitle>
+export const HostDetailsPanel = pure<HostDetailsPanelProps>(
+  ({ data, startDate, endDate, loading }) => (
+    <EuiFlexItem style={{ maxWidth: 600 }}>
+      <EuiPanel>
+        <EuiTitle size="s">
+          <h3>{i18n.SUMMARY}</h3>
+        </EuiTitle>
 
-      <EuiHorizontalRule margin="xs" />
-      {getEuiDescriptionList(data[0])}
-    </EuiPanel>
-  </EuiFlexItem>
-));
+        <EuiHorizontalRule margin="xs" />
+        {getEuiDescriptionList(getOr(null, 'node', data[0]), startDate, endDate)}
+      </EuiPanel>
+    </EuiFlexItem>
+  )
+);
 
 const fieldTitleMapping: Readonly<Record<string, string>> = {
-  'node.host.name': i18n.NAME,
-  'node.host.last_beat': i18n.LAST_BEAT,
-  'node.host.id': i18n.ID,
-  'node.host.ip': i18n.IP_ADDRESS,
-  'node.host.mac': i18n.MAC_ADDRESS,
-  'node.type': i18n.TYPE,
-  'node.host.os.platform': i18n.PLATFORM,
-  'node.host.os.name': i18n.OS_NAME,
-  'node.host.os.family': i18n.FAMILY,
-  'node.host.os.version': i18n.VERSION,
-  'node.host.architecture': i18n.ARCHITECTURE,
+  'host.name': i18n.NAME,
+  firstSeen: i18n.LAST_BEAT,
+  'host.id': i18n.ID,
+  'host.ip': i18n.IP_ADDRESS,
+  'host.mac': i18n.MAC_ADDRESS,
+  type: i18n.TYPE,
+  'host.os.platform': i18n.PLATFORM,
+  'host.os.name': i18n.OS_NAME,
+  'host.os.family': i18n.FAMILY,
+  'host.os.version': i18n.VERSION,
+  'host.architecture': i18n.ARCHITECTURE,
 };
 
-const getEuiDescriptionList = (host: HostsEdges) => {
+const relativeFields: string[] = ['firstSeen'];
+
+// TODO: create test - run mount
+const getEuiDescriptionList = (
+  host: HostItem | null,
+  startDate: number,
+  endDate: number
+): JSX.Element => {
   return (
     <EuiDescriptionList type="column" compressed>
-      {Object.entries(fieldTitleMapping).map(([field, title]: [string, string]) => {
-        const summaryValue = getOrEmpty(field, host);
+      {Object.entries(fieldTitleMapping).map(([field, title]) => {
+        const summaryValue: string | string[] = get(field, host);
         return (
           <React.Fragment key={field}>
             <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
-            <EuiDescriptionListDescription>
+            {/*Using EuiDescriptionListDescription throws off sizing of Draggable*/}
+            <div>
               {_.isArray(summaryValue)
-                ? summaryValue.map(v => createDraggable(v.toString(), field, host)) // TODO: Fix typing to ECS
-                : createDraggable(summaryValue, field.replace(/^node./, ''), host)}
-            </EuiDescriptionListDescription>
+                ? summaryValue.map((v: string) => createDraggable(v, field, startDate, endDate))
+                : createDraggable(summaryValue, field, startDate, endDate)}
+            </div>
           </React.Fragment>
         );
       })}
@@ -78,17 +90,23 @@ const getEuiDescriptionList = (host: HostsEdges) => {
   );
 };
 
-const createDraggable = (summaryValue: string, field: string, host: HostsEdges) => {
-  return summaryValue === getEmptyValue() ? (
-    <>{summaryValue}</>
+// Create test
+const createDraggable = (
+  summaryValue: string,
+  field: string,
+  startDate: number,
+  endDate: number
+) => {
+  return summaryValue == null ? (
+    <>{getEmptyValue()}</>
   ) : (
     <DraggableWrapper
-      key={summaryValue} // TODO: Better way to handle keys in this situation?
+      key={summaryValue}
       dataProvider={{
         and: [],
         enabled: true,
         excluded: false,
-        id: escapeDataProviderId(`${uuid.v4()}`), // TODO: https://github.com/elastic/ingest-dev/issues/223
+        id: escapeDataProviderId(`host-summmary-${field}-${summaryValue}`),
         name: summaryValue,
         kqlQuery: '',
         queryMatch: {
@@ -96,8 +114,8 @@ const createDraggable = (summaryValue: string, field: string, host: HostsEdges) 
           value: summaryValue,
         },
         queryDate: {
-          from: moment().valueOf(),
-          to: Date.now(),
+          from: startDate,
+          to: endDate,
         },
       }}
       render={(dataProvider, _, snapshot) =>
@@ -105,8 +123,12 @@ const createDraggable = (summaryValue: string, field: string, host: HostsEdges) 
           <DragEffects>
             <Provider dataProvider={dataProvider} />
           </DragEffects>
+        ) : relativeFields.includes(field) ? (
+          <EuiToolTip position="bottom" content={summaryValue}>
+            <FormattedRelative value={new Date(summaryValue)} />
+          </EuiToolTip>
         ) : (
-          <>{summaryValue}</>
+          <> {summaryValue} </>
         )
       }
     />

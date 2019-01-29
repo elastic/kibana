@@ -23,6 +23,8 @@ export interface HostsArgs {
   loading: boolean;
   loadMore: (cursor: string) => void;
   refetch: inputsModel.Refetch;
+  startDate: number;
+  endDate: number;
 }
 
 export interface OwnProps {
@@ -85,6 +87,8 @@ const HostsComponentQuery = pure<HostsProps>(
           loading,
           totalCount: getOr(0, 'source.Hosts.totalCount', data),
           hosts,
+          startDate,
+          endDate,
           pageInfo: getOr({}, 'source.Hosts.pageInfo', data),
           loadMore: (newCursor: string) =>
             fetchMore({
