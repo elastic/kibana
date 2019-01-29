@@ -63,23 +63,21 @@ export function createEsTestCluster(options = {}) {
     }
 
     async start(esArgs = []) {
-      let installPath;
-
       if (esFrom === 'source') {
-        installPath = (await cluster.installSource(config)).installPath;
+        this.installPath = (await cluster.installSource(config)).installPath;
       } else if (esFrom === 'snapshot') {
-        installPath = (await cluster.installSnapshot(config)).installPath;
+        this.installPath = (await cluster.installSnapshot(config)).installPath;
       } else if (path.isAbsolute(esFrom)) {
-        installPath = esFrom;
+        this.installPath = esFrom;
       } else {
         throw new Error(`unknown option esFrom "${esFrom}"`);
       }
 
       if (dataArchive) {
-        await cluster.extractDataDirectory(installPath, dataArchive);
+        await cluster.extractDataDirectory(this.installPath, dataArchive);
       }
 
-      await cluster.start(installPath, {
+      await cluster.start(this.installPath, {
         esArgs: [
           `cluster.name=${clusterName}`,
           `http.port=${port}`,

@@ -104,6 +104,20 @@ export async function startServers(options) {
     const config = await readConfigFile(log, options.config);
 
     const es = await runElasticsearch({ config, options: opts });
+
+    // Start a second Elasticsearch cluster.
+    // This allows us to make integration test for cross cluster replication
+    // adding remote clusters and follower indices
+    const config2 = await readConfigFile(log, options.config, {
+      servers: { elasticsearch: { port: config.get('servers.elasticsearch.port') + 1 } },
+      esTestCluster: { serverArgs: ['transport.tcp.port=9400', 'node.max_local_storage_nodes=2'] },
+    });
+
+    const es2 = await runElasticsearch({
+      config: config2,
+      options: { ...opts, esFrom: es.installPath },
+    });
+
     await runKibanaServer({
       procs,
       config,
@@ -120,6 +134,7 @@ export async function startServers(options) {
 
     await procs.waitForAllToStop();
     await es.cleanup();
+    await es2.cleanup();
   });
 }
 
