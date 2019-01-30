@@ -182,6 +182,7 @@ describe('ems_client', () => {
 function getEMSClient(options = {}) {
 
   const emsClient = new EMSClientV66({
+    language: 'en',
     kbnVersion: '6.x.x',
     manifestServiceUrl: 'https://foobar',
     htmlSanitizer: x => x,
