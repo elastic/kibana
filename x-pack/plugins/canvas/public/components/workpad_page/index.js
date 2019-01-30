@@ -161,6 +161,8 @@ export const WorkpadPage = compose(
             notify.success('Copied element to clipboard');
           }
         },
+        // TODO: This is slightly different from the duplicateElements function in sidebar/index.js. Should they be doing the same thing?
+        // This should also be abstracted.
         duplicateElements: () => {
           const clonedElements = selectedElements && cloneSubgraphs(selectedElements);
           if (clonedElements) {
