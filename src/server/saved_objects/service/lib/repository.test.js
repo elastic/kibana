@@ -856,7 +856,7 @@ describe('SavedObjectsRepository', () => {
       }
     });
 
-    it('passes mappings, schema, search, searchFields, type, sortField, sortOrder and referencedBy to getSearchDsl', async () => {
+    it('passes mappings, schema, search, searchFields, type, sortField, sortOrder and hasReference to getSearchDsl', async () => {
       callAdminCluster.returns(namespacedSearchResults);
       const relevantOpts = {
         namespace: 'foo-namespace',
@@ -865,7 +865,7 @@ describe('SavedObjectsRepository', () => {
         type: 'bar',
         sortField: 'name',
         sortOrder: 'desc',
-        referencedBy: {
+        hasReference: {
           type: 'foo',
           id: '1',
         },

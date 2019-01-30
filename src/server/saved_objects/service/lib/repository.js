@@ -295,7 +295,7 @@ export class SavedObjectsRepository {
    * @property {string} [options.sortOrder]
    * @property {Array<string>} [options.fields]
    * @property {string} [options.namespace]
-   * @property {object} [options.referencedBy] - { type, id }
+   * @property {object} [options.hasReference] - { type, id }
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   async find(options = {}) {
@@ -303,7 +303,7 @@ export class SavedObjectsRepository {
       type,
       search,
       searchFields,
-      referencedBy,
+      hasReference,
       page = 1,
       perPage = 20,
       sortField,
@@ -340,7 +340,7 @@ export class SavedObjectsRepository {
           sortField,
           sortOrder,
           namespace,
-          referencedBy,
+          hasReference,
         })
       }
     };

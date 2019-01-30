@@ -30,15 +30,21 @@ export function extractReferences({ attributes, references = [] }) {
 }
 
 export function injectReferences(savedObject, references) {
+  // Skip if wsState is missing, at the time of development of this, there is no guarantee each
+  // saved object has wsState.
   if (typeof savedObject.wsState !== 'string') {
     return;
   }
+  // Only need to parse / stringify once here compared to extractReferences
   const state = JSON.parse(savedObject.wsState);
+  // Like the migration, skip injectReferences if "indexPatternRefName" is missing
   if (!state.indexPatternRefName) {
-    throw new Error('indexPatternRefName attribute is missing from "wsState"');
+    return;
   }
   const indexPatternReference = references.find(reference => reference.name === state.indexPatternRefName);
   if (!indexPatternReference) {
+    // Throw an error as "indexPatternRefName" means the reference exists within
+    // "references" and in this scenario we have bad data.
     throw new Error(`Could not find reference "${state.indexPatternRefName}"`);
   }
   state.indexPattern = indexPatternReference.id;

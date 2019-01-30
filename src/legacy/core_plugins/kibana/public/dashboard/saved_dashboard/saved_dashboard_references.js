@@ -49,10 +49,14 @@ export function extractReferences({ attributes, references = [] }) {
 }
 
 export function injectReferences(savedObject, references) {
+  // Skip if panelsJSON is missing otherwise this will cause saved object import to fail when
+  // importing objects without panelsJSON. At development time of this, there is no guarantee each saved
+  // object has panelsJSON in all previous versions of kibana.
   if (typeof savedObject.panelsJSON !== 'string') {
     return;
   }
   const panels = JSON.parse(savedObject.panelsJSON);
+  // Same here, prevent failing saved object import if ever panels aren't an array.
   if (!Array.isArray(panels)) {
     return;
   }
@@ -62,6 +66,8 @@ export function injectReferences(savedObject, references) {
     }
     const reference = references.find(reference => reference.name === panel.panelRefName);
     if (!reference) {
+      // Throw an error since "panelRefName" means the reference exists within
+      // "references" and in this scenario we have bad data.
       throw new Error(`Could not find reference "${panel.panelRefName}"`);
     }
     panel.id = reference.id;

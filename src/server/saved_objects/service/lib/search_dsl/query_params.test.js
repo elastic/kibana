@@ -717,8 +717,8 @@ describe('searchDsl/queryParams', () => {
     });
   });
 
-  describe('type (plural, namespaced and global), referencedBy', () => {
-    it('supports referencedBy', () => {
+  describe('type (plural, namespaced and global), hasReference', () => {
+    it('supports hasReference', () => {
       expect(getQueryParams(MAPPINGS, SCHEMA, 'foo-namespace', ['saved', 'global'], null, null, { type: 'bar', id: '1' }))
         .toEqual({
           query: {

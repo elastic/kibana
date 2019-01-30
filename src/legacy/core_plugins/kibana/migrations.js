@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { cloneDeep, get, set, omit } from 'lodash';
+import { cloneDeep, get, omit } from 'lodash';
 
-function migrateIndexPattern(type, doc) {
+function migrateIndexPattern(doc) {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
   if (typeof searchSourceJSON !== 'string') {
     return;
@@ -41,7 +41,7 @@ function migrateIndexPattern(type, doc) {
   });
   searchSource.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
   delete searchSource.index;
-  set(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON', JSON.stringify(searchSource));
+  doc.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(searchSource);
 }
 
 export const migrations = {

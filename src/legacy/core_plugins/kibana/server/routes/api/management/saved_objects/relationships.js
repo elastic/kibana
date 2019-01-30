@@ -31,7 +31,7 @@ export function registerRelationships(server) {
           id: Joi.string(),
         }),
         query: Joi.object().keys({
-          size: Joi.number(),
+          size: Joi.number().default(10000),
         }),
       },
     },
@@ -39,7 +39,7 @@ export function registerRelationships(server) {
     handler: async (req) => {
       const type = req.params.type;
       const id = req.params.id;
-      const size = req.query.size || 10000;
+      const size = req.query.size;
       const savedObjectsClient = req.getSavedObjectsClient();
 
       return await findRelationships(type, id, {

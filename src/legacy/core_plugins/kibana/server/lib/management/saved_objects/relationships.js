@@ -19,7 +19,7 @@
 
 export async function findRelationships(type, id, options = {}) {
   const {
-    size = 10000,
+    size,
     savedObjectsClient,
     savedObjectTypes,
   } = options;
@@ -32,7 +32,7 @@ export async function findRelationships(type, id, options = {}) {
       ? savedObjectsClient.bulkGet(bulkGetOpts)
       : Promise.resolve({ saved_objects: [] }),
     savedObjectsClient.find({
-      referencedBy: { type, id },
+      hasReference: { type, id },
       perPage: size,
       fields: ['title'],
       type: savedObjectTypes,

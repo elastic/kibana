@@ -100,12 +100,12 @@ function getClauseForType(schema, namespace, type) {
  *  @param  {Array<string>} searchFields
  *  @return {Object}
  */
-export function getQueryParams(mappings, schema, namespace, type, search, searchFields, referencedBy) {
+export function getQueryParams(mappings, schema, namespace, type, search, searchFields, hasReference) {
   const types = getTypes(mappings, type);
   const bool = {
     filter: [{
       bool: {
-        must: referencedBy
+        must: hasReference
           ? [{
             nested: {
               path: 'references',
@@ -114,12 +114,12 @@ export function getQueryParams(mappings, schema, namespace, type, search, search
                   must: [
                     {
                       term: {
-                        'references.id': referencedBy.id,
+                        'references.id': hasReference.id,
                       },
                     },
                     {
                       term: {
-                        'references.type': referencedBy.type,
+                        'references.type': hasReference.type,
                       },
                     },
                   ],

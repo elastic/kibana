@@ -30,7 +30,7 @@ export function getSearchDsl(mappings, schema, options = {}) {
     sortField,
     sortOrder,
     namespace,
-    referencedBy,
+    hasReference,
   } = options;
 
   if (!type) {
@@ -42,7 +42,7 @@ export function getSearchDsl(mappings, schema, options = {}) {
   }
 
   return {
-    ...getQueryParams(mappings, schema, namespace, type, search, searchFields, referencedBy),
+    ...getQueryParams(mappings, schema, namespace, type, search, searchFields, hasReference),
     ...getSortingParams(mappings, type, sortField, sortOrder),
   };
 }
