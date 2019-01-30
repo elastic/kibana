@@ -132,14 +132,13 @@ function createCallCluster(esClient) {
     const action = get(esClient, path);
     const context = contextPath.length ? get(esClient, contextPath) : esClient;
 
-    const {
+    const { ignore, headers, requestTimeout, maxRetries, ...esParams } = params;
+    const { body } = await action.call(context, esParams, {
       ignore,
       headers,
-      requestTimeout,
       maxRetries,
-      ...esParams
-    } = params;
-    const { body } = await action.call(context, esParams, { ignore, headers, maxRetries, requestTimeout });
+      requestTimeout,
+    });
     return body;
   };
 }
