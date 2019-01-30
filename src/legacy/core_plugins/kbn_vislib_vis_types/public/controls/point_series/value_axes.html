@@ -31,8 +31,8 @@
         aria-controls="axisOptions{{axis.id}}"
         aria-label="Toggle {{axis.name}} options"
       >
-        <icon color="'primary'" aria-hidden="true" ng-if="isValueAxisOpen" type="'arrowDown'" size="'s'"></icon>
-        <icon color="'primary'" aria-hidden="true" ng-if="!isValueAxisOpen" type="'arrowRight'" size="'s'"></icon>
+        <icon class="kuiSideBarOptionsLink__caret" color="'primary'" aria-hidden="true" ng-if="isValueAxisOpen" type="'arrowDown'" size="'s'"></icon>
+        <icon class="kuiSideBarOptionsLink__caret" color="'primary'" aria-hidden="true" ng-if="!isValueAxisOpen" type="'arrowRight'" size="'s'"></icon>
 
         <span class="visEditorSidebar__collapsibleTitleText">
           {{axis.name}}
@@ -143,12 +143,12 @@
       <div class="visEditorSidebar__collapsible--margin">
         <a
           data-test-subj="toggleYAxisAdvancedOptions-{{axis.id}}"
-          class="kuiSideBarOptionsLink small"
+          class="small"
           ng-click="isValueAxisAdvancedOptionsOpen = !isValueAxisAdvancedOptionsOpen"
           kbn-accessible-click
         >
-          <icon color="'primary'" aria-hidden="true" ng-if="isValueAxisAdvancedOptionsOpen" type="'arrowDown'" size="'s'"></icon>
-          <icon color="'primary'" aria-hidden="true" ng-if="!isValueAxisAdvancedOptionsOpen" type="'arrowRight'" size="'s'"></icon>
+          <icon class="visEditorSidebar__advancedLinkIcon" color="'primary'" aria-hidden="true" ng-if="isValueAxisAdvancedOptionsOpen" type="'arrowDown'" size="'s'"></icon>
+          <icon class="visEditorSidebar__advancedLinkIcon" color="'primary'" aria-hidden="true" ng-if="!isValueAxisAdvancedOptionsOpen" type="'arrowRight'" size="'s'"></icon>
 
           <span
             class="kuiSideBarOptionsLink__text"
