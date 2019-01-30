@@ -205,7 +205,6 @@ app.directive('dashboardApp', function ($injector) {
       };
       updateBreadcrumbs();
       dashboardStateManager.registerChangeListener(updateBreadcrumbs);
-      config.watch('k7design', (val) => $scope.showPluginBreadcrumbs = !val);
 
       $scope.newDashboard = () => { kbnUrl.change(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}); };
       $scope.saveState = () => dashboardStateManager.saveState();
