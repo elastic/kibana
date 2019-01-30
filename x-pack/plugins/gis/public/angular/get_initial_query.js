@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const DEFAULT_QUERY_LANGUAGE = 'kuery';
+import chrome from 'ui/chrome';
+
+const settings = chrome.getUiSettingsClient();
 
 export function getInitialQuery({
   mapStateJSON,
@@ -25,6 +27,6 @@ export function getInitialQuery({
 
   return {
     query: '',
-    language: userQueryLanguage || DEFAULT_QUERY_LANGUAGE
+    language: userQueryLanguage || settings.get('search:queryLanguage')
   };
 }
