@@ -16,6 +16,7 @@ import {
   EuiButton,
   EuiToolTip,
   EuiEmptyPrompt,
+  EuiFilePicker,
 } from '@elastic/eui';
 import { sortByOrder } from 'lodash';
 import moment from 'moment';
@@ -25,7 +26,7 @@ import { Paginate } from '../paginate';
 import { WorkpadDropzone } from './workpad_dropzone';
 import { WorkpadCreate } from './workpad_create';
 import { WorkpadSearch } from './workpad_search';
-import { WorkpadUpload } from './workpad_upload';
+import { uploadWorkpad } from './upload_workpad';
 
 const formatDate = date => date && moment(date).format('MMM D, YYYY @ h:mma');
 
@@ -79,7 +80,7 @@ export class WorkpadLoader extends React.PureComponent {
   };
 
   // create new workpad from uploaded JSON
-  uploadWorkpad = async workpad => {
+  onUpload = async workpad => {
     this.setState({ createPending: true });
     await this.props.createWorkpad(workpad);
     this._isMounted && this.setState({ createPending: false });
@@ -232,7 +233,7 @@ export class WorkpadLoader extends React.PureComponent {
 
     return (
       <Fragment>
-        <WorkpadDropzone onUpload={this.uploadWorkpad} disabled={createPending || !canUserWrite}>
+        <WorkpadDropzone onUpload={this.onUpload} disabled={createPending || !canUserWrite}>
           <EuiBasicTable
             compressed
             items={rows}
@@ -294,7 +295,14 @@ export class WorkpadLoader extends React.PureComponent {
     );
 
     let uploadButton = (
-      <WorkpadUpload onUpload={this.uploadWorkpad} disabled={createPending || !canUserWrite} />
+      <EuiFilePicker
+        compressed
+        className="canvasWorkpad__upload--compressed"
+        initialPromptText="Import workpad JSON file"
+        onChange={([file]) => uploadWorkpad(file, this.onUpload)}
+        accept="application/json"
+        disabled={createPending || !canUserWrite}
+      />
     );
 
     if (!canUserWrite) {
