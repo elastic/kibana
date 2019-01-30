@@ -63,12 +63,12 @@ function getResponseInspectorStats(searchSource, resp) {
       label: i18n.translate('common.ui.courier.queryTimeLabel', {
         defaultMessage: 'Query time'
       }),
-      value: i18n.translate('common.ui.courier.requestTimeValue', {
+      value: i18n.translate('common.ui.courier.queryTimeValue', {
         defaultMessage: '{queryTime}ms',
         values: { queryTime: resp.took },
       }),
       description: i18n.translate('common.ui.courier.queryTimeDescription', {
-        defaultMessage: 'The time it took to process the query.' +
+        defaultMessage: 'The time it took to process the query. ' +
           'Does not include the time to send the request or parse it in the browser.'
       }),
     };
@@ -106,7 +106,7 @@ function getResponseInspectorStats(searchSource, resp) {
         values: { requestTime: lastRequest.ms },
       }),
       description: i18n.translate('common.ui.courier.requestTimeDescription', {
-        defaultMessage: 'The time of the request from the browser to Elasticsearch and back.' +
+        defaultMessage: 'The time of the request from the browser to Elasticsearch and back. ' +
           'Does not include the time the requested waited in the queue.'
       }),
     };
