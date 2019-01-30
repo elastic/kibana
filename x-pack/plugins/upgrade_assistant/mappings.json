@@ -25,16 +25,24 @@
           "indices": {
             "type": "long",
             "null_value": 0
-          }
+          },
         }
       },
       "ui_reindex": {
         "properties": {
+          "close": {
+            "type": "long",
+            "null_value": 0
+          },
+          "open": {
+            "type": "long",
+            "null_value": 0
+          },
           "start": {
             "type": "long",
             "null_value": 0
           },
-          "cancel": {
+          "stop": {
             "type": "long",
             "null_value": 0
           }

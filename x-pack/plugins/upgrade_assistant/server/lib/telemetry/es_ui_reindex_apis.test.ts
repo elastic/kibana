@@ -41,8 +41,10 @@ describe('Upgrade Assistant Telemetry SavedObject UIReindex', () => {
 
   const request = jest.fn().mockReturnValue({
     payload: {
+      close: true,
+      open: true,
       start: true,
-      cancel: true,
+      stop: true,
     },
   });
 
@@ -54,7 +56,17 @@ describe('Upgrade Assistant Telemetry SavedObject UIReindex', () => {
 
       await upsertUIReindexOption(serverMock, request());
 
-      expect(incCounterSORepoFunc).toHaveBeenCalledTimes(2);
+      expect(incCounterSORepoFunc).toHaveBeenCalledTimes(4);
+      expect(incCounterSORepoFunc).toHaveBeenCalledWith(
+        UPGRADE_ASSISTANT_TYPE,
+        UPGRADE_ASSISTANT_DOC_ID,
+        `ui_reindex.close`
+      );
+      expect(incCounterSORepoFunc).toHaveBeenCalledWith(
+        UPGRADE_ASSISTANT_TYPE,
+        UPGRADE_ASSISTANT_DOC_ID,
+        `ui_reindex.open`
+      );
       expect(incCounterSORepoFunc).toHaveBeenCalledWith(
         UPGRADE_ASSISTANT_TYPE,
         UPGRADE_ASSISTANT_DOC_ID,
@@ -63,7 +75,7 @@ describe('Upgrade Assistant Telemetry SavedObject UIReindex', () => {
       expect(incCounterSORepoFunc).toHaveBeenCalledWith(
         UPGRADE_ASSISTANT_TYPE,
         UPGRADE_ASSISTANT_DOC_ID,
-        `ui_reindex.cancel`
+        `ui_reindex.stop`
       );
     });
   });

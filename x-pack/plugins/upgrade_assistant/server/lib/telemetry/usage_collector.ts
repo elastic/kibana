@@ -63,8 +63,10 @@ export async function fetchUpgradeAssistantMetrics(
         indices: 0,
       },
       ui_reindex: {
+        close: 0,
+        open: 0,
         start: 0,
-        cancel: 0,
+        stop: 0,
       },
     };
 

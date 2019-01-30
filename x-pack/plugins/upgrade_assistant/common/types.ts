@@ -56,7 +56,7 @@ export enum ReindexWarning {
 export const UPGRADE_ASSISTANT_TYPE = 'upgrade-assistant-telemetry';
 export const UPGRADE_ASSISTANT_DOC_ID = 'upgrade-assistant-telemetry';
 export type UIOpenOption = 'overview' | 'cluster' | 'indices';
-export type UIReindexOption = 'start' | 'cancel';
+export type UIReindexOption = 'close' | 'open' | 'start' | 'stop';
 
 export interface UIOpen {
   overview: boolean;
@@ -65,8 +65,10 @@ export interface UIOpen {
 }
 
 export interface UIReindex {
+  close: boolean;
+  open: boolean;
   start: boolean;
-  cancel: boolean;
+  stop: boolean;
 }
 
 export interface UpgradeAssistantTelemetryServer extends Legacy.Server {
@@ -85,8 +87,10 @@ export interface UpgradeAssistantTelemetrySavedObject {
     indices: number;
   };
   ui_reindex: {
+    close: number;
+    open: number;
     start: number;
-    cancel: number;
+    stop: number;
   };
 }
 
@@ -97,8 +101,10 @@ export interface UpgradeAssistantTelemetry {
     indices: number;
   };
   ui_reindex: {
+    close: number;
+    open: number;
     start: number;
-    cancel: number;
+    stop: number;
   };
   features: {
     deprecation_logging: {

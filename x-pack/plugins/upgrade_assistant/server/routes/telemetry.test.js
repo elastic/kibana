@@ -87,8 +87,10 @@ describe('Upgrade Assistant Telemetry API', () => {
   describe('PUT /api/upgrade_assistant/telemetry/ui_reindex', () => {
     it('returns correct payload with single option', async () => {
       const returnPayload = {
+        close: false,
+        open: false,
         start: true,
-        cancel: false,
+        stop: false,
       };
 
       upsertUIReindexOption.mockResolvedValue(returnPayload);
@@ -106,8 +108,10 @@ describe('Upgrade Assistant Telemetry API', () => {
 
     it('returns correct payload with multiple option', async () => {
       const returnPayload = {
+        close: true,
+        open: true,
         start: true,
-        cancel: true,
+        stop: true,
       };
 
       upsertUIReindexOption.mockResolvedValue(returnPayload);
@@ -116,8 +120,10 @@ describe('Upgrade Assistant Telemetry API', () => {
         method: 'PUT',
         url: '/api/upgrade_assistant/telemetry/ui_reindex',
         payload: {
+          close: true,
+          open: true,
           start: true,
-          cancel: true,
+          stop: true,
         },
       });
 

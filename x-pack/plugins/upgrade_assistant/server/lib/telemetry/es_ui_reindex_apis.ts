@@ -32,18 +32,28 @@ export async function upsertUIReindexOption(
   server: UpgradeAssistantTelemetryServer,
   req: Legacy.Request
 ): Promise<UIReindex> {
-  const { start, cancel } = req.payload as UIReindex;
+  const { close, open, start, stop } = req.payload as UIReindex;
+
+  if (close) {
+    await incrementUIReindexOptionCounter(server, 'close');
+  }
+
+  if (open) {
+    await incrementUIReindexOptionCounter(server, 'open');
+  }
 
   if (start) {
     await incrementUIReindexOptionCounter(server, 'start');
   }
 
-  if (cancel) {
-    await incrementUIReindexOptionCounter(server, 'cancel');
+  if (stop) {
+    await incrementUIReindexOptionCounter(server, 'stop');
   }
 
   return {
+    close,
+    open,
     start,
-    cancel,
+    stop,
   };
 }

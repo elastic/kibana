@@ -38,8 +38,10 @@ export function registerTelemetryRoutes(server: UpgradeAssistantTelemetryServer)
     options: {
       validate: {
         payload: Joi.object({
+          close: Joi.boolean().default(false),
+          open: Joi.boolean().default(false),
           start: Joi.boolean().default(false),
-          cancel: Joi.boolean().default(false),
+          stop: Joi.boolean().default(false),
         }),
       },
     },
