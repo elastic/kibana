@@ -5,7 +5,7 @@ exports[`RemoteClusterList renders empty state when loading is complete and ther
   class="euiPageBody"
 >
   <div
-    class="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--horizontalCenter"
+    class="euiPanel euiPanel--paddingLarge euiPageContent"
   >
     <div
       class="euiEmptyPrompt"
