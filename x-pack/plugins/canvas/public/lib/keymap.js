@@ -6,16 +6,8 @@
 
 import { mapValues } from 'lodash';
 
-// map for shortcuts per operating system
-interface OSKeymap {
-  osx: string[];
-  windows: string[];
-  linux: string[];
-  other: string[];
-}
-
 // maps 'option' for mac and 'alt' for other OS
-const getAltShortcuts = (shortcuts: string | string[]): OSKeymap => {
+const getAltShortcuts = shortcuts => {
   if (!Array.isArray(shortcuts)) {
     shortcuts = [shortcuts];
   }
@@ -31,7 +23,7 @@ const getAltShortcuts = (shortcuts: string | string[]): OSKeymap => {
 };
 
 // maps 'command' for mac and 'ctrl' for other OS
-const getCtrlShortcuts = (shortcuts: string | string[]): OSKeymap => {
+const getCtrlShortcuts = shortcuts => {
   if (!Array.isArray(shortcuts)) {
     shortcuts = [shortcuts];
   }
