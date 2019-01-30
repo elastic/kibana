@@ -123,6 +123,7 @@ export const FollowerIndexForm = injectI18n(
         isValidatingIndexName: false,
       };
 
+      this.cachedAdvancedSettings = {};
       this.validateIndexName = debounce(this.validateIndexName, 500);
     }
 
@@ -221,36 +222,38 @@ export const FollowerIndexForm = injectI18n(
     };
 
     toggleAdvancedSettings = (event) => {
-      // Cache reference to target, otherwise SyntheticEvent will be returned to pool by the time
-      // async setState is executed.
-      const { target } = event;
-      this.setState(({ cachedAdvancedSettings }) => {
-        if (target.checked) {
-          // Show settings and restore fields from the cache.
-          this.onFieldsChange(cachedAdvancedSettings);
-          return {
-            areAdvancedSettingsVisible: true,
-            cachedAdvancedSettings: {},
-          };
+      // If the user edits the advanced settings but then hides them, we need to make sure the
+      // edited values don't get sent to the API when the user saves, but we *do* want to restore
+      // these values to the form when the user re-opens the advanced settings.
+      if (event.target.checked) {
+        // Apply the cached advanced settings to the advanced settings form.
+        this.onFieldsChange(this.cachedAdvancedSettings);
+
+        // Reset the cache of the advanced settings.
+        this.cachedAdvancedSettings = {};
+
+        // Show the advanced settings.
+        return this.setState({
+          areAdvancedSettingsVisible: true,
+        });
+      }
+
+      // Clear the advanced settings form.
+      this.onFieldsChange(emptyAdvancedSettings);
+
+      // Save a cache of the advanced settings.
+      const fields = this.getFields();
+      this.cachedAdvancedSettings = advancedSettingsFields.reduce((cache, { field }) => {
+        const value = fields[field];
+        if (value !== '') {
+          cache[field] = value;
         }
+        return cache;
+      }, {});
 
-        // Hide settings, clear fields, and create cache.
-        const fields = this.getFields();
-
-        const newCachedAdvancedSettings = advancedSettingsFields.reduce((cache, { field }) => {
-          const value = fields[field];
-          if (value !== '') {
-            cache[field] = value;
-          }
-          return cache;
-        }, {});
-
-        this.onFieldsChange(emptyAdvancedSettings);
-
-        return {
-          areAdvancedSettingsVisible: false,
-          cachedAdvancedSettings: newCachedAdvancedSettings,
-        };
+      // Hide the advanced settings.
+      this.setState({
+        areAdvancedSettingsVisible: false,
       });
     }
 
