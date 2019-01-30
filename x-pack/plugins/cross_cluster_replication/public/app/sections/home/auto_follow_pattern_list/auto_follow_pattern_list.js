@@ -104,8 +104,9 @@ export const AutoFollowPatternList = injectI18n(
               <EuiText>
                 <p>
                   <FormattedMessage
-                    id="xpack.crossClusterReplication.followerIndexList.followerIndicesDescription"
-                    defaultMessage="Followers replicate operations from the leader index to the follower index."
+                    id="xpack.crossClusterReplication.autoFollowPatternList.autoFollowPatternsDescription"
+                    defaultMessage="Auto-follow patterns replicate leader indices from a remote
+                      cluster to follower indices on the local cluster."
                   />
                 </p>
               </EuiText>
@@ -114,13 +115,13 @@ export const AutoFollowPatternList = injectI18n(
             <EuiFlexItem grow={false}>
               {isAuthorized && (
                 <EuiButton
-                  {...routing.getRouterLinkProps('/follower_indices/add')}
+                  {...routing.getRouterLinkProps('/auto_follow_patterns/add')}
                   fill
                   iconType="plusInCircle"
                 >
                   <FormattedMessage
-                    id="xpack.crossClusterReplication.followerIndexList.addFollowerButtonLabel"
-                    defaultMessage="Create a follower index"
+                    id="xpack.crossClusterReplication.autoFollowPatternList.addAutoFollowPatternButtonLabel"
+                    defaultMessage="Create an auto-follow pattern"
                   />
                 </EuiButton>
               )}
