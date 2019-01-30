@@ -428,7 +428,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
           defaultMessage: 'An index pattern with the title \'{title}\' already exists.' });
         try {
           await confirmModalPromise(confirmMessage, { confirmButtonText: 'Go to existing pattern' });
-          return kbnUrl.redirect('/management/kibana/indices/{{id}}', { id: potentialDuplicateByTitle.id });
+          return kbnUrl.redirect('/management/kibana/index_patterns/{{id}}', { id: potentialDuplicateByTitle.id });
         } catch (err) {
           return false;
         }

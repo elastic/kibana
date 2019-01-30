@@ -36,6 +36,7 @@ export interface InfraFrameworkAdapter {
   kbnVersion?: string;
   scaledDateFormat?: string;
   timezone?: string;
+  darkMode?: boolean;
 
   // Methods
   setUISettings(key: string, value: any): void;
