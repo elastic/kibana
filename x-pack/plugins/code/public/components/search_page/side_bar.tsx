@@ -45,7 +45,7 @@ const FacetTitle = styled(EuiFlexGroup)`
 `;
 
 const FacetItem = styled(EuiFacetButton)`
-  height: calc(32 / 14rem);
+  height: calc(32rem / 14);
 `;
 
 interface Props {

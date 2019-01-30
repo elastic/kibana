@@ -14,7 +14,7 @@ import { Breadcrumb } from './breadcrumb';
 import { SearchBar } from './search_bar';
 
 const TopBarContainer = styled.div`
-  --topBarContainerHeight: calc(40 / 14 rem);
+  --topBarContainerHeight: calc(40rem / 14);
   box-sizing: content-box;
   display: flex;
   flex-direction: row;
