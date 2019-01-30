@@ -185,13 +185,19 @@ export interface SourceEcsFields {
 }
 
 export interface HostEcsFields {
+  architecture?: string | null;
+
   id?: string | null;
 
-  ip?: string | null;
+  ip?: (string | null)[] | null;
+
+  mac?: (string | null)[] | null;
 
   name?: string | null;
 
   os?: OsEcsFields | null;
+
+  type?: string | null;
 }
 
 export interface OsEcsFields {
@@ -436,6 +442,8 @@ export interface EventsSourceArgs {
   filterQuery?: string | null;
 }
 export interface HostsSourceArgs {
+  id?: string | null;
+
   timerange: TimerangeInput;
 
   pagination: PaginationInput;
@@ -573,6 +581,8 @@ export namespace SourceResolvers {
     HostsArgs
   >;
   export interface HostsArgs {
+    id?: string | null;
+
     timerange: TimerangeInput;
 
     pagination: PaginationInput;
@@ -981,22 +991,38 @@ export namespace SourceEcsFieldsResolvers {
 
 export namespace HostEcsFieldsResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = HostEcsFields> {
+    architecture?: ArchitectureResolver<string | null, TypeParent, Context>;
+
     id?: IdResolver<string | null, TypeParent, Context>;
 
-    ip?: IpResolver<string | null, TypeParent, Context>;
+    ip?: IpResolver<(string | null)[] | null, TypeParent, Context>;
+
+    mac?: MacResolver<(string | null)[] | null, TypeParent, Context>;
 
     name?: NameResolver<string | null, TypeParent, Context>;
 
     os?: OsResolver<OsEcsFields | null, TypeParent, Context>;
+
+    type?: TypeResolver<string | null, TypeParent, Context>;
   }
 
+  export type ArchitectureResolver<
+    R = string | null,
+    Parent = HostEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
   export type IdResolver<
     R = string | null,
     Parent = HostEcsFields,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
   export type IpResolver<
-    R = string | null,
+    R = (string | null)[] | null,
+    Parent = HostEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type MacResolver<
+    R = (string | null)[] | null,
     Parent = HostEcsFields,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
@@ -1007,6 +1033,11 @@ export namespace HostEcsFieldsResolvers {
   > = Resolver<R, Parent, Context>;
   export type OsResolver<
     R = OsEcsFields | null,
+    Parent = HostEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type TypeResolver<
+    R = string | null,
     Parent = HostEcsFields,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;

@@ -6,8 +6,8 @@
 
 import gql from 'graphql-tag';
 
-export const hostsQuery = gql`
-  query GetHostsQuery(
+export const HostsTableQuery = gql`
+  query GetHostsTableQuery(
     $sourceId: ID!
     $timerange: TimerangeInput!
     $pagination: PaginationInput!

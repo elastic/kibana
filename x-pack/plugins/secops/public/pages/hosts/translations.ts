@@ -6,6 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const HOSTS = i18n.translate('xpack.secops.hosts.hosts', {
+  defaultMessage: 'Hosts',
+});
+
 export const NO_AUDITBEAT_INDICES = i18n.translate('xpack.secops.hosts.noAuditBeatIndicies', {
   defaultMessage: "Looks like you don't have any auditbeat indices.",
 });

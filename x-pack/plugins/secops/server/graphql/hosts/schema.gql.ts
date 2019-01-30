@@ -26,6 +26,11 @@ export const hostsSchema = gql`
 
   extend type Source {
     "Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified"
-    Hosts(timerange: TimerangeInput!, pagination: PaginationInput!, filterQuery: String): HostsData!
+    Hosts(
+      id: String
+      timerange: TimerangeInput!
+      pagination: PaginationInput!
+      filterQuery: String
+    ): HostsData!
   }
 `;

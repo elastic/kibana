@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DocumentNode } from 'graphql';
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
@@ -11,10 +12,9 @@ import { connect } from 'react-redux';
 import { pure } from 'recompose';
 
 import { ESQuery } from '../../../common/typed_json';
-import { GetHostsQuery, HostsEdges, PageInfo } from '../../graphql/types';
+import { GetHostsTableQuery, GetHostSummaryQuery, HostsEdges, PageInfo } from '../../graphql/types';
 import { hostsSelector, inputsModel, State } from '../../store';
 import { createFilter } from '../helpers';
-import { hostsQuery } from './index.gql_query';
 
 export interface HostsArgs {
   id: string;
@@ -24,10 +24,13 @@ export interface HostsArgs {
   loading: boolean;
   loadMore: (cursor: string) => void;
   refetch: inputsModel.Refetch;
+  startDate: number;
+  endDate: number;
 }
 
 export interface OwnProps {
   id?: string;
+  query: DocumentNode;
   children: (args: HostsArgs) => React.ReactNode;
   sourceId: string;
   startDate: number;
@@ -43,9 +46,22 @@ export interface HostsComponentReduxProps {
 type HostsProps = OwnProps & HostsComponentReduxProps;
 
 const HostsComponentQuery = pure<HostsProps>(
-  ({ id = 'hostsQuery', children, filterQuery, sourceId, startDate, endDate, limit, poll }) => (
-    <Query<GetHostsQuery.Query, GetHostsQuery.Variables>
-      query={hostsQuery}
+  ({
+    id = 'hostsQuery',
+    query,
+    children,
+    filterQuery,
+    sourceId,
+    startDate,
+    endDate,
+    limit,
+    poll,
+  }) => (
+    <Query<
+      GetHostsTableQuery.Query | GetHostSummaryQuery.Query,
+      GetHostsTableQuery.Variables | GetHostSummaryQuery.Variables
+    >
+      query={query}
       fetchPolicy="cache-and-network"
       pollInterval={poll}
       notifyOnNetworkStatusChange
@@ -72,6 +88,8 @@ const HostsComponentQuery = pure<HostsProps>(
           loading,
           totalCount: getOr(0, 'source.Hosts.totalCount', data),
           hosts,
+          startDate,
+          endDate,
           pageInfo: getOr({}, 'source.Hosts.pageInfo', data),
           loadMore: (newCursor: string) =>
             fetchMore({

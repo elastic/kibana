@@ -35,10 +35,13 @@ export const eventsSchema = gql`
   }
 
   type HostEcsFields {
+    architecture: String
     id: String
-    ip: String
+    ip: [String]
+    mac: [String]
     name: String
     os: OsEcsFields
+    type: String
   }
 
   type Thread {

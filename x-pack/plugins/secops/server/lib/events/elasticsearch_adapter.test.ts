@@ -20,7 +20,13 @@ describe('events elasticsearch_adapter', () => {
         '@timestamp': 'time-1',
         host: {
           name: 'hostname-1',
-          ip: 'hostip-1',
+        },
+        system: {
+          audit: {
+            host: {
+              ip: ['hostip-1'],
+            },
+          },
         },
         suricata: {
           eve: {
@@ -85,7 +91,7 @@ describe('events elasticsearch_adapter', () => {
           _id: 'id-123',
           _index: 'index-123',
           host: {
-            ip: 'hostip-1',
+            ip: ['hostip-1'],
           },
         },
       };
@@ -421,7 +427,7 @@ describe('events elasticsearch_adapter', () => {
           _index: 'index-123',
           host: {
             name: 'hostname-1',
-            ip: 'hostip-1',
+            ip: ['hostip-1'],
           },
           geo: {
             region_name: 'geo-region-1',

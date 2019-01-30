@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr, isUndefined } from 'lodash/fp';
+import { getOr } from 'lodash/fp';
 import React from 'react';
 import { pure } from 'recompose';
 import chrome from 'ui/chrome';
@@ -22,8 +22,9 @@ import { AuthenticationsQuery } from '../../containers/authentications';
 import { EventsQuery } from '../../containers/events';
 import { GlobalTime } from '../../containers/global_time';
 import { HostsQuery } from '../../containers/hosts';
+import { HostsTableQuery } from '../../containers/hosts/hosts_table.gql_query';
 import { KpiEventsQuery } from '../../containers/kpi_events';
-import { WithSource } from '../../containers/source';
+import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
 import { KpiItem } from '../../graphql/types';
 import * as i18n from './translations';
@@ -39,7 +40,7 @@ const TypesBarManage = manageQuery(TypesBar);
 export const Hosts = pure(() => (
   <WithSource sourceId="default">
     {({ auditbeatIndicesExist }) =>
-      auditbeatIndicesExist || isUndefined(auditbeatIndicesExist) ? (
+      indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
         <GlobalTime>
           {({ poll, to, from, setQuery }) => (
             <>
@@ -57,7 +58,13 @@ export const Hosts = pure(() => (
                   />
                 )}
               </KpiEventsQuery>
-              <HostsQuery sourceId="default" startDate={from} endDate={to} poll={poll}>
+              <HostsQuery
+                sourceId="default"
+                query={HostsTableQuery}
+                startDate={from}
+                endDate={to}
+                poll={poll}
+              >
                 {({ hosts, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
                   <HostsTableManage
                     id={id}

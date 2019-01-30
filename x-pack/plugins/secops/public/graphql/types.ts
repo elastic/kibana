@@ -156,13 +156,19 @@ export interface SourceEcsFields {
 }
 
 export interface HostEcsFields {
+  architecture?: string | null;
+
   id?: string | null;
 
-  ip?: string | null;
+  ip?: (string | null)[] | null;
+
+  mac?: (string | null)[] | null;
 
   name?: string | null;
 
   os?: OsEcsFields | null;
+
+  type?: string | null;
 }
 
 export interface OsEcsFields {
@@ -407,6 +413,8 @@ export interface EventsSourceArgs {
   filterQuery?: string | null;
 }
 export interface HostsSourceArgs {
+  id?: string | null;
+
   timerange: TimerangeInput;
 
   pagination: PaginationInput;
@@ -674,7 +682,7 @@ export namespace GetEventsQuery {
 
     name?: string | null;
 
-    ip?: string | null;
+    ip?: (string | null)[] | null;
 
     id?: string | null;
   };
@@ -728,7 +736,108 @@ export namespace GetEventsQuery {
   };
 }
 
-export namespace GetHostsQuery {
+export namespace GetHostSummaryQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    pagination: PaginationInput;
+    filterQuery?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    Hosts: Hosts;
+  };
+
+  export type Hosts = {
+    __typename?: 'HostsData';
+
+    totalCount: number;
+
+    edges: Edges[];
+
+    pageInfo: PageInfo;
+  };
+
+  export type Edges = {
+    __typename?: 'HostsEdges';
+
+    node: Node;
+
+    cursor: Cursor;
+  };
+
+  export type Node = {
+    __typename?: 'HostItem';
+
+    _id?: string | null;
+
+    firstSeen?: string | null;
+
+    host?: Host | null;
+  };
+
+  export type Host = {
+    __typename?: 'HostEcsFields';
+
+    architecture?: string | null;
+
+    id?: string | null;
+
+    ip?: (string | null)[] | null;
+
+    mac?: (string | null)[] | null;
+
+    name?: string | null;
+
+    os?: Os | null;
+
+    type?: string | null;
+  };
+
+  export type Os = {
+    __typename?: 'OsEcsFields';
+
+    family?: string | null;
+
+    name?: string | null;
+
+    platform?: string | null;
+
+    version?: string | null;
+  };
+
+  export type Cursor = {
+    __typename?: 'CursorType';
+
+    value: string;
+  };
+
+  export type PageInfo = {
+    __typename?: 'PageInfo';
+
+    endCursor?: EndCursor | null;
+
+    hasNextPage?: boolean | null;
+  };
+
+  export type EndCursor = {
+    __typename?: 'CursorType';
+
+    value: string;
+  };
+}
+
+export namespace GetHostsTableQuery {
   export type Variables = {
     sourceId: string;
     timerange: TimerangeInput;
@@ -1008,7 +1117,7 @@ export namespace GetTimelineQuery {
 
     name?: string | null;
 
-    ip?: string | null;
+    ip?: (string | null)[] | null;
   };
 
   export type _Source = {

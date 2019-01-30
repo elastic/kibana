@@ -9,6 +9,7 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
+import { isUndefined } from 'lodash';
 import { SourceQuery } from '../../graphql/types';
 import { sourceQuery } from './index.gql_query';
 
@@ -43,3 +44,6 @@ export const WithSource = ({ children, sourceId }: WithSourceProps) => (
     }}
   </Query>
 );
+
+export const indicesExistOrDataTemporarilyUnavailable = (indicesExist: boolean | undefined) =>
+  indicesExist || isUndefined(indicesExist);
