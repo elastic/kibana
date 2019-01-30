@@ -189,7 +189,7 @@ exports[`EnabledFeatures renders as expected 1`] = `
                 >
                   <FormattedMessage
                     defaultMessage="Roles"
-                    id="xpack.spaces.management.secureSpaceMessage.rolesLinkText"
+                    id="xpack.spaces.management.enabledSpaceFeatures.rolesLinkText"
                     values={Object {}}
                   />
                 </EuiLink>,
