@@ -122,6 +122,12 @@ export default function ({ getService, getPageObjects }) {
         const countOfDashboards = await PageObjects.dashboard.getCountOfDashboardsInListingTable();
         expect(countOfDashboards).to.equal(1);
       });
+
+      it('is using AND operator', async function () {
+        await PageObjects.dashboard.searchForDashboardWithName('three words');
+        const countOfDashboards = await PageObjects.dashboard.getCountOfDashboardsInListingTable();
+        expect(countOfDashboards).to.equal(0);
+      });
     });
 
     describe('search by title', function () {

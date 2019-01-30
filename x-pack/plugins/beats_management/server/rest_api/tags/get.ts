@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { REQUIRED_LICENSES } from 'x-pack/plugins/beats_management/common/constants';
+import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { BeatTag } from '../../../common/domain_types';
 import { CMServerLibs } from '../../lib/types';
 import { wrapEsError } from '../../utils/error_wrappers';
@@ -21,7 +21,7 @@ export const createGetTagsWithIdsRoute = (libs: CMServerLibs): FrameworkRouteOpt
 
     let tags: BeatTag[];
     try {
-      tags = await libs.tags.getTagsWithIds(request.user, tagIds);
+      tags = await libs.tags.getWithIds(request.user, tagIds);
     } catch (err) {
       return wrapEsError(err);
     }
