@@ -110,6 +110,9 @@ describe('onPostAuthRequestInterceptor', () => {
         basePath = newPath;
       });
 
+      // The onRequest interceptor is also included here because the onPostAuth interceptor requires the onRequest
+      // interceptor to parse out the space id and rewrite the request's URL. Rather than duplicating that logic,
+      // we are including the already tested interceptor here in the test chain.
       initSpacesOnRequestInterceptor(server);
       initSpacesOnPostAuthRequestInterceptor(server);
 
