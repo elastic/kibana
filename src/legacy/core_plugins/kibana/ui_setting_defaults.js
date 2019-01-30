@@ -91,7 +91,15 @@ export function getUiSettingDefaults() {
           'Query language used by the query bar. Kuery is an experimental new language built specifically for Kibana.',
       }),
       type: 'select',
-      options: ['lucene', 'kuery']
+      options: ['lucene', 'kuery'],
+      optionLabels: {
+        lucene: i18n.translate('kbn.advancedSettings.searchQueryLanguageLucene', {
+          defaultMessage: 'Lucene',
+        }),
+        kuery: i18n.translate('kbn.advancedSettings.searchQueryLanguageKql', {
+          defaultMessage: 'KQL',
+        }),
+      },
     },
     'sort:options': {
       name: i18n.translate('kbn.advancedSettings.sortOptionsTitle', {
