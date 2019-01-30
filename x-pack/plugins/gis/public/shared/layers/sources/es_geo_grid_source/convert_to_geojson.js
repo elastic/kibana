@@ -109,7 +109,6 @@ export function convertToGeoJson(tabifiedResponse) {
     meta: {
       min: min,
       max: max,
-      geohashPrecision: geoAgg && geoAgg.params.precision,
       geohashGridDimensionsAtEquator: geoAgg && gridDimensions(geoAgg.params.precision)
     }
   };

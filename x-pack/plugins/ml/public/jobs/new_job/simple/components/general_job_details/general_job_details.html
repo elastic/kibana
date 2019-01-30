@@ -13,7 +13,7 @@
       ng-change="changeJobIDCase(formConfig)"
       ng-disabled="jobState === JOB_STATE.RUNNING  || jobState === JOB_STATE.STOPPING || jobState === JOB_STATE.FINISHED"
       class="form-control lowercase" />
-    <div ng-hide="ui.validation.checks.jobId.valid" class="validation-error">{{ ( ui.validation.checks.jobId.message || "Enter a name for the job" ) }}</div>
+    <div ng-hide="ui.validation.checks.jobId.valid" class="validation-error">{{ ( ui.validation.checks.jobId.message || enterNameForJobLabel ) }}</div>
   </div>
 
   <div class="form-group">
