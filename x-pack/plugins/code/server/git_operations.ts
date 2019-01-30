@@ -446,6 +446,7 @@ export function commitInfo(commit: Commit): CommitInfo {
     message: commit.message(),
     committer: commit.committer().name(),
     id: commit.sha().substr(0, 7),
+    parents: commit.parents().map(oid => oid.toString().substring(0, 7)),
   };
 }
 
