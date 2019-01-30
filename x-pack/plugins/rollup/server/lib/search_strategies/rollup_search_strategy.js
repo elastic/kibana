@@ -23,11 +23,12 @@ export default (AbstractSearchStrategy, RollupSearchRequest, RollupSearchCapabil
       super(server, callWithRequestFactory, RollupSearchRequest);
     }
 
-    async getRollupData(req, indexPattern) {
+    getRollupData(req, indexPattern) {
       const callWithRequest = this.getCallWithRequestInstance(req);
-      return await callWithRequest(ROLLUP_INDEX_CAPABILITIES_METHOD, {
+
+      return callWithRequest(ROLLUP_INDEX_CAPABILITIES_METHOD, {
         indexPattern,
-      });
+      }).catch(() => Promise.resolve({}));
     }
 
     async checkForViability(req, indexPattern = DEFAULT_INDEX_PATTERN) {
