@@ -172,11 +172,6 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
           </h2>
         }
         titleSize={'s'}
-        // body={
-        //   <Fragment>
-        //     <span />
-        //   </Fragment>
-        // }
         actions={this.getAvailablePrivilegeButtons(false)}
       />
     );

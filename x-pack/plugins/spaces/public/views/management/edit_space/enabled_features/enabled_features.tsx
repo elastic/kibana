@@ -139,7 +139,7 @@ export class EnabledFeatures extends Component<Props, {}> {
                   rolesLink: (
                     <EuiLink href="#/management/security/roles">
                       <FormattedMessage
-                        id="xpack.spaces.management.secureSpaceMessage.rolesLinkText"
+                        id="xpack.spaces.management.enabledSpaceFeatures.rolesLinkText"
                         defaultMessage="Roles"
                       />
                     </EuiLink>
