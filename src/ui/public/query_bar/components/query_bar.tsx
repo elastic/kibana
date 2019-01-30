@@ -100,6 +100,12 @@ interface State {
 }
 
 export class QueryBarUI extends Component<Props, State> {
+  public static defaultProps = {
+    showDatePicker: false,
+    dateRangeFrom: 'now-15m',
+    dateRangeTo: 'now',
+  };
+
   public static getDerivedStateFromProps(nextProps: Props, prevState: State) {
     if (isEqual(prevState.currentProps, nextProps)) {
       return null;
@@ -141,13 +147,6 @@ export class QueryBarUI extends Component<Props, State> {
     }
     return nextState;
   }
-
-  // @ts-ignore
-  private static defaultProps = {
-    showDatePicker: false,
-    dateRangeFrom: 'now-15m',
-    dateRangeTo: 'now',
-  };
 
   /*
    Keep the "draft" value in local state until the user actually submits the query. There are a couple advantages:
