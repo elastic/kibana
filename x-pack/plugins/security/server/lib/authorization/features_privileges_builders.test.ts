@@ -128,39 +128,6 @@ describe('#buildFeaturesPrivileges', () => {
     });
   });
 
-  test('includes app actions when specified at the feature and privilege level', () => {
-    const actions = new Actions(versionNumber);
-    const builder = new FeaturesPrivilegesBuilder(actions);
-    const features = [
-      {
-        id: 'foo',
-        name: '',
-        app: ['foo-app', 'bar-app'],
-        privileges: {
-          bar: {
-            app: ['foo-app', 'bar-app'],
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: [],
-          },
-        },
-      },
-    ];
-    const result = builder.buildFeaturesPrivileges(features);
-    expect(result).toEqual({
-      foo: {
-        bar: [
-          actions.login,
-          actions.version,
-          actions.app.get('foo-app'),
-          actions.app.get('bar-app'),
-        ],
-      },
-    });
-  });
-
   test('includes only the app actions specified at the privilege level, when specified', () => {
     const actions = new Actions(versionNumber);
     const builder = new FeaturesPrivilegesBuilder(actions);
