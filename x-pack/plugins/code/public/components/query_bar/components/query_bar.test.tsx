@@ -86,7 +86,7 @@ test('render correctly with input query string changed', done => {
         repoSearchResults={[]}
         searchLoading={false}
         searchOptions={{ repoScopes: [] }}
-        query=""
+        query="mockquery"
         disableAutoFocus={false}
         appName="mockapp"
         suggestionProviders={[
@@ -123,5 +123,5 @@ test('render correctly with input query string changed', done => {
     expect(submitSpy.calledOnce).toBeTruthy();
 
     done();
-  }, 101);
+  }, 1000);
 });
