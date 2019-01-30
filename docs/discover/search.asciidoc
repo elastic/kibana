@@ -23,7 +23,7 @@ the request to Elasticsearch.
 [NOTE]
 ===========
 You can opt-in to our experimental query features by default by changing `search:queryLanguage`
-to `kuery` under Advanced Settings.
+to `KQL` under Advanced Settings.
 ===========
 
 [[lucene-query]]
