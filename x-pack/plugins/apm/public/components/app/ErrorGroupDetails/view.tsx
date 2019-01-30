@@ -7,16 +7,10 @@
 import { EuiBadge, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
-import { get } from 'lodash';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import {
-  ERROR_CULPRIT,
-  ERROR_EXC_HANDLED,
-  ERROR_EXC_MESSAGE,
-  ERROR_LOG_MESSAGE
-} from '../../../../common/constants';
-import { NOT_AVAILABLE_LABEL } from '../../../constants';
+import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
+import { idx } from 'x-pack/plugins/apm/common/idx';
 import { ErrorDistributionRequest } from '../../../store/reactReduxRequest/errorDistribution';
 import { ErrorGroupDetailsRequest } from '../../../store/reactReduxRequest/errorGroup';
 import { IUrlParams } from '../../../store/urlParams';
@@ -80,11 +74,14 @@ export function ErrorGroupDetails({ urlParams, location }: Props) {
       render={errorGroup => {
         // If there are 0 occurrences, show only distribution chart w. empty message
         const showDetails = errorGroup.data.occurrencesCount !== 0;
-        const logMessage = get(errorGroup.data.error, ERROR_LOG_MESSAGE);
-        const excMessage = get(errorGroup.data.error, ERROR_EXC_MESSAGE);
-        const culprit = get(errorGroup.data.error, ERROR_CULPRIT);
+        const logMessage = idx(errorGroup, _ => _.data.error.error.log.message);
+        const excMessage = idx(
+          errorGroup,
+          _ => _.data.error.error.exception.message
+        );
+        const culprit = idx(errorGroup, _ => _.data.error.error.culprit);
         const isUnhandled =
-          get(errorGroup.data.error, ERROR_EXC_HANDLED) === false;
+          idx(errorGroup, _ => _.data.error.error.exception.handled) === false;
 
         return (
           <div>

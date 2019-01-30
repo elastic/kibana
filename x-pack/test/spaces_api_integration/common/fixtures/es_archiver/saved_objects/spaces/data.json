@@ -1,8 +1,8 @@
 {
-  "type": "doc",
+  "type": "_doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
+    "type": "_doc",
     "id": "space:default",
     "source": {
       "type": "space",
@@ -17,10 +17,10 @@
 }
 
 {
-  "type": "doc",
+  "type": "_doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
+    "type": "_doc",
     "id": "space:space_1",
     "source": {
       "type": "space",
@@ -34,10 +34,10 @@
 }
 
 {
-  "type": "doc",
+  "type": "_doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
+    "type": "_doc",
     "id": "space:space_2",
     "source": {
       "type": "space",
@@ -51,10 +51,10 @@
 }
 
 {
-  "type": "doc",
+  "type": "_doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
+    "type": "_doc",
     "id": "space_2:dashboard:my_dashboard",
     "source": {
       "type": "dashboard",
@@ -69,10 +69,10 @@
 }
 
 {
-  "type": "doc",
+  "type": "_doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
+    "type": "_doc",
     "id": "space_1:dashboard:my_dashboard",
     "source": {
       "type": "dashboard",
@@ -87,10 +87,10 @@
 }
 
 {
-  "type": "doc",
+  "type": "_doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
+    "type": "_doc",
     "id": "dashboard:my_dashboard",
     "source": {
       "type": "dashboard",

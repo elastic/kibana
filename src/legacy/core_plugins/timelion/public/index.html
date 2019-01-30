@@ -8,11 +8,9 @@
           <span ng-show="opts.savedSheet.id && !k7design">
             {{opts.savedSheet.lastSavedTitle}}
             &nbsp;
-            <span class="fa fa-bolt" ng-click="showStats = !showStats"></span>
-            &nbsp;
           </span>
 
-          <span class="timApp__stats" ng-show="stats && (showStats || k7design)">
+          <span class="timApp__stats" ng-show="stats">
             <span
               i18n-id="timelion.topNavMenu.statsDescription"
               i18n-default-message="Query Time {queryTime}ms / Processing Time {processingTime}ms"

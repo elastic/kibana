@@ -13,7 +13,7 @@ import {
 } from 'x-pack/plugins/apm/public/components/shared/HistoryTabs';
 // @ts-ignore
 import { KueryBar } from '../../shared/KueryBar';
-import { SetupInstructionsLink } from '../../shared/SetupInstructionsLink';
+import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
 import { ServiceOverview } from '../ServiceOverview';
 import { TraceOverview } from '../TraceOverview';
 

@@ -93,7 +93,7 @@ const calculateBoundsFromMap = (map: InfraWaffleData): InfraWaffleMapBounds => {
   if (values.length === 1) {
     values.unshift(0);
   }
-  return { min: min(values), max: max(values) };
+  return { min: min(values) || 0, max: max(values) || 0 };
 };
 
 export const Waffle = injectI18n(

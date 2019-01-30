@@ -64,7 +64,6 @@ const deprecations = [
   rename('optimize.lazyHost', 'optimize.watchHost'),
   rename('optimize.lazyPrebuild', 'optimize.watchPrebuild'),
   rename('optimize.lazyProxyTimeout', 'optimize.watchProxyTimeout'),
-  rename('i18n.defaultLocale', 'i18n.locale'),
   savedObjectsIndexCheckTimeout,
   rewriteBasePath,
   loggingTimezone,

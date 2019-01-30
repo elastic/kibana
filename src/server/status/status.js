@@ -42,13 +42,15 @@ export default class Status extends EventEmitter {
         this.state === 'red' ? 'error' : 'info'
       ];
 
-      server.log(tags, {
-        tmpl: 'Status changed from <%= prevState %> to <%= state %><%= message ? " - " + message : "" %>',
-        state: this.state,
-        message: this.message,
-        prevState: previous,
-        prevMsg: previousMsg
-      });
+      server.logWithMetadata(tags,
+        `Status changed from ${ previous } to ${this.state}${ this.message ? ' - ' + this.message : '' }`,
+        {
+          state: this.state,
+          message: this.message,
+          prevState: previous,
+          prevMsg: previousMsg
+        }
+      );
     });
   }
 
