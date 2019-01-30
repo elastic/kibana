@@ -36,7 +36,9 @@ export const BaseFilterView: SFC<Props> = ({ filter, title, children, ...rest }:
           defaultMessage: 'NOT ',
         })}`
       : ''
-  }${title}. Select for more filter actions.`;
+  }${title}. ${i18n.translate('common.ui.filterBar.moreFilterActionsMessage', {
+    defaultMessage: 'Select for more filter actions.',
+  })}`;
 
   if (isFilterPinned(filter)) {
     badgeTitle = `${i18n.translate('common.ui.filterBar.pinnedFilterPrefix', {
