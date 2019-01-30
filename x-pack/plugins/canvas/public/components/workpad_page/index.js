@@ -31,6 +31,7 @@ const mapDispatchToProps = dispatch => {
     insertNodes: pageId => selectedElements => dispatch(insertNodes(selectedElements, pageId)),
     removeElements: pageId => elementIds => dispatch(removeElements(elementIds, pageId)),
     selectElement: selectedElement => dispatch(selectElement(selectedElement)),
+    // TODO: Abstract this out. This is the same code as in sidebar/index.js
     elementLayer: (pageId, selectedElement, movement) => {
       dispatch(
         elementLayer({
@@ -200,6 +201,7 @@ export const WorkpadPage = compose(
             }
           }
         },
+        // TODO: Same as above. Abstract these out. This is the same code as in sidebar/index.js
         bringForward: () => {
           selectedElements.forEach(element => elementLayer(page.id, element, 1));
           selectElement(selectedElements[0]);
