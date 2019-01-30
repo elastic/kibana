@@ -115,8 +115,7 @@ export class ContextMenuUi extends PureComponent {
                   >
                     <FormattedMessage
                       id="xpack.crossClusterReplication.followerIndex.contextMenu.pauseLabel"
-                      defaultMessage="Pause follower {activeFollowerIndicesLength, plural, one {index} other {indices}}"
-                      values={{ activeFollowerIndicesLength: activeFollowerIndices.length }}
+                      defaultMessage="Pause data replication"
                     />
                   </EuiContextMenuItem>
                 )}
@@ -134,8 +133,7 @@ export class ContextMenuUi extends PureComponent {
                   >
                     <FormattedMessage
                       id="xpack.crossClusterReplication.followerIndex.contextMenu.resumeLabel"
-                      defaultMessage="Resume follower {pausedFollowerIndicesLength, plural, one {index} other {indices}}"
-                      values={{ pausedFollowerIndicesLength: pausedFollowerIndexNames.length }}
+                      defaultMessage="Resume data replication"
                     />
                   </EuiContextMenuItem>
                 )}
