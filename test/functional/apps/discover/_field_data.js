@@ -80,8 +80,6 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('doc view should sort ascending', async function () {
-
-        // Note: Could just check the timestamp, but might as well check that the whole doc is as expected.
         const expectedTimeStamp = 'September 20th 2015, 00:00:00.000';
         await PageObjects.discover.clickDocSortDown();
 
