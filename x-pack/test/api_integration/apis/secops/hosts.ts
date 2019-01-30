@@ -21,7 +21,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
     before(() => esArchiver.load('auditbeat/hosts'));
     after(() => esArchiver.unload('auditbeat/hosts'));
 
-    test('Make sure that we get Hosts Table data', () => {
+    it('Make sure that we get Hosts Table data', () => {
       return client
         .query<GetHostsTableQuery.Query>({
           query: HostsTableQuery,
@@ -46,7 +46,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
         });
     });
 
-    test('Make sure that pagination is working in Hosts Table query', () => {
+    it('Make sure that pagination is working in Hosts Table query', () => {
       return client
         .query<GetHostsTableQuery.Query>({
           query: HostsTableQuery,
@@ -72,7 +72,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
         });
     });
 
-    test('Make sure that we get Host Summary data', () => {
+    it('Make sure that we get Host Summary data', () => {
       const expectedHost: GetHostSummaryQuery.Host = {
         architecture: 'x86_64',
         id: 'aa7ca589f1b8220002f2fc61c64cfbf1',
