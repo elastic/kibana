@@ -19,6 +19,7 @@ import moment from 'moment';
 import React from 'react';
 import styled from 'styled-components';
 import { CommitInfo } from '../../../model/commit';
+import { CommitLink } from '../diff_page/commit_link';
 
 const COMMIT_ID_LENGTH = 8;
 
@@ -76,9 +77,13 @@ const CommitId = styled.div`
 
 const CommitContainer = styled.div``;
 
-const Commit = (props: { commit: CommitInfo; date: string }) => {
+const Commit = (props: { commit: CommitInfo; date: string; repoUri: string }) => {
   const { date, commit } = props;
   const { message, committer, id } = commit;
+  const commitId = id
+    .split('')
+    .slice(0, COMMIT_ID_LENGTH)
+    .join('');
   return (
     <CommitRoot>
       <CommitContainer>
@@ -92,18 +97,15 @@ const Commit = (props: { commit: CommitInfo; date: string }) => {
         </EuiText>
       </CommitContainer>
       <CommitId>
-        {id
-          .split('')
-          .slice(0, COMMIT_ID_LENGTH)
-          .join('')}
+        <CommitLink repoUri={props.repoUri} commit={commitId} />
       </CommitId>
     </CommitRoot>
   );
 };
 
-const CommitGroup = (props: { commits: CommitInfo[]; date: string }) => {
+const CommitGroup = (props: { commits: CommitInfo[]; date: string; repoUri: string }) => {
   const commitList = props.commits.map(commit => (
-    <Commit commit={commit} key={commit.id} date={props.date} />
+    <Commit commit={commit} key={commit.id} date={props.date} repoUri={props.repoUri} />
   ));
   return (
     <CommitGroupContainer>
@@ -140,7 +142,12 @@ export const CommitHistory = (props: {
   const commits = _.groupBy(props.commits, commit => moment(commit.updated).format('YYYYMMDD'));
   const commitDates = Object.keys(commits).sort((a, b) => b.localeCompare(a)); // sort desc
   const commitList = commitDates.map(cd => (
-    <CommitGroup commits={commits[cd]} date={moment(cd).format('MMMM Do, YYYY')} key={cd} />
+    <CommitGroup
+      commits={commits[cd]}
+      date={moment(cd).format('MMMM Do, YYYY')}
+      key={cd}
+      repoUri={props.repoUri}
+    />
   ));
   return (
     <CommitMessages>

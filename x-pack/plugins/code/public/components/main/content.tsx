@@ -264,7 +264,7 @@ class CodeContent extends React.PureComponent<Props> {
         const blame = (
           <BlameContainer innerRef={this.scrollBlameInResponseOfScrollingEditor}>
             <div style={{ height: blamesHeight }}>
-              <Blame blames={blames} lineHeight={18} />
+              <Blame repoUri={repoUri} blames={blames} lineHeight={18} />
             </div>
           </BlameContainer>
         );
