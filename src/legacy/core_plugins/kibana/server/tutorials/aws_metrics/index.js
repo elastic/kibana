@@ -46,7 +46,7 @@ export function awsMetricsSpecProvider(server, context) {
         {
           id: 'c5846400-f7fb-11e8-af03-c999c9dea608',
           linkLabel: i18n.translate('kbn.server.tutorials.awsMetrics.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'aws metrics dashboard',
+            defaultMessage: 'AWS metrics dashboard',
           }),
           isOverview: true
         }
