@@ -93,11 +93,10 @@ export default function ({ getService }) {
       });
 
       it('should throw a 404 error when cluster is unknown', async () => {
-        payload.remote_cluster = 'cluster-never-declared';
+        payload.remoteCluster = 'unknown-cluster';
 
-        const { body } = await createAutoFollowIndexRequest(undefined, payload); // Temp remove .expect(404);
-        expect(body).to.eql({}); // To debug reason why CI fails...
-        // expect(body.cause[0]).to.contain('no such remote cluster');
+        const { body } = await createAutoFollowIndexRequest(undefined, payload).expect(404);
+        expect(body.cause[0]).to.contain('no such remote cluster');
       });
 
       it('should create an auto-follow pattern when cluster is known', async () => {
