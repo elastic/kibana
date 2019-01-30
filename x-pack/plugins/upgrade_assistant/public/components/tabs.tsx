@@ -152,14 +152,14 @@ export class UpgradeAssistantTabsUI extends React.Component<
     ];
   }
 
-  private sendTelemetryInfo(tabName: string) {
+  private async sendTelemetryInfo(tabName: string) {
     // In case we don't have any data yet, we wanna to ignore the
     // telemetry info update
     if (this.state.loadingState !== LoadingState.Success) {
       return;
     }
 
-    kfetch({
+    await kfetch({
       pathname: '/api/upgrade_assistant/telemetry/ui_open',
       method: 'PUT',
       body: JSON.stringify(set({}, tabName, true)),

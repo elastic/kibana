@@ -154,8 +154,8 @@ export class ReindexButton extends React.Component<ReindexButtonProps, ReindexBu
     this.setState({ flyoutVisible: false });
   };
 
-  private sendUIReindexTelemetryInfo(uiReindexAction: UIReindexOption) {
-    kfetch({
+  private async sendUIReindexTelemetryInfo(uiReindexAction: UIReindexOption) {
+    await kfetch({
       pathname: '/api/upgrade_assistant/telemetry/ui_reindex',
       method: 'PUT',
       body: JSON.stringify(set({}, uiReindexAction, true)),
