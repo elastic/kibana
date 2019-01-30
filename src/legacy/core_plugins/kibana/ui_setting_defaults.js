@@ -30,6 +30,14 @@ export function getUiSettingDefaults() {
     return numeralLanguage.id;
   })];
 
+  const luceneQueryLanguageLabel = i18n.translate('kbn.advancedSettings.searchQueryLanguageLucene', {
+    defaultMessage: 'Lucene',
+  });
+
+  const queryLanguageSettingName = i18n.translate('kbn.advancedSettings.searchQueryLanguageTitle', {
+    defaultMessage: 'Query language',
+  });
+
   // wrapped in provider so that a new instance is given to each app/test
   return {
     'buildNum': {
@@ -42,7 +50,8 @@ export function getUiSettingDefaults() {
       value: '{ "analyze_wildcard": true }',
       description:
         i18n.translate('kbn.advancedSettings.query.queryStringOptionsText', {
-          defaultMessage: '{optionsLink} for the lucene query string parser',
+          defaultMessage: '{optionsLink} for the lucene query string parser. Is only used when "{queryLanguage}" is set ' +
+            'to {luceneLanguage}.',
           description: 'Part of composite text: kbn.advancedSettings.query.queryStringOptions.optionsLinkText + ' +
                        'kbn.advancedSettings.query.queryStringOptionsText',
           values: {
@@ -52,6 +61,8 @@ export function getUiSettingDefaults() {
                 defaultMessage: 'Options',
               }) +
               '</a>',
+            luceneLanguage: luceneQueryLanguageLabel,
+            queryLanguage: queryLanguageSettingName,
           },
         }),
       type: 'json'
@@ -65,9 +76,12 @@ export function getUiSettingDefaults() {
         defaultMessage:
           'When set, * is allowed as the first character in a query clause. ' +
           'Currently only applies when experimental query features are enabled in the query bar. ' +
-          'To disallow leading wildcards in basic lucene queries, use {queryStringOptionsPattern}',
+          'To disallow leading wildcards in basic lucene queries, use {queryStringOptionsPattern}. Is only ' +
+          'used when "{queryLanguage}" is set to {luceneLanguage}.',
         values: {
           queryStringOptionsPattern: 'query:queryString:options',
+          luceneLanguage: luceneQueryLanguageLabel,
+          queryLanguage: queryLanguageSettingName,
         },
       }),
     },
@@ -82,9 +96,7 @@ export function getUiSettingDefaults() {
       }),
     },
     'search:queryLanguage': {
-      name: i18n.translate('kbn.advancedSettings.searchQueryLanguageTitle', {
-        defaultMessage: 'Query language',
-      }),
+      name: queryLanguageSettingName,
       value: 'lucene',
       description: i18n.translate('kbn.advancedSettings.searchQueryLanguageText', {
         defaultMessage:
@@ -93,9 +105,7 @@ export function getUiSettingDefaults() {
       type: 'select',
       options: ['lucene', 'kuery'],
       optionLabels: {
-        lucene: i18n.translate('kbn.advancedSettings.searchQueryLanguageLucene', {
-          defaultMessage: 'Lucene',
-        }),
+        lucene: luceneQueryLanguageLabel,
         kuery: i18n.translate('kbn.advancedSettings.searchQueryLanguageKql', {
           defaultMessage: 'KQL',
         }),
