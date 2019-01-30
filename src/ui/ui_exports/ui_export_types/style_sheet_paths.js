@@ -24,6 +24,10 @@ import { mapSpec, wrap } from './modify_reduce';
 
 const OK_EXTNAMES = ['.css', '.scss'];
 
+function getUrlBase(pluginSpec) {
+  return `plugins/${pluginSpec.getId()}`;
+}
+
 function getPublicPath(pluginSpec, localPath) {
   // get the path of the stylesheet relative to the public dir for the plugin
   let relativePath = path.relative(pluginSpec.getPublicDir(), localPath);
@@ -31,7 +35,7 @@ function getPublicPath(pluginSpec, localPath) {
   // replace back slashes on windows
   relativePath = relativePath.split('\\').join('/');
 
-  return `plugins/${pluginSpec.getId()}/${relativePath}`;
+  return `${getUrlBase(pluginSpec)}/${relativePath}`;
 }
 
 function getStyleSheetPath(pluginSpec, localPath, theme) {
@@ -42,6 +46,10 @@ function getStyleSheetPath(pluginSpec, localPath, theme) {
     theme,
     localPath: existsSync(localCssPath) ? localCssPath : localPath,
     publicPath: getPublicPath(pluginSpec, localCssPath),
+    urlImports: {
+      urlBase: `built_assets/css/${getUrlBase(pluginSpec)}`,
+      publicDir: pluginSpec.getPublicDir(),
+    }
   };
 }
 
@@ -74,7 +82,7 @@ function normalize(localPath, type, pluginSpec) {
     return {
       theme: '*',
       localPath: localPath,
-      publicPath: getPublicPath(pluginSpec, localPath)
+      publicPath: getPublicPath(pluginSpec, localPath),
     };
   }
 

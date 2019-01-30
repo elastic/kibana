@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { take } from 'lodash';
 import React from 'react';
 import { Query } from 'react-apollo';
+import { FilterBar as FilterBarType } from '../../../../common/graphql/types';
 import { UptimeCommonProps } from '../../../uptime_app';
 import { getFilterBarQuery } from './get_filter_bar';
 import { filterBarSearchSchema } from './search_schema';
@@ -38,11 +39,11 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: Props) 
         });
       }
       const {
-        filterBar: { port, id, scheme },
-      } = data;
+        filterBar: { ports, ids, schemes },
+      }: { filterBar: FilterBarType } = data;
       const showFilterDisclaimer =
-        (id.length && id.length > MAX_SELECTION_LENGTH) ||
-        (port.length && port.length > MAX_SELECTION_LENGTH);
+        (ids && ids.length && ids.length > MAX_SELECTION_LENGTH) ||
+        (ports && ports.length && ports.length > MAX_SELECTION_LENGTH);
 
       // TODO: add a factory function + type for these filter options
       const filters = [
@@ -57,10 +58,10 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: Props) 
               }),
             },
             {
-              value: i18n.translate('xpack.uptime.filterBar.filterDownLabel', {
+              value: 'down',
+              name: i18n.translate('xpack.uptime.filterBar.filterDownLabel', {
                 defaultMessage: 'Down',
               }),
-              name: 'Down',
             },
           ],
         },
@@ -72,10 +73,12 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: Props) 
             defaultMessage: 'ID',
           }),
           multiSelect: false,
-          options: take(id, MAX_SELECTION_LENGTH).map((idValue: any) => ({
-            value: idValue,
-            view: idValue,
-          })),
+          options: ids
+            ? take(ids, MAX_SELECTION_LENGTH).map(({ key, url }: any) => ({
+                value: key,
+                view: url,
+              }))
+            : [],
           searchThreshold: SEARCH_THRESHOLD,
         },
         {
@@ -85,20 +88,27 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: Props) 
             defaultMessage: 'Port',
           }),
           multiSelect: false,
-          options: take(port, MAX_SELECTION_LENGTH).map((portValue: any) => ({
-            value: portValue,
-            view: portValue,
-          })),
+          options: ports
+            ? take(ports, MAX_SELECTION_LENGTH).map((portValue: any) => ({
+                value: portValue,
+                view: portValue,
+              }))
+            : [],
           searchThreshold: SEARCH_THRESHOLD,
         },
         {
           type: 'field_value_selection',
-          field: 'monitor.scheme',
+          field: 'monitor.type',
           name: i18n.translate('xpack.uptime.filterBar.options.typeLabel', {
             defaultMessage: 'Type',
           }),
           multiSelect: false,
-          options: scheme.map((schemeValue: string) => ({ value: schemeValue, view: schemeValue })),
+          options: schemes
+            ? schemes.map((schemeValue: string) => ({
+                value: schemeValue,
+                view: schemeValue,
+              }))
+            : [],
           searchThreshold: SEARCH_THRESHOLD,
         },
       ];

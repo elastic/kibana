@@ -21,6 +21,7 @@ import { timeService } from '../kibana_services';
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const UPDATE_LAYER_ORDER = 'UPDATE_LAYER_ORDER';
 export const ADD_LAYER = 'ADD_LAYER';
+export const SET_LAYER_ERROR_STATUS = 'SET_LAYER_ERROR_STATUS';
 export const ADD_WAITING_FOR_MAP_READY_LAYER = 'ADD_WAITING_FOR_MAP_READY_LAYER';
 export const CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST = 'CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST';
 export const REMOVE_LAYER = 'REMOVE_LAYER';
@@ -105,6 +106,16 @@ export function addLayer(layerDescriptor) {
       layer: layerDescriptor,
     });
     dispatch(syncDataForLayer(layerDescriptor.id));
+  };
+}
+
+export function setLayerErrorStatus(id, errorMessage) {
+  return dispatch => {
+    dispatch({
+      type: SET_LAYER_ERROR_STATUS,
+      layerId: id,
+      errorMessage,
+    });
   };
 }
 
@@ -319,7 +330,6 @@ export function onDataLoadError(layerId, dataId, requestToken, errorMessage) {
 }
 
 export function updateSourceProp(layerId, propName, value) {
-
   return (dispatch) => {
     dispatch({
       type: UPDATE_SOURCE_PROP,
@@ -488,16 +498,12 @@ export function triggerRefreshTimer() {
 }
 
 export function updateLayerStyleForSelectedLayer(style, temporary = true) {
-  return async (dispatch, getState) => {
-    await dispatch({
-      type: UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
-      style: {
-        ...style,
-        temporary
-      },
-    });
-    const layer = getSelectedLayer(getState());
-    dispatch(syncDataForLayer(layer.getId()));
+  return {
+    type: UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
+    style: {
+      ...style,
+      temporary
+    },
   };
 }
 

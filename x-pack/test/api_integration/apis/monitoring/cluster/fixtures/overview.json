@@ -88,18 +88,18 @@
       "count": 1
     },
     "apm": {
-      "totalEvents": null,
-      "memRss": null,
-      "memTotal": null,
+      "totalEvents": 0,
+      "memRss": 0,
+      "memTotal": 0,
       "apms": {
-        "total": null
+        "total": 0
       }
     },
     "beats": {
-      "totalEvents": null,
-      "bytesSent": null,
+      "totalEvents": 0,
+      "bytesSent": 0,
       "beats": {
-        "total": null,
+        "total": 0,
         "types": []
       }
     },

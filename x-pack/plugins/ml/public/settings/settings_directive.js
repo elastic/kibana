@@ -19,6 +19,7 @@ import { getSettingsBreadcrumbs } from './breadcrumbs';
 
 import uiRoutes from 'ui/routes';
 import { timefilter } from 'ui/timefilter';
+import { I18nProvider } from '@kbn/i18n/react';
 
 const template = `
   <ml-nav-menu name="settings" />
@@ -55,10 +56,14 @@ module.directive('mlSettings', function () {
     scope: {},
     link: function (scope, element) {
       ReactDOM.render(
-        React.createElement(Settings, {
-          canGetFilters,
-          canGetCalendars
-        }),
+        <I18nProvider>
+          {React.createElement(
+            Settings, {
+              canGetFilters,
+              canGetCalendars
+            })
+          }
+        </I18nProvider>,
         element[0]
       );
     }
