@@ -23,6 +23,7 @@ import classNames from 'classnames';
 import _ from 'lodash';
 import { compact, debounce, get, isEqual } from 'lodash';
 import React, { Component } from 'react';
+import { getFromLegacyIndexPattern } from 'ui/index_patterns/static_utils';
 import { kfetch } from 'ui/kfetch';
 import { PersistedLog } from 'ui/persisted_log';
 import { Storage } from 'ui/storage';
@@ -78,7 +79,6 @@ interface Props {
   indexPatterns: IndexPattern[];
   store: Storage;
   intl: InjectedIntl;
-  prepend?: any;
   showDatePicker?: boolean;
   dateRangeFrom?: string;
   dateRangeTo?: string;
@@ -237,7 +237,7 @@ export class QueryBarUI extends Component<Props, State> {
       return recentSearchSuggestions;
     }
 
-    const indexPatterns = this.props.indexPatterns;
+    const indexPatterns = getFromLegacyIndexPattern(this.props.indexPatterns);
     const getAutocompleteSuggestions = autocompleteProvider({ config, indexPatterns });
 
     const { selectionStart, selectionEnd } = this.inputRef;
@@ -558,7 +558,7 @@ export class QueryBarUI extends Component<Props, State> {
               aria-controls="typeahead-items"
             >
               <form role="form" name="queryBarForm">
-                <div role="search">
+                <div className="kuiLocalSearch" role="search">
                   <div className="kuiLocalSearchAssistedInput">
                     <EuiFieldText
                       className="kuiLocalSearchAssistedInput__input"
@@ -593,7 +593,6 @@ export class QueryBarUI extends Component<Props, State> {
                         this.state.isSuggestionsVisible ? 'suggestion-' + this.state.index : ''
                       }
                       role="textbox"
-                      prepend={this.props.prepend}
                     />
                     <div className="kuiLocalSearchAssistedInput__assistance">
                       <QueryLanguageSwitcher
