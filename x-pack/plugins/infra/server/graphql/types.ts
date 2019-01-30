@@ -505,6 +505,7 @@ export enum InfraPathType {
   hosts = 'hosts',
   pods = 'pods',
   containers = 'containers',
+  custom = 'custom',
 }
 
 export enum InfraMetricType {
