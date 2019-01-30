@@ -108,10 +108,11 @@ export interface BeatTag
 export const RuntimeBeatEvent = t.interface(
   {
     type: t.union(['STATE', 'ERROR'].map(value => t.literal(value))),
+    beat: t.union([t.undefined, t.string]),
     timestamp: t.string,
     event: t.type({
       type: t.union(
-        ['STARTING', 'In_PROGRESS', 'CONFIG', 'FAILED', 'STOPPED'].map(value => t.literal(value))
+        ['STARTING', 'IN_PROGRESS', 'CONFIG', 'FAILED', 'STOPPED'].map(value => t.literal(value))
       ),
       message: t.string,
       uuid: t.union([t.undefined, t.string]),
@@ -119,4 +120,6 @@ export const RuntimeBeatEvent = t.interface(
   },
   'BeatEvent'
 );
-export interface BeatEvent extends t.TypeOf<typeof RuntimeBeatEvent> {}
+export interface BeatEvent extends t.TypeOf<typeof RuntimeBeatEvent> {
+  beat: string;
+}
