@@ -32,7 +32,6 @@ export default function canvasTests({ getService }: KibanaFunctionalTestDefaultP
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('canvas');
             expect(uiCapabilities.value!.canvas).to.eql({
-              show: true,
               showWriteControls: true,
             });
             break;
@@ -42,7 +41,6 @@ export default function canvasTests({ getService }: KibanaFunctionalTestDefaultP
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('canvas');
             expect(uiCapabilities.value!.canvas).to.eql({
-              show: true,
               showWriteControls: false,
             });
             break;
@@ -50,26 +48,25 @@ export default function canvasTests({ getService }: KibanaFunctionalTestDefaultP
           case 'apm_all':
           case 'dashboard_all':
           case 'dashboard_read':
-          case 'dev_tools_all':
+          case 'dev_tools_read':
           case 'discover_all':
           case 'discover_read':
           case 'graph_all':
           case 'graph_read':
           case 'gis_all':
           case 'gis_read':
-          case 'infrastructure_all':
-          case 'logs_all':
+          case 'infrastructure_read':
+          case 'logs_read':
           case 'ml_all':
           case 'monitoring_all':
           case 'timelion_all':
           case 'timelion_read':
-          case 'uptime_all':
+          case 'uptime_read':
           case 'visualize_all':
           case 'visualize_read':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('canvas');
             expect(uiCapabilities.value!.canvas).to.eql({
-              show: false,
               showWriteControls: false,
             });
             break;
