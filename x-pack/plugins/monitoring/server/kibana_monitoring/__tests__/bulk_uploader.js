@@ -39,7 +39,9 @@ describe('BulkUploader', () => {
             getCluster: () => ({
               createClient: () => ({
                 monitoring: {
-                  bulk: sinon.spy(),
+                  bulk: function () {
+                    return new Promise(resolve => setTimeout(resolve, CHECK_DELAY + 1));
+                  }
                 },
               }),
               callWithInternalUser: sinon.spy(), // this tests internal collection and bulk upload, not HTTP API
@@ -106,7 +108,9 @@ describe('BulkUploader', () => {
         uploader.stop();
 
         const loggingCalls = server.log.getCalls();
-        expect(loggingCalls.length).to.be.greaterThan(2); // should be 3-5: start, fetch, upload, fetch, upload
+        // If we are properly awaiting the bulk upload call, we shouldn't see
+        // the last 2 logs as the call takes longer than this timeout (see the above mock)
+        expect(loggingCalls.length).to.be(4);
         expect(loggingCalls[0].args).to.eql([
           ['info', 'monitoring-ui', 'kibana-monitoring'],
           'Starting monitoring stats collection',

@@ -60,6 +60,7 @@ export const nodesSchema: any = gql`
     hosts
     pods
     containers
+    custom
   }
 
   input InfraPathInput {

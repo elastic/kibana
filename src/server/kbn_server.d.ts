@@ -18,9 +18,10 @@
  */
 
 import { Server } from 'hapi';
+
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../legacy/core_plugins/elasticsearch';
 import { IndexPatternsServiceFactory } from './index_patterns';
-import { SavedObjectsService } from './saved_objects';
+import { SavedObjectsClient, SavedObjectsService } from './saved_objects';
 
 export interface KibanaConfig {
   get<T>(key: string): T;
@@ -31,6 +32,7 @@ declare module 'hapi' {
   interface PluginProperties {
     elasticsearch: ElasticsearchPlugin;
     kibana: any;
+    spaces: any;
     // add new plugin types here
   }
 
@@ -41,11 +43,9 @@ declare module 'hapi' {
   }
 
   interface Request {
-    getBasePath: () => string;
-  }
-
-  interface Request {
-    getUiSettingsService: () => any;
+    getSavedObjectsClient(): SavedObjectsClient;
+    getBasePath(): string;
+    getUiSettingsService(): any;
   }
 }
 
