@@ -204,22 +204,10 @@ export const WorkpadPage = compose(
           }
         },
         // TODO: Same as above. Abstract these out. This is the same code as in sidebar/index.js
-        bringForward: () => {
-          selectedElements.forEach(element => elementLayer(page.id, element, 1));
-          selectElement(selectedElements[0]);
-        },
-        bringToFront: () => {
-          selectedElements.forEach(element => elementLayer(page.id, element, Infinity));
-          selectElement(selectedElements[0]);
-        },
-        sendBackward: () => {
-          selectedElements.forEach(element => elementLayer(page.id, element, -1));
-          selectElement(selectedElements[0]);
-        },
-        sendToBack: () => {
-          selectedElements.forEach(element => elementLayer(page.id, element, -Infinity));
-          selectElement(selectedElements[0]);
-        },
+        bringForward: () => elementLayer(page.id, selectedElements[0], 1),
+        bringToFront: () => elementLayer(page.id, selectedElements[0], Infinity),
+        sendBackward: () => elementLayer(page.id, selectedElements[0], -1),
+        sendToBack: () => elementLayer(page.id, selectedElements[0], -Infinity),
       };
     }
   ), // Updates states; needs to have both local and global
