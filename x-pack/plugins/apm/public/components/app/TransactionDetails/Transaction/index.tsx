@@ -97,13 +97,15 @@ interface Props {
   urlParams: IUrlParams;
   location: Location;
   waterfall: IWaterfall;
+  errorCount?: number;
 }
 
 export const Transaction: React.SFC<Props> = ({
   transaction,
   urlParams,
   location,
-  waterfall
+  waterfall,
+  errorCount
 }) => {
   return (
     <EuiPanel paddingSize="m">
@@ -140,6 +142,7 @@ export const Transaction: React.SFC<Props> = ({
       <EuiSpacer />
 
       <StickyTransactionProperties
+        errorCount={errorCount}
         transaction={transaction}
         totalDuration={waterfall.traceRootDuration}
       />
