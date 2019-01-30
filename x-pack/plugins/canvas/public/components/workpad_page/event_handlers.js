@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { withHandlers } from 'recompose';
-
 const ancestorElement = element => {
   if (!element) {
     return element;
@@ -189,7 +187,7 @@ const handleKeyUp = (commit, { key }, isEditable) => {
   }
 };
 
-export const withEventHandlers = withHandlers({
+export const eventHandlers = {
   onMouseDown: props => e => handleMouseDown(props.commit, e, props.isEditable),
   onMouseMove: props => e => handleMouseMove(props.commit, e, props.isEditable),
   onKeyDown: props => e => handleKeyDown(props.commit, e, props.isEditable, props.remove),
@@ -197,4 +195,4 @@ export const withEventHandlers = withHandlers({
   onKeyUp: props => e => handleKeyUp(props.commit, e, props.isEditable),
   onWheel: props => e => handleWheel(props.commit, e, props.isEditable),
   resetHandler: () => () => resetHandler(),
-});
+};

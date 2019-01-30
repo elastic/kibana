@@ -6,16 +6,16 @@
 
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { compose, withState, withProps } from 'recompose';
+import { compose, withState, withProps, withHandlers } from 'recompose';
 import { notify } from '../../lib/notify';
 import { aeroelastic } from '../../lib/aeroelastic_kibana';
 import { setClipboardData, getClipboardData } from '../../lib/clipboard';
 import { cloneSubgraphs } from '../../lib/clone_subgraphs';
-import { removeElements, insertNodes } from '../../state/actions/elements';
+import { removeElements, insertNodes, elementLayer } from '../../state/actions/elements';
 import { getFullscreen, canUserWrite } from '../../state/selectors/app';
 import { getNodes, isWriteable } from '../../state/selectors/workpad';
 import { flatten } from '../../lib/aeroelastic/functional';
-import { withEventHandlers } from './event_handlers';
+import { eventHandlers } from './event_handlers';
 import { WorkpadPage as Component } from './workpad_page';
 import { selectElement } from './../../state/actions/transient';
 
@@ -31,6 +31,15 @@ const mapDispatchToProps = dispatch => {
     insertNodes: pageId => selectedElements => dispatch(insertNodes(selectedElements, pageId)),
     removeElements: pageId => elementIds => dispatch(removeElements(elementIds, pageId)),
     selectElement: selectedElement => dispatch(selectElement(selectedElement)),
+    elementLayer: (pageId, selectedElement, movement) => {
+      dispatch(
+        elementLayer({
+          pageId,
+          elementId: selectedElement.id,
+          movement,
+        })
+      );
+    },
   };
 };
 
@@ -84,6 +93,7 @@ export const WorkpadPage = compose(
       insertNodes,
       removeElements,
       selectElement,
+      elementLayer,
     }) => {
       const { shapes, selectedPrimaryShapes = [], cursor } = aeroelastic.getStore(
         page.id
@@ -131,7 +141,7 @@ export const WorkpadPage = compose(
           // TODO: remove this, it's a hack to force react to rerender
           setUpdateCount(updateCount + 1);
         },
-        remove: () => {
+        removeElements: () => {
           // currently, handle the removal of one element, exploiting multiselect subsequently
           if (selectedElementIds.length) {
             removeElements(page.id)(selectedElementIds);
@@ -148,6 +158,25 @@ export const WorkpadPage = compose(
             setClipboardData({ selectedElements, rootShapes: selectedPrimaryShapes });
             removeElements(page.id)(selectedElementIds);
             notify.success('Copied element to clipboard');
+          }
+        },
+        duplicateElements: () => {
+          const clonedElements = selectedElements && cloneSubgraphs(selectedElements);
+          if (clonedElements) {
+            insertNodes(page.id)(clonedElements);
+            if (selectedPrimaryShapes.length) {
+              if (selectedElements.length > 1) {
+                // adHocGroup branch (currently, pasting will leave only the 1st element selected, rather than forming a
+                // new adHocGroup - todo)
+                selectElement(clonedElements[0].id);
+              } else {
+                // single element or single persistentGroup branch
+                selectElement(
+                  clonedElements[selectedElements.findIndex(s => s.id === selectedPrimaryShapes[0])]
+                    .id
+                );
+              }
+            }
           }
         },
         pasteElements: () => {
@@ -171,10 +200,26 @@ export const WorkpadPage = compose(
             }
           }
         },
+        bringForward: () => {
+          selectedElements.forEach(element => elementLayer(page.id, element, 1));
+          selectElement(selectedElements[0]);
+        },
+        bringToFront: () => {
+          selectedElements.forEach(element => elementLayer(page.id, element, Infinity));
+          selectElement(selectedElements[0]);
+        },
+        sendBackward: () => {
+          selectedElements.forEach(element => elementLayer(page.id, element, -1));
+          selectElement(selectedElements[0]);
+        },
+        sendToBack: () => {
+          selectedElements.forEach(element => elementLayer(page.id, element, -Infinity));
+          selectElement(selectedElements[0]);
+        },
       };
     }
   ), // Updates states; needs to have both local and global
-  withEventHandlers // Captures user intent, needs to have reconciled state
+  withHandlers(eventHandlers) // Captures user intent, needs to have reconciled state
 )(Component);
 
 WorkpadPage.propTypes = {
