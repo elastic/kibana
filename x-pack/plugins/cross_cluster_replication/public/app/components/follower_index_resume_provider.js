@@ -10,9 +10,11 @@ import { connect } from 'react-redux';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiConfirmModal,
+  EuiLink,
   EuiOverlayMask,
 } from '@elastic/eui';
 
+import routing from '../services/routing';
 import { resumeFollowerIndex } from '../store/actions';
 import { arrify } from '../../../common/services/utils';
 
@@ -79,7 +81,7 @@ class Provider extends PureComponent {
           confirmButtonText={
             intl.formatMessage({
               id: 'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.confirmButtonText',
-              defaultMessage: 'Resume',
+              defaultMessage: 'Resume using default advanced settings',
             })
           }
           onMouseOver={this.onMouseOverModal}
@@ -88,8 +90,18 @@ class Provider extends PureComponent {
             <p>
               <FormattedMessage
                 id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.singleResumeDescription"
-                defaultMessage="This follower index will be resumed using default settings. To resume using
-                  different settings, edit this follower index instead."
+                defaultMessage="This follower index will be resumed using default advanced settings.
+                  To resume using custom advanced settings, {editLink}."
+                values={{
+                  editLink: (
+                    <EuiLink href={routing.getFollowerIndexPath(ids[0])}>
+                      <FormattedMessage
+                        id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.singleResumeEditLink"
+                        defaultMessage="edit this follower index instead"
+                      />
+                    </EuiLink>
+                  ),
+                }}
               />
             </p>
           ) : (
@@ -97,8 +109,8 @@ class Provider extends PureComponent {
               <p>
                 <FormattedMessage
                   id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.multipleResumeDescription"
-                  defaultMessage="These follower indices will be resumed using default settings. To resume using
-                    different settings, edit each follower index instead:"
+                  defaultMessage="The follower indices below will be resumed using default advanced settings.
+                    To resume using custom advanced settings, edit each follower index instead."
                 />
               </p>
               <ul>{ids.map(id => <li key={id}>{id}</li>)}</ul>

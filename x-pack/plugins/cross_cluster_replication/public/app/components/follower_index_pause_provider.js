@@ -15,6 +15,7 @@ import {
 
 import { pauseFollowerIndex } from '../store/actions';
 import { arrify } from '../../../common/services/utils';
+import { areAllSettingsDefault } from '../services/follower_index_default_settings';
 
 class Provider extends PureComponent {
   static propTypes = {
@@ -23,7 +24,7 @@ class Provider extends PureComponent {
 
   state = {
     isModalOpen: false,
-    ids: null
+    indices: []
   }
 
   onMouseOverModal = (event) => {
@@ -32,13 +33,13 @@ class Provider extends PureComponent {
     event.stopPropagation();
   };
 
-  pauseFollowerIndex = (id) => {
-    this.setState({ isModalOpen: true, ids: arrify(id) });
+  pauseFollowerIndex = (index) => {
+    this.setState({ isModalOpen: true, indices: arrify(index) });
   };
 
   onConfirm = () => {
-    this.props.pauseFollowerIndex(this.state.ids);
-    this.setState({ isModalOpen: false, ids: null });
+    this.props.pauseFollowerIndex(this.state.indices.map(index => index.name));
+    this.setState({ isModalOpen: false, indices: [] });
     this.props.onConfirm && this.props.onConfirm();
   }
 
@@ -50,17 +51,18 @@ class Provider extends PureComponent {
 
   renderModal = () => {
     const { intl } = this.props;
-    const { ids } = this.state;
-    const isSingle = ids.length === 1;
+    const { indices } = this.state;
+    const isSingle = indices.length === 1;
     const title = isSingle
       ? intl.formatMessage({
         id: 'xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.pauseSingleTitle',
         defaultMessage: 'Pause follower index \'{name}\'?',
-      }, { name: ids[0] })
+      }, { name: indices[0].name })
       : intl.formatMessage({
         id: 'xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.pauseMultipleTitle',
         defaultMessage: 'Pause {count} follower indices?',
-      }, { count: ids.length });
+      }, { count: indices.length });
+    const hasCustomSettings = indices.some(index => !areAllSettingsDefault(index));
 
     return (
       <EuiOverlayMask>
@@ -75,24 +77,51 @@ class Provider extends PureComponent {
               defaultMessage: 'Cancel',
             })
           }
-          buttonColor="primary"
+          buttonColor={hasCustomSettings ? 'danger' : 'primary'}
           confirmButtonText={
-            intl.formatMessage({
+            hasCustomSettings ? intl.formatMessage({
+              id: 'xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.confirmButtonTextWithSettingWarning',
+              defaultMessage: 'Pause and revert advanced settings to defaults',
+            }) : intl.formatMessage({
               id: 'xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.confirmButtonText',
               defaultMessage: 'Pause',
             })
           }
           onMouseOver={this.onMouseOverModal}
         >
-          {!isSingle && (
+          {isSingle ? (
+            <Fragment>
+              {
+                hasCustomSettings ? (
+                  <p>
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.singlePauseDescriptionWithSettingWarning"
+                      defaultMessage="The custom advanced settings on this follower index will be reverted to default
+                        advanced settings."
+                    />
+                  </p>
+                ) : null
+              }
+            </Fragment>
+          ) : (
             <Fragment>
               <p>
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.multiplePauseDescription"
-                  defaultMessage="These follower indices will be paused:"
-                />
+                {
+                  hasCustomSettings ? (
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.multiplePauseDescriptionWithSettingWarning"
+                      defaultMessage="The follower indices below will be paused. Custom advanced settings on one or more
+                        of these follower indices will be reverted to default advanced settings."
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.multiplePauseDescription"
+                      defaultMessage="These follower indices will be paused:"
+                    />
+                  )
+                }
               </p>
-              <ul>{ids.map(id => <li key={id}>{id}</li>)}</ul>
+              <ul>{indices.map(index => <li key={index.name}>{index.name}</li>)}</ul>
             </Fragment>
           )}
         </EuiConfirmModal>

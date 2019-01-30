@@ -84,7 +84,7 @@ export class ContextMenuUi extends PureComponent {
     );
 
     const pausedFollowerIndexNames = followerIndices.filter(({ isPaused }) => isPaused).map((index) => index.name);
-    const activeFollowerIndexNames = followerIndices.filter(({ isPaused }) => !isPaused).map((index) => index.name);
+    const activeFollowerIndices = followerIndices.filter(({ isPaused }) => !isPaused);
 
     return (
       <EuiPopover
@@ -106,17 +106,17 @@ export class ContextMenuUi extends PureComponent {
         <EuiContextMenuPanel>
 
           {
-            activeFollowerIndexNames.length ? (
+            activeFollowerIndices.length ? (
               <FollowerIndexPauseProvider onConfirm={this.closePopover}>
                 {(pauseFollowerIndex) => (
                   <EuiContextMenuItem
                     icon="pause"
-                    onClick={() => pauseFollowerIndex(activeFollowerIndexNames)}
+                    onClick={() => pauseFollowerIndex(activeFollowerIndices)}
                   >
                     <FormattedMessage
                       id="xpack.crossClusterReplication.followerIndex.contextMenu.pauseLabel"
                       defaultMessage="Pause follower {activeFollowerIndicesLength, plural, one {index} other {indices}}"
-                      values={{ activeFollowerIndicesLength: activeFollowerIndexNames.length }}
+                      values={{ activeFollowerIndicesLength: activeFollowerIndices.length }}
                     />
                   </EuiContextMenuItem>
                 )}
