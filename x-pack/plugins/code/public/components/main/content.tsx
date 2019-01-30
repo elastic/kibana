@@ -304,7 +304,11 @@ class CodeContent extends React.PureComponent<Props> {
               <CommitHistory
                 commits={commits}
                 repoUri={repoUri}
-                header={<Title>Commit History</Title>}
+                header={
+                  <Title>
+                    <h3>Commit History</h3>
+                  </Title>
+                }
               />
             </InfiniteScroll>
           </React.Fragment>
