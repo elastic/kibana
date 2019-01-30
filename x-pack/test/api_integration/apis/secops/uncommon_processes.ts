@@ -5,9 +5,9 @@
  */
 
 import expect from 'expect.js';
+
 import { uncommonProcessesQuery } from '../../../../plugins/secops/public/containers/uncommon_processes/index.gql_query';
 import { GetUncommonProcessesQuery } from '../../../../plugins/secops/public/graphql/types';
-
 import { KbnTestProvider } from './types';
 
 const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
@@ -103,9 +103,8 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
           },
         },
       });
-
-      expect(UncommonProcesses.edges[0].node).to.eql({
-        _id: 'QD1yEWgBiyhPd5Zoyisj',
+      const expected: GetUncommonProcessesQuery.Node = {
+        _id: 'MD2CEWgBiyhPd5Zo9kC_',
         instances: 2,
         host: [
           {
@@ -120,8 +119,9 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
           name: 'sshd',
           title: null,
         },
-        user: null,
-      });
+        user: { id: 0, name: 'root', __typename: 'UserEcsFields' },
+      };
+      expect(UncommonProcesses.edges[0].node).to.eql(expected);
     });
   });
 };

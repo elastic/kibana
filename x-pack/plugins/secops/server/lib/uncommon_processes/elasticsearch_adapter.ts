@@ -5,9 +5,10 @@
  */
 
 import { getOr } from 'lodash/fp';
+
 import { UncommonProcessesData, UncommonProcessesEdges } from '../../graphql/types';
 import { mergeFieldsWithHit } from '../../utils/build_query';
-import { processFieldsMap } from '../ecs_fields';
+import { processFieldsMap, userFieldsMap } from '../ecs_fields';
 import { FrameworkAdapter, FrameworkRequest, RequestOptions } from '../framework';
 import { HostHits, TermAggregation } from '../types';
 import { buildQuery } from './query.dsl';
@@ -36,7 +37,7 @@ export class ElasticsearchUncommonProcessesAdapter implements UncommonProcessesA
     const hits = getHits(buckets);
 
     const uncommonProcessesEdges = hits.map(hit =>
-      formatUncommonProcessesData(options.fields, hit, processFieldsMap)
+      formatUncommonProcessesData(options.fields, hit, { ...processFieldsMap, ...userFieldsMap })
     );
     const hasNextPage = uncommonProcessesEdges.length === limit + 1;
     const beginning = cursor != null ? parseInt(cursor!, 10) : 0;
