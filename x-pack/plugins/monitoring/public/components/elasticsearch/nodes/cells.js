@@ -42,7 +42,7 @@ function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
     const format = get(metric, 'metric.format');
 
     return (
-      <EuiFlexGroup gutterSize="m" alignItems="center" {...props}>
+      <EuiFlexGroup gutterSize="m" alignItems="center" wrap {...props}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="m">
             <h4>
