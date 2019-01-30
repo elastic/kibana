@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from 'expect.js';
+import { KibanaFunctionalTestDefaultProviders } from 'x-pack/test/types/providers';
 
-export default function ({ getPageObjects, getService }) {
+// tslint:disable no-default-export
+export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const kibanaServer = getService('kibanaServer');
@@ -16,9 +18,9 @@ export default function ({ getPageObjects, getService }) {
     before(async () => {
       await esArchiver.load('security/feature_privileges');
       await kibanaServer.uiSettings.replace({
-        "accessibility:disableAnimations": true,
-        "telemetry:optIn": false,
-        "defaultIndex": "logstash-*",
+        'accessibility:disableAnimations': true,
+        'telemetry:optIn': false,
+        defaultIndex: 'logstash-*',
       });
     });
 
@@ -30,18 +32,16 @@ export default function ({ getPageObjects, getService }) {
       before(async () => {
         await security.role.create('global_canvas_all_role', {
           elasticsearch: {
-            indices: [
-              { names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }
-            ],
+            indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
           kibana: [
             {
               feature: {
-                canvas: ['all']
+                canvas: ['all'],
               },
-              spaces: ['*']
-            }
-          ]
+              spaces: ['*'],
+            },
+          ],
         });
 
         await security.user.create('global_canvas_all_user', {
@@ -50,9 +50,13 @@ export default function ({ getPageObjects, getService }) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login('global_canvas_all_user', 'global_canvas_all_user-password', {
-          expectSpaceSelector: false,
-        });
+        await PageObjects.security.login(
+          'global_canvas_all_user',
+          'global_canvas_all_user-password',
+          {
+            expectSpaceSelector: false,
+          }
+        );
       });
 
       after(async () => {
@@ -62,10 +66,7 @@ export default function ({ getPageObjects, getService }) {
 
       it('shows canvas navlink', async () => {
         const navLinks = await PageObjects.common.getAppNavLinksText();
-        expect(navLinks).to.eql([
-          'Canvas',
-          'Management',
-        ]);
+        expect(navLinks).to.eql(['Canvas', 'Management']);
       });
 
       it(`landing page shows "Create new workpad" button`, async () => {
@@ -86,10 +87,14 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it(`allows a workpad to be edited`, async () => {
-        await PageObjects.common.navigateToActualUrl('canvas', 'workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31', {
-          ensureCurrentUrl: true,
-          showLoginIfPrompted: false,
-        });
+        await PageObjects.common.navigateToActualUrl(
+          'canvas',
+          'workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31',
+          {
+            ensureCurrentUrl: true,
+            showLoginIfPrompted: false,
+          }
+        );
 
         await PageObjects.canvas.expectAddElementButton();
       });
@@ -99,18 +104,16 @@ export default function ({ getPageObjects, getService }) {
       before(async () => {
         await security.role.create('global_canvas_read_role', {
           elasticsearch: {
-            indices: [
-              { names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }
-            ],
+            indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
           kibana: [
             {
               feature: {
-                canvas: ['read']
+                canvas: ['read'],
               },
-              spaces: ['*']
-            }
-          ]
+              spaces: ['*'],
+            },
+          ],
         });
 
         await security.user.create('global_canvas_read_user', {
@@ -119,9 +122,13 @@ export default function ({ getPageObjects, getService }) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login('global_canvas_read_user', 'global_canvas_read_user-password', {
-          expectSpaceSelector: false,
-        });
+        await PageObjects.security.login(
+          'global_canvas_read_user',
+          'global_canvas_read_user-password',
+          {
+            expectSpaceSelector: false,
+          }
+        );
       });
 
       after(async () => {
@@ -131,10 +138,7 @@ export default function ({ getPageObjects, getService }) {
 
       it('shows canvas navlink', async () => {
         const navLinks = await PageObjects.common.getAppNavLinksText();
-        expect(navLinks).to.eql([
-          'Canvas',
-          'Management',
-        ]);
+        expect(navLinks).to.eql(['Canvas', 'Management']);
       });
 
       it(`landing page shows disabled "Create new workpad" button`, async () => {
@@ -156,10 +160,14 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it(`does not allow a workpad to be edited`, async () => {
-        await PageObjects.common.navigateToActualUrl('canvas', 'workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31', {
-          ensureCurrentUrl: true,
-          shouldLoginIfPrompted: false,
-        });
+        await PageObjects.common.navigateToActualUrl(
+          'canvas',
+          'workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31',
+          {
+            ensureCurrentUrl: true,
+            shouldLoginIfPrompted: false,
+          }
+        );
 
         await PageObjects.canvas.expectNoAddElementButton();
       });
@@ -169,18 +177,16 @@ export default function ({ getPageObjects, getService }) {
       before(async () => {
         await security.role.create('no_canvas_privileges_role', {
           elasticsearch: {
-            indices: [
-              { names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }
-            ],
+            indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
           },
           kibana: [
             {
               feature: {
-                discover: ['all']
+                discover: ['all'],
               },
-              spaces: ['*']
-            }
-          ]
+              spaces: ['*'],
+            },
+          ],
         });
 
         await security.user.create('no_canvas_privileges_user', {
@@ -189,10 +195,14 @@ export default function ({ getPageObjects, getService }) {
           full_name: 'test user',
         });
 
-        await PageObjects.security.login('no_canvas_privileges_user', 'no_canvas_privileges_user-password', {
-          expectSpaceSelector: false,
-          shouldLoginIfPrompted: false,
-        });
+        await PageObjects.security.login(
+          'no_canvas_privileges_user',
+          'no_canvas_privileges_user-password',
+          {
+            expectSpaceSelector: false,
+            shouldLoginIfPrompted: false,
+          }
+        );
       });
 
       after(async () => {
@@ -200,7 +210,8 @@ export default function ({ getPageObjects, getService }) {
         await security.user.delete('no_canvas_privileges_user');
       });
 
-      const getMessageText = async () => await (await find.byCssSelector('body>pre')).getVisibleText();
+      const getMessageText = async () =>
+        await (await find.byCssSelector('body>pre')).getVisibleText();
 
       it(`returns a 404`, async () => {
         await PageObjects.common.navigateToActualUrl('canvas', '', {
@@ -208,11 +219,13 @@ export default function ({ getPageObjects, getService }) {
           shouldLoginIfPrompted: false,
         });
         const messageText = await getMessageText();
-        expect(messageText).to.eql(JSON.stringify({
-          statusCode: 404,
-          error: 'Not Found',
-          message: 'Not Found',
-        }));
+        expect(messageText).to.eql(
+          JSON.stringify({
+            statusCode: 404,
+            error: 'Not Found',
+            message: 'Not Found',
+          })
+        );
       });
 
       it(`create new workpad returns a 404`, async () => {
@@ -221,11 +234,13 @@ export default function ({ getPageObjects, getService }) {
           shouldLoginIfPrompted: false,
         });
         const messageText = await getMessageText();
-        expect(messageText).to.eql(JSON.stringify({
-          statusCode: 404,
-          error: 'Not Found',
-          message: 'Not Found',
-        }));
+        expect(messageText).to.eql(
+          JSON.stringify({
+            statusCode: 404,
+            error: 'Not Found',
+            message: 'Not Found',
+          })
+        );
       });
     });
   });

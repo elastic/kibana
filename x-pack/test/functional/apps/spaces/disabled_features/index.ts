@@ -9,7 +9,6 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../../types/provider
 // tslint:disable:no-default-export
 export default function({ loadTestFile }: KibanaFunctionalTestDefaultProviders) {
   describe('disabled features', () => {
-    loadTestFile(require.resolve('./canvas'));
     loadTestFile(require.resolve('./dashboard'));
     loadTestFile(require.resolve('./discover'));
   });
