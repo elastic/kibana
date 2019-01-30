@@ -30,7 +30,7 @@ import { ml } from 'plugins/ml/services/ml_api_service';
 import chrome from 'ui/chrome';
 const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
-module.directive('mlTimeseriesChart', function () {
+module.directive('mlTimeseriesChart', function ($timeout) {
 
   function link(scope, element) {
     // Key dimensions for the viz and constituent charts.
@@ -81,7 +81,9 @@ module.directive('mlTimeseriesChart', function () {
     renderReactComponent();
 
     scope.$on('render', () => {
-      renderReactComponent();
+      $timeout(() => {
+        renderReactComponent();
+      });
     });
 
     function renderFocusChart() {

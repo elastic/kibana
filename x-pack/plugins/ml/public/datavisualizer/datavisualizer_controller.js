@@ -92,7 +92,12 @@ module
     $scope.metricFieldFilter = '';
     $scope.fieldFilterIcon = 0;
     $scope.fieldFilter = '';
-    $scope.recognizerResults = { count: 0 };
+    $scope.recognizerResults = {
+      count: 0,
+      onChange() {
+        $scope.$applyAsync();
+      }
+    };
 
     $scope.showSidebar = isFullLicense();
 
