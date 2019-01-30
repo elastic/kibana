@@ -13,7 +13,6 @@ export const mockData: { Hosts: HostsData; DateFields: string[] } = {
       {
         node: {
           _id: 'yneHlmgBjVl2VqDlAjPR',
-          firstSeen: '2019-01-28T22:14:16.039Z',
           host: {
             architecture: 'x86_64',
             id: 'aa7ca589f1b8220002f2fc61c64cfbf1',

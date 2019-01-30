@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiLink } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -106,8 +106,6 @@ export const UncommonProcessTable = connect(
   }
 )(UncommonProcessTableComponent);
 
-const extractHostNames = (hosts: HostEcsFields[]) => hosts.map(host => host.name).join(', ');
-
 const getUncommonColumns = (startDate: number): Array<Columns<UncommonProcessesEdges>> => [
   {
     name: i18n.NAME,
@@ -180,6 +178,45 @@ const getUncommonColumns = (startDate: number): Array<Columns<UncommonProcessesE
     name: i18n.HOSTS,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => <>{node.host != null ? extractHostNames(node.host) : getEmptyValue()}</>,
+    render: ({ node }) => {
+      const hosts: HostEcsFields[] = node.host;
+      const draggables = hosts.map(({ id, name }) => {
+        if (name != null && id != null) {
+          return (
+            <DraggableWrapper
+              key={id}
+              dataProvider={{
+                and: [],
+                enabled: true,
+                id: escapeDataProviderId(`uncommon-process-table-${node._id}-hostName-${name}`),
+                name,
+                excluded: false,
+                kqlQuery: '',
+                queryMatch: {
+                  displayField: 'host.name',
+                  displayValue: name,
+                  field: 'host.id',
+                  value: id,
+                },
+                queryDate: {
+                  from: startDate,
+                  to: Date.now(),
+                },
+              }}
+              render={(dataProvider, _, snapshot) =>
+                snapshot.isDragging ? (
+                  <DragEffects>
+                    <Provider dataProvider={dataProvider} />
+                  </DragEffects>
+                ) : (
+                  <EuiLink href={`#/link-to/hosts/${encodeURIComponent(id)}`}>{name}</EuiLink>
+                )
+              }
+            />
+          );
+        }
+      });
+      return draggables.length > 0 ? draggables : getEmptyTagValue();
+    },
   },
 ];

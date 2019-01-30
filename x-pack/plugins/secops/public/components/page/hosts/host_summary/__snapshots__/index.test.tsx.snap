@@ -10,7 +10,6 @@ exports[`Host Summary Component rendering it renders the default Host Summary 1`
         },
         "node": Object {
           "_id": "yneHlmgBjVl2VqDlAjPR",
-          "firstSeen": "2019-01-28T22:14:16.039Z",
           "host": Object {
             "architecture": "x86_64",
             "id": "aa7ca589f1b8220002f2fc61c64cfbf1",
