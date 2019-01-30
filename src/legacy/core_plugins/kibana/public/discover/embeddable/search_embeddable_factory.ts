@@ -48,22 +48,13 @@ export class SearchEmbeddableFactory extends EmbeddableFactory {
    * @param onEmbeddableStateChanged
    * @return {Promise.<Embeddable>}
    */
-  public create(
-    panelMetadata: EmbeddableInstanceConfiguration,
+  public async create(
+    { id }: EmbeddableInstanceConfiguration,
     onEmbeddableStateChanged: OnEmbeddableStateChanged
   ) {
-    const searchId: string = panelMetadata.id;
-    const editUrl = this.getEditPath(searchId);
+    const editUrl = this.getEditPath(id);
 
-    return this.getSearchEmbeddable(searchId, editUrl, onEmbeddableStateChanged);
-  }
-
-  private async getSearchEmbeddable(
-    searchId: string,
-    editUrl: string,
-    onEmbeddableStateChanged: OnEmbeddableStateChanged
-  ) {
-    const savedObject: SavedSearch = await this.searchLoader.get(searchId);
+    const savedObject: SavedSearch = await this.searchLoader.get(id);
     return new SearchEmbeddable({
       onEmbeddableStateChanged,
       savedSearch: savedObject,
