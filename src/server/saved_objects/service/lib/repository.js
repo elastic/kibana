@@ -18,7 +18,7 @@
  */
 
 import { omit } from 'lodash';
-import { getRootType, getRootPropertiesObjects } from '../../../mappings';
+import { getRootPropertiesObjects } from '../../../mappings';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
 import { decorateEsError } from './decorate_es_error';
@@ -50,7 +50,9 @@ export class SavedObjectsRepository {
     this._index = index;
     this._mappings = mappings;
     this._schema = schema;
-    this._type = getRootType(this._mappings);
+
+    // ES7 and up expects the root type to be _doc
+    this._type = '_doc';
     this._onBeforeWrite = onBeforeWrite;
     this._unwrappedCallCluster = async (...args) => {
       await migrator.awaitMigration();

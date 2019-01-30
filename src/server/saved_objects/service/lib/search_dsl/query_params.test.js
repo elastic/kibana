@@ -20,42 +20,40 @@
 import { getQueryParams } from './query_params';
 
 const MAPPINGS = {
-  rootType: {
-    properties: {
-      type: {
-        type: 'keyword'
-      },
-      pending: {
-        properties: {
-          title: {
-            type: 'text',
-          }
+  properties: {
+    type: {
+      type: 'keyword'
+    },
+    pending: {
+      properties: {
+        title: {
+          type: 'text',
         }
-      },
-      saved: {
-        properties: {
-          title: {
-            type: 'text',
-            fields: {
-              raw: {
-                type: 'keyword'
-              }
+      }
+    },
+    saved: {
+      properties: {
+        title: {
+          type: 'text',
+          fields: {
+            raw: {
+              type: 'keyword'
             }
-          },
-          obj: {
-            properties: {
-              key1: {
-                type: 'text'
-              }
+          }
+        },
+        obj: {
+          properties: {
+            key1: {
+              type: 'text'
             }
           }
         }
-      },
-      global: {
-        properties: {
-          name: {
-            type: 'keyword',
-          }
+      }
+    },
+    global: {
+      properties: {
+        name: {
+          type: 'keyword',
         }
       }
     }

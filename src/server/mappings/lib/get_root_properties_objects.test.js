@@ -21,11 +21,9 @@ import { getRootPropertiesObjects } from './get_root_properties_objects';
 
 test(`returns single object with properties`, () => {
   const mappings = {
-    rootType: {
-      properties: {
-        foo: {
-          properties: {}
-        }
+    properties: {
+      foo: {
+        properties: {}
       }
     }
   };
@@ -40,11 +38,9 @@ test(`returns single object with properties`, () => {
 
 test(`returns single object with type === 'object'`, () => {
   const mappings = {
-    rootType: {
-      properties: {
-        foo: {
-          type: 'object'
-        }
+    properties: {
+      foo: {
+        type: 'object'
       }
     }
   };
@@ -59,14 +55,12 @@ test(`returns single object with type === 'object'`, () => {
 
 test(`returns two objects with properties`, () => {
   const mappings = {
-    rootType: {
-      properties: {
-        foo: {
-          properties: {}
-        },
-        bar: {
-          properties: {}
-        }
+    properties: {
+      foo: {
+        properties: {}
+      },
+      bar: {
+        properties: {}
       }
     }
   };
@@ -84,14 +78,12 @@ test(`returns two objects with properties`, () => {
 
 test(`returns two objects with type === 'object'`, () => {
   const mappings = {
-    rootType: {
-      properties: {
-        foo: {
-          type: 'object'
-        },
-        bar: {
-          type: 'object'
-        }
+    properties: {
+      foo: {
+        type: 'object'
+      },
+      bar: {
+        type: 'object'
       }
     }
   };
@@ -109,11 +101,9 @@ test(`returns two objects with type === 'object'`, () => {
 
 test(`excludes objects without properties and type of keyword`, () => {
   const mappings = {
-    rootType: {
-      properties: {
-        foo: {
-          type: 'keyword'
-        }
+    properties: {
+      foo: {
+        type: 'keyword'
       }
     }
   };
@@ -124,14 +114,12 @@ test(`excludes objects without properties and type of keyword`, () => {
 
 test(`excludes two objects without properties and type of keyword`, () => {
   const mappings = {
-    rootType: {
-      properties: {
-        foo: {
-          type: 'keyword'
-        },
-        bar: {
-          type: 'keyword'
-        }
+    properties: {
+      foo: {
+        type: 'keyword'
+      },
+      bar: {
+        type: 'keyword'
       }
     }
   };
@@ -142,14 +130,12 @@ test(`excludes two objects without properties and type of keyword`, () => {
 
 test(`includes one object with properties and excludes one object without properties`, () => {
   const mappings = {
-    rootType: {
-      properties: {
-        foo: {
-          properties: {}
-        },
-        bar: {
-          type: 'keyword'
-        }
+    properties: {
+      foo: {
+        properties: {}
+      },
+      bar: {
+        type: 'keyword'
       }
     }
   };
@@ -164,14 +150,12 @@ test(`includes one object with properties and excludes one object without proper
 
 test(`includes one object with type === 'object' and excludes one object without properties`, () => {
   const mappings = {
-    rootType: {
-      properties: {
-        foo: {
-          type: 'object'
-        },
-        bar: {
-          type: 'keyword'
-        }
+    properties: {
+      foo: {
+        type: 'object'
+      },
+      bar: {
+        type: 'keyword'
       }
     }
   };

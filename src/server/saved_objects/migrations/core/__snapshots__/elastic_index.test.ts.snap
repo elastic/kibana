@@ -9,7 +9,6 @@ Array [
         "index": Object {
           "_id": "niceguy:fredrogers",
           "_index": ".myalias",
-          "_type": "doc",
         },
       },
       Object {
@@ -25,7 +24,6 @@ Array [
         "index": Object {
           "_id": "badguy:rickygervais",
           "_index": ".myalias",
-          "_type": "doc",
         },
       },
       Object {

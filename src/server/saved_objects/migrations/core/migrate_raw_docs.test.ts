@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import { SavedObjectsSchema } from '../../schema';
-import { ROOT_TYPE, SavedObjectsSerializer } from '../../serialization';
+import { SavedObjectsSerializer } from '../../serialization';
 import { migrateRawDocs } from './migrate_raw_docs';
 
 describe('migrateRawDocs', () => {
@@ -35,12 +35,10 @@ describe('migrateRawDocs', () => {
       {
         _id: 'a:b',
         _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {} },
-        _type: ROOT_TYPE,
       },
       {
         _id: 'c:d',
         _source: { type: 'c', c: { name: 'HOI!' }, migrationVersion: {} },
-        _type: ROOT_TYPE,
       },
     ]);
 
@@ -59,7 +57,6 @@ describe('migrateRawDocs', () => {
       {
         _id: 'c:d',
         _source: { type: 'c', c: { name: 'TADA' }, migrationVersion: {} },
-        _type: ROOT_TYPE,
       },
     ]);
 

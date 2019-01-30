@@ -9,14 +9,12 @@
       }
     },
     "mappings": {
-      "doc": {
-        "properties": {
-          "geometry": {
-            "type": "geo_shape"
-          },
-          "name": {
-            "type": "keyword"
-          }
+      "properties": {
+        "geometry": {
+          "type": "geo_shape"
+        },
+        "name": {
+          "type": "keyword"
         }
       }
     }
@@ -34,11 +32,9 @@
       }
     },
     "mappings": {
-      "doc": {
-        "properties": {
-          "shape_name": {
-            "type": "keyword"
-          }
+      "properties": {
+        "shape_name": {
+          "type": "keyword"
         }
       }
     }
@@ -56,11 +52,9 @@
       }
     },
     "mappings": {
-      "doc": {
-        "properties": {
-          "location": {
-            "type": "geo_point"
-          }
+      "properties": {
+        "location": {
+          "type": "geo_point"
         }
       }
     }
@@ -78,11 +72,9 @@
       }
     },
     "mappings": {
-      "doc": {
-        "properties": {
-          "location": {
-            "type": "geo_shape"
-          }
+      "properties": {
+        "location": {
+          "type": "geo_shape"
         }
       }
     }
