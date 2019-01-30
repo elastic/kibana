@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { camelCase } from 'lodash';
 // @ts-ignore not typed yet
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import 'ui/autoload/all';
@@ -46,7 +47,7 @@ export function compose(): FrontendLibs {
 
   const framework = new FrameworkLib(
     new KibanaFrameworkAdapter(
-      PLUGIN.ID,
+      camelCase(PLUGIN.ID),
       management,
       routes,
       chrome.getBasePath,

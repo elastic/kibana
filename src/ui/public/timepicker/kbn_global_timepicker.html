@@ -28,7 +28,12 @@
     data-test-subj="globalRefreshButton"
   >
     <span ng-show="timefilterValues.refreshInterval.value === 0">
-      <span aria-hidden="true" class="kuiIcon fa-repeat"></span> Auto-refresh
+      <span aria-hidden="true" class="kuiIcon fa-repeat"></span> 
+      <span 
+        i18n-id="common.ui.timepicker.autoRefresh"
+        i18n-default-message="Auto-refresh"
+      >
+      </span>
     </span>
 
     <span
@@ -43,12 +48,12 @@
     ng-show="timefilterValues.isTimeRangeSelectorEnabled"
     class="kuiLocalMenuItem"
     ng-click="back()"
-    aria-label="Move backward in time"
+    aria-label="{{ ::'common.ui.timepicker.moveBackardInTime' | i18n: { defaultMessage: 'Move backward in time' } }}"
   >
     <span
       class="kuiIcon fa-chevron-left"
       aria-hidden="true"
-      tooltip="Move backward in time"
+      tooltip="{{ ::'common.ui.timepicker.moveBackardInTime' | i18n: { defaultMessage: 'Move backward in time' } }}"
     ></span>
   </button>
 
@@ -74,12 +79,12 @@
     ng-show="timefilterValues.isTimeRangeSelectorEnabled"
     class="kuiLocalMenuItem"
     ng-click="forward()"
-    aria-label="Move forward in time"
+    aria-label="{{ ::'common.ui.timepicker.moveForwardInTime' | i18n: { defaultMessage: 'Move forward in time' } }}"
   >
     <span
       aria-hidden="true"
       class="kuiIcon fa-chevron-right"
-      tooltip="Move forward in time"
+      tooltip="{{ ::'common.ui.timepicker.moveForwardInTime' | i18n: { defaultMessage: 'Move forward in time' } }}"
     ></span>
   </button>
 </div>

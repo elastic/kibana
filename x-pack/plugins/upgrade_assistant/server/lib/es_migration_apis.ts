@@ -12,10 +12,6 @@ import { DeprecationAPIResponse, DeprecationInfo } from 'src/legacy/core_plugins
 export interface EnrichedDeprecationInfo extends DeprecationInfo {
   index?: string;
   node?: string;
-  actions?: Array<{
-    label: string;
-    url: string;
-  }>;
 }
 
 export interface UpgradeAssistantStatus {
@@ -31,7 +27,7 @@ export async function getUpgradeAssistantStatus(
   basePath: string
 ): Promise<UpgradeAssistantStatus> {
   const deprecations = (await callWithRequest(req, 'transport.request', {
-    path: '/_xpack/migration/deprecations',
+    path: '/_migration/deprecations',
     method: 'GET',
   })) as DeprecationAPIResponse;
 
