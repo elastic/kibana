@@ -43,7 +43,10 @@ export const Map: React.SFC<Props> = ({
       {({ measureRef, content: { width = 0, height = 0 } }) => {
         const groupsWithLayout = applyWaffleMapLayout(map, width, height);
         return (
-          <WaffleMapOuterContiner innerRef={(el: any) => measureRef(el)} data-test-subj="waffleMap">
+          <WaffleMapOuterContainer
+            innerRef={(el: any) => measureRef(el)}
+            data-test-subj="waffleMap"
+          >
             <WaffleMapInnerContainer>
               {groupsWithLayout.map(group => {
                 if (isWaffleMapGroupWithGroups(group)) {
@@ -78,14 +81,14 @@ export const Map: React.SFC<Props> = ({
               })}
             </WaffleMapInnerContainer>
             <Legend formatter={formatter} bounds={bounds} legend={options.legend} />
-          </WaffleMapOuterContiner>
+          </WaffleMapOuterContainer>
         );
       }}
     </AutoSizer>
   );
 };
 
-const WaffleMapOuterContiner = styled.div`
+const WaffleMapOuterContainer = styled.div`
   flex: 1 0 0%;
   display: flex;
   justify-content: center;

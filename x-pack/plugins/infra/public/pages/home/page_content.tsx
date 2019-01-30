@@ -6,8 +6,8 @@
 
 import React from 'react';
 
+import { NodesOverview } from '../../components/nodes_overview';
 import { PageContent } from '../../components/page';
-import { WaffleMapVisualization } from '../../components/waffle';
 
 import { WithWaffleFilter } from '../../containers/waffle/with_waffle_filters';
 import { WithWaffleNodes } from '../../containers/waffle/with_waffle_nodes';
@@ -37,7 +37,7 @@ export const HomePageContent: React.SFC = () => (
                           timerange={currentTimeRange}
                         >
                           {({ nodes, loading, refetch }) => (
-                            <WaffleMapVisualization
+                            <NodesOverview
                               nodes={nodes}
                               loading={nodes.length > 0 && isAutoReloading ? false : loading}
                               nodeType={nodeType}
