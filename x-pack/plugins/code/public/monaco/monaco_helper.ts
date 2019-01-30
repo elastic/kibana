@@ -59,6 +59,7 @@ export class MonacoHelper {
           renderLineHighlight: 'none',
           contextmenu: false,
           folding: true,
+          scrollBeyondLastLine: false,
         },
         {
           textModelService: new TextModelResolverService(monaco),
@@ -137,8 +138,8 @@ export class MonacoHelper {
         range: new this.monaco!.Range(line, 0, line, 0),
         options: {
           isWholeLine: true,
-          className: 'highlightLine',
-          linesDecorationsClassName: 'markLineNumber',
+          className: 'code-monaco-highlight-line',
+          linesDecorationsClassName: 'code-mark-line-number',
         },
       },
     ]);
@@ -154,8 +155,8 @@ export class MonacoHelper {
         range: new this.monaco!.Range(line, 0, line, 0),
         options: {
           isWholeLine: true,
-          className: 'highlightLine',
-          linesDecorationsClassName: 'markLineNumber',
+          className: 'code-monaco-highlight-line',
+          linesDecorationsClassName: 'code-mark-line-number',
         },
       },
     ]);

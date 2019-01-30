@@ -4,8 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIcon, IconType } from '@elastic/eui';
-import { euiColorHighlight } from '@elastic/eui/dist/eui_theme_light.json';
+import { EuiIcon, EuiTitle, IconType } from '@elastic/eui';
+import {
+  euiColorHighlight,
+  euiSize,
+  euiSizeM,
+  euiSizeS,
+  euiSizeXs,
+  paddingSizes,
+} from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 import styled from 'styled-components';
@@ -13,7 +20,7 @@ import { FileTree, FileTreeItemType } from '../../../model';
 import { MainRouteParams, PathTypes } from '../../common/types';
 
 const Root = styled.div`
-  padding: 16px;
+  padding: ${paddingSizes.m};
 `;
 
 const DirectoryNodesContainer = styled.div`
@@ -22,7 +29,7 @@ const DirectoryNodesContainer = styled.div`
 `;
 
 const NodeName = styled.span`
-  margin-left: 5px;
+  margin-left: ${euiSizeXs};
   vertical-align: middle;
   a {
     :focus: {
@@ -36,22 +43,19 @@ const NodeName = styled.span`
   }
 `;
 
-const Title = styled.div`
-  color: #1a1a1a;
-  font-size: 20px;
-  font-weight: 600;
-  margin: 4px 0 18px;
+const Title = styled(EuiTitle)`
+  margin: ${euiSizeXs} 0 ${euiSize};
 `;
 
 const Container = styled.div`
   &:not(:first-child) {
-    margin-top: 20px;
+    margin-top: calc(20 / 14rem);
   }
 `;
 
 const DirectoryNode = styled.div`
-  width: 200px;
-  margin: 0 8px 10px;
+  width: calc(200 / 14rem);
+  margin: 0 ${euiSizeS} ${euiSizeM};
   :hover {
     background-color: ${euiColorHighlight};
     cursor: pointer;
@@ -80,7 +84,9 @@ const DirectoryNodes = (props: DirectoryNodesProps) => {
   ));
   return (
     <Container>
-      <Title>{props.title}</Title>
+      <Title size="s">
+        <h3>{props.title}</h3>
+      </Title>
       <DirectoryNodesContainer>{nodes}</DirectoryNodesContainer>
     </Container>
   );

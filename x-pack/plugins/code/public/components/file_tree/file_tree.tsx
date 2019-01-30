@@ -8,6 +8,7 @@ import React from 'react';
 import { EuiIcon, EuiSideNav } from '@elastic/eui';
 import classes from 'classnames';
 
+import { euiSizeXs } from '@elastic/eui/dist/eui_theme_light.json';
 import { connect } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import styled from 'styled-components';
@@ -18,7 +19,7 @@ import { RootState } from '../../reducers';
 import { FolderClosedTriangle, FolderOpenTriangle } from '../shared';
 
 const DirectoryNode = styled.span`
-  margin-left: 4px;
+  margin-left: ${euiSizeXs};
   vertical-align: middle;
 `;
 
@@ -69,7 +70,8 @@ export class CodeFileTree extends React.Component<Props> {
   };
 
   public getItemRenderer = (node: Tree, forceOpen: boolean) => () => {
-    const className = this.props.match.params.path === node.path ? 'activeFileNode' : 'fileNode';
+    const className =
+      this.props.match.params.path === node.path ? 'code-active-file-node' : 'code-file-node';
     const onClick = () => this.onClick(node);
     switch (node.type) {
       case FileTreeItemType.Directory: {
@@ -98,7 +100,11 @@ export class CodeFileTree extends React.Component<Props> {
       }
       case FileTreeItemType.Link: {
         return (
-          <div onClick={onClick} className={classes(className, 'fileTreeFile')} role="button">
+          <div
+            onClick={onClick}
+            className={classes(className, 'code-file-tree-file')}
+            role="button"
+          >
             <EuiIcon type="symlink" />
             <DirectoryNode>{node.name}</DirectoryNode>
           </div>
@@ -106,7 +112,11 @@ export class CodeFileTree extends React.Component<Props> {
       }
       case FileTreeItemType.File: {
         return (
-          <div onClick={onClick} className={classes(className, 'fileTreeFile')} role="button">
+          <div
+            onClick={onClick}
+            className={classes(className, 'code-file-tree-file')}
+            role="button"
+          >
             <EuiIcon type="document" />
             <DirectoryNode>{node.name}</DirectoryNode>
           </div>

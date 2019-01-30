@@ -5,7 +5,8 @@
  */
 
 // @ts-ignore
-import { EuiButton, EuiButtonGroup } from '@elastic/eui';
+import { EuiButton, EuiButtonGroup, EuiTitle } from '@elastic/eui';
+import { euiSize, euiSizeS, euiSizeXs } from '@elastic/eui/dist/eui_theme_light.json';
 import 'github-markdown-css/github-markdown.css';
 import React from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
@@ -23,9 +24,11 @@ import { RootState } from '../../reducers';
 import { hasMoreCommitsSelector, treeCommitsSelector } from '../../selectors';
 import { history } from '../../utils/url';
 import { Editor } from '../editor/editor';
+import { UnsupportedFileIcon } from '../shared/icons';
 import { Blame } from './blame';
 import { CommitHistory } from './commit_history';
 import { Directory } from './directory';
+import { UnsupportedFile } from './unsupported_file';
 
 const LARGE_Z_INDEX_NUMBER = 99;
 
@@ -33,10 +36,10 @@ const ButtonsContainer = styled.div`
   display: flex;
   flex-direction: row;
   position: absolute;
-  right: 1rem;
+  right: ${euiSize};
   z-index: ${LARGE_Z_INDEX_NUMBER};
   & > div:first-child {
-    margin-right: 8px;
+    margin-right: ${euiSizeS};
   }
 `;
 
@@ -50,7 +53,7 @@ const EditorBlameContainer = styled.div`
 
 const BlameContainer = styled.div`
   flex-grow: 3;
-  flex-basis: 400px;
+  flex-basis: calc(400 / 14rem);
   height: 100%;
   overflow: auto;
 `;
@@ -77,11 +80,8 @@ enum ButtonOption {
   Folder = 'Folder',
 }
 
-const Title = styled.div`
-  color: #1a1a1a;
-  font-size: 20px;
-  font-weight: 600;
-  margin: 4px 0 18px;
+const Title = styled(EuiTitle)`
+  margin: ${euiSizeXs} 0 ${euiSize};
 `;
 
 class CodeContent extends React.PureComponent<Props> {
@@ -222,7 +222,9 @@ class CodeContent extends React.PureComponent<Props> {
               repoUri={repoUri}
               header={
                 <React.Fragment>
-                  <Title>Recent Commits</Title>
+                  <Title>
+                    <h3>Recent Commits</h3>
+                  </Title>
                   <EuiButton
                     href={`#/${resource}/${org}/${repo}/${PathTypes.commits}/${revision}/${path ||
                       ''}`}
@@ -238,7 +240,16 @@ class CodeContent extends React.PureComponent<Props> {
         if (!file) {
           return null;
         }
-        const { lang: fileLanguage, content: fileContent, url } = file;
+        const { lang: fileLanguage, content: fileContent, url, isUnsupported } = file;
+        if (isUnsupported) {
+          return (
+            <UnsupportedFile
+              icon={<UnsupportedFileIcon />}
+              title={<h2>Unsupported File</h2>}
+              content="Unfortunately that’s an unsupported file type and we’re unable to render it here."
+            />
+          );
+        }
         if (fileLanguage === 'markdown') {
           return (
             <div className="markdown-body markdownContainer">
@@ -264,7 +275,7 @@ class CodeContent extends React.PureComponent<Props> {
         const blame = (
           <BlameContainer innerRef={this.scrollBlameInResponseOfScrollingEditor}>
             <div style={{ height: blamesHeight }}>
-              <Blame blames={blames} lineHeight={18} />
+              <Blame repoUri={repoUri} blames={blames} lineHeight={18} />
             </div>
           </BlameContainer>
         );
@@ -293,7 +304,11 @@ class CodeContent extends React.PureComponent<Props> {
               <CommitHistory
                 commits={commits}
                 repoUri={repoUri}
-                header={<Title>Commit History</Title>}
+                header={
+                  <Title>
+                    <h3>Commit History</h3>
+                  </Title>
+                }
               />
             </InfiniteScroll>
           </React.Fragment>

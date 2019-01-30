@@ -183,7 +183,7 @@ export async function requestFile(
     url += '?line=' + line;
   }
   const response: Response = await fetch(url);
-  if (response.status === 200) {
+  if (response.status >= 200 && response.status < 300) {
     const contentType = response.headers.get('Content-Type');
 
     if (contentType && contentType.startsWith('text/')) {
@@ -192,6 +192,7 @@ export async function requestFile(
         payload,
         lang,
         content: await response.text(),
+        isUnsupported: false,
       };
     } else if (contentType && contentType.startsWith('image/')) {
       return {
@@ -199,6 +200,15 @@ export async function requestFile(
         isImage: true,
         content: await response.text(),
         url,
+        isUnsupported: false,
+      };
+    } else {
+      return {
+        payload,
+        isImage: false,
+        content: await response.text(),
+        url,
+        isUnsupported: true,
       };
     }
   } else if (response.status === 404) {

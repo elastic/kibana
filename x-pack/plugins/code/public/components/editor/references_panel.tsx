@@ -62,7 +62,7 @@ export class ReferencesPanel extends React.Component<Props, State> {
       }
     }
     return (
-      <EuiPanel grow={false} className="referencesPanel" style={styles}>
+      <EuiPanel grow={false} className="code-editor-references-panel">
         <EuiButtonIcon
           size="s"
           onClick={this.toggleExpand}
@@ -83,7 +83,7 @@ export class ReferencesPanel extends React.Component<Props, State> {
           <h3>{this.props.title}</h3>
         </EuiTitle>
 
-        <div className="autoOverflow">{body}</div>
+        <div className="code-auto-overflow">{body}</div>
       </EuiPanel>
     );
   }
@@ -99,7 +99,7 @@ export class ReferencesPanel extends React.Component<Props, State> {
       <EuiAccordion
         id={repo}
         key={repo}
-        buttonContentClassName="referenceAccordionButton"
+        buttonContentClassName="code-editor-reference-accordion-button"
         buttonContent={repo}
         paddingSize="s"
         initialIsOpen={true}

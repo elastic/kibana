@@ -22,6 +22,9 @@ import _ from 'lodash';
 import { dataLabel } from '../lib/_data_label';
 import { VislibLibDispatchProvider } from '../lib/dispatch';
 import { TooltipProvider } from '../../vis/components/tooltip';
+import { getFormat } from '../../visualize/loader/pipeline_helpers/utilities';
+import { HierarchicalTooltipFormatterProvider } from '../../agg_response/hierarchical/_hierarchical_tooltip_formatter';
+import { PointSeriesTooltipFormatter } from '../../agg_response/point_series/_tooltip_formatter';
 
 export function VislibVisualizationsChartProvider(Private) {
 
@@ -45,12 +48,16 @@ export function VislibVisualizationsChartProvider(Private) {
 
       const events = this.events = new Dispatch(handler);
 
+      const fieldFormatter = getFormat(this.handler.data.get('tooltipFormatter'));
+      const tooltipFormatterProvider = this.handler.visConfig.get('type') === 'pie' ?
+        Private(HierarchicalTooltipFormatterProvider) : Private(PointSeriesTooltipFormatter);
+      const tooltipFormatter = tooltipFormatterProvider(fieldFormatter);
+
       if (this.handler.visConfig && this.handler.visConfig.get('addTooltip', false)) {
         const $el = this.handler.el;
-        const formatter = this.handler.data.get('tooltipFormatter');
 
         // Add tooltip
-        this.tooltip = new Tooltip('chart', $el, formatter, events);
+        this.tooltip = new Tooltip('chart', $el, tooltipFormatter, events);
         this.tooltips.push(this.tooltip);
       }
 

@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
 import React from 'react';
 import { Request, RRRRender } from 'react-redux-request';
-import { TRACE_ID } from 'x-pack/plugins/apm/common/constants';
+import { idx } from 'x-pack/plugins/apm/common/idx';
 import { TraceAPIResponse } from 'x-pack/plugins/apm/server/lib/traces/get_trace';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import {
@@ -29,7 +28,7 @@ interface Props {
 
 export function WaterfallRequest({ urlParams, transaction, render }: Props) {
   const { start, end } = urlParams;
-  const traceId: string = get(transaction, TRACE_ID);
+  const traceId = idx(transaction, _ => _.trace.id);
 
   if (!(traceId && start && end)) {
     return null;

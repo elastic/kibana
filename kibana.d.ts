@@ -32,9 +32,12 @@ import * as LegacyKibanaServer from './src/server/kbn_server';
  */
 // tslint:disable:no-namespace
 export namespace Legacy {
+  export type IndexPatternsService = LegacyKibanaServer.IndexPatternsService;
   export type KibanaConfig = LegacyKibanaServer.KibanaConfig;
   export type Request = LegacyKibanaServer.Request;
   export type ResponseToolkit = LegacyKibanaServer.ResponseToolkit;
+  export type SavedObjectsClient = LegacyKibanaServer.SavedObjectsClient;
+  export type SavedObjectsService = LegacyKibanaServer.SavedObjectsService;
   export type Server = LegacyKibanaServer.Server;
 
   export namespace Plugins {

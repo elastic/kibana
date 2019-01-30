@@ -10,6 +10,7 @@ import { LspIndexerFactory, RepositoryIndexInitializerFactory, tryMigrateIndices
 import { EsClient, Esqueue } from './lib/esqueue';
 import { Logger } from './log';
 import { InstallManager } from './lsp/install_manager';
+import { LanguageServers, LanguageServersDeveloping } from './lsp/language_servers';
 import { LspService } from './lsp/lsp_service';
 import { CancellationSerivce, CloneWorker, DeleteWorker, IndexWorker, UpdateWorker } from './queue';
 import { RepositoryConfigController } from './repository_config_controller';
@@ -86,7 +87,7 @@ export function init(server: Server, options: any) {
         if (serverHost !== undefined && serverHost !== 'localhost') {
           const serverPort = server.config().get('server.port');
           const schema = server.config().get('server.ssl.enabled') ? 'https' : 'http';
-          let basePath: string = server.config().get('basePath') || '';
+          let basePath: string = server.config().get('server.basePath') || '';
           if (!basePath.startsWith('/')) {
             basePath = '/' + basePath;
           }
@@ -212,6 +213,11 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   if (!serverOptions.disableScheduler) {
     updateScheduler.start();
     indexScheduler.start();
+  }
+
+  // Enable the developing language servers in development mode.
+  if (server.config().get('env.dev') === true) {
+    LanguageServers.push(...LanguageServersDeveloping);
   }
 
   // Add server routes and initialize the plugin here

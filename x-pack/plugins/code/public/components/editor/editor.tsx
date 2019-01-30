@@ -87,7 +87,7 @@ export class EditorComponent extends React.Component<Props> {
   }
   public render() {
     return (
-      <EuiFlexItem className="noOverflow" grow={1}>
+      <EuiFlexItem className="code-no-overflow" grow={1}>
         <Shortcut
           keyCode="f"
           help="With editor ‘active’ Find in file"
@@ -95,7 +95,12 @@ export class EditorComponent extends React.Component<Props> {
           macModifier={[Modifier.meta]}
           winModifier={[Modifier.ctrl]}
         />
-        <EuiFlexItem tabIndex={0} grow={1} className="editorContainer noOverflow" id="mainEditor" />
+        <EuiFlexItem
+          tabIndex={0}
+          grow={1}
+          className="code-editor-container code-no-overflow"
+          id="mainEditor"
+        />
         {this.renderReferences()}
       </EuiFlexItem>
     );

@@ -232,7 +232,7 @@ exports[`render full suggestions component 1`] = `
                 >
                   <div
                     aria-selected={true}
-                    className="sc-htpNat bUGPvU"
+                    className="sc-htpNat brrMHa"
                     id="suggestion-0-0"
                     onClick={[Function]}
                     onMouseEnter={[Function]}
@@ -294,10 +294,10 @@ exports[`render full suggestions component 1`] = `
                         <div>
                           <Styled(styled.div)>
                             <styled.div
-                              className="sc-bZQynM keiyFT"
+                              className="sc-bZQynM iALzZw"
                             >
                               <div
-                                className="sc-bZQynM keiyFT sc-ifAKCX bMxzXt"
+                                className="sc-bZQynM iALzZw sc-ifAKCX bMxzXt"
                               >
                                 <span>
                                   java.lang.
@@ -427,7 +427,7 @@ exports[`render full suggestions component 1`] = `
                 >
                   <div
                     aria-selected={false}
-                    className="sc-htpNat eUnATS"
+                    className="sc-htpNat hRxeyc"
                     id="suggestion-1-0"
                     onClick={[Function]}
                     onMouseEnter={[Function]}
@@ -440,10 +440,10 @@ exports[`render full suggestions component 1`] = `
                         <div>
                           <Styled(styled.div)>
                             <styled.div
-                              className="sc-bZQynM keiyFT"
+                              className="sc-bZQynM iALzZw"
                             >
                               <div
-                                className="sc-bZQynM keiyFT sc-ifAKCX bMxzXt"
+                                className="sc-bZQynM iALzZw sc-ifAKCX bMxzXt"
                               >
                                 src/foo/bar.java
                               </div>
@@ -570,7 +570,7 @@ exports[`render full suggestions component 1`] = `
                 >
                   <div
                     aria-selected={false}
-                    className="sc-htpNat eUnATS"
+                    className="sc-htpNat hRxeyc"
                     id="suggestion-2-0"
                     onClick={[Function]}
                     onMouseEnter={[Function]}
@@ -583,10 +583,10 @@ exports[`render full suggestions component 1`] = `
                         <div>
                           <Styled(styled.div)>
                             <styled.div
-                              className="sc-bZQynM keiyFT"
+                              className="sc-bZQynM iALzZw"
                             >
                               <div
-                                className="sc-bZQynM keiyFT sc-ifAKCX bMxzXt"
+                                className="sc-bZQynM iALzZw sc-ifAKCX bMxzXt"
                               >
                                 elastic/kibana
                               </div>
@@ -636,7 +636,7 @@ exports[`render full suggestions component 1`] = `
                 >
                   <div
                     aria-selected={false}
-                    className="sc-htpNat eUnATS"
+                    className="sc-htpNat hRxeyc"
                     id="suggestion-2-1"
                     onClick={[Function]}
                     onMouseEnter={[Function]}
@@ -649,10 +649,10 @@ exports[`render full suggestions component 1`] = `
                         <div>
                           <Styled(styled.div)>
                             <styled.div
-                              className="sc-bZQynM keiyFT"
+                              className="sc-bZQynM iALzZw"
                             >
                               <div
-                                className="sc-bZQynM keiyFT sc-ifAKCX bMxzXt"
+                                className="sc-bZQynM iALzZw sc-ifAKCX bMxzXt"
                               >
                                 elastic/elasticsearch
                               </div>

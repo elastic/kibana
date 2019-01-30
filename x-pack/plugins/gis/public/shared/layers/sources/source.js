@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-export class ASource {
+export class AbstractSource {
 
   static renderEditor() {
     throw new Error('Must implement Source.renderEditor');
@@ -60,7 +60,7 @@ export class ASource {
     return false;
   }
 
-  isGeohashPrecisionAware() {
+  isGeoGridPrecisionAware() {
     return false;
   }
 
@@ -82,6 +82,10 @@ export class ASource {
 
   getIndexPatternIds() {
     return  [];
+  }
+
+  getGeoGridPrecision() {
+    return 0;
   }
 }
 
