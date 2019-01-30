@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
 import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
+import { ThemeProvider } from 'styled-components';
 
 import { createStore } from '../../store';
 import { mockDataProviders } from '../timeline/data_providers/mock/mock_data_providers';
@@ -22,9 +24,11 @@ describe('DraggableWrapper', () => {
 
       const wrapper = mount(
         <ReduxStoreProvider store={store}>
-          <DragDropContextWrapper>
-            <DraggableWrapper dataProvider={dataProvider} render={() => message} />
-          </DragDropContextWrapper>
+          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+            <DragDropContextWrapper>
+              <DraggableWrapper dataProvider={dataProvider} render={() => message} />
+            </DragDropContextWrapper>
+          </ThemeProvider>
         </ReduxStoreProvider>
       );
 

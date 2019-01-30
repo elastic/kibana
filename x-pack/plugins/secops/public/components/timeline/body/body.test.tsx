@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
 import { get } from 'lodash/fp';
 import * as React from 'react';
+import { ThemeProvider } from 'styled-components';
 
 import moment = require('moment');
 import { Body } from '.';
@@ -22,14 +24,16 @@ describe('ColumnHeaders', () => {
       const headersSansTimestamp = headers.filter(h => h.id !== 'timestamp');
 
       const wrapper = mount(
-        <Body
-          id={'timeline-test'}
-          columnHeaders={headersSansTimestamp}
-          columnRenderers={columnRenderers}
-          data={mockEcsData}
-          rowRenderers={rowRenderers}
-          height={testBodyHeight}
-        />
+        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+          <Body
+            id={'timeline-test'}
+            columnHeaders={headersSansTimestamp}
+            columnRenderers={columnRenderers}
+            data={mockEcsData}
+            rowRenderers={rowRenderers}
+            height={testBodyHeight}
+          />
+        </ThemeProvider>
       );
 
       headersSansTimestamp.forEach(h => {
@@ -46,14 +50,16 @@ describe('ColumnHeaders', () => {
       const headersJustTimestamp = headers.filter(h => h.id === 'timestamp');
 
       const wrapper = mount(
-        <Body
-          id={'timeline-test'}
-          columnHeaders={headersJustTimestamp}
-          columnRenderers={columnRenderers}
-          data={mockEcsData}
-          rowRenderers={rowRenderers}
-          height={testBodyHeight}
-        />
+        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+          <Body
+            id={'timeline-test'}
+            columnHeaders={headersJustTimestamp}
+            columnRenderers={columnRenderers}
+            data={mockEcsData}
+            rowRenderers={rowRenderers}
+            height={testBodyHeight}
+          />
+        </ThemeProvider>
       );
 
       headersJustTimestamp.forEach(h => {

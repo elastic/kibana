@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { I18nProvider } from '@kbn/i18n/react';
 import { mount } from 'enzyme';
 import { noop } from 'lodash/fp';
@@ -12,10 +13,11 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import { DragDropContext } from 'react-beautiful-dnd';
 
 import { Provider as ReduxStoreProvider } from 'react-redux';
+import { ThemeProvider } from 'styled-components';
 import { eventsQuery } from '../../containers/events/index.gql_query';
 import { Direction } from '../../graphql/types';
-import { mockGlobalState } from '../../mock';
 import { mockEcsData } from '../../mock';
+import { mockGlobalState } from '../../mock';
 import { createStore, State } from '../../store';
 import { flyoutHeaderHeight } from '../flyout';
 import { ColumnHeaderType } from './body/column_headers/column_header';
@@ -93,35 +95,37 @@ describe('Timeline', () => {
       const wrapper = mount(
         <I18nProvider>
           <ReduxStoreProvider store={store}>
-            <DragDropContext onDragEnd={noop}>
-              <MockedProvider mocks={mocks}>
-                <Timeline
-                  id="foo"
-                  columnHeaders={headers}
-                  columnRenderers={columnRenderers}
-                  dataProviders={mockDataProviders}
-                  flyoutHeight={testFlyoutHeight}
-                  flyoutHeaderHeight={flyoutHeaderHeight}
-                  itemsPerPage={5}
-                  itemsPerPageOptions={[5, 10, 20]}
-                  kqlQuery=""
-                  onChangeDataProviderKqlQuery={noop}
-                  onChangeDroppableAndProvider={noop}
-                  onChangeItemsPerPage={noop}
-                  onColumnSorted={noop}
-                  onDataProviderRemoved={noop}
-                  onFilterChange={noop}
-                  onRangeSelected={noop}
-                  onToggleDataProviderEnabled={noop}
-                  onToggleDataProviderExcluded={noop}
-                  range={'1 Day'}
-                  rowRenderers={rowRenderers}
-                  show={true}
-                  sort={sort}
-                  indexPattern={indexPattern}
-                />
-              </MockedProvider>
-            </DragDropContext>
+            <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+              <DragDropContext onDragEnd={noop}>
+                <MockedProvider mocks={mocks}>
+                  <Timeline
+                    id="foo"
+                    columnHeaders={headers}
+                    columnRenderers={columnRenderers}
+                    dataProviders={mockDataProviders}
+                    flyoutHeight={testFlyoutHeight}
+                    flyoutHeaderHeight={flyoutHeaderHeight}
+                    itemsPerPage={5}
+                    itemsPerPageOptions={[5, 10, 20]}
+                    kqlQuery=""
+                    onChangeDataProviderKqlQuery={noop}
+                    onChangeDroppableAndProvider={noop}
+                    onChangeItemsPerPage={noop}
+                    onColumnSorted={noop}
+                    onDataProviderRemoved={noop}
+                    onFilterChange={noop}
+                    onRangeSelected={noop}
+                    onToggleDataProviderEnabled={noop}
+                    onToggleDataProviderExcluded={noop}
+                    range={'1 Day'}
+                    rowRenderers={rowRenderers}
+                    show={true}
+                    sort={sort}
+                    indexPattern={indexPattern}
+                  />
+                </MockedProvider>
+              </DragDropContext>
+            </ThemeProvider>
           </ReduxStoreProvider>
         </I18nProvider>
       );
@@ -133,35 +137,37 @@ describe('Timeline', () => {
       const wrapper = mount(
         <I18nProvider>
           <ReduxStoreProvider store={store}>
-            <DragDropContext onDragEnd={noop}>
-              <MockedProvider mocks={mocks}>
-                <Timeline
-                  id="foo"
-                  columnHeaders={headers}
-                  columnRenderers={columnRenderers}
-                  dataProviders={mockDataProviders}
-                  flyoutHeight={testFlyoutHeight}
-                  flyoutHeaderHeight={flyoutHeaderHeight}
-                  itemsPerPage={5}
-                  itemsPerPageOptions={[5, 10, 20]}
-                  kqlQuery=""
-                  onChangeDataProviderKqlQuery={noop}
-                  onChangeDroppableAndProvider={noop}
-                  onChangeItemsPerPage={noop}
-                  onColumnSorted={noop}
-                  onDataProviderRemoved={noop}
-                  onFilterChange={noop}
-                  onRangeSelected={noop}
-                  onToggleDataProviderEnabled={noop}
-                  onToggleDataProviderExcluded={noop}
-                  range={'1 Day'}
-                  rowRenderers={rowRenderers}
-                  show={true}
-                  sort={sort}
-                  indexPattern={indexPattern}
-                />
-              </MockedProvider>
-            </DragDropContext>
+            <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+              <DragDropContext onDragEnd={noop}>
+                <MockedProvider mocks={mocks}>
+                  <Timeline
+                    id="foo"
+                    columnHeaders={headers}
+                    columnRenderers={columnRenderers}
+                    dataProviders={mockDataProviders}
+                    flyoutHeight={testFlyoutHeight}
+                    flyoutHeaderHeight={flyoutHeaderHeight}
+                    itemsPerPage={5}
+                    itemsPerPageOptions={[5, 10, 20]}
+                    kqlQuery=""
+                    onChangeDataProviderKqlQuery={noop}
+                    onChangeDroppableAndProvider={noop}
+                    onChangeItemsPerPage={noop}
+                    onColumnSorted={noop}
+                    onDataProviderRemoved={noop}
+                    onFilterChange={noop}
+                    onRangeSelected={noop}
+                    onToggleDataProviderEnabled={noop}
+                    onToggleDataProviderExcluded={noop}
+                    range={'1 Day'}
+                    rowRenderers={rowRenderers}
+                    show={true}
+                    sort={sort}
+                    indexPattern={indexPattern}
+                  />
+                </MockedProvider>
+              </DragDropContext>
+            </ThemeProvider>
           </ReduxStoreProvider>
         </I18nProvider>
       );
@@ -173,35 +179,37 @@ describe('Timeline', () => {
       const wrapper = mount(
         <I18nProvider>
           <ReduxStoreProvider store={store}>
-            <DragDropContext onDragEnd={noop}>
-              <MockedProvider mocks={mocks}>
-                <Timeline
-                  id="foo"
-                  columnHeaders={headers}
-                  columnRenderers={columnRenderers}
-                  dataProviders={[]}
-                  flyoutHeight={testFlyoutHeight}
-                  flyoutHeaderHeight={flyoutHeaderHeight}
-                  itemsPerPage={5}
-                  itemsPerPageOptions={[5, 10, 20]}
-                  kqlQuery=""
-                  onChangeDataProviderKqlQuery={noop}
-                  onChangeDroppableAndProvider={noop}
-                  onChangeItemsPerPage={noop}
-                  onColumnSorted={noop}
-                  onDataProviderRemoved={noop}
-                  onFilterChange={noop}
-                  onRangeSelected={noop}
-                  onToggleDataProviderEnabled={noop}
-                  onToggleDataProviderExcluded={noop}
-                  range={'1 Day'}
-                  rowRenderers={rowRenderers}
-                  show={true}
-                  sort={sort}
-                  indexPattern={indexPattern}
-                />
-              </MockedProvider>
-            </DragDropContext>
+            <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+              <DragDropContext onDragEnd={noop}>
+                <MockedProvider mocks={mocks}>
+                  <Timeline
+                    id="foo"
+                    columnHeaders={headers}
+                    columnRenderers={columnRenderers}
+                    dataProviders={[]}
+                    flyoutHeight={testFlyoutHeight}
+                    flyoutHeaderHeight={flyoutHeaderHeight}
+                    itemsPerPage={5}
+                    itemsPerPageOptions={[5, 10, 20]}
+                    kqlQuery=""
+                    onChangeDataProviderKqlQuery={noop}
+                    onChangeDroppableAndProvider={noop}
+                    onChangeItemsPerPage={noop}
+                    onColumnSorted={noop}
+                    onDataProviderRemoved={noop}
+                    onFilterChange={noop}
+                    onRangeSelected={noop}
+                    onToggleDataProviderEnabled={noop}
+                    onToggleDataProviderExcluded={noop}
+                    range={'1 Day'}
+                    rowRenderers={rowRenderers}
+                    show={true}
+                    sort={sort}
+                    indexPattern={indexPattern}
+                  />
+                </MockedProvider>
+              </DragDropContext>
+            </ThemeProvider>
           </ReduxStoreProvider>
         </I18nProvider>
       );
@@ -218,35 +226,37 @@ describe('Timeline', () => {
         const wrapper = mount(
           <I18nProvider>
             <ReduxStoreProvider store={store}>
-              <DragDropContext onDragEnd={noop}>
-                <MockedProvider mocks={mocks}>
-                  <Timeline
-                    id="foo"
-                    columnHeaders={headers}
-                    columnRenderers={columnRenderers}
-                    dataProviders={mockDataProviders}
-                    flyoutHeight={testFlyoutHeight}
-                    flyoutHeaderHeight={flyoutHeaderHeight}
-                    itemsPerPage={5}
-                    itemsPerPageOptions={[5, 10, 20]}
-                    kqlQuery=""
-                    onChangeDataProviderKqlQuery={noop}
-                    onChangeDroppableAndProvider={noop}
-                    onColumnSorted={mockOnColumnSorted}
-                    onChangeItemsPerPage={noop}
-                    onDataProviderRemoved={noop}
-                    onFilterChange={noop}
-                    onRangeSelected={noop}
-                    onToggleDataProviderEnabled={noop}
-                    onToggleDataProviderExcluded={noop}
-                    range={'1 Day'}
-                    rowRenderers={rowRenderers}
-                    show={true}
-                    sort={sort}
-                    indexPattern={indexPattern}
-                  />
-                </MockedProvider>
-              </DragDropContext>
+              <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+                <DragDropContext onDragEnd={noop}>
+                  <MockedProvider mocks={mocks}>
+                    <Timeline
+                      id="foo"
+                      columnHeaders={headers}
+                      columnRenderers={columnRenderers}
+                      dataProviders={mockDataProviders}
+                      flyoutHeight={testFlyoutHeight}
+                      flyoutHeaderHeight={flyoutHeaderHeight}
+                      itemsPerPage={5}
+                      itemsPerPageOptions={[5, 10, 20]}
+                      kqlQuery=""
+                      onChangeDataProviderKqlQuery={noop}
+                      onChangeDroppableAndProvider={noop}
+                      onColumnSorted={mockOnColumnSorted}
+                      onChangeItemsPerPage={noop}
+                      onDataProviderRemoved={noop}
+                      onFilterChange={noop}
+                      onRangeSelected={noop}
+                      onToggleDataProviderEnabled={noop}
+                      onToggleDataProviderExcluded={noop}
+                      range={'1 Day'}
+                      rowRenderers={rowRenderers}
+                      show={true}
+                      sort={sort}
+                      indexPattern={indexPattern}
+                    />
+                  </MockedProvider>
+                </DragDropContext>
+              </ThemeProvider>
             </ReduxStoreProvider>
           </I18nProvider>
         );
@@ -270,35 +280,37 @@ describe('Timeline', () => {
         const wrapper = mount(
           <I18nProvider>
             <ReduxStoreProvider store={store}>
-              <DragDropContext onDragEnd={noop}>
-                <MockedProvider mocks={mocks}>
-                  <Timeline
-                    id="foo"
-                    columnHeaders={headers}
-                    columnRenderers={columnRenderers}
-                    dataProviders={mockDataProviders}
-                    flyoutHeight={testFlyoutHeight}
-                    flyoutHeaderHeight={flyoutHeaderHeight}
-                    itemsPerPage={5}
-                    itemsPerPageOptions={[5, 10, 20]}
-                    kqlQuery=""
-                    onChangeDataProviderKqlQuery={noop}
-                    onChangeDroppableAndProvider={noop}
-                    onChangeItemsPerPage={noop}
-                    onColumnSorted={noop}
-                    onDataProviderRemoved={mockOnDataProviderRemoved}
-                    onFilterChange={noop}
-                    onRangeSelected={noop}
-                    onToggleDataProviderEnabled={noop}
-                    onToggleDataProviderExcluded={noop}
-                    range={'1 Day'}
-                    rowRenderers={rowRenderers}
-                    show={true}
-                    sort={sort}
-                    indexPattern={indexPattern}
-                  />
-                </MockedProvider>
-              </DragDropContext>
+              <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+                <DragDropContext onDragEnd={noop}>
+                  <MockedProvider mocks={mocks}>
+                    <Timeline
+                      id="foo"
+                      columnHeaders={headers}
+                      columnRenderers={columnRenderers}
+                      dataProviders={mockDataProviders}
+                      flyoutHeight={testFlyoutHeight}
+                      flyoutHeaderHeight={flyoutHeaderHeight}
+                      itemsPerPage={5}
+                      itemsPerPageOptions={[5, 10, 20]}
+                      kqlQuery=""
+                      onChangeDataProviderKqlQuery={noop}
+                      onChangeDroppableAndProvider={noop}
+                      onChangeItemsPerPage={noop}
+                      onColumnSorted={noop}
+                      onDataProviderRemoved={mockOnDataProviderRemoved}
+                      onFilterChange={noop}
+                      onRangeSelected={noop}
+                      onToggleDataProviderEnabled={noop}
+                      onToggleDataProviderExcluded={noop}
+                      range={'1 Day'}
+                      rowRenderers={rowRenderers}
+                      show={true}
+                      sort={sort}
+                      indexPattern={indexPattern}
+                    />
+                  </MockedProvider>
+                </DragDropContext>
+              </ThemeProvider>
             </ReduxStoreProvider>
           </I18nProvider>
         );
@@ -317,35 +329,37 @@ describe('Timeline', () => {
         const wrapper = mount(
           <I18nProvider>
             <ReduxStoreProvider store={store}>
-              <DragDropContext onDragEnd={noop}>
-                <MockedProvider mocks={mocks}>
-                  <Timeline
-                    id="foo"
-                    columnHeaders={headers}
-                    columnRenderers={columnRenderers}
-                    dataProviders={mockDataProviders}
-                    flyoutHeight={testFlyoutHeight}
-                    flyoutHeaderHeight={flyoutHeaderHeight}
-                    itemsPerPage={5}
-                    itemsPerPageOptions={[5, 10, 20]}
-                    kqlQuery=""
-                    onChangeDataProviderKqlQuery={noop}
-                    onChangeDroppableAndProvider={noop}
-                    onChangeItemsPerPage={noop}
-                    onColumnSorted={noop}
-                    onDataProviderRemoved={mockOnDataProviderRemoved}
-                    onFilterChange={noop}
-                    onRangeSelected={noop}
-                    onToggleDataProviderEnabled={noop}
-                    onToggleDataProviderExcluded={noop}
-                    range={'1 Day'}
-                    rowRenderers={rowRenderers}
-                    show={true}
-                    sort={sort}
-                    indexPattern={indexPattern}
-                  />
-                </MockedProvider>
-              </DragDropContext>
+              <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+                <DragDropContext onDragEnd={noop}>
+                  <MockedProvider mocks={mocks}>
+                    <Timeline
+                      id="foo"
+                      columnHeaders={headers}
+                      columnRenderers={columnRenderers}
+                      dataProviders={mockDataProviders}
+                      flyoutHeight={testFlyoutHeight}
+                      flyoutHeaderHeight={flyoutHeaderHeight}
+                      itemsPerPage={5}
+                      itemsPerPageOptions={[5, 10, 20]}
+                      kqlQuery=""
+                      onChangeDataProviderKqlQuery={noop}
+                      onChangeDroppableAndProvider={noop}
+                      onChangeItemsPerPage={noop}
+                      onColumnSorted={noop}
+                      onDataProviderRemoved={mockOnDataProviderRemoved}
+                      onFilterChange={noop}
+                      onRangeSelected={noop}
+                      onToggleDataProviderEnabled={noop}
+                      onToggleDataProviderExcluded={noop}
+                      range={'1 Day'}
+                      rowRenderers={rowRenderers}
+                      show={true}
+                      sort={sort}
+                      indexPattern={indexPattern}
+                    />
+                  </MockedProvider>
+                </DragDropContext>
+              </ThemeProvider>
             </ReduxStoreProvider>
           </I18nProvider>
         );
@@ -379,35 +393,37 @@ describe('Timeline', () => {
         const wrapper = mount(
           <I18nProvider>
             <ReduxStoreProvider store={store}>
-              <DragDropContext onDragEnd={noop}>
-                <MockedProvider mocks={mocks}>
-                  <Timeline
-                    id="foo"
-                    columnHeaders={allColumnsHaveTextFilters}
-                    columnRenderers={columnRenderers}
-                    dataProviders={mockDataProviders}
-                    flyoutHeight={testFlyoutHeight}
-                    flyoutHeaderHeight={flyoutHeaderHeight}
-                    itemsPerPage={5}
-                    itemsPerPageOptions={[5, 10, 20]}
-                    kqlQuery=""
-                    onChangeDataProviderKqlQuery={noop}
-                    onChangeDroppableAndProvider={noop}
-                    onChangeItemsPerPage={noop}
-                    onColumnSorted={noop}
-                    onDataProviderRemoved={noop}
-                    onFilterChange={mockOnFilterChange}
-                    onRangeSelected={noop}
-                    onToggleDataProviderEnabled={noop}
-                    onToggleDataProviderExcluded={noop}
-                    range={'1 Day'}
-                    rowRenderers={rowRenderers}
-                    show={true}
-                    sort={sort}
-                    indexPattern={indexPattern}
-                  />
-                </MockedProvider>
-              </DragDropContext>
+              <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+                <DragDropContext onDragEnd={noop}>
+                  <MockedProvider mocks={mocks}>
+                    <Timeline
+                      id="foo"
+                      columnHeaders={allColumnsHaveTextFilters}
+                      columnRenderers={columnRenderers}
+                      dataProviders={mockDataProviders}
+                      flyoutHeight={testFlyoutHeight}
+                      flyoutHeaderHeight={flyoutHeaderHeight}
+                      itemsPerPage={5}
+                      itemsPerPageOptions={[5, 10, 20]}
+                      kqlQuery=""
+                      onChangeDataProviderKqlQuery={noop}
+                      onChangeDroppableAndProvider={noop}
+                      onChangeItemsPerPage={noop}
+                      onColumnSorted={noop}
+                      onDataProviderRemoved={noop}
+                      onFilterChange={mockOnFilterChange}
+                      onRangeSelected={noop}
+                      onToggleDataProviderEnabled={noop}
+                      onToggleDataProviderExcluded={noop}
+                      range={'1 Day'}
+                      rowRenderers={rowRenderers}
+                      show={true}
+                      sort={sort}
+                      indexPattern={indexPattern}
+                    />
+                  </MockedProvider>
+                </DragDropContext>
+              </ThemeProvider>
             </ReduxStoreProvider>
           </I18nProvider>
         );
@@ -437,35 +453,37 @@ describe('Timeline', () => {
         const wrapper = mount(
           <I18nProvider>
             <ReduxStoreProvider store={store}>
-              <DragDropContext onDragEnd={noop}>
-                <MockedProvider mocks={mocks}>
-                  <Timeline
-                    id="foo"
-                    columnHeaders={allColumnsHaveTextFilters}
-                    columnRenderers={columnRenderers}
-                    dataProviders={mockDataProviders}
-                    flyoutHeight={testFlyoutHeight}
-                    flyoutHeaderHeight={flyoutHeaderHeight}
-                    itemsPerPage={5}
-                    itemsPerPageOptions={[5, 10, 20]}
-                    kqlQuery=""
-                    onChangeDataProviderKqlQuery={noop}
-                    onChangeDroppableAndProvider={noop}
-                    onChangeItemsPerPage={noop}
-                    onColumnSorted={noop}
-                    onDataProviderRemoved={noop}
-                    onFilterChange={noop}
-                    onRangeSelected={noop}
-                    onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
-                    onToggleDataProviderExcluded={noop}
-                    range={'1 Day'}
-                    rowRenderers={rowRenderers}
-                    show={true}
-                    sort={sort}
-                    indexPattern={indexPattern}
-                  />
-                </MockedProvider>
-              </DragDropContext>
+              <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+                <DragDropContext onDragEnd={noop}>
+                  <MockedProvider mocks={mocks}>
+                    <Timeline
+                      id="foo"
+                      columnHeaders={allColumnsHaveTextFilters}
+                      columnRenderers={columnRenderers}
+                      dataProviders={mockDataProviders}
+                      flyoutHeight={testFlyoutHeight}
+                      flyoutHeaderHeight={flyoutHeaderHeight}
+                      itemsPerPage={5}
+                      itemsPerPageOptions={[5, 10, 20]}
+                      kqlQuery=""
+                      onChangeDataProviderKqlQuery={noop}
+                      onChangeDroppableAndProvider={noop}
+                      onChangeItemsPerPage={noop}
+                      onColumnSorted={noop}
+                      onDataProviderRemoved={noop}
+                      onFilterChange={noop}
+                      onRangeSelected={noop}
+                      onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
+                      onToggleDataProviderExcluded={noop}
+                      range={'1 Day'}
+                      rowRenderers={rowRenderers}
+                      show={true}
+                      sort={sort}
+                      indexPattern={indexPattern}
+                    />
+                  </MockedProvider>
+                </DragDropContext>
+              </ThemeProvider>
             </ReduxStoreProvider>
           </I18nProvider>
         );
@@ -502,35 +520,37 @@ describe('Timeline', () => {
         const wrapper = mount(
           <I18nProvider>
             <ReduxStoreProvider store={store}>
-              <DragDropContext onDragEnd={noop}>
-                <MockedProvider mocks={mocks}>
-                  <Timeline
-                    id="foo"
-                    columnHeaders={allColumnsHaveTextFilters}
-                    columnRenderers={columnRenderers}
-                    dataProviders={mockDataProviders}
-                    flyoutHeight={testFlyoutHeight}
-                    flyoutHeaderHeight={flyoutHeaderHeight}
-                    itemsPerPage={5}
-                    itemsPerPageOptions={[5, 10, 20]}
-                    kqlQuery=""
-                    onChangeDataProviderKqlQuery={noop}
-                    onChangeDroppableAndProvider={noop}
-                    onChangeItemsPerPage={noop}
-                    onColumnSorted={noop}
-                    onDataProviderRemoved={noop}
-                    onFilterChange={noop}
-                    onRangeSelected={noop}
-                    onToggleDataProviderEnabled={noop}
-                    onToggleDataProviderExcluded={mockOnToggleDataProviderExcluded}
-                    range={'1 Day'}
-                    rowRenderers={rowRenderers}
-                    show={true}
-                    sort={sort}
-                    indexPattern={indexPattern}
-                  />
-                </MockedProvider>
-              </DragDropContext>
+              <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+                <DragDropContext onDragEnd={noop}>
+                  <MockedProvider mocks={mocks}>
+                    <Timeline
+                      id="foo"
+                      columnHeaders={allColumnsHaveTextFilters}
+                      columnRenderers={columnRenderers}
+                      dataProviders={mockDataProviders}
+                      flyoutHeight={testFlyoutHeight}
+                      flyoutHeaderHeight={flyoutHeaderHeight}
+                      itemsPerPage={5}
+                      itemsPerPageOptions={[5, 10, 20]}
+                      kqlQuery=""
+                      onChangeDataProviderKqlQuery={noop}
+                      onChangeDroppableAndProvider={noop}
+                      onChangeItemsPerPage={noop}
+                      onColumnSorted={noop}
+                      onDataProviderRemoved={noop}
+                      onFilterChange={noop}
+                      onRangeSelected={noop}
+                      onToggleDataProviderEnabled={noop}
+                      onToggleDataProviderExcluded={mockOnToggleDataProviderExcluded}
+                      range={'1 Day'}
+                      rowRenderers={rowRenderers}
+                      show={true}
+                      sort={sort}
+                      indexPattern={indexPattern}
+                    />
+                  </MockedProvider>
+                </DragDropContext>
+              </ThemeProvider>
             </ReduxStoreProvider>
           </I18nProvider>
         );
@@ -568,35 +588,37 @@ describe('Timeline', () => {
         const wrapper = mount(
           <I18nProvider>
             <ReduxStoreProvider store={store}>
-              <DragDropContext onDragEnd={noop}>
-                <MockedProvider mocks={mocks}>
-                  <Timeline
-                    id="foo"
-                    columnHeaders={allColumnsHaveTextFilters}
-                    columnRenderers={columnRenderers}
-                    dataProviders={dataProviders}
-                    flyoutHeight={testFlyoutHeight}
-                    flyoutHeaderHeight={flyoutHeaderHeight}
-                    itemsPerPage={5}
-                    itemsPerPageOptions={[5, 10, 20]}
-                    kqlQuery=""
-                    onChangeDataProviderKqlQuery={noop}
-                    onChangeDroppableAndProvider={noop}
-                    onChangeItemsPerPage={noop}
-                    onColumnSorted={noop}
-                    onDataProviderRemoved={noop}
-                    onFilterChange={noop}
-                    onRangeSelected={noop}
-                    onToggleDataProviderEnabled={noop}
-                    onToggleDataProviderExcluded={noop}
-                    range={'1 Day'}
-                    rowRenderers={rowRenderers}
-                    show={true}
-                    sort={sort}
-                    indexPattern={indexPattern}
-                  />
-                </MockedProvider>
-              </DragDropContext>
+              <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+                <DragDropContext onDragEnd={noop}>
+                  <MockedProvider mocks={mocks}>
+                    <Timeline
+                      id="foo"
+                      columnHeaders={allColumnsHaveTextFilters}
+                      columnRenderers={columnRenderers}
+                      dataProviders={dataProviders}
+                      flyoutHeight={testFlyoutHeight}
+                      flyoutHeaderHeight={flyoutHeaderHeight}
+                      itemsPerPage={5}
+                      itemsPerPageOptions={[5, 10, 20]}
+                      kqlQuery=""
+                      onChangeDataProviderKqlQuery={noop}
+                      onChangeDroppableAndProvider={noop}
+                      onChangeItemsPerPage={noop}
+                      onColumnSorted={noop}
+                      onDataProviderRemoved={noop}
+                      onFilterChange={noop}
+                      onRangeSelected={noop}
+                      onToggleDataProviderEnabled={noop}
+                      onToggleDataProviderExcluded={noop}
+                      range={'1 Day'}
+                      rowRenderers={rowRenderers}
+                      show={true}
+                      sort={sort}
+                      indexPattern={indexPattern}
+                    />
+                  </MockedProvider>
+                </DragDropContext>
+              </ThemeProvider>
             </ReduxStoreProvider>
           </I18nProvider>
         );
@@ -622,35 +644,37 @@ describe('Timeline', () => {
         const wrapper = mount(
           <I18nProvider>
             <ReduxStoreProvider store={store}>
-              <DragDropContext onDragEnd={noop}>
-                <MockedProvider mocks={mocks}>
-                  <Timeline
-                    id="foo"
-                    columnHeaders={allColumnsHaveTextFilters}
-                    columnRenderers={columnRenderers}
-                    dataProviders={dataProviders}
-                    flyoutHeight={testFlyoutHeight}
-                    flyoutHeaderHeight={flyoutHeaderHeight}
-                    itemsPerPage={5}
-                    itemsPerPageOptions={[5, 10, 20]}
-                    kqlQuery=""
-                    onChangeDataProviderKqlQuery={noop}
-                    onChangeDroppableAndProvider={noop}
-                    onChangeItemsPerPage={noop}
-                    onColumnSorted={noop}
-                    onDataProviderRemoved={mockOnDataProviderRemoved}
-                    onFilterChange={noop}
-                    onRangeSelected={noop}
-                    onToggleDataProviderEnabled={noop}
-                    onToggleDataProviderExcluded={noop}
-                    range={'1 Day'}
-                    rowRenderers={rowRenderers}
-                    show={true}
-                    sort={sort}
-                    indexPattern={indexPattern}
-                  />
-                </MockedProvider>
-              </DragDropContext>
+              <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+                <DragDropContext onDragEnd={noop}>
+                  <MockedProvider mocks={mocks}>
+                    <Timeline
+                      id="foo"
+                      columnHeaders={allColumnsHaveTextFilters}
+                      columnRenderers={columnRenderers}
+                      dataProviders={dataProviders}
+                      flyoutHeight={testFlyoutHeight}
+                      flyoutHeaderHeight={flyoutHeaderHeight}
+                      itemsPerPage={5}
+                      itemsPerPageOptions={[5, 10, 20]}
+                      kqlQuery=""
+                      onChangeDataProviderKqlQuery={noop}
+                      onChangeDroppableAndProvider={noop}
+                      onChangeItemsPerPage={noop}
+                      onColumnSorted={noop}
+                      onDataProviderRemoved={mockOnDataProviderRemoved}
+                      onFilterChange={noop}
+                      onRangeSelected={noop}
+                      onToggleDataProviderEnabled={noop}
+                      onToggleDataProviderExcluded={noop}
+                      range={'1 Day'}
+                      rowRenderers={rowRenderers}
+                      show={true}
+                      sort={sort}
+                      indexPattern={indexPattern}
+                    />
+                  </MockedProvider>
+                </DragDropContext>
+              </ThemeProvider>
             </ReduxStoreProvider>
           </I18nProvider>
         );
@@ -684,35 +708,37 @@ describe('Timeline', () => {
         const wrapper = mount(
           <I18nProvider>
             <ReduxStoreProvider store={store}>
-              <DragDropContext onDragEnd={noop}>
-                <MockedProvider mocks={mocks}>
-                  <Timeline
-                    id="foo"
-                    columnHeaders={allColumnsHaveTextFilters}
-                    columnRenderers={columnRenderers}
-                    dataProviders={dataProviders}
-                    flyoutHeight={testFlyoutHeight}
-                    flyoutHeaderHeight={flyoutHeaderHeight}
-                    itemsPerPage={5}
-                    itemsPerPageOptions={[5, 10, 20]}
-                    kqlQuery=""
-                    onChangeDataProviderKqlQuery={noop}
-                    onChangeDroppableAndProvider={noop}
-                    onChangeItemsPerPage={noop}
-                    onColumnSorted={noop}
-                    onDataProviderRemoved={noop}
-                    onFilterChange={noop}
-                    onRangeSelected={noop}
-                    onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
-                    onToggleDataProviderExcluded={noop}
-                    range={'1 Day'}
-                    rowRenderers={rowRenderers}
-                    show={true}
-                    sort={sort}
-                    indexPattern={indexPattern}
-                  />
-                </MockedProvider>
-              </DragDropContext>
+              <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+                <DragDropContext onDragEnd={noop}>
+                  <MockedProvider mocks={mocks}>
+                    <Timeline
+                      id="foo"
+                      columnHeaders={allColumnsHaveTextFilters}
+                      columnRenderers={columnRenderers}
+                      dataProviders={dataProviders}
+                      flyoutHeight={testFlyoutHeight}
+                      flyoutHeaderHeight={flyoutHeaderHeight}
+                      itemsPerPage={5}
+                      itemsPerPageOptions={[5, 10, 20]}
+                      kqlQuery=""
+                      onChangeDataProviderKqlQuery={noop}
+                      onChangeDroppableAndProvider={noop}
+                      onChangeItemsPerPage={noop}
+                      onColumnSorted={noop}
+                      onDataProviderRemoved={noop}
+                      onFilterChange={noop}
+                      onRangeSelected={noop}
+                      onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
+                      onToggleDataProviderExcluded={noop}
+                      range={'1 Day'}
+                      rowRenderers={rowRenderers}
+                      show={true}
+                      sort={sort}
+                      indexPattern={indexPattern}
+                    />
+                  </MockedProvider>
+                </DragDropContext>
+              </ThemeProvider>
             </ReduxStoreProvider>
           </I18nProvider>
         );
@@ -750,35 +776,37 @@ describe('Timeline', () => {
         const wrapper = mount(
           <I18nProvider>
             <ReduxStoreProvider store={store}>
-              <DragDropContext onDragEnd={noop}>
-                <MockedProvider mocks={mocks}>
-                  <Timeline
-                    id="foo"
-                    columnHeaders={allColumnsHaveTextFilters}
-                    columnRenderers={columnRenderers}
-                    dataProviders={dataProviders}
-                    flyoutHeight={testFlyoutHeight}
-                    flyoutHeaderHeight={flyoutHeaderHeight}
-                    itemsPerPage={5}
-                    itemsPerPageOptions={[5, 10, 20]}
-                    kqlQuery=""
-                    onChangeDataProviderKqlQuery={noop}
-                    onChangeDroppableAndProvider={noop}
-                    onChangeItemsPerPage={noop}
-                    onColumnSorted={noop}
-                    onDataProviderRemoved={noop}
-                    onFilterChange={noop}
-                    onRangeSelected={noop}
-                    onToggleDataProviderEnabled={noop}
-                    onToggleDataProviderExcluded={mockOnToggleDataProviderExcluded}
-                    range={'1 Day'}
-                    rowRenderers={rowRenderers}
-                    show={true}
-                    sort={sort}
-                    indexPattern={indexPattern}
-                  />
-                </MockedProvider>
-              </DragDropContext>
+              <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+                <DragDropContext onDragEnd={noop}>
+                  <MockedProvider mocks={mocks}>
+                    <Timeline
+                      id="foo"
+                      columnHeaders={allColumnsHaveTextFilters}
+                      columnRenderers={columnRenderers}
+                      dataProviders={dataProviders}
+                      flyoutHeight={testFlyoutHeight}
+                      flyoutHeaderHeight={flyoutHeaderHeight}
+                      itemsPerPage={5}
+                      itemsPerPageOptions={[5, 10, 20]}
+                      kqlQuery=""
+                      onChangeDataProviderKqlQuery={noop}
+                      onChangeDroppableAndProvider={noop}
+                      onChangeItemsPerPage={noop}
+                      onColumnSorted={noop}
+                      onDataProviderRemoved={noop}
+                      onFilterChange={noop}
+                      onRangeSelected={noop}
+                      onToggleDataProviderEnabled={noop}
+                      onToggleDataProviderExcluded={mockOnToggleDataProviderExcluded}
+                      range={'1 Day'}
+                      rowRenderers={rowRenderers}
+                      show={true}
+                      sort={sort}
+                      indexPattern={indexPattern}
+                    />
+                  </MockedProvider>
+                </DragDropContext>
+              </ThemeProvider>
             </ReduxStoreProvider>
           </I18nProvider>
         );
