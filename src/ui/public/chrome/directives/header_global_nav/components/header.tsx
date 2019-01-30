@@ -37,6 +37,7 @@ import {
   EuiHideFor,
   EuiHorizontalRule,
   EuiIcon,
+  EuiLink,
   EuiListGroup,
   // @ts-ignore
   EuiListGroupItem,
@@ -52,6 +53,7 @@ import {
 } from '@elastic/eui';
 
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
+import { HeaderHelpMenu } from './header_help_menu';
 import { HeaderNavControls } from './header_nav_controls';
 
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
@@ -195,9 +197,14 @@ class HeaderUI extends Component<Props, State> {
           <HeaderBreadcrumbs appTitle={appTitle} breadcrumbs$={breadcrumbs$} />
 
           <EuiHeaderSection side="right">
+            <EuiHeaderSectionItem>
+              <HeaderHelpMenu customContent$={<EuiLink>Give APM Feedback</EuiLink>} />
+            </EuiHeaderSectionItem>
+
             <HeaderNavControls navControls={rightNavControls} />
           </EuiHeaderSection>
         </EuiHeader>
+
         <EuiOutsideClickDetector
           onOutsideClick={() => this.collapseDrawer()}
           isDisabled={this.state.outsideClickDisabled}
