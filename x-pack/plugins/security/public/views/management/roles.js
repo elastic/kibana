@@ -8,7 +8,7 @@ import _ from 'lodash';
 import routes from 'ui/routes';
 import { toastNotifications } from 'ui/notify';
 import { toggle, toggleSort } from 'plugins/security/lib/util';
-import { isRoleEnabled } from 'plugins/security/lib/role';
+import { isRoleEnabled } from 'plugins/security/lib/role_utils';
 import template from 'plugins/security/views/management/roles.html';
 import 'plugins/security/services/shield_role';
 import { checkLicenseError } from 'plugins/security/lib/check_license_error';

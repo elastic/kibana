@@ -9,14 +9,3 @@
     padding: $euiSizeS;
   }
 }
-
-// SASSTODO: Make sure these colors convert to theme variables
-.theme-dark {
-  @import '@elastic/eui/src/themes/k6/k6_colors_dark';
-
-  .config {
-    .container-fluid {
-      background-color: $euiColorLightestShade;
-    }
-  }
-}

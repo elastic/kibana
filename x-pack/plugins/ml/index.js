@@ -8,7 +8,6 @@
 
 import { resolve } from 'path';
 import Boom from 'boom';
-import { i18n } from '@kbn/i18n';
 import { checkLicense } from './server/lib/check_license';
 import { FEATURE_ANNOTATIONS_ENABLED } from './common/constants/feature_flags';
 
@@ -29,6 +28,8 @@ import { resultsServiceRoutes } from './server/routes/results_service';
 import { jobServiceRoutes } from './server/routes/job_service';
 import { jobAuditMessagesRoutes } from './server/routes/job_audit_messages';
 import { fileDataVisualizerRoutes } from './server/routes/file_data_visualizer';
+import { i18n } from '@kbn/i18n';
+import { initMlServerLog } from './server/client/log';
 
 export const ml = (kibana) => {
   return new kibana.Plugin({
@@ -72,25 +73,27 @@ export const ml = (kibana) => {
 
       xpackMainPlugin.registerFeature({
         id: 'ml',
-        name: 'Machine Learning',
+        name: i18n.translate('xpack.ml.featureRegistry.mlFeatureName', {
+          defaultMessage: 'Machine Learning',
+        }),
         icon: 'machineLearningApp',
         navLinkId: 'ml',
+        app: ['ml', 'kibana'],
+        catalogue: ['ml'],
         privileges: {
           all: {
-            metadata: {
-              tooltip: i18n.translate('xpack.ml.privileges.tooltip', {
-                defaultMessage: 'The machine_learning_user or machine_learning_admin role should be assigned to grant access'
-              })
-            },
             catalogue: ['ml'],
-            app: ['ml', 'kibana'],
+            grantWithBaseRead: true,
             savedObject: {
               all: [],
               read: ['config']
             },
             ui: [],
           },
-        }
+        },
+        privilegesTooltip: i18n.translate('xpack.ml.privileges.tooltip', {
+          defaultMessage: 'The machine_learning_user or machine_learning_admin role should also be assigned to users to grant access'
+        })
       });
 
       // Add server routes and initialize the plugin here
@@ -131,6 +134,8 @@ export const ml = (kibana) => {
       jobServiceRoutes(server, commonRouteConfig);
       jobAuditMessagesRoutes(server, commonRouteConfig);
       fileDataVisualizerRoutes(server, commonRouteConfig);
+
+      initMlServerLog(server);
     }
 
   });

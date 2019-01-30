@@ -5,17 +5,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import idx from 'idx';
-import { get } from 'lodash';
 import React from 'react';
+import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
+import { idx } from 'x-pack/plugins/apm/common/idx';
 import {
-  REQUEST_URL_FULL,
   TRANSACTION_DURATION,
   TRANSACTION_RESULT,
+  URL_FULL,
   USER_ID
 } from '../../../../../common/constants';
 import { Transaction } from '../../../../../typings/es_schemas/Transaction';
-import { NOT_AVAILABLE_LABEL } from '../../../../constants';
 import { asPercent, asTime } from '../../../../utils/formatters';
 import {
   IStickyProperty,
@@ -34,7 +33,7 @@ export function StickyTransactionProperties({
   const timestamp = transaction['@timestamp'];
   const url =
     idx(transaction, _ => _.context.page.url) ||
-    idx(transaction, _ => _.context.request.url.full) ||
+    idx(transaction, _ => _.url.full) ||
     NOT_AVAILABLE_LABEL;
   const duration = transaction.transaction.duration.us;
   const stickyProperties: IStickyProperty[] = [
@@ -48,7 +47,7 @@ export function StickyTransactionProperties({
       width: '50%'
     },
     {
-      fieldName: REQUEST_URL_FULL,
+      fieldName: URL_FULL,
       label: 'URL',
       val: url,
       truncated: true,
@@ -77,7 +76,7 @@ export function StickyTransactionProperties({
         defaultMessage: 'Result'
       }),
       fieldName: TRANSACTION_RESULT,
-      val: get(transaction, TRANSACTION_RESULT, NOT_AVAILABLE_LABEL),
+      val: idx(transaction, _ => _.transaction.result) || NOT_AVAILABLE_LABEL,
       width: '25%'
     },
     {
@@ -85,7 +84,7 @@ export function StickyTransactionProperties({
         defaultMessage: 'User ID'
       }),
       fieldName: USER_ID,
-      val: get(transaction, USER_ID, NOT_AVAILABLE_LABEL),
+      val: idx(transaction, _ => _.user.id) || NOT_AVAILABLE_LABEL,
       truncated: true,
       width: '25%'
     }

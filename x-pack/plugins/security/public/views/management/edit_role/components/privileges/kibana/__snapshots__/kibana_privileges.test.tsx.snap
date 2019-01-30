@@ -5,14 +5,31 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
   iconType="logoKibana"
   title="Kibana"
 >
-  <InjectIntl(SpaceAwarePrivilegeFormUI)
+  <InjectIntl(SpaceAwarePrivilegeSectionUI)
     editable={true}
-    kibanaAppPrivileges={
-      Array [
-        "all",
-      ]
-    }
+    features={Array []}
     onChange={[MockFunction]}
+    privilegeCalculatorFactory={
+      KibanaPrivilegeCalculatorFactory {
+        "privilegeDefinition": PrivilegeDefinition {
+          "privilegeActionMap": Object {
+            "features": Object {},
+            "global": Object {},
+            "space": Object {},
+          },
+        },
+        "rankedFeaturePrivileges": Object {},
+      }
+    }
+    privilegeDefinition={
+      PrivilegeDefinition {
+        "privilegeActionMap": Object {
+          "features": Object {},
+          "global": Object {},
+          "space": Object {},
+        },
+      }
+    }
     role={
       Object {
         "elasticsearch": Object {
@@ -20,10 +37,7 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
           "indices": Array [],
           "run_as": Array [],
         },
-        "kibana": Object {
-          "global": Array [],
-          "space": Object {},
-        },
+        "kibana": Array [],
         "name": "",
       }
     }
@@ -54,7 +68,6 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
     }
     validator={
       RoleValidator {
-        "inProgressSpacePrivileges": Array [],
         "shouldValidate": undefined,
       }
     }

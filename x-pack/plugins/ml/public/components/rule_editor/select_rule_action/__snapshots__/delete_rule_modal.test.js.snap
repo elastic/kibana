@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`DeleteRuleModal renders as delete button after opening and closing modal 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiLink
     color="danger"
     onClick={[Function]}
@@ -13,11 +13,11 @@ exports[`DeleteRuleModal renders as delete button after opening and closing moda
       values={Object {}}
     />
   </EuiLink>
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`DeleteRuleModal renders as delete button when not visible 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiLink
     color="danger"
     onClick={[Function]}
@@ -29,11 +29,11 @@ exports[`DeleteRuleModal renders as delete button when not visible 1`] = `
       values={Object {}}
     />
   </EuiLink>
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`DeleteRuleModal renders modal after clicking delete rule link 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiLink
     color="danger"
     onClick={[Function]}
@@ -82,5 +82,5 @@ exports[`DeleteRuleModal renders modal after clicking delete rule link 1`] = `
       </p>
     </EuiConfirmModal>
   </EuiOverlayMask>
-</React.Fragment>
+</Fragment>
 `;

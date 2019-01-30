@@ -11,6 +11,7 @@ describe('FeatureRegistry', () => {
     const feature: Feature = {
       id: 'test-feature',
       name: 'Test Feature',
+      app: [],
       privileges: {},
     };
 
@@ -31,13 +32,20 @@ describe('FeatureRegistry', () => {
       description: 'this is a rather boring feature description !@#$%^&*()_+-=\\[]{}|;\':"/.,<>?',
       icon: 'addDataApp',
       navLinkId: 'someNavLink',
+      app: ['app1', 'app2'],
       validLicenses: ['standard', 'basic', 'gold', 'platinum'],
+      catalogue: ['foo'],
+      management: {
+        foo: ['bar'],
+      },
       privileges: {
         all: {
-          metadata: {
-            tooltip: 'some fancy tooltip',
+          grantWithBaseRead: true,
+          catalogue: ['foo'],
+          management: {
+            foo: ['bar'],
           },
-          app: ['app1', 'app2'],
+          app: ['app1'],
           savedObject: {
             all: ['config', 'space', 'etc'],
             read: ['canvas'],
@@ -46,6 +54,7 @@ describe('FeatureRegistry', () => {
           ui: ['allowsFoo', 'showBar', 'showBaz'],
         },
       },
+      privilegesTooltip: 'some fancy tooltip',
     };
 
     const featureRegistry = new FeatureRegistry();
@@ -62,12 +71,14 @@ describe('FeatureRegistry', () => {
     const feature: Feature = {
       id: 'test-feature',
       name: 'Test Feature',
+      app: [],
       privileges: {},
     };
 
     const duplicateFeature: Feature = {
       id: 'test-feature',
       name: 'Duplicate Test Feature',
+      app: [],
       privileges: {},
     };
 
@@ -86,6 +97,7 @@ describe('FeatureRegistry', () => {
         featureRegistry.register({
           id: prohibitedId,
           name: 'some feature',
+          app: [],
           privileges: {},
         })
       ).toThrowErrorMatchingSnapshot();
@@ -96,11 +108,9 @@ describe('FeatureRegistry', () => {
     const feature: Feature = {
       id: 'test-feature',
       name: 'Test Feature',
+      app: ['app1', 'app2'],
       privileges: {
         ['some invalid key']: {
-          metadata: {
-            tooltip: 'some fancy tooltip',
-          },
           app: ['app1', 'app2'],
           savedObject: {
             all: ['config', 'space', 'etc'],
@@ -118,15 +128,131 @@ describe('FeatureRegistry', () => {
     );
   });
 
+  it(`prevents privileges from specifying app entries that don't exist at the root level`, () => {
+    const feature: Feature = {
+      id: 'test-feature',
+      name: 'Test Feature',
+      app: ['bar'],
+      privileges: {
+        all: {
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+          app: ['foo', 'bar', 'baz'],
+        },
+      },
+    };
+
+    const featureRegistry = new FeatureRegistry();
+
+    expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
+      `"Feature privilege test-feature.all has unknown app entries: foo, baz"`
+    );
+  });
+
+  it(`prevents privileges from specifying catalogue entries that don't exist at the root level`, () => {
+    const feature: Feature = {
+      id: 'test-feature',
+      name: 'Test Feature',
+      app: [],
+      catalogue: ['bar'],
+      privileges: {
+        all: {
+          catalogue: ['foo', 'bar', 'baz'],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+          app: [],
+        },
+      },
+    };
+
+    const featureRegistry = new FeatureRegistry();
+
+    expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
+      `"Feature privilege test-feature.all has unknown catalogue entries: foo, baz"`
+    );
+  });
+
+  it(`prevents privileges from specifying management sections that don't exist at the root level`, () => {
+    const feature: Feature = {
+      id: 'test-feature',
+      name: 'Test Feature',
+      app: [],
+      catalogue: ['bar'],
+      management: {
+        kibana: ['hey'],
+      },
+      privileges: {
+        all: {
+          catalogue: ['bar'],
+          management: {
+            elasticsearch: ['hey'],
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+          app: [],
+        },
+      },
+    };
+
+    const featureRegistry = new FeatureRegistry();
+
+    expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
+      `"Feature privilege test-feature.all has unknown management section: elasticsearch"`
+    );
+  });
+
+  it(`prevents privileges from specifying management entries that don't exist at the root level`, () => {
+    const feature: Feature = {
+      id: 'test-feature',
+      name: 'Test Feature',
+      app: [],
+      catalogue: ['bar'],
+      management: {
+        kibana: ['hey'],
+      },
+      privileges: {
+        all: {
+          catalogue: ['bar'],
+          management: {
+            kibana: ['hey-there'],
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+          app: [],
+        },
+      },
+    };
+
+    const featureRegistry = new FeatureRegistry();
+
+    expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
+      `"Feature privilege test-feature.all has unknown management entries for section kibana: hey-there"`
+    );
+  });
+
   it('cannot register feature after getAll has been called', () => {
     const feature1: Feature = {
       id: 'test-feature',
       name: 'Test Feature',
+      app: [],
       privileges: {},
     };
     const feature2: Feature = {
       id: 'test-feature-2',
       name: 'Test Feature 2',
+      app: [],
       privileges: {},
     };
 

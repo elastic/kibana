@@ -57,25 +57,27 @@ export const init = (monitoringPlugin, server) => {
 
   xpackMainPlugin.registerFeature({
     id: 'monitoring',
-    name: 'Monitoring',
+    name: i18n.translate('xpack.monitoring.featureRegistry.monitoringFeatureName', {
+      defaultMessage: 'Stack Monitoring',
+    }),
     icon: 'monitoringApp',
     navLinkId: 'monitoring',
+    app: ['monitoring', 'kibana'],
+    catalogue: ['monitoring'],
     privileges: {
       all: {
-        metadata: {
-          tooltip: i18n.translate('xpack.monitoring.privileges.tooltip', {
-            defaultMessage: 'The monitoring_user role should be assigned to grant access'
-          })
-        },
         catalogue: ['monitoring'],
-        app: ['monitoring', 'kibana'],
+        grantWithBaseRead: true,
         savedObject: {
           all: [],
           read: ['config'],
         },
         ui: [],
       },
-    }
+    },
+    privilegesTooltip: i18n.translate('xpack.monitoring.privileges.tooltip', {
+      defaultMessage: 'The monitoring_user role should also be assigned to users to grant access'
+    })
   });
 
   const bulkUploader = initBulkUploader(kbnServer, server);

@@ -4,16 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PrivilegeMap } from 'x-pack/plugins/security/common/model';
 import { Feature } from '../../../../xpack_main/types';
 import { IGNORED_TYPES } from '../../../common/constants';
 import { Actions } from './actions';
-import { FeaturesPrivileges, FeaturesPrivilegesBuilder } from './features_privileges_builder';
-
-export interface PrivilegeMap {
-  global: Record<string, string[]>;
-  features: FeaturesPrivileges;
-  space: Record<string, string[]>;
-}
+import { FeaturesPrivilegesBuilder } from './features_privileges_builder';
 
 export interface PrivilegesService {
   get(): PrivilegeMap;
@@ -56,9 +51,9 @@ export function privilegesFactory(
             ...featuresPrivilegesBuilder.getApiReadActions(features),
             actions.app.all,
             ...actions.savedObject.readOperations(validSavedObjectTypes),
-            ...featuresPrivilegesBuilder.getUIReadActions(features),
-            ...featuresPrivilegesBuilder.getManagementReadActions(features),
-            ...featuresPrivilegesBuilder.getCatalogueReadActions(features),
+            ...featuresPrivilegesBuilder.getUIFeaturesReadActions(features),
+            ...featuresPrivilegesBuilder.getUIManagementReadActions(features),
+            ...featuresPrivilegesBuilder.getUICatalogueReadActions(features),
             actions.ui.allNavLinks,
           ],
         },
@@ -77,9 +72,9 @@ export function privilegesFactory(
             ...featuresPrivilegesBuilder.getApiReadActions(features),
             actions.app.all,
             ...actions.savedObject.readOperations(validSavedObjectTypes),
-            ...featuresPrivilegesBuilder.getUIReadActions(features),
-            ...featuresPrivilegesBuilder.getManagementReadActions(features),
-            ...featuresPrivilegesBuilder.getCatalogueReadActions(features),
+            ...featuresPrivilegesBuilder.getUIFeaturesReadActions(features),
+            ...featuresPrivilegesBuilder.getUIManagementReadActions(features),
+            ...featuresPrivilegesBuilder.getUICatalogueReadActions(features),
             actions.ui.allNavLinks,
           ],
         },

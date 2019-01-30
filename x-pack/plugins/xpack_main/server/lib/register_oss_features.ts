@@ -3,19 +3,21 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { i18n } from '@kbn/i18n';
 import { Feature } from './feature_registry';
 
 const kibanaFeatures: Feature[] = [
   {
     id: 'discover',
-    name: 'Discover',
+    name: i18n.translate('xpack.main.featureRegistry.discoverFeatureName', {
+      defaultMessage: 'Discover',
+    }),
     icon: 'discoverApp',
     navLinkId: 'kibana:discover',
+    app: ['kibana'],
+    catalogue: ['discover'],
     privileges: {
       all: {
-        catalogue: ['discover'],
-        app: ['kibana'],
         savedObject: {
           all: ['search'],
           read: ['config', 'index-pattern'],
@@ -23,8 +25,6 @@ const kibanaFeatures: Feature[] = [
         ui: ['show', 'save'],
       },
       read: {
-        catalogue: ['discover'],
-        app: ['kibana'],
         savedObject: {
           all: [],
           read: ['config', 'index-pattern', 'search'],
@@ -35,13 +35,15 @@ const kibanaFeatures: Feature[] = [
   },
   {
     id: 'visualize',
-    name: 'Visualize',
+    name: i18n.translate('xpack.main.featureRegistry.visualizeFeatureName', {
+      defaultMessage: 'Visualize',
+    }),
     icon: 'visualizeApp',
     navLinkId: 'kibana:visualize',
+    app: ['kibana'],
+    catalogue: ['visualize'],
     privileges: {
       all: {
-        catalogue: ['visualize'],
-        app: ['kibana'],
         savedObject: {
           all: ['visualization'],
           read: ['config', 'index-pattern', 'search'],
@@ -49,8 +51,6 @@ const kibanaFeatures: Feature[] = [
         ui: [],
       },
       read: {
-        catalogue: ['visualize'],
-        app: ['kibana'],
         savedObject: {
           all: [],
           read: ['config', 'index-pattern', 'search', 'visualization'],
@@ -61,22 +61,29 @@ const kibanaFeatures: Feature[] = [
   },
   {
     id: 'dashboard',
-    name: 'Dashboard',
+    name: i18n.translate('xpack.main.featureRegistry.dashboardFeatureName', {
+      defaultMessage: 'Dashboard',
+    }),
     icon: 'dashboardApp',
     navLinkId: 'kibana:dashboard',
+    app: ['kibana'],
+    catalogue: ['dashboard'],
     privileges: {
       all: {
-        catalogue: ['dashboard'],
-        app: ['kibana'],
         savedObject: {
           all: ['dashboard'],
-          read: ['config', 'index-pattern', 'search', 'visualization', 'timelion', 'canvas'],
+          read: [
+            'config',
+            'index-pattern',
+            'search',
+            'visualization',
+            'timelion-sheet',
+            'canvas-workpad',
+          ],
         },
         ui: ['createNew', 'show', 'showWriteControls'],
       },
       read: {
-        catalogue: ['dashboard'],
-        app: ['kibana'],
         savedObject: {
           all: [],
           read: [
@@ -84,8 +91,8 @@ const kibanaFeatures: Feature[] = [
             'index-pattern',
             'search',
             'visualization',
-            'timelion',
-            'canvas',
+            'timelion-sheet',
+            'canvas-workpad',
             'dashboard',
           ],
         },
@@ -95,14 +102,16 @@ const kibanaFeatures: Feature[] = [
   },
   {
     id: 'dev_tools',
-    name: 'Dev Tools',
+    name: i18n.translate('xpack.main.featureRegistry.devToolsFeatureName', {
+      defaultMessage: 'Dev Tools',
+    }),
     icon: 'devToolsApp',
     navLinkId: 'kibana:dev_tools',
+    app: ['kibana'],
+    catalogue: ['console', 'searchprofiler', 'grokdebugger'],
     privileges: {
-      all: {
-        catalogue: ['console', 'searchprofiler', 'grokdebugger'],
+      read: {
         api: ['console/execute'],
-        app: ['kibana'],
         savedObject: {
           all: [],
           read: ['config'],
@@ -113,15 +122,17 @@ const kibanaFeatures: Feature[] = [
   },
   {
     id: 'advancedSettings',
-    name: 'Advanced Settings',
+    name: i18n.translate('xpack.main.featureRegistry.advancedSettingsFeatureName', {
+      defaultMessage: 'Advanced Settings',
+    }),
     icon: 'advancedSettingsApp',
+    app: ['kibana'],
+    catalogue: ['advanced_settings'],
+    management: {
+      kibana: ['settings'],
+    },
     privileges: {
       all: {
-        catalogue: ['advanced_settings'],
-        management: {
-          kibana: ['settings'],
-        },
-        app: ['kibana'],
         savedObject: {
           all: ['config'],
           read: [],
@@ -132,15 +143,17 @@ const kibanaFeatures: Feature[] = [
   },
   {
     id: 'indexPatterns',
-    name: 'Index Pattern Management',
+    name: i18n.translate('xpack.main.featureRegistry.indexPatternFeatureName', {
+      defaultMessage: 'Index Pattern Management',
+    }),
     icon: 'indexPatternApp',
+    app: ['kibana'],
+    catalogue: ['index_patterns'],
+    management: {
+      kibana: ['indices'],
+    },
     privileges: {
       all: {
-        catalogue: ['index_patterns'],
-        management: {
-          kibana: ['indices'],
-        },
-        app: ['kibana'],
         savedObject: {
           all: ['index-pattern'],
           read: ['config'],
@@ -157,22 +170,20 @@ const timelionFeatures: Feature[] = [
     name: 'Timelion',
     icon: 'timelionApp',
     navLinkId: 'timelion',
+    app: ['timelion', 'kibana'],
+    catalogue: ['timelion'],
     privileges: {
       all: {
-        catalogue: ['timelion'],
-        app: ['timelion', 'kibana'],
         savedObject: {
-          all: ['timelion'],
+          all: ['timelion-sheet'],
           read: ['config', 'index-pattern'],
         },
         ui: [],
       },
       read: {
-        catalogue: ['timelion'],
-        app: ['timelion', 'kibana'],
         savedObject: {
           all: [],
-          read: ['config', 'index-pattern', 'timelion'],
+          read: ['config', 'index-pattern', 'timelion-sheet'],
         },
         ui: [],
       },

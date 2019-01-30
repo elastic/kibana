@@ -5,6 +5,7 @@
  */
 
 import expect from 'expect.js';
+import { UICapabilities } from 'ui/capabilities';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import {
   GetUICapabilitiesFailureReason,
@@ -23,6 +24,9 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           username: scenario.username,
           password: scenario.password,
         });
+
+        const capabilities: UICapabilities = uiCapabilities.value as UICapabilities;
+
         switch (scenario.username) {
           // these users have a read/write view of Discover
           case 'superuser':
@@ -30,21 +34,23 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           case 'dual_privileges_all':
           case 'discover_all':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('discover');
-            expect(uiCapabilities.value!.discover).to.eql({
+            expect(capabilities).to.have.property('discover');
+            expect(capabilities!.discover).to.eql({
               show: true,
               save: true,
             });
+            expect(capabilities.catalogue.discover).to.eql(true);
             break;
           // these users have a read-only view of Discover
           case 'dual_privileges_read':
           case 'discover_read':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('discover');
-            expect(uiCapabilities.value!.discover).to.eql({
+            expect(capabilities).to.have.property('discover');
+            expect(capabilities!.discover).to.eql({
               show: true,
               save: false,
             });
+            expect(capabilities.catalogue.discover).to.eql(true);
             break;
           // these users can't do anything with Discover
           case 'apm_all':
@@ -52,26 +58,27 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           case 'canvas_read':
           case 'dashboard_all':
           case 'dashboard_read':
-          case 'dev_tools_all':
+          case 'dev_tools_read':
           case 'graph_all':
           case 'graph_read':
           case 'gis_all':
           case 'gis_read':
-          case 'infrastructure_all':
-          case 'logs_all':
+          case 'infrastructure_read':
+          case 'logs_read':
           case 'ml_all':
           case 'monitoring_all':
           case 'timelion_all':
           case 'timelion_read':
-          case 'uptime_all':
+          case 'uptime_read':
           case 'visualize_all':
           case 'visualize_read':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('discover');
-            expect(uiCapabilities.value!.discover).to.eql({
+            expect(capabilities).to.have.property('discover');
+            expect(capabilities!.discover).to.eql({
               show: false,
               save: false,
             });
+            expect(capabilities.catalogue.discover).to.eql(false);
             break;
           case 'no_kibana_privileges':
           case 'legacy_all':

@@ -5,7 +5,7 @@
  */
 
 import { IndexPrivilege } from './index_privilege';
-import { KibanaPrivilege } from './kibana_privilege';
+import { KibanaPrivilegeSpec } from './kibana_privilege';
 
 export interface Role {
   name: string;
@@ -14,16 +14,13 @@ export interface Role {
     indices: IndexPrivilege[];
     run_as: string[];
   };
-  kibana: {
-    global: KibanaPrivilege[];
-    space: {
-      [spaceId: string]: KibanaPrivilege[];
-    };
-  };
+  kibana: KibanaPrivilegeSpec[];
   metadata?: {
     [anyKey: string]: any;
   };
   transient_metadata?: {
     [anyKey: string]: any;
   };
+  _transform_error?: string[];
+  _unrecognized_applications?: string[];
 }

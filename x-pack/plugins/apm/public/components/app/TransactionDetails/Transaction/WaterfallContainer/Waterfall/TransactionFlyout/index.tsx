@@ -18,9 +18,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
-import { get } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
+import { idx } from 'x-pack/plugins/apm/common/idx';
 import { TransactionActionMenu } from 'x-pack/plugins/apm/public/components/shared/TransactionActionMenu/TransactionActionMenu';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { DROPPED_SPANS_DOCS } from 'x-pack/plugins/apm/public/utils/documentation/apm-get-started';
@@ -63,13 +63,8 @@ function DroppedSpansWarning({
 }: {
   transactionDoc: Transaction;
 }) {
-  const dropped: number = get(
-    transactionDoc,
-    'transaction.span_count.dropped.total',
-    0
-  );
-
-  if (dropped === 0) {
+  const dropped = idx(transactionDoc, _ => _.transaction.span_count.dropped);
+  if (!dropped) {
     return null;
   }
 

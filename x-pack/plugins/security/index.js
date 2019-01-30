@@ -10,6 +10,7 @@ import { getUserProvider } from './server/lib/get_user';
 import { initAuthenticateApi } from './server/routes/api/v1/authenticate';
 import { initUsersApi } from './server/routes/api/v1/users';
 import { initPublicRolesApi } from './server/routes/api/public/roles';
+import { initPrivilegesApi } from './server/routes/api/public/privileges';
 import { initIndicesApi } from './server/routes/api/v1/indices';
 import { initLoginView } from './server/routes/views/login';
 import { initLogoutView } from './server/routes/views/logout';
@@ -199,6 +200,7 @@ export const security = (kibana) => new kibana.Plugin({
     initUsersApi(server);
     initPublicRolesApi(server);
     initIndicesApi(server);
+    initPrivilegesApi(server);
     initLoginView(server, xpackMainPlugin);
     initLogoutView(server);
     initLoggedOutView(server);

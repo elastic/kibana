@@ -11,6 +11,7 @@ import mappings from './mappings.json';
 import { checkLicense } from './check_license';
 import { watchStatusAndLicenseToInitialize } from
   '../../server/lib/watch_status_and_license_to_initialize';
+import { i18n } from '@kbn/i18n';
 
 export function gis(kibana) {
 
@@ -62,12 +63,15 @@ export function gis(kibana) {
 
         xpackMainPlugin.registerFeature({
           id: 'gis',
-          name: 'Maps',
+          name: i18n.translate('xpack.gis.featureRegistry.gisFeatureName', {
+            defaultMessage: 'Maps',
+          }),
           icon: 'gisApp',
           navLinkId: 'gis',
+          app: ['gis', 'kibana'],
+          catalogue: ['gis'],
           privileges: {
             all: {
-              app: ['gis', 'kibana'],
               savedObject: {
                 all: ['gis-map'],
                 read: ['config']
@@ -75,7 +79,6 @@ export function gis(kibana) {
               ui: [],
             },
             read: {
-              app: ['gis', 'kibana'],
               savedObject: {
                 all: [],
                 read: ['gis-map', 'config']

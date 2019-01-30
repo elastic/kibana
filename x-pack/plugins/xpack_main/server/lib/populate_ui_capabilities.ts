@@ -31,6 +31,19 @@ function getCapabilitiesFromFeature(feature: Feature): FeatureCapabilities {
     [feature.id]: {},
   };
 
+  if (feature.catalogue) {
+    UIFeatureCapabilities.catalogue = {
+      ...UIFeatureCapabilities.catalogue,
+      ...feature.catalogue.reduce(
+        (acc, capability) => ({
+          ...acc,
+          [capability]: true,
+        }),
+        {}
+      ),
+    };
+  }
+
   Object.values(feature.privileges).forEach(privilege => {
     UIFeatureCapabilities[feature.id] = {
       ...UIFeatureCapabilities[feature.id],
@@ -42,19 +55,6 @@ function getCapabilitiesFromFeature(feature: Feature): FeatureCapabilities {
         {}
       ),
     };
-
-    if (privilege.catalogue) {
-      UIFeatureCapabilities.catalogue = {
-        ...UIFeatureCapabilities.catalogue,
-        ...privilege.catalogue.reduce(
-          (privilegeAcc, capability) => ({
-            ...privilegeAcc,
-            [capability]: true,
-          }),
-          {}
-        ),
-      };
-    }
   });
 
   return UIFeatureCapabilities;
