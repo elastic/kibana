@@ -104,3 +104,19 @@ export interface BeatTag
   // Used by the UI and api when a tag exists but is an invalid option
   disabled?: boolean;
 }
+
+export const RuntimeBeatEvent = t.interface(
+  {
+    type: t.union(['STATE', 'ERROR'].map(value => t.literal(value))),
+    timestamp: t.string,
+    event: t.type({
+      type: t.union(
+        ['STARTING', 'In_PROGRESS', 'CONFIG', 'FAILED', 'STOPPED'].map(value => t.literal(value))
+      ),
+      message: t.string,
+      uuid: t.union([t.undefined, t.string]),
+    }),
+  },
+  'BeatEvent'
+);
+export interface BeatEvent extends t.TypeOf<typeof RuntimeBeatEvent> {}

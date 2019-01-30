@@ -5,7 +5,7 @@
  */
 import { get } from 'lodash';
 import { INDEX_NAMES } from 'x-pack/plugins/beats_management/common/constants';
-import { beatsIndexTemplate } from '../../../utils/index_templates';
+import { beatsIndexTemplate } from '../../../index_templates';
 import { FrameworkUser } from '../framework/adapter_types';
 import { internalAuthData } from './../framework/adapter_types';
 import {
