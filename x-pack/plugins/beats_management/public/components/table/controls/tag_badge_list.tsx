@@ -9,6 +9,7 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiPopover,
 } from '@elastic/eui';
 import React from 'react';
@@ -17,7 +18,7 @@ import { TagBadge } from '../../tag/tag_badge';
 import { AssignmentActionType } from '../index';
 
 interface TagBadgeListProps {
-  items: any[];
+  items: object[];
   disabled: boolean;
   name: string;
   action?: AssignmentActionType;
@@ -26,6 +27,7 @@ interface TagBadgeListProps {
 
 interface ComponentState {
   isPopoverOpen: boolean;
+  items: object[];
 }
 
 export class TagBadgeList extends React.Component<TagBadgeListProps, ComponentState> {
@@ -34,6 +36,7 @@ export class TagBadgeList extends React.Component<TagBadgeListProps, ComponentSt
 
     this.state = {
       isPopoverOpen: false,
+      items: [],
     };
   }
 
@@ -61,26 +64,38 @@ export class TagBadgeList extends React.Component<TagBadgeListProps, ComponentSt
       >
         <EuiContextMenuPanel>
           <EuiFlexGroup direction="column" gutterSize="xs" style={{ margin: 10 }}>
-            {this.props.items.map((tag: any) => (
-              <EuiFlexItem key={`${tag.id}`}>
+            {!this.props.items && <EuiLoadingSpinner size="l" />}
+            {this.props.items && this.props.items.length === 0 && (
+              <EuiFlexItem>
                 <EuiFlexGroup gutterSize="xs">
-                  <EuiFlexItem>
-                    <TagBadge
-                      maxIdRenderSize={TABLE_CONFIG.TRUNCATE_TAG_LENGTH_SMALL}
-                      onClick={() => this.props.actionHandler(AssignmentActionType.Assign, tag.id)}
-                      onClickAriaLabel={tag.id}
-                      tag={tag}
-                    />
-                  </EuiFlexItem>
+                  <EuiFlexItem>No options avaliable</EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
-            ))}
+            )}
+            {this.props.items &&
+              this.props.items.map((tag: any) => (
+                <EuiFlexItem key={`${tag.id}`}>
+                  <EuiFlexGroup gutterSize="xs">
+                    <EuiFlexItem>
+                      <TagBadge
+                        maxIdRenderSize={TABLE_CONFIG.TRUNCATE_TAG_LENGTH_SMALL}
+                        onClick={() =>
+                          this.props.actionHandler(AssignmentActionType.Assign, tag.id)
+                        }
+                        onClickAriaLabel={tag.id}
+                        tag={tag}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              ))}
           </EuiFlexGroup>
         </EuiContextMenuPanel>
       </EuiPopover>
     );
   }
-  private onButtonClick = () => {
+  private onButtonClick = async () => {
+    this.props.actionHandler(AssignmentActionType.Reload);
     this.setState(prevState => ({
       isPopoverOpen: !prevState.isPopoverOpen,
     }));
