@@ -12,6 +12,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { ResizeChecker } from 'ui/resize_checker';
 import { monaco } from '../../monaco/monaco';
+import { registerEditor } from '../../monaco/single_selection_helper';
 
 const U = styled.u`
   color: ${euiCodeBlockTagColor};
@@ -71,6 +72,7 @@ export class CodeBlock extends React.PureComponent<Props> {
           });
         }
       });
+      registerEditor(this.ed);
       if (this.props.highlightRanges) {
         const decorations = this.props.highlightRanges.map((range: IRange) => {
           return {

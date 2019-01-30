@@ -15,6 +15,7 @@ import { EditorService } from './editor_service';
 import { HoverController } from './hover/hover_controller';
 import { monaco } from './monaco';
 import { registerReferencesAction } from './references/references_action';
+import { registerEditor } from './single_selection_helper';
 import { TextModelResolverService } from './textmodel_resolver';
 
 export class MonacoHelper {
@@ -66,6 +67,7 @@ export class MonacoHelper {
           codeEditorService,
         }
       );
+      registerEditor(this.editor);
       this.resizeChecker = new ResizeChecker(this.container);
       this.resizeChecker.on('resize', () => {
         setTimeout(() => {
