@@ -29,6 +29,7 @@ export interface FetchFileResponse {
   content?: string;
   lang?: string;
   isImage?: boolean;
+  isUnsupported?: boolean;
   url?: string;
 }
 
