@@ -21,30 +21,6 @@ export const createGetMonitorChartsQuery = gql`
         x
         y
       }
-      maxContent {
-        x
-        y
-      }
-      maxResponse {
-        x
-        y
-      }
-      maxValidate {
-        x
-        y
-      }
-      maxTotal {
-        x
-        y
-      }
-      maxWriteRequest {
-        x
-        y
-      }
-      maxTcpRtt {
-        x
-        y
-      }
       avgDuration {
         x
         y
