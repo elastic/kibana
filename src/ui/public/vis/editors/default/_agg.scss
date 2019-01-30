@@ -39,7 +39,7 @@
 }
 
 .visEditorAgg__subAgg {
-  border: 2px solid $euiColorLightShade;
+  border: $euiBorderThick;
   border-radius: $euiBorderRadius;
   background-color: transparent;
   margin: $vis-editor-agg-editor-spacing 0;

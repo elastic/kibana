@@ -18,6 +18,7 @@
 
   @include euiBreakpoint('l', 'xl') {
     @include flex-parent(1, 1, 1px);
+    @include euiScrollBar;
     overflow: auto;
   }
 }
