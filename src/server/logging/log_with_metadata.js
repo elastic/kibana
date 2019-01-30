@@ -16,19 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { isPlainObject } from 'lodash';
+const symbol = Symbol('log message with metadata');
 
-import good from '@elastic/good';
-import loggingConfiguration from './configuration';
-import { logWithMetadata } from './log_with_metadata';
+export const logWithMetadata = {
+  isLogEvent(eventData) {
+    return Boolean(isPlainObject(eventData) && eventData[symbol]);
+  },
 
-export async function setupLogging(server, config) {
-  return await server.register({
-    plugin: good,
-    options: loggingConfiguration(config)
-  });
-}
+  getLogEventData(eventData) {
+    const { message, metadata } = eventData[symbol];
+    return {
+      ...metadata,
+      message
+    };
+  },
 
-export async function loggingMixin(kbnServer, server, config) {
-  logWithMetadata.decorateServer(server);
-  return await setupLogging(server, config);
-}
+  decorateServer(server) {
+    server.decorate('server', 'logWithMetadata', (tags, message, metadata = {}) => {
+      server.log(tags, {
+        [symbol]: {
+          message,
+          metadata,
+        },
+      });
+    });
+  },
+};
