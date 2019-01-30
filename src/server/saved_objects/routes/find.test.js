@@ -107,7 +107,7 @@ describe('GET /api/saved_objects/_find', () => {
     expect(savedObjectsClient.find.calledOnce).toBe(true);
 
     const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).toEqual({ perPage: 20, page: 1, type: ['foo', 'bar'] });
+    expect(options).toEqual({ perPage: 20, page: 1, type: ['foo', 'bar'], defaultSearchOperator: 'OR' });
   });
 
   it('accepts the query parameter page/per_page', async () => {
@@ -121,7 +121,7 @@ describe('GET /api/saved_objects/_find', () => {
     expect(savedObjectsClient.find.calledOnce).toBe(true);
 
     const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).toEqual({ perPage: 10, page: 50, type: ['foo'] });
+    expect(options).toEqual({ perPage: 10, page: 50, type: ['foo'], defaultSearchOperator: 'OR' });
   });
 
   it('accepts the query parameter search_fields', async () => {
@@ -135,7 +135,7 @@ describe('GET /api/saved_objects/_find', () => {
     expect(savedObjectsClient.find.calledOnce).toBe(true);
 
     const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).toEqual({ perPage: 20, page: 1, searchFields: ['title'], type: ['foo'] });
+    expect(options).toEqual({ perPage: 20, page: 1, searchFields: ['title'], type: ['foo'], defaultSearchOperator: 'OR' });
   });
 
   it('accepts the query parameter fields as a string', async () => {
@@ -149,7 +149,7 @@ describe('GET /api/saved_objects/_find', () => {
     expect(savedObjectsClient.find.calledOnce).toBe(true);
 
     const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).toEqual({ perPage: 20, page: 1, fields: ['title'], type: ['foo'] });
+    expect(options).toEqual({ perPage: 20, page: 1, fields: ['title'], type: ['foo'], defaultSearchOperator: 'OR' });
   });
 
   it('accepts the query parameter fields as an array', async () => {
@@ -164,7 +164,7 @@ describe('GET /api/saved_objects/_find', () => {
 
     const options = savedObjectsClient.find.getCall(0).args[0];
     expect(options).toEqual({
-      perPage: 20, page: 1, fields: ['title', 'description'], type: ['foo']
+      perPage: 20, page: 1, fields: ['title', 'description'], type: ['foo'], defaultSearchOperator: 'OR'
     });
   });
 
@@ -179,7 +179,7 @@ describe('GET /api/saved_objects/_find', () => {
     expect(savedObjectsClient.find.calledOnce).toBe(true);
 
     const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).toEqual({ perPage: 20, page: 1, type: ['index-pattern'] });
+    expect(options).toEqual({ perPage: 20, page: 1, type: ['index-pattern'], defaultSearchOperator: 'OR' });
   });
 
   it('accepts the query parameter type as an array', async () => {
@@ -193,6 +193,6 @@ describe('GET /api/saved_objects/_find', () => {
     expect(savedObjectsClient.find.calledOnce).toBe(true);
 
     const options = savedObjectsClient.find.getCall(0).args[0];
-    expect(options).toEqual({ perPage: 20, page: 1, type: ['index-pattern', 'visualization'] });
+    expect(options).toEqual({ perPage: 20, page: 1, type: ['index-pattern', 'visualization'], defaultSearchOperator: 'OR' });
   });
 });

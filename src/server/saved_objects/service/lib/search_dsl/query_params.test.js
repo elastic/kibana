@@ -715,9 +715,73 @@ describe('searchDsl/queryParams', () => {
     });
   });
 
+  describe('type (plural, namespaced and global), search, defaultSearchOperator', () => {
+    it('supports defaultSearchOperator', () => {
+      expect(getQueryParams(MAPPINGS, SCHEMA, 'foo-namespace', ['saved', 'global'], 'foo', null, 'AND'))
+        .toEqual({
+          query: {
+            bool: {
+              filter: [
+                {
+                  bool: {
+                    minimum_should_match: 1,
+                    should: [
+                      {
+                        bool: {
+                          must: [
+                            {
+                              term: {
+                                type: 'saved',
+                              },
+                            },
+                            {
+                              term: {
+                                namespace: 'foo-namespace',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      {
+                        bool: {
+                          must: [
+                            {
+                              term: {
+                                type: 'global',
+                              },
+                            },
+                          ],
+                          must_not: [
+                            {
+                              exists: {
+                                field: 'namespace',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+              must: [
+                {
+                  simple_query_string: {
+                    all_fields: true,
+                    default_operator: 'AND',
+                    query: 'foo',
+                  },
+                },
+              ],
+            },
+          },
+        });
+    });
+  });
+
   describe('type (plural, namespaced and global), hasReference', () => {
     it('supports hasReference', () => {
-      expect(getQueryParams(MAPPINGS, SCHEMA, 'foo-namespace', ['saved', 'global'], null, null, { type: 'bar', id: '1' }))
+      expect(getQueryParams(MAPPINGS, SCHEMA, 'foo-namespace', ['saved', 'global'], null, null, 'OR', { type: 'bar', id: '1' }))
         .toEqual({
           query: {
             bool: {

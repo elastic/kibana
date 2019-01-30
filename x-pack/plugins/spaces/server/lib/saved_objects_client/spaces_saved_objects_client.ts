@@ -140,6 +140,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
    * @param {object} [options={}]
    * @property {(string|Array<string>)} [options.type]
    * @property {string} [options.search]
+   * @property {string} [options.defaultSearchOperator]
    * @property {Array<string>} [options.searchFields] - see Elasticsearch Simple Query String
    *                                        Query field argument for more information
    * @property {integer} [options.page=1]

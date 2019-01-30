@@ -55,6 +55,7 @@ describe('getSearchDsl', () => {
         type: 'foo',
         search: 'bar',
         searchFields: ['baz'],
+        defaultSearchOperator: 'AND',
         hasReference: {
           type: 'bar',
           id: '1',
@@ -71,6 +72,7 @@ describe('getSearchDsl', () => {
         opts.type,
         opts.search,
         opts.searchFields,
+        opts.defaultSearchOperator,
         opts.hasReference,
       );
     });

@@ -854,25 +854,29 @@ describe('SavedObjectsRepository', () => {
       }
     });
 
-    it('passes mappings, schema, search, searchFields, type, sortField, sortOrder and hasReference to getSearchDsl', async () => {
-      callAdminCluster.returns(namespacedSearchResults);
-      const relevantOpts = {
-        namespace: 'foo-namespace',
-        search: 'foo*',
-        searchFields: ['foo'],
-        type: 'bar',
-        sortField: 'name',
-        sortOrder: 'desc',
-        hasReference: {
-          type: 'foo',
-          id: '1',
-        },
-      };
+    it(
+      'passes mappings, schema, search, defaultSearchOperator, searchFields, type, sortField, sortOrder and hasReference to getSearchDsl',
+      async () => {
+        callAdminCluster.returns(namespacedSearchResults);
+        const relevantOpts = {
+          namespace: 'foo-namespace',
+          search: 'foo*',
+          searchFields: ['foo'],
+          type: 'bar',
+          sortField: 'name',
+          sortOrder: 'desc',
+          defaultSearchOperator: 'AND',
+          hasReference: {
+            type: 'foo',
+            id: '1',
+          },
+        };
 
-      await savedObjectsRepository.find(relevantOpts);
-      sinon.assert.calledOnce(getSearchDsl);
-      sinon.assert.calledWithExactly(getSearchDsl, mappings, schema, relevantOpts);
-    });
+        await savedObjectsRepository.find(relevantOpts);
+        sinon.assert.calledOnce(getSearchDsl);
+        sinon.assert.calledWithExactly(getSearchDsl, mappings, schema, relevantOpts);
+      }
+    );
 
     it('merges output of getSearchDsl into es request body', async () => {
       callAdminCluster.returns(noNamespaceSearchResults);
