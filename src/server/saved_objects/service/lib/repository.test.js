@@ -812,7 +812,7 @@ describe('SavedObjectsRepository', () => {
       }
     });
 
-    it('passes mappings, schema, search, searchFields, type, sortField, and sortOrder to getSearchDsl', async () => {
+    it('passes mappings, schema, search, defaultSearchOperator, searchFields, type, sortField, and sortOrder to getSearchDsl', async () => {
       callAdminCluster.returns(namespacedSearchResults);
       const relevantOpts = {
         namespace: 'foo-namespace',
@@ -821,6 +821,7 @@ describe('SavedObjectsRepository', () => {
         type: 'bar',
         sortField: 'name',
         sortOrder: 'desc',
+        defaultSearchOperator: 'AND',
       };
 
       await savedObjectsRepository.find(relevantOpts);
