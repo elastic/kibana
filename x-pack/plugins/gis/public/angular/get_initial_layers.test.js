@@ -50,15 +50,35 @@ describe('Saved object does not have layer list', () => {
     require('../meta').getDataSourcesSync = () => {
       return dataSources;
     };
+    require('../meta').isMetaDataLoaded = () => {
+      return true;
+    };
   }
 
-  it('should get empty layer list when the metadata has not loaded yet.', () => {
+  it('should get the default EMS layer when metadata has not loaded yet', () => {
+    mockDataSourceResponse();
     require('../meta').isMetaDataLoaded = () => {
       return false;
     };
-    mockDataSourceResponse();
     const layers = getInitialLayers(null);
-    expect(layers).toEqual([]);
+    expect(layers).toEqual([{
+      "alpha": 1,
+      "dataRequests": [],
+      "id": layers[0].id,
+      "label": null,
+      "maxZoom": 24,
+      "minZoom": 0,
+      "sourceDescriptor": {
+        "id": "road_map",
+      },
+      "style": {
+        "properties": {},
+        "type": "TILE",
+      },
+      "temporary": false,
+      "type": "TILE",
+      "visible": true,
+    }]);
   });
 
 
