@@ -37,7 +37,7 @@ function MonitoringTimeseriesContainerUI({ series, onBrush, intl }) {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiTitle size="s" tabIndex="0">

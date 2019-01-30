@@ -7,12 +7,8 @@
 import React from 'react';
 import { get } from 'lodash';
 import { formatMetric } from '../../../lib/format_number';
-<<<<<<< HEAD
-import { EuiStat, EuiText, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-=======
 import { EuiText, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
->>>>>>> UI design touchup for 7.0
+import { i18n } from '@kbn/i18n';
 
 function OfflineCell() {
   return (
