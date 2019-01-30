@@ -285,6 +285,32 @@ describe('Saved Object', function () {
         });
       });
     });
+
+    describe('with extractReferences', () => {
+      it('calls the function', async () => {
+        const id = '123';
+        stubESResponse(getMockedDocResponse('id'));
+        let extractReferencesCallCount = 0;
+        const extractReferences = ({ attributes, references }) => {
+          extractReferencesCallCount++;
+          return { attributes, references };
+        };
+        return createInitializedSavedObject({ type: 'dashboard', extractReferences })
+          .then((savedObject) => {
+            sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
+              return BluebirdPromise.resolve({
+                id,
+                version: 2,
+                type: 'dashboard',
+              });
+            });
+            return savedObject.save();
+          })
+          .then(() => {
+            expect(extractReferencesCallCount).to.be(1);
+          });
+      });
+    });
   });
 
   describe('applyESResp', function () {
@@ -405,6 +431,73 @@ describe('Saved Object', function () {
         });
     });
 
+    it('does not inject references when references array is missing', async () => {
+      const injectReferences = sinon.stub();
+      const config = {
+        type: 'dashboard',
+        injectReferences,
+      };
+      const savedObject = new SavedObject(config);
+      return savedObject.init()
+        .then(() => {
+          const response = {
+            found: true,
+            _source: {
+              dinosaurs: { tRex: 'has big teeth' },
+            },
+          };
+          return savedObject.applyESResp(response);
+        })
+        .then(() => {
+          expect(injectReferences).to.have.property('notCalled', true);
+        });
+    });
+
+    it('does not inject references when references array is empty', async () => {
+      const injectReferences = sinon.stub();
+      const config = {
+        type: 'dashboard',
+        injectReferences,
+      };
+      const savedObject = new SavedObject(config);
+      return savedObject.init()
+        .then(() => {
+          const response = {
+            found: true,
+            _source: {
+              dinosaurs: { tRex: 'has big teeth' },
+            },
+            references: [],
+          };
+          return savedObject.applyESResp(response);
+        })
+        .then(() => {
+          expect(injectReferences).to.have.property('notCalled', true);
+        });
+    });
+
+    it('injects references when function is provided and references exist', async () => {
+      const injectReferences = sinon.stub();
+      const config = {
+        type: 'dashboard',
+        injectReferences,
+      };
+      const savedObject = new SavedObject(config);
+      return savedObject.init()
+        .then(() => {
+          const response = {
+            found: true,
+            _source: {
+              dinosaurs: { tRex: 'has big teeth' },
+            },
+            references: [{}],
+          };
+          return savedObject.applyESResp(response);
+        })
+        .then(() => {
+          expect(injectReferences).to.have.property('calledOnce', true);
+        });
+    });
   });
 
   describe ('config', function () {
