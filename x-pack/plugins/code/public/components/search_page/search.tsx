@@ -15,11 +15,11 @@ import { DocumentSearchResult, SearchScope } from '../../../model';
 import { changeSearchScope } from '../../actions';
 import { RootState } from '../../reducers';
 import { history } from '../../utils/url';
+import { ProjectItem } from '../admin_page/project_item';
 import { ShortcutsProvider } from '../shortcuts';
 import { CodeResult } from './code_result';
 import { EmptyPlaceholder } from './empty_placeholder';
 import { Pagination } from './pagination';
-import { RepoItem } from './repository_item';
 import { SearchBar } from './search_bar';
 import { SideBar } from './side_bar';
 
@@ -140,16 +140,26 @@ class SearchPage extends React.PureComponent<Props, State> {
       repositorySearchResults &&
       repositorySearchResults.total > 0
     ) {
-      const { repositories: repos } = repositorySearchResults;
+      const { repositories: repos, from, total } = repositorySearchResults;
       const resultComps =
         repos &&
         repos.map((repo: any) => (
           <EuiFlexItem key={repo.uri}>
-            <RepoItem uri={repo.uri} />
+            <ProjectItem key={repo.uri} project={repo} enableManagement={false} />
           </EuiFlexItem>
         ));
+      const to = from + repos.length;
+      const statsComp = (
+        <EuiTitle size="m">
+          <h1>
+            Showing {from + 1} - {to} of {total} results.
+          </h1>
+        </EuiTitle>
+      );
       mainComp = (
         <MainContentContainer>
+          {statsComp}
+          <EuiSpacer />
           <RepositoryResultContainer>{resultComps}</RepositoryResultContainer>
         </MainContentContainer>
       );
