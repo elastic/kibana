@@ -61,12 +61,10 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
       });
     }
 
-    async fieldSuggestions(expectedFields) {
-      log.debug(`DashboardExpect.fieldSuggestions(${expectedFields})`);
-      const fields = await filterBar.getFilterEditorFields();
-      expectedFields.forEach(expectedField => {
-        expect(fields).to.contain(expectedField);
-      });
+    async fieldSuggestionIndexPatterns(expectedIndexPatterns) {
+      log.debug(`DashboardExpect.fieldSuggestionIndexPatterns(${expectedIndexPatterns})`);
+      const indexPatterns = await filterBar.getFilterFieldIndexPatterns();
+      expect(indexPatterns).to.eql(expectedIndexPatterns);
     }
 
     async legendValuesToExist(legendValues) {
