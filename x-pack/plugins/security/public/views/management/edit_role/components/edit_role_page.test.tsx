@@ -24,6 +24,7 @@ const buildFeatures = () => {
       id: 'feature1',
       name: 'Feature 1',
       icon: 'addDataApp',
+      app: ['feature1App'],
       privileges: {
         all: {
           app: ['feature1App'],
@@ -39,6 +40,7 @@ const buildFeatures = () => {
       id: 'feature2',
       name: 'Feature 2',
       icon: 'addDataApp',
+      app: ['feature2App'],
       privileges: {
         all: {
           app: ['feature2App'],
