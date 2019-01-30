@@ -20,6 +20,7 @@
 import { IndexPattern } from 'ui/index_patterns';
 
 import classNames from 'classnames';
+import _ from 'lodash';
 import { compact, debounce, get, isEqual } from 'lodash';
 import React, { Component } from 'react';
 import { getFromLegacyIndexPattern } from 'ui/index_patterns/static_utils';
@@ -100,12 +101,6 @@ interface State {
 }
 
 export class QueryBarUI extends Component<Props, State> {
-  public static defaultProps = {
-    showDatePicker: false,
-    dateRangeFrom: 'now-15m',
-    dateRangeTo: 'now',
-  };
-
   public static getDerivedStateFromProps(nextProps: Props, prevState: State) {
     if (isEqual(prevState.currentProps, nextProps)) {
       return null;
@@ -171,8 +166,8 @@ export class QueryBarUI extends Component<Props, State> {
     index: null,
     suggestions: [],
     suggestionLimit: 50,
-    dateRangeFrom: this.props.dateRangeFrom,
-    dateRangeTo: this.props.dateRangeTo,
+    dateRangeFrom: _.get(this.props, 'dateRangeFrom', 'now-15m'),
+    dateRangeTo: _.get(this.props, 'dateRangeTo', 'now'),
     isDateRangeInvalid: false,
   };
 
@@ -501,8 +496,8 @@ export class QueryBarUI extends Component<Props, State> {
         language,
       },
       dateRange: {
-        from: this.props.dateRangeFrom,
-        to: this.props.dateRangeTo,
+        from: this.state.dateRangeFrom,
+        to: this.state.dateRangeTo,
       },
     });
   };
