@@ -104,6 +104,19 @@ describe('NewVisModal', () => {
     });
   });
 
+  describe('filter for visualization types', () => {
+    it('should render as expected', () => {
+      const wrapper = mountWithIntl(
+        <I18nProvider>
+          <NewVisModal isOpen={true} onClose={() => null} visTypesRegistry={visTypes} />
+        </I18nProvider>
+      );
+      const searchBox = wrapper.find('input[data-test-subj="filterVisType"]');
+      searchBox.simulate('change', { target: { value: 'with' } });
+      expect(wrapper).toMatchSnapshot();
+    });
+  });
+
   describe('experimental visualizations', () => {
     it('should not show experimental visualizations if visualize:enableLabs is false', () => {
       settingsGet.mockReturnValue(false);
