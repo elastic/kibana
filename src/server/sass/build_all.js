@@ -33,6 +33,7 @@ export async function buildAll(styleSheets, log, buildDir) {
       log,
       theme: styleSheet.theme,
       targetPath: resolve(buildDir, styleSheet.publicPath),
+      urlImports: styleSheet.urlImports
     });
     await bundle.build();
 

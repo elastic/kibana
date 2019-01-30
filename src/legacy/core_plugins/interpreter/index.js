@@ -26,7 +26,7 @@ export default function (kibana) {
     require: ['kibana', 'elasticsearch'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
-      injectDefaultVars: server => ({ defaultSpaceBasePath: server.config().get('server.basePath') }),
+      injectDefaultVars: server => ({ serverBasePath: server.config().get('server.basePath') }),
     },
     init,
   });

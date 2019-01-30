@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BeatTag } from '../../../../common/domain_types';
+import { uniq } from 'lodash';
+import { BeatTag, CMBeat } from '../../../../common/domain_types';
 import { RestAPIAdapter } from '../rest_api/adapter_types';
 import { CMTagsAdapter } from './adapter_types';
 
@@ -13,7 +14,7 @@ export class RestTagsAdapter implements CMTagsAdapter {
 
   public async getTagsWithIds(tagIds: string[]): Promise<BeatTag[]> {
     try {
-      return await this.REST.get<BeatTag[]>(`/api/beats/tags/${tagIds.join(',')}`);
+      return await this.REST.get<BeatTag[]>(`/api/beats/tags/${uniq(tagIds).join(',')}`);
     } catch (e) {
       return [];
     }
@@ -28,16 +29,27 @@ export class RestTagsAdapter implements CMTagsAdapter {
   }
 
   public async delete(tagIds: string[]): Promise<boolean> {
-    return (await this.REST.delete<{ success: boolean }>(`/api/beats/tags/${tagIds.join(',')}`))
-      .success;
+    return (await this.REST.delete<{ success: boolean }>(
+      `/api/beats/tags/${uniq(tagIds).join(',')}`
+    )).success;
   }
 
   public async upsertTag(tag: BeatTag): Promise<BeatTag | null> {
     const response = await this.REST.put<{ success: boolean }>(`/api/beats/tag/${tag.id}`, {
       color: tag.color,
-      configuration_blocks: tag.configuration_blocks,
+      name: tag.name,
     });
 
     return response.success ? tag : null;
+  }
+
+  public async getAssignable(beats: CMBeat[]) {
+    try {
+      return await this.REST.get<BeatTag[]>(
+        `/api/beats/tags/assignable/${beats.map(beat => beat.id).join(',')}`
+      );
+    } catch (e) {
+      return [];
+    }
   }
 }
