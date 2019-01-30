@@ -20,7 +20,7 @@
 import { access, link, unlink } from 'fs';
 import { resolve } from 'path';
 import { promisify } from 'util';
-import { write, copyAll, exec } from '../../../lib';
+import { write, copyAll, exec, mkdirp } from '../../../lib';
 import * as dockerTemplates from './templates';
 
 const accessAsync = promisify(access);
@@ -43,6 +43,7 @@ export async function runDockerGenerator(config, log, build) {
   // kibana docker build folder if we have one.
   try {
     await accessAsync(resolve(artifactsDir, artifactTarball));
+    await mkdirp(dockerBuildDir);
     await unlinkAsync(resolve(dockerBuildDir, artifactTarball));
   } catch (e) {
     if (e && e.code === 'ENOENT' && e.syscall === 'access') {
