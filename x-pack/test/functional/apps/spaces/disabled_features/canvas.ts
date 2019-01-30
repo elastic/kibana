@@ -13,7 +13,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const spacesService: SpacesService = getService('spaces');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'canvas', 'security', 'spaceSelector']);
-  const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
   describe('canvas', () => {
     before(async () => {
@@ -82,6 +82,9 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
     });
 
     describe('space with Canvas disabled', () => {
+      const getMessageText = async () =>
+        await (await find.byCssSelector('body>pre')).getVisibleText();
+
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
@@ -111,16 +114,24 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         expect(navLinks).not.to.contain('Canvas');
       });
 
-      it(`create new workpad redirects to the home page`, async () => {
+      it(`create new workpad returns a 404`, async () => {
         await PageObjects.common.navigateToActualUrl('canvas', 'workpad/create', {
           basePath: '/s/custom_space',
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', 10000);
+
+        const messageText = await getMessageText();
+        expect(messageText).to.eql(
+          JSON.stringify({
+            statusCode: 404,
+            error: 'Not Found',
+            message: 'Not Found',
+          })
+        );
       });
 
-      it(`edit workpad redirects to the home page`, async () => {
+      it(`edit workpad returns a 404`, async () => {
         await PageObjects.common.navigateToActualUrl(
           'canvas',
           'workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31',
@@ -130,7 +141,14 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('homeApp', 10000);
+        const messageText = await getMessageText();
+        expect(messageText).to.eql(
+          JSON.stringify({
+            statusCode: 404,
+            error: 'Not Found',
+            message: 'Not Found',
+          })
+        );
       });
     });
   });
