@@ -80,17 +80,15 @@ export const esPersistMiddleware = ({ getState }) => {
     if (changedWorkpad && changedAssets) {
       // if both the workpad and the assets changed, save it in its entirety to elasticsearch
       const persistedWorkpad = getFullWorkpadPersisted(getState());
-      return update(persistedWorkpad.id, persistedWorkpad).catch(err => notifyError(err));
+      return update(persistedWorkpad.id, persistedWorkpad).catch(notifyError);
     } else if (changedWorkpad) {
       // if the workpad changed, save it to elasticsearch
       const persistedWorkpad = getWorkpadPersisted(getState());
-      return updateWorkpad(persistedWorkpad.id, persistedWorkpad).catch(err => notifyError(err));
+      return updateWorkpad(persistedWorkpad.id, persistedWorkpad).catch(notifyError);
     } else if (changedAssets) {
       // if the assets changed, save it to elasticsearch
       const persistedWorkpad = getFullWorkpadPersisted(getState());
-      return updateAssets(persistedWorkpad.id, persistedWorkpad.assets).catch(err =>
-        notifyError(err)
-      );
+      return updateAssets(persistedWorkpad.id, persistedWorkpad.assets).catch(notifyError);
     }
   };
 };
