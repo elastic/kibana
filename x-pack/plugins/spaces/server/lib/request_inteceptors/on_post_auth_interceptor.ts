@@ -29,7 +29,7 @@ export function initSpacesOnPostAuthRequestInterceptor(server: KbnServer) {
   const serverBasePath: string = server.config().get('server.basePath');
   const xpackMainPlugin: XpackMainPlugin = server.plugins.xpack_main;
 
-  server.ext('onPostAuth', async function spacesOnRequestHandler(request: any, h: any) {
+  server.ext('onPostAuth', async function spacesOnPostAuthHandler(request: any, h: any) {
     const path = request.path;
 
     const isRequestingKibanaRoot = path === '/';
