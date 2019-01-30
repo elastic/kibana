@@ -16,7 +16,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
-  EuiCode,
   EuiDescribedFormGroup,
   EuiFlexGroup,
   EuiFlexItem,
@@ -526,19 +525,7 @@ export const FollowerIndexForm = injectI18n(
                           <h3>{title}</h3>
                         </EuiTitle>
                       )}
-                      description={(
-                        <Fragment>
-                          {description}
-                          <EuiSpacer size="s" />
-                          <EuiText size="xs">
-                            <FormattedMessage
-                              id="xpack.crossClusterReplication.followerIndexForm.advancedSettingsDefaultLabel"
-                              defaultMessage="Default:"
-                            />{' '}
-                            <EuiCode>{defaultValue}</EuiCode>
-                          </EuiText>
-                        </Fragment>
-                      )}
+                      description={description}
                       label={label}
                       helpText={helpText}
                       areErrorsVisible={areErrorsVisible}
