@@ -28,19 +28,12 @@ import { SavedSearch, SavedSearchLoader } from '../types';
 import { SearchEmbeddable } from './search_embeddable';
 
 export class SearchEmbeddableFactory extends EmbeddableFactory {
-  private $compile: ng.ICompileService;
-  private $rootScope: ng.IRootScopeService;
-  private searchLoader: SavedSearchLoader;
-
   constructor(
-    $compile: ng.ICompileService,
-    $rootScope: ng.IRootScopeService,
-    searchLoader: SavedSearchLoader
+    private $compile: ng.ICompileService,
+    private $rootScope: ng.IRootScopeService,
+    private searchLoader: SavedSearchLoader
   ) {
     super({ name: 'search' });
-    this.$compile = $compile;
-    this.searchLoader = searchLoader;
-    this.$rootScope = $rootScope;
   }
 
   public getEditPath(panelId: string) {
@@ -61,14 +54,22 @@ export class SearchEmbeddableFactory extends EmbeddableFactory {
   ) {
     const searchId: string = panelMetadata.id;
     const editUrl = this.getEditPath(searchId);
-    return this.searchLoader.get(searchId).then((savedObject: SavedSearch) => {
-      return new SearchEmbeddable({
-        onEmbeddableStateChanged,
-        savedSearch: savedObject,
-        editUrl,
-        $rootScope: this.$rootScope,
-        $compile: this.$compile,
-      });
+
+    return this.getSearchEmbeddable(searchId, editUrl, onEmbeddableStateChanged);
+  }
+
+  private async getSearchEmbeddable(
+    searchId: string,
+    editUrl: string,
+    onEmbeddableStateChanged: OnEmbeddableStateChanged
+  ) {
+    const savedObject: SavedSearch = await this.searchLoader.get(searchId);
+    return new SearchEmbeddable({
+      onEmbeddableStateChanged,
+      savedSearch: savedObject,
+      editUrl,
+      $rootScope: this.$rootScope,
+      $compile: this.$compile,
     });
   }
 }
