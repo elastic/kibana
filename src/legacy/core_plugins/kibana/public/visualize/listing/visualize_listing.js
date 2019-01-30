@@ -92,5 +92,4 @@ export function VisualizeListingController($injector, createNewVis) {
       defaultMessage: 'Visualize',
     })
   }]);
-  config.watch('k7design', (val) => this.showPluginBreadcrumbs = !val);
 }
