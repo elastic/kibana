@@ -17,7 +17,9 @@ import { FormattedRelative } from '@kbn/i18n/react';
 import { get, getOr, isArray } from 'lodash/fp';
 import React from 'react';
 import { pure } from 'recompose';
+import styled from 'styled-components';
 import { HostItem, HostsEdges } from 'x-pack/plugins/secops/server/graphql/types';
+
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { getEmptyValue } from '../../../empty_value';
@@ -34,7 +36,7 @@ interface OwnProps {
 type HostSummaryProps = OwnProps;
 
 export const HostSummary = pure<HostSummaryProps>(({ data, startDate, endDate, loading }) => (
-  <EuiFlexItem style={{ maxWidth: 750 }}>
+  <StyledEuiFlexItem>
     <EuiPanel>
       <EuiTitle size="s">
         <h3>{i18n.SUMMARY}</h3>
@@ -43,7 +45,7 @@ export const HostSummary = pure<HostSummaryProps>(({ data, startDate, endDate, l
       <EuiHorizontalRule margin="xs" />
       {getEuiDescriptionList(getOr(null, 'node', data[0]), startDate, endDate)}
     </EuiPanel>
-  </EuiFlexItem>
+  </StyledEuiFlexItem>
 ));
 
 const fieldTitleMapping: Readonly<Record<string, string>> = {
@@ -77,8 +79,8 @@ export const getEuiDescriptionList = (
             {/*Using EuiDescriptionListDescription throws off sizing of Draggable*/}
             <div>
               {isArray(summaryValue)
-                ? summaryValue.map((v: string) =>
-                    createDraggable(v, field, startDate, endDate, dateFields)
+                ? summaryValue.map((value: string) =>
+                    createDraggable(value, field, startDate, endDate, dateFields)
                   )
                 : createDraggable(summaryValue, field, startDate, endDate, dateFields)}
             </div>
@@ -133,3 +135,7 @@ export const createDraggable = (
     />
   );
 };
+
+const StyledEuiFlexItem = styled(EuiFlexItem)`
+  max-width: 750px;
+`;

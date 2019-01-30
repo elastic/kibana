@@ -24,7 +24,7 @@ import { GlobalTime } from '../../containers/global_time';
 import { HostsQuery } from '../../containers/hosts';
 import { HostsTableQuery } from '../../containers/hosts/hosts_table.gql_query';
 import { KpiEventsQuery } from '../../containers/kpi_events';
-import { indiciesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
+import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
 import { KpiItem } from '../../graphql/types';
 import * as i18n from './translations';
@@ -40,7 +40,7 @@ const TypesBarManage = manageQuery(TypesBar);
 export const Hosts = pure(() => (
   <WithSource sourceId="default">
     {({ auditbeatIndicesExist }) =>
-      indiciesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
+      indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
         <GlobalTime>
           {({ poll, to, from, setQuery }) => (
             <>

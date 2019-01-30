@@ -45,5 +45,5 @@ export const WithSource = ({ children, sourceId }: WithSourceProps) => (
   </Query>
 );
 
-export const indiciesExistOrDataTemporarilyUnavailable = (indiciesExist: boolean) =>
-  indiciesExist || isUndefined(indiciesExist);
+export const indicesExistOrDataTemporarilyUnavailable = (indicesExist: boolean | undefined) =>
+  indicesExist || isUndefined(indicesExist);

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DocumentNode } from 'graphql';
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
@@ -12,8 +13,6 @@ import { pure } from 'recompose';
 
 import { ESQuery } from '../../../common/typed_json';
 import { GetHostsTableQuery, GetHostSummaryQuery, HostsEdges, PageInfo } from '../../graphql/types';
-
-import { DocumentNode } from 'graphql';
 import { hostsSelector, inputsModel, State } from '../../store';
 import { createFilter } from '../helpers';
 

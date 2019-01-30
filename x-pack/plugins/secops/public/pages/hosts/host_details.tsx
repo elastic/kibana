@@ -14,6 +14,7 @@ import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 import chrome from 'ui/chrome';
+
 import { ESTermQuery } from '../../../common/typed_json';
 import { EmptyPage } from '../../components/empty_page';
 import { getHostsUrl, HostComponentProps } from '../../components/link_to/redirect_to_hosts';
@@ -22,21 +23,21 @@ import { manageQuery } from '../../components/page/manage_query';
 import { GlobalTime } from '../../containers/global_time';
 import { HostsQuery } from '../../containers/hosts';
 import { HostSummaryQuery } from '../../containers/hosts/host_summary.gql_query';
-import { indiciesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
+import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import * as i18n from './translations';
 
 const basePath = chrome.getBasePath();
 
 const HostSummaryManage = manageQuery(HostSummary);
 
-export const HostDetails = pure<HostComponentProps>(({ match }) => (
+export const HostDetails = pure<HostComponentProps>(({ match: { params: { hostId } } }) => (
   <WithSource sourceId="default">
     {({ auditbeatIndicesExist }) =>
-      indiciesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
+      indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
         <GlobalTime>
           {({ poll, to, from, setQuery }) => (
             <>
-              <HostBreadcrumbWrapper breadcrumbs={getBreadcrumbs(match.params.hostId!)} />
+              <HostBreadcrumbWrapper breadcrumbs={getBreadcrumbs(hostId)} />
 
               <EuiFlexGroup>
                 <HostsQuery
@@ -45,7 +46,7 @@ export const HostDetails = pure<HostComponentProps>(({ match }) => (
                   startDate={from}
                   endDate={to}
                   poll={poll}
-                  filterQuery={getFilterQuery(match.params.hostId)}
+                  filterQuery={getFilterQuery(hostId)}
                 >
                   {({ hosts, loading, id, refetch, startDate, endDate }) => (
                     <HostSummaryManage
