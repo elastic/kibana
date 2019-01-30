@@ -1,0 +1,31 @@
+/**
+ * 1. Make sure the timepicker is always one right, even if the main menu doesn't exist
+ */
+
+.kbnTopNav {
+  background-color: $euiColorLightestShade;
+  border-bottom: $euiBorderThin;
+}
+
+.kbnTopNav__row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* 1 */
+}
+
+.kbnTopNav__mainMenu {
+  flex-grow: 1; /* 1 */
+
+  &:empty {
+    // Make sure the area doesn't take up any space if it is empty
+    padding: 0;
+  }
+
+  .kuiLocalMenuItem {
+    font-weight: $euiFontWeightMedium;
+  }
+
+  .kuiLocalMenuItem:not(.kuiLocalMenuItem-isDisabled) {
+    color: $euiLinkColor;
+  }
+}

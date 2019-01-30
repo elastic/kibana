@@ -84,7 +84,11 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
    * @property {string} [options.namespace]
    * @returns {promise} - { id, type, version, attributes }
    */
-  public async create(type: string, attributes = {}, options: CreateOptions = {}) {
+  public async create<T extends SavedObjectAttributes>(
+    type: string,
+    attributes: T = {} as T,
+    options: CreateOptions = {}
+  ) {
     throwErrorIfTypeIsSpace(type);
     throwErrorIfNamespaceSpecified(options);
 
@@ -215,10 +219,10 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
    * @property {string} [options.namespace]
    * @returns {promise}
    */
-  public async update(
+  public async update<T extends SavedObjectAttributes>(
     type: string,
     id: string,
-    attributes: SavedObjectAttributes,
+    attributes: Partial<T>,
     options: UpdateOptions = {}
   ) {
     throwErrorIfTypeIsSpace(type);
