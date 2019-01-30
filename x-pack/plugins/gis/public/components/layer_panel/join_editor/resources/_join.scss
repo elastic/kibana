@@ -1,13 +1,8 @@
 .gisJoinItem {
   background: tintOrShade($euiColorLightShade, 85%, 0);
   border-radius: $euiBorderRadius;
-  margin: $euiSizeXS 0;
   padding: $euiSizeXS;
   position: relative;
-
-  &:last-of-type {
-    margin-bottom: 0;
-  }
 
   &:hover,
   &:focus {
@@ -19,13 +14,13 @@
 }
 
 .gisJoinItem__delete {
+  @include euiBottomShadowSmall;
   position: absolute;
   right: 0;
   top: 50%;
-  margin-right: -8px;
-  margin-top: -12px;
+  margin-right: -$euiSizeS;
+  margin-top: -$euiSizeM;
   background: $euiColorEmptyShade;
-  @include euiBottomShadowSmall;
   padding: $euiSizeXS;
   visibility: hidden;
   opacity: 0;

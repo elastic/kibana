@@ -1,0 +1,10 @@
+.gisLayerAddpanel__card {
+  // EUITODO: Fix horizontal layout so it works with any size icon
+  .euiCard__content {
+    padding-top: 0 !important;
+  }
+
+  .euiCard__top + .euiCard__content {
+    padding-top: 2px !important;
+  }
+}

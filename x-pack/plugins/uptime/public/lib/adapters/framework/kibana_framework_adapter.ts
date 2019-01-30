@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
 import ReactDOM from 'react-dom';
 import { unmountComponentAtNode } from 'react-dom';
 import chrome from 'ui/chrome';
 import { PLUGIN } from '../../../../common/constants';
 import { UMBreadcrumb } from '../../../breadcrumbs';
-import { UptimePersistedState } from '../../../uptime_app';
+import { UptimeCommonProps } from '../../../uptime_app';
 import { BootstrapUptimeApp, UMFrameworkAdapter } from '../../lib';
 import { CreateGraphQLClient } from './framework_adapter_types';
 
@@ -18,11 +17,25 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
   private uiRoutes: any;
   private xsrfHeader: string;
   private uriPath: string;
+  private defaultDateRangeStart: string;
+  private defaultDateRangeEnd: string;
+  private defaultAutorefreshInterval: number;
+  private defaultAutorefreshIsPaused: boolean;
 
-  constructor(uiRoutes: any) {
+  constructor(
+    uiRoutes: any,
+    dateRangeStart?: string,
+    dateRangeEnd?: string,
+    autorefreshInterval?: number,
+    autorefreshIsPaused?: boolean
+  ) {
     this.uiRoutes = uiRoutes;
     this.xsrfHeader = chrome.getXsrfToken();
     this.uriPath = `${chrome.getBasePath()}/api/uptime/graphql`;
+    this.defaultDateRangeStart = dateRangeStart || 'now-15m';
+    this.defaultDateRangeEnd = dateRangeEnd || 'now';
+    this.defaultAutorefreshInterval = autorefreshInterval || 60 * 1000;
+    this.defaultAutorefreshIsPaused = autorefreshIsPaused || true;
   }
 
   public render = (
@@ -49,7 +62,7 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
             : basePath + PLUGIN.ROUTER_BASE_NAME;
           const persistedState = this.initializePersistedState();
           const {
-            autorefreshEnabled,
+            autorefreshIsPaused,
             autorefreshInterval,
             dateRangeStart,
             dateRangeEnd,
@@ -61,7 +74,7 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
               kibanaBreadcrumbs,
               routerBasename,
               graphQLClient,
-              initialAutorefreshEnabled: autorefreshEnabled,
+              initialAutorefreshIsPaused: autorefreshIsPaused,
               initialAutorefreshInterval: autorefreshInterval,
               initialDateRangeStart: dateRangeStart,
               initialDateRangeEnd: dateRangeEnd,
@@ -95,29 +108,40 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
     });
   };
 
-  private initializePersistedState = () => {
+  private initializePersistedState = (): UptimeCommonProps => {
     const uptimeConfigurationData = window.localStorage.getItem(PLUGIN.LOCAL_STORAGE_KEY);
+    const defaultState: UptimeCommonProps = {
+      autorefreshIsPaused: this.defaultAutorefreshIsPaused,
+      autorefreshInterval: this.defaultAutorefreshInterval,
+      dateRangeStart: this.defaultDateRangeStart,
+      dateRangeEnd: this.defaultDateRangeEnd,
+    };
     try {
       if (uptimeConfigurationData) {
-        return JSON.parse(uptimeConfigurationData) || {};
-      } else {
-        const initialState: UptimePersistedState = {
-          autorefreshEnabled: false,
-          autorefreshInterval: 5000,
-          dateRangeStart: moment()
-            .subtract(1, 'day')
-            .valueOf(),
-          dateRangeEnd: moment().valueOf(),
-        };
-        this.updatePersistedState(initialState);
-        return initialState;
+        const parsed = JSON.parse(uptimeConfigurationData) || {};
+        const { dateRangeStart, dateRangeEnd } = parsed;
+        // TODO: this is defensive code to ensure we don't encounter problems
+        // when encountering older versions of the localStorage values.
+        // The old code has never been released, so users don't need it, and this
+        // code should be removed eventually.
+        if (
+          (dateRangeEnd && typeof dateRangeEnd === 'number') ||
+          (dateRangeStart && typeof dateRangeStart === 'number')
+        ) {
+          this.updatePersistedState(defaultState);
+          return defaultState;
+        }
+        return parsed;
       }
     } catch (e) {
-      return {};
+      // TODO: this should result in a redirect to error page
+      throw e;
     }
+    this.updatePersistedState(defaultState);
+    return defaultState;
   };
 
-  private updatePersistedState = (state: UptimePersistedState) => {
+  private updatePersistedState = (state: UptimeCommonProps) => {
     window.localStorage.setItem(PLUGIN.LOCAL_STORAGE_KEY, JSON.stringify(state));
   };
 }

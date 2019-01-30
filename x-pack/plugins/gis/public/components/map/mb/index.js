@@ -13,6 +13,7 @@ import {
   setMouseCoordinates,
   clearMouseCoordinates,
   clearGoto,
+  setLayerErrorStatus,
 } from '../../../actions/store_actions';
 import { getLayerList, getMapReady, getGoto } from "../../../selectors/map_selectors";
 
@@ -20,7 +21,7 @@ function mapStateToProps(state = {}) {
   return {
     isMapReady: getMapReady(state),
     layerList: getLayerList(state),
-    goto: getGoto(state),
+    goto: getGoto(state)
   };
 }
 
@@ -45,7 +46,9 @@ function mapDispatchToProps(dispatch) {
     },
     clearGoto: () => {
       dispatch(clearGoto());
-    }
+    },
+    setLayerErrorStatus: (id, msg) =>
+      dispatch(setLayerErrorStatus(id, msg))
   };
 }
 

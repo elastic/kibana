@@ -17,7 +17,4 @@
  * under the License.
  */
 
-import { commonFunctions } from './index';
-
-// eslint-disable-next-line no-undef
-commonFunctions.forEach(canvas.register);
+import '../common/register';

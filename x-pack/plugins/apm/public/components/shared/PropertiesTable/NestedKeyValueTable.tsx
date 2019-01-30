@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { isBoolean, isNumber, isObject } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
-
+import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
 import { StringMap } from '../../../../typings/common';
 import {
   colors,
@@ -76,13 +75,7 @@ export function FormattedValue({ value }: { value: any }): JSX.Element {
   } else if (isBoolean(value) || isNumber(value)) {
     return <React.Fragment>{String(value)}</React.Fragment>;
   } else if (!value) {
-    return (
-      <EmptyValue>
-        {i18n.translate('xpack.apm.propertiesTable.notAvailableLabel', {
-          defaultMessage: 'N/A'
-        })}
-      </EmptyValue>
-    );
+    return <EmptyValue>{NOT_AVAILABLE_LABEL}</EmptyValue>;
   }
 
   return <React.Fragment>{value}</React.Fragment>;

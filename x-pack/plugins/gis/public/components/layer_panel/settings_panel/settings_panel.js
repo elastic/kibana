@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiLink,
 } from '@elastic/eui';
+import { ValidatedRange } from '../../../shared/components/validated_range';
 
 export class SettingsPanel extends Component {
 
@@ -45,10 +46,8 @@ export class SettingsPanel extends Component {
     this.props.updateMaxZoom(this.props.layerId, zoom);
   }
 
-  onAlphaValueChange = (event) => {
-    const sanitizedValue = parseFloat(event.target.value);
-    const alphaValue = isNaN(sanitizedValue) ? '' : sanitizedValue;
-    this.props.updateAlphaValue(this.props.layerId, alphaValue);
+  onAlphaChange = (alpha) => {
+    this.props.updateAlpha(this.props.layerId, alpha);
   }
 
   onSourceChange = ({ propName, value }) => {
@@ -58,7 +57,7 @@ export class SettingsPanel extends Component {
   renderZoomSliders() {
     return (
       <EuiFormRow
-        helpText="Dislay layer when map is within zoom level range."
+        helpText="Display layer when map is within zoom level range."
       >
         <EuiFlexGroup>
           <EuiFlexItem>
@@ -110,15 +109,15 @@ export class SettingsPanel extends Component {
   renderAlphaSlider() {
     return (
       <EuiFormRow
-        label="Layer opacity"
+        label="Layer transparency"
       >
-        <div className="alphaRange">
-          <EuiRange
+        <div className="gisAlphaRange">
+          <ValidatedRange
             min={.00}
             max={1.00}
             step={.05}
-            value={this.props.alphaValue.toString()} // EuiRange value must be string
-            onChange={this.onAlphaValueChange}
+            value={this.props.alpha}
+            onChange={this.onAlphaChange}
             showLabels
             showInput
             showRange
@@ -135,7 +134,7 @@ export class SettingsPanel extends Component {
 
     return (
       <Fragment>
-        {this.props.renderSourceDetails()}
+        {this.props.layer.renderSourceDetails()}
         <EuiSpacer margin="m"/>
       </Fragment>
     );
@@ -167,7 +166,7 @@ export class SettingsPanel extends Component {
 
         {this.renderAlphaSlider()}
 
-        {this.props.renderSourceSettingsEditor({ onChange: this.onSourceChange })}
+        {this.props.layer.renderSourceSettingsEditor({ onChange: this.onSourceChange })}
 
       </EuiPanel>
     );
