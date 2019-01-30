@@ -22,25 +22,27 @@ import { IndexPatternListFactory } from 'ui/management/index_pattern_list';
 import { IndexPatternCreationFactory } from 'ui/management/index_pattern_creation';
 import './create_index_pattern_wizard';
 import './edit_index_pattern';
+
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import indexTemplate from './index.html';
+import indexPatternListTemplate from './list.html';
+import { IndexPatternTable } from './index_pattern_table';
+import { CreateIndexPatternPrompt } from './create_index_pattern_prompt';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
+import { EuiBadge } from '@elastic/eui';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { IndexPatternList } from './index_pattern_list';
 
 const INDEX_PATTERN_LIST_DOM_ELEMENT_ID = 'indexPatternListReact';
 
 export function updateIndexPatternList(
-  $scope,
-  indexPatternCreationOptions,
-  defaultIndex,
   indexPatterns,
+  kbnUrl,
 ) {
   const node = document.getElementById(INDEX_PATTERN_LIST_DOM_ELEMENT_ID);
   if (!node) {
@@ -49,11 +51,8 @@ export function updateIndexPatternList(
 
   render(
     <I18nProvider>
-      <IndexPatternList
-        indexPatternCreationOptions={indexPatternCreationOptions}
-        defaultIndex={defaultIndex}
-        indexPatterns={indexPatterns}
-      />
+      {indexPatterns.length === 0 ? (<CreateIndexPatternPrompt />) :
+        (<IndexPatternTable indexPatterns={indexPatterns} navTo={kbnUrl.redirect} />)}
     </I18nProvider>,
     node,
   );
@@ -82,6 +81,13 @@ uiRoutes
     resolve: indexPatternsResolutions
   });
 
+
+uiRoutes
+  .when('/management/kibana/index_patterns', {
+    template: indexPatternListTemplate
+    //todo - template aaand breadcrumbs aaaand ?
+  });
+
 // wrapper directive, which sets some global stuff up like the left nav
 uiModules.get('apps/management')
   .directive('kbnManagementIndexPatterns', function ($route, config, kbnUrl, Private) {
@@ -90,11 +96,18 @@ uiModules.get('apps/management')
       transclude: true,
       template: indexTemplate,
       link: async function ($scope) {
+
         const indexPatternListProvider = Private(IndexPatternListFactory)();
+
         const indexPatternCreationProvider = Private(IndexPatternCreationFactory)();
-        const indexPatternCreationOptions = await indexPatternCreationProvider.getIndexPatternCreationOptions((url) => {
+
+        //const indexPatternCreationType = indexPatternCreationProvider.getType();
+
+        // TODO - I'm not sure what this does
+        await indexPatternCreationProvider.getIndexPatternCreationOptions((url) => {
           $scope.$evalAsync(() => kbnUrl.change(url));
         });
+
 
         const renderList = () => {
           $scope.indexPatternList = $route.current.locals.indexPatterns.map(pattern => {
@@ -103,7 +116,10 @@ uiModules.get('apps/management')
 
             return {
               id: id,
-              title: pattern.get('title'),
+              title:
+  <span>
+    {pattern.get('title')}{$scope.defaultIndex === id && (<EuiBadge style={{ marginLeft: '8px' }}>Default</EuiBadge>)}
+  </span>,
               url: kbnUrl.eval('#/management/kibana/index_patterns/{{id}}', { id: id }),
               active: $scope.editingId === id,
               default: $scope.defaultIndex === id,
@@ -125,7 +141,7 @@ uiModules.get('apps/management')
             return 0;
           }) || [];
 
-          updateIndexPatternList($scope, indexPatternCreationOptions, $scope.defaultIndex, $scope.indexPatternList);
+          updateIndexPatternList($scope.indexPatternList, kbnUrl);
         };
 
         $scope.$on('$destroy', destroyIndexPatternList);
@@ -133,6 +149,7 @@ uiModules.get('apps/management')
         $scope.$watch('defaultIndex', () => renderList());
         config.bindToScope($scope, 'defaultIndex');
         $scope.$apply();
+
       }
     };
   });
