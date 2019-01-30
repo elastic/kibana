@@ -18,12 +18,13 @@ import { UpgradeAssistantStatus } from '../../server/lib/es_migration_apis';
 import { LatestMinorBanner } from './latest_minor_banner';
 import { CheckupTab } from './tabs/checkup';
 import { OverviewTab } from './tabs/overview';
-import { LoadingState, UpgradeAssistantTabProps } from './types';
+import { LoadingState, TelemetryState, UpgradeAssistantTabProps } from './types';
 
 interface TabsState {
   loadingState: LoadingState;
   checkupData?: UpgradeAssistantStatus;
   selectedTabIndex: number;
+  telemetryState: TelemetryState;
 }
 
 export class UpgradeAssistantTabsUI extends React.Component<
@@ -36,6 +37,7 @@ export class UpgradeAssistantTabsUI extends React.Component<
     this.state = {
       loadingState: LoadingState.Loading,
       selectedTabIndex: 0,
+      telemetryState: TelemetryState.Complete,
     };
   }
 
@@ -47,11 +49,14 @@ export class UpgradeAssistantTabsUI extends React.Component<
   }
 
   public render() {
-    const { selectedTabIndex } = this.state;
+    const { selectedTabIndex, telemetryState } = this.state;
     const tabs = this.tabs;
 
     return (
       <EuiTabbedContent
+        data-test-subj={
+          telemetryState === TelemetryState.Running ? 'upgradeAssistantTelemetryRunning' : undefined
+        }
         tabs={tabs}
         onTabClick={this.onTabClick}
         selectedTab={tabs[selectedTabIndex]}
@@ -59,7 +64,7 @@ export class UpgradeAssistantTabsUI extends React.Component<
     );
   }
 
-  private onTabClick = (selectedTab: EuiTabbedContentTab) => {
+  private onTabClick = async (selectedTab: EuiTabbedContentTab) => {
     const selectedTabIndex = findIndex(this.tabs, { id: selectedTab.id });
     if (selectedTabIndex === -1) {
       throw new Error(`Clicked tab did not exist in tabs array`);
@@ -159,11 +164,15 @@ export class UpgradeAssistantTabsUI extends React.Component<
       return;
     }
 
+    this.setState({ telemetryState: TelemetryState.Running });
+
     await kfetch({
       pathname: '/api/upgrade_assistant/telemetry/ui_open',
       method: 'PUT',
       body: JSON.stringify(set({}, tabName, true)),
     });
+
+    this.setState({ telemetryState: TelemetryState.Complete });
   }
 }
 
