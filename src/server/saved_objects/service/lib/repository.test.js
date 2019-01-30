@@ -179,51 +179,49 @@ describe('SavedObjectsRepository', () => {
   };
 
   const mappings = {
-    doc: {
-      properties: {
-        'config': {
-          properties: {
+    properties: {
+      'config': {
+        properties: {
+          type: 'keyword'
+        },
+      },
+      'foo': {
+        properties: {
+          type: 'keyword',
+        },
+      },
+      'bar': {
+        properties: {
+          type: 'keyword',
+        },
+      },
+      'index-pattern': {
+        properties: {
+          someField: {
             type: 'keyword'
-          },
-        },
-        'foo': {
-          properties: {
-            type: 'keyword',
-          },
-        },
-        'bar': {
-          properties: {
-            type: 'keyword',
-          },
-        },
-        'index-pattern': {
-          properties: {
-            someField: {
-              type: 'keyword'
-            }
           }
-        },
-        'dashboard': {
-          properties: {
-            otherField: {
-              type: 'keyword'
-            }
+        }
+      },
+      'dashboard': {
+        properties: {
+          otherField: {
+            type: 'keyword'
           }
-        },
-        'globaltype': {
-          properties: {
-            yetAnotherField: {
-              type: 'keyword'
-            }
+        }
+      },
+      'globaltype': {
+        properties: {
+          yetAnotherField: {
+            type: 'keyword'
           }
-        },
-        'hiddenType': {
-          properties: {
-            someField: {
-              type: 'keyword'
-            }
+        }
+      },
+      'hiddenType': {
+        properties: {
+          someField: {
+            type: 'keyword'
           }
-        },
+        }
       },
     },
   };
@@ -1660,9 +1658,9 @@ describe('SavedObjectsRepository', () => {
       sinon.assert.calledWithExactly(callAdminCluster, 'mget', {
         body: {
           docs: [
-            { _id: 'config:one', _type: 'doc' },
-            { _id: 'index-pattern:two', _type: 'doc' },
-            { _id: 'globaltype:three', _type: 'doc' },
+            { _id: 'config:one', _type: '_doc' },
+            { _id: 'index-pattern:two', _type: '_doc' },
+            { _id: 'globaltype:three', _type: '_doc' },
           ]
         },
         index: '.kibana-test',

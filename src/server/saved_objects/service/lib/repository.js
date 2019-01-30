@@ -52,7 +52,7 @@ export class SavedObjectsRepository {
     this._mappings = mappings;
     this._schema = schema;
     this._allowedTypes = allowedTypes;
-    
+
     // ES7 and up expects the root type to be _doc
     this._type = '_doc';
     this._onBeforeWrite = onBeforeWrite;

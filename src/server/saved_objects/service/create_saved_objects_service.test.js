@@ -26,12 +26,10 @@ describe('saved object service creation', () => {
       config: () => { return { get: sinon.stub() }; },
       getKibanaIndexMappingsDsl: () => {
         return {
-          doc: {
-            properties: {
-              allowedType1: { properties: {} },
-              allowedType2: { properties: {} },
-              hiddenType: { properties: {} },
-            },
+          properties: {
+            allowedType1: { properties: {} },
+            allowedType2: { properties: {} },
+            hiddenType: { properties: {} },
           },
         };
       },
