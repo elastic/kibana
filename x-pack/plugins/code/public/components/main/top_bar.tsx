@@ -17,6 +17,8 @@ const TopBarContainer = styled.div`
   --topBarContainerHeight: calc(40 / 14 rem);
   box-sizing: content-box;
   display: flex;
+  flex-grow: 0;
+  flex-shrink: 0;
   flex-direction: row;
   justify-content: space-between;
   padding: ${paddingSizes.s};
