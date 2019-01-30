@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { UICapabilities } from 'ui/capabilities';
 import { EnabledFeatures } from './enabled_features';
 
 describe('EnabledFeatures', () => {
@@ -23,6 +24,14 @@ describe('EnabledFeatures', () => {
           ]}
           space={{
             id: 'my-space',
+          }}
+          uiCapabilities={{
+            navLinks: {},
+            management: {},
+            catalogue: {},
+            spaces: {
+              manage: true,
+            },
           }}
           intl={null as any}
           onChange={jest.fn()}

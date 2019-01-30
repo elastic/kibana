@@ -167,21 +167,16 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
           <h2>
             <FormattedMessage
               id="xpack.security.management.editRole.spacePrivilegeSection.noAccessToKibanaTitle"
-              defaultMessage="No access to Kibana"
+              defaultMessage="This role does not grant access to Kibana"
             />
           </h2>
         }
         titleSize={'s'}
-        body={
-          <Fragment>
-            <p>
-              <FormattedMessage
-                id="xpack.security.management.editRole.spacePrivilegeSection.noAccessToKibanaDescription"
-                defaultMessage="This role does not grant any access to Kibana. Add privileges to existing spaces or groups of existing spaces using the button below."
-              />
-            </p>
-          </Fragment>
-        }
+        // body={
+        //   <Fragment>
+        //     <span />
+        //   </Fragment>
+        // }
         actions={this.getAvailablePrivilegeButtons(false)}
       />
     );
