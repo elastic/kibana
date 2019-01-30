@@ -6,8 +6,7 @@
     "query": {
       "bool": {
         "filter": [
-          { "term":  { "event.module": "nginx" } },
-          { "term":  { "event.dataset": "access" } }
+          { "term":  { "event.dataset": "nginx.access" } }
         ]
       }
     },

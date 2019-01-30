@@ -1,15 +1,14 @@
 {
   "id": "nginx_ecs",
-  "title": "Filebeat nginx",
-  "description": "Find unusual activity in HTTP web access logs (ECS)",
+  "title": "Nginx access logs",
+  "description": "Find unusual activity in HTTP access logs from filebeat (ECS)",
   "type": "Web Access Logs",
   "logoFile": "logo.json",
   "defaultIndexPattern": "filebeat-*",
   "query": {
     "bool": {
       "filter": [
-        { "term": { "event.module": "nginx" } },
-        { "term": { "event.dataset": "access" } },
+        { "term":  { "event.dataset": "nginx.access" } },
         { "exists": { "field": "source.address" } },
         { "exists": { "field": "url.original" } },
         { "exists": { "field": "http.response.status_code" } }
@@ -22,8 +21,8 @@
       "file": "visitor_rate_ecs.json"
     },
     {
-      "id": "http_status_code_ecs",
-      "file": "http_status_code_ecs.json"
+      "id": "status_code_rate_ecs",
+      "file": "status_code_rate_ecs.json"
     },
     {
       "id": "source_ip_url_count_ecs",
@@ -45,9 +44,9 @@
       "job_id": "visitor_rate_ecs"
     },
     {
-      "id": "datafeed-http_status_code_ecs",
-      "file": "datafeed_http_status_code_ecs.json",
-      "job_id": "http_status_code_ecs"
+      "id": "datafeed-status_code_rate_ecs",
+      "file": "datafeed_status_code_rate_ecs.json",
+      "job_id": "status_code_rate_ecs"
     },
     {
       "id": "datafeed-source_ip_url_count_ecs",
@@ -68,8 +67,8 @@
   "kibana": {
     "dashboard": [
       {
-        "id": "ml_http_access_source_ip_count_explorer_ecs",
-        "file": "ml_http_access_source_ip_count_explorer_ecs.json"
+        "id": "ml_http_access_explorer_ecs",
+        "file": "ml_http_access_explorer_ecs.json"
       }
     ],
     "search": [
