@@ -10,15 +10,13 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Breadcrumb } from 'ui/chrome/api/breadcrumbs';
 import { WithKibanaChrome } from '../../containers/with_kibana_chrome';
 import { ExternalHeader } from './external_header';
-import { LegacyHeader } from './legacy_header';
 
 interface HeaderProps {
   breadcrumbs?: Breadcrumb[];
-  appendSections?: React.ReactNode;
   intl: InjectedIntl;
 }
 
-export const Header = injectI18n(({ appendSections, breadcrumbs = [], intl }: HeaderProps) => {
+export const Header = injectI18n(({ breadcrumbs = [], intl }: HeaderProps) => {
   const prefixedBreadcrumbs = [
     {
       href: '#/',
@@ -32,13 +30,9 @@ export const Header = injectI18n(({ appendSections, breadcrumbs = [], intl }: He
 
   return (
     <WithKibanaChrome>
-      {({ setBreadcrumbs, uiSettings: { k7Design } }) =>
-        k7Design ? (
-          <ExternalHeader breadcrumbs={prefixedBreadcrumbs} setBreadcrumbs={setBreadcrumbs} />
-        ) : (
-          <LegacyHeader appendSections={appendSections} breadcrumbs={prefixedBreadcrumbs} />
-        )
-      }
+      {({ setBreadcrumbs }) => (
+        <ExternalHeader breadcrumbs={prefixedBreadcrumbs} setBreadcrumbs={setBreadcrumbs} />
+      )}
     </WithKibanaChrome>
   );
 });
