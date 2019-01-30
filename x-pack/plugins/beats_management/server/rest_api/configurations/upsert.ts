@@ -50,7 +50,7 @@ export const upsertConfigurationRoute = (libs: CMServerLibs) => ({
 
         return { success, blockID };
       } catch (err) {
-        return { error: err };
+        return { success: false, error: err.msg };
       }
     });
 

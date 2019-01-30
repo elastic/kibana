@@ -113,6 +113,7 @@ export class CMBeatsDomain {
     const verifiedOn = moment().toJSON();
 
     await this.adapter.insert(this.framework.internalUser, {
+      tags: [],
       ...beat,
       active: true,
       enrollment_token: enrollmentToken,

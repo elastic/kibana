@@ -27,7 +27,6 @@ import { relativeOptions } from './relative_options';
 import { parseRelativeParts } from './parse_relative_parts';
 import dateMath from '@elastic/datemath';
 import moment from 'moment';
-import './timepicker.less';
 import '../directives/input_datetime';
 import '../directives/inequality';
 import './refresh_intervals';
@@ -36,6 +35,7 @@ import { uiModules } from '../modules';
 import { TIME_MODES } from './modes';
 import { timeUnits } from './time_units';
 import { prettyInterval } from './pretty_interval';
+import { i18n } from '@kbn/i18n';
 const module = uiModules.get('ui/timepicker');
 
 module.directive('kbnTimepicker', function (refreshIntervals) {
@@ -197,7 +197,7 @@ module.directive('kbnTimepicker', function (refreshIntervals) {
         const parsed = dateMath.parse(relativeString, { roundUp: key === 'to' });
         let preview;
         if (relativeString === 'now') {
-          preview = 'Now';
+          preview = i18n.translate('common.ui.timepicker.now', { defaultMessage: 'Now' });
         } else {
           preview = parsed ? parsed.format($scope.format) : undefined;
         }

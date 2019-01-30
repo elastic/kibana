@@ -91,6 +91,7 @@ export const RuntimeBeatTag = t.interface(
     id: t.union([t.undefined, t.string]),
     name: t.string,
     color: t.string,
+    hasConfigurationBlocksTypes: t.array(t.string),
   },
   'CMBeat'
 );
@@ -100,23 +101,6 @@ export interface BeatTag
     Exclude<keyof t.TypeOf<typeof RuntimeBeatTag>, 'id'>
   > {
   id: string;
-  hasConfigurationBlocksTypes?: string[];
   // Used by the UI and api when a tag exists but is an invalid option
   disabled?: boolean;
 }
-
-export const RuntimeBeatEvent = t.interface(
-  {
-    type: t.union(['STATE', 'ERROR'].map(value => t.literal(value))),
-    timestamp: t.string,
-    event: t.type({
-      type: t.union(
-        ['STARTING', 'In_PROGRESS', 'CONFIG', 'FAILED', 'STOPPED'].map(value => t.literal(value))
-      ),
-      message: t.string,
-      uuid: t.union([t.undefined, t.string]),
-    }),
-  },
-  'BeatEvent'
-);
-export interface BeatEvent extends t.TypeOf<typeof RuntimeBeatEvent> {}

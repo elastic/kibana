@@ -33,7 +33,12 @@ interface ComponentProps {
   onSave?(config: ConfigurationBlock): any;
 }
 
-class ConfigViewUi extends React.Component<ComponentProps, any> {
+interface ComponentState {
+  valid: boolean;
+  configBlock: ConfigurationBlock;
+}
+
+class ConfigViewUi extends React.Component<ComponentProps, ComponentState> {
   private form = React.createRef<any>();
   private editMode: boolean;
   private schema = translateConfigSchema(configBlockSchemas);
@@ -61,6 +66,14 @@ class ConfigViewUi extends React.Component<ComponentProps, any> {
     const { intl } = this.props;
     const thisConfigSchema = this.schema.find(s => this.state.configBlock.type === s.id);
 
+    if (!thisConfigSchema) {
+      return (
+        <FormattedMessage
+          id="xpack.beatsManagement.tagConfig.invalidSchema"
+          defaultMessage="Error: This config is invalid, it is not supported by Beats and should be removed"
+        />
+      );
+    }
     return (
       <EuiFlyout onClose={this.props.onClose}>
         <EuiFlyoutHeader>
@@ -150,7 +163,7 @@ class ConfigViewUi extends React.Component<ComponentProps, any> {
             ref={this.form}
             values={this.state.configBlock}
             id={thisConfigSchema ? thisConfigSchema.name : 'Undefined'}
-            schema={thisConfigSchema ? thisConfigSchema.configs : []}
+            schema={thisConfigSchema}
           />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>

@@ -35,7 +35,7 @@ export class BeatsContainer extends Container<ContainerState> {
 
   public reload = async (kuery?: string) => {
     if (kuery) {
-      this.query = await this.libs.elasticsearch.convertKueryToEsQuery(kuery);
+      this.query = kuery;
     } else {
       this.query = undefined;
     }

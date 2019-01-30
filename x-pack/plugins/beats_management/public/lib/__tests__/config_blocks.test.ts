@@ -70,13 +70,16 @@ describe('Tags Client Domain Lib', () => {
         description: 'string',
         config: {
           paths: ['adad/adasd'],
-          other: '',
+          other: `
+          sdfsdf: "foo"
+          `,
         },
       },
     ]);
 
     expect(convertedTag.length).toBe(1);
-    expect(convertedTag[0]).not.toHaveProperty('other');
+    expect(convertedTag[0].config).not.toHaveProperty('other');
+    expect(convertedTag[0].config.sdfsdf).toBe('foo');
   });
 
   it('should convert tokenized fields to JSON', async () => {

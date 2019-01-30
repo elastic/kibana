@@ -37,6 +37,13 @@ export class MemoryTagsAdapter implements CMTagsAdapter {
     return tag.id;
   }
 
+  public async getWithoutConfigTypes(
+    user: FrameworkUser,
+    blockTypes: string[]
+  ): Promise<BeatTag[]> {
+    return this.tagsDB.filter(tag => tag.hasConfigurationBlocksTypes.includes(blockTypes[0]));
+  }
+
   public setDB(tagsDB: BeatTag[]) {
     this.tagsDB = tagsDB;
   }

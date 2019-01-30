@@ -10,14 +10,22 @@ import { ConfigBlockSchema, ConfigurationBlock } from '../../common/domain_types
 import { FrontendConfigBlocksAdapter } from './adapters/configuration_blocks/adapter_types';
 
 export class ConfigBlocksLib {
-  public upsert = this.adapter.upsert.bind(this.adapter);
-  public getForTags = this.adapter.getForTags.bind(this.adapter);
   public delete = this.adapter.delete.bind(this.adapter);
 
   constructor(
     private readonly adapter: FrontendConfigBlocksAdapter,
     private readonly configSchemas: ConfigBlockSchema[]
   ) {}
+
+  public upsert = async (blocks: ConfigurationBlock[]) => {
+    return await this.adapter.upsert(this.userConfigsToJson(blocks));
+  };
+
+  public getForTags = async (tagIds: string[], page: number) => {
+    const result = await this.adapter.getForTags(tagIds, page);
+    result.blocks = this.jsonConfigToUserYaml(result.blocks);
+    return result;
+  };
 
   public jsonConfigToUserYaml(blocks: ConfigurationBlock[]): ConfigurationBlock[] {
     // configuration_blocks yaml, JS cant read YAML so we parse it into JS,
@@ -80,9 +88,15 @@ export class ConfigBlocksLib {
         .filter((id: string) => id !== 'other');
 
       const picked = this.pickDeep(config, knownConfigIds);
+      let other = yaml.safeLoad(config.other || '{}');
+      if (typeof other === 'string') {
+        other = {
+          [other]: '',
+        };
+      }
 
       const convertedConfig = {
-        ...yaml.safeLoad(config.other || '{}'),
+        ...other,
         ...picked,
       };
 

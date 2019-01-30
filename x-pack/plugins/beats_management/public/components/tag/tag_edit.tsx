@@ -49,7 +49,7 @@ interface TagEditProps {
 interface TagEditState {
   showFlyout: boolean;
   tableRef: any;
-  selectedConfigId?: string;
+  selectedConfig?: ConfigurationBlock;
 }
 
 export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
@@ -123,7 +123,6 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
         </EuiFlexGroup>
         <EuiSpacer />
         <EuiHorizontalRule />
-
         <EuiFlexGroup alignItems="stretch">
           <EuiFlexItem>
             <EuiTitle size="xs">
@@ -155,7 +154,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
                   } else {
                     this.setState({
                       showFlyout: true,
-                      selectedConfigId: block.id,
+                      selectedConfig: block,
                     });
                   }
                 }}
@@ -196,15 +195,12 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
             />
           </div>
         )}
-
         {this.state.showFlyout && (
           <ConfigView
-            configBlock={configuration_blocks.blocks.find(
-              block => block.id !== undefined && block.id === this.state.selectedConfigId
-            )}
-            onClose={() => this.setState({ showFlyout: false, selectedConfigId: undefined })}
+            configBlock={this.state.selectedConfig}
+            onClose={() => this.setState({ showFlyout: false, selectedConfig: undefined })}
             onSave={(config: ConfigurationBlock) => {
-              this.setState({ showFlyout: false, selectedConfigId: undefined });
+              this.setState({ showFlyout: false, selectedConfig: undefined });
               this.props.onConfigAddOrEdit(config);
             }}
           />

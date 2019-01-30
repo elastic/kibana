@@ -79,6 +79,14 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
     return result;
   }
 
+  public async deleteByQuery(
+    user: FrameworkUser,
+    params: DatabaseSearchParams
+  ): Promise<DatabaseDeleteDocumentResponse> {
+    const result = await this.callWithUser(user, 'deleteByQuery', params);
+    return result;
+  }
+
   public async search<Source>(
     user: FrameworkUser,
     params: DatabaseSearchParams
@@ -92,11 +100,11 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
     params: DatabaseSearchParams
   ): Promise<DatabaseSearchResponse<Source>> {
     const result = await this.callWithUser(user, 'search', {
-      ...params,
       scroll: '1m',
+      ...params,
       body: {
-        ...params.body,
         size: 1000,
+        ...params.body,
       },
     });
     return result;

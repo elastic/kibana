@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { darken } from 'polished';
+import { darken, transparentize } from 'polished';
 import * as React from 'react';
 import { css } from 'styled-components';
 
@@ -45,8 +45,14 @@ const highlightedFieldStyle = css`
 `;
 
 const hoveredFieldStyle = css`
-  background-color: ${props => darken(0.05, props.theme.eui.euiColorHighlight)};
-  border-color: ${props => darken(0.2, props.theme.eui.euiColorHighlight)};
+  background-color: ${props =>
+    props.theme.darkMode
+      ? transparentize(0.9, darken(0.05, props.theme.eui.euiColorHighlight))
+      : darken(0.05, props.theme.eui.euiColorHighlight)};
+  border-color: ${props =>
+    props.theme.darkMode
+      ? transparentize(0.7, darken(0.2, props.theme.eui.euiColorHighlight))
+      : darken(0.2, props.theme.eui.euiColorHighlight)};
   color: ${props => props.theme.eui.euiColorFullShade};
 `;
 

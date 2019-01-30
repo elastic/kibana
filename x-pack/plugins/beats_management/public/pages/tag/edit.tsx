@@ -159,11 +159,9 @@ class TagEditPageComponent extends React.PureComponent<
   private loadConfigBlocks = async (page: number = -1) => {
     const blocksResponse = await this.props.libs.configBlocks.getForTags([this.state.tag.id], page);
 
-    if (blocksResponse.blocks.length > 0) {
-      this.setState({
-        configuration_blocks: blocksResponse,
-      });
-    }
+    this.setState({
+      configuration_blocks: blocksResponse,
+    });
   };
 
   private loadTag = async () => {

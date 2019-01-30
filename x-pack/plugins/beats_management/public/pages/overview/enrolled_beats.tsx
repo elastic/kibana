@@ -52,18 +52,20 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
       assignmentOptions: null,
     };
 
-    if (props.urlState.beatsKBar) {
-      props.containers.beats.reload(props.urlState.beatsKBar);
-    }
     props.renderAction(this.renderActionArea);
-    this.updateBeatsData();
   }
 
-  public async updateBeatsData() {
-    const beats = sortBy(await this.props.libs.beats.getAll(), 'id') || [];
-    const tags = await this.props.libs.tags.getTagsWithIds(
-      flatten(this.props.containers.beats.state.list.map(beat => beat.tags))
-    );
+  public componentDidMount() {
+    if (this.props.urlState.beatsKBar) {
+      this.props.containers.beats.reload(this.props.urlState.beatsKBar);
+    }
+    this.updateBeatsData(this.props.urlState.beatsKBar);
+  }
+
+  public async updateBeatsData(beatsKBar?: string) {
+    const beats = sortBy(await this.props.libs.beats.getAll(beatsKBar), 'id') || [];
+    const tags = await this.props.libs.tags.getTagsWithIds(flatten(beats.map(beat => beat.tags)));
+
     this.setState({
       tags,
       beats,
@@ -174,11 +176,12 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
                 filterQueryDraft: 'false', // todo
                 isValid: this.props.libs.elasticsearch.isKueryValid(
                   this.props.urlState.beatsKBar || ''
-                ), // todo check if query converts to es query correctly
+                ),
                 onChange: (value: any) => {
                   this.props.setUrlState({ beatsKBar: value });
-                  this.props.containers.beats.reload(this.props.urlState.beatsKBar);
-                }, // todo
+
+                  this.updateBeatsData(value);
+                },
                 onSubmit: () => null, // todo
                 value: this.props.urlState.beatsKBar || '',
               }}
@@ -193,11 +196,12 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
                       payload,
                       this.getSelectedBeats()
                     );
-                    this.updateBeatsData();
+                    await this.updateBeatsData();
                     this.notifyUpdatedTagAssociation(status, this.getSelectedBeats(), payload);
                     break;
                   case AssignmentActionType.Delete:
-                    this.props.containers.beats.deactivate(this.getSelectedBeats());
+                    await this.props.containers.beats.deactivate(this.getSelectedBeats());
+                    await this.updateBeatsData();
                     this.notifyBeatDisenrolled(this.getSelectedBeats());
                     break;
                   case AssignmentActionType.Reload:

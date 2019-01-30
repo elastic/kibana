@@ -33,6 +33,7 @@ export const createSetTagRoute = (libs: CMServerLibs) => ({
       id: request.params.tagId,
       name: request.params.tagId,
       color: '#DD0A73',
+      hasConfigurationBlocksTypes: [],
     };
     const config = { ...defaultConfig, ...get(request, 'payload', {}) };
 

@@ -9,7 +9,6 @@ import { MemoryConfigurationBlockAdapter } from '../adapters/configuration_block
 import { HapiBackendFrameworkAdapter } from '../adapters/framework/hapi_framework_adapter';
 import { MemoryTagsAdapter } from '../adapters/tags/memory_tags_adapter';
 import { MemoryTokensAdapter } from '../adapters/tokens/memory_tokens_adapter';
-import { BeatEventsLib } from '../beat_events';
 import { CMBeatsDomain } from '../beats';
 import { ConfigurationBlocksLib } from '../configuration_blocks';
 import { BackendFrameworkLib } from '../framework';
@@ -20,23 +19,26 @@ import { CMServerLibs } from '../types';
 export function compose(server: any): CMServerLibs {
   const framework = new BackendFrameworkLib(new HapiBackendFrameworkAdapter(undefined, server));
 
+  const beatsAdapter = new MemoryBeatsAdapter(server.beatsDB || []);
   const configAdapter = new MemoryConfigurationBlockAdapter(server.configsDB || []);
-  const tags = new CMTagsDomain(new MemoryTagsAdapter(server.tagsDB || []), configAdapter);
+  const tags = new CMTagsDomain(
+    new MemoryTagsAdapter(server.tagsDB || []),
+    configAdapter,
+    beatsAdapter
+  );
   const configurationBlocks = new ConfigurationBlocksLib(configAdapter, tags);
   const tokens = new CMTokensDomain(new MemoryTokensAdapter(server.tokensDB || []), {
     framework,
   });
-  const beats = new CMBeatsDomain(new MemoryBeatsAdapter(server.beatsDB || []), {
+  const beats = new CMBeatsDomain(beatsAdapter, {
     tags,
     tokens,
     framework,
   });
-  const beatEvents = new BeatEventsLib({} as any, beats);
 
   const libs: CMServerLibs = {
     framework,
     beats,
-    beatEvents,
     tags,
     tokens,
     configurationBlocks,

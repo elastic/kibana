@@ -22,6 +22,10 @@ export interface DatabaseAdapter {
     user: FrameworkUser,
     params: DatabaseDeleteDocumentParams
   ): Promise<DatabaseDeleteDocumentResponse>;
+  deleteByQuery(
+    user: FrameworkUser,
+    params: DatabaseSearchParams
+  ): Promise<DatabaseDeleteDocumentResponse>;
   mget<T>(user: FrameworkUser, params: DatabaseMGetParams): Promise<DatabaseMGetResponse<T>>;
   bulk(
     user: FrameworkUser,
