@@ -25,13 +25,13 @@ import { UICapabilities } from 'ui/capabilities';
 import { toastNotifications } from 'ui/notify';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../spaces/common/model/space';
-import { PrivilegeDefinition, PrivilegeMap, Role } from '../../../../../common/model';
+import { KibanaPrivileges, RawKibanaPrivileges, Role } from '../../../../../common/model';
 import { isReadOnlyRole, isReservedRole } from '../../../../lib/role_utils';
 import { deleteRole, saveRole } from '../../../../objects';
 import { ROLES_PATH } from '../../management_urls';
 import { RoleValidationResult, RoleValidator } from '../lib/validate_role';
 import { DeleteRoleButton } from './delete_role_button';
-import { ElasticsearchPrivileges, KibanaPrivileges } from './privileges';
+import { ElasticsearchPrivileges, KibanaPrivilegesRegion } from './privileges';
 import { ReservedRoleBadge } from './reserved_role_badge';
 
 interface Props {
@@ -41,7 +41,7 @@ interface Props {
   httpClient: any;
   allowDocumentLevelSecurity: boolean;
   allowFieldLevelSecurity: boolean;
-  privileges: PrivilegeMap;
+  privileges: RawKibanaPrivileges;
   spaces?: Space[];
   spacesEnabled: boolean;
   intl: InjectedIntl;
@@ -243,8 +243,8 @@ class EditRolePageUI extends Component<Props, State> {
     return (
       <div>
         <EuiSpacer />
-        <KibanaPrivileges
-          privilegeDefinition={new PrivilegeDefinition(this.props.privileges)}
+        <KibanaPrivilegesRegion
+          kibanaPrivileges={new KibanaPrivileges(this.props.privileges)}
           spaces={this.props.spaces}
           spacesEnabled={this.props.spacesEnabled}
           features={this.props.features}

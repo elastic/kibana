@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface IndexPrivilege {
+export interface RoleIndexPrivilege {
   names: string[];
   privileges: string[];
   field_security?: {

@@ -4,17 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FeaturePrivilegeSet } from './privileges/feature_privileges';
-export type FeaturesPrivileges = Record<string, Record<string, string[]>>;
+import { RawKibanaFeaturePrivileges } from './privileges/feature_privileges';
 
-export interface PrivilegeMap {
+export interface RawKibanaPrivileges {
   global: Record<string, string[]>;
-  features: FeaturesPrivileges;
+  features: RawKibanaFeaturePrivileges;
   space: Record<string, string[]>;
-}
-
-export interface KibanaPrivilegeSpec {
-  spaces: string[];
-  base: string[];
-  feature: FeaturePrivilegeSet;
 }

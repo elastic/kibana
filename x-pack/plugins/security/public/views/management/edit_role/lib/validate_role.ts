@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IndexPrivilege, Role } from '../../../../../common/model';
+import { Role, RoleIndexPrivilege } from '../../../../../common/model';
 
 interface RoleValidatorOptions {
   shouldValidate?: boolean;
@@ -94,7 +94,7 @@ export class RoleValidator {
     return invalid();
   }
 
-  public validateIndexPrivilege(indexPrivilege: IndexPrivilege): RoleValidationResult {
+  public validateIndexPrivilege(indexPrivilege: RoleIndexPrivilege): RoleValidationResult {
     if (!this.shouldValidate) {
       return valid();
     }

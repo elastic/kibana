@@ -9,7 +9,7 @@ import React, { Component } from 'react';
 import { UICapabilities } from 'ui/capabilities';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../spaces/common/model/space';
-import { PrivilegeDefinition, Role } from '../../../../../../../common/model';
+import { KibanaPrivileges, Role } from '../../../../../../../common/model';
 import { KibanaPrivilegeCalculatorFactory } from '../../../../../../lib/kibana_privilege_calculator';
 import { RoleValidator } from '../../../lib/validate_role';
 import { CollapsiblePanel } from '../../collapsible_panel';
@@ -24,13 +24,13 @@ interface Props {
   uiCapabilities: UICapabilities;
   features: Feature[];
   editable: boolean;
-  privilegeDefinition: PrivilegeDefinition;
+  kibanaPrivileges: KibanaPrivileges;
   onChange: (role: Role) => void;
   validator: RoleValidator;
   intl: InjectedIntl;
 }
 
-export class KibanaPrivileges extends Component<Props, {}> {
+export class KibanaPrivilegesRegion extends Component<Props, {}> {
   public render() {
     return (
       <CollapsiblePanel iconType={'logoKibana'} title={'Kibana'}>
@@ -41,7 +41,7 @@ export class KibanaPrivileges extends Component<Props, {}> {
 
   public getForm = () => {
     const {
-      privilegeDefinition,
+      kibanaPrivileges,
       role,
       spacesEnabled,
       spaces = [],
@@ -56,12 +56,12 @@ export class KibanaPrivileges extends Component<Props, {}> {
       return <TransformErrorSection />;
     }
 
-    const privilegeCalculatorFactory = new KibanaPrivilegeCalculatorFactory(privilegeDefinition);
+    const privilegeCalculatorFactory = new KibanaPrivilegeCalculatorFactory(kibanaPrivileges);
 
     if (spacesEnabled) {
       return (
         <SpaceAwarePrivilegeSection
-          privilegeDefinition={privilegeDefinition}
+          kibanaPrivileges={kibanaPrivileges}
           role={role}
           privilegeCalculatorFactory={privilegeCalculatorFactory}
           spaces={spaces}
@@ -75,7 +75,7 @@ export class KibanaPrivileges extends Component<Props, {}> {
     } else {
       return (
         <SimplePrivilegeSection
-          privilegeDefinition={privilegeDefinition}
+          kibanaPrivileges={kibanaPrivileges}
           features={features}
           role={role}
           privilegeCalculatorFactory={privilegeCalculatorFactory}

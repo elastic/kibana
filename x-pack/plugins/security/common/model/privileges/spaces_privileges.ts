@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export class SpacesPrivileges {
+export class KibanaSpacesPrivileges {
   constructor(private readonly spacesPrivilegesMap: Record<string, string[]>) {}
 
   public getAllPrivileges(): string[] {

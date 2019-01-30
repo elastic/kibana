@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Dictionary, flatten, mapValues, uniq } from 'lodash';
-import { FeaturesPrivileges } from 'x-pack/plugins/security/common/model';
-import { FeaturePrivilegeDefinition } from 'x-pack/plugins/xpack_main/server/lib/feature_registry/feature_registry';
+import { flatten, mapValues, uniq } from 'lodash';
+import { RawKibanaFeaturePrivileges } from 'x-pack/plugins/security/common/model/privileges/feature_privileges';
+import { FeatureKibanaPrivileges } from 'x-pack/plugins/xpack_main/server/lib/feature_registry/feature_registry';
 import { Feature } from '../../../../xpack_main/types';
 import { Actions } from './actions';
 
@@ -16,8 +16,8 @@ export class FeaturesPrivilegesBuilder {
     this.actions = actions;
   }
 
-  public buildFeaturesPrivileges(features: Feature[]): FeaturesPrivileges {
-    return features.reduce((acc: FeaturesPrivileges, feature: Feature) => {
+  public buildFeaturesPrivileges(features: Feature[]): RawKibanaFeaturePrivileges {
+    return features.reduce((acc: RawKibanaFeaturePrivileges, feature: Feature) => {
       acc[feature.id] = this.buildFeaturePrivileges(feature);
       return acc;
     }, {});
@@ -119,11 +119,11 @@ export class FeaturesPrivilegesBuilder {
     return uniq(allManagementReadActions);
   }
 
-  private includeInBaseRead(privilegeId: string, privilege: FeaturePrivilegeDefinition): boolean {
+  private includeInBaseRead(privilegeId: string, privilege: FeatureKibanaPrivileges): boolean {
     return privilegeId === 'read' || Boolean(privilege.grantWithBaseRead);
   }
 
-  private buildFeaturePrivileges(feature: Feature): Dictionary<string[]> {
+  private buildFeaturePrivileges(feature: Feature): Record<string, string[]> {
     return mapValues(feature.privileges, privilegeDefinition => [
       this.actions.login,
       this.actions.version,
@@ -150,7 +150,7 @@ export class FeaturesPrivilegesBuilder {
   }
 
   private buildAppFeaturePrivileges(
-    privilegeDefinition: FeaturePrivilegeDefinition,
+    privilegeDefinition: FeatureKibanaPrivileges,
     feature: Feature
   ): string[] {
     const appEntries = privilegeDefinition.app || feature.app;
@@ -163,7 +163,7 @@ export class FeaturesPrivilegesBuilder {
   }
 
   private buildCatalogueFeaturePrivileges(
-    privilegeDefinition: FeaturePrivilegeDefinition,
+    privilegeDefinition: FeatureKibanaPrivileges,
     feature: Feature
   ): string[] {
     const catalogueEntries = privilegeDefinition.catalogue || feature.catalogue;
@@ -178,7 +178,7 @@ export class FeaturesPrivilegesBuilder {
   }
 
   private buildManagementFeaturePrivileges(
-    privilegeDefinition: FeaturePrivilegeDefinition,
+    privilegeDefinition: FeatureKibanaPrivileges,
     feature: Feature
   ): string[] {
     const managementSections = privilegeDefinition.management || feature.management;

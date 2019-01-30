@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { PrivilegeDefinition } from '../../../../../../../../common/model';
+import { KibanaPrivileges } from '../../../../../../../../common/model';
 import { KibanaPrivilegeCalculatorFactory } from '../../../../../../../lib/kibana_privilege_calculator';
 import { RoleValidator } from '../../../../lib/validate_role';
 import { PrivilegeSpaceForm } from './privilege_space_form';
@@ -29,13 +29,13 @@ const buildProps = (customProps = {}) => {
         disabledFeatures: [],
       },
     ],
-    privilegeDefinition: new PrivilegeDefinition({
+    kibanaPrivileges: new KibanaPrivileges({
       features: {},
       global: {},
       space: {},
     }),
     privilegeCalculatorFactory: new KibanaPrivilegeCalculatorFactory(
-      new PrivilegeDefinition({
+      new KibanaPrivileges({
         global: {},
         features: {},
         space: {},

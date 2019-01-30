@@ -5,7 +5,7 @@
  */
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { IndexPrivilege, Role } from '../../../../../../../common/model';
+import { Role, RoleIndexPrivilege } from '../../../../../../../common/model';
 import { isReadOnlyRole, isReservedRole, isRoleEnabled } from '../../../../../../lib/role_utils';
 import { getFields } from '../../../../../../objects';
 import { RoleValidator } from '../../../lib/validate_role';
@@ -54,7 +54,7 @@ export class IndexPrivileges extends Component<Props, State> {
       isReadOnlyRole: isReadOnlyRole(this.props.role),
     };
 
-    const forms = indices.map((indexPrivilege: IndexPrivilege, idx) => (
+    const forms = indices.map((indexPrivilege: RoleIndexPrivilege, idx) => (
       <IndexPrivilegeForm
         key={idx}
         {...props}
@@ -95,7 +95,7 @@ export class IndexPrivileges extends Component<Props, State> {
   };
 
   public onIndexPrivilegeChange = (privilegeIndex: number) => {
-    return (updatedPrivilege: IndexPrivilege) => {
+    return (updatedPrivilege: RoleIndexPrivilege) => {
       const { role } = this.props;
       const { indices } = role.elasticsearch;
 
@@ -131,11 +131,11 @@ export class IndexPrivileges extends Component<Props, State> {
     };
   };
 
-  public isPlaceholderPrivilege = (indexPrivilege: IndexPrivilege) => {
+  public isPlaceholderPrivilege = (indexPrivilege: RoleIndexPrivilege) => {
     return indexPrivilege.names.length === 0;
   };
 
-  public loadAvailableFields(privileges: IndexPrivilege[]) {
+  public loadAvailableFields(privileges: RoleIndexPrivilege[]) {
     // Reserved roles cannot be edited, and therefore do not need to fetch available fields.
     if (isReservedRole(this.props.role)) {
       return;

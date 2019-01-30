@@ -4,20 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface FeaturePrivilegesMap {
+export interface RawKibanaFeaturePrivileges {
   [featureId: string]: {
     [privilegeId: string]: string[];
   };
 }
 
-export interface FeaturePrivilegeSet {
+export interface FeaturesPrivileges {
   [featureId: string]: string[];
 }
 
-export class FeaturePrivileges {
-  constructor(private readonly featurePrivilegesMap: FeaturePrivilegesMap) {}
+export class KibanaFeaturePrivileges {
+  constructor(private readonly featurePrivilegesMap: RawKibanaFeaturePrivileges) {}
 
-  public getAllPrivileges(): FeaturePrivilegeSet {
+  public getAllPrivileges(): FeaturesPrivileges {
     return Object.entries(this.featurePrivilegesMap).reduce((acc, [featureId, privileges]) => {
       return {
         ...acc,
