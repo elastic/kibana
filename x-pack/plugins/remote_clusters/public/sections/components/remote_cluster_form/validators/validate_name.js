@@ -26,5 +26,5 @@ export function validateName(name) {
     );
   }
 
-  return undefined;
+  return null;
 }

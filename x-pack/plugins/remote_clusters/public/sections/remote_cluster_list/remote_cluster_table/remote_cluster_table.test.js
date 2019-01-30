@@ -69,8 +69,10 @@ describe('RemoteClusterTable', () => {
       seeds: ['seed'],
     }];
 
-    test('name link opens detail panel when clicked', () => {
-      const component = mountWithIntl(
+    let component;
+
+    beforeEach(() => {
+      component = mountWithIntl(
         <Provider store={remoteClustersStore}>
           <RemoteClusterTable
             clusters={clusters}
@@ -78,7 +80,9 @@ describe('RemoteClusterTable', () => {
           />
         </Provider>
       );
+    });
 
+    test('name link opens detail panel when clicked', () => {
       const rowName = findTestSubject(component, `remoteClusterTableRowName-${name}`);
       rowName.simulate('click');
       const detailPanel = findTestSubject(component, 'remoteClusterDetailFlyout');
@@ -86,15 +90,6 @@ describe('RemoteClusterTable', () => {
     });
 
     test('remove button displays a confirmation modal when clicked', () => {
-      const component = mountWithIntl(
-        <Provider store={remoteClustersStore}>
-          <RemoteClusterTable
-            clusters={clusters}
-            openDetailPanel={() => {}}
-          />
-        </Provider>
-      );
-
       const removeButton = findTestSubject(component, `remoteClusterTableRowRemoveButton-${name}`);
       removeButton.simulate('click');
       const confirmModal = findTestSubject(component, 'remoteClustersDeleteConfirmModal');

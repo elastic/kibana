@@ -203,7 +203,7 @@ export const RemoteClusterForm = injectI18n(
     hasErrors = () => {
       const { fieldsErrors, localSeedErrors } = this.state;
       const errorValues = Object.values(fieldsErrors);
-      const hasErrors = errorValues.some(error => error !== undefined) || localSeedErrors.length;
+      const hasErrors = errorValues.some(error => error != null) || localSeedErrors.length;
       return hasErrors;
     };
 

@@ -18,9 +18,9 @@ export function validateSeed(seed) {
     return errors;
   }
 
-  const isInvalid = !isSeedNodeValid(seed);
+  const isValid = isSeedNodeValid(seed);
 
-  if (isInvalid) {
+  if (!isValid) {
     errors.push(i18n.translate(
       'xpack.remoteClusters.remoteClusterForm.localSeedError.invalidCharactersMessage',
       {
@@ -30,9 +30,9 @@ export function validateSeed(seed) {
     ));
   }
 
-  const isPortInvalid = !isSeedNodePortValid(seed);
+  const isPortValid = isSeedNodePortValid(seed);
 
-  if (isPortInvalid) {
+  if (!isPortValid) {
     errors.push(i18n.translate(
       'xpack.remoteClusters.remoteClusterForm.localSeedError.invalidPortMessage',
       {

@@ -12,10 +12,10 @@ describe('validateSeeds', () => {
   });
 
   test(`accepts empty seeds when there's input`, () => {
-    expect(validateSeeds([], 'input')).toBe(undefined);
+    expect(validateSeeds([], 'input')).toBe(null);
   });
 
   test(`accepts existing seeds`, () => {
-    expect(validateSeeds(['seed'])).toBe(undefined);
+    expect(validateSeeds(['seed'])).toBe(null);
   });
 });
