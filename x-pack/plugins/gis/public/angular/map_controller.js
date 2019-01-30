@@ -65,7 +65,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     });
   };
 
-  getStore().then(async store => {
+  getStore().then(store => {
     // clear old UI state
     store.dispatch(setSelectedLayer(null));
     store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
@@ -104,6 +104,9 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       });
     }
 
+    const layerList = getInitialLayers(savedMap.layerListJSON);
+    store.dispatch(replaceLayerList(layerList));
+
     const root = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
     render(
       <Provider store={store}>
@@ -111,8 +114,6 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       </Provider>,
       root);
 
-    const layerList = await getInitialLayers(savedMap.layerListJSON);
-    store.dispatch(replaceLayerList(layerList));
   });
 
   let prevIndexPatternIds;

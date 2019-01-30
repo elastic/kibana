@@ -24,7 +24,7 @@ const mockEmsDataSource = {
 };
 
 describe('Saved object has layer list', () => {
-  it('Should get initial layers from saved object first', async () => {
+  it('Should get initial layers from saved object first', () => {
     const layerListFromSavedObject = [
       {
         id: 'layerId',
@@ -32,7 +32,7 @@ describe('Saved object has layer list', () => {
       }
     ];
     const layerListJSON = JSON.stringify(layerListFromSavedObject);
-    expect((await getInitialLayers(layerListJSON))).toEqual(layerListFromSavedObject);
+    expect((getInitialLayers(layerListJSON))).toEqual(layerListFromSavedObject);
   });
 });
 
@@ -41,25 +41,25 @@ describe('Saved object has layer list', () => {
 describe('Saved object does not have layer list', () => {
 
   beforeEach(() => {
-    require('../meta').isMetaDataLoaded = async () => {
+    require('../meta').isMetaDataLoaded = () => {
       return true;
     };
   });
 
   function mockDataSourceResponse(dataSources) {
-    require('../meta').getDataSources = async () => {
+    require('../meta').getDataSourcesSync = () => {
       return dataSources;
     };
   }
 
-  it('Should get initial layer from Kibana tilemap data source when Kibana tilemap is configured ', async () => {
+  it('Should get initial layer from Kibana tilemap data source when Kibana tilemap is configured ', () => {
 
     mockDataSourceResponse({
       kibana: mockKibanaDataSource,
       ems: mockEmsDataSource
     });
 
-    const layers = await getInitialLayers(null);
+    const layers = getInitialLayers(null);
     expect(layers).toEqual([{
       "alpha": 1,
       dataRequests: [],
@@ -82,13 +82,13 @@ describe('Saved object does not have layer list', () => {
     }]);
   });
 
-  it('Should get initial layer from ems data source when Kibana tilemap is not configured', async () => {
+  it('Should get initial layer from ems data source when Kibana tilemap is not configured', () => {
     const dataSources = {
       ems: mockEmsDataSource
     };
     mockDataSourceResponse(dataSources);
 
-    const layers = await getInitialLayers(null);
+    const layers = getInitialLayers(null);
     expect(layers).toEqual([{
       "alpha": 1,
       dataRequests: [],
@@ -111,18 +111,18 @@ describe('Saved object does not have layer list', () => {
     }]);
   });
 
-  it('Should return empty list when no ems.tms sources are provided', async () => {
+  it('Should return empty list when no ems.tms sources are provided', () => {
     const dataSources = {
       ems: {
         tms: []
       }
     };
     mockDataSourceResponse(dataSources);
-    expect((await getInitialLayers(null))).toEqual([]);
+    expect((getInitialLayers(null))).toEqual([]);
   });
 
-  it('Should return empty list when no dataSoures are provided', async () => {
+  it('Should return empty list when no dataSoures are provided', () => {
     mockDataSourceResponse(null);
-    expect((await getInitialLayers(null))).toEqual([]);
+    expect((getInitialLayers(null))).toEqual([]);
   });
 });

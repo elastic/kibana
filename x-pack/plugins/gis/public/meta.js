@@ -28,11 +28,18 @@ export async function getDataSources() {
   return meta;
 }
 
-export async function isMetaDataLoaded() {
+export function getDataSourcesSync() {
+  if (!isLoaded) {
+    throw new Error('Metadata is not loaded yet. Use isMetadataLoaded first before calling this function.');
+  }
+  return meta;
+}
+
+export function isMetaDataLoaded() {
   return isLoaded;
 }
 
-export async function getEmsFiles() {
+export async function getEmsVectorFilesMeta() {
   const dataSource = await getDataSources();
   return _.get(dataSource, 'ems.file', []);
 }

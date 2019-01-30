@@ -11,7 +11,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 
-import { getEmsFiles } from '../../../../meta';
+import { getEmsVectorFilesMeta } from '../../../../meta';
 
 
 export class EMSFileCreateSourceEditor extends React.Component {
@@ -22,7 +22,7 @@ export class EMSFileCreateSourceEditor extends React.Component {
   };
 
   _loadFileOptions = async () => {
-    const options = await getEmsFiles();
+    const options = await getEmsVectorFilesMeta();
     if (this._isMounted) {
       this.setState({
         emsFileOptionsRaw: options

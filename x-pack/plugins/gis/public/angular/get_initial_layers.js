@@ -6,10 +6,10 @@
 import _ from 'lodash';
 import { KibanaTilemapSource } from '../shared/layers/sources/kibana_tilemap_source';
 import { EMSTMSSource } from '../shared/layers/sources/ems_tms_source';
-import { isMetaDataLoaded, getDataSources } from '../meta';
+import { isMetaDataLoaded, getDataSourcesSync } from '../meta';
 import { DEFAULT_EMS_TILE_LAYER } from '../../common/constants';
 
-export async function getInitialLayers(savedMapLayerListJSON) {
+export function getInitialLayers(savedMapLayerListJSON) {
 
   if (savedMapLayerListJSON) {
     return JSON.parse(savedMapLayerListJSON);
@@ -23,7 +23,7 @@ export async function getInitialLayers(savedMapLayerListJSON) {
     ];
   }
 
-  const dataSources = await getDataSources();
+  const dataSources = getDataSourcesSync();
   const kibanaTilemapUrl = _.get(dataSources, 'kibana.tilemap.url');
   if (kibanaTilemapUrl) {
     const sourceDescriptor = KibanaTilemapSource.createDescriptor(kibanaTilemapUrl);
@@ -45,5 +45,4 @@ export async function getInitialLayers(savedMapLayerListJSON) {
   }
 
   return [];
-
 }

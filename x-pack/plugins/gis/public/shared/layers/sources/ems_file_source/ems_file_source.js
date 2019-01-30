@@ -8,8 +8,8 @@ import { AbstractVectorSource } from '../vector_source';
 import React from 'react';
 import { GIS_API_PATH } from '../../../../../common/constants';
 import { emsServiceSettings } from '../../../../kibana_services';
-import { getEmsFiles } from '../../../../meta';
-import { EMSFileCreateSourceEditor } from './ems_file_source_source_editor';
+import { getEmsVectorFilesMeta } from '../../../../meta';
+import { EMSFileCreateSourceEditor } from './create_source_editor';
 
 export class EMSFileSource extends AbstractVectorSource {
 
@@ -40,7 +40,7 @@ export class EMSFileSource extends AbstractVectorSource {
   }
 
   async getGeoJsonWithMeta() {
-    const emsFiles = await getEmsFiles();
+    const emsFiles = await getEmsVectorFilesMeta();
     const fileSource = emsFiles.find((source => source.id === this._descriptor.id));
     const fetchUrl = `../${GIS_API_PATH}/data/ems?id=${encodeURIComponent(this._descriptor.id)}`;
     const featureCollection = await AbstractVectorSource.getGeoJson(fileSource, fetchUrl);
@@ -59,20 +59,20 @@ export class EMSFileSource extends AbstractVectorSource {
   }
 
   async getDisplayName() {
-    const emsFiles = await getEmsFiles();
+    const emsFiles = await getEmsVectorFilesMeta();
     const fileSource = emsFiles.find((source => source.id === this._descriptor.id));
     return fileSource.name;
   }
 
   async getAttributions() {
-    const emsFiles = await getEmsFiles();
+    const emsFiles = await getEmsVectorFilesMeta();
     const fileSource = emsFiles.find((source => source.id === this._descriptor.id));
     return fileSource.attributions;
   }
 
 
   async getStringFields() {
-    const emsFiles = await getEmsFiles();
+    const emsFiles = await getEmsVectorFilesMeta();
     const fileSource = emsFiles.find((source => source.id === this._descriptor.id));
     return fileSource.fields.map(f => {
       return { name: f.name, label: f.description };

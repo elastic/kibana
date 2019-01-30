@@ -8,7 +8,7 @@ import { AbstractTMSSource } from '../tms_source';
 import { TileLayer } from '../../tile_layer';
 
 import { getEmsTMSServices } from '../../../../meta';
-import { EMSTMSCreateSourceEditor } from './ems_tms_source_editor';
+import { EMSTMSCreateSourceEditor } from './create_source_editor';
 
 
 export class EMSTMSSource extends AbstractTMSSource {
