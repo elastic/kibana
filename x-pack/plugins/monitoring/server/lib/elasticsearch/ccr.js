@@ -5,21 +5,47 @@
  */
 
 import { get } from 'lodash';
+import moment from 'moment';
+import { checkParam } from '../error_missing_required';
+import { ElasticsearchMetric } from '../metrics';
+import { createQuery } from '../create_query';
 
 export function handleResponse(response) {
-  const result = get(response.defaults, 'xpack.ccr.enabled');
-  return result === true || result === 'true';
+  const isEnabled = get(response, 'hits.hits[0]._source.stack_stats.xpack.ccr.enabled');
+  const isAvailable = get(response, 'hits.hits[0]._source.stack_stats.xpack.ccr.available');
+  return isEnabled && isAvailable;
 }
 
-export async function checkCcrEnabled(req) {
-  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  const response = await callWithRequest(req, 'transport.request', {
-    method: 'GET',
-    path: '/_cluster/settings?include_defaults',
-    filter_path: [
-      'defaults.xpack.ccr.enabled',
-    ]
-  });
+export async function checkCcrEnabled(req, esIndexPattern) {
+  checkParam(esIndexPattern, 'esIndexPattern in getNodes');
 
+  const start = moment.utc(req.payload.timeRange.min).valueOf();
+  const end = moment.utc(req.payload.timeRange.max).valueOf();
+
+  const clusterUuid = req.params.clusterUuid;
+  const metricFields = ElasticsearchMetric.getMetricFields();
+
+  const params = {
+    index: esIndexPattern,
+    size: 1,
+    terminate_after: 1,
+    ignoreUnavailable: true,
+    body: {
+      query: createQuery({
+        type: 'cluster_stats',
+        start,
+        end,
+        clusterUuid,
+        metric: metricFields
+      }),
+      sort: [ { timestamp: { order: 'desc' } } ]
+    },
+    filterPath: [
+      'hits.hits._source.stack_stats.xpack.ccr',
+    ]
+  };
+
+  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
+  const response = await callWithRequest(req, 'search', params);
   return handleResponse(response);
 }

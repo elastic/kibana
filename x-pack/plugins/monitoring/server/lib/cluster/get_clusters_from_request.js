@@ -151,7 +151,7 @@ export async function getClustersFromRequest(req, indexPatterns, { clusterUuid, 
   });
 
   // check ccr configuration
-  const isCcrEnabled = await checkCcrEnabled(req);
+  const isCcrEnabled = await checkCcrEnabled(req, esIndexPattern);
 
   const config = req.server.config();
   const kibanaUuid = config.get('server.uuid');
