@@ -5,8 +5,8 @@
  */
 
 import Joi from 'joi';
-import { get, values } from 'lodash';
-import { ConfigurationBlockTypes, REQUIRED_LICENSES } from '../../../common/constants';
+import { get } from 'lodash';
+import { REQUIRED_LICENSES } from '../../../common/constants';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
 import { wrapEsError } from '../../utils/error_wrappers';
@@ -14,41 +14,33 @@ import { wrapEsError } from '../../utils/error_wrappers';
 // TODO: write to Kibana audit log file
 export const createSetTagRoute = (libs: CMServerLibs) => ({
   method: 'PUT',
-  path: '/api/beats/tag/{tag}',
+  path: '/api/beats/tag/{tagId}',
   licenseRequired: REQUIRED_LICENSES,
   requiredRoles: ['beats_admin'],
   config: {
     validate: {
       params: Joi.object({
-        tag: Joi.string(),
+        tagId: Joi.string(),
       }),
       payload: Joi.object({
         color: Joi.string(),
-        configuration_blocks: Joi.array().items(
-          Joi.object({
-            configs: Joi.array()
-              .items(Joi.object())
-              .required(),
-            description: Joi.string().allow(''),
-            type: Joi.string()
-              .only(values(ConfigurationBlockTypes))
-              .required(),
-          })
-        ),
-      }).allow(null),
+        name: Joi.string(),
+      }),
     },
   },
-  handler: async (request: FrameworkRequest, h: any) => {
-    const defaultConfig = { configuration_blocks: [], color: '#DD0A73' };
-    const config = get(request, 'payload', defaultConfig) || defaultConfig;
+  handler: async (request: FrameworkRequest) => {
+    const defaultConfig = {
+      id: request.params.tagId,
+      name: request.params.tagId,
+      color: '#DD0A73',
+      hasConfigurationBlocksTypes: [],
+    };
+    const config = { ...defaultConfig, ...get(request, 'payload', {}) };
 
     try {
-      const { isValid, result } = await libs.tags.saveTag(request.user, request.params.tag, config);
-      if (!isValid) {
-        return h.response({ result, success: false }).code(400);
-      }
+      const id = await libs.tags.upsertTag(request.user, config);
 
-      return h.response({ success: true }).code(result === 'created' ? 201 : 200);
+      return { success: true, id };
     } catch (err) {
       // TODO move this to kibana route thing in adapter
       return wrapEsError(err);

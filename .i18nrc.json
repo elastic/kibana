@@ -28,6 +28,7 @@
     "xpack.idxMgmt": "x-pack/plugins/index_management",
     "xpack.indexLifecycleMgmt": "x-pack/plugins/index_lifecycle_management",
     "xpack.infra": "x-pack/plugins/infra",
+    "xpack.kueryAutocomplete": "x-pack/plugins/kuery_autocomplete",
     "xpack.licenseMgmt": "x-pack/plugins/license_management",
     "xpack.ml": "x-pack/plugins/ml",
     "xpack.logstash": "x-pack/plugins/logstash",

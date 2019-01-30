@@ -25,7 +25,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
       }
     },
     url: {
-      fmt: '/_xpack/watcher/watch/<%=id%>/_deactivate',
+      fmt: '/_watcher/watch/<%=id%>/_deactivate',
       req: {
         id: {
           type: 'string',
@@ -51,7 +51,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
       }
     },
     url: {
-      fmt: '/_xpack/watcher/watch/<%=id%>/_activate',
+      fmt: '/_watcher/watch/<%=id%>/_activate',
       req: {
         id: {
           type: 'string',
@@ -78,7 +78,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
       }
     },
     url: {
-      fmt: '/_xpack/watcher/watch/<%=id%>/_ack/<%=action%>',
+      fmt: '/_watcher/watch/<%=id%>/_ack/<%=action%>',
       req: {
         id: {
           type: 'string',
@@ -112,7 +112,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
       }
     },
     url: {
-      fmt: '/_xpack/watcher/watch/<%=id%>',
+      fmt: '/_watcher/watch/<%=id%>',
       req: {
         id: {
           type: 'string',
@@ -136,7 +136,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
       }
     },
     url: {
-      fmt: '/_xpack/watcher/watch/_execute'
+      fmt: '/_watcher/watch/_execute'
     },
     needBody: true,
     method: 'POST'
@@ -151,7 +151,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   watcher.getWatch = ca({
     params: {},
     url: {
-      fmt: '/_xpack/watcher/watch/<%=id%>',
+      fmt: '/_watcher/watch/<%=id%>',
       req: {
         id: {
           type: 'string',
@@ -176,7 +176,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
       }
     },
     url: {
-      fmt: '/_xpack/watcher/watch/<%=id%>',
+      fmt: '/_watcher/watch/<%=id%>',
       req: {
         id: {
           type: 'string',
@@ -196,7 +196,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   watcher.restart = ca({
     params: {},
     url: {
-      fmt: '/_xpack/watcher/_restart'
+      fmt: '/_watcher/_restart'
     },
     method: 'PUT'
   });
@@ -209,7 +209,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   watcher.start = ca({
     params: {},
     url: {
-      fmt: '/_xpack/watcher/_start'
+      fmt: '/_watcher/_start'
     },
     method: 'PUT'
   });
@@ -222,7 +222,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   watcher.stats = ca({
     params: {},
     url: {
-      fmt: '/_xpack/watcher/stats'
+      fmt: '/_watcher/stats'
     }
   });
 
@@ -234,7 +234,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   watcher.stop = ca({
     params: {},
     url: {
-      fmt: '/_xpack/watcher/_stop'
+      fmt: '/_watcher/_stop'
     },
     method: 'PUT'
   });
