@@ -9,7 +9,7 @@ import { alertsClusterSearch } from '../../../../cluster_alerts/alerts_cluster_s
 import { checkLicense } from '../../../../cluster_alerts/check_license';
 import { getClusterLicense } from '../../../../lib/cluster/get_cluster_license';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
-import { INDEX_PATTERN_ELASTICSEARCH, INDEX_PATTERN_ALERTS } from '../../../../../common/constants';
+import { INDEX_PATTERN_ELASTICSEARCH, INDEX_ALERTS } from '../../../../../common/constants';
 
 /*
  * Cluster Alerts route.
@@ -37,7 +37,7 @@ export function clusterAlertsRoute(server) {
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
       const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
-      const alertsIndex = prefixIndexPattern(config, INDEX_PATTERN_ALERTS, ccs);
+      const alertsIndex = prefixIndexPattern(config, INDEX_ALERTS, ccs);
       const options = {
         start: req.payload.timeRange.min,
         end: req.payload.timeRange.max

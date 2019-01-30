@@ -157,5 +157,5 @@ export const INDEX_PATTERN = '.monitoring-*-6-*';
 export const INDEX_PATTERN_KIBANA = '.monitoring-kibana-6-*';
 export const INDEX_PATTERN_LOGSTASH = '.monitoring-logstash-6-*';
 export const INDEX_PATTERN_BEATS = '.monitoring-beats-6-*';
-export const INDEX_PATTERN_ALERTS = '.monitoring-alerts-6';
+export const INDEX_ALERTS = '.monitoring-alerts-6';
 export const INDEX_PATTERN_ELASTICSEARCH = '.monitoring-es-6-*';
