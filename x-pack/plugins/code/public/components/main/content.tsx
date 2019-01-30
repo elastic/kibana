@@ -220,7 +220,9 @@ class CodeContent extends React.PureComponent<Props> {
               repoUri={repoUri}
               header={
                 <React.Fragment>
-                  <Title>Recent Commits</Title>
+                  <Title>
+                    <h3>Recent Commits</h3>
+                  </Title>
                   <EuiButton
                     href={`#/${resource}/${org}/${repo}/${PathTypes.commits}/${revision}/${path ||
                       ''}`}
