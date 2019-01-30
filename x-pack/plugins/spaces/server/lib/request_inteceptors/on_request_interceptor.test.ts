@@ -20,13 +20,7 @@ describe('onRequestInterceptor', () => {
 
   beforeEach(() => {
     teardowns.push(() => sandbox.restore());
-    request = async (
-      path: string,
-      setupFn: (ser: any) => void = () => {
-        return;
-      },
-      testConfig = {}
-    ) => {
+    request = async (path: string) => {
       server = new Server();
 
       interface Config {
@@ -34,7 +28,6 @@ describe('onRequestInterceptor', () => {
       }
       const config: Config = {
         'server.basePath': '/foo',
-        ...testConfig,
       };
 
       server.decorate(
@@ -100,14 +93,26 @@ describe('onRequestInterceptor', () => {
         },
         {
           method: 'GET',
+          path: '/some/path/s/foo/bar',
+          handler: (req: any) => {
+            return { path: req.path, url: req.url, basePath: req.getBasePath() };
+          },
+        },
+        {
+          method: 'GET',
+          path: '/i/love/spaces',
+          handler: (req: any) => {
+            return { path: req.path, query: req.query, url: req.url, basePath: req.getBasePath() };
+          },
+        },
+        {
+          method: 'GET',
           path: '/api/foo',
           handler: (req: any) => {
             return { path: req.path, url: req.url, basePath: req.getBasePath() };
           },
         },
       ]);
-
-      await setupFn(server);
 
       let basePath: string | undefined;
       server.decorate('request', 'getBasePath', () => basePath);
@@ -131,58 +136,59 @@ describe('onRequestInterceptor', () => {
 
   describe('onRequest', () => {
     test('handles paths without a space identifier', async () => {
-      const testHandler = jest.fn((req, h) => {
-        expect(req.path).toBe('/');
-        return h.continue;
-      });
+      const response = await request('/');
 
-      await request('/', (hapiServer: any) => {
-        hapiServer.ext('onRequest', testHandler);
+      expect(response.statusCode).toEqual(200);
+      expect(JSON.parse(response.payload)).toMatchObject({
+        path: '/',
+        url: {
+          path: '/',
+          pathname: '/',
+          href: '/',
+        },
       });
-
-      expect(testHandler).toHaveBeenCalledTimes(1);
     });
 
     test('strips the Space URL Context from the request', async () => {
-      const testHandler = jest.fn((req, h) => {
-        expect(req.path).toBe('/');
-        return h.continue;
+      const response = await request('/s/foo');
+      expect(response.statusCode).toEqual(200);
+      expect(JSON.parse(response.payload)).toMatchObject({
+        path: '/',
+        url: {
+          path: '/',
+          pathname: '/',
+          href: '/',
+        },
       });
-
-      await request('/s/foo', (hapiServer: any) => {
-        hapiServer.ext('onRequest', testHandler);
-      });
-
-      expect(testHandler).toHaveBeenCalledTimes(1);
     });
 
     test('ignores space identifiers in the middle of the path', async () => {
-      const testHandler = jest.fn((req, h) => {
-        expect(req.path).toBe('/some/path/s/foo/bar');
-        return h.continue;
+      const response = await request('/some/path/s/foo/bar');
+      expect(response.statusCode).toEqual(200);
+      expect(JSON.parse(response.payload)).toMatchObject({
+        path: '/some/path/s/foo/bar',
+        url: {
+          path: '/some/path/s/foo/bar',
+          pathname: '/some/path/s/foo/bar',
+          href: '/some/path/s/foo/bar',
+        },
       });
-
-      await request('/some/path/s/foo/bar', (hapiServer: any) => {
-        hapiServer.ext('onRequest', testHandler);
-      });
-
-      expect(testHandler).toHaveBeenCalledTimes(1);
     });
 
     test('strips the Space URL Context from the request, maintaining the rest of the path', async () => {
-      const testHandler = jest.fn((req, h) => {
-        expect(req.path).toBe('/i/love/spaces.html');
-        expect(req.query).toEqual({
+      const response = await request('/s/foo/i/love/spaces?queryParam=queryValue');
+      expect(response.statusCode).toEqual(200);
+      expect(JSON.parse(response.payload)).toMatchObject({
+        path: '/i/love/spaces',
+        query: {
           queryParam: 'queryValue',
-        });
-        return h.continue;
+        },
+        url: {
+          path: '/i/love/spaces',
+          pathname: '/i/love/spaces',
+          href: '/i/love/spaces',
+        },
       });
-
-      await request('/s/foo/i/love/spaces.html?queryParam=queryValue', (hapiServer: any) => {
-        hapiServer.ext('onRequest', testHandler);
-      });
-
-      expect(testHandler).toHaveBeenCalledTimes(1);
     });
   });
 });
