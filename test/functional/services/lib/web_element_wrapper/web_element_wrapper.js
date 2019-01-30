@@ -20,7 +20,7 @@
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
 
 export class WebElementWrapper {
-  constructor(webElement, webDriver, timeout, fixedHeaderHeight) {
+  constructor(webElement, webDriver, timeout, fixedHeaderHeight, log) {
     if (webElement instanceof WebElementWrapper) {
       return webElement;
     }
@@ -33,6 +33,7 @@ export class WebElementWrapper {
     this._LegacyAction = webDriver.LegacyActionSequence;
     this._defaultFindTimeout = timeout;
     this._fixedHeaderHeight = fixedHeaderHeight;
+    this._logger = log;
   }
 
   _wrap(otherWebElement) {
@@ -88,6 +89,7 @@ export class WebElementWrapper {
    * @return {Promise<void>}
    */
   async click() {
+    this._logger.debug('WebElementWrapper.click()');
     await this.scrollIntoViewIfNecessary();
     await this._webElement.click();
   }
@@ -158,6 +160,7 @@ export class WebElementWrapper {
    * @param {string} name
    */
   async getAttribute(name) {
+    this._logger.debug('WebElementWrapper.getAttribute()');
     const rectAttributes = ['height', 'width', 'x', 'y'];
     if (rectAttributes.includes(name)) {
       const rect = await this.getSize();
@@ -179,6 +182,7 @@ export class WebElementWrapper {
    * @return {Promise<any>}
    */
   async getProperty(name) {
+
     const property = await this._webElement.getAttribute(name);
 
     // leadfoot compatibility convertion
@@ -213,6 +217,7 @@ export class WebElementWrapper {
    * @return {Promise<string>}
    */
   async getVisibleText() {
+    this._logger.debug('WebElementWrapper.getVisibleText()');
     return await this._webElement.getText();
   }
 

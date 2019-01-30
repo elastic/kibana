@@ -35,7 +35,7 @@ export async function FindProvider({ getService }) {
   const defaultImplicitWait = 0;
 
   const wrap = webElement => (
-    new WebElementWrapper(webElement, webdriver, defaultFindTimeout, fixedHeaderHeight)
+    new WebElementWrapper(webElement, webdriver, defaultFindTimeout, fixedHeaderHeight, log)
   );
 
   const wrapAll = webElements => (
