@@ -42,7 +42,7 @@ export class FormEntryRow extends PureComponent {
     defaultValue: PropTypes.oneOfType([
       PropTypes.string,
       PropTypes.number
-    ]).isRequired,
+    ]),
     isLoading: PropTypes.bool,
     error: PropTypes.oneOfType([
       PropTypes.node,
@@ -101,12 +101,14 @@ export class FormEntryRow extends PureComponent {
 
     const hasError = !!error;
     const isInvalid = hasError && (error.alwaysVisible || areErrorsVisible);
+    const canBeResetToDefault = defaultValue !== undefined;
+    const isResetToDefaultVisible = value !== defaultValue;
 
     const fieldHelpText = (
       <Fragment>
         {helpText}
 
-        {value !== defaultValue && (
+        {canBeResetToDefault && isResetToDefaultVisible && (
           <p>
             <EuiLink onClick={() => this.onFieldChange(defaultValue)}>
               <FormattedMessage

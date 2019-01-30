@@ -512,7 +512,7 @@ export const FollowerIndexForm = injectI18n(
               <Fragment>
                 <EuiSpacer size="s"/>
                 {advancedSettingsFields.map((advancedSetting) => {
-                  const { field, title, description, label, helpText, defaultValue } = advancedSetting;
+                  const { field, title, description, label, helpText, defaultValue, type } = advancedSetting;
                   return (
                     <FormEntryRow
                       key={field}
@@ -528,6 +528,7 @@ export const FollowerIndexForm = injectI18n(
                       description={description}
                       label={label}
                       helpText={helpText}
+                      type={type}
                       areErrorsVisible={areErrorsVisible}
                       onValueUpdate={this.onFieldsChange}
                     />
