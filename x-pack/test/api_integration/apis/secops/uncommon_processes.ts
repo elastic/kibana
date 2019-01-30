@@ -119,7 +119,7 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
           name: 'sshd',
           title: null,
         },
-        user: null,
+        user: { id: 0, name: 'root', __typename: 'UserEcsFields' },
       });
     });
   });
