@@ -49,11 +49,11 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     });
   }
 
-  public on(event: 'xpack.status.green', cb: () => void) {
+  public on(event: 'xpack.status.green' | 'elasticsearch.status.green', cb: () => void) {
     switch (event) {
       case 'xpack.status.green':
         this.server.plugins.xpack_main.status.on('green', cb);
-      case 'xpack.status.green':
+      case 'elasticsearch.status.green':
         this.server.plugins.elasticsearch.status.on('green', cb);
     }
   }
