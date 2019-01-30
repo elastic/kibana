@@ -12,6 +12,8 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
+import moment = require('moment');
+import { HostItem } from 'x-pack/plugins/secops/public/graphql/types';
 import { mockGlobalState } from '../../../../mock';
 import { createStore, State } from '../../../../store';
 import { DragDropContextWrapper } from '../../../drag_and_drop/drag_drop_context_wrapper';
@@ -66,7 +68,9 @@ describe('Host Summary Component', () => {
 
     test('if it returns a FormattedRelative element', () => {
       const draggable = createDraggable(
-        '2019-01-28T22:14:16.039Z',
+        moment()
+          .subtract(1, 'days')
+          .format(),
         'firstSeen',
         552204000000,
         618472800000,
@@ -103,11 +107,11 @@ describe('Host Summary Component', () => {
 
   describe('#getEuiDescriptionList', () => {
     test('if it creates a description list', () => {
-      const euiDescriptionList = getEuiDescriptionList(
-        mockData.Hosts.edges[0].node,
-        552204000000,
-        618472800000
-      );
+      const mockNode: HostItem = mockData.Hosts.edges[0].node;
+      mockNode.firstSeen = moment()
+        .subtract(1, 'days')
+        .format();
+      const euiDescriptionList = getEuiDescriptionList(mockNode, 552204000000, 618472800000);
       const wrapper = mountWithIntl(
         <ReduxStoreProvider store={store}>
           <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>

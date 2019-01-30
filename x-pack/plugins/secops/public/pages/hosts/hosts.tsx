@@ -33,6 +33,7 @@ import { GlobalTime } from '../../containers/global_time';
 import { HostsFilter, HostsQuery } from '../../containers/hosts';
 import { HostsTableQuery } from '../../containers/hosts/hosts_table.gql_query';
 import { KpiEventsQuery } from '../../containers/kpi_events';
+import { KueryAutocompletion } from '../../containers/kuery_autocompletion';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
 import { IndexType, KpiItem } from '../../graphql/types';
