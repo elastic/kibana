@@ -5,7 +5,7 @@
  */
 
 import { resolve } from 'path';
-import Boom from 'boom';
+import { i18n } from '@kbn/i18n';
 
 import { initServer } from './server';
 import mappings from './mappings.json';
@@ -52,7 +52,9 @@ export function graph(kibana) {
 
       server.plugins.xpack_main.registerFeature({
         id: 'graph',
-        name: 'Graph',
+        name: i18n.translate('xpack.graph.featureRegistry.graphFeatureName', {
+          defaultMessage: 'Graph',
+        }),
         icon: 'graphApp',
         navLinkId: 'graph',
         app: ['graph', 'kibana'],

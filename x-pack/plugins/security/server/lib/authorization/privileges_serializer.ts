@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PrivilegeMap } from 'x-pack/plugins/security/common/model';
 import { PrivilegeSerializer } from './privilege_serializer';
-import { PrivilegeMap } from './privileges';
 
 interface SerializedPrivilege {
   application: string;

@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Dictionary, flatten, mapValues, uniq } from 'lodash';
+import { FeaturesPrivileges } from 'x-pack/plugins/security/common/model';
 import { FeaturePrivilegeDefinition } from 'x-pack/plugins/xpack_main/server/lib/feature_registry/feature_registry';
 import { Feature } from '../../../../xpack_main/types';
 import { Actions } from './actions';
-
-export type FeaturesPrivileges = Record<string, Record<string, string[]>>;
 
 export class FeaturesPrivilegesBuilder {
   private actions: Actions;

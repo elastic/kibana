@@ -40,9 +40,6 @@ describe('FeatureRegistry', () => {
       },
       privileges: {
         all: {
-          metadata: {
-            tooltip: 'some fancy tooltip',
-          },
           grantWithBaseRead: true,
           catalogue: ['foo'],
           management: {
@@ -57,6 +54,7 @@ describe('FeatureRegistry', () => {
           ui: ['allowsFoo', 'showBar', 'showBaz'],
         },
       },
+      privilegesTooltip: 'some fancy tooltip',
     };
 
     const featureRegistry = new FeatureRegistry();
@@ -110,12 +108,10 @@ describe('FeatureRegistry', () => {
     const feature: Feature = {
       id: 'test-feature',
       name: 'Test Feature',
-      app: [],
+      app: ['app1', 'app2'],
       privileges: {
         ['some invalid key']: {
-          metadata: {
-            tooltip: 'some fancy tooltip',
-          },
+          app: ['app1', 'app2'],
           savedObject: {
             all: ['config', 'space', 'etc'],
             read: ['canvas'],

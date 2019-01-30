@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { PluginProperties, Request, Server } from 'hapi';
 import { Feature } from 'x-pack/plugins/xpack_main/server/lib/feature_registry/feature_registry';
 import { PLUGIN } from '../common/constants';
@@ -36,7 +37,9 @@ export const initServerWithKibana = (server: KibanaServer) => {
   const xpackMainPlugin = server.plugins.xpack_main;
   xpackMainPlugin.registerFeature({
     id: PLUGIN.ID,
-    name: 'Uptime',
+    name: i18n.translate('xpack.uptime.featureRegistry.uptimeFeatureName', {
+      defaultMessage: 'Uptime',
+    }),
     navLinkId: PLUGIN.ID,
     app: ['uptime', 'kibana'],
     catalogue: ['uptime'],

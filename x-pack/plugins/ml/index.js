@@ -73,18 +73,16 @@ export const ml = (kibana) => {
 
       xpackMainPlugin.registerFeature({
         id: 'ml',
-        name: 'Machine Learning',
+        name: i18n.translate('xpack.ml.featureRegistry.mlFeatureName', {
+          defaultMessage: 'Machine Learning',
+        }),
         icon: 'machineLearningApp',
         navLinkId: 'ml',
         app: ['ml', 'kibana'],
         catalogue: ['ml'],
         privileges: {
           all: {
-            metadata: {
-              tooltip: i18n.translate('xpack.ml.privileges.tooltip', {
-                defaultMessage: 'The machine_learning_user or machine_learning_admin role should be assigned to grant access'
-              })
-            },
+            catalogue: ['ml'],
             grantWithBaseRead: true,
             savedObject: {
               all: [],
@@ -92,7 +90,10 @@ export const ml = (kibana) => {
             },
             ui: [],
           },
-        }
+        },
+        privilegesTooltip: i18n.translate('xpack.ml.privileges.tooltip', {
+          defaultMessage: 'The machine_learning_user or machine_learning_admin role should also be assigned to users to grant access'
+        })
       });
 
       // Add server routes and initialize the plugin here

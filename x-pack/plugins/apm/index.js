@@ -71,7 +71,9 @@ export function apm(kibana) {
     init(server) {
       server.plugins.xpack_main.registerFeature({
         id: 'apm',
-        name: 'APM',
+        name: i18n.translate('xpack.apm.featureRegistry.apmFeatureName', {
+          defaultMessage: 'APM'
+        }),
         icon: 'apmApp',
         navLinkId: 'apm',
         app: ['apm', 'kibana'],
@@ -86,7 +88,11 @@ export function apm(kibana) {
             },
             ui: []
           }
-        }
+        },
+        privilegesTooltip: i18n.translate('xpack.apm.privileges.tooltip', {
+          defaultMessage:
+            'A role with access to the apm-* indicies should be assigned to users to grant access'
+        })
       });
 
       initTransactionsApi(server);
