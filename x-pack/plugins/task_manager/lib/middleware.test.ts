@@ -149,6 +149,7 @@ Object {
       "abc": "def",
     },
     "runAt": 2018-09-18T05:33:09.588Z,
+    "scheduledAt": 2018-09-18T05:33:09.588Z,
     "state": Object {},
     "status": "idle",
     "taskType": "nice_task",
