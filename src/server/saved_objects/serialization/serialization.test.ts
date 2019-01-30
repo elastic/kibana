@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { ROOT_TYPE, SavedObjectsSerializer } from '.';
+import { SavedObjectsSerializer } from '.';
 import { SavedObjectsSchema } from '../schema';
 
 describe('saved object conversion', () => {
@@ -86,7 +86,6 @@ describe('saved object conversion', () => {
       const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.rawToSavedObject({
         _id: 'hello:world',
-        _type: ROOT_TYPE,
         _version: 3,
         _source: {
           type: 'hello',
@@ -172,7 +171,6 @@ describe('saved object conversion', () => {
       const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.rawToSavedObject({
         _id: 'universe',
-        _type: ROOT_TYPE,
         _source: {
           type: 'hello',
           hello: {
@@ -195,7 +193,6 @@ describe('saved object conversion', () => {
       const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.rawToSavedObject({
         _id: 'universe',
-        _type: ROOT_TYPE,
         _source: {
           type: 'hello',
         },
@@ -212,7 +209,6 @@ describe('saved object conversion', () => {
       expect(() =>
         serializer.rawToSavedObject({
           _id: 'universe',
-          _type: ROOT_TYPE,
           _source: {
             hello: {
               world: 'earth',
@@ -226,7 +222,6 @@ describe('saved object conversion', () => {
       const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const raw = {
         _id: 'foo-namespace:foo:bar',
-        _type: ROOT_TYPE,
         _version: 24,
         _source: {
           type: 'foo',
@@ -409,7 +404,6 @@ describe('saved object conversion', () => {
         attributes: {},
       } as any);
 
-      expect(actual).toHaveProperty('_type', ROOT_TYPE);
       expect(actual._source).toHaveProperty('type', 'foo');
     });
 
