@@ -18,7 +18,7 @@ export function initTransactionsApi(server: Server) {
     options: {
       validate: {
         query: withDefaultValidators({
-          traceId: Joi.string().allow('') // TODO: this should be a path param and made required by 7.0
+          traceId: Joi.string().required()
         })
       }
     },
@@ -26,13 +26,13 @@ export function initTransactionsApi(server: Server) {
       const { transactionId } = req.params;
       const { traceId } = req.query as { traceId: string };
       const setup = setupRequest(req);
-      const transactionwithErrorCount = await getTransactionWithErrorCount(
+      const transactionWithErrorCount = await getTransactionWithErrorCount(
         transactionId,
         traceId,
         setup
       );
-      if (transactionwithErrorCount.transaction) {
-        return transactionwithErrorCount;
+      if (transactionWithErrorCount.transaction) {
+        return transactionWithErrorCount;
       } else {
         throw Boom.notFound('Cannot find the requested page');
       }

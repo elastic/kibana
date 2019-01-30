@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Request, RRRRender } from 'react-redux-request';
-import { TransactionWithErrorCountAPIResponse } from 'x-pack/plugins/apm/typings/get_transaction';
+import { TransactionWithErrorCountAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/get_transaction';
 import { loadTransaction } from '../../services/rest/apm/transactions';
 import { IReduxState } from '../rootReducer';
 import { IUrlParams } from '../urlParams';

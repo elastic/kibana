@@ -9,26 +9,18 @@ import { idx } from 'x-pack/plugins/apm/common/idx';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
 import {
   PROCESSOR_EVENT,
-  SERVICE_NAME,
   TRACE_ID,
   TRANSACTION_ID
 } from '../../../common/constants';
 import { Setup } from '../helpers/setup_request';
 
-export async function getErrorCount({
-  serviceName,
-  transactionId,
-  traceId,
-  setup
-}: {
-  serviceName: string;
-  transactionId: string;
-  traceId: string;
-  setup: Setup;
-}): Promise<number> {
+export async function getErrorCount(
+  transactionId: string,
+  traceId: string,
+  setup: Setup
+): Promise<number> {
   const { start, end, esFilterQuery, client, config } = setup;
   const filter: ESFilter[] = [
-    { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_ID]: transactionId } },
     { term: { [TRACE_ID]: traceId } },
     { term: { [PROCESSOR_EVENT]: 'error' } },

@@ -8,16 +8,19 @@ import { ESFilter } from 'elasticsearch';
 import { idx } from 'x-pack/plugins/apm/common/idx';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import {
-  TransactionAPIResponse,
-  TransactionWithErrorCountAPIResponse
-} from 'x-pack/plugins/apm/typings/get_transaction';
-import {
   PROCESSOR_EVENT,
   TRACE_ID,
   TRANSACTION_ID
 } from '../../../../common/constants';
 import { getErrorCount } from '../../errors/get_error_count';
 import { Setup } from '../../helpers/setup_request';
+
+export type TransactionAPIResponse = Transaction | undefined;
+
+export interface TransactionWithErrorCountAPIResponse {
+  transaction: TransactionAPIResponse;
+  errorCount: number;
+}
 
 export async function getTransaction(
   transactionId: string,
@@ -66,18 +69,8 @@ export async function getTransactionWithErrorCount(
   traceId: string,
   setup: Setup
 ): Promise<TransactionWithErrorCountAPIResponse> {
-  const transaction = await getTransaction(transactionId, traceId, setup);
-  const errorCount = transaction
-    ? await getErrorCount({
-        serviceName: transaction.service.name,
-        transactionId: transaction.transaction.id,
-        traceId,
-        setup
-      })
-    : 0;
-
-  return {
-    transaction,
-    errorCount
-  };
+  return Promise.all([
+    getTransaction(transactionId, traceId, setup),
+    getErrorCount(transactionId, traceId, setup)
+  ]).then(([transaction, errorCount]) => ({ transaction, errorCount }));
 }
