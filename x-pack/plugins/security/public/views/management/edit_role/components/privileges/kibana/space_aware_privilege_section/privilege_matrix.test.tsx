@@ -26,18 +26,21 @@ describe('PrivilegeMatrix', () => {
         id: 'feature1',
         name: 'feature 1',
         icon: 'apmApp',
+        app: [],
         privileges: {},
       },
       {
         id: 'feature2',
         name: 'feature 2',
         icon: 'apmApp',
+        app: [],
         privileges: {},
       },
       {
         id: 'feature3',
         name: 'feature 3',
         icon: 'apmApp',
+        app: [],
         privileges: {},
       },
     ];

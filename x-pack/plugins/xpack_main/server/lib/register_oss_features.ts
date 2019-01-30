@@ -14,10 +14,10 @@ const kibanaFeatures: Feature[] = [
     }),
     icon: 'discoverApp',
     navLinkId: 'kibana:discover',
+    app: ['kibana'],
     catalogue: ['discover'],
     privileges: {
       all: {
-        app: ['kibana'],
         savedObject: {
           all: ['search'],
           read: ['config', 'index-pattern'],
@@ -25,7 +25,6 @@ const kibanaFeatures: Feature[] = [
         ui: ['show', 'save'],
       },
       read: {
-        app: ['kibana'],
         savedObject: {
           all: [],
           read: ['config', 'index-pattern', 'search'],
@@ -41,10 +40,10 @@ const kibanaFeatures: Feature[] = [
     }),
     icon: 'visualizeApp',
     navLinkId: 'kibana:visualize',
+    app: ['kibana'],
     catalogue: ['visualize'],
     privileges: {
       all: {
-        app: ['kibana'],
         savedObject: {
           all: ['visualization'],
           read: ['config', 'index-pattern', 'search'],
@@ -52,7 +51,6 @@ const kibanaFeatures: Feature[] = [
         ui: [],
       },
       read: {
-        app: ['kibana'],
         savedObject: {
           all: [],
           read: ['config', 'index-pattern', 'search', 'visualization'],
@@ -68,10 +66,10 @@ const kibanaFeatures: Feature[] = [
     }),
     icon: 'dashboardApp',
     navLinkId: 'kibana:dashboard',
+    app: ['kibana'],
     catalogue: ['dashboard'],
     privileges: {
       all: {
-        app: ['kibana'],
         savedObject: {
           all: ['dashboard'],
           read: [
@@ -86,7 +84,6 @@ const kibanaFeatures: Feature[] = [
         ui: ['createNew', 'show', 'showWriteControls'],
       },
       read: {
-        app: ['kibana'],
         savedObject: {
           all: [],
           read: [
@@ -110,11 +107,11 @@ const kibanaFeatures: Feature[] = [
     }),
     icon: 'devToolsApp',
     navLinkId: 'kibana:dev_tools',
+    app: ['kibana'],
     catalogue: ['console', 'searchprofiler', 'grokdebugger'],
     privileges: {
       read: {
         api: ['console/execute'],
-        app: ['kibana'],
         savedObject: {
           all: [],
           read: ['config'],
@@ -129,13 +126,13 @@ const kibanaFeatures: Feature[] = [
       defaultMessage: 'Advanced Settings',
     }),
     icon: 'advancedSettingsApp',
+    app: ['kibana'],
     catalogue: ['advanced_settings'],
     management: {
       kibana: ['settings'],
     },
     privileges: {
       all: {
-        app: ['kibana'],
         savedObject: {
           all: ['config'],
           read: [],
@@ -150,13 +147,13 @@ const kibanaFeatures: Feature[] = [
       defaultMessage: 'Index Pattern Management',
     }),
     icon: 'indexPatternApp',
+    app: ['kibana'],
     catalogue: ['index_patterns'],
     management: {
       kibana: ['indices'],
     },
     privileges: {
       all: {
-        app: ['kibana'],
         savedObject: {
           all: ['index-pattern'],
           read: ['config'],
@@ -173,10 +170,10 @@ const timelionFeatures: Feature[] = [
     name: 'Timelion',
     icon: 'timelionApp',
     navLinkId: 'timelion',
+    app: ['timelion', 'kibana'],
     catalogue: ['timelion'],
     privileges: {
       all: {
-        app: ['timelion', 'kibana'],
         savedObject: {
           all: ['timelion-sheet'],
           read: ['config', 'index-pattern'],
@@ -184,7 +181,6 @@ const timelionFeatures: Feature[] = [
         ui: [],
       },
       read: {
-        app: ['timelion', 'kibana'],
         savedObject: {
           all: [],
           read: ['config', 'index-pattern', 'timelion-sheet'],

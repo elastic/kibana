@@ -186,6 +186,7 @@ exports[`EnabledFeatures renders as expected 1`] = `
         features={
           Array [
             Object {
+              "app": Array [],
               "icon": "discoverApp",
               "id": "some-feature",
               "name": "Some Feature",

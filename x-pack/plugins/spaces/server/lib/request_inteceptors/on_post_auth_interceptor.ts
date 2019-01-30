@@ -3,42 +3,33 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import Boom from 'boom';
+import { PluginProperties, Server } from 'hapi';
+import { Space } from 'x-pack/plugins/spaces/common/model/space';
+import { Feature } from 'x-pack/plugins/xpack_main/types';
+import { wrapError } from '../errors';
+import { getSpaceSelectorUrl } from '../get_space_selector_url';
+import { SpacesClient } from '../spaces_client';
+import { addSpaceIdToPath, getSpaceIdFromPath } from '../spaces_url_parser';
 
-import { DEFAULT_SPACE_ID } from '../../common/constants';
-import { wrapError } from './errors';
-import { getSpaceSelectorUrl } from './get_space_selector_url';
-import { addSpaceIdToPath, getSpaceIdFromPath } from './spaces_url_parser';
+interface XpackMainPlugin {
+  getFeatures: () => Feature[];
+}
 
-export function initSpacesRequestInterceptors(server: any) {
-  const serverBasePath = server.config().get('server.basePath');
+interface KbnPluginProperties extends PluginProperties {
+  xpack_main: XpackMainPlugin;
+}
 
-  server.ext('onRequest', async function spacesOnRequestHandler(request: any, h: any) {
-    const path = request.path;
+interface KbnServer extends Server {
+  plugins: KbnPluginProperties;
+  getHiddenUiAppById: (appId: string) => any;
+}
 
-    // If navigating within the context of a space, then we store the Space's URL Context on the request,
-    // and rewrite the request to not include the space identifier in the URL.
-    const spaceId = getSpaceIdFromPath(path, serverBasePath);
+export function initSpacesOnPostAuthRequestInterceptor(server: KbnServer) {
+  const serverBasePath: string = server.config().get('server.basePath');
+  const xpackMainPlugin: XpackMainPlugin = server.plugins.xpack_main;
 
-    if (spaceId !== DEFAULT_SPACE_ID) {
-      const reqBasePath = `/s/${spaceId}`;
-      request.setBasePath(reqBasePath);
-
-      const newLocation = path.substr(reqBasePath.length) || '/';
-
-      const newUrl = {
-        ...request.url,
-        path: newLocation,
-        pathname: newLocation,
-        href: newLocation,
-      };
-
-      request.setUrl(newUrl);
-    }
-
-    return h.continue;
-  });
-
-  server.ext('onPostAuth', async function spacesOnRequestHandler(request: any, h: any) {
+  server.ext('onPostAuth', async function spacesOnPostAuthHandler(request: any, h: any) {
     const path = request.path;
 
     const isRequestingKibanaRoot = path === '/';
@@ -53,8 +44,8 @@ export function initSpacesRequestInterceptors(server: any) {
         const spaces = await spacesClient.getAll();
 
         const config = server.config();
-        const basePath = config.get('server.basePath');
-        const defaultRoute = config.get('server.defaultRoute');
+        const basePath: string = config.get('server.basePath');
+        const defaultRoute: string = config.get('server.defaultRoute');
 
         if (spaces.length === 1) {
           // If only one space is available, then send user there directly.
@@ -78,14 +69,17 @@ export function initSpacesRequestInterceptors(server: any) {
     // This condition should only happen after selecting a space, or when transitioning from one application to another
     // e.g.: Navigating from Dashboard to Timelion
     if (isRequestingApplication) {
-      let spaceId;
+      let spaceId: string = '';
+      let space: Space;
       try {
-        const spacesClient = server.plugins.spaces.spacesClient.getScopedClient(request);
+        const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
+          request
+        );
         spaceId = getSpaceIdFromPath(request.getBasePath(), serverBasePath);
 
         server.log(['spaces', 'debug'], `Verifying access to space "${spaceId}"`);
 
-        await spacesClient.get(spaceId);
+        space = await spacesClient.get(spaceId);
       } catch (error) {
         server.log(
           ['spaces', 'error'],
@@ -93,6 +87,30 @@ export function initSpacesRequestInterceptors(server: any) {
         );
         // Space doesn't exist, or user not authorized for space, or some other issue retrieving the active space.
         return h.redirect(getSpaceSelectorUrl(server.config())).takeover();
+      }
+
+      // Verify application is available in this space
+      if (space && space.disabledFeatures.length > 0) {
+        const appId = path.split('/', 3)[2];
+        server.log(['spaces', 'debug'], `Verifying application is available: "${appId}"`);
+
+        const allFeatures = xpackMainPlugin.getFeatures();
+
+        const isRegisteredApp = allFeatures.some(feature => feature.app.includes(appId));
+        if (isRegisteredApp) {
+          const enabledFeatures = allFeatures.filter(
+            feature => !space.disabledFeatures.includes(feature.id)
+          );
+
+          const isAvailableInSpace = enabledFeatures.some(feature => feature.app.includes(appId));
+          if (!isAvailableInSpace) {
+            server.log(
+              ['spaces', 'error'],
+              `App ${appId} is not enabled within space "${spaceId}".`
+            );
+            return Boom.notFound();
+          }
+        }
       }
     }
     return h.continue;

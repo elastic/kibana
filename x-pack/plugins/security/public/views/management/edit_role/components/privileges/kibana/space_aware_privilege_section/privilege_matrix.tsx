@@ -137,6 +137,7 @@ export class PrivilegeMatrix extends Component<Props, State> {
             id: 'xpack.security.management.editRole.spacePrivilegeMatrix.basePrivilegeText',
             defaultMessage: 'Base privilege',
           }),
+          app: [],
           privileges: {},
         },
         role,

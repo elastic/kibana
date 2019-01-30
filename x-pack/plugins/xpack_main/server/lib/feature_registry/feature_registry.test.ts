@@ -11,6 +11,7 @@ describe('FeatureRegistry', () => {
     const feature: Feature = {
       id: 'test-feature',
       name: 'Test Feature',
+      app: [],
       privileges: {},
     };
 
@@ -31,6 +32,7 @@ describe('FeatureRegistry', () => {
       description: 'this is a rather boring feature description !@#$%^&*()_+-=\\[]{}|;\':"/.,<>?',
       icon: 'addDataApp',
       navLinkId: 'someNavLink',
+      app: ['app1', 'app2'],
       validLicenses: ['standard', 'basic', 'gold', 'platinum'],
       catalogue: ['foo'],
       management: {
@@ -43,7 +45,7 @@ describe('FeatureRegistry', () => {
           management: {
             foo: ['bar'],
           },
-          app: ['app1', 'app2'],
+          app: ['app1'],
           savedObject: {
             all: ['config', 'space', 'etc'],
             read: ['canvas'],
@@ -69,12 +71,14 @@ describe('FeatureRegistry', () => {
     const feature: Feature = {
       id: 'test-feature',
       name: 'Test Feature',
+      app: [],
       privileges: {},
     };
 
     const duplicateFeature: Feature = {
       id: 'test-feature',
       name: 'Duplicate Test Feature',
+      app: [],
       privileges: {},
     };
 
@@ -93,6 +97,7 @@ describe('FeatureRegistry', () => {
         featureRegistry.register({
           id: prohibitedId,
           name: 'some feature',
+          app: [],
           privileges: {},
         })
       ).toThrowErrorMatchingSnapshot();
@@ -103,6 +108,7 @@ describe('FeatureRegistry', () => {
     const feature: Feature = {
       id: 'test-feature',
       name: 'Test Feature',
+      app: ['app1', 'app2'],
       privileges: {
         ['some invalid key']: {
           app: ['app1', 'app2'],
@@ -122,10 +128,35 @@ describe('FeatureRegistry', () => {
     );
   });
 
+  it(`prevents privileges from specifying app entries that don't exist at the root level`, () => {
+    const feature: Feature = {
+      id: 'test-feature',
+      name: 'Test Feature',
+      app: ['bar'],
+      privileges: {
+        all: {
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+          app: ['foo', 'bar', 'baz'],
+        },
+      },
+    };
+
+    const featureRegistry = new FeatureRegistry();
+
+    expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
+      `"Feature privilege test-feature.all has unknown app entries: foo, baz"`
+    );
+  });
+
   it(`prevents privileges from specifying catalogue entries that don't exist at the root level`, () => {
     const feature: Feature = {
       id: 'test-feature',
       name: 'Test Feature',
+      app: [],
       catalogue: ['bar'],
       privileges: {
         all: {
@@ -151,6 +182,7 @@ describe('FeatureRegistry', () => {
     const feature: Feature = {
       id: 'test-feature',
       name: 'Test Feature',
+      app: [],
       catalogue: ['bar'],
       management: {
         kibana: ['hey'],
@@ -182,6 +214,7 @@ describe('FeatureRegistry', () => {
     const feature: Feature = {
       id: 'test-feature',
       name: 'Test Feature',
+      app: [],
       catalogue: ['bar'],
       management: {
         kibana: ['hey'],
@@ -213,11 +246,13 @@ describe('FeatureRegistry', () => {
     const feature1: Feature = {
       id: 'test-feature',
       name: 'Test Feature',
+      app: [],
       privileges: {},
     };
     const feature2: Feature = {
       id: 'test-feature-2',
       name: 'Test Feature 2',
+      app: [],
       privileges: {},
     };
 

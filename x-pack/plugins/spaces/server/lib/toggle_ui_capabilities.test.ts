@@ -13,12 +13,14 @@ const features: Feature[] = [
   {
     id: 'feature_1',
     name: 'Feature 1',
+    app: [],
     privileges: {},
   },
   {
     id: 'feature_2',
     name: 'Feature 2',
     navLinkId: 'feature2',
+    app: [],
     catalogue: ['feature2Entry'],
     management: {
       kibana: ['somethingElse'],
@@ -38,6 +40,7 @@ const features: Feature[] = [
     id: 'feature_3',
     name: 'Feature 3',
     navLinkId: 'feature3',
+    app: [],
     catalogue: ['feature3Entry'],
     management: {
       kibana: ['indices'],
