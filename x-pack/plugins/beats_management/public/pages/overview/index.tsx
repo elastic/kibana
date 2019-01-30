@@ -5,7 +5,6 @@
  */
 
 import {
-  // @ts-ignore types for EuiTabs not currently available
   EuiTab,
   // @ts-ignore types for EuiTab not currently available
   EuiTabs,
@@ -13,7 +12,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { Subscribe } from 'unstated';
-import { CMPopulatedBeat } from '../../../common/domain_types';
+import { CMBeat } from '../../../common/domain_types';
 import { PrimaryLayout } from '../../components/layouts/primary';
 import { ChildRoutes } from '../../components/navigation/child_routes';
 import { BeatsContainer } from '../../containers/beats';
@@ -25,7 +24,7 @@ interface MainPagesState {
   enrollBeat?: {
     enrollmentToken: string;
   } | null;
-  beats: CMPopulatedBeat[];
+  beats: CMBeat[];
   loadedBeatsAtLeastOnce: boolean;
 }
 
@@ -45,7 +44,10 @@ class MainPageComponent extends React.PureComponent<AppPageProps, MainPagesState
 
   public render() {
     return (
-      <PrimaryLayout title="Beats" hideBreadcrumbs={this.props.libs.framework.info.k7Design}>
+      <PrimaryLayout
+        title="Beats"
+        hideBreadcrumbs={this.props.libs.framework.versionGreaterThen('6.7.0')}
+      >
         {(renderAction: any) => (
           <Subscribe to={[BeatsContainer, TagsContainer]}>
             {(beats: BeatsContainer, tags: TagsContainer) => (

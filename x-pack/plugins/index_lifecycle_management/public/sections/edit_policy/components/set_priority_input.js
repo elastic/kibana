@@ -32,8 +32,8 @@ export const SetPriorityInput = props => {
         <EuiTextColor color="subdued">
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.indexPriorityExplanationText"
-            defaultMessage="Determine the order in which your indices are recovered.
-              Indices with higher values for index priority are recovered before indices with lower values."
+            defaultMessage="Set the priority for recovering your indices after a node restart.
+              Indices with higher priorities are recovered before indices with lower priorities."
           />{' '}
           <LearnMoreLink docPath="recovery-prioritization.html" />
         </EuiTextColor>
