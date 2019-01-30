@@ -1,6 +1,11 @@
 {
   "index_patterns": [".management-beats-events-*"],
   "version": 66000,
+  "index": {
+    "lifecycle": {
+      "name": ".beats-management-events-retention"
+    }
+  },
   "settings": {
     "index": {
       "number_of_shards": 1,
