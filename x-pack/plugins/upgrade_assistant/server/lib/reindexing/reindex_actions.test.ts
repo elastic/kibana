@@ -8,6 +8,7 @@ import Boom from 'boom';
 import moment from 'moment';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import {
+  IndexGroup,
   REINDEX_OP_TYPE,
   ReindexSavedObject,
   ReindexStatus,
@@ -17,7 +18,7 @@ import {
   CURRENT_MAJOR_VERSION,
   PREV_MAJOR_VERSION,
 } from 'x-pack/plugins/upgrade_assistant/common/version';
-import { IndexGroup, LOCK_WINDOW, ReindexActions, reindexActionsFactory } from './reindex_actions';
+import { LOCK_WINDOW, ReindexActions, reindexActionsFactory } from './reindex_actions';
 
 describe('ReindexActions', () => {
   let client: jest.Mocked<any>;

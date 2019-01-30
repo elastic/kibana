@@ -16,6 +16,7 @@ import {
   PREV_MAJOR_VERSION,
 } from 'x-pack/plugins/upgrade_assistant/common/version';
 import {
+  IndexGroup,
   REINDEX_OP_TYPE,
   ReindexOperation,
   ReindexSavedObject,
@@ -26,11 +27,6 @@ import { FlatSettings } from './types';
 
 // TODO: base on elasticsearch.requestTimeout?
 export const LOCK_WINDOW = moment.duration(90, 'seconds');
-
-export enum IndexGroup {
-  ml = '___ML_REINDEX_LOCK___',
-  watcher = '___WATCHER_REINDEX_LOCK___',
-}
 
 /**
  * A collection of utility functions pulled out out of the ReindexService to make testing simpler.

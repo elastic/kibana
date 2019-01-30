@@ -52,3 +52,8 @@ export enum ReindexWarning {
 
   // 7.0 -> 8.0 warnings
 }
+
+export enum IndexGroup {
+  ml = '___ML_REINDEX_LOCK___',
+  watcher = '___WATCHER_REINDEX_LOCK___',
+}

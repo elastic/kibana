@@ -52,6 +52,7 @@ export const ChecklistFlyoutStep: React.StatelessComponent<{
     lastCompletedStep,
     errorMessage,
     hasRequiredPrivileges,
+    indexGroup,
   } = reindexState;
   const loading = loadingState === LoadingState.Loading || status === ReindexStatus.inProgress;
 
@@ -87,6 +88,7 @@ export const ChecklistFlyoutStep: React.StatelessComponent<{
           <h3>Reindexing process</h3>
         </EuiTitle>
         <ReindexProgress
+          indexGroup={indexGroup}
           lastCompletedStep={lastCompletedStep}
           reindexStatus={status}
           reindexTaskPercComplete={reindexTaskPercComplete}

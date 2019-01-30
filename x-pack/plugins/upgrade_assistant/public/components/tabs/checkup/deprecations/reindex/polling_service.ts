@@ -8,6 +8,7 @@ import chrome from 'ui/chrome';
 
 import { BehaviorSubject } from 'rxjs';
 import {
+  IndexGroup,
   ReindexOperation,
   ReindexStatus,
   ReindexStep,
@@ -36,12 +37,14 @@ export interface ReindexState {
   errorMessage: string | null;
   reindexWarnings?: ReindexWarning[];
   hasRequiredPrivileges?: boolean;
+  indexGroup?: IndexGroup;
 }
 
 interface StatusResponse {
   warnings?: ReindexWarning[];
   reindexOp?: ReindexOperation;
   hasRequiredPrivileges?: boolean;
+  indexGroup?: IndexGroup;
 }
 
 /**
@@ -112,7 +115,12 @@ export class ReindexPollingService {
     }
   };
 
-  private updateWithResponse = ({ reindexOp, warnings, hasRequiredPrivileges }: StatusResponse) => {
+  private updateWithResponse = ({
+    reindexOp,
+    warnings,
+    hasRequiredPrivileges,
+    indexGroup,
+  }: StatusResponse) => {
     // Next value should always include the entire state, not just what changes.
     // We make a shallow copy as a starting new state.
     const nextValue = {
@@ -127,6 +135,10 @@ export class ReindexPollingService {
 
     if (hasRequiredPrivileges !== undefined) {
       nextValue.hasRequiredPrivileges = hasRequiredPrivileges;
+    }
+
+    if (indexGroup) {
+      nextValue.indexGroup = indexGroup;
     }
 
     if (reindexOp) {

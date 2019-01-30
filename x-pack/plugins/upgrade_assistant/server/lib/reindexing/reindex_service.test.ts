@@ -6,12 +6,12 @@
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import {
+  IndexGroup,
   ReindexOperation,
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
-import { IndexGroup } from './reindex_actions';
 import { ReindexService, reindexServiceFactory } from './reindex_service';
 
 describe('reindexService', () => {

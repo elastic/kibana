@@ -8,13 +8,14 @@ import Boom from 'boom';
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import {
+  IndexGroup,
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
   ReindexWarning,
 } from '../../../common/types';
 import { getReindexWarnings, transformFlatSettings } from './index_settings';
-import { IndexGroup, ReindexActions } from './reindex_actions';
+import { ReindexActions } from './reindex_actions';
 
 const VERSION_REGEX = new RegExp(/^([1-9]+)\.([0-9]+)\.([0-9]+)/);
 
@@ -31,6 +32,12 @@ export interface ReindexService {
    * @param indexName
    */
   detectReindexWarnings(indexName: string): Promise<ReindexWarning[] | null>;
+
+  /**
+   * Returns an IndexGroup if the index belongs to one, otherwise undefined.
+   * @param indexName
+   */
+  getIndexGroup(indexName: string): IndexGroup | undefined;
 
   /**
    * Creates a new reindex operation for a given index.
@@ -425,6 +432,14 @@ export const reindexServiceFactory = (
         return null;
       } else {
         return getReindexWarnings(flatSettings);
+      }
+    },
+
+    getIndexGroup(indexName: string) {
+      if (isMlIndex(indexName)) {
+        return IndexGroup.ml;
+      } else if (isWatcherIndex(indexName)) {
+        return IndexGroup.watcher;
       }
     },
 

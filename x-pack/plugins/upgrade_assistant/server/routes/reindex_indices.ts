@@ -118,10 +118,12 @@ export function registerReindexIndicesRoutes(
         const warnings = hasRequiredPrivileges
           ? await reindexService.detectReindexWarnings(indexName)
           : [];
+        const indexGroup = reindexService.getIndexGroup(indexName);
 
         return {
           reindexOp: reindexOp ? reindexOp.attributes : null,
           warnings,
+          indexGroup,
           hasRequiredPrivileges,
         };
       } catch (e) {
