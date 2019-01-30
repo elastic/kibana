@@ -258,7 +258,7 @@
     "webpack-merge": "4.1.4",
     "whatwg-fetch": "^2.0.3",
     "wreck": "^14.0.2",
-    "x-pack": "6.6.0",
+    "x-pack": "6.6.1",
     "yauzl": "2.7.0"
   },
   "devDependencies": {
