@@ -29,6 +29,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
     server = new MockServer();
 
     const prereqs = {
+      types: ['index-pattern'],
       getSavedObjectsClient: {
         assign: 'savedObjectsClient',
         method() {

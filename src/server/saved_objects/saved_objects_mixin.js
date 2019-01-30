@@ -48,7 +48,13 @@ export function savedObjectsMixin(kbnServer, server) {
     return;
   }
 
+
+  const schema = new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas);
+  const serializer = new SavedObjectsSerializer(schema);
+  const service = createSavedObjectsService(server, schema, serializer, migrator);
+
   const prereqs = {
+    types: service.types,
     getSavedObjectsClient: {
       assign: 'savedObjectsClient',
       method(req) {
@@ -56,8 +62,6 @@ export function savedObjectsMixin(kbnServer, server) {
       },
     },
   };
-
-
   server.route(createBulkCreateRoute(prereqs));
   server.route(createBulkGetRoute(prereqs));
   server.route(createCreateRoute(prereqs));
@@ -66,9 +70,7 @@ export function savedObjectsMixin(kbnServer, server) {
   server.route(createGetRoute(prereqs));
   server.route(createUpdateRoute(prereqs));
 
-  const schema = new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas);
-  const serializer = new SavedObjectsSerializer(schema);
-  server.decorate('server', 'savedObjects', createSavedObjectsService(server, schema, serializer, migrator));
+  server.decorate('server', 'savedObjects', service);
 
   const savedObjectsClientCache = new WeakMap();
   server.decorate('request', 'getSavedObjectsClient', function () {

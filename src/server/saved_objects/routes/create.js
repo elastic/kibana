@@ -33,7 +33,7 @@ export const createCreateRoute = prereqs => {
           .default(),
         params: Joi.object()
           .keys({
-            type: Joi.string().required(),
+            type: Joi.string().valid(prereqs.types).required(),
             id: Joi.string(),
           })
           .required(),

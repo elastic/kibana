@@ -29,6 +29,7 @@ describe('GET /api/saved_objects/_find', () => {
     server = new MockServer();
 
     const prereqs = {
+      types: ['index-pattern', 'visualization', 'foo', 'bar'],
       getSavedObjectsClient: {
         assign: 'savedObjectsClient',
         method() {
