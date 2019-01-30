@@ -11,5 +11,5 @@ export interface BreadcrumbContext {
 }
 export interface Breadcrumb {
   text: string;
-  href: string;
+  href?: string;
 }

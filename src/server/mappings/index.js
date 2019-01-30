@@ -19,7 +19,6 @@
 
 export {
   getTypes,
-  getRootType,
   getProperty,
   getRootProperties,
   getRootPropertiesObjects,
