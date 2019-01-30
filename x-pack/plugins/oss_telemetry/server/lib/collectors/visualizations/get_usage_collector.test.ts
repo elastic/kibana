@@ -45,6 +45,16 @@ describe('getVisualizationsCollector#fetch', () => {
   });
 
   describe('Error handling', () => {
+    test('Silently handles Task Manager NotInitialized', async () => {
+      const mockTaskFetch = sinon.stub();
+      mockTaskFetch.rejects(
+        new Error('NotInitialized taskManager is still waiting for plugins to load')
+      );
+      mockKbnServer = getMockKbnServer(getMockCallWithInternal(), mockTaskFetch);
+
+      const { fetch } = getUsageCollector(mockKbnServer);
+      await expect(fetch()).resolves.toBe(undefined);
+    });
     // In real life, the CollectorSet calls fetch and handles errors
     test('defers the errors', async () => {
       const mockTaskFetch = sinon.stub();

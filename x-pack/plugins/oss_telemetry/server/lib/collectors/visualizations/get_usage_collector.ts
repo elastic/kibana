@@ -25,7 +25,7 @@ export function getUsageCollector(server: HapiServer) {
          * has to wait for all plugins to initialize first.
          * It's fine to ignore it as next time around it will be initialized (or it will throw a different type of error)
          */
-        if (errMessage.indexOf('NotInitialized') >= 0) {
+        if (errMessage.includes('NotInitialized')) {
           docs = {};
         } else {
           throw err;
