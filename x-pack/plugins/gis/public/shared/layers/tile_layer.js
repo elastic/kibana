@@ -69,6 +69,8 @@ export class TileLayer extends AbstractLayer {
     const layerId = this.getId() + '_raster';
 
     if (source) {
+      // If source exists, just sync style
+      this._setTileLayerProperties(mbMap, layerId);
       return;
     }
 
@@ -90,7 +92,10 @@ export class TileLayer extends AbstractLayer {
     });
 
     await this._tileLoadErrorTracker(mbMap, url);
+    this._setTileLayerProperties(mbMap, layerId);
+  }
 
+  _setTileLayerProperties(mbMap, layerId) {
     mbMap.setLayoutProperty(layerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     mbMap.setLayerZoomRange(layerId, this._descriptor.minZoom, this._descriptor.maxZoom);
     this._style && this._style.setMBPaintProperties({
