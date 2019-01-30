@@ -101,7 +101,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
         ...config.get(['apps', appName]),
         ...opts.appConfig,
       });
-      log.info('navigating to ' + appName + ' url: ' + appUrl);
+      log.debug('navigating to ' + appName + ' url: ' + appUrl);
 
       function navigateTo(url) {
         return retry.try(function () {
