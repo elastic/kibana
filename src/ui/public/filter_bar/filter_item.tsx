@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { EuiBadge, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { EuiContextMenu, EuiPopover } from '@elastic/eui';
 import {
   Filter,
   isFilterPinned,
