@@ -20,15 +20,21 @@
 import { ExistsFilter } from '@kbn/es-query';
 import React from 'react';
 import { existsOperator } from '../filter_editor/lib/filter_operators';
+import { BaseFilterView } from '../filter_view/base_filter_view';
 
 interface Props {
   filter: ExistsFilter;
+  [propName: string]: any;
 }
 
-export function ExistsFilterView({ filter }: Props) {
+export function ExistsFilterView({ filter, ...rest }: Props) {
   return (
-    <span>
+    <BaseFilterView
+      filter={filter}
+      title={`${filter.meta.key} ${existsOperator.message}`}
+      {...rest}
+    >
       {filter.meta.key} {existsOperator.message}
-    </span>
+    </BaseFilterView>
   );
 }

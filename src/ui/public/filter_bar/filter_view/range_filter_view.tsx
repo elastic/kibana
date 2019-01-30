@@ -19,15 +19,17 @@
 
 import { RangeFilter } from '@kbn/es-query';
 import React from 'react';
+import { BaseFilterView } from 'ui/filter_bar/filter_view/base_filter_view';
 
 interface Props {
   filter: RangeFilter;
+  [propName: string]: any;
 }
 
-export function RangeFilterView({ filter }: Props) {
+export function RangeFilterView({ filter, ...rest }: Props) {
   return (
-    <span>
+    <BaseFilterView filter={filter} title={`${filter.meta.key}: ${filter.meta.value}`} {...rest}>
       {filter.meta.key}: {filter.meta.value}
-    </span>
+    </BaseFilterView>
   );
 }

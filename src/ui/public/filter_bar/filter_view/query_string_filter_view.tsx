@@ -19,11 +19,17 @@
 
 import { QueryStringFilter } from '@kbn/es-query';
 import React from 'react';
+import { BaseFilterView } from 'ui/filter_bar/filter_view/base_filter_view';
 
 interface Props {
   filter: QueryStringFilter;
+  [propName: string]: any;
 }
 
-export function QueryStringFilterView({ filter }: Props) {
-  return <span>{filter.meta.value}</span>;
+export function QueryStringFilterView({ filter, ...rest }: Props) {
+  return (
+    <BaseFilterView filter={filter} title={`${filter.meta.value}`} {...rest}>
+      {filter.meta.value}
+    </BaseFilterView>
+  );
 }

@@ -72,30 +72,13 @@ class FilterItemUI extends Component<Props, State> {
     }`;
 
     const badge = (
-      <EuiBadge
+      <FilterView
+        filter={filter}
         className={classes}
         iconOnClick={() => this.props.onRemove()}
-        iconOnClickAriaLabel={this.props.intl.formatMessage({
-          id: 'common.ui.filterBar.filterItemBadgeIconAriaLabel',
-          defaultMessage: 'Delete',
-        })}
-        iconType="cross"
-        // @ts-ignore
-        iconSide="right"
         onClick={this.togglePopover}
-        onClickAriaLabel={this.props.intl.formatMessage({
-          id: 'common.ui.filterBar.filterItemBadgeAriaLabel',
-          defaultMessage: 'Filter actions',
-        })}
-        closeButtonProps={{
-          // Removing tab focus on close button because the same option can be optained through the context menu
-          // Also, we may want to add a `DEL` keyboard press functionality
-          tabIndex: '-1',
-        }}
         data-test-subj={`filter ${dataTestSubjDisabled} ${dataTestSubjKey} ${dataTestSubjValue}`}
-      >
-        <FilterView filter={filter} />
-      </EuiBadge>
+      />
     );
 
     const panelTree = [

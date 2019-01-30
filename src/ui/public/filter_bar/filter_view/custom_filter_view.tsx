@@ -19,11 +19,17 @@
 
 import { CustomFilter } from '@kbn/es-query';
 import React from 'react';
+import { BaseFilterView } from 'ui/filter_bar/filter_view/base_filter_view';
 
 interface Props {
   filter: CustomFilter;
+  [propName: string]: any;
 }
 
-export function CustomFilterView({ filter }: Props) {
-  return <span>{JSON.stringify(filter.query)}</span>;
+export function CustomFilterView({ filter, ...rest }: Props) {
+  return (
+    <BaseFilterView filter={filter} title={JSON.stringify(filter.query)} {...rest}>
+      {JSON.stringify(filter.query)}
+    </BaseFilterView>
+  );
 }

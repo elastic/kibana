@@ -28,8 +28,8 @@ import {
   QueryStringFilter,
   RangeFilter,
 } from '@kbn/es-query';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
+import React, { SFC } from 'react';
+import { BaseFilterView } from 'ui/filter_bar/filter_view/base_filter_view';
 import { CustomFilterView } from './custom_filter_view';
 import { ExistsFilterView } from './exists_filter_view';
 import { GeoBoundingBoxFilterView } from './geo_bounding_box_filter_view';
@@ -41,41 +41,37 @@ import { RangeFilterView } from './range_filter_view';
 
 interface Props {
   filter: Filter;
+  [propName: string]: any;
 }
 
-export function FilterView({ filter }: Props) {
+export const FilterView: SFC<Props> = ({ filter, ...rest }: Props) => {
   if (filter.meta.alias !== null) {
-    return <span>{filter.meta.alias}</span>;
+    return (
+      <BaseFilterView filter={filter} title={filter.meta.alias} {...rest}>
+        {filter.meta.alias}
+      </BaseFilterView>
+    );
   }
-  return (
-    <span>
-      {filter.meta.negate ? (
-        <FormattedMessage id="common.ui.filterBar.negatedFilterPrefix" defaultMessage="NOT " />
-      ) : (
-        ''
-      )}
-      {renderViewForType(filter)}
-    </span>
-  );
-}
+  return <span>{renderViewForType(filter, rest)}</span>;
+};
 
-function renderViewForType(filter: Filter) {
+function renderViewForType(filter: Filter, rest: any) {
   switch (filter.meta.type) {
     case 'exists':
-      return <ExistsFilterView filter={filter as ExistsFilter} />;
+      return <ExistsFilterView filter={filter as ExistsFilter} {...rest} />;
     case 'geo_bounding_box':
-      return <GeoBoundingBoxFilterView filter={filter as GeoBoundingBoxFilter} />;
+      return <GeoBoundingBoxFilterView filter={filter as GeoBoundingBoxFilter} {...rest} />;
     case 'geo_polygon':
-      return <GeoPolygonFilterView filter={filter as GeoPolygonFilter} />;
+      return <GeoPolygonFilterView filter={filter as GeoPolygonFilter} {...rest} />;
     case 'phrase':
-      return <PhraseFilterView filter={filter as PhraseFilter} />;
+      return <PhraseFilterView filter={filter as PhraseFilter} {...rest} />;
     case 'phrases':
-      return <PhrasesFilterView filter={filter as PhrasesFilter} />;
+      return <PhrasesFilterView filter={filter as PhrasesFilter} {...rest} />;
     case 'query_string':
-      return <QueryStringFilterView filter={filter as QueryStringFilter} />;
+      return <QueryStringFilterView filter={filter as QueryStringFilter} {...rest} />;
     case 'range':
-      return <RangeFilterView filter={filter as RangeFilter} />;
+      return <RangeFilterView filter={filter as RangeFilter} {...rest} />;
     default:
-      return <CustomFilterView filter={filter as CustomFilter} />;
+      return <CustomFilterView filter={filter as CustomFilter} {...rest} />;
   }
 }

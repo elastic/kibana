@@ -19,15 +19,17 @@
 
 import { GeoPolygonFilter } from '@kbn/es-query';
 import React from 'react';
+import { BaseFilterView } from 'ui/filter_bar/filter_view/base_filter_view';
 
 interface Props {
   filter: GeoPolygonFilter;
+  [propName: string]: any;
 }
 
-export function GeoPolygonFilterView({ filter }: Props) {
+export function GeoPolygonFilterView({ filter, ...rest }: Props) {
   return (
-    <span>
+    <BaseFilterView filter={filter} title={`${filter.meta.key}: ${filter.meta.value}`} {...rest}>
       {filter.meta.key}: {filter.meta.value}
-    </span>
+    </BaseFilterView>
   );
 }

@@ -19,16 +19,22 @@
 
 import { PhrasesFilter } from '@kbn/es-query';
 import React from 'react';
+import { BaseFilterView } from 'ui/filter_bar/filter_view/base_filter_view';
 import { isOneOfOperator } from '../filter_editor/lib/filter_operators';
 
 interface Props {
   filter: PhrasesFilter;
+  [propName: string]: any;
 }
 
-export function PhrasesFilterView({ filter }: Props) {
+export function PhrasesFilterView({ filter, ...rest }: Props) {
   return (
-    <span>
+    <BaseFilterView
+      filter={filter}
+      title={`${filter.meta.key} ${isOneOfOperator.message} ${filter.meta.value}`}
+      {...rest}
+    >
       {filter.meta.key} {isOneOfOperator.message} {filter.meta.value}
-    </span>
+    </BaseFilterView>
   );
 }
