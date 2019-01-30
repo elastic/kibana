@@ -39,7 +39,8 @@ export async function runDockerGenerator(config, log, build) {
 
   // Verify if we have the needed kibana target in order
   // to build the kibana docker image.
-  // Also delete the current linked target into the
+  // Also create the docker build target folder
+  // and  delete the current linked target into the
   // kibana docker build folder if we have one.
   try {
     await accessAsync(resolve(artifactsDir, artifactTarball));
