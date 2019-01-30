@@ -17,11 +17,13 @@ describe('#buildFeaturesPrivileges', () => {
       {
         id: 'foo',
         name: '',
+        app: [],
         privileges: {},
       },
       {
         id: 'bar',
         name: '',
+        app: [],
         privileges: {},
       },
     ];
@@ -39,6 +41,7 @@ describe('#buildFeaturesPrivileges', () => {
       {
         id: 'foo',
         name: '',
+        app: [],
         privileges: {
           bar: {
             app: [],
@@ -66,6 +69,7 @@ describe('#buildFeaturesPrivileges', () => {
       {
         id: 'foo',
         name: '',
+        app: [],
         privileges: {
           bar: {
             api: ['foo/operation', 'bar/operation'],
@@ -92,16 +96,16 @@ describe('#buildFeaturesPrivileges', () => {
     });
   });
 
-  test('includes app actions when specified', () => {
+  test('includes app actions when specified at the feature level', () => {
     const actions = new Actions(versionNumber);
     const builder = new FeaturesPrivilegesBuilder(actions);
     const features = [
       {
         id: 'foo',
         name: '',
+        app: ['foo-app', 'bar-app'],
         privileges: {
           bar: {
-            app: ['foo-app', 'bar-app'],
             savedObject: {
               all: [],
               read: [],
@@ -124,6 +128,62 @@ describe('#buildFeaturesPrivileges', () => {
     });
   });
 
+  test('includes only the app actions specified at the privilege level, when specified', () => {
+    const actions = new Actions(versionNumber);
+    const builder = new FeaturesPrivilegesBuilder(actions);
+    const features = [
+      {
+        id: 'foo',
+        name: '',
+        app: ['foo-app', 'bar-app'],
+        privileges: {
+          bar: {
+            app: ['foo-app'],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+      },
+    ];
+    const result = builder.buildFeaturesPrivileges(features);
+    expect(result).toEqual({
+      foo: {
+        bar: [actions.login, actions.version, actions.app.get('foo-app')],
+      },
+    });
+  });
+
+  test('excludes apps when an empty array is provided at the privilege level', () => {
+    const actions = new Actions(versionNumber);
+    const builder = new FeaturesPrivilegesBuilder(actions);
+    const features = [
+      {
+        id: 'foo',
+        name: '',
+        app: ['foo-app', 'bar-app'],
+        privileges: {
+          bar: {
+            app: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+      },
+    ];
+    const result = builder.buildFeaturesPrivileges(features);
+    expect(result).toEqual({
+      foo: {
+        bar: [actions.login, actions.version],
+      },
+    });
+  });
+
   test('includes catalogue actions when specified', () => {
     const actions = new Actions(versionNumber);
     const builder = new FeaturesPrivilegesBuilder(actions);
@@ -131,10 +191,10 @@ describe('#buildFeaturesPrivileges', () => {
       {
         id: 'foo',
         name: '',
+        app: [],
         privileges: {
           bar: {
             catalogue: ['fooEntry', 'barEntry'],
-            app: [],
             savedObject: {
               all: [],
               read: [],
@@ -164,6 +224,7 @@ describe('#buildFeaturesPrivileges', () => {
       {
         id: 'foo',
         name: '',
+        app: [],
         privileges: {
           bar: {
             app: [],
@@ -195,6 +256,7 @@ describe('#buildFeaturesPrivileges', () => {
       {
         id: 'foo',
         name: '',
+        app: [],
         privileges: {
           bar: {
             app: [],
@@ -226,6 +288,7 @@ describe('#buildFeaturesPrivileges', () => {
       {
         id: 'foo',
         name: '',
+        app: [],
         privileges: {
           bar: {
             app: [],
@@ -259,6 +322,7 @@ describe('#buildFeaturesPrivileges', () => {
         id: 'foo',
         name: '',
         navLinkId: 'foo-navlink',
+        app: [],
         privileges: {
           bar: {
             app: [],
@@ -288,6 +352,7 @@ describe('#getApiReadActions', () => {
       {
         id: 'foo',
         name: '',
+        app: [],
         privileges: {
           // wrong privilege name
           bar: {
@@ -313,6 +378,7 @@ describe('#getApiReadActions', () => {
       {
         id: 'bar',
         name: '',
+        app: [],
         privileges: {
           // this one should show up in the results
           read: {
@@ -338,6 +404,7 @@ describe('#getApiReadActions', () => {
       {
         id: 'foo',
         name: '',
+        app: [],
         privileges: {
           bar: {
             app: [],
@@ -364,6 +431,7 @@ describe('#getApiReadActions', () => {
       {
         id: 'bar',
         name: '',
+        app: [],
         privileges: {
           // this one should show up in the results
           read: {
@@ -391,6 +459,7 @@ describe('#getUIFeaturesReadActions', () => {
       {
         id: 'foo',
         name: '',
+        app: [],
         privileges: {
           // wrong privilege name
           bar: {
@@ -415,6 +484,7 @@ describe('#getUIFeaturesReadActions', () => {
       {
         id: 'bar',
         name: '',
+        app: [],
         privileges: {
           // this ui capability should show up in the results
           read: {
@@ -439,6 +509,7 @@ describe('#getUIFeaturesReadActions', () => {
       {
         id: 'foo',
         name: '',
+        app: [],
         privileges: {
           // this should show up in the results
           bar: {
@@ -464,6 +535,7 @@ describe('#getUIFeaturesReadActions', () => {
       {
         id: 'bar',
         name: '',
+        app: [],
         privileges: {
           // this ui capability should show up in the results
           read: {
@@ -493,6 +565,7 @@ describe('#getUIManagementReadActions', () => {
       {
         id: 'foo',
         name: '',
+        app: [],
         privileges: {
           // wrong privilege name
           bar: {
@@ -517,6 +590,7 @@ describe('#getUIManagementReadActions', () => {
       {
         id: 'bar',
         name: '',
+        app: [],
         management: {
           kibana: ['fooManagementLink', 'otherManagementLink'],
           es: ['barManagementLink', 'bazManagementLink'],
@@ -553,6 +627,7 @@ describe('#getUIManagementReadActions', () => {
       {
         id: 'foo',
         name: '',
+        app: [],
         privileges: {
           // wrong privilege name
           bar: {
@@ -577,6 +652,7 @@ describe('#getUIManagementReadActions', () => {
       {
         id: 'bar',
         name: '',
+        app: [],
         management: {
           kibana: ['fooManagementLink', 'otherManagementLink'],
           es: ['barManagementLink', 'bazManagementLink'],
@@ -609,6 +685,7 @@ describe('#getUIManagementReadActions', () => {
       {
         id: 'foo',
         name: '',
+        app: [],
         privileges: {
           // wrong privilege name
           bar: {
@@ -633,6 +710,7 @@ describe('#getUIManagementReadActions', () => {
       {
         id: 'bar',
         name: '',
+        app: [],
         management: {
           kibana: ['fooManagementLink', 'otherManagementLink'],
           es: ['barManagementLink', 'bazManagementLink'],
@@ -661,6 +739,7 @@ describe('#getUIManagementReadActions', () => {
       {
         id: 'foo',
         name: '',
+        app: [],
         management: {
           foo: ['bar'],
         },
@@ -692,6 +771,7 @@ describe('#getUIManagementReadActions', () => {
       {
         id: 'bar',
         name: '',
+        app: [],
         management: {
           kibana: ['fooManagementLink', 'otherManagementLink'],
           es: ['barManagementLink', 'bazManagementLink'],
@@ -731,6 +811,7 @@ describe('#getUICatalogueReadActions', () => {
       {
         id: 'foo',
         name: '',
+        app: [],
         privileges: {
           // wrong privilege name
           bar: {
@@ -756,6 +837,7 @@ describe('#getUICatalogueReadActions', () => {
       {
         id: 'bar',
         name: '',
+        app: [],
         catalogue: ['barCatalogueLink', 'bazCatalogueLink', 'anotherCatalogueLink'],
         privileges: {
           // this catalogue capability should show up in the results
@@ -785,6 +867,7 @@ describe('#getUICatalogueReadActions', () => {
       {
         id: 'foo',
         name: '',
+        app: [],
         privileges: {
           // wrong privilege name
           bar: {
@@ -810,6 +893,7 @@ describe('#getUICatalogueReadActions', () => {
       {
         id: 'bar',
         name: '',
+        app: [],
         catalogue: ['barCatalogueLink', 'bazCatalogueLink', 'anotherCatalogueLink'],
         privileges: {
           read: {
@@ -838,6 +922,7 @@ describe('#getUICatalogueReadActions', () => {
       {
         id: 'foo',
         name: '',
+        app: [],
         privileges: {
           // wrong privilege name
           bar: {
@@ -863,6 +948,7 @@ describe('#getUICatalogueReadActions', () => {
       {
         id: 'bar',
         name: '',
+        app: [],
         catalogue: [],
         privileges: {
           read: {
@@ -887,6 +973,7 @@ describe('#getUICatalogueReadActions', () => {
       {
         id: 'foo',
         name: '',
+        app: [],
         catalogue: ['fooCatalogueLink'],
         privileges: {
           // this catalogue capability should show up in the results
@@ -914,6 +1001,7 @@ describe('#getUICatalogueReadActions', () => {
       {
         id: 'bar',
         name: '',
+        app: [],
         catalogue: ['barCatalogueLink', 'bazCatalogueLink', 'anotherCatalogueLink'],
         privileges: {
           // this catalogue capability should show up in the results

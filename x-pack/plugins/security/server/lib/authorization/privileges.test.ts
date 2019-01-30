@@ -21,13 +21,13 @@ test(`builds privileges correctly`, () => {
       name: 'Foo Feature',
       icon: 'arrowDown',
       navLinkId: 'kibana:foo-feature',
+      app: ['foo-app'],
       catalogue: ['fooAppEntry1', 'fooAppEntry2', 'fooReadEntry'],
       management: {
         foo: ['fooManagementLink', 'anotherFooManagementLink'],
       },
       privileges: {
         all: {
-          app: ['foo-app'],
           catalogue: ['fooAppEntry1', 'fooAppEntry2'],
           management: {
             foo: ['fooManagementLink', 'anotherFooManagementLink'],
@@ -39,7 +39,7 @@ test(`builds privileges correctly`, () => {
           ui: ['show', 'showSaveButton', 'showCreateButton'],
         },
         read: {
-          app: ['foo-app'],
+          app: [],
           api: ['foo/read/api'],
           catalogue: ['fooReadEntry'],
           management: {
@@ -57,13 +57,13 @@ test(`builds privileges correctly`, () => {
       id: 'bar-feature',
       name: 'Bar Feature',
       icon: 'arrowUp',
+      app: ['bar-app', 'another-bar-app'],
       catalogue: ['barCatalogue'],
       management: {
         kibana: ['yeppers'],
       },
       privileges: {
         all: {
-          app: ['bar-app'],
           savedObject: {
             all: ['bar-saved-object-type'],
             read: ['foo-saved-object-type'],
@@ -71,10 +71,10 @@ test(`builds privileges correctly`, () => {
           ui: ['show', 'showSaveButton', 'showCreateButton'],
         },
         read: {
+          app: ['another-bar-app'],
           management: {
             kibana: ['yeppers'],
           },
-          app: ['bar-app'],
           api: ['bar/read/api'],
           savedObject: {
             all: [],
@@ -88,6 +88,7 @@ test(`builds privileges correctly`, () => {
       id: 'baz-feature',
       name: 'Baz Feature',
       icon: 'arrowUp',
+      app: ['bar-app'],
       catalogue: ['bazCatalogue'],
       management: {
         kibana: ['bazKibana'],
@@ -99,7 +100,6 @@ test(`builds privileges correctly`, () => {
           management: {
             kibana: ['bazKibana'],
           },
-          app: ['bar-app'],
           api: ['bar/read/api'],
           savedObject: {
             all: [],
@@ -127,6 +127,7 @@ test(`builds privileges correctly`, () => {
           'login:',
           'version:1.0.0-zeta1',
           'app:bar-app',
+          'app:another-bar-app',
           'saved_object:bar-saved-object-type/bulk_get',
           'saved_object:bar-saved-object-type/get',
           'saved_object:bar-saved-object-type/find',
@@ -147,7 +148,7 @@ test(`builds privileges correctly`, () => {
           'login:',
           'version:1.0.0-zeta1',
           'api:bar/read/api',
-          'app:bar-app',
+          'app:another-bar-app',
           'saved_object:foo-saved-object-type/bulk_get',
           'saved_object:foo-saved-object-type/get',
           'saved_object:foo-saved-object-type/find',
@@ -204,7 +205,6 @@ test(`builds privileges correctly`, () => {
           'login:',
           'version:1.0.0-zeta1',
           'api:foo/read/api',
-          'app:foo-app',
           'saved_object:foo-saved-object-type/bulk_get',
           'saved_object:foo-saved-object-type/get',
           'saved_object:foo-saved-object-type/find',

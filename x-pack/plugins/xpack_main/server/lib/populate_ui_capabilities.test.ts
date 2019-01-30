@@ -80,6 +80,7 @@ describe('populateUICapabilities', () => {
       {
         id: 'newFeature',
         name: 'my new feature',
+        app: ['bar-app'],
         privileges: {
           ...createFeaturePrivilege('all'),
         },
@@ -111,6 +112,7 @@ describe('populateUICapabilities', () => {
         id: 'newFeature',
         name: 'my new feature',
         navLinkId: 'newFeatureNavLink',
+        app: ['bar-app'],
         privileges: {
           ...createFeaturePrivilege('all', ['capability1', 'capability2']),
         },
@@ -145,6 +147,7 @@ describe('populateUICapabilities', () => {
         id: 'newFeature',
         name: 'my new feature',
         navLinkId: 'newFeatureNavLink',
+        app: ['bar-app'],
         catalogue: ['anotherFooEntry', 'anotherBarEntry'],
         privileges: {
           ...createFeaturePrivilege('foo', ['capability1', 'capability2']),
@@ -186,6 +189,7 @@ describe('populateUICapabilities', () => {
         id: 'newFeature',
         name: 'my new feature',
         navLinkId: 'newFeatureNavLink',
+        app: ['bar-app'],
         privileges: {
           ...createFeaturePrivilege('foo', ['capability1', 'capability2']),
           ...createFeaturePrivilege('bar', ['capability3', 'capability4']),
@@ -225,6 +229,7 @@ describe('populateUICapabilities', () => {
         id: 'newFeature',
         name: 'my new feature',
         navLinkId: 'newFeatureNavLink',
+        app: ['bar-app'],
         privileges: {
           ...createFeaturePrivilege('foo', ['capability1', 'capability2']),
           ...createFeaturePrivilege('bar', ['capability3', 'capability4']),
@@ -234,6 +239,7 @@ describe('populateUICapabilities', () => {
       {
         id: 'anotherNewFeature',
         name: 'another new feature',
+        app: ['bar-app'],
         privileges: {
           ...createFeaturePrivilege('foo', ['capability1', 'capability2']),
           ...createFeaturePrivilege('bar', ['capability3', 'capability4']),
@@ -243,6 +249,7 @@ describe('populateUICapabilities', () => {
         id: 'yetAnotherNewFeature',
         name: 'yet another new feature',
         navLinkId: 'yetAnotherNavLink',
+        app: ['bar-app'],
         privileges: {
           ...createFeaturePrivilege('all', ['capability1', 'capability2']),
           ...createFeaturePrivilege('read', []),

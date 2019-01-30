@@ -19,6 +19,7 @@ describe('EnabledFeatures', () => {
               id: 'some-feature',
               name: 'Some Feature',
               icon: 'discoverApp',
+              app: [],
               privileges: {},
             },
           ]}

@@ -38,10 +38,10 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
     }),
     icon: 'infraApp',
     navLinkId: 'infra:home',
+    app: ['infra', 'kibana'],
     catalogue: ['infraops'],
     privileges: {
       read: {
-        app: ['infra', 'kibana'],
         savedObject: {
           all: [],
           read: ['config'],
@@ -58,10 +58,10 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
     }),
     icon: 'loggingApp',
     navLinkId: 'infra:logs',
+    app: ['infra', 'kibana'],
     catalogue: ['infralogging'],
     privileges: {
       read: {
-        app: ['infra', 'kibana'],
         savedObject: {
           all: [],
           read: ['config'],

@@ -78,12 +78,12 @@ export const ml = (kibana) => {
         }),
         icon: 'machineLearningApp',
         navLinkId: 'ml',
+        app: ['ml', 'kibana'],
         catalogue: ['ml'],
         privileges: {
           all: {
             catalogue: ['ml'],
             grantWithBaseRead: true,
-            app: ['ml', 'kibana'],
             savedObject: {
               all: [],
               read: ['config']
