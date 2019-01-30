@@ -78,11 +78,11 @@ interface Props {
   indexPatterns: IndexPattern[];
   store: Storage;
   intl: InjectedIntl;
-  showDatePicker: boolean;
-  dateRangeFrom: string;
-  dateRangeTo: string;
-  isRefreshPaused: boolean;
-  refreshInterval: number;
+  showDatePicker?: boolean;
+  dateRangeFrom?: string;
+  dateRangeTo?: string;
+  isRefreshPaused?: boolean;
+  refreshInterval?: number;
   onRefreshChange?: (isPaused: boolean, refreshInterval: number) => void;
 }
 
