@@ -16,7 +16,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
-  EuiCode,
   EuiDescribedFormGroup,
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,6 +25,7 @@ import {
   EuiLoadingSpinner,
   EuiOverlayMask,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -36,7 +36,11 @@ import { loadIndices } from '../../services/api';
 import { API_STATUS } from '../../constants';
 import { SectionError } from '../section_error';
 import { FormEntryRow } from '../form_entry_row';
-import { advancedSettingsFields, emptyAdvancedSettings } from './advanced_settings_fields';
+import {
+  advancedSettingsFields,
+  emptyAdvancedSettings,
+  areAdvancedSettingsEdited,
+} from './advanced_settings_fields';
 import { extractQueryParams } from '../../services/query_params';
 import { getRemoteClusterName } from '../../services/get_remote_cluster_name';
 import { RemoteClustersFormField } from '../remote_clusters_form_field';
@@ -93,9 +97,10 @@ export const FollowerIndexForm = injectI18n(
     constructor(props) {
       super(props);
 
-      const isNew = this.props.followerIndex === undefined;
       const { route: { location: { search } } } = routing.reactRouter;
       const queryParams = extractQueryParams(search);
+
+      const isNew = this.props.followerIndex === undefined;
       const remoteClusterName = getRemoteClusterName(this.props.remoteClusters, queryParams.cluster);
       const followerIndex = isNew
         ? getEmptyFollowerIndex(remoteClusterName)
@@ -103,6 +108,9 @@ export const FollowerIndexForm = injectI18n(
           ...getEmptyFollowerIndex(),
           ...this.props.followerIndex,
         };
+      const areAdvancedSettingsVisible = isNew ? false : ( // eslint-disable-line no-nested-ternary
+        areAdvancedSettingsEdited(followerIndex) ? true : false
+      );
 
       const fieldsErrors = this.getFieldsErrors(followerIndex);
 
@@ -111,10 +119,11 @@ export const FollowerIndexForm = injectI18n(
         followerIndex,
         fieldsErrors,
         areErrorsVisible: false,
-        areAdvancedSettingsVisible: isNew ? false : true,
+        areAdvancedSettingsVisible,
         isValidatingIndexName: false,
       };
 
+      this.cachedAdvancedSettings = {};
       this.validateIndexName = debounce(this.validateIndexName, 500);
     }
 
@@ -212,34 +221,39 @@ export const FollowerIndexForm = injectI18n(
       return this.state.followerIndex;
     };
 
-    toggleAdvancedSettings = () => {
-      this.setState(({ areAdvancedSettingsVisible, cachedAdvancedSettings }) => {
-        // Hide settings, clear fields, and create cache.
-        if (areAdvancedSettingsVisible) {
-          const fields = this.getFields();
+    toggleAdvancedSettings = (event) => {
+      // If the user edits the advanced settings but then hides them, we need to make sure the
+      // edited values don't get sent to the API when the user saves, but we *do* want to restore
+      // these values to the form when the user re-opens the advanced settings.
+      if (event.target.checked) {
+        // Apply the cached advanced settings to the advanced settings form.
+        this.onFieldsChange(this.cachedAdvancedSettings);
 
-          const newCachedAdvancedSettings = advancedSettingsFields.reduce((cache, { field }) => {
-            const value = fields[field];
-            if (value !== '') {
-              cache[field] = value;
-            }
-            return cache;
-          }, {});
+        // Reset the cache of the advanced settings.
+        this.cachedAdvancedSettings = {};
 
-          this.onFieldsChange(emptyAdvancedSettings);
-
-          return {
-            areAdvancedSettingsVisible: false,
-            cachedAdvancedSettings: newCachedAdvancedSettings,
-          };
-        }
-
-        // Show settings and restore fields from the cache.
-        this.onFieldsChange(cachedAdvancedSettings);
-        return {
+        // Show the advanced settings.
+        return this.setState({
           areAdvancedSettingsVisible: true,
-          cachedAdvancedSettings: {},
-        };
+        });
+      }
+
+      // Clear the advanced settings form.
+      this.onFieldsChange(emptyAdvancedSettings);
+
+      // Save a cache of the advanced settings.
+      const fields = this.getFields();
+      this.cachedAdvancedSettings = advancedSettingsFields.reduce((cache, { field }) => {
+        const value = fields[field];
+        if (value !== '') {
+          cache[field] = value;
+        }
+        return cache;
+      }, {});
+
+      // Hide the advanced settings.
+      this.setState({
+        areAdvancedSettingsVisible: false,
       });
     }
 
@@ -455,22 +469,7 @@ export const FollowerIndexForm = injectI18n(
        * Advanced settings
        */
 
-      const toggleAdvancedSettingButtonLabel = areAdvancedSettingsVisible
-        ? (
-          <FormattedMessage
-            id="xpack.crossClusterReplication.followerIndex.advancedSettingsForm.hideButtonLabel"
-            defaultMessage="Don't use advanced settings"
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.crossClusterReplication.followerIndex.advancedSettingsForm.showButtonLabel"
-            defaultMessage="Use advanced settings"
-          />
-        );
-
       const renderAdvancedSettings = () => {
-        const { isNew } = this.state;
-
         return (
           <Fragment>
             <EuiHorizontalRule />
@@ -480,7 +479,7 @@ export const FollowerIndexForm = injectI18n(
                   <h2>
                     <FormattedMessage
                       id="xpack.crossClusterReplication.followerIndexForm.advancedSettingsTitle"
-                      defaultMessage="Advanced settings"
+                      defaultMessage="Advanced settings (optional)"
                     />
                   </h2>
                 </EuiTitle>
@@ -490,17 +489,21 @@ export const FollowerIndexForm = injectI18n(
                   <p>
                     <FormattedMessage
                       id="xpack.crossClusterReplication.followerIndexForm.advancedSettingsDescription"
-                      defaultMessage="Use advanced settings to control the rate at which data is replicated."
+                      defaultMessage="Customize advanced settings to control the rate at which data is replicated.
+                        If you don't customize them, default advanced settings will be applied."
                     />
                   </p>
-                  {isNew ? (
-                    <EuiButton
-                      color="primary"
-                      onClick={this.toggleAdvancedSettings}
-                    >
-                      {toggleAdvancedSettingButtonLabel}
-                    </EuiButton>
-                  ) : null}
+
+                  <EuiSwitch
+                    label={(
+                      <FormattedMessage
+                        id="xpack.crossClusterReplication.followerIndex.advancedSettingsForm.showSwitchLabel"
+                        defaultMessage="Customize advanced settings"
+                      />
+                    )}
+                    checked={areAdvancedSettingsVisible}
+                    onChange={this.toggleAdvancedSettings}
+                  />
                 </Fragment>
               )}
               fullWidth
@@ -518,25 +521,14 @@ export const FollowerIndexForm = injectI18n(
                       key={field}
                       field={field}
                       value={followerIndex[field]}
+                      defaultValue={defaultValue}
                       error={fieldsErrors[field]}
                       title={(
                         <EuiTitle size="xs">
                           <h3>{title}</h3>
                         </EuiTitle>
                       )}
-                      description={(
-                        <Fragment>
-                          {description}
-                          <EuiSpacer size="s" />
-                          <EuiText size="xs">
-                            <FormattedMessage
-                              id="xpack.crossClusterReplication.followerIndexForm.advancedSettingsDefaultLabel"
-                              defaultMessage="Default:"
-                            />{' '}
-                            <EuiCode>{defaultValue}</EuiCode>
-                          </EuiText>
-                        </Fragment>
-                      )}
+                      description={description}
                       label={label}
                       helpText={helpText}
                       type={type}

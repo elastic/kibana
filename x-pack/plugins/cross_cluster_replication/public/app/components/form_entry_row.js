@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { PureComponent } from 'react';
+import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  EuiFieldText,
-  EuiFieldNumber,
   EuiDescribedFormGroup,
+  EuiFieldNumber,
+  EuiFieldText,
   EuiFormRow,
+  EuiLink,
 } from '@elastic/eui';
 
 /**
@@ -37,6 +39,10 @@ export class FormEntryRow extends PureComponent {
       PropTypes.string,
       PropTypes.number
     ]).isRequired,
+    defaultValue: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.number
+    ]),
     isLoading: PropTypes.bool,
     error: PropTypes.oneOfType([
       PropTypes.node,
@@ -96,10 +102,31 @@ export class FormEntryRow extends PureComponent {
       description,
       helpText,
       areErrorsVisible,
+      value,
+      defaultValue,
     } = this.props;
 
     const hasError = !!error;
     const isInvalid = hasError && (error.alwaysVisible || areErrorsVisible);
+    const canBeResetToDefault = defaultValue !== undefined;
+    const isResetToDefaultVisible = value !== defaultValue;
+
+    const fieldHelpText = (
+      <Fragment>
+        {helpText}
+
+        {canBeResetToDefault && isResetToDefaultVisible && (
+          <p>
+            <EuiLink onClick={() => this.onFieldChange(defaultValue)}>
+              <FormattedMessage
+                id="xpack.crossClusterReplication.followerIndexForm.resetFieldButtonLabel"
+                defaultMessage="Reset to default"
+              />
+            </EuiLink>
+          </p>
+        )}
+      </Fragment>
+    );
 
     return (
       <EuiDescribedFormGroup
@@ -110,7 +137,7 @@ export class FormEntryRow extends PureComponent {
       >
         <EuiFormRow
           label={label}
-          helpText={helpText}
+          helpText={fieldHelpText}
           error={(error && error.message) ? error.message : error}
           isInvalid={isInvalid}
           fullWidth

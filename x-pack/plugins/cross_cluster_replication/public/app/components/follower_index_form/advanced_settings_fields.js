@@ -55,7 +55,7 @@ export const advancedSettingsFields = [
     ),
     label: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestOperationCountLabel', {
-        defaultMessage: 'Max read request operation count (optional)'
+        defaultMessage: 'Max read request operation count'
       }
     ),
     defaultValue: getSettingDefault('maxReadRequestOperationCount'),
@@ -72,7 +72,7 @@ export const advancedSettingsFields = [
     }),
     label: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingReadRequestsLabel', {
-        defaultMessage: 'Max outstanding read requests (optional)'
+        defaultMessage: 'Max outstanding read requests'
       }
     ),
     defaultValue: getSettingDefault('maxOutstandingReadRequests'),
@@ -89,7 +89,7 @@ export const advancedSettingsFields = [
     }),
     label: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestSizeLabel', {
-        defaultMessage: 'Max read request size (optional)'
+        defaultMessage: 'Max read request size'
       }
     ),
     defaultValue: getSettingDefault('maxReadRequestSize'),
@@ -108,7 +108,7 @@ export const advancedSettingsFields = [
     ),
     label: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestOperationCountLabel', {
-        defaultMessage: 'Max write request operation count (optional)'
+        defaultMessage: 'Max write request operation count'
       }
     ),
     defaultValue: getSettingDefault('maxWriteRequestOperationCount'),
@@ -127,7 +127,7 @@ export const advancedSettingsFields = [
     ),
     label: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestSizeLabel', {
-        defaultMessage: 'Max write request size (optional)'
+        defaultMessage: 'Max write request size'
       }
     ),
     defaultValue: getSettingDefault('maxWriteRequestSize'),
@@ -146,7 +146,7 @@ export const advancedSettingsFields = [
     ),
     label: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingWriteRequestsLabel', {
-        defaultMessage: 'Max outstanding write requests (optional)'
+        defaultMessage: 'Max outstanding write requests'
       }
     ),
     defaultValue: getSettingDefault('maxOutstandingWriteRequests'),
@@ -167,7 +167,7 @@ export const advancedSettingsFields = [
     ),
     label: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferCountLabel', {
-        defaultMessage: 'Max write buffer count (optional)'
+        defaultMessage: 'Max write buffer count'
       }
     ),
     defaultValue: getSettingDefault('maxWriteBufferCount'),
@@ -188,7 +188,7 @@ export const advancedSettingsFields = [
     ),
     label: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferSizeLabel', {
-        defaultMessage: 'Max write buffer size (optional)'
+        defaultMessage: 'Max write buffer size'
       }
     ),
     defaultValue: getSettingDefault('maxWriteBufferSize'),
@@ -208,7 +208,7 @@ export const advancedSettingsFields = [
     ),
     label: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxRetryDelayLabel', {
-        defaultMessage: 'Max retry delay (optional)'
+        defaultMessage: 'Max retry delay'
       }
     ),
     defaultValue: getSettingDefault('maxRetryDelay'),
@@ -230,7 +230,7 @@ export const advancedSettingsFields = [
     ),
     label: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.readPollTimeoutLabel', {
-        defaultMessage: 'Read poll timeout (optional)'
+        defaultMessage: 'Read poll timeout'
       }
     ),
     defaultValue: getSettingDefault('readPollTimeout'),
@@ -239,5 +239,13 @@ export const advancedSettingsFields = [
 ];
 
 export const emptyAdvancedSettings = advancedSettingsFields.reduce((obj, advancedSetting) => {
-  return { ...obj, [advancedSetting.field]: '' };
+  const { field, defaultValue } = advancedSetting;
+  return { ...obj, [field]: defaultValue };
 }, {});
+
+export function areAdvancedSettingsEdited(followerIndex) {
+  return advancedSettingsFields.some(advancedSetting => {
+    const { field } = advancedSetting;
+    return followerIndex[field] !== emptyAdvancedSettings[field];
+  });
+}
