@@ -125,9 +125,12 @@ export function main(server) {
   }
 
   function handleError(exportType, err) {
-    if (err instanceof esErrors['401']) return boom.unauthorized(`Sorry, you aren't authenticated`);
-    if (err instanceof esErrors['403']) return boom.forbidden(`Sorry, you are not authorized to create ${exportType} reports`);
-    if (err instanceof esErrors['404']) return boom.boomify(err, { statusCode: 404 });
+    function isResponseError(err, statusCode) {
+      return err instanceof esErrors.ResponseError && err.statusCode === statusCode;
+    }
+    if (isResponseError(err, 401)) return boom.unauthorized(`Sorry, you aren't authenticated`);
+    if (isResponseError(err, 403)) return boom.forbidden(`Sorry, you are not authorized to create ${exportType} reports`);
+    if (isResponseError(err, 404)) return boom.boomify(err, { statusCode: 404 });
     return err;
   }
 }

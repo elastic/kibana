@@ -108,16 +108,17 @@ export default function ({ getService }) {
       });
 
       it('wraps other errors in Boom', async () => {
-        const error = new esErrors.AuthenticationException({
-          root_cause: [
-            {
-              type: 'security_exception',
-              reason: 'action [indices:data/read/field_caps] is unauthorized for user [standard]'
-            }
-          ],
-          type: 'security_exception',
-          reason: 'action [indices:data/read/field_caps] is unauthorized for user [standard]'
-        }, {
+        const error = new esErrors.ResponseError({
+          body: {
+            root_cause: [
+              {
+                type: 'security_exception',
+                reason: 'action [indices:data/read/field_caps] is unauthorized for user [standard]'
+              }
+            ],
+            type: 'security_exception',
+            reason: 'action [indices:data/read/field_caps] is unauthorized for user [standard]'
+          },
           statusCode: 403
         });
 

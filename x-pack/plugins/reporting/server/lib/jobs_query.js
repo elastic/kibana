@@ -39,9 +39,13 @@ function jobsQueryFn(server) {
 
     return callWithInternalUser(type, query)
       .catch((err) => {
-        if (err instanceof esErrors['401']) return;
-        if (err instanceof esErrors['403']) return;
-        if (err instanceof esErrors['404']) return;
+        function isResponseError(err, statusCode) {
+          return err instanceof esErrors.ResponseError && err.statusCode === statusCode;
+        }
+
+        if (isResponseError(err, 401)) return;
+        if (isResponseError(err, 403)) return;
+        if (isResponseError(err, 404)) return;
         throw err;
       });
   }

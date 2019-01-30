@@ -13,6 +13,12 @@ const esErrorsFactory = memoize((server) => {
 export function isEsErrorFactory(server) {
   const esErrors = esErrorsFactory(server);
   return function isEsError(err) {
-    return err instanceof esErrors._Abstract;
+    const keys = Object.keys(esErrors);
+    for (let i = 0; i < keys.length; i++) {
+      if (err instanceof esErrors[keys[i]]) {
+        return true;
+      }
+    }
+    return false;
   };
 }

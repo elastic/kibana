@@ -299,7 +299,7 @@ describe('ui settings', () => {
     it('returns an empty object on NoConnections responses', async () => {
       const { uiSettings } = setup({
         async callCluster() {
-          throw new esErrors.NoConnections();
+          throw new esErrors.NoLivingConnectionsError();
         }
       });
 

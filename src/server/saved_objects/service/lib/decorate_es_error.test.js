@@ -37,63 +37,63 @@ describe('savedObjectsClient/decorateEsError', () => {
   });
 
   it('makes es.ConnectionFault a SavedObjectsClient/EsUnavailable error', () => {
-    const error = new esErrors.ConnectionFault();
+    const error = new esErrors.ConnectionError();
     expect(isEsUnavailableError(error)).toBe(false);
     expect(decorateEsError(error)).toBe(error);
     expect(isEsUnavailableError(error)).toBe(true);
   });
 
   it('makes es.ServiceUnavailable a SavedObjectsClient/EsUnavailable error', () => {
-    const error = new esErrors.ServiceUnavailable();
+    const error = new esErrors.ResponseError({ statusCode: 503 });
     expect(isEsUnavailableError(error)).toBe(false);
     expect(decorateEsError(error)).toBe(error);
     expect(isEsUnavailableError(error)).toBe(true);
   });
 
   it('makes es.NoConnections a SavedObjectsClient/EsUnavailable error', () => {
-    const error = new esErrors.NoConnections();
+    const error = new esErrors.NoLivingConnectionsError();
     expect(isEsUnavailableError(error)).toBe(false);
     expect(decorateEsError(error)).toBe(error);
     expect(isEsUnavailableError(error)).toBe(true);
   });
 
   it('makes es.RequestTimeout a SavedObjectsClient/EsUnavailable error', () => {
-    const error = new esErrors.RequestTimeout();
+    const error = new esErrors.TimeoutError();
     expect(isEsUnavailableError(error)).toBe(false);
     expect(decorateEsError(error)).toBe(error);
     expect(isEsUnavailableError(error)).toBe(true);
   });
 
   it('makes es.Conflict a SavedObjectsClient/Conflict error', () => {
-    const error = new esErrors.Conflict();
+    const error = new esErrors.ResponseError({ statusCode: 409 });
     expect(isConflictError(error)).toBe(false);
     expect(decorateEsError(error)).toBe(error);
     expect(isConflictError(error)).toBe(true);
   });
 
   it('makes es.AuthenticationException a SavedObjectsClient/NotAuthorized error', () => {
-    const error = new esErrors.AuthenticationException();
+    const error = new esErrors.ResponseError({ statusCode: 401 });
     expect(isNotAuthorizedError(error)).toBe(false);
     expect(decorateEsError(error)).toBe(error);
     expect(isNotAuthorizedError(error)).toBe(true);
   });
 
   it('makes es.Forbidden a SavedObjectsClient/Forbidden error', () => {
-    const error = new esErrors.Forbidden();
+    const error = new esErrors.ResponseError({ statusCode: 403 });
     expect(isForbiddenError(error)).toBe(false);
     expect(decorateEsError(error)).toBe(error);
     expect(isForbiddenError(error)).toBe(true);
   });
 
   it('makes es.RequestEntityTooLarge a SavedObjectsClient/RequestEntityTooLarge error', () => {
-    const error = new esErrors.RequestEntityTooLarge();
+    const error = new esErrors.ResponseError({ statusCode: 413 });
     expect(isRequestEntityTooLargeError(error)).toBe(false);
     expect(decorateEsError(error)).toBe(error);
     expect(isRequestEntityTooLargeError(error)).toBe(true);
   });
 
   it('discards es.NotFound errors and returns a generic NotFound error', () => {
-    const error = new esErrors.NotFound();
+    const error = new esErrors.ResponseError({ statusCode: 404 });
     expect(isNotFoundError(error)).toBe(false);
     const genericError = decorateEsError(error);
     expect(genericError).not.toBe(error);
@@ -102,7 +102,7 @@ describe('savedObjectsClient/decorateEsError', () => {
   });
 
   it('makes es.BadRequest a SavedObjectsClient/BadRequest error', () => {
-    const error = new esErrors.BadRequest();
+    const error = new esErrors.ResponseError({ statusCode: 400 });
     expect(isBadRequestError(error)).toBe(false);
     expect(decorateEsError(error)).toBe(error);
     expect(isBadRequestError(error)).toBe(true);
