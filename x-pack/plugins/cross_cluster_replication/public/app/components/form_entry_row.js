@@ -49,7 +49,14 @@ export class FormEntryRow extends PureComponent {
   onFieldChange = (value) => {
     const { field, onValueUpdate, type } = this.props;
     const isNumber = type === 'number';
-    onValueUpdate({ [field]: isNumber ? parseInt(value, 10) : value });
+
+    let valueParsed = value;
+
+    if (isNumber) {
+      valueParsed = !!value ? Math.max(0, parseInt(value, 10)) : value; // make sure we don't send NaN value or a negative number
+    }
+
+    onValueUpdate({ [field]: valueParsed });
   }
 
   renderField = (isInvalid) => {

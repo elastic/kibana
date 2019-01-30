@@ -95,7 +95,7 @@ export const updateFollowerIndex = (id, followerIndex) => (
 
 /* Stats */
 export const loadAutoFollowStats = () => (
-  httpClient.get(`${apiPrefixIndexManagement}/stats/auto_follow`).then(extractData)
+  httpClient.get(`${apiPrefix}/stats/auto-follow`).then(extractData)
 );
 
 /* Indices */
