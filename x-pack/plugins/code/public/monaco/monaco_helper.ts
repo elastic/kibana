@@ -129,24 +129,6 @@ export class MonacoHelper {
     return ed;
   }
 
-  public revealLine(line: number) {
-    this.editor!.revealLineInCenter(line);
-    this.editor!.setPosition({
-      lineNumber: line,
-      column: 1,
-    });
-    this.decorations = this.editor!.deltaDecorations(this.decorations, [
-      {
-        range: new this.monaco!.Range(line, 0, line, 0),
-        options: {
-          isWholeLine: true,
-          className: 'code-monaco-highlight-line',
-          linesDecorationsClassName: 'code-mark-line-number',
-        },
-      },
-    ]);
-  }
-
   public revealPosition(line: number, pos: number) {
     const position = {
       lineNumber: line,
@@ -162,8 +144,8 @@ export class MonacoHelper {
         },
       },
     ]);
-    this.editor!.revealPositionInCenter(position);
     this.editor!.setPosition(position);
+    this.editor!.revealLineInCenterIfOutsideViewport(line);
   }
 
   private handleCopy(e: any) {

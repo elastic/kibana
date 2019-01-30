@@ -151,6 +151,7 @@ monaco.editor.defineTheme('k6-colors-light', {
     'editor.foreground': elasticLight.foreground,
     'editor.background': elasticLight.editorBackground,
     'editorLineNumber.foreground': elasticLight.lineNumbers,
+    'editorLineNumber.activeForeground': elasticLight.lineNumbers,
   },
 });
 monaco.editor.setTheme('k6-colors-light');

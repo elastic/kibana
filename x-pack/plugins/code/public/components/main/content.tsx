@@ -291,7 +291,7 @@ class CodeContent extends React.PureComponent<Props> {
           <React.Fragment>
             {this.renderButtons(ButtonOption.History)}
             <InfiniteScroll
-              initialLoad={false}
+              initialLoad={true}
               loadMore={() => !loadingCommits && this.props.fetchMoreCommits(repoUri)}
               hasMore={!loadingCommits && hasMoreCommits}
               useWindow={true}

@@ -14,7 +14,7 @@ import { FileTree } from '../../model';
 import {
   closeReferences,
   fetchFile,
-  FetchFilePayload,
+  FetchFileResponse,
   fetchRepoTree,
   fetchTreeCommits,
   findReferences,
@@ -95,7 +95,8 @@ function* handleReference(url: string) {
 }
 
 function* handleFile(repoUri: string, file: string, revision: string) {
-  const payload: FetchFilePayload = yield select(fileSelector);
+  const response: FetchFileResponse = yield select(fileSelector);
+  const payload = response && response.payload;
   if (
     payload &&
     payload.path === file &&
