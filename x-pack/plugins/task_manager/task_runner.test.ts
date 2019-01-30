@@ -232,6 +232,7 @@ describe('TaskManagerRunner', () => {
           taskType: 'bar',
           version: 32,
           runAt: new Date(),
+          scheduledAt: new Date(),
           attempts: 0,
           params: {},
           scope: ['reporting'],
