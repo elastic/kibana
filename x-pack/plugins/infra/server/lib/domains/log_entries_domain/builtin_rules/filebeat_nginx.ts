@@ -6,8 +6,11 @@
 
 export const filebeatNginxRules = [
   {
+    // ECS
     when: {
-      exists: ['nginx.access'],
+      values: {
+        'event.dataset': 'nginx.access',
+      },
     },
     format: [
       {
@@ -50,11 +53,87 @@ export const filebeatNginxRules = [
         constant: ' ',
       },
       {
+        field: 'http.response.body.bytes',
+      },
+    ],
+  },
+  {
+    // pre-ECS
+    when: {
+      exists: ['nginx.access'],
+    },
+    format: [
+      {
+        constant: '[Nginx][access] ',
+      },
+      {
+        field: 'nginx.access.remote_ip',
+      },
+      {
+        constant: ' ',
+      },
+      {
+        field: 'nginx.access.user_name',
+      },
+      {
+        constant: ' "',
+      },
+      {
+        field: 'nginx.access.method',
+      },
+      {
+        constant: ' ',
+      },
+      {
+        field: 'nginx.access.url',
+      },
+      {
+        constant: ' HTTP/',
+      },
+      {
+        field: 'nginx.access.http_version',
+      },
+      {
+        constant: '" ',
+      },
+      {
+        field: 'nginx.access.response_code',
+      },
+      {
+        constant: ' ',
+      },
+      {
         field: 'nginx.access.body_sent.bytes',
       },
     ],
   },
   {
+    // ECS
+    when: {
+      values: {
+        'event.dataset': 'nginx.error',
+      },
+    },
+    format: [
+      {
+        constant: '[Nginx]',
+      },
+      {
+        constant: '[',
+      },
+      {
+        field: 'log.level',
+      },
+      {
+        constant: '] ',
+      },
+      {
+        field: 'message',
+      },
+    ],
+  },
+  {
+    // pre-ECS
     when: {
       exists: ['nginx.error.message'],
     },
