@@ -144,6 +144,11 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   const esClient: EsClient = adminCluster.getClient();
   const repoConfigController = new RepositoryConfigController(esClient);
 
+  // Enable the developing language servers in development mode.
+  if (server.config().get('env.dev') === true) {
+    LanguageServers.push(...LanguageServersDeveloping);
+  }
+
   const installManager = new InstallManager(server, serverOptions);
   const lspService = new LspService(
     '127.0.0.1',
@@ -213,11 +218,6 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   if (!serverOptions.disableScheduler) {
     updateScheduler.start();
     indexScheduler.start();
-  }
-
-  // Enable the developing language servers in development mode.
-  if (server.config().get('env.dev') === true) {
-    LanguageServers.push(...LanguageServersDeveloping);
   }
 
   // Add server routes and initialize the plugin here
