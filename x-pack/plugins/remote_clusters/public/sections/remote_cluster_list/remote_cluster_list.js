@@ -183,6 +183,7 @@ export const RemoteClusterList = injectI18n(
     renderEmpty() {
       return (
         <EuiEmptyPrompt
+          data-test-subj="remoteClusterListEmptyPrompt"
           iconType="managementApp"
           title={(
             <h1>

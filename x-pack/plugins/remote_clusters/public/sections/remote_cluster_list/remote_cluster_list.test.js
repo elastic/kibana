@@ -5,9 +5,19 @@
  */
 
 import React from 'react';
-import { renderWithIntl } from 'test_utils/enzyme_helpers';
+import { Provider } from 'react-redux';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { findTestSubject } from '@elastic/eui/lib/test';
 
+import { remoteClustersStore } from '../../store';
 import { RemoteClusterList } from './remote_cluster_list';
+
+jest.mock('ui/chrome', () => ({
+  addBasePath: () => {},
+  breadcrumbs: {
+    set: () => {},
+  },
+}));
 
 jest.mock('../../services', () => {
   const services = require.requireActual('../../services');
@@ -18,20 +28,25 @@ jest.mock('../../services', () => {
 });
 
 describe('RemoteClusterList', () => {
-  test(`renders empty state when loading is complete and there are no clusters`, () => {
-    const component = renderWithIntl(
-      <RemoteClusterList
-        loadClusters={() => {}}
-        refreshClusters={() => {}}
-        openDetailPanel={() => {}}
-        closeDetailPanel={() => {}}
-        isDetailPanelOpen={false}
-        clusters={[]}
-        isLoading={false}
-        isCopyingCluster={false}
-        isRemovingCluster={false}
-      />
+  test('renders empty prompt when loading is complete and there are no clusters', () => {
+    const component = mountWithIntl(
+      <Provider store={remoteClustersStore}>
+        <RemoteClusterList
+          loadClusters={() => {}}
+          refreshClusters={() => {}}
+          openDetailPanel={() => {}}
+          closeDetailPanel={() => {}}
+          isDetailPanelOpen={false}
+          clusters={[]}
+          isLoading={false}
+          isCopyingCluster={false}
+          isRemovingCluster={false}
+          history={{ location: { search: '' } }}
+        />
+      </Provider>
     );
-    expect(component).toMatchSnapshot();
+
+    const emptyPrompt = findTestSubject(component, 'remoteClusterListEmptyPrompt');
+    expect(emptyPrompt).toBeTruthy();
   });
 });
