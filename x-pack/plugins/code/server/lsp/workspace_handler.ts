@@ -255,12 +255,14 @@ export class WorkspaceHandler {
   }
 
   private convertLocation(location: Location) {
-    const parsedLocation = this.parseLocation(location);
-    if (parsedLocation) {
-      const { repoUri, revision, file } = parsedLocation;
-      location.uri = `git://${repoUri}/blob/${revision}/${file}`;
+    if (location) {
+      const parsedLocation = this.parseLocation(location);
+      if (parsedLocation) {
+        const { repoUri, revision, file } = parsedLocation;
+        location.uri = `git://${repoUri}/blob/${revision}/${file}`;
+      }
+      return parsedLocation;
     }
-    return parsedLocation;
   }
 
   private fileUrl(str: string) {
