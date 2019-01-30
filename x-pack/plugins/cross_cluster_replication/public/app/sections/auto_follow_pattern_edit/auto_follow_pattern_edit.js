@@ -119,7 +119,7 @@ export const AutoFollowPatternEdit = injectI18n(
     }
 
     render() {
-      const { saveAutoFollowPattern, apiStatus, apiError, autoFollowPattern, intl, match: { url: currentUrl }  } = this.props;
+      const { saveAutoFollowPattern, apiStatus, apiError, autoFollowPattern, match: { url: currentUrl }  } = this.props;
 
       return (
         <EuiPageContent
@@ -154,20 +154,12 @@ export const AutoFollowPatternEdit = injectI18n(
                   );
                 }
 
-                if (error) {
-                  const title = intl.formatMessage({
-                    id: 'xpack.crossClusterReplication.autoFollowPatternEditForm.loadingRemoteClustersErrorTitle',
-                    defaultMessage: 'Error loading remote clusters',
-                  });
-                  return <SectionError title={title} error={error} />;
-                }
-
                 return (
                   <AutoFollowPatternForm
                     apiStatus={apiStatus.save}
                     apiError={apiError.save}
                     currentUrl={currentUrl}
-                    remoteClusters={remoteClusters}
+                    remoteClusters={error ? [] : remoteClusters}
                     autoFollowPattern={autoFollowPattern}
                     saveAutoFollowPattern={saveAutoFollowPattern}
                   />

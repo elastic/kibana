@@ -20,7 +20,6 @@ import {
   FollowerIndexPageTitle,
   RemoteClustersProvider,
   SectionLoading,
-  SectionError,
 } from '../../components';
 
 export const FollowerIndexAdd = injectI18n(
@@ -41,7 +40,7 @@ export const FollowerIndexAdd = injectI18n(
     }
 
     render() {
-      const { saveFollowerIndex, clearApiError, apiStatus, apiError, intl, match: { url: currentUrl }  } = this.props;
+      const { saveFollowerIndex, clearApiError, apiStatus, apiError, match: { url: currentUrl }  } = this.props;
 
       return (
         <EuiPageContent
@@ -70,20 +69,12 @@ export const FollowerIndexAdd = injectI18n(
                 );
               }
 
-              if (error) {
-                const title = intl.formatMessage({
-                  id: 'xpack.crossClusterReplication.followerIndexCreateForm.loadingRemoteClustersErrorTitle',
-                  defaultMessage: 'Error loading remote clusters',
-                });
-                return <SectionError title={title} error={error} />;
-              }
-
               return (
                 <FollowerIndexForm
                   apiStatus={apiStatus}
                   apiError={apiError}
                   currentUrl={currentUrl}
-                  remoteClusters={remoteClusters}
+                  remoteClusters={error ? [] : remoteClusters}
                   saveFollowerIndex={saveFollowerIndex}
                   clearApiError={clearApiError}
                 />

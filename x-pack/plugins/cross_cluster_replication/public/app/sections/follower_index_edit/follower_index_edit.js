@@ -242,17 +242,13 @@ export const FollowerIndexEdit = injectI18n(
                   );
                 }
 
-                if (error) {
-                  remoteClusters = [];
-                }
-
                 return (
                   <FollowerIndexForm
                     followerIndex={rest}
                     apiStatus={apiStatus.save}
                     apiError={apiError.save}
                     currentUrl={currentUrl}
-                    remoteClusters={remoteClusters}
+                    remoteClusters={error ? [] : remoteClusters}
                     saveFollowerIndex={this.saveFollowerIndex}
                     clearApiError={clearApiError}
                   />
