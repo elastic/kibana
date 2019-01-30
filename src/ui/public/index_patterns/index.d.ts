@@ -17,9 +17,4 @@
  * under the License.
  */
 
-export {
-  IndexPattern,
-  StaticIndexPattern,
-  StaticIndexPatternField,
-} from 'ui/index_patterns/_index_pattern';
-export { Field } from 'ui/index_patterns/_field';
+export { IndexPattern, StaticIndexPattern } from 'ui/index_patterns/_index_pattern';

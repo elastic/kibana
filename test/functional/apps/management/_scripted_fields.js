@@ -38,7 +38,6 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
-  const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize', 'discover']);
 
   describe('scripted fields', () => {
@@ -129,7 +128,7 @@ export default function ({ getService, getPageObjects }) {
           ['20', '23'], ['19', '21'], ['6', '20'], ['17', '20'], ['30', '20'], ['13', '19'], ['18', '18'],
           ['16', '17'], ['5', '16'], ['8', '16'], ['15', '14'], ['3', '13'], ['2', '12'], ['9', '10'], ['4', '9']
         ];
-        await filterBar.removeAllFilters();
+        await PageObjects.discover.removeAllFilters();
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
@@ -186,7 +185,7 @@ export default function ({ getService, getPageObjects }) {
         await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be('27');
         });
-        await filterBar.removeAllFilters();
+        await PageObjects.discover.removeAllFilters();
       });
 
       it('should visualize scripted field in vertical bar chart', async function () {
@@ -248,7 +247,7 @@ export default function ({ getService, getPageObjects }) {
         await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be('359');
         });
-        await filterBar.removeAllFilters();
+        await PageObjects.discover.removeAllFilters();
       });
 
       it('should visualize scripted field in vertical bar chart', async function () {
@@ -310,7 +309,7 @@ export default function ({ getService, getPageObjects }) {
         await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be('1');
         });
-        await filterBar.removeAllFilters();
+        await PageObjects.discover.removeAllFilters();
       });
 
       it('should visualize scripted field in vertical bar chart', async function () {

@@ -108,17 +108,17 @@ const createMockStorage = () => ({
 });
 
 const mockIndexPattern = {
-  id: '1234',
   title: 'logstash-*',
-  fields: [
-    {
-      name: 'response',
-      type: 'number',
-      aggregatable: true,
-      filterable: true,
-      searchable: true,
-    },
-  ],
+  fields: {
+    raw: [
+      {
+        name: 'response',
+        type: 'number',
+        aggregatable: true,
+        searchable: true,
+      },
+    ],
+  },
 };
 
 describe('QueryBar', () => {
