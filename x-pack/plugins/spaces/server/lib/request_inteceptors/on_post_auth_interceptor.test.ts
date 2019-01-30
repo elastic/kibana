@@ -321,8 +321,7 @@ describe('onPostAuthRequestInterceptor', () => {
 
       const response = await request('/s/a-space/app/app-2', spaces);
 
-      expect(response.statusCode).toEqual(302);
-      expect(response.headers.location).toEqual('/s/a-space/app/kibana');
+      expect(response.statusCode).toEqual(404);
 
       expect(server.plugins.spaces.spacesClient.getScopedClient).toHaveBeenCalledWith(
         expect.objectContaining({

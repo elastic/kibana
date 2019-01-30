@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import Boom from 'boom';
 import { PluginProperties, Server } from 'hapi';
 import { Space } from 'x-pack/plugins/spaces/common/model/space';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
@@ -105,9 +106,9 @@ export function initSpacesOnPostAuthRequestInterceptor(server: KbnServer) {
           if (!isAvailableInSpace) {
             server.log(
               ['spaces', 'error'],
-              `App ${appId} is not enabled within space "${spaceId}". Redirecting to Kibana home.`
+              `App ${appId} is not enabled within space "${spaceId}".`
             );
-            return h.redirect(`${request.getBasePath()}/app/kibana`).takeover();
+            return Boom.notFound();
           }
         }
       }
