@@ -1,4 +1,15 @@
 {
+  "upgrade-assistant-reindex-operation": {
+    "dynamic": true,
+    "properties": {
+      "indexName": {
+        "type": "keyword"
+      },
+      "status": {
+        "type": "integer"
+      }
+    }
+  },
   "upgrade-assistant-telemetry": {
     "properties": {
       "ui_open": {
