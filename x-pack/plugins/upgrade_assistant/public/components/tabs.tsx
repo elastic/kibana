@@ -64,7 +64,7 @@ export class UpgradeAssistantTabsUI extends React.Component<
     );
   }
 
-  private onTabClick = async (selectedTab: EuiTabbedContentTab) => {
+  private onTabClick = (selectedTab: EuiTabbedContentTab) => {
     const selectedTabIndex = findIndex(this.tabs, { id: selectedTab.id });
     if (selectedTabIndex === -1) {
       throw new Error(`Clicked tab did not exist in tabs array`);
