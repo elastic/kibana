@@ -12,48 +12,37 @@ const chance = new Chance();
 const CHARS_POOL = 'abcdefghijklmnopqrstuvwxyz';
 const getRandomName = () => chance.string({ pool: CHARS_POOL });
 const CLUSTER_NAME = `test-${getRandomName()}`;
-const BASE_AUTOFOLLOW_PATTERN = '/auto_follow_patterns';
-const AUTOFOLLOW_PATTERNS_API_BASE_PATH = API_BASE_PATH + BASE_AUTOFOLLOW_PATTERN;
+const AUTO_FOLLOW_PATTERNS_API_BASE_PATH = API_BASE_PATH + '/auto_follow_patterns';
 
 export default function ({ getService }) {
-  let remoteClusterAdded = false;
   let autoFollowPatternsCreated = [];
   const supertest = getService('supertest');
 
-  const addCluster = async (name = CLUSTER_NAME) => {
-    remoteClusterAdded = true;
-
-    return (
-      await supertest
-        .post(`${REMOTE_CLUSTERS_API_BASE_PATH}`)
-        .set('kbn-xsrf', 'xxx')
-        .send({
-          "name": name,
-          "seeds": [
-            "localhost:9300"
-          ],
-          "skipUnavailable": true,
-        })
-    );
-  };
+  const addCluster = async (name = CLUSTER_NAME) => (
+    await supertest
+      .post(`${REMOTE_CLUSTERS_API_BASE_PATH}`)
+      .set('kbn-xsrf', 'xxx')
+      .send({
+        "name": name,
+        "seeds": [
+          "localhost:9300"
+        ],
+        "skipUnavailable": true,
+      })
+  );
 
   const deleteCluster = (name = CLUSTER_NAME) => {
-    if (!remoteClusterAdded) {
-      return Promise.resolve();
-    }
     return (
       supertest
         .delete(`${REMOTE_CLUSTERS_API_BASE_PATH}/${name}`)
         .set('kbn-xsrf', 'xxx')
-        .expect(200)
     );
   };
 
   const deleteAutoFollowPattern = async (name) => (
     await supertest
-      .delete(`${AUTOFOLLOW_PATTERNS_API_BASE_PATH}/${name}`)
+      .delete(`${AUTO_FOLLOW_PATTERNS_API_BASE_PATH}/${name}`)
       .set('kbn-xsrf', 'xxx')
-      .expect(200)
   );
 
   const getAutoFollowIndexPayload = () => ({
@@ -66,7 +55,7 @@ export default function ({ getService }) {
     autoFollowPatternsCreated.push(name);
 
     return supertest
-      .post(AUTOFOLLOW_PATTERNS_API_BASE_PATH)
+      .post(AUTO_FOLLOW_PATTERNS_API_BASE_PATH)
       .set('kbn-xsrf', 'xxx')
       .send({ ...payload, id: name });
   };
@@ -75,7 +64,6 @@ export default function ({ getService }) {
     Promise.all([deleteCluster(), ...autoFollowPatternsCreated.map(name => deleteAutoFollowPattern(name))])
       .then(() => {
         autoFollowPatternsCreated = [];
-        remoteClusterAdded = false;
       })
   );
 
@@ -87,7 +75,7 @@ export default function ({ getService }) {
 
     describe('list()', () => {
       it('should return an empty object when there are no auto follow patterns', async () => {
-        const uri = `${AUTOFOLLOW_PATTERNS_API_BASE_PATH}`;
+        const uri = `${AUTO_FOLLOW_PATTERNS_API_BASE_PATH}`;
 
         const { body } = await supertest
           .get(uri)
@@ -125,7 +113,7 @@ export default function ({ getService }) {
       it('should return a 404 when the auto-follow pattern is not found', async () => {
         const name = getRandomName();
         const { body } = await supertest
-          .get(`${AUTOFOLLOW_PATTERNS_API_BASE_PATH}/${name}`)
+          .get(`${AUTO_FOLLOW_PATTERNS_API_BASE_PATH}/${name}`)
           .expect(404);
 
         expect(body.cause).not.to.be(undefined);
@@ -139,7 +127,7 @@ export default function ({ getService }) {
         await createAutoFollowIndexRequest(name, autoFollowPattern);
 
         const { body } = await supertest
-          .get(`${AUTOFOLLOW_PATTERNS_API_BASE_PATH}/${name}`)
+          .get(`${AUTO_FOLLOW_PATTERNS_API_BASE_PATH}/${name}`)
           .expect(200);
 
         expect(body).to.eql({ ...autoFollowPattern, name });
