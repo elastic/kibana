@@ -8,6 +8,7 @@ import React from 'react';
 import { get } from 'lodash';
 import { formatMetric } from '../../../lib/format_number';
 import { EuiStat, EuiText, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 function OfflineCell() {
   return (
@@ -52,10 +53,20 @@ function MetricCell({ isOnline, metric = {}, isPercent, ...props }) {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="xs">
-                { metricVal(maxVal, format, isPercent) + ' max' }
+                {i18n.translate('xpack.monitoring.elasticsearch.nodes.cells.maxText', {
+                  defaultMessage: '{metric} max',
+                  values: {
+                    metric: metricVal(maxVal, format, isPercent)
+                  }
+                })}
               </EuiText>
               <EuiText size="xs">
-                { metricVal(minVal, format, isPercent) + ' min' }
+                {i18n.translate('xpack.monitoring.elasticsearch.nodes.cells.minText', {
+                  defaultMessage: '{metric} min',
+                  values: {
+                    metric: metricVal(minVal, format, isPercent)
+                  }
+                })}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
