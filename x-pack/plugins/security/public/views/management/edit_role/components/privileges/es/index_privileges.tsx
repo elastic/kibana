@@ -5,9 +5,8 @@
  */
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { IndexPrivilege } from '../../../../../../../common/model/index_privilege';
-import { Role } from '../../../../../../../common/model/role';
-import { isReservedRole, isRoleEnabled } from '../../../../../../lib/role';
+import { IndexPrivilege, Role } from '../../../../../../../common/model';
+import { isReadOnlyRole, isReservedRole, isRoleEnabled } from '../../../../../../lib/role_utils';
 import { getFields } from '../../../../../../objects';
 import { RoleValidator } from '../../../lib/validate_role';
 import { IndexPrivilegeForm } from './index_privilege_form';
@@ -52,7 +51,7 @@ export class IndexPrivileges extends Component<Props, State> {
       // doesn't permit FLS/DLS).
       allowDocumentLevelSecurity: allowDocumentLevelSecurity || !isRoleEnabled(this.props.role),
       allowFieldLevelSecurity: allowFieldLevelSecurity || !isRoleEnabled(this.props.role),
-      isReservedRole: isReservedRole(this.props.role),
+      isReadOnlyRole: isReadOnlyRole(this.props.role),
     };
 
     const forms = indices.map((indexPrivilege: IndexPrivilege, idx) => (
@@ -61,7 +60,7 @@ export class IndexPrivileges extends Component<Props, State> {
         {...props}
         formIndex={idx}
         validator={this.props.validator}
-        allowDelete={!props.isReservedRole}
+        allowDelete={!props.isReadOnlyRole}
         indexPrivilege={indexPrivilege}
         availableFields={this.state.availableFields[indexPrivilege.names.join(',')]}
         onChange={this.onIndexPrivilegeChange(idx)}

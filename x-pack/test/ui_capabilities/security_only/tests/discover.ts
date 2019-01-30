@@ -58,18 +58,18 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           case 'canvas_read':
           case 'dashboard_all':
           case 'dashboard_read':
-          case 'dev_tools_all':
+          case 'dev_tools_read':
           case 'graph_all':
           case 'graph_read':
           case 'gis_all':
           case 'gis_read':
-          case 'infrastructure_all':
-          case 'logs_all':
+          case 'infrastructure_read':
+          case 'logs_read':
           case 'ml_all':
           case 'monitoring_all':
           case 'timelion_all':
           case 'timelion_read':
-          case 'uptime_all':
+          case 'uptime_read':
           case 'visualize_all':
           case 'visualize_read':
             expect(uiCapabilities.success).to.be(true);

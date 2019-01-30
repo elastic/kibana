@@ -232,19 +232,19 @@ const DashboardRead: DashboardRead = {
   },
 };
 
-interface DevToolsAll extends User {
-  username: 'dev_tools_all';
+interface DevToolsRead extends User {
+  username: 'dev_tools_read';
 }
-const DevToolsAll: DevToolsAll = {
-  username: 'dev_tools_all',
-  fullName: 'dev_tools_all',
-  password: 'dev_tools_all-password',
+const DevToolsRead: DevToolsRead = {
+  username: 'dev_tools_read',
+  fullName: 'dev_tools_read',
+  password: 'dev_tools_read-password',
   role: {
-    name: 'dev_tools_all_role',
+    name: 'dev_tools_read_role',
     kibana: [
       {
         feature: {
-          dev_tools: ['all'],
+          dev_tools: ['read'],
         },
         spaces: ['*'],
       },
@@ -372,19 +372,19 @@ const GisRead: GisRead = {
   },
 };
 
-interface InfrastructureAll extends User {
-  username: 'infrastructure_all';
+interface InfrastructureRead extends User {
+  username: 'infrastructure_read';
 }
-const InfrastructureAll: InfrastructureAll = {
-  username: 'infrastructure_all',
-  fullName: 'infrastructure_all',
-  password: 'infrastructure_all-password',
+const InfrastructureRead: InfrastructureRead = {
+  username: 'infrastructure_read',
+  fullName: 'infrastructure_read',
+  password: 'infrastructure_read-password',
   role: {
-    name: 'infrastructure_all_role',
+    name: 'infrastructure_read_role',
     kibana: [
       {
         feature: {
-          infrastructure: ['all'],
+          infrastructure: ['read'],
         },
         spaces: ['*'],
       },
@@ -392,19 +392,19 @@ const InfrastructureAll: InfrastructureAll = {
   },
 };
 
-interface LogsAll extends User {
-  username: 'logs_all';
+interface LogsRead extends User {
+  username: 'logs_read';
 }
-const LogsAll: LogsAll = {
-  username: 'logs_all',
-  fullName: 'logs_all',
-  password: 'logs_all-password',
+const LogsRead: LogsRead = {
+  username: 'logs_read',
+  fullName: 'logs_read',
+  password: 'logs_read-password',
   role: {
-    name: 'logs_all_role',
+    name: 'logs_read_role',
     kibana: [
       {
         feature: {
-          logs: ['all'],
+          logs: ['read'],
         },
         spaces: ['*'],
       },
@@ -492,19 +492,19 @@ const TimelionRead: TimelionRead = {
   },
 };
 
-interface UptimeAll extends User {
-  username: 'uptime_all';
+interface UptimeRead extends User {
+  username: 'uptime_read';
 }
-const UptimeAll: UptimeAll = {
-  username: 'uptime_all',
-  fullName: 'uptime_all',
-  password: 'uptime_all-password',
+const UptimeRead: UptimeRead = {
+  username: 'uptime_read',
+  fullName: 'uptime_read',
+  password: 'uptime_read-password',
   role: {
-    name: 'uptime_all_role',
+    name: 'uptime_read_role',
     kibana: [
       {
         feature: {
-          uptime: ['all'],
+          uptime: ['read'],
         },
         spaces: ['*'],
       },
@@ -564,20 +564,20 @@ export type UserScenarios =
   | CanvasRead
   | DashboardAll
   | DashboardRead
-  | DevToolsAll
+  | DevToolsRead
   | DiscoverAll
   | DiscoverRead
   | GraphAll
   | GraphRead
   | GisAll
   | GisRead
-  | InfrastructureAll
-  | LogsAll
+  | InfrastructureRead
+  | LogsRead
   | MonitoringAll
   | MlAll
   | TimelionAll
   | TimelionRead
-  | UptimeAll
+  | UptimeRead
   | VisualizeAll
   | VisualizeRead;
 export const UserScenarios: UserScenarios[] = [
@@ -592,20 +592,20 @@ export const UserScenarios: UserScenarios[] = [
   CanvasRead,
   DashboardAll,
   DashboardRead,
-  DevToolsAll,
+  DevToolsRead,
   DiscoverAll,
   DiscoverRead,
   GraphAll,
   GraphRead,
   GisAll,
   GisRead,
-  InfrastructureAll,
-  LogsAll,
+  InfrastructureRead,
+  LogsRead,
   MonitoringAll,
   MlAll,
   TimelionAll,
   TimelionRead,
-  UptimeAll,
+  UptimeRead,
   VisualizeAll,
   VisualizeRead,
 ];

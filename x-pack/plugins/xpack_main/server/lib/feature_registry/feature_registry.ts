@@ -10,9 +10,6 @@ import _ from 'lodash';
 import { UICapabilities } from 'ui/capabilities';
 
 export interface FeaturePrivilegeDefinition {
-  metadata?: {
-    tooltip?: string;
-  };
   grantWithBaseRead?: boolean;
   management?: {
     [sectionId: string]: string[];
@@ -41,6 +38,7 @@ export interface Feature {
   privileges: {
     [key: string]: FeaturePrivilegeDefinition;
   };
+  privilegesTooltip?: string;
 }
 
 // Each feature gets its own property on the UICapabilities object,
@@ -73,9 +71,6 @@ const schema = Joi.object({
     .pattern(
       featurePrivilegePartRegex,
       Joi.object({
-        metadata: Joi.object({
-          tooltip: Joi.string(),
-        }),
         grantWithBaseRead: Joi.bool(),
         management: managementSchema,
         catalogue: catalogueSchema,
@@ -97,6 +92,7 @@ const schema = Joi.object({
       })
     )
     .required(),
+  privilegesTooltip: Joi.string(),
 });
 
 export class FeatureRegistry {
@@ -128,7 +124,7 @@ function validateFeature(feature: Feature) {
   if (validateResult.error) {
     throw validateResult.error;
   }
-// the following validation can't be enforced by the Joi schema, since it'd require us looking "up" the object graph for the list of valid value, which they explicitly forbid.
+  // the following validation can't be enforced by the Joi schema, since it'd require us looking "up" the object graph for the list of valid value, which they explicitly forbid.
   const { management = {}, catalogue = [] } = feature;
 
   Object.entries(feature.privileges).forEach(([privilegeId, privilegeDefinition]) => {

@@ -6,11 +6,12 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { KibanaPrivilege } from '../../../../../../../../security/common/model/kibana_privilege';
+import { PrivilegeDefinition, Role } from '../../../../../../../common/model';
 import { RoleValidator } from '../../../lib/validate_role';
 import { KibanaPrivileges } from './kibana_privileges';
-import { SimplePrivilegeForm } from './simple_privilege_form';
-import { SpaceAwarePrivilegeForm } from './space_aware_privilege_form';
+import { SimplePrivilegeSection } from './simple_privilege_section';
+import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
+import { TransformErrorSection } from './transform_error_section';
 
 const buildProps = (customProps = {}) => {
   return {
@@ -21,10 +22,7 @@ const buildProps = (customProps = {}) => {
         indices: [],
         run_as: [],
       },
-      kibana: {
-        global: [],
-        space: {},
-      },
+      kibana: [],
     },
     spacesEnabled: true,
     spaces: [
@@ -40,6 +38,13 @@ const buildProps = (customProps = {}) => {
         disabledFeatures: [],
       },
     ],
+    features: [],
+    privilegeDefinition: new PrivilegeDefinition({
+      global: {},
+      space: {},
+      features: {},
+    }),
+    intl: null as any,
     uiCapabilities: {
       navLinks: {},
       management: {},
@@ -49,7 +54,6 @@ const buildProps = (customProps = {}) => {
       },
     },
     editable: true,
-    kibanaAppPrivileges: ['all' as KibanaPrivilege],
     onChange: jest.fn(),
     validator: new RoleValidator(),
     ...customProps,
@@ -64,14 +68,24 @@ describe('<KibanaPrivileges>', () => {
   it('renders the simple privilege form when spaces is disabled', () => {
     const props = buildProps({ spacesEnabled: false });
     const wrapper = shallow(<KibanaPrivileges {...props} />);
-    expect(wrapper.find(SimplePrivilegeForm)).toHaveLength(1);
-    expect(wrapper.find(SpaceAwarePrivilegeForm)).toHaveLength(0);
+    expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
+    expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(0);
   });
 
   it('renders the space-aware privilege form when spaces is enabled', () => {
     const props = buildProps({ spacesEnabled: true });
     const wrapper = shallow(<KibanaPrivileges {...props} />);
-    expect(wrapper.find(SimplePrivilegeForm)).toHaveLength(0);
-    expect(wrapper.find(SpaceAwarePrivilegeForm)).toHaveLength(1);
+    expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(0);
+    expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
+  });
+
+  it('renders the transform error section when the role has a transform error', () => {
+    const props = buildProps({ spacesEnabled: true });
+    (props.role as Role)._transform_error = ['kibana'];
+
+    const wrapper = shallow(<KibanaPrivileges {...props} />);
+    expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(0);
+    expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(0);
+    expect(wrapper.find(TransformErrorSection)).toHaveLength(1);
   });
 });

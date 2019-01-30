@@ -58,7 +58,7 @@ export class FeatureTable extends Component<Props, {}> {
       render: (feature: Feature) => {
         return (
           <EuiText>
-            <EuiIcon type={feature.icon as IconType} />
+            <EuiIcon size="m" type={feature.icon as IconType} />
             &ensp; {feature.name}
           </EuiText>
         );

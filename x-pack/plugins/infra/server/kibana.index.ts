@@ -33,9 +33,10 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
   const xpackMainPlugin = kbnServer.plugins.xpack_main;
   xpackMainPlugin.registerFeature({
     id: 'infrastructure',
-    name: i18n.translate('xpack.infra.linkInfrastructureTitle', {
+    name: i18n.translate('xpack.infra.featureRegistry.linkInfrastructureTitle', {
       defaultMessage: 'Infrastructure',
     }),
+    icon: 'infraApp',
     navLinkId: 'infra:home',
     catalogue: ['infraops'],
     privileges: {
@@ -52,9 +53,10 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
 
   xpackMainPlugin.registerFeature({
     id: 'logs',
-    name: i18n.translate('xpack.infra.linkLogsTitle', {
+    name: i18n.translate('xpack.infra.featureRegistry.linkLogsTitle', {
       defaultMessage: 'Logs',
     }),
+    icon: 'loggingApp',
     navLinkId: 'infra:logs',
     catalogue: ['infralogging'],
     privileges: {

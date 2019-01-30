@@ -82,13 +82,20 @@ exports[`SpacesGridPage renders as expected 1`] = `
             "sortable": true,
           },
           Object {
-            "field": "id",
-            "name": "Identifier",
+            "field": "description",
+            "name": "Description",
             "sortable": true,
           },
           Object {
-            "field": "description",
-            "name": "Description",
+            "field": "disabledFeatures",
+            "name": "Features",
+            "render": [Function],
+            "sortable": true,
+          },
+          Object {
+            "field": "id",
+            "name": "Identifier",
+            "render": [Function],
             "sortable": true,
           },
           Object {
