@@ -33,7 +33,7 @@ export async function collectReferencesDeep(
   savedObjectClient: SavedObjectsClient,
   objects: ObjectsToCollect[]
 ) {
-  let result = Array<SavedObject>();
+  let result: SavedObject[] = [];
   const queue = [...objects];
   while (queue.length !== 0) {
     const itemsToGet = queue.splice(0, MAX_BULK_GET_SIZE);
