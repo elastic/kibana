@@ -4,15 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiAccordion,
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTitle } from '@elastic/eui';
 import {
   euiBorderThick,
   euiBorderThin,
@@ -24,8 +16,9 @@ import {
   euiSizeXs,
   paddingSizes,
 } from '@elastic/eui/dist/eui_theme_light.json';
-import React from 'react';
+import React, { MouseEvent } from 'react';
 import { connect } from 'react-redux';
+import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 import styled from 'styled-components';
 import { SearchScope } from 'x-pack/plugins/code/model';
 import { CommitDiff, FileDiff } from '../../../common/git_diff';
@@ -66,6 +59,15 @@ const Container = styled.div`
   padding: ${paddingSizes.xs} ${paddingSizes.m};
 `;
 
+const TopBarContainer = styled.div`
+  height: calc(48rem / 14);
+  border-bottom: ${euiBorderThin};
+  padding: 0 ${paddingSizes.m};
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+`;
+
 const Accordion = styled(EuiAccordion)`
   border: ${euiBorderThick};
   border-radius: ${euiSizeS};
@@ -76,7 +78,24 @@ const Icon = styled(EuiIcon)`
   margin-right: ${euiSizeS};
 `;
 
-interface Props {
+const Parents = styled.div`
+  border-left: ${euiBorderThin};
+  height: calc(32rem / 14);
+  line-height: calc(32rem / 14);
+  padding-left: ${paddingSizes.s};
+  margin: ${euiSizeS} 0;
+`;
+
+const H4 = styled.h4`
+  height: 100%;
+  line-height: calc(48rem / 14);
+`;
+
+const ButtonContainer = styled.div`
+  cursor: default;
+`;
+
+interface Props extends RouteComponentProps<{ resource: string; org: string; repo: string }> {
   commit: CommitDiff | null;
   query: string;
   onSearchScopeChanged: (s: SearchScope) => void;
@@ -87,12 +106,17 @@ export enum DiffLayout {
   Split,
 }
 
-const Difference = (props: { fileDiff: FileDiff }) => (
+const onClick = (e: MouseEvent<HTMLDivElement>) => {
+  e.preventDefault();
+  e.stopPropagation();
+};
+
+const Difference = (props: { fileDiff: FileDiff; repoUri: string; revision: string }) => (
   <Accordion
     initialIsOpen={true}
     id={props.fileDiff.path}
     buttonContent={
-      <div>
+      <ButtonContainer role="button" onClick={onClick}>
         <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="none">
@@ -102,10 +126,16 @@ const Difference = (props: { fileDiff: FileDiff }) => (
           </EuiFlexItem>
           <EuiFlexItem>{props.fileDiff.path}</EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton size="s">View File</EuiButton>
+            <div className="euiButton euiButton--primary euiButton--small" role="button">
+              <span className="euiButton__content">
+                <Link to={`/${props.repoUri}/blob/${props.revision}/${props.fileDiff.path}`}>
+                  View File
+                </Link>
+              </span>
+            </div>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </div>
+      </ButtonContainer>
     }
   >
     <DiffEditor
@@ -131,32 +161,50 @@ export class DiffPage extends React.Component<Props> {
   };
 
   public render() {
-    const { commit, parents } = this.props;
+    const { commit, match } = this.props;
+    const { repo, org, resource } = match.params;
+    const repoUri = `${resource}/${org}/${repo}`;
     if (!commit) {
       return null;
     }
     const { additions, deletions, files } = commit;
+    const { parents } = commit.commit;
     const title = commit.commit.message.split('\n')[0];
+    let parentsLinks = null;
+    if (parents.length > 1) {
+      const [p1, p2] = parents;
+      parentsLinks = (
+        <React.Fragment>
+          <Link to={`/commit/${repoUri}/${p1}`}>{p1}</Link>+
+          <Link to={`/commit/${repoUri}/${p2}`}>{p2}</Link>
+        </React.Fragment>
+      );
+    } else if (parents.length === 1) {
+      parentsLinks = <Link to={`/commit/${repoUri}/${parents[0]}`}>{parents[0]}</Link>;
+    }
     const topBar = (
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle>
-            <h3>{title}</h3>
+      <TopBarContainer>
+        <div>
+          <EuiTitle size="xs">
+            <H4>{title}</H4>
           </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <div>Parents: ${parents}</div>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        </div>
+        <div>
+          <Parents>Parents: {parentsLinks}</Parents>
+        </div>
+      </TopBarContainer>
     );
     const fileCount = files.length;
-    const diffs = commit.files.map(file => <Difference fileDiff={file} key={file.path} />);
+    const diffs = commit.files.map(file => (
+      <Difference repoUri={repoUri} revision={commit.commit.id} fileDiff={file} key={file.path} />
+    ));
     return (
       <div>
         <SearchBar
           query={this.props.query}
           onSearchScopeChanged={this.props.onSearchScopeChanged}
         />
+        {topBar}
         <Container>
           <EuiText>{commit.commit.message}</EuiText>
         </Container>
@@ -174,8 +222,8 @@ export class DiffPage extends React.Component<Props> {
             <EuiFlexItem grow={false}>
               <EuiText>
                 Committed by
-                <PrimaryB> {commit.commit.author} </PrimaryB>
-                <CommitId>{commit.commit.sha.substr(0, COMMIT_ID_LENGTH)}</CommitId>
+                <PrimaryB> {commit.commit.committer} </PrimaryB>
+                <CommitId>{commit.commit.id.substr(0, COMMIT_ID_LENGTH)}</CommitId>
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -189,14 +237,15 @@ export class DiffPage extends React.Component<Props> {
 const mapStateToProps = (state: RootState) => ({
   commit: state.commit.commit,
   query: state.search.query,
-  parents: '',
 });
 
 const mapDispatchToProps = {
   onSearchScopeChanged: changeSearchScope,
 };
 
-export const Diff = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(DiffPage);
+export const Diff = withRouter(
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  )(DiffPage)
+);

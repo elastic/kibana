@@ -23,9 +23,7 @@ declare module '@elastic/eui/dist/eui_theme_light.json' {
   const euiSizeXl: string;
   const euiSizeXxl: string;
   const euiTextColor: string;
-<<<<<<< HEAD
   const euiCodeBlockTagColor: string;
-  const euiBorderThin: string;
   const euiBorderThick: string;
   const paddingSizes: {
     xs: string;
@@ -35,7 +33,8 @@ declare module '@elastic/eui/dist/eui_theme_light.json' {
   };
   const euiFontSizeL: string;
   const euiColorLightestShade: string;
-=======
   const euiBorderThin: string;
->>>>>>> feature(code): diff page
+  const euiColorDanger: string;
+  const euiColorPrimary: string;
+  const euiColorVis0: string;
 }

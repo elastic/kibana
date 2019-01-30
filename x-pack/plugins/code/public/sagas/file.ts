@@ -161,7 +161,8 @@ function* handleFetchTreeCommits(action: Action<FetchFilePayload>) {
 function requestCommits(
   { uri, revision }: FetchRepoPayloadWithRevision,
   path?: string,
-  loadMore?: boolean
+  loadMore?: boolean,
+  count?: number
 ) {
   const pathStr = path ? `/${path}` : '';
   const options: any = {
@@ -169,6 +170,9 @@ function requestCommits(
   };
   if (loadMore) {
     options.query = { after: 1 };
+  }
+  if (count) {
+    options.count = count;
   }
   return kfetch(options);
 }
