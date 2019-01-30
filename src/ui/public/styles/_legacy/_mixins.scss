@@ -6,7 +6,9 @@
 @import '@elastic/eui/src/components/form/variables';
 
 @mixin __legacyInputStyles__bad {
-  appearance: none;
+  &:not([type='range']) {
+    appearance: none;
+  }
   display: block;
   width: 100%;
   height: $euiFormControlCompressedHeight;

@@ -150,13 +150,11 @@ body > .select2-container.open {
     color: $euiColorMediumShade;
   }
 
-  &:focus {
-    outline: none;
-  }
-
+  &:focus,
   &:active {
     background-color: $euiColorEmptyShade;
     color: $euiTextColor;
+    outline: none;
   }
 }
 
@@ -169,13 +167,12 @@ body > .select2-container.open {
 .ui-select-bootstrap > .ui-select-no-choice {
   width: 100%;
   height: auto;
-  max-height: 200px;
+  max-height: $euiSize * 14;
   overflow-x: hidden;
-  margin-top: $euiSizeXS / 2;
 }
 
 body > .ui-select-bootstrap.open {
-  z-index: 1000; /* Standard Bootstrap dropdown z-index */
+  z-index: $euiZContentMenu;
 }
 
 .ui-select-multiple.ui-select-bootstrap {
@@ -236,21 +233,24 @@ body > .ui-select-bootstrap.open {
 }
 
 .ui-select-bootstrap .ui-select-choices-row>span {
-    cursor: pointer;
-    display: block;
-    padding: 3px 20px;
-    clear: both;
-    font-weight: 400;
-    line-height: 1.42857143;
-    color: $euiTextColor;
-    white-space: nowrap;
-}
+  @include euiFontSizeS;
+  @include euiTextTruncate;
+  font-weight: inherit;
+  cursor: pointer;
+  display: block;
+  padding: $euiSizeXS $euiSize;
+  clear: both;
+  color: $euiTextColor;
+  white-space: nowrap;
 
-.ui-select-bootstrap .ui-select-choices-row>span:hover, .ui-select-bootstrap .ui-select-choices-row>span:focus {
+  &:hover,
+  &:focus {
     text-decoration: none;
     color: $euiTextColor;
     background-color: $euiFocusBackgroundColor;
+  }
 }
+
 
 .ui-select-bootstrap .ui-select-choices-row.active>span {
     color: $euiTextColor;
@@ -354,4 +354,10 @@ body > .ui-select-bootstrap.open {
 
 .uiSelectMatch--ellipsis {
   @include euiTextTruncate;
+}
+
+.ui-select-choices-group-label {
+  @include euiTitle('xxxs');
+  @include euiTextTruncate;
+  padding: $euiSizeXS;
 }
