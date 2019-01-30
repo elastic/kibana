@@ -184,6 +184,10 @@ export class QueryBarUI extends Component<Props, State> {
   private persistedLog: PersistedLog | null = null;
 
   public isDirty = () => {
+    if (!this.props.showDatePicker) {
+      return this.state.query.query !== this.props.query.query;
+    }
+
     return (
       this.state.query.query !== this.props.query.query ||
       this.state.dateRangeFrom !== this.props.dateRangeFrom ||
