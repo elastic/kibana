@@ -14,9 +14,26 @@ export const UptimePageProvider = ({
   const uptimeService = getService('uptime');
 
   return {
-    async goToUptimeOverview() {
-      await pageObject.common.navigateToApp('uptime');
-      await uptimeService.assertExists();
+    async goToUptimeOverviewAndLoadData(datePickerStartValue: string, monitorIdToCheck: string) {
+      await pageObject.common.navigateToApp('home');
+      await uptimeService.navigateToPlugin();
+      await uptimeService.setStartOfDatePickerRange(datePickerStartValue);
+      await uptimeService.monitorIdExists(monitorIdToCheck);
+    },
+    async loadDataAndGoToMonitorPage(
+      datePickerStartValue: string,
+      monitorId: string,
+      monitorName: string
+    ) {
+      await pageObject.common.navigateToApp('home');
+      await uptimeService.navigateToPlugin();
+      if (!(await uptimeService.dateRangeIsAlreadySet())) {
+        await uptimeService.setStartOfDatePickerRange(datePickerStartValue);
+      }
+      await uptimeService.navigateToMonitorWithId(monitorId);
+      if ((await uptimeService.getMonitorNameDisplayedOnPageTitle()) !== monitorName) {
+        throw new Error('Expected monitor name not found');
+      }
     },
   };
 };

@@ -8,12 +8,36 @@ import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
 
 export const UptimeProvider = ({ getService }: KibanaFunctionalTestDefaultProviders) => {
   const testSubjects = getService('testSubjects');
-
+  const wait = (seconds: number) => new Promise(r => setTimeout(r, seconds * 1000));
   return {
     async assertExists(key: string) {
       if (!(await testSubjects.exists(key))) {
         throw new Error(`Couldn't find expected element with key "${key}".`);
       }
+    },
+    async navigateToPlugin() {
+      await testSubjects.click('homeSynopsisLinkuptime');
+    },
+    async setStartOfDatePickerRange(dateRangeStart: string) {
+      await testSubjects.click('superDatePickerShowDatesButton');
+      await wait(1);
+      await testSubjects.click('superDatePickerstartDatePopoverButton');
+      await wait(1);
+      await testSubjects.click('superDatePickerAbsoluteTab');
+      await wait(1);
+      await testSubjects.setValue('superDatePickerAbsoluteDateInput', dateRangeStart);
+    },
+    async dateRangeIsAlreadySet() {
+      return await testSubjects.exists('superDatePickerstartDatePopoverButton');
+    },
+    async monitorIdExists(key: string) {
+      await testSubjects.existOrFail(key);
+    },
+    async navigateToMonitorWithId(monitorId: string) {
+      await testSubjects.click(`monitor-page-link-${monitorId}`);
+    },
+    async getMonitorNameDisplayedOnPageTitle() {
+      return await testSubjects.getVisibleText('monitor-page-title');
     },
   };
 };

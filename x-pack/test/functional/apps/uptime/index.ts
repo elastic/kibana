@@ -6,11 +6,19 @@
 
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
+const ARCHIVE = 'uptime/full_heartbeat';
+
 // tslint:disable-next-line:no-default-export
-export default ({ loadTestFile }: KibanaFunctionalTestDefaultProviders) => {
+export default ({ loadTestFile, getService }: KibanaFunctionalTestDefaultProviders) => {
   describe('Uptime app', function() {
+    const esArchiver = getService('esArchiver');
+    before(async () => {
+      await esArchiver.load(ARCHIVE);
+    });
+    after(async () => await esArchiver.unload(ARCHIVE));
     this.tags('ciGroup6');
 
     loadTestFile(require.resolve('./overview'));
+    loadTestFile(require.resolve('./monitor'));
   });
 };

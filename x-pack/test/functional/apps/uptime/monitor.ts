@@ -7,14 +7,22 @@
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 // tslint:disable-next-line:no-default-export
-export default ({ getPageObjects }: KibanaFunctionalTestDefaultProviders) => {
+export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) => {
+  const esArchiver = getService('esArchiver');
   // TODO: add UI functional tests
   const pageObjects = getPageObjects(['uptime']);
-  describe('overview page', () => {
+  const archive = 'uptime/full_heartbeat';
+
+  describe('monitor page', () => {
+    before(async () => {
+      await esArchiver.load(archive);
+    });
+    after(async () => await esArchiver.unload(archive));
     it('loads and displays uptime data based on date range', async () => {
-      await pageObjects.uptime.goToUptimeOverviewAndLoadData(
+      await pageObjects.uptime.loadDataAndGoToMonitorPage(
         '2019-01-28 12:40:08.078',
-        'monitor-page-link-auto-http-0X131221E73F825974'
+        'auto-http-0X131221E73F825974',
+        'https://www.google.com/'
       );
     });
   });

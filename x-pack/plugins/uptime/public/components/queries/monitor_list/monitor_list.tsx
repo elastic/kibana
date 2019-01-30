@@ -71,7 +71,7 @@ const monitorListColumns = [
       defaultMessage: 'ID',
     }),
     render: (id: string, item: LatestMonitor) => (
-      <Link to={`/monitor/${id}`}>
+      <Link data-test-subj={`monitor-page-link-${id}`} to={`/monitor/${id}`}>
         {item.ping && item.ping.monitor && item.ping.monitor.name ? item.ping.monitor.name : id}
       </Link>
     ),
