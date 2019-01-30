@@ -177,7 +177,7 @@ The tool is used for verifying locale file, finding unused / missing messages, k
 
 ### Notes
 
-The tool throws an exception if formats object is missing in locale file.
+The tool throws an exception if `formats` object is missing in locale file.
 
 ### Usage
 
