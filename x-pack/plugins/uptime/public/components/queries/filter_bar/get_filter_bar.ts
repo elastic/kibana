@@ -14,6 +14,7 @@ export const getFilterBarQuery = gql`
         key
         url
       }
+      names
       schemes
     }
   }

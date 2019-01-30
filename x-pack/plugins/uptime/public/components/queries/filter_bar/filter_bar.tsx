@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSearchBar, EuiToolTip } from '@e
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Query } from 'react-apollo';
-import { FilterBar as FilterBarType } from '../../../../common/graphql/types';
+import { FilterBar as FilterBarType, MonitorKey } from '../../../../common/graphql/types';
 import { UptimeCommonProps } from '../../../uptime_app';
 import { getFilterBarQuery } from './get_filter_bar';
 import { filterBarSearchSchema } from './search_schema';
@@ -37,7 +37,7 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: Props) 
         });
       }
       const {
-        filterBar: { ports, ids, schemes },
+        filterBar: { names, ports, ids, schemes },
       }: { filterBar: FilterBarType } = data;
 
       // TODO: add a factory function + type for these filter options
@@ -69,12 +69,33 @@ export const FilterBar = ({ dateRangeEnd, dateRangeStart, updateQuery }: Props) 
           }),
           multiSelect: false,
           options: ids
-            ? ids.map(({ key, url }: any) => ({
-                name: url,
+            ? ids.map(({ key }: MonitorKey) => ({
                 value: key,
-                view: url,
+                view: key,
               }))
             : [],
+          searchThreshold: SEARCH_THRESHOLD,
+        },
+        {
+          type: 'field_value_selection',
+          field: 'monitor.name',
+          name: i18n.translate('xpack.uptime.filterBar.options.nameLabel', {
+            defaultMessage: 'Name',
+          }),
+          multiSelect: false,
+          options: names
+            ? names.map((nameValue: string) => ({ value: nameValue, view: nameValue }))
+            : [],
+          searchThreshold: SEARCH_THRESHOLD,
+        },
+        {
+          type: 'field_value_selection',
+          field: 'url.full',
+          name: i18n.translate('xpack.uptime.filterBar.options.urlLabel', {
+            defaultMessage: 'URL',
+          }),
+          multiSelect: false,
+          options: ids ? ids.map(({ url }: MonitorKey) => ({ value: url, view: url })) : [],
           searchThreshold: SEARCH_THRESHOLD,
         },
         {
