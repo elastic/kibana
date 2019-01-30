@@ -5,7 +5,7 @@ $localNavButtonTextColor: $kuiTextColor;
 $localNavButtonTextColor-isHover: $kuiColorLightestGray;
 $localNavButtonBackgroundColor: transparent;
 $localNavButtonBackgroundColor-isHover: $kuiColorBlue;
-$localNavButtonBackgroundColor-isSelected: $kuiColorLightestGray;
+$localNavButtonBackgroundColor-isSelected: transparent;
 $localNavBreadcrumbDelimiterColor: $euiBorderColor;
 $localSearchBackgroundColor: $euiColorGhost;
 $localSearchBorderColor-isInvalid: $euiColorDanger;
@@ -22,7 +22,7 @@ $localDatePickerCellSelectedBackgroundColor: $euiColorDarkShade;
 $localDatePickerCellSelectedTextColor: $euiTextColor;
 
 // Spacing
-$localNavSideSpacing: 10px;
+$localNavSideSpacing: $euiSizeS;
 $localSearchHeight: 32px;
 $localDatePickerBottomSpacing: 4px;
 $localDatePickerButtonPadding: 3px 6px;

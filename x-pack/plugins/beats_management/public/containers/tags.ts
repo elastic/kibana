@@ -22,7 +22,7 @@ export class TagsContainer extends Container<ContainerState> {
   }
   public reload = async (kuery?: string) => {
     if (kuery) {
-      this.query = await this.libs.elasticsearch.convertKueryToEsQuery(kuery);
+      this.query = kuery;
     } else {
       this.query = undefined;
     }
@@ -45,9 +45,7 @@ export class TagsContainer extends Container<ContainerState> {
 
   public upsertTag = async (tag: BeatTag) => {
     const beatTag = await this.libs.tags.upsertTag(tag);
-    if (beatTag !== null) {
-      this.reload(this.query);
-    }
+    await this.reload();
     return beatTag !== null;
   };
 }

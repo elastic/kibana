@@ -63,7 +63,7 @@ export const registerCcrRoutes = (server) => {
           },
         });
 
-        const missingPermissions = Object.keys(cluster).reduce((permissions, permissionName) => {
+        const missingClusterPrivileges = Object.keys(cluster).reduce((permissions, permissionName) => {
           if (!cluster[permissionName]) {
             permissions.push(permissionName);
             return permissions;
@@ -72,7 +72,7 @@ export const registerCcrRoutes = (server) => {
 
         return {
           hasPermission,
-          missingPermissions,
+          missingClusterPrivileges,
         };
       } catch(err) {
         if (isEsError(err)) {
