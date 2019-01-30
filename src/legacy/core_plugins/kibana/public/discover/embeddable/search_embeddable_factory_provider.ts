@@ -17,15 +17,20 @@
  * under the License.
  */
 
-import { SearchEmbeddableFactory } from './search_embeddable_factory';
 import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
+import { IPrivate } from 'ui/private';
+import { SavedSearchLoader } from '../types';
+import { SearchEmbeddableFactory } from './search_embeddable_factory';
 
-export function searchEmbeddableFactoryProvider(Private) {
-  const SearchEmbeddableFactoryProvider = ($compile, $rootScope, savedSearches, Promise, courier) => {
-    return new SearchEmbeddableFactory($compile, $rootScope, savedSearches, Promise, courier);
+export function searchEmbeddableFactoryProvider(Private: IPrivate) {
+  const SearchEmbeddableFactoryProvider = (
+    $compile: ng.ICompileService,
+    $rootScope: ng.IRootScopeService,
+    savedSearches: SavedSearchLoader
+  ) => {
+    return new SearchEmbeddableFactory($compile, $rootScope, savedSearches);
   };
   return Private(SearchEmbeddableFactoryProvider);
 }
-
 
 EmbeddableFactoriesRegistryProvider.register(searchEmbeddableFactoryProvider);

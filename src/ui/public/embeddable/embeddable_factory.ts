@@ -20,6 +20,10 @@
 import { Embeddable } from './embeddable';
 import { EmbeddableState } from './types';
 
+export interface EmbeddableInstanceConfiguration {
+  id: string;
+}
+
 export type OnEmbeddableStateChanged = (embeddableStateChanges: EmbeddableState) => void;
 
 /**

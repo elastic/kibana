@@ -30,5 +30,6 @@ export interface SavedSearch {
 }
 
 export interface SavedSearchLoader {
-  get: (id: string) => SavedSearch;
+  get: (id: string) => Promise<SavedSearch>;
+  urlFor: (id: string) => string;
 }

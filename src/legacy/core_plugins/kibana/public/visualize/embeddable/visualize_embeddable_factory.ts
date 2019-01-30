@@ -17,19 +17,18 @@
  * under the License.
  */
 
-import { EmbeddableFactory } from 'ui/embeddable';
-import { getVisualizeLoader, VisualizeLoader } from 'ui/visualize/loader';
+import { SavedVisualizations } from '../types';
+import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { VisualizeEmbeddable } from './visualize_embeddable';
 
 import { Legacy } from 'kibana';
-import { OnEmbeddableStateChanged } from 'ui/embeddable/embeddable_factory';
+import { EmbeddableFactory } from 'ui/embeddable';
+import {
+  EmbeddableInstanceConfiguration,
+  OnEmbeddableStateChanged,
+} from 'ui/embeddable/embeddable_factory';
+import { getVisualizeLoader, VisualizeLoader } from 'ui/visualize/loader';
 import { VisSavedObject } from 'ui/visualize/loader/types';
-import { SavedVisualizations } from '../types';
-import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
-
-export interface VisualizeEmbeddableInstanceConfiguration {
-  id: string;
-}
 
 export class VisualizeEmbeddableFactory extends EmbeddableFactory {
   private savedVisualizations: SavedVisualizations;
@@ -54,7 +53,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
    * @return {Promise.<{ metadata, onContainerStateChanged, render, destroy }>}
    */
   public create(
-    panelMetadata: VisualizeEmbeddableInstanceConfiguration,
+    panelMetadata: EmbeddableInstanceConfiguration,
     onEmbeddableStateChanged: OnEmbeddableStateChanged
   ) {
     const visId = panelMetadata.id;
