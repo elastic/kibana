@@ -32,5 +32,6 @@ export class I18nProvider implements angular.IServiceProvider {
   public getFormats = i18n.getFormats;
   public getRegisteredLocales = i18n.getRegisteredLocales;
   public init = i18n.init;
+  public load = i18n.load;
   public $get = () => i18n.translate;
 }

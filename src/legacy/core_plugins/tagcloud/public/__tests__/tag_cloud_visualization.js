@@ -41,18 +41,10 @@ describe('TagCloudVisualizationTest', function () {
   const dummyTableGroup = {
     columns: [{
       id: 'col-0',
-      'aggConfig': {
-        'id': '2',
-        'enabled': true,
-        'type': 'terms',
-        'schema': 'segment',
-        'params': { 'field': 'geo.dest', 'size': 5, 'order': 'desc', 'orderBy': '1' },
-        fieldFormatter: () => (x => x)
-      }, 'title': 'geo.dest: Descending'
+      title: 'geo.dest: Descending'
     }, {
       id: 'col-1',
-      'aggConfig': { 'id': '1', 'enabled': true, 'type': 'count', 'schema': 'metric', 'params': {} },
-      'title': 'Count'
+      title: 'Count'
     }],
     rows: [
       { 'col-0': 'CN', 'col-1': 26 },
@@ -76,7 +68,11 @@ describe('TagCloudVisualizationTest', function () {
       setupDOM('512px', '512px');
       imageComparator = new ImageComparator();
       vis = new Vis(indexPattern, {
-        type: 'tagcloud'
+        type: 'tagcloud',
+        params: {
+          bucket: { accessor: 0, format: {} },
+          metric: { accessor: 0, format: {} },
+        },
       });
 
     });

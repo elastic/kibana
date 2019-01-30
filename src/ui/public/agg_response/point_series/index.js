@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { AggResponsePointSeriesProvider } from './point_series';
+export { buildPointSeriesData } from './point_series';

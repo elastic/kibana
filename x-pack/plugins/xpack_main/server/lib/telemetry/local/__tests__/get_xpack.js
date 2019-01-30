@@ -18,7 +18,7 @@ import {
 function mockGetXPackLicense(callCluster, license) {
   callCluster.withArgs('transport.request', {
     method: 'GET',
-    path: '/_xpack/license',
+    path: '/_license',
     query: {
       local: 'true'
     }
@@ -54,7 +54,7 @@ describe('get_xpack', () => {
 
   describe('getXPackLicense', () => {
 
-    it('uses callCluster to get /_xpack/license API', async () => {
+    it('uses callCluster to get /_license API', async () => {
       const response = { type: 'basic' };
       const callCluster = sinon.stub();
 

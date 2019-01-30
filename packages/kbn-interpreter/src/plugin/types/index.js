@@ -30,6 +30,7 @@ import { shape } from './shape';
 import { string } from './string';
 import { style } from './style';
 import { kibanaContext } from './kibana_context';
+import { kibanaDatatable } from './kibana_datatable';
 
 export const typeSpecs = [
   boolean,
@@ -45,4 +46,5 @@ export const typeSpecs = [
   string,
   style,
   kibanaContext,
+  kibanaDatatable,
 ];

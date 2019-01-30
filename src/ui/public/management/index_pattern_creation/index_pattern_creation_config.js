@@ -51,7 +51,7 @@ export class IndexPatternCreationConfig {
       description: indexPatternButtonDescription,
       testSubj: `createStandardIndexPatternButton`,
       onClick: () => {
-        urlHandler('/management/kibana/index');
+        urlHandler('/management/kibana/index_pattern');
       },
     };
   }

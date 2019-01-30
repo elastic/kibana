@@ -6,12 +6,11 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { EuiBasicTable, EuiBadge } from '@elastic/eui';
+import { EuiBasicTable, EuiBadge, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import moment from 'moment';
 import { toQuery, fromQuery, history } from '../../../shared/Links/url_helpers';
 import { KibanaLink } from '../../../shared/Links/KibanaLink';
-import TooltipOverlay from '../../../shared/TooltipOverlay';
 import styled from 'styled-components';
 import {
   unit,
@@ -20,7 +19,7 @@ import {
   fontSizes,
   truncate
 } from '../../../../style/variables';
-import { NOT_AVAILABLE_LABEL } from '../../../../constants';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { i18n } from '@kbn/i18n';
 
 function paginateItems({ items, pageIndex, pageSize }) {
@@ -45,7 +44,7 @@ const Culprit = styled.div`
   font-family: ${fontFamilyCode};
 `;
 
-class List extends Component {
+export class ErrorGroupList extends Component {
   state = {
     page: {
       index: 0,
@@ -107,14 +106,21 @@ class List extends Component {
         render: (message, item) => {
           return (
             <MessageAndCulpritCell>
-              <TooltipOverlay content={message || NOT_AVAILABLE_LABEL}>
+              <EuiToolTip
+                id="error-message-tooltip"
+                content={message || NOT_AVAILABLE_LABEL}
+              >
                 <MessageLink hash={`/${serviceName}/errors/${item.groupId}`}>
                   {message || NOT_AVAILABLE_LABEL}
                 </MessageLink>
-              </TooltipOverlay>
-              <TooltipOverlay content={item.culprit || NOT_AVAILABLE_LABEL}>
+              </EuiToolTip>
+              <br />
+              <EuiToolTip
+                id="error-culprit-tooltip"
+                content={item.culprit || NOT_AVAILABLE_LABEL}
+              >
                 <Culprit>{item.culprit || NOT_AVAILABLE_LABEL}</Culprit>
-              </TooltipOverlay>
+              </EuiToolTip>
             </MessageAndCulpritCell>
           );
         }
@@ -181,8 +187,6 @@ class List extends Component {
   }
 }
 
-List.propTypes = {
+ErrorGroupList.propTypes = {
   location: PropTypes.object.isRequired
 };
-
-export default List;
