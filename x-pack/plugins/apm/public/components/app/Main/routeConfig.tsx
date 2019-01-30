@@ -15,7 +15,7 @@ import { ServiceDetails } from '../ServiceDetails';
 import { TransactionDetails } from '../TransactionDetails';
 import { Home } from './Home';
 
-interface BreadcrumbArgs {
+export interface BreadcrumbProps {
   match: {
     params: StringMap;
   };
@@ -25,7 +25,7 @@ interface RouteParams {
   serviceName: string;
 }
 
-type BreadcrumbFunction = (args: BreadcrumbArgs) => string | null;
+export type BreadcrumbFunction = (props: BreadcrumbProps) => string;
 
 interface Route extends RouteProps {
   switchRoutes?: Route[];
@@ -54,7 +54,7 @@ export const routes: Route[] = [
     exact: true,
     path: '/:serviceName/errors/:groupId',
     component: ErrorGroupDetails,
-    breadcrumb: ({ match }: BreadcrumbArgs) => match.params.groupId
+    breadcrumb: ({ match }: BreadcrumbProps) => match.params.groupId
   },
   {
     exact: true,
@@ -99,7 +99,7 @@ export const routes: Route[] = [
       {
         exact: true,
         path: '/:serviceName',
-        breadcrumb: ({ match }: BreadcrumbArgs) => match.params.serviceName,
+        breadcrumb: ({ match }: BreadcrumbProps) => match.params.serviceName,
         render: (props: RouteComponentProps<RouteParams>) =>
           renderAsRedirectTo(`/${props.match.params.serviceName}/transactions`)(
             props
@@ -135,7 +135,7 @@ export const routes: Route[] = [
     exact: true,
     path: '/:serviceName/transactions/:transactionType/:transactionName',
     component: TransactionDetails,
-    breadcrumb: ({ match }: BreadcrumbArgs) =>
+    breadcrumb: ({ match }: BreadcrumbProps) =>
       legacyDecodeURIComponent(match.params.transactionName)
   }
 ];

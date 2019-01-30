@@ -5,18 +5,23 @@
  */
 
 import { Location } from 'history';
-import { flatten } from 'lodash';
+import { flatten, last } from 'lodash';
 import React from 'react';
 // @ts-ignore
 import { withBreadcrumbs } from 'react-router-breadcrumbs-hoc';
 import chrome from 'ui/chrome';
 import { toQuery } from '../../shared/Links/url_helpers';
-import { routes } from './routeConfig';
+import { BreadcrumbFunction, BreadcrumbProps, routes } from './routeConfig';
+
+interface BreadcrumbElement {
+  type: BreadcrumbFunction;
+  props: BreadcrumbProps;
+}
 
 interface Props {
   location: Location;
   breadcrumbs: Array<{
-    breadcrumb: any;
+    breadcrumb: string | BreadcrumbElement;
     match: {
       url: string;
     };
@@ -26,11 +31,16 @@ interface Props {
 class UpdateBreadcrumbsComponent extends React.Component<Props> {
   public updateHeaderBreadcrumbs() {
     const { _g = '', kuery = '' } = toQuery(this.props.location.search);
-    const breadcrumbs = this.props.breadcrumbs.map(({ breadcrumb, match }) => ({
-      text: breadcrumb,
-      href: `#${match.url}?_g=${_g}&kuery=${kuery}`
-    }));
+    const breadcrumbs = this.props.breadcrumbs.map(({ breadcrumb, match }) => {
+      const text =
+        typeof breadcrumb === 'string'
+          ? breadcrumb
+          : breadcrumb.type(breadcrumb.props); // "render" the element
 
+      return { text, href: `#${match.url}?_g=${_g}&kuery=${kuery}` };
+    });
+
+    document.title = last(breadcrumbs).text;
     chrome.breadcrumbs.set(breadcrumbs);
   }
 
