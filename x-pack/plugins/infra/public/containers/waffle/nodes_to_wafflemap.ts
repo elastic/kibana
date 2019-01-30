@@ -45,7 +45,6 @@ function findOrCreateGroupWithNodes(
   if (isWaffleMapGroupWithNodes(existingGroup)) {
     return existingGroup;
   }
-  const lastPath = last(path);
   return {
     id,
     name:
@@ -71,7 +70,6 @@ function findOrCreateGroupWithGroups(
   if (isWaffleMapGroupWithGroups(existingGroup)) {
     return existingGroup;
   }
-  const lastPath = last(path);
   return {
     id,
     name:
