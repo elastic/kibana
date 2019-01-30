@@ -28,8 +28,8 @@ export interface PanelHeaderProps {
   title?: string;
   panelId: PanelId;
   embeddable?: Embeddable;
-  isViewOnlyMode: boolean;
-  hidePanelTitles: boolean;
+  isViewOnlyMode?: boolean;
+  hidePanelTitles?: boolean;
 }
 
 interface PanelHeaderUiProps extends PanelHeaderProps {

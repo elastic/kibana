@@ -27,12 +27,13 @@ function createPanelWithDimensions(x: number, y: number, w: number, h: number) {
     version: '6.3.0',
     type: 'bar',
     panelIndex: 'test',
+    title: 'test title',
     gridData: {
       x,
       y,
       w,
       h,
-      id: 'an id',
+      i: 'an id',
     },
   };
 }
