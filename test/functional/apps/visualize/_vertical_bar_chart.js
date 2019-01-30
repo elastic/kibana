@@ -20,6 +20,7 @@
 import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
+  const find = getService('find');
   const log = getService('log');
   const retry = getService('retry');
   const inspector = getService('inspector');
@@ -38,31 +39,39 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickNewSearch();
       log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      log.debug('Bucket = X-Axis');
-      await PageObjects.visualize.clickBucket('X-Axis');
-      log.debug('Aggregation = Date Histogram');
-      await PageObjects.visualize.selectAggregation('Date Histogram');
-      log.debug('Field = @timestamp');
-      await PageObjects.visualize.selectField('@timestamp');
-      // leaving Interval set to Auto
-      await PageObjects.visualize.clickGo();
+      const attemptsCount = 5;
+      for (let i = 0; i < attemptsCount; i++) {
+        const links = await find.allByCssSelector('[data-test-subj]');
+        console.log(`links count = ${links.length}`);
+        const textArray = await Promise.all(links.map(link => link.getVisibleText()));
+        console.log(`attempt ${i + 1} passed`);
+        console.log(`${textArray.toString()}`);
+      }
+      // log.debug('Bucket = X-Axis');
+      // await PageObjects.visualize.clickBucket('X-Axis');
+      // log.debug('Aggregation = Date Histogram');
+      // await PageObjects.visualize.selectAggregation('Date Histogram');
+      // log.debug('Field = @timestamp');
+      // await PageObjects.visualize.selectField('@timestamp');
+      // // leaving Interval set to Auto
+      // await PageObjects.visualize.clickGo();
     };
 
 
     before(initBarChart);
 
     it('should save and load', async function () {
-      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
-      await PageObjects.visualize.waitForVisualizationSavedToastGone();
-      await PageObjects.visualize.loadSavedVisualization(vizName1);
-      await PageObjects.visualize.waitForVisualization();
+      // await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
+      // await PageObjects.visualize.waitForVisualizationSavedToastGone();
+      // await PageObjects.visualize.loadSavedVisualization(vizName1);
+      // await PageObjects.visualize.waitForVisualization();
     });
 
-    it('should have inspector enabled', async function () {
+    it.skip('should have inspector enabled', async function () {
       await inspector.expectIsEnabled();
     });
 
-    it('should show correct chart', async function () {
+    it.skip('should show correct chart', async function () {
       const expectedChartValues = [37, 202, 740, 1437, 1371, 751, 188, 31, 42, 202, 683,
         1361, 1415, 707, 177, 27, 32, 175, 707, 1408, 1355, 726, 201, 29
       ];
@@ -78,7 +87,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('should show correct data', async function () {
+    it.skip('should show correct data', async function () {
       // this is only the first page of the tabular data.
       const expectedChartData =  [
         ['2015-09-20 00:00', '37'],
@@ -108,7 +117,7 @@ export default function ({ getService, getPageObjects }) {
       await inspector.close();
     });
 
-    it('should have `drop partial buckets` option', async () => {
+    it.skip('should have `drop partial buckets` option', async () => {
       const fromTime = '2015-09-20 06:31:44.000';
       const toTime = '2015-09-22 18:31:44.000';
 
@@ -227,112 +236,112 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('vertical bar with split series', function () {
-      before(initBarChart);
+    // describe('vertical bar with split series', function () {
+    //   before(initBarChart);
 
-      it('should show correct series', async function () {
-        await PageObjects.visualize.toggleOpenEditor(2, 'false');
-        await PageObjects.visualize.clickAddBucket();
-        await PageObjects.visualize.clickBucket('Split Series');
-        await PageObjects.visualize.selectAggregation('Terms');
-        await PageObjects.visualize.selectField('response.raw');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+    //   it('should show correct series', async function () {
+    //     await PageObjects.visualize.toggleOpenEditor(2, 'false');
+    //     await PageObjects.visualize.clickAddBucket();
+    //     await PageObjects.visualize.clickBucket('Split Series');
+    //     await PageObjects.visualize.selectAggregation('Terms');
+    //     await PageObjects.visualize.selectField('response.raw');
+    //     await PageObjects.header.waitUntilLoadingHasFinished();
 
-        await PageObjects.common.sleep(1003);
-        await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
+    //     await PageObjects.common.sleep(1003);
+    //     await PageObjects.visualize.clickGo();
+    //     await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const expectedEntries = ['200', '404', '503'];
-        const legendEntries = await PageObjects.visualize.getLegendEntries();
-        expect(legendEntries).to.eql(expectedEntries);
-      });
+    //     const expectedEntries = ['200', '404', '503'];
+    //     const legendEntries = await PageObjects.visualize.getLegendEntries();
+    //     expect(legendEntries).to.eql(expectedEntries);
+    //   });
 
-      it('should allow custom sorting of series', async () => {
-        await PageObjects.visualize.toggleOpenEditor(1, 'false');
-        await PageObjects.visualize.selectCustomSortMetric(3, 'Min', 'bytes');
-        await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
+    //   it('should allow custom sorting of series', async () => {
+    //     await PageObjects.visualize.toggleOpenEditor(1, 'false');
+    //     await PageObjects.visualize.selectCustomSortMetric(3, 'Min', 'bytes');
+    //     await PageObjects.visualize.clickGo();
+    //     await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const expectedEntries = ['404', '200', '503'];
-        const legendEntries = await PageObjects.visualize.getLegendEntries();
-        expect(legendEntries).to.eql(expectedEntries);
-      });
-    });
+    //     const expectedEntries = ['404', '200', '503'];
+    //     const legendEntries = await PageObjects.visualize.getLegendEntries();
+    //     expect(legendEntries).to.eql(expectedEntries);
+    //   });
+    // });
 
-    describe('vertical bar with multiple splits', function () {
-      before(initBarChart);
+    // describe('vertical bar with multiple splits', function () {
+    //   before(initBarChart);
 
-      it('should show correct series', async function () {
-        await PageObjects.visualize.toggleOpenEditor(2, 'false');
-        await PageObjects.visualize.clickAddBucket();
-        await PageObjects.visualize.clickBucket('Split Series');
-        await PageObjects.visualize.selectAggregation('Terms');
-        await PageObjects.visualize.selectField('response.raw');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+    //   it('should show correct series', async function () {
+    //     await PageObjects.visualize.toggleOpenEditor(2, 'false');
+    //     await PageObjects.visualize.clickAddBucket();
+    //     await PageObjects.visualize.clickBucket('Split Series');
+    //     await PageObjects.visualize.selectAggregation('Terms');
+    //     await PageObjects.visualize.selectField('response.raw');
+    //     await PageObjects.header.waitUntilLoadingHasFinished();
 
-        await PageObjects.visualize.toggleOpenEditor(3, 'false');
-        await PageObjects.visualize.clickAddBucket();
-        await PageObjects.visualize.clickBucket('Split Series');
-        await PageObjects.visualize.selectAggregation('Terms');
-        await PageObjects.visualize.selectField('machine.os');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+    //     await PageObjects.visualize.toggleOpenEditor(3, 'false');
+    //     await PageObjects.visualize.clickAddBucket();
+    //     await PageObjects.visualize.clickBucket('Split Series');
+    //     await PageObjects.visualize.selectAggregation('Terms');
+    //     await PageObjects.visualize.selectField('machine.os');
+    //     await PageObjects.header.waitUntilLoadingHasFinished();
 
-        await PageObjects.common.sleep(1003);
-        await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
+    //     await PageObjects.common.sleep(1003);
+    //     await PageObjects.visualize.clickGo();
+    //     await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const expectedEntries = [
-          '200 - win 8', '200 - win xp', '200 - ios', '200 - osx', '200 - win 7',
-          '404 - ios', '503 - ios', '503 - osx', '503 - win 7', '503 - win 8',
-          '503 - win xp', '404 - osx', '404 - win 7', '404 - win 8', '404 - win xp'
-        ];
-        const legendEntries = await PageObjects.visualize.getLegendEntries();
-        expect(legendEntries).to.eql(expectedEntries);
-      });
+    //     const expectedEntries = [
+    //       '200 - win 8', '200 - win xp', '200 - ios', '200 - osx', '200 - win 7',
+    //       '404 - ios', '503 - ios', '503 - osx', '503 - win 7', '503 - win 8',
+    //       '503 - win xp', '404 - osx', '404 - win 7', '404 - win 8', '404 - win xp'
+    //     ];
+    //     const legendEntries = await PageObjects.visualize.getLegendEntries();
+    //     expect(legendEntries).to.eql(expectedEntries);
+    //   });
 
-      it('should show correct series when disabling first agg', async function () {
-        await PageObjects.visualize.toggleDisabledAgg(3);
-        await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
+    //   it('should show correct series when disabling first agg', async function () {
+    //     await PageObjects.visualize.toggleDisabledAgg(3);
+    //     await PageObjects.visualize.clickGo();
+    //     await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const expectedEntries = [ 'win 8', 'win xp', 'ios', 'osx', 'win 7' ];
-        const legendEntries = await PageObjects.visualize.getLegendEntries();
-        expect(legendEntries).to.eql(expectedEntries);
-      });
-    });
+    //     const expectedEntries = [ 'win 8', 'win xp', 'ios', 'osx', 'win 7' ];
+    //     const legendEntries = await PageObjects.visualize.getLegendEntries();
+    //     expect(legendEntries).to.eql(expectedEntries);
+    //   });
+    // });
 
-    describe('vertical bar with derivative', function () {
-      before(initBarChart);
+    // describe('vertical bar with derivative', function () {
+    //   before(initBarChart);
 
-      it('should show correct series', async function () {
-        await PageObjects.visualize.toggleOpenEditor(2, 'false');
-        await PageObjects.visualize.toggleOpenEditor(1);
-        await PageObjects.visualize.selectAggregation('Derivative', 'metrics');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+    //   it('should show correct series', async function () {
+    //     await PageObjects.visualize.toggleOpenEditor(2, 'false');
+    //     await PageObjects.visualize.toggleOpenEditor(1);
+    //     await PageObjects.visualize.selectAggregation('Derivative', 'metrics');
+    //     await PageObjects.header.waitUntilLoadingHasFinished();
 
 
-        await PageObjects.common.sleep(1003);
-        await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
+    //     await PageObjects.common.sleep(1003);
+    //     await PageObjects.visualize.clickGo();
+    //     await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const expectedEntries = [
-          'Derivative of Count'
-        ];
-        const legendEntries = await PageObjects.visualize.getLegendEntries();
-        expect(legendEntries).to.eql(expectedEntries);
-      });
+    //     const expectedEntries = [
+    //       'Derivative of Count'
+    //     ];
+    //     const legendEntries = await PageObjects.visualize.getLegendEntries();
+    //     expect(legendEntries).to.eql(expectedEntries);
+    //   });
 
-      it('should show an error if last bucket aggregation is terms', async () => {
-        await PageObjects.visualize.toggleOpenEditor(2, 'false');
-        await PageObjects.visualize.clickAddBucket();
-        await PageObjects.visualize.clickBucket('Split Series');
-        await PageObjects.visualize.selectAggregation('Terms');
-        await PageObjects.visualize.selectField('response.raw');
+    //   it('should show an error if last bucket aggregation is terms', async () => {
+    //     await PageObjects.visualize.toggleOpenEditor(2, 'false');
+    //     await PageObjects.visualize.clickAddBucket();
+    //     await PageObjects.visualize.clickBucket('Split Series');
+    //     await PageObjects.visualize.selectAggregation('Terms');
+    //     await PageObjects.visualize.selectField('response.raw');
 
-        const errorMessage = await PageObjects.visualize.getBucketErrorMessage();
-        expect(errorMessage).to.contain('Last bucket aggregation must be "Date Histogram"');
-      });
+    //     const errorMessage = await PageObjects.visualize.getBucketErrorMessage();
+    //     expect(errorMessage).to.contain('Last bucket aggregation must be "Date Histogram"');
+    //   });
 
-    });
+    // });
   });
 }

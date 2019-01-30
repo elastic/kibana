@@ -24,6 +24,7 @@ const chrome = require('selenium-webdriver/chrome');
 const firefox = require('selenium-webdriver/firefox');
 const geckoDriver = require('geckodriver');
 const chromeDriver = require('chromedriver');
+const webdriverio = require('webdriverio');
 
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
@@ -36,30 +37,14 @@ async function attemptToCreateCommand(log, browserType) {
   const buildDriverInstance = async (browserType) => {
     switch (browserType) {
       case 'chrome':
-        const chromeOptions = new chrome.Options();
-        const prefs = new logging.Preferences();
-        const loggingPref = prefs.setLevel(logging.Type.BROWSER, logging.Level.ALL);
-        chromeOptions.addArguments('verbose');
-        if (process.env.TEST_BROWSER_HEADLESS) {
-          // Use --disable-gpu to avoid an error from a missing Mesa library, as per
-          // https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md
-          chromeOptions.addArguments('headless', 'disable-gpu');
-        }
-        chromeOptions.setLoggingPrefs(loggingPref);
-        const chromeService = new chrome.ServiceBuilder(chromeDriver.path).enableVerboseLogging();
-        return new Builder()
-          .forBrowser(browserType)
-          .setChromeOptions(chromeOptions)
-          .setChromeService(chromeService)
-          .build();
-      case 'firefox':
-        const firefoxOptions = new firefox.Options();
-        const firefoxService = new firefox.ServiceBuilder(geckoDriver.path).enableVerboseLogging();
-        return new Builder()
-          .forBrowser(browserType)
-          .setFirefoxOptions(firefoxOptions)
-          .setFirefoxService(firefoxService)
-          .build();
+        const options = {
+          port: 9515,
+          logLevel: 'error',
+          capabilities: {
+            browserName: 'chrome'
+          }
+        };
+        return webdriverio.remote(options);
       default:
         throw new Error(`${browserType} is not supported yet`);
     }

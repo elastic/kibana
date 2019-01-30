@@ -37,7 +37,7 @@ export async function BrowserProvider({ getService }) {
      * @return {Promise<{height: number, width: number, x: number, y: number}>}
      */
     async getWindowSize() {
-      return await driver.manage().window().getRect();
+      return await driver.getWindowSize();
     }
 
     /**
@@ -48,8 +48,8 @@ export async function BrowserProvider({ getService }) {
      * @param {number} height
      * @return {Promise<void>}
      */
-    async setWindowSize(...args) {
-      await driver.manage().window().setRect({ width: args[0], height: args[1] });
+    async setWindowSize(width, height) {
+      await driver.setWindowSize(width, height);
     }
 
     /**
@@ -60,7 +60,7 @@ export async function BrowserProvider({ getService }) {
      */
     async getCurrentUrl() {
       // strip _t=Date query param when url is read
-      const current = await driver.getCurrentUrl();
+      const current = await driver.getUrl();
       const currentWithoutTime = modifyUrl(current, parsed => {
         delete parsed.query._t;
       });
@@ -81,9 +81,9 @@ export async function BrowserProvider({ getService }) {
           parsed.query._t = Date.now();
         });
 
-        return await driver.get(urlWithTime);
+        return await driver.url(urlWithTime);
       }
-      return await driver.get(url);
+      return await driver.url(url);
     }
 
     /**
@@ -97,15 +97,16 @@ export async function BrowserProvider({ getService }) {
      * @return {Promise<void>}
      */
     async moveMouseTo(element, xOffset, yOffset) {
-      const mouse = driver.actions().mouse();
-      const actions = driver.actions({ bridge: true });
-      if (element instanceof WebElementWrapper) {
-        await actions.pause(mouse).move({ origin: element._webElement }).perform();
-      } else if (isNaN(xOffset) || isNaN(yOffset) === false) {
-        await actions.pause(mouse).move({ origin: { x: xOffset, y: yOffset } }).perform();
-      } else {
-        throw new Error('Element or coordinates should be provided');
-      }
+      await element._webElement.moveTo(xOffset, yOffset);
+      // const mouse = driver.actions().mouse();
+      // const actions = driver.actions({ bridge: true });
+      // if (element instanceof WebElementWrapper) {
+      //   await actions.pause(mouse).move({ origin: element._webElement }).perform();
+      // } else if (isNaN(xOffset) || isNaN(yOffset) === false) {
+      //   await actions.pause(mouse).move({ origin: { x: xOffset, y: yOffset } }).perform();
+      // } else {
+      //   throw new Error('Element or coordinates should be provided');
+      //}
     }
 
     /**
@@ -117,6 +118,7 @@ export async function BrowserProvider({ getService }) {
      * @return {Promise<void>}
      */
     async dragAndDrop(from, to) {
+      //to be implemented with WDIO
       let _from;
       let _to;
       const _fromOffset = (from.offset) ? { x: from.offset.x || 0,  y: from.offset.y || 0 } : { x: 0, y: 0 };
@@ -159,7 +161,7 @@ export async function BrowserProvider({ getService }) {
      * @return {Promise<void>}
      */
     async refresh() {
-      await driver.navigate().refresh();
+      await driver.refresh();
     }
 
     /**
@@ -169,7 +171,7 @@ export async function BrowserProvider({ getService }) {
      * @return {Promise<void>}
      */
     async goBack() {
-      await driver.navigate().back();
+      await driver.back();
     }
 
     /**
@@ -228,7 +230,7 @@ export async function BrowserProvider({ getService }) {
      * @return {Promise<LogEntry[]>}
      */
     async getLogsFor(...args) {
-      return await driver.manage().logs().get(...args);
+      return await driver.getLogs(...args);
     }
 
     /**
@@ -248,12 +250,7 @@ export async function BrowserProvider({ getService }) {
      * @return {Promise<void>}
      */
     async doubleClick(element) {
-      const actions = driver.actions({ bridge: true });
-      if (element instanceof WebElementWrapper) {
-        await actions.doubleClick(element._webElement).perform();
-      } else {
-        await actions.doubleClick().perform();
-      }
+      await element._webElement.doubleClick();
     }
 
     /**
@@ -265,7 +262,7 @@ export async function BrowserProvider({ getService }) {
      * @return {Promise<void>}
      */
     async switchToWindow(...args) {
-      await driver.switchTo().window(...args);
+      await driver.switchToWindow(...args);
     }
 
     /**
@@ -275,7 +272,7 @@ export async function BrowserProvider({ getService }) {
      * @return {Promise<string[]>}
      */
     async getAllWindowHandles() {
-      return await driver.getAllWindowHandles();
+      return await driver.getWindowHandles();
     }
 
     /**
@@ -297,7 +294,7 @@ export async function BrowserProvider({ getService }) {
      * @return {Promise<void>}
      */
     async closeCurrentWindow() {
-      await driver.close();
+      await driver.closeWindow();
     }
 
     /**
@@ -308,7 +305,7 @@ export async function BrowserProvider({ getService }) {
      * @param  {...any[]} args
      */
     async execute(...args) {
-      return await driver.executeScript(...args);
+      return await driver.execute(...args);
     }
   }
 

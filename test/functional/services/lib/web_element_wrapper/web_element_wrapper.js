@@ -100,7 +100,7 @@ export class WebElementWrapper {
    * @return {Promise<void>}
    */
   async clearValue() {
-    await this._webElement.clear();
+    await this._webElement.clearValue();
   }
 
   /**
@@ -121,9 +121,9 @@ export class WebElementWrapper {
   async type(...values) {
     //leadfoot compatibility
     if (Array.isArray(values[0])) {
-      await this._webElement.sendKeys(...values[0]);
+      await this._webElement.addValue(...values[0]);
     } else {
-      await this._webElement.sendKeys(...values);
+      await this._webElement.addValue(...values);
     }
   }
 
@@ -255,10 +255,11 @@ export class WebElementWrapper {
    * @return {Promise<void>}
    */
   async moveMouseTo() {
-    await this.scrollIntoViewIfNecessary();
-    const mouse = this._driver.actions().mouse();
-    const actions = this._driver.actions({ bridge: true });
-    await actions.pause(mouse).move({ origin: this._webElement }).perform();
+    // await this.scrollIntoViewIfNecessary();
+    // const mouse = this._driver.actions().mouse();
+    // const actions = this._driver.actions({ bridge: true });
+    // await actions.pause(mouse).move({ origin: this._webElement }).perform();
+    await this._webElement.moveTo();
   }
 
   /**
@@ -405,6 +406,6 @@ export class WebElementWrapper {
    * @return {Promise<void>}
    */
   async scrollIntoViewIfNecessary() {
-    await this._driver.executeScript(scrollIntoViewIfNecessary, this._webElement, this._fixedHeaderHeight);
+    //await this._driver.execute(scrollIntoViewIfNecessary, this._webElement, this._fixedHeaderHeight);
   }
 }

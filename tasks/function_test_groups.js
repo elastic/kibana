@@ -25,17 +25,17 @@ import grunt from 'grunt';
  * and to the list of jobs in .ci/jobs.yml
  */
 const TEST_TAGS = [
-  'ciGroup1',
-  'ciGroup2',
-  'ciGroup3',
-  'ciGroup4',
-  'ciGroup5',
-  'ciGroup6',
-  'ciGroup7',
-  'ciGroup8',
-  'ciGroup9',
-  'ciGroup10',
-  'ciGroup11',
+  // 'ciGroup1',
+  // 'ciGroup2',
+  // 'ciGroup3',
+  // 'ciGroup4',
+  // 'ciGroup5',
+  // 'ciGroup6',
+  // 'ciGroup7',
+  // 'ciGroup8',
+  // 'ciGroup9',
+  // 'ciGroup10',
+  // 'ciGroup11',
   'ciGroup12'
 ];
 

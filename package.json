@@ -402,6 +402,7 @@
     "tslint-plugin-prettier": "^2.0.0",
     "typescript": "^3.0.3",
     "vinyl-fs": "^3.0.2",
+    "webdriverio": "5.4.1",
     "xml2js": "^0.4.19",
     "xmlbuilder": "9.0.4",
     "zlib": "^1.0.5"

@@ -18,6 +18,7 @@
  */
 
 import { initWebDriver } from './webdriver';
+const chromeDriver = require('chromedriver');
 
 export async function RemoteProvider({ getService }) {
   const lifecycle = getService('lifecycle');
@@ -29,6 +30,14 @@ export async function RemoteProvider({ getService }) {
     throw new Error(`Unexpected TEST_BROWSER_TYPE "${browserType}". Valid options are ` +  possibleBrowsers.join(','));
   }
 
+  const port = 9515;
+  const args = [
+    '--url-base=wd/hub',
+    `--port=${port}`
+  ];
+
+  chromeDriver.start(args);
+
   const { driver, By, Key, until, LegacyActionSequence } = await initWebDriver({ log, browserType });
 
   log.info('Remote initialized');
@@ -36,24 +45,28 @@ export async function RemoteProvider({ getService }) {
   lifecycle.on('beforeTests', async () => {
     // hard coded default, can be overridden per suite using `browser.setWindowSize()`
     // and will be automatically reverted after each suite
-    await driver.manage().window().setRect({ width: 1600, height: 1000 });
+    await driver.setWindowSize(1600, 1000);
   });
 
   const windowSizeStack = [];
   lifecycle.on('beforeTestSuite', async () => {
-    windowSizeStack.unshift(await driver.manage().window().getRect());
+    windowSizeStack.unshift(await driver.getWindowSize());
+    await driver.setTimeout({ 'implicit': 30000 });
   });
 
-  lifecycle.on('beforeEachTest', async () => {
-    await driver.manage().setTimeouts({ implicit: 0 });
-  });
+  // lifecycle.on('beforeEachTest', async () => {
+  //   await driver.setTimeout({ 'implicit': 20000 });
+  // });
 
   lifecycle.on('afterTestSuite', async () => {
     const { width, height } = windowSizeStack.shift();
-    await driver.manage().window().setRect({ width: width, height: height });
+    await driver.setWindowSize(width, height);
   });
 
-  lifecycle.on('cleanup', async () => await driver.quit());
+  lifecycle.on('cleanup', async () => {
+    await driver.deleteSession();
+    await chromeDriver.stop();
+  });
 
   return { driver, By, Key, until, LegacyActionSequence };
 }
