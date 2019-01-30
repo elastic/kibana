@@ -103,10 +103,11 @@ const monitorListColumns = [
       return (
         <EuiSeriesChart
           showDefaultAxis={false}
+          width={180}
           height={70}
           stackBy="y"
           // TODO: style hack
-          style={{ marginBottom: '-20px' }}
+          style={{ marginLeft: '-40px', marginBottom: '-40px' }}
           xType={EuiSeriesChartUtils.SCALE.TIME}
         >
           <EuiHistogramSeries
