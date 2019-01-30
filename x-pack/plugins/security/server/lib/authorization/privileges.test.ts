@@ -39,6 +39,7 @@ test(`builds privileges correctly`, () => {
           ui: ['show', 'showSaveButton', 'showCreateButton'],
         },
         read: {
+          app: [],
           api: ['foo/read/api'],
           catalogue: ['fooReadEntry'],
           management: {
@@ -56,7 +57,7 @@ test(`builds privileges correctly`, () => {
       id: 'bar-feature',
       name: 'Bar Feature',
       icon: 'arrowUp',
-      app: ['bar-app'],
+      app: ['bar-app', 'another-bar-app'],
       catalogue: ['barCatalogue'],
       management: {
         kibana: ['yeppers'],
@@ -70,6 +71,7 @@ test(`builds privileges correctly`, () => {
           ui: ['show', 'showSaveButton', 'showCreateButton'],
         },
         read: {
+          app: ['another-bar-app'],
           management: {
             kibana: ['yeppers'],
           },
@@ -125,6 +127,7 @@ test(`builds privileges correctly`, () => {
           'login:',
           'version:1.0.0-zeta1',
           'app:bar-app',
+          'app:another-bar-app',
           'saved_object:bar-saved-object-type/bulk_get',
           'saved_object:bar-saved-object-type/get',
           'saved_object:bar-saved-object-type/find',
@@ -145,7 +148,7 @@ test(`builds privileges correctly`, () => {
           'login:',
           'version:1.0.0-zeta1',
           'api:bar/read/api',
-          'app:bar-app',
+          'app:another-bar-app',
           'saved_object:foo-saved-object-type/bulk_get',
           'saved_object:foo-saved-object-type/get',
           'saved_object:foo-saved-object-type/find',
@@ -202,7 +205,6 @@ test(`builds privileges correctly`, () => {
           'login:',
           'version:1.0.0-zeta1',
           'api:foo/read/api',
-          'app:foo-app',
           'saved_object:foo-saved-object-type/bulk_get',
           'saved_object:foo-saved-object-type/get',
           'saved_object:foo-saved-object-type/find',
