@@ -52,6 +52,16 @@ describe('Saved object does not have layer list', () => {
     };
   }
 
+  it('should get empty layer list when the metadata has not loaded yet.', () => {
+    require('../meta').isMetaDataLoaded = () => {
+      return false;
+    };
+    mockDataSourceResponse();
+    const layers = getInitialLayers(null);
+    expect(layers).toEqual([]);
+  });
+
+
   it('Should get initial layer from Kibana tilemap data source when Kibana tilemap is configured ', () => {
 
     mockDataSourceResponse({
