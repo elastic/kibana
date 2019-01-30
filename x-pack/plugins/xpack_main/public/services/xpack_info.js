@@ -27,7 +27,11 @@ export function XPackInfoProvider($window, $injector, Private) {
     };
 
     setAll = (updatedXPackInfo) => {
-      $window.sessionStorage.setItem(XPACK_INFO_KEY, JSON.stringify(updatedXPackInfo));
+      // The decision to convert kebab-case/snake-case keys to camel-case keys stemmed from an old
+      // convention of using kebabe-case/snake-case in API response bodies but camel-case in JS
+      // objects. See pull #29304 for more info.
+      const camelCasedXPackInfo = convertKeysToCamelCaseDeep(updatedXPackInfo);
+      $window.sessionStorage.setItem(XPACK_INFO_KEY, JSON.stringify(camelCasedXPackInfo));
     };
 
     clear = () => {
@@ -52,7 +56,7 @@ export function XPackInfoProvider($window, $injector, Private) {
             throw err;
           })
           .then((xpackInfoResponse) => {
-            this.setAll(convertKeysToCamelCaseDeep(xpackInfoResponse.data));
+            this.setAll(xpackInfoResponse.data);
             xpackInfoSignature.set(xpackInfoResponse.headers('kbn-xpack-sig'));
           })
           .finally(() => {
