@@ -9,30 +9,32 @@ import {
   EuiBreadcrumbs,
   EuiFlexGroup,
 } from '@elastic/eui';
+import { getOr } from 'lodash/fp';
 import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
-<<<<<<< HEAD
 import chrome from 'ui/chrome';
 
 import { ESTermQuery } from '../../../common/typed_json';
 import { EmptyPage } from '../../components/empty_page';
-=======
-
-import { ESTermQuery } from '../../../common/typed_json';
->>>>>>> Improved types
 import { getHostsUrl, HostComponentProps } from '../../components/link_to/redirect_to_hosts';
+import { UncommonProcessTable } from '../../components/page/hosts';
+import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
 import { HostSummary } from '../../components/page/hosts/host_summary';
 import { manageQuery } from '../../components/page/manage_query';
+import { AuthenticationsQuery } from '../../containers/authentications';
 import { GlobalTime } from '../../containers/global_time';
 import { HostsQuery } from '../../containers/hosts';
 import { HostSummaryQuery } from '../../containers/hosts/host_summary.gql_query';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
+import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
 import * as i18n from './translations';
 
 const basePath = chrome.getBasePath();
 
 const HostSummaryManage = manageQuery(HostSummary);
+const AuthenticationTableManage = manageQuery(AuthenticationTable);
+const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
 
 export const HostDetails = pure<HostComponentProps>(({ match: { params: { hostId } } }) => (
   <WithSource sourceId="default">
@@ -65,6 +67,51 @@ export const HostDetails = pure<HostComponentProps>(({ match: { params: { hostId
                   )}
                 </HostsQuery>
               </EuiFlexGroup>
+              <AuthenticationsQuery
+                sourceId="default"
+                startDate={from}
+                endDate={to}
+                poll={poll}
+                filterQuery={getFilterQuery(hostId)}
+              >
+                {({ authentications, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
+                  <AuthenticationTableManage
+                    id={id}
+                    refetch={refetch}
+                    setQuery={setQuery}
+                    loading={loading}
+                    startDate={from}
+                    data={authentications}
+                    totalCount={totalCount}
+                    nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                    hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                    loadMore={loadMore}
+                  />
+                )}
+              </AuthenticationsQuery>
+              <UncommonProcessesQuery
+                sourceId="default"
+                startDate={from}
+                endDate={to}
+                poll={poll}
+                cursor={null}
+                filterQuery={getFilterQuery(hostId)}
+              >
+                {({ uncommonProcesses, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
+                  <UncommonProcessTableManage
+                    id={id}
+                    refetch={refetch}
+                    setQuery={setQuery}
+                    loading={loading}
+                    startDate={from}
+                    data={uncommonProcesses}
+                    totalCount={totalCount}
+                    nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                    hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                    loadMore={loadMore}
+                  />
+                )}
+              </UncommonProcessesQuery>
             </>
           )}
         </GlobalTime>
