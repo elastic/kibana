@@ -759,7 +759,7 @@
 
 "@elastic/elasticsearch@elastic/elasticsearch-js#next":
   version "0.1.0-alpha.5"
-  resolved "https://codeload.github.com/elastic/elasticsearch-js/tar.gz/2f3e2a6c962acf6c883202c0a616df58154fdf80"
+  resolved "https://codeload.github.com/elastic/elasticsearch-js/tar.gz/95c4369f9b03d0ccb7e1ff5766734860f36f9e6e"
   dependencies:
     debug "^4.1.0"
     decompress-response "^3.3.0"
