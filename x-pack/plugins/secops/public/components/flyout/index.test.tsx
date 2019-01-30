@@ -189,7 +189,7 @@ describe('Flyout', () => {
     test('it does NOT render the data providers badge when the number is equal to 0', () => {
       const wrapper = mount(
         <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })} >
+          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
             <DragDropContextWrapper>
               <Flyout
                 flyoutHeight={testFlyoutHeight}
