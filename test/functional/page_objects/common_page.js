@@ -90,10 +90,18 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     }
 
 
-    navigateToApp(appName) {
+    /**
+     * @param {string} appName - name of the app
+     * @param {object} [opts] - optional options object
+     * @param {object} [opts.appConfig] - overrides for appConfig, e.g. { pathname, hash }
+     */
+    navigateToApp(appName, opts = { appConfig: {} }) {
       const self = this;
-      const appUrl = getUrl.noAuth(config.get('servers.kibana'), config.get(['apps', appName]));
-      log.debug('navigating to ' + appName + ' url: ' + appUrl);
+      const appUrl = getUrl.noAuth(config.get('servers.kibana'), {
+        ...config.get(['apps', appName]),
+        ...opts.appConfig,
+      });
+      log.info('navigating to ' + appName + ' url: ' + appUrl);
 
       function navigateTo(url) {
         return retry.try(function () {
