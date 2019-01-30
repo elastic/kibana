@@ -9,7 +9,6 @@
  */
 
 import { chain, each, get, union, uniq } from 'lodash';
-import { timefilter } from 'ui/timefilter';
 import { parseInterval } from 'ui/utils/parse_interval';
 
 import { isTimeSeriesViewDetector } from '../../common/util/job_utils';
@@ -165,10 +164,9 @@ export function getFieldsByJob() {
   }, { '*': [] });
 }
 
-export function getSelectionTimeRange(selectedCells, interval) {
+export function getSelectionTimeRange(selectedCells, interval, bounds) {
   // Returns the time range of the cell(s) currently selected in the swimlane.
   // If no cell(s) are currently selected, returns the dashboard time range.
-  const bounds = timefilter.getActiveBounds();
   let earliestMs = bounds.min.valueOf();
   let latestMs = bounds.max.valueOf();
 
@@ -383,10 +381,10 @@ export function processViewByResults(
   return dataset;
 }
 
-export async function loadAnnotationsTableData(selectedCells, selectedJobs, interval) {
+export async function loadAnnotationsTableData(selectedCells, selectedJobs, interval, bounds) {
   const jobIds = (selectedCells !== null && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL) ?
     selectedCells.lanes : selectedJobs.map(d => d.id);
-  const timeRange = getSelectionTimeRange(selectedCells, interval);
+  const timeRange = getSelectionTimeRange(selectedCells, interval, bounds);
 
   if (mlAnnotationsEnabled === false) {
     return Promise.resolve([]);
@@ -419,11 +417,11 @@ export async function loadAnnotationsTableData(selectedCells, selectedJobs, inte
   );
 }
 
-export async function loadAnomaliesTableData(selectedCells, selectedJobs, dateFormatTz, interval, fieldName) {
+export async function loadAnomaliesTableData(selectedCells, selectedJobs, dateFormatTz, interval, bounds, fieldName) {
   const jobIds = (selectedCells !== null && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL) ?
     selectedCells.lanes : selectedJobs.map(d => d.id);
   const influencers = getSelectionInfluencers(selectedCells, fieldName);
-  const timeRange = getSelectionTimeRange(selectedCells, interval);
+  const timeRange = getSelectionTimeRange(selectedCells, interval, bounds);
 
   return new Promise((resolve, reject) => {
     ml.results.getAnomaliesTableData(

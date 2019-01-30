@@ -20,24 +20,37 @@
 import dateMath from '@elastic/datemath';
 import moment from 'moment';
 import { timeUnits } from './time_units';
+import { i18n } from '@kbn/i18n';
+
+const TIME_NOW = 'now';
 
 function cantLookup(timeFrom, timeTo, dateFormat) {
   const displayFrom = formatTimeString(timeFrom, dateFormat);
   const displayTo = formatTimeString(timeTo, dateFormat, true);
-  return `${displayFrom} to ${displayTo}`;
+  return i18n.translate('common.ui.timepicker.fullTimeRange', {
+    defaultMessage: '{displayFrom} to {displayTo}',
+    values: {
+      displayFrom,
+      displayTo
+    }
+  });
 }
 
 function formatTimeString(timeString, dateFormat, roundUp = false) {
   if (moment(timeString).isValid()) {
     return moment(timeString).format(dateFormat);
   } else {
-    if (timeString === 'now') {
-      return 'now';
+    if (timeString === TIME_NOW) {
+      return i18n.translate('common.ui.timepicker.timeNow', { defaultMessage: 'now' });
     } else {
       const tryParse = dateMath.parse(timeString, { roundUp: roundUp });
       return moment.isMoment(tryParse) ? '~ ' + tryParse.fromNow() : timeString;
     }
   }
+}
+
+function getDateLookupKey(startDate, endDate) {
+  return startDate + ' to ' + endDate;
 }
 
 export function prettyDuration(timeFrom, timeTo, getConfig) {
@@ -46,21 +59,28 @@ export function prettyDuration(timeFrom, timeTo, getConfig) {
 
   const lookupByRange = {};
   quickRanges.forEach((frame) => {
-    lookupByRange[frame.from + ' to ' + frame.to] = frame;
+    lookupByRange[getDateLookupKey(frame.from, frame.to)] = frame;
   });
 
   // If both parts are date math, try to look up a reasonable string
   if (timeFrom && timeTo && !moment.isMoment(timeFrom) && !moment.isMoment(timeTo)) {
-    const tryLookup = lookupByRange[timeFrom.toString() + ' to ' + timeTo.toString()];
+    const tryLookup = lookupByRange[getDateLookupKey(timeFrom, timeTo)];
     if (tryLookup) {
       return tryLookup.display;
     } else {
-      const fromParts = timeFrom.toString().split('-');
-      if (timeTo.toString() === 'now' && fromParts[0] === 'now' && fromParts[1]) {
-        const rounded = fromParts[1].split('/');
-        let text = 'Last ' + rounded[0];
-        if (rounded[1]) {
-          text = text + ' rounded to the ' + timeUnits[rounded[1]];
+      const [start, end] = timeFrom.toString().split('-');
+      if (timeTo.toString() === TIME_NOW && start === TIME_NOW && end) {
+        const [amount, unitId] = end.split('/');
+        let text = i18n.translate('common.ui.timepicker.timeUntilNowStr', {
+          defaultMessage: 'Last {amount}',
+          values: { amount }
+        });
+
+        if (unitId) {
+          text = text + ' ' + i18n.translate('common.ui.timepicker.roundedTo', {
+            defaultMessage: 'rounded to the {unit}',
+            values: { unit: timeUnits[unitId] }
+          });
         }
         return text;
       } else {
