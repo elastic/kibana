@@ -8,18 +8,18 @@ import React from 'react';
 
 import {
   EuiFieldText,
-  EuiText,
   EuiFormRow,
 } from '@elastic/eui';
 
-import { TMSSource } from './tms_source';
+import { AbstractTMSSource } from './tms_source';
 import { TileLayer } from '../tile_layer';
 
-export class XYZTMSSource extends TMSSource {
+export class XYZTMSSource extends AbstractTMSSource {
 
   static type = 'EMS_XYZ';
-
-  static typeDisplayName = 'TMS XYZ';
+  static title = 'Tile Map Service from URL';
+  static description = 'Map tiles from a URL that includes the XYZ coordinates';
+  static icon = 'grid';
 
   static createDescriptor(urlTemplate) {
     return {
@@ -37,16 +37,11 @@ export class XYZTMSSource extends TMSSource {
     return (<XYZTMSEditor previewTMS={previewTMS} />);
   }
 
-  renderDetails() {
-    return (
-      <EuiText color="subdued" size="s">
-        <p className="gisLayerDetails">
-          <strong className="gisLayerDetails__label">Type </strong><span>Tile</span><br/>
-          <strong className="gisLayerDetails__label">Url </strong>
-          <span className="eui-textBreakAll">{this._descriptor.urlTemplate}</span><br/>
-        </p>
-      </EuiText>
-    );
+  async getImmutableProperties() {
+    return [
+      { label: 'Data source', value: XYZTMSSource.title },
+      { label: 'Url', value: this._descriptor.urlTemplate },
+    ];
   }
 
   _createDefaultLayerDescriptor(options) {

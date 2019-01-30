@@ -1,156 +1,150 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`SpacesGridPage renders as expected 1`] = `
-<EuiPage
+<div
   className="spcGridPage"
-  restrictWidth={true}
 >
-  <EuiPageBody
-    restrictWidth={false}
+  <EuiPageContent
+    horizontalPosition="center"
+    panelPaddingSize="l"
   >
-    <EuiPageContent
-      horizontalPosition="center"
-      panelPaddingSize="l"
+    <EuiFlexGroup
+      alignItems="stretch"
+      component="div"
+      direction="row"
+      gutterSize="l"
+      justifyContent="spaceBetween"
+      responsive={true}
+      wrap={false}
     >
-      <React.Fragment>
-        <EuiFlexGroup
-          alignItems="stretch"
-          component="div"
-          direction="row"
-          gutterSize="l"
-          justifyContent="spaceBetween"
-          responsive={true}
-          wrap={false}
+      <EuiFlexItem
+        component="div"
+        grow={false}
+      >
+        <EuiTitle
+          size="m"
+          textTransform="none"
         >
-          <EuiFlexItem
-            component="div"
-            grow={false}
-          >
-            <EuiText
-              grow={true}
-              size="m"
-            >
-              <h1>
-                <FormattedMessage
-                  defaultMessage="Spaces"
-                  id="xpack.spaces.management.spacesGridPage.spacesTitle"
-                  values={Object {}}
-                />
-              </h1>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem
-            component="div"
-            grow={false}
-          >
-            <EuiButton
-              color="primary"
-              fill={true}
-              iconSide="left"
-              onClick={[Function]}
-              type="button"
-            >
-              <FormattedMessage
-                defaultMessage="Create a space"
-                id="xpack.spaces.management.spacesGridPage.createSpaceButtonLabel"
-                values={Object {}}
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer
-          size="xl"
-        />
-        <EuiInMemoryTable
-          columns={
-            Array [
-              Object {
-                "field": "name",
-                "name": "",
-                "render": [Function],
-                "sortable": true,
-                "width": "50px",
-              },
-              Object {
-                "field": "name",
-                "name": "Space",
-                "render": [Function],
-                "sortable": true,
-              },
-              Object {
-                "field": "id",
-                "name": "Identifier",
-                "sortable": true,
-              },
-              Object {
-                "field": "description",
-                "name": "Description",
-                "sortable": true,
-              },
-              Object {
-                "actions": Array [
-                  Object {
-                    "color": "primary",
-                    "description": "Edit this space.",
-                    "icon": "pencil",
-                    "name": "Edit",
-                    "onClick": [Function],
-                    "type": "icon",
-                  },
-                  Object {
-                    "available": [Function],
-                    "color": "danger",
-                    "description": "Delete this space.",
-                    "icon": "trash",
-                    "name": "Delete",
-                    "onClick": [Function],
-                    "type": "icon",
-                  },
-                ],
-                "name": "Actions",
-              },
-            ]
-          }
-          hasActions={true}
-          itemId="id"
-          items={Array []}
-          loading={true}
-          message={
+          <h1>
             <FormattedMessage
-              defaultMessage="loading…"
-              id="xpack.spaces.management.spacesGridPage.loadingTitle"
+              defaultMessage="Spaces"
+              id="xpack.spaces.management.spacesGridPage.spacesTitle"
               values={Object {}}
             />
-          }
-          pagination={true}
-          responsive={true}
-          search={
-            Object {
-              "box": Object {
-                "placeholder": "Search",
+          </h1>
+        </EuiTitle>
+        <EuiText
+          color="subdued"
+          grow={true}
+          size="m"
+        >
+          <p>
+            Organize your dashboards and other saved objects into meaningful categories.
+          </p>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
+        grow={false}
+      >
+        <EuiButton
+          color="primary"
+          fill={true}
+          iconSide="left"
+          onClick={[Function]}
+          type="button"
+        >
+          <FormattedMessage
+            defaultMessage="Create a space"
+            id="xpack.spaces.management.spacesGridPage.createSpaceButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiSpacer
+      size="l"
+    />
+    <EuiInMemoryTable
+      columns={
+        Array [
+          Object {
+            "field": "name",
+            "name": "",
+            "render": [Function],
+            "sortable": true,
+            "width": "50px",
+          },
+          Object {
+            "field": "name",
+            "name": "Space",
+            "render": [Function],
+            "sortable": true,
+          },
+          Object {
+            "field": "id",
+            "name": "Identifier",
+            "sortable": true,
+          },
+          Object {
+            "field": "description",
+            "name": "Description",
+            "sortable": true,
+          },
+          Object {
+            "actions": Array [
+              Object {
+                "render": [Function],
               },
-            }
-          }
-          sorting={false}
+              Object {
+                "available": [Function],
+                "render": [Function],
+              },
+            ],
+            "name": "Actions",
+          },
+        ]
+      }
+      executeQueryOptions={Object {}}
+      hasActions={true}
+      itemId="id"
+      items={Array []}
+      loading={true}
+      message={
+        <FormattedMessage
+          defaultMessage="loading…"
+          id="xpack.spaces.management.spacesGridPage.loadingTitle"
+          values={Object {}}
         />
-      </React.Fragment>
-    </EuiPageContent>
-    <Component
-      userProfile={
-        UserProfileClass {
-          "capabilities": Object {
-            "manageSpaces": true,
+      }
+      pagination={true}
+      responsive={true}
+      search={
+        Object {
+          "box": Object {
+            "placeholder": "Search",
           },
         }
       }
+      sorting={false}
     />
-  </EuiPageBody>
-</EuiPage>
+  </EuiPageContent>
+  <Component
+    userProfile={
+      UserProfileClass {
+        "capabilities": Object {
+          "manageSpaces": true,
+        },
+      }
+    }
+  />
+</div>
 `;
 
 exports[`SpacesGridPage renders the list of spaces 1`] = `
 Array [
   <Component
+    announceSpaceName={true}
     size="s"
     space={
       Object {
@@ -191,6 +185,7 @@ Array [
     </EuiAvatar>
   </Component>,
   <Component
+    announceSpaceName={true}
     size="s"
     space={
       Object {
@@ -230,6 +225,7 @@ Array [
     </EuiAvatar>
   </Component>,
   <Component
+    announceSpaceName={true}
     size="s"
     space={
       Object {

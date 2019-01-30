@@ -130,7 +130,7 @@ export function jobAuditMessagesProvider(callWithRequest) {
             levelsPerJob: {
               terms: {
                 field: 'job_id',
-                size: Math.min(maxBuckets, jobAggregationSize)
+                size: (Math.min(maxBuckets, jobAggregationSize) || 1), // don't allow a value of 0
               },
               aggs: {
                 levels: {

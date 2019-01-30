@@ -38,11 +38,11 @@ import { i18n } from '@kbn/i18n';
 
 export function getRoutes() {
   return {
-    edit: '/management/kibana/indices/{{id}}',
-    addField: '/management/kibana/indices/{{id}}/create-field',
-    indexedFields: '/management/kibana/indices/{{id}}?_a=(tab:indexedFields)',
-    scriptedFields: '/management/kibana/indices/{{id}}?_a=(tab:scriptedFields)',
-    sourceFilters: '/management/kibana/indices/{{id}}?_a=(tab:sourceFilters)'
+    edit: '/management/kibana/index_patterns/{{id}}',
+    addField: '/management/kibana/index_patterns/{{id}}/create-field',
+    indexedFields: '/management/kibana/index_patterns/{{id}}?_a=(tab:indexedFields)',
+    scriptedFields: '/management/kibana/index_patterns/{{id}}?_a=(tab:scriptedFields)',
+    sourceFilters: '/management/kibana/index_patterns/{{id}}?_a=(tab:sourceFilters)'
   };
 }
 
@@ -100,7 +100,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       throw new SavedObjectNotFound(
         type,
         indexPattern.id,
-        '#/management/kibana/index',
+        '#/management/kibana/index_pattern',
       );
     }
 
@@ -428,7 +428,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
           defaultMessage: 'An index pattern with the title \'{title}\' already exists.' });
         try {
           await confirmModalPromise(confirmMessage, { confirmButtonText: 'Go to existing pattern' });
-          return kbnUrl.redirect('/management/kibana/indices/{{id}}', { id: potentialDuplicateByTitle.id });
+          return kbnUrl.redirect('/management/kibana/index_patterns/{{id}}', { id: potentialDuplicateByTitle.id });
         } catch (err) {
           return false;
         }
@@ -444,8 +444,14 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
         await confirmModalPromise(
           i18n.translate('common.ui.indexPattern.confirmOverwriteLabel', { values: { title: this.title },
             defaultMessage: 'Are you sure you want to overwrite \'{title}\'?' }),
-          { confirmButtonText: i18n.translate('common.ui.indexPattern.confirmOverwriteButton', { defaultMessage: 'Overwrite' })
-          });
+          {
+            title: i18n.translate('common.ui.indexPattern.confirmOverwriteTitle', {
+              defaultMessage: 'Overwrite {type}?',
+              values: { type },
+            }),
+            confirmButtonText: i18n.translate('common.ui.indexPattern.confirmOverwriteButton', { defaultMessage: 'Overwrite' }),
+          }
+        );
       } catch (err) {
         // They changed their mind
         return false;

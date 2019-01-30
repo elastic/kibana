@@ -5,8 +5,7 @@
  */
 
 import { ESFilter } from 'elasticsearch';
-import { get } from 'lodash';
-import { oc } from 'ts-optchain';
+import { idx } from 'x-pack/plugins/apm/common/idx';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import {
@@ -20,7 +19,7 @@ import { getTransaction } from '../transactions/get_transaction';
 export interface ErrorGroupAPIResponse {
   transaction?: Transaction;
   error?: APMError;
-  occurrencesCount?: number;
+  occurrencesCount: number;
 }
 
 // TODO: rename from "getErrorGroup"  to "getErrorGroupSample" (since a single error is returned, not an errorGroup)
@@ -70,18 +69,18 @@ export async function getErrorGroup({
   };
 
   const resp = await client<APMError>('search', params);
-  const error = oc(resp).hits.hits[0]._source();
-  const transactionId = oc(error).transaction.id();
-  const traceId: string | undefined = get(error, 'trace.id'); // cannot use oc because 'trace' doesn't exist on v1 errors
+  const error = idx(resp, _ => _.hits.hits[0]._source);
+  const transactionId = idx(error, _ => _.transaction.id);
+  const traceId = idx(error, _ => _.trace.id);
 
   let transaction;
-  if (transactionId) {
+  if (transactionId && traceId) {
     transaction = await getTransaction(transactionId, traceId, setup);
   }
 
   return {
     transaction,
     error,
-    occurrencesCount: oc(resp).hits.total()
+    occurrencesCount: resp.hits.total
   };
 }

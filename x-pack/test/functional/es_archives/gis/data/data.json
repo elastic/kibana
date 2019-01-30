@@ -1,16 +1,29 @@
-
 {
   "type": "doc",
   "value": {
     "index": "geo_shapes",
-    "type": "doc",
     "id": "1",
     "source": {
       "geometry": {
-        "type" : "polygon",
+        "type": "polygon",
         "coordinates": [
           [
-            [100.0, 5.0], [95.0, -5.0], [105.0, -5.0], [100.0, 5.0]
+            [
+              100,
+              5
+            ],
+            [
+              95,
+              -5
+            ],
+            [
+              105,
+              -5
+            ],
+            [
+              100,
+              5
+            ]
           ]
         ]
       },
@@ -23,14 +36,28 @@
   "type": "doc",
   "value": {
     "index": "geo_shapes",
-    "type": "doc",
     "id": "2",
     "source": {
       "geometry": {
-        "type" : "polygon",
+        "type": "polygon",
         "coordinates": [
           [
-            [80.0, 5.0], [75.0, -5.0], [85.0, -5.0], [80.0, 5.0]
+            [
+              80,
+              5
+            ],
+            [
+              75,
+              -5
+            ],
+            [
+              85,
+              -5
+            ],
+            [
+              80,
+              5
+            ]
           ]
         ]
       },
@@ -43,14 +70,28 @@
   "type": "doc",
   "value": {
     "index": "geo_shapes",
-    "type": "doc",
     "id": "3",
     "source": {
       "geometry": {
-        "type" : "polygon",
+        "type": "polygon",
         "coordinates": [
           [
-            [60.0, 5.0], [55.0, -5.0], [65.0, -5.0], [60.0, 5.0]
+            [
+              60,
+              5
+            ],
+            [
+              55,
+              -5
+            ],
+            [
+              65,
+              -5
+            ],
+            [
+              60,
+              5
+            ]
           ]
         ]
       },
@@ -63,7 +104,6 @@
   "type": "doc",
   "value": {
     "index": "meta_for_geo_shapes",
-    "type": "doc",
     "id": "1",
     "source": {
       "shape_name": "alpha",
@@ -76,7 +116,6 @@
   "type": "doc",
   "value": {
     "index": "meta_for_geo_shapes",
-    "type": "doc",
     "id": "2",
     "source": {
       "shape_name": "alpha",
@@ -89,7 +128,6 @@
   "type": "doc",
   "value": {
     "index": "meta_for_geo_shapes",
-    "type": "doc",
     "id": "3",
     "source": {
       "shape_name": "alpha",
@@ -102,7 +140,6 @@
   "type": "doc",
   "value": {
     "index": "meta_for_geo_shapes",
-    "type": "doc",
     "id": "4",
     "source": {
       "shape_name": "bravo",
@@ -115,7 +152,6 @@
   "type": "doc",
   "value": {
     "index": "meta_for_geo_shapes",
-    "type": "doc",
     "id": "5",
     "source": {
       "shape_name": "charlie",
@@ -128,11 +164,151 @@
   "type": "doc",
   "value": {
     "index": "meta_for_geo_shapes",
-    "type": "doc",
     "id": "6",
     "source": {
       "shape_name": "charlie",
       "prop1": 12
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "antimeridian_points",
+    "id": "1",
+    "source": {
+      "location": {
+        "lat": 0,
+        "lon": 179.5
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "antimeridian_points",
+    "id": "2",
+    "source": {
+      "location": {
+        "lat": 0,
+        "lon": -179.5
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "antimeridian_points",
+    "id": "3",
+    "source": {
+      "location": {
+        "lat": 0,
+        "lon": 0
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "antimeridian_shapes",
+    "id": "1",
+    "source": {
+      "location": {
+        "type": "polygon",
+        "coordinates": [
+          [
+            [
+              179,
+              5
+            ],
+            [
+              178.5,
+              -5
+            ],
+            [
+              179.5,
+              -5
+            ],
+            [
+              179,
+              5
+            ]
+          ]
+        ]
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "antimeridian_shapes",
+    "id": "2",
+    "source": {
+      "location": {
+        "type": "polygon",
+        "coordinates": [
+          [
+            [
+              -179,
+              5
+            ],
+            [
+              -178.5,
+              -5
+            ],
+            [
+              -179.5,
+              -5
+            ],
+            [
+              -179,
+              5
+            ]
+          ]
+        ]
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "antimeridian_shapes",
+    "id": "3",
+    "source": {
+      "location": {
+        "type": "polygon",
+        "coordinates": [
+          [
+            [
+              0,
+              5
+            ],
+            [
+              -0.5,
+              -5
+            ],
+            [
+              0.5,
+              -5
+            ],
+            [
+              0,
+              5
+            ]
+          ]
+        ]
+      }
     }
   }
 }

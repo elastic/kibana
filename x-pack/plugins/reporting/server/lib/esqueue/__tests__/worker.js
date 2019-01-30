@@ -867,6 +867,33 @@ describe('Worker class', function () {
       return sinon.stub(workerWithFailure, '_failJob').returns(Promise.resolve());
     }
 
+    describe('saving output failure', () => {
+      it('should mark the job as failed if saving to ES fails', async () => {
+        const job = {
+          _id: 'shouldSucced',
+          _source: {
+            timeout: 1000,
+            payload: 'test'
+          }
+        };
+
+        sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 413 }));
+
+        const workerFn = function (jobPayload) {
+          return new Promise(function (resolve) {
+            setTimeout(() => resolve(jobPayload), 10);
+          });
+        };
+        const worker = new Worker(mockQueue, 'test', workerFn, defaultWorkerOptions);
+        const failStub = getFailStub(worker);
+
+        await worker._performJob(job);
+        worker.destroy();
+
+        sinon.assert.called(failStub);
+      });
+    });
+
     describe('search failure', function () {
       it('causes _processPendingJobs to reject the Promise', function () {
         sinon.stub(mockQueue.client, 'search').returns(Promise.reject(new Error('test error')));

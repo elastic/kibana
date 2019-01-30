@@ -29,9 +29,11 @@ fi
 export KIBANA_DIR="$dir"
 export XPACK_DIR="$KIBANA_DIR/x-pack"
 export PARENT_DIR="$(cd "$KIBANA_DIR/.."; pwd)"
+
 echo "-> KIBANA_DIR $KIBANA_DIR"
 echo "-> XPACK_DIR $XPACK_DIR"
 echo "-> PARENT_DIR $PARENT_DIR"
+echo "-> TEST_ES_SNAPSHOT_VERSION $TEST_ES_SNAPSHOT_VERSION"
 
 ###
 ### download node

@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`EditFilterListHeader renders the header when creating a new filter list with ID, description and items set 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiFlexGroup
     alignItems="baseline"
     component="div"
@@ -128,11 +128,11 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
   <EuiSpacer
     size="s"
   />
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`EditFilterListHeader renders the header when creating a new filter list with the ID not set 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiFlexGroup
     alignItems="baseline"
     component="div"
@@ -269,11 +269,11 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
   <EuiSpacer
     size="s"
   />
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`EditFilterListHeader renders the header when editing an existing unused filter list with no description or items 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiFlexGroup
     alignItems="baseline"
     component="div"
@@ -386,28 +386,26 @@ exports[`EditFilterListHeader renders the header when editing an existing unused
   <EuiSpacer
     size="s"
   />
-  <React.Fragment>
-    <EuiText
-      grow={true}
-      size="m"
-    >
-      <p>
-        <FormattedMessage
-          defaultMessage="This filter list is not used by any jobs."
-          id="xpack.ml.settings.filterLists.editFilterList.filterIsNotUsedInJobsDescription"
-          values={Object {}}
-        />
-      </p>
-    </EuiText>
-    <EuiSpacer
-      size="s"
-    />
-  </React.Fragment>
-</React.Fragment>
+  <EuiText
+    grow={true}
+    size="m"
+  >
+    <p>
+      <FormattedMessage
+        defaultMessage="This filter list is not used by any jobs."
+        id="xpack.ml.settings.filterLists.editFilterList.filterIsNotUsedInJobsDescription"
+        values={Object {}}
+      />
+    </p>
+  </EuiText>
+  <EuiSpacer
+    size="s"
+  />
+</Fragment>
 `;
 
 exports[`EditFilterListHeader renders the header when editing an existing used filter list with description and items set 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiFlexGroup
     alignItems="baseline"
     component="div"
@@ -514,50 +512,48 @@ exports[`EditFilterListHeader renders the header when editing an existing used f
   <EuiSpacer
     size="s"
   />
-  <React.Fragment>
-    <div
-      className="ml-filter-list-usage"
+  <div
+    className="ml-filter-list-usage"
+  >
+    <EuiText
+      grow={true}
+      size="m"
     >
-      <EuiText
-        grow={true}
-        size="m"
-      >
-        <FormattedMessage
-          defaultMessage="This filter list is used in"
-          id="xpack.ml.settings.filterLists.editFilterList.filterIsUsedInJobsDescription"
-          values={Object {}}
-        />
-      </EuiText>
-      <FilterListUsagePopover
-        entityType="detector"
-        entityValues={
-          Array [
-            "mean CPUUtilization",
-          ]
-        }
+      <FormattedMessage
+        defaultMessage="This filter list is used in"
+        id="xpack.ml.settings.filterLists.editFilterList.filterIsUsedInJobsDescription"
+        values={Object {}}
       />
-      <EuiText
-        grow={true}
-        size="m"
-      >
-        <FormattedMessage
-          defaultMessage="across"
-          id="xpack.ml.settings.filterLists.editFilterList.acrossText"
-          values={Object {}}
-        />
-      </EuiText>
-      <FilterListUsagePopover
-        entityType="job"
-        entityValues={
-          Array [
-            "cloudwatch",
-          ]
-        }
-      />
-    </div>
-    <EuiSpacer
-      size="s"
+    </EuiText>
+    <FilterListUsagePopover
+      entityType="detector"
+      entityValues={
+        Array [
+          "mean CPUUtilization",
+        ]
+      }
     />
-  </React.Fragment>
-</React.Fragment>
+    <EuiText
+      grow={true}
+      size="m"
+    >
+      <FormattedMessage
+        defaultMessage="across"
+        id="xpack.ml.settings.filterLists.editFilterList.acrossText"
+        values={Object {}}
+      />
+    </EuiText>
+    <FilterListUsagePopover
+      entityType="job"
+      entityValues={
+        Array [
+          "cloudwatch",
+        ]
+      }
+    />
+  </div>
+  <EuiSpacer
+    size="s"
+  />
+</Fragment>
 `;

@@ -5,7 +5,7 @@
  */
 
 
-import { shallow, mount } from 'enzyme';
+import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { CalendarsListTable } from './table';
@@ -41,15 +41,15 @@ const props = {
 describe('CalendarsListTable', () => {
 
   test('renders the table with all calendars', () => {
-    const wrapper = shallow(
-      <CalendarsListTable {...props} />
+    const wrapper = shallowWithIntl(
+      <CalendarsListTable.WrappedComponent {...props} />
     );
     expect(wrapper).toMatchSnapshot();
   });
 
   test('New button enabled if permission available', () => {
-    const wrapper = mount(
-      <CalendarsListTable {...props} />
+    const wrapper = mountWithIntl(
+      <CalendarsListTable.WrappedComponent {...props} />
     );
 
     const buttons = wrapper.find('[data-testid="new_calendar_button"]');
@@ -64,8 +64,8 @@ describe('CalendarsListTable', () => {
       canCreateCalendar: false
     };
 
-    const wrapper = mount(
-      <CalendarsListTable {...disableProps} />
+    const wrapper = mountWithIntl(
+      <CalendarsListTable.WrappedComponent {...disableProps} />
     );
 
     const buttons = wrapper.find('[data-testid="new_calendar_button"]');
@@ -81,8 +81,8 @@ describe('CalendarsListTable', () => {
       mlNodesAvailable: false
     };
 
-    const wrapper = mount(
-      <CalendarsListTable {...disableProps} />
+    const wrapper = mountWithIntl(
+      <CalendarsListTable.WrappedComponent {...disableProps} />
     );
 
     const buttons = wrapper.find('[data-testid="new_calendar_button"]');

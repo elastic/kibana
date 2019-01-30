@@ -5,6 +5,7 @@
  */
 
 
+import { i18n } from '@kbn/i18n';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
 
@@ -51,7 +52,9 @@ export function datafeedsProvider(callWithRequest) {
           results[datafeedId] = { started: false, error };
         }
       } else {
-        results[datafeedId] = { started: false, error: 'Job has no datafeed' };
+        results[datafeedId] = { started: false, error: i18n.translate('xpack.ml.models.jobService.jobHasNoDatafeedErrorMessage', {
+          defaultMessage: 'Job has no datafeed',
+        }) };
       }
     }
 

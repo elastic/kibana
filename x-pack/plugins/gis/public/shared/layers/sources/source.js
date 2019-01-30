@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-
-export class ASource {
+export class AbstractSource {
 
   static renderEditor() {
     throw new Error('Must implement Source.renderEditor');
@@ -16,14 +14,22 @@ export class ASource {
     throw new Error('Must implement Source.createDescriptor');
   }
 
+  static renderDropdownDisplayOption() {
+    throw new Error('Must implement Source.renderDropdownDisplayOption');
+  }
+
   constructor(descriptor) {
     this._descriptor = descriptor;
   }
 
   destroy() {}
 
-  renderDetails() {
-    return (<div>{`Here be details for source`}</div>);
+  /**
+   * return list of immutable source properties.
+   * Immutable source properties are properties that can not be edited by the user.
+   */
+  async getImmutableProperties() {
+    return [];
   }
 
   _createDefaultLayerDescriptor() {
@@ -39,11 +45,28 @@ export class ASource {
     return '';
   }
 
+  /**
+   * return attribution for this layer as array of objects with url and label property.
+   * e.g. [{ url: 'example.com', label: 'foobar' }]
+   * @return {Promise<null>}
+   */
+  async getAttributions() {
+    return [];
+  }
+
   isFieldAware() {
     return false;
   }
 
   isRefreshTimerAware() {
+    return false;
+  }
+
+  isGeoGridPrecisionAware() {
+    return false;
+  }
+
+  isQueryAware() {
     return false;
   }
 
@@ -57,6 +80,14 @@ export class ASource {
 
   renderSourceSettingsEditor() {
     return null;
+  }
+
+  getIndexPatternIds() {
+    return  [];
+  }
+
+  getGeoGridPrecision() {
+    return 0;
   }
 }
 

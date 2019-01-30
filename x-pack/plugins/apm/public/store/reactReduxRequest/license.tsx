@@ -12,10 +12,10 @@ import { createInitialDataSelector } from './helpers';
 const ID = 'license';
 const INITIAL_DATA = {
   features: {
-    watcher: { isAvailable: false },
-    ml: { isAvailable: false }
+    watcher: { is_available: false },
+    ml: { is_available: false }
   },
-  license: { isActive: false }
+  license: { is_active: false }
 };
 
 const withInitialData = createInitialDataSelector(INITIAL_DATA);

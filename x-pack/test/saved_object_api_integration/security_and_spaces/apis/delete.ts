@@ -16,7 +16,6 @@ export default function({ getService }: TestInvoker) {
 
   describe('delete', () => {
     const {
-      createExpectLegacyForbidden,
       createExpectUnknownDocNotFound,
       deleteTest,
       expectEmpty,
@@ -32,7 +31,6 @@ export default function({ getService }: TestInvoker) {
           noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
           superuser: AUTHENTICATION.SUPERUSER,
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
           allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
@@ -48,7 +46,6 @@ export default function({ getService }: TestInvoker) {
           noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
           superuser: AUTHENTICATION.SUPERUSER,
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
-          legacyRead: AUTHENTICATION.KIBANA_LEGACY_DASHBOARD_ONLY_USER,
           allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
@@ -65,15 +62,15 @@ export default function({ getService }: TestInvoker) {
         tests: {
           spaceAware: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.users.noAccess.username),
+            response: expectRbacSpaceAwareForbidden,
           },
           notSpaceAware: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.users.noAccess.username),
+            response: expectRbacNotSpaceAwareForbidden,
           },
           invalidId: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.users.noAccess.username),
+            response: expectRbacInvalidIdForbidden,
           },
         },
       });
@@ -102,35 +99,16 @@ export default function({ getService }: TestInvoker) {
         spaceId: scenario.spaceId,
         tests: {
           spaceAware: {
-            statusCode: 200,
-            response: expectEmpty,
-          },
-          notSpaceAware: {
-            statusCode: 200,
-            response: expectEmpty,
-          },
-          invalidId: {
-            statusCode: 404,
-            response: createExpectUnknownDocNotFound(scenario.spaceId),
-          },
-        },
-      });
-
-      deleteTest(`legacy readonly user within the ${scenario.spaceId} space`, {
-        user: scenario.users.legacyRead,
-        spaceId: scenario.spaceId,
-        tests: {
-          spaceAware: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.users.legacyRead.username),
+            response: expectRbacSpaceAwareForbidden,
           },
           notSpaceAware: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.users.legacyRead.username),
+            response: expectRbacNotSpaceAwareForbidden,
           },
           invalidId: {
             statusCode: 403,
-            response: createExpectLegacyForbidden(scenario.users.legacyRead.username),
+            response: expectRbacInvalidIdForbidden,
           },
         },
       });

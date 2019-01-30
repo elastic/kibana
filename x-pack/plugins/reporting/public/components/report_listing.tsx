@@ -25,9 +25,8 @@ import { ReportInfoButton } from './report_info_button';
 import {
   EuiBasicTable,
   EuiButtonIcon,
-  EuiPage,
-  EuiPageBody,
   EuiPageContent,
+  EuiSpacer,
   EuiText,
   EuiTextColor,
   EuiTitle,
@@ -46,6 +45,8 @@ interface Job {
   status: string;
   statusLabel: string;
   max_size_reached: boolean;
+  attempts: number;
+  max_attempts: number;
 }
 
 interface Props {
@@ -67,31 +68,31 @@ const jobStatusLabelsMap = new Map<JobStatuses, string>([
   [
     JobStatuses.PENDING,
     i18n.translate('xpack.reporting.jobStatuses.pendingText', {
-      defaultMessage: 'pending',
+      defaultMessage: 'Pending',
     }),
   ],
   [
     JobStatuses.PROCESSING,
     i18n.translate('xpack.reporting.jobStatuses.processingText', {
-      defaultMessage: 'processing',
+      defaultMessage: 'Processing',
     }),
   ],
   [
     JobStatuses.COMPLETED,
     i18n.translate('xpack.reporting.jobStatuses.completedText', {
-      defaultMessage: 'completed',
+      defaultMessage: 'Completed',
     }),
   ],
   [
     JobStatuses.FAILED,
     i18n.translate('xpack.reporting.jobStatuses.failedText', {
-      defaultMessage: 'failed',
+      defaultMessage: 'Failed',
     }),
   ],
   [
     JobStatuses.CANCELLED,
     i18n.translate('xpack.reporting.jobStatuses.cancelledText', {
-      defaultMessage: 'cancelled',
+      defaultMessage: 'Cancelled',
     }),
   ],
 ]);
@@ -116,21 +117,23 @@ class ReportListingUi extends Component<Props, State> {
 
   public render() {
     return (
-      <EuiPage>
-        <EuiPageBody restrictWidth>
-          <EuiPageContent horizontalPosition="center">
-            <EuiTitle>
-              <h1>
-                <FormattedMessage
-                  id="xpack.reporting.listing.reportsTitle"
-                  defaultMessage="Reports"
-                />
-              </h1>
-            </EuiTitle>
-            {this.renderTable()}
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
+      <EuiPageContent horizontalPosition="center" className="euiPageBody--restrictWidth-default">
+        <EuiTitle>
+          <h1>
+            <FormattedMessage id="xpack.reporting.listing.reportstitle" defaultMessage="Reports" />
+          </h1>
+        </EuiTitle>
+        <EuiText color="subdued">
+          <p>
+            <FormattedMessage
+              id="xpack.reporting.listing.reports.subtitle"
+              defaultMessage="Find reports generated in Kibana applications here"
+            />
+          </p>
+        </EuiText>
+        <EuiSpacer />
+        {this.renderTable()}
+      </EuiPageContent>
     );
   }
 
@@ -205,7 +208,7 @@ class ReportListingUi extends Component<Props, State> {
               <div>
                 <FormattedMessage
                   id="xpack.reporting.listing.tableValue.createdAtDetail.pendingStatusReachedText"
-                  defaultMessage="pending - waiting for job to be processed"
+                  defaultMessage="Pending - waiting for job to be processed"
                 />
               </div>
             );
@@ -217,7 +220,7 @@ class ReportListingUi extends Component<Props, State> {
               <span>
                 <FormattedMessage
                   id="xpack.reporting.listing.tableValue.createdAtDetail.maxSizeReachedText"
-                  defaultMessage=" - max size reached"
+                  defaultMessage=" - Max size reached"
                 />
               </span>
             );
@@ -233,7 +236,11 @@ class ReportListingUi extends Component<Props, State> {
             statusTimestamp = this.formatDate(record.completed_at);
           }
 
-          const statusLabel = jobStatusLabelsMap.get(status as JobStatuses) || status;
+          let statusLabel = jobStatusLabelsMap.get(status as JobStatuses) || status;
+
+          if (status === JobStatuses.PROCESSING) {
+            statusLabel = statusLabel + ` (attempt ${record.attempts} of ${record.max_attempts})`;
+          }
 
           if (statusTimestamp) {
             return (
@@ -406,8 +413,8 @@ class ReportListingUi extends Component<Props, State> {
       this.setState({
         isLoading: false,
         total,
-        jobs: jobs.map((job: JobQueueEntry) => {
-          return {
+        jobs: jobs.map(
+          (job: JobQueueEntry): Job => ({
             id: job._id,
             type: job._source.jobtype,
             object_type: job._source.payload.type,
@@ -420,8 +427,10 @@ class ReportListingUi extends Component<Props, State> {
             statusLabel:
               jobStatusLabelsMap.get(job._source.status as JobStatuses) || job._source.status,
             max_size_reached: job._source.output ? job._source.output.max_size_reached : false,
-          };
-        }),
+            attempts: job._source.attempts,
+            max_attempts: job._source.max_attempts,
+          })
+        ),
       });
     }
   };

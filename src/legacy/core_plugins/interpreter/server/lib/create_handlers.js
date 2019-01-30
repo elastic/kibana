@@ -27,14 +27,10 @@ export const createHandlers = (request, server) => {
 
   return {
     environment: 'server',
-    // TODO: https://github.com/elastic/kibana/issues/27437 - A temporary measure to allow the timelion data source to negotiate secure connections to the Kibana server, to be removed by 6.7
-    // See https://github.com/elastic/kibana/pull/26809 and https://github.com/elastic/kibana/issues/26812
-    __dangerouslyUnsupportedSslConfig: server.config().get('server.ssl'),
     serverUri:
       config.has('server.rewriteBasePath') && config.get('server.rewriteBasePath')
         ? `${server.info.uri}${config.get('server.basePath')}`
         : server.info.uri,
-    httpHeaders: request.headers,
     elasticsearchClient: async (...args) => {
       // check if the session is valid because continuing to use it
       if (isSecurityEnabled(server)) {

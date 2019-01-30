@@ -9,14 +9,12 @@
       }
     },
     "mappings": {
-      "doc": {
-        "properties": {
-          "geometry": {
-            "type": "geo_shape"
-          },
-          "name": {
-            "type": "keyword"
-          }
+      "properties": {
+        "geometry": {
+          "type": "geo_shape"
+        },
+        "name": {
+          "type": "keyword"
         }
       }
     }
@@ -34,11 +32,49 @@
       }
     },
     "mappings": {
-      "doc": {
-        "properties": {
-          "shape_name": {
-            "type": "keyword"
-          }
+      "properties": {
+        "shape_name": {
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "antimeridian_points",
+    "settings": {
+      "index": {
+        "number_of_shards": "1",
+        "number_of_replicas": "0"
+      }
+    },
+    "mappings": {
+      "properties": {
+        "location": {
+          "type": "geo_point"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "antimeridian_shapes",
+    "settings": {
+      "index": {
+        "number_of_shards": "1",
+        "number_of_replicas": "0"
+      }
+    },
+    "mappings": {
+      "properties": {
+        "location": {
+          "type": "geo_shape"
         }
       }
     }

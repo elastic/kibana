@@ -10,6 +10,7 @@ import { ResizeChecker } from 'ui/resize_checker';
 import { syncLayerOrder, removeOrphanedSourcesAndLayers, createMbMapInstance } from './utils';
 import { inspectorAdapters } from '../../../kibana_services';
 import { DECIMAL_DEGREES_PRECISION, ZOOM_PRECISION } from '../../../../common/constants';
+import mapboxgl from 'mapbox-gl';
 
 export class MBMapContainer extends React.Component {
 
@@ -61,10 +62,8 @@ export class MBMapContainer extends React.Component {
   }
 
   async _initializeMap() {
-    const initialZoom = this.props.mapState.zoom;
-    const initialCenter = this.props.mapState.center;
-    this._mbMap = await createMbMapInstance(this.refs.mapContainer, initialZoom, initialCenter);
-    window._mbMap = this._mbMap;
+
+    this._mbMap = await createMbMapInstance(this.refs.mapContainer, this.props.goto ? this.props.goto.center : null);
 
     // Override mapboxgl.Map "on" and "removeLayer" methods so we can track layer listeners
     // Tracked layer listerners are used to clean up event handlers
@@ -90,9 +89,28 @@ export class MBMapContainer extends React.Component {
     };
 
     this.assignSizeWatch();
-    this._mbMap.on('moveend', () => {
+
+
+    // moveend callback is debounced to avoid updating map extent state while map extent is still changing
+    // moveend is fired while the map extent is still changing in the following scenarios
+    // 1) During opening/closing of layer details panel, the EUI animation results in 8 moveend events
+    // 2) Setting map zoom and center from goto is done in 2 API calls, resulting in 2 moveend events
+    this._mbMap.on('moveend', _.debounce(() => {
       this.props.extentChanged(this._getMapState());
+    }, 100));
+
+    const throttledSetMouseCoordinates = _.throttle(e => {
+      this.props.setMouseCoordinates({
+        lat: e.lngLat.lat,
+        lon: e.lngLat.lng
+      });
+    }, 100);
+    this._mbMap.on('mousemove', throttledSetMouseCoordinates);
+    this._mbMap.on('mouseout', () => {
+      throttledSetMouseCoordinates.cancel(); // cancel any delayed setMouseCoordinates invocations
+      this.props.clearMouseCoordinates();
     });
+
     this.props.onMapReady(this._getMapState());
   }
 
@@ -145,28 +163,33 @@ export class MBMapContainer extends React.Component {
   _syncMbMapWithMapState = () => {
     const {
       isMapReady,
-      mapState,
+      goto,
+      clearGoto,
     } = this.props;
 
-    if (!isMapReady) {
+    if (!isMapReady || !goto) {
       return;
     }
 
-    const zoom = _.round(this._mbMap.getZoom(), ZOOM_PRECISION);
-    if (typeof mapState.zoom === 'number' && mapState.zoom !== zoom) {
-      this._mbMap.setZoom(mapState.zoom);
-    }
+    clearGoto();
 
-    const center = this._mbMap.getCenter();
-    if (mapState.center &&
-      (mapState.center.lat !== _.round(center.lat, DECIMAL_DEGREES_PRECISION)
-      || mapState.center.lon !== _.round(center.lng, DECIMAL_DEGREES_PRECISION))) {
+    if (goto.bounds) {
+      //clamping ot -89/89 latitudes since Mapboxgl does not seem to handle bounds that contain the poles (logs errors to the console when using -90/90)
+      const lnLatBounds = new mapboxgl.LngLatBounds(
+        new mapboxgl.LngLat(clamp(goto.bounds.min_lon, -180, 180), clamp(goto.bounds.min_lat, -89, 89)),
+        new mapboxgl.LngLat(clamp(goto.bounds.max_lon, -180, 180), clamp(goto.bounds.max_lat, -89, 89)),
+      );
+      this._mbMap.fitBounds(lnLatBounds);
+    } else if (goto.center) {
+      this._mbMap.setZoom(goto.center.zoom);
       this._mbMap.setCenter({
-        lng: mapState.center.lon,
-        lat: mapState.center.lat
+        lng: goto.center.lon,
+        lat: goto.center.lat
       });
     }
-  }
+
+
+  };
 
   _syncMbMapWithLayerList = () => {
     const {
@@ -177,12 +200,17 @@ export class MBMapContainer extends React.Component {
     if (!isMapReady) {
       return;
     }
+
     removeOrphanedSourcesAndLayers(this._mbMap, layerList);
-    layerList.forEach((layer) => {
-      layer.syncLayerWithMB(this._mbMap);
+    layerList.forEach(layer => {
+      if (!layer.hasErrors()) {
+        Promise.resolve(layer.syncLayerWithMB(this._mbMap))
+          .catch(({ message }) =>
+            this.props.setLayerErrorStatus(layer.getId(), message));
+      }
     });
     syncLayerOrder(this._mbMap, layerList);
-  }
+  };
 
   _syncMbMapWithInspector = () => {
     if (!this.props.isMapReady) {
@@ -198,7 +226,7 @@ export class MBMapContainer extends React.Component {
       stats,
       style: this._mbMap.getStyle(),
     });
-  }
+  };
 
   render() {
     // do not debounce syncing zoom and center
@@ -208,4 +236,11 @@ export class MBMapContainer extends React.Component {
       <div id={'mapContainer'} className="mapContainer" ref="mapContainer"/>
     );
   }
+}
+
+
+function clamp(val, min, max) {
+  if (val > max) val = max;
+  else if (val < min) val = min;
+  return val;
 }

@@ -9,14 +9,8 @@ import styled from 'styled-components';
 import {
   IStackframe,
   IStackframeWithLineContext
-} from '../../../../typings/es_schemas/Stackframe';
-import {
-  borderRadius,
-  colors,
-  fontFamilyCode,
-  px,
-  units
-} from '../../../style/variables';
+} from 'x-pack/plugins/apm/typings/es_schemas/fields/Stackframe';
+import { borderRadius, colors, fontFamilyCode } from '../../../style/variables';
 import { FrameHeading } from '../Stacktrace/FrameHeading';
 import { Context } from './Context';
 import { Variables } from './Variables';
@@ -27,7 +21,6 @@ const CodeHeader = styled.div`
 `;
 
 const Container = styled.div<{ isLibraryFrame: boolean }>`
-  margin: 0 0 ${px(units.plus)} 0;
   position: relative;
   font-family: ${fontFamilyCode};
   border: 1px solid ${colors.gray4};

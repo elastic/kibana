@@ -30,16 +30,16 @@ export const config = (Joi) => {
         }).default()
       }).default()
     }).default(),
-    index_pattern: Joi.string().default('.monitoring-*-2-*,.monitoring-*-6-*'),
+    index_pattern: Joi.string().default('.monitoring-*-6-*'),
     kibana: Joi.object({
-      index_pattern: Joi.string().default('.monitoring-kibana-2-*,.monitoring-kibana-6-*'),
+      index_pattern: Joi.string().default('.monitoring-kibana-6-*'),
       collection: Joi.object({
         enabled: Joi.boolean().default(true),
         interval: Joi.number().default(10000) // op status metrics get buffered at `ops.interval` and flushed to the bulk endpoint at this interval
       }).default()
     }).default(),
     logstash: Joi.object({
-      index_pattern: Joi.string().default('.monitoring-logstash-2-*,.monitoring-logstash-6-*')
+      index_pattern: Joi.string().default('.monitoring-logstash-6-*')
     }).default(),
     beats: Joi.object({
       index_pattern: Joi.string().default('.monitoring-beats-6-*')
@@ -62,7 +62,7 @@ export const config = (Joi) => {
     }).default(),
     elasticsearch: Joi.object({
       customHeaders: Joi.object().default({}),
-      index_pattern: Joi.string().default('.monitoring-es-2-*,.monitoring-es-6-*'),
+      index_pattern: Joi.string().default('.monitoring-es-6-*'),
       logQueries: Joi.boolean().default(false),
       requestHeadersWhitelist: Joi.array().items().single().default(DEFAULT_REQUEST_HEADERS),
       sniffOnStart: Joi.boolean().default(false),
@@ -82,6 +82,11 @@ export const config = (Joi) => {
         alwaysPresentCertificate: Joi.boolean().default(false),
       }).default(),
       apiVersion: Joi.string().default('master')
-    }).default()
+    }).default(),
+    tests: Joi.object({
+      cloud_detector: Joi.object({
+        enabled: Joi.boolean().default(true)
+      }).default()
+    }).default(),
   }).default();
 };
