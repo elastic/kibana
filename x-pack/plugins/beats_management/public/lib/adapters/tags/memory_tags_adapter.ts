@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BeatTag } from '../../../../common/domain_types';
+import { BeatTag, CMBeat } from '../../../../common/domain_types';
 import { CMTagsAdapter } from './adapter_types';
 
 export class MemoryTagsAdapter implements CMTagsAdapter {
@@ -35,5 +35,9 @@ export class MemoryTagsAdapter implements CMTagsAdapter {
       this.tagsDB.push(tag);
     }
     return tag;
+  }
+
+  public async getAssignable(beats: CMBeat[]) {
+    return this.tagsDB;
   }
 }

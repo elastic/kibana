@@ -9,6 +9,8 @@ import PropTypes from 'prop-types';
 import { isEmpty, capitalize } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiHorizontalRule } from '@elastic/eui';
 import { StatusIcon } from '../status_icon/index.js';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const wrapChild = ({ label, value, ...props }, index) => (
   <EuiFlexItem
@@ -27,9 +29,23 @@ const wrapChild = ({ label, value, ...props }, index) => (
 
 const DefaultIconComponent = ({ status }) => (
   <Fragment>
-    Status: {(
-      <StatusIcon type={status.toUpperCase()} label={`Status: ${status}`} />
-    )}
+    <FormattedMessage
+      id="xpack.monitoring.summaryStatus.statusIconTitle"
+      defaultMessage="Status: {statusIcon}"
+      values={{
+        statusIcon: (
+          <StatusIcon
+            type={status.toUpperCase()}
+            label={i18n.translate('xpack.monitoring.summaryStatus.statusIconLabel', {
+              defaultMessage: 'Status: {status}',
+              values: {
+                status
+              }
+            })}
+          />
+        )
+      }}
+    />
   </Fragment>
 );
 
@@ -53,7 +69,9 @@ const StatusIndicator = ({ status, isOnline, IconComponent }) => {
         )}
         titleSize="s"
         textAlign="left"
-        description="Status:"
+        description={i18n.translate('xpack.monitoring.summaryStatus.statusDescription', {
+          defaultMessage: 'Status:',
+        })}
       />
     </EuiFlexItem>
   );

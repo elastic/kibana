@@ -13,6 +13,7 @@ import { ClusterStatus } from '../cluster_status';
 import { Sparkline } from 'plugins/monitoring/components/sparkline';
 import { EuiMonitoringTable } from '../../table';
 import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 class PipelineListingUI extends Component {
   tooltipXValueFormatter(xValue) {
@@ -29,7 +30,9 @@ class PipelineListingUI extends Component {
 
     return [
       {
-        name: 'ID',
+        name: i18n.translate('xpack.monitoring.logstash.pipelines.idTitle', {
+          defaultMessage: 'ID'
+        }),
         field: 'id',
         sortable: true,
         render: (id) => (
@@ -46,7 +49,9 @@ class PipelineListingUI extends Component {
         )
       },
       {
-        name: 'Events Emitted Rate',
+        name: i18n.translate('xpack.monitoring.logstash.pipelines.eventsEmittedRateTitle', {
+          defaultMessage: 'Events Emitted Rate'
+        }),
         field: 'latestThroughput',
         sortable: true,
         render: (value, pipeline) => {
@@ -78,7 +83,9 @@ class PipelineListingUI extends Component {
         }
       },
       {
-        name: 'Number of Nodes',
+        name: i18n.translate('xpack.monitoring.logstash.pipelines.numberOfNodesTitle', {
+          defaultMessage: 'Number of Nodes'
+        }),
         field: 'latestNodesCount',
         sortable: true,
         render: (value, pipeline) => {
