@@ -56,6 +56,7 @@ export const TableView = injectI18n(
           }),
           sortable: true,
           truncateText: true,
+          textOnly: true,
           render: (value: string, item: { node: InfraWaffleMapNode }) => (
             <NodeContextMenu
               node={item.node}
@@ -76,6 +77,7 @@ export const TableView = injectI18n(
           name: fieldToName((grouping && grouping.field) || '', intl),
           sortable: true,
           truncateText: true,
+          textOnly: true,
           render: (value: string) => {
             const handleClick = () => this.props.onFilter(`${grouping.field}:"${value}"`);
             return (
