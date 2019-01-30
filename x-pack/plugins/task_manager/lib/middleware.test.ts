@@ -55,7 +55,7 @@ const defaultBeforeRun = async (opts: RunContext) => {
 };
 
 describe('addMiddlewareToChain', () => {
-  it('chains the beforeSave functions', () => {
+  it('chains the beforeSave functions', async () => {
     const m1 = {
       beforeSave: async (opts: BeforeSaveOpts) => {
         Object.assign(opts.taskInstance.params, { m1: true });
@@ -82,8 +82,10 @@ describe('addMiddlewareToChain', () => {
     middlewareChain = addMiddlewareToChain(m1, m2);
     middlewareChain = addMiddlewareToChain(middlewareChain, m3);
 
-    middlewareChain.beforeSave({ taskInstance: getMockTaskInstance() }).then((saveOpts: any) => {
-      expect(saveOpts).toMatchInlineSnapshot(`
+    await middlewareChain
+      .beforeSave({ taskInstance: getMockTaskInstance() })
+      .then((saveOpts: any) => {
+        expect(saveOpts).toMatchInlineSnapshot(`
 Object {
   "taskInstance": Object {
     "params": Object {
@@ -97,10 +99,10 @@ Object {
   },
 }
 `);
-    });
+      });
   });
 
-  it('chains the beforeRun functions', () => {
+  it('chains the beforeRun functions', async () => {
     const m1 = {
       beforeSave: defaultBeforeSave,
       beforeRun: async (opts: RunContext) => {
@@ -133,7 +135,7 @@ Object {
     middlewareChain = addMiddlewareToChain(m1, m2);
     middlewareChain = addMiddlewareToChain(middlewareChain, m3);
 
-    middlewareChain
+    await middlewareChain
       .beforeRun(getMockRunContext(getMockConcreteTaskInstance()))
       .then(contextOpts => {
         expect(contextOpts).toMatchInlineSnapshot(`
