@@ -60,33 +60,6 @@ function defaultMapping(): IndexMapping {
             type: 'keyword',
           },
         },
-        migrationVersion: {
-          dynamic: 'true',
-          type: 'object',
-        },
-        type: {
-          type: 'keyword',
-        },
-        namespace: {
-          type: 'keyword',
-        },
-        updated_at: {
-          type: 'date',
-        },
-        references: {
-          type: 'nested',
-          properties: {
-            name: {
-              type: 'keyword',
-            },
-            type: {
-              type: 'keyword',
-            },
-            id: {
-              type: 'keyword',
-            },
-          },
-        },
       },
       migrationVersion: {
         dynamic: 'true',
@@ -100,6 +73,20 @@ function defaultMapping(): IndexMapping {
       },
       updated_at: {
         type: 'date',
+      },
+      references: {
+        type: 'nested',
+        properties: {
+          name: {
+            type: 'keyword',
+          },
+          type: {
+            type: 'keyword',
+          },
+          id: {
+            type: 'keyword',
+          },
+        },
       },
     },
   };
