@@ -14,5 +14,7 @@ export class ElasticsearchBeatEventsAdapter implements BeatEventsAdapter {
   constructor(private readonly database: DatabaseAdapter) {}
 
   // tslint:disable-next-line
-  public bulkInsert = async (user: FrameworkUser, beatId: string, events: BeatEvent[]) => {};
+  public bulkInsert = async (user: FrameworkUser, beatId: string, events: BeatEvent[]) => {
+    // await this.database.putTemplate(INDEX_NAMES.EVENTS_TODAY, beatsIndexTemplate);
+  };
 }

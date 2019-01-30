@@ -6,4 +6,5 @@
 
 export const INDEX_NAMES = {
   BEATS: '.management-beats',
+  EVENTS_ALIAS: '.management-beats-events',
 };

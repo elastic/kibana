@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { get } from 'lodash';
-import { INDEX_NAMES } from 'x-pack/plugins/beats_management/common/constants';
-import { beatsIndexTemplate } from '../../../index_templates';
 import { FrameworkUser } from '../framework/adapter_types';
 import { internalAuthData } from './../framework/adapter_types';
 import {
@@ -52,8 +50,6 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
   }
 
   public async bulk(user: FrameworkUser, params: DatabaseBulkIndexDocumentsParams): Promise<any> {
-    await this.putTemplate();
-
     const result = await this.callWithUser(user, 'bulk', params);
     return result;
   }
@@ -62,12 +58,10 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
     user: FrameworkUser,
     params: DatabaseCreateDocumentParams
   ): Promise<DatabaseCreateDocumentResponse> {
-    await this.putTemplate();
     const result = await this.callWithUser(user, 'create', params);
     return result;
   }
   public async index<T>(user: FrameworkUser, params: DatabaseIndexDocumentParams<T>): Promise<any> {
-    await this.putTemplate();
     const result = await this.callWithUser(user, 'index', params);
     return result;
   }
@@ -110,11 +104,10 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
     return result;
   }
 
-  // TODO move beats template name and body out of this bridge
-  private async putTemplate(): Promise<any> {
+  public async putTemplate(name: string, template: any): Promise<any> {
     const result = await this.callWithUser({ kind: 'internal' }, 'indices.putTemplate', {
-      name: INDEX_NAMES.BEATS,
-      body: beatsIndexTemplate,
+      name,
+      body: template,
     });
 
     return result;

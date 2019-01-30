@@ -39,7 +39,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
 
     mirrorPluginStatus(xpackMainPlugin, thisPlugin);
 
-    xpackMainPlugin.status.once('green', () => {
+    xpackMainPlugin.status.on('green', () => {
       this.xpackInfoWasUpdatedHandler(xpackMainPlugin.info);
       // Register a function that is called whenever the xpack info changes,
       // to re-compute the license check results for this plugin
@@ -52,7 +52,9 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
   public on(event: 'xpack.status.green', cb: () => void) {
     switch (event) {
       case 'xpack.status.green':
-        this.server.plugins.xpack_main.status.once('green', cb);
+        this.server.plugins.xpack_main.status.on('green', cb);
+      case 'xpack.status.green':
+        this.server.plugins.elasticsearch.status.on('green', cb);
     }
   }
 

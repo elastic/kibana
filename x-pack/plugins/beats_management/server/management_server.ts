@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { INDEX_NAMES } from '../common/constants/index_names';
+import { beatsIndexTemplate } from './index_templates';
 import { CMServerLibs } from './lib/types';
 import { createGetBeatConfigurationRoute } from './rest_api/beats/configuration';
 import { createBeatEnrollmentRoute } from './rest_api/beats/enroll';
@@ -23,6 +25,12 @@ import { createSetTagRoute } from './rest_api/tags/set';
 import { createTokensRoute } from './rest_api/tokens/create';
 
 export const initManagementServer = (libs: CMServerLibs) => {
+  if (libs.database) {
+    libs.framework.on('elasticsearch.status.green', async () => {
+      await libs.database!.putTemplate(INDEX_NAMES.BEATS, beatsIndexTemplate);
+    });
+  }
+
   libs.framework.registerRoute(createGetBeatRoute(libs));
   libs.framework.registerRoute(createGetTagsWithIdsRoute(libs));
   libs.framework.registerRoute(createListTagsRoute(libs));
