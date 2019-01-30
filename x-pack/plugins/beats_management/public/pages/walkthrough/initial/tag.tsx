@@ -6,13 +6,16 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { isEqual } from 'lodash';
 import React, { Component } from 'react';
-import { BeatTag } from '../../../../common/domain_types';
+import uuidv4 from 'uuid/v4';
+import { BeatTag, ConfigurationBlock } from '../../../../common/domain_types';
 import { TagEdit } from '../../../components/tag/tag_edit';
 import { AppPageProps } from '../../../frontend_types';
-
 interface PageState {
   tag: BeatTag;
+  configuration_blocks: ConfigurationBlock[];
+  currentConfigPage: number;
 }
 
 export class InitialTagPage extends Component<AppPageProps, PageState> {
@@ -20,11 +23,13 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
     super(props);
     this.state = {
       tag: {
-        id: props.urlState.createdTag ? props.urlState.createdTag : '',
+        id: uuidv4(),
+        name: '',
         color: '#DD0A73',
-        configuration_blocks: [],
-        last_updated: new Date(),
+        hasConfigurationBlocksTypes: [],
       },
+      configuration_blocks: [],
+      currentConfigPage: 0,
     };
 
     if (props.urlState.createdTag) {
@@ -33,24 +38,56 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
   }
 
   public render() {
+    const blockStartingIndex = this.state.currentConfigPage * 5;
+
     return (
       <React.Fragment>
         <TagEdit
           tag={this.state.tag}
+          configuration_blocks={{
+            blocks: this.state.configuration_blocks.slice(
+              blockStartingIndex,
+              5 + blockStartingIndex
+            ),
+            page: this.state.currentConfigPage,
+            total: this.state.configuration_blocks.length,
+          }}
           onTagChange={(field: string, value: string | number) =>
             this.setState(oldState => ({
               tag: { ...oldState.tag, [field]: value },
             }))
           }
+          onConfigListChange={(index: number) => {
+            this.setState({
+              currentConfigPage: index,
+            });
+          }}
+          onConfigAddOrEdit={(block: ConfigurationBlock) => {
+            this.setState(previousState => ({
+              configuration_blocks: previousState.configuration_blocks.concat([block]),
+            }));
+          }}
+          onConfigRemoved={(block: ConfigurationBlock) => {
+            this.setState(previousState => {
+              const selectedIndex = previousState.configuration_blocks.findIndex(c => {
+                return isEqual(block, c);
+              });
+              const blocks = [...previousState.configuration_blocks];
+              blocks.splice(selectedIndex, 1);
+              return {
+                configuration_blocks: blocks,
+              };
+            });
+          }}
         />
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
               disabled={
-                this.state.tag.id.search(/^[a-zA-Z0-9-]+$/) === -1 ||
-                this.state.tag.id === '' ||
-                this.state.tag.configuration_blocks.length === 0
+                this.state.tag.name.search(/^[A-Za-z0-9? ,_-]+$/) === -1 ||
+                this.state.tag.name === '' ||
+                this.state.configuration_blocks.length === 0
               }
               onClick={this.saveTag}
             >
@@ -82,6 +119,16 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
           defaultMessage: 'error saving tag',
         })
       );
+    }
+    const createBlocksResponse = await this.props.libs.configBlocks.upsert(
+      this.state.configuration_blocks.map(block => ({ ...block, tag: this.state.tag.id }))
+    );
+    const creationError = createBlocksResponse.reduce(
+      (err: string, resp: any) => (!err ? (err = resp.error || '') : err),
+      ''
+    );
+    if (creationError) {
+      return alert(creationError);
     }
     this.props.setUrlState({
       createdTag: newTag.id,

@@ -9,6 +9,7 @@ import { LICENSES } from './../../../../common/constants/security';
 export interface FrameworkAdapter {
   // Instance vars
   info: FrameworkInfo;
+  version: string;
   currentUser: FrameworkUser;
   // Methods
   waitUntilFrameworkReady(): Promise<void>;
@@ -24,7 +25,7 @@ export interface FrameworkAdapter {
     order?: number;
   }): void;
   registerManagementUI(settings: {
-    id?: string;
+    sectionId?: string;
     name: string;
     basePath: string;
     visable?: boolean;

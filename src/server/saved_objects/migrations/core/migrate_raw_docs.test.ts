@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import { SavedObjectsSchema } from '../../schema';
-import { ROOT_TYPE, SavedObjectsSerializer } from '../../serialization';
+import { SavedObjectsSerializer } from '../../serialization';
 import { migrateRawDocs } from './migrate_raw_docs';
 
 describe('migrateRawDocs', () => {
@@ -34,13 +34,11 @@ describe('migrateRawDocs', () => {
     expect(result).toEqual([
       {
         _id: 'a:b',
-        _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {} },
-        _type: ROOT_TYPE,
+        _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
       },
       {
         _id: 'c:d',
-        _source: { type: 'c', c: { name: 'HOI!' }, migrationVersion: {} },
-        _type: ROOT_TYPE,
+        _source: { type: 'c', c: { name: 'HOI!' }, migrationVersion: {}, references: [] },
       },
     ]);
 
@@ -58,8 +56,7 @@ describe('migrateRawDocs', () => {
       { _id: 'foo:b', _source: { type: 'a', a: { name: 'AAA' } } },
       {
         _id: 'c:d',
-        _source: { type: 'c', c: { name: 'TADA' }, migrationVersion: {} },
-        _type: ROOT_TYPE,
+        _source: { type: 'c', c: { name: 'TADA' }, migrationVersion: {}, references: [] },
       },
     ]);
 
@@ -72,6 +69,7 @@ describe('migrateRawDocs', () => {
             name: 'DDD',
           },
           migrationVersion: {},
+          references: [],
         },
       ],
     ]);
