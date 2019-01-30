@@ -36,6 +36,7 @@ import { remoteClusters } from './plugins/remote_clusters';
 import { crossClusterReplication } from './plugins/cross_cluster_replication';
 import { upgradeAssistant } from './plugins/upgrade_assistant';
 import { uptime } from './plugins/uptime';
+import { ossTelemetry } from './plugins/oss_telemetry';
 
 module.exports = function (kibana) {
   return [
@@ -71,5 +72,6 @@ module.exports = function (kibana) {
     crossClusterReplication(kibana),
     upgradeAssistant(kibana),
     uptime(kibana),
+    ossTelemetry(kibana),
   ];
 };

@@ -15,6 +15,7 @@ import {
   InfraNodeMetric,
   InfraNodePath,
   InfraPathInput,
+  InfraPathType,
   InfraTimerangeInput,
   SourceQuery,
 } from '../graphql/types';
@@ -36,6 +37,7 @@ export interface InfraFrameworkAdapter {
   kbnVersion?: string;
   scaledDateFormat?: string;
   timezone?: string;
+  darkMode?: boolean;
 
   // Methods
   setUISettings(key: string, value: any): void;
@@ -202,4 +204,10 @@ export enum InfraWaffleMapDataFormat {
   bitsBinaryIEC = 'bitsBinaryIEC',
   bitsBinaryJEDEC = 'bitsBinaryJEDEC',
   abbreviatedNumber = 'abbreviatedNumber',
+}
+
+export interface InfraGroupByOptions {
+  text: string;
+  type: InfraPathType;
+  field: string;
 }

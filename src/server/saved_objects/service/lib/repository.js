@@ -18,7 +18,7 @@
  */
 
 import { omit } from 'lodash';
-import { getRootType, getRootPropertiesObjects } from '../../../mappings';
+import { getRootPropertiesObjects } from '../../../mappings';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
 import { decorateEsError } from './decorate_es_error';
@@ -50,7 +50,9 @@ export class SavedObjectsRepository {
     this._index = index;
     this._mappings = mappings;
     this._schema = schema;
-    this._type = getRootType(this._mappings);
+
+    // ES7 and up expects the root type to be _doc
+    this._type = '_doc';
     this._onBeforeWrite = onBeforeWrite;
     this._unwrappedCallCluster = async (...args) => {
       await migrator.awaitMigration();
@@ -281,6 +283,7 @@ export class SavedObjectsRepository {
    * @param {object} [options={}]
    * @property {(string|Array<string>)} [options.type]
    * @property {string} [options.search]
+   * @property {string} [options.defaultSearchOperator]
    * @property {Array<string>} [options.searchFields] - see Elasticsearch Simple Query String
    *                                        Query field argument for more information
    * @property {integer} [options.page=1]
@@ -295,6 +298,7 @@ export class SavedObjectsRepository {
     const {
       type,
       search,
+      defaultSearchOperator = 'OR',
       searchFields,
       page = 1,
       perPage = 20,
@@ -313,7 +317,7 @@ export class SavedObjectsRepository {
     }
 
     if (fields && !Array.isArray(fields)) {
-      throw new TypeError('options.searchFields must be an array');
+      throw new TypeError('options.fields must be an array');
     }
 
     const esOptions = {
@@ -327,6 +331,7 @@ export class SavedObjectsRepository {
         version: true,
         ...getSearchDsl(this._mappings, this._schema, {
           search,
+          defaultSearchOperator,
           searchFields,
           type,
           sortField,
