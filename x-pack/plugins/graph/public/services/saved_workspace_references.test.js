@@ -96,14 +96,18 @@ Object {
 `);
   });
 
-  test('fails when indexPatternRefName is missing wsState', () => {
+  test('skips when indexPatternRefName is missing wsState', () => {
     const context = {
       id: '1',
       wsState: JSON.stringify({ bar: true }),
     };
-    expect(() => injectReferences(context, [])).toThrowErrorMatchingInlineSnapshot(
-      `"indexPatternRefName attribute is missing from \\"wsState\\""`
-    );
+    injectReferences(context, []);
+    expect(context).toMatchInlineSnapshot(`
+Object {
+  "id": "1",
+  "wsState": "{\\"bar\\":true}",
+}
+`);
   });
 
   test(`fails when it can't find the reference in the array`, () => {

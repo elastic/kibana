@@ -51,7 +51,7 @@ export const migrations = {
       doc.references = doc.references || [];
 
       // Migrate index pattern
-      migrateIndexPattern('visualization', doc);
+      migrateIndexPattern(doc);
 
       // Migrate saved search
       const savedSearchId = get(doc, 'attributes.savedSearchId');
@@ -105,7 +105,7 @@ export const migrations = {
       // Set new "references" attribute
       doc.references = doc.references || [];
       // Migrate index pattern
-      migrateIndexPattern('dashboard', doc);
+      migrateIndexPattern(doc);
       // Migrate panels
       const panelsJSON = get(doc, 'attributes.panelsJSON');
       if (typeof panelsJSON !== 'string') {
@@ -143,7 +143,7 @@ export const migrations = {
       // Set new "references" attribute
       doc.references = doc.references || [];
       // Migrate index pattern
-      migrateIndexPattern('search', doc);
+      migrateIndexPattern(doc);
       return doc;
     },
   },
