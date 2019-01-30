@@ -19,6 +19,8 @@ saved objects by various conditions.
   (number) The page of objects to return
 `search` (optional)::
   (string) A {ref}/query-dsl-simple-query-string-query.html[simple_query_string] Elasticsearch query to filter the objects in the response
+`default_search_operator` (optional)::
+  (string) The default operator to use for the `simple_query_string`
 `search_fields` (optional)::
   (array|string) The fields to perform the `simple_query_string` parsed query against
 `fields` (optional)::
