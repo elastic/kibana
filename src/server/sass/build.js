@@ -23,7 +23,7 @@ import fs from 'fs';
 import sass from 'node-sass';
 import autoprefixer from 'autoprefixer';
 import postcss from 'postcss';
-import postcssUrl from 'postcss-url'; // eslint-disable-line import/no-unresolved
+import postcssUrl from 'postcss-url';
 import mkdirp from 'mkdirp';
 import chalk from 'chalk';
 import isPathInside from 'is-path-inside';
