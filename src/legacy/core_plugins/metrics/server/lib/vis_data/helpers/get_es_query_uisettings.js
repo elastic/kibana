@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import buildProcessorFunction from './build_processor_function';
-import processors from './request_processors/annotations';
-
-export default function buildAnnotationRequest(req, panel, annotation,  esQueryConfig, indexPattern) {
-  const processor = buildProcessorFunction(processors, req, panel, annotation,  esQueryConfig, indexPattern);
-  const doc = processor({});
-  return doc;
+export async function getEsQueryConfig(req) {
+  const uiSettings = req.getUiSettingsService();
+  const allowLeadingWildcards = await uiSettings.get('query:allowLeadingWildcards');
+  const queryStringOptions = await uiSettings.get('query:queryString:options');
+  return {
+    allowLeadingWildcards,
+    queryStringOptions: JSON.parse(queryStringOptions),
+  };
 }
