@@ -33,7 +33,7 @@ import {
 import { Filter } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
-import { FilterView } from '../filter_bar/filter_view';
+import { getFilterDisplayText } from '../filter_bar/filter_view';
 
 interface Props {
   filters: Filter[];
@@ -67,7 +67,7 @@ export class ApplyFiltersPopover extends Component<Props, State> {
         {this.props.filters.map((filter, i) => (
           <EuiFormRow key={i}>
             <EuiSwitch
-              label={<FilterView filter={filter} />}
+              label={getFilterDisplayText(filter)}
               checked={this.isFilterSelected(i)}
               onChange={() => this.toggleFilterSelected(i)}
             />

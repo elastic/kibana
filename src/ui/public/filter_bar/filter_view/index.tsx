@@ -17,27 +17,11 @@
  * under the License.
  */
 
-import {
-  CustomFilter,
-  ExistsFilter,
-  Filter,
-  GeoBoundingBoxFilter,
-  GeoPolygonFilter,
-  PhraseFilter,
-  PhrasesFilter,
-  QueryStringFilter,
-  RangeFilter,
-} from '@kbn/es-query';
+import { EuiBadge } from '@elastic/eui';
+import { Filter, isFilterPinned } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import React, { SFC } from 'react';
-import { BaseFilterView } from 'ui/filter_bar/filter_view/base_filter_view';
-import { CustomFilterView } from './custom_filter_view';
-import { ExistsFilterView } from './exists_filter_view';
-import { GeoBoundingBoxFilterView } from './geo_bounding_box_filter_view';
-import { GeoPolygonFilterView } from './geo_polygon_filter_view';
-import { PhraseFilterView } from './phrase_filter_view';
-import { PhrasesFilterView } from './phrases_filter_view';
-import { QueryStringFilterView } from './query_string_filter_view';
-import { RangeFilterView } from './range_filter_view';
+import { existsOperator, isOneOfOperator } from 'ui/filter_bar/filter_editor/lib/filter_operators';
 
 interface Props {
   filter: Filter;
@@ -45,33 +29,75 @@ interface Props {
 }
 
 export const FilterView: SFC<Props> = ({ filter, ...rest }: Props) => {
-  if (filter.meta.alias !== null) {
-    return (
-      <BaseFilterView filter={filter} title={filter.meta.alias} {...rest}>
-        {filter.meta.alias}
-      </BaseFilterView>
-    );
+  let title = `Filter: ${getFilterDisplayText(filter)}. ${i18n.translate(
+    'common.ui.filterBar.moreFilterActionsMessage',
+    {
+      defaultMessage: 'Select for more filter actions.',
+    }
+  )}`;
+
+  if (isFilterPinned(filter)) {
+    title = `${i18n.translate('common.ui.filterBar.pinnedFilterPrefix', {
+      defaultMessage: 'Pinned',
+    })} ${title}`;
   }
-  return <span>{renderViewForType(filter, rest)}</span>;
+  if (filter.meta.disabled) {
+    title = `${i18n.translate('common.ui.filterBar.disabledFilterPrefix', {
+      defaultMessage: 'Disabled',
+    })} ${title}`;
+  }
+
+  return (
+    <EuiBadge
+      title={title}
+      iconType="cross"
+      // @ts-ignore
+      iconSide="right"
+      closeButtonProps={{
+        // Removing tab focus on close button because the same option can be optained through the context menu
+        // Also, we may want to add a `DEL` keyboard press functionality
+        tabIndex: '-1',
+      }}
+      iconOnClickAriaLabel={i18n.translate('common.ui.filterBar.filterItemBadgeIconAriaLabel', {
+        defaultMessage: 'Delete',
+      })}
+      onClickAriaLabel={i18n.translate('common.ui.filterBar.filterItemBadgeAriaLabel', {
+        defaultMessage: 'Filter actions',
+      })}
+      {...rest}
+    >
+      <span>{getFilterDisplayText(filter)}</span>
+    </EuiBadge>
+  );
 };
 
-function renderViewForType(filter: Filter, rest: any) {
+export function getFilterDisplayText(filter: Filter) {
+  if (filter.meta.alias !== null) {
+    return filter.meta.alias;
+  }
+
+  const prefix = filter.meta.negate
+    ? ` ${i18n.translate('common.ui.filterBar.negatedFilterPrefix', {
+        defaultMessage: 'NOT ',
+      })}`
+    : '';
+
   switch (filter.meta.type) {
     case 'exists':
-      return <ExistsFilterView filter={filter as ExistsFilter} {...rest} />;
+      return `${prefix}${filter.meta.key} ${existsOperator.message}`;
     case 'geo_bounding_box':
-      return <GeoBoundingBoxFilterView filter={filter as GeoBoundingBoxFilter} {...rest} />;
+      return `${prefix}${filter.meta.key}: ${filter.meta.value}`;
     case 'geo_polygon':
-      return <GeoPolygonFilterView filter={filter as GeoPolygonFilter} {...rest} />;
+      return `${prefix}${filter.meta.key}: ${filter.meta.value}`;
     case 'phrase':
-      return <PhraseFilterView filter={filter as PhraseFilter} {...rest} />;
+      return `${prefix}${filter.meta.key}: ${filter.meta.value}`;
     case 'phrases':
-      return <PhrasesFilterView filter={filter as PhrasesFilter} {...rest} />;
+      return `${prefix}${filter.meta.key} ${isOneOfOperator.message} ${filter.meta.value}`;
     case 'query_string':
-      return <QueryStringFilterView filter={filter as QueryStringFilter} {...rest} />;
+      return `${prefix}${filter.meta.value}`;
     case 'range':
-      return <RangeFilterView filter={filter as RangeFilter} {...rest} />;
+      return `${prefix}${filter.meta.key}: ${filter.meta.value}`;
     default:
-      return <CustomFilterView filter={filter as CustomFilter} {...rest} />;
+      return `${prefix}${JSON.stringify(filter.query)}`;
   }
 }
