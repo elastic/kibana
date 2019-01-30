@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { UICapabilities } from 'ui/capabilities';
 import { EnabledFeatures } from './enabled_features';
 
 describe('EnabledFeatures', () => {
