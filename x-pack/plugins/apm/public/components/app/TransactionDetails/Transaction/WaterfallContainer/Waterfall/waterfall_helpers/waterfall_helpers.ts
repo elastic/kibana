@@ -185,10 +185,15 @@ export function getWaterfallItems(
   childrenByParentId: IWaterfallGroup,
   entryTransactionItem: IWaterfallItem
 ) {
+  const referenceSet = new Set();
   function getSortedChildren(
     item: IWaterfallItem,
     parentItem?: IWaterfallItem
   ): IWaterfallItem[] {
+    if (referenceSet.has(item)) {
+      return [];
+    }
+    referenceSet.add(item);
     const children = sortBy(childrenByParentId[item.id] || [], 'timestamp');
 
     item.childIds = children.map(child => child.id);
