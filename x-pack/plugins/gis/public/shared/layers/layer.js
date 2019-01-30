@@ -17,7 +17,6 @@ export class AbstractLayer {
     this._descriptor = AbstractLayer.createDescriptor(layerDescriptor);
     this._source = source;
     this._style = style;
-
     if (this._descriptor.dataRequests) {
       this._dataRequests = this._descriptor.dataRequests.map(dataRequest => new DataRequest(dataRequest));
     } else {
@@ -64,7 +63,10 @@ export class AbstractLayer {
   }
 
   async getAttributions() {
-    return await this._source.getAttributions();
+    if (!this.hasErrors()) {
+      return await this._source.getAttributions();
+    }
+    return [];
   }
 
   getLabel() {
@@ -131,29 +133,28 @@ export class AbstractLayer {
     return this._style;
   }
 
-  renderSourceDetails = () => {
-    return this._source.renderDetails();
-  };
+  async getImmutableSourceProperties() {
+    return this._source.getImmutableProperties();
+  }
 
   renderSourceSettingsEditor = ({ onChange }) => {
     return this._source.renderSourceSettingsEditor({ onChange });
   };
 
+  getSourceDataRequest() {
+    return this._dataRequests.find(dataRequest => dataRequest.getDataId() === 'source');
+  }
+
   isLayerLoading() {
     return this._dataRequests.some(dataRequest => dataRequest.isLoading());
   }
 
-  dataHasLoadError() {
-    return this._dataRequests.some(dataRequest => dataRequest.hasLoadError());
+  hasErrors() {
+    return _.get(this._descriptor, 'isInErrorState', false);
   }
 
-  getDataLoadError() {
-    const loadErrors =  this._dataRequests
-      .filter(dataRequest => dataRequest.hasLoadError())
-      .map(dataRequest => {
-        return dataRequest._descriptor.dataLoadError;
-      });
-    return loadErrors.join(',');
+  getErrors() {
+    return this.hasErrors() ? this._descriptor.errorMessage : '';
   }
 
   toLayerDescriptor() {
@@ -217,10 +218,6 @@ export class AbstractLayer {
 
   renderStyleEditor(style, options) {
     return style.renderEditor(options);
-  }
-
-  getSourceDataRequest() {
-    return this._dataRequests.find(dataRequest => dataRequest.getDataId() === 'source');
   }
 
   getIndexPatternIds() {

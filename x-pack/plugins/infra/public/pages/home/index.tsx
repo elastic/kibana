@@ -15,7 +15,7 @@ import { EmptyPage } from '../../components/empty_page';
 import { Header } from '../../components/header';
 import { ColumnarPage } from '../../components/page';
 
-import { InfrastructureBetaBadgeHeaderSection } from '../../components/beta_badge_header_section';
+import { InfraHeaderFeedbackLink } from '../../components/header_feedback_link';
 import { SourceConfigurationFlyout } from '../../components/source_configuration';
 import { WithSourceConfigurationFlyoutState } from '../../components/source_configuration/source_configuration_flyout_state';
 import { WithWaffleFilterUrlState } from '../../containers/waffle/with_waffle_filters';
@@ -37,7 +37,11 @@ export const HomePage = injectI18n(
 
       return (
         <ColumnarPage>
-          <Header appendSections={<InfrastructureBetaBadgeHeaderSection />} />
+          <Header
+            appendSections={
+              <InfraHeaderFeedbackLink url="https://discuss.elastic.co/c/infrastructure" />
+            }
+          />
           <SourceConfigurationFlyout />
           <WithSource>
             {({

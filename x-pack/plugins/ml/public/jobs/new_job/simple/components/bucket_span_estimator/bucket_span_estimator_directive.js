@@ -39,7 +39,9 @@ module.directive('mlBucketSpanEstimator', function (i18n) {
       const errorHandler = (error) => {
         console.log('Bucket span could not be estimated', error);
         $scope.ui.bucketSpanEstimator.status = STATUS.FAILED;
-        $scope.ui.bucketSpanEstimator.message = 'Bucket span could not be estimated';
+        $scope.ui.bucketSpanEstimator.message = i18n('xpack.ml.newJob.simple.bucketSpanEstimator.bucketSpanCouldNotBeEstimatedMessage', {
+          defaultMessage: 'Bucket span could not be estimated'
+        });
         $scope.$applyAsync();
       };
 

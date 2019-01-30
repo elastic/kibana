@@ -30,8 +30,9 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     if (!response.found) {
       return null;
     }
-
-    return _get<CMBeat>(response, '_source.beat');
+    const beat = _get<CMBeat>(response, '_source.beat');
+    beat.tags = beat.tags || [];
+    return beat;
   }
 
   public async insert(user: FrameworkUser, beat: CMBeat) {
@@ -80,7 +81,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
 
     return _get(response, 'docs', [])
       .filter((b: any) => b.found)
-      .map((b: any) => b._source.beat);
+      .map((b: any) => ({ tags: [], ...b._source.beat }));
   }
 
   public async getAllWithTags(user: FrameworkUser, tagIds: string[]): Promise<CMBeat[]> {
@@ -102,7 +103,10 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     if (beats.length === 0) {
       return [];
     }
-    return beats.map((beat: any) => omit(beat._source.beat, ['access_token']));
+    return beats.map((beat: any) => ({
+      tags: [] as string[],
+      ...(omit(beat._source.beat as CMBeat, ['access_token']) as CMBeat),
+    }));
   }
 
   public async getBeatWithToken(
@@ -127,7 +131,9 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     if (beats.length === 0) {
       return null;
     }
-    return omit<CMBeat, {}>(_get<CMBeat>(beats[0], '_source.beat'), ['access_token']);
+    return omit<CMBeat, {}>(_get<CMBeat>({ tags: [], ...beats[0] }, '_source.beat'), [
+      'access_token',
+    ]);
   }
 
   public async getAll(user: FrameworkUser, ESQuery?: any) {
@@ -167,7 +173,10 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     }
     const beats = _get<any>(response, 'hits.hits', []);
 
-    return beats.map((beat: any) => omit(beat._source.beat, ['access_token']));
+    return beats.map((beat: any) => ({
+      tags: [] as string[],
+      ...(omit(beat._source.beat as CMBeat, ['access_token']) as CMBeat),
+    }));
   }
 
   public async removeTagsFromBeats(
