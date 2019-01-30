@@ -4,4 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { FileUpload } from './file_upload';
+export const findExistingAsset = (type, content, assets) => {
+  const existingId = Object.keys(assets).find(
+    assetId => assets[assetId].type === type && assets[assetId].value === content
+  );
+  return existingId;
+};
