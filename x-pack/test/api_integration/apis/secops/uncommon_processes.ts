@@ -5,9 +5,9 @@
  */
 
 import expect from 'expect.js';
+
 import { uncommonProcessesQuery } from '../../../../plugins/secops/public/containers/uncommon_processes/index.gql_query';
 import { GetUncommonProcessesQuery } from '../../../../plugins/secops/public/graphql/types';
-
 import { KbnTestProvider } from './types';
 
 const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
