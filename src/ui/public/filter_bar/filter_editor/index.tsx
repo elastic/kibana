@@ -126,6 +126,7 @@ class FilterEditorUI extends Component<Props, State> {
             <EuiSpacer size="m" />
 
             <EuiSwitch
+              id="filterEditorCustomLabelSwitch"
               label={this.props.intl.formatMessage({
                 id: 'common.ui.filterEditor.createCustomLabelSwitchLabel',
                 defaultMessage: 'Create custom label?',
