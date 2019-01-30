@@ -34,7 +34,9 @@ export async function getUpgradeAssistantStatus(
     method: 'GET',
   });
 
-  const cluster = deprecations.cluster_settings.concat(deprecations.node_settings);
+  const cluster = deprecations.cluster_settings
+    .concat(deprecations.ml_settings)
+    .concat(deprecations.node_settings);
   const indices = getCombinedIndexInfos(deprecations, basePath);
 
   const criticalWarnings = cluster.concat(indices).filter(d => d.level === 'critical');

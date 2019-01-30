@@ -40,8 +40,9 @@ describe('getUpgradeAssistantStatus', () => {
 
   it('returns readyForUpgrade === true when no critical issues found', async () => {
     deprecationsResponse = {
-      node_settings: [],
       cluster_settings: [{ level: 'warning', message: 'Do not count me', url: 'https://...' }],
+      node_settings: [],
+      ml_settings: [],
       index_settings: {},
     };
 
