@@ -232,7 +232,7 @@ exports[`render full suggestions component 1`] = `
                 >
                   <div
                     aria-selected={true}
-                    className="sc-htpNat brrMHa"
+                    className="sc-htpNat hJjmYy"
                     id="suggestion-0-0"
                     onClick={[Function]}
                     onMouseEnter={[Function]}
@@ -427,7 +427,7 @@ exports[`render full suggestions component 1`] = `
                 >
                   <div
                     aria-selected={false}
-                    className="sc-htpNat hRxeyc"
+                    className="sc-htpNat kxKXpI"
                     id="suggestion-1-0"
                     onClick={[Function]}
                     onMouseEnter={[Function]}
@@ -570,7 +570,7 @@ exports[`render full suggestions component 1`] = `
                 >
                   <div
                     aria-selected={false}
-                    className="sc-htpNat hRxeyc"
+                    className="sc-htpNat kxKXpI"
                     id="suggestion-2-0"
                     onClick={[Function]}
                     onMouseEnter={[Function]}
@@ -636,7 +636,7 @@ exports[`render full suggestions component 1`] = `
                 >
                   <div
                     aria-selected={false}
-                    className="sc-htpNat hRxeyc"
+                    className="sc-htpNat kxKXpI"
                     id="suggestion-2-1"
                     onClick={[Function]}
                     onMouseEnter={[Function]}
