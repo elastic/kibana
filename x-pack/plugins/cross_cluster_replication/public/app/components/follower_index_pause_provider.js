@@ -56,11 +56,11 @@ class Provider extends PureComponent {
     const title = isSingle
       ? intl.formatMessage({
         id: 'xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.pauseSingleTitle',
-        defaultMessage: 'Pause data replication of follower index \'{name}\'?',
+        defaultMessage: 'Pause replication of follower index \'{name}\'?',
       }, { name: indices[0].name })
       : intl.formatMessage({
         id: 'xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.pauseMultipleTitle',
-        defaultMessage: 'Pause data replication of {count} follower indices?',
+        defaultMessage: 'Pause replication of {count} follower indices?',
       }, { count: indices.length });
     const hasCustomSettings = indices.some(index => !areAllSettingsDefault(index));
 
@@ -80,7 +80,7 @@ class Provider extends PureComponent {
           buttonColor={hasCustomSettings ? 'danger' : 'primary'}
           confirmButtonText={intl.formatMessage({
             id: 'xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.confirmButtonText',
-            defaultMessage: 'Pause data replication',
+            defaultMessage: 'Pause replication',
           })}
           onMouseOver={this.onMouseOverModal}
         >
@@ -89,13 +89,13 @@ class Provider extends PureComponent {
               {isSingle ? (
                 <FormattedMessage
                   id="xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.singlePauseDescriptionWithSettingWarning"
-                  defaultMessage="Pausing data replication of this follower index clears its custom
+                  defaultMessage="Pausing replication of this follower index clears its custom
                     advanced settings."
                 />
               ) : (
                 <FormattedMessage
                   id="xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.multiplePauseDescriptionWithSettingWarning"
-                  defaultMessage="Pausing data replication of a follower index clears its custom
+                  defaultMessage="Pausing replication of a follower index clears its custom
                     advanced settings."
                 />
               )}
@@ -107,7 +107,7 @@ class Provider extends PureComponent {
               <p>
                 <FormattedMessage
                   id="xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.multiplePauseDescription"
-                  defaultMessage="These follower indices will pause data replication:"
+                  defaultMessage="These follower indices will pause replication:"
                 />
               </p>
 

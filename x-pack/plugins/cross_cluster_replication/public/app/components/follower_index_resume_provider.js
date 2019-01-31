@@ -57,11 +57,11 @@ class Provider extends PureComponent {
     const title = isSingle
       ? intl.formatMessage({
         id: 'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.resumeSingleTitle',
-        defaultMessage: 'Resume data replication of follower index \'{name}\'?',
+        defaultMessage: 'Resume replication of follower index \'{name}\'?',
       }, { name: ids[0] })
       : intl.formatMessage({
         id: 'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.resumeMultipleTitle',
-        defaultMessage: 'Resume data replication of {count} follower indices?',
+        defaultMessage: 'Resume replication of {count} follower indices?',
       }, { count: ids.length });
 
     return (
@@ -81,7 +81,7 @@ class Provider extends PureComponent {
           confirmButtonText={
             intl.formatMessage({
               id: 'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.confirmButtonText',
-              defaultMessage: 'Resume data replication',
+              defaultMessage: 'Resume replication',
             })
           }
           onMouseOver={this.onMouseOverModal}
@@ -90,7 +90,7 @@ class Provider extends PureComponent {
             <p>
               <FormattedMessage
                 id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.singleResumeDescription"
-                defaultMessage="Data replication resumes using the default advanced settings. To use
+                defaultMessage="Replication resumes using the default advanced settings. To use
                   custom advanced settings, {editLink}."
                 values={{
                   editLink: (
@@ -109,14 +109,14 @@ class Provider extends PureComponent {
               <p>
                 <FormattedMessage
                   id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.multipleResumeDescriptionWithSettingWarning"
-                  defaultMessage="Data replication resumes using the default advanced settings."
+                  defaultMessage="Replication resumes using the default advanced settings."
                 />
               </p>
 
               <p>
                 <FormattedMessage
                   id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.multipleResumeDescription"
-                  defaultMessage="These follower indices will resume data replication:"
+                  defaultMessage="These follower indices will resume replication:"
                 />
               </p>
 

@@ -115,7 +115,7 @@ export class ContextMenuUi extends PureComponent {
                   >
                     <FormattedMessage
                       id="xpack.crossClusterReplication.followerIndex.contextMenu.pauseLabel"
-                      defaultMessage="Pause data replication"
+                      defaultMessage="Pause replication"
                     />
                   </EuiContextMenuItem>
                 )}
@@ -133,7 +133,7 @@ export class ContextMenuUi extends PureComponent {
                   >
                     <FormattedMessage
                       id="xpack.crossClusterReplication.followerIndex.contextMenu.resumeLabel"
-                      defaultMessage="Resume data replication"
+                      defaultMessage="Resume replication"
                     />
                   </EuiContextMenuItem>
                 )}
