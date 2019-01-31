@@ -707,7 +707,7 @@ exports[`render correctly with input query string changed 1`] = `
       onSearchScopeChanged={[Function]}
       onSelect={[Function]}
       onSubmit={[Function]}
-      query=""
+      query="mockquery"
       repoSearchResults={Array []}
       repositorySearch={[Function]}
       saveSearchOptions={[Function]}
@@ -1266,7 +1266,7 @@ exports[`render correctly with input query string changed 1`] = `
                           role="textbox"
                           spellCheck={false}
                           type="text"
-                          value=""
+                          value="mockquery"
                         >
                           <EuiFormControlLayout
                             compressed={false}
@@ -1297,7 +1297,7 @@ exports[`render correctly with input query string changed 1`] = `
                                     role="textbox"
                                     spellCheck={false}
                                     type="text"
-                                    value=""
+                                    value="mockquery"
                                   />
                                 </EuiValidatableControl>
                                 <EuiFormControlLayoutIcons
@@ -1357,7 +1357,7 @@ exports[`render correctly with input query string changed 1`] = `
                     loadMore={[Function]}
                     onClick={[Function]}
                     onMouseEnter={[Function]}
-                    query=""
+                    query="mockquery"
                     show={true}
                     suggestionGroups={Array []}
                   />

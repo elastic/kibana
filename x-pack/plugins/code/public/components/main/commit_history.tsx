@@ -64,7 +64,7 @@ const CommitGroupContainer = styled.div`
 `;
 
 const CommitId = styled.div`
-  --height: calc(20 / 14rem);
+  --height: calc(20rem / 14);
   width: var(--dotRadius);
   height: var(--height);
   margin: auto 0;

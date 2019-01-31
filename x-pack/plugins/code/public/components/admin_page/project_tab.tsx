@@ -167,7 +167,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
         key={repo.uri}
         project={repo}
         status={status[repo.uri]}
-        isAdmin={isAdmin}
+        enableManagement={isAdmin}
       />
     ));
 

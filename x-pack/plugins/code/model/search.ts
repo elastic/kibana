@@ -64,6 +64,9 @@ export interface SearchResult {
 
 export interface RepositorySearchResult extends SearchResult {
   repositories: Repository[];
+  from?: number;
+  page?: number;
+  totalPage?: number;
 }
 
 export interface SymbolSearchResult extends SearchResult {

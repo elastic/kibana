@@ -22,6 +22,7 @@ export const code = (kibana: any) =>
         title: 'Code',
         description: 'Code Search Plugin',
         main: 'plugins/code/app',
+        euiIconType: 'codeApp',
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       mappings,

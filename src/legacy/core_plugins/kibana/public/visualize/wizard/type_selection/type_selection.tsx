@@ -30,6 +30,7 @@ import {
   EuiKeyPadMenuItemButton,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiScreenReaderOnly,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
@@ -91,9 +92,30 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
                     value={query}
                     onChange={this.onQueryChange}
                     fullWidth
+                    data-test-subj="filterVisType"
+                    aria-label={i18n.translate(
+                      'kbn.visualize.newVisWizard.filterVisTypeAriaLabel',
+                      {
+                        defaultMessage: 'Filter for a visualization type',
+                      }
+                    )}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={1} className="visNewVisDialog__typesWrapper">
+                  <EuiScreenReaderOnly>
+                    <span aria-live="polite">
+                      {query && (
+                        <FormattedMessage
+                          id="kbn.visualize.newVisWizard.resultsFound"
+                          defaultMessage="{resultCount} {resultCount, plural,
+                            one {type}
+                            other {types}
+                          } found"
+                          values={{ resultCount: visTypes.filter(type => type.highlighted).length }}
+                        />
+                      )}
+                    </span>
+                  </EuiScreenReaderOnly>
                   <EuiKeyPadMenu
                     className="visNewVisDialog__types"
                     data-test-subj="visNewDialogTypes"

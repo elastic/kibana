@@ -53,7 +53,7 @@ const EditorBlameContainer = styled.div`
 
 const BlameContainer = styled.div`
   flex-grow: 3;
-  flex-basis: calc(400 / 14rem);
+  flex-basis: calc(400rem / 14);
   height: 100%;
   overflow: auto;
 `;
@@ -77,7 +77,7 @@ enum ButtonOption {
   Code = 'Code',
   Blame = 'Blame',
   History = 'History',
-  Folder = 'Folder',
+  Folder = 'Directory',
 }
 
 const Title = styled(EuiTitle)`
@@ -216,6 +216,7 @@ class CodeContent extends React.PureComponent<Props> {
         const node = this.findNode(path ? path.split('/') : [], tree);
         return (
           <DirectoryViewContainer>
+            {this.renderButtons(ButtonOption.Folder)}
             <Directory node={node} />
             <CommitHistory
               commits={commits}
@@ -291,7 +292,7 @@ class CodeContent extends React.PureComponent<Props> {
           <React.Fragment>
             {this.renderButtons(ButtonOption.History)}
             <InfiniteScroll
-              initialLoad={false}
+              initialLoad={true}
               loadMore={() => !loadingCommits && this.props.fetchMoreCommits(repoUri)}
               hasMore={!loadingCommits && hasMoreCommits}
               useWindow={true}

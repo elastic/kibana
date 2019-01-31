@@ -49,12 +49,12 @@ const Title = styled(EuiTitle)`
 
 const Container = styled.div`
   &:not(:first-child) {
-    margin-top: calc(20 / 14rem);
+    margin-top: calc(20rem / 14);
   }
 `;
 
 const DirectoryNode = styled.div`
-  width: calc(200 / 14rem);
+  width: calc(200rem / 14);
   margin: 0 ${euiSizeS} ${euiSizeM};
   :hover {
     background-color: ${euiColorHighlight};
@@ -76,10 +76,10 @@ const DirectoryNodes = (props: DirectoryNodesProps) => {
   };
   const nodes = props.nodes.map(n => (
     <DirectoryNode key={n.path}>
-      <EuiIcon type={typeIconMap[props.type]} />
-      <NodeName>
-        <Link to={props.getUrl(n.path!)}>{n.name}</Link>
-      </NodeName>
+      <Link to={props.getUrl(n.path!)}>
+        <EuiIcon type={typeIconMap[props.type]} color="black" />
+        <NodeName>{n.name}</NodeName>
+      </Link>
     </DirectoryNode>
   ));
   return (
