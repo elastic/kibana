@@ -12,7 +12,7 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common', 'security']);
 
   describe('smoke test', async () => {
     const workpadListSelector = 'canvasWorkpadLoaderTable canvasWorkpadLoaderWorkpad';
@@ -28,6 +28,10 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
       // load canvas
       // see also navigateToUrl(app, hash)
       await PageObjects.common.navigateToApp('canvas');
+    });
+
+    after(async () => {
+      await PageObjects.security.logout();
     });
 
     it('loads workpad list', async () => {
