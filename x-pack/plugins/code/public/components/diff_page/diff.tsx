@@ -25,6 +25,7 @@ import { CommitDiff, FileDiff } from '../../../common/git_diff';
 import { changeSearchScope } from '../../actions';
 import { RootState } from '../../reducers';
 import { SearchBar } from '../search_page/search_bar';
+import { ShortcutsProvider } from '../shortcuts';
 import { DiffEditor } from './diff_editor';
 
 const COMMIT_ID_LENGTH = 16;
@@ -229,6 +230,7 @@ export class DiffPage extends React.Component<Props> {
           </EuiFlexGroup>
         </Container>
         <Container>{diffs}</Container>
+        <ShortcutsProvider />
       </div>
     );
   }
