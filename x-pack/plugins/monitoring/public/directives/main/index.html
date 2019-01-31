@@ -194,11 +194,11 @@
             class="kuiLocalTab"
             ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('pipelines')}"
           >
-            <span class="kuiIcon fa-flask betaIcon" tooltip="Beta Feature" />
             <span
               i18n-id="xpack.monitoring.logstashNavigation.pipelinesLinkText"
               i18n-default-message="Pipelines"
             ></span>
+            <span class="kuiIcon fa-flask monTabs--icon" tooltip="Beta feature" />
           </a>
           <a
             ng-if="monitoringMain.instance"
@@ -215,11 +215,11 @@
             class="kuiLocalTab"
             ng-class="{'kuiLocalTab-isSelected': monitoringMain.page === 'pipelines'}"
           >
-            <span class="kuiIcon fa-flask betaIcon" tooltip="Beta Feature" />
             <span
               i18n-id="xpack.monitoring.logstashNavigation.instance.pipelinesLinkText"
               i18n-default-message="Pipelines"
             ></span>
+            <span class="kuiIcon fa-flask fa-sm monTabs--icon" tooltip="Beta feature" />
           </a>
           <a
             ng-if="monitoringMain.instance"

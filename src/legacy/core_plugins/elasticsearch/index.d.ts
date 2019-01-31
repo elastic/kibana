@@ -149,7 +149,7 @@ import {
 
 export class Cluster {
   public callWithRequest: CallClusterWithRequest;
-  public callWithInternalUser: CallClusterWithInternalUser;
+  public callWithInternalUser: CallCluster;
   public constructor(config: ClusterConfig);
 }
 
@@ -175,7 +175,7 @@ interface ElasticsearchClientLogging {
 }
 
 interface AssistantAPIClientParams extends GenericParams {
-  path: '/_xpack/migration/assistance';
+  path: '/_migration/assistance';
   method: 'GET';
 }
 
@@ -191,7 +191,7 @@ export interface AssistanceAPIResponse {
 }
 
 interface DeprecationAPIClientParams extends GenericParams {
-  path: '/_xpack/migration/deprecations';
+  path: '/_migration/deprecations';
   method: 'GET';
 }
 
@@ -376,11 +376,156 @@ export interface CallClusterWithRequest {
   ): Promise<T>;
 }
 
-export type CallClusterWithInternalUser = <T = any>(
-  endpoint: string,
-  clientParams: GenericParams,
-  options?: CallClusterOptions
-) => Promise<T>;
+export interface CallCluster {
+  /* tslint:disable */
+  (endpoint: 'bulk', params: BulkIndexDocumentsParams, options?: CallClusterOptions): ReturnType<ESClient['bulk']>;
+  (endpoint: 'clearScroll', params: ClearScrollParams, options?: CallClusterOptions): ReturnType<ESClient['clearScroll']>;
+  (endpoint: 'count', params: CountParams, options?: CallClusterOptions): ReturnType<ESClient['count']>;
+  (endpoint: 'create', params: CreateDocumentParams, options?: CallClusterOptions): ReturnType<ESClient['create']>;
+  (endpoint: 'delete', params: DeleteDocumentParams, options?: CallClusterOptions): ReturnType<ESClient['delete']>;
+  (endpoint: 'deleteByQuery', params: DeleteDocumentByQueryParams, options?: CallClusterOptions): ReturnType<ESClient['deleteByQuery']>;
+  (endpoint: 'deleteScript', params: DeleteScriptParams, options?: CallClusterOptions): ReturnType<ESClient['deleteScript']>;
+  (endpoint: 'deleteTemplate', params: DeleteTemplateParams, options?: CallClusterOptions): ReturnType<ESClient['deleteTemplate']>;
+  (endpoint: 'exists', params: ExistsParams, options?: CallClusterOptions): ReturnType<ESClient['exists']>;
+  (endpoint: 'explain', params: ExplainParams, options?: CallClusterOptions): ReturnType<ESClient['explain']>;
+  (endpoint: 'fieldStats', params: FieldStatsParams, options?: CallClusterOptions): ReturnType<ESClient['fieldStats']>;
+  // Generic types cannot be properly looked up with ReturnType. Hard code these explicitly.
+  <T>(endpoint: 'get', params: GetParams, options?: CallClusterOptions): Promise<GetResponse<T>>;
+  (endpoint: 'getScript', params: GetScriptParams, options?: CallClusterOptions): ReturnType<ESClient['getScript']>;
+  (endpoint: 'getSource', params: GetSourceParams, options?: CallClusterOptions): ReturnType<ESClient['getSource']>;
+  (endpoint: 'getTemplate', params: GetTemplateParams, options?: CallClusterOptions): ReturnType<ESClient['getTemplate']>;
+  // Generic types cannot be properly looked up with ReturnType. Hard code these explicitly.
+  <T>(endpoint: 'index', params: IndexDocumentParams<T>, options?: CallClusterOptions): ReturnType<ESClient['index']>;
+  (endpoint: 'info', params: InfoParams, options?: CallClusterOptions): ReturnType<ESClient['info']>;
+  // Generic types cannot be properly looked up with ReturnType. Hard code these explicitly.
+  <T>(endpoint: 'mget', params: MGetParams, options?: CallClusterOptions): Promise<MGetResponse<T>>;
+  <T>(endpoint: 'msearch', params: MSearchParams, options?: CallClusterOptions): Promise<MSearchResponse<T>>;
+  <T>(endpoint: 'msearchTemplate', params: MSearchTemplateParams, options?: CallClusterOptions): Promise<MSearchResponse<T>>;
+  (endpoint: 'mtermvectors', params: MTermVectorsParams, options?: CallClusterOptions): ReturnType<ESClient['mtermvectors']>;
+  (endpoint: 'ping', params: PingParams, options?: CallClusterOptions): ReturnType<ESClient['ping']>;
+  (endpoint: 'putScript', params: PutScriptParams, options?: CallClusterOptions): ReturnType<ESClient['putScript']>;
+  (endpoint: 'putTemplate', params: PutTemplateParams, options?: CallClusterOptions): ReturnType<ESClient['putTemplate']>;
+  (endpoint: 'reindex', params: ReindexParams, options?: CallClusterOptions): ReturnType<ESClient['reindex']>;
+  (endpoint: 'reindexRethrottle', params: ReindexRethrottleParams, options?: CallClusterOptions): ReturnType<ESClient['reindexRethrottle']>;
+  (endpoint: 'renderSearchTemplate', params: RenderSearchTemplateParams, options?: CallClusterOptions): ReturnType<ESClient['renderSearchTemplate']>;
+  // Generic types cannot be properly looked up with ReturnType. Hard code these explicitly.
+  <T>(endpoint: 'scroll', params: ScrollParams, options?: CallClusterOptions): Promise<SearchResponse<T>>;
+  <T>(endpoint: 'search', params: SearchParams, options?: CallClusterOptions): Promise<SearchResponse<T>>;
+  (endpoint: 'searchShards', params: SearchShardsParams, options?: CallClusterOptions): ReturnType<ESClient['searchShards']>;
+  (endpoint: 'searchTemplate', params: SearchTemplateParams, options?: CallClusterOptions): ReturnType<ESClient['searchTemplate']>;
+  (endpoint: 'suggest', params: SuggestParams, options?: CallClusterOptions): ReturnType<ESClient['suggest']>;
+  (endpoint: 'termvectors', params: TermvectorsParams, options?: CallClusterOptions): ReturnType<ESClient['termvectors']>;
+  (endpoint: 'update', params: UpdateDocumentParams, options?: CallClusterOptions): ReturnType<ESClient['update']>;
+  (endpoint: 'updateByQuery', params: UpdateDocumentByQueryParams, options?: CallClusterOptions): ReturnType<ESClient['updateByQuery']>;
+
+  // cat namespace
+  (endpoint: 'cat.aliases', params: CatAliasesParams, options?: CallClusterOptions): ReturnType<ESClient['cat']['aliases']>;
+  (endpoint: 'cat.allocation', params: CatAllocationParams, options?: CallClusterOptions): ReturnType<ESClient['cat']['allocation']>;
+  (endpoint: 'cat.count', params: CatAllocationParams, options?: CallClusterOptions): ReturnType<ESClient['cat']['count']>;
+  (endpoint: 'cat.fielddata', params: CatFielddataParams, options?: CallClusterOptions): ReturnType<ESClient['cat']['fielddata']>;
+  (endpoint: 'cat.health', params: CatHealthParams, options?: CallClusterOptions): ReturnType<ESClient['cat']['health']>;
+  (endpoint: 'cat.help', params: CatHelpParams, options?: CallClusterOptions): ReturnType<ESClient['cat']['help']>;
+  (endpoint: 'cat.indices', params: CatIndicesParams, options?: CallClusterOptions): ReturnType<ESClient['cat']['indices']>;
+  (endpoint: 'cat.master', params: CatCommonParams, options?: CallClusterOptions): ReturnType<ESClient['cat']['master']>;
+  (endpoint: 'cat.nodeattrs', params: CatCommonParams, options?: CallClusterOptions): ReturnType<ESClient['cat']['nodeattrs']>;
+  (endpoint: 'cat.nodes', params: CatCommonParams, options?: CallClusterOptions): ReturnType<ESClient['cat']['nodes']>;
+  (endpoint: 'cat.pendingTasks', params: CatCommonParams, options?: CallClusterOptions): ReturnType<ESClient['cat']['pendingTasks']>;
+  (endpoint: 'cat.plugins', params: CatCommonParams, options?: CallClusterOptions): ReturnType<ESClient['cat']['plugins']>;
+  (endpoint: 'cat.recovery', params: CatRecoveryParams, options?: CallClusterOptions): ReturnType<ESClient['cat']['recovery']>;
+  (endpoint: 'cat.repositories', params: CatCommonParams, options?: CallClusterOptions): ReturnType<ESClient['cat']['repositories']>;
+  (endpoint: 'cat.segments', params: CatSegmentsParams, options?: CallClusterOptions): ReturnType<ESClient['cat']['segments']>;
+  (endpoint: 'cat.shards', params: CatShardsParams, options?: CallClusterOptions): ReturnType<ESClient['cat']['shards']>;
+  (endpoint: 'cat.snapshots', params: CatSnapshotsParams, options?: CallClusterOptions): ReturnType<ESClient['cat']['snapshots']>;
+  (endpoint: 'cat.tasks', params: CatTasksParams, options?: CallClusterOptions): ReturnType<ESClient['cat']['tasks']>;
+  (endpoint: 'cat.threadPool', params: CatThreadPoolParams, options?: CallClusterOptions): ReturnType<ESClient['cat']['threadPool']>;
+
+  // cluster namespace
+  (endpoint: 'cluster.allocationExplain', params: ClusterAllocationExplainParams, options?: CallClusterOptions): ReturnType<ESClient['cluster']['allocationExplain']>;
+  (endpoint: 'cluster.getSettings', params: ClusterGetSettingsParams, options?: CallClusterOptions): ReturnType<ESClient['cluster']['getSettings']>;
+  (endpoint: 'cluster.health', params: ClusterHealthParams, options?: CallClusterOptions): ReturnType<ESClient['cluster']['health']>;
+  (endpoint: 'cluster.pendingTasks', params: ClusterPendingTasksParams, options?: CallClusterOptions): ReturnType<ESClient['cluster']['pendingTasks']>;
+  (endpoint: 'cluster.putSettings', params: ClusterPutSettingsParams, options?: CallClusterOptions): ReturnType<ESClient['cluster']['putSettings']>;
+  (endpoint: 'cluster.reroute', params: ClusterRerouteParams, options?: CallClusterOptions): ReturnType<ESClient['cluster']['reroute']>;
+  (endpoint: 'cluster.state', params: ClusterStateParams, options?: CallClusterOptions): ReturnType<ESClient['cluster']['state']>;
+  (endpoint: 'cluster.stats', params: ClusterStatsParams, options?: CallClusterOptions): ReturnType<ESClient['cluster']['stats']>;
+
+  // indices namespace
+  (endpoint: 'indices.analyze', params: IndicesAnalyzeParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['analyze']>;
+  (endpoint: 'indices.clearCache', params: IndicesClearCacheParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['clearCache']>;
+  (endpoint: 'indices.close', params: IndicesCloseParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['close']>;
+  (endpoint: 'indices.create', params: IndicesCreateParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['create']>;
+  (endpoint: 'indices.delete', params: IndicesDeleteParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['delete']>;
+  (endpoint: 'indices.deleteAlias', params: IndicesDeleteAliasParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['deleteAlias']>;
+  (endpoint: 'indices.deleteTemplate', params: IndicesDeleteTemplateParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['deleteTemplate']>;
+  (endpoint: 'indices.exists', params: IndicesExistsParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['exists']>;
+  (endpoint: 'indices.existsAlias', params: IndicesExistsAliasParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['existsAlias']>;
+  (endpoint: 'indices.existsTemplate', params: IndicesExistsTemplateParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['existsTemplate']>;
+  (endpoint: 'indices.existsType', params: IndicesExistsTypeParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['existsType']>;
+  (endpoint: 'indices.flush', params: IndicesFlushParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['flush']>;
+  (endpoint: 'indices.flushSynced', params: IndicesFlushSyncedParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['flushSynced']>;
+  (endpoint: 'indices.forcemerge', params: IndicesForcemergeParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['forcemerge']>;
+  (endpoint: 'indices.get', params: IndicesGetParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['get']>;
+  (endpoint: 'indices.getAlias', params: IndicesGetAliasParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['getAlias']>;
+  (endpoint: 'indices.getFieldMapping', params: IndicesGetFieldMappingParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['getFieldMapping']>;
+  (endpoint: 'indices.getMapping', params: IndicesGetMappingParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['getMapping']>;
+  (endpoint: 'indices.getSettings', params: IndicesGetSettingsParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['getSettings']>;
+  (endpoint: 'indices.getTemplate', params: IndicesGetTemplateParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['getTemplate']>;
+  (endpoint: 'indices.getUpgrade', params: IndicesGetUpgradeParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['getUpgrade']>;
+  (endpoint: 'indices.open', params: IndicesOpenParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['open']>;
+  (endpoint: 'indices.putAlias', params: IndicesPutAliasParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['putAlias']>;
+  (endpoint: 'indices.putMapping', params: IndicesPutMappingParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['putMapping']>;
+  (endpoint: 'indices.putSettings', params: IndicesPutSettingsParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['putSettings']>;
+  (endpoint: 'indices.putTemplate', params: IndicesPutTemplateParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['putTemplate']>;
+  (endpoint: 'indices.recovery', params: IndicesRecoveryParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['recovery']>;
+  (endpoint: 'indices.refresh', params: IndicesRefreshParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['refresh']>;
+  (endpoint: 'indices.rollover', params: IndicesRolloverParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['rollover']>;
+  (endpoint: 'indices.segments', params: IndicesSegmentsParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['segments']>;
+  (endpoint: 'indices.shardStores', params: IndicesShardStoresParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['shardStores']>;
+  (endpoint: 'indices.shrink', params: IndicesShrinkParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['shrink']>;
+  (endpoint: 'indices.stats', params: IndicesStatsParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['stats']>;
+  (endpoint: 'indices.updateAliases', params: IndicesUpdateAliasesParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['updateAliases']>;
+  (endpoint: 'indices.upgrade', params: IndicesUpgradeParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['upgrade']>;
+  (endpoint: 'indices.validateQuery', params: IndicesValidateQueryParams, options?: CallClusterOptions): ReturnType<ESClient['indices']['validateQuery']>;
+
+  // ingest namepsace
+  (endpoint: 'ingest.deletePipeline', params: IngestDeletePipelineParams, options?: CallClusterOptions): ReturnType<ESClient['ingest']['deletePipeline']>;
+  (endpoint: 'ingest.getPipeline', params: IngestGetPipelineParams, options?: CallClusterOptions): ReturnType<ESClient['ingest']['getPipeline']>;
+  (endpoint: 'ingest.putPipeline', params: IngestPutPipelineParams, options?: CallClusterOptions): ReturnType<ESClient['ingest']['putPipeline']>;
+  (endpoint: 'ingest.simulate', params: IngestSimulateParams, options?: CallClusterOptions): ReturnType<ESClient['ingest']['simulate']>;
+
+  // nodes namespace
+  (endpoint: 'nodes.hotThreads', params: NodesHotThreadsParams, options?: CallClusterOptions): ReturnType<ESClient['nodes']['hotThreads']>;
+  (endpoint: 'nodes.info', params: NodesInfoParams, options?: CallClusterOptions): ReturnType<ESClient['nodes']['info']>;
+  (endpoint: 'nodes.stats', params: NodesStatsParams, options?: CallClusterOptions): ReturnType<ESClient['nodes']['stats']>;
+
+  // snapshot namespace
+  (endpoint: 'snapshot.create', params: SnapshotCreateParams, options?: CallClusterOptions): ReturnType<ESClient['snapshot']['create']>;
+  (endpoint: 'snapshot.createRepository', params: SnapshotCreateRepositoryParams, options?: CallClusterOptions): ReturnType<ESClient['snapshot']['createRepository']>;
+  (endpoint: 'snapshot.delete', params: SnapshotDeleteParams, options?: CallClusterOptions): ReturnType<ESClient['snapshot']['delete']>;
+  (endpoint: 'snapshot.deleteRepository', params: SnapshotDeleteRepositoryParams, options?: CallClusterOptions): ReturnType<ESClient['snapshot']['deleteRepository']>;
+  (endpoint: 'snapshot.get', params: SnapshotGetParams, options?: CallClusterOptions): ReturnType<ESClient['snapshot']['get']>;
+  (endpoint: 'snapshot.getRepository', params: SnapshotGetRepositoryParams, options?: CallClusterOptions): ReturnType<ESClient['snapshot']['getRepository']>;
+  (endpoint: 'snapshot.restore', params: SnapshotRestoreParams, options?: CallClusterOptions): ReturnType<ESClient['snapshot']['restore']>;
+  (endpoint: 'snapshot.status', params: SnapshotStatusParams, options?: CallClusterOptions): ReturnType<ESClient['snapshot']['status']>;
+  (endpoint: 'snapshot.verifyRepository', params: SnapshotVerifyRepositoryParams, options?: CallClusterOptions): ReturnType<ESClient['snapshot']['verifyRepository']>;
+
+  // tasks namespace
+  (endpoint: 'tasks.cancel', params: TasksCancelParams, options?: CallClusterOptions): ReturnType<ESClient['tasks']['cancel']>;
+  (endpoint: 'tasks.get', params: TasksGetParams, options?: CallClusterOptions): ReturnType<ESClient['tasks']['get']>;
+  (endpoint: 'tasks.list', params: TasksListParams, options?: CallClusterOptions): ReturnType<ESClient['tasks']['list']>;
+  /* tslint:enable */
+
+  // other APIs accessed via transport.request
+  (endpoint: 'transport.request', clientParams: AssistantAPIClientParams, options?: {}): Promise<
+    AssistanceAPIResponse
+  >;
+  (endpoint: 'transport.request', clientParams: DeprecationAPIClientParams, options?: {}): Promise<
+    DeprecationAPIResponse
+  >;
+
+  // Catch-all definition
+  <T = any>(endpoint: string, clientParams: any, options?: CallClusterOptions): Promise<T>;
+}
 
 export interface ElasticsearchPlugin {
   ElasticsearchClientLogging: ElasticsearchClientLogging;

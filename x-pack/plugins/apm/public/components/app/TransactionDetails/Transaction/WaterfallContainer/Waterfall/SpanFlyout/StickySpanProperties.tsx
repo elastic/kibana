@@ -73,7 +73,7 @@ export function StickySpanProperties({ span, totalDuration }: Props) {
       ),
       val: spanTypeLabel,
       truncated: true,
-      widht: '50%'
+      width: '50%'
     },
     {
       fieldName: SPAN_DURATION,

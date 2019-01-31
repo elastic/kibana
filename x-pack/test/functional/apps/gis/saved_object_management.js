@@ -8,7 +8,7 @@ import expect from 'expect.js';
 
 export default function ({ getPageObjects, getService }) {
 
-  const PageObjects = getPageObjects(['gis', 'header']);
+  const PageObjects = getPageObjects(['gis', 'header', 'timePicker']);
   const queryBar = getService('queryBar');
   const browser = getService('browser');
   const inspector = getService('inspector');
@@ -25,13 +25,16 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('should update global Kibana time to value stored with map', async () => {
-        const kibanaTime = await PageObjects.header.getPrettyDuration();
-        expect(kibanaTime).to.equal('Last 17m');
+        const timeConfig = await PageObjects.timePicker.getTimeConfig();
+        expect(timeConfig.start).to.equal('~ 17 minutes ago');
+        expect(timeConfig.end).to.equal('now');
       });
 
       it('should update global Kibana refresh config to value stored with map', async () => {
-        const kibanaRefreshConfig = await PageObjects.header.getRefreshConfig();
-        expect(kibanaRefreshConfig).to.equal('inactive 1 second');
+        const kibanaRefreshConfig = await PageObjects.timePicker.getRefreshConfig();
+        expect(kibanaRefreshConfig.interval).to.equal('0.02');
+        expect(kibanaRefreshConfig.units).to.equal('minutes');
+        expect(kibanaRefreshConfig.isPaused).to.equal(true);
       });
 
       it('should set map location to value stored with map', async () => {

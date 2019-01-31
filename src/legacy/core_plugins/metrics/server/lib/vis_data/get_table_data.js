@@ -16,18 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { get } from 'lodash';
 import buildRequestBody from './table/build_request_body';
 import handleErrorResponse from './handle_error_response';
-import { get } from 'lodash';
 import processBucket from './table/process_bucket';
+import { getIndexPatternObject } from './helpers/get_index_pattern';
+import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
+
+
 export async function getTableData(req, panel) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
   const includeFrozen = await req.getUiSettingsService().get('search:includeFrozen');
+  const indexPatternString = panel.index_pattern;
+
+  const esQueryConfig = await getEsQueryConfig(req);
+  const indexPatternObject = await getIndexPatternObject(req, indexPatternString);
   const params = {
-    index: panel.index_pattern,
+    index: indexPatternString,
     ignore_throttled: !includeFrozen,
-    body: buildRequestBody(req, panel)
+    body: buildRequestBody(req, panel, esQueryConfig, indexPatternObject)
   };
   try {
     const resp = await callWithRequest(req, 'search', params);

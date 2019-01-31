@@ -32,13 +32,13 @@ export default function ({ getService, getPageObjects }) {
 
     it('should have an Elasticsearch Cluster Summary Status with correct info', async () => {
       expect(await esClusterSummaryStatus.getContent()).to.eql({
-        nodesCount: 'Nodes:\n3',
-        indicesCount: 'Indices:\n20',
-        memory: 'Memory:\n575.3 MB / 2.0 GB',
-        totalShards: 'Total Shards:\n80',
-        unassignedShards: 'Unassigned Shards:\n5',
-        documentCount: 'Documents:\n25,927',
-        dataSize: 'Data:\n101.6 MB',
+        nodesCount: 'Nodes\n3',
+        indicesCount: 'Indices\n20',
+        memory: 'Memory\n575.3 MB / 2.0 GB',
+        totalShards: 'Total Shards\n80',
+        unassignedShards: 'Unassigned Shards\n5',
+        documentCount: 'Documents\n25,927',
+        dataSize: 'Data\n101.6 MB',
         health: 'Health: yellow',
       });
     });

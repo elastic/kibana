@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import { AbstractVectorSource } from '../vector_source';
 import React from 'react';
-import {
-  EuiText,
-} from '@elastic/eui';
 import { CreateSourceEditor } from './create_source_editor';
+
+import { getKibanaRegionList } from '../../../../meta';
 
 export class KibanaRegionmapSource extends AbstractVectorSource {
 
@@ -19,9 +17,8 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
   static description = 'Vector shapes from static files configured in kibana.yml';
   static icon = 'logoKibana';
 
-  constructor(descriptor, { ymlFileLayers }) {
+  constructor(descriptor) {
     super(descriptor);
-    this._regionList = ymlFileLayers;
   }
 
   static createDescriptor(options) {
@@ -31,37 +28,30 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
     };
   }
 
-  static renderEditor = ({ dataSourcesMeta, onPreviewSource }) => {
-    const regionmapLayers = _.get(dataSourcesMeta, 'kibana.regionmap', []);
-
+  static renderEditor = ({ onPreviewSource }) => {
     const onSelect = (layerConfig) => {
       const sourceDescriptor = KibanaRegionmapSource.createDescriptor(layerConfig);
-      const source = new KibanaRegionmapSource(sourceDescriptor, { ymlFileLayers: regionmapLayers });
+      const source = new KibanaRegionmapSource(sourceDescriptor);
       onPreviewSource(source);
     };
 
     return (
       <CreateSourceEditor
         onSelect={onSelect}
-        regionmapLayers={regionmapLayers}
       />
     );
   };
 
-  renderDetails() {
-    return (
-      <EuiText color="subdued" size="s">
-        <p className="gisLayerDetails">
-          <strong className="gisLayerDetails__label">Source </strong><span>Kibana Region Map</span><br/>
-          <strong className="gisLayerDetails__label">Type </strong><span>Vector</span><br/>
-          <strong className="gisLayerDetails__label">Name </strong><span>{this._descriptor.name}</span><br/>
-        </p>
-      </EuiText>
-    );
+  async getImmutableProperties() {
+    return [
+      { label: 'Data source', value: KibanaRegionmapSource.title },
+      { label: 'Vector layer', value: this._descriptor.name },
+    ];
   }
 
   async getGeoJsonWithMeta() {
-    const fileSource = this._regionList.find(source => source.name === this._descriptor.name);
+    const regionList = await getKibanaRegionList();
+    const fileSource = regionList.find(source => source.name === this._descriptor.name);
     const featureCollection = await AbstractVectorSource.getGeoJson(fileSource, fileSource.url);
     return {
       data: featureCollection
@@ -69,8 +59,8 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
   }
 
   async getStringFields() {
-    //todo: use map/service-settings instead.
-    const fileSource = this._regionList.find((source => source.name === this._descriptor.name));
+    const regionList = await getKibanaRegionList();
+    const fileSource = regionList.find((source => source.name === this._descriptor.name));
 
     return fileSource.fields.map(f => {
       return { name: f.name, label: f.description };

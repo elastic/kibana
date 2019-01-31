@@ -8,122 +8,56 @@ import {
   EuiBadge,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
   EuiFilterButton,
   EuiFilterGroup,
   EuiPopover,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
-import { InfraNodeType, InfraPathInput, InfraPathType } from '../../graphql/types';
+import { InfraIndexField, InfraNodeType, InfraPathInput, InfraPathType } from '../../graphql/types';
+import { InfraGroupByOptions } from '../../lib/lib';
+import { CustomFieldPanel } from './custom_field_panel';
+import { fieldToName } from './lib/field_to_display_name';
 
 interface Props {
   nodeType: InfraNodeType;
   groupBy: InfraPathInput[];
   onChange: (groupBy: InfraPathInput[]) => void;
+  onChangeCustomOptions: (options: InfraGroupByOptions[]) => void;
+  fields: InfraIndexField[];
   intl: InjectedIntl;
+  customOptions: InfraGroupByOptions[];
 }
 
-let OPTIONS: { [P in InfraNodeType]: Array<{ text: string; type: InfraPathType; field: string }> };
+const createFieldToOptionMapper = (intl: InjectedIntl) => (field: string) => ({
+  text: fieldToName(field, intl),
+  type: InfraPathType.terms,
+  field,
+});
+
+let OPTIONS: { [P in InfraNodeType]: InfraGroupByOptions[] };
 const getOptions = (
   nodeType: InfraNodeType,
   intl: InjectedIntl
 ): Array<{ text: string; type: InfraPathType; field: string }> => {
   if (!OPTIONS) {
+    const mapFieldToOption = createFieldToOptionMapper(intl);
     OPTIONS = {
-      [InfraNodeType.pod]: [
-        {
-          text: intl.formatMessage({
-            id: 'xpack.infra.waffle.podGroupByOptions.namespaceLabel',
-            defaultMessage: 'Namespace',
-          }),
-          type: InfraPathType.terms,
-          field: 'kubernetes.namespace',
-        },
-        {
-          text: intl.formatMessage({
-            id: 'xpack.infra.waffle.podGroupByOptions.nodeLabel',
-            defaultMessage: 'Node',
-          }),
-          type: InfraPathType.terms,
-          field: 'kubernetes.node.name',
-        },
-      ],
+      [InfraNodeType.pod]: ['kubernetes.namespace', 'kubernetes.node.name'].map(mapFieldToOption),
       [InfraNodeType.container]: [
-        {
-          text: intl.formatMessage({
-            id: 'xpack.infra.waffle.containerGroupByOptions.hostLabel',
-            defaultMessage: 'Host',
-          }),
-          type: InfraPathType.terms,
-          field: 'host.name',
-        },
-        {
-          text: intl.formatMessage({
-            id: 'xpack.infra.waffle.containerGroupByOptions.availabilityZoneLabel',
-            defaultMessage: 'Availability Zone',
-          }),
-          type: InfraPathType.terms,
-          field: 'meta.cloud.availability_zone',
-        },
-        {
-          text: intl.formatMessage({
-            id: 'xpack.infra.waffle.containerGroupByOptions.machineTypeLabel',
-            defaultMessage: 'Machine Type',
-          }),
-          type: InfraPathType.terms,
-          field: 'meta.cloud.machine_type',
-        },
-        {
-          text: intl.formatMessage({
-            id: 'xpack.infra.waffle.containerGroupByOptions.projectIDLabel',
-            defaultMessage: 'Project ID',
-          }),
-          type: InfraPathType.terms,
-          field: 'meta.cloud.project_id',
-        },
-        {
-          text: intl.formatMessage({
-            id: 'xpack.infra.waffle.containerGroupByOptions.providerLabel',
-            defaultMessage: 'Provider',
-          }),
-          type: InfraPathType.terms,
-          field: 'meta.cloud.provider',
-        },
-      ],
+        'host.name',
+        'meta.cloud.availability_zone',
+        'meta.cloud.machine_type',
+        'meta.cloud.project_id',
+        'meta.cloud.provider',
+      ].map(mapFieldToOption),
       [InfraNodeType.host]: [
-        {
-          text: intl.formatMessage({
-            id: 'xpack.infra.waffle.hostGroupByOptions.availabilityZoneLabel',
-            defaultMessage: 'Availability Zone',
-          }),
-          type: InfraPathType.terms,
-          field: 'meta.cloud.availability_zone',
-        },
-        {
-          text: intl.formatMessage({
-            id: 'xpack.infra.waffle.hostGroupByOptions.machineTypeLabel',
-            defaultMessage: 'Machine Type',
-          }),
-          type: InfraPathType.terms,
-          field: 'meta.cloud.machine_type',
-        },
-        {
-          text: intl.formatMessage({
-            id: 'xpack.infra.waffle.hostGroupByOptions.projectIDLabel',
-            defaultMessage: 'Project ID',
-          }),
-          type: InfraPathType.terms,
-          field: 'meta.cloud.project_id',
-        },
-        {
-          text: intl.formatMessage({
-            id: 'xpack.infra.waffle.hostGroupByOptions.cloudProviderLabel',
-            defaultMessage: 'Cloud Provider',
-          }),
-          type: InfraPathType.terms,
-          field: 'meta.cloud.provider',
-        },
-      ],
+        'meta.cloud.availability_zone',
+        'meta.cloud.machine_type',
+        'meta.cloud.project_id',
+        'meta.cloud.provider',
+      ].map(mapFieldToOption),
     };
   }
 
@@ -143,7 +77,7 @@ export const WaffleGroupByControls = injectI18n(
 
     public render() {
       const { nodeType, groupBy, intl } = this.props;
-      const options = getOptions(nodeType, intl);
+      const options = getOptions(nodeType, intl).concat(this.props.customOptions);
 
       if (!options.length) {
         throw Error(
@@ -165,11 +99,35 @@ export const WaffleGroupByControls = injectI18n(
             id: 'xpack.infra.waffle.selectTwoGroupingsTitle',
             defaultMessage: 'Select up to two groupings',
           }),
-          items: options.map(o => {
-            const icon = groupBy.some(g => g.field === o.field) ? 'check' : 'empty';
-            const panel = { name: o.text, onClick: this.handleClick(o.field), icon };
-            return panel;
+          items: [
+            {
+              name: intl.formatMessage({
+                id: 'xpack.infra.waffle.customGroupByOptionName',
+                defaultMessage: 'Custom Field',
+              }),
+              icon: 'empty',
+              panel: 'customPanel',
+            },
+            ...options.map(o => {
+              const icon = groupBy.some(g => g.field === o.field) ? 'check' : 'empty';
+              const panel = {
+                name: o.text,
+                onClick: this.handleClick(o.field),
+                icon,
+              } as EuiContextMenuPanelItemDescriptor;
+              return panel;
+            }),
+          ],
+        },
+        {
+          id: 'customPanel',
+          title: intl.formatMessage({
+            id: 'xpack.infra.waffle.customGroupByPanelTitle',
+            defaultMessage: 'Group By Custom Field',
           }),
+          content: (
+            <CustomFieldPanel onSubmit={this.handleCustomField} fields={this.props.fields} />
+          ),
         },
       ];
       const buttonBody =
@@ -228,6 +186,8 @@ export const WaffleGroupByControls = injectI18n(
     private handleRemove = (field: string) => () => {
       const { groupBy } = this.props;
       this.props.onChange(groupBy.filter(g => g.field !== field));
+      const options = this.props.customOptions.filter(g => g.field !== field);
+      this.props.onChangeCustomOptions(options);
       // We need to close the panel after we rmeove the pill icon otherwise
       // it will remain open because the click is still captured by the EuiFilterButton
       setTimeout(() => this.handleClose());
@@ -239,6 +199,20 @@ export const WaffleGroupByControls = injectI18n(
 
     private handleToggle = () => {
       this.setState(state => ({ isPopoverOpen: !state.isPopoverOpen }));
+    };
+
+    private handleCustomField = (field: string) => {
+      const options = [
+        ...this.props.customOptions,
+        {
+          text: field,
+          field,
+          type: InfraPathType.custom,
+        },
+      ];
+      this.props.onChangeCustomOptions(options);
+      const fn = this.handleClick(field);
+      fn();
     };
 
     private handleClick = (field: string) => () => {

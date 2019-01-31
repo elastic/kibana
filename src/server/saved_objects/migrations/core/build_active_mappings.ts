@@ -39,10 +39,8 @@ export function buildActiveMappings({
 }): IndexMapping {
   const mapping = defaultMapping();
   return _.cloneDeep({
-    doc: {
-      ...mapping.doc,
-      properties: validateAndMerge(mapping.doc.properties, properties),
-    },
+    ...mapping,
+    properties: validateAndMerge(mapping.properties, properties),
   });
 }
 
@@ -53,29 +51,41 @@ export function buildActiveMappings({
  */
 function defaultMapping(): IndexMapping {
   return {
-    doc: {
-      dynamic: 'strict',
-      properties: {
-        config: {
-          dynamic: 'true',
-          properties: {
-            buildNum: {
-              type: 'keyword',
-            },
+    dynamic: 'strict',
+    properties: {
+      config: {
+        dynamic: 'true',
+        properties: {
+          buildNum: {
+            type: 'keyword',
           },
         },
-        migrationVersion: {
-          dynamic: 'true',
-          type: 'object',
-        },
-        type: {
-          type: 'keyword',
-        },
-        namespace: {
-          type: 'keyword',
-        },
-        updated_at: {
-          type: 'date',
+      },
+      migrationVersion: {
+        dynamic: 'true',
+        type: 'object',
+      },
+      type: {
+        type: 'keyword',
+      },
+      namespace: {
+        type: 'keyword',
+      },
+      updated_at: {
+        type: 'date',
+      },
+      references: {
+        type: 'nested',
+        properties: {
+          name: {
+            type: 'keyword',
+          },
+          type: {
+            type: 'keyword',
+          },
+          id: {
+            type: 'keyword',
+          },
         },
       },
     },
