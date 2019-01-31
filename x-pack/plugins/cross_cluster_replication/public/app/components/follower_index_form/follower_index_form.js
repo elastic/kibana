@@ -288,7 +288,7 @@ export const FollowerIndexForm = injectI18n(
       if (apiError) {
         const title = intl.formatMessage({
           id: 'xpack.crossClusterReplication.followerIndexForm.savingErrorTitle',
-          defaultMessage: 'Error creating follower index',
+          defaultMessage: `Can't create follower index`,
         });
         const { leaderIndex } = this.state.followerIndex;
         const error = apiError.status === 404
@@ -296,7 +296,7 @@ export const FollowerIndexForm = injectI18n(
             data: {
               message: intl.formatMessage({
                 id: 'xpack.crossClusterReplication.followerIndexForm.leaderIndexNotFoundError',
-                defaultMessage: `The leader index '{leaderIndex}' you want to replicate from does not exist.`,
+                defaultMessage: `The leader index '{leaderIndex}' does not exist.`,
               }, { leaderIndex })
             }
           }

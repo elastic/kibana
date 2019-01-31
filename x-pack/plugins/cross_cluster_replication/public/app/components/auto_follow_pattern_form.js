@@ -216,7 +216,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
     if (apiError) {
       const title = intl.formatMessage({
         id: 'xpack.crossClusterReplication.autoFollowPatternForm.savingErrorTitle',
-        defaultMessage: 'Error creating auto-follow pattern',
+        defaultMessage: `Can't create auto-follow pattern`,
       });
       return <SectionError title={title} error={apiError} />;
     }
