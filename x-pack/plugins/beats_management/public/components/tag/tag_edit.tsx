@@ -23,7 +23,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import 'brace/mode/yaml';
 import 'brace/theme/github';
-import { isEqual } from 'lodash';
 import React from 'react';
 import { BeatTag, CMBeat, ConfigurationBlock } from '../../../common/domain_types';
 import { ConfigList } from '../config_list';
@@ -32,16 +31,25 @@ import { ConfigView } from './config_view';
 import { TagBadge } from './tag_badge';
 
 interface TagEditProps {
-  tag: Pick<BeatTag, Exclude<keyof BeatTag, 'last_updated'>>;
+  tag: BeatTag;
+  configuration_blocks: {
+    error?: string | undefined;
+    blocks: ConfigurationBlock[];
+    page: number;
+    total: number;
+  };
+  onConfigListChange: (index: number, size: number) => void;
   onDetachBeat?: (beatIds: string[]) => void;
   onTagChange: (field: keyof BeatTag, value: string) => any;
+  onConfigAddOrEdit: (block: ConfigurationBlock) => any;
+  onConfigRemoved: (block: ConfigurationBlock) => any;
   attachedBeats?: CMBeat[];
 }
 
 interface TagEditState {
   showFlyout: boolean;
   tableRef: any;
-  selectedConfigIndex?: number;
+  selectedConfig?: ConfigurationBlock;
 }
 
 export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
@@ -55,7 +63,8 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
   }
 
   public render() {
-    const { tag, attachedBeats } = this.props;
+    const { tag, attachedBeats, configuration_blocks } = this.props;
+
     return (
       <div>
         <EuiFlexGroup>
@@ -77,7 +86,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
               </p>
             </EuiText>
             <div>
-              <TagBadge tag={{ color: tag.color || '#FF0', id: tag.id }} />
+              <TagBadge tag={tag} />
             </div>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -89,40 +98,32 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
                     defaultMessage="Tag Name"
                   />
                 }
-                isInvalid={!!this.getNameError(tag.id)}
-                error={this.getNameError(tag.id) || undefined}
+                isInvalid={!!this.getNameError(tag.name)}
+                error={this.getNameError(tag.name) || undefined}
               >
                 <EuiFieldText
                   name="name"
-                  isInvalid={!!this.getNameError(tag.id)}
-                  onChange={this.updateTag('id')}
-                  disabled={!!this.props.onDetachBeat}
-                  value={tag.id}
+                  isInvalid={!!this.getNameError(tag.name)}
+                  onChange={this.updateTag('name')}
+                  value={tag.name}
                   placeholder={i18n.translate('xpack.beatsManagement.tag.tagNamePlaceholder', {
                     defaultMessage: 'Tag name (required)',
                   })}
                 />
               </EuiFormRow>
-              {!this.props.onDetachBeat && (
-                <EuiFormRow
-                  label={i18n.translate('xpack.beatsManagement.tag.tagColorLabel', {
-                    defaultMessage: 'Tag Color',
-                  })}
-                >
-                  <EuiColorPicker color={tag.color} onChange={this.updateTag('color')} />
-                </EuiFormRow>
-              )}
+              <EuiFormRow
+                label={i18n.translate('xpack.beatsManagement.tag.tagColorLabel', {
+                  defaultMessage: 'Tag Color',
+                })}
+              >
+                <EuiColorPicker color={tag.color} onChange={this.updateTag('color')} />
+              </EuiFormRow>
             </EuiForm>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer />
         <EuiHorizontalRule />
-
-        <EuiFlexGroup
-          alignItems={
-            tag.configuration_blocks && tag.configuration_blocks.length ? 'stretch' : 'center'
-          }
-        >
+        <EuiFlexGroup alignItems="stretch">
           <EuiFlexItem>
             <EuiTitle size="xs">
               <h3>
@@ -145,19 +146,15 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
           <EuiFlexItem>
             <div>
               <ConfigList
-                configs={tag.configuration_blocks}
-                onConfigClick={(action: string, config: ConfigurationBlock) => {
-                  const selectedIndex = tag.configuration_blocks.findIndex(c => {
-                    return isEqual(config, c);
-                  });
+                onTableChange={this.props.onConfigListChange}
+                configs={configuration_blocks}
+                onConfigClick={(action: string, block: ConfigurationBlock) => {
                   if (action === 'delete') {
-                    const configs = [...tag.configuration_blocks];
-                    configs.splice(selectedIndex, 1);
-                    this.updateTag('configuration_blocks', configs);
+                    this.props.onConfigRemoved(block);
                   } else {
                     this.setState({
                       showFlyout: true,
-                      selectedConfigIndex: selectedIndex,
+                      selectedConfig: block,
                     });
                   }
                 }}
@@ -198,27 +195,13 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
             />
           </div>
         )}
-
         {this.state.showFlyout && (
           <ConfigView
-            configBlock={
-              this.state.selectedConfigIndex !== undefined
-                ? tag.configuration_blocks[this.state.selectedConfigIndex]
-                : undefined
-            }
-            onClose={() => this.setState({ showFlyout: false, selectedConfigIndex: undefined })}
-            onSave={(config: any) => {
-              this.setState({ showFlyout: false, selectedConfigIndex: undefined });
-              if (this.state.selectedConfigIndex !== undefined) {
-                const configs = [...tag.configuration_blocks];
-                configs[this.state.selectedConfigIndex] = config;
-                this.updateTag('configuration_blocks', configs);
-              } else {
-                this.updateTag('configuration_blocks', [
-                  ...(tag.configuration_blocks || []),
-                  config,
-                ]);
-              }
+            configBlock={this.state.selectedConfig}
+            onClose={() => this.setState({ showFlyout: false, selectedConfig: undefined })}
+            onSave={(config: ConfigurationBlock) => {
+              this.setState({ showFlyout: false, selectedConfig: undefined });
+              this.props.onConfigAddOrEdit(config);
             }}
           />
         )}

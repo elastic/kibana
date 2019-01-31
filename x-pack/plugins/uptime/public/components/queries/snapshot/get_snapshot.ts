@@ -7,23 +7,14 @@
 import gql from 'graphql-tag';
 
 export const getSnapshotQuery = gql`
-  query Snapshot(
-    $dateRangeStart: String!
-    $dateRangeEnd: String!
-    $downCount: Int!
-    $windowSize: Int!
-    $filters: String
-  ) {
+  query Snapshot($dateRangeStart: String!, $dateRangeEnd: String!, $filters: String) {
     snapshot: getSnapshot(
       dateRangeStart: $dateRangeStart
       dateRangeEnd: $dateRangeEnd
-      downCount: $downCount
-      windowSize: $windowSize
       filters: $filters
     ) {
       up
       down
-      trouble
       total
       histogram {
         monitorId

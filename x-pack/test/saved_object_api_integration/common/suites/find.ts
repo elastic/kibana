@@ -67,6 +67,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
           attributes: {
             name: 'My favorite global object',
           },
+          references: [],
         },
       ],
     });
@@ -99,6 +100,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
           attributes: {
             title: 'Count of requests',
           },
+          references: [],
         },
       ],
     });

@@ -17,7 +17,6 @@ import { FeatureTooltip } from 'plugins/gis/components/map/feature_tooltip';
 import { store } from '../../store/store';
 import { getMapColors } from '../../selectors/map_selectors';
 import _ from 'lodash';
-import { getGeohashPrecisionForZoom } from '../utils/zoom_to_precision';
 
 const EMPTY_FEATURE_COLLECTION = {
   type: 'FeatureCollection',
@@ -96,11 +95,6 @@ export class VectorLayer extends AbstractLayer {
     return 'vector';
   }
 
-  getColorRamp() {
-    // TODO: Determine if can be data-driven first
-    return this._style.getColorRamp();
-  }
-
   getTOCDetails() {
     return this._style.getTOCDetails();
   }
@@ -175,7 +169,7 @@ export class VectorLayer extends AbstractLayer {
     const extentAware = source.isFilterByMapBounds();
     const isFieldAware = source.isFieldAware();
     const isQueryAware = source.isQueryAware();
-    const isGeohashPrecisionAware = source.isGeohashPrecisionAware();
+    const isGeoGridPrecisionAware = source.isGeoGridPrecisionAware();
 
     if (
       !timeAware &&
@@ -183,7 +177,7 @@ export class VectorLayer extends AbstractLayer {
       !extentAware &&
       !isFieldAware &&
       !isQueryAware &&
-      !isGeohashPrecisionAware
+      !isGeoGridPrecisionAware
     ) {
       const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
       if (sourceDataRequest && sourceDataRequest.hasDataOrRequestInProgress()) {
@@ -222,8 +216,8 @@ export class VectorLayer extends AbstractLayer {
     }
 
     let updateDueToPrecisionChange = false;
-    if (isGeohashPrecisionAware) {
-      updateDueToPrecisionChange = !_.isEqual(meta.geohashPrecision, searchFilters.geohashPrecision);
+    if (isGeoGridPrecisionAware) {
+      updateDueToPrecisionChange = !_.isEqual(meta.geogridPrecision, searchFilters.geogridPrecision);
     }
 
     const updateDueToExtentChange = this.updateDueToExtent(source, meta, searchFilters);
@@ -289,11 +283,10 @@ export class VectorLayer extends AbstractLayer {
       })
     ];
 
-    const targetPrecision = getGeohashPrecisionForZoom(dataFilters.zoom);
     return {
       ...dataFilters,
       fieldNames: _.uniq(fieldNames).sort(),
-      geohashPrecision: targetPrecision
+      geogridPrecision: this._source.getGeoGridPrecision(dataFilters.zoom),
     };
   }
 

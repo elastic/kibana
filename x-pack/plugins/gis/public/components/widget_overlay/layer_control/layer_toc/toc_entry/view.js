@@ -82,7 +82,8 @@ export class TOCEntry extends React.Component {
           alignItems="center"
           responsive={false}
           className={
-            layer.isVisible() && layer.showAtZoomLevel(zoom) && !layer.dataHasLoadError() ? 'gisTocEntry-visible' : 'gisTocEntry-notVisible'
+            layer.isVisible() && layer.showAtZoomLevel(zoom)
+              && !layer.hasErrors() ? 'gisTocEntry-visible' : 'gisTocEntry-notVisible'
           }
         >
           <EuiFlexItem grow={false}>
