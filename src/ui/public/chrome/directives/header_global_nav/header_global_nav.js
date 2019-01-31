@@ -26,6 +26,7 @@ import { injectI18nProvider } from '@kbn/i18n/react';
 const module = uiModules.get('kibana');
 
 module.directive('headerGlobalNav', (reactDirective, chrome, Private) => {
+  const { recentlyAccessed } = require('ui/persisted_log');
   const navControls = Private(chromeHeaderNavControlsRegistry);
   const homeHref = chrome.addBasePath('/app/kibana#/home');
 
@@ -39,6 +40,7 @@ module.directive('headerGlobalNav', (reactDirective, chrome, Private) => {
   {
     breadcrumbs$: chrome.breadcrumbs.get$(),
     navLinks$: chrome.getNavLinks$(),
+    recentlyAccessed$: recentlyAccessed.get$(),
     navControls,
     homeHref
   });

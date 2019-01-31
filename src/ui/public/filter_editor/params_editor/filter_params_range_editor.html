@@ -1,6 +1,6 @@
 <div class="kuiVerticalRhythm">
   <filter-params-input-type
-    placeholder="From..."
+    placeholder="{{ ::'common.ui.filterEditor.filterParamsRangeEditor.fromPlaceholder' | i18n: { defaultMessage: 'From…' } }}"
     type="field.type"
     value="params.range.from"
     on-change="params.range.from = value"
@@ -10,7 +10,7 @@
 
 <div class="kuiVerticalRhythm">
   <filter-params-input-type
-    placeholder="To..."
+    placeholder="{{ ::'common.ui.filterEditor.filterParamsRangeEditor.toPlaceholder' | i18n: { defaultMessage: 'To…' } }}"
     type="field.type"
     value="params.range.to"
     on-change="params.range.to = value"
@@ -24,7 +24,7 @@
     documentation-href="date.dateMath"
     target="_blank"
     rel="noopener noreferrer"
-  >
-    Accepted date formats
-  </a>
+    i18n-id="common.ui.filterEditor.filterParamsRangeEditor.acceptedDateFormatsLinkText"
+    i18n-default-message="Accepted date formats"
+  ></a>
 </small>

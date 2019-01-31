@@ -39,7 +39,7 @@
     <td>
       <button
         type="button"
-        aria-label="Remove this range"
+        aria-label="{{ ::'common.ui.aggTypes.ranges.removeRangeButtonAriaLabel' | i18n: { defaultMessage: 'Remove this range' } }}"
         ng-click="agg.params.ranges.splice($index, 1)"
         class="kuiButton kuiButton--danger kuiButton--small">
         <i class="fa fa-times"></i>
