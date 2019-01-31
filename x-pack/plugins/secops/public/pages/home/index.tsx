@@ -87,7 +87,7 @@ export const HomePage = pure(() => (
             <EuiPageBody>
               <PageHeader data-test-subj="pageHeader">
                 <PageHeaderSection>
-                  <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
+                  <FixEuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
                     <EuiFlexItem grow={false} data-test-subj="datePickerContainer">
                       {window.location.hash.match(/[hosts|overview|network]\?/) && (
                         <Navigation data-test-subj="navigation" />
@@ -110,7 +110,7 @@ export const HomePage = pure(() => (
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </FixEuiFlexItem>
-                  </EuiFlexGroup>
+                  </FixEuiFlexGroup>
                 </PageHeaderSection>
               </PageHeader>
               <Switch>
@@ -150,4 +150,8 @@ const PageHeaderSection = styled(EuiPageHeaderSection)`
 
 const FixEuiFlexItem = styled(EuiFlexItem)`
   margin-top: '13px';
+`;
+
+const FixEuiFlexGroup = styled(EuiFlexGroup)`
+  margin-top: -6px;
 `;

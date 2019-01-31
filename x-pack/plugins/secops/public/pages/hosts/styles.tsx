@@ -19,15 +19,14 @@ export const PageHeader = styled(EuiPageHeader)`
   z-index: 1;
   padding: 6px 0px 0px 0px;
   margin-bottom: 0px;
-  /* margin-left: -1px; */
-  margin-top: 56px;
+  margin-top: 50px;
 `;
 
 export const PageHeaderSection = styled(EuiPageHeaderSection)`
   width: 100%;
 `;
 export const PageContent = styled(EuiPageContent)`
-  margin-top: 116px;
+  margin-top: 106px;
 `;
 
 export const PageContentBody = styled(EuiPageContentBody)`
