@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep, has } from 'lodash';
+import { has } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { VisRequestHandlersRegistryProvider } from '../../registry/vis_request_handlers';
 import { calculateObjectHash } from '../lib/calculate_object_hash';
@@ -123,7 +123,7 @@ const CourierRequestHandlerProvider = function () {
         }
       }
 
-      let resp = cloneDeep(searchSource.rawResponse);
+      let resp = searchSource.rawResponse;
       for (const agg of aggs) {
         if (has(agg, 'type.postFlightRequest')) {
           resp = await agg.type.postFlightRequest(
