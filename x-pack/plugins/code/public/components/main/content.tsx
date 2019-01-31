@@ -53,7 +53,7 @@ const EditorBlameContainer = styled.div`
 
 const BlameContainer = styled.div`
   flex-grow: 3;
-  flex-basis: calc(400 / 14rem);
+  flex-basis: calc(400rem / 14);
   height: 100%;
   overflow: auto;
 `;
