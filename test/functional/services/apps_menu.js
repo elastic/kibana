@@ -21,6 +21,7 @@ export function AppsMenuProvider({ getService }) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
   const retry = getService('retry');
+  const globalNav = getService('globalNav');
 
   return new class AppsMenu {
     async readLinks() {
@@ -62,7 +63,7 @@ export function AppsMenuProvider({ getService }) {
     }
 
     async _ensureMenuClosed() {
-      await testSubjects.moveMouseTo('kibanaLogo');
+      await globalNav.moveMouseToLogo();
       await retry.waitFor('apps drawer closed', async () => (
         await testSubjects.exists('navDrawer&collapsed')
       ));

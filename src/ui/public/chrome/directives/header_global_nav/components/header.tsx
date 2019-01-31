@@ -149,7 +149,7 @@ class HeaderUI extends Component<Props, State> {
     const { homeHref, intl } = this.props;
     return (
       <EuiHeaderLogo
-        data-test-subj="kibanaLogo"
+        data-test-subj="logo"
         iconType="logoKibana"
         href={homeHref}
         aria-label={intl.formatMessage({
