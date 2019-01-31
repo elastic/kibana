@@ -23,7 +23,8 @@ const SOCKET_CONNECTION_TIMEOUT = 5000; // timeout in ms
 
 export async function createSocket(basePath, functionsRegistry) {
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
+
     const socket = io({
       path: `${basePath}/socket.io`,
       transports: ['polling', 'websocket'],
@@ -50,10 +51,9 @@ export async function createSocket(basePath, functionsRegistry) {
       socket.off('connect_timeout', errorHandler);
     });
 
-    function errorHandler(err) {
+    function errorHandler() {
       // 'connectionFailed' returns an object with a reason prop
-      // other error cases provide their own error
-      reject(err.reason ? new Error(err.reason) : err);
+      resolve(null);
     }
 
     socket.on('connectionFailed', errorHandler);

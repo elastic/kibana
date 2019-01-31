@@ -42,29 +42,34 @@ export async function initializeInterpreter(socket, typesRegistry, functionsRegi
     return interpretFn(ast, context);
   };
 
-  // Listen for interpreter runs
-  socket.on('run', ({ ast, context, id }) => {
-    const types = typesRegistry.toJS();
-    const { serialize, deserialize } = serializeProvider(types);
-    interpretAst(ast, deserialize(context)).then(value => {
-      socket.emit(`resp:${id}`, { value: serialize(value) });
+  if (socket) {
+    // Listen for interpreter runs
+    socket.on('run', ({ ast, context, id }) => {
+      const types = typesRegistry.toJS();
+      const { serialize, deserialize } = serializeProvider(types);
+      interpretAst(ast, deserialize(context)).then(value => {
+        socket.emit(`resp:${id}`, { value: serialize(value) });
+      });
     });
-  });
 
-  // Create the function list
-  let gotFunctionList = false;
-  socket.once('functionList', (fl) => {
-    gotFunctionList = true;
-    resolve(fl);
-  });
+    // Create the function list
+    let gotFunctionList = false;
+    socket.once('functionList', (fl) => {
+      gotFunctionList = true;
+      resolve(fl);
+    });
 
-  const interval = setInterval(() => {
-    if (gotFunctionList) {
-      clearInterval(interval);
-      return;
-    }
-    socket.emit('getFunctionList');
-  }, 1000);
+    const interval = setInterval(() => {
+      if (gotFunctionList) {
+        clearInterval(interval);
+        return;
+      }
+      socket.emit('getFunctionList');
+    }, 1000);
+  } else {
+    resolve([]);
+  }
+
 
   return { getInitializedFunctions, interpretAst };
 }
