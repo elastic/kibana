@@ -464,39 +464,39 @@ export class PolicyTableUi extends Component {
                           </h1>
                         </EuiTitle>
                       </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiBetaBadge
-                            label={intl.formatMessage({
-                              id: 'xpack.indexLifecycleMgmt.policyTable.sectionHeadingBetaBadgeText',
-                              defaultMessage: 'Beta',
-                            })}
-                          />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                    {totalNumberOfPolicies ? (
-                      <EuiFlexItem grow={false}>{this.renderCreatePolicyButton()}</EuiFlexItem>
-                    ) : null}
-                  </EuiFlexGroup>
-                  <EuiSpacer size="s" />
-                  <EuiText>
-                    <p>
-                      <FormattedMessage
-                        id="xpack.indexLifecycleMgmt.policyTable.sectionDescription"
-                        defaultMessage="Manage your indices as they age.  Attach a policy to automate
+                      <EuiFlexItem grow={false}>
+                        <EuiBetaBadge
+                          label={intl.formatMessage({
+                            id: 'xpack.indexLifecycleMgmt.policyTable.sectionHeadingBetaBadgeText',
+                            defaultMessage: 'Beta',
+                          })}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  {totalNumberOfPolicies ? (
+                    <EuiFlexItem grow={false}>{this.renderCreatePolicyButton()}</EuiFlexItem>
+                  ) : null}
+                </EuiFlexGroup>
+                <EuiSpacer size="s" />
+                <EuiText>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.policyTable.sectionDescription"
+                      defaultMessage="Manage your indices as they age.  Attach a policy to automate
                           when and how to transition an index through its lifecycle."
-                      />
-                    </p>
-                  </EuiText>
-                </Fragment>
-              ) : null}
-              <EuiSpacer />
-              {content}
-              <EuiSpacer size="m" />
-              {totalNumberOfPolicies && totalNumberOfPolicies > 10 ? this.renderPager() : null}
-            </div>
-          </EuiPageContent>
-        </EuiPageBody>
+                    />
+                  </p>
+                </EuiText>
+              </Fragment>
+            ) : null}
+            <EuiSpacer />
+            {content}
+            <EuiSpacer size="m" />
+            {totalNumberOfPolicies && totalNumberOfPolicies > 10 ? this.renderPager() : null}
+          </div>
+        </EuiPageContent>
+      </EuiPageBody>
     );
   }
 }
