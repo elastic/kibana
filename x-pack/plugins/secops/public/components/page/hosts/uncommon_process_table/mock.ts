@@ -8,8 +8,26 @@ import { UncommonProcessesData } from '../../../../graphql/types';
 
 export const mockData: { UncommonProcess: UncommonProcessesData } = {
   UncommonProcess: {
-    totalCount: 4,
+    totalCount: 3,
     edges: [
+      {
+        node: {
+          _id: 'cPsuhGcB0WOhS6qyTKC0',
+          process: {
+            title: 'Hello World',
+            name: 'elrond.elstc.co',
+          },
+          host: [],
+          instances: 93,
+          user: {
+            id: 0,
+            name: 'root',
+          },
+        },
+        cursor: {
+          value: '98966fa2013c396155c460d35c0902be',
+        },
+      },
       {
         node: {
           _id: 'cPsuhGcB0WOhS6qyTKC0',
