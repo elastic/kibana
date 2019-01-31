@@ -23,8 +23,13 @@ export function CodeHomePageProvider({ getService }: KibanaFunctionalTestDefault
     },
 
     async clickImportRepositoryButton() {
-      log.info('Get import repository button.');
+      log.info('Click import repository button.');
       return await testSubjects.click('importRepositoryButton');
+    },
+
+    async clickDeleteRepositoryButton() {
+      log.info('Click delete repository button.');
+      return await testSubjects.click('deleteRepositoryButton');
     },
   };
 }
