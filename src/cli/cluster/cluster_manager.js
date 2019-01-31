@@ -170,7 +170,6 @@ export default class ClusterManager {
       fromRoot('x-pack/common'),
       fromRoot('x-pack/plugins'),
       fromRoot('x-pack/server'),
-      fromRoot('x-pack/webpackShims'),
       fromRoot('config'),
       ...extraPaths,
     ].map(path => resolve(path));
