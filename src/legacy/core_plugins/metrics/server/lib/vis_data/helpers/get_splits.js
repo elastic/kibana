@@ -35,8 +35,8 @@ export default function getSplits(resp, panel, series, meta) {
 
   const color = new Color(series.color);
   const metric = getLastMetric(series);
-  if (_.has(resp, `aggregations.${series.id}.buckets`)) {
-    const buckets = _.get(resp, `aggregations.${series.id}.buckets`);
+  const buckets = _.get(resp, `aggregations.${series.id}.buckets`);
+  if (buckets) {
     if (Array.isArray(buckets)) {
       const size = buckets.length;
       const colors = getSplitColors(series.color, size, series.split_color_mode);

@@ -34,7 +34,7 @@ export async function getTableData(req, panel) {
   const body = buildRequestBody(req, panel, esQueryConfig, indexPatternObject, capabilities);
 
   try {
-    const resp = await searchRequest.search({ body });
+    const [resp] = await searchRequest.search({ body });
     const buckets = get(resp, 'aggregations.pivot.buckets', []);
     return { type: 'table', series: buckets.map(processBucket(panel)) };
   } catch (err) {
