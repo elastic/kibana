@@ -29,12 +29,22 @@ import { IndexPattern } from 'ui/index_patterns';
 import { QueryBar } from 'ui/query_bar';
 import { Storage } from 'ui/storage';
 
+interface Query {
+  query: string;
+  language: string;
+}
+
+interface DateRange {
+  from: string;
+  to: string;
+}
+
 interface Props {
   query: {
     query: string;
     language: string;
   };
-  onQuerySubmit: (query: { query: string | object; language: string }) => void;
+  onQuerySubmit: (payload: { dateRange: DateRange; query: Query }) => void;
   disableAutoFocus?: boolean;
   appName: string;
   indexPatterns: IndexPattern[];
