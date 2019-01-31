@@ -108,7 +108,7 @@
             }
           }
         },
-        "gis-map": {
+        "map": {
           "properties": {
             "bounds": {
               "type": "geo_shape",
