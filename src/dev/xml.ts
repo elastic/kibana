@@ -33,6 +33,17 @@ const validXmlCharsRE = new RegExp(
 );
 
 export function escapeCdata(input: string) {
-  const match = stripAnsi(input).match(validXmlCharsRE) || [];
-  return match.join('');
+  let escaped = '';
+
+  const inputWithoutAnsi = stripAnsi(input);
+  while (true) {
+    const match = validXmlCharsRE.exec(inputWithoutAnsi);
+    if (!match) {
+      break;
+    }
+
+    escaped += match[0];
+  }
+
+  return escaped;
 }
