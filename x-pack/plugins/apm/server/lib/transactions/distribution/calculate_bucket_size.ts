@@ -30,7 +30,7 @@ export async function calculateBucketSize(
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [TRANSACTION_TYPE]: transactionType } },
-            { term: { [`${TRANSACTION_NAME}.keyword`]: transactionName } },
+            { term: { [TRANSACTION_NAME]: transactionName } },
             {
               range: {
                 '@timestamp': {
