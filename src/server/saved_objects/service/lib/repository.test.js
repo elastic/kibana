@@ -1489,7 +1489,7 @@ describe('SavedObjectsRepository', () => {
     it('can throw es errors and have them decorated as SavedObjectsClient errors', async () => {
       expect.assertions(3);
 
-      const es401 = new elasticsearch.errors[401];
+      const es401 = new elasticsearch.errors.ResponseError({ statusCode: 401 });
       expect(errors.isNotAuthorizedError(es401)).toBe(false);
       onBeforeWrite.throws(es401);
 
