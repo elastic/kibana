@@ -63,6 +63,7 @@ import { prometheusMetricsSpecProvider } from './prometheus_metrics';
 import { zookeeperMetricsSpecProvider } from './zookeeper_metrics';
 import { uptimeMonitorsSpecProvider } from './uptime_monitors';
 import { cloudwatchLogsSpecProvider } from './cloudwatch_logs';
+import { awsMetricsSpecProvider } from './aws_metrics';
 
 export function registerTutorials(server) {
   server.registerTutorial(systemLogsSpecProvider);
@@ -111,4 +112,5 @@ export function registerTutorials(server) {
   server.registerTutorial(zookeeperMetricsSpecProvider);
   server.registerTutorial(uptimeMonitorsSpecProvider);
   server.registerTutorial(cloudwatchLogsSpecProvider);
+  server.registerTutorial(awsMetricsSpecProvider);
 }

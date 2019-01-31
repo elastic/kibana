@@ -3,7 +3,7 @@
   ui-select-focus-on="focus-operator"
   on-select="onSelect({ operator: operator })"
 >
-  <ui-select-match placeholder="Operators...">
+  <ui-select-match placeholder="{{ ::'common.ui.filterEditor.operatorsPlaceholder' | i18n: { defaultMessage: 'Operators…' } }}">
     {{$select.selected.name}}
   </ui-select-match>
   <ui-select-choices repeat="operator in operatorOptions | filter:{ name: $select.search }">

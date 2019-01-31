@@ -148,7 +148,7 @@ class RelationshipsUI extends Component {
             />);
             break;
           case 'search':
-            if (type === 'visualizations') {
+            if (type === 'visualization') {
               calloutText = (<FormattedMessage
                 id="kbn.management.objects.objectsTable.relationships.search.visualizations.calloutText"
                 defaultMessage="Here are some visualizations that use this saved search. If
@@ -168,22 +168,44 @@ class RelationshipsUI extends Component {
             }
             break;
           case 'visualization':
-            calloutText = (<FormattedMessage
-              id="kbn.management.objects.objectsTable.relationships.visualization.calloutText"
-              defaultMessage="Here are some dashboards which contain this visualization. If
-              you delete this visualization, these dashboards will no longer
-              show them."
-            />);
+            if (type === 'index-pattern') {
+              calloutColor = 'success';
+              calloutTitle = (<FormattedMessage
+                id="kbn.management.objects.objectsTable.relationships.visualization.indexPattern.calloutTitle"
+                defaultMessage="Index Pattern"
+              />);
+              calloutText = (<FormattedMessage
+                id="kbn.management.objects.objectsTable.relationships.visualization.indexPattern.calloutText"
+                defaultMessage="Here is the index pattern tied to this visualization."
+              />);
+            } else if (type === 'search') {
+              calloutColor = 'success';
+              calloutTitle = (<FormattedMessage
+                id="kbn.management.objects.objectsTable.relationships.visualization.search.calloutTitle"
+                defaultMessage="Saved Search"
+              />);
+              calloutText = (<FormattedMessage
+                id="kbn.management.objects.objectsTable.relationships.visualization.search.calloutText"
+                defaultMessage="Here is the saved search tied to this visualization."
+              />);
+            } else {
+              calloutText = (<FormattedMessage
+                id="kbn.management.objects.objectsTable.relationships.visualization.calloutText"
+                defaultMessage="Here are some dashboards which contain this visualization. If
+                you delete this visualization, these dashboards will no longer
+                show them."
+              />);
+            }
             break;
           case 'index-pattern':
-            if (type === 'visualizations') {
+            if (type === 'visualization') {
               calloutText = (<FormattedMessage
                 id="kbn.management.objects.objectsTable.relationships.indexPattern.visualizations.calloutText"
                 defaultMessage="Here are some visualizations that use this index pattern. If
                 you delete this index pattern, these visualizations will not
                 longer work properly."
               />);
-            } else if (type === 'searches') {
+            } else if (type === 'search') {
               calloutText = (<FormattedMessage
                 id="kbn.management.objects.objectsTable.relationships.indexPattern.searches.calloutText"
                 defaultMessage="Here are some saved searches that use this index pattern. If
