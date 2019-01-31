@@ -166,6 +166,9 @@ uiRoutes.when('/kibana/instances', {
                       },
                     }}
                     onTableChange={this.onTableChange}
+                    executeQueryOptions={{
+                      defaultFields: ['name']
+                    }}
                   />
 
                 </EuiPageContent>

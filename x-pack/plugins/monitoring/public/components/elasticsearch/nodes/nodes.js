@@ -223,9 +223,17 @@ function ElasticsearchNodesUI({ clusterStatus, nodes, showCgroupMetricsElasticse
                   id: 'xpack.monitoring.elasticsearch.nodes.monitoringTablePlaceholder',
                   defaultMessage: 'Filter Nodes…',
                 }),
+                schema: {
+                  fields: {
+                    name: { type: 'string' }
+                  }
+                }
               },
             }}
             onTableChange={onTableChange}
+            executeQueryOptions={{
+              defaultFields: ['name']
+            }}
           />
         </EuiPageContent>
       </EuiPageBody>
