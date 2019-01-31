@@ -1,5 +1,5 @@
 <div
-  ng-show="timefilterValues.isAutoRefreshSelectorEnabled || timefilterValues.isTimeRangeSelectorEnabled"
+  ng-if="timefilterValues.isAutoRefreshSelectorEnabled || timefilterValues.isTimeRangeSelectorEnabled"
   data-shared-timefilter-from="{{ getSharedTimeFilterFromDate() }}"
   data-shared-timefilter-to="{{ getSharedTimeFilterToDate() }}"
   class="kuiLocalMenu"
