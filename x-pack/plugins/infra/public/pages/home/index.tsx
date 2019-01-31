@@ -11,7 +11,7 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { HomePageContent } from './page_content';
 import { HomeToolbar } from './toolbar';
 
-import { EmptyPage } from '../../components/empty_page';
+import { NoIndices } from '../../components/empty_states/no_indices';
 import { Header } from '../../components/header';
 import { ColumnarPage } from '../../components/page';
 
@@ -64,7 +64,7 @@ export const HomePage = injectI18n(
               ) : (
                 <WithKibanaChrome>
                   {({ basePath }) => (
-                    <EmptyPage
+                    <NoIndices
                       title={intl.formatMessage({
                         id: 'xpack.infra.homePage.noMetricsIndicesTitle',
                         defaultMessage: "Looks like you don't have any metrics indices.",
