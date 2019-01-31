@@ -89,7 +89,7 @@ export class GisMap extends Component {
       );
     }
     return (
-      <EuiFlexGroup gutterSize="none" responsive={false} className="gisMapFullScreen">
+      <EuiFlexGroup gutterSize="none" responsive={false}>
         <EuiFlexItem className="gisMapWrapper">
           <MBMapContainer/>
           <WidgetOverlay/>
