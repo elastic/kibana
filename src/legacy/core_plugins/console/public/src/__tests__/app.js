@@ -57,7 +57,7 @@ describe('app initialization', () => {
     const mockContent = {};
     ajaxDoneStub.yields(mockContent);
 
-    init(inputMock, outputMock, 'https://state.link.com/content');
+    init(inputMock, outputMock, 'http', 'https://state.link.com/content');
 
     sinon.assert.calledOnce($.ajax);
     sinon.assert.calledWithExactly($.ajax, {
@@ -81,7 +81,7 @@ describe('app initialization', () => {
     const mockContent = {};
     ajaxDoneStub.yields(mockContent);
 
-    init(inputMock, outputMock, 'https://api.github.com/content');
+    init(inputMock, outputMock, 'http', 'https://api.github.com/content');
 
     sinon.assert.calledOnce($.ajax);
     sinon.assert.calledWithExactly($.ajax, {
@@ -97,6 +97,23 @@ describe('app initialization', () => {
     sinon.assert.calledOnce(inputMock.updateActionsBar);
     sinon.assert.calledOnce(inputMock.update);
     sinon.assert.calledWithExactly(inputMock.update, sinon.match.same(mockContent));
+
+    sinon.assert.calledOnce(outputMock.update);
+    sinon.assert.calledWithExactly(outputMock.update, '');
+  });
+
+  it('correctly loads state from commands query param', () => {
+    init(inputMock, outputMock, 'text', 'GET /testIndex');
+
+    sinon.assert.notCalled();
+
+    sinon.assert.calledOnce(inputMock.autoIndent());
+    sinon.assert.calledTwice(inputMock.moveToNextRequestEdge);
+    sinon.assert.calledWithExactly(inputMock.moveToNextRequestEdge, true);
+    sinon.assert.calledOnce(inputMock.highlightCurrentRequestsAndUpdateActionBar);
+    sinon.assert.calledOnce(inputMock.updateActionsBar);
+    sinon.assert.calledOnce(inputMock.update);
+    sinon.assert.calledWithExactly(inputMock.update, sinon.match.same('GET /testIndex'));
 
     sinon.assert.calledOnce(outputMock.update);
     sinon.assert.calledWithExactly(outputMock.update, '');
