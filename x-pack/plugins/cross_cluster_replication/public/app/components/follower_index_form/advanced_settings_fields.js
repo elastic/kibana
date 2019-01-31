@@ -18,7 +18,7 @@ const byteUnitsHelpText = (
       <a href={byteUnitsUrl} target="_blank">
         <FormattedMessage
           id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.byteUnitsHelpTextLinkMessage"
-          defaultMessage="Learn more."
+          defaultMessage="Learn more"
         />
       </a>
     ) }}
@@ -33,7 +33,7 @@ const timeUnitsHelpText = (
       <a href={timeUnitsUrl} target="_blank">
         <FormattedMessage
           id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.timeUnitsHelpTextLinkMessage"
-          defaultMessage="Learn more."
+          defaultMessage="Learn more"
         />
       </a>
     ) }}

@@ -343,7 +343,7 @@ export const FollowerIndexForm = injectI18n(
 
       const indexNameLabel = i18n.translate(
         'xpack.crossClusterReplication.followerIndexForm.sectionFollowerIndexNameTitle', {
-          defaultMessage: 'Name'
+          defaultMessage: 'Follower index'
         }
       );
 
@@ -359,7 +359,7 @@ export const FollowerIndexForm = injectI18n(
           )}
           label={indexNameLabel}
           description={i18n.translate('xpack.crossClusterReplication.followerIndexForm.sectionFollowerIndexNameDescription', {
-            defaultMessage: 'A name for the follower index.'
+            defaultMessage: 'A unique name for your index.'
           })}
           helpText={indexNameHelpText}
           isLoading={isValidatingIndexName}
@@ -407,7 +407,7 @@ export const FollowerIndexForm = injectI18n(
             description={(
               <FormattedMessage
                 id="xpack.crossClusterReplication.followerIndexForm.sectionRemoteClusterDescription"
-                defaultMessage="The remote cluster to replicate your leader index from."
+                defaultMessage="The cluster that contains the index to replicate."
               />
             )}
             fullWidth
@@ -449,9 +449,31 @@ export const FollowerIndexForm = injectI18n(
             </EuiTitle>
           )}
           label={leaderIndexLabel}
-          description={i18n.translate('xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexDescription', {
-            defaultMessage: 'The leader index you want to replicate from the remote cluster.'
-          })}
+          description={(
+            <Fragment>
+              <p>
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexDescription"
+                  defaultMessage="The index you want to replicate."
+                />
+              </p>
+
+              <p>
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexDescription2"
+                  defaultMessage="{note} the leader index must already exist."
+                  values={{ note: (
+                    <strong>
+                      <FormattedMessage
+                        id="xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexDescription2.noteLabel"
+                        defaultMessage="Note:"
+                      />
+                    </strong>
+                  ) }}
+                />
+              </p>
+            </Fragment>
+          )}
           helpText={(
             <FormattedMessage
               id="xpack.crossClusterReplication.followerIndexForm.indexNameHelpLabel"
@@ -489,8 +511,7 @@ export const FollowerIndexForm = injectI18n(
                   <p>
                     <FormattedMessage
                       id="xpack.crossClusterReplication.followerIndexForm.advancedSettingsDescription"
-                      defaultMessage="Customize advanced settings to control the rate at which data is replicated.
-                        If you don't customize them, default advanced settings will be applied."
+                      defaultMessage="Advanced settings control the rate at which data is replicated.."
                     />
                   </p>
 
