@@ -25,17 +25,11 @@ export default function Main() {
       <UpdateBreadcrumbs />
       <Route component={ConnectRouterToRedux} />
       <Route component={ScrollToTopOnPathChange} />
-      {routes.map((route, i) => {
-        return route.switchRoutes ? (
-          <Switch key={i}>
-            {route.switchRoutes.map((route, i) => (
-              <Route key={i} {...route} />
-            ))}
-          </Switch>
-        ) : (
+      <Switch>
+        {routes.map((route, i) => (
           <Route key={i} {...route} />
-        );
-      })}
+        ))}
+      </Switch>
     </MainContainer>
   );
 }

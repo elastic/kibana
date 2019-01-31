@@ -16,7 +16,9 @@ import { TransactionDetails } from '../TransactionDetails';
 import { Home } from './Home';
 
 export interface BreadcrumbProps {
+  value: string;
   match: {
+    url: string;
     params: StringMap;
   };
 }
@@ -28,8 +30,8 @@ interface RouteParams {
 export type BreadcrumbFunction = (props: BreadcrumbProps) => string;
 
 interface Route extends RouteProps {
-  switchRoutes?: Route[];
-  breadcrumb?: string | BreadcrumbFunction | null;
+  path: string;
+  breadcrumb: string | BreadcrumbFunction | null;
 }
 
 const renderAsRedirectTo = (to: string) => {
@@ -52,6 +54,45 @@ export const routes: Route[] = [
   },
   {
     exact: true,
+    path: '/invalid-license',
+    breadcrumb: i18n.translate('xpack.apm.breadcrumb.invalidLicenseTitle', {
+      defaultMessage: 'Invalid License'
+    }),
+    render: () => (
+      <div>
+        {i18n.translate('xpack.apm.invalidLicenseLabel', {
+          defaultMessage: 'Invalid license'
+        })}
+      </div>
+    )
+  },
+  {
+    exact: true,
+    path: '/services',
+    component: Home,
+    breadcrumb: i18n.translate('xpack.apm.breadcrumb.servicesTitle', {
+      defaultMessage: 'Services'
+    })
+  },
+  {
+    exact: true,
+    path: '/traces',
+    component: Home,
+    breadcrumb: i18n.translate('xpack.apm.breadcrumb.tracesTitle', {
+      defaultMessage: 'Traces'
+    })
+  },
+  {
+    exact: true,
+    path: '/:serviceName',
+    breadcrumb: ({ match }: BreadcrumbProps) => match.params.serviceName,
+    render: (props: RouteComponentProps<RouteParams>) =>
+      renderAsRedirectTo(`/${props.match.params.serviceName}/transactions`)(
+        props
+      )
+  },
+  {
+    exact: true,
     path: '/:serviceName/errors/:groupId',
     component: ErrorGroupDetails,
     breadcrumb: ({ match }: BreadcrumbProps) => match.params.groupId
@@ -63,49 +104,6 @@ export const routes: Route[] = [
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.errorsTitle', {
       defaultMessage: 'Errors'
     })
-  },
-  {
-    switchRoutes: [
-      {
-        exact: true,
-        path: '/invalid-license',
-        breadcrumb: i18n.translate('xpack.apm.breadcrumb.invalidLicenseTitle', {
-          defaultMessage: 'Invalid License'
-        }),
-        render: () => (
-          <div>
-            {i18n.translate('xpack.apm.invalidLicenseLabel', {
-              defaultMessage: 'Invalid license'
-            })}
-          </div>
-        )
-      },
-      {
-        exact: true,
-        path: '/services',
-        component: Home,
-        breadcrumb: i18n.translate('xpack.apm.breadcrumb.servicesTitle', {
-          defaultMessage: 'Services'
-        })
-      },
-      {
-        exact: true,
-        path: '/traces',
-        component: Home,
-        breadcrumb: i18n.translate('xpack.apm.breadcrumb.tracesTitle', {
-          defaultMessage: 'Traces'
-        })
-      },
-      {
-        exact: true,
-        path: '/:serviceName',
-        breadcrumb: ({ match }: BreadcrumbProps) => match.params.serviceName,
-        render: (props: RouteComponentProps<RouteParams>) =>
-          renderAsRedirectTo(`/${props.match.params.serviceName}/transactions`)(
-            props
-          )
-      }
-    ]
   },
   {
     exact: true,
