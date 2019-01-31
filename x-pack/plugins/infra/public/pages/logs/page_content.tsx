@@ -48,7 +48,7 @@ export const LogsPageContent: React.SFC = () => (
                         isLoadingMore={isLoadingMore}
                         isReloading={isReloading}
                         isStreaming={isAutoReloading}
-                        items={[]}
+                        items={items}
                         jumpToTarget={jumpToTargetPosition}
                         lastLoadedTime={lastLoadedTime}
                         loadNewerItems={loadNewerEntries}
