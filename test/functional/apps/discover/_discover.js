@@ -18,6 +18,7 @@
  */
 
 import expect from 'expect.js';
+import moment from 'moment';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -126,7 +127,6 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show bars in the correct time zone', async function () {
-        await browser.setWindowSize(1200, 800);
         const ticks = await PageObjects.discover.getBarChartXTicks();
         expect(ticks).to.eql([
           '2015-09-20 00:00',
@@ -154,8 +154,13 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.brushHistogram(0, 1);
         await PageObjects.visualize.waitForVisualization();
-        const actualTimeString = await PageObjects.header.getPrettyDuration();
-        expect(actualTimeString).to.be('September 19th 2015, 23:58:37.207 to September 20th 2015, 02:54:22.490');
+        const newFromTime = await PageObjects.header.getFromTime();
+        const newToTime = await PageObjects.header.getToTime();
+
+        const newDurationHours = moment.duration(moment(newToTime) - moment(newFromTime)).asHours();
+        if (newDurationHours < 1 || newDurationHours >= 5) {
+          throw new Error(`expected new duration of ${newDurationHours} hours to be between 1 and 5 hours`);
+        }
       });
 
       it('should show correct initial chart interval of Auto', async function () {
