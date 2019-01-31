@@ -1,24 +1,43 @@
-<section aria-label="Filters">
+<section
+  aria-label="{{ ::'common.ui.filterBar.filtersAriaLabel' | i18n: { defaultMessage: 'Filters' } }}"
+>
   <div class="filter-bar-confirm" ng-show="newFilters.length">
     <form ng-submit="applyFilters(newFilters)">
     <ul class="list-unstyled">
-      <li>Apply these filters?</li>
+      <li
+        i18n-id="common.ui.filterBar.applyTheseFiltersLabel"
+        i18n-default-message="Apply these filters?"
+      ></li>
       <li ng-repeat="filter in newFilters track by $index" class="filter" ng-click="filter.meta.apply = !filter.meta.apply"><input type="checkbox" ng-checked="filter.meta.apply"/>
-        <span ng-if="filter.meta.negate">NOT </span> {{ filter.meta.key }}: {{ filter.meta.value }}
+        <span
+          ng-if="filter.meta.negate"
+          i18n-id="common.ui.filterBar.notFilterLabel"
+          i18n-default-message="NOT"
+        ></span>
+        {{ filter.meta.key }}: {{ filter.meta.value }}
       </li>
-      <li ng-if="changeTimeFilter" class="changeTimeFilter filter" ng-click="changeTimeFilter.meta.apply = !changeTimeFilter.meta.apply"><input type="checkbox" ng-checked="changeTimeFilter.meta.apply"/> <strong>Change time to:</strong> {{changeTimeFilter.meta.value}} </li>
+      <li ng-if="changeTimeFilter" class="changeTimeFilter filter" ng-click="changeTimeFilter.meta.apply = !changeTimeFilter.meta.apply"><input type="checkbox" ng-checked="changeTimeFilter.meta.apply"/>
+        <strong
+          i18n-id="common.ui.filterBar.changeTimeToLabel"
+          i18n-default-message="Change time to:"
+        ></strong>
+        {{changeTimeFilter.meta.value}}
+      </li>
       <li>
         <div class="kuiButtonGroup">
-          <button class="kuiButton kuiButton--primary kuiButton--small" data-test-subj="filterBarApplyFilters">
-            Apply Now
-          </button>
+          <button
+            class="kuiButton kuiButton--primary kuiButton--small"
+            data-test-subj="filterBarApplyFilters"
+            i18n-id="common.ui.filterBar.applyNowButtonLabel"
+            i18n-default-message="Apply Now"
+            ></button>
 
           <button
             class="kuiButton kuiButton--hollow"
             ng-click="clearFilterBar();"
-          >
-            Cancel
-          </button>
+            i18n-id="common.ui.filterBar.cancelButtonLabel"
+            i18n-default-message="Cancel"
+          ></button>
         </div>
       </li>
     </ul>
@@ -50,7 +69,10 @@
           class="euiLink euiLink--primary"
           data-test-subj="addFilter"
         >
-          Add a filter
+          <span
+            i18n-id="common.ui.filterBar.addFilterButtonLabel"
+            i18n-default-message="Add a filter"
+          ></span>
           <span class="fa fa-plus"></span>
         </button>
       </div>
@@ -68,7 +90,10 @@
           aria-expanded="{{!!showFilterActions}}"
           aria-controls="filterActionsAllContainer"
         >
-          Actions
+          <span
+            i18n-id="common.ui.filterBar.actionsButtonLabel"
+            i18n-default-message="Actions"
+          ></span>
           <span
             class="fa"
             ng-class="{
@@ -94,7 +119,7 @@
         class="filter-nav-link__collapser"
         ng-click="toggleFilterShown($event)"
         aria-expanded="true"
-        aria-label="Toggle filterbar"
+        aria-label="{{ ::'common.ui.filterBar.toggleFilterbarAriaLabel' | i18n: { defaultMessage: 'Toggle filterbar' } }}"
       >
         <span class="kuiIcon" ng-class="filterNavToggle.isOpen == true ? 'fa-chevron-circle-up' : 'fa-chevron-circle-down'"></span>
       </button>
@@ -121,28 +146,83 @@
   >
     <div class="filter-actions-all">
       <div class="filter-link">
-        <div class="filter-description"><strong>All filters:</strong></div>
+        <div class="filter-description">
+          <strong
+            i18n-id="common.ui.filterBar.allFiltersLabel"
+            i18n-default-message="All filters:"
+          ></strong>
+        </div>
       </div>
         <div class="filter-link">
-          <div class="filter-description"><a ng-click="toggleAll(false)" kbn-accessible-click>Enable</a></div>
+          <div class="filter-description">
+            <a
+              ng-click="toggleAll(false)"
+              kbn-accessible-click
+              i18n-id="common.ui.filterBar.allFilters.enableLabel"
+              i18n-default-message="Enable"
+            ></a>
+          </div>
         </div>
       <div class="filter-link">
-        <div class="filter-description"><a ng-click="toggleAll(true)" kbn-accessible-click>Disable</a></div>
+        <div class="filter-description">
+          <a
+            ng-click="toggleAll(true)"
+            kbn-accessible-click
+            i18n-id="common.ui.filterBar.allFilters.disableLabel"
+            i18n-default-message="Disable"
+          ></a>
+        </div>
       </div>
       <div class="filter-link">
-        <div class="filter-description"><a ng-click="pinAll(true)" kbn-accessible-click>Pin</a></div>
+        <div class="filter-description">
+          <a
+            ng-click="pinAll(true)"
+            kbn-accessible-click
+            i18n-id="common.ui.filterBar.allFilters.pinLabel"
+            i18n-default-message="Pin"
+          ></a>
+        </div>
       </div>
       <div class="filter-link">
-        <div class="filter-description"><a ng-click="pinAll(false)" kbn-accessible-click>Unpin</a></div>
+        <div class="filter-description">
+          <a
+            ng-click="pinAll(false)"
+            kbn-accessible-click
+            i18n-id="common.ui.filterBar.allFilters.unpinLabel"
+            i18n-default-message="Unpin"
+          ></a>
+        </div>
       </div>
       <div class="filter-link">
-        <div class="filter-description"><a ng-click="invertAll()" kbn-accessible-click>Invert</a></div>
+        <div class="filter-description">
+          <a
+            ng-click="invertAll()"
+            kbn-accessible-click
+            i18n-id="common.ui.filterBar.allFilters.invertLabel"
+            i18n-default-message="Invert"
+          ></a>
+        </div>
       </div>
       <div class="filter-link">
-        <div class="filter-description"><a ng-click="toggleAll()" kbn-accessible-click>Toggle</a></div>
+        <div class="filter-description">
+          <a
+            ng-click="toggleAll()"
+            kbn-accessible-click
+            i18n-id="common.ui.filterBar.allFilters.toggleLabel"
+            i18n-default-message="Toggle"
+          ></a>
+        </div>
       </div>
       <div class="filter-link">
-        <div class="filter-description"><a ng-click="removeAll()" data-test-subj="removeAllFilters" kbn-accessible-click>Remove</a></div>
+        <div class="filter-description">
+          <a
+            ng-click="removeAll()"
+            data-test-subj="removeAllFilters"
+            kbn-accessible-click
+            i18n-id="common.ui.filterBar.allFilters.removeLabel"
+            i18n-default-message="Remove"
+          ></a>
+        </div>
       </div>
     </div>
   </div>
