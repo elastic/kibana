@@ -11,27 +11,54 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 
+import { getKibanaTileMap } from '../../../../meta';
+
 const NO_TILEMAP_LAYER_MSG =
   'No tilemap layer is available.' +
   ' Ask your system administrator to set "map.tilemap.url" in kibana.yml.';
 
+
+
 export class CreateSourceEditor extends Component {
 
-  componentDidMount() {
-    if (this.props.url) {
+
+  state = {
+    url: null
+  }
+
+  _loadUrl = async () => {
+    const tilemap = await getKibanaTileMap();
+    if (this._isMounted) {
+      this.setState({
+        url: tilemap.url
+      });
       this.props.previewTilemap(this.props.url);
     }
   }
 
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  componentDidMount() {
+    this._isMounted = true;
+    this._loadUrl();
+  }
+
   render() {
+
+    if (this.state.url === null) {
+      return null;
+    }
+
     return (
       <EuiFormRow
         label="Tilemap url"
-        helpText={this.props.url ? null : NO_TILEMAP_LAYER_MSG}
+        helpText={this.state.url ? null : NO_TILEMAP_LAYER_MSG}
       >
         <EuiFieldText
           readOnly
-          value={this.props.url}
+          value={this.state.url}
         />
       </EuiFormRow>
     );
@@ -39,6 +66,5 @@ export class CreateSourceEditor extends Component {
 }
 
 CreateSourceEditor.propTypes = {
-  previewTilemap: PropTypes.func.isRequired,
-  url: PropTypes.string,
+  previewTilemap: PropTypes.func.isRequired
 };

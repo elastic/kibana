@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { IconType } from '@elastic/eui';
 import './header_global_nav';
 
 export enum NavControlSide {
@@ -30,13 +29,4 @@ export interface NavControl {
   order: number;
   side: NavControlSide;
   render: (targetDomElement: HTMLDivElement) => (() => void) | void;
-}
-
-export interface NavLink {
-  title: string;
-  url: string;
-  id: string;
-  euiIconType: IconType;
-  lastSubUrl?: string;
-  active: boolean;
 }

@@ -28,7 +28,7 @@ export function windowsMetricsSpecProvider(server, context) {
     name: i18n.translate('kbn.server.tutorials.windowsMetrics.nameTitle', {
       defaultMessage: 'Windows metrics',
     }),
-    isBeta: true,
+    isBeta: false,
     category: TUTORIAL_CATEGORY.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.windowsMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from Windows.',

@@ -4,6 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+jest.mock('../../../../meta', () => {
+  return {
+    getEmsTMSServices: async () => {
+      return [
+        {
+          id: 'road_map',
+          attributionMarkdown: '[foobar](http://foobar.org)  | [foobaz](http://foobaz.org)'
+        }, {
+          id: 'satellite',
+          attributionMarkdown: '[satellite](http://satellite.org)'
+        }
+      ];
+    }
+  };
+});
 
 import {
   EMSTMSSource,
@@ -15,21 +30,10 @@ describe('EMSTMSSource', () => {
 
     const emsTmsSource = new EMSTMSSource({
       id: 'road_map'
-    }, {
-      emsTmsServices: [
-        {
-          id: 'road_map',
-          attributionMarkdown: '[foobar](http://foobar.org)  | [foobaz](http://foobaz.org)'
-        }, {
-          id: 'satellite',
-          attributionMarkdown: '[satellite](http://satellite.org)'
-        }
-      ]
     });
 
 
     const attributions = await emsTmsSource.getAttributions();
-
     expect(attributions).toEqual([
       {
         label: 'foobar',
