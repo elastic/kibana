@@ -19,7 +19,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
       >
         <h2>
           <FormattedMessage
-            defaultMessage="Spaces privileges"
+            defaultMessage="Space privileges"
             id="xpack.security.management.editRole.spacePrivilegeForm.modalTitle"
             values={Object {}}
           />
@@ -187,8 +187,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                     </strong>
                     <p>
                       <FormattedMessage
-                        defaultMessage="Customize access by feature. Defaults to none for features not listed in the
-                      table below."
+                        defaultMessage="Customize access by feature in selected spaces."
                         id="xpack.security.management.editRole.spacePrivilegeForm.customPrivilegeDetails"
                         values={Object {}}
                       />
@@ -221,7 +220,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                     </strong>
                     <p>
                       <FormattedMessage
-                        defaultMessage="Grants read-only access to all features in selected spaces"
+                        defaultMessage="Grant read-only access to all features in selected spaces."
                         id="xpack.security.management.editRole.spacePrivilegeForm.readPrivilegeDetails"
                         values={Object {}}
                       />
@@ -253,7 +252,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                     </strong>
                     <p>
                       <FormattedMessage
-                        defaultMessage="Grants full access to all features in selected spaces"
+                        defaultMessage="Grant full access to all features in selected spaces."
                         id="xpack.security.management.editRole.spacePrivilegeForm.allPrivilegeDetails"
                         values={Object {}}
                       />
@@ -295,7 +294,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
           size="s"
         >
           <p>
-            Increase privilege levels from base privilege on a per-feature basis. Remember, some of these features may have been turned off by the space itself or affected by a global space privilege.
+            Increase privilege levels on a per feature basis. Some features might be hidden by the space or affected by a global space privilege.
           </p>
         </EuiText>
         <EuiSpacer

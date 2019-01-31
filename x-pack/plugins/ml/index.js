@@ -92,7 +92,7 @@ export const ml = (kibana) => {
           },
         },
         privilegesTooltip: i18n.translate('xpack.ml.privileges.tooltip', {
-          defaultMessage: 'The machine_learning_user or machine_learning_admin role should also be assigned to users to grant access'
+          defaultMessage: 'To grant users access, you should also assign either the machine_learning_user or machine_learning_admin role.'
         })
       });
 

@@ -98,7 +98,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
               <h2>
                 <FormattedMessage
                   id="xpack.security.management.editRole.spacePrivilegeForm.modalTitle"
-                  defaultMessage="Spaces privileges"
+                  defaultMessage="Space privileges"
                 />
               </h2>
             </EuiTitle>
@@ -194,8 +194,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
                     <p>
                       <FormattedMessage
                         id="xpack.security.management.editRole.spacePrivilegeForm.customPrivilegeDetails"
-                        defaultMessage="Customize access by feature. Defaults to none for features not listed in the
-                      table below."
+                        defaultMessage="Customize access by feature in selected spaces."
                       />
                     </p>
                   </EuiText>
@@ -223,7 +222,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
                     <p>
                       <FormattedMessage
                         id="xpack.security.management.editRole.spacePrivilegeForm.readPrivilegeDetails"
-                        defaultMessage="Grants read-only access to all features in selected spaces"
+                        defaultMessage="Grant read-only access to all features in selected spaces."
                       />
                     </p>
                   </EuiText>
@@ -250,7 +249,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
                     <p>
                       <FormattedMessage
                         id="xpack.security.management.editRole.spacePrivilegeForm.allPrivilegeDetails"
-                        defaultMessage="Grants full access to all features in selected spaces"
+                        defaultMessage="Grant full access to all features in selected spaces."
                       />
                     </p>
                   </EuiText>
@@ -302,7 +301,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
               title={
                 <FormattedMessage
                   id="xpack.security.management.editRole.spacePrivilegeForm.globalPrivilegeWarning"
-                  defaultMessage="Creating a global privilege may impact your other space privileges."
+                  defaultMessage="Creating a global privilege might impact your other space privileges."
                 />
               }
             />
@@ -393,14 +392,14 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
         id:
           'xpack.security.management.editRole.spacePrivilegeForm.featurePrivilegeSummaryDescription',
         defaultMessage:
-          'Showing privilege levels on a per-feature basis. Remember, some of these features may have been turned off by the space itself or affected by a global space privilege.',
+          'Some features might be hidden by the space or affected by a global space privilege.',
       });
     } else {
       return this.props.intl.formatMessage({
         id:
           'xpack.security.management.editRole.spacePrivilegeForm.customizeFeaturePrivilegeDescription',
         defaultMessage:
-          'Increase privilege levels from base privilege on a per-feature basis. Remember, some of these features may have been turned off by the space itself or affected by a global space privilege.',
+          'Increase privilege levels on a per feature basis. Some features might be hidden by the space or affected by a global space privilege.',
       });
     }
   };
@@ -414,7 +413,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
             iconType="iInCircle"
             title={this.props.intl.formatMessage({
               id: 'xpack.security.management.editRole.spacePrivilegeForm.globalPrivilegeNotice',
-              defaultMessage: 'These privileges will apply to all current and future spaces',
+              defaultMessage: 'These privileges will apply to all current and future spaces.',
             })}
           />
         </EuiFormRow>

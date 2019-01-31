@@ -74,7 +74,7 @@ export class PrivilegeMatrix extends Component<Props, State> {
               <EuiModalHeaderTitle>
                 <FormattedMessage
                   id="xpack.security.management.editRole.spacePrivilegeMatrix.modalTitle"
-                  defaultMessage="Privilege summary matrix"
+                  defaultMessage="Privilege summary"
                 />
               </EuiModalHeaderTitle>
             </EuiModalHeader>
@@ -97,7 +97,7 @@ export class PrivilegeMatrix extends Component<Props, State> {
         <EuiButtonEmpty onClick={this.showModal}>
           <FormattedMessage
             id="xpack.security.management.editRole.spacePrivilegeMatrix.showSummaryText"
-            defaultMessage="Show privilege summary"
+            defaultMessage="View privilege summary"
           />
         </EuiButtonEmpty>
         {modal}
@@ -171,7 +171,7 @@ export class PrivilegeMatrix extends Component<Props, State> {
                 content={intl.formatMessage({
                   id:
                     'xpack.security.management.editRole.spacePrivilegeMatrix.basePrivilegeTooltip',
-                  defaultMessage: 'Lowest privilege level allowed',
+                  defaultMessage: 'Lowest privilege level allowed.',
                 })}
                 color="subdued"
               />
