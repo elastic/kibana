@@ -195,7 +195,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
 
     if (swimlaneType === 'viewBy') {
       // If selecting a cell in the 'view by' swimlane, indicate the corresponding time in the Overall swimlane.
-      const overallSwimlane = d3.select('ml-explorer-swimlane[swimlane-type="overall"]');
+      const overallSwimlane = d3.select('.ml-swimlane-overall');
       times.forEach(time => {
         const overallCell = overallSwimlane.selectAll(`div[data-time="${time}"]`).selectAll('.sl-cell-inner,.sl-cell-inner-dragselect');
         overallCell.classed('sl-cell-inner-selected', true);
@@ -489,6 +489,8 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
   }
 
   render() {
-    return <div className="ml-swimlanes" ref={this.setRef.bind(this)} />;
+    const { swimlaneType } = this.props;
+
+    return <div className={`ml-swimlanes ml-swimlane-${swimlaneType}`} ref={this.setRef.bind(this)} />;
   }
 });

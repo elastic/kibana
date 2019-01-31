@@ -3,6 +3,7 @@
     "common.ui": "src/ui",
     "server": "src/server",
     "console": "src/legacy/core_plugins/console",
+    "core": "src/core",
     "inputControl": "src/legacy/core_plugins/input_control_vis",
     "inspectorViews": "src/legacy/core_plugins/inspector_views",
     "kbn": "src/legacy/core_plugins/kibana",
@@ -44,6 +45,7 @@
     "xpack.watcher": "x-pack/plugins/watcher"
   },
   "exclude": [
+    "src/core/public/fatal_errors/get_error_info.ts",
     "src/ui/ui_render/bootstrap/app_bootstrap.js",
     "src/ui/ui_render/ui_render_mixin.js",
     "x-pack/plugins/infra/public/graphql/types.ts",
