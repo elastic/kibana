@@ -30,9 +30,6 @@ uiModule.directive('monitoringBeatsListing', (kbnUrl) => {
               sorting={scope.sorting}
               pagination={scope.pagination}
               onTableChange={scope.onTableChange}
-              executeQueryOptions={{
-                defaultFields: ['name']
-              }}
               angular={{
                 kbnUrl,
                 scope,
