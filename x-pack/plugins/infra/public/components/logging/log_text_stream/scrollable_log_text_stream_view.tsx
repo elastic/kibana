@@ -42,6 +42,8 @@ interface ScrollableLogTextStreamViewProps {
     }
   ) => any;
   loadNewerItems: () => void;
+  setFlyoutItem: (id: string) => void;
+  showFlyout: () => void;
   intl: InjectedIntl;
 }
 
@@ -50,181 +52,187 @@ interface ScrollableLogTextStreamViewState {
   targetId: string | null;
 }
 
-export const ScrollableLogTextStreamView = injectI18n(
-  class extends React.PureComponent<
-    ScrollableLogTextStreamViewProps,
-    ScrollableLogTextStreamViewState
-  > {
-    public static getDerivedStateFromProps(
-      nextProps: ScrollableLogTextStreamViewProps,
-      prevState: ScrollableLogTextStreamViewState
-    ): Partial<ScrollableLogTextStreamViewState> | null {
-      const hasNewTarget = nextProps.target && nextProps.target !== prevState.target;
-      const hasItems = nextProps.items.length > 0;
+class ScrollableLogTextStreamViewClass extends React.PureComponent<
+  ScrollableLogTextStreamViewProps,
+  ScrollableLogTextStreamViewState
+> {
+  public static getDerivedStateFromProps(
+    nextProps: ScrollableLogTextStreamViewProps,
+    prevState: ScrollableLogTextStreamViewState
+  ): Partial<ScrollableLogTextStreamViewState> | null {
+    const hasNewTarget = nextProps.target && nextProps.target !== prevState.target;
+    const hasItems = nextProps.items.length > 0;
 
-      if (nextProps.isStreaming && hasItems) {
-        return {
-          target: nextProps.target,
-          targetId: getStreamItemId(nextProps.items[nextProps.items.length - 1]),
-        };
-      } else if (hasNewTarget && hasItems) {
-        return {
-          target: nextProps.target,
-          targetId: getStreamItemId(getStreamItemBeforeTimeKey(nextProps.items, nextProps.target!)),
-        };
-      } else if (!nextProps.target || !hasItems) {
-        return {
-          target: null,
-          targetId: null,
-        };
-      }
-
-      return null;
+    if (nextProps.isStreaming && hasItems) {
+      return {
+        target: nextProps.target,
+        targetId: getStreamItemId(nextProps.items[nextProps.items.length - 1]),
+      };
+    } else if (hasNewTarget && hasItems) {
+      return {
+        target: nextProps.target,
+        targetId: getStreamItemId(getStreamItemBeforeTimeKey(nextProps.items, nextProps.target!)),
+      };
+    } else if (!nextProps.target || !hasItems) {
+      return {
+        target: null,
+        targetId: null,
+      };
     }
 
-    public readonly state = {
-      target: null,
-      targetId: null,
-    };
-
-    public render() {
-      const {
-        items,
-        height,
-        width,
-        scale,
-        wrap,
-        isReloading,
-        isLoadingMore,
-        hasMoreBeforeStart,
-        hasMoreAfterEnd,
-        isStreaming,
-        lastLoadedTime,
-        intl,
-      } = this.props;
-      const { targetId } = this.state;
-      const hasItems = items.length > 0;
-      if (isReloading && !hasItems) {
-        return (
-          <InfraLoadingPanel
-            height={height}
-            width={width}
-            text={
-              <FormattedMessage
-                id="xpack.infra.logs.scrollableLogTextStreamView.loadingEntriesLabel"
-                defaultMessage="Loading entries"
-              />
-            }
-          />
-        );
-      } else if (!hasItems) {
-        return (
-          <NoData
-            titleText={intl.formatMessage({
-              id: 'xpack.infra.logs.emptyView.noLogMessageTitle',
-              defaultMessage: 'There are no log messages to display.',
-            })}
-            bodyText={intl.formatMessage({
-              id: 'xpack.infra.logs.emptyView.noLogMessageDescription',
-              defaultMessage: 'Try adjusting your filter.',
-            })}
-            refetchText={intl.formatMessage({
-              id: 'xpack.infra.logs.emptyView.checkForNewDataButtonLabel',
-              defaultMessage: 'Check for new data',
-            })}
-            onRefetch={this.handleReload}
-            testString="logsNoDataPrompt"
-          />
-        );
-      } else {
-        return (
-          <VerticalScrollPanel
-            height={height}
-            width={width}
-            onVisibleChildrenChange={this.handleVisibleChildrenChange}
-            target={targetId}
-            hideScrollbar={true}
-          >
-            {registerChild => (
-              <>
-                <LogTextStreamLoadingItemView
-                  alignment="bottom"
-                  isLoading={isLoadingMore}
-                  hasMore={hasMoreBeforeStart}
-                  isStreaming={false}
-                  lastStreamingUpdate={null}
-                />
-                {items.map(item => (
-                  <MeasurableItemView
-                    register={registerChild}
-                    registrationKey={getStreamItemId(item)}
-                    key={getStreamItemId(item)}
-                  >
-                    {measureRef => (
-                      <LogTextStreamItemView
-                        ref={measureRef}
-                        item={item}
-                        scale={scale}
-                        wrap={wrap}
-                      />
-                    )}
-                  </MeasurableItemView>
-                ))}
-                <LogTextStreamLoadingItemView
-                  alignment="top"
-                  isLoading={isStreaming || isLoadingMore}
-                  hasMore={hasMoreAfterEnd}
-                  isStreaming={isStreaming}
-                  lastStreamingUpdate={isStreaming ? lastLoadedTime : null}
-                  onLoadMore={this.handleLoadNewerItems}
-                />
-              </>
-            )}
-          </VerticalScrollPanel>
-        );
-      }
-    }
-
-    private handleReload = () => {
-      const { jumpToTarget, target } = this.props;
-
-      if (target) {
-        jumpToTarget(target);
-      }
-    };
-
-    private handleLoadNewerItems = () => {
-      const { loadNewerItems } = this.props;
-
-      if (loadNewerItems) {
-        loadNewerItems();
-      }
-    };
-
-    // this is actually a method but not recognized as such
-    // tslint:disable-next-line:member-ordering
-    private handleVisibleChildrenChange = callWithoutRepeats(
-      ({
-        topChild,
-        middleChild,
-        bottomChild,
-        pagesAbove,
-        pagesBelow,
-      }: {
-        topChild: string;
-        middleChild: string;
-        bottomChild: string;
-        pagesAbove: number;
-        pagesBelow: number;
-      }) => {
-        this.props.reportVisibleInterval({
-          endKey: parseStreamItemId(bottomChild),
-          middleKey: parseStreamItemId(middleChild),
-          pagesAfterEnd: pagesBelow,
-          pagesBeforeStart: pagesAbove,
-          startKey: parseStreamItemId(topChild),
-        });
-      }
-    );
+    return null;
   }
-);
+
+  public readonly state = {
+    target: null,
+    targetId: null,
+  };
+
+  public render() {
+    const {
+      items,
+      height,
+      width,
+      scale,
+      wrap,
+      isReloading,
+      isLoadingMore,
+      hasMoreBeforeStart,
+      hasMoreAfterEnd,
+      isStreaming,
+      lastLoadedTime,
+      intl,
+    } = this.props;
+    const { targetId } = this.state;
+    const hasItems = items.length > 0;
+    if (isReloading && !hasItems) {
+      return (
+        <InfraLoadingPanel
+          height={height}
+          width={width}
+          text={
+            <FormattedMessage
+              id="xpack.infra.logs.scrollableLogTextStreamView.loadingEntriesLabel"
+              defaultMessage="Loading entries"
+            />
+          }
+        />
+      );
+    } else if (!hasItems) {
+      return (
+        <NoData
+          titleText={intl.formatMessage({
+            id: 'xpack.infra.logs.emptyView.noLogMessageTitle',
+            defaultMessage: 'There are no log messages to display.',
+          })}
+          bodyText={intl.formatMessage({
+            id: 'xpack.infra.logs.emptyView.noLogMessageDescription',
+            defaultMessage: 'Try adjusting your filter.',
+          })}
+          refetchText={intl.formatMessage({
+            id: 'xpack.infra.logs.emptyView.checkForNewDataButtonLabel',
+            defaultMessage: 'Check for new data',
+          })}
+          onRefetch={this.handleReload}
+          testString="logsNoDataPrompt"
+        />
+      );
+    } else {
+      return (
+        <VerticalScrollPanel
+          height={height}
+          width={width}
+          onVisibleChildrenChange={this.handleVisibleChildrenChange}
+          target={targetId}
+          hideScrollbar={true}
+        >
+          {registerChild => (
+            <>
+              <LogTextStreamLoadingItemView
+                alignment="bottom"
+                isLoading={isLoadingMore}
+                hasMore={hasMoreBeforeStart}
+                isStreaming={false}
+                lastStreamingUpdate={null}
+              />
+              {items.map(item => (
+                <MeasurableItemView
+                  register={registerChild}
+                  registrationKey={getStreamItemId(item)}
+                  key={getStreamItemId(item)}
+                >
+                  {measureRef => (
+                    <LogTextStreamItemView
+                      openFlyoutWithItem={this.handleOpenFlyout}
+                      ref={measureRef}
+                      item={item}
+                      scale={scale}
+                      wrap={wrap}
+                    />
+                  )}
+                </MeasurableItemView>
+              ))}
+              <LogTextStreamLoadingItemView
+                alignment="top"
+                isLoading={isStreaming || isLoadingMore}
+                hasMore={hasMoreAfterEnd}
+                isStreaming={isStreaming}
+                lastStreamingUpdate={isStreaming ? lastLoadedTime : null}
+                onLoadMore={this.handleLoadNewerItems}
+              />
+            </>
+          )}
+        </VerticalScrollPanel>
+      );
+    }
+  }
+
+  private handleOpenFlyout = (id: string) => {
+    this.props.setFlyoutItem(id);
+    this.props.showFlyout();
+  };
+
+  private handleReload = () => {
+    const { jumpToTarget, target } = this.props;
+
+    if (target) {
+      jumpToTarget(target);
+    }
+  };
+
+  private handleLoadNewerItems = () => {
+    const { loadNewerItems } = this.props;
+
+    if (loadNewerItems) {
+      loadNewerItems();
+    }
+  };
+
+  // this is actually a method but not recognized as such
+  // tslint:disable-next-line:member-ordering
+  private handleVisibleChildrenChange = callWithoutRepeats(
+    ({
+      topChild,
+      middleChild,
+      bottomChild,
+      pagesAbove,
+      pagesBelow,
+    }: {
+      topChild: string;
+      middleChild: string;
+      bottomChild: string;
+      pagesAbove: number;
+      pagesBelow: number;
+    }) => {
+      this.props.reportVisibleInterval({
+        endKey: parseStreamItemId(bottomChild),
+        middleKey: parseStreamItemId(middleChild),
+        pagesAfterEnd: pagesBelow,
+        pagesBeforeStart: pagesAbove,
+        startKey: parseStreamItemId(topChild),
+      });
+    }
+  );
+}
+
+export const ScrollableLogTextStreamView = injectI18n(ScrollableLogTextStreamViewClass);
