@@ -89,6 +89,13 @@ This section summarizes the changes in each release.
 
 coming[6.6]
 
+[float]
+[[known-issues-6.6.0]]
+=== Known issues
+
+* {kib} may not start when using deprecated plugin settings in kibana.yml
++
+The server will log an error and the new configuration value.  Updating kibana.yml with the new configuration will allow the server to start.
 
 [float]
 [[breaking-6.6.0]]
