@@ -14,7 +14,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const PageObjects = getPageObjects(['common', 'canvas', 'security', 'spaceSelector']);
   const find = getService('find');
 
-  describe('canvas', () => {
+  describe('security feature controls', () => {
     before(async () => {
       await esArchiver.load('canvas/default');
       await kibanaServer.uiSettings.replace({
@@ -50,6 +50,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           full_name: 'test user',
         });
 
+        await PageObjects.security.logout();
+
         await PageObjects.security.login(
           'global_canvas_all_user',
           'global_canvas_all_user-password',
@@ -60,8 +62,11 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       after(async () => {
-        await security.role.delete('global_canvas_all_role');
-        await security.user.delete('global_canvas_all_user');
+        await Promise.all([
+          security.role.delete('global_canvas_all_role'),
+          security.user.delete('global_canvas_all_user'),
+          PageObjects.security.logout(),
+        ]);
       });
 
       it('shows canvas navlink', async () => {

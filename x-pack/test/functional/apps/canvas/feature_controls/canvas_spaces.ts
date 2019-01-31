@@ -15,7 +15,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const PageObjects = getPageObjects(['common', 'canvas', 'security', 'spaceSelector']);
   const find = getService('find');
 
-  describe('canvas', () => {
+  describe('spaces feature controls', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
     });
