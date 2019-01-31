@@ -48,6 +48,7 @@ async function getUnusedConfigKeys(
       set(settings, prefix, transform(pluginSettings));
     }
   }
+
   // remove config values from disabled plugins
   for (const spec of disabledPluginSpecs) {
     unset(settings, spec.getConfigPrefix());
