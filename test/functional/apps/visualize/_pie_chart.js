@@ -217,8 +217,25 @@ export default function ({ getService, getPageObjects }) {
     });
     describe('multi series slice', () => {
       before(async () => {
-        await PageObjects.visualize.loadSavedVisualization(vizName1);
-        await PageObjects.visualize.waitForRenderingCount();
+        log.debug('navigateToApp visualize');
+        await PageObjects.visualize.navigateToNewVisualization();
+        log.debug('clickPieChart');
+        await PageObjects.visualize.clickPieChart();
+        await PageObjects.visualize.clickNewSearch();
+        log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        log.debug('select bucket Split Slices');
+        await PageObjects.visualize.clickBucket('Split Slices');
+        log.debug('Click aggregation Histogram');
+        await PageObjects.visualize.selectAggregation('Histogram');
+        log.debug('Click field memory');
+        await PageObjects.visualize.selectField('memory');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.common.sleep(1003);
+        log.debug('setNumericInterval 4000');
+        await PageObjects.visualize.setNumericInterval('40000');
+        log.debug('Toggle previous editor');
+        await PageObjects.visualize.toggleAggregationEditor(2);
         await PageObjects.visualize.clickAddBucket();
         log.debug('select bucket Split Slices');
         await PageObjects.visualize.clickBucket('Split Slices');
