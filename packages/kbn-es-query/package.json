@@ -1,14 +1,17 @@
 {
   "name": "@kbn/es-query",
-  "main": "target/index.js",
+  "main": "target/server/index.js",
+  "browser": "target/public/index.js",
   "version": "1.0.0",
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
-    "build": "tsc && babel src --out-dir target",
+    "build": "rm -rf target && yarn build:server && yarn build:browser",
+    "build:server": "tsc && babel src --out-dir target/server",
+    "build:browser": "tsc --project tsconfig.browser.json && babel src --out-dir target/public",
     "kbn:bootstrap": "yarn build --quiet",
     "kbn:watch": "yarn build --watch"
-},
+  },
   "dependencies": {
     "lodash": "npm:@elastic/lodash@3.10.1-kibana1"
   },
