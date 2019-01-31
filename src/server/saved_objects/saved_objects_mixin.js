@@ -48,7 +48,6 @@ export function savedObjectsMixin(kbnServer, server) {
     return;
   }
 
-
   const schema = new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas);
   const serializer = new SavedObjectsSerializer(schema);
   const service = createSavedObjectsService(server, schema, serializer, migrator);
