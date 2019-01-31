@@ -57,11 +57,11 @@ class Provider extends PureComponent {
     const title = isSingle
       ? intl.formatMessage({
         id: 'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.resumeSingleTitle',
-        defaultMessage: 'Resume follower index \'{name}\'?',
+        defaultMessage: 'Resume data replication of follower index \'{name}\'?',
       }, { name: ids[0] })
       : intl.formatMessage({
         id: 'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.resumeMultipleTitle',
-        defaultMessage: 'Resume {count} follower indices?',
+        defaultMessage: 'Resume data replication of {count} follower indices?',
       }, { count: ids.length });
 
     return (
@@ -81,7 +81,7 @@ class Provider extends PureComponent {
           confirmButtonText={
             intl.formatMessage({
               id: 'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.confirmButtonText',
-              defaultMessage: 'Resume using default advanced settings',
+              defaultMessage: 'Resume data replication',
             })
           }
           onMouseOver={this.onMouseOverModal}
@@ -90,14 +90,14 @@ class Provider extends PureComponent {
             <p>
               <FormattedMessage
                 id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.singleResumeDescription"
-                defaultMessage="This follower index will be resumed using default advanced settings.
-                  To resume using custom advanced settings, {editLink}."
+                defaultMessage="Data replication resumes using the default advanced settings. To use
+                  custom advanced settings, {editLink}."
                 values={{
                   editLink: (
                     <EuiLink href={routing.getFollowerIndexPath(ids[0])}>
                       <FormattedMessage
                         id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.singleResumeEditLink"
-                        defaultMessage="edit this follower index instead"
+                        defaultMessage="edit the follower index"
                       />
                     </EuiLink>
                   ),
@@ -108,12 +108,21 @@ class Provider extends PureComponent {
             <Fragment>
               <p>
                 <FormattedMessage
-                  id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.multipleResumeDescription"
-                  defaultMessage="The follower indices below will be resumed using default advanced settings.
-                    To resume using custom advanced settings, edit each follower index instead."
+                  id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.multipleResumeDescriptionWithSettingWarning"
+                  defaultMessage="Data replication resumes using the default advanced settings."
                 />
               </p>
-              <ul>{ids.map(id => <li key={id}>{id}</li>)}</ul>
+
+              <p>
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.multipleResumeDescription"
+                  defaultMessage="These follower indices will resume data replication:"
+                />
+              </p>
+
+              <ul>
+                {ids.map(id => <li key={id}>{id}</li>)}
+              </ul>
             </Fragment>
           )}
         </EuiConfirmModal>
