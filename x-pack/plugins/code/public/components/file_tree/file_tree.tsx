@@ -73,21 +73,27 @@ export class CodeFileTree extends React.Component<Props> {
   public getItemRenderer = (node: Tree, forceOpen: boolean) => () => {
     const className =
       this.props.match.params.path === node.path ? 'code-active-file-node' : 'code-file-node';
-    const onClick = () => this.onClick(node);
+    const onClick = (evt: React.MouseEvent<Element>) => {
+      // @ts-ignore
+      if (evt.target && evt.target.tagName === 'I') {
+        return;
+      }
+      this.onClick(node);
+    };
     switch (node.type) {
       case FileTreeItemType.Directory: {
         const onFolderClick = () => {
           this.getTreeToggler(node.path || '', true)();
         };
         return (
-          <div className={className}>
+          <div className={className} role="button" onClick={onClick}>
             {forceOpen ? (
               <FolderOpenTriangle onClick={onFolderClick} />
             ) : (
               <FolderClosedTriangle onClick={onFolderClick} />
             )}
-            <EuiIcon type={forceOpen ? 'folderOpen' : 'folderClosed'} onClick={onClick} />
-            <DirectoryNode onClick={onClick}>{`${node.name}/`}</DirectoryNode>
+            <EuiIcon type={forceOpen ? 'folderOpen' : 'folderClosed'} />
+            <DirectoryNode>{`${node.name}/`}</DirectoryNode>
           </div>
         );
       }
