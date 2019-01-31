@@ -217,7 +217,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickPieChart();
         await PageObjects.visualize.clickNewSearch();
         log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         log.debug('select bucket Split Slices');
         await PageObjects.visualize.clickBucket('Split Slices');
         log.debug('Click aggregation Histogram');
