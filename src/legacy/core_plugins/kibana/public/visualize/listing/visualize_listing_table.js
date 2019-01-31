@@ -273,6 +273,10 @@ class VisualizeListingTableUi extends Component {
   }
 
   renderToolBarActions() {
+    if (!uiCapabilities.visualize.showWriteControls) {
+      return null;
+    }
+
     return this.state.selectedRowIds.length > 0 ?
       <KuiListingTableDeleteButton
         onDelete={this.onDelete}

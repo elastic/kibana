@@ -46,5 +46,6 @@ export default function uiCapabilitesTests({
     loadTestFile(require.resolve('./dashboard'));
     loadTestFile(require.resolve('./discover'));
     loadTestFile(require.resolve('./nav_links'));
+    loadTestFile(require.resolve('./visualize'));
   });
 }
