@@ -24,8 +24,7 @@ import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 
-import 'ui/search_bar';
-import 'ui/apply_filters';
+import 'ui/query_bar';
 
 import { panelActionsStore } from './store/panel_actions_store';
 
@@ -76,7 +75,6 @@ app.directive('dashboardApp', function ($injector) {
   const confirmModal = $injector.get('confirmModal');
   const config = $injector.get('config');
   const Private = $injector.get('Private');
-  const indexPatterns = $injector.get('indexPatterns');
 
   return {
     restrict: 'E',
@@ -92,7 +90,7 @@ app.directive('dashboardApp', function ($injector) {
       i18n,
     ) {
       const filterManager = Private(FilterManagerProvider);
-      const queryFilter = Private(FilterBarQueryFilterProvider);
+      const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
       const embeddableFactories = Private(EmbeddableFactoriesRegistryProvider);
       const panelActionsRegistry = Private(ContextMenuActionsRegistryProvider);
@@ -132,24 +130,12 @@ app.directive('dashboardApp', function ($injector) {
         // https://github.com/angular/angular.js/wiki/Understanding-Scopes
         $scope.model = {
           query: dashboardStateManager.getQuery(),
-          filters: queryFilter.getFilters(),
           timeRestore: dashboardStateManager.getTimeRestore(),
           title: dashboardStateManager.getTitle(),
           description: dashboardStateManager.getDescription(),
         };
         $scope.panels = dashboardStateManager.getPanels();
-
-        const panelIndexPatterns = dashboardStateManager.getPanelIndexPatterns();
-        if (panelIndexPatterns && panelIndexPatterns.length > 0) {
-          $scope.indexPatterns = panelIndexPatterns;
-        }
-        else {
-          indexPatterns.getDefault().then((defaultIndexPattern) => {
-            $scope.$evalAsync(() => {
-              $scope.indexPatterns = [defaultIndexPattern];
-            });
-          });
-        }
+        $scope.indexPatterns = dashboardStateManager.getPanelIndexPatterns();
       };
 
       // Part of the exposed plugin API - do not remove without careful consideration.
@@ -167,7 +153,7 @@ app.directive('dashboardApp', function ($injector) {
           query: '',
           language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
         },
-        queryFilter.getFilters()
+        filterBar.getFilters()
       );
 
       timefilter.enableAutoRefreshSelector();
@@ -229,7 +215,7 @@ app.directive('dashboardApp', function ($injector) {
             dashboardStateManager.getPanels().find((panel) => panel.panelIndex === panelIndex);
       };
 
-      $scope.updateQueryAndFetch = function (query) {
+      $scope.updateQueryAndFetch = function ({ query }) {
         const oldQuery = $scope.model.query;
         if (_.isEqual(oldQuery, query)) {
           // The user can still request a reload in the query bar, even if the
@@ -238,30 +224,10 @@ app.directive('dashboardApp', function ($injector) {
           dashboardStateManager.requestReload();
         } else {
           $scope.model.query = migrateLegacyQuery(query);
-          dashboardStateManager.applyFilters($scope.model.query, $scope.model.filters);
+          dashboardStateManager.applyFilters($scope.model.query, filterBar.getFilters());
         }
         $scope.refresh();
       };
-
-      $scope.onFiltersUpdated = filters => {
-        // The filters will automatically be set when the queryFilter emits an update event (see below)
-        queryFilter.setFilters(filters);
-      };
-
-      $scope.onCancelApplyFilters = () => {
-        $scope.appState.$newFilters = [];
-      };
-
-      $scope.onApplyFilters = filters => {
-        queryFilter.addFiltersAndChangeTimeFilter(filters);
-        $scope.appState.$newFilters = [];
-      };
-
-      $scope.$watch('appState.$newFilters', (filters = []) => {
-        if (filters.length === 1) {
-          $scope.onApplyFilters(filters);
-        }
-      });
 
       $scope.indexPatterns = [];
 
@@ -270,7 +236,9 @@ app.directive('dashboardApp', function ($injector) {
         $scope.indexPatterns = dashboardStateManager.getPanelIndexPatterns();
       };
 
-      $scope.$watch('model.query', $scope.updateQueryAndFetch);
+      $scope.$watch('model.query', (query) => {
+        $scope.updateQueryAndFetch({ query });
+      });
 
       $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
         dashboardStateManager.handleTimeChange(timefilter.getTime());
@@ -381,7 +349,7 @@ app.directive('dashboardApp', function ($injector) {
           });
       }
 
-      $scope.showFilterBar = () => $scope.model.filters.length > 0 || !dashboardStateManager.getFullScreenMode();
+      $scope.showFilterBar = () => filterBar.getFilters().length > 0 || !dashboardStateManager.getFullScreenMode();
 
       $scope.showAddPanel = () => {
         dashboardStateManager.setFullScreenMode(false);
@@ -492,13 +460,12 @@ app.directive('dashboardApp', function ($injector) {
       updateViewMode(dashboardStateManager.getViewMode());
 
       // update root source when filters update
-      $scope.$listen(queryFilter, 'update', function () {
-        $scope.model.filters = queryFilter.getFilters();
-        dashboardStateManager.applyFilters($scope.model.query, $scope.model.filters);
+      $scope.$listen(filterBar, 'update', function () {
+        dashboardStateManager.applyFilters($scope.model.query, filterBar.getFilters());
       });
 
       // update data when filters fire fetch event
-      $scope.$listen(queryFilter, 'fetch', $scope.refresh);
+      $scope.$listen(filterBar, 'fetch', $scope.refresh);
 
       $scope.$on('$destroy', () => {
         dashboardStateManager.destroy();

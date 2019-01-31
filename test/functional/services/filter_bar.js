@@ -18,9 +18,18 @@
  */
 
 export function FilterBarProvider({ getService, getPageObjects }) {
+  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
-  const comboBox = getService('comboBox');
+  const find = getService('find');
   const PageObjects = getPageObjects(['common', 'header']);
+
+  async function typeIntoReactSelect(testSubj, value) {
+    const select = await testSubjects.find(testSubj);
+    const input = await select.findByClassName('ui-select-search');
+    await input.type(value);
+    const activeSelection = await select.findByClassName('active');
+    await activeSelection.click();
+  }
 
   class FilterBar {
     hasFilter(key, value, enabled = true) {
@@ -31,33 +40,23 @@ export function FilterBarProvider({ getService, getPageObjects }) {
     }
 
     async removeFilter(key) {
-      await testSubjects.click(`filter & filter-key-${key}`);
-      await testSubjects.click(`deleteFilter`);
+      const filterElement = await testSubjects.find(`filter & filter-key-${key}`);
+      await browser.moveMouseTo(filterElement);
+      await testSubjects.click(`filter & filter-key-${key} removeFilter-${key}`);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
-    async removeAllFilters() {
-      await testSubjects.click('showFilterActions');
-      await testSubjects.click('removeAllFilters');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.common.waitUntilUrlIncludes('filters:!()');
-    }
-
     async toggleFilterEnabled(key) {
-      await testSubjects.click(`filter & filter-key-${key}`);
-      await testSubjects.click(`disableFilter`);
+      const filterElement = await testSubjects.find(`filter & filter-key-${key}`);
+      await browser.moveMouseTo(filterElement);
+      await testSubjects.click(`filter & filter-key-${key} disableFilter-${key}`);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
     async toggleFilterPinned(key) {
-      await testSubjects.click(`filter & filter-key-${key}`);
-      await testSubjects.click(`pinFilter`);
-      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
-    }
-
-    async getFilterCount() {
-      const filters = await testSubjects.findAll('filter');
-      return filters.length;
+      const filterElement = await testSubjects.find(`filter & filter-key-${key}`);
+      await browser.moveMouseTo(filterElement);
+      await testSubjects.click(`filter & filter-key-${key} pinFilter-${key}`);
     }
 
     /**
@@ -80,26 +79,18 @@ export function FilterBarProvider({ getService, getPageObjects }) {
      */
     async addFilter(field, operator, ...values) {
       await testSubjects.click('addFilter');
-      await comboBox.set('filterFieldSuggestionList', field);
-      await comboBox.set('filterOperatorList', operator);
+      await typeIntoReactSelect('filterfieldSuggestionList', field);
+      await typeIntoReactSelect('filterOperatorList', operator);
       const params = await testSubjects.find('filterParams');
-      const paramsComboBoxes = await params.findAllByCssSelector('[data-test-subj~="filterParamsComboBox"]');
       const paramFields = await params.findAllByTagName('input');
       for (let i = 0; i < values.length; i++) {
         let fieldValues = values[i];
         if (!Array.isArray(fieldValues)) {
           fieldValues = [fieldValues];
         }
-
-        if (paramsComboBoxes && paramsComboBoxes.length > 0) {
-          for (let j = 0; j < fieldValues.length; j++) {
-            await comboBox.setElement(paramsComboBoxes[i], fieldValues[j]);
-          }
-        }
-        else if (paramFields && paramFields.length > 0) {
-          for (let j = 0; j < fieldValues.length; j++) {
-            await paramFields[i].type(fieldValues[j]);
-          }
+        for (let j = 0; j < fieldValues.length; j++) {
+          await paramFields[i].type(fieldValues[j]);
+          await paramFields[i].pressKeys(browser.keys.RETURN);
         }
       }
       await testSubjects.click('saveFilter');
@@ -107,25 +98,30 @@ export function FilterBarProvider({ getService, getPageObjects }) {
     }
 
     async clickEditFilter(key, value) {
-      await testSubjects.click(`filter & filter-key-${key} & filter-value-${value}`);
-      await testSubjects.click(`editFilter`);
-      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+      const pill = await testSubjects.find(`filter & filter-key-${key} & filter-value-${value}`);
+      await browser.moveMouseTo(pill);
+      await testSubjects.click('editFilter');
     }
 
-    async getFilterEditorSelectedPhrases() {
-      return await comboBox.getComboBoxSelectedOptions('filterParamsComboBox');
-    }
-
-    async getFilterEditorFields() {
-      const optionsString = await comboBox.getOptionsList('filterFieldSuggestionList');
-      return optionsString.split('\n');
+    async getFilterEditorPhrases() {
+      const spans = await testSubjects.findAll('filterEditorPhrases');
+      return await Promise.all(spans.map(el => el.getVisibleText()));
     }
 
     async ensureFieldEditorModalIsClosed() {
-      const cancelSaveFilterModalButtonExists = await testSubjects.exists('cancelSaveFilter');
-      if (cancelSaveFilterModalButtonExists) {
-        await testSubjects.click('cancelSaveFilter');
+      const closeFilterEditorModalButtonExists = await testSubjects.exists('filterEditorModalCloseButton');
+      if (closeFilterEditorModalButtonExists) {
+        await testSubjects.click('filterEditorModalCloseButton');
       }
+    }
+
+    async getFilterFieldIndexPatterns() {
+      const indexPatterns = [];
+      const groups = await find.allByCssSelector('.ui-select-choices-group-label');
+      for (let i = 0; i < groups.length; i++) {
+        indexPatterns.push(await groups[i].getVisibleText());
+      }
+      return indexPatterns;
     }
   }
 

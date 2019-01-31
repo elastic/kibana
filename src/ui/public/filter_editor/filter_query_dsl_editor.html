@@ -1,0 +1,13 @@
+<div
+  json-input
+  require-keys="true"
+  kbn-ui-ace-keyboard-mode
+  ui-ace="{
+    mode: 'json',
+    onLoad: aceLoaded
+  }"
+  ng-model="queryDsl"
+  ng-change="onChange({
+    queryDsl: queryDsl
+  })"
+></div>

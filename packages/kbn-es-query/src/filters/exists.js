@@ -17,7 +17,6 @@
  * under the License.
  */
 
-// Creates a filter where the given field exists
 export function buildExistsFilter(field, indexPattern) {
   return {
     meta: {

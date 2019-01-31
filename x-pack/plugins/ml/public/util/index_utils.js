@@ -22,7 +22,7 @@ export function loadIndexPatterns(Private, indexPatterns) {
   const savedObjectsClient = Private(SavedObjectsClientProvider);
   return savedObjectsClient.find({
     type: 'index-pattern',
-    fields: ['id', 'title', 'type', 'fields'],
+    fields: ['title', 'type'],
     perPage: 10000
   }).then((response) => {
     indexPatternCache = response.savedObjects;

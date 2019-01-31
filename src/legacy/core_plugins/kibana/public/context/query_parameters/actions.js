@@ -19,7 +19,6 @@
 
 import _ from 'lodash';
 
-import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import {
   MAX_CONTEXT_SIZE,
@@ -29,7 +28,6 @@ import {
 
 
 export function QueryParameterActionsProvider(indexPatterns, Private) {
-  const queryFilter = Private(FilterBarQueryFilterProvider);
   const filterManager = Private(FilterManagerProvider);
 
   const setPredecessorCount = (state) => (predecessorCount) => (
@@ -67,10 +65,6 @@ export function QueryParameterActionsProvider(indexPatterns, Private) {
     )
   );
 
-  const updateFilters = () => filters => {
-    queryFilter.setFilters(filters);
-  };
-
   const addFilter = (state) => async (field, values, operation) => {
     const indexPatternId = state.queryParameters.indexPatternId;
     filterManager.add(field, values, operation, indexPatternId);
@@ -80,7 +74,6 @@ export function QueryParameterActionsProvider(indexPatterns, Private) {
 
   return {
     addFilter,
-    updateFilters,
     increasePredecessorCount,
     increaseSuccessorCount,
     setPredecessorCount,
