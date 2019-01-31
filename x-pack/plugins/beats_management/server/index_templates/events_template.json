@@ -1,6 +1,6 @@
 {
   "index_patterns": [".management-beats-events-*"],
-  "version": 66000,
+  "version": 67000,
   "index": {
     "lifecycle": {
       "name": ".beats-management-events-retention"

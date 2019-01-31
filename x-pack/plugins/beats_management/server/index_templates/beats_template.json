@@ -1,6 +1,6 @@
 {
   "index_patterns": [".management-beats"],
-  "version": 66000,
+  "version": 67000,
   "settings": {
     "index": {
       "number_of_shards": 1,
@@ -68,8 +68,28 @@
             "id": {
               "type": "keyword"
             },
-            "config_status": {
-              "type": "keyword"
+            "status": {
+              "properties": {
+                "type": {
+                  "type": "keyword"
+                },
+                "timestamp": {
+                  "type": "date"
+                },
+                "event": {
+                  "properties": {
+                    "type": {
+                      "type": "keyword"
+                    },
+                    "message": {
+                      "type": "text"
+                    },
+                    "uuid": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
             },
             "active": {
               "type": "boolean"

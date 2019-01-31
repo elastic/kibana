@@ -11,20 +11,40 @@ import { CMBeatsDomain } from './beats';
 
 export class BeatEventsLib {
   // @ts-ignore
-  constructor(private readonly adapter: BeatEventsAdapter, beats: CMBeatsDomain) {}
+  constructor(private readonly adapter: BeatEventsAdapter, private readonly beats: CMBeatsDomain) {}
 
   public log = async (
     user: FrameworkUser,
     beatId: string,
     events: BeatEvent[]
   ): Promise<Array<{ success: boolean; reason?: string }>> => {
-    return events.map(event => {
+    return events.map((event, i) => {
       const assertData = RuntimeBeatEvent.decode(event);
       if (assertData.isLeft()) {
+        if (events.length - 1 === i) {
+          this.beats
+            .update(user, beatId, {
+              status: events[events.length - 2],
+            })
+            .catch(e => {
+              // tslint:disable-next-line
+              console.error('Error inserting event into beats log.', e);
+            });
+        }
         return {
           success: false,
-          error: `Error parsing event, ${PathReporter.report(assertData)[0]}`,
+          error: `Error parsing event ${i}, ${PathReporter.report(assertData)[0]}`,
         };
+      }
+      if (events.length - 1 === i) {
+        this.beats
+          .update(user, beatId, {
+            status: events[events.length - 2],
+          })
+          .catch(e => {
+            // tslint:disable-next-line
+            console.error('Error inserting event into beats log.', e);
+          });
       }
       return { success: true };
     });

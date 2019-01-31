@@ -39,7 +39,7 @@ export interface ConfigurationBlock
 
 export interface CMBeat {
   id: string;
-  config_status: 'OK' | 'UNKNOWN' | 'ERROR';
+  status?: BeatEvent;
   enrollment_token: string;
   active: boolean;
   access_token: string;
@@ -111,9 +111,13 @@ export const RuntimeBeatEvent = t.interface(
     beat: t.union([t.undefined, t.string]),
     timestamp: t.string,
     event: t.type({
-      type: t.union(
-        ['STARTING', 'IN_PROGRESS', 'CONFIG', 'FAILED', 'STOPPED'].map(value => t.literal(value))
-      ),
+      type: t.union([
+        t.literal('STARTING'),
+        t.literal('IN_PROGRESS'),
+        t.literal('CONFIG'),
+        t.literal('FAILED'),
+        t.literal('STOPPED'),
+      ]),
       message: t.string,
       uuid: t.union([t.undefined, t.string]),
     }),
