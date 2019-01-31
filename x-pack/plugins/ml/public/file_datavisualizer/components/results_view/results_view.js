@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import {
@@ -18,14 +18,17 @@ import { FileContents } from '../file_contents';
 import { AnalysisSummary } from '../analysis_summary';
 import { FieldsStats } from '../fields_stats';
 
-export function ResultsView({ data, results, showEditFlyout }) {
+export const ResultsView = injectI18n(function ({ data, results, showEditFlyout, intl }) {
 
   console.log(results);
 
   const tabs = [
     {
       id: 'file-stats',
-      name: 'File stats',
+      name: intl.formatMessage({
+        id: 'xpack.ml.fileDatavisualizer.resultsView.fileStatsTabName',
+        defaultMessage: 'File stats'
+      }),
       content: <FieldsStats results={results} />,
     }
   ];
@@ -50,7 +53,10 @@ export function ResultsView({ data, results, showEditFlyout }) {
         <EuiSpacer size="m" />
 
         <EuiButton onClick={() => showEditFlyout()}>
-          Override settings
+          <FormattedMessage
+            id="xpack.ml.fileDatavisualizer.resultsView.overrideSettingsButtonLabel"
+            defaultMessage="Override settings"
+          />
         </EuiButton>
       </EuiPanel>
 
@@ -66,4 +72,4 @@ export function ResultsView({ data, results, showEditFlyout }) {
 
     </div>
   );
-}
+});

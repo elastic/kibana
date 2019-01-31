@@ -19,6 +19,7 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -104,12 +105,30 @@ export class SavedObjectSaveModal extends React.Component {
     return (
       <Fragment>
         <EuiCallOut
-          title={`A ${this.props.objectType} with the title '${this.state.title}' already exists.`}
+          title={(<FormattedMessage
+            id="common.ui.savedObjects.saveModal.duplicateTitleLabel"
+            defaultMessage="A {objectType} with the title '{title}' already exists."
+            values={{ objectType: this.props.objectType, title: this.state.title }}
+          />)}
           color="warning"
           data-test-subj="titleDupicateWarnMsg"
         >
           <p>
-            Click <strong>Confirm Save</strong> to save the {this.props.objectType} with the duplicate title.
+            <FormattedMessage
+              id="common.ui.savedObjects.saveModal.duplicateTitleDescription"
+              defaultMessage="Click {confirmSaveLabel} to save the {objectType} with the duplicate title."
+              values={{
+                objectType: this.props.objectType,
+                confirmSaveLabel: (
+                  <strong>
+                    <FormattedMessage
+                      id="common.ui.savedObjects.saveModal.duplicateTitleDescription.confirmSaveText"
+                      defaultMessage="Confirm Save"
+                    />
+                  </strong>
+                )
+              }}
+            />
           </p>
         </EuiCallOut>
         <EuiSpacer />
@@ -124,7 +143,11 @@ export class SavedObjectSaveModal extends React.Component {
 
     return (
       <EuiFormRow
-        label={`Save as a new ${this.props.objectType}`}
+        label={(<FormattedMessage
+          id="common.ui.savedObjects.saveModal.saveAsNewLabel"
+          defaultMessage="Save as a new {objectType}"
+          values={{ objectType: this.props.objectType }}
+        />)}
       >
         <EuiSwitch
           data-test-subj="saveAsNewCheckbox"
@@ -145,7 +168,11 @@ export class SavedObjectSaveModal extends React.Component {
         >
           <EuiModalHeader>
             <EuiModalHeaderTitle>
-              Save {this.props.objectType}
+              <FormattedMessage
+                id="common.ui.savedObjects.saveModal.saveTitle"
+                defaultMessage="Save {objectType}"
+                values={{ objectType: this.props.objectType }}
+              />
             </EuiModalHeaderTitle>
           </EuiModalHeader>
 
@@ -158,7 +185,10 @@ export class SavedObjectSaveModal extends React.Component {
               {this.renderCopyOnSave()}
 
               <EuiFormRow
-                label="Title"
+                label={(<FormattedMessage
+                  id="common.ui.savedObjects.saveModal.titleLabel"
+                  defaultMessage="Title"
+                />)}
               >
                 <EuiFieldText
                   autoFocus
@@ -180,7 +210,10 @@ export class SavedObjectSaveModal extends React.Component {
               data-test-subj="saveCancelButton"
               onClick={this.props.onClose}
             >
-              Cancel
+              <FormattedMessage
+                id="common.ui.savedObjects.saveModal.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
             </EuiButton>
 
             <EuiButton
@@ -190,7 +223,10 @@ export class SavedObjectSaveModal extends React.Component {
               isLoading={this.state.isLoading}
               isDisabled={this.state.title.length === 0}
             >
-              Confirm Save
+              <FormattedMessage
+                id="common.ui.savedObjects.saveModal.confirmSaveButtonLabel"
+                defaultMessage="Confirm Save"
+              />
             </EuiButton>
           </EuiModalFooter>
         </EuiModal>

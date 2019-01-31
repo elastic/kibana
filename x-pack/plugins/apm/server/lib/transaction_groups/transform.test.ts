@@ -19,12 +19,13 @@ describe('transactionGroupsTransformer', () => {
     ).toMatchSnapshot();
   });
 
-  fit('should transform response correctly', () => {
+  it('should transform response correctly', () => {
     const bucket = {
       key: 'POST /api/orders',
       doc_count: 180,
       avg: { value: 255966.30555555556 },
       p95: { values: { '95.0': 320238.5 } },
+      sum: { value: 3000000000 },
       sample: {
         hits: {
           total: 180,
@@ -53,5 +54,28 @@ describe('transactionGroupsTransformer', () => {
         transactionsPerMinute: 542.713567839196
       }
     ]);
+  });
+
+  it('should calculate impact from sum', () => {
+    const getBucket = (sum: number) => ({
+      key: 'POST /api/orders',
+      doc_count: 180,
+      avg: { value: 300000 },
+      p95: { values: { '95.0': 320000 } },
+      sum: { value: sum },
+      sample: { hits: { total: 180, hits: [{ _source: 'sample source' }] } }
+    });
+
+    const response = ({
+      aggregations: {
+        transactions: { buckets: [getBucket(10), getBucket(20), getBucket(50)] }
+      }
+    } as unknown) as ESResponse;
+
+    expect(
+      transactionGroupsTransformer({ response, start: 100, end: 20000 }).map(
+        bucket => bucket.impact
+      )
+    ).toEqual([0, 25, 100]);
   });
 });

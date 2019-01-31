@@ -1,15 +1,21 @@
 #!/usr/bin/env bash
 
 set -e
-set -o pipefail
 
-source "$(dirname "$0")/../../src/dev/ci_setup/setup.sh"
-source "$(dirname "$0")/../../src/dev/ci_setup/git_setup.sh"
-source "$(dirname "$0")/../../src/dev/ci_setup/java_setup.sh"
+function report {
+  if [[ -z "$PR_SOURCE_BRANCH" ]]; then
+    cd "$KIBANA_DIR"
+    node src/dev/failed_tests/cli
+  else
+    echo "Failure issues not created on pull requests"
+  fi
+}
+
+trap report EXIT
+
+source src/dev/ci_setup/checkout_sibling_es.sh
 
 export TEST_BROWSER_HEADLESS=1
-export XPACK_DIR="$(cd "$(dirname "$0")/../../x-pack"; pwd)"
-echo "-> XPACK_DIR ${XPACK_DIR}"
 
 echo " -> Ensuring all functional tests are in a ciGroup"
 cd "$XPACK_DIR"
@@ -19,7 +25,8 @@ node scripts/functional_tests --assert-none-excluded \
   --include-tag ciGroup3 \
   --include-tag ciGroup4 \
   --include-tag ciGroup5 \
-  --include-tag ciGroup6
+  --include-tag ciGroup6 \
+  --include-tag ciGroup7
 
 echo " -> building and extracting default Kibana distributable for use in functional tests"
 cd "$KIBANA_DIR"

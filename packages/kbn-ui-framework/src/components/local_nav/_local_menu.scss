@@ -1,35 +1,34 @@
 .kuiLocalMenu {
   display: flex;
   align-items: stretch;
+  padding-top: $euiSizeS;
+  padding-bottom: $euiSizeS;
 }
 
 .kuiLocalMenuItem {
   display: flex;
   align-items: center;
-  height: 100%;
-  padding: 0 $localNavSideSpacing;
+  padding: ($localNavSideSpacing * .25) $localNavSideSpacing;
   font-size: $kuiFontSize;
   background-color: $localNavButtonBackgroundColor;
   color: $localNavButtonTextColor;
   border: 0;
   cursor: pointer;
-  border-right: solid 1px transparent;
-  border-left: solid 1px transparent;
+  border-bottom: solid 2px transparent;
 
   &:hover, &:focus {
-    background-color: $localNavButtonBackgroundColor-isHover;
-    color: $localNavButtonTextColor-isHover;
+    background-color: rgba($localNavButtonBackgroundColor-isHover, .15);
+    text-decoration: underline;
   }
 
   &.kuiLocalMenuItem-isSelected {
-    background-color: $localNavButtonBackgroundColor-isSelected;
-    border-color: $kuiColorLightGray;
-    height: calc(100% + 1px); // Cheat the border when opened
-    z-index: 2;
     color: $kuiColorBlue;
+    background-color: $localNavButtonBackgroundColor-isSelected;
+    border-color: $euiColorPrimary;
+    z-index: 2;
 
     &:hover, &:focus {
-      color: $kuiColorBlue;
+      text-decoration: none;
     }
   }
 
@@ -38,30 +37,8 @@
     cursor: not-allowed;
 
     &:hover {
-      background-color: $localNavButtonBackgroundColor;
-      color: $localNavButtonTextColor;
-    }
-  }
-
-  @include darkTheme {
-    color: $localNavButtonTextColor--darkTheme;
-
-    &:hover {
-      background-color: $localNavButtonBackgroundColor-isHover--darkTheme;
-      color: $localNavButtonTextColor-isHover--darkTheme;
-    }
-
-    &.kuiLocalMenuItem-isSelected {
-      background-color: $localNavButtonBackgroundColor-isSelected--darkTheme;
-      border-color: darken($localNavBackgroundColor--darkTheme, 10%);
-      color: $localNavButtonTextColor-isHover--darkTheme;
-    }
-
-    &.kuiLocalMenuItem-isDisabled {
-      &:hover {
-        background-color: transparent;
-        color: $localNavButtonTextColor--darkTheme;
-      }
+      background-color: transparent;
+      text-decoration: none;
     }
   }
 }

@@ -5,10 +5,10 @@
  */
 
 import _ from 'lodash';
-
 import React from 'react';
 import { Query } from 'react-apollo';
-import { InfraNodeType, MetadataQuery } from '../../../common/graphql/types';
+
+import { InfraNodeType, MetadataQuery } from '../../graphql/types';
 import { InfraMetricLayout } from '../../pages/metrics/layouts/types';
 import { metadataQuery } from './metadata.gql_query';
 
@@ -21,6 +21,7 @@ interface WithMetadataProps {
 }
 
 interface WithMetadataArgs {
+  name: string;
   filteredLayouts: InfraMetricLayout[];
   error?: string | undefined;
   loading: boolean;
@@ -45,8 +46,9 @@ export const WithMetadata = ({
     >
       {({ data, error, loading }) => {
         const metadata = data && data.source && data.source.metadataByNode;
-        const filteredLayouts = getFilteredLayouts(layouts, metadata);
+        const filteredLayouts = (metadata && getFilteredLayouts(layouts, metadata.features)) || [];
         return children({
+          name: (metadata && metadata.name) || '',
           filteredLayouts,
           error: error && error.message,
           loading,
@@ -58,7 +60,7 @@ export const WithMetadata = ({
 
 const getFilteredLayouts = (
   layouts: InfraMetricLayout[],
-  metadata: Array<MetadataQuery.MetadataByNode | null> | undefined
+  metadata: Array<MetadataQuery.Features | null> | undefined
 ): InfraMetricLayout[] => {
   if (!metadata) {
     return layouts;

@@ -18,12 +18,12 @@
  */
 
 export default function ({ getService, loadTestFile, getPageObjects }) {
-  const remote = getService('remote');
+  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['dashboard']);
 
   async function loadCurrentData() {
-    await remote.setWindowSize(1300, 900);
+    await browser.setWindowSize(1300, 900);
     await PageObjects.dashboard.initTests({
       kibanaIndex: 'dashboard/current/kibana',
       dataIndex: 'dashboard/current/data',
@@ -47,13 +47,17 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
       after(unloadCurrentData);
 
       loadTestFile(require.resolve('./_empty_dashboard'));
-      loadTestFile(require.resolve('./_dark_theme'));
       loadTestFile(require.resolve('./_embeddable_rendering'));
       loadTestFile(require.resolve('./_create_and_add_embeddables'));
       loadTestFile(require.resolve('./_time_zones'));
       loadTestFile(require.resolve('./_dashboard_options'));
       loadTestFile(require.resolve('./_data_shared_attributes'));
       loadTestFile(require.resolve('./_embed_mode'));
+
+      // Note: This one must be last because it unloads some data for one of its tests!
+      // No, this isn't ideal, but loading/unloading takes so much time and these are all bunched
+      // to improve efficiency...
+      loadTestFile(require.resolve('./_dashboard_query_bar'));
     });
 
     describe('using current data', function () {
@@ -75,7 +79,7 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
     // legacy data only for specifically testing BWC situations.
     describe('using legacy data', function () {
       this.tags('ciGroup4');
-      before(() => remote.setWindowSize(1200, 900));
+      before(() => browser.setWindowSize(1200, 900));
 
       loadTestFile(require.resolve('./_dashboard_time_picker'));
       loadTestFile(require.resolve('./_bwc_shared_urls'));
@@ -85,7 +89,7 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
 
     describe('using legacy data', function () {
       this.tags('ciGroup5');
-      before(() => remote.setWindowSize(1200, 900));
+      before(() => browser.setWindowSize(1200, 900));
 
       loadTestFile(require.resolve('./_dashboard_save'));
       loadTestFile(require.resolve('./_dashboard_time'));

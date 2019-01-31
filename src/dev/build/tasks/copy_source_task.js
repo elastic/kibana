@@ -32,9 +32,10 @@ export const CopySourceTask = {
         '!src/**/{__tests__,__snapshots__}/**',
         '!src/test_utils/**',
         '!src/fixtures/**',
-        '!src/core_plugins/tests_bundle/**',
-        '!src/core_plugins/testbed/**',
-        '!src/core_plugins/console/public/tests/**',
+        '!src/legacy/core_plugins/tests_bundle/**',
+        '!src/legacy/core_plugins/testbed/**',
+        '!src/legacy/core_plugins/console/public/tests/**',
+        '!src/plugins/testbed/**',
         '!src/cli/cluster/**',
         '!src/cli/repl/**',
         '!src/es_archiver/**',
@@ -45,6 +46,7 @@ export const CopySourceTask = {
         'webpackShims/**',
         'config/kibana.yml',
         'tsconfig*.json',
+        'kibana.d.ts'
       ],
     });
   },

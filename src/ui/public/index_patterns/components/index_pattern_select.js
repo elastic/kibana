@@ -24,10 +24,10 @@ import chrome from 'ui/chrome';
 
 import { EuiComboBox } from '@elastic/eui';
 
-const getIndexPatterns = async (search) => {
+const getIndexPatterns = async (search, fields) => {
   const resp = await chrome.getSavedObjectsClient().find({
     type: 'index-pattern',
-    fields: ['title'],
+    fields,
     search: `${search}*`,
     search_fields: ['title'],
     perPage: 100
@@ -51,6 +51,7 @@ export class IndexPatternSelect extends Component {
       isLoading: false,
       options: [],
       selectedIndexPattern: undefined,
+      searchValue: undefined,
     };
   }
 
@@ -100,7 +101,27 @@ export class IndexPatternSelect extends Component {
   }
 
   debouncedFetch = _.debounce(async (searchValue) => {
-    const savedObjects = await getIndexPatterns(searchValue);
+    const { fieldTypes, onNoIndexPatterns } = this.props;
+
+    const savedObjectFields = ['title'];
+    if (fieldTypes) {
+      savedObjectFields.push('fields');
+    }
+    let savedObjects = await getIndexPatterns(searchValue, savedObjectFields);
+
+    if (fieldTypes) {
+      savedObjects = savedObjects.filter(savedObject => {
+        try {
+          const indexPatternFields = JSON.parse(savedObject.attributes.fields);
+          return indexPatternFields.some(({ type }) => {
+            return fieldTypes.includes(type);
+          });
+        } catch (err) {
+          // Unable to parse fields JSON, invalid index pattern
+          return false;
+        }
+      });
+    }
 
     if (!this._isMounted) {
       return;
@@ -119,6 +140,10 @@ export class IndexPatternSelect extends Component {
         isLoading: false,
         options,
       });
+
+      if (onNoIndexPatterns && searchValue === '' && options.length === 0) {
+        onNoIndexPatterns();
+      }
     }
   }, 300);
 
@@ -135,9 +160,11 @@ export class IndexPatternSelect extends Component {
 
   render() {
     const {
+      fieldTypes, // eslint-disable-line no-unused-vars
       onChange, // eslint-disable-line no-unused-vars
       indexPatternId, // eslint-disable-line no-unused-vars
       placeholder,
+      onNoIndexPatterns, // eslint-disable-line no-unused-vars
       ...rest
     } = this.props;
 
@@ -160,4 +187,13 @@ IndexPatternSelect.propTypes = {
   onChange: PropTypes.func.isRequired,
   indexPatternId: PropTypes.string,
   placeholder: PropTypes.string,
+  /**
+   * Filter index patterns to only those that include the field types
+   */
+  fieldTypes: PropTypes.arrayOf(PropTypes.string),
+  /**
+   * Callback called when there are no Kibana index patterns (or none that match the field types filter).
+   * Does not get called when user provided index pattern title search does match any index patterns.
+   */
+  onNoIndexPatterns: PropTypes.func,
 };

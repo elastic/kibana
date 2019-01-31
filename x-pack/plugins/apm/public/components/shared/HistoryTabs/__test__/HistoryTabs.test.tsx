@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore otherwise TS complains "Module ''@elastic/eui'' has no exported member 'EuiTab'"
 import { EuiTab } from '@elastic/eui';
 import { mount, ReactWrapper, shallow, ShallowWrapper } from 'enzyme';
 import React from 'react';
@@ -15,6 +14,11 @@ import {
   HistoryTabsWithoutRouter,
   IHistoryTab
 } from '..';
+
+type PropsOf<Component> = Component extends React.SFC<infer Props>
+  ? Props
+  : never;
+type EuiTabProps = PropsOf<typeof EuiTab>;
 
 describe('HistoryTabs', () => {
   let mockLocation: any;
@@ -36,25 +40,25 @@ describe('HistoryTabs', () => {
       {
         name: 'One',
         path: '/one',
-        component: () => <Content name="one" />
+        render: props => <Content {...props} name="one" />
       },
       {
         name: 'Two',
         path: '/two',
-        component: () => <Content name="two" />
+        render: () => <Content name="two" />
       },
       {
         name: 'Three',
         path: '/three',
-        component: () => <Content name="three" />
+        render: () => <Content name="three" />
       }
     ];
 
-    testProps = ({
+    testProps = {
       location: mockLocation,
       history: mockHistory,
       tabs: testTabs
-    } as unknown) as HistoryTabsProps;
+    } as HistoryTabsProps;
   });
 
   it('should render correctly', () => {
@@ -62,7 +66,7 @@ describe('HistoryTabs', () => {
     const wrapper = shallow(<HistoryTabsWithoutRouter {...testProps} />);
     expect(wrapper).toMatchSnapshot();
 
-    const tabs: ShallowWrapper<EuiTab> = wrapper.find(EuiTab);
+    const tabs: ShallowWrapper<EuiTabProps> = wrapper.find(EuiTab);
     expect(tabs.at(0).props().isSelected).toEqual(false);
     expect(tabs.at(1).props().isSelected).toEqual(true);
     expect(tabs.at(2).props().isSelected).toEqual(false);
@@ -82,7 +86,7 @@ describe('HistoryTabs', () => {
       .at(2)
       .simulate('click');
 
-    const tabs: ReactWrapper<EuiTab> = wrapper.find(EuiTab);
+    const tabs: ReactWrapper<EuiTabProps> = wrapper.find(EuiTab);
     expect(tabs.at(0).props().isSelected).toEqual(false);
     expect(tabs.at(1).props().isSelected).toEqual(false);
     expect(tabs.at(2).props().isSelected).toEqual(true);

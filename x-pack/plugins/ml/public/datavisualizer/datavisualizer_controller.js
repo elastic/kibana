@@ -22,6 +22,7 @@ import { decorateQuery, luceneStringToDsl } from '@kbn/es-query';
 import { notify, toastNotifications } from 'ui/notify';
 
 import { ML_JOB_FIELD_TYPES, KBN_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
+import { getDataVisualizerBreadcrumbs } from './breadcrumbs';
 import { kbnTypeToMLJobType } from 'plugins/ml/util/field_types_utils';
 import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
 import { checkBasicLicense, isFullLicense } from 'plugins/ml/license/check_license';
@@ -30,19 +31,18 @@ import { SearchItemsProvider } from 'plugins/ml/jobs/new_job/utils/new_job_utils
 import { loadCurrentIndexPattern, loadCurrentSavedSearch, timeBasedIndexCheck } from 'plugins/ml/util/index_utils';
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { ml } from 'plugins/ml/services/ml_api_service';
-import { initPromise } from 'plugins/ml/util/promise';
 import template from './datavisualizer.html';
 
 uiRoutes
   .when('/jobs/new_job/datavisualizer', {
     template,
+    k7Breadcrumbs: getDataVisualizerBreadcrumbs,
     resolve: {
       CheckLicense: checkBasicLicense,
       privileges: checkGetJobsPrivilege,
       indexPattern: loadCurrentIndexPattern,
       savedSearch: loadCurrentSavedSearch,
-      checkMlNodesAvailable,
-      initPromise: initPromise(true)
+      checkMlNodesAvailable
     }
   });
 
@@ -57,7 +57,8 @@ module
     $window,
     Private,
     AppState,
-    config) {
+    config,
+    i18n) {
 
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
@@ -94,7 +95,12 @@ module
     $scope.metricFieldFilter = '';
     $scope.fieldFilterIcon = 0;
     $scope.fieldFilter = '';
-    $scope.recognizerResults = { count: 0 };
+    $scope.recognizerResults = {
+      count: 0,
+      onChange() {
+        $scope.$applyAsync();
+      }
+    };
 
     $scope.showSidebar = isFullLicense();
 
@@ -106,8 +112,15 @@ module
       $scope.searchQueryText = _.get(queryBarQry, 'query', '');
     } else {
       toastNotifications.addWarning({
-        title: `${(queryBarQry.language !== undefined) ? queryBarQry.language : ''} syntax not supported`,
-        text: 'The Data Visualizer currently only supports queries using the lucene query syntax.',
+        title: i18n('xpack.ml.datavisualizer.languageSyntaxNotSupportedWarningTitle', {
+          defaultMessage: '{language} syntax not supported',
+          values: {
+            language: (queryBarQry.language !== undefined) ? queryBarQry.language : '',
+          }
+        }),
+        text: i18n('xpack.ml.datavisualizer.languageSyntaxNotSupportedWarningDescription', {
+          defaultMessage: 'The Data Visualizer currently only supports queries using the lucene query syntax.',
+        }),
       });
     }
 
@@ -259,7 +272,8 @@ module
 
     function buildSearchQuery() {
       const searchQuery = luceneStringToDsl($scope.searchQueryText);
-      decorateQuery(searchQuery, config);
+      const queryStringOptions = config.get('query:queryString:options');
+      decorateQuery(searchQuery, queryStringOptions);
       return searchQuery;
     }
 
@@ -296,12 +310,18 @@ module
 
       const metricCards = [];
 
-      // Add a config for 'document count', identified by no field name.
-      metricCards.push({
-        type: ML_JOB_FIELD_TYPES.NUMBER,
-        existsInDocs: true,
-        loading: true
-      });
+      // Add a config for 'document count', identified by no field name if index is timeseries based
+      if (indexPattern.timeFieldName !== undefined) {
+        metricCards.push({
+          type: ML_JOB_FIELD_TYPES.NUMBER,
+          existsInDocs: true,
+          loading: true
+        });
+      } else {
+        // disable timeRangeSelector and remove sidebar if index not timeseries based
+        timefilter.disableTimeRangeSelector();
+        $scope.showSidebar = false;
+      }
 
       // Add on 1 for the document count card.
       // TODO - remove the '+1' if document count goes in its own section.
@@ -471,7 +491,7 @@ module
         fields: numberFields
       })
         .then((resp) => {
-          // Add the metric stats to the existing stats in the corresponding card.
+          // Add the metric stats to the existing stats in the corresponding card. [ {documentCounts:...}, {fieldName: ..} ]
           _.each($scope.metricCards, (card) => {
             if (card.fieldName !== undefined) {
               card.stats = { ...card.stats, ...(_.find(resp, { fieldName: card.fieldName })) };
@@ -492,13 +512,32 @@ module
           // TODO - display error in cards saying data could not be loaded.
           console.log('DataVisualizer - error getting stats for metric cards from elasticsearch:', err);
           if (err.statusCode === 500) {
-            notify.error(`Error loading data for metrics in index ${indexPattern.title}. ${err.message}. ` +
-          'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
-            { lifetime: 30000 });
+            notify.error(
+              i18n('xpack.ml.datavisualizer.metricInternalServerErrorTitle', {
+                defaultMessage: 'Error loading data for metrics in index {index}. {message}. ' +
+                  'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
+                values: {
+                  index: indexPattern.title,
+                  message: err.message,
+                }
+              }),
+              { lifetime: 30000 }
+            );
           } else {
-            notify.error(`Error loading data for metrics in index ${indexPattern.title}. ${err.message}`,
-              { lifetime: 30000 });
+            notify.error(
+              i18n('xpack.ml.datavisualizer.loadingMetricDataErrorTitle', {
+                defaultMessage: 'Error loading data for metrics in index {index}. {message}',
+                values: {
+                  index: indexPattern.title,
+                  message: err.message,
+                }
+              }),
+              { lifetime: 30000 }
+            );
           }
+        })
+        .then(() => {
+          $scope.$applyAsync();
         });
 
     }
@@ -543,13 +582,32 @@ module
             // TODO - display error in cards saying data could not be loaded.
             console.log('DataVisualizer - error getting non metric field stats from elasticsearch:', err);
             if (err.statusCode === 500) {
-              notify.error(`Error loading data for fields in index ${indexPattern.title}. ${err.message}. ` +
-            'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
-              { lifetime: 30000 });
+              notify.error(
+                i18n('xpack.ml.datavisualizer.fieldsInternalServerErrorTitle', {
+                  defaultMessage: 'Error loading data for fields in index {index}. {message}. ' +
+                    'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
+                  values: {
+                    index: indexPattern.title,
+                    message: err.message,
+                  }
+                }),
+                { lifetime: 30000 }
+              );
             } else {
-              notify.error(`Error loading data for fields in index ${indexPattern.title}. ${err.message}`,
-                { lifetime: 30000 });
+              notify.error(
+                i18n('xpack.ml.datavisualizer.loadingFieldsDataErrorTitle', {
+                  defaultMessage: 'Error loading data for fields in index {index}. {message}',
+                  values: {
+                    index: indexPattern.title,
+                    message: err.message,
+                  }
+                }),
+                { lifetime: 30000 }
+              );
             }
+          })
+          .then(() => {
+            $scope.$applyAsync();
           });
       } else {
         $scope.fieldFilterIcon = 0;
@@ -593,13 +651,32 @@ module
           // TODO - display error in cards saying data could not be loaded.
           console.log('DataVisualizer - error getting overall stats from elasticsearch:', err);
           if (err.statusCode === 500) {
-            notify.error(`Error loading data for fields in index ${indexPattern.title}. ${err.message}. ` +
-          'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
-            { lifetime: 30000 });
+            notify.error(
+              i18n('xpack.ml.datavisualizer.overallFieldsInternalServerErrorTitle', {
+                defaultMessage: 'Error loading data for fields in index {index}. {message}. ' +
+                  'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
+                values: {
+                  index: indexPattern.title,
+                  message: err.message,
+                }
+              }),
+              { lifetime: 30000 }
+            );
           } else {
-            notify.error(`Error loading data for fields in index ${indexPattern.title}. ${err.message}`,
-              { lifetime: 30000 });
+            notify.error(
+              i18n('xpack.ml.datavisualizer.loadingOverallFieldsDataErrorTitle', {
+                defaultMessage: 'Error loading data for fields in index {index}. {message}',
+                values: {
+                  index: indexPattern.title,
+                  message: err.message,
+                }
+              }),
+              { lifetime: 30000 }
+            );
           }
+
+          $scope.$applyAsync();
+
         });
 
     }

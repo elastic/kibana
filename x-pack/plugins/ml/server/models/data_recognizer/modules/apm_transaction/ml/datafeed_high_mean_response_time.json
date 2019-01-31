@@ -3,7 +3,6 @@
   "indexes": [
     "INDEX_PATTERN_NAME"
   ],
-  "types": [],
   "query": {
     "match": {
       "processor.event": {

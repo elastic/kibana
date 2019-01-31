@@ -14,6 +14,7 @@ export const nodesSchema: any = gql`
 
   type InfraNodePath {
     value: String!
+    label: String!
   }
 
   type InfraNode {
@@ -59,6 +60,7 @@ export const nodesSchema: any = gql`
     hosts
     pods
     containers
+    custom
   }
 
   input InfraPathInput {

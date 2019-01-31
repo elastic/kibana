@@ -7,7 +7,8 @@
 import {
   PARENT_ID,
   PROCESSOR_EVENT,
-  TRACE_ID
+  TRACE_ID,
+  TRANSACTION_SAMPLED
 } from '../../../common/constants';
 import { Setup } from '../helpers/setup_request';
 import { getTransactionGroups } from '../transaction_groups';
@@ -48,7 +49,8 @@ export async function getTopTraces(
           }
         },
         { term: { [PROCESSOR_EVENT]: 'transaction' } }
-      ]
+      ],
+      should: [{ term: { [TRANSACTION_SAMPLED]: true } }]
     }
   };
 

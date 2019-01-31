@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { mount, shallow } from 'enzyme';
+import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import { UpgradeFailureActions } from './upgrade_failure_actions';
 
 describe('UpgradeFailureActions component', () => {
@@ -24,18 +24,18 @@ describe('UpgradeFailureActions component', () => {
   });
 
   it('renders component as expected', () => {
-    const wrapper = shallow(<UpgradeFailureActions {...props} />);
+    const wrapper = shallowWithIntl(<UpgradeFailureActions {...props} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('calls onRetry on update click', () => {
-    const wrapper = mount(<UpgradeFailureActions {...props} />);
+    const wrapper = mountWithIntl(<UpgradeFailureActions {...props} />);
     wrapper.find('EuiButton').simulate('click');
     expect(onRetry).toHaveBeenCalledTimes(1);
   });
 
   it('calls onClose on "Go back" click', () => {
-    const wrapper = mount(<UpgradeFailureActions {...props} />);
+    const wrapper = mountWithIntl(<UpgradeFailureActions {...props} />);
     wrapper.find('EuiButtonEmpty').simulate('click');
     expect(onClose).toHaveBeenCalledTimes(1);
   });

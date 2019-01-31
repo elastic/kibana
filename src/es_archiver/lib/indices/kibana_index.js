@@ -35,7 +35,7 @@ import { findPluginSpecs } from '../../../plugin_discovery';
 const buildUiExports = _.once(async () => {
   const { spec$ } = await findPluginSpecs({
     plugins: {
-      scanDirs: [path.resolve(__dirname, '../../../core_plugins')],
+      scanDirs: [path.resolve(__dirname, '../../../legacy/core_plugins')],
       paths: [path.resolve(__dirname, '../../../../x-pack')],
     },
   });
@@ -48,8 +48,7 @@ const buildUiExports = _.once(async () => {
  * Deletes all indices that start with `.kibana`
  */
 export async function deleteKibanaIndices({ client, stats, log }) {
-  const kibanaIndices = await client.cat.indices({ index: '.kibana*', format: 'json' });
-  const indexNames = kibanaIndices.map(x => x.index);
+  const indexNames = await fetchKibanaIndices(client);
   if (!indexNames.length) {
     return;
   }
@@ -138,7 +137,7 @@ async function getKibanaStatuses({ kibanaUrl }) {
 export async function createDefaultSpace({ index, client }) {
   await client.index({
     index,
-    type: 'doc',
+    type: '_doc',
     id: 'space:default',
     body: {
       type: 'space',
@@ -150,4 +149,51 @@ export async function createDefaultSpace({ index, client }) {
       }
     }
   });
+}
+
+/**
+ * Migrations mean that the Kibana index will look something like:
+ * .kibana, .kibana_1, .kibana_323, etc. This finds all indices starting
+ * with .kibana, then filters out any that aren't actually Kibana's core
+ * index (e.g. we don't want to remove .kibana_task_manager or the like).
+ *
+ * @param {string} index
+ */
+async function fetchKibanaIndices(client) {
+  const kibanaIndices = await client.cat.indices({ index: '.kibana*', format: 'json' });
+  const isKibanaIndex = (index) => (/^\.kibana(:?_\d*)?$/).test(index);
+  return kibanaIndices.map(x => x.index).filter(isKibanaIndex);
+}
+
+export async function cleanKibanaIndices({ client, stats, log, kibanaUrl }) {
+  if (!await isSpacesEnabled({ kibanaUrl })) {
+    return await deleteKibanaIndices({
+      client,
+      stats,
+      log,
+    });
+  }
+
+  await client.deleteByQuery({
+    index: `.kibana`,
+    body: {
+      query: {
+        bool: {
+          must_not: {
+            ids: {
+              type: 'doc',
+              values: ['space:default']
+            }
+          }
+        }
+      }
+    }
+  });
+
+  log.warning(
+    `since spaces are enabled, all objects other than the default space were deleted from ` +
+    `.kibana rather than deleting the whole index`
+  );
+
+  stats.deletedIndex('.kibana');
 }

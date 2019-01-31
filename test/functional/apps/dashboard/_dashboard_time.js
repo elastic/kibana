@@ -26,7 +26,7 @@ const toTime = '2015-09-23 18:31:44.000';
 
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['dashboard', 'header']);
-  const remote = getService('remote');
+  const browser = getService('browser');
 
   describe('dashboard time', () => {
     before(async function () {
@@ -94,14 +94,14 @@ export default function ({ getPageObjects, getService }) {
       // However, if the URL also contains time in the global state, then the global state
       // time should take precedence.
       it('should be overwritten by global state', async function () {
-        const currentUrl = await remote.getCurrentUrl();
+        const currentUrl = await browser.getCurrentUrl();
         const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
         const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
 
         await PageObjects.dashboard.gotoDashboardLandingPage();
 
         const urlWithGlobalTime = `${kibanaBaseUrl}#/dashboard/${id}?_g=(time:(from:now-1h,mode:quick,to:now))`;
-        await remote.get(urlWithGlobalTime, false);
+        await browser.get(urlWithGlobalTime, false);
         const prettyPrint = await PageObjects.header.getPrettyDuration();
         expect(prettyPrint).to.equal('Last 1 hour');
       });

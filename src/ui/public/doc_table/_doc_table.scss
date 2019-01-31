@@ -1,0 +1,71 @@
+/**
+ * 1. Stack content vertically so the table can scroll when its constrained by a fixed container height.
+ */
+doc-table {
+  overflow: auto;
+  flex: 1 1 100%;
+  flex-direction: column; /* 1 */
+
+  th {
+    text-align: left;
+    font-weight: bold;
+  }
+
+  .spinner {
+    position: absolute;
+    top: 40%;
+    left: 0;
+    right: 0;
+    z-index: $euiZLevel1;
+    opacity: 0.5;
+  }
+}
+
+.kbnDocTable__container.loading {
+  opacity: 0.5;
+}
+
+.kbnDocTable {
+  font-size: $euiFontSizeXS;
+
+  th {
+    white-space: nowrap;
+    padding-right: $euiSizeS;
+
+    .fa {
+      font-size: 1.1em;
+    }
+  }
+}
+
+.kbnDocTable__row {
+  td {
+    position: relative;
+
+    &:hover {
+      .kbnDocTableRowFilterButton {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+.kbnDocTable__row--highlight {
+  td,
+  .kbnDocTableRowFilterButton {
+    background-color: tintOrShade($euiColorPrimary, 90%, 70%);
+  }
+}
+
+.kbnDocTable__bar {
+  margin: $euiSizeXS $euiSizeXS 0;
+}
+
+.kbnDocTable__error {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1 0 100%;
+  text-align: center;
+}
+

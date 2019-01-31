@@ -33,7 +33,7 @@ class Timefilter extends SimpleEmitter {
     this.isTimeRangeSelectorEnabled = false;
     this.isAutoRefreshSelectorEnabled = false;
     this._time = chrome.getUiSettingsClient().get('timepicker:timeDefaults');
-    this._refreshInterval = chrome.getUiSettingsClient().get('timepicker:refreshIntervalDefaults');
+    this.setRefreshInterval(chrome.getUiSettingsClient().get('timepicker:refreshIntervalDefaults'));
   }
 
   getTime = () => {
@@ -79,17 +79,20 @@ class Timefilter extends SimpleEmitter {
    * @property {boolean} time.pause
    */
   setRefreshInterval = (refreshInterval) => {
-    // Object.assign used for partially composed updates
-    const newRefreshInterval = Object.assign(this.getRefreshInterval(), refreshInterval);
+    const prevRefreshInterval = this.getRefreshInterval();
+    const newRefreshInterval = { ...prevRefreshInterval, ...refreshInterval };
+    // If the refresh interval is <= 0 handle that as a paused refresh
     if (newRefreshInterval.value <= 0) {
       newRefreshInterval.value = 0;
       newRefreshInterval.pause = true;
     }
-    if (areTimePickerValsDifferent(this.getRefreshInterval(), newRefreshInterval)) {
-      this._refreshInterval = {
-        value: newRefreshInterval.value,
-        pause: newRefreshInterval.pause
-      };
+    this._refreshInterval = {
+      value: newRefreshInterval.value,
+      pause: newRefreshInterval.pause
+    };
+    // Only send out an event if we already had a previous refresh interval (not for the initial set)
+    // and the old and new refresh interval are actually different.
+    if (prevRefreshInterval && areTimePickerValsDifferent(prevRefreshInterval, newRefreshInterval)) {
       this.emit('refreshIntervalUpdate');
       if (!newRefreshInterval.pause && newRefreshInterval.value !== 0) {
         this.emit('fetch');

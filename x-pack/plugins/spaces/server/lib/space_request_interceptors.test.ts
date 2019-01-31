@@ -3,10 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// @ts-ignore
+
 import { Server } from 'hapi';
 import sinon from 'sinon';
-import { SavedObject } from './saved_objects_client/saved_objects_client_types';
+
+import { SavedObject } from 'src/server/saved_objects';
 import { initSpacesRequestInterceptors } from './space_request_interceptors';
 
 describe('interceptors', () => {
@@ -228,6 +229,7 @@ describe('interceptors', () => {
             attributes: {
               name: 'a space',
             },
+            references: [],
           },
         ];
 
@@ -264,6 +266,7 @@ describe('interceptors', () => {
             attributes: {
               name: 'a space',
             },
+            references: [],
           },
         ];
 
@@ -301,6 +304,7 @@ describe('interceptors', () => {
             attributes: {
               name: 'a space',
             },
+            references: [],
           },
         ];
 
@@ -347,6 +351,7 @@ describe('interceptors', () => {
             attributes: {
               name: 'Default Space',
             },
+            references: [],
           },
         ];
 
@@ -378,6 +383,7 @@ describe('interceptors', () => {
             attributes: {
               name: 'a space',
             },
+            references: [],
           },
           {
             id: 'b-space',
@@ -385,6 +391,7 @@ describe('interceptors', () => {
             attributes: {
               name: 'b space',
             },
+            references: [],
           },
         ];
 

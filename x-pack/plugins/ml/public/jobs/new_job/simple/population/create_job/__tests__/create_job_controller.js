@@ -32,7 +32,10 @@ describe('ML - Population Wizard - Create Job Controller', () => {
       };
 
       const scope = $rootScope.$new();
-      $controller('MlCreatePopulationJob', { $scope: scope });
+
+      expect(() => {
+        $controller('MlCreatePopulationJob', { $scope: scope });
+      }).to.not.throwError();
 
       expect(typeof scope.ui).to.eql('object');
       stub1.restore();

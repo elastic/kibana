@@ -27,13 +27,14 @@ export const WorkpadHeader = ({
   isWriteable,
   canUserWrite,
   toggleWriteable,
-  hasAssets,
   addElement,
   setShowElementModal,
   showElementModal,
 }) => {
   const keyHandler = action => {
-    if (action === 'EDITING') toggleWriteable();
+    if (action === 'EDITING') {
+      toggleWriteable();
+    }
   };
 
   const elementAdd = (
@@ -61,8 +62,11 @@ export const WorkpadHeader = ({
 
   let readOnlyToolTip = '';
 
-  if (!canUserWrite) readOnlyToolTip = "You don't have permission to edit this workpad";
-  else readOnlyToolTip = isWriteable ? 'Hide editing controls' : 'Show editing controls';
+  if (!canUserWrite) {
+    readOnlyToolTip = "You don't have permission to edit this workpad";
+  } else {
+    readOnlyToolTip = isWriteable ? 'Hide editing controls' : 'Show editing controls';
+  }
 
   return (
     <div>
@@ -90,7 +94,7 @@ export const WorkpadHeader = ({
               <WorkpadExport />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {!canUserWrite && (
+              {canUserWrite && (
                 <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector="body" global />
               )}
               <EuiToolTip position="bottom" content={readOnlyToolTip}>
@@ -110,11 +114,9 @@ export const WorkpadHeader = ({
         {isWriteable ? (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="s">
-              {hasAssets && (
-                <EuiFlexItem grow={false}>
-                  <AssetManager />
-                </EuiFlexItem>
-              )}
+              <EuiFlexItem grow={false}>
+                <AssetManager />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
                   fill
@@ -136,7 +138,6 @@ export const WorkpadHeader = ({
 WorkpadHeader.propTypes = {
   isWriteable: PropTypes.bool,
   toggleWriteable: PropTypes.func,
-  hasAssets: PropTypes.bool,
   addElement: PropTypes.func.isRequired,
   showElementModal: PropTypes.bool,
   setShowElementModal: PropTypes.func,

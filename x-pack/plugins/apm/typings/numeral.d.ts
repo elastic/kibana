@@ -7,6 +7,7 @@
 interface Numeral {
   (value?: unknown): Numeral;
   format: (pattern: string) => string;
+  unformat: (pattern: string) => number;
 }
 
 declare var numeral: Numeral;

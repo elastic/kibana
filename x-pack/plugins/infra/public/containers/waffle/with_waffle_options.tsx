@@ -7,8 +7,14 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
-import { InfraMetricInput, InfraMetricType, InfraPathType } from '../../../common/graphql/types';
-import { InfraNodeType } from '../../../server/lib/adapters/nodes';
+
+import {
+  InfraMetricInput,
+  InfraMetricType,
+  InfraNodeType,
+  InfraPathType,
+} from '../../graphql/types';
+import { InfraGroupByOptions } from '../../lib/lib';
 import { State, waffleOptionsActions, waffleOptionsSelectors } from '../../store';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
@@ -18,10 +24,12 @@ const selectOptionsUrlState = createSelector(
   waffleOptionsSelectors.selectMetric,
   waffleOptionsSelectors.selectGroupBy,
   waffleOptionsSelectors.selectNodeType,
-  (metric, groupBy, nodeType) => ({
+  waffleOptionsSelectors.selectCustomOptions,
+  (metric, groupBy, nodeType, customOptions) => ({
     metric,
     groupBy,
     nodeType,
+    customOptions,
   })
 );
 
@@ -30,12 +38,14 @@ export const withWaffleOptions = connect(
     metric: waffleOptionsSelectors.selectMetric(state),
     groupBy: waffleOptionsSelectors.selectGroupBy(state),
     nodeType: waffleOptionsSelectors.selectNodeType(state),
+    customOptions: waffleOptionsSelectors.selectCustomOptions(state),
     urlState: selectOptionsUrlState(state),
   }),
   bindPlainActionCreators({
     changeMetric: waffleOptionsActions.changeMetric,
     changeGroupBy: waffleOptionsActions.changeGroupBy,
     changeNodeType: waffleOptionsActions.changeNodeType,
+    changeCustomOptions: waffleOptionsActions.changeCustomOptions,
   })
 );
 
@@ -49,11 +59,12 @@ interface WaffleOptionsUrlState {
   metric?: ReturnType<typeof waffleOptionsSelectors.selectMetric>;
   groupBy?: ReturnType<typeof waffleOptionsSelectors.selectGroupBy>;
   nodeType?: ReturnType<typeof waffleOptionsSelectors.selectNodeType>;
+  customOptions?: ReturnType<typeof waffleOptionsSelectors.selectCustomOptions>;
 }
 
 export const WithWaffleOptionsUrlState = () => (
   <WithWaffleOptions>
-    {({ changeMetric, urlState, changeGroupBy, changeNodeType }) => (
+    {({ changeMetric, urlState, changeGroupBy, changeNodeType, changeCustomOptions }) => (
       <UrlStateContainer
         urlState={urlState}
         urlStateKey="waffleOptions"
@@ -68,6 +79,9 @@ export const WithWaffleOptionsUrlState = () => (
           if (newUrlState && newUrlState.nodeType) {
             changeNodeType(newUrlState.nodeType);
           }
+          if (newUrlState && newUrlState.customOptions) {
+            changeCustomOptions(newUrlState.customOptions);
+          }
         }}
         onInitialize={initialUrlState => {
           if (initialUrlState && initialUrlState.metric) {
@@ -78,6 +92,9 @@ export const WithWaffleOptionsUrlState = () => (
           }
           if (initialUrlState && initialUrlState.nodeType) {
             changeNodeType(initialUrlState.nodeType);
+          }
+          if (initialUrlState && initialUrlState.customOptions) {
+            changeCustomOptions(initialUrlState.customOptions);
           }
         }}
       />
@@ -91,6 +108,7 @@ const mapToUrlState = (value: any): WaffleOptionsUrlState | undefined =>
         metric: mapToMetricUrlState(value.metric),
         groupBy: mapToGroupByUrlState(value.groupBy),
         nodeType: mapToNodeTypeUrlState(value.nodeType),
+        customOptions: mapToCustomOptionsUrlState(value.customOptions),
       }
     : undefined;
 
@@ -100,6 +118,15 @@ const isInfraMetricInput = (subject: any): subject is InfraMetricInput => {
 
 const isInfraPathInput = (subject: any): subject is InfraPathType => {
   return subject != null && subject.type != null && InfraPathType[subject.type] != null;
+};
+
+const isInfraGroupByOption = (subject: any): subject is InfraGroupByOptions => {
+  return (
+    subject != null &&
+    subject.text != null &&
+    subject.field != null &&
+    InfraPathType[subject.type] != null
+  );
 };
 
 const mapToMetricUrlState = (subject: any) => {
@@ -112,4 +139,10 @@ const mapToGroupByUrlState = (subject: any) => {
 
 const mapToNodeTypeUrlState = (subject: any) => {
   return subject && InfraNodeType[subject] ? subject : undefined;
+};
+
+const mapToCustomOptionsUrlState = (subject: any) => {
+  return subject && Array.isArray(subject) && subject.every(isInfraGroupByOption)
+    ? subject
+    : undefined;
 };

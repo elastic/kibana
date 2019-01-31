@@ -3,6 +3,7 @@
 exports[`QueryBar Should disable autoFocus on EuiFieldText when disableAutoFocus prop is true 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
+  className="kbnQueryBar"
   component="div"
   direction="row"
   gutterSize="s"
@@ -18,6 +19,7 @@ exports[`QueryBar Should disable autoFocus on EuiFieldText when disableAutoFocus
       onOutsideClick={[Function]}
     >
       <div
+        aria-controls="typeahead-items"
         aria-expanded={false}
         aria-haspopup="true"
         aria-owns="typeahead-items"
@@ -57,7 +59,7 @@ exports[`QueryBar Should disable autoFocus on EuiFieldText when disableAutoFocus
                 onClick={[Function]}
                 onKeyDown={[Function]}
                 onKeyUp={[Function]}
-                placeholder="Search... (e.g. status:200 AND extension:PHP)"
+                placeholder="Search… (e.g. status:200 AND extension:PHP)"
                 role="textbox"
                 spellCheck={false}
                 type="text"
@@ -89,17 +91,13 @@ exports[`QueryBar Should disable autoFocus on EuiFieldText when disableAutoFocus
     component="div"
     grow={false}
   >
-    <EuiButton
-      aria-label="Search"
-      color="primary"
+    <EuiSuperUpdateButton
       data-test-subj="querySubmitButton"
-      fill={true}
-      iconSide="left"
+      isDisabled={false}
+      isLoading={false}
+      needsUpdate={false}
       onClick={[Function]}
-      type="button"
-    >
-      Refresh
-    </EuiButton>
+    />
   </EuiFlexItem>
 </EuiFlexGroup>
 `;
@@ -107,6 +105,7 @@ exports[`QueryBar Should disable autoFocus on EuiFieldText when disableAutoFocus
 exports[`QueryBar Should pass the query language to the language switcher 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
+  className="kbnQueryBar"
   component="div"
   direction="row"
   gutterSize="s"
@@ -122,6 +121,7 @@ exports[`QueryBar Should pass the query language to the language switcher 1`] = 
       onOutsideClick={[Function]}
     >
       <div
+        aria-controls="typeahead-items"
         aria-expanded={false}
         aria-haspopup="true"
         aria-owns="typeahead-items"
@@ -161,7 +161,7 @@ exports[`QueryBar Should pass the query language to the language switcher 1`] = 
                 onClick={[Function]}
                 onKeyDown={[Function]}
                 onKeyUp={[Function]}
-                placeholder="Search... (e.g. status:200 AND extension:PHP)"
+                placeholder="Search… (e.g. status:200 AND extension:PHP)"
                 role="textbox"
                 spellCheck={false}
                 type="text"
@@ -193,17 +193,13 @@ exports[`QueryBar Should pass the query language to the language switcher 1`] = 
     component="div"
     grow={false}
   >
-    <EuiButton
-      aria-label="Search"
-      color="primary"
+    <EuiSuperUpdateButton
       data-test-subj="querySubmitButton"
-      fill={true}
-      iconSide="left"
+      isDisabled={false}
+      isLoading={false}
+      needsUpdate={false}
       onClick={[Function]}
-      type="button"
-    >
-      Refresh
-    </EuiButton>
+    />
   </EuiFlexItem>
 </EuiFlexGroup>
 `;
@@ -211,6 +207,7 @@ exports[`QueryBar Should pass the query language to the language switcher 1`] = 
 exports[`QueryBar Should render the given query 1`] = `
 <EuiFlexGroup
   alignItems="stretch"
+  className="kbnQueryBar"
   component="div"
   direction="row"
   gutterSize="s"
@@ -226,6 +223,7 @@ exports[`QueryBar Should render the given query 1`] = `
       onOutsideClick={[Function]}
     >
       <div
+        aria-controls="typeahead-items"
         aria-expanded={false}
         aria-haspopup="true"
         aria-owns="typeahead-items"
@@ -265,7 +263,7 @@ exports[`QueryBar Should render the given query 1`] = `
                 onClick={[Function]}
                 onKeyDown={[Function]}
                 onKeyUp={[Function]}
-                placeholder="Search... (e.g. status:200 AND extension:PHP)"
+                placeholder="Search… (e.g. status:200 AND extension:PHP)"
                 role="textbox"
                 spellCheck={false}
                 type="text"
@@ -297,17 +295,13 @@ exports[`QueryBar Should render the given query 1`] = `
     component="div"
     grow={false}
   >
-    <EuiButton
-      aria-label="Search"
-      color="primary"
+    <EuiSuperUpdateButton
       data-test-subj="querySubmitButton"
-      fill={true}
-      iconSide="left"
+      isDisabled={false}
+      isLoading={false}
+      needsUpdate={false}
       onClick={[Function]}
-      type="button"
-    >
-      Refresh
-    </EuiButton>
+    />
   </EuiFlexItem>
 </EuiFlexGroup>
 `;

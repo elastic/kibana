@@ -5,59 +5,48 @@
  */
 
 import { isNumber, round, sortBy } from 'lodash';
-import mean from 'lodash.mean';
-import { oc } from 'ts-optchain';
-import { IAvgAnomaliesResponse } from '../get_avg_response_time_anomalies';
+import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
+import { idx } from 'x-pack/plugins/apm/common/idx';
+import { Coordinate } from 'x-pack/plugins/apm/typings/timeseries';
 import { ESResponse } from './fetcher';
 
-type MaybeNumber = number | null;
-
-export interface TimeSeriesAPIResponse {
+export interface ApmTimeSeriesResponse {
   totalHits: number;
-  dates: number[];
   responseTimes: {
-    avg: MaybeNumber[];
-    p95: MaybeNumber[];
-    p99: MaybeNumber[];
-    avgAnomalies?: IAvgAnomaliesResponse;
+    avg: Coordinate[];
+    p95: Coordinate[];
+    p99: Coordinate[];
   };
   tpmBuckets: Array<{
     key: string;
-    avg: number;
-    values: number[];
+    dataPoints: Coordinate[];
   }>;
   overallAvgDuration?: number;
 }
 
 export function timeseriesTransformer({
   timeseriesResponse,
-  avgAnomaliesResponse,
   bucketSize
 }: {
   timeseriesResponse: ESResponse;
-  avgAnomaliesResponse: IAvgAnomaliesResponse;
   bucketSize: number;
-}): TimeSeriesAPIResponse {
+}): ApmTimeSeriesResponse {
   const aggs = timeseriesResponse.aggregations;
-  const overallAvgDuration = oc(aggs).overall_avg_duration.value();
-
-  const responseTimeBuckets = oc(aggs)
-    .response_times.buckets([])
-    .slice(1, -1);
-  const dates = responseTimeBuckets.map(bucket => bucket.key);
+  const overallAvgDuration = idx(aggs, _ => _.overall_avg_duration.value);
+  const responseTimeBuckets = idx(aggs, _ => _.response_times.buckets);
   const { avg, p95, p99 } = getResponseTime(responseTimeBuckets);
-
-  const transactionResultBuckets = oc(aggs).transaction_results.buckets([]);
+  const transactionResultBuckets = idx(
+    aggs,
+    _ => _.transaction_results.buckets
+  );
   const tpmBuckets = getTpmBuckets(transactionResultBuckets, bucketSize);
 
   return {
     totalHits: timeseriesResponse.hits.total,
-    dates,
     responseTimes: {
       avg,
       p95,
-      p99,
-      avgAnomalies: avgAnomaliesResponse
+      p99
     },
     tpmBuckets,
     overallAvgDuration
@@ -65,20 +54,24 @@ export function timeseriesTransformer({
 }
 
 export function getTpmBuckets(
-  transactionResultBuckets: ESResponse['aggregations']['transaction_results']['buckets'],
+  transactionResultBuckets: ESResponse['aggregations']['transaction_results']['buckets'] = [],
   bucketSize: number
 ) {
-  const buckets = transactionResultBuckets.map(({ key, timeseries }) => {
-    const tpmValues = timeseries.buckets
-      .slice(1, -1)
-      .map(bucket => round(bucket.doc_count * (60 / bucketSize), 1));
+  const buckets = transactionResultBuckets.map(
+    ({ key: resultKey, timeseries }) => {
+      const dataPoints = timeseries.buckets.slice(1, -1).map(bucket => {
+        return {
+          x: bucket.key,
+          y: round(bucket.doc_count * (60 / bucketSize), 1)
+        };
+      });
 
-    return {
-      key,
-      avg: mean(tpmValues),
-      values: tpmValues
-    };
-  });
+      // Handle empty string result keys
+      const key = resultKey === '' ? NOT_AVAILABLE_LABEL : resultKey;
+
+      return { key, dataPoints };
+    }
+  );
 
   return sortBy(
     buckets,
@@ -87,21 +80,21 @@ export function getTpmBuckets(
 }
 
 function getResponseTime(
-  responseTimeBuckets: ESResponse['aggregations']['response_times']['buckets']
+  responseTimeBuckets: ESResponse['aggregations']['response_times']['buckets'] = []
 ) {
-  return responseTimeBuckets.reduce(
+  return responseTimeBuckets.slice(1, -1).reduce(
     (acc, bucket) => {
       const { '95.0': p95, '99.0': p99 } = bucket.pct.values;
 
-      acc.avg.push(bucket.avg.value);
-      acc.p95.push(isNumber(p95) ? p95 : null);
-      acc.p99.push(isNumber(p99) ? p99 : null);
+      acc.avg.push({ x: bucket.key, y: bucket.avg.value });
+      acc.p95.push({ x: bucket.key, y: isNumber(p95) ? p95 : null });
+      acc.p99.push({ x: bucket.key, y: isNumber(p99) ? p99 : null });
       return acc;
     },
     {
-      avg: [] as MaybeNumber[],
-      p95: [] as MaybeNumber[],
-      p99: [] as MaybeNumber[]
+      avg: [] as Coordinate[],
+      p95: [] as Coordinate[],
+      p99: [] as Coordinate[]
     }
   );
 }

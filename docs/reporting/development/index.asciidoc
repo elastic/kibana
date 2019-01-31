@@ -13,17 +13,10 @@ However, these docs will be kept up-to-date to reflect the current implementatio
 
 [float]
 [[reporting-nav-bar-extensions]]
-=== Nav Bar Extensions
-X-Pack uses the `NavBarExtensionsRegistryProvider` to register a navigation bar item for the
-Dashboard/Discover/Visualize applications. These all use the `export-config` AngularJS directive to display the
-Reporting options. Each of the different exportTypes require the AngularJS controller that the contains the
-`export-config` directive to implement certain methods/properties that are used when creating the {reporting} job.
+=== Share Menu Extensions
+X-Pack uses the `ShareContextMenuExtensionsRegistryProvider` to register actions in the share menu.
 
-If you wish to add Reporting integration via the navigation bar that emulates the way these options are chosen for
-Dashboards, Visualize and Discover, you can reuse the `export-config` directive for the time being. Otherwise, you can
-provide a custom UI that generates the URL that is used to generate the {reporting} job.
-
-This integration will likely be changing in the near future as we move away from AngularJS towards React.
+This integration will likely be changing in the near future as we move towards a unified actions abstraction across {kib}.
 
 [float]
 === Generate Job URL

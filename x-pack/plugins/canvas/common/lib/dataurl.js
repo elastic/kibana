@@ -12,17 +12,23 @@ const dataurlRegex = /^data:([a-z]+\/[a-z0-9-+.]+)(;[a-z-]+=[a-z0-9-]+)?(;([a-z0
 export const imageTypes = ['image/svg+xml', 'image/jpeg', 'image/png', 'image/gif'];
 
 export function parseDataUrl(str, withData = false) {
-  if (typeof str !== 'string') return;
+  if (typeof str !== 'string') {
+    return;
+  }
 
   const matches = str.match(dataurlRegex);
 
-  if (!matches) return;
+  if (!matches) {
+    return;
+  }
 
   const [, mimetype, charset, , encoding] = matches;
 
   // all types except for svg need to be base64 encoded
   const imageTypeIndex = imageTypes.indexOf(matches[1]);
-  if (imageTypeIndex > 0 && encoding !== 'base64') return;
+  if (imageTypeIndex > 0 && encoding !== 'base64') {
+    return;
+  }
 
   return {
     mimetype,

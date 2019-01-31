@@ -23,36 +23,26 @@ import { initYAxis } from '../_init_y_axis';
 
 describe('initYAxis', function () {
 
-
-  function agg() {
-    return {
-      fieldFormatter: _.constant({}),
-      write: _.constant({ params: {} }),
-      type: {}
-    };
-  }
-
   const baseChart = {
     aspects: {
       y: [
-        { aggConfig: agg(), title: 'y1' },
-        { aggConfig: agg(), title: 'y2' },
+        { title: 'y1', format: {} },
+        { title: 'y2', format: {} },
       ],
-      x: {
-        aggConfig: agg(),
+      x: [{
         title: 'x'
-      }
+      }]
     }
   };
 
   describe('with a single y aspect', function () {
     const singleYBaseChart = _.cloneDeep(baseChart);
-    singleYBaseChart.aspects.y = singleYBaseChart.aspects.y[0];
+    singleYBaseChart.aspects.y = [singleYBaseChart.aspects.y[0]];
 
     it('sets the yAxisFormatter the the field formats convert fn', function () {
       const chart = _.cloneDeep(singleYBaseChart);
       initYAxis(chart);
-      expect(chart).to.have.property('yAxisFormatter', chart.aspects.y.aggConfig.fieldFormatter());
+      expect(chart).to.have.property('yAxisFormat');
     });
 
     it('sets the yAxisLabel', function () {
@@ -67,10 +57,10 @@ describe('initYAxis', function () {
       const chart = _.cloneDeep(baseChart);
       initYAxis(chart);
 
-      expect(chart).to.have.property('yAxisFormatter');
-      expect(chart.yAxisFormatter)
-        .to.be(chart.aspects.y[0].aggConfig.fieldFormatter())
-        .and.not.be(chart.aspects.y[1].aggConfig.fieldFormatter());
+      expect(chart).to.have.property('yAxisFormat');
+      expect(chart.yAxisFormat)
+        .to.be(chart.aspects.y[0].format)
+        .and.not.be(chart.aspects.y[1].format);
     });
 
     it('does not set the yAxisLabel, it does not make sense to put multiple labels on the same axis', function () {

@@ -8,8 +8,9 @@ import * as Rx from 'rxjs';
 import { first, tap, mergeMap } from 'rxjs/operators';
 import fs from 'fs';
 import getPort from 'get-port';
-import { promisify } from 'bluebird';
+import { promisify } from 'util';
 import { LevelLogger } from '../../../server/lib/level_logger';
+import { i18n } from '@kbn/i18n';
 
 const fsp = {
   readFile: promisify(fs.readFile, fs)
@@ -60,7 +61,7 @@ export function screenshotsObservableFactory(server) {
   };
 
   const checkForToastMessage = async (browser, layout) => {
-    await browser.waitForSelector(layout.selectors.toastHeader);
+    await browser.waitForSelector(layout.selectors.toastHeader, { silent: true });
     const toastHeaderText = await browser.evaluate({
       fn: function (selector) {
         const nodeList = document.querySelectorAll(selector);
@@ -68,7 +69,9 @@ export function screenshotsObservableFactory(server) {
       },
       args: [layout.selectors.toastHeader],
     });
-    throw new Error('Encountered an unexpected message on the page: ' + toastHeaderText);
+    throw new Error(i18n.translate('xpack.reporting.exportTypes.printablePdf.screenshots.unexpectedErrorMessage', {
+      defaultMessage: 'Encountered an unexpected message on the page: {toastHeaderText}', values: { toastHeaderText }
+    }));
   };
 
   const getNumberOfItems = async (browser, layout) => {
@@ -326,3 +329,4 @@ export function screenshotsObservableFactory(server) {
     );
   };
 }
+

@@ -67,15 +67,6 @@ const createBulkRequests = (spaceId: string) => [
 const isGlobalType = (type: string) => type === 'globaltype';
 
 export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      // eslint-disable-next-line max-len
-      message: `action [indices:data/write/bulk] is unauthorized for user [${username}]: [security_exception] action [indices:data/write/bulk] is unauthorized for user [${username}]`,
-    });
-  };
-
   const createExpectResults = (spaceId = DEFAULT_SPACE_ID) => async (resp: {
     [key: string]: any;
   }) => {
@@ -97,6 +88,7 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
           attributes: {
             title: 'A great new dashboard',
           },
+          references: [],
         },
         {
           type: 'globaltype',
@@ -106,6 +98,7 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
           attributes: {
             name: 'A new globaltype object',
           },
+          references: [],
         },
         {
           type: 'globaltype',
@@ -125,7 +118,7 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
       // query ES directory to ensure namespace was or wasn't specified
       const { _source } = await es.get({
         id: `${expectedSpacePrefix}${savedObject.type}:${savedObject.id}`,
-        type: 'doc',
+        type: '_doc',
         index: '.kibana',
       });
 
@@ -185,7 +178,6 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
 
   return {
     bulkCreateTest,
-    createExpectLegacyForbidden,
     createExpectResults,
     expectRbacForbidden,
   };

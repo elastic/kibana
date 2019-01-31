@@ -1,0 +1,13 @@
+.mgtAdvancedSettings__field {
+  + * {
+    margin-top: $euiSize;
+  }
+
+  &Wrapper {
+    width: 640px;
+  }
+
+  &Actions {
+    padding-top: $euiSizeM;
+  }
+}

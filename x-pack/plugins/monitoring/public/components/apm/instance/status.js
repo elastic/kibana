@@ -29,7 +29,7 @@ function StatusUI({ stats, intl }) {
         defaultMessage: 'Name',
       }),
       value: name,
-      dataTestSubj: 'name'
+      'data-test-subj': 'name'
     },
     {
       label: intl.formatMessage({
@@ -37,7 +37,7 @@ function StatusUI({ stats, intl }) {
         defaultMessage: 'Output',
       }),
       value: output,
-      dataTestSubj: 'output'
+      'data-test-subj': 'output'
     },
     {
       label: intl.formatMessage({
@@ -45,7 +45,7 @@ function StatusUI({ stats, intl }) {
         defaultMessage: 'Version',
       }),
       value: version,
-      dataTestSubj: 'version'
+      'data-test-subj': 'version'
     },
     {
       label: intl.formatMessage({
@@ -53,7 +53,7 @@ function StatusUI({ stats, intl }) {
         defaultMessage: 'Uptime',
       }),
       value: formatMetric(uptime, 'time_since'),
-      dataTestSubj: 'uptime'
+      'data-test-subj': 'uptime'
     },
     {
       label: intl.formatMessage({
@@ -65,7 +65,7 @@ function StatusUI({ stats, intl }) {
         defaultMessage: '{timeOfLastEvent} ago' }, {
         timeOfLastEvent: formatTimestampToDuration(+moment(timeOfLastEvent), CALCULATE_DURATION_SINCE)
       }),
-      dataTestSubj: 'timeOfLastEvent',
+      'data-test-subj': 'timeOfLastEvent',
     }
   ];
 

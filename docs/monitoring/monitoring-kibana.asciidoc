@@ -67,7 +67,7 @@ and {ref}/cluster-update-settings.html[Cluster update settings].
 more information, see <<monitoring-settings-kb,Monitoring settings in {kib}>>.
 
 . Identify where to send monitoring data. {kib} automatically
-sends metrics to the {es} cluster specified in the `elasticsearch.url` setting
+sends metrics to the {es} cluster specified in the `elasticsearch.hosts` setting
 in the `kibana.yml` file. This property has a default value of
 `http://localhost:9200`. +
 +

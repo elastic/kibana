@@ -10,20 +10,15 @@ import {
   TRANSACTION_DURATION,
   TRANSACTION_NAME
 } from '../../../common/constants';
-import { Transaction } from '../../../typings/Transaction';
+import { Transaction } from '../../../typings/es_schemas/Transaction';
 import { Setup } from '../helpers/setup_request';
 
 interface Bucket {
   key: string;
   doc_count: number;
-  avg: {
-    value: number;
-  };
-  p95: {
-    values: {
-      '95.0': number;
-    };
-  };
+  avg: { value: number };
+  p95: { values: { '95.0': number } };
+  sum: { value: number };
   sample: {
     hits: {
       total: number;
@@ -57,20 +52,24 @@ export function transactionGroupsFetcher(
         transactions: {
           terms: {
             field: `${TRANSACTION_NAME}.keyword`,
-            order: { avg: 'desc' },
-            size: 100
+            order: { sum: 'desc' },
+            size: config.get<number>('xpack.apm.ui.transactionGroupBucketSize')
           },
           aggs: {
             sample: {
               top_hits: {
                 size: 1,
-                sort: [{ '@timestamp': { order: 'desc' } }]
+                sort: [
+                  { _score: 'desc' }, // sort by _score to ensure that buckets with sampled:true ends up on top
+                  { '@timestamp': { order: 'desc' } }
+                ]
               }
             },
             avg: { avg: { field: TRANSACTION_DURATION } },
             p95: {
               percentiles: { field: TRANSACTION_DURATION, percents: [95] }
-            }
+            },
+            sum: { sum: { field: TRANSACTION_DURATION } }
           }
         }
       }

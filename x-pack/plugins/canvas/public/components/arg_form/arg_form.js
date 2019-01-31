@@ -21,7 +21,9 @@ const branches = [
     const { argType } = argTypeInstance;
 
     // arg does not need to be resolved, no need to branch
-    if (!argType.resolveArgValue) return false;
+    if (!argType.resolveArgValue) {
+      return false;
+    }
 
     // arg needs to be resolved, render pending if the value is not defined
     return typeof resolvedArgValue === 'undefined';
@@ -49,6 +51,7 @@ class ArgFormComponent extends PureComponent {
       setLabel,
       onValueRemove,
       workpad,
+      assets,
       renderError,
       setRenderError,
       resolvedArgValue,
@@ -85,6 +88,7 @@ class ArgFormComponent extends PureComponent {
             label,
             workpad,
             argId,
+            assets,
           };
 
           const expandableLabel = Boolean(hasError || template);

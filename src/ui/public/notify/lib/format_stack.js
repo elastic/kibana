@@ -17,10 +17,19 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 // browsers format Error.stack differently; always include message
 export function formatStack(err) {
   if (err.stack && !~err.stack.indexOf(err.message)) {
-    return 'Error: ' + err.message + '\n' + err.stack;
+    return i18n.translate('common.ui.notify.toaster.errorMessage', {
+      defaultMessage: `Error: {errorMessage}
+      {errorStack}`,
+      values: {
+        errorMessage: err.message,
+        errorStack: err.stack
+      }
+    });
   }
   return err.stack;
 }

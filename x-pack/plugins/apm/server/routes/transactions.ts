@@ -9,137 +9,33 @@ import { Server } from 'hapi';
 import Joi from 'joi';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { getTimeseriesData } from '../lib/transactions/charts/get_timeseries_data';
-import { getDistribution } from '../lib/transactions/distribution';
-import { getTopTransactions } from '../lib/transactions/get_top_transactions';
-import { getTransaction } from '../lib/transactions/get_transaction';
-import { getSpans } from '../lib/transactions/spans/get_spans';
-
-const pre = [{ method: setupRequest, assign: 'setup' }];
-const ROOT = '/api/apm/services/{serviceName}/transactions';
-const defaultErrorHandler = (err: Error) => {
-  // tslint:disable-next-line
-  console.error(err.stack);
-  throw Boom.boomify(err, { statusCode: 400 });
-};
+import { getTransactionWithErrorCount } from '../lib/transactions/get_transaction';
 
 export function initTransactionsApi(server: Server) {
   server.route({
     method: 'GET',
-    path: ROOT,
+    path: `/api/apm/services/{serviceName}/transactions/{transactionId}`,
     options: {
-      pre,
       validate: {
         query: withDefaultValidators({
-          transaction_type: Joi.string().default('request'),
-          query: Joi.string()
+          traceId: Joi.string().required()
         })
       }
     },
-    handler: req => {
-      const { serviceName } = req.params;
-      const { transaction_type: transactionType } = req.query as {
-        transaction_type: string;
-      };
-      const { setup } = req.pre;
-
-      return getTopTransactions({
-        serviceName,
-        transactionType,
-        setup
-      }).catch(defaultErrorHandler);
-    }
-  });
-
-  server.route({
-    method: 'GET',
-    path: `${ROOT}/{transactionId}`,
-    options: {
-      pre,
-      validate: {
-        query: withDefaultValidators({
-          traceId: Joi.string().allow('')
-        })
-      }
-    },
-    handler: req => {
+    handler: async req => {
       const { transactionId } = req.params;
       const { traceId } = req.query as { traceId: string };
-      const { setup } = req.pre;
-      return getTransaction(transactionId, traceId, setup).catch(
-        defaultErrorHandler
-      );
-    }
-  });
-
-  server.route({
-    method: 'GET',
-    path: `${ROOT}/{transactionId}/spans`,
-    options: {
-      pre,
-      validate: {
-        query: withDefaultValidators()
-      }
-    },
-    handler: req => {
-      const { transactionId } = req.params;
-      const { setup } = req.pre;
-      return getSpans(transactionId, setup).catch(defaultErrorHandler);
-    }
-  });
-
-  server.route({
-    method: 'GET',
-    path: `${ROOT}/charts`,
-    options: {
-      pre,
-      validate: {
-        query: withDefaultValidators({
-          transaction_type: Joi.string().default('request'),
-          transaction_name: Joi.string(),
-          query: Joi.string()
-        })
-      }
-    },
-    handler: req => {
-      const { setup } = req.pre;
-      const { serviceName } = req.params;
-      const { transaction_type: transactionType } = req.query as {
-        transaction_type: string;
-      };
-      const { transaction_name: transactionName } = req.query as {
-        transaction_name: string;
-      };
-
-      return getTimeseriesData({
-        serviceName,
-        transactionType,
-        transactionName,
+      const setup = setupRequest(req);
+      const transactionWithErrorCount = await getTransactionWithErrorCount(
+        transactionId,
+        traceId,
         setup
-      }).catch(defaultErrorHandler);
-    }
-  });
-
-  server.route({
-    method: 'GET',
-    path: `${ROOT}/distribution`,
-    options: {
-      pre,
-      validate: {
-        query: withDefaultValidators({
-          transaction_name: Joi.string().required()
-        })
-      }
-    },
-    handler: req => {
-      const { setup } = req.pre;
-      const { serviceName } = req.params;
-      const { transaction_name: transactionName } = req.query as {
-        transaction_name: string;
-      };
-      return getDistribution(serviceName, transactionName, setup).catch(
-        defaultErrorHandler
       );
+      if (transactionWithErrorCount.transaction) {
+        return transactionWithErrorCount;
+      } else {
+        throw Boom.notFound('Cannot find the requested page');
+      }
     }
   });
 }

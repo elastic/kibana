@@ -46,7 +46,7 @@ interface Props {
   breadcrumbs$: Rx.Observable<Breadcrumb[]>;
   homeHref: string;
   isVisible: boolean;
-  navLinks: NavLink[];
+  navLinks$: Rx.Observable<NavLink[]>;
   navControls: ChromeHeaderNavControlsRegistry;
   intl: InjectedIntl;
 }
@@ -57,6 +57,7 @@ class HeaderUI extends Component<Props> {
     return (
       <EuiHeaderLogo
         iconType="logoKibana"
+        data-test-subj="logo"
         href={homeHref}
         aria-label={intl.formatMessage({
           id: 'common.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel',
@@ -67,7 +68,7 @@ class HeaderUI extends Component<Props> {
   }
 
   public render() {
-    const { appTitle, breadcrumbs$, isVisible, navControls, navLinks } = this.props;
+    const { appTitle, breadcrumbs$, isVisible, navControls, navLinks$ } = this.props;
 
     if (!isVisible) {
       return null;
@@ -78,19 +79,19 @@ class HeaderUI extends Component<Props> {
 
     return (
       <EuiHeader>
-        <EuiHeaderSection>
+        <EuiHeaderSection grow={false}>
           <EuiHeaderSectionItem border="right">{this.renderLogo()}</EuiHeaderSectionItem>
 
           <HeaderNavControls navControls={leftNavControls} />
-
-          <HeaderBreadcrumbs appTitle={appTitle} breadcrumbs$={breadcrumbs$} />
         </EuiHeaderSection>
+
+        <HeaderBreadcrumbs appTitle={appTitle} breadcrumbs$={breadcrumbs$} />
 
         <EuiHeaderSection side="right">
           <HeaderNavControls navControls={rightNavControls} />
 
           <EuiHeaderSectionItem>
-            <HeaderAppMenu navLinks={navLinks} />
+            <HeaderAppMenu navLinks$={navLinks$} />
           </EuiHeaderSectionItem>
         </EuiHeaderSection>
       </EuiHeader>

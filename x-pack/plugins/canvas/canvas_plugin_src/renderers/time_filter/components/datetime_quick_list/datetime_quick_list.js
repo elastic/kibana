@@ -11,17 +11,16 @@ import 'react-datetime/css/react-datetime.css';
 
 export const DatetimeQuickList = ({ from, to, ranges, onSelect, children }) => (
   <div style={{ display: 'grid', alignItems: 'center' }}>
-    {ranges.map(
-      (range, i) =>
-        from === range.from && to === range.to ? (
-          <EuiButton size="s" fill key={i} onClick={() => onSelect(range.from, range.to)}>
-            {range.display}
-          </EuiButton>
-        ) : (
-          <EuiButtonEmpty size="s" key={i} onClick={() => onSelect(range.from, range.to)}>
-            {range.display}
-          </EuiButtonEmpty>
-        )
+    {ranges.map((range, i) =>
+      from === range.from && to === range.to ? (
+        <EuiButton size="s" fill key={i} onClick={() => onSelect(range.from, range.to)}>
+          {range.display}
+        </EuiButton>
+      ) : (
+        <EuiButtonEmpty size="s" key={i} onClick={() => onSelect(range.from, range.to)}>
+          {range.display}
+        </EuiButtonEmpty>
+      )
     )}
     {children}
   </div>

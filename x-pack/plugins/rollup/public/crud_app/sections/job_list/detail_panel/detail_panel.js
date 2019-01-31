@@ -240,7 +240,7 @@ export class DetailPanelUi extends Component {
 
     return (
       <EuiFlyout
-        data-test-subj="indexDetailFlyout"
+        data-test-subj="rollupJobDetailFlyout"
         onClose={closeDetailPanel}
         aria-labelledby="rollupJobDetailsFlyoutTitle"
         size="m"

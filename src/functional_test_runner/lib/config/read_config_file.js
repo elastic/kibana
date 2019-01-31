@@ -25,7 +25,7 @@ import { transformDeprecations } from './transform_deprecations';
 const cache = new WeakMap();
 
 async function getSettingsFromFile(log, path, settingOverrides) {
-  const configModule = require(path);
+  const configModule = require(path); // eslint-disable-line import/no-dynamic-require
   const configProvider = configModule.__esModule
     ? configModule.default
     : configModule;

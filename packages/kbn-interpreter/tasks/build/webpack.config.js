@@ -18,6 +18,10 @@
  */
 
 const { resolve } = require('path');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+
+const { createServerCodeTransformer } = require('./server_code_transformer');
+
 const {
   PLUGIN_SOURCE_DIR,
   PLUGIN_BUILD_DIR,
@@ -28,9 +32,11 @@ module.exports = function ({ sourceMaps }, { watch }) {
   return {
     devtool: sourceMaps ? 'inline-cheap-module-source-map' : undefined,
 
+    mode: 'none',
     entry: {
       'types/all': resolve(PLUGIN_SOURCE_DIR, 'types/register.js'),
-      'functions/common/all': resolve(PLUGIN_SOURCE_DIR, 'functions/common/register.js'),
+      'functions/browser/all': resolve(PLUGIN_SOURCE_DIR, 'functions/browser/register.js'),
+      'functions/browser/common': resolve(PLUGIN_SOURCE_DIR, 'functions/common/register.js'),
     },
 
     // there were problems with the node and web targets since this code is actually
@@ -42,6 +48,16 @@ module.exports = function ({ sourceMaps }, { watch }) {
       path: PLUGIN_BUILD_DIR,
       filename: '[name].js', // Need long paths here.
       libraryTarget: 'umd',
+      // Note: this is needed due to a not yet resolved bug on
+      // webpack 4 with umd modules generation.
+      // For now we have 2 quick workarounds: one is what is implemented
+      // below another is to change the libraryTarget to commonjs
+      //
+      // The issues can be followed on:
+      // https://github.com/webpack/webpack/issues/6642
+      // https://github.com/webpack/webpack/issues/6525
+      // https://github.com/webpack/webpack/issues/6677
+      globalObject: `(typeof self !== 'undefined' ? self : this)`,
     },
 
     resolve: {
@@ -84,7 +100,16 @@ module.exports = function ({ sourceMaps }, { watch }) {
     stats: 'errors-only',
 
     plugins: [
-      function loaderFailHandler() {
+      new CopyWebpackPlugin([
+        {
+          from: resolve(PLUGIN_SOURCE_DIR, 'functions/common'),
+          to: resolve(PLUGIN_BUILD_DIR, 'functions/common'),
+          ignore: '**/__tests__/**',
+          transform: createServerCodeTransformer(sourceMaps)
+        },
+      ]),
+
+      function LoaderFailHandlerPlugin() {
         if (!watch) {
           return;
         }
@@ -93,7 +118,7 @@ module.exports = function ({ sourceMaps }, { watch }) {
 
         // bails on error, including loader errors
         // see https://github.com/webpack/webpack/issues/708, which does not fix loader errors
-        this.plugin('done', function (stats) {
+        this.hooks.done.tapPromise('LoaderFailHandlerPlugin', async stats => {
           if (stats.hasErrors() || stats.hasWarnings()) {
             lastBuildFailed = true;
             return;

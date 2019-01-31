@@ -11,12 +11,12 @@ import moment from 'moment';
 
 import { buildAnomalyTableItems } from './build_anomaly_table_items';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
+import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 
 
 // Service for carrying out Elasticsearch queries to obtain data for the
 // ML Results dashboards.
 
-const DEFAULT_QUERY_SIZE = 500;
 const DEFAULT_MAX_EXAMPLES = 500;
 
 export function resultsServiceProvider(callWithRequest) {
@@ -36,7 +36,7 @@ export function resultsServiceProvider(callWithRequest) {
     earliestMs,
     latestMs,
     dateFormatTz,
-    maxRecords = DEFAULT_QUERY_SIZE,
+    maxRecords = ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
     maxExamples = DEFAULT_MAX_EXAMPLES) {
 
     // Build the query to return the matching anomaly record results.
@@ -120,6 +120,7 @@ export function resultsServiceProvider(callWithRequest) {
 
     const resp = await callWithRequest('search', {
       index: ML_RESULTS_INDEX_PATTERN,
+      rest_total_hits_as_int: true,
       size: maxRecords,
       body: {
         query: {
@@ -201,7 +202,8 @@ export function resultsServiceProvider(callWithRequest) {
   async function getCategoryExamples(jobId, categoryIds, maxExamples) {
     const resp = await callWithRequest('search', {
       index: ML_RESULTS_INDEX_PATTERN,
-      size: DEFAULT_QUERY_SIZE,    // Matches size of records in anomaly summary table.
+      rest_total_hits_as_int: true,
+      size: ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,    // Matches size of records in anomaly summary table.
       body: {
         query: {
           bool: {
@@ -235,6 +237,7 @@ export function resultsServiceProvider(callWithRequest) {
   async function getCategoryDefinition(jobId, categoryId) {
     const resp = await callWithRequest('search', {
       index: ML_RESULTS_INDEX_PATTERN,
+      rest_total_hits_as_int: true,
       size: 1,
       body: {
         query: {

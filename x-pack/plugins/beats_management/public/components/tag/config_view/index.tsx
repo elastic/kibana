@@ -7,8 +7,6 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  // @ts-ignore
-  EuiCodeEditor,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,30 +15,33 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFormRow,
-  // @ts-ignore
   EuiHorizontalRule,
-  // @ts-ignore
-  EuiSearchBar,
-  // @ts-ignore
   EuiSelect,
-  // @ts-ignore
-  EuiTabbedContent,
   EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
+import { configBlockSchemas } from '../../../../common/config_schemas';
+import { translateConfigSchema } from '../../../../common/config_schemas_translations_map';
 import { ConfigurationBlock } from '../../../../common/domain_types';
-import { supportedConfigs } from '../../../config_schemas';
 import { ConfigForm } from './config_form';
 
 interface ComponentProps {
+  intl: InjectedIntl;
   configBlock?: ConfigurationBlock;
   onClose(): any;
   onSave?(config: ConfigurationBlock): any;
 }
 
-export class ConfigView extends React.Component<ComponentProps, any> {
+interface ComponentState {
+  valid: boolean;
+  configBlock: ConfigurationBlock;
+}
+
+class ConfigViewUi extends React.Component<ComponentProps, ComponentState> {
   private form = React.createRef<any>();
   private editMode: boolean;
+  private schema = translateConfigSchema(configBlockSchemas);
   constructor(props: any) {
     super(props);
     this.editMode = props.configBlock !== undefined;
@@ -48,7 +49,7 @@ export class ConfigView extends React.Component<ComponentProps, any> {
     this.state = {
       valid: false,
       configBlock: props.configBlock || {
-        type: supportedConfigs[0].value,
+        type: this.schema[0].id,
       },
     };
   }
@@ -62,42 +63,85 @@ export class ConfigView extends React.Component<ComponentProps, any> {
     }));
   };
   public render() {
+    const { intl } = this.props;
+    const thisConfigSchema = this.schema.find(s => this.state.configBlock.type === s.id);
+
+    if (!thisConfigSchema) {
+      return (
+        <FormattedMessage
+          id="xpack.beatsManagement.tagConfig.invalidSchema"
+          defaultMessage="Error: This config is invalid, it is not supported by Beats and should be removed"
+        />
+      );
+    }
     return (
       <EuiFlyout onClose={this.props.onClose}>
         <EuiFlyoutHeader>
           <EuiTitle size="m">
             <h2>
-              {this.editMode
-                ? this.props.onSave
-                  ? 'Edit configuration block'
-                  : 'View configuration block'
-                : 'Add configuration block'}
+              {this.editMode ? (
+                this.props.onSave ? (
+                  <FormattedMessage
+                    id="xpack.beatsManagement.tagConfig.editConfigurationTitle"
+                    defaultMessage="Edit configuration block"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.beatsManagement.tagConfig.viewConfigurationTitle"
+                    defaultMessage="View configuration block"
+                  />
+                )
+              ) : (
+                <FormattedMessage
+                  id="xpack.beatsManagement.tagConfig.addConfigurationTitle"
+                  defaultMessage="Add configuration block"
+                />
+              )}
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <EuiFormRow label="Type">
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.beatsManagement.tagConfig.typeLabel"
+                defaultMessage="Type"
+              />
+            }
+          >
             <EuiSelect
-              options={supportedConfigs}
+              options={this.schema.map(s => ({ value: s.id, text: s.name }))}
               value={this.state.configBlock.type}
               disabled={this.editMode}
               onChange={this.onValueChange('type')}
             />
           </EuiFormRow>
-          <EuiFormRow label="Description">
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.beatsManagement.tagConfig.descriptionLabel"
+                defaultMessage="Description"
+              />
+            }
+          >
             <EuiFieldText
               value={this.state.configBlock.description}
               disabled={!this.props.onSave}
               onChange={this.onValueChange('description')}
-              placeholder="Description (optional)"
+              placeholder={intl.formatMessage({
+                id: 'xpack.beatsManagement.tagConfig.descriptionPlaceholder',
+                defaultMessage: 'Description (optional)',
+              })}
             />
           </EuiFormRow>
           <h3>
-            {
-              (supportedConfigs.find(config => this.state.configBlock.type === config.value) as any)
-                .text
-            }
-            &nbsp;configuration
+            <FormattedMessage
+              id="xpack.beatsManagement.tagConfig.configurationTypeText"
+              defaultMessage="{configType} configuration"
+              values={{
+                configType: thisConfigSchema ? thisConfigSchema.name : 'Unknown',
+              }}
+            />
           </h3>
           <EuiHorizontalRule />
 
@@ -108,7 +152,7 @@ export class ConfigView extends React.Component<ComponentProps, any> {
                     if (this.props.onSave) {
                       this.props.onSave({
                         ...this.state.configBlock,
-                        configs: [data],
+                        config: data,
                       });
                     }
                     this.props.onClose();
@@ -118,21 +162,18 @@ export class ConfigView extends React.Component<ComponentProps, any> {
             canSubmit={canIt => this.setState({ valid: canIt })}
             ref={this.form}
             values={this.state.configBlock}
-            id={
-              (supportedConfigs.find(config => this.state.configBlock.type === config.value) as any)
-                .value
-            }
-            schema={
-              (supportedConfigs.find(config => this.state.configBlock.type === config.value) as any)
-                .config
-            }
+            id={thisConfigSchema ? thisConfigSchema.name : 'Undefined'}
+            schema={thisConfigSchema}
           />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty iconType="cross" onClick={this.props.onClose}>
-                Close
+                <FormattedMessage
+                  id="xpack.beatsManagement.tagConfig.closeButtonLabel"
+                  defaultMessage="Close"
+                />
               </EuiButtonEmpty>
             </EuiFlexItem>
             {this.props.onSave && (
@@ -141,12 +182,15 @@ export class ConfigView extends React.Component<ComponentProps, any> {
                   disabled={!this.state.valid}
                   fill
                   onClick={() => {
-                    if (this.form.current) {
-                      this.form.current.submit();
+                    if (this.form.current && this.form.current.getWrappedInstance()) {
+                      this.form.current.getWrappedInstance().submit();
                     }
                   }}
                 >
-                  Save
+                  <FormattedMessage
+                    id="xpack.beatsManagement.tagConfig.saveButtonLabel"
+                    defaultMessage="Save"
+                  />
                 </EuiButton>
               </EuiFlexItem>
             )}
@@ -156,3 +200,5 @@ export class ConfigView extends React.Component<ComponentProps, any> {
     );
   }
 }
+
+export const ConfigView = injectI18n(ConfigViewUi);

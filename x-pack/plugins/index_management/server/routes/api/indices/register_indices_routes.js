@@ -14,6 +14,8 @@ import { registerRefreshRoute } from './register_refresh_route';
 import { registerReloadRoute } from './register_reload_route';
 import { registerDeleteRoute } from './register_delete_route';
 import { registerShardsRoute } from './register_shards_route';
+import { registerFreezeRoute } from './register_freeze_route';
+import { registerUnfreezeRoute } from './register_unfreeze_route';
 
 export function registerIndicesRoutes(server) {
   registerClearCacheRoute(server);
@@ -26,4 +28,6 @@ export function registerIndicesRoutes(server) {
   registerReloadRoute(server);
   registerDeleteRoute(server);
   registerShardsRoute(server);
+  registerFreezeRoute(server);
+  registerUnfreezeRoute(server);
 }

@@ -17,7 +17,6 @@ import React, {
 import {
   EuiCheckbox,
   EuiExpression,
-  EuiExpressionButton,
   EuiPopoverTitle,
   EuiFlexItem,
   EuiFlexGroup,
@@ -27,6 +26,7 @@ import {
 
 import { FILTER_TYPE } from '../../../common/constants/detector_rule';
 import { filterTypeToText } from './utils';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 // Raise the popovers above GuidePageSideNav
 const POPOVER_STYLE = { zIndex: '200' };
@@ -95,8 +95,13 @@ export class ScopeExpression extends Component {
 
     return (
       <div style={POPOVER_STYLE}>
-        <EuiPopoverTitle>Is</EuiPopoverTitle>
-        <EuiExpression>
+        <EuiPopoverTitle>
+          <FormattedMessage
+            id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypePopoverTitle"
+            defaultMessage="Is"
+          />
+        </EuiPopoverTitle>
+        <div className="euiExpression">
           <EuiFlexGroup style={{ maxWidth: 450 }}>
             <EuiFlexItem grow={false} style={{ width: 150 }}>
               <EuiSelect
@@ -117,7 +122,7 @@ export class ScopeExpression extends Component {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiExpression>
+        </div>
       </div>
     );
   }
@@ -141,10 +146,13 @@ export class ScopeExpression extends Component {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiExpressionButton
+          <EuiExpression
             className="scope-field-button"
-            description="when"
-            buttonValue={fieldName}
+            description={<FormattedMessage
+              id="xpack.ml.ruleEditor.scopeExpression.scopeFieldWhenLabel"
+              defaultMessage="when"
+            />}
+            value={fieldName}
             isActive={false}
             onClick={(event) => event.preventDefault()}
           />
@@ -155,9 +163,13 @@ export class ScopeExpression extends Component {
             <EuiPopover
               id="operatorValuePopover"
               button={(
-                <EuiExpressionButton
-                  description={`is ${filterTypeToText(filterType)}`}
-                  buttonValue={filterId || ''}
+                <EuiExpression
+                  description={<FormattedMessage
+                    id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypeButtonLabel"
+                    defaultMessage="is {filterType}"
+                    values={{ filterType: filterTypeToText(filterType) }}
+                  />}
+                  value={filterId || ''}
                   isActive={this.state.isFilterListOpen}
                   onClick={this.openFilterList}
                 />

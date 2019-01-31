@@ -6,6 +6,11 @@
 
 import { uiModules } from 'ui/modules';
 import { SavedObjectProvider } from 'ui/courier';
+import { i18n } from '@kbn/i18n';
+import {
+  extractReferences,
+  injectReferences,
+} from './saved_workspace_references';
 
 const module = uiModules.get('app/dashboard');
 
@@ -20,13 +25,17 @@ export function SavedWorkspaceProvider(Private) {
         type: SavedWorkspace.type,
         mapping: SavedWorkspace.mapping,
         searchSource: SavedWorkspace.searchsource,
+        extractReferences: extractReferences,
+        injectReferences: injectReferences,
 
         // if this is null/undefined then the SavedObject will be assigned the defaults
         id: id,
 
         // default values that will get assigned if the doc is new
         defaults: {
-          title: 'New Graph Workspace',
+          title: i18n.translate('xpack.graph.savedWorkspace.workspaceNameTitle', {
+            defaultMessage: 'New Graph Workspace'
+          }),
           numLinks: 0,
           numVertices: 0,
           wsState: '{}',

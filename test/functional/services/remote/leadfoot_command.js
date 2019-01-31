@@ -32,6 +32,9 @@ async function attemptToCreateCommand(log, server, driverApi) {
   log.debug('[leadfoot:command] Creating session');
 
   let browserOptions = {};
+  if (process.env.TEST_DISABLE_GPU) {
+    browserOptions = { chromeOptions: { args: ['disable-gpu'] } };
+  }
   if (process.env.TEST_BROWSER_HEADLESS) {
     browserOptions = { chromeOptions: { args: ['headless', 'disable-gpu'] } };
   }

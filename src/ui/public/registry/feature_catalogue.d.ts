@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { I18nServiceType } from '@kbn/i18n/angular';
+
 export enum FeatureCatalogueCategory {
   ADMIN = 'admin',
   DATA = 'data',
@@ -33,7 +35,7 @@ interface FeatureCatalogueObject {
   category: FeatureCatalogueCategory;
 }
 
-type FeatureCatalogueRegistryFunction = () => FeatureCatalogueObject;
+type FeatureCatalogueRegistryFunction = (i18n: I18nServiceType) => FeatureCatalogueObject;
 
 export const FeatureCatalogueRegistryProvider: {
   register: (fn: FeatureCatalogueRegistryFunction) => void;

@@ -9,10 +9,11 @@
 declare module 'react-redux-request' {
   import React from 'react';
 
+  // status and args are optional, especially for places that use initial data in a reducer
   export interface RRRRenderResponse<T, P = any[]> {
-    status: 'SUCCESS' | 'LOADING' | 'FAILURE';
+    status?: 'SUCCESS' | 'LOADING' | 'FAILURE';
     data: T;
-    args: P;
+    args?: P;
   }
 
   export type RRRRender<T, P = any[]> = (

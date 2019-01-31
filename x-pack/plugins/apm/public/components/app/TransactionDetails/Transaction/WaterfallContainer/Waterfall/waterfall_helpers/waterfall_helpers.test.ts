@@ -5,8 +5,8 @@
  */
 
 import { groupBy } from 'lodash';
-import { Span } from 'x-pack/plugins/apm/typings/Span';
-import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
+import { Span } from 'x-pack/plugins/apm/typings/es_schemas/Span';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import {
   getClockSkew,
   getWaterfallItems,
@@ -90,9 +90,22 @@ describe('waterfall_helpers', () => {
         }
       ];
 
-      const childrenByParentId = groupBy(
-        items,
-        hit => (hit.parentId ? hit.parentId : 'root')
+      const childrenByParentId = groupBy(items, hit =>
+        hit.parentId ? hit.parentId : 'root'
+      );
+      const entryTransactionItem = childrenByParentId.root[0];
+      expect(
+        getWaterfallItems(childrenByParentId, entryTransactionItem)
+      ).toMatchSnapshot();
+    });
+
+    it('should handle cyclic references', () => {
+      const items = [
+        { id: 'a', timestamp: 10 } as IWaterfallItem,
+        { id: 'a', parentId: 'a', timestamp: 20 } as IWaterfallItem
+      ];
+      const childrenByParentId = groupBy(items, hit =>
+        hit.parentId ? hit.parentId : 'root'
       );
       const entryTransactionItem = childrenByParentId.root[0];
       expect(

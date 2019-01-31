@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { TimeKey } from '../../../../common/time';
+import { JsonObject } from '../../../../common/typed_json';
 import {
   InfraLogEntry,
   InfraLogMessageSegment,
   InfraLogSummaryBucket,
-} from '../../../../common/graphql/types';
-import { TimeKey } from '../../../../common/time';
-import { JsonObject } from '../../../../common/typed_json';
+} from '../../../graphql/types';
 import { InfraDateRangeAggregationBucket, InfraFrameworkRequest } from '../../adapters/framework';
 import { InfraSourceConfiguration, InfraSources } from '../../sources';
 import { builtinRules } from './builtin_rules';
@@ -38,12 +38,12 @@ export class InfraLogEntriesDomain {
       };
     }
 
-    const sourceConfiguration = await this.libs.sources.getConfiguration(sourceId);
+    const { configuration } = await this.libs.sources.getSourceConfiguration(request, sourceId);
     const formattingRules = compileFormattingRules(builtinRules);
 
     const documentsBefore = await this.adapter.getAdjacentLogEntryDocuments(
       request,
-      sourceConfiguration,
+      configuration,
       formattingRules.requiredFields,
       key,
       'desc',
@@ -61,7 +61,7 @@ export class InfraLogEntriesDomain {
 
     const documentsAfter = await this.adapter.getAdjacentLogEntryDocuments(
       request,
-      sourceConfiguration,
+      configuration,
       formattingRules.requiredFields,
       lastKeyBefore,
       'asc',
@@ -86,11 +86,11 @@ export class InfraLogEntriesDomain {
     filterQuery?: LogEntryQuery,
     highlightQuery?: string
   ): Promise<InfraLogEntry[]> {
-    const sourceConfiguration = await this.libs.sources.getConfiguration(sourceId);
+    const { configuration } = await this.libs.sources.getSourceConfiguration(request, sourceId);
     const formattingRules = compileFormattingRules(builtinRules);
     const documents = await this.adapter.getContainedLogEntryDocuments(
       request,
-      sourceConfiguration,
+      configuration,
       formattingRules.requiredFields,
       startKey,
       endKey,
@@ -109,10 +109,10 @@ export class InfraLogEntriesDomain {
     bucketSize: number,
     filterQuery?: LogEntryQuery
   ): Promise<InfraLogSummaryBucket[]> {
-    const sourceConfiguration = await this.libs.sources.getConfiguration(sourceId);
+    const { configuration } = await this.libs.sources.getSourceConfiguration(request, sourceId);
     const dateRangeBuckets = await this.adapter.getContainedLogSummaryBuckets(
       request,
-      sourceConfiguration,
+      configuration,
       start,
       end,
       bucketSize,
@@ -164,7 +164,7 @@ export interface LogEntryDocument {
 }
 
 export interface LogEntryDocumentFields {
-  [fieldName: string]: string | number | null;
+  [fieldName: string]: string | number | boolean | null;
 }
 
 const convertLogDocumentToEntry = (

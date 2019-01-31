@@ -1,0 +1,97 @@
+<table class="table table-condensed">
+  <tbody>
+    <tr ng-repeat="field in fields" data-test-subj="tableDocViewRow-{{ field }}">
+      <td field-name="field"
+          field-type="mapping[field].type"
+          width="1%"
+          class="kbnDocViewer__field">
+      </td>
+      <td width="1%" class="kbnDocViewer__buttons" ng-if="filter">
+        <span ng-if="mapping[field].filterable">
+          <button
+            aria-label="{{ ::'kbnDocViews.table.filterForValueButtonAriaLabel' | i18n: { defaultMessage: 'Filter for value' } }}"
+            ng-click="filter(mapping[field], flattened[field], '+')"
+            data-test-subj="addInclusiveFilterButton"
+            tooltip="{{ ::'kbnDocViews.table.filterForValueButtonTooltip' | i18n: { defaultMessage: 'Filter for value' } }}"
+            tooltip-append-to-body="1"
+          >
+            <i
+              class="fa fa-search-plus"></i>
+          </button>
+
+          <button
+            aria-label="{{ ::'kbnDocViews.table.filterOutValueButtonAriaLabel' | i18n: { defaultMessage: 'Filter out value' } }}"
+            ng-click="filter(mapping[field], flattened[field],'-')"
+            tooltip="{{ ::'kbnDocViews.table.filterOutValueButtonTooltip' | i18n: { defaultMessage: 'Filter out value' } }}"
+            tooltip-append-to-body="1"
+          >
+            <i
+              class="fa fa-search-minus"></i>
+          </button>
+        </span>
+        <span
+          ng-if="!mapping[field].filterable"
+          tooltip="{{ ::'kbnDocViews.table.unindexedFieldsCanNotBeSearchedTooltip' | i18n: { defaultMessage: 'Unindexed fields can not be searched' } }}"
+        >
+          <i class="fa fa-search-plus text-muted"></i>
+          <i class="fa fa-search-minus text-muted"></i>
+        </span>
+        <span ng-if="canToggleColumns()">
+          <button
+            aria-label="{{ ::'kbnDocViews.table.toggleColumnInTableButtonAriaLabel' | i18n: { defaultMessage: 'Toggle column in table' } }}"
+            aria-pressed="{{isColumnActive(field)}}"
+            ng-click="toggleColumn(field)"
+            tooltip-append-to-body="1"
+            tooltip="{{ ::'kbnDocViews.table.toggleColumnInTableButtonTooltip' | i18n: { defaultMessage: 'Toggle column in table' } }}"
+          >
+            <i
+              class="fa fa-columns"
+            ></i>
+          </button>
+        </span>
+        <span ng-if="!indexPattern.metaFields.includes(field) && !mapping[field].scripted">
+          <button
+            aria-label="{{ ::'kbnDocViews.table.filterForFieldPresentButtonAriaLabel' | i18n: { defaultMessage: 'Filter for field present' } }}"
+            ng-click="filter('_exists_', field, '+')"
+            tooltip="{{ ::'kbnDocViews.table.filterForFieldPresentButtonTooltip' | i18n: { defaultMessage: 'Filter for field present' } }}"
+            tooltip-append-to-body="1"
+          >
+            <i
+              class="fa fa-asterisk"></i>
+          </button>
+        </span>
+        <span
+          ng-if="indexPattern.metaFields.includes(field)"
+          tooltip="{{ ::'kbnDocViews.table.unableToFilterForPresenceOfMetaFieldsTooltip' | i18n: { defaultMessage: 'Unable to filter for presence of meta fields' } }}"
+        >
+          <i class="fa fa-asterisk text-muted"></i>
+        </span>
+        <span
+          ng-if="mapping[field].scripted"
+          tooltip="{{ ::'kbnDocViews.table.unableToFilterForPresenceOfScriptedFieldsTooltip' | i18n: { defaultMessage: 'Unable to filter for presence of scripted fields' } }}"
+        >
+          <i class="fa fa-asterisk text-muted"></i>
+        </span>
+      </td>
+
+      <td>
+        <i ng-if="!mapping[field] && field[0] === '_'"
+          tooltip-placement="top"
+          tooltip="{{ ::'kbnDocViews.table.fieldNamesBeginningWithUnderscoreUnsupportedTooltip' | i18n: {
+            defaultMessage: 'Field names beginning with {underscoreSign} are not supported',
+            values: { underscoreSign: '_' }
+          } }}"
+          class="fa fa-warning text-color-warning kbnDocViewer__underscore"></i>
+        <i ng-if="!mapping[field] && field[0] !== '_' && !showArrayInObjectsWarning(doc, field)"
+          tooltip-placement="top"
+          tooltip="{{ ::'kbnDocViews.table.noCachedMappingForThisFieldTooltip' | i18n: { defaultMessage: 'No cached mapping for this field. Refresh field list from the Management > Index Patterns page' } }}"
+          class="fa fa-warning text-color-warning kbnDocViewer__noMapping"></i>
+        <i ng-if="showArrayInObjectsWarning(doc, field)"
+          tooltip-placement="top"
+          tooltip="{{ ::'kbnDocViews.table.objectsInArraysAreNotWellSupportedTooltip' | i18n: { defaultMessage: 'Objects in arrays are not well supported.' } }}"
+          class="fa fa-warning text-color-warning kbnDocViewer__objectArray"></i>
+        <div class="kbnDocViewer__value" ng-bind-html="typeof(formatted[field]) === 'undefined' ? hit[field] : formatted[field] | trustAsHtml"></div>
+      </td>
+    </tr>
+  </tbody>
+</table>

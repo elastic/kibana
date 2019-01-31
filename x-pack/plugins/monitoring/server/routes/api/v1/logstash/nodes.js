@@ -5,11 +5,11 @@
  */
 
 import Joi from 'joi';
-import Promise from 'bluebird';
 import { getClusterStatus } from '../../../../lib/logstash/get_cluster_status';
 import { getNodes } from '../../../../lib/logstash/get_nodes';
 import { handleError } from '../../../../lib/errors';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
+import { INDEX_PATTERN_LOGSTASH } from '../../../../../common/constants';
 
 /*
  * Logstash Nodes route.
@@ -46,7 +46,7 @@ export function logstashNodesRoute(server) {
       const config = server.config();
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
-      const lsIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.logstash.index_pattern', ccs);
+      const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs);
 
       try {
         const [ clusterStatus, nodes ] = await Promise.all([

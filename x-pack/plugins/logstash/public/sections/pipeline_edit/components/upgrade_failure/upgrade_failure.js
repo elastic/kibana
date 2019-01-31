@@ -8,6 +8,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { isEmpty } from 'lodash';
 import { uiModules } from 'ui/modules';
+import { I18nProvider } from '@kbn/i18n/react';
 import { UpgradeFailure } from '../../../../components/upgrade_failure';
 
 const app = uiModules.get('xpack/logstash');
@@ -29,12 +30,14 @@ app.directive('upgradeFailure', $injector => {
       const isManualUpgrade = !!$route.current.params.retry;
 
       render(
-        <UpgradeFailure
-          isNewPipeline={isNewPipeline}
-          isManualUpgrade={isManualUpgrade}
-          onRetry={onRetry}
-          onClose={onClose}
-        />,
+        <I18nProvider>
+          <UpgradeFailure
+            isNewPipeline={isNewPipeline}
+            isManualUpgrade={isManualUpgrade}
+            onRetry={onRetry}
+            onClose={onClose}
+          />
+        </I18nProvider>,
         el[0]
       );
     },

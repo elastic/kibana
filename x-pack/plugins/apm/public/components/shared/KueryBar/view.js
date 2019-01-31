@@ -12,15 +12,20 @@ import {
   history,
   fromQuery,
   toQuery,
-  legacyEncodeURIComponent,
-  KibanaLink
-} from '../../../utils/url';
+  legacyEncodeURIComponent
+} from '../Links/url_helpers';
+import { KibanaLink } from '../Links/KibanaLink';
 import { Typeahead } from './Typeahead';
-import { getAPMIndexPattern } from '../../../services/rest/savedObjects';
-import { convertKueryToEsQuery, getSuggestions } from '../../../services/kuery';
+import chrome from 'ui/chrome';
+import {
+  convertKueryToEsQuery,
+  getSuggestions,
+  getAPMIndexPatternForKuery
+} from '../../../services/kuery';
 import styled from 'styled-components';
-
 import { getBoolFilter } from './get_bool_filter';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 const Container = styled.div`
   margin-bottom: 10px;
@@ -35,7 +40,7 @@ class KueryBarView extends Component {
   };
 
   async componentDidMount() {
-    const indexPattern = await getAPMIndexPattern();
+    const indexPattern = await getAPMIndexPatternForKuery();
     this.setState({ indexPattern, isLoadingIndexPattern: false });
   }
 
@@ -54,7 +59,9 @@ class KueryBarView extends Component {
         selectionStart,
         indexPattern,
         boolFilter
-      )).filter(suggestion => !startsWith(suggestion.text, 'span.'));
+      ))
+        .filter(suggestion => !startsWith(suggestion.text, 'span.'))
+        .slice(0, 15);
 
       if (currentRequest !== this.currentRequest) {
         return;
@@ -88,6 +95,7 @@ class KueryBarView extends Component {
   };
 
   render() {
+    const apmIndexPatternTitle = chrome.getInjected('apmIndexPatternTitle');
     const indexPatternMissing =
       !this.state.isLoadingIndexPattern && !this.state.indexPattern;
 
@@ -107,14 +115,24 @@ class KueryBarView extends Component {
             style={{ display: 'inline-block', marginTop: '10px' }}
             title={
               <div>
-                There&#39;s no APM index pattern available. To use the Query
-                bar, please choose to import the APM index pattern in the{' '}
-                <KibanaLink
-                  pathname={'/app/kibana'}
-                  hash={`/home/tutorial/apm`}
-                >
-                  Setup Instructions.
-                </KibanaLink>
+                <FormattedMessage
+                  id="xpack.apm.kueryBar.indexPatternMissingWarningMessage"
+                  defaultMessage="There's no APM index pattern with the title {apmIndexPatternTitle} available. To use the Query bar, please choose to import the APM index pattern via the {setupInstructionsLink}."
+                  values={{
+                    apmIndexPatternTitle: `"${apmIndexPatternTitle}"`,
+                    setupInstructionsLink: (
+                      <KibanaLink
+                        pathname={'/app/kibana'}
+                        hash={`/home/tutorial/apm`}
+                      >
+                        {i18n.translate(
+                          'xpack.apm.kueryBar.setupInstructionsLinkLabel',
+                          { defaultMessage: 'Setup Instructions' }
+                        )}
+                      </KibanaLink>
+                    )
+                  }}
+                />
               </div>
             }
             color="warning"

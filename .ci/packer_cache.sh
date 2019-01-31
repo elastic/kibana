@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
+set -e
+
 # run setup script that gives us node, yarn, and bootstraps the project
-source "src/dev/ci_setup/setup.sh";
+source src/dev/ci_setup/setup.sh;
 
 # download es snapshots
 node scripts/es snapshot --download-only;
@@ -19,5 +21,5 @@ tar -cf "$HOME/.kibana/bootstrap_cache/master.tar" \
   x-pack/node_modules \
   x-pack/plugins/*/node_modules \
   x-pack/plugins/reporting/.chromium \
-  x-pack/plugins/reporting/.phantom \
+  test/plugin_functional/plugins/*/node_modules \
   .es;

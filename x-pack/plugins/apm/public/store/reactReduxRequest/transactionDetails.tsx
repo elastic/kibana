@@ -6,12 +6,10 @@
 
 import React from 'react';
 import { Request, RRRRender } from 'react-redux-request';
-import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
-import { loadTransaction } from '../../services/rest/apm';
+import { TransactionWithErrorCountAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/get_transaction';
+import { loadTransaction } from '../../services/rest/apm/transactions';
 import { IReduxState } from '../rootReducer';
 import { IUrlParams } from '../urlParams';
-// @ts-ignore
-import { createInitialDataSelector } from './helpers';
 
 const ID = 'transactionDetails';
 export function getTransactionDetails(state: IReduxState) {
@@ -23,7 +21,7 @@ export function TransactionDetailsRequest({
   render
 }: {
   urlParams: IUrlParams;
-  render: RRRRender<Transaction | null>;
+  render: RRRRender<TransactionWithErrorCountAPIResponse>;
 }) {
   const { serviceName, start, end, transactionId, traceId, kuery } = urlParams;
 

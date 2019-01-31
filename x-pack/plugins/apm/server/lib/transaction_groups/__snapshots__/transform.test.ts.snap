@@ -4,7 +4,7 @@ exports[`transactionGroupsTransformer should match snapshot 1`] = `
 Array [
   Object {
     "averageResponseTime": 255966.30555555556,
-    "impact": 4.369340653255684,
+    "impact": 4.3693406535517445,
     "name": "POST /api/orders",
     "p95": 320238.5,
     "sample": Object {
@@ -255,7 +255,7 @@ baz",
   },
   Object {
     "averageResponseTime": 33265.03326147213,
-    "impact": 10.256357027900046,
+    "impact": 10.256357027376065,
     "name": "GET /api/orders",
     "p95": 58827.489999999976,
     "sample": Object {
@@ -376,7 +376,7 @@ baz",
   },
   Object {
     "averageResponseTime": 32900.72714285714,
-    "impact": 2.179120743402716,
+    "impact": 2.1791207411745854,
     "name": "GET /log-message",
     "p95": 40444,
     "sample": Object {
@@ -497,7 +497,7 @@ baz",
   },
   Object {
     "averageResponseTime": 32554.36257814184,
-    "impact": 14.344171564855404,
+    "impact": 14.344171563678346,
     "name": "GET /api/stats",
     "p95": 59356.73611111111,
     "sample": Object {
@@ -624,7 +624,7 @@ baz",
   },
   Object {
     "averageResponseTime": 32387.73641304348,
-    "impact": 2.2558112391673664,
+    "impact": 2.2558112380477584,
     "name": "GET /log-error",
     "p95": 40061.1,
     "sample": Object {
@@ -745,7 +745,7 @@ baz",
   },
   Object {
     "averageResponseTime": 32159.926322043968,
-    "impact": 10.279049521913821,
+    "impact": 10.27904952170656,
     "name": "GET /api/customers",
     "p95": 59845.85714285714,
     "sample": Object {
@@ -872,7 +872,7 @@ baz",
   },
   Object {
     "averageResponseTime": 27516.89144558744,
-    "impact": 9.651458993728006,
+    "impact": 9.651458992731666,
     "name": "GET /api/products/top",
     "p95": 56064.679999999986,
     "sample": Object {
@@ -1000,7 +1000,7 @@ baz",
   },
   Object {
     "averageResponseTime": 21331.714285714286,
-    "impact": 0.28817488008070574,
+    "impact": 0.28817487960409877,
     "name": "POST /api",
     "p95": 30938,
     "sample": Object {
@@ -1123,7 +1123,7 @@ baz",
   },
   Object {
     "averageResponseTime": 17189.329210275926,
-    "impact": 3.424381788267164,
+    "impact": 3.424381787142002,
     "name": "GET /api/products/:id/customers",
     "p95": 39284.79999999999,
     "sample": Object {
@@ -1250,7 +1250,7 @@ baz",
   },
   Object {
     "averageResponseTime": 12763.68806073154,
-    "impact": 1.747992435179465,
+    "impact": 1.7479924334286208,
     "name": "GET /api/types/:id",
     "p95": 30576.749999999996,
     "sample": Object {
@@ -1371,7 +1371,7 @@ baz",
   },
   Object {
     "averageResponseTime": 12683.190864600327,
-    "impact": 4.4239778511514745,
+    "impact": 4.4239778504968,
     "name": "GET /api/products",
     "p95": 35009.67999999999,
     "sample": Object {
@@ -1492,7 +1492,7 @@ baz",
   },
   Object {
     "averageResponseTime": 11257.757916666667,
-    "impact": 2.558180605423081,
+    "impact": 2.558180605569336,
     "name": "GET /api/types",
     "p95": 35222.944444444445,
     "sample": Object {
@@ -1613,7 +1613,7 @@ baz",
   },
   Object {
     "averageResponseTime": 10584.05144193297,
-    "impact": 1.2808106158729446,
+    "impact": 1.280810614916383,
     "name": "GET /api/orders/:id",
     "p95": 26555.399999999998,
     "sample": Object {
@@ -1732,7 +1732,7 @@ baz",
   },
   Object {
     "averageResponseTime": 10548.218597063622,
-    "impact": 1.8338764008269306,
+    "impact": 1.8338763992340905,
     "name": "GET /api/products/:id",
     "p95": 28413.383333333328,
     "sample": Object {
@@ -1853,7 +1853,7 @@ baz",
   },
   Object {
     "averageResponseTime": 9868.217894736843,
-    "impact": 1.7722323979309487,
+    "impact": 1.7722323960215767,
     "name": "GET /api/customers/:id",
     "p95": 27486.5,
     "sample": Object {
@@ -2111,7 +2111,7 @@ baz",
   },
   Object {
     "averageResponseTime": 4694.005586592179,
-    "impact": 0.1498514997591876,
+    "impact": 0.1498515000753004,
     "name": "GET /is-it-coffee-time",
     "p95": 11022.99999999992,
     "sample": Object {
@@ -2233,7 +2233,7 @@ baz",
   },
   Object {
     "averageResponseTime": 4549.889880952381,
-    "impact": 0.1354336505457395,
+    "impact": 0.13543365054509587,
     "name": "GET /throw-error",
     "p95": 7719.700000000001,
     "sample": Object {
@@ -2355,7 +2355,7 @@ baz",
   },
   Object {
     "averageResponseTime": 3504.5108924806746,
-    "impact": 2.36009934580083,
+    "impact": 2.3600993453143766,
     "name": "GET *",
     "p95": 11431.738095238095,
     "sample": Object {
@@ -2482,7 +2482,7 @@ baz",
   },
   Object {
     "averageResponseTime": 2742.4615384615386,
-    "impact": 0.08501029113483448,
+    "impact": 0.08501028923348058,
     "name": "OPTIONS unknown route",
     "p95": 4370.000000000002,
     "sample": Object {
@@ -2605,7 +2605,7 @@ baz",
   },
   Object {
     "averageResponseTime": 2651.8784461553205,
-    "impact": 15.770246498769827,
+    "impact": 15.770246496477105,
     "name": "GET static file",
     "p95": 6140.579335038363,
     "sample": Object {
@@ -2713,7 +2713,7 @@ baz",
   },
   Object {
     "averageResponseTime": 1422.926672899693,
-    "impact": 1.002712481568783,
+    "impact": 1.0027124806135428,
     "name": "GET unknown route",
     "p95": 2311.885238095238,
     "sample": Object {

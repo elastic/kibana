@@ -36,7 +36,10 @@ describe('ML - Data Visualizer View Fields Controller', () => {
       };
 
       const scope = $rootScope.$new();
-      $controller('MlDataVisualizerViewFields', { $scope: scope });
+
+      expect(() => {
+        $controller('MlDataVisualizerViewFields', { $scope: scope });
+      }).to.not.throwError();
 
       expect(scope.metricCards).to.eql([]);
       stub.restore();

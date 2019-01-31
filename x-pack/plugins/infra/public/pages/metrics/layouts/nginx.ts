@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { InfraMetric } from '../../../../common/graphql/types';
+import { InfraMetric } from '../../../graphql/types';
 import { InfraFormatterType } from '../../../lib/lib';
 import {
   InfraMetricLayoutCreator,
@@ -48,7 +48,7 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
             defaultMessage: 'Request Rate',
           }
         ),
-        requires: ['nginx.statusstub'],
+        requires: ['nginx.stubstatus'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
           formatter: InfraFormatterType.abbreviatedNumber,
@@ -66,7 +66,7 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
             defaultMessage: 'Active Connections',
           }
         ),
-        requires: ['nginx.statusstub'],
+        requires: ['nginx.stubstatus'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
           formatter: InfraFormatterType.abbreviatedNumber,
@@ -86,7 +86,7 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
             defaultMessage: 'Requests per Connections',
           }
         ),
-        requires: ['nginx.statusstub'],
+        requires: ['nginx.stubstatus'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
           formatter: InfraFormatterType.abbreviatedNumber,

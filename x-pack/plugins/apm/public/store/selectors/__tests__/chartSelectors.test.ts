@@ -4,134 +4,103 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AvgAnomalyBucket } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_avg_response_time_anomalies/get_anomaly_aggs/transform';
-import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/transform';
+import { ApmTimeSeriesResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/transform';
 import {
-  getAnomalyBoundaryValues,
-  getAnomalyScoreValues,
+  getAnomalyScoreSeries,
   getResponseTimeSeries,
   getTpmSeries
 } from '../chartSelectors';
-import { anomalyData } from './mockData/anomalyData';
 
 describe('chartSelectors', () => {
-  describe('getAnomalyScoreValues', () => {
-    it('should return anomaly score series', () => {
-      const dates = [0, 1000, 2000, 3000, 4000, 5000, 6000];
-      const buckets = [
-        {
-          anomalyScore: null
-        },
-        {
-          anomalyScore: 80
-        },
-        {
-          anomalyScore: 0
-        },
-        {
-          anomalyScore: 0
-        },
-        {
-          anomalyScore: 70
-        },
-        {
-          anomalyScore: 80
-        },
-        {
-          anomalyScore: 0
-        }
-      ] as AvgAnomalyBucket[];
-
-      expect(getAnomalyScoreValues(dates, buckets, 1000)).toEqual([
-        { x: 1000, y: 1 },
-        { x: 2000, y: 1 },
-        { x: 3000 },
-        { x: 5000, y: 1 },
-        { x: 6000, y: 1 },
-        { x: 7000 }
-      ]);
+  describe('getAnomalyScoreSeries', () => {
+    it('should return anomalyScoreSeries', () => {
+      const data = [{ x0: 0, x: 10 }];
+      expect(getAnomalyScoreSeries(data)).toEqual({
+        areaColor: 'rgba(146,0,0,0.1)',
+        color: 'none',
+        data: [{ x0: 0, x: 10 }],
+        hideLegend: true,
+        hideTooltipValue: true,
+        title: 'Anomaly score',
+        type: 'areaMaxHeight'
+      });
     });
   });
 
   describe('getResponseTimeSeries', () => {
-    const chartsData = {
-      dates: [0, 1000, 2000, 3000, 4000, 5000],
+    const apmTimeseries = {
       responseTimes: {
-        avg: [100, 200, 150, 250, 100, 50],
-        p95: [200, 300, 250, 350, 200, 150],
-        p99: [300, 400, 350, 450, 100, 50]
+        avg: [{ x: 0, y: 100 }, { x: 1000, y: 200 }],
+        p95: [{ x: 0, y: 200 }, { x: 1000, y: 300 }],
+        p99: [{ x: 0, y: 300 }, { x: 1000, y: 400 }]
       },
       overallAvgDuration: 200
-    } as TimeSeriesAPIResponse;
+    } as ApmTimeSeriesResponse;
 
     it('should match snapshot', () => {
-      expect(getResponseTimeSeries(chartsData)).toMatchSnapshot();
+      expect(getResponseTimeSeries(apmTimeseries)).toEqual([
+        {
+          color: '#3185fc',
+          data: [{ x: 0, y: 100 }, { x: 1000, y: 200 }],
+          legendValue: '0 ms',
+          title: 'Avg.',
+          type: 'linemark'
+        },
+        {
+          color: '#ecae23',
+          data: [{ x: 0, y: 200 }, { x: 1000, y: 300 }],
+          title: '95th percentile',
+          titleShort: '95th',
+          type: 'linemark'
+        },
+        {
+          color: '#f98510',
+          data: [{ x: 0, y: 300 }, { x: 1000, y: 400 }],
+          title: '99th percentile',
+          titleShort: '99th',
+          type: 'linemark'
+        }
+      ]);
     });
 
     it('should return 3 series', () => {
-      expect(getResponseTimeSeries(chartsData).length).toBe(3);
+      expect(getResponseTimeSeries(apmTimeseries).length).toBe(3);
     });
   });
 
   describe('getTpmSeries', () => {
-    const chartsData = {
-      dates: [0, 1000, 2000, 3000, 4000, 5000],
+    const apmTimeseries = ({
       tpmBuckets: [
-        {
-          key: 'HTTP 2xx',
-          avg: 10,
-          values: [5, 10, 3, 8, 4, 9]
-        },
-        {
-          key: 'HTTP 4xx',
-          avg: 2,
-          values: [1, 2, 3, 2, 3, 1]
-        },
-        {
-          key: 'HTTP 5xx',
-          avg: 1,
-          values: [0, 1, 2, 1, 0, 2]
-        }
+        { key: 'HTTP 2xx', dataPoints: [{ x: 0, y: 5 }, { x: 0, y: 2 }] },
+        { key: 'HTTP 4xx', dataPoints: [{ x: 0, y: 1 }] },
+        { key: 'HTTP 5xx', dataPoints: [{ x: 0, y: 0 }] }
       ]
-    } as TimeSeriesAPIResponse;
-
+    } as any) as ApmTimeSeriesResponse;
     const transactionType = 'MyTransactionType';
-
     it('should match snapshot', () => {
-      expect(getTpmSeries(chartsData, transactionType)).toMatchSnapshot();
-    });
-  });
-
-  describe('getAnomalyBoundaryValues', () => {
-    const { dates, buckets } = anomalyData;
-    const bucketSize = 240000;
-
-    it('should return correct buckets', () => {
-      expect(getAnomalyBoundaryValues(dates, buckets, bucketSize)).toEqual([
-        { x: 1530614880000, y: 54799, y0: 15669 },
-        { x: 1530615060000, y: 49874, y0: 17808 },
-        { x: 1530615300000, y: 49421, y0: 18012 },
-        { x: 1530615540000, y: 49654, y0: 17889 },
-        { x: 1530615780000, y: 50026, y0: 17713 },
-        { x: 1530616020000, y: 49371, y0: 18044 },
-        { x: 1530616260000, y: 50110, y0: 17713 },
-        { x: 1530616500000, y: 50419, y0: 17582 },
-        { x: 1530616620000, y: 50419, y0: 17582 }
+      expect(getTpmSeries(apmTimeseries, transactionType)).toEqual([
+        {
+          color: '#00b3a4',
+          data: [{ x: 0, y: 5 }, { x: 0, y: 2 }],
+          legendValue: '3.5 tpm',
+          title: 'HTTP 2xx',
+          type: 'linemark'
+        },
+        {
+          color: '#f98510',
+          data: [{ x: 0, y: 1 }],
+          legendValue: '1.0 tpm',
+          title: 'HTTP 4xx',
+          type: 'linemark'
+        },
+        {
+          color: '#db1374',
+          data: [{ x: 0, y: 0 }],
+          legendValue: '0.0 tpm',
+          title: 'HTTP 5xx',
+          type: 'linemark'
+        }
       ]);
-    });
-
-    it('should extend the last bucket with a size of bucketSize', () => {
-      const [lastBucket, secondLastBuckets] = getAnomalyBoundaryValues(
-        dates,
-        buckets,
-        bucketSize
-      ).reverse();
-
-      expect(secondLastBuckets.y).toBe(lastBucket.y);
-      expect(secondLastBuckets.y0).toBe(lastBucket.y0);
-      expect(
-        (lastBucket.x as number) - (secondLastBuckets.x as number)
-      ).toBeLessThanOrEqual(bucketSize);
     });
   });
 });

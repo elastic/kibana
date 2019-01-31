@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import Keys from 'leadfoot/keys';
-
 export function FilterBarProvider({ getService, getPageObjects }) {
-  const remote = getService('remote');
+  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const PageObjects = getPageObjects(['common', 'header']);
@@ -43,21 +41,21 @@ export function FilterBarProvider({ getService, getPageObjects }) {
 
     async removeFilter(key) {
       const filterElement = await testSubjects.find(`filter & filter-key-${key}`);
-      await remote.moveMouseTo(filterElement);
+      await browser.moveMouseTo(filterElement);
       await testSubjects.click(`filter & filter-key-${key} removeFilter-${key}`);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
     async toggleFilterEnabled(key) {
       const filterElement = await testSubjects.find(`filter & filter-key-${key}`);
-      await remote.moveMouseTo(filterElement);
+      await browser.moveMouseTo(filterElement);
       await testSubjects.click(`filter & filter-key-${key} disableFilter-${key}`);
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
     async toggleFilterPinned(key) {
       const filterElement = await testSubjects.find(`filter & filter-key-${key}`);
-      await remote.moveMouseTo(filterElement);
+      await browser.moveMouseTo(filterElement);
       await testSubjects.click(`filter & filter-key-${key} pinFilter-${key}`);
     }
 
@@ -92,7 +90,7 @@ export function FilterBarProvider({ getService, getPageObjects }) {
         }
         for (let j = 0; j < fieldValues.length; j++) {
           await paramFields[i].type(fieldValues[j]);
-          await remote.pressKeys(Keys.RETURN);
+          await paramFields[i].pressKeys(browser.keys.RETURN);
         }
       }
       await testSubjects.click('saveFilter');
@@ -101,7 +99,7 @@ export function FilterBarProvider({ getService, getPageObjects }) {
 
     async clickEditFilter(key, value) {
       const pill = await testSubjects.find(`filter & filter-key-${key} & filter-value-${value}`);
-      await remote.moveMouseTo(pill);
+      await browser.moveMouseTo(pill);
       await testSubjects.click('editFilter');
     }
 

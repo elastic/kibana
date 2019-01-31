@@ -60,7 +60,6 @@ describe('globalNavLink directive', () => {
   }
 
   describe('interface', () => {
-
     describe('isActive attribute', () => {
       it(`doesn't apply the active class when false`, () => {
         const element = create({
@@ -78,18 +77,18 @@ describe('globalNavLink directive', () => {
     });
 
     describe('isDisabled attribute', () => {
-      it(`doesn't apply the is-global-nav-link-disabled class when false`, () => {
+      it(`doesn't apply the kbnGlobalNavLink-isDisabled class when false`, () => {
         const element = create({
           isDisabled: false,
         });
-        expect(element.hasClass('is-global-nav-link-disabled')).to.be(false);
+        expect(element.hasClass('kbnGlobalNavLink-isDisabled')).to.be(false);
       });
 
-      it('applies the is-global-nav-link-disabled class when true', () => {
+      it('applies the kbnGlobalNavLink-isDisabled class when true', () => {
         const element = create({
           isDisabled: true,
         });
-        expect(element.hasClass('is-global-nav-link-disabled')).to.be(true);
+        expect(element.hasClass('kbnGlobalNavLink-isDisabled')).to.be(true);
       });
     });
 

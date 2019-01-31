@@ -32,6 +32,7 @@ export const filtersBucketAgg = new BucketAggType({
   name: 'filters',
   title: i18n.translate('common.ui.aggTypes.buckets.filtersTitle', {
     defaultMessage: 'Filters',
+    description: 'The name of an aggregation, that allows to specify multiple individual filters to group data by.'
   }),
   createFilter: createFilterFilters,
   customLabels: false,
@@ -57,8 +58,10 @@ export const filtersBucketAgg = new BucketAggType({
             console.log('malformed filter agg params, missing "query" on input'); // eslint-disable-line no-console
             return;
           }
+          const config = chrome.getUiSettingsClient();
+          const queryStringOptions = config.get('query:queryString:options');
 
-          decorateQuery(query, chrome.getUiSettingsClient());
+          decorateQuery(query, queryStringOptions);
 
           const matchAllLabel = (filter.input.query === '' && _.has(query, 'match_all')) ? '*' : '';
           const label = filter.label || matchAllLabel || _.get(query, 'query_string.query') || angular.toJson(query);

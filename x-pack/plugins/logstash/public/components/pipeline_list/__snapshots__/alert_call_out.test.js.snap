@@ -8,7 +8,11 @@ exports[`AlertCallOut component renders expected component 1`] = `
   title="Only pipelines created in Kibana Management appear here"
 >
   <p>
-    How can I see additional pipelines?
+    <FormattedMessage
+      defaultMessage="How can I see additional pipelines?"
+      id="xpack.logstash.alertCallOut.howToSeeAdditionalPipelinesDescription"
+      values={Object {}}
+    />
   </p>
   <div>
     Some text

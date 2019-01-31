@@ -18,14 +18,13 @@
  */
 
 import _ from 'lodash';
-import './table_header.less';
 import '../../filters/short_dots';
 import headerHtml from './table_header.html';
 import { uiModules } from '../../modules';
 const module = uiModules.get('app/discover');
 
 
-module.directive('kbnTableHeader', function (shortDotsFilter) {
+module.directive('kbnTableHeader', function (shortDotsFilter, i18n) {
   return {
     restrict: 'A',
     scope: {
@@ -37,7 +36,9 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
       onMoveColumn: '=?',
     },
     template: headerHtml,
-    controller: function ($scope) {
+    controller: function ($scope, config) {
+      $scope.hideTimeColumn = config.get('doc_table:hideTimeColumn');
+
       $scope.isSortableColumn = function isSortableColumn(columnName) {
         return (
           !!$scope.indexPattern
@@ -48,7 +49,10 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
 
       $scope.tooltip = function (column) {
         if (!$scope.isSortableColumn(column)) return '';
-        return 'Sort by ' + shortDotsFilter(column);
+        return i18n('common.ui.docTable.tableHeader.sortByColumnTooltip', {
+          defaultMessage: 'Sort by {columnName}',
+          values: { columnName: shortDotsFilter(column) },
+        });
       };
 
       $scope.canMoveColumnLeft = function canMoveColumn(columnName) {
@@ -76,7 +80,7 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
         if (!$scope.isSortableColumn(column)) return;
 
         const sortOrder = $scope.sortOrder;
-        const defaultClass = ['fa', 'fa-sort-up', 'table-header-sortchange'];
+        const defaultClass = ['fa', 'fa-sort-up', 'kbnDocTableHeader__sortChange'];
 
         if (!sortOrder || column !== sortOrder[0]) return defaultClass;
         return ['fa', sortOrder[1] === 'asc' ? 'fa-sort-up' : 'fa-sort-down'];
@@ -122,10 +126,15 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
 
         const [currentColumnName, currentDirection = 'asc'] = $scope.sortOrder;
         if(name === currentColumnName && currentDirection === 'asc') {
-          return `Sort ${name} descending`;
+          return i18n('common.ui.docTable.tableHeader.sortByColumnDescendingAriaLabel', {
+            defaultMessage: 'Sort {columnName} descending',
+            values: { columnName: name },
+          });
         }
-
-        return `Sort ${name} ascending`;
+        return i18n('common.ui.docTable.tableHeader.sortByColumnAscendingAriaLabel', {
+          defaultMessage: 'Sort {columnName} ascending',
+          values: { columnName: name },
+        });
       };
     }
   };
