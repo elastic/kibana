@@ -166,6 +166,7 @@ export default function ({ getService }) {
         'stack_stats.kibana.plugins.kql.defaultQueryLanguage',
         'stack_stats.kibana.plugins.kql.optInCount',
         'stack_stats.kibana.plugins.kql.optOutCount',
+        'stack_stats.kibana.plugins.ml.file_data_visualizer_index_creation_count',
         'stack_stats.kibana.plugins.reporting.PNG.available',
         'stack_stats.kibana.plugins.reporting.PNG.total',
         'stack_stats.kibana.plugins.reporting._all',
