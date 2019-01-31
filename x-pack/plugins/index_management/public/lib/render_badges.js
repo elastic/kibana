@@ -6,6 +6,7 @@
 
 
 import React, { Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiBadge, EuiSearchBar } from '@elastic/eui';
 import { getBadgeExtensions } from '../index_management_extensions';
 export const renderBadges = (index, filterChanged) => {
@@ -23,6 +24,13 @@ export const renderBadges = (index, filterChanged) => {
           <EuiBadge
             color={color}
             onClick={clickHandler}
+            aria-label={i18n.translate(
+              'xpack.idxMgmt.badgeAriaLabel',
+              {
+                defaultMessage: '{label}. Select to filter on this.',
+                values: { label },
+              },
+            )}
           >
             {label}
           </EuiBadge>
