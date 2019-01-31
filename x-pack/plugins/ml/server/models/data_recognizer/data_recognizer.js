@@ -388,7 +388,6 @@ export class DataRecognizer {
       results = await this.savedObjectsClient.bulkCreate(
         // Add an empty migrationVersion attribute to each saved object to ensure
         // it is automatically migrated to the 7.0+ format with a references attribute.
-        // TODO: update module kibana objects to be in the 7.0+ format
         filteredSavedObjects.map(doc => ({ ...doc, migrationVersion: doc.migrationVersion || { } }))
       );
     }
