@@ -14,7 +14,7 @@ import { UpgradeAssistantTabs } from './components/tabs';
 
 export const RootComponentUI: React.StatelessComponent = () => (
   <Fragment>
-    <EuiPageHeader>
+    <EuiPageHeader data-test-subj="upgradeAssistantRoot">
       <EuiPageHeaderSection>
         <EuiTitle size="l">
           <h1>
