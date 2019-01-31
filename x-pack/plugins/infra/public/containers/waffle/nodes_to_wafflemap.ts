@@ -40,11 +40,11 @@ function findOrCreateGroupWithNodes(
       }
     }
   }
+  const lastPath = last(path);
   const existingGroup = groups.find(g => g.id === id);
   if (isWaffleMapGroupWithNodes(existingGroup)) {
     return existingGroup;
   }
-  const lastPath = last(path);
   return {
     id,
     name:
@@ -65,11 +65,11 @@ function findOrCreateGroupWithGroups(
   path: InfraNodePath[]
 ): InfraWaffleMapGroupOfGroups {
   const id = path.length === 0 ? '__all__' : createId(path);
+  const lastPath = last(path);
   const existingGroup = groups.find(g => g.id === id);
   if (isWaffleMapGroupWithGroups(existingGroup)) {
     return existingGroup;
   }
-  const lastPath = last(path);
   return {
     id,
     name:

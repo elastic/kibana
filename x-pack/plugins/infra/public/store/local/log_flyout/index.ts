@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const GIS_API_PATH = 'api/gis';
+import * as flyoutOptionsActions from './actions';
+import * as flyoutOptionsSelectors from './selector';
 
-export const DECIMAL_DEGREES_PRECISION = 5; // meters precision
-
-export const ZOOM_PRECISION = 2;
-
-export const DEFAULT_EMS_TILE_LAYER = 'road_map';
+export { flyoutOptionsActions, flyoutOptionsSelectors };
+export * from './reducer';
