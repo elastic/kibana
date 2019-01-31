@@ -17,33 +17,12 @@
  * under the License.
  */
 
-// @ts-ignore
-import regenerate from 'regenerate';
-import stripAnsi from 'strip-ansi';
+import { escapeCdata } from './xml';
 
-// create a regular expression using regenerate() that selects any character that is explicitly allowed by https://www.w3.org/TR/xml/#NT-Char
-const validXmlCharsRE = new RegExp(
-  `((?:${regenerate()
-    .add(0x9, 0xa, 0xd)
-    .addRange(0x20, 0xd7ff)
-    .addRange(0xe000, 0xfffd)
-    .addRange(0x10000, 0x10ffff)
-    .toString()})+)`,
-  'g'
-);
+it('returns original string when there is no invalid XML character', () => {
+  expect(escapeCdata('foo')).toBe('foo');
+});
 
-export function escapeCdata(input: string) {
-  let escaped = '';
-
-  const inputWithoutAnsi = stripAnsi(input);
-  while (true) {
-    const match = validXmlCharsRE.exec(inputWithoutAnsi);
-    if (!match) {
-      break;
-    }
-
-    escaped += match[0];
-  }
-
-  return escaped;
-}
+it('strips ansi escape sequences, including \\b', () => {
+  expect(escapeCdata('[31mfoo[39m')).toBe('foo');
+});
