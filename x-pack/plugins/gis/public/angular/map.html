@@ -27,6 +27,12 @@
               app-name="'maps'"
               on-submit="updateQueryAndDispatch"
               index-patterns="indexPatterns"
+              show-date-picker="showDatePicker"
+              date-range-from="time.from"
+              date-range-to="time.to"
+              is-refresh-paused="refreshConfig.isPaused"
+              refresh-interval="refreshConfig.interval"
+              on-refresh-change="onRefreshChange"
             ></query-bar>
           </div>
 

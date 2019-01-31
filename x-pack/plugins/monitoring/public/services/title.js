@@ -16,8 +16,8 @@ uiModule.service('title', (Private, i18n) => {
     clusterName = (clusterName) ? `- ${clusterName}` : '';
     suffix = (suffix) ? `- ${suffix}` : '';
     docTitle.change(
-      i18n('xpack.monitoring.monitoringDocTitle', {
-        defaultMessage: 'Monitoring {clusterName} {suffix}',
+      i18n('xpack.monitoring.stackMonitoringDocTitle', {
+        defaultMessage: 'Stack Monitoring {clusterName} {suffix}',
         values: { clusterName, suffix }
       }), true);
   };
