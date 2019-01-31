@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiTab, EuiTabbedContent } from '@elastic/eui';
 import {
   euiBorderThin,
   euiColorLightestShade,
@@ -26,9 +26,25 @@ enum Tabs {
 }
 
 const Container = styled.div`
+  width: calc(256rem / 14);
   border-right: ${euiBorderThin};
   display: flex;
   flex-direction: column;
+  & > div {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    & > div:first-child {
+      flex-shrink: 0;
+      flex-grow: 0;
+    }
+    & > div:not(:first-child) {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      flex-shrink: 1;
+    }
+  }
 `;
 
 const FileTreeContainer = styled.div`
@@ -49,14 +65,28 @@ class CodeSideTabs extends React.PureComponent<RouteComponentProps<MainRoutePara
     const tab = parseQuery(qs).tab;
     return tab === Tabs.structure ? Tabs.structure : Tabs.file;
   }
-  public tabContentMap = {
-    [Tabs.file]: (
-      <FileTreeContainer>
-        <FileTree />
-      </FileTreeContainer>
-    ),
-    [Tabs.structure]: <SymbolTree />,
-  };
+
+  public get tabs() {
+    return [
+      {
+        id: Tabs.file,
+        name: 'File',
+        content: (
+          <FileTreeContainer>
+            <FileTree />
+          </FileTreeContainer>
+        ),
+        isSelected: Tabs.file === this.sideTab,
+      },
+      {
+        id: Tabs.structure,
+        name: 'Structure',
+        content: <SymbolTree />,
+        isSelected: Tabs.structure === this.sideTab,
+        disabled: this.props.match.params.pathType === PathTypes.tree,
+      },
+    ];
+  }
 
   public switchTab = (tab: Tabs) => {
     const { history } = this.props;
@@ -65,32 +95,15 @@ class CodeSideTabs extends React.PureComponent<RouteComponentProps<MainRoutePara
     history.push(QueryString.replaceParamInUrl(`${pathname}${search}`, 'tab', tab));
   };
 
-  public renderTabs = () => {
-    const clickFileTreeHandler = () => this.switchTab(Tabs.file);
-    const clickStructureTreeHandler = () => this.switchTab(Tabs.structure);
-    return (
-      <React.Fragment>
-        <EuiTab onClick={clickFileTreeHandler} isSelected={Tabs.file === this.sideTab}>
-          File Tree
-        </EuiTab>
-        <EuiTab
-          onClick={clickStructureTreeHandler}
-          isSelected={Tabs.structure === this.sideTab}
-          disabled={this.props.match.params.pathType === PathTypes.tree}
-        >
-          Structure Tree
-        </EuiTab>
-      </React.Fragment>
-    );
-  };
-
   public render() {
     return (
       <Container>
-        <div>
-          <EuiTabs>{this.renderTabs()}</EuiTabs>
-        </div>
-        {this.tabContentMap[this.sideTab]}
+        <EuiTabbedContent
+          tabs={this.tabs}
+          initialSelectedTab={this.tabs.find(t => t.id === this.sideTab)}
+          onTabClick={tab => this.switchTab(tab.id as Tabs)}
+          expand={true}
+        />
         <Shortcut
           keyCode="t"
           help="Toggle tree and symbol view in sidebar"
