@@ -21,7 +21,11 @@ export const markdown = () => ({
 
     /* eslint-disable react/no-danger */
     ReactDOM.render(
-      <div className="kbnMarkdown__body" style={fontStyle} dangerouslySetInnerHTML={html} />,
+      <div
+        className="kbnMarkdown__body canvasMarkdown"
+        style={fontStyle}
+        dangerouslySetInnerHTML={html}
+      />,
       domNode,
       () => handlers.done()
     );
