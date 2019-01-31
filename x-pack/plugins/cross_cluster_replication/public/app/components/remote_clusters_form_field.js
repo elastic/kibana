@@ -197,7 +197,6 @@ export const RemoteClustersFormField = injectI18n(
             <FormattedMessage
               id="xpack.crossClusterReplication.forms.viewRemoteClusterButtonLabel"
               defaultMessage="Edit remote cluster"
-              values={{ name }}
             />
           </EuiButton>
         </EuiCallOut>
