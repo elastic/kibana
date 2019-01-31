@@ -1,6 +1,14 @@
 .kbnTypeahead {
   position: relative;
 
+  // These are the various types in the dropdown, they each get a color
+  $kbnTypeaheadTypes: (
+    field: $euiColorWarning,
+    value: $euiColorSecondary,
+    operator: $euiColorPrimary,
+    conjunction: $typeaheadConjunctionColor,
+  );
+
   .kbnTypeahead__popover {
     @include euiBottomShadow($adjustBorders: true);
     border: 1px solid;
@@ -60,30 +68,13 @@
         color: $euiColorFullShade;
       }
 
-      .kbnSuggestionItem--field {
-        .kbnSuggestionItem__type {
-          background-color: tintOrShade($euiColorWarning, 80%, 60%);
+      @each $name, $color in $kbnTypeaheadTypes {
+        .kbnSuggestionItem--#{$name} {
+          .kbnSuggestionItem__type {
+            background-color: tintOrShade($color, 80%, 60%);
+          }
         }
       }
-
-      .kbnSuggestionItem--value {
-        .kbnSuggestionItem__type {
-          background-color: tintOrShade($euiColorSecondary, 80%, 60%);
-        }
-      }
-
-      .kbnSuggestionItem--operator {
-        .kbnSuggestionItem__type {
-          background-color: tintOrShade($euiColorPrimary, 80%, 60%);
-        }
-      }
-
-      .kbnSuggestionItem--conjunction {
-        .kbnSuggestionItem__type {
-          background-color: tintOrShade($typeaheadConjunctionColor, 80%, 60%);
-        }
-      }
-
     }
   }
 }
@@ -95,35 +86,13 @@
   align-items: center;
   font-size: $euiFontSizeXS;
   white-space: nowrap;
-  &.kbnSuggestionItem--field {
-    .kbnSuggestionItem__type {
-      background-color: tintOrShade($euiColorWarning, 90%, 50%);
-      color: makeHighContrastColor($euiColorWarning, tintOrShade($euiColorWarning, 90%, 50%));
-    }
-  }
 
-  &.kbnSuggestionItem--value {
-    .kbnSuggestionItem__type {
-      background-color: tintOrShade($euiColorSecondary, 90%, 50%);
-      color: makeHighContrastColor($euiColorSecondary, tintOrShade($euiColorSecondary, 90%, 50%));
-    }
-
-    .kbnSuggestionItem__text {
-      width: auto;
-    }
-  }
-
-  &.kbnSuggestionItem--operator {
-    .kbnSuggestionItem__type {
-      background-color: tintOrShade($euiColorPrimary, 90%, 50%);
-      color: makeHighContrastColor($euiColorPrimary, tintOrShade($euiColorPrimary, 90%, 50%));
-    }
-  }
-
-  &.kbnSuggestionItem--conjunction {
-    .kbnSuggestionItem__type {
-      background-color: tintOrShade($typeaheadConjunctionColor, 90%, 50%);
-      color: makeHighContrastColor($typeaheadConjunctionColor, tintOrShade($typeaheadConjunctionColor, 90%, 50%));
+  @each $name, $color in $kbnTypeaheadTypes {
+    .kbnSuggestionItem--#{$name} {
+      .kbnSuggestionItem__type {
+        background-color: tintOrShade($color, 90%, 50%);
+        color: makeHighContrastColor($color, tintOrShade($color, 90%, 50%));
+      }
     }
   }
 
