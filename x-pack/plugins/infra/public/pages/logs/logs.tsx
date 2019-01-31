@@ -12,10 +12,14 @@ import { LogsToolbar } from './toolbar';
 
 import { EmptyPage } from '../../components/empty_page';
 import { Header } from '../../components/header';
+import { LogFlyout } from '../../components/logging/log_flyout';
 import { ColumnarPage } from '../../components/page';
 
 import { LogsBetaBadgeHeaderSection } from '../../components/beta_badge_header_section';
-import { WithLogFilterUrlState } from '../../containers/logs/with_log_filter';
+import { WithLogFilter, WithLogFilterUrlState } from '../../containers/logs/with_log_filter';
+import { WithLogFlyout } from '../../containers/logs/with_log_flyout';
+import { WithFlyoutOptions } from '../../containers/logs/with_log_flyout_options';
+import { WithFlyoutOptionsUrlState } from '../../containers/logs/with_log_flyout_options';
 import { WithLogMinimapUrlState } from '../../containers/logs/with_log_minimap';
 import { WithLogPositionUrlState } from '../../containers/logs/with_log_position';
 import { WithLogTextviewUrlState } from '../../containers/logs/with_log_textview';
@@ -61,8 +65,32 @@ export const LogsPage = injectI18n(
                   <WithLogPositionUrlState />
                   <WithLogMinimapUrlState />
                   <WithLogTextviewUrlState />
+                  <WithFlyoutOptionsUrlState />
                   <LogsToolbar />
-                  <LogsPageContent />
+                  <WithLogFilter indexPattern={derivedIndexPattern}>
+                    {({ applyFilterQueryFromKueryExpression }) => (
+                      <React.Fragment>
+                        <WithFlyoutOptions>
+                          {({ showFlyout, setFlyoutItem }) => (
+                            <LogsPageContent
+                              showFlyout={showFlyout}
+                              setFlyoutItem={setFlyoutItem}
+                            />
+                          )}
+                        </WithFlyoutOptions>
+                        <WithLogFlyout>
+                          {({ flyoutItem, hideFlyout, loading }) => (
+                            <LogFlyout
+                              setFilter={applyFilterQueryFromKueryExpression}
+                              flyoutItem={flyoutItem}
+                              hideFlyout={hideFlyout}
+                              loading={loading}
+                            />
+                          )}
+                        </WithLogFlyout>
+                      </React.Fragment>
+                    )}
+                  </WithLogFilter>
                 </>
               ) : isLoading ? (
                 <SourceLoadingPage />
