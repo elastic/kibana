@@ -182,7 +182,7 @@ export const FollowerIndexEdit = injectI18n(
               {isPaused ? (
                 <FormattedMessage
                   id="xpack.crossClusterReplication.followerIndexEditForm.confirmModal.resumeDescription"
-                  defaultMessage="This follower index will also be resumed."
+                  defaultMessage="Updating a follower index resumes replication of data from its leader index."
                 />
               ) : (
                 <FormattedMessage
