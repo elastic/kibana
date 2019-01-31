@@ -80,7 +80,9 @@ describe('Snapshot component', () => {
 
   it('renders without errors', () => {
     const { snapshot } = data;
-    const wrapper = shallowWithIntl(<Snapshot snapshot={snapshot} />);
+    const wrapper = shallowWithIntl(
+      <Snapshot danger="danger" primary="primary" snapshot={snapshot} />
+    );
     expect(wrapper).toMatchSnapshot();
   });
 });

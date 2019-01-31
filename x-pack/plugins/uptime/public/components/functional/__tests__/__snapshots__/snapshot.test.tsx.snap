@@ -127,6 +127,7 @@ exports[`Snapshot component renders without errors 1`] = `
       paddingSize="s"
     >
       <Component
+        dangerColor="danger"
         histogram={
           Array [
             Object {
@@ -424,6 +425,7 @@ exports[`Snapshot component renders without errors 1`] = `
             },
           ]
         }
+        primaryColor="primary"
       />
     </EuiPanel>
   </EuiFlexItem>
