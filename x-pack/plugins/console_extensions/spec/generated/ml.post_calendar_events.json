@@ -1,0 +1,10 @@
+{
+  "ml.post_calendar_events": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_ml/calendars/{calendar_id}/events"
+    ]
+  }
+}
