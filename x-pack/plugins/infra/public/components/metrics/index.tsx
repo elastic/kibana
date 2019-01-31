@@ -11,8 +11,8 @@ import React from 'react';
 import { InfraMetricData } from '../../graphql/types';
 import { InfraMetricLayout, InfraMetricLayoutSection } from '../../pages/metrics/layouts/types';
 import { metricTimeActions } from '../../store';
-import { InfraLoadingPanel } from '../loading';
 import { NoData } from '../empty_states';
+import { InfraLoadingPanel } from '../loading';
 import { Section } from './section';
 
 interface Props {
