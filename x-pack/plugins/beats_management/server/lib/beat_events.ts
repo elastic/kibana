@@ -39,7 +39,7 @@ export class BeatEventsLib {
       if (events.length - 1 === i) {
         this.beats
           .update(user, beatId, {
-            status: events[events.length - 2],
+            status: events[events.length - 1],
           })
           .catch(e => {
             // tslint:disable-next-line
