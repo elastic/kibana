@@ -52,9 +52,9 @@ export function createDateFormat(FieldFormat) {
             return '-';
           }
 
-          const date = moment(val);
+          const date = moment.utc(val); // All dates returned by ES are UTC
           if (date.isValid()) {
-            return date.format(pattern);
+            return date.tz(this._timeZone).format(pattern);
           } else {
             return val;
           }

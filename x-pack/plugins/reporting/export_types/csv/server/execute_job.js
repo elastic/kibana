@@ -60,10 +60,13 @@ function executeJobFn(server) {
     const fieldFormats = await server.fieldFormatServiceFactory(uiSettings);
     const formatsMap = fieldFormatMapFactory(indexPatternSavedObject, fieldFormats);
 
-    const separator = await uiSettings.get('csv:separator');
-    const quoteValues = await uiSettings.get('csv:quoteValues');
-    const maxSizeBytes = config.get('xpack.reporting.csv.maxSizeBytes');
-    const scroll = config.get('xpack.reporting.csv.scroll');
+    const settings = {
+      separator: await uiSettings.get('csv:separator'),
+      quoteValues: await uiSettings.get('csv:quoteValues'),
+      maxSizeBytes: config.get('xpack.reporting.csv.maxSizeBytes'),
+      scroll: config.get('xpack.reporting.csv.scroll'),
+      timezone: await uiSettings.get('dateFormat:tz'),
+    };
 
     const { content, maxSizeReached, size } = await generateCsv({
       searchRequest,
@@ -73,12 +76,7 @@ function executeJobFn(server) {
       conflictedTypesFields,
       callEndpoint,
       cancellationToken,
-      settings: {
-        separator,
-        quoteValues,
-        maxSizeBytes,
-        scroll
-      }
+      settings,
     });
 
     return {
