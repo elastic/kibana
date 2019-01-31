@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
-
 import { Server } from 'hapi';
+import {
+  createMlTelemetry,
+  getSavedObjectsClient,
+  ML_TELEMETRY_DOC_ID,
+  MlTelemetry,
+} from './ml_telemetry';
 
-import { INDEX_META_DATA_CREATED_BY } from '../../../common/constants/file_datavisualizer';
-
-import { Dictionary } from '../../../common/types/common';
-import { createMlTelemetry, MlTelemetry } from './ml_telemetry';
-
-// TODO these types should be defined by the platform
+// TODO this type should be defined by the platform
 interface KibanaHapiServer extends Server {
   usage: {
     collectorSet: {
@@ -23,24 +22,17 @@ interface KibanaHapiServer extends Server {
   };
 }
 
-type CallCuster = (arg: string) => Promise<Dictionary<object>>;
-
 export function makeMlUsageCollector(server: KibanaHapiServer): void {
   const mlUsageCollector = server.usage.collectorSet.makeUsageCollector({
     type: 'ml',
-    fetch: async (callCluster: CallCuster): Promise<MlTelemetry> => {
+    fetch: async (): Promise<MlTelemetry> => {
+      const savedObjectsClient = getSavedObjectsClient(server);
       try {
-        // Fetch all index mappings
-        const allMappings = await callCluster('indices.getMapping');
-
-        // Iterate over the mappings and count the number of indices which have
-        // INDEX_META_DATA_CREATED_BY as their _meta.created_by field.
-        const indicesCount = Object.keys(allMappings).reduce((count, mappingKey) => {
-          const createdBy = get(allMappings[mappingKey], 'mappings._meta.created_by');
-          return createdBy === INDEX_META_DATA_CREATED_BY ? count + 1 : count;
-        }, 0);
-
-        return createMlTelemetry(indicesCount);
+        const mlTelemetrySavedObject = await savedObjectsClient.get(
+          'ml-telemetry',
+          ML_TELEMETRY_DOC_ID
+        );
+        return mlTelemetrySavedObject.attributes;
       } catch (err) {
         return createMlTelemetry();
       }

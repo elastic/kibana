@@ -17,6 +17,7 @@ import { jobRoutes } from './server/routes/anomaly_detectors';
 import { dataFeedRoutes } from './server/routes/datafeeds';
 import { indicesRoutes } from './server/routes/indices';
 import { jobValidationRoutes } from './server/routes/job_validation';
+import mappings from './mappings';
 import { makeMlUsageCollector } from './server/lib/ml_telemetry';
 import { notificationRoutes } from './server/routes/notification_settings';
 import { systemRoutes } from './server/routes/system';
@@ -53,6 +54,12 @@ export const ml = (kibana) => {
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: ['plugins/ml/hacks/toggle_app_link_in_nav'],
+      savedObjectSchemas: {
+        'ml-telemetry': {
+          isNamespaceAgnostic: true
+        }
+      },
+      mappings,
       home: ['plugins/ml/register_feature'],
       injectDefaultVars(server) {
         const config = server.config();
