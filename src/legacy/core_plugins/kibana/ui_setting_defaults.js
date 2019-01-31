@@ -751,7 +751,6 @@ export function getUiSettingDefaults() {
 `{
   "from": "now-15m",
   "to": "now",
-  "mode": "quick"
 }`,
       type: 'json',
       description: i18n.translate('kbn.advancedSettings.timepicker.timeDefaultsText', {
