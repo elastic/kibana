@@ -1,9 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`PipelineEditor component includes required error message for falsy pipeline id 1`] = `
-<EuiPage
+<div
   data-test-subj="pipelineEdit pipelineEdit-"
-  restrictWidth={false}
 >
   <EuiPageContent
     horizontalPosition="center"
@@ -341,13 +340,12 @@ Default value: 1024"
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPageContent>
-</EuiPage>
+</div>
 `;
 
 exports[`PipelineEditor component invalidates form for invalid pipeline id input 1`] = `
-<EuiPage
+<div
   data-test-subj="pipelineEdit pipelineEdit-$invalid-pipeline-name"
-  restrictWidth={false}
 >
   <EuiPageContent
     horizontalPosition="center"
@@ -684,13 +682,12 @@ Default value: 1024"
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPageContent>
-</EuiPage>
+</div>
 `;
 
 exports[`PipelineEditor component invalidates form for pipeline id with spaces 1`] = `
-<EuiPage
+<div
   data-test-subj="pipelineEdit pipelineEdit-pipeline id with spaces"
-  restrictWidth={false}
 >
   <EuiPageContent
     horizontalPosition="center"
@@ -1027,13 +1024,12 @@ Default value: 1024"
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPageContent>
-</EuiPage>
+</div>
 `;
 
 exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
-<EuiPage
+<div
   data-test-subj="pipelineEdit pipelineEdit-pipelineId"
-  restrictWidth={false}
 >
   <EuiPageContent
     horizontalPosition="center"
@@ -1360,13 +1356,12 @@ Default value: 1024"
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPageContent>
-</EuiPage>
+</div>
 `;
 
 exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
-<EuiPage
+<div
   data-test-subj="pipelineEdit pipelineEdit-pipelineId"
-  restrictWidth={false}
 >
   <EuiPageContent
     horizontalPosition="center"
@@ -1699,13 +1694,12 @@ Default value: 1024"
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPageContent>
-</EuiPage>
+</div>
 `;
 
 exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
-<EuiPage
+<div
   data-test-subj="pipelineEdit pipelineEdit-pipelineId"
-  restrictWidth={false}
 >
   <EuiPageContent
     horizontalPosition="center"
@@ -2032,5 +2026,5 @@ Default value: 1024"
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPageContent>
-</EuiPage>
+</div>
 `;
