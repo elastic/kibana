@@ -29,7 +29,7 @@ exports[`render file item 1`] = `
   >
     <div
       aria-selected={false}
-      className="sc-bdVaJa jBMimz"
+      className="sc-bdVaJa jlNfAS"
       id="suggestion-1-1"
       onClick={[Function]}
       onMouseEnter={[Function]}
@@ -105,7 +105,7 @@ exports[`render repository item 1`] = `
   >
     <div
       aria-selected={false}
-      className="sc-bdVaJa jBMimz"
+      className="sc-bdVaJa jlNfAS"
       id="suggestion-1-1"
       onClick={[Function]}
       onMouseEnter={[Function]}
@@ -178,7 +178,7 @@ exports[`render symbol item 1`] = `
   >
     <div
       aria-selected={false}
-      className="sc-bdVaJa jBMimz"
+      className="sc-bdVaJa jlNfAS"
       id="suggestion-1-1"
       onClick={[Function]}
       onMouseEnter={[Function]}

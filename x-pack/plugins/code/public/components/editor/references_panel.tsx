@@ -62,7 +62,7 @@ export class ReferencesPanel extends React.Component<Props, State> {
       }
     }
     return (
-      <EuiPanel grow={false} className="code-editor-references-panel" style={styles} >
+      <EuiPanel grow={false} className="code-editor-references-panel" style={styles}>
         <EuiButtonIcon
           size="s"
           onClick={this.toggleExpand}

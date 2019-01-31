@@ -77,7 +77,7 @@ exports[`render symbol tree correctly 1`] = `
           <div
             className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive sc-bxivhb hbpUhB"
           >
-            <span
+            <i
               className="sc-bwzfXH kVxRUe sc-bdVaJa fsxEnI"
               onClick={[Function]}
             />
