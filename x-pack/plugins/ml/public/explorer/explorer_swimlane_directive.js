@@ -20,6 +20,8 @@ const module = uiModules.get('apps/ml');
 
 import { mlExplorerDashboardService } from './explorer_dashboard_service';
 
+import { SWIMLANE_TYPE } from './explorer_constants';
+
 module.directive('mlExplorerSwimlane', function () {
 
   function link(scope, element) {
@@ -29,6 +31,13 @@ module.directive('mlExplorerSwimlane', function () {
         props.swimlaneData === undefined ||
         props.swimlaneData.earliest === undefined ||
         props.swimlaneData.latest === undefined
+      ) {
+        return;
+      }
+
+      if (
+        scope.swimlaneType === SWIMLANE_TYPE.VIEW_BY &&
+        props.showViewBySwimlane === false
       ) {
         return;
       }
