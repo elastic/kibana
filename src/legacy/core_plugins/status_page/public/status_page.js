@@ -20,6 +20,7 @@
 import 'ui/autoload/modules';
 import 'ui/autoload/styles';
 import 'ui/i18n';
+import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
 import { destroyStatusPage, renderStatusPage } from './components/render';
 
@@ -31,4 +32,9 @@ chrome
       renderStatusPage(buildNum, buildSha.substr(0, 8));
       $scope.$on('$destroy', destroyStatusPage);
     });
+  });
+
+uiModules.get('kibana')
+  .config(function (appSwitcherEnsureNavigationProvider) {
+    appSwitcherEnsureNavigationProvider.forceNavigation(true);
   });
