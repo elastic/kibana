@@ -164,12 +164,14 @@ function* handleMainRouteChange(action: Action<Match>) {
   if (currentTree.repoUri !== repoUri) {
     yield put(resetRepoTree());
   }
+  const tree = yield select(getTree);
   yield put(
     fetchRepoTree({
       uri: repoUri,
       revision,
       path: file || '',
-      parents: true,
+      parents: tree.children == null,
+      isDir: pathType === PathTypes.tree,
     })
   );
   if (file && pathType === PathTypes.blob) {

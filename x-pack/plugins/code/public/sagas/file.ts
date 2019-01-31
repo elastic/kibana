@@ -45,12 +45,22 @@ import { repoRoutePattern } from './patterns';
 
 function* handleFetchRepoTree(action: Action<FetchRepoTreePayload>) {
   try {
-    const { uri, revision, path, parents } = action.payload!;
+    const { uri, revision, path, parents, isDir } = action.payload!;
     if (path) {
       const requestedPaths: string[] = yield select(requestedPathsSelector);
-      const shouldFetch = !some(requestedPaths, p => p.startsWith(path));
+      const isPathNotRequested = (p: string) =>
+        !some(requestedPaths, requestedPath => requestedPath.startsWith(p));
+      const shouldFetch = isDir
+        ? isPathNotRequested(path)
+        : requestedPaths.length === 0 ||
+          isPathNotRequested(
+            path
+              .split('/')
+              .slice(0, -1)
+              .join('/')
+          );
       if (shouldFetch) {
-        yield call(fetchPath, { uri, revision, path, parents });
+        yield call(fetchPath, { uri, revision, path, parents, isDir });
       }
       const pathSegments = path.split('/');
       let currentPath = '';

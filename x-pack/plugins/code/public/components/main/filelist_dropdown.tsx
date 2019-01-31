@@ -32,6 +32,7 @@ class FileListDropdownComponent extends React.Component<Props, State> {
       uri: repoUri,
       revision,
       path: paths.slice(0, paths.length - 1).join('/'),
+      isDir: false,
     });
     this.setState({ isOpen: true });
     e.preventDefault();
