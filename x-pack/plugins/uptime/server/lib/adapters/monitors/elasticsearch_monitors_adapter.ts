@@ -297,8 +297,10 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     const latestMonitors: LatestMonitor[] = aggBuckets
       .filter(
         bucket =>
-          statusFilter &&
-          get(bucket, 'latest.hits.hits[0]._source.monitor.status', undefined) !== statusFilter
+          (statusFilter &&
+            get(bucket, 'latest.hits.hits[0]._source.monitor.status', undefined) ===
+              statusFilter) ||
+          !statusFilter
       )
       .map(
         (bucket): LatestMonitor => {
