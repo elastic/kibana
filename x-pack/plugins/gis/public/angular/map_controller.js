@@ -21,7 +21,7 @@ import {
   setQuery,
 } from '../actions/store_actions';
 import { getIsDarkTheme, updateFlyout, FLYOUT_STATE } from '../store/ui';
-import { getDataSources, getUniqueIndexPatternIds } from '../selectors/map_selectors';
+import {  getUniqueIndexPatternIds } from '../selectors/map_selectors';
 import { Inspector } from 'ui/inspector';
 import { inspectorAdapters, indexPatternService } from '../kibana_services';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
@@ -142,7 +142,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       }));
     }
 
-    const layerList = getInitialLayers(savedMap.layerListJSON, getDataSources(store.getState()));
+    const layerList = getInitialLayers(savedMap.layerListJSON);
     store.dispatch(replaceLayerList(layerList));
 
     store.dispatch(setRefreshConfig($scope.refreshConfig));
