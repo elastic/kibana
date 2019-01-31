@@ -187,4 +187,4 @@ node scripts/i18n_integrate --path path/to/locale.json
 
 ### Output
 
-The tool generates locale files in plugins folders after splitting them by namespaces.
+The tool generates locale files in plugin folders and few other special locations based on namespaces and corresponding mappings defined in [.i18nrc.json](../../../.i18nrc.json).
