@@ -56,7 +56,7 @@ export function ConnectionStatus({ isConnected }) {
             {icon}
           </EuiFlexItem>
 
-          <EuiFlexItem>
+          <EuiFlexItem style={{ whiteSpace: 'nowrap' }}>
             <EuiText>
               {message}
             </EuiText>
