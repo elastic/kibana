@@ -25,6 +25,10 @@ import * as i18n from '../core';
 import { isPseudoLocale, translateUsingPseudoLocale } from '../core/pseudo_locale';
 import { injectI18n } from './inject';
 
+interface I18nProviderProps {
+  children: React.ReactNode;
+}
+
 /**
  * To translate label that includes nested `FormattedMessage` instances React Intl
  * replaces them with special placeholders (@__uid__@ELEMENT-uid-counter@__uid__@)
@@ -50,21 +54,20 @@ function translateFormattedMessageUsingPseudoLocale(message: string) {
 /**
  * If pseudo locale is detected, default intl.formatMessage should be decorated
  * with the pseudo localization function.
- * @param child I18nProvider child component.
  */
 function wrapIntlFormatMessage() {
   let isIntlOverridden = false;
 
-  return injectI18n(({ intl, children }: any) => {
+  return injectI18n(({ intl, children }) => {
     if (!isIntlOverridden) {
       const formatMessage = intl.formatMessage;
-      intl.formatMessage = (...args: any[]) =>
+      intl.formatMessage = (...args) =>
         translateFormattedMessageUsingPseudoLocale(formatMessage(...args));
 
       isIntlOverridden = true;
     }
 
-    return children;
+    return React.Children.only(children);
   });
 }
 
@@ -73,20 +76,20 @@ function wrapIntlFormatMessage() {
  * of components. This component is used to setup the i18n context for a tree.
  * IntlProvider should wrap react app's root component (inside each react render method).
  */
-export class I18nProvider extends React.PureComponent {
+export class I18nProvider extends React.PureComponent<Readonly<I18nProviderProps>> {
   public static propTypes = { children: PropTypes.element.isRequired };
-  public WrapedIntlFormatMessage: any;
+  private readonly WrappedIntlFormatMessage?: ReturnType<typeof wrapIntlFormatMessage>;
 
-  public constructor(props: any) {
+  public constructor(props: Readonly<I18nProviderProps>) {
     super(props);
 
     if (isPseudoLocale(i18n.getLocale())) {
-      this.WrapedIntlFormatMessage = wrapIntlFormatMessage();
+      this.WrappedIntlFormatMessage = wrapIntlFormatMessage();
     }
   }
 
   public render() {
-    const WrapedIntlFormatMessage = this.WrapedIntlFormatMessage;
+    const WrappedIntlFormatMessage = this.WrappedIntlFormatMessage;
 
     return (
       <IntlProvider
@@ -96,8 +99,8 @@ export class I18nProvider extends React.PureComponent {
         formats={i18n.getFormats()}
         textComponent={React.Fragment}
       >
-        {WrapedIntlFormatMessage ? (
-          <WrapedIntlFormatMessage>{this.props.children}</WrapedIntlFormatMessage>
+        {WrappedIntlFormatMessage ? (
+          <WrappedIntlFormatMessage>{this.props.children}</WrappedIntlFormatMessage>
         ) : (
           this.props.children
         )}
