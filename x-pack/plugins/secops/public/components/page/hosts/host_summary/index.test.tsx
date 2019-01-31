@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
+import { ThemeProvider } from 'styled-components';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { mockGlobalState } from '../../../../mock';
@@ -54,13 +56,15 @@ describe('Host Summary Component', () => {
       );
       const wrapper = mountWithIntl(
         <ReduxStoreProvider store={store}>
-          <DragDropContextWrapper>{draggable}</DragDropContextWrapper>
+          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+            <DragDropContextWrapper>{draggable}</DragDropContextWrapper>
+          </ThemeProvider>
         </ReduxStoreProvider>
       );
       expect(wrapper.text()).toBe('debian');
     });
 
-    test('if it returns a FormattedRelative value', () => {
+    test('if it returns a FormattedRelative element', () => {
       const draggable = createDraggable(
         '2019-01-28T22:14:16.039Z',
         'firstSeen',
@@ -70,10 +74,12 @@ describe('Host Summary Component', () => {
       );
       const wrapper = mountWithIntl(
         <ReduxStoreProvider store={store}>
-          <DragDropContextWrapper>{draggable}</DragDropContextWrapper>
+          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+            <DragDropContextWrapper>{draggable}</DragDropContextWrapper>
+          </ThemeProvider>
         </ReduxStoreProvider>
       );
-      expect(wrapper.text()).toBe('yesterday');
+      expect(wrapper.find('FormattedRelative')).toHaveLength(1);
     });
 
     test('if it returns an empty value', () => {
@@ -86,7 +92,9 @@ describe('Host Summary Component', () => {
       );
       const wrapper = mountWithIntl(
         <ReduxStoreProvider store={store}>
-          <DragDropContextWrapper>{draggable}</DragDropContextWrapper>
+          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+            <DragDropContextWrapper>{draggable}</DragDropContextWrapper>
+          </ThemeProvider>
         </ReduxStoreProvider>
       );
       expect(wrapper.text()).toBe(getEmptyValue());
@@ -102,11 +110,13 @@ describe('Host Summary Component', () => {
       );
       const wrapper = mountWithIntl(
         <ReduxStoreProvider store={store}>
-          <DragDropContextWrapper>{euiDescriptionList}</DragDropContextWrapper>
+          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+            <DragDropContextWrapper>{euiDescriptionList}</DragDropContextWrapper>
+          </ThemeProvider>
         </ReduxStoreProvider>
       );
       expect(wrapper.text()).toBe(
-        'Namesiem-kibanaLast BeatyesterdayIdaa7ca589f1b8220002f2fc61c64cfbf1IP Address10.142.0.7fe80::4001:aff:fe8e:7MAC Addr42:01:0a:8e:00:07Typeprojects/189716325846/machineTypes/n1-standard-1PlatformdebianOS NameDebian GNU/LinuxFamilydebianVersion9 (stretch)Architecturex86_64'
+        'Namesiem-kibanaLast Beat--Idaa7ca589f1b8220002f2fc61c64cfbf1IP Address10.142.0.7fe80::4001:aff:fe8e:7MAC Addr42:01:0a:8e:00:07Typeprojects/189716325846/machineTypes/n1-standard-1PlatformdebianOS NameDebian GNU/LinuxFamilydebianVersion9 (stretch)Architecturex86_64'
       );
     });
 
@@ -114,7 +124,9 @@ describe('Host Summary Component', () => {
       const euiDescriptionList = getEuiDescriptionList(null, 552204000000, 618472800000);
       const wrapper = mountWithIntl(
         <ReduxStoreProvider store={store}>
-          <DragDropContextWrapper>{euiDescriptionList}</DragDropContextWrapper>
+          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+            <DragDropContextWrapper>{euiDescriptionList}</DragDropContextWrapper>
+          </ThemeProvider>
         </ReduxStoreProvider>
       );
       expect(wrapper.text()).toBe(

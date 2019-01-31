@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiLink } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
-import { get, has } from 'lodash/fp';
+import { get, has, isNil } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
@@ -234,8 +234,14 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
                 <DragEffects>
                   <Provider dataProvider={dataProvider} />
                 </DragEffects>
+              ) : isNil(get('lastFailure.host.id', node)) ? (
+                <>{hostName}</>
               ) : (
-                hostName
+                <EuiLink
+                  href={`#/link-to/hosts/${encodeURIComponent(node.lastFailure!.host!.id!)}`}
+                >
+                  {hostName}
+                </EuiLink>
               )
             }
           />
@@ -335,8 +341,14 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
                 <DragEffects>
                   <Provider dataProvider={dataProvider} />
                 </DragEffects>
+              ) : isNil(get('lastSuccess.host.id', node)) ? (
+                <>{hostName}</>
               ) : (
-                hostName
+                <EuiLink
+                  href={`#/link-to/hosts/${encodeURIComponent(node.lastSuccess!.host!.id!)}`}
+                >
+                  {hostName}
+                </EuiLink>
               )
             }
           />
