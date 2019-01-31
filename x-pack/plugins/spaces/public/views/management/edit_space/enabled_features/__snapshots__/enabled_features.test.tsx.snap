@@ -179,7 +179,7 @@ exports[`EnabledFeatures renders as expected 1`] = `
         <p>
           <FormattedMessage
             defaultMessage="Want to secure access? Go to {rolesLink}."
-            id="xpack.spaces.management.enabledSpaceFeatures.notASecurityMechanismMessage"
+            id="xpack.spaces.management.enabledSpaceFeatures.goToRolesLink"
             values={
               Object {
                 "rolesLink": <EuiLink

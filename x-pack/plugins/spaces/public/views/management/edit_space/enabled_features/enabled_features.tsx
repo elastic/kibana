@@ -133,7 +133,7 @@ export class EnabledFeatures extends Component<Props, {}> {
           {this.props.uiCapabilities.spaces.manage && (
             <p>
               <FormattedMessage
-                id="xpack.spaces.management.enabledSpaceFeatures.notASecurityMechanismMessage"
+                id="xpack.spaces.management.enabledSpaceFeatures.goToRolesLink"
                 defaultMessage="Want to secure access? Go to {rolesLink}."
                 values={{
                   rolesLink: (
