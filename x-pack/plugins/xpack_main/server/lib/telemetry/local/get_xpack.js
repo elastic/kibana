@@ -20,10 +20,8 @@ export function getXPackLicense(callCluster) {
   return callCluster('transport.request', {
     method: 'GET',
     path: '/_license',
-    query: {
-      // Fetching the local license is cheaper than getting it from the master and good enough
-      local: 'true'
-    }
+    // Fetching the local license is cheaper than getting it from the master and good enough
+    local: 'true',
   })
     .then(({ license }) => license);
 }
@@ -42,9 +40,7 @@ export function getXPackUsage(callCluster) {
   return callCluster('transport.request', {
     method: 'GET',
     path: '/_xpack/usage',
-    query: {
-      master_timeout: TIMEOUT
-    }
+    master_timeout: TIMEOUT,
   });
 }
 

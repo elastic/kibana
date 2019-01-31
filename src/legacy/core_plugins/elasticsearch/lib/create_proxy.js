@@ -33,10 +33,10 @@ export function createProxy(server) {
     async handler(req, h) {
       const { query, payload } = req;
       return callWithRequest(req, 'transport.request', {
+        ...query,
         path: '/_msearch',
         method: 'POST',
-        query,
-        body: payload.toString('utf8')
+        body: payload.toString('utf8'),
       }).finally(r => h.response(r));
     }
   });
@@ -54,9 +54,9 @@ export function createProxy(server) {
     handler(req, h) {
       const { query, payload: body } = req;
       return callWithRequest(req, 'transport.request', {
+        ...query,
         path: `/${encodeURIComponent(req.params.index)}/_search`,
         method: 'POST',
-        query,
         body
       }).finally(r => h.response(r));
     }
