@@ -1,7 +1,10 @@
 <div class="job-timepicker-modal">
   <ml-message-bar ></ml-message-bar>
   <h1
-    tooltip="Start datafeed for {{jobId}}"
+    tooltip="{{ ::'xpack.ml.jobTimePickerModal.startDatafeedForJobTooltip' | i18n: {
+      defaultMessage: 'Start datafeed for {jobId}',
+      values: { jobId }
+    } }}"
     class="euiTitle"
     i18n-id="xpack.ml.jobTimePickerModal.startDatafeedForJobTitle"
     i18n-default-message="Start datafeed for {jobId}"

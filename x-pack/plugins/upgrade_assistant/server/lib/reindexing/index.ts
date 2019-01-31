@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { FileUpload } from './file_upload';
+export { reindexServiceFactory } from './reindex_service';
+export { ReindexWorker } from './worker';

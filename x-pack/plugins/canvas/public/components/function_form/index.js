@@ -21,6 +21,7 @@ import {
   getContextForIndex,
 } from '../../state/selectors/workpad';
 import { getAssets } from '../../state/selectors/assets';
+import { findExistingAsset } from '../../lib/find_existing_asset';
 import { FunctionForm as Component } from './function_form';
 
 const mapStateToProps = (state, { expressionIndex }) => ({
@@ -93,9 +94,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     onValueAdd: addArgument(element, pageId),
     onValueRemove: deleteArgument(element, pageId),
     onAssetAdd: (type, content) => {
-      const existingId = Object.keys(assets).find(
-        assetId => assets[assetId].type === type && assets[assetId].value === content
-      );
+      const existingId = findExistingAsset(type, content, assets);
       if (existingId) {
         return existingId;
       }

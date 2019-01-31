@@ -313,7 +313,7 @@ export class SavedObjectsRepository {
     }
 
     if (fields && !Array.isArray(fields)) {
-      throw new TypeError('options.searchFields must be an array');
+      throw new TypeError('options.fields must be an array');
     }
 
     const esOptions = {

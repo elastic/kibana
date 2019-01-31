@@ -98,6 +98,20 @@ describe('waterfall_helpers', () => {
         getWaterfallItems(childrenByParentId, entryTransactionItem)
       ).toMatchSnapshot();
     });
+
+    it('should handle cyclic references', () => {
+      const items = [
+        { id: 'a', timestamp: 10 } as IWaterfallItem,
+        { id: 'a', parentId: 'a', timestamp: 20 } as IWaterfallItem
+      ];
+      const childrenByParentId = groupBy(items, hit =>
+        hit.parentId ? hit.parentId : 'root'
+      );
+      const entryTransactionItem = childrenByParentId.root[0];
+      expect(
+        getWaterfallItems(childrenByParentId, entryTransactionItem)
+      ).toMatchSnapshot();
+    });
   });
 
   describe('getClockSkew', () => {
