@@ -33,6 +33,7 @@ import {
   ExplorerNoResultsFound,
 } from './components';
 import { ExplorerSwimlane } from './explorer_swimlane';
+import { KueryFilterBar } from './kuery_filter_bar';
 import { formatHumanReadableDateTime } from '../util/date_utils';
 import { getBoundsRoundedToInterval } from 'plugins/ml/util/ml_time_buckets';
 import { InfluencersList } from '../components/influencers_list';
@@ -75,6 +76,7 @@ import {
   SWIMLANE_TYPE,
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
+import { ML_RESULTS_INDEX_PATTERN } from '../../common/constants/index_patterns';
 
 // Explorer Charts
 import { ExplorerChartsContainer } from './explorer_charts/explorer_charts_container';
@@ -88,6 +90,9 @@ function getExplorerDefaultState() {
     annotationsData: [],
     anomalyChartRecords: [],
     chartsData: getDefaultChartsData(),
+    filterActive: false,
+    filterData: null,
+    influencersFilterQuery: undefined,
     hasResults: false,
     influencers: {},
     loading: true,
@@ -138,6 +143,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
     // initialize an empty callback, this will be set in componentDidMount()
     updateCharts = () => {};
+
+    indexPattern = { title: ML_RESULTS_INDEX_PATTERN };
 
     dragSelect = new DragSelect({
       selectables: document.getElementsByClassName('sl-cell'),
@@ -285,6 +292,14 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       }
     }
 
+    // TODO: dynamically load influencers and create index pattern
+    async getIndexPattern() { // jobIds, noInfluencersConfigured
+      this.indexPattern.fields = [
+        { name: 'nginx.access.geoip.country_iso_code', type: 'string', aggregatable: false, searchable: true },
+        { name: 'nginx.access.url', type: 'string', aggregatable: false, searchable: true }
+      ];
+    }
+
     getSwimlaneBucketInterval(selectedJobs) {
       const { MlTimeBuckets } = this.props;
 
@@ -407,7 +422,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
     loadViewBySwimlanePreviousArgs = null;
     loadViewBySwimlanePreviousData = null;
-    loadViewBySwimlane(fieldValues, overallSwimlaneData, selectedJobs, swimlaneViewByFieldName) {
+    loadViewBySwimlane(fieldValues, overallSwimlaneData, selectedJobs, swimlaneViewByFieldName, influencersFilterQuery) {
       const { swimlaneLimit } = this.props;
 
       const compareArgs = {
@@ -490,7 +505,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
               searchBounds.min.valueOf(),
               searchBounds.max.valueOf(),
               interval,
-              swimlaneLimit
+              swimlaneLimit,
+              influencersFilterQuery
             ).then(finish);
           } else {
             const jobIds = (fieldValues !== undefined && fieldValues.length > 0) ? fieldValues : selectedJobIds;
@@ -570,6 +586,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     annotationsTablePreviousData = null;
     async updateExplorer(stateUpdate = {}, showOverallLoadingIndicator = true) {
       const {
+        filterData,
+        influencersFilterQuery,
         noInfluencersConfigured,
         noJobsFound,
         selectedCells,
@@ -673,7 +691,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
             [],
             overallSwimlaneData,
             selectedJobs,
-            viewBySwimlaneOptions.swimlaneViewByFieldName
+            viewBySwimlaneOptions.swimlaneViewByFieldName,
+            // influencersFilterQuery
           ),
         );
       }
@@ -708,11 +727,16 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         stateUpdate.influencers = await loadTopInfluencers(jobIds, timerange.earliestMs, timerange.latestMs, noInfluencersConfigured);
       }
 
+      // indexPattern only has title property - load the influencer fields for current job(s)
+      if (Object.keys(this.indexPattern).length === 1) {
+        this.getIndexPattern(jobIds, noInfluencersConfigured);
+      }
+
       const updatedAnomalyChartRecords = await loadDataForCharts(
-        jobIds, timerange.earliestMs, timerange.latestMs, selectionInfluencers, selectedCells
+        jobIds, timerange.earliestMs, timerange.latestMs, selectionInfluencers, selectedCells, filterData, influencersFilterQuery
       );
 
-      if (selectionInfluencers.length > 0 && updatedAnomalyChartRecords !== undefined) {
+      if ((selectionInfluencers.length > 0 || influencersFilterQuery !== undefined) && updatedAnomalyChartRecords !== undefined) {
         stateUpdate.influencers = await getFilteredTopInfluencers(
           jobIds,
           timerange.earliestMs,
@@ -720,6 +744,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           updatedAnomalyChartRecords,
           selectionInfluencers,
           noInfluencersConfigured,
+          influencersFilterQuery
         );
       }
 
@@ -748,6 +773,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         swimlaneViewByFieldName: viewBySwimlaneOptions.swimlaneViewByFieldName,
         tableInterval,
         tableSeverity,
+        influencersFilterQuery
       };
 
       if (_.isEqual(anomaliesTableCompareArgs, this.anomaliesTablePreviousArgs)) {
@@ -763,6 +789,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           viewBySwimlaneOptions.swimlaneViewByFieldName,
           tableInterval,
           tableSeverity,
+          influencersFilterQuery
         );
         this.setState({ tableData });
       }
@@ -834,6 +861,96 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       }
     }
 
+    // If query is empty object we clear any existing selection,
+    // otherwise we save the new selection in AppState and update the Explorer.
+    // TODO: deprecated - remove after reusing maskAll logic
+    applyFilter = (queryClauses) => {
+      const { swimlaneViewByFieldName } = this.state;
+      // TODO: double check
+      if (queryClauses.length === 0) {
+        const stateUpdate = { ...{
+          filterActive: false,
+          filterData: null,
+          maskAll: false
+        },
+        ...getClearedSelectedAnomaliesState()
+        };
+
+        this.updateExplorer(stateUpdate, false);
+      } else {
+        const filterData = this.getFilterData(queryClauses);
+        const maskAll = (swimlaneViewByFieldName === VIEW_BY_JOB_LABEL ||
+          filterData.fieldNames.includes(swimlaneViewByFieldName) === false);
+
+        this.updateExplorer({
+          filterActive: true,
+          filterData,
+          maskAll }, false);
+      }
+    };
+    // TODO: deprecated - remove once new filter works
+    getFilterData = (queryClauses) => {
+      const criteriaFields = [];
+      const fieldValues = []; // ['FR']
+      const fieldNames = [];
+      const influencerCriteriaFields = []; // [{ fieldName: country_code, fieldValue: 'FR' }]
+
+      queryClauses.forEach((clause) => {
+        // Each clause obj has a field property that is a string.
+        // Each clause obj has a value property that is either string/object or an array of strings/objects
+        fieldNames.push(clause.field);
+
+        if (Array.isArray(clause.value)) {
+          clause.value.forEach((value) => {
+            influencerCriteriaFields.push({
+              fieldName: clause.field,
+              fieldValue: value.raw || value
+            });
+
+            fieldValues.push(value.raw || value);
+          });
+        } else {
+          influencerCriteriaFields.push({
+            fieldName: clause.field,
+            fieldValue: clause.value.raw || clause.value
+          });
+
+          fieldValues.push(clause.value.raw || clause.value);
+        }
+      });
+
+      return {
+        type: 'viewBy',
+        criteriaFields,
+        influencerCriteriaFields,
+        fieldValues,
+        fieldNames
+      };
+    }
+
+    applyInfluencersFilterQuery = (influencersFilterQuery) => {
+      if (influencersFilterQuery.match_all && Object.keys(influencersFilterQuery.match_all).length === 0) {
+        const stateUpdate = {
+          ...{
+            filterActive: false,
+            filterData: null,
+            influencersFilterQuery: undefined,
+            maskAll: false
+          },
+          ...getClearedSelectedAnomaliesState()
+        };
+
+        this.updateExplorer(stateUpdate, false);
+      } else {
+        this.updateExplorer({
+          filterActive: true,
+          influencersFilterQuery,
+          // filterData,
+          // maskAll
+        }, false);
+      }
+    }
+
     render() {
       const {
         intl,
@@ -892,6 +1009,19 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
       return (
         <div className="results-container">
+          {/* {noInfluencersConfigured === false &&
+            influencers !== undefined &&
+            <ExplorerFilterBar
+              influencers={influencers}
+              applyFilter={this.applyFilter}
+            />} */}
+          {noInfluencersConfigured === false &&
+            influencers !== undefined &&
+            <KueryFilterBar
+              indexPattern={this.indexPattern}
+              onSubmit={this.applyInfluencersFilterQuery}
+            />}
+
           {noInfluencersConfigured && (
             <div className="no-influencers-warning">
               <EuiIconTip

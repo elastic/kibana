@@ -65,7 +65,14 @@ export function mapScopeToProps(scope) {
   };
 }
 
-export async function getFilteredTopInfluencers(jobIds, earliestMs, latestMs, records, influencers, noInfluencersConfigured) {
+export async function getFilteredTopInfluencers(
+  jobIds,
+  earliestMs,
+  latestMs,
+  records,
+  influencers,
+  noInfluencersConfigured,
+  influencersFilterQuery) {
   // Filter the Top Influencers list to show just the influencers from
   // the records in the selected time range.
   const recordInfluencersByName = {};
@@ -117,7 +124,7 @@ export async function getFilteredTopInfluencers(jobIds, earliestMs, latestMs, re
     }
   });
 
-  return await loadTopInfluencers(jobIds, earliestMs, latestMs, filterInfluencers, noInfluencersConfigured);
+  return await loadTopInfluencers(jobIds, earliestMs, latestMs, filterInfluencers, noInfluencersConfigured, influencersFilterQuery);
 }
 
 export function selectedJobsHaveInfluencers(selectedJobs = []) {
@@ -416,7 +423,15 @@ export async function loadAnnotationsTableData(selectedCells, selectedJobs, inte
 }
 
 export async function loadAnomaliesTableData(
-  selectedCells, selectedJobs, dateFormatTz, interval, bounds, fieldName, tableInterval, tableSeverity
+  selectedCells,
+  selectedJobs,
+  dateFormatTz,
+  interval,
+  bounds,
+  fieldName,
+  tableInterval,
+  tableSeverity,
+  influencersFilterQuery
 ) {
   const jobIds = (selectedCells !== null && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL) ?
     selectedCells.lanes : selectedJobs.map(d => d.id);
@@ -434,7 +449,8 @@ export async function loadAnomaliesTableData(
       timeRange.latestMs,
       dateFormatTz,
       ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
-      MAX_CATEGORY_EXAMPLES
+      MAX_CATEGORY_EXAMPLES,
+      influencersFilterQuery
     ).then((resp) => {
       const anomalies = resp.anomalies;
       const detectorsByJob = mlJobService.detectorsByJob;
@@ -478,11 +494,11 @@ export async function loadAnomaliesTableData(
 // track the request to be able to ignore out of date requests
 // and avoid race conditions ending up with the wrong charts.
 let requestCount = 0;
-export async function loadDataForCharts(jobIds, earliestMs, latestMs, influencers = [], selectedCells) {
+export async function loadDataForCharts(jobIds, earliestMs, latestMs, influencers = [], selectedCells, filterData, influencersFilterQuery) {
   return new Promise((resolve) => {
     // Just skip doing the request when this function
     // is called without the minimum required data.
-    if (selectedCells === null && influencers.length === 0) {
+    if (selectedCells === null && influencers.length === 0 && influencersFilterQuery === undefined) {
       resolve([]);
     }
 
@@ -491,7 +507,7 @@ export async function loadDataForCharts(jobIds, earliestMs, latestMs, influencer
 
     // Load the top anomalies (by record_score) which will be displayed in the charts.
     mlResultsService.getRecordsForInfluencer(
-      jobIds, influencers, 0, earliestMs, latestMs, 500
+      jobIds, influencers, 0, earliestMs, latestMs, 500, influencersFilterQuery
     )
       .then((resp) => {
         // Ignore this response if it's returned by an out of date promise
@@ -499,7 +515,9 @@ export async function loadDataForCharts(jobIds, earliestMs, latestMs, influencer
           resolve(undefined);
         }
 
-        if (selectedCells !== null && Object.keys(selectedCells).length > 0) {
+        if ((selectedCells !== null && Object.keys(selectedCells).length > 0) ||
+          filterData !== null ||
+          influencersFilterQuery !== undefined) {
           console.log('Explorer anomaly charts data set:', resp.records);
           resolve(resp.records);
         }
@@ -509,7 +527,14 @@ export async function loadDataForCharts(jobIds, earliestMs, latestMs, influencer
   });
 }
 
-export async function loadTopInfluencers(selectedJobIds, earliestMs, latestMs, influencers = [], noInfluencersConfigured) {
+export async function loadTopInfluencers(
+  selectedJobIds,
+  earliestMs,
+  latestMs,
+  influencers = [],
+  noInfluencersConfigured,
+  influencersFilterQuery
+) {
   return new Promise((resolve) => {
     if (noInfluencersConfigured !== true) {
       mlResultsService.getTopInfluencers(
@@ -517,7 +542,8 @@ export async function loadTopInfluencers(selectedJobIds, earliestMs, latestMs, i
         earliestMs,
         latestMs,
         MAX_INFLUENCER_FIELD_VALUES,
-        influencers
+        influencers,
+        influencersFilterQuery
       ).then((resp) => {
         // TODO - sort the influencers keys so that the partition field(s) are first.
         console.log('Explorer top influencers data set:', resp.influencers);
