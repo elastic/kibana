@@ -105,7 +105,7 @@ export const AutoFollowPatternList = injectI18n(
                 <p>
                   <FormattedMessage
                     id="xpack.crossClusterReplication.autoFollowPatternList.autoFollowPatternsDescription"
-                    defaultMessage="Auto-follow patterns replicate leader indices from a remote
+                    defaultMessage="An auto-follow pattern replicates leader indices from a remote
                       cluster to follower indices on the local cluster."
                   />
                 </p>

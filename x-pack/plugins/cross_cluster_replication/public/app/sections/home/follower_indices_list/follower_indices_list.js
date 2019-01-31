@@ -102,7 +102,7 @@ export const FollowerIndicesList = injectI18n(
                 <p>
                   <FormattedMessage
                     id="xpack.crossClusterReplication.followerIndexList.followerIndicesDescription"
-                    defaultMessage="Followers replicate operations from the leader index to the follower index."
+                    defaultMessage="A follower index replicates data from a leader index."
                   />
                 </p>
               </EuiText>

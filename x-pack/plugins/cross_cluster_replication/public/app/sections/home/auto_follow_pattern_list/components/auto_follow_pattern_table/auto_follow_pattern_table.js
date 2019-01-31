@@ -82,7 +82,7 @@ export const AutoFollowPatternTable = injectI18n(
         field: 'remoteCluster',
         name: intl.formatMessage({
           id: 'xpack.crossClusterReplication.autoFollowPatternList.table.clusterColumnTitle',
-          defaultMessage: 'Cluster',
+          defaultMessage: 'Remote cluster',
         }),
         truncateText: true,
         sortable: true,

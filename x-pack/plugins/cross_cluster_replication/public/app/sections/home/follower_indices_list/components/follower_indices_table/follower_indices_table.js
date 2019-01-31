@@ -204,7 +204,7 @@ export const FollowerIndicesTable = injectI18n(
         field: 'remoteCluster',
         name: intl.formatMessage({
           id: 'xpack.crossClusterReplication.followerIndexList.table.clusterColumnTitle',
-          defaultMessage: 'Cluster',
+          defaultMessage: 'Remote cluster',
         }),
         truncateText: true,
         sortable: true,
