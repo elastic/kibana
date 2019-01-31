@@ -11,7 +11,16 @@ Here are the highlights of the feature and user experience changes in 6.6.0.
 Refer to the <<release-notes-6.6.0, {kib} 6.6.0 Release Notes>> for a list of
 bug fixes and other changes.
 
-coming[6.6.0]
+[float]
+=== Support for multiple Elasticsearch nodes 
+
+For increased stability, you can now define multiple {es} nodes for {kib}. This 
+prevents {kib} from being tied to a single {es} node while allowing for the 
+requests to be distributed over multiple nodes in the cluster.  Simply set 
+`elasticsearch.host` in your kibana.yml file to the URLs of the {es} nodes you 
+want to use.  You can also configure {kib} to automatically discover other nodes 
+in the cluster (`elasticsearch.sniffOnStart`) or on an interval (`elasticsearch.sniffInterval`).
+For more information, see {kibana-ref}/settings.html[Kibana configuration settings].
 
 [float]
 === Index lifecycle policies (beta)
@@ -95,31 +104,15 @@ You'll find this feature in *Management > {es} > Upgrade Assistant*.
 image::images/highlights-6.6.0-upgrade-assistant.png[Share menu]
 
 [float]
-=== Support for multiple Elasticsearch nodes 
-
-For increased stability, you can now define multiple {es} nodes for {kib}. This 
-prevents {kib} from being tied to a single {es} node while allowing for the 
-requests to be distributed over multiple nodes in the cluster.  Simply set 
-`elasticsearch.host` in your kibana.yml file to the URLs of the {es} nodes you 
-want to use.  You can also configure {kib} to automatically discover other nodes 
-in the cluster (`elasticsearch.sniffOnStart`) or on an interval (`elasticsearch.sniffInterval`).
-For more information, see {kibana-ref}/settings.html[Kibana configuration settings].
-
-[float]
-=== Production version of Time Series Visual Builder
-
-{kibana-ref}/time-series-visual-builder.html[Time Series Visual Builder] is now in production use.  
-This visualization has also been enhanced to use the 
-{kibana-ref}/kuery-query.html[Kibana query language (KQL)] to filter and query data.
-
-[float]
-=== Annotate your {ml} results
+=== Annotation of {ml} results
 
 You can now add annotations by drag-selecting in the *Single Metric Viewer*
 charts. For example, you can annotate a time period to describe what is
 occurring in your operational environment or to explain why anomalies were
 detected. After you add annotations, they are also listed in the
-*Anomaly Explorer* and the *Job Management* page. See <<xpack-ml>>.
+*Anomaly Explorer* and the *Job Management* page. Some annotations are also
+added automatically, for example when data is missing due to ingestion delays.
+See <<xpack-ml>>.
 
 [float]
 === Simplified creation of {ml} jobs for {auditbeat} data

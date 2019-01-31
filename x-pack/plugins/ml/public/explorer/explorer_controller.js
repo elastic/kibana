@@ -376,6 +376,7 @@ module.controller('MlExplorerController', function (
     return {
       chartWidth: $scope.swimlaneWidth,
       MlTimeBuckets: TimeBuckets,
+      showViewBySwimlane: $scope.showViewBySwimlane,
       swimlaneData: getSwimlaneData(swimlaneType),
       swimlaneType,
       selection: $scope.appState.mlExplorerSwimlane
