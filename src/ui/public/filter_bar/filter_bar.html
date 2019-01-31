@@ -12,14 +12,14 @@
         <span
           ng-if="filter.meta.negate"
           i18n-id="common.ui.filterBar.notFilterLabel"
-          i18n-default-message="NOT "
+          i18n-default-message="NOT"
         ></span>
         {{ filter.meta.key }}: {{ filter.meta.value }}
       </li>
       <li ng-if="changeTimeFilter" class="changeTimeFilter filter" ng-click="changeTimeFilter.meta.apply = !changeTimeFilter.meta.apply"><input type="checkbox" ng-checked="changeTimeFilter.meta.apply"/>
         <strong
           i18n-id="common.ui.filterBar.changeTimeToLabel"
-          i18n-default-message="Change time to: "
+          i18n-default-message="Change time to:"
         ></strong>
         {{changeTimeFilter.meta.value}}
       </li>
