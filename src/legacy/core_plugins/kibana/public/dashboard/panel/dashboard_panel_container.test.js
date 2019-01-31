@@ -31,6 +31,21 @@ import {
 import { Provider } from 'react-redux';
 import { getEmbeddableFactoryMock } from '../__tests__/get_embeddable_factories_mock';
 
+jest.mock(
+  'ui/chrome',
+  () => ({
+    getInjected(injected) {
+      if (injected === 'uiCapabilities') {
+        return {
+          dashboard: { show: true, save: true },
+          visualize: { show: true, showWriteControls: true },
+        };
+      }
+    },
+  }),
+  { virtual: true }
+);
+
 function getProps(props = {}) {
   const defaultTestProps = {
     panelId: 'foo1',

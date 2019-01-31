@@ -26,7 +26,18 @@ import { getEmbeddableFactoryMock } from '../__tests__';
 
 import { DashboardGrid } from './dashboard_grid';
 
-jest.mock('ui/chrome', () => ({ getKibanaVersion: () => '6.0.0' }), { virtual: true });
+jest.mock('ui/chrome',
+  () => ({
+    getKibanaVersion: () => '6.0.0',
+    getInjected(injected) {
+      if (injected === 'uiCapabilities') {
+        return {
+          dashboard: { show: true, save: true },
+          visualize: { show: true, showWriteControls: true },
+        };
+      }
+    }
+  }), { virtual: true });
 
 jest.mock('ui/notify',
   () => ({

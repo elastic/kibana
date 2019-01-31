@@ -23,7 +23,18 @@ import { embeddableIsInitialized, setPanels } from './actions';
 import { getAppStateMock, getSavedDashboardMock } from './__tests__';
 import { store } from '../store';
 
-jest.mock('ui/chrome', () => ({ getKibanaVersion: () => '6.0.0' }), { virtual: true });
+jest.mock('ui/chrome',
+  () => ({
+    getKibanaVersion: () => '6.0.0',
+    getInjected(injected) {
+      if (injected === 'uiCapabilities') {
+        return {
+          dashboard: { show: true, save: true },
+          visualize: { show: true, showWriteControls: true },
+        };
+      }
+    }
+  }), { virtual: true });
 
 
 describe('DashboardState', function () {

@@ -28,7 +28,18 @@ import { store } from '../../store';
 import { DashboardGridContainer } from './dashboard_grid_container';
 import { updatePanels, updateTimeRange, updateUseMargins } from '../actions';
 
-jest.mock('ui/chrome', () => ({ getKibanaVersion: () => '6.3.0' }), { virtual: true });
+jest.mock('ui/chrome',
+  () => ({
+    getKibanaVersion: () => '6.3.0',
+    getInjected(injected) {
+      if (injected === 'uiCapabilities') {
+        return {
+          dashboard: { show: true, save: true },
+          visualize: { show: true, showWriteControls: true },
+        };
+      }
+    }
+  }), { virtual: true });
 
 jest.mock('ui/notify',
   () => ({
