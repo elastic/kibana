@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PrivilegeMap } from 'x-pack/plugins/security/common/model';
+import { RawKibanaPrivileges } from 'x-pack/plugins/security/common/model';
 import { Feature } from '../../../../xpack_main/types';
 import { IGNORED_TYPES } from '../../../common/constants';
 import { Actions } from './actions';
 import { FeaturesPrivilegesBuilder } from './features_privileges_builder';
 
 export interface PrivilegesService {
-  get(): PrivilegeMap;
+  get(): RawKibanaPrivileges;
 }
 
 interface XPackMainPlugin {

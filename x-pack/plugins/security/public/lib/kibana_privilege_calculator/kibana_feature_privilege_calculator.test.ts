@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaPrivilegeSpec, PrivilegeDefinition, Role } from '../../../common/model';
+import { KibanaPrivileges, Role, RoleKibanaPrivilege } from '../../../common/model';
 import { NO_PRIVILEGE_VALUE } from '../../views/management/edit_role/lib/constants';
 import { isGlobalPrivilegeDefinition } from '../privilege_utils';
 import { buildRole, BuildRoleOpts, defaultPrivilegeDefinition } from './__fixtures__';
@@ -14,7 +14,7 @@ import { PRIVILEGE_SOURCE } from './kibana_privilege_calculator_types';
 
 const buildEffectiveBasePrivilegeCalculator = (
   role: Role,
-  privilegeDefinition: PrivilegeDefinition = defaultPrivilegeDefinition
+  kibanaPrivileges: KibanaPrivileges = defaultPrivilegeDefinition
 ) => {
   const globalPrivilegeSpec =
     role.kibana.find(k => isGlobalPrivilegeDefinition(k)) ||
@@ -22,18 +22,18 @@ const buildEffectiveBasePrivilegeCalculator = (
       spaces: ['*'],
       base: [],
       feature: {},
-    } as KibanaPrivilegeSpec);
+    } as RoleKibanaPrivilege);
 
   const globalActions = globalPrivilegeSpec.base[0]
-    ? privilegeDefinition.getGlobalPrivileges().getActions(globalPrivilegeSpec.base[0])
+    ? kibanaPrivileges.getGlobalPrivileges().getActions(globalPrivilegeSpec.base[0])
     : [];
 
-  return new KibanaBasePrivilegeCalculator(privilegeDefinition, globalPrivilegeSpec, globalActions);
+  return new KibanaBasePrivilegeCalculator(kibanaPrivileges, globalPrivilegeSpec, globalActions);
 };
 
 const buildEffectiveFeaturePrivilegeCalculator = (
   role: Role,
-  privilegeDefinition: PrivilegeDefinition = defaultPrivilegeDefinition
+  kibanaPrivileges: KibanaPrivileges = defaultPrivilegeDefinition
 ) => {
   const globalPrivilegeSpec =
     role.kibana.find(k => isGlobalPrivilegeDefinition(k)) ||
@@ -41,16 +41,16 @@ const buildEffectiveFeaturePrivilegeCalculator = (
       spaces: ['*'],
       base: [],
       feature: {},
-    } as KibanaPrivilegeSpec);
+    } as RoleKibanaPrivilege);
 
   const globalActions = globalPrivilegeSpec.base[0]
-    ? privilegeDefinition.getGlobalPrivileges().getActions(globalPrivilegeSpec.base[0])
+    ? kibanaPrivileges.getGlobalPrivileges().getActions(globalPrivilegeSpec.base[0])
     : [];
 
-  const rankedFeaturePrivileges = privilegeDefinition.getFeaturePrivileges().getAllPrivileges();
+  const rankedFeaturePrivileges = kibanaPrivileges.getFeaturePrivileges().getAllPrivileges();
 
   return new KibanaFeaturePrivilegeCalculator(
-    privilegeDefinition,
+    kibanaPrivileges,
     globalPrivilegeSpec,
     globalActions,
     rankedFeaturePrivileges

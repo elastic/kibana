@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { KibanaPrivilegeSpec, PrivilegeDefinition } from '../../../common/model';
+import { KibanaPrivileges, RoleKibanaPrivilege } from '../../../common/model';
 import { NO_PRIVILEGE_VALUE } from '../../views/management/edit_role/lib/constants';
 import { isGlobalPrivilegeDefinition } from '../privilege_utils';
 import { PRIVILEGE_SOURCE, PrivilegeExplanation } from './kibana_privilege_calculator_types';
@@ -13,13 +13,13 @@ import { compareActions } from './privilege_calculator_utils';
 
 export class KibanaBasePrivilegeCalculator {
   constructor(
-    private readonly privilegeDefinition: PrivilegeDefinition,
-    private readonly globalPrivilege: KibanaPrivilegeSpec,
+    private readonly kibanaPrivileges: KibanaPrivileges,
+    private readonly globalPrivilege: RoleKibanaPrivilege,
     private readonly assignedGlobalBaseActions: string[]
   ) {}
 
   public getMostPermissiveBasePrivilege(
-    privilegeSpec: KibanaPrivilegeSpec,
+    privilegeSpec: RoleKibanaPrivilege,
     ignoreAssigned: boolean
   ): PrivilegeExplanation {
     const assignedPrivilege = privilegeSpec.base[0] || NO_PRIVILEGE_VALUE;
@@ -42,7 +42,7 @@ export class KibanaBasePrivilegeCalculator {
 
     // Otherwise, check to see if the global privilege supercedes this one.
     const baseActions = [
-      ...this.privilegeDefinition.getSpacesPrivileges().getActions(assignedPrivilege),
+      ...this.kibanaPrivileges.getSpacesPrivileges().getActions(assignedPrivilege),
     ];
 
     const globalSupercedes =

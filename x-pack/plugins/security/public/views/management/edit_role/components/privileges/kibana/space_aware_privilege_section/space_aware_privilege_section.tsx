@@ -17,7 +17,7 @@ import React, { Component, Fragment } from 'react';
 import { UICapabilities } from 'ui/capabilities';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
-import { PrivilegeDefinition, Role } from '../../../../../../../../common/model';
+import { KibanaPrivileges, Role } from '../../../../../../../../common/model';
 import { KibanaPrivilegeCalculatorFactory } from '../../../../../../../lib/kibana_privilege_calculator';
 import { RoleValidator } from '../../../../lib/validate_role';
 import { PrivilegeMatrix } from './privilege_matrix';
@@ -25,7 +25,7 @@ import { PrivilegeSpaceForm } from './privilege_space_form';
 import { PrivilegeSpaceTable } from './privilege_space_table';
 
 interface Props {
-  privilegeDefinition: PrivilegeDefinition;
+  kibanaPrivileges: KibanaPrivileges;
   role: Role;
   privilegeCalculatorFactory: KibanaPrivilegeCalculatorFactory;
   spaces: Space[];
@@ -119,7 +119,7 @@ class SpaceAwarePrivilegeSectionUI extends Component<Props, State> {
           <PrivilegeSpaceForm
             role={this.props.role}
             privilegeCalculatorFactory={privilegeCalculatorFactory}
-            privilegeDefinition={this.props.privilegeDefinition}
+            kibanaPrivileges={this.props.kibanaPrivileges}
             features={this.props.features}
             intl={this.props.intl}
             onChange={this.onSpacesPrivilegeChange}

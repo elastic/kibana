@@ -424,17 +424,17 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
               "timeZone": null,
             }
           }
-          onChange={[Function]}
-          onChangeAll={[Function]}
-          privilegeDefinition={
-            PrivilegeDefinition {
-              "privilegeActionMap": Object {
+          kibanaPrivileges={
+            KibanaPrivileges {
+              "rawKibanaPrivileges": Object {
                 "features": Object {},
                 "global": Object {},
                 "space": Object {},
               },
             }
           }
+          onChange={[Function]}
+          onChangeAll={[Function]}
           rankedFeaturePrivileges={Object {}}
           role={
             Object {

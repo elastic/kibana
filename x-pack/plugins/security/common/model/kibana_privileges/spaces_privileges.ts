@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export class GlobalPrivileges {
-  constructor(private readonly globalPrivilegesMap: Record<string, string[]>) {}
+export class KibanaSpacesPrivileges {
+  constructor(private readonly spacesPrivilegesMap: Record<string, string[]>) {}
 
   public getAllPrivileges(): string[] {
-    return Object.keys(this.globalPrivilegesMap);
+    return Object.keys(this.spacesPrivilegesMap);
   }
 
   public getActions(privilege: string): string[] {
-    return this.globalPrivilegesMap[privilege] || [];
+    return this.spacesPrivilegesMap[privilege] || [];
   }
 }

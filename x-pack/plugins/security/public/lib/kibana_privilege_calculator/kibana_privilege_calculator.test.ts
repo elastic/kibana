@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PrivilegeDefinition, Role } from '../../../common/model';
+import { KibanaPrivileges, Role } from '../../../common/model';
 import { NO_PRIVILEGE_VALUE } from '../../views/management/edit_role/lib/constants';
 import {
   buildRole,
@@ -23,9 +23,9 @@ import { KibanaPrivilegeCalculatorFactory } from './kibana_privileges_calculator
 
 const buildEffectivePrivileges = (
   role: Role,
-  privilegeDefinition: PrivilegeDefinition = defaultPrivilegeDefinition
+  kibanaPrivileges: KibanaPrivileges = defaultPrivilegeDefinition
 ) => {
-  const factory = new KibanaPrivilegeCalculatorFactory(privilegeDefinition);
+  const factory = new KibanaPrivilegeCalculatorFactory(kibanaPrivileges);
   return factory.getInstance(role);
 };
 

@@ -8,26 +8,26 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
   <InjectIntl(SpaceAwarePrivilegeSectionUI)
     editable={true}
     features={Array []}
+    kibanaPrivileges={
+      KibanaPrivileges {
+        "rawKibanaPrivileges": Object {
+          "features": Object {},
+          "global": Object {},
+          "space": Object {},
+        },
+      }
+    }
     onChange={[MockFunction]}
     privilegeCalculatorFactory={
       KibanaPrivilegeCalculatorFactory {
-        "privilegeDefinition": PrivilegeDefinition {
-          "privilegeActionMap": Object {
+        "kibanaPrivileges": KibanaPrivileges {
+          "rawKibanaPrivileges": Object {
             "features": Object {},
             "global": Object {},
             "space": Object {},
           },
         },
         "rankedFeaturePrivileges": Object {},
-      }
-    }
-    privilegeDefinition={
-      PrivilegeDefinition {
-        "privilegeActionMap": Object {
-          "features": Object {},
-          "global": Object {},
-          "space": Object {},
-        },
       }
     }
     role={

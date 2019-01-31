@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, Fragment } from 'react';
-import { IndexPrivilege } from '../../../../../../../common/model';
+import { RoleIndexPrivilege } from '../../../../../../../common/model';
 // @ts-ignore
 import { getIndexPrivileges } from '../../../../../../services/role_privileges';
 import { RoleValidator } from '../../../lib/validate_role';
@@ -27,10 +27,10 @@ const toOption = (value: string) => ({ label: value });
 
 interface Props {
   formIndex: number;
-  indexPrivilege: IndexPrivilege;
+  indexPrivilege: RoleIndexPrivilege;
   indexPatterns: string[];
   availableFields: string[];
-  onChange: (indexPrivilege: IndexPrivilege) => void;
+  onChange: (indexPrivilege: RoleIndexPrivilege) => void;
   onDelete: () => void;
   isReadOnlyRole: boolean;
   allowDelete: boolean;

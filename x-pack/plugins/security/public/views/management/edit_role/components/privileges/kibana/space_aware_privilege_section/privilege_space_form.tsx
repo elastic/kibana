@@ -27,7 +27,7 @@ import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
-import { PrivilegeDefinition, Role } from '../../../../../../../../common/model';
+import { KibanaPrivileges, Role } from '../../../../../../../../common/model';
 import {
   AllowedPrivilege,
   KibanaPrivilegeCalculatorFactory,
@@ -42,7 +42,7 @@ import { SpaceSelector } from './space_selector';
 interface Props {
   role: Role;
   privilegeCalculatorFactory: KibanaPrivilegeCalculatorFactory;
-  privilegeDefinition: PrivilegeDefinition;
+  kibanaPrivileges: KibanaPrivileges;
   features: Feature[];
   spaces: Space[];
   editingIndex: number;
@@ -287,7 +287,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           intl={this.props.intl}
           onChange={this.onFeaturePrivilegesChange}
           onChangeAll={this.onChangeAllFeaturePrivileges}
-          privilegeDefinition={this.props.privilegeDefinition}
+          kibanaPrivileges={this.props.kibanaPrivileges}
           spacesIndex={this.state.editingIndex}
           disabled={this.state.selectedBasePrivilege.length > 0}
         />

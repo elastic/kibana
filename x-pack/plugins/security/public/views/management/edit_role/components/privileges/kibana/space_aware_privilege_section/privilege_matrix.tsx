@@ -24,7 +24,7 @@ import React, { Component, Fragment } from 'react';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
 import { SpaceAvatar } from '../../../../../../../../../spaces/public/components';
-import { FeaturePrivilegeSet, Role } from '../../../../../../../../common/model';
+import { FeaturesPrivileges, Role } from '../../../../../../../../common/model';
 import { CalculatedPrivilege } from '../../../../../../../lib/kibana_privilege_calculator';
 import { isGlobalPrivilegeDefinition } from '../../../../../../../lib/privilege_utils';
 import { SpacesPopoverList } from '../../../spaces_popover_list';
@@ -56,7 +56,7 @@ interface SpacesColumn {
   spaces: Space[];
   privileges: {
     base: string[];
-    feature: FeaturePrivilegeSet;
+    feature: FeaturesPrivileges;
   };
 }
 
