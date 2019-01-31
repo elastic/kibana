@@ -385,7 +385,12 @@ export class DataRecognizer {
     let results = { saved_objects: [] };
     const filteredSavedObjects = objectExistResults.filter(o => o.exists === false).map(o => o.savedObject);
     if (filteredSavedObjects.length) {
-      results = await this.savedObjectsClient.bulkCreate(filteredSavedObjects);
+      results = await this.savedObjectsClient.bulkCreate(
+        // Add an empty migrationVersion attribute to each saved object to ensure
+        // it is automatically migrated to the 7.0+ format with a references attribute.
+        // TODO: update module kibana objects to be in the 7.0+ format
+        filteredSavedObjects.map(doc => ({ ...doc, migrationVersion: doc.migrationVersion || { } }))
+      );
     }
     return results.saved_objects;
   }
