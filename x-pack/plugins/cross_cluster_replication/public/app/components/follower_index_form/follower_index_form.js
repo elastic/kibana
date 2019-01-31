@@ -92,6 +92,7 @@ export const FollowerIndexForm = injectI18n(
       apiError: PropTypes.object,
       apiStatus: PropTypes.string.isRequired,
       remoteClusters: PropTypes.array,
+      saveButtonLabel: PropTypes.node,
     }
 
     constructor(props) {
@@ -599,7 +600,7 @@ export const FollowerIndexForm = injectI18n(
        * Form Actions
        */
       const renderActions = () => {
-        const { apiStatus } = this.props;
+        const { apiStatus, saveButtonLabel } = this.props;
         const { areErrorsVisible } = this.state;
 
         if (apiStatus === API_STATUS.SAVING) {
@@ -633,10 +634,7 @@ export const FollowerIndexForm = injectI18n(
                 fill
                 disabled={isSaveDisabled}
               >
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.followerIndexForm.saveButtonLabel"
-                  defaultMessage="Save"
-                />
+                {saveButtonLabel}
               </EuiButton>
             </EuiFlexItem>
 

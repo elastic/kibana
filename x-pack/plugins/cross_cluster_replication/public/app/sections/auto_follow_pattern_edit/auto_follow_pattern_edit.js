@@ -162,6 +162,12 @@ export const AutoFollowPatternEdit = injectI18n(
                     remoteClusters={error ? [] : remoteClusters}
                     autoFollowPattern={autoFollowPattern}
                     saveAutoFollowPattern={saveAutoFollowPattern}
+                    saveButtonLabel={(
+                      <FormattedMessage
+                        id="xpack.crossClusterReplication.autoFollowPatternEditForm.saveButtonLabel"
+                        defaultMessage="Update"
+                      />
+                    )}
                   />
                 );
               }}

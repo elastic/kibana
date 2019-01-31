@@ -251,6 +251,12 @@ export const FollowerIndexEdit = injectI18n(
                     remoteClusters={error ? [] : remoteClusters}
                     saveFollowerIndex={this.saveFollowerIndex}
                     clearApiError={clearApiError}
+                    saveButtonLabel={(
+                      <FormattedMessage
+                        id="xpack.crossClusterReplication.followerIndexEditForm.saveButtonLabel"
+                        defaultMessage="Update"
+                      />
+                    )}
                   />
                 );
               }}
