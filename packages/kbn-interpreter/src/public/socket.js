@@ -26,7 +26,7 @@ export async function createSocket(basePath, functionsRegistry) {
   return new Promise((resolve, reject) => {
     const socket = io({
       path: `${basePath}/socket.io`,
-      transports: ['polling', 'websocket'],
+      transports: ['polling'],
       transportOptions: {
         polling: {
           extraHeaders: {
