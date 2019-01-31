@@ -81,12 +81,13 @@ uiRoutes.when('/elasticsearch/indices/:index', {
         }
 
         const shards = data.shards;
-        data.totalCount = shards.length;
-        data.showing = transformer(shards, data.nodes);
+        $scope.totalCount = shards.length;
+        $scope.showing = transformer(shards, data.nodes);
+        $scope.labels = labels.node;
         if (shards.some((shard) => shard.state === 'UNASSIGNED')) {
-          data.labels = labels.indexWithUnassigned;
+          $scope.labels = labels.indexWithUnassigned;
         } else {
-          data.labels = labels.index;
+          $scope.labels = labels.index;
         }
 
         this.renderReact(
