@@ -3,16 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-export interface RawKibanaFeaturePrivileges {
-  [featureId: string]: {
-    [privilegeId: string]: string[];
-  };
-}
-
-export interface FeaturesPrivileges {
-  [featureId: string]: string[];
-}
+import { FeaturesPrivileges } from '../features_privileges';
+import { RawKibanaFeaturePrivileges } from '../raw_kibana_privileges';
 
 export class KibanaFeaturePrivileges {
   constructor(private readonly featurePrivilegesMap: RawKibanaFeaturePrivileges) {}

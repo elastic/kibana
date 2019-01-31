@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RawKibanaPrivileges } from '../kibana_privilege';
+import { RawKibanaPrivileges } from '../raw_kibana_privileges';
 import { KibanaFeaturePrivileges } from './feature_privileges';
 import { KibanaGlobalPrivileges } from './global_privileges';
 import { KibanaSpacesPrivileges } from './spaces_privileges';

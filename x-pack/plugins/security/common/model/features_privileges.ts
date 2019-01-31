@@ -4,11 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface RoleIndexPrivilege {
-  names: string[];
-  privileges: string[];
-  field_security?: {
-    grant?: string[];
-  };
-  query?: string;
+export interface FeaturesPrivileges {
+  [featureId: string]: string[];
 }

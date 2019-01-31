@@ -4,8 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RoleIndexPrivilege } from './index_privilege';
-import { FeaturesPrivileges } from './privileges/feature_privileges';
+import { FeaturesPrivileges } from './features_privileges';
+
+export interface RoleIndexPrivilege {
+  names: string[];
+  privileges: string[];
+  field_security?: {
+    grant?: string[];
+  };
+  query?: string;
+}
 
 export interface RoleKibanaPrivilege {
   spaces: string[];

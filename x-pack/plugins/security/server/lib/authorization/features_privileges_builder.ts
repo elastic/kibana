@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { flatten, mapValues, uniq } from 'lodash';
-import { RawKibanaFeaturePrivileges } from 'x-pack/plugins/security/common/model/privileges/feature_privileges';
 import { FeatureKibanaPrivileges } from 'x-pack/plugins/xpack_main/server/lib/feature_registry/feature_registry';
 import { Feature } from '../../../../xpack_main/types';
+import { RawKibanaFeaturePrivileges } from '../../../common/model';
 import { Actions } from './actions';
 
 export class FeaturesPrivilegesBuilder {
