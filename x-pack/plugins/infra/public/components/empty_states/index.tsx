@@ -5,3 +5,4 @@
  */
 
 export { NoIndices } from './no_indices';
+export { NoData } from './no_data';

@@ -12,7 +12,7 @@ import { InfraMetricData } from '../../graphql/types';
 import { InfraMetricLayout, InfraMetricLayoutSection } from '../../pages/metrics/layouts/types';
 import { metricTimeActions } from '../../store';
 import { InfraLoadingPanel } from '../loading';
-import { MetricsEmptyView } from './empty_view';
+import { NoData } from '../empty_states';
 import { Section } from './section';
 
 interface Props {
@@ -53,7 +53,7 @@ export const Metrics = injectI18n(
         );
       } else if (!this.props.loading && this.props.metrics && this.props.metrics.length === 0) {
         return (
-          <MetricsEmptyView
+          <NoData
             titleText={intl.formatMessage({
               id: 'xpack.infra.metrics.emptyViewTitle',
               defaultMessage: 'There is no data to display.',
