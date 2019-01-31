@@ -1,0 +1,16 @@
+{
+  "sort": [
+    "@timestamp",
+    "desc"
+  ],
+  "hits": 0,
+  "description": "Filebeat HTTP Access Data (ECS)",
+  "title": "ML HTTP Access Data (ECS)",
+  "version": 1,
+  "kibanaSavedObjectMeta": {
+    "searchSourceJSON": "{\"index\":\"INDEX_PATTERN_ID\",\"query\":{\"query_string\":{\"query\":\"fileset.name:access\",\"analyze_wildcard\":true}},\"filter\":[],\"highlight\":{\"pre_tags\":[\"@kibana-highlighted-field@\"],\"post_tags\":[\"@/kibana-highlighted-field@\"],\"fields\":{\"*\":{}},\"require_field_match\":false,\"fragment_size\":2147483647}}"
+  },
+  "columns": [
+    "_source"
+  ]
+}
