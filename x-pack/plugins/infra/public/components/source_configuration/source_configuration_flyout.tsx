@@ -40,7 +40,7 @@ export const SourceConfigurationFlyout = injectI18n(({ intl }: SourceConfigurati
           {({ create, configuration, exists, isLoading, update }) =>
             configuration ? (
               <WithSourceConfigurationFormState
-                initialState={{
+                initialFormState={{
                   name: configuration.name,
                   description: configuration.description,
                   fields: {

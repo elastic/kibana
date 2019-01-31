@@ -82,13 +82,13 @@ interface WithSourceConfigurationFormStateProps {
         getFieldFieldProps: (field: keyof FormState['fields']) => InputFieldProps;
       }
   >;
-  initialState: FormState;
+  initialFormState: FormState;
   onMount?: OnMount<State>;
 }
 
 export const WithSourceConfigurationFormState: React.SFC<WithSourceConfigurationFormStateProps> = ({
   children,
-  initialState,
+  initialFormState,
   onMount,
 }) => (
   <ConstateContainer
@@ -98,7 +98,7 @@ export const WithSourceConfigurationFormState: React.SFC<WithSourceConfiguration
     onMount={onMount}
   >
     {args => {
-      const currentFormState = getCurrentFormState(initialState, args.updates);
+      const currentFormState = getCurrentFormState(initialFormState, args.updates);
       return children({
         ...args,
         currentFormState,
