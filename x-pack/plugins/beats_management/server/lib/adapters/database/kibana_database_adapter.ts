@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { INDEX_NAMES } from '../../../../common/constants/index_names';
+import { get } from 'lodash';
+import { INDEX_NAMES } from 'x-pack/plugins/beats_management/common/constants';
 import { beatsIndexTemplate } from '../../../utils/index_templates';
 import { FrameworkUser } from '../framework/adapter_types';
 import { internalAuthData } from './../framework/adapter_types';
@@ -78,11 +79,34 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
     return result;
   }
 
+  public async deleteByQuery(
+    user: FrameworkUser,
+    params: DatabaseSearchParams
+  ): Promise<DatabaseDeleteDocumentResponse> {
+    const result = await this.callWithUser(user, 'deleteByQuery', params);
+    return result;
+  }
+
   public async search<Source>(
     user: FrameworkUser,
     params: DatabaseSearchParams
   ): Promise<DatabaseSearchResponse<Source>> {
     const result = await this.callWithUser(user, 'search', params);
+    return result;
+  }
+
+  public async searchAll<Source>(
+    user: FrameworkUser,
+    params: DatabaseSearchParams
+  ): Promise<DatabaseSearchResponse<Source>> {
+    const result = await this.callWithUser(user, 'search', {
+      scroll: '1m',
+      ...params,
+      body: {
+        size: 1000,
+        ...params.body,
+      },
+    });
     return result;
   }
 
@@ -94,6 +118,43 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
     });
 
     return result;
+  }
+
+  private async fetchAllFromScroll<Source>(
+    user: FrameworkUser,
+    response: DatabaseSearchResponse<Source>,
+    hits: DatabaseSearchResponse<Source>['hits']['hits'] = []
+  ): Promise<
+    Array<{
+      _index: string;
+      _type: string;
+      _id: string;
+      _score: number;
+      _source: Source;
+      _version?: number;
+      fields?: any;
+      highlight?: any;
+      inner_hits?: any;
+      sort?: string[];
+    }>
+  > {
+    const newHits = get(response, 'hits.hits', []);
+    const scrollId = get(response, '_scroll_id');
+
+    if (newHits.length > 0) {
+      hits.push(...newHits);
+
+      return this.callWithUser(user, 'scroll', {
+        body: {
+          scroll: '30s',
+          scroll_id: scrollId,
+        },
+      }).then((innerResponse: DatabaseSearchResponse<Source>) => {
+        return this.fetchAllFromScroll(user, innerResponse, hits);
+      });
+    }
+
+    return Promise.resolve(hits);
   }
 
   private callWithUser(user: FrameworkUser, esMethod: string, options: any = {}): any {

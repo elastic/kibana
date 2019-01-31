@@ -6,4 +6,3 @@
 
 export const ES_INDEX_NAME = '.management-beats';
 export const ES_TYPE_NAME = '_doc';
-
