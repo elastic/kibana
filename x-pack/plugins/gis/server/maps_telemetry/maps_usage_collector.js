@@ -5,19 +5,18 @@
  */
 
 import _ from 'lodash';
-import { TASK_ID, scheduleTask, registerMapsTelemetryTask } from './maps_telemetry_task';
+import { TASK_ID, scheduleTask, registerMapsTelemetryTask } from './telemetry_task';
 
 export function initTelemetryCollection(server) {
   const { taskManager } = server;
 
   registerMapsTelemetryTask(taskManager);
   scheduleTask(server, taskManager);
-  makeMapsUsageCollector(server);
+  registerMapsUsageCollector(server);
 }
 
-function makeMapsUsageCollector(server) {
-
-  const mapsUsageCollector = server.usage.collectorSet.makeUsageCollector({
+export function buildCollectorObj(server) {
+  return {
     type: 'maps',
     fetch: async () => {
       let docs;
@@ -47,8 +46,14 @@ function makeMapsUsageCollector(server) {
         }
       }
 
-      return _.get(docs, '[0].state.telemetry');
+      return _.get(docs, '[0].state.stats');
     },
-  });
-  server.usage.collectorSet.register(mapsUsageCollector);
+  };
+}
+
+export function registerMapsUsageCollector(server) {
+  const { usage } = server;
+  const collectorObj = buildCollectorObj(server);
+  const mapsUsageCollector = usage.collectorSet.makeUsageCollector(collectorObj);
+  usage.collectorSet.register(mapsUsageCollector);
 }

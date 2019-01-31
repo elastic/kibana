@@ -17,7 +17,7 @@ export function scheduleTask(server, taskManager) {
     taskManager.schedule({
       id: TASK_ID,
       taskType: TELEMETRY_TASK_TYPE,
-      state: { telemetry: {}, runs: 0 },
+      state: { stats: {}, runs: 0 },
     });
   });
 }
