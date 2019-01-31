@@ -100,6 +100,7 @@ export const ScrollableLogTextStreamView = injectI18n(
         hasMoreAfterEnd,
         isStreaming,
         lastLoadedTime,
+        intl,
       } = this.props;
       const { targetId } = this.state;
       const hasItems = items.length > 0;
