@@ -21,13 +21,14 @@ import React, { Fragment } from 'react';
 import {
   EuiEmptyPrompt,
   EuiButton,
-  EuiButtonEmpty,
+  EuiIcon,
   EuiText,
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 export const Prompt = () => (<EuiEmptyPrompt
+  className="euiPanel"
   iconType="editorStrike"
   title={
     <EuiText grow={false}>
@@ -45,20 +46,22 @@ export const Prompt = () => (<EuiEmptyPrompt
         />
       </p>
       <EuiHorizontalRule margin="m" />
-      <p>
+      <p style={{ textAlign: 'left' }}>
         <FormattedMessage
           id="kbn.management.indexPatternPrompt.examplesTitle"
           defaultMessage="Examples of index patterns"
         />
       </p>
-      <ul>
+      <ul style={{ textAlign: 'left' }}>
         <li>
+          <EuiIcon type="document" />
           <FormattedMessage
             id="kbn.management.indexPatternPrompt.exampleOne"
             defaultMessage="Index a single data source named log-west-001 so you can build charts or query its contents fast."
           />
         </li>
         <li>
+          <EuiIcon type="copy" />
           <FormattedMessage
             id="kbn.management.indexPatternPrompt.exampleTwo"
             defaultMessage="Group all incoming data sources starting with log-west* so you can query against all your west coast server
@@ -66,6 +69,7 @@ export const Prompt = () => (<EuiEmptyPrompt
           />
         </li>
         <li>
+          <EuiIcon type="calendar" />
           <FormattedMessage
             id="kbn.management.indexPatternPrompt.exampleThree"
             defaultMessage="Specifically group your archived, monthly, roll-up metrics of those logs into a separate index pattern so you
@@ -76,10 +80,16 @@ export const Prompt = () => (<EuiEmptyPrompt
     </Fragment>
   }
   actions={[
-    <EuiButton color="primary" fill href="#/management/kibana/index_pattern" iconSide="right" iconType="arrowDown">
+    <EuiButton
+      color="primary"
+      fill
+      href="#/management/kibana/index_pattern"
+      iconSide="right"
+      iconType="arrowDown"
+      data-test-subj="createIndexPatternButton"
+    >
       <FormattedMessage id="kbn.management.indexPatternPrompt.createBtn" defaultMessage="Create index pattern" />
     </EuiButton>,
-    <EuiButtonEmpty color="danger" href="#/management/kibana/index_pattern">View system indices Kibana auto-creates</EuiButtonEmpty>,
   ]}
 />);
 

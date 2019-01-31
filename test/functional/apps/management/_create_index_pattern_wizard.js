@@ -34,6 +34,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('step 1 next button', function () {
       it('is disabled by default', async function () {
+        await (await this.getCreateIndexPatternCreateButton()).click();
         const btn = await PageObjects.settings.getCreateIndexPatternGoToStep2Button();
         const isEnabled = await btn.isEnabled();
         expect(isEnabled).not.to.be.ok();
