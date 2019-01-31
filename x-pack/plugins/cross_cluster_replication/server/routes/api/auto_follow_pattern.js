@@ -36,7 +36,7 @@ export const registerAutoFollowPatternRoutes = (server) => {
       // throw wrapEsError(esErrors[403]); // Temp for development to test ES error in UI. MUST be commented in CR
 
       try {
-        const response = await callWithRequest('ccr.autoFollowPatterns');
+        const response = await callWithRequest('ccr.getAutoFollowPattern');
         return ({
           patterns: deserializeListAutoFollowPatterns(response.patterns)
         });
@@ -68,7 +68,7 @@ export const registerAutoFollowPatternRoutes = (server) => {
        * the same id does not exist.
        */
       try {
-        await callWithRequest('ccr.autoFollowPattern', { id });
+        await callWithRequest('ccr.getAutoFollowPattern', { name: id });
         // If we get here it means that an auto-follow pattern with the same id exists
         const error = Boom.conflict(`An auto-follow pattern with the name "${id}" already exists.`);
         throw(error);
@@ -82,7 +82,7 @@ export const registerAutoFollowPatternRoutes = (server) => {
       }
 
       try {
-        return await callWithRequest('ccr.saveAutoFollowPattern', { id, body });
+        return await callWithRequest('ccr.putAutoFollowPattern', { name: id, body });
       } catch(err) {
         if (isEsError(err)) {
           throw wrapEsError(err);
@@ -107,7 +107,7 @@ export const registerAutoFollowPatternRoutes = (server) => {
       const body = serializeAutoFollowPattern(request.payload);
 
       try {
-        return await callWithRequest('ccr.saveAutoFollowPattern', { id, body });
+        return await callWithRequest('ccr.putAutoFollowPattern', { name: id, body });
       } catch(err) {
         if (isEsError(err)) {
           throw wrapEsError(err);
@@ -131,7 +131,7 @@ export const registerAutoFollowPatternRoutes = (server) => {
       const { id } = request.params;
 
       try {
-        const response = await callWithRequest('ccr.autoFollowPattern', { id });
+        const response = await callWithRequest('ccr.getAutoFollowPattern', { name: id });
         const autoFollowPattern = response.patterns[0];
 
         return deserializeAutoFollowPattern(autoFollowPattern);
@@ -162,7 +162,7 @@ export const registerAutoFollowPatternRoutes = (server) => {
       const errors = [];
 
       await Promise.all(ids.map((_id) => (
-        callWithRequest('ccr.deleteAutoFollowPattern', { id: _id })
+        callWithRequest('ccr.deleteAutoFollowPattern', { name: _id })
           .then(() => itemsDeleted.push(_id))
           .catch(err => {
             if (isEsError(err)) {
