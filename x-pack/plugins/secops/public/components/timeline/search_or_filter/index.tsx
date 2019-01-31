@@ -30,7 +30,6 @@ interface StateReduxProps {
   filterQueryDraft: KueryFilterQuery;
   isFilterQueryDraftValid: boolean;
   kqlMode?: KqlMode;
-  kqlQuery?: string;
 }
 
 interface DispatchProps {
@@ -58,7 +57,6 @@ class StatefulSearchOrFilterComponent extends React.PureComponent<Props> {
       filterQueryDraft,
       isFilterQueryDraftValid,
       kqlMode,
-      kqlQuery,
       timelineId,
       setKqlFilterQueryDraft,
       updateKqlMode,
@@ -92,7 +90,6 @@ class StatefulSearchOrFilterComponent extends React.PureComponent<Props> {
         indexPattern={indexPattern}
         isFilterQueryDraftValid={isFilterQueryDraftValid}
         kqlMode={kqlMode!}
-        kqlQuery={kqlQuery!}
         timelineId={timelineId}
         updateKqlMode={updateKqlMode!}
         setKqlFilterQueryDraft={setFilterQueryDraftFromKueryExpression!}
@@ -109,7 +106,6 @@ const makeMapStateToProps = () => {
     const timeline: TimelineModel | {} = getTimeline(state, timelineId);
     return {
       kqlMode: getOr('filter', 'kqlMode', timeline),
-      kqlQuery: getOr('', 'kqlQuery', timeline),
       filterQueryDraft: getKqlFilterQueryDraft(state, timelineId),
       isFilterQueryDraftValid: isFilterQueryDraftValid(state, timelineId),
     };

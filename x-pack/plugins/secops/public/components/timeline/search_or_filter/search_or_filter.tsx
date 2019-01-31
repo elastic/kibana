@@ -41,7 +41,6 @@ interface Props {
   indexPattern: StaticIndexPattern;
   isFilterQueryDraftValid: boolean;
   kqlMode: KqlMode;
-  kqlQuery: string;
   timelineId: string;
   updateKqlMode: (
     {
@@ -73,7 +72,6 @@ export const SearchOrFilter = pure<Props>(
     isFilterQueryDraftValid,
     filterQueryDraft,
     kqlMode,
-    kqlQuery,
     timelineId,
     setKqlFilterQueryDraft,
     updateKqlMode,
@@ -108,10 +106,11 @@ export const SearchOrFilter = pure<Props>(
                     },
                   }}
                   query=""
-                  onChange={({ queryText }: { queryText: string }) =>
-                    // TODO: this handler is NOT being called by `EuiSearchBar`, which causes the query entered by the user to disappear
-                    alert('I will be doing filter at one point')
-                  }
+                  // TODO: this handler is NOT being called by `EuiSearchBar`, which causes the query entered by the user to disappear
+                  // we might have to use onSearch
+                  // onChange={({ queryText }: { queryText: string }) =>
+                  //   console.log('I will be doing filter at one point')
+                  // }
                 />
               )}
               {kqlMode === 'search' && (

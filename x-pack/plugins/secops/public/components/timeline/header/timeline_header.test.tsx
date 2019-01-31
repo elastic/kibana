@@ -13,48 +13,14 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 
 import { Direction } from '../../../graphql/types';
-import { mockGlobalState } from '../../../mock';
+import { mockGlobalState, mockIndexPattern } from '../../../mock';
 import { createStore, State } from '../../../store';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { TimelineHeader } from './timeline_header';
 
 describe('Header', () => {
   const state: State = mockGlobalState;
-  const indexPattern = {
-    fields: [
-      {
-        name: '@timestamp',
-        searchable: true,
-        type: 'date',
-        aggregatable: true,
-      },
-      {
-        name: '@version',
-        searchable: true,
-        type: 'string',
-        aggregatable: true,
-      },
-      {
-        name: 'agent.ephemeral_id',
-        searchable: true,
-        type: 'string',
-        aggregatable: true,
-      },
-      {
-        name: 'agent.hostname',
-        searchable: true,
-        type: 'string',
-        aggregatable: true,
-      },
-      {
-        name: 'agent.id',
-        searchable: true,
-        type: 'string',
-        aggregatable: true,
-      },
-    ],
-    title: 'filebeat-*,auditbeat-*,packetbeat-*',
-  };
+  const indexPattern = mockIndexPattern;
 
   let store = createStore(state);
 
