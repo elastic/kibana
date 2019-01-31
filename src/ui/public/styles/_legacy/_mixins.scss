@@ -34,6 +34,15 @@
   background-repeat: no-repeat;
   background-position: calc(100% - #{$euiSizeS});
   padding-right: $euiSizeXL;
+
+  &::-ms-expand {
+    display: none;
+  }
+
+  &:focus::-ms-value {
+    color: $euiTextColor;
+    background: transparent;
+  }
 }
 
 @mixin __legacyLabelStyles__bad {
