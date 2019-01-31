@@ -20,6 +20,8 @@ export function buildPrivilegeMap(savedObjectTypes, actions) {
     global: {
       all: [
         actions.version,
+        actions.login,
+        actions.manageSpaces,
         ...buildSavedObjectsActions([
           'create',
           'bulk_create',
