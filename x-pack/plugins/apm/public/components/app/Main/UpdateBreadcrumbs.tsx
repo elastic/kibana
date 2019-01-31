@@ -5,40 +5,25 @@
  */
 
 import { Location } from 'history';
-import { flatten, last } from 'lodash';
+import { last } from 'lodash';
 import React from 'react';
-// @ts-ignore
-import { withBreadcrumbs } from 'react-router-breadcrumbs-hoc';
 import chrome from 'ui/chrome';
 import { toQuery } from '../../shared/Links/url_helpers';
-import { BreadcrumbFunction, BreadcrumbProps, routes } from './routeConfig';
-
-interface BreadcrumbElement {
-  type: BreadcrumbFunction;
-  props: BreadcrumbProps;
-}
+import { Breadcrumb, ProvideBreadcrumbs } from './ProvideBreadcrumbs';
+import { routes } from './routeConfig';
 
 interface Props {
   location: Location;
-  breadcrumbs: Array<{
-    breadcrumb: string | BreadcrumbElement;
-    match: {
-      url: string;
-    };
-  }>;
+  breadcrumbs: Breadcrumb[];
 }
 
 class UpdateBreadcrumbsComponent extends React.Component<Props> {
   public updateHeaderBreadcrumbs() {
     const { _g = '', kuery = '' } = toQuery(this.props.location.search);
-    const breadcrumbs = this.props.breadcrumbs.map(({ breadcrumb, match }) => {
-      const text =
-        typeof breadcrumb === 'string'
-          ? breadcrumb
-          : breadcrumb.type(breadcrumb.props); // "render" the element
-
-      return { text, href: `#${match.url}?_g=${_g}&kuery=${kuery}` };
-    });
+    const breadcrumbs = this.props.breadcrumbs.map(({ value, match }) => ({
+      text: value,
+      href: `#${match.url}?_g=${_g}&kuery=${kuery}`
+    }));
 
     document.title = last(breadcrumbs).text;
     chrome.breadcrumbs.set(breadcrumbs);
@@ -57,12 +42,16 @@ class UpdateBreadcrumbsComponent extends React.Component<Props> {
   }
 }
 
-const flatRoutes = flatten(
-  routes.map(route => (route.switchRoutes ? route.switchRoutes : route))
-);
-
-const UpdateBreadcrumbs = withBreadcrumbs(flatRoutes)(
-  UpdateBreadcrumbsComponent
+const UpdateBreadcrumbs = () => (
+  <ProvideBreadcrumbs
+    routes={routes}
+    render={({ breadcrumbs, location }) => (
+      <UpdateBreadcrumbsComponent
+        breadcrumbs={breadcrumbs}
+        location={location}
+      />
+    )}
+  />
 );
 
 export { UpdateBreadcrumbs };

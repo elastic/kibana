@@ -6,32 +6,17 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Redirect, RouteComponentProps, RouteProps } from 'react-router-dom';
+import { Redirect, RouteComponentProps } from 'react-router-dom';
 import { legacyDecodeURIComponent } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
-import { StringMap } from '../../../../typings/common';
 // @ts-ignore
 import ErrorGroupDetails from '../ErrorGroupDetails';
 import { ServiceDetails } from '../ServiceDetails';
 import { TransactionDetails } from '../TransactionDetails';
 import { Home } from './Home';
-
-export interface BreadcrumbProps {
-  value: string;
-  match: {
-    url: string;
-    params: StringMap;
-  };
-}
+import { BreadcrumbRoute } from './ProvideBreadcrumbs';
 
 interface RouteParams {
   serviceName: string;
-}
-
-export type BreadcrumbFunction = (props: BreadcrumbProps) => string;
-
-interface Route extends RouteProps {
-  path: string;
-  breadcrumb: string | BreadcrumbFunction | null;
 }
 
 const renderAsRedirectTo = (to: string) => {
@@ -45,7 +30,7 @@ const renderAsRedirectTo = (to: string) => {
   );
 };
 
-export const routes: Route[] = [
+export const routes: BreadcrumbRoute[] = [
   {
     exact: true,
     path: '/',
@@ -85,7 +70,7 @@ export const routes: Route[] = [
   {
     exact: true,
     path: '/:serviceName',
-    breadcrumb: ({ match }: BreadcrumbProps) => match.params.serviceName,
+    breadcrumb: ({ match }) => match.params.serviceName,
     render: (props: RouteComponentProps<RouteParams>) =>
       renderAsRedirectTo(`/${props.match.params.serviceName}/transactions`)(
         props
@@ -95,7 +80,7 @@ export const routes: Route[] = [
     exact: true,
     path: '/:serviceName/errors/:groupId',
     component: ErrorGroupDetails,
-    breadcrumb: ({ match }: BreadcrumbProps) => match.params.groupId
+    breadcrumb: ({ match }) => match.params.groupId
   },
   {
     exact: true,
@@ -133,7 +118,7 @@ export const routes: Route[] = [
     exact: true,
     path: '/:serviceName/transactions/:transactionType/:transactionName',
     component: TransactionDetails,
-    breadcrumb: ({ match }: BreadcrumbProps) =>
-      legacyDecodeURIComponent(match.params.transactionName)
+    breadcrumb: ({ match }) =>
+      legacyDecodeURIComponent(match.params.transactionName) || ''
   }
 ];
