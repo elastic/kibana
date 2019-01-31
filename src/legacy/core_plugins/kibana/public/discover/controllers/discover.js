@@ -765,15 +765,16 @@ function discoverController(
         Promise
           .resolve(responseHandler(tabifiedData, buildVislibDimensions($scope.vis, $scope.timeRange)))
           .then(resp => {
-            visualizeHandler.render({
-              as: 'visualization',
-              value: {
-                visType: 'histogram',
-                visData: resp,
-                visConfig: $scope.vis.params,
-                params: {},
-              }
-            });
+            // visualizeHandler.render({
+            //   as: 'visualization',
+            //   value: {
+            //     visType: 'histogram',
+            //     visData: resp,
+            //     visConfig: $scope.vis.params,
+            //     params: {},
+            //   }
+            // });
+            visualizeHandler.render(resp);
           });
       }
 
