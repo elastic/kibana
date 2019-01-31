@@ -76,10 +76,10 @@ const DirectoryNodes = (props: DirectoryNodesProps) => {
   };
   const nodes = props.nodes.map(n => (
     <DirectoryNode key={n.path}>
-      <EuiIcon type={typeIconMap[props.type]} />
-      <NodeName>
-        <Link to={props.getUrl(n.path!)}>{n.name}</Link>
-      </NodeName>
+      <Link to={props.getUrl(n.path!)}>
+        <EuiIcon type={typeIconMap[props.type]} color="black" />
+        <NodeName>{n.name}</NodeName>
+      </Link>
     </DirectoryNode>
   ));
   return (
