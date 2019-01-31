@@ -41,6 +41,7 @@ module.directive('headerGlobalNav', (reactDirective, chrome, Private) => {
     breadcrumbs$: chrome.breadcrumbs.get$(),
     navLinks$: chrome.getNavLinks$(),
     recentlyAccessed$: recentlyAccessed.get$(),
+    forceAppSwitcherNavigation$: chrome.getForceAppSwitcherNavigation$(),
     navControls,
     homeHref
   });

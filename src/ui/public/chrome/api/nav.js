@@ -44,6 +44,15 @@ export function initChromeNavApi(chrome, internals) {
     );
   };
 
+  const forceAppSwitcherNavigation$ = new Rx.BehaviorSubject(false);
+  chrome.enableForcedAppSwitcherNavigation = () => {
+    forceAppSwitcherNavigation$.next(true);
+    return chrome;
+  };
+  chrome.getForceAppSwitcherNavigation$ = () => {
+    return forceAppSwitcherNavigation$.asObservable();
+  };
+
   chrome.navLinkExists = (id) => {
     return !!internals.nav.find(link => link.id === id);
   };
