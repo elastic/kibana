@@ -25,9 +25,7 @@ import {
 
 import { fatalError } from 'ui/notify';
 
-import { CRUD_APP_BASE_PATH } from '../../constants';
 import {
-  getRouterLinkProps,
   validateIndexPattern,
   formatFields,
 } from '../../services';
