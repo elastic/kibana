@@ -49,7 +49,7 @@ describe('ml_telemetry', () => {
       };
     });
 
-    it('should call savedObjectsClient create with the given ApmTelemetry object', () => {
+    it('should call savedObjectsClient create with the given MlTelemetry object', () => {
       storeMlTelemetry(server, mlTelemetry);
       expect(savedObjectsClientInstance.create.mock.calls[0][1]).toBe(mlTelemetry);
     });
