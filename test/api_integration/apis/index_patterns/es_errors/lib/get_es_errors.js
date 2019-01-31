@@ -25,7 +25,7 @@ export async function getIndexNotFoundError(es) {
       index: 'SHOULD NOT EXIST'
     });
   } catch (err) {
-    expect(err).to.have.property('status', 404); // sanity check
+    expect(err).to.have.property('statusCode', 404); // sanity check
     return err;
   }
 
@@ -40,7 +40,7 @@ export async function getDocNotFoundError(es) {
       id: '1234'
     });
   } catch (err) {
-    expect(err).to.have.property('status', 404); // sanity check
+    expect(err).to.have.property('statusCode', 404); // sanity check
     return err;
   }
 

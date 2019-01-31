@@ -35,7 +35,7 @@ export function createProxy(server) {
       return callWithRequest(req, 'transport.request', {
         path: '/_msearch',
         method: 'POST',
-        query,
+        querystring: query,
         body: payload.toString('utf8')
       }).finally(r => h.response(r));
     }
@@ -56,7 +56,7 @@ export function createProxy(server) {
       return callWithRequest(req, 'transport.request', {
         path: `/${encodeURIComponent(req.params.index)}/_search`,
         method: 'POST',
-        query,
+        querystring: query,
         body
       }).finally(r => h.response(r));
     }

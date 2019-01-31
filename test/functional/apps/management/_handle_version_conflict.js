@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.clickAddScriptedField();
       await PageObjects.settings.setScriptedFieldName(scriptedFiledName);
       await PageObjects.settings.setScriptedFieldScript(`doc['bytes'].value`);
-      const response = await es.update({
+      const { body } = await es.update({
         index: '.kibana',
         type: '_doc',
         id: 'index-pattern:logstash-*',
@@ -62,8 +62,8 @@ export default function ({ getService, getPageObjects }) {
           'doc': { 'index-pattern': { 'fieldFormatMap': '{"geo.src":{"id":"number"}}' } }
         }
       });
-      log.debug(JSON.stringify(response));
-      expect(response.result).to.be('updated');
+      log.debug(JSON.stringify(body));
+      expect(body.result).to.be('updated');
       await PageObjects.settings.setFieldFormat('url');
       await PageObjects.settings.clickSaveScriptedField();
       await retry.try(async function () {
@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.openControlsByName(fieldName);
       log.debug('controls are open');
       await PageObjects.settings.setFieldFormat('url');
-      const response = await es.update({
+      const { body } = await es.update({
         index: '.kibana',
         type: '_doc',
         id: 'index-pattern:logstash-*',
@@ -89,8 +89,8 @@ export default function ({ getService, getPageObjects }) {
           'doc': { 'index-pattern': { 'fieldFormatMap': '{"geo.dest":{"id":"number"}}' } }
         }
       });
-      log.debug(JSON.stringify(response));
-      expect(response.result).to.be('updated');
+      log.debug(JSON.stringify(body));
+      expect(body.result).to.be('updated');
       await PageObjects.settings.controlChangeSave();
       await retry.try(async function () {
         //await PageObjects.common.sleep(2000);

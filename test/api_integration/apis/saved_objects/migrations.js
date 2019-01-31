@@ -32,7 +32,11 @@ import { SavedObjectsSchema } from '../../../../src/server/saved_objects/schema'
 
 export default ({ getService }) => {
   const es = getService('es');
-  const callCluster = (path, ...args) => _.get(es, path).call(es, ...args);
+  const callCluster = async (path, ...args) => {
+    const method = _.get(es, path);
+    const resp = await method.call(es, ...args);
+    return resp.body;
+  };
 
   describe('Kibana index migration', () => {
     before(() => callCluster('indices.delete', { index: '.migrate-*' }));

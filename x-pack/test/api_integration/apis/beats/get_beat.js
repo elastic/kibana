@@ -102,7 +102,7 @@ export default function ({ getService }) {
         id: `beat:foo`,
       });
 
-      let beat = esResponse._source.beat;
+      let beat = esResponse.body._source.beat;
       expect(beat.config_status).to.be('OK');
 
       // 2. Beat polls reporting an error
@@ -122,7 +122,7 @@ export default function ({ getService }) {
         id: `beat:foo`,
       });
 
-      beat = esResponse._source.beat;
+      beat = esResponse.body._source.beat;
       expect(beat.config_status).to.be('ERROR');
     });
   });

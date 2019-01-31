@@ -38,7 +38,7 @@ export default function ({ getService }) {
         id: `tag:${tagId}`,
       });
 
-      const tagInEs = esResponse._source;
+      const tagInEs = esResponse.body._source;
 
       expect(tagInEs.type).to.be('tag');
       expect(tagInEs.tag.id).to.be(tagId);

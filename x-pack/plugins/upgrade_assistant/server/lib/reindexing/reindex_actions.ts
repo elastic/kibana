@@ -253,7 +253,11 @@ export const reindexActionsFactory = (
 
     async getFlatSettings(indexName: string) {
       const flatSettings = (await callCluster('transport.request', {
-        path: `/${encodeURIComponent(indexName)}?flat_settings=true&include_type_name=false`,
+        path: `/${encodeURIComponent(indexName)}`,
+        querystring: {
+          flat_settings: true,
+          include_type_name: false,
+        },
       })) as { [indexName: string]: FlatSettings };
 
       if (!flatSettings[indexName]) {

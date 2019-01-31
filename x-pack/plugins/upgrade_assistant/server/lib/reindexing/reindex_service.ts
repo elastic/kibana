@@ -82,7 +82,10 @@ export const reindexServiceFactory = (
       await validateNodesMinimumVersion(6, 7);
 
       const res = await callCluster('transport.request', {
-        path: '/_ml/set_upgrade_mode?enabled=true',
+        path: '/_ml/set_upgrade_mode',
+        querystring: {
+          enabled: true,
+        },
         method: 'POST',
       });
 
@@ -102,7 +105,10 @@ export const reindexServiceFactory = (
     await actions.runWhileMlLocked(async mlDoc => {
       if (mlDoc.attributes.mlReindexCount === 0) {
         const res = await callCluster('transport.request', {
-          path: '/_ml/set_upgrade_mode?enabled=false',
+          path: '/_ml/set_upgrade_mode',
+          querystring: {
+            enabled: false,
+          },
           method: 'POST',
         });
 

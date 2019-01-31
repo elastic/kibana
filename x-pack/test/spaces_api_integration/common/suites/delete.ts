@@ -60,7 +60,7 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
       },
     });
 
-    const buckets = response.aggregations.count.buckets;
+    const buckets = response.body.aggregations.count.buckets;
 
     // Space 2 deleted, all others should exist
     const expectedBuckets = [

@@ -15,7 +15,6 @@ export async function callEsGraphExploreApi({ callCluster, index, query }) {
         'path': '/' + encodeURIComponent(index) + '/_graph/explore',
         body: query,
         method: 'POST',
-        query: {}
       })
     };
   } catch (error) {

@@ -19,7 +19,7 @@ function mockGetXPackLicense(callCluster, license) {
   callCluster.withArgs('transport.request', {
     method: 'GET',
     path: '/_license',
-    query: {
+    querystring: {
       local: 'true'
     }
   })
@@ -31,7 +31,7 @@ function mockGetXPackUsage(callCluster, usage) {
   callCluster.withArgs('transport.request', {
     method: 'GET',
     path: '/_xpack/usage',
-    query: {
+    querystring: {
       master_timeout: TIMEOUT
     }
   })

@@ -63,7 +63,7 @@ export default function ({ getService }) {
       expect(lastState.status).to.equal(ReindexStatus.completed);
 
       const { newIndexName } = lastState;
-      const indexSummary = await es.indices.get({ index: 'dummydata' });
+      const { body: indexSummary } = await es.indices.get({ index: 'dummydata' });
 
       // The new index was created
       expect(indexSummary[newIndexName]).to.be.an('object');
@@ -71,7 +71,7 @@ export default function ({ getService }) {
       expect(indexSummary[newIndexName].aliases.dummydata).to.be.an('object');
       // The number of documents in the new index matches what we expect
       expect(
-        (await es.count({ index: lastState.newIndexName })).count
+        (await es.count({ index: lastState.newIndexName })).body.count
       ).to.be(3);
 
       // Cleanup newly created index
@@ -94,13 +94,13 @@ export default function ({ getService }) {
         }
       });
       expect(
-        (await es.count({ index: 'myAlias' })).count
+        (await es.count({ index: 'myAlias' })).body.count
       ).to.be(3);
       expect(
-        (await es.count({ index: 'wildcardAlias' })).count
+        (await es.count({ index: 'wildcardAlias' })).body.count
       ).to.be(3);
       expect(
-        (await es.count({ index: 'myHttpsAlias' })).count
+        (await es.count({ index: 'myHttpsAlias' })).body.count
       ).to.be(2);
 
       // Reindex
@@ -112,14 +112,14 @@ export default function ({ getService }) {
 
       // The regular aliases should still return 3 docs
       expect(
-        (await es.count({ index: 'myAlias' })).count
+        (await es.count({ index: 'myAlias' })).body.count
       ).to.be(3);
       expect(
-        (await es.count({ index: 'wildcardAlias' })).count
+        (await es.count({ index: 'wildcardAlias' })).body.count
       ).to.be(3);
       // The filtered alias should still return 2 docs
       expect(
-        (await es.count({ index: 'myHttpsAlias' })).count
+        (await es.count({ index: 'myHttpsAlias' })).body.count
       ).to.be(2);
 
       // Cleanup newly created index

@@ -19,7 +19,7 @@ export default function ({ getService }) {
         .expect(200);
 
       const responseFromES = await es.info();
-      expect(body.cluster.uuid).to.eql(responseFromES.cluster_uuid);
+      expect(body.cluster.uuid).to.eql(responseFromES.body.cluster_uuid);
     });
   });
 }

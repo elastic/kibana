@@ -34,7 +34,7 @@ export default function ({ getService }) {
         q: 'type:enrollment_token'
       });
 
-      const tokensInEs = esResponse.hits.hits
+      const tokensInEs = esResponse.body.hits.hits
         .map(hit => hit._source.enrollment_token.token);
 
       expect(tokensFromApi.length).to.eql(1);
@@ -63,7 +63,7 @@ export default function ({ getService }) {
         size: numTokens
       });
 
-      const tokensInEs = esResponse.hits.hits
+      const tokensInEs = esResponse.body.hits.hits
         .map(hit => hit._source.enrollment_token.token);
 
       expect(tokensFromApi.length).to.eql(numTokens);
@@ -85,7 +85,7 @@ export default function ({ getService }) {
         q: 'type:enrollment_token'
       });
 
-      const tokenInEs = esResponse.hits.hits[0]._source.enrollment_token;
+      const tokenInEs = esResponse.body.hits.hits[0]._source.enrollment_token;
 
       // We do a fuzzy check to see if the token expires between 9 and 10 minutes
       // from now because a bit of time has elapsed been the creation of the

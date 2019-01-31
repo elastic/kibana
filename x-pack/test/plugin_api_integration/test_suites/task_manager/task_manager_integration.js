@@ -21,12 +21,12 @@ export default function ({ getService }) {
       .set('kbn-xsrf', 'xxx')
       .expect(200));
 
-    beforeEach(async () =>
-      (await es.indices.exists({ index: testHistoryIndex })) && es.deleteByQuery({
-        index: testHistoryIndex,
-        q: 'type:task',
-        refresh: true,
-      }));
+    beforeEach(async () => await es.deleteByQuery({
+      index: testHistoryIndex,
+      q: 'type:task',
+      refresh: true,
+      ignore_unavailable: true,
+    }));
 
     function currentTasks() {
       return supertest.get('/api/sample_tasks')
@@ -38,7 +38,7 @@ export default function ({ getService }) {
       return es.search({
         index: testHistoryIndex,
         q: 'type:task',
-      }).then(result => result.hits.hits);
+      }).then(result => result.body.hits.hits);
     }
 
     function scheduleTask(task) {

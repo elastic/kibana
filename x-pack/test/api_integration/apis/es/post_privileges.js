@@ -30,7 +30,7 @@ export default function ({ getService }) {
         }
       });
 
-      expect(response).to.eql({
+      expect(response.body).to.eql({
         foo: {
           all: { created: true },
           read: { created: true }
@@ -61,7 +61,7 @@ export default function ({ getService }) {
         }
       });
 
-      expect(updateResponse).to.eql({
+      expect(updateResponse.body).to.eql({
         foo: {
           other: { created: true },
           read: { created: false }
@@ -69,7 +69,7 @@ export default function ({ getService }) {
       });
 
       const retrievedPrivilege = await es.shield.getPrivilege({ privilege: application });
-      expect(retrievedPrivilege).to.eql({
+      expect(retrievedPrivilege.body).to.eql({
         foo: {
           // "all" is maintained even though the subsequent update did not specify this privilege
           all: {
