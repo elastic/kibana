@@ -1,0 +1,97 @@
+<div
+  class="filter"
+  ng-class="{ negate: pill.filter.meta.negate, disabled: pill.filter.meta.disabled }"
+  data-test-subj="filter filter-{{ pill.filter.meta.disabled ? 'disabled' : 'enabled' }} {{ pill.filter.meta.key ? 'filter-key-' + pill.filter.meta.key : '' }} {{ pill.filter.meta.value ? 'filter-value-' + pill.filter.meta.value : '' }}"
+  ng-mouseover="pill.activateActions()"
+  ng-mouseleave="pill.deactivateActions()"
+>
+
+  <div
+    class="filter-description"
+    ng-class="{'filter-description-deactivated': pill.areActionsActivated}"
+    tabindex="0"
+    aria-disabled="{{pill.filter.meta.disabled}}"
+  >
+    <span ng-if="pill.filter.$state.store == 'globalState'"><span class="fa fa-fw fa-thumb-tack pinned"></span></span>
+    <span ng-if="pill.filter.meta.negate">NOT</span>
+    <span ng-if="pill.filter.meta.alias">{{ pill.filter.meta.alias }}</span>
+    <span ng-if="!pill.filter.meta.alias">{{ pill.filter.meta.key }}:</span>
+    <span ng-if="!pill.filter.meta.alias">"{{ pill.filter.meta.value }}"</span>
+  </div>
+
+  <div class="filter-actions" ng-class="{'filter-actions-activated': pill.areActionsActivated}">
+    <button
+      class="action filter-toggle"
+      ng-click="pill.onToggleFilter(pill.filter)"
+      data-test-subj="disableFilter-{{ pill.filter.meta.key }}"
+      ng-focus="pill.activateActions()"
+      ng-blur="pill.deactivateActions()"
+      aria-label="{{pill.filter.meta.disabled ? 'Enable filter' : 'Disable filter'}}"
+      tooltip="{{pill.filter.meta.disabled ? 'Enable filter' : 'Disable filter'}}"
+      tooltip-append-to-body="true"
+    >
+      <span ng-show="pill.filter.meta.disabled" class="fa fa-fw fa-square-o disabled"></span>
+      <span ng-hide="pill.filter.meta.disabled" class="fa fa-fw fa-check-square-o enabled"></span>
+    </button>
+
+    <button
+      class="action filter-pin"
+      ng-click="pill.onPinFilter(pill.filter)"
+      data-test-subj="pinFilter-{{ pill.filter.meta.key }}"
+      ng-focus="pill.activateActions()"
+      ng-blur="pill.deactivateActions()"
+      aria-label="{{pill.filter.$state.store == 'globalState' ? 'Unpin filter' : 'Pin filter'}}"
+      tooltip="{{pill.filter.$state.store == 'globalState' ? 'Unpin filter' : 'Pin filter'}}"
+      tooltip-append-to-body="true"
+    >
+      <span ng-show="pill.filter.$state.store == 'globalState'" class="fa fa-fw fa-thumb-tack pinned"></span>
+      <span ng-hide="pill.filter.$state.store == 'globalState'" class="fa fa-fw fa-thumb-tack fa-rotate-270 unpinned"></span>
+    </button>
+
+    <button
+      class="action filter-invert"
+      ng-click="pill.onInvertFilter(pill.filter)"
+      data-test-subj="invertFilter-{{ pill.filter.meta.key }}"
+      ng-focus="pill.activateActions()"
+      ng-blur="pill.deactivateActions()"
+      aria-label="{{pill.filter.meta.negate ? 'Include matches' : 'Exclude matches'}}"
+      tooltip="{{pill.filter.meta.negate ? 'Include matches' : 'Exclude matches'}}"
+      tooltip-append-to-body="true"
+    >
+      <span ng-show="pill.filter.meta.negate" class="fa fa-fw fa-search-plus negative"></span>
+      <span ng-hide="pill.filter.meta.negate" class="fa fa-fw fa-search-minus positive"></span>
+    </button>
+
+    <button
+      class="action filter-remove"
+      ng-click="pill.onDeleteFilter(pill.filter)"
+      ng-focus="pill.activateActions()"
+      ng-blur="pill.deactivateActions()"
+      aria-label="Remove filter"
+      tooltip="Remove filter"
+      tooltip-append-to-body="true"
+    >
+      <span class="fa fa-fw fa-trash" data-test-subj="removeFilter-{{ pill.filter.meta.key }}"></span>
+    </button>
+
+    <button
+      class="action filter-edit"
+      ng-click="pill.onEditFilter(pill.filter)"
+      ng-disabled="pill.isControlledByPanel()"
+      ng-focus="pill.activateActions()"
+      ng-blur="pill.deactivateActions()"
+      aria-label="Edit filter"
+      tooltip="Edit filter"
+      tooltip-append-to-body="true"
+      data-test-subj="editFilter"
+    >
+      <span
+        ng-show="pill.isControlledByPanel()"
+        tooltip="Edit disabled because filter is controlled by Kibana"
+        class="fa fa-fw fa-edit fa-disabled"
+      ></span>
+      <span ng-hide="pill.isControlledByPanel()" class="fa fa-fw fa-edit"></span>
+    </button>
+
+  </div>
+</div>

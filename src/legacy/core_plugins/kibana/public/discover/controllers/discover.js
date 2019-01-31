@@ -33,7 +33,7 @@ import 'ui/filters/moment';
 import 'ui/index_patterns';
 import 'ui/state_management/app_state';
 import { timefilter } from 'ui/timefilter';
-import 'ui/search_bar';
+import 'ui/query_bar';
 import { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
 import { toastNotifications } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
@@ -351,24 +351,6 @@ function discoverController(
 
   const $state = $scope.state = new AppState(getStateDefaults());
 
-  $scope.filters = queryFilter.getFilters();
-
-  $scope.onFiltersUpdated = filters => {
-    // The filters will automatically be set when the queryFilter emits an update event (see below)
-    queryFilter.setFilters(filters);
-  };
-
-  $scope.applyFilters = filters => {
-    queryFilter.addFiltersAndChangeTimeFilter(filters);
-    $scope.state.$newFilters = [];
-  };
-
-  $scope.$watch('state.$newFilters', (filters = []) => {
-    if (filters.length === 1) {
-      $scope.applyFilters(filters);
-    }
-  });
-
   const getFieldCounts = async () => {
     // the field counts aren't set until we have the data back,
     // so we wait for the fetch to be done before proceeding
@@ -506,7 +488,6 @@ function discoverController(
 
         // update data source when filters update
         $scope.$listen(queryFilter, 'update', function () {
-          $scope.filters = queryFilter.getFilters();
           return $scope.updateDataSource().then(function () {
             $state.save();
           });
@@ -544,7 +525,9 @@ function discoverController(
           }
         });
 
-        $scope.$watch('state.query', $scope.updateQueryAndFetch);
+        $scope.$watch('state.query', (query) => {
+          $scope.updateQueryAndFetch({ query });
+        });
 
         $scope.$watchMulti([
           'rows',
@@ -662,7 +645,7 @@ function discoverController(
       .catch(notify.error);
   };
 
-  $scope.updateQueryAndFetch = function (query) {
+  $scope.updateQueryAndFetch = function ({ query }) {
     $state.query = migrateLegacyQuery(query);
     $scope.fetch();
   };

@@ -530,6 +530,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
     }
 
+    async getFilters(timeout = defaultFindTimeout) {
+      return await find.allByCssSelector('.filter-bar .filter', timeout);
+    }
+
     async getFilterDescriptions(timeout = defaultFindTimeout) {
       const filters = await find.allByCssSelector(
         '.filter-bar > .filter > .filter-description',

@@ -8,11 +8,10 @@
     color: $euiTextColor;
     background-color: $euiColorEmptyShade;
     position: absolute;
-    top: -1px;
+    top: -8px;
     z-index: $euiZContentMenu;
     width: 100%;
-    border-bottom-left-radius: $euiBorderRadius;
-    border-bottom-right-radius: $euiBorderRadius;
+    border-radius: $euiBorderRadius;
 
     .typeahead-items {
       max-height: 60vh;

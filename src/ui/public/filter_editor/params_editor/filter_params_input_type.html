@@ -1,0 +1,50 @@
+<div
+  ng-switch="type"
+  class="kuiFieldGroupSection kuiFieldGroupSection--wide"
+>
+  <input
+    ng-switch-when="string"
+    type="text"
+    placeholder="{{placeholder}}"
+    class="kuiTextInput"
+    ng-model="value"
+    ng-change="onChange({ value: value })"
+  />
+  <input
+    ng-switch-when="number"
+    string-to-number
+    type="number"
+    placeholder="{{placeholder}}"
+    step="any"
+    class="kuiTextInput"
+    ng-model="value"
+    ng-change="onChange({ value: value })"
+  />
+  <input
+    ng-switch-when="date"
+    type="text"
+    placeholder="{{placeholder}}"
+    validate-date-math
+    class="kuiTextInput"
+    ng-model="value"
+    ng-change="onChange({ value: value })"
+  />
+  <input
+    ng-switch-when="ip"
+    type="text"
+    placeholder="{{placeholder}}"
+    validate-ip
+    class="kuiTextInput"
+    ng-model="value"
+    ng-change="onChange({ value: value })"
+  />
+  <div ng-switch-when="boolean">
+    <select
+      class="kuiSelect"
+      ng-model="value"
+      ng-options="option for option in boolOptions"
+      ng-change="onChange({ value: value })"
+      ng-init="setDefaultBool()"
+    ></select>
+  </div>
+</div>

@@ -2518,7 +2518,7 @@ exports[`Field for select setting should render as read only with help text if o
                   values={
                     Object {
                       "value": <EuiCode>
-                        orange
+                        Orange
                       </EuiCode>,
                     }
                   }
@@ -2576,11 +2576,11 @@ exports[`Field for select setting should render as read only with help text if o
           options={
             Array [
               Object {
-                "text": "apple",
+                "text": "Apple",
                 "value": "apple",
               },
               Object {
-                "text": "orange",
+                "text": "Orange",
                 "value": "orange",
               },
               Object {
@@ -2677,11 +2677,11 @@ exports[`Field for select setting should render custom setting icon if it is cus
           options={
             Array [
               Object {
-                "text": "apple",
+                "text": "Apple",
                 "value": "apple",
               },
               Object {
-                "text": "orange",
+                "text": "Orange",
                 "value": "orange",
               },
               Object {
@@ -2767,11 +2767,11 @@ exports[`Field for select setting should render default value if there is no use
           options={
             Array [
               Object {
-                "text": "apple",
+                "text": "Apple",
                 "value": "apple",
               },
               Object {
-                "text": "orange",
+                "text": "Orange",
                 "value": "orange",
               },
               Object {
@@ -2833,7 +2833,7 @@ exports[`Field for select setting should render user value if there is user valu
                   values={
                     Object {
                       "value": <EuiCode>
-                        orange
+                        Orange
                       </EuiCode>,
                     }
                   }
@@ -2899,11 +2899,11 @@ exports[`Field for select setting should render user value if there is user valu
           options={
             Array [
               Object {
-                "text": "apple",
+                "text": "Apple",
                 "value": "apple",
               },
               Object {
-                "text": "orange",
+                "text": "Orange",
                 "value": "orange",
               },
               Object {

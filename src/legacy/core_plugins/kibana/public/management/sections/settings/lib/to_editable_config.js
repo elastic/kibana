@@ -44,6 +44,7 @@ export function toEditableConfig({ def, name, value, isCustom, isOverridden }) {
     type: getValType(def, value),
     description: def.description,
     options: def.options,
+    optionLabels: def.optionLabels,
   };
 
   return conf;

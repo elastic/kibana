@@ -16,7 +16,6 @@ export default function ({ getService, getPageObjects }) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const appsMenu = getService('appsMenu');
-  const filterBar = getService('filterBar');
   const PageObjects = getPageObjects([
     'security',
     'common',
@@ -141,8 +140,8 @@ export default function ({ getService, getPageObjects }) {
       it('can filter on a visualization', async () => {
         await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
         await pieChart.filterOnPieSlice();
-        const filterCount = await filterBar.getFilterCount();
-        expect(filterCount).to.equal(1);
+        const filters = await PageObjects.dashboard.getFilters();
+        expect(filters.length).to.equal(1);
       });
 
       it('does not show the edit menu item', async () => {
