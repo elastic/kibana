@@ -772,7 +772,8 @@ export const TimeseriesChart = injectI18n(class TimeseriesChart extends React.Co
     // Don't render dots where value=null (data gaps, with no anomalies)
     // or for multi-bucket anomalies.
     const dots = d3.select('.focus-chart-markers').selectAll('.metric-value')
-      .data(data.filter(d => ((d.value !== null || d.anomalyScore !== null) && !showMultiBucketAnomalyMarker(d))));
+      .data(data.filter(d => ((d.value !== null || typeof d.anomalyScore === 'number') &&
+        !showMultiBucketAnomalyMarker(d))));
 
     // Remove dots that are no longer needed i.e. if number of chart points has decreased.
     dots.exit().remove();

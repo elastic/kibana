@@ -272,7 +272,8 @@ export const ExplorerChartSingleMetric = injectI18n(class ExplorerChartSingleMet
       const dots = lineChartGroup.append('g')
         .attr('class', 'chart-markers')
         .selectAll('.metric-value')
-        .data(data.filter(d => ((d.value !== null || d.anomalyScore !== null) && !showMultiBucketAnomalyMarker(d))));
+        .data(data.filter(d => ((d.value !== null || typeof d.anomalyScore === 'number') &&
+          !showMultiBucketAnomalyMarker(d))));
 
       // Remove dots that are no longer needed i.e. if number of chart points has decreased.
       dots.exit().remove();
