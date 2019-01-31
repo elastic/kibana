@@ -5,7 +5,7 @@
  */
 
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import {
@@ -23,7 +23,7 @@ import {
 
 import { WelcomeContent } from './welcome_content';
 
-export function AboutPanel({ onFilePickerChange }) {
+export const AboutPanel = injectI18n(function AboutPanel({ onFilePickerChange, intl }) {
   return (
     <EuiPage restrictWidth={1000}>
       <EuiPageBody>
@@ -37,12 +37,10 @@ export function AboutPanel({ onFilePickerChange }) {
               <div style={{ textAlign: 'center' }} >
                 <EuiFilePicker
                   id="filePicker"
-                  initialPromptText={
-                    <FormattedMessage
-                      id="xpack.ml.fileDatavisualizer.aboutPanel.selectOrDragAndDropFileDescription"
-                      defaultMessage="Select or drag and drop a file"
-                    />
-                  }
+                  initialPromptText={intl.formatMessage({
+                    id: 'xpack.ml.fileDatavisualizer.aboutPanel.selectOrDragAndDropFileDescription',
+                    defaultMessage: 'Select or drag and drop a file',
+                  })}
                   onChange={files => onFilePickerChange(files)}
                   className="file-datavisualizer-file-picker"
                 />
@@ -54,7 +52,7 @@ export function AboutPanel({ onFilePickerChange }) {
       </EuiPageBody>
     </EuiPage>
   );
-}
+});
 
 export function LoadingPanel() {
   return (

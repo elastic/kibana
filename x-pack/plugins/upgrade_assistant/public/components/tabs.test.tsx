@@ -9,6 +9,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 jest.mock('axios', () => ({
   get: jest.fn(),
+  create: jest.fn(),
 }));
 
 import { UpgradeAssistantTabs } from './tabs';

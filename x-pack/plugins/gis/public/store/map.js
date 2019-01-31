@@ -11,6 +11,7 @@ import {
   LAYER_DATA_LOAD_ENDED,
   LAYER_DATA_LOAD_ERROR,
   ADD_LAYER,
+  SET_LAYER_ERROR_STATUS,
   ADD_WAITING_FOR_MAP_READY_LAYER,
   CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
   REMOVE_LAYER,
@@ -19,7 +20,6 @@ import {
   MAP_EXTENT_CHANGED,
   MAP_READY,
   MAP_DESTROYED,
-  SET_TIME_FILTERS,
   SET_QUERY,
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
@@ -121,9 +121,8 @@ export function map(state = INITIAL_STATE, action) {
       return {
         ...state,
         goto: {
-          lat: action.lat,
-          lon: action.lon,
-          zoom: action.zoom,
+          center: action.center,
+          bounds: action.bounds
         }
       };
     case CLEAR_GOTO:
@@ -133,8 +132,11 @@ export function map(state = INITIAL_STATE, action) {
       };
     case LAYER_DATA_LOAD_STARTED:
       return updateWithDataRequest(state, action);
+    case SET_LAYER_ERROR_STATUS:
+      return setErrorStatus(state, action);
     case LAYER_DATA_LOAD_ERROR:
-      return updateWithDataLoadError(state, action);
+      const errorRequestResetState = resetDataRequest(state, action);
+      return setErrorStatus(errorRequestResetState, action);
     case LAYER_DATA_LOAD_ENDED:
       return updateWithDataResponse(state, action);
     case TOUCH_LAYER:
@@ -160,12 +162,16 @@ export function map(state = INITIAL_STATE, action) {
         buffer: action.mapState.buffer,
       };
       return { ...state, mapState: { ...state.mapState, ...newMapState } };
-    case SET_TIME_FILTERS:
-      const { from, to } = action;
-      return { ...state, mapState: { ...state.mapState, timeFilters: { from, to } } };
     case SET_QUERY:
-      const { query } = action;
-      return { ...state, mapState: { ...state.mapState, query } };
+      const { query, timeFilters } = action;
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          query,
+          timeFilters,
+        }
+      };
     case SET_REFRESH_CONFIG:
       const { isPaused, interval } = action;
       return {
@@ -264,6 +270,15 @@ export function map(state = INITIAL_STATE, action) {
   }
 }
 
+function setErrorStatus(state, { layerId, errorMessage }) {
+  const tmsErrorLayer = state.layerList.find(({ id }) => id === layerId);
+  return tmsErrorLayer
+    ? updateLayerInList(
+      updateLayerInList(state, tmsErrorLayer.id, 'isInErrorState', true),
+      tmsErrorLayer.id, 'errorMessage', errorMessage)
+    : state;
+}
+
 function findDataRequest(layerDescriptor, dataRequestAction) {
 
   if (!layerDescriptor.dataRequests) {
@@ -277,24 +292,17 @@ function findDataRequest(layerDescriptor, dataRequestAction) {
 
 
 function updateWithDataRequest(state, action) {
+  let dataRequest = getValidDataRequest(state, action, false);
   const layerRequestingData = findLayerById(state, action.layerId);
-  if (!layerRequestingData) {
-    return state;
-  }
 
-  if (!layerRequestingData.dataRequests) {
-    layerRequestingData.dataRequests = [];
-  }
-
-  let dataRequest = findDataRequest(layerRequestingData, action);
   if (!dataRequest) {
     dataRequest = {
       dataId: action.dataId
     };
-    layerRequestingData.dataRequests.push(dataRequest);
+    layerRequestingData.dataRequests = [
+      ...(layerRequestingData.dataRequests
+        ? layerRequestingData.dataRequests : []), dataRequest ];
   }
-  dataRequest.dataHasLoadError = false;
-  dataRequest.dataLoadError = null;
   dataRequest.dataMetaAtStart = action.meta;
   dataRequest.dataRequestToken = action.requestToken;
   const layerList = [...state.layerList];
@@ -302,59 +310,45 @@ function updateWithDataRequest(state, action) {
 }
 
 function updateWithDataResponse(state, action) {
-  const layerReceivingData = findLayerById(state, action.layerId);
-  if (!layerReceivingData) {
-    return state;
-  }
-
-
-  const dataRequest = findDataRequest(layerReceivingData, action);
-  if (!dataRequest) {
-    throw new Error('Data request should be initialized. Cannot call stopLoading before startLoading');
-  }
-
-  if (
-    dataRequest.dataRequestToken &&
-    dataRequest.dataRequestToken !== action.requestToken
-  ) {
-    // ignore responses to outdated requests
-    return { ...state };
-  }
+  const dataRequest = getValidDataRequest(state, action);
+  if (!dataRequest) { return state; }
 
   dataRequest.data = action.data;
   dataRequest.dataMeta = { ...dataRequest.dataMetaAtStart, ...action.meta };
   dataRequest.dataMetaAtStart = null;
+  return resetDataRequest(state, action, dataRequest);
+}
+
+function resetDataRequest(state, action, request) {
+  const dataRequest = request || getValidDataRequest(state, action);
+  if (!dataRequest) { return state; }
+
   dataRequest.dataRequestToken = null;
   dataRequest.dataId = action.dataId;
   const layerList = [...state.layerList];
   return { ...state, layerList };
 }
 
-function updateWithDataLoadError(state, action) {
+function getValidDataRequest(state, action, checkRequestToken = true) {
   const layer = findLayerById(state, action.layerId);
   if (!layer) {
-    return state;
+    return;
   }
 
   const dataRequest = findDataRequest(layer, action);
   if (!dataRequest) {
-    throw new Error('Data request should be initialized. Cannot call loadError before startLoading');
+    return;
   }
 
   if (
+    checkRequestToken &&
     dataRequest.dataRequestToken &&
     dataRequest.dataRequestToken !== action.requestToken
   ) {
     // ignore responses to outdated requests
-    return state;
+    return;
   }
-
-  dataRequest.dataHasLoadError = true;
-  dataRequest.dataLoadError = action.errorMessage;
-  dataRequest.dataRequestToken = null;
-  dataRequest.dataId = action.dataId;
-  const layerList = [...state.layerList];
-  return { ...state, layerList };
+  return dataRequest;
 }
 
 function findLayerById(state, id) {

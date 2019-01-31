@@ -5,14 +5,11 @@
  */
 
 import _ from 'lodash';
-import { VectorSource } from '../vector_source';
+import { AbstractVectorSource } from '../vector_source';
 import React from 'react';
-import {
-  EuiText,
-} from '@elastic/eui';
 import { CreateSourceEditor } from './create_source_editor';
 
-export class KibanaRegionmapSource extends VectorSource {
+export class KibanaRegionmapSource extends AbstractVectorSource {
 
   static type = 'REGIONMAP_FILE';
   static title = 'Custom vector shapes';
@@ -48,21 +45,16 @@ export class KibanaRegionmapSource extends VectorSource {
     );
   };
 
-  renderDetails() {
-    return (
-      <EuiText color="subdued" size="s">
-        <p className="gisLayerDetails">
-          <strong className="gisLayerDetails__label">Source </strong><span>Kibana Region Map</span><br/>
-          <strong className="gisLayerDetails__label">Type </strong><span>Vector</span><br/>
-          <strong className="gisLayerDetails__label">Name </strong><span>{this._descriptor.name}</span><br/>
-        </p>
-      </EuiText>
-    );
+  async getImmutableProperties() {
+    return [
+      { label: 'Data source', value: KibanaRegionmapSource.title },
+      { label: 'Vector layer', value: this._descriptor.name },
+    ];
   }
 
   async getGeoJsonWithMeta() {
     const fileSource = this._regionList.find(source => source.name === this._descriptor.name);
-    const featureCollection = await VectorSource.getGeoJson(fileSource, fileSource.url);
+    const featureCollection = await AbstractVectorSource.getGeoJson(fileSource, fileSource.url);
     return {
       data: featureCollection
     };

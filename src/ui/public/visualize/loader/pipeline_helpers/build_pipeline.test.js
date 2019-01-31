@@ -139,7 +139,8 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
     });
 
     describe('handles tagcloud function', () => {
-      const params = { metrics: {} };
+      const params = {};
+
       it('without buckets', () => {
         const schemas = { metric: [0] };
         const actual = buildPipelineVisFunction.tagcloud({ params }, schemas);
