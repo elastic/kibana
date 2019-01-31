@@ -112,6 +112,7 @@ export const RuntimeBeatEvent = t.interface(
     timestamp: t.string,
     event: t.type({
       type: t.union([
+        t.literal('RUNNING'),
         t.literal('STARTING'),
         t.literal('IN_PROGRESS'),
         t.literal('CONFIG'),
