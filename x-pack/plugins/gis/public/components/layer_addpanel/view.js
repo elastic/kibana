@@ -108,8 +108,7 @@ export class AddLayerPanel extends Component {
 
   _renderSourceEditor() {
     const editorProperties = {
-      onPreviewSource: this._previewLayer,
-      dataSourcesMeta: this.props.dataSourcesMeta
+      onPreviewSource: this._previewLayer
     };
 
     const Source = ALL_SOURCES.find((Source) => {

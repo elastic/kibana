@@ -212,7 +212,8 @@ module
                   title: o.title,
                   saveState: SAVE_STATE.NOT_SAVED,
                   config: o.config,
-                  exists: false
+                  exists: false,
+                  errors: [],
                 };
               });
             });
@@ -342,6 +343,9 @@ module
                       obj.saveState = SAVE_STATE.SAVED;
                     } else {
                       obj.saveState = SAVE_STATE.FAILED;
+                      if (kibanaObjectResult.error && kibanaObjectResult.error.message) {
+                        obj.errors.push(kibanaObjectResult.error.message);
+                      }
                     }
                   } else {
                     obj.saveState = SAVE_STATE.FAILED;

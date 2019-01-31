@@ -149,9 +149,11 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.brushHistogram(0, 1);
         await PageObjects.visualize.waitForVisualization();
-        const time = await PageObjects.timePicker.getTimeConfig();
-        expect(time.start).to.be('Sep 19, 2015 @ 23:59:02.606');
-        expect(time.end).to.be('Sep 20, 2015 @ 02:56:40.744');
+
+        const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
+        if (newDurationHours < 1 || newDurationHours >= 5) {
+          throw new Error(`expected new duration of ${newDurationHours} hours to be between 1 and 5 hours`);
+        }
       });
 
       it('should show correct initial chart interval of Auto', async function () {
