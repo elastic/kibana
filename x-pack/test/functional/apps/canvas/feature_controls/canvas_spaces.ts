@@ -24,7 +24,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('spaces/disabled_features');
+        await esArchiver.load('canvas/default');
         await kibanaServer.uiSettings.replace({
           'accessibility:disableAnimations': true,
           'telemetry:optIn': false,
@@ -39,7 +39,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('spaces/disabled_features');
+        await esArchiver.unload('canvas/default');
       });
 
       it('shows canvas navlink', async () => {

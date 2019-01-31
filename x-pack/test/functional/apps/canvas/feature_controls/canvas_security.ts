@@ -16,7 +16,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
   describe('canvas', () => {
     before(async () => {
-      await esArchiver.load('security/feature_privileges');
+      await esArchiver.load('canvas/default');
       await kibanaServer.uiSettings.replace({
         'accessibility:disableAnimations': true,
         'telemetry:optIn': false,
@@ -25,7 +25,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
     });
 
     after(async () => {
-      await esArchiver.unload('security/feature_privileges');
+      await esArchiver.unload('canvas/default');
     });
 
     describe('global canvas all privileges', () => {
