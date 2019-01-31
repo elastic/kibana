@@ -66,9 +66,11 @@ export class TileLayer extends AbstractLayer {
 
   async syncLayerWithMB(mbMap) {
     const source = mbMap.getSource(this.getId());
-    const layerId = this.getId() + '_raster';
+    const mbLayerId = this.getId() + '_raster';
 
     if (source) {
+      // If source exists, just sync style
+      this._setTileLayerProperties(mbMap, mbLayerId);
       return;
     }
 
@@ -82,7 +84,7 @@ export class TileLayer extends AbstractLayer {
     });
 
     mbMap.addLayer({
-      id: layerId,
+      id: mbLayerId,
       type: 'raster',
       source: sourceId,
       minzoom: 0,
@@ -90,13 +92,16 @@ export class TileLayer extends AbstractLayer {
     });
 
     await this._tileLoadErrorTracker(mbMap, url);
+    this._setTileLayerProperties(mbMap, mbLayerId);
+  }
 
-    mbMap.setLayoutProperty(layerId, 'visibility', this.isVisible() ? 'visible' : 'none');
-    mbMap.setLayerZoomRange(layerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+  _setTileLayerProperties(mbMap, mbLayerId) {
+    mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+    mbMap.setLayerZoomRange(mbLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
     this._style && this._style.setMBPaintProperties({
       alpha: this.getAlpha(),
       mbMap,
-      layerId,
+      mbLayerId,
     });
   }
 
