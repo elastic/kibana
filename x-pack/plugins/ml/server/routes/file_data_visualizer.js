@@ -41,7 +41,7 @@ export function fileDataVisualizerRoutes(server, commonRouteConfig) {
   server.route({
     method: 'POST',
     path: '/api/ml/file_data_visualizer/import',
-    async handler(request) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const { id } = request.query;
       const { index, data, settings, mappings, ingestPipeline } = request.payload;
