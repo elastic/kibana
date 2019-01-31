@@ -382,13 +382,13 @@ export const FollowerIndexForm = injectI18n(
           />),
           remoteClusterNotConnectedNotEditable: () => (<FormattedMessage
             id="xpack.crossClusterReplication.followerIndexForm.currentRemoteClusterNotConnectedCallOutDescription"
-            defaultMessage="You need to connect it before editing this follower index. Edit the remote cluster to
-              fix the problem."
+            defaultMessage="The remote cluster must be connected to edit this follower index."
           />),
-          remoteClusterDoesNotExist: () => (<FormattedMessage
+          remoteClusterDoesNotExist: (name) => (<FormattedMessage
             id="xpack.crossClusterReplication.followerIndexForm.currentRemoteClusterNotFoundCallOutDescription"
-            defaultMessage="It might have been removed. In order to edit this follower index,
-              you need to add a remote cluster with the same name."
+            defaultMessage="Before you can edit this follower index, you must add a remote cluster
+              named '{name}'."
+            values={{ name }}
           />)
         };
 

@@ -301,13 +301,13 @@ export class AutoFollowPatternFormUI extends PureComponent {
         />),
         remoteClusterNotConnectedNotEditable: () => (<FormattedMessage
           id="xpack.crossClusterReplication.autoFollowPatternForm.currentRemoteClusterNotConnectedCallOutDescription"
-          defaultMessage="You need to connect it before editing this auto-follow pattern. Edit the remote cluster to
-            fix the problem."
+          defaultMessage="The remote cluster must be connected to edit this auto-follow pattern."
         />),
-        remoteClusterDoesNotExist: () => (<FormattedMessage
+        remoteClusterDoesNotExist: (name) => (<FormattedMessage
           id="xpack.crossClusterReplication.autoFollowPatternForm.currentRemoteClusterNotFoundCallOutDescription"
-          defaultMessage="It might have been removed. In order to edit this auto-follow pattern,
-            you need to add a remote cluster with the same name."
+          defaultMessage="Before you can edit this auto-follow pattern, you must add a remote cluster
+            named '{name}'."
+          values={{ name }}
         />)
       };
 

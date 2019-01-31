@@ -24,11 +24,11 @@ import { BASE_PATH_REMOTE_CLUSTERS } from '../../../common/constants';
 const errorMessages = {
   noClusterFound: () => (<FormattedMessage
     id="xpack.crossClusterReplication.forms.emptyRemoteClustersCallOutDescription"
-    defaultMessage="No cluster found. You must add a remote cluster."
+    defaultMessage="You need at least one remote cluster to create a follower index."
   />),
   remoteClusterNotConnectedEditable: () => (<FormattedMessage
     id="xpack.crossClusterReplication.forms.currentRemoteClusterNotConnectedCallOutDescription"
-    defaultMessage="Edit the remote cluster to fix the problem or select a different one."
+    defaultMessage="Edit the remote cluster or select one that's connected."
   />),
 };
 
@@ -131,7 +131,7 @@ export const RemoteClustersFormField = injectI18n(
               >
                 <FormattedMessage
                   id="xpack.crossClusterReplication.forms.addRemoteClusterButtonLabel"
-                  defaultMessage="Add new remote cluster"
+                  defaultMessage="Add remote cluster"
                 />
               </EuiButtonEmpty>
             </div>
@@ -144,7 +144,7 @@ export const RemoteClustersFormField = injectI18n(
       const { intl, currentUrl } = this.props;
       const title = intl.formatMessage({
         id: 'xpack.crossClusterReplication.forms.emptyRemoteClustersCallOutTitle',
-        defaultMessage: 'No remote cluster found'
+        defaultMessage: `You don't have any remote clusters`,
       });
 
       return (
@@ -165,7 +165,7 @@ export const RemoteClustersFormField = injectI18n(
             >
               <FormattedMessage
                 id="xpack.crossClusterReplication.forms.addRemoteClusterButtonLabel"
-                defaultMessage="Add new remote cluster"
+                defaultMessage="Add remote cluster"
               />
             </EuiButton>
           </EuiCallOut>
@@ -177,7 +177,7 @@ export const RemoteClustersFormField = injectI18n(
       const { intl, isEditable, currentUrl } = this.props;
       const title = intl.formatMessage({
         id: 'xpack.crossClusterReplication.forms.remoteClusterConnectionErrorTitle',
-        defaultMessage: `The remote cluster '{name}' is not connected`
+        defaultMessage: `Remote cluster '{name}' is not connected`
       }, { name });
 
       return (
@@ -196,7 +196,7 @@ export const RemoteClustersFormField = injectI18n(
           >
             <FormattedMessage
               id="xpack.crossClusterReplication.forms.viewRemoteClusterButtonLabel"
-              defaultMessage="Edit remote cluster '{name}'"
+              defaultMessage="Edit remote cluster"
               values={{ name }}
             />
           </EuiButton>
@@ -208,7 +208,7 @@ export const RemoteClustersFormField = injectI18n(
       const { intl, currentUrl } = this.props;
       const title = intl.formatMessage({
         id: 'xpack.crossClusterReplication.forms.remoteClusterNotFoundTitle',
-        defaultMessage: `The remote cluster '{name}' was not found`,
+        defaultMessage: `Couldn't find remote cluster '{name}'`,
       }, { name });
 
       return (
@@ -218,7 +218,7 @@ export const RemoteClustersFormField = injectI18n(
           iconType="cross"
         >
           <p>
-            { this.errorMessages.remoteClusterDoesNotExist() }
+            { this.errorMessages.remoteClusterDoesNotExist(name) }
           </p>
           <EuiButton
             {...routing.getRouterLinkProps('/add', BASE_PATH_REMOTE_CLUSTERS, { redirect: currentUrl }, true)}
@@ -227,7 +227,7 @@ export const RemoteClustersFormField = injectI18n(
           >
             <FormattedMessage
               id="xpack.crossClusterReplication.forms.addRemoteClusterButtonLabel"
-              defaultMessage="Add new remote cluster"
+              defaultMessage="Add remote cluster"
             />
           </EuiButton>
         </EuiCallOut>
