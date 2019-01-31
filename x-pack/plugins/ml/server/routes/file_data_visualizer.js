@@ -9,12 +9,7 @@ import { wrapError } from '../client/errors';
 import { fileDataVisualizerProvider, importDataProvider } from '../models/file_data_visualizer';
 import { MAX_BYTES } from '../../common/constants/file_datavisualizer';
 
-import {
-  createMlTelemetry,
-  getSavedObjectsClient,
-  storeMlTelemetry,
-  ML_TELEMETRY_DOC_ID,
-} from '../lib/ml_telemetry';
+import { incrementFileDataVisualizerIndexCreationCount } from '../lib/ml_telemetry/ml_telemetry';
 
 function analyzeFiles(callWithRequest, data, overrides) {
   const { analyzeFile } = fileDataVisualizerProvider(callWithRequest);
@@ -51,15 +46,12 @@ export function fileDataVisualizerRoutes(server, commonRouteConfig) {
       const { id } = request.query;
       const { index, data, settings, mappings, ingestPipeline } = request.payload;
 
-      const savedObjectsClient = getSavedObjectsClient(server);
-      const mlTelemetrySavedObject = await savedObjectsClient.get(
-        'ml-telemetry',
-        ML_TELEMETRY_DOC_ID,
-      );
-      const indicesCount = mlTelemetrySavedObject.attributes.file_data_visualizer_index_creation_count + 1;
-
-      const mlTelemetry = createMlTelemetry(indicesCount);
-      storeMlTelemetry(server, mlTelemetry);
+      // `id` being `undefined` tells us that this is a new import due to create a new index.
+      // follow-up import calls to just add additional data will include the `id` of the created
+      // index, we'll ignore those and don't increment the counter.
+      if (id === undefined) {
+        incrementFileDataVisualizerIndexCreationCount(server);
+      }
 
       return importData(callWithRequest, id, index, settings, mappings, ingestPipeline, data)
         .catch(wrapError);

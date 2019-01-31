@@ -4,10 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  MlTelemetry,
-  storeMlTelemetry,
-  createMlTelemetry,
-  ML_TELEMETRY_DOC_ID,
-} from './ml_telemetry';
+export * from './ml_telemetry';
 export { makeMlUsageCollector } from './make_ml_usage_collector';
