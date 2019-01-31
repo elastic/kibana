@@ -302,7 +302,13 @@ export const FollowerIndexForm = injectI18n(
             }
           }
           : apiError;
-        return <SectionError title={title} error={error} />;
+
+        return (
+          <Fragment>
+            <SectionError title={title} error={error} />
+            <EuiSpacer size="l" />
+          </Fragment>
+        );
       }
 
       return null;
@@ -579,7 +585,6 @@ export const FollowerIndexForm = injectI18n(
 
         return (
           <Fragment>
-            <EuiSpacer size="m" />
             <EuiCallOut
               title={(
                 <FormattedMessage
@@ -664,6 +669,7 @@ export const FollowerIndexForm = injectI18n(
           </EuiForm>
 
           {renderFormErrorWarning()}
+          {this.renderApiErrors()}
           {renderActions()}
         </Fragment>
       );
@@ -685,7 +691,6 @@ export const FollowerIndexForm = injectI18n(
     render() {
       return (
         <Fragment>
-          {this.renderApiErrors()}
           {this.renderForm()}
           {this.renderLoading()}
         </Fragment>

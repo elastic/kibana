@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Route, Switch, Redirect } from 'react-router-dom';
 import chrome from 'ui/chrome';
@@ -18,6 +18,7 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPageContent,
+  EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -160,15 +161,19 @@ export const App = injectI18n(
 
       if (fetchPermissionError) {
         return (
-          <SectionError
-            title={(
-              <FormattedMessage
-                id="xpack.crossClusterReplication.app.permissionCheckErrorTitle"
-                defaultMessage="Error checking permissions"
-              />
-            )}
-            error={fetchPermissionError}
-          />
+          <Fragment>
+            <SectionError
+              title={(
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.app.permissionCheckErrorTitle"
+                  defaultMessage="Error checking permissions"
+                />
+              )}
+              error={fetchPermissionError}
+            />
+
+            <EuiSpacer size="m" />
+          </Fragment>
         );
       }
 

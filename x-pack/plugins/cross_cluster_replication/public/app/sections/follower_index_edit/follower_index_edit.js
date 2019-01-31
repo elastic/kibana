@@ -11,12 +11,13 @@ import chrome from 'ui/chrome';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import {
-  EuiPageContent,
   EuiButtonEmpty,
+  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiOverlayMask,
-  EuiConfirmModal,
+  EuiPageContent,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { listBreadcrumb, editBreadcrumb } from '../../services/breadcrumbs';
@@ -129,6 +130,9 @@ export const FollowerIndexEdit = injectI18n(
       return (
         <Fragment>
           <SectionError title={title} error={errorMessage} />
+
+          <EuiSpacer size="m" />
+
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty

@@ -219,7 +219,13 @@ export class AutoFollowPatternFormUI extends PureComponent {
         id: 'xpack.crossClusterReplication.autoFollowPatternForm.savingErrorTitle',
         defaultMessage: `Can't create auto-follow pattern`,
       });
-      return <SectionError title={title} error={apiError} />;
+
+      return (
+        <Fragment>
+          <SectionError title={title} error={apiError} />
+          <EuiSpacer size="l" />
+        </Fragment>
+      );
     }
 
     return null;
@@ -540,7 +546,6 @@ export class AutoFollowPatternFormUI extends PureComponent {
 
       return (
         <Fragment>
-          <EuiSpacer size="m" />
           <EuiCallOut
             title={(
               <FormattedMessage
@@ -551,6 +556,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
             color="danger"
             iconType="cross"
           />
+          <EuiSpacer size="l" />
         </Fragment>
       );
     };
@@ -621,7 +627,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
           {renderAutoFollowPatternPrefixSuffix()}
         </EuiForm>
         {renderFormErrorWarning()}
-        <EuiSpacer size="l" />
+        {this.renderApiErrors()}
         {renderActions()}
       </Fragment>
     );
@@ -643,7 +649,6 @@ export class AutoFollowPatternFormUI extends PureComponent {
   render() {
     return (
       <Fragment>
-        {this.renderApiErrors()}
         {this.renderForm()}
         {this.renderLoading()}
       </Fragment>

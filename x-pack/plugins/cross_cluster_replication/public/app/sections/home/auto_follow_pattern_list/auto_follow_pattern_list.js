@@ -158,7 +158,13 @@ export const AutoFollowPatternList = injectI18n(
           id: 'xpack.crossClusterReplication.autoFollowPatternList.loadingErrorTitle',
           defaultMessage: 'Error loading auto-follow patterns',
         });
-        return <SectionError title={title} error={apiError} />;
+
+        return (
+          <Fragment>
+            <SectionError title={title} error={apiError} />
+            <EuiSpacer size="m" />
+          </Fragment>
+        );
       }
 
       if (isEmpty) {

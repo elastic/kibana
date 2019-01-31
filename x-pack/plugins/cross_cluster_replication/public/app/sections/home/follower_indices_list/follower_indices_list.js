@@ -155,7 +155,13 @@ export const FollowerIndicesList = injectI18n(
           id: 'xpack.crossClusterReplication.followerIndexList.loadingErrorTitle',
           defaultMessage: 'Error loading follower indices',
         });
-        return <SectionError title={title} error={apiError} />;
+
+        return (
+          <Fragment>
+            <SectionError title={title} error={apiError} />
+            <EuiSpacer size="m" />
+          </Fragment>
+        );
       }
 
       if (isEmpty) {
