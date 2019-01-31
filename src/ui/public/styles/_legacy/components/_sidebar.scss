@@ -1,3 +1,5 @@
+// ONLY USED IN DISCOVER
+
 .sidebar-container {
   padding-left: 0px !important;
   padding-right: 0px !important;
@@ -38,13 +40,9 @@
       line-height: normal;
 
       label {
+        @include __legacyLabelStyles__bad;
         margin-bottom: $euiSizeXS;
-        font-weight: $euiFontWeightBold;
         display: block;
-      }
-
-      label[for] {
-        cursor: pointer;
       }
 
       &.active {
