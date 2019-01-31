@@ -146,23 +146,23 @@ function downloadFile(url, dest, log) {
 
 function getFilename(license, version) {
   const platform = os.platform();
-  let extension = null;
+  let suffix = null;
   switch (platform) {
     case 'darwin':
-      extension = 'darwin-x86_64';
+      suffix = 'darwin-x86_64.tar.gz';
       break;
     case 'linux':
-      extension = 'linux-x86_64';
+      suffix = 'linux-x86_64.tar.gz';
       break;
     case 'win32':
-      extension = 'windows-x86_64';
+      suffix = 'windows-x86_64.zip';
       break;
     default:
       throw new Error(`Unsupported platform ${platform}`);
   }
 
   const basename = `elasticsearch${license === 'oss' ? '-oss-' : '-'}${version}`;
-  return `${basename}-SNAPSHOT-${extension}`;
+  return `${basename}-SNAPSHOT-${suffix}`;
 }
 
 function getUrl(fileName) {
