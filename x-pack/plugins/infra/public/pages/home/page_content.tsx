@@ -6,8 +6,8 @@
 
 import React from 'react';
 
+import { NodesOverview } from '../../components/nodes_overview';
 import { PageContent } from '../../components/page';
-import { Waffle } from '../../components/waffle';
 
 import { WithWaffleFilter } from '../../containers/waffle/with_waffle_filters';
 import { WithWaffleNodes } from '../../containers/waffle/with_waffle_nodes';
@@ -27,7 +27,7 @@ export const HomePageContent: React.SFC = () => (
                 <WithWaffleTime>
                   {({ currentTimeRange, isAutoReloading }) => (
                     <WithWaffleOptions>
-                      {({ metric, groupBy, nodeType }) => (
+                      {({ metric, groupBy, nodeType, view, changeView }) => (
                         <WithWaffleNodes
                           filterQuery={filterQueryAsJson}
                           metric={metric}
@@ -37,14 +37,16 @@ export const HomePageContent: React.SFC = () => (
                           timerange={currentTimeRange}
                         >
                           {({ nodes, loading, refetch }) => (
-                            <Waffle
-                              map={nodes}
+                            <NodesOverview
+                              nodes={nodes}
                               loading={nodes.length > 0 && isAutoReloading ? false : loading}
                               nodeType={nodeType}
                               options={{ ...wafflemap, metric, fields: configuredFields, groupBy }}
                               reload={refetch}
                               onDrilldown={applyFilterQuery}
                               timeRange={currentTimeRange}
+                              view={view}
+                              onViewChange={changeView}
                             />
                           )}
                         </WithWaffleNodes>

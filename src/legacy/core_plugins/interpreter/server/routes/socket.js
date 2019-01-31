@@ -46,7 +46,10 @@ export function socketApi(server) {
     handler: () => 'pong',
   });
 
-  const io = socket(server.listener, { path: '/socket.io' });
+  const io = socket(server.listener, {
+    path: '/socket.io',
+    transports: ['polling'],
+  });
 
   io.on('connection', async socket => {
     // 'request' is the modified hapi request object

@@ -207,8 +207,14 @@ describe('QueryBar', () => {
     component.find(QueryLanguageSwitcher).simulate('selectLanguage', 'lucene');
     expect(mockStorage.set).toHaveBeenCalledWith('kibana.userQueryLanguage', 'lucene');
     expect(mockCallback).toHaveBeenCalledWith({
-      query: '',
-      language: 'lucene',
+      dateRange: {
+        from: 'now-15m',
+        to: 'now',
+      },
+      query: {
+        query: '',
+        language: 'lucene',
+      },
     });
   });
 
@@ -235,8 +241,14 @@ describe('QueryBar', () => {
 
     expect(mockCallback).toHaveBeenCalledTimes(1);
     expect(mockCallback).toHaveBeenCalledWith({
-      query: 'extension:jpg',
-      language: 'kuery',
+      dateRange: {
+        from: 'now-15m',
+        to: 'now',
+      },
+      query: {
+        query: 'extension:jpg',
+        language: 'kuery',
+      },
     });
   });
 

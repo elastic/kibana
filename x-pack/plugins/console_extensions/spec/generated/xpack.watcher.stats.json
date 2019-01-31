@@ -4,6 +4,7 @@
       "metric": [
         "_all",
         "queued_watches",
+        "current_watches",
         "pending_watches"
       ],
       "emit_stacktraces": "__flag__"
@@ -12,12 +13,13 @@
       "GET"
     ],
     "patterns": [
-      "_xpack/watcher/stats",
-      "_xpack/watcher/stats/{metrics}"
+      "_watcher/stats",
+      "_watcher/stats/{metrics}"
     ],
     "url_components": {
       "metrics": [
         "_all",
+        "current_watches",
         "pending_watches",
         "queued_watches"
       ]

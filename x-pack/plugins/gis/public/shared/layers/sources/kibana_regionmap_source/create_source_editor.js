@@ -10,48 +10,70 @@ import {
   EuiSelect,
   EuiFormRow,
 } from '@elastic/eui';
+import { getKibanaRegionList } from '../../../../meta';
 
 const NO_REGIONMAP_LAYERS_MSG =
   'No vector layers are available.' +
   ' Ask your system administrator to set "map.regionmap" in kibana.yml.';
 
-export function CreateSourceEditor({ onSelect, regionmapLayers }) {
+export class CreateSourceEditor extends React.Component {
 
-  const regionmapOptions = regionmapLayers.map(({ name, url }) => {
-    return {
-      value: url,
-      text: name
-    };
-  });
+  state  = {
+    regionmapLayers: []
+  }
 
-  const onChange = ({ target }) => {
-    const selectedName = target.options[target.selectedIndex].text;
-    onSelect({ name: selectedName });
+  _loadList = async () => {
+    const list = await getKibanaRegionList();
+    if (this._isMounted) {
+      this.setState({
+        regionmapLayers: list
+      });
+    }
   };
 
-  return (
-    <EuiFormRow
-      label="Vector layer"
-      helpText={regionmapLayers.length === 0 ? NO_REGIONMAP_LAYERS_MSG : null}
-    >
-      <EuiSelect
-        hasNoInitialSelection
-        options={regionmapOptions}
-        onChange={onChange}
-        disabled={regionmapLayers.length === 0}
-      />
-    </EuiFormRow>
-  );
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  componentDidMount() {
+    this._isMounted = true;
+    this._loadList();
+  }
+
+  render() {
+
+
+
+    const onChange = ({ target }) => {
+      const selectedName = target.options[target.selectedIndex].text;
+      this.props.onSelect({ name: selectedName });
+    };
+
+    const regionmapOptions = this.state.regionmapLayers.map(({ name, url }) => {
+      return {
+        value: url,
+        text: name
+      };
+    });
+
+    return (
+      <EuiFormRow
+        label="Vector layer"
+        helpText={this.state.regionmapLayers.length === 0 ? NO_REGIONMAP_LAYERS_MSG : null}
+      >
+        <EuiSelect
+          hasNoInitialSelection
+          options={regionmapOptions}
+          onChange={onChange}
+          disabled={this.state.regionmapLayers.length === 0}
+        />
+      </EuiFormRow>
+    );
+  }
 }
 
 CreateSourceEditor.propTypes = {
-  onSelect: PropTypes.func.isRequired,
-  regionmapLayers: PropTypes.arrayOf(PropTypes.shape({
-    url: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-  })),
+  onSelect: PropTypes.func.isRequired
 };
 
-CreateSourceEditor.defaultProps = {
-  regionmapLayers: [],
-};
+

@@ -57,7 +57,8 @@ describe('POST /api/saved_objects/{type}', () => {
     const clientResponse = {
       type: 'index-pattern',
       id: 'logstash-*',
-      title: 'Testing'
+      title: 'Testing',
+      references: [],
     };
 
     savedObjectsClient.create.returns(Promise.resolve(clientResponse));
@@ -100,7 +101,7 @@ describe('POST /api/saved_objects/{type}', () => {
     expect(savedObjectsClient.create.calledOnce).toBe(true);
 
     const args = savedObjectsClient.create.getCall(0).args;
-    const options = { overwrite: false, id: undefined, migrationVersion: undefined };
+    const options = { overwrite: false, id: undefined, migrationVersion: undefined, references: [] };
     const attributes = { title: 'Testing' };
 
     expect(args).toEqual(['index-pattern', attributes, options]);
@@ -121,7 +122,7 @@ describe('POST /api/saved_objects/{type}', () => {
     expect(savedObjectsClient.create.calledOnce).toBe(true);
 
     const args = savedObjectsClient.create.getCall(0).args;
-    const options = { overwrite: false, id: 'logstash-*' };
+    const options = { overwrite: false, id: 'logstash-*', references: [] };
     const attributes = { title: 'Testing' };
 
     expect(args).toEqual(['index-pattern', attributes, options]);

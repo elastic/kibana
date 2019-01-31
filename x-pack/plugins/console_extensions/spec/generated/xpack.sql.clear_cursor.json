@@ -4,7 +4,7 @@
       "POST"
     ],
     "patterns": [
-      "_xpack/sql/close"
+      "_sql/close"
     ],
     "documentation": "Clear SQL cursor"
   }
