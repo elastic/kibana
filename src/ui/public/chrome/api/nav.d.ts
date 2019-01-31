@@ -17,28 +17,28 @@
  * under the License.
  */
 
-export function GlobalNavProvider({ getService }) {
-  const testSubjects = getService('testSubjects');
+import { IconType } from '@elastic/eui';
+import * as Rx from 'rxjs';
 
-  return new class GlobalNav {
-    async moveMouseToLogo() {
-      await testSubjects.moveMouseTo('headerGlobalNav logo');
-    }
+import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 
-    async clickLogo() {
-      return await testSubjects.click('headerGlobalNav logo');
-    }
+export interface NavLink {
+  title: string;
+  url: string;
+  subUrlBase: string;
+  id: string;
+  euiIconType: IconType;
+  active: boolean;
+  lastSubUrl?: string;
+  hidden?: boolean;
+}
 
-    async exists() {
-      return await testSubjects.exists('headerGlobalNav');
-    }
-
-    async getFirstBreadcrumb() {
-      return await testSubjects.getVisibleText('headerGlobalNav breadcrumbs first&breadcrumb');
-    }
-
-    async getLastBreadcrumb() {
-      return await testSubjects.getVisibleText('headerGlobalNav breadcrumbs last&breadcrumb');
-    }
-  };
+export interface ChromeNavLinks {
+  getNavLinks$(): Rx.Observable<NavLink>;
+  getNavLinks(): NavLink[];
+  navLinkExists(id: string): boolean;
+  getNavLinkById(id: string): NavLink;
+  showOnlyById(id: string): void;
+  untrackNavLinksForDeletedSavedObjects(deletedIds: string[]): void;
+  trackSubUrlForApp(linkId: string, parsedKibanaUrl: KibanaParsedUrl): void;
 }
