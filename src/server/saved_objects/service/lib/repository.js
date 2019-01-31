@@ -18,7 +18,7 @@
  */
 
 import { omit } from 'lodash';
-import { getRootType, getRootPropertiesObjects } from '../../../mappings';
+import { getRootPropertiesObjects } from '../../../mappings';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
 import { decorateEsError } from './decorate_es_error';
@@ -50,7 +50,9 @@ export class SavedObjectsRepository {
     this._index = index;
     this._mappings = mappings;
     this._schema = schema;
-    this._type = getRootType(this._mappings);
+
+    // ES7 and up expects the root type to be _doc
+    this._type = '_doc';
     this._onBeforeWrite = onBeforeWrite;
     this._unwrappedCallCluster = async (...args) => {
       await migrator.awaitMigration();
@@ -70,6 +72,7 @@ export class SavedObjectsRepository {
    * @property {boolean} [options.overwrite=false]
    * @property {object} [options.migrationVersion=undefined]
    * @property {string} [options.namespace]
+   * @property {array} [options.references] - [{ name, type, id }]
    * @returns {promise} - { id, type, version, attributes }
   */
   async create(type, attributes = {}, options = {}) {
@@ -78,6 +81,7 @@ export class SavedObjectsRepository {
       migrationVersion,
       overwrite = false,
       namespace,
+      references = [],
     } = options;
 
     const method = id && !overwrite ? 'create' : 'index';
@@ -91,6 +95,7 @@ export class SavedObjectsRepository {
         attributes,
         migrationVersion,
         updated_at: time,
+        references,
       });
 
       const raw = this._serializer.savedObjectToRaw(migrated);
@@ -120,11 +125,11 @@ export class SavedObjectsRepository {
   /**
    * Creates multiple documents at once
    *
-   * @param {array} objects - [{ type, id, attributes, migrationVersion }]
+   * @param {array} objects - [{ type, id, attributes, references, migrationVersion }]
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false] - overwrites existing documents
    * @property {string} [options.namespace]
-   * @returns {promise} -  {saved_objects: [[{ id, type, version, attributes, error: { message } }]}
+   * @returns {promise} -  {saved_objects: [[{ id, type, version, references, attributes, error: { message } }]}
    */
   async bulkCreate(objects, options = {}) {
     const {
@@ -132,7 +137,8 @@ export class SavedObjectsRepository {
       overwrite = false,
     } = options;
     const time = this._getCurrentTime();
-    const objectToBulkRequest = (object) => {
+    const bulkCreateParams = [];
+    const rawObjectsToCreate = objects.map((object) => {
       const method = object.id && !overwrite ? 'create' : 'index';
       const migrated = this._migrator.migrateDocument({
         id: object.id,
@@ -141,27 +147,25 @@ export class SavedObjectsRepository {
         migrationVersion: object.migrationVersion,
         namespace,
         updated_at: time,
+        references: object.references || [],
       });
       const raw = this._serializer.savedObjectToRaw(migrated);
-
-      return [
+      bulkCreateParams.push(
         {
           [method]: {
             _id: raw._id,
             _type: this._type,
-          }
+          },
         },
         raw._source,
-      ];
-    };
+      );
+      return raw;
+    });
 
     const { items } = await this._writeToCluster('bulk', {
       index: this._index,
       refresh: 'wait_for',
-      body: objects.reduce((acc, object) => ([
-        ...acc,
-        ...objectToBulkRequest(object)
-      ]), []),
+      body: bulkCreateParams,
     });
 
     return {
@@ -174,9 +178,14 @@ export class SavedObjectsRepository {
 
         const {
           id = responseId,
-          type,
-          attributes,
         } = objects[i];
+        const {
+          _source: {
+            type,
+            [type]: attributes,
+            references = [],
+          },
+        } = rawObjectsToCreate[i];
 
         if (error) {
           if (error.type === 'version_conflict_engine_exception') {
@@ -200,7 +209,8 @@ export class SavedObjectsRepository {
           type,
           updated_at: time,
           version,
-          attributes
+          attributes,
+          references,
         };
       })
     };
@@ -281,6 +291,7 @@ export class SavedObjectsRepository {
    * @param {object} [options={}]
    * @property {(string|Array<string>)} [options.type]
    * @property {string} [options.search]
+   * @property {string} [options.defaultSearchOperator]
    * @property {Array<string>} [options.searchFields] - see Elasticsearch Simple Query String
    *                                        Query field argument for more information
    * @property {integer} [options.page=1]
@@ -289,13 +300,16 @@ export class SavedObjectsRepository {
    * @property {string} [options.sortOrder]
    * @property {Array<string>} [options.fields]
    * @property {string} [options.namespace]
+   * @property {object} [options.hasReference] - { type, id }
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   async find(options = {}) {
     const {
       type,
       search,
+      defaultSearchOperator = 'OR',
       searchFields,
+      hasReference,
       page = 1,
       perPage = 20,
       sortField,
@@ -313,7 +327,7 @@ export class SavedObjectsRepository {
     }
 
     if (fields && !Array.isArray(fields)) {
-      throw new TypeError('options.searchFields must be an array');
+      throw new TypeError('options.fields must be an array');
     }
 
     const esOptions = {
@@ -327,11 +341,13 @@ export class SavedObjectsRepository {
         version: true,
         ...getSearchDsl(this._mappings, this._schema, {
           search,
+          defaultSearchOperator,
           searchFields,
           type,
           sortField,
           sortOrder,
           namespace,
+          hasReference,
         })
       }
     };
@@ -409,6 +425,7 @@ export class SavedObjectsRepository {
           ...time && { updated_at: time },
           version: doc._version,
           attributes: doc._source[type],
+          references: doc._source.references || [],
           migrationVersion: doc._source.migrationVersion,
         };
       })
@@ -451,6 +468,7 @@ export class SavedObjectsRepository {
       ...updatedAt && { updated_at: updatedAt },
       version: response._version,
       attributes: response._source[type],
+      references: response._source.references || [],
       migrationVersion: response._source.migrationVersion,
     };
   }
@@ -463,12 +481,14 @@ export class SavedObjectsRepository {
    * @param {object} [options={}]
    * @property {integer} options.version - ensures version matches that of persisted object
    * @property {string} [options.namespace]
+   * @property {array} [options.references] - [{ name, type, id }]
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {
     const {
       version,
-      namespace
+      namespace,
+      references = [],
     } = options;
 
     const time = this._getCurrentTime();
@@ -483,6 +503,7 @@ export class SavedObjectsRepository {
         doc: {
           [type]: attributes,
           updated_at: time,
+          references,
         }
       },
     });
@@ -497,6 +518,7 @@ export class SavedObjectsRepository {
       type,
       updated_at: time,
       version: response._version,
+      references,
       attributes
     };
   }
@@ -570,6 +592,7 @@ export class SavedObjectsRepository {
       id,
       type,
       updated_at: time,
+      references: response.get._source.references,
       version: response._version,
       attributes: response.get._source[type],
     };

@@ -1699,14 +1699,6 @@
             "deprecationReason": null
           },
           {
-            "name": "trouble",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "total",
             "description": "",
             "args": [],

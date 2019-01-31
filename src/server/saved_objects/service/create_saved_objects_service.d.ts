@@ -17,19 +17,16 @@
  * under the License.
  */
 
-import { SavedObjectsRepository, ScopedSavedObjectsClientProvider } from './lib';
+import { ScopedSavedObjectsClientProvider } from './lib';
 import { SavedObjectsClient } from './saved_objects_client';
 
 export interface SavedObjectsService<Request = any> {
   // ATTENTION: these types are incomplete
-
   addScopedSavedObjectsClientWrapperFactory: ScopedSavedObjectsClientProvider<
     Request
   >['addClientWrapperFactory'];
-  getSavedObjectsRepository: (
-    callCluster: (endpoint: string, clientParams: any, options: any) => Promise<any>
-  ) => SavedObjectsRepository;
   getScopedSavedObjectsClient: ScopedSavedObjectsClientProvider<Request>['getClient'];
   SavedObjectsClient: typeof SavedObjectsClient;
   types: string[];
+  getSavedObjectsRepository(...rest: any[]): any;
 }

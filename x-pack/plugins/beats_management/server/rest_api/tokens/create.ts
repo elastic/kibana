@@ -7,7 +7,7 @@
 import Boom from 'boom';
 import Joi from 'joi';
 import { get } from 'lodash';
-import { REQUIRED_LICENSES } from 'x-pack/plugins/beats_management/common/constants';
+import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
 
