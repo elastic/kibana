@@ -130,7 +130,7 @@ class FilterBarUI extends Component<Props, State> {
         button={button}
         isOpen={this.state.isAddFilterPopoverOpen}
         closePopover={this.onCloseAddFilterPopover}
-        anchorPosition="downCenter"
+        anchorPosition="downLeft"
         withTitle
         panelPaddingSize="none"
         ownFocus={true}
