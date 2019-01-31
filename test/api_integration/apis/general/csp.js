@@ -19,7 +19,7 @@
 
 import expect from 'expect.js';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
 
   describe('csp smoke test', () => {
