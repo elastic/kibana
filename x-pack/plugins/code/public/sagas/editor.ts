@@ -143,7 +143,7 @@ function* handleMainRouteChange(action: Action<Match>) {
   }
   yield put(loadRepo(repoUri));
   if (file) {
-    if (pathType === PathTypes.blob) {
+    if ([PathTypes.blob, PathTypes.blame].includes(pathType)) {
       yield call(handleFile, repoUri, file, revision);
       if (position) {
         yield put(revealPosition(position));

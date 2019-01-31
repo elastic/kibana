@@ -9,7 +9,7 @@ import { call, put, takeEvery } from 'redux-saga/effects';
 import { kfetch } from 'ui/kfetch';
 import { Match } from '../actions';
 import { loadBlame, loadBlameFailed, LoadBlamePayload, loadBlameSuccess } from '../actions/blame';
-import { sourceFilePattern } from './patterns';
+import { blamePattern } from './patterns';
 
 function requestBlame(repoUri: string, revision: string, path: string) {
   return kfetch({ pathname: `../api/code/repo/${repoUri}/blame/${revision}/${path}` });
@@ -36,5 +36,5 @@ function* handleBlame(action: Action<Match>) {
 }
 
 export function* watchBlame() {
-  yield takeEvery(sourceFilePattern, handleBlame);
+  yield takeEvery(blamePattern, handleBlame);
 }

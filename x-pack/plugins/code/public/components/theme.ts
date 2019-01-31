@@ -8,6 +8,7 @@ declare module '@elastic/eui/dist/eui_theme_light.json' {
   const euiBorderColor: string;
   const euiBorderWidthThin: string;
   const euiColorDarkShade: string;
+  const euiColorPrimary: string;
   const euiCodeFontFamily: string;
   const euiColorFullShade: string;
   const euiColorHighlight: string;

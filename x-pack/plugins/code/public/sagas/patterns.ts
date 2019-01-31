@@ -21,3 +21,6 @@ export const commitRoutePattern = generatePattern(ROUTES.DIFF);
 
 export const sourceFilePattern = (action: Action<Match>) =>
   mainRoutePattern(action) && action.payload!.params.pathType === PathTypes.blob;
+
+export const blamePattern = (action: Action<Match>) =>
+  mainRoutePattern(action) && action.payload!.params.pathType === PathTypes.blame;
