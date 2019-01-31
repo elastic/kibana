@@ -12,8 +12,8 @@ import {
   SPAN_NAME,
   SPAN_TYPE
 } from 'x-pack/plugins/apm/common/constants';
+import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
 import { Span } from '../../../../../../../../typings/es_schemas/Span';
-import { NOT_AVAILABLE_LABEL } from '../../../../../../../constants';
 import { asMillis, asPercent } from '../../../../../../../utils/formatters';
 import { StickyProperties } from '../../../../../../shared/StickyProperties';
 
@@ -73,7 +73,7 @@ export function StickySpanProperties({ span, totalDuration }: Props) {
       ),
       val: spanTypeLabel,
       truncated: true,
-      widht: '50%'
+      width: '50%'
     },
     {
       fieldName: SPAN_DURATION,

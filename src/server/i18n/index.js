@@ -55,16 +55,11 @@ export async function i18nMixin(kbnServer, server, config) {
   ]);
 
   const translationPaths = [].concat(...groupedEntries);
-
   i18nLoader.registerTranslationFiles(translationPaths);
 
-  const pureTranslations = await i18nLoader.getTranslationsByLocale(locale);
-  const translations = Object.freeze({
+  const translations = await i18nLoader.getTranslationsByLocale(locale);
+  i18n.init(Object.freeze({
     locale,
-    ...pureTranslations,
-  });
-
-  i18n.init(translations);
-
-  server.decorate('server', 'getUiTranslations', () => translations);
+    ...translations,
+  }));
 }

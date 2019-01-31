@@ -33,7 +33,7 @@ export default function ({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./saved_object_management'));
     loadTestFile(require.resolve('./sample_data'));
     loadTestFile(require.resolve('./es_search_source'));
-    loadTestFile(require.resolve('./es_geohashgrid_source'));
+    loadTestFile(require.resolve('./es_geo_grid_source'));
     loadTestFile(require.resolve('./joins'));
   });
 }

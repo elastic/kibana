@@ -2,8 +2,10 @@
   <div class="kbn-timepicker-body kuiVerticalRhythm">
     <div class="kbn-timepicker-section kbn-timepicker-body-column">
       <div class="kuiLocalDropdownHeader kbn-timepicker-form-header">
-        <label class="kuiLocalDropdownHeader__label">
-          From
+        <label class="kuiLocalDropdownHeader__label"
+          i18n-id="common.ui.timepicker.from"
+          i18n-default-message="From"
+        >
         </label>
 
         <div class="kuiLocalDropdownHeader__actions">
@@ -12,7 +14,10 @@
             ng-click="setRelativeToNow({key:'from'})"
             kbn-accessible-click
           >
-            Set To Now
+          <span
+            i18n-id="common.ui.timepicker.setToNow"
+            i18n-default-message="Set To Now"
+          ></span>
           </a>
         </div>
       </div>
@@ -22,7 +27,11 @@
           {{relative.from.preview}}
         </span>
         <span ng-hide="relative.from.preview">
-          <em>Invalid Expression</em>
+          <em
+            i18n-id="common.ui.timepicker.relative.invalidExpression"
+            i18n-default-message="Invalid Expression"
+          >
+          </em>
         </span>
       </div>
 
@@ -61,8 +70,14 @@
             ng-checked="relative.from.round"
             ng-change="formatRelative({key:'from'})"
           >
-          <span class="kuiCheckBoxLabel__text">
-            round to the {{units[relative.from.unit.substring(0,1)]}}
+          <span class="kuiCheckBoxLabel__text"
+            i18n-id="common.ui.timepicker.roundTo"
+            i18n-default-message="round to the {unit}"
+            i18n-description="{unit} will be a translated time unit, e.g. \"hour\", \"minute\""
+            i18n-values="{
+              unit: units[relative.to.unit.substring(0,1)]
+            }"
+          >
           </span>
         </label>
       </div>
@@ -70,8 +85,10 @@
 
     <div class="kbn-timepicker-section kbn-timepicker-body-column">
       <div class="kuiLocalDropdownHeader kbn-timepicker-form-header">
-        <label class="kuiLocalDropdownHeader__label">
-          To
+        <label class="kuiLocalDropdownHeader__label"
+          i18n-id="common.ui.timepicker.to"
+          i18n-default-message="To"
+        >
         </label>
 
         <div class="kuiLocalDropdownHeader__actions">
@@ -80,7 +97,10 @@
             ng-click="setRelativeToNow({key:'to'})"
             kbn-accessible-click
           >
-            Set To Now
+          <span
+            i18n-id="common.ui.timepicker.setToNow"
+            i18n-default-message="Set To Now"
+          ></span>
           </a>
         </div>
       </div>
@@ -90,7 +110,11 @@
           {{relative.to.preview}}
         </span>
         <span ng-hide="relative.to.preview">
-          <em>Invalid Expression</em>
+          <em
+            i18n-id="common.ui.timepicker.invalidExpression"
+            i18n-default-message="Invalid Expression"
+          >
+          </em>
         </span>
       </div>
 
@@ -129,8 +153,14 @@
             ng-checked="relative.to.round"
             ng-change="formatRelative({key:'to'})"
           >
-          <span class="kuiCheckBoxLabel__text">
-            round to the {{units[relative.to.unit.substring(0,1)]}}
+          <span class="kuiCheckBoxLabel__text"
+            i18n-id="common.ui.timepicker.roundTo"
+            i18n-default-message="round to the {unit}"
+            i18n-description="{unit} will be a translated time unit, e.g. \"hour\", \"minute\""
+            i18n-values="{
+              unit: units[relative.to.unit.substring(0,1)]
+            }">
+            
           </span>
         </label>
       </div>
@@ -141,16 +171,21 @@
     <span
       class="kbn-timepicker-action-item kbn-timepicker-error"
       ng-show="checkRelative()"
-    >
-      <strong>From</strong> must occur before <strong>To</strong>
+      i18n-id="common.ui.timepicker.fromToError"
+      i18n-default-message="{strongStr}From{strongEnd} must occur before {strongStr}To{strongEnd}"
+      i18n-values="{
+        html_strongStr: '<strong>',
+        html_strongEnd: '</strong>'
+      }">
+      
     </span>
     <button
       type="submit"
       class="kuiButton kuiButton--primary kbn-timepicker-submit-button"
       ng-disabled="!(relative.from.preview && relative.to.preview) || checkRelative()"
       data-test-subj="timepickerGoButton"
-    >
-      Go
+      i18n-id="common.ui.timepicker.go"
+      i18n-default-message="Go">
     </button>
   </div>
 </form>
