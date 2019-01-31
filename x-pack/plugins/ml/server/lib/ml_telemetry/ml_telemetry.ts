@@ -34,11 +34,18 @@ export function getSavedObjectsClient(server: Server): any {
 }
 
 export async function incrementFileDataVisualizerIndexCreationCount(server: Server) {
-  const savedObjectsClient = getSavedObjectsClient(server);
-  const mlTelemetrySavedObject = await savedObjectsClient.get('ml-telemetry', ML_TELEMETRY_DOC_ID);
-  const indicesCount =
-    mlTelemetrySavedObject.attributes.file_data_visualizer_index_creation_count + 1;
+  try {
+    const savedObjectsClient = getSavedObjectsClient(server);
+    const mlTelemetrySavedObject = await savedObjectsClient.get(
+      'ml-telemetry',
+      ML_TELEMETRY_DOC_ID
+    );
+    const indicesCount =
+      mlTelemetrySavedObject.attributes.file_data_visualizer_index_creation_count + 1;
 
-  const mlTelemetry = createMlTelemetry(indicesCount);
-  storeMlTelemetry(server, mlTelemetry);
+    const mlTelemetry = createMlTelemetry(indicesCount);
+    storeMlTelemetry(server, mlTelemetry);
+  } catch (e) {
+    /* silently fail on telemetry error */
+  }
 }
