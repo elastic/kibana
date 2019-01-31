@@ -156,7 +156,7 @@ describe('ems_client', () => {
     { name: 'name', description: 'name', type: 'property' } ]);
 
 
-    expect((await layer.getEMSHotLink())).to.be('https://landing.foobar#file/world_countries');
+    expect((await layer.getEMSHotLink())).to.be('https://landing.foobar?locale=zz#file/world_countries');
 
   });
 

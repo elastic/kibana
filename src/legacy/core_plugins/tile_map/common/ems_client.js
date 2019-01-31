@@ -106,7 +106,7 @@ export class EMSClientV66 {
     this._manifestServiceUrl = manifestServiceUrl;
     this._loadFileLayers = null;
     this._loadTMSServices = null;
-    this._emsLandingPageUrl = landingPageUrl;
+    this._emsLandingPageUrl = typeof landingPageUrl === 'string' ? landingPageUrl : '';
     this._language = typeof language === 'string' ? language : DEFAULT_LANGUAGE;
 
     this._invalidateSettings();
