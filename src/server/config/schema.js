@@ -29,6 +29,7 @@ import {
 import {
   getData
 } from '../path';
+import { DEFAULT_CSP_RULES, DEFAULT_CSP_LEGACY_BROWSER_RULES } from '../csp';
 
 const tilemapSchema = Joi.object({
   url: Joi.string(),
@@ -92,6 +93,11 @@ export default () => Joi.object({
   pid: Joi.object({
     file: Joi.string(),
     exclusive: Joi.boolean().default(false)
+  }).default(),
+
+  csp: Joi.object({
+    rules: Joi.array().items(Joi.string()).default(DEFAULT_CSP_RULES),
+    legacyBrowserRules: Joi.array().items(Joi.string()).default(DEFAULT_CSP_LEGACY_BROWSER_RULES),
   }).default(),
 
   cpu: Joi.object({

@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { createHash, randomBytes } from 'crypto';
-import { promisify } from 'util';
+import { createHash } from 'crypto';
 import { props, reduce as reduceAsync } from 'bluebird';
 import Boom from 'boom';
 import { resolve } from 'path';
@@ -27,8 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { AppBootstrap } from './bootstrap';
 import { mergeVariables } from './lib';
 import { fromRoot } from '../../utils';
-
-const randomBytesAsync = promisify(randomBytes);
+import { generateCSPNonce, createCSPRuleString } from '../../server/csp';
 
 export function uiRenderMixin(kbnServer, server, config) {
   function replaceInjectedVars(request, injectedVars) {
@@ -215,7 +213,7 @@ export function uiRenderMixin(kbnServer, server, config) {
       injectedVarsOverrides
     });
 
-    const nonce = (await randomBytesAsync(12)).toString('base64');
+    const nonce = await generateCSPNonce();
 
     const response = h.view('ui_app', {
       nonce,
@@ -245,13 +243,11 @@ export function uiRenderMixin(kbnServer, server, config) {
       },
     });
 
-    const csp = [
-      `script-src 'unsafe-eval' 'nonce-${nonce}'`,
-      'worker-src blob:',
-      'child-src blob:',
-    ];
+    const csp = createCSPRuleString(config.get('csp.rules'), nonce);
+    response.header('content-security-policy', csp);
 
-    response.header('content-security-policy', csp.join(';'));
+    const legacyCsp = createCSPRuleString(config.get('csp.legacyBrowserRules'), nonce);
+    response.header('x-content-security-policy', legacyCsp);
 
     return response;
   }
