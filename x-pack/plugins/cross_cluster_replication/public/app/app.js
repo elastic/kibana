@@ -182,14 +182,15 @@ export const App = injectI18n(
                 <h2>
                   <FormattedMessage
                     id="xpack.crossClusterReplication.app.deniedPermissionTitle"
-                    defaultMessage="Permission denied"
+                    defaultMessage="You're missing cluster privileges"
                   />
                 </h2>}
               body={
                 <p>
                   <FormattedMessage
                     id="xpack.crossClusterReplication.app.deniedPermissionDescription"
-                    defaultMessage="You do not have required cluster privileges ({clusterPrivileges}) for Cross Cluster Replication."
+                    defaultMessage="To use Cross Cluster Replication, you must have {clusterPrivileges,
+                      plural, one {this cluster privilege} other {these cluster privileges}}: {clusterPrivileges}."
                     values={{ clusterPrivileges: missingClusterPrivileges.join(', ') }}
                   />
                 </p>}
