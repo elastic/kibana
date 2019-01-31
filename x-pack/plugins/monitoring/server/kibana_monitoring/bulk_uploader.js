@@ -12,7 +12,6 @@ import {
 } from '../../common/constants';
 import {
   sendBulkPayload,
-  monitoringBulk,
   getKibanaInfoForStats,
 } from './lib';
 

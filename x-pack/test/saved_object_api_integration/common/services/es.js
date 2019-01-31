@@ -7,7 +7,7 @@
 import { format as formatUrl } from 'url';
 
 import elasticsearch from '@elastic/elasticsearch';
-import shieldPlugin from '../../../../server/lib/esjs_shield_plugin';
+import addShieldExtensions from '../../../../server/lib/esjs_shield_plugin';
 import { TestInvoker } from '../lib/types';
 
 export function EsProvider({ getService }: TestInvoker) {
