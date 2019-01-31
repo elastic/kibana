@@ -16,8 +16,8 @@ export const convertChangeToUpdater = (change: UpdateSourceInput) => (
       change.setAliases
         ? {
             ...c,
-            metricAlias: change.setAliases.metricAlias || c.metricAlias,
-            logAlias: change.setAliases.logAlias || c.logAlias,
+            metricAlias: defaultTo(c.metricAlias, change.setAliases.metricAlias),
+            logAlias: defaultTo(c.logAlias, change.setAliases.logAlias),
           }
         : c,
     c =>
@@ -25,11 +25,11 @@ export const convertChangeToUpdater = (change: UpdateSourceInput) => (
         ? {
             ...c,
             fields: {
-              container: change.setFields.container || c.fields.container,
-              host: change.setFields.host || c.fields.host,
-              pod: change.setFields.pod || c.fields.pod,
-              tiebreaker: change.setFields.tiebreaker || c.fields.tiebreaker,
-              timestamp: change.setFields.timestamp || c.fields.timestamp,
+              container: defaultTo(c.fields.container, change.setFields.container),
+              host: defaultTo(c.fields.host, change.setFields.host),
+              pod: defaultTo(c.fields.pod, change.setFields.pod),
+              tiebreaker: defaultTo(c.fields.tiebreaker, change.setFields.tiebreaker),
+              timestamp: defaultTo(c.fields.timestamp, change.setFields.timestamp),
             },
           }
         : c,
@@ -39,3 +39,6 @@ export const convertChangeToUpdater = (change: UpdateSourceInput) => (
     configuration
   );
 };
+
+const defaultTo = <T>(defaultValue: T, maybeValue: T | undefined | null): T =>
+  typeof maybeValue === 'undefined' || maybeValue === null ? defaultValue : maybeValue;
