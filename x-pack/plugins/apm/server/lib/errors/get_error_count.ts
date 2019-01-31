@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter } from 'elasticsearch';
+import { ESFilter } from '@elastic/elasticsearch';
 import { idx } from 'x-pack/plugins/apm/common/idx';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
 import {

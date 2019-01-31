@@ -5,6 +5,15 @@
  */
 
 declare module '@elastic/elasticsearch' {
+  export interface GenericParams {
+    requestTimeout?: number;
+    maxRetries?: number;
+    method?: string;
+    body?: any;
+    ignore?: number | number[];
+    filterPath?: string | string[];
+  }
+
   export interface ShardsResponse {
     total: number;
     successful: number;
