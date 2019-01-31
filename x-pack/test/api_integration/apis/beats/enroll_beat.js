@@ -67,9 +67,9 @@ export default function ({ getService }) {
         id: `beat:${beatId}`,
       });
 
-      expect(esResponse._source.beat).to.have.property('verified_on');
-      expect(esResponse._source.beat).to.have.property('host_ip');
-      expect(esResponse._source.beat.config_status).to.eql('UNKNOWN');
+      expect(esResponse.body._source.beat).to.have.property('verified_on');
+      expect(esResponse.body._source.beat).to.have.property('host_ip');
+      expect(esResponse.body._source.beat.config_status).to.eql('UNKNOWN');
     });
 
     it('should contain an access token in the response', async () => {
@@ -88,7 +88,7 @@ export default function ({ getService }) {
         id: `beat:${beatId}`,
       });
 
-      const accessTokenInEs = esResponse._source.beat.access_token;
+      const accessTokenInEs = esResponse.body._source.beat.access_token;
 
       expect(accessTokenFromApi.length).to.be.greaterThan(0);
       expect(accessTokenFromApi).to.eql(accessTokenInEs);
@@ -151,7 +151,7 @@ export default function ({ getService }) {
         ignore: [404],
       });
 
-      expect(esResponse.found).to.be(false);
+      expect(esResponse.body.found).to.be(false);
     });
 
     it('should fail if the beat with the same ID is enrolled twice', async () => {

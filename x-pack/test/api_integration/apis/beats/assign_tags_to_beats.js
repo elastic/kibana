@@ -36,7 +36,7 @@ export default function ({ getService }) {
         id: `beat:bar`,
       });
 
-      const beat = esResponse._source.beat;
+      const beat = esResponse.body._source.beat;
       expect(beat.tags).to.eql(['production']);
     });
 
@@ -53,7 +53,7 @@ export default function ({ getService }) {
         id: `beat:foo`,
       });
 
-      beat = esResponse._source.beat;
+      beat = esResponse.body._source.beat;
       expect(beat.tags).to.eql([...tags, 'qa']);
 
       // Adding the existing tag
@@ -74,7 +74,7 @@ export default function ({ getService }) {
         id: `beat:foo`,
       });
 
-      beat = esResponse._source.beat;
+      beat = esResponse.body._source.beat;
       expect(beat.tags).to.eql([...tags, 'qa']);
     });
 
@@ -105,7 +105,7 @@ export default function ({ getService }) {
         id: `beat:foo`,
       });
 
-      beat = esResponse._source.beat;
+      beat = esResponse.body._source.beat;
       expect(beat.tags).to.eql(['production', 'qa', 'development']); // as beat 'foo' already had 'production' and 'qa' tags attached to it
 
       // Beat bar
@@ -115,7 +115,7 @@ export default function ({ getService }) {
         id: `beat:bar`,
       });
 
-      beat = esResponse._source.beat;
+      beat = esResponse.body._source.beat;
       expect(beat.tags).to.eql(['development']);
     });
 
@@ -142,7 +142,7 @@ export default function ({ getService }) {
         id: `beat:bar`,
       });
 
-      const beat = esResponse._source.beat;
+      const beat = esResponse.body._source.beat;
       expect(beat.tags).to.eql(['development', 'production']);
     });
 
@@ -173,7 +173,7 @@ export default function ({ getService }) {
         id: `beat:foo`,
       });
 
-      beat = esResponse._source.beat;
+      beat = esResponse.body._source.beat;
       expect(beat.tags).to.eql(['production', 'qa', 'development']); // as beat 'foo' already had 'production' and 'qa' tags attached to it
 
       // Beat bar
@@ -183,7 +183,7 @@ export default function ({ getService }) {
         id: `beat:bar`,
       });
 
-      beat = esResponse._source.beat;
+      beat = esResponse.body._source.beat;
       expect(beat.tags).to.eql(['production']);
     });
 
@@ -224,7 +224,7 @@ export default function ({ getService }) {
         id: `beat:bar`,
       });
 
-      const beat = esResponse._source.beat;
+      const beat = esResponse.body._source.beat;
       expect(beat).to.not.have.property('tags');
     });
 
@@ -250,7 +250,7 @@ export default function ({ getService }) {
         id: `beat:bar`,
       });
 
-      const beat = esResponse._source.beat;
+      const beat = esResponse.body._source.beat;
       expect(beat).to.not.have.property('tags');
     });
   });

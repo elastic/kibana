@@ -40,8 +40,8 @@ export default function ({ getService }) {
       return es.search({
         index: '.kibana',
         q: 'type:kql-telemetry',
-      }).then(response => {
-        const kqlTelemetryDoc = get(response, 'hits.hits[0]._source.kql-telemetry');
+      }).then(({ body }) => {
+        const kqlTelemetryDoc = get(body, 'hits.hits[0]._source.kql-telemetry');
         expect(kqlTelemetryDoc.optInCount).to.be(1);
       });
     });
@@ -56,8 +56,8 @@ export default function ({ getService }) {
       return es.search({
         index: '.kibana',
         q: 'type:kql-telemetry',
-      }).then(response => {
-        const kqlTelemetryDoc = get(response, 'hits.hits[0]._source.kql-telemetry');
+      }).then(({ body }) => {
+        const kqlTelemetryDoc = get(body, 'hits.hits[0]._source.kql-telemetry');
         expect(kqlTelemetryDoc.optOutCount).to.be(1);
       });
 

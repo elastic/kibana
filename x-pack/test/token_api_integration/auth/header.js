@@ -9,7 +9,7 @@ export default function ({ getService }) {
   const es = getService('es');
 
   async function createToken() {
-    const { access_token: accessToken } = await es.shield.getAccessToken({
+    const { body: { access_token: accessToken } } = await es.shield.getAccessToken({
       body: {
         grant_type: 'password',
         username: 'elastic',

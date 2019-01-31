@@ -73,12 +73,12 @@ export default function ({ getService }) {
         id: `beat:${beatId}`,
       });
 
-      expect(beatInEs._source.beat.id).to.be(beatId);
-      expect(beatInEs._source.beat.type).to.be(beat.type);
-      expect(beatInEs._source.beat.host_name).to.be(beat.host_name);
-      expect(beatInEs._source.beat.version).to.be(beat.version);
-      expect(beatInEs._source.beat.ephemeral_id).to.be(beat.ephemeral_id);
-      expect(beatInEs._source.beat.name).to.be(beat.name);
+      expect(beatInEs.body._source.beat.id).to.be(beatId);
+      expect(beatInEs.body._source.beat.type).to.be(beat.type);
+      expect(beatInEs.body._source.beat.host_name).to.be(beat.host_name);
+      expect(beatInEs.body._source.beat.version).to.be(beat.version);
+      expect(beatInEs.body._source.beat.ephemeral_id).to.be(beat.ephemeral_id);
+      expect(beatInEs.body._source.beat.name).to.be(beat.name);
     });
 
     it('should return an error for an invalid access token', async () => {
@@ -98,11 +98,11 @@ export default function ({ getService }) {
         id: `beat:${beatId}`,
       });
 
-      expect(beatInEs._source.beat.id).to.be(beatId);
-      expect(beatInEs._source.beat.type).to.not.be(beat.type);
-      expect(beatInEs._source.beat.host_name).to.not.be(beat.host_name);
-      expect(beatInEs._source.beat.version).to.not.be(beat.version);
-      expect(beatInEs._source.beat.ephemeral_id).to.not.be(beat.ephemeral_id);
+      expect(beatInEs.body._source.beat.id).to.be(beatId);
+      expect(beatInEs.body._source.beat.type).to.not.be(beat.type);
+      expect(beatInEs.body._source.beat.host_name).to.not.be(beat.host_name);
+      expect(beatInEs.body._source.beat.version).to.not.be(beat.version);
+      expect(beatInEs.body._source.beat.ephemeral_id).to.not.be(beat.ephemeral_id);
     });
 
     it('should return an error for a non-existent beat', async () => {
