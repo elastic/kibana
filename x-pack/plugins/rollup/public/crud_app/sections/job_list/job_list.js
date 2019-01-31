@@ -182,6 +182,7 @@ export class JobListUi extends Component {
         }
         actions={
           <EuiButton
+            data-test-subj="createRollupJobButton"
             {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/create`)}
             fill
             iconType="plusInCircle"
@@ -278,4 +279,3 @@ export class JobListUi extends Component {
 }
 
 export const JobList = injectI18n(JobListUi);
-

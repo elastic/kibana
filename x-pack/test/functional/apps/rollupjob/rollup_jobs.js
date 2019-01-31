@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-//import expect from 'expect.js';
-//import { indexBy } from 'lodash';
+import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
-  //const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   //const testSubjects = getService('testSubjects');
   //const log = getService('log');
@@ -21,17 +19,35 @@ export default function ({ getService, getPageObjects }) {
         esArchiver.loadIfNeeded('logstash_functional'),
         esArchiver.load('canvas/default'),
       ]);
-
-      // load canvas
-      // see also navigateToUrl(app, hash)
       await PageObjects.common.navigateToApp('rollupjob');
     });
 
     it('create and and save a new job', async () => {
-      // await PageObjects.watcher.createWatch(watchID, watchName);
-      // const watch = await PageObjects.watcher.getWatch(watchID);
-      // expect(watch.id).to.be(watchID);
-      // expect(watch.name).to.be(watchName);
+      await PageObjects.rollup.createNewRollUpJob();
+      await PageObjects.rollup.addRoleName('TestJob');
+      await PageObjects.rollup.addIndexPattern('.kibana*');
+      await PageObjects.rollup.rollupIndexName('Testjob');
+      await PageObjects.rollup.rollUpJobNextButton();
+
+      //now navigate to histogram
+      await PageObjects.rollup.rollupJobInterval('1000ms');
+      await PageObjects.rollup.rollUpJobNextButton();
+
+      //Terms (optional)
+      await PageObjects.rollup.rollUpJobNextButton();
+
+      //Histogram(optional)
+      await PageObjects.rollup.rollUpJobNextButton();
+
+      //Metrics(optional)
+      await PageObjects.rollup.rollUpJobNextButton();
+
+      //saveJob
+      await PageObjects.rollup.rollUpJobSaveButton();
+
+      // //jobListTitle
+      // expect(jobName).to.eql(['TestJob']);
+
     });
   });
 }

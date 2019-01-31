@@ -323,6 +323,7 @@ export class StepLogisticsUi extends Component {
                 value={id}
                 onChange={e => onFieldsChange({ id: e.target.value })}
                 fullWidth
+                data-test-subj="rollUpJobName"
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>
@@ -357,6 +358,7 @@ export class StepLogisticsUi extends Component {
               isInvalid={Boolean((areStepErrorsVisible && errorIndexPattern)) || Boolean(indexPatternAsyncErrors)}
               helpText={this.renderIndexPatternHelpText()}
               fullWidth
+
             >
               <EuiFieldText
                 value={indexPattern}
@@ -364,6 +366,7 @@ export class StepLogisticsUi extends Component {
                 isInvalid={Boolean(areStepErrorsVisible && errorIndexPattern) || Boolean(indexPatternAsyncErrors)}
                 isLoading={isValidatingIndexPattern}
                 fullWidth
+                data-test-subj="rollUpIndexPattern"
               />
             </EuiFormRow>
 
@@ -384,12 +387,14 @@ export class StepLogisticsUi extends Component {
                 />
               )}
               fullWidth
+
             >
               <EuiFieldText
                 value={rollupIndex}
                 onChange={e => onFieldsChange({ rollupIndex: e.target.value })}
                 isInvalid={Boolean(areStepErrorsVisible && errorRollupIndex)}
                 fullWidth
+                data-test-subj="rollUpIndexName"
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>
