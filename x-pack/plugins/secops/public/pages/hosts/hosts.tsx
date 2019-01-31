@@ -4,20 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-} from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
-import styled from 'styled-components';
 import chrome from 'ui/chrome';
 
-import { AutocompleteField } from '../../components/autocomplete_field';
 import { EmptyPage } from '../../components/empty_page';
 import {
   EventsTable,
@@ -30,14 +22,14 @@ import { manageQuery } from '../../components/page/manage_query';
 import { AuthenticationsQuery } from '../../containers/authentications';
 import { EventsQuery } from '../../containers/events';
 import { GlobalTime } from '../../containers/global_time';
-import { HostsFilter, HostsQuery } from '../../containers/hosts';
-import { HostsTableQuery } from '../../containers/hosts/hosts_table.gql_query';
+import { HostsQuery } from '../../containers/hosts';
 import { KpiEventsQuery } from '../../containers/kpi_events';
-import { KueryAutocompletion } from '../../containers/kuery_autocompletion';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
 import { IndexType, KpiItem } from '../../graphql/types';
-import { hostsSelectors, State } from '../../store';
+import { hostsModel, hostsSelectors, State } from '../../store';
+import { HostsKql } from './kql';
+import { PageContent, PageContentBody } from './styles';
 import * as i18n from './translations';
 
 const basePath = chrome.getBasePath();
@@ -59,33 +51,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
     {({ auditbeatIndicesExist, indexPattern }) =>
       indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
         <>
-          <PageHeader data-test-subj="paneHeader">
-            <PageHeaderSection>
-              <KueryAutocompletion indexPattern={indexPattern}>
-                {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
-                  <HostsFilter indexPattern={indexPattern}>
-                    {({
-                      applyFilterQueryFromKueryExpression,
-                      filterQueryDraft,
-                      isFilterQueryDraftValid,
-                      setFilterQueryDraftFromKueryExpression,
-                    }) => (
-                      <AutocompleteField
-                        isLoadingSuggestions={isLoadingSuggestions}
-                        isValid={isFilterQueryDraftValid}
-                        loadSuggestions={loadSuggestions}
-                        onChange={setFilterQueryDraftFromKueryExpression}
-                        onSubmit={applyFilterQueryFromKueryExpression}
-                        placeholder={i18n.KQL_PACE_HOLDER}
-                        suggestions={suggestions}
-                        value={filterQueryDraft ? filterQueryDraft.expression : ''}
-                      />
-                    )}
-                  </HostsFilter>
-                )}
-              </KueryAutocompletion>
-            </PageHeaderSection>
-          </PageHeader>
+          <HostsKql indexPattern={indexPattern} type={hostsModel.HostsType.page} />
           <PageContent data-test-subj="pageContent" panelPaddingSize="none">
             <PageContentBody data-test-subj="pane1ScrollContainer">
               <GlobalTime>
@@ -114,10 +80,10 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                     <HostsQuery
                       endDate={to}
                       filterQuery={filterQuery}
-                      query={HostsTableQuery}
                       sourceId="default"
                       startDate={from}
                       poll={poll}
+                      type={hostsModel.HostsType.page}
                     >
                       {({ hosts, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
                         <HostsTableManage
@@ -130,6 +96,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                           hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                           nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
                           loadMore={loadMore}
+                          type={hostsModel.HostsType.page}
                         />
                       )}
                     </HostsQuery>
@@ -140,6 +107,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                       poll={poll}
                       sourceId="default"
                       startDate={from}
+                      type={hostsModel.HostsType.page}
                     >
                       {({
                         uncommonProcesses,
@@ -161,6 +129,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                           nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
                           hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                           loadMore={loadMore}
+                          type={hostsModel.HostsType.page}
                         />
                       )}
                     </UncommonProcessesQuery>
@@ -170,6 +139,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                       poll={poll}
                       sourceId="default"
                       startDate={from}
+                      type={hostsModel.HostsType.page}
                     >
                       {({
                         authentications,
@@ -191,6 +161,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                           nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
                           hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                           loadMore={loadMore}
+                          type={hostsModel.HostsType.page}
                         />
                       )}
                     </AuthenticationsQuery>
@@ -200,6 +171,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                       poll={poll}
                       sourceId="default"
                       startDate={from}
+                      type={hostsModel.HostsType.page}
                     >
                       {({ events, loading, id, refetch, totalCount, pageInfo, loadMore }) => (
                         <EventsTableManage
@@ -214,6 +186,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                           tiebreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)!}
                           hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                           loadMore={loadMore}
+                          type={hostsModel.HostsType.page}
                         />
                       )}
                     </EventsQuery>
@@ -235,31 +208,12 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
   </WithSource>
 ));
 
-const mapStateToProps = (state: State) => ({
-  filterQuery: hostsSelectors.hostsFilterQueryAsJson(state) || '',
-});
+const makeMapStateToProps = () => {
+  const getHostsFilterQueryAsJson = hostsSelectors.hostsFilterQueryAsJson();
+  const mapStateToProps = (state: State) => ({
+    filterQuery: getHostsFilterQueryAsJson(state, hostsModel.HostsType.page) || '',
+  });
+  return mapStateToProps;
+};
 
-export const Hosts = connect(mapStateToProps)(HostsComponent);
-
-const PageContent = styled(EuiPageContent)`
-  margin-top: 116px;
-`;
-
-const PageHeader = styled(EuiPageHeader)`
-  background-color: ${props => props.theme.eui.euiColorLightestShade};
-  position: fixed;
-  width: calc(100% - 32px);
-  z-index: 1;
-  padding: 6px 0px 0px 0px;
-  margin-bottom: 0px;
-  /* margin-left: -1px; */
-  margin-top: 56px;
-`;
-
-const PageHeaderSection = styled(EuiPageHeaderSection)`
-  width: 100%;
-`;
-
-const PageContentBody = styled(EuiPageContentBody)`
-  padding: 12px;
-`;
+export const Hosts = connect(makeMapStateToProps)(HostsComponent);

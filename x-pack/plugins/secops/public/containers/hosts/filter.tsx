@@ -7,15 +7,17 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
+import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
+import { convertKueryToElasticSearchQuery } from '../../lib/keury';
 import {
   hostsActions,
+  hostsModel,
   hostsSelectors,
   KueryFilterQuery,
   SerializedFilterQuery,
   State,
 } from '../../store';
-import { getFilterComponent } from '../utils/filter_component';
 
 export interface HostsFilterArgs {
   applyFilterQueryFromKueryExpression: (expression: string) => void;
@@ -27,6 +29,7 @@ export interface HostsFilterArgs {
 interface OwnProps {
   children: (args: HostsFilterArgs) => React.ReactNode;
   indexPattern: StaticIndexPattern;
+  type: hostsModel.HostsType;
 }
 
 interface HostsFilterReduxProps {
@@ -35,8 +38,14 @@ interface HostsFilterReduxProps {
 }
 
 interface HostsFilterDispatchProps {
-  applyHostsFilterQuery: (filterQuery: SerializedFilterQuery) => void;
-  setHostsFilterQueryDraft: (filterQueryDraft: KueryFilterQuery) => void;
+  applyHostsFilterQuery: ActionCreator<{
+    filterQuery: SerializedFilterQuery;
+    hostsType: hostsModel.HostsType;
+  }>;
+  setHostsFilterQueryDraft: ActionCreator<{
+    filterQueryDraft: KueryFilterQuery;
+    hostsType: hostsModel.HostsType;
+  }>;
 }
 
 type HostsFilterProps = OwnProps & HostsFilterReduxProps & HostsFilterDispatchProps;
@@ -49,26 +58,50 @@ const HostsFilterComponent = pure<HostsFilterProps>(
     indexPattern,
     isHostFilterQueryDraftValid,
     setHostsFilterQueryDraft,
+    type,
   }) => (
     <>
-      {children(
-        getFilterComponent({
-          applyFilterQuery: applyHostsFilterQuery,
-          filterQueryDraft: hostsFilterQueryDraft,
-          indexPattern,
-          isFilterQueryDraftValid: isHostFilterQueryDraftValid,
-          setFilterQueryDraft: setHostsFilterQueryDraft,
-        })
-      )}
+      {children({
+        applyFilterQueryFromKueryExpression: (expression: string) =>
+          applyHostsFilterQuery({
+            filterQuery: {
+              query: {
+                kind: 'kuery',
+                expression,
+              },
+              serializedQuery: convertKueryToElasticSearchQuery(expression, indexPattern),
+            },
+            hostsType: type,
+          }),
+        filterQueryDraft: hostsFilterQueryDraft,
+        isFilterQueryDraftValid: isHostFilterQueryDraftValid,
+        setFilterQueryDraftFromKueryExpression: (expression: string) =>
+          setHostsFilterQueryDraft({
+            filterQueryDraft: {
+              kind: 'kuery',
+              expression,
+            },
+            hostsType: type,
+          }),
+      })}
     </>
   )
 );
 
+const makeMapStateToProps = () => {
+  const getHostsFilterQueryDraft = hostsSelectors.hostsFilterQueryDraft();
+  const getIsHostFilterQueryDraftValid = hostsSelectors.isHostFilterQueryDraftValid();
+  const mapStateToProps = (state: State, { type }: OwnProps) => {
+    return {
+      hostsFilterQueryDraft: getHostsFilterQueryDraft(state, type),
+      isHostFilterQueryDraftValid: getIsHostFilterQueryDraftValid(state, type),
+    };
+  };
+  return mapStateToProps;
+};
+
 export const HostsFilter = connect(
-  (state: State) => ({
-    hostsFilterQueryDraft: hostsSelectors.hostsFilterQueryDraft(state),
-    isHostFilterQueryDraftValid: hostsSelectors.isHostFilterQueryDraftValid(state),
-  }),
+  makeMapStateToProps,
   {
     applyHostsFilterQuery: hostsActions.applyHostsFilterQuery,
     setHostsFilterQueryDraft: hostsActions.setHostsFilterQueryDraft,

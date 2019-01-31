@@ -5,6 +5,8 @@
  */
 
 import {
+  // @ts-ignore: EuiBreadcrumbs has no exported member
+  EuiBreadcrumbs,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPage,
@@ -14,11 +16,9 @@ import {
   // @ts-ignore
   EuiSearchBar,
 } from '@elastic/eui';
-
 import * as React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { pure } from 'recompose';
-import { Dispatch } from 'redux';
 import styled from 'styled-components';
 import chrome from 'ui/chrome';
 
@@ -33,12 +33,9 @@ import { StatefulTimeline } from '../../components/timeline';
 import { headers } from '../../components/timeline/body/column_headers/headers';
 import { NotFoundPage } from '../404';
 import { HostsContainer } from '../hosts';
+import { getBreadcrumbs } from '../hosts/host_details';
 import { Network } from '../network';
 import { Overview } from '../overview';
-
-interface Props {
-  dispatch: Dispatch;
-}
 
 const WrappedByAutoSizer = styled.div`
   height: 100%;
@@ -61,7 +58,7 @@ const calculateFlyoutHeight = ({
   windowHeight: number;
 }): number => Math.max(0, windowHeight - (globalHeaderSize + additionalFlyoutPadding));
 
-export const HomePage = pure<Props>(() => (
+export const HomePage = pure(() => (
   <AutoSizer detectAnyWindowResize={true} content>
     {({ measureRef, windowMeasurement: { height: windowHeight = 0 } }) => (
       <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" innerRef={measureRef}>
@@ -92,9 +89,18 @@ export const HomePage = pure<Props>(() => (
                 <PageHeaderSection>
                   <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
                     <EuiFlexItem grow={false} data-test-subj="datePickerContainer">
-                      <Navigation data-test-subj="navigation" />
+                      {window.location.hash.match(/[hosts|overview|network]\?/) && (
+                        <Navigation data-test-subj="navigation" />
+                      )}
+                      {window.location.hash.match(/hosts\/.*?/) !== null && (
+                        <EuiBreadcrumbs
+                          breadcrumbs={getBreadcrumbs(
+                            window.location.hash.match(/\/([^/]*)\?/)![1]
+                          )}
+                        />
+                      )}
                     </EuiFlexItem>
-                    <EuiFlexItem grow={false} style={{ marginTop: '13px' }}>
+                    <FixEuiFlexItem grow={false}>
                       <EuiFlexGroup alignItems="center" wrap={false} gutterSize="s">
                         <EuiFlexItem grow={false} data-test-subj="datePickerContainer">
                           <RangeDatePicker id="global" />
@@ -103,7 +109,7 @@ export const HomePage = pure<Props>(() => (
                           <AppSettings />
                         </EuiFlexItem>
                       </EuiFlexGroup>
-                    </EuiFlexItem>
+                    </FixEuiFlexItem>
                   </EuiFlexGroup>
                 </PageHeaderSection>
               </PageHeader>
@@ -140,4 +146,8 @@ const PageHeader = styled(EuiPageHeader)`
 
 const PageHeaderSection = styled(EuiPageHeaderSection)`
   width: 100%;
+`;
+
+const FixEuiFlexItem = styled(EuiFlexItem)`
+  margin-top: '13px';
 `;

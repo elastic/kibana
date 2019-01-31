@@ -48,7 +48,6 @@ export class AutocompleteField extends React.Component<
   public render() {
     const { suggestions, isLoadingSuggestions, isValid, placeholder, value } = this.props;
     const { areSuggestionsVisible, selectedIndex } = this.state;
-
     return (
       <EuiOutsideClickDetector onOutsideClick={this.handleBlur}>
         <AutocompleteContainer>
@@ -106,7 +105,6 @@ export class AutocompleteField extends React.Component<
 
   private handleKeyDown = (evt: React.KeyboardEvent<HTMLInputElement>) => {
     const { suggestions } = this.props;
-
     switch (evt.key) {
       case 'ArrowUp':
         evt.preventDefault();
@@ -290,7 +288,7 @@ const withUnfocused = (state: AutocompleteFieldState) => ({
   isFocused: false,
 });
 
-const FixedEuiFieldSearch: React.SFC<
+export const FixedEuiFieldSearch: React.SFC<
   React.InputHTMLAttributes<HTMLInputElement> &
     EuiFieldSearchProps & {
       inputRef?: (element: HTMLInputElement | null) => void;

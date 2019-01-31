@@ -6,16 +6,29 @@
 
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
+export enum HostsType {
+  page = 'page',
+  details = 'details',
+}
+
 export interface BasicQuery {
   limit: number;
 }
-export interface HostsModel {
-  query: {
-    authentications: BasicQuery;
-    hosts: BasicQuery;
-    events: BasicQuery;
-    uncommonProcesses: BasicQuery;
-  };
+
+interface Queries {
+  authentications: BasicQuery;
+  hosts: BasicQuery;
+  events: BasicQuery;
+  uncommonProcesses: BasicQuery;
+}
+
+export interface GenericHostsModel {
   filterQuery: SerializedFilterQuery | null;
   filterQueryDraft: KueryFilterQuery | null;
+  queries: Queries;
+}
+
+export interface HostsModel {
+  page: GenericHostsModel;
+  details: GenericHostsModel;
 }

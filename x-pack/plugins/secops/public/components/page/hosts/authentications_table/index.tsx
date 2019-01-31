@@ -13,7 +13,7 @@ import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 
 import { AuthenticationsEdges } from '../../../../graphql/types';
-import { hostsActions, hostsSelectors, State } from '../../../../store';
+import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
@@ -29,6 +29,7 @@ interface OwnProps {
   totalCount: number;
   loadMore: (cursor: string) => void;
   startDate: number;
+  type: hostsModel.HostsType;
 }
 
 interface AuthenticationTableReduxProps {
@@ -93,10 +94,16 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
   )
 );
 
-const mapStateToProps = (state: State) => hostsSelectors.authenticationsSelector(state);
+const makeMapStateToProps = () => {
+  const getAuthenticationsSelector = hostsSelectors.authenticationsSelector();
+  const mapStateToProps = (state: State, { type }: OwnProps) => {
+    return getAuthenticationsSelector(state, type);
+  };
+  return mapStateToProps;
+};
 
 export const AuthenticationTable = connect(
-  mapStateToProps,
+  makeMapStateToProps,
   {
     updateLimitPagination: hostsActions.updateAuthenticationsLimit,
   }

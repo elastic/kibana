@@ -7,6 +7,7 @@
 import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiPanel,
@@ -36,16 +37,18 @@ interface OwnProps {
 type HostSummaryProps = OwnProps;
 
 export const HostSummary = pure<HostSummaryProps>(({ data, startDate, endDate, loading }) => (
-  <StyledEuiFlexItem>
-    <EuiPanel>
-      <EuiTitle size="s">
-        <h3>{i18n.SUMMARY}</h3>
-      </EuiTitle>
+  <EuiFlexGroup>
+    <StyledEuiFlexItem>
+      <EuiPanel>
+        <EuiTitle size="s">
+          <h3>{i18n.SUMMARY}</h3>
+        </EuiTitle>
 
-      <EuiHorizontalRule margin="xs" />
-      {getEuiDescriptionList(getOr(null, 'node', data[0]), startDate, endDate)}
-    </EuiPanel>
-  </StyledEuiFlexItem>
+        <EuiHorizontalRule margin="xs" />
+        {getEuiDescriptionList(getOr(null, 'node', data[0]), startDate, endDate)}
+      </EuiPanel>
+    </StyledEuiFlexItem>
+  </EuiFlexGroup>
 ));
 
 const fieldTitleMapping: Readonly<Record<string, string>> = {

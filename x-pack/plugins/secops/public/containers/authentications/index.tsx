@@ -12,7 +12,7 @@ import { pure } from 'recompose';
 
 import { ESQuery } from '../../../common/typed_json';
 import { AuthenticationsEdges, GetAuthenticationsQuery, PageInfo } from '../../graphql/types';
-import { hostsSelectors, inputsModel, State } from '../../store';
+import { hostsModel, hostsSelectors, inputsModel, State } from '../../store';
 import { createFilter } from '../helpers';
 import { authenticationsQuery } from './index.gql_query';
 
@@ -34,6 +34,7 @@ export interface OwnProps {
   endDate: number;
   filterQuery?: ESQuery | string;
   poll: number;
+  type: hostsModel.HostsType;
 }
 
 export interface AuthenticationsComponentReduxProps {
@@ -115,6 +116,12 @@ const AuthenticationsComponentQuery = pure<AuthenticationsProps>(
   )
 );
 
-const mapStateToProps = (state: State) => hostsSelectors.authenticationsSelector(state);
+const makeMapStateToProps = () => {
+  const getAuthenticationsSelector = hostsSelectors.authenticationsSelector();
+  const mapStateToProps = (state: State, { type }: OwnProps) => {
+    return getAuthenticationsSelector(state, type);
+  };
+  return mapStateToProps;
+};
 
-export const AuthenticationsQuery = connect(mapStateToProps)(AuthenticationsComponentQuery);
+export const AuthenticationsQuery = connect(makeMapStateToProps)(AuthenticationsComponentQuery);

@@ -14,22 +14,42 @@ export const mockGlobalState: State = {
       notesById: {},
     },
     hosts: {
-      query: {
-        authentications: {
-          limit: 10,
+      page: {
+        queries: {
+          authentications: {
+            limit: 10,
+          },
+          hosts: {
+            limit: 10,
+          },
+          events: {
+            limit: 10,
+          },
+          uncommonProcesses: {
+            limit: 10,
+          },
         },
-        hosts: {
-          limit: 2,
-        },
-        events: {
-          limit: 10,
-        },
-        uncommonProcesses: {
-          limit: 0,
-        },
+        filterQuery: null,
+        filterQueryDraft: null,
       },
-      filterQuery: null,
-      filterQueryDraft: null,
+      details: {
+        queries: {
+          authentications: {
+            limit: 10,
+          },
+          hosts: {
+            limit: 10,
+          },
+          events: {
+            limit: 10,
+          },
+          uncommonProcesses: {
+            limit: 10,
+          },
+        },
+        filterQuery: null,
+        filterQueryDraft: null,
+      },
     },
     inputs: {
       global: {

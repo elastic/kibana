@@ -12,7 +12,7 @@ import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { mockGlobalState } from '../../../../mock';
-import { createStore, State } from '../../../../store';
+import { createStore, hostsModel, State } from '../../../../store';
 import { getEmptyValue } from '../../../empty_value';
 import { EventsTable, formatSafely } from './index';
 import { mockData } from './mock';
@@ -40,6 +40,7 @@ describe('Load More Events Table Component', () => {
             nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
             loadMore={loadMore}
             startDate={1546878704036}
+            type={hostsModel.HostsType.page}
           />
         </ReduxStoreProvider>
       );

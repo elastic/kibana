@@ -12,7 +12,7 @@ import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { mockGlobalState } from '../../../../mock';
-import { createStore, State } from '../../../../store';
+import { createStore, hostsModel, State } from '../../../../store';
 import { HostsTable } from './index';
 import { mockData } from './mock';
 
@@ -37,6 +37,7 @@ describe('Load More Table Component', () => {
             hasNextPage={getOr(false, 'hasNextPage', mockData.Hosts.pageInfo)!}
             nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)!}
             loadMore={loadMore}
+            type={hostsModel.HostsType.page}
           />
         </ReduxStoreProvider>
       );

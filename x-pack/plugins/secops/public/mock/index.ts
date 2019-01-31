@@ -6,3 +6,4 @@
 
 export * from './global_state';
 export * from './mock_ecs';
+export * from './index_pattern';

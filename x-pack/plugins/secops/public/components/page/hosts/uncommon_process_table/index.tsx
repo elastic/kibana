@@ -12,7 +12,7 @@ import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 
 import { HostEcsFields, UncommonProcessesEdges } from '../../../../graphql/types';
-import { hostsActions, hostsSelectors, State } from '../../../../store';
+import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import {
@@ -33,6 +33,7 @@ interface OwnProps {
   totalCount: number;
   loadMore: (cursor: string) => void;
   startDate: number;
+  type: hostsModel.HostsType;
 }
 
 interface UncommonProcessTableReduxProps {
@@ -97,10 +98,16 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
   )
 );
 
-const mapStateToProps = (state: State) => hostsSelectors.uncommonProcessesSelector(state);
+const makeMapStateToProps = () => {
+  const getUncommonProcessesSelector = hostsSelectors.uncommonProcessesSelector();
+  const mapStateToProps = (state: State, { type }: OwnProps) => {
+    return getUncommonProcessesSelector(state, type);
+  };
+  return mapStateToProps;
+};
 
 export const UncommonProcessTable = connect(
-  mapStateToProps,
+  makeMapStateToProps,
   {
     updateLimitPagination: hostsActions.updateUncommonProcessesLimit,
   }

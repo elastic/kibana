@@ -21,13 +21,15 @@ interface KueryAutocompletionLifecycleProps {
   indexPattern: StaticIndexPattern;
 }
 
+interface KueryAutocompletionCurrentRequest {
+  expression: string;
+  cursorPosition: number;
+}
+
 interface KueryAutocompletionLifecycleState {
   // lacking cancellation support in the autocompletion api,
   // this is used to keep older, slower requests from clobbering newer ones
-  currentRequest: {
-    expression: string;
-    cursorPosition: number;
-  } | null;
+  currentRequest: KueryAutocompletionCurrentRequest | null;
   suggestions: AutocompleteSuggestion[];
 }
 
@@ -42,7 +44,6 @@ export class KueryAutocompletion extends React.Component<
 
   public render() {
     const { currentRequest, suggestions } = this.state;
-
     return this.props.children({
       isLoadingSuggestions: currentRequest !== null,
       loadSuggestions: this.loadSuggestions,
@@ -60,7 +61,6 @@ export class KueryAutocompletion extends React.Component<
     const config = {
       get: () => true,
     };
-
     if (!autocompletionProvider) {
       return;
     }

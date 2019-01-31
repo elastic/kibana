@@ -31,6 +31,7 @@ export class SuggestionItem extends React.Component<SuggestionItemProps> {
         isSelected={isSelected}
         onClick={onClick}
         onMouseEnter={onMouseEnter}
+        data-test-subj="suggestion-item"
       >
         <SuggestionItemIconField suggestionType={suggestion.type}>
           <EuiIcon type={getEuiIconType(suggestion.type)} />

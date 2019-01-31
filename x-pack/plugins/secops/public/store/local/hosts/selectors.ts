@@ -5,59 +5,68 @@
  */
 
 import { fromKueryExpression } from '@kbn/es-query';
+import { get } from 'lodash/fp';
 import { createSelector } from 'reselect';
 
 import { State } from '../../reducer';
-import { HostsModel } from './model';
+import { GenericHostsModel, HostsType } from './model';
 
-const hostsQuery = (state: State): HostsModel => state.local.hosts;
+const selectHosts = (state: State, hostsType: HostsType): GenericHostsModel =>
+  get(hostsType, state.local.hosts);
 
-export const authenticationsSelector = createSelector(
-  hostsQuery,
-  hosts => hosts.query.authentications
-);
+export const authenticationsSelector = () =>
+  createSelector(
+    selectHosts,
+    hosts => hosts.queries.authentications
+  );
 
-export const hostsSelector = createSelector(
-  hostsQuery,
-  hosts => hosts.query.hosts
-);
+export const hostsSelector = () =>
+  createSelector(
+    selectHosts,
+    hosts => hosts.queries.hosts
+  );
 
-export const eventsSelector = createSelector(
-  hostsQuery,
-  hosts => hosts.query.events
-);
+export const eventsSelector = () =>
+  createSelector(
+    selectHosts,
+    hosts => hosts.queries.events
+  );
 
-export const uncommonProcessesSelector = createSelector(
-  hostsQuery,
-  hosts => hosts.query.uncommonProcesses
-);
+export const uncommonProcessesSelector = () =>
+  createSelector(
+    selectHosts,
+    hosts => hosts.queries.uncommonProcesses
+  );
 
-export const hostsFilterQuery = createSelector(
-  hostsQuery,
-  hosts => (hosts.filterQuery ? hosts.filterQuery.query : null)
-);
+export const hostsFilterQueryExpression = () =>
+  createSelector(
+    selectHosts,
+    hosts => (hosts.filterQuery ? hosts.filterQuery.query.expression : null)
+  );
 
-export const hostsFilterQueryAsJson = createSelector(
-  hostsQuery,
-  hosts => (hosts.filterQuery ? hosts.filterQuery.serializedQuery : null)
-);
+export const hostsFilterQueryAsJson = () =>
+  createSelector(
+    selectHosts,
+    hosts => (hosts.filterQuery ? hosts.filterQuery.serializedQuery : null)
+  );
 
-export const hostsFilterQueryDraft = createSelector(
-  hostsQuery,
-  hosts => hosts.filterQueryDraft
-);
+export const hostsFilterQueryDraft = () =>
+  createSelector(
+    selectHosts,
+    hosts => hosts.filterQueryDraft
+  );
 
-export const isHostFilterQueryDraftValid = createSelector(
-  hostsFilterQueryDraft,
-  filterQueryDraft => {
-    if (filterQueryDraft && filterQueryDraft.kind === 'kuery') {
-      try {
-        fromKueryExpression(filterQueryDraft.expression);
-      } catch (err) {
-        return false;
+export const isHostFilterQueryDraftValid = () =>
+  createSelector(
+    selectHosts,
+    hosts => {
+      if (hosts.filterQueryDraft && hosts.filterQueryDraft.kind === 'kuery') {
+        try {
+          fromKueryExpression(hosts.filterQueryDraft.expression);
+        } catch (err) {
+          return false;
+        }
       }
+      return true;
     }
-
-    return true;
-  }
-);
+  );

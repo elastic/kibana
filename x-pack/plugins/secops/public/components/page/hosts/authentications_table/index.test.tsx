@@ -13,7 +13,7 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { AuthenticationTable } from '.';
 import { mockGlobalState } from '../../../../mock';
-import { createStore, State } from '../../../../store';
+import { createStore, hostsModel, State } from '../../../../store';
 import { mockData } from './mock';
 
 describe('Authentication Table Component', () => {
@@ -38,6 +38,7 @@ describe('Authentication Table Component', () => {
             nextCursor={getOr(null, 'endCursor.value', mockData.Authentications.pageInfo)!}
             loadMore={loadMore}
             startDate={1546965070707}
+            type={hostsModel.HostsType.page}
           />
         </ReduxStoreProvider>
       );

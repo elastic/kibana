@@ -12,7 +12,7 @@ import { pure } from 'recompose';
 
 import { ActionCreator } from 'typescript-fsa';
 import { Ecs, EcsEdges } from '../../../../graphql/types';
-import { hostsActions, hostsSelectors, State } from '../../../../store';
+import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { getEmptyTagValue, getEmptyValue, getOrEmpty, getOrEmptyTag } from '../../../empty_value';
@@ -29,6 +29,7 @@ interface OwnProps {
   totalCount: number;
   loadMore: (cursor: string, tiebreaker: string) => void;
   startDate: number;
+  type: hostsModel.HostsType;
 }
 
 interface EventsTableReduxProps {
@@ -92,10 +93,16 @@ const EventsTableComponent = pure<EventsTableProps>(
   )
 );
 
-const mapStateToProps = (state: State) => hostsSelectors.eventsSelector(state);
+const makeMapStateToProps = () => {
+  const getEventsSelector = hostsSelectors.eventsSelector();
+  const mapStateToProps = (state: State, { type }: OwnProps) => {
+    return getEventsSelector(state, type);
+  };
+  return mapStateToProps;
+};
 
 export const EventsTable = connect(
-  mapStateToProps,
+  makeMapStateToProps,
   {
     updateLimitPagination: hostsActions.updateEventsLimit,
   }
