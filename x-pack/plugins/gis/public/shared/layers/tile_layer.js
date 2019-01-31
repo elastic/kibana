@@ -10,6 +10,8 @@ import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { TileStyle } from '../layers/styles/tile_style';
 
+const TMS_LOAD_TIMEOUT = 32000;
+
 export class TileLayer extends AbstractLayer {
 
   static type = "TILE";
@@ -30,35 +32,97 @@ export class TileLayer extends AbstractLayer {
     return tileLayerDescriptor;
   }
 
+  _tileLoadErrorTracker(map, url) {
+    let tileLoad;
+    map.on('dataloading', ({ tile }) => {
+      if (tile && tile.request) {
+        // If at least one tile loads, endpoint/resource is valid
+        tile.request.onloadend = ({ loaded }) => {
+          if (loaded) {
+            tileLoad = true;
+          }
+        };
+      }
+    });
 
-  syncLayerWithMB(mbMap) {
+    return new Promise((resolve, reject) => {
+      let tileLoadTimer = null;
+
+      const clearChecks = () => {
+        clearTimeout(tileLoadTimer);
+        map.off('dataloading');
+      };
+
+      tileLoadTimer = setTimeout(() => {
+        if (!tileLoad) {
+          reject(new Error(`Tiles from "${url}" could not be loaded`));
+        } else {
+          resolve();
+        }
+        clearChecks();
+      }, TMS_LOAD_TIMEOUT);
+    });
+  }
+
+  async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
+    if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
+      return;
+    }
+    const sourceDataId = 'source';
+    const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
+    startLoading(sourceDataId, requestToken, dataFilters);
+    try {
+      const url = await this._source.getUrlTemplate();
+      stopLoading(sourceDataId, requestToken, url, {});
+    } catch(error) {
+      onLoadError(sourceDataId, requestToken, error.message);
+    }
+  }
+
+  async syncLayerWithMB(mbMap) {
 
     const source = mbMap.getSource(this.getId());
-    const layerId = this.getId() + '_raster';
-    if (!source) {
-      const url = this._source.getUrlTemplate();
-      mbMap.addSource(this.getId(), {
-        type: 'raster',
-        tiles: [url],
-        tileSize: 256,
-        scheme: 'xyz',
-      });
+    const mbLayerId = this.getId() + '_raster';
 
-      mbMap.addLayer({
-        id: layerId,
-        type: 'raster',
-        source: this.getId(),
-        minzoom: 0,
-        maxzoom: 22,
-      });
+    if (source) {
+      // If source exists, just sync style
+      this._setTileLayerProperties(mbMap, mbLayerId);
+      return;
     }
 
-    mbMap.setLayoutProperty(layerId, 'visibility', this.isVisible() ? 'visible' : 'none');
-    mbMap.setLayerZoomRange(layerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    const sourceDataRquest = this.getSourceDataRequest();
+    const url = sourceDataRquest.getData();
+    if (!url) {
+      return;
+    }
+
+    const sourceId = this.getId();
+    mbMap.addSource(sourceId, {
+      type: 'raster',
+      tiles: [url],
+      tileSize: 256,
+      scheme: 'xyz',
+    });
+
+    mbMap.addLayer({
+      id: mbLayerId,
+      type: 'raster',
+      source: sourceId,
+      minzoom: 0,
+      maxzoom: 22,
+    });
+
+    await this._tileLoadErrorTracker(mbMap, url);
+    this._setTileLayerProperties(mbMap, mbLayerId);
+  }
+
+  _setTileLayerProperties(mbMap, mbLayerId) {
+    mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+    mbMap.setLayerZoomRange(mbLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
     this._style && this._style.setMBPaintProperties({
       alpha: this.getAlpha(),
       mbMap,
-      layerId,
+      mbLayerId,
     });
   }
 
@@ -72,6 +136,9 @@ export class TileLayer extends AbstractLayer {
         type={this.getLayerTypeIconName()}
       />
     );
+  }
+  isLayerLoading() {
+    return false;
   }
 
 }

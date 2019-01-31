@@ -12,39 +12,41 @@ import { AddLayerPanel } from '../layer_addpanel/index';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Toasts } from '../toasts';
 
-import { timeService } from '../../kibana_services';
-
 export class GisMap extends Component {
 
   componentDidMount() {
-    timeService.on('timeUpdate', this.props.setTimeFiltersToKbnGlobalTime);
-    timeService.on('refreshIntervalUpdate', this.setRefreshTimer);
+    this.setRefreshTimer();
+  }
+
+  componentDidUpdate() {
     this.setRefreshTimer();
   }
 
   componentWillUnmount() {
-    timeService.off('timeUpdate', this.props.setTimeFiltersToKbnGlobalTime);
-    timeService.off('refreshIntervalUpdate', this.setRefreshTimer);
     this.clearRefreshTimer();
   }
 
   setRefreshTimer = () => {
+    const { isPaused, interval } = this.props.refreshConfig;
+
+    if (this.isPaused === isPaused && this.interval === interval) {
+      // refreshConfig is the same, nothing to do
+      return;
+    }
+
+    this.isPaused = isPaused;
+    this.interval = interval;
+
     this.clearRefreshTimer();
 
-    const { value, pause } = timeService.getRefreshInterval();
-    if (!pause && value > 0) {
+    if (!isPaused && interval > 0) {
       this.refreshTimerId = setInterval(
         () => {
           this.props.triggerRefreshTimer();
         },
-        value
+        interval
       );
     }
-
-    this.props.setRefreshConfig({
-      isPaused: pause,
-      interval: value,
-    });
   }
 
   clearRefreshTimer = () => {
