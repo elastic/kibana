@@ -40,6 +40,7 @@ function findOrCreateGroupWithNodes(
       }
     }
   }
+  const lastPath = last(path);
   const existingGroup = groups.find(g => g.id === id);
   if (isWaffleMapGroupWithNodes(existingGroup)) {
     return existingGroup;
@@ -51,7 +52,7 @@ function findOrCreateGroupWithNodes(
         ? i18n.translate('xpack.infra.nodesToWaffleMap.groupsWithNodes.allName', {
             defaultMessage: 'All',
           })
-        : last(path).label,
+        : (lastPath && lastPath.label) || 'No Group',
     count: 0,
     width: 0,
     squareSize: 0,
@@ -64,6 +65,7 @@ function findOrCreateGroupWithGroups(
   path: InfraNodePath[]
 ): InfraWaffleMapGroupOfGroups {
   const id = path.length === 0 ? '__all__' : createId(path);
+  const lastPath = last(path);
   const existingGroup = groups.find(g => g.id === id);
   if (isWaffleMapGroupWithGroups(existingGroup)) {
     return existingGroup;
@@ -75,7 +77,7 @@ function findOrCreateGroupWithGroups(
         ? i18n.translate('xpack.infra.nodesToWaffleMap.groupsWithGroups.allName', {
             defaultMessage: 'All',
           })
-        : last(path).label,
+        : (lastPath && lastPath.label) || 'No Group',
     count: 0,
     width: 0,
     squareSize: 0,
@@ -85,11 +87,14 @@ function findOrCreateGroupWithGroups(
 
 function createWaffleMapNode(node: InfraNode): InfraWaffleMapNode {
   const nodePathItem = last(node.path);
+  if (!nodePathItem) {
+    throw new Error('There must be a minimum of one path');
+  }
   return {
     pathId: node.path.map(p => p.value).join('/'),
     path: node.path,
     id: nodePathItem.value,
-    name: nodePathItem.label,
+    name: nodePathItem.label || nodePathItem.value,
     metric: node.metric,
   };
 }
