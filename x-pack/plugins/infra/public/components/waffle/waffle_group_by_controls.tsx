@@ -8,22 +8,28 @@ import {
   EuiBadge,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
   EuiFilterButton,
   EuiFilterGroup,
   EuiPopover,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
-import { InfraNodeType, InfraPathInput, InfraPathType } from '../../graphql/types';
+import { InfraIndexField, InfraNodeType, InfraPathInput, InfraPathType } from '../../graphql/types';
+import { InfraGroupByOptions } from '../../lib/lib';
+import { CustomFieldPanel } from './custom_field_panel';
 
 interface Props {
   nodeType: InfraNodeType;
   groupBy: InfraPathInput[];
   onChange: (groupBy: InfraPathInput[]) => void;
+  onChangeCustomOptions: (options: InfraGroupByOptions[]) => void;
+  fields: InfraIndexField[];
   intl: InjectedIntl;
+  customOptions: InfraGroupByOptions[];
 }
 
-let OPTIONS: { [P in InfraNodeType]: Array<{ text: string; type: InfraPathType; field: string }> };
+let OPTIONS: { [P in InfraNodeType]: InfraGroupByOptions[] };
 const getOptions = (
   nodeType: InfraNodeType,
   intl: InjectedIntl
@@ -143,7 +149,7 @@ export const WaffleGroupByControls = injectI18n(
 
     public render() {
       const { nodeType, groupBy, intl } = this.props;
-      const options = getOptions(nodeType, intl);
+      const options = getOptions(nodeType, intl).concat(this.props.customOptions);
 
       if (!options.length) {
         throw Error(
@@ -165,11 +171,35 @@ export const WaffleGroupByControls = injectI18n(
             id: 'xpack.infra.waffle.selectTwoGroupingsTitle',
             defaultMessage: 'Select up to two groupings',
           }),
-          items: options.map(o => {
-            const icon = groupBy.some(g => g.field === o.field) ? 'check' : 'empty';
-            const panel = { name: o.text, onClick: this.handleClick(o.field), icon };
-            return panel;
+          items: [
+            {
+              name: intl.formatMessage({
+                id: 'xpack.infra.waffle.customGroupByOptionName',
+                defaultMessage: 'Custom Field',
+              }),
+              icon: 'empty',
+              panel: 'customPanel',
+            },
+            ...options.map(o => {
+              const icon = groupBy.some(g => g.field === o.field) ? 'check' : 'empty';
+              const panel = {
+                name: o.text,
+                onClick: this.handleClick(o.field),
+                icon,
+              } as EuiContextMenuPanelItemDescriptor;
+              return panel;
+            }),
+          ],
+        },
+        {
+          id: 'customPanel',
+          title: intl.formatMessage({
+            id: 'xpack.infra.waffle.customGroupByPanelTitle',
+            defaultMessage: 'Group By Custom Field',
           }),
+          content: (
+            <CustomFieldPanel onSubmit={this.handleCustomField} fields={this.props.fields} />
+          ),
         },
       ];
       const buttonBody =
@@ -228,6 +258,8 @@ export const WaffleGroupByControls = injectI18n(
     private handleRemove = (field: string) => () => {
       const { groupBy } = this.props;
       this.props.onChange(groupBy.filter(g => g.field !== field));
+      const options = this.props.customOptions.filter(g => g.field !== field);
+      this.props.onChangeCustomOptions(options);
       // We need to close the panel after we rmeove the pill icon otherwise
       // it will remain open because the click is still captured by the EuiFilterButton
       setTimeout(() => this.handleClose());
@@ -239,6 +271,20 @@ export const WaffleGroupByControls = injectI18n(
 
     private handleToggle = () => {
       this.setState(state => ({ isPopoverOpen: !state.isPopoverOpen }));
+    };
+
+    private handleCustomField = (field: string) => {
+      const options = [
+        ...this.props.customOptions,
+        {
+          text: field,
+          field,
+          type: InfraPathType.custom,
+        },
+      ];
+      this.props.onChangeCustomOptions(options);
+      const fn = this.handleClick(field);
+      fn();
     };
 
     private handleClick = (field: string) => () => {

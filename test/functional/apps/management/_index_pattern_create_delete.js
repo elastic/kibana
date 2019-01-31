@@ -24,18 +24,41 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const log = getService('log');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['settings', 'common']);
+  const testSubjects = getService('testSubjects');
+  const PageObjects = getPageObjects(['settings', 'common', 'header']);
 
   describe('creating and deleting default index', function describeIndexTests() {
     before(function () {
-      // delete .kibana index and then wait for Kibana to re-create it
+      // Delete .kibana index and then wait for Kibana to re-create it
       return kibanaServer.uiSettings.replace({})
         .then(function () {
           return PageObjects.settings.navigateTo();
         })
         .then(function () {
-          return PageObjects.settings.clickKibanaIndices();
+          return PageObjects.settings.clickKibanaIndexPatterns();
         });
+    });
+
+    describe('special character handling', () => {
+      it('should handle special charaters in template input', async () => {
+        await PageObjects.settings.clickOptionalAddNewButton();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.settings.setIndexPatternField({
+          indexPatternName: '❤️',
+          expectWildcard: false
+        });
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await retry.try(async () => {
+          expect(await testSubjects.getVisibleText('createIndexPatternStatusMessage'))
+            .to.contain(`The index pattern you've entered doesn't match any indices`);
+        });
+      });
+
+      after(async () => {
+        await PageObjects.settings.navigateTo();
+        await PageObjects.settings.clickKibanaIndexPatterns();
+      });
     });
 
     describe('index pattern creation', function indexPatternCreation() {

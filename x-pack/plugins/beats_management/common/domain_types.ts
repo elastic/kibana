@@ -3,59 +3,38 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ConfigurationBlockTypes } from './constants';
+import * as t from 'io-ts';
+import { configBlockSchemas } from './config_schemas';
 
-export enum FilebeatModuleName {
-  system = 'system',
-  apache2 = 'apache2',
-  nginx = 'nginx',
-  mongodb = 'mongodb',
-  elasticsearch = 'elasticsearch',
-}
-
-export enum MetricbeatModuleName {
-  system = 'system',
-  apache2 = 'apache2',
-  nginx = 'nginx',
-  mongodb = 'mongodb',
-  elasticsearch = 'elasticsearch',
-}
-
-export enum OutputType {
-  elasticsearch = 'elasticsearch',
-  logstash = 'logstash',
-  kafka = 'kafka',
-  redis = 'redis',
-}
-
-// TODO convery above enum to an array dynamicly here
 export const OutputTypesArray = ['elasticsearch', 'logstash', 'kafka', 'redis'];
 
-export interface FilebeatInputsConfig {
-  paths: string[];
-  other: string;
-}
-export interface FilebeatModuleConfig {
-  module: FilebeatModuleName;
-  other: string;
-}
-export interface MetricbeatModuleConfig {
-  module: MetricbeatModuleName;
-  hosts?: string[];
-  period: string;
-  other: string;
-}
-
-export type ConfigContent = FilebeatInputsConfig | FilebeatModuleConfig | MetricbeatModuleConfig;
-export interface ConfigurationBlock {
-  type: ConfigurationBlockTypes;
-  description: string;
-  configs: ConfigContent[];
-}
-
-export interface ReturnedConfigurationBlock
-  extends Pick<ConfigurationBlock, Exclude<keyof ConfigurationBlock, 'configs'>> {
-  config: ConfigContent;
+// Here we create the runtime check for a generic, unknown beat config type.
+// We can also pass in optional params to create spacific runtime checks that
+// can be used to validate blocs on the API and UI
+export const createConfigurationBlockInterface = (
+  configType: t.LiteralType<string> | t.UnionType<Array<t.LiteralType<string>>> = t.union(
+    configBlockSchemas.map(s => t.literal(s.id))
+  ),
+  beatConfigInterface: t.Mixed = t.Dictionary
+) =>
+  t.interface(
+    {
+      id: t.union([t.undefined, t.string]),
+      type: configType,
+      description: t.union([t.undefined, t.string]),
+      tag: t.string,
+      config: beatConfigInterface,
+      last_updated: t.union([t.undefined, t.number]),
+    },
+    'ConfigBlock'
+  );
+const BaseConfigurationBlock = createConfigurationBlockInterface();
+export interface ConfigurationBlock
+  extends Pick<
+    t.TypeOf<typeof BaseConfigurationBlock>,
+    Exclude<keyof t.TypeOf<typeof BaseConfigurationBlock>, 'id'>
+  > {
+  id: string;
 }
 
 export interface CMBeat {
@@ -73,19 +52,55 @@ export interface CMBeat {
   last_checkin?: Date;
   event_rate?: string;
   local_configuration_yml?: string;
-  tags?: string[];
+  tags: string[];
   central_configuration_yml?: string;
   metadata?: {};
   name?: string;
+  last_updated: number;
 }
 
-export interface CMPopulatedBeat extends CMBeat {
-  full_tags: BeatTag[];
-}
-
-export interface BeatTag {
+export interface ConfigBlockSchema {
   id: string;
-  configuration_blocks: ConfigurationBlock[];
-  color?: string;
-  last_updated: Date;
+  name: string;
+  version: number;
+  allowOtherConfigs?: boolean;
+  configs: BeatConfigSchema[];
+}
+
+export interface BeatConfigSchema {
+  id: string;
+  ui: {
+    label: string;
+    labelId?: string;
+    type: 'input' | 'multi-input' | 'select' | 'code' | 'password';
+    helpText?: string;
+    helpTextId?: string;
+    placeholder?: string;
+  };
+  options?: Array<{ value: string; text: string }>;
+  validation?: 'isHosts' | 'isString' | 'isPeriod' | 'isPath' | 'isPaths' | 'isYaml';
+  error: string;
+  errorId: string;
+  defaultValue?: string;
+  required?: boolean;
+  parseValidResult?: (value: any) => any;
+}
+
+export const RuntimeBeatTag = t.interface(
+  {
+    id: t.union([t.undefined, t.string]),
+    name: t.string,
+    color: t.string,
+    hasConfigurationBlocksTypes: t.array(t.string),
+  },
+  'CMBeat'
+);
+export interface BeatTag
+  extends Pick<
+    t.TypeOf<typeof RuntimeBeatTag>,
+    Exclude<keyof t.TypeOf<typeof RuntimeBeatTag>, 'id'>
+  > {
+  id: string;
+  // Used by the UI and api when a tag exists but is an invalid option
+  disabled?: boolean;
 }

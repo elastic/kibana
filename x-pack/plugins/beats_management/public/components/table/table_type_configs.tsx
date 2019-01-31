@@ -6,10 +6,10 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiToolTip, IconColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { first, sortBy, sortByOrder, uniq } from 'lodash';
+import { sortBy, uniq } from 'lodash';
 import moment from 'moment';
 import React from 'react';
-import { BeatTag, CMPopulatedBeat, ConfigurationBlock } from '../../../common/domain_types';
+import { BeatTag, CMBeat } from '../../../common/domain_types';
 import { ConnectedLink } from '../navigation/connected_link';
 import { TagBadge } from '../tag';
 
@@ -60,7 +60,7 @@ export const BeatsTableType: TableType = {
       name: i18n.translate('xpack.beatsManagement.beatsTable.beatNameTitle', {
         defaultMessage: 'Beat name',
       }),
-      render: (name: string, beat: CMPopulatedBeat) => (
+      render: (name: string, beat: CMBeat) => (
         <ConnectedLink path={`/beat/${beat.id}/details`}>{name}</ConnectedLink>
       ),
       sortable: true,
@@ -77,9 +77,9 @@ export const BeatsTableType: TableType = {
       name: i18n.translate('xpack.beatsManagement.beatsTable.tagsTitle', {
         defaultMessage: 'Tags',
       }),
-      render: (value: string, beat: CMPopulatedBeat) => (
+      render: (value: string, beat: CMBeat & { tags: BeatTag[] }) => (
         <EuiFlexGroup wrap responsive={true} gutterSize="xs">
-          {(sortBy(beat.full_tags, 'id') || []).map(tag => (
+          {(sortBy(beat.tags, 'id') || []).map(tag => (
             <EuiFlexItem key={tag.id} grow={false}>
               <ConnectedLink path={`/tag/edit/${tag.id}`}>
                 <TagBadge tag={tag} />
@@ -95,7 +95,7 @@ export const BeatsTableType: TableType = {
       name: i18n.translate('xpack.beatsManagement.beatsTable.configStatusTitle', {
         defaultMessage: 'Config Status',
       }),
-      render: (value: string, beat: CMPopulatedBeat) => {
+      render: (value: string, beat: CMBeat) => {
         let color: IconColor = 'success';
         let statusText = i18n.translate('xpack.beatsManagement.beatsTable.configStatus.okLabel', {
           defaultMessage: 'OK',
@@ -159,19 +159,19 @@ export const BeatsTableType: TableType = {
       },
       sortable: false,
     },
-    {
-      field: 'full_tags',
-      name: i18n.translate('xpack.beatsManagement.beatsTable.lastConfigUpdateTitle', {
-        defaultMessage: 'Last config update',
-      }),
-      render: (tags?: BeatTag[]) =>
-        tags && tags.length ? (
-          <span>
-            {moment(first(sortByOrder(tags, ['last_updated'], ['desc'])).last_updated).fromNow()}
-          </span>
-        ) : null,
-      sortable: true,
-    },
+    // {
+    //   field: 'full_tags',
+    //   name: i18n.translate('xpack.beatsManagement.beatsTable.lastConfigUpdateTitle', {
+    //     defaultMessage: 'Last config update',
+    //   }),
+    //   render: (tags?: BeatTag[]) =>
+    //     tags && tags.length ? (
+    //       <span>
+    //         {moment(first(sortByOrder(tags, ['last_updated'], ['desc'])).last_updated).fromNow()}
+    //       </span>
+    //     ) : null,
+    //   sortable: true,
+    // },
   ],
   controlDefinitions: (data: any[]) => ({
     actions: [
@@ -214,17 +214,6 @@ export const TagsTableType: TableType = {
     },
     {
       align: 'right',
-      field: 'configuration_blocks',
-      name: i18n.translate('xpack.beatsManagement.tagsTable.configurationsTitle', {
-        defaultMessage: 'Configurations',
-      }),
-      render: (configurationBlocks: ConfigurationBlock[]) => (
-        <div>{configurationBlocks.length}</div>
-      ),
-      sortable: false,
-    },
-    {
-      align: 'right',
       field: 'last_updated',
       name: i18n.translate('xpack.beatsManagement.tagsTable.lastUpdateTitle', {
         defaultMessage: 'Last update',
@@ -262,15 +251,6 @@ export const BeatDetailTagsTable: TableType = {
       ),
       sortable: true,
       width: '55%',
-    },
-    {
-      align: 'right',
-      field: 'configuration_blocks',
-      name: i18n.translate('xpack.beatsManagement.beatTagsTable.configurationsTitle', {
-        defaultMessage: 'Configurations',
-      }),
-      render: (configurations: ConfigurationBlock[]) => <span>{configurations.length}</span>,
-      sortable: true,
     },
     {
       align: 'right',

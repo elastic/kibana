@@ -5,8 +5,8 @@
     <div data-transclude-slots>
       <!-- Breadcrumbs. -->
       <div data-transclude-slot="topLeftCorner" class="kuiLocalBreadcrumbs">
-        <h1 tabindex="0" id="kui_local_breadcrumb" class="kuiLocalBreadcrumb">
-          <span ng-show="opts.savedSearch.id" class="kuiLocalBreadcrumb__emphasis">
+        <h1 tabindex="0" id="kui_local_breadcrumb" class="kuiLocalBreadcrumb" ng-if="opts.savedSearch.id">
+          <span class="kuiLocalBreadcrumb__emphasis">
             <span data-test-subj="discoverCurrentQuery" ng-bind="opts.savedSearch.lastSavedTitle" ng-hide="k7design"></span>
             <span
               id="reload_saved_search"
@@ -17,13 +17,15 @@
               class="kuiIcon fa-undo small"
             ></span>&nbsp;
           </span>
+        </h1>
+        <div class="kuiLocalBreadcrumb">
           <span data-test-subj="discoverQueryHits" class="kuiLocalBreadcrumb__emphasis">{{(hits || 0) | number:0}}</span>
           <span
             i18n-id="kbn.discover.hitsPluralTitle"
             i18n-default-message="{hits, plural, one {hit} other {hits}}"
             i18n-values="{ hits }"
           ></span>
-        </h1>
+        </div>
       </div>
 
       <!-- Search. -->

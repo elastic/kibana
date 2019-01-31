@@ -131,7 +131,7 @@ export default function ({ getService, getPageObjects }) {
     describe('formatted field', function () {
       before(async function () {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndices();
+        await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.filterField(termsField);
         await PageObjects.settings.openControlsByName(termsField);
         await PageObjects.settings.setFieldFormat('bytes');
@@ -146,7 +146,7 @@ export default function ({ getService, getPageObjects }) {
       after(async function () {
         await filterBar.removeFilter(termsField);
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickKibanaIndices();
+        await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.filterField(termsField);
         await PageObjects.settings.openControlsByName(termsField);
         await PageObjects.settings.setFieldFormat('');

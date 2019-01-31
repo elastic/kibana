@@ -19,13 +19,14 @@
 
 import { IndexPattern } from 'ui/index_patterns';
 
+import classNames from 'classnames';
+import _ from 'lodash';
 import { compact, debounce, get, isEqual } from 'lodash';
 import React, { Component } from 'react';
 import { getFromLegacyIndexPattern } from 'ui/index_patterns/static_utils';
 import { kfetch } from 'ui/kfetch';
 import { PersistedLog } from 'ui/persisted_log';
 import { Storage } from 'ui/storage';
-// @ts-ignore
 import { timeHistory } from 'ui/timefilter/time_history';
 import {
   AutocompleteSuggestion,
@@ -38,18 +39,12 @@ import { matchPairs } from '../lib/match_pairs';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 
-import {
-  EuiButton,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiOutsideClickDetector,
-} from '@elastic/eui';
+import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector } from '@elastic/eui';
 
 // @ts-ignore
-import { EuiSuperDatePicker } from '@elastic/eui';
+import { EuiSuperDatePicker, EuiSuperUpdateButton } from '@elastic/eui';
 
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 
 const KEY_CODES = {
   LEFT: 37,
@@ -84,11 +79,11 @@ interface Props {
   indexPatterns: IndexPattern[];
   store: Storage;
   intl: InjectedIntl;
-  showDatePicker: boolean;
-  from: string;
-  to: string;
-  isPaused: boolean;
-  refreshInterval: number;
+  showDatePicker?: boolean;
+  dateRangeFrom?: string;
+  dateRangeTo?: string;
+  isRefreshPaused?: boolean;
+  refreshInterval?: number;
   onRefreshChange?: (isPaused: boolean, refreshInterval: number) => void;
 }
 
@@ -100,8 +95,9 @@ interface State {
   suggestions: AutocompleteSuggestion[];
   suggestionLimit: number;
   currentProps?: Props;
-  from: string;
-  to: string;
+  dateRangeFrom: string;
+  dateRangeTo: string;
+  isDateRangeInvalid: boolean;
 }
 
 export class QueryBarUI extends Component<Props, State> {
@@ -125,12 +121,12 @@ export class QueryBarUI extends Component<Props, State> {
 
     let nextDateRange = null;
     if (
-      nextProps.from !== get(prevState, 'currentProps.from') ||
-      nextProps.to !== get(prevState, 'currentProps.to')
+      nextProps.dateRangeFrom !== get(prevState, 'currentProps.dateRangeFrom') ||
+      nextProps.dateRangeTo !== get(prevState, 'currentProps.dateRangeTo')
     ) {
       nextDateRange = {
-        from: nextProps.from,
-        to: nextProps.to,
+        dateRangeFrom: nextProps.dateRangeFrom,
+        dateRangeTo: nextProps.dateRangeTo,
       };
     }
 
@@ -141,18 +137,11 @@ export class QueryBarUI extends Component<Props, State> {
       nextState.query = nextQuery;
     }
     if (nextDateRange) {
-      nextState.from = nextDateRange.from;
-      nextState.to = nextDateRange.to;
+      nextState.dateRangeFrom = nextDateRange.dateRangeFrom;
+      nextState.dateRangeTo = nextDateRange.dateRangeTo;
     }
     return nextState;
   }
-
-  // @ts-ignore
-  private static defaultProps = {
-    showDatePicker: false,
-    from: 'now-15m',
-    to: 'now',
-  };
 
   /*
    Keep the "draft" value in local state until the user actually submits the query. There are a couple advantages:
@@ -177,8 +166,9 @@ export class QueryBarUI extends Component<Props, State> {
     index: null,
     suggestions: [],
     suggestionLimit: 50,
-    from: this.props.from,
-    to: this.props.to,
+    dateRangeFrom: _.get(this.props, 'dateRangeFrom', 'now-15m'),
+    dateRangeTo: _.get(this.props, 'dateRangeTo', 'now'),
+    isDateRangeInvalid: false,
   };
 
   public updateSuggestions = debounce(async () => {
@@ -194,10 +184,14 @@ export class QueryBarUI extends Component<Props, State> {
   private persistedLog: PersistedLog | null = null;
 
   public isDirty = () => {
+    if (!this.props.showDatePicker) {
+      return this.state.query.query !== this.props.query.query;
+    }
+
     return (
       this.state.query.query !== this.props.query.query ||
-      this.state.from !== this.props.from ||
-      this.state.to !== this.props.to
+      this.state.dateRangeFrom !== this.props.dateRangeFrom ||
+      this.state.dateRangeTo !== this.props.dateRangeTo
     );
   };
 
@@ -369,10 +363,19 @@ export class QueryBarUI extends Component<Props, State> {
     this.onInputChange(event.target.value);
   };
 
-  public onTimeChange = ({ start, end }: { start: string; end: string }) => {
+  public onTimeChange = ({
+    start,
+    end,
+    isInvalid,
+  }: {
+    start: string;
+    end: string;
+    isInvalid: boolean;
+  }) => {
     this.setState({
-      from: start,
-      to: end,
+      dateRangeFrom: start,
+      dateRangeTo: end,
+      isDateRangeInvalid: isInvalid,
     });
   };
 
@@ -463,8 +466,8 @@ export class QueryBarUI extends Component<Props, State> {
     }
 
     timeHistory.add({
-      from: this.state.from,
-      to: this.state.to,
+      from: this.state.dateRangeFrom,
+      to: this.state.dateRangeTo,
     });
 
     this.props.onSubmit({
@@ -473,8 +476,8 @@ export class QueryBarUI extends Component<Props, State> {
         language: this.state.query.language,
       },
       dateRange: {
-        from: this.state.from,
-        to: this.state.to,
+        from: this.state.dateRangeFrom,
+        to: this.state.dateRangeTo,
       },
     });
     this.setState({ isSuggestionsVisible: false });
@@ -497,8 +500,8 @@ export class QueryBarUI extends Component<Props, State> {
         language,
       },
       dateRange: {
-        from: this.props.from,
-        to: this.props.to,
+        from: this.state.dateRangeFrom,
+        to: this.state.dateRangeTo,
       },
     });
   };
@@ -533,8 +536,16 @@ export class QueryBarUI extends Component<Props, State> {
   }
 
   public render() {
+    const classes = classNames('kbnQueryBar', {
+      'kbnQueryBar--withDatePicker': this.props.showDatePicker,
+    });
+
     return (
-      <EuiFlexGroup responsive={false} gutterSize="s">
+      <EuiFlexGroup
+        className={classes}
+        responsive={this.props.showDatePicker ? true : false}
+        gutterSize="s"
+      >
         <EuiFlexItem>
           <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
             {/* position:relative required on container so the suggestions appear under the query bar*/}
@@ -604,30 +615,30 @@ export class QueryBarUI extends Component<Props, State> {
             </div>
           </EuiOutsideClickDetector>
         </EuiFlexItem>
-        {this.renderDatePicker()}
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            aria-label={this.props.intl.formatMessage({
-              id: 'common.ui.queryBar.searchButtonAriaLabel',
-              defaultMessage: 'Search',
-            })}
-            data-test-subj="querySubmitButton"
-            color={this.isDirty() ? 'secondary' : 'primary'}
-            fill
-            onClick={this.onClickSubmitButton}
-          >
-            {this.isDirty() ? (
-              <FormattedMessage id="common.ui.queryBar.updateButtonLabel" defaultMessage="Update" />
-            ) : (
-              <FormattedMessage
-                id="common.ui.queryBar.refreshButtonLabel"
-                defaultMessage="Refresh"
-              />
-            )}
-          </EuiButton>
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{this.renderUpdateButton()}</EuiFlexItem>
       </EuiFlexGroup>
     );
+  }
+
+  private renderUpdateButton() {
+    const button = (
+      <EuiSuperUpdateButton
+        needsUpdate={this.isDirty()}
+        isDisabled={this.state.isDateRangeInvalid}
+        onClick={this.onClickSubmitButton}
+        data-test-subj="querySubmitButton"
+      />
+    );
+    if (this.props.showDatePicker) {
+      return (
+        <EuiFlexGroup responsive={false} gutterSize="s">
+          {this.renderDatePicker()}
+          <EuiFlexItem grow={false}>{button}</EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    } else {
+      return button;
+    }
   }
 
   private renderDatePicker() {
@@ -655,11 +666,11 @@ export class QueryBarUI extends Component<Props, State> {
       });
 
     return (
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem className="kbnQueryBar__datePickerWrapper">
         <EuiSuperDatePicker
-          start={this.state.from}
-          end={this.state.to}
-          isPaused={this.props.isPaused}
+          start={this.state.dateRangeFrom}
+          end={this.state.dateRangeTo}
+          isPaused={this.props.isRefreshPaused}
           refreshInterval={this.props.refreshInterval}
           onTimeChange={this.onTimeChange}
           onRefreshChange={this.props.onRefreshChange}

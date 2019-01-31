@@ -5,8 +5,7 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiLink, EuiFlexGroup, EuiFlexItem, } from '@elastic/eui';
-import { Tooltip } from 'plugins/monitoring/components/tooltip';
+import { EuiIcon, EuiLink, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { SourceTooltip } from './source_tooltip';
 
 export const SourceDestination = (props) => {
@@ -22,13 +21,12 @@ export const SourceDestination = (props) => {
         <EuiIcon type="arrowRight" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <Tooltip
-          text={targetTransportAddress}
-          placement="bottom"
-          trigger="hover"
+        <EuiToolTip
+          content={targetTransportAddress}
+          position="bottom"
         >
           <EuiLink>{targetName}</EuiLink>
-        </Tooltip>
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

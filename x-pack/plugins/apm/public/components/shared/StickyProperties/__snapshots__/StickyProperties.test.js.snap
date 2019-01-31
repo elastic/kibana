@@ -61,7 +61,7 @@ exports[`StickyProperties should render entire component 1`] = `
       <EuiToolTip
         content={
           <styled.span>
-            context.request.url.full
+            url.full
           </styled.span>
         }
         delay="regular"
@@ -97,7 +97,7 @@ exports[`StickyProperties should render entire component 1`] = `
       <EuiToolTip
         content={
           <styled.span>
-            context.request.method
+            http.request.method
           </styled.span>
         }
         delay="regular"
@@ -157,7 +157,7 @@ exports[`StickyProperties should render entire component 1`] = `
       <EuiToolTip
         content={
           <styled.span>
-            context.user.id
+            user.id
           </styled.span>
         }
         delay="regular"

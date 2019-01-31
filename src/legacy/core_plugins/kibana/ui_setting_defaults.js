@@ -777,14 +777,46 @@ export function getUiSettingDefaults() {
         defaultMessage: 'Time picker quick ranges',
       }),
       value: JSON.stringify([
-        { from: 'now/d',    to: 'now/d',    display: 'Today',                 },
-        { from: 'now/w',    to: 'now/w',    display: 'This week',             },
-        { from: 'now/M',    to: 'now/M',    display: 'This month',            },
-        { from: 'now/y',    to: 'now/y',    display: 'This year',             },
-        { from: 'now/d',    to: 'now',      display: 'Today so far',          },
-        { from: 'now/w',    to: 'now',      display: 'Week to date',          },
-        { from: 'now/M',    to: 'now',      display: 'Month to date',         },
-        { from: 'now/y',    to: 'now',      display: 'Year to date',          },
+        {
+          from: 'now/d',
+          to: 'now/d',
+          display: i18n.translate('kbn.advancedSettings.timepicker.today', { defaultMessage: 'Today' })
+        },
+        {
+          from: 'now/w',
+          to: 'now/w',
+          display: i18n.translate('kbn.advancedSettings.timepicker.thisWeek', { defaultMessage: 'This week' })
+        },
+        {
+          from: 'now/M',
+          to: 'now/M',
+          display: i18n.translate('kbn.advancedSettings.timepicker.thisMonth', { defaultMessage: 'This month' })
+        },
+        {
+          from: 'now/y',
+          to: 'now/y',
+          display: i18n.translate('kbn.advancedSettings.timepicker.thisYear', { defaultMessage: 'This year' })
+        },
+        {
+          from: 'now/d',
+          to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.todaySoFar', { defaultMessage: 'Today so far' })
+        },
+        {
+          from: 'now/w',
+          to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.weekToDate', { defaultMessage: 'Week to date' })
+        },
+        {
+          from: 'now/M',
+          to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.monthToDate', { defaultMessage: 'Month to date' })
+        },
+        {
+          from: 'now/y',
+          to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.yearToDate', { defaultMessage: 'Year to date' })
+        },
       ], null, 2),
       type: 'json',
       description: i18n.translate('kbn.advancedSettings.timepicker.quickRangesText', {
@@ -806,15 +838,14 @@ export function getUiSettingDefaults() {
         },
       }),
     },
-    'dashboard:defaultDarkTheme': {
-      name: i18n.translate('kbn.advancedSettings.dashboardDarkThemeTitle', {
-        defaultMessage: 'Dark theme',
+    'theme:darkMode': {
+      name: i18n.translate('kbn.advancedSettings.darkModeTitle', {
+        defaultMessage: 'Dark mode',
       }),
       value: false,
-      description: i18n.translate('kbn.advancedSettings.dashboardDarkThemeText', {
-        defaultMessage: 'New dashboards use dark theme by default',
+      description: i18n.translate('kbn.advancedSettings.darkModeText', {
+        defaultMessage: `Enable a dark mode for the Kibana UI. A page refresh is required for the setting to be applied.`,
       }),
-      category: ['dashboard'],
     },
     'filters:pinnedByDefault': {
       name: i18n.translate('kbn.advancedSettings.pinFiltersTitle', {

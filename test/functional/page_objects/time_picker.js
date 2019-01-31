@@ -20,6 +20,7 @@
 export function TimePickerPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
+  const find = getService('find');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['header']);
 
@@ -54,9 +55,6 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
-    async openFromTimePanel() {
-      await testSubjects.click('superDatePickerstartDatePopoverButton');
-    }
 
     async isQuickSelectMenuOpen() {
       return await testSubjects.exists('superDatePickerQuickMenu');
@@ -85,23 +83,26 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
     }
 
     async showStartEndTimes() {
-      await retry.try(async () => {
-        const isShowDatesButton = await testSubjects.exists('superDatePickerShowDatesButton');
-        if (isShowDatesButton) {
-          await testSubjects.click('superDatePickerShowDatesButton');
-        }
-
-        const endButtonExists = await testSubjects.exists('superDatePickerendDatePopoverButton');
-        if (!endButtonExists) {
-          throw new Error('start/end date buttons are not showing');
-        }
-      });
+      const isShowDatesButton = await testSubjects.exists('superDatePickerShowDatesButton');
+      if (isShowDatesButton) {
+        await testSubjects.click('superDatePickerShowDatesButton');
+      }
     }
 
     async getRefreshConfig(keepQuickSelectOpen = false) {
       await this.openQuickSelectTimeMenu();
       const interval = await testSubjects.getAttribute('superDatePickerRefreshIntervalInput', 'value');
-      const units = await testSubjects.getAttribute('superDatePickerRefreshIntervalUnitsSelect', 'value');
+
+      let selectedUnit;
+      const select = await testSubjects.find('superDatePickerRefreshIntervalUnitsSelect');
+      const options = await find.allDescendantDisplayedByCssSelector('option', select);
+      await Promise.all(options.map(async (optionElement) => {
+        const isSelected = await optionElement.isSelected();
+        if (isSelected) {
+          selectedUnit = await optionElement.getVisibleText();
+        }
+      }));
+
       const toggleButtonText = await testSubjects.getVisibleText('superDatePickerToggleRefreshButton');
       if (!keepQuickSelectOpen) {
         await this.closeQuickSelectTimeMenu();
@@ -109,7 +110,7 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
 
       return {
         interval,
-        units,
+        units: selectedUnit,
         isPaused: toggleButtonText === 'Start' ? true : false
       };
     }

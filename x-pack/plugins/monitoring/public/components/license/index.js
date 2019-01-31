@@ -44,7 +44,7 @@ const LicenseUpdateInfoForRemote = ({ isPrimaryCluster }) => {
       </p>
       <EuiSpacer />
       <EuiCodeBlock>
-        {`curl -XPUT -u <user> 'https://<host>:<port>/_xpack/license' -H 'Content-Type: application/json' -d @license.json`}
+        {`curl -XPUT -u <user> 'https://<host>:<port>/_license' -H 'Content-Type: application/json' -d @license.json`}
       </EuiCodeBlock>
     </EuiPanel>
   );

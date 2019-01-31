@@ -10,11 +10,11 @@ import { formatDateTimeLocal } from '../../../common/formatting';
 import { formatTimestampToDuration } from '../../../common';
 import { CALCULATE_DURATION_SINCE, EUI_SORT_DESCENDING } from '../../../common/constants';
 import { mapSeverity } from './map_severity';
-import { Tooltip } from 'plugins/monitoring/components/tooltip';
 import { FormattedAlert } from 'plugins/monitoring/components/alerts/formatted_alert';
 import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
-import { EuiHealth, EuiIcon } from '@elastic/eui';
+import { EuiHealth, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 const linkToCategories = {
   'elasticsearch/nodes': 'Elasticsearch Nodes',
@@ -24,35 +24,48 @@ const linkToCategories = {
 };
 const getColumns = (kbnUrl, scope) => ([
   {
-    name: 'Status',
+    name: i18n.translate('xpack.monitoring.alerts.statusColumnTitle', {
+      defaultMessage: 'Status',
+    }),
     field: 'status',
     sortable: true,
     render: severity => {
       const severityIcon = mapSeverity(severity);
 
       return (
-        <Tooltip text={severityIcon.title} placement="bottom" trigger="hover">
+        <EuiToolTip content={severityIcon.title} position="bottom">
           <EuiHealth color={severityIcon.color} data-test-subj="alertIcon" aria-label={severityIcon.title}>
             { capitalize(severityIcon.value) }
           </EuiHealth>
-        </Tooltip>
+        </EuiToolTip>
       );
     }
   },
   {
-    name: 'Resolved',
+    name: i18n.translate('xpack.monitoring.alerts.resolvedColumnTitle', {
+      defaultMessage: 'Resolved',
+    }),
     field: 'resolved_timestamp',
     sortable: true,
     render: (resolvedTimestamp) => {
+      const notResolvedLabel = i18n.translate('xpack.monitoring.alerts.notResolvedDescription', {
+        defaultMessage: 'Not Resolved',
+      });
+
       const resolution = {
         icon: null,
-        text: 'Not Resolved'
+        text: notResolvedLabel,
       };
 
       if (resolvedTimestamp) {
-        resolution.text = `${formatTimestampToDuration(resolvedTimestamp, CALCULATE_DURATION_SINCE)} ago`;
+        resolution.text = i18n.translate('xpack.monitoring.alerts.resolvedAgoDescription', {
+          defaultMessage: '{duration} ago',
+          values: {
+            duration: formatTimestampToDuration(resolvedTimestamp, CALCULATE_DURATION_SINCE)
+          }
+        });
       } else {
-        resolution.icon = <EuiIcon type="alert" size="m" aria-label="Not Resolved" />;
+        resolution.icon = <EuiIcon type="alert" size="m" aria-label={notResolvedLabel} />;
       }
 
       return (
@@ -63,7 +76,9 @@ const getColumns = (kbnUrl, scope) => ([
     },
   },
   {
-    name: 'Message',
+    name: i18n.translate('xpack.monitoring.alerts.messageColumnTitle', {
+      defaultMessage: 'Message',
+    }),
     field: 'message',
     sortable: true,
     render: (message, alert) => (
@@ -81,22 +96,37 @@ const getColumns = (kbnUrl, scope) => ([
     )
   },
   {
-    name: 'Category',
+    name: i18n.translate('xpack.monitoring.alerts.categoryColumnTitle', {
+      defaultMessage: 'Category',
+    }),
     field: 'category',
     sortable: true,
-    render: link => linkToCategories[link] ? linkToCategories[link] : 'General'
+    render: link => linkToCategories[link]
+      ? linkToCategories[link]
+      : i18n.translate('xpack.monitoring.alerts.categoryColumn.generalLabel', {
+        defaultMessage: 'General',
+      })
   },
   {
-    name: 'Last Checked',
+    name: i18n.translate('xpack.monitoring.alerts.lastCheckedColumnTitle', {
+      defaultMessage: 'Last Checked',
+    }),
     field: 'update_timestamp',
     sortable: true,
     render: timestamp => formatDateTimeLocal(timestamp)
   },
   {
-    name: 'Triggered',
+    name: i18n.translate('xpack.monitoring.alerts.triggeredColumnTitle', {
+      defaultMessage: 'Triggered',
+    }),
     field: 'timestamp',
     sortable: true,
-    render: timestamp => formatTimestampToDuration(timestamp, CALCULATE_DURATION_SINCE) + ' ago'
+    render: timestamp => i18n.translate('xpack.monitoring.alerts.triggeredColumnValue', {
+      defaultMessage: '{timestamp} ago',
+      values: {
+        timestamp: formatTimestampToDuration(timestamp, CALCULATE_DURATION_SINCE)
+      }
+    })
   },
 ]);
 

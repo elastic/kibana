@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const inspector = getService('inspector');
+  const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'timePicker']);
 
   describe('vertical bar chart', function () {
@@ -255,6 +256,16 @@ export default function ({ getService, getPageObjects }) {
         const expectedEntries = ['404', '200', '503'];
         const legendEntries = await PageObjects.visualize.getLegendEntries();
         expect(legendEntries).to.eql(expectedEntries);
+      });
+
+      it ('should correctly filter by legend', async () => {
+        await PageObjects.visualize.filterLegend('200');
+        await PageObjects.visualize.waitForVisualization();
+        const legendEntries = await PageObjects.visualize.getLegendEntries();
+        const expectedEntries = ['200'];
+        expect(legendEntries).to.eql(expectedEntries);
+        await filterBar.removeFilter('response.raw');
+        await PageObjects.visualize.waitForVisualization();
       });
     });
 

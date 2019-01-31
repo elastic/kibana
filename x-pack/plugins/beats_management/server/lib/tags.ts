@@ -3,114 +3,61 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { flatten, intersection, uniq, values } from 'lodash';
-import { UNIQUENESS_ENFORCING_TYPES } from '../../common/constants';
-import { ConfigurationBlock, OutputTypesArray } from '../../common/domain_types';
-import { entries } from '../utils/polyfills';
+import { uniq } from 'lodash';
+import { UNIQUENESS_ENFORCING_TYPES } from '../../common/constants/configuration_blocks';
+import { BeatTag } from '../../common/domain_types';
+import { CMBeatsAdapter } from './adapters/beats/adapter_types';
+import { ConfigurationBlockAdapter } from './adapters/configuration_blocks/adapter_types';
 import { FrameworkUser } from './adapters/framework/adapter_types';
 import { CMTagsAdapter } from './adapters/tags/adapter_types';
 
 export class CMTagsDomain {
-  constructor(private readonly adapter: CMTagsAdapter) {}
+  constructor(
+    private readonly adapter: CMTagsAdapter,
+    private readonly configurationBlocksAdapter: ConfigurationBlockAdapter,
+    private readonly beatsAdabter: CMBeatsAdapter
+  ) {}
 
-  public async getAll(user: FrameworkUser, ESQuery?: any) {
-    return await this.adapter.getAll(user, ESQuery);
+  public async getAll(user: FrameworkUser, ESQuery?: any): Promise<BeatTag[]> {
+    const tags = await this.adapter.getAll(user, ESQuery);
+    return tags;
   }
 
-  public async getTagsWithIds(user: FrameworkUser, tagIds: string[]) {
-    return await this.adapter.getTagsWithIds(user, tagIds);
+  public async getWithIds(user: FrameworkUser, tagIds: string[]): Promise<BeatTag[]> {
+    const tags = await this.adapter.getTagsWithIds(user, tagIds);
+    return tags;
   }
 
   public async delete(user: FrameworkUser, tagIds: string[]) {
+    const beats = await this.beatsAdabter.getAllWithTags(user, tagIds);
+    if (beats.length > 0) {
+      return false;
+    }
+    await this.configurationBlocksAdapter.deleteForTags(user, tagIds);
     return await this.adapter.delete(user, tagIds);
   }
 
-  public async saveTag(
-    user: FrameworkUser,
-    tagId: string,
-    config: { color: string; configuration_blocks: ConfigurationBlock[] }
-  ) {
-    const { isValid, message } = await this.validateConfigurationBlocks(
-      config.configuration_blocks
-    );
-    if (!isValid) {
-      return { isValid, result: message };
-    }
+  public async getNonConflictingTags(user: FrameworkUser, existingTagIds: string[]) {
+    const tags = await this.adapter.getTagsWithIds(user, existingTagIds);
+    const existingUniqueBlockTypes = uniq(
+      tags.reduce(
+        (existingUniqueTypes, tag) => {
+          if (tag.hasConfigurationBlocksTypes) {
+            existingUniqueTypes = existingUniqueTypes.concat(tag.hasConfigurationBlocksTypes);
+          }
+          return existingUniqueTypes;
+        },
+        [] as string[]
+      )
+    ).filter(type => UNIQUENESS_ENFORCING_TYPES.includes(type));
 
-    const tag = {
-      ...config,
-      id: tagId,
-      last_updated: new Date(),
-    };
-    return {
-      isValid: true,
-      result: await this.adapter.upsertTag(user, tag),
-    };
+    const safeTags = await this.adapter.getWithoutConfigTypes(user, existingUniqueBlockTypes);
+    return safeTags;
   }
 
-  private validateConfigurationBlocks(configurationBlocks: any) {
-    // Get all output types in the array of config blocks
-    const outputTypes: string[] = configurationBlocks.reduce(
-      (typesCollector: string[], block: any) => {
-        if (block.type !== 'output') {
-          return typesCollector;
-        }
-        // get all keys, where the key is the output type with the exception of the output key itself.
-        const keys = flatten<string>(
-          block.configs.map((config: any) => Object.keys(config).filter(key => key !== 'output'))
-        );
+  public async upsertTag(user: FrameworkUser, tag: BeatTag): Promise<string> {
+    const tagId = await this.adapter.upsertTag(user, tag);
 
-        typesCollector = [...typesCollector, ...keys];
-        return typesCollector;
-      },
-      []
-    );
-
-    // If not a provided output type, fail validation
-    if (outputTypes.some((type: string) => !OutputTypesArray.includes(type))) {
-      return { isValid: false, message: 'Invalid output type' };
-    }
-    const types = uniq(configurationBlocks.map((block: any) => block.type));
-
-    // If none of the types in the given configuration blocks are uniqueness-enforcing,
-    // we don't need to perform any further validation checks.
-    const uniquenessEnforcingTypes = intersection(types, UNIQUENESS_ENFORCING_TYPES);
-    if (uniquenessEnforcingTypes.length === 0) {
-      return { isValid: true };
-    }
-
-    // Count the number of uniqueness-enforcing types in the given configuration blocks
-    const typeCountMap = configurationBlocks.reduce((map: any, block: any) => {
-      const { type } = block;
-      if (!uniquenessEnforcingTypes.includes(type)) {
-        return map;
-      }
-
-      const count = map[type] || 0;
-      return {
-        ...map,
-        [type]: count + 1,
-      };
-    }, {});
-
-    // If there is no more than one of any uniqueness-enforcing types in the given
-    // configuration blocks, we don't need to perform any further validation checks.
-    if (values(typeCountMap).filter(count => count > 1).length === 0) {
-      return { isValid: true };
-    }
-
-    const message = entries(typeCountMap)
-      .filter(([, count]) => count > 1)
-      .map(
-        ([type, count]) =>
-          `Expected only one configuration block of type '${type}' but found ${count}`
-      )
-      .join(' ');
-
-    return {
-      isValid: false,
-      message,
-    };
+    return tagId;
   }
 }
