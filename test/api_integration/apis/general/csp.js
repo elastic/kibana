@@ -19,7 +19,6 @@
 
 import expect from 'expect.js';
 
-// tslint:disable-next-line:no-default-export
 export default function({ getService }) {
   const supertest = getService('supertest');
 
