@@ -525,7 +525,9 @@ function discoverController(
           }
         });
 
-        $scope.$watch('state.query', $scope.updateQueryAndFetch);
+        $scope.$watch('state.query', (query) => {
+          $scope.updateQueryAndFetch({ query });
+        });
 
         $scope.$watchMulti([
           'rows',
@@ -643,7 +645,7 @@ function discoverController(
       .catch(notify.error);
   };
 
-  $scope.updateQueryAndFetch = function (query) {
+  $scope.updateQueryAndFetch = function ({ query }) {
     $state.query = migrateLegacyQuery(query);
     $scope.fetch();
   };
@@ -763,7 +765,15 @@ function discoverController(
         Promise
           .resolve(responseHandler(tabifiedData, buildVislibDimensions($scope.vis, $scope.timeRange)))
           .then(resp => {
-            visualizeHandler.render({ value: resp });
+            visualizeHandler.render({
+              as: 'visualization',
+              value: {
+                visType: 'histogram',
+                visData: resp,
+                visConfig: $scope.vis.params,
+                params: {},
+              }
+            });
           });
       }
 

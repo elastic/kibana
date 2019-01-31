@@ -78,6 +78,7 @@ uiRoutes
 
         const $route = $injector.get('$route');
         const kbnUrl = $injector.get('kbnUrl');
+        const config = $injector.get('config');
         this.data = $route.current.locals.pageData;
         const globalState = $injector.get('globalState');
         $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
@@ -110,6 +111,7 @@ uiRoutes
                 pagination={this.pagination}
                 onTableChange={this.onTableChange}
                 upgradeMessage={upgradeMessage}
+                dateFormat={config.get('dateFormat')}
                 angular={{
                   kbnUrl,
                   scope: $scope,

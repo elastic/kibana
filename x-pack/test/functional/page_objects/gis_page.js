@@ -5,7 +5,7 @@
  */
 
 export function GisPageProvider({ getService, getPageObjects }) {
-  const PageObjects = getPageObjects(['common', 'header']);
+  const PageObjects = getPageObjects(['common', 'header', 'timePicker']);
 
   const log = getService('log');
   const testSubjects = getService('testSubjects');
@@ -105,11 +105,11 @@ export function GisPageProvider({ getService, getPageObjects }) {
      * Layer TOC (table to contents) utility functions
      */
     async setView(lat, lon, zoom) {
-      log.debug(`Set view lat: ${lat}, lon: ${lon}, zoom: ${zoom}`);
+      log.debug(`Set view lat: ${lat.toString()}, lon: ${lon.toString()}, zoom: ${zoom.toString()}`);
       await testSubjects.click('toggleSetViewVisibilityButton');
-      await testSubjects.setValue('latitudeInput', lat);
-      await testSubjects.setValue('longitudeInput', lon);
-      await testSubjects.setValue('zoomInput', zoom);
+      await testSubjects.setValue('latitudeInput', lat.toString());
+      await testSubjects.setValue('longitudeInput', lon.toString());
+      await testSubjects.setValue('zoomInput', zoom.toString());
       await testSubjects.click('submitViewButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -204,10 +204,10 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async triggerSingleRefresh(refreshInterval) {
       log.debug(`triggerSingleRefresh, refreshInterval: ${refreshInterval}`);
-      await PageObjects.header.resumeAutoRefresh();
+      await PageObjects.timePicker.resumeAutoRefresh();
       log.debug('waiting to give time for refresh timer to fire');
       await PageObjects.common.sleep(refreshInterval + (refreshInterval / 2));
-      await PageObjects.header.pauseAutoRefresh();
+      await PageObjects.timePicker.pauseAutoRefresh();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
   }

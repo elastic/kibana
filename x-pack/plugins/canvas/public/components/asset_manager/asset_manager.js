@@ -26,23 +26,30 @@ import {
   EuiSpacer,
   EuiTextColor,
   EuiToolTip,
+  EuiFilePicker,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { ConfirmModal } from '../confirm_modal';
 import { Clipboard } from '../clipboard';
 import { Download } from '../download';
+import { Loading } from '../loading';
 
 export class AssetManager extends React.PureComponent {
   static propTypes = {
     assets: PropTypes.array,
     addImageElement: PropTypes.func,
-    removeAsset: PropTypes.func,
-    copyAsset: PropTypes.func,
+    removeAsset: PropTypes.func.isRequired,
+    copyAsset: PropTypes.func.isRequired,
+    onAssetAdd: PropTypes.func.isRequired,
   };
 
   state = {
     deleteId: null,
     isModalVisible: false,
+    loading: false,
   };
+
+  _isMounted = true;
 
   showModal = () => this.setState({ isModalVisible: true });
   closeModal = () => this.setState({ isModalVisible: false });
@@ -50,6 +57,13 @@ export class AssetManager extends React.PureComponent {
   doDelete = () => {
     this.resetDelete();
     this.props.removeAsset(this.state.deleteId);
+  };
+
+  handleFileUpload = files => {
+    this.setState({ loading: true });
+    Promise.all(Array.from(files).map(file => this.props.onAssetAdd(file))).finally(() => {
+      this._isMounted && this.setState({ loading: false });
+    });
   };
 
   addElement = assetId => {
@@ -132,15 +146,31 @@ export class AssetManager extends React.PureComponent {
   );
 
   render() {
-    const { isModalVisible } = this.state;
+    const { isModalVisible, loading } = this.state;
+    const { assets } = this.props;
 
     const assetMaxLimit = 25000;
 
     const assetsTotal = Math.round(
-      this.props.assets.reduce((total, asset) => total + asset.value.length, 0) / 1024
+      assets.reduce((total, asset) => total + asset.value.length, 0) / 1024
     );
 
     const percentageUsed = Math.round((assetsTotal / assetMaxLimit) * 100);
+
+    const emptyAssets = (
+      <EuiPanel className="canvasAssetManager__emptyPanel">
+        <EuiEmptyPrompt
+          iconType="importAction"
+          title={<h2>No available assets</h2>}
+          titleSize="s"
+          body={
+            <Fragment>
+              <p>Upload your assets above to get started</p>
+            </Fragment>
+          }
+        />
+      </EuiPanel>
+    );
 
     const assetModal = isModalVisible ? (
       <EuiOverlayMask>
@@ -153,6 +183,40 @@ export class AssetManager extends React.PureComponent {
             <EuiModalHeaderTitle className="canvasAssetManager__modalHeaderTitle">
               Manage workpad assets
             </EuiModalHeaderTitle>
+            <EuiFlexGroup className="canvasAssetManager__fileUploadWrapper">
+              <EuiFlexItem grow={false}>
+                {loading ? (
+                  <Loading animated text="Uploading images" />
+                ) : (
+                  <EuiFilePicker
+                    initialPromptText="Select or drag and drop images"
+                    compressed
+                    multiple
+                    onChange={this.handleFileUpload}
+                    accept="image/*"
+                  />
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiModalHeader>
+          <EuiModalBody>
+            <EuiText size="s" color="subdued">
+              <p>
+                Below are the image assets that you added to this workpad. To reclaim space, delete
+                assets that you no longer need. Unfortunately, any assets that are actually in use
+                cannot be determined at this time.
+              </p>
+            </EuiText>
+            <EuiSpacer />
+            {assets.length ? (
+              <EuiFlexGrid responsive={false} columns={4}>
+                {assets.map(this.renderAsset)}
+              </EuiFlexGrid>
+            ) : (
+              emptyAssets
+            )}
+          </EuiModalBody>
+          <EuiModalFooter className="canvasAssetManager__modalFooter">
             <EuiFlexGroup className="canvasAssetManager__meterWrapper" responsive={false}>
               <EuiFlexItem>
                 <EuiProgress
@@ -167,20 +231,6 @@ export class AssetManager extends React.PureComponent {
                 <EuiText id="CanvasAssetManagerLabel">{percentageUsed}% space used</EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </EuiModalHeader>
-          <EuiModalBody>
-            <EuiText size="s" color="subdued">
-              <p>
-                Below are the image assets that you added to this workpad. To reclaim space, delete
-                assets that you no longer need. Unfortunately, any assets that are actually in use
-                cannot be determined at this time.
-              </p>
-            </EuiText>
-            <EuiFlexGrid responsive={false} columns={4}>
-              {this.props.assets.map(this.renderAsset)}
-            </EuiFlexGrid>
-          </EuiModalBody>
-          <EuiModalFooter>
             <EuiButton size="s" onClick={this.closeModal}>
               Close
             </EuiButton>

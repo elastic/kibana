@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CustomUrlList renders a list of custom URLs 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiFlexGroup
     alignItems="stretch"
     component="div"
@@ -473,5 +473,5 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
       </EuiFormRow>
     </EuiFlexItem>
   </EuiFlexGroup>
-</React.Fragment>
+</Fragment>
 `;
