@@ -393,7 +393,7 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
             'cluster:monitor/xpack/ml/datafeeds/stats/get'
           ]
         };
-        callWithRequest('ml.privilegeCheck', { body })
+        callWithRequest('security.hasPrivileges', { body })
           .then((resp) => {
             if (resp.cluster['cluster:monitor/xpack/ml/job/get'] &&
               resp.cluster['cluster:monitor/xpack/ml/job/stats/get'] &&

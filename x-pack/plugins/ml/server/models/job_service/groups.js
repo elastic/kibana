@@ -15,7 +15,7 @@ export function groupsProvider(callWithRequest) {
     const jobIds = {};
     const [ JOBS, CALENDARS ] = [0, 1];
     const results = await Promise.all([
-      callWithRequest('ml.jobs'),
+      callWithRequest('ml.getJobs'),
       calMngr.getAllCalendars(),
     ]);
 

@@ -16,7 +16,7 @@ export function jobRoutes(server, commonRouteConfig) {
     path: '/api/ml/anomaly_detectors',
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
-      return callWithRequest('ml.jobs')
+      return callWithRequest('ml.getJobs')
         .catch(resp => wrapError(resp));
     },
     config: {
@@ -30,7 +30,7 @@ export function jobRoutes(server, commonRouteConfig) {
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const jobId = request.params.jobId;
-      return callWithRequest('ml.jobs', { jobId })
+      return callWithRequest('ml.getJobs', { jobId })
         .catch(resp => wrapError(resp));
     },
     config: {
@@ -43,7 +43,7 @@ export function jobRoutes(server, commonRouteConfig) {
     path: '/api/ml/anomaly_detectors/_stats',
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
-      return callWithRequest('ml.jobStats')
+      return callWithRequest('ml.getJobStats')
         .catch(resp => wrapError(resp));
     },
     config: {
@@ -57,7 +57,7 @@ export function jobRoutes(server, commonRouteConfig) {
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const jobId = request.params.jobId;
-      return callWithRequest('ml.jobStats', { jobId })
+      return callWithRequest('ml.getJobStats', { jobId })
         .catch(resp => wrapError(resp));
     },
     config: {
@@ -72,7 +72,7 @@ export function jobRoutes(server, commonRouteConfig) {
       const callWithRequest = callWithRequestFactory(server, request);
       const jobId = request.params.jobId;
       const body = request.payload;
-      return callWithRequest('ml.addJob', { jobId, body })
+      return callWithRequest('ml.putJob', { jobId, body })
         .catch(resp => wrapError(resp));
     },
     config: {
@@ -183,7 +183,7 @@ export function jobRoutes(server, commonRouteConfig) {
     path: '/api/ml/anomaly_detectors/{jobId}/results/overall_buckets',
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
-      return callWithRequest('ml.overallBuckets', {
+      return callWithRequest('ml.getOverallBuckets', {
         jobId: request.params.jobId,
         top_n: request.payload.topN,
         bucket_span: request.payload.bucketSpan,

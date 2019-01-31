@@ -52,7 +52,7 @@ export function systemRoutes(server, commonRouteConfig) {
         return { securityDisabled: true };
       } else {
         const body = request.payload;
-        return callWithRequest('ml.privilegeCheck', { body })
+        return callWithRequest('security.hasPrivileges', { body })
           .catch(resp => wrapError(resp));
       }
     },
@@ -87,7 +87,7 @@ export function systemRoutes(server, commonRouteConfig) {
               'cluster:monitor/xpack/ml/datafeeds/stats/get'
             ]
           };
-          callWithRequest('ml.privilegeCheck', { body })
+          callWithRequest('security.hasPrivileges', { body })
             .then((resp) => {
               if (resp.cluster['cluster:monitor/xpack/ml/job/get'] &&
                 resp.cluster['cluster:monitor/xpack/ml/job/stats/get'] &&

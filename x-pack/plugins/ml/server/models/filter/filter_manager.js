@@ -17,8 +17,8 @@ export class FilterManager {
     try {
       const [ JOBS, FILTERS ] = [0, 1];
       const results = await Promise.all([
-        this.callWithRequest('ml.jobs'),
-        this.callWithRequest('ml.filters', { filterId })
+        this.callWithRequest('ml.getJobs'),
+        this.callWithRequest('ml.getFilters', { filterId })
       ]);
 
       if (results[FILTERS] && results[FILTERS].filters.length) {
@@ -40,7 +40,7 @@ export class FilterManager {
 
   async getAllFilters() {
     try {
-      const filtersResp = await this.callWithRequest('ml.filters');
+      const filtersResp = await this.callWithRequest('ml.getFilters');
       return filtersResp.filters;
     } catch (error) {
       throw Boom.badRequest(error);
@@ -51,8 +51,8 @@ export class FilterManager {
     try {
       const [ JOBS, FILTERS ] = [0, 1];
       const results = await Promise.all([
-        this.callWithRequest('ml.jobs'),
-        this.callWithRequest('ml.filters')
+        this.callWithRequest('ml.getJobs'),
+        this.callWithRequest('ml.getFilters')
       ]);
 
       // Build a map of filter_ids against jobs and detectors using that filter.
@@ -90,7 +90,7 @@ export class FilterManager {
     delete filter.filterId;
     try {
       // Returns the newly created filter.
-      return await this.callWithRequest('ml.addFilter', { filterId, body: filter });
+      return await this.callWithRequest('ml.putFilter', { filterId, body: filter });
     } catch (error) {
       throw Boom.badRequest(error);
     }

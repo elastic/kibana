@@ -11,7 +11,6 @@ import { elasticsearchJsPlugin } from './elasticsearch_ml';
 
 const callWithRequest = once((server) => {
   const config = {
-    plugins: [ elasticsearchJsPlugin ],
     ...server.config().get('elasticsearch')
   };
   const cluster = server.plugins.elasticsearch.createCluster('ml', config);

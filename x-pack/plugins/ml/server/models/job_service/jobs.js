@@ -141,10 +141,10 @@ export function jobsProvider(callWithRequest) {
     const datafeeds = {};
     const calendarsByJobId = {};
     const results = await Promise.all([
-      callWithRequest('ml.jobs', { jobId: jobIds }),
-      callWithRequest('ml.jobStats', { jobId: jobIds }),
-      callWithRequest('ml.datafeeds'),
-      callWithRequest('ml.datafeedStats'),
+      callWithRequest('ml.getJobs', { jobId: jobIds }),
+      callWithRequest('ml.getJobStats', { jobId: jobIds }),
+      callWithRequest('ml.getDatafeeds'),
+      callWithRequest('ml.getDatafeedStats'),
       calMngr.getAllCalendars(),
     ]);
 

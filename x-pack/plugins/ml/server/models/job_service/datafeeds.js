@@ -101,7 +101,7 @@ export function datafeedsProvider(callWithRequest) {
   }
 
   async function getDatafeedIdsByJobId() {
-    const datafeeds = await callWithRequest('ml.datafeeds');
+    const datafeeds = await callWithRequest('ml.getDatafeeds');
     return datafeeds.datafeeds.reduce((p, c) => {
       p[c.job_id] = c.datafeed_id;
       return p;
@@ -109,7 +109,7 @@ export function datafeedsProvider(callWithRequest) {
   }
 
   async function getJobIdsByDatafeedId() {
-    const datafeeds = await callWithRequest('ml.datafeeds');
+    const datafeeds = await callWithRequest('ml.getDatafeeds');
     return datafeeds.datafeeds.reduce((p, c) => {
       p[c.datafeed_id] = c.job_id;
       return p;

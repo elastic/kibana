@@ -19,7 +19,7 @@ export function fileDataVisualizerProvider(callWithRequest) {
     let results = [];
 
     try {
-      results = await callWithRequest('ml.fileStructure', { body: data, ...overrides });
+      results = await callWithRequest('ml.findFileStructure', { body: data, ...overrides });
       if (false) {
         // disabling caching for now
         cached = await cacheData(data);

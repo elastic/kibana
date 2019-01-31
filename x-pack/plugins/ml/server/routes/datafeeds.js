@@ -16,7 +16,7 @@ export function dataFeedRoutes(server, commonRouteConfig) {
     path: '/api/ml/datafeeds',
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
-      return callWithRequest('ml.datafeeds')
+      return callWithRequest('ml.getDatafeeds')
         .catch(resp => wrapError(resp));
     },
     config: {
@@ -30,7 +30,7 @@ export function dataFeedRoutes(server, commonRouteConfig) {
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const datafeedId = request.params.datafeedId;
-      return callWithRequest('ml.datafeeds', { datafeedId })
+      return callWithRequest('ml.getDatafeeds', { datafeedId })
         .catch(resp => wrapError(resp));
     },
     config: {
@@ -43,7 +43,7 @@ export function dataFeedRoutes(server, commonRouteConfig) {
     path: '/api/ml/datafeeds/_stats',
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
-      return callWithRequest('ml.datafeedStats')
+      return callWithRequest('ml.getDatafeedStats')
         .catch(resp => wrapError(resp));
     },
     config: {
@@ -57,7 +57,7 @@ export function dataFeedRoutes(server, commonRouteConfig) {
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const datafeedId = request.params.datafeedId;
-      return callWithRequest('ml.datafeedStats', { datafeedId })
+      return callWithRequest('ml.getDatafeedStats', { datafeedId })
         .catch(resp => wrapError(resp));
     },
     config: {
@@ -72,7 +72,7 @@ export function dataFeedRoutes(server, commonRouteConfig) {
       const callWithRequest = callWithRequestFactory(server, request);
       const datafeedId = request.params.datafeedId;
       const body = request.payload;
-      return callWithRequest('ml.addDatafeed', { datafeedId, body })
+      return callWithRequest('ml.putDatafeed', { datafeedId, body })
         .catch(resp => wrapError(resp));
     },
     config: {
@@ -151,7 +151,7 @@ export function dataFeedRoutes(server, commonRouteConfig) {
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const datafeedId = request.params.datafeedId;
-      return callWithRequest('ml.datafeedPreview', { datafeedId })
+      return callWithRequest('ml.previewDatafeed', { datafeedId })
         .catch(resp => wrapError(resp));
     },
     config: {

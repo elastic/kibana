@@ -19,7 +19,7 @@ export function jobAuditMessagesProvider(callWithRequest) {
   async function getJobAuditMessages(jobId, from) {
     let gte = null;
     if (jobId !== undefined && from === undefined) {
-      const jobs = await callWithRequest('ml.jobs', { jobId });
+      const jobs = await callWithRequest('ml.getJobs', { jobId });
       if (jobs.count > 0 && jobs.jobs !== undefined) {
         gte = moment(jobs.jobs[0].create_time).valueOf();
       }

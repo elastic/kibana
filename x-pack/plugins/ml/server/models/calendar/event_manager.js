@@ -16,7 +16,7 @@ export class EventManager {
 
   async getCalendarEvents(calendarId) {
     try {
-      const resp = await this.callWithRequest('ml.events', { calendarId });
+      const resp = await this.callWithRequest('ml.getCalendarEvents', { calendarId });
       return resp.events;
     } catch (error) {
       throw Boom.badRequest(error);
@@ -27,7 +27,7 @@ export class EventManager {
   async getAllEvents(jobId) {
     const calendarId = '_all';
     try {
-      const resp = await this.callWithRequest('ml.events', { calendarId, jobId });
+      const resp = await this.callWithRequest('ml.getCalendarEvents', { calendarId, jobId });
       return resp.events;
     } catch (error) {
       throw Boom.badRequest(error);
@@ -38,14 +38,14 @@ export class EventManager {
     const body = { events };
 
     try {
-      return await this.callWithRequest('ml.addEvent', { calendarId, body });
+      return await this.callWithRequest('ml.postCalendarEvents', { calendarId, body });
     } catch (error) {
       throw Boom.badRequest(error);
     }
   }
 
   async deleteEvent(calendarId, eventId) {
-    return this.callWithRequest('ml.deleteEvent', { calendarId, eventId });
+    return this.callWithRequest('ml.deleteCalendarEvent', { calendarId, eventId });
   }
 
   isEqual(ev1, ev2) {

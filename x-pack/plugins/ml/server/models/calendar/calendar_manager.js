@@ -19,7 +19,7 @@ export class CalendarManager {
 
   async getCalendar(calendarId) {
     try {
-      const resp = await this.callWithRequest('ml.calendars', { calendarId });
+      const resp = await this.callWithRequest('ml.getCalendars', { calendarId });
       const calendars = resp.calendars;
       if (calendars.length) {
         const calendar = calendars[0];
@@ -35,7 +35,7 @@ export class CalendarManager {
 
   async getAllCalendars() {
     try {
-      const calendarsResp = await this.callWithRequest('ml.calendars');
+      const calendarsResp = await this.callWithRequest('ml.getCalendars');
       const events = await this.eventManager.getAllEvents();
       const calendars = calendarsResp.calendars;
       calendars.forEach(cal => cal.events = []);
@@ -59,7 +59,7 @@ export class CalendarManager {
     delete calendar.calendarId;
     delete calendar.events;
     try {
-      await this.callWithRequest('ml.addCalendar', { calendarId, body: calendar });
+      await this.callWithRequest('ml.putCalendar', { calendarId, body: calendar });
       if (events.length) {
         await this.eventManager.addEvents(calendarId, events);
       }
@@ -95,12 +95,12 @@ export class CalendarManager {
 
       //add all new jobs
       if (jobsToAdd.length) {
-        await this.callWithRequest('ml.addJobToCalendar', { calendarId, jobId: jobsToAdd.join(',') });
+        await this.callWithRequest('ml.putCalendarJob', { calendarId, jobId: jobsToAdd.join(',') });
       }
 
       //remove all removed jobs
       if (jobsToRemove.length) {
-        await this.callWithRequest('ml.removeJobFromCalendar', { calendarId, jobId: jobsToRemove.join(',') });
+        await this.callWithRequest('ml.deleteCalendarJob', { calendarId, jobId: jobsToRemove.join(',') });
       }
 
 

@@ -408,7 +408,7 @@ export class DataRecognizer {
 
   async saveJob(job) {
     const { id: jobId, config: body } = job;
-    return this.callWithRequest('ml.addJob', { jobId, body });
+    return this.callWithRequest('ml.putJob', { jobId, body });
   }
 
   // save the datafeeds.
@@ -427,7 +427,7 @@ export class DataRecognizer {
 
   async saveDatafeed(datafeed) {
     const { id: datafeedId, config: body } = datafeed;
-    return this.callWithRequest('ml.addDatafeed', { datafeedId, body });
+    return this.callWithRequest('ml.putDatafeed', { datafeedId, body });
   }
 
   async startDatafeeds(datafeeds, start, end) {
