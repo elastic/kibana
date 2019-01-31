@@ -8,6 +8,7 @@ import { EuiAccordion, EuiButtonIcon, EuiLoadingKibana, EuiPanel, EuiTitle } fro
 import { IPosition } from 'monaco-editor';
 import queryString from 'querystring';
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { parseSchema } from '../../../common/uri_util';
 import { GroupedFileReferences, GroupedRepoReferences } from '../../actions';
 import { history } from '../../utils/url';
@@ -20,23 +21,64 @@ interface Props {
   refUrl?: string;
   onClose(): void;
 }
+interface State {
+  expanded: boolean;
+}
 
-export class ReferencesPanel extends React.Component<Props> {
+export class ReferencesPanel extends React.Component<Props, State> {
+  private node: Element | undefined = undefined;
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      expanded: false,
+    };
+  }
+
   public close = () => {
     this.props.onClose();
+  };
+  public componentDidMount(): void {
+    this.node = ReactDOM.findDOMNode(this) as Element;
+  }
+
+  public toggleExpand = () => {
+    this.setState({ expanded: !this.state.expanded });
   };
 
   public render() {
     const body = this.props.isLoading ? <EuiLoadingKibana size="xl" /> : this.renderGroupByRepo();
+    const styles: any = {};
+    const expanded = this.state.expanded;
+    if (expanded) {
+      styles.position = 'absolute';
+      styles.bottom = 0;
+      styles.right = 0;
+      if (this.node) {
+        const parent = this.node.parentNode as Element;
+        styles.width = parent.clientWidth;
+        styles.height = parent.clientHeight - 75;
+        styles.maxHeight = styles.height;
+        styles.zIndex = 1000;
+      }
+    }
     return (
-      <EuiPanel grow={false} className="code-editor-references-panel">
+      <EuiPanel grow={false} className="code-editor-references-panel" style={styles} >
         <EuiButtonIcon
-          className="euiFlyout__closeButton"
           size="s"
-          onClick={this.close}
-          iconType="cross"
+          onClick={this.toggleExpand}
+          iconType={expanded ? 'arrowDown' : 'arrowUp'}
           aria-label="Next"
+          className="expandButton"
         />
+        {!expanded && (
+          <EuiButtonIcon
+            className="euiFlyout__closeButton"
+            size="s"
+            onClick={this.close}
+            iconType="cross"
+            aria-label="Next"
+          />
+        )}
         <EuiTitle size="s">
           <h3>{this.props.title}</h3>
         </EuiTitle>
