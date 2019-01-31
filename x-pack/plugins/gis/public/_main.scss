@@ -8,6 +8,10 @@
   overflow: hidden;
 }
 
+.fullScreen {
+  height: 100vh !important;
+}
+
 #react-gis-root {
   flex-grow: 1;
   display: flex;

@@ -181,13 +181,14 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     $scope.indexPatterns = indexPatterns;
   }
 
-  let prevIsFullScreen;
+  $scope.isFullScreen = false;
   function handleStoreChanges(store) {
-    const isFullScreen = getIsFullScreen(store.getState());
-    if (prevIsFullScreen !== isFullScreen) {
+    const nextIsFullScreen = getIsFullScreen(store.getState());
+    if (nextIsFullScreen !== $scope.isFullScreen) {
       // Must trigger digest cycle for angular top nav to redraw itself when isFullScreen changes
-      $scope.$evalAsync(() => {});
-      prevIsFullScreen = isFullScreen;
+      $scope.$evalAsync(() => {
+        $scope.isFullScreen = nextIsFullScreen;
+      });
     }
 
     const nextIndexPatternIds = getUniqueIndexPatternIds(store.getState());
