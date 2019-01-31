@@ -20,7 +20,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
 
-  describe('dashboard', () => {
+  describe('spaces', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
     });
@@ -29,7 +29,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('spaces/disabled_features');
+        await esArchiver.load('dashboard/feature_controls/spaces');
         await kibanaServer.uiSettings.replace({
           'accessibility:disableAnimations': true,
           'telemetry:optIn': false,
