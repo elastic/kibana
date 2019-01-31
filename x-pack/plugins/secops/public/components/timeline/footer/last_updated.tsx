@@ -14,17 +14,19 @@ interface LastUpdatedAtProps {
 }
 
 interface LastUpdatedAtState {
-  date: Date;
+  date: number;
 }
 
 export class LastUpdatedAt extends React.PureComponent<LastUpdatedAtProps, LastUpdatedAtState> {
   public readonly state = {
-    date: new Date(),
+    date: Date.now(),
+    updateInterval: 0,
+    update: false,
   };
   private timerID?: NodeJS.Timeout;
 
   public componentDidMount() {
-    this.timerID = setInterval(() => this.tick(), 1000);
+    this.timerID = setInterval(() => this.tick(), 10000);
   }
 
   public componentWillUnmount() {
@@ -33,7 +35,7 @@ export class LastUpdatedAt extends React.PureComponent<LastUpdatedAtProps, LastU
 
   public tick() {
     this.setState({
-      date: new Date(),
+      date: Date.now(),
     });
   }
 
@@ -45,7 +47,13 @@ export class LastUpdatedAt extends React.PureComponent<LastUpdatedAtProps, LastU
         </EuiFlexItem>
         <EuiFlexItem>
           {' '}
-          {i18n.UPDATED} <FormattedRelative value={new Date(this.props.updatedAt)} />
+          {i18n.UPDATED}{' '}
+          {
+            <FormattedRelative
+              key={`FormatedTime-${this.state.date}`}
+              value={new Date(this.props.updatedAt)}
+            />
+          }
         </EuiFlexItem>
       </EuiFlexGroup>
     );
