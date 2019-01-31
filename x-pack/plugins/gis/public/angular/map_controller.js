@@ -273,7 +273,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
           onClose={() => {}}
           title={savedMap.title}
           showCopyOnSave={savedMap.id ? true : false}
-          objectType={'gis-map'}
+          objectType={'map'}
         />);
       showSaveModal(saveModal);
     }

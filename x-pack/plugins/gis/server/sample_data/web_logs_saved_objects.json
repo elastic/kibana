@@ -1,7 +1,7 @@
 [
   {
-    "id" : "gis-map:40298610-039e-11e9-b546-bdfedfa6a4c0",
-    "type": "gis-map",
+    "id" : "map:40298610-039e-11e9-b546-bdfedfa6a4c0",
+    "type": "map",
     "updated_at" : "2018-12-19T14:56:22.769Z",
     "version": 1,
     "migrationVersion": {},

@@ -54,7 +54,7 @@ routes
     },
     resolve: {
       hasMaps: function (kbnUrl) {
-        chrome.getSavedObjectsClient().find({ type: 'gis-map', perPage: 1 }).then(resp => {
+        chrome.getSavedObjectsClient().find({ type: 'xmap', perPage: 1 }).then(resp => {
           // Do not show empty listing page, just redirect to a new map
           if (resp.savedObjects.length === 0) {
             kbnUrl.redirect('/map');

@@ -43,7 +43,7 @@ module.factory('SavedGisMap', function (Private) {
     this.showInRecentlyAccessed = true;
   }
 
-  SavedGisMap.type = 'gis-map';
+  SavedGisMap.type = 'map';
 
   // Mappings are used to place object properties into saved object _source
   SavedGisMap.mapping = {
