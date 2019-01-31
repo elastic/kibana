@@ -141,7 +141,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
           await supertest
             .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=wigwags`)
             .auth(user.username, user.password)
-            .expect(tests.unknownType.statusCode)
+            .expect(400)
             .then(tests.unknownType.response));
       });
 
