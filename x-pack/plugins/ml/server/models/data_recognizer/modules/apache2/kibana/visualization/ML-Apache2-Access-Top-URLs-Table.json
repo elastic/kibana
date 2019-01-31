@@ -4,7 +4,6 @@
   "title": "ML Apache2 Access Top URLs Table",
   "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
   "version": 1,
-  "migrationVersion": {},
   "savedSearchId": "ML-Filebeat-Apache2-Access",
   "kibanaSavedObjectMeta": {
     "searchSourceJSON": "{}"
