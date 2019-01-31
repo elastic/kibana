@@ -204,6 +204,28 @@ export class DllCompiler {
           return reject(webpackErrors);
         }
 
+        // TODO: REFACT THIS
+        // We need to create a dll_allowed_modules
+        const notAllowedModules = [];
+        stats.compilation.modules.forEach((module) => {
+          if(module.userRequest
+            && !module.userRequest.includes(`${path.sep}node_modules${path.sep}`)
+            && !module.userRequest.includes(`${path.sep}packages${path.sep}`)
+            && !module.userRequest.includes(`${path.sep}webpackShims${path.sep}`)
+            && !module.userRequest.includes(this.rawDllConfig.outputPath)) {
+            notAllowedModules.push(module.userRequest);
+          }
+        });
+        if (notAllowedModules.length) {
+          this.logWithMetadata(
+            ['fatal', 'optimize:dynamic_dll_plugin'],
+            `The following modules are not allowed to be bundled into the dll: \n${notAllowedModules.join('\n')}`
+          );
+
+          // await rimrafAsync(this.rawDllConfig.outputPath);
+          // return reject(`The following modules are not allowed to be bundled into the dll: \n${notAllowedModules.join('\n')}`);
+        }
+
         // Otherwise let it proceed
         this.logWithMetadata(
           ['info', 'optimize:dynamic_dll_plugin'],

@@ -17,10 +17,12 @@
  * under the License.
  */
 
+import 'ui/angular-bootstrap';
 import html from './tooltip.html';
 import chrome from 'ui/chrome';
+import  { uiModules } from 'ui/modules';
 
-require('ui-bootstrap')
+uiModules.get('kibana')
   .config(function ($tooltipProvider) {
     // we use the uiSettings client because the config service is not available in the config phase
     const uiSettings = chrome.getUiSettingsClient();

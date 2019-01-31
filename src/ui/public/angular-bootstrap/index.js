@@ -1,9 +1,10 @@
-
 /* eslint-disable */
 
 /**
  * TODO: Write custom components that address our needs to directly and deprecate these Bootstrap components.
  */
+
+import 'angular';
 
 /*
  * angular-ui-bootstrap

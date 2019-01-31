@@ -33,11 +33,24 @@ import 'whatwg-fetch';
 import 'abortcontroller-polyfill';
 import 'childnode-remove-polyfill';
 
+import { uiModules } from 'ui/modules';
+import $ from 'jquery';
+import bindJqueryToFindTestSubject from 'ui/jquery/find_test_subject';
+
 import { i18n } from '@kbn/i18n';
 import { CoreSystem } from '__kibanaCore__'
 
-const injectedMetadata = JSON.parse(document.querySelector('kbn-injected-metadata').getAttribute('data'));
+// load and bootstrap required ui modules
+uiModules.get('kibana', [
+ 'ui.ace',
+ 'monospaced.elastic',
+ 'ui.select', 
+ 'ngSanitize',
+ 'elasticsearch'
+]);
+bindJqueryToFindTestSubject($);
 
+const injectedMetadata = JSON.parse(document.querySelector('kbn-injected-metadata').getAttribute('data'));
 i18n.load(injectedMetadata.i18n.translationsUrl)
   .catch(e => e)
   .then((i18nError) => {
