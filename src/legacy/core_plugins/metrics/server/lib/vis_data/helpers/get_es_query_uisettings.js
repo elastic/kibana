@@ -17,27 +17,12 @@
  * under the License.
  */
 
-import { collectPanels } from './collect_panels';
-
-export async function collectDashboards(savedObjectsClient, ids) {
-
-  if (ids.length === 0) return [];
-
-  const objects = ids.map(id => {
-    return {
-      type: 'dashboard',
-      id: id
-    };
-  });
-
-  const { saved_objects: savedObjects } = await savedObjectsClient.bulkGet(objects);
-  const results = await Promise.all(savedObjects.map(d => collectPanels(savedObjectsClient, d)));
-
-  return results
-    .reduce((acc, result) => acc.concat(result), [])
-    .reduce((acc, obj) => {
-      if (!acc.find(o => o.id === obj.id))  acc.push(obj);
-      return acc;
-    }, []);
-
+export async function getEsQueryConfig(req) {
+  const uiSettings = req.getUiSettingsService();
+  const allowLeadingWildcards = await uiSettings.get('query:allowLeadingWildcards');
+  const queryStringOptions = await uiSettings.get('query:queryString:options');
+  return {
+    allowLeadingWildcards,
+    queryStringOptions: JSON.parse(queryStringOptions),
+  };
 }

@@ -17,23 +17,25 @@
  * under the License.
  */
 
-import { collectIndexPatterns } from './collect_index_patterns';
+export async function getIndexPatternObject(req, indexPatternString) {
+  // getting the matching index pattern
+  const savedObjectClient = req.getSavedObjectsClient();
+  const indexPatternObjects = await savedObjectClient.find({
+    type: 'index-pattern',
+    fields: ['title', 'fields'],
+    search: `"${indexPatternString}"`,
+    search_fields: ['title'],
+  });
 
-export async function collectSearchSources(savedObjectsClient, panels) {
-  const docs = panels.reduce((acc, panel) => {
-    const { savedSearchId } = panel.attributes;
-    if (savedSearchId) {
-      if (!acc.find(s => s.id === savedSearchId) && !panels.find(p => p.id === savedSearchId)) {
-        acc.push({ type: 'search', id: savedSearchId });
-      }
-    }
-    return acc;
-  }, []);
-
-  if (docs.length === 0) return [];
-
-  const { saved_objects: savedObjects } = await savedObjectsClient.bulkGet(docs);
-  const indexPatterns = await collectIndexPatterns(savedObjectsClient, savedObjects);
-
-  return savedObjects.concat(indexPatterns);
+  // getting the index pattern fields
+  const indexPatterns = indexPatternObjects.saved_objects
+    .filter(obj => obj.attributes.title === indexPatternString)
+    .map(indexPattern => {
+      const { title, fields } = indexPattern.attributes;
+      return {
+        title,
+        fields: JSON.parse(fields),
+      };
+    });
+  return indexPatterns.length === 1 ? indexPatterns[0] : null;
 }

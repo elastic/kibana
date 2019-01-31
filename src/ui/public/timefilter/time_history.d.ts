@@ -17,27 +17,15 @@
  * under the License.
  */
 
-export async function collectIndexPatterns(savedObjectsClient, panels) {
-  const docs = panels.reduce((acc, panel) => {
-    const { kibanaSavedObjectMeta, savedSearchId } = panel.attributes;
-
-    if (kibanaSavedObjectMeta && kibanaSavedObjectMeta.searchSourceJSON && !savedSearchId) {
-      let searchSourceData;
-      try {
-        searchSourceData = JSON.parse(kibanaSavedObjectMeta.searchSourceJSON);
-      } catch (err) {
-        return acc;
-      }
-
-      if (searchSourceData.index && !acc.find(s => s.id === searchSourceData.index)) {
-        acc.push({ type: 'index-pattern', id: searchSourceData.index });
-      }
-    }
-    return acc;
-  }, []);
-
-  if (docs.length === 0) return [];
-
-  const { saved_objects: savedObjects } = await savedObjectsClient.bulkGet(docs);
-  return savedObjects;
+interface TimeRange {
+  from: string;
+  to: string;
+  mode?: string;
 }
+
+export interface TimeHistory {
+  add: (options: TimeRange) => void;
+  get: () => TimeRange[];
+}
+
+export const timeHistory: TimeHistory;
