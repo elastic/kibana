@@ -12,9 +12,12 @@ import shieldPlugin from '../../../server/lib/esjs_shield_plugin';
 export function EsProvider({ getService }) {
   const config = getService('config');
 
-  return new elasticsearch.Client({
+  const client = new elasticsearch.Client({
     node: formatUrl(config.get('servers.elasticsearch')),
-    requestTimeout: config.get('timeouts.esRequestTimeout'),
-    plugins: [shieldPlugin]
+    requestTimeout: config.get('timeouts.esRequestTimeout')
   });
+
+  addShieldExtensions(client);
+
+  return client;
 }

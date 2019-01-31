@@ -13,9 +13,12 @@ import { TestInvoker } from '../lib/types';
 export function EsProvider({ getService }: TestInvoker) {
   const config = getService('config');
 
-  return new elasticsearch.Client({
-    host: formatUrl(config.get('servers.elasticsearch')),
-    requestTimeout: config.get('timeouts.esRequestTimeout'),
-    plugins: [shieldPlugin],
+  const client = new elasticsearch.Client({
+    node: formatUrl(config.get('servers.elasticsearch')),
+    requestTimeout: config.get('timeouts.esRequestTimeout')
   });
+
+  addShieldExtensions(client);
+
+  return client;
 }

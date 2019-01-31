@@ -7,14 +7,17 @@
 import { format as formatUrl } from 'url';
 
 import elasticsearch from '@elastic/elasticsearch';
-import shieldPlugin from '../../../../server/lib/esjs_shield_plugin';
+import addShieldExtensions from '../../../../server/lib/esjs_shield_plugin';
 
 export function EsProvider({ getService }) {
   const config = getService('config');
 
-  return new elasticsearch.Client({
-    host: formatUrl(config.get('servers.elasticsearch')),
-    requestTimeout: config.get('timeouts.esRequestTimeout'),
-    plugins: [shieldPlugin]
+  const client = new elasticsearch.Client({
+    node: formatUrl(config.get('servers.elasticsearch')),
+    requestTimeout: config.get('timeouts.esRequestTimeout')
   });
+
+  addShieldExtensions(client);
+
+  return client;
 }
