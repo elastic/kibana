@@ -28,7 +28,7 @@ const errorMessages = {
   />),
   remoteClusterNotConnectedEditable: () => (<FormattedMessage
     id="xpack.crossClusterReplication.forms.currentRemoteClusterNotConnectedCallOutDescription"
-    defaultMessage="Edit the remote cluster or select one that's connected."
+    defaultMessage="Edit the remote cluster or select a cluster that is connected."
   />),
 };
 
@@ -174,11 +174,15 @@ export const RemoteClustersFormField = injectI18n(
     };
 
     renderCurrentRemoteClusterNotConnected = (name, fatal) => {
-      const { intl, isEditable, currentUrl } = this.props;
-      const title = intl.formatMessage({
-        id: 'xpack.crossClusterReplication.forms.remoteClusterConnectionErrorTitle',
-        defaultMessage: `Remote cluster '{name}' is not connected`
-      }, { name });
+      const { isEditable, currentUrl } = this.props;
+      const {
+        remoteClusterNotConnectedEditable,
+        remoteClusterNotConnectedNotEditable,
+      } = this.messages;
+
+      const { title, description } = isEditable
+        ? remoteClusterNotConnectedEditable()
+        : remoteClusterNotConnectedNotEditable(name);
 
       return (
         <EuiCallOut
@@ -187,9 +191,9 @@ export const RemoteClustersFormField = injectI18n(
           iconType="cross"
         >
           <p>
-            { isEditable && this.errorMessages.remoteClusterNotConnectedEditable()}
-            { !isEditable && this.errorMessages.remoteClusterNotConnectedNotEditable()}
+            { description }
           </p>
+
           <EuiButton
             {...routing.getRouterLinkProps(`/edit/${name}`, BASE_PATH_REMOTE_CLUSTERS, { redirect: currentUrl }, true)}
             color={fatal ? 'danger' : 'warning'}

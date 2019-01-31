@@ -302,20 +302,35 @@ export class AutoFollowPatternFormUI extends PureComponent {
       const { remoteClusters, currentUrl } = this.props;
 
       const errorMessages = {
-        noClusterFound: () => (<FormattedMessage
-          id="xpack.crossClusterReplication.autoFollowPatternForm.emptyRemoteClustersCallOutDescription"
-          defaultMessage="Auto-follow patterns capture indices on remote clusters. You must add a remote cluster."
-        />),
-        remoteClusterNotConnectedNotEditable: () => (<FormattedMessage
-          id="xpack.crossClusterReplication.autoFollowPatternForm.currentRemoteClusterNotConnectedCallOutDescription"
-          defaultMessage="The remote cluster must be connected to edit this auto-follow pattern."
-        />),
-        remoteClusterDoesNotExist: (name) => (<FormattedMessage
-          id="xpack.crossClusterReplication.autoFollowPatternForm.currentRemoteClusterNotFoundCallOutDescription"
-          defaultMessage="Before you can edit this auto-follow pattern, you must add a remote cluster
-            named '{name}'."
-          values={{ name }}
-        />)
+        noClusterFound: () => (
+          <FormattedMessage
+            id="xpack.crossClusterReplication.autoFollowPatternForm.emptyRemoteClustersCallOutDescription"
+            defaultMessage="Auto-follow patterns capture indices on remote clusters."
+          />
+        ),
+        remoteClusterNotConnectedNotEditable: (name) => ({
+          title: (
+            <FormattedMessage
+              id="xpack.crossClusterReplication.autoFollowPatternForm.currentRemoteClusterNotConnectedCallOutTitle"
+              defaultMessage="Can't edit auto-follow pattern because remote cluster '{name}' is not connected."
+              values={{ name }}
+            />
+          ),
+          description: (
+            <FormattedMessage
+              id="xpack.crossClusterReplication.autoFollowPatternForm.currentRemoteClusterNotConnectedCallOutDescription"
+              defaultMessage="You can address this by editing the remote cluster."
+            />
+          ),
+        }),
+        remoteClusterDoesNotExist: (name) => (
+          <FormattedMessage
+            id="xpack.crossClusterReplication.autoFollowPatternForm.currentRemoteClusterNotFoundCallOutDescription"
+            defaultMessage="To edit this auto-follow pattern, you must add a remote cluster
+              named '{name}'."
+            values={{ name }}
+          />
+        ),
       };
 
       return (
@@ -386,7 +401,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
               <p>
                 <FormattedMessage
                   id="xpack.crossClusterReplication.autoFollowPatternForm.sectionLeaderIndexPatternsDescription2"
-                  defaultMessage="{note} indices that already exist are not replicated."
+                  defaultMessage="{note} Indices that already exist are not replicated."
                   values={{ note: (
                     <strong>
                       <FormattedMessage

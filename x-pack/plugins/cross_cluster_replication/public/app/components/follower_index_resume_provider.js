@@ -116,7 +116,7 @@ class Provider extends PureComponent {
               <p>
                 <FormattedMessage
                   id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.multipleResumeDescription"
-                  defaultMessage="These follower indices will resume replication:"
+                  defaultMessage="Replication will resume on these follower indices:"
                 />
               </p>
 

@@ -89,8 +89,8 @@ class Provider extends PureComponent {
               <p>
                 <FormattedMessage
                   id="xpack.crossClusterReplication.unfollowLeaderIndex.confirmModal.singleUnfollowDescription"
-                  defaultMessage="This follower index will be converted to a standard index and no
-                    longer appear in Cross Cluster Replication, but you can manage it in Index
+                  defaultMessage="The follower index will be converted to a standard index. It will
+                    no longer appear in Cross Cluster Replication, but you can manage it in Index
                     Management. You can't undo this operation."
                 />
               </p>
@@ -100,9 +100,9 @@ class Provider extends PureComponent {
               <p>
                 <FormattedMessage
                   id="xpack.crossClusterReplication.unfollowLeaderIndex.confirmModal.multipleUnfollowDescription"
-                  defaultMessage="These follower indices will be converted to standard indices and no
-                    longer appear in Cross Cluster Replication, but you can manage them in Index
-                    Management. You can't undo this operation."
+                  defaultMessage="The follower indices will be converted to standard indices. They
+                    will no longer appear in Cross Cluster Replication, but you can manage them in
+                    Index Management. You can't undo this operation."
                 />
               </p>
               <ul>{ids.map(id => <li key={id}>{id}</li>)}</ul>
