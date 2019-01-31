@@ -37,7 +37,7 @@ export type SubscriptionResolver<Result, Parent = any, Context = any, Args = nev
 // ====================================================
 
 export interface Query {
-  /** Get an infrastructure data source by id.The resolution order for the source configuration attributes is as followswith the first defined value winning:1. The attributes of the saved object with the given 'id'.2. The attributes defined in the static Kibana configuration key'xpack.infra.sources.default'.3. The hard-coded default values.As a consequence, querying a source without a corresponding saved objectdoesn't error out, but returns the configured or hardcoded defaults. */
+  /** Get an infrastructure data source by id.The resolution order for the source configuration attributes is as followswith the first defined value winning:1. The attributes of the saved object with the given 'id'.2. The attributes defined in the static Kibana configuration key'xpack.infra.sources.default'.3. The hard-coded default values.As a consequence, querying a source that doesn't exist doesn't error out,but returns the configured or hardcoded defaults. */
   source: InfraSource;
   /** Get a list of all infrastructure data sources */
   allSources: InfraSource[];
@@ -488,6 +488,7 @@ export enum InfraPathType {
   hosts = 'hosts',
   pods = 'pods',
   containers = 'containers',
+  custom = 'custom',
 }
 
 export enum InfraMetricType {
@@ -555,7 +556,7 @@ export type InfraLogMessageSegment = InfraLogMessageFieldSegment | InfraLogMessa
 
 export namespace QueryResolvers {
   export interface Resolvers<Context = InfraContext, TypeParent = never> {
-    /** Get an infrastructure data source by id.The resolution order for the source configuration attributes is as followswith the first defined value winning:1. The attributes of the saved object with the given 'id'.2. The attributes defined in the static Kibana configuration key'xpack.infra.sources.default'.3. The hard-coded default values.As a consequence, querying a source without a corresponding saved objectdoesn't error out, but returns the configured or hardcoded defaults. */
+    /** Get an infrastructure data source by id.The resolution order for the source configuration attributes is as followswith the first defined value winning:1. The attributes of the saved object with the given 'id'.2. The attributes defined in the static Kibana configuration key'xpack.infra.sources.default'.3. The hard-coded default values.As a consequence, querying a source that doesn't exist doesn't error out,but returns the configured or hardcoded defaults. */
     source?: SourceResolver<InfraSource, TypeParent, Context>;
     /** Get a list of all infrastructure data sources */
     allSources?: AllSourcesResolver<InfraSource[], TypeParent, Context>;

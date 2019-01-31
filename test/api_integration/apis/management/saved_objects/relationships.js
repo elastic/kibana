@@ -40,8 +40,8 @@ export default function ({ getService }) {
     after(() => esArchiver.unload('management/saved_objects'));
 
     const SEARCH_RESPONSE_SCHEMA = Joi.object().keys({
-      visualizations: GENERIC_RESPONSE_SCHEMA,
-      indexPatterns: GENERIC_RESPONSE_SCHEMA,
+      visualization: GENERIC_RESPONSE_SCHEMA,
+      'index-pattern': GENERIC_RESPONSE_SCHEMA,
     });
 
     describe('searches', async () => {
@@ -61,13 +61,13 @@ export default function ({ getService }) {
           .expect(200)
           .then(resp => {
             expect(resp.body).to.eql({
-              visualizations: [
+              visualization: [
                 {
                   id: 'a42c0580-3224-11e8-a572-ffca06da1357',
                   title: 'VisualizationFromSavedSearch',
                 },
               ],
-              indexPatterns: [
+              'index-pattern': [
                 {
                   id: '8963ca30-3224-11e8-a572-ffca06da1357',
                   title: 'saved_objects*',
@@ -85,7 +85,7 @@ export default function ({ getService }) {
 
     describe('dashboards', async () => {
       const DASHBOARD_RESPONSE_SCHEMA = Joi.object().keys({
-        visualizations: GENERIC_RESPONSE_SCHEMA,
+        visualization: GENERIC_RESPONSE_SCHEMA,
       });
 
       it('should validate dashboard response schema', async () => {
@@ -104,7 +104,7 @@ export default function ({ getService }) {
           .expect(200)
           .then(resp => {
             expect(resp.body).to.eql({
-              visualizations: [
+              visualization: [
                 {
                   id: 'add810b0-3224-11e8-a572-ffca06da1357',
                   title: 'Visualization',
@@ -128,7 +128,8 @@ export default function ({ getService }) {
 
     describe('visualizations', async () => {
       const VISUALIZATIONS_RESPONSE_SCHEMA = Joi.object().keys({
-        dashboards: GENERIC_RESPONSE_SCHEMA,
+        dashboard: GENERIC_RESPONSE_SCHEMA,
+        search: GENERIC_RESPONSE_SCHEMA,
       });
 
       it('should validate visualization response schema', async () => {
@@ -147,7 +148,13 @@ export default function ({ getService }) {
           .expect(200)
           .then(resp => {
             expect(resp.body).to.eql({
-              dashboards: [
+              search: [
+                {
+                  id: '960372e0-3224-11e8-a572-ffca06da1357',
+                  title: 'OneRecord'
+                },
+              ],
+              dashboard: [
                 {
                   id: 'b70c7ae0-3224-11e8-a572-ffca06da1357',
                   title: 'Dashboard',
@@ -166,8 +173,8 @@ export default function ({ getService }) {
 
     describe('index patterns', async () => {
       const INDEX_PATTERN_RESPONSE_SCHEMA = Joi.object().keys({
-        searches: GENERIC_RESPONSE_SCHEMA,
-        visualizations: GENERIC_RESPONSE_SCHEMA,
+        search: GENERIC_RESPONSE_SCHEMA,
+        visualization: GENERIC_RESPONSE_SCHEMA,
       });
 
       it('should validate visualization response schema', async () => {
@@ -186,13 +193,13 @@ export default function ({ getService }) {
           .expect(200)
           .then(resp => {
             expect(resp.body).to.eql({
-              searches: [
+              search: [
                 {
                   id: '960372e0-3224-11e8-a572-ffca06da1357',
                   title: 'OneRecord',
                 },
               ],
-              visualizations: [
+              visualization: [
                 {
                   id: 'add810b0-3224-11e8-a572-ffca06da1357',
                   title: 'Visualization',

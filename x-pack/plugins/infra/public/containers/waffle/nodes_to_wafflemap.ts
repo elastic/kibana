@@ -94,7 +94,7 @@ export function createWaffleMapNode(node: InfraNode): InfraWaffleMapNode {
     pathId: node.path.map(p => p.value).join('/'),
     path: node.path,
     id: nodePathItem.value,
-    name: nodePathItem.label,
+    name: nodePathItem.label || nodePathItem.value,
     metric: node.metric,
   };
 }

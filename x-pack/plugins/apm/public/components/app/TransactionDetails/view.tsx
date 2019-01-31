@@ -8,6 +8,7 @@ import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React from 'react';
+import { idx } from 'x-pack/plugins/apm/common/idx';
 import { TransactionDetailsRequest } from '../../../store/reactReduxRequest/transactionDetails';
 import { TransactionDetailsChartsRequest } from '../../../store/reactReduxRequest/transactionDetailsCharts';
 import { TransactionDistributionRequest } from '../../../store/reactReduxRequest/transactionDistribution';
@@ -67,7 +68,10 @@ export function TransactionDetailsView({ urlParams, location }: Props) {
 
       <TransactionDetailsRequest
         urlParams={urlParams}
-        render={({ data: transaction }) => {
+        render={({ data }) => {
+          const transaction = idx(data, _ => _.transaction);
+          const errorCount = idx(data, _ => _.errorCount);
+
           if (!transaction) {
             return (
               <EmptyMessage
@@ -99,6 +103,7 @@ export function TransactionDetailsView({ urlParams, location }: Props) {
                     transaction={transaction}
                     urlParams={urlParams}
                     waterfall={waterfall}
+                    errorCount={errorCount}
                   />
                 );
               }}

@@ -53,7 +53,8 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
       id: 'logstash-*',
       title: 'logstash-*',
       timeFieldName: '@timestamp',
-      notExpandable: true
+      notExpandable: true,
+      references: [],
     };
 
     savedObjectsClient.get.returns(Promise.resolve(clientResponse));
