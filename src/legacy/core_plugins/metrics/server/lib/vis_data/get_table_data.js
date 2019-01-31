@@ -22,20 +22,16 @@ import handleErrorResponse from './handle_error_response';
 import { get } from 'lodash';
 import processBucket from './table/process_bucket';
 import SearchStrategiesRegister from '../search_strategies/search_strategies_register';
+import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
+import { getIndexPatternObject } from './helpers/get_index_pattern';
 
 export async function getTableData(req, panel) {
   const indexPattern = panel.index_pattern;
-  const { searchStrategy } = await SearchStrategiesRegister.getViableStrategy(req, indexPattern);
+  const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategy(req, indexPattern);
   const searchRequest = searchStrategy.getSearchRequest(req, indexPattern);
-  const body = buildRequestBody(req, panel);
-
-//  todo:
-//  const indexPatternObject = await getIndexPatternObject(req, indexPatternString);
-//  const params = {
-//    index: indexPatternString,
-//    ignore_throttled: !includeFrozen,
-//    body: buildRequestBody(req, panel, esQueryConfig, indexPatternObject)
-//  };
+  const esQueryConfig = await getEsQueryConfig(req);
+  const indexPatternObject = await getIndexPatternObject(req, indexPattern);
+  const body = buildRequestBody(req, panel, esQueryConfig, indexPatternObject, capabilities);
 
   try {
     const resp = await searchRequest.search({ body });

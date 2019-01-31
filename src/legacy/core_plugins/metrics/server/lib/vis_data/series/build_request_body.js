@@ -20,7 +20,6 @@
 import buildProcessorFunction from '../build_processor_function';
 import processors from '../request_processors/series';
 
-//todo: req, panel, series, esQueryConfig, indexPatter, capabilities
 function buildRequestBody(...args) {
   const processor = buildProcessorFunction(processors, ...args);
   const doc = processor({});

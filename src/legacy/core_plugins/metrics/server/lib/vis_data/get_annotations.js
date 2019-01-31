@@ -19,8 +19,6 @@
 import handleAnnotationResponse from './handle_annotation_response';
 import getRequestParams from './annorations/get_request_params';
 
-import SearchStrategiesRegister from '../search_strategies/search_strategies_register';
-
 function validAnnotation(annotation) {
   return annotation.index_pattern &&
     annotation.time_field &&
@@ -29,15 +27,14 @@ function validAnnotation(annotation) {
     annotation.template;
 }
 
-export default async (req, panel, esQueryConfig) => {
+export default async (req, panel, esQueryConfig, searchStrategy, capabilities) => {
   const indexPattern = panel.index_pattern;
-  const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategy(req, indexPattern);
   const searchRequest = searchStrategy.getSearchRequest(req, indexPattern);
   const annotations = panel.annotations.filter(validAnnotation);
 
-  const body = annotations
-    .map(annotation => getRequestParams(req, panel, annotation, esQueryConfig, capabilities))
-    .reduce((acc, item) => acc.concat(item), []);
+  const bodiesPromises = annotations.map(annotation => getRequestParams(req, panel, annotation, esQueryConfig, capabilities));
+  const body = (await Promise.all(bodiesPromises))
+    .reduce((acc, items) => acc.concat(items), []);
 
   if (!body.length) return { responses: [] };
 

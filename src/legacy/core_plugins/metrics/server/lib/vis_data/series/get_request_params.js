@@ -18,23 +18,24 @@
  */
 import buildRequestBody from './build_request_body';
 import getEsShardTimeout from '../helpers/get_es_shard_timeout';
+import { getIndexPatternObject } from '../helpers/get_index_pattern';
 
-export default (req, panel, series, esQueryConfig, capabilities) => {
+export default async (req, panel, series, esQueryConfig, capabilities) => {
   const bodies = [];
-  const indexPatternString = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;  
-  const indexPatternObject = await getIndexPatternObject(req, indexPatternString);
+  const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
+  const indexPatternObject = await getIndexPatternObject(req, indexPattern);
   const timeout = getEsShardTimeout(req);
 
   if (capabilities.batchRequestsSupport) {
     bodies.push({
-      index: indexPatternString,
+      index: indexPattern,
       ignoreUnavailable: true,
     });
   }
 
   bodies.push({
     ...buildRequestBody(req, panel, series, esQueryConfig, indexPatternObject, capabilities),
-    timeout
+    timeout,
   });
 
   return bodies;
