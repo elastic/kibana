@@ -5,11 +5,9 @@
 */
 
 import { once } from 'lodash';
-import { elasticsearchJsPlugin } from '../../client/elasticsearch_rollup';
 
 const callWithRequest = once((server) => {
   const config = {
-    plugins: [ elasticsearchJsPlugin ],
     ...server.config().get('elasticsearch')
   };
   const cluster = server.plugins.elasticsearch.createCluster('rollup', config);

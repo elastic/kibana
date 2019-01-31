@@ -30,8 +30,8 @@ export function registerIndicesRoute(server) {
     handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
       try {
-        const data = await callWithRequest('rollup.rollupIndexCapabilities', {
-          indexPattern: '_all'
+        const data = await callWithRequest('xpack.rollup.getRollupIndexCaps', {
+          index: '_all'
         });
         return getCapabilitiesForRollupIndices(data);
       } catch(err) {
@@ -61,8 +61,8 @@ export function registerIndicesRoute(server) {
       try {
         const { indexPattern } = request.params;
         const [ fieldCapabilities, rollupIndexCapabilities ] = await Promise.all([
-          callWithRequest('rollup.fieldCapabilities', { indexPattern }),
-          callWithRequest('rollup.rollupIndexCapabilities', { indexPattern }),
+          callWithRequest('fieldCaps', { index: indexPattern }),
+          callWithRequest('xpack.rollup.getRollupIndexCaps', { index: indexPattern }),
         ]);
 
         const doesMatchIndices = Object.entries(fieldCapabilities.fields).length !== 0;

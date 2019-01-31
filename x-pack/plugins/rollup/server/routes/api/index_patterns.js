@@ -59,8 +59,8 @@ export function registerFieldsForWildcardRoute(server) {
         const rollupFields = [];
         const rollupFieldNames = [];
         const fieldsFromFieldCapsApi = indexBy(fields, 'name');
-        const rollupIndexCapabilities = getCapabilitiesForRollupIndices(await callWithRequest('rollup.rollupIndexCapabilities', {
-          indexPattern: rollupIndex
+        const rollupIndexCapabilities = getCapabilitiesForRollupIndices(await callWithRequest('xpack.rollup.getRollupIndexCaps', {
+          index: rollupIndex
         }))[rollupIndex].aggs;
 
         // Keep meta fields

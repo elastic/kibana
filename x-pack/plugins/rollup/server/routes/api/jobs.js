@@ -21,7 +21,7 @@ export function registerJobsRoute(server) {
     handler: async (request) => {
       try {
         const callWithRequest = callWithRequestFactory(server, request);
-        return await callWithRequest('rollup.jobs');
+        return await callWithRequest('xpack.rollup.getJobs', { id: '_all' });
       } catch(err) {
         if (isEsError(err)) {
           return wrapEsError(err);
@@ -48,13 +48,13 @@ export function registerJobsRoute(server) {
         const callWithRequest = callWithRequestFactory(server, request);
 
         // Create job.
-        await callWithRequest('rollup.createJob', {
+        await callWithRequest('xpack.rollup.putJob', {
           id,
           body: rest,
         });
 
         // Then request the newly created job.
-        const results = await callWithRequest('rollup.job', { id });
+        const results = await callWithRequest('xpack.rollup.getJobs', { id });
         return results.jobs[0];
       } catch(err) {
         if (isEsError(err)) {
@@ -76,7 +76,7 @@ export function registerJobsRoute(server) {
       try {
         const { jobIds } = request.payload;
         const callWithRequest = callWithRequestFactory(server, request);
-        return await Promise.all(jobIds.map(id => callWithRequest('rollup.startJob', { id })));
+        return await Promise.all(jobIds.map(id => callWithRequest('xpack.rollup.startJob', { id })));
       } catch(err) {
         if (isEsError(err)) {
           return wrapEsError(err);
@@ -97,7 +97,7 @@ export function registerJobsRoute(server) {
       try {
         const { jobIds } = request.payload;
         const callWithRequest = callWithRequestFactory(server, request);
-        return await Promise.all(jobIds.map(id => callWithRequest('rollup.stopJob', { id })));
+        return await Promise.all(jobIds.map(id => callWithRequest('xpack.rollup.stopJob', { id })));
       } catch(err) {
         if (isEsError(err)) {
           return wrapEsError(err);
@@ -118,7 +118,7 @@ export function registerJobsRoute(server) {
       try {
         const { jobIds } = request.payload;
         const callWithRequest = callWithRequestFactory(server, request);
-        return await Promise.all(jobIds.map(id => callWithRequest('rollup.deleteJob', { id })));
+        return await Promise.all(jobIds.map(id => callWithRequest('xpack.rollup.deleteJob', { id })));
       } catch(err) {
         if (isEsError(err)) {
           return wrapEsError(err);

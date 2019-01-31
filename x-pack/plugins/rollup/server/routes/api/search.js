@@ -24,7 +24,7 @@ export function registerSearchRoute(server) {
 
       try {
         const requests = request.payload.map(({ index, query }) => (
-          callWithRequest('rollup.search', {
+          callWithRequest('xpack.rollup.rollupSearch', {
             index,
             rest_total_hits_as_int: true,
             body: query,
