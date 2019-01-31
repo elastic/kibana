@@ -15,9 +15,9 @@ import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { withRouter } from 'react-router-dom';
 import styled from 'styled-components';
-import { FileTree } from '../../../model';
+import { FileTree, SearchScope } from '../../../model';
 import { CommitInfo } from '../../../model/commit';
-import { FetchFileResponse, fetchMoreCommits } from '../../actions';
+import { changeSearchScope, FetchFileResponse, fetchMoreCommits } from '../../actions';
 import { MainRouteParams, PathTypes } from '../../common/types';
 import { RootState } from '../../reducers';
 import { hasMoreCommitsSelector, treeCommitsSelector } from '../../selectors';
@@ -26,17 +26,13 @@ import { Editor } from '../editor/editor';
 import { UnsupportedFileIcon } from '../shared/icons';
 import { CommitHistory } from './commit_history';
 import { Directory } from './directory';
+import { TopBar } from './top_bar';
 import { UnsupportedFile } from './unsupported_file';
-
-const LARGE_Z_INDEX_NUMBER = 99;
 
 const ButtonsContainer = styled.div`
   display: flex;
   flex-direction: row;
-  position: absolute;
-  right: ${euiSize};
-  z-index: ${LARGE_Z_INDEX_NUMBER};
-  & > div:first-child {
+  & > *:first-child {
     margin-right: ${euiSizeS};
   }
 `;
@@ -54,12 +50,19 @@ const DirectoryViewContainer = styled.div`
   flex-grow: 1;
 `;
 
+const Root = styled.div`
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+`;
+
 interface Props extends RouteComponentProps<MainRouteParams> {
   tree: FileTree;
   file: FetchFileResponse | undefined;
   commits: CommitInfo[];
   hasMoreCommits: boolean;
   loadingCommits: boolean;
+  onSearchScopeChanged: (s: SearchScope) => void;
   fetchMoreCommits(repoUri: string): void;
 }
 
@@ -110,23 +113,6 @@ class CodeContent extends React.PureComponent<Props> {
     }
   };
 
-  public scrollBlameInResponseOfScrollingEditor = (ele: HTMLDivElement) => {
-    const observer = new MutationObserver(records => {
-      if (!ele) {
-        observer.disconnect();
-        return;
-      }
-      const target = records[records.length - 1].target as HTMLElement;
-      const scrollTop = -parseInt(target.style.top!, 10);
-      ele.scrollTop = scrollTop;
-    });
-    const targetNode = document.querySelector('#mainEditor:first-child:first-child:first-child');
-    observer.observe(targetNode!, {
-      attributes: true,
-      subtree: true,
-    });
-  };
-
   public switchButton = (id: string) => {
     const { path, resource, org, repo, revision } = this.props.match.params;
     const repoUri = `${resource}/${org}/${repo}`;
@@ -152,7 +138,24 @@ class CodeContent extends React.PureComponent<Props> {
     window.open(`../api/code/repo/${repoUri}/blob/${revision}/${path}`);
   };
 
-  public renderButtons = (buttonId: ButtonOption) => {
+  public renderButtons = () => {
+    let buttonId = null;
+    switch (this.props.match.params.pathType) {
+      case PathTypes.blame:
+        buttonId = ButtonOption.Blame;
+        break;
+      case PathTypes.blob:
+        buttonId = ButtonOption.Code;
+        break;
+      case PathTypes.tree:
+        buttonId = ButtonOption.Folder;
+        break;
+      case PathTypes.commits:
+        buttonId = ButtonOption.History;
+        break;
+      default:
+        break;
+    }
     const { file } = this.props;
     if (file) {
       return (
@@ -198,6 +201,19 @@ class CodeContent extends React.PureComponent<Props> {
   };
 
   public render() {
+    return (
+      <Root>
+        <TopBar
+          routeParams={this.props.match.params}
+          onSearchScopeChanged={this.props.onSearchScopeChanged}
+          buttons={this.renderButtons()}
+        />
+        {this.renderContent()}
+      </Root>
+    );
+  }
+
+  public renderContent() {
     const { file, commits, match, tree, hasMoreCommits, loadingCommits } = this.props;
     const { path, pathType, resource, org, repo, revision } = match.params;
     const repoUri = `${resource}/${org}/${repo}`;
@@ -206,7 +222,6 @@ class CodeContent extends React.PureComponent<Props> {
         const node = this.findNode(path ? path.split('/') : [], tree);
         return (
           <DirectoryViewContainer>
-            {this.renderButtons(ButtonOption.Folder)}
             <Directory node={node} />
             <CommitHistory
               commits={commits}
@@ -256,21 +271,18 @@ class CodeContent extends React.PureComponent<Props> {
         }
         return (
           <EditorBlameContainer>
-            {this.renderButtons(ButtonOption.Code)}
-            <Editor />
+            <Editor showBlame={false} />
           </EditorBlameContainer>
         );
       case PathTypes.blame:
         return (
           <EditorBlameContainer>
-            {this.renderButtons(ButtonOption.Blame)}
             <Editor showBlame={true} />
           </EditorBlameContainer>
         );
       case PathTypes.commits:
         return (
           <React.Fragment>
-            {this.renderButtons(ButtonOption.History)}
             <InfiniteScroll
               initialLoad={true}
               loadMore={() => !loadingCommits && this.props.fetchMoreCommits(repoUri)}
@@ -308,6 +320,7 @@ const mapStateToProps = (state: RootState) => ({
 
 const mapDispatchToProps = {
   fetchMoreCommits,
+  onSearchScopeChanged: changeSearchScope,
 };
 
 export const Content = withRouter(

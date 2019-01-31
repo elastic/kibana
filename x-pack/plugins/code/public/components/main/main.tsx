@@ -10,8 +10,7 @@ import { RouteComponentProps } from 'react-router';
 import styled from 'styled-components';
 
 import { RepositoryUtils } from '../../../common/repository_utils';
-import { CloneProgress, SearchScope, WorkerReservedProgress } from '../../../model';
-import { changeSearchScope } from '../../actions';
+import { CloneProgress, WorkerReservedProgress } from '../../../model';
 import { MainRouteParams } from '../../common/types';
 import { RootState } from '../../reducers';
 import { cloneProgressSelector, progressSelector } from '../../selectors';
@@ -20,7 +19,6 @@ import { CloneStatus } from './clone_status';
 import { Content } from './content';
 import { NotFound } from './not_found';
 import { SideTabs } from './side_tabs';
-import { TopBar } from './top_bar';
 
 const Root = styled.div`
   position: absolute;
@@ -40,7 +38,6 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   progress: number;
   cloneProgress: CloneProgress;
   isNotFound: boolean;
-  onSearchScopeChanged: (s: SearchScope) => void;
 }
 
 class CodeMain extends React.Component<Props> {
@@ -77,10 +74,6 @@ class CodeMain extends React.Component<Props> {
     }
     return (
       <Root>
-        <TopBar
-          routeParams={this.props.match.params}
-          onSearchScopeChanged={this.props.onSearchScopeChanged}
-        />
         <Container>{this.renderContent()}</Container>
         <ShortcutsProvider />
       </Root>
@@ -94,12 +87,7 @@ const mapStateToProps = (state: RootState) => ({
   isNotFound: state.file.isNotFound,
 });
 
-const mapDispatchToProps = {
-  onSearchScopeChanged: changeSearchScope,
-};
-
 export const Main = connect(
-  mapStateToProps,
-  mapDispatchToProps
+  mapStateToProps
   // @ts-ignore
 )(CodeMain);
