@@ -48,8 +48,7 @@ function* handleFetchRepoTree(action: Action<FetchRepoTreePayload>) {
     const { uri, revision, path, parents, isDir } = action.payload!;
     if (path) {
       const requestedPaths: string[] = yield select(requestedPathsSelector);
-      const isPathNotRequested = (p: string) =>
-        !some(requestedPaths, requestedPath => requestedPath.startsWith(p));
+      const isPathNotRequested = (p: string) => !requestedPaths.includes(p);
       const shouldFetch = isDir
         ? isPathNotRequested(path)
         : requestedPaths.length === 0 ||
