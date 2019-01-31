@@ -6,12 +6,25 @@
 import _ from 'lodash';
 import { KibanaTilemapSource } from '../shared/layers/sources/kibana_tilemap_source';
 import { EMSTMSSource } from '../shared/layers/sources/ems_tms_source';
+import { isMetaDataLoaded, getDataSourcesSync } from '../meta';
+import { DEFAULT_EMS_TILE_LAYER } from '../../common/constants';
 
-export function getInitialLayers(savedMapLayerListJSON, dataSources) {
+export function getInitialLayers(savedMapLayerListJSON) {
+
   if (savedMapLayerListJSON) {
     return JSON.parse(savedMapLayerListJSON);
   }
 
+  if (!isMetaDataLoaded()) {
+    const descriptor = EMSTMSSource.createDescriptor(DEFAULT_EMS_TILE_LAYER);
+    const source = new EMSTMSSource(descriptor);
+    const layer = source.createDefaultLayer();
+    return [
+      layer.toLayerDescriptor()
+    ];
+  }
+
+  const dataSources = getDataSourcesSync();
   const kibanaTilemapUrl = _.get(dataSources, 'kibana.tilemap.url');
   if (kibanaTilemapUrl) {
     const sourceDescriptor = KibanaTilemapSource.createDescriptor(kibanaTilemapUrl);
@@ -32,7 +45,5 @@ export function getInitialLayers(savedMapLayerListJSON, dataSources) {
     ];
   }
 
-  // TODO display (or throw) warning that no tile layers are available and map.tilemap needs to be configured
-  // because EMS is unreachable or has been turned off on purpose.
   return [];
 }
