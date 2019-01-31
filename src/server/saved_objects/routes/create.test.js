@@ -128,4 +128,23 @@ describe('POST /api/saved_objects/{type}', () => {
 
     expect(args).toEqual(['index-pattern', attributes, options]);
   });
+
+  it('should return 400 if type is not allowed', async () => {
+    const request = {
+      method: 'POST',
+      url: '/api/saved_objects/invalid-type/abc123',
+      payload: {
+        attributes: {
+          title: 'foobar',
+        }
+      }
+    };
+
+    const { payload, statusCode } = await server.inject(request);
+    const response = JSON.parse(payload);
+
+    expect(statusCode).toBe(400);
+    expect(response.message).toMatch(/one of/);
+    expect(response.message).toMatch(/index-pattern/);
+  });
 });
