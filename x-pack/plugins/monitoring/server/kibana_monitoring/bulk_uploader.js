@@ -48,9 +48,7 @@ export class BulkUploader {
       warn: message => server.log(['warning', ...LOGGING_TAGS], message)
     };
 
-    this._client = server.plugins.elasticsearch.getCluster('admin').createClient({
-      plugins: [monitoringBulk],
-    });
+    this._client = server.plugins.elasticsearch.getCluster('admin').createClient();
 
     this._callClusterWithInternalUser = callClusterFactory(server).getCallClusterInternal();
     this._getKibanaInfoForStats = () => getKibanaInfoForStats(server, kbnServer);
