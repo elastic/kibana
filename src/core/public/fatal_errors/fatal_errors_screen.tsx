@@ -31,6 +31,8 @@ import React from 'react';
 import * as Rx from 'rxjs';
 import { tap } from 'rxjs/operators';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import { ErrorInfo } from './get_error_info';
 
 interface Props {
@@ -91,11 +93,21 @@ export class FatalErrorsScreen extends React.Component<Props, State> {
             <EuiEmptyPrompt
               iconType="alert"
               iconColor="danger"
-              title={<h2>Something went wrong</h2>}
+              title={
+                <h2>
+                  <FormattedMessage
+                    id="core.fatalErrors.somethingWentWrongTitle"
+                    defaultMessage="Something went wrong"
+                  />
+                </h2>
+              }
               body={
                 <p>
-                  Try refreshing the page. If that doesn't work, go back to the previous page or
-                  clear your session data.
+                  <FormattedMessage
+                    id="core.fatalErrors.tryRefreshingPageDescription"
+                    defaultMessage="Try refreshing the page. If that doesn't work, go back to the previous page or
+                    clear your session data."
+                  />
                 </p>
               }
               actions={[
@@ -105,10 +117,16 @@ export class FatalErrorsScreen extends React.Component<Props, State> {
                   onClick={this.onClickClearSession}
                   data-test-subj="clearSession"
                 >
-                  Clear your session
+                  <FormattedMessage
+                    id="core.fatalErrors.clearYourSessionButtonLabel"
+                    defaultMessage="Clear your session"
+                  />
                 </EuiButton>,
                 <EuiButtonEmpty onClick={this.onClickGoBack} data-test-subj="goBack">
-                  Go back
+                  <FormattedMessage
+                    id="core.fatalErrors.goBackButtonLabel"
+                    defaultMessage="Go back"
+                  />
                 </EuiButtonEmpty>,
               ]}
             />
