@@ -73,6 +73,11 @@
     &::after {
       border: none;
     }
+
+    &:hover,
+    &:focus {
+      background-color: transparentize($euiColorWarning, .9);
+    }
   }
 
   /**
@@ -95,7 +100,7 @@
    */
   &.react-grid-placeholder {
     border-radius: $euiBorderRadius;
-    background: $euiColorPrimary;
+    background: $euiColorWarning;
   }
 }
 

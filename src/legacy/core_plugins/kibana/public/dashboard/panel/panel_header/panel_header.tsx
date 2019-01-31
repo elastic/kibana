@@ -79,8 +79,6 @@ function PanelHeaderUi({
       </div>
 
       <PanelOptionsMenuContainer panelId={panelId} embeddable={embeddable} />
-
-      <div className="dshPanel__dragger" />
     </div>
   );
 }
