@@ -9,6 +9,7 @@ export interface CommitInfo {
   message: string;
   committer: string;
   id: string;
+  parents: string[];
 }
 
 export interface ReferenceInfo {
