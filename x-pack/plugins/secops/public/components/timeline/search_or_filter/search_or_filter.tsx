@@ -108,9 +108,10 @@ export const SearchOrFilter = pure<Props>(
                   query=""
                   // TODO: this handler is NOT being called by `EuiSearchBar`, which causes the query entered by the user to disappear
                   // we might have to use onSearch
-                  // onChange={({ queryText }: { queryText: string }) =>
-                  //   console.log('I will be doing filter at one point')
-                  // }
+                  onChange={({ queryText }: { queryText: string }) =>
+                    // tslint:disable-next-line:no-console
+                    console.log('I will be doing filter at one point')
+                  }
                 />
               )}
               {kqlMode === 'search' && (

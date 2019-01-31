@@ -100,7 +100,7 @@ export const HomePage = pure(() => (
                         />
                       )}
                     </EuiFlexItem>
-                    <FixEuiFlexItem grow={false}>
+                    <EuiFlexItem grow={false}>
                       <EuiFlexGroup alignItems="center" wrap={false} gutterSize="s">
                         <EuiFlexItem grow={false} data-test-subj="datePickerContainer">
                           <RangeDatePicker id="global" />
@@ -109,7 +109,7 @@ export const HomePage = pure(() => (
                           <AppSettings />
                         </EuiFlexItem>
                       </EuiFlexGroup>
-                    </FixEuiFlexItem>
+                    </EuiFlexItem>
                   </FixEuiFlexGroup>
                 </PageHeaderSection>
               </PageHeader>
@@ -146,10 +146,6 @@ const PageHeader = styled(EuiPageHeader)`
 
 const PageHeaderSection = styled(EuiPageHeaderSection)`
   width: 100%;
-`;
-
-const FixEuiFlexItem = styled(EuiFlexItem)`
-  margin-top: '13px';
 `;
 
 const FixEuiFlexGroup = styled(EuiFlexGroup)`

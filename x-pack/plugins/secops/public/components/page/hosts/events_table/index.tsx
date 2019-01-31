@@ -37,7 +37,7 @@ interface EventsTableReduxProps {
 }
 
 interface EventsTableDispatchProps {
-  updateLimitPagination: ActionCreator<{ limit: number }>;
+  updateLimitPagination: ActionCreator<{ limit: number; hostsType: hostsModel.HostsType }>;
 }
 
 type EventsTableProps = OwnProps & EventsTableReduxProps & EventsTableDispatchProps;
@@ -73,6 +73,7 @@ const EventsTableComponent = pure<EventsTableProps>(
     nextCursor,
     updateLimitPagination,
     startDate,
+    type,
   }) => (
     <LoadMoreTable
       columns={getEventsColumns(startDate)}
@@ -83,7 +84,9 @@ const EventsTableComponent = pure<EventsTableProps>(
       limit={limit}
       hasNextPage={hasNextPage}
       itemsPerRow={rowItems}
-      updateLimitPagination={newLimit => updateLimitPagination({ limit: newLimit })}
+      updateLimitPagination={newLimit =>
+        updateLimitPagination({ limit: newLimit, hostsType: type })
+      }
       title={
         <h3>
           {i18n.EVENTS} <EuiBadge color="hollow">{totalCount}</EuiBadge>

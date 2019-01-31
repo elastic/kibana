@@ -41,7 +41,7 @@ interface UncommonProcessTableReduxProps {
 }
 
 interface UncommonProcessTableDispatchProps {
-  updateLimitPagination: ActionCreator<{ limit: number }>;
+  updateLimitPagination: ActionCreator<{ limit: number; hostsType: hostsModel.HostsType }>;
 }
 
 type UncommonProcessTableProps = OwnProps &
@@ -78,6 +78,7 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
     nextCursor,
     updateLimitPagination,
     startDate,
+    type,
   }) => (
     <LoadMoreTable
       columns={getUncommonColumns(startDate)}
@@ -88,7 +89,9 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
       limit={limit}
       hasNextPage={hasNextPage}
       itemsPerRow={rowItems}
-      updateLimitPagination={newLimit => updateLimitPagination({ limit: newLimit })}
+      updateLimitPagination={newLimit =>
+        updateLimitPagination({ limit: newLimit, hostsType: type })
+      }
       title={
         <h3>
           {i18n.UNCOMMON_PROCESSES} <EuiBadge color="hollow">{totalCount}</EuiBadge>

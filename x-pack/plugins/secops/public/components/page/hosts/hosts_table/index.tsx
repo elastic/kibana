@@ -35,7 +35,7 @@ interface HostsTableReduxProps {
 }
 
 interface HostsTableDispatchProps {
-  updateLimitPagination: ActionCreator<{ limit: number }>;
+  updateLimitPagination: ActionCreator<{ limit: number; hostsType: hostsModel.HostsType }>;
 }
 
 type HostsTableProps = OwnProps & HostsTableReduxProps & HostsTableDispatchProps;
@@ -73,6 +73,7 @@ const HostsTableComponent = pure<HostsTableProps>(
     totalCount,
     nextCursor,
     updateLimitPagination,
+    type,
   }) => (
     <LoadMoreTable
       columns={getHostsColumns()}
@@ -83,7 +84,9 @@ const HostsTableComponent = pure<HostsTableProps>(
       limit={limit}
       hasNextPage={hasNextPage}
       itemsPerRow={rowItems}
-      updateLimitPagination={newLimit => updateLimitPagination({ limit: newLimit })}
+      updateLimitPagination={newLimit =>
+        updateLimitPagination({ limit: newLimit, hostsType: type })
+      }
       title={
         <h3>
           {i18n.HOSTS} <EuiBadge color="hollow">{totalCount}</EuiBadge>

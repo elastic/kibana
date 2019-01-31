@@ -37,7 +37,7 @@ interface AuthenticationTableReduxProps {
 }
 
 interface AuthenticationTableDispatchProps {
-  updateLimitPagination: ActionCreator<{ limit: number }>;
+  updateLimitPagination: ActionCreator<{ limit: number; hostsType: hostsModel.HostsType }>;
 }
 
 type AuthenticationTableProps = OwnProps &
@@ -74,6 +74,7 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
     nextCursor,
     updateLimitPagination,
     startDate,
+    type,
   }) => (
     <LoadMoreTable
       columns={getAuthenticationColumns(startDate)}
@@ -84,7 +85,9 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
       limit={limit}
       hasNextPage={hasNextPage}
       itemsPerRow={rowItems}
-      updateLimitPagination={newLimit => updateLimitPagination({ limit: newLimit })}
+      updateLimitPagination={newLimit =>
+        updateLimitPagination({ limit: newLimit, hostsType: type })
+      }
       title={
         <h3>
           {i18n.AUTHENTICATIONS} <EuiBadge color="hollow">{totalCount}</EuiBadge>
