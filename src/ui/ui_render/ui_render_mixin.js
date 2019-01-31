@@ -246,9 +246,6 @@ export function uiRenderMixin(kbnServer, server, config) {
     const csp = createCSPRuleString(config.get('csp.rules'), nonce);
     response.header('content-security-policy', csp);
 
-    const legacyCsp = createCSPRuleString(config.get('csp.legacyBrowserRules'), nonce);
-    response.header('x-content-security-policy', legacyCsp);
-
     return response;
   }
 

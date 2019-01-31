@@ -17,12 +17,7 @@
  * under the License.
  */
 
-import {
-  createCSPRuleString,
-  DEFAULT_CSP_LEGACY_BROWSER_RULES,
-  DEFAULT_CSP_RULES,
-  generateCSPNonce,
-} from './';
+import { createCSPRuleString, DEFAULT_CSP_RULES, generateCSPNonce } from './';
 
 // CSP rules aren't strictly additive, so any change can potentially expand or
 // restrict the policy in a way we consider a breaking change. For that reason,
@@ -44,8 +39,6 @@ Array [
   "child-src blob:",
 ]
 `);
-
-  expect(DEFAULT_CSP_LEGACY_BROWSER_RULES).toMatchInlineSnapshot(`Array []`);
 });
 
 test('generateCSPNonce() creates a 16 character string', async () => {

@@ -28,8 +28,6 @@ export const DEFAULT_CSP_RULES = Object.freeze([
   'child-src blob:',
 ]);
 
-export const DEFAULT_CSP_LEGACY_BROWSER_RULES = Object.freeze([]);
-
 export async function generateCSPNonce() {
   return (await randomBytesAsync(12)).toString('base64');
 }

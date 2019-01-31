@@ -28,7 +28,6 @@ export default function({ getService }) {
       const response = await supertest.get('/app/kibana');
 
       expect(response.headers).to.have.property('content-security-policy');
-      expect(response.headers).to.have.property('x-content-security-policy');
     });
 
     it('csp header does not allow all inline scripts', async () => {
