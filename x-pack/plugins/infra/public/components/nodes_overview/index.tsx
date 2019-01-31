@@ -107,7 +107,9 @@ export const NodesOverview = injectI18n(
               id: 'xpack.infra.waffle.checkNewDataButtonLabel',
               defaultMessage: 'Check for new data',
             })}
-            onRefetch={reload}
+            onRefetch={() => {
+              reload();
+            }}
             testString="noMetricsDataPrompt"
           />
         );
