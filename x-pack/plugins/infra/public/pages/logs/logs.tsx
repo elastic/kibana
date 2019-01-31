@@ -61,6 +61,7 @@ export const LogsPage = injectI18n(
               lastFailureMessage,
               load,
               logIndicesExist,
+              sourceId,
             }) => (
               <>
                 <SourceConfigurationFlyout />
@@ -83,7 +84,7 @@ export const LogsPage = injectI18n(
                               />
                             )}
                           </WithFlyoutOptions>
-                          <WithLogFlyout>
+                          <WithLogFlyout sourceId={sourceId}>
                             {({ flyoutItem, hideFlyout, loading }) => (
                               <LogFlyout
                                 setFilter={applyFilterQueryFromKueryExpression}

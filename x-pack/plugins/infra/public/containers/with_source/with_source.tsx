@@ -80,6 +80,7 @@ const createContainerProps = memoizeLast((sourceId: string, apolloClient: Apollo
     ...createStatusSelectors(({ operationStatusHistory }: State) => operationStatusHistory),
     getConfiguration: () => state =>
       (state && state.source && state.source.configuration) || undefined,
+    getSourceId: () => () => sourceId,
     getLogIndicesExist: () => state =>
       (state && state.source && state.source.status && state.source.status.logIndicesExist) ||
       undefined,
@@ -216,6 +217,7 @@ interface WithSourceProps {
     logIndicesExist?: boolean;
     metricAlias?: string;
     metricIndicesExist?: boolean;
+    sourceId: string;
     update: (changes: UpdateSourceInput[]) => Promise<any>;
     version?: number;
   }>;
@@ -235,6 +237,7 @@ export const WithSource: React.SFC<WithSourceProps> = ({ children }) => (
           getLastFailureMessage,
           getLogIndicesExist,
           getMetricIndicesExist,
+          getSourceId,
           getVersion,
           load,
           update,
@@ -250,6 +253,7 @@ export const WithSource: React.SFC<WithSourceProps> = ({ children }) => (
             load,
             logIndicesExist: getLogIndicesExist(),
             metricIndicesExist: getMetricIndicesExist(),
+            sourceId: getSourceId(),
             update,
             version: getVersion(),
           })

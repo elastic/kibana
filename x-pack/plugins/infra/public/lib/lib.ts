@@ -175,7 +175,6 @@ export interface InfraWaffleMapOptions {
 }
 
 export interface InfraOptions {
-  sourceId: string;
   timerange: InfraTimerangeInput;
   wafflemap: InfraWaffleMapOptions;
 }
