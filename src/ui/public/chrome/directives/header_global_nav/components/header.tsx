@@ -58,6 +58,7 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import chrome, { NavLink } from 'ui/chrome';
 import { RecentlyAccessedHistoryItem } from 'ui/persisted_log';
 import { ChromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
+import { relativeToAbsolute } from 'ui/url/relative_to_absolute';
 import { NavControlSide } from '../';
 import { Breadcrumb } from '../../../../../../core/public/chrome';
 
@@ -72,6 +73,20 @@ interface Props {
   intl: InjectedIntl;
 }
 
+function extendRecentlyAccessedHistoryItem(
+  navLinks: NavLink[],
+  recentlyAccessed: RecentlyAccessedHistoryItem
+) {
+  const href = relativeToAbsolute(chrome.addBasePath(recentlyAccessed.link));
+  const navLink = navLinks.find(nl => href.startsWith(nl.subUrlBase));
+
+  return {
+    ...recentlyAccessed,
+    href,
+    euiIconType: navLink ? navLink.euiIconType : undefined,
+  };
+}
+
 interface State {
   isCollapsed: boolean;
   flyoutIsCollapsed: boolean;
@@ -83,7 +98,7 @@ interface State {
   outsideClickDisabled: boolean;
   isManagingFocus: boolean;
   navLinks: NavLink[];
-  recentlyAccessed: RecentlyAccessedHistoryItem[];
+  recentlyAccessed: Array<ReturnType<typeof extendRecentlyAccessedHistoryItem>>;
 }
 
 class HeaderUI extends Component<Props, State> {
@@ -114,7 +129,12 @@ class HeaderUI extends Component<Props, State> {
       this.props.recentlyAccessed$
     ).subscribe({
       next: ([navLinks, recentlyAccessed]) => {
-        this.setState({ navLinks, recentlyAccessed });
+        this.setState({
+          navLinks,
+          recentlyAccessed: recentlyAccessed.map(ra =>
+            extendRecentlyAccessedHistoryItem(navLinks, ra)
+          ),
+        });
       },
     });
   }
@@ -244,8 +264,8 @@ class HeaderUI extends Component<Props, State> {
               isCollapsed={this.state.flyoutIsCollapsed}
               listItems={recentlyAccessed.map(item => ({
                 label: item.label,
-                href: chrome.addBasePath(item.link),
-                iconType: undefined,
+                href: item.href,
+                iconType: item.euiIconType,
                 size: 's',
                 style: { color: 'inherit' },
                 'aria-label': item.label,
