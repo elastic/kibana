@@ -26,6 +26,8 @@ import { InjectedMetadataService } from '../injected_metadata';
 import { FatalErrorsScreen } from './fatal_errors_screen';
 import { ErrorInfo, getErrorInfo } from './get_error_info';
 
+import { I18nProvider } from '@kbn/i18n/react';
+
 export interface FatalErrorsParams {
   rootDomElement: HTMLElement;
   injectedMetadata: InjectedMetadataService;
@@ -85,11 +87,13 @@ export class FatalErrorsService {
     this.params.rootDomElement.appendChild(container);
 
     render(
-      <FatalErrorsScreen
-        buildNumber={this.params.injectedMetadata.getKibanaBuildNumber()}
-        kibanaVersion={this.params.injectedMetadata.getKibanaVersion()}
-        errorInfo$={this.errorInfo$}
-      />,
+      <I18nProvider>
+        <FatalErrorsScreen
+          buildNumber={this.params.injectedMetadata.getKibanaBuildNumber()}
+          kibanaVersion={this.params.injectedMetadata.getKibanaVersion()}
+          errorInfo$={this.errorInfo$}
+        />
+      </I18nProvider>,
       container
     );
   }

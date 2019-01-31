@@ -215,7 +215,7 @@ app.directive('dashboardApp', function ($injector) {
             dashboardStateManager.getPanels().find((panel) => panel.panelIndex === panelIndex);
       };
 
-      $scope.updateQueryAndFetch = function (query) {
+      $scope.updateQueryAndFetch = function ({ query }) {
         const oldQuery = $scope.model.query;
         if (_.isEqual(oldQuery, query)) {
           // The user can still request a reload in the query bar, even if the
@@ -236,7 +236,9 @@ app.directive('dashboardApp', function ($injector) {
         $scope.indexPatterns = dashboardStateManager.getPanelIndexPatterns();
       };
 
-      $scope.$watch('model.query', $scope.updateQueryAndFetch);
+      $scope.$watch('model.query', (query) => {
+        $scope.updateQueryAndFetch({ query });
+      });
 
       $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
         dashboardStateManager.handleTimeChange(timefilter.getTime());
