@@ -86,7 +86,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
       <Fragment>
         <EuiText size="s">
           <p>
-            Visit our documentation website for more information on latest updates and how-to's.
+            Get updates, information, and answers in our documentation.
           </p>
         </EuiText>
 
