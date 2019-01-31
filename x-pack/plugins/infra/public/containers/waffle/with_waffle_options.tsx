@@ -25,7 +25,7 @@ const selectOptionsUrlState = createSelector(
   waffleOptionsSelectors.selectGroupBy,
   waffleOptionsSelectors.selectNodeType,
   waffleOptionsSelectors.selectCustomOptions,
-  (metric, groupBy, nodeType, customOptions) => ({
+  (metric, view, groupBy, nodeType, customOptions) => ({
     metric,
     groupBy,
     nodeType,
