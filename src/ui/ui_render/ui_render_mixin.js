@@ -249,7 +249,6 @@ export function uiRenderMixin(kbnServer, server, config) {
       `script-src 'unsafe-eval' 'nonce-${nonce}'`,
       'worker-src blob:',
       'child-src blob:',
-      'img-src * data: blob:',
     ];
 
     response.header('content-security-policy', csp.join(';'));
