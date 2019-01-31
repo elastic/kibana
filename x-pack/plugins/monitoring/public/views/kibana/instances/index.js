@@ -11,7 +11,7 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
 import { getPageData } from './get_page_data';
 import template from './index.html';
-import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer, EuiLink } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer, EuiLink } from '@elastic/eui';
 import { ClusterStatus } from '../../../components/kibana/cluster_status';
 import { EuiMonitoringTable } from '../../../components/table';
 import { KibanaStatusIcon } from '../../../components/kibana/status_icon';
@@ -148,9 +148,11 @@ uiRoutes.when('/kibana/instances', {
           <I18nProvider>
             <EuiPage>
               <EuiPageBody>
-                <EuiPageContent>
+                <EuiPanel>
                   <ClusterStatus stats={$scope.pageData.clusterStatus} />
-                  <EuiSpacer size="m"/>
+                </EuiPanel>
+                <EuiSpacer size="m" />
+                <EuiPageContent>
                   <EuiMonitoringTable
                     className="kibanaInstancesTable"
                     rows={dataFlattened}
