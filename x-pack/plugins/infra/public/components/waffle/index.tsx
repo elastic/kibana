@@ -24,6 +24,7 @@ import {
 import { KueryFilterQuery } from '../../store/local/waffle_filter';
 import { createFormatter } from '../../utils/formatters';
 import { AutoSizer } from '../auto_sizer';
+import { NoData } from '../empty_states';
 import { InfraLoadingPanel } from '../loading';
 import { GroupOfGroups } from './group_of_groups';
 import { GroupOfNodes } from './group_of_nodes';
@@ -114,40 +115,21 @@ export const Waffle = injectI18n(
         );
       } else if (!loading && map && map.length === 0) {
         return (
-          <CenteredEmptyPrompt
-            title={
-              <h2>
-                <FormattedMessage
-                  id="xpack.infra.waffle.noDataTitle"
-                  defaultMessage="There is no data to display."
-                />
-              </h2>
-            }
-            titleSize="m"
-            body={
-              <p>
-                <FormattedMessage
-                  id="xpack.infra.waffle.noDataDescription"
-                  defaultMessage="Try adjusting your time or filter."
-                />
-              </p>
-            }
-            actions={
-              <EuiButton
-                iconType="refresh"
-                color="primary"
-                fill
-                onClick={() => {
-                  reload();
-                }}
-              >
-                <FormattedMessage
-                  id="xpack.infra.waffle.checkNewDataButtonLabel"
-                  defaultMessage="Check for new data"
-                />
-              </EuiButton>
-            }
-            data-test-subj="noMetricsDataPrompt"
+          <NoData
+            titleText={intl.formatMessage({
+              id: 'xpack.infra.waffle.noDataTitle',
+              defaultMessage: 'There is no data to display.',
+            })}
+            bodyText={intl.formatMessage({
+              id: 'xpack.infra.waffle.noDataDescription',
+              defaultMessage: 'Try adjusting your time or filter.',
+            })}
+            refetchText={intl.formatMessage({
+              id: 'xpack.infra.waffle.checkNewDataButtonLabel',
+              defaultMessage: 'Check for new data',
+            })}
+            onRefetch={reload}
+            testString="noMetricsDataPrompt"
           />
         );
       }
