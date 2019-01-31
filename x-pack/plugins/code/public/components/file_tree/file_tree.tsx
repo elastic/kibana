@@ -139,7 +139,7 @@ export class CodeFileTree extends React.Component<Props> {
       forceOpen,
       onClick: () => void 0,
     };
-    if (node.type === FileTreeItemType.Directory && Number(node.childrenCount) > 0) {
+    if (node.type === FileTreeItemType.Directory && Number(node.childrenCount) > 0 && forceOpen) {
       const nodes = this.flattenDirectory(node);
       const length = nodes.length;
       if (length > 1 && !(this.props.match.params.path === node.path)) {
