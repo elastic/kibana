@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { difference } from 'lodash';
+import { difference, get, set } from 'lodash';
 import { transformDeprecations } from './transform_deprecations';
 import { unset, formatListAsProse, getFlattenedObject } from '../../utils';
 import { getTransform } from '../../deprecation';
@@ -39,12 +39,15 @@ async function getUnusedConfigKeys(
     const { spec } = plugins[i];
     const transform = await getTransform(spec);
     const prefix = spec.getConfigPrefix();
-    const pluginSettings = settings[prefix];
+
+    // nested plugin prefixes (a.b) translate to nested objects
+    const pluginSettings = get(settings, prefix);
     if (pluginSettings) {
-      settings[prefix] = transform(pluginSettings);
+      // flattened settings are expected to be converted to nested objects
+      // a.b = true => { a: { b: true }}
+      set(settings, prefix, transform(pluginSettings));
     }
   }
-
   // remove config values from disabled plugins
   for (const spec of disabledPluginSpecs) {
     unset(settings, spec.getConfigPrefix());
