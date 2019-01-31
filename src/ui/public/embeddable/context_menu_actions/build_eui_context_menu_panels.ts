@@ -19,6 +19,7 @@
 
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import _ from 'lodash';
+import { uiCapabilities } from 'ui/capabilities';
 import { ContainerState, ContextMenuAction, ContextMenuPanel, Embeddable } from 'ui/embeddable';
 
 /**
@@ -57,7 +58,7 @@ function buildEuiContextMenuPanelItemsAndChildPanels({
   const childPanels: EuiContextMenuPanelDescriptor[] = [];
   const actionsForPanel = getActionsForPanel(contextMenuPanelId, actions);
   actionsForPanel.forEach(action => {
-    const isVisible = action.isVisible({ embeddable, containerState });
+    const isVisible = action.isVisible({ embeddable, containerState, uiCapabilities });
     if (!isVisible) {
       return;
     }
@@ -109,7 +110,7 @@ export function buildEuiContextMenuPanels({
     id: contextMenuPanel.id,
     title: contextMenuPanel.title,
     items: [],
-    content: contextMenuPanel.getContent({ embeddable, containerState }),
+    content: contextMenuPanel.getContent({ embeddable, containerState, uiCapabilities }),
   };
   const contextMenuPanels = [euiContextMenuPanel];
 
@@ -144,20 +145,20 @@ function convertPanelActionToContextMenuItem({
     name: action.displayName,
     icon: action.icon,
     panel: _.get(action, 'childContextMenuPanel.id'),
-    disabled: action.isDisabled({ embeddable, containerState }),
+    disabled: action.isDisabled({ embeddable, containerState, uiCapabilities }),
     'data-test-subj': `dashboardPanelAction-${action.id}`,
   };
 
   if (action.onClick) {
     menuPanelItem.onClick = () => {
       if (action.onClick) {
-        action.onClick({ embeddable, containerState });
+        action.onClick({ embeddable, containerState, uiCapabilities });
       }
     };
   }
 
   if (action.getHref) {
-    menuPanelItem.href = action.getHref({ embeddable, containerState });
+    menuPanelItem.href = action.getHref({ embeddable, containerState, uiCapabilities });
   }
 
   return menuPanelItem;
