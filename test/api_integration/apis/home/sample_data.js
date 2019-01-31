@@ -27,6 +27,11 @@ export default function ({ getService }) {
   const MILLISECOND_IN_WEEK = 1000 * 60 * 60 * 24 * 7;
 
   describe('sample data apis', () => {
+    before(async () => {
+      await es.indices.delete({
+        index: 'kibana_sample_data_*'
+      });
+    });
 
     describe('list', () => {
       it('should return list of sample data sets with installed status', async () => {
@@ -59,11 +64,11 @@ export default function ({ getService }) {
       });
 
       it('should load elasticsearch index containing sample data with dates relative to current time', async () => {
-        const resp = await es.search({
+        const { body } = await es.search({
           index: 'kibana_sample_data_flights'
         });
 
-        const doc = resp.hits.hits[0];
+        const doc = body.hits.hits[0];
         const docMilliseconds = Date.parse(doc._source.timestamp);
         const nowMilliseconds = Date.now();
         const delta = Math.abs(nowMilliseconds - docMilliseconds);
@@ -77,11 +82,11 @@ export default function ({ getService }) {
             .post(`/api/sample_data/flights?now=${nowString}`)
             .set('kbn-xsrf', 'kibana');
 
-          const resp = await es.search({
+          const { body } = await es.search({
             index: 'kibana_sample_data_flights'
           });
 
-          const doc = resp.hits.hits[0];
+          const doc = body.hits.hits[0];
           const docMilliseconds = Date.parse(doc._source.timestamp);
           const nowMilliseconds = Date.parse(nowString);
           const delta = Math.abs(nowMilliseconds - docMilliseconds);
@@ -99,10 +104,10 @@ export default function ({ getService }) {
       });
 
       it('should remove elasticsearch index containing sample data', async () => {
-        const resp = await es.indices.exists({
+        const { body } = await es.indices.exists({
           index: 'kibana_sample_data_flights'
         });
-        expect(resp).to.be(false);
+        expect(body).to.be(false);
       });
     });
   });

@@ -141,7 +141,7 @@ function callAPI(client, endpoint, clientParams = {}, options = {}) {
     ...esParams
   } = clientParams;
   return Bluebird.resolve(api.call(apiContext, esParams, { ignore, headers, maxRetries, requestTimeout }))
-    .then((result) => (result && result.body) ? result.body : result)
+    .then(result => result.body)
     .catch((err) => {
       if (!wrap401Errors || err.statusCode !== 401) {
         return Promise.reject(err);
