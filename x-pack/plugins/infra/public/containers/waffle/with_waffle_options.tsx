@@ -22,6 +22,7 @@ import { UrlStateContainer } from '../../utils/url_state';
 
 const selectOptionsUrlState = createSelector(
   waffleOptionsSelectors.selectMetric,
+  waffleOptionsSelectors.selectView,
   waffleOptionsSelectors.selectGroupBy,
   waffleOptionsSelectors.selectNodeType,
   waffleOptionsSelectors.selectCustomOptions,
