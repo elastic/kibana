@@ -201,11 +201,11 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   input_control_vis: visState => {
     return `input_control_vis ${prepareJson('visConfig', visState.params)}`;
   },
-  metrics: (visState, schemas, uiState) => {
-    const params = prepareJson('params', visState.params);
-    const uiState = prepareJson('uiState', uiState);
+  metrics: (visState, schemas, uiState = {}) => {
+    const paramsJson = prepareJson('params', visState.params);
+    const uiStateJson = prepareJson('uiState', uiState);
 
-    return `tsvb ${params} ${uiState}`;
+    return `tsvb ${paramsJson} ${uiStateJson}`;
   },
   timelion: visState => {
     const expression = prepareString('expression', visState.params.expression);
