@@ -21,6 +21,12 @@
     width: 100%;
   }
 
+  .panel-content-isLoading {
+    // completely center the loading indicator
+    justify-content: center;
+    align-items: center;
+  }
+
   /**
    * 1. We want the kbnDocTable__container to scroll only when embedded in a dashboard panel
    * 2. Fix overflow of vis's specifically for inside dashboard panels, lets the panel decide the overflow
@@ -41,11 +47,12 @@
 }
 
 .dshPanel--editing {
+  border-style: dashed;
+  border-color: $euiColorMediumShade;
   transition: all $euiAnimSpeedFast $euiAnimSlightResistance;
 
   &:hover,
   &:focus {
-    border-color: $euiColorPrimary;
     @include euiSlightShadowHover;
   }
 }
@@ -69,57 +76,35 @@
 // HEADER
 
 .dshPanel__header {
-  padding: $euiSizeS;
   flex: 0 0 auto;
-  white-space: nowrap;
   display: flex;
-  border: none;
-  transition: background-color $euiAnimSpeedFast $euiAnimSlightResistance;
 }
 
 .dshPanel__title {
-  font-size: $euiFontSizeS;
-  color: $euiColorDarkShade;
-  transition: color $euiAnimSpeedFast $euiAnimSlightResistance;
-  flex: 1 1 auto;
   @include euiTextTruncate;
+  @include euiTitle('xxxs');
 
-  // flexbox fix for IE10
-  // http://stackoverflow.com/questions/22008135/internet-explorer-10-does-not-apply-flexbox-on-inline-elements
-  display: inline-block;
+  &:not(:empty) {
+    padding: $euiSizeXS $euiSizeS 0;
+  }
 }
 
-.dshPanel--editing:hover {
-  .dshPanel__header {
-    background-color: rgba($euiColorFullShade,.05) !important;
+.dshPanel--editing {
+  .dshPanel__dragger:hover {
     cursor: move;
   }
-
-  .dshPanel__title:hover {
-    color: $euiColorPrimary;
-  }
 }
 
-/**
-  * 1. Use opacity to make this element accessible to screen readers and keyboard.
-  * 2. Show on focus to enable keyboard accessibility.
-  */
+.dshPanel__dragger:not(.dshPanel__title) {
+  flex-grow: 1;
+}
+
 .dshPanel__header--floater {
-  opacity: 0; /* 1 */
   position: absolute;
-  right: 1px;
-  top: 1px;
-  background-color: $euiColorEmptyShade;
+  right: 0;
+  top: 0;
+  left: 0;
   z-index: $euiZLevel1;
-  transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance;
-
-  &:focus { /* 2 */
-    opacity: 1;
-  }
-}
-
-.dshPanel:hover .dshPanel__header--floater {
-  opacity: 1;
 }
 
 // OPTIONS MENU
@@ -129,6 +114,10 @@
   * 2. Show on focus to enable keyboard accessibility.
   */
 .dshPanel_optionsMenuButton {
+  background-color: transparentize($euiColorEmptyShade, .6);
+  border-radius: $euiBorderRadius;
+  position: relative;
+  top: 2px;
   opacity: 0; /* 1 */
 
   &:focus { /* 2 */
