@@ -76,8 +76,10 @@ exports[`render correctly 1`] = `
         >
           <div
             className="code-file-node"
+            onClick={[Function]}
+            role="button"
           >
-            <span
+            <i
               className="sc-bdVaJa fsxEnI"
               onClick={[Function]}
             />
@@ -85,7 +87,6 @@ exports[`render correctly 1`] = `
               className="euiIcon euiIcon--medium"
               focusable="false"
               height="16"
-              onClick={[Function]}
               style={null}
               viewBox="0 0 16 16"
               width="16"
@@ -97,7 +98,6 @@ exports[`render correctly 1`] = `
             </svg>
             <span
               className="sc-htpNat hyFNl"
-              onClick={[Function]}
             >
               android/
             </span>
@@ -108,8 +108,10 @@ exports[`render correctly 1`] = `
         >
           <div
             className="code-file-node"
+            onClick={[Function]}
+            role="button"
           >
-            <span
+            <i
               className="sc-bdVaJa fsxEnI"
               onClick={[Function]}
             />
@@ -117,7 +119,6 @@ exports[`render correctly 1`] = `
               className="euiIcon euiIcon--medium"
               focusable="false"
               height="16"
-              onClick={[Function]}
               style={null}
               viewBox="0 0 16 16"
               width="16"
@@ -129,7 +130,6 @@ exports[`render correctly 1`] = `
             </svg>
             <span
               className="sc-htpNat hyFNl"
-              onClick={[Function]}
             >
               futures/
             </span>
@@ -140,8 +140,10 @@ exports[`render correctly 1`] = `
         >
           <div
             className="code-file-node"
+            onClick={[Function]}
+            role="button"
           >
-            <span
+            <i
               className="sc-bwzfXH kVxRUe sc-bdVaJa fsxEnI"
               onClick={[Function]}
             />
@@ -149,7 +151,6 @@ exports[`render correctly 1`] = `
               className="euiIcon euiIcon--medium"
               focusable="false"
               height="16"
-              onClick={[Function]}
               style={null}
               viewBox="0 0 16 16"
               width="16"
@@ -161,7 +162,6 @@ exports[`render correctly 1`] = `
             </svg>
             <span
               className="sc-htpNat hyFNl"
-              onClick={[Function]}
             >
               guava/
             </span>
@@ -174,8 +174,10 @@ exports[`render correctly 1`] = `
             >
               <div
                 className="code-file-node"
+                onClick={[Function]}
+                role="button"
               >
-                <span
+                <i
                   className="sc-bdVaJa fsxEnI"
                   onClick={[Function]}
                 />
@@ -183,7 +185,6 @@ exports[`render correctly 1`] = `
                   className="euiIcon euiIcon--medium"
                   focusable="false"
                   height="16"
-                  onClick={[Function]}
                   style={null}
                   viewBox="0 0 16 16"
                   width="16"
@@ -195,7 +196,6 @@ exports[`render correctly 1`] = `
                 </svg>
                 <span
                   className="sc-htpNat hyFNl"
-                  onClick={[Function]}
                 >
                   javadoc-link/
                 </span>
@@ -241,8 +241,10 @@ exports[`render correctly 1`] = `
             >
               <div
                 className="code-active-file-node"
+                onClick={[Function]}
+                role="button"
               >
-                <span
+                <i
                   className="sc-bwzfXH kVxRUe sc-bdVaJa fsxEnI"
                   onClick={[Function]}
                 />
@@ -250,7 +252,6 @@ exports[`render correctly 1`] = `
                   className="euiIcon euiIcon--medium"
                   focusable="false"
                   height="16"
-                  onClick={[Function]}
                   style={null}
                   viewBox="0 0 16 16"
                   width="16"
@@ -262,7 +263,6 @@ exports[`render correctly 1`] = `
                 </svg>
                 <span
                   className="sc-htpNat hyFNl"
-                  onClick={[Function]}
                 >
                   src/com/google/
                 </span>
@@ -275,8 +275,10 @@ exports[`render correctly 1`] = `
                 >
                   <div
                     className="code-file-node"
+                    onClick={[Function]}
+                    role="button"
                   >
-                    <span
+                    <i
                       className="sc-bdVaJa fsxEnI"
                       onClick={[Function]}
                     />
@@ -284,7 +286,6 @@ exports[`render correctly 1`] = `
                       className="euiIcon euiIcon--medium"
                       focusable="false"
                       height="16"
-                      onClick={[Function]}
                       style={null}
                       viewBox="0 0 16 16"
                       width="16"
@@ -296,7 +297,6 @@ exports[`render correctly 1`] = `
                     </svg>
                     <span
                       className="sc-htpNat hyFNl"
-                      onClick={[Function]}
                     >
                       common/
                     </span>
@@ -307,8 +307,10 @@ exports[`render correctly 1`] = `
                 >
                   <div
                     className="code-file-node"
+                    onClick={[Function]}
+                    role="button"
                   >
-                    <span
+                    <i
                       className="sc-bdVaJa fsxEnI"
                       onClick={[Function]}
                     />
@@ -316,7 +318,6 @@ exports[`render correctly 1`] = `
                       className="euiIcon euiIcon--medium"
                       focusable="false"
                       height="16"
-                      onClick={[Function]}
                       style={null}
                       viewBox="0 0 16 16"
                       width="16"
@@ -328,9 +329,8 @@ exports[`render correctly 1`] = `
                     </svg>
                     <span
                       className="sc-htpNat hyFNl"
-                      onClick={[Function]}
                     >
-                      thirdparty/publicsuffix/
+                      thirdparty/
                     </span>
                   </div>
                 </div>
@@ -343,8 +343,10 @@ exports[`render correctly 1`] = `
         >
           <div
             className="code-file-node"
+            onClick={[Function]}
+            role="button"
           >
-            <span
+            <i
               className="sc-bdVaJa fsxEnI"
               onClick={[Function]}
             />
@@ -352,7 +354,6 @@ exports[`render correctly 1`] = `
               className="euiIcon euiIcon--medium"
               focusable="false"
               height="16"
-              onClick={[Function]}
               style={null}
               viewBox="0 0 16 16"
               width="16"
@@ -364,7 +365,6 @@ exports[`render correctly 1`] = `
             </svg>
             <span
               className="sc-htpNat hyFNl"
-              onClick={[Function]}
             >
               guava-bom/
             </span>
@@ -375,8 +375,10 @@ exports[`render correctly 1`] = `
         >
           <div
             className="code-file-node"
+            onClick={[Function]}
+            role="button"
           >
-            <span
+            <i
               className="sc-bdVaJa fsxEnI"
               onClick={[Function]}
             />
@@ -384,7 +386,6 @@ exports[`render correctly 1`] = `
               className="euiIcon euiIcon--medium"
               focusable="false"
               height="16"
-              onClick={[Function]}
               style={null}
               viewBox="0 0 16 16"
               width="16"
@@ -396,7 +397,6 @@ exports[`render correctly 1`] = `
             </svg>
             <span
               className="sc-htpNat hyFNl"
-              onClick={[Function]}
             >
               guava-gwt/
             </span>
@@ -407,8 +407,10 @@ exports[`render correctly 1`] = `
         >
           <div
             className="code-file-node"
+            onClick={[Function]}
+            role="button"
           >
-            <span
+            <i
               className="sc-bdVaJa fsxEnI"
               onClick={[Function]}
             />
@@ -416,7 +418,6 @@ exports[`render correctly 1`] = `
               className="euiIcon euiIcon--medium"
               focusable="false"
               height="16"
-              onClick={[Function]}
               style={null}
               viewBox="0 0 16 16"
               width="16"
@@ -428,7 +429,6 @@ exports[`render correctly 1`] = `
             </svg>
             <span
               className="sc-htpNat hyFNl"
-              onClick={[Function]}
             >
               guava-testlib/
             </span>
@@ -439,8 +439,10 @@ exports[`render correctly 1`] = `
         >
           <div
             className="code-file-node"
+            onClick={[Function]}
+            role="button"
           >
-            <span
+            <i
               className="sc-bdVaJa fsxEnI"
               onClick={[Function]}
             />
@@ -448,7 +450,6 @@ exports[`render correctly 1`] = `
               className="euiIcon euiIcon--medium"
               focusable="false"
               height="16"
-              onClick={[Function]}
               style={null}
               viewBox="0 0 16 16"
               width="16"
@@ -460,7 +461,6 @@ exports[`render correctly 1`] = `
             </svg>
             <span
               className="sc-htpNat hyFNl"
-              onClick={[Function]}
             >
               guava-tests/
             </span>
@@ -471,8 +471,10 @@ exports[`render correctly 1`] = `
         >
           <div
             className="code-file-node"
+            onClick={[Function]}
+            role="button"
           >
-            <span
+            <i
               className="sc-bdVaJa fsxEnI"
               onClick={[Function]}
             />
@@ -480,7 +482,6 @@ exports[`render correctly 1`] = `
               className="euiIcon euiIcon--medium"
               focusable="false"
               height="16"
-              onClick={[Function]}
               style={null}
               viewBox="0 0 16 16"
               width="16"
@@ -492,7 +493,6 @@ exports[`render correctly 1`] = `
             </svg>
             <span
               className="sc-htpNat hyFNl"
-              onClick={[Function]}
             >
               refactorings/
             </span>
@@ -503,8 +503,10 @@ exports[`render correctly 1`] = `
         >
           <div
             className="code-file-node"
+            onClick={[Function]}
+            role="button"
           >
-            <span
+            <i
               className="sc-bdVaJa fsxEnI"
               onClick={[Function]}
             />
@@ -512,7 +514,6 @@ exports[`render correctly 1`] = `
               className="euiIcon euiIcon--medium"
               focusable="false"
               height="16"
-              onClick={[Function]}
               style={null}
               viewBox="0 0 16 16"
               width="16"
@@ -524,7 +525,6 @@ exports[`render correctly 1`] = `
             </svg>
             <span
               className="sc-htpNat hyFNl"
-              onClick={[Function]}
             >
               util/
             </span>
