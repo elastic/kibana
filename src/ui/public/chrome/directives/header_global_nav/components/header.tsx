@@ -55,10 +55,10 @@ import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderNavControls } from './header_nav_controls';
 
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import chrome from 'ui/chrome';
+import chrome, { NavLink } from 'ui/chrome';
 import { RecentlyAccessedHistoryItem } from 'ui/persisted_log';
 import { ChromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
-import { NavControlSide, NavLink } from '../';
+import { NavControlSide } from '../';
 import { Breadcrumb } from '../../../../../../core/public/chrome';
 
 interface Props {

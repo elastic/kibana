@@ -17,16 +17,28 @@
  * under the License.
  */
 
-import './header_global_nav';
+import { IconType } from '@elastic/eui';
+import * as Rx from 'rxjs';
 
-export enum NavControlSide {
-  Left = 'left',
-  Right = 'right',
+import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
+
+export interface NavLink {
+  title: string;
+  url: string;
+  subUrlBase: string;
+  id: string;
+  euiIconType: IconType;
+  active: boolean;
+  lastSubUrl?: string;
+  hidden?: boolean;
 }
 
-export interface NavControl {
-  name: string;
-  order: number;
-  side: NavControlSide;
-  render: (targetDomElement: HTMLDivElement) => (() => void) | void;
+export interface ChromeNavLinks {
+  getNavLinks$(): Rx.Observable<NavLink>;
+  getNavLinks(): NavLink[];
+  navLinkExists(id: string): boolean;
+  getNavLinkById(id: string): NavLink;
+  showOnlyById(id: string): void;
+  untrackNavLinksForDeletedSavedObjects(deletedIds: string[]): void;
+  trackSubUrlForApp(linkId: string, parsedKibanaUrl: KibanaParsedUrl): void;
 }
