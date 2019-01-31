@@ -47,6 +47,7 @@ const badgeExtensions = [
     label: i18n.translate('xpack.idxMgmt.frozenBadgeLabel', {
       defaultMessage: 'Frozen',
     }),
+    filterExpression: 'isFrozen:true',
     color: 'primary'
   }
 ];

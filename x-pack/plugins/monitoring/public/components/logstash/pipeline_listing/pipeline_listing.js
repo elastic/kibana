@@ -13,10 +13,11 @@ import { ClusterStatus } from '../cluster_status';
 import { Sparkline } from 'plugins/monitoring/components/sparkline';
 import { EuiMonitoringTable } from '../../table';
 import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 class PipelineListingUI extends Component {
-  tooltipXValueFormatter(xValue) {
-    return moment(xValue).format(this.props.dateFormat);
+  tooltipXValueFormatter(xValue, dateFormat) {
+    return moment(xValue).format(dateFormat);
   }
 
   tooltipYValueFormatter(yValue, format, units) {
@@ -24,12 +25,14 @@ class PipelineListingUI extends Component {
   }
 
   getColumns() {
-    const { onBrush } = this.props;
+    const { onBrush, dateFormat } = this.props;
     const { kbnUrl, scope } = this.props.angular;
 
     return [
       {
-        name: 'ID',
+        name: i18n.translate('xpack.monitoring.logstash.pipelines.idTitle', {
+          defaultMessage: 'ID'
+        }),
         field: 'id',
         sortable: true,
         render: (id) => (
@@ -46,7 +49,9 @@ class PipelineListingUI extends Component {
         )
       },
       {
-        name: 'Events Emitted Rate',
+        name: i18n.translate('xpack.monitoring.logstash.pipelines.eventsEmittedRateTitle', {
+          defaultMessage: 'Events Emitted Rate'
+        }),
         field: 'latestThroughput',
         sortable: true,
         render: (value, pipeline) => {
@@ -61,7 +66,7 @@ class PipelineListingUI extends Component {
                   series={throughput.data}
                   onBrush={onBrush}
                   tooltip={{
-                    xValueFormatter: value => this.tooltipXValueFormatter(value),
+                    xValueFormatter: value => this.tooltipXValueFormatter(value, dateFormat),
                     yValueFormatter: partialRight(this.tooltipYValueFormatter, throughput.metric.format, throughput.metric.units)
                   }}
                   options={{ xaxis: throughput.timeRange }}
@@ -78,7 +83,9 @@ class PipelineListingUI extends Component {
         }
       },
       {
-        name: 'Number of Nodes',
+        name: i18n.translate('xpack.monitoring.logstash.pipelines.numberOfNodesTitle', {
+          defaultMessage: 'Number of Nodes'
+        }),
         field: 'latestNodesCount',
         sortable: true,
         render: (value, pipeline) => {
@@ -93,7 +100,7 @@ class PipelineListingUI extends Component {
                   series={nodesCount.data}
                   onBrush={onBrush}
                   tooltip={{
-                    xValueFormatter: this.tooltipXValueFormatter,
+                    xValueFormatter: value => this.tooltipXValueFormatter(value, dateFormat),
                     yValueFormatter: partialRight(this.tooltipYValueFormatter, nodesCount.metric.format, nodesCount.metric.units)
                   }}
                   options={{ xaxis: nodesCount.timeRange }}

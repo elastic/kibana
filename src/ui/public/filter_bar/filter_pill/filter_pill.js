@@ -23,7 +23,7 @@ import { uiModules } from '../../modules';
 
 const module = uiModules.get('kibana');
 
-module.directive('filterPill', function () {
+module.directive('filterPill', function (i18n) {
   return {
     template,
     restrict: 'E',
@@ -51,6 +51,20 @@ module.directive('filterPill', function () {
         return _.has(this.filter, 'meta.controlledBy');
       };
 
+      this.i18n = {
+        enableFilterAriaLabel: i18n('common.ui.filterBar.filterPill.enableFilterAriaLabel', { defaultMessage: 'Enable filter' }),
+        enableFilterTooltip: i18n('common.ui.filterBar.filterPill.enableFilterTooltip', { defaultMessage: 'Enable filter' }),
+        disableFilterAriaLabel: i18n('common.ui.filterBar.filterPill.disableFilterAriaLabel', { defaultMessage: 'Disable filter' }),
+        disableFilterTooltip: i18n('common.ui.filterBar.filterPill.disableFilterTooltip', { defaultMessage: 'Disable filter' }),
+        pinFilterAriaLabel: i18n('common.ui.filterBar.filterPill.pinFilterAriaLabel', { defaultMessage: 'Pin filter' }),
+        pinFilterTooltip: i18n('common.ui.filterBar.filterPill.pinFilterTooltip', { defaultMessage: 'Pin filter' }),
+        unpinFilterAriaLabel: i18n('common.ui.filterBar.filterPill.unpinFilterAriaLabel', { defaultMessage: 'Unpin filter' }),
+        unpinFilterTooltip: i18n('common.ui.filterBar.filterPill.unpinFilterTooltip', { defaultMessage: 'Unpin filter' }),
+        includeMatchesAriaLabel: i18n('common.ui.filterBar.filterPill.includeMatchesAriaLabel', { defaultMessage: 'Include matches' }),
+        includeMatchesTooltip: i18n('common.ui.filterBar.filterPill.includeMatchesTooltip', { defaultMessage: 'Include matches' }),
+        excludeMatchesAriaLabel: i18n('common.ui.filterBar.filterPill.excludeMatchesAriaLabel', { defaultMessage: 'Exclude matches' }),
+        excludeMatchesTooltip: i18n('common.ui.filterBar.filterPill.excludeMatchesTooltip', { defaultMessage: 'Exclude matches' }),
+      };
     }
   };
 });

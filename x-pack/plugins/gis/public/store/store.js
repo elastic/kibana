@@ -8,16 +8,13 @@ import { combineReducers, applyMiddleware, createStore, compose } from 'redux';
 import thunk from 'redux-thunk';
 import ui from './ui';
 import { map } from './map';
-import { loadMetaResources } from "../actions/store_actions";
-import config from './config';
 
 // TODO this should not be exported and all access to the store be via getStore
 export let store;
 
 const rootReducer = combineReducers({
   map,
-  ui,
-  config
+  ui
 });
 
 const enhancers = [ applyMiddleware(thunk) ];
@@ -36,6 +33,5 @@ export const getStore = async function () {
     storeConfig,
     composeEnhancers(...enhancers)
   );
-  await loadMetaResources(store.dispatch);
   return store;
 };

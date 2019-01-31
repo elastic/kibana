@@ -133,30 +133,6 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
       uploadLicense={[Function]}
       uploadLicenseStatus={[Function]}
     >
-      <EuiTitle
-        className="eui-textCenter"
-        size="l"
-        textTransform="none"
-      >
-        <h1
-          className="euiTitle euiTitle--large eui-textCenter"
-        >
-          <FormattedMessage
-            defaultMessage="Upload your license"
-            id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
-            values={Object {}}
-          >
-            Upload your license
-          </FormattedMessage>
-        </h1>
-      </EuiTitle>
-      <EuiSpacer
-        size="l"
-      >
-        <div
-          className="euiSpacer euiSpacer--l"
-        />
-      </EuiSpacer>
       <EuiPageContent
         horizontalPosition="center"
         panelPaddingSize="l"
@@ -175,6 +151,29 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
               <div
                 className="euiPageContentBody"
               >
+                <EuiTitle
+                  size="m"
+                  textTransform="none"
+                >
+                  <h1
+                    className="euiTitle euiTitle--medium"
+                  >
+                    <FormattedMessage
+                      defaultMessage="Upload your license"
+                      id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
+                      values={Object {}}
+                    >
+                      Upload your license
+                    </FormattedMessage>
+                  </h1>
+                </EuiTitle>
+                <EuiSpacer
+                  size="l"
+                >
+                  <div
+                    className="euiSpacer euiSpacer--l"
+                  />
+                </EuiSpacer>
                 <EuiOverlayMask>
                   <Portal
                     containerInfo={
@@ -902,30 +901,6 @@ exports[`UploadLicense should display an error when ES says license is expired 1
       uploadLicense={[Function]}
       uploadLicenseStatus={[Function]}
     >
-      <EuiTitle
-        className="eui-textCenter"
-        size="l"
-        textTransform="none"
-      >
-        <h1
-          className="euiTitle euiTitle--large eui-textCenter"
-        >
-          <FormattedMessage
-            defaultMessage="Upload your license"
-            id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
-            values={Object {}}
-          >
-            Upload your license
-          </FormattedMessage>
-        </h1>
-      </EuiTitle>
-      <EuiSpacer
-        size="l"
-      >
-        <div
-          className="euiSpacer euiSpacer--l"
-        />
-      </EuiSpacer>
       <EuiPageContent
         horizontalPosition="center"
         panelPaddingSize="l"
@@ -944,6 +919,29 @@ exports[`UploadLicense should display an error when ES says license is expired 1
               <div
                 className="euiPageContentBody"
               >
+                <EuiTitle
+                  size="m"
+                  textTransform="none"
+                >
+                  <h1
+                    className="euiTitle euiTitle--medium"
+                  >
+                    <FormattedMessage
+                      defaultMessage="Upload your license"
+                      id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
+                      values={Object {}}
+                    >
+                      Upload your license
+                    </FormattedMessage>
+                  </h1>
+                </EuiTitle>
+                <EuiSpacer
+                  size="l"
+                >
+                  <div
+                    className="euiSpacer euiSpacer--l"
+                  />
+                </EuiSpacer>
                 <EuiText
                   grow={true}
                   size="m"
@@ -1389,30 +1387,6 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
       uploadLicense={[Function]}
       uploadLicenseStatus={[Function]}
     >
-      <EuiTitle
-        className="eui-textCenter"
-        size="l"
-        textTransform="none"
-      >
-        <h1
-          className="euiTitle euiTitle--large eui-textCenter"
-        >
-          <FormattedMessage
-            defaultMessage="Upload your license"
-            id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
-            values={Object {}}
-          >
-            Upload your license
-          </FormattedMessage>
-        </h1>
-      </EuiTitle>
-      <EuiSpacer
-        size="l"
-      >
-        <div
-          className="euiSpacer euiSpacer--l"
-        />
-      </EuiSpacer>
       <EuiPageContent
         horizontalPosition="center"
         panelPaddingSize="l"
@@ -1431,6 +1405,29 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
               <div
                 className="euiPageContentBody"
               >
+                <EuiTitle
+                  size="m"
+                  textTransform="none"
+                >
+                  <h1
+                    className="euiTitle euiTitle--medium"
+                  >
+                    <FormattedMessage
+                      defaultMessage="Upload your license"
+                      id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
+                      values={Object {}}
+                    >
+                      Upload your license
+                    </FormattedMessage>
+                  </h1>
+                </EuiTitle>
+                <EuiSpacer
+                  size="l"
+                >
+                  <div
+                    className="euiSpacer euiSpacer--l"
+                  />
+                </EuiSpacer>
                 <EuiText
                   grow={true}
                   size="m"
@@ -1876,30 +1873,6 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
       uploadLicense={[Function]}
       uploadLicenseStatus={[Function]}
     >
-      <EuiTitle
-        className="eui-textCenter"
-        size="l"
-        textTransform="none"
-      >
-        <h1
-          className="euiTitle euiTitle--large eui-textCenter"
-        >
-          <FormattedMessage
-            defaultMessage="Upload your license"
-            id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
-            values={Object {}}
-          >
-            Upload your license
-          </FormattedMessage>
-        </h1>
-      </EuiTitle>
-      <EuiSpacer
-        size="l"
-      >
-        <div
-          className="euiSpacer euiSpacer--l"
-        />
-      </EuiSpacer>
       <EuiPageContent
         horizontalPosition="center"
         panelPaddingSize="l"
@@ -1918,6 +1891,29 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
               <div
                 className="euiPageContentBody"
               >
+                <EuiTitle
+                  size="m"
+                  textTransform="none"
+                >
+                  <h1
+                    className="euiTitle euiTitle--medium"
+                  >
+                    <FormattedMessage
+                      defaultMessage="Upload your license"
+                      id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
+                      values={Object {}}
+                    >
+                      Upload your license
+                    </FormattedMessage>
+                  </h1>
+                </EuiTitle>
+                <EuiSpacer
+                  size="l"
+                >
+                  <div
+                    className="euiSpacer euiSpacer--l"
+                  />
+                </EuiSpacer>
                 <EuiText
                   grow={true}
                   size="m"
@@ -2363,30 +2359,6 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
       uploadLicense={[Function]}
       uploadLicenseStatus={[Function]}
     >
-      <EuiTitle
-        className="eui-textCenter"
-        size="l"
-        textTransform="none"
-      >
-        <h1
-          className="euiTitle euiTitle--large eui-textCenter"
-        >
-          <FormattedMessage
-            defaultMessage="Upload your license"
-            id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
-            values={Object {}}
-          >
-            Upload your license
-          </FormattedMessage>
-        </h1>
-      </EuiTitle>
-      <EuiSpacer
-        size="l"
-      >
-        <div
-          className="euiSpacer euiSpacer--l"
-        />
-      </EuiSpacer>
       <EuiPageContent
         horizontalPosition="center"
         panelPaddingSize="l"
@@ -2405,6 +2377,29 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
               <div
                 className="euiPageContentBody"
               >
+                <EuiTitle
+                  size="m"
+                  textTransform="none"
+                >
+                  <h1
+                    className="euiTitle euiTitle--medium"
+                  >
+                    <FormattedMessage
+                      defaultMessage="Upload your license"
+                      id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
+                      values={Object {}}
+                    >
+                      Upload your license
+                    </FormattedMessage>
+                  </h1>
+                </EuiTitle>
+                <EuiSpacer
+                  size="l"
+                >
+                  <div
+                    className="euiSpacer euiSpacer--l"
+                  />
+                </EuiSpacer>
                 <EuiText
                   grow={true}
                   size="m"
