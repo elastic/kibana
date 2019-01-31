@@ -17,7 +17,7 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
           class="euiText euiText--small euiStat__description"
         >
           <p>
-            Status:
+            Status
           </p>
         </div>
         <p
@@ -67,7 +67,7 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
           class="euiText euiText--small euiStat__description"
         >
           <p>
-            Documents:
+            Documents
           </p>
         </div>
         <p
@@ -78,9 +78,6 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
       </div>
     </div>
   </div>
-  <hr
-    class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
-  />
 </div>
 `;
 
@@ -102,7 +99,7 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
           class="euiText euiText--small euiStat__description"
         >
           <p>
-            Free Disk Space:
+            Free Disk Space
           </p>
         </div>
         <p
@@ -123,7 +120,7 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
           class="euiText euiText--small euiStat__description"
         >
           <p>
-            Documents:
+            Documents
           </p>
         </div>
         <p
@@ -134,9 +131,6 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
       </div>
     </div>
   </div>
-  <hr
-    class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
-  />
 </div>
 `;
 
@@ -157,7 +151,7 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
           class="euiText euiText--small euiStat__description"
         >
           <p>
-            Status:
+            Status
           </p>
         </div>
         <p
@@ -188,7 +182,7 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
           class="euiText euiText--small euiStat__description"
         >
           <p>
-            Free Disk Space:
+            Free Disk Space
           </p>
         </div>
         <p
@@ -209,7 +203,7 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
           class="euiText euiText--small euiStat__description"
         >
           <p>
-            Documents:
+            Documents
           </p>
         </div>
         <p
@@ -220,8 +214,5 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
       </div>
     </div>
   </div>
-  <hr
-    class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
-  />
 </div>
 `;
