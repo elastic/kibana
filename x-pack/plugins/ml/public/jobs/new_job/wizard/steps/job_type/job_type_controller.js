@@ -61,7 +61,12 @@ module.controller('MlNewJobStepJobType',
 
     $scope.indexPattern = indexPattern;
     $scope.savedSearch = savedSearch;
-    $scope.recognizerResults = { count: 0 };
+    $scope.recognizerResults = {
+      count: 0,
+      onChange() {
+        $scope.$applyAsync();
+      }
+    };
 
     $scope.pageTitleLabel = (savedSearch.id !== undefined) ?
       `saved search ${savedSearch.title}` : `index pattern ${indexPattern.title}`;
