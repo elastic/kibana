@@ -20,10 +20,11 @@ import {
 const Container = styled.div`
   display: flex;
   margin-left: ${px(unit * 5)};
-  margin-top: ${px(units.half)};
+  flex-wrap: wrap;
 
   /* add margin to all direct descendant divs */
   & > div {
+    margin-top: ${px(units.half)};
     margin-right: ${px(unit)};
     &:last-child {
       margin-right: 0;
