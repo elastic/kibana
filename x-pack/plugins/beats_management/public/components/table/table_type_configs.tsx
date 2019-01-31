@@ -71,6 +71,15 @@ const dynamicStatuses = {
       defaultMessage: 'This Beat is currently reloading config from CM.',
     }),
   },
+  RUNNING: {
+    color: 'success',
+    status: i18n.translate('xpack.beatsManagement.beatsTable.runningStatusLabel', {
+      defaultMessage: 'Running',
+    }),
+    details: i18n.translate('xpack.beatsManagement.beatsTable.configStatus.runningTooltip', {
+      defaultMessage: 'This Beat is running without issues.',
+    }),
+  },
   CONFIG: {
     color: 'danger',
     status: i18n.translate('xpack.beatsManagement.beatsTable.configErrorStatusLabel', {
