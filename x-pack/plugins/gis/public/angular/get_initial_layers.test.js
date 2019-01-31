@@ -69,6 +69,7 @@ describe('Saved object does not have layer list', () => {
       "maxZoom": 24,
       "minZoom": 0,
       "sourceDescriptor": {
+        "type": "EMS_TMS",
         "id": "road_map",
       },
       "style": {

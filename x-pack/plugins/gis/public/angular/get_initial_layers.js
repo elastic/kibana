@@ -16,7 +16,8 @@ export function getInitialLayers(savedMapLayerListJSON) {
   }
 
   if (!isMetaDataLoaded()) {
-    const source = new EMSTMSSource({ id: DEFAULT_EMS_TILE_LAYER });
+    const descriptor = EMSTMSSource.createDescriptor(DEFAULT_EMS_TILE_LAYER);
+    const source = new EMSTMSSource(descriptor);
     const layer = source.createDefaultLayer();
     return [
       layer.toLayerDescriptor()
