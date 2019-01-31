@@ -113,6 +113,9 @@ export class EMSClientV66 {
 
   }
 
+  getLocale() {
+    return this._language;
+  }
 
   getValueInLanguage(i18nObject) {
     if (!i18nObject) {
