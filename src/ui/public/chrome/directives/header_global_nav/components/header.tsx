@@ -37,7 +37,6 @@ import {
   EuiHideFor,
   EuiHorizontalRule,
   EuiIcon,
-  EuiLink,
   EuiListGroup,
   // @ts-ignore
   EuiListGroupItem,
@@ -58,8 +57,8 @@ import { HeaderNavControls } from './header_nav_controls';
 
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import chrome, { NavLink } from 'ui/chrome';
-import { RecentlyAccessedHistoryItem } from 'ui/persisted_log';
 import { HelpExtension } from 'ui/chrome';
+import { RecentlyAccessedHistoryItem } from 'ui/persisted_log';
 import { ChromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
 import { relativeToAbsolute } from 'ui/url/relative_to_absolute';
 import { NavControlSide } from '../';
@@ -173,13 +172,7 @@ class HeaderUI extends Component<Props, State> {
   }
 
   public render() {
-    const {
-      appTitle,
-      breadcrumbs$,
-      isVisible,
-      navControls,
-      helpExtension$,
-    } = this.props;
+    const { appTitle, breadcrumbs$, isVisible, navControls, helpExtension$ } = this.props;
     const { navLinks, recentlyAccessed } = this.state;
 
     if (!isVisible) {
