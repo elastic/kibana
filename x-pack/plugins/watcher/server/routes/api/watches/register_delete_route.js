@@ -10,7 +10,7 @@ import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factor
 
 function deleteWatches(callWithRequest, watchIds) {
   const deletePromises = watchIds.map(watchId => {
-    return callWithRequest('watcher.deleteWatch', {
+    return callWithRequest('xpack.watcher.deleteWatch', {
       id: watchId
     })
       .then(success => ({ success }))

@@ -9,7 +9,6 @@ import { elasticsearchJsPlugin } from '../elasticsearch_js_plugin';
 
 const callWithRequest = once((server) => {
   const config = {
-    plugins: [ elasticsearchJsPlugin ],
     ...server.config().get('elasticsearch')
   };
   const cluster = server.plugins.elasticsearch.createCluster('watcher', config);

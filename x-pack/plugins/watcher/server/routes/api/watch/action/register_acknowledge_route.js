@@ -56,8 +56,5 @@ export function registerAcknowledgeRoute(server) {
 }
 
 function acknowledgeAction(callWithRequest, watchId, actionId) {
-  return callWithRequest('watcher.ackWatch', {
-    id: watchId,
-    action: actionId
-  });
+  return callWithRequest('xpack.watcher.ackWatch', { watchId, actionId });
 }

@@ -17,9 +17,7 @@ function executeWatch(callWithRequest, executeDetails, watchJson) {
   const body = executeDetails;
   body.watch = watchJson;
 
-  return callWithRequest('watcher.executeWatch', {
-    body
-  });
+  return callWithRequest('xpack.watcher.executeWatch', { body });
 }
 
 export function registerExecuteRoute(server) {

@@ -12,7 +12,7 @@ import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
 import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
 
 function fetchWatch(callWithRequest, watchId) {
-  return callWithRequest('watcher.getWatch', {
+  return callWithRequest('xpack.watcher.getWatch', {
     id: watchId
   });
 }

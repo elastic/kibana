@@ -10,9 +10,7 @@ import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
 import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
 
 function deleteWatch(callWithRequest, watchId) {
-  return callWithRequest('watcher.deleteWatch', {
-    id: watchId
-  });
+  return callWithRequest('xpack.watcher.deleteWatch', { id: watchId });
 }
 
 export function registerDeleteRoute(server) {

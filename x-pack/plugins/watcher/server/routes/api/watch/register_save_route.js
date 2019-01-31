@@ -11,7 +11,7 @@ import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
 import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
 
 function saveWatch(callWithRequest, watch) {
-  return callWithRequest('watcher.putWatch', {
+  return callWithRequest('xpack.watcher.putWatch', {
     id: watch.id,
     body: watch.watch
   });

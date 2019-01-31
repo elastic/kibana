@@ -12,9 +12,7 @@ import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factor
 import { WatchStatus } from '../../../models/watch_status';
 
 function activateWatch(callWithRequest, watchId) {
-  return callWithRequest('watcher.activateWatch', {
-    id: watchId
-  });
+  return callWithRequest('xpack.watcher.activateWatch', { watchId });
 }
 
 export function registerActivateRoute(server) {
