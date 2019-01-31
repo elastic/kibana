@@ -52,7 +52,9 @@ export const HomePage = injectI18n(
               load,
               metricIndicesExist,
             }) =>
-              metricIndicesExist ? (
+              isLoading ? (
+                <SourceLoadingPage />
+              ) : metricIndicesExist ? (
                 <>
                   <WithWaffleTimeUrlState />
                   <WithWaffleFilterUrlState indexPattern={derivedIndexPattern} />
@@ -60,8 +62,6 @@ export const HomePage = injectI18n(
                   <HomeToolbar />
                   <HomePageContent />
                 </>
-              ) : isLoading ? (
-                <SourceLoadingPage />
               ) : hasFailed ? (
                 <SourceErrorPage errorMessage={lastFailureMessage || ''} retry={load} />
               ) : (

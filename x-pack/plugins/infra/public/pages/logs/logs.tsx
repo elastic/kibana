@@ -65,7 +65,9 @@ export const LogsPage = injectI18n(
             }) => (
               <>
                 <SourceConfigurationFlyout />
-                {logIndicesExist ? (
+                {isLoading ? (
+                  <SourceLoadingPage />
+                ) : logIndicesExist ? (
                   <>
                     <WithLogFilterUrlState indexPattern={derivedIndexPattern} />
                     <WithLogPositionUrlState />
@@ -98,8 +100,6 @@ export const LogsPage = injectI18n(
                       )}
                     </WithLogFilter>
                   </>
-                ) : isLoading ? (
-                  <SourceLoadingPage />
                 ) : hasFailed ? (
                   <SourceErrorPage errorMessage={lastFailureMessage || ''} retry={load} />
                 ) : (
