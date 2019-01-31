@@ -33,7 +33,7 @@ import { SavedObjectsClient } from './saved_objects_client';
 export function createSavedObjectsService(server, schema, serializer, migrator, extraTypes) {
   const mappings = server.getKibanaIndexMappingsDsl();
   const allTypes = Object.keys(getRootPropertiesObjects(mappings));
-  const allowedTypes = [...new Set(extraTypes.concat(allTypes.filter(type => !schema.isHiddenType(type))))];
+  const allowedTypes = [...new Set((extraTypes || []).concat(allTypes.filter(type => !schema.isHiddenType(type))))];
   const repositoryProvider = new SavedObjectsRepositoryProvider({
     index: server.config().get('kibana.index'),
     migrator,
