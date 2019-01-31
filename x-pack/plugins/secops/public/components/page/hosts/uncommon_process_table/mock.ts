@@ -8,7 +8,7 @@ import { UncommonProcessesData } from '../../../../graphql/types';
 
 export const mockData: { UncommonProcess: UncommonProcessesData } = {
   UncommonProcess: {
-    totalCount: 3,
+    totalCount: 5,
     edges: [
       {
         node: {
@@ -56,6 +56,48 @@ export const mockData: { UncommonProcess: UncommonProcessesData } = {
           host: [
             { id: 'host-id-1', name: 'hello-world' },
             { id: 'host-id-2', name: 'hello-world-2' },
+          ],
+          instances: 97,
+          user: {
+            id: 1,
+            name: 'Evan',
+          },
+        },
+        cursor: {
+          value: 'aa7ca589f1b8220002f2fc61c64cfbf1',
+        },
+      },
+      {
+        node: {
+          _id: 'KwQDiWcB0WOhS6qyXmrW',
+          process: {
+            title: 'Hello World',
+            name: 'siem-kibana',
+          },
+          host: [{ ip: ['127.0.0.1'] }],
+          instances: 97,
+          user: {
+            id: 1,
+            name: 'Evan',
+          },
+        },
+        cursor: {
+          value: 'aa7ca589f1b8220002f2fc61c64cfbf1',
+        },
+      },
+      {
+        node: {
+          _id: 'KwQDiWcB0WOhS6qyXmrW',
+          process: {
+            title: 'Hello World',
+            name: 'siem-kibana',
+          },
+          host: [
+            { ip: ['127.0.0.1'] },
+            { id: 'host-id-1', name: 'hello-world' },
+            { ip: ['127.0.0.1'] },
+            { id: 'host-id-2', name: 'hello-world-2' },
+            { ip: ['127.0.0.1'] },
           ],
           instances: 97,
           user: {
