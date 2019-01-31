@@ -59,6 +59,7 @@ import { HeaderNavControls } from './header_nav_controls';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import chrome, { NavLink } from 'ui/chrome';
 import { RecentlyAccessedHistoryItem } from 'ui/persisted_log';
+import { HelpExtension } from 'ui/chrome';
 import { ChromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
 import { relativeToAbsolute } from 'ui/url/relative_to_absolute';
 import { NavControlSide } from '../';
@@ -71,6 +72,7 @@ interface Props {
   isVisible: boolean;
   navLinks$: Rx.Observable<NavLink[]>;
   recentlyAccessed$: Rx.Observable<RecentlyAccessedHistoryItem[]>;
+  helpExtension$: Rx.Observable<HelpExtension>;
   navControls: ChromeHeaderNavControlsRegistry;
   intl: InjectedIntl;
 }
@@ -171,7 +173,13 @@ class HeaderUI extends Component<Props, State> {
   }
 
   public render() {
-    const { appTitle, breadcrumbs$, isVisible, navControls } = this.props;
+    const {
+      appTitle,
+      breadcrumbs$,
+      isVisible,
+      navControls,
+      helpExtension$,
+    } = this.props;
     const { navLinks, recentlyAccessed } = this.state;
 
     if (!isVisible) {
@@ -198,7 +206,7 @@ class HeaderUI extends Component<Props, State> {
 
           <EuiHeaderSection side="right">
             <EuiHeaderSectionItem>
-              <HeaderHelpMenu customContent$={<EuiLink>Give APM Feedback</EuiLink>} />
+              <HeaderHelpMenu helpExtension$={helpExtension$} />
             </EuiHeaderSectionItem>
 
             <HeaderNavControls navControls={rightNavControls} />

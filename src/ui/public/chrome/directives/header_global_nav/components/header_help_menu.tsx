@@ -18,7 +18,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
-// import * as Rx from 'rxjs';
+import * as Rx from 'rxjs';
 
 import {
   // TODO: add type annotations
@@ -36,12 +36,13 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { NavLink } from '../';
+import { HelpExtension } from 'ui/chrome';
+
+import { HeaderExtension } from './header_extension';
 
 interface Props {
-  customContent$?: React.ReactNode;
+  helpExtension$: Rx.Observable<HelpExtension>;
   intl: InjectedIntl;
   useDefaultContent?: boolean;
   documentationLink?: string;
@@ -49,45 +50,46 @@ interface Props {
 
 interface State {
   isOpen: boolean;
-  customContent: NavLink[];
+  helpExtension?: HelpExtension;
 }
 
 class HeaderHelpMenuUI extends Component<Props, State> {
-  // private subscription?: Rx.Subscription;
+  private subscription?: Rx.Subscription;
 
   constructor(props: Props) {
     super(props);
 
     this.state = {
       isOpen: false,
-      customContent: [],
+      helpExtension: undefined,
     };
   }
 
   public componentDidMount() {
-    // this.subscription = this.props.customContent$.subscribe({
-    //   next: customContent => {
-    //     this.setState({ customContent });
-    //   },
-    // });
+    this.subscription = this.props.helpExtension$.subscribe({
+      next: helpExtension => {
+        this.setState({
+          helpExtension,
+        });
+      },
+    });
   }
 
   public componentWillUnmount() {
-    // if (this.subscription) {
-    //   this.subscription.unsubscribe();
-    //   this.subscription = undefined;
-    // }
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+      this.subscription = undefined;
+    }
   }
 
   public render() {
-    const { intl, useDefaultContent, customContent$, documentationLink } = this.props;
+    const { intl, useDefaultContent, documentationLink } = this.props;
+    const { helpExtension } = this.state;
 
     const defaultContent = useDefaultContent ? (
       <Fragment>
         <EuiText size="s">
-          <p>
-            Get updates, information, and answers in our documentation.
-          </p>
+          <p>Get updates, information, and answers in our documentation.</p>
         </EuiText>
 
         <EuiSpacer />
@@ -132,8 +134,8 @@ class HeaderHelpMenuUI extends Component<Props, State> {
 
         <div style={{ maxWidth: 300 }}>
           {defaultContent}
-          {defaultContent && customContent$ && <EuiSpacer />}
-          {customContent$}
+          {defaultContent && helpExtension && <EuiSpacer />}
+          {helpExtension && <HeaderExtension extension={helpExtension} />}
         </div>
       </EuiPopover>
     );

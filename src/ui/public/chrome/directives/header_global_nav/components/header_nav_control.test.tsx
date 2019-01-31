@@ -19,17 +19,12 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { NavControl, NavControlSide } from '../';
-import { HeaderNavControl } from './header_nav_control';
+import { HeaderExtension } from './header_extension';
 
-describe('HeaderNavControl', () => {
-  const defaultNavControl = { name: '', order: 1, side: NavControlSide.Right };
-
+describe('HeaderExtension', () => {
   it('calls navControl.render with div node', () => {
     const renderSpy = jest.fn();
-    const navControl = { ...defaultNavControl, render: renderSpy } as NavControl;
-
-    mount(<HeaderNavControl navControl={navControl} />);
+    mount(<HeaderExtension extension={renderSpy} />);
 
     expect(renderSpy.mock.calls.length).toEqual(1);
 
@@ -40,9 +35,8 @@ describe('HeaderNavControl', () => {
   it('calls unrender callback when unmounted', () => {
     const unrenderSpy = jest.fn();
     const render = () => unrenderSpy;
-    const navControl = { ...defaultNavControl, render } as NavControl;
 
-    const wrapper = mount(<HeaderNavControl navControl={navControl} />);
+    const wrapper = mount(<HeaderExtension extension={render} />);
 
     wrapper.unmount();
     expect(unrenderSpy.mock.calls.length).toEqual(1);
