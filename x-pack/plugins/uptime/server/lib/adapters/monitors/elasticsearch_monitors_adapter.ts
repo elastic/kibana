@@ -294,44 +294,45 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     };
     const queryResult = await this.database.search(request, params);
     const aggBuckets: any[] = get(queryResult, 'aggregations.hosts.buckets', []);
-    const latestMonitors: Array<LatestMonitor | undefined> = aggBuckets.map(bucket => {
-      if (
-        statusFilter &&
-        get(bucket, 'latest.hits.hits[0]._source.monitor.status', undefined) !== statusFilter
-      ) {
-        return undefined;
-      }
-      const key: string = get(bucket, 'key.id');
-      const url: string | null = get(bucket, 'key.url', null);
-      const upSeries: MonitorSeriesPoint[] = [];
-      const downSeries: MonitorSeriesPoint[] = [];
-      const histogramBuckets: any[] = get(bucket, 'histogram.buckets', []);
-      const ping: Ping = get(bucket, 'latest.hits.hits[0]._source');
-      const timestamp: string = get(bucket, 'latest.hits.hits[0]._source.@timestamp');
-      histogramBuckets.forEach(histogramBucket => {
-        const status = get(histogramBucket, 'status.buckets', []);
-        // @ts-ignore TODO update typings and remove this comment
-        const up = status.find(f => f.key === 'up');
-        // @ts-ignore TODO update typings and remove this comment
-        const down = status.find(f => f.key === 'down');
-        // @ts-ignore TODO update typings and remove this comment
-        upSeries.push({ x: histogramBucket.key, y: up ? up.doc_count : null });
-        // @ts-ignore TODO update typings and remove this comment
-        downSeries.push({ x: histogramBucket.key, y: down ? down.doc_count : null });
-      });
-      return {
-        id: { key, url },
-        ping: {
-          ...ping,
-          timestamp,
-        },
-        upSeries,
-        downSeries,
-      };
-    });
+    const latestMonitors: LatestMonitor[] = aggBuckets
+      .filter(
+        bucket =>
+          statusFilter &&
+          get(bucket, 'latest.hits.hits[0]._source.monitor.status', undefined) !== statusFilter
+      )
+      .map(
+        (bucket): LatestMonitor => {
+          const key: string = get(bucket, 'key.id');
+          const url: string | null = get(bucket, 'key.url', null);
+          const upSeries: MonitorSeriesPoint[] = [];
+          const downSeries: MonitorSeriesPoint[] = [];
+          const histogramBuckets: any[] = get(bucket, 'histogram.buckets', []);
+          const ping: Ping = get(bucket, 'latest.hits.hits[0]._source');
+          const timestamp: string = get(bucket, 'latest.hits.hits[0]._source.@timestamp');
+          histogramBuckets.forEach(histogramBucket => {
+            const status = get(histogramBucket, 'status.buckets', []);
+            // @ts-ignore TODO update typings and remove this comment
+            const up = status.find(f => f.key === 'up');
+            // @ts-ignore TODO update typings and remove this comment
+            const down = status.find(f => f.key === 'down');
+            // @ts-ignore TODO update typings and remove this comment
+            upSeries.push({ x: histogramBucket.key, y: up ? up.doc_count : null });
+            // @ts-ignore TODO update typings and remove this comment
+            downSeries.push({ x: histogramBucket.key, y: down ? down.doc_count : null });
+          });
+          return {
+            id: { key, url },
+            ping: {
+              ...ping,
+              timestamp,
+            },
+            upSeries,
+            downSeries,
+          };
+        }
+      );
 
-    // @ts-ignore undefined entries are filtered out
-    return latestMonitors.filter(monitor => monitor !== undefined);
+    return latestMonitors;
   }
 
   /**
