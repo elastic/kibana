@@ -6,11 +6,9 @@
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
-    "build": "rm -rf target && yarn build:server && yarn build:browser",
-    "build:server": "tsc && babel src --out-dir target/server",
-    "build:browser": "tsc --project tsconfig.browser.json && babel src --out-dir target/public",
-    "kbn:bootstrap": "yarn build --quiet",
-    "kbn:watch": "yarn build --watch"
+    "build": "node scripts/build",
+    "kbn:bootstrap": "node scripts/build --source-maps",
+    "kbn:watch": "node scripts/build --source-maps --watch"
   },
   "dependencies": {
     "lodash": "npm:@elastic/lodash@3.10.1-kibana1"
