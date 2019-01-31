@@ -35,6 +35,7 @@ import {
 import { isTermSizeZeroError } from '../../elasticsearch_errors';
 
 import { toastNotifications } from 'ui/notify';
+import { decorateVisObject } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 
 function getHandler<T extends RequestHandler | ResponseHandler>(
   from: Array<{ name: string; handler: T }>,
@@ -72,6 +73,8 @@ export class VisualizeDataLoader {
     this.vis.requestError = undefined;
     this.vis.showRequestError = false;
 
+    decorateVisObject(this.vis, { timeRange: params.timeRange });
+
     try {
       // searchSource is only there for courier request handler
       const requestHandlerResponse = await this.requestHandler({
@@ -96,7 +99,9 @@ export class VisualizeDataLoader {
       this.previousRequestHandlerResponse = requestHandlerResponse;
 
       if (!canSkipResponseHandler) {
-        this.visData = await Promise.resolve(this.responseHandler(requestHandlerResponse));
+        this.visData = await Promise.resolve(
+          this.responseHandler(requestHandlerResponse, this.vis.params.dimensions)
+        );
       }
       return this.visData;
     } catch (error) {
