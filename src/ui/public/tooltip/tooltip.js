@@ -17,15 +17,18 @@
  * under the License.
  */
 
-import 'ui/angular-bootstrap';
 import html from './tooltip.html';
 import chrome from 'ui/chrome';
 import  { uiModules } from 'ui/modules';
 
-uiModules.get('kibana')
+import 'ui/angular-bootstrap';
+
+uiModules.get('kibana', ['ui.bootstrap'])
   .config(function ($tooltipProvider) {
     // we use the uiSettings client because the config service is not available in the config phase
     const uiSettings = chrome.getUiSettingsClient();
+
+    $tooltipProvider.setTriggers({ 'mouseenter': 'mouseleave click' });
 
     $tooltipProvider.options({
       placement: 'bottom',

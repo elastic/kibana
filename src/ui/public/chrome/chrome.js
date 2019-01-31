@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import angular from 'angular';
+import 'ui/angular-bootstrap';
 
 import { metadata } from '../metadata';
 import '../state_management/global_state';
