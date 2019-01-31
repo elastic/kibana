@@ -64,7 +64,23 @@ export class TileLayer extends AbstractLayer {
     });
   }
 
+  async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
+    if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
+      return;
+    }
+    const sourceDataId = 'source';
+    const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
+    startLoading(sourceDataId, requestToken, dataFilters);
+    try {
+      const url = await this._source.getUrlTemplate();
+      stopLoading(sourceDataId, requestToken, url, {});
+    } catch(error) {
+      onLoadError(sourceDataId, requestToken, error.message);
+    }
+  }
+
   async syncLayerWithMB(mbMap) {
+
     const source = mbMap.getSource(this.getId());
     const mbLayerId = this.getId() + '_raster';
 
@@ -74,7 +90,12 @@ export class TileLayer extends AbstractLayer {
       return;
     }
 
-    const url = this._source.getUrlTemplate();
+    const sourceDataRquest = this.getSourceDataRequest();
+    const url = sourceDataRquest.getData();
+    if (!url) {
+      return;
+    }
+
     const sourceId = this.getId();
     mbMap.addSource(sourceId, {
       type: 'raster',
