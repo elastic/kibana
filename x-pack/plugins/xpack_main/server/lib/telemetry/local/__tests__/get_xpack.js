@@ -19,7 +19,9 @@ function mockGetXPackLicense(callCluster, license) {
   callCluster.withArgs('transport.request', {
     method: 'GET',
     path: '/_license',
-    local: 'true',
+    querystring: {
+      local: 'true'
+    }
   })
     // conveniently wraps the passed in license object as { license: response }, like it really is
     .returns(license.then(response => ({ license: response })));
@@ -29,7 +31,9 @@ function mockGetXPackUsage(callCluster, usage) {
   callCluster.withArgs('transport.request', {
     method: 'GET',
     path: '/_xpack/usage',
-    master_timeout: TIMEOUT,
+    querystring: {
+      master_timeout: TIMEOUT
+    }
   })
     .returns(usage);
 }

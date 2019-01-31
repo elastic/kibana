@@ -83,8 +83,10 @@ export const reindexServiceFactory = (
 
       const res = await callCluster('transport.request', {
         path: '/_ml/set_upgrade_mode',
+        querystring: {
+          enabled: true,
+        },
         method: 'POST',
-        enabled: true,
       });
 
       if (!res.acknowledged) {
@@ -104,8 +106,10 @@ export const reindexServiceFactory = (
       if (mlDoc.attributes.mlReindexCount === 0) {
         const res = await callCluster('transport.request', {
           path: '/_ml/set_upgrade_mode',
+          querystring: {
+            enabled: false,
+          },
           method: 'POST',
-          enabled: false,
         });
 
         if (!res.acknowledged) {
