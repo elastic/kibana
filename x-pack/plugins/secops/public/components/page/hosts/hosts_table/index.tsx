@@ -12,13 +12,14 @@ import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 
 import { HostsEdges } from '../../../../graphql/types';
-import { hostsActions, hostsSelector, State } from '../../../../store';
+import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue, getOrEmptyTag } from '../../../empty_value';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
 import * as i18n from './translations';
+
 interface OwnProps {
   data: HostsEdges[];
   loading: boolean;
@@ -26,6 +27,7 @@ interface OwnProps {
   nextCursor: string;
   totalCount: number;
   loadMore: (cursor: string) => void;
+  type: hostsModel.HostsType;
 }
 
 interface HostsTableReduxProps {
@@ -33,7 +35,7 @@ interface HostsTableReduxProps {
 }
 
 interface HostsTableDispatchProps {
-  updateLimitPagination: ActionCreator<{ limit: number }>;
+  updateLimitPagination: ActionCreator<{ limit: number; hostsType: hostsModel.HostsType }>;
 }
 
 type HostsTableProps = OwnProps & HostsTableReduxProps & HostsTableDispatchProps;
@@ -71,6 +73,7 @@ const HostsTableComponent = pure<HostsTableProps>(
     totalCount,
     nextCursor,
     updateLimitPagination,
+    type,
   }) => (
     <LoadMoreTable
       columns={getHostsColumns()}
@@ -81,7 +84,9 @@ const HostsTableComponent = pure<HostsTableProps>(
       limit={limit}
       hasNextPage={hasNextPage}
       itemsPerRow={rowItems}
-      updateLimitPagination={newLimit => updateLimitPagination({ limit: newLimit })}
+      updateLimitPagination={newLimit =>
+        updateLimitPagination({ limit: newLimit, hostsType: type })
+      }
       title={
         <h3>
           {i18n.HOSTS} <EuiBadge color="hollow">{totalCount}</EuiBadge>
@@ -91,10 +96,16 @@ const HostsTableComponent = pure<HostsTableProps>(
   )
 );
 
-const mapStateToProps = (state: State) => hostsSelector(state);
+const makeMapStateToProps = () => {
+  const getHostsSelector = hostsSelectors.hostsSelector();
+  const mapStateToProps = (state: State, { type }: OwnProps) => {
+    return getHostsSelector(state, type);
+  };
+  return mapStateToProps;
+};
 
 export const HostsTable = connect(
-  mapStateToProps,
+  makeMapStateToProps,
   {
     updateLimitPagination: hostsActions.updateHostsLimit,
   }

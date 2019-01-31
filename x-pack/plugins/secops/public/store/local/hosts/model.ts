@@ -4,14 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { KueryFilterQuery, SerializedFilterQuery } from '../model';
+
+export enum HostsType {
+  page = 'page',
+  details = 'details',
+}
+
 export interface BasicQuery {
   limit: number;
 }
+
+interface Queries {
+  authentications: BasicQuery;
+  hosts: BasicQuery;
+  events: BasicQuery;
+  uncommonProcesses: BasicQuery;
+}
+
+export interface GenericHostsModel {
+  filterQuery: SerializedFilterQuery | null;
+  filterQueryDraft: KueryFilterQuery | null;
+  queries: Queries;
+}
+
 export interface HostsModel {
-  query: {
-    authentications: BasicQuery;
-    hosts: BasicQuery;
-    events: BasicQuery;
-    uncommonProcesses: BasicQuery;
-  };
+  page: GenericHostsModel;
+  details: GenericHostsModel;
 }

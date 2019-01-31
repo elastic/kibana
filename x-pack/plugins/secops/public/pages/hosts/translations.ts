@@ -14,6 +14,10 @@ export const NO_AUDITBEAT_INDICES = i18n.translate('xpack.secops.hosts.noAuditBe
   defaultMessage: "Looks like you don't have any auditbeat indices.",
 });
 
+export const KQL_PLACE_HOLDER = i18n.translate('xpack.secops.hosts.kqlPlaceHolder', {
+  defaultMessage: 'Search… (e.g. host.name:"foo" AND process.name:"bar")',
+});
+
 export const LETS_ADD_SOME = i18n.translate('xpack.secops.hosts.letsAddSome', {
   defaultMessage: "Let's add some!",
 });

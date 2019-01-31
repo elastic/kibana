@@ -7,7 +7,7 @@
 import gql from 'graphql-tag';
 
 export const sourceQuery = gql`
-  query SourceQuery($sourceId: ID = "default") {
+  query SourceQuery($sourceId: ID = "default", $indexTypes: [IndexType!]) {
     source(id: $sourceId) {
       id
       configuration {
@@ -19,7 +19,7 @@ export const sourceQuery = gql`
         auditbeatIndicesExist
         auditbeatAliasExists
         auditbeatIndices
-        indexFields {
+        indexFields(indexTypes: $indexTypes) {
           name
           searchable
           type

@@ -4,20 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
+import { ThemeProvider } from 'styled-components';
 
 import { Direction } from '../../../graphql/types';
-import { mockGlobalState } from '../../../mock';
+import { mockGlobalState, mockIndexPattern } from '../../../mock';
 import { createStore, State } from '../../../store';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { TimelineHeader } from './timeline_header';
 
 describe('Header', () => {
   const state: State = mockGlobalState;
+  const indexPattern = mockIndexPattern;
 
   let store = createStore(state);
 
@@ -29,28 +32,30 @@ describe('Header', () => {
     test('it renders the data providers', () => {
       const wrapper = mount(
         <ReduxStoreProvider store={store}>
-          <DragDropContext onDragEnd={noop}>
-            <TimelineHeader
-              id="foo"
-              columnHeaders={[]}
-              dataProviders={mockDataProviders}
-              onChangeDataProviderKqlQuery={noop}
-              onChangeDroppableAndProvider={noop}
-              onColumnSorted={noop}
-              onDataProviderRemoved={noop}
-              onFilterChange={noop}
-              onRangeSelected={noop}
-              onToggleDataProviderEnabled={noop}
-              onToggleDataProviderExcluded={noop}
-              range="1 Day"
-              show={true}
-              sort={{
-                columnId: 'timestamp',
-                sortDirection: Direction.descending,
-              }}
-              theme="dark"
-            />
-          </DragDropContext>
+          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+            <DragDropContext onDragEnd={noop}>
+              <TimelineHeader
+                id="foo"
+                indexPattern={indexPattern}
+                columnHeaders={[]}
+                dataProviders={mockDataProviders}
+                onChangeDataProviderKqlQuery={noop}
+                onChangeDroppableAndProvider={noop}
+                onColumnSorted={noop}
+                onDataProviderRemoved={noop}
+                onFilterChange={noop}
+                onRangeSelected={noop}
+                onToggleDataProviderEnabled={noop}
+                onToggleDataProviderExcluded={noop}
+                range="1 Day"
+                show={true}
+                sort={{
+                  columnId: 'timestamp',
+                  sortDirection: Direction.descending,
+                }}
+              />
+            </DragDropContext>
+          </ThemeProvider>
         </ReduxStoreProvider>
       );
 

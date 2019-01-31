@@ -11,7 +11,7 @@ import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { mockGlobalState } from '../../../../mock';
-import { createStore, State } from '../../../../store';
+import { createStore, hostsModel, State } from '../../../../store';
 import { UncommonProcessTable } from './index';
 import { mockData } from './mock';
 
@@ -37,6 +37,7 @@ describe('UncommonProcess Table Component', () => {
             nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)!}
             loadMore={loadMore}
             startDate={1546965070707}
+            type={hostsModel.HostsType.page}
           />
         </ReduxStoreProvider>
       );

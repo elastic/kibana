@@ -12,7 +12,7 @@ import { pure } from 'recompose';
 
 import { ActionCreator } from 'typescript-fsa';
 import { Ecs, EcsEdges } from '../../../../graphql/types';
-import { eventsSelector, hostsActions, State } from '../../../../store';
+import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { getEmptyTagValue, getEmptyValue, getOrEmpty, getOrEmptyTag } from '../../../empty_value';
@@ -29,6 +29,7 @@ interface OwnProps {
   totalCount: number;
   loadMore: (cursor: string, tiebreaker: string) => void;
   startDate: number;
+  type: hostsModel.HostsType;
 }
 
 interface EventsTableReduxProps {
@@ -36,7 +37,7 @@ interface EventsTableReduxProps {
 }
 
 interface EventsTableDispatchProps {
-  updateLimitPagination: ActionCreator<{ limit: number }>;
+  updateLimitPagination: ActionCreator<{ limit: number; hostsType: hostsModel.HostsType }>;
 }
 
 type EventsTableProps = OwnProps & EventsTableReduxProps & EventsTableDispatchProps;
@@ -72,6 +73,7 @@ const EventsTableComponent = pure<EventsTableProps>(
     nextCursor,
     updateLimitPagination,
     startDate,
+    type,
   }) => (
     <LoadMoreTable
       columns={getEventsColumns(startDate)}
@@ -82,7 +84,9 @@ const EventsTableComponent = pure<EventsTableProps>(
       limit={limit}
       hasNextPage={hasNextPage}
       itemsPerRow={rowItems}
-      updateLimitPagination={newLimit => updateLimitPagination({ limit: newLimit })}
+      updateLimitPagination={newLimit =>
+        updateLimitPagination({ limit: newLimit, hostsType: type })
+      }
       title={
         <h3>
           {i18n.EVENTS} <EuiBadge color="hollow">{totalCount}</EuiBadge>
@@ -92,10 +96,16 @@ const EventsTableComponent = pure<EventsTableProps>(
   )
 );
 
-const mapStateToProps = (state: State) => eventsSelector(state);
+const makeMapStateToProps = () => {
+  const getEventsSelector = hostsSelectors.eventsSelector();
+  const mapStateToProps = (state: State, { type }: OwnProps) => {
+    return getEventsSelector(state, type);
+  };
+  return mapStateToProps;
+};
 
 export const EventsTable = connect(
-  mapStateToProps,
+  makeMapStateToProps,
   {
     updateLimitPagination: hostsActions.updateEventsLimit,
   }

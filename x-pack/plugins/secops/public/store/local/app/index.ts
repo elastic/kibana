@@ -5,7 +5,8 @@
  */
 
 import * as appActions from './actions';
+import * as appSelectors from './selectors';
 
-export * from './selectors';
+export { appSelectors };
 export { appActions };
 export * from './reducer';

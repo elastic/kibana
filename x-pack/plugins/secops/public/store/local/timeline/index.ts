@@ -5,7 +5,10 @@
  */
 
 import * as timelineActions from './actions';
+import * as timelineModel from './model';
+import * as timelineSelectors from './selectors';
 
 export { timelineActions };
+export { timelineModel };
 export * from './reducer';
-export * from './selectors';
+export { timelineSelectors };

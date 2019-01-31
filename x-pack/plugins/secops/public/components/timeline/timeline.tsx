@@ -11,7 +11,6 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { TimelineQuery } from '../../containers/timeline';
 import { Direction } from '../../graphql/types';
-import { Theme } from '../../store/local/app/model';
 import { AutoSizer } from '../auto_sizer';
 import { Body } from './body';
 import { ColumnHeader } from './body/column_headers/column_header';
@@ -44,6 +43,7 @@ interface Props {
   indexPattern: StaticIndexPattern;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
+  kqlQuery: string;
   onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
   onChangeDroppableAndProvider: OnChangeDroppableAndProvider;
   onChangeItemsPerPage: OnChangeItemsPerPage;
@@ -57,7 +57,6 @@ interface Props {
   rowRenderers: RowRenderer[];
   show: boolean;
   sort: Sort;
-  theme: Theme;
 }
 
 const WrappedByAutoSizer = styled.div`
@@ -76,6 +75,7 @@ export const Timeline = pure<Props>(
     indexPattern,
     itemsPerPage,
     itemsPerPageOptions,
+    kqlQuery,
     onChangeDataProviderKqlQuery,
     onChangeDroppableAndProvider,
     onChangeItemsPerPage,
@@ -89,9 +89,8 @@ export const Timeline = pure<Props>(
     rowRenderers,
     show,
     sort,
-    theme,
   }) => {
-    const combinedQueries = combineQueries(dataProviders, indexPattern);
+    const combinedQueries = combineQueries(dataProviders, indexPattern, kqlQuery);
     return (
       <>
         <AutoSizer detectAnyWindowResize={true} content>
@@ -101,6 +100,7 @@ export const Timeline = pure<Props>(
                 <TimelineHeader
                   columnHeaders={columnHeaders}
                   id={id}
+                  indexPattern={indexPattern}
                   dataProviders={dataProviders}
                   onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
                   onChangeDroppableAndProvider={onChangeDroppableAndProvider}
@@ -113,7 +113,6 @@ export const Timeline = pure<Props>(
                   range={range}
                   show={show}
                   sort={sort}
-                  theme={theme}
                 />
               </WrappedByAutoSizer>
 
@@ -142,7 +141,6 @@ export const Timeline = pure<Props>(
                             timelineFooterHeight: footerHeight,
                           })}
                           rowRenderers={rowRenderers}
-                          theme={theme}
                         />
                         <Footer
                           dataProviders={dataProviders}

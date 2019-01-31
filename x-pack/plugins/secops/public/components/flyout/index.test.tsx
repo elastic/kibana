@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
 import { set } from 'lodash/fp';
 import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 
-import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
 import { ActionCreator } from 'typescript-fsa';
 import { Flyout, FlyoutComponent, flyoutHeaderHeight } from '.';
 import { mockGlobalState } from '../../mock';
@@ -25,6 +25,7 @@ const testWidth = 640;
 
 describe('Flyout', () => {
   const state: State = mockGlobalState;
+  const theme = () => ({ eui: euiDarkVars, darkMode: true });
 
   let store = createStore(state);
 
@@ -36,7 +37,7 @@ describe('Flyout', () => {
     test('it renders the default flyout state as a button', () => {
       const wrapper = mount(
         <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={{ eui: euiVars }}>
+          <ThemeProvider theme={theme()}>
             <DragDropContextWrapper>
               <Flyout
                 flyoutHeight={testFlyoutHeight}
@@ -62,7 +63,7 @@ describe('Flyout', () => {
 
       const wrapper = mount(
         <ReduxStoreProvider store={storeShowIsTrue}>
-          <ThemeProvider theme={{ eui: euiVars }}>
+          <ThemeProvider theme={theme()}>
             <DragDropContextWrapper>
               <Flyout
                 flyoutHeight={testFlyoutHeight}
@@ -88,7 +89,7 @@ describe('Flyout', () => {
 
       const wrapper = mount(
         <ReduxStoreProvider store={storeShowIsTrue}>
-          <ThemeProvider theme={{ eui: euiVars }}>
+          <ThemeProvider theme={theme()}>
             <DragDropContextWrapper>
               <Flyout
                 flyoutHeight={testFlyoutHeight}
@@ -109,7 +110,7 @@ describe('Flyout', () => {
 
       const wrapper = mount(
         <ReduxStoreProvider store={storeShowIsTrue}>
-          <ThemeProvider theme={{ eui: euiVars }}>
+          <ThemeProvider theme={theme()}>
             <DragDropContextWrapper>
               <Flyout
                 flyoutHeight={testFlyoutHeight}
@@ -141,7 +142,7 @@ describe('Flyout', () => {
 
       const wrapper = mount(
         <ReduxStoreProvider store={storeWithDataProviders}>
-          <ThemeProvider theme={{ eui: euiVars }}>
+          <ThemeProvider theme={theme()}>
             <DragDropContextWrapper>
               <Flyout
                 flyoutHeight={testFlyoutHeight}
@@ -166,7 +167,7 @@ describe('Flyout', () => {
 
       const wrapper = mount(
         <ReduxStoreProvider store={storeWithDataProviders}>
-          <ThemeProvider theme={{ eui: euiVars }}>
+          <ThemeProvider theme={theme()}>
             <DragDropContextWrapper>
               <Flyout
                 flyoutHeight={testFlyoutHeight}
@@ -189,7 +190,7 @@ describe('Flyout', () => {
     test('it does NOT render the data providers badge when the number is equal to 0', () => {
       const wrapper = mount(
         <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={{ eui: euiVars }}>
+          <ThemeProvider theme={theme()}>
             <DragDropContextWrapper>
               <Flyout
                 flyoutHeight={testFlyoutHeight}
@@ -208,7 +209,7 @@ describe('Flyout', () => {
       const showTimeline = (jest.fn() as unknown) as ActionCreator<{ id: string; show: boolean }>;
       const wrapper = mount(
         <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={{ eui: euiVars }}>
+          <ThemeProvider theme={theme()}>
             <DragDropContextWrapper>
               <FlyoutComponent
                 dataProviders={mockDataProviders}
@@ -238,7 +239,7 @@ describe('Flyout', () => {
       const showTimeline = (jest.fn() as unknown) as ActionCreator<{ id: string; show: boolean }>;
       const wrapper = mount(
         <ReduxStoreProvider store={storeShowIsTrue}>
-          <ThemeProvider theme={{ eui: euiVars }}>
+          <ThemeProvider theme={theme()}>
             <DragDropContextWrapper>
               <FlyoutComponent
                 dataProviders={mockDataProviders}
@@ -267,7 +268,7 @@ describe('Flyout', () => {
       const closeMock = jest.fn();
       const wrapper = mount(
         <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={{ eui: euiVars }}>
+          <ThemeProvider theme={theme()}>
             <DragDropContextWrapper>
               <FlyoutPane
                 flyoutHeight={testFlyoutHeight}
@@ -295,7 +296,7 @@ describe('Flyout', () => {
       const closeMock = jest.fn();
       const wrapper = mount(
         <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={{ eui: euiVars }}>
+          <ThemeProvider theme={theme()}>
             <DragDropContextWrapper>
               <FlyoutPane
                 flyoutHeight={testFlyoutHeight}
@@ -322,7 +323,7 @@ describe('Flyout', () => {
       const closeMock = jest.fn();
       const wrapper = mount(
         <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={{ eui: euiVars }}>
+          <ThemeProvider theme={theme()}>
             <DragDropContextWrapper>
               <FlyoutPane
                 flyoutHeight={testFlyoutHeight}
@@ -351,15 +352,16 @@ describe('Flyout', () => {
       const openMock = jest.fn();
       const wrapper = mount(
         <ReduxStoreProvider store={store}>
-          <DragDropContextWrapper>
-            <FlyoutButton
-              dataProviders={mockDataProviders}
-              show={true}
-              theme="dark"
-              timelineId="test"
-              onOpen={openMock}
-            />{' '}
-          </DragDropContextWrapper>
+          <ThemeProvider theme={theme()}>
+            <DragDropContextWrapper>
+              <FlyoutButton
+                dataProviders={mockDataProviders}
+                show={true}
+                timelineId="test"
+                onOpen={openMock}
+              />
+            </DragDropContextWrapper>
+          </ThemeProvider>
         </ReduxStoreProvider>
       );
       expect(wrapper.find('[data-test-subj="flyoutButton"]').exists()).toEqual(true);
@@ -369,15 +371,16 @@ describe('Flyout', () => {
       const openMock = jest.fn();
       const wrapper = mount(
         <ReduxStoreProvider store={store}>
-          <DragDropContextWrapper>
-            <FlyoutButton
-              dataProviders={mockDataProviders}
-              show={false}
-              theme="dark"
-              timelineId="test"
-              onOpen={openMock}
-            />{' '}
-          </DragDropContextWrapper>
+          <ThemeProvider theme={theme()}>
+            <DragDropContextWrapper>
+              <FlyoutButton
+                dataProviders={mockDataProviders}
+                show={false}
+                timelineId="test"
+                onOpen={openMock}
+              />
+            </DragDropContextWrapper>
+          </ThemeProvider>
         </ReduxStoreProvider>
       );
       expect(wrapper.find('[data-test-subj="flyoutButton"]').exists()).toEqual(false);
@@ -387,15 +390,16 @@ describe('Flyout', () => {
       const openMock = jest.fn();
       const wrapper = mount(
         <ReduxStoreProvider store={store}>
-          <DragDropContextWrapper>
-            <FlyoutButton
-              dataProviders={mockDataProviders}
-              show={true}
-              theme="dark"
-              timelineId="test"
-              onOpen={openMock}
-            />{' '}
-          </DragDropContextWrapper>
+          <ThemeProvider theme={theme()}>
+            <DragDropContextWrapper>
+              <FlyoutButton
+                dataProviders={mockDataProviders}
+                show={true}
+                timelineId="test"
+                onOpen={openMock}
+              />
+            </DragDropContextWrapper>
+          </ThemeProvider>
         </ReduxStoreProvider>
       );
       expect(
@@ -410,15 +414,16 @@ describe('Flyout', () => {
       const openMock = jest.fn();
       const wrapper = mount(
         <ReduxStoreProvider store={store}>
-          <DragDropContextWrapper>
-            <FlyoutButton
-              dataProviders={mockDataProviders}
-              show={true}
-              theme="dark"
-              timelineId="test"
-              onOpen={openMock}
-            />
-          </DragDropContextWrapper>
+          <ThemeProvider theme={theme()}>
+            <DragDropContextWrapper>
+              <FlyoutButton
+                dataProviders={mockDataProviders}
+                show={true}
+                timelineId="test"
+                onOpen={openMock}
+              />
+            </DragDropContextWrapper>
+          </ThemeProvider>
         </ReduxStoreProvider>
       );
       wrapper

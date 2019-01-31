@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { appSelectors } from './app';
 export * from './drag_and_drop';
-export * from './hosts';
+export { hostsSelectors } from './hosts';
 export * from './inputs';
-export * from './timeline';
+export { timelineSelectors } from './timeline';

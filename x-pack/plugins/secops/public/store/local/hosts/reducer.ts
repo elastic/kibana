@@ -6,7 +6,10 @@
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
+import { get } from 'lodash/fp';
 import {
+  applyHostsFilterQuery,
+  setHostsFilterQueryDraft,
   updateAuthenticationsLimit,
   updateEventsLimit,
   updateHostsLimit,
@@ -19,58 +22,104 @@ export type HostsState = HostsModel;
 export const DEFAULT_LIMIT = 10;
 
 export const initialHostsState: HostsState = {
-  query: {
-    authentications: {
-      limit: DEFAULT_LIMIT,
+  page: {
+    queries: {
+      authentications: {
+        limit: DEFAULT_LIMIT,
+      },
+      hosts: {
+        limit: DEFAULT_LIMIT,
+      },
+      events: {
+        limit: DEFAULT_LIMIT,
+      },
+      uncommonProcesses: {
+        limit: DEFAULT_LIMIT,
+      },
     },
-    hosts: {
-      limit: DEFAULT_LIMIT,
+    filterQuery: null,
+    filterQueryDraft: null,
+  },
+  details: {
+    queries: {
+      authentications: {
+        limit: DEFAULT_LIMIT,
+      },
+      hosts: {
+        limit: DEFAULT_LIMIT,
+      },
+      events: {
+        limit: DEFAULT_LIMIT,
+      },
+      uncommonProcesses: {
+        limit: DEFAULT_LIMIT,
+      },
     },
-    events: {
-      limit: DEFAULT_LIMIT,
-    },
-    uncommonProcesses: {
-      limit: DEFAULT_LIMIT,
-    },
+    filterQuery: null,
+    filterQueryDraft: null,
   },
 };
 
 export const hostsReducer = reducerWithInitialState(initialHostsState)
-  .case(updateAuthenticationsLimit, (state, { limit }) => ({
+  .case(updateAuthenticationsLimit, (state, { limit, hostsType }) => ({
     ...state,
-    query: {
-      ...state.query,
-      authentications: {
-        limit,
+    [hostsType]: {
+      queries: {
+        ...get(`${hostsType}.queries`, state),
+        authentications: {
+          limit,
+        },
       },
     },
   }))
-  .case(updateHostsLimit, (state, { limit }) => ({
+  .case(updateHostsLimit, (state, { limit, hostsType }) => ({
     ...state,
-    query: {
-      ...state.query,
-      hosts: {
-        limit,
+    [hostsType]: {
+      ...get(`${hostsType}`, state),
+      queries: {
+        ...get(`${hostsType}.queries`, state),
+        hosts: {
+          limit,
+        },
       },
     },
   }))
-  .case(updateEventsLimit, (state, { limit }) => ({
+  .case(updateEventsLimit, (state, { limit, hostsType }) => ({
     ...state,
-    query: {
-      ...state.query,
-      events: {
-        limit,
+    [hostsType]: {
+      queries: {
+        ...get(`${hostsType}.queries`, state),
+        events: {
+          limit,
+        },
       },
     },
   }))
-  .case(updateUncommonProcessesLimit, (state, { limit }) => ({
+  .case(updateUncommonProcessesLimit, (state, { limit, hostsType }) => ({
     ...state,
-    query: {
-      ...state.query,
-      uncommonProcesses: {
-        ...state.query.uncommonProcesses,
-        limit,
+    [hostsType]: {
+      ...get(`${hostsType}`, state),
+      queries: {
+        ...get(`${hostsType}.queries`, state),
+        uncommonProcesses: {
+          limit,
+        },
       },
+    },
+  }))
+  .case(setHostsFilterQueryDraft, (state, { filterQueryDraft, hostsType }) => ({
+    ...state,
+    [hostsType]: {
+      ...get(`${hostsType}`, state),
+      filterQueryDraft,
+    },
+  }))
+  .case(applyHostsFilterQuery, (state, { filterQuery, hostsType }) => ({
+    ...state,
+    [hostsType]: {
+      ...get(`${hostsType}`, state),
+      filterQueryDraft: filterQuery.query,
+      filterQuery,
     },
   }))
   .build();

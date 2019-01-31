@@ -13,7 +13,7 @@ import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 
 import { AuthenticationsEdges } from '../../../../graphql/types';
-import { authenticationsSelector, hostsActions, State } from '../../../../store';
+import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
@@ -29,6 +29,7 @@ interface OwnProps {
   totalCount: number;
   loadMore: (cursor: string) => void;
   startDate: number;
+  type: hostsModel.HostsType;
 }
 
 interface AuthenticationTableReduxProps {
@@ -36,7 +37,7 @@ interface AuthenticationTableReduxProps {
 }
 
 interface AuthenticationTableDispatchProps {
-  updateLimitPagination: ActionCreator<{ limit: number }>;
+  updateLimitPagination: ActionCreator<{ limit: number; hostsType: hostsModel.HostsType }>;
 }
 
 type AuthenticationTableProps = OwnProps &
@@ -73,6 +74,7 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
     nextCursor,
     updateLimitPagination,
     startDate,
+    type,
   }) => (
     <LoadMoreTable
       columns={getAuthenticationColumns(startDate)}
@@ -83,7 +85,9 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
       limit={limit}
       hasNextPage={hasNextPage}
       itemsPerRow={rowItems}
-      updateLimitPagination={newLimit => updateLimitPagination({ limit: newLimit })}
+      updateLimitPagination={newLimit =>
+        updateLimitPagination({ limit: newLimit, hostsType: type })
+      }
       title={
         <h3>
           {i18n.AUTHENTICATIONS} <EuiBadge color="hollow">{totalCount}</EuiBadge>
@@ -93,10 +97,16 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
   )
 );
 
-const mapStateToProps = (state: State) => authenticationsSelector(state);
+const makeMapStateToProps = () => {
+  const getAuthenticationsSelector = hostsSelectors.authenticationsSelector();
+  const mapStateToProps = (state: State, { type }: OwnProps) => {
+    return getAuthenticationsSelector(state, type);
+  };
+  return mapStateToProps;
+};
 
 export const AuthenticationTable = connect(
-  mapStateToProps,
+  makeMapStateToProps,
   {
     updateLimitPagination: hostsActions.updateAuthenticationsLimit,
   }

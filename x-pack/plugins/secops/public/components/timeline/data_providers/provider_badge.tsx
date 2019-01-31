@@ -16,7 +16,6 @@ import { QueryDate } from './data_provider';
 import * as i18n from './translations';
 
 const ProviderBadgeStyled = styled(EuiBadge)`
-  border: none;
   .euiToolTipAnchor {
     &::after {
       font-style: normal;
@@ -29,7 +28,6 @@ const ProviderBadgeStyled = styled(EuiBadge)`
   }
   &.globalFilterItem {
     line-height: 28px;
-    border: none;
     &.globalFilterItem-isDisabled {
       text-decoration: line-through;
       font-weight: 400;
@@ -77,6 +75,7 @@ export const ProviderBadge = pure<ProviderBadgeProps>(
       <ProviderBadgeStyled
         id={`${providerId}-${field}-${val}`}
         className={classes}
+        color="hollow"
         title={title}
         iconOnClick={deleteFilter}
         iconOnClickAriaLabel={i18n.REMOVE_DATA_PROVIDER}

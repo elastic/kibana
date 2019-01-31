@@ -99,7 +99,7 @@ export class ProviderItemAndPopover extends React.PureComponent<
               {dataProvidersAnd.length}
             </NumberProviderAndBadge>
           )}
-          <EuiBadgeAndStyled>{i18n.AND}</EuiBadgeAndStyled>
+          <EuiBadgeAndStyled color="hollow">{i18n.AND}</EuiBadgeAndStyled>
         </EuiButtonContent>
       </EuiButtonEmpty>
     );
@@ -146,7 +146,7 @@ export class ProviderItemAndPopover extends React.PureComponent<
                 </EuiAccordion>
                 {index < dataProvidersAnd.length - 1 && (
                   <AndStyled>
-                    <EuiBadgeAndStyled color="default">{i18n.AND}</EuiBadgeAndStyled>
+                    <EuiBadgeAndStyled color="hollow">{i18n.AND}</EuiBadgeAndStyled>
                     <EuiHorizontalRule />
                   </AndStyled>
                 )}

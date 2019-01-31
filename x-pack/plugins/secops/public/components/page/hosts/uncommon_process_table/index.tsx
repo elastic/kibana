@@ -12,7 +12,7 @@ import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 
 import { HostEcsFields, UncommonProcessesEdges } from '../../../../graphql/types';
-import { hostsActions, State, uncommonProcessesSelector } from '../../../../store';
+import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import {
@@ -33,6 +33,7 @@ interface OwnProps {
   totalCount: number;
   loadMore: (cursor: string) => void;
   startDate: number;
+  type: hostsModel.HostsType;
 }
 
 interface UncommonProcessTableReduxProps {
@@ -40,7 +41,7 @@ interface UncommonProcessTableReduxProps {
 }
 
 interface UncommonProcessTableDispatchProps {
-  updateLimitPagination: ActionCreator<{ limit: number }>;
+  updateLimitPagination: ActionCreator<{ limit: number; hostsType: hostsModel.HostsType }>;
 }
 
 type UncommonProcessTableProps = OwnProps &
@@ -77,6 +78,7 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
     nextCursor,
     updateLimitPagination,
     startDate,
+    type,
   }) => (
     <LoadMoreTable
       columns={getUncommonColumns(startDate)}
@@ -87,7 +89,9 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
       limit={limit}
       hasNextPage={hasNextPage}
       itemsPerRow={rowItems}
-      updateLimitPagination={newLimit => updateLimitPagination({ limit: newLimit })}
+      updateLimitPagination={newLimit =>
+        updateLimitPagination({ limit: newLimit, hostsType: type })
+      }
       title={
         <h3>
           {i18n.UNCOMMON_PROCESSES} <EuiBadge color="hollow">{totalCount}</EuiBadge>
@@ -97,10 +101,16 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
   )
 );
 
-const mapStateToProps = (state: State) => uncommonProcessesSelector(state);
+const makeMapStateToProps = () => {
+  const getUncommonProcessesSelector = hostsSelectors.uncommonProcessesSelector();
+  const mapStateToProps = (state: State, { type }: OwnProps) => {
+    return getUncommonProcessesSelector(state, type);
+  };
+  return mapStateToProps;
+};
 
 export const UncommonProcessTable = connect(
-  mapStateToProps,
+  makeMapStateToProps,
   {
     updateLimitPagination: hostsActions.updateUncommonProcessesLimit,
   }

@@ -65,5 +65,6 @@ exports[`Load More Events Table Component rendering it renders the default Event
   startDate={1546878704036}
   tiebreaker="10624"
   totalCount={15546}
+  type="page"
 />
 `;

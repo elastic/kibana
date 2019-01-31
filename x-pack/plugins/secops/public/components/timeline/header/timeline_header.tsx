@@ -8,8 +8,8 @@ import { EuiHorizontalRule } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
+import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { Theme } from '../../../store/local/app/model';
 import { ColumnHeaders } from '../body/column_headers';
 import { ColumnHeader } from '../body/column_headers/column_header';
 import { Sort } from '../body/sort';
@@ -30,6 +30,7 @@ import { StatefulSearchOrFilter } from '../search_or_filter';
 interface Props {
   columnHeaders: ColumnHeader[];
   id: string;
+  indexPattern: StaticIndexPattern;
   dataProviders: DataProvider[];
   onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
   onChangeDroppableAndProvider: OnChangeDroppableAndProvider;
@@ -42,7 +43,6 @@ interface Props {
   range: string;
   show: boolean;
   sort: Sort;
-  theme: Theme;
 }
 
 const TimelineHeaderContainer = styled.div`
@@ -53,6 +53,7 @@ export const TimelineHeader = pure<Props>(
   ({
     columnHeaders,
     id,
+    indexPattern,
     dataProviders,
     onChangeDataProviderKqlQuery,
     onChangeDroppableAndProvider,
@@ -65,7 +66,6 @@ export const TimelineHeader = pure<Props>(
     range,
     show,
     sort,
-    theme,
   }) => (
     <TimelineHeaderContainer data-test-subj="timelineHeader">
       <DataProviders
@@ -77,11 +77,8 @@ export const TimelineHeader = pure<Props>(
         onToggleDataProviderEnabled={onToggleDataProviderEnabled}
         onToggleDataProviderExcluded={onToggleDataProviderExcluded}
         show={show}
-        theme={theme}
       />
-
-      <StatefulSearchOrFilter timelineId={id} />
-
+      <StatefulSearchOrFilter timelineId={id} indexPattern={indexPattern} />
       <ColumnHeaders
         columnHeaders={columnHeaders}
         onColumnSorted={onColumnSorted}
@@ -90,7 +87,6 @@ export const TimelineHeader = pure<Props>(
         range={range}
         sort={sort}
       />
-
       <EuiHorizontalRule margin="xs" />
     </TimelineHeaderContainer>
   )

@@ -5,7 +5,10 @@
  */
 
 import * as hostsActions from './actions';
+import * as hostsModel from './model';
+import * as hostsSelectors from './selectors';
 
 export { hostsActions };
-export * from './selectors';
+export { hostsModel };
+export { hostsSelectors };
 export * from './reducer';

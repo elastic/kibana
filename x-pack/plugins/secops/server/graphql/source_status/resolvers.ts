@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { defaultTo } from 'lodash/fp';
 import { IndexType, SourceStatusResolvers } from '../../graphql/types';
 import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { IndexFields } from '../../lib/index_fields';
@@ -106,7 +107,11 @@ export const createSourceStatusResolvers = (libs: {
       return await libs.sourceStatus.getIndexNames(req, source.id, 'packetbeatAlias');
     },
     async indexFields(source, args, { req }) {
-      return await libs.fields.getFields(req, source.id, args.indexType || IndexType.ANY);
+      return await libs.fields.getFields(
+        req,
+        source.id,
+        defaultTo([IndexType.ANY], args.indexTypes)
+      );
     },
   },
 });

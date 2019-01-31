@@ -43,5 +43,6 @@ exports[`Load More Table Component rendering it renders the default Hosts table 
   loading={false}
   nextCursor="aa7ca589f1b8220002f2fc61c64cfbf1"
   totalCount={4}
+  type="page"
 />
 `;

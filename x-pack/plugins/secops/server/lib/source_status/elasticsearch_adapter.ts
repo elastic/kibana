@@ -38,7 +38,21 @@ export class ElasticsearchSourceStatusAdapter implements SourceStatusAdapter {
   }
 
   public async hasIndices(request: FrameworkRequest, indexNames: string) {
-    return (await this.getIndexNames(request, indexNames)).length > 0;
+    return await this.framework
+      .callWithRequest(request, 'search', {
+        index: indexNames,
+        size: 0,
+        terminate_after: 1,
+      })
+      .then(
+        response => response._shards.total > 0,
+        err => {
+          if (err.status === 404) {
+            return false;
+          }
+          throw err;
+        }
+      );
   }
 }
 

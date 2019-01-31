@@ -12,22 +12,43 @@ export const mockGlobalState: State = {
   local: {
     app: {
       notesById: {},
-      theme: 'dark',
     },
     hosts: {
-      query: {
-        authentications: {
-          limit: 10,
+      page: {
+        queries: {
+          authentications: {
+            limit: 10,
+          },
+          hosts: {
+            limit: 10,
+          },
+          events: {
+            limit: 10,
+          },
+          uncommonProcesses: {
+            limit: 10,
+          },
         },
-        hosts: {
-          limit: 2,
+        filterQuery: null,
+        filterQueryDraft: null,
+      },
+      details: {
+        queries: {
+          authentications: {
+            limit: 10,
+          },
+          hosts: {
+            limit: 10,
+          },
+          events: {
+            limit: 10,
+          },
+          uncommonProcesses: {
+            limit: 10,
+          },
         },
-        events: {
-          limit: 10,
-        },
-        uncommonProcesses: {
-          limit: 0,
-        },
+        filterQuery: null,
+        filterQueryDraft: null,
       },
     },
     inputs: {
@@ -60,7 +81,10 @@ export const mockGlobalState: State = {
           isFavorite: false,
           isLive: false,
           kqlMode: 'filter',
-          kqlQuery: '',
+          kqlQuery: {
+            filterQuery: null,
+            filterQueryDraft: null,
+          },
           title: '',
           noteIds: [],
           range: '1 Day',

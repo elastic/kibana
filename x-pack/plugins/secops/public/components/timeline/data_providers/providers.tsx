@@ -170,7 +170,7 @@ export const Providers = pure<Props>(
               </EuiFlexGroup>
             </PanelProviderItemContainer>
             <PanelProviderItemContainer grow={false}>
-              <EuiBadgeOrStyled color="default">{i18n.OR.toLocaleUpperCase()}</EuiBadgeOrStyled>
+              <EuiBadgeOrStyled color="hollow">{i18n.OR.toLocaleUpperCase()}</EuiBadgeOrStyled>
               <EuiHorizontalRule />
             </PanelProviderItemContainer>
           </PanelProvidersGroupContainer>

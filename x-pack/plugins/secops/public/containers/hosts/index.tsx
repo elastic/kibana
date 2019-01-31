@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DocumentNode } from 'graphql';
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
@@ -13,8 +12,12 @@ import { pure } from 'recompose';
 
 import { ESQuery } from '../../../common/typed_json';
 import { GetHostsTableQuery, GetHostSummaryQuery, HostsEdges, PageInfo } from '../../graphql/types';
-import { hostsSelector, inputsModel, State } from '../../store';
+import { hostsModel, hostsSelectors, inputsModel, State } from '../../store';
 import { createFilter } from '../helpers';
+import { HostSummaryQuery } from './host_summary.gql_query';
+import { HostsTableQuery } from './hosts_table.gql_query';
+
+export { HostsFilter } from './filter';
 
 export interface HostsArgs {
   id: string;
@@ -30,13 +33,13 @@ export interface HostsArgs {
 
 export interface OwnProps {
   id?: string;
-  query: DocumentNode;
   children: (args: HostsArgs) => React.ReactNode;
   sourceId: string;
   startDate: number;
   endDate: number;
   filterQuery?: ESQuery | string;
   poll: number;
+  type: hostsModel.HostsType;
 }
 
 export interface HostsComponentReduxProps {
@@ -48,7 +51,6 @@ type HostsProps = OwnProps & HostsComponentReduxProps;
 const HostsComponentQuery = pure<HostsProps>(
   ({
     id = 'hostsQuery',
-    query,
     children,
     filterQuery,
     sourceId,
@@ -56,12 +58,13 @@ const HostsComponentQuery = pure<HostsProps>(
     endDate,
     limit,
     poll,
+    type,
   }) => (
     <Query<
       GetHostsTableQuery.Query | GetHostSummaryQuery.Query,
       GetHostsTableQuery.Variables | GetHostSummaryQuery.Variables
     >
-      query={query}
+      query={type === hostsModel.HostsType.page ? HostsTableQuery : HostSummaryQuery}
       fetchPolicy="cache-and-network"
       pollInterval={poll}
       notifyOnNetworkStatusChange
@@ -121,6 +124,12 @@ const HostsComponentQuery = pure<HostsProps>(
   )
 );
 
-const mapStateToProps = (state: State) => hostsSelector(state);
+const makeMapStateToProps = () => {
+  const getHostsSelector = hostsSelectors.hostsSelector();
+  const mapStateToProps = (state: State, { type }: OwnProps) => {
+    return getHostsSelector(state, type);
+  };
+  return mapStateToProps;
+};
 
-export const HostsQuery = connect(mapStateToProps)(HostsComponentQuery);
+export const HostsQuery = connect(makeMapStateToProps)(HostsComponentQuery);

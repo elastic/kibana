@@ -12,7 +12,7 @@ import { pure } from 'recompose';
 
 import { ESQuery } from '../../../common/typed_json';
 import { Direction, Ecs, GetEventsQuery, PageInfo } from '../../graphql/types';
-import { eventsSelector, inputsModel, State } from '../../store';
+import { hostsModel, hostsSelectors, inputsModel, State } from '../../store';
 import { createFilter } from '../helpers';
 import { eventsQuery } from './index.gql_query';
 
@@ -34,6 +34,7 @@ export interface OwnProps {
   sourceId: string;
   startDate: number;
   endDate: number;
+  type: hostsModel.HostsType;
 }
 
 export interface EventsComponentReduxProps {
@@ -108,6 +109,12 @@ const EventsComponentQuery = pure<EventsProps>(
   )
 );
 
-const mapStateToProps = (state: State) => eventsSelector(state);
+const makeMapStateToProps = () => {
+  const getEventsSelector = hostsSelectors.eventsSelector();
+  const mapStateToProps = (state: State, { type }: OwnProps) => {
+    return getEventsSelector(state, type);
+  };
+  return mapStateToProps;
+};
 
-export const EventsQuery = connect(mapStateToProps)(EventsComponentQuery);
+export const EventsQuery = connect(makeMapStateToProps)(EventsComponentQuery);

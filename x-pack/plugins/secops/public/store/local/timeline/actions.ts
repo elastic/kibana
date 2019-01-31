@@ -8,6 +8,7 @@ import actionCreatorFactory from 'typescript-fsa';
 
 import { Sort } from '../../../components/timeline/body/sort';
 import { DataProvider } from '../../../components/timeline/data_providers/data_provider';
+import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 import { KqlMode } from './model';
 
 const actionCreator = actionCreatorFactory('x-pack/secops/local/timeline');
@@ -75,7 +76,15 @@ export const updateDescription = actionCreator<{ id: string; description: string
 
 export const updateKqlMode = actionCreator<{ id: string; kqlMode: KqlMode }>('UPDATE_KQL_MODE');
 
-export const updateKqlQuery = actionCreator<{ id: string; kqlQuery: string }>('UPDATE_KQL_QUERY');
+export const setKqlFilterQueryDraft = actionCreator<{
+  id: string;
+  filterQueryDraft: KueryFilterQuery;
+}>('SET_KQL_FILTER_QUERY_DRAFT');
+
+export const applyKqlFilterQuery = actionCreator<{
+  id: string;
+  filterQuery: SerializedFilterQuery;
+}>('APPLY_KQL_FILTER_QUERY');
 
 export const updateIsFavorite = actionCreator<{ id: string; isFavorite: boolean }>(
   'UPDATE_IS_FAVORITE'

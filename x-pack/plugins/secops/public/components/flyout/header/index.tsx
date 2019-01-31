@@ -12,10 +12,13 @@ import { Dispatch } from 'redux';
 import { History } from '../../../lib/history';
 import { Note } from '../../../lib/note';
 import { getApplicableNotes } from '../../../lib/note/helpers';
-import { State, timelineActions } from '../../../store';
-import { appActions } from '../../../store/local';
-import { notesByIdSelector } from '../../../store/local/app';
-import { timelineByIdSelector } from '../../../store/selectors';
+import {
+  appActions,
+  appSelectors,
+  State,
+  timelineActions,
+  timelineSelectors,
+} from '../../../store';
 import { UpdateNote } from '../../notes/helpers';
 import { defaultWidth } from '../../timeline/body';
 import { Properties } from '../../timeline/properties';
@@ -102,7 +105,7 @@ const statefulFlyoutHeader = pure<Props>(
 const emptyHistory: History[] = []; // stable reference
 
 const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
-  const timelineById = defaultTo({}, timelineByIdSelector(state));
+  const timelineById = defaultTo({}, timelineSelectors.timelineByIdSelector(state));
 
   const description = getOr('', `${timelineId}.description`, timelineById);
   const history = emptyHistory; // TODO: get notes from store via selector
@@ -110,7 +113,7 @@ const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
   const isLive = getOr(false, `${timelineId}.isLive`, timelineById);
   const title = getOr('', `${timelineId}.title`, timelineById);
   const noteIds = getOr([], `${timelineId}.noteIds`, timelineById);
-  const notesById = notesByIdSelector(state);
+  const notesById = appSelectors.notesByIdSelector(state);
   const notes = getApplicableNotes({ noteIds, notesById });
   const width = getOr(defaultWidth, `${timelineId}.width`, timelineById);
 

@@ -8,7 +8,11 @@ import { IndexField, IndexType } from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
 
 export interface FieldsAdapter {
-  getFields?(req: FrameworkRequest, sourceId: string, indexType: IndexType): Promise<IndexField[]>;
+  getFields?(
+    req: FrameworkRequest,
+    sourceId: string,
+    indexTypes: IndexType[]
+  ): Promise<IndexField[]>;
   getIndexFields(req: FrameworkRequest, indices: string[]): Promise<IndexField[]>;
 }
 

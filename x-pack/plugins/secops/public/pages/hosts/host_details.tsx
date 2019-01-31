@@ -4,16 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  // @ts-ignore: EuiBreadcrumbs has no exported member
-  EuiBreadcrumbs,
-  EuiFlexGroup,
-} from '@elastic/eui';
-import { getOr } from 'lodash/fp';
+import { getOr, isEmpty } from 'lodash/fp';
 import React from 'react';
+import { connect } from 'react-redux';
 import { pure } from 'recompose';
-import styled from 'styled-components';
 import chrome from 'ui/chrome';
+import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { ESTermQuery } from '../../../common/typed_json';
 import { EmptyPage } from '../../components/empty_page';
@@ -25,9 +21,13 @@ import { manageQuery } from '../../components/page/manage_query';
 import { AuthenticationsQuery } from '../../containers/authentications';
 import { GlobalTime } from '../../containers/global_time';
 import { HostsQuery } from '../../containers/hosts';
-import { HostSummaryQuery } from '../../containers/hosts/host_summary.gql_query';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
+import { IndexType } from '../../graphql/types';
+import { convertKueryToElasticSearchQuery, escapeQueryValue } from '../../lib/keury';
+import { hostsModel, hostsSelectors, State } from '../../store';
+import { HostsKql } from './kql';
+import { PageContent, PageContentBody } from './styles';
 import * as i18n from './translations';
 
 const basePath = chrome.getBasePath();
@@ -36,98 +36,144 @@ const HostSummaryManage = manageQuery(HostSummary);
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
 
-export const HostDetails = pure<HostComponentProps>(({ match: { params: { hostId } } }) => (
-  <WithSource sourceId="default">
-    {({ auditbeatIndicesExist }) =>
-      indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
-        <GlobalTime>
-          {({ poll, to, from, setQuery }) => (
-            <>
-              <HostBreadcrumbWrapper breadcrumbs={getBreadcrumbs(hostId)} />
+interface HostDetailsComponentReduxProps {
+  filterQueryExpression: string;
+}
 
-              <EuiFlexGroup>
-                <HostsQuery
-                  sourceId="default"
-                  query={HostSummaryQuery}
-                  startDate={from}
-                  endDate={to}
-                  poll={poll}
-                  filterQuery={getFilterQuery(hostId)}
-                >
-                  {({ hosts, loading, id, refetch, startDate, endDate }) => (
-                    <HostSummaryManage
-                      id={id}
-                      refetch={refetch}
-                      setQuery={setQuery}
-                      startDate={startDate}
-                      endDate={endDate}
-                      data={hosts}
-                      loading={loading}
-                    />
+type HostDetailsComponentProps = HostDetailsComponentReduxProps & HostComponentProps;
+
+const HostDetailsComponent = pure<HostDetailsComponentProps>(
+  ({
+    match: {
+      params: { hostId },
+    },
+    filterQueryExpression,
+  }) => (
+    <WithSource sourceId="default" indexTypes={[IndexType.AUDITBEAT]}>
+      {({ auditbeatIndicesExist, indexPattern }) =>
+        indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
+          <>
+            <HostsKql indexPattern={indexPattern} type={hostsModel.HostsType.details} />
+            <PageContent data-test-subj="pageContent" panelPaddingSize="none">
+              <PageContentBody data-test-subj="pane1ScrollContainer">
+                <GlobalTime>
+                  {({ poll, to, from, setQuery }) => (
+                    <>
+                      <HostsQuery
+                        sourceId="default"
+                        startDate={from}
+                        endDate={to}
+                        poll={poll}
+                        filterQuery={getFilterQuery(hostId, filterQueryExpression, indexPattern)}
+                        type={hostsModel.HostsType.details}
+                      >
+                        {({ hosts, loading, id, refetch, startDate, endDate }) => (
+                          <HostSummaryManage
+                            id={id}
+                            refetch={refetch}
+                            setQuery={setQuery}
+                            startDate={startDate}
+                            endDate={endDate}
+                            data={hosts}
+                            loading={loading}
+                          />
+                        )}
+                      </HostsQuery>
+                      <AuthenticationsQuery
+                        sourceId="default"
+                        startDate={from}
+                        endDate={to}
+                        poll={poll}
+                        filterQuery={getFilterQuery(hostId, filterQueryExpression, indexPattern)}
+                        type={hostsModel.HostsType.details}
+                      >
+                        {({
+                          authentications,
+                          totalCount,
+                          loading,
+                          pageInfo,
+                          loadMore,
+                          id,
+                          refetch,
+                        }) => (
+                          <AuthenticationTableManage
+                            id={id}
+                            refetch={refetch}
+                            setQuery={setQuery}
+                            loading={loading}
+                            startDate={from}
+                            data={authentications}
+                            totalCount={totalCount}
+                            nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                            hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                            loadMore={loadMore}
+                            type={hostsModel.HostsType.details}
+                          />
+                        )}
+                      </AuthenticationsQuery>
+                      <UncommonProcessesQuery
+                        sourceId="default"
+                        startDate={from}
+                        endDate={to}
+                        poll={poll}
+                        cursor={null}
+                        filterQuery={getFilterQuery(hostId, filterQueryExpression, indexPattern)}
+                        type={hostsModel.HostsType.details}
+                      >
+                        {({
+                          uncommonProcesses,
+                          totalCount,
+                          loading,
+                          pageInfo,
+                          loadMore,
+                          id,
+                          refetch,
+                        }) => (
+                          <UncommonProcessTableManage
+                            id={id}
+                            refetch={refetch}
+                            setQuery={setQuery}
+                            loading={loading}
+                            startDate={from}
+                            data={uncommonProcesses}
+                            totalCount={totalCount}
+                            nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                            hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                            loadMore={loadMore}
+                            type={hostsModel.HostsType.details}
+                          />
+                        )}
+                      </UncommonProcessesQuery>
+                    </>
                   )}
-                </HostsQuery>
-              </EuiFlexGroup>
-              <AuthenticationsQuery
-                sourceId="default"
-                startDate={from}
-                endDate={to}
-                poll={poll}
-                filterQuery={getFilterQuery(hostId)}
-              >
-                {({ authentications, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
-                  <AuthenticationTableManage
-                    id={id}
-                    refetch={refetch}
-                    setQuery={setQuery}
-                    loading={loading}
-                    startDate={from}
-                    data={authentications}
-                    totalCount={totalCount}
-                    nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                    hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                    loadMore={loadMore}
-                  />
-                )}
-              </AuthenticationsQuery>
-              <UncommonProcessesQuery
-                sourceId="default"
-                startDate={from}
-                endDate={to}
-                poll={poll}
-                cursor={null}
-                filterQuery={getFilterQuery(hostId)}
-              >
-                {({ uncommonProcesses, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
-                  <UncommonProcessTableManage
-                    id={id}
-                    refetch={refetch}
-                    setQuery={setQuery}
-                    loading={loading}
-                    startDate={from}
-                    data={uncommonProcesses}
-                    totalCount={totalCount}
-                    nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                    hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                    loadMore={loadMore}
-                  />
-                )}
-              </UncommonProcessesQuery>
-            </>
-          )}
-        </GlobalTime>
-      ) : (
-        <EmptyPage
-          title={i18n.NO_AUDITBEAT_INDICES}
-          message={i18n.LETS_ADD_SOME}
-          actionLabel={i18n.SETUP_INSTRUCTIONS}
-          actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/security`}
-        />
-      )
-    }
-  </WithSource>
-));
+                </GlobalTime>
+              </PageContentBody>
+            </PageContent>
+          </>
+        ) : (
+          <EmptyPage
+            title={i18n.NO_AUDITBEAT_INDICES}
+            message={i18n.LETS_ADD_SOME}
+            actionLabel={i18n.SETUP_INSTRUCTIONS}
+            actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/security`}
+          />
+        )
+      }
+    </WithSource>
+  )
+);
 
-const getBreadcrumbs = (hostId: string) => [
+const makeMapStateToProps = () => {
+  const getHostsFilterQuery = hostsSelectors.hostsFilterQueryExpression();
+  const mapStateToProps = (state: State) => ({
+    filterQueryExpression: getHostsFilterQuery(state, hostsModel.HostsType.details) || '',
+  });
+  return mapStateToProps;
+};
+
+export const HostDetails = connect(makeMapStateToProps)(HostDetailsComponent);
+
+export const getBreadcrumbs = (hostId: string) => [
   {
     text: i18n.HOSTS,
     href: getHostsUrl(),
@@ -137,8 +183,14 @@ const getBreadcrumbs = (hostId: string) => [
   },
 ];
 
-const getFilterQuery = (hostId: string): ESTermQuery => ({ term: { 'host.id': hostId } });
-
-const HostBreadcrumbWrapper = styled(EuiBreadcrumbs)`
-  margin: 10px 0;
-`;
+const getFilterQuery = (
+  hostId: string,
+  filterQueryExpression: string,
+  indexPattern: StaticIndexPattern
+): ESTermQuery | string =>
+  isEmpty(filterQueryExpression)
+    ? { term: { 'host.id': hostId } }
+    : convertKueryToElasticSearchQuery(
+        `${filterQueryExpression} and host.id: ${escapeQueryValue(hostId)}`,
+        indexPattern
+      );

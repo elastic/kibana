@@ -66,6 +66,12 @@ export interface DatabaseResponse {
 
 export interface DatabaseSearchResponse<Hit = {}, Aggregations = undefined>
   extends DatabaseResponse {
+  _shards: {
+    total: number;
+    successful: number;
+    skipped: number;
+    failed: number;
+  };
   aggregations?: Aggregations;
   hits: {
     total: number;

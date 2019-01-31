@@ -4,34 +4,46 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultTo, getOr } from 'lodash/fp';
+import { getOr } from 'lodash/fp';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
+import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { timelineActions } from '../../../store';
-import { KqlMode } from '../../../store/local/timeline/model';
+import { convertKueryToElasticSearchQuery } from '../../../lib/keury';
+import {
+  KueryFilterQuery,
+  SerializedFilterQuery,
+  timelineActions,
+  timelineSelectors,
+} from '../../../store';
+import { KqlMode, TimelineModel } from '../../../store/local/timeline/model';
 import { State } from '../../../store/reducer';
-import { timelineByIdSelector } from '../../../store/selectors';
 import { SearchOrFilter } from './search_or_filter';
 
 interface OwnProps {
+  indexPattern: StaticIndexPattern;
   timelineId: string;
 }
 
 interface StateReduxProps {
+  filterQueryDraft: KueryFilterQuery;
+  isFilterQueryDraftValid: boolean;
   kqlMode?: KqlMode;
-  kqlQuery?: string;
 }
 
 interface DispatchProps {
-  updateKqlMode?: ActionCreator<{
+  applyKqlFilterQuery: ActionCreator<{
+    id: string;
+    filterQuery: SerializedFilterQuery;
+  }>;
+  updateKqlMode: ActionCreator<{
     id: string;
     kqlMode: KqlMode;
   }>;
-  updateKqlQuery?: ActionCreator<{
+  setKqlFilterQueryDraft: ActionCreator<{
     id: string;
-    kqlQuery: string;
+    filterQueryDraft: KueryFilterQuery;
   }>;
 }
 
@@ -39,33 +51,73 @@ type Props = OwnProps & StateReduxProps & DispatchProps;
 
 class StatefulSearchOrFilterComponent extends React.PureComponent<Props> {
   public render() {
-    const { kqlMode, kqlQuery, timelineId, updateKqlMode, updateKqlQuery } = this.props;
+    const {
+      applyKqlFilterQuery,
+      indexPattern,
+      filterQueryDraft,
+      isFilterQueryDraftValid,
+      kqlMode,
+      timelineId,
+      setKqlFilterQueryDraft,
+      updateKqlMode,
+    } = this.props;
+
+    const applyFilterQueryFromKueryExpression = (expression: string) =>
+      applyKqlFilterQuery({
+        id: timelineId,
+        filterQuery: {
+          query: {
+            kind: 'kuery',
+            expression,
+          },
+          serializedQuery: convertKueryToElasticSearchQuery(expression, indexPattern),
+        },
+      });
+
+    const setFilterQueryDraftFromKueryExpression = (expression: string) =>
+      setKqlFilterQueryDraft({
+        id: timelineId,
+        filterQueryDraft: {
+          kind: 'kuery',
+          expression,
+        },
+      });
 
     return (
       <SearchOrFilter
+        applyKqlFilterQuery={applyFilterQueryFromKueryExpression}
+        filterQueryDraft={filterQueryDraft}
+        indexPattern={indexPattern}
+        isFilterQueryDraftValid={isFilterQueryDraftValid}
         kqlMode={kqlMode!}
-        kqlQuery={kqlQuery!}
         timelineId={timelineId}
         updateKqlMode={updateKqlMode!}
-        updateKqlQuery={updateKqlQuery!}
+        setKqlFilterQueryDraft={setFilterQueryDraftFromKueryExpression!}
       />
     );
   }
 }
 
-const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
-  const timelineById = defaultTo({}, timelineByIdSelector(state));
-
-  const kqlMode: KqlMode = getOr('filter', `${timelineId}.kqlMode`, timelineById);
-  const kqlQuery = getOr('', `${timelineId}.kqlQuery`, timelineById);
-
-  return { kqlMode, kqlQuery };
+const makeMapStateToProps = () => {
+  const getTimeline = timelineSelectors.getTimelineByIdSelector();
+  const getKqlFilterQueryDraft = timelineSelectors.getKqlFilterQueryDraftSelector();
+  const isFilterQueryDraftValid = timelineSelectors.isFilterQueryDraftValidSelector();
+  const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
+    const timeline: TimelineModel | {} = getTimeline(state, timelineId);
+    return {
+      kqlMode: getOr('filter', 'kqlMode', timeline),
+      filterQueryDraft: getKqlFilterQueryDraft(state, timelineId),
+      isFilterQueryDraftValid: isFilterQueryDraftValid(state, timelineId),
+    };
+  };
+  return mapStateToProps;
 };
 
 export const StatefulSearchOrFilter = connect(
-  mapStateToProps,
+  makeMapStateToProps,
   {
+    applyKqlFilterQuery: timelineActions.applyKqlFilterQuery,
+    setKqlFilterQueryDraft: timelineActions.setKqlFilterQueryDraft,
     updateKqlMode: timelineActions.updateKqlMode,
-    updateKqlQuery: timelineActions.updateKqlQuery,
   }
 )(StatefulSearchOrFilterComponent);
