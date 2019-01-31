@@ -12,8 +12,8 @@ import { ITransactionGroup } from 'x-pack/plugins/apm/server/lib/transaction_gro
 import { fontSizes, truncate } from '../../../style/variables';
 import { asMillis } from '../../../utils/formatters';
 import { ImpactBar } from '../../shared/ImpactBar';
+import { TransactionLink } from '../../shared/Links/TransactionLink';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
-import { TransactionLink } from '../../shared/TransactionLink';
 
 const StyledTransactionLink = styled(TransactionLink)`
   font-size: ${fontSizes.large};

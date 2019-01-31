@@ -1,0 +1,77 @@
+{
+  "type": "doc",
+  "value": {
+    "index": "dummydata",
+    "type": "_doc",
+    "source": {
+      "@timestamp": "2018-10-30T18:51:56.792Z",
+      "host": {
+        "name": "foo.home",
+        "architecture": "x86_64",
+        "os": {
+          "version": "10.14",
+          "family": "darwin",
+          "build": "18A391",
+          "platform": "darwin"
+        }
+      },
+      "versions": [
+        "1.0.0",
+        "8.8.4"
+      ],
+      "https": true,
+      "response_ms": 114
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "dummydata",
+    "type": "_doc",
+    "source": {
+      "@timestamp": "2018-12-30T18:51:56.792Z",
+      "host": {
+        "name": "bar.home",
+        "architecture": "x86_64",
+        "os": {
+          "version": "10.12",
+          "family": "darwin",
+          "build": "18AXX",
+          "platform": "darwin"
+        }
+      },
+      "versions": [
+        "0.4"
+      ],
+      "https": false,
+      "response_ms": 1567
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "dummydata",
+    "type": "_doc",
+    "source": {
+      "@timestamp": "2018-01-30T18:51:56.792Z",
+      "host": {
+        "name": "qux.home",
+        "architecture": "x86_64",
+        "os": {
+          "version": "3.24",
+          "family": "linux",
+          "build": "YYY",
+          "platform": "linux"
+        }
+      },
+      "versions": [
+      ],
+      "https": true,
+      "response_ms": 94
+    }
+  }
+}

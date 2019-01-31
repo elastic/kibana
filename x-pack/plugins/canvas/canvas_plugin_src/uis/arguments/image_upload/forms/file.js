@@ -5,11 +5,21 @@
  */
 import React from 'react';
 import PropTypes from 'prop-types';
+import { EuiFilePicker } from '@elastic/eui';
 import { Loading } from '../../../../../public/components/loading/loading';
-import { FileUpload } from '../../../../../public/components/file_upload';
 
-export const FileForm = ({ loading, onUpload }) =>
-  loading ? <Loading animated text="Image uploading" /> : <FileUpload onUpload={onUpload} />;
+export const FileForm = ({ loading, onChange }) =>
+  loading ? (
+    <Loading animated text="Image uploading" />
+  ) : (
+    <EuiFilePicker
+      initialPromptText="Select or drag and drop an image"
+      onChange={onChange}
+      compressed
+      className="canvasImageUpload"
+      accept="image/*"
+    />
+  );
 
 FileForm.propTypes = {
   loading: PropTypes.bool,

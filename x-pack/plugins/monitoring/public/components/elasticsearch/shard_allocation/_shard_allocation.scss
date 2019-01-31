@@ -28,13 +28,11 @@ monitoring-shard-allocation {
     vertical-align: middle;
     width: 150px;
   }
-  .children {
-    display: flex;
-    flex-flow: row wrap;
-  }
+
   .child {
-    display: flex;
+    float: left;
     align-self: center;
+
     &.index {
       border-left: $euiSizeXS solid $euiColorSuccess;
       &.red {
@@ -48,7 +46,7 @@ monitoring-shard-allocation {
     margin: 5px;
     .title {
       padding: 5px 7px;
-      float: left;
+      display: inline-block;
       text-align: center;
       font-size: 12px;
       font: 10px sans-serif;
@@ -83,6 +81,7 @@ monitoring-shard-allocation {
     font: 10px sans-serif;
     border-left: 1px solid $euiColorEmptyShade;
     position: relative;
+    display: inline-block;
 
     .shard-tooltip {
       padding: 5px;

@@ -69,7 +69,8 @@ export default function ({ getService }) {
                   version: 1,
                   attributes: {
                     title: 'A great new dashboard'
-                  }
+                  },
+                  references: [],
                 },
               ]
             });
@@ -101,7 +102,8 @@ export default function ({ getService }) {
                   version: 1,
                   attributes: {
                     title: 'An existing visualization'
-                  }
+                  },
+                  references: [],
                 },
                 {
                   type: 'dashboard',
@@ -110,7 +112,8 @@ export default function ({ getService }) {
                   version: 1,
                   attributes: {
                     title: 'A great new dashboard'
-                  }
+                  },
+                  references: [],
                 },
               ]
             });

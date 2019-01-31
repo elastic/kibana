@@ -45,7 +45,8 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     private readonly getBasePath: () => string,
     private readonly onKibanaReady: () => Promise<IInjector>,
     private readonly XPackInfoProvider: unknown,
-    private readonly uiSettings: any
+    private readonly uiSettings: any,
+    public readonly version: string
   ) {
     this.adapterService = new KibanaAdapterServiceProvider();
 
@@ -135,23 +136,22 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     component: React.ReactElement<any>,
     toController: 'management' | 'self' = 'self'
   ) {
-    const DOM_ELEMENT_NAME = this.PLUGIN_ID.replace('_', '-');
     const adapter = this;
     this.routes.when(
       `${path}${[...Array(6)].map((e, n) => `/:arg${n}?`).join('')}`, // Hack because angular 1 does not support wildcards
       {
         template:
           toController === 'self'
-            ? `<${DOM_ELEMENT_NAME}><div id="${DOM_ELEMENT_NAME}ReactRoot"></div></${DOM_ELEMENT_NAME}>`
+            ? `<${this.PLUGIN_ID}><div id="${this.PLUGIN_ID}ReactRoot"></div></${this.PLUGIN_ID}>`
             : `<kbn-management-app section="${this.PLUGIN_ID.replace('_', '-')}">
                 <div id="management-sidenav" class="euiPageSideBar" style="position: static;"></div>
-                <div id="${DOM_ELEMENT_NAME}ReactRoot" />
+                <div id="${this.PLUGIN_ID}ReactRoot" />
                </kbn-management-app>`,
         // tslint:disable-next-line: max-classes-per-file
         controller: ($scope: any, $route: any) => {
           try {
             $scope.$$postDigest(() => {
-              const elem = document.getElementById(`${DOM_ELEMENT_NAME}ReactRoot`);
+              const elem = document.getElementById(`${this.PLUGIN_ID}ReactRoot`);
               ReactDOM.render(component, elem);
               adapter.manageAngularLifecycle($scope, $route, elem);
             });

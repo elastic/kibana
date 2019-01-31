@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { ROOT_TYPE, SavedObjectsSerializer } from '.';
+import { SavedObjectsSerializer } from '.';
 import { SavedObjectsSchema } from '../schema';
 
 describe('saved object conversion', () => {
@@ -32,6 +32,24 @@ describe('saved object conversion', () => {
         },
       });
       expect(actual).toHaveProperty('type', 'foo');
+    });
+
+    test('it copies the _source.references property to references', () => {
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
+      const actual = serializer.rawToSavedObject({
+        _id: 'foo:bar',
+        _source: {
+          type: 'foo',
+          references: [{ name: 'ref_0', type: 'index-pattern', id: 'pattern*' }],
+        },
+      });
+      expect(actual).toHaveProperty('references', [
+        {
+          name: 'ref_0',
+          type: 'index-pattern',
+          id: 'pattern*',
+        },
+      ]);
     });
 
     test('if specified it copies the _source.migrationVersion property to migrationVersion', () => {
@@ -68,7 +86,6 @@ describe('saved object conversion', () => {
       const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.rawToSavedObject({
         _id: 'hello:world',
-        _type: ROOT_TYPE,
         _version: 3,
         _source: {
           type: 'hello',
@@ -96,6 +113,7 @@ describe('saved object conversion', () => {
           acl: '33.3.5',
         },
         updated_at: now,
+        references: [],
       };
       expect(expected).toEqual(actual);
     });
@@ -153,7 +171,6 @@ describe('saved object conversion', () => {
       const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.rawToSavedObject({
         _id: 'universe',
-        _type: ROOT_TYPE,
         _source: {
           type: 'hello',
           hello: {
@@ -168,6 +185,7 @@ describe('saved object conversion', () => {
         attributes: {
           world: 'earth',
         },
+        references: [],
       });
     });
 
@@ -175,7 +193,6 @@ describe('saved object conversion', () => {
       const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.rawToSavedObject({
         _id: 'universe',
-        _type: ROOT_TYPE,
         _source: {
           type: 'hello',
         },
@@ -183,6 +200,7 @@ describe('saved object conversion', () => {
       expect(actual).toEqual({
         id: 'universe',
         type: 'hello',
+        references: [],
       });
     });
 
@@ -191,7 +209,6 @@ describe('saved object conversion', () => {
       expect(() =>
         serializer.rawToSavedObject({
           _id: 'universe',
-          _type: ROOT_TYPE,
           _source: {
             hello: {
               world: 'earth',
@@ -205,7 +222,6 @@ describe('saved object conversion', () => {
       const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const raw = {
         _id: 'foo-namespace:foo:bar',
-        _type: ROOT_TYPE,
         _version: 24,
         _source: {
           type: 'foo',
@@ -219,6 +235,7 @@ describe('saved object conversion', () => {
           },
           namespace: 'foo-namespace',
           updated_at: new Date(),
+          references: [],
         },
       };
 
@@ -387,8 +404,24 @@ describe('saved object conversion', () => {
         attributes: {},
       } as any);
 
-      expect(actual).toHaveProperty('_type', ROOT_TYPE);
       expect(actual._source).toHaveProperty('type', 'foo');
+    });
+
+    test('it copies the references property to _source.references', () => {
+      const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
+      const actual = serializer.savedObjectToRaw({
+        id: '1',
+        type: 'foo',
+        attributes: {},
+        references: [{ name: 'ref_0', type: 'index-pattern', id: 'pattern*' }],
+      });
+      expect(actual._source).toHaveProperty('references', [
+        {
+          name: 'ref_0',
+          type: 'index-pattern',
+          id: 'pattern*',
+        },
+      ]);
     });
 
     test('if specified it copies the updated_at property to _source.updated_at', () => {
