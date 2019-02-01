@@ -10,7 +10,7 @@ import React from 'react';
 import { calculateClass } from '../lib/calculate_class';
 import { vents } from '../lib/vents';
 import { i18n } from '@kbn/i18n';
-import { EuiTextColor, EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, EuiBadge } from '@elastic/eui';
 
 function getColor(classes) {
   return classes.split(' ').reduce((color, cls) => {
@@ -20,7 +20,7 @@ function getColor(classes) {
 
     switch (cls) {
       case 'primary':
-        return 'ghost';
+        return 'hollow';
       case 'replica':
         return 'secondary';
       case 'relocation':
@@ -85,9 +85,9 @@ export class Shard extends React.Component {
     const classification = classes + ' ' + shard.shard;
 
     let shardUi = (
-      <EuiTextColor color={color}>
+      <EuiBadge color={color}>
         {shard.shard}
-      </EuiTextColor>
+      </EuiBadge>
     );
 
     if (this.state.tooltipVisible) {
