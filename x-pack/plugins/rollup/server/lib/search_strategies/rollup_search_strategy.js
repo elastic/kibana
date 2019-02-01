@@ -57,7 +57,6 @@ export default (AbstractSearchStrategy, RollupSearchRequest, RollupSearchCapabil
 
     async getFieldsForWildcard(req, indexPattern, { fieldsCapabilities, rollupIndex }) {
       const fields = await super.getFieldsForWildcard(req, indexPattern);
-
       const fieldsFromFieldCapsApi = indexBy(fields, 'name');
       const rollupIndexCapabilities = fieldsCapabilities[rollupIndex].aggs;
 
