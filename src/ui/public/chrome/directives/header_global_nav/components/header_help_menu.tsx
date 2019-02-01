@@ -145,10 +145,10 @@ class HeaderHelpMenuUI extends Component<Props, State> {
                 defaultMessage="Help"
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} className="chrHeaderHelpMenu__version">
               <FormattedMessage
                 id="common.ui.chrome.headerGlobalNav.helpMenuVersion"
-                defaultMessage="v{version}"
+                defaultMessage="v {version}"
                 values={{ version: metadata.version }}
               />
             </EuiFlexItem>
