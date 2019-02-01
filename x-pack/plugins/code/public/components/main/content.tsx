@@ -15,16 +15,19 @@ import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { withRouter } from 'react-router-dom';
 import styled from 'styled-components';
-import { FileTree, FileTreeItemType, SearchScope } from '../../../model';
+
+import { RepositoryUtils } from '../../../common/repository_utils';
+import { FileTree, FileTreeItemType, SearchScope, WorkerReservedProgress } from '../../../model';
 import { CommitInfo } from '../../../model/commit';
 import { changeSearchScope, FetchFileResponse, fetchMoreCommits } from '../../actions';
 import { MainRouteParams, PathTypes } from '../../common/types';
-import { RootState } from '../../reducers';
-import { currentTreeSelector, hasMoreCommitsSelector, treeCommitsSelector } from '../../selectors';
+import { RepoState, RepoStatus, RootState } from '../../reducers';
+import { hasMoreCommitsSelector, statusSelector, treeCommitsSelector } from '../../selectors';
 import { history } from '../../utils/url';
 import { Editor } from '../editor/editor';
 import { UnsupportedFileIcon } from '../shared/icons';
-import { CommitHistory, CommitHistoryLoading } from './commit_history';
+import { CloneStatus } from './clone_status';
+import { CommitHistory } from './commit_history';
 import { Directory } from './directory';
 import { TopBar } from './top_bar';
 import { UnsupportedFile } from './unsupported_file';
@@ -61,6 +64,7 @@ const Root = styled.div`
 `;
 
 interface Props extends RouteComponentProps<MainRouteParams> {
+  repoStatus: RepoStatus;
   tree: FileTree;
   file: FetchFileResponse | undefined;
   currentTree: FileTree | undefined;
@@ -221,7 +225,33 @@ class CodeContent extends React.PureComponent<Props> {
     );
   }
 
+  public shouldRenderProgress() {
+    const { progress, cloneProgress, state } = this.props.repoStatus;
+    return (
+      !!progress &&
+      state === RepoState.CLONING &&
+      progress < WorkerReservedProgress.COMPLETED &&
+      !RepositoryUtils.hasFullyCloned(cloneProgress)
+    );
+  }
+
+  public renderProgress() {
+    const { progress, cloneProgress } = this.props.repoStatus;
+    const { org, repo } = this.props.match.params;
+    return (
+      <CloneStatus
+        repoName={`${org}/${repo}`}
+        progress={progress ? progress : 0}
+        cloneProgress={cloneProgress}
+      />
+    );
+  }
+
   public renderContent() {
+    if (this.shouldRenderProgress()) {
+      return this.renderProgress();
+    }
+
     const { file, commits, match, tree, hasMoreCommits, loadingCommits } = this.props;
     const { path, pathType, resource, org, repo, revision } = match.params;
     const repoUri = `${resource}/${org}/${repo}`;
@@ -322,6 +352,7 @@ const mapStateToProps = (state: RootState) => ({
   commits: treeCommitsSelector(state),
   hasMoreCommits: hasMoreCommitsSelector(state),
   loadingCommits: state.file.loadingCommits,
+  repoStatus: statusSelector(state),
 });
 
 const mapDispatchToProps = {

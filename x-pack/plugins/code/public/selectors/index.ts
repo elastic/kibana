@@ -35,23 +35,10 @@ export const repoUriSelector = (state: RootState) => {
   return `${resource}/${org}/${repo}`;
 };
 
-export const progressSelector = (state: RootState) => {
-  const status = state.status.status[repoUriSelector(state)];
-  if (status) {
-    return status.progress === undefined ? null : status.progress;
-  } else {
-    return null;
-  }
+export const statusSelector = (state: RootState) => {
+  return state.status.status[repoUriSelector(state)];
 };
 
-export const cloneProgressSelector = (state: RootState) => {
-  const status = state.status.status[repoUriSelector(state)];
-  if (status) {
-    return status.cloneProgress === undefined ? null : status.cloneProgress;
-  } else {
-    return null;
-  }
-};
 export const treeCommitsSelector = (state: RootState) => {
   const path = state.file.currentPath;
   if (path === '') {
