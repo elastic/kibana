@@ -27,7 +27,7 @@ const addStrategy = searchStrategy => {
   if (searchStrategy instanceof AbstractSearchStrategy) {
     strategies.unshift(searchStrategy);
   }
-  return this;
+  return strategies;
 };
 
 export default class SearchStrategiesRegister {
