@@ -34,7 +34,7 @@ export const vega = () => ({
       'null',
     ],
   },
-  help: i18n.translate('interpreter.functions.vega.help', {
+  help: i18n.translate('vega.functions.vega.help', {
     defaultMessage: 'Vega visualization'
   }),
   args: {
