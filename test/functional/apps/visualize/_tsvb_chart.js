@@ -36,9 +36,11 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show the correct count in the legend', async function () {
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be('156');
+        await retry.try(async () => {
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
+          expect(actualCount).to.be('156');
+        });
       });
 
       it('should show the correct count in the legend with 2h offset', async function () {
