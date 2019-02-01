@@ -32,7 +32,7 @@ exports[`props iconType 1`] = `
     >
       <EuiTitle
         className="synopsisTitle"
-        size="s"
+        size="xs"
         textTransform="none"
       >
         <h4>
@@ -42,7 +42,7 @@ exports[`props iconType 1`] = `
       <EuiText
         className="synopsisBody"
         grow={true}
-        size="m"
+        size="s"
       >
         <p>
           <EuiTextColor
@@ -90,7 +90,7 @@ exports[`props iconUrl 1`] = `
     >
       <EuiTitle
         className="synopsisTitle"
-        size="s"
+        size="xs"
         textTransform="none"
       >
         <h4>
@@ -100,7 +100,7 @@ exports[`props iconUrl 1`] = `
       <EuiText
         className="synopsisBody"
         grow={true}
-        size="m"
+        size="s"
       >
         <p>
           <EuiTextColor
@@ -138,7 +138,7 @@ exports[`props isBeta 1`] = `
     >
       <EuiTitle
         className="synopsisTitle"
-        size="s"
+        size="xs"
         textTransform="none"
       >
         <h4>
@@ -148,7 +148,7 @@ exports[`props isBeta 1`] = `
       <EuiText
         className="synopsisBody"
         grow={true}
-        size="m"
+        size="s"
       >
         <p>
           <EuiTextColor
@@ -186,7 +186,7 @@ exports[`render 1`] = `
     >
       <EuiTitle
         className="synopsisTitle"
-        size="s"
+        size="xs"
         textTransform="none"
       >
         <h4>
@@ -196,7 +196,7 @@ exports[`render 1`] = `
       <EuiText
         className="synopsisBody"
         grow={true}
-        size="m"
+        size="s"
       >
         <p>
           <EuiTextColor

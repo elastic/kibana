@@ -18,7 +18,6 @@
  */
 
 import React, { Component } from 'react';
-import './share_panel_content.less';
 
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu } from '@elastic/eui';
