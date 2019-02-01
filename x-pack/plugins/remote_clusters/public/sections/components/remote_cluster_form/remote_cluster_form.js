@@ -31,7 +31,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { skippingDisconnectedClustersUrl } from '../../../services/documentation_links';
+import {
+  skippingDisconnectedClustersUrl,
+  transportPortUrl,
+} from '../../../services/documentation_links';
 import { validateName, validateSeeds, validateSeed } from './validators';
 
 const defaultFields = {
@@ -264,7 +267,17 @@ export const RemoteClusterForm = injectI18n(
             helpText={(
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.sectionSeedsHelpText"
-                defaultMessage="An IP address or host name, followed by the transport port of the remote cluster."
+                defaultMessage="An IP address or host name, followed by the {transportPort} of the remote cluster."
+                values={{
+                  transportPort: (
+                    <EuiLink href={transportPortUrl} target="_blank">
+                      <FormattedMessage
+                        id="xpack.remoteClusters.remoteClusterForm.sectionSeedsHelpText.transportPortLinkText"
+                        defaultMessage="transport port"
+                      />
+                    </EuiLink>
+                  ),
+                }}
               />
             )}
             isInvalid={showErrors}
