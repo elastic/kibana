@@ -54,7 +54,11 @@ export function socketInterpreterProvider({
       return Promise.resolve(referableFunctions).then(referableFunctionMap => {
         // Check if the not-found function is in the list of alternatives, if not, throw
         if (!getByAlias(referableFunctionMap, functionName)) {
-          throw new Error(`Function not found: ${functionName}`);
+          let error = `Function not found: ${functionName}. `;
+          if (!socket) {
+            error += `Its possible that the function exists on server, to which we couldn't connect`;
+          }
+          throw new Error(error);
         }
 
         // set a unique message ID so the code knows what response to process
