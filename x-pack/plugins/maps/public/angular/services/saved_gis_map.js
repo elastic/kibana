@@ -20,7 +20,7 @@ import {
 import { getIsDarkTheme } from '../../store/ui';
 import { convertMapExtentToPolygon } from '../../elasticsearch_geo_utils';
 
-const module = uiModules.get('app/gis');
+const module = uiModules.get('app/maps');
 
 module.factory('SavedGisMap', function (Private) {
   const SavedObject = Private(SavedObjectProvider);
@@ -44,7 +44,7 @@ module.factory('SavedGisMap', function (Private) {
     this.showInRecentlyAccessed = true;
   }
 
-  SavedGisMap.type = 'gis-map';
+  SavedGisMap.type = 'map';
 
   // Mappings are used to place object properties into saved object _source
   SavedGisMap.mapping = {
@@ -63,7 +63,7 @@ module.factory('SavedGisMap', function (Private) {
   SavedGisMap.searchsource = false;
 
   SavedGisMap.prototype.getFullPath = function () {
-    return `/app/gis#map/${this.id}`;
+    return `/app/maps#map/${this.id}`;
   };
 
   SavedGisMap.prototype.syncWithStore = function (state) {

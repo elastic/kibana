@@ -12,11 +12,11 @@ import {
 
 FeatureCatalogueRegistryProvider.register(() => {
   return {
-    id: 'gis',
+    id: 'maps',
     title: 'Maps',
     description: 'Explore geospatial data from Elasticsearch and the Elastic Maps Service',
     icon: 'gisApp',
-    path: '/app/gis',
+    path: '/app/maps',
     showOnHomePage: true,
     category: FeatureCatalogueCategory.DATA
   };

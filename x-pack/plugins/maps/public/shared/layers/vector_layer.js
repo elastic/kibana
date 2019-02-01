@@ -13,7 +13,7 @@ import { AbstractLayer } from './layer';
 import { VectorStyle } from './styles/vector_style';
 import { LeftInnerJoin } from './joins/left_inner_join';
 
-import { FeatureTooltip } from 'plugins/gis/components/map/feature_tooltip';
+import { FeatureTooltip } from '../../components/map/feature_tooltip';
 import { store } from '../../store/store';
 import { getMapColors } from '../../selectors/map_selectors';
 import _ from 'lodash';
