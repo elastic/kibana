@@ -11,18 +11,13 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../../types/provider
 export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
   const esArchiver = getService('esArchiver');
   const security: SecurityService = getService('security');
-  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'discover', 'security', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
+  const appsMenu = getService('appsMenu');
 
   describe('security', () => {
     before(async () => {
       await esArchiver.load('discover/feature_controls/security');
-      await kibanaServer.uiSettings.replace({
-        'accessibility:disableAnimations': true,
-        'telemetry:optIn': false,
-        defaultIndex: 'logstash-*',
-      });
       await esArchiver.loadIfNeeded('logstash_functional');
 
       // ensure we're logged out so we can login as the appropriate users
@@ -73,8 +68,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it('shows discover navlink', async () => {
-        const navLinks = await PageObjects.common.getAppNavLinksText();
-        expect(navLinks).to.eql(['Discover', 'Management']);
+        const navLinks = await appsMenu.readLinks();
+        expect(navLinks.map((navLink: any) => navLink.text)).to.eql(['Discover', 'Management']);
       });
 
       it('shows save button', async () => {
@@ -120,8 +115,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it('shows discover navlink', async () => {
-        const navLinks = await PageObjects.common.getAppNavLinksText();
-        expect(navLinks).to.eql(['Discover', 'Management']);
+        const navLinks = await appsMenu.readLinks();
+        expect(navLinks.map((navLink: any) => navLink.text)).to.eql(['Discover', 'Management']);
       });
 
       it(`doesn't show save button`, async () => {

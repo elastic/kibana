@@ -16,18 +16,13 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../../types/provider
 export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
   const esArchiver = getService('esArchiver');
   const security: SecurityService = getService('security');
-  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'spaceSelector']);
+  const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
 
   describe('security', () => {
     before(async () => {
       await esArchiver.load('dashboard/feature_controls/security');
-      await kibanaServer.uiSettings.replace({
-        'accessibility:disableAnimations': true,
-        'telemetry:optIn': false,
-        defaultIndex: 'logstash-*',
-      });
       await esArchiver.loadIfNeeded('logstash_functional');
 
       // ensure we're logged out so we can login as the appropriate users
@@ -35,7 +30,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
     });
 
     after(async () => {
-      await esArchiver.unload('security/feature_privileges');
+      await esArchiver.unload('dashboard/feature_controls/security');
 
       // logout, so the other tests don't accidentally run as the custom users we're testing below
       await PageObjects.security.logout();
@@ -78,8 +73,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it('shows dashboard navlink', async () => {
-        const navLinks = await PageObjects.common.getAppNavLinksText();
-        expect(navLinks).to.eql(['Dashboard', 'Management']);
+        const navLinks = await appsMenu.readLinks();
+        expect(navLinks.map((navLink: any) => navLink.text)).to.eql(['Dashboard', 'Management']);
       });
 
       it(`landing page shows "Create new Dashboard" button`, async () => {
@@ -153,8 +148,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it('shows dashboard navlink', async () => {
-        const navLinks = await PageObjects.common.getAppNavLinksText();
-        expect(navLinks).to.eql(['Dashboard', 'Management']);
+        const navLinks = await appsMenu.readLinks();
+        expect(navLinks.map((navLink: any) => navLink.text)).to.eql(['Dashboard', 'Management']);
       });
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {
@@ -225,6 +220,11 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       after(async () => {
         await security.role.delete('no_dashboard_privileges_role');
         await security.user.delete('no_dashboard_privileges_user');
+      });
+
+      it(`doesn't show dashboard navLink`, async () => {
+        const navLinks = await appsMenu.readLinks();
+        expect(navLinks.map((navLink: any) => navLink.text)).to.not.contain(['Dashboard']);
       });
 
       it(`landing page redirects to the home page`, async () => {
