@@ -22,14 +22,27 @@ import routing from '../services/routing';
 import { BASE_PATH_REMOTE_CLUSTERS } from '../../../common/constants';
 
 const errorMessages = {
-  noClusterFound: () => (<FormattedMessage
-    id="xpack.crossClusterReplication.forms.emptyRemoteClustersCallOutDescription"
-    defaultMessage="You need at least one remote cluster to create a follower index."
-  />),
-  remoteClusterNotConnectedEditable: () => (<FormattedMessage
-    id="xpack.crossClusterReplication.forms.currentRemoteClusterNotConnectedCallOutDescription"
-    defaultMessage="Edit the remote cluster or select a cluster that is connected."
-  />),
+  noClusterFound: () => (
+    <FormattedMessage
+      id="xpack.crossClusterReplication.forms.emptyRemoteClustersCallOutDescription"
+      defaultMessage="You need at least one remote cluster to create a follower index."
+    />
+  ),
+  remoteClusterNotConnectedEditable: (name) => ({
+    title: (
+      <FormattedMessage
+        id="xpack.crossClusterReplication.forms.currentRemoteClusterNotConnectedCallOutTitle"
+        defaultMessage="Remote cluster '{name}' is not connected"
+        values={{ name }}
+      />
+    ),
+    description: (
+      <FormattedMessage
+        id="xpack.crossClusterReplication.forms.currentRemoteClusterNotConnectedCallOutDescription"
+        defaultMessage="Edit the remote cluster or select a cluster that is connected."
+      />
+    ),
+  }),
 };
 
 export const RemoteClustersFormField = injectI18n(
@@ -178,10 +191,10 @@ export const RemoteClustersFormField = injectI18n(
       const {
         remoteClusterNotConnectedEditable,
         remoteClusterNotConnectedNotEditable,
-      } = this.messages;
+      } = this.errorMessages;
 
       const { title, description } = isEditable
-        ? remoteClusterNotConnectedEditable()
+        ? remoteClusterNotConnectedEditable(name)
         : remoteClusterNotConnectedNotEditable(name);
 
       return (

@@ -393,7 +393,7 @@ export const FollowerIndexForm = injectI18n(
             title: (
               <FormattedMessage
                 id="xpack.crossClusterReplication.followerIndexForm.currentRemoteClusterNotConnectedCallOutTitle"
-                defaultMessage="Can't edit follower index because remote cluster '{name}' is not connected."
+                defaultMessage="Can't edit follower index because remote cluster '{name}' is not connected"
                 values={{ name }}
               />
             ),

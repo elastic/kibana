@@ -312,7 +312,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
           title: (
             <FormattedMessage
               id="xpack.crossClusterReplication.autoFollowPatternForm.currentRemoteClusterNotConnectedCallOutTitle"
-              defaultMessage="Can't edit auto-follow pattern because remote cluster '{name}' is not connected."
+              defaultMessage="Can't edit auto-follow pattern because remote cluster '{name}' is not connected"
               values={{ name }}
             />
           ),
