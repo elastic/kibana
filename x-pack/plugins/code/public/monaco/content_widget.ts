@@ -25,6 +25,7 @@ export abstract class ContentWidget extends Disposable implements Editor.IConten
   }
   protected readonly containerDomNode: HTMLElement;
   protected domNode: HTMLElement;
+  private readonly extraNode: HTMLDivElement;
   private scrollbar: any;
   private showAtPosition: Position | null;
   private stoleFocus: boolean = false;
@@ -34,9 +35,11 @@ export abstract class ContentWidget extends Disposable implements Editor.IConten
     super();
     this.containerDomNode = document.createElement('div');
     this.domNode = document.createElement('div');
+    this.extraNode = document.createElement('div');
     this.scrollbar = new DomScrollableElement(this.domNode, {});
     this.disposables.push(this.scrollbar);
     this.containerDomNode.appendChild(this.scrollbar.getDomNode());
+    this.containerDomNode.appendChild(this.extraNode);
 
     this.visible = false;
     this.editor.onDidLayoutChange(e => this.updateMaxHeight());
@@ -98,9 +101,13 @@ export abstract class ContentWidget extends Disposable implements Editor.IConten
     this.disposables.forEach(d => d.dispose());
   }
 
-  protected updateContents(node: Node): void {
+  protected updateContents(node: Node, extra?: Node): void {
     this.domNode.textContent = '';
     this.domNode.appendChild(node);
+    this.extraNode.innerHTML = '';
+    if (extra) {
+      this.extraNode.appendChild(extra);
+    }
     this.updateFont();
     // @ts-ignore
     this.editor.layoutContentWidget(this);
