@@ -74,7 +74,7 @@ export async function getErrorGroup({
   const traceId = idx(error, _ => _.trace.id);
 
   let transaction;
-  if (transactionId) {
+  if (transactionId && traceId) {
     transaction = await getTransaction(transactionId, traceId, setup);
   }
 

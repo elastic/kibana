@@ -9,11 +9,15 @@ import { get, set } from 'lodash';
 export const getFilteredQuery = (
   dateRangeStart: string,
   dateRangeEnd: string,
-  filters?: string | null
+  filters?: string | null | any
 ) => {
   let filtersObj;
   // TODO: handle bad JSON gracefully
-  filtersObj = filters ? JSON.parse(filters) : undefined;
+  if (typeof filters === 'string') {
+    filtersObj = JSON.parse(filters);
+  } else {
+    filtersObj = filters;
+  }
   if (get(filtersObj, 'bool.must', undefined)) {
     const userFilters = get(filtersObj, 'bool.must', []);
     delete filtersObj.bool.must;

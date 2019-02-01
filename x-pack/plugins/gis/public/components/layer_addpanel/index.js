@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import { AddLayerPanel } from './view';
 import { getFlyoutDisplay, updateFlyout, FLYOUT_STATE }
   from '../../store/ui';
-import { getTemporaryLayers, getDataSources } from "../../selectors/map_selectors";
+import { getTemporaryLayers } from "../../selectors/map_selectors";
 import {
   addLayer,
   removeLayer,
@@ -19,14 +19,12 @@ import _ from 'lodash';
 
 function mapStateToProps(state = {}) {
 
-  const dataSourceMeta = getDataSources(state);
   function isLoading() {
     const tmp = getTemporaryLayers(state);
     return tmp.some((layer) => layer.isLayerLoading());
   }
   return {
     flyoutVisible: getFlyoutDisplay(state) !== FLYOUT_STATE.NONE,
-    dataSourcesMeta: dataSourceMeta,
     layerLoading: isLoading(),
     temporaryLayers: !_.isEmpty(getTemporaryLayers(state))
   };

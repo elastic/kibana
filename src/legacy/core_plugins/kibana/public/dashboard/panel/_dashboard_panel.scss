@@ -78,7 +78,7 @@
 }
 
 .dshPanel__title {
-  font-size: inherit;
+  font-size: $euiFontSizeS;
   color: $euiColorDarkShade;
   transition: color $euiAnimSpeedFast $euiAnimSlightResistance;
   flex: 1 1 auto;

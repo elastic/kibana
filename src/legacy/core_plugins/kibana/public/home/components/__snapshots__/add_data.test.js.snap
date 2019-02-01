@@ -33,7 +33,7 @@ exports[`apmUiEnabled 1`] = `
       </EuiTitle>
       <EuiText
         grow={true}
-        size="m"
+        size="s"
       >
         <p>
           <FormattedMessage
@@ -218,7 +218,7 @@ exports[`apmUiEnabled 1`] = `
     >
       <EuiText
         grow={true}
-        size="m"
+        size="s"
       >
         <strong
           style={
@@ -259,7 +259,7 @@ exports[`apmUiEnabled 1`] = `
     >
       <EuiText
         grow={true}
-        size="m"
+        size="s"
       >
         <strong
           style={
@@ -330,7 +330,7 @@ exports[`isNewKibanaInstance 1`] = `
       </EuiTitle>
       <EuiText
         grow={true}
-        size="m"
+        size="s"
       >
         <p>
           <FormattedMessage
@@ -479,7 +479,7 @@ exports[`isNewKibanaInstance 1`] = `
     >
       <EuiText
         grow={true}
-        size="m"
+        size="s"
       >
         <strong
           style={
@@ -520,7 +520,7 @@ exports[`isNewKibanaInstance 1`] = `
     >
       <EuiText
         grow={true}
-        size="m"
+        size="s"
       >
         <strong
           style={
@@ -591,7 +591,7 @@ exports[`mlEnabled 1`] = `
       </EuiTitle>
       <EuiText
         grow={true}
-        size="m"
+        size="s"
       >
         <p>
           <FormattedMessage
@@ -776,7 +776,7 @@ exports[`mlEnabled 1`] = `
     >
       <EuiText
         grow={true}
-        size="m"
+        size="s"
       >
         <strong
           style={
@@ -817,7 +817,7 @@ exports[`mlEnabled 1`] = `
     >
       <EuiText
         grow={true}
-        size="m"
+        size="s"
       >
         <strong
           style={
@@ -858,7 +858,7 @@ exports[`mlEnabled 1`] = `
     >
       <EuiText
         grow={true}
-        size="m"
+        size="s"
       >
         <strong
           style={
@@ -929,7 +929,7 @@ exports[`render 1`] = `
       </EuiTitle>
       <EuiText
         grow={true}
-        size="m"
+        size="s"
       >
         <p>
           <FormattedMessage
@@ -1078,7 +1078,7 @@ exports[`render 1`] = `
     >
       <EuiText
         grow={true}
-        size="m"
+        size="s"
       >
         <strong
           style={
@@ -1119,7 +1119,7 @@ exports[`render 1`] = `
     >
       <EuiText
         grow={true}
-        size="m"
+        size="s"
       >
         <strong
           style={
