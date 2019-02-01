@@ -22,7 +22,6 @@ import { readFileSync } from 'fs';
 import { Duration } from 'moment';
 import { checkServerIdentity } from 'tls';
 import url from 'url';
-import util from 'util';
 import { pick } from '../../utils';
 import { Logger } from '../logging';
 import { ElasticsearchConfig } from './elasticsearch_config';
@@ -38,7 +37,6 @@ export type ElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' 
     | 'apiVersion'
     | 'customHeaders'
     | 'logQueries'
-    | 'requestHeadersWhitelist'
     | 'sniffOnStart'
     | 'sniffOnConnectionFault'
     | 'hosts'
@@ -52,7 +50,7 @@ export type ElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' 
   };
 
 /** @internal */
-export interface ElasticsearchClientConfigOverrides {
+interface ElasticsearchClientConfigOverrides {
   /**
    * If set to `true`, username and password from the config won't be used
    * to access Elasticsearch API even if these are specified.
@@ -68,7 +66,7 @@ export interface ElasticsearchClientConfigOverrides {
 
 // Original `ConfigOptions` defines `ssl: object` so we need something more specific.
 /** @internal */
-export type ExtendedConfigOptions = ConfigOptions &
+type ExtendedConfigOptions = ConfigOptions &
   Partial<{
     ssl: Partial<{
       rejectUnauthorized: boolean;
@@ -132,7 +130,7 @@ export function parseElasticsearchClientConfig(
       };
 
       if (needsAuth) {
-        host.auth = util.format('%s:%s', config.username, config.password);
+        host.auth = `${config.username}:${config.password}`;
       }
 
       return host;
@@ -165,7 +163,7 @@ export function parseElasticsearchClientConfig(
 
   const readFile = (file: string) => readFileSync(file, 'utf8');
   if (
-    Array.isArray(config.ssl.certificateAuthorities) &&
+    config.ssl.certificateAuthorities !== undefined &&
     config.ssl.certificateAuthorities.length > 0
   ) {
     esClientConfig.ssl.ca = config.ssl.certificateAuthorities.map(readFile);

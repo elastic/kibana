@@ -58,6 +58,8 @@ const configSchema = schema.object({
   healthCheck: schema.object({ delay: schema.duration({ defaultValue: 2500 }) }),
 });
 
+type SslConfigSchema = TypeOf<typeof configSchema>['ssl'];
+
 export class ElasticsearchConfig {
   public static schema = configSchema;
 
@@ -74,7 +76,10 @@ export class ElasticsearchConfig {
   public readonly sniffOnConnectionFault: boolean;
   public readonly username?: string;
   public readonly password?: string;
-  public readonly ssl: TypeOf<typeof configSchema>['ssl'];
+  public readonly ssl: Pick<
+    SslConfigSchema,
+    Exclude<keyof SslConfigSchema, 'certificateAuthorities'>
+  > & { certificateAuthorities?: string[] };
   public readonly customHeaders: TypeOf<typeof configSchema>['customHeaders'];
 
   constructor(config: TypeOf<typeof configSchema>) {
@@ -94,6 +99,16 @@ export class ElasticsearchConfig {
     this.username = config.username;
     this.password = config.password;
     this.customHeaders = config.customHeaders;
-    this.ssl = config.ssl;
+
+    const certificateAuthorities = Array.isArray(config.ssl.certificateAuthorities)
+      ? config.ssl.certificateAuthorities
+      : typeof config.ssl.certificateAuthorities === 'string'
+      ? [config.ssl.certificateAuthorities]
+      : undefined;
+
+    this.ssl = {
+      ...config.ssl,
+      certificateAuthorities,
+    };
   }
 }
