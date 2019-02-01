@@ -75,7 +75,7 @@ export const saveFollowerIndex = (name, followerIndex, isUpdating = false) => (
 
       toastNotifications.addSuccess(successMessage);
       routing.navigate(`/follower_indices`, undefined, {
-        pattern: encodeURIComponent(name),
+        name: encodeURIComponent(name),
       });
     },
   })
