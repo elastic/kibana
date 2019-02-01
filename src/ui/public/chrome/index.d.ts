@@ -20,6 +20,7 @@
 import { Brand } from '../../../core/public/chrome';
 import { BreadcrumbsApi } from './api/breadcrumbs';
 import { ChromeNavLinks } from './api/nav';
+import { HelpExtensionApi } from './api/help_extension';
 
 interface IInjector {
   get<T>(injectable: string): T;
@@ -27,6 +28,7 @@ interface IInjector {
 
 declare interface Chrome extends ChromeNavLinks {
   breadcrumbs: BreadcrumbsApi;
+  helpExtension: HelpExtensionApi;
   addBasePath<T = string>(path: T): T;
   dangerouslyGetActiveInjector(): Promise<IInjector>;
   getBasePath(): string;
@@ -48,3 +50,4 @@ declare const chrome: Chrome;
 export default chrome;
 export { Breadcrumb } from './api/breadcrumbs';
 export { NavLink } from './api/nav';
+export { HelpExtension } from './api/help_extension';

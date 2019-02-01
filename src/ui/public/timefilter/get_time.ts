@@ -18,8 +18,7 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { find } from 'lodash';
-import { IndexPattern } from 'ui/index_patterns';
+import { Field, IndexPattern } from 'ui/index_patterns';
 
 interface CalculateBoundsOptions {
   forceNow?: Date;
@@ -58,8 +57,9 @@ export function getTime(
   }
 
   let filter: Filter;
-  const timefield: { name: string } | undefined =
-    indexPattern.timeFieldName && find(indexPattern.fields, { name: indexPattern.timeFieldName });
+  const timefield: Field | undefined = indexPattern.fields.find(
+    field => field.name === indexPattern.timeFieldName
+  );
 
   if (!timefield) {
     return;

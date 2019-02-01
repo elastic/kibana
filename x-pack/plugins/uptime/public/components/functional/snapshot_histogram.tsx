@@ -13,6 +13,8 @@ import { formatHistogramData } from '../../lib/adapters/monitors/format_histogra
 
 interface SnapshotHistogramProps {
   windowWidth: number;
+  primaryColor: string;
+  dangerColor: string;
   histogram: HistogramSeries[];
 }
 
@@ -23,7 +25,12 @@ interface SnapshotHistogramProps {
  */
 const windowRatio = 0.545238095238095;
 
-export const SnapshotHistogram = ({ windowWidth, histogram }: SnapshotHistogramProps) => {
+export const SnapshotHistogram = ({
+  dangerColor,
+  histogram,
+  primaryColor,
+  windowWidth,
+}: SnapshotHistogramProps) => {
   const { upSeriesData, downSeriesData } = formatHistogramData(histogram);
 
   return (
@@ -38,14 +45,14 @@ export const SnapshotHistogram = ({ windowWidth, histogram }: SnapshotHistogramP
         name={i18n.translate('xpack.uptime.snapshotHistogram.series.upLabel', {
           defaultMessage: 'Up',
         })}
-        color="green"
+        color={primaryColor}
       />
       <EuiHistogramSeries
         data={downSeriesData}
         name={i18n.translate('xpack.uptime.snapshotHistogram.series.downLabel', {
           defaultMessage: 'Down',
         })}
-        color="red"
+        color={dangerColor}
       />
     </EuiSeriesChart>
   );

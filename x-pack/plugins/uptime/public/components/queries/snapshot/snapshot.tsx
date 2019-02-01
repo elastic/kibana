@@ -58,11 +58,12 @@ export class Snapshot extends React.Component<Props, SnapshotState> {
 
   public render() {
     const {
-      dateRangeStart,
-      dateRangeEnd,
       autorefreshIsPaused,
       autorefreshInterval,
+      dateRangeStart,
+      dateRangeEnd,
       filters,
+      colors: { danger, primary },
     } = this.props;
     return (
       <Query
@@ -157,7 +158,12 @@ export class Snapshot extends React.Component<Props, SnapshotState> {
                 {/* TODO: this is a UI hack that should be replaced */}
                 <EuiPanel paddingSize="s" style={{ maxHeight: '137px' }}>
                   {histogram && (
-                    <SnapshotHistogram histogram={histogram} windowWidth={this.state.windowWidth} />
+                    <SnapshotHistogram
+                      dangerColor={danger}
+                      histogram={histogram}
+                      primaryColor={primary}
+                      windowWidth={this.state.windowWidth}
+                    />
                   )}
                   {!histogram && (
                     <EuiEmptyPrompt
