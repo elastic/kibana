@@ -362,9 +362,14 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it ('correctly applies filter', async () => {
-        const expectedTableData = [[ 'win 8', '560', 'CN', '560' ]];
+        const expectedTableData = [
+          [ 'win 8', '560', 'CN', '560' ],
+          [ 'win 7', '537', 'CN', '537' ],
+          [ 'win xp', '526', 'CN', '526' ],
+          [ 'ios', '478', 'CN', '478' ],
+          [ 'osx', '228', 'CN', '228' ]
+        ];
         await PageObjects.visualize.filterLegend('CN');
-        await PageObjects.visualize.applyFilters();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await inspector.open();
         await inspector.setTablePageSize(50);
