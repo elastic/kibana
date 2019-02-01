@@ -342,8 +342,9 @@ export const FollowerIndexForm = injectI18n(
       );
 
       const indexNameLabel = i18n.translate(
-        'xpack.crossClusterReplication.followerIndexForm.sectionFollowerIndexNameTitle', {
-          defaultMessage: 'Name'
+        'xpack.crossClusterReplication.followerIndexForm.sectionFollowerIndexNameTitle',
+        {
+          defaultMessage: 'Follower index'
         }
       );
 
@@ -449,9 +450,12 @@ export const FollowerIndexForm = injectI18n(
             </EuiTitle>
           )}
           label={leaderIndexLabel}
-          description={i18n.translate('xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexDescription', {
-            defaultMessage: 'The leader index you want to replicate from the remote cluster.'
-          })}
+          description={i18n.translate(
+            'xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexDescription',
+            {
+              defaultMessage: 'The leader index you want to replicate from the remote cluster.'
+            }
+          )}
           helpText={(
             <FormattedMessage
               id="xpack.crossClusterReplication.followerIndexForm.indexNameHelpLabel"
@@ -637,9 +641,9 @@ export const FollowerIndexForm = injectI18n(
       return (
         <Fragment>
           <EuiForm>
-            {renderFollowerIndexName()}
             {renderRemoteClusterField()}
             {renderLeaderIndex()}
+            {renderFollowerIndexName()}
             <EuiSpacer size="s" />
             {renderAdvancedSettings()}
           </EuiForm>
