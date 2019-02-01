@@ -28,8 +28,6 @@ export function registerServerFunctions(server) {
     method: 'POST',
     path: `${API_ROUTE}/fns/{functionName}`,
     async handler(req) {
-      console.log(`POST ${API_ROUTE}/fn/${req.params.functionName} `);
-
       const types = server.plugins.interpreter.types.toJS();
       const { deserialize } = serializeProvider(types);
       const { functionName } = req.params;
@@ -42,7 +40,6 @@ export function registerServerFunctions(server) {
 
       const handlers = await createHandlers(req, server);
       const result = await fnDef.fn(deserialize(context), args, handlers);
-      // const result = await invokeFunction(fnDef, deserialize(context), args, types, handlers);
 
       return result;
     },
