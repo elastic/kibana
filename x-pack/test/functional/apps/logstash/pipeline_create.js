@@ -65,6 +65,8 @@ export default function ({ getService, getPageObjects }) {
 
         await pipelineEditor.clickSave();
         await pipelineList.assertExists();
+        await pipelineList.setFilter(id);
+
         const rows = await pipelineList.getRowsFromTable();
         const newRow = rows.find(row => row.id === id);
 

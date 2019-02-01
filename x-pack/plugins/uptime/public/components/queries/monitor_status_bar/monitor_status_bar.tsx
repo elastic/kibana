@@ -14,7 +14,7 @@ import { UptimeCommonProps } from '../../../uptime_app';
 import { StatusBar } from '../../functional';
 import { EmptyStatusBar } from '../../functional/empty_status_bar';
 import { formatDuration } from './format_duration';
-import { createGetMonitorStatusBarQuery } from './get_monitor_status_bar';
+import { getMonitorStatusBarQuery } from './get_monitor_status_bar';
 
 interface MonitorStatusBarProps {
   monitorId: string;
@@ -37,7 +37,7 @@ export const MonitorStatusBar = ({
 }: Props) => (
   <Query
     pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
-    query={createGetMonitorStatusBarQuery}
+    query={getMonitorStatusBarQuery}
     variables={{ dateRangeStart, dateRangeEnd, monitorId }}
   >
     {({ loading, error, data }: MonitorStatusBarQueryParams) => {

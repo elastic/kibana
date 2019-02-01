@@ -72,6 +72,7 @@ uiRoutes
     controller: class extends MonitoringViewBaseEuiTableController {
       constructor($injector, $scope, i18n) {
         const kbnUrl = $injector.get('kbnUrl');
+        const config = $injector.get('config');
 
         super({
           defaultData: {},
@@ -103,6 +104,7 @@ uiRoutes
                 sorting={this.sorting}
                 pagination={this.pagination}
                 onTableChange={this.onTableChange}
+                dateFormat={config.get('dateFormat')}
                 upgradeMessage={makeUpgradeMessage(data.nodeSummary.version, i18n)}
                 angular={{
                   kbnUrl,
