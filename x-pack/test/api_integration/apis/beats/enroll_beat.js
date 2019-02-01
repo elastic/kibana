@@ -147,8 +147,9 @@ export default function ({ getService }) {
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
         type: ES_TYPE_NAME,
-        id: `enrollment_token:${validEnrollmentToken}`,
-        ignore: [404],
+        id: `enrollment_token:${validEnrollmentToken}`
+      }, {
+        ignore: [404]
       });
 
       expect(esResponse.body.found).to.be(false);

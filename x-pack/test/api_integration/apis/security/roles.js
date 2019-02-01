@@ -193,11 +193,11 @@ export default function ({ getService }) {
         await supertest.delete('/api/security/role/role_with_privileges').set('kbn-xsrf', 'xxx').expect(204);
         await supertest.delete('/api/security/role/role_to_update').set('kbn-xsrf', 'xxx').expect(204);
 
-        const emptyRole = await es.shield.getRole({ name: 'empty_role', ignore: [404] });
+        const emptyRole = await es.shield.getRole({ name: 'empty_role' }, { ignore: [404] });
         expect(emptyRole.body).to.eql({});
-        const roleWithPrivileges = await es.shield.getRole({ name: 'role_with_privileges', ignore: [404] });
+        const roleWithPrivileges = await es.shield.getRole({ name: 'role_with_privileges' }, { ignore: [404] });
         expect(roleWithPrivileges.body).to.eql({});
-        const roleToUpdate = await es.shield.getRole({ name: 'role_to_update', ignore: [404] });
+        const roleToUpdate = await es.shield.getRole({ name: 'role_to_update' }, { ignore: [404] });
         expect(roleToUpdate.body).to.eql({});
       });
     });

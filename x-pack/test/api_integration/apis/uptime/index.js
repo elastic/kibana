@@ -10,8 +10,9 @@ export default function ({ getService, loadTestFile }) {
   describe('uptime', () => {
     beforeEach(() =>
       es.indices.delete({
-        index: 'heartbeat',
-        ignore: [404],
+        index: 'heartbeat'
+      }, {
+        ignore: [404]
       }));
 
     loadTestFile(require.resolve('./get_all_pings'));

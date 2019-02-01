@@ -48,7 +48,6 @@ export async function getIndices(es, indexPatternCreationType, rawPattern, limit
   const params = {
     ignoreUnavailable: true,
     index: pattern,
-    ignore: [404],
     body: {
       size: 0, // no hits
       aggs: {
@@ -63,7 +62,7 @@ export async function getIndices(es, indexPatternCreationType, rawPattern, limit
   };
 
   try {
-    const response = await es.search(params);
+    const response = await es.search(params, { ignore: [404] });
     if (!response || response.error || !response.aggregations) {
       return [];
     }

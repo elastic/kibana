@@ -11,7 +11,8 @@ export default function ({ getService, loadTestFile }) {
 
   describe('beats', () => {
     const cleanup = () => es.indices.delete({
-      index: ES_INDEX_NAME,
+      index: ES_INDEX_NAME
+    }, {
       ignore: [404]
     });
 
