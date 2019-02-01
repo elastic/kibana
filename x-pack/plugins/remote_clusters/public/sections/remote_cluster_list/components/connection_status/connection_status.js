@@ -56,7 +56,7 @@ export function ConnectionStatus({ isConnected }) {
             {icon}
           </EuiFlexItem>
 
-          <EuiFlexItem style={{ whiteSpace: 'nowrap' }}>
+          <EuiFlexItem className="remoteClustersConnectionStatus__message">
             <EuiText>
               {message}
             </EuiText>
