@@ -230,7 +230,7 @@ export const unfollowLeaderIndex = (id) => (
 
         const warningMessage = hasMultipleNotOpen
           ? i18n.translate('xpack.crossClusterReplication.followerIndex.unfollowAction.notOpenWarningMultipleNotificationTitle', {
-            defaultMessage: `{count} indicies could not be re-opened`,
+            defaultMessage: `{count} indices could not be re-opened`,
             values: { count: response.itemsNotOpen.length },
           })
           : i18n.translate('xpack.crossClusterReplication.followerIndex.unfollowAction.notOpenWarningSingleNotificationTitle', {
