@@ -1,13 +1,13 @@
+// These are the various types in the dropdown, they each get a color
+$kbnTypeaheadTypes: (
+  field: $euiColorWarning,
+  value: $euiColorSecondary,
+  operator: $euiColorPrimary,
+  conjunction: $typeaheadConjunctionColor,
+);
+
 .kbnTypeahead {
   position: relative;
-
-  // These are the various types in the dropdown, they each get a color
-  $kbnTypeaheadTypes: (
-    field: $euiColorWarning,
-    value: $euiColorSecondary,
-    operator: $euiColorPrimary,
-    conjunction: $typeaheadConjunctionColor,
-  );
 
   .kbnTypeahead__popover {
     @include euiBottomShadow($adjustBorders: true);
@@ -89,7 +89,7 @@
   white-space: nowrap;
 
   @each $name, $color in $kbnTypeaheadTypes {
-    .kbnSuggestionItem--#{$name} {
+    &.kbnSuggestionItem--#{$name} {
       .kbnSuggestionItem__type {
         background-color: tintOrShade($color, 90%, 50%);
         color: makeHighContrastColor($color, tintOrShade($color, 90%, 50%));
