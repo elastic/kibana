@@ -19,7 +19,7 @@ import { estimateBucketSpanFactory } from '../bucket_span_estimator';
 const permissions = [false, true];
 const callWithRequest = (method) => {
   return new Promise((resolve) => {
-    if (method === 'ml.privilegeCheck') {
+    if (method === 'security.hasPrivileges') {
       resolve({
         cluster: {
           'cluster:monitor/xpack/ml/job/get': true,
