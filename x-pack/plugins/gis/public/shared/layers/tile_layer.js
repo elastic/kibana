@@ -64,15 +64,38 @@ export class TileLayer extends AbstractLayer {
     });
   }
 
+  async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
+    if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
+      return;
+    }
+    const sourceDataId = 'source';
+    const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
+    startLoading(sourceDataId, requestToken, dataFilters);
+    try {
+      const url = await this._source.getUrlTemplate();
+      stopLoading(sourceDataId, requestToken, url, {});
+    } catch(error) {
+      onLoadError(sourceDataId, requestToken, error.message);
+    }
+  }
+
   async syncLayerWithMB(mbMap) {
+
     const source = mbMap.getSource(this.getId());
-    const layerId = this.getId() + '_raster';
+    const mbLayerId = this.getId() + '_raster';
 
     if (source) {
+      // If source exists, just sync style
+      this._setTileLayerProperties(mbMap, mbLayerId);
       return;
     }
 
-    const url = this._source.getUrlTemplate();
+    const sourceDataRquest = this.getSourceDataRequest();
+    const url = sourceDataRquest.getData();
+    if (!url) {
+      return;
+    }
+
     const sourceId = this.getId();
     mbMap.addSource(sourceId, {
       type: 'raster',
@@ -82,21 +105,24 @@ export class TileLayer extends AbstractLayer {
     });
 
     mbMap.addLayer({
-      id: layerId,
+      id: mbLayerId,
       type: 'raster',
       source: sourceId,
-      minzoom: 0,
-      maxzoom: 22,
+      minzoom: this._descriptor.minZoom,
+      maxzoom: this._descriptor.maxZoom,
     });
+    this._setTileLayerProperties(mbMap, mbLayerId);
 
     await this._tileLoadErrorTracker(mbMap, url);
+  }
 
-    mbMap.setLayoutProperty(layerId, 'visibility', this.isVisible() ? 'visible' : 'none');
-    mbMap.setLayerZoomRange(layerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+  _setTileLayerProperties(mbMap, mbLayerId) {
+    mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+    mbMap.setLayerZoomRange(mbLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
     this._style && this._style.setMBPaintProperties({
       alpha: this.getAlpha(),
       mbMap,
-      layerId,
+      layerId: mbLayerId,
     });
   }
 

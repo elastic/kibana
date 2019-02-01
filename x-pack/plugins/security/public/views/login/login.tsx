@@ -17,7 +17,6 @@ import chrome from 'ui/chrome';
 import { I18nContext } from 'ui/i18n/context';
 import { parse } from 'url';
 import { LoginState } from '../../../common/login_state';
-import './login.less';
 const messageMap = {
   SESSION_EXPIRED: i18n.translate('xpack.security.login.sessionExpiredDescription', {
     defaultMessage: 'Your session has timed out. Please log in again.',
