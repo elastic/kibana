@@ -31,12 +31,15 @@ export const UptimeProvider = ({ getService }: KibanaFunctionalTestDefaultProvid
       return await testSubjects.exists('superDatePickerstartDatePopoverButton');
     },
     async monitorIdExists(key: string) {
+      await wait(1);
       await testSubjects.existOrFail(key);
     },
     async navigateToMonitorWithId(monitorId: string) {
+      await wait(1);
       await testSubjects.click(`monitor-page-link-${monitorId}`);
     },
     async getMonitorNameDisplayedOnPageTitle() {
+      await wait(1);
       return await testSubjects.getVisibleText('monitor-page-title');
     },
   };
