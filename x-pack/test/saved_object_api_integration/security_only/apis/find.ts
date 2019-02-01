@@ -48,9 +48,9 @@ export default function({ getService }: TestInvoker) {
           response: createExpectRbacForbidden('visualization'),
         },
         unknownSearchField: {
-          description: 'forbidden login and find wigwags message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
+          description: 'empty result',
+          statusCode: 200,
+          response: createExpectEmpty(1, 20, 0),
         },
         noType: {
           description: 'bad request, type is required',
@@ -120,9 +120,9 @@ export default function({ getService }: TestInvoker) {
           response: createExpectRbacForbidden('visualization'),
         },
         unknownSearchField: {
-          description: 'forbidden login and find wigwags message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
+          description: 'empty result',
+          statusCode: 200,
+          response: createExpectEmpty(1, 20, 0),
         },
         noType: {
           description: 'bad request, type is required',
@@ -192,9 +192,9 @@ export default function({ getService }: TestInvoker) {
           response: createExpectEmpty(100, 100, 1),
         },
         unknownSearchField: {
-          description: 'forbidden find wigwags message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
+          description: 'empty result',
+          statusCode: 200,
+          response: createExpectEmpty(1, 20, 0),
         },
         noType: {
           description: 'bad request, type is required',
@@ -264,9 +264,9 @@ export default function({ getService }: TestInvoker) {
           response: createExpectEmpty(100, 100, 1),
         },
         unknownSearchField: {
-          description: 'forbidden find wigwags message',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
+          description: 'empty result',
+          statusCode: 200,
+          response: createExpectEmpty(1, 20, 0),
         },
         noType: {
           description: 'bad request, type is required',
@@ -301,8 +301,8 @@ export default function({ getService }: TestInvoker) {
         },
         unknownSearchField: {
           description: 'empty result',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
+          statusCode: 200,
+          response: createExpectEmpty(1, 20, 0),
         },
         noType: {
           description: 'bad request, type is required',
@@ -337,8 +337,8 @@ export default function({ getService }: TestInvoker) {
         },
         unknownSearchField: {
           description: 'empty result',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
+          statusCode: 200,
+          response: createExpectEmpty(1, 20, 0),
         },
         noType: {
           description: 'bad request, type is required',
@@ -373,8 +373,8 @@ export default function({ getService }: TestInvoker) {
         },
         unknownSearchField: {
           description: 'empty result',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
+          statusCode: 200,
+          response: createExpectEmpty(1, 20, 0),
         },
         noType: {
           description: 'bad request, type is required',
@@ -409,8 +409,8 @@ export default function({ getService }: TestInvoker) {
         },
         unknownSearchField: {
           description: 'empty result',
-          statusCode: 403,
-          response: createExpectRbacForbidden('wigwags'),
+          statusCode: 200,
+          response: createExpectEmpty(1, 20, 0),
         },
         noType: {
           description: 'bad request, type is required',
