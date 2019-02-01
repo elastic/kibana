@@ -32,12 +32,12 @@ function migrateIndexPattern(doc) {
     return;
   }
   if (searchSource.index) {
+    searchSource.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
     doc.references.push({
-      name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+      name: searchSource.indexRefName,
       type: 'index-pattern',
       id: searchSource.index,
     });
-    searchSource.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
     delete searchSource.index;
   }
   if (searchSource.filter) {

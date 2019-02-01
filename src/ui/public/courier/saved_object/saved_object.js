@@ -316,7 +316,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
           const { id: indexId } = searchSourceFields.index;
           searchSourceFields.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
           references.push({
-            name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+            name: searchSourceFields.indexRefName,
             type: 'index-pattern',
             id: indexId,
           });
