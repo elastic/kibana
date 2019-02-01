@@ -123,7 +123,7 @@ class ReportListingUi extends Component<Props, State> {
             <FormattedMessage id="xpack.reporting.listing.reportstitle" defaultMessage="Reports" />
           </h1>
         </EuiTitle>
-        <EuiText color="subdued">
+        <EuiText color="subdued" size="s">
           <p>
             <FormattedMessage
               id="xpack.reporting.listing.reports.subtitle"

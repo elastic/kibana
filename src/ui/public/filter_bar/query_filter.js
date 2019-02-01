@@ -24,10 +24,13 @@ import { uniqFilters } from './lib/uniq_filters';
 import { compareFilters } from './lib/compare_filters';
 import { EventsProvider } from '../events';
 import { FilterBarLibMapAndFlattenFiltersProvider } from './lib/map_and_flatten_filters';
+import { FilterBarLibExtractTimeFilterProvider } from './lib/extract_time_filter';
+import { changeTimeFilter } from './lib/change_time_filter';
 
 export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, globalState, config) {
   const EventEmitter = Private(EventsProvider);
   const mapAndFlattenFilters = Private(FilterBarLibMapAndFlattenFiltersProvider);
+  const extractTimeFilter = Private(FilterBarLibExtractTimeFilterProvider);
 
   const queryFilter = new EventEmitter();
 
@@ -216,6 +219,24 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
     executeOnFilters(pin);
   };
 
+  queryFilter.setFilters = filters => {
+    return mapAndFlattenFilters(filters)
+      .then(mappedFilters => {
+        const appState = getAppState();
+        const [globalFilters, appFilters] = _.partition(mappedFilters, filter => {
+          return filter.$state.store === 'globalState';
+        });
+        globalState.filters = globalFilters;
+        if (appState) appState.filters = appFilters;
+      });
+  };
+
+  queryFilter.addFiltersAndChangeTimeFilter = async filters => {
+    const timeFilter = await extractTimeFilter(filters);
+    if (timeFilter) changeTimeFilter(timeFilter);
+    queryFilter.addFilters(filters.filter(filter => filter !== timeFilter));
+  };
+
   initWatchers();
 
   return queryFilter;
@@ -268,7 +289,6 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
     // ensure we don't mutate the filters passed in
     const globalFilters = gFilters ? _.cloneDeep(gFilters) : [];
     const appFilters = aFilters ? _.cloneDeep(aFilters) : [];
-    compareOptions = _.defaults(compareOptions || {}, { disabled: true });
 
     // existing globalFilters should be mutated by appFilters
     _.each(appFilters, function (filter, i) {
@@ -293,8 +313,8 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
     return [
       // Reverse filters after uniq again, so they are still in the order, they
       // were before updating them
-      uniqFilters(globalFilters, { disabled: true }).reverse(),
-      uniqFilters(appFilters, { disabled: true }).reverse()
+      uniqFilters(globalFilters).reverse(),
+      uniqFilters(appFilters).reverse()
     ];
   }
 
@@ -332,8 +352,7 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
 
         // reconcile filter in global and app states
         const filters = mergeStateFilters(next[0], next[1]);
-        const globalFilters = filters[0];
-        const appFilters = filters[1];
+        const [globalFilters, appFilters] = filters;
         const appState = getAppState();
 
         // save the state, as it may have updated

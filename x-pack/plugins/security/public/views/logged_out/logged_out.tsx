@@ -10,7 +10,6 @@ import React from 'react';
 import { render } from 'react-dom';
 import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
-import './logged_out.less';
 
 import { LoggedOutPage } from './components';
 

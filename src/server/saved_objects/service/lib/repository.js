@@ -141,7 +141,8 @@ export class SavedObjectsRepository {
       overwrite = false,
     } = options;
     const time = this._getCurrentTime();
-    const objectToBulkRequest = (object) => {
+    const bulkCreateParams = [];
+    const rawObjectsToCreate = objects.map((object) => {
       const method = object.id && !overwrite ? 'create' : 'index';
       const migrated = this._migrator.migrateDocument({
         id: object.id,
@@ -153,28 +154,22 @@ export class SavedObjectsRepository {
         references: object.references || [],
       });
       const raw = this._serializer.savedObjectToRaw(migrated);
-
-      return [
+      bulkCreateParams.push(
         {
           [method]: {
             _id: raw._id,
             _type: this._type,
-          }
+          },
         },
         raw._source,
-      ];
-    };
+      );
+      return raw;
+    });
 
     const { items } = await this._writeToCluster('bulk', {
       index: this._index,
       refresh: 'wait_for',
-      body: objects.filter(object => {
-        this._assertAllowedType(object.type);
-        return object;
-      }).reduce((acc, object) => ([
-        ...acc,
-        ...objectToBulkRequest(object)
-      ]), []),
+      body: bulkCreateParams,
     });
 
     return {
@@ -187,10 +182,14 @@ export class SavedObjectsRepository {
 
         const {
           id = responseId,
-          type,
-          attributes,
-          references = [],
         } = objects[i];
+        const {
+          _source: {
+            type,
+            [type]: attributes,
+            references = [],
+          },
+        } = rawObjectsToCreate[i];
 
         if (error) {
           if (error.type === 'version_conflict_engine_exception') {

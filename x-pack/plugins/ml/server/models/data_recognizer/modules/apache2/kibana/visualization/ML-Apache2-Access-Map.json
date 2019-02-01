@@ -4,7 +4,6 @@
   "title": "ML Apache2 Access Map",
   "uiStateJSON": "{\n  \"mapCenter\": [\n    12.039320557540572,\n    -0.17578125\n  ]\n}",
   "version": 1,
-  "migrationVersion": {},
   "savedSearchId": "ML-Filebeat-Apache2-Access",
   "kibanaSavedObjectMeta": {
     "searchSourceJSON": "{\"filter\":[]}"

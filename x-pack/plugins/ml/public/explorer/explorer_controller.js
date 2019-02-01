@@ -5,7 +5,6 @@
  */
 
 
-
 /*
  * Angular controller for the Machine Learning Explorer dashboard. The controller makes
  * multiple queries to Elasticsearch to obtain the data to populate all the components
@@ -49,13 +48,16 @@ uiRoutes
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       indexPatterns: loadIndexPatterns,
-    }
+    },
   });
 
 import { uiModules } from 'ui/modules';
+import { getFromSavedObject } from 'ui/index_patterns/static_utils';
+
 const module = uiModules.get('apps/ml');
 
 module.controller('MlExplorerController', function (
+  $route,
   $injector,
   $scope,
   $timeout,
@@ -75,6 +77,7 @@ module.controller('MlExplorerController', function (
   // For the moment that's the job selector and the (hidden) filter bar.
   $scope.jobs = [];
   $scope.queryFilters = [];
+  $scope.indexPatterns = $route.current ? $route.current.locals.indexPatterns.map(getFromSavedObject) : [];
   timefilter.enableTimeRangeSelector();
   timefilter.enableAutoRefreshSelector();
 
@@ -96,6 +99,11 @@ module.controller('MlExplorerController', function (
       return job;
     });
 
+    $scope.updateFilters = filters => {
+      // The filters will automatically be set when the queryFilter emits an update event (see below)
+      queryFilter.setFilters(filters);
+    };
+
     const selectedJobs = jobs.filter(job => job.selected);
 
     function fieldFormatServiceCallback() {
@@ -108,7 +116,7 @@ module.controller('MlExplorerController', function (
         loading: false,
         noJobsFound,
         selectedCells,
-        selectedJobs
+        selectedJobs,
       });
     }
 
@@ -157,7 +165,7 @@ module.controller('MlExplorerController', function (
               fullJobs: resp.jobs,
               selectedCells,
               selectedJobIds,
-              swimlaneViewByFieldName: $scope.appState.mlExplorerSwimlane.viewByFieldName
+              swimlaneViewByFieldName: $scope.appState.mlExplorerSwimlane.viewByFieldName,
             });
           } else {
             mlExplorerDashboardService.explorer.changed(EXPLORER_ACTION.RELOAD, {
@@ -171,6 +179,7 @@ module.controller('MlExplorerController', function (
         });
     }
   }
+
   mlExplorerDashboardService.explorer.watch(loadJobsListener);
 
   // Listen for changes to job selection.
@@ -197,6 +206,7 @@ module.controller('MlExplorerController', function (
     // Only redraw 100ms after last resize event.
     resizeTimeout = $timeout(redrawOnResize, 100);
   }
+
   $(window).resize(jqueryRedrawOnResize);
 
   const navListener = $scope.$on('globalNav:update', () => {
