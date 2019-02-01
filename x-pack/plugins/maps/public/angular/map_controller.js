@@ -31,7 +31,7 @@ import { getInitialQuery } from './get_initial_query';
 import { getInitialTimeFilters } from './get_initial_time_filters';
 import { getInitialRefreshConfig } from './get_initial_refresh_config';
 
-const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-gis-root';
+const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 
 
 const app = uiModules.get('app/maps', []);
@@ -54,7 +54,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
 
   const $state = new AppState();
   $scope.$listen($state, 'fetch_with_changes', function (diff) {
-    if (diff.includes('query')) {
+    if (diff.includes('query') && $state.query) {
       $scope.updateQueryAndDispatch({ query: $state.query, dateRange: $scope.time });
     }
   });

@@ -4,13 +4,13 @@
  *    individual widgets.
  */
 
-.gisViewControl__coordinates {
+.mapViewControl__coordinates {
   padding: $euiSizeXS $euiSizeS;
   justify-content: center;
   pointer-events: none;
 }
 
-.gisViewControl__gotoButton {
+.mapViewControl__gotoButton {
   min-width: 0;
   pointer-events: all; /* 1 */
 }
