@@ -148,6 +148,20 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
         delete searchSourceValues.indexRefName;
       }
 
+      if (searchSourceValues.filter) {
+        searchSourceValues.filter.forEach((filterRow, i) => {
+          if (!filterRow.meta || !filterRow.meta.indexRefName) {
+            return;
+          }
+          const reference = references.find(reference => reference.name === filterRow.meta.indexRefName);
+          if (!reference) {
+            throw new Error(`Could not find reference for ${filterRow.meta.indexRefName} on ${this.getEsType()}`);
+          }
+          filterRow.meta.index = reference.id;
+          delete filterRow.meta.indexRefName;
+        });
+      }
+
       const searchSourceFields = this.searchSource.getFields();
       const fnProps = _.transform(searchSourceFields, function (dynamic, val, name) {
         if (_.isFunction(val)) dynamic[name] = val;
@@ -307,6 +321,20 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
             id: indexId,
           });
           delete searchSourceFields.index;
+        }
+        if (searchSourceFields.filter) {
+          searchSourceFields.filter.forEach((filterRow, i) => {
+            if (!filterRow.meta || !filterRow.meta.index) {
+              return;
+            }
+            filterRow.meta.indexRefName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
+            references.push({
+              name: filterRow.meta.indexRefName,
+              type: 'index-pattern',
+              id: filterRow.meta.index,
+            });
+            delete filterRow.meta.index;
+          });
         }
         attributes.kibanaSavedObjectMeta = {
           searchSourceJSON: angular.toJson(searchSourceFields)
