@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { EuiEmptyPrompt } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get, max, min } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
@@ -180,10 +180,6 @@ export const NodesOverview = injectI18n(
     };
   }
 );
-
-const CenteredEmptyPrompt = styled(EuiEmptyPrompt)`
-  align-self: center;
-`;
 
 const MainContainer = styled.div`
   position: relative;
