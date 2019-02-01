@@ -21,51 +21,66 @@ import { socketInterpreterProvider } from '../common/interpreter/socket_interpre
 import { serializeProvider } from '../common/lib/serialize';
 import { createHandlers } from './create_handlers';
 
-export async function initializeInterpreter(socket, typesRegistry, functionsRegistry) {
-  let resolve;
-  const functionList = new Promise(_resolve => (resolve = _resolve));
+// This should be moved to its own module, and will be where
+// HTTP batching and streaming happens.
+function createAjaxFunction(kbnVersion, basePath) {
+  return async (url, opts = {}) => {
+    const result = await fetch(`${basePath}${url}`, {
+      ...opts,
+      headers: {
+        ...(opts.headers || {}),
+        'kbn-version': kbnVersion,
+        'Content-Type': 'application/json',
+      },
+    });
 
-  const getInitializedFunctions = async () => {
-    return functionList;
+    const response = await result.json();
+
+    if (!result.ok) {
+      throw response;
+    }
+
+    return response;
   };
+}
+
+export async function initializeInterpreter(kbnVersion, basePath, typesRegistry, functionsRegistry) {
+  const ajax = createAjaxFunction(kbnVersion, basePath);
+  const serverFunctionList = await ajax(`/api/canvas/fns`);
+
+  // For every sever-side function, register a client-side
+  // function that matches its definition, but which simply
+  // calls the server-side function endpoint.
+  Object.keys(serverFunctionList).forEach(functionName => {
+    functionsRegistry.register(() => ({
+      ...serverFunctionList[functionName],
+      async fn(context, args) {
+        const types = typesRegistry.toJS();
+        const { serialize } = serializeProvider(types);
+        const result = await ajax(`/api/canvas/fns/${functionName}`, {
+          method: 'POST',
+          body: JSON.stringify({
+            args,
+            context: serialize(context),
+          }),
+        });
+
+        return result;
+      },
+    }));
+  });
 
   const interpretAst = async (ast, context, handlers) => {
     // Load plugins before attempting to get functions, otherwise this gets racey
-    const serverFunctionList = await functionList;
     const interpretFn = await socketInterpreterProvider({
       types: typesRegistry.toJS(),
-      handlers: { ...handlers, ...createHandlers(socket) },
+      handlers: { ...handlers, ...createHandlers() },
       functions: functionsRegistry.toJS(),
       referableFunctions: serverFunctionList,
-      socket: socket,
     });
     return interpretFn(ast, context);
   };
 
-  // Listen for interpreter runs
-  socket.on('run', ({ ast, context, id }) => {
-    const types = typesRegistry.toJS();
-    const { serialize, deserialize } = serializeProvider(types);
-    interpretAst(ast, deserialize(context)).then(value => {
-      socket.emit(`resp:${id}`, { value: serialize(value) });
-    });
-  });
-
-  // Create the function list
-  let gotFunctionList = false;
-  socket.once('functionList', (fl) => {
-    gotFunctionList = true;
-    resolve(fl);
-  });
-
-  const interval = setInterval(() => {
-    if (gotFunctionList) {
-      clearInterval(interval);
-      return;
-    }
-    socket.emit('getFunctionList');
-  }, 1000);
-
-  return { getInitializedFunctions, interpretAst };
+  return { interpretAst };
 }
 
