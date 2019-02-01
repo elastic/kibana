@@ -108,12 +108,12 @@ export class TileLayer extends AbstractLayer {
       id: mbLayerId,
       type: 'raster',
       source: sourceId,
-      minzoom: 0,
-      maxzoom: 22,
+      minzoom: this._descriptor.minZoom,
+      maxzoom: this._descriptor.maxZoom,
     });
+    this._setTileLayerProperties(mbMap, mbLayerId);
 
     await this._tileLoadErrorTracker(mbMap, url);
-    this._setTileLayerProperties(mbMap, mbLayerId);
   }
 
   _setTileLayerProperties(mbMap, mbLayerId) {
@@ -122,7 +122,7 @@ export class TileLayer extends AbstractLayer {
     this._style && this._style.setMBPaintProperties({
       alpha: this.getAlpha(),
       mbMap,
-      mbLayerId,
+      layerId: mbLayerId,
     });
   }
 
