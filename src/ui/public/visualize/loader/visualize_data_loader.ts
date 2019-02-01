@@ -31,6 +31,8 @@ import {
   Vis,
 } from '../../vis';
 
+import { VisResponseData } from './types';
+
 // @ts-ignore No typing present
 import { isTermSizeZeroError } from '../../elasticsearch_errors';
 
@@ -68,7 +70,7 @@ export class VisualizeDataLoader {
     this.responseHandler = getHandler(responseHandlers, responseHandler);
   }
 
-  public async fetch(params: RequestHandlerParams): Promise<any> {
+  public async fetch(params: RequestHandlerParams): Promise<VisResponseData | void> {
     this.vis.filters = { timeRange: params.timeRange };
     this.vis.requestError = undefined;
     this.vis.showRequestError = false;
@@ -104,7 +106,16 @@ export class VisualizeDataLoader {
           this.responseHandler(requestHandlerResponse, this.vis.params.dimensions)
         );
       }
-      return this.visData;
+
+      return {
+        as: 'visualization',
+        value: {
+          visType: this.vis.type.name,
+          visData: this.visData,
+          visConfig: this.vis.params,
+          params: {},
+        },
+      };
     } catch (error) {
       params.searchSource.cancelQueued();
 
@@ -116,11 +127,12 @@ export class VisualizeDataLoader {
       console.error(error);
 
       if (isTermSizeZeroError(error)) {
-        return toastNotifications.addDanger(
+        toastNotifications.addDanger(
           `Your visualization ('${this.vis.title}') has an error: it has a term ` +
             `aggregation with a size of 0. Please set it to a number greater than 0 to resolve ` +
             `the error.`
         );
+        return;
       }
 
       toastNotifications.addDanger({

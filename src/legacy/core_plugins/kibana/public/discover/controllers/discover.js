@@ -787,7 +787,7 @@ function discoverController(
             visualizeHandler.render({
               as: 'visualization',
               value: {
-                visType: 'histogram',
+                visType: $scope.vis.type.name,
                 visData: resp,
                 visConfig: $scope.vis.params,
                 params: {},
