@@ -78,7 +78,7 @@ export class SetView  extends React.Component {
       min: -90,
       max: 90,
       onChange: this._onLatChange,
-      label: 'latitude',
+      label: 'Latitude',
       dataTestSubj: 'latitudeInput',
     });
 
@@ -87,7 +87,7 @@ export class SetView  extends React.Component {
       min: -180,
       max: 180,
       onChange: this._onLonChange,
-      label: 'longitude',
+      label: 'Longitude',
       dataTestSubj: 'longitudeInput',
     });
 
@@ -96,7 +96,7 @@ export class SetView  extends React.Component {
       min: 0,
       max: 24,
       onChange: this._onZoomChange,
-      label: 'zoom',
+      label: 'Zoom',
       dataTestSubj: 'zoomInput',
     });
 
