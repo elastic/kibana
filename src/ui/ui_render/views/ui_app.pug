@@ -101,8 +101,7 @@ block content
       }
     }
 
-
-  .kibanaWelcomeView
+  .kibanaWelcomeView(id="kbn_loading_message", style="display: none;")
     .kibanaLoaderWrap
       .kibanaLoader
       .kibanaWelcomeLogoCircle
@@ -110,6 +109,20 @@ block content
     .kibanaWelcomeText(data-error-message=i18n('common.ui.welcomeErrorMessage', { defaultMessage: 'Kibana did not load properly. Check the server output for more information.' }))
       | #{i18n('common.ui.welcomeMessage', { defaultMessage: 'Loading Kibana' })}
 
+  .kibanaWelcomeView(id="kbn_legacy_browser_error", style="display: none;")
+    .kibanaLoaderWrap
+      .kibanaWelcomeLogoCircle
+        .kibanaWelcomeLogo
+    .kibanaWelcomeText
+      | #{i18n('common.ui.legacyBrowserMessage', { defaultMessage: 'Your browser version does not meet the required security capabilities of this application.' })}
+
+  script.
+    // Since this script tag does not contain a nonce, this code will not run
+    // in browsers that support content security policy(CSP). This is
+    // intentional as we check for the existence of __kbnCspNotEnforced__ in
+    // bootstrap.
+    window.__kbnCspNotEnforced__ = true;
   script(nonce=nonce).
+    window.__kbnStrictCsp = !{strictCsp};
     window.__webpack_nonce__ = '!{nonce}';
   script(src=bootstrapScriptUrl, nonce=nonce)
