@@ -20,9 +20,10 @@ describe('Rollup search request', () => {
   test('should create instance of RollupSearchRequest', () => {
     const rollupSearchRequest = new RollupSearchRequest();
 
+    expect(rollupSearchRequest).toBeInstanceOf(AbstractSearchRequest);
+    expect(rollupSearchRequest.search).toBeDefined();
     expect(rollupSearchRequest.indexPattern).toBeDefined();
     expect(rollupSearchRequest.callWithRequest).toBeDefined();
-    expect(rollupSearchRequest.search).toBeDefined();
   });
 
   test('should send one request for single search', async () => {
