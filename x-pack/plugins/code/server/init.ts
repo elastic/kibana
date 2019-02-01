@@ -23,6 +23,7 @@ import { redirectRoute } from './routes/redirect';
 import { redirectSocketRoute } from './routes/redirect_socket';
 import { repositoryRoute } from './routes/repository';
 import { documentSearchRoute, repositorySearchRoute, symbolSearchRoute } from './routes/search';
+import { setupRoute } from './routes/setup';
 import { socketRoute } from './routes/socket';
 import { userRoute } from './routes/user';
 import { workspaceRoute } from './routes/workspace';
@@ -239,4 +240,5 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   userRoute(server, serverOptions);
   installRoute(server, socketService, lspService, installManager, serverOptions);
   lspRoute(server, lspService, serverOptions);
+  setupRoute(server);
 }

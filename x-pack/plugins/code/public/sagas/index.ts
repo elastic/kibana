@@ -29,11 +29,13 @@ import {
   watchInitRepoCmd,
 } from './repository';
 import { watchDocumentSearch, watchRepositorySearch, watchSearchRouteChange } from './search';
+import { watchRootRoute } from './setup';
 import { watchRepoCloneSuccess, watchRepoDeleteFinished } from './status';
 import { watchLoadStructure } from './structure';
 import { watchLoadUserConfig } from './user';
 
 export function* rootSaga() {
+  yield fork(watchRootRoute);
   yield fork(watchLoadCommit);
   yield fork(watchFetchRepos);
   yield fork(watchDeleteRepo);
