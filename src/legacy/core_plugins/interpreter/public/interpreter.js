@@ -25,6 +25,7 @@ import { functionsRegistry } from './functions_registry';
 import { typesRegistry } from './types_registry';
 import { renderFunctionsRegistry } from './render_functions_registry';
 import { visualization } from './renderers/visualization';
+import 'uiExports/interpreterBrowserFunctions';
 
 const basePath = chrome.getInjected('serverBasePath');
 

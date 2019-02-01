@@ -21,12 +21,13 @@ import { resolve } from 'path';
 
 export default kibana => new kibana.Plugin({
   id: 'vega',
-  require: ['elasticsearch'],
+  require: ['elasticsearch', 'interpreter'],
 
   uiExports: {
     visTypes: ['plugins/vega/vega_type'],
     injectDefaultVars: server => ({ vegaConfig: server.config().get('vega') }),
     styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+    interpreterBrowserFunctions: ['plugins/vega/vega'],
   },
 
   config: (Joi) => Joi.object({

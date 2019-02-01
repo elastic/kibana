@@ -26,7 +26,7 @@ const experimentalLabel = i18n.translate('timelion.uiSettings.experimentalLabel'
 
 export default function (kibana) {
   return new kibana.Plugin({
-    require: ['kibana', 'elasticsearch'],
+    require: ['kibana', 'elasticsearch', 'interpreter'],
     uiExports: {
       app: {
         title: 'Timelion',
@@ -46,6 +46,7 @@ export default function (kibana) {
       visTypes: [
         'plugins/timelion/vis'
       ],
+      interpreterBrowserFunctions: ['plugins/timelion/timelion_vis'],
       home: [
         'plugins/timelion/register_feature'
       ],

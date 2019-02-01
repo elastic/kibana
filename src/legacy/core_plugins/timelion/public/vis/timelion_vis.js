@@ -19,11 +19,13 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import chrome from 'ui/chrome';
-import { VegaRequestHandlerProvider } from 'plugins/vega/vega_request_handler';
+import { TimelionRequestHandlerProvider } from './timelion_request_handler';
+import { functionsRegistry } from 'plugins/interpreter/functions_registry';
 
-export const vega = () => ({
-  name: 'vega',
+import chrome from 'ui/chrome';
+
+export const timelionVis = () => ({
+  name: 'timelion_vis',
   type: 'render',
   context: {
     types: [
@@ -31,38 +33,47 @@ export const vega = () => ({
       'null',
     ],
   },
-  help: i18n.translate('interpreter.functions.vega.help', {
-    defaultMessage: 'Vega visualization'
+  help: i18n.translate('interpreter.functions.timelion.help', {
+    defaultMessage: 'Timelion visualization'
   }),
   args: {
-    spec: {
+    expression: {
       types: ['string'],
-      default: '',
+      aliases: ['_'],
+      default: '".es(*)"',
     },
+    interval: {
+      types: ['string', 'null'],
+      default: 'auto',
+    }
   },
   async fn(context, args) {
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const Private = $injector.get('Private');
-    const vegaRequestHandler = Private(VegaRequestHandlerProvider).handler;
+    const timelionRequestHandler = Private(TimelionRequestHandlerProvider).handler;
 
-    const response = await vegaRequestHandler({
+    const visParams = { expression: args.expression, interval: args.interval };
+
+    const response = await timelionRequestHandler({
       timeRange: get(context, 'timeRange', null),
       query: get(context, 'query', null),
       filters: get(context, 'filters', null),
-      visParams: { spec: args.spec },
-      forceFetch: true
+      forceFetch: true,
+      visParams: visParams,
     });
+
+    response.visType = 'timelion';
 
     return {
       type: 'render',
       as: 'visualization',
       value: {
+        visParams,
+        visType: 'timelion',
         visData: response,
-        visType: 'vega',
-        visConfig: {
-          spec: args.spec
-        },
-      }
+      },
     };
-  }
+  },
 });
+
+functionsRegistry.register(timelionVis);

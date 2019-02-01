@@ -20,9 +20,6 @@
 import { esaggs } from './esaggs';
 import { kibana } from './kibana';
 import { kibanaContext } from './kibana_context';
-import { vega } from './vega';
-import { timelionVis } from './timelion_vis';
-import { tsvb } from './tsvb';
 import { kibanaMarkdown } from './markdown';
 import { inputControlVis } from './input_control';
 import { metric } from './metric';
@@ -35,6 +32,6 @@ import { vislib } from './vislib';
 import { visualization } from './visualization';
 
 export const functions = [
-  esaggs, kibana, kibanaContext, vega, timelionVis, tsvb, kibanaMarkdown, inputControlVis,
+  esaggs, kibana, kibanaContext, kibanaMarkdown, inputControlVis,
   metric, kibanaPie, regionmap, tilemap, kibanaTable, tagcloud, vislib, visualization
 ];

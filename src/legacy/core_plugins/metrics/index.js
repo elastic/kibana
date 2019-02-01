@@ -24,12 +24,13 @@ import visDataRoutes from './server/routes/vis';
 
 export default function (kibana) {
   return new kibana.Plugin({
-    require: ['kibana', 'elasticsearch'],
+    require: ['kibana', 'elasticsearch', 'interpreter'],
 
     uiExports: {
       visTypes: [
         'plugins/metrics/kbn_vis_types'
       ],
+      interpreterBrowserFunctions: ['plugins/metrics/kbn_vis_types/tsvb'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     },
 

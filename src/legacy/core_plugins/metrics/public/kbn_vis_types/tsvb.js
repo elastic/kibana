@@ -19,8 +19,9 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { MetricsRequestHandlerProvider } from 'plugins/metrics/kbn_vis_types/request_handler';
+import { MetricsRequestHandlerProvider } from './request_handler';
 import { PersistedState } from 'ui/persisted_state';
+import { functionsRegistry } from 'plugins/interpreter/functions_registry';
 
 import chrome from 'ui/chrome';
 
@@ -78,3 +79,5 @@ export const tsvb = () => ({
     };
   },
 });
+
+functionsRegistry.register(tsvb);
