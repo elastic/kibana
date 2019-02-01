@@ -4,12 +4,22 @@
 
 .visLegend__toggle {
   border-radius: $euiBorderRadius;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  background-color: $euiColorEmptyShade;
+  transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance,
+              background-color $euiAnimSpeedFast $euiAnimSlightResistance $euiAnimSpeedExtraSlow;
 
-  &:hover,
   &:focus {
     box-shadow: none;
-    background-color: $euiFocusBackgroundColor;
+    background-color: $euiFocusBackgroundColor !important;
   }
+}
+
+.visLegend__toggle--isOpen {
+  background-color: transparentize($euiColorDarkestShade, .9);
+  opacity: 1;
 }
 
 
@@ -27,47 +37,23 @@
   overflow: hidden;
 }
 
-.visLib {
-  // Default is legend on the right
-  .visLegend {
-    flex-direction: column;
-    align-items: flex-end;
+&.visLib--legend-left{
+  .visLegend__list {
+    margin-bottom: $euiSizeL;
   }
+}
 
-  .visLib__chart {
-    padding-left: $euiSizeL; /* 2 */
-  }
-
-  &.visLib--legend-left {
-    .visLegend {
-      align-items: flex-start;
-    }
-
-    .visLib__chart {
-      padding-left: 0; /* 2 */
-      padding-right: $euiSizeL; /* 2 */
-    }
-  }
-
-  &.visLib--legend-bottom,
-  &.visLib--legend-top {
-    .visLegend {
-      flex-direction: row;
-      align-items: flex-start;
-    }
-
-    .visLib__chart {
-      padding-left: 0;
-    }
+&.visLib--legend-bottom {
+  .visLegend__list {
+    margin-left: $euiSizeL;
   }
 }
 
 .visLegend__list {
   @include euiScrollBar;
+  line-height: $euiSize;
   width: 150px; // Must be a hard-coded width for the chart to get its correct dimensions
   flex: 1 1 auto;
-  flex-direction: column;
-  min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
 
@@ -88,7 +74,7 @@
 
 .visLegend__value {
   cursor: pointer;
-  padding: $euiSizeXS + 1px;
+  padding: $euiSizeXS;
   display: flex;
 
   > * {

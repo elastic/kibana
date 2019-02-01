@@ -50,6 +50,11 @@
   .visualization .visChart__container {
     overflow: visible; /* 2 */
   }
+
+  .visLegend__toggle {
+    border-bottom-right-radius: 0;
+    border-top-left-radius: 0;
+  }
 }
 
 .dshLayout--editing .dshPanel {
@@ -94,10 +99,11 @@
 .dshPanel__title {
   @include euiTextTruncate;
   @include euiTitle('xxxs');
+  line-height: 1.5;
   flex-grow: 1;
 
   &:not(:empty) {
-    padding: $euiSizeXS $euiSizeS 0;
+    padding: ($euiSizeXS * 1.5) $euiSizeS 0;
   }
 }
 
@@ -156,11 +162,6 @@
 }
 
 .dshLayout--editing {
-  .dshPanel_optionsMenuButton:hover,
-  .dshPanel_optionsMenuButton:focus {
-    background-color: transparentize($euiColorWarning, .9);
-  }
-
   .dshPanel_optionsMenuButton,
   .dshPanel .visLegend__toggle {
     opacity: 1; /* 3 */
