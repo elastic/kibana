@@ -74,15 +74,15 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
   };
 
   const expectValidType = (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 400,
-      error: 'Bad Request',
-      message:
-        'child "type" fails because [single value of "type" fails because ["type" must be one of [config, migrationVersion, references, globaltype, telemetry, graph-workspace, space, apm-telemetry, gis-map, canvas-workpad, infrastructure-ui-source, upgrade-assistant-reindex-operation, index-pattern, visualization, search, dashboard, url, server, kql-telemetry, timelion-sheet]]]',
-      validation: {
-        keys: ['type'],
-        source: 'query',
-      },
+    expect(resp.body).to.have.keys('statusCode', 'error', 'message', 'validation');
+    expect(resp.body).to.have.property('statusCode', 400);
+    expect(resp.body).to.have.property('error', 'Bad Request');
+    expect(resp.body.message).to.match(
+      /child \"type\" fails because \[single value of \"type\" fails because \[\"type\" must be one of \[.*\]\]\]/
+    );
+    expect(resp.body.validation).to.eql({
+      keys: ['type'],
+      source: 'query',
     });
   };
 
