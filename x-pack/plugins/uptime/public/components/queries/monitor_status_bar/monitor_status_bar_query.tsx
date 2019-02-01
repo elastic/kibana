@@ -11,8 +11,7 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { Ping } from 'x-pack/plugins/uptime/common/graphql/types';
 import { UptimeCommonProps } from '../../../uptime_app';
-import { StatusBar } from '../../functional';
-import { EmptyStatusBar } from '../../functional/empty_status_bar';
+import { EmptyStatusBar, MonitorStatusBar } from '../../functional';
 import { formatDuration } from './format_duration';
 import { getMonitorStatusBarQuery } from './get_monitor_status_bar';
 
@@ -28,7 +27,7 @@ interface MonitorStatusBarQueryParams {
 
 type Props = MonitorStatusBarProps & UptimeCommonProps;
 
-export const MonitorStatusBar = ({
+export const MonitorStatusBarQuery = ({
   dateRangeStart,
   dateRangeEnd,
   monitorId,
@@ -42,7 +41,14 @@ export const MonitorStatusBar = ({
   >
     {({ loading, error, data }: MonitorStatusBarQueryParams) => {
       if (loading) {
-        return <EmptyStatusBar message="Fetching data" monitorId={monitorId} />;
+        return (
+          <EmptyStatusBar
+            message={i18n.translate('xpack.uptime.monitorStatusBar.loadingMessage', {
+              defaultMessage: 'Loading…',
+            })}
+            monitorId={monitorId}
+          />
+        );
       }
       if (error) {
         return i18n.translate('xpack.uptime.monitorStatusBar.errorMessage', {
@@ -61,7 +67,7 @@ export const MonitorStatusBar = ({
       const full = get(url, 'full', undefined);
 
       return (
-        <StatusBar
+        <MonitorStatusBar
           duration={formatDuration(duration)}
           status={status}
           timestamp={timestamp}

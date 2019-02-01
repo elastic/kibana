@@ -30,9 +30,9 @@ export interface Query {
 
   getFilterBar?: FilterBar | null;
 
-  getErrorsList?: (ErrorListItem | null)[] | null;
-
   getMonitorPageTitle?: MonitorPageTitle | null;
+
+  getErrorsList?: ErrorListItem[] | null;
 }
 
 export interface PingResults {
@@ -305,7 +305,7 @@ export interface DocCount {
 }
 
 export interface LatestMonitorsResult {
-  monitors?: (LatestMonitor | null)[] | null;
+  monitors?: LatestMonitor[] | null;
 }
 
 export interface LatestMonitor {
@@ -337,7 +337,7 @@ export interface Snapshot {
 
   total?: number | null;
 
-  histogram?: (HistogramSeries | null)[] | null;
+  histogram?: HistogramSeries[] | null;
 }
 
 export interface HistogramSeries {
