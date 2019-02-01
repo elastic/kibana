@@ -293,6 +293,25 @@ export class EmbeddedVisualizeHandler {
   };
 
   /**
+   * Specifically for handling responses from discover, which may need
+   * a pipeline-like response to be manually created if using the pipeline
+   * renderer.
+   */
+  public renderMergedSegment = (resp: any = null, params: object = {}) => {
+    return ENABLE_PIPELINE_DATA_LOADER
+      ? this.render({
+          as: 'visualization',
+          value: {
+            visType: 'histogram',
+            visData: resp,
+            visConfig: params,
+            params: {},
+          },
+        })
+      : this.render(resp);
+  };
+
+  /**
    * Opens the inspector for the embedded visualization. This will return an
    * handler to the inspector to close and interact with it.
    * @return An inspector session to interact with the opened inspector.

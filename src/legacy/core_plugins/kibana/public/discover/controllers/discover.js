@@ -764,18 +764,7 @@ function discoverController(
         $scope.searchSource.rawResponse = merged;
         Promise
           .resolve(responseHandler(tabifiedData, buildVislibDimensions($scope.vis, $scope.timeRange)))
-          .then(resp => {
-            // visualizeHandler.render({
-            //   as: 'visualization',
-            //   value: {
-            //     visType: 'histogram',
-            //     visData: resp,
-            //     visConfig: $scope.vis.params,
-            //     params: {},
-            //   }
-            // });
-            visualizeHandler.render(resp);
-          });
+          .then(resp => visualizeHandler.renderMergedSegment(resp, $scope.vis.params));
       }
 
       $scope.hits = merged.hits.total;
