@@ -56,11 +56,11 @@ export class SuggestionsComponent extends Component<Props> {
 
     return (
       <div className="reactSuggestionTypeahead">
-        <div className="typeahead">
-          <div className="typeahead-popover">
+        <div className="kbnTypeahead">
+          <div className="kbnTypeahead__popover">
             <div
-              id="typeahead-items"
-              className="typeahead-items"
+              id="kbnTypeahead__items"
+              className="kbnTypeahead__items"
               role="listbox"
               ref={node => (this.parentNode = node)}
               onScroll={this.handleScroll}

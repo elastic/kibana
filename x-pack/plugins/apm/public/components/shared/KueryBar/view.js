@@ -59,7 +59,9 @@ class KueryBarView extends Component {
         selectionStart,
         indexPattern,
         boolFilter
-      )).filter(suggestion => !startsWith(suggestion.text, 'span.'));
+      ))
+        .filter(suggestion => !startsWith(suggestion.text, 'span.'))
+        .slice(0, 15);
 
       if (currentRequest !== this.currentRequest) {
         return;

@@ -103,6 +103,8 @@
 //##
 
 
+//** `<input>` background color
+@input-bg:                       lighten(@gray-lightest, 1.5%);
 //** Placeholder text color
 @input-color-placeholder:        @gray;
 
@@ -139,10 +141,10 @@
 @dropdown-link-active-color:    @white;
 
 //** Disabled dropdown menu item background color.
-@dropdown-link-disabled-color:  @text-muted;
+@dropdown-link-disabled-color:  @gray;
 
 //** Text color for headers within dropdown menus.
-@dropdown-header-color:         @text-muted;
+@dropdown-header-color:         @gray;
 
 // Note: Deprecated @dropdown-caret-color as of v3.1.0
 @dropdown-caret-color:          @gray-base;
@@ -176,7 +178,7 @@
 @navbar-padding-horizontal:        10px;
 
 // Default theme
-@navbar-default-bg:                     lighten(@gray-lighter, 50%);
+@navbar-default-bg:                     @gray-lightest;
 @navbar-default-color:                  @gray5;
 @navbar-default-border:                 transparent;
 @navbar-default-link-color:             @gray5;
