@@ -7,7 +7,7 @@
 const featurePrefix = 'feature_';
 const spacePrefix = 'space_';
 const basePrivilegeNames = ['all', 'read'];
-const globalBasePrivileges = [...basePrivilegeNames];
+const globalBasePrivileges = [...basePrivilegeNames, 'apm', 'ml', 'monitoring'];
 const spaceBasePrivileges = basePrivilegeNames.map(
   privilegeName => `${spacePrefix}${privilegeName}`
 );
@@ -30,7 +30,7 @@ export class PrivilegeSerializer {
   }
 
   public static serializeGlobalBasePrivilege(privilegeName: string) {
-    if (!basePrivilegeNames.includes(privilegeName)) {
+    if (!globalBasePrivileges.includes(privilegeName)) {
       throw new Error('Unrecognized global base privilege');
     }
 
