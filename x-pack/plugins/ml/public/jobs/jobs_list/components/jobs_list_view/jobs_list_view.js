@@ -34,7 +34,9 @@ import {
 
 const DEFAULT_REFRESH_INTERVAL_MS = 30000;
 const MINIMUM_REFRESH_INTERVAL_MS = 5000;
+const DELETING_JOBS_REFRESH_INTERVAL_MS = 2000;
 let jobsRefreshInterval =  null;
+let deletingJobsRefreshTimeout = null;
 
 export class JobsListView extends Component {
   constructor(props) {
@@ -49,6 +51,8 @@ export class JobsListView extends Component {
       selectedJobs: [],
       itemIdToExpandedRowMap: {},
       filterClauses: [],
+      deletingJobsCount: 0,
+      deletingJobsHash: '',
     };
 
     this.updateFunctions = {};
@@ -284,11 +288,36 @@ export class JobsListView extends Component {
           this.updateFunctions[j].setState({ job: fullJobsList[j] });
         });
 
+        jobs.forEach((job) => {
+          if (job.deleting && this.state.itemIdToExpandedRowMap[job.id]) {
+            this.toggleRow(job.id);
+          }
+        });
+
         this.isDoneRefreshing();
+        this.checkDeletingJobTasks();
       } catch (error) {
         console.error(error);
         this.setState({ loading: false });
       }
+    }
+  }
+
+  async checkDeletingJobTasks() {
+    const { count, hash } = await ml.jobs.deletingJobsCount();
+    if (count !== this.state.deletingJobsCount || hash !== this.state.deletingJobsHash) {
+      this.setState({
+        deletingJobsCount: count,
+        deletingJobsHash: hash,
+      });
+      this.refreshJobSummaryList(true);
+    }
+
+    if (count > 0 && deletingJobsRefreshTimeout === null) {
+      deletingJobsRefreshTimeout = setTimeout(() => {
+        deletingJobsRefreshTimeout = null;
+        this.checkDeletingJobTasks();
+      }, DELETING_JOBS_REFRESH_INTERVAL_MS);
     }
   }
 

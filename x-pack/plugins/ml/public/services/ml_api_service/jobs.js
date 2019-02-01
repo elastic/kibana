@@ -100,4 +100,11 @@ export const jobs = {
     });
   },
 
+  deletingJobsCount() {
+    return http({
+      url: `${basePath}/jobs/deleting_jobs_count`,
+      method: 'GET',
+    });
+  },
+
 };

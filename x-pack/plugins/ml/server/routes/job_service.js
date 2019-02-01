@@ -134,4 +134,18 @@ export function jobServiceRoutes(server, commonRouteConfig) {
     }
   });
 
+  server.route({
+    method: 'GET',
+    path: '/api/ml/jobs/deleting_jobs_count',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { deletingJobsCount } = jobServiceProvider(callWithRequest);
+      return deletingJobsCount()
+        .catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
 }

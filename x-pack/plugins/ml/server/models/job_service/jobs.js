@@ -5,12 +5,14 @@
  */
 
 
+import { i18n } from '@kbn/i18n';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import { datafeedsProvider } from './datafeeds';
 import { jobAuditMessagesProvider } from '../job_audit_messages';
 import { CalendarManager } from '../calendar';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
 import { isTimeSeriesViewJob } from '../../../common/util/job_utils';
+import { stringHash } from '../../../common/util/string_utils';
 import moment from 'moment';
 import { uniq } from 'lodash';
 
@@ -95,8 +97,12 @@ export function jobsProvider(callWithRequest) {
       return p;
     }, {});
 
+    const deletingStr = i18n.translate('xpack.ml.models.jobService.deletingJob', {
+      defaultMessage: 'deleting',
+    });
+
     const jobs = fullJobsList.map((job) => {
-      const hasDatafeed = (typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length);
+      const hasDatafeed = (typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0);
       const {
         earliest: earliestTimestampMs,
         latest: latestTimestampMs } = earliestAndLatestTimestamps(job.data_counts);
@@ -107,7 +113,7 @@ export function jobsProvider(callWithRequest) {
         groups: (Array.isArray(job.groups) ? job.groups.sort() : []),
         processed_record_count: job.data_counts.processed_record_count,
         memory_status: (job.model_size_stats) ? job.model_size_stats.memory_status : '',
-        jobState: job.state,
+        jobState: (job.deleting === true) ? deletingStr : job.state,
         hasDatafeed,
         datafeedId: (hasDatafeed && job.datafeed_config.datafeed_id) ? job.datafeed_config.datafeed_id : '',
         datafeedIndices: (hasDatafeed && job.datafeed_config.indices) ? job.datafeed_config.indices : [],
@@ -116,6 +122,7 @@ export function jobsProvider(callWithRequest) {
         earliestTimestampMs,
         isSingleMetricViewerJob: isTimeSeriesViewJob(job),
         nodeName: (job.node) ? job.node.name : undefined,
+        deleting: (job.deleting || undefined),
       };
       if (jobIds.find(j => (j === tempJob.id))) {
         tempJob.fullJob = job;
@@ -259,11 +266,33 @@ export function jobsProvider(callWithRequest) {
     return obj;
   }
 
+  async function deletingJobsCount() {
+    const actions = ['cluster:admin/xpack/ml/job/delete'];
+    let count = 0;
+    let hash = '';
+    try {
+      const tasksList =  await callWithRequest('tasks.list', { actions });
+      Object.keys(tasksList.nodes).forEach((nodeId) => {
+        const tasks = tasksList.nodes[nodeId].tasks;
+        count += Object.keys(tasks).length;
+        hash += Object.keys(tasks).reduce((p, c) => p + c, '');
+      });
+    } catch (e) {
+      // fail silently
+    }
+    // don't return the actual task ids, obfuscate them in a hash
+    // we return a hash made up of the ids so we know when processing jobs have changed.
+    // going on the count of processing jobs alone would be unclear.
+    hash = stringHash(hash);
+    return { count, hash };
+  }
+
   return {
     forceDeleteJob,
     deleteJobs,
     closeJobs,
     jobsSummary,
     createFullJobsList,
+    deletingJobsCount,
   };
 }
