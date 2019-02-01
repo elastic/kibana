@@ -241,7 +241,7 @@ export default () => Joi.object({
     tilemap: tilemapSchema,
     regionmap: regionmapSchema,
     manifestServiceUrl: Joi.string().default('https://catalogue.maps.elastic.co/v6.6/manifest'),
-    emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v6.6'),
+    emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v6.7'),
   }).default(),
   tilemap: tilemapSchema.notes('Deprecated'),
   regionmap: regionmapSchema.notes('Deprecated'),
