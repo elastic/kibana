@@ -40,6 +40,7 @@ export {
 
 export {
   visTypes,
+  interpreterBrowserFunctions,
   visResponseHandlers,
   visRequestHandlers,
   visEditorTypes,
@@ -71,7 +72,7 @@ export {
 } from './ui_nav_links';
 
 export {
-  interpreterPluginPaths
+  interpreterPluginPaths,
 } from './interpreter_plugin_paths';
 
 export {
