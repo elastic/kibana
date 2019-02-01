@@ -17,36 +17,13 @@
  * under the License.
  */
 
+import { kfetch } from 'ui/kfetch';
 import { socketInterpreterProvider } from '../common/interpreter/socket_interpret';
 import { serializeProvider } from '../common/lib/serialize';
 import { createHandlers } from './create_handlers';
 
-// This should be moved to its own module, and will be where
-// HTTP batching and streaming happens.
-function createAjaxFunction(kbnVersion, basePath) {
-  return async (url, opts = {}) => {
-    const result = await fetch(`${basePath}${url}`, {
-      ...opts,
-      headers: {
-        ...(opts.headers || {}),
-        'kbn-version': kbnVersion,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    const response = await result.json();
-
-    if (!result.ok) {
-      throw response;
-    }
-
-    return response;
-  };
-}
-
-export async function initializeInterpreter(kbnVersion, basePath, typesRegistry, functionsRegistry) {
-  const ajax = createAjaxFunction(kbnVersion, basePath);
-  const serverFunctionList = await ajax(`/api/canvas/fns`);
+export async function initializeInterpreter(typesRegistry, functionsRegistry) {
+  const serverFunctionList = await kfetch({ pathname: '/api/canvas/fns' });
 
   // For every sever-side function, register a client-side
   // function that matches its definition, but which simply
@@ -57,7 +34,8 @@ export async function initializeInterpreter(kbnVersion, basePath, typesRegistry,
       async fn(context, args) {
         const types = typesRegistry.toJS();
         const { serialize } = serializeProvider(types);
-        const result = await ajax(`/api/canvas/fns/${functionName}`, {
+        const result = await kfetch({
+          pathname: `/api/canvas/fns/${functionName}`,
           method: 'POST',
           body: JSON.stringify({
             args,

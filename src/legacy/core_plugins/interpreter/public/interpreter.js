@@ -27,7 +27,6 @@ import { renderFunctionsRegistry } from './render_functions_registry';
 import { visualization } from './renderers/visualization';
 
 const basePath = chrome.getInjected('serverBasePath');
-const kbnVersion = chrome.getXsrfToken();
 
 const types = {
   browserFunctions: functionsRegistry,
@@ -47,7 +46,7 @@ let _interpreterPromise;
 
 const initialize = async () => {
   await loadBrowserRegistries(types, basePath);
-  initializeInterpreter(kbnVersion, basePath, typesRegistry, functionsRegistry).then(interpreter => {
+  initializeInterpreter(typesRegistry, functionsRegistry).then(interpreter => {
     _resolve({ interpreter });
   });
 };
