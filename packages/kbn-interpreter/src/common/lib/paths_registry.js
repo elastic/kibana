@@ -17,16 +17,24 @@
  * under the License.
  */
 
-export { FunctionsRegistry } from './lib/functions_registry';
-export { TypesRegistry } from './lib/types_registry';
-export { createError } from './interpreter/create_error';
-export { interpretProvider } from './interpreter/interpret';
-export { serializeProvider } from './lib/serialize';
-export { fromExpression, toExpression, safeElementFromExpression } from './lib/ast';
-export { Fn } from './lib/fn';
-export { getType } from './lib/get_type';
-export { castProvider } from './interpreter/cast';
-export { parse } from './lib/grammar';
-export { getByAlias } from './lib/get_by_alias';
-export { Registry } from './lib/registry';
-export { PathsRegistry } from './lib/paths_registry';
+export class PathsRegistry {
+
+  constructor() {
+    this.paths = [];
+  }
+
+  register = (paths) => {
+    const pathArray = Array.isArray(paths) ? paths : [paths];
+    pathArray.forEach(p => {
+      this.paths.push(p);
+    });
+  };
+
+  get = () => {
+    return this.paths;
+  };
+
+  reset = () => {
+    this.paths = [];
+  };
+}
