@@ -7,12 +7,13 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
 import { units, px, colors, fontSizes } from '../../../../style/variables';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 
 const Container = styled.div`
   display: flex;
   align-items: center;
   font-size: ${props => props.fontSize};
-  color: ${colors.gray2};
+  color: ${theme.euiColorDarkShade};
   cursor: ${props => (props.clickable ? 'pointer' : 'initial')};
   opacity: ${props => (props.disabled ? 0.4 : 1)};
   user-select: none;

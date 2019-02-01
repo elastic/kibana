@@ -6,6 +6,7 @@
 
 import { EuiIcon } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { get, indexBy, uniq } from 'lodash';
 import React from 'react';
@@ -33,13 +34,13 @@ const TableInfo = styled.div`
   padding: ${px(unit)} 0 0;
   text-align: center;
   font-size: ${fontSize};
-  color: ${colors.gray2};
+  color: ${theme.euiColorDarkShade};
   line-height: 1.5;
 `;
 
 const TableInfoHeader = styled(TableInfo)`
   font-size: ${fontSizes.large};
-  color: ${colors.black2};
+  color: ${theme.euiColorDarkestShade};
 `;
 
 const EuiIconWithSpace = styled(EuiIcon)`
