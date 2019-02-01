@@ -35,7 +35,6 @@ exports[`QueryBar Should disable autoFocus on EuiFieldText when disableAutoFocus
           role="form"
         >
           <div
-            className="kuiLocalSearch"
             role="search"
           >
             <div
@@ -137,7 +136,6 @@ exports[`QueryBar Should pass the query language to the language switcher 1`] = 
           role="form"
         >
           <div
-            className="kuiLocalSearch"
             role="search"
           >
             <div
@@ -239,7 +237,6 @@ exports[`QueryBar Should render the given query 1`] = `
           role="form"
         >
           <div
-            className="kuiLocalSearch"
             role="search"
           >
             <div

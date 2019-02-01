@@ -63,7 +63,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
   public render() {
     if (this.isNotSaved() || this.props.isDirty || this.state.isStale) {
       return (
-        <EuiForm className="sharePanelContent" data-test-subj="shareReportingForm">
+        <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
           <EuiFormRow
             helpText={
               <FormattedMessage
@@ -91,7 +91,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
     );
 
     return (
-      <EuiForm className="sharePanelContent" data-test-subj="shareReportingForm">
+      <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
         <EuiText size="s">
           <p>{reportMsg}</p>
         </EuiText>
@@ -112,9 +112,12 @@ class ReportingPanelContentUi extends Component<Props, State> {
         </EuiText>
         <EuiSpacer size="s" />
 
-        <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="sharePanel__copyAnchor">
+        <EuiCopy
+          textToCopy={this.state.absoluteUrl}
+          anchorClassName="kbnShareContextMenu__copyAnchor"
+        >
           {(copy: () => void) => (
-            <EuiButton className="sharePanel__button" onClick={copy} size="s">
+            <EuiButton className="kbnShareContextMenu__copyButton" onClick={copy} size="s">
               <FormattedMessage
                 id="xpack.reporting.panelContent.copyUrlButtonLabel"
                 defaultMessage="Copy POST URL"
@@ -129,7 +132,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
   private renderGenerateReportButton = (isDisabled: boolean) => {
     return (
       <EuiButton
-        className="sharePanel__button"
+        className="kbnShareContextMenu__copyButton"
         disabled={isDisabled}
         fill
         onClick={this.createReportingJob}
