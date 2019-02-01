@@ -30,7 +30,9 @@ export const NameConfigurationPanel = ({
     </EuiTitle>
     <EuiSpacer size="m" />
     <EuiFormRow
+      error={nameFieldProps.error}
       fullWidth
+      isInvalid={nameFieldProps.isInvalid}
       label={
         <FormattedMessage id="xpack.infra.sourceConfiguration.nameLabel" defaultMessage="Name" />
       }

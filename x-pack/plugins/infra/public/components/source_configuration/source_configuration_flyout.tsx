@@ -55,11 +55,12 @@ export const SourceConfigurationFlyout = injectI18n(({ intl }: SourceConfigurati
                 }}
               >
                 {({
-                  currentFormState,
+                  getCurrentFormState,
                   getNameFieldProps,
                   getLogAliasFieldProps,
                   getMetricAliasFieldProps,
                   getFieldFieldProps,
+                  isFormValid,
                   resetForm,
                   updates,
                 }) => (
@@ -139,11 +140,11 @@ export const SourceConfigurationFlyout = injectI18n(({ intl }: SourceConfigurati
                           ) : (
                             <EuiButton
                               color="primary"
-                              isDisabled={updates.length === 0}
+                              isDisabled={updates.length === 0 || !isFormValid()}
                               fill
                               onClick={() =>
-                                (exists ? update(updates) : create(currentFormState)).then(() =>
-                                  resetForm()
+                                (exists ? update(updates) : create(getCurrentFormState())).then(
+                                  () => resetForm()
                                 )
                               }
                             >

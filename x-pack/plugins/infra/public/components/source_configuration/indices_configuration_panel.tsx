@@ -32,7 +32,9 @@ export const IndicesConfigurationPanel = ({
     </EuiTitle>
     <EuiSpacer size="m" />
     <EuiFormRow
+      error={metricAliasFieldProps.error}
       fullWidth
+      isInvalid={metricAliasFieldProps.isInvalid}
       label={
         <FormattedMessage
           id="xpack.infra.sourceConfiguration.metricIndicesLabel"
@@ -48,7 +50,9 @@ export const IndicesConfigurationPanel = ({
       />
     </EuiFormRow>
     <EuiFormRow
+      error={logAliasFieldProps.error}
       fullWidth
+      isInvalid={logAliasFieldProps.isInvalid}
       label={
         <FormattedMessage
           id="xpack.infra.sourceConfiguration.logIndicesLabel"

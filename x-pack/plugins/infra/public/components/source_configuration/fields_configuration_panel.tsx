@@ -38,7 +38,9 @@ export const FieldsConfigurationPanel = ({
     </EuiTitle>
     <EuiSpacer size="m" />
     <EuiFormRow
+      error={timestampFieldProps.error}
       fullWidth
+      isInvalid={timestampFieldProps.isInvalid}
       label={
         <FormattedMessage
           id="xpack.infra.sourceConfiguration.timestampFieldLabel"
@@ -49,7 +51,9 @@ export const FieldsConfigurationPanel = ({
       <EuiFieldText fullWidth disabled={isLoading} isLoading={isLoading} {...timestampFieldProps} />
     </EuiFormRow>
     <EuiFormRow
+      error={tiebreakerFieldProps.error}
       fullWidth
+      isInvalid={tiebreakerFieldProps.isInvalid}
       label={
         <FormattedMessage
           id="xpack.infra.sourceConfiguration.tiebreakerFieldLabel"
@@ -65,7 +69,9 @@ export const FieldsConfigurationPanel = ({
       />
     </EuiFormRow>
     <EuiFormRow
+      error={containerFieldProps.error}
       fullWidth
+      isInvalid={containerFieldProps.isInvalid}
       label={
         <FormattedMessage
           id="xpack.infra.sourceConfiguration.containerFieldLabel"
@@ -76,7 +82,9 @@ export const FieldsConfigurationPanel = ({
       <EuiFieldText fullWidth disabled={isLoading} isLoading={isLoading} {...containerFieldProps} />
     </EuiFormRow>
     <EuiFormRow
+      error={hostFieldProps.error}
       fullWidth
+      isInvalid={hostFieldProps.isInvalid}
       label={
         <FormattedMessage
           id="xpack.infra.sourceConfiguration.hostFieldLabel"
@@ -87,7 +95,9 @@ export const FieldsConfigurationPanel = ({
       <EuiFieldText fullWidth disabled={isLoading} isLoading={isLoading} {...hostFieldProps} />
     </EuiFormRow>
     <EuiFormRow
+      error={podFieldProps.error}
       fullWidth
+      isInvalid={podFieldProps.isInvalid}
       label={
         <FormattedMessage
           id="xpack.infra.sourceConfiguration.podFieldLabel"
