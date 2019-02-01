@@ -6,11 +6,9 @@
 import React from 'react';
 import { AbstractTMSSource } from '../tms_source';
 import { TileLayer } from '../../tile_layer';
-import {
-  EuiSelect,
-  EuiFormRow,
-} from '@elastic/eui';
-import _ from 'lodash';
+
+import { getEmsTMSServices } from '../../../../meta';
+import { EMSTMSCreateSourceEditor } from './create_source_editor';
 
 
 export class EMSTMSSource extends AbstractTMSSource {
@@ -27,34 +25,20 @@ export class EMSTMSSource extends AbstractTMSSource {
     };
   }
 
-  static renderEditor({ dataSourcesMeta, onPreviewSource }) {
-
-    const emsTmsOptionsRaw = _.get(dataSourcesMeta, "ems.tms", []);
-    const emsTileOptions = emsTmsOptionsRaw.map((service) => ({
-      value: service.id,
-      text: service.id //due to not having human readable names
-    }));
+  static renderEditor({ onPreviewSource }) {
 
     const onChange = ({ target }) => {
       const selectedId = target.options[target.selectedIndex].value;
       const emsTMSSourceDescriptor = EMSTMSSource.createDescriptor(selectedId);
-      const emsTMSSource = new EMSTMSSource(emsTMSSourceDescriptor, emsTmsOptionsRaw);
+      const emsTMSSource = new EMSTMSSource(emsTMSSourceDescriptor);
       onPreviewSource(emsTMSSource);
     };
-    return (
-      <EuiFormRow label="Tile service">
-        <EuiSelect
-          hasNoInitialSelection
-          options={emsTileOptions}
-          onChange={onChange}
-        />
-      </EuiFormRow>
-    );
+
+    return <EMSTMSCreateSourceEditor onChange={onChange}/>;
   }
 
-  constructor(descriptor, { emsTmsServices }) {
+  constructor(descriptor) {
     super(descriptor);
-    this._emsTileServices = emsTmsServices;
   }
 
   async getImmutableProperties() {
@@ -64,8 +48,13 @@ export class EMSTMSSource extends AbstractTMSSource {
     ];
   }
 
-  _getTMSOptions() {
-    return this._emsTileServices.find(service => {
+  async _getTMSOptions() {
+    const emsTileServices = await getEmsTMSServices();
+    if(!emsTileServices) {
+      return;
+    }
+
+    return emsTileServices.find(service => {
       return service.id === this._descriptor.id;
     });
   }
@@ -89,10 +78,12 @@ export class EMSTMSSource extends AbstractTMSSource {
   }
 
   async getAttributions() {
-    const service = this._getTMSOptions();
-    const attributions = service.attributionMarkdown.split('|');
+    const service = await this._getTMSOptions();
+    if (!service || !service.attributionMarkdown) {
+      return [];
+    }
 
-    return attributions.map((attribution) => {
+    return service.attributionMarkdown.split('|').map((attribution) => {
       attribution = attribution.trim();
       //this assumes attribution is plain markdown link
       const extractLink = /\[(.*)\]\((.*)\)/;
@@ -104,10 +95,11 @@ export class EMSTMSSource extends AbstractTMSSource {
     });
   }
 
-  getUrlTemplate() {
-    const service = this._getTMSOptions();
+  async getUrlTemplate() {
+    const service = await this._getTMSOptions();
+    if (!service || !service.url) {
+      throw new Error('Cannot generate EMS TMS url template');
+    }
     return service.url;
   }
-
-
 }

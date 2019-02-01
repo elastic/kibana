@@ -13,12 +13,9 @@ import { i18n } from '@kbn/i18n';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  EuiBreadcrumbs,
   EuiCallOut,
   EuiLoadingKibana,
   EuiOverlayMask,
-  EuiPage,
-  EuiPageBody,
   EuiPageContent,
   EuiPageContentHeader,
   EuiSpacer,
@@ -28,9 +25,7 @@ import {
 
 import { fatalError } from 'ui/notify';
 
-import { CRUD_APP_BASE_PATH } from '../../constants';
 import {
-  getRouterLinkProps,
   validateIndexPattern,
   formatFields,
 } from '../../services';
@@ -445,29 +440,12 @@ export class JobCreateUi extends Component {
   render() {
     const { isSaving, saveError } = this.props;
 
-    const breadcrumbs = [{
-      text: (
-        <FormattedMessage
-          id="xpack.rollupJobs.create.breadcrumbs.jobsText"
-          defaultMessage="Rollup jobs"
-        />
-      ),
-      ...getRouterLinkProps(CRUD_APP_BASE_PATH),
-    }, {
-      text: (
-        <FormattedMessage
-          id="xpack.rollupJobs.create.breadcrumbs.createText"
-          defaultMessage="Create"
-        />
-      ),
-    }];
-
     let savingFeedback;
 
     if (isSaving) {
       savingFeedback = (
         <EuiOverlayMask>
-          <EuiLoadingKibana size="xl"/>
+          <EuiLoadingKibana size="xl" />
         </EuiOverlayMask>
       );
     }
@@ -510,40 +488,37 @@ export class JobCreateUi extends Component {
 
     return (
       <Fragment>
-        <EuiPage>
-          <EuiPageBody restrictWidth>
-            <EuiPageContent
-              horizontalPosition="center"
-            >
-              <EuiBreadcrumbs breadcrumbs={breadcrumbs} responsive={false} />
-              <EuiSpacer size="xs" />
+        <EuiPageContent>
+          <EuiPageContentHeader>
+            <EuiTitle size="m">
+              <h1>
+                <FormattedMessage
+                  id="xpack.rollupJobs.createTitle"
+                  defaultMessage="Create rollup job"
+                />
+              </h1>
+            </EuiTitle>
+          </EuiPageContentHeader>
 
-              <EuiPageContentHeader>
-                <EuiTitle size="l">
-                  <h1>
-                    <FormattedMessage
-                      id="xpack.rollupJobs.createTitle"
-                      defaultMessage="Create rollup job"
-                    />
-                  </h1>
-                </EuiTitle>
-              </EuiPageContentHeader>
+          {saveErrorFeedback}
 
-              {saveErrorFeedback}
+          <EuiStepsHorizontal steps={this.getSteps()} />
 
-              <EuiStepsHorizontal steps={this.getSteps()} />
+          <EuiSpacer />
 
-              <EuiSpacer />
+          {this.renderCurrentStep()}
 
-              {this.renderCurrentStep()}
+          <EuiSpacer size="l" />
 
-              <EuiSpacer size="l" />
+          {this.renderNavigation()}
+          <EuiSpacer />
 
-              {this.renderNavigation()}
-            </EuiPageContent>
-          </EuiPageBody>
-        </EuiPage>
+          {this.renderCurrentStep()}
 
+          <EuiSpacer size="l" />
+
+          {this.renderNavigation()}
+        </EuiPageContent>
         {savingFeedback}
       </Fragment>
     );
