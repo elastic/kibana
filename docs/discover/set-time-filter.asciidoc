@@ -34,11 +34,13 @@ You can set a time filter from the histogram in one of two ways:
 the cursor over the background of the chart--the cursor changes to a plus sign
 when you hover over a valid start point.
 
-Notes:
+[role="screenshot"]
+image::images/Histogram-Time.png[Time range selector in Histogram]
+
+More options:
 
 * Use the browser Back button to undo your changes.
 * To move forward or backward in time, click the arrows to the left or right of the time rage. 
 * To use a different interval, click the dropdown and select an interval.
 
-[role="screenshot"]
-image::images/Histogram-Time.png[Time range selector in Histogram]
+
