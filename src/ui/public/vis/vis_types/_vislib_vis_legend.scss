@@ -37,13 +37,13 @@
   overflow: hidden;
 }
 
-&.visLib--legend-left{
+.visLib--legend-left{
   .visLegend__list {
     margin-bottom: $euiSizeL;
   }
 }
 
-&.visLib--legend-bottom {
+.visLib--legend-bottom {
   .visLegend__list {
     margin-left: $euiSizeL;
   }

@@ -18,9 +18,12 @@
  */
 .dshLayout--editing {
   .react-resizable-handle {
+    @include size($euiSizeL);
     z-index: $euiZLevel1; /* 1 */
-    right: $euiSizeXS;
-    bottom: $euiSizeXS;
+    right: 0;
+    bottom: 0;
+    padding-right: $euiSizeS;
+    padding-bottom: $euiSizeS;
   }
 }
 
