@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
 import { difference, memoize, zipObject } from 'lodash';
@@ -111,7 +112,7 @@ export function getMemorySeries(
             ),
             data: series.memoryUsedMax,
             type: 'linemark',
-            color: colors.apmBlue,
+            color: theme.euiColorVis1,
             legendValue: asPercent(overallValues.memoryUsedMax || 0, 1)
           },
           {
@@ -123,7 +124,7 @@ export function getMemorySeries(
             ),
             data: series.memoryUsedAvg,
             type: 'linemark',
-            color: colors.apmGreen,
+            color: theme.euiColorVis0,
             legendValue: asPercent(overallValues.memoryUsedAvg || 0, 1)
           }
         ];
@@ -148,7 +149,7 @@ export function getCPUSeries(CPUChartResponse: MetricsChartAPIResponse['cpu']) {
       }),
       data: series.systemCPUMax,
       type: 'linemark',
-      color: colors.apmBlue,
+      color: theme.euiColorVis1,
       legendValue: asPercent(overallValues.systemCPUMax || 0, 1)
     },
     {
@@ -157,7 +158,7 @@ export function getCPUSeries(CPUChartResponse: MetricsChartAPIResponse['cpu']) {
       }),
       data: series.systemCPUAverage,
       type: 'linemark',
-      color: colors.apmGreen,
+      color: theme.euiColorVis0,
       legendValue: asPercent(overallValues.systemCPUAverage || 0, 1)
     },
     {
@@ -166,7 +167,7 @@ export function getCPUSeries(CPUChartResponse: MetricsChartAPIResponse['cpu']) {
       }),
       data: series.processCPUMax,
       type: 'linemark',
-      color: colors.apmOrange,
+      color: theme.euiColorVis7,
       legendValue: asPercent(overallValues.processCPUMax || 0, 1)
     },
     {
@@ -175,7 +176,7 @@ export function getCPUSeries(CPUChartResponse: MetricsChartAPIResponse['cpu']) {
       }),
       data: series.processCPUAverage,
       type: 'linemark',
-      color: colors.apmYellow,
+      color: theme.euiColorVis5,
       legendValue: asPercent(overallValues.processCPUAverage || 0, 1)
     }
   ];
@@ -210,7 +211,7 @@ export function getResponseTimeSeries(
       data: avg,
       legendValue: asMillis(overallAvgDuration),
       type: 'linemark',
-      color: colors.apmBlue
+      color: theme.euiColorVis1
     },
     {
       title: i18n.translate(
@@ -222,7 +223,7 @@ export function getResponseTimeSeries(
       titleShort: '95th',
       data: p95,
       type: 'linemark',
-      color: colors.apmYellow
+      color: theme.euiColorVis5
     },
     {
       title: i18n.translate(
@@ -234,7 +235,7 @@ export function getResponseTimeSeries(
       titleShort: '99th',
       data: p99,
       type: 'linemark',
-      color: colors.apmOrange
+      color: theme.euiColorVis7
     }
   ];
 
@@ -261,7 +262,7 @@ export function getAnomalyScoreSeries(data: RectCoordinate[]) {
     data,
     type: 'areaMaxHeight',
     color: 'none',
-    areaColor: rgba(colors.apmRed, 0.1)
+    areaColor: rgba(theme.euiColorVis9, 0.1)
   };
 }
 
@@ -278,7 +279,7 @@ function getAnomalyBoundariesSeries(data: Coordinate[]) {
     data,
     type: 'area',
     color: 'none',
-    areaColor: rgba(colors.apmBlue, 0.1)
+    areaColor: rgba(theme.euiColorVis1, 0.1)
   };
 }
 
@@ -304,20 +305,20 @@ export function getTpmSeries(
 
 function getColorByKey(keys: string[]) {
   const assignedColors: StringMap<string> = {
-    'HTTP 2xx': colors.apmGreen,
-    'HTTP 3xx': colors.apmYellow,
-    'HTTP 4xx': colors.apmOrange,
-    'HTTP 5xx': colors.apmRed2
+    'HTTP 2xx': theme.euiColorVis0,
+    'HTTP 3xx': theme.euiColorVis5,
+    'HTTP 4xx': theme.euiColorVis7,
+    'HTTP 5xx': theme.euiColorVis2
   };
 
   const unknownKeys = difference(keys, Object.keys(assignedColors));
   const unassignedColors: StringMap<string> = zipObject(unknownKeys, [
-    colors.apmBlue,
-    colors.apmPurple,
-    colors.apmPink,
-    colors.apmTan,
-    colors.apmRed,
-    colors.apmBrown
+    theme.euiColorVis1,
+    theme.euiColorVis3,
+    theme.euiColorVis4,
+    theme.euiColorVis6,
+    theme.euiColorVis2,
+    theme.euiColorVis8
   ]);
 
   return (key: string) => assignedColors[key] || unassignedColors[key];

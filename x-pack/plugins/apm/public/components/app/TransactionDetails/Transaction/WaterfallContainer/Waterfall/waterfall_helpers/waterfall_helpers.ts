@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import {
   first,
   flatten,
@@ -197,13 +198,13 @@ export interface IServiceColors {
 
 function getServiceColors(services: string[]) {
   const assignedColors = [
-    colors.apmBlue,
-    colors.apmGreen,
-    colors.apmPurple,
-    colors.apmRed2,
-    colors.apmTan,
-    colors.apmOrange,
-    colors.apmYellow
+    theme.euiColorVis1,
+    theme.euiColorVis0,
+    theme.euiColorVis3,
+    theme.euiColorVis2,
+    theme.euiColorVis6,
+    theme.euiColorVis7,
+    theme.euiColorVis5
   ];
 
   return zipObject(services, assignedColors) as IServiceColors;

@@ -9,7 +9,6 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { EuiIcon } from '@elastic/eui';
 import {
-  colors,
   fontFamilyCode,
   px,
   units,
@@ -22,13 +21,13 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 function getIconColor(type) {
   switch (type) {
     case 'field':
-      return colors.apmOrange;
+      return theme.euiColorVis7;
     case 'value':
-      return theme.euiColorSecondary;
+      return theme.euiColorVis0;
     case 'operator':
-      return colors.apmBlue;
+      return theme.euiColorVis1;
     case 'conjunction':
-      return colors.apmPurple;
+      return theme.euiColorVis3;
     case 'recentSearch':
       return theme.euiColorMediumShade;
   }
