@@ -17,6 +17,6 @@
  * under the License.
  */
 
-import { PathsRegistry } from '@kbn/interpreter/src/common/lib/paths_registry';
+import { PathsRegistry } from '@kbn/interpreter/common';
 
 export const pathsRegistry = new PathsRegistry();
