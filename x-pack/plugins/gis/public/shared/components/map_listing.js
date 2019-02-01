@@ -337,7 +337,7 @@ export class MapListing extends React.Component {
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
               <h1>
-                GIS maps
+                Maps
               </h1>
             </EuiTitle>
           </EuiFlexItem>
