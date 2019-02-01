@@ -349,7 +349,8 @@ export const FollowerIndexForm = injectI18n(
       );
 
       const indexNameLabel = i18n.translate(
-        'xpack.crossClusterReplication.followerIndexForm.sectionFollowerIndexNameTitle', {
+        'xpack.crossClusterReplication.followerIndexForm.sectionFollowerIndexNameTitle',
+        {
           defaultMessage: 'Follower index'
         }
       );
@@ -677,9 +678,9 @@ export const FollowerIndexForm = injectI18n(
       return (
         <Fragment>
           <EuiForm>
-            {renderFollowerIndexName()}
             {renderRemoteClusterField()}
             {renderLeaderIndex()}
+            {renderFollowerIndexName()}
             <EuiSpacer size="s" />
             {renderAdvancedSettings()}
           </EuiForm>

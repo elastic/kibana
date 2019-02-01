@@ -128,7 +128,7 @@ export const AutoFollowPatternList = injectI18n(
             </EuiFlexItem>
           </EuiFlexGroup>
 
-          <EuiSpacer />
+          <EuiSpacer size="m" />
         </Fragment>
       );
     }

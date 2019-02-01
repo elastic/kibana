@@ -213,20 +213,23 @@ export class IndexTableUi extends Component {
   }
 
   buildRowCell(fieldName, value, index) {
-    const { openDetailPanel } = this.props;
+    const { openDetailPanel, filterChanged } = this.props;
     if (fieldName === 'health') {
       return <EuiHealth color={healthToColor(value)}>{value}</EuiHealth>;
     } else if (fieldName === 'name') {
       return (
-        <EuiLink
-          className="indTable__link"
-          data-test-subj="indexTableIndexNameLink"
-          onClick={() => {
-            openDetailPanel(value);
-          }}
-        >
-          {value}{renderBadges(index)}
-        </EuiLink>
+        <Fragment>
+          <EuiLink
+            className="indTable__link"
+            data-test-subj="indexTableIndexNameLink"
+            onClick={() => {
+              openDetailPanel(value);
+            }}
+          >
+            {value}
+          </EuiLink>
+          {renderBadges(index, filterChanged)}
+        </Fragment>
       );
     }
     return value;
@@ -366,7 +369,7 @@ export class IndexTableUi extends Component {
               </h1>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <EuiText>
+            <EuiText size="s" color="subdued">
               <p>
                 <FormattedMessage
                   id="xpack.idxMgmt.indexTable.sectionDescription"

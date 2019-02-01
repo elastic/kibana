@@ -8,12 +8,6 @@
   overflow: hidden;
 }
 
-@include euiBreakpoint('xs') {
-  #gis-plugin {
-    height: calc(100vh - #{$euiHeaderChildSizeMobile});
-  }
-}
-
 #react-gis-root {
   flex-grow: 1;
   display: flex;

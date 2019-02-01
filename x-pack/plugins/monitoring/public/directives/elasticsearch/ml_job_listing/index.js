@@ -17,6 +17,8 @@ import {
   EuiPage,
   EuiPageContent,
   EuiPageBody,
+  EuiPanel,
+  EuiSpacer,
 } from '@elastic/eui';
 import { ClusterStatus } from '../../../components/elasticsearch/cluster_status';
 import { i18n } from '@kbn/i18n';
@@ -131,8 +133,11 @@ uiModule.directive('monitoringMlListing', kbnUrl => {
           <I18nProvider>
             <EuiPage>
               <EuiPageBody>
-                <EuiPageContent>
+                <EuiPanel>
                   <ClusterStatus stats={scope.status} />
+                </EuiPanel>
+                <EuiSpacer size="m" />
+                <EuiPageContent>
                   <EuiMonitoringTable
                     className="mlJobsTable"
                     rows={jobs}

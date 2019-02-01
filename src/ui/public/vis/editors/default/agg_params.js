@@ -89,7 +89,7 @@ uiModules
         addAggSelector();
 
         function addSchemaEditor() {
-          const $schemaEditor = $('<div>').addClass('schemaEditors').appendTo($el);
+          const $schemaEditor = $('<div>').addClass('schemaEditors form-group').appendTo($el);
 
           if ($scope.agg.schema.editor) {
             $schemaEditor.append($scope.agg.schema.editor);
