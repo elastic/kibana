@@ -18,15 +18,15 @@
  */
 
 import 'ngreact';
+import { wrapIntoI18nContext } from 'ui/i18n/context';
 import { uiModules } from '../../modules';
 import { SearchBar } from '../components';
-import { injectI18nProvider } from '@kbn/i18n/react';
 
 const app = uiModules.get('app/kibana', ['react']);
 
 app.directive('searchBar', (reactDirective, localStorage) => {
   return reactDirective(
-    injectI18nProvider(SearchBar),
+    wrapIntoI18nContext(SearchBar),
     undefined,
     {},
     {
