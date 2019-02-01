@@ -71,6 +71,10 @@ export {
 } from './ui_nav_links';
 
 export {
+  interpreterPluginPaths
+} from './interpreter_plugin_paths';
+
+export {
   styleSheetPaths
 } from './style_sheet_paths';
 

@@ -17,27 +17,7 @@
  * under the License.
  */
 
-import { collectUiExports } from './collect_ui_exports';
-import { cloneDeep } from 'lodash';
+import { flatConcatAtType } from './reduce';
+import { wrap } from './modify_reduce';
 
-export function uiExportsMixin(kbnServer, server) {
-  kbnServer.uiExports = collectUiExports(
-    kbnServer.pluginSpecs
-  );
-
-  server.decorate('server', 'getUiExports', () => (
-    cloneDeep(kbnServer.uiExports)
-  ));
-
-  // check for unknown uiExport types
-  const { unknown = [] } = kbnServer.uiExports;
-  if (!unknown.length) {
-    return;
-  }
-
-  throw new Error(`Unknown uiExport types: ${
-    unknown
-      .map(({ pluginSpec, type }) => `${type} from ${pluginSpec.getId()}`)
-      .join(', ')
-  }`);
-}
+export const interpreterPluginPaths = wrap(flatConcatAtType);
