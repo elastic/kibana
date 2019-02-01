@@ -11,21 +11,29 @@ import _ from 'lodash';
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
 let meta = null;
+let loadingMetaPromise = null;
 let isLoaded = false;
 export async function getDataSources() {
-  if (!meta) {
-    meta = new Promise(async (resolve, reject) => {
-      try {
-        const meta = await fetch(`${GIS_API_RELATIVE}/meta`);
-        const metaJson = await meta.json();
-        isLoaded = true;
-        resolve(metaJson.data_sources);
-      } catch(e) {
-        reject(e);
-      }
-    });
+  if (meta) {
+    return meta;
   }
-  return meta;
+
+  if (loadingMetaPromise) {
+    return loadingMetaPromise;
+  }
+
+  loadingMetaPromise = new Promise(async (resolve, reject) => {
+    try {
+      const response = await fetch(`${GIS_API_RELATIVE}/meta`);
+      const metaJson = await response.json();
+      isLoaded = true;
+      meta = metaJson.data_sources;
+      resolve(meta);
+    } catch(e) {
+      reject(e);
+    }
+  });
+  return loadingMetaPromise;
 }
 
 export function getDataSourcesSync() {
