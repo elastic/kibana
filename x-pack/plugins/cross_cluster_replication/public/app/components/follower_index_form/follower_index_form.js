@@ -476,7 +476,7 @@ export const FollowerIndexForm = injectI18n(
               <p>
                 <FormattedMessage
                   id="xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexDescription"
-                  defaultMessage="The index you want to replicate."
+                  defaultMessage="The index you want to replicate from the remote cluster."
                 />
               </p>
 
