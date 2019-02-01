@@ -6,7 +6,7 @@
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPageContent } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
-import { CMPopulatedBeat } from '../../../../common/domain_types';
+import { CMBeat } from '../../../../common/domain_types';
 import { AppPageProps } from '../../../frontend_types';
 
 interface PageState {
@@ -120,7 +120,7 @@ class FinishWalkthrough extends React.Component<
     }
 
     await this.props.containers.beats.assignTagsToBeats(
-      [beat as CMPopulatedBeat],
+      [beat as CMBeat],
       this.props.urlState.createdTag
     );
     this.props.setUrlState({

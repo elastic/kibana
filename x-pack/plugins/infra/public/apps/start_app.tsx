@@ -15,7 +15,8 @@ import { ThemeProvider } from 'styled-components';
 
 // TODO use theme provided from parentApp when kibana supports it
 import { EuiErrorBoundary } from '@elastic/eui';
-import euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { I18nProvider } from '@kbn/i18n/react';
 import { InfraFrontendLibs } from '../lib/lib';
 import { PageRouter } from '../routes';
@@ -36,7 +37,12 @@ export async function startApp(libs: InfraFrontendLibs) {
         <ConstateProvider devtools>
           <ReduxStoreProvider store={store}>
             <ApolloProvider client={libs.apolloClient}>
-              <ThemeProvider theme={{ eui: euiVars }}>
+              <ThemeProvider
+                theme={() => ({
+                  eui: libs.framework.darkMode ? euiDarkVars : euiLightVars,
+                  darkMode: libs.framework.darkMode,
+                })}
+              >
                 <PageRouter history={history} />
               </ThemeProvider>
             </ApolloProvider>

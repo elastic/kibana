@@ -70,6 +70,7 @@ export default function ({ getService }) {
               {
                 names: ['logstash-*'],
                 privileges: ['read', 'view_index_metadata'],
+                allow_restricted_indices: false,
                 field_security: {
                   grant: ['*'],
                   except: ['geo.*']
@@ -188,6 +189,7 @@ export default function ({ getService }) {
               {
                 names: ['logstash-*'],
                 privileges: ['read', 'view_index_metadata'],
+                allow_restricted_indices: false,
                 field_security: {
                   grant: ['*'],
                   except: ['geo.*']

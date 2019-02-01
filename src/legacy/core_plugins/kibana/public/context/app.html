@@ -1,18 +1,15 @@
-<div class="kuiLocalNav" ng-if="!k7design">
-  <div class="kuiLocalNavRow">
-    <div class="kuiLocalNavRow__section">
-      <div
-        class="kuiLocalTitle"
-        role="heading"
-        aria-level="1"
-        i18n-id="kbn.context.surroundingDocumentsDescription"
-        i18n-default-message="Surrounding Documents in {indexPatternId}"
-        i18n-values="{
-          indexPatternId: contextApp.state.queryParameters.indexPatternId 
-        }"
-      ></div>
-    </div>
-  </div>
+<div class="kbnTopNav" ng-if="!k7design">
+  <div
+    class="kuiLocalTitle"
+    role="heading"
+    aria-level="1"
+    i18n-id="kbn.context.surroundingDocumentsDescription"
+    i18n-default-message="Surrounding Documents in {indexPatternId}"
+    i18n-values="{
+      indexPatternId: contextApp.state.queryParameters.indexPatternId
+    }"
+  ></div>
+
   <div class="kuiLocalNavRow kuiLocalNavRow--secondary">
     <div class="kuiLocalTabs">
       <div class="kuiLocalTab kuiLocalTab-isSelected" >
@@ -22,7 +19,12 @@
   </div>
 </div>
 
-<filter-bar index-patterns="[contextApp.indexPattern]"></filter-bar>
+<filter-bar
+  class-name="'globalFilterGroup__filterBar'"
+  filters="contextApp.state.queryParameters.filters"
+  on-filters-updated="contextApp.actions.updateFilters"
+  index-patterns="[contextApp.indexPattern]"
+></filter-bar>
 
 <!-- Error feedback -->
 <div

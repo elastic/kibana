@@ -37,7 +37,7 @@ export function FieldStatsCard({ field }) {
               <React.Fragment>
                 <div className="stats">
                   <div className="stat">
-                    <i className="fa fa-files-o" aria-hidden="true" />
+                    <i className="fa fa-files-o" aria-hidden="true" />&nbsp;
                     <FormattedMessage
                       id="xpack.ml.fileDatavisualizer.fieldStatsCard.documentsCountDescription"
                       defaultMessage="{fieldCount, plural, zero {# document} one {# document} other {# documents}} ({fieldPercent}%)"
@@ -48,7 +48,7 @@ export function FieldStatsCard({ field }) {
                     />
                   </div>
                   <div className="stat">
-                    <i className="fa fa-cubes" aria-hidden="true" />
+                    <i className="fa fa-cubes" aria-hidden="true" />&nbsp;
                     <FormattedMessage
                       id="xpack.ml.fileDatavisualizer.fieldStatsCard.distinctCountDescription"
                       defaultMessage="{fieldCardinality} distinct {fieldCardinality, plural, zero {value} one {value} other {values}}"

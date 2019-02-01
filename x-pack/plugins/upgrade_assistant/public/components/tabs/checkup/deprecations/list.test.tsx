@@ -71,14 +71,14 @@ describe('DeprecationList', () => {
   indices={
     Array [
       Object {
-        "actions": undefined,
         "details": undefined,
         "index": "0",
+        "reindex": false,
       },
       Object {
-        "actions": undefined,
         "details": undefined,
         "index": "1",
+        "reindex": false,
       },
     ]
   }
