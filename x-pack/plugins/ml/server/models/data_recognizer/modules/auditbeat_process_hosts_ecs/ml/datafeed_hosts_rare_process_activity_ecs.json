@@ -8,6 +8,9 @@
       "filter": [
         { "term":  { "event.module": "auditd" } }
       ],
+      "must": {
+        "exists": { "field": "auditd.data.syscall" }
+      },      
       "must_not": {
         "exists": { "field": "container.runtime" }
       }

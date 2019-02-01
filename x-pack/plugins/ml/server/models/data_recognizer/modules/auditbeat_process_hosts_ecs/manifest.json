@@ -60,8 +60,8 @@
         "file": "ml_auditbeat_hosts_process_event_rate_by_process_ecs.json"
       },
       {
-        "id": "ml_auditbeat_hosts_process_event_rate_ecs",
-        "file": "ml_auditbeat_hosts_process_event_rate_ecs.json"
+        "id": "ml_auditbeat_hosts_process_event_rate_vis_ecs",
+        "file": "ml_auditbeat_hosts_process_event_rate_vis_ecs.json"
       },
       {
         "id": "ml_auditbeat_hosts_process_occurrence_ecs",

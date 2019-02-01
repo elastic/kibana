@@ -3,7 +3,8 @@
   "description": "Auditbeat process events on host machines (ECS)",
   "hits": 0,
   "columns": [
-    "_source"
+    "auditd.data.syscall",
+    "process.executable"
   ],
   "sort": [
     "@timestamp",
