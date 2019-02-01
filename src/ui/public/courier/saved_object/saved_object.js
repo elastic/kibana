@@ -149,7 +149,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       }
 
       if (searchSourceValues.filter) {
-        searchSourceValues.filter.forEach((filterRow, i) => {
+        searchSourceValues.filter.forEach((filterRow) => {
           if (!filterRow.meta || !filterRow.meta.indexRefName) {
             return;
           }
@@ -313,7 +313,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       if (this.searchSource) {
         const searchSourceFields = _.omit(this.searchSource.getFields(), ['sort', 'size']);
         if (searchSourceFields.index) {
-          const indexId = searchSourceFields.index;
+          const { id: indexId } = searchSourceFields.index;
           searchSourceFields.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
           references.push({
             name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
