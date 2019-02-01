@@ -388,7 +388,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async addNewFilterAggregation() {
-      return await testSubjects.click('visEditorAddFilterButton');
+      await testSubjects.click('visEditorAddFilterButton');
+      // We should let new filter input to render completely before we enter any text into it.
+      return await PageObjects.common.sleep(500);
     }
 
     async toggleOpenEditor(index, toState = 'true') {
