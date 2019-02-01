@@ -70,7 +70,6 @@ export default (kibana) => {
             }
 
             testGlobs.push(`${plugin.publicDir}/**/__tests__/**/*.js`);
-            testGlobs.push(`built_assets/css/plugins/${plugin.id}/**/*.css`);
           });
         } else {
           // add the modules from all of the apps
@@ -80,7 +79,6 @@ export default (kibana) => {
 
           for (const plugin of plugins) {
             testGlobs.push(`${plugin.publicDir}/**/__tests__/**/*.js`);
-            testGlobs.push(`built_assets/css/plugins/${plugin.id}/**/*.css`);
           }
         }
 
