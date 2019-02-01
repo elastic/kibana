@@ -41,16 +41,16 @@ export function maps(kibana) {
     },
 
     init(server) {
-      const gisEnabled = server.config().get('xpack.maps.enabled');
+      const mapsEnabled = server.config().get('xpack.maps.enabled');
 
-      if (gisEnabled) {
+      if (mapsEnabled) {
         const thisPlugin = this;
         const xpackMainPlugin = server.plugins.xpack_main;
         let routesInitialized = false;
 
         watchStatusAndLicenseToInitialize(xpackMainPlugin, thisPlugin,
           async license => {
-            if (license && license.gis && !routesInitialized) {
+            if (license && license.maps && !routesInitialized) {
               routesInitialized = true;
               initRoutes(server, license.uid);
             }

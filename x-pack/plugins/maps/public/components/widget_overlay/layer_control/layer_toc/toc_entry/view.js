@@ -73,7 +73,7 @@ export class TOCEntry extends React.Component {
 
     return (
       <div
-        className="gisTocEntry"
+        className="mapTocEntry"
         id={layer.getId()}
         data-layerid={layer.getId()}
       >
@@ -83,7 +83,7 @@ export class TOCEntry extends React.Component {
           responsive={false}
           className={
             layer.isVisible() && layer.showAtZoomLevel(zoom)
-              && !layer.hasErrors() ? 'gisTocEntry-visible' : 'gisTocEntry-notVisible'
+              && !layer.hasErrors() ? 'mapTocEntry-visible' : 'mapTocEntry-notVisible'
           }
         >
           <EuiFlexItem grow={false}>
@@ -100,7 +100,7 @@ export class TOCEntry extends React.Component {
             </button>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <span className="gisTocEntry__grab"><EuiIcon type="grab"/></span>
+            <span className="mapTocEntry__grab"><EuiIcon type="grab"/></span>
           </EuiFlexItem>
         </EuiFlexGroup>
         {tocDetails}
