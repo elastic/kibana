@@ -5,6 +5,7 @@
  */
 
 import _ from 'lodash';
+import { EMS_FILE } from '../../common/constants';
 
 function getSavedObjectsClient(server, callCluster) {
   const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
@@ -32,23 +33,23 @@ function getUniqueLayerCounts(layerCountsList, mapsCount) {
 }
 
 export function buildMapsTelemetry(savedObjects) {
-  const savedMaps = savedObjects
+  const layerLists = savedObjects
     .map(savedMapObject =>
       JSON.parse(savedMapObject.attributes.layerListJSON));
-  const mapsCount = savedMaps.length;
+  const mapsCount = layerLists.length;
 
-  const dataSourcesCount = savedMaps.map(lList => {
+  const dataSourcesCount = layerLists.map(lList => {
     const sourceIdList = lList.map(layer => layer.sourceDescriptor.id);
     return _.uniq(sourceIdList).length;
   });
 
-  const layersCount = savedMaps.map(lList => lList.length);
-  const layerTypesCount = savedMaps.map(lList => _.countBy(lList, 'type'));
+  const layersCount = layerLists.map(lList => lList.length);
+  const layerTypesCount = layerLists.map(lList => _.countBy(lList, 'type'));
 
   // Count of EMS Vector layers used
-  const emsLayersCount = savedMaps.map(lList => _(lList)
+  const emsLayersCount = layerLists.map(lList => _(lList)
     .countBy(layer => {
-      const isEmsFile = _.get(layer, 'sourceDescriptor.type') === 'EMS_FILE';
+      const isEmsFile = _.get(layer, 'sourceDescriptor.type') === EMS_FILE;
       return isEmsFile && _.get(layer, 'sourceDescriptor.id');
     })
     .pick((val, key) => key !== 'false')

@@ -8,10 +8,8 @@ import _ from 'lodash';
 import { TASK_ID, scheduleTask, registerMapsTelemetryTask } from './telemetry_task';
 
 export function initTelemetryCollection(server) {
-  const { taskManager } = server;
-
-  registerMapsTelemetryTask(taskManager);
-  scheduleTask(server, taskManager);
+  registerMapsTelemetryTask(server.taskManager);
+  scheduleTask(server, server.taskManager);
   registerMapsUsageCollector(server);
 }
 
@@ -52,8 +50,8 @@ export function buildCollectorObj(server) {
 }
 
 export function registerMapsUsageCollector(server) {
-  const { usage } = server;
   const collectorObj = buildCollectorObj(server);
-  const mapsUsageCollector = usage.collectorSet.makeUsageCollector(collectorObj);
-  usage.collectorSet.register(mapsUsageCollector);
+  const mapsUsageCollector = server.usage.collectorSet
+    .makeUsageCollector(collectorObj);
+  server.usage.collectorSet.register(mapsUsageCollector);
 }
