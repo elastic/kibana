@@ -38,6 +38,12 @@
       color: $euiColorDarkShade;
     }
   }
+
+  .btn {
+    border: 1px solid #D3DAE6;
+    background-color: #FFF;
+    color: #343741;
+  }
  }
 
 .ui-select-container input[type="search"]::placeholder {
