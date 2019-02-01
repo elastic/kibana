@@ -21,9 +21,10 @@ export function createFormatCsvValues(escapeValue, separator, fields, formatsMap
           formattedValue = formatter.convert(value);
         }
 
-        return formattedValue.toString();
+        return formattedValue;
       })
       .map(value => (isObject(value) ? JSON.stringify(value) : value))
+      .map(value => value.toString())
       .map(escapeValue)
       .join(separator);
   };
