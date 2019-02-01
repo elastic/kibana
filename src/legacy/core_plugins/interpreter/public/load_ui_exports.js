@@ -17,22 +17,4 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import init from './init';
-
-export default function (kibana) {
-  const kbnInterpreterPath = resolve('node_modules/@kbn/interpreter');
-  const pluginPath = resolve(kbnInterpreterPath, 'target', 'canvas_plugin');
-  return new kibana.Plugin({
-    id: 'interpreter',
-    require: ['kibana', 'elasticsearch'],
-    publicDir: resolve(__dirname, 'public'),
-    uiExports: {
-      injectDefaultVars: server => ({ serverBasePath: server.config().get('server.basePath') }),
-      interpreterPluginPaths: [pluginPath],
-      hacks: ['plugins/interpreter/load_ui_exports'],
-    },
-    init,
-  });
-}
-
+import 'uiExports/interpreterBrowserFunctions';
