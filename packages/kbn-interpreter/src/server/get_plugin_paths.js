@@ -26,14 +26,10 @@ import { pluginPaths } from './plugin_paths';
 const lstat = promisify(fs.lstat);
 const readdir = promisify(fs.readdir);
 
-const canvasPluginDirectoryName = 'canvas_plugin';
-
 const isDirectory = path =>
   lstat(path)
     .then(stat => stat.isDirectory())
     .catch(() => false); // if lstat fails, it doesn't exist and is not a directory
-
-const isDirname = (p, name) => path.basename(p) === name;
 
 const filterDirectories = (paths, { exclude = false } = {}) => {
   return Promise.all(paths.map(p => isDirectory(p))).then(directories => {
@@ -41,61 +37,24 @@ const filterDirectories = (paths, { exclude = false } = {}) => {
   });
 };
 
-const getPackagePluginPath = () => {
-  let basePluginPath = path.resolve(__dirname, '..');
 
-  if (isDirname(basePluginPath, 'target')) {
-    basePluginPath = path.join(basePluginPath, '..');
-  }
-  return basePluginPath;
-};
-
-const getKibanaPluginsPath = () => {
-  let kibanaPath = path.resolve(getPackagePluginPath(), '..', '..');
-
-  // in dev mode we are in kibana folder, else we are in node_modules
-  if (!isDirname(kibanaPath, 'kibana')) {
-    kibanaPath = path.join(kibanaPath, '..');
-  }
-
-  return path.join(kibanaPath, 'plugins');
-};
-
-const getXPackPluginsPath = () => {
-  const kibanaPath = path.resolve(getPackagePluginPath(), '..', '..');
-
-  // in dev mode we are in kibana folder, else we are in node_modules
-  return path.join(kibanaPath, 'x-pack/plugins');
-};
-
-// These must all exist
-const paths = [
-  getPackagePluginPath(),
-  getXPackPluginsPath(), // Canvas core plugins
-  getKibanaPluginsPath(), // Kibana plugin directory
-].filter(Boolean);
-
-export const getPluginPaths = type => {
+export const getPluginPaths = (pathsRegistry, type) => {
   const typePath = pluginPaths[type];
   if (!typePath) throw new Error(`Unknown type: ${type}`);
+  const paths = pathsRegistry.get(type);
 
   async function findPlugins(directory) {
     const isDir = await isDirectory(directory);
     if (!isDir) return;
 
-    const names = await readdir(directory); // Get names of everything in the directory
-    return names
-      .filter(name => name[0] !== '.')
-      .map(name => path.resolve(directory, name, canvasPluginDirectoryName, ...typePath));
+    return path.resolve(directory, ...typePath);
   }
 
   return Promise.all(paths.map(findPlugins))
-    .then(dirs =>
-      dirs.reduce((list, dir) => {
-        if (!dir) return list;
-        return list.concat(dir);
-      }, [])
-    )
+    .then(dirs => dirs.reduce((list, dir) => {
+      if (!dir) return list;
+      return list.concat(dir);
+    }, []))
     .then(possibleCanvasPlugins => filterDirectories(possibleCanvasPlugins, { exclude: false }))
     .then(canvasPluginDirectories => {
       return Promise.all(

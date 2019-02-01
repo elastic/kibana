@@ -17,20 +17,14 @@
  * under the License.
  */
 
-import { pluginPaths } from '@kbn/interpreter/server';
 import { getPluginStream } from '../lib/get_plugin_stream';
 
 export function plugins(server) {
   server.route({
     method: 'GET',
     path: '/api/canvas/plugins',
-    handler: function (request, h) {
+    handler: function (request) {
       const { type } = request.query;
-
-      if (!pluginPaths[type]) {
-        return h.response({ error: 'Invalid type' }).code(400);
-      }
-
       return getPluginStream(type);
     },
     config: {

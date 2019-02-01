@@ -59,10 +59,12 @@ export function socketApi(server) {
     const types = server.plugins.interpreter.types.toJS();
     const { serialize, deserialize } = serializeProvider(types);
 
+    const registeredPaths = server.plugins.interpreter.pathsRegistry.get();
+
     // I'd love to find a way to generalize all of these, but they each need a different set of things
     // Note that ORDER MATTERS here. The environments will be tried in this order. Do not reorder this array.
     const routeExpression = routeExpressionProvider([
-      thread({ onFunctionNotFound, serialize, deserialize }),
+      thread({ onFunctionNotFound, serialize, deserialize, registeredPaths }),
       serverEnv({ onFunctionNotFound, request, server }),
       browser({ onFunctionNotFound, socket, serialize, deserialize }),
     ]);

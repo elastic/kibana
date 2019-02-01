@@ -20,8 +20,11 @@
 import { routes } from './server/routes';
 import { FunctionsRegistry, TypesRegistry } from '@kbn/interpreter/common';
 import { populateServerRegistries } from '@kbn/interpreter/server';
+import { pathsRegistry } from './server/lib/paths_registry';
 
 export default async function (server /*options*/) {
+
+  pathsRegistry.register(server.getUiExports().interpreterPluginPaths);
 
   const registries = {
     serverFunctions: new FunctionsRegistry(),
@@ -47,8 +50,9 @@ export default async function (server /*options*/) {
     };
   });
 
-  await populateServerRegistries(registries);
+  await populateServerRegistries(pathsRegistry, registries);
 
   server.expose(registries);
+  server.expose({ pathsRegistry });
   routes(server);
 }

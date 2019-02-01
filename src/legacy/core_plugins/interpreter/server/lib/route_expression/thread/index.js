@@ -27,9 +27,9 @@ const workerPath = resolve(__dirname, 'babeled.js');
 const heap = {};
 let worker = null;
 
-export function getWorker() {
+export function getWorker(registeredPaths) {
   if (worker) return worker;
-  worker = fork(workerPath, {});
+  worker = fork(workerPath, [ JSON.stringify(registeredPaths) ]);
 
   // handle run requests
   worker.on('message', msg => {
@@ -69,9 +69,9 @@ export function getWorker() {
 }
 
 // All serialize/deserialize must occur in here. We should not return serialized stuff to the expressionRouter
-export const thread = ({ onFunctionNotFound, serialize, deserialize }) => {
+export const thread = ({ onFunctionNotFound, serialize, deserialize, registeredPaths }) => {
   const getWorkerFunctions = new Promise(resolve => {
-    const worker = getWorker();
+    const worker = getWorker(registeredPaths);
 
     function functionListHandler(msg) {
       // wait for the function list message

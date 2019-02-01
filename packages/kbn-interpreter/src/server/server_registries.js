@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { getPluginPaths } from './get_plugin_paths';
 
 
-export const populateServerRegistries = registries => {
+export const populateServerRegistries = (pathsRegistry, registries) => {
   if (!registries) throw new Error('registries are required');
 
   return new Promise(resolve => {
@@ -30,7 +30,7 @@ export const populateServerRegistries = registries => {
 
     const loadType = () => {
       const type = remainingTypes.pop();
-      getPluginPaths(type).then(paths => {
+      getPluginPaths(pathsRegistry, type).then(paths => {
         global.canvas = global.canvas || {};
         global.canvas.register = d => registries[type].register(d);
         global.canvas.i18n = i18n;

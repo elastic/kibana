@@ -30,6 +30,7 @@ export function canvas(kibana) {
         'plugins/canvas/lib/window_error_handler.js',
       ],
       home: ['plugins/canvas/register_feature'],
+      interpreterPluginPaths: [resolve(__dirname, 'canvas_plugin')],
       mappings,
     },
 

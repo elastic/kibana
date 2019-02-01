@@ -20,13 +20,14 @@
 import fs from 'fs';
 import ss from 'stream-stream';
 import { getPluginPaths } from '@kbn/interpreter/server';
+import { pathsRegistry } from './paths_registry';
 
 export const getPluginStream = type => {
   const stream = ss({
     separator: '\n',
   });
 
-  getPluginPaths(type).then(files => {
+  getPluginPaths(pathsRegistry, type).then(files => {
     files.forEach(file => {
       stream.write(fs.createReadStream(file));
     });

@@ -19,7 +19,7 @@
 
 import uuid from 'uuid/v4';
 import { populateServerRegistries } from '@kbn/interpreter/server';
-import { interpretProvider, serializeProvider, FunctionsRegistry, TypesRegistry } from '@kbn/interpreter/common';
+import { interpretProvider, serializeProvider, FunctionsRegistry, TypesRegistry, PathsRegistry } from '@kbn/interpreter/common';
 
 // We actually DO need populateServerRegistries here since this is a different node process
 const registries = {
@@ -27,7 +27,11 @@ const registries = {
   types: new TypesRegistry(),
 };
 
-const pluginsReady = populateServerRegistries(registries);
+const registeredPaths = JSON.parse(process.argv.pop());
+const pathsRegistry = new PathsRegistry();
+pathsRegistry.register(registeredPaths);
+
+const pluginsReady = populateServerRegistries(pathsRegistry, registries);
 const heap = {};
 
 process.on('message', msg => {
