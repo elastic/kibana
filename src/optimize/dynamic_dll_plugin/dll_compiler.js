@@ -208,6 +208,8 @@ export class DllCompiler {
         // We need to create a dll_allowed_modules
         const notAllowedModules = [];
         stats.compilation.modules.forEach((module) => {
+          console.log(`request: ${module.request}`);
+          console.log(`userRequest: ${module.userRequest}`);
           if(module.userRequest
             && !module.userRequest.includes(`${path.sep}node_modules${path.sep}`)
             && !module.userRequest.includes(`${path.sep}packages${path.sep}`)
