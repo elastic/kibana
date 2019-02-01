@@ -60,7 +60,10 @@ export class Server {
     }
 
     const elasticsearchServiceStartContract = await this.elasticsearchModule.service.start();
-    const pluginsStartContract = await this.plugins.service.start();
+
+    const pluginsStartContract = await this.plugins.service.start({
+      elasticsearch: elasticsearchServiceStartContract,
+    });
 
     await this.legacy.service.start({
       elasticsearch: elasticsearchServiceStartContract,
