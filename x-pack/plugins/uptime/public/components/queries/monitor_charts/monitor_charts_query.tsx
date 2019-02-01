@@ -38,7 +38,7 @@ interface MonitorChartsState {
 
 type Props = MonitorChartsProps & UptimeCommonProps;
 
-export class MonitorCharts extends React.Component<Props, MonitorChartsState> {
+export class MonitorChartsQuery extends React.Component<Props, MonitorChartsState> {
   constructor(props: Props) {
     super(props);
     this.state = { crosshairLocation: 0 };

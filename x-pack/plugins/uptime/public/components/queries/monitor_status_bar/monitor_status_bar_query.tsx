@@ -28,7 +28,7 @@ interface MonitorStatusBarQueryParams {
 
 type Props = MonitorStatusBarProps & UptimeCommonProps;
 
-export const MonitorStatusBar = ({
+export const MonitorStatusBarQuery = ({
   dateRangeStart,
   dateRangeEnd,
   monitorId,

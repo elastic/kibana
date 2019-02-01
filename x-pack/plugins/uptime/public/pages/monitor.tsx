@@ -16,10 +16,12 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import { getMonitorPageBreadcrumb } from '../breadcrumbs';
-import { MonitorCharts } from '../components/queries/monitor_charts';
-import { MonitorSelect } from '../components/queries/monitor_select';
-import { MonitorStatusBar } from '../components/queries/monitor_status_bar';
-import { Pings } from '../components/queries/ping_list';
+import {
+  MonitorChartsQuery,
+  MonitorSelectQuery,
+  MonitorStatusBarQuery,
+  PingListQuery,
+} from '../components/queries';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeCommonProps } from '../uptime_app';
 
@@ -62,15 +64,19 @@ export class MonitorPage extends React.Component<Props> {
             </span>
           </EuiFlexItem>
           <EuiFlexItem>
-            <MonitorSelect valueOfSelectedMonitor={id} onChange={history.push} {...this.props} />
+            <MonitorSelectQuery
+              valueOfSelectedMonitor={id}
+              onChange={history.push}
+              {...this.props}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer />
-        <MonitorStatusBar monitorId={id} {...this.props} />
+        <MonitorStatusBarQuery monitorId={id} {...this.props} />
         <EuiSpacer />
-        <MonitorCharts monitorId={id} {...this.props} />
+        <MonitorChartsQuery monitorId={id} {...this.props} />
         <EuiSpacer />
-        <Pings monitorId={id} {...this.props} />
+        <PingListQuery monitorId={id} {...this.props} />
       </Fragment>
     );
   }

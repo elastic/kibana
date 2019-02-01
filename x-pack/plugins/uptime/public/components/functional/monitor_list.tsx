@@ -19,23 +19,23 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { get } from 'lodash';
 import moment from 'moment';
 import React, { Fragment } from 'react';
-import { Query } from 'react-apollo';
 import { Link } from 'react-router-dom';
-import { LatestMonitorsResult } from 'x-pack/plugins/uptime/common/graphql/types';
-import { UptimeCommonProps } from '../../../uptime_app';
+import { LatestMonitor } from '../../../common/graphql/types';
 import { formatSparklineCounts } from './format_sparkline_counts';
-import { getMonitorListQuery } from './get_monitor_list';
 
 interface MonitorListProps {
-  filters?: string;
+  loading: boolean;
+  monitors: LatestMonitor[];
 }
 
-type Props = MonitorListProps & UptimeCommonProps;
-
 const MONITOR_LIST_DEFAULT_PAGINATION = 10;
+
+const monitorListPagination = {
+  initialPageSize: MONITOR_LIST_DEFAULT_PAGINATION,
+  pageSizeOptions: [5, 10, 20, 50],
+};
 
 const monitorListColumns = [
   {
@@ -127,53 +127,24 @@ const monitorListColumns = [
   },
 ];
 
-const monitorListPagination = {
-  initialPageSize: MONITOR_LIST_DEFAULT_PAGINATION,
-  pageSizeOptions: [5, 10, 20, 50],
-};
-
-export const MonitorList = ({
-  autorefreshInterval,
-  autorefreshIsPaused,
-  dateRangeStart,
-  dateRangeEnd,
-  filters,
-}: Props) => (
-  <Query
-    pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
-    query={getMonitorListQuery}
-    variables={{ dateRangeStart, dateRangeEnd, filters }}
-  >
-    {({ loading, error, data }) => {
-      if (error) {
-        return i18n.translate('xpack.uptime.monitorList.errorMessage', {
-          values: { message: error.message },
-          defaultMessage: 'Error {message}',
-        });
-      }
-      const monitors: LatestMonitorsResult | undefined = get(data, 'monitorStatus.monitors');
-      // TODO: add a better loading message than "no items found", which it displays today
-      return (
-        <Fragment>
-          <EuiTitle size="xs">
-            <h5>
-              <FormattedMessage
-                id="xpack.uptime.monitorList.monitoringStatusTitle"
-                defaultMessage="Monitor status"
-              />
-            </h5>
-          </EuiTitle>
-          <EuiPanel paddingSize="l">
-            <EuiInMemoryTable
-              columns={monitorListColumns}
-              loading={loading}
-              items={monitors}
-              pagination={monitorListPagination}
-              sorting={true}
-            />
-          </EuiPanel>
-        </Fragment>
-      );
-    }}
-  </Query>
+export const MonitorList = ({ loading, monitors }: MonitorListProps) => (
+  <Fragment>
+    <EuiTitle size="xs">
+      <h5>
+        <FormattedMessage
+          id="xpack.uptime.monitorList.monitoringStatusTitle"
+          defaultMessage="Monitor status"
+        />
+      </h5>
+    </EuiTitle>
+    <EuiPanel paddingSize="l">
+      <EuiInMemoryTable
+        columns={monitorListColumns}
+        loading={loading}
+        items={monitors}
+        pagination={monitorListPagination}
+        sorting={true}
+      />
+    </EuiPanel>
+  </Fragment>
 );
