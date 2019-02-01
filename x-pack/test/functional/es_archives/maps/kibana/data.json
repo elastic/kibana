@@ -337,11 +337,10 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
     "id": "map:745c98b0-23e1-11e9-a048-6fef5a3e0d1e",
     "source": {
-      "type" : "map",
-      "gis-map" : {
+      "type": "map",
+      "map": {
         "title" : "layer with errors",
         "description" : "",
         "mapStateJSON" : "{\"zoom\":0.71,\"center\":{\"lon\":0.10268,\"lat\":0},\"timeFilters\":{\"from\":\"now-7d\",\"to\":\"now\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":0},\"query\":{\"query\":\"\",\"language\":\"kuery\"}}",
