@@ -533,7 +533,8 @@ export const FollowerIndexForm = injectI18n(
                   <p>
                     <FormattedMessage
                       id="xpack.crossClusterReplication.followerIndexForm.advancedSettingsDescription"
-                      defaultMessage="Advanced settings control the rate of replication."
+                      defaultMessage="Advanced settings control the rate of replication. You can
+                        customize these settings or use the default values."
                     />
                   </p>
 

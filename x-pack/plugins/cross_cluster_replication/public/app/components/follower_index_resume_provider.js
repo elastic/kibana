@@ -57,11 +57,11 @@ class Provider extends PureComponent {
     const title = isSingle
       ? intl.formatMessage({
         id: 'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.resumeSingleTitle',
-        defaultMessage: 'Resume replication of follower index \'{name}\'?',
+        defaultMessage: 'Resume replication to follower index \'{name}\'?',
       }, { name: ids[0] })
       : intl.formatMessage({
         id: 'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.resumeMultipleTitle',
-        defaultMessage: 'Resume replication of {count} follower indices?',
+        defaultMessage: 'Resume replication to {count} follower indices?',
       }, { count: ids.length });
 
     return (

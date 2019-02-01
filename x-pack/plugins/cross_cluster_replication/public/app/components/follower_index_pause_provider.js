@@ -56,11 +56,11 @@ class Provider extends PureComponent {
     const title = isSingle
       ? intl.formatMessage({
         id: 'xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.pauseSingleTitle',
-        defaultMessage: 'Pause replication of follower index \'{name}\'?',
+        defaultMessage: 'Pause replication to follower index \'{name}\'?',
       }, { name: indices[0].name })
       : intl.formatMessage({
         id: 'xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.pauseMultipleTitle',
-        defaultMessage: 'Pause replication of {count} follower indices?',
+        defaultMessage: 'Pause replication to {count} follower indices?',
       }, { count: indices.length });
     const hasCustomSettings = indices.some(index => !areAllSettingsDefault(index));
 
@@ -89,13 +89,13 @@ class Provider extends PureComponent {
               {isSingle ? (
                 <FormattedMessage
                   id="xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.singlePauseDescriptionWithSettingWarning"
-                  defaultMessage="Pausing replication of this follower index clears its custom
+                  defaultMessage="Pausing replication to this follower index clears its custom
                     advanced settings."
                 />
               ) : (
                 <FormattedMessage
                   id="xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.multiplePauseDescriptionWithSettingWarning"
-                  defaultMessage="Pausing replication of a follower index clears its custom
+                  defaultMessage="Pausing replication to a follower index clears its custom
                     advanced settings."
                 />
               )}
