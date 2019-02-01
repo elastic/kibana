@@ -108,20 +108,26 @@ export class AbstractESSource extends AbstractVectorSource {
   }
 
   async isTimeAware() {
-    const indexPattern = await this._getIndexPattern();
-    const timeField = indexPattern.timeFieldName;
-    return !!timeField;
+    try {
+      const indexPattern = await this._getIndexPattern();
+      const timeField = indexPattern.timeFieldName;
+      return !!timeField;
+    } catch (error) {
+      return false;
+    }
   }
 
-
   async _getIndexPattern() {
-    let indexPattern;
-    try {
-      indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
-    } catch (error) {
-      throw new Error(`Unable to find Index pattern ${this._descriptor.indexPatternId}`);
+    if (this.indexPattern) {
+      return this.indexPattern;
     }
-    return indexPattern;
+
+    try {
+      this.indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
+      return this.indexPattern;
+    } catch (error) {
+      throw new Error(`Unable to find Index pattern for id: ${this._descriptor.indexPatternId}`);
+    }
   }
 
   async _getGeoField() {
@@ -134,8 +140,13 @@ export class AbstractESSource extends AbstractVectorSource {
   }
 
   async getDisplayName() {
-    const indexPattern = await this._getIndexPattern();
-    return indexPattern.title;
+    try {
+      const indexPattern = await this._getIndexPattern();
+      return indexPattern.title;
+    } catch (error) {
+      // Unable to load index pattern, just return id as display name
+      return this._descriptor.indexPatternId;
+    }
   }
 
   isBoundsAware() {
