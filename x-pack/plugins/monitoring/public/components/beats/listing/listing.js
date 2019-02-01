@@ -108,14 +108,18 @@ class ListingUI extends PureComponent {
                   {
                     type: 'field_value_selection',
                     field: 'type',
-                    name: 'Type',
+                    name: i18n.translate('xpack.monitoring.beats.instances.typeFilter', {
+                      defaultMessage: 'Type'
+                    }),
                     options: types,
                     multiSelect: 'or',
                   },
                   {
                     type: 'field_value_selection',
                     field: 'version',
-                    name: 'Version',
+                    name: i18n.translate('xpack.monitoring.beats.instances.versionFilter', {
+                      defaultMessage: 'Version'
+                    }),
                     options: versions,
                     multiSelect: 'or',
                   }

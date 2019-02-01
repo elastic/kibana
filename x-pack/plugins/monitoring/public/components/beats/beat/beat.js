@@ -7,7 +7,7 @@
 import React from 'react';
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { formatMetric } from '../../../lib/format_number';
-import { EuiFlexItem, EuiPage, EuiPageBody, EuiFlexGrid, EuiSpacer, EuiPageContent } from '@elastic/eui';
+import { EuiFlexItem, EuiPage, EuiPageBody, EuiFlexGrid, EuiSpacer, EuiPageContent, EuiPanel } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 import { SummaryStatus } from '../../summary_status';
 
@@ -98,7 +98,7 @@ function BeatUi({ summary, metrics, intl, ...props }) {
   return (
     <EuiPage>
       <EuiPageBody>
-        <EuiPageContent>
+        <EuiPanel>
           <SummaryStatus
             metrics={summarytStatsTop}
             data-test-subj="beatSummaryStatus01"
@@ -107,15 +107,17 @@ function BeatUi({ summary, metrics, intl, ...props }) {
             metrics={summarytStatsBot}
             data-test-subj="beatSummaryStatus02"
           />
-          <EuiSpacer size="m"/>
-          <EuiFlexGrid columns={2} gutterSize="none">
+        </EuiPanel>
+        <EuiSpacer size="m" />
+        <EuiPageContent>
+          <EuiFlexGrid columns={2} gutterSize="s">
             {metricsToShow.map((metric, index) => (
-              <EuiFlexItem key={index} style={{ width: '50%' }}>
+              <EuiFlexItem key={index}>
                 <MonitoringTimeseriesContainer
                   series={metric}
                   {...props}
                 />
-                <EuiSpacer size="m"/>
+                <EuiSpacer />
               </EuiFlexItem>
             ))}
           </EuiFlexGrid>

@@ -7,8 +7,6 @@ import React from 'react';
 import { AbstractTMSSource } from '../tms_source';
 import { TileLayer } from '../../tile_layer';
 import { CreateSourceEditor } from './create_source_editor';
-import { EuiText } from '@elastic/eui';
-
 export class KibanaTilemapSource extends  AbstractTMSSource {
 
   static type = 'KIBANA_TILEMAP';
@@ -23,26 +21,20 @@ export class KibanaTilemapSource extends  AbstractTMSSource {
     };
   }
 
-  static renderEditor = ({ dataSourcesMeta, onPreviewSource }) => {
-    const { url } = dataSourcesMeta ? dataSourcesMeta.kibana.tilemap : {};
+  static renderEditor = ({ onPreviewSource }) => {
     const previewTilemap = (urlTemplate) => {
       const sourceDescriptor = KibanaTilemapSource.createDescriptor(urlTemplate);
       const source = new KibanaTilemapSource(sourceDescriptor);
       onPreviewSource(source);
     };
-    return (<CreateSourceEditor previewTilemap={previewTilemap} url={url} />);
+    return (<CreateSourceEditor previewTilemap={previewTilemap}  />);
   };
 
-  renderDetails() {
-    return (
-      <EuiText color="subdued" size="s">
-        <p className="gisLayerDetails">
-          <strong className="gisLayerDetails__label">Source </strong><span>Kibana Tilemap Configuration</span><br/>
-          <strong className="gisLayerDetails__label">Type </strong><span>Tile</span><br/>
-          <strong className="gisLayerDetails__label">Id </strong><span>{this._descriptor.id}</span><br/>
-        </p>
-      </EuiText>
-    );
+  async getImmutableProperties() {
+    return [
+      { label: 'Data source', value: KibanaTilemapSource.title },
+      { label: 'Tilemap url', value: (await this.getUrlTemplate()) },
+    ];
   }
 
   _createDefaultLayerDescriptor(options) {
@@ -60,11 +52,11 @@ export class KibanaTilemapSource extends  AbstractTMSSource {
   }
 
 
-  getUrlTemplate() {
+  async getUrlTemplate() {
     return this._descriptor.url;
   }
 
   async getDisplayName() {
-    return this.getUrlTemplate();
+    return await this.getUrlTemplate();
   }
 }
