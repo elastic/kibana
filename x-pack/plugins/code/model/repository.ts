@@ -23,6 +23,7 @@ export interface Repository {
 
 export interface RepositoryConfig {
   uri: RepositoryUri;
+  disableGo?: boolean;
   disableJava?: boolean;
   disableTypescript?: boolean;
 }
