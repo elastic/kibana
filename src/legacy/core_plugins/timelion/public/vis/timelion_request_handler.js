@@ -38,6 +38,7 @@ const TimelionRequestHandlerProvider = function (Private, Notifier, $http, confi
         const esQueryConfigs = {
           allowLeadingWildcards: config.get('query:allowLeadingWildcards'),
           queryStringOptions: config.get('query:queryString:options'),
+          ignoreFilterIfFieldNotInIndex: config.get('courier:ignoreFilterIfFieldNotInIndex'),
         };
         const httpResult = $http.post('../api/timelion/run', {
           sheet: [expression],

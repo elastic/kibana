@@ -37,6 +37,7 @@ export function VegaRequestHandlerProvider(es, serviceSettings, config) {
       const esQueryConfigs = {
         allowLeadingWildcards: config.get('query:allowLeadingWildcards'),
         queryStringOptions: config.get('query:queryString:options'),
+        ignoreFilterIfFieldNotInIndex: config.get('courier:ignoreFilterIfFieldNotInIndex'),
       };
       const filtersDsl = buildEsQuery(undefined, query, filters, esQueryConfigs);
       const vp = new VegaParser(visParams.spec, searchCache, timeCache, filtersDsl, serviceSettings);

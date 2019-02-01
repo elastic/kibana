@@ -17,9 +17,12 @@
  * under the License.
  */
 
-export { buildEsQuery } from './build_es_query';
-export { buildQueryFromFilters } from './from_filters';
-export { luceneStringToDsl } from './lucene_string_to_dsl';
-export { migrateFilter } from './migrate_filter';
-export { decorateQuery } from './decorate_query';
-export { filterMatchesIndex } from './filter_matches_index';
+// TODO: We should base this on something better than `filter.meta.key`. We should probably modify
+// this to check if `filter.meta.index` matches `indexPattern.id` instead, but that's a breaking
+// change.
+export function filterMatchesIndex(filter, indexPattern) {
+  if (!filter.meta || !indexPattern) {
+    return true;
+  }
+  return indexPattern.fields.some(field => field.name === filter.meta.key);
+}

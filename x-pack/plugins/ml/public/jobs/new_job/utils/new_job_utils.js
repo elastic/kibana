@@ -52,6 +52,7 @@ export function SearchItemsProvider(Private, $route, config) {
       const esQueryConfigs = {
         allowLeadingWildcards: config.get('query:allowLeadingWildcards'),
         queryStringOptions: config.get('query:queryString:options'),
+        ignoreFilterIfFieldNotInIndex: config.get('courier:ignoreFilterIfFieldNotInIndex'),
       };
       combinedQuery = buildEsQuery(indexPattern, [query], filters, esQueryConfigs);
     }
