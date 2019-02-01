@@ -53,7 +53,7 @@
   }
 
   &::-webkit-scrollbar-thumb { /* 4 */
-    background-color: tint($kbnChromeGlobalNavBackground, 50%);
+    background-color: tint($euiColorPrimary, 50%);
   }
 }
 

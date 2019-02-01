@@ -51,6 +51,10 @@ class RecentlyAccessed {
   public get() {
     return this.history.get();
   }
+
+  public get$() {
+    return this.history.get$();
+  }
 }
 
 export const recentlyAccessed = new RecentlyAccessed();
