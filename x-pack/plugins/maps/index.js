@@ -12,25 +12,25 @@ import { checkLicense } from './check_license';
 import { watchStatusAndLicenseToInitialize } from
   '../../server/lib/watch_status_and_license_to_initialize';
 
-export function gis(kibana) {
+export function maps(kibana) {
 
   return new kibana.Plugin({
     require: ['kibana', 'elasticsearch', 'xpack_main', 'tile_map'],
-    id: 'gis',
-    configPrefix: 'xpack.gis',
+    id: 'maps',
+    configPrefix: 'xpack.maps',
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       app: {
         title: 'Maps',
         description: 'Map application',
-        main: 'plugins/gis/index',
-        icon: 'plugins/gis/icon.svg',
+        main: 'plugins/maps/index',
+        icon: 'plugins/maps/icon.svg',
         euiIconType: 'gisApp',
       },
       inspectorViews: [
-        'plugins/gis/inspector/views/register_views',
+        'plugins/maps/inspector/views/register_views',
       ],
-      home: ['plugins/gis/register_feature'],
+      home: ['plugins/maps/register_feature'],
       styleSheetPaths: `${__dirname}/public/index.scss`,
       mappings
     },
@@ -41,7 +41,7 @@ export function gis(kibana) {
     },
 
     init(server) {
-      const gisEnabled = server.config().get('xpack.gis.enabled');
+      const gisEnabled = server.config().get('xpack.maps.enabled');
 
       if (gisEnabled) {
         const thisPlugin = this;
@@ -61,7 +61,7 @@ export function gis(kibana) {
           .registerLicenseCheckResultsGenerator(checkLicense);
 
         server.addSavedObjectsToSampleDataset('logs', webLogsSavedObjects);
-        server.injectUiAppVars('gis', async () => {
+        server.injectUiAppVars('maps', async () => {
           return await server.getInjectedUiAppVars('kibana');
         });
       } else {

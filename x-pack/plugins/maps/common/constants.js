@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const GIS_API_PATH = 'api/gis';
+export const GIS_API_PATH = 'api/maps';
 
 export const DECIMAL_DEGREES_PRECISION = 5; // meters precision
 

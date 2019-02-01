@@ -32,7 +32,7 @@ import listingTemplate from './angular/listing_ng_wrapper.html';
 import mapTemplate from './angular/map.html';
 import { MapListing } from './shared/components/map_listing';
 
-const app = uiModules.get('app/gis', ['ngRoute', 'react']);
+const app = uiModules.get('app/maps', ['ngRoute', 'react']);
 
 app.directive('mapListing', function (reactDirective) {
   return reactDirective(MapListing);
