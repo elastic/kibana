@@ -30,12 +30,13 @@ export class URIType extends Type<string> {
     super(internals.string().uri({ scheme: options.scheme }), options);
   }
 
-  protected handleError(type: string, { value }: Record<string, unknown>) {
+  protected handleError(type: string, { value, scheme }: Record<string, unknown>) {
     switch (type) {
       case 'any.required':
       case 'string.base':
-        return `expected value of type [string] but got [${typeDetect(value)}]`;
+        return `expected value of type [string] but got [${typeDetect(value)}].`;
       case 'string.uriCustomScheme':
+        return `expected URI with scheme [${scheme}] but but got [${value}].`;
       case 'string.uri':
         return `value is [${value}] but it must be a valid URI (see RFC 3986).`;
     }
