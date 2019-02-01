@@ -56,16 +56,10 @@ function translateFormattedMessageUsingPseudoLocale(message: string) {
  * with the pseudo localization function.
  */
 function wrapIntlFormatMessage() {
-  let isIntlOverridden = false;
-
   return injectI18n(({ intl, children }) => {
-    if (!isIntlOverridden) {
-      const formatMessage = intl.formatMessage;
-      intl.formatMessage = (...args) =>
-        translateFormattedMessageUsingPseudoLocale(formatMessage(...args));
-
-      isIntlOverridden = true;
-    }
+    const formatMessage = intl.formatMessage;
+    intl.formatMessage = (...args) =>
+      translateFormattedMessageUsingPseudoLocale(formatMessage(...args));
 
     return React.Children.only(children);
   });
