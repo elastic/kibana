@@ -36,6 +36,5 @@ declare module '@elastic/eui/dist/eui_theme_light.json' {
   const euiColorLightestShade: string;
   const euiBorderThin: string;
   const euiColorDanger: string;
-  const euiColorPrimary: string;
   const euiColorVis0: string;
 }

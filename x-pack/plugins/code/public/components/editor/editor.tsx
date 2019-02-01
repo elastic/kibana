@@ -28,7 +28,7 @@ export interface EditorActions {
   hoverResult(hover: Hover): void;
 }
 
-interface Props extends EditorActions, RouteComponentProps<MainRouteParams> {
+interface Props {
   file: FetchFileResponse;
   revealPosition?: Position;
   isReferencesOpen: boolean;
@@ -41,13 +41,15 @@ interface Props extends EditorActions, RouteComponentProps<MainRouteParams> {
   showBlame: boolean;
 }
 
-export class EditorComponent extends React.Component<Props> {
+type IProps = Props & EditorActions & RouteComponentProps<MainRouteParams>;
+
+export class EditorComponent extends React.Component<IProps> {
   public blameWidgets: any;
   private container: HTMLElement | undefined;
   private monaco: MonacoHelper | undefined;
   private editor: editorInterfaces.IStandaloneCodeEditor | undefined;
 
-  constructor(props: Props, context: any) {
+  constructor(props: IProps, context: any) {
     super(props, context);
   }
 
@@ -123,7 +125,7 @@ export class EditorComponent extends React.Component<Props> {
 
   public loadBlame(blames: GitBlame[]) {
     this.blameWidgets = blames.map((b, index) => {
-      return new BlameWidget(b, index === 0, this.editor);
+      return new BlameWidget(b, index === 0, this.editor!);
     });
   }
 
