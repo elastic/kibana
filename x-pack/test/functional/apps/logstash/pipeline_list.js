@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }) {
   const pipelineEditor = getService('pipelineEditor');
   const PageObjects = getPageObjects(['logstash']);
 
-  describe('pipeline list route', () => {
+  describe.only('pipeline list route', () => {
     let originalWindowSize;
 
     before(async () => {

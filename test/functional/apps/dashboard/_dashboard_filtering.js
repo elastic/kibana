@@ -227,7 +227,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('nested filtering', async () => {
+    describe.only('nested filtering', async () => {
       before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
       });
