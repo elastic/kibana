@@ -325,6 +325,19 @@ export const buildVislibDimensions = (vis: any, timeRange?: any) => {
   return dimensions;
 };
 
+// If not using the expression pipeline (i.e. visualize_data_loader), we need a mechanism to
+// take a Vis object and decorate it with the necessary params (dimensions, bucket, metric, etc)
+export const decorateVisObject = (vis: Vis, params: { timeRange?: any }) => {
+  const schemas = getSchemas(vis, params.timeRange);
+  let visConfig = vis.params;
+  if (buildVisConfig[vis.type.name]) {
+    visConfig = buildVisConfig[vis.type.name](vis, schemas);
+    vis.params = visConfig;
+  } else if (vislibCharts.includes(vis.type.name)) {
+    visConfig.dimensions = buildVislibDimensions(vis, params.timeRange);
+  }
+};
+
 export const buildPipeline = (
   vis: Vis,
   params: { searchSource: SearchSource; timeRange?: any }
