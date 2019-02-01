@@ -85,10 +85,14 @@
           ng-if="notif.isTimed()"
           class="kbnToaster__countdown"
           ng-click="notif.cancelTimer()"
-          title="Stop"
+          title="{{ ::'common.ui.notify.toaster.stopCountdownButtonTooltip' | i18n: { defaultMessage: 'Stop' } }}"
         >
           <span class="euiBadge__content">
-            <span> {{ notif.timeRemaining }}s </span>
+            <span
+              i18n-id="common.ui.notify.toaster.timeRemainingInSecondsLabel"
+              i18n-default-message="{timeRemaining}s"
+              i18n-values="{ timeRemaining: notif.timeRemaining }"
+            ></span>
           </span>
         </button>
       </div>

@@ -52,7 +52,7 @@ VoronoiPlot.propTypes = {
   onHover: PropTypes.func.isRequired,
   onMouseDown: PropTypes.func.isRequired,
   onMouseLeave: PropTypes.func.isRequired,
-  onMouseUp: PropTypes.func.isRequired,
+  onMouseUp: PropTypes.func,
   series: PropTypes.array.isRequired,
   plotValues: PropTypes.object.isRequired
 };
