@@ -155,7 +155,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
           </EuiFlexGroup>
         </EuiPopoverTitle>
 
-        <div style={{ maxWidth: 300 }}>
+        <div style={{ maxWidth: 240 }}>
           {defaultContent}
           {defaultContent && helpExtension && <EuiSpacer />}
           {helpExtension && <HeaderExtension extension={helpExtension} />}
