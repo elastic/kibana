@@ -194,7 +194,6 @@ export const LinksMenu = injectI18n(class LinksMenu extends Component {
         detectorIndex: record.detector_index,
         entities: entityCondition,
       },
-      filters: [],
       query: {
         query_string: {
           analyze_wildcard: true,

@@ -31,12 +31,10 @@ import {
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import chrome from 'ui/chrome';
-import { recentlyAccessedShape } from './recently_accessed';
 import { I18nProvider } from '@kbn/i18n/react';
 
 export function HomeApp({
   directories,
-  recentlyAccessed,
 }) {
 
   const isCloudEnabled = chrome.getInjected('isCloudEnabled', false);
@@ -98,7 +96,6 @@ export function HomeApp({
               directories={directories}
               apmUiEnabled={apmUiEnabled}
               mlEnabled={mlEnabled}
-              recentlyAccessed={recentlyAccessed}
               find={savedObjectsClient.find}
               localStorage={localStorage}
               urlBasePath={chrome.getBasePath()}
@@ -120,5 +117,4 @@ HomeApp.propTypes = {
     showOnHomePage: PropTypes.bool.isRequired,
     category: PropTypes.string.isRequired
   })),
-  recentlyAccessed: PropTypes.arrayOf(recentlyAccessedShape).isRequired,
 };

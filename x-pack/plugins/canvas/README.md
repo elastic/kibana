@@ -23,7 +23,7 @@ The easiest way to do develop on Canvas and have the plugins built automatically
 ```bash
 # while in kibana/
 cd x-pack/plugins/canvas
-yarn start
+node scripts/start.js
 ```
 
 There are several other scripts available once you are in that path as well.
