@@ -388,8 +388,8 @@ export class Worker extends events.EventEmitter {
       version: true,
       body: query
     })
-      .then((results) => {
-        const jobs = results.hits.hits;
+      .then(({ body }) => {
+        const jobs = body.hits.hits;
         if (jobs.length > 0) {
           this.debug(`${jobs.length} outstanding jobs returned`);
         }
