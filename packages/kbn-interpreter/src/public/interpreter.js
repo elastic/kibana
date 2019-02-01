@@ -20,9 +20,13 @@
 import { socketInterpreterProvider } from '../common/interpreter/socket_interpret';
 import { serializeProvider } from '../common/lib/serialize';
 import { createHandlers } from './create_handlers';
+import { batchedFetch } from './batched_fetch';
 
 export async function initializeInterpreter(kfetch, typesRegistry, functionsRegistry) {
   const serverFunctionList = await kfetch({ pathname: '/api/canvas/fns' });
+  const types = typesRegistry.toJS();
+  const { serialize } = serializeProvider(types);
+  const batch = batchedFetch({ kfetch, serialize });
 
   // For every sever-side function, register a client-side
   // function that matches its definition, but which simply
@@ -30,20 +34,7 @@ export async function initializeInterpreter(kfetch, typesRegistry, functionsRegi
   Object.keys(serverFunctionList).forEach(functionName => {
     functionsRegistry.register(() => ({
       ...serverFunctionList[functionName],
-      async fn(context, args) {
-        const types = typesRegistry.toJS();
-        const { serialize } = serializeProvider(types);
-        const result = await kfetch({
-          pathname: `/api/canvas/fns/${functionName}`,
-          method: 'POST',
-          body: JSON.stringify({
-            args,
-            context: serialize(context),
-          }),
-        });
-
-        return result;
-      },
+      fn: (context, args) => batch({ functionName, args, context }),
     }));
   });
 
