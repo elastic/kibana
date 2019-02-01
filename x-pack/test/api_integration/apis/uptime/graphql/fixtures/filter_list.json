@@ -1,6 +1,6 @@
 {
   "filterBar": {
-    "status": ["down", "up"],
+    "status": ["up", "down"],
     "port": [80, 443, 9200, 12349],
     "id": [
       "http@http://localhost:12349/",

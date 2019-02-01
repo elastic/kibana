@@ -357,13 +357,13 @@ export interface StatusData {
 }
 
 export interface FilterBar {
-  id?: (string | null)[] | null;
+  id?: string[] | null;
 
-  port?: (number | null)[] | null;
+  port?: number[] | null;
 
-  scheme?: (string | null)[] | null;
+  scheme?: string[] | null;
 
-  status?: (string | null)[] | null;
+  status?: string[] | null;
 }
 
 export interface ErrorListItem {
