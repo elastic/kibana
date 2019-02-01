@@ -17,8 +17,12 @@
  * under the License.
  */
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import * as Rx from 'rxjs';
+
+import { documentationLinks } from '../../../../documentation_links';
+import { metadata } from '../../../../metadata';
 
 import {
   // TODO: add type annotations
@@ -128,7 +132,13 @@ class HeaderHelpMenuUI extends Component<Props, State> {
         <EuiPopoverTitle>
           <EuiFlexGroup responsive={false}>
             <EuiFlexItem>Help</EuiFlexItem>
-            <EuiFlexItem grow={false}>v7.0.0.</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <FormattedMessage
+                id="common.ui.helpMenu.version"
+                defaultMessage="v{version}"
+                values={{ version: metadata.version }}
+              />
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPopoverTitle>
 
@@ -157,6 +167,6 @@ class HeaderHelpMenuUI extends Component<Props, State> {
 export const HeaderHelpMenu = injectI18n(HeaderHelpMenuUI);
 
 HeaderHelpMenu.defaultProps = {
-  documentationLink: 'https://www.elastic.co/guide/en/kibana/index.html',
+  documentationLink: documentationLinks.kibana,
   useDefaultContent: true,
 };
