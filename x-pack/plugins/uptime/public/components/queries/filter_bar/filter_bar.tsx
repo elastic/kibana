@@ -7,9 +7,9 @@
 // @ts-ignore No typings for EuiSearchBar
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSearchBar, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { take } from 'lodash';
 import React from 'react';
 import { Query } from 'react-apollo';
+import { FilterBar as FilterBarType } from '../../../../common/graphql/types';
 import { UptimeCommonProps } from '../../../uptime_app';
 import { getFilterBarQuery } from './get_filter_bar';
 import { filterBarSearchSchema } from './search_schema';
@@ -20,8 +20,7 @@ interface FilterBarProps {
 
 type Props = FilterBarProps & UptimeCommonProps;
 
-const MAX_SELECTION_LENGTH = 20;
-const SEARCH_THRESHOLD = 2;
+const SEARCH_THRESHOLD = 8;
 
 export const FilterBar = ({
   autorefreshInterval,
@@ -49,10 +48,7 @@ export const FilterBar = ({
       }
       const {
         filterBar: { port, id, scheme },
-      } = data;
-      const showFilterDisclaimer =
-        (id.length && id.length > MAX_SELECTION_LENGTH) ||
-        (port.length && port.length > MAX_SELECTION_LENGTH);
+      }: { filterBar: FilterBarType } = data;
 
       // TODO: add a factory function + type for these filter options
       const filters = [
@@ -82,10 +78,12 @@ export const FilterBar = ({
             defaultMessage: 'Host',
           }),
           multiSelect: false,
-          options: take(id, MAX_SELECTION_LENGTH).map((idValue: any) => ({
-            value: idValue,
-            view: idValue,
-          })),
+          options: id
+            ? id.map((idValue: any) => ({
+                value: idValue,
+                view: idValue,
+              }))
+            : [],
           searchThreshold: SEARCH_THRESHOLD,
         },
         {
@@ -95,10 +93,12 @@ export const FilterBar = ({
             defaultMessage: 'Port',
           }),
           multiSelect: false,
-          options: take(port, MAX_SELECTION_LENGTH).map((portValue: any) => ({
-            value: portValue,
-            view: portValue,
-          })),
+          options: port
+            ? port.map((portValue: any) => ({
+                value: portValue,
+                view: portValue,
+              }))
+            : [],
           searchThreshold: SEARCH_THRESHOLD,
         },
         {
@@ -108,7 +108,9 @@ export const FilterBar = ({
             defaultMessage: 'Type',
           }),
           multiSelect: false,
-          options: scheme.map((schemeValue: string) => ({ value: schemeValue, view: schemeValue })),
+          options: scheme
+            ? scheme.map((schemeValue: string) => ({ value: schemeValue, view: schemeValue }))
+            : [],
           searchThreshold: SEARCH_THRESHOLD,
         },
       ];
@@ -133,23 +135,6 @@ export const FilterBar = ({
               schema={filterBarSearchSchema}
             />
           </EuiFlexItem>
-          {showFilterDisclaimer && (
-            <EuiFlexItem grow={false}>
-              <EuiToolTip
-                position="left"
-                title={i18n.translate('xpack.uptime.filterBar.filterLimitationsTooltipTitle', {
-                  defaultMessage: 'Filter limitations',
-                })}
-                content={i18n.translate('xpack.uptime.filterBar.filterLimitationsTooltipText', {
-                  values: { selectionLength: MAX_SELECTION_LENGTH },
-                  defaultMessage:
-                    'The top {selectionLength} filter options for each field are displayed, but you can modify the filters manually or search for additional values.',
-                })}
-              >
-                <EuiIcon type="iInCircle" size="l" />
-              </EuiToolTip>
-            </EuiFlexItem>
-          )}
         </EuiFlexGroup>
       );
     }}
