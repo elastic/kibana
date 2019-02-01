@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiCode, EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -34,6 +34,15 @@ export const IndicesConfigurationPanel = ({
     <EuiFormRow
       error={metricAliasFieldProps.error}
       fullWidth
+      helpText={
+        <FormattedMessage
+          id="xpack.infra.sourceConfiguration.metricIndicesDescription"
+          defaultMessage="Index pattern for matching indices that contain Metricbeat data. Defaults to {defaultValue}."
+          values={{
+            defaultValue: <EuiCode>metricbeat-*</EuiCode>,
+          }}
+        />
+      }
       isInvalid={metricAliasFieldProps.isInvalid}
       label={
         <FormattedMessage
@@ -52,6 +61,15 @@ export const IndicesConfigurationPanel = ({
     <EuiFormRow
       error={logAliasFieldProps.error}
       fullWidth
+      helpText={
+        <FormattedMessage
+          id="xpack.infra.sourceConfiguration.logIndicesDescription"
+          defaultMessage="Index pattern for matching indices that contain log data. Defaults to {defaultValue}."
+          values={{
+            defaultValue: <EuiCode>filebeat-*</EuiCode>,
+          }}
+        />
+      }
       isInvalid={logAliasFieldProps.isInvalid}
       label={
         <FormattedMessage

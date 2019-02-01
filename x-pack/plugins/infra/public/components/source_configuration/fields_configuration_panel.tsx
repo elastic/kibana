@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiCode, EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -40,6 +40,15 @@ export const FieldsConfigurationPanel = ({
     <EuiFormRow
       error={timestampFieldProps.error}
       fullWidth
+      helpText={
+        <FormattedMessage
+          id="xpack.infra.sourceConfiguration.timestampFieldDescription"
+          defaultMessage="Timestamp used to sort log entries. Defaults to {defaultValue}."
+          values={{
+            defaultValue: <EuiCode>@timestamp</EuiCode>,
+          }}
+        />
+      }
       isInvalid={timestampFieldProps.isInvalid}
       label={
         <FormattedMessage
@@ -53,6 +62,15 @@ export const FieldsConfigurationPanel = ({
     <EuiFormRow
       error={tiebreakerFieldProps.error}
       fullWidth
+      helpText={
+        <FormattedMessage
+          id="xpack.infra.sourceConfiguration.tiebreakerFieldDescription"
+          defaultMessage="Field used to break ties between two entries with the same timestamp. Defaults to {defaultValue}."
+          values={{
+            defaultValue: <EuiCode>_doc</EuiCode>,
+          }}
+        />
+      }
       isInvalid={tiebreakerFieldProps.isInvalid}
       label={
         <FormattedMessage
@@ -71,6 +89,15 @@ export const FieldsConfigurationPanel = ({
     <EuiFormRow
       error={containerFieldProps.error}
       fullWidth
+      helpText={
+        <FormattedMessage
+          id="xpack.infra.sourceConfiguration.containerFieldDescription"
+          defaultMessage="Field used to identify Docker containers. Defaults to {defaultValue}."
+          values={{
+            defaultValue: <EuiCode>docker.container.id</EuiCode>,
+          }}
+        />
+      }
       isInvalid={containerFieldProps.isInvalid}
       label={
         <FormattedMessage
@@ -84,6 +111,15 @@ export const FieldsConfigurationPanel = ({
     <EuiFormRow
       error={hostFieldProps.error}
       fullWidth
+      helpText={
+        <FormattedMessage
+          id="xpack.infra.sourceConfiguration.hostFieldDescription"
+          defaultMessage="Field used to identify hosts. Defaults to {defaultValue}."
+          values={{
+            defaultValue: <EuiCode>host.name</EuiCode>,
+          }}
+        />
+      }
       isInvalid={hostFieldProps.isInvalid}
       label={
         <FormattedMessage
@@ -97,6 +133,15 @@ export const FieldsConfigurationPanel = ({
     <EuiFormRow
       error={podFieldProps.error}
       fullWidth
+      helpText={
+        <FormattedMessage
+          id="xpack.infra.sourceConfiguration.podFieldDescription"
+          defaultMessage="Field used to identify Kubernetes pods. Defaults to {defaultValue}."
+          values={{
+            defaultValue: <EuiCode>kubernetes.pod.uid</EuiCode>,
+          }}
+        />
+      }
       isInvalid={podFieldProps.isInvalid}
       label={
         <FormattedMessage
