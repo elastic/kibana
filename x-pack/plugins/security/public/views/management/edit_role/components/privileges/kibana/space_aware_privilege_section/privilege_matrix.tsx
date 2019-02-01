@@ -253,9 +253,11 @@ export class PrivilegeMatrix extends Component<Props, State> {
     ];
 
     return (
+      // @ts-ignore missing rowProps from typedef
       <EuiInMemoryTable
         columns={columns}
         items={rows}
+        // @ts-ignore missing rowProps from typedef
         rowProps={(item: TableRow) => {
           return {
             className: item.feature.isBase ? 'secPrivilegeMatrix__row--isBasePrivilege' : '',
