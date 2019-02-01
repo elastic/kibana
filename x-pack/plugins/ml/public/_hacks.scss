@@ -40,9 +40,9 @@
   }
 
   .btn {
-    border: 1px solid #D3DAE6;
-    background-color: #FFF;
-    color: #343741;
+    border: 1px solid $euiColorLightShade;
+    background-color: $euiColorEmptyShade;
+    color: $euiColorDarkestShade;
   }
  }
 
