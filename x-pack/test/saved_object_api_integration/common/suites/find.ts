@@ -73,6 +73,19 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
     });
   };
 
+  const expectValidType = (resp: { [key: string]: any }) => {
+    expect(resp.body).to.eql({
+      statusCode: 400,
+      error: 'Bad Request',
+      message:
+        'child "type" fails because [single value of "type" fails because ["type" must be one of [config, migrationVersion, references, globaltype, telemetry, graph-workspace, space, apm-telemetry, gis-map, canvas-workpad, infrastructure-ui-source, upgrade-assistant-reindex-operation, index-pattern, visualization, search, dashboard, url, server, kql-telemetry, timelion-sheet]]]',
+      validation: {
+        keys: ['type'],
+        source: 'query',
+      },
+    });
+  };
+
   const expectTypeRequired = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       error: 'Bad Request',
@@ -141,7 +154,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
           await supertest
             .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=wigwags`)
             .auth(user.username, user.password)
-            .expect(400)
+            .expect(tests.unknownType.statusCode)
             .then(tests.unknownType.response));
       });
 
@@ -165,7 +178,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
           tests.unknownSearchField.description
         }`, async () =>
           await supertest
-            .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=wigwags&search_fields=a`)
+            .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=url&search_fields=a`)
             .auth(user.username, user.password)
             .expect(tests.unknownSearchField.statusCode)
             .then(tests.unknownSearchField.response));
@@ -192,6 +205,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
     createExpectVisualizationResults,
     expectNotSpaceAwareResults,
     expectTypeRequired,
+    expectValidType,
     findTest,
   };
 }
