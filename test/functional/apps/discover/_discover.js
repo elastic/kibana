@@ -18,6 +18,7 @@
  */
 
 import expect from 'expect.js';
+import moment from 'moment';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -153,8 +154,13 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.brushHistogram(0, 1);
         await PageObjects.visualize.waitForVisualization();
-        const actualTimeString = await PageObjects.header.getPrettyDuration();
-        expect(actualTimeString).to.be('September 19th 2015, 23:59:02.606 to September 20th 2015, 02:56:40.744');
+        const newFromTime = await PageObjects.header.getFromTime();
+        const newToTime = await PageObjects.header.getToTime();
+
+        const newDurationHours = moment.duration(moment(newToTime) - moment(newFromTime)).asHours();
+        if (newDurationHours < 1 || newDurationHours >= 5) {
+          throw new Error(`expected new duration of ${newDurationHours} hours to be between 1 and 5 hours`);
+        }
       });
 
       it('should show correct initial chart interval of Auto', async function () {
@@ -413,7 +419,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show the phrases if you re-open a phrases filter', async function () {
         await filterBar.clickEditFilter('extension.raw', 'jpg');
-        const phrases = await filterBar.getFilterEditorPhrases();
+        const phrases = await filterBar.getFilterEditorSelectedPhrases();
         expect(phrases.length).to.be(1);
         expect(phrases[0]).to.be('jpg');
       });

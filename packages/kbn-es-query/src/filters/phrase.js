@@ -17,6 +17,7 @@
  * under the License.
  */
 
+// Creates an filter where the given field matches the given value
 export function buildPhraseFilter(field, value, indexPattern) {
   const filter = { meta: { index: indexPattern.id } };
   const convertedValue = getConvertedValueForField(field, value);

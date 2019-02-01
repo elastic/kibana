@@ -35,6 +35,7 @@ import {
   EuiIcon,
   EuiButton,
   EuiButtonEmpty,
+  EuiPortal,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -61,62 +62,64 @@ export class Welcome extends React.Component {
     const { urlBasePath, onSkip } = this.props;
 
     return (
-      <div className="homWelcome">
-        <header className="homWelcome__header">
-          <div className="homWelcome__content eui-textCenter">
-            <EuiSpacer size="xxl" />
-            <span className="homWelcome__logo">
-              <EuiIcon type="logoKibana" size="xxl" />
-            </span>
-            <EuiTitle size="l" className="homWelcome__title">
-              <h1>
-                <FormattedMessage id="kbn.home.welcomeTitle" defaultMessage="Welcome to Kibana"/>
-              </h1>
-            </EuiTitle>
-            <EuiText size="s" color="subdued" className="homWelcome__subtitle">
-              <p>
-                <FormattedMessage id="kbn.home.welcomeDescription" defaultMessage="Your window into the Elastic Stack"/>
-              </p>
-            </EuiText>
-            <EuiSpacer size="xl" />
+      <EuiPortal>
+        <div className="homWelcome">
+          <header className="homWelcome__header">
+            <div className="homWelcome__content eui-textCenter">
+              <EuiSpacer size="xxl" />
+              <span className="homWelcome__logo">
+                <EuiIcon type="logoKibana" size="xxl" />
+              </span>
+              <EuiTitle size="l" className="homWelcome__title">
+                <h1>
+                  <FormattedMessage id="kbn.home.welcomeTitle" defaultMessage="Welcome to Kibana"/>
+                </h1>
+              </EuiTitle>
+              <EuiText size="s" color="subdued" className="homWelcome__subtitle">
+                <p>
+                  <FormattedMessage id="kbn.home.welcomeDescription" defaultMessage="Your window into the Elastic Stack"/>
+                </p>
+              </EuiText>
+              <EuiSpacer size="xl" />
+            </div>
+          </header>
+          <div className="homWelcome__content homWelcome-body">
+            <EuiFlexGroup gutterSize="l">
+              <EuiFlexItem>
+                <EuiCard
+                  image={`${urlBasePath}/plugins/kibana/assets/illo_dashboard.png`}
+                  textAlign="left"
+                  title={<FormattedMessage id="kbn.home.letsStartTitle" defaultMessage="Let's get started"/>}
+                  description={
+                    <FormattedMessage
+                      id="kbn.home.letsStartDescription"
+                      defaultMessage="We noticed that you don't have any data in your cluster.
+  You can try our sample data and dashboards or jump in with your own data."
+                    />}
+                  footer={
+                    <footer>
+                      <EuiButton
+                        fill
+                        className="homWelcome__footerAction"
+                        href="#/home/tutorial_directory/sampleData"
+                      >
+                        <FormattedMessage id="kbn.home.tryButtonLabel" defaultMessage="Try our sample data"/>
+                      </EuiButton>
+                      <EuiButtonEmpty
+                        className="homWelcome__footerAction"
+                        onClick={onSkip}
+                        data-test-subj="skipWelcomeScreen"
+                      >
+                        <FormattedMessage id="kbn.home.exploreButtonLabel" defaultMessage="Explore on my own"/>
+                      </EuiButtonEmpty>
+                    </footer>
+                  }
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </div>
-        </header>
-        <div className="homWelcome__content homWelcome-body">
-          <EuiFlexGroup gutterSize="l">
-            <EuiFlexItem>
-              <EuiCard
-                image={`${urlBasePath}/plugins/kibana/assets/illo_dashboard.png`}
-                textAlign="left"
-                title={<FormattedMessage id="kbn.home.letsStartTitle" defaultMessage="Let's get started"/>}
-                description={
-                  <FormattedMessage
-                    id="kbn.home.letsStartDescription"
-                    defaultMessage="We noticed that you don't have any data in your cluster.
-You can try our sample data and dashboards or jump in with your own data."
-                  />}
-                footer={
-                  <footer>
-                    <EuiButton
-                      fill
-                      className="homWelcome__footerAction"
-                      href="#/home/tutorial_directory/sampleData"
-                    >
-                      <FormattedMessage id="kbn.home.tryButtonLabel" defaultMessage="Try our sample data"/>
-                    </EuiButton>
-                    <EuiButtonEmpty
-                      className="homWelcome__footerAction"
-                      onClick={onSkip}
-                      data-test-subj="skipWelcomeScreen"
-                    >
-                      <FormattedMessage id="kbn.home.exploreButtonLabel" defaultMessage="Explore on my own"/>
-                    </EuiButtonEmpty>
-                  </footer>
-                }
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
         </div>
-      </div>
+      </EuiPortal>
     );
   }
 }

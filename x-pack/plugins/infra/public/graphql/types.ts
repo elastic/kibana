@@ -215,6 +215,10 @@ export interface InfraNodeMetric {
   name: InfraMetricType;
 
   value: number;
+
+  avg: number;
+
+  max: number;
 }
 
 export interface InfraMetricData {
@@ -719,6 +723,10 @@ export namespace WaffleNodesQuery {
     name: InfraMetricType;
 
     value: number;
+
+    avg: number;
+
+    max: number;
   };
 }
 
