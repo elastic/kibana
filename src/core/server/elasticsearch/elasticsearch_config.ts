@@ -18,9 +18,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { get, has, set } from 'lodash';
 import { Duration } from 'moment';
-import { DeprecationHelpers } from '../config/config_with_schema';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 
@@ -63,50 +61,6 @@ const configSchema = schema.object({
 /** @internal */
 export class ElasticsearchConfig {
   public static schema = configSchema;
-
-  public static deprecations({ rename, custom }: DeprecationHelpers) {
-    const sslVerify = custom((rawConfig, log) => {
-      const sslSettings = get(rawConfig, 'ssl');
-
-      if (!has(sslSettings, 'verify')) {
-        return;
-      }
-
-      const verificationMode = get(sslSettings, 'verify') ? 'full' : 'none';
-      set(sslSettings, 'verificationMode', verificationMode);
-      // TODO unset(sslSettings, 'verify');
-
-      log(
-        'Config key "elasticsearch.ssl.verify" is deprecated. It has been replaced with "elasticsearch.ssl.verificationMode"'
-      );
-    });
-
-    const url = custom((settings, log) => {
-      const deprecatedUrl = get(settings, 'url');
-      const hosts = get(settings, 'hosts.length');
-      if (!deprecatedUrl) {
-        return;
-      }
-      if (hosts) {
-        log(
-          'Deprecated config key "elasticsearch.url" conflicts with "elasticsearch.hosts".  Ignoring "elasticsearch.url"'
-        );
-      } else {
-        set(settings, 'hosts', [deprecatedUrl]);
-        log(
-          'Config key "elasticsearch.url" is deprecated. It has been replaced with "elasticsearch.hosts"'
-        );
-      }
-      // TODO unset(settings, 'url');
-    });
-
-    return [
-      rename('ssl.ca', 'ssl.certificateAuthorities'),
-      rename('ssl.cert', 'ssl.certificate'),
-      url,
-      sslVerify,
-    ];
-  }
 
   public readonly healthCheckDelay: Duration;
   public readonly apiVersion: string;

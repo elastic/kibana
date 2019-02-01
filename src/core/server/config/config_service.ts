@@ -21,7 +21,6 @@ import { Type } from '@kbn/config-schema';
 import { isEqual } from 'lodash';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, first, map } from 'rxjs/operators';
-import typeDetect from 'type-detect';
 
 import { Config, ConfigPath, ConfigWithSchema, Env } from '.';
 import { Logger, LoggerFactory } from '../logging';
@@ -125,7 +124,7 @@ export class ConfigService {
 
   private createConfig<TSchema extends Type<any>, TConfig>(
     path: ConfigPath,
-    config: Record<string, unknown>,
+    config: Record<string, any>,
     ConfigClass: ConfigWithSchema<TSchema, TConfig>
   ) {
     const namespace = Array.isArray(path) ? path.join('.') : path;
@@ -138,40 +137,6 @@ export class ConfigService {
           ConfigClass.name
         }] did not contain a static 'schema' field, which is required when creating a config instance`
       );
-    }
-
-    if (ConfigClass.deprecations !== undefined) {
-      if (typeof ConfigClass.deprecations !== 'function') {
-        throw new Error(
-          `The config class [${
-            ConfigClass.name
-          }] "deprecations" should be a function, but got [${typeDetect(
-            ConfigClass.deprecations
-          )}].`
-        );
-      }
-
-      const deprecations = ConfigClass.deprecations({
-        rename(oldPath, newPath) {
-          return () => {
-            // noop
-          };
-        },
-        unused(unusedPath) {
-          return () => {
-            // noop
-          };
-        },
-        custom(transform) {
-          return transform;
-        },
-      });
-
-      const deprecationLogger = (message: string) =>
-        this.log.warn(message, { tags: ['deprecation'] });
-      for (const deprecation of deprecations) {
-        deprecation(config, deprecationLogger);
-      }
     }
 
     const validatedConfig = ConfigClass.schema.validate(
