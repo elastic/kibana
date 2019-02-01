@@ -46,7 +46,7 @@ export function SettingsPanel(props) {
   const renderZoomSliders = () => {
     return (
       <EuiFormRow
-        helpText="Display layer when map is within zoom level range."
+        helpText="Display layer when map is in zoom range."
       >
         <EuiFlexGroup>
           <EuiFlexItem>
@@ -85,7 +85,7 @@ export function SettingsPanel(props) {
   const renderLabel = () => {
     return (
       <EuiFormRow
-        label="Layer display name"
+        label="Layer name"
       >
         <EuiFieldText
           value={props.label}
