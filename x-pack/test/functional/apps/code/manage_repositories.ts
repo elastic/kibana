@@ -36,7 +36,9 @@ export default function manageRepositoriesFunctonalTests({
       it('import repository', async () => {
         log.debug('Code test import repository');
         // Fill in the import repository input box with a valid git repository url.
-        await PageObjects.code.fillImportRepositoryUrlInputBox();
+        await PageObjects.code.fillImportRepositoryUrlInputBox(
+          'https://github.com/Microsoft/TypeScript-Node-Starter'
+        );
         // Click the import repository button.
         await PageObjects.code.clickImportRepositoryButton();
 

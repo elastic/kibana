@@ -13,13 +13,20 @@ import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
 export function CodeHomePageProvider({ getService }: KibanaFunctionalTestDefaultProviders) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
+  const queryBar = getService('queryBar');
 
   return {
-    async fillImportRepositoryUrlInputBox() {
-      return await testSubjects.setValue(
-        'importRepositoryUrlInputBox',
-        'https://github.com/Microsoft/TypeScript-Node-Starter'
-      );
+    async fillImportRepositoryUrlInputBox(repoUrl: string) {
+      return await testSubjects.setValue('importRepositoryUrlInputBox', repoUrl);
+    },
+
+    async fillSearchQuery(query: string) {
+      // return await testSubjects.setValue('queryInput', query);
+      await queryBar.setQuery(query);
+    },
+
+    async submitSearchQuery() {
+      await queryBar.submitQuery();
     },
 
     async clickImportRepositoryButton() {

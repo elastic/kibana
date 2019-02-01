@@ -168,6 +168,7 @@ export class SuggestionsComponent extends Component<Props> {
             id="typeahead-items"
             className="typeahead-items"
             role="listbox"
+            data-test-subj={`codeTypeaheadList-${type}`}
             ref={node => (this.parentNode = node)}
             onScroll={this.handleScroll}
             key={`${type}-suggestions`}

@@ -40,7 +40,7 @@ export class CodeResult extends React.PureComponent<Props> {
         return lineMapping[l - 1];
       };
       return (
-        <div key={`resultitem${key}`}>
+        <div key={`resultitem${key}`} data-test-subj="codeSearchResultList">
           <p style={{ marginBottom: '.5rem' }}>
             <Link to={repoLinkUrl}>
               <OrgName>{RepositoryUtils.orgNameFromUri(uri)}</OrgName>/
@@ -57,7 +57,7 @@ export class CodeResult extends React.PureComponent<Props> {
               <EuiBadge color="default">{hits}</EuiBadge>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>hits from</EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} data-test-subj="codeSearchResultFileItem">
               <Link to={fileLinkUrl}>{filePath}</Link>
             </EuiFlexItem>
           </EuiFlexGroup>
