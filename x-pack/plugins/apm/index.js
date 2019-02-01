@@ -78,21 +78,7 @@ export function apm(kibana) {
         navLinkId: 'apm',
         app: ['apm', 'kibana'],
         catalogue: ['apm'],
-        privileges: {
-          all: {
-            grantWithBaseRead: true,
-            catalogue: ['apm'],
-            savedObject: {
-              all: [],
-              read: ['config']
-            },
-            ui: []
-          }
-        },
-        privilegesTooltip: i18n.translate('xpack.apm.privileges.tooltip', {
-          defaultMessage:
-            'A role with access to the apm-* indicies should be assigned to users to grant access'
-        })
+        privileges: {}
       });
 
       initTransactionsApi(server);
