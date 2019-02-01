@@ -45,7 +45,7 @@ export class VectorStyle {
     return 'Vector style';
   }
 
-  static description = 'Use property values to symbolize features.';
+  static description = '';
 
   static renderEditor({ handleStyleChange, style, layer }) {
 
