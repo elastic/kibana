@@ -32,8 +32,8 @@ export default function ({ getPageObjects, getService }) {
 
       it('should update global Kibana refresh config to value stored with map', async () => {
         const kibanaRefreshConfig = await PageObjects.timePicker.getRefreshConfig();
-        expect(kibanaRefreshConfig.interval).to.equal('0.02');
-        expect(kibanaRefreshConfig.units).to.equal('minutes');
+        expect(kibanaRefreshConfig.interval).to.equal('1');
+        expect(kibanaRefreshConfig.units).to.equal('seconds');
         expect(kibanaRefreshConfig.isPaused).to.equal(true);
       });
 
