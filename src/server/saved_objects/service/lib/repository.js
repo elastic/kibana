@@ -143,6 +143,7 @@ export class SavedObjectsRepository {
     const time = this._getCurrentTime();
     const bulkCreateParams = [];
     const rawObjectsToCreate = objects.map((object) => {
+      this._assertAllowedType(object.type);
       const method = object.id && !overwrite ? 'create' : 'index';
       const migrated = this._migrator.migrateDocument({
         id: object.id,
