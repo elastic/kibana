@@ -131,25 +131,38 @@
   * 2. Show on focus to enable keyboard accessibility.
   * 3. Always show in editing mode
   */
+
 .dshPanel_optionsMenuButton {
   background-color: transparentize($euiColorDarkestShade, .9);
   border-bottom-right-radius: 0;
   border-top-left-radius: 0;
+}
+
+.dshPanel .visLegend__toggle,
+.dshPanel_optionsMenuButton {
   opacity: 0; /* 1 */
 
   &:focus {
     opacity: 1; /* 2 */
   }
+}
 
-  .dshPanel_optionsMenuPopover[class*="-isOpen"] &,
-  .dshPanel:hover & {
+.dshPanel_optionsMenuPopover[class*="-isOpen"],
+.dshPanel:hover  {
+  .dshPanel_optionsMenuButton,
+  .visLegend__toggle {
     opacity: 1;
   }
 }
 
 .dshLayout--editing {
-  .dshPanel_optionsMenuButton {
+  .dshPanel_optionsMenuButton:hover,
+  .dshPanel_optionsMenuButton:focus {
     background-color: transparentize($euiColorWarning, .9);
+  }
+
+  .dshPanel_optionsMenuButton,
+  .dshPanel .visLegend__toggle {
     opacity: 1; /* 3 */
   }
 }

@@ -3,69 +3,92 @@
 // NOTE: Some of the styles attempt to align with the TSVB legend
 
 .visLegend__toggle {
-  align-self: flex-start;
-  // Override .kuiCollapseButton
-  color: $visValueColor !important;
+  border-radius: $euiBorderRadius;
+
+  &:hover,
+  &:focus {
+    box-shadow: none;
+    background-color: $euiFocusBackgroundColor;
+  }
 }
+
+
+/**
+  * 1. Keep the legend from being overlapped by the dashboard panel title
+  * 2. Make sure the chart is centered based on legend
+  */
 
 .visLegend {
   @include euiFontSizeXS;
   display: flex;
-  flex-direction: row;
-  padding: $euiSizeXS 0;
-  overflow: auto;
+  padding-top: $euiSizeM; /* 1 */
   min-height: 0;
   height: 100%;
   overflow: hidden;
+}
 
-  // flex-direction re-aligns toggle button
-  .visLib--legend-left & {
-    flex-direction: row-reverse;
+.visLib {
+  // Default is legend on the right
+  .visLegend {
+    flex-direction: column;
+    align-items: flex-end;
   }
 
-  .visLib--legend-right & {
-    flex-direction: row;
+  .visLib__chart {
+    padding-left: $euiSizeL; /* 2 */
   }
 
-  .visLib--legend-top & {
-    flex-direction: column-reverse;
-    width: 100%;
-    padding-left: $euiSizeL;
+  &.visLib--legend-left {
+    .visLegend {
+      align-items: flex-start;
+    }
 
+    .visLib__chart {
+      padding-left: 0; /* 2 */
+      padding-right: $euiSizeL; /* 2 */
+    }
   }
+
+  &.visLib--legend-bottom,
+  &.visLib--legend-top {
+    .visLegend {
+      flex-direction: row;
+      align-items: flex-start;
+    }
+
+    .visLib__chart {
+      padding-left: 0;
+    }
+  }
+}
+
+.visLegend__list {
+  @include euiScrollBar;
+  width: 150px; // Must be a hard-coded width for the chart to get its correct dimensions
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  .visLib--legend-top &,
   .visLib--legend-bottom & {
-    flex-direction: column;
-    width: 100%;
-    padding-left: $euiSizeL;
+    width: auto;
+    overflow-y: hidden;
+
+    .visLegend__value {
+      display: inline-block;
+    }
   }
 
-  .visLegend__list {
-    width: 150px; // Must be a hard-coded width for the chart to get its correct dimensions
-    flex: 1 1 auto;
-    flex-direction: column;
-    min-height: 0;
-    overflow-x: hidden;
-    overflow-y: auto;
-
-    .visLib--legend-top &,
-    .visLib--legend-bottom & {
-      width: auto;
-      overflow-y: hidden;
-
-      .visLegend__value {
-        display: inline-block;
-      }
-    }
-
-    &.hidden {
-      visibility: hidden;
-    }
+  &.hidden {
+    visibility: hidden;
   }
 }
 
 .visLegend__value {
   cursor: pointer;
-  padding: $euiSizeXS;
+  padding: $euiSizeXS + 1px;
   display: flex;
 
   > * {
