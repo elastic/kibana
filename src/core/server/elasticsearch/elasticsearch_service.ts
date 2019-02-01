@@ -31,7 +31,6 @@ interface CoreClusterClients {
   dataClient: ClusterClient;
 }
 
-/** @internal */
 export interface ElasticsearchServiceStartContract {
   // Required for the BWC only.
   readonly bwc: {
@@ -114,9 +113,6 @@ export class ElasticsearchService implements CoreService<ElasticsearchServiceSta
   }
 
   private createClusterClient(type: string, config: ElasticsearchClientConfig) {
-    return new ClusterClient(
-      config,
-      this.coreContext.logger.get('elasticsearch', config.loggerContext || type)
-    );
+    return new ClusterClient(config, this.coreContext.logger.get('elasticsearch', type));
   }
 }

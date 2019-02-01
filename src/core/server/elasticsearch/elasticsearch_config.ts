@@ -58,7 +58,6 @@ const configSchema = schema.object({
   healthCheck: schema.object({ delay: schema.duration({ defaultValue: 2500 }) }),
 });
 
-/** @internal */
 export class ElasticsearchConfig {
   public static schema = configSchema;
 

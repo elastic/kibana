@@ -31,7 +31,6 @@ export function exposeClient(server) {
     ...config,
     plugins: [monitoringBulk],
     logQueries: Boolean(monitoringEsConfig.logQueries),
-    loggerContext: LOGGING_TAG,
   });
 
   server.events.on('stop', bindKey(cluster, 'close'));

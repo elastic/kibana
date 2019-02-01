@@ -49,7 +49,6 @@ export type ElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'log' 
     requestTimeout?: ElasticsearchConfig['requestTimeout'] | ConfigOptions['requestTimeout'];
     sniffInterval?: ElasticsearchConfig['sniffInterval'] | ConfigOptions['sniffInterval'];
     ssl?: Partial<ElasticsearchConfig['ssl']>;
-    loggerContext?: string;
   };
 
 /** @internal */
