@@ -42,6 +42,7 @@ export class MonacoHelper {
       };
       this.monaco.languages.registerDefinitionProvider('java', definitionProvider);
       this.monaco.languages.registerDefinitionProvider('typescript', definitionProvider);
+      this.monaco.languages.registerDefinitionProvider('javascript', definitionProvider);
       const codeEditorService = new EditorService();
       codeEditorService.setMonacoHelper(this);
       this.editor = monaco.editor.create(

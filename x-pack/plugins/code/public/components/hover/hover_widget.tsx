@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiFlexGroup, EuiText } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { euiFontSizeXs } from '@elastic/eui/dist/eui_theme_light.json';
 // @ts-ignore
 import { renderMarkdown } from 'monaco-editor/esm/vs/base/browser/htmlContentRenderer';
@@ -30,7 +30,7 @@ export interface HoverWidgetProps {
 
 export enum HoverState {
   LOADING,
-  INITIALTING,
+  INITIALIZING,
   READY,
 }
 
@@ -42,27 +42,14 @@ export class HoverWidget extends React.PureComponent<HoverWidgetProps> {
       case HoverState.READY:
         contents = this.renderContents();
         break;
-      case HoverState.INITIALTING:
+      case HoverState.INITIALIZING:
         contents = this.renderInitialting();
         break;
       case HoverState.LOADING:
       default:
         contents = this.renderLoading();
     }
-    return (
-      <div className="monaco-editor-hover-content">
-        {contents}
-        <EuiFlexGroup className="button-group euiFlexGroup" gutterSize="none" responsive={true}>
-          <EuiButton size="s" onClick={this.props.gotoDefinition}>
-            Goto Definition
-          </EuiButton>
-          <EuiButton size="s" onClick={this.props.findReferences}>
-            Find Reference
-          </EuiButton>
-          <EuiButton size="s">Go to Type</EuiButton>
-        </EuiFlexGroup>
-      </div>
-    );
+    return <React.Fragment>{contents}</React.Fragment>;
   }
 
   private renderLoading() {

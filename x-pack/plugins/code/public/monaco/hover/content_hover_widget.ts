@@ -15,10 +15,11 @@ import { createCancelablePromise } from 'monaco-editor/esm/vs/base/common/async'
 import { getOccurrencesAtPosition } from 'monaco-editor/esm/vs/editor/contrib/wordHighlighter/wordHighlighter';
 
 import React from 'react';
-import ReactDom from 'react-dom';
+import ReactDOM from 'react-dom';
 import DocumentHighlight = languages.DocumentHighlight;
 import { Hover, MarkedString, Range } from 'vscode-languageserver-types';
 import { ServerNotInitialized } from '../../../common/lsp_error_codes';
+import { HoverButtons } from '../../components/hover/hover_buttons';
 import { HoverState, HoverWidget, HoverWidgetProps } from '../../components/hover/hover_widget';
 import { ContentWidget } from '../content_widget';
 import { Operation } from '../operation';
@@ -49,7 +50,7 @@ export class ContentHoverWidget extends ContentWidget {
       error => {
         // @ts-ignore
         if (error.code === ServerNotInitialized) {
-          this.hoverState = HoverState.INITIALTING;
+          this.hoverState = HoverState.INITIALIZING;
           this.render(this.lastRange!);
         }
       },
@@ -140,8 +141,12 @@ export class ContentHoverWidget extends ContentWidget {
     this.showAt(new monaco.Position(renderRange.startLineNumber, startColumn), this.shouldFocus);
     const element = React.createElement(HoverWidget, props, null);
     // @ts-ignore
-    ReactDom.render(element, fragment);
-    this.updateContents(fragment);
+    ReactDOM.render(element, fragment);
+    const buttonFragment = document.createDocumentFragment();
+    const buttons = React.createElement(HoverButtons, props, null);
+    // @ts-ignore
+    ReactDOM.render(buttons, buttonFragment);
+    this.updateContents(fragment, buttonFragment);
   }
 
   private toMonacoRange(r: Range): EditorRange {
