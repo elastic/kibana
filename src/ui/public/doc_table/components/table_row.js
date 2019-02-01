@@ -27,7 +27,7 @@ import { noWhiteSpace } from '../../../../legacy/core_plugins/kibana/common/util
 import openRowHtml from './table_row/open.html';
 import detailsHtml from './table_row/details.html';
 import { uiModules } from '../../modules';
-import { disableFilter } from '../../filter_bar';
+import { disableFilter } from '@kbn/es-query';
 import { dispatchRenderComplete } from '../../render_complete';
 
 const module = uiModules.get('app/discover');
