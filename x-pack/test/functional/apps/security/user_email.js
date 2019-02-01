@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('useremail', function () {
     before(async () => {
-      await esArchiver.load('discover');
+      await esArchiver.load('security/discover');
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchUsers();
     });

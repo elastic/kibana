@@ -81,6 +81,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/watcher'),
       resolve(__dirname, './apps/dashboard'),
       resolve(__dirname, './apps/dashboard_mode'),
+      resolve(__dirname, './apps/discover'),
       resolve(__dirname, './apps/security'),
       resolve(__dirname, './apps/spaces'),
       resolve(__dirname, './apps/logstash'),

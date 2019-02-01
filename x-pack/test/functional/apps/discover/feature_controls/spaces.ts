@@ -11,11 +11,10 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../../types/provider
 export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
   const esArchiver = getService('esArchiver');
   const spacesService: SpacesService = getService('spaces');
-  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'discover', 'security', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
 
-  describe('discover', () => {
+  describe('spaces', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
     });
@@ -24,12 +23,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('spaces/disabled_features');
-        await kibanaServer.uiSettings.replace({
-          'accessibility:disableAnimations': true,
-          'telemetry:optIn': false,
-          defaultIndex: 'logstash-*',
-        });
+        await esArchiver.load('discover/feature_controls/spaces');
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -39,7 +33,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('spaces/disabled_features');
+        await esArchiver.unload('discover/feature_controls/spaces');
       });
 
       it('shows discover navlink', async () => {
@@ -62,12 +56,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('spaces/disabled_features');
-        await kibanaServer.uiSettings.replace({
-          'accessibility:disableAnimations': true,
-          'telemetry:optIn': false,
-          defaultIndex: 'logstash-*',
-        });
+        await esArchiver.load('discover/feature_controls/spaces');
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -77,7 +66,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('spaces/disabled_features');
+        await esArchiver.unload('discover/feature_controls/spaces');
       });
 
       it(`doesn't show discover navlink`, async () => {
