@@ -6,6 +6,8 @@
 
 import { Server } from 'hapi';
 
+import { callWithInternalUserFactory } from '../../client/call_with_internal_user_factory';
+
 export interface MlTelemetry {
   file_data_visualizer_index_creation_count: number;
 }
@@ -28,7 +30,7 @@ export function storeMlTelemetry(server: Server, mlTelemetry: MlTelemetry): void
 
 export function getSavedObjectsClient(server: Server): any {
   const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
-  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
+  const callWithInternalUser = callWithInternalUserFactory(server);
   const internalRepository = getSavedObjectsRepository(callWithInternalUser);
   return new SavedObjectsClient(internalRepository);
 }

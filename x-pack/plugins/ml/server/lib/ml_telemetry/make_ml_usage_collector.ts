@@ -5,6 +5,7 @@
  */
 
 import { Server } from 'hapi';
+
 import {
   createMlTelemetry,
   getSavedObjectsClient,
@@ -26,8 +27,8 @@ export function makeMlUsageCollector(server: KibanaHapiServer): void {
   const mlUsageCollector = server.usage.collectorSet.makeUsageCollector({
     type: 'ml',
     fetch: async (): Promise<MlTelemetry> => {
-      const savedObjectsClient = getSavedObjectsClient(server);
       try {
+        const savedObjectsClient = getSavedObjectsClient(server);
         const mlTelemetrySavedObject = await savedObjectsClient.get(
           'ml-telemetry',
           ML_TELEMETRY_DOC_ID
