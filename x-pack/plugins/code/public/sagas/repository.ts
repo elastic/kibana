@@ -135,7 +135,7 @@ function requestRepoInitCmd(repoUri: string) {
 function* handleGotoRepo(action: Action<string>) {
   const repoUri = action.payload as string;
   const repo = yield call(requestRepo, repoUri);
-  history.push(`${repoUri}/tree/${repo.defaultBranch || 'master'}`);
+  history.replace(`${repoUri}/tree/${repo.defaultBranch || 'master'}`);
 }
 
 function requestRepo(uri: string) {
