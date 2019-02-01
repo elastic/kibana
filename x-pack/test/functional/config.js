@@ -88,6 +88,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/gis'),
       resolve(__dirname, './apps/status_page'),
       resolve(__dirname, './apps/upgrade_assistant'),
+      resolve(__dirname, './apps/visualize'),
     ],
 
     // define the name and providers for services that should be
