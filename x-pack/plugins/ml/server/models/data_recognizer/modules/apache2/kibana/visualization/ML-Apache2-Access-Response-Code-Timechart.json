@@ -4,7 +4,6 @@
   "title": "ML Apache2 Access Response Code Timechart",
   "uiStateJSON": "{\n  \"vis\": {\n    \"colors\": {\n      \"200\": \"#7EB26D\",\n      \"404\": \"#614D93\"\n    }\n  }\n}",
   "version": 1,
-  "migrationVersion": {},
   "savedSearchId": "ML-Filebeat-Apache2-Access",
   "kibanaSavedObjectMeta": {
     "searchSourceJSON": "{\"filter\":[]}"

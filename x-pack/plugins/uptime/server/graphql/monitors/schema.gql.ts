@@ -9,6 +9,7 @@ import gql from 'graphql-tag';
 export const monitorsSchema = gql`
   type FilterBar {
     ids: [MonitorKey!]
+    names: [String!]
     ports: [Int!]
     schemes: [String!]
     statuses: [String!]
@@ -30,7 +31,6 @@ export const monitorsSchema = gql`
   type Snapshot {
     up: Int
     down: Int
-    trouble: Int
     total: Int
     histogram: [HistogramSeries]
   }
