@@ -127,7 +127,7 @@ export default new Datasource('es', {
       });
     }
 
-    const esShardTimeout = await tlConfig.server.core.es.bwc.config$.pipe(
+    const esShardTimeout = await tlConfig.server.core.elasticsearch.bwc.config$.pipe(
       first(),
       map(config => config.shardTimeout.asMilliseconds())
     ).toPromise();

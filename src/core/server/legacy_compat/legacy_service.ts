@@ -37,7 +37,7 @@ interface LegacyKbnServer {
 }
 
 interface Deps {
-  es: ElasticsearchServiceStartContract;
+  elasticsearch: ElasticsearchServiceStartContract;
   http?: HttpServiceStartContract;
   plugins: PluginsServiceStartContract;
 }
@@ -130,7 +130,7 @@ export class LegacyService implements CoreService {
     );
   }
 
-  private async createKbnServer(config: Config, deps: Deps) {
+  private async createKbnServer(config: Config, { elasticsearch, http, plugins }: Deps) {
     const KbnServer = require('../../../server/kbn_server');
     const kbnServer: LegacyKbnServer = new KbnServer(getLegacyRawConfig(config), {
       // If core HTTP service is run we'll receive internal server reference and
@@ -139,15 +139,15 @@ export class LegacyService implements CoreService {
       // managed by ClusterManager or optimizer) then we won't have that info,
       // so we can't start "legacy" server either.
       serverOptions:
-        deps.http !== undefined
+        http !== undefined
           ? {
-              ...deps.http.options,
-              listener: this.setupProxyListener(deps.http.server),
+              ...http.options,
+              listener: this.setupProxyListener(http.server),
             }
           : { autoListen: false },
       handledConfigPaths: await this.coreContext.configService.getUsedPaths(),
-      es: deps.es,
-      plugins: deps.plugins,
+      elasticsearch,
+      plugins,
     });
 
     // The kbnWorkerType check is necessary to prevent the repl

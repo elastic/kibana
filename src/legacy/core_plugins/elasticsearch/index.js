@@ -36,9 +36,9 @@ export default function (kibana) {
       // value from all observables here to be able to synchronously return and create
       // cluster clients afterwards.
       const [bwcEsConfig, adminCluster, dataCluster] = await combineLatest(
-        server.core.es.bwc.config$,
-        server.core.es.adminClient$,
-        server.core.es.dataClient$
+        server.core.elasticsearch.bwc.config$,
+        server.core.elasticsearch.adminClient$,
+        server.core.elasticsearch.dataClient$
       ).pipe(
         first(),
         map(([config, adminClusterClient, dataClusterClient]) => [
@@ -75,7 +75,7 @@ export default function (kibana) {
         // We fill all the missing properties in the `clientConfig` using the default
         // Elasticsearch config so that we don't depend on default values set and
         // controlled by underlying Elasticsearch JS client.
-        const cluster = new Cluster(server.core.es.createClient(name, {
+        const cluster = new Cluster(server.core.elasticsearch.createClient(name, {
           ...bwcEsConfig,
           ...clientConfig,
         }));

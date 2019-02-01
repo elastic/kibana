@@ -29,7 +29,7 @@ import { LegacyCompatModule } from './legacy_compat';
 import { Logger, LoggerFactory } from './logging';
 
 export class Server {
-  private readonly es: ElasticsearchModule;
+  private readonly elasticsearchModule: ElasticsearchModule;
   private readonly http: HttpModule;
   private readonly plugins: PluginsModule;
   private readonly legacy: LegacyCompatModule;
@@ -43,7 +43,7 @@ export class Server {
     const core = { env, configService, logger };
     this.plugins = new PluginsModule(core);
     this.legacy = new LegacyCompatModule(core);
-    this.es = new ElasticsearchModule(core);
+    this.elasticsearchModule = new ElasticsearchModule(core);
   }
 
   public async start() {
@@ -59,11 +59,11 @@ export class Server {
       httpStartContract = await this.http.service.start();
     }
 
-    const esStartContract = await this.es.service.start();
+    const elasticsearchServiceStartContract = await this.elasticsearchModule.service.start();
     const pluginsStartContract = await this.plugins.service.start();
 
     await this.legacy.service.start({
-      es: esStartContract,
+      elasticsearch: elasticsearchServiceStartContract,
       http: httpStartContract,
       plugins: pluginsStartContract,
     });
@@ -74,7 +74,7 @@ export class Server {
 
     await this.legacy.service.stop();
     await this.plugins.service.stop();
-    await this.es.service.stop();
+    await this.elasticsearchModule.service.stop();
     await this.http.service.stop();
   }
 }
