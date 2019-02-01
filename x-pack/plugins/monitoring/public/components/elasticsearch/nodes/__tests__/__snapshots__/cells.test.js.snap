@@ -10,94 +10,68 @@ exports[`Node Listing Metric Cell should format N/A as the metric for an offline
 
 exports[`Node Listing Metric Cell should format a non-percentage metric 1`] = `
 <div
-  class="euiStat euiStat--leftAligned"
+  class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+  intl="[object Object]"
 >
   <div
-    class="euiText euiText--small euiStat__description"
+    class="euiFlexItem euiFlexItem--flexGrowZero"
   >
-    <p />
+    <h4
+      class="euiTitle euiTitle--medium"
+    >
+      206.3 GB 
+      <span
+        class="fa fa-long-arrow-down"
+      />
+    </h4>
   </div>
-  <p
-    class="euiTitle euiTitle--large euiStat__title"
-  />
   <div
-    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
-    intl="[object Object]"
+    class="euiFlexItem euiFlexItem--flexGrowZero"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiText euiText--extraSmall"
     >
-      <h4
-        class="euiTitle euiTitle--medium"
-      >
-        206.3 GB 
-        <span
-          class="fa fa-long-arrow-down"
-        />
-      </h4>
+      206.5 GB max
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiText euiText--extraSmall"
     >
-      <div
-        class="euiText euiText--extraSmall"
-      >
-        206.5 GB max
-      </div>
-      <div
-        class="euiText euiText--extraSmall"
-      >
-        206.3 GB min
-      </div>
+      206.3 GB min
     </div>
   </div>
-  <p />
 </div>
 `;
 
 exports[`Node Listing Metric Cell should format a percentage metric 1`] = `
 <div
-  class="euiStat euiStat--leftAligned"
+  class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+  intl="[object Object]"
 >
   <div
-    class="euiText euiText--small euiStat__description"
+    class="euiFlexItem euiFlexItem--flexGrowZero"
   >
-    <p />
+    <h4
+      class="euiTitle euiTitle--medium"
+    >
+      0% 
+      <span
+        class="fa fa-long-arrow-down"
+      />
+    </h4>
   </div>
-  <p
-    class="euiTitle euiTitle--large euiStat__title"
-  />
   <div
-    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
-    intl="[object Object]"
+    class="euiFlexItem euiFlexItem--flexGrowZero"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiText euiText--extraSmall"
     >
-      <h4
-        class="euiTitle euiTitle--medium"
-      >
-        0% 
-        <span
-          class="fa fa-long-arrow-down"
-        />
-      </h4>
+      2% max
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiText euiText--extraSmall"
     >
-      <div
-        class="euiText euiText--extraSmall"
-      >
-        2% max
-      </div>
-      <div
-        class="euiText euiText--extraSmall"
-      >
-        0% min
-      </div>
+      0% min
     </div>
   </div>
-  <p />
 </div>
 `;

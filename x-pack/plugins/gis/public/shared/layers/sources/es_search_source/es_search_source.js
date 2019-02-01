@@ -22,7 +22,7 @@ export class ESSearchSource extends AbstractESSource {
 
   static type = 'ES_SEARCH';
   static title = 'Elasticsearch documents';
-  static description = 'Geospatial data from an Elasticsearch index';
+  static description = 'Geospatial data from a Kibana index pattern';
 
   static renderEditor({ onPreviewSource }) {
     const onSelect = (layerConfig) => {

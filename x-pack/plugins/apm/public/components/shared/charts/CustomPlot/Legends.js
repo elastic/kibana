@@ -19,8 +19,7 @@ import {
 
 const Container = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: space-around;
+  margin-left: ${px(unit * 5)};
   flex-wrap: wrap;
 
   /* add margin to all direct descendant divs */
