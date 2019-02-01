@@ -111,9 +111,9 @@ export class TileLayer extends AbstractLayer {
       minzoom: 0,
       maxzoom: 22,
     });
+    this._setTileLayerProperties(mbMap, mbLayerId);
 
     await this._tileLoadErrorTracker(mbMap, url);
-    this._setTileLayerProperties(mbMap, mbLayerId);
   }
 
   _setTileLayerProperties(mbMap, mbLayerId) {
