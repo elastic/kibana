@@ -54,10 +54,12 @@ import {
 } from '@elastic/eui';
 
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
+import { HeaderHelpMenu } from './header_help_menu';
 import { HeaderNavControls } from './header_nav_controls';
 
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import chrome, { NavLink } from 'ui/chrome';
+import { HelpExtension } from 'ui/chrome';
 import { RecentlyAccessedHistoryItem } from 'ui/persisted_log';
 import { ChromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
 import { relativeToAbsolute } from 'ui/url/relative_to_absolute';
@@ -72,6 +74,7 @@ interface Props {
   navLinks$: Rx.Observable<NavLink[]>;
   recentlyAccessed$: Rx.Observable<RecentlyAccessedHistoryItem[]>;
   forceAppSwitcherNavigation$: Rx.Observable<boolean>;
+  helpExtension$: Rx.Observable<HelpExtension>;
   navControls: ChromeHeaderNavControlsRegistry;
   intl: InjectedIntl;
 }
@@ -199,7 +202,7 @@ class HeaderUI extends Component<Props, State> {
   }
 
   public render() {
-    const { appTitle, breadcrumbs$, isVisible, navControls } = this.props;
+    const { appTitle, breadcrumbs$, isVisible, navControls, helpExtension$ } = this.props;
     const { navLinks, recentlyAccessed } = this.state;
 
     if (!isVisible) {
@@ -225,9 +228,14 @@ class HeaderUI extends Component<Props, State> {
           <HeaderBreadcrumbs appTitle={appTitle} breadcrumbs$={breadcrumbs$} />
 
           <EuiHeaderSection side="right">
+            <EuiHeaderSectionItem>
+              <HeaderHelpMenu helpExtension$={helpExtension$} />
+            </EuiHeaderSectionItem>
+
             <HeaderNavControls navControls={rightNavControls} />
           </EuiHeaderSection>
         </EuiHeader>
+
         <EuiOutsideClickDetector
           onOutsideClick={() => this.collapseDrawer()}
           isDisabled={this.state.outsideClickDisabled}

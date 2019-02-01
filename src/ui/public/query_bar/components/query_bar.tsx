@@ -23,7 +23,6 @@ import classNames from 'classnames';
 import _ from 'lodash';
 import { compact, debounce, get, isEqual } from 'lodash';
 import React, { Component } from 'react';
-import { getFromLegacyIndexPattern } from 'ui/index_patterns/static_utils';
 import { kfetch } from 'ui/kfetch';
 import { PersistedLog } from 'ui/persisted_log';
 import { Storage } from 'ui/storage';
@@ -79,6 +78,7 @@ interface Props {
   indexPatterns: IndexPattern[];
   store: Storage;
   intl: InjectedIntl;
+  prepend?: any;
   showDatePicker?: boolean;
   dateRangeFrom?: string;
   dateRangeTo?: string;
@@ -237,7 +237,7 @@ export class QueryBarUI extends Component<Props, State> {
       return recentSearchSuggestions;
     }
 
-    const indexPatterns = getFromLegacyIndexPattern(this.props.indexPatterns);
+    const indexPatterns = this.props.indexPatterns;
     const getAutocompleteSuggestions = autocompleteProvider({ config, indexPatterns });
 
     const { selectionStart, selectionEnd } = this.inputRef;
@@ -554,11 +554,11 @@ export class QueryBarUI extends Component<Props, State> {
               role="combobox"
               aria-haspopup="true"
               aria-expanded={this.state.isSuggestionsVisible}
-              aria-owns="typeahead-items"
-              aria-controls="typeahead-items"
+              aria-owns="kbnTypeahead__items"
+              aria-controls="kbnTypeahead__items"
             >
               <form role="form" name="queryBarForm">
-                <div className="kuiLocalSearch" role="search">
+                <div role="search">
                   <div className="kuiLocalSearchAssistedInput">
                     <EuiFieldText
                       className="kuiLocalSearchAssistedInput__input"
@@ -588,11 +588,12 @@ export class QueryBarUI extends Component<Props, State> {
                       type="text"
                       data-test-subj="queryInput"
                       aria-autocomplete="list"
-                      aria-controls="typeahead-items"
+                      aria-controls="kbnTypeahead__items"
                       aria-activedescendant={
                         this.state.isSuggestionsVisible ? 'suggestion-' + this.state.index : ''
                       }
                       role="textbox"
+                      prepend={this.props.prepend}
                     />
                     <div className="kuiLocalSearchAssistedInput__assistance">
                       <QueryLanguageSwitcher
