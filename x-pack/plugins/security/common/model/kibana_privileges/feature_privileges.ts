@@ -3,21 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { FeaturesPrivileges } from '../features_privileges';
+import { RawKibanaFeaturePrivileges } from '../raw_kibana_privileges';
 
-interface FeaturePrivilegesMap {
-  [featureId: string]: {
-    [privilegeId: string]: string[];
-  };
-}
+export class KibanaFeaturePrivileges {
+  constructor(private readonly featurePrivilegesMap: RawKibanaFeaturePrivileges) {}
 
-export interface FeaturePrivilegeSet {
-  [featureId: string]: string[];
-}
-
-export class FeaturePrivileges {
-  constructor(private readonly featurePrivilegesMap: FeaturePrivilegesMap) {}
-
-  public getAllPrivileges(): FeaturePrivilegeSet {
+  public getAllPrivileges(): FeaturesPrivileges {
     return Object.entries(this.featurePrivilegesMap).reduce((acc, [featureId, privileges]) => {
       return {
         ...acc,

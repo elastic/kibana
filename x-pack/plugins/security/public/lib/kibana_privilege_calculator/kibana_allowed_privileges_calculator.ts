@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { KibanaPrivilegeSpec, PrivilegeDefinition, Role } from '../../../common/model';
+import { KibanaPrivileges, Role, RoleKibanaPrivilege } from '../../../common/model';
 import { NO_PRIVILEGE_VALUE } from '../../views/management/edit_role/lib/constants';
 import { isGlobalPrivilegeDefinition } from '../privilege_utils';
 import {
@@ -17,18 +17,15 @@ import { areActionsFullyCovered, compareActions } from './privilege_calculator_u
 
 export class KibanaAllowedPrivilegesCalculator {
   // reference to the global privilege definition
-  private globalPrivilege: KibanaPrivilegeSpec;
+  private globalPrivilege: RoleKibanaPrivilege;
 
   // list of privilege actions that comprise the global base privilege
   private assignedGlobalBaseActions: string[];
 
-  constructor(
-    private readonly privilegeDefinition: PrivilegeDefinition,
-    private readonly role: Role
-  ) {
+  constructor(private readonly kibanaPrivileges: KibanaPrivileges, private readonly role: Role) {
     this.globalPrivilege = this.locateGlobalPrivilege(role);
     this.assignedGlobalBaseActions = this.globalPrivilege.base[0]
-      ? privilegeDefinition.getGlobalPrivileges().getActions(this.globalPrivilege.base[0])
+      ? kibanaPrivileges.getGlobalPrivileges().getActions(this.globalPrivilege.base[0])
       : [];
   }
 
@@ -42,7 +39,7 @@ export class KibanaAllowedPrivilegesCalculator {
   }
 
   private calculateAllowedPrivilege(
-    privilegeSpec: KibanaPrivilegeSpec,
+    privilegeSpec: RoleKibanaPrivilege,
     effectivePrivileges: CalculatedPrivilege
   ): AllowedPrivilege {
     const result: AllowedPrivilege = {
@@ -56,10 +53,10 @@ export class KibanaAllowedPrivilegesCalculator {
     if (isGlobalPrivilegeDefinition(privilegeSpec)) {
       // nothing can impede global privileges
       result.base.canUnassign = true;
-      result.base.privileges = this.privilegeDefinition.getGlobalPrivileges().getAllPrivileges();
+      result.base.privileges = this.kibanaPrivileges.getGlobalPrivileges().getAllPrivileges();
     } else {
       // space base privileges are restricted based on the assigned global privileges
-      const spacePrivileges = this.privilegeDefinition.getSpacesPrivileges().getAllPrivileges();
+      const spacePrivileges = this.kibanaPrivileges.getSpacesPrivileges().getAllPrivileges();
       result.base.canUnassign = this.assignedGlobalBaseActions.length === 0;
       result.base.privileges = spacePrivileges.filter(privilege => {
         // always allowed to assign the calculated effective privilege
@@ -72,7 +69,7 @@ export class KibanaAllowedPrivilegesCalculator {
       });
     }
 
-    const allFeaturePrivileges = this.privilegeDefinition.getFeaturePrivileges().getAllPrivileges();
+    const allFeaturePrivileges = this.kibanaPrivileges.getFeaturePrivileges().getAllPrivileges();
     result.feature = Object.entries(allFeaturePrivileges).reduce(
       (acc, [featureId, featurePrivileges]) => {
         return {
@@ -127,7 +124,7 @@ export class KibanaAllowedPrivilegesCalculator {
       case PRIVILEGE_SOURCE.GLOBAL_BASE:
         return this.assignedGlobalBaseActions;
       case PRIVILEGE_SOURCE.SPACE_BASE:
-        return this.privilegeDefinition.getSpacesPrivileges().getActions(privilegeId);
+        return this.kibanaPrivileges.getSpacesPrivileges().getActions(privilegeId);
       default:
         throw new Error(
           `Cannot get base actions for unsupported privilege source ${PRIVILEGE_SOURCE[source]}`
@@ -136,7 +133,7 @@ export class KibanaAllowedPrivilegesCalculator {
   }
 
   private getFeatureActions(featureId: string, privilegeId: string): string[] {
-    return this.privilegeDefinition.getFeaturePrivileges().getActions(featureId, privilegeId);
+    return this.kibanaPrivileges.getFeaturePrivileges().getActions(featureId, privilegeId);
   }
 
   private locateGlobalPrivilege(role: Role) {

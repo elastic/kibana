@@ -5,14 +5,14 @@
  */
 import Boom from 'boom';
 import { PluginProperties, Server } from 'hapi';
-import { PrivilegeMap } from '../../../../../common/model';
+import { RawKibanaPrivileges } from '../../../../../common/model';
 import { initGetPrivilegesApi } from './get';
 
 interface KibanaPluginProperties extends PluginProperties {
   security: {
     authorization: {
       privileges: {
-        get: () => PrivilegeMap;
+        get: () => RawKibanaPrivileges;
       };
     };
   };
@@ -22,7 +22,7 @@ interface KibanaServer extends Server {
   plugins: KibanaPluginProperties;
 }
 
-const createPrivilegeMap: () => PrivilegeMap = () => {
+const createRawKibanaPrivileges: () => RawKibanaPrivileges = () => {
   return {
     features: {
       feature1: {
@@ -50,7 +50,7 @@ const createMockServer = () => {
     authorization: {
       privileges: {
         get: jest.fn().mockImplementation(() => {
-          return createPrivilegeMap();
+          return createRawKibanaPrivileges();
         }),
       },
     },
@@ -115,7 +115,7 @@ describe('GET privileges', () => {
       includeActions: true,
       asserts: {
         statusCode: 200,
-        result: createPrivilegeMap(),
+        result: createRawKibanaPrivileges(),
       },
     });
 

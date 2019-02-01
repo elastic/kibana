@@ -78,7 +78,7 @@ export const EffectivePrivilegeDisplay: SFC<Props> = (props: Props) => {
   const tooltipContent = (
     <FormattedMessage
       id="xpack.security.management.editRole.spaceAwarePrivilegeDisplay.effectivePrivilegeMessage"
-      defaultMessage="Granted via {source}"
+      defaultMessage="Granted via {source}."
       values={{ source }}
     />
   );

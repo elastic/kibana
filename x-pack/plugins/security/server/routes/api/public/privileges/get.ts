@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Joi from 'joi';
-import { PrivilegeMap } from 'x-pack/plugins/security/common/model';
+import { RawKibanaPrivileges } from 'x-pack/plugins/security/common/model';
 
 export function initGetPrivilegesApi(
   server: Record<string, any>,
@@ -15,7 +15,7 @@ export function initGetPrivilegesApi(
     path: '/api/security/privileges',
     handler(req: Record<string, any>) {
       const { authorization } = server.plugins.security;
-      const privileges: PrivilegeMap = authorization.privileges.get();
+      const privileges: RawKibanaPrivileges = authorization.privileges.get();
 
       if (req.query.includeActions) {
         return privileges;

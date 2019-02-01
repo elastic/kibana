@@ -6,10 +6,10 @@
 
 import _ from 'lodash';
 import {
-  FeaturePrivilegeSet,
-  KibanaPrivilegeSpec,
-  PrivilegeDefinition,
+  FeaturesPrivileges,
+  KibanaPrivileges,
   Role,
+  RoleKibanaPrivilege,
 } from '../../../common/model';
 import { isGlobalPrivilegeDefinition } from '../privilege_utils';
 import { KibanaAllowedPrivilegesCalculator } from './kibana_allowed_privileges_calculator';
@@ -25,29 +25,29 @@ export class KibanaPrivilegeCalculator {
   private effectiveFeaturePrivilegesCalculator: KibanaFeaturePrivilegeCalculator;
 
   constructor(
-    private readonly privilegeDefinition: PrivilegeDefinition,
+    private readonly kibanaPrivileges: KibanaPrivileges,
     private readonly role: Role,
-    public readonly rankedFeaturePrivileges: FeaturePrivilegeSet
+    public readonly rankedFeaturePrivileges: FeaturesPrivileges
   ) {
     const globalPrivilege = this.locateGlobalPrivilege(role);
 
     const assignedGlobalBaseActions: string[] = globalPrivilege.base[0]
-      ? privilegeDefinition.getGlobalPrivileges().getActions(globalPrivilege.base[0])
+      ? kibanaPrivileges.getGlobalPrivileges().getActions(globalPrivilege.base[0])
       : [];
 
     this.allowedPrivilegesCalculator = new KibanaAllowedPrivilegesCalculator(
-      privilegeDefinition,
+      kibanaPrivileges,
       role
     );
 
     this.effectiveBasePrivilegesCalculator = new KibanaBasePrivilegeCalculator(
-      privilegeDefinition,
+      kibanaPrivileges,
       globalPrivilege,
       assignedGlobalBaseActions
     );
 
     this.effectiveFeaturePrivilegesCalculator = new KibanaFeaturePrivilegeCalculator(
-      privilegeDefinition,
+      kibanaPrivileges,
       globalPrivilege,
       assignedGlobalBaseActions,
       rankedFeaturePrivileges
@@ -67,7 +67,7 @@ export class KibanaPrivilegeCalculator {
   }
 
   private calculateEffectivePrivilege(
-    privilegeSpec: KibanaPrivilegeSpec,
+    privilegeSpec: RoleKibanaPrivilege,
     ignoreAssigned: boolean
   ): CalculatedPrivilege {
     const result: CalculatedPrivilege = {
@@ -84,7 +84,7 @@ export class KibanaPrivilegeCalculator {
       ? this.effectiveBasePrivilegesCalculator.getMostPermissiveBasePrivilege(privilegeSpec, false)
       : result.base;
 
-    const allFeaturePrivileges = this.privilegeDefinition.getFeaturePrivileges().getAllPrivileges();
+    const allFeaturePrivileges = this.kibanaPrivileges.getFeaturePrivileges().getAllPrivileges();
     result.feature = Object.keys(allFeaturePrivileges).reduce((acc, featureId) => {
       return {
         ...acc,

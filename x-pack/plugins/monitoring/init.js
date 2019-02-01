@@ -76,7 +76,7 @@ export const init = (monitoringPlugin, server) => {
       },
     },
     privilegesTooltip: i18n.translate('xpack.monitoring.privileges.tooltip', {
-      defaultMessage: 'The monitoring_user role should also be assigned to users to grant access'
+      defaultMessage: 'To grant users access, you should also assign the monitoring_user role.'
     })
   });
 

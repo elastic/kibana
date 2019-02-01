@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PrivilegeDefinition } from '../../../../common/model';
+import { KibanaPrivileges } from '../../../../common/model';
 
-export const defaultPrivilegeDefinition = new PrivilegeDefinition({
+export const defaultPrivilegeDefinition = new KibanaPrivileges({
   global: {
     all: ['api:/*', 'ui:/*'],
     read: ['ui:/feature1/foo', 'ui:/feature2/foo', 'ui:/feature3/foo/*'],

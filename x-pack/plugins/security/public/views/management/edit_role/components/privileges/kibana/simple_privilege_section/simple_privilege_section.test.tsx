@@ -8,13 +8,13 @@ import { EuiButtonGroup, EuiButtonGroupProps, EuiSuperSelect } from '@elastic/eu
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
-import { PrivilegeDefinition, Role } from '../../../../../../../../common/model';
+import { KibanaPrivileges, Role } from '../../../../../../../../common/model';
 import { KibanaPrivilegeCalculatorFactory } from '../../../../../../../lib/kibana_privilege_calculator';
 import { SimplePrivilegeSection } from './simple_privilege_section';
 import { UnsupportedSpacePrivilegesWarning } from './unsupported_space_privileges_warning';
 
 const buildProps = (customProps: any = {}) => {
-  const privilegeDefinition = new PrivilegeDefinition({
+  const kibanaPrivileges = new KibanaPrivileges({
     features: {
       feature1: {
         all: ['*'],
@@ -38,8 +38,8 @@ const buildProps = (customProps: any = {}) => {
 
   return {
     editable: true,
-    privilegeDefinition,
-    privilegeCalculatorFactory: new KibanaPrivilegeCalculatorFactory(privilegeDefinition),
+    kibanaPrivileges,
+    privilegeCalculatorFactory: new KibanaPrivilegeCalculatorFactory(kibanaPrivileges),
     features: [
       {
         id: 'feature1',
