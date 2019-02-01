@@ -18,47 +18,50 @@
  */
 
 import React from 'react';
-import { NavControl } from '../';
 
 interface Props {
-  navControl: NavControl;
+  extension?: (el: HTMLDivElement) => (() => void);
 }
 
-export class HeaderNavControl extends React.Component<Props> {
+export class HeaderExtension extends React.Component<Props> {
   private readonly ref = React.createRef<HTMLDivElement>();
   private unrender?: () => void;
 
   public componentDidMount() {
-    if (!this.ref.current) {
-      throw new Error('<NavControl /> mounted without ref');
-    }
-
-    this.unrender = this.props.navControl.render(this.ref.current) || undefined;
+    this.renderExtension();
   }
 
   public componentDidUpdate(prevProps: Props) {
-    if (this.props.navControl.render === prevProps.navControl.render) {
+    if (this.props.extension === prevProps.extension) {
       return;
     }
 
-    if (!this.ref.current) {
-      throw new Error('<NavControl /> updated without ref');
-    }
-
-    if (this.unrender) {
-      this.unrender();
-    }
-
-    this.unrender = this.props.navControl.render(this.ref.current) || undefined;
+    this.unrenderExtension();
+    this.renderExtension();
   }
 
   public componentWillUnmount() {
-    if (this.unrender) {
-      this.unrender();
-    }
+    this.unrenderExtension();
   }
 
   public render() {
     return <div ref={this.ref} />;
+  }
+
+  private renderExtension() {
+    if (!this.ref.current) {
+      throw new Error('<HeaderExtension /> mounted without ref');
+    }
+
+    if (this.props.extension) {
+      this.unrender = this.props.extension(this.ref.current);
+    }
+  }
+
+  private unrenderExtension() {
+    if (this.unrender) {
+      this.unrender();
+      this.unrender = undefined;
+    }
   }
 }

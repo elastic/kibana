@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { get } from 'lodash';
-import { documentationLinks } from './documentation_links';
+export { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION, documentationLinks } from './documentation_links';
 
-export const getDocLink = id => get(documentationLinks, id);
+export { getDocLink } from './get_doc_link';

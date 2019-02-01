@@ -17,12 +17,28 @@
  * under the License.
  */
 
-export {
-  ELASTIC_WEBSITE_URL,
-  DOC_LINK_VERSION,
-  documentationLinks,
-} from './documentation_links';
+import { mount } from 'enzyme';
+import React from 'react';
+import { HeaderExtension } from './header_extension';
 
-export {
-  getDocLink,
-} from './get_doc_link';
+describe('HeaderExtension', () => {
+  it('calls navControl.render with div node', () => {
+    const renderSpy = jest.fn();
+    mount(<HeaderExtension extension={renderSpy} />);
+
+    expect(renderSpy.mock.calls.length).toEqual(1);
+
+    const [divNode] = renderSpy.mock.calls[0];
+    expect(divNode).toBeInstanceOf(HTMLElement);
+  });
+
+  it('calls unrender callback when unmounted', () => {
+    const unrenderSpy = jest.fn();
+    const render = () => unrenderSpy;
+
+    const wrapper = mount(<HeaderExtension extension={render} />);
+
+    wrapper.unmount();
+    expect(unrenderSpy.mock.calls.length).toEqual(1);
+  });
+});

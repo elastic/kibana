@@ -17,10 +17,7 @@
  * under the License.
  */
 
-export {
-  Breadcrumb,
-  ChromeService,
-  ChromeStartContract,
-  Brand,
-  HelpExtension,
-} from './chrome_service';
+import { get } from 'lodash';
+import { documentationLinks } from './documentation_links';
+
+export const getDocLink = (id: string) => get(documentationLinks, id);
