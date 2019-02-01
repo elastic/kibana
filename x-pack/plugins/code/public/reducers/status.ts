@@ -139,10 +139,15 @@ export const status = handleActions(
       }),
     [String(updateDeleteProgress)]: (state: StatusState, action: any) =>
       produce<StatusState>(state, draft => {
-        draft.status[action.payload.repoUri] = {
-          ...action.payload,
-          state: RepoState.DELETING,
-        };
+        const progress = action.payload.progress;
+        if (progress === WorkerReservedProgress.COMPLETED) {
+          delete draft.status[action.payload.repoUri];
+        } else {
+          draft.status[action.payload.repoUri] = {
+            ...action.payload,
+            state: RepoState.DELETING,
+          };
+        }
       }),
   },
   initialState

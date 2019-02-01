@@ -15,9 +15,12 @@ import { repository, RepositoryState } from './repository';
 import { route, RouteState } from './route';
 import { search, SearchState } from './search';
 import { shortcuts, ShortcutsState } from './shortcuts';
-import { status, StatusState } from './status';
+import { RepoState, RepoStatus, status, StatusState } from './status';
 import { symbol, SymbolState } from './symbol';
 import { userConfig, UserConfigState } from './user';
+
+export { RepoState, RepoStatus };
+
 export interface RootState {
   repository: RepositoryState;
   search: SearchState;
