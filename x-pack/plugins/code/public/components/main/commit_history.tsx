@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiTextColor } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiText,
+  EuiTextColor,
+} from '@elastic/eui';
 import {
   euiBorderColor,
   euiBorderThick,
@@ -126,16 +133,28 @@ const CommitGroup = (props: { commits: CommitInfo[]; date: string; repoUri: stri
   );
 };
 
+const LoadingContainer = styled.div`
+  padding: 1.5rem;
+  text-align: center;
+`;
+
+export const CommitHistoryLoading = () => (
+  <LoadingContainer>
+    <EuiLoadingSpinner size="xl" />
+  </LoadingContainer>
+);
+
 export const CommitHistory = (props: {
   commits: CommitInfo[];
   repoUri: string;
   header: React.ReactNode;
+  hideLoading?: boolean;
 }) => {
   if (!props.commits) {
     return (
       <CommitMessages>
         <h1>Commits</h1>
-        <h3>loading</h3>
+        {!props.hideLoading && <CommitHistoryLoading />}
       </CommitMessages>
     );
   }

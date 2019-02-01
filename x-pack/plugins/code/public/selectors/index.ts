@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { FileTree } from '../../model';
 import { RootState } from '../reducers';
 
 export const getTree = (state: RootState) => state.file.tree;
@@ -66,3 +67,23 @@ export const hasMoreCommitsSelector = (state: RootState) => {
 };
 
 export const requestedPathsSelector = (state: RootState) => state.file.requestedPaths;
+
+function find(tree: FileTree, paths: string[]): FileTree | null {
+  if (paths.length === 0) {
+    return tree;
+  }
+  const [p, ...rest] = paths;
+  if (tree.children) {
+    const child = tree.children.find((c: FileTree) => c.name === p);
+    if (child) {
+      return find(child, rest);
+    }
+  }
+  return null;
+}
+
+export const currentTreeSelector = (state: RootState) => {
+  const tree = getTree(state);
+  const path = state.file.currentPath;
+  return find(tree, path.split('/'));
+};
