@@ -9,13 +9,13 @@ export default function ({ loadTestFile, getService }) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('gis app', function () {
+  describe('maps app', function () {
     this.tags('ciGroup3');
 
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('gis/data');
-      await esArchiver.load('gis/kibana');
+      await esArchiver.load('maps/data');
+      await esArchiver.load('maps/kibana');
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'UTC',
         'defaultIndex': 'logstash-*'
@@ -26,8 +26,8 @@ export default function ({ loadTestFile, getService }) {
     });
 
     after(async () => {
-      await esArchiver.unload('gis/data');
-      await esArchiver.unload('gis/kibana');
+      await esArchiver.unload('maps/data');
+      await esArchiver.unload('maps/kibana');
     });
 
     loadTestFile(require.resolve('./saved_object_management'));
