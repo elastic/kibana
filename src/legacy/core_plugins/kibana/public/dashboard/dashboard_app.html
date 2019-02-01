@@ -30,22 +30,25 @@
 
       <!-- Search. -->
       <div ng-show="chrome.getVisible()" class="fullWidth" data-transclude-slot="bottomRow">
-        <query-bar
+        <search-bar
           query="model.query"
+          on-query-submit="updateQueryAndFetch"
           app-name="'dashboard'"
-          on-submit="updateQueryAndFetch"
           index-patterns="indexPatterns"
-        ></query-bar>
+          filters="model.filters"
+          on-filters-updated="onFiltersUpdated"
+          show-filter-bar="showFilterBar()"
+          watch-depth="reference"
+        ></search-bar>
       </div>
     </div>
   </kbn-top-nav>
 
-  <!-- Filters. -->
-  <filter-bar
-    ng-show="showFilterBar()"
-    state="state"
-    index-patterns="indexPatterns"
-  ></filter-bar>
+  <apply-filters-popover
+    filters="appState.$newFilters"
+    on-cancel="onCancelApplyFilters"
+    on-submit="onApplyFilters"
+  ></apply-filters-popover>
 
   <div
     ng-show="getShouldShowEditHelp()"

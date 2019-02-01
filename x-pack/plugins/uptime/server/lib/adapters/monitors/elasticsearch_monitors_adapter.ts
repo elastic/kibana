@@ -15,7 +15,7 @@ import {
   MonitorSeriesPoint,
   Ping,
 } from '../../../../common/graphql/types';
-import { getFilteredQuery } from '../../helper';
+import { getFilteredQuery, getFilteredQueryAndStatusFilter } from '../../helper';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
 
@@ -139,11 +139,16 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     dateRangeEnd: string,
     filters?: string | null
   ): Promise<any> {
+    const { statusFilter, query } = getFilteredQueryAndStatusFilter(
+      dateRangeStart,
+      dateRangeEnd,
+      filters
+    );
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
+        query,
         size: 0,
-        query: getFilteredQuery(dateRangeStart, dateRangeEnd, filters),
         aggs: {
           urls: {
             composite: {
@@ -188,6 +193,9 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       return latest.reduce(
         (acc, doc) => {
           const status = get(doc, '_source.monitor.status', null);
+          if (statusFilter && statusFilter !== status) {
+            return acc;
+          }
           if (status === 'up') {
             acc.up += 1;
           } else {
@@ -223,10 +231,15 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     dateRangeEnd: string,
     filters?: string | null
   ): Promise<LatestMonitor[]> {
+    const { statusFilter, query } = getFilteredQueryAndStatusFilter(
+      dateRangeStart,
+      dateRangeEnd,
+      filters
+    );
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
-        query: getFilteredQuery(dateRangeStart, dateRangeEnd, filters),
+        query,
         size: 0,
         aggs: {
           hosts: {
@@ -281,35 +294,46 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     };
     const queryResult = await this.database.search(request, params);
     const aggBuckets: any[] = get(queryResult, 'aggregations.hosts.buckets', []);
-    const latestMonitors: LatestMonitor[] = aggBuckets.map(bucket => {
-      const key: string = get(bucket, 'key.id');
-      const url: string | null = get(bucket, 'key.url', null);
-      const upSeries: MonitorSeriesPoint[] = [];
-      const downSeries: MonitorSeriesPoint[] = [];
-      const histogramBuckets: any[] = get(bucket, 'histogram.buckets', []);
-      const ping: Ping = get(bucket, 'latest.hits.hits[0]._source');
-      const timestamp: string = get(bucket, 'latest.hits.hits[0]._source.@timestamp');
-      histogramBuckets.forEach(histogramBucket => {
-        const status = get(histogramBucket, 'status.buckets', []);
-        // @ts-ignore TODO update typings and remove this comment
-        const up = status.find(f => f.key === 'up');
-        // @ts-ignore TODO update typings and remove this comment
-        const down = status.find(f => f.key === 'down');
-        // @ts-ignore TODO update typings and remove this comment
-        upSeries.push({ x: histogramBucket.key, y: up ? up.doc_count : null });
-        // @ts-ignore TODO update typings and remove this comment
-        downSeries.push({ x: histogramBucket.key, y: down ? down.doc_count : null });
-      });
-      return {
-        id: { key, url },
-        ping: {
-          ...ping,
-          timestamp,
-        },
-        upSeries,
-        downSeries,
-      };
-    });
+    const latestMonitors: LatestMonitor[] = aggBuckets
+      .filter(
+        bucket =>
+          (statusFilter &&
+            get(bucket, 'latest.hits.hits[0]._source.monitor.status', undefined) ===
+              statusFilter) ||
+          !statusFilter
+      )
+      .map(
+        (bucket): LatestMonitor => {
+          const key: string = get(bucket, 'key.id');
+          const url: string | null = get(bucket, 'key.url', null);
+          const upSeries: MonitorSeriesPoint[] = [];
+          const downSeries: MonitorSeriesPoint[] = [];
+          const histogramBuckets: any[] = get(bucket, 'histogram.buckets', []);
+          const ping: Ping = get(bucket, 'latest.hits.hits[0]._source');
+          const timestamp: string = get(bucket, 'latest.hits.hits[0]._source.@timestamp');
+          histogramBuckets.forEach(histogramBucket => {
+            const status = get(histogramBucket, 'status.buckets', []);
+            // @ts-ignore TODO update typings and remove this comment
+            const up = status.find(f => f.key === 'up');
+            // @ts-ignore TODO update typings and remove this comment
+            const down = status.find(f => f.key === 'down');
+            // @ts-ignore TODO update typings and remove this comment
+            upSeries.push({ x: histogramBucket.key, y: up ? up.doc_count : null });
+            // @ts-ignore TODO update typings and remove this comment
+            downSeries.push({ x: histogramBucket.key, y: down ? down.doc_count : null });
+          });
+          return {
+            id: { key, url },
+            ping: {
+              ...ping,
+              timestamp,
+            },
+            upSeries,
+            downSeries,
+          };
+        }
+      );
+
     return latestMonitors;
   }
 

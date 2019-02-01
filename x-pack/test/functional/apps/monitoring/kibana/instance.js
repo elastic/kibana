@@ -36,10 +36,10 @@ export default function ({ getService, getPageObjects }) {
 
     it('should have Instance Summary Status showing correct info', async () => {
       expect(await instance.getSummary()).to.eql({
-        transportAddress: 'Transport Address:\ntsullivan.local:5601',
-        osFreeMemory: 'OS Free Memory:\n1.5 GB',
-        version: 'Version:\n7.0.0-alpha1',
-        uptime: 'Uptime:\n3 minutes',
+        transportAddress: 'Transport Address\ntsullivan.local:5601',
+        osFreeMemory: 'OS Free Memory\n1.5 GB',
+        version: 'Version\n7.0.0-alpha1',
+        uptime: 'Uptime\n3 minutes',
         health: 'Health: green',
       });
     });

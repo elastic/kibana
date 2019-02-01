@@ -297,6 +297,7 @@ describe('SavedObjectsRepository', () => {
       migrator.migrateDocument = (doc) => {
         doc.attributes.title = doc.attributes.title + '!!';
         doc.migrationVersion = { foo: '2.3.4' };
+        doc.references = [{ name: 'search_0', type: 'search', id: '123' }];
         return doc;
       };
 
@@ -311,7 +312,8 @@ describe('SavedObjectsRepository', () => {
           'index-pattern': { id: 'logstash-*', title: 'Logstash!!' },
           migrationVersion: { foo: '2.3.4' },
           type: 'index-pattern',
-          updated_at: '2017-08-14T15:49:14.886Z'
+          updated_at: '2017-08-14T15:49:14.886Z',
+          references: [{ name: 'search_0', type: 'search', id: '123' }],
         },
       });
     });
@@ -463,14 +465,33 @@ describe('SavedObjectsRepository', () => {
     });
 
     it('migrates the docs', async () => {
-      callAdminCluster.returns({ items: [] });
+      callAdminCluster.returns({
+        items: [
+          {
+            create: {
+              error: false,
+              _id: '1',
+              _version: 1,
+            }
+          },
+          {
+            create: {
+              error: false,
+              _id: '2',
+              _version: 1,
+            }
+          }
+        ],
+      });
+
       migrator.migrateDocument = (doc) => {
         doc.attributes.title = doc.attributes.title + '!!';
         doc.migrationVersion = { foo: '2.3.4' };
+        doc.references = [{ name: 'search_0', type: 'search', id: '123' }];
         return doc;
       };
 
-      await savedObjectsRepository.bulkCreate([
+      const bulkCreateResp = await savedObjectsRepository.bulkCreate([
         { type: 'config', id: 'one', attributes: { title: 'Test One' } },
         { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
       ]);
@@ -483,7 +504,7 @@ describe('SavedObjectsRepository', () => {
             ...mockTimestampFields,
             config: { title: 'Test One!!' },
             migrationVersion: { foo: '2.3.4' },
-            references: [],
+            references: [{ name: 'search_0', type: 'search', id: '123' }],
           },
           { create: { _type: '_doc', _id: 'index-pattern:two' } },
           {
@@ -491,10 +512,35 @@ describe('SavedObjectsRepository', () => {
             ...mockTimestampFields,
             'index-pattern': { title: 'Test Two!!' },
             migrationVersion: { foo: '2.3.4' },
-            references: [],
+            references: [{ name: 'search_0', type: 'search', id: '123' }],
           },
         ]
       }));
+
+      expect(bulkCreateResp).toEqual({
+        saved_objects: [
+          {
+            id: 'one',
+            type: 'config',
+            version: 1,
+            updated_at: mockTimestamp,
+            attributes: {
+              title: 'Test One!!',
+            },
+            references: [{ name: 'search_0', type: 'search', id: '123' }],
+          },
+          {
+            id: 'two',
+            type: 'index-pattern',
+            version: 1,
+            updated_at: mockTimestamp,
+            attributes: {
+              title: 'Test Two!!',
+            },
+            references: [{ name: 'search_0', type: 'search', id: '123' }],
+          },
+        ],
+      });
     });
 
     it('should overwrite objects if overwrite is truthy', async () => {
@@ -1432,6 +1478,7 @@ describe('SavedObjectsRepository', () => {
       migrator.migrateDocument = (doc) => {
         doc.attributes.buildNum = 42;
         doc.migrationVersion = { foo: '2.3.4' };
+        doc.references = [{ name: 'search_0', type: 'search', id: '123' }];
         return doc;
       };
 
@@ -1451,7 +1498,8 @@ describe('SavedObjectsRepository', () => {
             config: { buildNum: 42 },
             migrationVersion: { foo: '2.3.4' },
             type: 'config',
-            ...mockTimestampFields
+            ...mockTimestampFields,
+            references: [{ name: 'search_0', type: 'search', id: '123' }],
           }
         },
       });
