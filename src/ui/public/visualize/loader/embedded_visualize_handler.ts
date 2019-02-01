@@ -18,7 +18,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { debounce, forEach } from 'lodash';
+import { debounce, forEach, get } from 'lodash';
 // @ts-ignore
 import { renderFunctionsRegistry } from 'plugins/interpreter/render_functions_registry';
 import * as Rx from 'rxjs';
@@ -31,6 +31,7 @@ import { RenderCompleteHelper } from '../../render_complete';
 import { AppState } from '../../state_management/app_state';
 import { timefilter } from '../../timefilter';
 import { RequestHandlerParams, Vis } from '../../vis';
+import { PipelineDataLoader } from './pipeline_data_loader';
 import { visualizationLoader } from './visualization_loader';
 import { VisualizeDataLoader } from './visualize_data_loader';
 
@@ -44,6 +45,8 @@ interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
   queryFilter: any;
   autoFetch?: boolean;
 }
+
+const ENABLE_PIPELINE_DATA_LOADER = false;
 
 const RENDER_COMPLETE_EVENT = 'render_complete';
 const LOADING_ATTRIBUTE = 'data-loading';
@@ -85,7 +88,7 @@ export class EmbeddedVisualizeHandler {
   private dataLoaderParams: RequestHandlerParams;
   private readonly appState?: AppState;
   private uiState: PersistedState;
-  private dataLoader: VisualizeDataLoader;
+  private dataLoader: VisualizeDataLoader | PipelineDataLoader;
   private dataSubject: Rx.Subject<any>;
   private actions: any = {};
   private events$: Rx.Observable<any>;
@@ -149,7 +152,9 @@ export class EmbeddedVisualizeHandler {
     this.uiState.on('change', this.onUiStateChange);
     timefilter.on('autoRefreshFetch', this.reload);
 
-    this.dataLoader = new VisualizeDataLoader(vis, Private);
+    this.dataLoader = ENABLE_PIPELINE_DATA_LOADER
+      ? new PipelineDataLoader(vis)
+      : new VisualizeDataLoader(vis, Private);
     this.renderCompleteHelper = new RenderCompleteHelper(element);
     this.inspectorAdapters = this.getActiveInspectorAdapters();
     this.vis.openInspector = this.openInspector;
@@ -250,45 +255,42 @@ export class EmbeddedVisualizeHandler {
 
   /**
    * renders visualization with provided data
-   * @param visData: visualization data
+   * @param resp: visualization data
    */
-  public render = (visData: any = null) => {
-    return visualizationLoader
-      .render(this.element, this.vis, visData, this.uiState, {
+  public render = (resp: any = null) => {
+    const renderer = ENABLE_PIPELINE_DATA_LOADER
+      ? renderFunctionsRegistry.get(get(resp || {}, 'as', 'visualization'))
+      : visualizationLoader;
+
+    if (!renderer) {
+      return;
+    }
+
+    let args = [
+      this.element,
+      this.vis,
+      resp,
+      this.uiState,
+      {
         listenOnChange: false,
-      })
-      .then(() => {
-        if (!this.loaded) {
-          this.loaded = true;
-          if (this.autoFetch) {
-            this.fetchAndRender();
-          }
+      },
+    ];
+
+    if (ENABLE_PIPELINE_DATA_LOADER) {
+      args = [this.element, get(resp, 'value') || { visType: this.vis.type.name }, this.handlers];
+    }
+
+    // TODO: we have this weird situation when we need to render first,
+    // and then we call fetch and render... we need to get rid of that.
+    return renderer.render(...args).then(() => {
+      if (!this.loaded) {
+        this.loaded = true;
+        if (this.autoFetch) {
+          this.fetchAndRender();
         }
-      });
+      }
+    });
   };
-  // public render = (pipelineResponse: any = {}) => {
-  //   // TODO: we have this weird situation when we need to render first, and then we call fetch and render ....
-  //   // we need to get rid of that ....
-  //
-  //   const renderer = renderFunctionsRegistry.get(get(pipelineResponse, 'as', 'visualization'));
-  //   if (!renderer) {
-  //     return;
-  //   }
-  //   renderer
-  //     .render(
-  //       this.element,
-  //       pipelineResponse.value || { visType: this.vis.type.name },
-  //       this.handlers
-  //     )
-  //     .then(() => {
-  //       if (!this.loaded) {
-  //         this.loaded = true;
-  //         if (this.autoFetch) {
-  //           this.fetchAndRender();
-  //         }
-  //       }
-  //     });
-  // };
 
   /**
    * Opens the inspector for the embedded visualization. This will return an
