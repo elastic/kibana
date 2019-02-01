@@ -15,48 +15,37 @@ describe('ErrorList component', () => {
     getErrorListResponse = {
       errorList: [
         {
-          latestMessage: 'received status code 301 expecting 200',
-          monitorId: 'http@http://www.example.com',
-          type: 'validate',
-          count: 482,
-          statusCode: '301',
-          timestamp: '2019-01-18T23:02:58.384Z',
-        },
-        {
           latestMessage:
             'Get http://localhost:12349/: dial tcp 127.0.0.1:12349: connect: connection refused',
-          monitorId: 'http@http://localhost:12349/',
+          monitorId: 'auto-http-0X3675F89EF0612091',
           type: 'io',
-          count: 6,
+          count: 843,
           statusCode: null,
-          timestamp: '2019-01-18T22:11:18.387Z',
+          timestamp: '2019-01-28T18:43:15.077Z',
         },
         {
-          latestMessage:
-            'Get https://example.com/: http: request timed out while waiting for response (Client.Timeout exceeded while awaiting headers)',
-          monitorId: 'http@http://www.example.com',
+          latestMessage: 'dial tcp 127.0.0.1:9200: connect: connection refused',
+          monitorId: 'auto-tcp-0X81440A68E839814C',
+          type: 'io',
+          count: 748,
+          statusCode: null,
+          timestamp: '2019-01-28T17:59:34.075Z',
+        },
+        {
+          latestMessage: 'lookup www.reddit.com: no such host',
+          monitorId: 'auto-http-0XD9AE729FC1C1E04A',
           type: 'io',
           count: 1,
           statusCode: null,
-          timestamp: '2019-01-18T22:42:23.391Z',
+          timestamp: '2019-01-28T18:03:10.077Z',
         },
         {
-          latestMessage:
-            'Get http://www.google.com/: dial tcp 172.217.11.36:80: connect: network is down',
-          monitorId: 'http@http://www.google.com/',
-          type: 'io',
-          count: 1,
-          statusCode: null,
-          timestamp: '2019-01-18T23:02:27.007Z',
-        },
-        {
-          latestMessage:
-            'Get https://www.google.com/: dial tcp 172.217.11.36:443: connect: network is down',
-          monitorId: 'http@https://www.google.com/',
-          type: 'io',
-          count: 1,
-          statusCode: null,
-          timestamp: '2019-01-18T23:02:27.007Z',
+          latestMessage: 'received status code 301 expecting 200',
+          monitorId: 'auto-http-0XA8096548ECEB85B7',
+          type: 'validate',
+          count: 645,
+          statusCode: '301',
+          timestamp: '2019-01-28T18:43:07.078Z',
         },
       ],
     };
