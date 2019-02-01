@@ -37,8 +37,12 @@ export class AttributionControl  extends React.Component {
 
   _syncMbMapWithAttribution = async () => {
 
-    const attributionPromises = this.props.layerList.map(layer => {
-      return layer.getAttributions();
+    const attributionPromises = this.props.layerList.map(async (layer) => {
+      try {
+        return await layer.getAttributions();
+      } catch (error) {
+        return [];
+      }
     });
     const attributions = await Promise.all(attributionPromises);
     if (!this._isMounted) {
