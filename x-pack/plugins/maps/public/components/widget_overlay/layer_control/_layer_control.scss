@@ -1,4 +1,4 @@
-.gisLayerControl {
+.mapLayerControl {
   @include euiScrollBar;
   overflow-y: auto;
   flex-basis: auto !important; // Fixes IE and ensures the layer items are visible

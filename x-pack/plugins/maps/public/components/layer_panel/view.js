@@ -106,7 +106,7 @@ export class LayerPanel  extends React.Component {
         return (<span>{value}</span>);
       }
       return (
-        <p key={label} className="gisLayerPanel__sourceDetail">
+        <p key={label} className="mapLayerPanel__sourceDetail">
           <strong>{label}</strong>{' '}
           {renderValue()}
         </p>
@@ -122,7 +122,7 @@ export class LayerPanel  extends React.Component {
         direction="column"
         gutterSize="none"
       >
-        <EuiFlyoutHeader hasBorder className="gisLayerPanel__header">
+        <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
@@ -140,7 +140,7 @@ export class LayerPanel  extends React.Component {
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="xs" />
-          <div className="gisLayerPanel__sourceDetails">
+          <div className="mapLayerPanel__sourceDetails">
             <EuiAccordion
               id="accordion1"
               buttonContent="Source details"
@@ -153,14 +153,14 @@ export class LayerPanel  extends React.Component {
           </div>
         </EuiFlyoutHeader>
 
-        <EuiFlyoutBody className="gisLayerPanel__body">
+        <EuiFlyoutBody className="mapLayerPanel__body">
           <SettingsPanel/>
           <EuiSpacer size="s" />
           {this._renderJoinSection()}
           <StyleTabs layer={selectedLayer}/>
         </EuiFlyoutBody>
 
-        <EuiFlyoutFooter className="gisLayerPanel__footer">
+        <EuiFlyoutFooter className="mapLayerPanel__footer">
           <FlyoutFooter/>
         </EuiFlyoutFooter>
       </EuiFlexGroup>

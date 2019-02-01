@@ -83,7 +83,7 @@ export class AddLayerPanel extends Component {
         <Fragment key={Source.type}>
           <EuiSpacer size="s" />
           <EuiCard
-            className="gisLayerAddpanel__card"
+            className="mapLayerAddpanel__card"
             title={Source.title}
             icon={icon}
             onClick={() => this._onSourceTypeChange(Source.type)}
@@ -150,17 +150,17 @@ export class AddLayerPanel extends Component {
         direction="column"
         gutterSize="none"
       >
-        <EuiFlyoutHeader hasBorder className="gisLayerPanel__header">
+        <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
           <EuiTitle size="s">
             <h2>Add layer</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
 
-        <EuiFlyoutBody className="gisLayerPanel__body">
+        <EuiFlyoutBody className="mapLayerPanel__body">
           {this._renderAddLayerForm()}
         </EuiFlyoutBody>
 
-        <EuiFlyoutFooter className="gisLayerPanel__footer">
+        <EuiFlyoutFooter className="mapLayerPanel__footer">
           <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
