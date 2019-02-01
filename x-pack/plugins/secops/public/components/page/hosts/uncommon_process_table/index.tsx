@@ -194,7 +194,7 @@ const getUncommonColumns = (startDate: number): Array<Columns<UncommonProcessesE
         .filter(({ id, name }) => id != null && name != null)
         .map(({ id, name }, index) => {
           return (
-            <React.Fragment key={index}>
+            <React.Fragment key={id!}>
               {index !== 0 ? <>,&nbsp;</> : null}
               <DraggableWrapper
                 key={id!}
