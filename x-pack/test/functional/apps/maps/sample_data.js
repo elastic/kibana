@@ -9,7 +9,7 @@ import expect from 'expect.js';
 export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'gis', 'header', 'home']);
 
-  describe('gis-maps loaded from sample data', () => {
+  describe('maps loaded from sample data', () => {
     describe('web logs', () => {
 
       before(async () => {

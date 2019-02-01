@@ -85,7 +85,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       const onPage = await this.onMapListingPage();
       if (!onPage) {
         await retry.try(async () => {
-          await PageObjects.common.navigateToUrl('gis', '/');
+          await PageObjects.common.navigateToUrl('maps', '/');
           const onMapListingPage = await this.onMapListingPage();
           if (!onMapListingPage) throw new Error('Not on map listing page.');
         });

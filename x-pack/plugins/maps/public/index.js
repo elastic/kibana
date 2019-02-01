@@ -32,7 +32,7 @@ import listingTemplate from './angular/listing_ng_wrapper.html';
 import mapTemplate from './angular/map.html';
 import { MapListing } from './shared/components/map_listing';
 
-const app = uiModules.get('app/gis', ['ngRoute', 'react']);
+const app = uiModules.get('app/maps', ['ngRoute', 'react']);
 
 app.directive('mapListing', function (reactDirective) {
   return reactDirective(MapListing);
@@ -54,7 +54,7 @@ routes
     },
     resolve: {
       hasMaps: function (kbnUrl) {
-        chrome.getSavedObjectsClient().find({ type: 'gis-map', perPage: 1 }).then(resp => {
+        chrome.getSavedObjectsClient().find({ type: 'map', perPage: 1 }).then(resp => {
           // Do not show empty listing page, just redirect to a new map
           if (resp.savedObjects.length === 0) {
             kbnUrl.redirect('/map');

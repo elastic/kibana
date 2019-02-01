@@ -10,7 +10,7 @@ import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
-const module = uiModules.get('app/gis');
+const module = uiModules.get('app/maps');
 
 // Register this service with the saved object registry so it can be
 // edited by the object editor.

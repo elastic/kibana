@@ -42,7 +42,7 @@ export async function fetchSearchSourceAndRecordWithInspector({ searchSource, re
   return resp;
 }
 
-uiModules.get('app/gis').run(($injector) => {
+uiModules.get('app/maps').run(($injector) => {
   indexPatternService = $injector.get('indexPatterns');
   const Private = $injector.get('Private');
   SearchSource = Private(SearchSourceProvider);
