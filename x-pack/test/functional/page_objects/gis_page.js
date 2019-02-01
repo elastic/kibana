@@ -5,7 +5,7 @@
  */
 
 export function GisPageProvider({ getService, getPageObjects }) {
-  const PageObjects = getPageObjects(['common', 'header']);
+  const PageObjects = getPageObjects(['common', 'header', 'timePicker']);
 
   const log = getService('log');
   const testSubjects = getService('testSubjects');
@@ -85,7 +85,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       const onPage = await this.onMapListingPage();
       if (!onPage) {
         await retry.try(async () => {
-          await PageObjects.common.navigateToUrl('gis', '/');
+          await PageObjects.common.navigateToUrl('maps', '/');
           const onMapListingPage = await this.onMapListingPage();
           if (!onMapListingPage) throw new Error('Not on map listing page.');
         });
@@ -204,10 +204,10 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async triggerSingleRefresh(refreshInterval) {
       log.debug(`triggerSingleRefresh, refreshInterval: ${refreshInterval}`);
-      await PageObjects.header.resumeAutoRefresh();
+      await PageObjects.timePicker.resumeAutoRefresh();
       log.debug('waiting to give time for refresh timer to fire');
       await PageObjects.common.sleep(refreshInterval + (refreshInterval / 2));
-      await PageObjects.header.pauseAutoRefresh();
+      await PageObjects.timePicker.pauseAutoRefresh();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
   }

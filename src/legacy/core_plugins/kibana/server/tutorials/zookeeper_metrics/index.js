@@ -28,7 +28,7 @@ export function zookeeperMetricsSpecProvider(server, context) {
     name: i18n.translate('kbn.server.tutorials.zookeeperMetrics.nameTitle', {
       defaultMessage: 'Zookeeper metrics',
     }),
-    isBeta: true,
+    isBeta: false,
     category: TUTORIAL_CATEGORY.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.zookeeperMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from a Zookeeper server.',

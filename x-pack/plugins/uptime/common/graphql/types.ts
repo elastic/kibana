@@ -335,8 +335,6 @@ export interface Snapshot {
 
   down?: number | null;
 
-  trouble?: number | null;
-
   total?: number | null;
 
   histogram?: (HistogramSeries | null)[] | null;
@@ -400,6 +398,8 @@ export interface StatusData {
 
 export interface FilterBar {
   ids?: MonitorKey[] | null;
+
+  names?: string[] | null;
 
   ports?: number[] | null;
 

@@ -5,7 +5,7 @@
       "POST"
     ],
     "patterns": [
-      "_xpack/watcher/watch/{watch_id}/_activate"
+      "_watcher/watch/{watch_id}/_activate"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/watcher-api-activate-watch.html"
   }

@@ -57,12 +57,12 @@ export function Synopsis({ description, iconUrl, iconType, title, url, wrapInPan
     <EuiFlexGroup>
       {optionalImg}
       <EuiFlexItem className="synopsisContent">
-        <EuiTitle size="s" className="synopsisTitle">
+        <EuiTitle size="xs" className="synopsisTitle">
           <h4>
             {title}
           </h4>
         </EuiTitle>
-        <EuiText className="synopsisBody">
+        <EuiText className="synopsisBody" size="s">
           <p>
             <EuiTextColor color="subdued">
               {description}

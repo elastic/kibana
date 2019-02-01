@@ -102,6 +102,14 @@ jest.mock('ui/chrome/api/controls', () => {
   };
 });
 
+const mockChromeHelpExtensionInit = jest.fn();
+jest.mock('ui/chrome/api/help_extension', () => {
+  mockLoadOrder.push('ui/chrome/api/help_extension');
+  return {
+    __newPlatformInit__: mockChromeHelpExtensionInit,
+  };
+});
+
 const mockChromeThemeInit = jest.fn();
 jest.mock('ui/chrome/api/theme', () => {
   mockLoadOrder.push('ui/chrome/api/theme');
@@ -267,6 +275,17 @@ describe('#start()', () => {
 
       expect(mockChromeControlsInit).toHaveBeenCalledTimes(1);
       expect(mockChromeControlsInit).toHaveBeenCalledWith(chromeStartContract);
+    });
+
+    it('passes chrome service to ui/chrome/api/help_extension', () => {
+      const legacyPlatform = new LegacyPlatformService({
+        ...defaultParams,
+      });
+
+      legacyPlatform.start(defaultStartDeps);
+
+      expect(mockChromeHelpExtensionInit).toHaveBeenCalledTimes(1);
+      expect(mockChromeHelpExtensionInit).toHaveBeenCalledWith(chromeStartContract);
     });
 
     it('passes chrome service to ui/chrome/api/theme', () => {
