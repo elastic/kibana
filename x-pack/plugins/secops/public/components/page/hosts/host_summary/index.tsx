@@ -101,7 +101,7 @@ export const createDraggable = (
   endDate: number,
   relativeFields: string[]
 ) => {
-  return summaryValue == null ? (
+  return summaryValue == null || summaryValue === '' ? (
     <>{getEmptyValue()}</>
   ) : (
     <DraggableWrapper

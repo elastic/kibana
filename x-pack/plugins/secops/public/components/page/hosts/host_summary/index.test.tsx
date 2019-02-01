@@ -99,6 +99,42 @@ describe('Host Summary Component', () => {
       );
       expect(wrapper.text()).toBe(getEmptyValue());
     });
+
+    test('if it returns an empty value with an empty string', () => {
+      const draggable = createDraggable(
+        '',
+        'Platform',
+        552204000000,
+        618472800000,
+        mockData.DateFields
+      );
+      const wrapper = mountWithIntl(
+        <ReduxStoreProvider store={store}>
+          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+            <DragDropContextWrapper>{draggable}</DragDropContextWrapper>
+          </ThemeProvider>
+        </ReduxStoreProvider>
+      );
+      expect(wrapper.text()).toBe(getEmptyValue());
+    });
+
+    test('if works with a string with a single space as a valid value and NOT an empty value', () => {
+      const draggable = createDraggable(
+        ' ',
+        'Platform',
+        552204000000,
+        618472800000,
+        mockData.DateFields
+      );
+      const wrapper = mountWithIntl(
+        <ReduxStoreProvider store={store}>
+          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+            <DragDropContextWrapper>{draggable}</DragDropContextWrapper>
+          </ThemeProvider>
+        </ReduxStoreProvider>
+      );
+      expect(wrapper.text()).toBe(' ');
+    });
   });
 
   describe('#getEuiDescriptionList', () => {

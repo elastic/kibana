@@ -14,11 +14,12 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 import { ESTermQuery } from '../../../common/typed_json';
 import { EmptyPage } from '../../components/empty_page';
 import { getHostsUrl, HostComponentProps } from '../../components/link_to/redirect_to_hosts';
-import { UncommonProcessTable } from '../../components/page/hosts';
+import { EventsTable, UncommonProcessTable } from '../../components/page/hosts';
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
 import { HostSummary } from '../../components/page/hosts/host_summary';
 import { manageQuery } from '../../components/page/manage_query';
 import { AuthenticationsQuery } from '../../containers/authentications';
+import { EventsQuery } from '../../containers/events';
 import { GlobalTime } from '../../containers/global_time';
 import { HostsQuery } from '../../containers/hosts';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
@@ -35,6 +36,7 @@ const basePath = chrome.getBasePath();
 const HostSummaryManage = manageQuery(HostSummary);
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
+const EventsTableManage = manageQuery(EventsTable);
 
 interface HostDetailsComponentReduxProps {
   filterQueryExpression: string;
@@ -144,6 +146,31 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                           />
                         )}
                       </UncommonProcessesQuery>
+                      <EventsQuery
+                        endDate={to}
+                        filterQuery={getFilterQuery(hostId, filterQueryExpression, indexPattern)}
+                        poll={poll}
+                        sourceId="default"
+                        startDate={from}
+                        type={hostsModel.HostsType.page}
+                      >
+                        {({ events, loading, id, refetch, totalCount, pageInfo, loadMore }) => (
+                          <EventsTableManage
+                            id={id}
+                            refetch={refetch}
+                            setQuery={setQuery}
+                            data={events!}
+                            loading={loading}
+                            startDate={from}
+                            totalCount={totalCount}
+                            nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                            tiebreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)!}
+                            hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                            loadMore={loadMore}
+                            type={hostsModel.HostsType.page}
+                          />
+                        )}
+                      </EventsQuery>
                     </>
                   )}
                 </GlobalTime>
