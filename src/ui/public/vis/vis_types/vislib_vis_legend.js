@@ -104,13 +104,13 @@ uiModules.get('kibana')
         $scope.filter = function (legendData, negate) {
           const value = Array.isArray(legendData.values) ? legendData.values[0] : legendData.values;
           const datum = { aggConfigResult: value.aggConfigResult.$parent };
-          $scope.vis.API.events.filter({ datum, negate: negate });
+          $scope.vis.API.events.filter({ datum, negate: negate, shallow: true });
         };
 
         $scope.canFilter = function (legendData) {
           const value = Array.isArray(legendData.values) ? legendData.values[0] : legendData.values;
           const datum = { aggConfigResult: value.aggConfigResult.$parent };
-          const filters = visFilters.filter({ datum }, { simulate: true });
+          const filters = visFilters.filter({ datum, shallow: true }, { simulate: true });
           return filters.length;
         };
 
