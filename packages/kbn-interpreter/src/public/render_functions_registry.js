@@ -17,17 +17,13 @@
  * under the License.
  */
 
-import buildRequestBody from './build_request_body';
-export default (req, panel, entities) => {
-  const bodies = [];
-  entities.forEach(entity => {
-    bodies.push({
-      index: panel.index_pattern,
-      ignoreUnavailable: true,
-    });
-    const body = buildRequestBody(req, panel, entity);
-    body.timeout = '90s';
-    bodies.push(body);
-  });
-  return bodies;
-};
+import { Registry } from '../common';
+import { RenderFunction } from './render_function';
+
+class RenderFunctionsRegistry extends Registry {
+  wrapper(obj) {
+    return new RenderFunction(obj);
+  }
+}
+
+export { RenderFunctionsRegistry };

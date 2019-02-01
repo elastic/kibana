@@ -13,7 +13,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
-import idx from 'idx';
 import { first, get } from 'lodash';
 import React from 'react';
 import { RRRRenderResponse } from 'react-redux-request';
@@ -22,6 +21,7 @@ import {
   ERROR_EXC_STACKTRACE,
   ERROR_LOG_STACKTRACE
 } from 'x-pack/plugins/apm/common/constants';
+import { idx } from 'x-pack/plugins/apm/common/idx';
 import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
 import { legacyEncodeURIComponent } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import {
@@ -33,7 +33,7 @@ import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/public/constants';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { ErrorGroupAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_error_group';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
-import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/Stackframe';
+import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/fields/Stackframe';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import {
   ERROR_EXC_HANDLED,
@@ -54,9 +54,9 @@ import {
 import { DiscoverErrorLink } from '../../../shared/Links/DiscoverLinks/DiscoverErrorLink';
 import {
   getPropertyTabNames,
-  PropertiesTable,
-  Tab
+  PropertiesTable
 } from '../../../shared/PropertiesTable';
+import { Tab } from '../../../shared/PropertiesTable/propertyConfig';
 import { Stacktrace } from '../../../shared/Stacktrace';
 import { StickyProperties } from '../../../shared/StickyProperties';
 
@@ -126,7 +126,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
       label: 'URL',
       val:
         idx(error, _ => _.context.page.url) ||
-        idx(transaction, _ => _.context.request.url.full) ||
+        idx(transaction, _ => _.url.full) ||
         NOT_AVAILABLE_LABEL,
       truncated: true,
       width: '50%'
@@ -239,7 +239,7 @@ function getTransactionLink(error: APMError, transaction?: Transaction) {
   }
 
   const path = `/${
-    transaction.context.service.name
+    transaction.service.name
   }/transactions/${legacyEncodeURIComponent(
     transaction.transaction.type
   )}/${legacyEncodeURIComponent(transaction.transaction.name)}`;
@@ -266,8 +266,8 @@ export function TabContent({
   error: APMError;
   currentTab: Tab;
 }) {
-  const codeLanguage = error.context.service.name;
-  const agentName = error.context.service.agent.name;
+  const codeLanguage = error.service.name;
+  const agentName = error.agent.name;
   const excStackframes: MaybeStackframes = get(error, ERROR_EXC_STACKTRACE);
   const logStackframes: MaybeStackframes = get(error, ERROR_LOG_STACKTRACE);
 
@@ -281,7 +281,7 @@ export function TabContent({
         <Stacktrace stackframes={excStackframes} codeLanguage={codeLanguage} />
       );
     default:
-      const propData = error.context[currentTab.key] as any;
+      const propData = get(error, currentTab);
       return (
         <PropertiesTable
           propData={propData}
@@ -300,11 +300,9 @@ export function getCurrentTab(tabs: Tab[] = [], selectedTabKey?: string) {
 
 export function getTabs(error: APMError) {
   const hasLogStacktrace = get(error, ERROR_LOG_STACKTRACE, []).length > 0;
-  const contextKeys = Object.keys(error.context);
-
   return [
     ...(hasLogStacktrace ? [logStacktraceTab] : []),
     exceptionStacktraceTab,
-    ...getPropertyTabNames(contextKeys)
+    ...getPropertyTabNames(error)
   ];
 }
