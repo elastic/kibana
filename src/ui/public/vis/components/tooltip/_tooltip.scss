@@ -1,18 +1,14 @@
-// EUITODO: Use EuiTooltip or create a tooltip mixin
+@import '@elastic/eui/src/components/tool_tip/mixins';
+
 .visTooltip,
 .visTooltip__sizingClone {
-  @include euiBottomShadow($color: $euiColorFullShade);
-  @include euiFontSizeXS;
+  @include euiToolTipStyle('s');
   visibility: hidden;
   pointer-events: none;
   position: fixed;
-  z-index: $euiZLevel9;
-  background-color: tintOrShade($euiColorFullShade, 25%, 90%);
-  color: $euiColorGhost;
-  border-radius: $euiBorderRadius;
   max-width: $euiSizeXL * 10;
   overflow: hidden;
-  overflow-wrap: break-word;
+  padding: 0;
 
   > :last-child {
     margin-bottom: $euiSizeS;

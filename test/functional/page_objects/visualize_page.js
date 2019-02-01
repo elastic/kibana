@@ -428,10 +428,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // it would be nice to get the correct axis by name like "LeftAxis-1"
       // instead of an incremented index, but this link isn't under the div above
       const advancedLink =
-        await find.byCssSelector(`#axisOptionsValueAxis-1 .kuiSideBarOptionsLink .kuiSideBarOptionsLink__caret`);
+        await find.byCssSelector(`#axisOptionsValueAxis-1 .visEditorSidebar__advancedLinkIcon`);
 
-      const advancedLinkState = await advancedLink.getAttribute('class');
-      if (advancedLinkState.includes('fa-caret-right')) {
+      const advancedLinkState = await advancedLink.getAttribute('type');
+      if (advancedLinkState.includes('arrowRight')) {
         await advancedLink.moveMouseTo();
         log.debug('click advancedLink');
         await advancedLink.click();

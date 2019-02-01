@@ -122,7 +122,7 @@ export class TileLayer extends AbstractLayer {
     this._style && this._style.setMBPaintProperties({
       alpha: this.getAlpha(),
       mbMap,
-      mbLayerId,
+      layerId: mbLayerId,
     });
   }
 

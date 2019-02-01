@@ -401,7 +401,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show the phrases if you re-open a phrases filter', async function () {
         await filterBar.clickEditFilter('extension.raw', 'jpg');
-        const phrases = await filterBar.getFilterEditorPhrases();
+        const phrases = await filterBar.getFilterEditorSelectedPhrases();
         expect(phrases.length).to.be(1);
         expect(phrases[0]).to.be('jpg');
       });
