@@ -454,8 +454,8 @@ export default function ({ getService, getPageObjects }) {
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
         await browser.refresh();
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        const ticks = await PageObjects.discover.getBarChartXTicks();
-        expect(ticks).to.eql([
+
+        const maxTicks = [
           '2015-09-19 17:00',
           '2015-09-20 05:00',
           '2015-09-20 17:00',
@@ -464,7 +464,13 @@ export default function ({ getService, getPageObjects }) {
           '2015-09-22 05:00',
           '2015-09-22 17:00',
           '2015-09-23 05:00'
-        ]);
+        ];
+
+        for (const tick of await PageObjects.discover.getBarChartXTicks()) {
+          if (!maxTicks.includes(tick)) {
+            throw new Error(`unexpected x-axis tick "${tick}"`);
+          }
+        }
       });
     });
   });
