@@ -80,7 +80,7 @@ export class UpdateSourceEditor extends Component {
 
         <EuiFormRow>
           <EuiSwitch
-            label="Only filter for data in the visible map area"
+            label="Dynamically filter for data in the visible map area."
             checked={this.props.filterByMapBounds}
             onChange={this.onFilterByMapBoundsChange}
           />

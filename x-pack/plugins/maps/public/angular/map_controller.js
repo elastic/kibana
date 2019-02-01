@@ -197,7 +197,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   // k7design breadcrumbs
   // TODO subscribe to store change and change when store updates title
   chrome.breadcrumbs.set([
-    { text: 'Map', href: '#' },
+    { text: 'Maps', href: '#' },
     { text: $scope.getMapTitle() }
   ]);
   config.watch('k7design', (val) => $scope.showPluginBreadcrumbs = !val);
