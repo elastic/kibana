@@ -33,6 +33,8 @@ describe('authorized_user_pre_routing', function () {
         elasticsearch: {
           createCluster: function () {
             return {
+              _client: { extend: () => {} },
+              _noAuthClient: { extend: () => {} },
               callWithRequest: callWithRequestStub
             };
           }
