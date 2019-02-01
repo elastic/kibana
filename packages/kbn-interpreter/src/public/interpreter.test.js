@@ -17,12 +17,7 @@
  * under the License.
  */
 
-import mockFetch from 'ui/kfetch';
 import { initializeInterpreter } from './interpreter';
-
-jest.mock('ui/kfetch', () => ({
-  kfetch: jest.fn(() => Promise.resolve({})),
-}));
 
 jest.mock('../common/interpreter/socket_interpret', () => ({
   socketInterpreterProvider: () => () => ({}),
@@ -38,23 +33,23 @@ jest.mock('./create_handlers', () => ({
 
 describe('kbn-interpreter/interpreter', () => {
   it('loads server-side functions', async () => {
-    mockFetch.kfetch.mockResolvedValue({});
+    const kfetch = jest.fn(async () => ({}));
 
-    await initializeInterpreter({ toJS: () => ({}) }, ({ register: () => {} }));
+    await initializeInterpreter(kfetch, { toJS: () => ({}) }, ({ register: () => {} }));
 
-    expect(mockFetch.kfetch).toHaveBeenCalledTimes(1);
-    expect(mockFetch.kfetch).toHaveBeenCalledWith({ pathname: '/api/canvas/fns' });
+    expect(kfetch).toHaveBeenCalledTimes(1);
+    expect(kfetch).toHaveBeenCalledWith({ pathname: '/api/canvas/fns' });
   });
 
   it('registers client-side functions that pass through to the server', async () => {
-    mockFetch.kfetch.mockResolvedValue({
+    const kfetch = jest.fn(async () => ({
       hello: { name: 'hello' },
       world: { name: 'world' },
-    });
+    }));
 
     const register = jest.fn();
 
-    await initializeInterpreter({ toJS: () => ({}) }, ({ register }));
+    await initializeInterpreter(kfetch, { toJS: () => ({}) }, ({ register }));
 
     expect(register).toHaveBeenCalledTimes(2);
 
@@ -70,7 +65,7 @@ describe('kbn-interpreter/interpreter', () => {
 
     await hello.fn(context, args);
 
-    expect(mockFetch.kfetch).toHaveBeenCalledWith({
+    expect(kfetch).toHaveBeenCalledWith({
       pathname: '/api/canvas/fns/hello',
       method: 'POST',
       body: JSON.stringify({ args, context }),

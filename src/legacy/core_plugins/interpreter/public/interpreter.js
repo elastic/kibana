@@ -19,6 +19,7 @@
 
 
 import { initializeInterpreter, loadBrowserRegistries } from '@kbn/interpreter/public';
+import { kfetch } from 'ui/kfetch';
 import chrome from 'ui/chrome';
 import { functions } from './functions';
 import { functionsRegistry } from './functions_registry';
@@ -46,7 +47,7 @@ let _interpreterPromise;
 
 const initialize = async () => {
   await loadBrowserRegistries(types, basePath);
-  initializeInterpreter(typesRegistry, functionsRegistry).then(interpreter => {
+  initializeInterpreter(kfetch, typesRegistry, functionsRegistry).then(interpreter => {
     _resolve({ interpreter });
   });
 };

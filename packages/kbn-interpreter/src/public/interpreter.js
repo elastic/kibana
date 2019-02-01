@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import { kfetch } from 'ui/kfetch';
 import { socketInterpreterProvider } from '../common/interpreter/socket_interpret';
 import { serializeProvider } from '../common/lib/serialize';
 import { createHandlers } from './create_handlers';
 
-export async function initializeInterpreter(typesRegistry, functionsRegistry) {
+export async function initializeInterpreter(kfetch, typesRegistry, functionsRegistry) {
   const serverFunctionList = await kfetch({ pathname: '/api/canvas/fns' });
 
   // For every sever-side function, register a client-side
@@ -49,7 +48,6 @@ export async function initializeInterpreter(typesRegistry, functionsRegistry) {
   });
 
   const interpretAst = async (ast, context, handlers) => {
-    // Load plugins before attempting to get functions, otherwise this gets racey
     const interpretFn = await socketInterpreterProvider({
       types: typesRegistry.toJS(),
       handlers: { ...handlers, ...createHandlers() },
