@@ -85,15 +85,12 @@ export class Cluster {
     const client = new elasticsearch.Client(parseConfig(config, parseOptions));
     // This is just for initial debugging
     client.on('response', (err, meta) => {
-      console.log();
-      console.log('Connection ID:', meta.connection.id);
-      console.log('Request', meta.request);
       if (err) {
+        console.log();
+        console.log('Request', meta.request);
         console.log('Error', err);
-      } else {
-        console.log('Response', meta.response);
+        console.log();
       }
-      console.log();
     });
     this._clients.add(client);
     return client;
