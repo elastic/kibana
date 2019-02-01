@@ -89,20 +89,6 @@ describe('ml_telemetry', () => {
       };
     });
 
-    it('should use internal user "admin"', () => {
-      getSavedObjectsClient(server);
-
-      expect(server.plugins.elasticsearch.getCluster).toHaveBeenCalledWith('admin');
-    });
-
-    it('should call getSavedObjectsRepository with a cluster using the internal user context', () => {
-      getSavedObjectsClient(server);
-
-      expect(server.savedObjects.getSavedObjectsRepository).toHaveBeenCalledWith(
-        callWithInternalUser
-      );
-    });
-
     it('should return a SavedObjectsClient initialized with the saved objects internal repository', () => {
       const result = getSavedObjectsClient(server);
 
