@@ -19,8 +19,8 @@
 
 import { initializeInterpreter } from './interpreter';
 
-jest.mock('../common/interpreter/socket_interpret', () => ({
-  socketInterpreterProvider: () => () => ({}),
+jest.mock('../common/interpreter/interpreter_provider', () => ({
+  interpreterProvider: () => () => ({}),
 }));
 
 jest.mock('../common/lib/serialize', () => ({

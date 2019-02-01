@@ -33,7 +33,7 @@ import { interpretProvider } from './interpret';
   socket: the socket to communicate over
 */
 
-export function socketInterpreterProvider({
+export function interpreterProvider({
   types,
   functions,
   handlers,

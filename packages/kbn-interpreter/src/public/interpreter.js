@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { socketInterpreterProvider } from '../common/interpreter/socket_interpret';
+import { interpreterProvider } from '../common/interpreter/interpreter_provider';
 import { serializeProvider } from '../common/lib/serialize';
 import { createHandlers } from './create_handlers';
 
@@ -48,7 +48,7 @@ export async function initializeInterpreter(kfetch, typesRegistry, functionsRegi
   });
 
   const interpretAst = async (ast, context, handlers) => {
-    const interpretFn = await socketInterpreterProvider({
+    const interpretFn = await interpreterProvider({
       types: typesRegistry.toJS(),
       handlers: { ...handlers, ...createHandlers() },
       functions: functionsRegistry.toJS(),
