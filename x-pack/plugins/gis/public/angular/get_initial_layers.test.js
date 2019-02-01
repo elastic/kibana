@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+jest.mock('../meta', () => {
+  return {};
+});
+
 import { getInitialLayers } from './get_initial_layers';
 
 const mockKibanaDataSource = {
@@ -28,22 +32,65 @@ describe('Saved object has layer list', () => {
       }
     ];
     const layerListJSON = JSON.stringify(layerListFromSavedObject);
-    const dataSources = {
-      kibana: mockKibanaDataSource,
-      ems: mockEmsDataSource
-    };
-    expect(getInitialLayers(layerListJSON, dataSources)).toEqual(layerListFromSavedObject);
+    expect((getInitialLayers(layerListJSON))).toEqual(layerListFromSavedObject);
   });
 });
 
+
+
 describe('Saved object does not have layer list', () => {
+
+  beforeEach(() => {
+    require('../meta').isMetaDataLoaded = () => {
+      return true;
+    };
+  });
+
+  function mockDataSourceResponse(dataSources) {
+    require('../meta').getDataSourcesSync = () => {
+      return dataSources;
+    };
+    require('../meta').isMetaDataLoaded = () => {
+      return true;
+    };
+  }
+
+  it('should get the default EMS layer when metadata has not loaded yet', () => {
+    mockDataSourceResponse();
+    require('../meta').isMetaDataLoaded = () => {
+      return false;
+    };
+    const layers = getInitialLayers(null);
+    expect(layers).toEqual([{
+      "alpha": 1,
+      "dataRequests": [],
+      "id": layers[0].id,
+      "label": null,
+      "maxZoom": 24,
+      "minZoom": 0,
+      "sourceDescriptor": {
+        "type": "EMS_TMS",
+        "id": "road_map",
+      },
+      "style": {
+        "properties": {},
+        "type": "TILE",
+      },
+      "temporary": false,
+      "type": "TILE",
+      "visible": true,
+    }]);
+  });
+
+
   it('Should get initial layer from Kibana tilemap data source when Kibana tilemap is configured ', () => {
-    const dataSources = {
+
+    mockDataSourceResponse({
       kibana: mockKibanaDataSource,
       ems: mockEmsDataSource
-    };
+    });
 
-    const layers = getInitialLayers(null, dataSources);
+    const layers = getInitialLayers(null);
     expect(layers).toEqual([{
       "alpha": 1,
       dataRequests: [],
@@ -70,8 +117,9 @@ describe('Saved object does not have layer list', () => {
     const dataSources = {
       ems: mockEmsDataSource
     };
+    mockDataSourceResponse(dataSources);
 
-    const layers = getInitialLayers(null, dataSources);
+    const layers = getInitialLayers(null);
     expect(layers).toEqual([{
       "alpha": 1,
       dataRequests: [],
@@ -100,10 +148,12 @@ describe('Saved object does not have layer list', () => {
         tms: []
       }
     };
-    expect(getInitialLayers(null, dataSources)).toEqual([]);
+    mockDataSourceResponse(dataSources);
+    expect((getInitialLayers(null))).toEqual([]);
   });
 
   it('Should return empty list when no dataSoures are provided', () => {
-    expect(getInitialLayers(null, null)).toEqual([]);
+    mockDataSourceResponse(null);
+    expect((getInitialLayers(null))).toEqual([]);
   });
 });

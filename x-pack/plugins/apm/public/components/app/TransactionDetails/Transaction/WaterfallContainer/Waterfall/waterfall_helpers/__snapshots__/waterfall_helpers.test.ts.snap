@@ -1,5 +1,29 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`waterfall_helpers getWaterfallItems should handle cyclic references 1`] = `
+Array [
+  Object {
+    "childIds": Array [
+      "a",
+    ],
+    "id": "a",
+    "offset": 0,
+    "skew": 0,
+    "timestamp": 10,
+  },
+  Object {
+    "childIds": Array [
+      "a",
+    ],
+    "id": "a",
+    "offset": 10,
+    "parentId": "a",
+    "skew": undefined,
+    "timestamp": 20,
+  },
+]
+`;
+
 exports[`waterfall_helpers getWaterfallItems should order items correctly 1`] = `
 Array [
   Object {

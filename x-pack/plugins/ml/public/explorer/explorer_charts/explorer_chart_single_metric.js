@@ -267,11 +267,13 @@ export const ExplorerChartSingleMetric = injectI18n(class ExplorerChartSingleMet
     function drawLineChartMarkers(data) {
       // Render circle markers for the points.
       // These are used for displaying tooltips on mouseover.
-      // Don't render dots where value=null (data gaps) or for multi-bucket anomalies.
+      // Don't render dots where value=null (data gaps, with no anomalies)
+      // or for multi-bucket anomalies.
       const dots = lineChartGroup.append('g')
         .attr('class', 'chart-markers')
         .selectAll('.metric-value')
-        .data(data.filter(d => (d.value !== null && !showMultiBucketAnomalyMarker(d))));
+        .data(data.filter(d => ((d.value !== null || typeof d.anomalyScore === 'number') &&
+          !showMultiBucketAnomalyMarker(d))));
 
       // Remove dots that are no longer needed i.e. if number of chart points has decreased.
       dots.exit().remove();

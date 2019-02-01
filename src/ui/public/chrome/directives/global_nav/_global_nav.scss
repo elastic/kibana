@@ -22,6 +22,13 @@
     height: $kbnGlobalNavLogoHeight;
     width: $kbnGlobalNavOpenWidth;
     list-style-type: none;
+
+    &.kibana {
+      background-image: url('ui/assets/images/kibana.svg');
+      background-position: 10px 14px;
+      background-size: 120px 42px;
+      background-repeat: no-repeat;
+    }
   }
 }
 
@@ -46,7 +53,7 @@
   }
 
   &::-webkit-scrollbar-thumb { /* 4 */
-    background-color: tint($kbnChromeGlobalNavBackground, 50%);
+    background-color: tint($euiColorPrimary, 50%);
   }
 }
 

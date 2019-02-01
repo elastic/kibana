@@ -46,6 +46,7 @@ export class MonitorCharts extends React.Component<Props, MonitorChartsState> {
 
   public render() {
     const {
+      colors: { primary, secondary, danger },
       dateRangeStart,
       dateRangeEnd,
       monitorId,
@@ -75,13 +76,13 @@ export class MonitorCharts extends React.Component<Props, MonitorChartsState> {
           // an object that contains these series already shaped in the way required by the visualizations.
           const { monitorChartsData } = data;
           const avgDurationSeries: any[] = [];
-          const areaRttSeries: any[] = [];
+          const areaDurationSeries: any[] = [];
           const downSeries: any[] = [];
           const upSeries: any[] = [];
           const checksSeries: any[] = [];
           monitorChartsData.forEach(({ avgDuration, maxDuration, minDuration, status }: any) => {
             avgDurationSeries.push(avgDuration);
-            areaRttSeries.push({ x: minDuration.x, y0: minDuration.y, y: maxDuration.y });
+            areaDurationSeries.push({ x: minDuration.x, y0: minDuration.y, y: maxDuration.y });
             downSeries.push({ x: status.x, y: status.down });
             upSeries.push({ x: status.x, y: status.up });
             checksSeries.push({ x: status.x, y: status.total });
@@ -91,7 +92,7 @@ export class MonitorCharts extends React.Component<Props, MonitorChartsState> {
           // Without this code the chart could render data outside of the field.
           const checksDomain = upSeries.concat(downSeries).map(({ y }) => y);
           const checkDomainLimits = [0, Math.max(...checksDomain)];
-          const durationDomain = avgDurationSeries.concat(areaRttSeries);
+          const durationDomain = avgDurationSeries.concat(areaDurationSeries);
           const durationDomainLimits = [0, Math.max(...durationDomain.map(({ y }) => y))];
 
           return (
@@ -119,16 +120,18 @@ export class MonitorCharts extends React.Component<Props, MonitorChartsState> {
                       onCrosshairUpdate={this.updateCrosshairLocation}
                     >
                       <EuiAreaSeries
+                        color={secondary}
                         name={i18n.translate(
                           'xpack.uptime.monitorCharts.monitorDuration.series.durationRangeLabel',
                           {
                             defaultMessage: 'Duration range',
                           }
                         )}
-                        data={areaRttSeries}
+                        data={areaDurationSeries}
                         curve="curveBasis"
                       />
                       <EuiLineSeries
+                        color={primary}
                         name={i18n.translate(
                           'xpack.uptime.monitorCharts.monitorDuration.series.meanDurationLabel',
                           {
@@ -168,7 +171,8 @@ export class MonitorCharts extends React.Component<Props, MonitorChartsState> {
                           }
                         )}
                         data={upSeries}
-                        color="green"
+                        curve="curveBasis"
+                        color={primary}
                       />
                       <EuiAreaSeries
                         name={i18n.translate(
@@ -178,7 +182,7 @@ export class MonitorCharts extends React.Component<Props, MonitorChartsState> {
                           }
                         )}
                         data={downSeries}
-                        color="red"
+                        color={danger}
                       />
                     </EuiSeriesChart>
                   </EuiPanel>
