@@ -24,18 +24,15 @@ const optionalFields = [
   'url'
 ];
 
+const allFields = [...requiredFields, ...optionalFields];
+
 export class WebhookAction extends BaseAction {
   constructor(props = {}) {
     super(props);
 
-    requiredFields.forEach((field) => {
-      this[field] = props[field];
+    allFields.forEach((field) => {
+      this[field] = get(props, field);
     });
-
-    optionalFields.forEach((field) => {
-      this[field] = get(props, field, undefined);
-    });
-
 
     this.fullPath = this.url ? this.url : this.host + this.port + this.path;
   }
@@ -47,7 +44,7 @@ export class WebhookAction extends BaseAction {
       return acc;
     }, super.upstreamJson);
 
-    // If optional fields have been set, send them as well
+    // If optional fields have been set, add them to the body
     result = optionalFields.reduce((acc, field) => {
       if (this[field]) {
         acc[field] = this[field];
