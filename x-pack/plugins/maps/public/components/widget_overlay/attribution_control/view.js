@@ -78,7 +78,7 @@ export class AttributionControl  extends React.Component {
       return null;
     }
     return (
-      <EuiPanel className="gisWidgetControl gisAttributionControl" paddingSize="none" grow={false}>
+      <EuiPanel className="mapWidgetControl mapAttributionControl" paddingSize="none" grow={false}>
         <EuiText color="subdued" size="xs">
           <small>{this._renderAttributions()}</small>
         </EuiText>

@@ -100,7 +100,7 @@ export function SettingsPanel(props) {
       <EuiFormRow
         label="Layer transparency"
       >
-        <div className="gisAlphaRange">
+        <div className="mapAlphaRange">
           <ValidatedRange
             min={.00}
             max={1.00}

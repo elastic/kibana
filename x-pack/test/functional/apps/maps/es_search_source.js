@@ -7,27 +7,27 @@
 import expect from 'expect.js';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['gis']);
+  const PageObjects = getPageObjects(['maps']);
   const queryBar = getService('queryBar');
   const inspector = getService('inspector');
 
   describe('elasticsearch document layer', () => {
     before(async () => {
-      await PageObjects.gis.loadSavedMap('document example');
+      await PageObjects.maps.loadSavedMap('document example');
     });
 
     async function getRequestTimestamp() {
-      await PageObjects.gis.openInspectorRequestsView();
+      await PageObjects.maps.openInspectorRequestsView();
       const requestStats = await inspector.getTableData();
-      const requestTimestamp =  PageObjects.gis.getInspectorStatRowHit(requestStats, 'Request timestamp');
+      const requestTimestamp =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Request timestamp');
       await inspector.close();
       return requestTimestamp;
     }
 
     async function getHits() {
-      await PageObjects.gis.openInspectorRequestsView();
+      await PageObjects.maps.openInspectorRequestsView();
       const requestStats = await inspector.getTableData();
-      const hits = PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits');
+      const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
       await inspector.close();
       return hits;
     }
@@ -35,7 +35,7 @@ export default function ({ getPageObjects, getService }) {
     it('should re-fetch geohashgrid aggregation with refresh timer', async () => {
       const beforeRefreshTimerTimestamp = await getRequestTimestamp();
       expect(beforeRefreshTimerTimestamp.length).to.be(24);
-      await PageObjects.gis.triggerSingleRefresh(1000);
+      await PageObjects.maps.triggerSingleRefresh(1000);
       const afterRefreshTimerTimestamp = await getRequestTimestamp();
       expect(beforeRefreshTimerTimestamp).not.to.equal(afterRefreshTimerTimestamp);
     });
@@ -52,9 +52,9 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('should apply query to search request', async () => {
-        await PageObjects.gis.openInspectorRequestsView();
+        await PageObjects.maps.openInspectorRequestsView();
         const requestStats = await inspector.getTableData();
-        const hits = PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits');
+        const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
         await inspector.close();
         expect(hits).to.equal('1');
       });
@@ -76,13 +76,13 @@ export default function ({ getPageObjects, getService }) {
 
     describe('filter by extent', () => {
       it('should handle geo_point filtering with extents that cross antimeridian', async () => {
-        await PageObjects.gis.loadSavedMap('antimeridian points example');
+        await PageObjects.maps.loadSavedMap('antimeridian points example');
         const hits = await getHits();
         expect(hits).to.equal('2');
       });
 
       it('should handle geo_shape filtering with extents that cross antimeridian', async () => {
-        await PageObjects.gis.loadSavedMap('antimeridian shapes example');
+        await PageObjects.maps.loadSavedMap('antimeridian shapes example');
         const hits = await getHits();
         expect(hits).to.equal('2');
       });
