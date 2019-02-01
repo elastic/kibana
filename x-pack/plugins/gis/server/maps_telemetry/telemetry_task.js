@@ -29,33 +29,40 @@ export function registerMapsTelemetryTask(taskManager) {
       type: TELEMETRY_TASK_TYPE,
       timeout: '1m',
       numWorkers: 2,
+      createTaskRunner: telemetryTaskRunner(),
+    },
+  });
+}
 
-      createTaskRunner: ({ kbnServer, taskInstance }) => ({
-        async run() {
-          const { state } = taskInstance;
-          const prevState = state;
-          let mapsTelemetry = {};
+export function telemetryTaskRunner() {
 
-          const callCluster = kbnServer.server.plugins.elasticsearch
-            .getCluster('admin').callWithInternalUser;
-          const { server } = kbnServer;
-          try {
-            mapsTelemetry = await getMapsTelemetry(server, callCluster);
-          } catch (err) {
-            server.log(['warning'], `Error loading maps telemetry: ${err}`);
-          }
+  return ({ kbnServer, taskInstance }) => {
+    const { state } = taskInstance;
+    const prevState = state;
+    const { server } = kbnServer;
+    let mapsTelemetry = {};
 
+    const callCluster = server.plugins.elasticsearch.getCluster('admin')
+      .callWithInternalUser;
+
+    return {
+      async run() {
+        try {
+          mapsTelemetry = await getMapsTelemetry(server, callCluster);
+        } catch (err) {
+          server.log(['warning'], `Error loading maps telemetry: ${err}`);
+        } finally {
           return {
             state: {
-              runs: taskInstance.state.runs + 1,
-              telemetry: mapsTelemetry.attributes || prevState.telemetry || {},
+              runs: state.runs || 0 + 1,
+              stats: mapsTelemetry.attributes || prevState.stats || {},
             },
             runAt: getNextMidnight(),
           };
-        },
-      }),
-    },
-  });
+        }
+      },
+    };
+  };
 }
 
 export function getNextMidnight() {

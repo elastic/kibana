@@ -21,22 +21,20 @@ function getUniqueLayerCounts(layerCountsList, mapsCount) {
       tCounts[type] && accu.push(tCounts[type]);
       return accu;
     }, []);
+    const typeCountsSum = _.sum(typeCounts);
     accu[type] = {
-      min: _.min(typeCounts),
-      max: _.max(typeCounts),
-      avg: _.sum(typeCounts) / mapsCount
+      min: typeCounts.length ? _.min(typeCounts) : 0,
+      max: typeCounts.length ? _.max(typeCounts) : 0,
+      avg: typeCountsSum ? typeCountsSum / mapsCount : 0
     };
     return accu;
   }, {});
 }
 
-async function buildMapsTelemetry(savedObjectsClient) {
-  const gisMapsSavedObject = await savedObjectsClient.find({
-    type: 'gis-map'
-  });
-
-  const savedMaps = _.get(gisMapsSavedObject, 'saved_objects')
-    .map(savedMapObject => JSON.parse(savedMapObject.attributes.layerListJSON));
+export function buildMapsTelemetry(savedObjects) {
+  const savedMaps = savedObjects
+    .map(savedMapObject =>
+      JSON.parse(savedMapObject.attributes.layerListJSON));
   const mapsCount = savedMaps.length;
 
   const dataSourcesCount = savedMaps.map(lList => {
@@ -56,21 +54,23 @@ async function buildMapsTelemetry(savedObjectsClient) {
     .pick((val, key) => key !== 'false')
     .value());
 
+  const dataSourcesCountSum = _.sum(dataSourcesCount);
+  const layersCountSum = _.sum(layersCount);
   const mapsTelem = {
     // Total count of maps
     mapsTotalCount: mapsCount,
     attributesPerMap: {
       // Count of data sources per map
       dataSourcesCount: {
-        min: _.min(dataSourcesCount),
-        max: _.max(dataSourcesCount),
-        avg: _.sum(dataSourcesCount) / mapsCount
+        min: dataSourcesCount.length ? _.min(dataSourcesCount) : 0,
+        max: dataSourcesCount.length ? _.max(dataSourcesCount) : 0,
+        avg: dataSourcesCountSum ? layersCountSum / mapsCount : 0
       },
       // Total count of layers per map
       layersCount: {
-        min: _.min(layersCount),
-        max: _.max(layersCount),
-        avg: _.sum(layersCount) / mapsCount
+        min: layersCount.length ? _.min(layersCount) : 0,
+        max: layersCount.length ? _.max(layersCount) : 0,
+        avg: layersCountSum ? layersCountSum / mapsCount : 0
       },
       // Count of layers by type
       layerTypesCount: {
@@ -85,9 +85,17 @@ async function buildMapsTelemetry(savedObjectsClient) {
   return mapsTelem;
 }
 
+async function getSavedObjects(savedObjectsClient) {
+  const gisMapsSavedObject = await savedObjectsClient.find({
+    type: 'gis-map'
+  });
+  return _.get(gisMapsSavedObject, 'saved_objects');
+}
+
 export async function getMapsTelemetry(server, callCluster) {
   const savedObjectsClient = getSavedObjectsClient(server, callCluster);
-  const mapsTelemetry = await buildMapsTelemetry(savedObjectsClient);
+  const savedObjects = await getSavedObjects(savedObjectsClient);
+  const mapsTelemetry = buildMapsTelemetry(savedObjects);
 
   return await savedObjectsClient.create('maps-telemetry',
     mapsTelemetry, {

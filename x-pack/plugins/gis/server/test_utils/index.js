@@ -10,8 +10,9 @@ const defaultMockSavedObjects = [{
     type: 'food',
   },
 }];
-
 const defaultMockTaskDocs = [{ state: { runs: 0, stats: {} } }];
+
+export const getMockTaskInstance = () => ({ state: { runs: 0, stats: {} } });
 
 export const getMockCallWithInternal = (hits = defaultMockSavedObjects) => {
   return () => {
@@ -20,8 +21,6 @@ export const getMockCallWithInternal = (hits = defaultMockSavedObjects) => {
 };
 
 export const getMockTaskFetch = (docs = defaultMockTaskDocs) => {
-  console.log('$$$$$$$$$$$$$$$$$$$$');
-  console.log(docs);
   return () => Promise.resolve({ docs });
 };
 
@@ -48,4 +47,5 @@ export const getMockKbnServer = (
     },
   },
   config: () => ({ get: () => '' }),
+  log: () => undefined
 });
