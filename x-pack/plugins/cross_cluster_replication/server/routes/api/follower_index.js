@@ -257,6 +257,7 @@ export const registerFollowerIndexRoutes = (server) => {
       const ids = id.split(',');
 
       const itemsUnfollowed = [];
+      const itemsNotOpen = [];
       const errors = [];
 
       await Promise.all(ids.map(async (_id) => {
@@ -274,6 +275,13 @@ export const registerFollowerIndexRoutes = (server) => {
           // Unfollow leader
           await callWithRequest('ccr.unfollowLeaderIndex', { id: _id });
 
+          // Try to re-open the index, store failures in a separate array to surface warnings in the UI
+          try {
+            await callWithRequest('indices.open', { index: _id });
+          } catch (e) {
+            itemsNotOpen.push(_id);
+          }
+
           // Push success
           itemsUnfollowed.push(_id);
         } catch (err) {
@@ -287,6 +295,7 @@ export const registerFollowerIndexRoutes = (server) => {
 
       return {
         itemsUnfollowed,
+        itemsNotOpen,
         errors
       };
     },
