@@ -86,7 +86,7 @@ exports[`RemoteClusterTable renders a row for an API-defined remote cluster 1`] 
               </svg>
             </div>
             <div
-              class="euiFlexItem"
+              class="euiFlexItem remoteClustersConnectionStatus__message"
             >
               <div
                 class="euiText euiText--medium"
@@ -336,7 +336,7 @@ exports[`RemoteClusterTable renders a row with a tooltip for a remote cluster de
               </svg>
             </div>
             <div
-              class="euiFlexItem"
+              class="euiFlexItem remoteClustersConnectionStatus__message"
             >
               <div
                 class="euiText euiText--medium"
