@@ -58,7 +58,7 @@ describe('DELETE role', () => {
             }),
           }),
           'shield.deleteRole',
-          { name },
+          { username: name },
         );
       } else {
         expect(mockCallWithRequest).not.toHaveBeenCalled();

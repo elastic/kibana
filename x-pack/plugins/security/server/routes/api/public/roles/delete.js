@@ -13,7 +13,7 @@ export function initDeleteRolesApi(server, callWithRequest, routePreCheckLicense
     path: '/api/security/role/{name}',
     handler(request, h) {
       const { name } = request.params;
-      return callWithRequest(request, 'shield.deleteRole', { name }).then(
+      return callWithRequest(request, 'shield.deleteRole', { username: name }).then(
         () => h.response().code(204),
         wrapError
       );
