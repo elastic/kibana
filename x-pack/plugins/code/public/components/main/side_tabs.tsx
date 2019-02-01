@@ -25,6 +25,8 @@ const Container = styled.div`
   width: calc(256rem / 14);
   border-right: ${theme.euiBorderThin};
   display: flex;
+  flex-grow: 0;
+  flex-shrink: 0;
   flex-direction: column;
   & > div {
     height: 100%;
