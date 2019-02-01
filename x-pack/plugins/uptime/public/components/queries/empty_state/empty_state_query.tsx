@@ -37,13 +37,7 @@ export const EmptyStateQuery = ({ autorefreshInterval, autorefreshIsPaused, chil
                 })
               : undefined
           }
-          loading={
-            loading
-              ? i18n.translate('xpack.uptime.emptyState.loadingMessage', {
-                  defaultMessage: 'Loading…',
-                })
-              : undefined
-          }
+          loading={loading}
         />
       );
     }}

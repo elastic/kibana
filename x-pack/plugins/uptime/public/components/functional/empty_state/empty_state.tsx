@@ -4,62 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiEmptyPrompt, EuiLink, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
+import { EmptyIndex } from './empty_index';
+import { EmptyStateError } from './empty_state_error';
+import { EmptyStateLoading } from './empty_state_loading';
 
 interface EmptyStateProps {
   children: JSX.Element[] | JSX.Element;
   count: number | undefined;
-  error: string | undefined;
-  loading: string | undefined;
+  error?: string;
+  loading?: boolean;
 }
 
-export const EmptyState = ({ children, count }: EmptyStateProps) => (
-  <Fragment>
-    {!count && (
-      <EuiEmptyPrompt
-        title={
-          <EuiTitle size="l">
-            <h3>
-              <FormattedMessage
-                id="xpack.uptime.emptyState.noDataTitle"
-                defaultMessage="No Uptime Data"
-              />
-            </h3>
-          </EuiTitle>
-        }
-        body={
-          <Fragment>
-            <p>
-              <FormattedMessage
-                id="xpack.uptime.emptyState.noDataDescription"
-                defaultMessage="There is no uptime data available."
-              />
-            </p>
-            <p>
-              <FormattedMessage
-                id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
-                defaultMessage="{configureHeartbeatLink} to start logging uptime data."
-                values={{
-                  configureHeartbeatLink: (
-                    <EuiLink
-                      target="_blank"
-                      href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuring-howto-heartbeat.html"
-                    >
-                      <FormattedMessage
-                        id="xpack.uptime.emptyState.configureHeartbeatLinkText"
-                        defaultMessage="Configure Heartbeat"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </p>
-          </Fragment>
-        }
-      />
-    )}
-    {count && count > 0 && children}
-  </Fragment>
-);
+export const EmptyState = ({ children, count, error, loading }: EmptyStateProps) => {
+  if (error) {
+    return <EmptyStateError errorMessage={error} />;
+  }
+  if (loading) {
+    return <EmptyStateLoading />;
+  } else if (!count) {
+    return <EmptyIndex />;
+  }
+  return <Fragment>{children}</Fragment>;
+};

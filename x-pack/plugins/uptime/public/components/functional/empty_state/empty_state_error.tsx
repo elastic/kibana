@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 interface EmptyStateErrorProps {
-  errorMessage: string;
+  errorMessage?: string;
 }
 
 export const EmptyStateError = ({ errorMessage }: EmptyStateErrorProps) => (
@@ -24,6 +24,6 @@ export const EmptyStateError = ({ errorMessage }: EmptyStateErrorProps) => (
         </h3>
       </EuiTitle>
     }
-    body={<p>{errorMessage}</p>}
+    body={<p>{errorMessage ? errorMessage : ''}</p>}
   />
 );
