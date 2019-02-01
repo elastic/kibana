@@ -6,6 +6,7 @@
       <!-- Breadcrumbs. -->
       <bread-crumbs
         data-transclude-slot="topLeftCorner"
+        class="fullWidth"
         page-title="getVisualizationTitle()"
         use-links="true"
         omit-current-page="true"
@@ -18,7 +19,7 @@
         ng-show="chrome.getVisible()"
         class="fullWidth"
       >
-        <div ng-if="vis.type.requiresSearch && state.linked">
+        <div ng-if="vis.type.requiresSearch && state.linked" class="kuiVerticalRhythmSmall">
           {{ ::'kbn.visualize.linkedToSearchInfoText' | i18n: { defaultMessage: 'Linked to Saved Search' } }}
           <a
             href="#/discover/{{savedVis.savedSearch.id}}"
@@ -36,25 +37,41 @@
           </a>
         </div>
 
-        <div ng-if="vis.type.requiresSearch && vis.type.options.showQueryBar" class="fullWidth">
-          <query-bar
+        <div class="fullWidth kuiVerticalRhythmSmall">
+          <search-bar
             query="state.query"
+            on-query-submit="updateQueryAndFetch"
             app-name="'visualize'"
-            on-submit="updateQueryAndFetch"
-            disable-auto-focus="true"
             index-patterns="[indexPattern]"
-          ></query-bar>
+            filters="filters"
+            on-filters-updated="onFiltersUpdated"
+            show-query-bar="vis.type.requiresSearch && vis.type.options.showQueryBar"
+            show-filter-bar="vis.type.options.showFilterBar && chrome.getVisible()"
+            watch-depth="reference"
+          ></search-bar>
         </div>
       </div>
     </div>
   </kbn-top-nav>
 
-  <!-- Filters. -->
+  <!--
+    The top nav is hidden in embed mode but the filter bar must still be present so
+    we show the filter bar on its own here if the chrome is not visible.
+  -->
   <filter-bar
-    ng-if="vis.type.options.showFilterBar"
-    state="state"
+    ng-if="vis.type.options.showFilterBar && !chrome.getVisible()"
+    class-name="'globalFilterGroup__filterBar'"
+    filters="filters"
+    on-filters-updated="onFiltersUpdated"
     index-patterns="[indexPattern]"
   ></filter-bar>
+
+  <apply-filters-popover
+    key="applyFiltersKey"
+    filters="state.$newFilters"
+    on-cancel="onCancelApplyFilters"
+    on-submit="onApplyFilters"
+  ></apply-filters-popover>
 
   <div
     class="euiCallOut euiCallOut--primary euiCallOut--small hide-for-sharing"

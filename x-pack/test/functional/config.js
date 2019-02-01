@@ -22,6 +22,7 @@ import {
   GisPageProvider,
   StatusPagePageProvider,
   UpgradeAssistantProvider,
+  UptimePageProvider,
 } from './page_objects';
 
 import {
@@ -52,6 +53,7 @@ import {
   AceEditorProvider,
   GrokDebuggerProvider,
   UserMenuProvider,
+  UptimeProvider,
 } from './services';
 
 import {
@@ -88,6 +90,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/gis'),
       resolve(__dirname, './apps/status_page'),
       resolve(__dirname, './apps/upgrade_assistant'),
+      resolve(__dirname, './apps/uptime')
     ],
 
     // define the name and providers for services that should be
@@ -125,6 +128,7 @@ export default async function ({ readConfigFile }) {
       security: SecurityServiceProvider,
       spaces: SpacesServiceProvider,
       userMenu: UserMenuProvider,
+      uptime: UptimeProvider,
     },
 
     // just like services, PageObjects are defined as a map of
@@ -144,6 +148,7 @@ export default async function ({ readConfigFile }) {
       gis: GisPageProvider,
       statusPage: StatusPagePageProvider,
       upgradeAssistant: UpgradeAssistantProvider,
+      uptime: UptimePageProvider,
     },
 
     servers: kibanaFunctionalConfig.get('servers'),
@@ -205,6 +210,9 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/canvas',
         hash: '/',
       },
+      uptime: {
+        pathname: '/app/uptime',
+      }
     },
 
     // choose where esArchiver should load archives from

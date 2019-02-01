@@ -123,7 +123,6 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       return currentUrl;
     }
 
-
     navigateToApp(appName, { basePath = '', shouldLoginIfPrompted = true } = {}) {
       const self = this;
       const appConfig = config.get(['apps', appName]);
