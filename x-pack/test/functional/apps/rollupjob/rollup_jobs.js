@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+//import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   //const testSubjects = getService('testSubjects');
@@ -24,9 +24,8 @@ export default function ({ getService, getPageObjects }) {
 
     it('create and and save a new job', async () => {
       await PageObjects.rollup.createNewRollUpJob();
-      await PageObjects.rollup.addRoleName('TestJob');
-      await PageObjects.rollup.addIndexPattern('.kibana*');
-      await PageObjects.rollup.rollupIndexName('Testjob');
+      await PageObjects.rollup.addRoleNameandIndexPattern('Testjob', '.kibana*', 'Testjob');
+      await PageObjects.rollup.verifyIndexPatternAccepted();
       await PageObjects.rollup.rollUpJobNextButton();
 
       //now navigate to histogram

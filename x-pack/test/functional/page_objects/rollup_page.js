@@ -5,7 +5,7 @@
  */
 
 //import { map as mapAsync } from 'bluebird';
-//import expect from 'expect.js';
+import expect from 'expect.js';
 
 export function RollUpPageProvider({ getService }) {
   const testSubjects = getService('testSubjects');
@@ -15,42 +15,40 @@ export function RollUpPageProvider({ getService }) {
 
   class RollupJobPage {
     async createNewRollUpJob() {
-      //await testSubjects.find('createRollupJobButton');
       await testSubjects.click('createRollupJobButton');
     }
 
-    async addRoleName(name) {
+    async addRoleNameandIndexPattern(name, indexPattern, rollUpIndexName) {
       log.debug(`Adding name ${name} to form`);
-      const rollUpJobNameInput =
-      await retry.try(() => find.byCssSelector('[data-test-subj="rollUpJobName"]'));
-      await rollUpJobNameInput.type(name);
+      await testSubjects.setValue('rollUpJobName', name);
+      await testSubjects.setValue('rollUpIndexPattern', indexPattern);
+      await testSubjects.setValue('rollUpIndexPatternName', rollUpIndexName);
     }
 
 
-    async addIndexPattern(name) {
-      log.debug(`Adding name ${name} to form`);
-      const rollUpIndexPattern =
-      await retry.try(() => find.byCssSelector('[data-test-subj="rollUpIndexPattern"]'));
-      await rollUpIndexPattern.type(name);
+    async verifyIndexPatternAccepted() {
+      await testSubjects.find('fieldIndexPatternSuccessMessage');
+      //const message = await testSubjects.find('fieldIndexPatternSuccessMessage');
+      //const text = await message.getVisibleText();
+      //expect(text).to.be.equal("Success! Index pattern has matching indices.");
+      //Success! Index pattern has matching indices.
+
     }
-
-
-    async rollupIndexName(name) {
-      log.debug(`Adding name ${name} to form`);
-      const rollUpIndexName =
-      await retry.try(() => find.byCssSelector('[data-test-subj="rollUpIndexName"]'));
-      await rollUpIndexName.type(name);
-    }
-
     async rollUpJobNextButton() {
       await testSubjects.click('rollUpJobNextButton');
     }
 
-    async rollupJobInterval(name) {
-      const rollupJobInterval =
-      await retry.try(() => find.byCssSelector('[data-test-subj="rollupJobInterval"]'));
-      await rollupJobInterval.type(name);
+
+    async rollupJobInterval(time) {
+      await testSubjects.setValue('rollupJobInterval', time);
     }
+
+
+    // async rollupJobInterval(name) {
+    //   const rollupJobInterval =
+    //   await retry.try(() => find.byCssSelector('[data-test-subj="rollupJobInterval"]'));
+    //   await rollupJobInterval.type(name);
+    // }
 
     async rollUpJobSaveButton() {
       await testSubjects.click('rollUpJobSaveButton');
