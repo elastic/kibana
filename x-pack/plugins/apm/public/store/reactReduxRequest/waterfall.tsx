@@ -39,8 +39,16 @@ export function WaterfallRequest({ urlParams, transaction, render }: Props) {
       id={ID}
       fn={loadTrace}
       args={[{ traceId, start, end }]}
-      render={({ args, data = [], status }) => {
-        const waterfall = getWaterfall(data, transaction);
+      render={({
+        args,
+        data = { trace: [], transactionErrorCounts: {} },
+        status
+      }) => {
+        const waterfall = getWaterfall(
+          data.trace,
+          transaction,
+          data.transactionErrorCounts
+        );
         return render({ args, data: waterfall, status });
       }}
     />

@@ -15,6 +15,7 @@ import {
   uniq,
   zipObject
 } from 'lodash';
+import { TraceAPIResponse } from 'x-pack/plugins/apm/server/lib/traces/get_trace';
 import { StringMap } from 'x-pack/plugins/apm/typings/common';
 import { Span } from '../../../../../../../../typings/es_schemas/Span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/Transaction';
@@ -73,6 +74,7 @@ interface IWaterfallItemBase {
 interface IWaterfallItemTransaction extends IWaterfallItemBase {
   transaction: Transaction;
   docType: 'transaction';
+  errorCount: number;
 }
 
 interface IWaterfallItemSpan extends IWaterfallItemBase {
@@ -83,7 +85,8 @@ interface IWaterfallItemSpan extends IWaterfallItemBase {
 export type IWaterfallItem = IWaterfallItemSpan | IWaterfallItemTransaction;
 
 function getTransactionItem(
-  transaction: Transaction
+  transaction: Transaction,
+  transactionErrorCounts: TraceAPIResponse['transactionErrorCounts']
 ): IWaterfallItemTransaction {
   return {
     id: transaction.transaction.id,
@@ -95,7 +98,8 @@ function getTransactionItem(
     offset: 0,
     skew: 0,
     docType: 'transaction',
-    transaction
+    transaction,
+    errorCount: transactionErrorCounts[transaction.transaction.id] || 0
   };
 }
 
@@ -230,8 +234,9 @@ function createGetTransactionById(itemsById: IWaterfallIndex) {
 }
 
 export function getWaterfall(
-  hits: Array<Span | Transaction>,
-  entryTransaction: Transaction
+  hits: TraceAPIResponse['trace'],
+  entryTransaction: Transaction,
+  transactionErrorCounts: TraceAPIResponse['transactionErrorCounts']
 ): IWaterfall {
   if (isEmpty(hits)) {
     return {
@@ -255,7 +260,7 @@ export function getWaterfall(
         case 'span':
           return getSpanItem(hit as Span);
         case 'transaction':
-          return getTransactionItem(hit as Transaction);
+          return getTransactionItem(hit as Transaction, transactionErrorCounts);
         default:
           throw new Error(`Unknown type ${docType}`);
       }
@@ -264,7 +269,10 @@ export function getWaterfall(
   const childrenByParentId = groupBy(filteredHits, hit =>
     hit.parentId ? hit.parentId : 'root'
   );
-  const entryTransactionItem = getTransactionItem(entryTransaction);
+  const entryTransactionItem = getTransactionItem(
+    entryTransaction,
+    transactionErrorCounts
+  );
   const itemsById: IWaterfallIndex = indexBy(filteredHits, 'id');
   const items = getWaterfallItems(childrenByParentId, entryTransactionItem);
   const traceRoot = getTraceRoot(childrenByParentId);

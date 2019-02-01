@@ -10,7 +10,27 @@ import { Span } from '../../../typings/es_schemas/Span';
 import { Transaction } from '../../../typings/es_schemas/Transaction';
 import { Setup } from '../helpers/setup_request';
 
-export type TraceAPIResponse = Array<Transaction | Span>;
+export interface TransactionErrorCounts {
+  [transactionId: string]: number;
+}
+export type TraceItems = Array<Transaction | Span>;
+export interface TraceAPIResponse {
+  trace: TraceItems;
+  transactionErrorCounts: TransactionErrorCounts;
+}
+
+interface TraceErrorsAggregationBucket {
+  key: string;
+  errors: {
+    doc_count: number;
+  };
+}
+
+interface TraceAggregationResponse {
+  transactions: {
+    buckets: TraceErrorsAggregationBucket[];
+  };
+}
 
 export async function getTrace(
   traceId: string,
@@ -37,10 +57,46 @@ export async function getTrace(
             }
           ]
         }
+      },
+      aggs: {
+        transactions: {
+          terms: {
+            field: 'transaction.id'
+          },
+          aggs: {
+            errors: {
+              filter: {
+                term: {
+                  'processor.event': 'error'
+                }
+              }
+            }
+          }
+        }
       }
     }
   };
 
-  const resp = await client<Span | Transaction>('search', params);
-  return resp.hits.hits.map(hit => hit._source);
+  const resp = await client<Span | Transaction, TraceAggregationResponse>(
+    'search',
+    params
+  );
+  const trace = resp.hits.hits.map(hit => hit._source);
+  const transactionErrorCounts = resp.aggregations.transactions.buckets.reduce(
+    (
+      acc: object,
+      { key, errors: { doc_count } }: TraceErrorsAggregationBucket
+    ) => {
+      return {
+        ...acc,
+        [key]: doc_count
+      };
+    },
+    {}
+  );
+
+  return {
+    trace,
+    transactionErrorCounts
+  };
 }

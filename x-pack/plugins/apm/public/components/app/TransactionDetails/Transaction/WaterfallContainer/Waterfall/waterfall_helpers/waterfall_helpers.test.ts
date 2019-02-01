@@ -75,7 +75,8 @@ describe('waterfall_helpers', () => {
           offset: 0,
           skew: 0,
           docType: 'transaction',
-          transaction: {} as Transaction
+          transaction: {} as Transaction,
+          errorCount: 0
         },
         {
           id: 'a',
@@ -86,7 +87,8 @@ describe('waterfall_helpers', () => {
           offset: 0,
           skew: 0,
           docType: 'transaction',
-          transaction: {} as Transaction
+          transaction: {} as Transaction,
+          errorCount: 0
         }
       ];
 

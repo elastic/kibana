@@ -104,6 +104,8 @@ export function TransactionFlyout({
     return null;
   }
 
+  const waterfallItem = waterfall.itemsById[transactionDoc.transaction.id];
+
   return (
     <EuiPortal>
       <ResponsiveFlyout onClose={onClose} ownFocus={true} maxWidth={false}>
@@ -134,6 +136,11 @@ export function TransactionFlyout({
           <FlyoutTopLevelProperties transaction={transactionDoc} />
           <EuiHorizontalRule />
           <StickyTransactionProperties
+            errorCount={
+              waterfallItem.docType === 'transaction'
+                ? waterfallItem.errorCount
+                : undefined
+            }
             transaction={transactionDoc}
             totalDuration={waterfall.traceRootDuration}
           />
