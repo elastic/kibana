@@ -4,7 +4,6 @@
   "title": "ML Apache2 Access Unique Count URL Timechart",
   "uiStateJSON": "{}",
   "version": 1,
-  "migrationVersion": {},
   "savedSearchId": "ML-Filebeat-Apache2-Access",
   "kibanaSavedObjectMeta": {
     "searchSourceJSON": "{}"
