@@ -168,3 +168,23 @@ The tool generates a JSON/JSON5 file only if `--output` path is provided. It con
   }
 }
 ```
+
+## Locale files verification / integration tool
+
+### Description
+
+The tool is used for verifying locale file, finding unused / missing messages, key duplications, grouping messages by namespaces and creating JSON files in right folders.
+
+### Notes
+
+The tool throws an exception if `formats` object is missing in locale file.
+
+### Usage
+
+```bash
+node scripts/i18n_integrate --path path/to/locale.json
+```
+
+### Output
+
+The tool generates locale files in plugin folders and few other special locations based on namespaces and corresponding mappings defined in [.i18nrc.json](../../../.i18nrc.json).

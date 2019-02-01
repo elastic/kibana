@@ -46,7 +46,7 @@ describe('getSearchDsl', () => {
   });
 
   describe('passes control', () => {
-    it('passes (mappings, schema, namespace, type, search, searchFields) to getQueryParams', () => {
+    it('passes (mappings, schema, namespace, type, search, searchFields, hasReference) to getQueryParams', () => {
       const spy = sandbox.spy(queryParamsNS, 'getQueryParams');
       const mappings = { type: { properties: {} } };
       const schema = { isNamespaceAgnostic: () => {} };
@@ -55,6 +55,11 @@ describe('getSearchDsl', () => {
         type: 'foo',
         search: 'bar',
         searchFields: ['baz'],
+        defaultSearchOperator: 'AND',
+        hasReference: {
+          type: 'bar',
+          id: '1',
+        },
       };
 
       getSearchDsl(mappings, schema, opts);
@@ -67,6 +72,8 @@ describe('getSearchDsl', () => {
         opts.type,
         opts.search,
         opts.searchFields,
+        opts.defaultSearchOperator,
+        opts.hasReference,
       );
     });
 

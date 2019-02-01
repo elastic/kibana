@@ -30,8 +30,8 @@ export function FilterBarLibMapPhraseProvider(Promise, indexPatterns) {
     function getParams(indexPattern) {
       const type = 'phrase';
       const key = isScriptedPhraseFilter ? filter.meta.field : Object.keys(filter.query.match)[0];
-      const params = isScriptedPhraseFilter ? filter.script.script.params : filter.query.match[key];
-      const query = isScriptedPhraseFilter ? params.value : params.query;
+      const query = isScriptedPhraseFilter ? filter.script.script.params.value : filter.query.match[key].query;
+      const params = { query };
 
       // Sometimes a filter will end up with an invalid index or field param. This could happen for a lot of reasons,
       // for example a user might manually edit the url or the index pattern's ID might change due to
@@ -54,6 +54,6 @@ export function FilterBarLibMapPhraseProvider(Promise, indexPatterns) {
 }
 
 function isScriptedPhrase(filter) {
-  const params = _.get(filter, ['script', 'script', 'params']);
-  return params && params.value;
+  const value = _.get(filter, ['script', 'script', 'params', 'value']);
+  return typeof value !== 'undefined';
 }

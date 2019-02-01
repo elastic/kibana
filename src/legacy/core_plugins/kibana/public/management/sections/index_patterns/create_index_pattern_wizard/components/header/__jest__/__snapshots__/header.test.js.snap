@@ -38,7 +38,7 @@ exports[`Header should render a different name, prompt, and beta tag if provided
     >
       <EuiText
         grow={true}
-        size="m"
+        size="s"
       >
         <p>
           <EuiTextColor
@@ -100,7 +100,7 @@ exports[`Header should render normally 1`] = `
     >
       <EuiText
         grow={true}
-        size="m"
+        size="s"
       >
         <p>
           <EuiTextColor
@@ -156,7 +156,7 @@ exports[`Header should render without including system indices 1`] = `
     >
       <EuiText
         grow={true}
-        size="m"
+        size="s"
       >
         <p>
           <EuiTextColor
