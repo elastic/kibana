@@ -6,11 +6,13 @@
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { euiTextColor } from '@elastic/eui/dist/eui_theme_light.json';
+import { IPosition } from 'monaco-editor';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { RepositoryUtils } from '../../../common/repository_utils';
+import { history } from '../../utils/url';
 import { CodeBlock } from '../codeblock/codeblock';
 
 const OrgName = styled.span`
@@ -67,9 +69,17 @@ export class CodeResult extends React.PureComponent<Props> {
             highlightRanges={ranges}
             folding={false}
             lineNumbersFunc={lineMappingFunc}
+            onClick={this.onCodeClick.bind(this, lineMapping, fileLinkUrl)}
           />
         </div>
       );
     });
+  }
+
+  private onCodeClick(lineNumbers: string[], fileUrl: string, pos: IPosition) {
+    const line = parseInt(lineNumbers[pos.lineNumber - 1], 10);
+    if (!isNaN(line)) {
+      history.push(`${fileUrl}!L${line}:0`);
+    }
   }
 }
