@@ -93,13 +93,21 @@ class HeaderHelpMenuUI extends Component<Props, State> {
     const defaultContent = useDefaultContent ? (
       <Fragment>
         <EuiText size="s">
-          <p>Get updates, information, and answers in our documentation.</p>
+          <p>
+            <FormattedMessage
+              id="common.ui.chrome.headerGlobalNav.helpMenuHelpDescription"
+              defaultMessage="Get updates, information, and answers in our documentation."
+            />
+          </p>
         </EuiText>
 
         <EuiSpacer />
 
         <EuiButton iconType="popout" href={documentationLink} target="_blank">
-          Go to documentation
+          <FormattedMessage
+            id="common.ui.chrome.headerGlobalNav.helpMenuGoToDocumentation"
+            defaultMessage="Go to documentation"
+          />
         </EuiButton>
       </Fragment>
     ) : null;
@@ -131,10 +139,15 @@ class HeaderHelpMenuUI extends Component<Props, State> {
       >
         <EuiPopoverTitle>
           <EuiFlexGroup responsive={false}>
-            <EuiFlexItem>Help</EuiFlexItem>
+            <EuiFlexItem>
+              <FormattedMessage
+                id="common.ui.chrome.headerGlobalNav.helpMenuTitle"
+                defaultMessage="Help"
+              />
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <FormattedMessage
-                id="common.ui.helpMenu.version"
+                id="common.ui.chrome.headerGlobalNav.helpMenuVersion"
                 defaultMessage="v{version}"
                 values={{ version: metadata.version }}
               />
