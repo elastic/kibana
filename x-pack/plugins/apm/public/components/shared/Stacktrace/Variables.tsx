@@ -11,7 +11,6 @@ import styled from 'styled-components';
 import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/fields/Stackframe';
 import {
   borderRadius,
-  colors,
   fontFamily,
   px,
   unit,
