@@ -17,6 +17,7 @@ import {
   EuiPage,
   EuiPageContent,
   EuiPageBody,
+  EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { injectI18n } from '@kbn/i18n/react';
@@ -67,7 +68,11 @@ const getColumns = showCgroupMetricsElasticsearch => {
     field: 'isOnline',
     sortable: true,
     render: value => {
-      const status = value ? 'Online' : 'Offline';
+      const status = value ? i18n.translate('xpack.monitoring.elasticsearch.nodes.statusColumn.onlineLabel', {
+        defaultMessage: 'Online',
+      }) : i18n.translate('xpack.monitoring.elasticsearch.nodes.statusColumn.offlineLabel', {
+        defaultMessage: 'Offline',
+      });
       return (
         <div className="monTableCell__status">
           <NodeStatusIcon
@@ -203,9 +208,11 @@ function ElasticsearchNodesUI({ clusterStatus, nodes, showCgroupMetricsElasticse
   return (
     <EuiPage>
       <EuiPageBody>
-        <EuiPageContent>
+        <EuiPanel>
           <ClusterStatus stats={clusterStatus} />
-          <EuiSpacer size="m"/>
+        </EuiPanel>
+        <EuiSpacer size="m" />
+        <EuiPageContent>
           <EuiMonitoringTable
             className="elasticsearchNodesTable"
             rows={nodes}

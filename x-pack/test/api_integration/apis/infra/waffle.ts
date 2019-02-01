@@ -48,6 +48,8 @@ const waffleTests: KbnTestProvider = ({ getService }) => {
             expect(firstNode.metric).to.eql({
               name: 'cpu',
               value: 0.011,
+              avg: 0.012215686274509805,
+              max: 0.020999999999999998,
               __typename: 'InfraNodeMetric',
             });
           }

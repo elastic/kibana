@@ -22,16 +22,16 @@ interface ErrorListProps {
 type Props = ErrorListProps & UptimeCommonProps;
 
 export const ErrorList = ({
+  autorefreshInterval,
+  autorefreshIsPaused,
   dateRangeStart,
   dateRangeEnd,
   filters,
-  autorefreshInterval,
-  autorefreshIsPaused,
 }: Props) => (
   <Query
+    pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
     query={getErrorListQuery}
     variables={{ dateRangeStart, dateRangeEnd, filters }}
-    pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
   >
     {({ loading, error, data }) => {
       if (error) {

@@ -1,0 +1,13 @@
+{
+  "ml.get_overall_buckets": {
+    "data_autocomplete_rules": {
+      "allow_no_jobs": { "__one_of": ["true", "false"] },
+      "bucket_span": "",
+      "end": "",
+      "exclude_interim": { "__one_of": ["true", "false"] },
+      "overall_score": 0,
+      "start": "",
+      "top_n": 0
+    }
+  }
+}

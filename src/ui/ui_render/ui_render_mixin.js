@@ -117,10 +117,10 @@ export function uiRenderMixin(kbnServer, server, config) {
           ...(
             darkMode ?
               [
-                `${basePath}/node_modules/@elastic/eui/dist/eui_theme_k6_dark.css`,
+                `${basePath}/node_modules/@elastic/eui/dist/eui_theme_dark.css`,
                 `${basePath}/node_modules/@kbn/ui-framework/dist/kui_dark.css`,
               ] : [
-                `${basePath}/node_modules/@elastic/eui/dist/eui_theme_k6_light.css`,
+                `${basePath}/node_modules/@elastic/eui/dist/eui_theme_light.css`,
                 `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
               ]
           ),

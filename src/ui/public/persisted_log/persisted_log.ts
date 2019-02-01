@@ -18,6 +18,8 @@
  */
 
 import _ from 'lodash';
+import * as Rx from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Storage } from 'ui/storage';
 
 const localStorage = new Storage(window.localStorage);
@@ -39,6 +41,8 @@ export class PersistedLog<T = any> {
   public isDuplicate: (oldItem: T, newItem: T) => boolean;
   public storage: Storage;
   public items: T[];
+
+  private update$ = new Rx.BehaviorSubject(undefined);
 
   constructor(name: string, options: PersistedLogOptions<T> = {}, storage = localStorage) {
     this.name = name;
@@ -76,10 +80,15 @@ export class PersistedLog<T = any> {
 
     // persist the stack
     this.storage.set(this.name, this.items);
+    this.update$.next(undefined);
     return this.items;
   }
 
   public get() {
     return _.cloneDeep(this.items);
+  }
+
+  public get$() {
+    return this.update$.pipe(map(() => this.get()));
   }
 }

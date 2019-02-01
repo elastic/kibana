@@ -2,36 +2,48 @@
 
 exports[`KibanaMigrator getActiveMappings returns full index mappings w/ core properties 1`] = `
 Object {
-  "doc": Object {
-    "dynamic": "strict",
-    "properties": Object {
-      "amap": Object {
-        "type": "text",
-      },
-      "bmap": Object {
-        "type": "text",
-      },
-      "config": Object {
-        "dynamic": "true",
-        "properties": Object {
-          "buildNum": Object {
-            "type": "keyword",
-          },
+  "dynamic": "strict",
+  "properties": Object {
+    "amap": Object {
+      "type": "text",
+    },
+    "bmap": Object {
+      "type": "text",
+    },
+    "config": Object {
+      "dynamic": "true",
+      "properties": Object {
+        "buildNum": Object {
+          "type": "keyword",
         },
       },
-      "migrationVersion": Object {
-        "dynamic": "true",
-        "type": "object",
+    },
+    "migrationVersion": Object {
+      "dynamic": "true",
+      "type": "object",
+    },
+    "namespace": Object {
+      "type": "keyword",
+    },
+    "references": Object {
+      "properties": Object {
+        "id": Object {
+          "type": "keyword",
+        },
+        "name": Object {
+          "type": "keyword",
+        },
+        "type": Object {
+          "type": "keyword",
+        },
       },
-      "namespace": Object {
-        "type": "keyword",
-      },
-      "type": Object {
-        "type": "keyword",
-      },
-      "updated_at": Object {
-        "type": "date",
-      },
+      "type": "nested",
+    },
+    "type": Object {
+      "type": "keyword",
+    },
+    "updated_at": Object {
+      "type": "date",
     },
   },
 }
