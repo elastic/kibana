@@ -156,9 +156,11 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should allow printing raw timestamp of data', async () => {
-        await PageObjects.visualBuilder.enterMarkdown('{{ count.data.raw.[0].[0] }}');
-        const text = await PageObjects.visualBuilder.getMarkdownText();
-        expect(text).to.be('1442901600000');
+        await retry.try(async () => {
+          await PageObjects.visualBuilder.enterMarkdown('{{ count.data.raw.[0].[0] }}');
+          const text = await PageObjects.visualBuilder.getMarkdownText();
+          expect(text).to.be('1442901600000');
+        });
       });
 
       it('should allow printing raw value of data', async () => {
