@@ -131,7 +131,7 @@ describe('UncommonProcess Table Component', () => {
           .find('[data-header="Hosts"]')
           .at(2)
           .text()
-      ).toBe('hello-world, hello-world-2');
+      ).toBe('hello-world,\u00a0hello-world-2');
     });
 
     test('it is empty when all hosts are invalid because they do not contain an id and a name', () => {
@@ -187,7 +187,7 @@ describe('UncommonProcess Table Component', () => {
           .find('[data-header="Hosts"]')
           .at(4)
           .text()
-      ).toBe('hello-world, hello-world-2');
+      ).toBe('hello-world,\u00a0hello-world-2');
     });
   });
 });

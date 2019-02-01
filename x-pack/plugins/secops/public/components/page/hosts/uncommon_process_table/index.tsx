@@ -194,8 +194,8 @@ const getUncommonColumns = (startDate: number): Array<Columns<UncommonProcessesE
         .filter(({ id, name }) => id != null && name != null)
         .map(({ id, name }, index) => {
           return (
-            <>
-              {index !== 0 ? ', ' : ''}
+            <React.Fragment key={index}>
+              {index !== 0 ? <>,&nbsp;</> : null}
               <DraggableWrapper
                 key={id!}
                 dataProvider={{
@@ -226,7 +226,7 @@ const getUncommonColumns = (startDate: number): Array<Columns<UncommonProcessesE
                   )
                 }
               />
-            </>
+            </React.Fragment>
           );
         });
       return draggables.length > 0 ? draggables : getEmptyTagValue();
