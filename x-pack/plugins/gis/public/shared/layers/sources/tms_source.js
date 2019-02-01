@@ -8,7 +8,7 @@
 import { AbstractSource } from './source';
 
 export class AbstractTMSSource extends AbstractSource {
-  getUrlTemplate() {
+  async getUrlTemplate() {
     throw new Error('Should implement TMSSource#getUrlTemplate');
   }
 }

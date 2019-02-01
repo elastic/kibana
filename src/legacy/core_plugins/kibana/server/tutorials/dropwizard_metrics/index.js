@@ -28,7 +28,7 @@ export function dropwizardMetricsSpecProvider(server, context) {
     name: i18n.translate('kbn.server.tutorials.dropwizardMetrics.nameTitle', {
       defaultMessage: 'Dropwizard metrics',
     }),
-    isBeta: true,
+    isBeta: false,
     category: TUTORIAL_CATEGORY.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.dropwizardMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from Dropwizard Java application.',
