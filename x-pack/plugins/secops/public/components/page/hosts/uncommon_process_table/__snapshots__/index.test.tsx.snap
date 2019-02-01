@@ -10,6 +10,24 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
         },
         "node": Object {
           "_id": "cPsuhGcB0WOhS6qyTKC0",
+          "host": Array [],
+          "instances": 93,
+          "process": Object {
+            "name": "elrond.elstc.co",
+            "title": "Hello World",
+          },
+          "user": Object {
+            "id": 0,
+            "name": "root",
+          },
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "98966fa2013c396155c460d35c0902be",
+        },
+        "node": Object {
+          "_id": "cPsuhGcB0WOhS6qyTKC0",
           "host": Array [
             Object {
               "id": "host-id-1",
@@ -54,6 +72,72 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
           },
         },
       },
+      Object {
+        "cursor": Object {
+          "value": "aa7ca589f1b8220002f2fc61c64cfbf1",
+        },
+        "node": Object {
+          "_id": "KwQDiWcB0WOhS6qyXmrW",
+          "host": Array [
+            Object {
+              "ip": Array [
+                "127.0.0.1",
+              ],
+            },
+          ],
+          "instances": 97,
+          "process": Object {
+            "name": "siem-kibana",
+            "title": "Hello World",
+          },
+          "user": Object {
+            "id": 1,
+            "name": "Evan",
+          },
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "aa7ca589f1b8220002f2fc61c64cfbf1",
+        },
+        "node": Object {
+          "_id": "KwQDiWcB0WOhS6qyXmrW",
+          "host": Array [
+            Object {
+              "ip": Array [
+                "127.0.0.1",
+              ],
+            },
+            Object {
+              "id": "host-id-1",
+              "name": "hello-world",
+            },
+            Object {
+              "ip": Array [
+                "127.0.0.1",
+              ],
+            },
+            Object {
+              "id": "host-id-2",
+              "name": "hello-world-2",
+            },
+            Object {
+              "ip": Array [
+                "127.0.0.1",
+              ],
+            },
+          ],
+          "instances": 97,
+          "process": Object {
+            "name": "siem-kibana",
+            "title": "Hello World",
+          },
+          "user": Object {
+            "id": 1,
+            "name": "Evan",
+          },
+        },
+      },
     ]
   }
   hasNextPage={true}
@@ -61,7 +145,7 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
   loading={false}
   nextCursor="aa7ca589f1b8220002f2fc61c64cfbf1"
   startDate={1546965070707}
-  totalCount={4}
+  totalCount={5}
   type="page"
 />
 `;

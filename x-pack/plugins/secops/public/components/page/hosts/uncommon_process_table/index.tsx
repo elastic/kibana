@@ -190,42 +190,45 @@ const getUncommonColumns = (startDate: number): Array<Columns<UncommonProcessesE
     hideForMobile: false,
     render: ({ node }) => {
       const hosts: HostEcsFields[] = node.host;
-      const draggables = hosts.map(({ id, name }) => {
-        if (name != null && id != null) {
+      const draggables = hosts
+        .filter(({ id, name }) => id != null && name != null)
+        .map(({ id, name }, index) => {
           return (
-            <DraggableWrapper
-              key={id}
-              dataProvider={{
-                and: [],
-                enabled: true,
-                id: escapeDataProviderId(`uncommon-process-table-${node._id}-hostName-${name}`),
-                name,
-                excluded: false,
-                kqlQuery: '',
-                queryMatch: {
-                  displayField: 'host.name',
-                  displayValue: name,
-                  field: 'host.id',
-                  value: id,
-                },
-                queryDate: {
-                  from: startDate,
-                  to: Date.now(),
-                },
-              }}
-              render={(dataProvider, _, snapshot) =>
-                snapshot.isDragging ? (
-                  <DragEffects>
-                    <Provider dataProvider={dataProvider} />
-                  </DragEffects>
-                ) : (
-                  <EuiLink href={`#/link-to/hosts/${encodeURIComponent(id)}`}>{name}</EuiLink>
-                )
-              }
-            />
+            <React.Fragment key={id!}>
+              {index !== 0 ? <>,&nbsp;</> : null}
+              <DraggableWrapper
+                key={id!}
+                dataProvider={{
+                  and: [],
+                  enabled: true,
+                  id: escapeDataProviderId(`uncommon-process-table-${node._id}-hostName-${name}`),
+                  name: name!,
+                  excluded: false,
+                  kqlQuery: '',
+                  queryMatch: {
+                    displayField: 'host.name',
+                    displayValue: name!,
+                    field: 'host.id',
+                    value: id!,
+                  },
+                  queryDate: {
+                    from: startDate,
+                    to: Date.now(),
+                  },
+                }}
+                render={(dataProvider, _, snapshot) =>
+                  snapshot.isDragging ? (
+                    <DragEffects>
+                      <Provider dataProvider={dataProvider} />
+                    </DragEffects>
+                  ) : (
+                    <EuiLink href={`#/link-to/hosts/${encodeURIComponent(id!)}`}>{name}</EuiLink>
+                  )
+                }
+              />
+            </React.Fragment>
           );
-        }
-      });
+        });
       return draggables.length > 0 ? draggables : getEmptyTagValue();
     },
   },
