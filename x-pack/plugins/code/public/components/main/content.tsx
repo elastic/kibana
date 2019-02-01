@@ -15,16 +15,16 @@ import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { withRouter } from 'react-router-dom';
 import styled from 'styled-components';
-import { FileTree, SearchScope } from '../../../model';
+import { FileTree, FileTreeItemType, SearchScope } from '../../../model';
 import { CommitInfo } from '../../../model/commit';
 import { changeSearchScope, FetchFileResponse, fetchMoreCommits } from '../../actions';
 import { MainRouteParams, PathTypes } from '../../common/types';
 import { RootState } from '../../reducers';
-import { hasMoreCommitsSelector, treeCommitsSelector } from '../../selectors';
+import { currentTreeSelector, hasMoreCommitsSelector, treeCommitsSelector } from '../../selectors';
 import { history } from '../../utils/url';
 import { Editor } from '../editor/editor';
 import { UnsupportedFileIcon } from '../shared/icons';
-import { CommitHistory } from './commit_history';
+import { CommitHistory, CommitHistoryLoading } from './commit_history';
 import { Directory } from './directory';
 import { TopBar } from './top_bar';
 import { UnsupportedFile } from './unsupported_file';
@@ -49,6 +49,10 @@ const DirectoryViewContainer = styled.div`
   overflow: auto;
   flex-grow: 1;
 `;
+const CommitHistoryContainer = styled.div`
+  overflow: auto;
+  flex-grow: 1;
+`;
 
 const Root = styled.div`
   flex-grow: 1;
@@ -59,6 +63,7 @@ const Root = styled.div`
 interface Props extends RouteComponentProps<MainRouteParams> {
   tree: FileTree;
   file: FetchFileResponse | undefined;
+  currentTree: FileTree | undefined;
   commits: CommitInfo[];
   hasMoreCommits: boolean;
   loadingCommits: boolean;
@@ -156,8 +161,11 @@ class CodeContent extends React.PureComponent<Props> {
       default:
         break;
     }
-    const { file } = this.props;
-    if (file) {
+    const currentTree = this.props.currentTree;
+    if (
+      currentTree &&
+      (currentTree.type === FileTreeItemType.File || currentTree.type === FileTreeItemType.Link)
+    ) {
       return (
         <ButtonsContainer>
           <EuiButtonGroup
@@ -258,7 +266,7 @@ class CodeContent extends React.PureComponent<Props> {
         }
         if (fileLanguage === 'markdown') {
           return (
-            <div className="markdown-body markdownContainer">
+            <div className="markdown-body code-markdown-container">
               <Markdown source={fileContent} escapeHtml={true} skipHtml={true} />
             </div>
           );
@@ -282,19 +290,16 @@ class CodeContent extends React.PureComponent<Props> {
         );
       case PathTypes.commits:
         return (
-          <React.Fragment>
+          <CommitHistoryContainer>
             <InfiniteScroll
               initialLoad={true}
               loadMore={() => !loadingCommits && this.props.fetchMoreCommits(repoUri)}
               hasMore={!loadingCommits && hasMoreCommits}
-              useWindow={true}
-              loader={
-                <div className="loader" key={0}>
-                  Loading ...
-                </div>
-              }
+              useWindow={false}
+              loader={<CommitHistoryLoading />}
             >
               <CommitHistory
+                hideLoading={true}
                 commits={commits}
                 repoUri={repoUri}
                 header={
@@ -304,7 +309,7 @@ class CodeContent extends React.PureComponent<Props> {
                 }
               />
             </InfiniteScroll>
-          </React.Fragment>
+          </CommitHistoryContainer>
         );
     }
   }
@@ -313,6 +318,7 @@ class CodeContent extends React.PureComponent<Props> {
 const mapStateToProps = (state: RootState) => ({
   file: state.file.file,
   tree: state.file.tree,
+  currentTree: currentTreeSelector(state),
   commits: treeCommitsSelector(state),
   hasMoreCommits: hasMoreCommitsSelector(state),
   loadingCommits: state.file.loadingCommits,
@@ -327,5 +333,6 @@ export const Content = withRouter(
   connect(
     mapStateToProps,
     mapDispatchToProps
+    // @ts-ignore
   )(CodeContent)
 );

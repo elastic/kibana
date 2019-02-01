@@ -19,6 +19,7 @@ const TopBarContainer = styled.div`
   flex-direction: column;
   justify-content: space-between;
   padding: ${paddingSizes.s};
+  min-height: 80px;
   border-bottom: ${euiBorderThick};
   nav {
     a {
