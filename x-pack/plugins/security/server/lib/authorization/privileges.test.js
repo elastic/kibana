@@ -27,11 +27,14 @@ describe('privileges should be tiered', () => {
       getSavedObjectAction,
       version: 'testVersion',
       login: 'test:login',
+      manageSpaces: 'manageSpaces',
     });
     expect(privMap).toMatchObject({
       global: {
         all: [
           'testVersion',
+          'test:login',
+          'manageSpaces',
           'action:saved_objects/someTypes/create',
           'action:saved_objects/someTypes/bulk_create',
           'action:saved_objects/someTypes/delete',
