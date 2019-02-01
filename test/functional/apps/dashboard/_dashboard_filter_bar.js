@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('uses default index pattern on an empty dashboard', async () => {
         await testSubjects.click('addFilter');
-        await dashboardExpect.fieldSuggestionIndexPatterns(['logstash-*']);
+        await dashboardExpect.fieldSuggestions(['bytes']);
       });
 
       it('shows index pattern of vis when one is added', async () => {
@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await filterBar.ensureFieldEditorModalIsClosed();
         await testSubjects.click('addFilter');
-        await dashboardExpect.fieldSuggestionIndexPatterns(['animals-*']);
+        await dashboardExpect.fieldSuggestions(['animal']);
       });
 
       it('works when a vis with no index pattern is added', async () => {
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await filterBar.ensureFieldEditorModalIsClosed();
         await testSubjects.click('addFilter');
-        await dashboardExpect.fieldSuggestionIndexPatterns(['animals-*']);
+        await dashboardExpect.fieldSuggestions(['animal']);
       });
     });
 
@@ -86,16 +86,16 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('are not selected by default', async function () {
-        const filters = await PageObjects.dashboard.getFilters(1000);
-        expect(filters.length).to.equal(0);
+        const filterCount = await filterBar.getFilterCount();
+        expect(filterCount).to.equal(0);
       });
 
       it('are added when a pie chart slice is clicked', async function () {
         await dashboardAddPanel.addVisualization('Rendering Test: pie');
         await PageObjects.dashboard.waitForRenderComplete();
         await pieChart.filterOnPieSlice('4,886');
-        const filters = await PageObjects.dashboard.getFilters();
-        expect(filters.length).to.equal(1);
+        const filterCount = await filterBar.getFilterCount();
+        expect(filterCount).to.equal(1);
 
         await pieChart.expectPieSliceCount(1);
       });
@@ -104,8 +104,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.saveDashboard('with filters');
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const filters = await PageObjects.dashboard.getFilters();
-        expect(filters.length).to.equal(1);
+        const filterCount = await filterBar.getFilterCount();
+        expect(filterCount).to.equal(1);
 
         await pieChart.expectPieSliceCount(1);
       });
@@ -115,8 +115,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.loadSavedDashboard('with filters');
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const filters = await PageObjects.dashboard.getFilters();
-        expect(filters.length).to.equal(1);
+        const filterCount = await filterBar.getFilterCount();
+        expect(filterCount).to.equal(1);
 
         await pieChart.expectPieSliceCount(1);
       });

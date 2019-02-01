@@ -41,7 +41,10 @@ export function replacePlaceholder(read, replacement) {
 
   replace.close = () => {
     read.unpipe();
-    read.close();
+
+    if (read.close) {
+      read.close();
+    }
   };
 
   return read.pipe(replace);
