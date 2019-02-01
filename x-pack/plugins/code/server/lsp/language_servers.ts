@@ -7,6 +7,7 @@
 import * as path from 'path';
 import { InstallationType } from '../../common/installation';
 import { LanguageServer } from '../../common/language_server';
+import { GoLauncher } from './go_launcher';
 import { JavaLauncher } from './java_launcher';
 import { LauncherConstructor } from './language_server_launcher';
 import { TypescriptServerLauncher } from './ts_launcher';
@@ -46,5 +47,13 @@ export const JAVA: LanguageServerDefinition = {
       lang.version
     }/jdt-language-server-${lang.version}-${lang.build}.tar.gz`,
 };
+export const GO: LanguageServerDefinition = {
+  name: 'Go',
+  builtinWorkspaceFolders: true,
+  languages: ['go'],
+  launcher: GoLauncher,
+  installationType: InstallationType.Plugin,
+  installationPluginName: 'goLanguageServer',
+};
 export const LanguageServers: LanguageServerDefinition[] = [TYPESCRIPT, JAVA];
-export const LanguageServersDeveloping: LanguageServerDefinition[] = [];
+export const LanguageServersDeveloping: LanguageServerDefinition[] = [GO];

@@ -138,6 +138,9 @@
           },
           "repository_config": {
             "properties": {
+              "disableGo": {
+                "type": "boolean"
+              },
               "disableJava": {
                 "type": "boolean"
               },

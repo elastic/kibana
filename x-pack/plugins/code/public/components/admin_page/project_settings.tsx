@@ -36,6 +36,7 @@ const IconContainer = styled.div`
 `;
 
 const defaultConfig = {
+  disableGo: true,
   disableJava: true,
   disableTypescript: true,
 };

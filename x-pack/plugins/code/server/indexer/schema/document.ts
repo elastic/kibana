@@ -68,6 +68,9 @@ export const DocumentSchema = {
       uri: {
         type: 'text',
       },
+      disableGo: {
+        type: 'boolean',
+      },
       disableJava: {
         type: 'boolean',
       },
