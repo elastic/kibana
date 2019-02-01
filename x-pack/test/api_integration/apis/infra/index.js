@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-console.log("Did you load?");
 export default function ({ loadTestFile }) {
   describe('InfraOps GraphQL Endpoints', () => {
     loadTestFile(require.resolve('./metadata'));
