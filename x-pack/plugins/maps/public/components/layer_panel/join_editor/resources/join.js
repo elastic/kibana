@@ -173,7 +173,7 @@ export class Join extends Component {
     }
 
     return (
-      <EuiFlexGroup className="gisJoinItem" responsive={false} wrap={true} gutterSize="s">
+      <EuiFlexGroup className="mapJoinItem" responsive={false} wrap={true} gutterSize="s">
 
         <EuiFlexItem grow={false}>
           <JoinExpression
@@ -195,7 +195,7 @@ export class Join extends Component {
         {metricsExpression}
 
         <EuiButtonIcon
-          className="gisJoinItem__delete"
+          className="mapJoinItem__delete"
           iconType="trash"
           color="danger"
           aria-label="Delete join"
