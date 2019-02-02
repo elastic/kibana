@@ -17,7 +17,6 @@ export function normalizeType(type) {
       'short',
       'byte',
       'token_count',
-      // TODO-VERSION
       '_version',
     ],
     date: ['date', 'datetime'],

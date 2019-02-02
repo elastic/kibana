@@ -72,7 +72,6 @@ module
 
     // List of system fields we don't want to display.
     // TODO - are we happy to ignore these fields?
-    // TODO-VERSION
     const OMIT_FIELDS = ['_source', '_type', '_index', '_id', '_version', '_score'];
 
     $scope.metricCards = [];

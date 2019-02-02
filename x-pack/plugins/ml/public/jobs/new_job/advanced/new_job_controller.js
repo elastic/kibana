@@ -106,7 +106,6 @@ module.controller('MlNewJob',
       '_source',
       '_type',
       '_uid',
-      // TODO-VERSION
       '_version',
       '_feature',
       '_ignored',
