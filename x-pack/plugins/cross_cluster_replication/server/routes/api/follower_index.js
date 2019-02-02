@@ -276,6 +276,7 @@ export const registerFollowerIndexRoutes = (server) => {
           await callWithRequest('ccr.unfollowLeaderIndex', { id: _id });
 
           // Try to re-open the index, store failures in a separate array to surface warnings in the UI
+          // This will allow users to query their index normally after unfollowing
           try {
             await callWithRequest('indices.open', { index: _id });
           } catch (e) {
