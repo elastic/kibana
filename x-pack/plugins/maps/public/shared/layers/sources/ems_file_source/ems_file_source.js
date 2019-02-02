@@ -39,11 +39,19 @@ export class EMSFileSource extends AbstractVectorSource {
     super(descriptor);
   }
 
-  async getGeoJsonWithMeta() {
+  async _getEmsVectorFileMeta() {
     const emsFiles = await getEmsVectorFilesMeta();
-    const fileSource = emsFiles.find((source => source.id === this._descriptor.id));
+    const meta = emsFiles.find((source => source.id === this._descriptor.id));
+    if (!meta) {
+      throw new Error(`Unable to find EMS vector shapes for id: ${this._descriptor.id}`);
+    }
+    return meta;
+  }
+
+  async getGeoJsonWithMeta() {
+    const emsVectorFileMeta = await this._getEmsVectorFileMeta();
     const fetchUrl = `../${GIS_API_PATH}/data/ems?id=${encodeURIComponent(this._descriptor.id)}`;
-    const featureCollection = await AbstractVectorSource.getGeoJson(fileSource, fetchUrl);
+    const featureCollection = await AbstractVectorSource.getGeoJson(emsVectorFileMeta, fetchUrl);
     return {
       data: featureCollection,
       meta: {}
@@ -59,22 +67,23 @@ export class EMSFileSource extends AbstractVectorSource {
   }
 
   async getDisplayName() {
-    const emsFiles = await getEmsVectorFilesMeta();
-    const fileSource = emsFiles.find((source => source.id === this._descriptor.id));
-    return fileSource.name;
+    try {
+      const emsVectorFileMeta = await this._getEmsVectorFileMeta();
+      return emsVectorFileMeta.name;
+    } catch (error) {
+      return this._descriptor.id;
+    }
   }
 
   async getAttributions() {
-    const emsFiles = await getEmsVectorFilesMeta();
-    const fileSource = emsFiles.find((source => source.id === this._descriptor.id));
-    return fileSource.attributions;
+    const emsVectorFileMeta = await this._getEmsVectorFileMeta();
+    return emsVectorFileMeta.attributions;
   }
 
 
   async getStringFields() {
-    const emsFiles = await getEmsVectorFilesMeta();
-    const fileSource = emsFiles.find((source => source.id === this._descriptor.id));
-    return fileSource.fields.map(f => {
+    const emsVectorFileMeta = await this._getEmsVectorFileMeta();
+    return emsVectorFileMeta.fields.map(f => {
       return { name: f.name, label: f.description };
     });
   }
