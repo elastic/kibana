@@ -23,7 +23,7 @@ import { Modifier, Shortcut } from '../shortcuts';
 import { ReferencesPanel } from './references_panel';
 
 export interface EditorActions {
-  closeReferences(): void;
+  closeReferences(changeUrl: boolean): void;
   findReferences(params: TextDocumentPositionParams): void;
   hoverResult(hover: Hover): void;
 }
@@ -160,7 +160,7 @@ export class EditorComponent extends React.Component<IProps> {
     return (
       this.props.isReferencesOpen && (
         <ReferencesPanel
-          onClose={this.props.closeReferences}
+          onClose={() => this.props.closeReferences(true)}
           references={this.props.references}
           isLoading={this.props.isReferencesLoading}
           title={this.props.referencesTitle}

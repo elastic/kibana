@@ -55,20 +55,22 @@ export function* watchLspMethods() {
   yield takeLatest(String(findReferences), handleReferences);
 }
 
-function handleCloseReferences() {
-  const { pathname, search } = history.location;
-  const queryParams = queryString.parse(search);
-  if (queryParams.tab) {
-    delete queryParams.tab;
-  }
-  if (queryParams.refUrl) {
-    delete queryParams.refUrl;
-  }
-  const query = queryString.stringify(queryParams);
-  if (query) {
-    history.push(`${pathname}?${query}`);
-  } else {
-    history.push(pathname);
+function handleCloseReferences(action: Action<boolean>) {
+  if (action.payload) {
+    const { pathname, search } = history.location;
+    const queryParams = queryString.parse(search);
+    if (queryParams.tab) {
+      delete queryParams.tab;
+    }
+    if (queryParams.refUrl) {
+      delete queryParams.refUrl;
+    }
+    const query = queryString.stringify(queryParams);
+    if (query) {
+      history.push(`${pathname}?${query}`);
+    } else {
+      history.push(pathname);
+    }
   }
 }
 
@@ -151,6 +153,8 @@ function* handleMainRouteChange(action: Action<Match>) {
       const { tab, refUrl } = queryParams;
       if (tab === 'references' && refUrl) {
         yield call(handleReference, decodeURIComponent(refUrl as string));
+      } else {
+        yield put(closeReferences(false));
       }
     }
     const commits = yield select((state: RootState) => state.file.treeCommits[file]);
