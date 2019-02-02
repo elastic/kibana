@@ -9,7 +9,7 @@ import { all, call, put, takeEvery } from 'redux-saga/effects';
 import { kfetch } from 'ui/kfetch';
 import { Repository } from '../../model';
 import { fetchReposSuccess } from '../actions';
-import { loadStatusFailed, loadStatusSuccess } from '../actions';
+import { loadRepoSuccess, loadStatusFailed, loadStatusSuccess } from '../actions';
 
 function fetchStatus(repoUri: string) {
   return kfetch({
@@ -17,7 +17,7 @@ function fetchStatus(repoUri: string) {
   });
 }
 
-function* loadStatus(action: Action<Repository[]>) {
+function* loadRepoListStatus(action: Action<Repository[]>) {
   try {
     const repositories = action.payload!;
     const promises = repositories.map(repo => call(fetchStatus, repo.uri));
@@ -35,6 +35,24 @@ function* loadStatus(action: Action<Repository[]>) {
   }
 }
 
-export function* watchLoadStatus() {
-  yield takeEvery(String(fetchReposSuccess), loadStatus);
+function* loadRepoStatus(action: Action<any>) {
+  try {
+    const repository = action.payload!;
+    const repoStatus = yield call(fetchStatus, repository.uri);
+    yield put(
+      loadStatusSuccess({
+        [repository.uri]: repoStatus,
+      })
+    );
+  } catch (err) {
+    yield put(loadStatusFailed(err));
+  }
+}
+
+export function* watchLoadRepoListStatus() {
+  yield takeEvery(String(fetchReposSuccess), loadRepoListStatus);
+}
+
+export function* watchLoadRepoStatus() {
+  yield takeEvery(String(loadRepoSuccess), loadRepoStatus);
 }
