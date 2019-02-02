@@ -83,7 +83,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   ml.closeJob = ca({
     urls: [
       {
-        fmt: '/_ml/anomaly_detectors/<%=jobId%>/_close?force=true',
+        fmt: '/_ml/anomaly_detectors/<%=jobId%>/_close?force=<%=force%>',
         req: {
           jobId: {
             type: 'string'
