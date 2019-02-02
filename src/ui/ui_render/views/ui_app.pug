@@ -16,12 +16,23 @@ block content
       background-color: #{darkMode ? '#242424' : '#F5F7FA'};
     }
 
-    .kibanaWelcomeText {
-      color: #222;
-      font-size: 14px;
+    .kibanaWelcomeTitle {
+      color: #000;
+      font-size: 20px;
       font-family: Sans-serif;
       margin-top: 20px;
-      color: #666;
+      color: #000;
+      animation: fadeIn 1s ease-in-out;
+      animation-fill-mode: forwards;
+      opacity: 0;
+      animation-delay: 1.0s;
+    }
+
+    .kibanaWelcomeText {
+      color: #;
+      font-size: 14px;
+      font-family: Sans-serif;
+      color: #343741;
       animation: fadeIn 1s ease-in-out;
       animation-fill-mode: forwards;
       opacity: 0;
@@ -33,6 +44,10 @@ block content
       width: 128px;
       position: relative;
       margin-top: 40px;
+    }
+
+    .kibanaLoaderWrap + * {
+      margin-top: 24px;
     }
 
     .kibanaLoader {
@@ -113,8 +128,10 @@ block content
     .kibanaLoaderWrap
       .kibanaWelcomeLogoCircle
         .kibanaWelcomeLogo
+    h2.kibanaWelcomeTitle
+      | #{i18n('common.ui.legacyBrowserTitle', { defaultMessage: 'Please upgrade your browser' })}
     .kibanaWelcomeText
-      | #{i18n('common.ui.legacyBrowserMessage', { defaultMessage: 'Your browser version does not meet the required security capabilities of this application.' })}
+      | #{i18n('common.ui.legacyBrowserMessage', { defaultMessage: 'This Kibana installation has strict security requirements enabled that your current browser does not meet.' })}
 
   script.
     // Since this script tag does not contain a nonce, this code will not run
