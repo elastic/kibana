@@ -74,22 +74,21 @@ export default async function ({ readConfigFile }) {
   return {
     // list paths to the files that contain your plugins tests
     testFiles: [
-      resolve(__dirname, './apps/canvas'),
-      resolve(__dirname, './apps/graph'),
-      resolve(__dirname, './apps/monitoring'),
-      resolve(__dirname, './apps/watcher'),
-      resolve(__dirname, './apps/dashboard_mode'),
-      resolve(__dirname, './apps/security'),
-      resolve(__dirname, './apps/spaces'),
-      resolve(__dirname, './apps/logstash'),
-      resolve(__dirname, './apps/grok_debugger'),
-      resolve(__dirname, './apps/infra'),
-      resolve(__dirname, './apps/rollup_job'),
-      resolve(__dirname, './apps/maps'),
-      resolve(__dirname, './apps/status_page'),
-      resolve(__dirname, './apps/upgrade_assistant'),
+      // resolve(__dirname, './apps/canvas'),
+      // resolve(__dirname, './apps/graph'),
+      // resolve(__dirname, './apps/monitoring'),
+      // resolve(__dirname, './apps/watcher'),
+      // resolve(__dirname, './apps/dashboard_mode'),
+      // resolve(__dirname, './apps/security'),
+      // resolve(__dirname, './apps/spaces'),
+      // resolve(__dirname, './apps/logstash'),
+      // resolve(__dirname, './apps/grok_debugger'),
+      // resolve(__dirname, './apps/infra'),
+      // resolve(__dirname, './apps/gis'),
+      // resolve(__dirname, './apps/status_page'),
+      // resolve(__dirname, './apps/upgrade_assistant'),
       resolve(__dirname, './apps/code'),
-      resolve(__dirname, './apps/uptime')
+      // resolve(__dirname, './apps/uptime')
     ],
 
     // define the name and providers for services that should be
@@ -185,33 +184,33 @@ export default async function ({ readConfigFile }) {
       login: {
         pathname: '/login',
       },
-      monitoring: {
-        pathname: '/app/monitoring',
-      },
-      logstashPipelines: {
-        pathname: '/app/kibana',
-        hash: '/management/logstash/pipelines',
-      },
-      maps: {
-        pathname: '/app/maps',
-      },
-      graph: {
-        pathname: '/app/graph',
-      },
-      grokDebugger: {
-        pathname: '/app/kibana',
-        hash: '/dev_tools/grokdebugger',
-      },
-      spaceSelector: {
-        pathname: '/',
-      },
-      infraOps: {
-        pathname: '/app/infra',
-      },
-      canvas: {
-        pathname: '/app/canvas',
-        hash: '/',
-      },
+      // monitoring: {
+      //   pathname: '/app/monitoring',
+      // },
+      // logstashPipelines: {
+      //   pathname: '/app/kibana',
+      //   hash: '/management/logstash/pipelines',
+      // },
+      // gis: {
+      //   pathname: '/app/gis',
+      // },
+      // graph: {
+      //   pathname: '/app/graph',
+      // },
+      // grokDebugger: {
+      //   pathname: '/app/kibana',
+      //   hash: '/dev_tools/grokdebugger',
+      // },
+      // spaceSelector: {
+      //   pathname: '/',
+      // },
+      // infraOps: {
+      //   pathname: '/app/infra',
+      // },
+      // canvas: {
+      //   pathname: '/app/canvas',
+      //   hash: '/',
+      // },
       code: {
         pathname: '/app/code',
         hash: '/admin',
@@ -220,13 +219,13 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/code',
         hash: '/search',
       },
-      uptime: {
-        pathname: '/app/uptime',
-      },
-      rollupJob: {
-        pathname: '/app/kibana',
-        hash: '/management/elasticsearch/rollup_jobs/'
-      }
+      // uptime: {
+      //   pathname: '/app/uptime',
+      // },
+      // rollupJob: {
+      //   pathname: '/app/kibana',
+      //   hash: '/management/elasticsearch/rollup_jobs/'
+      // }
     },
 
     // choose where esArchiver should load archives from

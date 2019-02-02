@@ -26,16 +26,16 @@ export default async function ({ readConfigFile }) {
 
   return {
     testFiles: [
-      require.resolve('./apps/console'),
-      require.resolve('./apps/getting_started'),
-      require.resolve('./apps/context'),
-      require.resolve('./apps/dashboard'),
-      require.resolve('./apps/discover'),
-      require.resolve('./apps/home'),
-      require.resolve('./apps/management'),
-      require.resolve('./apps/status_page'),
-      require.resolve('./apps/timelion'),
-      require.resolve('./apps/visualize'),
+      // require.resolve('./apps/console'),
+      // require.resolve('./apps/getting_started'),
+      // require.resolve('./apps/context'),
+      // require.resolve('./apps/dashboard'),
+      // require.resolve('./apps/discover'),
+      // require.resolve('./apps/home'),
+      // require.resolve('./apps/management'),
+      // require.resolve('./apps/status_page'),
+      // require.resolve('./apps/timelion'),
+      // require.resolve('./apps/visualize'),
       require.resolve('./apps/xpack'),
     ],
     pageObjects,
@@ -64,44 +64,44 @@ export default async function ({ readConfigFile }) {
     },
 
     apps: {
-      status_page: {
-        pathname: '/status',
-      },
-      discover: {
-        pathname: '/app/kibana',
-        hash: '/discover',
-      },
-      context: {
-        pathname: '/app/kibana',
-        hash: '/context',
-      },
-      visualize: {
-        pathname: '/app/kibana',
-        hash: '/visualize',
-      },
-      dashboard: {
-        pathname: '/app/kibana',
-        hash: '/dashboards',
-      },
+      // status_page: {
+      //   pathname: '/status',
+      // },
+      // discover: {
+      //   pathname: '/app/kibana',
+      //   hash: '/discover',
+      // },
+      // context: {
+      //   pathname: '/app/kibana',
+      //   hash: '/context',
+      // },
+      // visualize: {
+      //   pathname: '/app/kibana',
+      //   hash: '/visualize',
+      // },
+      // dashboard: {
+      //   pathname: '/app/kibana',
+      //   hash: '/dashboards',
+      // },
       settings: {
         pathname: '/app/kibana',
         hash: '/management',
       },
-      timelion: {
-        pathname: '/app/timelion',
-      },
-      console: {
-        pathname: '/app/kibana',
-        hash: '/dev_tools/console',
-      },
-      account: {
-        pathname: '/app/kibana',
-        hash: '/account',
-      },
-      home: {
-        pathname: '/app/kibana',
-        hash: '/home',
-      },
+      // timelion: {
+      //   pathname: '/app/timelion',
+      // },
+      // console: {
+      //   pathname: '/app/kibana',
+      //   hash: '/dev_tools/console',
+      // },
+      // account: {
+      //   pathname: '/app/kibana',
+      //   hash: '/account',
+      // },
+      // home: {
+      //   pathname: '/app/kibana',
+      //   hash: '/home',
+      // },
     },
     junit: {
       reportName: 'UI Functional Tests'
