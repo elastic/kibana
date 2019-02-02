@@ -5,6 +5,7 @@
  */
 
 import Boom from 'boom';
+import { get } from 'lodash';
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import {
@@ -395,6 +396,16 @@ export const reindexServiceFactory = (
 
   return {
     async hasRequiredPrivileges(indexName: string) {
+      // If security is disabled, return true.
+      const xpackInfo = await callCluster('transport.request', {
+        path: '/_xpack',
+        method: 'GET',
+      });
+      if (!get(xpackInfo, 'features.security.enabled')) {
+        return true;
+      }
+
+      // Otherwise, query for required privileges for this index.
       const body = {
         cluster: ['manage'],
         index: [
@@ -418,7 +429,7 @@ export const reindexServiceFactory = (
       }
 
       const resp = await callCluster('transport.request', {
-        path: '/_xpack/security/user/_has_privileges',
+        path: '/_security/user/_has_privileges',
         method: 'POST',
         body,
       });

@@ -47,13 +47,22 @@ describe('reindexService', () => {
   });
 
   describe('hasRequiredPrivileges', () => {
-    it('calls security API with basic requirements', async () => {
-      callCluster.mockResolvedValueOnce({ has_all_requested: true });
+    it('returns true if security is disabled', async () => {
+      callCluster.mockResolvedValueOnce({ features: { security: { enabled: false } } });
 
       const hasRequired = await service.hasRequiredPrivileges('anIndex');
       expect(hasRequired).toBe(true);
-      expect(callCluster).toHaveBeenCalledWith('transport.request', {
-        path: '/_xpack/security/user/_has_privileges',
+    });
+
+    it('calls security API with basic requirements', async () => {
+      callCluster
+        .mockResolvedValueOnce({ features: { security: { enabled: true } } })
+        .mockResolvedValueOnce({ has_all_requested: true });
+
+      const hasRequired = await service.hasRequiredPrivileges('anIndex');
+      expect(hasRequired).toBe(true);
+      expect(callCluster).toHaveBeenNthCalledWith(2, 'transport.request', {
+        path: '/_security/user/_has_privileges',
         method: 'POST',
         body: {
           cluster: ['manage'],
@@ -72,11 +81,13 @@ describe('reindexService', () => {
     });
 
     it('includes manage_ml for ML indices', async () => {
-      callCluster.mockResolvedValueOnce({ has_all_requested: true });
+      callCluster
+        .mockResolvedValueOnce({ features: { security: { enabled: true } } })
+        .mockResolvedValueOnce({ has_all_requested: true });
 
       await service.hasRequiredPrivileges('.ml-anomalies');
-      expect(callCluster).toHaveBeenCalledWith('transport.request', {
-        path: '/_xpack/security/user/_has_privileges',
+      expect(callCluster).toHaveBeenNthCalledWith(2, 'transport.request', {
+        path: '/_security/user/_has_privileges',
         method: 'POST',
         body: {
           cluster: ['manage', 'manage_ml'],
@@ -95,11 +106,13 @@ describe('reindexService', () => {
     });
 
     it('includes manage_watcher for watcher indices', async () => {
-      callCluster.mockResolvedValueOnce({ has_all_requested: true });
+      callCluster
+        .mockResolvedValueOnce({ features: { security: { enabled: true } } })
+        .mockResolvedValueOnce({ has_all_requested: true });
 
       await service.hasRequiredPrivileges('.watches');
-      expect(callCluster).toHaveBeenCalledWith('transport.request', {
-        path: '/_xpack/security/user/_has_privileges',
+      expect(callCluster).toHaveBeenNthCalledWith(2, 'transport.request', {
+        path: '/_security/user/_has_privileges',
         method: 'POST',
         body: {
           cluster: ['manage', 'manage_watcher'],
