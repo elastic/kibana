@@ -91,35 +91,23 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   $scope.updateQueryAndDispatch = function ({ dateRange, query }) {
     $scope.query = query;
     $scope.time = dateRange;
-    getStore().then(store => {
-      // ignore outdated query
-      if ($scope.query !== query && $scope.time !== dateRange) {
-        return;
-      }
+    syncAppAndGlobalState();
 
-      store.dispatch(setQuery({ query: $scope.query, timeFilters: $scope.time }));
-
-      syncAppAndGlobalState();
-    });
+    getStore().dispatch(setQuery({ query: $scope.query, timeFilters: $scope.time }));
   };
   $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
     $scope.refreshConfig = {
       isPaused,
       interval: refreshInterval ? refreshInterval : $scope.refreshConfig.interval
     };
-    getStore().then(store => {
-      // ignore outdated
-      if ($scope.refreshConfig.isPaused !== isPaused && $scope.refreshConfig.interval !== refreshInterval) {
-        return;
-      }
+    syncAppAndGlobalState();
 
-      store.dispatch(setRefreshConfig($scope.refreshConfig));
-
-      syncAppAndGlobalState();
-    });
+    getStore().dispatch(setRefreshConfig($scope.refreshConfig));
   };
 
-  getStore().then(store => {
+  function renderMap() {
+    const store = getStore();
+
     // clear old UI state
     store.dispatch(setSelectedLayer(null));
     store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
@@ -150,8 +138,10 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       <Provider store={store}>
         <GisMap/>
       </Provider>,
-      root);
-  });
+      root
+    );
+  }
+  renderMap();
 
   let prevIndexPatternIds;
   async function updateIndexPatterns(nextIndexPatternIds) {
@@ -203,8 +193,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   config.watch('k7design', (val) => $scope.showPluginBreadcrumbs = !val);
 
   async function doSave(saveOptions) {
-    const store = await  getStore();
-    savedMap.syncWithStore(store.getState());
+    savedMap.syncWithStore(getStore().getState());
 
     let id;
     try {
