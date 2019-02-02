@@ -23,15 +23,9 @@
 }
 
 
-/**
-  * 1. Keep the legend from being overlapped by the dashboard panel title
-  * 2. Make sure the chart is centered based on legend
-  */
-
 .visLegend {
   @include euiFontSizeXS;
   display: flex;
-  padding-top: $euiSizeM; /* 1 */
   min-height: 0;
   height: 100%;
   overflow: hidden;

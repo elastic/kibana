@@ -70,6 +70,7 @@ input[type="checkbox"],
 }
 
 .application {
+  background-color: $euiColorEmptyShade;
   position: relative;
   z-index: 0;
   display: flex;
