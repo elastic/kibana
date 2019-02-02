@@ -72,7 +72,7 @@ describe('getDeprecatedApmIndices', () => {
   });
 });
 
-describe.only('isLegacyApmIndex', () => {
+describe('isLegacyApmIndex', () => {
   it('is true when for no version', () => {
     expect(isLegacyApmIndex('foo-1', ['foo-*'], {})).toEqual(true);
   });

@@ -277,10 +277,7 @@ export const reindexServiceFactory = (
     const startReindex = (await callCluster('reindex', {
       refresh: true,
       waitForCompletion: false,
-      body: {
-        source: { index: indexName },
-        dest: { index: reindexOp.attributes.newIndexName },
-      },
+      body: reindexBody,
     })) as any;
 
     return actions.updateReindexOp(reindexOp, {

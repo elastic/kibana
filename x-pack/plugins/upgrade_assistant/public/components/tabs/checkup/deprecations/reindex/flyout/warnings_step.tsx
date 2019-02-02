@@ -117,8 +117,7 @@ export class WarningsFlyoutStep extends React.Component<
               />
               <p className="upgWarningsStep__warningDescription">
                 Starting in version 7.0.0, APM data will be represented in the Elastic Common
-                Schema. In order for legacy data to be included, it is required that the data is
-                re-indexed to support this new format.
+                Schema. Historical APM data will not visible until it's reindexed.
                 <br />
                 <EuiLink
                   href="https://www.elastic.co/guide/en/apm/server/master/breaking-changes.html"

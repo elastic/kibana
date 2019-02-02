@@ -9,18 +9,13 @@ import React from 'react';
 
 import { EuiBasicTable } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
+import { EnrichedDeprecationInfo } from '../../../../../server/lib/es_migration_apis';
 import { ReindexButton } from './reindex';
 
 const PAGE_SIZES = [10, 25, 50, 100, 250, 500, 1000];
 
-export interface IndexDeprecationDetails {
-  index: string;
-  reindex?: boolean;
-  details?: string;
-}
-
 export interface IndexDeprecationTableProps extends ReactIntl.InjectedIntlProps {
-  indices: IndexDeprecationDetails[];
+  indices: EnrichedDeprecationInfo[];
 }
 
 interface IndexDeprecationTableState {
@@ -142,8 +137,8 @@ export class IndexDeprecationTableUI extends React.Component<
     return {
       actions: [
         {
-          render(indexDep: IndexDeprecationDetails) {
-            return <ReindexButton indexName={indexDep.index} />;
+          render(indexDep: EnrichedDeprecationInfo) {
+            return <ReindexButton indexName={indexDep.index!} />;
           },
         },
       ],
