@@ -23,9 +23,6 @@
   @import 'viewport/index';
 }
 
-// Imports outside of theme selector don't change between light/dark modes
-@import 'components/index';
-
 // Must be outside of theme selector because it lives in a portal
 @import 'panel/panel_header/panel_options_menu_form';
 
