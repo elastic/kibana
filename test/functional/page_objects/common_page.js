@@ -270,15 +270,8 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     }
 
     async getAppNavLinksText() {
-      await retry.try(async () => {
-        if (await testSubjects.exists('appsMenu')) {
-          return;
-        }
-
-        await testSubjects.click('appsMenuButton');
-        await testSubjects.existsOrFail('appsMenu');
-      });
       const appsMenu = await testSubjects.find('appsMenu');
+      await browser.moveMouseTo(appsMenu);
       const appLinks = await testSubjects.findAllDescendant('appLink', appsMenu);
       const linksText = await Promise.all(appLinks.map((appLink) => appLink.getVisibleText()));
       return linksText;
