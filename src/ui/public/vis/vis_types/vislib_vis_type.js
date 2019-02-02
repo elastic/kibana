@@ -63,13 +63,7 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
         this.destroy();
       }
 
-      // console.log(esResponse);
-
       return new Promise(async (resolve) => {
-        if (!esResponse) {
-          return;
-        }
-
         if (this.el.clientWidth === 0 || this.el.clientHeight === 0) {
           return resolve();
         }
