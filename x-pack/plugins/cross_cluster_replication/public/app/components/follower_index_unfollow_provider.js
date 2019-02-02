@@ -55,11 +55,11 @@ class Provider extends PureComponent {
     const title = isSingle
       ? intl.formatMessage({
         id: 'xpack.crossClusterReplication.unfollowLeaderIndex.confirmModal.unfollowSingleTitle',
-        defaultMessage: 'Unfollow leader index of follower index \'{name}\'?',
+        defaultMessage: `Unfollow leader index of '{name}'?`,
       }, { name: ids[0] })
       : intl.formatMessage({
         id: 'xpack.crossClusterReplication.unfollowLeaderIndex.confirmModal.unfollowMultipleTitle',
-        defaultMessage: 'Unfollow leader indices of {count} follower indices?',
+        defaultMessage: 'Unfollow {count} leader indices?',
       }, { count: ids.length });
 
     return (
@@ -79,7 +79,7 @@ class Provider extends PureComponent {
           confirmButtonText={
             intl.formatMessage({
               id: 'xpack.crossClusterReplication.unfollowLeaderIndex.confirmModal.confirmButtonText',
-              defaultMessage: 'Unfollow',
+              defaultMessage: 'Unfollow leader',
             })
           }
           onMouseOver={this.onMouseOverModal}
@@ -89,9 +89,9 @@ class Provider extends PureComponent {
               <p>
                 <FormattedMessage
                   id="xpack.crossClusterReplication.unfollowLeaderIndex.confirmModal.singleUnfollowDescription"
-                  defaultMessage="This follower index will be paused, closed, and converted into a regular index.
-                    The index will no longer appear in Cross Cluster Replication but can still be managed using Index
-                    Management. This operation cannot be undone."
+                  defaultMessage="The follower index will be converted to a standard index. It will
+                    no longer appear in Cross Cluster Replication, but you can manage it in Index
+                    Management. You can't undo this operation."
                 />
               </p>
             </Fragment>
@@ -100,9 +100,9 @@ class Provider extends PureComponent {
               <p>
                 <FormattedMessage
                   id="xpack.crossClusterReplication.unfollowLeaderIndex.confirmModal.multipleUnfollowDescription"
-                  defaultMessage="The follower indices below will be paused, closed, and converted into regular indices.
-                    The indices will no longer appear in Cross Cluster Replication but can still be managed using Index
-                    Management. This operation cannot be undone."
+                  defaultMessage="The follower indices will be converted to standard indices. They
+                    will no longer appear in Cross Cluster Replication, but you can manage them in
+                    Index Management. You can't undo this operation."
                 />
               </p>
               <ul>{ids.map(id => <li key={id}>{id}</li>)}</ul>

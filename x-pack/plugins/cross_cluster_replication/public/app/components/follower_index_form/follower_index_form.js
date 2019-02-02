@@ -92,6 +92,7 @@ export const FollowerIndexForm = injectI18n(
       apiError: PropTypes.object,
       apiStatus: PropTypes.string.isRequired,
       remoteClusters: PropTypes.array,
+      saveButtonLabel: PropTypes.node,
     }
 
     constructor(props) {
@@ -288,7 +289,7 @@ export const FollowerIndexForm = injectI18n(
       if (apiError) {
         const title = intl.formatMessage({
           id: 'xpack.crossClusterReplication.followerIndexForm.savingErrorTitle',
-          defaultMessage: 'Error creating follower index',
+          defaultMessage: `Can't create follower index`,
         });
         const { leaderIndex } = this.state.followerIndex;
         const error = apiError.status === 404
@@ -296,12 +297,18 @@ export const FollowerIndexForm = injectI18n(
             data: {
               message: intl.formatMessage({
                 id: 'xpack.crossClusterReplication.followerIndexForm.leaderIndexNotFoundError',
-                defaultMessage: `The leader index '{leaderIndex}' you want to replicate from does not exist.`,
+                defaultMessage: `The leader index '{leaderIndex}' does not exist.`,
               }, { leaderIndex })
             }
           }
           : apiError;
-        return <SectionError title={title} error={error} />;
+
+        return (
+          <Fragment>
+            <SectionError title={title} error={error} />
+            <EuiSpacer size="l" />
+          </Fragment>
+        );
       }
 
       return null;
@@ -360,7 +367,7 @@ export const FollowerIndexForm = injectI18n(
           )}
           label={indexNameLabel}
           description={i18n.translate('xpack.crossClusterReplication.followerIndexForm.sectionFollowerIndexNameDescription', {
-            defaultMessage: 'A name for the follower index.'
+            defaultMessage: 'A unique name for your index.'
           })}
           helpText={indexNameHelpText}
           isLoading={isValidatingIndexName}
@@ -377,20 +384,35 @@ export const FollowerIndexForm = injectI18n(
         const { remoteClusters, currentUrl } = this.props;
 
         const errorMessages = {
-          noClusterFound: () => (<FormattedMessage
-            id="xpack.crossClusterReplication.followerIndexForm.emptyRemoteClustersCallOutDescription"
-            defaultMessage="Follower indices replicate indices on remote clusters. You must add a remote cluster."
-          />),
-          remoteClusterNotConnectedNotEditable: () => (<FormattedMessage
-            id="xpack.crossClusterReplication.followerIndexForm.currentRemoteClusterNotConnectedCallOutDescription"
-            defaultMessage="You need to connect it before editing this follower index. Edit the remote cluster to
-              fix the problem."
-          />),
-          remoteClusterDoesNotExist: () => (<FormattedMessage
-            id="xpack.crossClusterReplication.followerIndexForm.currentRemoteClusterNotFoundCallOutDescription"
-            defaultMessage="It might have been removed. In order to edit this follower index,
-              you need to add a remote cluster with the same name."
-          />)
+          noClusterFound: () => (
+            <FormattedMessage
+              id="xpack.crossClusterReplication.followerIndexForm.emptyRemoteClustersCallOutDescription"
+              defaultMessage="Replication requires a leader index on a remote cluster."
+            />
+          ),
+          remoteClusterNotConnectedNotEditable: (name) => ({
+            title: (
+              <FormattedMessage
+                id="xpack.crossClusterReplication.followerIndexForm.currentRemoteClusterNotConnectedCallOutTitle"
+                defaultMessage="Can't edit follower index because remote cluster '{name}' is not connected"
+                values={{ name }}
+              />
+            ),
+            description: (
+              <FormattedMessage
+                id="xpack.crossClusterReplication.followerIndexForm.currentRemoteClusterNotConnectedCallOutDescription"
+                defaultMessage="You can address this by editing the remote cluster."
+              />
+            ),
+          }),
+          remoteClusterDoesNotExist: (name) => (
+            <FormattedMessage
+              id="xpack.crossClusterReplication.followerIndexForm.currentRemoteClusterNotFoundCallOutDescription"
+              defaultMessage="To edit this follower index, you must add a remote cluster
+                named '{name}'."
+              values={{ name }}
+            />
+          ),
         };
 
         return (
@@ -408,7 +430,7 @@ export const FollowerIndexForm = injectI18n(
             description={(
               <FormattedMessage
                 id="xpack.crossClusterReplication.followerIndexForm.sectionRemoteClusterDescription"
-                defaultMessage="The remote cluster to replicate your leader index from."
+                defaultMessage="The cluster that contains the index to replicate."
               />
             )}
             fullWidth
@@ -450,11 +472,30 @@ export const FollowerIndexForm = injectI18n(
             </EuiTitle>
           )}
           label={leaderIndexLabel}
-          description={i18n.translate(
-            'xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexDescription',
-            {
-              defaultMessage: 'The leader index you want to replicate from the remote cluster.'
-            }
+          description={(
+            <Fragment>
+              <p>
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexDescription"
+                  defaultMessage="The index on the remote cluster to replicate to the follower index."
+                />
+              </p>
+
+              <p>
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexDescription2"
+                  defaultMessage="{note} The leader index must already exist."
+                  values={{ note: (
+                    <strong>
+                      <FormattedMessage
+                        id="xpack.crossClusterReplication.followerIndexForm.sectionLeaderIndexDescription2.noteLabel"
+                        defaultMessage="Note:"
+                      />
+                    </strong>
+                  ) }}
+                />
+              </p>
+            </Fragment>
           )}
           helpText={(
             <FormattedMessage
@@ -493,8 +534,8 @@ export const FollowerIndexForm = injectI18n(
                   <p>
                     <FormattedMessage
                       id="xpack.crossClusterReplication.followerIndexForm.advancedSettingsDescription"
-                      defaultMessage="Customize advanced settings to control the rate at which data is replicated.
-                        If you don't customize them, default advanced settings will be applied."
+                      defaultMessage="Advanced settings control the rate of replication. You can
+                        customize these settings or use the default values."
                     />
                   </p>
 
@@ -561,7 +602,6 @@ export const FollowerIndexForm = injectI18n(
 
         return (
           <Fragment>
-            <EuiSpacer size="m" />
             <EuiCallOut
               title={(
                 <FormattedMessage
@@ -582,7 +622,7 @@ export const FollowerIndexForm = injectI18n(
        * Form Actions
        */
       const renderActions = () => {
-        const { apiStatus } = this.props;
+        const { apiStatus, saveButtonLabel } = this.props;
         const { areErrorsVisible } = this.state;
 
         if (apiStatus === API_STATUS.SAVING) {
@@ -616,10 +656,7 @@ export const FollowerIndexForm = injectI18n(
                 fill
                 disabled={isSaveDisabled}
               >
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.followerIndexForm.saveButtonLabel"
-                  defaultMessage="Save"
-                />
+                {saveButtonLabel}
               </EuiButton>
             </EuiFlexItem>
 
@@ -649,6 +686,7 @@ export const FollowerIndexForm = injectI18n(
           </EuiForm>
 
           {renderFormErrorWarning()}
+          {this.renderApiErrors()}
           {renderActions()}
         </Fragment>
       );
@@ -670,7 +708,6 @@ export const FollowerIndexForm = injectI18n(
     render() {
       return (
         <Fragment>
-          {this.renderApiErrors()}
           {this.renderForm()}
           {this.renderLoading()}
         </Fragment>

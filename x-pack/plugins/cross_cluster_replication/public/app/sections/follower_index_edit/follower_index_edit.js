@@ -11,12 +11,13 @@ import chrome from 'ui/chrome';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import {
-  EuiPageContent,
   EuiButtonEmpty,
+  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiOverlayMask,
-  EuiConfirmModal,
+  EuiPageContent,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { listBreadcrumb, editBreadcrumb } from '../../services/breadcrumbs';
@@ -129,6 +130,9 @@ export const FollowerIndexEdit = injectI18n(
       return (
         <Fragment>
           <SectionError title={title} error={errorMessage} />
+
+          <EuiSpacer size="m" />
+
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
@@ -182,13 +186,13 @@ export const FollowerIndexEdit = injectI18n(
               {isPaused ? (
                 <FormattedMessage
                   id="xpack.crossClusterReplication.followerIndexEditForm.confirmModal.resumeDescription"
-                  defaultMessage="This follower index will also be resumed."
+                  defaultMessage="Updating a follower index resumes replication of its leader index."
                 />
               ) : (
                 <FormattedMessage
                   id="xpack.crossClusterReplication.followerIndexEditForm.confirmModal.description"
-                  defaultMessage="To update the follower index, it will first be paused and then resumed.
-                  If the update fails, you may need to manually resume the follower index."
+                  defaultMessage="The follower index is paused, then resumed. If the update fails,
+                    try manually resuming replication."
                 />
               )}
             </p>
@@ -251,6 +255,12 @@ export const FollowerIndexEdit = injectI18n(
                     remoteClusters={error ? [] : remoteClusters}
                     saveFollowerIndex={this.saveFollowerIndex}
                     clearApiError={clearApiError}
+                    saveButtonLabel={(
+                      <FormattedMessage
+                        id="xpack.crossClusterReplication.followerIndexEditForm.saveButtonLabel"
+                        defaultMessage="Update"
+                      />
+                    )}
                   />
                 );
               }}
