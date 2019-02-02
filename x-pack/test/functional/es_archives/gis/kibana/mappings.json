@@ -271,6 +271,9 @@
             "initials": {
               "type": "keyword"
             },
+            "disabledFeatures": {
+              "type": "keyword"
+            },
             "name": {
               "type": "text",
               "fields": {
