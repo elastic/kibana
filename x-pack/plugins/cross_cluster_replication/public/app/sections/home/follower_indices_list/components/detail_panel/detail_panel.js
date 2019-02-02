@@ -420,11 +420,13 @@ export class DetailPanelUi extends Component {
 
   renderFooter() {
     const {
+      followerIndexId,
       followerIndex,
       closeDetailPanel,
     } = this.props;
 
-    const indexManagementUri = getIndexListUri(`name:${followerIndex.name}`);
+    // Use ID instead of followerIndex, because followerIndex may not be loaded yet.
+    const indexManagementUri = getIndexListUri(`name:${followerIndexId}`);
 
     return (
       <EuiFlyoutFooter>
