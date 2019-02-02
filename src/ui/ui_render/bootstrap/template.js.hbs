@@ -1,9 +1,9 @@
 if (window.__kbnStrictCsp && window.__kbnCspNotEnforced__) {
   var legacyBrowserError = document.getElementById('kbn_legacy_browser_error');
-  legacyBrowserError.style = 'display: flex;'
+  legacyBrowserError.style.display = 'flex';
 } else {
   var loadingMessage = document.getElementById('kbn_loading_message');
-  loadingMessage.style = 'display: flex;'
+  loadingMessage.style.display = 'flex';
 
   window.onload = function () {
     var files = [
