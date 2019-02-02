@@ -56,7 +56,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async onMapListingPage() {
       log.debug(`onMapListingPage`);
-      const exists = await testSubjects.exists('gisListingPage');
+      const exists = await testSubjects.exists('mapsListingPage');
       return exists;
     }
 

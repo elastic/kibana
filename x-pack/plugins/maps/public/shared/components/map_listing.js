@@ -373,7 +373,7 @@ export class MapListing extends React.Component {
 
   render() {
     return (
-      <EuiPage data-test-subj="gisListingPage" restrictWidth>
+      <EuiPage data-test-subj="mapsListingPage" restrictWidth>
         <EuiPageBody>
           {this.renderPageContent()}
         </EuiPageBody>
