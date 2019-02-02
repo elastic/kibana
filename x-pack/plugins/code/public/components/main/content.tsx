@@ -22,12 +22,17 @@ import { CommitInfo } from '../../../model/commit';
 import { changeSearchScope, FetchFileResponse, fetchMoreCommits } from '../../actions';
 import { MainRouteParams, PathTypes } from '../../common/types';
 import { RepoState, RepoStatus, RootState } from '../../reducers';
-import { hasMoreCommitsSelector, statusSelector, treeCommitsSelector } from '../../selectors';
+import {
+  currentTreeSelector,
+  hasMoreCommitsSelector,
+  statusSelector,
+  treeCommitsSelector,
+} from '../../selectors';
 import { history } from '../../utils/url';
 import { Editor } from '../editor/editor';
 import { UnsupportedFileIcon } from '../shared/icons';
 import { CloneStatus } from './clone_status';
-import { CommitHistory } from './commit_history';
+import { CommitHistory, CommitHistoryLoading } from './commit_history';
 import { Directory } from './directory';
 import { TopBar } from './top_bar';
 import { UnsupportedFile } from './unsupported_file';
@@ -64,7 +69,7 @@ const Root = styled.div`
 `;
 
 interface Props extends RouteComponentProps<MainRouteParams> {
-  repoStatus: RepoStatus;
+  repoStatus?: RepoStatus;
   tree: FileTree;
   file: FetchFileResponse | undefined;
   currentTree: FileTree | undefined;
@@ -226,6 +231,9 @@ class CodeContent extends React.PureComponent<Props> {
   }
 
   public shouldRenderProgress() {
+    if (!this.props.repoStatus) {
+      return false;
+    }
     const { progress, cloneProgress, state } = this.props.repoStatus;
     return (
       !!progress &&
@@ -236,6 +244,9 @@ class CodeContent extends React.PureComponent<Props> {
   }
 
   public renderProgress() {
+    if (!this.props.repoStatus) {
+      return null;
+    }
     const { progress, cloneProgress } = this.props.repoStatus;
     const { org, repo } = this.props.match.params;
     return (

@@ -92,22 +92,26 @@ class CodeProjectItem extends React.PureComponent<{
     const projectManagement = (
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="none">
-          <EuiFlexItem grow={false}>
-            <div className="code-project-button" onClick={onClickSettings} role="button">
-              <EuiIcon type="gear" />
-              <EuiText size="xs" color="subdued">
-                Settings
-              </EuiText>
-            </div>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <div className="code-project-button" onClick={onClickIndex} role="button">
-              <EuiIcon type="indexSettings" />
-              <EuiText size="xs" color="subdued">
-                Index
-              </EuiText>
-            </div>
-          </EuiFlexItem>
+          {status && status.state !== RepoState.CLONING && (
+            <EuiFlexItem grow={false}>
+              <div className="code-project-button" onClick={onClickSettings} role="button">
+                <EuiIcon type="gear" />
+                <EuiText size="xs" color="subdued">
+                  Settings
+                </EuiText>
+              </div>
+            </EuiFlexItem>
+          )}
+          {status && status.state !== RepoState.CLONING && (
+            <EuiFlexItem grow={false}>
+              <div className="code-project-button" onClick={onClickIndex} role="button">
+                <EuiIcon type="indexSettings" />
+                <EuiText size="xs" color="subdued">
+                  Index
+                </EuiText>
+              </div>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <div className="code-project-button" onClick={onClickDelete} role="button">
               <EuiIcon type="trash" color="danger" />
