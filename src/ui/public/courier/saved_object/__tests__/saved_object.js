@@ -42,14 +42,13 @@ describe('Saved Object', function () {
    * that can be used to stub es calls.
    * @param indexPatternId
    * @param additionalOptions - object that will be assigned to the mocked doc response.
-   * @returns {{attributes: {}, type: string, id: *, _version: integer}}
+   * @returns {{attributes: {}, type: string, id: *, _version: string}}
    */
   function getMockedDocResponse(indexPatternId, additionalOptions = {}) {
     return {
       type: 'dashboard',
       id: indexPatternId,
-      // TODO-VERSION
-      _version: 2,
+      _version: 'foo',
       attributes: {},
       ...additionalOptions
     };
@@ -246,8 +245,7 @@ describe('Saved Object', function () {
           return BluebirdPromise.resolve({
             type: 'dashboard',
             id: 'myId',
-            // TODO-VERSION
-            _version: 2
+            _version: 'foo'
           });
         });
 
@@ -269,8 +267,7 @@ describe('Saved Object', function () {
             return BluebirdPromise.resolve({
               type: 'dashboard',
               id,
-              // TODO-VERSION
-              version: 2
+              version: 'foo'
             });
           });
           expect(savedObject.isSaving).to.be(false);
@@ -309,8 +306,7 @@ describe('Saved Object', function () {
             sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
               return BluebirdPromise.resolve({
                 id,
-                // TODO-VERSION
-                version: 2,
+                version: 'foo',
                 type: 'dashboard',
               });
             });
@@ -554,8 +550,7 @@ describe('Saved Object', function () {
           attributes: {
             title: 'testIndexPattern'
           },
-          // TODO-VERSION
-          _version: 2
+          _version: 'foo'
         });
 
         const savedObject = new SavedObject(config);
