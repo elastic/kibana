@@ -3,7 +3,6 @@ export const search = {
   _index: '.kibana',
   _type: 'search',
   _id: 'mock-search',
-  // TODO-VERSION
   _version: 1,
   found: true,
   _source: {
@@ -31,7 +30,6 @@ export const visualization = {
   _index: '.kibana',
   _type: 'visualization',
   _id: 'mock-visualization',
-  // TODO-VERSION
   _version: 1,
   found: true,
   _source: {
@@ -55,7 +53,6 @@ export const dashboard = {
   _index: '.kibana',
   _type: 'dashboard',
   _id: 'mock-dashboard',
-  // TODO-VERSION
   _version: 1,
   found: true,
   _source: {
