@@ -21,7 +21,7 @@ export function StaticColorSelection({ onChange, styleOptions }) {
       <EuiColorPicker
         onChange={onColorChange}
         color={styleOptions.color}
-        className="gisColorPicker euiFieldText"
+        className="mapColorPicker euiFieldText"
       />
     </EuiFormControlLayout>
   );

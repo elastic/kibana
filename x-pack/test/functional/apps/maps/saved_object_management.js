@@ -8,7 +8,7 @@ import expect from 'expect.js';
 
 export default function ({ getPageObjects, getService }) {
 
-  const PageObjects = getPageObjects(['gis', 'header', 'timePicker']);
+  const PageObjects = getPageObjects(['maps', 'header', 'timePicker']);
   const queryBar = getService('queryBar');
   const browser = getService('browser');
   const inspector = getService('inspector');
@@ -21,7 +21,7 @@ export default function ({ getPageObjects, getService }) {
 
     describe('read', () => {
       before(async () => {
-        await PageObjects.gis.loadSavedMap('join example');
+        await PageObjects.maps.loadSavedMap('join example');
       });
 
       it('should update global Kibana time to value stored with map', async () => {
@@ -32,26 +32,26 @@ export default function ({ getPageObjects, getService }) {
 
       it('should update global Kibana refresh config to value stored with map', async () => {
         const kibanaRefreshConfig = await PageObjects.timePicker.getRefreshConfig();
-        expect(kibanaRefreshConfig.interval).to.equal('0.02');
-        expect(kibanaRefreshConfig.units).to.equal('minutes');
+        expect(kibanaRefreshConfig.interval).to.equal('1');
+        expect(kibanaRefreshConfig.units).to.equal('seconds');
         expect(kibanaRefreshConfig.isPaused).to.equal(true);
       });
 
       it('should set map location to value stored with map', async () => {
-        const { lat, lon, zoom } = await PageObjects.gis.getView();
+        const { lat, lon, zoom } = await PageObjects.maps.getView();
         expect(lat).to.equal('-0.04647');
         expect(lon).to.equal('77.33426');
         expect(zoom).to.equal('3.02');
       });
 
       it('should load map layers stored with map', async () => {
-        const layerExists = await PageObjects.gis.doesLayerExist('geo_shapes*');
+        const layerExists = await PageObjects.maps.doesLayerExist('geo_shapes*');
         expect(layerExists).to.equal(true);
       });
 
       describe('mapState contains query', () => {
         before(async () => {
-          await PageObjects.gis.loadSavedMap('document example with query');
+          await PageObjects.maps.loadSavedMap('document example with query');
         });
 
         it('should update query bar with query stored with map', async () => {
@@ -66,9 +66,9 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should apply query stored with map', async () => {
-          await PageObjects.gis.openInspectorRequestsView();
+          await PageObjects.maps.openInspectorRequestsView();
           const requestStats = await inspector.getTableData();
-          const hits = PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits');
+          const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
           await inspector.close();
           expect(hits).to.equal('2');
         });
@@ -84,10 +84,10 @@ export default function ({ getPageObjects, getService }) {
           const query = await queryBar.getQueryString();
           expect(query).to.equal('machine.os.raw : "win 8"');
 
-          await PageObjects.gis.openInspectorRequestsView();
+          await PageObjects.maps.openInspectorRequestsView();
           const requestStats = await inspector.getTableData();
           await inspector.close();
-          const hits = PageObjects.gis.getInspectorStatRowHit(requestStats, 'Hits');
+          const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
           expect(hits).to.equal('1');
         });
       });
@@ -95,31 +95,31 @@ export default function ({ getPageObjects, getService }) {
 
     describe('create', () => {
       it('should allow saving map', async () => {
-        await PageObjects.gis.openNewMap();
+        await PageObjects.maps.openNewMap();
 
-        await PageObjects.gis.saveMap(MAP1_NAME);
-        const count = await PageObjects.gis.getMapCountWithName(MAP1_NAME);
+        await PageObjects.maps.saveMap(MAP1_NAME);
+        const count = await PageObjects.maps.getMapCountWithName(MAP1_NAME);
         expect(count).to.equal(1);
       });
 
       it('should allow saving map that crosses dateline', async () => {
-        await PageObjects.gis.openNewMap();
-        await PageObjects.gis.setView('64', '179', '5');
+        await PageObjects.maps.openNewMap();
+        await PageObjects.maps.setView('64', '179', '5');
 
-        await PageObjects.gis.saveMap(MAP2_NAME);
-        const count = await PageObjects.gis.getMapCountWithName(MAP2_NAME);
+        await PageObjects.maps.saveMap(MAP2_NAME);
+        const count = await PageObjects.maps.getMapCountWithName(MAP2_NAME);
         expect(count).to.equal(1);
       });
     });
 
     describe('delete', () => {
       it('should delete selected saved objects', async () => {
-        await PageObjects.gis.deleteSavedMaps(MAP_NAME_PREFIX);
+        await PageObjects.maps.deleteSavedMaps(MAP_NAME_PREFIX);
 
-        const map1Count = await PageObjects.gis.getMapCountWithName(MAP1_NAME);
+        const map1Count = await PageObjects.maps.getMapCountWithName(MAP1_NAME);
         expect(map1Count).to.equal(0);
 
-        const map2Count = await PageObjects.gis.getMapCountWithName(MAP2_NAME);
+        const map2Count = await PageObjects.maps.getMapCountWithName(MAP2_NAME);
         expect(map2Count).to.equal(0);
       });
     });

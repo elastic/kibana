@@ -17,9 +17,25 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('general', () => {
-    loadTestFile(require.resolve('./cookies'));
-    loadTestFile(require.resolve('./csp'));
-  });
+import { randomBytes } from 'crypto';
+import { promisify } from 'util';
+
+const randomBytesAsync = promisify(randomBytes);
+
+export const DEFAULT_CSP_RULES = Object.freeze([
+  `script-src 'unsafe-eval' 'nonce-{nonce}'`,
+  'worker-src blob:',
+  'child-src blob:',
+]);
+
+export async function generateCSPNonce() {
+  return (await randomBytesAsync(12)).toString('base64');
+}
+
+export function createCSPRuleString(rules: string[], nonce?: string) {
+  let ruleString = rules.join('; ');
+  if (nonce) {
+    ruleString = ruleString.replace(/\{nonce\}/g, nonce);
+  }
+  return ruleString;
 }

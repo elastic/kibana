@@ -15,10 +15,10 @@ import { AttributionControl } from './attribution_control';
 
 export function WidgetOverlay() {
   return (
-    <EuiFlexGroup className="gisWidgetOverlay" responsive={false} direction="column" alignItems="flexEnd" gutterSize="s">
+    <EuiFlexGroup className="mapWidgetOverlay" responsive={false} direction="column" alignItems="flexEnd" gutterSize="s">
       <EuiFlexItem>
         <EuiFlexGroup
-          className="gisWidgetOverlay__rightSide"
+          className="mapWidgetOverlay__rightSide"
           direction="column"
           justifyContent="spaceBetween"
           responsive={false}

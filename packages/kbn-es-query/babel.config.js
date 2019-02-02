@@ -17,9 +17,36 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('general', () => {
-    loadTestFile(require.resolve('./cookies'));
-    loadTestFile(require.resolve('./csp'));
-  });
-}
+// We can't use common Kibana presets here because of babel versions incompatibility
+module.exports = {
+  plugins: ['@babel/plugin-proposal-class-properties', '@babel/plugin-proposal-object-rest-spread'],
+  presets: ['@babel/typescript'],
+  env: {
+    public: {
+      presets: [
+        [
+          '@babel/preset-env',
+          {
+            targets: {
+              browsers: ['last 2 versions', '> 5%', 'Safari 7'],
+            },
+            modules: false
+          },
+        ],
+      ],
+    },
+    server: {
+      presets: [
+        [
+          '@babel/preset-env',
+          {
+            targets: {
+              node: 'current',
+            },
+          },
+        ],
+      ],
+    },
+  },
+  ignore: ['**/__tests__/**/*', '**/*.test.ts', '**/*.test.tsx'],
+};
