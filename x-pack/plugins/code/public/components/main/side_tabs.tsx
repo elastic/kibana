@@ -77,6 +77,7 @@ class CodeSideTabs extends React.PureComponent<RouteComponentProps<MainRoutePara
           </FileTreeContainer>
         ),
         isSelected: Tabs.file === this.sideTab,
+        'data-test-subj': 'codeFileTreeTab',
       },
       {
         id: Tabs.structure,
@@ -84,6 +85,7 @@ class CodeSideTabs extends React.PureComponent<RouteComponentProps<MainRoutePara
         content: <SymbolTree />,
         isSelected: Tabs.structure === this.sideTab,
         disabled: this.props.match.params.pathType === PathTypes.tree,
+        'data-test-subj': 'codeStructureTreeTab',
       },
     ];
   }

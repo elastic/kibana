@@ -205,6 +205,10 @@ export default async function ({ readConfigFile }) {
       code: {
         pathname: '/app/code',
         hash: '/admin',
+      },
+      codeSearch: {
+        pathname: '/app/code',
+        hash: '/search',
       }
     },
 

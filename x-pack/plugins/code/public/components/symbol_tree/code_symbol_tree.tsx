@@ -74,6 +74,7 @@ export class CodeSymbolTree extends React.PureComponent<Props> {
                 // @ts-ignore */}
         <Token iconType={tokenType} />
         <EuiText
+          data-test-subj={`codeStructureTreeNode-${name}`}
           onClick={this.getClickHandler(`${RepositoryUtils.locationToUrl(location)}?tab=structure`)}
         >
           <strong>{name}</strong>

@@ -76,7 +76,7 @@ const DirectoryNodes = (props: DirectoryNodesProps) => {
   };
   const nodes = props.nodes.map(n => (
     <DirectoryNode key={n.path}>
-      <Link to={props.getUrl(n.path!)}>
+      <Link to={props.getUrl(n.path!)} data-test-subj={`codeFileExplorerNode-${n.name}`}>
         <EuiIcon type={typeIconMap[props.type]} color="black" />
         <NodeName>{n.name}</NodeName>
       </Link>

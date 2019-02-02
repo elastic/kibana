@@ -42,7 +42,7 @@ export default function manageRepositoriesFunctonalTests({
         // Click the import repository button.
         await PageObjects.code.clickImportRepositoryButton();
 
-        await retry.tryForTime(120000, async () => {
+        await retry.tryForTime(300000, async () => {
           const repositoryItems = await testSubjects.findAll(repositoryListSelector);
           expect(repositoryItems).to.have.length(1);
           expect(await repositoryItems[0].getVisibleText()).to.equal(

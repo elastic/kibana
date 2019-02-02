@@ -100,6 +100,7 @@ exports[`render symbol tree correctly 1`] = `
             </div>
             <div
               className="euiText euiText--medium"
+              data-test-subj="codeStructureTreeNode-\\"User\\""
               onClick={[Function]}
             >
               <strong>
@@ -136,6 +137,7 @@ exports[`render symbol tree correctly 1`] = `
                 </div>
                 <div
                   className="euiText euiText--medium"
+                  data-test-subj="codeStructureTreeNode-bcrypt"
                   onClick={[Function]}
                 >
                   <strong>
@@ -170,6 +172,7 @@ exports[`render symbol tree correctly 1`] = `
                 </div>
                 <div
                   className="euiText euiText--medium"
+                  data-test-subj="codeStructureTreeNode-crypto"
                   onClick={[Function]}
                 >
                   <strong>
@@ -204,6 +207,7 @@ exports[`render symbol tree correctly 1`] = `
                 </div>
                 <div
                   className="euiText euiText--medium"
+                  data-test-subj="codeStructureTreeNode-mongoose"
                   onClick={[Function]}
                 >
                   <strong>
@@ -238,6 +242,7 @@ exports[`render symbol tree correctly 1`] = `
                 </div>
                 <div
                   className="euiText euiText--medium"
+                  data-test-subj="codeStructureTreeNode-UserModel"
                   onClick={[Function]}
                 >
                   <strong>
@@ -272,6 +277,7 @@ exports[`render symbol tree correctly 1`] = `
                 </div>
                 <div
                   className="euiText euiText--medium"
+                  data-test-subj="codeStructureTreeNode-comparePasswordFunction"
                   onClick={[Function]}
                 >
                   <strong>
@@ -306,6 +312,7 @@ exports[`render symbol tree correctly 1`] = `
                 </div>
                 <div
                   className="euiText euiText--medium"
+                  data-test-subj="codeStructureTreeNode-AuthToken"
                   onClick={[Function]}
                 >
                   <strong>
@@ -340,6 +347,7 @@ exports[`render symbol tree correctly 1`] = `
                 </div>
                 <div
                   className="euiText euiText--medium"
+                  data-test-subj="codeStructureTreeNode-userSchema"
                   onClick={[Function]}
                 >
                   <strong>
@@ -374,6 +382,7 @@ exports[`render symbol tree correctly 1`] = `
                 </div>
                 <div
                   className="euiText euiText--medium"
+                  data-test-subj="codeStructureTreeNode-save"
                   onClick={[Function]}
                 >
                   <strong>
@@ -408,6 +417,7 @@ exports[`render symbol tree correctly 1`] = `
                 </div>
                 <div
                   className="euiText euiText--medium"
+                  data-test-subj="codeStructureTreeNode-comparePassword"
                   onClick={[Function]}
                 >
                   <strong>
@@ -442,6 +452,7 @@ exports[`render symbol tree correctly 1`] = `
                 </div>
                 <div
                   className="euiText euiText--medium"
+                  data-test-subj="codeStructureTreeNode-gravatar"
                   onClick={[Function]}
                 >
                   <strong>
@@ -476,6 +487,7 @@ exports[`render symbol tree correctly 1`] = `
                 </div>
                 <div
                   className="euiText euiText--medium"
+                  data-test-subj="codeStructureTreeNode-User"
                   onClick={[Function]}
                 >
                   <strong>

@@ -86,7 +86,12 @@ export class CodeFileTree extends React.Component<Props> {
           this.getTreeToggler(node.path || '', true)();
         };
         return (
-          <div className={className} role="button" onClick={onClick}>
+          <div
+            data-test-subj={`codeFileTreeNode-Directory-${node.path}`}
+            className={className}
+            role="button"
+            onClick={onClick}
+          >
             {forceOpen ? (
               <FolderOpenTriangle onClick={onFolderClick} />
             ) : (
@@ -99,7 +104,12 @@ export class CodeFileTree extends React.Component<Props> {
       }
       case FileTreeItemType.Submodule: {
         return (
-          <div onClick={onClick} className={className} role="button">
+          <div
+            data-test-subj={`codeFileTreeNode-Submodule-${node.path}`}
+            onClick={onClick}
+            className={className}
+            role="button"
+          >
             <EuiIcon type="submodule" />
             <DirectoryNode>{node.name}</DirectoryNode>
           </div>
@@ -108,6 +118,7 @@ export class CodeFileTree extends React.Component<Props> {
       case FileTreeItemType.Link: {
         return (
           <div
+            data-test-subj={`codeFileTreeNode-Link-${node.path}`}
             onClick={onClick}
             className={classes(className, 'code-file-tree-file')}
             role="button"
@@ -120,6 +131,7 @@ export class CodeFileTree extends React.Component<Props> {
       case FileTreeItemType.File: {
         return (
           <div
+            data-test-subj={`codeFileTreeNode-File-${node.path}`}
             onClick={onClick}
             className={classes(className, 'code-file-tree-file')}
             role="button"
