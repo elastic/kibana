@@ -25,3 +25,6 @@ export function isNotFoundError(maybeError: any): boolean;
 export function isConflictError(maybeError: any): boolean;
 export function isEsUnavailableError(maybeError: any): boolean;
 export function isEsAutoCreateIndexError(maybeError: any): boolean;
+
+export function createInvalidVersionError(version: any): Error;
+export function isInvalidVersionError(maybeError: Error): boolean;

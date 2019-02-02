@@ -103,7 +103,6 @@ export class SavedObjectsClient {
    * @property {string} [options.id] - force id on creation, not recommended
    * @property {boolean} [options.overwrite=false]
    * @property {string} [options.namespace]
-   * // TODO-VERSION
    * @returns {promise} - { id, type, version, attributes }
   */
   async create(type, attributes = {}, options = {}) {
@@ -117,7 +116,6 @@ export class SavedObjectsClient {
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false] - overwrites existing documents
    * @property {string} [options.namespace]
-   * // TODO-VERSION
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes, error: { message } }]}
    */
   async bulkCreate(objects, options = {}) {
@@ -151,7 +149,6 @@ export class SavedObjectsClient {
    * @property {Array<string>} [options.fields]
    * @property {string} [options.namespace]
    * @property {object} [options.hasReference] - { type, id }
-   * // TODO-VERSION
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   async find(options = {}) {
@@ -164,7 +161,6 @@ export class SavedObjectsClient {
    * @param {array} objects - an array ids, or an array of objects containing id and optionally type
    * @param {object} [options={}]
    * @property {string} [options.namespace]
-   * // TODO-VERSION
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
    * @example
    *
@@ -184,7 +180,6 @@ export class SavedObjectsClient {
    * @param {string} id
    * @param {object} [options={}]
    * @property {string} [options.namespace]
-   * // TODO-VERSION
    * @returns {promise} - { id, type, version, attributes }
    */
   async get(type, id, options = {}) {
@@ -197,7 +192,6 @@ export class SavedObjectsClient {
    * @param {string} type
    * @param {string} id
    * @param {object} [options={}]
-   * // TODO-VERSION
    * @property {integer} options.version - ensures version matches that of persisted object
    * @property {string} [options.namespace]
    * @returns {promise}

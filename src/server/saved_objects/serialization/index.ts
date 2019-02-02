@@ -24,6 +24,7 @@
 
 import uuid from 'uuid';
 import { SavedObjectsSchema } from '../schema';
+import { decodeVersion, encodeVersion } from '../service/lib/version';
 
 /**
  * A raw document as represented directly in the saved object index.
@@ -32,8 +33,8 @@ export interface RawDoc {
   _id: string;
   _source: any;
   _type?: string;
-  // TODO-VERSION
-  _version?: number;
+  _seq_no?: number;
+  _primary_term?: number;
 }
 
 /**
@@ -65,8 +66,7 @@ interface SavedObjectDoc {
   type: string;
   namespace?: string;
   migrationVersion?: MigrationVersion;
-  // TODO-VERSION
-  version?: number;
+  version?: string;
   updated_at?: Date;
 
   [rootProp: string]: any;
@@ -118,9 +118,15 @@ export class SavedObjectsSerializer {
    *
    *  @param {RawDoc} rawDoc - The raw ES document to be converted to saved object format.
    */
-  // TODO-VERSION
-  public rawToSavedObject({ _id, _source, _version }: RawDoc): SanitizedSavedObjectDoc {
+  public rawToSavedObject(doc: RawDoc): SanitizedSavedObjectDoc {
+    const { _id, _source, _seq_no, _primary_term } = doc;
     const { type, namespace } = _source;
+
+    const version =
+      _seq_no != null || _primary_term != null
+        ? encodeVersion(_seq_no!, _primary_term!)
+        : undefined;
+
     return {
       type,
       id: this.trimIdPrefix(namespace, type, _id),
@@ -129,8 +135,7 @@ export class SavedObjectsSerializer {
       references: _source.references || [],
       ...(_source.migrationVersion && { migrationVersion: _source.migrationVersion }),
       ...(_source.updated_at && { updated_at: _source.updated_at }),
-      // TODO-VERSION
-      ...(_version != null && { version: _version }),
+      ...(version && { version }),
     };
   }
 
@@ -147,7 +152,6 @@ export class SavedObjectsSerializer {
       attributes,
       migrationVersion,
       updated_at,
-      // TODO-VERSION
       version,
       references,
     } = savedObj;
@@ -163,8 +167,7 @@ export class SavedObjectsSerializer {
     return {
       _id: this.generateRawId(namespace, type, id),
       _source: source,
-      // TODO-VERSION
-      ...(version != null && { _version: version }),
+      ...(version != null && decodeVersion(version)),
     };
   }
 

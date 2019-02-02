@@ -52,7 +52,6 @@ export class SavedObjectsClient {
    * @property {boolean} [options.overwrite=false]
    * @property {object} [options.migrationVersion]
    * @property {array} [options.references] [{ name, type, id }]
-   * // TODO-VERSION
    * @returns {promise} - SavedObject({ id, type, version, attributes })
    */
   create = (type, attributes = {}, options = {}) => {
@@ -90,7 +89,6 @@ export class SavedObjectsClient {
    * @param {array} objects - [{ type, id, attributes, references, migrationVersion }]
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false]
-   * // TODO-VERSION
    * @returns {promise} - { savedObjects: [{ id, type, version, attributes, error: { message } }]}
    */
   bulkCreate = (objects = [], options = {}) => {
@@ -131,7 +129,6 @@ export class SavedObjectsClient {
    * @property {integer} [options.perPage=20]
    * @property {array} options.fields
    * @property {object} [options.hasReference] - { type, id }
-   * // TODO-VERSION
    * @returns {promise} - { savedObjects: [ SavedObject({ id, type, version, attributes }) ]}
    */
   find = (options = {}) => {
@@ -149,7 +146,6 @@ export class SavedObjectsClient {
    *
    * @param {string} type
    * @param {string} id
-   * // TODO-VERSION
    * @returns {promise} - SavedObject({ id, type, version, attributes })
    */
   get = (type, id) => {
@@ -167,7 +163,6 @@ export class SavedObjectsClient {
    * Returns an array of objects by id
    *
    * @param {array} objects - an array ids, or an array of objects containing id and optionally type
-   * // TODO-VERSION
    * @returns {promise} - { savedObjects: [ SavedObject({ id, type, version, attributes }) ] }
    * @example
    *
@@ -193,13 +188,11 @@ export class SavedObjectsClient {
    * @param {string} id
    * @param {object} attributes
    * @param {object} options
-   * // TODO-VERSION
    * @prop {integer} options.version - ensures version matches that of persisted object
    * @prop {object} options.migrationVersion - The optional migrationVersion of this document
    * @prop {array} option.references - the references of the saved object
    * @returns {promise}
    */
-  // TODO-VERSION
   update(type, id, attributes, { version, migrationVersion, references } = {}) {
     if (!type || !id || !attributes) {
       return Promise.reject(new Error('requires type, id and attributes'));
@@ -210,7 +203,6 @@ export class SavedObjectsClient {
       attributes,
       migrationVersion,
       references,
-      // TODO-VERSION
       version
     };
 

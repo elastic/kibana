@@ -29,8 +29,7 @@ describe('SavedObjectsClient', () => {
     id: 'AVwSwFxtcMV38qjDZoQg',
     type: 'config',
     attributes: { title: 'Example title' },
-    // TODO-VERSION
-    version: 2
+    version: 'foo'
   };
 
   let kfetchStub;
@@ -229,10 +228,8 @@ describe('SavedObjectsClient', () => {
 
     test('makes HTTP call', () => {
       const attributes = { foo: 'Foo', bar: 'Bar' };
-      // TODO-VERSION
-      const body = { attributes, version: 2 };
-      // TODO-VERSION
-      const options = { version: 2 };
+      const body = { attributes, version: 'foo' };
+      const options = { version: 'foo' };
 
       savedObjectsClient.update('index-pattern', 'logstash-*', attributes, options);
       sinon.assert.calledOnce(kfetchStub);

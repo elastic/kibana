@@ -32,8 +32,7 @@ export const createUpdateRoute = (prereqs) => {
         }).required(),
         payload: Joi.object({
           attributes: Joi.object().required(),
-          // TODO-VERSION
-          version: Joi.number().min(1),
+          version: Joi.string(),
           references: Joi.array().items(
             Joi.object()
               .keys({
@@ -47,9 +46,7 @@ export const createUpdateRoute = (prereqs) => {
       handler(request) {
         const { savedObjectsClient } = request.pre;
         const { type, id } = request.params;
-        // TODO-VERSION
         const { attributes, version, references } = request.payload;
-        // TODO-VERSION
         const options = { version, references };
 
         return savedObjectsClient.update(type, id, attributes, options);
