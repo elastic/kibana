@@ -59,7 +59,6 @@ export default function ({ getService }) {
                   },
                   type: 'visualization',
                   updated_at: '2017-09-21T18:51:23.794Z',
-                  // TODO-VERSION
                   version: resp.body.saved_objects[0].version,
                   attributes: {
                     title: 'Count of requests',
@@ -91,7 +90,6 @@ export default function ({ getService }) {
                   id: '7.0.0-alpha1',
                   type: 'config',
                   updated_at: '2017-09-21T18:49:16.302Z',
-                  // TODO-VERSION
                   version: resp.body.saved_objects[2].version,
                   attributes: {
                     buildNum: 8467,
