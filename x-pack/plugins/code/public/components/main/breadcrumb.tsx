@@ -8,7 +8,6 @@
 import { EuiBreadcrumbs } from '@elastic/eui';
 import React from 'react';
 import { MainRouteParams } from '../../common/types';
-import { FileListDropdown } from './filelist_dropdown';
 import { VersionDropDown } from './version_dropdown';
 
 interface Props {
@@ -39,14 +38,11 @@ export class Breadcrumb extends React.PureComponent<Props> {
     const pathSegments = path ? path.split('/') : [];
 
     pathSegments.forEach((p, index) => {
+      const paths = pathSegments.slice(0, index + 1);
+      const href = `#${resource}/${org}/${repo}/tree/master/${paths.join('/')}`;
       breadcrumbs.push({
-        text: (
-          <FileListDropdown
-            revision={revision}
-            repoUri={repoUri}
-            paths={pathSegments.slice(0, index + 1)}
-          />
-        ),
+        text: p,
+        href,
       });
     });
     return <EuiBreadcrumbs max={Number.MAX_VALUE} truncate={false} breadcrumbs={breadcrumbs} />;
