@@ -42,6 +42,7 @@ module.directive('headerGlobalNav', (reactDirective, chrome, Private) => {
     helpExtension$: chrome.helpExtension.get$(),
     navLinks$: chrome.getNavLinks$(),
     recentlyAccessed$: recentlyAccessed.get$(),
+    forceAppSwitcherNavigation$: chrome.getForceAppSwitcherNavigation$(),
     navControls,
     homeHref
   });
