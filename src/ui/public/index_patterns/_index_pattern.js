@@ -179,7 +179,6 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
     return id;
   }
 
-  // TODO-VERSION
   function setVersion(indexPattern, version) {
     indexPattern.version = version;
     return version;
@@ -247,14 +246,12 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
         .then(resp => {
           // temporary compatability for savedObjectsClient
 
-          // TODO-VERSION
           setVersion(this, resp._version);
 
           return {
             _id: resp.id,
             _type: resp.type,
             _source: _.cloneDeep(resp.attributes),
-            // TODO-VERSION
             found: resp._version ? true : false
           };
         })
@@ -468,12 +465,9 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       const body = this.prepBody();
       // What keys changed since they last pulled the index pattern
       const originalChangedKeys = Object.keys(body).filter(key => body[key] !== this.originalBody[key]);
-      // TODO-VERSION
       return savedObjectsClient.update(type, this.id, body, { version: this.version })
-        // TODO-VERSION
         .then(({ id, _version }) => {
           setId(this, id);
-          // TODO-VERSION
           setVersion(this, _version);
         })
         .catch(err => {
@@ -516,7 +510,6 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
                   this[key] = samePattern[key];
                 });
 
-                // TODO-VERSION
                 setVersion(this, samePattern.version);
 
                 // Clear cache
