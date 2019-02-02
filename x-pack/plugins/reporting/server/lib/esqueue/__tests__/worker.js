@@ -336,13 +336,6 @@ describe('Worker class', function () {
         searchStub = sinon.stub(mockQueue.client, 'search').callsFake(() => Promise.resolve({ hits: { hits: [] } }));
       });
 
-      // TODO-VERSION
-      it('should query with version', function () {
-        const params = getSearchParams();
-        // TODO-VERSION
-        expect(params).to.have.property('version', true);
-      });
-
       it('should query by default doctype', function () {
         const params = getSearchParams();
         expect(params).to.have.property('type', constants.DEFAULT_SETTING_DOCTYPE);
@@ -367,6 +360,11 @@ describe('Worker class', function () {
 
       afterEach(() => {
         clock.restore();
+      });
+
+      it('should query with seq_no_primary_term', function () {
+        const { body } = getSearchParams(jobtype);
+        expect(body).to.have.property('seq_no_primary_term', true);
       });
 
       it('should filter unwanted source data', function () {
@@ -434,8 +432,6 @@ describe('Worker class', function () {
         index: 'myIndex',
         type: 'test',
         id: 12345,
-        // TODO-VERSION
-        version: 3
       };
       return mockQueue.client.get(params)
         .then((jobDoc) => {
@@ -449,15 +445,14 @@ describe('Worker class', function () {
       clock.restore();
     });
 
-    // TODO-VERSION
-    it('should use version on update', function () {
+    it('should use seqNo and primaryTerm on update', function () {
       worker._claimJob(job);
       const query = updateSpy.firstCall.args[0];
       expect(query).to.have.property('index', job._index);
       expect(query).to.have.property('type', job._type);
       expect(query).to.have.property('id', job._id);
-      // TODO-VERSION
-      expect(query).to.have.property('version', job._version);
+      expect(query).to.have.property('if_seq_no', job._seq_no);
+      expect(query).to.have.property('if_primary_term', job._primary_term);
     });
 
     it('should increment the job attempts', function () {
@@ -505,8 +500,7 @@ describe('Worker class', function () {
       expect(msg).to.equal(false);
     });
 
-    // TODO-VERSION
-    it('should reject the promise on version errors', function () {
+    it('should reject the promise on conflict errors', function () {
       mockQueue.client.update.restore();
       sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 409 }));
       return worker._claimJob(job)
@@ -530,8 +524,8 @@ describe('Worker class', function () {
       _index: 'myIndex',
       _type: 'test',
       _id: 12345,
-      // TODO-VERSION
-      _version: 3,
+      _seq_no: 3,
+      _primary_term: 3,
       found: true,
       _source: {
         jobtype: 'jobtype',
@@ -615,15 +609,14 @@ describe('Worker class', function () {
       clock.restore();
     });
 
-    // TODO-VERSION
-    it('should use version on update', function () {
+    it('should use _seq_no and _primary_term on update', function () {
       worker._failJob(job);
       const query = updateSpy.firstCall.args[0];
       expect(query).to.have.property('index', job._index);
       expect(query).to.have.property('type', job._type);
       expect(query).to.have.property('id', job._id);
-      // TODO-VERSION
-      expect(query).to.have.property('version', job._version);
+      expect(query).to.have.property('if_seq_no', job._seq_no);
+      expect(query).to.have.property('if_primary_term', job._primary_term);
     });
 
     it('should set status to failed', function () {
@@ -640,8 +633,7 @@ describe('Worker class', function () {
       expect(doc.output).to.have.property('content', msg);
     });
 
-    // TODO-VERSION
-    it('should return true on version mismatch errors', function () {
+    it('should return true on conflict errors', function () {
       mockQueue.client.update.restore();
       sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 409 }));
       return worker._failJob(job)
@@ -745,8 +737,8 @@ describe('Worker class', function () {
             expect(query).to.have.property('index', job._index);
             expect(query).to.have.property('type', job._type);
             expect(query).to.have.property('id', job._id);
-            // TODO-VERSION
-            expect(query).to.have.property('version', job._version);
+            expect(query).to.have.property('if_seq_no', job._seq_no);
+            expect(query).to.have.property('if_primary_term', job._primary_term);
             expect(query.body.doc).to.have.property('output');
             expect(query.body.doc.output).to.have.property('content_type', false);
             expect(query.body.doc.output).to.have.property('content', payload);
