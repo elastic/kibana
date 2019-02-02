@@ -12,7 +12,6 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
@@ -25,6 +24,10 @@ import { DataProvider } from '../data_providers/data_provider';
 import { OnChangeItemsPerPage, OnLoadMore } from '../events';
 import { LastUpdatedAt } from './last_updated';
 import * as i18n from './translations';
+
+const PagingContainer = styled.div`
+  padding: 0 10px 0 10px;
+`;
 
 interface FooterProps {
   dataProviders: DataProvider[];
@@ -40,6 +43,7 @@ interface FooterProps {
   serverSideEventCount: number;
   tieBreaker: string;
   updatedAt: number;
+  width: number;
 }
 
 interface FooterState {
@@ -48,19 +52,77 @@ interface FooterState {
 }
 
 /** The height of the footer, exported for use in height calculations */
-export const footerHeight = 50; // px
+export const footerHeight = 55; // px
+
+export const ServerSideEventCount = styled.div`
+  margin: 0 5px 0 5px;
+`;
 
 /** Displays the server-side count of events */
-export const EventsCount = pure<{ serverSideEventCount: number; itemsCount: number }>(
-  ({ itemsCount, serverSideEventCount }) => (
-    <EuiToolTip content={i18n.TOTAL_COUNT_OF_EVENTS}>
-      <h5>
-        <EuiBadge color="hollow">{itemsCount}</EuiBadge> {i18n.OF}{' '}
+export const EventsCount = pure<{
+  closePopover: () => void;
+  isOpen: boolean;
+  items: React.ReactNode[];
+  itemsCount: number;
+  onClick: () => void;
+  serverSideEventCount: number;
+}>(({ closePopover, isOpen, items, itemsCount, onClick, serverSideEventCount }) => (
+  <h5>
+    <PopoverRowItems
+      className="footer-popover"
+      id="customizablePagination"
+      data-test-subj="timelineSizeRowPopover"
+      button={
+        <>
+          <EuiBadge color="hollow">
+            {itemsCount}
+            <EuiButtonEmpty
+              size="s"
+              color="text"
+              iconType="arrowDown"
+              iconSide="right"
+              onClick={onClick}
+            />
+          </EuiBadge>
+          {` ${i18n.OF} `}
+        </>
+      }
+      isOpen={isOpen}
+      closePopover={closePopover}
+      panelPaddingSize="none"
+    >
+      <EuiContextMenuPanel items={items} data-test-subj="timelinePickSizeRow" />
+    </PopoverRowItems>
+    <EuiToolTip content={`${serverSideEventCount} ${i18n.TOTAL_COUNT_OF_EVENTS}`}>
+      <ServerSideEventCount>
         <EuiBadge color="hollow">{serverSideEventCount}</EuiBadge> {i18n.EVENTS}
-      </h5>
+      </ServerSideEventCount>
     </EuiToolTip>
-  )
-);
+  </h5>
+));
+
+export const PagingControl = pure<{
+  hasNextPage: boolean;
+  isLoading: boolean;
+  loadMore: () => void;
+}>(({ hasNextPage, isLoading, loadMore }) => (
+  <>
+    {hasNextPage && (
+      <PagingContainer>
+        <EuiButton
+          data-test-subj="TimelineMoreButton"
+          isLoading={isLoading}
+          onClick={loadMore}
+          size="s"
+        >
+          {isLoading ? `${i18n.LOADING}...` : i18n.LOAD_MORE}
+        </EuiButton>
+      </PagingContainer>
+    )}
+  </>
+));
+
+export const shortLastUpdated = (width: number): boolean => width < 500;
 
 const SpinnerAndEventCount = styled.div`
   display: flex;
@@ -71,7 +133,11 @@ const SpinnerAndEventCount = styled.div`
 const FooterContainer = styled.div<{ height: number }>`
   height: ${({ height }) => height}px;
   max-height: ${({ height }) => height}px;
+  overflow: hidden;
+  padding-top: 4px;
+  text-overflow: ellipsis;
   user-select: none;
+  white-space: nowrap;
 `;
 
 const PopoverRowItems = styled(EuiPopover)`
@@ -110,36 +176,28 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
       serverSideEventCount,
       hasNextPage,
       updatedAt,
+      width,
     } = this.props;
 
     if (isLoading && !this.state.paginationLoading) {
       return (
-        <LoadingPanel
-          height="auto"
-          width="100%"
-          text={`${i18n.LOADING_TIMELINE_DATA}...`}
-          data-test-subj="LoadingPanelTimeline"
-        />
+        <>
+          <LoadingPanel
+            data-test-subj="LoadingPanelTimeline"
+            height="35px"
+            showBorder={false}
+            text={`${i18n.LOADING_TIMELINE_DATA}...`}
+            width="100%"
+          />
+        </>
       );
     }
-
-    const button = (
-      <EuiButtonEmpty
-        size="s"
-        color="text"
-        iconType="arrowDown"
-        iconSide="right"
-        onClick={this.onButtonClick}
-      >
-        Rows: {itemsPerPage}
-      </EuiButtonEmpty>
-    );
 
     const rowItems =
       itemsPerPageOptions &&
       itemsPerPageOptions.map(item => (
         <EuiContextMenuItem
-          key={`${item}-timeline-rows`}
+          key={item}
           icon={itemsPerPage === item ? 'check' : 'empty'}
           onClick={() => {
             this.closePopover();
@@ -151,7 +209,6 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
       ));
     return (
       <>
-        <EuiHorizontalRule margin="xs" />
         {dataProviders.length !== 0 && (
           <FooterContainer height={height} data-test-subj="timeline-footer">
             <EuiFlexGroup
@@ -161,62 +218,26 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
               direction="row"
             >
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup
-                  gutterSize="none"
-                  alignItems="flexStart"
-                  justifyContent="flexStart"
-                  direction="column"
-                >
-                  <EuiFlexItem>
-                    <SpinnerAndEventCount data-test-subj="timeline-event-count">
-                      <EventsCount
-                        itemsCount={itemsCount}
-                        serverSideEventCount={serverSideEventCount}
-                      />
-                    </SpinnerAndEventCount>
-                  </EuiFlexItem>
-                  {serverSideEventCount > itemsPerPage && rowItems.length > 0 && (
-                    <EuiFlexItem>
-                      <PopoverRowItems
-                        className="footer-popover"
-                        id="customizablePagination"
-                        data-test-subj="timelineSizeRowPopover"
-                        button={button}
-                        isOpen={this.state.isPopoverOpen}
-                        closePopover={this.closePopover}
-                        panelPaddingSize="none"
-                      >
-                        <EuiContextMenuPanel
-                          items={rowItems}
-                          data-test-subj="timelinePickSizeRow"
-                        />
-                      </PopoverRowItems>
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
+                <SpinnerAndEventCount data-test-subj="timeline-event-count">
+                  <EventsCount
+                    closePopover={this.closePopover}
+                    isOpen={this.state.isPopoverOpen}
+                    items={rowItems}
+                    itemsCount={itemsCount}
+                    onClick={this.onButtonClick}
+                    serverSideEventCount={serverSideEventCount}
+                  />
+                </SpinnerAndEventCount>
               </EuiFlexItem>
-              {hasNextPage && (
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup
-                    gutterSize="none"
-                    alignItems="flexStart"
-                    justifyContent="center"
-                    direction="row"
-                  >
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        data-test-subj="TimelineMoreButton"
-                        isLoading={isLoading}
-                        onClick={this.loadMore}
-                      >
-                        {isLoading ? 'Loading...' : 'Load More'}
-                      </EuiButton>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              )}
               <EuiFlexItem grow={false}>
-                <LastUpdatedAt updatedAt={updatedAt} />
+                <PagingControl
+                  hasNextPage={hasNextPage}
+                  isLoading={isLoading}
+                  loadMore={this.loadMore}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <LastUpdatedAt updatedAt={updatedAt} short={shortLastUpdated(width)} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </FooterContainer>

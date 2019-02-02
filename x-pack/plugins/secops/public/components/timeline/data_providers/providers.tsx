@@ -5,7 +5,6 @@
  */
 
 import {
-  EuiBadge,
   // @ts-ignore
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,6 +15,7 @@ import { Draggable } from 'react-beautiful-dnd';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import { AndOrBadge } from '../../and_or_badge';
 import {
   OnChangeDataProviderKqlQuery,
   OnChangeDroppableAndProvider,
@@ -27,7 +27,6 @@ import { DataProvider } from './data_provider';
 import { Empty } from './empty';
 import { ProviderItemAndDragDrop } from './provider_item_and_drag_drop';
 import { ProviderItemBadge } from './provider_item_badge';
-import * as i18n from './translations';
 
 interface Props {
   id: string;
@@ -43,19 +42,15 @@ const PanelProviders = styled.div`
   display: flex;
   flex-direction: row;
   min-height: 100px;
-  padding: 10px;
+  padding: 5px 10px 5px 10px;
   overflow-y: auto;
 `;
 
-const EuiBadgeOrStyled = styled(EuiBadge)`
+const EuiBadgeOrStyled = styled.div`
   position: absolute;
-  right: -37px;
+  right: -42px;
   top: 27px;
   z-index: 1;
-  width: 20px;
-  height: 20px;
-  padding: 7px 6px 4px 6px;
-  border-radius: 100%;
 `;
 
 const PanelProvidersGroupContainer = styled(EuiFlexGroup)`
@@ -170,7 +165,9 @@ export const Providers = pure<Props>(
               </EuiFlexGroup>
             </PanelProviderItemContainer>
             <PanelProviderItemContainer grow={false}>
-              <EuiBadgeOrStyled color="hollow">{i18n.OR.toLocaleUpperCase()}</EuiBadgeOrStyled>
+              <EuiBadgeOrStyled>
+                <AndOrBadge type="or" />
+              </EuiBadgeOrStyled>
               <EuiHorizontalRule />
             </PanelProviderItemContainer>
           </PanelProvidersGroupContainer>

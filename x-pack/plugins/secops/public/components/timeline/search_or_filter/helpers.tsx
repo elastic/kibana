@@ -12,9 +12,16 @@ import {
   EuiSuperSelect,
   EuiText,
 } from '@elastic/eui';
+import styled from 'styled-components';
 
 import { KqlMode } from '../../../store/local/timeline/model';
+import { AndOrBadge } from '../../and_or_badge';
 import * as i18n from './translations';
+
+const AndOrContainer = styled.div`
+  position: relative;
+  top: -1px;
+`;
 
 interface ModeProperties {
   mode: KqlMode;
@@ -44,9 +51,15 @@ export const modes: { [key in KqlMode]: ModeProperties } = {
 export const options = [
   {
     value: modes.filter.mode,
-    inputDisplay: modes.filter.selectText,
+    inputDisplay: (
+      <AndOrContainer>
+        <AndOrBadge type="and" />
+        {modes.filter.selectText}
+      </AndOrContainer>
+    ),
     dropdownDisplay: (
       <>
+        <AndOrBadge type="and" />
         <strong>{modes.filter.selectText}</strong>
         <EuiSpacer size="xs" />
         <EuiText size="s" color="subdued">
@@ -57,9 +70,15 @@ export const options = [
   },
   {
     value: modes.search.mode,
-    inputDisplay: modes.search.selectText,
+    inputDisplay: (
+      <AndOrContainer>
+        <AndOrBadge type="or" />
+        {modes.search.selectText}
+      </AndOrContainer>
+    ),
     dropdownDisplay: (
       <>
+        <AndOrBadge type="or" />
         <strong>{modes.search.selectText}</strong>
         <EuiSpacer size="xs" />
         <EuiText size="s" color="subdued">

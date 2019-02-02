@@ -10,12 +10,12 @@ import {
   EuiButtonEmpty,
   EuiButtonEmptyProps,
   EuiContextMenu,
-  EuiHorizontalRule,
   EuiPopover,
 } from '@elastic/eui';
 import * as React from 'react';
 import styled from 'styled-components';
 
+import { AndOrBadge } from '../../and_or_badge';
 import {
   OnChangeDataProviderKqlQuery,
   OnDataProviderRemoved,
@@ -25,28 +25,17 @@ import {
 import { DataProvider } from './data_provider';
 import { ProviderBadge } from './provider_badge';
 import { getProviderActions } from './provider_item_actions';
-import * as i18n from './translations';
 
 const NumberProviderAndBadge = styled(EuiBadge)`
   margin: 0px 5px;
 `;
 
-const EuiBadgeAndStyled = styled(EuiBadge)`
-  position: absolute;
-  left: calc(50% - 15px);
-  top: -18px;
-  z-index: 1;
-  width: 27px;
-  height: 27px;
-  padding: 8px 3px 0px 3px;
-  border-radius: 100%;
-`;
-
-const AndStyled = styled.div`
-  position: relative;
-  .euiHorizontalRule {
-    margin: 28px 0px;
-  }
+const AndContianer = styled.div`
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 5px 0 5px 0;
 `;
 
 const EuiButtonContent = styled.div`
@@ -99,7 +88,7 @@ export class ProviderItemAndPopover extends React.PureComponent<
               {dataProvidersAnd.length}
             </NumberProviderAndBadge>
           )}
-          <EuiBadgeAndStyled color="hollow">{i18n.AND}</EuiBadgeAndStyled>
+          <AndOrBadge type="and" />
         </EuiButtonContent>
       </EuiButtonEmpty>
     );
@@ -145,10 +134,9 @@ export class ProviderItemAndPopover extends React.PureComponent<
                   <EuiContextMenu initialPanelId={0} panels={panelTree} />
                 </EuiAccordion>
                 {index < dataProvidersAnd.length - 1 && (
-                  <AndStyled>
-                    <EuiBadgeAndStyled color="hollow">{i18n.AND}</EuiBadgeAndStyled>
-                    <EuiHorizontalRule />
-                  </AndStyled>
+                  <AndContianer>
+                    <AndOrBadge type="and" />
+                  </AndContianer>
                 )}
               </div>
             );

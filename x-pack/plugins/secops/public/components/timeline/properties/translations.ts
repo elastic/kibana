@@ -43,7 +43,7 @@ export const DESCRIPTION = i18n.translate('xpack.secops.timeline.properties.desc
 export const DESCRIPTION_TOOL_TIP = i18n.translate(
   'xpack.secops.timeline.properties.descriptionToolTip',
   {
-    defaultMessage: 'The story told by the events and notes in this Timeline',
+    defaultMessage: 'A summary of the events and notes in this Timeline',
   }
 );
 

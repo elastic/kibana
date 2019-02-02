@@ -17,6 +17,7 @@ import { mockData } from './mock';
 describe('Footer Timeline Component', () => {
   const loadMore = jest.fn();
   const onChangeItemsPerPage = jest.fn();
+  const width = 500;
 
   describe('rendering', () => {
     test('it renders the default timeline footer', () => {
@@ -35,6 +36,7 @@ describe('Footer Timeline Component', () => {
           nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
           tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
           updatedAt={1546878704036}
+          width={width}
         />
       );
 
@@ -57,6 +59,7 @@ describe('Footer Timeline Component', () => {
           nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
           tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
           updatedAt={1546878704036}
+          width={width}
         />
       );
 
@@ -79,6 +82,7 @@ describe('Footer Timeline Component', () => {
           nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
           tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
           updatedAt={1546878704036}
+          width={width}
         />
       );
 
@@ -102,6 +106,7 @@ describe('Footer Timeline Component', () => {
             nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
             tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
             updatedAt={1546878704036}
+            width={width}
           />
         </I18nProvider>
       );
@@ -126,6 +131,7 @@ describe('Footer Timeline Component', () => {
             nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
             tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
             updatedAt={1546878704036}
+            width={width}
           />
         </I18nProvider>
       );
@@ -159,6 +165,7 @@ describe('Footer Timeline Component', () => {
           nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
           tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
           updatedAt={1546878704036}
+          width={width}
         />
       );
 
@@ -182,6 +189,7 @@ describe('Footer Timeline Component', () => {
             nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
             tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
             updatedAt={1546878704036}
+            width={width}
           />
         </I18nProvider>
       );
@@ -191,54 +199,6 @@ describe('Footer Timeline Component', () => {
         .first()
         .simulate('click');
       expect(wrapper.find('[data-test-subj="timelinePickSizeRow"]').exists()).toBeTruthy();
-    });
-
-    test('it does NOT render popover to select new itemsPerPage in timeline if there is not enough data for it ', () => {
-      const wrapper = mount(
-        <I18nProvider>
-          <Footer
-            dataProviders={mockDataProviders}
-            serverSideEventCount={2}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
-            height={100}
-            isLoading={false}
-            itemsCount={mockData.Events.edges.length}
-            itemsPerPage={2}
-            itemsPerPageOptions={[1, 5, 10, 20]}
-            onChangeItemsPerPage={onChangeItemsPerPage}
-            onLoadMore={loadMore}
-            nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
-            tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
-            updatedAt={1546878704036}
-          />
-        </I18nProvider>
-      );
-
-      expect(wrapper.find('[data-test-subj="timelineSizeRowPopover"]').exists()).toBeFalsy();
-    });
-
-    test('it will NOT render popover to select new itemsPerPage in timeline if props itemsPerPageOptions is empty', () => {
-      const wrapper = mount(
-        <I18nProvider>
-          <Footer
-            dataProviders={mockDataProviders}
-            serverSideEventCount={mockData.Events.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
-            height={100}
-            isLoading={false}
-            itemsCount={mockData.Events.edges.length}
-            itemsPerPage={2}
-            itemsPerPageOptions={[]}
-            onChangeItemsPerPage={onChangeItemsPerPage}
-            onLoadMore={loadMore}
-            nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
-            tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
-            updatedAt={1546878704036}
-          />
-        </I18nProvider>
-      );
-
-      expect(wrapper.find('[data-test-subj="timelineSizeRowPopover"]').exists()).toBeFalsy();
     });
   });
 
@@ -260,6 +220,7 @@ describe('Footer Timeline Component', () => {
             nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
             tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
             updatedAt={1546878704036}
+            width={width}
           />
         </I18nProvider>
       );
@@ -289,6 +250,7 @@ describe('Footer Timeline Component', () => {
             nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
             tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
             updatedAt={1546878704036}
+            width={width}
           />
         </I18nProvider>
       );

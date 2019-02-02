@@ -4,13 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
-import { cloneDeep, omit } from 'lodash/fp';
-import React from 'react';
+import { cloneDeep, noop, omit } from 'lodash/fp';
+import * as React from 'react';
+import { DragDropContext } from 'react-beautiful-dnd';
+import { Provider as ReduxStoreProvider } from 'react-redux';
+import { ThemeProvider } from 'styled-components';
 
 import { columnRenderers } from '.';
 import { Ecs } from '../../../../graphql/types';
 import { mockEcsData } from '../../../../mock';
+import { createStore } from '../../../../store';
 import { getEmptyValue } from '../../../empty_value';
 import { getColumnRenderer } from './get_column_renderer';
 
@@ -24,10 +29,19 @@ describe('get_column_renderer', () => {
   });
 
   test('should render event id when dealing with data that is not suricata', () => {
+    const store = createStore();
     const columnName = 'event.id';
     const columnRenderer = getColumnRenderer(columnName, columnRenderers, nonSuricata);
     const column = columnRenderer.renderColumn(columnName, nonSuricata);
-    const wrapper = mount(<span>{column}</span>);
+    const wrapper = mount(
+      <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+        <ReduxStoreProvider store={store}>
+          <DragDropContext onDragEnd={noop}>
+            <span>{column}</span>
+          </DragDropContext>
+        </ReduxStoreProvider>
+      </ThemeProvider>
+    );
     expect(wrapper.text()).toEqual('1');
   });
 

@@ -50,10 +50,10 @@ const NotesContainer = styled.div`
 const InMemoryTable = styled(EuiInMemoryTable)`
   overflow-x: hidden;
   overflow-y: auto;
-  height: 500px;
-
-  max-height: 500px;
+  height: 220px;
 `;
+
+//   max-height: 220px;
 
 /** A view for entering and reviewing notes */
 export class Notes extends React.PureComponent<Props, State> {

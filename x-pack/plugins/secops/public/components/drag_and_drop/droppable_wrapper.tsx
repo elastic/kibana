@@ -53,7 +53,7 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean }>`
       display: none !important;
     }
   }
-  
+
   `
       : ''}
   > div.timeline-drop-area {

@@ -65,13 +65,12 @@ export const columns = [
         hoverContent={
           <HoverActionsContainer data-test-subj="hover-actions-container">
             <EuiToolTip content={i18n.COPY_TO_CLIPBOARD}>
-              <WithCopyToClipboard text={field} />
+              <WithCopyToClipboard text={field} titleSummary={i18n.FIELD} />
             </EuiToolTip>
           </HoverActionsContainer>
         }
-      >
-        <span>{field}</span>
-      </WithHoverActions>
+        render={() => <span>{field}</span>}
+      />
     ),
   },
   {
@@ -84,13 +83,12 @@ export const columns = [
         hoverContent={
           <HoverActionsContainer data-test-subj="hover-actions-container">
             <EuiToolTip content={i18n.COPY_TO_CLIPBOARD}>
-              <WithCopyToClipboard text={item.valueAsString} />
+              <WithCopyToClipboard text={item.valueAsString} titleSummary={i18n.VALUE} />
             </EuiToolTip>
           </HoverActionsContainer>
         }
-      >
-        {value}
-      </WithHoverActions>
+        render={() => value}
+      />
     ),
   },
   {

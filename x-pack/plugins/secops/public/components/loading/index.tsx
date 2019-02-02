@@ -7,26 +7,37 @@
 import { EuiLoadingChart, EuiPanel, EuiText } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
-import styled from 'styled-components';
+import styled, { injectGlobal } from 'styled-components';
+
+// SIDE EFFECT: the following `injectGlobal` overrides default styling in angular code that was not theme-friendly
+// tslint:disable-next-line:no-unused-expression
+injectGlobal`
+  .euiPanel-loading-hide-border {
+    border: none;
+  }
+`;
 
 interface LoadingProps {
   text: string;
   height: number | string;
+  showBorder?: boolean;
   width: number | string;
 }
 
-export const LoadingPanel = pure<LoadingProps>(({ height = 'auto', text, width }) => (
-  <InfraLoadingStaticPanel style={{ height, width }}>
-    <InfraLoadingStaticContentPanel>
-      <EuiPanel>
-        <EuiLoadingChart size="m" />
-        <EuiText>
-          <p>{text}</p>
-        </EuiText>
-      </EuiPanel>
-    </InfraLoadingStaticContentPanel>
-  </InfraLoadingStaticPanel>
-));
+export const LoadingPanel = pure<LoadingProps>(
+  ({ height = 'auto', showBorder = true, text, width }) => (
+    <InfraLoadingStaticPanel style={{ height, width }}>
+      <InfraLoadingStaticContentPanel>
+        <EuiPanel className={showBorder ? '' : 'euiPanel-loading-hide-border'}>
+          <EuiLoadingChart size="m" />
+          <EuiText>
+            <p>{text}</p>
+          </EuiText>
+        </EuiPanel>
+      </InfraLoadingStaticContentPanel>
+    </InfraLoadingStaticPanel>
+  )
+);
 
 export const InfraLoadingStaticPanel = styled.div`
   position: relative;

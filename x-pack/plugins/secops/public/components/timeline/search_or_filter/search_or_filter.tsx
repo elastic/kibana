@@ -54,7 +54,7 @@ interface Props {
   setKqlFilterQueryDraft: (expression: string) => void;
 }
 
-const SearchAndFilterContainer = styled.div`
+const SearchOrFilterContainer = styled.div`
   margin: 5px 0 10px 0;
   user-select: none;
 `;
@@ -62,8 +62,6 @@ const SearchAndFilterContainer = styled.div`
 const ModeFlexItem = styled(EuiFlexItem)`
   user-select: none;
 `;
-
-const SuperSelect = styled(EuiSuperSelect)``;
 
 export const SearchOrFilter = pure<Props>(
   ({
@@ -76,11 +74,11 @@ export const SearchOrFilter = pure<Props>(
     setKqlFilterQueryDraft,
     updateKqlMode,
   }) => (
-    <SearchAndFilterContainer>
-      <EuiFlexGroup data-test-subj="timeline-search-and-filter-container">
+    <SearchOrFilterContainer>
+      <EuiFlexGroup data-test-subj="timeline-search-or-filter" gutterSize="xs">
         <ModeFlexItem grow={false}>
           <EuiToolTip content={i18n.FILTER_OR_SEARCH_WITH_KQL}>
-            <SuperSelect
+            <EuiSuperSelect
               data-test-subj="timeline-select-search-or-filter"
               hasDividers={true}
               itemLayoutAlign="top"
@@ -91,7 +89,7 @@ export const SearchOrFilter = pure<Props>(
             />
           </EuiToolTip>
         </ModeFlexItem>
-        <EuiFlexItem data-test-subj="timeline-search-container">
+        <EuiFlexItem data-test-subj="timeline-search-or-filter-search-container">
           <EuiToolTip content={modes[kqlMode].kqlBarTooltip}>
             <>
               {kqlMode === 'filter' && (
@@ -134,6 +132,6 @@ export const SearchOrFilter = pure<Props>(
           </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </SearchAndFilterContainer>
+    </SearchOrFilterContainer>
   )
 );

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
@@ -23,15 +23,17 @@ const WithCopyToClipboardContainer = styled.div`
  * Renders `children` with an adjacent icon that when clicked, copies `text` to
  * the clipboard and displays a confirmation toast
  */
-export const WithCopyToClipboard = pure<{ text: string }>(({ text, children }) => (
-  <WithCopyToClipboardContainer>
-    <>{children}</>
-    <Clipboard content={text}>
-      <EuiButtonIcon
-        color="text"
-        iconType="copyClipboard"
-        aria-label={`${i18n.COPY} ${text} ${i18n.TO_CLIPBOARD}`}
-      />
-    </Clipboard>
-  </WithCopyToClipboardContainer>
-));
+export const WithCopyToClipboard = pure<{ text: string; titleSummary?: string }>(
+  ({ text, titleSummary, children }) => (
+    <WithCopyToClipboardContainer>
+      <>{children}</>
+      <Clipboard content={text} titleSummary={titleSummary}>
+        <EuiIcon
+          color="text"
+          type="copyClipboard"
+          aria-label={`${i18n.COPY} ${text} ${i18n.TO_THE_CLIPBOARD}`}
+        />
+      </Clipboard>
+    </WithCopyToClipboardContainer>
+  )
+);

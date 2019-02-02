@@ -4,64 +4,77 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { OnColumnSorted, OnFilterChange, OnRangeSelected } from '../../events';
+import { OnColumnSorted, OnFilterChange } from '../../events';
 import { Sort } from '../sort';
 import { ColumnHeader } from './column_header';
+import { EventsSelect } from './events_select';
 import { Header } from './header';
-import { RangePicker } from './range_picker';
+
+const SettingsContainer = styled.div`
+  height: 24px;
+  width: 24px;
+`;
+
+const EventsSelectAndSettingsContainer = styled.div<{ actionsColumnWidth: number }>`
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-right: 5px;
+  padding-right: 5px;
+  width: ${({ actionsColumnWidth }) => actionsColumnWidth}px;
+`;
 
 interface Props {
+  actionsColumnWidth: number;
   columnHeaders: ColumnHeader[];
   onColumnSorted?: OnColumnSorted;
   onFilterChange?: OnFilterChange;
-  onRangeSelected: OnRangeSelected;
-  range: string;
   sort: Sort;
+  timelineId: string;
 }
-
-const ColumnHeadersSpan = styled.span`
-  display: flex;
-`;
-
-/* stylelint-disable block-no-empty */
-const ColumnHeaderContainer = styled.div``;
-
-const Flex = styled.div`
-  display: flex;
-  margin-left: 5px;
-  user-select: none;
-  width: 100%;
-`;
 
 /** Renders the timeline header columns */
 export const ColumnHeaders = pure<Props>(
   ({
+    actionsColumnWidth,
     columnHeaders,
     onColumnSorted = noop,
     onFilterChange = noop,
-    onRangeSelected,
-    range,
     sort,
+    timelineId,
   }) => (
-    <ColumnHeadersSpan data-test-subj="columnHeaders">
-      <RangePicker selected={range} onRangeSelected={onRangeSelected} />
-      <Flex>
-        {columnHeaders.map(header => (
-          <ColumnHeaderContainer data-test-subj="columnHeaderContainer" key={header.id}>
-            <Header
-              header={header}
-              onColumnSorted={onColumnSorted}
-              onFilterChange={onFilterChange}
-              sort={sort}
-            />
-          </ColumnHeaderContainer>
-        ))}
-      </Flex>
-    </ColumnHeadersSpan>
+    <EuiFlexGroup data-test-subj="column-headers" gutterSize="none">
+      <EuiFlexItem grow={false}>
+        <EventsSelectAndSettingsContainer
+          actionsColumnWidth={actionsColumnWidth}
+          data-test-subj="events-select-and-settings-container"
+        >
+          <EventsSelect checkState="unchecked" timelineId={timelineId} />
+          <SettingsContainer data-test-subj="settings-container">
+            <EuiIcon data-test-subj="gear" type="gear" size="l" onClick={noop} />
+          </SettingsContainer>
+        </EventsSelectAndSettingsContainer>
+      </EuiFlexItem>
+      <EuiFlexItem grow={true}>
+        <EuiFlexGroup gutterSize="none">
+          {columnHeaders.map(header => (
+            <EuiFlexItem key={header.id}>
+              <Header
+                header={header}
+                onColumnSorted={onColumnSorted}
+                onFilterChange={onFilterChange}
+                sort={sort}
+              />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   )
 );

@@ -37,17 +37,12 @@ describe('Header', () => {
               <TimelineHeader
                 id="foo"
                 indexPattern={indexPattern}
-                columnHeaders={[]}
                 dataProviders={mockDataProviders}
                 onChangeDataProviderKqlQuery={noop}
                 onChangeDroppableAndProvider={noop}
-                onColumnSorted={noop}
                 onDataProviderRemoved={noop}
-                onFilterChange={noop}
-                onRangeSelected={noop}
                 onToggleDataProviderEnabled={noop}
                 onToggleDataProviderExcluded={noop}
-                range="1 Day"
                 show={true}
                 sort={{
                   columnId: 'timestamp',

@@ -27,6 +27,7 @@ interface OwnProps {
 
 const MyEuiPopover = styled(EuiPopover)`
   height: 100%;
+  user-select: none;
 `;
 
 export const getProviderActions = (
@@ -99,7 +100,9 @@ export const ProviderItemActions = pure<OwnProps>(
         anchorPosition="downCenter"
         panelPaddingSize="none"
       >
-        <EuiContextMenu initialPanelId={0} panels={panelTree} data-test-subj="providerActions" />
+        <div style={{ userSelect: 'none' }}>
+          <EuiContextMenu initialPanelId={0} panels={panelTree} data-test-subj="providerActions" />
+        </div>
       </MyEuiPopover>
     );
   }

@@ -16,7 +16,7 @@ export type KqlMode = 'filter' | 'search';
 export interface TimelineModel {
   /** The sources of the event data shown in the timeline */
   dataProviders: DataProvider[];
-  /** The story told by the events and notes in this timeline */
+  /** A summary of the events and notes in this timeline */
   description: string;
   /** A map of events in this timeline to the chronologically ordered notes (in this timeline) associated with the event */
   eventIdToNoteIds: { [eventId: string]: string[] };

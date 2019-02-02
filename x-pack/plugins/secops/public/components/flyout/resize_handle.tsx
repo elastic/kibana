@@ -62,7 +62,7 @@ export class ResizeHandleComponent extends React.PureComponent<Props> {
       const delta = (e as MouseEvent).movementX;
       const bodyClientWidthPixels = document.body.clientWidth;
 
-      const minWidthPixels = 310; // do not allow the flyout to shrink below this width (pixels)
+      const minWidthPixels = 415; // do not allow the flyout to shrink below this width (pixels)
       const maxWidthPercent = 95; // do not allow the flyout to grow past this percentage of the view
 
       applyDeltaToWidth({ id, delta, bodyClientWidthPixels, minWidthPixels, maxWidthPercent });

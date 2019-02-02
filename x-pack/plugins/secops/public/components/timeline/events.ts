@@ -62,3 +62,9 @@ export type OnChangeItemsPerPage = (itemsPerPage: number) => void;
 export type OnLoadMore = (cursor: string, tieBreaker: string) => void;
 
 export type OnChangeDroppableAndProvider = (providerId: string) => void;
+
+/** Invoked when a user pins an event */
+export type OnPinEvent = (eventId: string) => void;
+
+/** Invoked when a user unpins an event */
+export type OnUnPinEvent = (eventId: string) => void;
