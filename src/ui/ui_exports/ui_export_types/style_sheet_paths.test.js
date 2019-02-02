@@ -29,7 +29,7 @@ const pluginSpec = {
 
 expect.addSnapshotSerializer({
   test: value => typeof value === 'string' && value.startsWith(dir),
-  print: value => value.replace(dir, '<absolute>'),
+  print: value => value.replace(dir, '<absolute>').replace(/\\/g, '/'),
 });
 
 describe('uiExports.styleSheetPaths', () => {
@@ -61,7 +61,21 @@ describe('uiExports.styleSheetPaths', () => {
 Array [
   Object {
     "localPath": <absolute>/kibana/public/bar.scss,
-    "publicPath": "plugins/test/bar.css",
+    "publicPath": "plugins/test/bar.light.css",
+    "theme": "light",
+    "urlImports": Object {
+      "publicDir": <absolute>/kibana/public,
+      "urlBase": "built_assets/css/plugins/test",
+    },
+  },
+  Object {
+    "localPath": <absolute>/kibana/public/bar.scss,
+    "publicPath": "plugins/test/bar.dark.css",
+    "theme": "dark",
+    "urlImports": Object {
+      "publicDir": <absolute>/kibana/public,
+      "urlBase": "built_assets/css/plugins/test",
+    },
   },
 ]
 `);
@@ -75,7 +89,21 @@ Array [
 Array [
   Object {
     "localPath": <absolute>/kibana/public/bar.scss,
-    "publicPath": "plugins/test/bar.css",
+    "publicPath": "plugins/test/bar.light.css",
+    "theme": "light",
+    "urlImports": Object {
+      "publicDir": <absolute>/kibana/public,
+      "urlBase": "built_assets/css/plugins/test",
+    },
+  },
+  Object {
+    "localPath": <absolute>/kibana/public/bar.scss,
+    "publicPath": "plugins/test/bar.dark.css",
+    "theme": "dark",
+    "urlImports": Object {
+      "publicDir": <absolute>/kibana/public,
+      "urlBase": "built_assets/css/plugins/test",
+    },
   },
 ]
 `);
@@ -88,8 +116,22 @@ Array [
     expect(uiExports.styleSheetPaths).toMatchInlineSnapshot(`
 Array [
   Object {
-    "localPath": <absolute>/kibana/public\\bar.scss,
-    "publicPath": "plugins/test/../public/bar.css",
+    "localPath": <absolute>/kibana/public/bar.scss,
+    "publicPath": "plugins/test/../public/bar.light.css",
+    "theme": "light",
+    "urlImports": Object {
+      "publicDir": <absolute>/kibana/public,
+      "urlBase": "built_assets/css/plugins/test",
+    },
+  },
+  Object {
+    "localPath": <absolute>/kibana/public/bar.scss,
+    "publicPath": "plugins/test/../public/bar.dark.css",
+    "theme": "dark",
+    "urlImports": Object {
+      "publicDir": <absolute>/kibana/public,
+      "urlBase": "built_assets/css/plugins/test",
+    },
   },
 ]
 `);

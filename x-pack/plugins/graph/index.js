@@ -7,6 +7,7 @@
 import { resolve } from 'path';
 import Boom from 'boom';
 
+import migrations from './migrations';
 import { initServer } from './server';
 import mappings from './mappings.json';
 
@@ -28,7 +29,8 @@ export function graph(kibana) {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: ['plugins/graph/hacks/toggle_app_link_in_nav'],
       home: ['plugins/graph/register_feature'],
-      mappings
+      mappings,
+      migrations,
     },
 
     config(Joi) {

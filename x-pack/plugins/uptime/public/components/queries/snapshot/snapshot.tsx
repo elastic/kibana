@@ -37,17 +37,17 @@ interface SnapshotProps {
 type Props = SnapshotProps & UptimeCommonProps;
 
 export const Snapshot = ({
-  dateRangeStart,
-  dateRangeEnd,
   autorefreshIsPaused,
   autorefreshInterval,
+  colors: { danger, primary },
+  dateRangeStart,
+  dateRangeEnd,
   filters,
 }: Props) => (
   <Query
     pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
     query={getSnapshotQuery}
-    // TODO downCount and windowSize aren't needed for MVP
-    variables={{ dateRangeStart, dateRangeEnd, downCount: 1, windowSize: 1, filters }}
+    variables={{ dateRangeStart, dateRangeEnd, filters }}
   >
     {({ loading, error, data }) => {
       if (loading) {
@@ -129,7 +129,13 @@ export const Snapshot = ({
             </EuiTitle>
             {/* TODO: this is a UI hack that should be replaced */}
             <EuiPanel paddingSize="s">
-              {histogram && <SnapshotHistogram histogram={histogram} />}
+              {histogram && (
+                <SnapshotHistogram
+                  dangerColor={danger}
+                  primaryColor={primary}
+                  histogram={histogram}
+                />
+              )}
               {!histogram && (
                 <EuiEmptyPrompt
                   title={

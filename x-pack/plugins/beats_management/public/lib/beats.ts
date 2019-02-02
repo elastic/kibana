@@ -4,26 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten } from 'lodash';
-import { CMBeat, CMPopulatedBeat } from './../../common/domain_types';
+import { CMBeat } from './../../common/domain_types';
 import {
   BeatsRemovalReturn,
   BeatsTagAssignment,
   CMAssignmentReturn,
   CMBeatsAdapter,
 } from './adapters/beats/adapter_types';
-import { FrontendDomainLibs } from './types';
+import { ElasticsearchLib } from './elasticsearch';
 
 export class BeatsLib {
   constructor(
     private readonly adapter: CMBeatsAdapter,
-    private readonly libs: { tags: FrontendDomainLibs['tags'] }
+    private readonly elasticsearch: ElasticsearchLib
   ) {}
 
   /** Get a single beat using it's ID for lookup */
-  public async get(id: string): Promise<CMPopulatedBeat | null> {
+  public async get(id: string): Promise<CMBeat | null> {
     const beat = await this.adapter.get(id);
-    return beat ? (await this.mergeInTags([beat]))[0] : null;
+    return beat;
   }
 
   /** Get a single beat using the token it was enrolled in for lookup */
@@ -33,16 +32,20 @@ export class BeatsLib {
   };
 
   /** Get an array of beats that have a given tag id assigned to it */
-  public getBeatsWithTag = async (tagId: string): Promise<CMPopulatedBeat[]> => {
+  public getBeatsWithTag = async (tagId: string): Promise<CMBeat[]> => {
     const beats = await this.adapter.getBeatsWithTag(tagId);
-    return await this.mergeInTags(beats);
+    return beats;
   };
 
   // FIXME: This needs to be paginated https://github.com/elastic/kibana/issues/26022
   /** Get an array of all enrolled beats. */
-  public getAll = async (ESQuery?: string): Promise<CMPopulatedBeat[]> => {
+  public getAll = async (kuery?: string): Promise<CMBeat[]> => {
+    let ESQuery;
+    if (kuery) {
+      ESQuery = await this.elasticsearch.convertKueryToEsQuery(kuery);
+    }
     const beats = await this.adapter.getAll(ESQuery);
-    return await this.mergeInTags(beats);
+    return beats;
   };
 
   /** Update a given beat via it's ID */
@@ -62,23 +65,5 @@ export class BeatsLib {
     assignments: BeatsTagAssignment[]
   ): Promise<CMAssignmentReturn[]> => {
     return await this.adapter.assignTagsToBeats(assignments);
-  };
-
-  /** method user to join tags to beats, thus fully populating the beats */
-  private mergeInTags = async (beats: CMBeat[]): Promise<CMPopulatedBeat[]> => {
-    const tagIds = flatten(beats.map(b => b.tags || []));
-    const tags = await this.libs.tags.getTagsWithIds(tagIds);
-
-    // TODO the filter should not be needed, if the data gets into a bad state, we should error
-    // and inform the user they need to delete the tag, or else we should auto delete it
-    // https://github.com/elastic/kibana/issues/26021
-    const mergedBeats: CMPopulatedBeat[] = beats.map(
-      b =>
-        ({
-          ...b,
-          full_tags: (b.tags || []).map(tagId => tags.find(t => t.id === tagId)).filter(t => t),
-        } as CMPopulatedBeat)
-    );
-    return mergedBeats;
   };
 }
