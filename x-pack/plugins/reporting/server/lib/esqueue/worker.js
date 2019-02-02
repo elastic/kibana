@@ -328,6 +328,7 @@ export class Worker extends events.EventEmitter {
             return claimResult;
           })
           .catch((err) => {
+            // TODO-VERSION
             if (err.statusCode === 409) {
               this.warn(`_claimPendingJobs encountered a version conflict on updating pending job ${job._id}`, err);
               return; // continue reducing and looking for a different job to claim

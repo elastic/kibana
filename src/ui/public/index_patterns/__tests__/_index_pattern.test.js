@@ -134,6 +134,7 @@ const kbnUrl = {
 const i18n = arg => arg;
 
 describe('IndexPattern', () => {
+  // TODO-VERSION
   it('should handle version conflicts', async () => {
     const IndexPattern = IndexPatternProvider(Private, config, Promise, confirmModalPromise, kbnUrl, i18n); // eslint-disable-line new-cap
 
@@ -141,12 +142,14 @@ describe('IndexPattern', () => {
     const pattern = new IndexPattern('foo');
     await pattern.init();
 
+    // TODO-VERSION
     expect(pattern.version).toBe(2);
 
     // Create the same one - we're going to handle concurrency
     const samePattern = new IndexPattern('foo');
     await samePattern.init();
 
+    // TODO-VERSION
     expect(samePattern.version).toBe(3);
 
     // This will conflict because samePattern did a save (from refreshFields)

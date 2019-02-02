@@ -168,6 +168,7 @@ describe('SavedObjectsRepository', () => {
     total: 23,
     deleted: 23,
     batches: 1,
+    // TODO-VERSION
     version_conflicts: 0,
     noops: 0,
     retries: { bulk: 0, search: 0 },
@@ -1288,6 +1289,7 @@ describe('SavedObjectsRepository', () => {
       sinon.assert.calledOnce(migrator.awaitMigration);
     });
 
+    // TODO-VERSION
     it('returns current ES document version', async () => {
       const response = await savedObjectsRepository.update('index-pattern', 'logstash-*', attributes, {
         namespace: 'foo-namespace',
@@ -1312,6 +1314,7 @@ describe('SavedObjectsRepository', () => {
       });
     });
 
+    // TODO-VERSION
     it('accepts version', async () => {
       await savedObjectsRepository.update(
         type,

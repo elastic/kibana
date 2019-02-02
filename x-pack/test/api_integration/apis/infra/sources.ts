@@ -233,6 +233,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
           },
         });
 
+        // TODO-VERSION
         const { version, updatedAt, configuration, status } =
           updateResponse.data && updateResponse.data.updateSource.source;
 
@@ -283,6 +284,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
           },
         });
 
+        // TODO-VERSION
         const { version, updatedAt, configuration, status } =
           updateResponse.data && updateResponse.data.updateSource.source;
 
@@ -326,6 +328,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
           },
         });
 
+        // TODO-VERSION
         const { version, updatedAt, configuration } =
           updateResponse.data && updateResponse.data.updateSource.source;
 
@@ -349,6 +352,7 @@ const createSourceMutation = gql`
     createSource(id: $sourceId, source: $source) {
       source {
         id
+        // TODO-VERSION
         version
         updatedAt
         configuration {
@@ -386,6 +390,7 @@ const updateSourceMutation = gql`
     updateSource(id: $sourceId, changes: $changes) {
       source {
         id
+        // TODO-VERSION
         version
         updatedAt
         configuration {

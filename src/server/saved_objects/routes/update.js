@@ -47,7 +47,9 @@ export const createUpdateRoute = (prereqs) => {
       handler(request) {
         const { savedObjectsClient } = request.pre;
         const { type, id } = request.params;
+        // TODO-VERSION
         const { attributes, version, references } = request.payload;
+        // TODO-VERSION
         const options = { version, references };
 
         return savedObjectsClient.update(type, id, attributes, options);
