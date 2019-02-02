@@ -82,6 +82,7 @@ export class Job extends events.EventEmitter {
           id: doc._id,
           type: doc._type,
           index: doc._index,
+          // TODO-VERSION
           version: doc._version,
         };
         this.debug(`Job created in index ${this.index}`);
@@ -118,6 +119,7 @@ export class Job extends events.EventEmitter {
           index: doc._index,
           id: doc._id,
           type: doc._type,
+          // TODO-VERSION
           version: doc._version,
         });
       });

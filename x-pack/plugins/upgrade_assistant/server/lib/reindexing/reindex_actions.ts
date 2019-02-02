@@ -158,6 +158,7 @@ export const reindexActionsFactory = (
       REINDEX_OP_TYPE,
       reindexOp.id,
       { ...reindexOp.attributes, locked: moment().format() },
+      // TODO-VERSION
       { version: reindexOp.version }
     );
   };
@@ -167,6 +168,7 @@ export const reindexActionsFactory = (
       REINDEX_OP_TYPE,
       reindexOp.id,
       { ...reindexOp.attributes, locked: null },
+      // TODO-VERSION
       { version: reindexOp.version }
     );
   };
@@ -198,6 +200,7 @@ export const reindexActionsFactory = (
 
       const newAttrs = { ...reindexOp.attributes, locked: moment().format(), ...attrs };
       return client.update<ReindexOperation>(REINDEX_OP_TYPE, reindexOp.id, newAttrs, {
+        // TODO-VERSION
         version: reindexOp.version,
       });
     },

@@ -173,6 +173,7 @@ export class SavedObjectsRepository {
         const {
           error,
           _id: responseId,
+          // TODO-VERSION
           _version: version,
         } = Object.values(response)[0];
 
@@ -188,6 +189,7 @@ export class SavedObjectsRepository {
         } = rawObjectsToCreate[i];
 
         if (error) {
+          // TODO-VERSION
           if (error.type === 'version_conflict_engine_exception') {
             return {
               id,
@@ -208,6 +210,7 @@ export class SavedObjectsRepository {
           id,
           type,
           updated_at: time,
+          // TODO-VERSION
           version,
           attributes,
           references,
@@ -338,6 +341,7 @@ export class SavedObjectsRepository {
       ignore: [404],
       rest_total_hits_as_int: true,
       body: {
+        // TODO-VERSION
         version: true,
         ...getSearchDsl(this._mappings, this._schema, {
           search,
@@ -423,6 +427,7 @@ export class SavedObjectsRepository {
           id,
           type,
           ...time && { updated_at: time },
+          // TODO-VERSION
           version: doc._version,
           attributes: doc._source[type],
           references: doc._source.references || [],
@@ -466,6 +471,7 @@ export class SavedObjectsRepository {
       id,
       type,
       ...updatedAt && { updated_at: updatedAt },
+      // TODO-VERSION
       version: response._version,
       attributes: response._source[type],
       references: response._source.references || [],
@@ -486,6 +492,7 @@ export class SavedObjectsRepository {
    */
   async update(type, id, attributes, options = {}) {
     const {
+      // TODO-VERSION
       version,
       namespace,
       references = [],
@@ -496,6 +503,7 @@ export class SavedObjectsRepository {
       id: this._serializer.generateRawId(namespace, type, id),
       type: this._type,
       index: this._index,
+      // TODO-VERSION
       version,
       refresh: 'wait_for',
       ignore: [404],
@@ -517,6 +525,7 @@ export class SavedObjectsRepository {
       id,
       type,
       updated_at: time,
+      // TODO-VERSION
       version: response._version,
       references,
       attributes
@@ -593,6 +602,7 @@ export class SavedObjectsRepository {
       type,
       updated_at: time,
       references: response.get._source.references,
+      // TODO-VERSION
       version: response._version,
       attributes: response.get._source[type],
     };

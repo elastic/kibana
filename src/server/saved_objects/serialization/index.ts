@@ -32,6 +32,7 @@ export interface RawDoc {
   _id: string;
   _source: any;
   _type?: string;
+  // TODO-VERSION
   _version?: number;
 }
 
@@ -64,6 +65,7 @@ interface SavedObjectDoc {
   type: string;
   namespace?: string;
   migrationVersion?: MigrationVersion;
+  // TODO-VERSION
   version?: number;
   updated_at?: Date;
 
@@ -116,6 +118,7 @@ export class SavedObjectsSerializer {
    *
    *  @param {RawDoc} rawDoc - The raw ES document to be converted to saved object format.
    */
+  // TODO-VERSION
   public rawToSavedObject({ _id, _source, _version }: RawDoc): SanitizedSavedObjectDoc {
     const { type, namespace } = _source;
     return {
@@ -126,6 +129,7 @@ export class SavedObjectsSerializer {
       references: _source.references || [],
       ...(_source.migrationVersion && { migrationVersion: _source.migrationVersion }),
       ...(_source.updated_at && { updated_at: _source.updated_at }),
+      // TODO-VERSION
       ...(_version != null && { version: _version }),
     };
   }
@@ -143,6 +147,7 @@ export class SavedObjectsSerializer {
       attributes,
       migrationVersion,
       updated_at,
+      // TODO-VERSION
       version,
       references,
     } = savedObj;
@@ -158,6 +163,7 @@ export class SavedObjectsSerializer {
     return {
       _id: this.generateRawId(namespace, type, id),
       _source: source,
+      // TODO-VERSION
       ...(version != null && { _version: version }),
     };
   }

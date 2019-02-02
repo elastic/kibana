@@ -230,6 +230,7 @@ describe('TaskManagerRunner', () => {
         {
           id: 'foo',
           taskType: 'bar',
+          // TODO-VERSION
           version: 32,
           runAt: new Date(),
           attempts: 0,

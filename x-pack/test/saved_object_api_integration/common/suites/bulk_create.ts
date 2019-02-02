@@ -84,6 +84,7 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
           type: 'dashboard',
           id: `${getIdPrefix(spaceId)}a01b2f57-fcfd-4864-b735-09e28f0d815e`,
           updated_at: resp.body.saved_objects[1].updated_at,
+          // TODO-VERSION
           version: 1,
           attributes: {
             title: 'A great new dashboard',
@@ -94,6 +95,7 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
           type: 'globaltype',
           id: `05976c65-1145-4858-bbf0-d225cc78a06e`,
           updated_at: resp.body.saved_objects[2].updated_at,
+          // TODO-VERSION
           version: 1,
           attributes: {
             name: 'A new globaltype object',

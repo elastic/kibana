@@ -41,6 +41,7 @@ export default function ({ getService }) {
               },
               type: 'visualization',
               updated_at: '2017-09-21T18:51:23.794Z',
+              // TODO-VERSION
               version: resp.body.version,
               migrationVersion: {
                 visualization: '7.0.0',

@@ -17,6 +17,7 @@ describe('field format map', function () {
   const indexPatternSavedObject = {
     id: 'logstash-*',
     type: 'index-pattern',
+    // TODO-VERSION
     version: 4,
     attributes: {
       title: 'logstash-*',

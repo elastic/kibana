@@ -29,6 +29,7 @@ describe('SavedObjectsClient', () => {
     id: 'AVwSwFxtcMV38qjDZoQg',
     type: 'config',
     attributes: { title: 'Example title' },
+    // TODO-VERSION
     version: 2
   };
 
@@ -228,7 +229,9 @@ describe('SavedObjectsClient', () => {
 
     test('makes HTTP call', () => {
       const attributes = { foo: 'Foo', bar: 'Bar' };
+      // TODO-VERSION
       const body = { attributes, version: 2 };
+      // TODO-VERSION
       const options = { version: 2 };
 
       savedObjectsClient.update('index-pattern', 'logstash-*', attributes, options);

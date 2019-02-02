@@ -69,6 +69,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
           },
         });
 
+        // TODO-VERSION
         const { version, updatedAt, configuration, status } =
           response.data && response.data.createSource.source;
 
@@ -98,6 +99,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
           },
         });
 
+        // TODO-VERSION
         const { version, updatedAt, configuration, status } =
           response.data && response.data.createSource.source;
 
@@ -160,6 +162,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
           },
         });
 
+        // TODO-VERSION
         const { version } = creationResponse.data && creationResponse.data.createSource.source;
 
         expect(version).to.be.greaterThan(0);
@@ -189,6 +192,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
           },
         });
 
+        // TODO-VERSION
         const { version: initialVersion, updatedAt: createdAt } =
           creationResponse.data && creationResponse.data.createSource.source;
 
@@ -258,6 +262,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
           },
         });
 
+        // TODO-VERSION
         const { version: initialVersion, updatedAt: createdAt } =
           creationResponse.data && creationResponse.data.createSource.source;
 
@@ -300,6 +305,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
           },
         });
 
+        // TODO-VERSION
         const { version: initialVersion, updatedAt: createdAt } =
           creationResponse.data && creationResponse.data.createSource.source;
 

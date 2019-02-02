@@ -29,6 +29,7 @@ export interface MlJob {
   finished_time: number;
   job_id: string;
   job_type: string;
+  // TODO-VERSION
   job_version: string;
   model_plot_config: object;
   model_size_stats: object;

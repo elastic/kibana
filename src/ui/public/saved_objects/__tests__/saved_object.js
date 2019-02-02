@@ -46,8 +46,10 @@ describe('SavedObject', () => {
     const version = 2;
 
     const client = sinon.stub();
+    // TODO-VERSION
     const savedObject = new SavedObject(client, { version });
 
+    // TODO-VERSION
     expect(savedObject._version).to.be(version);
   });
 });

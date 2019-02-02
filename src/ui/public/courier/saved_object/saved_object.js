@@ -226,6 +226,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
                 _type: resp.type,
                 _source: _.cloneDeep(resp.attributes),
                 references: resp.references,
+                // TODO-VERSION
                 found: resp._version ? true : false
               };
             })

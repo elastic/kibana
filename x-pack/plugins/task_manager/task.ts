@@ -208,6 +208,7 @@ export interface ConcreteTaskInstance extends TaskInstance {
   /**
    * The version of the Elaticsearch document.
    */
+  // TODO-VERSION
   version: number;
 
   /**

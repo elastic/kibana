@@ -51,6 +51,7 @@ export default function ({ getService }) {
                 visualization: '7.0.0'
               },
               updated_at: resp.body.updated_at,
+              // TODO-VERSION
               version: 1,
               attributes: {
                 title: 'My favorite vis'
@@ -96,6 +97,7 @@ export default function ({ getService }) {
                 visualization: '7.0.0'
               },
               updated_at: resp.body.updated_at,
+              // TODO-VERSION
               version: 1,
               attributes: {
                 title: 'My favorite vis'

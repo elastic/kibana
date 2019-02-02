@@ -20,6 +20,7 @@ const getMockTaskInstance = () => ({
 const getMockConcreteTaskInstance = () => {
   const concrete: {
     id: string;
+    // TODO-VERSION
     version: number;
     attempts: number;
     status: TaskStatus;
@@ -29,6 +30,7 @@ const getMockConcreteTaskInstance = () => {
     params: any;
   } = {
     id: 'hy8o99o83',
+    // TODO-VERSION
     version: 1,
     attempts: 0,
     status: 'idle',

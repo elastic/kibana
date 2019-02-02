@@ -42,6 +42,7 @@ describe('TaskStore', () => {
       const callCluster = sinon.spy(() =>
         Promise.resolve({
           _id: 'testid',
+          // TODO-VERSION
           _version: 3344,
         })
       );
@@ -89,6 +90,7 @@ describe('TaskStore', () => {
 
       expect(result).toMatchObject({
         ...task,
+        // TODO-VERSION
         version: 3344,
         id: 'testid',
       });
@@ -255,6 +257,7 @@ describe('TaskStore', () => {
             status: 'idle',
             taskType: 'foo',
             user: 'jimbo',
+            // TODO-VERSION
             version: undefined,
           },
           {
@@ -268,6 +271,7 @@ describe('TaskStore', () => {
             status: 'running',
             taskType: 'bar',
             user: 'dabo',
+            // TODO-VERSION
             version: undefined,
           },
         ],
@@ -345,6 +349,7 @@ describe('TaskStore', () => {
           },
           size: 10,
           sort: { 'task.runAt': { order: 'asc' } },
+          // TODO-VERSION
           version: true,
         },
         index,
@@ -405,6 +410,7 @@ describe('TaskStore', () => {
           status: 'idle',
           taskType: 'foo',
           user: 'jimbo',
+          // TODO-VERSION
           version: undefined,
         },
         {
@@ -418,6 +424,7 @@ describe('TaskStore', () => {
           status: 'running',
           taskType: 'bar',
           user: 'dabo',
+          // TODO-VERSION
           version: undefined,
         },
       ]);
@@ -425,6 +432,7 @@ describe('TaskStore', () => {
   });
 
   describe('update', () => {
+    // TODO-VERSION
     test('refreshes the index, handles versioning', async () => {
       const runAt = new Date();
       const task = {
@@ -433,11 +441,13 @@ describe('TaskStore', () => {
         params: { hello: 'world' },
         state: { foo: 'bar' },
         taskType: 'report',
+        // TODO-VERSION
         version: 2,
         attempts: 3,
         status: 'idle' as TaskStatus,
       };
 
+      // TODO-VERSION
       const callCluster = sinon.spy(async () => ({ _version: task.version + 1 }));
       const store = new TaskStore({
         callCluster,
@@ -454,11 +464,13 @@ describe('TaskStore', () => {
       expect(callCluster.args[0][1]).toMatchObject({
         id: task.id,
         index: 'tasky',
+        // TODO-VERSION
         version: 2,
         refresh: true,
         body: {
           doc: {
             task: {
+              // TODO-VERSION
               ...['id', 'version'].reduce((acc, prop) => _.omit(acc, prop), task),
               params: JSON.stringify(task.params),
               state: JSON.stringify(task.state),
@@ -467,6 +479,7 @@ describe('TaskStore', () => {
         },
       });
 
+      // TODO-VERSION
       expect(result).toEqual({ ...task, version: 3 });
     });
   });
@@ -478,6 +491,7 @@ describe('TaskStore', () => {
         Promise.resolve({
           _index: 'myindex',
           _id: id,
+          // TODO-VERSION
           _version: 32,
           result: 'deleted',
         })
@@ -496,6 +510,7 @@ describe('TaskStore', () => {
       expect(result).toEqual({
         id,
         index: 'myindex',
+        // TODO-VERSION
         version: 32,
         result: 'deleted',
       });

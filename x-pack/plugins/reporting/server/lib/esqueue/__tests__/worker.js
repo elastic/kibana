@@ -336,8 +336,10 @@ describe('Worker class', function () {
         searchStub = sinon.stub(mockQueue.client, 'search').callsFake(() => Promise.resolve({ hits: { hits: [] } }));
       });
 
+      // TODO-VERSION
       it('should query with version', function () {
         const params = getSearchParams();
+        // TODO-VERSION
         expect(params).to.have.property('version', true);
       });
 
@@ -432,6 +434,7 @@ describe('Worker class', function () {
         index: 'myIndex',
         type: 'test',
         id: 12345,
+        // TODO-VERSION
         version: 3
       };
       return mockQueue.client.get(params)
@@ -446,12 +449,14 @@ describe('Worker class', function () {
       clock.restore();
     });
 
+    // TODO-VERSION
     it('should use version on update', function () {
       worker._claimJob(job);
       const query = updateSpy.firstCall.args[0];
       expect(query).to.have.property('index', job._index);
       expect(query).to.have.property('type', job._type);
       expect(query).to.have.property('id', job._id);
+      // TODO-VERSION
       expect(query).to.have.property('version', job._version);
     });
 
@@ -500,6 +505,7 @@ describe('Worker class', function () {
       expect(msg).to.equal(false);
     });
 
+    // TODO-VERSION
     it('should reject the promise on version errors', function () {
       mockQueue.client.update.restore();
       sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 409 }));
@@ -524,6 +530,7 @@ describe('Worker class', function () {
       _index: 'myIndex',
       _type: 'test',
       _id: 12345,
+      // TODO-VERSION
       _version: 3,
       found: true,
       _source: {
@@ -608,12 +615,14 @@ describe('Worker class', function () {
       clock.restore();
     });
 
+    // TODO-VERSION
     it('should use version on update', function () {
       worker._failJob(job);
       const query = updateSpy.firstCall.args[0];
       expect(query).to.have.property('index', job._index);
       expect(query).to.have.property('type', job._type);
       expect(query).to.have.property('id', job._id);
+      // TODO-VERSION
       expect(query).to.have.property('version', job._version);
     });
 
@@ -631,6 +640,7 @@ describe('Worker class', function () {
       expect(doc.output).to.have.property('content', msg);
     });
 
+    // TODO-VERSION
     it('should return true on version mismatch errors', function () {
       mockQueue.client.update.restore();
       sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 409 }));
@@ -735,6 +745,7 @@ describe('Worker class', function () {
             expect(query).to.have.property('index', job._index);
             expect(query).to.have.property('type', job._type);
             expect(query).to.have.property('id', job._id);
+            // TODO-VERSION
             expect(query).to.have.property('version', job._version);
             expect(query.body.doc).to.have.property('output');
             expect(query.body.doc.output).to.have.property('content_type', false);

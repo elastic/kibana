@@ -14,6 +14,7 @@ describe('the InfraSources lib', () => {
         configuration: createMockStaticConfiguration({}),
         savedObjects: createMockSavedObjectsService({
           id: 'TEST_ID',
+          // TODO-VERSION
           version: 1,
           updated_at: '2000-01-01T00:00:00.000Z',
           attributes: {
@@ -34,6 +35,7 @@ describe('the InfraSources lib', () => {
 
       expect(await sourcesLib.getSourceConfiguration(request, 'TEST_ID')).toMatchObject({
         id: 'TEST_ID',
+        // TODO-VERSION
         version: 1,
         updatedAt: 946684800000,
         configuration: {
@@ -66,6 +68,7 @@ describe('the InfraSources lib', () => {
         }),
         savedObjects: createMockSavedObjectsService({
           id: 'TEST_ID',
+          // TODO-VERSION
           version: 1,
           updated_at: '2000-01-01T00:00:00.000Z',
           attributes: {
@@ -80,6 +83,7 @@ describe('the InfraSources lib', () => {
 
       expect(await sourcesLib.getSourceConfiguration(request, 'TEST_ID')).toMatchObject({
         id: 'TEST_ID',
+        // TODO-VERSION
         version: 1,
         updatedAt: 946684800000,
         configuration: {
@@ -101,6 +105,7 @@ describe('the InfraSources lib', () => {
         configuration: createMockStaticConfiguration({}),
         savedObjects: createMockSavedObjectsService({
           id: 'TEST_ID',
+          // TODO-VERSION
           version: 1,
           updated_at: '2000-01-01T00:00:00.000Z',
           attributes: {},
@@ -111,6 +116,7 @@ describe('the InfraSources lib', () => {
 
       expect(await sourcesLib.getSourceConfiguration(request, 'TEST_ID')).toMatchObject({
         id: 'TEST_ID',
+        // TODO-VERSION
         version: 1,
         updatedAt: 946684800000,
         configuration: {

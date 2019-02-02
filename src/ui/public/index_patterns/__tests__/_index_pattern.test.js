@@ -86,6 +86,7 @@ jest.mock('../unsupported_time_patterns', () => ({
 
 jest.mock('../../saved_objects', () => {
   const object = {
+    // TODO-VERSION
     _version: 1,
     _id: 'foo',
     attributes: {
@@ -96,7 +97,9 @@ jest.mock('../../saved_objects', () => {
   return {
     SavedObjectsClientProvider: {
       get: async () => object,
+      // TODO-VERSION
       update: async (type, id, body, { version }) => {
+        // TODO-VERSION
         if (object._version !== version) {
           throw {
             res: {
@@ -109,6 +112,7 @@ jest.mock('../../saved_objects', () => {
 
         return {
           id: object._id,
+          // TODO-VERSION
           _version: ++object._version,
         };
       }

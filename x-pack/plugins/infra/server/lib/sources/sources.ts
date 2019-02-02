@@ -44,6 +44,7 @@ export class InfraSources {
         this.libs.savedObjects.SavedObjectsClient.errors.isNotFoundError(err)
           ? Promise.resolve({
               id: sourceId,
+              // TODO-VERSION
               version: undefined,
               updatedAt: undefined,
               configuration: staticDefaultSourceConfiguration,
@@ -112,6 +113,7 @@ export class InfraSources {
   ) {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
 
+    // TODO-VERSION
     const { configuration, version } = await this.getSourceConfiguration(request, sourceId);
 
     const updatedConfigurationAttributes = updaters.reduce(

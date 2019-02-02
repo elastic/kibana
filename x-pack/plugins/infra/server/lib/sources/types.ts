@@ -51,6 +51,7 @@ export const InfraSavedSourceConfigurationRuntimeType = runtimeTypes.intersectio
     attributes: PartialInfraSourceConfigurationRuntimeType,
   }),
   runtimeTypes.partial({
+    // TODO-VERSION
     version: runtimeTypes.number,
     updated_at: TimestampFromString,
   }),

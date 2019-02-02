@@ -42,12 +42,14 @@ describe('Saved Object', function () {
    * that can be used to stub es calls.
    * @param indexPatternId
    * @param additionalOptions - object that will be assigned to the mocked doc response.
+   // TODO-VERSION
    * @returns {{attributes: {}, type: string, id: *, _version: integer}}
    */
   function getMockedDocResponse(indexPatternId, additionalOptions = {}) {
     return {
       type: 'dashboard',
       id: indexPatternId,
+      // TODO-VERSION
       _version: 2,
       attributes: {},
       ...additionalOptions
@@ -242,7 +244,12 @@ describe('Saved Object', function () {
       return createInitializedSavedObject({ type: 'dashboard' }).then(savedObject => {
         const mockDocResponse = getMockedDocResponse('myId');
         sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
-          return BluebirdPromise.resolve({ type: 'dashboard', id: 'myId', _version: 2 });
+          return BluebirdPromise.resolve({
+            type: 'dashboard',
+            id: 'myId',
+            // TODO-VERSION
+            _version: 2
+          });
         });
 
         stubESResponse(mockDocResponse);
@@ -261,7 +268,10 @@ describe('Saved Object', function () {
           sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
             expect(savedObject.isSaving).to.be(true);
             return BluebirdPromise.resolve({
-              type: 'dashboard', id, version: 2
+              type: 'dashboard',
+              id,
+              // TODO-VERSION
+              version: 2
             });
           });
           expect(savedObject.isSaving).to.be(false);
@@ -300,6 +310,7 @@ describe('Saved Object', function () {
             sinon.stub(savedObjectsClientStub, 'create').callsFake(() => {
               return BluebirdPromise.resolve({
                 id,
+                // TODO-VERSION
                 version: 2,
                 type: 'dashboard',
               });
@@ -544,6 +555,7 @@ describe('Saved Object', function () {
           attributes: {
             title: 'testIndexPattern'
           },
+          // TODO-VERSION
           _version: 2
         });
 

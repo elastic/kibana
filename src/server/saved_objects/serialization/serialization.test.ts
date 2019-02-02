@@ -86,6 +86,7 @@ describe('saved object conversion', () => {
       const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.rawToSavedObject({
         _id: 'hello:world',
+        // TODO-VERSION
         _version: 3,
         _source: {
           type: 'hello',
@@ -103,6 +104,7 @@ describe('saved object conversion', () => {
       const expected = {
         id: 'world',
         type: 'hello',
+        // TODO-VERSION
         version: 3,
         attributes: {
           a: 'b',
@@ -130,10 +132,12 @@ describe('saved object conversion', () => {
       expect(actual).not.toHaveProperty('version');
     });
 
+    // TODO-VERSION
     test(`if specified it copies _version to version`, () => {
       const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.rawToSavedObject({
         _id: 'foo:bar',
+        // TODO-VERSION
         _version: 4,
         _source: {
           type: 'foo',
@@ -222,6 +226,7 @@ describe('saved object conversion', () => {
       const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const raw = {
         _id: 'foo-namespace:foo:bar',
+        // TODO-VERSION
         _version: 24,
         _source: {
           type: 'foo',
@@ -473,17 +478,21 @@ describe('saved object conversion', () => {
       expect(actual._source).not.toHaveProperty('migrationVersion');
     });
 
+    // TODO-VERSION
     test('it copies the version property to _version', () => {
       const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.savedObjectToRaw({
         type: '',
         attributes: {},
+        // TODO-VERSION
         version: 4,
       } as any);
 
+      // TODO-VERSION
       expect(actual).toHaveProperty('_version', 4);
     });
 
+    // TODO-VERSION
     test(`if unspecified it doesn't add _version property`, () => {
       const serializer = new SavedObjectsSerializer(new SavedObjectsSchema());
       const actual = serializer.savedObjectToRaw({
@@ -491,6 +500,7 @@ describe('saved object conversion', () => {
         attributes: {},
       } as any);
 
+      // TODO-VERSION
       expect(actual).not.toHaveProperty('_version');
     });
 

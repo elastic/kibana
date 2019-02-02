@@ -26,6 +26,7 @@ export class SavedObject {
     this.type = type;
     this.attributes = attributes || {};
     this.references = references || [];
+    // TODO-VERSION
     this._version = version;
     this.migrationVersion = migrationVersion;
     if (error) {

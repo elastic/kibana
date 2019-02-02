@@ -237,6 +237,7 @@ describe('SavedObjectsRepository', () => {
       callAdminCluster.callsFake((method, params) => ({
         _type: '_doc',
         _id: params.id,
+        // TODO-VERSION
         _version: 2
       }));
     });
@@ -270,6 +271,7 @@ describe('SavedObjectsRepository', () => {
         type: 'index-pattern',
         id: 'logstash-*',
         ...mockTimestampFields,
+        // TODO-VERSION
         version: 2,
         attributes: {
           title: 'Logstash',
@@ -471,6 +473,7 @@ describe('SavedObjectsRepository', () => {
             create: {
               error: false,
               _id: '1',
+              // TODO-VERSION
               _version: 1,
             }
           },
@@ -478,6 +481,7 @@ describe('SavedObjectsRepository', () => {
             create: {
               error: false,
               _id: '2',
+              // TODO-VERSION
               _version: 1,
             }
           }
@@ -522,6 +526,7 @@ describe('SavedObjectsRepository', () => {
           {
             id: 'one',
             type: 'config',
+            // TODO-VERSION
             version: 1,
             updated_at: mockTimestamp,
             attributes: {
@@ -532,6 +537,7 @@ describe('SavedObjectsRepository', () => {
           {
             id: 'two',
             type: 'index-pattern',
+            // TODO-VERSION
             version: 1,
             updated_at: mockTimestamp,
             attributes: {
@@ -589,6 +595,7 @@ describe('SavedObjectsRepository', () => {
           create: {
             _type: '_doc',
             _id: 'index-pattern:two',
+            // TODO-VERSION
             _version: 2
           }
         }]
@@ -608,6 +615,7 @@ describe('SavedObjectsRepository', () => {
           }, {
             id: 'two',
             type: 'index-pattern',
+            // TODO-VERSION
             version: 2,
             ...mockTimestampFields,
             attributes: { title: 'Test Two' },
@@ -624,12 +632,14 @@ describe('SavedObjectsRepository', () => {
           create: {
             _type: '_doc',
             _id: 'config:one',
+            // TODO-VERSION
             _version: 2
           }
         }, {
           create: {
             _type: '_doc',
             _id: 'index-pattern:two',
+            // TODO-VERSION
             _version: 2
           }
         }]
@@ -647,6 +657,7 @@ describe('SavedObjectsRepository', () => {
           {
             id: 'one',
             type: 'config',
+            // TODO-VERSION
             version: 2,
             ...mockTimestampFields,
             attributes: { title: 'Test One' },
@@ -654,6 +665,7 @@ describe('SavedObjectsRepository', () => {
           }, {
             id: 'two',
             type: 'index-pattern',
+            // TODO-VERSION
             version: 2,
             ...mockTimestampFields,
             attributes: { title: 'Test Two' },
@@ -952,6 +964,7 @@ describe('SavedObjectsRepository', () => {
           id: doc._id.replace(/(index-pattern|config|globaltype)\:/, ''),
           type: doc._source.type,
           ...mockTimestampFields,
+          // TODO-VERSION
           version: doc._version,
           attributes: doc._source[doc._source.type],
           references: [],
@@ -976,6 +989,7 @@ describe('SavedObjectsRepository', () => {
           id: doc._id.replace(/(foo-namespace\:)?(index-pattern|config|globaltype)\:/, ''),
           type: doc._source.type,
           ...mockTimestampFields,
+          // TODO-VERSION
           version: doc._version,
           attributes: doc._source[doc._source.type],
           references: [],
@@ -1022,6 +1036,7 @@ describe('SavedObjectsRepository', () => {
     const noNamespaceResult = {
       _id: 'index-pattern:logstash-*',
       _type: '_doc',
+      // TODO-VERSION
       _version: 2,
       _source: {
         type: 'index-pattern',
@@ -1035,6 +1050,7 @@ describe('SavedObjectsRepository', () => {
     const namespacedResult = {
       _id: 'foo-namespace:index-pattern:logstash-*',
       _type: '_doc',
+      // TODO-VERSION
       _version: 2,
       _source: {
         namespace: 'foo-namespace',
@@ -1064,6 +1080,7 @@ describe('SavedObjectsRepository', () => {
         id: 'logstash-*',
         type: 'index-pattern',
         updated_at: mockTimestamp,
+        // TODO-VERSION
         version: 2,
         attributes: {
           title: 'Testing'
@@ -1080,6 +1097,7 @@ describe('SavedObjectsRepository', () => {
         id: 'logstash-*',
         type: 'index-pattern',
         updated_at: mockTimestamp,
+        // TODO-VERSION
         version: 2,
         attributes: {
           title: 'Testing'
@@ -1209,6 +1227,7 @@ describe('SavedObjectsRepository', () => {
           _type: '_doc',
           _id: 'config:good',
           found: true,
+          // TODO-VERSION
           _version: 2,
           _source: { ...mockTimestampFields, config: { title: 'Test' } }
         }, {
@@ -1230,6 +1249,7 @@ describe('SavedObjectsRepository', () => {
         id: 'good',
         type: 'config',
         ...mockTimestampFields,
+        // TODO-VERSION
         version: 2,
         attributes: { title: 'Test' },
         references: [],
@@ -1252,6 +1272,7 @@ describe('SavedObjectsRepository', () => {
       callAdminCluster.returns(Promise.resolve({
         _id: `${type}:${id}`,
         _type: '_doc',
+        // TODO-VERSION
         _version: newVersion,
         result: 'updated'
       }));
@@ -1280,6 +1301,7 @@ describe('SavedObjectsRepository', () => {
         id,
         type,
         ...mockTimestampFields,
+        // TODO-VERSION
         version: newVersion,
         attributes,
         references: [{
@@ -1295,11 +1317,13 @@ describe('SavedObjectsRepository', () => {
         type,
         id,
         { title: 'Testing' },
+        // TODO-VERSION
         { version: newVersion - 1 }
       );
 
       sinon.assert.calledOnce(callAdminCluster);
       sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
+        // TODO-VERSION
         version: newVersion - 1
       }));
     });
@@ -1320,6 +1344,7 @@ describe('SavedObjectsRepository', () => {
       sinon.assert.calledWithExactly(callAdminCluster, 'update', {
         type: '_doc',
         id: 'foo-namespace:index-pattern:logstash-*',
+        // TODO-VERSION
         version: undefined,
         body: {
           doc: {
@@ -1355,6 +1380,7 @@ describe('SavedObjectsRepository', () => {
       sinon.assert.calledWithExactly(callAdminCluster, 'update', {
         type: '_doc',
         id: 'index-pattern:logstash-*',
+        // TODO-VERSION
         version: undefined,
         body: {
           doc: {
@@ -1391,6 +1417,7 @@ describe('SavedObjectsRepository', () => {
       sinon.assert.calledWithExactly(callAdminCluster, 'update', {
         type: '_doc',
         id: 'globaltype:foo',
+        // TODO-VERSION
         version: undefined,
         body: {
           doc: {
@@ -1417,6 +1444,7 @@ describe('SavedObjectsRepository', () => {
       callAdminCluster.callsFake((method, params) => ({
         _type: '_doc',
         _id: params.id,
+        // TODO-VERSION
         _version: 2,
         _index: '.kibana',
         get: {
@@ -1437,6 +1465,7 @@ describe('SavedObjectsRepository', () => {
       callAdminCluster.callsFake((method, params) => ({
         _type: '_doc',
         _id: params.id,
+        // TODO-VERSION
         _version: 2,
         _index: '.kibana',
         get: {
@@ -1466,6 +1495,7 @@ describe('SavedObjectsRepository', () => {
         type: 'config',
         id: '6.0.0-alpha1',
         ...mockTimestampFields,
+        // TODO-VERSION
         version: 2,
         attributes: {
           buildNum: 8468,
@@ -1539,6 +1569,7 @@ describe('SavedObjectsRepository', () => {
       callAdminCluster.callsFake((method, params) => ({
         _type: '_doc',
         _id: params.id,
+        // TODO-VERSION
         _version: 2,
         _index: '.kibana',
         get: {

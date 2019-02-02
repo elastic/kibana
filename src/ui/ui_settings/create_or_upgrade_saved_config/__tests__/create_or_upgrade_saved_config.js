@@ -41,6 +41,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
       create: sinon.stub().callsFake(async (type, attributes, options = {}) => ({
         type,
         id: options.id,
+        // TODO-VERSION
         version: 1,
       }))
     };
@@ -48,6 +49,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
     async function run(options = {}) {
       const resp = await createOrUpgradeSavedConfig({
         savedObjectsClient,
+        // TODO-VERSION
         version,
         buildNum,
         logWithMetadata,
@@ -55,6 +57,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
       });
 
       sinon.assert.calledOnce(getUpgradeableConfig);
+      // TODO-VERSION
       sinon.assert.alwaysCalledWith(getUpgradeableConfig, { savedObjectsClient, version });
 
       return resp;

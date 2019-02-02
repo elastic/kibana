@@ -131,6 +131,7 @@ export class KibanaDatabaseAdapter implements DatabaseAdapter {
       _id: string;
       _score: number;
       _source: Source;
+      // TODO-VERSION
       _version?: number;
       fields?: any;
       highlight?: any;

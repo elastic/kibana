@@ -130,6 +130,7 @@ export class Worker extends events.EventEmitter {
       index: job._index,
       type: job._type,
       id: job._id,
+      // TODO-VERSION
       version: job._version,
       body: { doc }
     })
@@ -167,6 +168,7 @@ export class Worker extends events.EventEmitter {
       index: job._index,
       type: job._type,
       id: job._id,
+      // TODO-VERSION
       version: job._version,
       body: { doc }
     })
@@ -244,6 +246,7 @@ export class Worker extends events.EventEmitter {
         index: job._index,
         type: job._type,
         id: job._id,
+        // TODO-VERSION
         version: job._version,
         body: { doc }
       })
@@ -385,6 +388,7 @@ export class Worker extends events.EventEmitter {
     return this.client.search({
       index: `${this.queue.index}-*`,
       type: this.doctype,
+      // TODO-VERSION
       version: true,
       body: query
     })

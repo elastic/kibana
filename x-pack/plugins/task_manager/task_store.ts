@@ -33,6 +33,7 @@ export interface FetchResult {
 export interface RemoveResult {
   index: string;
   id: string;
+  // TODO-VERSION
   version: string;
   result: string;
 }
@@ -41,6 +42,7 @@ export interface RemoveResult {
 export interface RawTaskDoc {
   _id: string;
   _index: string;
+  // TODO-VERSION
   _version: number;
   _source: {
     type: string;
@@ -179,6 +181,7 @@ export class TaskStore {
     return {
       ...taskInstance,
       id: result._id,
+      // TODO-VERSION
       version: result._version,
       attempts: 0,
       status: task.status,
@@ -225,6 +228,7 @@ export class TaskStore {
       },
       size: 10,
       sort: { 'task.runAt': { order: 'asc' } },
+      // TODO-VERSION
       version: true,
     });
 
@@ -241,12 +245,14 @@ export class TaskStore {
   public async update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance> {
     const rawDoc = taskDocToRaw(doc, this.index);
 
+    // TODO-VERSION
     const { _version } = await this.callCluster('update', {
       body: {
         doc: rawDoc._source,
       },
       id: doc.id,
       index: this.index,
+      // TODO-VERSION
       version: doc.version,
       // The refresh is important so that if we immediately look for work,
       // we don't pick up this task.
@@ -255,6 +261,7 @@ export class TaskStore {
 
     return {
       ...doc,
+      // TODO-VERSION
       version: _version,
     };
   }
@@ -277,6 +284,7 @@ export class TaskStore {
     return {
       index: result._index,
       id: result._id,
+      // TODO-VERSION
       version: result._version,
       result: result.result,
     };
@@ -333,6 +341,7 @@ function rawSource(doc: TaskInstance) {
   };
 
   delete (source as any).id;
+  // TODO-VERSION
   delete (source as any).version;
   delete (source as any).type;
 
@@ -350,6 +359,7 @@ function taskDocToRaw(doc: ConcreteTaskInstance, index: string): RawTaskDoc {
     _id: doc.id,
     _index: index,
     _source: { type, task },
+    // TODO-VERSION
     _version: doc.version,
   };
 }
@@ -358,6 +368,7 @@ function rawToTaskDoc(doc: RawTaskDoc): ConcreteTaskInstance {
   return {
     ...doc._source.task,
     id: doc._id,
+    // TODO-VERSION
     version: doc._version,
     params: parseJSONField(doc._source.task.params, 'params', doc),
     state: parseJSONField(doc._source.task.state, 'state', doc),

@@ -48,6 +48,7 @@ export default function ({ getService }) {
               id: resp.body.id,
               type: 'visualization',
               updated_at: resp.body.updated_at,
+              // TODO-VERSION
               version: 2,
               attributes: {
                 title: 'My second favorite vis'

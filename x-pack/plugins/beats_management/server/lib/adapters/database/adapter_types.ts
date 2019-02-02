@@ -100,6 +100,7 @@ export interface DatabaseSearchResponse<T> {
       _id: string;
       _score: number;
       _source: T;
+      // TODO-VERSION
       _version?: number;
       _explanation?: DatabaseExplanation;
       fields?: any;
@@ -128,6 +129,7 @@ export interface DatabaseGetDocumentResponse<Source> {
   _index: string;
   _type: string;
   _id: string;
+  // TODO-VERSION
   _version: number;
   found: boolean;
   _source: Source;
@@ -182,6 +184,7 @@ export interface DatabaseDeleteDocumentParams extends DatabaseGenericParams {
   refresh?: DatabaseRefresh;
   routing?: string;
   timeout?: string;
+  // TODO-VERSION
   version?: number;
   versionType?: DatabaseVersionType;
   index: string;
@@ -194,6 +197,7 @@ export interface DatabaseIndexDocumentResponse {
   _index: string;
   _type: string;
   _id: string;
+  // TODO-VERSION
   _version: number;
   result: string;
 }
@@ -203,6 +207,7 @@ export interface DatabaseUpdateDocumentResponse {
   _index: string;
   _type: string;
   _id: string;
+  // TODO-VERSION
   _version: number;
   result: string;
 }
@@ -212,6 +217,7 @@ export interface DatabaseDeleteDocumentResponse {
   _index: string;
   _type: string;
   _id: string;
+  // TODO-VERSION
   _version: number;
   result: string;
 }
@@ -225,6 +231,7 @@ export interface DatabaseIndexDocumentParams<T> extends DatabaseGenericParams {
   timeout?: string;
   timestamp?: Date | number;
   ttl?: string;
+  // TODO-VERSION
   version?: number;
   versionType?: DatabaseVersionType;
   pipeline?: string;
@@ -246,6 +253,7 @@ export interface DatabaseCreateDocumentParams extends DatabaseGenericParams {
   timeout?: string;
   timestamp?: Date | number;
   ttl?: string;
+  // TODO-VERSION
   version?: number;
   versionType?: DatabaseVersionType;
   pipeline?: string;
@@ -265,6 +273,7 @@ export interface DatabaseDeleteDocumentParams extends DatabaseGenericParams {
   refresh?: DatabaseRefresh;
   routing?: string;
   timeout?: string;
+  // TODO-VERSION
   version?: number;
   versionType?: DatabaseVersionType;
   index: string;
@@ -282,6 +291,7 @@ export interface DatabaseGetParams extends DatabaseGenericParams {
   _source?: DatabaseNameList;
   _sourceExclude?: DatabaseNameList;
   _source_includes?: DatabaseNameList;
+  // TODO-VERSION
   version?: number;
   versionType?: DatabaseVersionType;
   id: string;
@@ -310,6 +320,7 @@ export interface DatabaseDeleteDocumentResponse {
   _index: string;
   _type: string;
   _id: string;
+  // TODO-VERSION
   _version: number;
   result: string;
 }
