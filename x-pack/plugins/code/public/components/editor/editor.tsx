@@ -150,9 +150,13 @@ export class EditorComponent extends React.Component<IProps> {
     }
   }
 
-  private revealPosition({ line, character }: Position) {
+  private revealPosition(pos: Position | undefined) {
     if (this.monaco) {
-      this.monaco.revealPosition(line, character);
+      if (pos) {
+        this.monaco.revealPosition(pos.line, pos.character);
+      } else {
+        this.monaco.clearLineSelection();
+      }
     }
   }
 

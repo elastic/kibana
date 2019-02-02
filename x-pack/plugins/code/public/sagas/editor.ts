@@ -147,9 +147,7 @@ function* handleMainRouteChange(action: Action<Match>) {
   if (file) {
     if ([PathTypes.blob, PathTypes.blame].includes(pathType as PathTypes)) {
       yield call(handleFile, repoUri, file, revision);
-      if (position) {
-        yield put(revealPosition(position));
-      }
+      yield put(revealPosition(position));
       const { tab, refUrl } = queryParams;
       if (tab === 'references' && refUrl) {
         yield call(handleReference, decodeURIComponent(refUrl as string));
