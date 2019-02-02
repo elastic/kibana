@@ -37,6 +37,7 @@ describe('app initialization', () => {
     sandbox.stub(mappings, 'startRetrievingAutoCompleteInfo');
 
     inputMock = {
+      autoIndent: sinon.stub(),
       update: sinon.stub(),
       moveToNextRequestEdge: sinon.stub(),
       highlightCurrentRequestsAndUpdateActionBar: sinon.stub(),
@@ -102,12 +103,12 @@ describe('app initialization', () => {
     sinon.assert.calledWithExactly(outputMock.update, '');
   });
 
-  it('correctly loads state from commands query param', () => {
+  it('correctly loads state from text source', () => {
     init(inputMock, outputMock, 'text', 'GET /testIndex');
 
-    sinon.assert.notCalled();
+    sinon.assert.notCalled($.ajax);
 
-    sinon.assert.calledOnce(inputMock.autoIndent());
+    sinon.assert.calledOnce(inputMock.autoIndent);
     sinon.assert.calledTwice(inputMock.moveToNextRequestEdge);
     sinon.assert.calledWithExactly(inputMock.moveToNextRequestEdge, true);
     sinon.assert.calledOnce(inputMock.highlightCurrentRequestsAndUpdateActionBar);
