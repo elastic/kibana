@@ -17,7 +17,12 @@ import { WithLogTextview } from '../../containers/logs/with_log_textview';
 import { WithStreamItems } from '../../containers/logs/with_stream_items';
 import { WithSummary } from '../../containers/logs/with_summary';
 
-export const LogsPageContent: React.SFC = () => (
+interface Props {
+  setFlyoutItem: (id: string) => void;
+  showFlyout: () => void;
+}
+
+export const LogsPageContent: React.SFC<Props> = ({ showFlyout, setFlyoutItem }) => (
   <PageContent>
     <AutoSizer content>
       {({ measureRef, content: { width = 0, height = 0 } }) => (
@@ -57,6 +62,8 @@ export const LogsPageContent: React.SFC = () => (
                         target={targetPosition}
                         width={width}
                         wrap={wrap}
+                        setFlyoutItem={setFlyoutItem}
+                        showFlyout={showFlyout}
                       />
                     )}
                   </WithStreamItems>

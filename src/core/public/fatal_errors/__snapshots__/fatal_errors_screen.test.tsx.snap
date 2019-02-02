@@ -28,7 +28,11 @@ exports[`rendering render matches snapshot 1`] = `
               onClick={[Function]}
               type="button"
             >
-              Clear your session
+              <FormattedMessage
+                defaultMessage="Clear your session"
+                id="core.fatalErrors.clearYourSessionButtonLabel"
+                values={Object {}}
+              />
             </EuiButton>,
             <EuiButtonEmpty
               color="primary"
@@ -37,20 +41,33 @@ exports[`rendering render matches snapshot 1`] = `
               onClick={[Function]}
               type="button"
             >
-              Go back
+              <FormattedMessage
+                defaultMessage="Go back"
+                id="core.fatalErrors.goBackButtonLabel"
+                values={Object {}}
+              />
             </EuiButtonEmpty>,
           ]
         }
         body={
           <p>
-            Try refreshing the page. If that doesn't work, go back to the previous page or clear your session data.
+            <FormattedMessage
+              defaultMessage="Try refreshing the page. If that doesn't work, go back to the previous page or
+                    clear your session data."
+              id="core.fatalErrors.tryRefreshingPageDescription"
+              values={Object {}}
+            />
           </p>
         }
         iconColor="danger"
         iconType="alert"
         title={
           <h2>
-            Something went wrong
+            <FormattedMessage
+              defaultMessage="Something went wrong"
+              id="core.fatalErrors.somethingWentWrongTitle"
+              values={Object {}}
+            />
           </h2>
         }
       />
