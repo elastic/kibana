@@ -12,10 +12,10 @@ import {
 } from '@elastic/eui';
 
 import { getEmsTMSServices } from '../../../../meta';
+import { getEmsUnavailableMessage } from '../ems_unavailable_message';
 
 
 export class EMSTMSCreateSourceEditor extends React.Component {
-
 
   state = {
     emsTmsOptionsRaw: null
@@ -42,6 +42,7 @@ export class EMSTMSCreateSourceEditor extends React.Component {
   render() {
 
     if (!this.state.emsTmsOptionsRaw) {
+      // TODO display loading message
       return null;
     }
 
@@ -52,11 +53,15 @@ export class EMSTMSCreateSourceEditor extends React.Component {
 
 
     return (
-      <EuiFormRow label="Tile service">
+      <EuiFormRow
+        label="Tile service"
+        helpText={this.state.emsTmsOptionsRaw.length === 0 ? getEmsUnavailableMessage() : null}
+      >
         <EuiSelect
           hasNoInitialSelection
           options={emsTileOptions}
           onChange={this.props.onChange}
+          disabled={this.state.emsTmsOptionsRaw.length === 0}
         />
       </EuiFormRow>
     );
