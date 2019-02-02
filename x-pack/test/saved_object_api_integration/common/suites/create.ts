@@ -63,8 +63,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
       },
       type: spaceAwareType,
       updated_at: resp.body.updated_at,
-      // TODO-VERSION
-      version: 1,
+      version: resp.body.version,
       attributes: {
         title: 'My favorite vis',
       },
@@ -105,8 +104,7 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
       id: resp.body.id,
       type: notSpaceAwareType,
       updated_at: resp.body.updated_at,
-      // TODO-VERSION
-      version: 1,
+      version: resp.body.version,
       attributes: {
         name: `Can't be contained to a space`,
       },

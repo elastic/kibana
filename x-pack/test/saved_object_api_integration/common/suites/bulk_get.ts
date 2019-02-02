@@ -65,7 +65,6 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
           id: `8121a00-8efd-21e7-1cb3-34ab966434445`,
           type: 'globaltype',
           updated_at: '2017-09-21T18:59:16.270Z',
-          // TODO-VERSION
           version: resp.body.saved_objects[2].version,
           attributes: {
             name: 'My favorite global object',
@@ -94,7 +93,6 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
             visualization: '7.0.0',
           },
           updated_at: '2017-09-21T18:51:23.794Z',
-          // TODO-VERSION
           version: resp.body.saved_objects[0].version,
           attributes: {
             title: 'Count of requests',
@@ -125,7 +123,6 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
           id: `8121a00-8efd-21e7-1cb3-34ab966434445`,
           type: 'globaltype',
           updated_at: '2017-09-21T18:59:16.270Z',
-          // TODO-VERSION
           version: resp.body.saved_objects[2].version,
           attributes: {
             name: 'My favorite global object',

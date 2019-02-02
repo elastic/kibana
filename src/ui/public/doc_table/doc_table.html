@@ -37,7 +37,6 @@
         on-remove-column="onRemoveColumn"
       ></thead>
       <tbody>
-        <!-- // TODO-VERSION -->
         <tr ng-repeat="row in pageOfItems|limitTo:limit track by row._index+row._type+row._id+row._score+row._version"
           kbn-table-row="row"
           columns="columns"
@@ -88,7 +87,6 @@
       on-remove-column="onRemoveColumn"
     ></thead>
     <tbody>
-      <!-- // TODO-VERSION -->
       <tr ng-repeat="row in hits|limitTo:limit track by row._index+row._type+row._id+row._score+row._version"
         kbn-table-row="row"
         columns="columns"

@@ -42,7 +42,6 @@ describe('Saved Object', function () {
    * that can be used to stub es calls.
    * @param indexPatternId
    * @param additionalOptions - object that will be assigned to the mocked doc response.
-   // TODO-VERSION
    * @returns {{attributes: {}, type: string, id: *, _version: integer}}
    */
   function getMockedDocResponse(indexPatternId, additionalOptions = {}) {

@@ -65,7 +65,6 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
       id: `${notSpaceAwareId}`,
       type: 'globaltype',
       updated_at: '2017-09-21T18:59:16.270Z',
-      // TODO-VERSION
       version: resp.body.version,
       attributes: {
         name: 'My favorite global object',
@@ -100,7 +99,6 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) 
         visualization: '7.0.0',
       },
       updated_at: '2017-09-21T18:51:23.794Z',
-      // TODO-VERSION
       version: resp.body.version,
       attributes: {
         title: 'Count of requests',
