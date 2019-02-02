@@ -247,6 +247,29 @@ Array [
 `);
     });
   });
+
+  describe('help extension', () => {
+    it('updates/emits the current help extension', async () => {
+      const service = new ChromeService();
+      const start = service.start();
+      const promise = start
+        .getHelpExtension$()
+        .pipe(toArray())
+        .toPromise();
+
+      start.setHelpExtension(() => () => undefined);
+      start.setHelpExtension(undefined);
+      service.stop();
+
+      await expect(promise).resolves.toMatchInlineSnapshot(`
+Array [
+  undefined,
+  [Function],
+  undefined,
+]
+`);
+    });
+  });
 });
 
 describe('stop', () => {
@@ -258,7 +281,8 @@ describe('stop', () => {
       start.getApplicationClasses$(),
       start.getIsCollapsed$(),
       start.getBreadcrumbs$(),
-      start.getIsVisible$()
+      start.getIsVisible$(),
+      start.getHelpExtension$()
     ).toPromise();
 
     service.stop();
@@ -276,7 +300,8 @@ describe('stop', () => {
         start.getApplicationClasses$(),
         start.getIsCollapsed$(),
         start.getBreadcrumbs$(),
-        start.getIsVisible$()
+        start.getIsVisible$(),
+        start.getHelpExtension$()
       ).toPromise()
     ).resolves.toBe(undefined);
   });
