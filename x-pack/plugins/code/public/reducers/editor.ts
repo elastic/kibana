@@ -62,6 +62,7 @@ export const editor = handleActions(
         draft.showing = false;
         draft.loading = false;
         draft.refPayload = undefined;
+        draft.references = [];
       }),
     [String(hoverResult)]: (state: EditorState, action: any) =>
       produce<EditorState>(state, draft => {

@@ -141,6 +141,10 @@ export class MonacoHelper {
     this.editor!.revealLineInCenterIfOutsideViewport(line);
   }
 
+  public clearLineSelection() {
+    this.decorations = this.editor!.deltaDecorations(this.decorations, []);
+  }
+
   private handleCopy(e: any) {
     if (
       this.editor &&

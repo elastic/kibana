@@ -117,7 +117,7 @@ export function lspRoute(
             startLine: l.range.start.line,
             endLine: l.range.end.line,
           }));
-          const ranges = expandRanges(lines, 3);
+          const ranges = expandRanges(lines, 1);
           const mergedRanges = mergeRanges(ranges);
           const blob = await gitOperations.fileContent(repoUri, file!, revision);
           const source = blob
