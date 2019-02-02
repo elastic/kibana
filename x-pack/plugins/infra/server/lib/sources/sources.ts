@@ -129,7 +129,6 @@ export class InfraSources {
           sourceId,
           { ...updatedConfigurationAttributes },
           {
-            // TODO-VERSION
             version,
           }
         )
@@ -205,7 +204,6 @@ const convertSavedObjectToSavedSourceConfiguration = (savedObject: unknown) =>
   InfraSavedSourceConfigurationRuntimeType.decode(savedObject)
     .map(savedSourceConfiguration => ({
       id: savedSourceConfiguration.id,
-      // TODO-VERSION
       version: savedSourceConfiguration.version,
       updatedAt: savedSourceConfiguration.updated_at,
       configuration: savedSourceConfiguration.attributes,

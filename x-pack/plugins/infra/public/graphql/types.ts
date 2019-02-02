@@ -19,7 +19,7 @@ export interface InfraSource {
   /** The id of the source */
   id: string;
   /** The version number the source configuration was last persisted with */
-  version?: number | null;
+  version?: string | null;
   /** The timestamp the source configuration was last persisted at */
   updatedAt?: number | null;
   /** The raw configuration of the source */

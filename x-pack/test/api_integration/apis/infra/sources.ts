@@ -69,11 +69,10 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
           },
         });
 
-        // TODO-VERSION
         const { version, updatedAt, configuration, status } =
           response.data && response.data.createSource.source;
 
-        expect(version).to.be.greaterThan(0);
+        expect(version).to.be.a('string');
         expect(updatedAt).to.be.greaterThan(0);
         expect(configuration.name).to.be('NAME');
         expect(configuration.description).to.be('DESCRIPTION');
@@ -99,11 +98,10 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
           },
         });
 
-        // TODO-VERSION
         const { version, updatedAt, configuration, status } =
           response.data && response.data.createSource.source;
 
-        expect(version).to.be.greaterThan(0);
+        expect(version).to.be.a('string');
         expect(updatedAt).to.be.greaterThan(0);
         expect(configuration.name).to.be('NAME');
         expect(configuration.description).to.be('');
@@ -162,10 +160,9 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
           },
         });
 
-        // TODO-VERSION
         const { version } = creationResponse.data && creationResponse.data.createSource.source;
 
-        expect(version).to.be.greaterThan(0);
+        expect(version).to.be.a('string');
 
         const deletionResponse = await client.mutate<any>({
           mutation: deleteSourceMutation,
@@ -192,11 +189,10 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
           },
         });
 
-        // TODO-VERSION
         const { version: initialVersion, updatedAt: createdAt } =
           creationResponse.data && creationResponse.data.createSource.source;
 
-        expect(initialVersion).to.be.greaterThan(0);
+        expect(initialVersion).to.be.a('string');
         expect(createdAt).to.be.greaterThan(0);
 
         const updateResponse = await client.mutate<any>({
@@ -233,11 +229,11 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
           },
         });
 
-        // TODO-VERSION
         const { version, updatedAt, configuration, status } =
           updateResponse.data && updateResponse.data.updateSource.source;
 
-        expect(version).to.be.greaterThan(initialVersion);
+        expect(version).to.be.a('string');
+        expect(version).to.not.be(initialVersion);
         expect(updatedAt).to.be.greaterThan(createdAt);
         expect(configuration.name).to.be('UPDATED_NAME');
         expect(configuration.description).to.be('UPDATED_DESCRIPTION');
@@ -263,11 +259,10 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
           },
         });
 
-        // TODO-VERSION
         const { version: initialVersion, updatedAt: createdAt } =
           creationResponse.data && creationResponse.data.createSource.source;
 
-        expect(initialVersion).to.be.greaterThan(0);
+        expect(initialVersion).to.be.a('string');
         expect(createdAt).to.be.greaterThan(0);
 
         const updateResponse = await client.mutate<any>({
@@ -284,11 +279,11 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
           },
         });
 
-        // TODO-VERSION
         const { version, updatedAt, configuration, status } =
           updateResponse.data && updateResponse.data.updateSource.source;
 
-        expect(version).to.be.greaterThan(initialVersion);
+        expect(version).to.be.a('string');
+        expect(version).to.not.be(initialVersion);
         expect(updatedAt).to.be.greaterThan(createdAt);
         expect(configuration.metricAlias).to.be('metricbeat-**');
         expect(configuration.logAlias).to.be('filebeat-*');
@@ -307,11 +302,10 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
           },
         });
 
-        // TODO-VERSION
         const { version: initialVersion, updatedAt: createdAt } =
           creationResponse.data && creationResponse.data.createSource.source;
 
-        expect(initialVersion).to.be.greaterThan(0);
+        expect(initialVersion).to.be.a('string');
         expect(createdAt).to.be.greaterThan(0);
 
         const updateResponse = await client.mutate<any>({
@@ -328,11 +322,11 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
           },
         });
 
-        // TODO-VERSION
         const { version, updatedAt, configuration } =
           updateResponse.data && updateResponse.data.updateSource.source;
 
-        expect(version).to.be.greaterThan(initialVersion);
+        expect(version).to.be.a('string');
+        expect(version).to.not.be(initialVersion);
         expect(updatedAt).to.be.greaterThan(createdAt);
         expect(configuration.fields.container).to.be('UPDATED_CONTAINER');
         expect(configuration.fields.host).to.be('host.name');
@@ -352,7 +346,6 @@ const createSourceMutation = gql`
     createSource(id: $sourceId, source: $source) {
       source {
         id
-        // TODO-VERSION
         version
         updatedAt
         configuration {
@@ -390,7 +383,6 @@ const updateSourceMutation = gql`
     updateSource(id: $sourceId, changes: $changes) {
       source {
         id
-        // TODO-VERSION
         version
         updatedAt
         configuration {

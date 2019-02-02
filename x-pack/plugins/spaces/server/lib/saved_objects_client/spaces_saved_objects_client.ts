@@ -82,7 +82,6 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
    * @property {string} [options.id] - force id on creation, not recommended
    * @property {boolean} [options.overwrite=false]
    * @property {string} [options.namespace]
-   * // TODO-VERSION
    * @returns {promise} - { id, type, version, attributes }
    */
   public async create<T extends SavedObjectAttributes>(
@@ -106,7 +105,6 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
    * @param {object} [options={}]
    * @property {boolean} [options.overwrite=false] - overwrites existing documents
    * @property {string} [options.namespace]
-   * // TODO-VERSION
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes, error: { message } }]}
    */
   public async bulkCreate(objects: BulkCreateObject[], options: BaseOptions = {}) {
@@ -152,7 +150,6 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
    * @property {Array<string>} [options.fields]
    * @property {string} [options.namespace]
    * @property {object} [options.hasReference] - { type, id }
-   * // TODO-VERSION
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   public async find(options: FindOptions = {}) {
@@ -177,7 +174,6 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
    * @param {array} objects - an array ids, or an array of objects containing id and optionally type
    * @param {object} [options={}]
    * @property {string} [options.namespace]
-   * // TODO-VERSION
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
    * @example
    *
@@ -203,7 +199,6 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
    * @param {string} id
    * @param {object} [options={}]
    * @property {string} [options.namespace]
-   * // TODO-VERSION
    * @returns {promise} - { id, type, version, attributes }
    */
   public async get(type: string, id: string, options: BaseOptions = {}) {
@@ -222,8 +217,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
    * @param {string} type
    * @param {string} id
    * @param {object} [options={}]
-   * // TODO-VERSION
-   * @property {integer} options.version - ensures version matches that of persisted object
+   * @property {string} options.version - ensures version matches that of persisted object
    * @property {string} [options.namespace]
    * @returns {promise}
    */
