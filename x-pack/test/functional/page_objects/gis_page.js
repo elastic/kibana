@@ -143,6 +143,12 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.click(`mapRemoveLayerButton`);
     }
 
+    async getLayerErrorText(layerName) {
+      log.debug(`Remove layer ${layerName}`);
+      await this.openLayerPanel(layerName);
+      return await testSubjects.getVisibleText(`layerErrorMessage`);
+    }
+
     async openInspectorView(viewId) {
       await inspector.open();
       log.debug(`Open Inspector view ${viewId}`);

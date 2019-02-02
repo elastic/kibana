@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 
 import {
   EuiFlexGroup,
@@ -15,6 +15,7 @@ import {
   EuiFieldText,
   EuiRange,
   EuiSpacer,
+  EuiCallOut,
 } from '@elastic/eui';
 import { ValidatedRange } from '../../../shared/components/validated_range';
 
@@ -41,6 +42,26 @@ export function SettingsPanel(props) {
 
   const onSourceChange = ({ propName, value }) => {
     props.updateSourceProp(props.layerId, propName, value);
+  };
+
+  const renderLayerErrors = () => {
+    if (!props.layer.hasErrors()) {
+      return null;
+    }
+
+    return (
+      <Fragment>
+        <EuiCallOut
+          color="warning"
+          title="Unable to load layer"
+        >
+          <p data-test-subj="layerErrorMessage">
+            {props.layer.getErrors()}
+          </p>
+        </EuiCallOut>
+        <EuiSpacer margin="m"/>
+      </Fragment>
+    );
   };
 
   const renderZoomSliders = () => {
@@ -117,23 +138,27 @@ export function SettingsPanel(props) {
   };
 
   return (
-    <EuiPanel>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle size="xs"><h5>Settings</h5></EuiTitle>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <Fragment>
 
-      <EuiSpacer margin="m"/>
+      {renderLayerErrors()}
 
-      {renderLabel()}
+      <EuiPanel>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiTitle size="xs"><h5>Settings</h5></EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-      {renderZoomSliders()}
+        <EuiSpacer margin="m"/>
 
-      {renderAlphaSlider()}
+        {renderLabel()}
 
-      {props.layer.renderSourceSettingsEditor({ onChange: onSourceChange })}
+        {renderZoomSliders()}
 
-    </EuiPanel>
+        {renderAlphaSlider()}
+
+        {props.layer.renderSourceSettingsEditor({ onChange: onSourceChange })}
+      </EuiPanel>
+    </Fragment>
   );
 }
