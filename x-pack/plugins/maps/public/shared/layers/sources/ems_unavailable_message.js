@@ -10,7 +10,7 @@ const NO_EMS_ACCESS_MSG =
   'Kibana is unable to access Elastic Maps Service. Contact your system administrator';
 
 const EMS_ACCESS_DISABLED_MSG =
-  'Access to EMS has been disabled.' +
+  'Access to Elastic Maps Service has been disabled.' +
   ' Ask your system administrator to set "map.includeElasticMapsService" in kibana.yml.';
 
 export function getEmsUnavailableMessage() {

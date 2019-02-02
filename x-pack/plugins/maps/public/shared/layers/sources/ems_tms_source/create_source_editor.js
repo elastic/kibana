@@ -14,7 +14,6 @@ import {
 import { getEmsTMSServices } from '../../../../meta';
 import { getEmsUnavailableMessage } from '../ems_unavailable_message';
 
-
 export class EMSTMSCreateSourceEditor extends React.Component {
 
   state = {
