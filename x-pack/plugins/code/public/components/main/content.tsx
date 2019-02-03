@@ -66,6 +66,9 @@ const Root = styled.div`
   flex-grow: 1;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
+  min-width: 0;
+  overflow: auto;
 `;
 
 interface Props extends RouteComponentProps<MainRouteParams> {
