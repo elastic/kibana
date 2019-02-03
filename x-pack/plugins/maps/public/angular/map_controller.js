@@ -6,6 +6,7 @@
 
 import chrome from 'ui/chrome';
 import React from 'react';
+import { I18nProvider } from '@kbn/i18n/react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
@@ -19,8 +20,13 @@ import {
   replaceLayerList,
   setQuery,
 } from '../actions/store_actions';
-import { updateFlyout, FLYOUT_STATE } from '../store/ui';
-import {  getUniqueIndexPatternIds } from '../selectors/map_selectors';
+import {
+  enableFullScreen,
+  getIsFullScreen,
+  updateFlyout,
+  FLYOUT_STATE
+} from '../store/ui';
+import { getUniqueIndexPatternIds } from '../selectors/map_selectors';
 import { Inspector } from 'ui/inspector';
 import { inspectorAdapters, indexPatternService } from '../kibana_services';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
@@ -31,7 +37,7 @@ import { getInitialQuery } from './get_initial_query';
 import { getInitialTimeFilters } from './get_initial_time_filters';
 import { getInitialRefreshConfig } from './get_initial_refresh_config';
 
-const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-gis-root';
+const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 
 
 const app = uiModules.get('app/maps', []);
@@ -54,7 +60,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
 
   const $state = new AppState();
   $scope.$listen($state, 'fetch_with_changes', function (diff) {
-    if (diff.includes('query')) {
+    if (diff.includes('query') && $state.query) {
       $scope.updateQueryAndDispatch({ query: $state.query, dateRange: $scope.time });
     }
   });
@@ -148,7 +154,9 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     const root = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
     render(
       <Provider store={store}>
-        <GisMap/>
+        <I18nProvider>
+          <GisMap/>
+        </I18nProvider>
       </Provider>,
       root);
   });
@@ -173,7 +181,16 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     $scope.indexPatterns = indexPatterns;
   }
 
+  $scope.isFullScreen = false;
   function handleStoreChanges(store) {
+    const nextIsFullScreen = getIsFullScreen(store.getState());
+    if (nextIsFullScreen !== $scope.isFullScreen) {
+      // Must trigger digest cycle for angular top nav to redraw itself when isFullScreen changes
+      $scope.$evalAsync(() => {
+        $scope.isFullScreen = nextIsFullScreen;
+      });
+    }
+
     const nextIndexPatternIds = getUniqueIndexPatternIds(store.getState());
     if (nextIndexPatternIds !== prevIndexPatternIds) {
       prevIndexPatternIds = nextIndexPatternIds;
@@ -238,6 +255,15 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   timefilter.disableAutoRefreshSelector();
   $scope.showDatePicker = true; // used by query-bar directive to enable timepikcer in query bar
   $scope.topNavMenu = [{
+    key: 'fullScreen',
+    description: 'Full screen',
+    testId: 'fullScreenMode',
+    run() {
+      getStore().then(store => {
+        store.dispatch(enableFullScreen());
+      });
+    }
+  }, {
     key: 'inspect',
     description: 'Open Inspector',
     testId: 'openInspectorButton',

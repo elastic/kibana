@@ -17,24 +17,36 @@
  * under the License.
  */
 
-import 'ui/autoload/modules';
-import 'ui/autoload/styles';
-import 'ui/i18n';
-import { uiModules } from 'ui/modules';
-import chrome from 'ui/chrome';
-import { destroyStatusPage, renderStatusPage } from './components/render';
-
-chrome
-  .enableForcedAppSwitcherNavigation()
-  .setRootTemplate(require('plugins/status_page/status_page.html'))
-  .setRootController('ui', function ($scope, buildNum, buildSha) {
-    $scope.$$postDigest(() => {
-      renderStatusPage(buildNum, buildSha.substr(0, 8));
-      $scope.$on('$destroy', destroyStatusPage);
-    });
-  });
-
-uiModules.get('kibana')
-  .config(function (appSwitcherEnsureNavigationProvider) {
-    appSwitcherEnsureNavigationProvider.forceNavigation(true);
-  });
+// We can't use common Kibana presets here because of babel versions incompatibility
+module.exports = {
+  plugins: ['@babel/plugin-proposal-class-properties', '@babel/plugin-proposal-object-rest-spread'],
+  presets: ['@babel/typescript'],
+  env: {
+    public: {
+      presets: [
+        [
+          '@babel/preset-env',
+          {
+            targets: {
+              browsers: ['last 2 versions', '> 5%', 'Safari 7'],
+            },
+            modules: false
+          },
+        ],
+      ],
+    },
+    server: {
+      presets: [
+        [
+          '@babel/preset-env',
+          {
+            targets: {
+              node: 'current',
+            },
+          },
+        ],
+      ],
+    },
+  },
+  ignore: ['**/__tests__/**/*', '**/*.test.ts', '**/*.test.tsx'],
+};
