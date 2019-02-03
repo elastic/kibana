@@ -38,6 +38,7 @@ export class ReindexWorker {
   private static workerSingleton?: ReindexWorker;
   private continuePolling: boolean = false;
   private updateOperationLoopRunning: boolean = false;
+  private timeout?: NodeJS.Timeout;
   private inProgressOps: ReindexSavedObject[] = [];
   private readonly reindexService: ReindexService;
 
@@ -76,6 +77,10 @@ export class ReindexWorker {
    */
   public stop = () => {
     this.log(['debug', ...LOG_TAGS], `Stopping worker...`);
+    if (this.timeout) {
+      clearTimeout(this.timeout);
+    }
+
     this.updateOperationLoopRunning = false;
     this.continuePolling = false;
   };
@@ -117,12 +122,17 @@ export class ReindexWorker {
     await this.refresh();
 
     if (this.continuePolling) {
-      setTimeout(this.pollForOperations, POLL_INTERVAL);
+      this.timeout = setTimeout(this.pollForOperations, POLL_INTERVAL);
     }
   };
 
   private refresh = async () => {
-    this.inProgressOps = await this.reindexService.findAllByStatus(ReindexStatus.inProgress);
+    try {
+      this.inProgressOps = await this.reindexService.findAllByStatus(ReindexStatus.inProgress);
+    } catch (e) {
+      this.log(['debug', ...LOG_TAGS], `Could not fetch riendex operations from Elasticsearch`);
+      this.inProgressOps = [];
+    }
 
     // If there are operations in progress and we're not already updating operations, kick off the update loop
     if (!this.updateOperationLoopRunning) {
