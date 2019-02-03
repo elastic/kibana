@@ -103,7 +103,7 @@ export class EditorComponent extends React.Component<IProps> {
   }
   public render() {
     return (
-      <EuiFlexItem className="code-no-overflow" grow={1}>
+      <EuiFlexItem data-test-subj="codeSourceViewer" className="code-no-overflow" grow={1}>
         <Shortcut
           keyCode="f"
           help="With editor ‘active’ Find in file"

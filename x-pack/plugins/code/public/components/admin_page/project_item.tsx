@@ -60,8 +60,14 @@ class CodeProjectItem extends React.PureComponent<{
     let footer = null;
     let disableRepoLink = false;
     let hasError = false;
-    if (!status || status.state === RepoState.READY) {
-      footer = <Footer>LAST UPDATED: {moment(nextUpdateTimestamp).fromNow()}</Footer>;
+    if (!status) {
+      footer = <Footer>INIT...</Footer>;
+    } else if (status.state === RepoState.READY) {
+      footer = (
+        <Footer data-test-subj="repositoryIndexDone">
+          LAST UPDATED: {moment(nextUpdateTimestamp).fromNow()}
+        </Footer>
+      );
     } else if (status.state === RepoState.DELETING) {
       footer = <Footer>DELETING...</Footer>;
     } else if (status.state === RepoState.INDEXING) {
@@ -113,7 +119,12 @@ class CodeProjectItem extends React.PureComponent<{
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
-            <div className="code-project-button" onClick={onClickDelete} role="button">
+            <div
+              className="code-project-button"
+              data-test-subj="deleteRepositoryButton"
+              onClick={onClickDelete}
+              role="button"
+            >
               <EuiIcon type="trash" color="danger" />
               <EuiText size="xs" color="subdued">
                 Delete

@@ -95,6 +95,7 @@ export class SideBar extends React.PureComponent<Props> {
             onClick={this.props.onLanguageFilterToggled(item.name)}
             quantity={item.value}
             isSelected={true}
+            data-test-subj="codeSearchLanguageFilterItem"
           >
             {item.name}
           </FacetItem>
@@ -102,9 +103,10 @@ export class SideBar extends React.PureComponent<Props> {
       } else {
         return (
           <FacetItem
-            key={`repostats${index}`}
+            key={`langstats${index}`}
             onClick={this.props.onLanguageFilterToggled(item.name)}
             quantity={item.value}
+            data-test-subj="codeSearchLanguageFilterItem"
           >
             {item.name}
           </FacetItem>
@@ -141,7 +143,9 @@ export class SideBar extends React.PureComponent<Props> {
               </EuiTitle>
             </EuiFlexItem>
           </FacetTitle>
-          <EuiFacetGroup>{langStatsComp}</EuiFacetGroup>
+          <EuiFacetGroup data-test-subj="codeSearchLanguageFilterList">
+            {langStatsComp}
+          </EuiFacetGroup>
         </FacetContainer>
       </SideBarContainer>
     );

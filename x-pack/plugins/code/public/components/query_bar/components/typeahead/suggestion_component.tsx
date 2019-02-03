@@ -132,7 +132,9 @@ export const SuggestionComponent: SFC<Props> = props => {
       <SuggestionItemInner>
         {icon}
         <div>
-          <SuggestionItemText>{renderMatchingText(props.suggestion.text)}</SuggestionItemText>
+          <SuggestionItemText data-test-subj={`codeTypeaheadItem`}>
+            {renderMatchingText(props.suggestion.text)}
+          </SuggestionItemText>
           <SuggestionItemDescription>{props.suggestion.description}</SuggestionItemDescription>
         </div>
       </SuggestionItemInner>

@@ -8,7 +8,7 @@ import expect from 'expect.js';
 import { TestInvoker } from './lib/types';
 
 // tslint:disable:no-default-export
-export default function importRepositoryFunctonalTests({
+export default function manageRepositoriesFunctonalTests({
   getService,
   getPageObjects,
 }: TestInvoker) {
@@ -21,7 +21,7 @@ export default function importRepositoryFunctonalTests({
   describe('Code', () => {
     const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
 
-    describe('Import Repository', () => {
+    describe('Manage Repositories', () => {
       before(async () => {
         // Navigate to the code app.
         await PageObjects.common.navigateToApp('code');
@@ -29,23 +29,39 @@ export default function importRepositoryFunctonalTests({
       });
       // after(async () => await esArchiver.unload('code'));
 
-      afterEach(async () => {
+      after(async () => {
         await PageObjects.security.logout();
       });
 
       it('import repository', async () => {
         log.debug('Code test import repository');
         // Fill in the import repository input box with a valid git repository url.
-        await PageObjects.code.fillImportRepositoryUrlInputBox();
+        await PageObjects.code.fillImportRepositoryUrlInputBox(
+          'https://github.com/Microsoft/TypeScript-Node-Starter'
+        );
         // Click the import repository button.
         await PageObjects.code.clickImportRepositoryButton();
 
-        await retry.try(async () => {
+        await retry.tryForTime(300000, async () => {
           const repositoryItems = await testSubjects.findAll(repositoryListSelector);
           expect(repositoryItems).to.have.length(1);
           expect(await repositoryItems[0].getVisibleText()).to.equal(
             'Microsoft/TypeScript-Node-Starter'
           );
+
+          // Wait for the repository to finish index.
+          expect(await testSubjects.exists('repositoryIndexDone')).to.be(true);
+        });
+      });
+
+      it('delete repository', async () => {
+        log.debug('Code test delete repository');
+        // Click the delete repository button.
+        await PageObjects.code.clickDeleteRepositoryButton();
+
+        await retry.try(async () => {
+          const repositoryItems = await testSubjects.findAll(repositoryListSelector);
+          expect(repositoryItems).to.have.length(0);
         });
       });
     });
