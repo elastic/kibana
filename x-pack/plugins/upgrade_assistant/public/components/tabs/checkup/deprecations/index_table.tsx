@@ -14,6 +14,12 @@ import { ReindexButton } from './reindex';
 
 const PAGE_SIZES = [10, 25, 50, 100, 250, 500, 1000];
 
+export interface IndexDeprecationDetails {
+  index: string;
+  reindex: boolean;
+  details?: string;
+}
+
 export interface IndexDeprecationTableProps extends ReactIntl.InjectedIntlProps {
   indices: EnrichedDeprecationInfo[];
 }

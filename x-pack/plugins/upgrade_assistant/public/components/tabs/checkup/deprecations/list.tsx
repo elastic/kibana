@@ -12,7 +12,7 @@ import { GroupByOption } from '../../../types';
 
 import { COLOR_MAP, LEVEL_MAP } from '../constants';
 import { DeprecationCell } from './cell';
-import { IndexDeprecationTable } from './index_table';
+import { IndexDeprecationDetails, IndexDeprecationTable } from './index_table';
 
 const sortByLevelDesc = (a: DeprecationInfo, b: DeprecationInfo) => {
   return -1 * (LEVEL_MAP[a.level] - LEVEL_MAP[b.level]);
@@ -57,16 +57,17 @@ const SimpleMessageDeprecation: StatelessComponent<{ deprecation: EnrichedDeprec
 };
 
 interface IndexDeprecationProps {
-  deprecations: EnrichedDeprecationInfo[];
+  deprecation: DeprecationInfo;
+  indices: IndexDeprecationDetails[];
 }
 
 /**
  * Shows a single deprecation and table of affected indices with details for each index.
  */
-const IndexDeprecation: StatelessComponent<IndexDeprecationProps> = ({ deprecations }) => {
+const IndexDeprecation: StatelessComponent<IndexDeprecationProps> = ({ deprecation, indices }) => {
   return (
-    <DeprecationCell docUrl={deprecations[0].url}>
-      <IndexDeprecationTable indices={deprecations} />
+    <DeprecationCell docUrl={deprecation.url}>
+      <IndexDeprecationTable indices={indices} />
     </DeprecationCell>
   );
 };
@@ -84,7 +85,12 @@ export const DeprecationList: StatelessComponent<{
   if (currentGroupBy === GroupByOption.message && deprecations[0].index !== undefined) {
     // We assume that every deprecation message is the same issue (since they have the same
     // message) and that each deprecation will have an index associated with it.
-    return <IndexDeprecation deprecations={deprecations} />;
+    const indices = deprecations.map(dep => ({
+      index: dep.index!,
+      details: dep.details,
+      reindex: dep.reindex === true,
+    }));
+    return <IndexDeprecation indices={indices} deprecation={deprecations[0]} />;
   } else if (currentGroupBy === GroupByOption.index) {
     return (
       <div>

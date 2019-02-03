@@ -41,6 +41,9 @@ describe('reindex template API', () => {
     elasticsearch: {
       getCluster: () => ({ callWithRequest: jest.fn() } as any),
     } as any,
+    apm_oss: {
+      indexPatterns: ['apm-*'] as string[],
+    } as any,
   } as any;
   server.config = () => ({ get: () => '' } as any);
   server.decorate('request', 'getSavedObjectsClient', () => jest.fn());

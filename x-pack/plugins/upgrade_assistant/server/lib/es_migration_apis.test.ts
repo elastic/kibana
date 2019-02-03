@@ -16,6 +16,8 @@ describe('getUpgradeAssistantStatus', () => {
   const callWithRequest = jest.fn().mockImplementation(async (req, api, { path }) => {
     if (path === '/_migration/deprecations') {
       return deprecationsResponse;
+    } else if (api === 'indices.getMapping') {
+      return {};
     } else {
       throw new Error(`Unexpected API call: ${path}`);
     }
