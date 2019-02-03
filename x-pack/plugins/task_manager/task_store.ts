@@ -33,8 +33,8 @@ export interface FetchResult {
 export interface RemoveResult {
   index: string;
   id: string;
-  // TODO-VERSION
-  version: string;
+  sequenceNumber: number;
+  primaryTerm: number;
   result: string;
 }
 
@@ -42,8 +42,8 @@ export interface RemoveResult {
 export interface RawTaskDoc {
   _id: string;
   _index: string;
-  // TODO-VERSION
-  _version: number;
+  _seq_no: number;
+  _primary_term: number;
   _source: {
     type: string;
     task: {
@@ -181,8 +181,8 @@ export class TaskStore {
     return {
       ...taskInstance,
       id: result._id,
-      // TODO-VERSION
-      version: result._version,
+      sequenceNumber: result._seq_no,
+      primaryTerm: result._primary_term,
       attempts: 0,
       status: task.status,
       runAt: task.runAt,
@@ -228,8 +228,7 @@ export class TaskStore {
       },
       size: 10,
       sort: { 'task.runAt': { order: 'asc' } },
-      // TODO-VERSION
-      version: true,
+      seq_no_primary_term: true,
     });
 
     return docs;
@@ -245,15 +244,14 @@ export class TaskStore {
   public async update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance> {
     const rawDoc = taskDocToRaw(doc, this.index);
 
-    // TODO-VERSION
-    const { _version } = await this.callCluster('update', {
+    const result = await this.callCluster('update', {
       body: {
         doc: rawDoc._source,
       },
       id: doc.id,
       index: this.index,
-      // TODO-VERSION
-      version: doc.version,
+      if_seq_no: doc.sequenceNumber,
+      if_primary_term: doc.primaryTerm,
       // The refresh is important so that if we immediately look for work,
       // we don't pick up this task.
       refresh: true,
@@ -261,8 +259,8 @@ export class TaskStore {
 
     return {
       ...doc,
-      // TODO-VERSION
-      version: _version,
+      sequenceNumber: result._seq_no,
+      primaryTerm: result._primary_term,
     };
   }
 
@@ -284,8 +282,8 @@ export class TaskStore {
     return {
       index: result._index,
       id: result._id,
-      // TODO-VERSION
-      version: result._version,
+      sequenceNumber: result._seq_no,
+      primaryTerm: result._primary_term,
       result: result.result,
     };
   }
@@ -341,8 +339,8 @@ function rawSource(doc: TaskInstance) {
   };
 
   delete (source as any).id;
-  // TODO-VERSION
-  delete (source as any).version;
+  delete (source as any).sequenceNumber;
+  delete (source as any).primaryTerm;
   delete (source as any).type;
 
   return {
@@ -359,8 +357,8 @@ function taskDocToRaw(doc: ConcreteTaskInstance, index: string): RawTaskDoc {
     _id: doc.id,
     _index: index,
     _source: { type, task },
-    // TODO-VERSION
-    _version: doc.version,
+    _seq_no: doc.sequenceNumber,
+    _primary_term: doc.primaryTerm,
   };
 }
 
@@ -368,8 +366,8 @@ function rawToTaskDoc(doc: RawTaskDoc): ConcreteTaskInstance {
   return {
     ...doc._source.task,
     id: doc._id,
-    // TODO-VERSION
-    version: doc._version,
+    sequenceNumber: doc._seq_no,
+    primaryTerm: doc._primary_term,
     params: parseJSONField(doc._source.task.params, 'params', doc),
     state: parseJSONField(doc._source.task.state, 'state', doc),
   };

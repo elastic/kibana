@@ -42,8 +42,8 @@ describe('TaskStore', () => {
       const callCluster = sinon.spy(() =>
         Promise.resolve({
           _id: 'testid',
-          // TODO-VERSION
-          _version: 3344,
+          _seq_no: 3344,
+          _primary_term: 3344,
         })
       );
       const store = new TaskStore({
@@ -90,8 +90,8 @@ describe('TaskStore', () => {
 
       expect(result).toMatchObject({
         ...task,
-        // TODO-VERSION
-        version: 3344,
+        sequenceNumber: 3344,
+        primaryTerm: 3344,
         id: 'testid',
       });
     });
@@ -257,8 +257,8 @@ describe('TaskStore', () => {
             status: 'idle',
             taskType: 'foo',
             user: 'jimbo',
-            // TODO-VERSION
-            version: undefined,
+            sequenceNumber: undefined,
+            primaryTerm: undefined,
           },
           {
             attempts: 2,
@@ -271,8 +271,8 @@ describe('TaskStore', () => {
             status: 'running',
             taskType: 'bar',
             user: 'dabo',
-            // TODO-VERSION
-            version: undefined,
+            sequenceNumber: undefined,
+            primaryTerm: undefined,
           },
         ],
         searchAfter: ['b', 2],
@@ -349,8 +349,7 @@ describe('TaskStore', () => {
           },
           size: 10,
           sort: { 'task.runAt': { order: 'asc' } },
-          // TODO-VERSION
-          version: true,
+          seq_no_primary_term: true,
         },
         index,
       });
@@ -410,8 +409,8 @@ describe('TaskStore', () => {
           status: 'idle',
           taskType: 'foo',
           user: 'jimbo',
-          // TODO-VERSION
-          version: undefined,
+          sequenceNumber: undefined,
+          primaryTerm: undefined,
         },
         {
           attempts: 2,
@@ -424,15 +423,14 @@ describe('TaskStore', () => {
           status: 'running',
           taskType: 'bar',
           user: 'dabo',
-          // TODO-VERSION
-          version: undefined,
+          sequenceNumber: undefined,
+          primaryTerm: undefined,
         },
       ]);
     });
   });
 
   describe('update', () => {
-    // TODO-VERSION
     test('refreshes the index, handles versioning', async () => {
       const runAt = new Date();
       const task = {
@@ -441,14 +439,17 @@ describe('TaskStore', () => {
         params: { hello: 'world' },
         state: { foo: 'bar' },
         taskType: 'report',
-        // TODO-VERSION
-        version: 2,
+        sequenceNumber: 2,
+        primaryTerm: 2,
         attempts: 3,
         status: 'idle' as TaskStatus,
       };
 
-      // TODO-VERSION
-      const callCluster = sinon.spy(async () => ({ _version: task.version + 1 }));
+      const callCluster = sinon.spy(async () => ({
+        _seq_no: task.sequenceNumber + 1,
+        _primary_term: task.primaryTerm + 1,
+      }));
+
       const store = new TaskStore({
         callCluster,
         index: 'tasky',
@@ -464,14 +465,13 @@ describe('TaskStore', () => {
       expect(callCluster.args[0][1]).toMatchObject({
         id: task.id,
         index: 'tasky',
-        // TODO-VERSION
-        version: 2,
+        if_seq_no: 2,
+        if_primary_term: 2,
         refresh: true,
         body: {
           doc: {
             task: {
-              // TODO-VERSION
-              ...['id', 'version'].reduce((acc, prop) => _.omit(acc, prop), task),
+              ..._.omit(task, ['id', 'sequenceNumber', 'primaryTerm']),
               params: JSON.stringify(task.params),
               state: JSON.stringify(task.state),
             },
@@ -479,8 +479,11 @@ describe('TaskStore', () => {
         },
       });
 
-      // TODO-VERSION
-      expect(result).toEqual({ ...task, version: 3 });
+      expect(result).toEqual({
+        ...task,
+        sequenceNumber: 3,
+        primaryTerm: 3,
+      });
     });
   });
 
@@ -491,8 +494,8 @@ describe('TaskStore', () => {
         Promise.resolve({
           _index: 'myindex',
           _id: id,
-          // TODO-VERSION
-          _version: 32,
+          _seq_no: 32,
+          _primary_term: 32,
           result: 'deleted',
         })
       );
@@ -510,8 +513,8 @@ describe('TaskStore', () => {
       expect(result).toEqual({
         id,
         index: 'myindex',
-        // TODO-VERSION
-        version: 32,
+        sequenceNumber: 32,
+        primaryTerm: 32,
         result: 'deleted',
       });
 

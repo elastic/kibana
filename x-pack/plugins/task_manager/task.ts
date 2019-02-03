@@ -206,10 +206,14 @@ export interface ConcreteTaskInstance extends TaskInstance {
   id: string;
 
   /**
-   * The version of the Elaticsearch document.
+   * The sequence number from the Elaticsearch document.
    */
-  // TODO-VERSION
-  version: number;
+  sequenceNumber: number;
+
+  /**
+   * The primary term from the Elaticsearch document.
+   */
+  primaryTerm: number;
 
   /**
    * The number of unsuccessful attempts since the last successful run. This
