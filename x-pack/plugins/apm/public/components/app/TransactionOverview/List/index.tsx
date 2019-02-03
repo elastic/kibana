@@ -28,7 +28,7 @@ interface Props {
 }
 
 export function TransactionList({ items, serviceName, ...rest }: Props) {
-  const columns: ITableColumn[] = [
+  const columns: Array<ITableColumn<ITransactionGroup>> = [
     {
       field: 'name',
       name: i18n.translate('xpack.apm.transactionsTable.nameColumnLabel', {

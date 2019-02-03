@@ -26,7 +26,7 @@ interface Props {
   isLoading: boolean;
 }
 
-const traceListColumns: ITableColumn[] = [
+const traceListColumns: Array<ITableColumn<ITransactionGroup>> = [
   {
     field: 'name',
     name: i18n.translate('xpack.apm.tracesTable.nameColumnLabel', {
