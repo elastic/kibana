@@ -191,4 +191,89 @@ describe('formatHistogramData', () => {
     const result = formatHistogramData(seriesList);
     expect(result).toMatchSnapshot();
   });
+
+  it(`doesn't add an entry to either count when none exists`, () => {
+    const seriesList: HistogramSeries[] = [
+      {
+        monitorId: 'monitor1',
+        data: [
+          {
+            upCount: 3,
+            downCount: null,
+            x: 10,
+            x0: 11,
+            y: 4,
+          },
+          {
+            upCount: 3,
+            downCount: null,
+            x: 11,
+            x0: 12,
+            y: 4,
+          },
+          {
+            upCount: 3,
+            downCount: null,
+            x: 12,
+            x0: 13,
+            y: 4,
+          },
+        ],
+      },
+      {
+        monitorId: 'monitor2',
+        data: [
+          {
+            upCount: null,
+            downCount: 2,
+            x: 10,
+            x0: 11,
+            y: 4,
+          },
+          {
+            upCount: null,
+            downCount: 2,
+            x: 11,
+            x0: 12,
+            y: 4,
+          },
+          {
+            upCount: 4,
+            downCount: null,
+            x: 12,
+            x0: 13,
+            y: 4,
+          },
+        ],
+      },
+      {
+        monitorId: 'monitor3',
+        data: [
+          {
+            upCount: null,
+            downCount: 24,
+            x: 10,
+            x0: 11,
+            y: 4,
+          },
+          {
+            upCount: null,
+            downCount: null,
+            x: 11,
+            x0: 12,
+            y: 4,
+          },
+          {
+            upCount: null,
+            downCount: 35,
+            x: 12,
+            x0: 13,
+            y: 4,
+          },
+        ],
+      },
+    ];
+    const result = formatHistogramData(seriesList);
+    expect(result).toMatchSnapshot();
+  });
 });

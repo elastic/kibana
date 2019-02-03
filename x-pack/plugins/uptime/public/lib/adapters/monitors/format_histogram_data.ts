@@ -25,7 +25,7 @@ export const formatHistogramData = (histograms: HistogramSeries[]): FormattedHis
       (accumulatedData: FormattedHistogramData, data) => {
         // @ts-ignore data will not be null/undefined because those elements are filtered
         data.forEach(dataPoint => {
-          const { x, x0, downCount } = dataPoint;
+          const { x, x0, downCount, upCount } = dataPoint;
           const findPointInSeries = (hdp: HistogramDataPoint) => hdp.x === x && hdp.x0 === x0;
           const upEntry = accumulatedData.upSeriesData.find(findPointInSeries);
           const downEntry = accumulatedData.downSeriesData.find(findPointInSeries);
@@ -35,7 +35,7 @@ export const formatHistogramData = (histograms: HistogramSeries[]): FormattedHis
             } else {
               accumulatedData.downSeriesData.push({ x, x0, y: 1 });
             }
-          } else {
+          } else if (upCount) {
             if (upEntry) {
               upEntry.y += 1;
             } else {
