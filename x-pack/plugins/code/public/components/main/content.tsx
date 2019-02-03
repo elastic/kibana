@@ -50,7 +50,6 @@ const EditorBlameContainer = styled.div`
   display: flex;
   flex-direction: row;
   flex-grow: 1;
-  overflow: auto;
 `;
 
 const DirectoryViewContainer = styled.div`
@@ -66,6 +65,7 @@ const Root = styled.div`
   flex-grow: 1;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 `;
 
 interface Props extends RouteComponentProps<MainRouteParams> {
