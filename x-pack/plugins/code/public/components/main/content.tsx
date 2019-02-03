@@ -77,6 +77,7 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   hasMoreCommits: boolean;
   loadingCommits: boolean;
   onSearchScopeChanged: (s: SearchScope) => void;
+  repoScope: string[];
   fetchMoreCommits(repoUri: string): void;
 }
 
@@ -224,6 +225,7 @@ class CodeContent extends React.PureComponent<Props> {
           routeParams={this.props.match.params}
           onSearchScopeChanged={this.props.onSearchScopeChanged}
           buttons={this.renderButtons()}
+          repoScope={this.props.repoScope}
         />
         {this.renderContent()}
       </Root>
@@ -373,6 +375,7 @@ const mapStateToProps = (state: RootState) => ({
   hasMoreCommits: hasMoreCommitsSelector(state),
   loadingCommits: state.file.loadingCommits,
   repoStatus: statusSelector(state),
+  repoScope: state.search.searchOptions.repoScope.map(r => r.uri),
 });
 
 const mapDispatchToProps = {

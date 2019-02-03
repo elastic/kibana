@@ -186,7 +186,11 @@ export class CodeQueryBar extends Component<Props, State> {
 
     const res = await Promise.all(
       this.props.suggestionProviders.map((provider: SuggestionsProvider) => {
-        return provider.getSuggestions(query, this.props.searchScope);
+        return provider.getSuggestions(
+          query,
+          this.props.searchScope,
+          this.props.searchOptions.repoScope.map(repo => repo.uri)
+        );
       })
     );
 
@@ -461,7 +465,7 @@ const mapStateToProps = (state: RootState) => ({
     : [],
   searchLoading: state.search.isLoading,
   searchScope: state.search.scope,
-  searchOptions: state.search.searchOptions || { repoScopes: [] },
+  searchOptions: state.search.searchOptions,
 });
 
 const mapDispatchToProps = {

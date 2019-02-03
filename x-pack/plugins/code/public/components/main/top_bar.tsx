@@ -35,13 +35,17 @@ interface Props {
   routeParams: MainRouteParams;
   onSearchScopeChanged: (s: SearchScope) => void;
   buttons: React.ReactNode;
+  repoScope: string[];
 }
 
 export class TopBar extends React.Component<Props> {
   public render() {
     return (
       <TopBarContainer>
-        <SearchBar onSearchScopeChanged={this.props.onSearchScopeChanged} />
+        <SearchBar
+          onSearchScopeChanged={this.props.onSearchScopeChanged}
+          repoScope={this.props.repoScope}
+        />
         <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <Breadcrumb routeParams={this.props.routeParams} />

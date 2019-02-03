@@ -14,7 +14,7 @@ exports[`render correctly with empty query string 1`] = `
   searchLoading={false}
   searchOptions={
     Object {
-      "repoScopes": Array [],
+      "repoScope": Array [],
     }
   }
   searchScope="default"
@@ -645,7 +645,7 @@ exports[`render correctly with empty query string 1`] = `
                       searchLoading={false}
                       searchOptions={
                         Object {
-                          "repoScopes": Array [],
+                          "repoScope": Array [],
                         }
                       }
                     >
@@ -757,7 +757,7 @@ exports[`render correctly with input query string changed 1`] = `
       searchLoading={false}
       searchOptions={
         Object {
-          "repoScopes": Array [],
+          "repoScope": Array [],
         }
       }
       searchScope="default"
@@ -1400,7 +1400,7 @@ exports[`render correctly with input query string changed 1`] = `
                           searchLoading={false}
                           searchOptions={
                             Object {
-                              "repoScopes": Array [],
+                              "repoScope": Array [],
                             }
                           }
                         >

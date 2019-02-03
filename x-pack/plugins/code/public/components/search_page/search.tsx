@@ -13,7 +13,7 @@ import Url from 'url';
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { DocumentSearchResult, SearchScope } from '../../../model';
-import { changeSearchScope } from '../../actions';
+import { changeSearchScope, SearchOptions } from '../../actions';
 import { RootState } from '../../reducers';
 import { history } from '../../utils/url';
 import { ProjectItem } from '../admin_page/project_item';
@@ -44,6 +44,7 @@ const CodeResultContainer = styled.div`
 const RepositoryResultContainer = CodeResultContainer;
 
 interface Props {
+  searchOptions: SearchOptions;
   query: string;
   scope: SearchScope;
   page?: number;
@@ -211,6 +212,7 @@ class SearchPage extends React.PureComponent<Props, State> {
           </EuiFlexItem>
           <EuiFlexItem>
             <SearchBar
+              repoScope={this.props.searchOptions.repoScope.map(r => r.uri)}
               query={this.props.query}
               onSearchScopeChanged={this.props.onSearchScopeChanged}
             />

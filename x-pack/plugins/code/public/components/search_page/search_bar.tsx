@@ -32,6 +32,7 @@ const SearchBarContainer = styled.div`
 interface Props {
   query: string;
   onSearchScopeChanged: (s: SearchScope) => void;
+  repoScope: string[];
 }
 
 export class SearchBar extends React.PureComponent<Props> {
@@ -44,6 +45,7 @@ export class SearchBar extends React.PureComponent<Props> {
         query: {
           ...queries,
           q: query,
+          repoScope: this.props.repoScope,
         },
       })
     );
