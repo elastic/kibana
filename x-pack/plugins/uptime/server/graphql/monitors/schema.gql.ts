@@ -25,7 +25,7 @@ export const monitorsSchema = gql`
 
   type HistogramSeries {
     monitorId: String
-    data: [HistogramDataPoint]
+    data: [HistogramDataPoint!]
   }
 
   type Snapshot {

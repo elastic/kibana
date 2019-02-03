@@ -30,9 +30,9 @@ export interface Query {
 
   getFilterBar?: FilterBar | null;
 
-  getMonitorPageTitle?: MonitorPageTitle | null;
-
   getErrorsList?: ErrorListItem[] | null;
+
+  getMonitorPageTitle?: MonitorPageTitle | null;
 }
 
 export interface PingResults {
@@ -343,7 +343,7 @@ export interface Snapshot {
 export interface HistogramSeries {
   monitorId?: string | null;
 
-  data?: (HistogramDataPoint | null)[] | null;
+  data?: HistogramDataPoint[] | null;
 }
 
 export interface HistogramDataPoint {
