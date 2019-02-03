@@ -5,9 +5,9 @@
  */
 
 import Boom from 'boom';
-import { get } from 'lodash';
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { XPackInfo } from 'x-pack/plugins/xpack_main/server/lib/xpack_info';
 import {
   IndexGroup,
   ReindexSavedObject,
@@ -81,6 +81,7 @@ export interface ReindexService {
 
 export const reindexServiceFactory = (
   callCluster: CallCluster,
+  xpackInfo: XPackInfo,
   actions: ReindexActions
 ): ReindexService => {
   // ------ Utility functions
@@ -396,12 +397,9 @@ export const reindexServiceFactory = (
 
   return {
     async hasRequiredPrivileges(indexName: string) {
-      // If security is disabled, return true.
-      const xpackInfo = await callCluster('transport.request', {
-        path: '/_xpack',
-        method: 'GET',
-      });
-      if (!get(xpackInfo, 'features.security.enabled')) {
+      // If security is disabled or unavailable, return true.
+      const security = xpackInfo.feature('security');
+      if (!security.isAvailable() || !security.isEnabled()) {
         return true;
       }
 

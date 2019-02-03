@@ -38,6 +38,9 @@ describe('reindex API', () => {
     elasticsearch: {
       getCluster: () => ({ callWithRequest: jest.fn() } as any),
     } as any,
+    xpack_main: {
+      info: {},
+    },
   } as any;
   server.config = () => ({ get: () => '' } as any);
   server.decorate('request', 'getSavedObjectsClient', () => jest.fn());

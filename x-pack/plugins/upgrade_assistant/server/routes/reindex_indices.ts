@@ -18,6 +18,7 @@ export function registerReindexWorker(server: Server, credentialStore: Credentia
   const { callWithRequest, callWithInternalUser } = server.plugins.elasticsearch.getCluster(
     'admin'
   );
+  const xpackInfo = server.plugins.xpack_main.info;
   const savedObjectsRepository = server.savedObjects.getSavedObjectsRepository(
     callWithInternalUser
   );
@@ -38,6 +39,7 @@ export function registerReindexWorker(server: Server, credentialStore: Credentia
     credentialStore,
     callWithRequest,
     callWithInternalUser,
+    xpackInfo,
     log
   );
 
@@ -56,6 +58,7 @@ export function registerReindexIndicesRoutes(
   credentialStore: CredentialStore
 ) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
+  const xpackInfo = server.plugins.xpack_main.info;
   const BASE_PATH = '/api/upgrade_assistant/reindex';
 
   // Start reindex for an index
@@ -68,7 +71,7 @@ export function registerReindexIndicesRoutes(
 
       const callCluster = callWithRequest.bind(null, request) as CallCluster;
       const reindexActions = reindexActionsFactory(client, callCluster);
-      const reindexService = reindexServiceFactory(callCluster, reindexActions);
+      const reindexService = reindexServiceFactory(callCluster, xpackInfo, reindexActions);
 
       try {
         if (!(await reindexService.hasRequiredPrivileges(indexName))) {
@@ -109,7 +112,7 @@ export function registerReindexIndicesRoutes(
       const { indexName } = request.params;
       const callCluster = callWithRequest.bind(null, request) as CallCluster;
       const reindexActions = reindexActionsFactory(client, callCluster);
-      const reindexService = reindexServiceFactory(callCluster, reindexActions);
+      const reindexService = reindexServiceFactory(callCluster, xpackInfo, reindexActions);
 
       try {
         const hasRequiredPrivileges = await reindexService.hasRequiredPrivileges(indexName);

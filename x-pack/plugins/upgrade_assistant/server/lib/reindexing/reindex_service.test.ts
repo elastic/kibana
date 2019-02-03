@@ -17,6 +17,7 @@ import { ReindexService, reindexServiceFactory } from './reindex_service';
 describe('reindexService', () => {
   let actions: jest.Mocked<any>;
   let callCluster: jest.Mock<CallCluster>;
+  let xpackInfo: { feature: jest.Mocked<any> };
   let service: ReindexService;
 
   const updateMockImpl = (reindexOp: ReindexSavedObject, attrs: Partial<ReindexOperation> = {}) =>
@@ -43,25 +44,40 @@ describe('reindexService', () => {
       runWhileIndexGroupLocked: jest.fn(async (group: string, f: any) => f({ attributes: {} })),
     };
     callCluster = jest.fn();
-    service = reindexServiceFactory(callCluster, actions);
+    xpackInfo = {
+      feature: jest.fn(() => ({
+        isAvailable() {
+          return true;
+        },
+        isEnabled() {
+          return true;
+        },
+      })),
+    };
+    service = reindexServiceFactory(callCluster, xpackInfo as any, actions);
   });
 
   describe('hasRequiredPrivileges', () => {
     it('returns true if security is disabled', async () => {
-      callCluster.mockResolvedValueOnce({ features: { security: { enabled: false } } });
+      xpackInfo.feature.mockReturnValueOnce({
+        isAvailable() {
+          return true;
+        },
+        isEnabled() {
+          return false;
+        },
+      });
 
       const hasRequired = await service.hasRequiredPrivileges('anIndex');
       expect(hasRequired).toBe(true);
     });
 
     it('calls security API with basic requirements', async () => {
-      callCluster
-        .mockResolvedValueOnce({ features: { security: { enabled: true } } })
-        .mockResolvedValueOnce({ has_all_requested: true });
+      callCluster.mockResolvedValueOnce({ has_all_requested: true });
 
       const hasRequired = await service.hasRequiredPrivileges('anIndex');
       expect(hasRequired).toBe(true);
-      expect(callCluster).toHaveBeenNthCalledWith(2, 'transport.request', {
+      expect(callCluster).toHaveBeenCalledWith('transport.request', {
         path: '/_security/user/_has_privileges',
         method: 'POST',
         body: {
@@ -81,12 +97,10 @@ describe('reindexService', () => {
     });
 
     it('includes manage_ml for ML indices', async () => {
-      callCluster
-        .mockResolvedValueOnce({ features: { security: { enabled: true } } })
-        .mockResolvedValueOnce({ has_all_requested: true });
+      callCluster.mockResolvedValueOnce({ has_all_requested: true });
 
       await service.hasRequiredPrivileges('.ml-anomalies');
-      expect(callCluster).toHaveBeenNthCalledWith(2, 'transport.request', {
+      expect(callCluster).toHaveBeenCalledWith('transport.request', {
         path: '/_security/user/_has_privileges',
         method: 'POST',
         body: {
@@ -106,12 +120,10 @@ describe('reindexService', () => {
     });
 
     it('includes manage_watcher for watcher indices', async () => {
-      callCluster
-        .mockResolvedValueOnce({ features: { security: { enabled: true } } })
-        .mockResolvedValueOnce({ has_all_requested: true });
+      callCluster.mockResolvedValueOnce({ has_all_requested: true });
 
       await service.hasRequiredPrivileges('.watches');
-      expect(callCluster).toHaveBeenNthCalledWith(2, 'transport.request', {
+      expect(callCluster).toHaveBeenCalledWith('transport.request', {
         path: '/_security/user/_has_privileges',
         method: 'POST',
         body: {
