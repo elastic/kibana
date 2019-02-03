@@ -19,7 +19,6 @@
 
 // @ts-ignore
 import { setBounds } from 'ui/agg_types/buckets/date_histogram';
-import { SearchSource } from 'ui/courier';
 import { AggConfig, Vis, VisState } from 'ui/vis';
 
 interface SchemaFormat {
@@ -49,12 +48,7 @@ interface Schemas {
   [key: string]: any[] | undefined;
 }
 
-type buildVisFunction = (visState: VisState, schemas: Schemas) => string;
 type buildVisConfigFunction = (visState: Vis, schemas: Schemas) => VisState;
-
-interface BuildPipelineVisFunction {
-  [key: string]: buildVisFunction;
-}
 
 interface BuildVisConfigFunction {
   [key: string]: buildVisConfigFunction;
@@ -189,62 +183,6 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
   return schemas;
 };
 
-export const prepareJson = (variable: string, data: object): string => {
-  return `${variable}='${JSON.stringify(data)
-    .replace(/\\/g, `\\\\`)
-    .replace(/'/g, `\\'`)}' `;
-};
-
-export const prepareString = (variable: string, data: string): string => {
-  return `${variable}='${data.replace(/\\/g, `\\\\`).replace(/'/g, `\\'`)}' `;
-};
-
-export const buildPipelineVisFunction: BuildPipelineVisFunction = {
-  vega: visState => {
-    return `vega ${prepareString('spec', visState.params.spec)}`;
-  },
-  input_control_vis: visState => {
-    return `input_control_vis ${prepareJson('visConfig', visState.params)}`;
-  },
-  metrics: visState => {
-    return `tsvb ${prepareJson('params', visState.params)}`;
-  },
-  timelion: visState => {
-    const expression = prepareString('expression', visState.params.expression);
-    const interval = prepareString('interval', visState.params.interval);
-    return `timelion_vis ${expression}${interval}`;
-  },
-  markdown: visState => {
-    const expression = prepareString('expression', visState.params.markdown);
-    const visConfig = prepareJson('visConfig', visState.params);
-    return `kibana_markdown ${expression}${visConfig}`;
-  },
-  table: (visState, schemas) => {
-    const visConfig = buildVisConfig.table(visState, schemas);
-    return `kibana_table ${prepareJson('visConfig', visConfig)}`;
-  },
-  metric: (visState, schemas) => {
-    const visConfig = buildVisConfig.metric(visState, schemas);
-    return `kibana_metric ${prepareJson('visConfig', visConfig)}`;
-  },
-  tagcloud: (visState, schemas) => {
-    const visConfig = buildVisConfig.tagcloud(visState, schemas);
-    return `tagcloud ${prepareJson('visConfig', visConfig)}`;
-  },
-  region_map: (visState, schemas) => {
-    const visConfig = buildVisConfig.region_map(visState, schemas);
-    return `regionmap ${prepareJson('visConfig', visConfig)}`;
-  },
-  tile_map: (visState, schemas) => {
-    const visConfig = buildVisConfig.tile_map(visState, schemas);
-    return `tilemap ${prepareJson('visConfig', visConfig)}`;
-  },
-  pie: (visState, schemas) => {
-    const visConfig = buildVisConfig.pie(visState, schemas);
-    return `kibana_pie ${prepareJson('visConfig', visConfig)}`;
-  },
-};
-
 const buildVisConfig: BuildVisConfigFunction = {
   table: (visState, schemas) => {
     const visConfig = visState.params;
@@ -336,57 +274,4 @@ export const decorateVisObject = (vis: Vis, params: { timeRange?: any }) => {
   } else if (vislibCharts.includes(vis.type.name)) {
     visConfig.dimensions = buildVislibDimensions(vis, params.timeRange);
   }
-};
-
-export const buildPipeline = (
-  vis: Vis,
-  params: { searchSource: SearchSource; timeRange?: any }
-) => {
-  const { searchSource } = params;
-  const { indexPattern } = vis;
-  const query = searchSource.getField('query');
-  const filters = searchSource.getField('filter');
-  const visState = vis.getCurrentState();
-
-  // context
-  let pipeline = `kibana | kibana_context `;
-  if (query) {
-    pipeline += prepareJson('query', query);
-  }
-  if (filters) {
-    pipeline += prepareJson('filters', filters);
-  }
-  if (vis.savedSearchId) {
-    pipeline += prepareString('savedSearchId', vis.savedSearchId);
-  }
-  pipeline += '| ';
-
-  // request handler
-  if (vis.type.requestHandler === 'courier') {
-    pipeline += `esaggs
-    ${prepareString('index', indexPattern.id)}
-    metricsAtAllLevels=${vis.isHierarchical()}
-    partialRows=${vis.params.showPartialRows || vis.type.requiresPartialRows || false}
-    ${prepareJson('aggConfigs', visState.aggs)} | `;
-  }
-
-  const schemas = getSchemas(vis, params.timeRange);
-  if (buildPipelineVisFunction[vis.type.name]) {
-    pipeline += buildPipelineVisFunction[vis.type.name](visState, schemas);
-  } else if (vislibCharts.includes(vis.type.name)) {
-    const visConfig = visState.params;
-    visConfig.dimensions = buildVislibDimensions(vis, params.timeRange);
-
-    pipeline += `vislib ${prepareJson('visConfig', visState.params)}`;
-  } else {
-    pipeline += `visualization type='${vis.type.name}'
-    ${prepareJson('visConfig', visState.params)}
-    metricsAtAllLevels=${vis.isHierarchical()}
-    partialRows=${vis.params.showPartialRows || vis.type.name === 'tile_map'} `;
-    if (indexPattern) {
-      pipeline += `${prepareString('index', indexPattern.id)}`;
-    }
-  }
-
-  return pipeline;
 };

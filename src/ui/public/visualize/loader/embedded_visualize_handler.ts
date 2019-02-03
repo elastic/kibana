@@ -31,18 +31,13 @@ import { RenderCompleteHelper } from '../../render_complete';
 import { AppState } from '../../state_management/app_state';
 import { timefilter } from '../../timefilter';
 import { RequestHandlerParams, Vis } from '../../vis';
-import { PipelineDataLoader } from './pipeline_data_loader';
 import { visualizationLoader } from './visualization_loader';
+import { VisualizeDataLoader } from './visualize_data_loader';
 
 import { DataAdapter, RequestAdapter } from '../../inspector/adapters';
 
 import { getTableAggs } from './pipeline_helpers/utilities';
-import {
-  VisResponseData,
-  VisSavedObject,
-  VisualizeLoaderParams,
-  VisualizeUpdateParams,
-} from './types';
+import { VisSavedObject, VisualizeLoaderParams, VisualizeUpdateParams } from './types';
 
 interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
   Private: IPrivate;
@@ -90,7 +85,7 @@ export class EmbeddedVisualizeHandler {
   private dataLoaderParams: RequestHandlerParams;
   private readonly appState?: AppState;
   private uiState: PersistedState;
-  private dataLoader: PipelineDataLoader;
+  private dataLoader: VisualizeDataLoader;
   private dataSubject: Rx.Subject<any>;
   private actions: any = {};
   private events$: Rx.Observable<any>;
@@ -103,7 +98,16 @@ export class EmbeddedVisualizeHandler {
   ) {
     const { searchSource, vis } = savedObject;
 
-    const { appState, uiState, queryFilter, timeRange, filters, query, autoFetch } = params;
+    const {
+      appState,
+      uiState,
+      queryFilter,
+      timeRange,
+      filters,
+      query,
+      autoFetch,
+      Private,
+    } = params;
 
     this.dataLoaderParams = {
       searchSource,
@@ -145,7 +149,7 @@ export class EmbeddedVisualizeHandler {
     this.uiState.on('change', this.onUiStateChange);
     timefilter.on('autoRefreshFetch', this.reload);
 
-    this.dataLoader = new PipelineDataLoader(vis);
+    this.dataLoader = new VisualizeDataLoader(vis, Private);
     this.renderCompleteHelper = new RenderCompleteHelper(element);
     this.inspectorAdapters = this.getActiveInspectorAdapters();
     this.vis.openInspector = this.openInspector;
@@ -246,18 +250,15 @@ export class EmbeddedVisualizeHandler {
 
   /**
    * renders visualization with provided data
-   * @param data: visualization data
+   * @param response: visualization data
    */
-  public render = (data: VisResponseData | null = null) => {
-    // TODO: we have this weird situation when we need to render first, and then we call fetch and render ....
-    // we need to get rid of that ....
-
-    const renderer = renderFunctionsRegistry.get(get(data || {}, 'as', 'visualization'));
-    if (!renderer) {
-      return;
-    }
-    renderer
-      .render(this.element, get(data, 'value') || { visType: this.vis.type.name }, this.handlers)
+  public render = (response: any = null): void => {
+    // TODO: we have this weird situation when we need to render first,
+    // and then we call fetch and render... we need to get rid of that.
+    visualizationLoader
+      .render(this.element, this.vis, get(response, 'value.visData', null), this.uiState, {
+        listenOnChange: false,
+      })
       .then(() => {
         if (!this.loaded) {
           this.loaded = true;
