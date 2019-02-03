@@ -18,13 +18,22 @@ export function repositorySearchRoute(server: hapi.Server, log: Logger) {
     method: 'GET',
     async handler(req) {
       let page = 1;
-      const { p, q } = req.query as hapi.RequestQuery;
+      const { p, q, repoScope } = req.query as hapi.RequestQuery;
       if (p) {
         page = parseInt(p as string, 10);
       }
+
+      let scope = [];
+      if (typeof repoScope === 'string') {
+        scope.push(repoScope);
+      } else {
+        scope = repoScope;
+      }
+
       const searchReq: RepositorySearchRequest = {
         query: q as string,
         page,
+        repoScope: scope,
       };
       try {
         const repoSearchClient = new RepositorySearchClient(new EsClientWithRequest(req), log);
@@ -41,13 +50,22 @@ export function repositorySearchRoute(server: hapi.Server, log: Logger) {
     method: 'GET',
     async handler(req) {
       let page = 1;
-      const { p, q } = req.query as hapi.RequestQuery;
+      const { p, q, repoScope } = req.query as hapi.RequestQuery;
       if (p) {
         page = parseInt(p as string, 10);
       }
+
+      let scope = [];
+      if (typeof repoScope === 'string') {
+        scope.push(repoScope);
+      } else {
+        scope = repoScope;
+      }
+
       const searchReq: RepositorySearchRequest = {
         query: q as string,
         page,
+        repoScope: scope,
       };
       try {
         const repoSearchClient = new RepositorySearchClient(new EsClientWithRequest(req), log);
@@ -66,15 +84,24 @@ export function documentSearchRoute(server: hapi.Server, log: Logger) {
     method: 'GET',
     async handler(req) {
       let page = 1;
-      const { p, q, langs, repos } = req.query as hapi.RequestQuery;
+      const { p, q, langs, repos, repoScope } = req.query as hapi.RequestQuery;
       if (p) {
         page = parseInt(p as string, 10);
       }
+
+      let scope = [];
+      if (typeof repoScope === 'string') {
+        scope.push(repoScope);
+      } else {
+        scope = repoScope;
+      }
+
       const searchReq: DocumentSearchRequest = {
         query: q as string,
         page,
         langFilters: langs ? (langs as string).split(',') : [],
-        repoFileters: repos ? decodeURIComponent(repos as string).split(',') : [],
+        repoFilters: repos ? decodeURIComponent(repos as string).split(',') : [],
+        repoScope: scope,
       };
       try {
         const docSearchClient = new DocumentSearchClient(new EsClientWithRequest(req), log);
@@ -91,13 +118,22 @@ export function documentSearchRoute(server: hapi.Server, log: Logger) {
     method: 'GET',
     async handler(req) {
       let page = 1;
-      const { p, q } = req.query as hapi.RequestQuery;
+      const { p, q, repoScope } = req.query as hapi.RequestQuery;
       if (p) {
         page = parseInt(p as string, 10);
       }
+
+      let scope = [];
+      if (typeof repoScope === 'string') {
+        scope.push(repoScope);
+      } else {
+        scope = repoScope;
+      }
+
       const searchReq: DocumentSearchRequest = {
         query: q as string,
         page,
+        repoScope: scope,
       };
       try {
         const docSearchClient = new DocumentSearchClient(new EsClientWithRequest(req), log);
@@ -113,13 +149,22 @@ export function documentSearchRoute(server: hapi.Server, log: Logger) {
 export function symbolSearchRoute(server: hapi.Server, log: Logger) {
   const symbolSearchHandler = async (req: hapi.Request) => {
     let page = 1;
-    const { p, q } = req.query as hapi.RequestQuery;
+    const { p, q, repoScope } = req.query as hapi.RequestQuery;
     if (p) {
       page = parseInt(p as string, 10);
     }
+
+    let scope = [];
+    if (typeof repoScope === 'string') {
+      scope.push(repoScope);
+    } else {
+      scope = repoScope;
+    }
+
     const searchReq: SymbolSearchRequest = {
       query: q as string,
       page,
+      repoScope: scope,
     };
     try {
       const symbolSearchClient = new SymbolSearchClient(new EsClientWithRequest(req), log);

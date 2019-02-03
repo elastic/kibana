@@ -9,12 +9,14 @@ import {
   DocumentIndexName,
   DocumentIndexNamePrefix,
   DocumentSchema,
+  DocumentSearchIndexWithScope,
 } from './document';
 
 export const RepositorySchema = DocumentSchema;
 export const RepositoryAnalysisSettings = DocumentAnalysisSettings;
 export const RepositoryIndexNamePrefix = DocumentIndexNamePrefix;
 export const RepositoryIndexName = DocumentIndexName;
+export const RepositorySearchIndexWithScope = DocumentSearchIndexWithScope;
 
 // The field name of repository object nested in the Document index.
 export const RepositoryReservedField = 'repository';

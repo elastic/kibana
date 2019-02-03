@@ -5,7 +5,11 @@
  */
 
 import { Repository, RepositorySearchRequest, RepositorySearchResult } from '../../model';
-import { RepositoryIndexNamePrefix, RepositoryReservedField } from '../indexer/schema';
+import {
+  RepositoryIndexNamePrefix,
+  RepositoryReservedField,
+  RepositorySearchIndexWithScope,
+} from '../indexer/schema';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import { AbstractSearchClient } from './abstract_search_client';
@@ -19,8 +23,13 @@ export class RepositorySearchClient extends AbstractSearchClient {
     const resultsPerPage = this.getResultsPerPage(req);
     const from = (req.page - 1) * resultsPerPage;
     const size = resultsPerPage;
+
+    const index = req.repoScope
+      ? RepositorySearchIndexWithScope(req.repoScope)
+      : `${RepositoryIndexNamePrefix}*`;
+
     const rawRes = await this.client.search({
-      index: `${RepositoryIndexNamePrefix}*`,
+      index,
       body: {
         from,
         size,
