@@ -73,6 +73,11 @@ export interface BulkGetResponse<T extends SavedObjectAttributes = any> {
   saved_objects: Array<SavedObject<T>>;
 }
 
+// TODO find better name for that
+export interface CamelCaseBulkGetResponse<T extends SavedObjectAttributes = any> {
+  savedObjects: Array<SavedObject<T>>;
+}
+
 export interface MigrationVersion {
   [pluginName: string]: string;
 }

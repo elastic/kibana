@@ -19,8 +19,6 @@
 
 import { cloneDeep, pick, throttle } from 'lodash';
 
-import { kfetch } from 'ui/kfetch';
-import { resolve as resolveUrl } from 'url';
 import {
   FindOptions,
   MigrationVersion,
@@ -28,7 +26,14 @@ import {
   SavedObjectAttributes,
   SavedObjectReference,
   SavedObjectsClient as SavedObjectsApi,
-} from '../../../server/saved_objects';
+} from 'src/server/saved_objects';
+import {
+  BulkGetResponse,
+  CamelCaseBulkGetResponse,
+} from 'src/server/saved_objects/service/saved_objects_client';
+import { kfetch } from 'ui/kfetch';
+import { KFetchQuery } from 'ui/kfetch/kfetch';
+import { resolve as resolveUrl } from 'url';
 import { keysToCamelCaseShallow, keysToSnakeCaseShallow } from '../../../utils/case_conversion';
 import { isAutoCreateIndexError, showAutoCreateIndexErrorPage } from '../error_auto_create_index';
 import { SavedObject } from './saved_object';
@@ -36,7 +41,7 @@ import { SavedObject } from './saved_object';
 interface RequestParams {
   method: 'POST' | 'GET' | 'PUT' | 'DELETE';
   path: string;
-  query?: { [paramName: string]: string };
+  query?: KFetchQuery;
   body?: object;
 }
 
@@ -63,8 +68,8 @@ interface FindResults<T extends SavedObjectAttributes = any> {
 interface BatchQueueEntry {
   type: string;
   id: string;
-  resolve: () => void;
-  reject: () => void;
+  resolve: <T extends SavedObjectAttributes>(value: SavedObject<T> | PlainSavedObject<T>) => void;
+  reject: (reason?: any) => void;
 }
 
 const join = (...uriComponents: Array<string | undefined>) =>
@@ -85,7 +90,6 @@ export class SavedObjectsClient {
   /**
    * Throttled processing of get requests into bulk requests at 100ms interval
    */
-  // TODO: Type this function
   private processBatchQueue = throttle(
     () => {
       const queue = cloneDeep(this.batchQueue);
@@ -157,18 +161,15 @@ export class SavedObjectsClient {
       },
     });
 
-    return (
-      createRequest
-        .catch((error: object) => {
-          if (isAutoCreateIndexError(error)) {
-            return showAutoCreateIndexErrorPage();
-          }
+    return createRequest
+      .then(resp => this.createSavedObject(resp))
+      .catch((error: object) => {
+        if (isAutoCreateIndexError(error)) {
+          showAutoCreateIndexErrorPage();
+        }
 
-          throw error;
-        })
-        // TODO: Why is this `void` in here?
-        .then(resp => this.createSavedObject(resp))
-    );
+        throw error;
+      }) as Promise<SavedObject<T>>;
   };
 
   /**
@@ -179,9 +180,9 @@ export class SavedObjectsClient {
    * @property {boolean} [options.overwrite=false]
    * @returns {promise} - { savedObjects: [{ id, type, version, attributes, error: { message } }]}
    */
-  public bulkCreate = (objects = [], options = {}) => {
+  public bulkCreate = (objects = [], options: KFetchQuery = {}) => {
     const path = this.getPath(['_bulk_create']);
-    const query = pick(options, ['overwrite']);
+    const query = pick(options, ['overwrite']) as Pick<KFetchQuery, 'overwrite'>;
 
     const request: ReturnType<SavedObjectsApi['bulkCreate']> = this.request({
       method: 'POST',
@@ -255,7 +256,7 @@ export class SavedObjectsClient {
     }
 
     return new Promise((resolve, reject) => {
-      this.batchQueue.push({ type, id, resolve, reject });
+      this.batchQueue.push({ type, id, resolve, reject } as BatchQueueEntry);
       this.processBatchQueue();
     });
   };
@@ -272,7 +273,6 @@ export class SavedObjectsClient {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  // TODO: Add return type
   public bulkGet = (objects: Array<{ id: string; type: string }> = []) => {
     const path = this.getPath(['_bulk_get']);
     const filteredObjects = objects.map(obj => pick(obj, ['id', 'type']));
@@ -282,9 +282,9 @@ export class SavedObjectsClient {
       path,
       body: filteredObjects,
     });
-    return request.then(resp => {
+    return request.then(<T extends SavedObjectAttributes = any>(resp: BulkGetResponse<T>) => {
       resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
-      return keysToCamelCaseShallow(resp);
+      return keysToCamelCaseShallow(resp) as CamelCaseBulkGetResponse<T>;
     });
   };
 
@@ -322,10 +322,9 @@ export class SavedObjectsClient {
       path,
       body,
     });
-    // TODO: can we somehow get T into the above ReturnType definition, so it knows it's actually ReturnType<SavedObjectsApi.<T>update>
     return request.then(resp => {
       return this.createSavedObject(resp);
-    });
+    }) as Promise<SavedObject<T>>;
   }
 
   private createSavedObject<T extends SavedObjectAttributes>(
