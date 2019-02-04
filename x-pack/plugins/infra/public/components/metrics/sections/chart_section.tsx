@@ -43,6 +43,8 @@ interface Props {
   onChangeRangeTime?: (time: metricTimeActions.MetricRangeTimeState) => void;
   crosshairValue?: number;
   onCrosshairUpdate?: (crosshairValue: number) => void;
+  isLiveStreaming?: boolean;
+  stopLiveStreaming?: () => void;
   intl: InjectedIntl;
 }
 
@@ -214,13 +216,16 @@ export const ChartSection = injectI18n(
     }
 
     private handleSelectionBrushEnd = (area: Area) => {
-      const { onChangeRangeTime } = this.props;
+      const { onChangeRangeTime, isLiveStreaming, stopLiveStreaming } = this.props;
       const { startX, endX } = area.domainArea;
       if (onChangeRangeTime) {
         onChangeRangeTime({
           to: endX.valueOf(),
           from: startX.valueOf(),
         } as metricTimeActions.MetricRangeTimeState);
+      }
+      if (isLiveStreaming && stopLiveStreaming) {
+        stopLiveStreaming();
       }
     };
   }
