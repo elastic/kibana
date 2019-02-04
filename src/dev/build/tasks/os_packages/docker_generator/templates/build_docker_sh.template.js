@@ -38,7 +38,7 @@ function generator({ imageTag, imageFlavor, versionTag, dockerOutputDir }) {
   echo "Building: kibana${ imageFlavor }-docker"; \\
   docker build -t ${ imageTag }${ imageFlavor }:${ versionTag } -f Dockerfile . || exit 1;
 
-  docker save -o ${ dockerOutputDir } ${ imageTag }${ imageFlavor }:${ versionTag }
+  docker save ${ imageTag }${ imageFlavor }:${ versionTag } | gzip -c > ${ dockerOutputDir }
   
   exit 0
   `);

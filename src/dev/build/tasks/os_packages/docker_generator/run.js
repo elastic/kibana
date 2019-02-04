@@ -36,7 +36,7 @@ export async function runDockerGenerator(config, log, build) {
   const artifactTarball = `kibana${ imageFlavor }-${ versionTag }-linux-x86_64.tar.gz`;
   const artifactsDir = config.resolveFromTarget('.');
   const dockerBuildDir = config.resolveFromRepo('build', 'kibana-docker', build.isOss() ? 'oss' : 'default');
-  const dockerOutputDir = config.resolveFromTarget(`kibana${ imageFlavor }-${ versionTag }-docker.tar`);
+  const dockerOutputDir = config.resolveFromTarget(`kibana${ imageFlavor }-${ versionTag }-docker.tar.gz`);
 
   // Verify if we have the needed kibana target in order
   // to build the kibana docker image.
