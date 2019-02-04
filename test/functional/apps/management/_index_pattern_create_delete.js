@@ -127,7 +127,7 @@ export default function ({ getService, getPageObjects }) {
           return browser.getCurrentUrl()
             .then(function (currentUrl) {
               log.debug('currentUrl = ' + currentUrl);
-              expect(currentUrl).to.contain('kibana/management/index_patterns');
+              expect(currentUrl).to.contain('management/kibana/index_patterns');
             });
         });
       });
