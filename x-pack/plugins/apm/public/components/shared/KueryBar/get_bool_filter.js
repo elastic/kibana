@@ -39,7 +39,7 @@ export function getBoolFilter(urlParams) {
 
       if (urlParams.transactionName) {
         boolFilter.push({
-          term: { [`${TRANSACTION_NAME}.keyword`]: urlParams.transactionName }
+          term: { [TRANSACTION_NAME]: urlParams.transactionName }
         });
       }
 

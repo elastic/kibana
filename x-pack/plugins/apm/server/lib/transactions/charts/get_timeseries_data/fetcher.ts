@@ -141,7 +141,7 @@ export function timeseriesFetcher({
 
   if (transactionName) {
     params.body.query.bool.must = [
-      { term: { [`${TRANSACTION_NAME}.keyword`]: transactionName } }
+      { term: { [TRANSACTION_NAME]: transactionName } }
     ];
   }
 

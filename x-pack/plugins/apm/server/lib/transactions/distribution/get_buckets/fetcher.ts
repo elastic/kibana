@@ -54,7 +54,7 @@ export function bucketFetcher(
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: transactionType } },
-    { term: { [`${TRANSACTION_NAME}.keyword`]: transactionName } },
+    { term: { [TRANSACTION_NAME]: transactionName } },
     {
       range: {
         '@timestamp': {
