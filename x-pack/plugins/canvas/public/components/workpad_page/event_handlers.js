@@ -152,19 +152,14 @@ const isTextInput = ({ tagName, type }) => {
 
 const modifierKey = key => ['KeyALT', 'KeyCONTROL'].indexOf(keyCode(key)) > -1;
 
-const handleKeyDown = (commit, e, isEditable, remove) => {
-  const { key, target } = e;
+const handleKeyDown = (commit, e, isEditable) => {
+  const { key } = e;
 
-  if (isEditable) {
-    if ((key === 'Backspace' || key === 'Delete') && !isTextInput(target)) {
-      e.preventDefault();
-      remove();
-    } else if (!modifierKey(key)) {
-      commit('keyboardEvent', {
-        event: 'keyDown',
-        code: keyCode(key), // convert to standard event code
-      });
-    }
+  if (isEditable && !modifierKey(key)) {
+    commit('keyboardEvent', {
+      event: 'keyDown',
+      code: keyCode(key), // convert to standard event code
+    });
   }
 };
 
@@ -190,7 +185,7 @@ const handleKeyUp = (commit, { key }, isEditable) => {
 export const eventHandlers = {
   onMouseDown: props => e => handleMouseDown(props.commit, e, props.isEditable),
   onMouseMove: props => e => handleMouseMove(props.commit, e, props.isEditable),
-  onKeyDown: props => e => handleKeyDown(props.commit, e, props.isEditable, props.remove),
+  onKeyDown: props => e => handleKeyDown(props.commit, e, props.isEditable),
   onKeyPress: props => e => handleKeyPress(props.commit, e, props.isEditable),
   onKeyUp: props => e => handleKeyUp(props.commit, e, props.isEditable),
   onWheel: props => e => handleWheel(props.commit, e, props.isEditable),
