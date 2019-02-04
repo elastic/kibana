@@ -20,6 +20,7 @@ import { LoadingState, UpgradeAssistantTabProps } from './types';
 
 interface TabsState {
   loadingState: LoadingState;
+  loadingError?: Error;
   checkupData?: UpgradeAssistantStatus;
   selectedTabIndex: number;
 }
@@ -76,14 +77,15 @@ export class UpgradeAssistantTabsUI extends React.Component<
         checkupData: resp.data,
       });
     } catch (e) {
-      this.setState({ loadingState: LoadingState.Error });
+      this.setState({ loadingState: LoadingState.Error, loadingError: e });
     }
   };
 
   private get tabs() {
     const { intl } = this.props;
-    const { loadingState, checkupData } = this.state;
+    const { loadingError, loadingState, checkupData } = this.state;
     const commonProps: UpgradeAssistantTabProps = {
+      loadingError,
       loadingState,
       refreshCheckupData: this.loadData,
       setSelectedTabIndex: this.setSelectedTabIndex,
