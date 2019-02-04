@@ -30,7 +30,7 @@
         "type": "long"
       },
       "timeCaptured": {
-        "type": "text"
+        "type": "date"
       },
       "attributesPerMap": {
         "properties": {
