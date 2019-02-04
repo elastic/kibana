@@ -18,6 +18,7 @@ import React from 'react';
 import { InfraIndexField, InfraNodeType, InfraPathInput, InfraPathType } from '../../graphql/types';
 import { InfraGroupByOptions } from '../../lib/lib';
 import { CustomFieldPanel } from './custom_field_panel';
+import { fieldToName } from './lib/field_to_display_name';
 
 interface Props {
   nodeType: InfraNodeType;
@@ -29,107 +30,34 @@ interface Props {
   customOptions: InfraGroupByOptions[];
 }
 
+const createFieldToOptionMapper = (intl: InjectedIntl) => (field: string) => ({
+  text: fieldToName(field, intl),
+  type: InfraPathType.terms,
+  field,
+});
+
 let OPTIONS: { [P in InfraNodeType]: InfraGroupByOptions[] };
 const getOptions = (
   nodeType: InfraNodeType,
   intl: InjectedIntl
 ): Array<{ text: string; type: InfraPathType; field: string }> => {
   if (!OPTIONS) {
+    const mapFieldToOption = createFieldToOptionMapper(intl);
     OPTIONS = {
-      [InfraNodeType.pod]: [
-        {
-          text: intl.formatMessage({
-            id: 'xpack.infra.waffle.podGroupByOptions.namespaceLabel',
-            defaultMessage: 'Namespace',
-          }),
-          type: InfraPathType.terms,
-          field: 'kubernetes.namespace',
-        },
-        {
-          text: intl.formatMessage({
-            id: 'xpack.infra.waffle.podGroupByOptions.nodeLabel',
-            defaultMessage: 'Node',
-          }),
-          type: InfraPathType.terms,
-          field: 'kubernetes.node.name',
-        },
-      ],
+      [InfraNodeType.pod]: ['kubernetes.namespace', 'kubernetes.node.name'].map(mapFieldToOption),
       [InfraNodeType.container]: [
-        {
-          text: intl.formatMessage({
-            id: 'xpack.infra.waffle.containerGroupByOptions.hostLabel',
-            defaultMessage: 'Host',
-          }),
-          type: InfraPathType.terms,
-          field: 'host.name',
-        },
-        {
-          text: intl.formatMessage({
-            id: 'xpack.infra.waffle.containerGroupByOptions.availabilityZoneLabel',
-            defaultMessage: 'Availability Zone',
-          }),
-          type: InfraPathType.terms,
-          field: 'meta.cloud.availability_zone',
-        },
-        {
-          text: intl.formatMessage({
-            id: 'xpack.infra.waffle.containerGroupByOptions.machineTypeLabel',
-            defaultMessage: 'Machine Type',
-          }),
-          type: InfraPathType.terms,
-          field: 'meta.cloud.machine_type',
-        },
-        {
-          text: intl.formatMessage({
-            id: 'xpack.infra.waffle.containerGroupByOptions.projectIDLabel',
-            defaultMessage: 'Project ID',
-          }),
-          type: InfraPathType.terms,
-          field: 'meta.cloud.project_id',
-        },
-        {
-          text: intl.formatMessage({
-            id: 'xpack.infra.waffle.containerGroupByOptions.providerLabel',
-            defaultMessage: 'Provider',
-          }),
-          type: InfraPathType.terms,
-          field: 'meta.cloud.provider',
-        },
-      ],
+        'host.name',
+        'cloud.availability_zone',
+        'cloud.machine_type',
+        'cloud.project_id',
+        'cloud.provider',
+      ].map(mapFieldToOption),
       [InfraNodeType.host]: [
-        {
-          text: intl.formatMessage({
-            id: 'xpack.infra.waffle.hostGroupByOptions.availabilityZoneLabel',
-            defaultMessage: 'Availability Zone',
-          }),
-          type: InfraPathType.terms,
-          field: 'meta.cloud.availability_zone',
-        },
-        {
-          text: intl.formatMessage({
-            id: 'xpack.infra.waffle.hostGroupByOptions.machineTypeLabel',
-            defaultMessage: 'Machine Type',
-          }),
-          type: InfraPathType.terms,
-          field: 'meta.cloud.machine_type',
-        },
-        {
-          text: intl.formatMessage({
-            id: 'xpack.infra.waffle.hostGroupByOptions.projectIDLabel',
-            defaultMessage: 'Project ID',
-          }),
-          type: InfraPathType.terms,
-          field: 'meta.cloud.project_id',
-        },
-        {
-          text: intl.formatMessage({
-            id: 'xpack.infra.waffle.hostGroupByOptions.cloudProviderLabel',
-            defaultMessage: 'Cloud Provider',
-          }),
-          type: InfraPathType.terms,
-          field: 'meta.cloud.provider',
-        },
-      ],
+        'cloud.availability_zone',
+        'cloud.machine_type',
+        'cloud.project_id',
+        'cloud.provider',
+      ].map(mapFieldToOption),
     };
   }
 

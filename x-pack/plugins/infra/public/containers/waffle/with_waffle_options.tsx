@@ -22,13 +22,15 @@ import { UrlStateContainer } from '../../utils/url_state';
 
 const selectOptionsUrlState = createSelector(
   waffleOptionsSelectors.selectMetric,
+  waffleOptionsSelectors.selectView,
   waffleOptionsSelectors.selectGroupBy,
   waffleOptionsSelectors.selectNodeType,
   waffleOptionsSelectors.selectCustomOptions,
-  (metric, groupBy, nodeType, customOptions) => ({
+  (metric, view, groupBy, nodeType, customOptions) => ({
     metric,
     groupBy,
     nodeType,
+    view,
     customOptions,
   })
 );
@@ -38,6 +40,7 @@ export const withWaffleOptions = connect(
     metric: waffleOptionsSelectors.selectMetric(state),
     groupBy: waffleOptionsSelectors.selectGroupBy(state),
     nodeType: waffleOptionsSelectors.selectNodeType(state),
+    view: waffleOptionsSelectors.selectView(state),
     customOptions: waffleOptionsSelectors.selectCustomOptions(state),
     urlState: selectOptionsUrlState(state),
   }),
@@ -45,6 +48,7 @@ export const withWaffleOptions = connect(
     changeMetric: waffleOptionsActions.changeMetric,
     changeGroupBy: waffleOptionsActions.changeGroupBy,
     changeNodeType: waffleOptionsActions.changeNodeType,
+    changeView: waffleOptionsActions.changeView,
     changeCustomOptions: waffleOptionsActions.changeCustomOptions,
   })
 );
@@ -59,12 +63,20 @@ interface WaffleOptionsUrlState {
   metric?: ReturnType<typeof waffleOptionsSelectors.selectMetric>;
   groupBy?: ReturnType<typeof waffleOptionsSelectors.selectGroupBy>;
   nodeType?: ReturnType<typeof waffleOptionsSelectors.selectNodeType>;
+  view?: ReturnType<typeof waffleOptionsSelectors.selectView>;
   customOptions?: ReturnType<typeof waffleOptionsSelectors.selectCustomOptions>;
 }
 
 export const WithWaffleOptionsUrlState = () => (
   <WithWaffleOptions>
-    {({ changeMetric, urlState, changeGroupBy, changeNodeType, changeCustomOptions }) => (
+    {({
+      changeMetric,
+      urlState,
+      changeGroupBy,
+      changeNodeType,
+      changeView,
+      changeCustomOptions,
+    }) => (
       <UrlStateContainer
         urlState={urlState}
         urlStateKey="waffleOptions"
@@ -79,6 +91,9 @@ export const WithWaffleOptionsUrlState = () => (
           if (newUrlState && newUrlState.nodeType) {
             changeNodeType(newUrlState.nodeType);
           }
+          if (newUrlState && newUrlState.view) {
+            changeView(newUrlState.view);
+          }
           if (newUrlState && newUrlState.customOptions) {
             changeCustomOptions(newUrlState.customOptions);
           }
@@ -92,6 +107,9 @@ export const WithWaffleOptionsUrlState = () => (
           }
           if (initialUrlState && initialUrlState.nodeType) {
             changeNodeType(initialUrlState.nodeType);
+          }
+          if (initialUrlState && initialUrlState.view) {
+            changeView(initialUrlState.view);
           }
           if (initialUrlState && initialUrlState.customOptions) {
             changeCustomOptions(initialUrlState.customOptions);
@@ -108,6 +126,7 @@ const mapToUrlState = (value: any): WaffleOptionsUrlState | undefined =>
         metric: mapToMetricUrlState(value.metric),
         groupBy: mapToGroupByUrlState(value.groupBy),
         nodeType: mapToNodeTypeUrlState(value.nodeType),
+        view: mapToViewUrlState(value.view),
         customOptions: mapToCustomOptionsUrlState(value.customOptions),
       }
     : undefined;
@@ -139,6 +158,10 @@ const mapToGroupByUrlState = (subject: any) => {
 
 const mapToNodeTypeUrlState = (subject: any) => {
   return subject && InfraNodeType[subject] ? subject : undefined;
+};
+
+const mapToViewUrlState = (subject: any) => {
+  return subject && ['map', 'table'].includes(subject) ? subject : undefined;
 };
 
 const mapToCustomOptionsUrlState = (subject: any) => {

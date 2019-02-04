@@ -1,11 +1,11 @@
 {
   "groups": ["nginx"],
-  "description": "HTTP Access Logs: Detect unusual source ips - high request rates (ECS)",
+  "description": "HTTP Access Logs: Detect unusual source IPs - high request rates (ECS)",
   "analysis_config" : {
     "bucket_span": "1h",
     "detectors": [
         {
-        "detector_description": "nginx_access_source_ip_high_count",
+        "detector_description": "Nginx access source IP high count",
         "function": "high_count",
         "over_field_name": "source.address"
       }

@@ -25,6 +25,8 @@ export const waffleNodesQuery = gql`
           metric {
             name
             value
+            avg
+            max
           }
         }
       }
