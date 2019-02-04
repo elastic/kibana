@@ -57,7 +57,7 @@ export function interpreterProvider(config) {
     // if the function is not found, pass the expression chain to the not found handler
     // in this case, it will try to execute the function in another context
     if (!fnDef) {
-      createError({ message: `Function ${fnDef.name} could not be found.` });
+      createError({ message: `Function ${fnName} could not be found.` });
     }
 
     try {
