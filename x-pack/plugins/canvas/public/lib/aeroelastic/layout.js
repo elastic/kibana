@@ -136,7 +136,7 @@ const mouseTransformGesture = select(tuple =>
 
 const transformGestures = mouseTransformGesture;
 
-const restateShapesEvent = select(action => {
+const restateShapesEvent = select((action, preexistingShapes) => {
   if (!action || action.type !== 'restateShapesEvent') {
     return null;
   }
@@ -150,9 +150,13 @@ const restateShapesEvent = select(action => {
       shape.transformMatrix
     );
   };
-  const newShapes = shapes.map(s => ({ ...s, localTransformMatrix: local(s) }));
+  const newShapes = shapes
+    .map(s => ({ ...s, localTransformMatrix: local(s) }))
+    .concat(
+      preexistingShapes.filter(p => p.type === 'annotation' && shapes.find(s => s.id === p.parent))
+    ); // retain annotations unless the parent element is gone
   return { newShapes, uid: action.payload.uid };
-})(primaryUpdate);
+})(primaryUpdate, shapes);
 
 // directSelect is an API entry point (via the `shapeSelect` action) that lets the client directly specify what thing
 // is selected, as otherwise selection is driven by gestures and knowledge of element positions
