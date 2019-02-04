@@ -156,6 +156,9 @@ uiModule.directive('monitoringMlListing', kbnUrl => {
                       },
                     }}
                     onTableChange={scope.onTableChange}
+                    executeQueryOptions={{
+                      defaultFields: ['job_id']
+                    }}
                   />
                 </EuiPageContent>
               </EuiPageBody>
