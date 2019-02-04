@@ -117,16 +117,17 @@ export class ESGeoGridSource extends AbstractESSource {
   }
 
   getGeoGridPrecision(zoom) {
-    return Math.round(zoom) + 3 + this._getGeoGridPrecisionResolutionDelta();
+    const targetGeotileLevel = Math.ceil(zoom) + this._getGeoGridPrecisionResolutionDelta();
+    return Math.min(targetGeotileLevel, 22);
   }
 
   _getGeoGridPrecisionResolutionDelta() {
     if (this._descriptor.resolution === GRID_RESOLUTION.COARSE) {
-      return 0;
+      return 2;
     }
 
     if (this._descriptor.resolution === GRID_RESOLUTION.FINE) {
-      return 2;
+      return 3;
     }
 
     if (this._descriptor.resolution === GRID_RESOLUTION.MOST_FINE) {
