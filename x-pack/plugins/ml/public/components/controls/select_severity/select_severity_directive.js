@@ -7,13 +7,13 @@
 
 import 'ngreact';
 
+import { wrapInI18nContext } from 'ui/i18n';
 import { stateFactoryProvider } from 'plugins/ml/factories/state_factory';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
 import { SelectSeverity, mlSelectSeverityService } from './select_severity';
-import { injectI18nProvider } from '@kbn/i18n/react';
 
 module.service('mlSelectSeverityService', function (Private, i18n) {
   const stateFactory = Private(stateFactoryProvider);
@@ -29,7 +29,7 @@ module.service('mlSelectSeverityService', function (Private, i18n) {
     const reactDirective = $injector.get('reactDirective');
 
     return reactDirective(
-      injectI18nProvider(SelectSeverity),
+      wrapInI18nContext(SelectSeverity),
       undefined,
       { restrict: 'E' },
     );

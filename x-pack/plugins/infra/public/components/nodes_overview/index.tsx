@@ -3,8 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get, max, min } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
@@ -18,6 +17,7 @@ import {
 import { InfraFormatterType, InfraWaffleMapBounds, InfraWaffleMapOptions } from '../../lib/lib';
 import { KueryFilterQuery } from '../../store/local/waffle_filter';
 import { createFormatter } from '../../utils/formatters';
+import { NoData } from '../empty_states';
 import { InfraLoadingPanel } from '../loading';
 import { Map } from '../waffle/map';
 import { ViewSwitcher } from '../waffle/view_switcher';
@@ -93,40 +93,23 @@ export const NodesOverview = injectI18n(
         );
       } else if (!loading && nodes && nodes.length === 0) {
         return (
-          <CenteredEmptyPrompt
-            title={
-              <h2>
-                <FormattedMessage
-                  id="xpack.infra.waffle.noDataTitle"
-                  defaultMessage="There is no data to display."
-                />
-              </h2>
-            }
-            titleSize="m"
-            body={
-              <p>
-                <FormattedMessage
-                  id="xpack.infra.waffle.noDataDescription"
-                  defaultMessage="Try adjusting your time or filter."
-                />
-              </p>
-            }
-            actions={
-              <EuiButton
-                iconType="refresh"
-                color="primary"
-                fill
-                onClick={() => {
-                  reload();
-                }}
-              >
-                <FormattedMessage
-                  id="xpack.infra.waffle.checkNewDataButtonLabel"
-                  defaultMessage="Check for new data"
-                />
-              </EuiButton>
-            }
-            data-test-subj="noMetricsDataPrompt"
+          <NoData
+            titleText={intl.formatMessage({
+              id: 'xpack.infra.waffle.noDataTitle',
+              defaultMessage: 'There is no data to display.',
+            })}
+            bodyText={intl.formatMessage({
+              id: 'xpack.infra.waffle.noDataDescription',
+              defaultMessage: 'Try adjusting your time or filter.',
+            })}
+            refetchText={intl.formatMessage({
+              id: 'xpack.infra.waffle.checkNewDataButtonLabel',
+              defaultMessage: 'Check for new data',
+            })}
+            onRefetch={() => {
+              reload();
+            }}
+            testString="noMetricsDataPrompt"
           />
         );
       }
@@ -196,10 +179,6 @@ export const NodesOverview = injectI18n(
     };
   }
 );
-
-const CenteredEmptyPrompt = styled(EuiEmptyPrompt)`
-  align-self: center;
-`;
 
 const MainContainer = styled.div`
   position: relative;

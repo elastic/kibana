@@ -8,12 +8,12 @@ import expect from 'expect.js';
 
 export default function ({ getPageObjects }) {
 
-  const PageObjects = getPageObjects(['gis', 'header']);
+  const PageObjects = getPageObjects(['maps', 'header']);
 
   describe('layer errors', () => {
 
     before(async () => {
-      await PageObjects.gis.loadSavedMap('layer with errors');
+      await PageObjects.maps.loadSavedMap('layer with errors');
     });
 
     describe('ESSearchSource with missing index pattern id', async () => {
@@ -22,13 +22,13 @@ export default function ({ getPageObjects }) {
 
 
       it('should diplay error message in layer panel', async () => {
-        const errorMsg = await PageObjects.gis.getLayerErrorText(LAYER_NAME);
+        const errorMsg = await PageObjects.maps.getLayerErrorText(LAYER_NAME);
         expect(errorMsg).to.equal(`Unable to find Index pattern for id: ${MISSING_INDEX_ID}`);
       });
 
       it('should allow deletion of layer', async () => {
-        await PageObjects.gis.removeLayer(LAYER_NAME);
-        const exists = await PageObjects.gis.doesLayerExist(LAYER_NAME);
+        await PageObjects.maps.removeLayer(LAYER_NAME);
+        const exists = await PageObjects.maps.doesLayerExist(LAYER_NAME);
         expect(exists).to.be(false);
       });
     });
@@ -38,13 +38,13 @@ export default function ({ getPageObjects }) {
       const LAYER_NAME = MISSING_INDEX_ID;
 
       it('should diplay error message in layer panel', async () => {
-        const errorMsg = await PageObjects.gis.getLayerErrorText(LAYER_NAME);
+        const errorMsg = await PageObjects.maps.getLayerErrorText(LAYER_NAME);
         expect(errorMsg).to.equal(`Unable to find Index pattern for id: ${MISSING_INDEX_ID}`);
       });
 
       it('should allow deletion of layer', async () => {
-        await PageObjects.gis.removeLayer(LAYER_NAME);
-        const exists = await PageObjects.gis.doesLayerExist(LAYER_NAME);
+        await PageObjects.maps.removeLayer(LAYER_NAME);
+        const exists = await PageObjects.maps.doesLayerExist(LAYER_NAME);
         expect(exists).to.be(false);
       });
     });
@@ -54,13 +54,13 @@ export default function ({ getPageObjects }) {
       const LAYER_NAME = 'EMS_vector_shapes';
 
       it('should diplay error message in layer panel', async () => {
-        const errorMsg = await PageObjects.gis.getLayerErrorText(LAYER_NAME);
+        const errorMsg = await PageObjects.maps.getLayerErrorText(LAYER_NAME);
         expect(errorMsg).to.equal(`Unable to find EMS vector shapes for id: ${MISSING_EMS_ID}`);
       });
 
       it('should allow deletion of layer', async () => {
-        await PageObjects.gis.removeLayer(LAYER_NAME);
-        const exists = await PageObjects.gis.doesLayerExist(LAYER_NAME);
+        await PageObjects.maps.removeLayer(LAYER_NAME);
+        const exists = await PageObjects.maps.doesLayerExist(LAYER_NAME);
         expect(exists).to.be(false);
       });
     });
@@ -70,13 +70,13 @@ export default function ({ getPageObjects }) {
       const LAYER_NAME = 'EMS_tiles';
 
       it('should diplay error message in layer panel', async () => {
-        const errorMsg = await PageObjects.gis.getLayerErrorText(LAYER_NAME);
+        const errorMsg = await PageObjects.maps.getLayerErrorText(LAYER_NAME);
         expect(errorMsg).to.equal(`Unable to find EMS tile configuration for id: ${MISSING_EMS_ID}`);
       });
 
       it('should allow deletion of layer', async () => {
-        await PageObjects.gis.removeLayer(LAYER_NAME);
-        const exists = await PageObjects.gis.doesLayerExist(LAYER_NAME);
+        await PageObjects.maps.removeLayer(LAYER_NAME);
+        const exists = await PageObjects.maps.doesLayerExist(LAYER_NAME);
         expect(exists).to.be(false);
       });
     });
@@ -86,13 +86,13 @@ export default function ({ getPageObjects }) {
       const LAYER_NAME = 'Custom_vector_shapes';
 
       it('should diplay error message in layer panel', async () => {
-        const errorMsg = await PageObjects.gis.getLayerErrorText(LAYER_NAME);
+        const errorMsg = await PageObjects.maps.getLayerErrorText(LAYER_NAME);
         expect(errorMsg).to.equal(`Unable to find map.regionmap configuration for ${MISSING_REGION_NAME}`);
       });
 
       it('should allow deletion of layer', async () => {
-        await PageObjects.gis.removeLayer(LAYER_NAME);
-        const exists = await PageObjects.gis.doesLayerExist(LAYER_NAME);
+        await PageObjects.maps.removeLayer(LAYER_NAME);
+        const exists = await PageObjects.maps.doesLayerExist(LAYER_NAME);
         expect(exists).to.be(false);
       });
     });
