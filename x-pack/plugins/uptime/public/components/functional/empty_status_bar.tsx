@@ -19,9 +19,10 @@ export const EmptyStatusBar = ({ message, monitorId }: Props) => (
       <EuiFlexItem grow={false}>
         {!message
           ? i18n.translate('xpack.uptime.emptyStatusBar.defaultMessage', {
-              defaultMessage: `No data found for monitor id ${monitorId}`,
+              defaultMessage: 'No data found for monitor id {monitorId}',
               description:
                 'This is the default message we display in a status bar when there is no data available for an uptime monitor.',
+              values: { monitorId },
             })
           : message}
       </EuiFlexItem>
