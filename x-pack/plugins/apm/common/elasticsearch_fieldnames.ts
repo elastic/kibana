@@ -38,9 +38,9 @@ export const ERROR_GROUP_ID = 'error.grouping_key';
 export const ERROR_CULPRIT = 'error.culprit';
 export const ERROR_LOG_MESSAGE = 'error.log.message';
 export const ERROR_LOG_STACKTRACE = 'error.log.stacktrace';
-export const ERROR_EXC_MESSAGE = 'error.exception.message';
-export const ERROR_EXC_STACKTRACE = 'error.exception.stacktrace';
-export const ERROR_EXC_HANDLED = 'error.exception.handled';
+export const ERROR_EXC_MESSAGE = 'error.exception.message'; // only to be used in es queries, since error.exception is now an array
+export const ERROR_EXC_STACKTRACE = 'error.exception.stacktrace'; // only to be used in es queries, since error.exception is now an array
+export const ERROR_EXC_HANDLED = 'error.exception.handled'; // only to be used in es queries, since error.exception is now an array
 
 // METRICS
 export const METRIC_SYSTEM_FREE_MEMORY = 'system.memory.actual.free';

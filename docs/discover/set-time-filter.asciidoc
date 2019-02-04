@@ -22,7 +22,7 @@ adjust the time by editing the *To* and *From* fields.
 * *Recent*. Click one of the times from your list of recently used time filters.
 
 [role="screenshot"]
-image::images/Timepicker-Select.png[Time picker menu]
+image::images/Timepicker-View.png[Time picker menu]
 
 [float]
 === Filtering from the histogram
