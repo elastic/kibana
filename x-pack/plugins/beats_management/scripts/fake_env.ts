@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Chance from 'chance'; // eslint-disable-line
+import { flatten } from 'lodash';
 // @ts-ignore
 import request from 'request';
 import uuidv4 from 'uuid/v4';
@@ -58,7 +59,26 @@ const start = async (
     const libs = compose(kibanaURL);
     // tslint:disable-next-line
     console.error(`Enrolling ${numberOfBeats} fake beats...`);
-    const enrollmentTokens = await libs.tokens.createEnrollmentTokens(numberOfBeats);
+    let enrollmentTokens: string[] = [];
+
+    if (numberOfBeats > 100) {
+      const tokenGroups = numberOfBeats / 100;
+      enrollmentTokens = flatten(
+        await Promise.all(
+          [...Array(tokenGroups)].map(async () => {
+            // @ts-ignore
+            process.stdout.clearLine();
+            // @ts-ignore
+            process.stdout.cursorTo(0);
+            process.stdout.write(`Tokens created: ${enrollmentTokens.length}`);
+            return await libs.tokens.createEnrollmentTokens(100);
+          })
+        )
+      );
+    } else {
+      enrollmentTokens = await libs.tokens.createEnrollmentTokens(numberOfBeats);
+    }
+
     Promise.all(enrollmentTokens.map(token => enroll(kibanaURL, token)));
     await sleep(2000);
     // tslint:disable-next-line
@@ -111,9 +131,9 @@ Duo Reges: constructio interrete. Itaque his sapiens semper vacabit.`.substring(
     } else if (e.response && e.response.data && e.response.reason) {
       // tslint:disable-next-line
       console.error(e.response.data.reason);
-    } else if (e.response) {
+    } else if (e.code) {
       // tslint:disable-next-line
-      console.error(e.response);
+      console.error(e.code);
     } else {
       // tslint:disable-next-line
       console.error(e);

@@ -121,9 +121,10 @@ export class CMTokensDomain {
       .toJSON();
 
     while (tokens.length < numTokens) {
+      const hash = this.createRandomHash();
       tokens.push({
         expires_on: enrollmentTokenExpiration,
-        token: this.createRandomHash(),
+        token: hash,
       });
     }
 

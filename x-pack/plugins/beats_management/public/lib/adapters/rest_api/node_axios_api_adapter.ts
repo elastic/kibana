@@ -50,7 +50,7 @@ export class NodeAxiosAPIAdapter implements RestAPIAdapter {
       baseURL: this.basePath,
       withCredentials: true,
       responseType: 'json',
-      timeout: 300000000000,
+      timeout: 60 * 10 * 1000, // 10min
       auth: {
         username: this.username,
         password: this.password,
