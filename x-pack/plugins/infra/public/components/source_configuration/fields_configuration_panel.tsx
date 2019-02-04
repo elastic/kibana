@@ -43,7 +43,7 @@ export const FieldsConfigurationPanel = ({
       helpText={
         <FormattedMessage
           id="xpack.infra.sourceConfiguration.timestampFieldDescription"
-          defaultMessage="Timestamp used to sort log entries. Defaults to {defaultValue}."
+          defaultMessage="Timestamp used to sort log entries. The recommended value is {defaultValue}."
           values={{
             defaultValue: <EuiCode>@timestamp</EuiCode>,
           }}
@@ -65,7 +65,7 @@ export const FieldsConfigurationPanel = ({
       helpText={
         <FormattedMessage
           id="xpack.infra.sourceConfiguration.tiebreakerFieldDescription"
-          defaultMessage="Field used to break ties between two entries with the same timestamp. Defaults to {defaultValue}."
+          defaultMessage="Field used to break ties between two entries with the same timestamp. The recommended value is {defaultValue}."
           values={{
             defaultValue: <EuiCode>_doc</EuiCode>,
           }}
@@ -92,7 +92,7 @@ export const FieldsConfigurationPanel = ({
       helpText={
         <FormattedMessage
           id="xpack.infra.sourceConfiguration.containerFieldDescription"
-          defaultMessage="Field used to identify Docker containers. Defaults to {defaultValue}."
+          defaultMessage="Field used to identify Docker containers. The recommended value is {defaultValue}."
           values={{
             defaultValue: <EuiCode>docker.container.id</EuiCode>,
           }}
@@ -114,7 +114,7 @@ export const FieldsConfigurationPanel = ({
       helpText={
         <FormattedMessage
           id="xpack.infra.sourceConfiguration.hostFieldDescription"
-          defaultMessage="Field used to identify hosts. Defaults to {defaultValue}."
+          defaultMessage="Field used to identify hosts. The recommended value is {defaultValue}."
           values={{
             defaultValue: <EuiCode>host.name</EuiCode>,
           }}
@@ -136,7 +136,7 @@ export const FieldsConfigurationPanel = ({
       helpText={
         <FormattedMessage
           id="xpack.infra.sourceConfiguration.podFieldDescription"
-          defaultMessage="Field used to identify Kubernetes pods. Defaults to {defaultValue}."
+          defaultMessage="Field used to identify Kubernetes pods. The recommended value is {defaultValue}."
           values={{
             defaultValue: <EuiCode>kubernetes.pod.uid</EuiCode>,
           }}

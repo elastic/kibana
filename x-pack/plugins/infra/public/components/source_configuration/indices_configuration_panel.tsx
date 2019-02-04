@@ -37,7 +37,7 @@ export const IndicesConfigurationPanel = ({
       helpText={
         <FormattedMessage
           id="xpack.infra.sourceConfiguration.metricIndicesDescription"
-          defaultMessage="Index pattern for matching indices that contain Metricbeat data. Defaults to {defaultValue}."
+          defaultMessage="Index pattern for matching indices that contain Metricbeat data. The recommended value is {defaultValue}."
           values={{
             defaultValue: <EuiCode>metricbeat-*</EuiCode>,
           }}
@@ -64,7 +64,7 @@ export const IndicesConfigurationPanel = ({
       helpText={
         <FormattedMessage
           id="xpack.infra.sourceConfiguration.logIndicesDescription"
-          defaultMessage="Index pattern for matching indices that contain log data. Defaults to {defaultValue}."
+          defaultMessage="Index pattern for matching indices that contain log data. The recommended value is {defaultValue}."
           values={{
             defaultValue: <EuiCode>filebeat-*</EuiCode>,
           }}
