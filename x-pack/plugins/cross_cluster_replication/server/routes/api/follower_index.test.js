@@ -247,6 +247,7 @@ describe('[CCR API Routes] Follower Index', () => {
       setHttpRequestResponse(null, { acknowledge: true });
       setHttpRequestResponse(null, { acknowledge: true });
       setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(null, { acknowledge: true });
 
       const response = await routeHandler({ params: { id: '1' } });
 
@@ -255,6 +256,9 @@ describe('[CCR API Routes] Follower Index', () => {
     });
 
     it('should accept a list of ids to unfollow', async () => {
+      setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(null, { acknowledge: true });
+      setHttpRequestResponse(null, { acknowledge: true });
       setHttpRequestResponse(null, { acknowledge: true });
       setHttpRequestResponse(null, { acknowledge: true });
       setHttpRequestResponse(null, { acknowledge: true });
