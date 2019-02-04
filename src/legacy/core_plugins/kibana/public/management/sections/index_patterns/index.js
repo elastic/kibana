@@ -32,7 +32,7 @@ import { CreateIndexPatternPrompt } from './create_index_pattern_prompt';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 import { EuiBadge } from '@elastic/eui';
 
 import React from 'react';
@@ -50,10 +50,10 @@ export function updateIndexPatternList(
   }
 
   render(
-    <I18nProvider>
+    <I18nContext>
       {indexPatterns.length === 0 ? (<CreateIndexPatternPrompt />) :
         (<IndexPatternTable indexPatterns={indexPatterns} navTo={kbnUrl.redirect} />)}
-    </I18nProvider>,
+    </I18nContext>,
     node,
   );
 }
