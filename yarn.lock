@@ -871,10 +871,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@6.7.4":
-  version "6.7.4"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-6.7.4.tgz#04fb02cfee7d7851ca90659eae121555f56ff83a"
-  integrity sha512-h0542LAqKjFdbyV8heiwQOlGe6fkThNagPCr7wymFBF/HYBWvIcJSplSVVRNgwgNRvWEXEGLOGrVLInn0Atfpg==
+"@elastic/eui@6.8.0":
+  version "6.8.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-6.8.0.tgz#16152cb2b04ddc756bed5cadb525d27a8904ec42"
+  integrity sha512-AnBgIpcEzpKrdbqYRIitU0kPN0fTgO2olOSaQqoKz8LUQButYLE9+ghV6c48K12UuuMQUK7m+qvyXt2z/5xCGQ==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
@@ -890,6 +890,7 @@
     react-ace "^5.5.0"
     react-color "^2.13.8"
     react-input-autosize "^2.2.1"
+    react-is "~16.3.0"
     react-virtualized "^9.18.5"
     react-vis "1.10.2"
     resize-observer-polyfill "^1.5.0"
@@ -17707,6 +17708,11 @@ react-is@^16.4.0, react-is@^16.5.2:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.6.0.tgz#456645144581a6e99f6816ae2bd24ee94bdd0c01"
   integrity sha512-q8U7k0Fi7oxF1HvQgyBjPwDXeMplEsArnKt2iYhuIF86+GBbgLHdAmokL3XUFjTd7Q363OSNG55FOGUdONVn1g==
 
+react-is@~16.3.0:
+  version "16.3.2"
+  resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.3.2.tgz#f4d3d0e2f5fbb6ac46450641eb2e25bf05d36b22"
+  integrity sha512-ybEM7YOr4yBgFd6w8dJqwxegqZGJNBZl6U27HnGKuTZmDvVrD5quWOK/wAnMywiZzW+Qsk+l4X2c70+thp/A8Q==
+
 react-lib-adler32@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/react-lib-adler32/-/react-lib-adler32-1.0.1.tgz#01f7a0e24fe715580aadb8a827c39a850e1ccc4e"
@@ -19253,11 +19259,6 @@ script-loader@0.7.2:
   integrity sha512-UMNLEvgOAQuzK8ji8qIscM3GIrRCWN6MmMXGD4SD5l6cSycgGsCo0tX5xRnfQcoghqct0tjHjcykgI1PyBE2aA==
   dependencies:
     raw-loader "~0.5.1"
-
-scriptjs@^2.5.8:
-  version "2.5.8"
-  resolved "https://registry.yarnpkg.com/scriptjs/-/scriptjs-2.5.8.tgz#d0c43955c2e6bad33b6e4edf7b53b8965aa7ca5f"
-  integrity sha1-0MQ5VcLmutM7bk7fe1O4llqnyl8=
 
 scroll-into-view@^1.3.0:
   version "1.9.1"

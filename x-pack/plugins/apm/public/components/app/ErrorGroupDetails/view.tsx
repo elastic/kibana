@@ -5,6 +5,7 @@
  */
 
 import { EuiBadge, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React, { Fragment } from 'react';
@@ -15,7 +16,6 @@ import { ErrorDistributionRequest } from '../../../store/reactReduxRequest/error
 import { ErrorGroupDetailsRequest } from '../../../store/reactReduxRequest/errorGroup';
 import { IUrlParams } from '../../../store/urlParams';
 import {
-  colors,
   fontFamilyCode,
   fontSizes,
   px,
@@ -40,7 +40,7 @@ const UnhandledBadge = styled(EuiBadge)`
 const Label = styled.div`
   margin-bottom: ${px(units.quarter)};
   font-size: ${fontSizes.small};
-  color: ${colors.gray3};
+  color: ${theme.euiColorMediumShade};
 `;
 
 const Message = styled.div`

@@ -11,10 +11,11 @@ import { isEmpty } from 'lodash';
 import Suggestion from './Suggestion';
 import { units, colors, px, unit } from '../../../../style/variables';
 import { rgba } from 'polished';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 
 const List = styled.ul`
   width: 100%;
-  border: 1px solid ${colors.gray4};
+  border: 1px solid ${theme.euiColorLightShade};
   border-radius: ${px(units.quarter)};
   box-shadow: 0px ${px(units.quarter)} ${px(units.double)}
     ${rgba(colors.black, 0.1)};

@@ -8,7 +8,7 @@ import React from 'react';
 import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 import template from './index.html';
 import { Listing } from '../../../components/cluster/listing';
 
@@ -59,7 +59,7 @@ uiRoutes.when('/home', {
 
       $scope.$watch(() => this.data, data => {
         this.renderReact(
-          <I18nProvider>
+          <I18nContext>
             <Listing
               clusters={data}
               angular={{
@@ -73,7 +73,7 @@ uiRoutes.when('/home', {
               pagination={this.pagination}
               onTableChange={this.onTableChange}
             />
-          </I18nProvider>
+          </I18nContext>
         );
       });
     }
