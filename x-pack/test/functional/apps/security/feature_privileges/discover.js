@@ -11,6 +11,7 @@ export default function ({ getPageObjects, getService }) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'discover', 'security', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
+  const appsMenu = getService('appsMenu');
 
   describe('discover', () => {
     before(async () => {
@@ -62,7 +63,7 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('shows discover navlink', async () => {
-        const navLinks = await PageObjects.common.getAppNavLinksText();
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.eql([
           'Discover',
           'Management',
@@ -110,7 +111,7 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('shows discover navlink', async () => {
-        const navLinks = await PageObjects.common.getAppNavLinksText();
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.eql([
           'Discover',
           'Management',
