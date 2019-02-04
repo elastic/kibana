@@ -21,6 +21,7 @@ import { NewJobButton } from '../new_job_button';
 import { JobStatsBar } from '../jobs_stats_bar';
 import { NodeAvailableWarning } from '../node_available_warning';
 import { RefreshJobsListButton } from '../refresh_jobs_list_button';
+import { isEqual } from 'lodash';
 
 import React, {
   Component
@@ -51,8 +52,7 @@ export class JobsListView extends Component {
       selectedJobs: [],
       itemIdToExpandedRowMap: {},
       filterClauses: [],
-      deletingJobsCount: 0,
-      deletingJobsHash: '',
+      deletingJobIds: [],
     };
 
     this.updateFunctions = {};
@@ -295,7 +295,12 @@ export class JobsListView extends Component {
         });
 
         this.isDoneRefreshing();
-        this.checkDeletingJobTasks();
+        if (jobsSummaryList.some(j => j.deleting === true)) {
+          // if there are some jobs in a deleting state, start polling for
+          // deleting jobs so we can update the jobs list once the
+          // deleting tasks are over
+          this.checkDeletingJobTasks();
+        }
       } catch (error) {
         console.error(error);
         this.setState({ loading: false });
@@ -304,16 +309,16 @@ export class JobsListView extends Component {
   }
 
   async checkDeletingJobTasks() {
-    const { count, hash } = await ml.jobs.deletingJobsCount();
-    if (count !== this.state.deletingJobsCount || hash !== this.state.deletingJobsHash) {
+    const { jobIds } = await ml.jobs.deletingJobTasks();
+
+    if (jobIds.length === 0 || isEqual(jobIds.sort(), this.state.deletingJobIds.sort())) {
       this.setState({
-        deletingJobsCount: count,
-        deletingJobsHash: hash,
+        deletingJobIds: jobIds,
       });
       this.refreshJobSummaryList(true);
     }
 
-    if (count > 0 && deletingJobsRefreshTimeout === null) {
+    if (jobIds.length > 0 && deletingJobsRefreshTimeout === null) {
       deletingJobsRefreshTimeout = setTimeout(() => {
         deletingJobsRefreshTimeout = null;
         this.checkDeletingJobTasks();

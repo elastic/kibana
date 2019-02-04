@@ -115,7 +115,7 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
       }),
       icon: 'trash',
       color: 'danger',
-      enabled: (item) => (item.deleting !== true && canDeleteJob),
+      enabled: () => canDeleteJob,
       onClick: (item) => {
         showDeleteJobModal([item]);
         closeMenu();

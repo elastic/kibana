@@ -12,7 +12,6 @@ import { jobAuditMessagesProvider } from '../job_audit_messages';
 import { CalendarManager } from '../calendar';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
 import { isTimeSeriesViewJob } from '../../../common/util/job_utils';
-import { stringHash } from '../../../common/util/string_utils';
 import moment from 'moment';
 import { uniq } from 'lodash';
 
@@ -266,25 +265,25 @@ export function jobsProvider(callWithRequest) {
     return obj;
   }
 
-  async function deletingJobsCount() {
+  async function deletingJobTasks() {
     const actions = ['cluster:admin/xpack/ml/job/delete'];
-    let count = 0;
-    let hash = '';
+    const detailed = true;
+    const jobIds = [];
     try {
-      const tasksList =  await callWithRequest('tasks.list', { actions });
+      const tasksList =  await callWithRequest('tasks.list', { actions, detailed });
       Object.keys(tasksList.nodes).forEach((nodeId) => {
         const tasks = tasksList.nodes[nodeId].tasks;
-        count += Object.keys(tasks).length;
-        hash += Object.keys(tasks).reduce((p, c) => p + c, '');
+        Object.keys(tasks).forEach((taskId) => {
+          jobIds.push(tasks[taskId].description.replace(/^delete-job-/, ''));
+        });
       });
     } catch (e) {
-      // fail silently
+      // if the user doesn't have permission to load the task list,
+      // use the jobs list to get the ids of deleting jobs
+      const { jobs } = await callWithRequest('ml.jobs');
+      jobIds.push(...jobs.filter(j => j.deleting === true).map(j => j.job_id));
     }
-    // don't return the actual task ids, obfuscate them in a hash
-    // we return a hash made up of the ids so we know when processing jobs have changed.
-    // going on the count of processing jobs alone would be unclear.
-    hash = stringHash(hash);
-    return { count, hash };
+    return { jobIds };
   }
 
   return {
@@ -293,6 +292,6 @@ export function jobsProvider(callWithRequest) {
     closeJobs,
     jobsSummary,
     createFullJobsList,
-    deletingJobsCount,
+    deletingJobTasks,
   };
 }
