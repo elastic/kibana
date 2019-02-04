@@ -34,14 +34,14 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.addSampleDataSet('ecommerce');
         await PageObjects.maps.loadSavedMap('[eCommerce] Orders by Country');
-        await setTimerangeToCoverAllSampleData();
-        await PageObjects.maps.waitForLayersToLoad();
-        await PageObjects.maps.enterFullScreen();
         await PageObjects.maps.toggleLayerVisibility('road_map');
         await PageObjects.maps.toggleLayerVisibility('United Kingdom');
         await PageObjects.maps.toggleLayerVisibility('France');
         await PageObjects.maps.toggleLayerVisibility('United States');
         await PageObjects.maps.toggleLayerVisibility('World Countries');
+        await setTimerangeToCoverAllSampleData();
+        await PageObjects.maps.waitForLayersToLoad();
+        await PageObjects.maps.enterFullScreen();
       });
 
       after(async () => {
@@ -63,10 +63,10 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.addSampleDataSet('flights');
         await PageObjects.maps.loadSavedMap('[Flights] Origin and Destination Flight Time');
+        await PageObjects.maps.toggleLayerVisibility('road_map');
         await setTimerangeToCoverAllSampleData();
         await PageObjects.maps.waitForLayersToLoad();
         await PageObjects.maps.enterFullScreen();
-        await PageObjects.maps.toggleLayerVisibility('road_map');
       });
 
       after(async () => {
@@ -89,11 +89,11 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.home.addSampleDataSet('logs');
         await PageObjects.maps.loadSavedMap('[Logs] Total Requests and Bytes');
+        await PageObjects.maps.toggleLayerVisibility('road_map');
+        await PageObjects.maps.toggleLayerVisibility('Total Requests by Country');
         await setTimerangeToCoverAllSampleData();
         await PageObjects.maps.waitForLayersToLoad();
         await PageObjects.maps.enterFullScreen();
-        await PageObjects.maps.toggleLayerVisibility('road_map');
-        await PageObjects.maps.toggleLayerVisibility('Total Requests by Country');
       });
 
       after(async () => {

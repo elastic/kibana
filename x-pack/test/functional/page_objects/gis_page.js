@@ -18,6 +18,9 @@ export function GisPageProvider({ getService, getPageObjects }) {
     async enterFullScreen() {
       log.debug(`enterFullScreen`);
       await testSubjects.click('mapsFullScreenMode');
+      await retry.try(async () => {
+        await testSubjects.exists('exitFullScreenModeLogo');
+      });
     }
 
     // TODO combine with dashboard full screen into a service
