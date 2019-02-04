@@ -1,9 +1,10 @@
 .mapMapWrapper {
+  background-color: $euiColorEmptyShade;
   position: relative;
 }
 
 .mapMapLayerPanel {
-  background-color: $euiColorLightestShade;
+  background-color: $euiPageBackgroundColor;
   width: 0;
   overflow: hidden;
 
