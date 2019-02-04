@@ -337,7 +337,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async clickOnOnlyIndexPattern() {
-      return await testSubjects.click('indexPatternLink');
+      return await find.clickByPartialLinkText('logstash-*');
     }
 
     async removeIndexPattern() {

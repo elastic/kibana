@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }) {
     after(async function afterAll() {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
-      await (await find.clickByPartialLinkText('logstash-*'));
+      await find.clickByPartialLinkText('logstash-*');
       await PageObjects.settings.removeIndexPattern();
     });
 

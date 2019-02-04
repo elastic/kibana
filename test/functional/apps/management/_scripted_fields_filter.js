@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }) {
     it('should filter scripted fields', async function () {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
-      await (await find.clickByPartialLinkText('logstash-*'));
+      await find.clickByPartialLinkText('logstash-*');
       await PageObjects.settings.clickScriptedFieldsTab();
       const scriptedFieldLangsBefore = await PageObjects.settings.getScriptedFieldLangs();
       await log.debug('add scripted field');
