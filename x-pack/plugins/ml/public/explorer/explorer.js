@@ -60,6 +60,7 @@ import {
   processOverallResults,
   processViewByResults,
   selectedJobsHaveInfluencers,
+  loadInfluencerFields,
 } from './explorer_utils';
 import {
   explorerChartsContainerServiceFactory,
@@ -232,7 +233,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
             selectedJobs,
             swimlaneViewByFieldName: currentSwimlaneViewByFieldName
           };
-
+          this.getIndexPattern(selectedJobs, stateUpdate.noInfluencersConfigured);
           this.updateExplorer(stateUpdate, true);
         }
 
@@ -292,12 +293,21 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       }
     }
 
-    // TODO: dynamically load influencers and create index pattern
-    async getIndexPattern() { // jobIds, noInfluencersConfigured
-      this.indexPattern.fields = [
-        { name: 'nginx.access.geoip.country_iso_code', type: 'string', aggregatable: false, searchable: true },
-        { name: 'nginx.access.url', type: 'string', aggregatable: false, searchable: true }
-      ];
+    // Creates index pattern in the format expected by the kuery bar/kuery autocomplete provider
+    // Field objects required fields: name, type, aggregatable, searchable
+
+    // TODO: Figure out if we need type other than string since types returned from mapping may be more
+    // varied than what is accepted by the kuery bar.
+    async getIndexPattern(selectedJobs, noInfluencersConfigured) {
+      const selectedJobIds = selectedJobs.map((job) => job.id);
+      const influencers = await loadInfluencerFields(selectedJobIds, noInfluencersConfigured);
+
+      this.indexPattern.fields = influencers.map((influencer) => ({
+        name: influencer,
+        type: 'string',
+        aggregatable: true,
+        searchable: true
+      }));
     }
 
     getSwimlaneBucketInterval(selectedJobs) {
@@ -524,7 +534,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
     topFieldsPreviousArgs = null;
     topFieldsPreviousData = null;
-    loadViewByTopFieldValuesForSelectedTime(earliestMs, latestMs, selectedJobs, swimlaneViewByFieldName) {
+    loadViewByTopFieldValuesForSelectedTime(earliestMs, latestMs, selectedJobs, swimlaneViewByFieldName) { // influencersFilterQuery
       const selectedJobIds = selectedJobs.map(d => d.id);
       const { swimlaneLimit } = this.props;
 
@@ -547,7 +557,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
             selectedJobIds,
             earliestMs,
             latestMs,
-            swimlaneLimit
+            swimlaneLimit,
+            //influencersFilterQuery
           ).then((resp) => {
             if (resp.influencers[swimlaneViewByFieldName] === undefined) {
               this.topFieldsPreviousData = [];
@@ -727,11 +738,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         stateUpdate.influencers = await loadTopInfluencers(jobIds, timerange.earliestMs, timerange.latestMs, noInfluencersConfigured);
       }
 
-      // indexPattern only has title property - load the influencer fields for current job(s)
-      if (Object.keys(this.indexPattern).length === 1) {
-        this.getIndexPattern(jobIds, noInfluencersConfigured);
-      }
-
       const updatedAnomalyChartRecords = await loadDataForCharts(
         jobIds, timerange.earliestMs, timerange.latestMs, selectionInfluencers, selectedCells, filterData, influencersFilterQuery
       );
@@ -752,7 +758,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
       this.setState(stateUpdate);
 
-      if (selectedCells !== null) {
+      if (selectedCells !== null || influencersFilterQuery !== undefined) {
         this.updateCharts(
           stateUpdate.anomalyChartRecords, timerange.earliestMs, timerange.latestMs
         );
@@ -1009,12 +1015,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
       return (
         <div className="results-container">
-          {/* {noInfluencersConfigured === false &&
-            influencers !== undefined &&
-            <ExplorerFilterBar
-              influencers={influencers}
-              applyFilter={this.applyFilter}
-            />} */}
+
           {noInfluencersConfigured === false &&
             influencers !== undefined &&
             <KueryFilterBar

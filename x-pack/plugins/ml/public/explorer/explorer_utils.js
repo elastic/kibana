@@ -554,3 +554,38 @@ export async function loadTopInfluencers(
     }
   });
 }
+
+// Returns an array of influencer field names as strings for all selectedJobs
+// GET _ml/anomaly_detectors/<job-id>,<job-id>
+//   response format:
+// { count: 1, jobs: [ { "analysis_config": { influencers: [ 'influencerOne', 'influencerTwo' ] } } ] }
+export async function loadInfluencerFields(
+  selectedJobIds,
+  noInfluencersConfigured,
+) {
+  return new Promise((resolve) => {
+    const influencers = [];
+    if (noInfluencersConfigured !== true) {
+      ml.getMultipleJobs(
+        selectedJobIds
+      )
+        .then((resp) => {
+          if (resp.jobs) {
+            resp.jobs.forEach((job) => {
+              if (job.analysis_config && job.analysis_config.influencers) {
+                influencers.push(...job.analysis_config.influencers);
+              }
+            });
+          }
+          console.log('Explorer - influencer fields for selected jobs', influencers);
+          resolve(influencers);
+        })
+        .catch((err) => {
+          // TODO: error handling
+          console.log('Error fetching influencers', err);
+        });
+    } else {
+      resolve(influencers);
+    }
+  });
+}
