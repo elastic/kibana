@@ -23,6 +23,7 @@ import { HostItem, HostsEdges } from 'x-pack/plugins/secops/server/graphql/types
 
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
+import { getOrEmptyStringTag } from '../../../empty_string';
 import { getEmptyValue } from '../../../empty_value';
 import { Provider } from '../../../timeline/data_providers/provider';
 import * as i18n from './translations';
@@ -71,28 +72,26 @@ export const getEuiDescriptionList = (
   host: HostItem | null,
   startDate: number,
   endDate: number
-): JSX.Element => {
-  return (
-    <EuiDescriptionList type="column" compressed>
-      {Object.entries(fieldTitleMapping).map(([field, title]) => {
-        const summaryValue: string | string[] | null = get(field, host);
-        return (
-          <React.Fragment key={field}>
-            <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
-            {/*Using EuiDescriptionListDescription throws off sizing of Draggable*/}
-            <div>
-              {isArray(summaryValue)
-                ? summaryValue.map((value: string) =>
-                    createDraggable(value, field, startDate, endDate, dateFields)
-                  )
-                : createDraggable(summaryValue, field, startDate, endDate, dateFields)}
-            </div>
-          </React.Fragment>
-        );
-      })}
-    </EuiDescriptionList>
-  );
-};
+): JSX.Element => (
+  <EuiDescriptionList type="column" compressed>
+    {Object.entries(fieldTitleMapping).map(([field, title]) => {
+      const summaryValue: string | string[] | null = get(field, host);
+      return (
+        <React.Fragment key={`host-summary-${field}-${title}`}>
+          <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
+          {/*Using EuiDescriptionListDescription throws off sizing of Draggable*/}
+          <div>
+            {isArray(summaryValue)
+              ? summaryValue.map((value: string) =>
+                  createDraggable(value, field, startDate, endDate, dateFields)
+                )
+              : createDraggable(summaryValue, field, startDate, endDate, dateFields)}
+          </div>
+        </React.Fragment>
+      );
+    })}
+  </EuiDescriptionList>
+);
 
 export const createDraggable = (
   summaryValue: string | null,
@@ -100,17 +99,17 @@ export const createDraggable = (
   startDate: number,
   endDate: number,
   relativeFields: string[]
-) => {
-  return summaryValue == null ? (
+) =>
+  summaryValue == null ? (
     <>{getEmptyValue()}</>
   ) : (
     <DraggableWrapper
-      key={summaryValue}
+      key={`host-summary-${field}-${summaryValue}`}
       dataProvider={{
         and: [],
         enabled: true,
         excluded: false,
-        id: escapeDataProviderId(`host-summmary-${field}-${summaryValue}`),
+        id: escapeDataProviderId(`host-summary-${field}-${summaryValue}`),
         name: summaryValue,
         kqlQuery: '',
         queryMatch: {
@@ -132,12 +131,11 @@ export const createDraggable = (
             <FormattedRelative value={new Date(summaryValue)} />
           </EuiToolTip>
         ) : (
-          <>{summaryValue}</>
+          <>{getOrEmptyStringTag(summaryValue)}</>
         )
       }
     />
   );
-};
 
 const StyledEuiFlexItem = styled(EuiFlexItem)`
   max-width: 750px;

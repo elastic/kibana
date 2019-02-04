@@ -15,13 +15,14 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { mockGlobalState } from '../../../../mock';
 import { createStore, State } from '../../../../store';
 import { DragDropContextWrapper } from '../../../drag_and_drop/drag_drop_context_wrapper';
+import { getEmptyString } from '../../../empty_string';
 import { getEmptyValue } from '../../../empty_value';
 import { createDraggable, getEuiDescriptionList, HostSummary } from './index';
 import { mockData } from './mock';
 
 describe('Host Summary Component', () => {
   const state: State = mockGlobalState;
-
+  const theme = () => ({ eui: euiDarkVars, darkMode: true });
   let store = createStore(state);
 
   beforeEach(() => {
@@ -56,7 +57,7 @@ describe('Host Summary Component', () => {
       );
       const wrapper = mountWithIntl(
         <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+          <ThemeProvider theme={theme}>
             <DragDropContextWrapper>{draggable}</DragDropContextWrapper>
           </ThemeProvider>
         </ReduxStoreProvider>
@@ -74,7 +75,7 @@ describe('Host Summary Component', () => {
       );
       const wrapper = mountWithIntl(
         <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+          <ThemeProvider theme={theme}>
             <DragDropContextWrapper>{draggable}</DragDropContextWrapper>
           </ThemeProvider>
         </ReduxStoreProvider>
@@ -92,12 +93,48 @@ describe('Host Summary Component', () => {
       );
       const wrapper = mountWithIntl(
         <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+          <ThemeProvider theme={theme}>
             <DragDropContextWrapper>{draggable}</DragDropContextWrapper>
           </ThemeProvider>
         </ReduxStoreProvider>
       );
       expect(wrapper.text()).toBe(getEmptyValue());
+    });
+
+    test('if it returns a string placeholder with an empty string', () => {
+      const draggable = createDraggable(
+        '',
+        'Platform',
+        552204000000,
+        618472800000,
+        mockData.DateFields
+      );
+      const wrapper = mountWithIntl(
+        <ReduxStoreProvider store={store}>
+          <ThemeProvider theme={theme}>
+            <DragDropContextWrapper>{draggable}</DragDropContextWrapper>
+          </ThemeProvider>
+        </ReduxStoreProvider>
+      );
+      expect(wrapper.text()).toBe(getEmptyString());
+    });
+
+    test('if works with a string with a single space as a valid value and NOT an empty value', () => {
+      const draggable = createDraggable(
+        ' ',
+        'Platform',
+        552204000000,
+        618472800000,
+        mockData.DateFields
+      );
+      const wrapper = mountWithIntl(
+        <ReduxStoreProvider store={store}>
+          <ThemeProvider theme={theme}>
+            <DragDropContextWrapper>{draggable}</DragDropContextWrapper>
+          </ThemeProvider>
+        </ReduxStoreProvider>
+      );
+      expect(wrapper.text()).toBe(' ');
     });
   });
 
@@ -110,7 +147,7 @@ describe('Host Summary Component', () => {
       );
       const wrapper = mountWithIntl(
         <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+          <ThemeProvider theme={theme}>
             <DragDropContextWrapper>{euiDescriptionList}</DragDropContextWrapper>
           </ThemeProvider>
         </ReduxStoreProvider>
@@ -124,7 +161,7 @@ describe('Host Summary Component', () => {
       const euiDescriptionList = getEuiDescriptionList(null, 552204000000, 618472800000);
       const wrapper = mountWithIntl(
         <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+          <ThemeProvider theme={theme}>
             <DragDropContextWrapper>{euiDescriptionList}</DragDropContextWrapper>
           </ThemeProvider>
         </ReduxStoreProvider>

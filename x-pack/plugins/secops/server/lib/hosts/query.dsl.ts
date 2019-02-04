@@ -22,15 +22,15 @@ export const buildQuery = ({
   pagination: { limit, cursor },
   sourceConfiguration: {
     fields: { timestamp },
+    logAlias,
     auditbeatAlias,
+    packetbeatAlias,
   },
 }: RequestOptions) => {
   const esFields = reduceFields(fields, hostsFieldsMap);
 
   const filter = [
     ...createQueryFilterClauses(filterQuery),
-    { term: { 'event.module': 'system' } },
-    { term: { 'event.dataset': 'host' } },
     {
       range: {
         [timestamp]: {
@@ -51,7 +51,7 @@ export const buildQuery = ({
 
   const dslQuery = {
     allowNoIndices: true,
-    index: auditbeatAlias,
+    index: [logAlias, auditbeatAlias, packetbeatAlias],
     ignoreUnavailable: true,
     body: {
       aggregations: {
