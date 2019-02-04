@@ -95,7 +95,7 @@ exports[` 1`] = `
                         </svg>
                       </div>
                       <div
-                        class="euiFlexItem"
+                        class="euiFlexItem remoteClustersConnectionStatus__message"
                       >
                         <div
                           class="euiText euiText--medium"
