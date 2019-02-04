@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PrivilegeMap } from 'x-pack/plugins/security/common/model';
+import { RawKibanaPrivileges } from 'x-pack/plugins/security/common/model';
 import { PrivilegeSerializer } from './privilege_serializer';
 
 interface SerializedPrivilege {
@@ -24,7 +24,7 @@ interface SerializedPrivileges {
 
 export const serializePrivileges = (
   application: string,
-  privilegeMap: PrivilegeMap
+  privilegeMap: RawKibanaPrivileges
 ): SerializedPrivileges => {
   return {
     [application]: {

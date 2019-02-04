@@ -25,6 +25,14 @@ describe('EnabledFeatures', () => {
           space={{
             id: 'my-space',
           }}
+          uiCapabilities={{
+            navLinks: {},
+            management: {},
+            catalogue: {},
+            spaces: {
+              manage: true,
+            },
+          }}
           intl={null as any}
           onChange={jest.fn()}
         />

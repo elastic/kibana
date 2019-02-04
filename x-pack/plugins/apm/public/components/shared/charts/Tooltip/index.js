@@ -11,7 +11,6 @@ import moment from 'moment';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import {
-  colors,
   unit,
   units,
   px,
@@ -20,23 +19,24 @@ import {
   fontSizes
 } from '../../../../style/variables';
 import Legend from '../Legend';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 
 const TooltipElm = styled.div`
   margin: 0 ${px(unit)};
   transform: translateY(-50%);
-  border: 1px solid ${colors.gray4};
-  background: ${colors.white};
+  border: 1px solid ${theme.euiColorLightShade};
+  background: ${theme.euiColorEmptyShade};
   border-radius: ${borderRadius};
   font-size: ${fontSize};
-  color: ${colors.black};
+  color: ${theme.euiColorFullShade};
 `;
 
 const Header = styled.div`
-  background: ${colors.gray5};
-  border-bottom: 1px solid ${colors.gray4};
+  background: ${theme.euiColorLightestShade};
+  border-bottom: 1px solid ${theme.euiColorLightShade};
   border-radius: ${borderRadius} ${borderRadius} 0 0;
   padding: ${px(units.half)};
-  color: ${colors.gray3};
+  color: ${theme.euiColorMediumShade};
 `;
 
 const Content = styled.div`
@@ -46,7 +46,7 @@ const Content = styled.div`
 `;
 
 const Footer = styled.div`
-  color: ${colors.gray3};
+  color: ${theme.euiColorMediumShade};
   margin: ${px(units.half)};
   font-size: ${fontSizes.small};
 `;
@@ -59,12 +59,12 @@ const LegendContainer = styled.div`
 `;
 
 const LegendGray = styled(Legend)`
-  color: ${colors.gray3};
+  color: ${theme.euiColorMediumShade};
   padding-bottom: 0;
 `;
 
 const Value = styled.div`
-  color: ${colors.gray2};
+  color: ${theme.euiColorDarkShade};
   font-size: ${fontSize};
 `;
 

@@ -9,7 +9,7 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
 import { Feature } from '../../../../../../../../../xpack_main/types';
-import { PrivilegeDefinition, Role } from '../../../../../../../../common/model';
+import { KibanaPrivileges, Role } from '../../../../../../../../common/model';
 import { KibanaPrivilegeCalculatorFactory } from '../../../../../../..//lib/kibana_privilege_calculator';
 import { PrivilegeMatrix } from './privilege_matrix';
 
@@ -80,7 +80,7 @@ describe('PrivilegeMatrix', () => {
     };
 
     const calculator = new KibanaPrivilegeCalculatorFactory(
-      new PrivilegeDefinition({
+      new KibanaPrivileges({
         global: {
           all: [],
           read: [],

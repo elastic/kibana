@@ -11,6 +11,7 @@ export default function ({ getPageObjects, getService }) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'security', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
+  const appsMenu = getService('appsMenu');
 
   async function setDiscoverTimeRange() {
     const fromTime = '2015-09-19 06:31:44.000';
@@ -68,7 +69,7 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('shows discover navlink', async () => {
-        const navLinks = await PageObjects.common.getAppNavLinksText();
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.eql([
           'Discover',
           'Management',
@@ -116,7 +117,7 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('shows discover navlink', async () => {
-        const navLinks = await PageObjects.common.getAppNavLinksText();
+        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
         expect(navLinks).to.eql([
           'Discover',
           'Management',

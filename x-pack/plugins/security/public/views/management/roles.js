@@ -103,11 +103,11 @@ routes.when(ROLES_PATH, {
     }
 
     $scope.reversedTooltip = i18n('xpack.security.management.roles.reversedTooltip', {
-      defaultMessage: 'Reserved roles are built-in and cannot be removed or modified. Only the password may be changed.',
+      defaultMessage: `Reserved roles are built-in. You can't remove or modify them.`,
     });
 
     $scope.reversedAriaLabel = i18n('xpack.security.management.roles.reversedAriaLabel', {
-      defaultMessage: 'Reserved roles are built-in and cannot be removed or modified. Only the password may be changed.',
+      defaultMessage: `Reserved roles are built-in. You can't remove or modify them.`,
     });
 
   },

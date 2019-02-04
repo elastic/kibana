@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPrivilege, Role } from '../../common/model';
+import { Role, RoleIndexPrivilege } from '../../common/model';
 import { isGlobalPrivilegeDefinition } from './privilege_utils';
 
 export function transformRoleForSave(role: Role, spacesEnabled: boolean) {
@@ -36,6 +36,6 @@ export function transformRoleForSave(role: Role, spacesEnabled: boolean) {
   return role;
 }
 
-function isPlaceholderPrivilege(indexPrivilege: IndexPrivilege) {
+function isPlaceholderPrivilege(indexPrivilege: RoleIndexPrivilege) {
   return indexPrivilege.names.length === 0;
 }

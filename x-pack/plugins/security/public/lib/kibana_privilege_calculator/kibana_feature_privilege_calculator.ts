@@ -5,11 +5,7 @@
  */
 
 import _ from 'lodash';
-import {
-  FeaturePrivilegeSet,
-  KibanaPrivilegeSpec,
-  PrivilegeDefinition,
-} from '../../../common/model';
+import { FeaturesPrivileges, KibanaPrivileges, RoleKibanaPrivilege } from '../../../common/model';
 import { NO_PRIVILEGE_VALUE } from '../../views/management/edit_role/lib/constants';
 import { isGlobalPrivilegeDefinition } from '../privilege_utils';
 import {
@@ -21,14 +17,14 @@ import { areActionsFullyCovered } from './privilege_calculator_utils';
 
 export class KibanaFeaturePrivilegeCalculator {
   constructor(
-    private readonly privilegeDefinition: PrivilegeDefinition,
-    private readonly globalPrivilege: KibanaPrivilegeSpec,
+    private readonly kibanaPrivileges: KibanaPrivileges,
+    private readonly globalPrivilege: RoleKibanaPrivilege,
     private readonly assignedGlobalBaseActions: string[],
-    private readonly rankedFeaturePrivileges: FeaturePrivilegeSet
+    private readonly rankedFeaturePrivileges: FeaturesPrivileges
   ) {}
 
   public getMostPermissiveFeaturePrivilege(
-    privilegeSpec: KibanaPrivilegeSpec,
+    privilegeSpec: RoleKibanaPrivilege,
     basePrivilegeExplanation: PrivilegeExplanation,
     featureId: string,
     ignoreAssigned: boolean
@@ -44,7 +40,7 @@ export class KibanaFeaturePrivilegeCalculator {
 
     // inspect feature privileges in ranked order (most permissive -> least permissive)
     for (const featurePrivilege of featurePrivileges) {
-      const actions = this.privilegeDefinition
+      const actions = this.kibanaPrivileges
         .getFeaturePrivileges()
         .getActions(featureId, featurePrivilege);
 
@@ -76,7 +72,7 @@ export class KibanaFeaturePrivilegeCalculator {
   }
 
   private buildFeaturePrivilegeScenarios(
-    privilegeSpec: KibanaPrivilegeSpec,
+    privilegeSpec: RoleKibanaPrivilege,
     basePrivilegeExplanation: PrivilegeExplanation,
     featureId: string,
     ignoreAssigned: boolean
@@ -169,7 +165,7 @@ export class KibanaFeaturePrivilegeCalculator {
       case PRIVILEGE_SOURCE.GLOBAL_BASE:
         return this.assignedGlobalBaseActions;
       case PRIVILEGE_SOURCE.SPACE_BASE:
-        return this.privilegeDefinition.getSpacesPrivileges().getActions(privilegeId);
+        return this.kibanaPrivileges.getSpacesPrivileges().getActions(privilegeId);
       default:
         throw new Error(
           `Cannot get base actions for unsupported privilege source ${PRIVILEGE_SOURCE[source]}`
@@ -178,10 +174,10 @@ export class KibanaFeaturePrivilegeCalculator {
   }
 
   private getFeatureActions(featureId: string, privilegeId: string) {
-    return this.privilegeDefinition.getFeaturePrivileges().getActions(featureId, privilegeId);
+    return this.kibanaPrivileges.getFeaturePrivileges().getActions(featureId, privilegeId);
   }
 
-  private getAssignedFeaturePrivilege(privilegeSpec: KibanaPrivilegeSpec, featureId: string) {
+  private getAssignedFeaturePrivilege(privilegeSpec: RoleKibanaPrivilege, featureId: string) {
     const featureEntry = privilegeSpec.feature[featureId] || [];
     return featureEntry[0] || NO_PRIVILEGE_VALUE;
   }

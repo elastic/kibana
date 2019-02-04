@@ -9,11 +9,11 @@ import {
   EuiSpacer,
   // @ts-ignore No typings for EuiSuperSelect
   EuiSuperSelect,
-  EuiTitle,
 } from '@elastic/eui';
 import React, { Fragment } from 'react';
 import { getMonitorPageBreadcrumb } from '../breadcrumbs';
 import { MonitorCharts } from '../components/queries/monitor_charts';
+import { MonitorPageTitleQuery } from '../components/queries/monitor_page_title';
 import { MonitorStatusBar } from '../components/queries/monitor_status_bar';
 import { Pings } from '../components/queries/ping_list';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
@@ -43,9 +43,7 @@ export class MonitorPage extends React.Component<Props> {
     const id = this.props.location.pathname.replace(/^(\/monitor\/)/, '');
     return (
       <Fragment>
-        <EuiTitle>
-          <h2>{id}</h2>
-        </EuiTitle>
+        <MonitorPageTitleQuery monitorId={id} {...this.props} />
         <EuiSpacer />
         <MonitorStatusBar monitorId={id} {...this.props} />
         <EuiSpacer />

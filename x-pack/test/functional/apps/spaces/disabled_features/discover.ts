@@ -14,6 +14,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'security', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
+  const appsMenu = getService('appsMenu');
 
   async function setDiscoverTimeRange() {
     const fromTime = '2015-09-19 06:31:44.000';
@@ -52,7 +53,9 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = await PageObjects.common.getAppNavLinksText();
+        const navLinks = (await appsMenu.readLinks()).map(
+          (link: Record<string, string>) => link.text
+        );
         expect(navLinks).to.contain('Discover');
       });
 
@@ -99,7 +102,9 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = await PageObjects.common.getAppNavLinksText();
+        const navLinks = (await appsMenu.readLinks()).map(
+          (link: Record<string, string>) => link.text
+        );
         expect(navLinks).not.to.contain('Discover');
       });
 

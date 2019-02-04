@@ -17,11 +17,7 @@ import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component } from 'react';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
-import {
-  FeaturePrivilegeSet,
-  PrivilegeDefinition,
-  Role,
-} from '../../../../../../../../common/model';
+import { FeaturesPrivileges, KibanaPrivileges, Role } from '../../../../../../../../common/model';
 import {
   AllowedPrivilege,
   CalculatedPrivilege,
@@ -37,8 +33,8 @@ interface Props {
   features: Feature[];
   calculatedPrivileges: CalculatedPrivilege;
   allowedPrivileges: AllowedPrivilege;
-  rankedFeaturePrivileges: FeaturePrivilegeSet;
-  privilegeDefinition: PrivilegeDefinition;
+  rankedFeaturePrivileges: FeaturesPrivileges;
+  kibanaPrivileges: KibanaPrivileges;
   intl: InjectedIntl;
   spacesIndex: number;
   onChange: (featureId: string, privileges: string[]) => void;
@@ -79,7 +75,9 @@ export class FeatureTable extends Component<Props, {}> {
     const availablePrivileges = Object.values(rankedFeaturePrivileges)[0];
 
     return (
+      // @ts-ignore missing responsive from typedef
       <EuiInMemoryTable
+        // @ts-ignore missing rowProps from typedef
         responsive={false}
         columns={this.getColumns(availablePrivileges)}
         items={items}
@@ -150,7 +148,7 @@ export class FeatureTable extends Component<Props, {}> {
       render: (roleEntry: Role, record: TableRow) => {
         const featureId = record.feature.id;
 
-        const featurePrivileges = this.props.privilegeDefinition
+        const featurePrivileges = this.props.kibanaPrivileges
           .getFeaturePrivileges()
           .getPrivileges(featureId);
 
@@ -193,7 +191,9 @@ export class FeatureTable extends Component<Props, {}> {
         });
 
         return (
+          // @ts-ignore missing name from typedef
           <EuiButtonGroup
+            // @ts-ignore missing rowProps from typedef
             name={`featurePrivilege_${featureId}`}
             options={options}
             idSelected={`${featureId}_${actualPrivilegeValue || NO_PRIVILEGE_VALUE}`}

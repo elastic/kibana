@@ -9,7 +9,7 @@ import Joi from 'joi';
 import _ from 'lodash';
 import { UICapabilities } from 'ui/capabilities';
 
-export interface FeaturePrivilegeDefinition {
+export interface FeatureKibanaPrivileges {
   grantWithBaseRead?: boolean;
   management?: {
     [sectionId: string]: string[];
@@ -37,7 +37,7 @@ export interface Feature {
   };
   catalogue?: string[];
   privileges: {
-    [key: string]: FeaturePrivilegeDefinition;
+    [key: string]: FeatureKibanaPrivileges;
   };
   privilegesTooltip?: string;
 }

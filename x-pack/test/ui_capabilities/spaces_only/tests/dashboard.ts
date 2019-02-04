@@ -25,7 +25,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
           case 'dev_tools_disabled_space':
           case 'discover_disabled_space':
           case 'graph_disabled_space':
-          case 'gis_disabled_space':
+          case 'maps_disabled_space':
           case 'infrastructure_disabled_space':
           case 'logs_disabled_space':
           case 'ml_disabled_space':

@@ -12,7 +12,7 @@ import { actionsFactory } from 'x-pack/plugins/security/server/lib/authorization
 import { privilegesFactory } from 'x-pack/plugins/security/server/lib/authorization/privileges';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../spaces/common/model/space';
-import { PrivilegeMap, Role } from '../../../../../common/model';
+import { RawKibanaPrivileges, Role } from '../../../../../common/model';
 import { EditRolePage } from './edit_role_page';
 import { SimplePrivilegeSection } from './privileges/kibana/simple_privilege_section';
 import { SpaceAwarePrivilegeSection } from './privileges/kibana/space_aware_privilege_section';
@@ -55,7 +55,7 @@ const buildFeatures = () => {
   ] as Feature[];
 };
 
-const buildPrivilegeMap = () => {
+const buildRawKibanaPrivileges = () => {
   const xpackMainPlugin = {
     getFeatures: () => buildFeatures(),
   };
@@ -132,7 +132,7 @@ describe('<EditRolePage />', () => {
       const features: Feature[] = buildFeatures();
       const mockHttpClient = jest.fn();
       const indexPatterns: string[] = ['foo*', 'bar*'];
-      const privileges: PrivilegeMap = buildPrivilegeMap();
+      const privileges: RawKibanaPrivileges = buildRawKibanaPrivileges();
       const spaces: Space[] = buildSpaces();
       const uiCapabilities: UICapabilities = buildUICapabilities();
 
@@ -179,7 +179,7 @@ describe('<EditRolePage />', () => {
       const features: Feature[] = buildFeatures();
       const mockHttpClient = jest.fn();
       const indexPatterns: string[] = ['foo*', 'bar*'];
-      const privileges: PrivilegeMap = buildPrivilegeMap();
+      const privileges: RawKibanaPrivileges = buildRawKibanaPrivileges();
       const spaces: Space[] = buildSpaces();
       const uiCapabilities: UICapabilities = buildUICapabilities();
 
@@ -220,7 +220,7 @@ describe('<EditRolePage />', () => {
       const features: Feature[] = buildFeatures();
       const mockHttpClient = jest.fn();
       const indexPatterns: string[] = ['foo*', 'bar*'];
-      const privileges: PrivilegeMap = buildPrivilegeMap();
+      const privileges: RawKibanaPrivileges = buildRawKibanaPrivileges();
       const spaces: Space[] = buildSpaces();
       const uiCapabilities: UICapabilities = buildUICapabilities();
 
@@ -266,7 +266,7 @@ describe('<EditRolePage />', () => {
       const features: Feature[] = buildFeatures();
       const mockHttpClient = jest.fn();
       const indexPatterns: string[] = ['foo*', 'bar*'];
-      const privileges: PrivilegeMap = buildPrivilegeMap();
+      const privileges: RawKibanaPrivileges = buildRawKibanaPrivileges();
       const spaces: Space[] = buildSpaces();
       const uiCapabilities: UICapabilities = buildUICapabilities(false);
 
@@ -312,7 +312,7 @@ describe('<EditRolePage />', () => {
       const features: Feature[] = buildFeatures();
       const mockHttpClient = jest.fn();
       const indexPatterns: string[] = ['foo*', 'bar*'];
-      const privileges: PrivilegeMap = buildPrivilegeMap();
+      const privileges: RawKibanaPrivileges = buildRawKibanaPrivileges();
       const spaces: Space[] = buildSpaces();
       const uiCapabilities: UICapabilities = buildUICapabilities(false);
 
@@ -361,7 +361,7 @@ describe('<EditRolePage />', () => {
       const features: Feature[] = buildFeatures();
       const mockHttpClient = jest.fn();
       const indexPatterns: string[] = ['foo*', 'bar*'];
-      const privileges: PrivilegeMap = buildPrivilegeMap();
+      const privileges: RawKibanaPrivileges = buildRawKibanaPrivileges();
       const uiCapabilities: UICapabilities = buildUICapabilities();
 
       const wrapper = mountWithIntl(
@@ -407,7 +407,7 @@ describe('<EditRolePage />', () => {
       const features: Feature[] = buildFeatures();
       const mockHttpClient = jest.fn();
       const indexPatterns: string[] = ['foo*', 'bar*'];
-      const privileges: PrivilegeMap = buildPrivilegeMap();
+      const privileges: RawKibanaPrivileges = buildRawKibanaPrivileges();
       const uiCapabilities: UICapabilities = buildUICapabilities();
 
       const wrapper = mountWithIntl(
@@ -447,7 +447,7 @@ describe('<EditRolePage />', () => {
       const features: Feature[] = buildFeatures();
       const mockHttpClient = jest.fn();
       const indexPatterns: string[] = ['foo*', 'bar*'];
-      const privileges: PrivilegeMap = buildPrivilegeMap();
+      const privileges: RawKibanaPrivileges = buildRawKibanaPrivileges();
       const uiCapabilities: UICapabilities = buildUICapabilities();
 
       const wrapper = mountWithIntl(
@@ -491,7 +491,7 @@ describe('<EditRolePage />', () => {
       const features: Feature[] = buildFeatures();
       const mockHttpClient = jest.fn();
       const indexPatterns: string[] = ['foo*', 'bar*'];
-      const privileges: PrivilegeMap = buildPrivilegeMap();
+      const privileges: RawKibanaPrivileges = buildRawKibanaPrivileges();
       const uiCapabilities: UICapabilities = buildUICapabilities(false);
 
       const wrapper = mountWithIntl(
@@ -536,7 +536,7 @@ describe('<EditRolePage />', () => {
       const features: Feature[] = buildFeatures();
       const mockHttpClient = jest.fn();
       const indexPatterns: string[] = ['foo*', 'bar*'];
-      const privileges: PrivilegeMap = buildPrivilegeMap();
+      const privileges: RawKibanaPrivileges = buildRawKibanaPrivileges();
       const uiCapabilities: UICapabilities = buildUICapabilities(false);
 
       const wrapper = mountWithIntl(

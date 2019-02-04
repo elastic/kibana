@@ -6,12 +6,12 @@
 
 import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
 import { getClient } from '../../../../../server/lib/get_client_shield';
-import { buildPrivilegeMap } from './privileges';
+import { buildRawKibanaPrivileges } from './privileges';
 jest.mock('../../../../../server/lib/get_client_shield', () => ({
   getClient: jest.fn(),
 }));
 jest.mock('./privileges', () => ({
-  buildPrivilegeMap: jest.fn(),
+  buildRawKibanaPrivileges: jest.fn(),
 }));
 
 const application = 'default-application';
@@ -198,7 +198,7 @@ const registerPrivilegesWithClusterTest = (description, {
       expectDidntUpdatePrivileges: createExpectDidntUpdatePrivileges(mockServer, mockCallWithInternalUser, error),
       expectErrorThrown: createExpectErrorThrown(mockServer, error),
       mocks: {
-        buildPrivilegeMap,
+        buildRawKibanaPrivileges,
         server: mockServer,
       }
     });

@@ -11,8 +11,8 @@ import {
   TRANSACTION_NAME
 } from 'x-pack/plugins/apm/common/constants';
 import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
+import { TransactionLink } from 'x-pack/plugins/apm/public/components/shared/Links/TransactionLink';
 import { StickyProperties } from 'x-pack/plugins/apm/public/components/shared/StickyProperties';
-import { TransactionLink } from 'x-pack/plugins/apm/public/components/shared/TransactionLink';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 
 interface Props {

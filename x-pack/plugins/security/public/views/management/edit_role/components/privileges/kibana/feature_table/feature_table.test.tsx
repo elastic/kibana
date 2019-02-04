@@ -7,15 +7,11 @@
 import { EuiInMemoryTable } from '@elastic/eui';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import {
-  FeaturePrivilegeSet,
-  PrivilegeDefinition,
-  Role,
-} from '../../../../../../../../common/model';
+import { FeaturesPrivileges, KibanaPrivileges, Role } from '../../../../../../../../common/model';
 import { KibanaPrivilegeCalculatorFactory } from '../../../../../../../lib/kibana_privilege_calculator';
 import { FeatureTable } from './feature_table';
 
-const defaultPrivilegeDefinition = new PrivilegeDefinition({
+const defaultPrivilegeDefinition = new KibanaPrivileges({
   global: {
     all: ['api:/*', 'ui:/*'],
     read: ['ui:/feature1/foo', 'ui:/feature2/foo'],
@@ -45,12 +41,12 @@ const defaultPrivilegeDefinition = new PrivilegeDefinition({
 interface BuildRoleOpts {
   globalPrivilege?: {
     base: string[];
-    feature: FeaturePrivilegeSet;
+    feature: FeaturesPrivileges;
   };
   spacesPrivileges?: Array<{
     spaces: string[];
     base: string[];
-    feature: FeaturePrivilegeSet;
+    feature: FeaturesPrivileges;
   }>;
 }
 const buildRole = (options: BuildRoleOpts = {}) => {
@@ -103,7 +99,7 @@ describe('FeatureTable', () => {
     const wrapper = shallowWithIntl(
       <FeatureTable
         role={role}
-        privilegeDefinition={defaultPrivilegeDefinition}
+        kibanaPrivileges={defaultPrivilegeDefinition}
         calculatedPrivileges={calculator.calculateEffectivePrivileges()[0]}
         allowedPrivileges={calculator.calculateAllowedPrivileges()[0]}
         rankedFeaturePrivileges={{
@@ -131,7 +127,7 @@ describe('FeatureTable', () => {
     const wrapper = mountWithIntl(
       <FeatureTable
         role={role}
-        privilegeDefinition={defaultPrivilegeDefinition}
+        kibanaPrivileges={defaultPrivilegeDefinition}
         calculatedPrivileges={calculator.calculateEffectivePrivileges()[0]}
         allowedPrivileges={calculator.calculateAllowedPrivileges()[0]}
         rankedFeaturePrivileges={{

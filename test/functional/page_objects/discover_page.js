@@ -273,13 +273,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async removeAllFilters() {
-      await testSubjects.click('showFilterActions');
-      await testSubjects.click('removeAllFilters');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.common.waitUntilUrlIncludes('filters:!()');
-    }
-
     async removeHeaderColumn(name) {
       await testSubjects.moveMouseTo(`docTableHeader-${name}`);
       await testSubjects.click(`docTableRemoveHeader-${name}`);
