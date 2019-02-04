@@ -20,7 +20,7 @@
 import { FUNCTIONS_URL } from './consts';
 import { initializeInterpreter } from './interpreter';
 
-jest.mock('../common/interpreter/interpreter_provider', () => ({
+jest.mock('../common/interpreter/interpret', () => ({
   interpreterProvider: () => () => ({}),
 }));
 
